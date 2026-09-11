@@ -14,9 +14,8 @@ a brief is not `scope: "species"`, or lacks the `familyActions` key A-S2 (`brief
 supplies on every signature brief it assembles -- silently defaulting an absent key to `[]` is
 exactly how "no family round has run yet" quietly becomes "this species genuinely has no family"
 (spec SS3, and `brief_assembly.derive.require_family_actions`'s own identical rule, restated here
-for THIS module's own consumer side). A key present with an EMPTY list is legal and common (31 of
-84 species carry no family assignment, spec-brief-assembly.md SS5 test 2) -- the two cases must
-never be collapsed.
+for THIS module's own consumer side). A key present with an EMPTY list is legal and common for
+species without family membership -- the two cases must never be collapsed.
 
 Closely mirrors `family_propose/prompts.py`'s own shape (system prompt, schema, `build_context`,
 `build_brief`, `entry_for`, validators) -- named by spec-signature-propose.md SS1 as this module's
@@ -198,7 +197,7 @@ def schema_for_call(allowed_atom_families: Sequence[str], motifs_expressed_enum:
 #: A-S1's own species-scope anchor envelope (spec-distribution-planner.md SS3 step 2, measured
 #: 2026-09-04 against every `scope: "species"` entry of `data/seed/actions/_briefs/round-1.json`):
 #: `family` (nullable), `element`, `rarity`, `themeKey`, `motifs`, `antiMotifs` -- present as KEYS
-#: on every species-scope brief, `family` legally `None` for a family-less species (31 of 84).
+#: on every species-scope brief, `family` legally `None` for a family-less species.
 _REQUIRED_SPECIES_ANCHOR_KEYS: "tuple[str, ...]" = (
     "family", "element", "rarity", "themeKey", "motifs", "antiMotifs",
 )
@@ -254,7 +253,7 @@ def _require_family_actions(brief: Mapping[str, Any]) -> "list[dict]":
     brief whose `familyActions` key is ABSENT raises -- A-S2 (`brief_assembly`) always supplies
     this key on every signature brief it assembles, so a missing key means something upstream is
     broken, never "this species has no family". A key present with an EMPTY list is legal and
-    common (31 of 84 species carry no family assignment) -- collapsing the two is exactly how this
+    common for species without family membership -- collapsing the two is exactly how this
     stage could silently run before its family's P2 round is accepted (spec SS3)."""
     if "familyActions" not in brief:
         raise ValueError(
@@ -429,6 +428,11 @@ def build_brief(context: Mapping[str, Any]) -> str:
         for action in family_actions:
             fams = ", ".join(sorted(action.get("atomFamilies") or ()))
             lines.append(f"  - {action.get('name')} [{fams}] (fingerprint: {action.get('fingerprint')})")
+    elif context.get("family"):
+        lines.append(
+            "This creature belongs to a family, but that family has no accepted sibling actions "
+            "in this round; do not treat the missing list as proof that it has no family."
+        )
     else:
         lines.append("This creature has no family; there is nothing to differ from.")
 

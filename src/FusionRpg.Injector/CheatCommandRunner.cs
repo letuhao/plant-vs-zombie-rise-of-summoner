@@ -289,6 +289,9 @@ public static class CheatCommandRunner
             case "debug.enter-level":
                 DebugActions.EnterLevel(p);
                 break;
+            case "debug.skip-setup":
+                DebugActions.SkipSetup(p);
+                break;
             case "debug.select":
                 DebugActions.Select(p);
                 break;

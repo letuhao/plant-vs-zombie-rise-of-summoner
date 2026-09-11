@@ -40,8 +40,18 @@ vi.mock("@/lib/bus/actorSurface", async () => {
   };
 });
 
-let sheetQuery: { data: unknown; isLoading: boolean; isError: boolean };
-let derivedQuery: { data: unknown; isLoading: boolean; isError: boolean };
+let sheetQuery: {
+  data: unknown;
+  isLoading: boolean;
+  isError: boolean;
+  refetch: () => Promise<unknown>;
+};
+let derivedQuery: {
+  data: unknown;
+  isLoading: boolean;
+  isError: boolean;
+  refetch: () => Promise<unknown>;
+};
 
 function wrap(ui: ReactNode) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -72,6 +82,7 @@ describe("DerivedCombatConsole DOM contract", () => {
     sheetQuery = {
       isLoading: false,
       isError: false,
+      refetch: async () => ({}),
       data: {
         instanceId: "actor-1",
         playerId: 1,
@@ -105,15 +116,21 @@ describe("DerivedCombatConsole DOM contract", () => {
         primary: []
       }
     };
-    derivedQuery = { data: undefined, isLoading: false, isError: false };
+    derivedQuery = {
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      refetch: async () => ({})
+    };
   });
 
   it("root landmark is derived-combat-console with HTML chrome classes", () => {
     wrap(<DerivedTab data={minimalActor()} surface={actorSurfaceFixture()} />);
     const root = screen.getByTestId("derived-combat-console");
     expect(root).toHaveClass("derived-combat-console", "console");
-    expect(root.querySelector(".console-hd")).toBeTruthy();
+    expect(root.querySelector(".console-hd")).toBeNull();
     expect(root.querySelector(".cat-bar")).toBeTruthy();
+    expect(root.querySelector(".hd-tools")).toBeTruthy();
     expect(root.querySelector(".inspect-split")).toBeTruthy();
     expect(root.querySelector(".inspect")).toBeTruthy();
     expect(root.querySelector(".foot")).toBeTruthy();
@@ -131,7 +148,7 @@ describe("DerivedCombatConsole DOM contract", () => {
 
   it("primary tablist is exactly cook ids — never sheetGroups", () => {
     wrap(<DerivedTab data={minimalActor()} surface={actorSurfaceFixture()} />);
-    const tablist = screen.getByTestId("derived-primary-tablist");
+    const tablist = screen.getByTestId("derived-tab");
     const tabs = within(tablist).getAllByRole("tab");
     const ids = tabs.map((t) => t.getAttribute("data-tab") ?? t.getAttribute("data-testid"));
     expect(ids).toEqual([...COOK_PRIMARY_TAB_IDS].map((id) => id));
@@ -164,6 +181,10 @@ describe("DerivedCombatConsole DOM contract", () => {
     expect(screen.getByTestId("derived-stack")).toBeInTheDocument();
     expect(screen.getByTestId("derived-sources")).toBeInTheDocument();
     expect(screen.getByTestId("derived-contribution-chart").querySelector(".share-donut")).toBeTruthy();
+    expect(screen.getByTestId("derived-contribution-chart").querySelector(".stack")).toBeTruthy();
     expect(screen.getByTestId("derived-stack").querySelector(".stack-row")).toBeTruthy();
+    // DC-8: player band — no GG-49 / Join channelId
+    expect(screen.getByTestId("derived-sources").textContent ?? "").not.toMatch(/GG-49/);
+    expect(screen.getByTestId("derived-inspector").textContent ?? "").not.toMatch(/Join:\s*combat\.power/);
   });
 });

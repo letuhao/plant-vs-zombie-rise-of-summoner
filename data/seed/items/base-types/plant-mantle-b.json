@@ -452,6 +452,582 @@
           "family": "atom.enhance-aegis"
         }
       ]
+    },
+    {
+      "id": "item.plant-canopy-b-013",
+      "nameKey": "base.verdant-shroud",
+      "name": "Verdant Shroud",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.verdant-shroud",
+      "flavorKey": "flavor.base.verdant-shroud",
+      "flavor": "A dense weave of living vines and broad leaves that shifts to catch the light. It clings to the wearer like a second skin of foliage.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-014",
+      "nameKey": "base.verdant-shroud",
+      "name": "Verdant Shroud",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.verdant-shroud",
+      "flavorKey": "flavor.base.verdant-shroud",
+      "flavor": "A dense weave of living vines and broad leaves designed to drape over the shoulders. It shifts slightly with the wearer's movements, as if breathing in tandem with them.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-015",
+      "nameKey": "base.verdant-shroud",
+      "name": "Verdant Shroud",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.verdant-shroud",
+      "flavorKey": "flavor.base.verdant-shroud",
+      "flavor": "A dense weave of living vines and broad leaves designed to drape over the shoulders. It shifts slightly with the wearer's breath, maintaining a constant connection to the soil.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-016",
+      "nameKey": "base.verdant-shroud",
+      "name": "Verdant Shroud",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.verdant-shroud",
+      "flavorKey": "flavor.base.verdant-shroud",
+      "flavor": "A dense weave of living vines and broad leaves designed to drape over the shoulders. It shifts slightly with the wearer's breath, maintaining a constant connection to the soil.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-017",
+      "nameKey": "base.verdant-shroud",
+      "name": "Verdant Shroud",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.verdant-shroud",
+      "flavorKey": "flavor.base.verdant-shroud",
+      "flavor": "A dense weave of living vines and broad leaves designed to drape over the shoulders. It shifts slightly with the wearer's breath, maintaining a constant connection to the soil.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-018",
+      "nameKey": "base.verdant-shroud",
+      "name": "Verdant Shroud",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.verdant-shroud",
+      "flavorKey": "flavor.base.verdant-shroud",
+      "flavor": "A dense weave of living vines and broad leaves designed to drape over the shoulders. It shifts slightly with the wearer's breath, maintaining a constant connection to the soil.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-019",
+      "nameKey": "base.verdant-shroud",
+      "name": "Verdant Shroud",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.verdant-shroud",
+      "flavorKey": "flavor.base.verdant-shroud",
+      "flavor": "A dense weave of living vines and broad leaves designed to drape over the shoulders. It shifts slightly with the wearer's movements, as if breathing in unison.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-020",
+      "nameKey": "base.verdant-shroud",
+      "name": "Verdant Shroud",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.verdant-shroud",
+      "flavorKey": "flavor.base.verdant-shroud",
+      "flavor": "A dense weave of living vines and broad leaves designed to drape over the shoulders. It shifts slightly with the wearer's movements, mimicking the natural sway of a forest ceiling.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-021",
+      "nameKey": "base.woven-thicket",
+      "name": "Woven Thicket",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.woven-thicket",
+      "flavorKey": "flavor.base.woven-thicket",
+      "flavor": "A dense lattice of interlaced vines and supple twigs designed to catch and deflect incoming strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-022",
+      "nameKey": "base.woven-thicket",
+      "name": "Woven Thicket",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.woven-thicket",
+      "flavorKey": "flavor.base.woven-thicket",
+      "flavor": "A dense interlacing of living vines and supple twigs designed to catch and deflect incoming strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-023",
+      "nameKey": "base.woven-thicket",
+      "name": "Woven Thicket",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.woven-thicket",
+      "flavorKey": "flavor.base.woven-thicket",
+      "flavor": "A dense interlacing of supple vines and flexible shoots designed to catch and deflect incoming strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-024",
+      "nameKey": "base.braided-thicket",
+      "name": "Braided Thicket",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.braided-thicket",
+      "flavorKey": "flavor.base.braided-thicket",
+      "flavor": "A dense weave of living vines and supple shoots, designed to wrap around the shoulders to deflect incoming strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-025",
+      "nameKey": "base.woven-thicket",
+      "name": "Woven Thicket",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.woven-thicket",
+      "flavorKey": "flavor.base.woven-thicket",
+      "flavor": "A dense interlacing of flexible vines and supple shoots designed to catch and deflect incoming strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-026",
+      "nameKey": "base.braided-thicket",
+      "name": "Braided Thicket",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.braided-thicket",
+      "flavorKey": "flavor.base.braided-thicket",
+      "flavor": "A dense weave of living vines and supple shoots, designed to wrap around the shoulders to deflect incoming strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-027",
+      "nameKey": "base.latticed-trellis",
+      "name": "Latticed Trellis",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.latticed-trellis",
+      "flavorKey": "flavor.base.latticed-trellis",
+      "flavor": "A woven framework of supple vines designed to support heavy growth or provide layered protection.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-028",
+      "nameKey": "base.latticed-thicket",
+      "name": "Latticed Thicket",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.latticed-thicket",
+      "flavorKey": "flavor.base.latticed-thicket",
+      "flavor": "A dense weave of interlaced vines and supple shoots designed to catch and deflect incoming strikes. It provides a flexible layer of protection that moves in concert with the wearer.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     }
   ]
 }

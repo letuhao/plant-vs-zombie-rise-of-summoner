@@ -38,8 +38,12 @@ hand-type a base-type entry into JSON again.
    it belongs to, which slot); every numeric field (level requirement, `socketMax`, any tier gating) is
    resolved by deterministic code reading the tuning tables, never by the model. Match `setgen/brief.py`'s
    own pattern of a schema that mechanically rejects a bare number field reaching a model call.
-2. Output writes to the existing corpus path (`data/seed/items/base-types/*.json`), through
+2. Output writes to the existing corpus path (`data/seed/items/base-types/**/*.json`), through
    `generator-harness`'s ledger — append+reconcile by default, explicit `--overwrite` for a full redo.
+   The entry's own `(role, frame, band)` is the partition authority: the corpus contains both
+   display-name filenames and nested legacy paths, so discovery and append locate that one existing
+   file recursively rather than deriving a second filename. Multiple files claiming one partition
+   refuse before a write.
 3. `--kind base-type --write` with a live model endpoint (see `set-charm-live-endpoint`'s wiring for the
    endpoint plumbing this module reuses) produces at least one new, valid base-type entry, importable by
    the real `ItemSeedValidator`/`AtomImporter` pipeline with zero new refusals.
@@ -78,6 +82,8 @@ the same harness, and matching the first one's shape is what makes a third easy 
 - A generated entry imports cleanly through `AtomImporter`/`ItemSeedValidator` with no new refusal.
 - Harness tests (resume/reconcile/overwrite) via `generator-harness`'s own shared test shape, applied to
   this corpus specifically.
+- A nested legacy partition is discovered, loaded into the brief, and rewritten in place; a duplicate
+  logical partition is refused rather than split or overwritten.
 
 ## Boundaries
 

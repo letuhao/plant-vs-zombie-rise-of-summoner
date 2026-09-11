@@ -3,8 +3,50 @@
     "confidence": {},
     "minorityValues": {},
     "model": "google/gemma-4-26b-a4b-qat",
-    "planHash": "",
-    "promptVersion": "tree-language/1"
+    "planHash": "a149193647b81813cdddfc3985e4b5ffb6600bd94ccc9ad2eeaa93acf365dd78",
+    "promptVersion": "mixed",
+    "promptVersionByNode": {
+      "skill.focus-def-t1-n0": "",
+      "skill.focus-def-t1-n1": "tree-language/3",
+      "skill.focus-def-t1-n2": "tree-language/3",
+      "skill.focus-def-t10-n0": "tree-language/3",
+      "skill.focus-def-t2-n0": "",
+      "skill.focus-def-t2-n1": "tree-language/3",
+      "skill.focus-def-t2-n2": "",
+      "skill.focus-def-t3-n0": "",
+      "skill.focus-def-t3-n1": "tree-language/3",
+      "skill.focus-def-t3-n2": "",
+      "skill.focus-def-t4-n0": "",
+      "skill.focus-def-t4-n1": "tree-language/3",
+      "skill.focus-def-t5-n0": "tree-language/3",
+      "skill.focus-def-t5-n1": "tree-language/3",
+      "skill.focus-def-t6-n0": "tree-language/3",
+      "skill.focus-def-t6-n1": "tree-language/3",
+      "skill.focus-def-t7-n0": "tree-language/3",
+      "skill.focus-def-t7-n1": "tree-language/3",
+      "skill.focus-def-t8-n0": "tree-language/3",
+      "skill.focus-def-t9-n0": "tree-language/3",
+      "skill.focus-off-t1-n0": "tree-language/3",
+      "skill.focus-off-t1-n1": "tree-language/3",
+      "skill.focus-off-t1-n2": "",
+      "skill.focus-off-t10-n0": "",
+      "skill.focus-off-t2-n0": "",
+      "skill.focus-off-t2-n1": "",
+      "skill.focus-off-t2-n2": "",
+      "skill.focus-off-t3-n0": "",
+      "skill.focus-off-t3-n1": "",
+      "skill.focus-off-t3-n2": "tree-language/3",
+      "skill.focus-off-t4-n0": "tree-language/3",
+      "skill.focus-off-t4-n1": "",
+      "skill.focus-off-t5-n0": "tree-language/3",
+      "skill.focus-off-t5-n1": "",
+      "skill.focus-off-t6-n0": "tree-language/3",
+      "skill.focus-off-t6-n1": "tree-language/3",
+      "skill.focus-off-t7-n0": "tree-language/3",
+      "skill.focus-off-t7-n1": "tree-language/3",
+      "skill.focus-off-t8-n0": "tree-language/3",
+      "skill.focus-off-t9-n0": "tree-language/3"
+    }
   },
   "nodes": [
     {
@@ -33,51 +75,32 @@
     },
     {
       "affinity": [
-        "likely",
         "core"
       ],
       "affixIds": [
-        "atom.ward-harden",
-        "atom.warding"
+        "atom.arm-hardening"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The skin thickens into a dense, protective layer that absorbs the impact of the world.",
+      "flavor": "The weight of the earth becomes your strongest ally.",
       "id": "skill.focus-def-t1-n1",
-      "name": "Barkskin Aegis",
-      "nameKey": "tree.node.barkskin-aegis",
+      "name": "Anchored Bastion",
+      "nameKey": "tree.node.anchored-bastion",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
-      "rationale": "",
-      "tier": 1
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.shield-capacity"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reduction",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "jala",
+        "trigger": "OnMatchEnd"
       },
-      "flavor": "The deeper the roots, the more life flows through the veins.",
-      "id": "skill.focus-def-t1-n2",
-      "name": "Sapling's Persistence",
-      "nameKey": "tree.node.sapling-s-persistence",
-      "nodeClass": "magnitude",
-      "nodeKey": "n2",
       "rationale": "",
       "tier": 1
     },
@@ -86,23 +109,63 @@
         "likely"
       ],
       "affixIds": [
-        "atom.shld-surge"
+        "atom.vitality"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The momentum of impact is not lost, but stored within the structural seams.",
+      "flavor": "The weight of purpose anchors the soul against the coming storm.",
+      "id": "skill.focus-def-t1-n2",
+      "name": "Grounded Resolve",
+      "nameKey": "tree.node.grounded-resolve",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.damage",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "kelp",
+        "trigger": "OnMatchEnd"
+      },
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-surge",
+        "atom.ward-flux"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of the shield becomes a pulse of renewed strength.",
       "id": "skill.focus-def-t10-n0",
-      "name": "Kinetic Reservoir",
-      "nameKey": "tree.node.kinetic-reservoir-3",
+      "name": "Surging Aegis",
+      "nameKey": "tree.node.surging-aegis",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
-      "rationale": "",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.realm",
+        "element": "omni",
+        "exclusionForm": "reroute",
+        "nodeClass": "mechanism",
+        "status": "wither",
+        "trigger": "OnWave"
+      },
+      "rationale": "No conflict exists with the provided exclusion list.",
       "tier": 10
     },
     {
@@ -133,27 +196,34 @@
     },
     {
       "affinity": [
-        "core",
-        "core"
+        "likely",
+        "occasional"
       ],
       "affixIds": [
-        "atom.fortitude",
-        "atom.vitality"
+        "atom.shld-toughness",
+        "atom.sust-grit"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The deeper the anchor, the harder the strike fails to find purchase.",
+      "flavor": "Layers of dense material provide a steady, unyielding base.",
       "id": "skill.focus-def-t2-n1",
-      "name": "Rooted Constitution",
-      "nameKey": "tree.node.rooted-constitution",
+      "name": "Reinforced Foundation",
+      "nameKey": "tree.node.reinforced-foundation",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.damage",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "leech",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 2
     },
@@ -212,22 +282,29 @@
         "core"
       ],
       "affixIds": [
-        "atom.shield-capacity"
+        "atom.sust-callus"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The very essence of the grove flows through the marrow, hardening the spirit and the flesh alike.",
+      "flavor": "Layers of hardened tissue and reinforced shell form a natural defense.",
       "id": "skill.focus-def-t3-n1",
-      "name": "Deepwood Marrow",
-      "nameKey": "tree.node.deepwood-marrow",
+      "name": "Calloused Plating",
+      "nameKey": "tree.node.calloused-plating",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.pen",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "nerve.afflicted",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 3
     },
@@ -288,172 +365,221 @@
         "core"
       ],
       "affixIds": [
-        "atom.arm-hardening"
+        "atom.shield-capacity"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The skin thickens where the sap runs slowest, turning bark into plate.",
+      "flavor": "Layer upon layer of calcified defense, turning the body into an impenetrable monument.",
       "id": "skill.focus-def-t4-n1",
-      "name": "Ironwood Suture",
-      "nameKey": "tree.node.ironwood-suture",
+      "name": "Hardened Shell",
+      "nameKey": "tree.node.hardened-shell",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "loadout.slots",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "nerve.unsettled",
+        "trigger": "OnSpawn"
+      },
       "rationale": "",
       "tier": 4
+    },
+    {
+      "affinity": [
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of the ward dictates the pulse of the shield.",
+      "id": "skill.focus-def-t5-n0",
+      "name": "Resonant Siphon",
+      "nameKey": "tree.node.resonant-siphon",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "move.range",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "nerve.unsettled",
+        "trigger": "OnSunCollect"
+      },
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "likely",
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.arm-welding",
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "Layers of reinforced metal and organic tissue fuse into a seamless defense.",
+      "id": "skill.focus-def-t5-n1",
+      "name": "Laminated Plating",
+      "nameKey": "tree.node.laminated-plating",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm1",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "pact_mark",
+        "trigger": "OnSunCollect"
+      },
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "likely",
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.ward-link"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of impact feeds the barrier's hunger.",
+      "id": "skill.focus-def-t6-n0",
+      "name": "Kinetic Siphon",
+      "nameKey": "tree.node.kinetic-siphon-4",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm2",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "poison",
+        "trigger": "OnSunCollect"
+      },
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The weight of the earth settles into the marrow, turning every impact into a memory of stone.",
+      "id": "skill.focus-def-t6-n1",
+      "name": "Deep-Rooted Stance",
+      "nameKey": "tree.node.deep-rooted-stance",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.atk",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "rally",
+        "trigger": "OnTimer"
+      },
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ward-harden",
+        "atom.ward-link"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of the impact dictates the flow of the defense.",
+      "id": "skill.focus-def-t7-n0",
+      "name": "Rhythmic Aegis",
+      "nameKey": "tree.node.rhythmic-aegis",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.defense",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "rot",
+        "trigger": "OnTimer"
+      },
+      "rationale": "",
+      "tier": 7
     },
     {
       "affinity": [
         "likely"
       ],
       "affixIds": [
-        "atom.sust-husk"
+        "atom.arm-hardening"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The skin thickens where the spirit is most focused.",
-      "id": "skill.focus-def-t5-n0",
-      "name": "Calloused Intent",
-      "nameKey": "tree.node.calloused-intent",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 5
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.sust-grit"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The bark thickens where the impact is most frequent, turning skin into stone.",
-      "id": "skill.focus-def-t5-n1",
-      "name": "Lignified Plating",
-      "nameKey": "tree.node.lignified-plating",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 5
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.shld-cycle",
-        "atom.shld-surge"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The rhythm of impact feeds the rhythm of the shield.",
-      "id": "skill.focus-def-t6-n0",
-      "name": "Kinetic Siphon",
-      "nameKey": "tree.node.kinetic-siphon-5",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "likely",
-        "core"
-      ],
-      "affixIds": [
-        "atom.shield-capacity",
-        "atom.warding"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The very essence of the graft hardens into a permanent, unyielding structure.",
-      "id": "skill.focus-def-t6-n1",
-      "name": "Calcified Marrow",
-      "nameKey": "tree.node.calcified-marrow",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.shld-cycle",
-        "atom.shld-surge"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The lifeblood of the grove flows in rhythmic pulses, turning every impact into a surge of renewed protection.",
-      "id": "skill.focus-def-t7-n0",
-      "name": "Circulatory Sap",
-      "nameKey": "tree.node.circulatory-sap",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.sust-grit"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
-      },
-      "flavor": "The weight of the earth settles into the marrow, making every step an anchor.",
+      "flavor": "The skin thickens where the spirit is most resolute.",
       "id": "skill.focus-def-t7-n1",
-      "name": "Deep Rooting",
-      "nameKey": "tree.node.deep-rooting-2",
+      "name": "Ironwood Bastion",
+      "nameKey": "tree.node.ironwood-bastion",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.maxHp",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "shatter",
+        "trigger": "OnTimer"
+      },
       "rationale": "",
       "tier": 7
     },
@@ -462,48 +588,62 @@
         "core"
       ],
       "affixIds": [
-        "atom.shld-surge"
+        "atom.shld-toughness-mod"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The impact of a blow is not lost, but redirected into the rhythm of the defense.",
+      "flavor": "The boundary between self and world becomes a permeable filter, turning impact into essence.",
       "id": "skill.focus-def-t8-n0",
-      "name": "Kinetic Recirculation",
-      "nameKey": "tree.node.kinetic-recirculation-3",
+      "name": "Osmotic Membrane",
+      "nameKey": "tree.node.osmotic-membrane",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.breakthroughSuccess",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "spark",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 8
     },
     {
       "affinity": [
-        "likely",
-        "core"
+        "core",
+        "likely"
       ],
       "affixIds": [
-        "atom.shld-surge",
-        "atom.ward-brace"
+        "atom.shld-cycle",
+        "atom.ward-flux"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A structural reinforcement that converts kinetic impact into immediate defensive expansion.",
+      "flavor": "The internal conduits pulse with a rhythmic, restorative pressure.",
       "id": "skill.focus-def-t9-n0",
-      "name": "Graftplate Lattice",
-      "nameKey": "tree.node.graftplate-lattice",
+      "name": "Capillary Recirculation",
+      "nameKey": "tree.node.capillary-recirculation",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.power",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "spore",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 9
     },
@@ -516,18 +656,25 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A singular, devastating strike that finds the gap in any defense.",
+      "flavor": "A singular focus that leaves no room for hesitation.",
       "id": "skill.focus-off-t1-n0",
-      "name": "Focused Volley",
-      "nameKey": "tree.node.focused-volley",
+      "name": "Unwavering Intent",
+      "nameKey": "tree.node.unwavering-intent",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "ai.aggression",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 1
     },
@@ -540,18 +687,25 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A singular, unwavering gaze that finds the weakness in any defense.",
+      "flavor": "The world slows as the eye finds its mark.",
       "id": "skill.focus-off-t1-n1",
-      "name": "Pointed Intent",
-      "nameKey": "tree.node.pointed-intent-2",
+      "name": "Focused Sightline",
+      "nameKey": "tree.node.focused-sightline",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.absorption",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 1
     },
@@ -729,51 +883,63 @@
     },
     {
       "affinity": [
-        "core"
+        "occasional"
       ],
       "affixIds": [
-        "atom.ferocity"
+        "atom.might"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The instinct to rend flesh overrides the need for form.",
+      "flavor": "The instinct to strike overrides the need for caution.",
       "id": "skill.focus-off-t3-n2",
-      "name": "Primal Hunger",
-      "nameKey": "tree.node.primal-hunger",
+      "name": "Primal Drive",
+      "nameKey": "tree.node.primal-drive",
       "nodeClass": "magnitude",
       "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.damage",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "cold",
+        "trigger": "OnDamageTaken"
+      },
       "rationale": "",
       "tier": 3
     },
     {
       "affinity": [
-        "likely",
         "core"
       ],
       "affixIds": [
-        "atom.elpw-pierce",
-        "atom.prec-verdict"
+        "atom.prec-focus"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The eye finds the gap before the mind can process the opening.",
+      "flavor": "The rhythm of the strike dictates the harvest of the blow.",
       "id": "skill.focus-off-t4-n0",
-      "name": "Vantage Point",
-      "nameKey": "tree.node.vantage-point",
+      "name": "Calculated Momentum",
+      "nameKey": "tree.node.calculated-momentum",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.rate",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "cold",
+        "trigger": "OnDamageTaken"
+      },
       "rationale": "",
       "tier": 4
     },
@@ -803,27 +969,34 @@
     },
     {
       "affinity": [
-        "core",
-        "likely"
+        "likely",
+        "core"
       ],
       "affixIds": [
-        "atom.elpw-focus",
-        "atom.elpw-override"
+        "atom.elpw-overflow",
+        "atom.elpw-surge"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The eye ignores the spectrum to find the breaking point.",
+      "flavor": "The rhythm of power accelerates, spilling over its own boundaries.",
       "id": "skill.focus-off-t5-n0",
-      "name": "Overload Sight",
-      "nameKey": "tree.node.overload-sight",
+      "name": "Surging Flux",
+      "nameKey": "tree.node.surging-flux",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist.damage",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnDamageTaken"
+      },
       "rationale": "",
       "tier": 5
     },
@@ -856,24 +1029,128 @@
         "core"
       ],
       "affixIds": [
-        "atom.elpw-attune"
+        "atom.elpw-pierce"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the strike dictates the flow of the elements.",
+      "flavor": "Light bends, then breaks through the strongest defenses.",
       "id": "skill.focus-off-t6-n0",
-      "name": "Harmonic Resonance",
-      "nameKey": "tree.node.harmonic-resonance-2",
+      "name": "Refractive Aperture",
+      "nameKey": "tree.node.refractive-aperture",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.dodge",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 6
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.keen-edge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "A singular focus that turns every movement into a cutting strike.",
+      "id": "skill.focus-off-t6-n1",
+      "name": "Sharpened Intent",
+      "nameKey": "tree.node.sharpened-intent",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.heal.power",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "expose",
+        "trigger": "OnDeath"
+      },
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "likely",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-focus",
+        "atom.elpw-surfeit"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The spectrum bends to the will of the striker, saturating every blow with raw essence.",
+      "id": "skill.focus-off-t7-n0",
+      "name": "Chromatic Attunement",
+      "nameKey": "tree.node.chromatic-attunement",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.break",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "expose",
+        "trigger": "OnDeath"
+      },
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of the hunt dictates the lethality of the strike.",
+      "id": "skill.focus-off-t7-n1",
+      "name": "Apex Predator",
+      "nameKey": "tree.node.apex-predator-7",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.rate",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "freeze",
+        "trigger": "OnGridPlace"
+      },
+      "rationale": "",
+      "tier": 7
     },
     {
       "affinity": [
@@ -881,123 +1158,61 @@
         "core"
       ],
       "affixIds": [
-        "atom.ferocity",
-        "atom.precision"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
-      },
-      "flavor": "The rhythm of the strike dictates the speed of the recovery.",
-      "id": "skill.focus-off-t6-n1",
-      "name": "Focused Momentum",
-      "nameKey": "tree.node.focused-momentum",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
         "atom.elpw-attune",
-        "atom.elpw-overflow"
+        "atom.elpw-override"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the elements becomes a physical force, pushing beyond the limits of the vessel.",
-      "id": "skill.focus-off-t7-n0",
-      "name": "Resonant Surge",
-      "nameKey": "tree.node.resonant-surge",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.ferocity",
-        "atom.precision"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "aptitude"
-        ]
-      },
-      "flavor": "The instinct to strike is sharpened by the certainty of the kill.",
-      "id": "skill.focus-off-t7-n1",
-      "name": "Apex Predator",
-      "nameKey": "tree.node.apex-predator-8",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.elpw-pierce"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "The spectrum fractures, spilling raw energy through every available aperture.",
+      "flavor": "The spectrum fractures, forcing the elements to obey a single, violent command.",
       "id": "skill.focus-off-t8-n0",
       "name": "Prismatic Overload",
-      "nameKey": "tree.node.prismatic-overload",
+      "nameKey": "tree.node.prismatic-overload-8",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.shred",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "freeze",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 8
     },
     {
       "affinity": [
-        "core"
+        "likely"
       ],
       "affixIds": [
         "atom.elpw-overflow"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The internal pressure of raw energy forces the essence to breach its natural boundaries.",
+      "flavor": "The pressure of the flow becomes a weapon in itself.",
       "id": "skill.focus-off-t9-n0",
-      "name": "Prismatic Overload",
-      "nameKey": "tree.node.prismatic-overload-3",
+      "name": "Conduit Overload",
+      "nameKey": "tree.node.conduit-overload",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.strength",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "hypno",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 9
     }

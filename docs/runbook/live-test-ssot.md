@@ -57,6 +57,34 @@ Named labs (see `DebugScenarios`): `lab-overlay`, `lab-empty`, `lab-shield-bar`.
 
 Refuse lab when latest live `board.start` has `levelType` in `Explore`, `Travel*`, `IZ`.
 
+### Setup panel skip
+
+The setup panel can be completed through the host game's own IL2CPP handler. The injector command
+is gated so ordinary player runs do not invoke it. Set the gate before launching the game, then use
+the proof script or endpoint:
+
+```powershell
+$env:FUSIONRPG_SETUP_SKIP = "1"
+.\scripts\prove-live-setup-skip.ps1 -Method quick
+# If the current profile does not advance with QuickInGame:
+.\scripts\prove-live-setup-skip.ps1 -Method button
+```
+
+The endpoint is `POST /api/debug/setup/skip` with `{ "method": "quick", "timeoutSec": 15 }`.
+Success means the injector emitted `debug.setup.skip` with `ok=true`; the HTTP enqueue alone is not
+proof. `quick` calls `InitBoard.QuickInGame()`. `button` calls
+`InGameUI.OnStartBattleButtonClick()`. Never replace either call with a panel visibility change.
+
+LIVE proof record (2026-09-09, `pvzrh-3.9`, MelonLoader): the first call from the main menu
+returned the expected honest refusal, `InitBoard.Instance is null`. After the existing gated level
+entry path created an Adventure board (`board.start` event 12267 and `debug.level.enter` event
+12273), `-Method quick` returned `ok=true` with `board=true` and `ui=true`. A follow-up
+`lab-overlay` run produced live target and plant pointers, including `targetPtr=282FAD2F960` and
+`plantPtr=282F898C900`, proving the board continued past setup without a manual click. The
+acknowledgement payload reported `ready=false`; that field is diagnostic only, not a success gate.
+The direct `button` method remains an explicit comparison probe; `quick` is the proven default for
+this profile.
+
 ## 4. Debug API encyclopedia (live)
 
 Base: `/api/debug`. Success event kinds usually mirror the command name (`debug.shield.bar-status`, etc.) unless noted.

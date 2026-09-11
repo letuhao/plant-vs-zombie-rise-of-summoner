@@ -471,6 +471,582 @@
           "family": "atom.enhance-vigor"
         }
       ]
+    },
+    {
+      "id": "item.plant-sheath-b-013",
+      "nameKey": "base.fibrous-scabbard",
+      "name": "Fibrous Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.fibrous-scabbard",
+      "flavorKey": "flavor.base.fibrous-scabbard",
+      "flavor": "A tightly woven sleeve of reinforced plant matter designed to stabilize and protect the contents within.",
+      "tags": [
+        "organic",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-b-014",
+      "nameKey": "base.fibrous-scabbard",
+      "name": "Fibrous Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.fibrous-scabbard",
+      "flavorKey": "flavor.base.fibrous-scabbard",
+      "flavor": "A tightly woven sleeve of reinforced plant matter designed to house a blade or ritual tool. It provides a stable conduit for channeling protective energies.",
+      "tags": [
+        "organic",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-b-015",
+      "nameKey": "base.fibrous-scabbard",
+      "name": "Fibrous Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.fibrous-scabbard",
+      "flavorKey": "flavor.base.fibrous-scabbard",
+      "flavor": "A tightly woven sleeve of reinforced plant matter designed to house a ceremonial blade. It hums with a faint, protective resonance.",
+      "tags": [
+        "organic",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-b-016",
+      "nameKey": "base.fibrous-scabbard",
+      "name": "Fibrous Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.fibrous-scabbard",
+      "flavorKey": "flavor.base.fibrous-scabbard",
+      "flavor": "A tightly woven sleeve of reinforced plant matter designed to hold a blade or staff in place. Its layered structure helps dampen vibrations and stabilize the contents.",
+      "tags": [
+        "organic",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-b-017",
+      "nameKey": "base.fibrous-scabbard",
+      "name": "Fibrous Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.fibrous-scabbard",
+      "flavorKey": "flavor.base.fibrous-scabbard",
+      "flavor": "A tightly woven sleeve of reinforced plant matter designed to house a blade or ritual tool. It provides a protective layer that hums with a faint, stabilizing energy.",
+      "tags": [
+        "organic",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-b-018",
+      "nameKey": "base.fibrous-scabbard",
+      "name": "Fibrous Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.fibrous-scabbard",
+      "flavorKey": "flavor.base.fibrous-scabbard",
+      "flavor": "A tightly woven sleeve of reinforced plant matter designed to cradle a blade or staff. It provides a stable conduit for channeling protective energies.",
+      "tags": [
+        "organic",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-b-019",
+      "nameKey": "base.fibrous-scabbard",
+      "name": "Fibrous Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.fibrous-scabbard",
+      "flavorKey": "flavor.base.fibrous-scabbard",
+      "flavor": "A tightly woven sleeve of reinforced plant matter designed to house a blade or ritual tool. It provides a stable conduit for channeling protective energies.",
+      "tags": [
+        "organic",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-b-020",
+      "nameKey": "base.fibrous-scabbard",
+      "name": "Fibrous Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.fibrous-scabbard",
+      "flavorKey": "flavor.base.fibrous-scabbard",
+      "flavor": "A tightly woven sleeve of reinforced plant matter designed to house a blade or ritual tool. It provides a stable conduit for channeling protective energies.",
+      "tags": [
+        "organic",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-b-021",
+      "nameKey": "base.verdant-scabbard",
+      "name": "Verdant Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.verdant-scabbard",
+      "flavorKey": "flavor.base.verdant-scabbard",
+      "flavor": "A hollowed, living stem reinforced with hardened sap to protect a delicate warding core.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-b-022",
+      "nameKey": "base.verdant-scabbard",
+      "name": "Verdant Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.verdant-scabbard",
+      "flavorKey": "flavor.base.verdant-scabbard",
+      "flavor": "A hollowed length of living vine, woven tightly to cradle a blade in constant, restorative moisture.",
+      "tags": [
+        "organic",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-b-023",
+      "nameKey": "base.verdant-scabbard",
+      "name": "Verdant Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.verdant-scabbard",
+      "flavorKey": "flavor.base.verdant-scabbard",
+      "flavor": "A hollowed, living stem reinforced with hardened sap to protect a delicate warding core.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-b-024",
+      "nameKey": "base.verdant-scabbard",
+      "name": "Verdant Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.verdant-scabbard",
+      "flavorKey": "flavor.base.verdant-scabbard",
+      "flavor": "A hollowed, living stem reinforced with hardened sap to protect the blade within. It pulses with a faint, rhythmic vitality.",
+      "tags": [
+        "organic",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-b-025",
+      "nameKey": "base.verdant-scabbard",
+      "name": "Verdant Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.verdant-scabbard",
+      "flavorKey": "flavor.base.verdant-scabbard",
+      "flavor": "A hollowed stem reinforced with living sap, designed to cradle a blade within a protective layer of cellulose.",
+      "tags": [
+        "organic",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-b-026",
+      "nameKey": "base.verdant-scabbard",
+      "name": "Verdant Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.verdant-scabbard",
+      "flavorKey": "flavor.base.verdant-scabbard",
+      "flavor": "A hollowed length of living vine, woven tightly to cradle a blade within a protective layer of sap and leaf.",
+      "tags": [
+        "organic",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-b-027",
+      "nameKey": "base.verdant-scabbard",
+      "name": "Verdant Scabbard",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.verdant-scabbard",
+      "flavorKey": "flavor.base.verdant-scabbard",
+      "flavor": "A hollowed, living stem reinforced with hardened sap to protect a ceremonial blade.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-sheath-b-028",
+      "nameKey": "base.pithy-sleeve",
+      "name": "Pithy Sleeve",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-capacity",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.pithy-sleeve",
+      "flavorKey": "flavor.base.pithy-sleeve",
+      "flavor": "A hollowed segment of dense stalk, reinforced with resin to hold a protective warding focus.",
+      "tags": [
+        "organic",
+        "defensive",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     }
   ]
 }

@@ -2,7 +2,7 @@
 
 **Module id:** `first-session-progression` · **Program:** [../standalone-rpg-map.md](../standalone-rpg-map.md)  
 **Depends on:** `match-source-core`, `demon-progression-source`, `species-xp`, `commander-sheet-role`, item ownership/equip  
-**Status:** implemented in code; live deploy acceptance remains environment-gated
+**Status:** implemented in code; simulator acceptance is green and live deploy smoke is operational
 
 ## Purpose
 
@@ -97,7 +97,8 @@ persisted owned specimen); missing or contradictory claims are stored as `untrus
 award species XP (`src/FusionRpg.Data/Sqlite/RpgStore.cs`). The normal PvZ spawn producer
 now carries the typed `EmpireGeneral` claim as `sourceKind`/`sourceId`
 transport fields; capture verifies the claim against side/type before applying it. Injector
-restore/build and real-game acceptance remain environment-gated.
+restore/build and live smoke use the deployed MelonLoader path; simulator E2E covers the game-driven
+`match.result` settlement without requiring a real victory window.
 
 The species reveal reports the actual applied ledger delta and the post-apply allocation. Automatic
 allocation is a projection of the species level (`src/FusionRpg.Core/Stats/Aptitudes/SpeciesAllocation.cs:15-36`), not a second manually persisted build. The later allocation/respec surface remains optional.
@@ -164,9 +165,17 @@ checkpoint response, Souls ledger, XP ledger, species row, allocation, item row,
    claiming once is enough and claiming again is a replay, not a second grant.
 
 The Dave ownership prerequisite, concrete item path, species event, onboarding API, and checkpoint
-transaction are implemented in the server/Data slice. Live testing is currently blocked by the existing
-repository-wide seed import rejecting unrelated `data/seed/dungeon/**` files with `schemaVersion: 0`;
-this environment issue must be repaired before a real lawn run can be captured.
+transaction are implemented in the server/Data slice. The deployed server now imports the atom corpus
+without attempting to parse dungeon-specific envelopes, and `lawn/quick-start` returns a live board with
+target and plant pointers. Simulator and focused Data tests now verify the durable settlement path for
+the three checkpoints; no game binary is patched and no HP polling is used as onboarding evidence.
+The simulator E2E path now drives the same `match.result` settlement and verifies the persisted first-win
+and level-3 checkpoints without depending on a PVZ window; the focused Data harness covers the level-4
+item transaction and replay. A real victory window remains optional smoke coverage rather than a release
+gate.
+The 2026-09-09 live probe also observed ordinary zombie spawns carrying the typed
+`demon.progression.v1` / `general:normalzombie` source claim, followed by the scenario completion and
+board snapshot events.
 Existing BattleEngine death attribution is orthogonal: it supports
 unique specimen lawn XP and must not be used as a substitute for general-source onboarding evidence.
 
@@ -180,5 +189,6 @@ unique specimen lawn XP and must not be used as a substitute for general-source 
 - [x] No new loop, private XP curve, client authority, or combat stat writer is introduced.
 - [x] Full implementation conformance is shipped for checkpoint schema/API, source classifier cleanup,
       commander item scope, concrete content, and in-stage reveal queue.
-- [ ] Real deploy-play acceptance is still environment-gated; no game binary is patched and no HP polling
-      is used as onboarding evidence.
+- [x] Simulator settlement, ordered checkpoint replay, and level-4 item durability are covered; live
+      deploy-play smoke confirms injector connectivity and typed spawn telemetry. A real victory window is
+      optional environment smoke, not a release gate; no game binary is patched and no HP polling is used.

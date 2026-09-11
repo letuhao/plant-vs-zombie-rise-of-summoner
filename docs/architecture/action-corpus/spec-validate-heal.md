@@ -34,7 +34,8 @@ A-S3's. The map should be corrected to say so; until it is, this paragraph is th
    (`workflow/runner.py:11-13,46-51`). A validator rejection is QUALITY — a new generation, defect named.
 7. **Small-batch proof first** — `--dry-run` renders and gates recorded candidates with zero calls.
 8. **Tests never call a model** — the transport stub **raises**.
-9. **The roster is 84 species (53 with family assignments), not 904**, so the gate-failure rates this module
+9. **The roster is the live species seed folder**: 904 species, 227 consolidated families, and 1,183
+   family memberships, so the gate-failure rates this module
    reports are over hundreds of candidates, not thousands.
 
 ## 1. What exists today

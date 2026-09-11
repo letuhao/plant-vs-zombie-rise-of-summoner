@@ -21,11 +21,37 @@ DEMONS_ROOT = Path(__file__).resolve().parents[5] / "data" / "seed" / "demons"
 
 
 def _load_entries(root: Path) -> "dict[str, dict]":
+    """Load the complete almanac roster, with a legacy-fixture fallback.
+
+    The old implementation read ``demon/*.json`` (the authored 84-row slice), which left the
+    motif registry and every downstream theme consumer blind to the rest of the indexed species.
+    The almanac dump is the canonical complete source; preserve the private-fixture fallback for
+    tests and older checkouts that do not carry it.
+    """
     entries: "dict[str, dict]" = {}
+    almanac_dir = root / "_dump" / "almanac"
+    for path in sorted(almanac_dir.glob("*.json")):
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        rows = raw if isinstance(raw, list) else raw.get("entries", [])
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            sid = str(row.get("typeName") or row.get("id") or "").strip().lower()
+            if sid:
+                entries[sid] = {
+                    "id": sid,
+                    "name": row.get("displayName") or row.get("name") or sid,
+                    "flavorInfo": row.get("flavorInfo"),
+                    "flavorIntroduce": row.get("flavorIntroduce"),
+                }
+    if entries:
+        return entries
     for path in sorted((root / "demon").rglob("*.json")):
         doc = json.loads(path.read_text(encoding="utf-8"))
         for row in doc.get("entries", []):
-            entries[row["id"]] = row
+            sid = str(row.get("id") or "").strip().lower()
+            if sid:
+                entries[sid] = row
     return entries
 
 

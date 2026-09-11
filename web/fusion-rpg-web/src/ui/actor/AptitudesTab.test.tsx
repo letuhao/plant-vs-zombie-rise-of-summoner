@@ -6,18 +6,44 @@ import { known, pendingWithReason } from "@/contract/pending";
 import type { ActorView } from "@/contract/types";
 import { actorSurfaceFixture } from "@/lib/bus/actorSurface";
 import { AptitudesTab } from "./AptitudesTab";
+import { resetAptitudeObsForTests } from "./aptitudeObs";
 
-const mutateAsync = vi.fn();
-const aptitudesData = {
+const mutateCommander = vi.fn();
+const mutateUnique = vi.fn();
+const commanderData = {
   theta: 100,
   budget: 300,
   shares: { Might: 12, Fortitude: 8, Agility: 5 }
 };
+const uniqueData = {
+  instanceId: "a1",
+  playerId: 1,
+  specimenLevel: 14,
+  budget: 200,
+  spent: 20,
+  leftover: 180,
+  withinBudget: true,
+  shares: { Might: 10, Fortitude: 5, Agility: 5 },
+  theta: 80
+};
 
 vi.mock("@/lib/bus", () => ({
   usePlayers: () => ({ data: { currentPlayerId: 1 } }),
-  useAptitudes: () => ({ data: aptitudesData, isLoading: false }),
-  useSaveAptitudes: () => ({ mutateAsync, isPending: false })
+  useAptitudes: (playerId: number | null | undefined) =>
+    playerId
+      ? { data: commanderData, isLoading: false }
+      : { data: undefined, isLoading: false },
+  useUniqueAptitudes: (instanceId: string | null | undefined) =>
+    instanceId
+      ? { data: uniqueData, isLoading: false }
+      : { data: undefined, isLoading: false },
+  useSaveAptitudes: () => ({ mutateAsync: mutateCommander, isPending: false }),
+  useSaveUniqueAptitudes: () => ({ mutateAsync: mutateUnique, isPending: false })
+}));
+
+vi.mock("@/lib/bus/aptitudePresets", () => ({
+  probeAptitudePresetsApi: vi.fn(async () => true),
+  useAptitudePresetActive: () => ({ data: { presetId: null }, isLoading: false })
 }));
 
 function actor(): ActorView {
@@ -41,14 +67,24 @@ function actor(): ActorView {
 
 describe("AptitudesTab", () => {
   beforeEach(() => {
-    mutateAsync.mockReset();
+    mutateCommander.mockReset();
+    mutateUnique.mockReset();
+    resetAptitudeObsForTests();
   });
 
-  it("renders catalog displayNames as tiles", () => {
+  it("Mode A creature uses UniqueDemon scope and catalog icons", () => {
     const surface = actorSurfaceFixture();
-    render(<AptitudesTab data={actor()} surface={surface} />);
-    expect(screen.getByTestId("aptitudes-tab")).toBeInTheDocument();
+    render(<AptitudesTab data={actor()} surface={surface} role="creature" />);
+    expect(screen.getByTestId("aptitudes-tab")).toHaveAttribute("data-mode", "unique");
+    expect(screen.getByTestId("aptitudes-scope-chip")).toHaveTextContent("Unique specimen");
     expect(screen.getByTestId("aptitude-tile-Might")).toHaveTextContent("Might");
+    expect(screen.getByTestId("aptitude-icon-Might")).toBeInTheDocument();
+  });
+
+  it("Mode C commander chip fiction differs from UniqueDemon", () => {
+    const surface = actorSurfaceFixture();
+    render(<AptitudesTab data={actor()} surface={surface} role="commander" />);
+    expect(screen.getByTestId("aptitudes-tab")).toHaveAttribute("data-mode", "commander");
     expect(screen.getByTestId("aptitudes-scope-chip")).toHaveTextContent("Commander");
   });
 
@@ -56,10 +92,28 @@ describe("AptitudesTab", () => {
     const user = userEvent.setup();
     const onDraftState = vi.fn();
     const surface = actorSurfaceFixture();
-    render(<AptitudesTab data={actor()} surface={surface} onDraftState={onDraftState} />);
+    render(
+      <AptitudesTab data={actor()} surface={surface} role="creature" onDraftState={onDraftState} />
+    );
     await user.click(screen.getByTestId("aptitude-inc-Might"));
     const last = onDraftState.mock.calls.at(-1)?.[0];
     expect(last?.dirty).toBe(true);
-    expect(last?.spent).toBeGreaterThan(12 + 8 + 5);
+    expect(last?.mode).toBe("unique");
+    expect(last?.spent).toBeGreaterThan(20);
+  });
+
+  it("Confirm save posts UniqueDemon allocate for Mode A", async () => {
+    mutateUnique.mockResolvedValue(uniqueData);
+    const onDraftState = vi.fn();
+    const user = userEvent.setup();
+    const surface = actorSurfaceFixture();
+    render(
+      <AptitudesTab data={actor()} surface={surface} role="creature" onDraftState={onDraftState} />
+    );
+    await user.click(screen.getByTestId("aptitude-inc-Might"));
+    const draft = onDraftState.mock.calls.at(-1)?.[0];
+    await draft.save();
+    expect(mutateUnique).toHaveBeenCalled();
+    expect(mutateCommander).not.toHaveBeenCalled();
   });
 });

@@ -143,27 +143,29 @@ def main(argv=None) -> int:
     ap.add_argument("--model", default="", help="overrides load_config()'s own model for this run")
     args = ap.parse_args(argv)
 
-    brief = brief_mod.build_affix_family_brief(args.group, args.affix_kind,
-                                               theme_note=args.theme)
+    partition = brief_mod.load_partition_context(args.group)
+    free_pairs = brief_mod.free_channel_ops(partition, args.affix_kind)
 
     if args.dry_run:
         print(json.dumps({"group": args.group, "kindId": args.affix_kind,
-                          "existingChannels": list(brief.partition.channels)},
+                          "existingChannels": list(partition.channels),
+                          "freePairs": [f"{c}|{o}" for c, o in free_pairs]},
                          ensure_ascii=False, indent=2))
-        print("--- brief ---")
-        print(brief.render())
+        if free_pairs:
+            brief = brief_mod.build_affix_family_brief(args.group, args.affix_kind,
+                                                       theme_note=args.theme)
+            print("--- brief ---")
+            print(brief.render())
+        else:
+            print("--- brief ---")
+            print("(skipped — no free (channel, op) pair remains)")
         return 0
 
     if not args.write:
         raise SystemExit(
             "seedsmith: refused — no --write. Use --dry-run to inspect the brief first, "
             "then re-run with --write --endpoint <url> to actually call a model and persist.")
-    if not args.endpoint:
-        raise SystemExit(
-            "seedsmith: --write refused — no --endpoint. A real run needs a live model "
-            "(--endpoint <url> [--model <name>]); --dry-run needs neither.")
 
-    free_pairs = brief_mod.free_channel_ops(brief.partition, args.affix_kind)
     if not free_pairs:
         print(json.dumps({
             "outcome": "blocked",
@@ -171,13 +173,30 @@ def main(argv=None) -> int:
         }, ensure_ascii=False, indent=2))
         return 0
 
-    from ....pipeline.llm_caller import live_answer_caller, load_config
+    brief = brief_mod.build_affix_family_brief(args.group, args.affix_kind,
+                                               theme_note=args.theme)
 
-    base_config = load_config()
-    config = dataclasses.replace(base_config, endpoint=args.endpoint,
-                                 model=args.model or base_config.model)
-    validator = lambda answer, schema: schema_mod.validate_answer(
-        answer, schema, channel_ops=brief.partition.channel_ops, kind_id=args.affix_kind)
+    from ....pipeline.llm_caller import live_answer_caller, resolve_live_transport
+
+    config = resolve_live_transport(args.endpoint, args.model)
+    if not config.endpoint:
+        raise SystemExit(
+            "seedsmith: --write refused — no live endpoint. Pass --endpoint <url> or set "
+            "SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env; --dry-run needs neither.")
+    def validator(answer: dict, schema: dict) -> list[str]:
+        defects = schema_mod.validate_answer(
+            answer, schema, channel_ops=brief.partition.channel_ops, kind_id=args.affix_kind,
+            free_pairs=free_pairs)
+        # The schema constrains the channel/op pair but the minted id also depends on the model's
+        # free-form word. Reject a word collision during the shared repair attempt instead of
+        # letting emit.assemble_entry abort the whole fill step after the model call returns.
+        word = answer.get("word")
+        if isinstance(word, str) and word:
+            minted_id = emit.family_id(brief.partition.stem, word)
+            if minted_id in brief.partition.existing_ids:
+                defects.append(
+                    f"word {word!r} mints existing id {minted_id!r}; choose a new mechanical word")
+        return defects
     answer = live_answer_caller(config, validator=validator)(brief.render(), brief.schema)
 
     defects = validator(answer, brief.schema)

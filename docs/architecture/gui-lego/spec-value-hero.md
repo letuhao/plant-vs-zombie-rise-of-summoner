@@ -1,53 +1,94 @@
-# Piece: value-hero
+# Piece: `value-hero`
 
-**Program:** gui-lego · **Kind:** entity · **ERM rung:** Token→display  
+**Program:** `gui-lego` · **Kind:** entity · **ERM rung:** Token→display  
 **Draft:** [../../design/gui-lego/pieces/value-hero.html](../../design/gui-lego/pieces/value-hero.html)  
-**Composition:** [spec-composition.md](spec-composition.md)
+**Shared types:** [payload-types.md](payload-types.md) · **Composition:** [spec-composition.md](spec-composition.md)
 
 ## Role
-Big magnitude
+
+Big magnitude for inspect — displays valueText from VM.
 
 ## Structure
-- Landmark / root class: .big (see draft HTML)
-- Slots: _none_
-- CSS > ancestors: only when parent is surface-shell / split-inspect — **no illicit wrappers**
 
-## Payload (sketch)
-`json
+| | |
+|---|---|
+| Landmark / root | `.big (+ .reading)` |
+| Slots | _none_ |
+| CSS `>` parents | inspect-pane hero |
+
+**Ban:** illicit wrappers between a `>` parent and its declared child.
+
+## Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `piece` | `"value-hero"` | yes | Registry id |
+| `instanceId` | `string` | yes | Stable mount / testid |
+| `phase` | `Phase` | yes | See payload-types |
+| `title` | `string` | yes | Channel title |
+| `reading` | `string` | yes | Reading line |
+| `valueRaw` | `number or string` | when ready |  |
+| `valueText` | `string` | when ready |  |
+| `formatterId` | `string` | when ready |  |
+| `themeRef` | `ThemeRef` | no |  |
+
+
+
+## Theme slots
+
+- Pack kind(s): `themeRef`
+- Reads: `--piece-accent` on .big
+- Vfx keys: none
+
+## Data flow
+
+- **Bind:** `vm.inspect.hero`
+- **Bus out:** _none_
+
+## Focus (GG-19)
+
+no
+
+## Motion (GG-31/32)
+
+none
+
+## Empty / error
+
+phase-pending — do not show 0 as invented
+
+## Sample payloads
+
+```json
 {
   "piece": "value-hero",
-  "instanceId": "demo:value-hero",
+  "instanceId": "inspect:hero",
   "phase": "ready",
   "title": "Power",
+  "reading": "Fire power",
   "valueRaw": 2847,
   "valueText": "2,847",
-  "reading": "Fire power",
+  "formatterId": "whole",
   "themeRef": {
     "kind": "element",
     "id": "fire"
   }
 }
-`
-phase: 
-eady|loading|empty|error|pending. Magnitudes use alueRaw + alueText (VM formats).
+```
 
-## Theme slots
-- Pack kind(s): themeRef
-- Reads: --piece-accent, --piece-rail-edge, paint.accent / paint.accentMuted when visual
-- Vfx keys: none
-
-## Data flow
-- Bind: vm.inspect.hero
-- Bus out: _none (parent or host)_
-
-## Focus (GG-19)
-no
-
-## Motion (GG-31/32)
-none
-
-## Empty / error
-If bind missing or phase not ready, parent mounts the matching phase-* piece — this leaf does not invent data.
-
-## Samples
-HTML draft shows structure + sample JSON; themeable pieces include fire vs ice (or status-dot) swap.
+```json
+{
+  "piece": "value-hero",
+  "instanceId": "inspect:hero",
+  "phase": "ready",
+  "title": "Power",
+  "reading": "Ice power",
+  "valueRaw": 1920,
+  "valueText": "1,920",
+  "formatterId": "whole",
+  "themeRef": {
+    "kind": "element",
+    "id": "ice"
+  }
+}
+```

@@ -1,26 +1,26 @@
 /** Shared actor HUD display tokens — Inspector (CSS) + Phaser canvas (numeric colors). */
 
+import {
+  elementPaintAccentHex,
+  elementPaintAccentPhaser
+} from "../../features/gui-lego/themes/elementPaint";
+
 /** Structural mirror of `data/tuning/actor-hud.v1.json` `statusStripMax` (web does not load tuning file v1). */
 export const STATUS_STRIP_MAX = 3;
 
 export type HudTokenResolve = { hudToken: string; color: string; displayName: string };
 
-export const ELEMENT_COLORS_HEX: Record<string, string> = {
-  fire: "#e07040",
-  ice: "#60a8e0",
-  poison: "#70c060",
-  lightning: "#e0d040",
-  physical: "#a0a0a8"
-};
+/**
+ * Element colors — redirected to gui-lego `resolveElementPaint` (CG-A1 / paint SSOT).
+ * Do not add a private hex table here.
+ */
+export function elementColorHex(element: string): string {
+  return elementPaintAccentHex(element);
+}
 
-/** Phaser fill colors — keep in sync with ELEMENT_COLORS_HEX. */
-export const ELEMENT_COLORS: Record<string, number> = {
-  fire: 0xe07040,
-  ice: 0x60a8e0,
-  poison: 0x70c060,
-  lightning: 0xe0d040,
-  physical: 0xa0a0a8
-};
+export function elementColorPhaser(element: string): number {
+  return elementPaintAccentPhaser(element);
+}
 
 export const TIER_BORDER: Record<string, string> = {
   normal: "border-border-control",
@@ -35,14 +35,6 @@ export const TIER_STROKE: Record<string, number> = {
   boss: 0xcc4444,
   unique: 0xe8b040
 };
-
-export function elementColorHex(element: string): string {
-  return ELEMENT_COLORS_HEX[element.toLowerCase()] ?? ELEMENT_COLORS_HEX.physical;
-}
-
-export function elementColorPhaser(element: string): number {
-  return ELEMENT_COLORS[element.toLowerCase()] ?? ELEMENT_COLORS.physical;
-}
 
 /**
  * H2 resolve: catalog hudToken/color when actor-surface is injected; else designed placeholder

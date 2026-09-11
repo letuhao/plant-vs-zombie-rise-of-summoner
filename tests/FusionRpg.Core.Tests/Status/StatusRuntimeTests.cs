@@ -65,6 +65,22 @@ public class StatusRuntimeTests
     }
 
     [Fact]
+    public void WithdrawEntity_does_not_fire_OnEnded()
+    {
+        var rt = Runtime();
+        var ended = 0;
+        rt.OnEnded = _ => ended++;
+        var now = DateTimeOffset.UtcNow;
+        rt.Apply(WitherApply(now), new CoreStatus.FixedStatusRng(0.0), now);
+        Assert.NotEmpty(rt.ForHost("Z1"));
+
+        var taken = rt.TakeHostInstances("Z1");
+        Assert.Single(taken);
+        Assert.Equal(0, ended);
+        Assert.Empty(rt.ForHost("Z1"));
+    }
+
+    [Fact]
     public void Withdraw_entity_clears_instances()
     {
         var rt = Runtime();

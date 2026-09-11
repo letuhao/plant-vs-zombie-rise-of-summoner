@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>preset-distribution-chart — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>preset-distribution-chart</code></h1>
+  <p class="lede">Live <strong>recharts donut</strong> fiction (SVG stand-in) of twelve aptitudes as %. Segment paint from posture theme packs — not a peer pie/radar. Honest empty when no points. Spec: <code>docs/architecture/aptitude-sheet/spec-aptitude-pieces.md</code>.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live)</h2>
+      <div class="piece-stage">
+        <div class="share-donut" style="display:flex; align-items:flex-start; gap:14px">
+          <!-- recharts Pie donut fiction — stroke hex from posture packs -->
+          <svg width="96" height="96" viewBox="0 0 42 42" aria-hidden="true">
+            <circle cx="21" cy="21" r="15.5" fill="none" stroke="#2a241c" stroke-width="6"/>
+            <circle cx="21" cy="21" r="15.5" fill="none" stroke="#e0703c" stroke-width="6"
+              stroke-dasharray="38 62" stroke-dashoffset="25"/>
+            <circle cx="21" cy="21" r="15.5" fill="none" stroke="#6fc4d9" stroke-width="6"
+              stroke-dasharray="32 68" stroke-dashoffset="-13"/>
+            <circle cx="21" cy="21" r="15.5" fill="none" stroke="#8bc34a" stroke-width="6"
+              stroke-dasharray="20 80" stroke-dashoffset="-45"/>
+            <circle cx="21" cy="21" r="15.5" fill="none" stroke="#c9a227" stroke-width="6"
+              stroke-dasharray="10 90" stroke-dashoffset="-65"/>
+          </svg>
+          <ul class="share-legend">
+            <li><i style="background:#e0703c"></i> Force group</li>
+            <li><i style="background:#6fc4d9"></i> Finesse group</li>
+            <li><i style="background:#8bc34a"></i> Bastion group</li>
+            <li><i style="background:#c9a227"></i> Leftover 10%</li>
+          </ul>
+        </div>
+        <p class="lede" style="margin-top:10px;margin-bottom:0">Optional small posture stacked bar companion — not a second pie.</p>
+      </div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "preset-distribution-chart",
+  "instanceId": "presets:donut",
+  "segments": [
+    {
+      "aptitudeId": "might",
+      "displayName": "Might",
+      "permille": 120,
+      "postureId": "force"
+    },
+    {
+      "aptitudeId": "swift",
+      "displayName": "Swift",
+      "permille": 100,
+      "postureId": "finesse"
+    },
+    {
+      "aptitudeId": "guard",
+      "displayName": "Guard",
+      "permille": 80,
+      "postureId": "bastion"
+    }
+  ],
+  "leftover": 2,
+  "revision": 4,
+  "budget": 24,
+  "lib": "recharts",
+  "empty": false,
+  "phase": "ready"
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

@@ -446,14 +446,28 @@ export const emptyMod = (): StatMod => ({
   defenseFlat: 0
 });
 
-/** spec-aptitude-allocation-surface.md — GET/POST /api/aptitudes. Commander scope only; `shares` always
- * carries all twelve aptitude ids (zero if unset, never omitted). */
+/** spec-aptitude-allocation-surface.md — GET/POST /api/aptitudes. Commander Mode C; `shares` always
+ * carries all twelve aptitude ids (zero if unset, never omitted). Nested `species` is additive (S10). */
 export type AptitudesState = {
   theta: number;
   budget: number;
   spent: number;
   withinBudget: boolean;
   shares: Record<string, number>;
+  species?: Record<string, Record<string, number>>;
+};
+
+/** aptitude-sheet unique-allocate — GET/POST UniqueDemon by instanceId (Mode A). Persisted shares only. */
+export type UniqueAptitudesState = {
+  instanceId: string;
+  playerId: number;
+  specimenLevel: number;
+  budget: number;
+  spent: number;
+  leftover: number;
+  withinBudget: boolean;
+  shares: Record<string, number>;
+  theta?: number;
 };
 
 /** spec-allocation-surface.md — GET /api/aptitudes/species/{playerId}/{speciesId}. `shares` is the

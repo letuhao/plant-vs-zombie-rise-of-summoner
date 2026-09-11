@@ -3,8 +3,50 @@
     "confidence": {},
     "minorityValues": {},
     "model": "google/gemma-4-26b-a4b-qat",
-    "planHash": "",
-    "promptVersion": "tree-language/1"
+    "planHash": "4385786d61d063bdea498c006c588f5253d952bd5e9bf7b5e878883e74dd8516",
+    "promptVersion": "mixed",
+    "promptVersionByNode": {
+      "skill.blight-def-t1-n0": "",
+      "skill.blight-def-t1-n1": "",
+      "skill.blight-def-t10-n0": "tree-language/3",
+      "skill.blight-def-t10-n1": "tree-language/3",
+      "skill.blight-def-t2-n0": "tree-language/3",
+      "skill.blight-def-t2-n1": "tree-language/3",
+      "skill.blight-def-t3-n0": "tree-language/3",
+      "skill.blight-def-t3-n1": "tree-language/3",
+      "skill.blight-def-t4-n0": "tree-language/3",
+      "skill.blight-def-t4-n1": "tree-language/3",
+      "skill.blight-def-t5-n0": "",
+      "skill.blight-def-t5-n1": "tree-language/3",
+      "skill.blight-def-t6-n0": "tree-language/3",
+      "skill.blight-def-t6-n1": "",
+      "skill.blight-def-t7-n0": "tree-language/3",
+      "skill.blight-def-t7-n1": "tree-language/3",
+      "skill.blight-def-t8-n0": "tree-language/3",
+      "skill.blight-def-t8-n1": "",
+      "skill.blight-def-t9-n0": "tree-language/3",
+      "skill.blight-def-t9-n1": "tree-language/3",
+      "skill.blight-off-t1-n0": "tree-language/3",
+      "skill.blight-off-t1-n1": "tree-language/3",
+      "skill.blight-off-t10-n0": "tree-language/3",
+      "skill.blight-off-t10-n1": "",
+      "skill.blight-off-t2-n0": "tree-language/3",
+      "skill.blight-off-t2-n1": "tree-language/3",
+      "skill.blight-off-t3-n0": "tree-language/3",
+      "skill.blight-off-t3-n1": "tree-language/3",
+      "skill.blight-off-t4-n0": "tree-language/3",
+      "skill.blight-off-t4-n1": "tree-language/3",
+      "skill.blight-off-t5-n0": "tree-language/3",
+      "skill.blight-off-t5-n1": "tree-language/3",
+      "skill.blight-off-t6-n0": "tree-language/3",
+      "skill.blight-off-t6-n1": "tree-language/3",
+      "skill.blight-off-t7-n0": "tree-language/3",
+      "skill.blight-off-t7-n1": "tree-language/3",
+      "skill.blight-off-t8-n0": "tree-language/3",
+      "skill.blight-off-t8-n1": "tree-language/3",
+      "skill.blight-off-t9-n0": "",
+      "skill.blight-off-t9-n1": "tree-language/3"
+    }
   },
   "nodes": [
     {
@@ -59,25 +101,34 @@
     },
     {
       "affinity": [
+        "core",
         "likely"
       ],
       "affixIds": [
-        "atom.evd-harden"
+        "atom.shld-cycle",
+        "atom.ward-flux"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A sudden release of pressurized spores upon impact, hardening the skin and startling the attacker.",
+      "flavor": "The very rhythm of the rot dictates the ebb and flow of the protective veil.",
       "id": "skill.blight-def-t10-n0",
-      "name": "Reactive Spore-Burst",
-      "nameKey": "tree.node.reactive-spore-burst",
+      "name": "Rhythmic Spore-Pulse",
+      "nameKey": "tree.node.rhythmic-spore-pulse",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.power",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "blight",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 10
     },
@@ -87,23 +138,30 @@
         "likely"
       ],
       "affixIds": [
-        "atom.life-graft",
-        "atom.mending"
+        "atom.shld-cycle",
+        "atom.shld-surge"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The wound does not close; it simply becomes part of the organism.",
+      "flavor": "The fungal network pulses in rhythm with the shield's ebb and flow, recycling kinetic energy into protective surges.",
       "id": "skill.blight-def-t10-n1",
-      "name": "Necrotic Suture",
-      "nameKey": "tree.node.necrotic-suture-3",
+      "name": "Spore-Driven Recirculation",
+      "nameKey": "tree.node.spore-driven-recirculation",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.realm",
+        "element": "omni",
+        "exclusionForm": "reroute",
+        "nodeClass": "mechanism",
+        "status": "blight",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 10
     },
@@ -112,96 +170,91 @@
         "core"
       ],
       "affixIds": [
-        "atom.shield-capacity"
+        "atom.evd-harden"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "nullification",
-        "printedText": "Inert while nodeClass is active — nodeClass wins.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The very essence of the blight flows through the core, thickening the spirit and the flesh alike.",
+      "flavor": "The very air becomes heavy and viscous, clinging to the skin like a protective layer of rot.",
       "id": "skill.blight-def-t2-n0",
-      "name": "Verdant Marrow",
-      "nameKey": "tree.node.verdant-marrow",
+      "name": "Thickened Sludge",
+      "nameKey": "tree.node.thickened-sludge",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.damage",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
       "tier": 2
     },
     {
       "affinity": [
         "likely"
-      ],
-      "affixIds": [
-        "atom.evd-harden"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "Layers of hardened sap provide a natural defense against the elements.",
-      "id": "skill.blight-def-t2-n1",
-      "name": "Thickened Bark",
-      "nameKey": "tree.node.thickened-bark-7",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 2
-    },
-    {
-      "affinity": [
-        "likely",
-        "core"
-      ],
-      "affixIds": [
-        "atom.fortitude",
-        "atom.vitality"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The very essence of the blight swells, thickening the blood and hardening the bone.",
-      "id": "skill.blight-def-t3-n0",
-      "name": "Overgrowth",
-      "nameKey": "tree.node.overgrowth-2",
-      "nodeClass": "magnitude",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 3
-    },
-    {
-      "affinity": [
-        "core"
       ],
       "affixIds": [
         "atom.plating"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "tier"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A dense, overlapping layer of hardened fungal matter that reinforces the outer shell.",
-      "id": "skill.blight-def-t3-n1",
-      "name": "Chitinous Plating",
-      "nameKey": "tree.node.chitinous-plating",
+      "flavor": "The skin thickens where the rot meets the bone.",
+      "id": "skill.blight-def-t2-n1",
+      "name": "Layered Callus",
+      "nameKey": "tree.node.layered-callus",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.rate",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnMatchEnd"
+      },
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.sust-callus"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "A layer of hardened fungal tissue that thickens with every impact.",
+      "id": "skill.blight-def-t3-n0",
+      "name": "Calloused Spore-Skin",
+      "nameKey": "tree.node.calloused-spore-skin",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.damage",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 3
     },
@@ -210,46 +263,93 @@
         "core"
       ],
       "affixIds": [
-        "atom.sust-husk"
+        "atom.sust-callus"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The soil thickens with every fallen spore, building a foundation that refuses to crumble.",
+      "flavor": "A dense, layered skin that thickens with every impact.",
+      "id": "skill.blight-def-t3-n1",
+      "name": "Calloused Bark",
+      "nameKey": "tree.node.calloused-bark",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.rate",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnMatchStart"
+      },
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ward-flux",
+        "atom.ward-link"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The blight does not merely coat the skin; it weaves itself into the very essence of the ward.",
       "id": "skill.blight-def-t4-n0",
-      "name": "Layered Humus",
-      "nameKey": "tree.node.layered-humus",
+      "name": "Symbiotic Weave",
+      "nameKey": "tree.node.symbiotic-weave",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.capacity",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "blight",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 4
     },
     {
       "affinity": [
-        "likely"
+        "core"
       ],
       "affixIds": [
-        "atom.resilience"
+        "atom.sust-grit"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The skin thickens into a knot of unyielding fiber, turning every impact into a mere tremor against the bark.",
+      "flavor": "Layers of hardened fungal matter provide a stubborn layer of protection against the inevitable.",
       "id": "skill.blight-def-t4-n1",
-      "name": "Lignified Integument",
-      "nameKey": "tree.node.lignified-integument",
+      "name": "Grit-Bound Bark",
+      "nameKey": "tree.node.grit-bound-bark",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.pen",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 4
     },
@@ -279,25 +379,34 @@
     },
     {
       "affinity": [
+        "likely",
         "core"
       ],
       "affixIds": [
+        "atom.fortitude",
         "atom.sust-grit"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A thick, amber-like secretion that hardens upon contact with air, swelling the protective shell.",
+      "flavor": "The very soil becomes a layer of unyielding resolve.",
       "id": "skill.blight-def-t5-n1",
-      "name": "Chitinous Reservoir",
-      "nameKey": "tree.node.chitinous-reservoir",
+      "name": "Grit-Sown Fortification",
+      "nameKey": "tree.node.grit-sown-fortification",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.toughness",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnSpawn"
+      },
       "rationale": "",
       "tier": 5
     },
@@ -306,22 +415,29 @@
         "core"
       ],
       "affixIds": [
-        "atom.shld-surge"
+        "atom.ward-harden"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rot does not merely consume; it builds a wall of calcified spores to deflect the blow.",
+      "flavor": "Layers of hardened fungal chitin fuse with protective plating to form an impenetrable shell.",
       "id": "skill.blight-def-t6-n0",
-      "name": "Spore-Fed Aegis",
-      "nameKey": "tree.node.spore-fed-aegis",
+      "name": "Calcified Graftplate",
+      "nameKey": "tree.node.calcified-graftplate",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "loadout.slots",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "blight",
+        "trigger": "OnSpawn"
+      },
       "rationale": "",
       "tier": 6
     },
@@ -356,72 +472,93 @@
         "core"
       ],
       "affixIds": [
-        "atom.life-surge"
+        "atom.ward-brace"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A rhythmic, subterranean thrumming that knits flesh back to the soil.",
+      "flavor": "The rot does not merely consume; it binds the soul to the soil through a web of living iron.",
       "id": "skill.blight-def-t7-n0",
-      "name": "Pulsing Mycelium",
-      "nameKey": "tree.node.pulsing-mycelium",
+      "name": "Mycelial Tether",
+      "nameKey": "tree.node.mycelial-tether",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm1",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "blight",
+        "trigger": "OnSunCollect"
+      },
       "rationale": "",
       "tier": 7
     },
     {
       "affinity": [
-        "likely",
         "core"
       ],
       "affixIds": [
-        "atom.fortitude",
         "atom.vitality"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The very essence of the blight thickens, turning bone into something more akin to ironwood.",
+      "flavor": "The rhythm of the forest beats within the marrow, mending flesh as quickly as it grows.",
       "id": "skill.blight-def-t7-n1",
-      "name": "Thickened Marrow",
-      "nameKey": "tree.node.thickened-marrow-3",
+      "name": "Verdant Pulse",
+      "nameKey": "tree.node.verdant-pulse",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm2",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnSunCollect"
+      },
       "rationale": "",
       "tier": 7
     },
     {
       "affinity": [
+        "core",
         "likely"
       ],
       "affixIds": [
-        "atom.econ-toll"
+        "atom.shld-cycle",
+        "atom.shld-surge"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A dense, protective layer of fungal filaments that swells upon impact, absorbing the blow before it reaches the core.",
+      "flavor": "A rhythmic expansion of chitin that breathes with the heartbeat of the blight.",
       "id": "skill.blight-def-t8-n0",
-      "name": "Mycelial Bulwark",
-      "nameKey": "tree.node.mycelial-bulwark",
+      "name": "Pulsing Carapace",
+      "nameKey": "tree.node.pulsing-carapace",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.atk",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "blight",
+        "trigger": "OnTimer"
+      },
       "rationale": "",
       "tier": 8
     },
@@ -453,103 +590,96 @@
     },
     {
       "affinity": [
-        "likely",
-        "core"
+        "likely"
       ],
       "affixIds": [
-        "atom.mending",
-        "atom.sust-husk"
+        "atom.ward-link"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The skin hardens into a brittle, protective shell as the lifeblood within turns to dust.",
+      "flavor": "A thick, weeping layer of fungal matter that pulses in rhythm with the wearer's heartbeat.",
       "id": "skill.blight-def-t9-n0",
-      "name": "Desiccated Husk",
-      "nameKey": "tree.node.desiccated-husk",
+      "name": "Spore-Saturated Membrane",
+      "nameKey": "tree.node.spore-saturated-membrane",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
-      "rationale": "",
-      "tier": 9
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.sust-freshgraft"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.maxHp",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "blight",
+        "trigger": "OnTimer"
       },
-      "flavor": "A thick, pulsating fungal mass that stitches flesh to bark.",
-      "id": "skill.blight-def-t9-n1",
-      "name": "Grafting Spore",
-      "nameKey": "tree.node.grafting-spore",
-      "nodeClass": "mechanism",
-      "nodeKey": "n1",
       "rationale": "",
       "tier": 9
     },
     {
       "affinity": [
         "core",
-        "core"
+        "likely"
       ],
       "affixIds": [
-        "atom.blighting",
-        "atom.rotting"
+        "atom.shld-cycle",
+        "atom.shld-surge"
       ],
-      "branch": "offensive",
+      "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rot spreads before the strike even lands.",
-      "id": "skill.blight-off-t1-n0",
-      "name": "Creeping Decay",
-      "nameKey": "tree.node.creeping-decay",
-      "nodeClass": "magnitude",
-      "nodeKey": "n0",
+      "flavor": "The fungal network pulses with a rhythmic, protective energy, weaving wards into the very air.",
+      "id": "skill.blight-def-t9-n1",
+      "name": "Mycelial Conduit",
+      "nameKey": "tree.node.mycelial-conduit",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.breakthroughSuccess",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "blight",
+        "trigger": "OnWave"
+      },
       "rationale": "",
-      "tier": 1
+      "tier": 9
     },
     {
       "affinity": [
-        "likely",
         "core"
       ],
       "affixIds": [
-        "atom.ferocity",
-        "atom.savagery"
+        "atom.blighting"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The very air thickens with the weight of decay, turning every breath into a slow, inevitable dissolution.",
-      "id": "skill.blight-off-t1-n1",
-      "name": "Festering Spore",
-      "nameKey": "tree.node.festering-spore",
+      "flavor": "The very air thickens with a predatory intent, turning every breath into a strike.",
+      "id": "skill.blight-off-t1-n0",
+      "name": "Feral Spore",
+      "nameKey": "tree.node.feral-spore",
       "nodeClass": "magnitude",
-      "nodeKey": "n1",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "ai.aggression",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 1
     },
@@ -562,18 +692,58 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rot does not merely consume; it seeps into the very marrow of the target.",
+      "flavor": "The very air thickens with the scent of slow dissolution.",
+      "id": "skill.blight-off-t1-n1",
+      "name": "Blighted Decay",
+      "nameKey": "tree.node.blighted-decay",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.absorption",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnActivate"
+      },
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.blighting",
+        "atom.rot-punisher"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The blight does not merely sit upon the skin; it weaves through the very marrow.",
       "id": "skill.blight-off-t10-n0",
-      "name": "Venomous Blight",
-      "nameKey": "tree.node.venomous-blight",
+      "name": "Necrotic Spore-Vein",
+      "nameKey": "tree.node.necrotic-spore-vein",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.strength",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "blight",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 10
     },
@@ -605,55 +775,32 @@
     },
     {
       "affinity": [
-        "core",
-        "core"
+        "occasional"
       ],
       "affixIds": [
-        "atom.blighting",
         "atom.rotting"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "branch"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rot does not merely sit upon the skin; it flows through the very marrow of the strike.",
+      "flavor": "The rot does not merely sit; it spreads with a hunger that outpaces the host.",
       "id": "skill.blight-off-t2-n0",
-      "name": "Blighted Veins",
-      "nameKey": "tree.node.blighted-veins",
+      "name": "Creeping Decay",
+      "nameKey": "tree.node.creeping-decay",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
-      "rationale": "",
-      "tier": 2
-    },
-    {
-      "affinity": [
-        "core",
-        "likely",
-        "core"
-      ],
-      "affixIds": [
-        "atom.blighting",
-        "atom.cruelty",
-        "atom.rotting"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "branch"
-        ]
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.accuracy",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnActivate"
       },
-      "flavor": "The rot feeds upon the cruelty of the strike, growing more virulent with every wound.",
-      "id": "skill.blight-off-t2-n1",
-      "name": "Vile Harvest",
-      "nameKey": "tree.node.vile-harvest",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
       "rationale": "",
       "tier": 2
     },
@@ -664,24 +811,124 @@
       ],
       "affixIds": [
         "atom.blighting",
-        "atom.cruelty"
+        "atom.rotting"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The very air thickens with a toxic, merciless haze.",
+      "flavor": "The rot spreads before the strike even lands.",
+      "id": "skill.blight-off-t2-n1",
+      "name": "Creeping Spore",
+      "nameKey": "tree.node.creeping-spore",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.amplification",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnActivate"
+      },
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.rotting"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The very air thickens with the scent of decay.",
       "id": "skill.blight-off-t3-n0",
       "name": "Vile Spore",
-      "nameKey": "tree.node.vile-spore",
+      "nameKey": "tree.node.vile-spore-2",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.break",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
       "tier": 3
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.rotting"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The very soil hungers for the rot it has cultivated.",
+      "id": "skill.blight-off-t3-n1",
+      "name": "Malignant Overgrowth",
+      "nameKey": "tree.node.malignant-overgrowth",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.rate",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnDamageDealt"
+      },
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.blighting"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "Every burst of spores leaves behind a residue of wealth.",
+      "id": "skill.blight-off-t4-n0",
+      "name": "Fungal Tithe",
+      "nameKey": "tree.node.fungal-tithe",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.shred",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "blight",
+        "trigger": "OnDamageDealt"
+      },
+      "rationale": "",
+      "tier": 4
     },
     {
       "affinity": [
@@ -690,50 +937,95 @@
       ],
       "affixIds": [
         "atom.blighting",
-        "atom.cruelty"
+        "atom.rotting"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The very air thickens with a caustic haze that eats through resolve and flesh alike.",
-      "id": "skill.blight-off-t3-n1",
-      "name": "Corrosive Spore",
-      "nameKey": "tree.node.corrosive-spore",
+      "flavor": "The very air thickens with the scent of decay, turning every breath into a slow dissolution.",
+      "id": "skill.blight-off-t4-n1",
+      "name": "Spore Rot",
+      "nameKey": "tree.node.spore-rot",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.strength",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
-      "tier": 3
+      "tier": 4
     },
     {
       "affinity": [
-        "core",
-        "core"
+        "likely",
+        "likely"
       ],
       "affixIds": [
         "atom.blighting",
-        "atom.rot-punisher"
+        "atom.withering"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rot does not merely consume; it learns the rhythm of the decay.",
-      "id": "skill.blight-off-t4-n0",
-      "name": "Fungal Resurgence",
-      "nameKey": "tree.node.fungal-resurgence",
+      "flavor": "The air thickens with spores that feed upon the very essence of the rot.",
+      "id": "skill.blight-off-t5-n0",
+      "name": "Fungal Spore-Siphon",
+      "nameKey": "tree.node.fungal-spore-siphon",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.damage",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "blight",
+        "trigger": "OnDamageTaken"
+      },
       "rationale": "",
-      "tier": 4
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.withering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The very soil hungers for the rot it provides.",
+      "id": "skill.blight-off-t5-n1",
+      "name": "Virulent Overgrowth",
+      "nameKey": "tree.node.virulent-overgrowth",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.rate",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 5
     },
     {
       "affinity": [
@@ -744,190 +1036,155 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The very essence of the blight swells, feeding on the violence of the strike to fuel further devastation.",
-      "id": "skill.blight-off-t4-n1",
-      "name": "Overgrowth",
-      "nameKey": "tree.node.overgrowth",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
+      "flavor": "The rapid expansion of fungal colonies accelerates the spread of decay.",
+      "id": "skill.blight-off-t6-n0",
+      "name": "Spore Surge",
+      "nameKey": "tree.node.spore-surge",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "blight",
+        "trigger": "OnDamageTaken"
+      },
       "rationale": "",
-      "tier": 4
+      "tier": 6
     },
     {
       "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.blighting"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The very air thickens with the scent of inevitable decay.",
+      "id": "skill.blight-off-t6-n1",
+      "name": "Putrid Bloom",
+      "nameKey": "tree.node.putrid-bloom",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist.damage",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
         "likely"
       ],
       "affixIds": [
+        "atom.blighting",
+        "atom.sporing"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The air thickens with a fine, toxic mist that turns every impact into a blooming catastrophe.",
+      "id": "skill.blight-off-t7-n0",
+      "name": "Spore-Cloud Catalyst",
+      "nameKey": "tree.node.spore-cloud-catalyst",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.defense",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "blight",
+        "trigger": "OnDeath"
+      },
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The very air thickens with a violent, predatory intent.",
+      "id": "skill.blight-off-t7-n1",
+      "name": "Feral Spore-Burst",
+      "nameKey": "tree.node.feral-spore-burst",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.dodge",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnDeath"
+      },
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.blighting",
         "atom.death-glean"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The soil remembers every life it has reclaimed.",
-      "id": "skill.blight-off-t5-n0",
-      "name": "Carrion Sieve",
-      "nameKey": "tree.node.carrion-sieve",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 5
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.ferocity"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The scent of decay sharpens the senses and fuels the hunt.",
-      "id": "skill.blight-off-t5-n1",
-      "name": "Predatory Spore",
-      "nameKey": "tree.node.predatory-spore",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 5
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.blighting",
-        "atom.dooming"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While status holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "status"
-        ]
-      },
-      "flavor": "The rot does not merely consume; it marks the inevitable end.",
-      "id": "skill.blight-off-t6-n0",
-      "name": "Festering Omen",
-      "nameKey": "tree.node.festering-omen",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.blighting"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "branch"
-        ]
-      },
-      "flavor": "The rot does not merely spread; it foretells the end of all things.",
-      "id": "skill.blight-off-t6-n1",
-      "name": "Blighted Omen",
-      "nameKey": "tree.node.blighted-omen",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "likely"
-      ],
-      "affixIds": [
-        "atom.dooming"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The rot does not merely consume; it judges the very soil it inhabits.",
-      "id": "skill.blight-off-t7-n0",
-      "name": "Spore-Laden Verdict",
-      "nameKey": "tree.node.spore-laden-verdict",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "core",
-        "occasional"
-      ],
-      "affixIds": [
-        "atom.blighting",
-        "atom.ferocity"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
-      },
-      "flavor": "The very essence of decay becomes a potent, spreading toxin.",
-      "id": "skill.blight-off-t7-n1",
-      "name": "Vile Infusion",
-      "nameKey": "tree.node.vile-infusion",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.blighting"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The rot does not merely consume; it harvests.",
+      "flavor": "The soil drinks deep of the rot, turning decay into momentum.",
       "id": "skill.blight-off-t8-n0",
-      "name": "Festering Yield",
-      "nameKey": "tree.node.festering-yield",
+      "name": "Blighted Harvest",
+      "nameKey": "tree.node.blighted-harvest",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.heal.power",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "blight",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 8
     },
@@ -940,18 +1197,25 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While status holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "status"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The very air thickens as the rot begins to feed upon the essence of the living.",
+      "flavor": "The harvest is measured by the weight of the remains.",
       "id": "skill.blight-off-t8-n1",
-      "name": "Necrotic Osmosis",
-      "nameKey": "tree.node.necrotic-osmosis",
+      "name": "Grafting Tally",
+      "nameKey": "tree.node.grafting-tally",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.break",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "blight",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 8
     },
@@ -983,27 +1247,32 @@
     },
     {
       "affinity": [
-        "core",
-        "core"
+        "occasional"
       ],
       "affixIds": [
-        "atom.blighting",
-        "atom.rotting"
+        "atom.death-glean"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While status holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "status"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rot does not merely spread; it judges the very essence of the afflicted.",
+      "flavor": "The rot does not merely settle; it erupts from the fallen.",
       "id": "skill.blight-off-t9-n1",
-      "name": "Blighted Reckoning",
-      "nameKey": "tree.node.blighted-reckoning",
+      "name": "Carrion Volley",
+      "nameKey": "tree.node.carrion-volley",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.shred",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "blight",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 9
     }

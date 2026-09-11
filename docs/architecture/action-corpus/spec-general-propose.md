@@ -30,7 +30,8 @@ whole identity, and it is why this cannot be `A-P2` with a `scope` flag.
 7. **Small-batch proof first.** `--dry-run` and a small `--count` ship with the stage. The call budget is a
    ceiling, not a plan; a full run is an owner decision behind a quality gate.
 8. **Tests never call a model** — the transport stub **raises**.
-9. **The roster is 84 species (53 with family assignments), not 904** — measured, see §1.
+9. **The planner's roster is the live species seed folder** — currently 904 species, 227
+   consolidated families, and 1,183 family memberships; generated projections are not inputs.
 
 ## 1. What exists today
 
@@ -63,8 +64,8 @@ whole identity, and it is why this cannot be `A-P2` with a `scope` flag.
 - **This stage.** No `general-propose` adapter, schema, prompt or entrypoint exists anywhere under
   `tools/seedsmith/seedsmith/adapters/`.
 - **`A-S1` does not exist**, so the brief this stage consumes has no producer yet.
-- **The roster is 84, not 904** — `data/seed/demons/_generated/motif-assignments.json` has 84 keys and
-  `family-assignments.json` has 53 across **19** family tokens. The general tier is the one tier that does
+- **The roster is the live species seed folder** — currently 904 keys across 227 consolidated family
+  tokens, with 1,183 memberships. The general tier is the one tier that does
   **not** care: it reads no anchor, so it is the only pipeline the roster finding leaves untouched.
 
 ## 2. The contract

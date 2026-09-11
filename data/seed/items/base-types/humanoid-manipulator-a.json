@@ -455,6 +455,581 @@
           "family": "atom.enhance-keen"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-hands-a-013",
+      "nameKey": "base.etched-gauntlet",
+      "name": "Etched Gauntlet",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.etched-gauntlet",
+      "flavorKey": "flavor.base.etched-gauntlet",
+      "flavor": "A heavy-duty sleeve of reinforced plating designed to channel precise, lethal movements.",
+      "tags": [
+        "metal",
+        "offensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-014",
+      "nameKey": "base.etched-gauntlet",
+      "name": "Etched Gauntlet",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.etched-gauntlet",
+      "flavorKey": "flavor.base.etched-gauntlet",
+      "flavor": "A heavy-duty sleeve of reinforced plating designed to channel precise, lethal movements through the fingertips.",
+      "tags": [
+        "metal",
+        "offensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-015",
+      "nameKey": "base.serrated-gauntlet",
+      "name": "Serrated Gauntlet",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.serrated-gauntlet",
+      "flavorKey": "flavor.base.serrated-gauntlet",
+      "flavor": "A heavy, reinforced glove fitted with jagged metal ridges designed to catch and tear through flesh.",
+      "tags": [
+        "metal",
+        "offensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-016",
+      "nameKey": "base.etched-gauntlet",
+      "name": "Etched Gauntlet",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.etched-gauntlet",
+      "flavorKey": "flavor.base.etched-gauntlet",
+      "flavor": "A heavy-duty sleeve of reinforced material designed to channel precise, lethal movements through the fingertips.",
+      "tags": [
+        "medium",
+        "offensive",
+        "crafted-only"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-017",
+      "nameKey": "base.etched-gauntlet",
+      "name": "Etched Gauntlet",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.etched-gauntlet",
+      "flavorKey": "flavor.base.etched-gauntlet",
+      "flavor": "A rigid, articulated sleeve designed to channel precise, lethal movements through the fingertips.",
+      "tags": [
+        "metal",
+        "offensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-018",
+      "nameKey": "base.etched-gauntlet",
+      "name": "Etched Gauntlet",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.etched-gauntlet",
+      "flavorKey": "flavor.base.etched-gauntlet",
+      "flavor": "A heavy, articulated sleeve of reinforced leather designed to channel precise, lethal movements.",
+      "tags": [
+        "medium",
+        "offensive",
+        "crafted-only"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-019",
+      "nameKey": "base.serrated-gauntlet",
+      "name": "Serrated Gauntlet",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.serrated-gauntlet",
+      "flavorKey": "flavor.base.serrated-gauntlet",
+      "flavor": "A heavy-duty glove fitted with retractable, razor-sharp ridges designed to catch and tear through flesh.",
+      "tags": [
+        "offensive",
+        "metal",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-020",
+      "nameKey": "base.serrated-gauntlet",
+      "name": "Serrated Gauntlet",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.serrated-gauntlet",
+      "flavorKey": "flavor.base.serrated-gauntlet",
+      "flavor": "A heavy-duty glove fitted with jagged, inward-facing blades designed to catch and tear through flesh.",
+      "tags": [
+        "offensive",
+        "metal",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-021",
+      "nameKey": "base.vitreous-manacles",
+      "name": "Vitreous Manacles",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.vitreous-manacles",
+      "flavorKey": "flavor.base.vitreous-manacles",
+      "flavor": "Translucent, razor-edged restraints designed to constrict and punish the movements of a captive.",
+      "tags": [
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-022",
+      "nameKey": "base.vitreous-manacles",
+      "name": "Vitreous Manacles",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.vitreous-manacles",
+      "flavorKey": "flavor.base.vitreous-manacles",
+      "flavor": "Translucent restraints that seem to tighten whenever the wearer's intent turns toward malice.",
+      "tags": [
+        "arcane",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-023",
+      "nameKey": "base.vitreous-manacles",
+      "name": "Vitreous Manacles",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.vitreous-manacles",
+      "flavorKey": "flavor.base.vitreous-manacles",
+      "flavor": "Translucent restraints that pulse with a rhythmic, predatory intent. They seem to tighten instinctively when a target's pulse quickens.",
+      "tags": [
+        "medium",
+        "offensive",
+        "arcane"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-024",
+      "nameKey": "base.vitreous-manacles",
+      "name": "Vitreous Manacles",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.vitreous-manacles",
+      "flavorKey": "flavor.base.vitreous-manacles",
+      "flavor": "Translucent restraints that seem to tighten whenever the wearer's intent turns toward malice.",
+      "tags": [
+        "arcane",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-025",
+      "nameKey": "base.vitreous-manacles",
+      "name": "Vitreous Manacles",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.vitreous-manacles",
+      "flavorKey": "flavor.base.vitreous-manacles",
+      "flavor": "Translucent restraints that seem to pulse with a rhythmic, predatory hunger. They tighten instinctively when a target's pulse quickens.",
+      "tags": [
+        "medium",
+        "offensive",
+        "arcane"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-026",
+      "nameKey": "base.taut-sinew-wrap",
+      "name": "Taut Sinew Wrap",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.taut-sinew-wrap",
+      "flavorKey": "flavor.base.taut-sinew-wrap",
+      "flavor": "Tightly wound cords of dried tendon designed to tighten around the wrist for maximum leverage during a strike.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium-light"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-027",
+      "nameKey": "base.vitreous-manacles",
+      "name": "Vitreous Manacles",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.vitreous-manacles",
+      "flavorKey": "flavor.base.vitreous-manacles",
+      "flavor": "Translucent restraints that pulse with a rhythmic, predatory intent. They seem to tighten instinctively when a target's pulse quickens.",
+      "tags": [
+        "medium",
+        "offensive",
+        "arcane"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-a-028",
+      "nameKey": "base.vitreous-manacles",
+      "name": "Vitreous Manacles",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cruelty",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.vitreous-manacles",
+      "flavorKey": "flavor.base.vitreous-manacles",
+      "flavor": "Translucent restraints that pulse with a rhythmic, predatory hunger. They seem to tighten instinctively when a target's pulse quickens.",
+      "tags": [
+        "medium",
+        "offensive",
+        "arcane"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

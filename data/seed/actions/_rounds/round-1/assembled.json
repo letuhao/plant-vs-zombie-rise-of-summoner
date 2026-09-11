@@ -3,7 +3,8 @@
     "briefsPath": "..\\..\\data\\seed\\actions\\_briefs\\round-1.json",
     "candidatesPaths": [
       "..\\..\\data\\seed\\actions\\_candidates\\general\\round-1.json",
-      "..\\..\\data\\seed\\actions\\_candidates\\family\\round-1.json"
+      "..\\..\\data\\seed\\actions\\_candidates\\family\\round-1.json",
+      "..\\..\\data\\seed\\actions\\_candidates\\signature\\round-1.json"
     ],
     "gateEnabled": true,
     "partition": "round-1",
@@ -13,12 +14,117 @@
     {
       "areaShape": null,
       "atomFamilies": [
-        "atom.evd-brace",
-        "atom.sust-grit"
+        "atom.chill-punisher",
+        "atom.freezing"
+      ],
+      "category": "attack",
+      "id": "action.general.0019",
+      "name": "Frostbite Impact",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "payoff",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.freezing"
+      ],
+      "category": "attack",
+      "id": "action.general.0020",
+      "name": "Frostbite Touch",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "enabler",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.bloodletting",
+        "atom.rot-punisher",
+        "atom.sporing",
+        "atom.venomous",
+        "atom.withering"
+      ],
+      "category": "attack",
+      "id": "action.general.0021",
+      "name": "Vile Contagion",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "payoff",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.marking",
+        "atom.rotting",
+        "atom.venomous"
+      ],
+      "category": "attack",
+      "id": "action.general.0022",
+      "name": "Blighted Mark",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "enabler",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.fortitude",
+        "atom.savagery",
+        "atom.vitality"
+      ],
+      "category": "attack",
+      "id": "action.general.0023",
+      "name": "Vanguard's Resolve",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.fortitude",
+        "atom.plating"
       ],
       "category": "defense",
-      "id": "action.general.0001",
-      "name": "Brace",
+      "id": "action.general.0024",
+      "name": "Ironclad Resolve",
       "pairedPayoffFamily": null,
       "pairingRole": "none",
       "relation": "self",
@@ -33,12 +139,12 @@
     {
       "areaShape": null,
       "atomFamilies": [
-        "atom.evd-brace",
-        "atom.fortitude"
+        "atom.fortitude",
+        "atom.might"
       ],
       "category": "defense",
-      "id": "action.general.0002",
-      "name": "Brace",
+      "id": "action.general.0025",
+      "name": "Ironclad Resolve",
       "pairedPayoffFamily": null,
       "pairingRole": "none",
       "relation": "self",
@@ -53,12 +159,54 @@
     {
       "areaShape": null,
       "atomFamilies": [
-        "atom.tempo-surge",
+        "atom.arm-hardening",
+        "atom.plating",
+        "atom.venomous"
+      ],
+      "category": "defense",
+      "id": "action.general.0026",
+      "name": "Ironclad Shell",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-hardening",
+        "atom.sporing",
+        "atom.warding"
+      ],
+      "category": "defense",
+      "id": "action.general.0027",
+      "name": "Resilient Bastion",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "multi"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
         "atom.vitality"
       ],
       "category": "support",
-      "id": "action.general.0003",
-      "name": "Shared Pulse",
+      "id": "action.general.0028",
+      "name": "Vitality Surge",
       "pairedPayoffFamily": null,
       "pairingRole": "none",
       "relation": "ally",
@@ -73,12 +221,95 @@
     {
       "areaShape": null,
       "atomFamilies": [
-        "atom.swiftness",
-        "atom.tempo-surge"
+        "atom.death-salvo",
+        "atom.resilience"
+      ],
+      "category": "support",
+      "id": "action.general.0029",
+      "name": "Resilient Echo",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "multi"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-override",
+        "atom.mending"
+      ],
+      "category": "support",
+      "id": "action.general.0030",
+      "name": "Resilient Chorus",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "multi"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.life-surge",
+        "atom.mending",
+        "atom.vitality"
+      ],
+      "category": "support",
+      "id": "action.general.0031",
+      "name": "Vitality Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.life-surge",
+        "atom.mending",
+        "atom.swiftness"
+      ],
+      "category": "support",
+      "id": "action.general.0032",
+      "name": "Vitality Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.evd-shift",
+        "atom.quickening"
       ],
       "category": "movement",
-      "id": "action.general.0004",
-      "name": "Shift",
+      "id": "action.general.0033",
+      "name": "Sudden Displacement",
       "pairedPayoffFamily": null,
       "pairingRole": "none",
       "relation": "self",
@@ -93,12 +324,34 @@
     {
       "areaShape": null,
       "atomFamilies": [
-        "atom.evasion",
-        "atom.swiftness"
+        "atom.arm-hardening",
+        "atom.swiftness",
+        "atom.tempo-surge"
       ],
       "category": "movement",
-      "id": "action.general.0005",
-      "name": "Shift",
+      "id": "action.general.0034",
+      "name": "Sudden Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.freezing",
+        "atom.swiftness",
+        "atom.tempo-surge"
+      ],
+      "category": "movement",
+      "id": "action.general.0035",
+      "name": "Vanguard Advance",
       "pairedPayoffFamily": null,
       "pairingRole": "none",
       "relation": "self",
@@ -111,14 +364,139 @@
       "targetMode": "all"
     },
     {
-      "areaShape": "row",
+      "areaShape": null,
       "atomFamilies": [
-        "atom.dooming",
-        "atom.withering"
+        "atom.tempo-haste",
+        "atom.tempo-surge",
+        "atom.volley"
+      ],
+      "category": "movement",
+      "id": "action.general.0036",
+      "name": "Sudden Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "all"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.deathblast",
+        "atom.swiftness",
+        "atom.tempo-haste",
+        "atom.tempo-surge"
+      ],
+      "category": "movement",
+      "id": "action.general.0037",
+      "name": "Sudden Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "all"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.blighting",
+        "atom.sust-husk"
       ],
       "category": "status",
-      "id": "action.general.0006",
-      "name": "Lingering Tremor",
+      "id": "action.general.0038",
+      "name": "Lingering Blight",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "all"
+    },
+    {
+      "areaShape": "row",
+      "atomFamilies": [
+        "atom.firelining",
+        "atom.retribution"
+      ],
+      "category": "status",
+      "id": "action.general.0039",
+      "name": "Lava Vein",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "area"
+    },
+    {
+      "areaShape": "column",
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.elpw-overflow",
+        "atom.freezing"
+      ],
+      "category": "status",
+      "id": "action.general.0040",
+      "name": "Frostbound Column",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "area"
+    },
+    {
+      "areaShape": "square",
+      "atomFamilies": [
+        "atom.econ-toll",
+        "atom.sporing"
+      ],
+      "category": "status",
+      "id": "action.general.0041",
+      "name": "Verdant Overgrowth",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "area"
+    },
+    {
+      "areaShape": "rectangle",
+      "atomFamilies": [
+        "atom.blighting",
+        "atom.elemental-power",
+        "atom.sporing"
+      ],
+      "category": "status",
+      "id": "action.general.0042",
+      "name": "Overgrowth Spore",
       "pairedPayoffFamily": null,
       "pairingRole": "none",
       "relation": "enemy",
@@ -133,337 +511,210 @@
     {
       "areaShape": null,
       "atomFamilies": [
-        "atom.sporing",
-        "atom.volley"
+        "atom.chill-punisher",
+        "atom.freezing"
       ],
       "category": "attack",
-      "id": "action.family.cactus.001",
+      "id": "action.family.academic.001",
       "motifsUsed": [
-        "仙人掌",
-        "发射"
+        "花园里",
+        "樱桃派",
+        "僵尸",
+        "保证",
+        "东西"
       ],
-      "name": "Spined Volley",
-      "pairedPayoffFamily": null,
-      "pairingRole": "none",
+      "name": "The Orchard's Guarantee",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "payoff",
       "relation": "enemy",
       "rungBand": [
         1,
         7
       ],
       "scope": "family",
-      "scopeKey": "cactus",
+      "scopeKey": "academic",
       "targetMode": "self"
     },
     {
       "areaShape": null,
       "atomFamilies": [
-        "atom.cherry-bloom",
-        "atom.death-harvest"
+        "atom.rot-punisher"
       ],
       "category": "support",
-      "id": "action.family.cherry.001",
+      "id": "action.family.academic.002",
       "motifsUsed": [
+        "花园里",
+        "樱桃派",
+        "保证",
         "僵尸",
-        "樱桃"
+        "东西"
       ],
-      "name": "The Crimson Reanimation",
-      "pairedPayoffFamily": null,
-      "pairingRole": "none",
+      "name": "The Orchard's Guarantee",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "payoff",
       "relation": "ally",
       "rungBand": [
         1,
         7
       ],
       "scope": "family",
-      "scopeKey": "cherry",
-      "targetMode": "single"
+      "scopeKey": "academic",
+      "targetMode": "multi"
     },
     {
       "areaShape": null,
       "atomFamilies": [
-        "atom.death-harvest",
-        "atom.lifesteal"
-      ],
-      "category": "attack",
-      "id": "action.family.chomper.001",
-      "motifsUsed": [
-        "吞食",
-        "僵尸"
-      ],
-      "name": "Grave-Gorge",
-      "pairedPayoffFamily": null,
-      "pairingRole": "none",
-      "relation": "enemy",
-      "rungBand": [
-        1,
-        7
-      ],
-      "scope": "family",
-      "scopeKey": "chomper",
-      "targetMode": "self"
-    },
-    {
-      "areaShape": null,
-      "atomFamilies": [
-        "atom.death-salvo",
-        "atom.elpw-pierce"
-      ],
-      "category": "attack",
-      "id": "action.family.corn.001",
-      "motifsUsed": [
-        "子弹",
-        "制成"
-      ],
-      "name": "Internal Ballistic Forging",
-      "pairedPayoffFamily": null,
-      "pairingRole": "none",
-      "relation": "enemy",
-      "rungBand": [
-        1,
-        7
-      ],
-      "scope": "family",
-      "scopeKey": "corn",
-      "targetMode": "self"
-    },
-    {
-      "areaShape": null,
-      "atomFamilies": [
-        "atom.death-salvo",
-        "atom.volley"
-      ],
-      "category": "attack",
-      "id": "action.family.double.001",
-      "motifsUsed": [
-        "发射",
-        "子弹"
-      ],
-      "name": "Kinetic Discharge",
-      "pairedPayoffFamily": null,
-      "pairingRole": "none",
-      "relation": "enemy",
-      "rungBand": [
-        1,
-        7
-      ],
-      "scope": "family",
-      "scopeKey": "double",
-      "targetMode": "self"
-    },
-    {
-      "areaShape": null,
-      "atomFamilies": [
-        "atom.evd-harden",
-        "atom.shld-surge"
-      ],
-      "category": "defense",
-      "id": "action.family.fruit.001",
-      "motifsUsed": [
-        "发射",
-        "方向"
-      ],
-      "name": "Directional Kinetic Discharge",
-      "pairedPayoffFamily": null,
-      "pairingRole": "none",
-      "relation": "self",
-      "rungBand": [
-        1,
-        7
-      ],
-      "scope": "family",
-      "scopeKey": "fruit",
-      "targetMode": "single"
-    },
-    {
-      "areaShape": null,
-      "atomFamilies": [
-        "atom.venomous",
-        "atom.withering"
-      ],
-      "category": "attack",
-      "id": "action.family.garlic.001",
-      "motifsUsed": [
-        "中毒",
-        "体内"
-      ],
-      "name": "Internal Saturation",
-      "pairedPayoffFamily": null,
-      "pairingRole": "none",
-      "relation": "enemy",
-      "rungBand": [
-        1,
-        7
-      ],
-      "scope": "family",
-      "scopeKey": "garlic",
-      "targetMode": "self"
-    },
-    {
-      "areaShape": null,
-      "atomFamilies": [
+        "atom.rotting",
         "atom.venomous"
       ],
-      "category": "support",
-      "id": "action.family.garlic.002",
+      "category": "movement",
+      "id": "action.family.academic.003",
       "motifsUsed": [
-        "体内",
-        "中毒"
+        "保证",
+        "东西",
+        "樱桃派",
+        "花园里",
+        "僵尸"
       ],
-      "name": "Internal Saturation",
+      "name": "The Gardener's Rot",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "academic",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.econ-toll",
+        "atom.gardener",
+        "atom.rotting"
+      ],
+      "category": "status",
+      "id": "action.family.academic.004",
+      "motifsUsed": [
+        "樱桃派",
+        "东西",
+        "保证",
+        "僵尸",
+        "花园里"
+      ],
+      "name": "The Orchard's Guarantee",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "academic",
+      "targetMode": "all"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.evd-evd"
+      ],
+      "category": "attack",
+      "id": "action.species.abyssswordstar.001",
+      "motifsUsed": [
+        "从天而降"
+      ],
+      "name": "Sky-Sunderer's Descent",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "abyssswordstar",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-attune",
+        "atom.prec-truesight"
+      ],
+      "category": "support",
+      "id": "action.species.abyssswordstar.002",
+      "motifsUsed": [
+        "形态",
+        "巨剑",
+        "仙剑",
+        "从天而降",
+        "召唤"
+      ],
+      "name": "abyssswordstar",
       "pairedPayoffFamily": null,
       "pairingRole": "none",
       "relation": "ally",
       "rungBand": [
         1,
-        7
+        10
       ],
-      "scope": "family",
-      "scopeKey": "garlic",
-      "targetMode": "single"
+      "scope": "species",
+      "scopeKey": "abyssswordstar",
+      "targetMode": "multi"
     },
     {
       "areaShape": null,
       "atomFamilies": [
-        "atom.death-harvest",
-        "atom.mesmerizing"
-      ],
-      "category": "attack",
-      "id": "action.family.hypno.001",
-      "motifsUsed": [
-        "僵尸",
-        "变心"
-      ],
-      "name": "The Fickle Rot",
-      "pairedPayoffFamily": null,
-      "pairingRole": "none",
-      "relation": "enemy",
-      "rungBand": [
-        1,
-        7
-      ],
-      "scope": "family",
-      "scopeKey": "hypno",
-      "targetMode": "self"
-    },
-    {
-      "areaShape": null,
-      "atomFamilies": [
-        "atom.evd-harden",
-        "atom.sust-husk"
-      ],
-      "category": "defense",
-      "id": "action.family.hypno.002",
-      "motifsUsed": [
-        "僵尸",
-        "变心"
-      ],
-      "name": "Fickle Rigor Mortis",
-      "pairedPayoffFamily": null,
-      "pairingRole": "none",
-      "relation": "self",
-      "rungBand": [
-        1,
-        7
-      ],
-      "scope": "family",
-      "scopeKey": "hypno",
-      "targetMode": "single"
-    },
-    {
-      "areaShape": null,
-      "atomFamilies": [
-        "atom.carapace",
-        "atom.elpw-pierce"
-      ],
-      "category": "attack",
-      "id": "action.family.nut.001",
-      "motifsUsed": [
-        "穿透",
-        "坚果"
-      ],
-      "name": "Hardened Penetration",
-      "pairedPayoffFamily": null,
-      "pairingRole": "none",
-      "relation": "enemy",
-      "rungBand": [
-        1,
-        7
-      ],
-      "scope": "family",
-      "scopeKey": "nut",
-      "targetMode": "self"
-    },
-    {
-      "areaShape": null,
-      "atomFamilies": [
-        "atom.death-salvo",
-        "atom.sporing"
-      ],
-      "category": "attack",
-      "id": "action.family.pea.001",
-      "motifsUsed": [
-        "僵尸",
-        "发射"
-      ],
-      "name": "Undead Volley",
-      "pairedPayoffFamily": null,
-      "pairingRole": "none",
-      "relation": "enemy",
-      "rungBand": [
-        1,
-        7
-      ],
-      "scope": "family",
-      "scopeKey": "pea",
-      "targetMode": "self"
-    },
-    {
-      "areaShape": null,
-      "atomFamilies": [
-        "atom.death-salvo",
-        "atom.tempo-surge"
+        "atom.elpw-surge",
+        "atom.ward-harden"
       ],
       "category": "movement",
-      "id": "action.family.pea.002",
+      "id": "action.species.abyssswordstar.003",
       "motifsUsed": [
-        "僵尸",
-        "发射"
+        "从天而降"
       ],
-      "name": "Relentless Surge of the Unliving",
+      "name": "Sky-Sunder Descent",
       "pairedPayoffFamily": null,
       "pairingRole": "none",
       "relation": "self",
       "rungBand": [
         1,
-        7
+        10
       ],
-      "scope": "family",
-      "scopeKey": "pea",
-      "targetMode": "single"
+      "scope": "species",
+      "scopeKey": "abyssswordstar",
+      "targetMode": "rolledTarget"
     },
     {
       "areaShape": null,
       "atomFamilies": [
-        "atom.death-harvest",
-        "atom.sunbloom"
+        "atom.bonding",
+        "atom.elpw-override"
       ],
-      "category": "attack",
-      "id": "action.family.sunflower.001",
+      "category": "status",
+      "id": "action.species.abyssswordstar.004",
       "motifsUsed": [
-        "嘴花",
-        "完成"
+        "形态",
+        "从天而降",
+        "仙剑",
+        "召唤",
+        "巨剑"
       ],
-      "name": "Radiant Completion",
+      "name": "Abyssswordstar",
       "pairedPayoffFamily": null,
       "pairingRole": "none",
       "relation": "enemy",
       "rungBand": [
         1,
-        7
+        10
       ],
-      "scope": "family",
-      "scopeKey": "sunflower",
-      "targetMode": "self"
+      "scope": "species",
+      "scopeKey": "abyssswordstar",
+      "targetMode": "all"
     }
   ],
   "kind": "action-seed",

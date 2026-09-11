@@ -100,6 +100,3629 @@
     "charm-species-demon.wallnut": {
       "entryId": "charm.surv-util-028",
       "attempts": 1
+    },
+    "charm-species-demon.allpeater": {
+      "entryId": "charm.off-ctrl-038",
+      "attempts": 2
+    },
+    "charm-species-demon.bucketzombie": {
+      "entryId": "charm.surv-util-029",
+      "attempts": 1
+    },
+    "charm-species-demon.cabbagepult": {
+      "entryId": "charm.off-ctrl-315",
+      "attempts": 1
+    },
+    "charm-species-demon.caltrop": {
+      "entryId": "charm.off-ctrl-039",
+      "attempts": 1
+    },
+    "charm-species-demon.caltropnut": {
+      "entryId": "charm.surv-util-030",
+      "attempts": 1
+    },
+    "charm-species-demon.chomper": {
+      "entryId": "charm.off-ctrl-040",
+      "attempts": 1
+    },
+    "charm-species-demon.cornpot": {
+      "entryId": "charm.econ-056",
+      "attempts": 1
+    },
+    "charm-species-demon.dolldiamond": {
+      "entryId": "charm.econ-062",
+      "attempts": 1
+    },
+    "charm-species-demon.flagzombie": {
+      "entryId": "charm.surv-util-031",
+      "attempts": 2
+    },
+    "charm-species-demon.fumeshroom": {
+      "entryId": "charm.off-ctrl-041",
+      "attempts": 2
+    },
+    "charm-species-demon.garlic": {
+      "entryId": "charm.off-ctrl-331",
+      "attempts": 1
+    },
+    "charm-species-demon.garlicpea": {
+      "entryId": "charm.off-ctrl-042",
+      "attempts": 1
+    },
+    "charm-species-demon.gatlingpea": {
+      "entryId": "charm.econ-112",
+      "attempts": 1
+    },
+    "charm-species-demon.hypnochomper": {
+      "entryId": "charm.off-ctrl-043",
+      "attempts": 1
+    },
+    "charm-species-demon.jalapeno": {
+      "entryId": "charm.surv-util-032",
+      "attempts": 1
+    },
+    "charm-species-demon.jalastar": {
+      "entryId": "charm.off-ctrl-044",
+      "attempts": 1
+    },
+    "charm-species-demon.lanterncactus": {
+      "entryId": "charm.off-ctrl-357",
+      "attempts": 1
+    },
+    "charm-species-demon.lanternchomper": {
+      "entryId": "charm.surv-util-276",
+      "attempts": 1
+    },
+    "charm-species-demon.lanternpea": {
+      "entryId": "charm.off-ctrl-045",
+      "attempts": 1
+    },
+    "charm-species-demon.marigold": {
+      "entryId": "charm.econ-022",
+      "attempts": 2
+    },
+    "charm-species-demon.normalzombie": {
+      "entryId": "charm.off-ctrl-364",
+      "attempts": 1
+    },
+    "charm-species-demon.plantern": {
+      "entryId": "charm.off-ctrl-046",
+      "attempts": 1
+    },
+    "charm-species-demon.pumpkin": {
+      "entryId": "charm.surv-util-033",
+      "attempts": 1
+    },
+    "charm-species-demon.snowpeashooter": {
+      "entryId": "charm.off-ctrl-047",
+      "attempts": 2
+    },
+    "charm-species-demon.squash": {
+      "entryId": "charm.off-ctrl-382",
+      "attempts": 1
+    },
+    "charm-species-demon.sunchomper": {
+      "entryId": "charm.surv-util-034",
+      "attempts": 1
+    },
+    "charm-species-demon.threecabbage": {
+      "entryId": "charm.surv-util-357",
+      "attempts": 1
+    },
+    "charm-species-demon.threeplantern": {
+      "entryId": "charm.surv-util-359",
+      "attempts": 1
+    },
+    "charm-species-demon.abyssswordstar": {
+      "entryId": "charm.off-ctrl-303",
+      "attempts": 1
+    },
+    "charm-species-demon.acientsunnut": {
+      "entryId": "charm.surv-util-035",
+      "attempts": 2
+    },
+    "charm-species-demon.apple": {
+      "entryId": "charm.surv-util-036",
+      "attempts": 1
+    },
+    "charm-species-demon.armedgargantuar": {
+      "entryId": "charm.surv-util-037",
+      "attempts": 2
+    },
+    "charm-species-demon.armoredimpzombie": {
+      "entryId": "charm.surv-util-038",
+      "attempts": 1
+    },
+    "charm-species-demon.balloonzombie": {
+      "entryId": "charm.off-ctrl-309",
+      "attempts": 1
+    },
+    "charm-species-demon.bamboo": {
+      "entryId": "charm.off-ctrl-305",
+      "attempts": 1
+    },
+    "charm-species-demon.bamboodragon": {
+      "entryId": "charm.surv-util-039",
+      "attempts": 1
+    },
+    "charm-species-demon.bamboofurnace": {
+      "entryId": "charm.off-ctrl-048",
+      "attempts": 2
+    },
+    "charm-species-demon.bamboospruce": {
+      "entryId": "charm.off-ctrl-306",
+      "attempts": 1
+    },
+    "charm-species-demon.bedrocksnowzombie": {
+      "entryId": "charm.surv-util-229",
+      "attempts": 1
+    },
+    "charm-species-demon.bedrocktallnut": {
+      "entryId": "charm.surv-util-040",
+      "attempts": 2
+    },
+    "charm-species-demon.bigchomper": {
+      "entryId": "charm.off-ctrl-049",
+      "attempts": 2
+    },
+    "charm-species-demon.biggatling": {
+      "entryId": "charm.off-ctrl-050",
+      "attempts": 1
+    },
+    "charm-species-demon.biggloom": {
+      "entryId": "charm.off-ctrl-051",
+      "attempts": 2
+    },
+    "charm-species-demon.bigpumpkin": {
+      "entryId": "charm.surv-util-041",
+      "attempts": 1
+    },
+    "charm-species-demon.bigseashroom": {
+      "entryId": "charm.off-ctrl-052",
+      "attempts": 2
+    },
+    "charm-species-demon.bigsunnut": {
+      "entryId": "charm.off-ctrl-053",
+      "attempts": 2
+    },
+    "charm-species-demon.bigsunshroom": {
+      "entryId": "charm.econ-023",
+      "attempts": 2
+    },
+    "charm-species-demon.bigwallnut": {
+      "entryId": "charm.off-ctrl-054",
+      "attempts": 3
+    },
+    "charm-species-demon.blackelephantzombie": {
+      "entryId": "charm.off-ctrl-307",
+      "attempts": 1
+    },
+    "charm-species-demon.blackflagfootball": {
+      "entryId": "charm.off-ctrl-055",
+      "attempts": 1
+    },
+    "charm-species-demon.blackfootball": {
+      "entryId": "charm.surv-util-042",
+      "attempts": 2
+    },
+    "charm-species-demon.blackfootball_a": {
+      "entryId": "charm.surv-util-043",
+      "attempts": 2
+    },
+    "charm-species-demon.blackfootball_b": {
+      "entryId": "charm.off-ctrl-056",
+      "attempts": 2
+    },
+    "charm-species-demon.blackfootball_c": {
+      "entryId": "charm.surv-util-044",
+      "attempts": 1
+    },
+    "charm-species-demon.blackfootball_c2": {
+      "entryId": "charm.off-ctrl-057",
+      "attempts": 1
+    },
+    "charm-species-demon.blackhorse": {
+      "entryId": "charm.off-ctrl-058",
+      "attempts": 2
+    },
+    "charm-species-demon.blackjackboxzombie": {
+      "entryId": "charm.off-ctrl-059",
+      "attempts": 2
+    },
+    "charm-species-demon.blacktrainzombie": {
+      "entryId": "charm.econ-037",
+      "attempts": 1
+    },
+    "charm-species-demon.blover": {
+      "entryId": "charm.off-ctrl-060",
+      "attempts": 3
+    },
+    "charm-species-demon.blovermine": {
+      "entryId": "charm.off-ctrl-061",
+      "attempts": 2
+    },
+    "charm-species-demon.bloverpot": {
+      "entryId": "charm.surv-util-045",
+      "attempts": 2
+    },
+    "charm-species-demon.bloverumbrella": {
+      "entryId": "charm.surv-util-236",
+      "attempts": 1
+    },
+    "charm-species-demon.blowerpumpkin": {
+      "entryId": "charm.surv-util-231",
+      "attempts": 1
+    },
+    "charm-species-demon.bluegargantuar": {
+      "entryId": "charm.surv-util-047",
+      "attempts": 2
+    },
+    "charm-species-demon.boatimp": {
+      "entryId": "charm.surv-util-048",
+      "attempts": 2
+    },
+    "charm-species-demon.bucketdoom": {
+      "entryId": "charm.off-ctrl-308",
+      "attempts": 2
+    },
+    "charm-species-demon.bucketpaper": {
+      "entryId": "charm.surv-util-233",
+      "attempts": 1
+    },
+    "charm-species-demon.bucketplant": {
+      "entryId": "charm.surv-util-234",
+      "attempts": 1
+    },
+    "charm-species-demon.bucketzombieduck": {
+      "entryId": "charm.surv-util-235",
+      "attempts": 2
+    },
+    "charm-species-demon.bungizombie": {
+      "entryId": "charm.surv-util-049",
+      "attempts": 1
+    },
+    "charm-species-demon.cabbageblover": {
+      "entryId": "charm.surv-util-050",
+      "attempts": 2
+    },
+    "charm-species-demon.cabbagecaltrop": {
+      "entryId": "charm.off-ctrl-310",
+      "attempts": 1
+    },
+    "charm-species-demon.cabbagecannon": {
+      "entryId": "charm.off-ctrl-314",
+      "attempts": 1
+    },
+    "charm-species-demon.cabbagefume": {
+      "entryId": "charm.off-ctrl-063",
+      "attempts": 1
+    },
+    "charm-species-demon.cabbagemelon": {
+      "entryId": "charm.off-ctrl-064",
+      "attempts": 1
+    },
+    "charm-species-demon.cabbagenut": {
+      "entryId": "charm.surv-util-237",
+      "attempts": 1
+    },
+    "charm-species-demon.cabbagepot": {
+      "entryId": "charm.surv-util-052",
+      "attempts": 2
+    },
+    "charm-species-demon.cabbagepuff": {
+      "entryId": "charm.surv-util-053",
+      "attempts": 2
+    },
+    "charm-species-demon.cabbagesquash": {
+      "entryId": "charm.off-ctrl-065",
+      "attempts": 1
+    },
+    "charm-species-demon.cabbageumbrella": {
+      "entryId": "charm.off-ctrl-313",
+      "attempts": 1
+    },
+    "charm-species-demon.cacstusstar": {
+      "entryId": "charm.off-ctrl-316",
+      "attempts": 1
+    },
+    "charm-species-demon.cactus": {
+      "entryId": "charm.surv-util-238",
+      "attempts": 1
+    },
+    "charm-species-demon.cactusblover": {
+      "entryId": "charm.econ-038",
+      "attempts": 1
+    },
+    "charm-species-demon.cactuscaltrop": {
+      "entryId": "charm.off-ctrl-069",
+      "attempts": 2
+    },
+    "charm-species-demon.cactusfume": {
+      "entryId": "charm.off-ctrl-070",
+      "attempts": 1
+    },
+    "charm-species-demon.cactusnut": {
+      "entryId": "charm.off-ctrl-071",
+      "attempts": 2
+    },
+    "charm-species-demon.cactuspumpkin": {
+      "entryId": "charm.surv-util-054",
+      "attempts": 3
+    },
+    "charm-species-demon.cactusumbrella": {
+      "entryId": "charm.econ-039",
+      "attempts": 1
+    },
+    "charm-species-demon.caltropfume": {
+      "entryId": "charm.surv-util-239",
+      "attempts": 1
+    },
+    "charm-species-demon.caltropkelp_land": {
+      "entryId": "charm.off-ctrl-317",
+      "attempts": 1
+    },
+    "charm-species-demon.caltropkelp_water": {
+      "entryId": "charm.surv-util-240",
+      "attempts": 1
+    },
+    "charm-species-demon.caltroppot": {
+      "entryId": "charm.surv-util-055",
+      "attempts": 2
+    },
+    "charm-species-demon.catapultzombie": {
+      "entryId": "charm.surv-util-241",
+      "attempts": 1
+    },
+    "charm-species-demon.cattailgirl": {
+      "entryId": "charm.off-ctrl-072",
+      "attempts": 2
+    },
+    "charm-species-demon.cattaillour": {
+      "entryId": "charm.surv-util-242",
+      "attempts": 2
+    },
+    "charm-species-demon.cattailplant": {
+      "entryId": "charm.off-ctrl-073",
+      "attempts": 2
+    },
+    "charm-species-demon.cherryblover": {
+      "entryId": "charm.off-ctrl-074",
+      "attempts": 2
+    },
+    "charm-species-demon.cherrybomb": {
+      "entryId": "charm.off-ctrl-075",
+      "attempts": 2
+    },
+    "charm-species-demon.cherrycatapultzombie": {
+      "entryId": "charm.off-ctrl-076",
+      "attempts": 2
+    },
+    "charm-species-demon.cherrychomper": {
+      "entryId": "charm.surv-util-243",
+      "attempts": 1
+    },
+    "charm-species-demon.cherryfume": {
+      "entryId": "charm.econ-040",
+      "attempts": 1
+    },
+    "charm-species-demon.cherrygatling": {
+      "entryId": "charm.off-ctrl-078",
+      "attempts": 2
+    },
+    "charm-species-demon.cherryhypno": {
+      "entryId": "charm.off-ctrl-079",
+      "attempts": 2
+    },
+    "charm-species-demon.cherryjalapeno": {
+      "entryId": "charm.off-ctrl-080",
+      "attempts": 2
+    },
+    "charm-species-demon.cherrymagnet": {
+      "entryId": "charm.surv-util-244",
+      "attempts": 1
+    },
+    "charm-species-demon.cherrymine": {
+      "entryId": "charm.econ-041",
+      "attempts": 1
+    },
+    "charm-species-demon.cherrynut": {
+      "entryId": "charm.off-ctrl-318",
+      "attempts": 1
+    },
+    "charm-species-demon.cherrynutzombie": {
+      "entryId": "charm.surv-util-056",
+      "attempts": 2
+    },
+    "charm-species-demon.cherrypaperz95": {
+      "entryId": "charm.econ-042",
+      "attempts": 1
+    },
+    "charm-species-demon.cherrypaperzombie": {
+      "entryId": "charm.surv-util-245",
+      "attempts": 1
+    },
+    "charm-species-demon.cherrypot": {
+      "entryId": "charm.econ-043",
+      "attempts": 1
+    },
+    "charm-species-demon.cherrypuff": {
+      "entryId": "charm.econ-044",
+      "attempts": 1
+    },
+    "charm-species-demon.cherrypumpkin": {
+      "entryId": "charm.econ-045",
+      "attempts": 1
+    },
+    "charm-species-demon.cherryscaredy": {
+      "entryId": "charm.off-ctrl-081",
+      "attempts": 1
+    },
+    "charm-species-demon.cherryshooter": {
+      "entryId": "charm.econ-046",
+      "attempts": 1
+    },
+    "charm-species-demon.cherryshooterzombie": {
+      "entryId": "charm.off-ctrl-082",
+      "attempts": 2
+    },
+    "charm-species-demon.cherrysplit": {
+      "entryId": "charm.econ-047",
+      "attempts": 1
+    },
+    "charm-species-demon.cherrysquash": {
+      "entryId": "charm.off-ctrl-083",
+      "attempts": 1
+    },
+    "charm-species-demon.cherrysubmarine": {
+      "entryId": "charm.econ-048",
+      "attempts": 1
+    },
+    "charm-species-demon.cherrytorch": {
+      "entryId": "charm.econ-049",
+      "attempts": 1
+    },
+    "charm-species-demon.cherryultimatepumpkin": {
+      "entryId": "charm.surv-util-057",
+      "attempts": 2
+    },
+    "charm-species-demon.cherryumbrella": {
+      "entryId": "charm.surv-util-058",
+      "attempts": 2
+    },
+    "charm-species-demon.chickenimp": {
+      "entryId": "charm.off-ctrl-084",
+      "attempts": 2
+    },
+    "charm-species-demon.chomperpumpkin": {
+      "entryId": "charm.econ-050",
+      "attempts": 1
+    },
+    "charm-species-demon.chompersquash": {
+      "entryId": "charm.surv-util-059",
+      "attempts": 2
+    },
+    "charm-species-demon.chrysantheautumn": {
+      "entryId": "charm.econ-051",
+      "attempts": 1
+    },
+    "charm-species-demon.coachpaper": {
+      "entryId": "charm.off-ctrl-085",
+      "attempts": 2
+    },
+    "charm-species-demon.cobcannon": {
+      "entryId": "charm.econ-052",
+      "attempts": 1
+    },
+    "charm-species-demon.conezombieduck": {
+      "entryId": "charm.econ-053",
+      "attempts": 1
+    },
+    "charm-species-demon.cornblover": {
+      "entryId": "charm.econ-054",
+      "attempts": 1
+    },
+    "charm-species-demon.corncabbage": {
+      "entryId": "charm.econ-055",
+      "attempts": 1
+    },
+    "charm-species-demon.corncaltrop": {
+      "entryId": "charm.off-ctrl-087",
+      "attempts": 2
+    },
+    "charm-species-demon.cornfume": {
+      "entryId": "charm.off-ctrl-088",
+      "attempts": 1
+    },
+    "charm-species-demon.cornmelon": {
+      "entryId": "charm.off-ctrl-089",
+      "attempts": 1
+    },
+    "charm-species-demon.cornnut": {
+      "entryId": "charm.off-ctrl-090",
+      "attempts": 1
+    },
+    "charm-species-demon.cornpuff": {
+      "entryId": "charm.econ-057",
+      "attempts": 1
+    },
+    "charm-species-demon.cornpult": {
+      "entryId": "charm.off-ctrl-092",
+      "attempts": 1
+    },
+    "charm-species-demon.cornumbrella": {
+      "entryId": "charm.econ-058",
+      "attempts": 1
+    },
+    "charm-species-demon.dancepolzombie2": {
+      "entryId": "charm.surv-util-060",
+      "attempts": 2
+    },
+    "charm-species-demon.deathchomper": {
+      "entryId": "charm.surv-util-061",
+      "attempts": 2
+    },
+    "charm-species-demon.deathmine": {
+      "entryId": "charm.econ-059",
+      "attempts": 1
+    },
+    "charm-species-demon.diamondimitater": {
+      "entryId": "charm.econ-060",
+      "attempts": 1
+    },
+    "charm-species-demon.diamondpotatonut": {
+      "entryId": "charm.econ-061",
+      "attempts": 1
+    },
+    "charm-species-demon.diamondrandomzombie": {
+      "entryId": "charm.econ-024",
+      "attempts": 2
+    },
+    "charm-species-demon.dolphingatlingzombie": {
+      "entryId": "charm.off-ctrl-093",
+      "attempts": 2
+    },
+    "charm-species-demon.dolphinpaper": {
+      "entryId": "charm.surv-util-063",
+      "attempts": 2
+    },
+    "charm-species-demon.dolphinpeazombie": {
+      "entryId": "charm.econ-063",
+      "attempts": 1
+    },
+    "charm-species-demon.dolphinrider": {
+      "entryId": "charm.econ-064",
+      "attempts": 1
+    },
+    "charm-species-demon.doomblover": {
+      "entryId": "charm.econ-065",
+      "attempts": 1
+    },
+    "charm-species-demon.doomcabbage": {
+      "entryId": "charm.off-ctrl-094",
+      "attempts": 1
+    },
+    "charm-species-demon.doomcherry": {
+      "entryId": "charm.off-ctrl-095",
+      "attempts": 2
+    },
+    "charm-species-demon.doomchomper": {
+      "entryId": "charm.off-ctrl-096",
+      "attempts": 2
+    },
+    "charm-species-demon.doomcorn": {
+      "entryId": "charm.off-ctrl-097",
+      "attempts": 2
+    },
+    "charm-species-demon.doomfume": {
+      "entryId": "charm.econ-066",
+      "attempts": 1
+    },
+    "charm-species-demon.doomgarlic": {
+      "entryId": "charm.econ-067",
+      "attempts": 1
+    },
+    "charm-species-demon.doomgatling": {
+      "entryId": "charm.econ-068",
+      "attempts": 1
+    },
+    "charm-species-demon.doomjalapeno": {
+      "entryId": "charm.econ-069",
+      "attempts": 1
+    },
+    "charm-species-demon.doomkelp": {
+      "entryId": "charm.econ-070",
+      "attempts": 1
+    },
+    "charm-species-demon.doommelon": {
+      "entryId": "charm.off-ctrl-099",
+      "attempts": 1
+    },
+    "charm-species-demon.doomnut": {
+      "entryId": "charm.econ-071",
+      "attempts": 1
+    },
+    "charm-species-demon.doompaper": {
+      "entryId": "charm.off-ctrl-100",
+      "attempts": 2
+    },
+    "charm-species-demon.doompeashooter": {
+      "entryId": "charm.off-ctrl-101",
+      "attempts": 2
+    },
+    "charm-species-demon.doomplantern": {
+      "entryId": "charm.off-ctrl-102",
+      "attempts": 2
+    },
+    "charm-species-demon.doompumpkin": {
+      "entryId": "charm.econ-072",
+      "attempts": 1
+    },
+    "charm-species-demon.doomseashroom": {
+      "entryId": "charm.off-ctrl-103",
+      "attempts": 2
+    },
+    "charm-species-demon.doomseed": {
+      "entryId": "charm.econ-073",
+      "attempts": 1
+    },
+    "charm-species-demon.doomshroom": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.econ-087",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Void-Pit Spore' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.doomsniper": {
+      "entryId": "charm.off-ctrl-104",
+      "attempts": 1
+    },
+    "charm-species-demon.doomsquash": {
+      "entryId": "charm.off-ctrl-105",
+      "attempts": 2
+    },
+    "charm-species-demon.doomstar": {
+      "entryId": "charm.econ-075",
+      "attempts": 1
+    },
+    "charm-species-demon.doomsunflower": {
+      "entryId": "charm.off-ctrl-106",
+      "attempts": 2
+    },
+    "charm-species-demon.doomthreepeater": {
+      "entryId": "charm.off-ctrl-107",
+      "attempts": 3
+    },
+    "charm-species-demon.doomtorch": {
+      "entryId": "charm.off-ctrl-108",
+      "attempts": 2
+    },
+    "charm-species-demon.doomzombie": {
+      "entryId": "charm.surv-util-064",
+      "attempts": 1
+    },
+    "charm-species-demon.doublecherry": {
+      "entryId": "charm.off-ctrl-109",
+      "attempts": 1
+    },
+    "charm-species-demon.doublepuff": {
+      "entryId": "charm.econ-076",
+      "attempts": 1
+    },
+    "charm-species-demon.doubleshooter": {
+      "entryId": "charm.econ-078",
+      "attempts": 1
+    },
+    "charm-species-demon.doublesnow": {
+      "entryId": "charm.off-ctrl-110",
+      "attempts": 1
+    },
+    "charm-species-demon.driver_a": {
+      "entryId": "charm.econ-079",
+      "attempts": 1
+    },
+    "charm-species-demon.driver_b": {
+      "entryId": "charm.surv-util-065",
+      "attempts": 2
+    },
+    "charm-species-demon.driver_c": {
+      "entryId": "charm.econ-080",
+      "attempts": 1
+    },
+    "charm-species-demon.drown_a": {
+      "entryId": "charm.surv-util-066",
+      "attempts": 1
+    },
+    "charm-species-demon.drown_b": {
+      "entryId": "charm.surv-util-067",
+      "attempts": 1
+    },
+    "charm-species-demon.drown_c": {
+      "entryId": "charm.econ-081",
+      "attempts": 1
+    },
+    "charm-species-demon.drowngargantuar": {
+      "entryId": "charm.surv-util-068",
+      "attempts": 2
+    },
+    "charm-species-demon.drownpult_a": {
+      "entryId": "charm.off-ctrl-111",
+      "attempts": 2
+    },
+    "charm-species-demon.drownpult_b": {
+      "entryId": "charm.econ-082",
+      "attempts": 1
+    },
+    "charm-species-demon.drownpult_c": {
+      "entryId": "charm.econ-083",
+      "attempts": 2
+    },
+    "charm-species-demon.drownpultzombie": {
+      "entryId": "charm.econ-084",
+      "attempts": 1
+    },
+    "charm-species-demon.drownzombie": {
+      "entryId": "charm.off-ctrl-112",
+      "attempts": 1
+    },
+    "charm-species-demon.electriconion": {
+      "entryId": "charm.econ-085",
+      "attempts": 1
+    },
+    "charm-species-demon.elephantzombie": {
+      "entryId": "charm.econ-086",
+      "attempts": 1
+    },
+    "charm-species-demon.elephantzombie_a": {
+      "entryId": "charm.surv-util-069",
+      "attempts": 1
+    },
+    "charm-species-demon.elephantzombie_b": {
+      "entryId": "charm.surv-util-070",
+      "attempts": 2
+    },
+    "charm-species-demon.elephantzombie_c": {
+      "entryId": "charm.surv-util-071",
+      "attempts": 2
+    },
+    "charm-species-demon.elitepaperzombie": {
+      "entryId": "charm.econ-088",
+      "attempts": 1
+    },
+    "charm-species-demon.emeraldumbrella": {
+      "entryId": "charm.off-ctrl-113",
+      "attempts": 1
+    },
+    "charm-species-demon.endoflame": {
+      "entryId": "charm.econ-025",
+      "attempts": 2
+    },
+    "charm-species-demon.endoflamegirl": {
+      "entryId": "charm.econ-089",
+      "attempts": 1
+    },
+    "charm-species-demon.endoflamezombie": {
+      "entryId": "charm.surv-util-072",
+      "attempts": 2
+    },
+    "charm-species-demon.endpumpiner": {
+      "entryId": "charm.econ-090",
+      "attempts": 1
+    },
+    "charm-species-demon.enumvalue261": {
+      "entryId": "charm.econ-091",
+      "attempts": 1
+    },
+    "charm-species-demon.enumvalue262": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.econ-092",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Silt-Void Vessel' within this batch; kept 'charm.econ-091'"
+      ]
+    },
+    "charm-species-demon.enumvalue263": {
+      "entryId": "charm.econ-093",
+      "attempts": 1
+    },
+    "charm-species-demon.enumvalue264": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.econ-094",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Silt-Void Vessel' within this batch; kept 'charm.econ-091'"
+      ]
+    },
+    "charm-species-demon.enumvalue265": {
+      "entryId": "charm.surv-util-073",
+      "attempts": 2
+    },
+    "charm-species-demon.enumvalue266": {
+      "entryId": "charm.surv-util-074",
+      "attempts": 1
+    },
+    "charm-species-demon.enumvalue267": {
+      "entryId": "charm.off-ctrl-319",
+      "attempts": 1
+    },
+    "charm-species-demon.enumvalue268": {
+      "entryId": "charm.econ-095",
+      "attempts": 1
+    },
+    "charm-species-demon.eternalzombie_a": {
+      "entryId": "charm.off-ctrl-320",
+      "attempts": 1
+    },
+    "charm-species-demon.eternalzombie_b": {
+      "entryId": "charm.econ-096",
+      "attempts": 1
+    },
+    "charm-species-demon.eternalzombie_c": {
+      "entryId": "charm.off-ctrl-321",
+      "attempts": 2
+    },
+    "charm-species-demon.extract_single": {
+      "entryId": "charm.econ-097",
+      "attempts": 1
+    },
+    "charm-species-demon.extract_ten": {
+      "entryId": "charm.off-ctrl-322",
+      "attempts": 1
+    },
+    "charm-species-demon.firecabbage": {
+      "entryId": "charm.off-ctrl-114",
+      "attempts": 1
+    },
+    "charm-species-demon.firecaltrop": {
+      "entryId": "charm.off-ctrl-115",
+      "attempts": 1
+    },
+    "charm-species-demon.firecannon": {
+      "entryId": "charm.econ-098",
+      "attempts": 1
+    },
+    "charm-species-demon.firecattail": {
+      "entryId": "charm.off-ctrl-323",
+      "attempts": 1
+    },
+    "charm-species-demon.firecracker": {
+      "entryId": "charm.econ-099",
+      "attempts": 1
+    },
+    "charm-species-demon.firefume": {
+      "entryId": "charm.off-ctrl-324",
+      "attempts": 1
+    },
+    "charm-species-demon.firegloom": {
+      "entryId": "charm.econ-100",
+      "attempts": 1
+    },
+    "charm-species-demon.firekelp": {
+      "entryId": "charm.off-ctrl-116",
+      "attempts": 2
+    },
+    "charm-species-demon.firemelon": {
+      "entryId": "charm.off-ctrl-325",
+      "attempts": 1
+    },
+    "charm-species-demon.firemine": {
+      "entryId": "charm.econ-101",
+      "attempts": 1
+    },
+    "charm-species-demon.firenut": {
+      "entryId": "charm.surv-util-075",
+      "attempts": 2
+    },
+    "charm-species-demon.fireseashroom": {
+      "entryId": "charm.off-ctrl-326",
+      "attempts": 1
+    },
+    "charm-species-demon.firesniper": {
+      "entryId": "charm.econ-102",
+      "attempts": 1
+    },
+    "charm-species-demon.firespikerock": {
+      "entryId": "charm.off-ctrl-327",
+      "attempts": 1
+    },
+    "charm-species-demon.firesquash": {
+      "entryId": "charm.econ-103",
+      "attempts": 1
+    },
+    "charm-species-demon.firesunshroom_a": {
+      "entryId": "charm.surv-util-076",
+      "attempts": 2
+    },
+    "charm-species-demon.firesunshroom_b": {
+      "entryId": "charm.surv-util-077",
+      "attempts": 1
+    },
+    "charm-species-demon.firesunshroom_c": {
+      "entryId": "charm.surv-util-078",
+      "attempts": 1
+    },
+    "charm-species-demon.flagfootball": {
+      "entryId": "charm.off-ctrl-328",
+      "attempts": 1
+    },
+    "charm-species-demon.flyingthreepeater": {
+      "entryId": "charm.off-ctrl-117",
+      "attempts": 2
+    },
+    "charm-species-demon.flyingthreepeater_sp": {
+      "entryId": "charm.off-ctrl-118",
+      "attempts": 2
+    },
+    "charm-species-demon.footballboss": {
+      "entryId": "charm.econ-104",
+      "attempts": 1
+    },
+    "charm-species-demon.footballdolphin": {
+      "entryId": "charm.surv-util-079",
+      "attempts": 2
+    },
+    "charm-species-demon.footballdrown": {
+      "entryId": "charm.off-ctrl-329",
+      "attempts": 1
+    },
+    "charm-species-demon.frozenpear": {
+      "entryId": "charm.econ-105",
+      "attempts": 1
+    },
+    "charm-species-demon.fumepumpkin": {
+      "entryId": "charm.off-ctrl-330",
+      "attempts": 1
+    },
+    "charm-species-demon.gargantuar": {
+      "entryId": "charm.econ-106",
+      "attempts": 1
+    },
+    "charm-species-demon.garlicblover": {
+      "entryId": "charm.econ-107",
+      "attempts": 1
+    },
+    "charm-species-demon.garliccabbage": {
+      "entryId": "charm.off-ctrl-119",
+      "attempts": 2
+    },
+    "charm-species-demon.garliccorn": {
+      "entryId": "charm.off-ctrl-332",
+      "attempts": 1
+    },
+    "charm-species-demon.garlicfume": {
+      "entryId": "charm.econ-108",
+      "attempts": 1
+    },
+    "charm-species-demon.garlicgatling": {
+      "entryId": "charm.off-ctrl-120",
+      "attempts": 1
+    },
+    "charm-species-demon.garlicmelon": {
+      "entryId": "charm.off-ctrl-333",
+      "attempts": 1
+    },
+    "charm-species-demon.garlicnut": {
+      "entryId": "charm.econ-109",
+      "attempts": 1
+    },
+    "charm-species-demon.garlicpot": {
+      "entryId": "charm.off-ctrl-334",
+      "attempts": 1
+    },
+    "charm-species-demon.garlicpumpkin": {
+      "entryId": "charm.surv-util-080",
+      "attempts": 2
+    },
+    "charm-species-demon.garlicrepeater": {
+      "entryId": "charm.off-ctrl-121",
+      "attempts": 2
+    },
+    "charm-species-demon.garlicsniper": {
+      "entryId": "charm.off-ctrl-122",
+      "attempts": 2
+    },
+    "charm-species-demon.garlicsplit": {
+      "entryId": "charm.econ-110",
+      "attempts": 1
+    },
+    "charm-species-demon.garlictorch": {
+      "entryId": "charm.off-ctrl-335",
+      "attempts": 1
+    },
+    "charm-species-demon.garlicultimatechomper": {
+      "entryId": "charm.surv-util-081",
+      "attempts": 2
+    },
+    "charm-species-demon.garlicumbrella": {
+      "entryId": "charm.econ-111",
+      "attempts": 1
+    },
+    "charm-species-demon.gatlingblackfootball": {
+      "entryId": "charm.off-ctrl-123",
+      "attempts": 2
+    },
+    "charm-species-demon.gatlingdoomscaredy": {
+      "entryId": "charm.off-ctrl-124",
+      "attempts": 2
+    },
+    "charm-species-demon.gatlingfootballzombie": {
+      "entryId": "charm.off-ctrl-336",
+      "attempts": 1
+    },
+    "charm-species-demon.gatlingpaper_a": {
+      "entryId": "charm.off-ctrl-125",
+      "attempts": 2
+    },
+    "charm-species-demon.gatlingpaper_b": {
+      "entryId": "charm.surv-util-082",
+      "attempts": 2
+    },
+    "charm-species-demon.gatlingpaper_c": {
+      "entryId": "charm.off-ctrl-126",
+      "attempts": 1
+    },
+    "charm-species-demon.gatlingpeazombie": {
+      "entryId": "charm.off-ctrl-337",
+      "attempts": 1
+    },
+    "charm-species-demon.gatlingpuff": {
+      "entryId": "charm.off-ctrl-127",
+      "attempts": 1
+    },
+    "charm-species-demon.gloomshroom": {
+      "entryId": "charm.econ-113",
+      "attempts": 1
+    },
+    "charm-species-demon.goldbungizombie": {
+      "entryId": "charm.off-ctrl-338",
+      "attempts": 1
+    },
+    "charm-species-demon.goldcabbage": {
+      "entryId": "charm.econ-114",
+      "attempts": 1
+    },
+    "charm-species-demon.goldcorn": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.off-ctrl-339",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Golden Kernel Volley' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.golddoom": {
+      "entryId": "charm.off-ctrl-130",
+      "attempts": 1
+    },
+    "charm-species-demon.goldgarlic": {
+      "entryId": "charm.econ-115",
+      "attempts": 1
+    },
+    "charm-species-demon.goldhypnodoom": {
+      "entryId": "charm.econ-026",
+      "attempts": 1
+    },
+    "charm-species-demon.goldiceshroom": {
+      "entryId": "charm.surv-util-083",
+      "attempts": 2
+    },
+    "charm-species-demon.goldmagnet": {
+      "entryId": "charm.off-ctrl-131",
+      "attempts": 1
+    },
+    "charm-species-demon.goldmelon": {
+      "entryId": "charm.off-ctrl-132",
+      "attempts": 2
+    },
+    "charm-species-demon.goldnut": {
+      "entryId": "charm.surv-util-084",
+      "attempts": 1
+    },
+    "charm-species-demon.goldpot": {
+      "entryId": "charm.off-ctrl-340",
+      "attempts": 1
+    },
+    "charm-species-demon.goldscarypot": {
+      "entryId": "charm.econ-116",
+      "attempts": 1
+    },
+    "charm-species-demon.goldsunflower": {
+      "entryId": "charm.surv-util-086",
+      "attempts": 1
+    },
+    "charm-species-demon.goldthreeplantern": {
+      "entryId": "charm.off-ctrl-341",
+      "attempts": 1
+    },
+    "charm-species-demon.goldthreetorch": {
+      "entryId": "charm.surv-util-246",
+      "attempts": 1
+    },
+    "charm-species-demon.goldumbrella": {
+      "entryId": "charm.econ-117",
+      "attempts": 1
+    },
+    "charm-species-demon.goldzombie": {
+      "entryId": "charm.off-ctrl-342",
+      "attempts": 1
+    },
+    "charm-species-demon.gravebuster": {
+      "entryId": "charm.surv-util-247",
+      "attempts": 1
+    },
+    "charm-species-demon.greengargantuar": {
+      "entryId": "charm.off-ctrl-133",
+      "attempts": 2
+    },
+    "charm-species-demon.hamburger": {
+      "entryId": "charm.off-ctrl-134",
+      "attempts": 2
+    },
+    "charm-species-demon.helmetfume": {
+      "entryId": "charm.off-ctrl-135",
+      "attempts": 2
+    },
+    "charm-species-demon.helmetgatling": {
+      "entryId": "charm.off-ctrl-136",
+      "attempts": 2
+    },
+    "charm-species-demon.helmetplant": {
+      "entryId": "charm.surv-util-087",
+      "attempts": 1
+    },
+    "charm-species-demon.holographicplant": {
+      "entryId": "charm.econ-118",
+      "attempts": 1
+    },
+    "charm-species-demon.horseboss": {
+      "entryId": "charm.off-ctrl-137",
+      "attempts": 2
+    },
+    "charm-species-demon.horsezombie": {
+      "entryId": "charm.off-ctrl-343",
+      "attempts": 1
+    },
+    "charm-species-demon.hugewallnut": {
+      "entryId": "charm.surv-util-248",
+      "attempts": 1
+    },
+    "charm-species-demon.hurricaneblover": {
+      "entryId": "charm.econ-119",
+      "attempts": 1
+    },
+    "charm-species-demon.hypnoblover": {
+      "entryId": "charm.surv-util-249",
+      "attempts": 1
+    },
+    "charm-species-demon.hypnocattailgirl": {
+      "entryId": "charm.off-ctrl-138",
+      "attempts": 2
+    },
+    "charm-species-demon.hypnocattailgirl_land": {
+      "entryId": "charm.off-ctrl-344",
+      "attempts": 1
+    },
+    "charm-species-demon.hypnodoom": {
+      "entryId": "charm.surv-util-250",
+      "attempts": 1
+    },
+    "charm-species-demon.hypnoemperor": {
+      "entryId": "charm.off-ctrl-139",
+      "attempts": 2
+    },
+    "charm-species-demon.hypnofume": {
+      "entryId": "charm.off-ctrl-140",
+      "attempts": 2
+    },
+    "charm-species-demon.hypnogarlic": {
+      "entryId": "charm.econ-120",
+      "attempts": 1
+    },
+    "charm-species-demon.hypnogatling": {
+      "entryId": "charm.off-ctrl-141",
+      "attempts": 2
+    },
+    "charm-species-demon.hypnojalapeno": {
+      "entryId": "charm.surv-util-251",
+      "attempts": 1
+    },
+    "charm-species-demon.hypnojalapenopickaxezombie": {
+      "entryId": "charm.off-ctrl-142",
+      "attempts": 1
+    },
+    "charm-species-demon.hypnojalapenozombie": {
+      "entryId": "charm.surv-util-088",
+      "attempts": 2
+    },
+    "charm-species-demon.hypnomagnet": {
+      "entryId": "charm.off-ctrl-345",
+      "attempts": 1
+    },
+    "charm-species-demon.hypnomelon": {
+      "entryId": "charm.off-ctrl-143",
+      "attempts": 2
+    },
+    "charm-species-demon.hypnomine": {
+      "entryId": "charm.surv-util-252",
+      "attempts": 1
+    },
+    "charm-species-demon.hypnonut": {
+      "entryId": "charm.off-ctrl-144",
+      "attempts": 2
+    },
+    "charm-species-demon.hypnopeashooter": {
+      "entryId": "charm.econ-121",
+      "attempts": 1
+    },
+    "charm-species-demon.hypnopot": {
+      "entryId": "charm.surv-util-089",
+      "attempts": 2
+    },
+    "charm-species-demon.hypnopuff": {
+      "entryId": "charm.off-ctrl-145",
+      "attempts": 2
+    },
+    "charm-species-demon.hypnopumpkin": {
+      "entryId": "charm.off-ctrl-146",
+      "attempts": 2
+    },
+    "charm-species-demon.hypnoqueen": {
+      "entryId": "charm.surv-util-090",
+      "attempts": 2
+    },
+    "charm-species-demon.hypnorepeater": {
+      "entryId": "charm.surv-util-253",
+      "attempts": 1
+    },
+    "charm-species-demon.hypnoshroom": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.(axis-group)-NNN for hypnoshroom",
+      "attempts": 3,
+      "defects": [
+        "blocked: 'none' is too short to be a real reason — either explain concretely why the brief cannot be satisfied, or answer it instead"
+      ]
+    },
+    "charm-species-demon.hypnosplit": {
+      "entryId": "charm.surv-util-254",
+      "attempts": 1
+    },
+    "charm-species-demon.hypnosquash": {
+      "entryId": "charm.off-ctrl-148",
+      "attempts": 2
+    },
+    "charm-species-demon.hypnotorch": {
+      "entryId": "charm.off-ctrl-149",
+      "attempts": 2
+    },
+    "charm-species-demon.icebean": {
+      "entryId": "charm.econ-122",
+      "attempts": 1
+    },
+    "charm-species-demon.iceblover": {
+      "entryId": "charm.surv-util-255",
+      "attempts": 1
+    },
+    "charm-species-demon.icecabbage": {
+      "entryId": "charm.off-ctrl-150",
+      "attempts": 2
+    },
+    "charm-species-demon.icecactus": {
+      "entryId": "charm.off-ctrl-346",
+      "attempts": 1
+    },
+    "charm-species-demon.icecaltrop": {
+      "entryId": "charm.surv-util-256",
+      "attempts": 1
+    },
+    "charm-species-demon.icecannon": {
+      "entryId": "charm.econ-123",
+      "attempts": 1
+    },
+    "charm-species-demon.icecattail": {
+      "entryId": "charm.off-ctrl-151",
+      "attempts": 2
+    },
+    "charm-species-demon.icecherry": {
+      "entryId": "charm.off-ctrl-152",
+      "attempts": 1
+    },
+    "charm-species-demon.iceclawzombie": {
+      "entryId": "charm.surv-util-091",
+      "attempts": 1
+    },
+    "charm-species-demon.icecorn": {
+      "entryId": "charm.off-ctrl-153",
+      "attempts": 1
+    },
+    "charm-species-demon.icedoom": {
+      "entryId": "charm.off-ctrl-154",
+      "attempts": 2
+    },
+    "charm-species-demon.icefumeshroom": {
+      "entryId": "charm.surv-util-257",
+      "attempts": 1
+    },
+    "charm-species-demon.icefurnace": {
+      "entryId": "charm.off-ctrl-347",
+      "attempts": 1
+    },
+    "charm-species-demon.icegloom": {
+      "entryId": "charm.off-ctrl-156",
+      "attempts": 2
+    },
+    "charm-species-demon.icehypno": {
+      "entryId": "charm.surv-util-258",
+      "attempts": 1
+    },
+    "charm-species-demon.icelaserumbrella": {
+      "entryId": "charm.off-ctrl-157",
+      "attempts": 1
+    },
+    "charm-species-demon.icelotus": {
+      "entryId": "charm.econ-124",
+      "attempts": 1
+    },
+    "charm-species-demon.icemine": {
+      "entryId": "charm.off-ctrl-158",
+      "attempts": 1
+    },
+    "charm-species-demon.icenut": {
+      "entryId": "charm.surv-util-093",
+      "attempts": 3
+    },
+    "charm-species-demon.icepeach": {
+      "entryId": "charm.surv-util-094",
+      "attempts": 2
+    },
+    "charm-species-demon.iceplantern": {
+      "entryId": "charm.off-ctrl-159",
+      "attempts": 2
+    },
+    "charm-species-demon.icepot": {
+      "entryId": "charm.off-ctrl-160",
+      "attempts": 2
+    },
+    "charm-species-demon.icepuff": {
+      "entryId": "charm.off-ctrl-161",
+      "attempts": 1
+    },
+    "charm-species-demon.icepumpkin": {
+      "entryId": "charm.off-ctrl-162",
+      "attempts": 2
+    },
+    "charm-species-demon.icescaredyshroom": {
+      "entryId": "charm.off-ctrl-163",
+      "attempts": 2
+    },
+    "charm-species-demon.iceseashroom": {
+      "entryId": "charm.surv-util-095",
+      "attempts": 2
+    },
+    "charm-species-demon.iceshroom": {
+      "entryId": "charm.surv-util-259",
+      "attempts": 1
+    },
+    "charm-species-demon.icespikerock": {
+      "entryId": "charm.off-ctrl-164",
+      "attempts": 2
+    },
+    "charm-species-demon.icesquash": {
+      "entryId": "charm.off-ctrl-165",
+      "attempts": 2
+    },
+    "charm-species-demon.icetorch": {
+      "entryId": "charm.off-ctrl-166",
+      "attempts": 1
+    },
+    "charm-species-demon.ifvblover": {
+      "entryId": "charm.off-ctrl-348",
+      "attempts": 1
+    },
+    "charm-species-demon.ifvironpuff": {
+      "entryId": "charm.surv-util-260",
+      "attempts": 1
+    },
+    "charm-species-demon.ifvpumpkin": {
+      "entryId": "charm.econ-125",
+      "attempts": 1
+    },
+    "charm-species-demon.ifvstar": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.(axis-group)-NNN for ifvstar",
+      "attempts": 3,
+      "defects": [
+        "families: 'atom.magnetism' is not an always-on family in the brief's closed list — copy an id from the list exactly as printed",
+        "drawback.family: 'atom.weight' is not a family in the brief's closed list",
+        "CharmSignetHasNoDrawback: class 'signet' must carry an authored negative atom"
+      ]
+    },
+    "charm-species-demon.imitater": {
+      "entryId": "charm.surv-util-096",
+      "attempts": 1
+    },
+    "charm-species-demon.imitatewheat": {
+      "entryId": "charm.off-ctrl-168",
+      "attempts": 2
+    },
+    "charm-species-demon.impking": {
+      "entryId": "charm.off-ctrl-169",
+      "attempts": 1
+    },
+    "charm-species-demon.impzombie": {
+      "entryId": "charm.off-ctrl-349",
+      "attempts": 1
+    },
+    "charm-species-demon.ironballoonzombie": {
+      "entryId": "charm.surv-util-097",
+      "attempts": 2
+    },
+    "charm-species-demon.ironballoonzombie2": {
+      "entryId": "charm.surv-util-261",
+      "attempts": 1
+    },
+    "charm-species-demon.ironconezombie": {
+      "entryId": "charm.surv-util-098",
+      "attempts": 2
+    },
+    "charm-species-demon.ironcorn": {
+      "entryId": "charm.off-ctrl-170",
+      "attempts": 1
+    },
+    "charm-species-demon.ironfume": {
+      "entryId": "charm.econ-126",
+      "attempts": 1
+    },
+    "charm-species-demon.irongargantuar": {
+      "entryId": "charm.surv-util-262",
+      "attempts": 1
+    },
+    "charm-species-demon.ironmelon": {
+      "entryId": "charm.surv-util-099",
+      "attempts": 2
+    },
+    "charm-species-demon.ironnut": {
+      "entryId": "charm.surv-util-100",
+      "attempts": 1
+    },
+    "charm-species-demon.ironpea": {
+      "entryId": "charm.off-ctrl-171",
+      "attempts": 2
+    },
+    "charm-species-demon.ironpeadoorzombie": {
+      "entryId": "charm.surv-util-101",
+      "attempts": 1
+    },
+    "charm-species-demon.ironpuff": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.off-ctrl-350",
+      "attempts": 2,
+      "defects": [
+        "duplicate name 'Iron-Spore Launcher' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.ironpumpkin": {
+      "entryId": "charm.surv-util-102",
+      "attempts": 2
+    },
+    "charm-species-demon.ironredgargantuar": {
+      "entryId": "charm.surv-util-103",
+      "attempts": 2
+    },
+    "charm-species-demon.ironsquash": {
+      "entryId": "charm.surv-util-263",
+      "attempts": 1
+    },
+    "charm-species-demon.ironstar": {
+      "entryId": "charm.off-ctrl-172",
+      "attempts": 2
+    },
+    "charm-species-demon.jackbox_a": {
+      "entryId": "charm.econ-127",
+      "attempts": 1
+    },
+    "charm-species-demon.jackbox_b": {
+      "entryId": "charm.surv-util-264",
+      "attempts": 1
+    },
+    "charm-species-demon.jackbox_c": {
+      "entryId": "charm.surv-util-104",
+      "attempts": 2
+    },
+    "charm-species-demon.jackboxdoom": {
+      "entryId": "charm.off-ctrl-351",
+      "attempts": 1
+    },
+    "charm-species-demon.jackboxjumpzombie": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.(axis-group)-NNN for jackboxjumpzombie",
+      "attempts": 3,
+      "defects": [
+        "blocked: 'none' is too short to be a real reason — either explain concretely why the brief cannot be satisfied, or answer it instead"
+      ]
+    },
+    "charm-species-demon.jackboxplant": {
+      "entryId": "charm.surv-util-105",
+      "attempts": 2
+    },
+    "charm-species-demon.jackboxpumpkin": {
+      "entryId": "charm.surv-util-106",
+      "attempts": 1
+    },
+    "charm-species-demon.jackboxstar": {
+      "entryId": "charm.econ-128",
+      "attempts": 1
+    },
+    "charm-species-demon.jackboxzombie": {
+      "entryId": "charm.surv-util-265",
+      "attempts": 1
+    },
+    "charm-species-demon.jackson_a": {
+      "entryId": "charm.off-ctrl-352",
+      "attempts": 1
+    },
+    "charm-species-demon.jackson_b": {
+      "entryId": "charm.surv-util-266",
+      "attempts": 1
+    },
+    "charm-species-demon.jackson_c": {
+      "entryId": "charm.econ-129",
+      "attempts": 2
+    },
+    "charm-species-demon.jacksondriver": {
+      "entryId": "charm.surv-util-267",
+      "attempts": 1
+    },
+    "charm-species-demon.jacksondriverboss": {
+      "entryId": "charm.off-ctrl-353",
+      "attempts": 1
+    },
+    "charm-species-demon.jacksonzombie": {
+      "entryId": "charm.surv-util-268",
+      "attempts": 1
+    },
+    "charm-species-demon.jalacaltrop": {
+      "entryId": "charm.off-ctrl-173",
+      "attempts": 1
+    },
+    "charm-species-demon.jalacorn": {
+      "entryId": "charm.off-ctrl-174",
+      "attempts": 2
+    },
+    "charm-species-demon.jaladoubleshooter": {
+      "entryId": "charm.econ-130",
+      "attempts": 1
+    },
+    "charm-species-demon.jalagatling": {
+      "entryId": "charm.surv-util-269",
+      "attempts": 1
+    },
+    "charm-species-demon.jalakelp": {
+      "entryId": "charm.off-ctrl-175",
+      "attempts": 1
+    },
+    "charm-species-demon.jalamine": {
+      "entryId": "charm.off-ctrl-176",
+      "attempts": 1
+    },
+    "charm-species-demon.jalapenozombie": {
+      "entryId": "charm.off-ctrl-354",
+      "attempts": 1
+    },
+    "charm-species-demon.jalapumpkin": {
+      "entryId": "charm.off-ctrl-177",
+      "attempts": 2
+    },
+    "charm-species-demon.jalasplit": {
+      "entryId": "charm.off-ctrl-178",
+      "attempts": 2
+    },
+    "charm-species-demon.jalasquash": {
+      "entryId": "charm.surv-util-270",
+      "attempts": 1
+    },
+    "charm-species-demon.jalasquashzombie": {
+      "entryId": "charm.econ-131",
+      "attempts": 1
+    },
+    "charm-species-demon.jalatorch": {
+      "entryId": "charm.surv-util-271",
+      "attempts": 1
+    },
+    "charm-species-demon.kelpfume": {
+      "entryId": "charm.off-ctrl-355",
+      "attempts": 1
+    },
+    "charm-species-demon.kelpmine_land": {
+      "entryId": "charm.off-ctrl-179",
+      "attempts": 2
+    },
+    "charm-species-demon.kelpmine_water": {
+      "entryId": "charm.surv-util-272",
+      "attempts": 1
+    },
+    "charm-species-demon.kelpnut": {
+      "entryId": "charm.surv-util-107",
+      "attempts": 1
+    },
+    "charm-species-demon.kelppuff": {
+      "entryId": "charm.econ-132",
+      "attempts": 1
+    },
+    "charm-species-demon.kelptorch": {
+      "entryId": "charm.surv-util-273",
+      "attempts": 1
+    },
+    "charm-species-demon.kirov_a": {
+      "entryId": "charm.off-ctrl-180",
+      "attempts": 2
+    },
+    "charm-species-demon.kirov_b": {
+      "entryId": "charm.surv-util-108",
+      "attempts": 1
+    },
+    "charm-species-demon.kirov_c": {
+      "entryId": "charm.off-ctrl-181",
+      "attempts": 1
+    },
+    "charm-species-demon.kirovzombie": {
+      "entryId": "charm.off-ctrl-356",
+      "attempts": 1
+    },
+    "charm-species-demon.ladderzombie": {
+      "entryId": "charm.surv-util-274",
+      "attempts": 1
+    },
+    "charm-species-demon.landsubmarine": {
+      "entryId": "charm.econ-133",
+      "attempts": 1
+    },
+    "charm-species-demon.lanternblover": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.surv-util-275",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Trifolium Radiance' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.lanternfume": {
+      "entryId": "charm.off-ctrl-182",
+      "attempts": 1
+    },
+    "charm-species-demon.lanterngatling": {
+      "entryId": "charm.off-ctrl-183",
+      "attempts": 2
+    },
+    "charm-species-demon.lanternmagnet": {
+      "entryId": "charm.surv-util-110",
+      "attempts": 2
+    },
+    "charm-species-demon.lanternnut": {
+      "entryId": "charm.surv-util-111",
+      "attempts": 3
+    },
+    "charm-species-demon.lanternpot": {
+      "entryId": "charm.econ-134",
+      "attempts": 1
+    },
+    "charm-species-demon.lanternpumpkin": {
+      "entryId": "charm.surv-util-112",
+      "attempts": 1
+    },
+    "charm-species-demon.lanternrepeater": {
+      "entryId": "charm.surv-util-277",
+      "attempts": 1
+    },
+    "charm-species-demon.lanternsplit": {
+      "entryId": "charm.off-ctrl-358",
+      "attempts": 1
+    },
+    "charm-species-demon.lanternstar": {
+      "entryId": "charm.surv-util-113",
+      "attempts": 2
+    },
+    "charm-species-demon.lanternumbrella": {
+      "entryId": "charm.surv-util-278",
+      "attempts": 1
+    },
+    "charm-species-demon.laserumbrella": {
+      "entryId": "charm.surv-util-114",
+      "attempts": 2
+    },
+    "charm-species-demon.legionsniperzombie": {
+      "entryId": "charm.econ-135",
+      "attempts": 1
+    },
+    "charm-species-demon.legionzombie": {
+      "entryId": "charm.surv-util-279",
+      "attempts": 1
+    },
+    "charm-species-demon.levatationzombie": {
+      "entryId": "charm.off-ctrl-359",
+      "attempts": 1
+    },
+    "charm-species-demon.lilypad": {
+      "entryId": "charm.surv-util-115",
+      "attempts": 2
+    },
+    "charm-species-demon.lotusaloes": {
+      "entryId": "charm.surv-util-280",
+      "attempts": 1
+    },
+    "charm-species-demon.lotusbamboo": {
+      "entryId": "charm.econ-136",
+      "attempts": 1
+    },
+    "charm-species-demon.lotusspruce": {
+      "entryId": "charm.surv-util-281",
+      "attempts": 1
+    },
+    "charm-species-demon.luckyblover": {
+      "entryId": "charm.surv-util-116",
+      "attempts": 2
+    },
+    "charm-species-demon.machinelevatation": {
+      "entryId": "charm.surv-util-117",
+      "attempts": 2
+    },
+    "charm-species-demon.machinenut": {
+      "entryId": "charm.off-ctrl-360",
+      "attempts": 1
+    },
+    "charm-species-demon.machinenutzombie": {
+      "entryId": "charm.off-ctrl-184",
+      "attempts": 2
+    },
+    "charm-species-demon.machineshardplant": {
+      "entryId": "charm.surv-util-282",
+      "attempts": 1
+    },
+    "charm-species-demon.magicsnowpea": {
+      "entryId": "charm.off-ctrl-185",
+      "attempts": 1
+    },
+    "charm-species-demon.magicsnowpea2": {
+      "entryId": "charm.econ-137",
+      "attempts": 1
+    },
+    "charm-species-demon.magnetblover": {
+      "entryId": "charm.surv-util-118",
+      "attempts": 2
+    },
+    "charm-species-demon.magnetbox": {
+      "entryId": "charm.surv-util-283",
+      "attempts": 1
+    },
+    "charm-species-demon.magnetcactus": {
+      "entryId": "charm.off-ctrl-187",
+      "attempts": 1
+    },
+    "charm-species-demon.magnetcorn": {
+      "entryId": "charm.off-ctrl-361",
+      "attempts": 1
+    },
+    "charm-species-demon.magnetdoom": {
+      "entryId": "charm.surv-util-284",
+      "attempts": 1
+    },
+    "charm-species-demon.magnetfume": {
+      "entryId": "charm.econ-138",
+      "attempts": 1
+    },
+    "charm-species-demon.magnetinterface": {
+      "entryId": "charm.surv-util-285",
+      "attempts": 1
+    },
+    "charm-species-demon.magnetmelon": {
+      "entryId": "charm.surv-util-119",
+      "attempts": 2
+    },
+    "charm-species-demon.magnetnut": {
+      "entryId": "charm.off-ctrl-188",
+      "attempts": 1
+    },
+    "charm-species-demon.magnetpumpkin": {
+      "entryId": "charm.off-ctrl-362",
+      "attempts": 1
+    },
+    "charm-species-demon.magnetshroom": {
+      "entryId": "charm.surv-util-286",
+      "attempts": 1
+    },
+    "charm-species-demon.magnetstar": {
+      "entryId": "charm.econ-139",
+      "attempts": 1
+    },
+    "charm-species-demon.melonblover": {
+      "entryId": "charm.surv-util-120",
+      "attempts": 2
+    },
+    "charm-species-demon.meloncaltrop": {
+      "entryId": "charm.off-ctrl-189",
+      "attempts": 1
+    },
+    "charm-species-demon.meloncannon": {
+      "entryId": "charm.off-ctrl-190",
+      "attempts": 1
+    },
+    "charm-species-demon.melonfume": {
+      "entryId": "charm.surv-util-287",
+      "attempts": 1
+    },
+    "charm-species-demon.melonnut": {
+      "entryId": "charm.surv-util-121",
+      "attempts": 2
+    },
+    "charm-species-demon.melonpot": {
+      "entryId": "charm.off-ctrl-191",
+      "attempts": 2
+    },
+    "charm-species-demon.melonpuff": {
+      "entryId": "charm.off-ctrl-192",
+      "attempts": 2
+    },
+    "charm-species-demon.melonpumpkin": {
+      "entryId": "charm.off-ctrl-193",
+      "attempts": 1
+    },
+    "charm-species-demon.melonumbrella": {
+      "entryId": "charm.off-ctrl-363",
+      "attempts": 1
+    },
+    "charm-species-demon.minerzombie": {
+      "entryId": "charm.surv-util-288",
+      "attempts": 1
+    },
+    "charm-species-demon.minisandmonster": {
+      "entryId": "charm.econ-140",
+      "attempts": 1
+    },
+    "charm-species-demon.minisnowmonster": {
+      "entryId": "charm.surv-util-122",
+      "attempts": 2
+    },
+    "charm-species-demon.mixanim": {
+      "entryId": "charm.surv-util-289",
+      "attempts": 1
+    },
+    "charm-species-demon.mixbomb": {
+      "entryId": "charm.surv-util-123",
+      "attempts": 1
+    },
+    "charm-species-demon.newyearzombie": {
+      "entryId": "charm.surv-util-124",
+      "attempts": 1
+    },
+    "charm-species-demon.nucleardoomcherry": {
+      "entryId": "charm.surv-util-290",
+      "attempts": 1
+    },
+    "charm-species-demon.nuclearsquash": {
+      "entryId": "charm.off-ctrl-194",
+      "attempts": 2
+    },
+    "charm-species-demon.nutblover": {
+      "entryId": "charm.surv-util-125",
+      "attempts": 1
+    },
+    "charm-species-demon.nutchomper": {
+      "entryId": "charm.off-ctrl-195",
+      "attempts": 1
+    },
+    "charm-species-demon.nutfume": {
+      "entryId": "charm.surv-util-126",
+      "attempts": 2
+    },
+    "charm-species-demon.nutpot": {
+      "entryId": "charm.surv-util-127",
+      "attempts": 2
+    },
+    "charm-species-demon.nutpumpkin": {
+      "entryId": "charm.surv-util-128",
+      "attempts": 2
+    },
+    "charm-species-demon.nuttorch": {
+      "entryId": "charm.off-ctrl-196",
+      "attempts": 2
+    },
+    "charm-species-demon.nutumbrella": {
+      "entryId": "charm.econ-141",
+      "attempts": 1
+    },
+    "charm-species-demon.obsidianclawzombie": {
+      "entryId": "charm.surv-util-291",
+      "attempts": 1
+    },
+    "charm-species-demon.obsidianimpzombie": {
+      "entryId": "charm.off-ctrl-197",
+      "attempts": 1
+    },
+    "charm-species-demon.obsidianjalapeno": {
+      "entryId": "charm.surv-util-129",
+      "attempts": 1
+    },
+    "charm-species-demon.obsidianspike": {
+      "entryId": "charm.surv-util-130",
+      "attempts": 2
+    },
+    "charm-species-demon.obsidiantallnutzombie": {
+      "entryId": "charm.off-ctrl-365",
+      "attempts": 1
+    },
+    "charm-species-demon.obsidianwallnut": {
+      "entryId": "charm.surv-util-292",
+      "attempts": 1
+    },
+    "charm-species-demon.obsidianwheat": {
+      "entryId": "charm.econ-142",
+      "attempts": 1
+    },
+    "charm-species-demon.passionfruit": {
+      "entryId": "charm.surv-util-293",
+      "attempts": 1
+    },
+    "charm-species-demon.peablover": {
+      "entryId": "charm.off-ctrl-198",
+      "attempts": 1
+    },
+    "charm-species-demon.peachomper": {
+      "entryId": "charm.off-ctrl-366",
+      "attempts": 1
+    },
+    "charm-species-demon.peafume": {
+      "entryId": "charm.surv-util-294",
+      "attempts": 2
+    },
+    "charm-species-demon.peamine": {
+      "entryId": "charm.econ-143",
+      "attempts": 1
+    },
+    "charm-species-demon.peanut": {
+      "entryId": "charm.off-ctrl-199",
+      "attempts": 2
+    },
+    "charm-species-demon.peapot": {
+      "entryId": "charm.off-ctrl-200",
+      "attempts": 1
+    },
+    "charm-species-demon.peapuff": {
+      "entryId": "charm.off-ctrl-201",
+      "attempts": 2
+    },
+    "charm-species-demon.peapumpkin": {
+      "entryId": "charm.off-ctrl-202",
+      "attempts": 1
+    },
+    "charm-species-demon.peascaredy": {
+      "entryId": "charm.off-ctrl-203",
+      "attempts": 2
+    },
+    "charm-species-demon.peashooter": {
+      "entryId": "charm.surv-util-295",
+      "attempts": 1
+    },
+    "charm-species-demon.peashooterzombie": {
+      "entryId": "charm.off-ctrl-367",
+      "attempts": 1
+    },
+    "charm-species-demon.peasquash": {
+      "entryId": "charm.off-ctrl-205",
+      "attempts": 1
+    },
+    "charm-species-demon.penguinzombie": {
+      "entryId": "charm.off-ctrl-206",
+      "attempts": 2
+    },
+    "charm-species-demon.pickaxe_a": {
+      "entryId": "charm.econ-027",
+      "attempts": 1
+    },
+    "charm-species-demon.pickaxe_b": {
+      "entryId": "charm.surv-util-131",
+      "attempts": 1
+    },
+    "charm-species-demon.pickaxe_c": {
+      "entryId": "charm.off-ctrl-207",
+      "attempts": 2
+    },
+    "charm-species-demon.pickaxeplant": {
+      "entryId": "charm.off-ctrl-208",
+      "attempts": 1
+    },
+    "charm-species-demon.pickaxepumpkin": {
+      "entryId": "charm.surv-util-132",
+      "attempts": 2
+    },
+    "charm-species-demon.pickaxestar": {
+      "entryId": "charm.surv-util-296",
+      "attempts": 1
+    },
+    "charm-species-demon.pickaxezombie": {
+      "entryId": "charm.econ-144",
+      "attempts": 1
+    },
+    "charm-species-demon.pinefurnace": {
+      "entryId": "charm.surv-util-133",
+      "attempts": 2
+    },
+    "charm-species-demon.pinkonion": {
+      "entryId": "charm.surv-util-297",
+      "attempts": 1
+    },
+    "charm-species-demon.pit": {
+      "entryId": "charm.off-ctrl-368",
+      "attempts": 1
+    },
+    "charm-species-demon.pogozombie": {
+      "entryId": "charm.surv-util-298",
+      "attempts": 1
+    },
+    "charm-species-demon.polfootballzombie": {
+      "entryId": "charm.surv-util-134",
+      "attempts": 2
+    },
+    "charm-species-demon.portalballoonzombie": {
+      "entryId": "charm.econ-145",
+      "attempts": 1
+    },
+    "charm-species-demon.portalcorn": {
+      "entryId": "charm.surv-util-299",
+      "attempts": 1
+    },
+    "charm-species-demon.portaldoom": {
+      "entryId": "charm.off-ctrl-369",
+      "attempts": 1
+    },
+    "charm-species-demon.portalmelon": {
+      "entryId": "charm.surv-util-135",
+      "attempts": 2
+    },
+    "charm-species-demon.portalnut": {
+      "entryId": "charm.surv-util-300",
+      "attempts": 1
+    },
+    "charm-species-demon.portalpea": {
+      "entryId": "charm.econ-146",
+      "attempts": 1
+    },
+    "charm-species-demon.portalplant": {
+      "entryId": "charm.surv-util-301",
+      "attempts": 1
+    },
+    "charm-species-demon.portalpolevaulter": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.(axis-group)-NNN for portalpolevaulter",
+      "attempts": 3,
+      "defects": [
+        "blocked: 'none' is too short to be a real reason — either explain concretely why the brief cannot be satisfied, or answer it instead"
+      ]
+    },
+    "charm-species-demon.potatochomper": {
+      "entryId": "charm.surv-util-302",
+      "attempts": 1
+    },
+    "charm-species-demon.potatodoom": {
+      "entryId": "charm.off-ctrl-209",
+      "attempts": 1
+    },
+    "charm-species-demon.potatofume": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.econ-147",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Spore-Burst Tuber' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.potatomine": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.surv-util-303",
+      "attempts": 2,
+      "defects": [
+        "duplicate name 'Tuberous Grave-Burst' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.potatonut": {
+      "entryId": "charm.off-ctrl-370",
+      "attempts": 1
+    },
+    "charm-species-demon.potatopuff": {
+      "entryId": "charm.surv-util-137",
+      "attempts": 2
+    },
+    "charm-species-demon.potatopumpkin": {
+      "entryId": "charm.surv-util-304",
+      "attempts": 1
+    },
+    "charm-species-demon.potatosquash": {
+      "entryId": "charm.econ-148",
+      "attempts": 1
+    },
+    "charm-species-demon.potatosquashbody": {
+      "entryId": "charm.off-ctrl-211",
+      "attempts": 2
+    },
+    "charm-species-demon.present": {
+      "entryId": "charm.surv-util-305",
+      "attempts": 1
+    },
+    "charm-species-demon.presentzombie": {
+      "entryId": "charm.off-ctrl-371",
+      "attempts": 1
+    },
+    "charm-species-demon.projectilezombie": {
+      "entryId": "charm.surv-util-306",
+      "attempts": 1
+    },
+    "charm-species-demon.protalzombie": {
+      "entryId": "charm.econ-149",
+      "attempts": 1
+    },
+    "charm-species-demon.pudding": {
+      "entryId": "charm.off-ctrl-212",
+      "attempts": 2
+    },
+    "charm-species-demon.puffdoom": {
+      "entryId": "charm.surv-util-307",
+      "attempts": 1
+    },
+    "charm-species-demon.puffjalapeno": {
+      "entryId": "charm.off-ctrl-372",
+      "attempts": 1
+    },
+    "charm-species-demon.puffnut": {
+      "entryId": "charm.surv-util-138",
+      "attempts": 2
+    },
+    "charm-species-demon.puffpumpkin": {
+      "entryId": "charm.surv-util-139",
+      "attempts": 2
+    },
+    "charm-species-demon.puffseashroom": {
+      "entryId": "charm.surv-util-308",
+      "attempts": 1
+    },
+    "charm-species-demon.puffsquash": {
+      "entryId": "charm.off-ctrl-213",
+      "attempts": 2
+    },
+    "charm-species-demon.pumpiner": {
+      "entryId": "charm.surv-util-140",
+      "attempts": 2
+    },
+    "charm-species-demon.qingzombie": {
+      "entryId": "charm.surv-util-141",
+      "attempts": 2
+    },
+    "charm-species-demon.quickjacksonzombie": {
+      "entryId": "charm.econ-150",
+      "attempts": 1
+    },
+    "charm-species-demon.randomgargantuar": {
+      "entryId": "charm.surv-util-142",
+      "attempts": 2
+    },
+    "charm-species-demon.randompluszombie": {
+      "entryId": "charm.surv-util-309",
+      "attempts": 1
+    },
+    "charm-species-demon.randomzombie": {
+      "entryId": "charm.off-ctrl-373",
+      "attempts": 1
+    },
+    "charm-species-demon.redemeraldumbrella": {
+      "entryId": "charm.off-ctrl-214",
+      "attempts": 2
+    },
+    "charm-species-demon.redgargantuar": {
+      "entryId": "charm.surv-util-310",
+      "attempts": 1
+    },
+    "charm-species-demon.redzombieloonnut": {
+      "entryId": "charm.off-ctrl-215",
+      "attempts": 2
+    },
+    "charm-species-demon.refrash": {
+      "entryId": "charm.surv-util-143",
+      "attempts": 1
+    },
+    "charm-species-demon.sandjackson": {
+      "entryId": "charm.surv-util-144",
+      "attempts": 2
+    },
+    "charm-species-demon.scaredfume": {
+      "entryId": "charm.econ-151",
+      "attempts": 1
+    },
+    "charm-species-demon.scaredsun": {
+      "entryId": "charm.surv-util-145",
+      "attempts": 2
+    },
+    "charm-species-demon.scaredyblover": {
+      "entryId": "charm.surv-util-146",
+      "attempts": 1
+    },
+    "charm-species-demon.scaredydoom": {
+      "entryId": "charm.off-ctrl-216",
+      "attempts": 2
+    },
+    "charm-species-demon.scaredyhypno": {
+      "entryId": "charm.surv-util-147",
+      "attempts": 1
+    },
+    "charm-species-demon.scaredynut": {
+      "entryId": "charm.surv-util-311",
+      "attempts": 1
+    },
+    "charm-species-demon.scaredypot": {
+      "entryId": "charm.econ-028",
+      "attempts": 1
+    },
+    "charm-species-demon.scaredypotato": {
+      "entryId": "charm.off-ctrl-217",
+      "attempts": 2
+    },
+    "charm-species-demon.scaredypumpkin": {
+      "entryId": "charm.surv-util-148",
+      "attempts": 1
+    },
+    "charm-species-demon.scaredystar": {
+      "entryId": "charm.off-ctrl-218",
+      "attempts": 2
+    },
+    "charm-species-demon.seablover": {
+      "entryId": "charm.off-ctrl-219",
+      "attempts": 1
+    },
+    "charm-species-demon.seacactus": {
+      "entryId": "charm.off-ctrl-220",
+      "attempts": 1
+    },
+    "charm-species-demon.seafume": {
+      "entryId": "charm.off-ctrl-221",
+      "attempts": 1
+    },
+    "charm-species-demon.seahypno": {
+      "entryId": "charm.off-ctrl-374",
+      "attempts": 1
+    },
+    "charm-species-demon.sealantern": {
+      "entryId": "charm.surv-util-312",
+      "attempts": 1
+    },
+    "charm-species-demon.seamagnet": {
+      "entryId": "charm.econ-152",
+      "attempts": 1
+    },
+    "charm-species-demon.seamine_land": {
+      "entryId": "charm.surv-util-313",
+      "attempts": 1
+    },
+    "charm-species-demon.seamine_water": {
+      "entryId": "charm.surv-util-149",
+      "attempts": 1
+    },
+    "charm-species-demon.seanut": {
+      "entryId": "charm.surv-util-150",
+      "attempts": 2
+    },
+    "charm-species-demon.seapumpkin": {
+      "entryId": "charm.surv-util-151",
+      "attempts": 1
+    },
+    "charm-species-demon.seascaredyshroom": {
+      "entryId": "charm.off-ctrl-223",
+      "attempts": 1
+    },
+    "charm-species-demon.seashroom": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.off-ctrl-375",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Spore-Cloud Diffuser' within this batch; kept 'charm.econ-151'"
+      ]
+    },
+    "charm-species-demon.seasquash": {
+      "entryId": "charm.surv-util-152",
+      "attempts": 2
+    },
+    "charm-species-demon.seastarfruit": {
+      "entryId": "charm.surv-util-314",
+      "attempts": 1
+    },
+    "charm-species-demon.seasunshroom": {
+      "entryId": "charm.surv-util-153",
+      "attempts": 1
+    },
+    "charm-species-demon.shulkbamboo": {
+      "entryId": "charm.surv-util-154",
+      "attempts": 1
+    },
+    "charm-species-demon.shulkflower": {
+      "entryId": "charm.econ-153",
+      "attempts": 1
+    },
+    "charm-species-demon.shulkfurnace": {
+      "entryId": "charm.surv-util-155",
+      "attempts": 2
+    },
+    "charm-species-demon.shulklotus": {
+      "entryId": "charm.surv-util-315",
+      "attempts": 1
+    },
+    "charm-species-demon.silvercabbage": {
+      "entryId": "charm.off-ctrl-376",
+      "attempts": 1
+    },
+    "charm-species-demon.silvercorn": {
+      "entryId": "charm.econ-029",
+      "attempts": 2
+    },
+    "charm-species-demon.silverdoom": {
+      "entryId": "charm.surv-util-316",
+      "attempts": 2
+    },
+    "charm-species-demon.silvergarlic": {
+      "entryId": "charm.econ-154",
+      "attempts": 1
+    },
+    "charm-species-demon.silvericeshroom": {
+      "entryId": "charm.surv-util-317",
+      "attempts": 1
+    },
+    "charm-species-demon.silvermelon": {
+      "entryId": "charm.off-ctrl-377",
+      "attempts": 1
+    },
+    "charm-species-demon.silvernut": {
+      "entryId": "charm.surv-util-156",
+      "attempts": 2
+    },
+    "charm-species-demon.silverpot": {
+      "entryId": "charm.surv-util-318",
+      "attempts": 1
+    },
+    "charm-species-demon.silversunflower": {
+      "entryId": "charm.econ-030",
+      "attempts": 1
+    },
+    "charm-species-demon.silverumbrella": {
+      "entryId": "charm.econ-031",
+      "attempts": 2
+    },
+    "charm-species-demon.silverzombie": {
+      "entryId": "charm.econ-032",
+      "attempts": 2
+    },
+    "charm-species-demon.smalliceshroom": {
+      "entryId": "charm.off-ctrl-224",
+      "attempts": 2
+    },
+    "charm-species-demon.smallpuff": {
+      "entryId": "charm.econ-155",
+      "attempts": 1
+    },
+    "charm-species-demon.smallumbrella": {
+      "entryId": "charm.surv-util-157",
+      "attempts": 2
+    },
+    "charm-species-demon.sniperchomper": {
+      "entryId": "charm.off-ctrl-225",
+      "attempts": 2
+    },
+    "charm-species-demon.sniperpea": {
+      "entryId": "charm.off-ctrl-226",
+      "attempts": 2
+    },
+    "charm-species-demon.sniperpot": {
+      "entryId": "charm.surv-util-319",
+      "attempts": 1
+    },
+    "charm-species-demon.sniperpuff": {
+      "entryId": "charm.off-ctrl-378",
+      "attempts": 1
+    },
+    "charm-species-demon.snorklezombie": {
+      "entryId": "charm.surv-util-320",
+      "attempts": 1
+    },
+    "charm-species-demon.snowbucketzombie": {
+      "entryId": "charm.econ-156",
+      "attempts": 1
+    },
+    "charm-species-demon.snowconezombie": {
+      "entryId": "charm.surv-util-321",
+      "attempts": 1
+    },
+    "charm-species-demon.snowdolphinrider": {
+      "entryId": "charm.off-ctrl-379",
+      "attempts": 1
+    },
+    "charm-species-demon.snowdrownzombie": {
+      "entryId": "charm.off-ctrl-227",
+      "attempts": 1
+    },
+    "charm-species-demon.snowgatlingpeazombie": {
+      "entryId": "charm.surv-util-322",
+      "attempts": 1
+    },
+    "charm-species-demon.snowgatlingpuff": {
+      "entryId": "charm.econ-157",
+      "attempts": 1
+    },
+    "charm-species-demon.snowgunzombie": {
+      "entryId": "charm.off-ctrl-228",
+      "attempts": 1
+    },
+    "charm-species-demon.snowmonsterrider": {
+      "entryId": "charm.surv-util-323",
+      "attempts": 1
+    },
+    "charm-species-demon.snowmonsterzombie": {
+      "entryId": "charm.off-ctrl-229",
+      "attempts": 1
+    },
+    "charm-species-demon.snownormalzombie": {
+      "entryId": "charm.surv-util-159",
+      "attempts": 2
+    },
+    "charm-species-demon.snowpresent": {
+      "entryId": "charm.econ-033",
+      "attempts": 2
+    },
+    "charm-species-demon.snowshieldzombie": {
+      "entryId": "charm.surv-util-160",
+      "attempts": 1
+    },
+    "charm-species-demon.snowsplit": {
+      "entryId": "charm.off-ctrl-230",
+      "attempts": 2
+    },
+    "charm-species-demon.snowzombie": {
+      "entryId": "charm.off-ctrl-380",
+      "attempts": 1
+    },
+    "charm-species-demon.solarlily": {
+      "entryId": "charm.surv-util-161",
+      "attempts": 2
+    },
+    "charm-species-demon.solarpot": {
+      "entryId": "charm.surv-util-162",
+      "attempts": 2
+    },
+    "charm-species-demon.solarsunflower": {
+      "entryId": "charm.off-ctrl-231",
+      "attempts": 2
+    },
+    "charm-species-demon.spikerock": {
+      "entryId": "charm.off-ctrl-232",
+      "attempts": 1
+    },
+    "charm-species-demon.splitpea": {
+      "entryId": "charm.off-ctrl-233",
+      "attempts": 1
+    },
+    "charm-species-demon.splitpuff": {
+      "entryId": "charm.surv-util-324",
+      "attempts": 1
+    },
+    "charm-species-demon.spreadfume": {
+      "entryId": "charm.econ-158",
+      "attempts": 1
+    },
+    "charm-species-demon.spreadscaredyshroom": {
+      "entryId": "charm.surv-util-325",
+      "attempts": 1
+    },
+    "charm-species-demon.spruceballista": {
+      "entryId": "charm.off-ctrl-234",
+      "attempts": 2
+    },
+    "charm-species-demon.sprucefurnace": {
+      "entryId": "charm.off-ctrl-381",
+      "attempts": 1
+    },
+    "charm-species-demon.spruceshooter": {
+      "entryId": "charm.surv-util-326",
+      "attempts": 1
+    },
+    "charm-species-demon.spruceshulk": {
+      "entryId": "charm.econ-159",
+      "attempts": 1
+    },
+    "charm-species-demon.squalour": {
+      "entryId": "charm.surv-util-327",
+      "attempts": 1
+    },
+    "charm-species-demon.squalourzombie": {
+      "entryId": "charm.off-ctrl-235",
+      "attempts": 2
+    },
+    "charm-species-demon.squashblover": {
+      "entryId": "charm.surv-util-328",
+      "attempts": 1
+    },
+    "charm-species-demon.squashcorn": {
+      "entryId": "charm.off-ctrl-236",
+      "attempts": 2
+    },
+    "charm-species-demon.squashkelp": {
+      "entryId": "charm.off-ctrl-237",
+      "attempts": 2
+    },
+    "charm-species-demon.squashmelon": {
+      "entryId": "charm.off-ctrl-238",
+      "attempts": 2
+    },
+    "charm-species-demon.squashnut": {
+      "entryId": "charm.econ-160",
+      "attempts": 1
+    },
+    "charm-species-demon.squashpumpkin": {
+      "entryId": "charm.surv-util-329",
+      "attempts": 1
+    },
+    "charm-species-demon.squashspike": {
+      "entryId": "charm.off-ctrl-383",
+      "attempts": 1
+    },
+    "charm-species-demon.squashtorch": {
+      "entryId": "charm.surv-util-163",
+      "attempts": 1
+    },
+    "charm-species-demon.squashzombie": {
+      "entryId": "charm.surv-util-164",
+      "attempts": 2
+    },
+    "charm-species-demon.starblover": {
+      "entryId": "charm.surv-util-330",
+      "attempts": 1
+    },
+    "charm-species-demon.starfruit": {
+      "entryId": "charm.econ-161",
+      "attempts": 1
+    },
+    "charm-species-demon.starfume": {
+      "entryId": "charm.off-ctrl-239",
+      "attempts": 1
+    },
+    "charm-species-demon.starhypno": {
+      "entryId": "charm.surv-util-331",
+      "attempts": 1
+    },
+    "charm-species-demon.starnut": {
+      "entryId": "charm.off-ctrl-384",
+      "attempts": 1
+    },
+    "charm-species-demon.starpea": {
+      "entryId": "charm.surv-util-332",
+      "attempts": 1
+    },
+    "charm-species-demon.starpuff": {
+      "entryId": "charm.off-ctrl-240",
+      "attempts": 1
+    },
+    "charm-species-demon.starpumpkin": {
+      "entryId": "charm.surv-util-166",
+      "attempts": 2
+    },
+    "charm-species-demon.starsniper": {
+      "entryId": "charm.econ-162",
+      "attempts": 1
+    },
+    "charm-species-demon.starsquash": {
+      "entryId": "charm.off-ctrl-241",
+      "attempts": 2
+    },
+    "charm-species-demon.startorch": {
+      "entryId": "charm.surv-util-333",
+      "attempts": 1
+    },
+    "charm-species-demon.stonedancer": {
+      "entryId": "charm.surv-util-167",
+      "attempts": 1
+    },
+    "charm-species-demon.submarine_a": {
+      "entryId": "charm.off-ctrl-385",
+      "attempts": 1
+    },
+    "charm-species-demon.submarine_b": {
+      "entryId": "charm.surv-util-334",
+      "attempts": 1
+    },
+    "charm-species-demon.submarine_b2": {
+      "entryId": "charm.econ-163",
+      "attempts": 1
+    },
+    "charm-species-demon.submarine_c": {
+      "entryId": "charm.surv-util-168",
+      "attempts": 1
+    },
+    "charm-species-demon.submarine_c2": {
+      "entryId": "charm.surv-util-335",
+      "attempts": 1
+    },
+    "charm-species-demon.submarinezombie": {
+      "entryId": "charm.off-ctrl-386",
+      "attempts": 1
+    },
+    "charm-species-demon.summonedhorse": {
+      "entryId": "charm.surv-util-336",
+      "attempts": 1
+    },
+    "charm-species-demon.sunblover": {
+      "entryId": "charm.off-ctrl-242",
+      "attempts": 1
+    },
+    "charm-species-demon.sunbomb": {
+      "entryId": "charm.econ-164",
+      "attempts": 1
+    },
+    "charm-species-demon.suncabbage": {
+      "entryId": "charm.surv-util-337",
+      "attempts": 1
+    },
+    "charm-species-demon.suncaltrop": {
+      "entryId": "charm.off-ctrl-387",
+      "attempts": 1
+    },
+    "charm-species-demon.sunflower": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.(axis-group)-NNN for sunflower",
+      "attempts": 3,
+      "defects": [
+        "blocked: 'none' is too short to be a real reason — either explain concretely why the brief cannot be satisfied, or answer it instead"
+      ]
+    },
+    "charm-species-demon.sungatlingpuff": {
+      "entryId": "charm.econ-165",
+      "attempts": 1
+    },
+    "charm-species-demon.sunhypno": {
+      "entryId": "charm.surv-util-169",
+      "attempts": 1
+    },
+    "charm-species-demon.suniceshroom": {
+      "entryId": "charm.surv-util-338",
+      "attempts": 1
+    },
+    "charm-species-demon.sunjalapeno": {
+      "entryId": "charm.off-ctrl-243",
+      "attempts": 2
+    },
+    "charm-species-demon.sunmagnet": {
+      "entryId": "charm.surv-util-170",
+      "attempts": 2
+    },
+    "charm-species-demon.sunmine": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.off-ctrl-388",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Solar Spud Detonator' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.sunnut": {
+      "entryId": "charm.surv-util-339",
+      "attempts": 1
+    },
+    "charm-species-demon.sunnutzombie": {
+      "entryId": "charm.surv-util-171",
+      "attempts": 2
+    },
+    "charm-species-demon.sunpot": {
+      "entryId": "charm.surv-util-172",
+      "attempts": 2
+    },
+    "charm-species-demon.sunpumpkin": {
+      "entryId": "charm.econ-166",
+      "attempts": 1
+    },
+    "charm-species-demon.sunshroom": {
+      "entryId": "charm.surv-util-340",
+      "attempts": 1
+    },
+    "charm-species-demon.sunsquash": {
+      "entryId": "charm.surv-util-173",
+      "attempts": 2
+    },
+    "charm-species-demon.sunstar": {
+      "entryId": "charm.off-ctrl-244",
+      "attempts": 2
+    },
+    "charm-species-demon.superblackfootball": {
+      "entryId": "charm.surv-util-174",
+      "attempts": 2
+    },
+    "charm-species-demon.superblackhorse": {
+      "entryId": "charm.surv-util-175",
+      "attempts": 2
+    },
+    "charm-species-demon.superbombthrower": {
+      "entryId": "charm.off-ctrl-389",
+      "attempts": 1
+    },
+    "charm-species-demon.supercaltrop": {
+      "entryId": "charm.surv-util-341",
+      "attempts": 1
+    },
+    "charm-species-demon.supercaltroppot": {
+      "entryId": "charm.surv-util-176",
+      "attempts": 2
+    },
+    "charm-species-demon.supercherrygatling": {
+      "entryId": "charm.econ-167",
+      "attempts": 2
+    },
+    "charm-species-demon.supercherryshooter": {
+      "entryId": "charm.off-ctrl-245",
+      "attempts": 2
+    },
+    "charm-species-demon.supercherryshooterzombie": {
+      "entryId": "charm.off-ctrl-246",
+      "attempts": 2
+    },
+    "charm-species-demon.superchomper": {
+      "entryId": "charm.surv-util-342",
+      "attempts": 1
+    },
+    "charm-species-demon.superdancepolzombie": {
+      "entryId": "charm.off-ctrl-247",
+      "attempts": 2
+    },
+    "charm-species-demon.superdriver": {
+      "entryId": "charm.surv-util-177",
+      "attempts": 1
+    },
+    "charm-species-demon.superfume": {
+      "entryId": "charm.off-ctrl-390",
+      "attempts": 1
+    },
+    "charm-species-demon.superfurnace": {
+      "entryId": "charm.surv-util-343",
+      "attempts": 1
+    },
+    "charm-species-demon.supergargantuar": {
+      "entryId": "charm.surv-util-178",
+      "attempts": 2
+    },
+    "charm-species-demon.supergatling": {
+      "entryId": "charm.econ-168",
+      "attempts": 1
+    },
+    "charm-species-demon.supergatlingpeamine": {
+      "entryId": "charm.surv-util-344",
+      "attempts": 1
+    },
+    "charm-species-demon.supergatlingpumpkin": {
+      "entryId": "charm.off-ctrl-248",
+      "attempts": 2
+    },
+    "charm-species-demon.superhorse": {
+      "entryId": "charm.off-ctrl-249",
+      "attempts": 2
+    },
+    "charm-species-demon.superhurricaneblover": {
+      "entryId": "charm.off-ctrl-250",
+      "attempts": 2
+    },
+    "charm-species-demon.superhypno": {
+      "entryId": "charm.off-ctrl-251",
+      "attempts": 2
+    },
+    "charm-species-demon.superhypnodoom": {
+      "entryId": "charm.off-ctrl-391",
+      "attempts": 1
+    },
+    "charm-species-demon.superhypnogatling": {
+      "entryId": "charm.surv-util-345",
+      "attempts": 1
+    },
+    "charm-species-demon.superjackboxzombie": {
+      "entryId": "charm.econ-169",
+      "attempts": 1
+    },
+    "charm-species-demon.superjalanut": {
+      "entryId": "charm.surv-util-179",
+      "attempts": 2
+    },
+    "charm-species-demon.superkelp": {
+      "entryId": "charm.off-ctrl-252",
+      "attempts": 2
+    },
+    "charm-species-demon.superkirov": {
+      "entryId": "charm.surv-util-346",
+      "attempts": 1
+    },
+    "charm-species-demon.superladderzombie": {
+      "entryId": "charm.surv-util-180",
+      "attempts": 2
+    },
+    "charm-species-demon.superlevatation": {
+      "entryId": "charm.surv-util-181",
+      "attempts": 2
+    },
+    "charm-species-demon.supermachinenut": {
+      "entryId": "charm.surv-util-182",
+      "attempts": 2
+    },
+    "charm-species-demon.supermachinenutzombie": {
+      "entryId": "charm.off-ctrl-392",
+      "attempts": 1
+    },
+    "charm-species-demon.supermachineshardplant": {
+      "entryId": "charm.surv-util-347",
+      "attempts": 1
+    },
+    "charm-species-demon.supermelon": {
+      "entryId": "charm.econ-170",
+      "attempts": 1
+    },
+    "charm-species-demon.supernutshooter": {
+      "entryId": "charm.off-ctrl-253",
+      "attempts": 1
+    },
+    "charm-species-demon.superpenguinzombie": {
+      "entryId": "charm.off-ctrl-254",
+      "attempts": 2
+    },
+    "charm-species-demon.superpogozombie": {
+      "entryId": "charm.surv-util-348",
+      "attempts": 1
+    },
+    "charm-species-demon.superpolevaulter": {
+      "entryId": "charm.off-ctrl-255",
+      "attempts": 2
+    },
+    "charm-species-demon.superpumpkin": {
+      "entryId": "charm.off-ctrl-393",
+      "attempts": 1
+    },
+    "charm-species-demon.supersnowgatling": {
+      "entryId": "charm.surv-util-349",
+      "attempts": 1
+    },
+    "charm-species-demon.supersnowmonsterzombie": {
+      "entryId": "charm.econ-171",
+      "attempts": 1
+    },
+    "charm-species-demon.superspruce": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.surv-util-350",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Glacial Needle-Spire' within this batch; kept 'charm.off-ctrl-346'"
+      ]
+    },
+    "charm-species-demon.superstar": {
+      "entryId": "charm.surv-util-183",
+      "attempts": 2
+    },
+    "charm-species-demon.supersubmarine": {
+      "entryId": "charm.surv-util-184",
+      "attempts": 1
+    },
+    "charm-species-demon.supersunnut": {
+      "entryId": "charm.off-ctrl-394",
+      "attempts": 1
+    },
+    "charm-species-demon.supersunnutzombie": {
+      "entryId": "charm.surv-util-351",
+      "attempts": 1
+    },
+    "charm-species-demon.superthreegatling": {
+      "entryId": "charm.econ-172",
+      "attempts": 1
+    },
+    "charm-species-demon.superthreepeater": {
+      "entryId": "charm.surv-util-185",
+      "attempts": 1
+    },
+    "charm-species-demon.superthreepeater_sp": {
+      "entryId": "charm.surv-util-352",
+      "attempts": 1
+    },
+    "charm-species-demon.supertorch": {
+      "entryId": "charm.off-ctrl-395",
+      "attempts": 1
+    },
+    "charm-species-demon.superumbrella": {
+      "entryId": "charm.surv-util-353",
+      "attempts": 1
+    },
+    "charm-species-demon.swordstar": {
+      "entryId": "charm.econ-173",
+      "attempts": 1
+    },
+    "charm-species-demon.tallfirenut": {
+      "entryId": "charm.surv-util-187",
+      "attempts": 2
+    },
+    "charm-species-demon.tallfirenutzombie": {
+      "entryId": "charm.surv-util-188",
+      "attempts": 2
+    },
+    "charm-species-demon.tallicenut": {
+      "entryId": "charm.surv-util-354",
+      "attempts": 1
+    },
+    "charm-species-demon.tallicenutzombie": {
+      "entryId": "charm.surv-util-189",
+      "attempts": 2
+    },
+    "charm-species-demon.tallnut": {
+      "entryId": "charm.off-ctrl-396",
+      "attempts": 1
+    },
+    "charm-species-demon.tallnutfootball": {
+      "entryId": "charm.surv-util-190",
+      "attempts": 2
+    },
+    "charm-species-demon.tallnutfootballzombie": {
+      "entryId": "charm.surv-util-191",
+      "attempts": 2
+    },
+    "charm-species-demon.tanglekelp": {
+      "entryId": "charm.surv-util-355",
+      "attempts": 1
+    },
+    "charm-species-demon.thorns": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.econ-174",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Spore-Burst Husk' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.thornsbamboo": {
+      "entryId": "charm.surv-util-356",
+      "attempts": 1
+    },
+    "charm-species-demon.thornslotus": {
+      "entryId": "charm.off-ctrl-256",
+      "attempts": 2
+    },
+    "charm-species-demon.thornsshulk": {
+      "entryId": "charm.surv-util-192",
+      "attempts": 1
+    },
+    "charm-species-demon.thornsspruce": {
+      "entryId": "charm.off-ctrl-397",
+      "attempts": 1
+    },
+    "charm-species-demon.threecorn": {
+      "entryId": "charm.off-ctrl-257",
+      "attempts": 2
+    },
+    "charm-species-demon.threekelp": {
+      "entryId": "charm.econ-175",
+      "attempts": 1
+    },
+    "charm-species-demon.threemelon": {
+      "entryId": "charm.off-ctrl-258",
+      "attempts": 2
+    },
+    "charm-species-demon.threemine": {
+      "entryId": "charm.surv-util-358",
+      "attempts": 1
+    },
+    "charm-species-demon.threenut": {
+      "entryId": "charm.off-ctrl-398",
+      "attempts": 1
+    },
+    "charm-species-demon.threepot": {
+      "entryId": "charm.econ-176",
+      "attempts": 1
+    },
+    "charm-species-demon.threepumpkin": {
+      "entryId": "charm.surv-util-193",
+      "attempts": 3
+    },
+    "charm-species-demon.threespike": {
+      "entryId": "charm.surv-util-360",
+      "attempts": 1
+    },
+    "charm-species-demon.threesquash": {
+      "entryId": "charm.off-ctrl-399",
+      "attempts": 1
+    },
+    "charm-species-demon.threetorch": {
+      "entryId": "charm.off-ctrl-260",
+      "attempts": 2
+    },
+    "charm-species-demon.thronsaloes": {
+      "entryId": "charm.off-ctrl-261",
+      "attempts": 2
+    },
+    "charm-species-demon.torchfirenut": {
+      "entryId": "charm.surv-util-361",
+      "attempts": 1
+    },
+    "charm-species-demon.torchfirepumpkin": {
+      "entryId": "charm.surv-util-194",
+      "attempts": 2
+    },
+    "charm-species-demon.torchfume": {
+      "entryId": "charm.off-ctrl-262",
+      "attempts": 1
+    },
+    "charm-species-demon.torchmine": {
+      "entryId": "charm.surv-util-195",
+      "attempts": 2
+    },
+    "charm-species-demon.torchpumpkin": {
+      "entryId": "charm.econ-177",
+      "attempts": 1
+    },
+    "charm-species-demon.torchseashroom": {
+      "entryId": "charm.surv-util-362",
+      "attempts": 1
+    },
+    "charm-species-demon.torchspike": {
+      "entryId": "charm.off-ctrl-263",
+      "attempts": 2
+    },
+    "charm-species-demon.torchsunflower": {
+      "entryId": "charm.off-ctrl-264",
+      "attempts": 2
+    },
+    "charm-species-demon.torchwood": {
+      "entryId": "charm.off-ctrl-265",
+      "attempts": 2
+    },
+    "charm-species-demon.tower_bigsunshroom": {
+      "entryId": "charm.off-ctrl-400",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_cherrychomper": {
+      "entryId": "charm.surv-util-363",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_cherryshooter": {
+      "entryId": "charm.off-ctrl-266",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_doomfume": {
+      "entryId": "charm.off-ctrl-267",
+      "attempts": 2
+    },
+    "charm-species-demon.tower_doomstar": {
+      "entryId": "charm.econ-178",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_electriconion": {
+      "entryId": "charm.surv-util-364",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_gravebuster": {
+      "entryId": "charm.surv-util-196",
+      "attempts": 2
+    },
+    "charm-species-demon.tower_iceblover": {
+      "entryId": "charm.off-ctrl-269",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_icegloom": {
+      "entryId": "charm.off-ctrl-401",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_lilypad": {
+      "entryId": "charm.surv-util-197",
+      "attempts": 2
+    },
+    "charm-species-demon.tower_peapuff": {
+      "entryId": "charm.surv-util-365",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_peasunflower": {
+      "entryId": "charm.econ-179",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_scaredyfume": {
+      "entryId": "charm.surv-util-366",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_squashnut": {
+      "entryId": "charm.off-ctrl-402",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_starnut": {
+      "entryId": "charm.off-ctrl-272",
+      "attempts": 2
+    },
+    "charm-species-demon.tower_sunmine": {
+      "entryId": "charm.surv-util-367",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_sunshroom": {
+      "entryId": "charm.econ-034",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_threemine": {
+      "entryId": "charm.econ-180",
+      "attempts": 1
+    },
+    "charm-species-demon.tower_watercan": {
+      "entryId": "charm.surv-util-368",
+      "attempts": 2
+    },
+    "charm-species-demon.trainingdummy": {
+      "entryId": "charm.off-ctrl-274",
+      "attempts": 2
+    },
+    "charm-species-demon.treasuremine": {
+      "entryId": "charm.off-ctrl-403",
+      "attempts": 1
+    },
+    "charm-species-demon.twinmarigold": {
+      "entryId": "charm.econ-035",
+      "attempts": 1
+    },
+    "charm-species-demon.twinshulk": {
+      "entryId": "charm.off-ctrl-275",
+      "attempts": 1
+    },
+    "charm-species-demon.ulti_cherrygatling": {
+      "entryId": "charm.surv-util-198",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatebamboo": {
+      "entryId": "charm.surv-util-369",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatebigchomper": {
+      "entryId": "charm.surv-util-200",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatebiggatling": {
+      "entryId": "charm.econ-181",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatebigsniper": {
+      "entryId": "charm.surv-util-370",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimateblover": {
+      "entryId": "charm.surv-util-201",
+      "attempts": 3
+    },
+    "charm-species-demon.ultimatecabbage": {
+      "entryId": "charm.off-ctrl-404",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatecabbagecannon": {
+      "entryId": "charm.surv-util-371",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatecactus": {
+      "entryId": "charm.econ-182",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatecannon": {
+      "entryId": "charm.off-ctrl-276",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatecattail": {
+      "entryId": "charm.off-ctrl-277",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatechomper": {
+      "entryId": "charm.surv-util-202",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatecorn": {
+      "entryId": "charm.off-ctrl-278",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatecornfume": {
+      "entryId": "charm.surv-util-372",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatedolphin": {
+      "entryId": "charm.off-ctrl-279",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatedoomgatling": {
+      "entryId": "charm.off-ctrl-280",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatedoomscaredy": {
+      "entryId": "charm.off-ctrl-281",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimateendoflamezombie": {
+      "entryId": "charm.surv-util-203",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimateexplodecannon": {
+      "entryId": "charm.off-ctrl-405",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatefireseashroom": {
+      "entryId": "charm.off-ctrl-282",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatefly": {
+      "entryId": "charm.surv-util-373",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatefootballdrown": {
+      "entryId": "charm.off-ctrl-283",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatefootballzombie": {
+      "entryId": "charm.econ-183",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatefume": {
+      "entryId": "charm.surv-util-374",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimategargantuar": {
+      "entryId": "charm.off-ctrl-406",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimategarlicsplit": {
+      "entryId": "charm.off-ctrl-284",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimategatling": {
+      "entryId": "charm.surv-util-375",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimategatlingblover": {
+      "entryId": "charm.econ-184",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimategloom": {
+      "entryId": "charm.surv-util-376",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimategoldgargantuar": {
+      "entryId": "charm.off-ctrl-407",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatehelmetgatling": {
+      "entryId": "charm.off-ctrl-285",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatehorse": {
+      "entryId": "charm.surv-util-377",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatehorse2": {
+      "entryId": "charm.econ-185",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatehugenut": {
+      "entryId": "charm.surv-util-204",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatehypno": {
+      "entryId": "charm.surv-util-378",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatehypnodoom": {
+      "entryId": "charm.off-ctrl-408",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatehypnopumpkin": {
+      "entryId": "charm.surv-util-205",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimateicedoom": {
+      "entryId": "charm.off-ctrl-286",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimateiceshroom": {
+      "entryId": "charm.off-ctrl-287",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimateiceshroom2": {
+      "entryId": "charm.off-ctrl-288",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimateimpking": {
+      "entryId": "charm.surv-util-206",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatejackboxzombie": {
+      "entryId": "charm.surv-util-207",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatejacksondriver": {
+      "entryId": "charm.surv-util-379",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatejalanut": {
+      "entryId": "charm.surv-util-208",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatejalapeno": {
+      "entryId": "charm.off-ctrl-289",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatejalapuff": {
+      "entryId": "charm.surv-util-209",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatekelp": {
+      "entryId": "charm.econ-036",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatekirovzombie": {
+      "entryId": "charm.surv-util-210",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatelanternsplit": {
+      "entryId": "charm.econ-186",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatelegionzombie": {
+      "entryId": "charm.surv-util-211",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatelunarcabbage": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.surv-util-380",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Solaris Cabbage Core' within this batch; kept 'charm.surv-util-337'"
+      ]
+    },
+    "charm-species-demon.ultimatemachinenut": {
+      "entryId": "charm.off-ctrl-409",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatemachinenutzombie": {
+      "entryId": "charm.surv-util-213",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatemagnet": {
+      "entryId": "charm.surv-util-381",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatemelon": {
+      "entryId": "charm.econ-187",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatemeloncannon": {
+      "entryId": "charm.off-ctrl-290",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatemelonpuff": {
+      "entryId": "charm.surv-util-382",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimateminigun": {
+      "entryId": "charm.off-ctrl-291",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatepaperzombie": {
+      "entryId": "charm.surv-util-214",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimateplantern": {
+      "entryId": "charm.surv-util-215",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatepoisonfume": {
+      "entryId": "charm.off-ctrl-292",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimateportalnut": {
+      "entryId": "charm.off-ctrl-410",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimateportalsniper": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.(axis-group)-NNN for ultimateportalsniper",
+      "attempts": 3,
+      "defects": [
+        "families: 'atom.evd-seal' is not an always-on family in the brief's closed list — copy an id from the list exactly as printed"
+      ]
+    },
+    "charm-species-demon.ultimatepotatonut": {
+      "entryId": "charm.surv-util-216",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatepumpkin": {
+      "entryId": "charm.econ-188",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimateredlunar": {
+      "entryId": "charm.surv-util-217",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimateseashroom": {
+      "entryId": "charm.off-ctrl-293",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatesnipergatling": {
+      "entryId": "charm.off-ctrl-294",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatesnowgatlingpuff": {
+      "entryId": "charm.off-ctrl-295",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatesnowzombie": {
+      "entryId": "charm.surv-util-383",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatespring": {
+      "entryId": "charm.off-ctrl-411",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatespruce": {
+      "entryId": "charm.surv-util-218",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatestar": {
+      "entryId": "charm.surv-util-384",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatestartorch": {
+      "entryId": "charm.econ-189",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatesunflower": {
+      "entryId": "charm.off-ctrl-296",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatesungatlingpuff": {
+      "entryId": "charm.surv-util-219",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatesunmagnet": {
+      "entryId": "charm.surv-util-385",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatesunnut": {
+      "entryId": "charm.off-ctrl-412",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimateswordzombie": {
+      "entryId": "charm.surv-util-386",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatetallnut": {
+      "entryId": "charm.surv-util-220",
+      "attempts": 2
+    },
+    "charm-species-demon.ultimatetorch": {
+      "entryId": "charm.off-ctrl-297",
+      "attempts": 1
+    },
+    "charm-species-demon.ultimatewintermelon": {
+      "entryId": "charm.off-ctrl-298",
+      "attempts": 1
+    },
+    "charm-species-demon.ultiwatergargantuar": {
+      "entryId": "charm.surv-util-221",
+      "attempts": 1
+    },
+    "charm-species-demon.umbrellaleaf": {
+      "entryId": "charm.surv-util-222",
+      "attempts": 1
+    },
+    "charm-species-demon.umbrellapot": {
+      "entryId": "charm.surv-util-223",
+      "attempts": 1
+    },
+    "charm-species-demon.vectorplant": {
+      "entryId": "charm.econ-190",
+      "attempts": 1
+    },
+    "charm-species-demon.voodoodollzombie": {
+      "entryId": "charm.surv-util-387",
+      "attempts": 1
+    },
+    "charm-species-demon.wallnutzombie": {
+      "entryId": "charm.off-ctrl-413",
+      "attempts": 1
+    },
+    "charm-species-demon.wateraloes": {
+      "entryId": "charm.off-ctrl-299",
+      "attempts": 2
+    },
+    "charm-species-demon.waterballista": {
+      "entryId": "charm.surv-util-388",
+      "attempts": 1
+    },
+    "charm-species-demon.waterbamboo": {
+      "entryId": "charm.off-ctrl-300",
+      "attempts": 2
+    },
+    "charm-species-demon.waterfurnace": {
+      "entryId": "charm.econ-191",
+      "attempts": 1
+    },
+    "charm-species-demon.waterjackboxjumpzombie": {
+      "entryId": "charm.surv-util-389",
+      "attempts": 1
+    },
+    "charm-species-demon.watershulk": {
+      "entryId": "charm.off-ctrl-301",
+      "attempts": 1
+    },
+    "charm-species-demon.waterspruce": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.off-ctrl-414",
+      "attempts": 1,
+      "defects": [
+        "duplicate name 'Glacial Spicule' within existing corpus; kept 'existing corpus'"
+      ]
+    },
+    "charm-species-demon.wheat": {
+      "entryId": "charm.surv-util-224",
+      "attempts": 1
+    },
+    "charm-species-demon.whitefootball": {
+      "entryId": "charm.surv-util-225",
+      "attempts": 2
+    },
+    "charm-species-demon.wintermelon": {
+      "entryId": "charm.surv-util-390",
+      "attempts": 1
+    },
+    "charm-species-demon.xxspot": {
+      "entryId": "charm.off-ctrl-302",
+      "attempts": 1
+    },
+    "charm-species-demon.yellowfootball": {
+      "entryId": "charm.econ-192",
+      "attempts": 1
+    },
+    "charm-species-demon.yellowgargantuar": {
+      "entryId": "charm.surv-util-226",
+      "attempts": 2
+    },
+    "charm-species-demon.zombie9527": {
+      "entryId": "charm.surv-util-391",
+      "attempts": 1
+    },
+    "charm-species-demon.zombieboss": {
+      "entryId": "charm.surv-util-227",
+      "attempts": 2
+    },
+    "charm-species-demon.zombieboss2": {
+      "entryId": "charm.surv-util-228",
+      "attempts": 2
+    },
+    "charm-species-demon.zombieduck": {
+      "terminalSchemaVersion": 1,
+      "outcome": "escalated",
+      "entryId": "charm.(axis-group)-NNN for zombieduck",
+      "attempts": 3,
+      "defects": [
+        "families: 'atom.evd-husk' is not an always-on family in the brief's closed list — copy an id from the list exactly as printed"
+      ]
+    },
+    "charm-species-demon.zombieendoflame": {
+      "entryId": "charm.surv-util-392",
+      "attempts": 1
+    },
+    "charm-species-demon.zombieloonnut": {
+      "entryId": "charm.econ-193",
+      "attempts": 1
     }
   }
 }

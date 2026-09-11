@@ -16,6 +16,7 @@ Two review modes over the same run, not two contradictory truths:
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 import json
 import sys
 from pathlib import Path
@@ -51,8 +52,22 @@ EXIT_CLEAN = 0
 EXIT_GAP = 1
 EXIT_CANNOT_RUN = 2
 EXIT_REFUSED = 3
+EXIT_ESCALATED = 4
 
 _SEVERITY_ORDER = {Severity.GAP: 0, Severity.NOTE: 1, Severity.NOT_MEASURED: 2}
+
+
+def _exit_for_graph_batch(result) -> int:
+    """EXIT_CLEAN when the batch finished without escalate — persisted and/or blocked (or empty).
+
+    Affix already returns 0 on a coherent `blocked`. Set/charm/combination used to require at least
+    one persist this batch, so fill `--limit 1` turned a legitimate decline into `gap` and stalled
+    resume. Escalate has its own result so the fill walker can record it and keep walking without
+    treating a genuine corpus gap as recoverable.
+    """
+    if any(getattr(o, "outcome", None) == "escalated" for o in getattr(result, "outcomes", ())):
+        return EXIT_ESCALATED
+    return EXIT_CLEAN
 
 
 def build_registry() -> MetricRegistry:
@@ -183,6 +198,7 @@ def _cmd_check_family(args: argparse.Namespace) -> int:
 
     from ..adapters.trees.nodegen import emit as nodegen_emit
     from ..adapters.trees.nodegen import plan_read as nodegen_plan_read
+    from ..adapters.trees.nodegen import quota as nodegen_quota
     from ..adapters.trees.nodegen import run as nodegen_run
     from ..adapters.trees.nodegen import verdict as tree_verdict
     from ..adapters.trees.plan import emit as plan_emit
@@ -190,7 +206,9 @@ def _cmd_check_family(args: argparse.Namespace) -> int:
     from ..adapters.trees.plan.archetypes import SHIPPED_ARCHETYPES, TIER_COUNT
     from ..adapters.trees.targets import PassiveTreeTargetsError
     from ..adapters.trees.targets import load as load_tree_targets
-    from ..metrics.passive_tree import HiddenFileCountMetric, PassiveTreePlanCtx
+    from ..metrics.passive_tree import (
+        HiddenFileCountMetric, PassiveTreePlanCtx, SpeciesUniquenessMetric,
+    )
 
     seed_root = (Path(args.plan_root) if getattr(args, "plan_root", None)
                 else plan_emit.REPO_ROOT / "data" / "seed")
@@ -230,6 +248,7 @@ def _cmd_check_family(args: argparse.Namespace) -> int:
     tree_plans: "list[object]" = []
     nodes_by_tree: "dict[str, list]" = {}
     outcomes_by_tree: "dict[str, list]" = {}
+    quota_cells_by_tree: "dict[str, dict]" = {}
     for plan_doc in plans:
         tree_id = plan_doc.get("treeId")
         if not tree_id:
@@ -241,9 +260,52 @@ def _cmd_check_family(args: argparse.Namespace) -> int:
         nodes_by_tree[tree_id] = list(seed_doc["nodes"]) if seed_doc else []
         outcomes = [{"nodeId": subject_id.split(":", 1)[1], "outcome": "accepted"}
                    for subject_id in run_plan.already_done]
-        outcomes.extend({"nodeId": subject.node_id, "outcome": "unresolved"}
-                        for subject in run_plan.subjects)
+        # A scheduled subject either has no ledger row (never attempted) or a prior FAILED attempt
+        # row (`record: null` from `record_attempt`, 2026-09-11). Prefer the recorded outcome so the
+        # metric reflects what actually happened (escalated/blocked/unresolved), falling back to
+        # `unresolved` for a never-attempted node — the same "not accepted" bucket the metric gates.
+        for subject in run_plan.subjects:
+            entry = ledger.get(subject.subject_id) or {}
+            outcomes.append({"nodeId": subject.node_id,
+                             "outcome": entry.get("outcome") or "unresolved"})
         outcomes_by_tree[tree_id] = outcomes
+        # Distribution-audit wiring (2026-09-10): re-derive each tree's six-axis cells from the
+        # committed plan via the SAME `quota_for_plan` the generation CLI calls — so
+        # `PassiveTree/QuotaDrift` and `PassiveTree/CellOccupancy` measure for real instead of
+        # reporting NOT_MEASURED forever (the cells were never persisted on pre-2026-09-10 seed
+        # records; re-derivation is the designed stand-in until a regeneration writes `quotaCell`).
+        # Prefer a node's own persisted `quotaCell` when present (post-persistence generation), so
+        # a future regenerated corpus is measured against what was actually assigned, not a fresh
+        # re-draw that could drift from the generation-time assignment if the quota walk ever
+        # changes. A tree with neither targets nor a resolvable category contributes nothing, never
+        # a crash — QuotaDrift already reports NOT_MEASURED per tree in that case.
+        if tree_targets is not None:
+            try:
+                cells = nodegen_quota.quota_for_plan(
+                    tree_plan, tree_targets, category=str(plan_doc.get("category")),
+                    forced_element=plan_doc.get("forcedElement"),
+                    forced_status=plan_doc.get("forcedStatus"))
+            except (ValueError, KeyError):
+                cells = {}
+            # Overlay any persisted cells from the seed document (additive; absent on old records).
+            for node in nodes_by_tree[tree_id]:
+                raw_cell = node.get("quotaCell")
+                if not raw_cell:
+                    continue
+                try:
+                    from ..adapters.trees.nodegen.emit import quota_cell_from_dict
+                    parsed = quota_cell_from_dict(raw_cell)
+                except (KeyError, TypeError):
+                    continue
+                if parsed is None:
+                    continue
+                cells[node["id"]] = nodegen_quota.QuotaCell(
+                    node_class=parsed["nodeClass"], trigger=parsed["trigger"],
+                    element=parsed["element"], status=parsed["status"],
+                    channel_family=parsed["channelFamily"],
+                    exclusion_form=parsed["exclusionForm"])
+            if cells:
+                quota_cells_by_tree[tree_id] = cells
 
     registry = build_registry()
     # H5's own reason `build_registry()` never carries `HiddenFileCountMetric`/`DeepMechanismValueMetric`
@@ -254,6 +316,12 @@ def _cmd_check_family(args: argparse.Namespace) -> int:
     # ("populated somewhere a real run reaches") without touching the shared registry's own documented
     # exclusion for every other caller.
     registry.register(HiddenFileCountMetric())
+    # SpeciesUniqueness (J6) is gates=False and deliberately NOT in ALL_PASSIVE_TREE_METRICS (that
+    # tuple is H4's own eight, frozen by a length assertion). Register it here the same way
+    # HiddenFileCount is — a check-family-only registration that never breaks generation's
+    # assert_exactly_one_hard_gate. ExclusionPresentation stays out (gates=True; would break that
+    # invariant), per metrics/passive_tree.py's own tracked note.
+    registry.register(SpeciesUniquenessMetric())
     passive_tree_ctx = PassiveTreePlanCtx(
         plans=plans, archetypes=SHIPPED_ARCHETYPES, tier_count=TIER_COUNT,
         unlock_first_points=tuning_doc["unlockCost"]["firstPoints"],
@@ -262,6 +330,7 @@ def _cmd_check_family(args: argparse.Namespace) -> int:
         min_terminal_width=tuning_doc["potency"]["minTerminalWidth"],
         targets=tree_targets, tree_plans=tuple(tree_plans),
         nodes_by_tree=nodes_by_tree, outcomes_by_tree=outcomes_by_tree,
+        quota_cells_by_tree=quota_cells_by_tree,
         # H5's own real acceptance gap (spec-tree-review.md §7): `HiddenFileCountMetric` was fully
         # built and tested but had ZERO real call site, `tree_seed_roots` always defaulting to `()`
         # everywhere outside its own test. A single root here already covers every category's own
@@ -303,7 +372,20 @@ def cmd_check(args: argparse.Namespace) -> int:
               f"(known: {', '.join(known_adapter_names())})", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
-    if args.adapter == "dungeon":
+    loader_findings = []
+    if args.adapter == "actions":
+        # Actions has a domain loader because `_rounds/` is scratch output and must not be
+        # loaded beside the committed root corpus. Raw `Corpus.load` would see both copies of
+        # the same action id and fail before any metric can run.
+        from ..adapters.actions import load_committed
+        try:
+            load_result = load_committed(Path(args.corpus_root))
+        except CorpusLoadError as e:
+            print(f"seedsmith: could not load corpus: {e}", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+        corpus = load_result.corpus
+        loader_findings = load_result.findings
+    elif args.adapter == "dungeon":
         # `Corpus.load()` requires a top-level `kind`/`entries` wrapper (`corpus/model.py:183-186`)
         # -- dungeon's own real content is one bare object per file (`emit.py`'s own docstring), so
         # the generic loader silently sees zero entries for this adapter. `load_dungeon_corpus`
@@ -341,6 +423,17 @@ def cmd_check(args: argparse.Namespace) -> int:
     ctx = Ctx(corpus=corpus, adapter=adapter, numerics=numerics_ctx, budget=budget_rows)
     registry = build_registry()
     findings = run_all(registry, ctx, metric_ids=args.metric or None)
+    if loader_findings and (not args.metric or "Actions/Loader" in args.metric):
+        from ..metrics import Finding
+        findings.extend(
+            Finding(
+                metric="Actions/Loader", severity=Severity.GAP,
+                subject=f.entry_id or f.path,
+                message=f.message,
+                evidence={"code": f.code, "path": f.path, "entryId": f.entry_id},
+            )
+            for f in loader_findings
+        )
 
     if args.json:
         Path(args.json).write_text(
@@ -493,34 +586,69 @@ def cmd_effects(args: argparse.Namespace) -> int:
     return EXIT_CANNOT_RUN
 
 
+def _apply_items_write_defaults(args: argparse.Namespace) -> None:
+    """Fill empty `--out-dir` / `--allow-production-tree` from `.env` before plan or write.
+
+    Mutates `args` in place so planning and writing share the same out-dir (ledger resume).
+    """
+    from ..adapters.items import defaults as items_defaults
+
+    allow = items_defaults.allow_production_tree(cli_allow=bool(args.allow_production_tree))
+    args.allow_production_tree = allow
+    args.out_dir = items_defaults.resolve_out_dir_arg(
+        args.kind, getattr(args, "out_dir", "") or "", allow_production=allow)
+
+
+def _retry_blocked_ledger(ledger: dict[str, dict]) -> tuple[dict[str, dict], set[str]]:
+    """Return a resume ledger with terminal subjects removed and duplicate-name feedback.
+
+    Authored rows stay in the ledger.  Only rows explicitly terminal (blocked/escalated) are
+    retried; duplicate-name defects are surfaced to the next model brief so repair is a new
+    answer rather than an accidental replay of the rejected name.
+    """
+    feedback = {
+        subject_id for subject_id, row in ledger.items()
+        if isinstance(row, dict) and any(
+            "duplicate name" in str(defect).casefold()
+            for defect in (row.get("defects") or ())
+        )
+    }
+    resumable = {
+        subject_id: row for subject_id, row in ledger.items()
+        if isinstance(row, dict) and row.get("outcome") not in {"blocked", "escalated"}
+    }
+    return resumable, feedback
+
+
 def cmd_items(args: argparse.Namespace) -> int:
-    """`seedsmith items generate --kind set|charm --population build|species` (item module 13).
+    """`seedsmith items generate|validate|combogen-migrate|fill` (item modules 13 + 21 + fill UX).
 
-    ⚠ **No `items` subcommand existed** — `build_parser` registered `check`, `report`, `metrics`,
-    `demons` and `effects` and nothing else, so every command the module-13 spec listed was a
-    documented interface that did not exist. The same defect class `cmd_demons`'s own docstring
-    records twice. Made true here rather than softened in the spec.
-
-    ⛔ **`--dry-run` is the default, and that is deliberate.** A real run is ~1,800 model calls; a
-    flag you must remember to pass to avoid spending them is a flag someone eventually forgets.
-    `--write` is the explicit opt-in.
-
-    ⭐ **`--write` now writes along either of two transports (module 13, `set-charm-live-endpoint`).**
-    The generation graph is `workflow/graphs/item_set.py`; its `call` is injected. `--answers <file>`
-    keeps the deterministic path from before — `setgen.answers.replay_caller` reads answers a model
-    has already authored against briefs this command emitted (`--briefs-out`); CI and dry runs stay
-    on this path. `--endpoint <url> [--model <name>]` is the new live path — `setgen.run.live_caller`
-    bound to `pipeline.llm_caller.call_model`, the same real HTTP transport `effects generate` and
-    `demons generate` already use. `--write` with neither flag still refuses with the reason, because
-    a command that silently writes nothing is worse than one that says so.
+    ⛔ **`--dry-run` is the default on `generate`.** A real run is ~1,800 model calls; `--write`
+    is the explicit opt-in. `items fill` is the intentional “just finish it” verb (write/resume
+    across kinds). Empty `--endpoint` / `--out-dir` fall through to `tools/seedsmith/.env`.
     """
     if args.items_command == "validate":
         return _cmd_items_validate(args)
     if args.items_command == "combogen-migrate":
         return _cmd_items_combogen_migrate(args)
+    if args.items_command == "fill":
+        return _cmd_items_fill(args)
+    if args.items_command == "repair-sets":
+        return _cmd_items_repair_sets(args)
+    if args.items_command == "repair-names":
+        return _cmd_items_repair_names(args)
     if args.items_command != "generate":
         print(f"unknown items command {args.items_command!r}", file=sys.stderr)
         return EXIT_CANNOT_RUN
+
+    if args.kind in ("set", "charm", "combination"):
+        if args.write or args.out_dir:
+            _apply_items_write_defaults(args)
+        elif args.dry_run:
+            # A read-only plan must inspect the same production ledger that a write would use.
+            # Do not turn on the production-write permission; only resolve its configured path.
+            from ..adapters.items import defaults as items_defaults
+            args.out_dir = items_defaults.default_out_dir(args.kind)
 
     if args.kind == "combination":
         return _cmd_items_combination(args)
@@ -557,6 +685,12 @@ def cmd_items(args: argparse.Namespace) -> int:
         ledger = run_mod.read_ledger(Path(args.out_dir) / "set-charm-gen.ledger.json")
     else:
         ledger = None
+    # Explicit recovery mode: retry only terminal blocked/escalated subjects while preserving
+    # authored rows and their sequence numbers. This is deliberately separate from
+    # --ignore-ledger, which would re-plan every subject and can mint duplicates.
+    retry_feedback: set[str] = set()
+    if getattr(args, "retry_blocked", False) and ledger:
+        ledger, retry_feedback = _retry_blocked_ledger(ledger)
     try:
         plan = run_mod.plan_run(kind=args.kind, population=args.population,
                                 tuning=tuning, vocabulary=vocabulary, ledger=ledger)
@@ -565,6 +699,14 @@ def cmd_items(args: argparse.Namespace) -> int:
         return EXIT_CANNOT_RUN
 
     planned_total = len(plan.subjects)
+    if retry_feedback:
+        plan.subjects = [
+            replace(subject, brief=(subject.brief + "\nPrevious attempt was rejected because its "
+                                    "name duplicated an existing item. Choose a completely new "
+                                    "surface name; do not reuse that name or a close variant."))
+            if subject.subject_id in retry_feedback else subject
+            for subject in plan.subjects
+        ]
     if args.limit and args.limit > 0:
         plan.subjects = plan.subjects[:args.limit]
 
@@ -583,6 +725,19 @@ def cmd_items(args: argparse.Namespace) -> int:
         "gatesMissingAThreshold": missing_thresholds(tuning),
     }
     print(json.dumps(summary, ensure_ascii=False, indent=2))
+
+    # A stale demon theme registry is an upstream registration defect, not a smaller valid item
+    # population. Without this guard, a newly shipped species absent from themes.v1.json simply
+    # disappeared from the set/charm plan while the command still returned success. Refresh the
+    # registry first (`seedsmith demons themes`); never spend model calls on a partial walk.
+    if args.population == "species" and (coverage.uncovered or coverage.orphaned):
+        print(
+            "seedsmith: species plan refused — demon theme registry is stale "
+            f"(uncovered={len(coverage.uncovered)}, orphaned={len(coverage.orphaned)}); "
+            "run `seedsmith demons themes` and retry",
+            file=sys.stderr,
+        )
+        return EXIT_CANNOT_RUN
 
     if args.sample_brief and plan.subjects:
         print("\n--- sample brief ---")
@@ -611,34 +766,29 @@ def _prompt_version() -> str:
 def _cmd_items_write(args: argparse.Namespace, *, plan, tuning, vocabulary) -> int:
     """The `--write` half. Refuses loudly and specifically rather than writing an empty run.
 
-    ⚠ **`--out-dir` has no default, and a path inside `data/seed/items/` is refused unless
-    `--allow-production-tree` is passed.** Every items metric globs that tree recursively, so a
-    sample written there moves finding counts other streams baseline against — the failure is
-    silent and shows up as someone else's regression.
-
-    ⭐ **Two transports, one refusal (module 13, `set-charm-live-endpoint`).** `--answers <file>` is
-    the deterministic replay path, unchanged. `--endpoint <url>` is the live path — a real call
-    through `pipeline.llm_caller.call_model`, the same transport `effects generate`/`demons generate`
-    already use — and it makes `--answers` optional, not `--out-dir`: a write still needs somewhere
-    to land. Only when NEITHER transport is named does this refuse, the same safety net as before.
+    Empty `--out-dir` / `--endpoint` fall through to `.env` defaults (`SEEDSMITH_ALLOW_PRODUCTION_TREE`,
+    production kind dirs, `SEEDSMITH_LLM_*`) via `_apply_items_write_defaults` /
+    `resolve_live_transport`. A path inside `data/seed/items/` still needs allow-production.
     """
-    import dataclasses
-
     from ..adapters.items.setgen import authored as authored_mod
     from ..adapters.items.setgen import answers as answers_mod
     from ..adapters.items.setgen import run as run_mod
     from ..adapters.items.setgen import seedfile as seedfile_mod
-    from ..pipeline.llm_caller import load_config
+    from ..pipeline.llm_caller import resolve_live_transport
+
+    _apply_items_write_defaults(args)
 
     if not args.out_dir:
-        print("seedsmith: --write is refused — no --out-dir given; a write needs somewhere to "
-              "land.", file=sys.stderr)
+        print("seedsmith: --write is refused — no --out-dir given and production defaults are "
+              "off. Pass --out-dir, or set SEEDSMITH_ALLOW_PRODUCTION_TREE=1 in "
+              "tools/seedsmith/.env (with optional SEEDSMITH_ITEMS_OUT_DIR).",
+              file=sys.stderr)
         return EXIT_REFUSED
-    if not args.answers and not args.endpoint:
-        print("seedsmith: --write is refused — no transport. The generation graph "
-              "(workflow/graphs/item_set.py) is wired to two: an authored-answer file (emit briefs "
-              "with --briefs-out, have a model answer them, then pass --answers <file>), or a live "
-              "model endpoint (--endpoint <url> [--model <name>]).",
+
+    transport = resolve_live_transport(args.endpoint, args.model)
+    if not args.answers and not transport.endpoint:
+        print("seedsmith: --write is refused — no transport. Pass --answers <file>, "
+              "--endpoint <url>, or set SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env.",
               file=sys.stderr)
         return EXIT_REFUSED
 
@@ -663,24 +813,10 @@ def _cmd_items_write(args: argparse.Namespace, *, plan, tuning, vocabulary) -> i
             return EXIT_REFUSED
         effective_model = args.model
     else:
-        # No answer file at all this time — `run_batch`'s own `answers` parameter is consulted
-        # only to build the DEFAULT (replay) caller, which never happens here because `call` is
-        # given explicitly. This empty stand-in satisfies the parameter's type without pretending
-        # an answer file exists.
         answers = answers_mod.AnswerFile(kind=args.kind, population=args.population,
                                          prompt_version=_prompt_version(), by_subject={})
-        # ⛔ Real bug, found 2026-09-08: this used to build `LlmCallerConfig(endpoint=..., model=...)`
-        # directly, which NEVER called `load_config()` — every `.env`/`seedsmith.toml` override
-        # (model, timeout, attempts, retry_delay, max_heal, max_tokens) was silently ignored on this,
-        # the actual live-generation path, no matter what was set. `--model unrecorded` (the CLI's own
-        # not-passed sentinel) fell back to `LlmCallerConfig`'s hardcoded dataclass default, not to
-        # `.env`. Fixed: `load_config()` is now the base, and only `--endpoint`/`--model` (when the
-        # operator actually passed them) override it — every other `.env`/toml-set field survives.
-        base_config = load_config()
-        effective_model = (args.model if args.model and args.model != "unrecorded"
-                           else base_config.model)
-        config = dataclasses.replace(base_config, endpoint=args.endpoint, model=effective_model)
-        call = run_mod.live_caller(config)
+        effective_model = transport.model
+        call = run_mod.live_caller(transport)
 
     ledger_path = Path(args.ledger) if args.ledger else out_dir / "set-charm-gen.ledger.json"
     result = authored_mod.run_batch(
@@ -689,8 +825,92 @@ def _cmd_items_write(args: argparse.Namespace, *, plan, tuning, vocabulary) -> i
         model=effective_model, ledger_path=ledger_path, call=call)
     print("\n--- write report ---")
     print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
-    return EXIT_CLEAN if result.persisted and not any(
-        o.outcome == "escalated" for o in result.outcomes) else EXIT_GAP
+    return _exit_for_graph_batch(result)
+
+
+def _cmd_items_repair_sets(args: argparse.Namespace) -> int:
+    """Bind legacy role/frame-only set members to real base types.
+
+    This is deliberately separate from ``items fill``: it changes existing authored rows, while
+    fill only appends new subjects. The default is a read-only plan; ``--write`` is an explicit
+    production-tree migration.
+    """
+    from ..adapters.items.setgen import repair as repair_mod
+    from ..adapters.items.setgen import seedfile as seedfile_mod
+
+    sets_dir = Path(args.sets_dir) if args.sets_dir else seedfile_mod.ITEM_SEED_ROOT / "sets"
+    base_types_dir = Path(args.base_types_dir) if args.base_types_dir else None
+    if args.write:
+        try:
+            sets_dir.resolve().relative_to(seedfile_mod.ITEM_SEED_ROOT.resolve())
+        except ValueError:
+            pass
+        else:
+            if not args.allow_production_tree:
+                print("seedsmith: repair-sets refused — production data/seed/items is read-only "
+                      "unless --allow-production-tree is passed", file=sys.stderr)
+                return EXIT_REFUSED
+    try:
+        files = repair_mod.repair_set_corpus(sets_dir=sets_dir, base_types_dir=base_types_dir,
+                                             write=bool(args.write))
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"seedsmith: repair-sets failed — {exc}", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+    print(json.dumps(repair_mod.repair_report(files, write=bool(args.write)),
+                     ensure_ascii=False, indent=2))
+    return EXIT_CLEAN
+
+
+def _cmd_items_repair_names(args: argparse.Namespace) -> int:
+    """Plan or apply model-authored surface-name repairs for persisted set/charm collisions."""
+    from ..adapters.items.setgen import name_repair
+    from ..pipeline.llm_caller import live_answer_caller, resolve_live_transport
+
+    root = Path(args.items_dir) if args.items_dir else name_repair.ITEM_SEED_ROOT
+    repairs = name_repair.plan(root)
+    if args.limit > 0:
+        repairs = repairs[:args.limit]
+    payload = {"write": bool(args.write), "repairs": [
+        {"entryId": repair.entry_id, "kind": repair.kind, "oldName": repair.old_name,
+         "keeperId": repair.keeper_id, "brief": name_repair.brief(repair)}
+        for repair in repairs]}
+    if not args.write:
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return EXIT_CLEAN
+    try:
+        root.resolve().relative_to(name_repair.ITEM_SEED_ROOT.resolve())
+    except ValueError:
+        pass
+    else:
+        if not args.allow_production_tree:
+            print("seedsmith: repair-names refused — production data/seed/items is read-only "
+                  "unless --allow-production-tree is passed", file=sys.stderr)
+            return EXIT_REFUSED
+    if args.answers:
+        document = json.loads(Path(args.answers).read_text(encoding="utf-8"))
+        answers = document.get("answers", document) if isinstance(document, dict) else None
+        if not isinstance(answers, dict):
+            print("seedsmith: repair-names answers must be a JSON object keyed by entry id", file=sys.stderr)
+            return EXIT_REFUSED
+    else:
+        transport = resolve_live_transport(args.endpoint, args.model)
+        if not transport.endpoint:
+            print("seedsmith: repair-names --write needs --answers or a live endpoint", file=sys.stderr)
+            return EXIT_REFUSED
+        caller = live_answer_caller(transport)
+        try:
+            answers = {repair.entry_id: caller(name_repair.brief(repair), name_repair.schema())
+                       for repair in repairs}
+        except (RuntimeError, ValueError, json.JSONDecodeError) as exc:
+            print(f"seedsmith: repair-names model call failed — {exc}", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+    try:
+        changed = name_repair.apply(repairs, answers, write=True, items_root=root)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"seedsmith: repair-names failed — {exc}", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+    print(json.dumps({**payload, "changed": [str(path) for path in changed]}, ensure_ascii=False, indent=2))
+    return EXIT_CLEAN
 
 
 _PASSTHROUGH_MODULE_BY_KIND = {
@@ -822,9 +1042,18 @@ def _cmd_items_combination(args: argparse.Namespace) -> int:
         return EXIT_CANNOT_RUN
 
     planned_total = len(plan.subjects)
+    # Resume before limit: slicing the full grid first made --limit 1 hit an already-ledgered
+    # sample cell and report planned=0 while dozens of subjects still needed work.
+    from ..adapters.items.combogen import authored as authored_mod
+    from ..pipeline.run_ledger import RunLedger
+    import dataclasses
+
+    ledger_root = Path(args.out_dir) if args.out_dir else authored_mod.COMBINATIONS_DIR
+    ledger = RunLedger(ledger_root / authored_mod.DEFAULT_LEDGER_NAME)
+    needing = authored_mod.plan_needing_work(plan, ledger)
     if args.limit and args.limit > 0:
-        import dataclasses
-        plan = dataclasses.replace(plan, subjects=plan.subjects[:args.limit])
+        needing = needing[: args.limit]
+    plan = dataclasses.replace(plan, subjects=needing)
 
     legality = migrate_mod.legality_report(tuning, host_roles=plan.host_roles)
     summary = {
@@ -898,23 +1127,24 @@ def _cmd_items_combination_write(args: argparse.Namespace, *, plan, tuning) -> i
     owns (`items validate --deps`, schema/`audit_schema` conformance, `dependency_validator`), not
     against `tools/ItemSeedValidator`.
     """
-    import dataclasses
-
     from ..adapters.items.combogen import authored as authored_mod
     from ..adapters.items.setgen import answers as answers_mod
     from ..adapters.items.setgen import run as set_run_mod
     from ..adapters.items.setgen import seedfile as seedfile_mod
-    from ..pipeline.llm_caller import load_config
+    from ..pipeline.llm_caller import resolve_live_transport
+
+    _apply_items_write_defaults(args)
 
     if not args.out_dir:
-        print("seedsmith: --write is refused — no --out-dir given; a write needs somewhere to "
-              "land.", file=sys.stderr)
+        print("seedsmith: --write is refused — no --out-dir given and production defaults are "
+              "off. Pass --out-dir, or set SEEDSMITH_ALLOW_PRODUCTION_TREE=1 in "
+              "tools/seedsmith/.env.", file=sys.stderr)
         return EXIT_REFUSED
-    if not args.answers and not args.endpoint:
-        print("seedsmith: --write is refused — no transport. The generation graph "
-              "(workflow/graphs/item_combination.py) accepts an authored-answer file (emit briefs "
-              "with --briefs-out, then pass --answers <file>) or a live model endpoint "
-              "(--endpoint <url> [--model <name>]).", file=sys.stderr)
+    transport = resolve_live_transport(args.endpoint, args.model)
+    if not args.answers and not transport.endpoint:
+        print("seedsmith: --write is refused — no transport. Pass --answers <file>, "
+              "--endpoint <url>, or set SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env.",
+              file=sys.stderr)
         return EXIT_REFUSED
     try:
         out_dir = seedfile_mod.resolve_out_dir(
@@ -938,11 +1168,8 @@ def _cmd_items_combination_write(args: argparse.Namespace, *, plan, tuning) -> i
     else:
         answers = answers_mod.AnswerFile(
             kind="combination", population="n/a", prompt_version="live", by_subject={})
-        base_config = load_config()
-        effective_model = (args.model if args.model and args.model != "unrecorded"
-                           else base_config.model)
-        config = dataclasses.replace(base_config, endpoint=args.endpoint, model=effective_model)
-        call = set_run_mod.live_caller(config)
+        effective_model = transport.model
+        call = set_run_mod.live_caller(transport)
 
     ledger_path = Path(args.ledger) if args.ledger else None
     result = authored_mod.run_batch(
@@ -950,8 +1177,7 @@ def _cmd_items_combination_write(args: argparse.Namespace, *, plan, tuning) -> i
         authored_utc=args.authored_utc, model=effective_model, ledger_path=ledger_path, call=call)
     print("\n--- write report ---")
     print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
-    return EXIT_CLEAN if result.persisted and not any(
-        o.outcome == "escalated" for o in result.outcomes) else EXIT_GAP
+    return _exit_for_graph_batch(result)
 
 
 def _cmd_items_validate(args: argparse.Namespace) -> int:
@@ -977,6 +1203,100 @@ def _cmd_items_validate(args: argparse.Namespace) -> int:
     report = deps_mod.preflight(tuning)
     print(json.dumps({"kind": "combination", **report.to_dict()}, ensure_ascii=False, indent=2))
     return EXIT_REFUSED if report.refused else EXIT_CLEAN
+
+
+def _cmd_items_fill(args: argparse.Namespace) -> int:
+    """`seedsmith items fill` — resume/fill missing subjects across item kinds.
+
+    Implies write (unless `--dry-run`). Uses `.env` for endpoint / production out-dirs. Walks
+    kinds in item-seedgen-map dependency order; partition kinds use discovered corpus files only.
+
+    Unbounded set/charm/combination require `--limit N` or `--full`. Allow-production is required
+    only when the plan includes those kinds.
+    """
+    from ..adapters.items import defaults as items_defaults
+    from ..adapters.items import fill as fill_mod
+
+    kinds = None
+    if getattr(args, "kinds", ""):
+        kinds = tuple(k.strip() for k in args.kinds.split(",") if k.strip())
+        unknown = [k for k in kinds if k not in items_defaults.FILL_KIND_ORDER]
+        if unknown:
+            print(f"seedsmith: unknown --kinds {unknown!r}; legal: "
+                  f"{', '.join(items_defaults.FILL_KIND_ORDER)}", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+
+    selected = set(kinds) if kinds is not None else set(items_defaults.FILL_KIND_ORDER)
+    needs_production = bool(selected & fill_mod.PRODUCTION_KINDS)
+    allow = items_defaults.allow_production_tree(
+        cli_allow=bool(getattr(args, "allow_production_tree", False)))
+    if not args.dry_run and needs_production and not allow:
+        print("seedsmith: items fill refused — set/charm/combination need "
+              "SEEDSMITH_ALLOW_PRODUCTION_TREE=1 in tools/seedsmith/.env or "
+              "--allow-production-tree.",
+              file=sys.stderr)
+        return EXIT_REFUSED
+
+    count_raw = getattr(args, "count", None)
+    batch_raw = getattr(args, "batch_size", None)
+    # argparse defaults are None so --full can drain; smoke still gets 1 when omitted.
+    count_explicit = count_raw is not None
+    batch_explicit = batch_raw is not None
+    limits = fill_mod.FillLimits(
+        limit=int(getattr(args, "limit", 0) or 0),
+        count=int(count_raw) if count_explicit else 1,
+        batch_size=int(batch_raw) if batch_explicit else 1,
+        max_partitions=int(getattr(args, "max_partitions", 1) or 0),
+        full=bool(getattr(args, "full", False)),
+        count_explicit=count_explicit,
+        batch_size_explicit=batch_explicit,
+    )
+    # When not --full, default max_partitions stays 1 (smoke). --full means all partitions
+    # (max_partitions 0 = uncapped in plan_fill_steps).
+    if limits.full:
+        limits.max_partitions = 0
+
+    if not args.dry_run and getattr(args, "validate_deps", True) and "combination" in selected:
+        vargs = argparse.Namespace(deps=True)
+        deps_code = _cmd_items_validate(vargs)
+        if deps_code == EXIT_REFUSED:
+            print("seedsmith: items fill refused — combination deps preflight failed "
+                  "(fix with items validate --deps, or pass --no-validate-deps).",
+                  file=sys.stderr)
+            return EXIT_REFUSED
+
+    report = fill_mod.run_fill(
+        kinds=kinds, dry_run=bool(args.dry_run), allow_production=allow or not needs_production,
+        limits=limits,
+        stop_on_error=not bool(getattr(args, "continue_on_error", False)))
+    print(json.dumps(report.to_dict(), ensure_ascii=False, indent=2))
+    if report.refused_reason:
+        print(f"seedsmith: {report.refused_reason}", file=sys.stderr)
+        return EXIT_REFUSED
+    code = report.worst_exit_code
+    # A clean dispatch only means every scheduled batch returned clean.  Reconcile the finite
+    # populations separately so held set/charm subjects (or an unconsumed gem pool) cannot be
+    # mistaken for a complete fill.  This is model-free and reads the same ledgers as generation.
+    completion = fill_mod.generation_completion(kinds=kinds)
+    print("\n--- generation completion ---")
+    print(json.dumps(completion, ensure_ascii=False, indent=2))
+    if code == EXIT_CLEAN and getattr(args, "verify", False):
+        completion_gap = not completion["complete"]
+        if completion_gap:
+            print("seedsmith: items fill left finite populations pending or held; the run is not "
+                  "complete", file=sys.stderr)
+        print("\n--- post-fill corpus gate ---")
+        verify_args = argparse.Namespace(
+            family="", corpus_root=str(fill_mod.ITEM_SEED_ROOT), adapter="items",
+            gate=True, json=None, metric=None, plan_root="")
+        verify_code = cmd_check(verify_args)
+        if verify_code != EXIT_CLEAN:
+            print("seedsmith: items fill completed its generation steps, but the corpus gate "
+                  "still reports unresolved gaps; the run is not complete", file=sys.stderr)
+            return verify_code
+        if completion_gap:
+            return EXIT_GAP
+    return code
 
 
 def _cmd_items_combogen_migrate(args: argparse.Namespace) -> int:
@@ -1019,7 +1339,7 @@ def _cmd_items_combogen_migrate(args: argparse.Namespace) -> int:
 
 
 def cmd_demons(args: argparse.Namespace) -> int:
-    """`seedsmith demons <motifs|generate>` — the demon generation entrypoints.
+    """`seedsmith demons <motifs|themes|theme-enrich|generate>` — the demon generation entrypoints.
 
     ⛔ Why this exists. Two of the audit's own `Verify` lines named commands that did not exist:
     `python -m seedsmith demons motifs` (G1.3) and
@@ -1051,6 +1371,32 @@ def cmd_demons(args: argparse.Namespace) -> int:
         from ..adapters.demons.generate_motifs import regenerate
         print(_json.dumps(regenerate(), ensure_ascii=False, indent=2))
         return EXIT_CLEAN
+
+    if args.demon_command in ("themes", "theme-refresh"):
+        # Keep the documented theme-refresh stage on the public CLI. Calling the private module
+        # path was the only way to register a newly observed species, so an item fill could read a
+        # stale theme snapshot and quietly plan a partial population. This is deterministic and
+        # model-free; --dry-run exercises the complete-roster read without replacing the registry.
+        import json as _json
+
+        from ..adapters.demons.generate_themes import regenerate
+        summary = regenerate(rebuild=bool(args.rebuild), write=not bool(args.dry_run))
+        print(_json.dumps({**summary, "dryRun": bool(args.dry_run)},
+                          ensure_ascii=False, indent=2))
+        return EXIT_CLEAN
+
+    if args.demon_command == "theme-enrich":
+        from ..adapters.demons import theme_enrich
+        passthrough: list[str] = []
+        if args.dry_run:
+            passthrough.append("--dry-run")
+        if args.write:
+            passthrough.append("--write")
+        for flag in ("endpoint", "model"):
+            value = getattr(args, flag, "")
+            if value:
+                passthrough.extend([f"--{flag}", value])
+        return theme_enrich.main(passthrough)
 
     if args.demon_command == "power-parse":
         return _cmd_demons_power_parse(args)
@@ -1239,6 +1585,27 @@ def _every_planned_tree_id(seed_root: "Path | None" = None) -> "list[str]":
     return sorted(p.name[: -len(".v1.json")] for p in plan_dir.glob("*.v1.json"))
 
 
+def _all_roster_specs() -> "list":
+    """Every tree spec the roster names — 12 aptitudes, 6 elements, 24 statuses — built through the
+    SAME named spec functions `--tree <id>` already uses (`primary_tree_spec`/`elemental_tree_spec`/
+    `status_tree_spec`), so the manifest and a single-tree emit can never disagree about one tree's
+    plan. Demon families are deliberately absent: they have no committed plan under
+    `plan/*.v1.json` and ride the manifest's `_pending` list (spec-tree-plan.md's own `roster`
+    block), never `trees[]`."""
+    from ..adapters.trees.plan import emit as plan_emit
+    from ..adapters.trees.plan.vocabulary import load_roster
+
+    roster = load_roster()
+    specs: "list" = []
+    for aptitude in roster.aptitudes:
+        specs.append(plan_emit.primary_tree_spec(aptitude))
+    for element in roster.elements:
+        specs.append(plan_emit.elemental_tree_spec(element))
+    for status in roster.statuses:
+        specs.append(plan_emit.status_tree_spec(status))
+    return specs
+
+
 def _cmd_trees_generate(args: argparse.Namespace) -> int:
     """`seedsmith trees generate --tree <id>|--all [--dry-run|--write] [--sample-brief]`
     (task H2/H3, spec-tree-language.md §Commands).
@@ -1332,7 +1699,8 @@ def _cmd_trees_generate(args: argparse.Namespace) -> int:
                     tree_reading=tree_id, branch=node.branch, tier=node.tier,
                     node_class=node.node_class, motifs=(), anti_motifs=(),
                     permitted_affixes=permitted_affixes,
-                    permitted_properties=sorted(plan.property_vocabulary))
+                    permitted_properties=sorted(plan.property_vocabulary),
+                    exclusion_form=cell.exclusion_form)
 
     # §6.1's own cost arithmetic (D29's corpus table), COMPUTED from `total_subjects` — never a
     # hardcoded literal. At the generic corpus's real size (1,560 subjects: 39 trees x 40 nodes)
@@ -1380,12 +1748,14 @@ def _cmd_trees_generate(args: argparse.Namespace) -> int:
         for tree_id in tree_ids:
             plan, cells = plans_and_cells[tree_id]
 
-            def inputs_for(subject, _plan=plan):
+            def inputs_for(subject, _plan=plan, _cells=cells):
                 # Matches the dry-run's own --sample-brief call above exactly: permitted_properties
                 # is the sorted set of property AXIS NAMES (e.g. "aptitude", "element") a node's
                 # exclusion may reference, never a per-cell-narrowed id list — `permitted_ids_for_cell`
                 # (used above only for the dry run's own resolved_subjects boolean check) is not an
-                # input `NodeGenerationInputs`/`render_brief` takes.
+                # input `NodeGenerationInputs`/`render_brief` takes. `quota_cell` is the SAME cell
+                # this dry-run already resolved into `_cells` — persisted onto the accepted record
+                # so `PassiveTree/QuotaDrift` can measure without a generation-time snapshot.
                 permitted_affixes = affix_vocab.permitted_for_branch(subject.branch)
                 return run_mod.NodeGenerationInputs(
                     tree_display_name=tree_id, tree_reading=tree_id,
@@ -1394,6 +1764,7 @@ def _cmd_trees_generate(args: argparse.Namespace) -> int:
                     permitted_properties=sorted(_plan.property_vocabulary),
                     property_vocabulary=_plan.property_vocabulary,
                     affix_vocab=affix_vocab,
+                    quota_cell=_cells.get(subject.node_id),
                 )
 
             # 2026-09-06 real-call finding (`might`, a real generation run): two DIFFERENT accepted
@@ -1413,7 +1784,8 @@ def _cmd_trees_generate(args: argparse.Namespace) -> int:
                     ledger_path=Path(args.ledger_path) if getattr(args, "ledger_path", "") else None,
                     seed_root=seed_root,
                     unresolved_max_share_permille=targets.unresolved_count_max_share_permille,
-                    max_workers=max(1, getattr(args, "workers", 1)))
+                    max_workers=max(1, getattr(args, "workers", 1)),
+                    supersede_stale=bool(getattr(args, "supersede", False)))
             except emit_mod.NodeKeyRefused as ex:
                 per_tree_reports.append({
                     "tree": tree_id, "seedPath": None,
@@ -1549,7 +1921,11 @@ def _cmd_trees_plan(args: argparse.Namespace) -> int:
     # roster/gate-evidence files `might_tree_spec` always read, never a new content decision. "might"
     # keeps calling the original named function verbatim — zero behavior change for the one tree
     # every existing test already exercises.
-    if args.tree == "might":
+    #
+    # `--tree` omitted (`None`): a single-tree emit still needs a spec, and "might" is B1's own named
+    # default. `--manifest` without `--tree` ignores `spec` entirely and builds the full roster.
+    tree_id = args.tree if args.tree is not None else "might"
+    if tree_id == "might":
         try:
             spec = plan_emit.might_tree_spec()
         except Exception as ex:  # gates.GateEvidenceError, etc. — never resolved silently
@@ -1559,7 +1935,7 @@ def _cmd_trees_plan(args: argparse.Namespace) -> int:
         from ..adapters.trees.plan.vocabulary import load_roster
         roster = load_roster()
         aptitude_by_lower = {a.lower(): a for a in roster.aptitudes}
-        aptitude_id = aptitude_by_lower.get(args.tree)
+        aptitude_id = aptitude_by_lower.get(tree_id)
         # J1 (spec-tree-plan.md §7 table): elemental_tree_spec/status_tree_spec, the two remaining
         # mechanical extensions of primary_tree_spec's own generalization pattern. Checked after
         # aptitudes (the pre-existing, most-exercised path stays first and unchanged) — roster.elements
@@ -1572,20 +1948,20 @@ def _cmd_trees_plan(args: argparse.Namespace) -> int:
             except Exception as ex:  # ValueError, gates.GateEvidenceError, etc. — never resolved silently
                 print(f"EXIT_CANNOT_RUN: {ex}")
                 return EXIT_CANNOT_RUN
-        elif args.tree in roster.elements:
+        elif tree_id in roster.elements:
             try:
-                spec = plan_emit.elemental_tree_spec(args.tree)
+                spec = plan_emit.elemental_tree_spec(tree_id)
             except Exception as ex:
                 print(f"EXIT_CANNOT_RUN: {ex}")
                 return EXIT_CANNOT_RUN
-        elif args.tree in roster.statuses:
+        elif tree_id in roster.statuses:
             try:
-                spec = plan_emit.status_tree_spec(args.tree)
+                spec = plan_emit.status_tree_spec(tree_id)
             except Exception as ex:
                 print(f"EXIT_CANNOT_RUN: {ex}")
                 return EXIT_CANNOT_RUN
         else:
-            print(f"seedsmith: {args.tree!r} is not one of the {len(roster.aptitudes)} primary trees "
+            print(f"seedsmith: {tree_id!r} is not one of the {len(roster.aptitudes)} primary trees "
                  f"{sorted(aptitude_by_lower)!r}, the {len(roster.elements)} elemental trees "
                  f"{sorted(roster.elements)!r}, or the {len(roster.statuses)} status trees "
                  f"{sorted(roster.statuses)!r}", file=sys.stderr)
@@ -1602,7 +1978,21 @@ def _cmd_trees_plan(args: argparse.Namespace) -> int:
         return EXIT_CLEAN
 
     if args.manifest:
-        specs = [spec]
+        # `--manifest` operates on the TOP-LEVEL manifest and the full `trees[]` index it carries
+        # (spec-tree-plan.md Commands: `trees plan --emit` writes the whole manifest). Before this
+        # fix the branch built a one-element `[spec]` list from `--tree`'s default ("might"), so a
+        # bare `--emit` rewrote `plan.v1.json` indexing ONE tree while 41 committed per-tree plans
+        # sat unindexed — the roster block claimed 21 statuses against the roster's real 24, and the
+        # manifest's own `planHash` described a 1-tree corpus. A manifest is a corpus-level object;
+        # only an explicit `--tree` narrows it (the single-tree case the old tests exercised).
+        if args.tree is not None:
+            specs = [spec]
+        else:
+            try:
+                specs = _all_roster_specs()
+            except Exception as ex:  # GateEvidenceError, EmitError, a missing roster mirror, ...
+                print(f"EXIT_CANNOT_RUN: {ex}")
+                return EXIT_CANNOT_RUN
         if args.check:
             try:
                 diffs = plan_emit.check_manifest(specs, tuning_doc)
@@ -1622,7 +2012,7 @@ def _cmd_trees_plan(args: argparse.Namespace) -> int:
         except (plan_emit.EmitError, plan_invariants.PlanInvariantError) as ex:
             print(f"EXIT_REFUSED: {ex}")
             return EXIT_REFUSED
-        print(f"wrote {path}")
+        print(f"wrote {path} ({len(specs)} tree(s) indexed)")
         return EXIT_CLEAN
 
     if args.check:
@@ -2177,6 +2567,19 @@ def build_parser() -> argparse.ArgumentParser:
     demons = sub.add_parser("demons", help="demon corpus generation entrypoints")
     demon_sub = demons.add_subparsers(dest="demon_command", required=True)
     demon_sub.add_parser("motifs", help="re-derive motifs + the motif registry (no model calls)")
+    themes = demon_sub.add_parser(
+        "themes", aliases=("theme-refresh",),
+        help="refresh the published theme registry over the complete species roster")
+    themes.add_argument("--dry-run", action="store_true",
+                        help="read and count the complete roster without writing")
+    themes.add_argument("--rebuild", action="store_true",
+                        help="discard published snapshots and re-derive (reviewed correction only)")
+    enrich = demon_sub.add_parser(
+        "theme-enrich", help="generate lore for name-basis themes (model calls; dry-run by default)")
+    enrich.add_argument("--dry-run", action="store_true")
+    enrich.add_argument("--write", action="store_true")
+    enrich.add_argument("--endpoint", default="")
+    enrich.add_argument("--model", default="")
     power_parse = demon_sub.add_parser(
         "power-parse", help="numeric power seed + basis per species (no model calls)")
     power_parse.add_argument("--dump", required=True, help="corpus-dump tree root")
@@ -2290,23 +2693,25 @@ def build_parser() -> argparse.ArgumentParser:
                            "of attempts per subject is legal — the graph's repair edge consumes "
                            "them in order). The deterministic path; mutually exclusive with "
                            "--endpoint in practice (--answers wins if both are given)")
-    igen.add_argument("--endpoint", default="",
-                      help="set/charm/combination --write: call a real model endpoint via "
-                           "pipeline.llm_caller.call_model instead of replaying an answer file — "
-                           "the same live transport --endpoint already selects for effects/demons "
-                           "generate. Ignored when --answers is also given")
     igen.add_argument("--out-dir", dest="out_dir", default="",
-                      help="set/charm/combination --write: where the seed files land. No default, and a path "
-                           "inside data/seed/items/ is refused unless --allow-production-tree")
+                      help="set/charm/combination --write: where the seed files land. Defaults to "
+                           "the kind's production folder when SEEDSMITH_ALLOW_PRODUCTION_TREE=1 "
+                           "(or --allow-production-tree). A path inside data/seed/items/ is refused "
+                           "unless allow-production is on")
     igen.add_argument("--allow-production-tree", dest="allow_production_tree",
                       action="store_true",
-                      help="set/charm/combination --write: permit an --out-dir inside data/seed/items/. This "
-                           "is the production run; every items metric globs that tree")
+                      help="set/charm/combination --write: permit an --out-dir inside "
+                           "data/seed/items/. Also settable via SEEDSMITH_ALLOW_PRODUCTION_TREE=1")
+    igen.add_argument("--endpoint", default="",
+                      help="set/charm/combination --write: live model endpoint. Empty falls "
+                           "through to SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env")
     igen.add_argument("--ledger", default="",
                       help="set/charm/combination --write: resume-ledger path (default: generator-specific "
                            "ledger inside --out-dir, so a sample never touches the real one)")
     igen.add_argument("--ignore-ledger", dest="ignore_ledger", action="store_true",
                       help="plan every generatable subject, even ones a previous run recorded")
+    igen.add_argument("--retry-blocked", dest="retry_blocked", action="store_true",
+                      help="re-plan only subjects ledgered as blocked/escalated; never re-run authored rows")
     igen.add_argument("--model", default="unrecorded",
                       help="set/charm/combination --write: with --answers, metadata only — the model id "
                            "stamped into each seed file's _meta. With --endpoint, also the model "
@@ -2356,6 +2761,69 @@ def build_parser() -> argparse.ArgumentParser:
                            help="combination: confirm every hostRole/ingredients family a run "
                                 "could request resolves against real content, before any subject "
                                 "is planned (acceptance 3a, spec-combination-write-unblock.md)")
+    ifill = items_sub.add_parser(
+        "fill",
+        help="resume/fill missing item corpus subjects across kinds (uses .env for endpoint/"
+             "production out-dirs; --dry-run plans only; requires --limit or --full for "
+             "set/charm/combination)")
+    ifill.add_argument("--dry-run", dest="dry_run", action="store_true",
+                       help="print the dependency-ordered work plan; make no model calls")
+    ifill.add_argument("--kinds", default="",
+                       help="comma-separated kind filter (default: all fill kinds in map order)")
+    ifill.add_argument("--limit", type=int, default=0,
+                       help="set/charm/combination: plan only the first N subjects (required "
+                            "unless --full; also bounds each --full checkpoint when supplied")
+    ifill.add_argument("--count", type=int, default=None,
+                       help="base-type/enhancement-milestone/recipe/drop-table draws per step "
+                            "(default 1; under --full without this flag, uses an elevated pass)")
+    ifill.add_argument("--batch-size", dest="batch_size", type=int, default=None,
+                       help="gem: subjects per partition step (default 1; under --full without "
+                            "this flag, drains remaining unauthored families in the slot)")
+    ifill.add_argument("--max-partitions", dest="max_partitions", type=int, default=1,
+                       help="cap discovered affix/base-type/gem/drop-table jobs (default 1; "
+                            "ignored under --full)")
+    ifill.add_argument("--full", action="store_true",
+                       help="unbounded closed grids + all discovered partitions; open kinds "
+                            "drain/elevated pass unless --count/--batch-size set (explicit opt-in)")
+    ifill.add_argument("--allow-production-tree", dest="allow_production_tree",
+                       action="store_true",
+                       help="permit data/seed/items/ writes for set/charm/combination (also "
+                            "SEEDSMITH_ALLOW_PRODUCTION_TREE=1)")
+    ifill.add_argument("--continue-on-error", dest="continue_on_error", action="store_true",
+                       help="keep walking after a refused/gap/error step (default: stop)")
+    ifill.add_argument("--no-validate-deps", dest="validate_deps", action="store_false",
+                       help="skip the combination deps preflight before fill")
+    ifill.add_argument("--verify", action="store_true",
+                       help="after generation, run the full items health gate; non-zero means "
+                            "the corpus still has unresolved gaps")
+    ifill.set_defaults(validate_deps=True)
+    irepair = items_sub.add_parser(
+        "repair-sets", help="bind legacy set members to existing base types (dry-run by default)")
+    irepair.add_argument("--write", action="store_true",
+                         help="apply the idempotent member-binding migration")
+    irepair.add_argument("--allow-production-tree", dest="allow_production_tree",
+                         action="store_true",
+                         help="permit writes under data/seed/items/")
+    irepair.add_argument("--sets-dir", default="",
+                         help="set partition directory (default data/seed/items/sets)")
+    irepair.add_argument("--base-types-dir", default="",
+                         help="base-type directory (default data/seed/items/base-types)")
+    inames = items_sub.add_parser(
+        "repair-names", help="rename persisted duplicate set/charm names (dry-run by default)")
+    inames.add_argument("--write", action="store_true",
+                        help="apply validated replacement names")
+    inames.add_argument("--allow-production-tree", dest="allow_production_tree", action="store_true",
+                        help="permit writes under data/seed/items/")
+    inames.add_argument("--items-dir", default="",
+                        help="items root containing sets/ and charms/ (default data/seed/items)")
+    inames.add_argument("--answers", default="",
+                        help="JSON object keyed by losing entry id, each with name and optional flavor")
+    inames.add_argument("--endpoint", default="",
+                        help="live model endpoint; omitted when --answers supplies replacements")
+    inames.add_argument("--model", default="unrecorded",
+                        help="live model id; falls through to configured default")
+    inames.add_argument("--limit", type=int, default=0,
+                        help="repair at most N losing rows (0 = every duplicate)")
     imigrate = items_sub.add_parser(
         "combogen-migrate",
         help="report combogen.migrate's own socket-word retirement plan (module 21)")
@@ -2398,10 +2866,11 @@ def build_parser() -> argparse.ArgumentParser:
     trees_plan.add_argument("--emit", action="store_true", help="write the plan (default if no flag given)")
     trees_plan.add_argument("--check", action="store_true",
                             help="regenerate in memory and diff against the committed plan")
-    trees_plan.add_argument("--tree", default="might",
+    trees_plan.add_argument("--tree", default=None,
                             help="tree id to plan — any of the 12 primary trees named by the roster, "
                                  "or (J1) any of the roster's elemental or status tree ids "
-                                 "(default: might, B1's own named tree)")
+                                 "(default: might for a single-tree emit; omitted entirely means "
+                                 "every roster tree for --manifest)")
     trees_plan.add_argument("--manifest", action="store_true",
                             help="operate on the top-level manifest (plan.v1.json) + its trees[], "
                                  "not just --tree alone (task C2)")
@@ -2447,6 +2916,13 @@ def build_parser() -> argparse.ArgumentParser:
                                      "rationale for a local model queue, but cannot reuse that helper "
                                      "directly (it is built around a LangGraph app.invoke() interface "
                                      "this pipeline never adopted)")
+    trees_generate.add_argument(
+        "--supersede", action="store_true",
+        help="--write companion: re-generate ledger rows whose per-record promptVersion is absent "
+             "or differs from the current brief vintage (brief.PROMPT_VERSION), preserving the "
+             "prior row under supersededRecord (spec-tree-review.md §8's provenance-supersede "
+             "pass). Without it, already-done subjects are replayed from the ledger, never "
+             "re-rolled")
     trees_review = trees_sub.add_parser(
         "review", help="tree-review entrypoints (task H7, spec-tree-review.md §5.5, §Commands)")
     trees_review.add_argument("--lot", required=True, help="the review lot id")

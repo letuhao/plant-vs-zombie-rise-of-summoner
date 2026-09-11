@@ -6,18 +6,18 @@
     "partition": "gems/1",
     "contractVersion": 1,
     "registryVersions": {
-      "core": 1,
       "bands": 1,
-      "tags": 3,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
       "themes": 1,
-      "classes": 2,
-      "naming": 4,
-      "words": 4
+      "words": 5
     },
     "exemplarVersion": 1,
-    "promptVersion": 1,
-    "model": "claude-haiku-4-5-20251001",
-    "authoredUtc": "2026-08-22T00:00:00Z",
+    "promptVersion": "gem-gen/1",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "2026-09-07T00:00:00Z",
     "sourceRef": "entry-shapes.md#1"
   },
   "entries": [
@@ -254,6 +254,436 @@
       "powerBand": "high",
       "iconKey": "icon.gem.resilience-gem",
       "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "family": "atom.entangling",
+      "iconKey": "icon.gem.entangling-spore",
+      "id": "gem.g1-021",
+      "name": "Entangling Spore",
+      "nameKey": "gem.entangling-spore",
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.arm-op",
+      "iconKey": "icon.gem.reinforced-plating",
+      "id": "gem.g1-022",
+      "name": "Reinforced Plating",
+      "nameKey": "gem.reinforced-plating",
+      "powerBand": "medium",
+      "tags": [
+        "sturdy",
+        "metal"
+      ]
+    },
+    {
+      "family": "atom.arm-plate",
+      "iconKey": "icon.gem.reinforced-plating",
+      "id": "gem.g1-023",
+      "name": "Reinforced Plating",
+      "nameKey": "gem.reinforced-plating",
+      "powerBand": "medium",
+      "tags": [
+        "metal",
+        "sturdy"
+      ]
+    },
+    {
+      "family": "atom.firelining",
+      "iconKey": "icon.gem.firelining",
+      "id": "gem.g1-024",
+      "name": "Firelining",
+      "nameKey": "gem.firelining",
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.elpw-surge",
+      "iconKey": "icon.gem.elpw-surge",
+      "id": "gem.g1-025",
+      "name": "Elpw Surge",
+      "nameKey": "gem.elpw-surge",
+      "powerBand": "medium",
+      "tags": [
+        "arcane",
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.evd-evd",
+      "iconKey": "icon.gem.evasion",
+      "id": "gem.g1-026",
+      "name": "Evasion",
+      "nameKey": "gem.evasion",
+      "powerBand": "high",
+      "tags": [
+        "defensive",
+        "utility"
+      ]
+    },
+    {
+      "family": "atom.flash-freeze",
+      "iconKey": "icon.gem.flash-freeze",
+      "id": "gem.g1-027",
+      "name": "Flash Freeze",
+      "nameKey": "gem.flash-freeze",
+      "powerBand": "low",
+      "tags": [
+        "utility"
+      ]
+    },
+    {
+      "family": "atom.freezing",
+      "iconKey": "icon.gem.frostbite",
+      "id": "gem.g1-028",
+      "name": "Frostbite",
+      "nameKey": "gem.frostbite",
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.gravedigging",
+      "iconKey": "icon.gem.relic-of-the-grave",
+      "id": "gem.g1-029",
+      "name": "Relic of the Grave",
+      "nameKey": "gem.relic-of-the-grave",
+      "powerBand": "high",
+      "tags": [
+        "utility"
+      ]
+    },
+    {
+      "family": "atom.gravemaking",
+      "iconKey": "icon.gem.gravemaker",
+      "id": "gem.g1-030",
+      "name": "Gravemaker",
+      "nameKey": "gem.gravemaker",
+      "powerBand": "low",
+      "tags": [
+        "utility"
+      ]
+    },
+    {
+      "family": "atom.immunity",
+      "iconKey": "icon.gem.immunity",
+      "id": "gem.g1-031",
+      "name": "Immunity",
+      "nameKey": "gem.immunity",
+      "powerBand": "medium",
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "family": "atom.life-graft",
+      "iconKey": "icon.gem.vitality-graft",
+      "id": "gem.g1-032",
+      "name": "Vitality Graft",
+      "nameKey": "gem.vitality-graft",
+      "powerBand": "high",
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "family": "atom.life-surge",
+      "iconKey": "icon.gem.vitality-surge",
+      "id": "gem.g1-033",
+      "name": "Vitality Surge",
+      "nameKey": "gem.vitality-surge",
+      "powerBand": "low",
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "family": "atom.marking",
+      "iconKey": "icon.gem.pact-mark",
+      "id": "gem.g1-034",
+      "name": "Pact Mark",
+      "nameKey": "gem.pact-mark",
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.martyrdom",
+      "iconKey": "icon.gem.martyrs-soul",
+      "id": "gem.g1-035",
+      "name": "Martyr's Soul",
+      "nameKey": "gem.martyrs-soul",
+      "powerBand": "high",
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "family": "atom.mesmerizing",
+      "iconKey": "icon.gem.hypnotic-dust",
+      "id": "gem.g1-036",
+      "name": "Hypnotic Dust",
+      "nameKey": "gem.hypnotic-dust",
+      "powerBand": "low",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.midas",
+      "iconKey": "icon.gem.midas-touch",
+      "id": "gem.g1-037",
+      "name": "Midas Touch",
+      "nameKey": "gem.midas-touch",
+      "powerBand": "medium",
+      "tags": [
+        "utility"
+      ]
+    },
+    {
+      "family": "atom.prec-focus",
+      "iconKey": "icon.gem.focusing-lens",
+      "id": "gem.g1-038",
+      "name": "Focusing Lens",
+      "nameKey": "gem.focusing-lens",
+      "powerBand": "high",
+      "tags": [
+        "mechanical",
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.regeneration",
+      "iconKey": "icon.gem.regeneration",
+      "id": "gem.g1-039",
+      "name": "Regeneration",
+      "nameKey": "gem.regeneration",
+      "powerBand": "low",
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "family": "atom.rot-punisher",
+      "iconKey": "icon.gem.blighted-reckoning",
+      "id": "gem.g1-040",
+      "name": "Blighted Reckoning",
+      "nameKey": "gem.blighted-reckoning",
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.rotting",
+      "iconKey": "icon.gem.soft-rot",
+      "id": "gem.g1-041",
+      "name": "Soft Rot",
+      "nameKey": "gem.soft-rot",
+      "powerBand": "high",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.shld-toughness",
+      "iconKey": "icon.gem.shield-toughness",
+      "id": "gem.g1-042",
+      "name": "Shield Toughness",
+      "nameKey": "gem.shield-toughness",
+      "powerBand": "low",
+      "tags": [
+        "defensive",
+        "sturdy"
+      ]
+    },
+    {
+      "family": "atom.sparking",
+      "iconKey": "icon.gem.flicker",
+      "id": "gem.g1-043",
+      "name": "Flicker",
+      "nameKey": "gem.flicker",
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.sporing",
+      "iconKey": "icon.gem.spore-infusion",
+      "id": "gem.g1-044",
+      "name": "Spore Infusion",
+      "nameKey": "gem.spore-infusion",
+      "powerBand": "high",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.sunbloom",
+      "iconKey": "icon.gem.sunbloom",
+      "id": "gem.g1-045",
+      "name": "Sunbloom",
+      "nameKey": "gem.sunbloom",
+      "powerBand": "low",
+      "tags": [
+        "utility"
+      ]
+    },
+    {
+      "family": "atom.sust-callus",
+      "iconKey": "icon.gem.callus",
+      "id": "gem.g1-046",
+      "name": "Callus",
+      "nameKey": "gem.callus",
+      "powerBand": "medium",
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "family": "atom.sust-freshgraft",
+      "iconKey": "icon.gem.fresh-graft",
+      "id": "gem.g1-047",
+      "name": "Fresh Graft",
+      "nameKey": "gem.fresh-graft",
+      "powerBand": "high",
+      "tags": [
+        "utility"
+      ]
+    },
+    {
+      "family": "atom.sust-grit",
+      "iconKey": "icon.gem.grit",
+      "id": "gem.g1-048",
+      "name": "Grit",
+      "nameKey": "gem.grit",
+      "powerBand": "low",
+      "tags": [
+        "utility"
+      ]
+    },
+    {
+      "family": "atom.sust-husk",
+      "iconKey": "icon.gem.renewing-husk",
+      "id": "gem.g1-049",
+      "name": "Renewing Husk",
+      "nameKey": "gem.renewing-husk",
+      "powerBand": "medium",
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "family": "atom.tempo-haste",
+      "iconKey": "icon.gem.accelerated-reflexes",
+      "id": "gem.g1-050",
+      "name": "Accelerated Reflexes",
+      "nameKey": "gem.accelerated-reflexes",
+      "powerBand": "high",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.tempo-pulse",
+      "iconKey": "icon.gem.tempo-pulse",
+      "id": "gem.g1-051",
+      "name": "Tempo Pulse",
+      "nameKey": "gem.tempo-pulse",
+      "powerBand": "low",
+      "tags": [
+        "arcane",
+        "mechanical"
+      ]
+    },
+    {
+      "family": "atom.tempo-stampede",
+      "iconKey": "icon.gem.stampede",
+      "id": "gem.g1-052",
+      "name": "Stampede",
+      "nameKey": "gem.stampede",
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.tempo-surge",
+      "iconKey": "icon.gem.surging-momentum",
+      "id": "gem.g1-053",
+      "name": "Surging Momentum",
+      "nameKey": "gem.surging-momentum",
+      "powerBand": "high",
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.evd-shift",
+      "iconKey": "icon.gem.evasion",
+      "id": "gem.g1-054",
+      "name": "Evasion",
+      "nameKey": "gem.evasion",
+      "powerBand": "medium",
+      "tags": [
+        "defensive",
+        "utility"
+      ]
+    },
+    {
+      "family": "atom.prec-sync",
+      "iconKey": "icon.gem.precision",
+      "id": "gem.g1-055",
+      "name": "Precision",
+      "nameKey": "gem.precision",
+      "powerBand": "high",
+      "tags": [
+        "mechanical",
+        "offensive"
+      ]
+    },
+    {
+      "family": "atom.shld-toughness-mod",
+      "iconKey": "icon.gem.shield-reinforcement",
+      "id": "gem.g1-056",
+      "name": "Shield Reinforcement",
+      "nameKey": "gem.shield-reinforcement",
+      "powerBand": "low",
+      "tags": [
+        "sturdy",
+        "defensive"
+      ]
+    },
+    {
+      "family": "atom.ward-link",
+      "iconKey": "icon.gem.ward-link",
+      "id": "gem.g1-057",
+      "name": "Ward Link",
+      "nameKey": "gem.ward-link",
+      "powerBand": "medium",
+      "tags": [
+        "arcane",
+        "defensive"
+      ]
+    },
+    {
+      "family": "atom.ward-ward",
+      "iconKey": "icon.gem.unyielding-essence",
+      "id": "gem.g1-058",
+      "name": "Unyielding Essence",
+      "nameKey": "gem.unyielding-essence",
+      "powerBand": "high",
+      "tags": [
+        "sturdy",
         "defensive"
       ]
     }

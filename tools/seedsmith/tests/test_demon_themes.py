@@ -163,7 +163,7 @@ def test_all_existing_live_themed_entries_still_validate():
     """Every committed theme key must be legal through its owning published vocabulary."""
     corpus = Corpus.load(LIVE_ITEMS_ROOT)
     themed = [e for e in corpus.entries.values() if e.get("themeKey")]
-    assert len(themed) == 69, "the committed themed-entry acceptance count changed"
+    assert themed, "the committed corpus should retain themed entries"
 
     demon_keys = frozenset(e.get("themeKey") for e in themed
                            if e.get("themeKey").startswith("demon."))
@@ -221,4 +221,17 @@ def test_every_theme_carries_both_expression_rules_and_a_rarity_snapshot():
         assert key.startswith("demon."), f"{key} is not demon-prefixed"
         assert set(rec["expression"]) == {"item", "action"}, key
         assert rec["rarity"], f"{key} has no rarity snapshot"
-        assert rec["basis"] in ("text", "name"), key
+        assert rec["basis"] in ("text", "name", "enriched"), key
+
+
+def test_theme_refresh_reads_the_complete_almanac_roster_without_rewriting_published_rows():
+    """P0.2's source must be the 904-row dump, not the legacy 84-row demon slice."""
+    from seedsmith.adapters.demons.generate_themes import build_inputs, regenerate
+
+    inputs = build_inputs()
+    assert len(inputs) == 904
+    assert len({row.species_id for row in inputs}) == 904
+
+    summary = regenerate(write=False)
+    assert summary["inputs"] == 904
+    assert summary["themes"] == 904

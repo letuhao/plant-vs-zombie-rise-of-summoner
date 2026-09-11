@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>inspect-pane — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>inspect-pane</code></h1>
+  <p class="lede">Panel-slice assembling hero / meta / cap / gauges / sources slots. Spec: <code>docs/architecture/gui-lego/spec-inspect-pane.md</code>. Visuals from payload/theme — no hard-coded element colors in the piece root.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live)</h2>
+      <div class="piece-stage"><aside class="inspect" style="--piece-accent:var(--el-fire); --piece-rail-edge:var(--el-fire); --piece-select-glow:rgb(224 112 60 / 0.35)">
+    <div class="big">2,847</div>
+    <div class="reading">Fire power</div>
+    <div class="sentence">Compose: Hub derived</div>
+    <div class="cap-note">No cap on this channel.</div>
+    <div class="share-donut" style="margin-top:12px">
+      <svg width="64" height="64" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.5" fill="none" stroke="#e0703c" stroke-width="6" stroke-dasharray="100 0"/></svg>
+    </div>
+  </aside></div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "inspect-pane",
+  "instanceId": "inspect:derived",
+  "channelId": "combat.power.fire",
+  "themeRef": {
+    "kind": "element",
+    "id": "fire"
+  },
+  "phase": "ready"
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

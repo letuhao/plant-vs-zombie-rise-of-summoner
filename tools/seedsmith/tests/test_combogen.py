@@ -242,6 +242,23 @@ class AuthoredBatchTests(unittest.TestCase):
         # The file still reflects both already-done entries — resume does not drop them.
         self.assertEqual(len(result_again.entries), 2)
 
+    def test_limit_after_resume_skips_already_done_first_cell(self) -> None:
+        """`--limit` must apply to needing work, not the raw grid head (smoke planned=0 bug)."""
+        authored_mod.run_batch(
+            plan=dataclasses.replace(self.plan, subjects=self.plan.subjects[:1]),
+            answers=self._answers_for_plan(), tuning=self.tuning,
+            out_dir=self.out_dir, authored_utc="1970-01-01T00:00:00Z", model="test/1",
+            ledger_path=self.ledger_path)
+        ledger = RunLedger(self.ledger_path)
+        needing = authored_mod.plan_needing_work(self.plan, ledger)
+        limited = needing[:1]
+        self.assertEqual(len(limited), 1)
+        self.assertEqual(limited[0].subject_id, self.plan.subjects[1].subject_id)
+        # Wrong order (limit then resume) yields empty — the defect this guards against.
+        wrong = authored_mod.plan_needing_work(
+            dataclasses.replace(self.plan, subjects=self.plan.subjects[:1]), ledger)
+        self.assertEqual(wrong, [])
+
     def test_reconcile_recovers_a_corrupted_ledger_row(self) -> None:
         authored_mod.run_batch(
             plan=self.plan, answers=self._answers_for_plan(), tuning=self.tuning,
@@ -286,6 +303,39 @@ class AuthoredBatchTests(unittest.TestCase):
         blocked = [o for o in result.outcomes if o.subject_id == first_id]
         self.assertEqual(blocked[0].outcome, "blocked")
         self.assertEqual(len(result.persisted), 1)
+        ledger = RunLedger(self.ledger_path)
+        needing = authored_mod.plan_needing_work(self.plan, ledger)
+        self.assertEqual([s.subject_id for s in needing], [])
+
+    def test_an_escalated_answer_is_ledgered_so_resume_advances(self) -> None:
+        answers = self._answers_for_plan()
+        first_id = self.plan.subjects[0].subject_id
+        # Exhaust attempts → escalate (ReplayTransport runs out of authored answers).
+        answers.by_subject[first_id] = ()
+        result = authored_mod.run_batch(
+            plan=self.plan, answers=answers, tuning=self.tuning, out_dir=self.out_dir,
+            authored_utc="1970-01-01T00:00:00Z", model="test/1", ledger_path=self.ledger_path)
+        escalated = [o for o in result.outcomes if o.subject_id == first_id]
+        self.assertEqual(escalated[0].outcome, "escalated")
+        self.assertEqual(cli_mod._exit_for_graph_batch(result), cli_mod.EXIT_ESCALATED)
+        ledger = RunLedger(self.ledger_path)
+        needing = authored_mod.plan_needing_work(self.plan, ledger)
+        self.assertNotIn(first_id, [s.subject_id for s in needing])
+        row = ledger.read_done()[first_id]
+        self.assertEqual(row["outcome"], "escalated")
+        self.assertEqual(row.get("terminalSchemaVersion"), 1)
+        self.assertEqual(row["terminalSchemaVersion"], 1)
+
+    def test_blocked_only_batch_exits_clean_and_escalated_has_its_own_exit(self) -> None:
+        blocked = SimpleNamespace(outcomes=[
+            SimpleNamespace(outcome="blocked"),
+            SimpleNamespace(outcome="persisted"),
+        ])
+        empty = SimpleNamespace(outcomes=[])
+        escalated = SimpleNamespace(outcomes=[SimpleNamespace(outcome="escalated")])
+        self.assertEqual(cli_mod.EXIT_CLEAN, cli_mod._exit_for_graph_batch(blocked))
+        self.assertEqual(cli_mod.EXIT_CLEAN, cli_mod._exit_for_graph_batch(empty))
+        self.assertEqual(cli_mod.EXIT_ESCALATED, cli_mod._exit_for_graph_batch(escalated))
 
     def test_authored_module_never_imports_the_live_model_caller(self) -> None:
         """Mirrors `setgen.answers`'s own "cannot reach the network" discipline: the replay
@@ -312,6 +362,7 @@ class CombinationLiveTransportTests(unittest.TestCase):
         plan = dataclasses.replace(plan, subjects=plan.subjects[:1])
         with tempfile.TemporaryDirectory() as temp:
             args = SimpleNamespace(
+                kind="combination",
                 out_dir=temp, answers="", endpoint="http://127.0.0.1:9876/v1/chat/completions",
                 model="test-live-model", allow_production_tree=False, ledger="",
                 authored_utc="1970-01-01T00:00:00Z")

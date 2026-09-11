@@ -14,8 +14,8 @@
     {"term": "Respec", "meaning": "Changing your mind is allowed and priced when it applies — friction, not a forbidden door."}
   ],
   "alsoTrue": [
-    "In this build, commander-scope spend is live and thin; other scopes and a polished sheet are still ahead.",
-    "Allocation can stack across commander, species, variant, and the unique demon — who you are is the sum."
+    "Commander-scope spend is live (Mode C). UniqueDemon (UniqueActor sheet) and species-build (empire generals) player surfaces are specified under aptitude-sheet-map.md — not still-ahead as a product excuse.",
+    "Allocation can stack across commander, species, aspect (blocked), and the unique demon — who you are is the sum."
   ],
   "sections": [
     {

@@ -287,10 +287,6 @@ def main(argv=None) -> int:
             "seedsmith: refused — no --write. --theme with no --write has nothing further to "
             "inspect (this module has no --dry-run brief preview yet); re-run with --write "
             "--endpoint <url> to actually call a model and persist.")
-    if not args.endpoint:
-        raise SystemExit(
-            "seedsmith: --write refused — no --endpoint. A real run needs a live model "
-            "(--endpoint <url> [--model <name>]).")
 
     if args.overwrite:
         entry_id = args.overwrite
@@ -303,11 +299,13 @@ def main(argv=None) -> int:
 
     seq = int(entry_id.rsplit("-", 1)[-1])
 
-    from ....pipeline.llm_caller import live_answer_caller, load_config
+    from ....pipeline.llm_caller import live_answer_caller, resolve_live_transport
 
-    base_config = load_config()
-    config = dataclasses.replace(base_config, endpoint=args.endpoint,
-                                 model=args.model or base_config.model)
+    config = resolve_live_transport(args.endpoint, args.model)
+    if not config.endpoint:
+        raise SystemExit(
+            "seedsmith: --write refused — no live endpoint. Pass --endpoint <url> or set "
+            "SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env; --dry-run needs neither.")
     caller = live_answer_caller(config)
     brief = brief_mod.build_consumable_brief(args.theme)
     answer = caller(brief, {})

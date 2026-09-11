@@ -468,6 +468,571 @@
           "family": "atom.enhance-keen"
         }
       ]
+    },
+    {
+      "id": "item.plant-muzzle-b-013",
+      "nameKey": "base.pulsing-pod",
+      "name": "Pulsing Pod",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.pulsing-pod",
+      "flavorKey": "flavor.base.pulsing-pod",
+      "flavor": "A thick, translucent bulb that rhythmically expands and contracts, building internal pressure before a violent release.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-014",
+      "nameKey": "base.spined-pod-caster",
+      "name": "Spined Pod-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.spined-pod-caster",
+      "flavorKey": "flavor.base.spined-pod-caster",
+      "flavor": "A thick, fibrous husk lined with serrated protrusions designed to launch hardened organic projectiles at high velocity.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-015",
+      "nameKey": "base.spined-pod-caster",
+      "name": "Spined Pod-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.spined-pod-caster",
+      "flavorKey": "flavor.base.spined-pod-caster",
+      "flavor": "A thick, fibrous husk lined with serrated protrusions designed to launch hardened organic projectiles at high velocity.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-016",
+      "nameKey": "base.thorned-spore-caster",
+      "name": "Thorned Spore-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.thorned-spore-caster",
+      "flavorKey": "flavor.base.thorned-spore-caster",
+      "flavor": "A bulbous, calcified pod that rhythmically pulses with internal pressure. It releases a fine mist of caustic spores through a jagged, fibrous aperture.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-017",
+      "nameKey": "base.spined-pod-caster",
+      "name": "Spined Pod-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.spined-pod-caster",
+      "flavorKey": "flavor.base.spined-pod-caster",
+      "flavor": "A thick, fibrous husk lined with serrated protrusions designed to launch hardened organic projectiles at high velocity.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-018",
+      "nameKey": "base.thorned-spore-caster",
+      "name": "Thorned Spore-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "low"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.thorned-spore-caster",
+      "flavorKey": "flavor.base.thorned-spore-caster",
+      "flavor": "A dense, bulbous pod encased in a lattice of hardened briars. It releases concentrated bursts of toxic particulate through a narrow, fibrous aperture.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-019",
+      "nameKey": "base.thorned-spore-caster",
+      "name": "Thorned Spore-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.thorned-spore-caster",
+      "flavorKey": "flavor.base.thorned-spore-caster",
+      "flavor": "A dense, bulbous pod encased in a lattice of hardened briars. It releases concentrated bursts of toxic particulate through a narrow, fibrous aperture.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-020",
+      "nameKey": "base.thorned-spore-caster",
+      "name": "Thorned Spore-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.thorned-spore-caster",
+      "flavorKey": "flavor.base.thorned-spore-caster",
+      "flavor": "A dense, bulbous pod encased in a lattice of calcified briars. It releases a fine mist of caustic spores through a narrow, fibrous aperture.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-021",
+      "nameKey": "base.thorned-spore-caster",
+      "name": "Thorned Spore-Caster",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "low"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.thorned-spore-caster",
+      "flavorKey": "flavor.base.thorned-spore-caster",
+      "flavor": "A dense, bulbous growth that rhythmically expels clouds of caustic particulate. It requires constant moisture to maintain its internal pressure.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-022",
+      "nameKey": "base.thrumming-spore-lance",
+      "name": "Thrumming Spore-Lance",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.thrumming-spore-lance",
+      "flavorKey": "flavor.base.thrumming-spore-lance",
+      "flavor": "A rigid, elongated seed-pod that vibrates with internal pressure. It channels concentrated botanical energy through its tapered tip.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-023",
+      "nameKey": "base.gnarled-spore-lance",
+      "name": "Gnarled Spore-Lance",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.gnarled-spore-lance",
+      "flavorKey": "flavor.base.gnarled-spore-lance",
+      "flavor": "A hardened, elongated woody stalk tipped with a pressurized bulb of volatile fungal matter. It is designed to be braced against the shoulder for high-velocity discharge.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-024",
+      "nameKey": "base.coiled-tendril-barrel",
+      "name": "Coiled Tendril-Barrel",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.coiled-tendril-barrel",
+      "flavorKey": "flavor.base.coiled-tendril-barrel",
+      "flavor": "A thick, muscular vine that constricts around a central firing chamber. It twitches with anticipation before discharging its payload.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-025",
+      "nameKey": "base.thrumming-spore-cask",
+      "name": "Thrumming Spore-Cask",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.thrumming-spore-cask",
+      "flavorKey": "flavor.base.thrumming-spore-cask",
+      "flavor": "A heavy, bulbous vessel of hardened cellulose that vibrates with the internal pressure of volatile fungal spores.",
+      "tags": [
+        "organic",
+        "heavy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-026",
+      "nameKey": "base.thrumming-spore-lance",
+      "name": "Thrumming Spore-Lance",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.thrumming-spore-lance",
+      "flavorKey": "flavor.base.thrumming-spore-lance",
+      "flavor": "A long, hollowed stalk of hardened cellulose that vibrates with the pressure of internal gases. It serves as a focused conduit for rapid-fire botanical projectiles.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-027",
+      "nameKey": "base.thrumming-spore-lance",
+      "name": "Thrumming Spore-Lance",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.thrumming-spore-lance",
+      "flavorKey": "flavor.base.thrumming-spore-lance",
+      "flavor": "A long, hollowed stalk that vibrates with the internal pressure of volatile fungal spores. It channels kinetic energy through its tapered tip to launch projectiles with sudden, violent force.",
+      "tags": [
+        "organic",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-muzzle-b-028",
+      "nameKey": "base.thrumming-spore-cask",
+      "name": "Thrumming Spore-Cask",
+      "frame": "plant",
+      "role": "armament-primary",
+      "class": "nozzle",
+      "band": "b",
+      "implicit": {
+        "family": "atom.elemental-power",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.thrumming-spore-cask",
+      "flavorKey": "flavor.base.thrumming-spore-cask",
+      "flavor": "A dense, bulbous growth that vibrates with internal pressure, ready to rupture at the slightest trigger.",
+      "tags": [
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

@@ -470,6 +470,581 @@
           "family": "atom.enhance-keen"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-main-hand-b-013",
+      "nameKey": "base.heavy-piston-driver",
+      "name": "Heavy Piston-Driver",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.heavy-piston-driver",
+      "flavorKey": "flavor.base.heavy-piston-driver",
+      "flavor": "A pneumatic-assisted striking tool designed to deliver concentrated kinetic force through a reinforced driving head.",
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-b-014",
+      "nameKey": "base.weighted-mace",
+      "name": "Weighted Mace",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-pen",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.weighted-mace",
+      "flavorKey": "flavor.base.weighted-mace",
+      "flavor": "A dense, iron-headed club designed to deliver crushing momentum through heavy armor.",
+      "tags": [
+        "metal",
+        "heavy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-b-015",
+      "nameKey": "base.heavy-piledriver",
+      "name": "Heavy Piledriver",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.heavy-piledriver",
+      "flavorKey": "flavor.base.heavy-piledriver",
+      "flavor": "A massive, piston-driven shaft designed to deliver devastating kinetic impact through sheer mechanical force.",
+      "tags": [
+        "heavy",
+        "mechanical",
+        "metal"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-b-016",
+      "nameKey": "base.heavy-piledriver",
+      "name": "Heavy Piledriver",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.heavy-piledriver",
+      "flavorKey": "flavor.base.heavy-piledriver",
+      "flavor": "A massive, pneumatic-assisted piston mounted to a reinforced chassis. It relies on sheer kinetic force to crush through armor and bone alike.",
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-b-017",
+      "nameKey": "base.heavy-piledriver",
+      "name": "Heavy Piledriver",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.heavy-piledriver",
+      "flavorKey": "flavor.base.heavy-piledriver",
+      "flavor": "A massive, pneumatic-assisted piston mounted to a reinforced chassis. It relies on sheer kinetic force to crush through heavy plating.",
+      "tags": [
+        "heavy",
+        "mechanical",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-b-018",
+      "nameKey": "base.heavy-gauge-blunderbuss",
+      "name": "Heavy-Gauge Blunderbuss",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "launcher",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.heavy-gauge-blunderbuss",
+      "flavorKey": "flavor.base.heavy-gauge-blunderbuss",
+      "flavor": "A wide-bore firearm designed to disperse a chaotic spray of shrapnel across a wide area. Its bulky frame demands a firm grip to manage the violent kickback.",
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-b-019",
+      "nameKey": "base.heavy-piston-driver",
+      "name": "Heavy Piston-Driver",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.heavy-piston-driver",
+      "flavorKey": "flavor.base.heavy-piston-driver",
+      "flavor": "A pneumatic-assisted striking tool designed to deliver concentrated kinetic force through a reinforced driving head.",
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-b-020",
+      "nameKey": "base.heavy-piledriver",
+      "name": "Heavy Piledriver",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.heavy-piledriver",
+      "flavorKey": "flavor.base.heavy-piledriver",
+      "flavor": "A massive, pneumatic-assisted piston mounted to a reinforced chassis. It relies on sheer kinetic impact to shatter through heavy plating.",
+      "tags": [
+        "heavy",
+        "mechanical",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-b-021",
+      "nameKey": "base.tungsten-spiker",
+      "name": "Tungsten Spiker",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "b",
+      "implicit": {
+        "family": "atom.shield-pen",
+        "powerBand": "low"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.tungsten-spiker",
+      "flavorKey": "flavor.base.tungsten-spiker",
+      "flavor": "A dense, heavy-headed rod designed to deliver concentrated kinetic force through thick plating.",
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-b-022",
+      "nameKey": "base.ordnance-spanner",
+      "name": "Ordnance Spanner",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.ordnance-spanner",
+      "flavorKey": "flavor.base.ordnance-spanner",
+      "flavor": "A heavy, reinforced wrench designed to torque massive bolts or serve as a crushing tool in a pinch. Its thick, industrial head is built to withstand the recoil of heavy machinery.",
+      "tags": [
+        "metal",
+        "heavy",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-b-023",
+      "nameKey": "base.heavy-barreled-carbine",
+      "name": "Heavy-Barreled Carbine",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "launcher",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.heavy-barreled-carbine",
+      "flavorKey": "flavor.base.heavy-barreled-carbine",
+      "flavor": "A thick-walled firearm designed for high-velocity impact. Its weight ensures stability during the violent discharge of its primer.",
+      "tags": [
+        "metal",
+        "heavy",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-b-024",
+      "nameKey": "base.tungsten-spiker",
+      "name": "Tungsten Spiker",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.tungsten-spiker",
+      "flavorKey": "flavor.base.tungsten-spiker",
+      "flavor": "A heavy, reinforced rod designed to deliver concentrated kinetic force through a single, devastating point of impact.",
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-b-025",
+      "nameKey": "base.heavy-barreled-blunderbuss",
+      "name": "Heavy-Barreled Blunderbuss",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "launcher",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.heavy-barreled-blunderbuss",
+      "flavorKey": "flavor.base.heavy-barreled-blunderbuss",
+      "flavor": "A wide-mouthed, short-range firearm designed to scatter projectiles in a devastating cone. Its heavy frame provides significant recoil but immense stopping power.",
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-b-026",
+      "nameKey": "base.tungsten-spiker",
+      "name": "Tungsten Spiker",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 3,
+      "iconKey": "icon.base.tungsten-spiker",
+      "flavorKey": "flavor.base.tungsten-spiker",
+      "flavor": "A dense, weighted rod designed to deliver concentrated kinetic force through a single, devastating point of impact.",
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-b-027",
+      "nameKey": "base.tungsten-spiker",
+      "name": "Tungsten Spiker",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blunt",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 4,
+      "iconKey": "icon.base.tungsten-spiker",
+      "flavorKey": "flavor.base.tungsten-spiker",
+      "flavor": "A dense, weighted rod designed to deliver concentrated kinetic energy through a single, devastating point of impact.",
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-main-hand-b-028",
+      "nameKey": "base.ornate-gladius",
+      "name": "Ornate Gladius",
+      "frame": "humanoid",
+      "role": "armament-primary",
+      "class": "blade",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.ornate-gladius",
+      "flavorKey": "flavor.base.ornate-gladius",
+      "flavor": "A slender, balanced blade designed for precision thrusting and rapid, rhythmic strikes.",
+      "tags": [
+        "metal",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

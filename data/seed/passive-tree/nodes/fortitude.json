@@ -3,8 +3,50 @@
     "confidence": {},
     "minorityValues": {},
     "model": "google/gemma-4-26b-a4b-qat",
-    "planHash": "",
-    "promptVersion": "tree-language/1"
+    "planHash": "4dfe2ead1b30fa7f272da21d2fc0d3038cc995bd1fd9bc745bd95dbe763bf560",
+    "promptVersion": "mixed",
+    "promptVersionByNode": {
+      "skill.fortitude-def-t1-n0": "",
+      "skill.fortitude-def-t1-n1": "",
+      "skill.fortitude-def-t1-n2": "tree-language/3",
+      "skill.fortitude-def-t10-n0": "tree-language/3",
+      "skill.fortitude-def-t2-n0": "tree-language/3",
+      "skill.fortitude-def-t2-n1": "",
+      "skill.fortitude-def-t2-n2": "tree-language/3",
+      "skill.fortitude-def-t3-n0": "tree-language/3",
+      "skill.fortitude-def-t3-n1": "",
+      "skill.fortitude-def-t3-n2": "",
+      "skill.fortitude-def-t4-n0": "tree-language/3",
+      "skill.fortitude-def-t4-n1": "tree-language/3",
+      "skill.fortitude-def-t5-n0": "tree-language/3",
+      "skill.fortitude-def-t5-n1": "",
+      "skill.fortitude-def-t6-n0": "tree-language/3",
+      "skill.fortitude-def-t6-n1": "tree-language/3",
+      "skill.fortitude-def-t7-n0": "",
+      "skill.fortitude-def-t7-n1": "tree-language/3",
+      "skill.fortitude-def-t8-n0": "tree-language/3",
+      "skill.fortitude-def-t9-n0": "tree-language/3",
+      "skill.fortitude-off-t1-n0": "tree-language/3",
+      "skill.fortitude-off-t1-n1": "tree-language/3",
+      "skill.fortitude-off-t1-n2": "",
+      "skill.fortitude-off-t10-n0": "tree-language/3",
+      "skill.fortitude-off-t2-n0": "tree-language/3",
+      "skill.fortitude-off-t2-n1": "",
+      "skill.fortitude-off-t2-n2": "tree-language/3",
+      "skill.fortitude-off-t3-n0": "tree-language/3",
+      "skill.fortitude-off-t3-n1": "tree-language/3",
+      "skill.fortitude-off-t3-n2": "tree-language/3",
+      "skill.fortitude-off-t4-n0": "",
+      "skill.fortitude-off-t4-n1": "tree-language/3",
+      "skill.fortitude-off-t5-n0": "",
+      "skill.fortitude-off-t5-n1": "tree-language/3",
+      "skill.fortitude-off-t6-n0": "tree-language/3",
+      "skill.fortitude-off-t6-n1": "",
+      "skill.fortitude-off-t7-n0": "tree-language/3",
+      "skill.fortitude-off-t7-n1": "tree-language/3",
+      "skill.fortitude-off-t8-n0": "",
+      "skill.fortitude-off-t9-n0": "tree-language/3"
+    }
   },
   "nodes": [
     {
@@ -66,18 +108,25 @@
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "nullification",
-        "printedText": "Inert while tier is active — tier wins.",
-        "propertyKeys": [
-          "tier"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the shell becomes a second skin, thickening with every passing moment of survival.",
+      "flavor": "The weight of the earth settles into your very marrow.",
       "id": "skill.fortitude-def-t1-n2",
-      "name": "Layered Bastion",
-      "nameKey": "tree.node.layered-bastion",
+      "name": "Unyielding Stance",
+      "nameKey": "tree.node.unyielding-stance",
       "nodeClass": "magnitude",
       "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.damage",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "kelp",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
       "tier": 1
     },
@@ -86,48 +135,60 @@
         "core"
       ],
       "affixIds": [
-        "atom.shield-regen"
+        "atom.shld-cycle"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythmic pulse of the shield feeds the marrow, and the marrow, in turn, reinforces the barrier.",
+      "flavor": "The rhythm of the shield dictates the rhythm of the soul.",
       "id": "skill.fortitude-def-t10-n0",
-      "name": "Circulatory Sapping",
-      "nameKey": "tree.node.circulatory-sapping",
+      "name": "Cyclical Aegis Flux",
+      "nameKey": "tree.node.cyclical-aegis-flux",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.realm",
+        "element": "omni",
+        "exclusionForm": "reroute",
+        "nodeClass": "mechanism",
+        "status": "wither",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 10
     },
     {
       "affinity": [
-        "core",
         "core"
       ],
       "affixIds": [
-        "atom.fortitude",
-        "atom.resilience"
+        "atom.vitality"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "tier"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The skin hardens into a knot of unyielding fiber.",
+      "flavor": "The foundation is laid before the walls are raised.",
       "id": "skill.fortitude-def-t2-n0",
-      "name": "Thickened Bark",
-      "nameKey": "tree.node.thickened-bark",
+      "name": "Deep Roots",
+      "nameKey": "tree.node.deep-roots",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.rate",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "kelp",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
       "tier": 2
     },
@@ -164,48 +225,60 @@
         "likely"
       ],
       "affixIds": [
-        "atom.arm-hardening"
+        "atom.shield-capacity"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The deeper the roots, the harder the bark.",
+      "flavor": "The weight of the earth becomes your own, anchoring your spirit against the tide.",
       "id": "skill.fortitude-def-t2-n2",
-      "name": "Rooted Endurance",
-      "nameKey": "tree.node.rooted-endurance-2",
+      "name": "Deep-Rooted Resolve",
+      "nameKey": "tree.node.deep-rooted-resolve",
       "nodeClass": "magnitude",
       "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.rate",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "leech",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 2
     },
     {
       "affinity": [
-        "core",
         "core"
       ],
       "affixIds": [
-        "atom.shield-capacity",
-        "atom.warding"
+        "atom.shield-regen"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The grain of the wood tightens, turning impact into a rhythmic vibration that feeds the spirit.",
+      "flavor": "A layer of living tissue that pulses in rhythm with the shield's ebb and flow.",
       "id": "skill.fortitude-def-t3-n0",
-      "name": "Ironwood Sieve",
-      "nameKey": "tree.node.ironwood-sieve",
+      "name": "Resilient Graft",
+      "nameKey": "tree.node.resilient-graft",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.capacity",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "nerve.afflicted",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 3
     },
@@ -261,81 +334,94 @@
     },
     {
       "affinity": [
-        "likely",
         "core"
       ],
       "affixIds": [
-        "atom.shld-cycle",
-        "atom.shld-surge"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The impact of a blow is not lost, but repurposed into a rhythmic defense.",
-      "id": "skill.fortitude-def-t4-n0",
-      "name": "Kinetic Redirection",
-      "nameKey": "tree.node.kinetic-redirection",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 4
-    },
-    {
-      "affinity": [
-        "core",
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.fortitude",
-        "atom.resilience",
-        "atom.sust-grit"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "tier"
-        ]
-      },
-      "flavor": "The foundation of the self becomes as unmoving as the mountain itself.",
-      "id": "skill.fortitude-def-t4-n1",
-      "name": "Unyielding Core",
-      "nameKey": "tree.node.unyielding-core",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 4
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.shield-regen",
         "atom.shld-cycle"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The impact of a blow is not lost, but redirected into the internal flow of the shell.",
-      "id": "skill.fortitude-def-t5-n0",
-      "name": "Kinetic Recirculation",
-      "nameKey": "tree.node.kinetic-recirculation",
+      "flavor": "Energy flows through the plating, converting impact into a rhythmic surge of protection.",
+      "id": "skill.fortitude-def-t4-n0",
+      "name": "Kinetic Recalibration Protocol",
+      "nameKey": "tree.node.kinetic-recalibration-protocol",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.toughness",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "nerve.shaken",
+        "trigger": "OnSpawn"
+      },
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.arm-hardening"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The weight of the world is met with an unyielding foundation.",
+      "id": "skill.fortitude-def-t4-n1",
+      "name": "Bastion's Grit",
+      "nameKey": "tree.node.bastion-s-grit",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "loadout.slots",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "nerve.unsettled",
+        "trigger": "OnSpawn"
+      },
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "Absorb the impact to fuel the recovery.",
+      "id": "skill.fortitude-def-t5-n0",
+      "name": "Kinetic Dampening",
+      "nameKey": "tree.node.kinetic-dampening",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "move.range",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "nerve.unsettled",
+        "trigger": "OnSunCollect"
+      },
       "rationale": "",
       "tier": 5
     },
@@ -365,55 +451,67 @@
     },
     {
       "affinity": [
+        "occasional",
         "core"
       ],
       "affixIds": [
-        "atom.ward-harden"
+        "atom.shld-surge",
+        "atom.ward-link"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "Layers of hardened sap and iron-rich sediment fuse into a permanent, unyielding shell.",
+      "flavor": "Energy flows through the seams of the plating, binding the spirit to the shell.",
       "id": "skill.fortitude-def-t6-n0",
-      "name": "Calcified Graft",
-      "nameKey": "tree.node.calcified-graft",
+      "name": "Kinetic Tether",
+      "nameKey": "tree.node.kinetic-tether",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm2",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "poison",
+        "trigger": "OnSunCollect"
+      },
       "rationale": "",
       "tier": 6
     },
     {
       "affinity": [
-        "core",
-        "core",
         "likely",
         "core"
       ],
       "affixIds": [
-        "atom.fortitude",
-        "atom.resilience",
-        "atom.sust-grit",
+        "atom.shield-toughness",
         "atom.vitality"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The marrow thickens, turning bone into a dense, unyielding foundation.",
+      "flavor": "The marrow turns to stone, and the skin to granite.",
       "id": "skill.fortitude-def-t6-n1",
-      "name": "Deepened Marrow",
-      "nameKey": "tree.node.deepened-marrow-2",
+      "name": "Lithic Constitution",
+      "nameKey": "tree.node.lithic-constitution",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.atk",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "rally",
+        "trigger": "OnTimer"
+      },
       "rationale": "",
       "tier": 6
     },
@@ -443,53 +541,65 @@
     },
     {
       "affinity": [
-        "likely",
-        "core"
+        "core",
+        "likely"
       ],
       "affixIds": [
-        "atom.sust-grit",
+        "atom.fortitude",
         "atom.vitality"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The deeper the roots, the harder the spirit breaks.",
+      "flavor": "The very earth seems to rise to meet your stride, anchoring your spirit to the bedrock of existence.",
       "id": "skill.fortitude-def-t7-n1",
-      "name": "Rooted Endurance",
-      "nameKey": "tree.node.rooted-endurance-3",
+      "name": "Immovable Foundation",
+      "nameKey": "tree.node.immovable-foundation",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.maxHp",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "shatter",
+        "trigger": "OnTimer"
+      },
       "rationale": "",
       "tier": 7
     },
     {
       "affinity": [
-        "core",
         "core"
       ],
       "affixIds": [
-        "atom.shld-cycle",
-        "atom.shld-surge"
+        "atom.ward-link"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The grain of the wood thickens where the impact was most severe, turning scars into armor.",
+      "flavor": "The boundary between self and protection dissolves into a singular, unyielding presence.",
       "id": "skill.fortitude-def-t8-n0",
-      "name": "Lignin Suture",
-      "nameKey": "tree.node.lignin-suture",
+      "name": "Symbiotic Aegis",
+      "nameKey": "tree.node.symbiotic-aegis",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.breakthroughSuccess",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "spark",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 8
     },
@@ -502,20 +612,58 @@
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The shell drinks from the void to mend the breach.",
+      "flavor": "The rhythm of impact is converted into a structural reinforcement, sealing the gaps between plates.",
       "id": "skill.fortitude-def-t9-n0",
-      "name": "Osmotic Bastion",
-      "nameKey": "tree.node.osmotic-bastion",
+      "name": "Kinetic Osmosis Protocol",
+      "nameKey": "tree.node.kinetic-osmosis-protocol",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.power",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "spore",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 9
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.might"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The momentum of the charge dictates the severity of the strike.",
+      "id": "skill.fortitude-off-t1-n0",
+      "name": "Vanguard's Edge",
+      "nameKey": "tree.node.vanguard-s-edge-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "ai.aggression",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnActivate"
+      },
+      "rationale": "",
+      "tier": 1
     },
     {
       "affinity": [
@@ -528,42 +676,25 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the strike is matched only by the fury behind it.",
-      "id": "skill.fortitude-off-t1-n0",
-      "name": "Vanguard's Edge",
-      "nameKey": "tree.node.vanguard-s-edge-2",
-      "nodeClass": "magnitude",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 1
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.might"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The weight of your defense becomes the momentum of your strike.",
+      "flavor": "The first strike carries the weight of all subsequent carnage.",
       "id": "skill.fortitude-off-t1-n1",
-      "name": "Vanguard's Onset",
-      "nameKey": "tree.node.vanguard-s-onset",
+      "name": "Sanguine Onset",
+      "nameKey": "tree.node.sanguine-onset",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.absorption",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 1
     },
@@ -598,48 +729,60 @@
         "core"
       ],
       "affixIds": [
-        "atom.deathblast"
+        "atom.shld-breach"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The final flowering is always the most violent.",
+      "flavor": "The weight of the fallen fuels the next strike.",
       "id": "skill.fortitude-off-t10-n0",
-      "name": "Terminal Bloom",
-      "nameKey": "tree.node.terminal-bloom",
+      "name": "Finality's Toll",
+      "nameKey": "tree.node.finality-s-toll",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.penetration",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "hypno",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 10
     },
     {
       "affinity": [
-        "core",
-        "core"
+        "likely"
       ],
       "affixIds": [
-        "atom.ferocity",
         "atom.might"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "branch"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The sharpness of the thorn is matched only by the hunger of the vine.",
+      "flavor": "The weight of the strike grows with the heat of the fray.",
       "id": "skill.fortitude-off-t2-n0",
-      "name": "Predatory Edge",
-      "nameKey": "tree.node.predatory-edge",
+      "name": "Aggressor's Momentum",
+      "nameKey": "tree.node.aggressor-s-momentum",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.amplification",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 2
     },
@@ -671,77 +814,96 @@
     },
     {
       "affinity": [
-        "core",
-        "likely"
+        "core"
       ],
       "affixIds": [
-        "atom.might",
-        "atom.savagery"
+        "atom.might"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the strike is measured by the hunger that follows.",
+      "flavor": "The rhythm of battle accelerates with every decisive strike.",
       "id": "skill.fortitude-off-t2-n2",
-      "name": "Predatory Surge",
-      "nameKey": "tree.node.predatory-surge",
+      "name": "Momentum's Surge",
+      "nameKey": "tree.node.momentum-s-surge",
       "nodeClass": "magnitude",
       "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.rate",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
       "tier": 2
     },
     {
       "affinity": [
-        "core",
-        "likely"
+        "core"
       ],
       "affixIds": [
-        "atom.hit-followthrough",
-        "atom.might"
+        "atom.shld-breach"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the strike carries the force of the stance.",
+      "flavor": "Forceful strikes leave the defenses of others in ruin.",
       "id": "skill.fortitude-off-t3-n0",
-      "name": "Momentum Breach",
-      "nameKey": "tree.node.momentum-breach",
+      "name": "Breach Protocol",
+      "nameKey": "tree.node.breach-protocol",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.shred",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "charm_pulse",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
       "tier": 3
     },
     {
       "affinity": [
+        "likely",
         "core"
       ],
       "affixIds": [
+        "atom.ferocity",
         "atom.might"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of your defense becomes the momentum of your strike.",
+      "flavor": "The rhythm of the strike dictates the fury of the follow-through.",
       "id": "skill.fortitude-off-t3-n1",
-      "name": "Vanguard's Edge",
-      "nameKey": "tree.node.vanguard-s-edge",
+      "name": "Onslaught Instinct",
+      "nameKey": "tree.node.onslaught-instinct",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.strength",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "charm_pulse",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
       "tier": 3
     },
@@ -754,18 +916,25 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the strike is measured by the cracks it leaves behind.",
+      "flavor": "The rhythm of the blade dictates the rhythm of the heart.",
       "id": "skill.fortitude-off-t3-n2",
-      "name": "Shattering Blow",
-      "nameKey": "tree.node.shattering-blow",
+      "name": "Crimson Onslaught",
+      "nameKey": "tree.node.crimson-onslaught",
       "nodeClass": "magnitude",
       "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.damage",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "cold",
+        "trigger": "OnDamageTaken"
+      },
       "rationale": "",
       "tier": 3
     },
@@ -797,27 +966,34 @@
     },
     {
       "affinity": [
-        "core",
-        "likely"
+        "likely",
+        "core"
       ],
       "affixIds": [
-        "atom.might",
-        "atom.savagery"
+        "atom.ferocity",
+        "atom.might"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the strike feeds the hunger of the blade.",
+      "flavor": "The weight of the blow is matched only by the fury behind it.",
       "id": "skill.fortitude-off-t4-n1",
-      "name": "Sanguine Momentum",
-      "nameKey": "tree.node.sanguine-momentum",
+      "name": "Sunderer's Intent",
+      "nameKey": "tree.node.sunderer-s-intent",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnDamageTaken"
+      },
       "rationale": "",
       "tier": 4
     },
@@ -849,51 +1025,63 @@
     },
     {
       "affinity": [
-        "core",
         "core"
       ],
       "affixIds": [
-        "atom.might",
-        "atom.savagery"
+        "atom.might"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The hunt is not merely a struggle, but a calculated escalation of force.",
+      "flavor": "The scent of blood accelerates the hunt.",
       "id": "skill.fortitude-off-t5-n1",
       "name": "Apex Predator",
-      "nameKey": "tree.node.apex-predator-4",
+      "nameKey": "tree.node.apex-predator-8",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.defense",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 5
     },
     {
       "affinity": [
-        "core"
+        "likely"
       ],
       "affixIds": [
-        "atom.hit-followthrough"
+        "atom.tempo-surge"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the strike dictates the rhythm of the soul.",
+      "flavor": "The rhythm of the strike dictates the magnitude of the surge.",
       "id": "skill.fortitude-off-t6-n0",
-      "name": "Relentless Cadence",
-      "nameKey": "tree.node.relentless-cadence",
+      "name": "Elemental Overload Sequence",
+      "nameKey": "tree.node.elemental-overload-sequence",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.dodge",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "ember",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 6
     },
@@ -927,49 +1115,61 @@
         "likely"
       ],
       "affixIds": [
-        "atom.hit-followthrough",
-        "atom.tempo-surge"
+        "atom.elpw-override",
+        "atom.elpw-surge"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of your defense becomes the fuel for your advance.",
+      "flavor": "The rhythm of the strike dictates the flow of the surge.",
       "id": "skill.fortitude-off-t7-n0",
-      "name": "Momentum Engine",
-      "nameKey": "tree.node.momentum-engine",
+      "name": "Overclocked Resonance",
+      "nameKey": "tree.node.overclocked-resonance",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.break",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "expose",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 7
     },
     {
       "affinity": [
-        "core",
         "core"
       ],
       "affixIds": [
-        "atom.ferocity",
         "atom.might"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of your defense becomes the momentum of your slaughter.",
+      "flavor": "The eye finds the gap where the armor fails.",
       "id": "skill.fortitude-off-t7-n1",
-      "name": "Savage Momentum",
-      "nameKey": "tree.node.savage-momentum",
+      "name": "Ruthless Accuracy",
+      "nameKey": "tree.node.ruthless-accuracy",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.rate",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "freeze",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 7
     },
@@ -999,25 +1199,32 @@
     },
     {
       "affinity": [
-        "core"
+        "likely"
       ],
       "affixIds": [
-        "atom.tempo-surge"
+        "atom.elpw-attune"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The harder the blow, the deeper the puncture.",
+      "flavor": "The rhythm of the strike dictates the flow of the elements.",
       "id": "skill.fortitude-off-t9-n0",
-      "name": "Sanguine Thorns",
-      "nameKey": "tree.node.sanguine-thorns",
+      "name": "Harmonic Calibration",
+      "nameKey": "tree.node.harmonic-calibration",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.strength",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "hypno",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 9
     }

@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
+using FusionRpg.Core.Status;
 
 namespace FusionRpg.Core.ActorSurface;
 
@@ -18,7 +19,8 @@ public sealed record ActorSheetTabDto(
     [property: JsonPropertyName("kind")] string Kind,
     string Label,
     int Order,
-    bool Hidden);
+    bool Hidden,
+    string? Icon);
 
 public sealed record AptitudeSurfaceEntryDto(
     string Id,
@@ -26,7 +28,8 @@ public sealed record AptitudeSurfaceEntryDto(
     int Ordinal,
     string DisplayName,
     string Role,
-    string Reading);
+    string Reading,
+    string? Icon);
 
 public sealed record DerivedStatSurfaceEntryDto(
     string Family,
@@ -92,6 +95,7 @@ public static class ActorSurfaceCatalogHub
         AptitudeSurfaceCatalogHub.Configure(aptitudes);
         DerivedStatSurfaceCatalogHub.Configure(derived);
         StatusSurfaceCatalogHub.Configure(statuses);
+        StatusCatalogHub.Configure(StatusCatalogFactory.FromSurface(statuses));
         ResourceSurfaceCatalogHub.Configure(resources);
         ElementSurfaceCatalogHub.Configure(elements);
         ActorSheetSurfaceCatalogHub.Configure(sheet);
@@ -123,14 +127,16 @@ public static class ActorSurfaceCatalogHub
                 Kind: TabKindWire(t.Kind),
                 Label: t.Label,
                 Order: t.Order,
-                Hidden: t.Hidden)).ToList(),
+                Hidden: t.Hidden,
+                Icon: t.Icon)).ToList(),
             Aptitudes: aptitudes.Entries.Select(a => new AptitudeSurfaceEntryDto(
                 Id: a.Id,
                 Posture: a.Posture.ToString().ToLowerInvariant(),
                 Ordinal: a.Ordinal,
                 DisplayName: a.DisplayName,
                 Role: a.Role,
-                Reading: a.Reading)).ToList(),
+                Reading: a.Reading,
+                Icon: a.Icon)).ToList(),
             Families: derived.Entries.Select(f => new DerivedStatSurfaceEntryDto(
                 Family: f.Family,
                 Expand: DerivedStatSurfaceCatalogLoader.ExpandWire(f.Expand),

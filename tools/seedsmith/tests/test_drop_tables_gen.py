@@ -333,7 +333,34 @@ class TestHarness:
         assert entry["id"] == "droptable.d2-001"
         assert len(blocked) == 1
         done = ledger.read_done()
-        assert set(done) == {"droptable-draw-d2-000"}
+        assert set(done) == {"droptable-draw-d2-000", "droptable-draw-d2-001"}
+        assert done["droptable-draw-d2-001"]["outcome"] == "blocked"
+
+    def test_run_draws_does_not_checkpoint_before_persist_callback(self, tmp_path):
+        ledger = RunLedger(tmp_path / "ledger.json")
+        dt_dir = tmp_path / "drop-tables"
+        plan = run_mod.plan_run(slot=2, count=1, ledger=ledger, drop_tables_dir=dt_dir)
+
+        def persist(_entry):
+            raise RuntimeError("simulated corpus write failure")
+
+        with pytest.raises(RuntimeError, match="corpus write failure"):
+            run_mod.run_draws(plan, ledger=ledger, call=_fake_call(name="Retry Me"), persist=persist)
+        assert ledger.read_done() == {}
+
+    def test_run_draws_continues_after_an_invalid_model_answer(self, tmp_path):
+        ledger = RunLedger(tmp_path / "ledger.json")
+        dt_dir = tmp_path / "drop-tables"
+        plan = run_mod.plan_run(slot=2, count=2, ledger=ledger, drop_tables_dir=dt_dir)
+        calls = iter([
+            lambda _brief, _schema: {"name": "Bad", "rowBands": []},
+            _fake_call(name="Recovered"),
+        ])
+        fresh, blocked = run_mod.run_draws(plan, ledger=ledger, call=lambda b, s: next(calls)(b, s))
+        assert set(blocked) == {"droptable-draw-d2-000"}
+        assert {entry["name"] for entry in fresh.values()} == {"Recovered"}
+        assert set(ledger.read_done()) == {"droptable-draw-d2-000", "droptable-draw-d2-001"}
+        assert ledger.read_done()["droptable-draw-d2-000"]["outcome"] == "escalated"
 
     def test_resume_never_repeats_a_committed_draw(self, tmp_path):
         ledger = RunLedger(tmp_path / "ledger.json")
@@ -349,6 +376,14 @@ class TestHarness:
     def test_reconcile_resurfaces_a_draw_whose_table_was_deleted(self):
         ledger_entry = {"entryId": "droptable.d1-999", "name": "Ghost Table"}
         assert run_mod.is_valid("x", ledger_entry, existing={}) is False
+
+    def test_plan_run_reuses_an_invalid_ledger_slot_before_allocating_new_draws(self, tmp_path):
+        ledger = RunLedger(tmp_path / "ledger.json")
+        ledger.mark_done("droptable-draw-d2-000", {
+            "entryId": "droptable.d2-999", "name": "Ghost Table",
+        })
+        plan = run_mod.plan_run(slot=2, count=1, ledger=ledger, drop_tables_dir=tmp_path / "dt")
+        assert plan.subjects[0].subject_id == "droptable-draw-d2-000"
 
     def test_reconcile_leaves_a_draw_alone_when_it_still_matches(self):
         ledger_entry = {"entryId": "droptable.d1-999", "name": "Ghost Table"}
@@ -400,7 +435,12 @@ class TestHarness:
             run_mod.main(["--slot", "1", "--count", "1"])
 
     def test_cli_write_without_endpoint_refuses(self, monkeypatch, tmp_path):
+        """Refuse only when the *resolved* transport has no endpoint."""
+        from seedsmith.pipeline.llm_caller import LlmCallerConfig
         monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", tmp_path / "ledger.json")
+        monkeypatch.setattr(
+            "seedsmith.pipeline.llm_caller.resolve_live_transport",
+            lambda *a, **k: LlmCallerConfig(endpoint="", model="x"))
         with pytest.raises(SystemExit):
             run_mod.main(["--slot", "1", "--count", "1", "--write"])
 

@@ -80,6 +80,10 @@ def regenerate(*, plan_path: Path, accepted_round_path: Path, actions_root: Path
     envelope = ba.build_envelope(briefs, meta={
         "partition": f"round-{round_no}", "round": round_no,
         "planPath": str(plan_path), "acceptedRoundPath": str(accepted_round_path),
+        # Preserve A-S1's round-wide digest so every downstream proposer can prove which
+        # complete brief plan its model calls answered. The accepted-round digest below is a
+        # different input and must not be substituted for it.
+        "planCorpusHash": plan_doc.get("_meta", {}).get("corpusHash"),
         # The accepted P2 round's OWN candidate-set digest (A-S3's `_meta.corpusHash` on its own
         # survivors envelope, `dedup_select.derive.RoundResult.corpus_hash`) -- carried through
         # here so A-P3 (signature-propose) never has to re-open `accepted_round_path` itself just

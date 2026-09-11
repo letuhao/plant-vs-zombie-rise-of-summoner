@@ -19,7 +19,8 @@ public sealed record ActorSheetTabEntry(
     ActorSheetTabKind Kind,
     string Label,
     int Order,
-    bool Hidden);
+    bool Hidden,
+    string? Icon);
 
 public sealed record ActorSheetKitRoleLabels(string Humanoid, string Plant);
 
@@ -59,7 +60,8 @@ public static class ActorSheetSurfaceCatalogLoader
                 Kind: ParseTabKind(el, "kind", path),
                 Label: ActorSurfaceJson.Str(el, "label", path, Catalog),
                 Order: ActorSurfaceJson.Int(el, "order", path, Catalog),
-                Hidden: ActorSurfaceJson.Bool(el, "hidden", path, Catalog)));
+                Hidden: ActorSurfaceJson.Bool(el, "hidden", path, Catalog),
+                Icon: ActorSurfaceJson.OptionalStr(el, "icon", path, Catalog)));
             ti++;
         }
 

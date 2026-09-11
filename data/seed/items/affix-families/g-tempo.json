@@ -415,6 +415,26 @@
         "offensive"
       ],
       "notes": "NEW family, stem `tempo` (naming.v1.json idNamespaces.affixFamilies), word `wildgrowth`. Closes the one gap `attackInterval` still had: `quickening` ships `Flat` and `tempo-haste` ships `Increased`, but no `More` -- the same trio `zombieSpeed` was missing until `tempo-stampede` filled its own `More` slot. Same rare-tier reasoning `tempo-stampede`'s own notes give for that family: classes.v1.json's design note that no `More`-op family ever appears on an implicit slate applies identically here, so this is rolled-only, gated to a late tier window via `powerBand: high`. `roles`/`frames`/`side` copied verbatim from `quickening`/`tempo-haste` -- same channel, same legality question. `displayTemplate` reuses `tempo-haste`'s own text verbatim (`{value}% faster attack rate`), matching the established, if unusual, precedent this group already set between `tempo-surge` (Increased) and `tempo-stampede` (More) on `zombieSpeed`, which share an identical template. `nameWords` follows `tempo-stampede`'s REAL shape (checked directly 2026-09-07, correcting this note's own earlier misdescription): three rows, one per band, the same word repeated (`tempo-stampede` itself repeats \"Onslaught\" across A/B/C) -- not one row claiming a wide `t1-t5` range under a single band, which `AffixNameTable.Resolve` cannot match for tier 3/4/5 (band-keyed lookup is exact-band, never a range scan). HAND-AUTHORED 2026-09-07 (affixfamgen/hand-authored-1) as a stand-in for a live LLM call -- no reachable model endpoint this session, per the established item-seedgen precedent for this exact situation. ⛔ Corrected 2026-09-08 (atom-family-expansion): `attackInterval` is NOT outside `AtomKindRegistry.PrimaryChannels` -- E16/E38 already promoted it. RUNTIME: the real, current blocker is that `FamilyExpandGen`'s `FlatReferenceBase` has no `BattleRuleset` curve for `attackInterval` yet (no vanilla \"shipped code\" formula was ever found for it -- see `spec-battle-ruleset-curve-extension.md` §4/Task 5); this row imports but does not yet expand into a real atom row, the same declared state as every other entry already in this file."
+    },
+    {
+      "id": "atom.tempo-pulse",
+      "nameKey": "affix.tempo-shift",
+      "name": "Tempo Shift",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "produceInterval",
+        "op": "More"
+      },
+      "roles": [
+        "manipulator",
+        "infusion"
+      ],
+      "powerBand": "medium",
+      "displayTemplate": "{name} {tempo}",
+      "tags": [
+        "arcane",
+        "mechanical"
+      ]
     }
   ]
 }

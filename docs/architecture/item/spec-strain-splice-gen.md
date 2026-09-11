@@ -51,9 +51,10 @@ also what keeps it from being *"a volume discount with a name"*.
 
 ### Ingredient count is **4** — and nothing in the shipped corpus can hold four
 
-**D20 as amended (§2f.2): the ingredient count is 4, matching `socket_max`'s cap.** ssot-sockets §4.1
-fixes the structural maximum at 4 for four stated reasons, the third being *"a word is at most four
-ingredients, which is memorable."*
+**D20 as amended (§2f.2): the ingredient count is 4, matching one socket circuit.** The eight-socket
+topology partitions an item into consecutive four-socket circuits. A Strain or Splice consumes one
+complete circuit; an eight-socket host can therefore carry two independent combinations without creating
+an eight-ingredient recipe.
 
 ⛔ **Measured over all 740 shipped base types (`data/seed/items/base-types/**`, read 2026-09-03): the
 maximum `socketMax` anywhere is 2.**
@@ -66,11 +67,12 @@ maximum `socketMax` anywhere is 2.**
 
 `socketsNow` is capped at `base_type.socket_max` (ssot-sockets §4.1; D23 prices the top-up but does not
 raise the cap — and §2f.2 corrects D23 to *"a pricing ruling, not the resolution of a blocking
-contradiction"*). **So no Strain and no Splice is buildable on any shipped chassis** — and neither are the
-ten existing 3-ingredient socket-words.
+contradiction"*). **So no Strain and no Splice is buildable unless a chassis has one complete
+four-socket circuit** — and neither are the ten existing 3-ingredient socket-words.
 
-> ⛔ **Hard dependency on module 6 (`base-types`):** it must issue `socketMax = 4` on at least
-> `armament-primary` and `core-guard`, which are the two roles ssot-sockets §4.1 already assigns 4.
+> ⛔ **Hard dependency on module 6 (`base-types`):** it must issue `socketMax >= 4` on at least
+> `armament-primary` and `core-guard`, which ssot-sockets §4.1 now assigns two complete four-socket
+> circuits each.
 > ⚠ [item-ideal.md](../item-ideal.md) §2g #7 is the same finding from the other end — the lane's
 > `socket_max` table *"uses the old twelve role ids and assigns nothing to `ward-array`, `infusion` or
 > `retinue`"*. **Both must be fixed together, and this module is inert until they are.**
@@ -199,9 +201,10 @@ combo.splice-{aptitudeA}-{aptitudeB}     combo.splice-might-agility        66   
 Sorting the pair by ordinal is what makes a Splice **unordered by construction** rather than by a
 uniqueness check that fires after 66 rows exist. One segment after the prefix, no second dot — legal.
 
-⚠ **A per-actor cap is owed** ([item-ideal.md](../item-ideal.md) §2g #8): *"One-per-item is capped; twelve
-Splices on one actor is not. Tunable, start at 3."* It is a count over equipped items, so its natural home
-is module 12's evaluator at assignment time, priced in `data/tuning/`. **Named here; not built here.**
+⚠ **An active per-actor cap is owed** ([item-ideal.md](../item-ideal.md) §2g #8). It now counts active
+combination circuits, not merely host items: an eight-socket item can carry two. Its value is tuning-owned
+and must be re-measured for the eight-socket topology; the evaluator suppresses the lowest stable-priority
+combination rather than refusing an insert. **Named here; not built here.**
 
 ⚠ **ssot-sockets §5.4's `bind_ordinal` request is module 16's**, not this module's — but a 4-ingredient
 combination is exactly the case that makes two identical inserts tie in a sort `definitions.md` §5
@@ -300,8 +303,10 @@ enforced; the fourth `ContainerKind` value `combo` (effect-atom's `definitions.m
 `audit_schema` rejects a numeric field mechanically, and **that check is the enforcement, not review**.
 Never make matching affinity a **requirement** — §2f.2 reverted that and the hard version could never fail
 on a crafted chassis. Never let a set piece carry a combination. Never invent an aptitude → element
-mapping. Never raise `base_type.socket_max` above 4 — it is a **legibility limit, not a progression
-ceiling**, and D23 requires that to be said in a comment where it is declared (module 6's).
+mapping. Never raise `base_type.socket_max` above 8. The **four-socket circuit** is the legibility limit,
+not the host capacity: an eight-socket host has two independently evaluated circuits, never an
+eight-ingredient recipe. D23 requires that distinction to be stated in a comment where the role-derived
+capacity is declared (module 6's).
 
 ## Success criteria
 

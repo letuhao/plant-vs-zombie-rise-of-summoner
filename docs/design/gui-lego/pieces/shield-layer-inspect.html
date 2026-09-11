@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>shield-layer-inspect — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+<style>
+  .shield-layer-inspect {
+    min-width: 160px;
+    padding: 12px 14px;
+    border: 1px solid color-mix(in srgb, var(--piece-accent, var(--border-control)) 40%, var(--border-control));
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--piece-accent, transparent) 8%, var(--panel-inset));
+    color: var(--text);
+  }
+  .shield-layer-inspect .eyebrow {
+    margin: 0;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--piece-accent, var(--muted));
+  }
+  .shield-layer-inspect .title {
+    margin: 4px 0 0;
+    font-family: var(--font-display);
+    font-size: 16px;
+  }
+  .shield-layer-inspect .hp {
+    margin: 8px 0 0;
+    font-family: var(--font-mono, ui-monospace);
+    font-size: 14px;
+    font-weight: 800;
+  }
+  .shield-layer-inspect .meta {
+    margin: 8px 0 0;
+    display: grid;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .shield-layer-inspect .meta b {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .shield-layer-inspect.is-empty,
+  .shield-layer-inspect.is-pending {
+    border-style: dashed;
+    background: var(--panel-inset);
+  }
+</style>
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>shield-layer-inspect</code></h1>
+  <p class="lede">Inspect selected layer: hp/max, element, priority fiction, source fiction. No FE absorb math. Cascade / apply-outcome deferred (D8). Spec: <code>docs/architecture/gui-lego/spec-shield-layer-inspect.md</code>.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live)</h2>
+      <div class="piece-stage">
+        <div class="shield-layer-inspect" style="--piece-accent:var(--el-ice); --piece-rail-edge:var(--el-ice)">
+          <p class="eyebrow">Selected layer</p>
+          <p class="title">Ice aura shield</p>
+          <p class="hp">40 / 40</p>
+          <div class="meta">
+            <span>Priority · <b>Aura</b></span>
+            <span>Source · <b>From your pact</b></span>
+            <span>Element · <b>Ice</b></span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "shield-layer-inspect",
+  "instanceId": "shield:inspect:aura-1",
+  "phase": "ready",
+  "title": "Ice aura shield",
+  "currentText": "40",
+  "maxText": "40",
+  "priorityLabel": "Aura",
+  "sourceLabel": "From your pact",
+  "elementLabel": "Ice",
+  "themeRef": { "kind": "element", "id": "ice" }
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

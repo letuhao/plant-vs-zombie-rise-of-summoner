@@ -72,8 +72,59 @@ export type ActorSheetChannelDto = {
   displayName: string;
   reading: string;
   composeKind: string;
+  /** D6: wire twin of Contracts double Value (overflow widen is a separate Core ticket). */
   value: number;
   contributions: ActorContributionDto[];
+  unitClass: string;
+  defaultValue: number;
+  /** Null when uncapped (e.g. status.resist.omni). */
+  cap: number | null;
+  /** D2 authoritative: active|default|capped|stub|no-producer|unregistered. */
+  renderState: string;
+};
+
+export type ActorElementTypingDto = {
+  primary: string;
+  secondary?: string;
+};
+
+export type ActorStatusGlyphDto = {
+  statusId: string;
+  remainingPermille?: number | null;
+};
+
+export type ActorResourcePoolDto = {
+  resourceId: string;
+  current?: number | null;
+  max?: number | null;
+};
+
+export type ActorShieldSummaryDto = {
+  elementId?: string | null;
+  current?: number | null;
+  max?: number | null;
+  stacks?: number | null;
+};
+
+/** Wire shape for one drain-order shield layer on ActorSheetDto (S1). */
+export type ActorShieldLayerDto = {
+  shieldId: string;
+  elementId?: string | null;
+  current: number;
+  max: number;
+  priority: number;
+  sourceId: string;
+  isInnate: boolean;
+  regenPerSecond?: number | null;
+  broken?: boolean;
+};
+
+export type ActorStandingDto = {
+  offense: number;
+  survivability: number;
+  control: number;
+  utility: number;
+  economy: number;
 };
 
 export type ActorSheetDto = {
@@ -82,7 +133,19 @@ export type ActorSheetDto = {
   side: string;
   typeId: number;
   displayName: string | null;
+  speciesId?: string | null;
+  speciesName?: string | null;
+  phase?: string | null;
+  roleLabel?: string | null;
   level: number;
+  xp?: number;
+  xpToNext?: number | null;
+  elementTyping?: ActorElementTypingDto | null;
+  standing?: ActorStandingDto | null;
+  liveStatuses?: ActorStatusGlyphDto[];
+  resourcePools?: ActorResourcePoolDto[];
+  shieldSummary?: ActorShieldSummaryDto | null;
+  shieldLayers?: ActorShieldLayerDto[];
   derived: ActorSheetChannelDto[];
   primary: ActorContributionDto[];
 };
@@ -91,6 +154,7 @@ export type ActorSheetDto = {
 export function contributionFictionLabel(sourceId: string): string {
   if (!sourceId.trim()) return "(unattributed)";
   if (sourceId === "rpg.progression") return "Progression";
+  if (sourceId === "rpg.resource.base") return "Resource base";
   if (sourceId.startsWith("equip:")) {
     const parts = sourceId.split(":");
     const role = parts[1] ?? "unknown";

@@ -1,0 +1,177 @@
+{
+  "_meta": {
+    "assemblyGateRejectCount": 0,
+    "candidateSetHash": "f559e12e41c841a5195851375a108099bfab65df046b00591effebad44eb0353",
+    "differentiatorNoneRate": 0.0,
+    "disagreementRate": {},
+    "partition": "rounds",
+    "preflight": "skipped",
+    "restrictionUncheckedCount": 0,
+    "round": 1
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "briefHash": "60d48a2dd4136effa7446ce719cf70437ff11e3707ef31746dd816442defb3b5",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:14:45+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.arm-plate",
+            "atom.stalwart"
+          ],
+          [
+            "atom.plating",
+            "atom.sust-callus"
+          ],
+          [
+            "atom.fortitude",
+            "atom.immunity"
+          ]
+        ]
+      },
+      "briefId": "brief.general.general.007",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.arm-plate|atom.fortitude|atom.immunity|atom.plating|atom.stalwart|atom.sust-callus"
+    },
+    {
+      "_provenance": {
+        "briefHash": "9fe99173483afccc4208177da100c2bc0fe708d8f2e7f82cd9eaea22e3f0c19b",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T15:20:00+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.chilling"
+          ],
+          [
+            "atom.cherry-bloom"
+          ],
+          [
+            "atom.ward-harden"
+          ]
+        ]
+      },
+      "briefId": "brief.family.academic.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.cherry-bloom|atom.chilling|atom.ward-harden"
+    },
+    {
+      "_provenance": {
+        "briefHash": "8224bf04cdc8a412759634db8c2719584cd8ae98d982cda6a6415c5cdb1bfb33",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T16:52:38+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "7c7d3fbd5bf40590cb8f6008f040276d4833ad2466bdf6b84ecda584c7e4eb18",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.shld-toughness"
+          ],
+          [
+            "atom.sust-husk"
+          ],
+          [
+            "atom.ward-harden"
+          ]
+        ]
+      },
+      "briefId": "brief.species.abyssswordstar.002",
+      "candidateId": null,
+      "confidence": {
+        "atomFamilies": "unresolved",
+        "differentiator": "split"
+      },
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.shld-toughness",
+          "atom.sust-husk",
+          "atom.ward-harden"
+        ],
+        "differentiator": "atoms"
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "79404892ad6d8ebe8ebf27d2a1a947ad7bf665badad9295c68444b69baac8c9c",
+        "briefsCorpusHash": "d73e1db06b24c4ed812761cb50ecde768b6435d252eee649e24eab6d869167e0",
+        "generatedUtc": "2026-09-10T16:52:38+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "7c7d3fbd5bf40590cb8f6008f040276d4833ad2466bdf6b84ecda584c7e4eb18",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.elpw-surfeit"
+          ],
+          [
+            "atom.elpw-attune"
+          ],
+          [
+            "atom.elpw-surge"
+          ]
+        ]
+      },
+      "briefId": "brief.species.abyssswordstar.003",
+      "candidateId": null,
+      "confidence": {
+        "atomFamilies": "unresolved",
+        "differentiator": "high"
+      },
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.elpw-attune",
+          "atom.elpw-surfeit",
+          "atom.elpw-surge"
+        ],
+        "differentiator": null
+      }
+    }
+  ],
+  "kind": "action-review",
+  "schemaVersion": 1
+}

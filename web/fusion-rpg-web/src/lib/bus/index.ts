@@ -3,6 +3,7 @@ export * from "./rest";
 export * from "./keys";
 export * from "./queries";
 export * from "./mutations";
+export * from "./aptitudePresets";
 export * from "./hub-provider";
 export * from "./log-store";
 export * from "./cheat-dirty";

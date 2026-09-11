@@ -127,6 +127,7 @@ docs/design/
   _kit/kit.css                 foundation component styles
   _kit/screens.css             stage layouts and screen-level structures
   00-foundation.html … 13-actor-sheet.html   the plates (numbered by design order)
+  gui-lego/                    composable menu Lego drafts (pieces, themes, recipes) — design-only
 ```
 
 Plates are numbered by the order they are *designed*, not by navigation order.
@@ -156,6 +157,8 @@ connects them.
 | [11-world-stage.html](11-world-stage.html) | **The world map component catalog** — inspector sector **card** in every state · compact **map pin** (plate §O: pin ≠ card, zoom LOD, dual-plane, focus, safe-area) · lanes as a stroke legend · the four fog states · legions and supply · orders and targeting · lenses · the anchored HUD · turn cluster · outliner · bounded inspector · confirms · turn playback · unit families. **Supersedes plate 03's world sections**. HUD/commands ideal: [world-stage-ideal.md](../architecture/world-stage-ideal.md). Map plane ideal: [world-map-runtime-ideal.md](../architecture/world-map-runtime-ideal.md) | **Draft — for review** |
 | [12-lawn-stage.html](12-lawn-stage.html) | **Lawn interactive catalog** — ActorCollection, reserved-left dock, 12-col board, spawn tray, off-board combat book, match HUD. ActorSheet is composed here, catalogs live on plate 13. Contract: [spec-lawn-interactive.md](spec-lawn-interactive.md) | **Draft — audit-folded, for review** |
 | [13-actor-sheet.html](13-actor-sheet.html) | **Complete ActorSheet catalog** — InspectSplit, leftover + Confirm, StatRow, lexicon seed, visual shield/status, eight tabs, closed inventories underneath | **Draft — visual pass 2026-09-07, for review** |
+| [actor-sheet-shell-rail.html](actor-sheet-shell-rail.html) | **ActorSheet root shell** — left vertical rail (expand/collapse), actor summarize (name/level/role), right tab panel. Shell chrome SSOT for `actor-sheet-shell` | **Draft — 2026-09-09** |
+| [gui-lego/README.md](gui-lego/README.md) | **Game menu Lego kit** — piece drafts, theme packs, `derived-console` recipe (MVVM + ERM). Ideal: [gui-lego-ideal.md](../architecture/gui-lego-ideal.md). First slice = Derived combat console | **Draft — awaiting owner review of piece boundaries** |
 
 ### Coverage
 

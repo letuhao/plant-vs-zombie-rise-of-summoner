@@ -8,6 +8,11 @@
 #                                            # a stale wwwroot silently served an old FE build for a
 #                                            # whole session because this used to be opt-in and got
 #                                            # forgotten; opt-out is the only safe default)
+# FE landing (2026-09-09): vite writes src\FusionRpg.Server\wwwroot; the running server serves
+# dist\FusionRpg.Server\wwwroot (ContentRoot = exe dir). A running server skips `dotnet publish`
+# (DLL locks), which used to leave dist's FE stale even after a fresh vite build. This script always
+# mirrors src wwwroot → dist wwwroot after the UI step so -NoServer / "server already up" still
+# lets you hard-refresh and confirm FE fixes without -RestartServer.
 # Server data (rpg-hot / rpg-media) lives next to the published exe: dist\FusionRpg.Server\data\
 # Runs guard-single-writer.ps1 + guard-dal.ps1 + guard-secondary-no-unity.ps1 + guard-funnel-delta.ps1 + guard-actor-hub.ps1
 # + guard-overflow.ps1 + guard-magic-numbers.ps1 + guard-power.ps1 + guard-stat-pairs.ps1
@@ -29,7 +34,49 @@ $ServerProj = Join-Path $Root "src\FusionRpg.Server\FusionRpg.Server.csproj"
 $ServerOut = Join-Path $Root "dist\FusionRpg.Server"
 $ServerExe = Join-Path $ServerOut "FusionRpg.Server.exe"
 $DataDir = Join-Path $ServerOut "data"
+$WwwrootSrc = Join-Path $Root "src\FusionRpg.Server\wwwroot"
+$WwwrootDist = Join-Path $ServerOut "wwwroot"
 $Health = "http://127.0.0.1:5088/health"
+
+function Sync-ServerWwwroot {
+    param(
+        [Parameter(Mandatory = $true)][string]$Source,
+        [Parameter(Mandatory = $true)][string]$Destination
+    )
+    if (-not (Test-Path $Source)) {
+        throw "wwwroot missing: $Source (run without -NoRebuildUi, or build web\fusion-rpg-web first)"
+    }
+    New-Item -ItemType Directory -Force -Path $Destination | Out-Null
+    # Mirror so hashed vite chunks deleted from src do not linger in dist and get served stale.
+    # robocopy uses bit-flag exits (1 = copied files). Do not let PS 7 native-command preference
+    # treat a successful copy as a terminating error.
+    $prevNative = $null
+    if (Test-Path variable:PSNativeCommandUseErrorActionPreference) {
+        $prevNative = $PSNativeCommandUseErrorActionPreference
+        $PSNativeCommandUseErrorActionPreference = $false
+    }
+    try {
+        $null = & robocopy $Source $Destination /MIR /NFL /NDL /NJH /NJS /nc /ns /np
+        $rc = $LASTEXITCODE
+    } finally {
+        if ($null -ne $prevNative) { $PSNativeCommandUseErrorActionPreference = $prevNative }
+    }
+    # robocopy: 0-7 = success/partial copy; 8+ = failure
+    if ($rc -ge 8) {
+        throw "wwwroot sync failed (robocopy exit $rc): $Source -> $Destination"
+    }
+    $srcIndex = Join-Path $Source "index.html"
+    $dstIndex = Join-Path $Destination "index.html"
+    if (-not (Test-Path $dstIndex)) {
+        throw "wwwroot sync left no index.html at $dstIndex"
+    }
+    $srcHash = (Get-FileHash $srcIndex -Algorithm SHA256).Hash
+    $dstHash = (Get-FileHash $dstIndex -Algorithm SHA256).Hash
+    if ($srcHash -ne $dstHash) {
+        throw "wwwroot sync mismatch: src index.html hash $srcHash != dist $dstHash"
+    }
+    Write-Host "==> FE synced to $Destination (index.html SHA256 $($srcHash.Substring(0,12))…)"
+}
 
 if ($LoaderHost -eq "MelonLoader") {
     # Default install for this machine (2026-08-30) -- override with $env:FUSIONRPG_ML_GAMEDIR for a
@@ -72,7 +119,16 @@ if (-not $NoRebuildUi) {
     if ($LASTEXITCODE -ne 0) { Pop-Location; throw "web UI build failed" }
     Pop-Location
 } else {
-    Write-Host "==> Skipping web UI build (-NoRebuildUi) -- server will serve whatever is already in wwwroot"
+    Write-Host "==> Skipping web UI build (-NoRebuildUi) -- will sync whatever is already in src wwwroot"
+}
+
+# Always push FE into dist, even when `dotnet publish` is skipped because :5088 is locked.
+# The live server ContentRoot is dist\FusionRpg.Server — src wwwroot alone is not enough.
+if (Test-Path $WwwrootSrc) {
+    Write-Host "==> Syncing FE wwwroot into published server tree"
+    Sync-ServerWwwroot -Source $WwwrootSrc -Destination $WwwrootDist
+} else {
+    Write-Host "==> No src wwwroot yet — FE sync deferred until after publish (or build the UI)"
 }
 
 Write-Host "==> Single-writer guard"
@@ -229,16 +285,26 @@ $serverWasUp = Test-ServerUp
 
     if ($serverWasUp) {
         # A running server locks its own published DLLs -- `dotnet publish` below would fail with a
-        # confusing MSBuild file-lock retry spam, not a clear message. Fail fast with the real reason
-        # and the actual fix instead (2026-08-30 -- hit this for real while chasing a stale-FE bug).
-        Write-Host "==> Server already running at $Health -- skipping publish (it would fail: the running exe locks its own DLLs)."
-        Write-Host "    Pass -RestartServer to stop it and deploy the fresh build, or stop it yourself first."
+        # confusing MSBuild file-lock retry spam, not a clear message. Skip DLL publish, but FE was
+        # already mirrored into dist\wwwroot above (2026-09-09). Pass -RestartServer when you need
+        # fresh server/injector managed DLLs too.
+        Write-Host "==> Server already running at $Health -- skipping DLL publish (exe locks its own DLLs)."
+        Write-Host "    FE wwwroot was synced into dist; hard-refresh the browser to confirm UI fixes."
+        Write-Host "    Pass -RestartServer to stop it and publish a fresh server binary, or stop it yourself first."
+        if (Test-Path $WwwrootSrc) {
+            Sync-ServerWwwroot -Source $WwwrootSrc -Destination $WwwrootDist
+        }
     } else {
         Write-Host "==> Publishing server to $ServerOut"
         dotnet publish $ServerProj -c Release -o $ServerOut --nologo -v q
         if ($LASTEXITCODE -ne 0) { throw "server publish failed -- see output above" }
         if (-not (Test-Path $ServerExe)) {
             throw "Server exe missing after publish: $ServerExe"
+        }
+        # Publish copies wwwroot, but vite may have finished after MSBuild's content snapshot in some
+        # edge timings — re-mirror so dist always matches the UI build from this same script run.
+        if (Test-Path $WwwrootSrc) {
+            Sync-ServerWwwroot -Source $WwwrootSrc -Destination $WwwrootDist
         }
     }
 
@@ -251,7 +317,8 @@ $serverWasUp = Test-ServerUp
         Write-Host "==> -NoServer: built and published, NOT started. Start it yourself with:"
         Write-Host "    Start-Process -FilePath `"$ServerExe`" -WorkingDirectory `"$ServerOut`""
     } elseif ($serverWasUp) {
-        Write-Host "==> Server still running at $Health (unchanged -- pass -RestartServer to deploy the fresh build)"
+        Write-Host "==> Server still running at $Health (DLLs unchanged; FE wwwroot synced — hard-refresh UI)"
+        Write-Host "    Pass -RestartServer to redeploy the server binary too"
     } else {
         Write-Host "==> Starting RPG server (data beside exe: $DataDir)"
         # No FUSIONRPG_DATA — Program.cs defaults to {exeDir}/data/{rpg-hot,rpg-media}.sqlite

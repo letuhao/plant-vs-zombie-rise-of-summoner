@@ -139,16 +139,25 @@ recomputes*). **The server sends the cascade; the UI renders it.**
 Not three separate bars, and not one merged bar. **One bar, segmented, drawn in drain order
 left-to-right**, so the reading direction *is* the depletion direction.
 
+**FE SSOT (2026-09-10):** piece `shield-stack-bar` · wire `sheet.shieldLayers` (ActorSheet Hot,
+same flush as `shieldSummary`) · programs [shield-sheet-map.md](../architecture/shield-sheet-map.md)
++ glance [condition-glance](../architecture/condition-glance-map.md) (`shield-status` from Totals).
+Player `GET …/shields` is **not** the tab SSOT. Three permanent “Empty layer” radials are **out**.
+
+Glance summary: `ActorShieldSummaryDto` from `Totals`; `elementId` = front drain-order layer;
+omit mount when null/`current≤0` (Q3).
+
 - Each segment carries its **element** (or an untyped hatch), its current/max, and its source.
 - **Segment width is proportional to `maxHp`, and the fill within each is its own `hp/maxHp`** — a
   broken layer collapses to an empty slot rather than vanishing, because the player needs to see the
   layer existed.
 - The three priority tiers are **labelled, not just ordered** — aura / skill / innate. Order alone
   cannot survive two shields sharing a tier.
-- Regen shows as a rate on the segment (`+3/s`), in the `GameUnitsPerSecond` unit class.
+- Regen shows as a rate on the segment (`+3/s`), in the `GameUnitsPerSecond` unit class — **v1 only
+  if runtime exposes the rate on the layer DTO**; else omit (D8).
 - **A typed segment carries its element's colour**, because the element *is* the mechanic here —
   `elemMod` is computed against it, so a generic fill would hide the thing deciding how much the
-  layer pays. Untyped renders as a neutral hatch.
+  layer pays. Untyped renders as a neutral hatch. Paint via `element-paint-ssot`.
 
 **Measured, not eyeballed (GG-30).** The segment label is `--text` over the blended fill. At the
 first-drawn opacity of `.55` the pale elements **failed WCAG AA** — `light` 3.28, `air` 3.90,

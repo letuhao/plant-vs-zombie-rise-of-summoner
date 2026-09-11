@@ -113,6 +113,7 @@ public class ItemCardTests
 
     static readonly Lazy<IReadOnlyList<SetDef>> Sets = new(() =>
         Directory.EnumerateFiles(Seed("items", "sets"), "*.json")
+            .Where(f => !Path.GetFileName(f).EndsWith(".ledger.json", StringComparison.Ordinal))
             .OrderBy(f => f, StringComparer.Ordinal)
             .SelectMany(f => SetCorpus.Parse(File.ReadAllText(f)))
             .ToList());
@@ -754,6 +755,7 @@ public class ItemCardTests
                     yield return (k, t);
 
         foreach (var file in Directory.EnumerateFiles(Seed("items", "sets"), "*.json")
+                     .Where(f => !Path.GetFileName(f).EndsWith(".ledger.json", StringComparison.Ordinal))
                      .OrderBy(f => f, StringComparer.Ordinal))
             foreach (var s in SetCorpus.Parse(File.ReadAllText(file)))
                 if (s.FlavourKey is { Length: > 0 } k && s.FlavourText is { Length: > 0 } t)

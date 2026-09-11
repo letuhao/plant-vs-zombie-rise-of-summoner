@@ -212,9 +212,11 @@ class TestPolicyTests:
 
 class TestRealCorpusTests:
     def test_the_real_corpus_loads_and_reports_without_error(self):
-        # Explicit acceptance value for the shared committed affix-family corpus.
+        # Explicit acceptance value for the shared committed affix-family corpus (112 -> 125
+        # after the owner's item-seed commits; nodegen's test_nodegen_vocab tracks the same
+        # number, so the two stay in step).
         report = build_report(REPO_ROOT).to_dict()
-        assert report["populationSize"] == 112
+        assert report["populationSize"] == 125
         assert report["acceptedCount"] > 0
 
     def test_the_report_is_byte_identical_across_two_runs(self):
@@ -222,7 +224,7 @@ class TestRealCorpusTests:
         b = canonical_dump(build_report(REPO_ROOT).to_dict())
         assert a == b
 
-    def test_load_affix_family_ids_finds_all_112_real_families(self):
+    def test_load_affix_family_ids_finds_all_real_families(self):
         ids = load_affix_family_ids(REPO_ROOT)
-        assert len(ids) == 112
+        assert len(ids) == 125
         assert "atom.might" in ids

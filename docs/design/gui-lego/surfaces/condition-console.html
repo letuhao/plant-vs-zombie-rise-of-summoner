@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Condition Console — 2×2 grid</title>
+  <style>
+    body { margin: 0; padding: 24px; background:#1f1914; color:#f2ead8; font-family: Inter, sans-serif; }
+    .condition-console {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-areas:
+        "prog identity"
+        "hero stand";
+      gap: 16px;
+      max-width: 1100px;
+      margin: 0 auto;
+      min-height: 520px;
+    }
+    .progression-gauge { grid-area: prog; }
+    .actor-identity { grid-area: identity; }
+    .cond-hero { grid-area: hero; min-height: 0; }
+    .stand-row { grid-area: stand; min-height: 0; }
+
+    .card {
+      border: 1px solid #5b5144;
+      border-radius: 14px;
+      background: #2f261d;
+      padding: 16px;
+      min-width: 0;
+    }
+    .eyebrow, .spec-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #a39583;
+    }
+    .hd { display:flex; justify-content:space-between; gap:12px; align-items:center; }
+    .track {
+      margin-top: 8px; height: 10px; overflow: hidden;
+      border-radius: 999px; background: #201a14; border: 1px solid #5b5144;
+    }
+    .track > i, .fill { display:block; height:100%; background:#e0b44b; }
+
+    .actor-identity { display:flex; gap:12px; align-items:flex-start; }
+    .portrait {
+      width:48px; height:48px; flex:none;
+      border:1px solid #7fb4ff; border-radius:8px; background:#111;
+    }
+    .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .chip {
+      padding:2px 8px; border:1px solid #5b5144; border-radius:999px;
+      font-size:10px; text-transform:uppercase; color:#a39583;
+    }
+
+    .cond-hero {
+      display:flex; gap:16px; align-items:stretch;
+    }
+    .radial-wrap {
+      width:128px; height:128px; flex:none; position:relative;
+      border:1px solid #5b5144; border-radius:16px;
+      display:grid; place-items:center; background:#241d17;
+    }
+    .radial {
+      --p: 69; --c: #d98787;
+      width: 88px; height: 88px; border-radius: 50%;
+      background: conic-gradient(var(--c) calc(var(--p) * 1%), #201a14 0);
+      display: grid; place-items: center;
+    }
+    .radial::after {
+      content: ""; width: 66%; height: 66%; border-radius: 50%;
+      background: #2f261d; border: 1px solid #5b5144;
+    }
+    .radial-wrap .n {
+      position: absolute; z-index: 1; font-weight: 800; font-size: 12px;
+    }
+    .pool-col {
+      flex:1; min-width:0; min-height:0;
+      display:grid; gap:4px; align-content:start;
+      overflow:auto;
+    }
+    .meter {
+      padding:6px 8px; border: none; border-radius:0; background:transparent;
+    }
+    .meter .cap { display:flex; justify-content:space-between; font-size:12px; }
+    .meter .track { height:6px; margin-top:4px; }
+    .meter[data-pool="hp"] .fill { background:#d98787; }
+    .meter[data-pool="stamina"] .fill { background:#e0b44b; }
+    .meter[data-pool="hunger"] .fill { background:#e7733f; }
+    .meter[data-pool="spirit"] .fill { background:#7fb4ff; }
+    .meter[data-pool="qi"] .fill { background:#d8c9a8; }
+    .meter[data-pool="poise"] .fill { background:#9ad0c8; }
+    .meter .cap { display:flex; justify-content:space-between; font-size:12px; gap:8px; }
+    .meter .track { height:8px; margin-top:6px; }
+    .meter .fill { width:69%; background:#d98787; }
+
+    .stand-row {
+      display:grid; grid-template-columns:140px minmax(0, 1fr); gap:16px;
+    }
+    .radar-box { display:grid; place-items:center; }
+    .live-col { min-width:0; min-height:0; overflow:auto; }
+    .bars { display:grid; gap:8px; margin-top:8px; }
+    .bar {
+      display:grid; grid-template-columns:100px minmax(0, 1fr) 40px;
+      gap:8px; align-items:center; font-size:12px;
+    }
+    .bar .t {
+      height:8px; overflow:hidden; border-radius:999px;
+      background:#201a14; border:1px solid #5b5144;
+    }
+    .bar .t i { display:block; height:100%; }
+    .glyphs { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+    .glyphs > * {
+      width:46px; height:46px; border-radius:12px; border:1px solid #5b5144;
+      background:#241d17; display:grid; place-items:center;
+    }
+
+    @media (max-width: 900px) {
+      .condition-console {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "prog"
+          "identity"
+          "hero"
+          "stand";
+        min-height: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="condition-console" data-testid="condition-console">
+    <section class="card progression-gauge" data-grid-area="prog">
+      <div class="hd">
+        <span class="eyebrow">Current progression</span>
+        <strong>Lv 14</strong>
+      </div>
+      <div style="margin-top:8px"><b>2,140 / 3,400 XP</b></div>
+      <div class="track"><i style="width:62%"></i></div>
+    </section>
+
+    <section class="card actor-identity" data-grid-area="identity">
+      <div class="portrait" aria-hidden="true"></div>
+      <div>
+        <div style="font:700 18px/1.1 ui-serif">Sunflower</div>
+        <div class="chips">
+          <span class="chip">ActiveBound</span>
+          <span class="chip">fire</span>
+          <span class="chip">light</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card cond-hero" data-grid-area="hero">
+      <div class="radial-wrap" title="HP with shield overlay">
+        <div class="radial" style="width:96px;height:96px;--p:40;--c:#e7733f"></div>
+        <div class="radial" style="position:absolute;width:72px;height:72px;--p:69;--c:#d98787"></div>
+        <span class="n">HP</span>
+      </div>
+      <div class="pool-col">
+        <div class="meter" data-pool="hp"><span class="cap"><span>HP</span><b>1,240 / 1,800</b></span><span class="track"><span class="fill" style="width:69%"></span></span></div>
+        <div class="meter" data-pool="stamina"><span class="cap"><span>Stamina</span><b>44 / 60</b></span><span class="track"><span class="fill" style="width:73%"></span></span></div>
+        <div class="meter" data-pool="hunger"><span class="cap"><span>Sun</span><b>12 / 40</b></span><span class="track"><span class="fill" style="width:30%"></span></span></div>
+        <div class="meter" data-pool="spirit"><span class="cap"><span>Spirit</span><b>22 / 40</b></span><span class="track"><span class="fill" style="width:55%"></span></span></div>
+        <div class="meter" data-pool="qi"><span class="cap"><span>Yang</span><b>8 / 24</b></span><span class="track"><span class="fill" style="width:33%"></span></span></div>
+        <div class="meter" data-pool="poise"><span class="cap"><span>Poise</span><b>18 / 20</b></span><span class="track"><span class="fill" style="width:90%"></span></span></div>
+      </div>
+    </section>
+
+    <section class="card stand-row" data-grid-area="stand">
+      <div class="radar-box" aria-label="Standing five axes">
+        <svg width="140" height="140" viewBox="0 0 150 150">
+          <polygon points="75,18 132,62 110,128 40,128 18,62" fill="none" stroke="#5b5144"/>
+          <polygon points="75,38 110,64 98,108 52,108 40,64" fill="rgb(224 180 75 / 0.28)" stroke="#e0b44b"/>
+        </svg>
+      </div>
+      <div class="live-col">
+        <p class="spec-label">Standing</p>
+        <div class="bars">
+          <div class="bar"><span>Offense</span><span class="t"><i style="width:100%;background:#d98787"></i></span><b>77</b></div>
+          <div class="bar"><span>Survivability</span><span class="t"><i style="width:75%;background:#6dbb63"></i></span><b>58</b></div>
+          <div class="bar"><span>Control</span><span class="t"><i style="width:47%;background:#b48ae6"></i></span><b>36</b></div>
+          <div class="bar"><span>Utility</span><span class="t"><i style="width:34%;background:#7fb4ff"></i></span><b>26</b></div>
+          <div class="bar"><span>Economy</span><span class="t"><i style="width:64%;background:#e0b44b"></i></span><b>49</b></div>
+        </div>
+        <p class="spec-label" style="margin-top:16px">Effects</p>
+        <div class="glyphs"><button type="button">SP</button><button type="button">CO</button><button type="button">EM</button><span>+1</span></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

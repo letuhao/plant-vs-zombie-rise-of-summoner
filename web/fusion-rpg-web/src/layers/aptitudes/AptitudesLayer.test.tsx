@@ -30,6 +30,11 @@ vi.mock("@/lib/bus/demons", () => ({
   newCorrelationId: () => "corr-1"
 }));
 
+vi.mock("@/lib/bus/aptitudePresets", () => ({
+  probeAptitudePresetsApi: vi.fn(async () => true),
+  useAptitudePresetActive: () => ({ data: { presetId: null }, isLoading: false })
+}));
+
 describe("AptitudesLayer", () => {
   it("with no speciesId, opens on the Commander tab and names the missing selection on the Species tab", async () => {
     const user = userEvent.setup();

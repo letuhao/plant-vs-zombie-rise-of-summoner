@@ -119,12 +119,12 @@ public class WorldCalendarProjectionTests : IAsyncLifetime
         // Structural: no "seed" key anywhere in the whole response, not just absent from Calendar.
         Assert.DoesNotContain("\"seed\"", raw, StringComparison.OrdinalIgnoreCase);
 
-        // No future roll: the calendar object has exactly the seven fields this turn's roll needs,
+        // No future roll: the calendar object has exactly the eight fields this turn's roll needs,
         // nothing shaped like a next-turn or next-week preview.
         var calendar = (await State()).GetProperty("calendar");
         var propertyNames = calendar.EnumerateObject().Select(p => p.Name).OrderBy(n => n, StringComparer.Ordinal).ToList();
         Assert.Equal(
-            new[] { "daysPerWeek", "monthBoundary", "plague", "specialMonth", "specialWeek", "weekBoundary", "weeksPerMonth" },
+            new[] { "daysPerWeek", "monthBoundary", "plague", "season", "specialMonth", "specialWeek", "weekBoundary", "weeksPerMonth" },
             propertyNames);
     }
 

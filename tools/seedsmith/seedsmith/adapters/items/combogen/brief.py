@@ -23,7 +23,7 @@ from .grid import Cell, scan_for_banned_word
 from .supply import SupplyReport
 from .tuning import ComboTuning
 
-PROMPT_VERSION = "strain-splice-gen/1"
+PROMPT_VERSION = "strain-splice-gen/2"
 
 
 class BriefRefused(ValueError):
@@ -39,20 +39,42 @@ def _supply_lines(supply: SupplyReport, limit: int) -> str:
     return "\n".join(lines)
 
 
+def _strain_reading_lines(cell: Cell) -> str:
+    """Aptitude meaning always; offense-shaped `reading` only on the offense archetype.
+
+    Defense/balance themes still carry the roster's global reading (e.g. Might → "Hit harder.") and
+    often `antiMotifs: ["offense"]`. Pasting both into one brief invites a coherent `blocked`. Frame
+    non-offense cells as posture over the aptitude, and omit the offense-shaped play reading so it
+    cannot contradict `Avoid entirely: offense`.
+    """
+    apt = cell.aptitudes[0]
+    lines = [f"What '{apt.id}' means: {apt.meaning}"]
+    if cell.archetype == "offense":
+        lines.append(f"What it reads as in play: {apt.reading}")
+    else:
+        lines.append(
+            f"This cell's archetype is '{cell.archetype}' — express '{apt.id}' through that "
+            f"posture (mitigation, sustain, or balanced commitment), not as a demand to grant "
+            f"offense.")
+    return "\n".join(lines)
+
+
 def _identity_block(cell: Cell) -> str:
     if cell.combination_kind == "strain":
         apt = cell.aptitudes[0]
         return (
             f"a STRAIN — a single cultivated line of the '{apt.id}' aptitude, expressed through "
             f"the '{cell.archetype}' archetype.\n"
-            f"What '{apt.id}' means: {apt.meaning}\n"
-            f"What it reads as in play: {apt.reading}")
+            f"{_strain_reading_lines(cell)}")
     lo, hi = cell.aptitudes
     return (
         f"a SPLICE — two cultivated lines fused, '{lo.id}' with '{hi.id}'. Splicing is the base "
         f"game's own verb; the result belongs to neither parent.\n"
         f"What '{lo.id}' means: {lo.meaning}  ({lo.reading})\n"
-        f"What '{hi.id}' means: {hi.meaning}  ({hi.reading})")
+        f"What '{hi.id}' means: {hi.meaning}  ({hi.reading})\n"
+        f"Opposing or tensioned readings across the two parents are the fusion's material — "
+        f"author a mechanism that bridges them; do not refuse the cell merely because the "
+        f"readings pull apart.")
 
 
 def build_brief(cell: Cell, tuning: ComboTuning, supply: SupplyReport, *,

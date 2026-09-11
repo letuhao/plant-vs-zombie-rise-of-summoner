@@ -127,9 +127,11 @@ class LiveCorpusIntegrationTests(unittest.TestCase):
     def test_loads_the_expected_entry_and_file_counts(self) -> None:
         # Explicit committed-corpus acceptance values. Re-measure these when a deliberate content
         # batch or a recovery merge changes the corpus; do not preserve an obsolete snapshot.
-        self.assertEqual(len(self.corpus.entries), 1570)
+        # Re-measured 2026-09-11 (owner's setgen/gem/recipe/droptable batches): 1570 -> 3927
+        # entries over 158 -> 1008 files.
+        self.assertEqual(len(self.corpus.entries), 3927)
         seen_files = {e.path for e in self.corpus.entries.values()}
-        self.assertEqual(len(seen_files), 158)
+        self.assertEqual(len(seen_files), 1008)
 
     def test_authored_item_names_are_unique_across_kinds(self) -> None:
         """Identity names are global player-facing labels, not merely unique within one kind."""

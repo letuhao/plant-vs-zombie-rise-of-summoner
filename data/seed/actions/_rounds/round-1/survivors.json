@@ -1,87 +1,296 @@
 {
   "_meta": {
-    "candidateSetHash": "51a084013dd97bf32a06bf5d3d4a3d8934a3f767ad2d245c8b44a7cacd21a365",
-    "corpusHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "candidateSetHash": "07de0efb7b08b220f089415098babf504a271722ced9f0b955ab8448965fa32f",
+    "corpusHash": "7c7d3fbd5bf40590cb8f6008f040276d4833ad2466bdf6b84ecda584c7e4eb18",
     "partition": "rounds",
     "round": 1,
     "tuningVersion": 1
   },
   "entries": [
     {
-      "id": "action.family.cactus.001",
-      "promoted": true
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.rot-punisher"
+      ],
+      "category": "support",
+      "id": "action.family.academic.002",
+      "motifsUsed": [
+        "花园里",
+        "樱桃派",
+        "保证",
+        "僵尸",
+        "东西"
+      ],
+      "name": "The Orchard's Guarantee",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "payoff",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "academic",
+      "targetMode": "multi"
     },
     {
-      "id": "action.family.cherry.001",
-      "promoted": true
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.rotting",
+        "atom.venomous"
+      ],
+      "category": "movement",
+      "id": "action.family.academic.003",
+      "motifsUsed": [
+        "保证",
+        "东西",
+        "樱桃派",
+        "花园里",
+        "僵尸"
+      ],
+      "name": "The Gardener's Rot",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "academic",
+      "targetMode": "rolledTarget"
     },
     {
-      "id": "action.family.chomper.001",
-      "promoted": true
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.econ-toll",
+        "atom.gardener",
+        "atom.rotting"
+      ],
+      "category": "status",
+      "id": "action.family.academic.004",
+      "motifsUsed": [
+        "樱桃派",
+        "东西",
+        "保证",
+        "僵尸",
+        "花园里"
+      ],
+      "name": "The Orchard's Guarantee",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "academic",
+      "targetMode": "all"
     },
     {
-      "id": "action.family.corn.001",
-      "promoted": true
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.fortitude",
+        "atom.savagery",
+        "atom.vitality"
+      ],
+      "category": "attack",
+      "id": "action.general.0023",
+      "name": "Vanguard's Resolve",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
     },
     {
-      "id": "action.family.double.001",
-      "promoted": true
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-hardening",
+        "atom.sporing",
+        "atom.warding"
+      ],
+      "category": "defense",
+      "id": "action.general.0027",
+      "name": "Resilient Bastion",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "multi"
     },
     {
-      "id": "action.family.fruit.001",
-      "promoted": true
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.life-surge",
+        "atom.mending",
+        "atom.vitality"
+      ],
+      "category": "support",
+      "id": "action.general.0031",
+      "name": "Vitality Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "rolledTarget"
     },
     {
-      "id": "action.family.garlic.001",
-      "promoted": true
+      "areaShape": "square",
+      "atomFamilies": [
+        "atom.econ-toll",
+        "atom.sporing"
+      ],
+      "category": "status",
+      "id": "action.general.0041",
+      "name": "Verdant Overgrowth",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "area"
     },
     {
-      "id": "action.family.garlic.002",
-      "promoted": true
+      "areaShape": "rectangle",
+      "atomFamilies": [
+        "atom.blighting",
+        "atom.elemental-power",
+        "atom.sporing"
+      ],
+      "category": "status",
+      "id": "action.general.0042",
+      "name": "Overgrowth Spore",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "area"
     },
     {
-      "id": "action.family.hypno.001",
-      "promoted": true
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.evd-evd"
+      ],
+      "category": "attack",
+      "id": "action.species.abyssswordstar.001",
+      "motifsUsed": [
+        "从天而降"
+      ],
+      "name": "Sky-Sunderer's Descent",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "abyssswordstar",
+      "targetMode": "self"
     },
     {
-      "id": "action.family.hypno.002",
-      "promoted": true
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-attune",
+        "atom.prec-truesight"
+      ],
+      "category": "support",
+      "id": "action.species.abyssswordstar.002",
+      "motifsUsed": [
+        "形态",
+        "巨剑",
+        "仙剑",
+        "从天而降",
+        "召唤"
+      ],
+      "name": "abyssswordstar",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "abyssswordstar",
+      "targetMode": "multi"
     },
     {
-      "id": "action.family.nut.001",
-      "promoted": true
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.ward-harden"
+      ],
+      "category": "movement",
+      "id": "action.species.abyssswordstar.003",
+      "motifsUsed": [
+        "从天而降"
+      ],
+      "name": "Sky-Sunder Descent",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "abyssswordstar",
+      "targetMode": "rolledTarget"
     },
     {
-      "id": "action.family.pea.001",
-      "promoted": true
-    },
-    {
-      "id": "action.family.pea.002",
-      "promoted": true
-    },
-    {
-      "id": "action.family.sunflower.001",
-      "promoted": true
-    },
-    {
-      "id": "action.general.0001",
-      "promoted": true
-    },
-    {
-      "id": "action.general.0003",
-      "promoted": true
-    },
-    {
-      "id": "action.general.0004",
-      "promoted": true
-    },
-    {
-      "id": "action.general.0005",
-      "promoted": true
-    },
-    {
-      "id": "action.general.0006",
-      "promoted": true
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.bonding",
+        "atom.elpw-override"
+      ],
+      "category": "status",
+      "id": "action.species.abyssswordstar.004",
+      "motifsUsed": [
+        "形态",
+        "从天而降",
+        "仙剑",
+        "召唤",
+        "巨剑"
+      ],
+      "name": "Abyssswordstar",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "abyssswordstar",
+      "targetMode": "all"
     }
   ],
   "kind": "action-seed",

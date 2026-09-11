@@ -30,7 +30,8 @@ It forces the ordering **P1 ∥ P2 → P3**.
    bound repairs at **two**, then `unresolved`.
 7. **Small-batch proof first** — `--dry-run` and a small `--count`. The call budget is a ceiling, not a plan.
 8. **Tests never call a model** — the transport stub **raises**.
-9. **The roster is 84 species (53 with family assignments), not 904.**
+9. **The roster is the live species seed folder**: 904 species, 227 consolidated families, and
+   1,183 family memberships at the current measurement.
 
 ## 1. What exists today
 
@@ -58,11 +59,12 @@ It forces the ordering **P1 ∥ P2 → P3**.
 
 - **This stage** — no `signature-propose` adapter, schema, prompt or entrypoint exists.
 - **`A-S1` and `A-P2` do not exist**, and this stage cannot run before P2's round is accepted.
-- **Corpus sizing was computed against 904 species.** At the shipped 84 with 3 signature actions each the
-  signature tier is **252**, not 2,712 (`action-corpus-ideal.md:1426-1436`). The per-species count is a
-  tunable precisely so a re-run is a config change.
-- **31 of 84 species have motifs but no family**, so their briefs carry no family output to differ from.
-  The stage must handle an empty `familyActions` list as a first-class case, not an error.
+- **Corpus sizing is computed against the live 904 species.** At five signature actions each the
+  signature tier is **4,520**. The per-species count is a tunable precisely so a re-run is a config
+  change.
+- **A live species may have no family**, so its brief carries no family output to differ from. The
+  stage must handle an empty `familyActions` list as a first-class case, not an error; a family that
+  simply has no accepted sibling action is a different state and must not be described as family-less.
 
 ## 2. The contract
 

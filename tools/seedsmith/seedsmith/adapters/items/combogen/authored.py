@@ -46,10 +46,20 @@ DEFAULT_LEDGER_NAME = "combination-gen.ledger.json"
 
 def _ledger_is_valid(_subject_id: str, entry: dict) -> bool:
     """The reconcile half `RunLedger.plan` exists for — mirrors `gemgen.run._ledger_is_valid`
-    exactly: a ledger row counts as done only if it carries an assembled entry with a real id, never
-    trusted on the row's mere presence."""
-    return (isinstance(entry, dict) and isinstance(entry.get("entry"), dict)
-           and isinstance(entry["entry"].get("id"), str) and bool(entry["entry"].get("id")))
+    for persisted rows, plus explicit `blocked` / `escalated` completions so resume advances
+    (affix returns clean on blocked; combination used to re-hit the same cell forever)."""
+    if not isinstance(entry, dict):
+        return False
+    if (isinstance(entry.get("entry"), dict)
+            and isinstance(entry["entry"].get("id"), str) and bool(entry["entry"].get("id"))):
+        return True
+    outcome = entry.get("outcome")
+    if outcome == "blocked":
+        reason = entry.get("blockedReason")
+        return isinstance(reason, str) and bool(reason.strip())
+    if outcome == "escalated":
+        return True
+    return False
 
 
 def plan_needing_work(plan: RunPlan, ledger: RunLedger) -> "list[Subject]":
@@ -209,10 +219,13 @@ def run_batch(*, plan: RunPlan, answers, tuning: ComboTuning, out_dir: Path,
         try:
             final = run_one(app, state)
         except (AnswerMissing, AnswerExhausted) as exc:
+            defects = list(getattr(exc, "defects", ())) or [str(exc)]
+            attempts = len(answers.attempts_for(subject.subject_id))
             result.outcomes.append(SubjectOutcome(
                 subject_id=subject.subject_id, entry_id=subject.entry_id, outcome="escalated",
-                attempts=len(answers.attempts_for(subject.subject_id)),
-                defects=list(getattr(exc, "defects", ())) or [str(exc)]))
+                attempts=attempts, defects=defects))
+            ledger.mark_terminal(subject.subject_id, outcome="escalated",
+                                 entry_id=subject.entry_id, attempts=attempts, defects=defects)
             continue
 
         draft = drafts.pop(subject.subject_id, None)
@@ -222,11 +235,18 @@ def run_batch(*, plan: RunPlan, answers, tuning: ComboTuning, out_dir: Path,
             result.outcomes.append(SubjectOutcome(
                 subject_id=subject.subject_id, entry_id=subject.entry_id,
                 outcome="escalated", attempts=attempts, defects=defects))
+            ledger.mark_terminal(subject.subject_id, outcome="escalated",
+                                 entry_id=subject.entry_id, attempts=attempts, defects=defects)
             continue
         if isinstance(draft.get("blocked"), str) and draft["blocked"].strip():
+            reason = draft["blocked"].strip()
             result.outcomes.append(SubjectOutcome(
                 subject_id=subject.subject_id, entry_id=subject.entry_id,
-                outcome="blocked", attempts=attempts, blocked_reason=draft["blocked"]))
+                outcome="blocked", attempts=attempts, blocked_reason=reason))
+            # No seed entry — but ledger the decline so --limit / resume advances past this cell.
+            ledger.mark_terminal(subject.subject_id, outcome="blocked",
+                                 entry_id=subject.entry_id, attempts=attempts,
+                                 blocked_reason=reason)
             continue
 
         entry = emit.assemble_entry(

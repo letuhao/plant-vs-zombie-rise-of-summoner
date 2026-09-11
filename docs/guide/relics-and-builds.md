@@ -44,7 +44,8 @@ Spend commander points across the twelve. What you allocate reaches every demon 
 
 Allocation can stack across commander, species, variant, and the unique demon itself — who you are is the sum of those layers. Priced **respec** is the friction that holds a build together.
 
-**In this build:** commander-scope spend is live and thin. Other scopes and a polished sheet are still ahead.
+**In this build:** commander-scope spend is live (Mode C). UniqueDemon and species-build player
+surfaces are under [aptitude-sheet-map.md](architecture/aptitude-sheet-map.md) — not “still ahead.”
 
 ---
 

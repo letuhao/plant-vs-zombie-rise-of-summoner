@@ -38,7 +38,7 @@ against the generator, not hand-recomputed and left to go stale again.**
 | `loadout.slots` (H.8, D4.25 — party-dungeon, spec-unique-pipeline.md §4) | 1 | same |
 | **Pre-registered total** | **269** | 99 → 256 (T2) → 259 (class-system `poise-resource`, 2026-08-26) → 261 (P0.5 / battle-timeline B9, `turn.speed`+`turn.haste`, 2026-08-28) → 267 (action-corpus Phase 0.8, 2026-09-02: `combat.heal.power` generalised into `resource.restore.{resource}` — +6 members, and the old id stays registered as a retirement shim so archived `aptitudes.v1/v2/v3.json` remain loadable) → 268 (party-dungeon D4.25, 2026-09-06: `loadout.slots`, the extend-action-slot grant's derived channel) → **269** (base-defense siege-ai, 2026-09-07: `ai.aggression`, §5.20 rule 4's signed targeting-priority scalar) |
 | Nine **open-ended prefix families** — `status.power.{id}` · `status.resist.{id}` · `status.duration.{id}` · `status.durationReduction.{id}` · `status.intensity.{id}` · `status.intensityReduction.{id}` · `status.immune.{tag}` · `status.immuneReduction.{tag}` · `status.expose.{category}` | **unbounded** | resolved dynamically in `TryResolveChannel` (5 original + 4 from H.2, T2) |
-| …of which the locked 21-status catalog could expand the first **six** by | **+126** | [status-ssot.md §9](../architecture/status-ssot.md) — 21 statuses × 6 sparse-eligible dimensions. **Corrected from a "+42, ~298" estimate** that counted only power/resist — H.2's four new sparse families are exercisable by the same 21-status catalog and were omitted from that arithmetic |
+| …of which the locked **24**-status catalog could expand the first **six** by | **+144** | [status-ssot.md §9](../architecture/status-ssot.md) — 24 statuses × 6 sparse-eligible dimensions (was 21 → +126 before `nerve.*`) |
 
 **So the sheet must render ~385 channels today (was ~141) and cannot know the ceiling.** That single
 fact rules out every design that enumerates channels in the component. The sheet renders **what the
@@ -108,15 +108,18 @@ Verified in code this session, so the sheet ships with real examples rather than
 
 | Channel | State | Evidence |
 |---|---|---|
-| `progression.power`, `progression.realm` | **`stub`** | default `1.0` via `FlatReplace`, [DerivedStatRegistry.cs:35-36](../../src/FusionRpg.Core/Stats/Derived/DerivedStatRegistry.cs); `ActorDerivedSnapshot.StubNeutral()` hardcodes both to `1.0` ([:18-23](../../src/FusionRpg.Core/Stats/Derived/ActorDerivedSnapshot.cs)). `TierPower = power × realm` = 1.0 for every actor in the game |
+| `progression.power`, `progression.realm` | **`stub`** | default `1.0` via `FlatReplace`, [DerivedStatRegistry.cs](../../src/FusionRpg.Core/Stats/Derived/DerivedStatRegistry.cs); `ActorDerivedSnapshot.StubNeutral()` hardcodes both to `1.0`. `TierPower = power × realm` = 1.0 for every actor in the game |
 | `progression.bonus.arm1`, `.arm2` | **`no-producer`** | registered and read, no writer |
-| `status.expose.{category}` | **`no-producer`** | resolves at [:105-109](../../src/FusionRpg.Core/Stats/Derived/DerivedStatRegistry.cs), **zero readers** |
-| `turn.speed`, `turn.haste`, `turn.moveSpeed` | **`unregistered`** | declared in [DerivedTurnChannels.cs](../../src/FusionRpg.Core/Battle/Timeline/DerivedTurnChannels.cs); `RegisterDefaults()` does not register them and `TryResolveChannel` has no `turn.` branch, so `ValidateChannel` throws `UnknownDerivedChannelException` |
+| `status.expose.{category}` | **`no-producer`** | resolves dynamically; **zero readers** |
+| `turn.speed`, `turn.haste` | **`active` / registered** | Registered in `RegisterDefaults()` (battle-timeline B9, 2026-08-28) — FlatSum with non-zero defaults. **Errata 2026-09-10:** earlier text called these unregistered |
+| `turn.moveSpeed` | **`unregistered`** | Declared in [DerivedTurnChannels.cs](../../src/FusionRpg.Core/Battle/Timeline/DerivedTurnChannels.cs); still **not** in `RegisterDefaults()` |
 
-> **Correction to the SSOT.** [actor-hub-ssot.md §11.4](../architecture/actor-hub-ssot.md) names
-> *"`turn.speed` / `turn.haste`"* as the unregistered pair. There are **three** — `turn.moveSpeed` is
-> declared on the same class. Minor, but the count is the kind of thing this sheet would surface, so it
-> is fixed at the source.
+> **Correction (2026-09-10).** `turn.speed` / `turn.haste` are registered. Only `turn.moveSpeed`
+> remains the unregistered example for §3 `unregistered` state demos.
+
+**Show unchanged (policy lock D4, derived-cook 2026-09-10):** the toggle hides rows in state
+**`default` only**. Rows in **`no-producer`** stay visible with fiction copy (*"nothing grants this
+yet"*) — they must not be collapsed into “unchanged.” Shipped FE that hid both is defective.
 
 **These four states are the `Pending<T>` contract, applied to a stat.** `absent` and `pending` looking
 identical is the exact bug the sealed contract exists to prevent
@@ -157,28 +160,27 @@ Six to eight lines, chosen by **what is non-default on this actor**, never a fix
 *"see all N"* affordance carrying the real count. A fixed summary would hide the one channel a player's
 build actually moved.
 
-### 5.2 The sheet — a band-2 panel
+### 5.2 The sheet — a band-2 panel (cook primary rail)
+
+**Shipped IA (gui-lego `derived-console`, 2026-09):** primary tabs are **Elements · Status ·
+Resources · Other** with a **variant rail** (element / status-category / action-category / Shared).
+That cook rail is the **player chrome SSOT**. The 28×7 combat **matrix** remains the structural
+truth of the combat block (Guard 1) and may appear as element occupancy pips / Elements-tab
+presentation — it is **not** a competing primary tablist of sheetGroups (offense/pools/…).
 
 ```text
-┌ Derived stats · Emberling ─────────────────────────────── [ Show unchanged ⃞ ] ┐
-│  Combat                                      omni  fire  ice  air earth light dark │
-│    Power                          game units   12   150    ·    ·    ·     ·    ·  │
-│    Defense                        game units    ·     ·   40    ·    ·     ·    ·  │
-│    Crit rate                   sigmoid points  150    ·    ·    ·    ·     ·    ·  │
-│    …                                                                               │
-│  Status                                                                            │
-│    Resist · damage over time                   ·    0.95 CAP  ← next point does nothing │
-│  Progression                                                                       │
-│    Power                          placeholder  1.0   the real curve is not built   │
-└────────────────────────────────────────────────────────────────────────────────────┘
+┌ Derived · Emberling ──── [search] [Show unchanged] ─────────────────────────────┐
+│  Elements | Status | Resources | Other     ← cook primary                        │
+│  Omni | Fire | Ice | …                     ← variant rail (expand mode)          │
+│  family blocks → channel rows → inspect                                          │
+└──────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Zero-suppressed by default, with `Show unchanged` as a real toggle — not a hidden default.** Eighty-four
-mostly-empty cells is noise; a permanently hidden channel is a thing the player cannot learn exists.
-The toggle is persisted per player (`localStorage`, decision T4). **The count of what is hidden is always
-visible**, so suppression never reads as absence.
+**Zero-suppressed by default, with `Show unchanged` as a real toggle — not a hidden default.**
+Hide **`default` only** (D4). The count of what is hidden is always visible, so suppression never
+reads as absence. **`no-producer` stays visible.**
 
-**The unit label is on the group row, never in the cell** — this is
+**The unit label is on the group/family row, never in the cell** — this is
 [spec-magnitude-and-units.md §3](spec-magnitude-and-units.md)'s rule expressed as a layout constraint,
 and it is what stops `+150 crit rate` and `+12 fire power` being read as comparable. Guard 3 of that
 document tests exactly this.
@@ -200,21 +202,24 @@ rule — not by a hardcoded component list (§1).
 A player row binds `(displayName, reading, unitClass, gauge, cap)` from the catalog plus the six
 render states from §3. `idWords` is developer-only (GG-62).
 
-### 5.2b StatRow + InspectSplit (added 2026-09-07)
+### 5.2b StatRow + InspectSplit (added 2026-09-07; cook rail note 2026-09-10)
 
-The combat block is still a **matrix** (28 × 7). The player does not meet it as 196 `<tr>` of ids.
+The combat block is still a **matrix** (28 × 7) at the data layer. Under cook IA, the player meets
+it as **variant × family list** (Elements tab + element variant), not 196 bare `<tr>` of ids.
+Occupancy pips / sparks are **`derived-statrow-gauge` (D7 deferred)** — optional polish after
+six-state + CAP truth land.
 
 | Piece | Job |
 |---|---|
-| **StatRow** | icon · catalog name · number · spark · `?`. One family per row; element occupancy as seven pips, not seven columns of text |
-| **Category collapse** | offense / defense / shield / guard / reflect / status / progression (from catalog sheet groups). **One group open** |
-| **InspectSplit** | clicking a row or `?` fills the **right inspector** (value, unit sentence, compose sentence from §4, cap or “no cap — more still counts”, contribution list). Not a nested dialog (GG-63) |
+| **channel-row / StatRow** | icon · catalog name · number · optional spark · select. One expanded channel per row |
+| **Cook grouping** | Primary tab + variant (not sheetGroup as primary chrome) |
+| **InspectSplit** | clicking a row fills the **right inspector** (value, unit sentence, compose sentence from §4, cap or “no cap — more still counts”, contribution list). Not a nested dialog (GG-63) |
 
-**Spark policy** is the catalog `gauge` field. Uncapped `GameUnits` sparks are *relative to this
+**Spark policy** is the catalog `gauge` field when D7 lands. Uncapped `GameUnits` sparks are *relative to this
 actor’s siblings* and never paint `CAP`. Registry caps (`status.resist.dot` at 0.95) fill against
 the cap and show the §3 marker. That is GG-64 / PS-8, not a third classification.
 
-The ActorSheet **Derived** tab *is* this sheet. Plate 13 is the visual catalog.
+The ActorSheet **Derived** tab *is* this sheet. Harden program: [derived-cook-map.md](../architecture/derived-cook-map.md).
 
 ### 5.3 Channel detail — the "why"
 
@@ -261,7 +266,7 @@ knowledge of which channels exist — the same registry-shape discipline the res
 | 4 | **No numeric column mixes unit classes** | inherits [spec-magnitude-and-units.md §8](spec-magnitude-and-units.md) guard 3 |
 | 5 | **An unknown channel id renders rather than throwing or dropping** | a future status's channel silently vanishes |
 | 6 | **`FlatReplace` channels render the compose sentence** | a contribution list does not sum to its total, with no explanation |
-| 7 | **Volume fixture at ~382 (current, §1) and at 500 channels (stress)** | the panel is only ever tested against a near-empty actor. GG-50. Numbers follow §1's count — updated 2026-08-24 alongside it, not independently re-derived |
+| 7 | **Volume fixture at current §1 scale (~269 registered + open-prefix expand; ~385 today when status catalog expands sparse dims) and at 500 channels (stress)** | the panel is only ever tested against a near-empty actor. GG-50. Numbers follow §1 — do not hand-recompute independently |
 
 ---
 

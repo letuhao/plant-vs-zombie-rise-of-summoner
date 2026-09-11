@@ -64,6 +64,7 @@ def _parse_role_lean_rows(doc: dict) -> "list[RoleLeanRow]":
         secondary = element.get("secondary")
         rows.append(RoleLeanRow(
             species_key=e["speciesKey"], family=e.get("family"),
+            families=tuple(e.get("families") or ((e["family"],) if e.get("family") else ())),
             lean_order=tuple(e["leanOrder"]), lean_source=e["leanSource"],
             separation=e.get("separation"),
             element_primary=element["primary"],

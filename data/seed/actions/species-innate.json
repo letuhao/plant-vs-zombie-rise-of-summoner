@@ -1,19 +1,19 @@
 {
   "_meta": {
-    "corpusHash": "a739fff4666f998ea4c7a8293caabaf75dcebed5c0abbbcbac8cd814ba60f954",
+    "corpusHash": "2ecc5b14a5824ede8a8d3677422a33c42abcc49b90a09e12816333af50f3baaf",
     "partition": "innate",
     "tuningVersion": 1
   },
   "entries": [
     {
-      "eligibleCount": 1,
+      "eligibleCount": 2,
       "id": "innate.allpeater",
       "innateActionId": "action.species.allpeater.001",
-      "runnerUp": null,
-      "score": 11,
+      "runnerUp": "action.species.allpeater.002",
+      "score": 23,
       "speciesKey": "allpeater",
       "terms": {
-        "categoryScarcity": 0,
+        "categoryScarcity": 1,
         "elementMatch": 0,
         "motifCoverage": 1,
         "roleLeanMatch": 5,
@@ -21,10 +21,19 @@
       }
     },
     {
+      "eligibleCount": 1,
       "id": "innate.ashthreepeater",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "ashthreepeater"
+      "innateActionId": "action.species.ashthreepeater.001",
+      "runnerUp": null,
+      "score": 19,
+      "speciesKey": "ashthreepeater",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 3,
+        "roleLeanMatch": 4,
+        "rungCeiling": 10
+      }
     },
     {
       "eligibleCount": 1,
@@ -63,10 +72,10 @@
       }
     },
     {
-      "eligibleCount": 1,
+      "eligibleCount": 2,
       "id": "innate.cactus",
       "innateActionId": "action.family.cactus.001",
-      "runnerUp": null,
+      "runnerUp": "action.species.cactus.001",
       "score": 71,
       "speciesKey": "cactus",
       "terms": {
@@ -78,12 +87,72 @@
       }
     },
     {
-      "eligibleCount": 1,
+      "eligibleCount": 2,
       "id": "innate.cactusblover",
       "innateActionId": "action.species.cactusblover.001",
+      "runnerUp": "action.species.cactusblover.002",
+      "score": 35,
+      "speciesKey": "cactusblover",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 1,
+      "id": "innate.caltrop",
+      "innateActionId": "action.species.caltrop.001",
+      "runnerUp": null,
+      "score": 9,
+      "speciesKey": "caltrop",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 1,
+        "roleLeanMatch": 4,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 2,
+      "id": "innate.caltropnut",
+      "innateActionId": "action.species.caltropnut.001",
+      "runnerUp": "action.species.caltropnut.002",
+      "score": 47,
+      "speciesKey": "caltropnut",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 3,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 3,
+      "id": "innate.cherrybomb",
+      "innateActionId": "action.species.cherrybomb.001",
+      "runnerUp": "action.species.cherrybomb.002",
+      "score": 212,
+      "speciesKey": "cherrybomb",
+      "terms": {
+        "categoryScarcity": 2,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 1,
+      "id": "innate.cherrygatling",
+      "innateActionId": "action.species.cherrygatling.001",
       "runnerUp": null,
       "score": 17,
-      "speciesKey": "cactusblover",
+      "speciesKey": "cherrygatling",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
@@ -93,97 +162,145 @@
       }
     },
     {
-      "id": "innate.caltrop",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "caltrop"
-    },
-    {
-      "id": "innate.caltropnut",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "caltropnut"
-    },
-    {
-      "id": "innate.cherrybomb",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "cherrybomb"
-    },
-    {
-      "id": "innate.cherrygatling",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "cherrygatling"
-    },
-    {
+      "eligibleCount": 3,
       "id": "innate.cherrynut",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "cherrynut"
-    },
-    {
-      "id": "innate.cherrynutzombie",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "cherrynutzombie"
-    },
-    {
-      "eligibleCount": 1,
-      "id": "innate.cherrypaperzombie",
-      "innateActionId": "action.family.cherry.001",
-      "runnerUp": null,
-      "score": 47,
-      "speciesKey": "cherrypaperzombie",
+      "innateActionId": "action.species.cherrynut.001",
+      "runnerUp": "action.family.cherry.001",
+      "score": 212,
+      "speciesKey": "cherrynut",
       "terms": {
-        "categoryScarcity": 0,
+        "categoryScarcity": 2,
         "elementMatch": 0,
         "motifCoverage": 2,
-        "roleLeanMatch": 3,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 3,
+      "id": "innate.cherrynutzombie",
+      "innateActionId": "action.species.cherrynutzombie.001",
+      "runnerUp": "action.species.cherrynutzombie.002",
+      "score": 284,
+      "speciesKey": "cherrynutzombie",
+      "terms": {
+        "categoryScarcity": 2,
+        "elementMatch": 0,
+        "motifCoverage": 3,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 3,
+      "id": "innate.cherrypaperzombie",
+      "innateActionId": "action.species.cherrypaperzombie.001",
+      "runnerUp": "action.species.cherrypaperzombie.002",
+      "score": 284,
+      "speciesKey": "cherrypaperzombie",
+      "terms": {
+        "categoryScarcity": 2,
+        "elementMatch": 0,
+        "motifCoverage": 3,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 3,
+      "id": "innate.cherryshooter",
+      "innateActionId": "action.family.cherry.001",
+      "runnerUp": "action.species.cherryshooter.001",
+      "score": 103,
+      "speciesKey": "cherryshooter",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 2,
         "rungCeiling": 7
       }
     },
     {
-      "id": "innate.cherryshooter",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "cherryshooter"
-    },
-    {
+      "eligibleCount": 1,
       "id": "innate.cherrysplit",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "cherrysplit"
-    },
-    {
-      "id": "innate.cherrythreepeater",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "cherrythreepeater"
-    },
-    {
-      "id": "innate.chomper",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "chomper"
-    },
-    {
-      "id": "innate.conezombie",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "conezombie"
-    },
-    {
-      "id": "innate.cornpot",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "cornpot"
+      "innateActionId": "action.species.cherrysplit.001",
+      "runnerUp": null,
+      "score": 23,
+      "speciesKey": "cherrysplit",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 3,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
       "eligibleCount": 1,
+      "id": "innate.cherrythreepeater",
+      "innateActionId": "action.species.cherrythreepeater.001",
+      "runnerUp": null,
+      "score": 17,
+      "speciesKey": "cherrythreepeater",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 1,
+      "id": "innate.chomper",
+      "innateActionId": "action.species.chomper.001",
+      "runnerUp": null,
+      "score": 17,
+      "speciesKey": "chomper",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 1,
+      "id": "innate.conezombie",
+      "innateActionId": "action.species.conezombie.001",
+      "runnerUp": null,
+      "score": 17,
+      "speciesKey": "conezombie",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 1,
+      "id": "innate.cornpot",
+      "innateActionId": "action.species.cornpot.001",
+      "runnerUp": null,
+      "score": 17,
+      "speciesKey": "cornpot",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 2,
       "id": "innate.cornpult",
       "innateActionId": "action.family.corn.001",
-      "runnerUp": null,
+      "runnerUp": "action.species.cornpult.001",
       "score": 59,
       "speciesKey": "cornpult",
       "terms": {
@@ -195,40 +312,94 @@
       }
     },
     {
+      "eligibleCount": 2,
       "id": "innate.dancepolzombie",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "dancepolzombie"
+      "innateActionId": "action.species.dancepolzombie.002",
+      "runnerUp": "action.species.dancepolzombie.001",
+      "score": 71,
+      "speciesKey": "dancepolzombie",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 5,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 1,
       "id": "innate.darkthreepeater",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "darkthreepeater"
+      "innateActionId": "action.species.darkthreepeater.001",
+      "runnerUp": null,
+      "score": 9,
+      "speciesKey": "darkthreepeater",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 1,
+        "roleLeanMatch": 4,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 1,
       "id": "innate.dolldiamond",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "dolldiamond"
+      "innateActionId": "action.species.dolldiamond.001",
+      "runnerUp": null,
+      "score": 19,
+      "speciesKey": "dolldiamond",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 3,
+        "roleLeanMatch": 4,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 2,
       "id": "innate.dollgold",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "dollgold"
+      "innateActionId": "action.species.dollgold.001",
+      "runnerUp": "action.species.dollgold.002",
+      "score": 35,
+      "speciesKey": "dollgold",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 1,
       "id": "innate.dollsilver",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "dollsilver"
+      "innateActionId": "action.species.dollsilver.001",
+      "runnerUp": null,
+      "score": 9,
+      "speciesKey": "dollsilver",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 1,
+        "roleLeanMatch": 4,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 2,
       "id": "innate.doomcactus",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "doomcactus"
+      "innateActionId": "action.species.doomcactus.001",
+      "runnerUp": "action.species.doomcactus.002",
+      "score": 71,
+      "speciesKey": "doomcactus",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 5,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
       "id": "innate.doorzombie",
@@ -237,14 +408,14 @@
       "speciesKey": "doorzombie"
     },
     {
-      "eligibleCount": 1,
+      "eligibleCount": 2,
       "id": "innate.doublecherry",
       "innateActionId": "action.family.double.001",
-      "runnerUp": null,
-      "score": 71,
+      "runnerUp": "action.species.doublecherry.001",
+      "score": 143,
       "speciesKey": "doublecherry",
       "terms": {
-        "categoryScarcity": 0,
+        "categoryScarcity": 1,
         "elementMatch": 0,
         "motifCoverage": 2,
         "roleLeanMatch": 5,
@@ -258,22 +429,49 @@
       "speciesKey": "doubleshooter"
     },
     {
+      "eligibleCount": 1,
       "id": "innate.doublesnow",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "doublesnow"
+      "innateActionId": "action.species.doublesnow.001",
+      "runnerUp": null,
+      "score": 17,
+      "speciesKey": "doublesnow",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 1,
       "id": "innate.driverzombie",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "driverzombie"
+      "innateActionId": "action.species.driverzombie.001",
+      "runnerUp": null,
+      "score": 29,
+      "speciesKey": "driverzombie",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 5,
+        "roleLeanMatch": 4,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 2,
       "id": "innate.flagzombie",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "flagzombie"
+      "innateActionId": "action.species.flagzombie.001",
+      "runnerUp": "action.species.flagzombie.002",
+      "score": 67,
+      "speciesKey": "flagzombie",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 3,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
       "id": "innate.footballzombie",
@@ -282,26 +480,59 @@
       "speciesKey": "footballzombie"
     },
     {
+      "eligibleCount": 1,
       "id": "innate.fumeshroom",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "fumeshroom"
-    },
-    {
-      "id": "innate.garlic",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "garlic"
+      "innateActionId": "action.species.fumeshroom.001",
+      "runnerUp": null,
+      "score": 23,
+      "speciesKey": "fumeshroom",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 3,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
       "eligibleCount": 1,
-      "id": "innate.garlicpea",
-      "innateActionId": "action.family.garlic.002",
+      "id": "innate.garlic",
+      "innateActionId": "action.species.garlic.001",
       "runnerUp": null,
-      "score": 71,
-      "speciesKey": "garlicpea",
+      "score": 17,
+      "speciesKey": "garlic",
       "terms": {
         "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 3,
+      "id": "innate.garlicpea",
+      "innateActionId": "action.species.garlicpea.001",
+      "runnerUp": "action.family.garlic.002",
+      "score": 212,
+      "speciesKey": "garlicpea",
+      "terms": {
+        "categoryScarcity": 2,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 4,
+      "id": "innate.garlicthreepeater",
+      "innateActionId": "action.family.garlic.001",
+      "runnerUp": "action.species.garlicthreepeater.001",
+      "score": 363,
+      "speciesKey": "garlicthreepeater",
+      "terms": {
+        "categoryScarcity": 2,
         "elementMatch": 0,
         "motifCoverage": 2,
         "roleLeanMatch": 5,
@@ -310,61 +541,73 @@
     },
     {
       "eligibleCount": 2,
-      "id": "innate.garlicthreepeater",
-      "innateActionId": "action.family.garlic.001",
-      "runnerUp": "action.family.garlic.002",
-      "score": 119,
-      "speciesKey": "garlicthreepeater",
+      "id": "innate.gatlingpea",
+      "innateActionId": "action.species.gatlingpea.001",
+      "runnerUp": "action.species.gatlingpea.002",
+      "score": 35,
+      "speciesKey": "gatlingpea",
       "terms": {
         "categoryScarcity": 1,
         "elementMatch": 0,
         "motifCoverage": 2,
-        "roleLeanMatch": 4,
-        "rungCeiling": 7
-      }
-    },
-    {
-      "id": "innate.gatlingpea",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "gatlingpea"
-    },
-    {
-      "id": "innate.hypnochomper",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "hypnochomper"
-    },
-    {
-      "id": "innate.hypnojalapeno",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "hypnojalapeno"
-    },
-    {
-      "eligibleCount": 1,
-      "id": "innate.hypnopeashooter",
-      "innateActionId": "action.family.hypno.002",
-      "runnerUp": null,
-      "score": 35,
-      "speciesKey": "hypnopeashooter",
-      "terms": {
-        "categoryScarcity": 0,
-        "elementMatch": 0,
-        "motifCoverage": 2,
-        "roleLeanMatch": 2,
-        "rungCeiling": 7
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
       }
     },
     {
       "eligibleCount": 2,
+      "id": "innate.hypnochomper",
+      "innateActionId": "action.species.hypnochomper.001",
+      "runnerUp": "action.species.hypnochomper.002",
+      "score": 23,
+      "speciesKey": "hypnochomper",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 1,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 3,
+      "id": "innate.hypnojalapeno",
+      "innateActionId": "action.species.hypnojalapeno.001",
+      "runnerUp": "action.family.hypno.002",
+      "score": 200,
+      "speciesKey": "hypnojalapeno",
+      "terms": {
+        "categoryScarcity": 2,
+        "elementMatch": 0,
+        "motifCoverage": 1,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 3,
+      "id": "innate.hypnopeashooter",
+      "innateActionId": "action.species.hypnopeashooter.001",
+      "runnerUp": "action.family.hypno.002",
+      "score": 200,
+      "speciesKey": "hypnopeashooter",
+      "terms": {
+        "categoryScarcity": 2,
+        "elementMatch": 0,
+        "motifCoverage": 1,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 3,
       "id": "innate.hypnoshroom",
       "innateActionId": "action.family.hypno.001",
       "runnerUp": "action.family.hypno.002",
-      "score": 143,
+      "score": 215,
       "speciesKey": "hypnoshroom",
       "terms": {
-        "categoryScarcity": 1,
+        "categoryScarcity": 2,
         "elementMatch": 0,
         "motifCoverage": 2,
         "roleLeanMatch": 5,
@@ -372,46 +615,109 @@
       }
     },
     {
+      "eligibleCount": 1,
       "id": "innate.icecaltrop",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "icecaltrop"
+      "innateActionId": "action.species.icecaltrop.001",
+      "runnerUp": null,
+      "score": 17,
+      "speciesKey": "icecaltrop",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 1,
       "id": "innate.iceshroom",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "iceshroom"
+      "innateActionId": "action.species.iceshroom.001",
+      "runnerUp": null,
+      "score": 7,
+      "speciesKey": "iceshroom",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 1,
+        "roleLeanMatch": 3,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 2,
       "id": "innate.ironpeazombie",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "ironpeazombie"
+      "innateActionId": "action.species.ironpeazombie.001",
+      "runnerUp": "action.species.ironpeazombie.002",
+      "score": 45,
+      "speciesKey": "ironpeazombie",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 2,
       "id": "innate.jalacaltrop",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "jalacaltrop"
+      "innateActionId": "action.species.jalacaltrop.001",
+      "runnerUp": "action.species.jalacaltrop.002",
+      "score": 35,
+      "speciesKey": "jalacaltrop",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 1,
       "id": "innate.jalagatling",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "jalagatling"
+      "innateActionId": "action.species.jalagatling.001",
+      "runnerUp": null,
+      "score": 5,
+      "speciesKey": "jalagatling",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 0,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 1,
       "id": "innate.jalapeashooter",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "jalapeashooter"
+      "innateActionId": "action.species.jalapeashooter.001",
+      "runnerUp": null,
+      "score": 7,
+      "speciesKey": "jalapeashooter",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 1,
+        "roleLeanMatch": 3,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 1,
       "id": "innate.jalapeno",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "jalapeno"
+      "innateActionId": "action.species.jalapeno.001",
+      "runnerUp": null,
+      "score": 17,
+      "speciesKey": "jalapeno",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
       "id": "innate.jalastar",
@@ -426,40 +732,85 @@
       "speciesKey": "lanterncactus"
     },
     {
+      "eligibleCount": 1,
       "id": "innate.lanternchomper",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "lanternchomper"
-    },
-    {
-      "id": "innate.lanternpea",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "lanternpea"
-    },
-    {
-      "id": "innate.marigold",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "marigold"
-    },
-    {
-      "id": "innate.melonpult",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "melonpult"
-    },
-    {
-      "id": "innate.normalzombie",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "normalzombie"
+      "innateActionId": "action.species.lanternchomper.001",
+      "runnerUp": null,
+      "score": 17,
+      "speciesKey": "lanternchomper",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
       "eligibleCount": 1,
+      "id": "innate.lanternpea",
+      "innateActionId": "action.species.lanternpea.001",
+      "runnerUp": null,
+      "score": 17,
+      "speciesKey": "lanternpea",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 2,
+      "id": "innate.marigold",
+      "innateActionId": "action.species.marigold.002",
+      "runnerUp": "action.species.marigold.001",
+      "score": 35,
+      "speciesKey": "marigold",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 1,
+      "id": "innate.melonpult",
+      "innateActionId": "action.species.melonpult.001",
+      "runnerUp": null,
+      "score": 35,
+      "speciesKey": "melonpult",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 5,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 1,
+      "id": "innate.normalzombie",
+      "innateActionId": "action.species.normalzombie.001",
+      "runnerUp": null,
+      "score": 19,
+      "speciesKey": "normalzombie",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 3,
+        "roleLeanMatch": 4,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 2,
       "id": "innate.nutchomper",
       "innateActionId": "action.family.chomper.001",
-      "runnerUp": null,
+      "runnerUp": "action.species.nutchomper.001",
       "score": 71,
       "speciesKey": "nutchomper",
       "terms": {
@@ -471,22 +822,40 @@
       }
     },
     {
+      "eligibleCount": 1,
       "id": "innate.paperzombie",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "paperzombie"
-    },
-    {
-      "id": "innate.peachomper",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "peachomper"
+      "innateActionId": "action.species.paperzombie.001",
+      "runnerUp": null,
+      "score": 17,
+      "speciesKey": "paperzombie",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
       "eligibleCount": 1,
+      "id": "innate.peachomper",
+      "innateActionId": "action.species.peachomper.001",
+      "runnerUp": null,
+      "score": 11,
+      "speciesKey": "peachomper",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 1,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 2,
       "id": "innate.peanut",
       "innateActionId": "action.family.nut.001",
-      "runnerUp": null,
+      "runnerUp": "action.species.peanut.001",
       "score": 59,
       "speciesKey": "peanut",
       "terms": {
@@ -517,21 +886,30 @@
       "id": "innate.peashooterzombie",
       "innateActionId": "action.family.pea.001",
       "runnerUp": "action.family.pea.002",
-      "score": 71,
+      "score": 95,
       "speciesKey": "peashooterzombie",
       "terms": {
         "categoryScarcity": 1,
         "elementMatch": 0,
         "motifCoverage": 2,
-        "roleLeanMatch": 2,
+        "roleLeanMatch": 3,
         "rungCeiling": 7
       }
     },
     {
+      "eligibleCount": 1,
       "id": "innate.peasquash",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "peasquash"
+      "innateActionId": "action.species.peasquash.001",
+      "runnerUp": null,
+      "score": 23,
+      "speciesKey": "peasquash",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 3,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
       "id": "innate.peasunflower",
@@ -540,52 +918,124 @@
       "speciesKey": "peasunflower"
     },
     {
+      "eligibleCount": 2,
       "id": "innate.plantern",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "plantern"
+      "innateActionId": "action.species.plantern.001",
+      "runnerUp": "action.species.plantern.002",
+      "score": 23,
+      "speciesKey": "plantern",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 1,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 1,
       "id": "innate.polevaulterzombie",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "polevaulterzombie"
+      "innateActionId": "action.species.polevaulterzombie.001",
+      "runnerUp": null,
+      "score": 11,
+      "speciesKey": "polevaulterzombie",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 1,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 2,
       "id": "innate.pot",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "pot"
+      "innateActionId": "action.species.pot.001",
+      "runnerUp": "action.family.base.002",
+      "score": 116,
+      "speciesKey": "pot",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 4,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 2,
       "id": "innate.pumpkin",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "pumpkin"
+      "innateActionId": "action.species.pumpkin.001",
+      "runnerUp": "action.family.base.002",
+      "score": 92,
+      "speciesKey": "pumpkin",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 3,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 2,
       "id": "innate.scaredyshroom",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "scaredyshroom"
+      "innateActionId": "action.species.scaredyshroom.002",
+      "runnerUp": "action.species.scaredyshroom.001",
+      "score": 59,
+      "speciesKey": "scaredyshroom",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 4,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 2,
       "id": "innate.snowgatling",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "snowgatling"
+      "innateActionId": "action.species.snowgatling.001",
+      "runnerUp": "action.species.snowgatling.002",
+      "score": 23,
+      "speciesKey": "snowgatling",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 1,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 1,
       "id": "innate.snowpeashooter",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "snowpeashooter"
+      "innateActionId": "action.species.snowpeashooter.001",
+      "runnerUp": null,
+      "score": 19,
+      "speciesKey": "snowpeashooter",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 3,
+        "roleLeanMatch": 4,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 1,
       "id": "innate.snowsplit",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "snowsplit"
+      "innateActionId": "action.species.snowsplit.001",
+      "runnerUp": null,
+      "score": 17,
+      "speciesKey": "snowsplit",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
       "id": "innate.splitpea",
@@ -594,47 +1044,74 @@
       "speciesKey": "splitpea"
     },
     {
+      "eligibleCount": 1,
       "id": "innate.squash",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "squash"
+      "innateActionId": "action.species.squash.001",
+      "runnerUp": null,
+      "score": 9,
+      "speciesKey": "squash",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 1,
+        "roleLeanMatch": 4,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 2,
+      "id": "innate.starfruit",
+      "innateActionId": "action.species.starfruit.001",
+      "runnerUp": "action.family.fruit.001",
+      "score": 116,
+      "speciesKey": "starfruit",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 4,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 3,
+      "id": "innate.starpea",
+      "innateActionId": "action.species.starpea.001",
+      "runnerUp": "action.family.fruit.001",
+      "score": 212,
+      "speciesKey": "starpea",
+      "terms": {
+        "categoryScarcity": 2,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
       "eligibleCount": 1,
-      "id": "innate.starfruit",
-      "innateActionId": "action.family.fruit.001",
+      "id": "innate.sunchomper",
+      "innateActionId": "action.species.sunchomper.001",
       "runnerUp": null,
-      "score": 47,
-      "speciesKey": "starfruit",
+      "score": 17,
+      "speciesKey": "sunchomper",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 2,
-        "roleLeanMatch": 3,
-        "rungCeiling": 7
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
       }
     },
     {
-      "id": "innate.starpea",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "starpea"
-    },
-    {
-      "id": "innate.sunchomper",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "sunchomper"
-    },
-    {
-      "eligibleCount": 1,
+      "eligibleCount": 3,
       "id": "innate.sunflower",
       "innateActionId": "action.family.sunflower.001",
-      "runnerUp": null,
-      "score": 71,
+      "runnerUp": "action.species.sunflower.001",
+      "score": 271,
       "speciesKey": "sunflower",
       "terms": {
-        "categoryScarcity": 0,
+        "categoryScarcity": 1,
         "elementMatch": 0,
         "motifCoverage": 2,
         "roleLeanMatch": 5,
@@ -648,28 +1125,64 @@
       "speciesKey": "threecabbage"
     },
     {
+      "eligibleCount": 1,
       "id": "innate.threepeater",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "threepeater"
+      "innateActionId": "action.species.threepeater.001",
+      "runnerUp": null,
+      "score": 17,
+      "speciesKey": "threepeater",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 1,
       "id": "innate.threeplantern",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "threeplantern"
+      "innateActionId": "action.species.threeplantern.001",
+      "runnerUp": null,
+      "score": 23,
+      "speciesKey": "threeplantern",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 3,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 2,
       "id": "innate.twinflower",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "twinflower"
+      "innateActionId": "action.species.twinflower.001",
+      "runnerUp": "action.species.twinflower.002",
+      "score": 47,
+      "speciesKey": "twinflower",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 3,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     },
     {
+      "eligibleCount": 2,
       "id": "innate.wallnut",
-      "innateActionId": null,
-      "reason": "no eligible action",
-      "speciesKey": "wallnut"
+      "innateActionId": "action.species.wallnut.001",
+      "runnerUp": "action.species.wallnut.002",
+      "score": 67,
+      "speciesKey": "wallnut",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 3,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
     }
   ],
   "kind": "action-innate",

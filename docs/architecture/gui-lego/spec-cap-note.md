@@ -1,47 +1,66 @@
-# Piece: cap-note
+# Piece: `cap-note`
 
-**Program:** gui-lego · **Kind:** chrome · **ERM rung:** —  
+**Program:** `gui-lego` · **Kind:** chrome · **ERM rung:** —  
 **Draft:** [../../design/gui-lego/pieces/cap-note.html](../../design/gui-lego/pieces/cap-note.html)  
-**Composition:** [spec-composition.md](spec-composition.md)
+**Shared types:** [payload-types.md](payload-types.md) · **Composition:** [spec-composition.md](spec-composition.md)
 
 ## Role
-Cap / no-cap sentence
+
+Cap sentence only when a cap exists; otherwise explicit none or omit.
 
 ## Structure
-- Landmark / root class: .cap-note (see draft HTML)
-- Slots: _none_
-- CSS > ancestors: only when parent is surface-shell / split-inspect — **no illicit wrappers**
 
-## Payload (sketch)
-`json
+| | |
+|---|---|
+| Landmark / root | `.cap-note` |
+| Slots | _none_ |
+| CSS `>` parents | inspect-pane cap |
+
+**Ban:** illicit wrappers between a `>` parent and its declared child.
+
+## Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `piece` | `"cap-note"` | yes | Registry id |
+| `instanceId` | `string` | yes | Stable mount / testid |
+| `phase` | `Phase` | yes | See payload-types |
+| `capKind` | `"none" | "soft" | "hard" | string` | yes | Never invent a cap |
+| `text` | `string` | yes | Player sentence |
+
+
+
+## Theme slots
+
+- Pack kind(s): `neutral`
+- Reads: sun accent for note
+- Vfx keys: none
+
+## Data flow
+
+- **Bind:** `vm.inspect.cap`
+- **Bus out:** _none_
+
+## Focus (GG-19)
+
+no
+
+## Motion (GG-31/32)
+
+none
+
+## Empty / error
+
+Omit piece when fold sets absent
+
+## Sample payloads
+
+```json
 {
   "piece": "cap-note",
-  "instanceId": "demo:cap-note",
+  "instanceId": "inspect:cap",
   "phase": "ready",
   "capKind": "none",
   "text": "No cap on this channel."
 }
-`
-phase: 
-eady|loading|empty|error|pending. Magnitudes use alueRaw + alueText (VM formats).
-
-## Theme slots
-- Pack kind(s): neutral
-- Reads: --piece-accent, --piece-rail-edge, paint.accent / paint.accentMuted when visual
-- Vfx keys: none
-
-## Data flow
-- Bind: vm.inspect.cap
-- Bus out: _none (parent or host)_
-
-## Focus (GG-19)
-no
-
-## Motion (GG-31/32)
-none
-
-## Empty / error
-If bind missing or phase not ready, parent mounts the matching phase-* piece — this leaf does not invent data.
-
-## Samples
-HTML draft shows structure + sample JSON; themeable pieces include fire vs ice (or status-dot) swap.
+```

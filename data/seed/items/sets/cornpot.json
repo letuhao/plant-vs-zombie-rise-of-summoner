@@ -29,19 +29,23 @@
       "members": [
         {
           "role": "armament-primary",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-muzzle-b-004"
         },
         {
           "role": "core-guard",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-stem-b-004"
         },
         {
           "role": "manipulator",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-leaves-b-011"
         },
         {
           "role": "jewel-minor-a",
-          "frame": "plant"
+          "frame": "plant",
+          "baseType": "item.plant-graft-1-a-010"
         }
       ],
       "thresholds": [

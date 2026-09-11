@@ -310,9 +310,9 @@ public class MaterialCorpusTests
     {
         var catalog = Catalog();
 
-        // Measured against the real file, not estimated. 30 authored entries; 30 -> 32 (2026-09-07):
-        // a recipes-gen trial batch added recipe.031/032 to prove that pipeline end to end.
-        Assert.Equal(32, catalog.Recipes.Count + catalog.Refusals.Count);
+        // Population size is not a fixture: recipegen appends valid recipes as it fills the
+        // operation/output coverage grid. Parsing and the named-refusal contract are the invariant.
+        Assert.NotEmpty(catalog.Recipes);
 
         // ⭐ Defect 1 CLOSED 2026-09-05 by module 15 (`enhance-reroll`), which owns the op_kind
         // namespace the reroll-one/reroll-all split lives in. The seven `reroll` rows were re-authored
@@ -334,10 +334,6 @@ public class MaterialCorpusTests
         var legacyRefusals = catalog.Refusals.Where(r => r.Rule == MaterialRecipeCatalog.MaterialUnissuableRule).ToList();
         Assert.Empty(legacyRefusals);
 
-        // 32 authored (2026-09-07 recipegen trial batch, recipe.031/032) − 0 legacy-shard refusals
-        // (fixed the same day) = 32 resolvable, up from 25.
-        Assert.Equal(32, catalog.Recipes.Count);
-
         // Nothing is refused for a reason the module invented: every rule is one of the five it
         // registered, all namespaced `material.*` under the ONE ContentRuleViolated code.
         Assert.All(catalog.Refusals, r =>
@@ -347,7 +343,6 @@ public class MaterialCorpusTests
             Assert.Equal(FusionRpg.Core.Effects.Atoms.AtomRejectionReason.ContentRuleViolated, rejection.Reason);
         });
 
-        Assert.NotEmpty(catalog.Recipes);
     }
 
     [Fact]

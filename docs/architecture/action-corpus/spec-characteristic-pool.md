@@ -17,9 +17,10 @@ theme, that absence is recorded as an absence.
    atom *families*, never a resolved `(family, tier, variant)` triple.
 2. **Small-batch proof before any full run.** The call budget is a **ceiling, not a plan**; this module
    spends zero of it, and its output must be reviewable before a single token is spent.
-3. **The roster is 84 species, not 904.** Measured 2026-09-03: 84 `SpeciesId` rows in
-   `DemonSpeciesCatalog.Generated.cs`, 84 keys in `motif-assignments.json`, **53** in
-   `family-assignments.json`. Per-species counts are tunables.
+3. **The roster is the live species seed folder.** Measured 2026-09-10: 904 species records,
+   227 consolidated families, and 1,183 family memberships under
+   `data/seed/demons/species/**/*.json`. Generated C# and `_generated` projections are not action
+   inputs. Per-species counts are tunables.
 4. **C1's family-access widening is gated** on three things that do not exist. So the pool this module
    emits carries **structure axes** as the tier differentiator, and its `allowedAtomFamilies` is the
    same set for every tier until those three land.
@@ -30,9 +31,9 @@ theme, that absence is recorded as an absence.
 
 | Thing | Count / evidence |
 |---|---|
-| Species catalog with `ElementPrimary`, `ElementSecondary`, `BaseRarity`, `Side`, `DeployMode`, `Acquisition`, `Variants`, `TraitPool` | **84 rows**, `DemonSpeciesCatalog.Generated.cs:14+` |
-| Motif anchors (`motifs`, `antiMotifs`, `basis`, `tautological`) | **84 keys**, `data/seed/demons/_generated/motif-assignments.json`. Joins the catalog **100%** (0 keys outside it) |
-| Family assignments | **53 keys** over **19 distinct families**, `family-assignments.json`. All 53 are catalog species; no species carries two families |
+| Live species catalog with element, rarity and traits | **904 records**, `data/seed/demons/species/**/*.json` |
+| Motif anchors (`motifs`, `antiMotifs`, `basis`, `tautological`) | **904 keys**, `data/seed/demons/_generated/motif-assignments.json`; joins the live roster **100%** |
+| Family assignments | **904 keys** over **227 consolidated families**, derived from each live record's `family` field; **1,183 memberships** |
 | Theme registry with `themeKey` = `demon.<speciesId>` | **84 themes**, `data/seed/demons/_registry/themes.v1.json`; `expression.action` = *"tempo and effect shape — how fast, how it lands"* |
 | Closed vocabularies | 5 categories `ActionEnums.cs:26-33` · 8 tags `:39-49` · 3 kinds `:10-15` · 6 target modes `ActionTargetSpec.cs:16-32` · 4 area shapes `:41-47` · 6 elements `ActorElementTypes.cs:3-11` · 21 statuses `StatusCatalogBootstrap.cs:16-58` · 10 rungs with `structureBudget` `data/tuning/action-rungs.v1.json` |
 | Rarity ladder, 10 rungs, ordinal is rank | `DemonRarity.cs:16-27` |
@@ -59,11 +60,11 @@ There is no characteristic pool and no role lean. `type-weights.json` is named i
 
 | Path | For |
 |---|---|
-| `src/FusionRpg.Core/Demons/DemonSpeciesCatalog.Generated.cs` | the roster, element, rarity, side, deploy mode, acquisition, traits |
+| `data/seed/demons/species/**/*.json` | the roster, element, rarity, traits, and family membership |
 | `data/seed/demons/_generated/motif-assignments.json` | motifs, antiMotifs, basis |
 | `data/seed/demons/_generated/family-assignments.json` | family |
 | `data/seed/demons/_registry/themes.v1.json` | `themeKey`, `expression.action` |
-| `data/seed/demons/species/**/*.json` | the optional 19-species enrichment (aptitude, posture, reach, targetPreference) |
+| `data/seed/demons/species/**/*.json` | live species records and optional anchor enrichment (aptitude, posture, reach, targetPreference) |
 | `data/tuning/action-rungs.v1.json` | rung windows and `structureBudget` |
 | `data/tuning/action-role-lean.v1.json` | **new** — the derivation weights, per-mille |
 
@@ -109,14 +110,14 @@ ideal keeps its dated record and is no longer the source.
 2. **`threatBand` removed from group B.** It is real, but it belongs to the **demon-seed** program
    (`spec-anchor-contract.md:51`, `spec-threat-band.md:33`) and it fails three separate tests for
    membership here. It is **not on the catalog** this module reads — `DemonSpeciesCatalog.Generated.cs`
-   has no such field — so it reaches only the 28-entry anchor tree, of which **19** join the catalog:
-   this module could supply it for 19 of 84 species and would have to record `null` for the other 65.
+   has no such field — so it reaches only the 28-entry anchor tree, while live species records
+   supply family membership directly.
    Its own spec says it *"sets the `Theta` offset, so it scales every magnitude the species ever has"*
    (`spec-option-permutation.md:44`) and that it influences **nothing** about membership
    (`spec-species-effects.md:42,143`). A characteristic is *"a closed-vocabulary constraint that the
    planner chooses and the model obeys"* — putting a `Θ` offset in a brief the model reads hands a
    **magnitude** signal to the identity writer, which is Law 2 the wrong way round.
-   **What would overturn it:** `threatBand` landing on all 84 catalog rows **and** a stated
+   **What would overturn it:** `threatBand` landing on all 904 live seed rows **and** a stated
    identity-side meaning for it. Until both, a `null` for 65 species is not a characteristic.
 - `data/seed/actions/_generated/role-lean.json` — `kind: "action-role-lean"`, one entry per species:
 
@@ -124,7 +125,7 @@ ideal keeps its dated record and is no longer the source.
 {
   "id": "lean.cherrybomb",
   "speciesKey": "cherrybomb",
-  "family": "cherry",                 // null when unassigned — 31 of 84 today
+  "family": "cherry",                 // null when unassigned; derived from the live seed record
   "themeKey": "demon.cherrybomb",
   "element": { "primary": "fire", "secondary": "none" },
   "rarity": "cultivated",             // the LADDER id, never the legacy band
@@ -147,17 +148,17 @@ ideal keeps its dated record and is no longer the source.
    recorded in an `unjoined` list with its id — **never dropped silently, never renamed to fit**. Today
    that list has exactly 9 members.
 2. **Anchor assembly, per species, in catalog order.** Element and rarity come from the **catalog**,
-   because the catalog covers all 84 while the anchor tree covers 19. Motifs come from
+   because the live species seed folder is the roster while the anchor tree is a partial enrichment. Motifs come from
    `motif-assignments.json`. Family comes from `family-assignments.json` or is `null`. `themeKey` comes
    from the theme registry. If the theme registry's `rarity` is a legacy band, it is mapped through
    `DemonRarity.cs:95-100` and never carried forward in the legacy vocabulary.
-3. **Family floor.** For each of the 19 families, the floor lean is the category ordering produced by
+3. **Family floor.** For each of the 227 consolidated families, the floor lean is the category ordering produced by
    summing its members' signal scores (step 4) and ranking.
 
    **⛔ CORRECTED 2026-09-03 (review F12). A family-less species is derived, not floored.** The
    earlier rule sent a species with no family to a **uniform floor** — *"all five categories tied,
    `leanSource: "floor"`, `separation: 0`"* — which discarded a derivation this module already has
-   for **31 of 84 species, 37% of the roster**. Step 4's signals exist for **all 84**: `TraitPool` is
+   for any family-less live species. Step 4's signals exist for **all 904** live records: the trait pool is
    populated on every catalog row (measured 2026-09-03 — 84 rows, **zero** with an empty pool,
    `DemonSpeciesCatalog.Generated.cs:14+`), `ElementPrimary` is set on every row, and `BaseRarity` is
    set on every row. Absence of a *family* is not absence of a *signal*.
@@ -224,7 +225,7 @@ ideal keeps its dated record and is no longer the source.
    Arithmetic: `long` throughout, widen before multiplying, **divide by 1000 last, exactly once**.
    Ranking is by descending score; ties break on the declared category order
    (`ActionEnums.cs:119-123`), which is a total order, so the result cannot depend on enumeration
-   order. **This step runs for all 84 species, family or not** (step 3's F12 correction) — the trait,
+   order. **This step runs for all 904 live species, family or not** (step 3's F12 correction) — the trait,
    element and rarity signals are catalog-wide, and the anchor enrichment is the only one that is
    present for a subset (19 species) rather than for all.
 5. **Residue measurement (Checkpoint 2).** `separation` is the rank distance between a species'
@@ -247,7 +248,7 @@ ideal keeps its dated record and is no longer the source.
 ## 4. What it must NOT do
 
 - **Never invent an anchor.** A species with no family gets `null`, not a guessed family. A species
-  with no motifs (0 of 84 today) would get an empty list, not a fabricated one. 31 of 84 have empty
+  with no motifs would get an empty list, not a fabricated one. Family-less live species have empty
   `antiMotifs`; that stays empty.
 - Never call a model, and never import the transport.
 - Never emit a weight, probability or duration — those are A-T1's and the tuning file's. **The model
@@ -267,9 +268,9 @@ ideal keeps its dated record and is no longer the source.
 | Case | Expect |
 |---|---|
 | **Determinism** | two runs over unchanged inputs produce byte-identical `role-lean.json` and `characteristic-pool.json`, asserted by hash |
-| **Join counts** | asserted as literals against today's measured data: 84 catalog · 84 motif · 53 family · 19 families · 28 anchors · **9** unjoined · 8 in the four-way join. A change in any of these is a real content change and should fail loudly |
+| **Join counts** | asserted against today's live measurements: 904 species · 904 motif keys · 227 consolidated families · 1,183 memberships. A change is real content drift and should fail loudly |
 | **Planted violation — invented anchor** | a species stripped of its family assignment must come out with `family: null`, `leanSource: "derived-nofloor"` and a **non-empty** `signals` list. If any code path substitutes a neighbour's family, the test fails — and so does a path that drops the derivation and returns a five-way tie (review F12) |
-| **Family-less species are derived** | over the 31 family-less species today, the count whose `leanOrder` is **not** the bare declared order is asserted to be greater than zero; a build where all 31 come out identical means step 4 did not run for them |
+| **Family-less species are derived** | any family-less live species is still derived from its own signals; a future family-less record must not silently become a five-way tie |
 | **Planted violation — legacy rarity leak** | a role-lean entry carrying `"rarity": "epic"` is refused; only the 10 ladder ids are legal |
 | **Planted violation — degenerate signal** | re-adding `attackTempo` as a scoring signal changes no species' lean, which the test asserts, so a future contributor sees why it was excluded |
 | **Tie determinism** | two species with identical signals produce identical `leanOrder`, and shuffling the input file order changes nothing |

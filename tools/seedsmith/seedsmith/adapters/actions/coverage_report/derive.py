@@ -56,7 +56,7 @@ __all__ = [
     "next_round_targets", "Verdict", "compute_verdict", "corpus_hash", "build_envelope",
     "canonical_dump",
     "TOLERANCE_UNITS", "SIGNATURE_ACTIONS_PER_SPECIES", "RESEARCH_BAND_UNITS",
-    "RESEARCH_BAND_ROSTER", "PLAUSIBLE_SPECIES_CEILING",
+    "RESEARCH_BAND_ROSTER",
 ]
 
 _GENERAL_SUBJECT_KEY = "general"          # the general scope's one pseudo-subject
@@ -499,47 +499,31 @@ def structure_enforceability_findings(metric_id: str, cov: ActionCoverageCtx) ->
     return findings
 
 
-# Spec's own worked re-derivation (spec-coverage-report.md §4): 84 species x 3 signature actions
-# each ~= 252, roughly 850 for the whole corpus — BELOW the 1,500-3,500 band, which was derived for
-# a 904-unit roster. `3` is the module's own stated re-derivation constant (never re-typed as a
-# balance-surface number here — it describes the shape of the SPEC'S OWN worked example, not a
-# per-species run count a balance pass would retune independently; `perSpeciesCount` in
-# `action-corpus-run.v1.json` is the real tunable).
+# The research band is historical context. The live roster and the per-species count are read from
+# the seed tree and `action-corpus-run.v1.json`; neither may be rejected because it differs from the
+# old projection used by the original spec.
 SIGNATURE_ACTIONS_PER_SPECIES = 3
 RESEARCH_BAND_UNITS = (1500, 3500)
 RESEARCH_BAND_ROSTER = 904
 
-# An order-of-magnitude sanity ceiling, not a balance-surface number: the shipped roster is 84
-# species; the pre-power-ladder almanac this module must never quote a band against is 904 — a
-# roster this metric is ever handed above 200 is refused outright rather than silently re-deriving
-# nonsense against it (the planted-violation "roster inflation" case).
-PLAUSIBLE_SPECIES_CEILING = 200
-
-
 def roster_reconciliation_findings(
     metric_id: str, roster: RosterCounts, accepted_corpus_size: int,
+    signature_actions_per_species: int = SIGNATURE_ACTIONS_PER_SPECIES,
 ) -> "list[Finding]":
-    if roster.species_count > PLAUSIBLE_SPECIES_CEILING:
-        return [Finding(
-            metric=metric_id, severity=Severity.GAP, subject="roster",
-            message=f"speciesCount={roster.species_count} is roster-inflated — this looks like the "
-                    f"pre-power-ladder {RESEARCH_BAND_ROSTER}-unit almanac count, not the shipped "
-                    f"roster (measured 84 species, 19 families, 53 family-assigned) — refused before "
-                    f"deriving anything against it",
-            evidence={"speciesCount": roster.species_count, "ceiling": PLAUSIBLE_SPECIES_CEILING})]
-
-    signature_tier_estimate = roster.species_count * SIGNATURE_ACTIONS_PER_SPECIES
+    if signature_actions_per_species < 0:
+        raise ValueError("signature_actions_per_species must be non-negative")
+    signature_tier_estimate = roster.species_count * signature_actions_per_species
     below_band = signature_tier_estimate < RESEARCH_BAND_UNITS[0]
     return [Finding(
         metric=metric_id, severity=Severity.NOTE, subject="(suite)",
         message=(f"shipped roster: {roster.species_count} species, {roster.family_count} families, "
                  f"{roster.family_assigned_count} family-assigned. Signature-tier re-derivation: "
-                 f"{roster.species_count} x {SIGNATURE_ACTIONS_PER_SPECIES} = "
+                 f"{roster.species_count} x {signature_actions_per_species} = "
                  f"{signature_tier_estimate}, "
                  f"{'below' if below_band else 'inside/above'} the "
-                 f"{RESEARCH_BAND_UNITS[0]}-{RESEARCH_BAND_UNITS[1]} band (that band was derived "
-                 f"for a {RESEARCH_BAND_ROSTER}-unit roster and is never quoted directly against "
-                 f"{roster.species_count}). Accepted corpus today: {accepted_corpus_size} rows."),
+                 f"{RESEARCH_BAND_UNITS[0]}-{RESEARCH_BAND_UNITS[1]} band (historical context from "
+                 f"a {RESEARCH_BAND_ROSTER}-unit roster; this is not a pass/fail gate). Accepted "
+                 f"corpus today: {accepted_corpus_size} rows."),
         evidence={"speciesCount": roster.species_count, "familyCount": roster.family_count,
                  "familyAssignedCount": roster.family_assigned_count,
                  "signatureTierEstimate": signature_tier_estimate,

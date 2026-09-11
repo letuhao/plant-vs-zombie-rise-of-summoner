@@ -1,18 +1,11 @@
 /**
- * ActorSheet → Derived. Compose only: hooks → cook model → console shell.
- * Visual SSOT = docs/design/derived-combat-console.html.
- * Structure: tasks/actor-sheet-derived-structure.md
+ * Derived tab host — fold → bindSurface → RecipeMount.
+ * Visual SSOT: docs/design/gui-lego/surfaces/derived-console.html
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { isKnown } from "@/contract/pending";
 import type { ActorView } from "@/contract/types";
-import {
-  derivedSurfaceFromFixture,
-  type ActorSurfaceCatalog,
-  useDerivedSurface
-} from "@/lib/bus/actorSurface";
-import { useActorDerived, useActorSheet } from "@/lib/bus/aura";
-import { DerivedCombatConsole } from "./derived/DerivedCombatConsole";
+import { bindSurface } from "@/features/gui-lego/bindSurface";
 import {
   COOK_PRIMARY_TAB_IDS,
   FORBIDDEN_PRIMARY_TAB_IDS,
@@ -22,12 +15,22 @@ import {
   isUnchangedState,
   joinDerivedChannelId,
   resolveDerivedRenderState,
-  toLiveMap,
-  type DerivedRowModel,
   type DerivedRenderState,
   type ExpandedDerivedChannel,
   type LiveChannelView
-} from "./derived/derivedCook";
+} from "@/features/gui-lego/cook";
+import { asSurfaceBusLike } from "@/features/gui-lego/createSurfaceBus";
+import { createDerivedSurfaceBus } from "@/features/gui-lego/derivedSurfaceBus";
+import { foldDerivedSurfaceVm } from "@/features/gui-lego/foldDerivedSurfaceVm";
+import { getRecipe } from "@/features/gui-lego/recipeRegistry";
+import {
+  derivedSurfaceFromFixture,
+  type ActorSurfaceCatalog,
+  useDerivedSurface
+} from "@/lib/bus/actorSurface";
+import { useActorDerived, useActorSheet } from "@/lib/bus/aura";
+import { RecipeMount } from "@/ui/gui-lego/RecipeMount";
+import { ensureDerivedGuiLegoRegistered } from "@/ui/gui-lego/registerDerived";
 
 export {
   COOK_PRIMARY_TAB_IDS,
@@ -41,6 +44,8 @@ export {
   type ExpandedDerivedChannel,
   type LiveChannelView
 };
+
+ensureDerivedGuiLegoRegistered();
 
 export function DerivedTab({
   data,
@@ -64,6 +69,46 @@ export function DerivedTab({
   const [query, setQuery] = useState("");
   const [tabId, setTabId] = useState("elements");
   const [variantId, setVariantId] = useState<string | null>(null);
+  const [retryTick, setRetryTick] = useState(0);
+  const revisionRef = useRef(0);
+  const searchFocused = useRef(false);
+
+  const typedBus = useMemo(() => createDerivedSurfaceBus(), []);
+  const bus = useMemo(() => asSurfaceBusLike(typedBus), [typedBus]);
+
+  useEffect(() => {
+    const offs = [
+      typedBus.on("derived.search.set", (p) => {
+        const q = (p as { query?: string })?.query;
+        if (typeof q === "string") setQuery(q);
+      }),
+      typedBus.on("derived.showUnchanged.set", (p) => {
+        const v = (p as { value?: boolean })?.value;
+        if (typeof v === "boolean") setShowUnchanged(v);
+      }),
+      typedBus.on("derived.tab.set", (p) => {
+        const id = (p as { tabId?: string })?.tabId;
+        if (typeof id === "string") {
+          setTabId(id);
+          setVariantId(null);
+        }
+      }),
+      typedBus.on("derived.variant.set", (p) => {
+        const id = (p as { variantId?: string })?.variantId;
+        if (typeof id === "string") setVariantId(id);
+      }),
+      typedBus.on("derived.channel.select", (p) => {
+        const id = (p as { channelId?: string })?.channelId;
+        if (typeof id === "string") setSelectedId(id);
+      }),
+      typedBus.on("derived.retry", () => {
+        void sheet.refetch();
+        void derived.refetch();
+        setRetryTick((t) => t + 1);
+      })
+    ];
+    return () => offs.forEach((off) => off());
+  }, [typedBus, sheet, derived]);
 
   const tabs = useMemo(() => {
     const cooked = cook.data?.tabs?.length
@@ -72,152 +117,142 @@ export function DerivedTab({
     return [...cooked].sort((a, b) => a.order - b.order);
   }, [cook.data, surface, data.side]);
 
-  const activeTab = tabs.find((t) => t.id === tabId) ?? tabs[0] ?? null;
-
-  const variantChoices = useMemo(() => {
-    if (!activeTab) return [] as { id: string; displayName: string; presentationOnly?: boolean }[];
-    if (activeTab.id === "other") {
-      return (activeTab.actionCategoryVariants ?? []).map((v) => ({
-        id: v.id,
-        displayName: v.displayName,
-        presentationOnly: v.presentationOnly
-      }));
-    }
-    return activeTab.variants.map((v) => ({
-      id: v.id,
-      displayName: v.displayName,
-      presentationOnly: v.presentationOnly
-    }));
-  }, [activeTab]);
-
-  useEffect(() => {
-    if (!tabs.some((t) => t.id === tabId) && tabs[0]) setTabId(tabs[0].id);
-  }, [tabs, tabId]);
-
-  useEffect(() => {
-    if (variantChoices.length === 0) {
-      setVariantId(null);
-      return;
-    }
-    if (!variantId || !variantChoices.some((v) => v.id === variantId)) {
-      const preferFire =
-        activeTab?.id === "elements" && variantChoices.some((v) => v.id === "fire")
-          ? "fire"
-          : variantChoices[0]!.id;
-      setVariantId(preferFire);
-    }
-  }, [variantChoices, variantId, activeTab?.id]);
-
-  const byId = useMemo(
-    () => toLiveMap(sheet.data?.derived, derived.data?.channels),
-    [sheet.data, derived.data]
-  );
-
-  const familyRows = useMemo(() => {
-    if (!activeTab) return [] as DerivedRowModel[];
-    const rows: DerivedRowModel[] = [];
-    for (const cat of activeTab.categories) {
-      for (const family of cat.families) {
-        let channelVariant = variantId;
-        let variantLabel =
-          variantChoices.find((v) => v.id === variantId)?.displayName ?? variantId ?? "";
-
-        if (family.expand === "none") {
-          channelVariant = null;
-          variantLabel = family.displayName;
-        } else if (!variantId) {
-          continue;
-        }
-
-        const channelId = joinDerivedChannelId(family.family, family.expand, channelVariant);
-        const element =
-          family.expand === "element"
-            ? (surface.elements.find((e) => e.id === channelVariant) ?? null)
-            : null;
-        const entry: ExpandedDerivedChannel = {
-          channelId,
-          element,
-          variantLabel
-        };
-        const live = byId.get(channelId);
-        const state = resolveDerivedRenderState(channelId, live, family.capRef);
-        rows.push({
-          family,
-          categoryId: cat.id,
-          categoryLabel: cat.displayName,
-          entry,
-          live,
-          state,
-          displayName: family.displayName
-        });
-      }
-    }
-    return rows;
-  }, [activeTab, variantId, variantChoices, byId, surface.elements]);
-
-  const q = query.trim().toLowerCase();
-  const visibleRows = familyRows.filter((row) => {
-    if (
-      q &&
-      !`${row.displayName} ${row.entry.channelId} ${row.family.reading} ${row.categoryLabel}`
-        .toLowerCase()
-        .includes(q)
-    ) {
-      return false;
-    }
-    if (!showUnchanged && isUnchangedState(row.state) && row.entry.channelId !== selectedId) {
-      return false;
-    }
-    return true;
-  });
-  const hiddenCount = familyRows.length - visibleRows.length;
-
-  useEffect(() => {
-    if (selectedId && visibleRows.some((r) => r.entry.channelId === selectedId)) return;
-    const firstActive = visibleRows.find((r) => r.state === "active") ?? visibleRows[0];
-    setSelectedId(firstActive?.entry.channelId ?? null);
-  }, [visibleRows, selectedId]);
-
-  const selected = visibleRows.find((r) => r.entry.channelId === selectedId) ?? null;
-  const loading = sheet.isLoading && derived.isLoading;
-  const errored = sheet.isError && derived.isError;
-
-  const groupedVisible = useMemo(() => {
-    const map = new Map<string, { label: string; rows: DerivedRowModel[] }>();
-    for (const row of visibleRows) {
-      const bucket = map.get(row.categoryId) ?? { label: row.categoryLabel, rows: [] };
-      bucket.rows.push(row);
-      map.set(row.categoryId, bucket);
-    }
-    return [...map.entries()] as [string, { label: string; rows: DerivedRowModel[] }][];
-  }, [visibleRows]);
+  const loading = sheet.isLoading;
+  const hasSheet = (sheet.data?.derived?.length ?? 0) > 0;
+  // DC-9: sheet-only when projection ready — lean only for UniqueDemon Pending honesty.
+  const sheetProjectionReady =
+    hasSheet &&
+    (sheet.data?.derived?.some(
+      (ch) => ch.renderState != null || ch.unitClass != null || ch.cap !== undefined
+    ) ??
+      false);
+  const leanOnly =
+    !hasSheet &&
+    !sheet.isLoading &&
+    (derived.data?.channels?.length ?? 0) > 0 &&
+    !derived.isError;
+  const errored =
+    (sheet.isError || (!sheetProjectionReady && derived.isError)) && !loading && !leanOnly;
+  const availability = loading
+    ? "loading"
+    : errored
+      ? "error"
+      : leanOnly
+        ? "pending"
+        : "ready";
 
   const displayName = isKnown(data.displayName) ? data.displayName.value : data.instanceId;
 
+  const revision = useMemo(() => {
+    revisionRef.current += 1;
+    return revisionRef.current;
+  }, [
+    displayName,
+    data.level,
+    data.side,
+    tabs,
+    sheet.data,
+    sheetProjectionReady ? undefined : derived.data,
+    surface.elements,
+    tabId,
+    variantId,
+    query,
+    showUnchanged,
+    selectedId,
+    availability,
+    retryTick
+  ]);
+
+  const vm = useMemo(
+    () =>
+      foldDerivedSurfaceVm({
+        identity: {
+          displayName,
+          level: data.level,
+          side: data.side
+        },
+        cookTabs: tabs,
+        sheetChannels: sheet.data?.derived,
+        leanChannels: sheetProjectionReady ? undefined : derived.data?.channels,
+        elements: surface.elements,
+        statuses: surface.statuses,
+        ui: {
+          tabId,
+          variantId,
+          query,
+          showUnchanged,
+          selectedChannelId: selectedId
+        },
+        availability,
+        revision
+      }),
+    [
+      displayName,
+      data.level,
+      data.side,
+      tabs,
+      sheet.data,
+      sheetProjectionReady,
+      derived.data,
+      surface.elements,
+      surface.statuses,
+      tabId,
+      variantId,
+      query,
+      showUnchanged,
+      selectedId,
+      availability,
+      revision
+    ]
+  );
+
+  // Keep host selection in sync with fold fallback
+  useEffect(() => {
+    if (vm.selectedChannelId !== selectedId) {
+      setSelectedId(vm.selectedChannelId);
+    }
+  }, [vm.selectedChannelId, selectedId]);
+
+  const recipe = getRecipe("derived-console");
+  const plan = useMemo(
+    () => (recipe ? bindSurface(recipe, vm) : null),
+    [recipe, vm]
+  );
+
+  // GG-19 — focus search when surface becomes ready (or empty chrome with search)
+  useEffect(() => {
+    if ((vm.phase !== "ready" && vm.phase !== "empty") || searchFocused.current) return;
+    const el = document.querySelector<HTMLInputElement>(
+      '[data-testid="derived-combat-console"] [data-testid="derived-search"]'
+    );
+    if (el) {
+      el.focus();
+      searchFocused.current = true;
+    }
+  }, [vm.phase, plan]);
+
+  if (!plan) {
+    return <p className="rd">Derived recipe not registered.</p>;
+  }
+
+  // Loading/error full overlay — still wrap so ActorPanel has a root testid if needed
+  if (!plan.root && plan.overlay) {
+    return (
+      <div className="flex h-full min-h-0 flex-1 flex-col" data-testid="derived-tab-host">
+        <div
+          className="derived-combat-console console"
+          data-testid="derived-combat-console"
+          data-derived-root="1"
+        >
+          <RecipeMount plan={plan} bus={bus} />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <DerivedCombatConsole
-      displayName={displayName}
-      level={data.level}
-      side={data.side}
-      loading={loading}
-      errored={errored}
-      tabs={tabs}
-      activeTab={activeTab}
-      tabId={activeTab?.id ?? tabId}
-      onTabId={setTabId}
-      variantChoices={variantChoices}
-      variantId={variantId}
-      onVariantId={setVariantId}
-      query={query}
-      onQuery={setQuery}
-      showUnchanged={showUnchanged}
-      onShowUnchanged={setShowUnchanged}
-      groupedVisible={groupedVisible}
-      visibleCount={visibleRows.length}
-      hiddenCount={hiddenCount}
-      selectedId={selectedId}
-      selected={selected}
-      onSelect={setSelectedId}
-    />
+    <div className="flex h-full min-h-0 flex-1 flex-col" data-testid="derived-tab-host">
+      <RecipeMount plan={plan} bus={bus} />
+    </div>
   );
 }

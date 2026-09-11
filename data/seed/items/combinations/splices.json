@@ -1,0 +1,1808 @@
+{
+  "schemaVersion": 1,
+  "kind": "combination",
+  "_meta": {
+    "batch": "combination-gen-splice",
+    "partition": "combinations/splice",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 6,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "strain-splice-gen/2",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
+    "sourceRef": "docs/architecture/item-seedgen/spec-combination-write-unblock.md"
+  },
+  "entries": [
+    {
+      "aptitudes": [
+        "Agility",
+        "Bulwark"
+      ],
+      "flavor": "The momentum of a missed strike is instantly converted into a wall of force.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.quickening"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-agility-bulwark",
+      "ingredients": [
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.evasion",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Deflection",
+      "nameKey": "combination.splice-agility-bulwark",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Agility",
+        "Composure"
+      ],
+      "flavor": "The art of being everywhere and nowhere at once, leaving only a hollow echo where a strike should have landed.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.quickening"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-agility-composure",
+      "ingredients": [
+        {
+          "family": "atom.evasion",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.stoicism",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Ghost-Step Stoicism",
+      "nameKey": "combination.splice-agility-composure",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Agility",
+        "Ferocity"
+      ],
+      "flavor": "The moment of impact is a ghost; you are already elsewhere when the wound opens.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.precision",
+        "atom.quickening"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-agility-ferocity",
+      "ingredients": [
+        {
+          "family": "atom.evasion",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.ferocity",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Flicker-Strike",
+      "nameKey": "combination.splice-agility-ferocity",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Agility",
+        "Focus"
+      ],
+      "flavor": "The dancer does not merely avoid the blow; they exist in the momentary lapse between the strike and its impact, resetting their momentum before the world can catch up.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.swiftness",
+        "atom.precision"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-agility-focus",
+      "ingredients": [
+        {
+          "family": "atom.econ-muster",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.evasion",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-followthrough",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.quickening",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Ghost-Step Rhythm",
+      "nameKey": "combination.splice-agility-focus",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Agility",
+        "Pierce"
+      ],
+      "flavor": "A strike that exists in the space between heartbeats, passing through steel as if it were mist.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.precision",
+        "atom.swiftness"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-agility-pierce",
+      "ingredients": [
+        {
+          "family": "atom.evasion",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Ghost-Point Needle",
+      "nameKey": "combination.splice-agility-pierce",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Agility",
+        "Retribution"
+      ],
+      "flavor": "The space you occupied becomes a trap; to strike where you were is to strike a mirror.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.precision",
+        "atom.retribution"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-agility-retribution",
+      "ingredients": [
+        {
+          "family": "atom.evasion",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.hit-retort",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Vengeful Afterimage",
+      "nameKey": "combination.splice-agility-retribution",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Bulwark",
+        "Ferocity"
+      ],
+      "flavor": "The impact of a perfect block is not a stop, but a release of kinetic fury.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.precision"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-bulwark-ferocity",
+      "ingredients": [
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.ferocity",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Shatter-Guard",
+      "nameKey": "combination.splice-bulwark-ferocity",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Bulwark",
+        "Precision"
+      ],
+      "flavor": "The moment the shield meets the strike, the target's movement is frozen by the sheer certainty of the impact.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.stalwart"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-bulwark-precision",
+      "ingredients": [
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.precision",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Infallible Point",
+      "nameKey": "combination.splice-bulwark-precision",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Bulwark",
+        "Retribution"
+      ],
+      "flavor": "The shield does not merely stop the blow; it drinks the impact and spits it back with interest.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.hit-retort",
+        "atom.stalwart"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-bulwark-retribution",
+      "ingredients": [
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.retribution",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Vengeful Bastion",
+      "nameKey": "combination.splice-bulwark-retribution",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Composure",
+        "Focus"
+      ],
+      "flavor": "The rhythm of the strike is not lost, merely compressed into a single, inevitable point of impact.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.precision",
+        "atom.retribution"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-composure-focus",
+      "ingredients": [
+        {
+          "family": "atom.quickening",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.stoicism",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Stilled Momentum",
+      "nameKey": "combination.splice-composure-focus",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Composure",
+        "Pierce"
+      ],
+      "flavor": "A stillness so absolute that even the sharpest edge finds no purchase, only to shatter against the void it meant to pierce.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.precision"
+      ],
+      "hostFrame": "plant",
+      "hostRole": "core-guard",
+      "id": "combo.splice-composure-pierce",
+      "ingredients": [
+        {
+          "family": "atom.arm-plate",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.precision",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "The Unyielding Needle",
+      "nameKey": "combination.splice-composure-pierce",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Composure",
+        "Precision"
+      ],
+      "flavor": "Where the stillness of the mind meets the inevitability of the strike; they cannot dodge what has already arrived.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.precision"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-composure-precision",
+      "ingredients": [
+        {
+          "family": "atom.fortitude",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.precision",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.precision",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.stoicism",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "The Unfaltering Point",
+      "nameKey": "combination.splice-composure-precision",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Composure",
+        "Retribution"
+      ],
+      "flavor": "The calmest surface reflects the deepest wound.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.stoicism"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-composure-retribution",
+      "ingredients": [
+        {
+          "family": "atom.fortitude",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-retort",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.retribution",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.stoicism",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Stillness in the Storm",
+      "nameKey": "combination.splice-composure-retribution",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Focus",
+        "Ferocity"
+      ],
+      "flavor": "The rhythm of the strike dictates the rhythm of the breath; to strike with madness is to find perfect clarity.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.quickening",
+        "atom.savagery"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-focus-ferocity",
+      "ingredients": [
+        {
+          "family": "atom.econ-muster",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-followthrough",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Frenzy-Flow",
+      "nameKey": "combination.splice-focus-ferocity",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Focus",
+        "Precision"
+      ],
+      "flavor": "The rhythm of the strike becomes a loop; the moment of impact is no longer an event, but a constant state of being.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.quickening",
+        "atom.precision"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-focus-precision",
+      "ingredients": [
+        {
+          "family": "atom.econ-muster",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Singular Intent",
+      "nameKey": "combination.splice-focus-precision",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Fortitude",
+        "Agility"
+      ],
+      "flavor": "The impact is absorbed not by the bone, but by the space the body occupied a moment before.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.quickening"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-fortitude-agility",
+      "ingredients": [
+        {
+          "family": "atom.evasion",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Displacement",
+      "nameKey": "combination.splice-fortitude-agility",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Fortitude",
+        "Bulwark"
+      ],
+      "flavor": "The impact is not merely absorbed; it is redirected into a momentary, impenetrable stance.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.stalwart"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-fortitude-bulwark",
+      "ingredients": [
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Bastion",
+      "nameKey": "combination.splice-fortitude-bulwark",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Fortitude",
+        "Ferocity"
+      ],
+      "flavor": "The more the shell absorbs, the more the edge hungers.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.precision"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-fortitude-ferocity",
+      "ingredients": [
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Vengeful Bastion",
+      "nameKey": "combination.splice-fortitude-ferocity",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Fortitude",
+        "Focus"
+      ],
+      "flavor": "The rhythm of the strike dictates the rhythm of the breath; as the impact settles, the spirit recovers.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.quickening",
+        "atom.shield-regen"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-fortitude-focus",
+      "ingredients": [
+        {
+          "family": "atom.econ-muster",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-followthrough",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-retort",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Steady Rhythm",
+      "nameKey": "combination.splice-fortitude-focus",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Fortitude",
+        "Onslaught"
+      ],
+      "flavor": "The impact that breaks the shield is the same force that shatters the foe.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.resilience"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-fortitude-onslaught",
+      "ingredients": [
+        {
+          "family": "atom.arm-plate",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-retort",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Rebound",
+      "nameKey": "combination.splice-fortitude-onslaught",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Fortitude",
+        "Pierce"
+      ],
+      "flavor": "The moment the shell cracks is the moment the strike finds its truth.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.precision"
+      ],
+      "hostFrame": "plant",
+      "hostRole": "core-guard",
+      "id": "combo.splice-fortitude-pierce",
+      "ingredients": [
+        {
+          "family": "atom.fortitude",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Fracture-Point Aegis",
+      "nameKey": "combination.splice-fortitude-pierce",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Fortitude",
+        "Precision"
+      ],
+      "flavor": "The weight of the blow is not lost to the target's movement; it is anchored by the defender's resolve.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.stalwart"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-fortitude-precision",
+      "ingredients": [
+        {
+          "family": "atom.fortitude",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.precision",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Unfailing Impact",
+      "nameKey": "combination.splice-fortitude-precision",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Fortitude",
+        "Retribution"
+      ],
+      "flavor": "The harder the blow that strikes the shell, the more violent the echo that returns.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.hit-retort",
+        "atom.resilience"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-fortitude-retribution",
+      "ingredients": [
+        {
+          "family": "atom.fortitude",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.retribution",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Reciprocity",
+      "nameKey": "combination.splice-fortitude-retribution",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Might",
+        "Agility"
+      ],
+      "flavor": "The momentum of a heavy blow, redirected into a sudden, impossible repositioning.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.quickening"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-might-agility",
+      "ingredients": [
+        {
+          "family": "atom.evasion",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.ferocity",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Impact",
+      "nameKey": "combination.splice-might-agility",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Might",
+        "Bulwark"
+      ],
+      "flavor": "The force of the impact is not lost, but redirected into the next strike.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-might-bulwark",
+      "ingredients": [
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.might",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Bastion",
+      "nameKey": "combination.splice-might-bulwark",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Might",
+        "Composure"
+      ],
+      "flavor": "The force of the blow is not lost, but redirected into a steady, unshakeable stance.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution"
+      ],
+      "hostFrame": "plant",
+      "hostRole": "core-guard",
+      "id": "combo.splice-might-composure",
+      "ingredients": [
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.retribution",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.stoicism",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Anchor",
+      "nameKey": "combination.splice-might-composure",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Might",
+        "Ferocity"
+      ],
+      "flavor": "The weight of the blow is irrelevant if the strike finds the seam in the world.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.savagery",
+        "atom.precision"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-might-ferocity",
+      "ingredients": [
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.might",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Shatter-Point",
+      "nameKey": "combination.splice-might-ferocity",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Might",
+        "Focus"
+      ],
+      "flavor": "The momentum of the strike is not lost to the air, but folded back into the soul to fuel the next.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.quickening",
+        "atom.ferocity"
+      ],
+      "hostFrame": "plant",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-might-focus",
+      "ingredients": [
+        {
+          "family": "atom.econ-muster",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-followthrough",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.quickening",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Recurrence",
+      "nameKey": "combination.splice-might-focus",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Might",
+        "Fortitude"
+      ],
+      "flavor": "The force of the blow is returned through the very density of the defender's stance.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution"
+      ],
+      "hostFrame": "plant",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-might-fortitude",
+      "ingredients": [
+        {
+          "family": "atom.fortitude",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.might",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Impact",
+      "nameKey": "combination.splice-might-fortitude",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Might",
+        "Onslaught"
+      ],
+      "flavor": "The impact does not merely strike; it shatters the concept of defense, turning the enemy's own momentum into a crushing weight.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.savagery"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-might-onslaught",
+      "ingredients": [
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-followthrough",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-retort",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.savagery",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Sunder-Pulse",
+      "nameKey": "combination.splice-might-onslaught",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Might",
+        "Pierce"
+      ],
+      "flavor": "The force of the impact is not lost to the armor, but channeled through it to shatter the wearer.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.savagery",
+        "atom.precision"
+      ],
+      "hostFrame": "plant",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-might-pierce",
+      "ingredients": [
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Breach",
+      "nameKey": "combination.splice-might-pierce",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Might",
+        "Precision"
+      ],
+      "flavor": "The weight of the blow finds the gap before the target can even blink.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.savagery",
+        "atom.precision"
+      ],
+      "hostFrame": "plant",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-might-precision",
+      "ingredients": [
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Sunder-Point",
+      "nameKey": "combination.splice-might-precision",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Might",
+        "Vigor"
+      ],
+      "flavor": "The force of the blow is recycled into the strength of the stance.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.shield-regen"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-might-vigor",
+      "ingredients": [
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Bastion",
+      "nameKey": "combination.splice-might-vigor",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Onslaught",
+        "Agility"
+      ],
+      "flavor": "The blow lands where the enemy is not, yet the impact is felt as if they were standing still.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.precision",
+        "atom.retribution"
+      ],
+      "hostFrame": "plant",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-onslaught-agility",
+      "ingredients": [
+        {
+          "family": "atom.evasion",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-retort",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.quickening",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Ghost-Strike",
+      "nameKey": "combination.splice-onslaught-agility",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Onslaught",
+        "Composure"
+      ],
+      "flavor": "The moment the strike lands, it is already a memory; the impact is absorbed into a perfect, violent silence.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.resilience"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-onslaught-composure",
+      "ingredients": [
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-retort",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.precision",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.stoicism",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Unstoppable Stillness",
+      "nameKey": "combination.splice-onslaught-composure",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Onslaught",
+        "Focus"
+      ],
+      "flavor": "The moment the guard breaks, the flow begins; every impact is a catalyst for the next.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.quickening"
+      ],
+      "hostFrame": "plant",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-onslaught-focus",
+      "ingredients": [
+        {
+          "family": "atom.death-salvo",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.econ-muster",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-retort",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.quickening",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Rhythm of the Rupture",
+      "nameKey": "combination.splice-onslaught-focus",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Onslaught",
+        "Retribution"
+      ],
+      "flavor": "The moment the shield shatters is the moment the blow returns twofold.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.savagery",
+        "atom.retribution"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-onslaught-retribution",
+      "ingredients": [
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.hit-retort",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Vengeance Breach",
+      "nameKey": "combination.splice-onslaught-retribution",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Pierce",
+        "Bulwark"
+      ],
+      "flavor": "The moment the shield breaks is the moment the strike finds its mark.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.precision"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-pierce-bulwark",
+      "ingredients": [
+        {
+          "family": "atom.arm-plate",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.arm-riveting",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.bulwark",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Shatter-Guard",
+      "nameKey": "combination.splice-pierce-bulwark",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Pierce",
+        "Ferocity"
+      ],
+      "flavor": "The armor is not merely bypassed; it is shredded by the sheer, unbridled momentum of the strike.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.savagery",
+        "atom.precision"
+      ],
+      "hostFrame": "plant",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-pierce-ferocity",
+      "ingredients": [
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Sunder-Frenzy",
+      "nameKey": "combination.splice-pierce-ferocity",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Pierce",
+        "Focus"
+      ],
+      "flavor": "The strike ignores the shell, and the rhythm of the blow feeds the soul.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.precision",
+        "atom.quickening"
+      ],
+      "hostFrame": "plant",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-pierce-focus",
+      "ingredients": [
+        {
+          "family": "atom.keen-edge",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.quickening",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Vortex of the Unbound",
+      "nameKey": "combination.splice-pierce-focus",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Pierce",
+        "Retribution"
+      ],
+      "flavor": "The wound is not merely opened; it is a conduit for the enemy's own momentum to turn inward.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.precision",
+        "atom.retribution"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-pierce-retribution",
+      "ingredients": [
+        {
+          "family": "atom.hit-retort",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Vengeful Breach",
+      "nameKey": "combination.splice-pierce-retribution",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Precision",
+        "Ferocity"
+      ],
+      "flavor": "The strike is so precise it finds the gap, and so violent it tears the wound wide.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.savagery",
+        "atom.keen-edge"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-precision-ferocity",
+      "ingredients": [
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.precision",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Surgical Rupture",
+      "nameKey": "combination.splice-precision-ferocity",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Retribution",
+        "Ferocity"
+      ],
+      "flavor": "When the blow lands, the wound answers back with a jagged, unyielding edge.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.precision",
+        "atom.savagery"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.splice-retribution-ferocity",
+      "ingredients": [
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-retort",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.precision",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.savagery",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Vengeful Rupture",
+      "nameKey": "combination.splice-retribution-ferocity",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Vigor",
+        "Agility"
+      ],
+      "flavor": "The harder the blow, the more likely the target is to strike nothing but air.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.quickening"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-vigor-agility",
+      "ingredients": [
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.evasion",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Bastion",
+      "nameKey": "combination.splice-vigor-agility",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Vigor",
+        "Composure"
+      ],
+      "flavor": "The impact is absorbed, not resisted; the force is redirected into a steady, unyielding rhythm.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.shield-regen"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-vigor-composure",
+      "ingredients": [
+        {
+          "family": "atom.arm-hardening",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.arm-plate",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.bulwark",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.stoicism",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Dampener",
+      "nameKey": "combination.splice-vigor-composure",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Vigor",
+        "Ferocity"
+      ],
+      "flavor": "The more blood is spilled, the harder the shell becomes.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.vitality"
+      ],
+      "hostFrame": "plant",
+      "hostRole": "core-guard",
+      "id": "combo.splice-vigor-ferocity",
+      "ingredients": [
+        {
+          "family": "atom.bloodletting",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.bulwark",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.ferocity",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Sanguine Bastion",
+      "nameKey": "combination.splice-vigor-ferocity",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Vigor",
+        "Focus"
+      ],
+      "flavor": "The impact does not deplete the shield; it refines the flow of qi, turning the weight of defense into the momentum of action.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.shield-regen",
+        "atom.quickening"
+      ],
+      "hostFrame": "plant",
+      "hostRole": "core-guard",
+      "id": "combo.splice-vigor-focus",
+      "ingredients": [
+        {
+          "family": "atom.fortitude",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.quickening",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Recalibration",
+      "nameKey": "combination.splice-vigor-focus",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Vigor",
+        "Onslaught"
+      ],
+      "flavor": "The more they strike the shell, the more the shell strikes back.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.shield-toughness"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-vigor-onslaught",
+      "ingredients": [
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.retribution",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.shield-toughness",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Bastion",
+      "nameKey": "combination.splice-vigor-onslaught",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Vigor",
+        "Pierce"
+      ],
+      "flavor": "The impact doesn't just crack the armor; it turns the victim's own protection into a weapon of blunt force.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.shield-toughness"
+      ],
+      "hostFrame": "plant",
+      "hostRole": "core-guard",
+      "id": "combo.splice-vigor-pierce",
+      "ingredients": [
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Shatter-Shell",
+      "nameKey": "combination.splice-vigor-pierce",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Vigor",
+        "Precision"
+      ],
+      "flavor": "The strike is inevitable, and the impact is absorbed without a tremor.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.shield-regen"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-vigor-precision",
+      "ingredients": [
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.precision",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Unfailing Bulwark",
+      "nameKey": "combination.splice-vigor-precision",
+      "shape": "splice"
+    },
+    {
+      "aptitudes": [
+        "Vigor",
+        "Retribution"
+      ],
+      "flavor": "The more the shell absorbs, the more the impact recoils.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.shield-regen"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.splice-vigor-retribution",
+      "ingredients": [
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-retort",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Feedback Loop",
+      "nameKey": "combination.splice-vigor-retribution",
+      "shape": "splice"
+    }
+  ]
+}

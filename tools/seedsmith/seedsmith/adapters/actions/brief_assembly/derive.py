@@ -110,7 +110,8 @@ def assemble_brief(plan_entry: Mapping[str, object],
     `plan_entry` (`id`, `briefId`, `scope`, `scopeKey`, `anchor`, `slot`, `pool`, `pairing`,
     `avoidNeighbours`, `_provenance`) is carried through untouched; `familyActions` is the only
     key this module adds. A family-less species (`anchor.family` is `None` or the key is absent)
-    gets the key present and EMPTY, never omitted (spec §3.3 — 31 of 84, the common case)."""
+    gets the key present and EMPTY, never omitted (spec §3.3 — the common case for species without
+    family membership)."""
     if plan_entry.get("scope") != "species":
         raise ValueError(
             f"assemble_brief: expected a species-scope (signature) brief, got scope="
@@ -128,7 +129,7 @@ def assemble_briefs(plan_entries: Sequence[Mapping[str, object]],
                     family_ids: "frozenset[str]") -> "list[dict]":
     """§3 end to end: every species-scope (signature) entry in A-S1's plan gets exactly one P3
     brief, **never skipped** (spec §3.3), walked in the plan's own order (A-S1 already ordered the
-    84-species catalog once; this module does not re-sort it). `general`/`family`-scope plan
+    live species catalog once; this module does not re-sort it). `general`/`family`-scope plan
     entries are not signature briefs and are not emitted here — A-P3 has no use for them."""
     by_family = index_accepted_family_actions(accepted_rows, family_ids)
     return [assemble_brief(e, by_family) for e in plan_entries if e.get("scope") == "species"]

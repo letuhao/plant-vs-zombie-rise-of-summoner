@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tool-search — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>tool-search</code></h1>
+  <p class="lede">Search field — emits derived.search.set. Spec: <code>docs/architecture/gui-lego/spec-tool-search.md</code>. Visuals from payload/theme — no hard-coded element colors in the piece root.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live)</h2>
+      <div class="piece-stage"><input class="search" type="search" placeholder="Search channels" value="" aria-label="Search channels"></div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "tool-search",
+  "instanceId": "tool:search",
+  "query": "",
+  "placeholder": "Search channels",
+  "phase": "ready"
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

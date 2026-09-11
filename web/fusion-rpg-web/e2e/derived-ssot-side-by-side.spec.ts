@@ -15,7 +15,15 @@ import { waitForApiHealth } from "./helpers/live-debug-api";
 const liveEnabled = isLiveDerivedSheetE2e();
 const API_BASE = (process.env.FUSIONRPG_API_BASE ?? "http://127.0.0.1:5088").replace(/\/$/, "");
 const ARTIFACT_DIR = path.join("e2e", "artifacts", "derived");
-const HTML_SSOT = path.resolve("..", "..", "docs", "design", "derived-combat-console.html");
+const HTML_SSOT = path.resolve(
+  "..",
+  "..",
+  "docs",
+  "design",
+  "gui-lego",
+  "surfaces",
+  "derived-console.html"
+);
 
 test.describe("Derived SSOT side-by-side (owner visual gate)", () => {
   test.skip(!liveEnabled, "requires derived-live-chromium project or DERIVED_SHEET_LIVE_E2E=1");
@@ -28,8 +36,10 @@ test.describe("Derived SSOT side-by-side (owner visual gate)", () => {
     // HTML draft
     expect(fs.existsSync(HTML_SSOT), `missing SSOT HTML at ${HTML_SSOT}`).toBe(true);
     await page.goto(pathToFileURL(HTML_SSOT).href);
-    await expect(page.getByTestId("derived-combat-console")).toBeVisible({ timeout: 15_000 });
-    await page.getByTestId("derived-combat-console").screenshot({
+    // Assembled Lego surface — root landmark is `.console[data-surface=derived-console]`
+    const htmlRoot = page.locator(".console[data-surface='derived-console']");
+    await expect(htmlRoot).toBeVisible({ timeout: 15_000 });
+    await htmlRoot.screenshot({
       path: path.join(ARTIFACT_DIR, "ssot-html.png")
     });
 
@@ -48,7 +58,7 @@ test.describe("Derived SSOT side-by-side (owner visual gate)", () => {
     await page.getByTestId("actor-sheet-tab-derived").click();
     await expect(page.getByTestId("derived-combat-console")).toBeVisible({ timeout: 30_000 });
 
-    const primary = page.getByTestId("derived-primary-tablist");
+    const primary = page.getByTestId("derived-tab");
     await expect(primary.getByTestId("derived-tab-elements")).toBeVisible();
     await expect(primary.getByTestId("derived-tab-offense")).toHaveCount(0);
     await expect(page.getByTestId("derived-variant-rail")).toBeVisible();

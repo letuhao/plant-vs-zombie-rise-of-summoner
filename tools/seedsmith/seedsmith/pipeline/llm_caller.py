@@ -13,6 +13,7 @@ it is buildable and testable before any of those exist, and must stay that way.
 """
 from __future__ import annotations
 
+import dataclasses
 import json
 import re
 import time
@@ -27,6 +28,11 @@ VerifyFn = Callable[[dict, dict], tuple[dict, dict]]
 BuildUserFn = Callable[[dict], str]
 BuildHealUserFn = Callable[[dict, dict, dict], str]
 DefaultForFn = Callable[[str, object], object]
+
+#: `tools/seedsmith/` — parent of the `seedsmith` package. Used when CWD has no `.env` so a
+#: repo-root `python -m seedsmith` still finds the machine-local file operators keep next to
+#: `.env.example`.
+_PACKAGE_TOOL_ROOT = Path(__file__).resolve().parents[2]
 
 
 @dataclass(frozen=True)
@@ -87,6 +93,34 @@ def _parse_dotenv(path: Path) -> "dict[str, str]":
     return out
 
 
+def resolve_dotenv_path(dotenv_path: Path | None = None) -> Path:
+    """Pick the `.env` file to read.
+
+    - Explicit `dotenv_path` always wins (tests pass a guaranteed-absent path for hermeticity).
+    - Else CWD `.env` if it exists (operator ran from `tools/seedsmith`).
+    - Else `tools/seedsmith/.env` next to the package (repo-root / other CWD still finds it).
+    - Else CWD `.env` as a non-existent placeholder — `load_config` treats a missing file as
+      "no override," same as before.
+    """
+    if dotenv_path is not None:
+        return dotenv_path
+    cwd = Path(".env")
+    if cwd.exists():
+        return cwd
+    packaged = _PACKAGE_TOOL_ROOT / ".env"
+    if packaged.exists():
+        return packaged
+    return cwd
+
+
+def read_dotenv_values(dotenv_path: Path | None = None) -> "dict[str, str]":
+    """Raw `KEY=value` map from the resolved `.env`, or `{}` when the file is absent."""
+    path = resolve_dotenv_path(dotenv_path)
+    if not path.exists():
+        return {}
+    return _parse_dotenv(path)
+
+
 def load_config(toml_path: Path | None = None, *, dotenv_path: Path | None = None) -> LlmCallerConfig:
     """Read `[pipeline.llm_caller]` from `seedsmith.toml`, then layer `.env` on top (`.env` is
     per-machine and wins — a real endpoint/model override belongs there, never hand-edited into
@@ -120,14 +154,41 @@ def load_config(toml_path: Path | None = None, *, dotenv_path: Path | None = Non
         "max_tokens": section.get("max_tokens", base.max_tokens),
     }
 
-    dotenv_path = dotenv_path or Path(".env")
-    if dotenv_path.exists():
-        env_values = _parse_dotenv(dotenv_path)
+    env_file = resolve_dotenv_path(dotenv_path)
+    if env_file.exists():
+        env_values = _parse_dotenv(env_file)
         for env_key, (field, caster) in _ENV_KEYS.items():
             if env_key in env_values and env_values[env_key] != "":
                 resolved[field] = caster(env_values[env_key])
 
     return LlmCallerConfig(**resolved)
+
+
+def resolve_live_transport(
+    cli_endpoint: str = "",
+    cli_model: str = "",
+    *,
+    toml_path: Path | None = None,
+    dotenv_path: Path | None = None,
+) -> LlmCallerConfig:
+    """Merge CLI `--endpoint`/`--model` onto `load_config()` — empty CLI falls through to
+    `.env` / toml / built-in defaults. Spec-foundation §7.3: every flag has a config equivalent;
+    the flag wins when the operator actually passed a non-empty value.
+
+    Callers that previously refused `--write` when `args.endpoint` was empty should refuse only
+    when *this* helper's `.endpoint` is empty (CLI and config both blank).
+    """
+    base = load_config(toml_path, dotenv_path=dotenv_path)
+    endpoint = (cli_endpoint or "").strip() or base.endpoint
+    # LM Studio operators commonly paste the API root (`http://localhost:1234/v1`) while the
+    # OpenAI-compatible completion route is `/v1/chat/completions`. Normalize that shorthand so
+    # a reachable root cannot produce an empty/HTML response that looks like a model failure.
+    if endpoint.rstrip("/").endswith("/v1"):
+        endpoint = endpoint.rstrip("/") + "/chat/completions"
+    model = (cli_model or "").strip()
+    if not model or model == "unrecorded":
+        model = base.model
+    return dataclasses.replace(base, endpoint=endpoint, model=model)
 
 
 class DegenerateGenerationError(RuntimeError):
@@ -141,6 +202,10 @@ class DegenerateGenerationError(RuntimeError):
     16384 tokens of repeated garbage). The only real fix is catching the loop WHILE STREAMING and
     aborting the connection immediately — see `_has_repetition_loop` and `call_model`'s own
     streaming loop below."""
+
+
+class EmptyModelResponseError(RuntimeError):
+    """The endpoint completed an SSE stream without emitting assistant content."""
 
 
 def _has_repetition_loop(text: str, *, tail: int = 400, min_period: int = 2, max_period: int = 80,
@@ -222,7 +287,12 @@ def _stream_once(config: LlmCallerConfig, body: bytes) -> str:
                     f"[{config.model}] repetition loop detected after {total_len} chars "
                     f"({now - started:.0f}s) -- aborting this attempt rather than burning the "
                     f"full max_tokens budget on it")
-    return "".join(accumulated)
+    result = "".join(accumulated)
+    if not result.strip():
+        raise EmptyModelResponseError(
+            f"[{config.model}] endpoint returned no assistant content; refusing to parse an empty response"
+        )
+    return result
 
 
 def call_model(system: str, user: str, *, config: LlmCallerConfig = DEFAULT_CONFIG,
@@ -278,7 +348,13 @@ def call_model(system: str, user: str, *, config: LlmCallerConfig = DEFAULT_CONF
             print(f"seedsmith.llm_caller: [{config.model}] call complete, {len(result)} chars, "
                  f"{time.monotonic() - started:.1f}s", flush=True)
             return result
-        except (urllib.error.URLError, TimeoutError, KeyError, DegenerateGenerationError) as e:
+        except EmptyModelResponseError:
+            # An empty assistant stream is a deterministic content/configuration failure (for
+            # example, a reasoning-only template), not a transport hiccup. Retrying spends the
+            # same model budget and cannot repair the request, so fail immediately.
+            raise
+        except (urllib.error.URLError, TimeoutError, KeyError,
+                DegenerateGenerationError) as e:
             last_err = e
             print(f"seedsmith.llm_caller: [{config.model}] attempt {attempt + 1}/{config.attempts} "
                  f"failed ({type(e).__name__}: {e}); "
@@ -356,12 +432,18 @@ def live_answer_caller(config: LlmCallerConfig, *,
                     defects.append(f"field {field!r} is not in the schema")
                 continue
             declared = spec.get("type")
-            expected = type_map.get(declared)
+            types = (declared,) if isinstance(declared, str) else tuple(declared or ())
+            if value is None:
+                if "null" not in types and types:
+                    defects.append(f"field {field!r} is null but schema does not allow null")
+                continue
+            concrete = next((t for t in types if t != "null"), None)
+            expected = type_map.get(concrete) if concrete else None
             if expected is not None:
-                if declared in ("number", "integer") and isinstance(value, bool):
-                    defects.append(f"field {field!r} is a boolean, not {declared}")
+                if concrete in ("number", "integer") and isinstance(value, bool):
+                    defects.append(f"field {field!r} is a boolean, not {concrete}")
                 elif not isinstance(value, expected):
-                    defects.append(f"field {field!r} should be {declared}")
+                    defects.append(f"field {field!r} should be {concrete}")
             allowed = spec.get("enum")
             if allowed is not None and value not in allowed:
                 defects.append(f"field {field!r} value {value!r} is not one of {list(allowed)}")

@@ -70,6 +70,7 @@ REAL_BRIEFS_PATH = REPO_ROOT / "data" / "seed" / "actions" / "_briefs" / "round-
 REAL_FAMILY_ASSIGNMENTS_PATH = (
     REPO_ROOT / "data" / "seed" / "demons" / "_generated" / "family-assignments.json"
 )
+RUN_TUNING_PATH = REPO_ROOT / "data" / "tuning" / "action-corpus-run.v1.json"
 
 
 def raising_call(*args, **kwargs):
@@ -243,12 +244,13 @@ class FamilyAnchorRaiseTests(unittest.TestCase):
             build_context(general_brief, sample_index=0)
 
     def test_real_family_scope_briefs_never_raise(self):
-        # verified against A-S1's own real output, not assumed: every one of the 38 family
-        # entries (19 families x perFamilyCount 2, expanded real smoke batch) carries all three
-        # derivation keys and no species-scoped content.
+        # The expected count comes from the live family keys and the current run tuning, not the
+        # retired 19-family smoke projection.
         doc = json.loads(REAL_BRIEFS_PATH.read_text(encoding="utf-8"))
         family_briefs = [e for e in doc["entries"] if e["scope"] == "family"]
-        self.assertEqual(len(family_briefs), 38)
+        family_count = len({e["scopeKey"] for e in family_briefs})
+        per_family_count = json.loads(RUN_TUNING_PATH.read_text(encoding="utf-8"))["perFamilyCount"]
+        self.assertEqual(len(family_briefs), family_count * per_family_count)
         for brief in family_briefs:
             with self.subTest(briefId=brief["briefId"]):
                 build_context(brief, sample_index=0)  # must not raise
@@ -411,7 +413,7 @@ class DeterminismTests(unittest.TestCase):
         # two DIFFERENT field names in the permutation seed (spec SS2): a large enough atom pool
         # and motif pool that a shared/aliased seed would be statistically implausible to miss.
         doc = json.loads(REAL_BRIEFS_PATH.read_text(encoding="utf-8"))
-        brief = next(e for e in doc["entries"] if e["scope"] == "family" and e["scopeKey"] == "base")
+        brief = next(e for e in doc["entries"] if e["scope"] == "family")
         context = build_context(brief, sample_index=0)
         atom_orders = [build_context(brief, sample_index=i)["allowedAtomFamilies"] for i in range(3)]
         self.assertTrue(atom_orders[0] != atom_orders[1] or atom_orders[1] != atom_orders[2])
@@ -702,7 +704,9 @@ class DryRunEntrypointTests(unittest.TestCase):
             summary = gen_mod.regenerate(dry_run=True, count=2)
         self.assertTrue(summary["dryRun"])
         self.assertEqual(summary["modelCalls"], 0)
-        self.assertEqual(summary["totalFamilyBriefs"], 38)
+        expected = len({e["scopeKey"] for e in json.loads(REAL_BRIEFS_PATH.read_text(encoding="utf-8"))["entries"]
+                        if e["scope"] == "family"}) * json.loads(RUN_TUNING_PATH.read_text(encoding="utf-8"))["perFamilyCount"]
+        self.assertEqual(summary["totalFamilyBriefs"], expected)
         self.assertEqual(summary["selected"], 2)
         self.assertIn("Design ONE family action", summary["sampleBrief"])
 
@@ -714,7 +718,8 @@ class DryRunEntrypointTests(unittest.TestCase):
     def test_load_family_briefs_reads_only_family_scope_sorted(self):
         briefs = gen_mod.load_family_briefs()
         self.assertTrue(all(b["scope"] == "family" for b in briefs))
-        self.assertEqual(len(briefs), 38)
+        expected = len({b["scopeKey"] for b in briefs}) * json.loads(RUN_TUNING_PATH.read_text(encoding="utf-8"))["perFamilyCount"]
+        self.assertEqual(len(briefs), expected)
         self.assertEqual([b["briefId"] for b in briefs], sorted(b["briefId"] for b in briefs))
 
     def test_brief_hash_is_deterministic_and_brief_specific(self):

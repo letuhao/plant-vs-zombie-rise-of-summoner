@@ -69,8 +69,21 @@ function joinChannel(family: string, expand: string, variantId: string | null): 
 }
 
 function variantIdsForTab(tab: SurfaceTab): string[] {
-  if (tab.id === "other") return (tab.actionCategoryVariants ?? []).map((v) => v.id);
+  if (tab.id === "other") {
+    // D3: Shared lives on cook variants; action chips stay on actionCategoryVariants.
+    return [
+      ...(tab.variants ?? []).map((v) => v.id),
+      ...(tab.actionCategoryVariants ?? []).map((v) => v.id)
+    ];
+  }
   return (tab.variants ?? []).map((v) => v.id);
+}
+
+function familyVisibleOnOther(famExpand: string, variantId: string | null, tab: SurfaceTab): boolean {
+  const actionIds = new Set((tab.actionCategoryVariants ?? []).map((v) => v.id));
+  const isAction = variantId != null && actionIds.has(variantId);
+  if (!isAction) return famExpand === "none";
+  return famExpand === "action-category";
 }
 
 async function ensureShowUnchanged(page: Page) {
@@ -79,7 +92,7 @@ async function ensureShowUnchanged(page: Page) {
   const checked = await toggle.isChecked();
   if (!checked) {
     // HTML SSOT uses a track/knob label — the opacity-0 checkbox is covered; click the label.
-    await page.locator(".derived-combat-console label.toggle").click();
+    await page.locator(".derived-combat-console button.toggle").click();
     await expect(toggle).toBeChecked();
   }
 }
@@ -144,7 +157,7 @@ test.describe("Derived sheet visual (live Server Hub)", () => {
     await ensureShowUnchanged(page);
 
     // Contract: cook primary tabs present; sheetGroup Offense/Pools must not be primary rail.
-    const primary = page.getByTestId("derived-primary-tablist");
+    const primary = page.getByTestId("derived-tab");
     await expect(primary.getByTestId("derived-tab-elements")).toBeVisible();
     await expect(primary.getByTestId("derived-tab-status")).toBeVisible();
     await expect(primary.getByTestId("derived-tab-resources")).toBeVisible();
@@ -166,6 +179,7 @@ test.describe("Derived sheet visual (live Server Hub)", () => {
 
         const expandFamilies = tab.categories.flatMap((c) => c.families);
         for (const fam of expandFamilies) {
+          if (tab.id === "other" && !familyVisibleOnOther(fam.expand, variantId, tab)) continue;
           const channelId = joinChannel(fam.family, fam.expand, variantId);
           if (!sheetPresent.has(channelId)) continue;
           // Only assert reachability for channels Hub actually returned on the sheet.

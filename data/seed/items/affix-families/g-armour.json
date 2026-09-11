@@ -353,6 +353,45 @@
         "defensive"
       ],
       "notes": "NEW family, stem `arm`, word `welding`. The `carapace` mirror of `atom.arm-riveting` — closes the same Flat-only gap on `arm2Max` that `arm-riveting` closes on `arm1Max`, for the identical reason (every other primary channel in the library ships with at least a Flat+Increased pair; `plating`/`carapace` did not). Same zombie-only field, same nine armour roles, same frames/side as `atom.carapace`. Kept as a distinct family from `arm-riveting` rather than one family spanning both channels, for the same reason `plating` and `carapace` are two families and not one: `effect_atom`'s unique key is `(family_id, tier, variant)`, and the two channels already belong to two separately-named shipped families, so their scaling siblings follow the same one-family-per-channel shape rather than reintroducing the channel-pair ambiguity flagged above."
+    },
+    {
+      "id": "atom.arm-plate",
+      "nameKey": "affix.armour-reinforcement",
+      "name": "Armour Reinforcement",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "arm1Max",
+        "op": "More"
+      },
+      "roles": [
+        "core-guard"
+      ],
+      "powerBand": "high",
+      "displayTemplate": "Armour {word} {op}",
+      "tags": [
+        "metal",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "atom.arm-op",
+      "nameKey": "affix.armour-reinforcement",
+      "name": "Armour Reinforcement",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "arm2Max",
+        "op": "More"
+      },
+      "roles": [
+        "core-guard",
+        "ward-array"
+      ],
+      "powerBand": "high",
+      "displayTemplate": "Armour {word}",
+      "tags": [
+        "sturdy",
+        "metal"
+      ]
     }
   ]
 }

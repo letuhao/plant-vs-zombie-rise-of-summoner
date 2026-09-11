@@ -132,7 +132,8 @@ class RosterReconciliationMetric(Metric):
 
     def run(self, ctx: Ctx) -> "list[Finding]":
         cov = ctx.action_coverage
-        return cr.roster_reconciliation_findings(self.id, cov.roster, len(cov.accepted_rows))
+        return cr.roster_reconciliation_findings(
+            self.id, cov.roster, len(cov.accepted_rows), cov.per_species_count)
 
 
 class FlavourQualityMetric(Metric):

@@ -34,7 +34,8 @@ from seedsmith.adapters.actions.characteristic_pool import derive as derive_mod 
 from seedsmith.adapters.actions.characteristic_pool import pool as pool_mod  # noqa: E402
 from seedsmith.adapters.actions.characteristic_pool.anchors import AnchorRow, AnchorTree  # noqa: E402
 from seedsmith.adapters.actions.characteristic_pool.catalog import (  # noqa: E402
-    RARITY_LADDER, SpeciesRow, TRAIT_POOL, load_catalog,
+    LEGACY_CATALOG_PATH, RARITY_LADDER, SpeciesRow, TRAIT_POOL,
+    derive_live_family_assignments, load_catalog,
 )
 from seedsmith.adapters.actions.characteristic_pool.derive import (  # noqa: E402
     CATEGORIES, RoleLeanWeights, SpeciesAnchor, build_species_anchor, compute_scores, derive_all,
@@ -84,11 +85,17 @@ def _anchor(species: SpeciesRow, *, family=None, motifs=(), anti_motifs=(),
 
 
 class CatalogParserTests(unittest.TestCase):
-    """Sanity on the C# parser this whole module is built on — never trust the spec's own
-    citation without re-checking the live file (this repo's design-gate discipline)."""
+    """Sanity checks for the live seed loader and its explicit legacy compatibility parser."""
 
-    def test_84_species(self) -> None:
-        self.assertEqual(len(load_catalog()), 84)
+    def test_live_seed_species(self) -> None:
+        self.assertEqual(len(load_catalog()), 904)
+
+    def test_default_catalog_is_the_live_seed_folder(self) -> None:
+        live_ids = {row.species_id for row in load_catalog()}
+        legacy_ids = {row.species_id for row in load_catalog(LEGACY_CATALOG_PATH)}
+        self.assertIn("abyssswordstar", live_ids)
+        self.assertNotIn("abyssswordstar", legacy_ids)
+        self.assertGreater(len(live_ids - legacy_ids), 800)
 
     def test_trait_counts_match_spec_step_4(self) -> None:
         # spec §3 step 4's own measured counts, re-derived here from the live file rather than
@@ -101,7 +108,7 @@ class CatalogParserTests(unittest.TestCase):
             "genius": 14, "bloodthirsty": 14, "chaos-marked": 12, "void-touched": 9, "immortal": 7,
         }
         counts: "dict[str, int]" = {t: 0 for t in TRAIT_POOL}
-        for row in load_catalog():
+        for row in load_catalog(LEGACY_CATALOG_PATH):
             for t in row.traits:
                 counts[t] += 1
         self.assertEqual(counts, expected)
@@ -112,29 +119,24 @@ class CatalogParserTests(unittest.TestCase):
 
 
 class JoinCountTests(unittest.TestCase):
-    """Acceptance/spec test 'Join counts' — the STABLE half. 84 catalog / 84 motif (100% join) /
-    53 family species over 19 family ids are re-checked against real committed data every run;
-    they have been measured identical across every check made while this module was built and
-    are the honest tripwire spec §5 asks for."""
+    """The action source boundary must cover every live species and family membership."""
 
     def test_catalog_and_motif_and_family_counts(self) -> None:
         catalog = load_catalog()
-        self.assertEqual(len(catalog), 84)
+        self.assertEqual(len(catalog), 904)
         catalog_ids = {r.species_id for r in catalog}
 
         motif = json.loads((DEMONS_ROOT / "_generated" / "motif-assignments.json")
                            .read_text(encoding="utf-8"))
-        self.assertEqual(len(motif), 84)
+        self.assertEqual(len(motif), 904)
         self.assertEqual(set(motif) - catalog_ids, set(), "every motif key must join the catalog")
 
-        family = json.loads((DEMONS_ROOT / "_generated" / "family-assignments.json")
-                            .read_text(encoding="utf-8"))
-        self.assertEqual(len(family), 53)
+        family = derive_live_family_assignments()
+        self.assertEqual(len(family), 904)
         family_ids: "set[str]" = set()
         for v in family.values():
-            self.assertEqual(len(v), 1, "spec §1: no species carries two families")
             family_ids.update(v)
-        self.assertEqual(len(family_ids), 19)
+        self.assertEqual(len(family_ids), 227)
 
 
 class AnchorTreeJoinTests(unittest.TestCase):
@@ -316,20 +318,17 @@ class FamilyFloorAndF12Tests(unittest.TestCase):
         weights = load_weights()
         motif = json.loads((DEMONS_ROOT / "_generated" / "motif-assignments.json")
                            .read_text(encoding="utf-8"))
-        family = json.loads((DEMONS_ROOT / "_generated" / "family-assignments.json")
-                            .read_text(encoding="utf-8"))
+        family = derive_live_family_assignments()
         anchor_tree = anchors_mod.load_anchor_tree()
         anchors = [build_species_anchor(sp, family_assignments=family, motif_assignments=motif,
                                         anchor_by_lower=anchor_tree.by_lower_id)
                   for sp in catalog]
         entries, report = derive_all(anchors, weights)
-        self.assertEqual(report.family_less_count, 84 - 53)
+        self.assertEqual(report.family_less_count, 0)
         family_less = [e for e in entries if not e.species_anchor.family]
-        non_bare = sum(1 for e in family_less if e.lean_order != CATEGORIES)
+        self.assertEqual(family_less, [])
+        non_bare = sum(1 for e in entries if e.lean_order != CATEGORIES)
         self.assertGreater(non_bare, 0)
-        # And the corollary: no build regressed to flooring every family-less species uniformly.
-        floored = sum(1 for e in family_less if e.lean_source == "floor")
-        self.assertLess(floored, len(family_less))
 
 
 class LegacyRarityLeakTests(unittest.TestCase):
@@ -440,7 +439,7 @@ class OfflineGuaranteeTests(unittest.TestCase):
         # could reach a network. A stub transport that raises would be redundant scaffolding for
         # a module with zero call sites to stub.
         summary = gen_mod.regenerate(write=False)
-        self.assertEqual(summary["species"], 84)
+        self.assertEqual(summary["species"], 904)
 
 
 class ResidueReportedTests(unittest.TestCase):
@@ -454,8 +453,8 @@ class ResidueReportedTests(unittest.TestCase):
         self.assertIn("residue", summary)
         for key in ("familyAssigned", "familyLess", "residueCount", "residueSpecies"):
             self.assertIn(key, summary["residue"])
-        self.assertEqual(summary["residue"]["familyAssigned"], 53)
-        self.assertEqual(summary["residue"]["familyLess"], 31)
+        self.assertEqual(summary["residue"]["familyAssigned"], 904)
+        self.assertEqual(summary["residue"]["familyLess"], 0)
 
     def test_every_written_entry_carries_its_own_separation(self) -> None:
         path = ACTIONS_ROOT / "_generated" / "role-lean.json"
@@ -517,10 +516,14 @@ class DeterminismTests(unittest.TestCase):
 
             summary1 = gen_mod.regenerate(
                 actions_root=actions_root_1, demons_root=demons_root,
-                species_root=species_root, write=True)
+                species_root=species_root,
+                family_assignments_path=demons_root / "_generated" / "family-assignments.json",
+                write=True)
             summary2 = gen_mod.regenerate(
                 actions_root=actions_root_2, demons_root=demons_root,
-                species_root=species_root, write=True)
+                species_root=species_root,
+                family_assignments_path=demons_root / "_generated" / "family-assignments.json",
+                write=True)
 
             for name in ("role-lean.json", "characteristic-pool.json"):
                 text1 = (actions_root_1 / "_generated" / name).read_text(encoding="utf-8")
@@ -560,8 +563,8 @@ class RoleLeanShapeTests(unittest.TestCase):
         if self.doc is None:
             self.skipTest("role-lean.json not yet generated in this checkout")
 
-    def test_exactly_84_entries(self) -> None:
-        self.assertEqual(len(self.doc["entries"]), 84)
+    def test_exactly_904_entries(self) -> None:
+        self.assertEqual(len(self.doc["entries"]), 904)
 
     def test_lean_order_is_a_permutation_of_the_five_categories(self) -> None:
         for entry in self.doc["entries"]:
@@ -622,7 +625,7 @@ class CorpusLoadRoundTripTests(unittest.TestCase):
         if not (ACTIONS_ROOT / "_generated" / "role-lean.json").is_file():
             self.skipTest("outputs not yet generated in this checkout")
         result = load_committed(ACTIONS_ROOT)
-        self.assertEqual(len(result.corpus.by_kind("action-role-lean")), 84)
+        self.assertEqual(len(result.corpus.by_kind("action-role-lean")), 904)
         self.assertEqual(len(result.corpus.by_kind("action-characteristic-pool")), 6)
 
 

@@ -1,45 +1,63 @@
-# Piece: scroll-region
+# Piece: `scroll-region`
 
-**Program:** gui-lego · **Kind:** layout · **ERM rung:** —  
+**Program:** `gui-lego` · **Kind:** layout · **ERM rung:** —  
 **Draft:** [../../design/gui-lego/pieces/scroll-region.html](../../design/gui-lego/pieces/scroll-region.html)  
-**Composition:** [spec-composition.md](spec-composition.md)
+**Shared types:** [payload-types.md](payload-types.md) · **Composition:** [spec-composition.md](spec-composition.md)
 
 ## Role
-Declared overflow region
+
+Declared overflow host for dock or inspect content.
 
 ## Structure
-- Landmark / root class: .scroll-region (see draft HTML)
-- Slots: content
-- CSS > ancestors: only when parent is surface-shell / split-inspect — **no illicit wrappers**
 
-## Payload (sketch)
-`json
-{
-  "piece": "scroll-region",
-  "instanceId": "demo:scroll-region",
-  "phase": "ready"
-}
-`
-phase: 
-eady|loading|empty|error|pending. Magnitudes use alueRaw + alueText (VM formats).
+| | |
+|---|---|
+| Landmark / root | `.scroll-region` |
+| Slots | `content` |
+| CSS `>` parents | split-inspect dock or inspect |
+
+**Ban:** illicit wrappers between a `>` parent and its declared child.
+
+## Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `piece` | `"scroll-region"` | yes | Registry id |
+| `instanceId` | `string` | yes | Stable mount / testid |
+| `phase` | `Phase` | yes | See payload-types |
+| `phase` | `Phase` | yes |  |
+
+
 
 ## Theme slots
-- Pack kind(s): neutral
-- Reads: --piece-accent, --piece-rail-edge, paint.accent / paint.accentMuted when visual
+
+- Pack kind(s): `neutral`
+- Reads: none
 - Vfx keys: none
 
 ## Data flow
-- Bind: vm.*Scroll
-- Bus out: _none (parent or host)_
+
+- **Bind:** `vm.dockScroll | vm.inspectScroll`
+- **Bus out:** _none_
 
 ## Focus (GG-19)
+
 contains focusables
 
 ## Motion (GG-31/32)
+
 none
 
 ## Empty / error
-If bind missing or phase not ready, parent mounts the matching phase-* piece — this leaf does not invent data.
 
-## Samples
-HTML draft shows structure + sample JSON; themeable pieces include fire vs ice (or status-dot) swap.
+content slot may be phase-empty
+
+## Sample payloads
+
+```json
+{
+  "piece": "scroll-region",
+  "instanceId": "scroll:dock",
+  "phase": "ready"
+}
+```

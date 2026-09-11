@@ -45,13 +45,19 @@ def validate_against_schema(payload: Mapping[str, Any], schema: Mapping[str, Any
                 problems.append(f"field {name!r} is not in the schema")
             continue
         declared = spec.get("type")
-        if isinstance(declared, str) and declared in type_names:
-            expected = type_names[declared]
+        types = (declared,) if isinstance(declared, str) else tuple(declared or ())
+        if value is None:
+            if "null" not in types and types:
+                problems.append(f"field {name!r} is null but schema does not allow null")
+            continue
+        concrete = next((t for t in types if t != "null"), None)
+        if concrete and concrete in type_names:
+            expected = type_names[concrete]
             # bool is an int in Python; a bool where a number belongs is a real defect.
-            if declared in ("number", "integer") and isinstance(value, bool):
-                problems.append(f"field {name!r} is a boolean, not {declared}")
+            if concrete in ("number", "integer") and isinstance(value, bool):
+                problems.append(f"field {name!r} is a boolean, not {concrete}")
             elif not isinstance(value, expected):
-                problems.append(f"field {name!r} should be {declared}")
+                problems.append(f"field {name!r} should be {concrete}")
         allowed = spec.get("enum")
         if allowed is not None and value not in allowed:
             problems.append(f"field {name!r} value {value!r} is not one of {list(allowed)}")

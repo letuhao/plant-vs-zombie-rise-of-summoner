@@ -144,7 +144,7 @@ Twenty-one. Model calls in **two** (13 and 21).
 |---|---|---|---|
 | 14 | [`salvage-craft`](item/spec-salvage-craft.md) | I9 — materials, salvage, the cost vocabulary. The first sink, and the cheapest | 2, 7 |
 | 15 | [`enhance-reroll`](item/spec-enhance-reroll.md) | I6 + I7 under one mutation contract. **D7: cost, never luck** — steep tier-keyed cost, a success chance, and **mandatory bad-luck protection** (`rpg_summon_pity` is the precedent). The cost curve is a **configurable soft cap** in `data/tuning/`, never a hard stop | 9, 14 |
-| 16 | [`sockets`](item/spec-sockets.md) | I4 — inserts as instance bindings on the same owner; **the combination evaluator** (25 resonances + Strains/Splices); D22's affinity **bonus**; D21's set-piece exclusivity validator. ⚠ *"No atom-table change"* was wrong — the lane requests `bind_ordinal` on `effect_binding` (§5.4) | 4, **15**, 14 |
+| 16 | [`sockets`](item/spec-sockets.md) | I4 — inserts as instance bindings on the same owner; **the combination evaluator** (25 resonances + Strains/Splices); D22's affinity **bonus**; D21's set-piece exclusivity validator. ⚠ *"No atom-table change"* was wrong — the lane requests `bind_ordinal` on `effect_binding` (§5.4). **2026-09-10 topology decision:** a future versioned socket tuning revision may raise role ceilings to 8, evaluated as two fixed four-socket circuits; it does not create an eight-ingredient combination or rewrite the shipped corpus. | 4, **15**, 14 |
 
 ### Late and gated
 
@@ -157,6 +157,19 @@ Twenty-one. Model calls in **two** (13 and 21).
 | **22** | [`charm-carry`](item/spec-threshold-grants.md) | ⭐ **Split out of 12 by D40, 2026-09-04.** The charm pouch: five tables, the carry gate, five reason codes and the run-lifecycle hook. Sized larger than the threshold evaluator it would have ridden inside. ⚠ **Specced inside `spec-threshold-grants.md` today** — it needs its own file when it is scheduled | 12 |
 | **21** | ⭐ [`strain-splice-gen`](item/spec-strain-splice-gen.md) | **Added 2026-09-03.** The 102 generated combinations — 36 Strains (12 aptitudes × 3 archetypes) + 66 Splices (C(12,2)), seedsmith-configured. **The program's second model call.** Also owns retiring the existing element-keyed `socket-word` corpus | **yes** → 8, 16 |
 
+### Requirement trials and maintenance — approved 2026-09-09
+
+| # | id | Capability | Depends on |
+|---|---|---|---|
+| **23** | `requirement-profiles` | Frozen concrete equipment requirement profiles, tuning matrix, deterministic trial evaluation, and Seedsmith validation. Generated requirements never reject an otherwise legal assignment. | 4, 9 |
+| **24** | `equipment-activation` | Deployment-run trial/active/suspended equipment status, canonical upkeep order, HP recovery latch, and filtering at the existing equipment effect-read seam. | 5, 23 |
+| **25** | `set-requirement-reconciliation` | Frozen compatible set requirement envelope, full-set witness validation, and set-level trial activation. | 12, 13, 24 |
+
+Build order: **23 `requirement-profiles` → 24 `equipment-activation` → 25
+`set-requirement-reconciliation`**. Module 20 `item-surfaces` owns the card and API
+disclosure added by these modules; it is amended when the disclosure contract is ready,
+not duplicated here.
+
 > ⚠ **Declared dependencies were reconciled against each spec's own body, 2026-09-04** (a sixth row
 > added 2026-09-05). These rows understated what the module actually reads:
 >
@@ -166,7 +179,7 @@ Twenty-one. Model calls in **two** (13 and 21).
 > | 12 `threshold-grants` | **3** | it reads `budgetWeightMilli` and the twelve-role list, and `Core/Items/` does not exist until module 3 creates it |
 > | 13 `set-charm-gen` | **3** | the twelve-role generator cap is module 3's to issue |
 > | 16 `sockets` | **`bind_ordinal` on `effect_binding`** | requested by the lane (§5.4) and **absent** from the shipped DDL |
-> | 21 `strain-splice-gen` | **6** | inert until `socketMax` can reach 4; no shipped base type hosts a 4-ingredient recipe |
+> | 21 `strain-splice-gen` | **6** | requires a host with `socketMax >= 4`; future eight-socket capacity is separate topology work and evaluates as two circuits, not a wider recipe |
 > | 19 `granted-actions` | **6** | ⭐ **added 2026-09-05 when the module was built** — the sixth row of the same kind. `item_granted_action.container_id` keys on the base type (ssot §4.4), and gate **GA2** is blocked by module 6 in the spec's own gate table. §4.3's `armament-primary`-only rule is likewise a base-type role check |
 >
 > **X7** (D27's container kinds) additionally gates **12, 13, 16, 18 and 21**, and **X4** gates **11, 13,
@@ -298,4 +311,3 @@ four rows here; each is this program's file to change, consumed there.
 | Module 19 `ItemGrantValidator` admits unique container ids | `Items/Grants/ItemGrantValidator.cs` | `item_granted_action.container_id` may be a unique's `item.<slug>` beside a base type's — one validator arm — `spec-unique-pipeline.md` §3 | a unique cannot grant an action |
 | Lock check on `rpg_delve_pack_lock` | salvage, transfer, assign and bulk paths in `RpgStore.Items.cs` / `ItemSurfaceEndpoints.cs` | refuse an instance carried in a live delve (`pack.carried`); the armoury listing hides or badges it — `party-dungeon/spec-loot-pack.md` §4 | a carried item can be salvaged at home mid-delve |
 | Item-side derived price (`seed-contract.md` §2.1: price DERIVED, none built) | item program | class × grade × `contentScale(Θ)`; the Delve contributes only `merchant.markupMilli` | the delve merchant refuses (`delve.price-undesigned`) and opens as a sell-nothing rest |
-

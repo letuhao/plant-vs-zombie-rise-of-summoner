@@ -11,9 +11,8 @@ Reads:
                                                                 own module docstring)
     data/seed/actions/_generated/role-lean.json               A-S0 — leanOrder/leanSource/family/
                                                                 motifs
-    src/FusionRpg.Core/Demons/DemonSpeciesCatalog.Generated.cs the 84-species roster, catalog
-                                                                order + element (parsed via
-                                                                `characteristic_pool.catalog`)
+    data/seed/demons/species/**/*.json                      the live roster, seed order + element
+                                                                (parsed via `characteristic_pool.catalog`)
     data/tuning/action-innate-picker.v1.json                  this module's OWN tuning file (the
                                                                 five `w_t`)
 
@@ -69,6 +68,14 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, catalog_path: Path = CATALO
 
     role_lean_doc = json.loads(role_lean_path.read_text(encoding="utf-8"))
     role_lean_by_key = ip.parse_role_lean_doc(role_lean_doc)
+    species_ids = {row.species_id for row in species_rows}
+    if set(role_lean_by_key) != species_ids:
+        missing = sorted(species_ids - set(role_lean_by_key))
+        extra = sorted(set(role_lean_by_key) - species_ids)
+        raise ValueError(
+            "role-lean.json is stale relative to the live species seed folder: "
+            f"missing={missing[:5]!r}, extra={extra[:5]!r}"
+        )
 
     load_result = load_committed(actions_root)          # excludes `_rounds/` already (A-C1)
     committed_rows = [e.data for e in load_result.corpus.by_kind("action-seed")]

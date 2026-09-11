@@ -74,6 +74,17 @@ test.describe("ActorSheet catalog-era shell", () => {
         await expect(page.getByTestId(`actor-sheet-tab-${kind}`)).toBeVisible();
       }
 
+      await expect(page.getByTestId("actor-sheet-rail")).toBeVisible();
+      await expect(page.getByTestId("actor-summarize")).toBeVisible();
+      await expect(page.getByTestId("actor-panel-header")).toHaveAttribute("data-header-mode", "none");
+      await expect(page.getByTestId("actor-sheet-close")).toBeVisible();
+
+      await page.getByTestId("actor-sheet-rail-toggle").click();
+      await expect(page.getByTestId("actor-sheet-rail")).toHaveAttribute("data-collapsed", "true");
+      await expect(page.getByTestId("actor-summarize-glyph")).toBeVisible();
+      await page.getByTestId("actor-sheet-rail-toggle").click();
+      await expect(page.getByTestId("actor-sheet-rail")).toHaveAttribute("data-collapsed", "false");
+
       await expect(page.getByTestId("condition-xp-pending")).toBeVisible();
       await expect(panel.getByTestId("actor-standing-pending")).toBeVisible();
       await expect(page.getByTestId("condition-live-effects-pending")).toBeVisible();

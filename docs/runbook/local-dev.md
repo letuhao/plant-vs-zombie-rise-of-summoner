@@ -104,6 +104,12 @@ The web UI build runs by default (2026-08-30 — it used to be opt-in via `-Rebu
 leaving a stale FE served for a whole session). Flags: `-LoaderHost` (`MelonLoader`/`BepInEx`), `-NoGame`,
 `-NoServer`, `-NoRebuildUi` (skip the web UI build), `-RestartServer`.
 
+**FE always lands in `dist` (2026-09-09):** Vite writes `src/FusionRpg.Server/wwwroot`; the published
+server serves `dist/FusionRpg.Server/wwwroot` (`ContentRoot` = exe dir). If `:5088` is already up,
+`dotnet publish` is skipped (DLL locks) — the script still **mirrors** src wwwroot → dist wwwroot, so
+`.\scripts\deploy-play.ps1 -NoGame -NoServer` is enough to confirm UI fixes after a hard-refresh.
+Pass `-RestartServer` when you also need a fresh server binary.
+
 SQLite for this session: `dist/FusionRpg.Server/data/rpg-hot.sqlite` + `rpg-media.sqlite` (beside the published exe; gitignored). Icons/almanac are BLOBs in the media file.
 
 Do not use the Simulator tab in the same session as the real injector.

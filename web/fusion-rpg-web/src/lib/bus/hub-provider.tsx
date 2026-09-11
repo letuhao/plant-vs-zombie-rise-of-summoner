@@ -141,11 +141,26 @@ export function HubProvider({ children }: { children: ReactNode }) {
     // species allocation change from ANOTHER client (e.g. the injector reloading it) never live-
     // updated a connected web client. Mirrors `onCommandersUpdated`'s exact shape: player-scoped when
     // the payload carries one, plus a bare invalidation so an unscoped broadcast still refreshes.
-    const onAptitudesUpdated = (msg: { playerId?: number } | null) => {
+    const onAptitudesUpdated = (msg: {
+      playerId?: number;
+      scope?: string;
+      instanceId?: string | null;
+      speciesId?: string | null;
+    } | null) => {
+      if (msg?.scope === "unique" && msg.instanceId) {
+        void qc.invalidateQueries({ queryKey: queryKeys.uniqueAptitudes(msg.instanceId) });
+      }
+      if (msg?.scope === "species" && msg.playerId != null && msg.speciesId) {
+        void qc.invalidateQueries({
+          queryKey: queryKeys.speciesAptitudes(msg.playerId, msg.speciesId)
+        });
+      }
       if (msg?.playerId != null) {
         void qc.invalidateQueries({ queryKey: queryKeys.aptitudes(msg.playerId) });
       }
+      // Legacy thin { playerId } / unscoped: refresh all aptitude query families
       void qc.invalidateQueries({ queryKey: ["aptitudes"] });
+      void qc.invalidateQueries({ queryKey: ["uniqueAptitudes"] });
       void qc.invalidateQueries({ queryKey: ["speciesAptitudes"] });
     };
 
@@ -158,6 +173,15 @@ export function HubProvider({ children }: { children: ReactNode }) {
         void qc.invalidateQueries({ queryKey: queryKeys.passiveTree(msg.playerId) });
       }
       void qc.invalidateQueries({ queryKey: ["passiveTree"] });
+    };
+
+    // CG-A5 — Hot bag update refreshes Condition + Shield via same actorSheet query.
+    const onActorLiveStateChanged = (msg: { instanceId?: string } | null) => {
+      if (msg?.instanceId) {
+        void qc.invalidateQueries({ queryKey: ["actorSheet", msg.instanceId] });
+      } else {
+        void qc.invalidateQueries({ queryKey: ["actorSheet"] });
+      }
     };
 
     c.on("Event", onEvent);
@@ -174,6 +198,7 @@ export function HubProvider({ children }: { children: ReactNode }) {
     c.on("CommandersUpdated", onCommandersUpdated);
     c.on("AptitudesUpdated", onAptitudesUpdated);
     c.on("PassiveTreeUpdated", onPassiveTreeUpdated);
+    c.on("ActorLiveStateChanged", onActorLiveStateChanged);
 
     c.onreconnecting(() => setStatus("off"));
     c.onreconnected(() => {
@@ -209,6 +234,7 @@ export function HubProvider({ children }: { children: ReactNode }) {
       c.off("CommandersUpdated", onCommandersUpdated);
       c.off("AptitudesUpdated", onAptitudesUpdated);
       c.off("PassiveTreeUpdated", onPassiveTreeUpdated);
+      c.off("ActorLiveStateChanged", onActorLiveStateChanged);
       void c.stop();
     };
   }, [qc]);

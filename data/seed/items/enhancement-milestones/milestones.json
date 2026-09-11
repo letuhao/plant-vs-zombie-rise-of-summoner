@@ -2,52 +2,7 @@
   "schemaVersion": 1,
   "kind": "enhancement-milestone",
   "_meta": {
-    "batch": "enh-milestones-wave1",
-    "partition": "enhancement-milestones",
-    "contractVersion": 1,
-    "registryVersions": {
-      "core": 1,
-      "bands": 1,
-      "themes": 1,
-      "tags": 4,
-      "classes": 2,
-      "naming": 4,
-      "words": 4
-    },
-    "exemplarVersion": 1,
-    "sourceRef": "docs/architecture/item/entry-shapes.md §6; docs/architecture/item/ssot-enhancement.md §5.5",
-    "promptVersion": 1,
-    "model": "claude-haiku-4-5-20251001",
-    "authoredUtc": "2026-08-22T00:00:00Z",
-    "waves": [
-      {
-        "batch": "enh-milestones-wave1",
-        "model": "claude-haiku-4-5-20251001",
-        "authoredUtc": "2026-08-22T00:00:00Z",
-        "entryIds": [
-          "enh.001",
-          "enh.002",
-          "enh.003",
-          "enh.004",
-          "enh.005",
-          "enh.006",
-          "enh.007",
-          "enh.008",
-          "enh.009",
-          "enh.010"
-        ]
-      },
-      {
-        "batch": "enh-milestones-wave2-trial",
-        "model": "milestonegen/hand-authored-1",
-        "authoredUtc": "2026-09-07T00:00:00Z",
-        "entryIds": [
-          "enh.011",
-          "enh.012"
-        ],
-        "note": "small trial batch, hand-authored standing in for a live model call (no reachable LLM endpoint this session) -- run through the real milestonegen.run plan_run/run_draws/write_corpus + RunLedger."
-      }
-    ]
+    "partition": "enhancement-milestones"
   },
   "entries": [
     {
@@ -241,6 +196,118 @@
         "utility"
       ],
       "notes": "Milestone family for enhanced movement speed, granted along the enhancement track for base types built around repositioning and lane control. The Increased op keeps the gain proportional to the base type's own starting speed, so a naturally mobile base type stays comparably faster after enhancement rather than converging toward a flat baseline."
+    },
+    {
+      "id": "enh.013",
+      "nameKey": "enh.enhance-resilience",
+      "name": "Enhancement Resilience",
+      "runtimeFamily": "atom.enhance-resilience",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "maxHp",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "defensive"
+      ],
+      "notes": "The core essence of the unit hardens, allowing it to withstand sudden impacts with greater composure."
+    },
+    {
+      "id": "enh.014",
+      "nameKey": "enh.enhance-vitality",
+      "name": "Enhancement Vitality",
+      "runtimeFamily": "atom.enhance-vitality",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "maxHp",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "defensive"
+      ],
+      "notes": "A surge of life essence that bolsters the physical vessel against the coming storm."
+    },
+    {
+      "id": "enh.015",
+      "nameKey": "enh.enhance-prowess",
+      "name": "Enhancement Prowess",
+      "runtimeFamily": "atom.enhance-prowess",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "atk",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "The base type's innate combat instincts sharpen, allowing for more devastating strikes when momentum is high."
+    },
+    {
+      "id": "enh.016",
+      "nameKey": "enh.enhance-might",
+      "name": "Enhancement Might",
+      "runtimeFamily": "atom.enhance-might",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "atk",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "The base essence of the entity swells with raw, unbridled power."
+    },
+    {
+      "id": "enh.017",
+      "nameKey": "enh.enhance-bloom",
+      "name": "Enhancement Bloom",
+      "runtimeFamily": "atom.enhance-bloom",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "plantShield",
+        "op": "Flat"
+      },
+      "powerBand": "high",
+      "tags": [
+        "defensive"
+      ],
+      "notes": "The essence of the plant surges outward, manifesting as a protective layer of energy upon emergence."
+    },
+    {
+      "id": "enh.018",
+      "nameKey": "enh.enhance-zenith",
+      "name": "Enhancement Zenith",
+      "runtimeFamily": "atom.enhance-zenith",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "atk",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "A sudden surge of peak performance that pushes the unit beyond its natural limits. This milestone marks the moment a plant reaches its absolute potential."
+    },
+    {
+      "id": "enh.019",
+      "nameKey": "enh.enhance-girth",
+      "name": "Enhancement Girth",
+      "runtimeFamily": "atom.enhance-girth",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "maxHp",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "defensive"
+      ],
+      "notes": "The structural integrity of the core thickens, allowing it to withstand greater physical strain."
     }
   ]
 }

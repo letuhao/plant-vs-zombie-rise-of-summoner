@@ -99,18 +99,25 @@ def test_real_shipped_corpus_ops_are_all_within_opvocabs_closed_set() -> None:
 
 def test_affix_family_schema_is_audit_schema_clean_for_both_kinds() -> None:
     for kind_id in ("stat.modify", "stat.derived"):
+        free = (("defense", "Flat"),) if kind_id == "stat.modify" else (("defense", "Flag"),)
         schema = schema_mod.affix_family_schema(
-            kind_id, channels=("defense",), roles=("standard",), tags=("defensive",),
+            kind_id, free_pairs=free, roles=("standard",), tags=("defensive",),
             power_bands=("low", "medium", "high"))
         assert audit_schema(schema) == []
+        assert "nameKey" not in schema["properties"]
+        assert "required" in schema and "name" in schema["required"]
 
 
-def test_affix_family_schema_op_enum_matches_opvocab_exactly() -> None:
-    for kind_id in ("stat.modify", "stat.derived"):
-        schema = schema_mod.affix_family_schema(
-            kind_id, channels=("defense",), roles=("standard",), tags=("defensive",),
-            power_bands=("low",))
-        assert tuple(schema["properties"]["op"]["enum"]) == opvocab.legal_ops(kind_id)
+def test_affix_family_schema_channel_op_enum_is_free_pairs_only() -> None:
+    free = (("arm1Max", "More"), ("arm2Max", "More"))
+    schema = schema_mod.affix_family_schema(
+        "stat.modify", free_pairs=free, roles=("standard",), tags=("defensive",),
+        power_bands=("low",))
+    enum = schema["properties"]["channelOp"]["enum"]
+    assert "arm1Max|More" in enum
+    assert "arm2Max|More" in enum
+    assert "defense|More" not in enum
+    assert None in enum
 
 
 def test_a_bare_numeric_field_fails_schema_construction() -> None:
@@ -120,8 +127,8 @@ def test_a_bare_numeric_field_fails_schema_construction() -> None:
     construction — actually catches it, mirroring `pipeline.model.Pipeline.__post_init__`'s own
     guard style."""
     broken = schema_mod.affix_family_schema(
-        "stat.modify", channels=("defense",), roles=("standard",), tags=("defensive",),
-        power_bands=("low",))
+        "stat.modify", free_pairs=(("defense", "Increased"),), roles=("standard",),
+        tags=("defensive",), power_bands=("low",))
     broken["properties"]["amount"] = {"type": "integer"}
     defects = audit_schema(broken)
     assert any("amount" in str(d) or "bare numeric" in str(d) for d in defects)
@@ -135,8 +142,8 @@ def test_brief_construction_refuses_a_schema_that_smuggles_a_number() -> None:
         group_id="g.armour", stem="arm", existing_ids=("atom.warding",),
         channel_ops={"defense": ("Flat",)})
     bad_schema = schema_mod.affix_family_schema(
-        "stat.modify", channels=("defense",), roles=("standard",), tags=("defensive",),
-        power_bands=("low",))
+        "stat.modify", free_pairs=(("defense", "Increased"),), roles=("standard",),
+        tags=("defensive",), power_bands=("low",))
     bad_schema["properties"]["tier"] = {"type": "integer", "enum": [1, 2, 3]}
     with pytest.raises(ValueError):
         brief_mod.AffixFamilyBrief(
@@ -179,13 +186,18 @@ def test_role_vocabulary_is_the_real_registry_vocabulary() -> None:
 
 
 def test_build_affix_family_brief_end_to_end_for_real_partition() -> None:
-    brief = brief_mod.build_affix_family_brief("g.armour", "stat.modify")
-    assert brief.schema["properties"]["op"]["enum"] == ["Flat", "Increased", "More"]
-    assert "defense" in brief.partition.channels
+    # Armour is intentionally full in the current corpus; use a still-runnable shipped
+    # partition for the end-to-end brief contract.
+    brief = brief_mod.build_affix_family_brief("g.elem-power", "stat.derived")
+    enum = brief.schema["properties"]["channelOp"]["enum"]
+    assert enum
+    assert "defense|More" not in enum
+    assert "combat.power" in " ".join(brief.partition.channels)
     assert audit_schema(brief.schema) == []
     text = brief.render()
-    assert "atom.arm-" in text
+    assert "atom.elpw-" in text
     assert "Never choose a number" in text
+    assert "channelOp" in text
 
 
 def test_brief_refuses_a_partition_with_no_channels() -> None:
@@ -202,20 +214,31 @@ def test_brief_refuses_a_partition_with_no_channels() -> None:
 
 @pytest.fixture()
 def armour_partition() -> brief_mod.PartitionContext:
-    return brief_mod.load_partition_context("g.armour")
+    # Keep emit/schema tests independent of production slot capacity. The live armour partition
+    # is full today, but these tests need two legal free pairs to exercise successful assembly.
+    return brief_mod.PartitionContext(
+        group_id="g.armour", stem="arm",
+        existing_ids=("atom.warding", "atom.resilience", "atom.plating"),
+        channel_ops={
+            "defense": ("Flat", "Increased", "More"),
+            "arm1Max": ("Flat", "Increased"),
+            "arm2Max": ("Flat", "Increased"),
+        },
+    )
 
 
 def test_assemble_entry_produces_a_shipped_shaped_entry(armour_partition) -> None:
     answer = {
-        "word": "plating-mastery", "channel": "arm1Max", "op": "More",
+        "word": "plating-mastery", "channelOp": "arm1Max|More",
         "roles": ["core-guard", "mantle"], "tags": ["defensive"], "powerBand": "low",
-        "name": "Plating Mastery", "nameKey": "affix.plating-mastery",
-        "displayTemplate": "{value}% more armor plating",
+        "name": "Plating Mastery", "displayTemplate": "{value}% more armor plating",
+        "blocked": None,
     }
     entry = emit.assemble_entry(answer, armour_partition, "stat.modify")
     assert entry["id"] == "atom.arm-plating-mastery"
     assert entry["kindId"] == "stat.modify"
     assert entry["params"] == {"channel": "arm1Max", "op": "More"}
+    assert entry["nameKey"] == "affix.plating-mastery"
     assert entry["roles"] == ["core-guard", "mantle"]
 
 
@@ -223,38 +246,51 @@ def test_assemble_entry_rejects_a_duplicate_channel_op_pair(armour_partition) ->
     """`defense`+`Flat` is `atom.warding` — the exact duplicate-mechanic case
     `g-attack.json`'s own notes name (the elemental_power/elpw-amplify precedent)."""
     answer = {
-        "word": "second-warding", "channel": "defense", "op": "Flat",
+        "word": "second-warding", "channelOp": "defense|Flat",
         "roles": ["standard"], "tags": ["defensive"], "powerBand": "medium",
-        "name": "Second Warding", "nameKey": "affix.second-warding",
-        "displayTemplate": "+{value} defense",
+        "name": "Second Warding", "displayTemplate": "+{value} defense", "blocked": None,
     }
     with pytest.raises(emit.DuplicateChannelOpError):
         emit.assemble_entry(answer, armour_partition, "stat.modify")
 
 
-def test_answer_validation_names_a_duplicate_channel_op_pair(armour_partition) -> None:
+def test_answer_validation_rejects_taken_pair_not_in_free_set(armour_partition) -> None:
+    free = brief_mod.free_channel_ops(armour_partition, "stat.modify")
     schema = schema_mod.affix_family_schema(
-        "stat.modify", channels=armour_partition.channels, roles=("standard",),
+        "stat.modify", free_pairs=free, roles=("standard",),
         tags=("defensive",), power_bands=("low",),
     )
     answer = {
-        "word": "second-warding", "channel": "defense", "op": "Flat",
+        "word": "second-warding", "channelOp": "defense|Flat",
         "roles": ["standard"], "tags": ["defensive"], "powerBand": "low",
-        "name": "Second Warding", "nameKey": "affix.second-warding",
-        "displayTemplate": "+{value} defense",
+        "name": "Second Warding", "displayTemplate": "+{value} defense", "blocked": None,
     }
 
     defects = schema_mod.validate_answer(
-        answer, schema, channel_ops=armour_partition.channel_ops, kind_id="stat.modify")
+        answer, schema, channel_ops=armour_partition.channel_ops, kind_id="stat.modify",
+        free_pairs=free)
 
-    assert any("already ships" in defect for defect in defects)
+    assert any("free-pair" in defect or "already ships" in defect for defect in defects)
+
+
+def test_validate_answer_accepts_blocked_with_null_content() -> None:
+    free = (("arm1Max", "More"),)
+    schema = schema_mod.affix_family_schema(
+        "stat.modify", free_pairs=free, roles=("standard",), tags=("defensive",),
+        power_bands=("low",))
+    answer = {
+        "blocked": "no good theme",
+        "name": None, "displayTemplate": None, "word": None, "channelOp": None,
+        "roles": None, "tags": None, "powerBand": None,
+    }
+    assert schema_mod.validate_answer(answer, schema, free_pairs=free, kind_id="stat.modify") == []
 
 
 def test_assemble_entry_rejects_an_illegal_op_for_the_kind(armour_partition) -> None:
     answer = {
-        "word": "brand-new", "channel": "arm1Max", "op": "Override",
+        "word": "brand-new", "channelOp": "arm1Max|Override",
         "roles": ["standard"], "tags": ["defensive"], "powerBand": "low",
-        "name": "Brand New", "nameKey": "affix.brand-new", "displayTemplate": "x",
+        "name": "Brand New", "displayTemplate": "x", "blocked": None,
     }
     with pytest.raises(opvocab.IllegalOpError):
         emit.assemble_entry(answer, armour_partition, "stat.modify")
@@ -265,9 +301,9 @@ def test_assemble_entry_rejects_an_id_collision() -> None:
         group_id="g.armour", stem="arm", existing_ids=("atom.arm-foo",),
         channel_ops={"defense": ("Flat",)})
     answer = {
-        "word": "foo", "channel": "defense", "op": "Increased",
+        "word": "foo", "channelOp": "defense|Increased",
         "roles": ["standard"], "tags": ["defensive"], "powerBand": "low",
-        "name": "Foo", "nameKey": "affix.foo", "displayTemplate": "x",
+        "name": "Foo", "displayTemplate": "x", "blocked": None,
     }
     with pytest.raises(emit.IdCollisionError):
         emit.assemble_entry(answer, ctx, "stat.modify")
@@ -275,9 +311,9 @@ def test_assemble_entry_rejects_an_id_collision() -> None:
 
 def test_assemble_entry_normalizes_op_casing(armour_partition) -> None:
     answer = {
-        "word": "lower-case-op", "channel": "arm2Max", "op": "more",
+        "word": "lower-case-op", "channelOp": "arm2Max|more",
         "roles": ["standard"], "tags": ["defensive"], "powerBand": "low",
-        "name": "Lower Case Op", "nameKey": "affix.lower-case-op", "displayTemplate": "x",
+        "name": "Lower Case Op", "displayTemplate": "x", "blocked": None,
     }
     entry = emit.assemble_entry(answer, armour_partition, "stat.modify")
     assert entry["params"]["op"] == "More"
@@ -435,8 +471,18 @@ def isolated_families_dir(tmp_path, monkeypatch):
     tmp copy, never the live repo file."""
     families_dir = tmp_path / "affix-families"
     families_dir.mkdir()
-    real_doc = (FAMILIES_DIR / "g-armour.json").read_text(encoding="utf-8")
-    (families_dir / "g-armour.json").write_text(real_doc, encoding="utf-8")
+    real_doc = json.loads((FAMILIES_DIR / "g-armour.json").read_text(encoding="utf-8"))
+    # The shipped armour partition is full after the latest generation run. Remove only the two
+    # pairs exercised by these CLI tests in the isolated copy; never mutate production data.
+    real_doc["entries"] = [
+        entry for entry in real_doc["entries"]
+        if not (
+            entry.get("params", {}).get("channel") in {"arm1Max", "arm2Max"}
+            and entry.get("params", {}).get("op") == "More"
+        )
+    ]
+    (families_dir / "g-armour.json").write_text(
+        json.dumps(real_doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     monkeypatch.setattr(brief_mod, "FAMILIES_DIR", families_dir)
     monkeypatch.setattr(run_mod, "DEFAULT_LEDGER", tmp_path / "ledger.json")
     return families_dir
@@ -449,9 +495,15 @@ def test_cli_dry_run_prints_the_brief_and_makes_no_model_call(isolated_families_
     assert "g.armour" in out
 
 
-def test_cli_write_without_endpoint_refuses(isolated_families_dir):
+def test_cli_write_without_endpoint_refuses(isolated_families_dir, monkeypatch):
+    """Refuse only when the *resolved* transport has no endpoint (CLI empty + config empty)."""
+    from seedsmith.pipeline.llm_caller import LlmCallerConfig
+    monkeypatch.setattr(
+        "seedsmith.pipeline.llm_caller.resolve_live_transport",
+        lambda *a, **k: LlmCallerConfig(endpoint="", model="x"))
     with pytest.raises(SystemExit):
         run_mod.main(["--group", "g.armour", "--affix-kind", "stat.modify", "--write"])
+
 
 
 def test_cli_a_real_live_run_writes_a_real_partition_file(isolated_families_dir, capsys, monkeypatch):
@@ -467,10 +519,10 @@ def test_cli_a_real_live_run_writes_a_real_partition_file(isolated_families_dir,
         def _call(brief, schema):
             called_with["schema"] = schema
             # arm1Max only ships Flat/Increased on the real, shipped partition — More is free.
-            return {"word": "livewired", "channel": "arm1Max", "op": "More",
-                    "roles": ["tank"], "tags": ["defensive"], "powerBand": "medium",
-                    "name": "Live-Wired Ward", "nameKey": "affix.live-wired-ward",
-                    "displayTemplate": "+{value} Defense"}
+            return {"word": "livewired", "channelOp": "arm1Max|More",
+                    "roles": ["core-guard"], "tags": ["defensive"], "powerBand": "medium",
+                    "name": "Live-Wired Ward", "displayTemplate": "+{value} Defense",
+                    "blocked": None}
         return _call
 
     monkeypatch.setattr("seedsmith.pipeline.llm_caller.live_answer_caller",
@@ -493,7 +545,11 @@ def test_cli_a_real_live_run_writes_a_real_partition_file(isolated_families_dir,
 
 def test_cli_blocked_answer_is_reported_and_writes_nothing(isolated_families_dir, capsys, monkeypatch):
     def _fake_live_answer_caller(config, *, validator=None):
-        return lambda brief, schema: {"blocked": "no legal (channel, op) pair left"}
+        return lambda brief, schema: {
+            "blocked": "no legal (channel, op) pair left",
+            "name": None, "displayTemplate": None, "word": None, "channelOp": None,
+            "roles": None, "tags": None, "powerBand": None,
+        }
 
     monkeypatch.setattr("seedsmith.pipeline.llm_caller.live_answer_caller",
                         _fake_live_answer_caller)

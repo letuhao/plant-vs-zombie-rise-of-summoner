@@ -18,7 +18,7 @@ public static class DerivedSurfaceCook
         var derived = DerivedStatSurfaceCatalogHub.Catalog;
         var elements = ElementSurfaceCatalogHub.Catalog;
         var resources = ResourceSurfaceCatalogHub.Catalog;
-        // Status hub is configured for ConfigureAll / version stamp; variants come from derived catalog.
+        // Status hub supplies Status rail variants (Omni + catalog ids).
         _ = StatusSurfaceCatalogHub.Catalog;
 
         var entriesByGroup = derived.Entries
@@ -69,16 +69,7 @@ public static class DerivedSurfaceCook
                     PresentationOnly = e.PresentationOnly
                 })
                 .ToList(),
-            "status" => derived.StatusCategoryVariants
-                .OrderBy(v => v.Ordinal)
-                .Select(v => new DerivedSurfaceVariantDto
-                {
-                    Id = v.Id,
-                    DisplayName = v.DisplayName.Resolve(lang),
-                    Ordinal = v.Ordinal,
-                    PresentationOnly = v.PresentationOnly
-                })
-                .ToList(),
+            "status" => CookStatusVariants(lang),
             "resources" => CookResourceVariants(resources, side),
             _ => new List<DerivedSurfaceVariantDto>()
         };
@@ -86,6 +77,17 @@ public static class DerivedSurfaceCook
         IReadOnlyList<DerivedSurfaceVariantDto>? actionCategoryVariants = null;
         if (tab.Id == "other")
         {
+            // D3: OTHER Shared is first-class on cook Variants — FE selects, does not invent.
+            variants = new List<DerivedSurfaceVariantDto>
+            {
+                new()
+                {
+                    Id = "shared",
+                    DisplayName = lang.StartsWith("zh", StringComparison.OrdinalIgnoreCase) ? "共用" : "Shared",
+                    Ordinal = 0,
+                    PresentationOnly = false
+                }
+            };
             actionCategoryVariants = derived.ActionCategoryVariants
                 .OrderBy(v => v.Ordinal)
                 .Select(v => new DerivedSurfaceVariantDto
@@ -164,6 +166,28 @@ public static class DerivedSurfaceCook
             });
         }
 
+        return list;
+    }
+
+    static List<DerivedSurfaceVariantDto> CookStatusVariants(string lang)
+    {
+        // D1: Status rail = Omni + statusCategoryVariants (L2b) — not per-status-id chips.
+        var cats = DerivedStatSurfaceCatalogHub.Catalog.StatusCategoryVariants
+            .OrderBy(v => v.Ordinal)
+            .ToList();
+        var list = new List<DerivedSurfaceVariantDto>(cats.Count);
+        for (var i = 0; i < cats.Count; i++)
+        {
+            var v = cats[i];
+            list.Add(new DerivedSurfaceVariantDto
+            {
+                Id = v.Id,
+                DisplayName = v.DisplayName.Resolve(lang),
+                Ordinal = v.Ordinal,
+                // Omni is the presentation-only dense slot; category chips are joinable.
+                PresentationOnly = string.Equals(v.Id, "omni", StringComparison.Ordinal)
+            });
+        }
         return list;
     }
 

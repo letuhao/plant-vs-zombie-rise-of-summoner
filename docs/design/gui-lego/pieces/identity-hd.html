@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>identity-hd — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>identity-hd</code></h1>
+  <p class="lede">Who / meta strip. Side theme may tint; ActorPanel header may also show identity (embed delta). Spec: <code>docs/architecture/gui-lego/spec-identity-hd.md</code>. Visuals from payload/theme — no hard-coded element colors in the piece root.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live)</h2>
+      <div class="piece-stage"><div class="identity"><div class="who">Emberling</div><div class="meta">Lv <b>12</b> · Plant · Elements / Fire</div></div></div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "identity-hd",
+  "instanceId": "identity:derived",
+  "who": "Emberling",
+  "meta": "Lv 12 \u00b7 Plant \u00b7 Elements / Fire",
+  "themeRef": {
+    "kind": "side",
+    "id": "plant"
+  },
+  "phase": "ready"
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

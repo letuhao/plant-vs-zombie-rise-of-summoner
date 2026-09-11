@@ -37,6 +37,23 @@ suite: 3105 passed (up from 3094), 12 failed (all pre-existing, unrelated "100 v
 drift spanning trees/actions/distribution-planner/usage-stats — confirmed already true before this
 session touched anything, well outside item-seedgen's own scope).
 
+## Post-build operational repair — `fill-runner`
+
+- [x] **T31** — Implement [`spec-fill-runner.md`](../docs/architecture/item-seedgen/spec-fill-runner.md):
+      classify a recorded escalation separately from a corpus gap, persist it as a typed terminal
+      ledger outcome, continue the default fill walk past it, and prove a resume does not re-call it.
+- [x] **T32** — Complete the full-depth contract tests: both set populations, all discovered
+      partitions, gem remaining-family drain, elevated open-kind pass, explicit depth override, and
+      stable dry-run order. Socket-word retirement and consumable action/cooldown fields stay out of
+      scope.
+- [x] **T33** — Make open-ended generator checkpoints crash-safe: persist each accepted corpus row
+      before marking its ledger draw done, and requeue ledger rows whose recorded entry is missing or
+      changed on resume. This repairs the observed drop-table/milestone ledger-to-file drift instead
+      of silently advancing past holes.
+- [x] **T34** — Reconcile stale capacity assumptions in the fill and affix-family tests. Full affix
+      partitions are skipped deterministically, and corpus-count tests derive expectations from the
+      current open-ended corpus rather than historical row counts.
+
 ## T0 — ✅ Resolved 2026-09-07 (owner decision)
 
 - [x] **T0** — `enhancement-milestones` folded in as module 11 (`enhancement-milestones-gen`), spec at
@@ -362,6 +379,14 @@ returned as of this update.
       independently re-run this session**: `test_combogen.py` + `test_strain_splice_gen.py` — 67/67
       passing (found and fixed 2 stale gem-count assertions, 40→60 and 34→54, matching sockets-gen's real
       g2 addition, exactly the same drift pattern already fixed in the C# suites).
+
+      **Binding follow-up (2026-09-09):** the original checkpoint measured categorical coverage but did
+      not assert that persisted set rows contained the concrete `baseType` required by Core import.
+      `setgen` now performs that deterministic binding from the live base-type corpus, and
+      `items repair-sets --write --allow-production-tree` repaired 87 legacy files (the dry-run is now
+      idempotent). Thirty legacy rows still use the retired/non-hybrid `head-guard`/`sense` roles and
+      three historical rows intentionally conflict with unique bases; both are explicit content debt,
+      not silently remapped by the generator.
 
 ## Phase 5 — `drop-tables-gen` (alone, last)
 

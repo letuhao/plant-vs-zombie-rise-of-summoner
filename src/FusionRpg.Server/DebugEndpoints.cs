@@ -102,6 +102,36 @@ public static class DebugEndpoints
             return Results.Ok(new { items });
         });
 
+        g.MapPost("/setup/skip", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            var b = BodyOrEmpty(body);
+            var method = (StrProp(b, "method") ?? "quick").Trim().ToLowerInvariant();
+            if (method is not ("quick" or "button"))
+                return Results.BadRequest(new { ok = false, error = "unknown method — expected quick or button" });
+
+            if (!store.InjectorConnected)
+                return Results.Conflict(new { ok = false, error = "injector not connected — start the game with the FusionRpg injector loaded" });
+
+            const int defaultTimeoutSec = 15; // structural acknowledgement wait, not a balance value
+            var timeoutSec = IntProp(b, "timeoutSec", defaultTimeoutSec);
+            var before = store.GetMaxEventId();
+            await Send(hub, inbox, "debug.skip-setup", new { method });
+            var ack = await PollForKind(store, before, "debug.setup.skip", TimeSpan.FromSeconds(timeoutSec));
+            if (ack is null)
+                return Results.Conflict(new { ok = false, method, error = $"debug.setup.skip did not ack within {timeoutSec}s" });
+
+            var ok = PayloadBool(ack.Payload, "ok");
+            if (!ok)
+                return Results.Conflict(new
+                {
+                    ok = false,
+                    method,
+                    error = PayloadString(ack.Payload, "error") ?? "injector refused setup skip"
+                });
+
+            return Results.Ok(new { ok = true, method, acknowledgement = ack.Payload });
+        });
+
         g.MapGet("/scenarios", () => Results.Ok(new { items = DebugScenarios.AllIds }));
 
         g.MapPost("/scenario/{id}", async (string id, JsonElement? body, EventIngest ingest, IHubContext<RpgHub> hub, InjectorCommandInbox inbox, EffectGrantSession grants) =>
@@ -152,6 +182,7 @@ public static class DebugEndpoints
 
             var entered = false;
             var boardStart = FindLatestLiveBoardStart(store);
+            string? enteredLevelType = null;
 
             if (boardStart is null)
             {
@@ -172,13 +203,27 @@ public static class DebugEndpoints
                     var err = PayloadString(enterAck.Payload, "error") ?? "enter-level rejected";
                     if (!err.Contains("board already live", StringComparison.OrdinalIgnoreCase))
                         return Results.Conflict(new { ok = false, error = err });
-                    // "board already live" — fall through and use the board that's already there.
+                    // "board already live" is an explicit injector assertion. On cold starts the
+                    // Board.Awake event can predate the server's current event window, so use the
+                    // injector assertion and the latest catalog level metadata rather than inventing
+                    // a board lifecycle row. The scenario snapshot below still proves the board.
+                    boardStart = FindLatestLiveBoardStart(store, trustInjectorLiveBoard: true);
+                    if (boardStart is null)
+                        enteredLevelType = PayloadString(FindLatestKind(store, "catalog.zombies")?.Payload, "levelType");
                 }
                 else
                 {
-                    boardStart = await PollForKind(store, beforeEnter, "board.start", TimeSpan.FromSeconds(timeoutSec));
-                    if (boardStart is null)
-                        return Results.Conflict(new { ok = false, error = $"enter-level ok but no board.start within {timeoutSec}s — check main menu state" });
+                    // Some game builds create the Board and begin spawning before the Board.Awake
+                    // telemetry reaches the server. The injector's successful enter acknowledgement
+                    // is still authoritative for the level type; keep waiting for board.start for
+                    // lifecycle correlation, but do not reject a usable live board solely because
+                    // that optional telemetry edge was missed.
+                    enteredLevelType = PayloadString(enterAck.Payload, "levelType");
+                    // Board.Awake telemetry is best-effort on cold starts; bound this optional wait so
+                    // quick-start can continue from the authoritative enter acknowledgement instead
+                    // of holding the HTTP request for the full scenario timeout.
+                    boardStart = await PollForKind(store, beforeEnter, "board.start",
+                        TimeSpan.FromSeconds(Math.Min(timeoutSec, 5)));
                     entered = true;
                 }
 
@@ -188,13 +233,13 @@ public static class DebugEndpoints
                 // SAME live board, which would otherwise look "stale" to the session rule below and
                 // 409 a perfectly good lawn. Found live 2026-08-30, immediately after the session rule
                 // itself was added — the fix for one false positive created a false negative.
-                if (boardStart is null)
-                    boardStart = FindLatestLiveBoardStart(store, trustInjectorLiveBoard: true);
-                if (boardStart is null)
-                    return Results.Conflict(new { ok = false, error = "enter-level reported board already live, but no live board.start was found" });
+                if (boardStart is null && string.IsNullOrWhiteSpace(enteredLevelType))
+                    return Results.Conflict(new { ok = false, error = "enter-level reported board already live, but no level metadata was found" });
             }
 
-            var levelType = PayloadString(boardStart.Payload, "levelType") ?? "";
+            var levelType = boardStart is null
+                ? enteredLevelType ?? ""
+                : PayloadString(boardStart.Payload, "levelType") ?? "";
             if (BadLevelTypes.Contains(levelType))
                 return Results.Conflict(new { ok = false, error = $"refusing lab on levelType={levelType} — open Adventure/Challenge day lawn, not Explore/Travel" });
 
@@ -653,6 +698,15 @@ public static class DebugEndpoints
     {
         var items = store.ListEvents(500, afterId);
         return items.LastOrDefault(e => e.Kind == kind);
+    }
+
+    static EventEnvelope? FindLatestKind(RpgStore store, string kind)
+    {
+        var max = store.GetMaxEventId();
+        if (max <= 0) return null;
+        const int windowCapacity = 2000;
+        return store.ListEvents(windowCapacity, Math.Max(0, max - windowCapacity))
+            .LastOrDefault(e => string.Equals(e.Kind, kind, StringComparison.OrdinalIgnoreCase));
     }
 
     static async Task<EventEnvelope?> PollForKind(RpgStore store, long afterId, string kind, TimeSpan timeout)

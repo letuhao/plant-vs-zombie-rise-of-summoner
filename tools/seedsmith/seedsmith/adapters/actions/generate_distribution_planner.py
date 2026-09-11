@@ -2,7 +2,7 @@
 (spec-distribution-planner.md). Reads:
 
     data/seed/actions/_generated/role-lean.json       (A-S0 — species anchor + family membership)
-    data/seed/demons/_generated/family-assignments.json (species -> family LIST, size-measured)
+    data/seed/demons/species/**/*.json                      (live species and family fields)
     data/seed/actions/type-weights.json                (A-T1 — categoryMilli/targetModeMilli/...)
     data/tuning/action-rungs.v1.json                   (the 10-row rung table)
     data/tuning/action-corpus-run.v1.json              (this module's OWN new tuning file)
@@ -37,39 +37,66 @@ import hashlib
 import json
 from pathlib import Path
 
-from .characteristic_pool.catalog import CATALOG_PATH, load_catalog
+from .characteristic_pool.catalog import (
+    CATALOG_PATH, derive_live_family_assignments, load_catalog,
+)
 from .distribution_planner import derive as dp
 from .distribution_planner.tuning import (
     DEDUP_TUNING_PATH, RUN_TUNING_PATH, load_dedup_k, load_run_tuning,
 )
 from .vocab import load_family_ids
 
-__all__ = ["run", "regenerate", "ACTIONS_ROOT", "DEMONS_ROOT"]
+__all__ = ["run", "regenerate", "is_passing_quality_gate", "ACTIONS_ROOT", "DEMONS_ROOT"]
 
 REPO_ROOT = Path(__file__).resolve().parents[5]
 ACTIONS_ROOT = REPO_ROOT / "data" / "seed" / "actions"
 DEMONS_ROOT = REPO_ROOT / "data" / "seed" / "demons"
 RUNGS_PATH = REPO_ROOT / "data" / "tuning" / "action-rungs.v1.json"
 ROLE_LEAN_PATH = ACTIONS_ROOT / "_generated" / "role-lean.json"
-FAMILY_ASSIGNMENTS_PATH = DEMONS_ROOT / "_generated" / "family-assignments.json"
 TYPE_WEIGHTS_PATH = ACTIONS_ROOT / "type-weights.json"
 PAIRINGS_PATH = ACTIONS_ROOT / "pairings.json"
 BRIEFS_DIR = ACTIONS_ROOT / "_briefs"
 
-# A-S5 `coverage-report` is not built yet (map §7's own dependency table). This is the plausible
-# path its quality-gate report would land at (`_reports/`, matching `kinds.py`'s own
-# `action-coverage` KindSpec directory) -- checked for existence only, never parsed for content,
-# since no module writes it yet. Its absence is exactly why `mode: "full"` is refused today.
-SMOKE_GATE_EVIDENCE_PATH = ACTIONS_ROOT / "_reports" / "coverage.json"
+# A-S5 writes the round-scoped quality-gate report at this path. The full-run gate below checks the
+# report's measured verdict, not mere file presence.
+SMOKE_GATE_EVIDENCE_PATH = ACTIONS_ROOT / "_reports" / "coverage-round-1.json"
 
 
 def _canonical_dump(doc: dict) -> str:
     return json.dumps(doc, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def is_passing_quality_gate(path: Path, *, round_no: int = 1) -> bool:
+    """Return whether an A-S5 report can authorize a full A-S1 plan.
+
+    A report is evidence only when it is the expected envelope for this round and its closed
+    metrics explicitly passed.  This deliberately fails closed for stale smoke output, malformed
+    JSON, a review/reject envelope, an unevaluated metric, or any remaining gap.
+    """
+    if not path.is_file():
+        return False
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    if not isinstance(doc, dict) or doc.get("kind") != "action-coverage":
+        return False
+    meta = doc.get("_meta")
+    verdict = meta.get("verdict") if isinstance(meta, dict) else None
+    if not isinstance(meta, dict) or meta.get("round") != round_no or not isinstance(verdict, dict):
+        return False
+    # A clean smoke report is also a passing quality gate. A full report uses `pass`; a smoke
+    # report uses `smoke-clean` because A-S5 deliberately never labels a partial run `pass`.
+    return (verdict.get("verdict") in {"pass", "smoke-clean"} and
+            verdict.get("notMeasuredMetrics") == [] and
+            verdict.get("gapMetrics") == [])
+
+
 def _family_members(family_assignments: dict) -> "dict[str, list[str]]":
     members: "dict[str, list[str]]" = {}
     for species_id, families in family_assignments.items():
+        if isinstance(families, str):
+            families = [families]
         for fam in families:
             members.setdefault(fam, []).append(species_id)
     return {fam: sorted(v) for fam, v in members.items()}
@@ -97,20 +124,17 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
               full_flag: bool = False, write: bool = True) -> dict:
     """Pure computation + (optionally) one file write. Returns a summary dict for the caller to
     report -- never prints itself, so a test can call this without capturing stdout."""
-    # `family_assignments_path` derives from the `demons_root` PARAMETER (a caller redirecting
-    # demons_root genuinely wants its own family-assignments file read too). `type_weights_path`/
-    # `pairings_path` deliberately do NOT derive from the `actions_root` parameter -- that
+    # `type_weights_path`/`pairings_path` deliberately do NOT derive from the `actions_root` parameter -- that
     # parameter names only where THIS run WRITES its own round file (`_briefs/round-1.json`
     # below), so a test can redirect the write target without also redirecting every real read.
-    family_assignments_path = family_assignments_path or (demons_root / "_generated" / "family-assignments.json")
     type_weights_path = type_weights_path or (ACTIONS_ROOT / "type-weights.json")
     pairings_path = pairings_path or (ACTIONS_ROOT / "pairings.json")
 
     run_tuning = load_run_tuning(run_tuning_path)
     dedup_k, dedup_k_source = load_dedup_k(dedup_tuning_path)
 
-    gate_evidence_present = SMOKE_GATE_EVIDENCE_PATH.is_file()
-    dp.refuse_full_run_if_ungated(run_tuning.mode, full_flag, gate_evidence_present)
+    gate_passed = is_passing_quality_gate(SMOKE_GATE_EVIDENCE_PATH)
+    dp.refuse_full_run_if_ungated(run_tuning.mode, full_flag, gate_passed)
 
     catalog = load_catalog(catalog_path)
     species_ids = [s.species_id for s in catalog]
@@ -120,8 +144,23 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
     species_anchor = dp.parse_species_anchor(role_lean_doc)
     role_lean_corpus_hash = role_lean_doc["_meta"]["corpusHash"]
 
-    family_assignments = json.loads(family_assignments_path.read_text(encoding="utf-8"))
+    using_live_families = family_assignments_path is None
+    if using_live_families:
+        live_species_root = catalog_path if catalog_path.is_dir() else demons_root / "species"
+        family_assignments = derive_live_family_assignments(live_species_root)
+    else:
+        family_assignments = json.loads(family_assignments_path.read_text(encoding="utf-8"))
     family_members = _family_members(family_assignments)
+    if using_live_families and set(family_assignments) != set(species_ids):
+        raise ValueError("live family assignments do not cover exactly the live species roster")
+
+    if set(species_anchor) != set(species_ids):
+        missing = sorted(set(species_ids) - set(species_anchor))
+        extra = sorted(set(species_anchor) - set(species_ids))
+        raise ValueError(
+            "role-lean.json is stale relative to the live species seed folder: "
+            f"missing={missing[:5]!r}, extra={extra[:5]!r}"
+        )
 
     type_weights_text = type_weights_path.read_text(encoding="utf-8")
     type_weights_doc = json.loads(type_weights_text)

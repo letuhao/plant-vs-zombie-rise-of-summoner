@@ -21,7 +21,9 @@ mock server this test owns, so it needs no skip and runs in CI like every other 
 """
 from __future__ import annotations
 
+import contextlib
 import http.server
+import io
 import json
 import sys
 import tempfile
@@ -181,37 +183,61 @@ class CliFlagTests(unittest.TestCase):
         self.assertEqual(args.endpoint, "")
         self.assertEqual(args.model, "unrecorded")
 
+    def test_dry_run_reads_the_configured_kind_ledger(self):
+        """A read-only plan must reconcile against the same default ledger as a write."""
+        with tempfile.TemporaryDirectory() as tmp:
+            ledger = Path(tmp) / "set-charm-gen.ledger.json"
+            ledger.write_text(json.dumps({"done": {
+                "charm-species-demon.allpeater": {"outcome": "done"},
+            }}), encoding="utf-8")
+            args = _generate_args(kind="charm", population="species", dry_run=True, write=False,
+                                  out_dir="")
+            output = io.StringIO()
+            with patch("seedsmith.adapters.items.defaults.default_out_dir", return_value=tmp), \
+                    contextlib.redirect_stdout(output):
+                exit_code = cli_mod.cmd_items(args)
+            self.assertEqual(exit_code, cli_mod.EXIT_CLEAN)
+            summary = json.loads(output.getvalue())
+            self.assertEqual(summary["alreadyDone"], 1)
+
 
 class RefusalNarrowingTests(unittest.TestCase):
     """`_cmd_items_write`'s own refusal — proven directly, the same way `authored_mod.run_batch`
     is proven directly in test_item_gen_wiring.py, rather than through the full `cmd_items` plan
     machinery, so the assertion is about the transport gate and nothing else."""
 
-    def test_neither_answers_nor_endpoint_still_refuses(self):
+    def test_neither_answers_nor_resolved_endpoint_still_refuses(self):
+        """Empty CLI `--endpoint` is no longer enough to refuse — `.env` / defaults can supply
+        one. Refuse only when the *resolved* transport endpoint is blank."""
+        empty = LlmCallerConfig(endpoint="", model="x")
         with tempfile.TemporaryDirectory() as tmp:
             plan = _set_plan()
-            args = _write_args(out_dir=str(Path(tmp) / "out"))
-            exit_code = cli_mod._cmd_items_write(args, plan=plan, tuning=TUNING, vocabulary=VOCAB)
+            args = _write_args(out_dir=str(Path(tmp) / "out"), allow_production_tree=True)
+            with patch("seedsmith.pipeline.llm_caller.resolve_live_transport",
+                       return_value=empty):
+                exit_code = cli_mod._cmd_items_write(
+                    args, plan=plan, tuning=TUNING, vocabulary=VOCAB)
         self.assertEqual(exit_code, cli_mod.EXIT_REFUSED)
 
     def test_no_out_dir_still_refuses_even_with_an_endpoint(self):
         """A live endpoint is not a substitute for somewhere to write — the write half of the
-        contract is unchanged."""
+        contract is unchanged when production defaults are off."""
         plan = _set_plan()
-        args = _write_args(endpoint="http://127.0.0.1:1/v1/chat/completions", out_dir="")
-        exit_code = cli_mod._cmd_items_write(args, plan=plan, tuning=TUNING, vocabulary=VOCAB)
+        args = _write_args(endpoint="http://127.0.0.1:1/v1/chat/completions", out_dir="",
+                           allow_production_tree=False)
+        with patch("seedsmith.adapters.items.defaults.allow_production_tree",
+                   return_value=False), \
+             patch("seedsmith.adapters.items.defaults.resolve_out_dir_arg",
+                   return_value=""):
+            exit_code = cli_mod._cmd_items_write(args, plan=plan, tuning=TUNING, vocabulary=VOCAB)
         self.assertEqual(exit_code, cli_mod.EXIT_REFUSED)
 
     # `--endpoint` alone no longer hitting the refusal gate is proven by
     # `LiveEndToEndTests.test_a_live_call_writes_a_seed_file_identical_in_shape_to_the_replay_path`
     # below: it drives `_cmd_items_write` with `--endpoint` and no `--answers` all the way to
     # `EXIT_CLEAN`, which is strictly stronger than "not refused". A separate refusal-only probe
-    # against an unreachable endpoint was deliberately NOT added here — `run_batch` only catches
-    # `AnswerMissing`/`AnswerExhausted` per subject (the replay transport's own exceptions); a live
-    # `call_model` failure raises `RuntimeError` uncaught, which is a real, separate gap (a batch
-    # with N-1 good subjects and one dead endpoint call loses the whole batch, not just that
-    # subject) worth flagging but out of this module's file scope (`authored.py`'s exception
-    # handling, not `cli.py`/`run.py`).
+    # Runtime transport failures are handled per subject by `authored.run_batch` and recorded as
+    # terminal escalations; the batch driver test covers that isolation boundary directly.
 
 
 class LedgerReadPathMatchesWritePathTests(unittest.TestCase):
@@ -244,18 +270,20 @@ class LedgerReadPathMatchesWritePathTests(unittest.TestCase):
             self.assertEqual(exit_code, cli_mod.EXIT_CLEAN)
             self.assertEqual(len(self.server.requests), 1)
 
+            # The live build-theme catalogue has one uncovered subject in this fixture.  The first
+            # invocation therefore exhausts the finite population; resume must make no second call
+            # rather than inventing a new subject merely to prove the ledger is being read.
             self.server.queue(json.dumps(_clean_set_answer()))
             second = _generate_args(endpoint=self.server.url, out_dir=out_dir, limit=1)
             with patch("sys.stdout"):
                 cli_mod.cmd_items(second)
 
-            self.assertEqual(len(self.server.requests), 2, "the second run must still call the "
-                             "model once for whatever NEW subject it plans")
+            self.assertEqual(len(self.server.requests), 1,
+                             "a resumed run must not redo an exhausted subject")
             files = [f for f in Path(out_dir).glob("*.json")
                     if f.name != "set-charm-gen.ledger.json"]
-            self.assertEqual(len(files), 2,
-                             "a resumed run must add a SECOND subject's file, not overwrite the "
-                             "first invocation's already-persisted one")
+            self.assertEqual(len(files), 1,
+                             "a resumed run must preserve the first invocation's file")
 
     def test_ignore_ledger_still_replans_the_full_population(self):
         """The fix must not accidentally make `--ignore-ledger` a no-op — it is the documented

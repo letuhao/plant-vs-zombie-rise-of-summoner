@@ -27,7 +27,8 @@ standalone payload.
 6. **TRANSIENT ≠ QUALITY** on any run that consumes this vocabulary.
 7. **Small-batch proof first** — a movement payload set is reviewable before any generation round runs.
 8. **Tests never call a model** — the transport stub raises. Trivially true here, and asserted anyway.
-9. **The roster is 84 species (53 with family assignments), not 904.**
+9. **The roster is the live species seed folder**: 904 species, 227 consolidated families, and
+   1,183 family memberships at the current measurement.
 
 ## 1. What exists today
 

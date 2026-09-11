@@ -119,3 +119,7 @@ Reuse when visually compatible. Reuse does not override fidelity.
 - GUI principles: [game-gui-principles.md](game-gui-principles.md)
 - FE foundation: [fe-game-foundation.md](fe-game-foundation.md)
 - Design index: [../design/README.md](../design/README.md)
+- **Player menu composition (binding):** [gui-lego-authoring.md](gui-lego-authoring.md) ·
+  [gui-lego-ideal.md](gui-lego-ideal.md) · [../design/gui-lego/README.md](../design/gui-lego/README.md)
+  — prefer recipes of pieces for menus; this HTML-port doc still governs fidelity when a locked
+  plate is the visual SSOT.

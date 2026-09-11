@@ -42,9 +42,13 @@ def derive_unique_row(corpus) -> BudgetRow:
 
 
 def derive_set_row(corpus) -> BudgetRow:
-    """Structural: theme_count x sets_per_theme, both read from the live corpus's own
-    partitioning, not hand-copied — spec-budget.md's own worked example (5 themes x 6 sets = 30)
-    is exactly what this computes when it still holds."""
+    """A current-corpus observation, not an allocation.
+
+    `theme_count x floor(current / theme_count)` is useful diagnostics, but cannot authoritatively
+    say what the next run should create: both inputs change when content is added.  Keep it as a
+    conflicted budget row so CellDeviation makes that limitation visible rather than manufacturing
+    zero-tolerance generation debt.
+    """
     sets = corpus.by_kind("set")
     themes = {e.partition for e in sets}
     theme_count = len(themes)
@@ -55,19 +59,20 @@ def derive_set_row(corpus) -> BudgetRow:
         target=target,
         tolerance=Tolerance(under=0, over=0),
         derivation=Derivation.STRUCTURAL,
-        rationale=f"{theme_count} themes x {sets_per_theme} sets/theme — arithmetic on a "
-                 f"committed allocation, zero tolerance because a deviation means the "
-                 f"allocation was not executed",
+        rationale=f"{theme_count} themes x {sets_per_theme} floor-average sets/theme, derived "
+                 f"from the current corpus; an approved per-theme allocation is required before "
+                 f"this can guide generation",
         provenance=(Provenance(value=target, source="corpus theme partitioning",
-                               status="authoritative", authoritative=True),),
+                               status="current-corpus observation; allocation unadjudicated"),),
     )
 
 
 def derive_base_type_role_rows(corpus, adapter) -> "list[BudgetRow]":
     """Proportional: base types across roles split by the SAME `budgetWeightMilli` that decides
     power, via largest-remainder apportionment (never naive rounding — spec-budget.md §4.3, same
-    reasoning as spec-numerics.md §9.2). Wider tolerance and `derivation=PROPORTIONAL` because
-    this is a reasoned default, not a decision anyone has looked at yet."""
+    reasoning as spec-numerics.md §9.2).  The weights price combat budget; no approved base-type
+    corpus total says they also allocate authoring volume, so the rows stay conflicted and cannot
+    guide generation yet."""
     registries = adapter.registries()
     weights = {}
     # roleId -> budgetWeightMilli, read from the SAME live registry numerics already reads —
@@ -94,7 +99,8 @@ def derive_base_type_role_rows(corpus, adapter) -> "list[BudgetRow]":
                      f"budgetWeightMilli={weights[role_id]}/1000, largest-remainder apportioned",
             provenance=(Provenance(value=target, source="core.v1.json roles.list "
                                   f"(budgetWeightMilli={weights[role_id]})",
-                                  status="proportional default", authoritative=True),),
+                                  status="combat-budget proportional observation; authoring "
+                                         "allocation unadjudicated"),),
         ))
     return rows
 

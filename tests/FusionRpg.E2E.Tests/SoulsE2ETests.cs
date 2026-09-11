@@ -54,4 +54,49 @@ public class SoulsE2ETests : IAsyncLifetime
         var balance = await _http.GetFromJsonAsync<JsonElement>("/api/souls/1");
         Assert.Equal(250, balance.GetProperty("balance").GetInt64());
     }
+
+    [Fact]
+    public async Task Sim_victory_emits_game_driven_result_and_unlocks_ordered_onboarding_reveals()
+    {
+        (await _http.PostAsJsonAsync("/api/sim/hello", new { })).EnsureSuccessStatusCode();
+        (await _http.PostAsJsonAsync("/api/sim/board/start", new
+        {
+            levelName = "onboarding-sim",
+            levelType = "Advanture",
+            boardLevel = 1,
+            matchKey = "onboarding-sim-victory"
+        })).EnsureSuccessStatusCode();
+        // 21 kills provide enough player XP to cross the level-3 teaching gate.
+        for (var i = 0; i < 21; i++)
+        {
+            var ptr = $"ONB{i}";
+            (await _http.PostAsJsonAsync("/api/sim/zombie/spawn", new
+            {
+                ptr,
+                type = 0,
+                typeName = "NormalZombie",
+                source = "initHealth",
+                sourceKind = "demon.progression.v1",
+                sourceId = "general:normalzombie"
+            })).EnsureSuccessStatusCode();
+            (await _http.PostAsJsonAsync("/api/sim/zombie/die", new { ptr })).EnsureSuccessStatusCode();
+        }
+        var resultResponse = await _http.PostAsJsonAsync("/api/sim/match/result", new { result = "victory" });
+        resultResponse.EnsureSuccessStatusCode();
+        var resultBody = await resultResponse.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal("match.result", resultBody.GetProperty("events")[0].GetProperty("kind").GetString());
+        Assert.Equal("victory", resultBody.GetProperty("events")[0].GetProperty("payload").GetProperty("result").GetString());
+        (await _http.PostAsJsonAsync("/api/sim/board/end", new { })).EnsureSuccessStatusCode();
+        _ = await _http.GetFromJsonAsync<JsonElement>("/api/test/snapshot");
+
+        var onboarding = await _http.GetFromJsonAsync<JsonElement>("/api/onboarding/1");
+        var checkpoints = onboarding.GetProperty("checkpoints").EnumerateArray().ToList();
+        Assert.Equal(new[] { "first-win-dave", "level-3-general-species" },
+            checkpoints.Select(c => c.GetProperty("checkpointId").GetString()));
+        Assert.All(checkpoints, checkpoint =>
+        {
+            Assert.Equal("earned", checkpoint.GetProperty("state").GetString());
+            Assert.True(checkpoint.GetProperty("earnedRunId").GetInt64() > 0);
+        });
+    }
 }

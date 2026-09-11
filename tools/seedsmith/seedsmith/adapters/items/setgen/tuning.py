@@ -29,6 +29,7 @@ class CharmClassRule:
     max_pool_rolls: int
     unique_carry: bool
     requires_drawback: bool
+    target_weight: int
 
 
 @dataclass(frozen=True)
@@ -113,6 +114,7 @@ def load(path: "Path | None" = None) -> SetCharmGenTuning:
             min_pool_rolls=int(row["minPoolRolls"]), max_pool_rolls=int(row["maxPoolRolls"]),
             unique_carry=bool(row["uniqueCarry"]),
             requires_drawback=bool(row["requiresDrawback"]),
+            target_weight=int(row["targetWeight"]),
         )
         for row in _require(doc, "charm", "classes")
     )
@@ -204,6 +206,10 @@ def _validate(t: SetCharmGenTuning) -> None:
             raise SetCharmTuningError(
                 f"charm class {rule.id!r} has minPoolRolls {rule.min_pool_rolls} above "
                 f"maxPoolRolls {rule.max_pool_rolls}")
+        if rule.target_weight < 1:
+            raise SetCharmTuningError(
+                f"charm class {rule.id!r} has targetWeight {rule.target_weight}; every class "
+                "must have positive deterministic allocation weight")
     if t.median_cell_occupancy_max < 1:
         raise SetCharmTuningError(
             "medianCellOccupancyMax below 1 is unreachable — a cell that exists holds at least one")

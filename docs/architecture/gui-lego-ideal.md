@@ -1,13 +1,20 @@
 # GUI Lego — the ideal
 
-**Status:** Design-only — pending owner review of piece boundaries / payloads. **No React
-implementation authorized until review gates pass.**  
+**Status:** **Binding design standard** for new and refactored player menus (band-2 bodies,
+ActorSheet tabs, filter/inspect panels). **No React implementation** of Derived until owner
+accepts hardened piece/recipe contracts + assembled surface.  
 **Program id:** `gui-lego`  
 **Map:** [gui-lego-map.md](gui-lego-map.md)  
+**Authoring:** [gui-lego-authoring.md](gui-lego-authoring.md)  
+**Idea-UI (menu audits before `/spec`):** [idea-ui-phase.md](idea-ui-phase.md)  
 **Design index:** [../design/gui-lego/README.md](../design/gui-lego/README.md)  
 **Module specs:** [gui-lego/](gui-lego/)  
+**Queue:** [gui-lego/menu-refactor-queue.md](gui-lego/menu-refactor-queue.md)  
 **Tasks:** [gui-lego-plan.md](../../tasks/gui-lego-plan.md) ·
 [gui-lego-todo.md](../../tasks/gui-lego-todo.md)
+
+**Decision:** `decisions.md` **GUI Lego — menu composition (2026-09-09)**.  
+**DESIGN-GATE:** UI row + **Player menus** row.
 
 **Inputs already locked (do not reopen):**
 

@@ -1,7 +1,7 @@
 """seedsmith.numerics.channel_weight_backfill — atom-family-expansion module `tier-bands-coverage`
 (docs/architecture/atom-family-expansion/spec-tier-bands-coverage.md).
 
-Closes 98 of the 103 `tools/FamilyExpandGen -- --check` refusals shaped "no authored sharePermille
+Closes the historical `tools/FamilyExpandGen -- --check` refusals shaped "no authored sharePermille
 for family X (channel stem X not in tier-bands.v1.json)" by computing, from each family's own
 `powerBand`, the `channelWeightPermille` entry it lacks today — then handing the result to the
 already-built `seedsmith numerics rebalance --set-file ... --publish` CLI (`report/cli.py`) rather
@@ -97,8 +97,8 @@ def load_families(families_dir: "Path | None" = None) -> "list[FamilyEntry]":
 #: The 14 stems `tier-bands.v1.json` actually published, the ONLY set the owner's "ship the
 #: formula, accept the known bias, leave the 14 untouched" decision (spec §6) was made against.
 #: ⛔ **Real, found-mid-execution collision, not a hypothetical**: `TierBands.load("latest")`
-#: resolves to `v3.json` (v2/v3 both pre-existing, from an unrelated earlier effort,
-#: `tasks/seedsmith-todo.md` S5) which ALREADY has all 112 stems present -- uniformly `1000`,
+#: resolved to the pre-backfill `v3.json`/`v4.json` snapshots (from an unrelated earlier effort,
+#: `tasks/seedsmith-todo.md` S5) which carried the original 112 stems uniformly at `1000`,
 #: `_meta` itself saying "not a validated balance decision yet," i.e. the exact placeholder state
 #: this module exists to supersede for 98 of them. Checking "already covered" against `latest`
 #: would treat that placeholder work as a second, unreviewed "protect this" decision and make this
@@ -111,12 +111,19 @@ PROTECTED_V1_STEMS: "frozenset[str]" = frozenset({
 })
 
 
-#: The uniform placeholder every non-`PROTECTED_V1_STEMS` entry in `v2.json`/`v3.json` happens to
-#: carry today (verified live: 98/98 of them, no exceptions) — `tier-bands.v1.json`'s (and v2/v3's)
+#: The uniform placeholder every non-`PROTECTED_V1_STEMS` entry in the pre-v5 snapshots happened to
+#: carry (verified live for the original 98 entries, no exceptions) — `tier-bands.v1.json`'s (and
+#: v2-v4's)
 #: own `_meta.note` says these are "not a validated balance decision," and this exact value is the
 #: tell. Used only as a defense-in-depth signal (see `missing_channel_weights` below), never as a
 #: magic number a real computation depends on.
 _UNREVIEWED_PLACEHOLDER_WEIGHT = 1000
+
+# v5 is the first published tier-band snapshot produced by this backfill against the complete
+# 125-family corpus. From that version onward, a 1000‰ value is an authored medium-band weight,
+# not the old uniform placeholder. Older immutable snapshots retain the historical detection
+# behaviour so the migration remains auditable.
+_BACKFILL_COMPLETE_VERSION = 5
 
 
 def missing_channel_weights(
@@ -139,8 +146,9 @@ def missing_channel_weights(
         if stem in PROTECTED_V1_STEMS:
             continue
         current = tuning.channel_weight_permille.get(stem)
-        if current is not None and current != _UNREVIEWED_PLACEHOLDER_WEIGHT:
-            continue
+        if current is not None:
+            if tuning.version >= _BACKFILL_COMPLETE_VERSION or current != _UNREVIEWED_PLACEHOLDER_WEIGHT:
+                continue
         missing[stem] = WEIGHT_BY_BAND[family.power_band]
     return missing
 

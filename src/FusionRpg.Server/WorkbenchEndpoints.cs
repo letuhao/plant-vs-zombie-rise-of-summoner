@@ -210,7 +210,9 @@ public static class BaseTypeSocketMaxCorpus
         var byId = new Dictionary<string, int>(StringComparer.Ordinal);
         if (!Directory.Exists(baseTypesDir)) return _ => null;
 
-        foreach (var file in Directory.EnumerateFiles(baseTypesDir, "*.json").OrderBy(f => f, StringComparer.Ordinal))
+        foreach (var file in Directory
+                     .EnumerateFiles(baseTypesDir, "*.json", SearchOption.AllDirectories)
+                     .OrderBy(f => f, StringComparer.Ordinal))
         {
             JsonDocument doc;
             try { doc = JsonDocument.Parse(File.ReadAllText(file)); }

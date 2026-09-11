@@ -98,7 +98,9 @@ class LiveFlavourMissingTests(unittest.TestCase):
         self.assertEqual(findings["consumable"].evidence["missingCount"], 63)
         self.assertEqual(findings["consumable"].evidence["totalCount"], 63)
         self.assertEqual(findings["charm"].evidence["missingCount"], 30)
-        self.assertEqual(findings["charm"].evidence["totalCount"], 96)
+        # Re-measured 2026-09-11: the owner's setgen batches grew charm 96 -> 954 rows (the
+        # 30-missing count held); the 100% historical missing rate is unchanged, only the count.
+        self.assertEqual(findings["charm"].evidence["totalCount"], 954)
 
 
 @unittest.skipUnless(LIVE_ITEMS_ROOT.is_dir(), "live item corpus not present in this checkout")

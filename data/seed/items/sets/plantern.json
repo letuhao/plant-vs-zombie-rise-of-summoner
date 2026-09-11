@@ -23,25 +23,29 @@
   "entries": [
     {
       "id": "set.plantern-001",
-      "nameKey": "set.luminous-volley",
-      "name": "Luminous Volley",
+      "nameKey": "set.radiant-burst",
+      "name": "Radiant Burst",
       "themeKey": "demon.plantern",
       "members": [
         {
           "role": "armament-primary",
-          "frame": "humanoid"
+          "frame": "humanoid",
+          "baseType": "item.humanoid-main-hand-a-025"
         },
         {
           "role": "jewel-major",
-          "frame": "humanoid"
+          "frame": "humanoid",
+          "baseType": "item.humanoid-neck-b-024"
         },
         {
           "role": "manipulator",
-          "frame": "humanoid"
+          "frame": "humanoid",
+          "baseType": "item.humanoid-hands-b-018"
         },
         {
           "role": "jewel-minor-a",
-          "frame": "humanoid"
+          "frame": "humanoid",
+          "baseType": "item.humanoid-ring-1-a-002"
         }
       ],
       "thresholds": [
@@ -72,7 +76,7 @@
           ]
         }
       ],
-      "flavor": "A concentrated beam of pure radiance that strikes with unerring precision.",
+      "flavor": "A sudden flash of brilliance that pierces the dark.",
       "tags": [],
       "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType binding is NOT resolved here — module 13 builds no base-type chooser, and inventing one would be deterministic code writing identity."
     }

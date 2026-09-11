@@ -1,19 +1,84 @@
 {
   "done": {
+    "g.armour:stat.modify:op": {
+      "groupId": "g.armour",
+      "kindId": "stat.modify",
+      "mintedId": "atom.arm-op"
+    },
+    "g.armour:stat.modify:plate": {
+      "groupId": "g.armour",
+      "kindId": "stat.modify",
+      "mintedId": "atom.arm-plate"
+    },
     "g.elem-power:stat.derived:surfeit": {
       "groupId": "g.elem-power",
       "kindId": "stat.derived",
       "mintedId": "atom.elpw-surfeit"
+    },
+    "g.elem-power:stat.derived:surge": {
+      "groupId": "g.elem-power",
+      "kindId": "stat.derived",
+      "mintedId": "atom.elpw-surge"
+    },
+    "g.evade:stat.derived:evd": {
+      "groupId": "g.evade",
+      "kindId": "stat.derived",
+      "mintedId": "atom.evd-evd"
+    },
+    "g.evade:stat.derived:shift": {
+      "groupId": "g.evade",
+      "kindId": "stat.derived",
+      "mintedId": "atom.evd-shift"
+    },
+    "g.precision:stat.derived:focus": {
+      "groupId": "g.precision",
+      "kindId": "stat.derived",
+      "mintedId": "atom.prec-focus"
+    },
+    "g.precision:stat.derived:sync": {
+      "groupId": "g.precision",
+      "kindId": "stat.derived",
+      "mintedId": "atom.prec-sync"
     },
     "g.shield-stat:stat.derived:absolute": {
       "groupId": "g.shield-stat",
       "kindId": "stat.derived",
       "mintedId": "atom.shld-absolute"
     },
+    "g.shield-stat:stat.derived:toughness": {
+      "groupId": "g.shield-stat",
+      "kindId": "stat.derived",
+      "mintedId": "atom.shld-toughness"
+    },
+    "g.shield-stat:stat.derived:toughness-mod": {
+      "groupId": "g.shield-stat",
+      "kindId": "stat.derived",
+      "mintedId": "atom.shld-toughness-mod"
+    },
+    "g.tempo:stat.modify:pulse": {
+      "groupId": "g.tempo",
+      "kindId": "stat.modify",
+      "mintedId": "atom.tempo-pulse"
+    },
     "g.tempo:stat.modify:wildgrowth": {
       "groupId": "g.tempo",
       "kindId": "stat.modify",
       "mintedId": "atom.tempo-wildgrowth"
+    },
+    "g.ward:stat.derived:flux": {
+      "groupId": "g.ward",
+      "kindId": "stat.derived",
+      "mintedId": "atom.ward-flux"
+    },
+    "g.ward:stat.derived:link": {
+      "groupId": "g.ward",
+      "kindId": "stat.derived",
+      "mintedId": "atom.ward-link"
+    },
+    "g.ward:stat.derived:ward": {
+      "groupId": "g.ward",
+      "kindId": "stat.derived",
+      "mintedId": "atom.ward-ward"
     }
   },
   "schemaVersion": 1

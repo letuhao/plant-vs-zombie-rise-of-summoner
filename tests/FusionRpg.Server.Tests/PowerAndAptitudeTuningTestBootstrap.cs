@@ -43,6 +43,22 @@ internal static class PowerAndAptitudeTuningTestBootstrap
         // Bootstrap.DefaultBattle` (tunables-ssot.md §7.2's "construct one inline") — not the shipped
         // file, minimal enough to cover the two rows this assembly's tests actually resolve.
         BattleTuningHub.Configure(DefaultBattle);
+        // World projection and district-assault endpoint tests reach these process-global board
+        // policies too. Configure them once from the current shipped tuning files so test order
+        // cannot turn a missing dependency into a misleading HTTP 500 response.
+        var tuningDir = Path.Combine(FindRepoRoot(), "data", "tuning");
+        FusionRpg.Core.Battle.Board.BattleBoardTuningPolicy.Configure(
+            FusionRpg.Core.Battle.Board.BattleBoardTuningLoader.Parse(
+                File.ReadAllText(Path.Combine(tuningDir, "battle-board.v1.json"))));
+        FusionRpg.Core.Battle.Board.SiegeTuningPolicy.Configure(
+            FusionRpg.Core.Battle.Board.SiegeTuningLoader.Parse(
+                File.ReadAllText(Path.Combine(tuningDir, "siege.v1.json"))));
+        FusionRpg.Core.Battle.Timeline.ReactionLanePolicy.Configure(
+            FusionRpg.Core.Battle.Timeline.ReactionLaneTuningLoader.Parse(
+                File.ReadAllText(Path.Combine(tuningDir, "reaction-lane.v3.json"))));
+        FusionRpg.Core.World.StructureCatalog.Configure(
+            FusionRpg.Core.World.StructureSeed.StructureCorpus.Load(
+                Path.Combine(FindRepoRoot(), "data", "seed", "structures")));
         // Same reason: BattleRunState's constructor unconditionally reads ActionTimingPolicy.Tuning.
         // Values transcribed from the real, shipped data/tuning/action-timing.v1.json, matching Core
         // .Tests' own ContractTuningTestBootstrap.DefaultActionTiming exactly.
@@ -138,6 +154,7 @@ internal static class PowerAndAptitudeTuningTestBootstrap
         {
             ["classic-round"] = new(W: 1, WReact: 0, PassQuantum: 1, MaxPoints: null),
             ["delve"] = new(W: 4, WReact: 0, PassQuantum: 1, MaxPoints: 2),
+            ["siege"] = new(W: 2, WReact: 0, PassQuantum: 1, MaxPoints: null),
         },
         HybridSecondaryWeightMilli: 300,
         LoopGuardRoundMultiple: 4000,
@@ -202,4 +219,15 @@ internal static class PowerAndAptitudeTuningTestBootstrap
           "edges": [ { "channel": "combat.power.omni", "source": "Might", "kMilli": 2200 } ]
         }
         """);
+
+    static string FindRepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            if (Directory.Exists(Path.Combine(dir.FullName, "src", "FusionRpg.Injector"))) return dir.FullName;
+            dir = dir.Parent;
+        }
+        throw new DirectoryNotFoundException("could not find repo root above " + AppContext.BaseDirectory);
+    }
 }

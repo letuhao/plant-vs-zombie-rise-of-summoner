@@ -186,7 +186,12 @@ public class SiegeEconomyTests
         var dir = AppContext.BaseDirectory;
         for (var i = 0; i < 10 && dir != null; i++)
         {
-            var candidate = System.IO.Directory.GetFiles(dir, fileName, System.IO.SearchOption.AllDirectories);
+            var candidate = System.IO.Directory.GetFiles(dir, fileName, new System.IO.EnumerationOptions
+            {
+                RecurseSubdirectories = true,
+                IgnoreInaccessible = true,
+                AttributesToSkip = System.IO.FileAttributes.Hidden | System.IO.FileAttributes.System,
+            });
             if (candidate.Length > 0) return candidate[0];
             dir = System.IO.Directory.GetParent(dir)?.FullName;
         }

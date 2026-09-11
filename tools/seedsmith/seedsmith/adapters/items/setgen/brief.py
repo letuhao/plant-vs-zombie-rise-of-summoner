@@ -15,7 +15,7 @@ Two things this brief deliberately does NOT contain, each because putting it the
 """
 from __future__ import annotations
 
-from .distribute import threshold_ladder
+from .distribute import legal_set_stat_pool, threshold_ladder
 from .roles import HYBRID_CORE_ROLES
 from .themes import Theme
 from .tuning import SetCharmGenTuning
@@ -96,13 +96,14 @@ def build_set_brief(theme: Theme, tuning: SetCharmGenTuning, vocabulary: Vocabul
     ladder = threshold_ladder(tuning, members)
     higher = ladder[1:]
     capability_pool = vocabulary.capability
-    stat_pool = vocabulary.stat
+    stat_pool = legal_set_stat_pool(vocabulary, tuning)
     identity = (f"the demon species '{theme.display_name}'" if theme.population == "species"
                 else f"the build '{theme.display_name}' ({theme.aptitude} / {theme.archetype})")
     anti = (f"\nAvoid entirely: {', '.join(theme.anti_motifs)}." if theme.anti_motifs else "")
+    lore = f"\nAdditional authored lore context: {theme.lore}" if theme.lore else ""
     return f"""Author ONE equipment set for {identity}.
 
-Motifs to express: {', '.join(theme.motifs)}.{anti}
+Motifs to express: {', '.join(theme.motifs)}.{anti}{lore}
 How this theme expresses itself in an item: {theme.expression_item}
 
 Choose, and nothing else:
@@ -131,7 +132,8 @@ Stat families ({len(stat_pool)} picks):
 If this theme cannot carry a set you would be happy to ship, set `blocked` and say why."""
 
 
-def build_charm_brief(theme: Theme, tuning: SetCharmGenTuning, vocabulary: Vocabulary) -> str:
+def build_charm_brief(theme: Theme, tuning: SetCharmGenTuning, vocabulary: Vocabulary,
+                      *, axis_hint: str | None = None, class_hint: str | None = None) -> str:
     """One charm, one theme. Charms are the always-on, side-wide layer.
 
     ⭐ **The pool is `charmgen.rules.charm_pool`, and that is the whole of defects 1 and 2.** This
@@ -142,11 +144,16 @@ def build_charm_brief(theme: Theme, tuning: SetCharmGenTuning, vocabulary: Vocab
     the distributor refuses against, drawn from both buckets, and printed whole.
     """
     anti = (f"\nAvoid entirely: {', '.join(theme.anti_motifs)}." if theme.anti_motifs else "")
+    lore = f"\nAdditional authored lore context: {theme.lore}" if theme.lore else ""
     classes = ", ".join(c.id for c in tuning.charm_classes)
     pool = charm_pool(tuning, vocabulary.all_picks)
+    axis_instruction = (f"\nDeterministic coverage assignment: use axis `{axis_hint}` for this subject."
+                        if axis_hint else "")
+    class_instruction = (f"\nDeterministic class assignment: use charmClass `{class_hint}` for this subject."
+                         if class_hint else "")
     return f"""Author ONE charm for the demon species '{theme.display_name}'.
 
-Motifs to express: {', '.join(theme.motifs)}.{anti}
+Motifs to express: {', '.join(theme.motifs)}.{anti}{lore}
 How this theme expresses itself in an item: {theme.expression_item}
 
 A charm is carried by the commander, not worn by one actor: it is always on, it applies to every
@@ -154,19 +161,28 @@ deployed actor, and it buys that breadth with depth. So it carries FLAT effects 
 percentage, never a multiplier.
 
 Choose, and nothing else:
-1. `charmClass` — one of: {classes}. A signet is named, carries a drawback, and rolls nothing.
-2. `axis` — one of offense, survivability, control, utility, economy. Pick the one this species
-   actually leans into; the population is judged on spread across all five, not on any one of them.
+1. `charmClass` — one of: {classes}. Use the assigned class when one is provided. A signet is named,
+   carries a drawback, and rolls nothing.{class_instruction}
+2. `axis` — one of offense, survivability, control, utility, economy. Pick the assigned axis when
+   one is provided; otherwise pick the one this species actually leans into.{axis_instruction}
 3. `frameHint`, `families` (one or two always-on families from the list below), `name`, `flavor`.
    A signet also names its `drawback` family.
+   `name` must be a new, specific surface name for this species; do not reuse a generic name
+   such as a familiar weapon/material phrase or any name you have seen in another item.
 
 Never choose a number, a cost, a strength or a tier. Those are resolved after you answer.
 (There is no `nameKey` field to fill in — it is derived automatically from `name`.)
 
 The list below is the WHOLE legal pool — every id in it is accepted, and nothing outside it is.
 Copy an id exactly as printed, including the element suffix where one is shown.
+Do not prepend `atom.` to an id that already starts with `atom.` (for example, write
+`atom.death-salvo`, never `atom.atom.death-salvo`).
 
 Always-on families ({len(pool)} picks):
 {_charm_pick_lines(pool)}
 
-If this theme cannot carry a charm you would be happy to ship, set `blocked` and say why."""
+Decision rule for difficult motifs: do not block merely because the motif suggests a projectile,
+trigger, multiplier, or narrative mechanic. Choose the closest legal always-on FLAT family and
+let the deterministic planner enforce its magnitude and tier rules. Set `blocked` only when no
+legal family/class/axis combination exists in the printed pool, or when the theme's anti-motifs
+forbid every such combination. Explain that concrete incompatibility in `blocked`."""

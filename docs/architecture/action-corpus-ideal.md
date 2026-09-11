@@ -1398,12 +1398,19 @@ Owner: *"now audit, debate, strenthen whole idea."* Four parallel audits plus a 
 held on architecture and failed on arithmetic and on citation** — which is the useful outcome, because
 the expensive errors are the ones that read as verified.
 
+**⛔ SOURCE-BOUNDARY CORRECTION 2026-09-10.** The historical 84-species finding in §39 is superseded.
+Seedsmith action generation reads `data/seed/demons/species/**/*.json` at run time, not SQLite and not
+the generated C# projection. The current live seed folder measures 904 species, 227 consolidated
+families, and 1,183 family memberships. The executable plan consequently contains 5,680 briefs:
+25 general, 1,135 family, and 4,520 species. Historical 84/53/19 measurements remain below as an
+incident record only and must not be used as current pipeline inputs.
+
 **Everything below is corrected in place above.** This part records what was wrong and why, so the same
 class of error is visible rather than quietly overwritten.
 
-## 39. ⛔ The finding that gates the whole pipeline — 904 species do not exist
+## 39. ⛔ Historical finding — the 84-row projection was not the live roster
 
-Every corpus number in this document is built on **904 species**. Measured 2026-09-03:
+The original finding was measured against a generated C# projection on 2026-09-03:
 
 | Source | Count |
 |---|---:|
@@ -1412,7 +1419,9 @@ Every corpus number in this document is built on **904 species**. Measured 2026-
 | `_generated/family-assignments.json` | **53** |
 | `seedsmith-map.md:149` | *"84 eligible rows today, **rising toward ~904**"* |
 
-**904 is the almanac row count, not the roster.** The shipped roster is 84.
+That conclusion is now superseded. The live source is the demon seed folder, which currently contains
+904 species records. The generated C# file remains an explicit legacy compatibility input for fixtures,
+not a source of truth for action generation.
 
 **Why this is not merely a number to divide by 10.** §16's brief block is explicit that the anchor is
 *"group B — read from the demon seed, **never invented**"*: `family`, `element`, `rarity`, `themeKey`,
@@ -1422,8 +1431,8 @@ Every corpus number in this document is built on **904 species**. Measured 2026-
   anti-motifs. Available for **84**.
 - **`P-family`** asks *"what expresses THIS family"* — needs a family assignment. Available for **53**.
 
-**For the other ~820 species there is nothing to read.** The pipeline cannot invent an anchor without
-breaking the one rule §16 states about it.
+The old projection omitted roughly 820 live seed records. The corrected loader reads those records
+directly and derives family membership from each record's `family` field, without inventing anchors.
 
 ### 39.1 §9's Q4 closed a narrower question than the one that blocks
 
@@ -1441,9 +1450,9 @@ its own pipeline, prompt template and review surface is a genuine question that 
 ### 39.3 What this changes, stated without drama
 
 **Not the architecture.** Three pipelines, the rung windows, the model-free stage ordering and the seed →
-concrete law are all unaffected. **The corpus sizing and the run cost are.** At 84 species with 3
-signature actions each the signature tier is **252**, not 2,712 — and the whole corpus is roughly
-**850**, which lands *below* the 1,500–3,500 research band rather than inside it.
+concrete law are all unaffected. **The source boundary and corpus sizing are corrected.** The current
+live plan is 4,520 species briefs plus 1,135 family briefs and 25 general briefs; its run cost must be
+measured from that generated plan rather than copied from the historical projection.
 
 **So §36.1's derivation is correct in method and was applied to the wrong roster.** It should be re-run
 when the roster is known, and the per-species count is a tunable precisely so that re-run is a config

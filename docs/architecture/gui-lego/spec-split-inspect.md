@@ -1,45 +1,63 @@
-# Piece: split-inspect
+# Piece: `split-inspect`
 
-**Program:** gui-lego · **Kind:** layout · **ERM rung:** —  
+**Program:** `gui-lego` · **Kind:** layout · **ERM rung:** —  
 **Draft:** [../../design/gui-lego/pieces/split-inspect.html](../../design/gui-lego/pieces/split-inspect.html)  
-**Composition:** [spec-composition.md](spec-composition.md)
+**Shared types:** [payload-types.md](payload-types.md) · **Composition:** [spec-composition.md](spec-composition.md)
 
 ## Role
-Dock | inspect layout
+
+Dock | inspect layout. Fragility: direct children only.
 
 ## Structure
-- Landmark / root class: .inspect-split (see draft HTML)
-- Slots: dock,inspect
-- CSS > ancestors: only when parent is surface-shell / split-inspect — **no illicit wrappers**
 
-## Payload (sketch)
-`json
-{
-  "piece": "split-inspect",
-  "instanceId": "demo:split-inspect",
-  "phase": "ready"
-}
-`
-phase: 
-eady|loading|empty|error|pending. Magnitudes use alueRaw + alueText (VM formats).
+| | |
+|---|---|
+| Landmark / root | `.inspect-split` |
+| Slots | `dock` · `inspect` |
+| CSS `>` parents | `.console > .inspect-split`; `.inspect-split > .dock`; `.inspect-split > .inspect` |
+
+**Ban:** illicit wrappers between a `>` parent and its declared child.
+
+## Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `piece` | `"split-inspect"` | yes | Registry id |
+| `instanceId` | `string` | yes | Stable mount / testid |
+| `phase` | `Phase` | yes | See payload-types |
+| `phase` | `Phase` | yes | Usually ready when surface ready |
+
+
 
 ## Theme slots
-- Pack kind(s): neutral
-- Reads: --piece-accent, --piece-rail-edge, paint.accent / paint.accentMuted when visual
+
+- Pack kind(s): `neutral`
+- Reads: none
 - Vfx keys: none
 
 ## Data flow
-- Bind: vm
-- Bus out: _none (parent or host)_
+
+- **Bind:** `vm`
+- **Bus out:** _none_
 
 ## Focus (GG-19)
-no
+
+no (children hold focus)
 
 ## Motion (GG-31/32)
+
 none
 
 ## Empty / error
-If bind missing or phase not ready, parent mounts the matching phase-* piece — this leaf does not invent data.
 
-## Samples
-HTML draft shows structure + sample JSON; themeable pieces include fire vs ice (or status-dot) swap.
+Dock/inspect may each show phase-empty
+
+## Sample payloads
+
+```json
+{
+  "piece": "split-inspect",
+  "instanceId": "split:derived",
+  "phase": "ready"
+}
+```

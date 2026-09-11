@@ -85,10 +85,30 @@ def _next_draw_index(done: "dict[str, dict]", prefix: str) -> int:
     return (max(indices) + 1) if indices else 0
 
 
+def _draw_indices(done: "dict[str, dict]", prefix: str, count: int,
+                  existing: "dict[str, dict]") -> "list[int]":
+    """Repair invalid ledger slots before allocating new open-ended draws."""
+    indexed = {
+        idx: (sid, row) for sid, row in done.items()
+        if (idx := _seq_from_subject(sid, prefix)) is not None
+    }
+    invalid = [idx for idx, (sid, row) in indexed.items() if not is_valid(sid, row, existing=existing)]
+    next_index = max(indexed, default=-1) + 1
+    selected = sorted(invalid)
+    while len(selected) < count:
+        selected.append(next_index)
+        next_index += 1
+    return selected[:count]
+
+
 def is_valid(_subject_id: str, entry: dict, *, existing: "dict[str, dict]") -> bool:
     """The reconcile half `RunLedger.plan` exists for: a ledger row counts as done only if its
     recorded table id still exists in the CURRENT on-disk partition file AND still carries the same
     `name` -- a hand edit that renamed or deleted the table resurfaces the draw as needing work."""
+    # Terminal model outcomes are deliberate checkpoints without corpus content. They must not be
+    # requeued forever by the open-ended draw planner; an explicit retry/overwrite can revisit them.
+    if entry.get("outcome") in {"blocked", "escalated"}:
+        return True
     table_id = entry.get("entryId")
     if not table_id or table_id not in existing:
         return False
@@ -105,12 +125,12 @@ def plan_run(*, slot: int, count: int, ledger: RunLedger,
     existing = load_existing(slot, drop_tables_dir=drop_tables_dir)
     done = ledger.read_done()
     prefix = _draw_prefix(slot)
-    start_draw = _next_draw_index(done, prefix)
+    draw_indices = _draw_indices(done, prefix, count, existing)
     start_entry_seq = emit_mod.next_seq(tuple(existing), slot)
 
     subjects = []
     for i in range(count):
-        draw_index = start_draw + i
+        draw_index = draw_indices[i]
         # seq_index for the row-slot rotation is the TABLE's own minted sequence position, so two
         # different partition slots (which start their own entry-seq counters independently) still
         # each rotate deterministically over their own history rather than colliding on index 0.
@@ -147,22 +167,45 @@ def resolve_answer(answer: dict, *, plan: "brief_mod.RowSlotPlan", table_id: str
 
 
 def run_draws(plan: RunPlan, *, ledger: RunLedger,
-             call: "Callable[[str, dict], dict]") -> "tuple[dict[str, dict], dict[str, dict]]":
+             call: "Callable[[str, dict], dict]",
+             persist: "Callable[[dict], None] | None" = None
+             ) -> "tuple[dict[str, dict], dict[str, dict]]":
     """Executes every subject in `plan`, marking each resolved draw done in `ledger` as it
     completes -- not all-or-nothing, mirroring `basetypegen.run.run_draws`."""
     fresh: "dict[str, dict]" = {}
     blocked: "dict[str, dict]" = {}
 
     for subject in plan.subjects:
-        answer = call(subject.brief, subject.schema)
-        if answer.get("blocked"):
-            blocked[subject.subject_id] = {"reason": answer["blocked"]}
-            continue
         table_id = emit_mod.mint_table_id(plan.slot, subject.seq)
-        entry = resolve_answer(answer, plan=subject.plan, table_id=table_id)
+        try:
+            answer = call(subject.brief, subject.schema)
+        except ValueError as exc:
+            reason = f"invalid model response: {exc}"
+            ledger.mark_terminal(subject.subject_id, outcome="escalated", entry_id=table_id,
+                                 attempts=1, defects=[reason])
+            blocked[subject.subject_id] = {"reason": reason}
+            continue
+        if answer.get("blocked"):
+            reason = str(answer["blocked"])
+            ledger.mark_terminal(subject.subject_id, outcome="blocked", entry_id=table_id,
+                                 attempts=1, blocked_reason=reason)
+            blocked[subject.subject_id] = {"reason": reason}
+            continue
+        try:
+            entry = resolve_answer(answer, plan=subject.plan, table_id=table_id)
+        except ValueError as exc:
+            reason = f"invalid model response: {exc}"
+            ledger.mark_terminal(subject.subject_id, outcome="escalated", entry_id=table_id,
+                                 attempts=1, defects=[reason])
+            blocked[subject.subject_id] = {"reason": reason}
+            continue
         if entry is None:
             blocked[subject.subject_id] = {"reason": "no reason given"}
             continue
+        if persist is not None:
+            # Corpus first, ledger second. A kill between these operations leaves the draw
+            # unledgered and therefore safely retryable instead of creating a ledger/file split.
+            persist(entry)
         fresh[entry["id"]] = entry
         ledger.mark_done(subject.subject_id, {"entryId": entry["id"], "name": entry["name"]})
 
@@ -247,25 +290,28 @@ def main(argv=None) -> int:
         raise SystemExit(
             "seedsmith: refused -- no --write. Use --dry-run to inspect the plan first, "
             "then re-run with --write --endpoint <url> to actually call a model and persist.")
-    if not args.endpoint:
-        raise SystemExit(
-            "seedsmith: --write refused -- no --endpoint. A real run needs a live model "
-            "(--endpoint <url> [--model <name>]); --dry-run needs neither.")
 
     # ⛔ Real gap, closed 2026-09-08 -- see basetypegen.run.main's own identical fix for the full
     # account: this branch used to be an unconditional refusal even though `plan_run`/`run_draws`/
     # `write_corpus` were all real and tested.
     import dataclasses
 
-    from ....pipeline.llm_caller import live_answer_caller, load_config
+    from ....pipeline.llm_caller import live_answer_caller, resolve_live_transport
 
-    base_config = load_config()
-    config = dataclasses.replace(base_config, endpoint=args.endpoint,
-                                 model=args.model or base_config.model)
+    config = resolve_live_transport(args.endpoint, args.model)
+    if not config.endpoint:
+        raise SystemExit(
+            "seedsmith: --write refused — no live endpoint. Pass --endpoint <url> or set "
+            "SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env; --dry-run needs neither.")
     plan = plan_run(slot=args.slot, count=args.count, ledger=ledger, theme_hint=args.theme)
-    fresh, blocked = run_draws(plan, ledger=ledger, call=live_answer_caller(config))
-    if fresh:
-        write_corpus(args.slot, fresh, existing=plan.existing, model=config.model)
+    persisted = dict(plan.existing)
+
+    def persist(entry: dict) -> None:
+        write_corpus(args.slot, {entry["id"]: entry}, existing=persisted, model=config.model)
+        persisted[entry["id"]] = entry
+
+    fresh, blocked = run_draws(plan, ledger=ledger, call=live_answer_caller(config),
+                               persist=persist)
     print(json.dumps({"planned": len(plan.subjects), "fresh": len(fresh),
                       "blocked": len(blocked), "blockedReasons": blocked},
                      ensure_ascii=False, indent=2))

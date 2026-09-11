@@ -446,6 +446,26 @@
         "offensive"
       ],
       "notes": "NEW family, stem `elpw` (naming.v1.json idNamespaces.affixFamilies), word `surfeit`. The `Increased` sibling `combat.power.overflow.{variant}` did not yet have -- `elpw-overflow` ships `Flat` only, unlike `combat.power.pierce.{variant}` (`elpw-pierce`/`elpw-focus`, both ops already shipped). NOT the same slot as `atom.elpw-amplify`: that family (the `Increased` sibling of `combat.power.{variant}` itself, this group's PRIMARY channel) is this file's own named, deliberate omission -- its `atom.elemental-power` note states outright that nothing references it and authoring an unreferenced rollable family is a content decision, not a gap closure. This entry does not reopen that decision; it targets `combat.power.overflow.{variant}`, the group's SECONDARY channel, on the same Flat/Increased split logic `elpw-pierce`/`elpw-focus` already use on a different channel. `roles` copied verbatim from `elpw-overflow` -- identical channel legality question. `powerBand: low`, matching the Flat sibling's own `low` rather than stepping down further: `low` is already this group's lowest ordinary rung (only the structural `Flag` family `elpw-attune` sits at `trivial`, for a boolean gate, not a graded stat), so `atom.shld-cycle`'s own precedent applies here (both op-siblings sharing a band once the Flat sibling is already the smallest pull in its own pair, to avoid falling through the tier-1 legibility floor). `nameWords` deliberately uses a flood/excess axis (Welling/Cresting/Overspilling) rather than reusing `elpw-overflow`'s own harvest/hunger axis (Overripe/Brimming/Gorged) -- the brief's own adjective-clustering rule this file's other entries already follow (pierce/focus on shape/sharpening, override/attune on dominance/rooting, overflow on harvest/hunger): a sixth family sharing a channel with an existing one needs its own idea, not a synonym of the sibling's. HAND-AUTHORED 2026-09-07 (affixfamgen/hand-authored-1), stand-in for a live LLM call -- no reachable endpoint this session. RUNTIME: this file's own `atom.elemental-power` note (2026-09-06) reports the stat.derived D6 quarantine ended (AtomKindRegistry.cs:572, Full/Full/Partial) -- this entry inherits whatever that most-recent, code-checked note establishes rather than independently re-verifying the claim against source in this pass."
+    },
+    {
+      "id": "atom.elpw-surge",
+      "nameKey": "affix.elpw-surge",
+      "name": "elpw-surge",
+      "kindId": "stat.derived",
+      "params": {
+        "channel": "combat.power.overflow.{variant}",
+        "op": "Replace"
+      },
+      "roles": [
+        "armament-primary",
+        "infusion"
+      ],
+      "powerBand": "high",
+      "displayTemplate": "Power Surge",
+      "tags": [
+        "arcane",
+        "offensive"
+      ]
     }
   ]
 }

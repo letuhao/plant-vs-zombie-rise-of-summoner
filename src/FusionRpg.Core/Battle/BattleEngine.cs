@@ -413,6 +413,8 @@ public static partial class BattleEngine
                     // exactly like `trace`/`actionCatalog`/`containerResolver`/`intentSource` above —
                     // null for every existing caller (no `_board` supplied), which is byte-identical to
                     // this line's own prior literal `board: null`.
+                    // status-rail C2: refresh snap so contagion sees live positions / Active filter.
+                    state.RefreshCombatBoardSnapshot();
                     state.Status.Tick(now, state.PulseSink, board: state.CombatBoardSnapshot, spreadRng: state.StatusRng);
                     state.Host.Flush();
                     state.PostFlush(rounds);
@@ -669,7 +671,7 @@ public static partial class BattleEngine
                         continue;
                     }
 
-                    state.Status.WithdrawEntity(a.Setup.Key);
+                    state.WithdrawStatusHost(a.Setup.Key);
                     state.Shields.RemoveAll(Contracts.EffectOwnerKeys.Entity(a.Setup.Key));
                 }
 

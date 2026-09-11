@@ -1297,6 +1297,76 @@ public static class DebugActions
         }
     }
 
+    /// <summary>
+    /// Gated LIVE probe for the host game's plant-selection completion path. The command is drained
+    /// from <see cref="Host.InjectorLoop"/>, so both candidate handlers run on Unity's main thread.
+    /// Do not hide the panel directly: InitBoard may still be awaiting its selection/click state.
+    /// </summary>
+    public static void SkipSetup(JsonElement p)
+    {
+        var envOn = string.Equals(
+            Environment.GetEnvironmentVariable("FUSIONRPG_SETUP_SKIP"), "1", StringComparison.Ordinal);
+        var toggleOn = CheatState.On("DEBUG-SETUP-SKIP");
+        var method = (Str(p, "method") ?? "quick").Trim().ToLowerInvariant();
+        var dump = new Dictionary<string, object>
+        {
+            ["method"] = method,
+            ["env"] = envOn,
+            ["toggle"] = toggleOn
+        };
+
+        if (!envOn && !toggleOn)
+        {
+            dump["ok"] = false;
+            dump["error"] = "disabled — set FUSIONRPG_SETUP_SKIP=1 or enable DEBUG-SETUP-SKIP";
+            DebugRuntime.Emit("debug.setup.skip", dump);
+            CheatState.Error("debug.skip-setup: disabled");
+            return;
+        }
+
+        if (method is not ("quick" or "button"))
+        {
+            dump["ok"] = false;
+            dump["error"] = "unknown method — expected quick or button";
+            DebugRuntime.Emit("debug.setup.skip", dump);
+            CheatState.Error("debug.skip-setup: unknown method " + method);
+            return;
+        }
+
+        try
+        {
+            var init = InitBoard.Instance;
+            dump["ready"] = init != null && init.ready;
+            dump["board"] = init != null && init.board != null;
+            dump["ui"] = init != null && init.uI != null;
+            if (init == null)
+                throw new InvalidOperationException("InitBoard.Instance is null");
+
+            if (method == "quick")
+            {
+                init.QuickInGame();
+            }
+            else
+            {
+                var ui = InGameUI.Instance;
+                if (ui == null)
+                    throw new InvalidOperationException("InGameUI.Instance is null");
+                ui.OnStartBattleButtonClick();
+            }
+
+            dump["ok"] = true;
+            DebugRuntime.Emit("debug.setup.skip", dump);
+            CheatState.Note("debug.skip-setup " + method);
+        }
+        catch (Exception ex)
+        {
+            dump["ok"] = false;
+            dump["error"] = ex.Message;
+            DebugRuntime.Emit("debug.setup.skip", dump);
+            CheatState.Error("debug.skip-setup: " + ex.Message);
+        }
+    }
+
     static LevelType ParseLevelType(JsonElement p)
     {
         if (p.TryGetProperty("levelType", out var el))

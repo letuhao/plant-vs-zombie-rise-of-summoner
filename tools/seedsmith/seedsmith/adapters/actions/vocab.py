@@ -109,6 +109,11 @@ def load_pairing_keys() -> "frozenset[str]":
 #: model, not a schema change (the schema's own `enum` still lists ids only, unchanged).
 _GLOSSARY_PLACEHOLDER_SUBS: "tuple[tuple[str, str], ...]" = (
     ("{value}", "X"), ("{element}", "an element"), ("{variant}", "a kind"),
+    # Several later family partitions use the same display-template convention with more
+    # specific tokens.  A glossary is prompt grounding, not a formatter: expose a readable
+    # placeholder while never leaking template syntax to the model.
+    ("{word}", "an effect"), ("{op}", "an operation"),
+    ("{name}", "a name"), ("{tempo}", "tempo"),
 )
 
 
@@ -159,4 +164,18 @@ def load_family_map_keys() -> "frozenset[str]":
     if not path.is_file():
         return frozenset()
     doc = _load_json(path)
-    return frozenset(doc.values())
+    family_ids: "set[str]" = set()
+    for value in doc.values():
+        if isinstance(value, str):
+            family_ids.add(value)
+        elif isinstance(value, list):
+            family_ids.update(str(family_id) for family_id in value)
+
+    # Keep previously committed family-scoped action rows loadable while the live
+    # seed roster evolves its family vocabulary. This compatibility registry is
+    # seed data, never a runtime or SQLite projection.
+    registry_path = REPO_ROOT / "data" / "seed" / "demons" / "_registry" / "families.v1.json"
+    if registry_path.is_file():
+        registry = _load_json(registry_path)
+        family_ids.update(str(family_id) for family_id in (registry.get("families") or {}).keys())
+    return frozenset(family_ids)

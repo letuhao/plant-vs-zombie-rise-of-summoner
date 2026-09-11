@@ -1517,6 +1517,646 @@
         }
       ],
       "tags": []
+    },
+    {
+      "id": "droptable.d1-014",
+      "nameKey": "droptable.verdant-echo-cache",
+      "name": "Verdant Echo Cache",
+      "sourceAllow": [
+        "web"
+      ],
+      "groups": [
+        {
+          "groupKey": "verdant-echo-cache-gear",
+          "entries": [
+            {
+              "entryKind": "equipment",
+              "role": "ward-array",
+              "frame": "plant",
+              "dropBand": "seldom",
+              "rarityFloor": "grafted"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "armament-primary",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "verdant-echo-cache-mat",
+          "entries": [
+            {
+              "entryKind": "material",
+              "ref": "substrate.humanoid.sound",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "substrate.plant.crude",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            }
+          ]
+        },
+        {
+          "groupKey": "verdant-echo-cache-con",
+          "entries": [
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-014",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "verdant-echo-cache-ins",
+          "entries": [
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-014",
+              "dropBand": "seldom"
+            }
+          ]
+        },
+        {
+          "groupKey": "verdant-echo-cache-cur",
+          "entries": [
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-015",
+      "nameKey": "droptable.overgrowth-cache",
+      "name": "Overgrowth Cache",
+      "sourceAllow": [
+        "web"
+      ],
+      "groups": [
+        {
+          "groupKey": "overgrowth-cache-gear",
+          "entries": [
+            {
+              "entryKind": "equipment",
+              "role": "armament-primary",
+              "frame": "plant",
+              "dropBand": "seldom",
+              "rarityFloor": "grafted"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "armament-secondary",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrowth-cache-mat",
+          "entries": [
+            {
+              "entryKind": "material",
+              "ref": "substrate.plant.fine",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "substrate.plant.prime",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrowth-cache-con",
+          "entries": [
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-015",
+              "dropBand": "frequent"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrowth-cache-ins",
+          "entries": [
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-015",
+              "dropBand": "seldom"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrowth-cache-cur",
+          "entries": [
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-016",
+      "nameKey": "droptable.overgrowth-cache",
+      "name": "Overgrowth Cache",
+      "sourceAllow": [
+        "web"
+      ],
+      "groups": [
+        {
+          "groupKey": "overgrowth-cache-gear",
+          "entries": [
+            {
+              "entryKind": "equipment",
+              "role": "armament-secondary",
+              "frame": "plant",
+              "dropBand": "seldom",
+              "rarityFloor": "grafted"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "core-guard",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrowth-cache-mat",
+          "entries": [
+            {
+              "entryKind": "material",
+              "ref": "substrate.plant.sound",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "catalyst.flux",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrowth-cache-con",
+          "entries": [
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-016",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrowth-cache-ins",
+          "entries": [
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-016",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrowth-cache-cur",
+          "entries": [
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-017",
+      "nameKey": "droptable.verdant-husk",
+      "name": "Verdant Husk",
+      "sourceAllow": [
+        "web"
+      ],
+      "groups": [
+        {
+          "groupKey": "verdant-husk-gear",
+          "entries": [
+            {
+              "entryKind": "equipment",
+              "role": "core-guard",
+              "frame": "plant",
+              "dropBand": "seldom",
+              "rarityFloor": "grafted"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "girdle",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "verdant-husk-mat",
+          "entries": [
+            {
+              "entryKind": "material",
+              "ref": "catalyst.forge",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "catalyst.temper",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            }
+          ]
+        },
+        {
+          "groupKey": "verdant-husk-con",
+          "entries": [
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-017",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "verdant-husk-ins",
+          "entries": [
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-017",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "verdant-husk-cur",
+          "entries": [
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-018",
+      "nameKey": "droptable.aetheric-husk",
+      "name": "Aetheric Husk",
+      "sourceAllow": [
+        "web"
+      ],
+      "groups": [
+        {
+          "groupKey": "aetheric-husk-gear",
+          "entries": [
+            {
+              "entryKind": "equipment",
+              "role": "girdle",
+              "frame": "plant",
+              "dropBand": "seldom",
+              "rarityFloor": "grafted"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "head-guard",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "aetheric-husk-mat",
+          "entries": [
+            {
+              "entryKind": "material",
+              "ref": "essence.air",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "essence.dark",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            }
+          ]
+        },
+        {
+          "groupKey": "aetheric-husk-con",
+          "entries": [
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-018",
+              "dropBand": "frequent"
+            }
+          ]
+        },
+        {
+          "groupKey": "aetheric-husk-ins",
+          "entries": [
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-018",
+              "dropBand": "occasional"
+            }
+          ]
+        },
+        {
+          "groupKey": "aetheric-husk-cur",
+          "entries": [
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-021",
+      "nameKey": "droptable.overgrown-reliquary",
+      "name": "Overgrown Reliquary",
+      "sourceAllow": [
+        "web"
+      ],
+      "groups": [
+        {
+          "groupKey": "overgrown-reliquary-gear",
+          "entries": [
+            {
+              "entryKind": "equipment",
+              "role": "jewel-minor-a",
+              "frame": "plant",
+              "dropBand": "seldom",
+              "rarityFloor": "grafted"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "jewel-minor-b",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrown-reliquary-mat",
+          "entries": [
+            {
+              "entryKind": "material",
+              "ref": "shard.almanac",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "shard.chaff",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrown-reliquary-con",
+          "entries": [
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-021",
+              "dropBand": "frequent"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrown-reliquary-ins",
+          "entries": [
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-021",
+              "dropBand": "seldom"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrown-reliquary-cur",
+          "entries": [
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-023",
+      "nameKey": "droptable.overgrowth-cache",
+      "name": "Overgrowth Cache",
+      "sourceAllow": [
+        "web"
+      ],
+      "groups": [
+        {
+          "groupKey": "overgrowth-cache-gear",
+          "entries": [
+            {
+              "entryKind": "equipment",
+              "role": "manipulator",
+              "frame": "plant",
+              "dropBand": "occasional",
+              "rarityFloor": "grafted"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "mantle",
+              "frame": "humanoid",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrowth-cache-mat",
+          "entries": [
+            {
+              "entryKind": "material",
+              "ref": "shard.cultivated",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "shard.epic",
+              "dropBand": "seldom",
+              "qtyCurve": "curve.019"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrowth-cache-con",
+          "entries": [
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-002",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrowth-cache-ins",
+          "entries": [
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-023",
+              "dropBand": "exceptional"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrowth-cache-cur",
+          "entries": [
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-025",
+      "nameKey": "droptable.overgrown-reliquary",
+      "name": "Overgrown Reliquary",
+      "sourceAllow": [
+        "web"
+      ],
+      "groups": [
+        {
+          "groupKey": "overgrown-reliquary-gear",
+          "entries": [
+            {
+              "entryKind": "equipment",
+              "role": "sense",
+              "frame": "humanoid",
+              "dropBand": "seldom",
+              "rarityFloor": "cultivated"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "sense",
+              "frame": "plant",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrown-reliquary-mat",
+          "entries": [
+            {
+              "entryKind": "material",
+              "ref": "shard.grafted",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "shard.heirloom",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrown-reliquary-con",
+          "entries": [
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-004",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrown-reliquary-ins",
+          "entries": [
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-025",
+              "dropBand": "occasional"
+            }
+          ]
+        },
+        {
+          "groupKey": "overgrown-reliquary-cur",
+          "entries": [
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
+          ]
+        }
+      ],
+      "tags": []
     }
   ]
 }

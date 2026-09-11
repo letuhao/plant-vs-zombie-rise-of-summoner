@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>cond-hero</title>
+  <link rel="stylesheet" href="_piece-kit.css" />
+  <style>
+    .cond-hero { width: 860px; display:flex; gap:20px; align-items:center; padding:16px; border:1px solid #5b5144; border-radius:14px; background:#2f261d; color:#f2ead8; }
+    .radial-wrap { width:128px; height:128px; position:relative; border:1px solid #5b5144; border-radius:16px; background:#241d17; }
+    .radial { position:absolute; border-radius:999px; inset:12px; background: conic-gradient(#e7733f 40%, transparent 0); }
+    .radial.hp { inset:28px; background: conic-gradient(#d98787 69%, transparent 0); }
+    .n { position:absolute; inset:0; display:grid; place-items:center; font-size:22px; font-weight:700; }
+    .pool-col { display:grid; gap:10px; flex:1; }
+    .meter { padding:10px 12px; border:1px solid #5b5144; border-radius:12px; background:#241d17; }
+  </style>
+</head>
+<body>
+  <section class="cond-hero">
+    <div class="radial-wrap">
+      <div class="radial"></div>
+      <div class="radial hp"></div>
+      <span class="n">HP</span>
+    </div>
+    <div class="pool-col">
+      <div class="meter">HP 1,240 / 1,800</div>
+      <div class="meter">Sun 12 / 40</div>
+      <div class="meter">Poise 18 / 20</div>
+    </div>
+  </section>
+</body>
+</html>

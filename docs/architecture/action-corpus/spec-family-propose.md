@@ -31,7 +31,8 @@ that second job belongs to `A-P3`, which is why these are two pipelines and not 
 7. **Small-batch proof first** — `--dry-run` and a small `--count`. The call budget is a ceiling, not a
    plan; a full run is an owner decision behind a quality gate.
 8. **Tests never call a model** — the transport stub **raises**.
-9. **The roster is 84 species, 53 with family assignments — not 904.** This is the constraint that bites
+9. **The roster is the live species seed folder.** It currently contains 904 species, 227 consolidated
+   families, and 1,183 family memberships; this is the constraint that bites
    *this* module hardest; see §1.
 
 ## 1. What exists today
@@ -40,8 +41,8 @@ that second job belongs to `A-P3`, which is why these are two pipelines and not 
 
 | Thing | Evidence |
 |---|---|
-| Family assignments — **53 species across 19 family tokens** | `data/seed/demons/_generated/family-assignments.json` (measured 2026-09-03: 53 keys; values are lists of family tokens, e.g. `bucketnutzombie: ["bucket"]`) |
-| Motif assignments — **84 species**, each with `motifs`, `antiMotifs`, `basis`, `tautological` | `data/seed/demons/_generated/motif-assignments.json` (84 keys) |
+| Family assignments — **904 species across 227 consolidated family tokens** | `data/seed/demons/species/**/*.json` (measured 2026-09-10; values are lists of family tokens, e.g. `bucketnutzombie: ["bucket"]`) |
+| Motif assignments — **904 species**, each with `motifs`, `antiMotifs`, `basis`, `tautological` | `data/seed/demons/_generated/motif-assignments.json` (904 keys) |
 | Closed action vocabularies (5 categories, 6 target modes, 4 shapes, 8 tags) | `ActionEnums.cs:26-49`, `ActionTargetSpec.cs:14-33`, `:42-48` |
 | Rung table with per-row `structureBudget` | `data/tuning/action-rungs.v1.json:11-20` |
 | Schema audit — numeric fields **and** a missing `blocked` escape both rejected | `pipeline/model.py:53-99` |
@@ -61,13 +62,12 @@ that second job belongs to `A-P3`, which is why these are two pipelines and not 
 - **`A-S1` does not exist**, so nothing produces the brief.
 - **⛔ The premise this pipeline was sized on is wrong, and it is measurable.** §20 of the ideal justified
   P-family partly because a family brief is *"shared across ~48 species"* (904 / 19). Part VIII already
-  corrected that to **4.4** at the shipped 84 (`action-corpus-ideal.md:1420-1424`). Measured against the
-  real file it is smaller still: **53 assigned species over 19 families = 2.8 mean**, largest family
-  `cherry` = **7**, **eleven families hold exactly 2**, and `nut` holds exactly **1**. A judgement shared by
-  two species is barely a family judgement; shared by one it is a signature judgement wearing a family
-  label. **This spec does not resolve that** — see §6, hazard 1.
+  corrected that to the live ratio of **5.3** memberships per consolidated family. Measured against the
+  live records: 1,183 memberships over 227 families, with sizes measured at plan time. A judgement
+  shared by only a few species may be barely a family judgement; **this spec does not resolve that** —
+  see §6, hazard 1.
 - ~~**Family motifs do not exist as a distinct artifact.**~~ ⛔ **CLOSED 2026-09-03 (review F15).**
-  `motif-assignments.json` is still keyed by *species* (84 keys), and a family's motif set still has
+  motif assignments are still keyed by *species*, and a family's motif set still has
   to be derived — but the derivation **now exists**, written into A-S1
   (`spec-distribution-planner.md` §3 step 2b) rather than merely assigned to it. This spec said
   *"A-S1 owns it"* and A-S1's spec never mentioned it, so ownership passed in a circle and **AC5
@@ -307,7 +307,7 @@ default.
 | Needs | From | State |
 |---|---|---|
 | The brief, including **derived family motifs/anti-motifs** | **A-S1** `distribution-planner` | does not exist; the derivation is unwritten |
-| Family assignments | **seedsmith D2/D5** | 53 species, 19 families — real, on disk |
+| Family assignments | **seedsmith D2/D5** | 904 species, 227 consolidated families — derived from live seed records |
 | Quality gates, bounded repair | **A-S4** `validate-heal` | does not exist |
 | A loadable `data/seed/actions/` | **A-C1** `corpus-loader` | files silently skipped (`corpus/model.py:159-185`) |
 | Channel pools | **effect-atom E30** | outside this program |

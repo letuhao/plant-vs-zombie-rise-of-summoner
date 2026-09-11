@@ -704,4 +704,30 @@ public sealed class RpgClient
             Volatile.Write(ref _inFlight, 0);
         }
     }
+
+    /// <summary>
+    /// CG-A4b: Hot live bag upsert for sheet projection.
+    /// Server emits SignalR <c>ActorLiveStateChanged</c> on write.
+    /// </summary>
+    public async Task PostActorLiveStateAsync(string instanceId, ActorLiveStatePayload payload)
+    {
+        if (string.IsNullOrWhiteSpace(instanceId) || payload == null) return;
+        try
+        {
+            var body = JsonSerializer.Serialize(new
+            {
+                liveStatuses = payload.LiveStatuses,
+                shieldLayers = payload.ShieldLayers
+            }, Json);
+            using var content = new StringContent(body, Encoding.UTF8, "application/json");
+            await Http().PostAsync(
+                    $"{_base}/api/internal/actors/{Uri.EscapeDataString(instanceId.Trim())}/live-state",
+                    content)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+        }
+    }
 }

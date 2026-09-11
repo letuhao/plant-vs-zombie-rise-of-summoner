@@ -12,7 +12,9 @@ public sealed record StatusSurfaceEntry(
     string DisplayName,
     string Reading,
     string HudToken,
-    string Color);
+    string Color,
+    string? Family = null,
+    bool PulseHealsAttacker = false);
 
 public sealed record StatusSurfaceCatalog(
     int SchemaVersion,
@@ -48,11 +50,32 @@ public static class StatusSurfaceCatalogLoader
                 DisplayName: ActorSurfaceJson.Str(el, "displayName", path, Catalog),
                 Reading: ActorSurfaceJson.Str(el, "reading", path, Catalog),
                 HudToken: ActorSurfaceJson.Str(el, "hudToken", path, Catalog),
-                Color: ActorSurfaceJson.Str(el, "color", path, Catalog)));
+                Color: ActorSurfaceJson.Str(el, "color", path, Catalog),
+                Family: OptionalStr(el, "family"),
+                PulseHealsAttacker: OptionalBool(el, "pulseHealsAttacker")));
             i++;
         }
 
         return new StatusSurfaceCatalog(schemaVersion, version, entries);
+    }
+
+    static string? OptionalStr(JsonElement el, string name)
+    {
+        if (!el.TryGetProperty(name, out var p) || p.ValueKind == JsonValueKind.Null)
+            return null;
+        if (p.ValueKind != JsonValueKind.String)
+            throw new ActorSurfaceCatalogRejection($"{Catalog}: non-string '{name}'");
+        var s = p.GetString();
+        return string.IsNullOrWhiteSpace(s) ? null : s.Trim();
+    }
+
+    static bool OptionalBool(JsonElement el, string name)
+    {
+        if (!el.TryGetProperty(name, out var p) || p.ValueKind == JsonValueKind.Null)
+            return false;
+        if (p.ValueKind == JsonValueKind.True) return true;
+        if (p.ValueKind == JsonValueKind.False) return false;
+        throw new ActorSurfaceCatalogRejection($"{Catalog}: non-bool '{name}'");
     }
 
     static StatusKind ParseStatusKind(JsonElement el, string path)

@@ -121,7 +121,10 @@ def run_species_tree(
             motifs=(), anti_motifs=(), anti_motif_tags=(),
             permitted_affixes=permitted_affixes,
             permitted_properties=sorted(tree_plan.property_vocabulary),
-            property_vocabulary=tree_plan.property_vocabulary, affix_vocab=affix_vocab)
+            property_vocabulary=tree_plan.property_vocabulary, affix_vocab=affix_vocab,
+            # 2026-09-11 (A2): a species node's own quota cell travels with it, same as the
+            # generic CLI's inputs_for — `generate_node` narrows the exclusion enum to this cell.
+            quota_cell=cell)
 
     # Real-call finding (2026-09-07, `AbyssSwordStar`'s own first live proof-of-concept run): the
     # model independently generated two DIFFERENT nodes both named "Abyssal Shell", and

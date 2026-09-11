@@ -3,8 +3,50 @@
     "confidence": {},
     "minorityValues": {},
     "model": "google/gemma-4-26b-a4b-qat",
-    "planHash": "",
-    "promptVersion": "tree-language/1"
+    "planHash": "8f00addf4c4acdee18e6526a900bf00a8c06fa36d983487e277186fa26ff3695",
+    "promptVersion": "mixed",
+    "promptVersionByNode": {
+      "skill.bond-def-t1-n0": "tree-language/3",
+      "skill.bond-def-t1-n1": "",
+      "skill.bond-def-t1-n2": "tree-language/3",
+      "skill.bond-def-t10-n0": "tree-language/3",
+      "skill.bond-def-t2-n0": "tree-language/3",
+      "skill.bond-def-t2-n1": "tree-language/3",
+      "skill.bond-def-t2-n2": "tree-language/3",
+      "skill.bond-def-t3-n0": "tree-language/3",
+      "skill.bond-def-t3-n1": "tree-language/3",
+      "skill.bond-def-t3-n2": "tree-language/3",
+      "skill.bond-def-t4-n0": "tree-language/3",
+      "skill.bond-def-t4-n1": "tree-language/3",
+      "skill.bond-def-t5-n0": "tree-language/3",
+      "skill.bond-def-t5-n1": "tree-language/3",
+      "skill.bond-def-t6-n0": "tree-language/3",
+      "skill.bond-def-t6-n1": "tree-language/3",
+      "skill.bond-def-t7-n0": "",
+      "skill.bond-def-t7-n1": "tree-language/3",
+      "skill.bond-def-t8-n0": "tree-language/3",
+      "skill.bond-def-t9-n0": "",
+      "skill.bond-off-t1-n0": "tree-language/3",
+      "skill.bond-off-t1-n1": "tree-language/3",
+      "skill.bond-off-t1-n2": "tree-language/3",
+      "skill.bond-off-t10-n0": "tree-language/3",
+      "skill.bond-off-t2-n0": "tree-language/3",
+      "skill.bond-off-t2-n1": "",
+      "skill.bond-off-t2-n2": "tree-language/3",
+      "skill.bond-off-t3-n0": "",
+      "skill.bond-off-t3-n1": "tree-language/3",
+      "skill.bond-off-t3-n2": "tree-language/3",
+      "skill.bond-off-t4-n0": "tree-language/3",
+      "skill.bond-off-t4-n1": "tree-language/3",
+      "skill.bond-off-t5-n0": "tree-language/3",
+      "skill.bond-off-t5-n1": "tree-language/3",
+      "skill.bond-off-t6-n0": "tree-language/3",
+      "skill.bond-off-t6-n1": "",
+      "skill.bond-off-t7-n0": "tree-language/3",
+      "skill.bond-off-t7-n1": "tree-language/3",
+      "skill.bond-off-t8-n0": "tree-language/3",
+      "skill.bond-off-t9-n0": "tree-language/3"
+    }
   },
   "nodes": [
     {
@@ -12,22 +54,29 @@
         "core"
       ],
       "affixIds": [
-        "atom.fortitude"
+        "atom.vitality"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "aptitude"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "To stand firm is to become part of the earth itself.",
+      "flavor": "The deeper the connection, the harder the foundation.",
       "id": "skill.bond-def-t1-n0",
-      "name": "Rooted Resolve",
-      "nameKey": "tree.node.rooted-resolve-4",
+      "name": "Rooted Kinship",
+      "nameKey": "tree.node.rooted-kinship",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.power",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
       "tier": 1
     },
@@ -60,48 +109,161 @@
         "core"
       ],
       "affixIds": [
-        "atom.vitality"
+        "atom.fortitude"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "nullification",
-        "printedText": "Inert while branch is active — branch wins.",
-        "propertyKeys": [
-          "branch"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The bond is not merely skin deep; it weaves through the very marrow of the being.",
+      "flavor": "The deeper the connection, the harder the shell.",
       "id": "skill.bond-def-t1-n2",
-      "name": "Deep-Rooted Symbiosis",
-      "nameKey": "tree.node.deep-rooted-symbiosis",
+      "name": "Rooted Symbiosis",
+      "nameKey": "tree.node.rooted-symbiosis",
       "nodeClass": "magnitude",
       "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.damage",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
       "tier": 1
     },
     {
       "affinity": [
-        "core"
+        "likely"
       ],
       "affixIds": [
-        "atom.shld-cycle"
+        "atom.shld-toughness"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The circulatory system is rerouted to feed the protective plating, ensuring the shield never stagnates.",
+      "flavor": "The graft is no longer merely attached; it is woven into the very marrow of the host.",
       "id": "skill.bond-def-t10-n0",
-      "name": "Vascular Conduit",
-      "nameKey": "tree.node.vascular-conduit",
+      "name": "Sutured Bastion",
+      "nameKey": "tree.node.sutured-bastion",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.realm",
+        "element": "omni",
+        "exclusionForm": "reroute",
+        "nodeClass": "mechanism",
+        "status": "bond",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.ward-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The strength of the many becomes the armor of the one.",
+      "id": "skill.bond-def-t2-n0",
+      "name": "Shared Bastion",
+      "nameKey": "tree.node.shared-bastion",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.rate",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnMatchEnd"
+      },
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.warding"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The strength of one becomes the foundation for the many.",
+      "id": "skill.bond-def-t2-n1",
+      "name": "Shared Resilience",
+      "nameKey": "tree.node.shared-resilience",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.damage",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnMatchStart"
+      },
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.warding"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The strength of the bond is reflected in the resilience of the shell.",
+      "id": "skill.bond-def-t2-n2",
+      "name": "Tethered Aegis",
+      "nameKey": "tree.node.tethered-aegis",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.rate",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnMatchStart"
+      },
+      "rationale": "",
+      "tier": 2
     },
     {
       "affinity": [
@@ -109,49 +271,65 @@
         "core"
       ],
       "affixIds": [
-        "atom.sust-callus",
-        "atom.sust-grit"
+        "atom.shld-cycle",
+        "atom.ward-link"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "nullification",
-        "printedText": "Inert while atomKind is active — atomKind wins.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The bond between flesh and spirit hardens into a resilient, calloused layer of survival.",
-      "id": "skill.bond-def-t2-n0",
-      "name": "Thickened Sinew",
-      "nameKey": "tree.node.thickened-sinew-2",
-      "nodeClass": "magnitude",
+      "flavor": "The strength of the bond is measured by the friction of the impact.",
+      "id": "skill.bond-def-t3-n0",
+      "name": "Kinship Buffer",
+      "nameKey": "tree.node.kinship-buffer",
+      "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.capacity",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "bond",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
-      "tier": 2
+      "tier": 3
     },
     {
       "affinity": [
-        "likely"
+        "core",
+        "core"
       ],
       "affixIds": [
-        "atom.arm-hardening"
+        "atom.shield-capacity",
+        "atom.vitality"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A dense layering of organic plates that hardens upon impact.",
-      "id": "skill.bond-def-t2-n1",
-      "name": "Reinforced Integument",
-      "nameKey": "tree.node.reinforced-integument",
+      "flavor": "The bond tightens as the vessel fills.",
+      "id": "skill.bond-def-t3-n1",
+      "name": "Cohesive Membrane",
+      "nameKey": "tree.node.cohesive-membrane",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.pen",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
-      "tier": 2
+      "tier": 3
     },
     {
       "affinity": [
@@ -162,70 +340,58 @@
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "nullification",
-        "printedText": "Inert while atomKind is active — atomKind wins.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A hardening of the outer layer that absorbs impact and stabilizes the internal flow.",
-      "id": "skill.bond-def-t2-n2",
-      "name": "Resilient Shell",
-      "nameKey": "tree.node.resilient-shell",
+      "flavor": "The bond thickens, weaving protection from both spirit and substance.",
+      "id": "skill.bond-def-t3-n2",
+      "name": "Symbiotic Shell",
+      "nameKey": "tree.node.symbiotic-shell",
       "nodeClass": "magnitude",
       "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.regen",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnSpawn"
+      },
       "rationale": "",
-      "tier": 2
+      "tier": 3
     },
     {
       "affinity": [
         "core"
       ],
       "affixIds": [
-        "atom.plating"
+        "atom.ward-link"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The bark thickens into a calcified rind, turning skin into stone.",
-      "id": "skill.bond-def-t3-n0",
-      "name": "Lignified Plating",
-      "nameKey": "tree.node.lignified-plating-3",
+      "flavor": "The bond thickens as life is repurposed into structural integrity.",
+      "id": "skill.bond-def-t4-n0",
+      "name": "Sanguine Grafting",
+      "nameKey": "tree.node.sanguine-grafting",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
-      "rationale": "",
-      "tier": 3
-    },
-    {
-      "affinity": [
-        "likely",
-        "core"
-      ],
-      "affixIds": [
-        "atom.arm-hardening",
-        "atom.plating"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.toughness",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "bond",
+        "trigger": "OnSpawn"
       },
-      "flavor": "A secondary layer of dermal plating that thickens with every impact.",
-      "id": "skill.bond-def-t3-n1",
-      "name": "Reinforced Membrane",
-      "nameKey": "tree.node.reinforced-membrane",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
       "rationale": "",
-      "tier": 3
+      "tier": 4
     },
     {
       "affinity": [
@@ -234,170 +400,161 @@
       ],
       "affixIds": [
         "atom.shield-capacity",
-        "atom.shield-toughness"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "branch"
-        ]
-      },
-      "flavor": "A layer of calcified sap that thickens with every breath of the forest.",
-      "id": "skill.bond-def-t3-n2",
-      "name": "Hardened Husk",
-      "nameKey": "tree.node.hardened-husk",
-      "nodeClass": "magnitude",
-      "nodeKey": "n2",
-      "rationale": "",
-      "tier": 3
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.shield-regen",
-        "atom.shld-cycle"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
-      },
-      "flavor": "A network of vascular conduits that cycles protective fluids through the shield's membrane.",
-      "id": "skill.bond-def-t4-n0",
-      "name": "Sap-Flow Circuitry",
-      "nameKey": "tree.node.sap-flow-circuitry",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 4
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.warding"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The skin thickens where the spirit meets the world, turning impact into a memory of strength.",
-      "id": "skill.bond-def-t4-n1",
-      "name": "Grafted Aegis",
-      "nameKey": "tree.node.grafted-aegis-2",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 4
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.ward-brace"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The bond draws strength from the very impact meant to sever it.",
-      "id": "skill.bond-def-t5-n0",
-      "name": "Osmotic Siphon",
-      "nameKey": "tree.node.osmotic-siphon-2",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 5
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.fortitude",
         "atom.vitality"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A dense weave of reinforced plating and structural integrity.",
-      "id": "skill.bond-def-t5-n1",
-      "name": "Layered Bastion",
-      "nameKey": "tree.node.layered-bastion-8",
+      "flavor": "The strength of the bond is measured by the thickness of the blood and the weight of the shield.",
+      "id": "skill.bond-def-t4-n1",
+      "name": "Coalescent Marrow",
+      "nameKey": "tree.node.coalescent-marrow",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "loadout.slots",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnSpawn"
+      },
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-surge",
+        "atom.ward-link"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of the bond beats through the marrow, turning every impact into a surge of protective energy.",
+      "id": "skill.bond-def-t5-n0",
+      "name": "Pulse of the Graft",
+      "nameKey": "tree.node.pulse-of-the-graft",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "move.range",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "bond",
+        "trigger": "OnSunCollect"
+      },
       "rationale": "",
       "tier": 5
     },
     {
       "affinity": [
-        "core"
+        "likely"
       ],
       "affixIds": [
-        "atom.shld-surge"
+        "atom.fortitude"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The bond deepens as the shield pulses, weaving protection directly into the marrow.",
+      "flavor": "The strength of the connection hardens the shell against the coming storm.",
+      "id": "skill.bond-def-t5-n1",
+      "name": "Bulwark of the Bonded",
+      "nameKey": "tree.node.bulwark-of-the-bonded",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm1",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnSunCollect"
+      },
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.ward-flux"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The pulse of the bond dictates the flow of protection.",
       "id": "skill.bond-def-t6-n0",
-      "name": "Symbiotic Graft",
-      "nameKey": "tree.node.symbiotic-graft",
+      "name": "Rhythmic Grafting",
+      "nameKey": "tree.node.rhythmic-grafting",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm2",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "bond",
+        "trigger": "OnSunCollect"
+      },
       "rationale": "",
       "tier": 6
     },
     {
       "affinity": [
-        "core"
+        "occasional",
+        "core",
+        "likely"
       ],
       "affixIds": [
+        "atom.fortitude",
+        "atom.shield-capacity",
         "atom.vitality"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "tier"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The connection runs deeper than the surface, anchoring the spirit to the very marrow of the world.",
+      "flavor": "The strength of the connection is measured by the life it sustains and the weight it carries.",
       "id": "skill.bond-def-t6-n1",
-      "name": "Deep-Rooted Vitality",
-      "nameKey": "tree.node.deep-rooted-vitality",
+      "name": "Tethered Vitality",
+      "nameKey": "tree.node.tethered-vitality",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.atk",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnTimer"
+      },
       "rationale": "",
       "tier": 6
     },
@@ -429,27 +586,32 @@
     },
     {
       "affinity": [
-        "core",
-        "core"
+        "likely"
       ],
       "affixIds": [
-        "atom.plating",
-        "atom.resilience"
+        "atom.arm-hardening"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "branch"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The skin thickens where the spirit refuses to break.",
+      "flavor": "The connection deepens, turning skin to bark and bone to iron.",
       "id": "skill.bond-def-t7-n1",
-      "name": "Calloused Resilience",
-      "nameKey": "tree.node.calloused-resilience",
+      "name": "Rooted Carapace",
+      "nameKey": "tree.node.rooted-carapace",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.maxHp",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnTimer"
+      },
       "rationale": "",
       "tier": 7
     },
@@ -459,23 +621,30 @@
         "core"
       ],
       "affixIds": [
-        "atom.shld-cycle",
-        "atom.sust-husk"
+        "atom.sust-husk",
+        "atom.ward-link"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A rigid, calcified layer that hardens the skin at the cost of fluid movement.",
+      "flavor": "The graft does not merely sit upon the skin; it weaves into the very marrow of the host.",
       "id": "skill.bond-def-t8-n0",
-      "name": "Exoskeletal Graft",
-      "nameKey": "tree.node.exoskeletal-graft",
+      "name": "Callous Integration",
+      "nameKey": "tree.node.callous-integration",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.breakthroughSuccess",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "bond",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 8
     },
@@ -508,46 +677,29 @@
         "core"
       ],
       "affixIds": [
-        "atom.ferocity"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "branch"
-        ]
-      },
-      "flavor": "The strength of the bond is written in the heat of the struggle.",
-      "id": "skill.bond-off-t1-n0",
-      "name": "Sanguine Vigor",
-      "nameKey": "tree.node.sanguine-vigor",
-      "nodeClass": "magnitude",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 1
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
         "atom.might"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The first strike carries the weight of a thousand debts.",
-      "id": "skill.bond-off-t1-n1",
-      "name": "Vicious Onset",
-      "nameKey": "tree.node.vicious-onset",
+      "flavor": "The strength of the bond is measured in the heat of the fray.",
+      "id": "skill.bond-off-t1-n0",
+      "name": "Blood Pact",
+      "nameKey": "tree.node.blood-pact",
       "nodeClass": "magnitude",
-      "nodeKey": "n1",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "ai.aggression",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 1
     },
@@ -556,55 +708,98 @@
         "core"
       ],
       "affixIds": [
-        "atom.ferocity"
+        "atom.bloodletting"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The bond tightens with every strike, turning momentum into raw aggression.",
-      "id": "skill.bond-off-t1-n2",
-      "name": "Sanguine Edge",
-      "nameKey": "tree.node.sanguine-edge",
+      "flavor": "The pulse of one becomes the weapon of the other.",
+      "id": "skill.bond-off-t1-n1",
+      "name": "Crimson Linkage",
+      "nameKey": "tree.node.crimson-linkage",
       "nodeClass": "magnitude",
-      "nodeKey": "n2",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.absorption",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 1
     },
     {
       "affinity": [
-        "core",
-        "likely"
+        "occasional"
       ],
       "affixIds": [
-        "atom.bonding",
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The strength of the connection grows with the weight of the shared purpose.",
+      "id": "skill.bond-off-t1-n2",
+      "name": "Coalescent Link",
+      "nameKey": "tree.node.coalescent-link",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.accuracy",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnActivate"
+      },
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
         "atom.elpw-attune"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The resonance between essence and element creates a feedback loop of pure potential.",
+      "flavor": "The bond bleeds color into the void, turning raw essence into a torrential flood of elemental potential.",
       "id": "skill.bond-off-t10-n0",
-      "name": "Harmonic Graft",
-      "nameKey": "tree.node.harmonic-graft",
+      "name": "Prismatic Siphon",
+      "nameKey": "tree.node.prismatic-siphon",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.penetration",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "bond",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 10
     },
     {
       "affinity": [
-        "core",
-        "likely"
+        "likely",
+        "core"
       ],
       "affixIds": [
         "atom.ferocity",
@@ -612,18 +807,25 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "aptitude"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The pulse of the forest quickens with every strike, fueling a cycle of raw aggression.",
+      "flavor": "The pulse of the bond beats with increasing vigor.",
       "id": "skill.bond-off-t2-n0",
-      "name": "Primal Surge",
-      "nameKey": "tree.node.primal-surge-5",
+      "name": "Sanguine Resonance",
+      "nameKey": "tree.node.sanguine-resonance",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.amplification",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 2
     },
@@ -658,22 +860,29 @@
         "core"
       ],
       "affixIds": [
-        "atom.precision"
+        "atom.might"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the strike dictates the speed of the recovery.",
+      "flavor": "The threads of life intertwine, turning every wound into a shared strength.",
       "id": "skill.bond-off-t2-n2",
-      "name": "Vanguard's Cadence",
-      "nameKey": "tree.node.vanguard-s-cadence",
+      "name": "Sanguine Weave",
+      "nameKey": "tree.node.sanguine-weave",
       "nodeClass": "magnitude",
       "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.rate",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
       "tier": 2
     },
@@ -708,7 +917,7 @@
     {
       "affinity": [
         "core",
-        "core"
+        "likely"
       ],
       "affixIds": [
         "atom.ferocity",
@@ -716,42 +925,56 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The bond is not merely shared; it is a violent exchange of essence.",
+      "flavor": "The bond hungers, sharpening the instinct to strike and the fury to follow.",
       "id": "skill.bond-off-t3-n1",
-      "name": "Sanguine Onslaught",
-      "nameKey": "tree.node.sanguine-onslaught-3",
+      "name": "Feral Symbiosis",
+      "nameKey": "tree.node.feral-symbiosis",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.strength",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
       "tier": 3
     },
     {
       "affinity": [
-        "core"
+        "likely"
       ],
       "affixIds": [
         "atom.ferocity"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the hunt quickens with every strike.",
+      "flavor": "The strength of the bond is measured by the weight of the blood spilled in unison.",
       "id": "skill.bond-off-t3-n2",
-      "name": "Predatory Pulse",
-      "nameKey": "tree.node.predatory-pulse",
+      "name": "Sanguine Accord",
+      "nameKey": "tree.node.sanguine-accord",
       "nodeClass": "magnitude",
       "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.damage",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnDamageTaken"
+      },
       "rationale": "",
       "tier": 3
     },
@@ -760,28 +983,35 @@
         "core"
       ],
       "affixIds": [
-        "atom.elpw-overflow"
+        "atom.elpw-attune"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The vibration of one element forces the next to erupt with violent instability.",
+      "flavor": "The connection pulses, feeding the surge through the link.",
       "id": "skill.bond-off-t4-n0",
-      "name": "Resonant Overload",
-      "nameKey": "tree.node.resonant-overload",
+      "name": "Resonant Overgrowth",
+      "nameKey": "tree.node.resonant-overgrowth",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.rate",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "bond",
+        "trigger": "OnDamageTaken"
+      },
       "rationale": "",
       "tier": 4
     },
     {
       "affinity": [
-        "core",
+        "likely",
         "core"
       ],
       "affixIds": [
@@ -790,94 +1020,118 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The pulse of the hunt quickens the blood, turning every strike into a rhythmic tide of violence.",
+      "flavor": "The pulse of the many becomes the strike of the one.",
       "id": "skill.bond-off-t4-n1",
-      "name": "Sanguine Surge",
-      "nameKey": "tree.node.sanguine-surge",
+      "name": "Sanguine Convergence",
+      "nameKey": "tree.node.sanguine-convergence",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnDamageTaken"
+      },
       "rationale": "",
       "tier": 4
     },
     {
       "affinity": [
-        "core",
-        "likely"
+        "core"
       ],
       "affixIds": [
-        "atom.bonding",
-        "atom.elpw-attune"
+        "atom.bonding"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the strike dictates the flow of the essence.",
+      "flavor": "The rhythm of the strike and the bond become one.",
       "id": "skill.bond-off-t5-n0",
-      "name": "Harmonic Resonance",
-      "nameKey": "tree.node.harmonic-resonance-3",
+      "name": "Synchronized Pulse",
+      "nameKey": "tree.node.synchronized-pulse",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist.damage",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "bond",
+        "trigger": "OnDamageTaken"
+      },
       "rationale": "",
       "tier": 5
     },
     {
       "affinity": [
-        "likely"
+        "core"
       ],
       "affixIds": [
-        "atom.savagery"
+        "atom.might"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "nullification",
-        "printedText": "Inert while atomKind is active — atomKind wins.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The bond is not merely a connection, but a hunger that demands more.",
+      "flavor": "The strength of the bond is measured by the focus of the strike.",
       "id": "skill.bond-off-t5-n1",
-      "name": "Primal Hunger",
-      "nameKey": "tree.node.primal-hunger-4",
+      "name": "Coalesced Intent",
+      "nameKey": "tree.node.coalesced-intent",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.defense",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 5
     },
     {
       "affinity": [
-        "core",
-        "likely"
+        "core"
       ],
       "affixIds": [
-        "atom.bonding",
-        "atom.elpw-pierce"
+        "atom.bonding"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The bond is no longer a tether, but a conduit for the raw essence to tear through the target's defenses.",
+      "flavor": "The rhythm of the graft accelerates the flow of elemental energy.",
       "id": "skill.bond-off-t6-n0",
-      "name": "Coalescent Breach",
-      "nameKey": "tree.node.coalescent-breach",
+      "name": "Symbiotic Resonance",
+      "nameKey": "tree.node.symbiotic-resonance",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.dodge",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "bond",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 6
     },
@@ -909,33 +1163,38 @@
     },
     {
       "affinity": [
-        "core",
-        "core"
+        "occasional"
       ],
       "affixIds": [
-        "atom.bonding",
-        "atom.elpw-attune"
+        "atom.tempo-surge"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The boundary between thought and instinct dissolves into a single, unified impulse.",
+      "flavor": "The momentum of the strike lingers, echoing through the marrow.",
       "id": "skill.bond-off-t7-n0",
-      "name": "Neural Symbiosis",
-      "nameKey": "tree.node.neural-symbiosis",
+      "name": "Kinetic Afterglow",
+      "nameKey": "tree.node.kinetic-afterglow",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.break",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "bond",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 7
     },
     {
       "affinity": [
-        "core",
+        "likely",
         "core"
       ],
       "affixIds": [
@@ -944,70 +1203,89 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The bond pulses with a violent, rhythmic heat, turning every strike into a surge of raw aggression.",
+      "flavor": "The resonance between power and precision creates a feedback loop of devastating potential.",
       "id": "skill.bond-off-t7-n1",
-      "name": "Sanguine Overdrive",
-      "nameKey": "tree.node.sanguine-overdrive",
+      "name": "Harmonious Overload",
+      "nameKey": "tree.node.harmonious-overload",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.rate",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 7
     },
     {
       "affinity": [
-        "core",
+        "occasional",
         "likely"
       ],
       "affixIds": [
-        "atom.bonding",
-        "atom.elpw-overflow"
+        "atom.elpw-surge",
+        "atom.tempo-surge"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The momentum of the bond pulls the soul forward, turning every connection into a catalyst for motion.",
+      "flavor": "The rhythm of the graft accelerates, pushing the essence beyond its natural limits.",
       "id": "skill.bond-off-t8-n0",
-      "name": "Kinetic Tether",
-      "nameKey": "tree.node.kinetic-tether",
+      "name": "Surging Vitality",
+      "nameKey": "tree.node.surging-vitality",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.shred",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "bond",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 8
     },
     {
       "affinity": [
-        "core",
         "core"
       ],
       "affixIds": [
-        "atom.bonding",
-        "atom.elpw-overflow"
+        "atom.elpw-pierce"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The bond vibrates with such intensity that the elemental essence ceases to flow and begins to erupt.",
+      "flavor": "When the bond breaks, the bounty blooms.",
       "id": "skill.bond-off-t9-n0",
-      "name": "Resonant Overload",
-      "nameKey": "tree.node.resonant-overload-2",
+      "name": "Finality's Harvest",
+      "nameKey": "tree.node.finality-s-harvest",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.strength",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "bond",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 9
     }

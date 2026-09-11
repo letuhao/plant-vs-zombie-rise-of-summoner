@@ -22,11 +22,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from datetime import datetime, timezone
 from pathlib import Path
 
 from ...pipeline.llm_caller import LlmCallerConfig
 from .distribution_planner.derive import load_pairing_table
+from .generation_batches import load_resume_entries, merge_entries, select_brief_batch
 from .general_propose.derive import candidate_row, candidate_set_hash, canonical_dump, propose_general_action
 from .general_propose.prompts import build_brief, build_context, render_worked_example
 from .vocab import load_family_glossary
@@ -67,14 +67,22 @@ def load_general_briefs(briefs_path: Path = BRIEFS_PATH) -> "list[dict]":
 def regenerate(*, briefs_path: Path = BRIEFS_PATH, pairings_path: Path = PAIRINGS_PATH,
               candidates_dir: Path = CANDIDATES_DIR, count: int = 1, dry_run: bool = True,
               round_no: int = 1, endpoint: str = "http://localhost:1234/v1/chat/completions",
-              model: str = "google/gemma-4-26b-a4b-qat", write: bool = True) -> dict:
+              model: str = "google/gemma-4-26b-a4b-qat", write: bool = True,
+              resume: bool = False) -> dict:
     """Pure-ish computation (`dry_run=True` makes zero model calls and writes nothing regardless
     of `write`) plus, on a real run, up to `count * 3 * (MAX_HEAL + 1)` model calls and one file
     write. Returns a summary dict; never prints itself, matching `generate_distribution_planner
     .regenerate`'s own "a test can call this without capturing stdout" convention."""
     briefs_doc = json.loads(briefs_path.read_text(encoding="utf-8"))
     general_briefs = _general_briefs_of(briefs_doc)
-    selected = general_briefs[:max(0, count)]
+    output_path = candidates_dir / f"round-{round_no}.json"
+    plan_hash = briefs_doc.get("_meta", {}).get("corpusHash")
+    existing_entries = (load_resume_entries(
+        output_path, partition="general", round_no=round_no, briefs_corpus_hash=plan_hash)
+        if resume else [])
+    selected = (select_brief_batch(general_briefs, count=count, existing_entries=existing_entries)
+                if resume else general_briefs[:max(0, count)])
+    brief_index = {brief["briefId"]: i for i, brief in enumerate(general_briefs)}
 
     pairing_table = load_pairing_table(pairings_path) if pairings_path.is_file() else {}
     #: SMOKE BATCH criterion-2 fix, 2026-09-05: read fresh every call, never cached (matches
@@ -104,13 +112,12 @@ def regenerate(*, briefs_path: Path = BRIEFS_PATH, pairings_path: Path = PAIRING
     base_provenance = {
         "pipeline": "general-propose", "model": model, "promptVersion": PROMPT_VERSION,
         "briefsCorpusHash": briefs_doc.get("_meta", {}).get("corpusHash"),
-        "generatedUtc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
 
     rows: "list[dict]" = []
     by_outcome: "dict[str, int]" = {}
     for i, brief in enumerate(selected):
-        candidate_id = f"candidate.general.{i:03d}"
+        candidate_id = f"candidate.general.{brief_index[brief['briefId']]:03d}"
         prov = dict(base_provenance)
         prov["briefHash"] = _brief_hash(brief)
         candidate = propose_general_action(
@@ -123,6 +130,7 @@ def regenerate(*, briefs_path: Path = BRIEFS_PATH, pairings_path: Path = PAIRING
         by_outcome[candidate.outcome] = by_outcome.get(candidate.outcome, 0) + 1
 
     rows.sort(key=lambda r: r["briefId"])
+    rows = merge_entries(existing_entries, rows) if resume else rows
     set_hash = candidate_set_hash(rows)
 
     out_doc = {
@@ -138,12 +146,17 @@ def regenerate(*, briefs_path: Path = BRIEFS_PATH, pairings_path: Path = PAIRING
 
     if write:
         candidates_dir.mkdir(parents=True, exist_ok=True)
-        (candidates_dir / f"round-{round_no}.json").write_text(canonical_dump(out_doc), encoding="utf-8")
+        output_path.write_text(canonical_dump(out_doc), encoding="utf-8")
 
     return {
         "dryRun": False,
         "totalGeneralBriefs": len(general_briefs),
         "selected": len(selected),
+        "resumed": len(existing_entries),
+        "remaining": sum(1 for brief in general_briefs
+                         if not any(e.get("briefId") == brief["briefId"] and
+                                    e.get("outcome") in {"accepted", "blocked", "escalated"}
+                                    for e in rows)),
         "byOutcome": by_outcome,
         "candidateSetHash": set_hash,
         "written": bool(write),
@@ -156,12 +169,14 @@ def run(argv=None) -> int:
     ap.add_argument("--dry-run", action="store_true", help="render briefs, make no model calls")
     ap.add_argument("--count", type=int, default=1, help="how many briefs to draw a candidate for")
     ap.add_argument("--round", type=int, default=1, help="the round number this run writes")
+    ap.add_argument("--resume", action="store_true",
+                    help="merge this batch into the existing partition and skip terminal rows")
     ap.add_argument("--endpoint", default="http://localhost:1234/v1/chat/completions")
     ap.add_argument("--model", default="google/gemma-4-26b-a4b-qat")
     args = ap.parse_args(argv)
 
     summary = regenerate(count=args.count, dry_run=args.dry_run, round_no=args.round,
-                         endpoint=args.endpoint, model=args.model)
+                         endpoint=args.endpoint, model=args.model, resume=args.resume)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0
 

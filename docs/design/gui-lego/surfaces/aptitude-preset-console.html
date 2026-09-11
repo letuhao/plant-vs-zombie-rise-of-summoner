@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Aptitude Preset Console — gallery + editor + donut</title>
+  <style>
+    body { margin: 0; padding: 24px; background:#1f1914; color:#f2ead8; font-family: Georgia, serif; }
+    .preset-console {
+      display: grid;
+      grid-template-columns: 14rem minmax(0,1fr) 12rem;
+      grid-template-rows: minmax(0,1fr) auto;
+      grid-template-areas:
+        "gallery editor chart"
+        "actions actions actions";
+      gap: 12px;
+      max-width: 980px;
+      margin: 0 auto;
+      min-height: 420px;
+    }
+    .card { border: 1px solid #5b5144; border-radius: 4px; background: #2f261d; padding: 12px; }
+    .gallery { grid-area: gallery; }
+    .editor { grid-area: editor; overflow: auto; }
+    .chart { grid-area: chart; }
+    .actions { grid-area: actions; display: flex; flex-wrap: wrap; gap: 8px; }
+    .eyebrow { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: #a39583; margin: 0 0 8px; font-family: Inter, sans-serif; }
+    .row { display: flex; gap: 6px; align-items: center; padding: 4px 0; border-bottom: 1px solid #3d342a; font-size: 12px; font-family: Inter, sans-serif; }
+    .row input { width: 3.5rem; }
+    button { font-family: Inter, sans-serif; font-size: 12px; padding: 6px 10px; border: 1px solid #5b5144; background: #3a3128; color: #f2ead8; border-radius: 2px; }
+    .active { outline: 1px solid #c9a227; }
+  </style>
+</head>
+<body>
+  <h1>aptitude-preset-console</h1>
+  <p>Nested depth-3 surface (GG-10). Recipe: <code>aptitude-preset-console.json</code>. Dual abs + ‰ editor (G12). Donut primary (E4).</p>
+  <div class="preset-console" data-testid="aptitude-preset-console">
+    <section class="card gallery">
+      <p class="eyebrow">Gallery</p>
+      <button class="active">Even · active</button>
+      <button>Favour seed</button>
+      <button>+ New</button>
+    </section>
+    <section class="card editor">
+      <p class="eyebrow">Editor · sum ‰ = 1000</p>
+      <label>Name <input value="Even" /></label>
+      <div class="row"><span>Might</span><input value="84" /><span>minAbs</span><input /><span>maxAbs</span><input /><span>min‰</span><input /><span>max‰</span><input /></div>
+      <div class="row"><span>…12 rows…</span></div>
+    </section>
+    <section class="card chart">
+      <p class="eyebrow">Distribution</p>
+      <div style="height:120px;border:1px dashed #5b5144;display:grid;place-items:center;font-size:12px;color:#a39583">donut</div>
+      <p style="font-size:11px;color:#a39583">Budget preview leftover legal (E2)</p>
+    </section>
+    <footer class="card actions">
+      <button>Apply to draft</button>
+      <button>Activate</button>
+      <button>Save</button>
+      <button>Delete</button>
+      <button>Close</button>
+    </footer>
+  </div>
+</body>
+</html>

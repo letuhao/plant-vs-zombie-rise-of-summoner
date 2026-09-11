@@ -103,8 +103,8 @@ def expand_counts(counts: "Mapping[str, int]", order: "Sequence[str]") -> "list[
 
 
 # ---------------------------------------------------------------------------------------------
-# §3 step 2 — anchor rows read from role-lean.json (species) and family-assignments.json
-# (family membership, enumerated by the caller — see generate_distribution_planner.py).
+# §3 step 2 — anchor rows read from role-lean.json (species) and live seed family memberships
+# enumerated by the caller (see generate_distribution_planner.py).
 # ---------------------------------------------------------------------------------------------
 
 @dataclass(frozen=True)
@@ -375,8 +375,8 @@ def assign_pairing_roles(ordinal_count: int, allowed_universe: "frozenset[str]",
     twin of `EnablerPayoffCoverage.Check` (`EnablerPayoffCoverage.cs:21-34`), assigned rather than
     hoped for. This module never invents a pairing key: `pairing_table` is read verbatim from
     `pairings.json` (production) or a synthetic fixture (tests) — never hard-coded here. Against
-    the real 5-id table today, `role: 'none'` for every brief is the correct, measured output
-    (spec §2: neither shipped payoff key exists in the 98-family namespace)."""
+    the live pairings table, `role: 'none'` for every brief is the correct output when no payoff
+    key exists in the live atom-family namespace (spec §2)."""
     out = [PairingAssignment("none", None, None) for _ in range(ordinal_count)]
     reachable_payoffs = sorted(k for k in pairing_table if k in allowed_universe)
     cursor = 0
@@ -464,14 +464,12 @@ def audit_no_magnitude_smuggling(brief: dict) -> None:
 
 # ---------------------------------------------------------------------------------------------
 # §3 step 1 — the full-run refusal. `mode: "full"` needs `--full` AND passing smoke-gate evidence
-# (A-S5's coverage report); A-S5 is not built, so `gate_evidence_present` is always False today —
-# `--full` alone is necessary but not sufficient, matching the spec's own "refuses... naming the
-# missing evidence" testing-strategy line.
+# (A-S5's coverage report); `--full` alone is necessary but not sufficient, matching the spec's
+# own "refuses... naming the missing evidence" testing-strategy line.
 # ---------------------------------------------------------------------------------------------
 
 SMOKE_GATE_EVIDENCE_NOTE = (
-    "a passing quality-gate report from A-S5 (coverage-report) -- A-S5 is not built yet, so no "
-    "smoke-gate evidence can exist; --full is necessary but not sufficient "
+    "a passing quality-gate report from A-S5 (coverage-report); --full is necessary but not sufficient "
     "(spec-distribution-planner.md SS3 step 1)"
 )
 
@@ -545,8 +543,8 @@ def plan_subject(*, scope: str, scope_key: "str | None", count: int, weights: We
     # ⛔ Species scope never pairs (2026-09-06 finding). `assign_pairing_roles` greedily claims a
     # subject's FIRST two ordinals for the first reachable payoff -- fine for `family`/`general`
     # (few subjects, a shared audience a pairing theme can legitimately dominate a slice of), but
-    # a species subject's own `count` is small enough (today: 2) that the first reachable payoff
-    # consumes its ENTIRE budget, forcing every one of ~84 species into the IDENTICAL pairing and
+    # a species subject's own count is small enough that the first reachable payoff consumes its
+    # ENTIRE budget, forcing every species into the IDENTICAL pairing and
     # crowding out the per-species distinctiveness the game-design docs name as the point of
     # species scope at all (seedsmith-design Step 2, "distinctness is carried by abilities").
     # Species subjects always stay `role: none`; pairing content lives at family/general scope.
@@ -637,8 +635,8 @@ def plan_round(*, species_ids: "Sequence[str]", family_members: "Mapping[str, Se
                corpus_hash: str, tuning_version: int, round_no: int = 1,
                prompt_version: int = 1) -> "list[dict]":
     """§3 steps 2-9 over the whole roster. Subject order: general (one pseudo-subject), then the
-    84 species in CATALOG order (`species_ids`, as the caller already ordered it), then the 19
-    families in sorted order (a total order over family ids — neither dict nor filesystem
+    every live species in seed order (`species_ids`, as the caller already ordered it), then the
+    consolidated families in sorted order (a total order over family ids — neither dict nor filesystem
     iteration order, matching spec §4's own "never let ordinal assignment depend on..." rule)."""
     allowed_families, forbidden_pair_ids = build_pool(family_ids, multiplicative_pairs)
 

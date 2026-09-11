@@ -456,6 +456,582 @@
           "family": "atom.enhance-quicken"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-off-hand-a-013",
+      "nameKey": "base.weighted-censer",
+      "name": "Weighted Censer",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.weighted-censer",
+      "flavorKey": "flavor.base.weighted-censer",
+      "flavor": "A heavy, perforated metal vessel designed to swing rhythmically to disperse thick clouds of incense or caustic salts.",
+      "tags": [
+        "metal",
+        "medium",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-a-014",
+      "nameKey": "base.weighted-censer",
+      "name": "Weighted Censer",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.weighted-censer",
+      "flavorKey": "flavor.base.weighted-censer",
+      "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse thick clouds of incense or caustic vapors.",
+      "tags": [
+        "metal",
+        "medium",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-a-015",
+      "nameKey": "base.weighted-censer",
+      "name": "Weighted Censer",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.weighted-censer",
+      "flavorKey": "flavor.base.weighted-censer",
+      "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse thick clouds of incense or caustic salts.",
+      "tags": [
+        "metal",
+        "medium",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-a-016",
+      "nameKey": "base.weighted-censer",
+      "name": "Weighted Censer",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.weighted-censer",
+      "flavorKey": "flavor.base.weighted-censer",
+      "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse thick clouds of incense or caustic salts.",
+      "tags": [
+        "metal",
+        "medium",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-a-017",
+      "nameKey": "base.weighted-censer",
+      "name": "Weighted Censer",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.weighted-censer",
+      "flavorKey": "flavor.base.weighted-censer",
+      "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse thick clouds of incense or caustic vapors.",
+      "tags": [
+        "metal",
+        "utility",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-a-018",
+      "nameKey": "base.weighted-censer",
+      "name": "Weighted Censer",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.weighted-censer",
+      "flavorKey": "flavor.base.weighted-censer",
+      "flavor": "A heavy metal vessel designed to swing rhythmically, trailing thick plumes of sanctified smoke.",
+      "tags": [
+        "metal",
+        "heavy",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-a-019",
+      "nameKey": "base.weighted-censer",
+      "name": "Weighted Censer",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.weighted-censer",
+      "flavorKey": "flavor.base.weighted-censer",
+      "flavor": "A heavy metal vessel designed to swing rhythmically, trailing thick plumes of incense to mask the scent of battle.",
+      "tags": [
+        "metal",
+        "medium",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-a-020",
+      "nameKey": "base.weighted-censer",
+      "name": "Weighted Censer",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.weighted-censer",
+      "flavorKey": "flavor.base.weighted-censer",
+      "flavor": "A heavy metal vessel designed to swing rhythmically, trailing thick plumes of incense to mask the scent of battle.",
+      "tags": [
+        "metal",
+        "medium",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-a-021",
+      "nameKey": "base.iron-bound-censer",
+      "name": "Iron-Bound Censer",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.retribution",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.iron-bound-censer",
+      "flavorKey": "flavor.base.iron-bound-censer",
+      "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse incense or caustic vapors. Its weight makes it a formidable tool for crushing skulls in close quarters.",
+      "tags": [
+        "metal",
+        "heavy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-a-022",
+      "nameKey": "base.iron-bound-censer",
+      "name": "Iron-Bound Censer",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.retribution",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.iron-bound-censer",
+      "flavorKey": "flavor.base.iron-bound-censer",
+      "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse thick, choking clouds of incense or caustic salts.",
+      "tags": [
+        "metal",
+        "heavy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-a-023",
+      "nameKey": "base.iron-bound-censer",
+      "name": "Iron-Bound Censer",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.retribution",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.iron-bound-censer",
+      "flavorKey": "flavor.base.iron-bound-censer",
+      "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse incense or caustic vapors.",
+      "tags": [
+        "metal",
+        "medium",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-a-024",
+      "nameKey": "base.iron-bound-censer",
+      "name": "Iron-Bound Censer",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.retribution",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.iron-bound-censer",
+      "flavorKey": "flavor.base.iron-bound-censer",
+      "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse thick clouds of incense or caustic vapors.",
+      "tags": [
+        "metal",
+        "heavy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-a-025",
+      "nameKey": "base.iron-bound-censer",
+      "name": "Iron-Bound Censer",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.retribution",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.iron-bound-censer",
+      "flavorKey": "flavor.base.iron-bound-censer",
+      "flavor": "A heavy, perforated vessel designed to swing rhythmically to release thick clouds of incense or caustic vapors.",
+      "tags": [
+        "metal",
+        "heavy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-a-026",
+      "nameKey": "base.iron-bound-censer",
+      "name": "Iron-Bound Censer",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.retribution",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.iron-bound-censer",
+      "flavorKey": "flavor.base.iron-bound-censer",
+      "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse incense or caustic vapors.",
+      "tags": [
+        "metal",
+        "heavy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-a-027",
+      "nameKey": "base.lead-weighted-baton",
+      "name": "Lead-Weighted Baton",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.lead-weighted-baton",
+      "flavorKey": "flavor.base.lead-weighted-baton",
+      "flavor": "A dense, cylindrical rod designed for quick, concussive strikes in close quarters. Its unbalanced weight makes it ideal for breaking through guard postures.",
+      "tags": [
+        "metal",
+        "offensive",
+        "medium"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-off-hand-a-028",
+      "nameKey": "base.iron-bound-censer",
+      "name": "Iron-Bound Censer",
+      "frame": "humanoid",
+      "role": "armament-secondary",
+      "class": "blunt",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.iron-bound-censer",
+      "flavorKey": "flavor.base.iron-bound-censer",
+      "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse incense or caustic vapors. Its weight makes it a formidable tool for crushing blows.",
+      "tags": [
+        "metal",
+        "heavy",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
     }
   ]
 }

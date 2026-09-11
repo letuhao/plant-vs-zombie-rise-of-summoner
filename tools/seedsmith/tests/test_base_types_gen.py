@@ -20,7 +20,9 @@ import pytest
 
 from seedsmith.adapters.items.basetypegen import brief as brief_mod
 from seedsmith.adapters.items.basetypegen import emit as emit_mod
+from seedsmith.adapters.items.basetypegen import partitions as partitions_mod
 from seedsmith.adapters.items.basetypegen import run as run_mod
+from seedsmith.pipeline.llm_caller import LlmCallerConfig
 from seedsmith.adapters.items.basetypegen import schema as schema_mod
 from seedsmith.adapters.items.basetypegen import tuning as tuning_mod
 from seedsmith.pipeline.model import audit_schema
@@ -463,6 +465,20 @@ def test_run_draws_keeps_going_after_one_malformed_live_response(tmp_path):
     assert set(ledger.read_done()) == {"basetype-draw-armament-primary-humanoid-a-001"}
 
 
+def test_run_draws_does_not_checkpoint_before_persist_callback(tmp_path):
+    ledger = RunLedger(tmp_path / "ledger.json")
+    base_types_dir = tmp_path / "base-types"
+    plan = run_mod.plan_run(role="armament-primary", frame="humanoid", band="a", count=1,
+                            ledger=ledger, base_types_dir=base_types_dir)
+
+    def persist(_entry):
+        raise RuntimeError("simulated corpus write failure")
+
+    with pytest.raises(RuntimeError, match="corpus write failure"):
+        run_mod.run_draws(plan, ledger=ledger, call=_fake_call(name="Retry Me"), persist=persist)
+    assert ledger.read_done() == {}
+
+
 def test_resume_never_repeats_a_committed_draw_across_two_plan_run_calls(tmp_path):
     ledger = RunLedger(tmp_path / "ledger.json")
     base_types_dir = tmp_path / "base-types"
@@ -482,6 +498,17 @@ def test_reconcile_resurfaces_a_draw_whose_entry_was_deleted_from_the_corpus():
     ledger_entry = {"entryId": "item.humanoid-main-hand-a-999", "class": "blade",
                     "implicitFamily": "atom.might"}
     assert run_mod.is_valid("x", ledger_entry, existing={}) is False
+
+
+def test_plan_run_reuses_an_invalid_ledger_slot_before_allocating_new_draws(tmp_path):
+    ledger = RunLedger(tmp_path / "ledger.json")
+    ledger.mark_done("basetype-draw-armament-primary-humanoid-a-000", {
+        "entryId": "item.humanoid-main-hand-a-999", "class": "blade",
+        "implicitFamily": "atom.might",
+    })
+    plan = run_mod.plan_run(role="armament-primary", frame="humanoid", band="a", count=1,
+                            ledger=ledger, base_types_dir=tmp_path / "base-types")
+    assert plan.subjects[0].subject_id == "basetype-draw-armament-primary-humanoid-a-000"
 
 
 def test_reconcile_leaves_a_draw_alone_when_its_entry_still_matches():
@@ -522,6 +549,54 @@ def test_write_corpus_is_additive_and_never_drops_an_existing_entry(tmp_path):
     assert written_ids == {"item.humanoid-main-hand-a-001", "item.humanoid-main-hand-a-002"}
 
 
+def test_nested_legacy_partition_is_read_and_rewritten_in_place(tmp_path):
+    base_types_dir = tmp_path / "base-types"
+    legacy_path = base_types_dir / "mantle" / "humanoid" / "a.json"
+    legacy_path.parent.mkdir(parents=True)
+    legacy_path.write_text(json.dumps({
+        "schemaVersion": 1,
+        "kind": "base-type",
+        "entries": [{
+            "id": "item.humanoid-back-a-001",
+            "name": "Weathered Cloak",
+            "frame": "humanoid",
+            "role": "mantle",
+            "band": "a",
+            "class": "cloak",
+            "implicit": {"family": "atom.evasion", "powerBand": "low"},
+            "socketMax": 0,
+            "tags": ["cloth"],
+            "enhanceTrack": [{"atLevel": 4, "family": "atom.enhance-edge"}],
+        }],
+    }), encoding="utf-8")
+
+    ledger = RunLedger(tmp_path / "ledger.json")
+    plan = run_mod.plan_run(role="mantle", frame="humanoid", band="a", count=1,
+                            ledger=ledger, base_types_dir=base_types_dir)
+    assert set(plan.existing) == {"item.humanoid-back-a-001"}
+
+    fresh, _ = run_mod.run_draws(plan, ledger=ledger, call=_fake_call(name="Storm Mantle"))
+    written = run_mod.write_corpus("mantle", "humanoid", "a", fresh,
+                                   existing=plan.existing, base_types_dir=base_types_dir)
+
+    assert written == legacy_path
+    assert not (base_types_dir / "humanoid-mantle-a.json").exists()
+    assert len(json.loads(written.read_text(encoding="utf-8"))["entries"]) == 2
+
+
+def test_duplicate_files_claiming_one_partition_refuse_before_any_write(tmp_path):
+    base_types_dir = tmp_path / "base-types"
+    nested = base_types_dir / "mantle" / "humanoid" / "a.json"
+    nested.parent.mkdir(parents=True)
+    entry = {"id": "item.humanoid-back-a-001", "frame": "humanoid", "role": "mantle", "band": "a"}
+    document = json.dumps({"kind": "base-type", "entries": [entry]})
+    nested.write_text(document, encoding="utf-8")
+    (base_types_dir / "humanoid-mantle-a.json").write_text(document, encoding="utf-8")
+
+    with pytest.raises(partitions_mod.PartitionAmbiguityError, match="multiple files"):
+        run_mod.load_existing("mantle", "humanoid", "a", base_types_dir=base_types_dir)
+
+
 def test_overwrite_by_id_bypasses_validity_for_named_ids_only(tmp_path):
     ledger = RunLedger(tmp_path / "ledger.json")
     ledger.mark_done("basetype-draw-armament-primary-humanoid-a-000",
@@ -547,10 +622,15 @@ def test_cli_refuses_a_real_run_with_no_model_call_wired():
 
 
 def test_cli_write_without_endpoint_refuses(tmp_path, monkeypatch):
+    """Refuse only when the *resolved* transport has no endpoint (CLI empty + config empty)."""
     monkeypatch.setattr(run_mod, "DEFAULT_LEDGER_PATH", tmp_path / "ledger.json")
+    monkeypatch.setattr(
+        "seedsmith.pipeline.llm_caller.resolve_live_transport",
+        lambda *a, **k: LlmCallerConfig(endpoint="", model="x"))
     with pytest.raises(SystemExit):
         run_mod.main(["--role", "armament-primary", "--frame", "humanoid", "--band", "a",
                      "--write"])
+
 
 
 def test_cli_a_real_live_run_writes_a_real_partition_file(tmp_path, monkeypatch, capsys):

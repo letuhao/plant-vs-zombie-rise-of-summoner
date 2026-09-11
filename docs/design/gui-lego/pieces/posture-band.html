@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>posture-band — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>posture-band</code></h1>
+  <p class="lede">Chrome + title for Force / Finesse / Bastion; hosts four aptitude tiles. Player title is <code>displayName</code> (e.g. Force) — never raw posture id. Spec: <code>docs/architecture/aptitude-sheet/spec-aptitude-pieces.md</code>.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live)</h2>
+      <div class="piece-stage">
+        <section aria-label="Force" style="--piece-accent:#e0703c; --piece-rail-edge:#e0703c; border-left:3px solid #e0703c; padding:10px 12px; border-radius:var(--r-sm); background:var(--panel-inset)">
+          <header style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px">
+            <h3 style="margin:0;font-size:14px">Force</h3>
+            <span style="font-size:11px;color:var(--muted)">4 tiles</span>
+          </header>
+          <div style="display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; min-height:48px">
+            <div class="chip" style="justify-content:center;opacity:.7">tile</div>
+            <div class="chip" style="justify-content:center;opacity:.7">tile</div>
+            <div class="chip" style="justify-content:center;opacity:.7">tile</div>
+            <div class="chip" style="justify-content:center;opacity:.7">tile</div>
+          </div>
+        </section>
+      </div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "posture-band",
+  "instanceId": "aptitudes:band:force",
+  "postureId": "force",
+  "displayName": "Force",
+  "themeRef": { "kind": "posture", "id": "force" },
+  "tileSlot": "aptitude-tile×4",
+  "phase": "ready"
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

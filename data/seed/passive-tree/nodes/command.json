@@ -3,40 +3,91 @@
     "confidence": {},
     "minorityValues": {},
     "model": "google/gemma-4-26b-a4b-qat",
-    "planHash": "",
-    "promptVersion": "tree-language/1"
+    "planHash": "9f1fbf9251b9df0473c9eba243d808eab66d318548b02964583e4fcb76074c59",
+    "promptVersion": "mixed",
+    "promptVersionByNode": {
+      "skill.command-def-t1-n0": "tree-language/3",
+      "skill.command-def-t10-n0": "tree-language/3",
+      "skill.command-def-t10-n1": "tree-language/3",
+      "skill.command-def-t10-n2": "",
+      "skill.command-def-t2-n0": "tree-language/3",
+      "skill.command-def-t3-n0": "",
+      "skill.command-def-t3-n1": "tree-language/3",
+      "skill.command-def-t4-n0": "tree-language/3",
+      "skill.command-def-t4-n1": "tree-language/3",
+      "skill.command-def-t5-n0": "tree-language/3",
+      "skill.command-def-t5-n1": "",
+      "skill.command-def-t6-n0": "",
+      "skill.command-def-t6-n1": "tree-language/3",
+      "skill.command-def-t7-n0": "tree-language/3",
+      "skill.command-def-t7-n1": "tree-language/3",
+      "skill.command-def-t8-n0": "tree-language/3",
+      "skill.command-def-t8-n1": "tree-language/3",
+      "skill.command-def-t9-n0": "",
+      "skill.command-def-t9-n1": "tree-language/3",
+      "skill.command-def-t9-n2": "tree-language/3",
+      "skill.command-off-t1-n0": "tree-language/3",
+      "skill.command-off-t10-n0": "tree-language/3",
+      "skill.command-off-t10-n1": "tree-language/3",
+      "skill.command-off-t10-n2": "",
+      "skill.command-off-t2-n0": "tree-language/3",
+      "skill.command-off-t3-n0": "tree-language/3",
+      "skill.command-off-t3-n1": "tree-language/3",
+      "skill.command-off-t4-n0": "tree-language/3",
+      "skill.command-off-t4-n1": "tree-language/3",
+      "skill.command-off-t5-n0": "",
+      "skill.command-off-t5-n1": "tree-language/3",
+      "skill.command-off-t6-n0": "",
+      "skill.command-off-t6-n1": "tree-language/3",
+      "skill.command-off-t7-n0": "",
+      "skill.command-off-t7-n1": "tree-language/3",
+      "skill.command-off-t8-n0": "tree-language/3",
+      "skill.command-off-t8-n1": "tree-language/3",
+      "skill.command-off-t9-n0": "tree-language/3",
+      "skill.command-off-t9-n1": "tree-language/3",
+      "skill.command-off-t9-n2": "tree-language/3"
+    }
   },
   "nodes": [
     {
       "affinity": [
         "core",
+        "core",
         "likely"
       ],
       "affixIds": [
-        "atom.shield-capacity",
-        "atom.shield-toughness"
+        "atom.fortitude",
+        "atom.resilience",
+        "atom.vitality"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The sheer weight of authority hardens the spirit and expands the protective veil.",
+      "flavor": "The weight of authority anchors the soul to the earth.",
       "id": "skill.command-def-t1-n0",
-      "name": "Commanding Presence",
-      "nameKey": "tree.node.commanding-presence-2",
+      "name": "Rooted Command",
+      "nameKey": "tree.node.rooted-command",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.power",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
       "tier": 1
     },
     {
       "affinity": [
         "core",
-        "core"
+        "likely"
       ],
       "affixIds": [
         "atom.shld-cycle",
@@ -44,42 +95,58 @@
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the shield becomes a heartbeat, driving the next surge before the first has even faded.",
+      "flavor": "Unity in formation creates a seamless barrier of shared protection.",
       "id": "skill.command-def-t10-n0",
-      "name": "Overclocked Aegis",
-      "nameKey": "tree.node.overclocked-aegis",
+      "name": "Phalanx Synchrony",
+      "nameKey": "tree.node.phalanx-synchrony",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.breakthroughSuccess",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 10
     },
     {
       "affinity": [
-        "likely"
+        "likely",
+        "core"
       ],
       "affixIds": [
-        "atom.evd-husk"
+        "atom.shld-cycle",
+        "atom.ward-link"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "tier"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The command is not spoken, but felt through the crushing weight of the earth itself.",
+      "flavor": "The rhythm of the shield is the rhythm of the war.",
       "id": "skill.command-def-t10-n1",
-      "name": "Subterranean Mandate",
-      "nameKey": "tree.node.subterranean-mandate",
+      "name": "Cyclical Command",
+      "nameKey": "tree.node.cyclical-command",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.power",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 10
     },
@@ -111,25 +178,36 @@
     },
     {
       "affinity": [
-        "core"
+        "occasional",
+        "core",
+        "likely"
       ],
       "affixIds": [
-        "atom.shield-capacity"
+        "atom.plating",
+        "atom.shield-capacity",
+        "atom.warding"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "tier"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The commander's presence hardens the very air around the vanguard.",
+      "flavor": "The commander's presence hardens the resolve of the front line, turning skin to steel.",
       "id": "skill.command-def-t2-n0",
       "name": "Ironclad Mandate",
-      "nameKey": "tree.node.ironclad-mandate",
+      "nameKey": "tree.node.ironclad-mandate-3",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reduction",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
       "tier": 2
     },
@@ -161,75 +239,96 @@
     },
     {
       "affinity": [
+        "occasional",
         "core"
       ],
       "affixIds": [
-        "atom.shield-capacity"
+        "atom.arm-hardening",
+        "atom.shld-toughness"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "Structural integrity reinforced by layered defensive protocols.",
+      "flavor": "A layered command structure that reinforces the shell against all impact.",
       "id": "skill.command-def-t3-n1",
       "name": "Bastion Protocol",
-      "nameKey": "tree.node.bastion-protocol",
+      "nameKey": "tree.node.bastion-protocol-2",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.rate",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
       "tier": 3
     },
     {
       "affinity": [
-        "core",
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "A rhythmic rotation of defensive measures that leaves no opening for the enemy.",
+      "id": "skill.command-def-t4-n0",
+      "name": "Phalanx Sequence",
+      "nameKey": "tree.node.phalanx-sequence",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.damage",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnMatchStart"
+      },
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
         "core"
       ],
       "affixIds": [
-        "atom.shld-cycle",
         "atom.shld-surge"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "When the directive is absolute, the shield pulses in rhythm with the commander's intent.",
-      "id": "skill.command-def-t4-n0",
-      "name": "Command Overload",
-      "nameKey": "tree.node.command-overload",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 4
-    },
-    {
-      "affinity": [
-        "likely"
-      ],
-      "affixIds": [
-        "atom.shield-toughness"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "branch"
-        ]
-      },
-      "flavor": "Reinforcing the structural integrity of the protective barrier through multi-layered plating.",
+      "flavor": "The command structure thickens, layering protection upon protection.",
       "id": "skill.command-def-t4-n1",
-      "name": "Layered Defenses",
-      "nameKey": "tree.node.layered-defenses",
+      "name": "Bulwark Protocol",
+      "nameKey": "tree.node.bulwark-protocol",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.rate",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 4
     },
@@ -240,22 +339,29 @@
       ],
       "affixIds": [
         "atom.shld-cycle",
-        "atom.shld-surge"
+        "atom.ward-link"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the shield dictates the rhythm of the soul.",
+      "flavor": "A single, cohesive directive that binds the defenses of the many into one unbreakable front.",
       "id": "skill.command-def-t5-n0",
-      "name": "Cyclical Aegis",
-      "nameKey": "tree.node.cyclical-aegis-3",
+      "name": "Unified Command",
+      "nameKey": "tree.node.unified-command",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.capacity",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 5
     },
@@ -311,53 +417,104 @@
     },
     {
       "affinity": [
+        "occasional",
         "core",
-        "likely"
+        "occasional"
       ],
       "affixIds": [
-        "atom.shield-capacity",
-        "atom.shield-toughness"
+        "atom.arm-welding",
+        "atom.evd-harden",
+        "atom.shld-toughness"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "Layered plating that thickens as the command structure holds.",
+      "flavor": "The line holds, not through strength alone, but through the refusal to yield an inch of ground.",
       "id": "skill.command-def-t6-n1",
       "name": "Phalanx Reinforcement",
-      "nameKey": "tree.node.phalanx-reinforcement",
+      "nameKey": "tree.node.phalanx-reinforcement-2",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.toughness",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnSpawn"
+      },
       "rationale": "",
       "tier": 6
     },
     {
       "affinity": [
         "core",
-        "core"
+        "occasional",
+        "likely"
       ],
       "affixIds": [
-        "atom.shld-cycle",
-        "atom.shld-surge"
+        "atom.evd-brace",
+        "atom.mending",
+        "atom.sust-callus"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the shield becomes the rhythm of the soul.",
+      "flavor": "The longer the siege, the thicker the skin.",
       "id": "skill.command-def-t7-n0",
-      "name": "Recursive Aegis",
-      "nameKey": "tree.node.recursive-aegis",
+      "name": "Attrition Doctrine",
+      "nameKey": "tree.node.attrition-doctrine",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "loadout.slots",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnSpawn"
+      },
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely",
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.arm-hardening",
+        "atom.plating"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The command is not merely to hold, but to persist through the very marrow of the legion.",
+      "id": "skill.command-def-t7-n1",
+      "name": "Sovereign Endurance",
+      "nameKey": "tree.node.sovereign-endurance",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "move.range",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnSunCollect"
+      },
       "rationale": "",
       "tier": 7
     },
@@ -367,75 +524,61 @@
         "core"
       ],
       "affixIds": [
-        "atom.fortitude",
-        "atom.vitality"
+        "atom.ward-brace",
+        "atom.ward-flux"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The foundation of the command structure is not built on steel, but on the unyielding strength of the living marrow.",
-      "id": "skill.command-def-t7-n1",
-      "name": "Deep Rooted",
-      "nameKey": "tree.node.deep-rooted-4",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.shld-cycle",
-        "atom.shld-surge"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The command structure anticipates the impact, converting the momentum of a strike into a rhythmic pulse of defensive energy.",
+      "flavor": "The command structure anticipates the impact before the first shot is even fired.",
       "id": "skill.command-def-t8-n0",
-      "name": "Reactive Bastion",
-      "nameKey": "tree.node.reactive-bastion",
+      "name": "Overwatch Protocol",
+      "nameKey": "tree.node.overwatch-protocol",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm1",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnSunCollect"
+      },
       "rationale": "",
       "tier": 8
     },
     {
       "affinity": [
-        "core",
         "core"
       ],
       "affixIds": [
-        "atom.shld-cycle",
-        "atom.shld-surge"
+        "atom.ward-flux"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the shield is the heartbeat of the command.",
+      "flavor": "The impact is not absorbed, but redirected through the structural integrity of the ward.",
       "id": "skill.command-def-t8-n1",
-      "name": "Synchronized Aegis",
-      "nameKey": "tree.node.synchronized-aegis",
+      "name": "Kinetic Displacement",
+      "nameKey": "tree.node.kinetic-displacement",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm2",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnSunCollect"
+      },
       "rationale": "",
       "tier": 8
     },
@@ -465,25 +608,34 @@
     },
     {
       "affinity": [
-        "core"
+        "core",
+        "likely"
       ],
       "affixIds": [
-        "atom.shld-cycle"
+        "atom.shld-surge",
+        "atom.ward-harden"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While conversionState holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "conversionState"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The command is not merely spoken; it is etched into the very cellular structure of the unit.",
+      "flavor": "A rhythmic deployment of kinetic shielding and calcified plating.",
       "id": "skill.command-def-t9-n1",
-      "name": "Dermal Grafting",
-      "nameKey": "tree.node.dermal-grafting",
+      "name": "Bastion Sequence",
+      "nameKey": "tree.node.bastion-sequence",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.defense",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnTimer"
+      },
       "rationale": "",
       "tier": 9
     },
@@ -492,72 +644,97 @@
         "core"
       ],
       "affixIds": [
-        "atom.shld-surge"
+        "atom.shield-capacity"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the shield's pulse dictates the tempo of the recovery.",
+      "flavor": "The structural integrity of the command unit is reinforced by the very energy it seeks to project.",
       "id": "skill.command-def-t9-n2",
-      "name": "Resonant Feedback",
-      "nameKey": "tree.node.resonant-feedback",
+      "name": "Aegis Integration",
+      "nameKey": "tree.node.aegis-integration",
       "nodeClass": "mechanism",
       "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.maxHp",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnTimer"
+      },
       "rationale": "",
       "tier": 9
     },
     {
       "affinity": [
-        "core"
+        "likely",
+        "core",
+        "occasional"
       ],
       "affixIds": [
-        "atom.ferocity"
+        "atom.ferocity",
+        "atom.might",
+        "atom.savagery"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The eye perceives the fracture before the blade even strikes.",
+      "flavor": "The weight of the charge amplifies every strike.",
       "id": "skill.command-off-t1-n0",
-      "name": "Apex Sight",
-      "nameKey": "tree.node.apex-sight-2",
+      "name": "Vanguard's Prowess",
+      "nameKey": "tree.node.vanguard-s-prowess",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "ai.aggression",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 1
     },
     {
       "affinity": [
-        "likely",
-        "core"
+        "core",
+        "occasional"
       ],
       "affixIds": [
-        "atom.elpw-attune",
-        "atom.elpw-overflow"
+        "atom.death-salvo",
+        "atom.tempo-yield"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The air hums with the friction of excess energy, demanding release.",
+      "flavor": "When the command is issued, the sequence cannot be broken.",
       "id": "skill.command-off-t10-n0",
-      "name": "Resonant Overload",
-      "nameKey": "tree.node.resonant-overload-3",
+      "name": "Finality Protocol",
+      "nameKey": "tree.node.finality-protocol",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.shred",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 10
     },
@@ -566,22 +743,29 @@
         "core"
       ],
       "affixIds": [
-        "atom.elpw-override"
+        "atom.elpw-pierce"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The order is given; the momentum is absolute.",
+      "flavor": "Harmonic frequencies bypass the most stubborn defenses.",
       "id": "skill.command-off-t10-n1",
-      "name": "Command Overrun",
-      "nameKey": "tree.node.command-overrun",
+      "name": "Resonance Sequence",
+      "nameKey": "tree.node.resonance-sequence",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.strength",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 10
     },
@@ -611,8 +795,8 @@
     },
     {
       "affinity": [
-        "likely",
-        "core"
+        "core",
+        "likely"
       ],
       "affixIds": [
         "atom.ferocity",
@@ -620,18 +804,25 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "aptitude"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The sheer weight of authority compels the blood to surge and the blade to bite deeper.",
+      "flavor": "The weight of command is felt in every crushing blow.",
       "id": "skill.command-off-t2-n0",
-      "name": "Commanding Presence",
-      "nameKey": "tree.node.commanding-presence",
+      "name": "Sovereign Onslaught",
+      "nameKey": "tree.node.sovereign-onslaught",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.absorption",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 2
     },
@@ -641,23 +832,30 @@
         "likely"
       ],
       "affixIds": [
-        "atom.ferocity",
-        "atom.might"
+        "atom.precision",
+        "atom.swiftness"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of command turns momentum into raw, crushing force.",
+      "flavor": "Precision is a rhythm, and rhythm is a weapon.",
       "id": "skill.command-off-t3-n0",
-      "name": "Vanguard's Zeal",
-      "nameKey": "tree.node.vanguard-s-zeal",
+      "name": "Tactical Cadence",
+      "nameKey": "tree.node.tactical-cadence",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.accuracy",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 3
     },
@@ -667,71 +865,96 @@
         "core"
       ],
       "affixIds": [
-        "atom.might",
-        "atom.precision"
+        "atom.ferocity",
+        "atom.might"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "aptitude"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A focused gaze that turns every movement into a lethal strike.",
+      "flavor": "The weight of command ripples through the air, sharpening focus and swelling the storm.",
       "id": "skill.command-off-t3-n1",
-      "name": "Tactical Precision",
-      "nameKey": "tree.node.tactical-precision",
+      "name": "Overwhelming Decree",
+      "nameKey": "tree.node.overwhelming-decree",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.amplification",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 3
     },
     {
       "affinity": [
-        "core"
+        "core",
+        "likely"
       ],
       "affixIds": [
-        "atom.tempo-surge"
+        "atom.elpw-attune",
+        "atom.elpw-surge"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the strike dictates the speed of the next.",
+      "flavor": "The frequency of command aligns with the elemental surge.",
       "id": "skill.command-off-t4-n0",
-      "name": "Momentum Protocol",
-      "nameKey": "tree.node.momentum-protocol",
+      "name": "Resonance Protocol",
+      "nameKey": "tree.node.resonance-protocol",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.break",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
       "tier": 4
     },
     {
       "affinity": [
+        "core",
         "likely"
       ],
       "affixIds": [
-        "atom.precision"
+        "atom.elpw-overflow",
+        "atom.elpw-surfeit"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "aptitude"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A calculated assessment of the battlefield ensures every strike finds its mark and every blow carries weight.",
+      "flavor": "The flow of energy becomes an unstoppable torrent.",
       "id": "skill.command-off-t4-n1",
-      "name": "Strategic Oversight",
-      "nameKey": "tree.node.strategic-oversight",
+      "name": "Surge Protocol",
+      "nameKey": "tree.node.surge-protocol",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.rate",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
       "tier": 4
     },
@@ -761,25 +984,36 @@
     },
     {
       "affinity": [
-        "core"
+        "core",
+        "likely",
+        "occasional"
       ],
       "affixIds": [
-        "atom.ferocity"
+        "atom.ferocity",
+        "atom.precision",
+        "atom.swiftness"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The commander's voice carries a weight that compels the blood to boil and the blade to strike with unyielding fury.",
+      "flavor": "The rhythm of the strike dictates the speed of the soul.",
       "id": "skill.command-off-t5-n1",
-      "name": "Aggressive Mandate",
-      "nameKey": "tree.node.aggressive-mandate",
+      "name": "Momentum Mandate",
+      "nameKey": "tree.node.momentum-mandate",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.strength",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
       "tier": 5
     },
@@ -809,27 +1043,32 @@
     },
     {
       "affinity": [
-        "core",
         "likely"
       ],
       "affixIds": [
-        "atom.might",
-        "atom.precision"
+        "atom.cruelty"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "aptitude"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A decisive strike that leaves no room for error or hesitation.",
+      "flavor": "The weight of command turns every calculated strike into a crushing blow.",
       "id": "skill.command-off-t6-n1",
-      "name": "Commanding Salvo",
-      "nameKey": "tree.node.commanding-salvo",
+      "name": "Vanguard's Decree",
+      "nameKey": "tree.node.vanguard-s-decree",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.rate",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnDamageTaken"
+      },
       "rationale": "",
       "tier": 6
     },
@@ -861,8 +1100,8 @@
     },
     {
       "affinity": [
-        "likely",
-        "core"
+        "occasional",
+        "likely"
       ],
       "affixIds": [
         "atom.ferocity",
@@ -870,118 +1109,155 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The momentum of the front line fuels the strength of the strike.",
+      "flavor": "The battlefield is a map of inevitable outcomes.",
       "id": "skill.command-off-t7-n1",
-      "name": "Vanguard's Surge",
-      "nameKey": "tree.node.vanguard-s-surge-2",
+      "name": "Grand Strategist",
+      "nameKey": "tree.node.grand-strategist",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist.damage",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnDamageTaken"
+      },
       "rationale": "",
       "tier": 7
     },
     {
       "affinity": [
-        "likely",
+        "occasional",
         "core"
       ],
       "affixIds": [
-        "atom.elpw-overflow",
-        "atom.elpw-pierce"
+        "atom.elpw-attune",
+        "atom.elpw-override"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The spectrum fractures, allowing raw energy to bypass the physical constraints of the target.",
+      "flavor": "The command is absolute; the elements must bend to the will of the strategist.",
       "id": "skill.command-off-t8-n0",
-      "name": "Prismatic Breach",
-      "nameKey": "tree.node.prismatic-breach",
+      "name": "Overlord Protocol",
+      "nameKey": "tree.node.overlord-protocol",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.defense",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 8
     },
     {
       "affinity": [
+        "core",
         "likely"
       ],
       "affixIds": [
-        "atom.elpw-focus"
+        "atom.elpw-focus",
+        "atom.elpw-override"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The hierarchy is absolute; the elements must obey the directive.",
+      "flavor": "The command is absolute; the elements must obey or be consumed.",
       "id": "skill.command-off-t8-n1",
-      "name": "Command Override",
-      "nameKey": "tree.node.command-override",
+      "name": "Overload Directive",
+      "nameKey": "tree.node.overload-directive",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.dodge",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 8
     },
     {
       "affinity": [
+        "likely",
         "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of the command is broken by the violent surge of excess energy.",
+      "id": "skill.command-off-t9-n0",
+      "name": "Overload Sequence",
+      "nameKey": "tree.node.overload-sequence",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.heal.power",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnDeath"
+      },
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "occasional"
       ],
       "affixIds": [
         "atom.tempo-surge"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The momentum of the first strike dictates the rhythm of the entire engagement.",
-      "id": "skill.command-off-t9-n0",
-      "name": "Chain of Command",
-      "nameKey": "tree.node.chain-of-command",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 9
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.elpw-overflow",
-        "atom.elpw-pierce"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The command is not merely to strike, but to ensure the strike ignores all resistance.",
+      "flavor": "The rhythm of the advance dictates the intensity of the strike.",
       "id": "skill.command-off-t9-n1",
-      "name": "Sovereign Breach",
-      "nameKey": "tree.node.sovereign-breach",
+      "name": "Cascading Command",
+      "nameKey": "tree.node.cascading-command",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.break",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 9
     },
@@ -990,22 +1266,29 @@
         "core"
       ],
       "affixIds": [
-        "atom.elpw-attune"
+        "atom.prec-sync"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While element holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "element"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the command dictates the flow of the storm.",
+      "flavor": "The rhythm of the strike dictates the intensity of the blast.",
       "id": "skill.command-off-t9-n2",
-      "name": "Resonant Frequency",
-      "nameKey": "tree.node.resonant-frequency",
+      "name": "Tactical Overload",
+      "nameKey": "tree.node.tactical-overload",
       "nodeClass": "mechanism",
       "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.rate",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 9
     }

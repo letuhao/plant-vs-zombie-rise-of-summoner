@@ -1,8 +1,10 @@
 import { cn } from "@/lib/cn";
+import { CatalogIcon } from "./CatalogIcon";
 
 export function AptitudeTile({
   id,
   displayName,
+  icon,
   value,
   selected,
   onSelect,
@@ -12,6 +14,7 @@ export function AptitudeTile({
 }: {
   id: string;
   displayName: string;
+  icon?: string | null;
   value: number;
   selected?: boolean;
   onSelect?: () => void;
@@ -29,7 +32,14 @@ export function AptitudeTile({
       )}
     >
       <button type="button" className="w-full text-left" onClick={onSelect}>
-        <span className="block font-ui text-sm text-text">{displayName}</span>
+        <span className="mb-1 flex items-center gap-2">
+          <CatalogIcon
+            icon={icon}
+            fallbackToken={displayName.slice(0, 2)}
+            testId={`aptitude-icon-${id}`}
+          />
+          <span className="block font-ui text-sm text-text">{displayName}</span>
+        </span>
         <span className="block font-mono text-lg text-text" data-testid={`aptitude-value-${id}`}>
           {value}
         </span>

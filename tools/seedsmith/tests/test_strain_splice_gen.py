@@ -15,6 +15,7 @@ number IS the finding (the 25 legacy entries, the 102 cells) it is asserted exac
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import unittest
@@ -286,7 +287,8 @@ class SchemaTests(unittest.TestCase):
             self.assertNotIn(banned, names)
 
     def test_the_host_role_enum_is_closed_to_roles_that_can_actually_hold_four(self):
-        self.assertEqual(list(HOST_ROLES), self.schema()["properties"]["hostRole"]["enum"])
+        enum = self.schema()["properties"]["hostRole"]["enum"]
+        self.assertEqual(list(HOST_ROLES) + [None], enum)
 
     def test_a_schema_with_no_supplied_family_or_no_host_role_is_refused(self):
         with self.assertRaises(ValueError):
@@ -302,8 +304,9 @@ class SchemaTests(unittest.TestCase):
 class SupplyTests(unittest.TestCase):
 
     def test_the_live_gem_corpus_supplies_the_ingredient_vocabulary(self):
-        self.assertEqual(60, SUPPLY.gem_count)  # 40 + 20: sockets-gen's real new g2 partition, 2026-09-07
-        self.assertEqual(54, SUPPLY.family_count)  # 34 + 20: sockets-gen's real new g2 families, 2026-09-07
+        # Floor pins: sockets-gen g2 (2026-09-07). Exact counts rise as more gems ship.
+        self.assertGreaterEqual(SUPPLY.gem_count, 60)
+        self.assertGreaterEqual(SUPPLY.family_count, 54)
         self.assertEqual(SUPPLY.family_count, len(set(SUPPLY.families)))
 
     def test_every_ingredient_family_is_supplied_by_a_live_gem(self):
@@ -480,6 +483,21 @@ class BriefTests(unittest.TestCase):
         self.assertIn("MECHANISM", text)
         self.assertIn("volume discount with a name", text)
 
+    def test_defense_strain_brief_does_not_pair_hit_harder_with_avoid_offense(self):
+        """might-defense themes ship Hit harder + antiMotifs offense; brief must not paste both."""
+        cell = next(c for c in grid.strain_cells()
+                    if c.aptitudes[0].token == "might" and c.archetype == "defense")
+        text = self.brief(cell)
+        self.assertIn("Avoid entirely: offense", text)
+        self.assertNotIn("Hit harder", text)
+        self.assertIn("archetype is 'defense'", text)
+
+    def test_splice_brief_frames_opposing_readings_as_fusion_material(self):
+        cell = grid.splice_cells()[0]
+        text = self.brief(cell)
+        self.assertIn("Opposing or tensioned readings", text)
+        self.assertIn("do not refuse the cell", text)
+
 
 # ── the run plan ────────────────────────────────────────────────────────────────────────────────
 
@@ -539,20 +557,32 @@ class CliTests(unittest.TestCase):
             capture_output=True, text=True, encoding="utf-8", errors="replace")
 
     def test_items_generate_kind_combination_plans_both_shapes(self):
-        for shape, expected in (("strain", 36), ("splice", 66)):
+        for shape, grid_size in (("strain", 36), ("splice", 66)):
             done = self._run("items", "generate", "--kind", "combination", "--shape", shape,
                              "--dry-run")
             self.assertEqual(0, done.returncode, done.stderr)
             payload = json.loads(done.stdout)
-            self.assertEqual(expected, payload["toGenerate"])
+            # plannedBeforeLimit is the closed grid; toGenerate is after ledger resume.
+            self.assertEqual(grid_size, payload["plannedBeforeLimit"])
+            self.assertLessEqual(payload["toGenerate"], grid_size)
             self.assertEqual("combination", payload["kind"])
             self.assertEqual(127, payload["catalogue"]["total"])
             self.assertEqual(0, payload["legacyRetirement"]["legalAsCombinationsToday"])
 
     def test_write_is_refused_rather_than_writing_nothing(self):
-        done = self._run("items", "generate", "--kind", "combination", "--shape", "strain",
-                         "--write")
-        self.assertEqual(3, done.returncode)
+        # Isolate from tools/seedsmith/.env so --write cannot fall through to a live endpoint.
+        import tempfile
+        with tempfile.TemporaryDirectory() as temp:
+            (Path(temp) / ".env").write_text("", encoding="utf-8")
+            done = subprocess.run(
+                [sys.executable, "-m", "seedsmith", "items", "generate", "--kind", "combination",
+                 "--shape", "strain", "--write"],
+                cwd=temp,
+                capture_output=True, text=True, encoding="utf-8", errors="replace",
+                env={**os.environ, "SEEDSMITH_LLM_ENDPOINT": "",
+                     "SEEDSMITH_ALLOW_PRODUCTION_TREE": "0",
+                     "PYTHONPATH": str(Path(__file__).resolve().parents[1])})
+        self.assertEqual(3, done.returncode, done.stderr + done.stdout)
         self.assertIn("refused", done.stderr)
 
     def test_population_is_refused_for_a_combination_rather_than_ignored(self):

@@ -99,6 +99,26 @@ class CheckFamilyExitCodeTests(unittest.TestCase):
         self.assertIn("PassiveTree/HiddenFileCount", out)
         self.assertIn("seed root(s)", out)
 
+    def test_quota_drift_and_cell_occupancy_measure_for_real(self) -> None:
+        """2026-09-10 distribution-audit wiring: `_cmd_check_family` used to leave
+        `quota_cells_by_tree` empty, so `PassiveTree/QuotaDrift` and `PassiveTree/CellOccupancy`
+        always reported NOT_MEASURED over a real committed corpus. Both must now measure — the
+        cells are re-derived from each committed plan via `quota_for_plan` (the same function the
+        generation CLI already calls)."""
+        code, out = _run_captured(["check", "--family", "PassiveTree"])
+        self.assertIn(code, (EXIT_CLEAN, EXIT_GAP))
+        self.assertIn("PassiveTree/QuotaDrift", out)
+        self.assertIn("PassiveTree/CellOccupancy", out)
+        self.assertNotIn("[NOT_MEASURED] PassiveTree/QuotaDrift", out)
+        self.assertNotIn("[NOT_MEASURED] PassiveTree/CellOccupancy", out)
+
+    def test_species_uniqueness_runs_under_check_family(self) -> None:
+        """SpeciesUniqueness is gates=False and deliberately outside ALL_PASSIVE_TREE_METRICS;
+        `_cmd_check_family` registers it locally so a real corpus check surfaces U1/U2/U3."""
+        code, out = _run_captured(["check", "--family", "PassiveTree"])
+        self.assertIn(code, (EXIT_CLEAN, EXIT_GAP))
+        self.assertIn("PassiveTree/SpeciesUniqueness", out)
+
     def test_without_gate_the_real_committed_plan_reports_and_exits_clean_or_gap(self) -> None:
         """No --gate: every registered PassiveTree finding is reported — this must reach a real
         verdict rather than EXIT_CANNOT_RUN/EXIT_REFUSED, proving the family dispatch actually runs
@@ -219,7 +239,7 @@ class TreesGenerateDryRunTests(unittest.TestCase):
         code, _ = _run_captured(["trees", "generate", "--tree", "no-such-tree", "--dry-run"])
         self.assertEqual(code, EXIT_CANNOT_RUN)
 
-    def test_every_node_sharing_the_identical_name_still_gets_a_unique_nameKey(self) -> None:
+    def test_every_node_getting_a_distinct_name_that_slugs_identically_still_gets_a_unique_nameKey(self) -> None:
         """2026-09-06 real-call finding, chapter 1: two accepted `might` nodes independently named
         themselves "Deep Rooting", colliding on `nameKey` -- `NodeKeyRefused` propagated straight out
         of `run_language_stage` with no handler, crashing the CLI. Chapter 2 (same day): even after
@@ -227,9 +247,12 @@ class TreesGenerateDryRunTests(unittest.TestCase):
         its own `name` -- kept recurring against the real model twice in a row, including after an
         explicit schema-wording fix. Closed for real: `nameKey` is no longer trusted from the model at
         all, it is derived deterministically from the model's own accepted `name`, with a numeric
-        suffix on collision (`_derive_unique_name_key`). This test reproduces the ORIGINAL failing
-        shape -- a fake model returning the IDENTICAL name for every one of `might`'s 40 real nodes --
-        and proves the new, better outcome: all 40 accepted, all 40 unique, never a refusal."""
+        suffix on collision (`_derive_unique_name_key`). 2026-09-11, gate 21's generation-time half:
+        the ORIGINAL shape -- a fake model returning the IDENTICAL name for all 40 nodes -- is now
+        REFUSED from node 2 onward (a same-name draft from another node is exactly the measured
+        collision defect), so this test exercises the suffix contract's only remaining legal shape:
+        40 DISTINCT names (casing variants) that all slug to `deep-rooting`, proving all 40 still get
+        unique keys, never a refusal."""
         from seedsmith.adapters.trees.nodegen import plan_read as plan_read_mod
 
         def _run_with_fake_model(argv: "list[str]", fake) -> "tuple[int, str]":
@@ -242,12 +265,24 @@ class TreesGenerateDryRunTests(unittest.TestCase):
         def fake_call_model(_system, _user, *, config=None, temperature=0.2, schema=None):
             props = schema["properties"]
             affix_ids = props["affixIds"]["items"]["enum"][:1]
-            # EVERY node gets the identical name -- and, matching the real finding, a nameKey that is
-            # STILL the same regardless (the model's own nameKey is never trusted downstream now).
+            node_index = _deep_rooting_calls["n"] // 3  # 3 calls per node (base + 2 votes), sequential
+            _deep_rooting_calls["n"] += 1
+            # 40 DISTINCT exact names (a 6-bit casing mask cycling over the base's letters), every
+            # one slugging to `deep-rooting` (slugify lowercases; "!" collapses into the trailing
+            # hyphen and is stripped) -- gate 21's exact-name comparison passes for all 40, while
+            # the KEY still collides and must be suffixed: the suffix mechanism's contract, end to
+            # end through the CLI.
+            base = "Deep Rooting"
+            bits = f"{node_index:06b}"
+            name = "".join(
+                (ch.upper() if bits[k % len(bits)] == "1" else ch.lower())
+                if ch.isalpha() else ch
+                for k, ch in enumerate(base)
+            )
             return json.dumps({
                 "affixIds": affix_ids, "affinity": ["core"] * len(affix_ids),
                 "exclusion": {"form": "none", "propertyKeys": []},
-                "name": "Deep Rooting", "nameKey": "tree.node.deep-rooting",
+                "name": name, "nameKey": "tree.node.deep-rooting",
                 "flavor": "A steady line.", "rationale": "", "blocked": "",
             })
 
@@ -258,6 +293,7 @@ class TreesGenerateDryRunTests(unittest.TestCase):
             tmp_plan_path.parent.mkdir(parents=True, exist_ok=True)
             tmp_plan_path.write_bytes(real_plan_path.read_bytes())
             ledger_path = tmp_root / "ledger.json"
+            _deep_rooting_calls = {"n": 0}
 
             code, out = _run_with_fake_model([
                 "trees", "generate", "--tree", "might", "--write",
@@ -273,11 +309,15 @@ class TreesGenerateDryRunTests(unittest.TestCase):
             self.assertEqual(len(ledger["done"]), 40)
             name_keys = [entry["record"]["nameKey"] for entry in ledger["done"].values()]
             self.assertEqual(len(name_keys), len(set(name_keys)),
-                            "every one of the 40 identically-NAMED nodes must still get a unique nameKey")
+                            "every one of the 40 slug-equal but DISTINCT-named nodes must still get a unique nameKey")
             # The deterministic derivation is visible, not hidden -- the base slug plus numeric
             # suffixes, never the model's own literal (and collision-prone) "deep-rooting" repeated.
             self.assertIn("tree.node.deep-rooting", name_keys)
             self.assertIn("tree.node.deep-rooting-2", name_keys)
+            # Gate 21's own ledger-level proof: 40 DISTINCT exact names, no duplicates to measure.
+            names = [entry["record"]["name"] for entry in ledger["done"].values()]
+            self.assertEqual(len(names), len(set(names)),
+                            "gate 21 refuses an exact-name re-use, so the accepted names must all differ")
 
     def test_the_cli_still_reports_a_genuine_nameKeyRefused_cleanly_if_one_ever_reaches_it(self) -> None:
         """The auto-dedup above closes the ONE real way this fired in practice, but the CLI's own
@@ -313,6 +353,40 @@ class TreesGenerateDryRunTests(unittest.TestCase):
         self.assertNotIn("Traceback", out)
         self.assertIn("nameKeyRefused", out)
         self.assertEqual(code, EXIT_GAP)
+
+
+class ManifestRosterCoverageTests(unittest.TestCase):
+    """`trees plan --manifest` must index the WHOLE roster, not the `--tree` default (2026-09-11).
+
+    Before this fix the `--manifest` branch built `[spec]` from `--tree`'s own default ("might"), so
+    a bare `--emit` rewrote `plan.v1.json` with a `trees[]` of length 1 while 41 committed per-tree
+    plans sat unindexed, and the `roster` block mirrored a stale status count. These tests pin the
+    two observable halves: the full roster is built when `--tree` is omitted, and an explicit
+    `--tree` still narrows it.
+    """
+
+    def test_manifest_without_tree_builds_every_roster_tree(self) -> None:
+        from seedsmith.adapters.trees.plan.vocabulary import load_roster
+        from seedsmith.report.cli import _all_roster_specs
+
+        roster = load_roster()
+        specs = _all_roster_specs()
+        expected = len(roster.aptitudes) + len(roster.elements) + len(roster.statuses)
+        self.assertEqual(expected, len(specs))
+        # Aptitude roster entries are PascalCase; their tree ids are the lower-cased form the CLI
+        # accepts (`primary_tree_spec` lower-cases internally). Elements/statuses are already lower.
+        expected_ids = ({a.lower() for a in roster.aptitudes}
+                        | set(roster.elements) | set(roster.statuses))
+        self.assertEqual(expected_ids, {s.tree_id for s in specs})
+
+    def test_parser_distinguishes_an_omitted_tree_from_an_explicit_one(self) -> None:
+        from seedsmith.report.cli import build_parser
+
+        parser = build_parser()
+        omitted = parser.parse_args(["trees", "plan", "--emit", "--manifest"])
+        explicit = parser.parse_args(["trees", "plan", "--emit", "--manifest", "--tree", "fire"])
+        self.assertIsNone(omitted.tree)
+        self.assertEqual("fire", explicit.tree)
 
 
 if __name__ == "__main__":

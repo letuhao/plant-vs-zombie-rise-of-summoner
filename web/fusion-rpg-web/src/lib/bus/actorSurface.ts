@@ -22,6 +22,7 @@ export type DerivedExpandKind =
   | "none"
   | "element"
   | "status-category"
+  | "status-id"
   | "resource"
   | "action-category";
 
@@ -30,6 +31,8 @@ export type ActorSurfaceTab = {
   label: string;
   order: number;
   hidden: boolean;
+  /** Optional lucide key for rail icons (CatalogIcon). */
+  icon?: string | null;
 };
 
 export type AptitudeCatalogRow = {
@@ -39,6 +42,8 @@ export type AptitudeCatalogRow = {
   displayName: string;
   role: string;
   reading: string;
+  /** Lucide / CatalogIcon key — optional so a missing icon never crashes the tile. */
+  icon?: string | null;
 };
 
 export type DerivedFamilyCatalogRow = {
@@ -79,6 +84,9 @@ export type StatusCatalogRow = {
   reading: string;
   hudToken: string;
   color: string;
+  /** L2b categories from status-catalog — replaces fold statusId→L2b maps. */
+  categories?: string[];
+  icon?: string | null;
 };
 
 export type KitRoleCatalogRow = {
@@ -277,7 +285,7 @@ export function derivedSurfaceFromFixture(
             id: v.id,
             displayName: localeEn(v.displayName),
             ordinal: v.ordinal,
-            presentationOnly: v.presentationOnly ?? false
+            presentationOnly: v.id === "omni"
           }));
       } else if (tab.id === "resources") {
         variants = surface.resources.map((r, i) => ({
@@ -287,6 +295,15 @@ export function derivedSurfaceFromFixture(
           presentationOnly: false
         }));
       } else if (tab.id === "other") {
+        // D3: Shared from cook Variants — fixture mirrors DerivedSurfaceCook.
+        variants = [
+          {
+            id: "shared",
+            displayName: "Shared",
+            ordinal: 0,
+            presentationOnly: false
+          }
+        ];
         actionCategoryVariants = raw.actionCategoryVariants
           .slice()
           .sort((a, b) => a.ordinal - b.ordinal)

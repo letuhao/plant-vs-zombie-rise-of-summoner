@@ -8,19 +8,483 @@
     "registryVersions": {
       "bands": 1,
       "core": 2,
-      "naming": 5,
+      "naming": 6,
       "tags": 4,
       "classes": 3,
       "themes": 1,
       "words": 5
     },
     "exemplarVersion": 1,
-    "promptVersion": "strain-splice-gen/1",
-    "model": "combogen/hand-authored-1",
-    "authoredUtc": "2026-09-07T00:00:00Z",
+    "promptVersion": "strain-splice-gen/2",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "authoredUtc": "1970-01-01T00:00:00Z",
     "sourceRef": "docs/architecture/item-seedgen/spec-combination-write-unblock.md"
   },
   "entries": [
+    {
+      "aptitudes": [
+        "Agility"
+      ],
+      "archetype": "balance",
+      "flavor": "A momentary lapse in physics where the user is simply no longer where the blow landed.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.evasion"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.strain-agility-balance",
+      "ingredients": [
+        {
+          "family": "atom.evasion",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.precision",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.quickening",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.swiftness",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Weightless Pivot",
+      "nameKey": "combination.strain-agility-balance",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Agility"
+      ],
+      "archetype": "defense",
+      "flavor": "A rhythmic dance of momentum and redirection, turning the enemy's strike into a wasted gesture.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.evasion",
+        "atom.swiftness"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.strain-agility-defense",
+      "ingredients": [
+        {
+          "family": "atom.evasion",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.evasion",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.quickening",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Slipstream Weave",
+      "nameKey": "combination.strain-agility-defense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Agility"
+      ],
+      "archetype": "offense",
+      "flavor": "A flicker in the peripheral vision, leaving only a vacuum where a killer once stood.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.evasion",
+        "atom.swiftness"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.strain-agility-offense",
+      "ingredients": [
+        {
+          "family": "atom.evasion",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-followthrough",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.precision",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.quickening",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Ghost-Step",
+      "nameKey": "combination.strain-agility-offense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Bulwark"
+      ],
+      "archetype": "balance",
+      "flavor": "A perfect equilibrium of weight and will that turns a collision into a standstill.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.stalwart"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.strain-bulwark-balance",
+      "ingredients": [
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.plating",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "The Immovable Axis",
+      "nameKey": "combination.strain-bulwark-balance",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Bulwark"
+      ],
+      "archetype": "defense",
+      "flavor": "A rhythmic pulse of fortification that turns a defensive stance into an immovable landmark.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.shield-regen",
+        "atom.stalwart"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.strain-bulwark-defense",
+      "ingredients": [
+        {
+          "family": "atom.arm-plate",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.mending",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Bastion's Anchor",
+      "nameKey": "combination.strain-bulwark-defense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Bulwark"
+      ],
+      "archetype": "offense",
+      "flavor": "The weight of the wall becomes a hammer.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.strain-bulwark-offense",
+      "ingredients": [
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.ferocity",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.might",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Bastion's Rebuttal",
+      "nameKey": "combination.strain-bulwark-offense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Composure"
+      ],
+      "archetype": "defense",
+      "flavor": "A rhythmic, unshakeable stillness that denies the chaos of the strike.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.stoicism",
+        "atom.warding"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.strain-composure-defense",
+      "ingredients": [
+        {
+          "family": "atom.evasion",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Stilled Pulse",
+      "nameKey": "combination.strain-composure-defense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Ferocity"
+      ],
+      "archetype": "offense",
+      "flavor": "The bastion does not wait for the breach; it becomes the breach.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.precision",
+        "atom.savagery"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.strain-ferocity-offense",
+      "ingredients": [
+        {
+          "family": "atom.cruelty",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.ferocity",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-followthrough",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Unstoppable Momentum",
+      "nameKey": "combination.strain-ferocity-offense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Focus"
+      ],
+      "archetype": "balance",
+      "flavor": "A rhythmic cadence of effort and recovery, where every exertion is met with a measured return.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.shield-regen",
+        "atom.quickening"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.strain-focus-balance",
+      "ingredients": [
+        {
+          "family": "atom.econ-muster",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-followthrough",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-mend",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.quickening",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Steady Pulse",
+      "nameKey": "combination.strain-focus-balance",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Focus"
+      ],
+      "archetype": "defense",
+      "flavor": "A rhythmic, efficient circulation of qi that stabilizes the spirit before the storm.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.shield-regen",
+        "atom.quickening"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.strain-focus-defense",
+      "ingredients": [
+        {
+          "family": "atom.cleansing",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.econ-endure",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.econ-endure",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.mending",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Stilled Pulse",
+      "nameKey": "combination.strain-focus-defense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Focus"
+      ],
+      "archetype": "offense",
+      "flavor": "The rhythm of the strike dictates the rhythm of the soul; strike once, and the next is already halfway there.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.quickening"
+      ],
+      "hostFrame": "plant",
+      "hostRole": "armament-primary",
+      "id": "combo.strain-focus-offense",
+      "ingredients": [
+        {
+          "family": "atom.hit-followthrough",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.precision",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.precision",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.quickening",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Flow-State",
+      "nameKey": "combination.strain-focus-offense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Fortitude"
+      ],
+      "archetype": "balance",
+      "flavor": "A steady rhythm of impact and absorption, where every blow received is transmuted into a foundation for the next.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.shield-regen",
+        "atom.resilience"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.strain-fortitude-balance",
+      "ingredients": [
+        {
+          "family": "atom.arm-plate",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.mending",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Equilibrium of the Unyielding",
+      "nameKey": "combination.strain-fortitude-balance",
+      "shape": "strain"
+    },
     {
       "aptitudes": [
         "Fortitude"
@@ -61,6 +525,83 @@
     },
     {
       "aptitudes": [
+        "Fortitude"
+      ],
+      "archetype": "offense",
+      "flavor": "The impact of your strike is not lost; it is redirected into the next blow.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.might"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.strain-fortitude-offense",
+      "ingredients": [
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-followthrough",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.might",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Recoil",
+      "nameKey": "combination.strain-fortitude-offense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Might"
+      ],
+      "archetype": "defense",
+      "flavor": "The force of the impact is not lost, but channeled through the frame to bolster the next strike.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.might"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.strain-might-defense",
+      "ingredients": [
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.hit-retort",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.might",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Redirection",
+      "nameKey": "combination.strain-might-defense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
         "Might"
       ],
       "archetype": "offense",
@@ -95,6 +636,347 @@
       "minSockets": 4,
       "name": "Savage Verdict",
       "nameKey": "combination.strain-might-offense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Onslaught"
+      ],
+      "archetype": "defense",
+      "flavor": "The force of the impact is not lost; it is redirected through the plating to strike back.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.shield-toughness"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.strain-onslaught-defense",
+      "ingredients": [
+        {
+          "family": "atom.arm-plate",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.bulwark",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-retort",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Kinetic Recoil",
+      "nameKey": "combination.strain-onslaught-defense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Onslaught"
+      ],
+      "archetype": "offense",
+      "flavor": "The impact does not care for the strength of the wall; it only cares for the weight of the blow.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.might",
+        "atom.retribution"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.strain-onslaught-offense",
+      "ingredients": [
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.hit-followthrough",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Unstoppable Momentum",
+      "nameKey": "combination.strain-onslaught-offense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Pierce"
+      ],
+      "archetype": "offense",
+      "flavor": "A strike so precise it ignores the thickness of the steel it meets.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.precision"
+      ],
+      "hostFrame": "plant",
+      "hostRole": "armament-primary",
+      "id": "combo.strain-pierce-offense",
+      "ingredients": [
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.precision",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Needle-Point",
+      "nameKey": "combination.strain-pierce-offense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Precision"
+      ],
+      "archetype": "offense",
+      "flavor": "A calculated path that renders evasion a mathematical impossibility.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.precision"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.strain-precision-offense",
+      "ingredients": [
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.keen-edge",
+          "minTier": 2,
+          "quantity": 2
+        }
+      ],
+      "minSockets": 4,
+      "name": "Unavoidable Trajectory",
+      "nameKey": "combination.strain-precision-offense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Retribution"
+      ],
+      "archetype": "balance",
+      "flavor": "Every blow dealt against the bastion is a debt that must be repaid in kind.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.strain-retribution-balance",
+      "ingredients": [
+        {
+          "family": "atom.arm-hardening",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-retort",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "The Weight of Reciprocity",
+      "nameKey": "combination.strain-retribution-balance",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Retribution"
+      ],
+      "archetype": "offense",
+      "flavor": "Every blow struck against this iron wall is a debt that must be repaid in blood.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.retribution",
+        "atom.ferocity"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.strain-retribution-offense",
+      "ingredients": [
+        {
+          "family": "atom.cruelty",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.ferocity",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-retort",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.retribution",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Vengeful Bastion",
+      "nameKey": "combination.strain-retribution-offense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Vigor"
+      ],
+      "archetype": "balance",
+      "flavor": "A steady rhythm of impact and recovery, where every blow taken is met with a measured surge of renewed strength.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.shield-regen",
+        "atom.stalwart"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.strain-vigor-balance",
+      "ingredients": [
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.mending",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.shield-regen",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Equilibrium of the Bulwark",
+      "nameKey": "combination.strain-vigor-balance",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Vigor"
+      ],
+      "archetype": "defense",
+      "flavor": "A dense, layered fortification that absorbs the impact of the world and converts the momentum into a steady, rhythmic replenishment of the spirit.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.shield-regen",
+        "atom.stalwart"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "core-guard",
+      "id": "combo.strain-vigor-defense",
+      "ingredients": [
+        {
+          "family": "atom.bulwark",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.fortitude",
+          "minTier": 1,
+          "quantity": 1
+        },
+        {
+          "family": "atom.mending",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.shield-regen",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Bulwark of the Unyielding",
+      "nameKey": "combination.strain-vigor-defense",
+      "shape": "strain"
+    },
+    {
+      "aptitudes": [
+        "Vigor"
+      ],
+      "archetype": "offense",
+      "flavor": "The more you bleed, the harder you strike.",
+      "grantedTier": 1,
+      "grants": [
+        "atom.might",
+        "atom.lifesteal"
+      ],
+      "hostFrame": "humanoid",
+      "hostRole": "armament-primary",
+      "id": "combo.strain-vigor-offense",
+      "ingredients": [
+        {
+          "family": "atom.bloodletting",
+          "minTier": 1,
+          "quantity": 2
+        },
+        {
+          "family": "atom.ferocity",
+          "minTier": 2,
+          "quantity": 1
+        },
+        {
+          "family": "atom.hit-followthrough",
+          "minTier": 2,
+          "quantity": 1
+        }
+      ],
+      "minSockets": 4,
+      "name": "Sanguine Momentum",
+      "nameKey": "combination.strain-vigor-offense",
       "shape": "strain"
     }
   ]

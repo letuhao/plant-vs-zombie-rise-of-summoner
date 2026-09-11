@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>status-glyph-strip</title>
+  <link rel="stylesheet" href="_piece-kit.css" />
+  <style>
+    .status-strip { width: 360px; color: #f2ead8; }
+    .spec-label { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #a39583; }
+    .glyph-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .status-glyph {
+      width: 46px; height: 46px; border-radius: 12px; border: 1px solid #5b5144;
+      background: #241d17; color: #f2ead8; font-weight: 700; display: grid; place-items: center;
+    }
+  </style>
+</head>
+<body>
+  <p>Live effects strip — composes shared StatusGlyph. <strong>Omit entire strip when items.length === 0</strong> (no empty chrome).</p>
+  <div class="status-strip" data-testid="condition-status-strip">
+    <p class="spec-label">Effects</p>
+    <div class="glyph-wrap" data-testid="condition-live-effects">
+      <button class="status-glyph" type="button">SP</button>
+      <button class="status-glyph" type="button">CO</button>
+      <button class="status-glyph" type="button">EM</button>
+    </div>
+  </div>
+</body>
+</html>

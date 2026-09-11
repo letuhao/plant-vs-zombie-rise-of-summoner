@@ -1,0 +1,421 @@
+{
+  "_meta": {
+    "candidateSetHash": "7d51158ae2c8de89addf7b8a1e8eba5e3f2235d9f65349002d14525c085149eb",
+    "corpusHash": "50b08fb26645582959613f18ec989e63aa754a6093201711928339f3ed2099d6",
+    "partition": "rounds",
+    "round": 909,
+    "tuningVersion": 1
+  },
+  "entries": [
+    {
+      "id": "action.family.base.002",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0006",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0007",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0015",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0017",
+      "promoted": true
+    },
+    {
+      "id": "action.species.allpeater.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.ashthreepeater.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cactus.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cactusblover.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.caltrop.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.caltropnut.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.caltropnut.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cherrybomb.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cherrybomb.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cherrygatling.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cherrynut.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cherrynut.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cherrynutzombie.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cherrynutzombie.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cherrypaperzombie.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cherrypaperzombie.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cherryshooter.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cherryshooter.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cherrysplit.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cherrythreepeater.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.chomper.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.conezombie.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cornpot.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.cornpult.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.dancepolzombie.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.dancepolzombie.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.darkthreepeater.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.dolldiamond.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.dollgold.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.dollgold.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.dollsilver.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.doomcactus.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.doomcactus.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.doublecherry.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.doublesnow.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.driverzombie.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.flagzombie.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.flagzombie.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.fumeshroom.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.garlic.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.garlicpea.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.garlicpea.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.garlicthreepeater.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.garlicthreepeater.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.gatlingpea.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.gatlingpea.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.hypnochomper.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.hypnochomper.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.hypnojalapeno.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.hypnojalapeno.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.hypnopeashooter.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.hypnopeashooter.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.hypnoshroom.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.icecaltrop.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.iceshroom.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.ironpeazombie.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.ironpeazombie.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.jalacaltrop.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.jalacaltrop.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.jalagatling.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.jalapeashooter.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.jalapeno.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.lanternchomper.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.lanternpea.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.marigold.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.marigold.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.melonpult.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.normalzombie.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.nutchomper.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.paperzombie.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.peachomper.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.peanut.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.peasquash.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.plantern.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.plantern.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.polevaulterzombie.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.pot.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.pumpkin.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.scaredyshroom.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.scaredyshroom.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.snowgatling.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.snowgatling.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.snowpeashooter.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.snowsplit.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.squash.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.starfruit.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.starpea.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.starpea.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.sunchomper.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.sunflower.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.sunflower.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.threepeater.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.threeplantern.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.twinflower.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.twinflower.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.wallnut.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.wallnut.002",
+      "promoted": true
+    }
+  ],
+  "kind": "action-seed",
+  "schemaVersion": 1
+}

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>element-badge — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+<style>
+  .element-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border: 1px solid color-mix(in srgb, var(--piece-accent, var(--border-control)) 55%, var(--border-control));
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--piece-accent, var(--text));
+    background: color-mix(in srgb, var(--piece-accent, transparent) 12%, var(--panel-inset));
+  }
+  .element-badge .glyph {
+    width: 12px; height: 12px; border-radius: 2px;
+    background: var(--piece-accent, var(--muted));
+  }
+</style>
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>element-badge</code></h1>
+  <p class="lede">Shared elemental identity Chip. Paint from element-paint SSOT / theme packs — never mute grey alone. Spec: <code>docs/architecture/gui-lego/spec-element-badge.md</code>.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live)</h2>
+      <div class="piece-stage" style="display:flex;flex-wrap:wrap;gap:8px">
+        <span class="element-badge" data-el="dark" style="--piece-accent:var(--el-dark); --piece-rail-edge:var(--el-dark)">
+          <i class="glyph" aria-hidden="true"></i>Dark
+        </span>
+        <span class="element-badge" data-el="fire" style="--piece-accent:var(--el-fire); --piece-rail-edge:var(--el-fire)">
+          <i class="glyph" aria-hidden="true"></i>Fire
+        </span>
+      </div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "element-badge",
+  "instanceId": "condition:el:dark",
+  "phase": "ready",
+  "elementId": "dark",
+  "label": "Dark",
+  "themeRef": { "kind": "element", "id": "dark" }
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

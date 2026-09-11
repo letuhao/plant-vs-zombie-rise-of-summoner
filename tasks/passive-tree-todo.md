@@ -6902,6 +6902,36 @@ already-identified files (plus the one test file's four tests) **grew to 6 produ
 files** once every positional call site was found by the build, not by the original grep; still no
 schema migration required.
 
+### J13: Regenerate the 42 shared trees under `tree-language/2` — OWNER GO/NO-GO on model spend
+**Filed by:** 2026-09-10 corpus distribution audit
+([docs/research/passive-tree/23-corpus-distribution-audit.md](../docs/research/passive-tree/23-corpus-distribution-audit.md)).
+**Why:** Layer-1 metrics over the committed 1,677-node shared corpus report three generation-vintage
+defects whose brief-side root cause is already fixed (`PROMPT_VERSION` bumped to `tree-language/2` in
+`adapters/trees/nodegen/brief.py`), but the committed corpus still carries `promptVersion:
+tree-language/1`:
+
+| Metric | Measured | Target |
+|---|---|---|
+| ExclusionRate | 1676/1677 (999‰); almost all `reroute` | ≤30‰ (~2% D14) |
+| NameCollision | 646/1677 (385‰) | 0 preferred |
+| NearDuplicate | 116/1677 (69‰) | ≤5‰ |
+
+Plus three missing mechanism nodes (`dark-def-t4-n0`, `fire-def-t9-n0`, `wither-def-t9-n1`) that are
+exactly the three MechanismRamp shortfalls.
+**Acceptance:**
+- [ ] Owner authorises the model-spend budget (~5,040 base+vote calls for 42×40 subjects, plus resume
+      for the 3 holes)
+- [ ] `python -m seedsmith trees generate --all --write` (or per-tree) under `tree-language/2` completes
+- [ ] `python -m seedsmith check --family PassiveTree` — ExclusionRate / NameCollision / NearDuplicate
+      within targets; MechanismRamp clean; UnresolvedCount still ≤50‰
+- [ ] Every regenerated seed document carries `promptVersion: tree-language/2` and a persisted
+      `quotaCell` (emit wiring landed with the audit)
+- [ ] No hand-edits of exclusion forms, names, or `kMicro` — regenerate only (spec-tree-review §6.1)
+**Verification:** `check --family PassiveTree` exit 0 under `--gate`; full family report shows no GAP
+on the three generation-vintage metrics above.
+**Depends on:** owner go/no-go. Audit + wiring already landed (this session). **Scope:** M — a run,
+not authoring. **Do not start without the owner call.**
+
 ### ⬜ Checkpoint J — ship — NOT YET REACHED (label corrected 2026-09-06, was falsely ✅ with all bullets unchecked)
 - [ ] Full corpus reviewed; escalations resolved through the ladder, not by hand edits
 - [ ] **This is the irreversible point** (D24) — after players build against these ids, a change is a

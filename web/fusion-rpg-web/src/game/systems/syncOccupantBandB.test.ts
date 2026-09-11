@@ -25,6 +25,7 @@ type MockGo = {
   setName: (n: string) => MockGo;
   setStrokeStyle: () => MockGo;
   setOrigin: () => MockGo;
+  setScrollFactor?: () => MockGo;
   getByName?: (n: string) => MockGo | null;
   add?: (child: MockGo) => MockGo;
   list?: MockGo[];
@@ -45,6 +46,9 @@ function makeMockContainer(children: MockGo[] = []): MockGo {
       return container;
     },
     setOrigin() {
+      return container;
+    },
+    setScrollFactor() {
       return container;
     },
     getByName(n: string) {

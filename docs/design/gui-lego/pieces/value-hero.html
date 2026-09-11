@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>value-hero — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>value-hero</code></h1>
+  <p class="lede">Big magnitude — displays valueText from VM (GG-46). Spec: <code>docs/architecture/gui-lego/spec-value-hero.md</code>. Visuals from payload/theme — no hard-coded element colors in the piece root.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live)</h2>
+      <div class="piece-stage"><div style="--piece-accent:var(--el-fire); --piece-rail-edge:var(--el-fire); --piece-select-glow:rgb(224 112 60 / 0.35)"><div class="big">2,847</div><div class="reading">Fire power</div></div></div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "value-hero",
+  "instanceId": "inspect:hero",
+  "title": "Power",
+  "valueRaw": 2847,
+  "valueText": "2,847",
+  "reading": "Fire power",
+  "themeRef": {
+    "kind": "element",
+    "id": "fire"
+  },
+  "phase": "ready"
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

@@ -279,3 +279,72 @@ python -m pytest tools/seedsmith       # corpus + gating metrics
 | ⚠ **`ContentValidation.cs:71` skips a null ceiling**, so `Budget` currently evaluates zero containers and reports green | A green Budget is not evidence until this is fixed. Folded into Phase 2 as a precondition of Checkpoint 2 |
 | **The two-way edge on X4** stalls 11 and 13 against each other | L0 ships with an empty declared channel set; 11 and 13 register on load |
 | **346 authored `nameWords` are dropped by the only code that reads them** (`AffixFamilyFile.cs:13`) | **Module 8** owns naming (`spec-affix-legality.md:374`); the work is *wiring existing words*, not authoring 210 rows. ⚠ 27 of 98 families are not band-keyed, so a position-indexed naming function would be wrong for those |
+
+## Phase 7 — requirement trials and maintenance (modules 23–25)
+
+**Status:** Planned 2026-09-09. Specs:
+[requirement-profiles](../docs/architecture/item/spec-requirement-profiles.md) →
+[equipment-activation](../docs/architecture/item/spec-equipment-activation.md) →
+[set-requirement-reconciliation](../docs/architecture/item/spec-set-requirement-reconciliation.md).
+Tasks: [item-todo.md](item-todo.md) P7.1–P7.7.
+
+### Architecture decisions
+
+- Generated requirements are frozen concrete-item facts and activation trials,
+  never new `EquipGate` refusal axes.
+- Profile resolution consumes existing power reads and unassisted aptitude
+  allocation. It has no level curve, model call, or resource write.
+- Activation is deployment-run state. It filters the existing equipment read
+  and pays through `CostLedger`; it never deletes an assignment to suspend it.
+  Lawn status begins at Bound and clears at binding/board end; Delve status
+  spans rooms and clears at deployment end. Siege follows the same contract
+  only for individually equipped combat participants; world-map troop legions
+  and structures never pay upkeep.
+- A set gets one frozen compatible envelope before its members mint. Existing
+  role-deduped set progress remains unchanged; inactive full sets grant no tier
+  effects.
+
+### Dependency graph
+
+```text
+equip-assign + item-power-reads
+             │
+             ▼
+P7.1 profile contract/resolver ──► P7.2 tuning and Seedsmith validation
+             │                              │
+             └──────────────┬───────────────┘
+                            ▼
+P7.3 deployment status owner ──► P7.4 upkeep scheduler and effect filter
+                            │
+                            ▼
+threshold-grants + set-charm-gen ──► P7.5 envelope ──► P7.6 metric and
+                                                              set activation
+                            │
+                            ▼
+                       P7.7 end-to-end evidence
+```
+
+### Checkpoints
+
+**Checkpoint 7A — frozen profile contract (P7.1–P7.2):** replay resolution is
+byte-identical; generated profiles never alter static admission; tuning and
+seed validators are green; magic-number audit is clean.
+
+**Checkpoint 7B — activation and upkeep (P7.3–P7.4):** a legal unmet item
+stays equipped with no effects; restart, ordering, delayed tick, and HP recovery
+tests pass; every enabled runtime has a logical tick caller.
+
+**Checkpoint 7C — set reconciliation (P7.5–P7.7):** every accepted set has a
+witnessed envelope and can be fully equipped; full unmet sets grant no tier
+effects; set-requirement and existing linkage metrics report zero findings.
+
+### Risks and mitigations
+
+| Risk | Mitigation |
+|---|---|
+| Profile state lands in the wrong lifetime | P7.3 owns deployment-run status; only frozen profiles and assignments are durable. |
+| Upkeep differs by runtime | P7.4 adapts each deployment's logical clock and pool owner; sustained content stays disabled until its adapter exists. |
+| Set members conflict | P7.5 validates one frozen envelope; P7.6 blocks unsatisfiable seeds before mint. |
+| Rarity leaks into value arithmetic | P7.1 proves identical selected profiles resolve equally across rarities. |
+| Balance literals hide in code | P7.1/P7.2 centralize weights, bands, reserve, cost, and period in versioned tuning. |
+| Deployment ownership is scattered | P7 uses thin adapters over lawn, battle, Delve, and siege. A later cross-program refactor standardizes only key, clock, bound/clear events, and pool lookup; it does not merge existing FSMs. |

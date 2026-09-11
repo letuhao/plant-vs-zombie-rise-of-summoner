@@ -90,7 +90,7 @@ foreach ($name in @("force", "finesse", "bastion")) {
 
 Push-Location $Root
 try {
-    dotnet run --project tools\CombatSim -- predict --json --out "$residualPath" `
+    dotnet run --project tools\CombatSim --no-restore --no-build -- predict --json --out "$residualPath" `
         --models "$liveAptitudesPath" --archetypes ($scratchPaths -join ",") --theta 100 --seed 8888 | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "CombatSim predict failed (exit $LASTEXITCODE)" }
 } finally { Pop-Location }
@@ -101,7 +101,7 @@ Write-Host "==> _baseline-dominance.json (CombatSim trinity --json, live $liveAp
 $dominancePath = Join-Path $OutDir "_baseline-dominance.json"
 Push-Location $Root
 try {
-    dotnet run --project tools\CombatSim -- trinity --json --out "$dominancePath" --models "$liveAptitudesPath" --seed 20260826 | Out-Null
+    dotnet run --project tools\CombatSim --no-restore --no-build -- trinity --json --out "$dominancePath" --models "$liveAptitudesPath" --seed 20260826 | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "CombatSim trinity failed (exit $LASTEXITCODE)" }
 } finally { Pop-Location }
 # class-system-todo.md P8.5/Checkpoint 8, resolved 2026-08-27: --models above now points trinity at the
@@ -123,7 +123,7 @@ Write-Host "==> overlaying dominanceMatrix/dominantCorners (FusionRpg.Core.Domin
 $coreDominancePath = Join-Path $OutDir "_dominance-core-scratch.json"
 Push-Location $Root
 try {
-    dotnet run --project tools\DominanceBaseline -- --theta 100 --out "$coreDominancePath" | Out-Null
+    dotnet run --project tools\DominanceBaseline --no-restore --no-build -- --theta 100 --out "$coreDominancePath" | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "DominanceBaseline failed (exit $LASTEXITCODE)" }
 } finally { Pop-Location }
 $coreDominance = Get-Content -LiteralPath $coreDominancePath -Raw | ConvertFrom-Json

@@ -43,8 +43,8 @@ A **surface** is `recipe + fold + bus`. It is not a freestyle TSX tree.
 |---|---|
 | `surface-shell` | `identity`, `tools`, `railPrimary`, `railVariant`, `main`, `foot` |
 | `split-inspect` | `dock`, `inspect` |
-| `family-block` | `header`, `rows` |
-| `family-list` | `blocks` (array of `family-block`) |
+| `family-block` | `rows` (array of `channel-row`) — **header is payload-owned** (`title` / `hint`), not a child piece |
+| `family-list` | `blocks` (array of `family-block`); empty filter uses payload `count === 0` → dock `phase-empty` (keep chrome) |
 | `inspect-pane` | `hero`, `meta`, `cap`, `gauges`, `sources` |
 | `scroll-region` | `content` |
 | `rail-primary` / `rail-variant` | `chips` (array of `chip`) |

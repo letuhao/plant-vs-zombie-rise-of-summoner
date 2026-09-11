@@ -9,6 +9,7 @@ public enum DerivedExpandKind
     None,
     Element,
     StatusCategory,
+    StatusId,
     Resource,
     ActionCategory
 }
@@ -127,7 +128,7 @@ public static class DerivedStatSurfaceCatalogLoader
             || !StatusCategoryIds.SetEquals(statusVariants.Select(v => v.Id)))
         {
             throw new ActorSurfaceCatalogRejection(
-                $"{Catalog}: statusCategoryVariants must be exactly omni/dot/cc/contagion");
+                $"{Catalog}: statusCategoryVariants must be exactly omni/dot/cc/contagion (L2b math vocabulary; Status rail uses status-catalog)");
         }
 
         if (actionVariants.Count != DerivedStatChannels.ActionCategories.Count
@@ -288,6 +289,7 @@ public static class DerivedStatSurfaceCatalogLoader
             "none" => DerivedExpandKind.None,
             "element" => DerivedExpandKind.Element,
             "status-category" => DerivedExpandKind.StatusCategory,
+            "status-id" => DerivedExpandKind.StatusId,
             "resource" => DerivedExpandKind.Resource,
             "action-category" => DerivedExpandKind.ActionCategory,
             _ => throw new ActorSurfaceCatalogRejection($"{Catalog}: unknown '{path}.expand' value '{raw}'")
@@ -422,14 +424,14 @@ public static class DerivedStatSurfaceCatalogLoader
     static void RejectStatusParity(IReadOnlyList<DerivedStatSurfaceEntry> entries)
     {
         var statusFamilies = entries
-            .Where(e => e.Expand == DerivedExpandKind.StatusCategory)
+            .Where(e => e.Expand == DerivedExpandKind.StatusId || e.Expand == DerivedExpandKind.StatusCategory)
             .Select(e => e.Family)
             .ToHashSet(StringComparer.Ordinal);
 
         if (!StatusFamilyIds.SetEquals(statusFamilies))
         {
             throw new ActorSurfaceCatalogRejection(
-                $"{Catalog}: status-category families must be exactly the six status.* potency families");
+                $"{Catalog}: status-id/status-category families must be exactly the six status.* potency families");
         }
     }
 
@@ -470,7 +472,7 @@ public static class DerivedStatSurfaceCatalogLoader
     public static string ExpandTabId(DerivedExpandKind expand) => expand switch
     {
         DerivedExpandKind.Element => "elements",
-        DerivedExpandKind.StatusCategory => "status",
+        DerivedExpandKind.StatusCategory or DerivedExpandKind.StatusId => "status",
         DerivedExpandKind.Resource => "resources",
         DerivedExpandKind.None or DerivedExpandKind.ActionCategory => "other",
         _ => throw new ActorSurfaceCatalogRejection($"{Catalog}: unmapped expand '{expand}'")
@@ -481,6 +483,7 @@ public static class DerivedStatSurfaceCatalogLoader
         DerivedExpandKind.None => "none",
         DerivedExpandKind.Element => "element",
         DerivedExpandKind.StatusCategory => "status-category",
+        DerivedExpandKind.StatusId => "status-id",
         DerivedExpandKind.Resource => "resource",
         DerivedExpandKind.ActionCategory => "action-category",
         _ => throw new ActorSurfaceCatalogRejection($"{Catalog}: unmapped expand '{expand}'")

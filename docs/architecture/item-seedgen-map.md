@@ -62,7 +62,7 @@ owner's rule, re-verified against the REAL schemas both audit passes:
 | Recipes (`outputKind: container`) | `outputRef` | **Hard** | `recipes.json:30`: `"outputRef": "item.humanoid-torso-a-001"` | `base-types-gen` |
 | Recipes (`outputKind: material`) | `outputRef` | **Hard** | `recipes.json:126`: `"outputRef": "substrate.humanoid.sound"` | `materials-gen` |
 | Recipes (any kind) | `costLines[].material` | **Hard** | `recipes.json:35`: `"substrate.humanoid.crude"` | `materials-gen` |
-| Sets/charms | `members[].role`+`.frame` | **Categorical** | `setgen/schema.py:104-107`: enums, never a container id | `base-types-gen` |
+| Sets/charms | `members[].role`+`.frame` → persisted `members[].baseType` | **Categorical, then deterministic binding** | `setgen/schema.py:104-107` accepts the category; `setgen/seedfile.py` resolves a concrete live base-type id by stable lookup before write | `base-types-gen` (coverage), `set-charm-live-endpoint` (binding) |
 | Combinations | `ingredients[]` (`supplied_families`) | **Categorical** | `combogen/schema.py:76-87`, enum at line 82 — ⚠ **corrected, 2nd pass: an earlier draft cited lines 92-98, which is actually the `grants` field below, not `ingredients`** | `sockets-gen` |
 | Combinations | `hostRole` | **Categorical** | `combogen/schema.py:100-102` | `base-types-gen` |
 | Combinations | `grants` (`granted_families`) | **External** ✅ resolved | `combogen/schema.py:88-98`; target confirmed below | `atom-family-library.md` |
@@ -96,9 +96,11 @@ depends on IT, reversing the first draft's "run in the same parallel phase" grou
 | 8 | `recipes-gen` | The 30-entry crafting-recipe corpus | 1, **6** (hard, `container` outputs), **3** (hard, `material` outputs + all `costLines`) | 4 |
 | 9 | `combination-write-unblock` | Unblocks module 21's `combination` `--write` refusal | 1, **6** (categorical `hostRole`), **4** (categorical `ingredients`); `grants` is `external` | 4 |
 | 10 | `drop-tables-gen` | The symbolic drop-table corpus | 1, **6** (categorical), **3, 4, 5** (all hard) | **5 — last, now depends on the most other modules** |
+| 12 | `fill-runner` | Safe full-corpus orchestration, terminal escalation checkpoints, deterministic depth | 1, 2–11 | **post-build operational repair** |
 
-Eleven modules now (was ten) — module 11 is numbered for when it was found, not its build phase; it
-runs in Phase 2 alongside modules 2-5.
+Twelve modules now (was ten) — module 11 is numbered for when it was found, not its build phase; it
+runs in Phase 2 alongside modules 2-5. Module 12 is a post-build orchestration repair; its contract is
+[`spec-fill-runner.md`](item-seedgen/spec-fill-runner.md), not a new content dependency.
 
 ## 3. Dependency graph (corrected, second pass)
 

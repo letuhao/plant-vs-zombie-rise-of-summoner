@@ -19,6 +19,18 @@ from seedsmith.report.cli import (  # noqa: E402
     main,
 )
 
+
+def test_retry_blocked_ledger_preserves_authored_and_marks_duplicate_feedback():
+    from seedsmith.report.cli import _retry_blocked_ledger
+
+    ledger, feedback = _retry_blocked_ledger({
+        "authored": {"attempts": 1},
+        "blocked": {"outcome": "blocked", "defects": ["schema mismatch"]},
+        "duplicate": {"outcome": "escalated", "defects": ["duplicate name 'Ash' "]},
+    })
+    assert set(ledger) == {"authored"}
+    assert feedback == {"duplicate"}
+
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
 
@@ -82,6 +94,14 @@ class MetricFilterTests(unittest.TestCase):
         self.assertEqual(code, EXIT_CLEAN)  # nothing ran, so nothing found a GAP
 
 
+def test_actions_check_uses_domain_loader_and_excludes_round_scratch(capsys):
+    """The actions loader excludes `_rounds/`, whose ids intentionally overlap committed seeds."""
+    live_actions = Path(__file__).resolve().parents[3] / "data" / "seed" / "actions"
+    assert main(["check", "--adapter", "actions", "--metric", "Actions/Loader",
+                 str(live_actions)]) == EXIT_CLEAN
+    assert "could not load corpus" not in capsys.readouterr().err
+
+
 if __name__ == "__main__":
     unittest.main()
 
@@ -101,10 +121,37 @@ def test_demons_subcommand_is_registered_with_both_verbs():
     from seedsmith.report.cli import build_parser
 
     parser = build_parser()
-    for argv in (["demons", "motifs"], ["demons", "generate", "--kind", "commander-effect"]):
+    for argv in (["demons", "motifs"], ["demons", "themes"],
+                 ["demons", "theme-refresh"],
+                 ["demons", "generate", "--kind", "commander-effect"]):
         args = parser.parse_args(argv)
         assert args.command == "demons"
         assert callable(args.func)
+
+
+def test_theme_refresh_public_command_reads_the_complete_roster(capsys):
+    """A stale theme snapshot must be repairable through the documented CLI, not a private module path."""
+    from seedsmith.report.cli import EXIT_CLEAN, main
+
+    assert main(["demons", "themes", "--dry-run"]) == EXIT_CLEAN
+    report = json.loads(capsys.readouterr().out)
+    assert report["dryRun"] is True
+    assert report["inputs"] == report["themes"] == 904
+
+
+def test_species_item_plan_refuses_when_theme_coverage_is_stale(capsys):
+    """A missing registration must stop the walk instead of looking like a smaller plan."""
+    from types import SimpleNamespace
+    from unittest.mock import patch
+
+    from seedsmith.adapters.items.setgen import themes as themes_mod
+    from seedsmith.report.cli import EXIT_CANNOT_RUN, main
+
+    stale = SimpleNamespace(species=904, themes=903, uncovered=("new-demon",), orphaned=())
+    with patch.object(themes_mod, "coverage_report", return_value=stale):
+        assert main(["items", "generate", "--kind", "set", "--population", "species",
+                     "--dry-run"]) == EXIT_CANNOT_RUN
+    assert "theme registry is stale" in capsys.readouterr().err
 
 
 def test_demons_requires_a_verb():

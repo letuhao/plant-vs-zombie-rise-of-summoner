@@ -18,8 +18,9 @@ easy to get wrong — leaves the two shipped runtime-config files exactly as the
 2. **Small-batch proof before any full run.** The call budget is a **ceiling, not a plan**. This module
    makes no model calls at all, so it inherits the constraint only as: it must load a 5-entry smoke batch
    as happily as a full one, and it must never require a full run to be valid.
-3. **The roster is 84 species, not 904.** `DemonSpeciesCatalog.Generated.cs` carries 84 `SpeciesId` rows
-   (counted 2026-09-03); 904 is the almanac row count. Per-species counts are tunables.
+3. **The roster used by action generation is the live species seed folder.** It currently carries
+   904 records, 227 consolidated families, and 1,183 family memberships. Generated C# and SQLite
+   projections are not action-corpus inputs. Per-species counts are tunables.
 4. **C1's family-access widening is gated** on three things that do not exist. Until then the generator
    emits structure-gated tiers only, and this loader must not assume an `allowedAtomFamilies` narrowing
    is present on an entry.

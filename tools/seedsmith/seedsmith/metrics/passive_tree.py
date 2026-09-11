@@ -662,6 +662,15 @@ class ExclusionRateMetric(Metric):
     same "recompute rather than trust a stored value" discipline `QuotaDrift` uses, applied to the
     one field §2's own table says is template-composed, never asked of the model.
 
+    **The corpus-side half (2026-09-11, the audit's C todo).** When the re-derived quota (the SAME
+    two-stage `quota_for_plan` the generation CLI calls — `exclusionForm` now allocates `none` to
+    ~98% of cells, with the 450/450/100 rung weights split over the ~2% designated subset) names a
+    node's cell `none` while the COMMITTED record carries a non-`none` form, that is not a style
+    note: it is a record whose exclusion was authored outside its own cell's allocation — the
+    `tree-language/2` vintage measured 1638/1677 (97.7%) against a target of ≤30‰, with
+    `QuotaDrift` blind to it (emitted and re-derived cells carried the same over-allocation,
+    tautologically equal). Reported per node as a GAP naming both forms, never silently tolerated.
+
     **The cross-node half of D40/§5.2 rule 1 ("both sides name the same winner") is deliberately
     NOT re-checked here** — `nodegen.exclusion`'s own docstring already states why: there is no
     second node's response to compare against today, and the corpus-wide PAIRING census is
@@ -687,10 +696,16 @@ class ExclusionRateMetric(Metric):
         findings: "list[Finding]" = []
         total = 0
         by_form: "Counter[str]" = Counter()
+        # C (2026-09-11): per-tree form mismatches between the re-derived cell and the corpus row.
+        assignment_findings: "list[Finding]" = []
 
         for tree_id, nodes in plan_ctx.nodes_by_tree.items():
             plan = plan_by_id.get(tree_id)
             vocab = plan.property_vocabulary if plan is not None else {}
+            # C (2026-09-11): the cells the CURRENT two-stage quota walk assigns this tree — the
+            # same source `QuotaDrift` reads. Persisted cells (a regenerated corpus) overlay the
+            # re-derivation upstream, so this is the assignment of record either way.
+            rederived = plan_ctx.quota_cells_by_tree.get(tree_id) or {}
             for node in nodes:
                 total += 1
                 node_id = node.get("id", "?")
@@ -705,6 +720,22 @@ class ExclusionRateMetric(Metric):
                         metric=self.id, severity=Severity.GAP, subject=node_id,
                         message=f"{node_id}: {defect}",
                         evidence={"code": "ExclusionFormDefect", "treeId": tree_id}))
+
+                # C (2026-09-11): the corpus-side half of A2 - the node's COMMITTED form against
+                # the cell the current quota assigns it. A mismatch is exactly a generation-vintage
+                # row (authored before the two-stage apportionment) or an out-of-cell authorship;
+                # both are defects this metric now names instead of leaving QuotaDrift's
+                # tautology to hide them.
+                cell = rederived.get(node_id)
+                if cell is not None and form != cell.exclusion_form:
+                    assignment_findings.append(Finding(
+                        metric=self.id, severity=Severity.GAP, subject=node_id,
+                        message=f"{node_id}: corpus holds form {form!r} but the cell the current "
+                                f"quota assigns is {cell.exclusion_form!r} - a generation-vintage "
+                                f"row or an out-of-cell authorship; regenerate via "
+                                f"`trees generate --supersede`",
+                        evidence={"code": "ExclusionOutsideCell", "treeId": tree_id,
+                                  "corpusForm": form, "assignedForm": cell.exclusion_form}))
 
                 if form != nodegen_exclusion.NONE_FORM:
                     expected_text = nodegen_exclusion.compose_printed_text(form, keys, role="loser")
@@ -732,9 +763,12 @@ class ExclusionRateMetric(Metric):
         findings.append(Finding(
             metric=self.id, severity=severity, subject="(suite)",
             message=f"{excluded}/{total} nodes carry an exclusion ({share_permille}‰), target <= "
-                    f"{max_share}‰; form split {dict(sorted(by_form.items()))}",
+                    f"{max_share}‰; form split {dict(sorted(by_form.items()))}"
+                    + (f"; {len(assignment_findings)} node(s) outside their cell's allocation"
+                       if assignment_findings else ""),
             evidence={"excluded": excluded, "total": total, "sharePermille": share_permille,
-                     "byForm": dict(by_form), "maxSharePermille": max_share}))
+                     "byForm": dict(by_form), "maxSharePermille": max_share,
+                     "outsideCell": len(assignment_findings)}))
         return findings
 
 

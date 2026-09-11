@@ -16,6 +16,11 @@ export type PanelShellProps = {
   band?: Extract<Band, "panel" | "system">;
   /** ActorSheet alone uses the near-fullscreen GG-61 bound; ordinary panels keep the compact default. */
   size?: "default" | "actorSheet";
+  /**
+   * `none` — no header chrome; title/description are sr-only (ActorSheet owns Esc in the left rail).
+   * Default keeps the visible title header.
+   */
+  headerMode?: "default" | "none";
 };
 
 /**
@@ -34,7 +39,8 @@ export function PanelShell({
   children,
   testId = "panel-shell",
   band = "panel",
-  size = "default"
+  size = "default",
+  headerMode = "default"
 }: PanelShellProps) {
   const id = useId();
   const push = useLayerStack((state) => state.push);
@@ -56,6 +62,8 @@ export function PanelShell({
     openerRef.current = (document.activeElement as HTMLElement) ?? null;
   }
   wasOpenRef.current = open;
+
+  const actorSheetBody = size === "actorSheet" && headerMode === "none";
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -91,16 +99,30 @@ export function PanelShell({
               : "max-h-[min(720px,82vh)] w-[min(640px,92vw)]"
           )}
         >
-          <header className="flex flex-none items-start gap-3 border-b border-border bg-soil-raised px-4 py-3">
-            <div className="min-w-0">
-              <Dialog.Title className="truncate font-display text-xl text-text">{title}</Dialog.Title>
-              <Dialog.Description className={subtitle ? "text-xs text-muted" : "sr-only"}>
-                {subtitle ?? title}
-              </Dialog.Description>
+          {headerMode === "none" ? (
+            <div className="sr-only" data-testid={`${testId}-header`} data-header-mode="none">
+              <Dialog.Title>{title}</Dialog.Title>
+              <Dialog.Description>{subtitle ?? title}</Dialog.Description>
             </div>
-          </header>
+          ) : (
+            <header
+              className="flex flex-none items-start gap-3 border-b border-border bg-soil-raised px-4 py-3"
+              data-testid={`${testId}-header`}
+              data-header-mode="default"
+            >
+              <div className="min-w-0">
+                <Dialog.Title className="truncate font-display text-xl text-text">{title}</Dialog.Title>
+                <Dialog.Description className={subtitle ? "text-xs text-muted" : "sr-only"}>
+                  {subtitle ?? title}
+                </Dialog.Description>
+              </div>
+            </header>
+          )}
           <div
-            className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-4"
+            className={cn(
+              "min-h-0 flex-1 overflow-x-hidden",
+              actorSheetBody ? "flex overflow-hidden p-0" : "overflow-y-auto px-4 py-4"
+            )}
             data-testid={`${testId}-body`}
           >
             {children}

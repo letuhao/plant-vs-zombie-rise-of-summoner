@@ -34,6 +34,11 @@ An **equip slot** is lane I2's word and never appears here for either concept.
 >
 > ✅ **The lane's four *"recalled, not verified"* D2/PoE claims are now verified** — all confirmed; see
 > §2b's D20–D25 closing table. §10.5's roster-scale question is closed by **D1**.
+>
+> **Amended 2026-09-10:** the structural socket maximum is now **8**, not 4. This does **not** widen
+> Strain/Splice to eight ingredients. Consecutive socket indices are partitioned into deterministic
+> four-socket circuits; resonance and one four-ingredient combination evaluate per circuit. An
+> eight-socket host has two circuits, not one eight-step recipe.
 
 ## 2. Scope
 
@@ -122,7 +127,7 @@ socketsNow    = socketsAtDrop + (recorded socket.add operations)
                 capped at base_type.socket_max
 ```
 
-- **Base type declares `socket_max` (0–4)**, and it is a *role* property, so a ring never holds four and
+- **Base type declares `socket_max` (0–8)**, and it is a *role* property, so a ring never holds eight and
   a breastplate does. This is what stops socket count being one number compared across the whole loot
   pool — a 1-socket ring and a 4-socket cuirass are not in the same conversation.
 - **Rarity grants a range, not a number** (D), rolled from `roll_seed` at drop. The range **overlaps
@@ -131,18 +136,19 @@ socketsNow    = socketsAtDrop + (recorded socket.add operations)
 - **Crafting tops the count up** (C) to `base_type.socket_max`. A bad socket roll is therefore a cost,
   not a discard — which removes most of the pressure that makes option A toxic.
 
-**Maximum is 4.** Four and not six, for four reasons:
+**Maximum is 8.** Eight is a structural capacity limit, not an eight-ingredient
+recipe size. Socket index deterministically selects a circuit:
 
-1. **Combination legibility.** With six concrete elements the resonance ladder reads cleanly at
-   k ∈ {2, 3, 4}. A fifth and sixth step add rows and add nothing a player can hold in their head.
-2. **Roster scale.** [item-ideal.md](../item-ideal.md) §8 already flags that twenty demons times twelve
-   equip slots is 240 items before anything sits in a bag. At a maximum of 4 that is up to 540 sockets
-   across a roster; at 6 it is 810.
-3. **A word is at most four ingredients**, which is memorable. Six-ingredient recipes are exactly the
-   thing nobody remembers.
-4. Prior art in the other direction is a warning, not a model: D2 went to 6 and the base hunt became a
-   socket-count hunt; PoE went to 6 links and made socket *colour* a currency treadmill (both recalled,
-   **neither verified**).
+```text
+circuitIndex  = floor(socketIndex / 4)     # zero-based
+circuitPosition = socketIndex mod 4         # zero-based
+```
+
+Every circuit has at most four inserts. Resonance reads only its circuit's
+inserts; a Strain or Splice consumes exactly one complete four-insert circuit.
+Thus capacity 8 means two readable four-insert decisions, not an eight-step
+wiki recipe. The circuit size is structural and must be named as such beside
+the runtime constant; role ceilings and rarity ranges remain versioned tuning.
 
 **Registered with I1** (contract cut #3 — I propose, I1 registers). I1 owns the rungs and their names,
 so this is stated by ordinal band rather than by rung name:
@@ -150,29 +156,33 @@ so this is stated by ordinal band rather than by rung name:
 | Rarity band (position in I1's ladder) | `socket_min` | `socket_max` |
 |---|---|---|
 | bottom ~20% | 0 | 0 |
-| ~20–40% | 0 | 1 |
-| ~40–60% | 1 | 2 |
-| ~60–80% | 1 | 3 |
-| top ~20% | 2 | 4 |
+| ~20–40% | 0 | 2 |
+| ~40–60% | 2 | 4 |
+| ~60–80% | 2 | 6 |
+| top ~20% | 4 | 8 |
 
-Adjacent bands overlap by design: a `[1..3]` item rolling 3 out-sockets a `[2..4]` item rolling 2.
+Adjacent bands overlap by design: a `[2..6]` item rolling 6 out-sockets a `[4..8]` item rolling 4.
 
-**Proposed `socket_max` per role** (I3 owns the column; roles are I2's twelve from item-ideal §5.1):
+**Proposed `socket_max` per role** (I3 owns the column; the re-issued fifteen-role contract in
+`spec-sockets.md` §3 supersedes the former twelve-role table):
 
-| Role | `socket_max` | Why |
+| `role_id` | `socket_max` | Why |
 |---|---|---|
-| core-protective (`torso` / `stem`) | 4 | already the largest budget on the body |
-| armament-primary (`main-hand` / `muzzle`) | 4 | identity-defining, so it should be where words live |
-| head-protective (`head` / `crown`) | 3 | |
-| mantle-utility (`back` / `canopy`) | 3 | |
-| armament-secondary (`off-hand` / `thorn`) | 3 | |
-| manipulator-offense (`hands` / `leaves`) | 2 | |
-| girdle-resource (`waist` / `soil`) | 2 | |
-| footing (`feet` / `roots`) | 2 | |
-| sense-utility (`face` / `bract`) | 1 | |
-| jewel-major (`neck` / `pollen`) | 1 | the amulet should earn its place with affixes, not with sockets |
-| jewel-minor A / B (`ring-1/2` / `graft-1/2`) | 1 | item-ideal §5.5: keep the pair's budget small |
-| commander `standard` (item-ideal §5.6, if it ships) | 2 | |
+| `armament-primary` | 8 | identity slot; two complete circuits |
+| `core-guard` | 8 | largest defensive budget; two complete circuits |
+| `ward-array` | 6 | depleting shield layer |
+| `armament-secondary` | 6 | answering half |
+| `jewel-major` | 2 | earns its place with affixes, not sockets |
+| `manipulator` | 4 | rate and follow-through |
+| `mantle` | 6 | resistance home |
+| `head-guard` | 6 | disable resistance |
+| `girdle` | 4 | resource role |
+| `sense` | 2 | narrow accuracy and crit-rate role |
+| `footing` | 4 | frame-split by design |
+| `infusion` | 4 | what hits inflict |
+| `retinue` | 4 | what else is on the board |
+| `jewel-minor-a` | 2 | small paired budget |
+| `jewel-minor-b` | 2 | identical paired budget |
 
 ### 4.2 Typed sockets or universal sockets
 
@@ -710,15 +720,19 @@ mattered less than whether it rolled the socket count a runeword needed (recalle
 
 **What prevents it here:**
 
-- `socket_max` is a **role** property, so socket count is not comparable across the loot pool.
-- Socket count is **derived, not an independent rolled column** (§5.3) — no separate lottery to re-roll,
-  no separate stat to filter on.
-- Crafting **tops the count up to the base cap**, so a low roll is a cost rather than a discard.
-- The cap is **4**, low enough that the top of the range is reachable rather than mythical.
+- `socketCeiling` is a **role** property, so capacity is bounded by the equipped role rather than being
+  one number compared across the loot pool.
+- A base type's `socketMax` is **derived, not model-authored or independently rolled**: the published
+  resolver uses the role ceiling, declared content band, and stable sequence. The item-drop socket roll
+  is then clamped to that already-published capacity.
+- Crafting **tops the count up to the base cap**, so a low drop roll is a cost rather than a discard.
+- Eight capacity is two four-socket circuits, so growth adds one readable decision at a time instead of
+  a larger recipe grammar.
 
-**Residual risk, stated honestly:** if I3 ever varies `socket_max` *within* a role, a `socket_max = 4`
-base type immediately outranks a `socket_max = 2` one in the same role, and this defence is gone. My
-proposal fixes `socket_max` per role precisely so it cannot become a base-type lottery — see §9.6.
+**Residual risk, stated honestly:** capacity still has opportunity value within a role. The mitigation
+is not a false claim that all bases are equal; it is deterministic publication, visible role ceilings,
+overlapping rarity rolls, and no rerollable capacity lottery. Any new input to the resolver must be
+versioned and coverage-tested before it reaches a corpus.
 
 ### 8.2 Recipes so obscure players need a wiki
 
@@ -852,10 +866,10 @@ socket is a fascinating decision. Some of them are not, and the design should le
    are how OD4's overlap principle reaches the socket axis; a single number per rung would make socket
    count a strict ladder and re-open §8.1.
 
-6. **I3 — `socket_max` and per-socket `affinity` on the base type.** I propose the per-role caps in §4.1
-   and ask that `socket_max` be **fixed per role, not varied per base type** — §8.1's residual risk is
-   entirely about that choice. Affinity is a list of `socket_max` element ids (or `''`), declared once on
-   the base type and copied into `item_socket` at drop.
+6. **I3 — `socket_max` and per-socket `affinity` on the base type.** I propose the per-role ceilings in
+   §4.1 and require each base type's `socketMax` to be resolved below its ceiling through the published
+   deterministic `(role, content band, stable sequence)` path. Affinity is a list of `socket_max`
+   element ids (or `''`), declared once on the base type and copied into `item_socket` at drop.
 
 7. **I5 — agree the socket/set boundary.** My position, which I5 must agree to or overrule:
    - An **insert is never a set piece.** I5 counts *equipped items*; an insert is not equipped, it is

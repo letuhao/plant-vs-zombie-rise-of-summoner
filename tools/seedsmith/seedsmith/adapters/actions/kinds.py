@@ -57,16 +57,16 @@ def _unspecified(kind: str, directory: str, pattern: str) -> KindSpec:
 
 KINDS: "tuple[KindSpec, ...]" = (
     _seed("action-seed", "",
-         r"^action\.(general\.[0-9]{4}|(family|species)\.[a-z0-9-]+\.[0-9]{3})$"),
+         r"^action\.(general\.[0-9]{4}|(family|species)\.[a-z0-9_-]+\.[0-9]{3})$"),
     _unspecified("action-brief", "_briefs",
-                r"^brief\.(general|family|species)\.[a-z0-9-]+\.[0-9]{3}$"),
-    _unspecified("action-reject", "_rounds", r"^reject\.[a-z0-9.-]+$"),
-    _unspecified("action-review", "_rounds", r"^review\.[a-z0-9.-]+$"),
-    _unspecified("action-coverage", "_reports", r"^(cell|target)\.[a-z0-9.-]+$"),
-    _unspecified("action-innate", "", r"^innate\.[a-z0-9-]+$"),
-    _unspecified("action-type-weights", "_generated", r"^weights\.(species|family)\.[a-z0-9-]+$"),
-    _unspecified("action-role-lean", "_generated", r"^lean\.[a-z0-9-]+$"),
-    _unspecified("action-characteristic-pool", "_generated", r"^pool\.[a-z0-9-]+$"),
+                r"^brief\.(general|family|species)\.[a-z0-9_-]+\.[0-9]{3}$"),
+    _unspecified("action-reject", "_rounds", r"^reject\.[a-z0-9_.-]+$"),
+    _unspecified("action-review", "_rounds", r"^review\.[a-z0-9_.-]+$"),
+    _unspecified("action-coverage", "_reports", r"^(cell|target)\.[a-z0-9_.-]+$"),
+    _unspecified("action-innate", "", r"^innate\.[a-z0-9_-]+$"),
+    _unspecified("action-type-weights", "_generated", r"^weights\.(species|family)\.[a-z0-9_-]+$"),
+    _unspecified("action-role-lean", "_generated", r"^lean\.[a-z0-9_-]+$"),
+    _unspecified("action-characteristic-pool", "_generated", r"^pool\.[a-z0-9_-]+$"),
     # A manifest entry, not an entry graph (§2's table: "(none) — a manifest entry, not an entry
     # graph") — no `id_pattern`, so `load.load_committed` skips it when calling `discover_edges`.
     KindSpec(kind="action-config", directory="", namespace="action-config"),

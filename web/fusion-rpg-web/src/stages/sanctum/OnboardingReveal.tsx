@@ -31,7 +31,12 @@ export function OnboardingReveal({ playerId, onOpenCommanders }: { playerId: num
           : "This reward is saved automatically and is ready on your commander sheet."}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
-        <Button size="sm" onClick={() => void claim.mutateAsync(current.checkpointId)} disabled={claim.isPending}>
+        <Button
+          size="sm"
+          onClick={() => void claim.mutateAsync(current.checkpointId)}
+          disabled={claim.isPending}
+          title={claim.isPending ? "Saving reward…" : "Acknowledge this reward"}
+        >
           {claim.isPending ? "Saving…" : "Got it"}
         </Button>
         {isDave ? <Button size="sm" variant="ghost" onClick={onOpenCommanders}>Open Dave’s sheet</Button> : null}

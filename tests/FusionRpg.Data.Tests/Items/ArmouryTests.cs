@@ -123,9 +123,16 @@ public class ArmouryTests : IDisposable
     static string FindSourceFile(string fileName)
     {
         var dir = FindRepoRoot();
-        var matches = Directory.GetFiles(dir, fileName, SearchOption.AllDirectories)
+        var matches = Directory.GetFiles(dir, fileName, new EnumerationOptions
+            {
+                RecurseSubdirectories = true,
+                IgnoreInaccessible = true,
+                AttributesToSkip = FileAttributes.Hidden | FileAttributes.System,
+            })
             .Where(p => !p.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}") &&
-                        !p.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}"))
+                        !p.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}") &&
+                        !p.Contains($"{Path.DirectorySeparatorChar}.pytest_cache{Path.DirectorySeparatorChar}") &&
+                        !p.Contains($"{Path.DirectorySeparatorChar}.tmp-seedsmith-reconcile{Path.DirectorySeparatorChar}"))
             .ToList();
         Assert.True(matches.Count == 1, $"expected exactly one {fileName}, found {matches.Count}");
         return matches[0];

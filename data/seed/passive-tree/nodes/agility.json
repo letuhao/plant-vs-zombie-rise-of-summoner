@@ -3,116 +3,56 @@
     "confidence": {},
     "minorityValues": {},
     "model": "google/gemma-4-26b-a4b-qat",
-    "planHash": "",
-    "promptVersion": "tree-language/1"
+    "planHash": "785e0b17131b45169552b25de57610b7cae1eff7d07444db36b1454d82256da1",
+    "promptVersion": "mixed",
+    "promptVersionByNode": {
+      "skill.agility-def-t1-n0": "tree-language/3",
+      "skill.agility-def-t1-n1": "tree-language/3",
+      "skill.agility-def-t1-n2": "tree-language/3",
+      "skill.agility-def-t10-n0": "tree-language/3",
+      "skill.agility-def-t2-n0": "tree-language/3",
+      "skill.agility-def-t2-n1": "tree-language/3",
+      "skill.agility-def-t2-n2": "tree-language/3",
+      "skill.agility-def-t3-n0": "tree-language/3",
+      "skill.agility-def-t3-n1": "tree-language/3",
+      "skill.agility-def-t3-n2": "tree-language/3",
+      "skill.agility-def-t4-n0": "tree-language/3",
+      "skill.agility-def-t4-n1": "tree-language/3",
+      "skill.agility-def-t5-n0": "tree-language/3",
+      "skill.agility-def-t5-n1": "tree-language/3",
+      "skill.agility-def-t6-n0": "tree-language/3",
+      "skill.agility-def-t6-n1": "tree-language/3",
+      "skill.agility-def-t7-n0": "tree-language/3",
+      "skill.agility-def-t7-n1": "tree-language/3",
+      "skill.agility-def-t8-n0": "tree-language/3",
+      "skill.agility-def-t9-n0": "tree-language/3",
+      "skill.agility-off-t1-n0": "tree-language/3",
+      "skill.agility-off-t1-n1": "tree-language/3",
+      "skill.agility-off-t1-n2": "tree-language/3",
+      "skill.agility-off-t10-n0": "tree-language/3",
+      "skill.agility-off-t2-n0": "tree-language/3",
+      "skill.agility-off-t2-n1": "tree-language/3",
+      "skill.agility-off-t2-n2": "tree-language/3",
+      "skill.agility-off-t3-n0": "tree-language/3",
+      "skill.agility-off-t3-n1": "tree-language/3",
+      "skill.agility-off-t3-n2": "tree-language/3",
+      "skill.agility-off-t4-n0": "tree-language/3",
+      "skill.agility-off-t4-n1": "tree-language/3",
+      "skill.agility-off-t5-n0": "tree-language/3",
+      "skill.agility-off-t5-n1": "tree-language/3",
+      "skill.agility-off-t6-n0": "",
+      "skill.agility-off-t6-n1": "tree-language/3",
+      "skill.agility-off-t7-n0": "tree-language/3",
+      "skill.agility-off-t7-n1": "tree-language/3",
+      "skill.agility-off-t8-n0": "tree-language/3",
+      "skill.agility-off-t9-n0": "tree-language/3"
+    }
   },
   "nodes": [
     {
       "affinity": [
         "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.evd-brace",
-        "atom.evd-harden"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
-      },
-      "flavor": "A grounded weight that turns momentum into stability.",
-      "id": "skill.agility-def-t1-n0",
-      "name": "Steady Stance",
-      "nameKey": "tree.node.steady-stance",
-      "nodeClass": "magnitude",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 1
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.evasion",
-        "atom.evd-harden"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
-      },
-      "flavor": "Movement is the first line of defense; to be seen is to be struck.",
-      "id": "skill.agility-def-t1-n1",
-      "name": "Fleet-Footed Reflex",
-      "nameKey": "tree.node.fleet-footed-reflex",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 1
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.evasion",
-        "atom.evd-flinch"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
-      },
-      "flavor": "A dancer's poise applied to the art of survival.",
-      "id": "skill.agility-def-t1-n2",
-      "name": "Light-Footed Grace",
-      "nameKey": "tree.node.light-footed-grace",
-      "nodeClass": "magnitude",
-      "nodeKey": "n2",
-      "rationale": "",
-      "tier": 1
-    },
-    {
-      "affinity": [
-        "likely"
-      ],
-      "affixIds": [
-        "atom.evd-scar"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
-      },
-      "flavor": "The skin thickens where the wind strikes hardest, turning momentum into a protective layer.",
-      "id": "skill.agility-def-t10-n0",
-      "name": "Calloused Reflex",
-      "nameKey": "tree.node.calloused-reflex",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 10
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
+        "core"
       ],
       "affixIds": [
         "atom.evasion",
@@ -120,46 +60,58 @@
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "nullification",
-        "printedText": "Inert while posture is active — posture wins.",
-        "propertyKeys": [
-          "posture"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The body shifts before the blow even lands, turning momentum into a defensive pivot.",
-      "id": "skill.agility-def-t2-n0",
-      "name": "Reactive Spring",
-      "nameKey": "tree.node.reactive-spring",
+      "flavor": "A precarious balance that turns momentum into stability.",
+      "id": "skill.agility-def-t1-n0",
+      "name": "Unsteady Equilibrium",
+      "nameKey": "tree.node.unsteady-equilibrium",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.power",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "jala",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
-      "tier": 2
+      "tier": 1
     },
     {
       "affinity": [
-        "core",
         "core"
       ],
       "affixIds": [
-        "atom.evasion",
-        "atom.evd-harden"
+        "atom.evd-evd"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The weight of the world is felt less when the feet never touch the ground for long.",
-      "id": "skill.agility-def-t2-n1",
-      "name": "Light-Footed Resilience",
-      "nameKey": "tree.node.light-footed-resilience",
+      "flavor": "The rhythm of movement becomes a shield of its own.",
+      "id": "skill.agility-def-t1-n1",
+      "name": "Fleet-Strider",
+      "nameKey": "tree.node.fleet-strider",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reduction",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "jala",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
-      "tier": 2
+      "tier": 1
     },
     {
       "affinity": [
@@ -167,109 +119,38 @@
         "likely"
       ],
       "affixIds": [
-        "atom.evasion",
+        "atom.evd-evd",
         "atom.evd-harden"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "Tension held in the muscle, ready to snap back against the strike.",
-      "id": "skill.agility-def-t2-n2",
-      "name": "Spring-Loaded Sinew",
-      "nameKey": "tree.node.spring-loaded-sinew",
+      "flavor": "A rhythmic lightness that turns momentum into a defensive grace.",
+      "id": "skill.agility-def-t1-n2",
+      "name": "Fleet-Step",
+      "nameKey": "tree.node.fleet-step",
       "nodeClass": "magnitude",
       "nodeKey": "n2",
-      "rationale": "",
-      "tier": 2
-    },
-    {
-      "affinity": [
-        "likely",
-        "core"
-      ],
-      "affixIds": [
-        "atom.evd-brace",
-        "atom.evd-flinch"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.damage",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "kelp",
+        "trigger": "OnMatchEnd"
       },
-      "flavor": "A sudden shift in weight that turns a stumble into a defensive repositioning.",
-      "id": "skill.agility-def-t3-n0",
-      "name": "Reactive Pivot",
-      "nameKey": "tree.node.reactive-pivot",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
       "rationale": "",
-      "tier": 3
+      "tier": 1
     },
     {
       "affinity": [
         "likely"
       ],
       "affixIds": [
-        "atom.evd-harden"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "Layers of hardened sap provide a secondary layer of protection against impact.",
-      "id": "skill.agility-def-t3-n1",
-      "name": "Thickened Bark",
-      "nameKey": "tree.node.thickened-bark-3",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 3
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.evasion",
-        "atom.evd-harden"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "aptitude"
-        ]
-      },
-      "flavor": "The weight of experience anchors the soul against the coming storm.",
-      "id": "skill.agility-def-t3-n2",
-      "name": "Rooted Stance",
-      "nameKey": "tree.node.rooted-stance",
-      "nodeClass": "magnitude",
-      "nodeKey": "n2",
-      "rationale": "",
-      "tier": 3
-    },
-    {
-      "affinity": [
-        "likely",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.evd-brace",
         "atom.shld-cycle"
       ],
       "branch": "defensive",
@@ -280,366 +161,54 @@
           "atomKind"
         ]
       },
-      "flavor": "The rhythm of a bending branch allows the weight of a blow to pass through without breaking the wood.",
-      "id": "skill.agility-def-t4-n0",
-      "name": "Swaying Sap",
-      "nameKey": "tree.node.swaying-sap",
+      "flavor": "The rhythm of movement becomes a vessel for the ward.",
+      "id": "skill.agility-def-t10-n0",
+      "name": "Kinetic Flux Capacitor",
+      "nameKey": "tree.node.kinetic-flux-capacitor",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
-      "rationale": "",
-      "tier": 4
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.evasion",
-        "atom.evd-harden"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "branch"
-        ]
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.realm",
+        "element": "omni",
+        "exclusionForm": "reroute",
+        "nodeClass": "mechanism",
+        "status": "wither",
+        "trigger": "OnWave"
       },
-      "flavor": "The body moves before the mind can process the threat.",
-      "id": "skill.agility-def-t4-n1",
-      "name": "Fluid Reflex",
-      "nameKey": "tree.node.fluid-reflex",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 4
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.evd-husk",
-        "atom.evd-seal"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
-      },
-      "flavor": "The momentum of a near-miss feeds the next defense.",
-      "id": "skill.agility-def-t5-n0",
-      "name": "Kinetic Siphon",
-      "nameKey": "tree.node.kinetic-siphon-4",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 5
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.evasion"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The skin thickens where the spirit is most resilient, turning impact into a memory of strength.",
-      "id": "skill.agility-def-t5-n1",
-      "name": "Layered Integument",
-      "nameKey": "tree.node.layered-integument",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 5
-    },
-    {
-      "affinity": [
-        "likely",
-        "core"
-      ],
-      "affixIds": [
-        "atom.evd-brace",
-        "atom.evd-flinch"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "A sudden shift in weight that turns an incoming blow into a momentary opening.",
-      "id": "skill.agility-def-t6-n0",
-      "name": "Reactive Pivot",
-      "nameKey": "tree.node.reactive-pivot-2",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.evd-harden"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The skin thickens where the spirit is most focused, turning reflex into a physical barrier.",
-      "id": "skill.agility-def-t6-n1",
-      "name": "Tempered Husk",
-      "nameKey": "tree.node.tempered-husk",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.evd-flinch"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
-      },
-      "flavor": "The impact of a strike is not lost, but redirected into a sudden, hardening tension.",
-      "id": "skill.agility-def-t7-n0",
-      "name": "Kinetic Recoil",
-      "nameKey": "tree.node.kinetic-recoil-4",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.evasion",
-        "atom.evd-brace"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
-      },
-      "flavor": "Balance is found not in stillness, but in the perfect correction of momentum.",
-      "id": "skill.agility-def-t7-n1",
-      "name": "Reactive Equilibrium",
-      "nameKey": "tree.node.reactive-equilibrium",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.evd-brace",
-        "atom.evd-flinch"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
-      },
-      "flavor": "The body moves before the mind can process the threat.",
-      "id": "skill.agility-def-t8-n0",
-      "name": "Instinctive Recoil",
-      "nameKey": "tree.node.instinctive-recoil",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 8
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.evd-seal"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
-      },
-      "flavor": "The body flows like resin, absorbing impact only to push it back through a sudden surge of protective energy.",
-      "id": "skill.agility-def-t9-n0",
-      "name": "Swaying Sap",
-      "nameKey": "tree.node.swaying-sap-2",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 9
-    },
-    {
-      "affinity": [
-        "occasional",
-        "core"
-      ],
-      "affixIds": [
-        "atom.quickening",
-        "atom.swiftness"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "aptitude"
-        ]
-      },
-      "flavor": "The rhythm of the hunt dictates the precision of the strike.",
-      "id": "skill.agility-off-t1-n0",
-      "name": "Predatory Instinct",
-      "nameKey": "tree.node.predatory-instinct",
-      "nodeClass": "magnitude",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 1
-    },
-    {
-      "affinity": [
-        "likely",
-        "core"
-      ],
-      "affixIds": [
-        "atom.ferocity",
-        "atom.precision"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "aptitude"
-        ]
-      },
-      "flavor": "The rhythm of the strike dictates the flow of the dance.",
-      "id": "skill.agility-off-t1-n1",
-      "name": "Vanguard's Momentum",
-      "nameKey": "tree.node.vanguard-s-momentum",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 1
-    },
-    {
-      "affinity": [
-        "likely",
-        "core"
-      ],
-      "affixIds": [
-        "atom.ferocity",
-        "atom.swiftness"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "branch"
-        ]
-      },
-      "flavor": "The rhythm of the hunt accelerates with every strike.",
-      "id": "skill.agility-off-t1-n2",
-      "name": "Savage Momentum",
-      "nameKey": "tree.node.savage-momentum-4",
-      "nodeClass": "magnitude",
-      "nodeKey": "n2",
-      "rationale": "",
-      "tier": 1
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.tempo-surge"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The rhythm of the strike dictates the speed of the recovery.",
-      "id": "skill.agility-off-t10-n0",
-      "name": "Momentum Engine",
-      "nameKey": "tree.node.momentum-engine-3",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
+      "rationale": "The node reroutes the atomKind of the chosen effects to ensure they function as a single mechanism for the resolver.",
       "tier": 10
     },
     {
       "affinity": [
         "core",
-        "core"
+        "likely"
       ],
       "affixIds": [
-        "atom.quickening",
-        "atom.swiftness"
+        "atom.evd-brace",
+        "atom.evd-harden"
       ],
-      "branch": "offensive",
+      "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the hunt accelerates the pulse, turning movement into momentum.",
-      "id": "skill.agility-off-t2-n0",
-      "name": "Adrenaline Surge",
-      "nameKey": "tree.node.adrenaline-surge",
+      "flavor": "A rhythmic weightlessness that turns momentum into stability.",
+      "id": "skill.agility-def-t2-n0",
+      "name": "Supple Foundation",
+      "nameKey": "tree.node.supple-foundation",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.rate",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "kelp",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
       "tier": 2
     },
@@ -648,46 +217,62 @@
         "likely"
       ],
       "affixIds": [
-        "atom.swiftness"
+        "atom.evd-brace"
       ],
-      "branch": "offensive",
+      "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the strike dictates the speed of the recovery.",
-      "id": "skill.agility-off-t2-n1",
-      "name": "Flowing Cadence",
-      "nameKey": "tree.node.flowing-cadence",
+      "flavor": "A lightness of step that turns momentum into a defensive advantage.",
+      "id": "skill.agility-def-t2-n1",
+      "name": "Nimble Stance",
+      "nameKey": "tree.node.nimble-stance",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.damage",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "leech",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 2
     },
     {
       "affinity": [
+        "core",
         "likely"
       ],
       "affixIds": [
-        "atom.swiftness"
+        "atom.evasion",
+        "atom.evd-harden"
       ],
-      "branch": "offensive",
+      "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The scent of blood sharpens the instinct to strike.",
-      "id": "skill.agility-off-t2-n2",
-      "name": "Predatory Ferocity",
-      "nameKey": "tree.node.predatory-ferocity",
+      "flavor": "The air moves before the strike can land.",
+      "id": "skill.agility-def-t2-n2",
+      "name": "Wind-Swept Reflex",
+      "nameKey": "tree.node.wind-swept-reflex",
       "nodeClass": "magnitude",
       "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.rate",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "leech",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 2
     },
@@ -696,50 +281,126 @@
         "core"
       ],
       "affixIds": [
-        "atom.tempo-surge"
+        "atom.evd-shift"
       ],
-      "branch": "offensive",
+      "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the hunt dictates the pace of the kill.",
-      "id": "skill.agility-off-t3-n0",
-      "name": "Momentum Shift",
-      "nameKey": "tree.node.momentum-shift",
+      "flavor": "The body moves before the mind can process the threat.",
+      "id": "skill.agility-def-t3-n0",
+      "name": "Reactive Displacement",
+      "nameKey": "tree.node.reactive-displacement",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.capacity",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "nerve.afflicted",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 3
     },
     {
       "affinity": [
-        "likely",
         "core"
       ],
       "affixIds": [
-        "atom.quickening",
-        "atom.swiftness"
+        "atom.evd-brace"
       ],
-      "branch": "offensive",
+      "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "aptitude"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the stride dictates the speed of the strike.",
-      "id": "skill.agility-off-t3-n1",
-      "name": "Fleet-Footed Momentum",
-      "nameKey": "tree.node.fleet-footed-momentum",
+      "flavor": "A rhythmic weight to every step, grounding the soul against the impact.",
+      "id": "skill.agility-def-t3-n1",
+      "name": "Steadying Cadence",
+      "nameKey": "tree.node.steadying-cadence",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.pen",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "nerve.afflicted",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evd-evd",
+        "atom.evd-shift"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "Weightless movement allows for effortless redirection of incoming force.",
+      "id": "skill.agility-def-t3-n2",
+      "name": "Light-Footed",
+      "nameKey": "tree.node.light-footed",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.regen",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "nerve.shaken",
+        "trigger": "OnSpawn"
+      },
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-brace"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "A sudden shift in weight that turns momentum into a defensive stance.",
+      "id": "skill.agility-def-t4-n0",
+      "name": "Spring-Loaded Pivot",
+      "nameKey": "tree.node.spring-loaded-pivot",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.toughness",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "nerve.shaken",
+        "trigger": "OnSpawn"
+      },
+      "rationale": "",
+      "tier": 4
     },
     {
       "affinity": [
@@ -747,49 +408,294 @@
         "core"
       ],
       "affixIds": [
-        "atom.ferocity",
-        "atom.swiftness"
+        "atom.evd-evd",
+        "atom.evd-shift"
       ],
-      "branch": "offensive",
+      "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "aptitude"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "Precision is nothing without the speed to apply it.",
-      "id": "skill.agility-off-t3-n2",
-      "name": "Vigilant Velocity",
-      "nameKey": "tree.node.vigilant-velocity",
+      "flavor": "Movement becomes a shield, turning momentum into a rhythmic dance of avoidance.",
+      "id": "skill.agility-def-t4-n1",
+      "name": "Flowing Grace",
+      "nameKey": "tree.node.flowing-grace",
       "nodeClass": "magnitude",
-      "nodeKey": "n2",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "loadout.slots",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "nerve.unsettled",
+        "trigger": "OnSpawn"
+      },
       "rationale": "",
-      "tier": 3
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely",
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.evd-shift",
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of movement becomes a barrier of its own.",
+      "id": "skill.agility-def-t5-n0",
+      "name": "Momentum Displacement",
+      "nameKey": "tree.node.momentum-displacement",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "move.range",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "nerve.unsettled",
+        "trigger": "OnSunCollect"
+      },
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evd-evd",
+        "atom.evd-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The body learns to move before the mind can process the threat.",
+      "id": "skill.agility-def-t5-n1",
+      "name": "Tempered Reflex",
+      "nameKey": "tree.node.tempered-reflex",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm1",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "pact_mark",
+        "trigger": "OnSunCollect"
+      },
+      "rationale": "",
+      "tier": 5
     },
     {
       "affinity": [
         "core"
       ],
       "affixIds": [
-        "atom.tempo-surge"
+        "atom.evd-shift"
       ],
-      "branch": "offensive",
+      "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The blur of your movement leaves a shadow that strikes a moment later.",
-      "id": "skill.agility-off-t4-n0",
-      "name": "Kinetic Afterimage",
-      "nameKey": "tree.node.kinetic-afterimage",
+      "flavor": "Movement is the first line of defense.",
+      "id": "skill.agility-def-t6-n0",
+      "name": "Fluid Displacement",
+      "nameKey": "tree.node.fluid-displacement",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm2",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "poison",
+        "trigger": "OnSunCollect"
+      },
       "rationale": "",
-      "tier": 4
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evasion",
+        "atom.evd-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The skin hardens in the split second before impact, turning momentum into a shield.",
+      "id": "skill.agility-def-t6-n1",
+      "name": "Reactive Carapace",
+      "nameKey": "tree.node.reactive-carapace",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.atk",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "rally",
+        "trigger": "OnTimer"
+      },
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "likely",
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.evd-shift",
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "Energy diverted from a missed strike becomes the foundation for the next defense.",
+      "id": "skill.agility-def-t7-n0",
+      "name": "Kinetic Redirection Flow",
+      "nameKey": "tree.node.kinetic-redirection-flow",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.defense",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "rot",
+        "trigger": "OnTimer"
+      },
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.evd-harden",
+        "atom.evd-shift"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The momentum of a missed strike becomes the foundation of your next movement.",
+      "id": "skill.agility-def-t7-n1",
+      "name": "Kinetic Recoil Displacement",
+      "nameKey": "tree.node.kinetic-recoil-displacement",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.maxHp",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "shatter",
+        "trigger": "OnTimer"
+      },
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evd-flinch",
+        "atom.evd-harden"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "A frantic, instinctive twitch that turns a stumble into a defensive posture.",
+      "id": "skill.agility-def-t8-n0",
+      "name": "Sudden Recoil",
+      "nameKey": "tree.node.sudden-recoil",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.breakthroughSuccess",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "spark",
+        "trigger": "OnWave"
+      },
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.evd-brace",
+        "atom.shld-cycle"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The momentum of a missed strike is not lost, but redirected into a protective shell.",
+      "id": "skill.agility-def-t9-n0",
+      "name": "Kinetic Recoil Buffer",
+      "nameKey": "tree.node.kinetic-recoil-buffer",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.power",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "spore",
+        "trigger": "OnWave"
+      },
+      "rationale": "",
+      "tier": 9
     },
     {
       "affinity": [
@@ -802,46 +708,60 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the hunt dictates the speed of the strike.",
-      "id": "skill.agility-off-t4-n1",
-      "name": "Accelerated Pulse",
-      "nameKey": "tree.node.accelerated-pulse-2",
+      "flavor": "Movement is the precursor to the strike.",
+      "id": "skill.agility-off-t1-n0",
+      "name": "Fleet-Footed",
+      "nameKey": "tree.node.fleet-footed",
       "nodeClass": "magnitude",
-      "nodeKey": "n1",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "ai.aggression",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
-      "tier": 4
+      "tier": 1
     },
     {
       "affinity": [
-        "likely",
+        "core",
         "likely"
       ],
       "affixIds": [
-        "atom.hit-followthrough",
-        "atom.precision"
+        "atom.swiftness",
+        "atom.tempo-haste"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of movement dictates the rhythm of the strike.",
-      "id": "skill.agility-off-t5-n0",
-      "name": "Slipstream Cadence",
-      "nameKey": "tree.node.slipstream-cadence",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
+      "flavor": "The blur of motion becomes a singular point of impact.",
+      "id": "skill.agility-off-t1-n1",
+      "name": "Fleet-Footed Aim",
+      "nameKey": "tree.node.fleet-footed-aim",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.absorption",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "blight",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
-      "tier": 5
+      "tier": 1
     },
     {
       "affinity": [
@@ -849,23 +769,381 @@
         "core"
       ],
       "affixIds": [
-        "atom.precision",
+        "atom.quickening",
         "atom.swiftness"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
       "flavor": "The rhythm of the stride dictates the rhythm of the strike.",
-      "id": "skill.agility-off-t5-n1",
-      "name": "Fleet-Footed Momentum",
-      "nameKey": "tree.node.fleet-footed-momentum-2",
+      "id": "skill.agility-off-t1-n2",
+      "name": "Fleet Footwork",
+      "nameKey": "tree.node.fleet-footwork",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.accuracy",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnActivate"
+      },
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of movement begins to harmonize with the elemental currents.",
+      "id": "skill.agility-off-t10-n0",
+      "name": "Chromatic Resonance",
+      "nameKey": "tree.node.chromatic-resonance",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.penetration",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "hypno",
+        "trigger": "OnGridPlace"
+      },
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.swiftness"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of the strike dictates the speed of the soul.",
+      "id": "skill.agility-off-t2-n0",
+      "name": "Surging Momentum",
+      "nameKey": "tree.node.surging-momentum",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.amplification",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "bond",
+        "trigger": "OnActivate"
+      },
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.quickening",
+        "atom.swiftness"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of the hunt is found in the blur of motion.",
+      "id": "skill.agility-off-t2-n1",
+      "name": "Fleet Momentum",
+      "nameKey": "tree.node.fleet-momentum",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.break",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnDamageDealt"
+      },
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.swiftness"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of movement dictates the rhythm of the strike.",
+      "id": "skill.agility-off-t2-n2",
+      "name": "Fleet-Footed Reflexes",
+      "nameKey": "tree.node.fleet-footed-reflexes",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.rate",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnDamageDealt"
+      },
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.prec-sync",
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of movement dictates the rhythm of the strike.",
+      "id": "skill.agility-off-t3-n0",
+      "name": "Kinetic Synchrony",
+      "nameKey": "tree.node.kinetic-synchrony",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.shred",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "charm_pulse",
+        "trigger": "OnDamageDealt"
+      },
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "A strike that finds the gap and refuses to let go.",
+      "id": "skill.agility-off-t3-n1",
+      "name": "Viper's Edge",
+      "nameKey": "tree.node.viper-s-edge",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.strength",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "charm_pulse",
+        "trigger": "OnDamageDealt"
+      },
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.quickening",
+        "atom.swiftness"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The cadence of movement dictates the rhythm of the strike.",
+      "id": "skill.agility-off-t3-n2",
+      "name": "Rhythmic Velocity",
+      "nameKey": "tree.node.rhythmic-velocity",
+      "nodeClass": "magnitude",
+      "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.damage",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "cold",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of movement dictates the rhythm of the strike.",
+      "id": "skill.agility-off-t4-n0",
+      "name": "Kinetic Cadence",
+      "nameKey": "tree.node.kinetic-cadence",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.rate",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "cold",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely",
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.swiftness",
+        "atom.tempo-haste",
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of the strike dictates the speed of the soul.",
+      "id": "skill.agility-off-t4-n1",
+      "name": "Relentless Velocity",
+      "nameKey": "tree.node.relentless-velocity",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "command",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The strike lands before the shadow even settles.",
+      "id": "skill.agility-off-t5-n0",
+      "name": "Momentum's Afterimage",
+      "nameKey": "tree.node.momentum-s-afterimage",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist.damage",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "command",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "Precision meets raw aggression in every calculated strike.",
+      "id": "skill.agility-off-t5-n1",
+      "name": "Striker's Acuity",
+      "nameKey": "tree.node.striker-s-acuity",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.defense",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "ember",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 5
     },
@@ -895,125 +1173,164 @@
     },
     {
       "affinity": [
-        "likely",
-        "core"
+        "likely"
       ],
       "affixIds": [
-        "atom.precision",
-        "atom.swiftness"
+        "atom.tempo-surge"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the strike dictates the rhythm of the breath.",
+      "flavor": "The rhythm of the strike dictates the speed of the next.",
       "id": "skill.agility-off-t6-n1",
-      "name": "Viper's Cadence",
-      "nameKey": "tree.node.viper-s-cadence",
+      "name": "Surging Cadence",
+      "nameKey": "tree.node.surging-cadence",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.heal.power",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "expose",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 6
     },
     {
       "affinity": [
-        "likely",
-        "core"
+        "core",
+        "likely"
       ],
       "affixIds": [
         "atom.hit-followthrough",
-        "atom.tempo-stampede"
+        "atom.tempo-surge"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "Motion becomes a weapon when the rhythm outpaces the target's ability to react.",
+      "flavor": "Every strike carries the weight of the one that came before.",
       "id": "skill.agility-off-t7-n0",
-      "name": "Velocity Vector",
-      "nameKey": "tree.node.velocity-vector",
+      "name": "Kinetic Momentum",
+      "nameKey": "tree.node.kinetic-momentum",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.swiftness"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.break",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "expose",
+        "trigger": "OnDeath"
       },
-      "flavor": "The rhythm of the strike is dictated by the speed of the breath.",
-      "id": "skill.agility-off-t7-n1",
-      "name": "Apex Velocity",
-      "nameKey": "tree.node.apex-velocity",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
       "rationale": "",
       "tier": 7
     },
     {
       "affinity": [
+        "core",
+        "core",
         "core"
       ],
       "affixIds": [
+        "atom.quickening",
+        "atom.swiftness",
         "atom.tempo-haste"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of movement becomes a blur, leaving only the echo of a strike behind.",
+      "flavor": "The blur of a blade is often mistaken for a ghost.",
+      "id": "skill.agility-off-t7-n1",
+      "name": "Apex Velocity",
+      "nameKey": "tree.node.apex-velocity-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.rate",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "freeze",
+        "trigger": "OnGridPlace"
+      },
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.tempo-stampede",
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of the strike dictates the flow of the elements.",
       "id": "skill.agility-off-t8-n0",
-      "name": "Flicker-Step Cadence",
-      "nameKey": "tree.node.flicker-step-cadence",
+      "name": "Overdrive Pulse",
+      "nameKey": "tree.node.overdrive-pulse",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.shred",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "freeze",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 8
     },
     {
       "affinity": [
-        "likely"
+        "core"
       ],
       "affixIds": [
-        "atom.quickening"
+        "atom.prec-sync"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the strike dictates the speed of the soul.",
+      "flavor": "The friction of movement ignites the very air around the strike.",
       "id": "skill.agility-off-t9-n0",
-      "name": "Accelerated Momentum",
-      "nameKey": "tree.node.accelerated-momentum",
+      "name": "Kinetic Overload",
+      "nameKey": "tree.node.kinetic-overload",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.strength",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "hypno",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 9
     }

@@ -1,48 +1,68 @@
-# Piece: family-block
+# Piece: `family-block`
 
-**Program:** gui-lego · **Kind:** layout · **ERM rung:** —  
+**Program:** `gui-lego` · **Kind:** layout · **ERM rung:** —  
 **Draft:** [../../design/gui-lego/pieces/family-block.html](../../design/gui-lego/pieces/family-block.html)  
-**Composition:** [spec-composition.md](spec-composition.md)
+**Shared types:** [payload-types.md](payload-types.md) · **Composition:** [spec-composition.md](spec-composition.md)
 
 ## Role
-Section header + rows
+
+Section header + rows. Header is owned inline (not a separate piece).
 
 ## Structure
-- Landmark / root class: .family-block (see draft HTML)
-- Slots: header,rows
-- CSS > ancestors: only when parent is surface-shell / split-inspect — **no illicit wrappers**
 
-## Payload (sketch)
-`json
+| | |
+|---|---|
+| Landmark / root | `.family-block (.family-hd + rows)` |
+| Slots | `rows` (channel-row[]) — header is props, not a child piece |
+| CSS `>` parents | family-list blocks |
+
+**Ban:** illicit wrappers between a `>` parent and its declared child.
+
+## Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `piece` | `"family-block"` | yes | Registry id |
+| `instanceId` | `string` | yes | Stable mount / testid |
+| `phase` | `Phase` | yes | See payload-types |
+| `familyId` | `string` | yes | Stable family key |
+| `title` | `string` | yes | Section title |
+| `rowCount` | `number` | yes | Visible rows in block |
+
+
+
+## Theme slots
+
+- Pack kind(s): `neutral`
+- Reads: none
+- Vfx keys: none
+
+## Data flow
+
+- **Bind:** `vm.families[]`
+- **Bus out:** _none_
+
+## Focus (GG-19)
+
+no
+
+## Motion (GG-31/32)
+
+none
+
+## Empty / error
+
+Skip empty families in fold
+
+## Sample payloads
+
+```json
 {
   "piece": "family-block",
-  "instanceId": "demo:family-block",
+  "instanceId": "family:power",
   "phase": "ready",
   "familyId": "power",
   "title": "Power",
   "rowCount": 3
 }
-`
-phase: 
-eady|loading|empty|error|pending. Magnitudes use alueRaw + alueText (VM formats).
-
-## Theme slots
-- Pack kind(s): neutral
-- Reads: --piece-accent, --piece-rail-edge, paint.accent / paint.accentMuted when visual
-- Vfx keys: none
-
-## Data flow
-- Bind: families[]
-- Bus out: _none (parent or host)_
-
-## Focus (GG-19)
-no
-
-## Motion (GG-31/32)
-none
-
-## Empty / error
-If bind missing or phase not ready, parent mounts the matching phase-* piece — this leaf does not invent data.
-
-## Samples
-HTML draft shows structure + sample JSON; themeable pieces include fire vs ice (or status-dot) swap.
+```

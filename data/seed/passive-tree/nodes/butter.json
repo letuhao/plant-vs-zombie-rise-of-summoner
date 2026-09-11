@@ -3,8 +3,50 @@
     "confidence": {},
     "minorityValues": {},
     "model": "google/gemma-4-26b-a4b-qat",
-    "planHash": "",
-    "promptVersion": "tree-language/1"
+    "planHash": "4af000e37fbe6b0b5e3052a69581ea5e76244f00d407ea95c583f67342b0c79f",
+    "promptVersion": "mixed",
+    "promptVersionByNode": {
+      "skill.butter-def-t1-n0": "",
+      "skill.butter-def-t10-n0": "tree-language/3",
+      "skill.butter-def-t10-n1": "tree-language/3",
+      "skill.butter-def-t10-n2": "tree-language/3",
+      "skill.butter-def-t2-n0": "",
+      "skill.butter-def-t3-n0": "",
+      "skill.butter-def-t3-n1": "tree-language/3",
+      "skill.butter-def-t4-n0": "tree-language/3",
+      "skill.butter-def-t4-n1": "tree-language/3",
+      "skill.butter-def-t5-n0": "tree-language/3",
+      "skill.butter-def-t5-n1": "",
+      "skill.butter-def-t6-n0": "",
+      "skill.butter-def-t6-n1": "tree-language/3",
+      "skill.butter-def-t7-n0": "tree-language/3",
+      "skill.butter-def-t7-n1": "tree-language/3",
+      "skill.butter-def-t8-n0": "tree-language/3",
+      "skill.butter-def-t8-n1": "",
+      "skill.butter-def-t9-n0": "",
+      "skill.butter-def-t9-n1": "tree-language/3",
+      "skill.butter-def-t9-n2": "",
+      "skill.butter-off-t1-n0": "tree-language/3",
+      "skill.butter-off-t10-n0": "",
+      "skill.butter-off-t10-n1": "",
+      "skill.butter-off-t10-n2": "",
+      "skill.butter-off-t2-n0": "tree-language/3",
+      "skill.butter-off-t3-n0": "tree-language/3",
+      "skill.butter-off-t3-n1": "tree-language/3",
+      "skill.butter-off-t4-n0": "tree-language/3",
+      "skill.butter-off-t4-n1": "tree-language/3",
+      "skill.butter-off-t5-n0": "tree-language/3",
+      "skill.butter-off-t5-n1": "tree-language/3",
+      "skill.butter-off-t6-n0": "tree-language/3",
+      "skill.butter-off-t6-n1": "tree-language/3",
+      "skill.butter-off-t7-n0": "tree-language/3",
+      "skill.butter-off-t7-n1": "tree-language/3",
+      "skill.butter-off-t8-n0": "tree-language/3",
+      "skill.butter-off-t8-n1": "tree-language/3",
+      "skill.butter-off-t9-n0": "tree-language/3",
+      "skill.butter-off-t9-n1": "tree-language/3",
+      "skill.butter-off-t9-n2": "tree-language/3"
+    }
   },
   "nodes": [
     {
@@ -34,76 +76,99 @@
     {
       "affinity": [
         "core",
-        "likely",
-        "core"
+        "likely"
       ],
       "affixIds": [
-        "atom.shld-cycle",
         "atom.shld-surge",
-        "atom.warding"
+        "atom.ward-brace"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The more the barrier breaks, the more the essence flows to mend it.",
+      "flavor": "Layers of solidified fat provide a structural foundation for the spirit's defense.",
       "id": "skill.butter-def-t10-n0",
-      "name": "Lactic Osmosis",
-      "nameKey": "tree.node.lactic-osmosis",
+      "name": "Laminated Curd",
+      "nameKey": "tree.node.laminated-curd",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.breakthroughSuccess",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 10
     },
     {
       "affinity": [
-        "core"
+        "core",
+        "likely"
       ],
       "affixIds": [
-        "atom.mending"
+        "atom.shld-surge",
+        "atom.ward-link"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The body attempts to knit itself back together using the very fats that once caused its sluggishness.",
+      "flavor": "The more the surface yields, the more the core binds.",
       "id": "skill.butter-def-t10-n1",
-      "name": "Curdled Seam",
-      "nameKey": "tree.node.curdled-seam",
+      "name": "Viscous Tether",
+      "nameKey": "tree.node.viscous-tether",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.power",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 10
     },
     {
       "affinity": [
-        "core"
+        "core",
+        "likely"
       ],
       "affixIds": [
-        "atom.shld-surge"
+        "atom.shld-surge",
+        "atom.ward-link"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythmic pulse of the shield becomes a self-sustaining cycle of fluid pressure.",
+      "flavor": "The barrier does not merely hold; it reaches out to pull the essence of the strike into the self.",
       "id": "skill.butter-def-t10-n2",
-      "name": "Lactic Osmosis",
-      "nameKey": "tree.node.lactic-osmosis-2",
+      "name": "Viscous Osmosis",
+      "nameKey": "tree.node.viscous-osmosis",
       "nodeClass": "mechanism",
       "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.realm",
+        "element": "omni",
+        "exclusionForm": "reroute",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnWave"
+      },
       "rationale": "",
       "tier": 10
     },
@@ -157,81 +222,34 @@
     },
     {
       "affinity": [
-        "core",
-        "likely"
+        "occasional"
       ],
       "affixIds": [
-        "atom.shield-capacity",
-        "atom.shield-toughness"
+        "atom.sust-grit"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "nullification",
-        "printedText": "Inert while atomKind is active — atomKind wins.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A thick, greasy coating that absorbs impact and expands the protective barrier.",
+      "flavor": "Layers of hardened residue provide a resilient barrier against impact.",
       "id": "skill.butter-def-t3-n1",
-      "name": "Lard-Bound Shell",
-      "nameKey": "tree.node.lard-bound-shell",
+      "name": "Laminated Shell",
+      "nameKey": "tree.node.laminated-shell",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.rate",
+        "element": "earth",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnMatchEnd"
+      },
       "rationale": "",
       "tier": 3
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.shld-cycle",
-        "atom.sust-freshgraft"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "A thick, viscous layer that absorbs impact and redistributes the kinetic energy into a protective swell.",
-      "id": "skill.butter-def-t4-n0",
-      "name": "Churned Bastion",
-      "nameKey": "tree.node.churned-bastion",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 4
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.arm-riveting",
-        "atom.arm-welding"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
-      },
-      "flavor": "The deeper the fat, the harder the bone.",
-      "id": "skill.butter-def-t4-n1",
-      "name": "Rendered Marrow",
-      "nameKey": "tree.node.rendered-marrow",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 4
     },
     {
       "affinity": [
@@ -242,18 +260,87 @@
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The body learns to knit itself back together before the wound even closes.",
-      "id": "skill.butter-def-t5-n0",
-      "name": "Lactic Suture",
-      "nameKey": "tree.node.lactic-suture",
+      "flavor": "The rhythm of impact dictates the rhythm of recovery.",
+      "id": "skill.butter-def-t4-n0",
+      "name": "Oscillating Plate",
+      "nameKey": "tree.node.oscillating-plate",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.damage",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnMatchStart"
+      },
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.arm-hardening"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "A thick, unyielding layer that absorbs the impact of the world.",
+      "id": "skill.butter-def-t4-n1",
+      "name": "Rendered Bastion",
+      "nameKey": "tree.node.rendered-bastion",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.reflect.resist.rate",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnMatchStart"
+      },
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The impact is absorbed, then redistributed through the layer.",
+      "id": "skill.butter-def-t5-n0",
+      "name": "Viscous Buffer",
+      "nameKey": "tree.node.viscous-buffer",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.capacity",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnMatchStart"
+      },
       "rationale": "",
       "tier": 5
     },
@@ -307,77 +394,36 @@
     },
     {
       "affinity": [
+        "likely",
         "core"
       ],
       "affixIds": [
-        "atom.fortitude"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "tier"
-        ]
-      },
-      "flavor": "The density of the layer increases with every passing moment of survival.",
-      "id": "skill.butter-def-t6-n1",
-      "name": "Curdled Fortification",
-      "nameKey": "tree.node.curdled-fortification",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.evd-brace",
+        "atom.arm-hardening",
         "atom.sust-grit"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A layer of yellowed fat that absorbs the shock of impact, turning a sudden blow into a slow, sliding momentum.",
-      "id": "skill.butter-def-t7-n0",
-      "name": "Subcutaneous Viscosity",
-      "nameKey": "tree.node.subcutaneous-viscosity",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 7
-    },
-    {
-      "affinity": [
-        "core"
-      ],
-      "affixIds": [
-        "atom.vitality"
-      ],
-      "branch": "defensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "tier"
-        ]
-      },
-      "flavor": "A dense, coagulated layer that absorbs the impact of heavy blows.",
-      "id": "skill.butter-def-t7-n1",
-      "name": "Thickened Curd",
-      "nameKey": "tree.node.thickened-curd",
+      "flavor": "The friction of battle only serves to smooth the edges of your resolve.",
+      "id": "skill.butter-def-t6-n1",
+      "name": "Rendered Resilience",
+      "nameKey": "tree.node.rendered-resilience",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.shield.toughness",
+        "element": "light",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnSpawn"
+      },
       "rationale": "",
-      "tier": 7
+      "tier": 6
     },
     {
       "affinity": [
@@ -386,22 +432,93 @@
       ],
       "affixIds": [
         "atom.shld-cycle",
-        "atom.shld-surge"
+        "atom.ward-flux"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The impact of a blow is absorbed into a swirling, viscous layer, recycling the kinetic energy into a renewed protective barrier.",
-      "id": "skill.butter-def-t8-n0",
-      "name": "Churned Bastion",
-      "nameKey": "tree.node.churned-bastion-2",
+      "flavor": "The friction of impact is converted into a rhythmic, protective swell.",
+      "id": "skill.butter-def-t7-n0",
+      "name": "Churned Viscosity",
+      "nameKey": "tree.node.churned-viscosity",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "loadout.slots",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnSpawn"
+      },
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.sust-callus"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "Layers of fat and fiber, folded into a dense, unyielding mass.",
+      "id": "skill.butter-def-t7-n1",
+      "name": "Churned Integument",
+      "nameKey": "tree.node.churned-integument",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "move.range",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnSunCollect"
+      },
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.ward-flux"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The rhythm of the shield becomes a tide of shifting essence.",
+      "id": "skill.butter-def-t8-n0",
+      "name": "Churned Flux",
+      "nameKey": "tree.node.churned-flux",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.arm1",
+        "element": "dark",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnSunCollect"
+      },
       "rationale": "",
       "tier": 8
     },
@@ -457,25 +574,34 @@
     },
     {
       "affinity": [
-        "core"
+        "core",
+        "likely"
       ],
       "affixIds": [
-        "atom.plating"
+        "atom.shld-cycle",
+        "atom.ward-flux"
       ],
       "branch": "defensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythmic pulse of fluid through hardened channels, turning impact into momentum.",
+      "flavor": "The substance thickens, turning momentum into a protective barrier.",
       "id": "skill.butter-def-t9-n1",
-      "name": "Lactic Osmosis",
-      "nameKey": "tree.node.lactic-osmosis-3",
+      "name": "Coagulated Flow",
+      "nameKey": "tree.node.coagulated-flow",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "progression.bonus.defense",
+        "element": "omni",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnTimer"
+      },
       "rationale": "",
       "tier": 9
     },
@@ -505,27 +631,32 @@
     },
     {
       "affinity": [
-        "core",
         "likely"
       ],
       "affixIds": [
-        "atom.ferocity",
-        "atom.savagery"
+        "atom.ferocity"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The heat of the strike leaves a lingering burn upon the soul.",
+      "flavor": "The friction of the slide leaves a searing heat in its wake.",
       "id": "skill.butter-off-t1-n0",
-      "name": "Searing Edge",
-      "nameKey": "tree.node.searing-edge",
+      "name": "Churned Edge",
+      "nameKey": "tree.node.churned-edge",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "ai.aggression",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 1
     },
@@ -609,49 +740,96 @@
     },
     {
       "affinity": [
-        "core"
+        "likely"
       ],
       "affixIds": [
-        "atom.buttering"
+        "atom.keen-edge"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A coating so smooth, the blade slides through bone as if through warm cream.",
+      "flavor": "The ground becomes a treacherous slide of golden grease.",
       "id": "skill.butter-off-t2-n0",
-      "name": "Lard-Slicked Edge",
-      "nameKey": "tree.node.lard-slicked-edge",
+      "name": "Slick Surface",
+      "nameKey": "tree.node.slick-surface",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.absorption",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 2
     },
     {
       "affinity": [
-        "likely"
+        "core"
       ],
       "affixIds": [
+        "atom.buttering"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The blade slides through armor as if it were warm fat.",
+      "id": "skill.butter-off-t3-n0",
+      "name": "Greased Edge",
+      "nameKey": "tree.node.greased-edge",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.accuracy",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnActivate"
+      },
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.buttering",
         "atom.ferocity"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The blade glides through resistance as if coated in warm fat.",
-      "id": "skill.butter-off-t3-n0",
-      "name": "Slicked Strike",
-      "nameKey": "tree.node.slicked-strike",
+      "flavor": "The friction of battle dissolves into a seamless, sliding rush.",
+      "id": "skill.butter-off-t3-n1",
+      "name": "Lard-Slicked Momentum",
+      "nameKey": "tree.node.lard-slicked-momentum",
       "nodeClass": "magnitude",
-      "nodeKey": "n0",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.amplification",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnActivate"
+      },
       "rationale": "",
       "tier": 3
     },
@@ -660,128 +838,62 @@
         "core"
       ],
       "affixIds": [
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The friction of the world yields to a more fluid momentum.",
+      "id": "skill.butter-off-t4-n0",
+      "name": "Accelerated Viscosity",
+      "nameKey": "tree.node.accelerated-viscosity",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.break",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnDamageDealt"
+      },
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
         "atom.ferocity"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "posture"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "Movement becomes a frictionless descent into violence.",
-      "id": "skill.butter-off-t3-n1",
-      "name": "Greased Slide",
-      "nameKey": "tree.node.greased-slide",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 3
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.buttering",
-        "atom.tempo-surge"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
-      },
-      "flavor": "The friction of combat yields to a smooth, relentless flow.",
-      "id": "skill.butter-off-t4-n0",
-      "name": "Lathered Momentum",
-      "nameKey": "tree.node.lathered-momentum",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 4
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.buttering",
-        "atom.tempo-surge"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The friction of the world simply ceases to apply when everything is sufficiently slick.",
+      "flavor": "The heavy, viscous weight of the harvest provides a foundation for overwhelming force.",
       "id": "skill.butter-off-t4-n1",
-      "name": "Viscous Acceleration",
-      "nameKey": "tree.node.viscous-acceleration",
+      "name": "Rendered Might",
+      "nameKey": "tree.node.rendered-might",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.rate",
+        "element": "fire",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
       "tier": 4
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.buttering",
-        "atom.tempo-surge"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The friction of combat dissolves into a seamless, oily glide.",
-      "id": "skill.butter-off-t5-n0",
-      "name": "Slipstream Lather",
-      "nameKey": "tree.node.slipstream-lather",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
-      "rationale": "",
-      "tier": 5
-    },
-    {
-      "affinity": [
-        "core",
-        "likely"
-      ],
-      "affixIds": [
-        "atom.buttering",
-        "atom.tempo-surge"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
-      },
-      "flavor": "The heat of the struggle melts the fat into pure, aggressive momentum.",
-      "id": "skill.butter-off-t5-n1",
-      "name": "Rendered Adrenaline",
-      "nameKey": "tree.node.rendered-adrenaline",
-      "nodeClass": "magnitude",
-      "nodeKey": "n1",
-      "rationale": "",
-      "tier": 5
     },
     {
       "affinity": [
@@ -792,20 +904,27 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The fat absorbs the heat, turning a sudden flash into a sustained burn.",
-      "id": "skill.butter-off-t6-n0",
-      "name": "Viscous Conductor",
-      "nameKey": "tree.node.viscous-conductor",
+      "flavor": "The friction of combat yields to a rhythmic, sliding momentum.",
+      "id": "skill.butter-off-t5-n0",
+      "name": "Lubricated Cadence",
+      "nameKey": "tree.node.lubricated-cadence",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.shred",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnDamageDealt"
+      },
       "rationale": "",
-      "tier": 6
+      "tier": 5
     },
     {
       "affinity": [
@@ -813,75 +932,162 @@
         "likely"
       ],
       "affixIds": [
-        "atom.buttering",
-        "atom.tempo-surge"
+        "atom.savagery",
+        "atom.tempo-haste"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The friction of combat dissolves into a seamless, gliding assault.",
-      "id": "skill.butter-off-t6-n1",
-      "name": "Slippery Momentum",
-      "nameKey": "tree.node.slippery-momentum",
+      "flavor": "The more they struggle, the faster you slide through them.",
+      "id": "skill.butter-off-t5-n1",
+      "name": "Slippery Onslaught",
+      "nameKey": "tree.node.slippery-onslaught",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
-      "rationale": "",
-      "tier": 6
-    },
-    {
-      "affinity": [
-        "core",
-        "core"
-      ],
-      "affixIds": [
-        "atom.buttering",
-        "atom.tempo-surge"
-      ],
-      "branch": "offensive",
-      "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.block.strength",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnDamageDealt"
       },
-      "flavor": "The friction of combat is lost to a slick, unstoppable flow.",
-      "id": "skill.butter-off-t7-n0",
-      "name": "Viscous Momentum",
-      "nameKey": "tree.node.viscous-momentum",
-      "nodeClass": "mechanism",
-      "nodeKey": "n0",
       "rationale": "",
-      "tier": 7
+      "tier": 5
     },
     {
       "affinity": [
         "likely",
-        "core"
+        "occasional"
       ],
       "affixIds": [
-        "atom.ferocity",
-        "atom.savagery"
+        "atom.buttering",
+        "atom.tempo-surge"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomAttachPoint"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "A frictionless coating that accelerates the rhythm of the strike.",
-      "id": "skill.butter-off-t7-n1",
-      "name": "Gilded Slip",
-      "nameKey": "tree.node.gilded-slip",
+      "flavor": "A coating of pure momentum that turns every movement into a slide.",
+      "id": "skill.butter-off-t6-n0",
+      "name": "Glazed Velocity",
+      "nameKey": "tree.node.glazed-velocity",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.damage",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "occasional"
+      ],
+      "affixIds": [
+        "atom.buttering",
+        "atom.swiftness"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The friction of battle yields to a seamless, sliding violence.",
+      "id": "skill.butter-off-t6-n1",
+      "name": "Churned Momentum",
+      "nameKey": "tree.node.churned-momentum",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.rate",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.buttering",
+        "atom.tempo-yield"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The friction of the struggle is lost to the slickness of the harvest.",
+      "id": "skill.butter-off-t7-n0",
+      "name": "Churned Yield",
+      "nameKey": "tree.node.churned-yield",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnDamageTaken"
+      },
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.buttering",
+        "atom.tempo-yield"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
+      },
+      "flavor": "The friction of movement leaves a shimmering, slippery residue that feeds the harvest.",
+      "id": "skill.butter-off-t7-n1",
+      "name": "Churned Luster",
+      "nameKey": "tree.node.churned-luster",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.crit.resist.damage",
+        "element": "ice",
+        "exclusionForm": "none",
+        "nodeClass": "magnitude",
+        "status": "butter",
+        "trigger": "OnDamageTaken"
+      },
       "rationale": "",
       "tier": 7
     },
@@ -894,44 +1100,56 @@
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The rhythm of the slide dictates the speed of the strike.",
+      "flavor": "The friction of combat dissolves into a seamless, sliding momentum.",
       "id": "skill.butter-off-t8-n0",
-      "name": "Viscous Cadence",
-      "nameKey": "tree.node.viscous-cadence",
+      "name": "Slicked Advance",
+      "nameKey": "tree.node.slicked-advance",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.defense",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 8
     },
     {
       "affinity": [
-        "core",
-        "likely"
+        "core"
       ],
       "affixIds": [
-        "atom.buttering",
-        "atom.tempo-surge"
+        "atom.elpw-attune"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomTrigger"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The friction of existence is merely a suggestion to those who move with the flow.",
+      "flavor": "The friction of battle dissolves into a seamless, sliding grace.",
       "id": "skill.butter-off-t8-n1",
-      "name": "Lathered Velocity",
-      "nameKey": "tree.node.lathered-velocity",
+      "name": "Churned Fluidity",
+      "nameKey": "tree.node.churned-fluidity",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.dodge",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 8
     },
@@ -942,74 +1160,93 @@
       ],
       "affixIds": [
         "atom.buttering",
-        "atom.tempo-surge"
+        "atom.elpw-overflow"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "atomKind"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The friction of movement becomes a lubricant for the next strike.",
+      "flavor": "The friction of combat dissolves into a slick, elemental slipstream.",
       "id": "skill.butter-off-t9-n0",
-      "name": "Viscous Acceleration",
-      "nameKey": "tree.node.viscous-acceleration-2",
+      "name": "Churned Lube",
+      "nameKey": "tree.node.churned-lube",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.heal.power",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 9
     },
     {
       "affinity": [
-        "core",
         "core"
       ],
       "affixIds": [
-        "atom.buttering",
-        "atom.tempo-surge"
+        "atom.buttering"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The friction of combat is replaced by a seamless, oily flow of motion.",
+      "flavor": "The friction of the slide becomes a violent, unstoppable surge.",
       "id": "skill.butter-off-t9-n1",
-      "name": "Lubricated Sequence",
-      "nameKey": "tree.node.lubricated-sequence",
+      "name": "Churned Overrun",
+      "nameKey": "tree.node.churned-overrun",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.break",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnDeath"
+      },
       "rationale": "",
       "tier": 9
     },
     {
       "affinity": [
         "core",
-        "core"
+        "occasional"
       ],
       "affixIds": [
         "atom.buttering",
-        "atom.tempo-surge"
+        "atom.elpw-overflow"
       ],
       "branch": "offensive",
       "exclusion": {
-        "form": "reroute",
-        "printedText": "While nodeClass holds, this effect reroutes instead of applying normally.",
-        "propertyKeys": [
-          "nodeClass"
-        ]
+        "form": "none",
+        "printedText": "",
+        "propertyKeys": []
       },
-      "flavor": "The friction of combat dissolves into a seamless, sliding grace.",
+      "flavor": "Heat thins the coating, turning a slick surface into a spreading wave.",
       "id": "skill.butter-off-t9-n2",
-      "name": "Lathered Momentum",
-      "nameKey": "tree.node.lathered-momentum-2",
+      "name": "Churned Convection",
+      "nameKey": "tree.node.churned-convection",
       "nodeClass": "mechanism",
       "nodeKey": "n2",
+      "promptVersion": "tree-language/3",
+      "quotaCell": {
+        "channelFamily": "combat.parry.rate",
+        "element": "air",
+        "exclusionForm": "none",
+        "nodeClass": "mechanism",
+        "status": "butter",
+        "trigger": "OnGridPlace"
+      },
       "rationale": "",
       "tier": 9
     }

@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _nodegen_fixtures import write_plan  # noqa: E402
 
 from seedsmith.adapters.trees.nodegen import plan_read, run
+from seedsmith.adapters.trees.nodegen.emit import NodeSeedRecord
 
 
 class PlanRunTests(unittest.TestCase):
@@ -31,10 +32,26 @@ class PlanRunTests(unittest.TestCase):
         write_plan(seed_root, "t1", node_count=4)
         plan = plan_read.load("t1", seed_root)
         first_node = plan.nodes[0]
-        ledger = {f"t1:{first_node.node_id}": {"done": True}}
+        # A real accepted row: a `record` is what marks a subject done (2026-09-11). A row without
+        # one is a prior FAILED attempt, which stays scheduled — see the next test.
+        ledger = {f"t1:{first_node.node_id}": {"record": {"id": first_node.node_id}}}
         result = run.plan_run(plan, ledger=ledger)
         self.assertEqual(len(result.subjects), 3)
         self.assertEqual(result.already_done, [f"t1:{first_node.node_id}"])
+
+    def test_a_prior_failed_attempt_is_still_scheduled(self) -> None:
+        """An attempt row (`record: null`, written by `record_attempt`) is bookkeeping, never
+        "done": the node is still owed a generation, so `plan_run` schedules it again."""
+        seed_root = Path(tempfile.mkdtemp())
+        write_plan(seed_root, "t1", node_count=4)
+        plan = plan_read.load("t1", seed_root)
+        first_node = plan.nodes[0]
+        ledger = {f"t1:{first_node.node_id}": {
+            "record": None, "outcome": "unresolved", "detail": "1-1-1 vote", "attempts": 2}}
+        result = run.plan_run(plan, ledger=ledger)
+        self.assertEqual(len(result.subjects), 4)
+        self.assertEqual(result.already_done, [])
+        self.assertIn(f"t1:{first_node.node_id}", [s.subject_id for s in result.subjects])
 
     def test_subject_carries_no_brief_or_schema_yet(self) -> None:
         """H1's own honest gap: resolving a brief/schema needs a quota cell, which is H3's."""
@@ -56,6 +73,46 @@ class LedgerRoundTripTests(unittest.TestCase):
     def test_reading_a_missing_ledger_returns_empty(self) -> None:
         missing = Path(tempfile.mkdtemp()) / "does-not-exist.json"
         self.assertEqual(run.read_ledger(missing), {})
+
+
+class AttemptLedgerTests(unittest.TestCase):
+    """`record_attempt` (owner request, 2026-09-11): a non-accepted outcome leaves a real ledger row
+    so the corpus can name which nodes are still owed and how often each has failed."""
+
+    def test_an_attempt_row_has_no_record_and_counts_attempts(self) -> None:
+        done = run.record_attempt({}, "t1:n0", "unresolved", "1-1-1 vote")
+        self.assertIsNone(done["t1:n0"]["record"])
+        self.assertEqual(done["t1:n0"]["outcome"], "unresolved")
+        self.assertEqual(done["t1:n0"]["detail"], "1-1-1 vote")
+        self.assertEqual(done["t1:n0"]["attempts"], 1)
+        again = run.record_attempt(done, "t1:n0", "unresolved", "still 1-1-1")
+        self.assertEqual(again["t1:n0"]["attempts"], 2)
+
+    def test_an_attempt_never_clobbers_an_accepted_record(self) -> None:
+        accepted = {"t1:n0": {"record": {"id": "skill.t1-off-t1-n0", "name": "Kept"}}}
+        after = run.record_attempt(accepted, "t1:n0", "unresolved", "re-roll failed")
+        self.assertEqual(after["t1:n0"], accepted["t1:n0"])
+
+    def test_accepting_over_a_prior_attempt_is_not_a_duplicate(self) -> None:
+        attempted = run.record_attempt({}, "t1:n0", "unresolved", "1-1-1 vote")
+        record = NodeSeedRecord(
+            node_id="skill.t1-off-t1-n0", node_key="n0", branch="offensive", tier=1,
+            node_class="mechanism", affix_ids=("atom.a",), affinity=("core",),
+            exclusion_form="none", exclusion_property_keys=(), name="Resolved",
+            name_key="tree.node.resolved", flavor="line", rationale="")
+        done = run.record_accepted(attempted, "t1:n0", record)
+        self.assertIsNotNone(done["t1:n0"]["record"])
+        self.assertNotIn("outcome", done["t1:n0"])
+
+    def test_accepting_over_an_accepted_record_still_raises(self) -> None:
+        accepted = {"t1:n0": {"record": {"id": "x"}}}
+        record = NodeSeedRecord(
+            node_id="skill.t1-off-t1-n0", node_key="n0", branch="offensive", tier=1,
+            node_class="mechanism", affix_ids=("atom.a",), affinity=("core",),
+            exclusion_form="none", exclusion_property_keys=(), name="Second",
+            name_key="tree.node.second", flavor="line", rationale="")
+        with self.assertRaises(ValueError):
+            run.record_accepted(accepted, "t1:n0", record)
 
 
 class RunPlanSummaryTests(unittest.TestCase):

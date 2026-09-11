@@ -7,6 +7,146 @@
     "recipe-draw-001": {
       "entryId": "recipe.032",
       "operation": "elevate"
+    },
+    "recipe-draw-002": {
+      "entryId": "recipe.033",
+      "operation": "temper"
+    },
+    "recipe-draw-003": {
+      "entryId": "recipe.034",
+      "operation": "temper"
+    },
+    "recipe-draw-004": {
+      "entryId": "recipe.035",
+      "operation": "temper"
+    },
+    "recipe-draw-005": {
+      "entryId": "recipe.036",
+      "operation": "temper"
+    },
+    "recipe-draw-006": {
+      "entryId": "recipe.037",
+      "operation": "temper"
+    },
+    "recipe-draw-007": {
+      "entryId": "recipe.038",
+      "operation": "temper"
+    },
+    "recipe-draw-008": {
+      "entryId": "recipe.039",
+      "operation": "temper"
+    },
+    "recipe-draw-009": {
+      "entryId": "recipe.040",
+      "operation": "temper"
+    },
+    "recipe-draw-010": {
+      "entryId": "recipe.041",
+      "operation": "temper"
+    },
+    "recipe-draw-011": {
+      "entryId": "recipe.042",
+      "operation": "temper"
+    },
+    "recipe-draw-012": {
+      "entryId": "recipe.043",
+      "operation": "temper"
+    },
+    "recipe-draw-013": {
+      "entryId": "recipe.044",
+      "operation": "temper"
+    },
+    "recipe-draw-014": {
+      "entryId": "recipe.045",
+      "operation": "temper"
+    },
+    "recipe-draw-015": {
+      "entryId": "recipe.046",
+      "operation": "temper"
+    },
+    "recipe-draw-016": {
+      "entryId": "recipe.047",
+      "operation": "temper"
+    },
+    "recipe-draw-017": {
+      "entryId": "recipe.048",
+      "operation": "temper"
+    },
+    "recipe-draw-018": {
+      "entryId": "recipe.049",
+      "operation": "temper"
+    },
+    "recipe-draw-019": {
+      "entryId": "recipe.050",
+      "operation": "temper"
+    },
+    "recipe-draw-020": {
+      "entryId": "recipe.051",
+      "operation": "elevate"
+    },
+    "recipe-draw-021": {
+      "entryId": "recipe.052",
+      "operation": "temper"
+    },
+    "recipe-draw-022": {
+      "entryId": "recipe.053",
+      "operation": "temper"
+    },
+    "recipe-draw-023": {
+      "entryId": "recipe.054",
+      "operation": "temper"
+    },
+    "recipe-draw-024": {
+      "entryId": "recipe.055",
+      "operation": "temper"
+    },
+    "recipe-draw-025": {
+      "entryId": "recipe.056",
+      "operation": "elevate"
+    },
+    "recipe-draw-026": {
+      "entryId": "recipe.057",
+      "operation": "elevate"
+    },
+    "recipe-draw-027": {
+      "entryId": "recipe.058",
+      "operation": "temper"
+    },
+    "recipe-draw-028": {
+      "entryId": "recipe.059",
+      "operation": "temper"
+    },
+    "recipe-draw-029": {
+      "entryId": "recipe.060",
+      "operation": "temper"
+    },
+    "recipe-draw-030": {
+      "entryId": "recipe.061",
+      "operation": "temper"
+    },
+    "recipe-draw-031": {
+      "entryId": "recipe.062",
+      "operation": "temper"
+    },
+    "recipe-draw-032": {
+      "entryId": "recipe.063",
+      "operation": "elevate"
+    },
+    "recipe-draw-033": {
+      "entryId": "recipe.064",
+      "operation": "temper"
+    },
+    "recipe-draw-034": {
+      "entryId": "recipe.065",
+      "operation": "temper"
+    },
+    "recipe-draw-035": {
+      "entryId": "recipe.066",
+      "operation": "temper"
+    },
+    "recipe-draw-036": {
+      "entryId": "recipe.067",
+      "operation": "temper"
     }
   },
   "schemaVersion": 1

@@ -344,8 +344,13 @@ class CliTests(unittest.TestCase):
         self.addCleanup(self._ledger_patch.stop)
 
     def test_cli_write_without_endpoint_refuses(self) -> None:
-        with self.assertRaises(SystemExit):
-            run_mod.main(["--overwrite", "shard.chaff", "--write"])
+        """Refuse only when the *resolved* transport has no endpoint."""
+        from seedsmith.pipeline.llm_caller import LlmCallerConfig
+        with unittest.mock.patch(
+                "seedsmith.pipeline.llm_caller.resolve_live_transport",
+                return_value=LlmCallerConfig(endpoint="", model="x")):
+            with self.assertRaises(SystemExit):
+                run_mod.main(["--overwrite", "shard.chaff", "--write"])
 
     def test_cli_a_real_live_run_writes_a_real_corpus_file(self) -> None:
         """⛔ Real gap, closed 2026-09-08 — see basetypegen's identical test for the full account:

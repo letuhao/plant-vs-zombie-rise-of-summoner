@@ -63,10 +63,10 @@ public class BuildSquadEquippedActionsTests : IDisposable
             FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(Read("progression.v1.json")));
         // T59.8: the real BattleEngine.Resolve call needs the same three tunables
         // ContractTuningTestBootstrap configures for Core.Tests -- none covered by this assembly's
-        // own [ModuleInitializer] bootstrap. battle.v3.json, not v2 (v2 is stale -- missing
-        // speciesTempo, the same drift AptitudeChannelModsTests is separately failing on).
+        // own [ModuleInitializer] bootstrap. Use the current battle.v5.json so every shipped
+        // profile remains available after the timeline catalog grows.
         FusionRpg.Core.Battle.BattleTuningHub.Configure(
-            FusionRpg.Core.Battle.BattleTuningLoader.Parse(Read("battle.v3.json")));
+            FusionRpg.Core.Battle.BattleTuningLoader.Parse(Read("battle.v5.json")));
         FusionRpg.Core.Battle.BattleRuleset.ConfigureResources(
             FusionRpg.Core.Battle.BattleResourceTuningLoader.Parse(Read("battle-resources.v1.json")));
         FusionRpg.Core.Actions.ActionTimingPolicy.Configure(

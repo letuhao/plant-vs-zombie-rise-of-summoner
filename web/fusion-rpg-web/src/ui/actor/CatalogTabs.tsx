@@ -5,25 +5,7 @@ import { InspectSplit } from "./InspectSplit";
 import { PendingNote } from "./shared";
 import { StatusGlyph } from "./StatusGlyph";
 
-export function ShieldTab({ data }: { data: ActorView }) {
-  return (
-    <div className="mt-4" data-testid="shield-tab">
-      <h3 className="font-display text-lg text-text">Shield layers</h3>
-      <div className="mt-3 grid grid-cols-3 gap-3">
-        {[1, 2, 3].map((slot) => (
-          <div
-            key={slot}
-            data-testid={`shield-well-${slot}`}
-            className="flex aspect-square max-w-36 items-center justify-center rounded-full border border-dashed border-border-control text-xs text-muted"
-          >
-            Empty layer
-          </div>
-        ))}
-      </div>
-      <PendingNote pending={data.shieldStack} testId="actor-shield-pending" />
-    </div>
-  );
-}
+export { ShieldTab } from "./ShieldTab";
 
 export function StatusTab({ surface }: { surface: ActorSurfaceCatalog }) {
   const [selected, setSelected] = useState<StatusCatalogRow | null>(surface.statuses[0] ?? null);

@@ -32,6 +32,83 @@ from .vocab import Vocabulary
 
 REPO_ROOT = Path(__file__).resolve().parents[6]
 DEFAULT_LEDGER = REPO_ROOT / "data" / "seed" / "items" / "_runs" / "set-charm-gen.ledger.json"
+DEFAULT_SETS_DIR = REPO_ROOT / "data" / "seed" / "items" / "sets"
+DEFAULT_CHARMS_DIR = REPO_ROOT / "data" / "seed" / "items" / "charms"
+
+
+def _existing_charm_axis_counts(directory: Path = DEFAULT_CHARMS_DIR) -> dict[str, int]:
+    """Measure authored charm axes for deterministic least-populated assignment."""
+    counts: dict[str, int] = {}
+    if not directory.is_dir():
+        return counts
+    for path in directory.glob("*.json"):
+        if "ledger" in path.name:
+            continue
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        for row in document.get("entries") or ():
+            axis = row.get("axis") if isinstance(row, dict) else None
+            if isinstance(axis, str) and axis:
+                counts[axis] = counts.get(axis, 0) + 1
+    return counts
+
+
+def _existing_charm_class_counts(directory: Path = DEFAULT_CHARMS_DIR) -> dict[str, int]:
+    """Measure authored charm classes for deterministic weighted assignment."""
+    counts: dict[str, int] = {}
+    if not directory.is_dir():
+        return counts
+    for path in directory.glob("*.json"):
+        if "ledger" in path.name:
+            continue
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        for row in document.get("entries") or ():
+            charm_class = row.get("charmClass") if isinstance(row, dict) else None
+            if isinstance(charm_class, str) and charm_class:
+                counts[charm_class] = counts.get(charm_class, 0) + 1
+    return counts
+
+
+def _least_represented_charm_class(tuning: SetCharmGenTuning,
+                                   counts: "dict[str, int]") -> str:
+    """Choose the smallest actual/target-weight ratio using integer cross multiplication.
+
+    Charm class determines AP cost, rolls and unique-carry semantics.  It cannot be a free model
+    choice: the model is asked for identity, while this makes the corpus' scarce top tier a
+    deterministic tuned allocation.  Ties retain tuning-file order for reproducible plans.
+    """
+    best = tuning.charm_classes[0]
+    for candidate in tuning.charm_classes[1:]:
+        if counts.get(candidate.id, 0) * best.target_weight < \
+                counts.get(best.id, 0) * candidate.target_weight:
+            best = candidate
+    return best.id
+
+
+def _set_entry_on_disk(entry_id: str, *, sets_dir: "Path | None" = None) -> bool:
+    """True when the production (or test) sets corpus already carries this id.
+
+    Ledger subject keys can drift when a theme/species id is renamed (e.g. demon.caltrop →
+    demon.caltropnut) while the partition file still holds the minted set id. Re-planning that
+    theme then regenerates a different row for the same id and `_merged_partition_rows` raises.
+    Corpus presence wins — same discipline materialgen uses for hand-authored rows without a
+    ledger record.
+    """
+    if not isinstance(entry_id, str) or "." not in entry_id:
+        return False
+    body = entry_id.split(".", 1)[1]
+    partition = body.rsplit("-", 1)[0]
+    path = (sets_dir or DEFAULT_SETS_DIR) / f"{partition}.json"
+    if not path.exists():
+        return False
+    document = json.loads(path.read_text(encoding="utf-8"))
+    return any(isinstance(row, dict) and row.get("id") == entry_id
+               for row in (document.get("entries") or []))
 
 
 def live_caller(live_config: LlmCallerConfig) -> "Callable[..., str]":
@@ -66,10 +143,14 @@ class Subject:
     theme_key: str
     entry_id: str
     brief: str
+    charm_class_hint: str = ""
 
     def to_dict(self) -> dict:
-        return {"subjectId": self.subject_id, "kind": self.kind, "population": self.population,
-                "themeKey": self.theme_key, "entryId": self.entry_id}
+        row = {"subjectId": self.subject_id, "kind": self.kind, "population": self.population,
+               "themeKey": self.theme_key, "entryId": self.entry_id}
+        if self.charm_class_hint:
+            row["charmClass"] = self.charm_class_hint
+        return row
 
 
 @dataclass
@@ -80,8 +161,12 @@ class RunPlan:
 
     @property
     def complete(self) -> bool:
-        """A plan with a held partition is NOT complete, and the run verdict must reflect that."""
-        return not self.held
+        """True only when there is neither pending work nor a held subject.
+
+        Previously this checked only ``held``. That made a build plan with one or more subjects
+        report ``complete: true`` and obscured interrupted or partially drained runs in the CLI.
+        """
+        return not self.subjects and not self.held
 
     def summary(self) -> dict:
         by_reason: "dict[str, int]" = {}
@@ -120,7 +205,8 @@ def plan_run(*, kind: str, population: str, tuning: SetCharmGenTuning, vocabular
              species_themes: "list[Theme] | None" = None,
              build_themes: "list[Theme] | None" = None,
              ledger: "dict[str, dict] | None" = None,
-             legacy_partitions: "frozenset[str] | None" = None) -> RunPlan:
+             legacy_partitions: "frozenset[str] | None" = None,
+             sets_dir: "Path | None" = None) -> RunPlan:
     if kind not in ("set", "charm"):
         raise ValueError(f"kind must be 'set' or 'charm', got {kind!r}")
     if population not in ("species", "build"):
@@ -139,7 +225,14 @@ def plan_run(*, kind: str, population: str, tuning: SetCharmGenTuning, vocabular
 
     subjects: "list[Subject]" = []
     already: "list[str]" = []
+    planned_entry_ids: dict[str, str] = {}
     report = themes_mod.holdback_report(pool)
+    charm_axes = ()
+    if kind == "charm":
+        from ..charmgen.rules import CHARM_AXES
+        charm_axes = tuple(CHARM_AXES)
+    axis_counts = _existing_charm_axis_counts() if kind == "charm" else {}
+    class_counts = _existing_charm_class_counts() if kind == "charm" else {}
 
     for theme in pool:
         if theme.hold_reason:
@@ -149,10 +242,34 @@ def plan_run(*, kind: str, population: str, tuning: SetCharmGenTuning, vocabular
             already.append(subject_id)
             continue
         entry_id = _entry_id(kind, population, theme, partitions)
+        if kind == "set" and entry_id in planned_entry_ids:
+            other = planned_entry_ids[entry_id]
+            raise ValueError(
+                f"species ids {other!r} and {theme.species_id!r} normalise to the same set id "
+                f"{entry_id!r}; refusing an ambiguous plan")
+        if kind == "set":
+            planned_entry_ids[entry_id] = theme.species_id or ""
+        if kind == "set" and _set_entry_on_disk(entry_id, sets_dir=sets_dir):
+            already.append(subject_id)
+            continue
+        assigned_class = ""
+        if kind == "charm":
+            assigned_class = _least_represented_charm_class(tuning, class_counts)
         text = (brief_mod.build_set_brief(theme, tuning, vocabulary) if kind == "set"
-                else brief_mod.build_charm_brief(theme, tuning, vocabulary))
+                else brief_mod.build_charm_brief(
+                    theme, tuning, vocabulary,
+                    axis_hint=(min(charm_axes, key=lambda axis: (axis_counts.get(axis, 0),
+                                                                  charm_axes.index(axis)))
+                               if charm_axes else None),
+                    class_hint=assigned_class or None))
+        if kind == "charm" and charm_axes:
+            assigned_axis = min(charm_axes, key=lambda axis: (axis_counts.get(axis, 0),
+                                                               charm_axes.index(axis)))
+            axis_counts[assigned_axis] = axis_counts.get(assigned_axis, 0) + 1
+            class_counts[assigned_class] = class_counts.get(assigned_class, 0) + 1
         subjects.append(Subject(subject_id=subject_id, kind=kind, population=population,
-                                theme_key=theme.theme_key, entry_id=entry_id, brief=text))
+                                theme_key=theme.theme_key, entry_id=entry_id, brief=text,
+                                charm_class_hint=assigned_class))
 
     return RunPlan(subjects=subjects, held=list(report.held), already_done=already)
 

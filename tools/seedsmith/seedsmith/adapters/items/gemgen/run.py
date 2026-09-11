@@ -350,16 +350,14 @@ def main(argv=None) -> int:
         raise SystemExit(
             "seedsmith: refused — no --write. Use --dry-run to inspect the plan first, "
             "then re-run with --write --endpoint <url> to actually call a model and persist.")
-    if not args.endpoint:
+
+    from ....pipeline.llm_caller import live_answer_caller, resolve_live_transport
+
+    config = resolve_live_transport(args.endpoint, args.model)
+    if not config.endpoint:
         raise SystemExit(
-            "seedsmith: --write refused — no --endpoint. A real run needs a live model "
-            "(--endpoint <url> [--model <name>]); --dry-run needs neither.")
-
-    from ....pipeline.llm_caller import live_answer_caller, load_config
-
-    base_config = load_config()
-    config = dataclasses.replace(base_config, endpoint=args.endpoint,
-                                 model=args.model or base_config.model)
+            "seedsmith: --write refused — no live endpoint. Pass --endpoint <url> or set "
+            "SEEDSMITH_LLM_ENDPOINT in tools/seedsmith/.env; --dry-run needs neither.")
     caller = live_answer_caller(config)
 
     if args.overwrite:

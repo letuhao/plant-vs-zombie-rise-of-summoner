@@ -7,6 +7,34 @@
     "milestone-draw-001": {
       "entryId": "enh.012",
       "runtimeFamily": "atom.enhance-swift"
+    },
+    "milestone-draw-002": {
+      "entryId": "enh.013",
+      "runtimeFamily": "atom.enhance-resilience"
+    },
+    "milestone-draw-003": {
+      "entryId": "enh.014",
+      "runtimeFamily": "atom.enhance-vitality"
+    },
+    "milestone-draw-004": {
+      "entryId": "enh.015",
+      "runtimeFamily": "atom.enhance-prowess"
+    },
+    "milestone-draw-005": {
+      "entryId": "enh.016",
+      "runtimeFamily": "atom.enhance-might"
+    },
+    "milestone-draw-006": {
+      "entryId": "enh.017",
+      "runtimeFamily": "atom.enhance-bloom"
+    },
+    "milestone-draw-007": {
+      "entryId": "enh.018",
+      "runtimeFamily": "atom.enhance-zenith"
+    },
+    "milestone-draw-008": {
+      "entryId": "enh.019",
+      "runtimeFamily": "atom.enhance-girth"
     }
   },
   "schemaVersion": 1

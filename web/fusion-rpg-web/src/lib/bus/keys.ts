@@ -42,9 +42,14 @@ export const queryKeys = {
   uniqueEquipment: (instanceId: string) => ["uniqueEquipment", instanceId] as const,
   relics: ["relics"] as const,
   aptitudes: (playerId: number) => ["aptitudes", playerId] as const,
+  uniqueAptitudes: (instanceId: string) => ["uniqueAptitudes", instanceId] as const,
   speciesAptitudes: (playerId: number, speciesId: string) => ["speciesAptitudes", playerId, speciesId] as const,
   speciesRespecPrice: (playerId: number, speciesId: string) =>
     ["speciesRespecPrice", playerId, speciesId] as const,
+  aptitudePresets: (playerId: number) => ["aptitudePresets", playerId] as const,
+  aptitudePresetFavour: (speciesId: string) => ["aptitudePresetFavour", speciesId] as const,
+  aptitudePresetActive: (playerId: number, scope: string, scopeKey: string) =>
+    ["aptitudePresetActive", playerId, scope, scopeKey] as const,
   commanders: (playerId: number) => ["commanders", playerId] as const,
   onboarding: (playerId: number) => ["onboarding", playerId] as const,
   passiveTree: (playerId: number) => ["passiveTree", playerId] as const,

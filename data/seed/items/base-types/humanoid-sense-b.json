@@ -463,6 +463,577 @@
           "family": "atom.enhance-evasion"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-face-b-013",
+      "nameKey": "base.polished-monocle",
+      "name": "Polished Monocle",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.polished-monocle",
+      "flavorKey": "flavor.base.polished-monocle",
+      "flavor": "A singular, high-clarity lens set within a rigid frame to sharpen the wearer's perception of the immediate surroundings.",
+      "tags": [
+        "light",
+        "crafted-only"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-014",
+      "nameKey": "base.polished-monocle",
+      "name": "Polished Monocle",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "cloth",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.polished-monocle",
+      "flavorKey": "flavor.base.polished-monocle",
+      "flavor": "A singular, high-clarity lens mounted to a delicate frame, designed to sharpen the wearer's perception of subtle movements.",
+      "tags": [
+        "light",
+        "arcane",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-015",
+      "nameKey": "base.polished-monocle",
+      "name": "Polished Monocle",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.polished-monocle",
+      "flavorKey": "flavor.base.polished-monocle",
+      "flavor": "A singular, high-clarity lens mounted to a fine metal frame. It is designed to sharpen the wearer's perception of subtle movements.",
+      "tags": [
+        "light",
+        "metal",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-016",
+      "nameKey": "base.polished-monocle",
+      "name": "Polished Monocle",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.polished-monocle",
+      "flavorKey": "flavor.base.polished-monocle",
+      "flavor": "A singular, high-clarity lens mounted to a rigid frame, designed to sharpen the wearer's perception of subtle movements.",
+      "tags": [
+        "light",
+        "crafted-only"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-017",
+      "nameKey": "base.etched-monocle",
+      "name": "Etched Monocle",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.etched-monocle",
+      "flavorKey": "flavor.base.etched-monocle",
+      "flavor": "A singular, polished lens set within a delicate metal frame. It focuses the senses upon the minute details of a target's movement.",
+      "tags": [
+        "light",
+        "metal",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-018",
+      "nameKey": "base.polished-monocle",
+      "name": "Polished Monocle",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "cloth",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.polished-monocle",
+      "flavorKey": "flavor.base.polished-monocle",
+      "flavor": "A singular, crystal-clear lens mounted to a fine metal frame. It focuses the wearer's perception onto a single point of interest.",
+      "tags": [
+        "light",
+        "metal",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-019",
+      "nameKey": "base.polished-monocle",
+      "name": "Polished Monocle",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.polished-monocle",
+      "flavorKey": "flavor.base.polished-monocle",
+      "flavor": "A singular, high-clarity lens mounted to a rigid frame. It focuses the wearer's perception toward minute details and subtle movements.",
+      "tags": [
+        "light",
+        "crafted-only"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-020",
+      "nameKey": "base.polished-monocle",
+      "name": "Polished Monocle",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.polished-monocle",
+      "flavorKey": "flavor.base.polished-monocle",
+      "flavor": "A singular, high-clarity lens mounted to a fine frame, designed to sharpen the focus of the wearer's primary sensory input.",
+      "tags": [
+        "light",
+        "crafted-only"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-021",
+      "nameKey": "base.lensed-cowl",
+      "name": "Lensed Cowl",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.lensed-cowl",
+      "flavorKey": "flavor.base.lensed-cowl",
+      "flavor": "A heavy leather hood fitted with a series of rotating glass apertures for adjusting focus.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-022",
+      "nameKey": "base.lensed-cowl",
+      "name": "Lensed Cowl",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.lensed-cowl",
+      "flavorKey": "flavor.base.lensed-cowl",
+      "flavor": "A heavy leather hood fitted with a series of rotating glass lenses to sharpen the wearer's perception.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-023",
+      "nameKey": "base.gilded-periscope",
+      "name": "Gilded Periscope",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.gilded-periscope",
+      "flavorKey": "flavor.base.gilded-periscope",
+      "flavor": "A brass-mounted ocular lens that extends from the brow to provide a heightened perspective of the battlefield.",
+      "tags": [
+        "metal",
+        "utility",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-024",
+      "nameKey": "base.lensed-cowl",
+      "name": "Lensed Cowl",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.lensed-cowl",
+      "flavorKey": "flavor.base.lensed-cowl",
+      "flavor": "A heavy leather hood fitted with a series of rotating glass prisms to filter light and sharpen focus.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-025",
+      "nameKey": "base.lensed-cowl",
+      "name": "Lensed Cowl",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.lensed-cowl",
+      "flavorKey": "flavor.base.lensed-cowl",
+      "flavor": "A heavy leather hood fitted with various magnifying crystals to sharpen the wearer's perception of the world.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-026",
+      "nameKey": "base.lensed-cowl",
+      "name": "Lensed Cowl",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.lensed-cowl",
+      "flavorKey": "flavor.base.lensed-cowl",
+      "flavor": "A heavy hood fitted with a series of rotating crystalline lenses for filtering light and motion.",
+      "tags": [
+        "medium",
+        "crafted-only"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-027",
+      "nameKey": "base.lensed-cowl",
+      "name": "Lensed Cowl",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.lensed-cowl",
+      "flavorKey": "flavor.base.lensed-cowl",
+      "flavor": "A heavy leather hood fitted with various magnifying crystals and adjustable shutters to sharpen the wearer's perception.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-028",
+      "nameKey": "base.lensed-cowl",
+      "name": "Lensed Cowl",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.precision",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.lensed-cowl",
+      "flavorKey": "flavor.base.lensed-cowl",
+      "flavor": "A heavy leather hood fitted with a series of rotating glass apertures to filter light and focus sight.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
+      ]
     }
   ]
 }

@@ -147,10 +147,12 @@ class ClosedVocabularyTests(unittest.TestCase):
 class FamilyAndPairingVocabularyTests(unittest.TestCase):
     """The two data-derived (not C#-derived) vocabularies §2's "DECIDED" section adds."""
 
-    def test_one_hundred_twelve_atom_families(self) -> None:
-        # Explicit acceptance value for the current shared affix-family corpus.
+    def test_atom_family_count_tracks_the_live_corpus(self) -> None:
+        # Explicit acceptance value for the current shared affix-family corpus. The owner's item
+        # seed commits (27e908d3/3f9afb44) grew it 112 -> 125 families; nodegen's own
+        # test_nodegen_vocab sentinel tracks the same number, so the two stay in step.
         regs = ActionsAdapter().registries()
-        self.assertEqual(len(regs.vocabularies["atomFamily"]), 112)
+        self.assertEqual(len(regs.vocabularies["atomFamily"]), 125)
 
     def test_pairing_keys_match_the_live_pairings_file(self) -> None:
         pairings_path = REPO_ROOT / "data" / "seed" / "actions" / "pairings.json"
@@ -158,12 +160,14 @@ class FamilyAndPairingVocabularyTests(unittest.TestCase):
         regs = ActionsAdapter().registries()
         self.assertEqual(regs.vocabularies["pairingKey"], frozenset(doc.keys()))
 
-    def test_family_map_keys_are_the_nineteen_family_ids(self) -> None:
-        # Measured 2026-09-03 (spec §3 step 5's eleventh vocabulary): 53 species over 19 family
-        # ids. This file already exists in the live tree — see this module's build report for why
-        # that differs from the task's own "if it doesn't exist yet" framing.
+    def test_family_map_keys_union_map_plus_registry(self) -> None:
+        # Measured 2026-09-03: 19 consolidated registry families. The live family-map now covers
+        # the full 904-species roster (227 raw family tokens; owner roster growth), and the
+        # loader deliberately unions them with the registry for compatibility with already-
+        # committed family-scoped action rows (227 + 19 − 4 shared = 242). Keep this acceptance
+        # value explicit so a roster change is reviewed here.
         regs = ActionsAdapter().registries()
-        self.assertEqual(len(regs.vocabularies["familyMapKey"]), 19)
+        self.assertEqual(len(regs.vocabularies["familyMapKey"]), 242)
 
 
 class LegalCombinationsTests(unittest.TestCase):

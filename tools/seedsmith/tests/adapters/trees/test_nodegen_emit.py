@@ -81,6 +81,39 @@ class BuildNodeRecordTests(unittest.TestCase):
         self.assertEqual(as_dict["exclusion"]["printedText"], record.printed_text)
         self.assertTrue(as_dict["exclusion"]["printedText"])
 
+    def test_quota_cell_is_absent_by_default(self) -> None:
+        """Additive: every pre-persistence call site (and every old committed record) leaves
+        `quotaCell` off the dict entirely — never a silently-empty map that looks like a real cell."""
+        record = emit.build_node_record(
+            node_id="skill.might-off-t1-n0", node_key="n0", branch="offensive", tier=1,
+            node_class="mechanism", response=_sample_response(),
+        )
+        self.assertIsNone(record.quota_cell)
+        self.assertNotIn("quotaCell", record.to_dict())
+
+    def test_quota_cell_round_trips_through_to_dict_and_build(self) -> None:
+        cell = {
+            "nodeClass": "mechanism", "trigger": "OnHit", "element": "fire",
+            "status": "none", "channelFamily": "atk", "exclusionForm": "none",
+        }
+        record = emit.build_node_record(
+            node_id="skill.might-off-t1-n0", node_key="n0", branch="offensive", tier=1,
+            node_class="mechanism", response=_sample_response(), quota_cell=cell,
+        )
+        as_dict = record.to_dict()
+        self.assertEqual(as_dict["quotaCell"], cell)
+        # Load path: a response that already carries quotaCell (ledger replay) reconstructs it
+        # without the caller re-supplying the kwarg.
+        replay = emit.build_node_record(
+            node_id="skill.might-off-t1-n0", node_key="n0", branch="offensive", tier=1,
+            node_class="mechanism", response={**_sample_response(), "quotaCell": cell},
+        )
+        self.assertEqual(dict(replay.quota_cell or {}), cell)
+
+    def test_quota_cell_from_dict_refuses_a_partial_map(self) -> None:
+        with self.assertRaises(KeyError):
+            emit.quota_cell_from_dict({"nodeClass": "mechanism"})
+
     def test_refuses_a_malformed_name_key_even_from_a_response(self) -> None:
         with self.assertRaises(emit.NodeKeyRefused):
             emit.build_node_record(
@@ -143,6 +176,58 @@ class SeedDocumentRoundTripTests(unittest.TestCase):
         path_a = emit.write_seed_document(doc, seed_root_a)
         path_b = emit.write_seed_document(doc, seed_root_b)
         self.assertEqual(path_a.read_bytes(), path_b.read_bytes())
+
+    def test_an_all_current_vintage_document_is_stamped_with_it(self) -> None:
+        records = [
+            emit.build_node_record(
+                node_id="skill.might-off-t1-n0", node_key="n0", branch="offensive", tier=1,
+                node_class="mechanism", response=_sample_response(name_key="tree.node.a"),
+                prompt_version="tree-language/3"),
+            emit.build_node_record(
+                node_id="skill.might-off-t1-n1", node_key="n1", branch="offensive", tier=1,
+                node_class="magnitude", response=_sample_response(name_key="tree.node.b"),
+                prompt_version="tree-language/3"),
+        ]
+        doc = emit.build_seed_document("might", records, plan_hash="x",
+                                       prompt_version="tree-language/3", model="sonnet")
+        self.assertEqual("tree-language/3", doc["_provenance"]["promptVersion"])
+        self.assertNotIn("promptVersionByNode", doc["_provenance"])
+
+    def test_a_partially_superseded_document_is_stamped_mixed_not_current(self) -> None:
+        """2026-09-11, D2's own exposed lie. Under `--supersede`, a failed re-roll KEEPS its prior,
+        pre-provenance record (so the tree stays complete). Filtering empties out of the vintage set
+        would then see only the current vintage and stamp the WHOLE document with it — hiding the
+        exact stale nodes the stamp exists to name. An empty per-record vintage is its own sentinel.
+        """
+        records = [
+            emit.build_node_record(
+                node_id="skill.might-off-t1-n0", node_key="n0", branch="offensive", tier=1,
+                node_class="mechanism", response=_sample_response(name_key="tree.node.a"),
+                prompt_version="tree-language/3"),
+            # A re-roll that failed: prior record kept, no per-record vintage (the legacy shape).
+            emit.build_node_record(
+                node_id="skill.might-off-t1-n1", node_key="n1", branch="offensive", tier=1,
+                node_class="magnitude", response=_sample_response(name_key="tree.node.b"),
+                prompt_version=""),
+        ]
+        doc = emit.build_seed_document("might", records, plan_hash="x",
+                                       prompt_version="tree-language/3", model="sonnet")
+        self.assertEqual("mixed", doc["_provenance"]["promptVersion"])
+        self.assertEqual({"skill.might-off-t1-n0": "tree-language/3",
+                          "skill.might-off-t1-n1": ""},
+                         doc["_provenance"]["promptVersionByNode"])
+
+    def test_an_all_empty_vintage_document_keeps_the_legacy_caller_stamp(self) -> None:
+        records = [
+            emit.build_node_record(
+                node_id="skill.might-off-t1-n0", node_key="n0", branch="offensive", tier=1,
+                node_class="mechanism", response=_sample_response(name_key="tree.node.a"),
+                prompt_version=""),
+        ]
+        doc = emit.build_seed_document("might", records, plan_hash="x",
+                                       prompt_version="tree-language/3", model="sonnet")
+        self.assertEqual("tree-language/3", doc["_provenance"]["promptVersion"])
+        self.assertNotIn("promptVersionByNode", doc["_provenance"])
 
 
 if __name__ == "__main__":

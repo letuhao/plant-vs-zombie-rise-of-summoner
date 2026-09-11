@@ -67,12 +67,12 @@ def answer_matches_schema(draft: dict, context: "dict[str, Any]") -> "list[str]"
 
 
 def answer_declares_content(draft: dict, context: "dict[str, Any]") -> "list[str]":  # noqa: ARG001
-    """`required: []` at the schema's top level is deliberate (`schema.py`'s own choice) — a
-    `blocked` answer is legal and carries none of the content fields. What is not legal is an
-    answer that declares neither."""
+    """Top-level fields are `required` + nullable (2026-09-09 wire fix). A `blocked` answer is
+    legal with null content; what is not legal is an answer that declares neither."""
     if isinstance(draft.get("blocked"), str) and draft["blocked"].strip():
         return []
-    missing = [f for f in _CONTENT_FIELDS if f not in draft]
+    missing = [f for f in _CONTENT_FIELDS
+               if draft.get(f) is None or f not in draft]
     if missing:
         return [f"the answer declares neither `blocked` nor a complete combination: missing "
                 f"{missing}"]

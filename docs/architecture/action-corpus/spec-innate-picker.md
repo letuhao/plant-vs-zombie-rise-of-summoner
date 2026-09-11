@@ -19,7 +19,8 @@ ranking to apply.
    *seed's* declared element affinity against the species' catalog element, never a rolled channel.
 2. **Small-batch proof before any full run.** The call budget is a **ceiling, not a plan**. This module
    costs zero calls and must produce a correct answer over a smoke batch — Checkpoint 5 is exactly that.
-3. **The roster is 84 species, not 904.** So this module emits at most 84 picks, and a species with no
+3. **The roster is the live species seed folder.** It currently contains 904 species, so this module
+   emits at most 904 picks, and a species with no
    eligible action gets `null` rather than a fabricated one.
 4. **C1's family-access widening is gated.** So a family-tier candidate and a signature-tier candidate
    may draw from the same atom families, which makes the ranking's later terms load-bearing rather than
@@ -37,7 +38,7 @@ ranking to apply.
 | An innate is **never bound** — putting one in the equipped set is a category error, not a wasted slot | `LoadoutSet.cs:74` (`IntrinsicNotEquippable`) |
 | The scarce thing it bypasses is **5 slots** | `LoadoutSet.cs:40` |
 | The five categories in declared order — the tie order for the lean | `ActionEnums.cs:119-123` |
-| Six elements, with `ElementPrimary`/`ElementSecondary` per species for all 84 | `ActorElementTypes.cs:3-11`; `DemonSpeciesCatalog.Generated.cs:14+` |
+| Six elements, with `ElementPrimary`/`ElementSecondary` per species for all 904 live records | `ActorElementTypes.cs:3-11`; `data/seed/demons/species/**/*.json` |
 | Rung table with `cap: 10` | `data/tuning/action-rungs.v1.json` |
 
 **One overclaim corrected, because the conclusion must not rest on it.** An earlier argument filed
@@ -101,7 +102,7 @@ Term by term, each an integer with a stated maximum so the positional weights be
 
 | Term | Definition | Range |
 |---|---|---|
-| `roleLeanMatch` | `5 - index` of the action's `category` in the species' `leanOrder` from A-S0. **A species whose A-S0 `leanSource` is `floor` — a genuine five-way tie — scores 0 for every candidate**, so the term goes inert and the next one decides: an absence, never an invented preference. ⛔ **CORRECTED 2026-09-03 (review F12):** the trigger was *"`separation == 0`, no family"*, which would have made this term inert for **31 of 84** species that now carry a real derivation (`spec-characteristic-pool.md` §3 step 3). A family-less species has `separation: null` and a derived `leanOrder`, and this term reads it normally | 0..5 |
+| `roleLeanMatch` | `5 - index` of the action's `category` in the species' `leanOrder` from A-S0. **A species whose A-S0 `leanSource` is `floor` — a genuine five-way tie — scores 0 for every candidate**, so the term goes inert and the next one decides: an absence, never an invented preference. ⛔ **CORRECTED 2026-09-03 (review F12):** the trigger was *"`separation == 0`, no family"*, which would have made this term inert for family-less species that carry a real derivation (`spec-characteristic-pool.md` §3 step 3). A family-less species has `separation: null` and a derived `leanOrder`, and this term reads it normally | 0..5 |
 | `motifCoverage` | how many of the species' `motifs` appear in the action's recorded `motifsUsed`. Read from what the generator recorded against the brief's anchor, **never re-derived by matching prose** | 0..len(motifs) |
 | `elementMatch` | 2 if the action's element affinity equals `ElementPrimary`; 1 if it equals `ElementSecondary`; 0 otherwise | 0..2 |
 | `categoryScarcity` | `eligibleCount - (count of eligible actions sharing this action's category)`. Scarcer inside the species' own set ranks higher | 0..eligibleCount-1 |
@@ -184,7 +185,7 @@ score  = Σ_t ( (long)base_t * (term_t + offset_t) * w_t ) / 1000     # ONE divi
 | **Planted violation — general leaks in** | a `general`-scoped action planted into the eligible set is **refused**, naming the scope |
 | **Planted violation — empty set** | a species with zero eligible actions gets `null` and a reason; a fabricated pick fails the test |
 | **Planted violation — a weight in code** | a bare numeric multiplier in the module source is caught by `python scripts/audit-magic-numbers.py`, which must report zero targets for this module |
-| **Uniform floor** | a species whose A-S0 `leanSource` is `floor` scores 0 on `roleLeanMatch` for every candidate, and the pick is decided by `motifCoverage` onward. **A family-less species is NOT that case** — a test asserts one of the 31 gets a non-zero `roleLeanMatch` spread across its candidates (review F12) |
+| **Uniform floor** | a species whose A-S0 `leanSource` is `floor` scores 0 on `roleLeanMatch` for every candidate, and the pick is decided by `motifCoverage` onward. **A family-less species is NOT that case** — a test asserts a live family-less record gets a non-zero `roleLeanMatch` spread across its candidates (review F12) |
 | **Weight default** | with every `w_t = 1000` the score ordering equals the lexicographic tuple ordering, over a generated set of candidate permutations |
 | **Overflow** | a synthetic species with a large eligible set and maximal terms does not overflow `long`; a forced overflow **throws** |
 | **Validator round trip** | the emitted picks pass `ActionValidator`'s innate check (`ActionValidator.cs:107-115`) — the picked id exists and is `kind = innate` |

@@ -102,6 +102,24 @@ class RenderBriefTests(unittest.TestCase):
         )
         self.assertIn("Chill Touch", text)
 
+    def test_affinity_instruction_states_one_entry_per_effect(self) -> None:
+        """2026-09-11 real-call finding: the brief's item 2 said only "how central each is", so the
+        real model repeatedly returned ONE `affinity` entry for a two-member `affixIds`. That failed
+        the §6.3 same-length gate, forced a self-heal, and the heal re-rolled the affix set — so the
+        three §6.1 vote samples disagreed by construction and the vote resolved to `1-1-1
+        unresolved` on roughly a quarter of nodes. The schema states "the same order as `affixIds`
+        and the same length"; the brief now says the same thing, and this test keeps it that way."""
+        text = brief.render_brief(
+            node_id="skill.t-off-t1-n0", sample_index=0, tree_display_name="Might",
+            tree_reading="raw physical force", branch="offensive", tier=1, node_class="mechanism",
+            motifs=[], anti_motifs=[], permitted_affixes=_affixes(), permitted_properties=[],
+        )
+        affinity_clause = text[text.index("2. `affinity`"):text.index("3. `exclusion`")]
+        normalized = " ".join(affinity_clause.split())
+        self.assertIn("PER chosen effect", normalized)
+        self.assertIn("same order as `affixIds`", normalized)
+        self.assertIn("the same length", normalized)
+
 
 class ExclusionInstructionOrderingTests(unittest.TestCase):
     """2026-09-07 real-corpus finding, guarded against regressing: `check --family PassiveTree

@@ -722,7 +722,11 @@ public class ItemGrantedActionTests
         };
 
         foreach (var root in srcDirs)
-            foreach (var file in Directory.EnumerateFiles(root, "*.cs", SearchOption.AllDirectories))
+            foreach (var file in Directory.EnumerateFiles(root, "*.cs", new EnumerationOptions
+            {
+                RecurseSubdirectories = true,
+                IgnoreInaccessible = true,
+            }))
                 Assert.DoesNotContain("ActionSeeder.Generate(", CodeOnly(file), StringComparison.Ordinal);
     }
 
@@ -748,7 +752,11 @@ public class ItemGrantedActionTests
     {
         var dir = Path.Combine(RepoRoot(), "data", "seed", "items", "base-types");
         var result = new List<BaseTypeEntry>();
-        foreach (var path in Directory.EnumerateFiles(dir, "*.json", SearchOption.AllDirectories))
+        foreach (var path in Directory.EnumerateFiles(dir, "*.json", new EnumerationOptions
+        {
+            RecurseSubdirectories = true,
+            IgnoreInaccessible = true,
+        }))
         {
             using var doc = JsonDocument.Parse(File.ReadAllText(path));
             if (!doc.RootElement.TryGetProperty("entries", out var entries)) continue;
@@ -768,7 +776,11 @@ public class ItemGrantedActionTests
     public void No_shipped_base_type_authors_a_granted_action()
     {
         var dir = Path.Combine(RepoRoot(), "data", "seed", "items", "base-types");
-        foreach (var path in Directory.EnumerateFiles(dir, "*.json", SearchOption.AllDirectories))
+        foreach (var path in Directory.EnumerateFiles(dir, "*.json", new EnumerationOptions
+        {
+            RecurseSubdirectories = true,
+            IgnoreInaccessible = true,
+        }))
         {
             var text = File.ReadAllText(path);
             Assert.DoesNotContain("grantsAction", text, StringComparison.OrdinalIgnoreCase);

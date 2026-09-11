@@ -83,9 +83,13 @@ def assemble_entry(answer: "Mapping[str, Any]", partition: PartitionContext,
     (id collision, illegal op, duplicate channel/op pair, illegal role, illegal tag) rather than
     silently coercing — a model or caller bug should fail loudly here, at assembly, not ship a
     corrupt family."""
+    from .schema import _resolve_channel_op, derive_name_key
+
     word = answer["word"]
-    channel = answer["channel"]
-    op = opvocab.canonical_op(kind_id, answer["op"])  # raises IllegalOpError/UnsupportedKindError
+    channel, op_raw = _resolve_channel_op(answer)
+    if channel is None or op_raw is None:
+        raise ValueError("answer is missing a free (channel, op) pair")
+    op = opvocab.canonical_op(kind_id, op_raw)  # raises IllegalOpError/UnsupportedKindError
 
     minted_id = family_id(partition.stem, word)
     if minted_id in partition.existing_ids:
@@ -101,11 +105,12 @@ def assemble_entry(answer: "Mapping[str, Any]", partition: PartitionContext,
 
     roles = tuple(answer["roles"])
     tags = tuple(answer["tags"])
+    name = answer["name"]
 
     return {
         "id": minted_id,
-        "nameKey": answer["nameKey"],
-        "name": answer["name"],
+        "nameKey": derive_name_key(name),
+        "name": name,
         "kindId": kind_id,
         "params": {"channel": channel, "op": op},
         "roles": list(roles),

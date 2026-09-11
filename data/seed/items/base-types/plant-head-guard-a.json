@@ -463,6 +463,584 @@
           "family": "atom.enhance-aegis"
         }
       ]
+    },
+    {
+      "id": "item.plant-crown-a-013",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of waxy leaves designed to deflect glancing blows from the brow.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-014",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the wearer's brow from overhead strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-015",
+      "nameKey": "base.thickened-burl",
+      "name": "Thickened Burl",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.thickened-burl",
+      "flavorKey": "flavor.base.thickened-burl",
+      "flavor": "A dense, knotty growth of hardened sap and bark that serves as a natural reinforcement for the skull.",
+      "tags": [
+        "organic",
+        "heavy",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-016",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the wearer's brow from overhead strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-017",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of waxy leaves designed to deflect blows away from the wearer's brow.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-018",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of reinforced leaves designed to shield the wearer's brow from overhead strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-019",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of reinforced leaves designed to shield the wearer's brow from overhead strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-020",
+      "nameKey": "base.thickened-bract",
+      "name": "Thickened Bract",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.thickened-bract",
+      "flavorKey": "flavor.base.thickened-bract",
+      "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the wearer's brow from overhead strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-021",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A dense, spring-like arrangement of reinforced vines designed to absorb the impact of heavy blows. It wraps tightly around the brow to stabilize the wearer.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-022",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A dense, spring-like arrangement of braided vines designed to absorb the shock of a heavy blow. It wraps tightly around the brow to stabilize the wearer.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-023",
+      "nameKey": "base.knotted-burl",
+      "name": "Knotted Burl",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.knotted-burl",
+      "flavorKey": "flavor.base.knotted-burl",
+      "flavor": "A dense, calcified mass of overgrowth that has hardened into a protective shell. It sits heavily upon the brow, absorbing the brunt of incoming strikes.",
+      "tags": [
+        "heavy",
+        "organic",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-024",
+      "nameKey": "base.coiled-tendril-crown",
+      "name": "Coiled Tendril-Crown",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.coiled-tendril-crown",
+      "flavorKey": "flavor.base.coiled-tendril-crown",
+      "flavor": "A dense arrangement of braided vines that tightens around the brow to brace the wearer against impact.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-025",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A dense, spring-like arrangement of braided vines designed to absorb the impact of a heavy blow. It wraps firmly around the brow to stabilize the wearer.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-026",
+      "nameKey": "base.coiled-tendril",
+      "name": "Coiled Tendril",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.coiled-tendril",
+      "flavorKey": "flavor.base.coiled-tendril",
+      "flavor": "A dense, spring-like arrangement of braided vines designed to absorb the impact of a heavy blow. It wraps snugly around the brow to stabilize the wearer.",
+      "tags": [
+        "organic",
+        "defensive",
+        "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-027",
+      "nameKey": "base.coiled-thistle-crown",
+      "name": "Coiled Thistle-Crown",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.coiled-thistle-crown",
+      "flavorKey": "flavor.base.coiled-thistle-crown",
+      "flavor": "A dense, interlocking ring of sharpened briars designed to protect the wearer's brow from overhead strikes.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-028",
+      "nameKey": "base.coiled-thistle-crown",
+      "name": "Coiled Thistle-Crown",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.coiled-thistle-crown",
+      "flavorKey": "flavor.base.coiled-thistle-crown",
+      "flavor": "A dense ring of interlocking, thorned vines designed to deflect downward strikes. It sits low upon the brow, blending seamlessly into the wearer's natural growth.",
+      "tags": [
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     }
   ]
 }

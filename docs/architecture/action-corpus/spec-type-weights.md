@@ -17,8 +17,8 @@ the exact defect the atom program exists to stop"* (`spec-action-seeding.md:101`
    weights a *pool choice*, never a pre-multiplied concrete channel.
 2. **Small-batch proof before any full run.** The call budget is a **ceiling, not a plan.** This module
    spends none of it; its whole value is that the run's anchor is reviewable before a token is spent.
-3. **The roster is 84 species, not 904.** So this file has 84 species rows and 19 family rows, and its
-   size is a measurement rather than a projection.
+3. **The roster is the live species seed folder.** This file currently has 904 species rows and 227
+   family rows; its size is a measurement rather than a projection.
 4. **C1's family-access widening is gated** on three things that do not exist. A weight vector may not
    be used to smuggle that widening in through the back door: **weights bias which of an already-legal
    pool is drawn, never which pools are legal.**

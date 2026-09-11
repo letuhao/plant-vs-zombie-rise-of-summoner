@@ -63,7 +63,7 @@ embedding YAML loaders inside Core or inventing status ids only in C#.
 
 | Mechanism | Design (amended) | Notes |
 |---|---|---|
-| **StatusDef catalog** | Hosts load `data/tuning/status-catalog.v{n}.json` and inject into Core; `StatusCatalog` is the in-memory registry built from that object (tunables-ssot §7.2 / T8). DisplayName, reading, hudToken, color live on the same row | Replaces “code-first; no runtime YAML loader.” YAML is still **not** shipped. `StatusCatalogBootstrap` C# registration is the **migration source** until inject lands |
+| **StatusDef catalog** | Hosts load `data/tuning/status-catalog.v{n}.json` and inject into Core; `StatusCatalog` is the in-memory registry built from that object (tunables-ssot §7.2 / T8). DisplayName, reading, hudToken, color live on the same row | **Inject landed (status-rail B1, 2026-09-09):** `StatusCatalogFactory.FromSurface` + `StatusCatalogHub` via `ActorSurfaceCatalogHub.ConfigureAll` (Server + Injector). `StatusCatalogBootstrap` remains the **migration golden / parity shim**, not the live combat source when hosts configure |
 | **Magnitudes / spread** | Grant `overlay_json` (Server push, debug API, Secondary enqueue) | Unchanged |
 | **New status id** | Add a catalog row whose `kind` / payload kinds already exist in C# enums + grant content. Load-reject unknown kind names (T5) | UnityCc with no FA2 case is a **def error** (shipped once for `charm_pulse`) — not a silent no-op |
 | **Hot reload** | **Not required** — startup load + restart | Same as every other tuning domain |
@@ -277,7 +277,7 @@ Magnitudes stay in grant overlay. This table is id + kind + host + notes only.
 | `expose` | Debuff tag | Actor | More overlay HP taken (CombatMath later) |
 | `command` | Meter | Actor | Stacks when you apply statuses |
 | `shatter` | Consume window | Actor | Brief amp after freeze expires |
-| `charm_pulse` | CrowdControl UnityCc | actor ptr | Short hypno; L4 zombie adapter |
+| `charm_pulse` | CrowdControl + ModifyStat | actor ptr | Overlay CC lock via `cc` category; no UnityCc path (E17 def correction) |
 
 ### 9.4 Contagion overlay ids
 
@@ -305,7 +305,7 @@ ResistanceEvaluator uses **`status.power.{category}`** / **`status.resist.{categ
 
 **Per-id override:** when `status.power.{statusId}` or `status.resist.{statusId}` is set, it **adds** to category + omni totals (additive only).
 
-**Immunity tags:** StatusDef `tags[]` match `status.immune.{tag}` / `status.immuneReduction.{tag}` — separate from resist category.
+**Immunity tags:** grant overlay may supply immunity tags at Apply (`StatusApplyInput.ImmunityTags`). **StatusDef `tags[]` stay empty in the injected catalog** (status-rail B4) — immunity is **grant-only**, not def-authored. Channels `status.immune.{tag}` / `status.immuneReduction.{tag}` still exist for grant-driven tags; do not treat empty def tags as unfinished wiring.
 
 Examples: [examples/status/](examples/status/).
 

@@ -253,7 +253,7 @@ class RunPlanTests(unittest.TestCase):
         self.assertEqual([s.entry_id for s in plan.subjects],
                          ["gem.g2-001", "gem.g2-002", "gem.g2-003"])
         self.assertEqual([s.family_id for s in plan.subjects],
-                         ["atom.affliction", "atom.arm-hardening", "atom.arm-riveting"])
+                         ["atom.affliction", "atom.arm-hardening", "atom.arm-op"])
         self.assertEqual(plan.already_done, [])
         self.assertFalse(plan.complete is True and plan.subjects)  # sanity: complete means no work
 
@@ -473,8 +473,12 @@ class CliTests(unittest.TestCase):
         self.assertIn("atom.affliction", buf.getvalue())
 
     def test_cli_write_without_endpoint_refuses(self) -> None:
+        """Refuse only when the *resolved* transport has no endpoint."""
+        from seedsmith.pipeline.llm_caller import LlmCallerConfig
         with mock.patch.object(run_mod, "GEMS_DIR", self.gems_dir), \
-             mock.patch.object(run_mod, "DEFAULT_LEDGER_PATH", self.tmp_path / "ledger.json"):
+             mock.patch.object(run_mod, "DEFAULT_LEDGER_PATH", self.tmp_path / "ledger.json"), \
+             mock.patch("seedsmith.pipeline.llm_caller.resolve_live_transport",
+                        return_value=LlmCallerConfig(endpoint="", model="x")):
             with self.assertRaises(SystemExit):
                 run_mod.main(["--slot", "2", "--write"])
 

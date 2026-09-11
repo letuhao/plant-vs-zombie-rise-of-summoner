@@ -33,7 +33,7 @@ catalog response. Live magnitudes stay on `GET /api/actors/{id}/sheet` by `chann
 | Tab | Expand | Variants |
 |---|---|---|
 | `elements` | `element` | element-catalog (omni `presentationOnly`) |
-| `status` | `status-category` | fixed four: omni / dot / cc / contagion |
+| `status` | `status-id` | **Omni + 24** status-catalog chips (status-rail; replaces L2b category rail) |
 | `resources` | `resource` | resource-catalog (6); `?side=` flips hunger/qi labels |
 | `other` | `none` (+ skill `action-category`) | empty tab variants; `actionCategoryVariants` for skills |
 

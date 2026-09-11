@@ -455,6 +455,582 @@
           "family": "atom.enhance-aegis"
         }
       ]
+    },
+    {
+      "id": "item.humanoid-head-a-013",
+      "nameKey": "base.reinforced-visor",
+      "name": "Reinforced Visor",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.reinforced-visor",
+      "flavorKey": "flavor.base.reinforced-visor",
+      "flavor": "A rigid metal strip designed to protect the eyes and brow from downward strikes. It is bolted directly to the head-guard's existing headwear.",
+      "tags": [
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-014",
+      "nameKey": "base.reinforced-sallet",
+      "name": "Reinforced Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-sallet",
+      "flavorKey": "flavor.base.reinforced-sallet",
+      "flavor": "A polished steel helm designed to protect the cranium from heavy downward strikes. Its narrow visor offers a focused view of the battlefield.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-015",
+      "nameKey": "base.reinforced-sallet",
+      "name": "Reinforced Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.reinforced-sallet",
+      "flavorKey": "flavor.base.reinforced-sallet",
+      "flavor": "A polished steel helm designed to protect the cranium from downward strikes. Its narrow visor offers a focused field of vision for the vigilant.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-016",
+      "nameKey": "base.reinforced-sallet",
+      "name": "Reinforced Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.reinforced-sallet",
+      "flavorKey": "flavor.base.reinforced-sallet",
+      "flavor": "A polished steel helm designed to protect the cranium from downward strikes. Its narrow visor offers a clear line of sight for the vigilant.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-017",
+      "nameKey": "base.reinforced-sallet",
+      "name": "Reinforced Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-sallet",
+      "flavorKey": "flavor.base.reinforced-sallet",
+      "flavor": "A polished steel helm designed to protect the skull and neck from downward strikes. Its smooth surface is built to deflect glancing blows away from the eyes.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-018",
+      "nameKey": "base.reinforced-sallet",
+      "name": "Reinforced Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.reinforced-sallet",
+      "flavorKey": "flavor.base.reinforced-sallet",
+      "flavor": "A polished steel helm designed to protect the cranium from heavy downward strikes. Its narrow visor offers a focused field of vision for the vigilant.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-019",
+      "nameKey": "base.reinforced-sallet",
+      "name": "Reinforced Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.reinforced-sallet",
+      "flavorKey": "flavor.base.reinforced-sallet",
+      "flavor": "A polished steel helm designed to protect the cranium from downward strikes. Its smooth surface is meant to deflect blows away from the neck.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-020",
+      "nameKey": "base.reinforced-sallet",
+      "name": "Reinforced Sallet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-sallet",
+      "flavorKey": "flavor.base.reinforced-sallet",
+      "flavor": "A polished steel basin designed to protect the cranium from downward strikes. Its smooth surface is meant to deflect blows away from the neck.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-021",
+      "nameKey": "base.plated-gorget",
+      "name": "Plated Gorget",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.plated-gorget",
+      "flavorKey": "flavor.base.plated-gorget",
+      "flavor": "A rigid collar of interlocking metal plates designed to protect the neck and throat from downward strikes.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-022",
+      "nameKey": "base.polished-greathelm",
+      "name": "Polished Greathelm",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.polished-greathelm",
+      "flavorKey": "flavor.base.polished-greathelm",
+      "flavor": "A heavy, full-face helm designed to shield the wearer from both blade and blunt impact. Its wide brim provides a clear field of vision while protecting the neck.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-023",
+      "nameKey": "base.plated-gorget",
+      "name": "Plated Gorget",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.plated-gorget",
+      "flavorKey": "flavor.base.plated-gorget",
+      "flavor": "A rigid collar of interlocking steel designed to protect the throat and jawline from downward strikes.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-024",
+      "nameKey": "base.plated-gorget",
+      "name": "Plated Gorget",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.plated-gorget",
+      "flavorKey": "flavor.base.plated-gorget",
+      "flavor": "A rigid collar of interlocking metal designed to protect the throat and jawline from downward strikes.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-025",
+      "nameKey": "base.plated-gorget",
+      "name": "Plated Gorget",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.plated-gorget",
+      "flavorKey": "flavor.base.plated-gorget",
+      "flavor": "A rigid collar of interlocking metal designed to protect the throat and jawline from downward strikes.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-026",
+      "nameKey": "base.plated-gorget",
+      "name": "Plated Gorget",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.plated-gorget",
+      "flavorKey": "flavor.base.plated-gorget",
+      "flavor": "A rigid collar of interlocking metal designed to protect the neck and jawline from downward strikes.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-027",
+      "nameKey": "base.plated-gorget",
+      "name": "Plated Gorget",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "plate",
+      "band": "a",
+      "implicit": {
+        "family": "atom.stalwart",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.plated-gorget",
+      "flavorKey": "flavor.base.plated-gorget",
+      "flavor": "A rigid collar of interlocking steel designed to protect the throat and jawline from downward strikes.",
+      "tags": [
+        "metal",
+        "defensive",
+        "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-028",
+      "nameKey": "base.laminated-coif",
+      "name": "Laminated Coif",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.padding",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.laminated-coif",
+      "flavorKey": "flavor.base.laminated-coif",
+      "flavor": "Layers of toughened hide stitched together to protect the neck and jaw without sacrificing visibility.",
+      "tags": [
+        "medium",
+        "organic",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     }
   ]
 }

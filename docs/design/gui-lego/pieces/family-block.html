@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>family-block — gui-lego</title>
+<link rel="stylesheet" href="../../_kit/tokens.css">
+<link rel="stylesheet" href="../../_kit/kit.css">
+<link rel="stylesheet" href="_piece-kit.css">
+</head>
+<body style="margin:0;background:var(--soil);color:var(--text);font-family:var(--font-ui);">
+<main class="lego-page">
+  <h1><code>family-block</code></h1>
+  <p class="lede">Section header + rows slot. Spec: <code>docs/architecture/gui-lego/spec-family-block.md</code>. Visuals from payload/theme — no hard-coded element colors in the piece root.</p>
+  <div class="lego-grid two">
+    <section class="lego-card">
+      <h2>Structure (live)</h2>
+      <div class="piece-stage"><div class="family-block">
+    <div class="family-hd">Power</div>
+    <button type="button" class="row is-selected" style="--piece-accent:var(--el-fire); --piece-rail-edge:var(--el-fire); --piece-select-glow:rgb(224 112 60 / 0.35)">
+      <span class="glyph">F</span>
+      <span><span class="nm">Power</span><div class="rd">Fire</div></span>
+      <span class="val">2,847</span>
+      <span class="rd">active</span>
+    </button>
+  </div></div>
+    </section>
+    <section class="lego-card">
+      <h2>Sample payload</h2>
+      <pre>{
+  "piece": "family-block",
+  "instanceId": "family:power",
+  "familyId": "power",
+  "title": "Power",
+  "rowCount": 1,
+  "phase": "ready"
+}</pre>
+    </section>
+  </div>
+</main>
+</body>
+</html>

@@ -1,23 +1,69 @@
-# Piece: gauge-stack
+# Piece: `gauge-stack`
 
-**Program:** gui-lego · **Kind:** gauge · **ERM rung:** —  
+**Program:** `gui-lego` · **Kind:** gauge · **ERM rung:** —  
 **Draft:** [../../design/gui-lego/pieces/gauge-stack.html](../../design/gui-lego/pieces/gauge-stack.html)  
-**Composition:** [spec-composition.md](spec-composition.md)
+**Shared types:** [payload-types.md](payload-types.md) · **Composition:** [spec-composition.md](spec-composition.md)
 
 ## Role
-Contribution stack bars
+
+Contribution stack bars — width from sharePm; color from theme css.
 
 ## Structure
-- Landmark / root class: .stack (see draft HTML)
-- Slots: _none_
-- CSS > ancestors: only when parent is surface-shell / split-inspect — **no illicit wrappers**
 
-## Payload (sketch)
-`json
+| | |
+|---|---|
+| Landmark / root | `.stack / .stack-row` |
+| Slots | _none_ |
+| CSS `>` parents | inspect-pane gauges |
+
+**Ban:** illicit wrappers between a `>` parent and its declared child.
+
+## Fields
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `piece` | `"gauge-stack"` | yes | Registry id |
+| `instanceId` | `string` | yes | Stable mount / testid |
+| `phase` | `Phase` | yes | See payload-types |
+| `rows` | `{ id, label, valueText, sharePm }[]` | yes |  |
+| `themeRef` | `ThemeRef` | yes |  |
+
+
+
+## Theme slots
+
+- Pack kind(s): `themeRef`
+- Reads: `--piece-accent` on bar fill
+- Vfx keys: none
+
+## Data flow
+
+- **Bind:** `vm.inspect.stack`
+- **Bus out:** _none_
+
+## Focus (GG-19)
+
+no
+
+## Motion (GG-31/32)
+
+none
+
+## Empty / error
+
+Hide when empty
+
+## Sample payloads
+
+```json
 {
   "piece": "gauge-stack",
-  "instanceId": "demo:gauge-stack",
+  "instanceId": "inspect:stack",
   "phase": "ready",
+  "themeRef": {
+    "kind": "element",
+    "id": "fire"
+  },
   "rows": [
     {
       "id": "base",
@@ -31,33 +77,32 @@ Contribution stack bars
       "valueText": "+1,083",
       "sharePm": 380
     }
-  ],
+  ]
+}
+```
+
+```json
+{
+  "piece": "gauge-stack",
+  "instanceId": "inspect:stack",
+  "phase": "ready",
   "themeRef": {
     "kind": "element",
-    "id": "fire"
-  }
+    "id": "ice"
+  },
+  "rows": [
+    {
+      "id": "base",
+      "label": "Base",
+      "valueText": "+1,344",
+      "sharePm": 700
+    },
+    {
+      "id": "gear",
+      "label": "Gear",
+      "valueText": "+576",
+      "sharePm": 300
+    }
+  ]
 }
-`
-phase: 
-eady|loading|empty|error|pending. Magnitudes use alueRaw + alueText (VM formats).
-
-## Theme slots
-- Pack kind(s): themeRef
-- Reads: --piece-accent, --piece-rail-edge, paint.accent / paint.accentMuted when visual
-- Vfx keys: none
-
-## Data flow
-- Bind: vm.inspect.stack
-- Bus out: _none (parent or host)_
-
-## Focus (GG-19)
-no
-
-## Motion (GG-31/32)
-none
-
-## Empty / error
-If bind missing or phase not ready, parent mounts the matching phase-* piece — this leaf does not invent data.
-
-## Samples
-HTML draft shows structure + sample JSON; themeable pieces include fire vs ice (or status-dot) swap.
+```
