@@ -4,7 +4,8 @@
 **Program id:** `actor-hub-and-combat-power-solid-fixing`  
 **Map:** [docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md](../docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md)  
 **Ideals:** [combat-power-number-ideal.md](../docs/architecture/combat-power-number-ideal.md) · [actor-hub-and-combat-power-solid-fixing-ideal.md](../docs/architecture/actor-hub-and-combat-power-solid-fixing-ideal.md)  
-**Task list:** [actor-hub-and-combat-power-solid-fixing-todo.md](actor-hub-and-combat-power-solid-fixing-todo.md)
+**Task list:** [actor-hub-and-combat-power-solid-fixing-todo.md](actor-hub-and-combat-power-solid-fixing-todo.md)  
+**Runbook / evidence:** [runbook](actor-hub-and-combat-power-solid-fixing-runbook.md) · [evidence map](actor-hub-and-combat-power-solid-fixing-evidence-map.md) · execution command `/solid-run`
 
 ---
 
