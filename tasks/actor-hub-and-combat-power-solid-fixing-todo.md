@@ -3,7 +3,7 @@
 **Plan:** [actor-hub-and-combat-power-solid-fixing-plan.md](actor-hub-and-combat-power-solid-fixing-plan.md)  
 **Map:** [docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md](../docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md)  
 **Runbook / evidence:** [runbook](actor-hub-and-combat-power-solid-fixing-runbook.md) · [evidence map](actor-hub-and-combat-power-solid-fixing-evidence-map.md) · command `/solid-run`  
-**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 complete (T1-T7 done); Wave 2 (T8, Standing honesty) next, pending the owner-review gate this checkpoint still lists.
+**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 complete (T1-T7 done); Wave 2 in progress: T8, T9 done, T10-T11 (FE) next.
 
 ---
 
@@ -230,15 +230,15 @@
 **Description:** `ProjectStanding` prices Hub combat writers (incl. aptitude) via synthetics + membership → `ActorPowerCache.Compose`; no Θ; no double-count equip/tree.
 
 **Acceptance criteria:**
-- [ ] Standing includes aptitude (and other Hub combat writers) via synthetics + filter.
-- [ ] Double-count proven absent for equip/tree.
-- [ ] `progression.*` / Θ do not raise Standing.
-- [ ] Five-axis DTO unchanged.
-- [ ] Cooldown (or other non-atom Hub membership channel) raises Standing.
-- [ ] Still `ActorPowerCache.Compose(AtomRow[])` only — no Hub-snapshot overload.
+- [x] Standing includes aptitude (and other Hub combat writers) via synthetics + filter.
+- [x] Double-count proven absent for equip/tree.
+- [x] `progression.*` / Θ do not raise Standing.
+- [x] Five-axis DTO unchanged.
+- [x] Cooldown (or other non-atom Hub membership channel) raises Standing.
+- [x] Still `ActorPowerCache.Compose(AtomRow[])` only — no Hub-snapshot overload.
 
 **Verification:**
-- [ ] Server/Core tests: `Standing|UniqueActorHub|ProjectStanding|ActorPower`
+- [x] Server tests: `ProjectStandingTests` (4/4 PASS); full Core.Tests (13339/13376, unchanged from T8 baseline) + full Server.Tests (409/411, 2 pre-existing FAIL confirmed via stash-compare) regression clean
 
 **Dependencies:** T8  
 **Files likely touched:** `UniqueActorHubCompose.cs`, synthetic helpers, tests  
