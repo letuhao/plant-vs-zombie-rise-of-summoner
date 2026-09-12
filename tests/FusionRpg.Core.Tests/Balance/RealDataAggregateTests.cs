@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text.Json;
 using FusionRpg.Core.Tests.TestSupport;
 using Microsoft.Data.Sqlite;
@@ -145,14 +144,8 @@ public class RealDataAggregateTests : IDisposable
     (int Exit, string Stdout, string Stderr) RunTool(string args)
     {
         var repoRoot = FindRepoRoot();
-        var psi = new ProcessStartInfo
-        {
-            FileName = "dotnet",
-            Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "RealDataAggregate")}\" -c Release --no-restore --no-build -- --data \"{_dbPath}\" {args}",
-            CreateNoWindow = true,
-            WorkingDirectory = repoRoot
-        };
-        return ExternalProcess.Run(psi, 120_000, "RealDataAggregate invocation timed out");
+        // ProjectReference + apphost (see ToolProcess) — no implicit build, no stale Release output.
+        return ToolProcess.Run(repoRoot, "RealDataAggregate", $"--data \"{_dbPath}\" {args}", 120_000);
     }
 
     static string FindRepoRoot()

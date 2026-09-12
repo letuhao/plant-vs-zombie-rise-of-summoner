@@ -17,6 +17,10 @@
     ".kilo/setup-script.ps1",
     "tasks/actor-hub-and-combat-power-solid-fixing-runbook.md"
   ],
+  "sharedWith": [
+    "data-test-substrate-20260912-9d6a"
+  ],
+  "sharedNote": "Owner decision 2026-09-12: work on the current branch alongside data-test-substrate rather than take a worktree. Overlap is intentional; commit with explicit paths and never stage the other session's uncommitted files.",
   "started": "2026-09-12T08:36:00Z",
   "status": "active"
 }

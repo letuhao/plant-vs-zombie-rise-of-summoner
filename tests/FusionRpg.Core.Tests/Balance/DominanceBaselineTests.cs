@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text.Json;
 using FusionRpg.Core.Tests.TestSupport;
 using Xunit;
@@ -83,14 +82,10 @@ public class DominanceBaselineTests
     static (int Exit, string Stdout, string Stderr) Run(string args)
     {
         var repoRoot = FindRepoRoot();
-        var psi = new ProcessStartInfo
-        {
-            FileName = "dotnet",
-            Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "DominanceBaseline")}\" -c Release --no-restore --no-build -- {args}",
-            CreateNoWindow = true,
-            WorkingDirectory = repoRoot
-        };
-        return ExternalProcess.Run(psi, 120_000, "DominanceBaseline invocation timed out");
+        // The tool is a ProjectReference of this test project, so its apphost is built beside the
+        // test dll and launched directly — no `dotnet run`, no implicit build, no stale Release
+        // output to run against (see ToolProcess).
+        return ToolProcess.Run(repoRoot, "DominanceBaseline", args, 120_000);
     }
 
     static string FindRepoRoot()

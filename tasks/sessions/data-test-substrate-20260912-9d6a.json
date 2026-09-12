@@ -28,5 +28,9 @@
     "tasks/sessions/data-test-substrate-*.json"
   ],
   "started": "2026-09-12T11:06:58Z",
-  "status": "active"
+  "status": "active",
+  "sharedWith": [
+    "session-boundary-standard-20260912-a3f2"
+  ],
+  "sharedNote": "Owner decision 2026-09-12: shared boundary on features/derived-stat-extension. This session owns src/FusionRpg.Data + tests/FusionRpg.Data.Tests; the contributing-standards session takes tests/FusionRpg.Core.Tests balance-tool launch + scripts/commit-tool. Commit explicit paths only."
 }

@@ -28,6 +28,22 @@
          has for RpgStore, just scoped to this one module. -->
     <ProjectReference Include="..\..\src\FusionRpg.Data\FusionRpg.Data.csproj" />
     <ProjectReference Include="..\..\tools\CreatureCorpusDump\CreatureCorpusDump.csproj" />
+    <!-- Cold-process tool fixtures (2026-09-12). Nine test classes shell out to these tools with a
+         no-build Release invocation, but nothing ever built them: the tool bin folders are untracked
+         and the test project did not reference them, so CI (and any clean clone) either ran a stale
+         binary or found none. Two of them embed FusionRpg.Core, so a rename the source already
+         carried (demonType to creatureType) survived in the 9/4 Release output and made the Balance
+         tests throw `missing required key 'demonType'` — a binary-freshness defect, not a test bug.
+         Referencing each tool makes `dotnet test` build it in the same configuration, so the
+         no-build invocation finds a binary that matches the source. This mirrors the apphost
+         convention FusionRpg.AtomImporter.Tests established for the same reason. -->
+    <ProjectReference Include="..\..\tools\DominanceBaseline\DominanceBaseline.csproj" />
+    <ProjectReference Include="..\..\tools\ResidualFitLoop\ResidualFitLoop.csproj" />
+    <ProjectReference Include="..\..\tools\RealDataAggregate\RealDataAggregate.csproj" />
+    <ProjectReference Include="..\..\tools\CombatSim\CombatSim.csproj" />
+    <ProjectReference Include="..\..\tools\CreatureQualityReport\CreatureQualityReport.csproj" />
+    <ProjectReference Include="..\..\tools\ProveAptitude\ProveAptitude.csproj" />
+    <ProjectReference Include="..\..\tools\CreatureSpeciesGen\CreatureSpeciesGen.csproj" />
   </ItemGroup>
   <ItemGroup>
     <!-- These have no Unity/Harmony/BepInEx deps (pure Core types only) — compile for unit tests

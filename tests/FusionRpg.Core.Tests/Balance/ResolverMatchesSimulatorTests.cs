@@ -109,14 +109,8 @@ public class ResolverMatchesSimulatorTests : IDisposable
 
     static (int Exit, string Stdout, string Stderr) RunCombatSim(string repoRoot, string args)
     {
-        var psi = new ProcessStartInfo
-        {
-            FileName = "dotnet",
-            Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "CombatSim")}\" -c Release --no-restore --no-build -- {args}",
-            CreateNoWindow = true,
-            WorkingDirectory = repoRoot
-        };
-        return ExternalProcess.Run(psi, 120_000, "CombatSim invocation timed out");
+        // ProjectReference + apphost (see ToolProcess) — no implicit build, no stale Release output.
+        return ToolProcess.Run(repoRoot, "CombatSim", args, 120_000);
     }
 
     static string LatestAptitudesPath(string repoRoot)

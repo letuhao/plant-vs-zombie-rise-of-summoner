@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
 using FusionRpg.Core.Tests.TestSupport;
@@ -75,18 +74,10 @@ public class CreatureQualityReportTests
 
         try
         {
-            var psi = new ProcessStartInfo
-            {
-                FileName = "dotnet",
-                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "CreatureQualityReport")}\" --no-restore --no-build -- " +
-                            $"--seed \"{speciesDir}\" --trials 50 --json \"{jsonOut}\"",
-                WorkingDirectory = repoRoot,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            };
-            var (exitCode, stdout, stderr) = ExternalProcess.Run(psi, 120_000, "CreatureQualityReport did not exit within 120s");
+            // ProjectReference + apphost (see ToolProcess) — no implicit build, no stale output.
+            var (exitCode, stdout, stderr) = ToolProcess.Run(
+                repoRoot, "CreatureQualityReport",
+                $"--seed \"{speciesDir}\" --trials 50 --json \"{jsonOut}\"", 120_000);
             Assert.True(exitCode == 0, $"expected exit 0, got {exitCode}\nstdout:\n{stdout}\nstderr:\n{stderr}");
 
             // Section 1: the duplicate and the two clean species are all named.
@@ -161,18 +152,10 @@ public class CreatureQualityReportTests
 
         try
         {
-            var psi = new ProcessStartInfo
-            {
-                FileName = "dotnet",
-                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "CreatureQualityReport")}\" --no-restore --no-build -- " +
-                            $"--seed \"{speciesDir}\" --trials 20",
-                WorkingDirectory = repoRoot,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            };
-            var (exitCode, stdout, stderr) = ExternalProcess.Run(psi, 120_000, "CreatureQualityReport did not exit within 120s");
+            // ProjectReference + apphost (see ToolProcess) — no implicit build, no stale output.
+            var (exitCode, stdout, stderr) = ToolProcess.Run(
+                repoRoot, "CreatureQualityReport",
+                $"--seed \"{speciesDir}\" --trials 20", 120_000);
             Assert.True(exitCode == 0, $"expected exit 0, got {exitCode}\nstdout:\n{stdout}\nstderr:\n{stderr}");
 
             var sideLine = stdout.Split('\n').Single(l => l.TrimStart().StartsWith("side "));
