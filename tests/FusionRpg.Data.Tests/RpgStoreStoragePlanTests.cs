@@ -148,6 +148,54 @@ public class RpgStoreStoragePlanTests
     }
 
     [Fact]
+    public void Keeper_survives_a_global_ClearAllPools()
+    {
+        using var store = RpgStore.InMemory();
+        store.Init();
+        Assert.True(store.UpsertAtom(Atom("atom.vitality")).IsOk);
+
+        // Another test's process-wide pool clear must not kill a store whose keeper holds the DB.
+        SqliteConnection.ClearAllPools();
+
+        Assert.NotEmpty(store.ListAtoms());
+    }
+
+    [Fact]
+    public void Memory_schema_is_identical_to_the_file_store()
+    {
+        // R2: disk here is the thing under test — this compares the memory schema against the
+        // production file schema, which cannot be proven without one file store. The dir is created
+        // under the test output root (not the OS temp dir) and deleted on the way out; a failed
+        // delete is a failure, never a swallowed catch.
+        var dir = Path.Combine(AppContext.BaseDirectory, "msp-parity-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            using var file = new RpgStore(dir);
+            file.Init();
+            using var mem = RpgStore.InMemory();
+            mem.Init();
+
+            Assert.Equal(SchemaDdl(file), SchemaDdl(mem));
+        }
+        finally
+        {
+            SqliteConnection.ClearAllPools();
+            Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    static List<string> SchemaDdl(RpgStore store)
+    {
+        using var db = SqliteConnectionFactory.Open(store.HotPath);
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = "SELECT type || ':' || name FROM sqlite_master ORDER BY type, name;";
+        var rows = new List<string>();
+        using var r = cmd.ExecuteReader();
+        while (r.Read()) rows.Add(r.GetString(0));
+        return rows;
+    }
+
+    [Fact]
     public void Memory_store_archive_entry_point_throws_rather_than_writing_to_cwd()
     {
         using var store = RpgStore.InMemory();

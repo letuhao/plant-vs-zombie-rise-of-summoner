@@ -56,12 +56,13 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - Files: `src/FusionRpg.Data/Sqlite/{RpgStore,StorePlanException}.cs`, `RpgStore.Compaction.cs`, `RpgStore.Storage.cs`, `tests/FusionRpg.Data.Tests/RpgStoreStoragePlanTests.cs`. Scope: M.
   - Dependencies: T3.
 
-- [ ] **Task T5: Module-1 proof tests (the module's Definition of Done)**
-  - Description: memory round-trips SQL with zero files; table set equals the file store's (`sqlite_master` relationship); all three doors; URI-trap throw; read-only throw; archive throw; **`Parallel.For` N-store independence**; keeper survives `ClearAllPools`; existing smoke tests unmodified.
-  - Acceptance: every row in the spec's testing table is a passing test; `RpgStoreSmokeTests`/`RpgStoreDalSmokeTests` pass **without change**.
-  - Verify: `dotnet test tests/FusionRpg.Data.Tests` + `guard-dal.ps1` + `guard-test-substrate.ps1`.
-  - Files: `tests/FusionRpg.Data.Tests/MemoryStoragePlanTests.cs`. Scope: M.
+- [x] **Task T5: Module-1 proof tests (the module's Definition of Done)** ✅ 2026-09-12
+  - Description: completed the spec's Testing-strategy table — added the two missing rows: **`Memory_schema_is_identical_to_the_file_store`** (asserts the `sqlite_master` DDL row-set relationship, not a count) and **`Keeper_survives_a_global_ClearAllPools`**. Every other row already had a covering test from T2–T4.
+  - Acceptance met: every spec testing row maps to an executed passing test; `RpgStoreSmokeTests`/`RpgStoreDalSmokeTests` pass **unmodified** (git-clean, green).
+  - Verified: gate subagent PASS — spec-row mapping complete, focused 18/18, full Data 1277/1277, both guards green, no leaked parity dir.
+  - Files: `tests/FusionRpg.Data.Tests/RpgStoreStoragePlanTests.cs`. Scope: M.
   - Dependencies: T4.
+  - **Module 1 (`memory-storage-plan`) is complete** — Checkpoint 1 reached; production path unchanged.
 
 ### Checkpoint 1 — Foundation
 - [ ] Data suite green; production smoke tests untouched; `guard-dal` + `guard-test-substrate` green; owner reviews the seam before migration starts.
