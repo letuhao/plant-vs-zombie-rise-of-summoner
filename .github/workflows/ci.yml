@@ -192,6 +192,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "guard-actor-hub.ps1 failed — actor compose bypassed ActorHub" }
           .\scripts\guard-dal.ps1
           if ($LASTEXITCODE -ne 0) { throw "guard-dal.ps1 failed — SQL appeared outside FusionRpg.Data" }
+          .\scripts\guard-test-substrate.ps1
+          if ($LASTEXITCODE -ne 0) { throw "guard-test-substrate.ps1 failed — a test leaked a temp store or swallowed a temp-delete" }
 
       - name: Content validation gate (E47)
         shell: pwsh
