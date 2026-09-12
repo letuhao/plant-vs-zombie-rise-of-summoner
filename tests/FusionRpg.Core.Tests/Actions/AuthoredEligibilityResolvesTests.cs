@@ -55,9 +55,26 @@ public class AuthoredEligibilityResolvesTests
         return rows;
     }
 
-    static IReadOnlyDictionary<string, string> RealFamilyMap() =>
+    static IReadOnlyDictionary<string, IReadOnlyList<string>> RealFamilyMap() =>
         FamilyMap.Parse(File.ReadAllText(Path.Combine(
             RepoRoot(), "data", "seed", "actions", "_generated", "family-map.json")));
+
+    /// <summary>The family ids a `family`-scoped row may name: the live map's values UNION the
+    /// `families.v1.json` compatibility registry, matching `vocab.py:load_family_map_keys` exactly.
+    /// The registry keeps previously committed rows loadable while the live roster's family vocabulary
+    /// evolves — a scoped row naming a registry family is shipped and intentional, not dangling.</summary>
+    static HashSet<string> LoadableFamilyIds()
+    {
+        var families = RealFamilyMap().Values.SelectMany(v => v).ToList();
+        var registryPath = Path.Combine(RepoRoot(), "data", "seed", "demons", "_registry", "families.v1.json");
+        if (File.Exists(registryPath))
+        {
+            using var doc = JsonDocument.Parse(File.ReadAllText(registryPath));
+            if (doc.RootElement.TryGetProperty("families", out var reg) && reg.ValueKind == JsonValueKind.Object)
+                foreach (var p in reg.EnumerateObject()) families.Add(p.Name);
+        }
+        return families.ToHashSet(StringComparer.Ordinal);
+    }
 
     static ActionRow Row(Authored a) => new()
     {
@@ -83,7 +100,7 @@ public class AuthoredEligibilityResolvesTests
     public void Every_authored_scope_key_resolves_against_the_shipped_content()
     {
         var rows = AuthoredRows();
-        var families = RealFamilyMap().Values.ToHashSet(StringComparer.Ordinal);
+        var families = LoadableFamilyIds();
 
         var indexPath = Path.Combine(RepoRoot(), "data", "seed", "demons", "species", "_index.json");
         var species = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(indexPath))!
@@ -153,11 +170,11 @@ public class AuthoredEligibilityResolvesTests
                                   .Select(r => r.ScopeKey!)
                                   .ToHashSet(StringComparer.Ordinal);
 
-        var pair = map.FirstOrDefault(kv => authoredFamilies.Contains(kv.Value));
+        var pair = map.FirstOrDefault(kv => kv.Value.Any(authoredFamilies.Contains));
         Assert.False(pair.Key is null,
             "no mapped species belongs to any family that has an authored action — family scope is shipped but unreachable");
 
         var candidates = ActionEligibility.Candidates(all, pair.Key, map);
-        Assert.Contains(candidates, c => c.Scope == EligibilityScope.Family && c.ScopeKey == pair.Value);
+        Assert.Contains(candidates, c => c.Scope == EligibilityScope.Family && authoredFamilies.Contains(c.ScopeKey!));
     }
 }

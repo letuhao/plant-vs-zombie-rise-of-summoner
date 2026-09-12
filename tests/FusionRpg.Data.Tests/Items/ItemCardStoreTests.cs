@@ -508,10 +508,6 @@ public class ItemCardStoreTests : IDisposable
     public void An_item_under_the_rare_threshold_is_named_by_the_affix_grammar()
     {
         var f = SeedWorld();
-        var instance = _store.GetInstance(f.InstanceId)!;
-        var container = _store.GetContainer(f.ContainerId)!;
-        var drawnFamily = _store.GetAtom(
-            instance.Atoms.First(a => container.Atoms.All(c => c.Seq != a.Seq)).AtomId)!.FamilyId;
 
         // Raise the threshold above this item's affix count so the grammar path runs against a real,
         // already-minted instance rather than needing a second fixture.
@@ -519,9 +515,20 @@ public class ItemCardStoreTests : IDisposable
         ItemsTuningHub.Configure(previous with { RareNameThreshold = 99 });
         try
         {
+            // The item rolls three prefixes, and `BestWord` picks the highest-tier one — NOT
+            // necessarily the family `drawnFamily` names. Stubbing only one family made this test
+            // depend on which affix won the roll, so it broke whenever the generated pool changed.
+            // The contract under test is the grammar itself (word + authored base name), so the stub
+            // supplies a Probe word for EVERY family the corpus asks about.
+            var probe = new AffixNameSlot(AffixClass.Prefix, new[]
+            {
+                new AffixNameRow("A", null, "Probe-A", null),
+                new AffixNameRow("B", null, "Probe-B", null),
+                new AffixNameRow("C", null, "Probe-C", null),
+            });
             var corpus = Corpus() with
             {
-                LookupNameWords = NameWordsFor(drawnFamily, "atom.not-drawn"),
+                LookupNameWords = _ => probe,
                 RareNameDraw = _ => ("never", "used"),
             };
 

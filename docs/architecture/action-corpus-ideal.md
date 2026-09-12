@@ -1398,12 +1398,18 @@ Owner: *"now audit, debate, strenthen whole idea."* Four parallel audits plus a 
 held on architecture and failed on arithmetic and on citation** — which is the useful outcome, because
 the expensive errors are the ones that read as verified.
 
-**⛔ SOURCE-BOUNDARY CORRECTION 2026-09-10.** The historical 84-species finding in §39 is superseded.
-Seedsmith action generation reads `data/seed/demons/species/**/*.json` at run time, not SQLite and not
-the generated C# projection. The current live seed folder measures 904 species, 227 consolidated
-families, and 1,183 family memberships. The executable plan consequently contains 5,680 briefs:
-25 general, 1,135 family, and 4,520 species. Historical 84/53/19 measurements remain below as an
-incident record only and must not be used as current pipeline inputs.
+**⛔ SOURCE-BOUNDARY CORRECTION 2026-09-10, revised 2026-09-11.** The historical 84-species finding in
+§39 is superseded. Seedsmith action generation reads `data/seed/demons/species/**/*.json` at run time,
+not SQLite and not the generated C# projection.
+
+**The roster, its family memberships, and the resulting brief totals are READINGS, not design
+constants.** The live seed folder is a population that grows every time a species ships, so its size
+and every figure derived from it (species, consolidated families, memberships, brief total, per-tier
+counts) change with content. The A-S1 planner emits over whatever the live roster is at run time; the
+executable plan's per-tier counts (general `generalCount`, five per family, five per species) are
+computed from it. Do not treat any of these as a fixed number in a spec or test —
+[validation-ssot.md](validation-ssot.md). Historical 84/53/19 measurements remain below as an incident
+record only and must not be used as current pipeline inputs.
 
 **Everything below is corrected in place above.** This part records what was wrong and why, so the same
 class of error is visible rather than quietly overwritten.

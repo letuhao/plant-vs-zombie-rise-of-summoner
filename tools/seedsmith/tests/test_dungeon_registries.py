@@ -175,7 +175,8 @@ class VersionTests(unittest.TestCase):
 class ThemeTests(unittest.TestCase):
     """D1.10 (2026-09-07 correction): `theme` reads the demon-seed program's own already-shipped,
     already-reviewed registry as a frozen cross-program input — never a dungeon-authored vocabulary
-    (`spec-dungeon-seed-contract.md:44`: "`themes.v1.json` (84 rows)")."""
+    (`spec-dungeon-seed-contract.md:44`). The roster size is a READING (validation-ssot.md); the
+    test asserts the loaded themes ARE the registry's themes, one entry each."""
 
     def test_demons_registry_dir_resolves_to_the_real_committed_folder(self) -> None:
         self.assertEqual(DEMONS_REGISTRY_DIR, LIVE_DEMONS_REGISTRY_ROOT)
@@ -183,8 +184,9 @@ class ThemeTests(unittest.TestCase):
 
     def test_themes_match_the_complete_published_roster(self) -> None:
         themes = load_themes()
-        self.assertEqual(len(themes), 904)
-        self.assertEqual(set(themes), set(_raw_demons("themes.v1.json")["themes"]))
+        raw = _raw_demons("themes.v1.json")["themes"]
+        self.assertEqual(set(themes), set(raw))
+        self.assertEqual(len(themes), len(raw), "one loaded theme per registry row, no duplicates")
 
     def test_every_theme_id_is_demon_prefixed_never_the_legacy_theme_prefix(self) -> None:
         # THEME_PREFIX in adapters/demons/themes.py is "demon." specifically so it can never
@@ -260,18 +262,29 @@ class AtomFamilyTests(unittest.TestCase):
         self.assertTrue(bound, "fixture assumption: at least one shipped family carries icdKey")
         self.assertEqual(load_grantable_atom_families() & bound, set())
 
-    def test_grantable_matches_the_measured_generic_stat_families(self) -> None:
-        # Named explicitly so a future atom-catalog change that silently narrows or widens this
-        # pool is a loud, reviewed diff here rather than a quiet content-time surprise.
-        self.assertEqual(load_grantable_atom_families(), frozenset({
-            "atom.arm-hardening", "atom.arm-riveting", "atom.arm-welding", "atom.bulwark",
-            "atom.evd-flinch", "atom.evd-harden", "atom.evd-seal", "atom.ferocity",
-            "atom.fortitude", "atom.life-graft", "atom.life-surge", "atom.mending",
-            "atom.might", "atom.resilience", "atom.savagery", "atom.shld-breach",
-            "atom.shld-cycle", "atom.shld-surge", "atom.tempo-haste", "atom.tempo-stampede",
-            "atom.tempo-surge", "atom.tempo-wildgrowth", "atom.tempo-yield", "atom.vitality",
-            "atom.ward-harden", "atom.warding",
-        }))
+    def test_grantable_is_exactly_the_unbound_atom_families(self) -> None:
+        """The CONTRACT, not a snapshot. The atom catalog is a POPULATION that grows as content
+        ships, so the grantable set changes with it; a pinned set here fails the moment an atom
+        family is authored (validation-ssot.md). The rule the loader documents: grantable == every
+        family that never carries an `icdKey`/`when` binding. Asserted independently by a direct scan
+        so a loader that silently starts returning something else is caught."""
+        grantable = load_grantable_atom_families()
+        bound: "set[str]" = set()
+        every: "set[str]" = set()
+        for path in ATOMS_DIR.rglob("*.json"):
+            doc = json.loads(path.read_text(encoding="utf-8"))
+            for entry in doc.get("entries") or ():
+                family = entry.get("family")
+                if isinstance(family, str):
+                    every.add(family)
+                    if "icdKey" in entry:
+                        bound.add(family)
+        self.assertEqual(grantable, every - bound,
+                         "grantable is exactly the families with no icdKey binding")
+        self.assertTrue(grantable.issubset(every))
+        self.assertTrue(bound, "fixture assumption: at least one shipped family carries a binding")
+        self.assertTrue(grantable, "the unbound pool must be non-empty")
+        print(f"grantable atom families: {len(grantable)} of {len(every)}")
 
 
 class PowerBandTests(unittest.TestCase):

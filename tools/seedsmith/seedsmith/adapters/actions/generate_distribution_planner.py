@@ -59,6 +59,14 @@ TYPE_WEIGHTS_PATH = ACTIONS_ROOT / "type-weights.json"
 PAIRINGS_PATH = ACTIONS_ROOT / "pairings.json"
 BRIEFS_DIR = ACTIONS_ROOT / "_briefs"
 
+#: Bump ONLY when a change alters the briefs this module emits for unchanged inputs. Folded into
+#: `_corpus_hash` so a plan produced by an older algorithm fails the freshness check rather than
+#: silently resuming candidates generated against a different ordinal order. History:
+#:   1 — 2026-09-11: initial explicit version; the ordinal-spreading fix in `expand_counts` (marginals
+#:       unchanged, emitted order changed) is the change that motivated making the algorithm
+#:       versioned at all.
+ALGORITHM_VERSION = 1
+
 # A-S5 writes the round-scoped quality-gate report at this path. The full-run gate below checks the
 # report's measured verdict, not mere file presence.
 SMOKE_GATE_EVIDENCE_PATH = ACTIONS_ROOT / "_reports" / "coverage-round-1.json"
@@ -153,10 +161,21 @@ def _corpus_hash(role_lean_corpus_hash: str, type_weights_lean_hash: str, run_tu
     """A stable digest over every real input this module's OWN algorithm consumes -- never a
     wall-clock stamp. Deliberately does NOT re-hash the whole role-lean/type-weights files (their
     own `_meta` hashes already cover their content); this is a hash of THOSE hashes plus the two
-    version numbers this module additionally depends on."""
+    version numbers this module additionally depends on.
+
+    **⛔ ALGORITHM_VERSION is folded in — the 2026-09-11 freshness hole.** The payload originally
+    covered only INPUTS (role-lean/type-weights hashes, tuning/rungs versions). A change to a pure
+    function the planner owns -- e.g. the 2026-09-11 ordinal-spreading fix in `expand_counts`, whose
+    marginals are identical but whose emitted order is not -- therefore produced different briefs
+    under the SAME hash. The stale plan would still pass `_load_plan`'s freshness check, and
+    `load_resume_entries` would accept candidates generated against the old ordinal order. Bumping
+    this integer whenever `distribution_planner.derive`'s OUTPUT for unchanged inputs changes makes
+    the freshness check cover the algorithm, not just its inputs. It is not a tuning value and must
+    never be moved by a balance pass -- only by a change that alters emitted briefs."""
     payload = {
         "roleLeanCorpusHash": role_lean_corpus_hash, "typeWeightsLeanHash": type_weights_lean_hash,
         "runTuningVersion": run_tuning_version, "rungsVersion": rungs_version,
+        "algorithmVersion": ALGORITHM_VERSION,
     }
     blob = json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
     return hashlib.sha256(blob).hexdigest()

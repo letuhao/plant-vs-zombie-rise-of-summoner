@@ -333,7 +333,6 @@ public class ItemCardTests
         // asserted against the family count itself rather than as a second literal. 109 -> 112
         // (2026-09-07): an affix-families-gen trial batch's three new families each got a real
         // template the same run this test caught their absence.
-        Assert.Equal(112, Templates.Value.Count);
         Assert.Equal(RealFamilies.Value.Count, Templates.Value.Count);
         Assert.NotEmpty(BaseTypes.Value);
     }
@@ -1429,13 +1428,16 @@ public class ItemCardTests
             .Select(r => r.FamilyId)
             .ToHashSet(StringComparer.Ordinal);
 
-        // BEFORE — v1, faithfully: exactly the families it has no stem for. Was 95 of 109; the
-        // 2026-09-07 `affix-families-gen` trial batch added 3 more families v1 (frozen before they
-        // existed) obviously has no share for either -> 98 of 112.
+        // BEFORE — v1, faithfully: exactly the families it has no stem for. Both the family total and
+        // the unshared total are corpus-derived and move every generation, so they are asserted
+        // RELATIVELY (v1 shares fewer than the shipped tuning; the shipped tuning shares all) rather
+        // than as literals. The v1 file is frozen history, so the property that matters is v1 leaves a
+        // strict, non-empty subset unshared while the shipped tuning leaves none.
         var unsharedV1 = UnsharedUnder(v1, RealFamilies.Value);
         Assert.Equal(unsharedV1, RefusedForNoShare(v1));
-        Assert.Equal(98, unsharedV1.Count);
-        Assert.Equal(112, RealFamilies.Value.Count);
+        Assert.NotEmpty(unsharedV1);
+        Assert.True(unsharedV1.Count < RealFamilies.Value.Count,
+            "the frozen v1 tuning must leave at least one family unshared");
 
         // AFTER — the shipped tuning: nothing left at that gate at all.
         Assert.Empty(UnsharedUnder(shipped, RealFamilies.Value));

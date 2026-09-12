@@ -138,6 +138,15 @@ explicitly, and expect a decision) or your own misunderstanding (far more likely
 5. **Verify counts by counting.** Not by trusting a number written elsewhere in the same doc set.
 6. **When you correct something, propagate it.** A fix that lands in prose but not in the sibling
    Structure / Testing / Boundaries block, the map, and the task list has not landed. Re-grep after.
+7. **A guardrail validates the contract and closed enums — never a population count or generated
+   text.** A test that asserts `len(species) == 904` guards nothing; it fails when a species ships (the
+   normal case) and the "fix" is to bump the number. The demon-seed corpus is a **population** that
+   grows every time content ships, so its size is a **reading, not a constant** — as are item totals,
+   per-cycle accepted/rejected counts, and authored `name`/`description` strings. Assert the envelope,
+   closed-enum membership, joins/closure, uniqueness, internal reconciliation, cross-artifact hashes,
+   determinism, and structural bounds — all stable across generations. Pin a literal only for a
+   **closed vocabulary** (an enum/registry the code owns and a human changes) and say why. Standard:
+   [architecture/validation-ssot.md](architecture/validation-ssot.md).
 
 ---
 
@@ -158,6 +167,7 @@ argument for the gate — keep it factual and keep it growing.
 | 2026-08-24 | A 12-spec program for derived stats concluded *"no UI surface exists for 157 new channels"* and proposed a fresh `magnitude`/`bounded-ratio` classification | **Both already existed in `docs/design/`.** `spec-derived-stat-sheet.md` designs the surface (six render states, the `no-producer` state these channels land in); `spec-magnitude-and-units.md` §3 is a **nine-class `UnitClass` ledger, each class verified against its consumer in `src/`**, already bound in the web contract. The §1 *Stats* row named only the two `architecture/` docs, so neither was ever opened | The `docs/design/` note under §1's table — added because of this |
 | 2026-08-24 | *"`DerivedStatRegistryTests.cs:22` asserts a literal 84; replace it with the formula"* | The test **already computes** `families.Count × (roster.Count + 1)`; the literal on the line above is a deliberate canary asserting what the formula currently equals. A sibling test is named `The_channel_count_is_the_formula_not_the_literal_eighty_four`. The spec would have had someone rewrite tests that were already correct | Reading the whole test body, not the cited line. **Evidence rule 3 applies to code, not just prose** |
 | 2026-09-12 | Dual compose (ActorHub vs `BattleStatComposer`) locked as intentional ADR exception | SOLID/DRY fork of the same actor combat numbers treated as “by design” because an ADR / class-system decision said so | §2.15 SOLID — PO/ADR confirmation does not bless a SOLID defect; overturn + fuse (FUSE-battle-hub owed) |
+| 2026-09-11 | Correcting the stale `84` roster by replacing it with `904` — then propagating `904`/`227`/`1,183` into specs and tests | The roster is a **population that grows per shipped species**, not a constant. Both `84` and `904` are readings; a pinned literal is stale-by-design and turns every successful seed extension into a red suite | Evidence rule 7 + [architecture/validation-ssot.md](architecture/validation-ssot.md). The same class as the 2026-08-24 literal-84 incident below, from the other direction |
 
 ---
 
@@ -176,6 +186,10 @@ Paste and complete before presenting any design work.
     "needs sign-off", "breaks X" - and said what I ran.
 [ ] Nothing contradicts a §2 invariant, or I named the contradiction explicitly.
 [ ] Corrections are propagated to prose, Structure, Testing, Boundaries, map, and tasks.
+[ ] No assertion pins a derived-population count, an item total, generated `name`/`description`
+    text, or a per-cycle outcome. Population scale is a reading; guardrails assert the contract and
+    closed enums only (validation-ssot.md). A pinned literal has a named closed vocabulary and a
+    stated reason.
 [ ] If this feature produces or consumes an actor combat/derived magnitude: it either
     contributes via ActorHub (`IActorStatSubsystem` / registered atom reader) with a
     non-empty ContributionSourceIds grammar id, or it consumes Hub output only —

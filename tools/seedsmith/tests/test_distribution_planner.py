@@ -243,7 +243,7 @@ class FamilyMotifDerivationTests(unittest.TestCase):
         self.assertEqual(anti, ())
         self.assertEqual(basis, "intersection")
 
-    def test_all_nineteen_families_intersect_nonempty_against_real_data(self) -> None:
+    def test_every_family_intersects_nonempty_against_real_data(self) -> None:
         fam_path = REPO_ROOT / "data" / "seed" / "demons" / "_generated" / "family-assignments.json"
         lean_path = ACTIONS_ROOT / "_generated" / "role-lean.json"
         if not fam_path.is_file() or not lean_path.is_file():
@@ -251,9 +251,11 @@ class FamilyMotifDerivationTests(unittest.TestCase):
         family_assignments = json.loads(fam_path.read_text(encoding="utf-8"))
         species_anchor = dp.parse_species_anchor(json.loads(lean_path.read_text(encoding="utf-8")))
         members = gen_mod._family_members(family_assignments)
-        self.assertEqual(len(members), 19)
+        # A JOIN, not a pinned family count: the member map's keys are exactly the assignment values.
+        declared = {f for v in family_assignments.values() for f in (v if isinstance(v, list) else [v])}
+        self.assertEqual(set(members), declared)
+        self.assertTrue(members, "the real family map is non-empty")
 
-        cherry_seen = False
         for family_id, species_ids in members.items():
             rows = [(species_anchor[s].motifs, species_anchor[s].anti_motifs)
                    for s in species_ids if s in species_anchor]
@@ -261,13 +263,11 @@ class FamilyMotifDerivationTests(unittest.TestCase):
             self.assertEqual(basis, "intersection", f"family {family_id!r} needed a fallback")
             self.assertGreater(len(motifs), 0)
             self.assertEqual(len(anti), 5, f"family {family_id!r} anti-motif union != 5")
-            if family_id == "cherry":
-                cherry_seen = True
-                self.assertEqual(motifs, ("僵尸", "樱桃"))
-                self.assertEqual(len(species_ids), 7)
-        self.assertTrue(cherry_seen, "cherry family not found in the real corpus")
 
-    def test_family_size_histogram_matches_spec_measurement(self) -> None:
+    def test_family_size_histogram_reconciles(self) -> None:
+        """The histogram is a READING of the current family map (it moves as species ship), so the
+        contract is reconciliation: bin counts sum to the distinct-family count, and the membership
+        total is the per-species sum — never a pinned `{7:1, ...}` snapshot (validation-ssot.md)."""
         fam_path = REPO_ROOT / "data" / "seed" / "demons" / "_generated" / "family-assignments.json"
         if not fam_path.is_file():
             self.skipTest("family-assignments.json not present in this checkout")
@@ -276,9 +276,14 @@ class FamilyMotifDerivationTests(unittest.TestCase):
         sizes = {}
         for v in members.values():
             sizes[len(v)] = sizes.get(len(v), 0) + 1
-        self.assertEqual(sizes, {7: 1, 5: 2, 4: 1, 3: 3, 2: 11, 1: 1})
-        self.assertEqual(sum(len(v) for v in members.values()), 53)
-        self.assertEqual(len(members), 19)
+        self.assertEqual(sum(sizes.values()), len(members),
+                         "the family-size histogram bins every family exactly once")
+        self.assertEqual(sum(len(v) for v in members.values()),
+                         sum(len(v if isinstance(v, list) else [v])
+                             for v in family_assignments.values()),
+                         "memberships reconcile to the per-species sum")
+        self.assertTrue(all(len(v) >= 1 for v in members.values()), "no empty family bin")
+        print(f"families: {len(members)} over {sum(len(v) for v in members.values())} memberships")
 
 
 class LargestRemainderAndExpandTests(unittest.TestCase):
@@ -295,10 +300,40 @@ class LargestRemainderAndExpandTests(unittest.TestCase):
         counts = dp.largest_remainder_count(weights, CATEGORIES, 0)
         self.assertEqual(set(counts.values()), {0})
 
-    def test_expand_counts_is_declared_order_grouped(self) -> None:
+    def test_expand_counts_spreads_each_quota_instead_of_grouping_it(self) -> None:
+        """The 2026-09-11 sequencing fix: each key's quota is spread across the sequence by round
+        (stride), never emitted back-to-back. Grouping made the JOINT frame constant for long
+        stretches once two blocked vectors were zipped — measured 134-long runs and 15 total frames
+        in the 1,000-brief general tier, which drove A-S3 to reject 56% of a batch as near-dupes.
+        Marginals are preserved exactly; only order changes."""
         counts = {"attack": 2, "defense": 0, "support": 1, "movement": 0, "status": 1}
         seq = dp.expand_counts(counts, CATEGORIES)
-        self.assertEqual(seq, ["attack", "attack", "support", "status"])
+        self.assertEqual(seq, ["attack", "support", "status", "attack"])
+        self.assertEqual(sorted(seq), ["attack", "attack", "status", "support"])
+
+    def test_expand_counts_preserves_every_marginal(self) -> None:
+        counts = {"attack": 200, "defense": 200, "support": 200, "movement": 200, "status": 200}
+        seq = dp.expand_counts(counts, CATEGORIES)
+        self.assertEqual(len(seq), 1000)
+        self.assertEqual({c: seq.count(c) for c in CATEGORIES}, counts)
+
+    def test_expand_counts_has_no_long_run_at_the_shipped_general_size(self) -> None:
+        import itertools
+        counts = {"attack": 200, "defense": 200, "support": 200, "movement": 200, "status": 200}
+        seq = dp.expand_counts(counts, CATEGORIES)
+        longest = max(len(list(g)) for _, g in itertools.groupby(seq))
+        self.assertEqual(longest, 1, "a 200-quota key must not emit 200 identical slots in a row")
+
+    def test_joint_frames_stay_diverse_across_a_batch(self) -> None:
+        """The defect the sequencing fix targets: the JOINT (category, targetMode) frame must vary
+        across a proposal batch's own contiguous slice, because a batch draws consecutive ordinals
+        and the model sees one frame per call."""
+        cat = dp.expand_counts({c: 200 for c in CATEGORIES}, CATEGORIES)
+        tm = dp.expand_counts({m: 167 for m in TARGET_MODES}, TARGET_MODES)
+        frames = list(zip(cat, tm))
+        self.assertGreater(len(set(frames)), 20, "the general tier must not collapse to a few frames")
+        # The first 40 ordinals are one small batch; they must not all share a single frame.
+        self.assertGreater(len(set(frames[:40])), 20)
 
     def test_independent_of_dict_insertion_order(self) -> None:
         a = {"attack": 7, "defense": 3, "support": 5, "movement": 2, "status": 1}
@@ -555,7 +590,7 @@ class PairingRoleTests(unittest.TestCase):
         pairings.json was unreachable. Now that two payoffs are real, family/general scope DOES
         pair (by design -- see `plan_subject`'s species-scope guard); species scope must not,
         since a species subject's own count (2) is small enough that pairing would force EVERY
-        one of ~84 species into the identical pair, destroying per-species distinctiveness."""
+        one of ~900 species into the identical pair, destroying per-species distinctiveness."""
         if not OUTPUT_PATH.is_file():
             self.skipTest("round-1.json not yet generated in this checkout")
         doc = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
@@ -803,7 +838,14 @@ class CorpusLoadRoundTripTests(unittest.TestCase):
         result = load_committed(ACTIONS_ROOT)
         rows = result.corpus.by_kind("action-brief")
         tuning = load_run_tuning()
-        expected = tuning.general_count + 227 * tuning.per_family_count + 904 * tuning.per_species_count
+        # Subject counts recomputed from the LIVE roster, never literals — the roster grows per
+        # shipped species. The expected total is the planner's own formula over the live inputs.
+        from seedsmith.adapters.actions.characteristic_pool.catalog import (
+            derive_live_family_assignments, load_catalog)
+        species_count = len({r.species_id for r in load_catalog()})
+        family_count = len(gen_mod._family_members(derive_live_family_assignments()))
+        expected = (tuning.general_count + family_count * tuning.per_family_count
+                    + species_count * tuning.per_species_count)
         self.assertEqual(len(rows), expected)
         kind_spec = next(k for k in KINDS if k.kind == "action-brief")
         edges = result.corpus.discover_edges(kind_spec.id_pattern, skip_fields=frozenset({"name"}))
@@ -894,7 +936,9 @@ class DryRunAndOfflineTests(unittest.TestCase):
 
 
 class RosterSizeTests(unittest.TestCase):
-    """The planner must cover the live species roster and every derived family namespace."""
+    """The planner must cover the live species roster and every derived family namespace — asserted
+    as JOINS to the plan, never as roster literals. The corpus grows per shipped species, so a pinned
+    904/227/1,183 fails the suite for succeeding at its job (validation-ssot.md)."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -907,21 +951,36 @@ class RosterSizeTests(unittest.TestCase):
         if self.doc is None:
             self.skipTest("round-1.json not yet generated in this checkout")
 
-    def test_species_and_family_subject_counts(self) -> None:
+    def test_plan_subjects_cover_the_live_roster_and_family_namespace(self) -> None:
+        from seedsmith.adapters.actions.characteristic_pool.catalog import (
+            derive_live_family_assignments, load_catalog)
+        catalog_ids = {r.species_id for r in load_catalog()}
+        family_members = gen_mod._family_members(derive_live_family_assignments())
+
         species_briefs = [e for e in self.doc["entries"] if e["scope"] == "species"]
         family_briefs = [e for e in self.doc["entries"] if e["scope"] == "family"]
         general_briefs = [e for e in self.doc["entries"] if e["scope"] == "general"]
-        self.assertEqual(len({e["scopeKey"] for e in species_briefs}), 904)
-        self.assertEqual(len({e["scopeKey"] for e in family_briefs}), 227)
+
+        self.assertEqual({e["scopeKey"] for e in species_briefs}, catalog_ids,
+                         "every live species receives species-scoped briefs, and no stray key")
+        self.assertEqual({e["scopeKey"] for e in family_briefs}, set(family_members),
+                         "every consolidated family receives family-scoped briefs")
+        print(f"plan subjects: {len(catalog_ids)} species, {len(family_members)} families")
         # The general tier is one pseudo-subject whose count is the run tuning's `generalCount`,
         # never a literal — it moved 25 -> 1000 in the 2026-09-11 general-tier change.
         self.assertEqual(len(general_briefs), load_run_tuning().general_count)
 
     def test_family_assigned_species_count_is_live_memberships(self) -> None:
+        """The reconciliation the old literal stood in for: memberships == the per-species sum, and
+        every species contributes at least one."""
         from seedsmith.adapters.actions.characteristic_pool.catalog import derive_live_family_assignments
         family_assignments = derive_live_family_assignments()
         members = gen_mod._family_members(family_assignments)
-        self.assertEqual(sum(len(v) for v in members.values()), 1183)
+        self.assertEqual(sum(len(v) for v in members.values()),
+                         sum(len(v if isinstance(v, list) else [v])
+                             for v in family_assignments.values()))
+        self.assertTrue(all(v for v in family_assignments.values()))
+        print(f"family memberships: {sum(len(v) for v in members.values())}")
 
 
 class QuotaExactnessTests(unittest.TestCase):

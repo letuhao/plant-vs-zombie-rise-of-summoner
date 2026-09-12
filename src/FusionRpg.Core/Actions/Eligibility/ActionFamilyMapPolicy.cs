@@ -11,14 +11,16 @@ namespace FusionRpg.Core.Actions.Eligibility;
 /// </summary>
 public static class ActionFamilyMapPolicy
 {
-    static IReadOnlyDictionary<string, string>? _map;
+    static IReadOnlyDictionary<string, IReadOnlyList<string>>? _map;
 
-    public static void Configure(IReadOnlyDictionary<string, string> map) => _map = map ?? throw new ArgumentNullException(nameof(map));
+    public static void Configure(IReadOnlyDictionary<string, IReadOnlyList<string>> map) => _map = map ?? throw new ArgumentNullException(nameof(map));
 
     /// <summary>Empty, never throwing, until configured — a specimen's species/family-scoped actions
-    /// are simply unreachable (falls back to `null` familyId inside `ActionEligibility.Candidates`)
-    /// rather than failing every unlock roll outright when no host has configured this yet.</summary>
-    public static IReadOnlyDictionary<string, string> Map => _map ?? EmptyMap;
+    /// are simply unreachable (falls back to an empty family set inside
+    /// `ActionEligibility.Candidates`) rather than failing every unlock roll outright when no host has
+    /// configured this yet.</summary>
+    public static IReadOnlyDictionary<string, IReadOnlyList<string>> Map => _map ?? EmptyMap;
 
-    static readonly IReadOnlyDictionary<string, string> EmptyMap = new Dictionary<string, string>(StringComparer.Ordinal);
+    static readonly IReadOnlyDictionary<string, IReadOnlyList<string>> EmptyMap =
+        new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
 }

@@ -356,8 +356,13 @@
     },
     {
       "id": "atom.arm-plate",
-      "nameKey": "affix.armour-reinforcement",
-      "name": "Armour Reinforcement",
+      "nameKey": "affix.arm-plate",
+      "name": "Plate Reinforcement",
+      "frames": [
+        "humanoid",
+        "hybrid"
+      ],
+      "side": "zombie",
       "kindId": "stat.modify",
       "params": {
         "channel": "arm1Max",
@@ -375,8 +380,13 @@
     },
     {
       "id": "atom.arm-op",
-      "nameKey": "affix.armour-reinforcement",
-      "name": "Armour Reinforcement",
+      "nameKey": "affix.arm-op",
+      "name": "Offhand Reinforcement",
+      "frames": [
+        "humanoid",
+        "hybrid"
+      ],
+      "side": "zombie",
       "kindId": "stat.modify",
       "params": {
         "channel": "arm2Max",

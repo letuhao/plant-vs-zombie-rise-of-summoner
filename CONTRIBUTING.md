@@ -13,7 +13,17 @@ Write like a teammate, not a template engine.
 - Do **not** use extra commit trailers, bot attribution lines, or watermark phrasing (`agent assert`, `agent turn`, and similar) in docs or history.
 - Commit subjects: imperative, concise, focused on *why*. Example: `Add XP watermark repair path for trimmed ledgers`.
 
-**Automated assistants:** read [AGENTS.md](AGENTS.md) — never commit or push; the owner handles all git writes.
+**Automated assistants:** may commit **only** through the clean-commit tool (never raw `git commit`):
+
+```powershell
+powershell -File scripts/commit-tool/install_hooks.ps1   # once per clone
+python scripts/commit-tool/clean_commit.py -m "Fix overflow in SoulEarnPolicy"
+python scripts/commit-tool/clean_commit.py -m "Add delve loot table" -- path/a path/b
+```
+
+That tool forces the allowlisted author/committer from `scripts/commit-tool/policy.json`, rejects `Co-authored-by` / vendor watermark text, and pairs with `.githooks/commit-msg` plus a Cursor shell gate so raw `git commit` cannot sneak trailers in. Push remains owner-only unless you explicitly ask for it.
+
+**Humans** may still use normal git; the commit-msg hook still rejects watermark trailers and non-allowlisted authors.
 
 ## Quick start (developers)
 

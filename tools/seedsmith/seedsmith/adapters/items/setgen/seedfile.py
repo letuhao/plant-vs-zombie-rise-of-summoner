@@ -348,6 +348,16 @@ def set_entry(*, entry_id: str, theme_key: str, draft: "dict[str, Any]", plan: S
     }
 
 
+def _frame_hint(value: Any) -> str:
+    """§3.7's frame_hint vocabulary: any/humanoid/plant. Absent, explicit null, or blank all resolve to
+    the author-neutral default `any`; a non-blank value is preserved for the carry gate to judge (an
+    out-of-vocabulary string is the gate's refusal to report, not this emitter's to silently rewrite)."""
+    if value is None:
+        return "any"
+    text = str(value).strip()
+    return text or "any"
+
+
 def charm_entry(*, entry_id: str, theme_key: str, draft: "dict[str, Any]", plan: CharmPlan,
                 ) -> "dict[str, Any]":
     """One `charm` row. `apCost`, `prefixRolls` and `suffixRolls` come from the CLASS, never from
@@ -361,7 +371,11 @@ def charm_entry(*, entry_id: str, theme_key: str, draft: "dict[str, Any]", plan:
         "charmClass": plan.charm_class,
         "apCost": plan.ap_cost,
         "axis": plan.axis,
-        "frameHint": draft.get("frameHint", "any"),
+        # §3.7's frame_hint has exactly three legal values (any/humanoid/plant). `draft.get(k, "any")`
+        # returns the model's EXPLICIT null when it emits `"frameHint": null`, which is not the same as
+        # the key being absent -- two shipped charms (charm.econ-028, charm.econ-151) carried a literal
+        # null that way. Normalise null/blank to the default rather than let a null reach the corpus.
+        "frameHint": _frame_hint(draft.get("frameHint")),
         "fixedAtoms": fixed,
         "prefixRolls": plan.prefix_rolls,
         "suffixRolls": plan.suffix_rolls,

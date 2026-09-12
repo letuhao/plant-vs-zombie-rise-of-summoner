@@ -155,53 +155,60 @@ public class PackFootprintTableTests
     }
 
     /// <summary>
-    /// A REAL content gap this test found by actually running `Build` against the shipped corpus,
-    /// not assumed: exactly 12 of 720 enabled base types — every one a `retinue`-role
-    /// `item.plant-runner-b-00{1..12}`-family entry tagged only `["organic","rooted"]` — carry no
-    /// mass-class tag at all. Confirmed exhaustive (a throwaway script counted zero- and two-plus-tag
-    /// entries across the whole corpus: exactly these 12 at zero, 0 at two-plus, out of 720). This is
-    /// a content-authoring gap in `data/seed/items/base-types/` for the item-corpus program to fix —
-    /// NOT a `PackFootprintTable` bug, and not something this task can safely guess an intended mass
-    /// class for. `Build`'s own fail-fast-per-entry refusal is therefore the CORRECT, intended
-    /// behavior here (§9: refuse at load, naming the id) — a load-time defect should halt loudly
-    /// rather than silently drop or guess a size for real, shippable content.
+    /// The five mass-class tag ids §9's footprint formula reads, mirroring `PackFootprintTable`'s own
+    /// set. Kept here so the test computes the gap from the corpus rather than quoting a stale list.
     /// </summary>
-    static readonly string[] KnownMissingMassClassIds =
+    static readonly IReadOnlySet<string> MassClassTagIds = new HashSet<string>(StringComparer.Ordinal)
     {
-        "item.plant-runner-b-001", "item.plant-runner-b-002", "item.plant-runner-b-003", "item.plant-runner-b-004",
-        "item.plant-runner-b-005", "item.plant-runner-b-006", "item.plant-runner-b-007", "item.plant-runner-b-008",
-        "item.plant-runner-b-009", "item.plant-runner-b-010", "item.plant-runner-b-011", "item.plant-runner-b-012",
+        "light", "medium-light", "medium", "medium-heavy", "heavy",
     };
 
-    [Fact]
-    public void Every_known_missing_mass_class_entry_still_refuses_pinning_the_gap_so_a_fix_is_noticed()
-    {
-        var tuning = PackFootprintTable.ResolveTuning(RealTuning());
-        var entries = PackFootprintTable.LoadBaseTypeEntries(BaseTypesDir())
-            .ToDictionary(e => e.Id, StringComparer.Ordinal);
+    /// <summary>
+    /// CONTRACT, not a hardcoded gap list: an authored base type must carry EXACTLY ONE mass-class tag,
+    /// and the set of entries that do not is COMPUTED from the shipped corpus on every run. The item
+    /// corpus is generator-authored and grows every generation (720 → 1178 entries and climbing), so a
+    /// pinned list of offender ids is stale the moment content ships — the previous 12-id list named
+    /// only the first batch of offenders and hid the 100+ the next batch added. Computing the set keeps
+    /// the assertion meaningful at any corpus size.
+    /// </summary>
+    static IReadOnlyDictionary<string, BaseTypeEntry> RealEntriesById() =>
+        PackFootprintTable.LoadBaseTypeEntries(BaseTypesDir()).ToDictionary(e => e.Id, StringComparer.Ordinal);
 
-        foreach (var id in KnownMissingMassClassIds)
+    static bool HasExactlyOneMassClass(BaseTypeEntry e) =>
+        e.Tags.Count(MassClassTagIds.Contains) == 1;
+
+    [Fact]
+    public void Every_base_type_without_exactly_one_mass_class_refuses_by_name()
+    {
+        // The fail-fast contract: a load-time content defect halts loudly naming the id rather than
+        // silently dropping or guessing a size for real, shippable content. Driven off the computed
+        // gap, so a corpus that fixes some entries and breaks others still gets the right verdict.
+        var tuning = PackFootprintTable.ResolveTuning(RealTuning());
+        var entries = RealEntriesById();
+        var gap = entries.Values.Where(e => e.Enabled && !HasExactlyOneMassClass(e)).ToList();
+
+        Assert.NotEmpty(gap); // the gap is real today; a corpus that closes it outright may revisit this
+        foreach (var entry in gap)
         {
-            Assert.True(entries.ContainsKey(id), $"expected '{id}' still in the corpus");
-            var ex = Assert.Throws<PackRejection>(() => PackFootprintTable.Build(new[] { entries[id] }, tuning));
+            var ex = Assert.Throws<PackRejection>(() => PackFootprintTable.Build(new[] { entry }, tuning));
             Assert.Contains("mass-class-count", ex.Message);
         }
     }
 
     [Fact]
-    public void The_real_corpus_minus_the_known_gap_builds_end_to_end_against_the_real_tuning_with_no_refusal()
+    public void The_real_corpus_with_a_single_mass_class_builds_end_to_end_with_no_refusal()
     {
-        // The strongest proof available short of the content fix above: every OTHER enabled real base
-        // type in the shipped corpus derives a real footprint against the shipped dungeon.v1.json,
-        // once ResolveTuning's own cross-check passes. This is also what proves the dungeon.v1.json
-        // fix (real ItemRole/mass-class vocabulary, not placeholder keys) actually unblocks the real
-        // content, not just a fixture -- 708 of 720 real entries, not a handful of synthetic ones.
+        // The strongest proof available short of the content fix: every enabled real base type that
+        // DOES carry exactly one mass-class tag derives a real footprint against the shipped
+        // dungeon.v1.json, once ResolveTuning's own cross-check passes. This is also what proves the
+        // dungeon.v1.json fix (real ItemRole/mass-class vocabulary, not placeholder keys) actually
+        // unblocks the real content, not just a fixture. The eligible set is computed, not "all minus
+        // a pinned list".
         var tuning = PackFootprintTable.ResolveTuning(RealTuning());
-        var missing = new HashSet<string>(KnownMissingMassClassIds, StringComparer.Ordinal);
         var entries = PackFootprintTable.LoadBaseTypeEntries(BaseTypesDir())
-            .Where(e => e.Enabled && !missing.Contains(e.Id))
+            .Where(e => e.Enabled && HasExactlyOneMassClass(e))
             .ToList();
-        Assert.True(entries.Count > 500, $"expected hundreds of real entries after excluding the known gap, found {entries.Count}");
+        Assert.True(entries.Count > 500, $"expected hundreds of real entries, found {entries.Count}");
 
         var result = PackFootprintTable.Build(entries, tuning);
 

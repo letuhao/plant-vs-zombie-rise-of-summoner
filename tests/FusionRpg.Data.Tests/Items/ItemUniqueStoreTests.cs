@@ -170,8 +170,13 @@ public class ItemUniqueStoreTests : IDisposable
 
         _store.SeedUniqueEligible(Tuning());
 
+        // CONTRACT, not a hardcoded ordinal: the eligibility floor is a tunable
+        // (`uniques.v1.json.rungFloorOrdinal`) and D4.23 moved it 30 → 80. Asserting against the
+        // TUNING's own floor rather than a literal keeps this true when a balance pass moves the rung
+        // — the old `ordinal >= 30` was stale the moment the floor moved.
+        var floor = Tuning().RungFloorOrdinal;
         foreach (var (id, ordinal) in ladder)
-            Assert.Equal(ordinal >= 30 ? 1 : 0,
+            Assert.Equal(ordinal >= floor ? 1 : 0,
                 _store.GetRarityBudget(id, UniqueLimits.EligibilityBudgetKey));
     }
 

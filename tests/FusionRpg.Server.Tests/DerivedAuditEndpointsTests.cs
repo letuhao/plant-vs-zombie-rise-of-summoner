@@ -72,6 +72,9 @@ public class DerivedAuditEndpointsTests : IAsyncLifetime
         builder.Services.AddSingleton<IHotCompactor>(sp => new HotCompactor(sp.GetRequiredService<RpgStore>()));
         builder.Services.AddSingleton<EventIngest>();
         builder.Services.AddSingleton<FusionRpg.Server.DelveBattleSessionManager>();
+        // `/api/actors/{id}/sheet` takes IActorLiveStateStore (CG-A5b live statuses/shields). Production
+        // registers it at Program.cs:345; this test host must too, or route inference fails at start.
+        builder.Services.AddSingleton<IActorLiveStateStore, ActorLiveStateStore>();
         builder.WebHost.UseUrls(baseUrl);
         _app = builder.Build();
         _app.UseDeveloperExceptionPage();
@@ -120,11 +123,12 @@ public class DerivedAuditEndpointsTests : IAsyncLifetime
         Assert.Equal(269, root.GetProperty("registryCount").GetInt32());
         Assert.True(root.GetProperty("presentCount").GetInt32() > 0);
         Assert.True(root.GetProperty("touchedCount").GetInt32() > 0);
-        // The cook expands sparse status.{id} joins that are intentionally session-only. They are
-        // expected to be absent from a cold server sheet; the registry itself must still be complete.
+        // The cook expands sparse status.{id} joins that are intentionally session-only. They may be
+        // absent from a cold server sheet — but the audit's CONTRACT is not "there must be gaps": it is
+        // that whatever IS missing is properly accounted for. A closed gap (empty `missingCook`) is a
+        // pass, so this asserts the classification invariant rather than non-emptiness.
         var missingCook = root.GetProperty("missingCook").EnumerateArray()
             .Select(e => e.GetString()!).ToList();
-        Assert.NotEmpty(missingCook);
         Assert.All(missingCook, id => Assert.True(
             DerivedAuditCoverage.IsStatusSessionChannel(id), "unexpected cold-sheet cook gap: " + id));
         Assert.Equal(0, root.GetProperty("missingRegistry").GetArrayLength());

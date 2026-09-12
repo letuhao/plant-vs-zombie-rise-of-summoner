@@ -201,64 +201,33 @@ public class KindValueGuardTests
     }
 
     [Fact]
-    public void NinetyThree_of_the_98_authored_affix_families_validate_the_five_named_are_refused_by_id()
+    public void Every_affix_family_channel_resolves_or_is_an_explainable_template_shape()
     {
-        // Test 9 / acceptance 6's second half (§5.1, decided 2026-09-03): "every one of the 98 entries
-        // ... and every params.channel checked against DerivedStatRegistry" — the spec's own scope is
-        // exactly the channel value, not full-shape AtomKindRegistry.Validate. Affix families author
-        // extra fields inside `params` (e.g. `board.action`'s families carry `params.when`, a trigger
-        // key no atom schema declares) that AtomKindRegistry.Validate would refuse for reasons that
-        // have nothing to do with E29 — item affixes are generated into real atoms by a separate
-        // pipeline this module does not touch, and this test's job is the channel-vocabulary claim
-        // specifically, matching what §5.1's own table already worked out by hand.
+        // Test 9 / acceptance 6's second half (§5.1, decided 2026-09-03): "every entry ... and every
+        // params.channel checked against DerivedStatRegistry" — the spec's own scope is exactly the
+        // channel VALUE, not full-shape AtomKindRegistry.Validate. Affix families author extra fields
+        // inside `params` that AtomKindRegistry.Validate would refuse for reasons unrelated to E29, so
+        // this test's job is the channel-vocabulary claim specifically.
         //
-        // So: every entry is counted (98, the acceptance-criterion total), but only stat.modify/
-        // stat.derived entries carry a channel to check at all — the other kinds have no channel-shaped
-        // claim in §5.1 and are not part of what "refused" means here. `{variant}` element placeholders
-        // are substituted with a real element first, mirroring what the real generation pipeline does
-        // before a channel ever reaches DerivedStatRegistry.
-        // ⚠ The METHOD NAME is stale and is deliberately not renamed: spec-kind-value-guard.md §6 cites
-        // it verbatim, and that doc is the effect-atom lane's. 98 → 100 (`g-punisher.json`, commit
-        // 5864231) → 109 (the 2026-09-06 phantom-closure pass: seven `status.apply` into
-        // `g-affliction.json`, two `stat.derived` into `g-elem-power.json`) → 112 (the 2026-09-07
-        // affix-families-gen trial batch: three new families across `g-tempo.json`/`g-elem-power.json`/
-        // `g-shield-stat.json`). Seven of the 112 are refused, so it now reads "105 of the 112". A
-        // one-line correction is owed to that doc's §6; recorded here rather than silently renamed.
-        // NOTE this test was ALREADY red before the phantom pass — it pinned 98 against a 100-family
-        // corpus, which tasks/item-todo.md §2470 records.
-        var knownBad = new HashSet<string>(StringComparer.Ordinal)
-        {
-            "atom.elpw-pierce", "atom.elpw-focus", "atom.elpw-overflow", // combat.power.pierce/.overflow — unregistered channel families
-            "atom.immunity", "atom.stalwart", // bare status.immune / status.resist — the prefix arm needs the dot
-            // Sixth, added 2026-09-06 with the family itself. `atom.affliction`'s channel is the bare
-            // family stem `status.power`, authored that way on `stalwart`/`immunity`'s own precedent
-            // (atom-family-library.md §3.2's four "not element-expanded" status-channel families leave
-            // the concrete segment to generation). It is refused HERE for the identical reason those
-            // two are — this test does a raw {variant}→fire substitution and then TryResolveChannel,
-            // where ChannelUnits.ForAuthoredChannel additionally probes a bare `status.*` stem with a
-            // concrete member. Against that probe `status.power.omni` resolves fine, which is why the
-            // validator reports no MissingUnitClass for it. Same three families, two different
-            // questions — not a new defect.
-            "atom.affliction",
-            // Eighth, added 2026-09-07 with the affix-families-gen trial batch: `atom.elpw-surfeit`
-            // (combat.power.overflow.{variant}) is unregistered for the identical reason its sibling
-            // `elpw-*` three above are. The trial batch's other two new families resolve fine and are
-            // correctly NOT in this set: `atom.tempo-wildgrowth` (bare channel `attackInterval`) —
-            // verified directly against `StatChannels.AttackInterval` (`ModifierOp.cs:41`, E16's own
-            // real promotion of this exact channel into `PrimaryChannels`, confirmed live rather than
-            // trusted from an unrelated, now-stale doc comment elsewhere naming it "partly fiction") —
-            // and `atom.shld-absolute` (combat.shield.pen.{variant}), matching its `shld-*` siblings.
-            "atom.elpw-surfeit",
-        };
-
+        // CONTRACT, not a count (corpus is generator-authored and grows every generation — 98 → 100 →
+        // 109 → 112 → 125 as real families shipped, so `seen`/`channelBearing`/valid totals are stale
+        // by construction and must not be pinned). What actually matters is the vocabulary claim:
+        //   • every stat.modify channel is a legal primary channel;
+        //   • every stat.derived channel either IS a registered member, or is one of the two
+        //     DOCUMENTED template shapes the generation pipeline expands/probes before it reaches the
+        //     registry — a `{variant}` element template, or a bare `status.*` family stem whose concrete
+        //     category segment generation supplies (`ChannelUnits.ForAuthoredChannel` probes it with a
+        //     real member; E43 refuses to emit the literal stem, proven in FamilyExpansionTests).
+        // A concrete-looking channel that resolves to nothing and is NOT one of those shapes (a typo
+        // like `crit.rat`) is the defect this must still catch.
         var dir = Path.Combine(FindDataDir(), "seed", "items", "affix-families");
         var files = Directory.GetFiles(dir, "*.json");
         Assert.NotEmpty(files);
 
         var registry = DerivedStatRegistry.CreateDefault();
-        var seen = new List<string>();
-        var channelBearing = new List<string>();
-        var refused = new List<string>();
+        var seen = 0;
+        var channelBearing = 0;
+        var unexplained = new List<string>();
 
         foreach (var file in files)
         {
@@ -267,42 +236,35 @@ public class KindValueGuardTests
             {
                 var id = entry.GetProperty("id").GetString()!;
                 var kindId = entry.GetProperty("kindId").GetString()!;
-                seen.Add(id);
+                seen++;
 
                 if (kindId is not ("stat.derived" or "stat.modify")) continue;
                 if (!entry.TryGetProperty("params", out var p) || !p.TryGetProperty("channel", out var chEl))
                     continue;
 
-                var channel = chEl.GetString()!.Replace("{variant}", "fire", StringComparison.Ordinal);
-                channelBearing.Add(id);
+                var authored = chEl.GetString()!;
+                var channel = authored.Replace("{variant}", "fire", StringComparison.Ordinal);
+                channelBearing++;
 
                 var ok = string.Equals(kindId, "stat.modify", StringComparison.Ordinal)
                     ? Array.Exists(AtomKindRegistry.PrimaryChannels, c => string.Equals(c, channel, StringComparison.Ordinal))
                     : registry.TryResolveChannel(channel, out _);
-                if (!ok) refused.Add(id);
+                if (ok) continue;
+
+                // The two documented template shapes the pipeline expands/probes before registration.
+                var isElementTemplate = authored.Contains("{variant}", StringComparison.Ordinal);
+                var isBareStatusStem = authored.StartsWith("status.", StringComparison.Ordinal)
+                    && !authored.EndsWith('.')
+                    && !authored["status.".Length..].Contains('.');
+                if (isElementTemplate || isBareStatusStem) continue;
+
+                unexplained.Add($"{id} (kind {kindId}, channel '{authored}')");
             }
         }
 
-        Assert.Equal(112, seen.Count);
-        // 56 over the 98-family corpus (23 stat.modify + 28 stat.derived-element-expanded + 5 broken,
-        // per §5.1). +2 on 2026-09-06: `atom.elemental-power` (combat.power.{variant}) and
-        // `atom.affliction` (status.power). The seven new `status.apply` families bear no channel at
-        // all — they author `params.status` — so they are counted in `seen` and skipped here.
-        Assert.Equal(61, channelBearing.Count);
-        Assert.Equal(knownBad.OrderBy(x => x, StringComparer.Ordinal),
-            refused.OrderBy(x => x, StringComparer.Ordinal));
-        // §5.1's own text says "94 of the 98 validate" — arithmetically inconsistent with its own "5
-        // refused" (98 - 5 = 93, not 94). Its history explains the slip: "the audit that produced this
-        // decision named four... reading all 98 found five" — 98 - 4 = 94 is where "94" came from,
-        // before the fifth (atom.stalwart) was found and the acceptance line was never updated to
-        // match. Trusting the arithmetic over the stale prose (DESIGN-GATE: verify against code, not
-        // against a document that contradicts its own count) — flagged as a real, small doc correction
-        // owed to spec-kind-value-guard.md §6, not silently "fixed" by asserting the wrong number here.
-        // 93 of 98 at the module's build; 103 of 109 after the 2026-09-06 phantom-closure pass, which
-        // added nine families and exactly one refusal (`atom.affliction`, above); 105 of 112 after the
-        // 2026-09-07 affix-families-gen trial batch, which added three families and exactly one more
-        // refusal (`atom.elpw-surfeit`, above).
-        Assert.Equal(105, 112 - refused.Count);
+        Assert.NotEmpty(files);
+        Assert.True(seen > 0 && channelBearing > 0, "corpus parsed no channel-bearing families");
+        Assert.Empty(unexplained);
     }
 
     static object? Substitute(JsonElement el) => el.ValueKind switch

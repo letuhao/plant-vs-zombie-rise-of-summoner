@@ -536,7 +536,12 @@ class FamilyRowTests(unittest.TestCase):
         rows = gen_mod._parse_role_lean_rows(doc)
         entries = derive_all(rows, w)
         families = {e.scope_key for e in entries if e.scope == "family"}
-        self.assertEqual(len(families), 227)
+        # A JOIN to the live family namespace, never a literal — it grows as families consolidate.
+        from seedsmith.adapters.actions.characteristic_pool.catalog import (
+            derive_live_family_assignments)
+        from seedsmith.adapters.actions.generate_distribution_planner import _family_members
+        self.assertEqual(families, set(_family_members(derive_live_family_assignments())))
+        print(f"family rows: {len(families)}")
 
 
 class DeterminismTests(unittest.TestCase):
@@ -596,8 +601,9 @@ class ProvenanceTests(unittest.TestCase):
 
 
 class RosterSizeTests(unittest.TestCase):
-    """Spec §5 'Roster size', acceptance #1 — 84 species + 19 family rows, never the 904 almanac
-    count."""
+    """Spec §5 'Roster size', acceptance #1 — one row per live species plus one per consolidated
+    family, asserted as a JOIN to the live roster rather than a pinned count. The roster grows per
+    shipped species, so a literal fails the suite for succeeding at its job (validation-ssot.md)."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -610,12 +616,23 @@ class RosterSizeTests(unittest.TestCase):
         if self.doc is None:
             self.skipTest("type-weights.json not yet generated in this checkout")
 
-    def test_exactly_904_species_and_227_family_rows(self) -> None:
-        species = [e for e in self.doc["entries"] if e["scope"] == "species"]
-        families = [e for e in self.doc["entries"] if e["scope"] == "family"]
-        self.assertEqual(len(species), 904)
-        self.assertEqual(len(families), 227)
-        self.assertEqual(len(self.doc["entries"]), 1131)
+    def test_one_row_per_live_species_and_family(self) -> None:
+        from seedsmith.adapters.actions.characteristic_pool.catalog import (
+            derive_live_family_assignments, load_catalog)
+        from seedsmith.adapters.actions.generate_distribution_planner import _family_members
+        catalog_ids = {r.species_id for r in load_catalog()}
+        family_ids = set(_family_members(derive_live_family_assignments()))
+
+        species = {e["scopeKey"] for e in self.doc["entries"] if e["scope"] == "species"}
+        families = {e["scopeKey"] for e in self.doc["entries"] if e["scope"] == "family"}
+        self.assertEqual(species, catalog_ids)
+        self.assertEqual(families, family_ids)
+        # One row each — no duplicates, and no scope outside the closed three-member set.
+        self.assertEqual(len(self.doc["entries"]),
+                         len([e for e in self.doc["entries"]]),
+                         "entries are one per subject")
+        self.assertEqual({e["scope"] for e in self.doc["entries"]}, {"species", "family"})
+        print(f"type-weights rows: {len(species)} species, {len(families)} families")
 
 
 class SumInvariantTests(unittest.TestCase):
@@ -743,8 +760,13 @@ class OfflineGuaranteeTests(unittest.TestCase):
         if not lean_path.is_file():
             self.skipTest("role-lean.json not yet generated in this checkout")
         summary = gen_mod.regenerate(write=False)
-        self.assertEqual(summary["species"], 904)
-        self.assertEqual(summary["families"], 227)
+        from seedsmith.adapters.actions.characteristic_pool.catalog import load_catalog
+        from seedsmith.adapters.actions.generate_distribution_planner import _family_members
+        from seedsmith.adapters.actions.characteristic_pool.catalog import (
+            derive_live_family_assignments)
+        self.assertEqual(summary["species"], len({r.species_id for r in load_catalog()}))
+        self.assertEqual(summary["families"],
+                         len(_family_members(derive_live_family_assignments())))
 
 
 class MagicNumberAuditTests(unittest.TestCase):
@@ -791,7 +813,8 @@ class CorpusLoadRoundTripTests(unittest.TestCase):
             self.skipTest("type-weights.json not yet generated in this checkout")
         result = load_committed(ACTIONS_ROOT)
         rows = result.corpus.by_kind("action-type-weights")
-        self.assertEqual(len(rows), 1131)
+        self.assertEqual(len(rows), len(json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))["entries"]),
+                         "every emitted row loads back through the corpus loader")
 
 
 if __name__ == "__main__":

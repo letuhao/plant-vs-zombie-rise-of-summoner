@@ -41,7 +41,19 @@ class EnumerateCellsTests(unittest.TestCase):
             [("roomKind", dims["roomKind"].values), ("climate", dims["climate"].values)],
             adapter.legal_combinations(),
         )
-        self.assertEqual(len(cells), 53)
+        # The cell count is the product of the two CLOSED dimension vocabularies filtered by the
+        # adapter's own legality rule — derived here, not pinned, so adding a room kind or climate
+        # moves the expectation automatically (and the per-kind structure below still guards it).
+        room_kinds = dims["roomKind"].values
+        climates = dims["climate"].values
+        legal = adapter.legal_combinations()
+        expected = sum(
+            1
+            for kind in room_kinds
+            for climate in climates
+            if legal("roomKind", kind, "climate", climate)
+        )
+        self.assertEqual(len(cells), expected)
         # A climate-neutral kind appears exactly once (climate=none); a climate-bearing kind
         # appears seven times (six elements + none).
         boss_cells = [c for c in cells if c.dimension_values[0] == "boss"]

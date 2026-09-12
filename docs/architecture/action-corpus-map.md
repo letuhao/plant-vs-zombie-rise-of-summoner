@@ -23,13 +23,18 @@ plan → `tasks/action-corpus-plan.md` + `tasks/action-corpus-todo.md`.
 
 **⛔ LIVE ROSTER SOURCE CORRECTION 2026-09-10.** The executable Seedsmith action pipeline reads the
 live JSON roster under `data/seed/demons/species/` and derives family membership from each seed's
-`family` field. The current source contains **904 species**, **227 consolidated family namespaces**,
-and **1,183 family memberships**. The older 84-species / 53-assignment / 19-family figures that
-remain in historical module prose are not valid inputs for the current pipeline; neither the
-runtime SQLite database nor `DemonSpeciesCatalog.Generated.cs` is an action-pipeline source of truth.
-The generated action plan is therefore **5,680 briefs**: 25 general, 1,135 family, and 4,520
-species, with five category slots per subject across `attack`, `defense`, `movement`, `support`, and
-`status`.
+`family` field. The older 84-species / 53-assignment / 19-family figures that remain in historical
+module prose are not valid inputs for the current pipeline; neither the runtime SQLite database nor
+`DemonSpeciesCatalog.Generated.cs` is an action-pipeline source of truth.
+
+**⛔ ROSTER AND PLAN SIZES ARE READINGS, NOT CONSTANTS (2026-09-11).** The live seed folder is a
+**population**: it grows every time a species ships, so its size and every figure derived from it
+(species count, consolidated family count, family memberships, brief total, per-tier counts) change
+with content. The plan is emitted by the deterministic A-S1 planner over whatever the live roster is
+at run time, with five category slots per subject across `attack`, `defense`, `movement`, `support`,
+and `status`. Do not write a population count into a spec, test, or doc as an acceptance value — see
+[validation-ssot.md](validation-ssot.md). To read the current scale, run the planner and print its
+summary; to assert correctness, assert the **joins and reconciliation**, never the total.
 
 ---
 
@@ -67,9 +72,10 @@ Restated inline, because a downstream session reads this map and not its links.
 2. **Small-batch proof before any full run.** *"prove LLM pipeline work very well before big batch run…
    i will decide when we fully run."* Every model stage ships `--dry-run` and a small `--count`; **§17's
    call budget is a ceiling, not a plan.**
-3. **The live roster is read from the seed folder.** The current run has 904 species, 227
-   consolidated family namespaces, and 1,183 memberships. These counts are measurements, not hard-coded
-   design points; the generators must re-read the folder on every run.
+3. **The live roster is read from the seed folder.** Its size (species, consolidated families,
+   memberships) is a **reading that grows as content ships** — never a hard-coded design point. The
+   generators re-read the folder on every run; tests assert the *joins* to it, not its size
+   ([validation-ssot.md](validation-ssot.md)).
 4. **C1's family-access widening is gated** (`ideal` §21.3) on three things that do not exist: a per-rung
    `powerBudget` row, a family-aware non-additive price (needs D2), and a budget check with a production
    caller. **Until all three hold, the generator emits structure-gated tiers only.**
@@ -188,7 +194,7 @@ picker are all inspectable against real data, and the only unknown left is the j
 | `OnActivate` raised on the lawn | **effect-atom E33** | ⛔ **A-M2 is blocked on it** — the only hard cross-program block. **And E33 is not enough:** it ships the seam with no production caller of its own (`spec-activation-edge.md:13-14`), so A-M2 lands **inert** until a lawn-side producer exists — a named, criteria-stated task that blocks no other module (⛔ decided 2026-09-03) |
 | Channel pools (L2) | **effect-atom E30** | A generated action's atoms reference pools |
 | Binding production | **effect-pipeline module 4** `instance-producer` | `effect_binding` has **zero rows**; without it the corpus is authored into a runtime nothing reaches |
-| Species anchors (motifs, family, theme) | **live demon seed folder** | 904 species and 1,183 family memberships; descriptive traits remain seed data |
+| Species anchors (motifs, family, theme) | **live demon seed folder** | one anchor per live species, family membership derived from each seed's `family` field; descriptive traits remain seed data (size is a reading — see validation-ssot.md) |
 | Rung window in the caps register | **A-G1** (was: power) | ✅ **Done 2026-09-04.** `ssot-power-scale.md` §11.2 now carries the `powerBudgetMilli` row §5 constraint 2 promised |
 | Real per-family usage counts | **roster-balance** `usage-stats` (FC1, `docs/research/action-corpus/_usage-*.json`) | A-S7 reads the latest report fresh every round — never a persisted rotation cursor, same "recompute from real data, never a snapshot" discipline `set-charm-gen.v1.json`'s own tuning note already states. Degrades to "every family equally due" when no report exists yet |
 | `restriction` axis detection | **effect-atom** (per-atom payload/target data) | ⛔ **Still absent, and not A-G1's to close alone.** `StructureBudgetGuard.SpentAxes` reads only `rpg_action` + `rpg_action_cost` + `rpg_action_effect_scope` — none carry per-atom payload/target data, so `restriction` (action-ideal.md §8.7: a self-debuff, `status.apply` scoped to `caster`) cannot be detected from here. A-G1 (spec-tier-access-gate.md §3.3, AC8) makes this explicit via `StructureBudgetGuard.UndetectableAxes()` rather than reporting `0` |

@@ -70,20 +70,35 @@ def test_staleness_key_does_not_collide_across_a_field_boundary():
 
 
 def test_the_real_committed_ferocity_seed_is_stale_against_the_current_prompt_version():
-    """The real, already-found stale record: ferocity.json's own `_provenance.promptVersion` is
-    an older version than the code's current `PROMPT_VERSION`. This is exactly the case
-    `Content/FieldStale` (Task 3) must report — proven here at the staleness-key layer first."""
+    """The real, already-found stale record: ferocity.json cannot prove it was generated under the
+    current `PROMPT_VERSION`, so `Content/FieldStale` (Task 3) must report it.
+
+    ⛔ CORRECTED 2026-09-11: the doc-level stamp is no longer a single literal. `emit.build_seed_document`
+    now derives it from the records: a tree that mixed vintages (here `''` from pre-provenance
+    re-roll survivors and `tree-language/3` from fresh nodes) stamps `"mixed"` and carries the
+    per-node split in `promptVersionByNode`. Pinning `"tree-language/1"` was stale the moment that
+    landed. The invariant that actually matters — and that this test exists for — is that the
+    committed record is NOT current, proven against whatever stamp the document carries."""
     doc = _real_ferocity_doc()
-    recorded_prompt_version = doc["_provenance"]["promptVersion"]
-    assert recorded_prompt_version == "tree-language/1"
-    assert recorded_prompt_version != PROMPT_VERSION
+    prov = doc["_provenance"]
+    recorded_prompt_version = prov["promptVersion"]
+
+    # Not current: either an explicit older vintage, or `mixed` whose per-node split contains at
+    # least one value that is not the current vintage.
+    if recorded_prompt_version == "mixed":
+        per_node = prov.get("promptVersionByNode", {})
+        assert any(v != PROMPT_VERSION for v in per_node.values()), (
+            "a `mixed` stamp must carry at least one non-current per-node vintage"
+        )
+    else:
+        assert recorded_prompt_version != PROMPT_VERSION
 
     recorded = {"stalenessKey": staleness_key(
         brief_hash="irrelevant-for-this-check", prompt_version=recorded_prompt_version,
-        schema_version="1", model_id=doc["_provenance"]["model"])}
+        schema_version="1", model_id=prov["model"])}
     current_key = staleness_key(
         brief_hash="irrelevant-for-this-check", prompt_version=PROMPT_VERSION,
-        schema_version="1", model_id=doc["_provenance"]["model"])
+        schema_version="1", model_id=prov["model"])
 
     assert is_stale(recorded, current_key) is True
 

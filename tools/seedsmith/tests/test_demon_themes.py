@@ -225,13 +225,18 @@ def test_every_theme_carries_both_expression_rules_and_a_rarity_snapshot():
 
 
 def test_theme_refresh_reads_the_complete_almanac_roster_without_rewriting_published_rows():
-    """P0.2's source must be the 904-row dump, not the legacy 84-row demon slice."""
+    """P0.2's source must be the complete live dump, not the legacy 84-row demon slice. Asserted as
+    a CONTRACT: build_inputs covers exactly the live species set, one row each, and the refresh
+    produces one theme per input — never a pinned roster size (validation-ssot.md)."""
     from seedsmith.adapters.demons.generate_themes import build_inputs, regenerate
+    from seedsmith.adapters.actions.characteristic_pool.catalog import load_catalog
 
+    catalog_ids = {row.species_id for row in load_catalog()}
     inputs = build_inputs()
-    assert len(inputs) == 904
-    assert len({row.species_id for row in inputs}) == 904
+    input_ids = {row.species_id for row in inputs}
+    assert len(inputs) == len(input_ids), "one theme input per species, no duplicates"
+    assert input_ids == catalog_ids, "the almanac roster is exactly the live catalog"
 
     summary = regenerate(write=False)
-    assert summary["inputs"] == 904
-    assert summary["themes"] == 904
+    assert summary["inputs"] == len(inputs)
+    assert summary["themes"] == len(inputs)

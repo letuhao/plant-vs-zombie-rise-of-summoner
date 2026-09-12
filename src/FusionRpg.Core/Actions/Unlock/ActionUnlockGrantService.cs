@@ -24,7 +24,7 @@ public sealed class ActionUnlockGrantService
     readonly Func<string, UnlockState> _loadUnlockState;
     readonly Action<string, UnlockState> _saveUnlockState;
     readonly Func<IReadOnlyList<ActionRow>> _catalog;
-    readonly IReadOnlyDictionary<string, string> _familyOf;
+    readonly IReadOnlyDictionary<string, IReadOnlyList<string>> _familyOf;
     readonly Action<string, string> _grant;
 
     /// <param name="loadUnlockState">Reads one owner's current <see cref="UnlockState"/> —
@@ -33,7 +33,8 @@ public sealed class ActionUnlockGrantService
     /// never on an empty candidate set or a missed roll.</param>
     /// <param name="catalog">The full imported action catalog — read once per call, matching
     /// <see cref="ActionEligibility.Candidates"/>'s own caller-supplies-everything contract.</param>
-    /// <param name="familyOf">The specimen's own species → family lookup (A-E1's decided mapping).</param>
+    /// <param name="familyOf">The specimen's own species → families lookup (A-E1's decided mapping —
+    /// a relation, not a scalar; see <see cref="FamilyMap"/>).</param>
     /// <param name="grant">Grants the chosen action to the owner — the already-proven
     /// <c>RpgStore.UpsertGrant</c> path, one level up. Called ONLY alongside <paramref name="saveUnlockState"/>,
     /// never independently.</param>
@@ -41,7 +42,7 @@ public sealed class ActionUnlockGrantService
         Func<string, UnlockState> loadUnlockState,
         Action<string, UnlockState> saveUnlockState,
         Func<IReadOnlyList<ActionRow>> catalog,
-        IReadOnlyDictionary<string, string> familyOf,
+        IReadOnlyDictionary<string, IReadOnlyList<string>> familyOf,
         Action<string, string> grant)
     {
         _loadUnlockState = loadUnlockState ?? throw new ArgumentNullException(nameof(loadUnlockState));

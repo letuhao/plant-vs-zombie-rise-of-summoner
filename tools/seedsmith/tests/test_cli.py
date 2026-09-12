@@ -136,7 +136,10 @@ def test_theme_refresh_public_command_reads_the_complete_roster(capsys):
     assert main(["demons", "themes", "--dry-run"]) == EXIT_CLEAN
     report = json.loads(capsys.readouterr().out)
     assert report["dryRun"] is True
-    assert report["inputs"] == report["themes"] == 904
+    # Contract: every species input produced a theme. The roster size is a reading, so assert the
+    # relationship and let the scale print (validation-ssot.md).
+    assert report["inputs"] > 0
+    assert report["inputs"] == report["themes"]
 
 
 def test_species_item_plan_refuses_when_theme_coverage_is_stale(capsys):

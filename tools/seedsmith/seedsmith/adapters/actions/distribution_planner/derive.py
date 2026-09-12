@@ -111,16 +111,33 @@ def largest_remainder_raw(weights: "Mapping[str, int]", order: "Sequence[str]", 
 
 
 def expand_counts(counts: "Mapping[str, int]", order: "Sequence[str]") -> "list[str]":
-    """A `{key: count}` allocation, flattened into a deterministic list of length `sum(counts)` —
-    every `order[0]` slot before any `order[1]` slot. Spec §3 leaves the JOINT distribution of two
-    independently-allocated vectors (category counts, target-mode counts) over one subject's
-    ordinals unspecified; this is the simplest total function that turns two exact marginals into
-    per-ordinal assignments without inventing a correlation the spec never states — acceptance
-    #3/#4b test each marginal's exactness, not a joint one."""
-    out: "list[str]" = []
-    for k in order:
-        out.extend([k] * counts[k])
-    return out
+    """A `{key: count}` allocation, flattened into a deterministic list of length `sum(counts)`
+    that **spreads each key's quota evenly** across the sequence instead of grouping it.
+
+    Spec §3 leaves the JOINT distribution of two independently-allocated vectors (category counts,
+    target-mode counts) over one subject's ordinals unspecified; this is a total function that turns
+    two exact marginals into per-ordinal assignments without inventing a correlation — acceptance
+    #3/#4b test each marginal's exactness, not a joint one, and this preserves every marginal exactly
+    (only ORDER changes, never the counts).
+
+    ⛔ **FIXED 2026-09-11 from a measured defect, not a preference.** The original body emitted each
+    key's runs back-to-back (`[k]*counts[k]` in `order`), so a subject's ordinals were blocked by
+    category. Zipping two blocked sequences made the JOINT frame constant for long stretches: measured
+    over the live general tier (1,000 briefs), only **15 distinct frames** existed with runs up to
+    **134 consecutive identical briefs**, and the first 40 briefs shared **one** frame. A proposal
+    batch draws a contiguous slice of ordinals, so every batch saw near-identical context, the model
+    produced near-duplicates, and A-S3 rejected **32 of 57 candidates (56%)** at tier 2. This was
+    latent at the old `generalCount: 25` (runs of ~5) and the 1000-brief general tier exposed it.
+
+    The spread is the standard stride/round-robin: key `k`'s j-th unit is placed in round `j`, with
+    keys in `order` within a round. It is a total function of `order` and the counts — never of
+    `counts`' own dict insertion order — so it stays deterministic and order-independent."""
+    slots: "list[tuple[int, int, str]]" = []
+    for index, key in enumerate(order):
+        for j in range(int(counts[key])):
+            slots.append((j, index, key))
+    slots.sort(key=lambda item: (item[0], item[1]))
+    return [key for _, _, key in slots]
 
 
 def largest_remainder_apportion(raw_weights: "Mapping[str, int]", order: "Sequence[str]",

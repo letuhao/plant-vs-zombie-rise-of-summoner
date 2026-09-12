@@ -1214,16 +1214,28 @@ class ValidateHealG3NeverPenalisesDifferentiatorNoneTests(unittest.TestCase):
 
 # ---------------------------------------------------------------------------------------------
 # Roster test, not a claim (spec SS4): the plan was sized on real per-species motif/family data
-# read straight from the generated files -- asserted here so those numbers cannot silently drift.
+# read straight from the generated files -- asserted as a JOIN to the live roster, never a pinned
+# size (docs/architecture/validation-ssot.md: a population that grows per shipped species is a
+# reading).
 # ---------------------------------------------------------------------------------------------
 
 class RosterTests(unittest.TestCase):
-    def test_live_roster_and_family_memberships(self):
+    def test_live_roster_and_family_memberships_reconcile(self):
         species = load_catalog(CATALOG_PATH)
         families = derive_live_family_assignments(CATALOG_PATH)
-        self.assertEqual(len(species), 904)
-        self.assertEqual(len(families), len(species))
-        self.assertEqual(sum(len(v) for v in families.values()), 1183)
+        species_ids = {row.species_id for row in species}
+        # JOIN: one family assignment per species, every key a real species, none stray.
+        self.assertEqual(set(families), species_ids)
+        self.assertTrue(all(v for v in families.values()),
+                        "every species carries at least one family")
+        # Every family id is a non-empty string; the membership total is the per-species sum.
+        family_ids = {f for v in families.values() for f in (v if isinstance(v, list) else [v])}
+        self.assertTrue(all(isinstance(f, str) and f for f in family_ids))
+        memberships = sum(len(v if isinstance(v, list) else [v]) for v in families.values())
+        self.assertGreaterEqual(memberships, len(species_ids),
+                                "at least one membership per species")
+        print(f"signature roster: {len(species_ids)} species, {len(family_ids)} families, "
+              f"{memberships} memberships")
 
 
 if __name__ == "__main__":

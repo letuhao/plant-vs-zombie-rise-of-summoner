@@ -268,7 +268,7 @@ ideal keeps its dated record and is no longer the source.
 | Case | Expect |
 |---|---|
 | **Determinism** | two runs over unchanged inputs produce byte-identical `role-lean.json` and `characteristic-pool.json`, asserted by hash |
-| **Join counts** | asserted against today's live measurements: 904 species · 904 motif keys · 227 consolidated families · 1,183 memberships. A change is real content drift and should fail loudly |
+| **Join coverage** | asserted as a JOIN to the live roster, never a count: every catalog id has exactly one role-lean entry and a motif key, and the family map's keys equal the catalog's — recomputed from the seed each run. ⛔ **CORRECTED 2026-09-11:** this row previously pinned "904 species · 904 motif keys · 227 families · 1,183 memberships" as acceptance values. That is a **population** (it grows per shipped species); per [validation-ssot.md](../../architecture/validation-ssot.md) the test asserts the relationship and prints the scale. "A change is content drift and should fail loudly" was exactly backwards — content shipping is the normal case |
 | **Planted violation — invented anchor** | a species stripped of its family assignment must come out with `family: null`, `leanSource: "derived-nofloor"` and a **non-empty** `signals` list. If any code path substitutes a neighbour's family, the test fails — and so does a path that drops the derivation and returns a five-way tie (review F12) |
 | **Family-less species are derived** | any family-less live species is still derived from its own signals; a future family-less record must not silently become a five-way tie |
 | **Planted violation — legacy rarity leak** | a role-lean entry carrying `"rarity": "epic"` is refused; only the 10 ladder ids are legal |

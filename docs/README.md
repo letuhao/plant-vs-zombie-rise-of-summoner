@@ -177,6 +177,7 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [testing/probes.md](testing/probes.md) | SIM-only reset / snapshot / `test.probe` |
 | [testing/player-pack-smoke.md](testing/player-pack-smoke.md) | Offline/online smoke for `dist/FusionRpg` (not SIM HTTP) |
 | [testing/web.md](testing/web.md) | Vitest coverage + Playwright e2e for the SPA |
+| [architecture/validation-ssot.md](architecture/validation-ssot.md) | **Standard** — a guardrail validates the CONTRACT and closed enums, never a population count or generated text; criteria must be stable across generations |
 
 ## 6. Runbook
 

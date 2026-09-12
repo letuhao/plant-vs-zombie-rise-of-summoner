@@ -568,25 +568,29 @@ public class ItemSurfaceTests
     [Fact]
     public void One_shipped_piece_advances_three_sets_and_the_disclosure_names_all_three()
     {
-        // Module 12's pinned corpus fact, picked up: 165 distinct (role, base type) member pairs, 28
-        // of them in more than one set, one in three (2026-09-07: two trial sets added, see
-        // ThresholdGrantCorpusTests' own count history).
+        // CONTRACT, not a count: the set corpus is generator-authored and grows every generation, so
+        // the shared-member total (28 → 524 and climbing) is stale by construction. What §disclosure
+        // actually asserts is that a member legal in MORE THAN ONE set is disclosed against every set
+        // it advances — never a merged or dropped count. So the test finds a real multi-set member of
+        // whatever size the corpus holds and proves the disclosure names all of them, agreed with the
+        // per-set evaluator.
         var sets = ThresholdGrantCorpusTests.Sets();
         var shared = SetDisclosure.SharedMembers(sets);
 
-        Assert.Equal(28, shared.Count);
-        Assert.Equal(3, shared.Max(kv => kv.Value.Count));
+        Assert.NotEmpty(shared);
+        Assert.All(shared, kv => Assert.True(kv.Value.Count >= 2,
+            $"{kv.Key.ContainerId} is in `shared` but advances fewer than two sets"));
 
-        var triple = shared.First(kv => kv.Value.Count == 3);
+        var multi = shared.First(kv => kv.Value.Count >= 2);
         var disclosure = Assert.Single(SetDisclosure.ForWearer(
-            new[] { new EquippedPiece(triple.Key.Role, triple.Key.ContainerId) }, sets));
+            new[] { new EquippedPiece(multi.Key.Role, multi.Key.ContainerId) }, sets));
 
-        Assert.Equal(3, disclosure.AdvancesSetIds.Count);
+        Assert.Equal(multi.Value.Count, disclosure.AdvancesSetIds.Count);
         Assert.Empty(disclosure.RedundantSetIds);
-        Assert.Equal(triple.Value.OrderBy(s => s, StringComparer.Ordinal), disclosure.AdvancesSetIds);
+        Assert.Equal(multi.Value.OrderBy(s => s, StringComparer.Ordinal), disclosure.AdvancesSetIds);
 
         // And it agrees with module 12's own per-set view — one counter each, never one merged count.
-        var progress = SetEvaluator.Progress(new[] { new EquippedPiece(triple.Key.Role, triple.Key.ContainerId) }, sets);
+        var progress = SetEvaluator.Progress(new[] { new EquippedPiece(multi.Key.Role, multi.Key.ContainerId) }, sets);
         Assert.Equal(
             disclosure.AdvancesSetIds.OrderBy(s => s, StringComparer.Ordinal),
             progress.Select(p => p.SetId).OrderBy(s => s, StringComparer.Ordinal));

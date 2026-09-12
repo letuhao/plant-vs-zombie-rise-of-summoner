@@ -451,10 +451,18 @@
       "id": "atom.elpw-surge",
       "nameKey": "affix.elpw-surge",
       "name": "elpw-surge",
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
       "kindId": "stat.derived",
       "params": {
         "channel": "combat.power.overflow.{variant}",
         "op": "Replace"
+      },
+      "variants": {
+        "generate": "elements+omni"
       },
       "roles": [
         "armament-primary",

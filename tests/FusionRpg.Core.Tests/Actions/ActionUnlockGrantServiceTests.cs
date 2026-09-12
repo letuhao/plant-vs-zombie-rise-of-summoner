@@ -33,7 +33,7 @@ public class ActionUnlockGrantServiceTests
             loadUnlockState: _ => UnlockState.Empty(),
             saveUnlockState: PoisonSave,
             catalog: () => Array.Empty<ActionRow>(),
-            familyOf: new Dictionary<string, string>(),
+            familyOf: new Dictionary<string, IReadOnlyList<string>>(),
             grant: Poison);
 
         var outcome = service.TryRollOnce("specimen-1", speciesKey: null, specimenWorldSeed: 42, AlwaysAccepts);
@@ -53,7 +53,7 @@ public class ActionUnlockGrantServiceTests
             loadUnlockState: _ => alreadyHeld,
             saveUnlockState: PoisonSave,
             catalog: () => catalog,
-            familyOf: new Dictionary<string, string>(),
+            familyOf: new Dictionary<string, IReadOnlyList<string>>(),
             grant: Poison);
 
         var outcome = service.TryRollOnce("specimen-1", speciesKey: null, specimenWorldSeed: 42, AlwaysAccepts);
@@ -74,7 +74,7 @@ public class ActionUnlockGrantServiceTests
             loadUnlockState: _ => UnlockState.Empty(),
             saveUnlockState: (id, state) => saved = state,
             catalog: () => catalog,
-            familyOf: new Dictionary<string, string>(),
+            familyOf: new Dictionary<string, IReadOnlyList<string>>(),
             grant: (id, actionId) => { grantedTo = id; grantedAction = actionId; });
 
         var outcome = service.TryRollOnce("specimen-1", speciesKey: null, specimenWorldSeed: 42, AlwaysAccepts);
@@ -96,7 +96,7 @@ public class ActionUnlockGrantServiceTests
             loadUnlockState: _ => UnlockState.Empty(),
             saveUnlockState: (_, _) => { },
             catalog: () => catalog,
-            familyOf: new Dictionary<string, string>(),
+            familyOf: new Dictionary<string, IReadOnlyList<string>>(),
             grant: (_, _) => { }).TryRollOnce("specimen-x", speciesKey: null, specimenWorldSeed: 777, AlwaysAccepts);
 
         var first = Run();
@@ -122,7 +122,7 @@ public class ActionUnlockGrantServiceTests
                 loadUnlockState: _ => UnlockState.Empty(),
                 saveUnlockState: PoisonSave,
                 catalog: () => catalog,
-                familyOf: new Dictionary<string, string>(),
+                familyOf: new Dictionary<string, IReadOnlyList<string>>(),
                 grant: Poison);
 
             var outcome = service.TryRollOnce("specimen-1", speciesKey: null, specimenWorldSeed: seed, RarelyAccepts);
@@ -150,7 +150,7 @@ public class ActionUnlockGrantServiceTests
             loadUnlockState: _ => UnlockState.Empty(),
             saveUnlockState: (_, _) => { },
             catalog: () => catalog,
-            familyOf: new Dictionary<string, string> { ["species.mine"] = "my-family" }, // does not map to "other-family"
+            familyOf: new Dictionary<string, IReadOnlyList<string>> { ["species.mine"] = new[] { "my-family" } }, // does not map to "other-family"
             grant: (_, actionId) => granted = actionId);
 
         service.TryRollOnce("specimen-1", speciesKey: "species.mine", specimenWorldSeed: 1, AlwaysAccepts);

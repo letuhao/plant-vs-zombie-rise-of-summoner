@@ -280,6 +280,20 @@ nothing real:
    A-S5's question *"is the plan satisfiable?"* rather than *"did the model drift?"*. The general
    scope has one subject, so its scope quota and its subject split coincide and the simpler
    per-subject rule is correct there.
+
+   **⛔ CORRECTED 2026-09-11 (measured defect) — ordinals SPREAD each marginal, never group it.**
+   Each allocated vector is flattened into the subject's ordinals by **stride/round-robin** (key `k`'s
+   j-th unit lands in round `j`, keys in declared order within a round), not by emitting each key's
+   quota back-to-back. The marginals are preserved exactly — only order changes — so step 9's
+   "ordinals in canonical order" and acceptance #3/#4b still hold. The previous grouped emission made
+   the **joint** `(category, targetMode, …)` frame constant for long stretches: measured over the
+   live 1,000-brief general tier, only **15 distinct frames** existed with runs up to **134
+   consecutive identical briefs**, and the first 40 briefs shared **one** frame. A proposal batch
+   draws a contiguous slice of ordinals, so every batch saw near-identical context and the model
+   produced near-duplicates — A-S3 rejected **32 of 57 candidates (56%)** at tier 2. Spreading raised
+   the general tier to **49 distinct frames** with a longest run of **2** and **35 distinct frames in
+   the first 40**. The defect was latent at the old `generalCount: 25` (runs of ~5); the 1000-brief
+   general tier exposed it.
 4. **Assign the rung window per scope** from tuning: general **1-4**, family **1-7**, signature
    **1-10** — the *ceilings* geometrically even, three rungs apart, each 2.315× the last. Emitted as
    `rungBand`, never as a magnitude.

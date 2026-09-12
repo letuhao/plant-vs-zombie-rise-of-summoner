@@ -36,7 +36,7 @@ public class BuildSquadEquippedActionsTests : IDisposable
     {
         UnlockTuningPolicy.Configure(new UnlockTuning(
             P1Milli: 1000, DeltaMilli: 1000, FloorMilli: 1000, HeldCap: 10, RungCap: 10, DiscardTaxCoeffMilli: 100));
-        ActionFamilyMapPolicy.Configure(new Dictionary<string, string>());
+        ActionFamilyMapPolicy.Configure(new Dictionary<string, IReadOnlyList<string>>());
     }
 
     public BuildSquadEquippedActionsTests()

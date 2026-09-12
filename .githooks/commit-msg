@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+# Reject commit messages / identities that violate scripts/commit-tool/policy.json
+REPO_ROOT=$(git rev-parse --show-toplevel) || exit 1
+MSG_FILE=$1
+if [ -z "$MSG_FILE" ]; then
+  echo "commit-msg: missing message file" >&2
+  exit 1
+fi
+
+if command -v python >/dev/null 2>&1; then
+  PY=python
+elif command -v python3 >/dev/null 2>&1; then
+  PY=python3
+else
+  echo "commit-msg: python not found on PATH" >&2
+  exit 1
+fi
+
+exec "$PY" "$REPO_ROOT/scripts/commit-tool/validate.py" --commit-msg-file "$MSG_FILE"

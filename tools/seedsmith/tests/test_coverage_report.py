@@ -335,36 +335,43 @@ class ReactionAcceptedTests(unittest.TestCase):
 # ---------------------------------------------------------------------------------------------
 
 class RosterReconciliationTests(unittest.TestCase):
-    def test_a_904_species_count_is_measured_from_the_live_roster(self) -> None:
-        live_roster = RosterCounts(species_count=904, family_count=227,
-                                   family_assigned_count=1183)
+    """The roster reconciliation REPORT is driven by whatever counts it is handed — the test passes
+    its own synthetic counts so the arithmetic (band, estimate, message) is what is pinned, not the
+    live roster size, which grows per shipped species (validation-ssot.md)."""
+
+    def test_reconciliation_reports_the_arithmetic_it_was_given(self) -> None:
+        live_roster = RosterCounts(species_count=900, family_count=220,
+                                   family_assigned_count=1200)
         findings = cr.roster_reconciliation_findings("m", live_roster, accepted_corpus_size=0,
                                                      signature_actions_per_species=5)
         self.assertEqual(len(findings), 1)
         self.assertEqual(findings[0].severity, Severity.NOTE)
-        self.assertIn("904 x 5 = 4520", findings[0].message)
+        self.assertIn("900 x 5 = 4500", findings[0].message)
 
     def test_the_live_seed_roster_re_derives_against_the_run_tuning(self) -> None:
-        """Acceptance #6 — re-verify the roster numbers directly rather than trusting any prompt."""
+        """Acceptance #6 — re-verify the roster numbers directly rather than trusting any prompt.
+        Asserted as a RELATIONSHIP (catalog ↔ family map ↔ reconciliation), never a pinned size."""
         catalog = load_catalog()
         family_assignments = derive_live_family_assignments()
         members = gen_mod._family_members(family_assignments)
         roster = RosterCounts(species_count=len(catalog), family_count=len(members),
                               family_assigned_count=sum(len(v) for v in members.values()))
-        self.assertEqual(roster.species_count, 904)
-        self.assertEqual(roster.family_count, 227)
-        self.assertEqual(roster.family_assigned_count, 1183)
+        self.assertEqual(roster.species_count, len({r.species_id for r in catalog}))
+        self.assertEqual(roster.family_count, len(members))
+        self.assertEqual(roster.family_assigned_count,
+                         sum(len(v if isinstance(v, list) else [v])
+                             for v in family_assignments.values()))
 
         findings = cr.roster_reconciliation_findings("m", roster, accepted_corpus_size=0,
                                                      signature_actions_per_species=5)
         self.assertEqual(len(findings), 1)
         self.assertEqual(findings[0].severity, Severity.NOTE)
         evidence = findings[0].evidence
-        self.assertEqual(evidence["signatureTierEstimate"], 904 * 5)
-        self.assertFalse(evidence["belowBand"])
-        self.assertEqual(evidence["researchBandRoster"], 904)
+        self.assertEqual(evidence["signatureTierEstimate"], roster.species_count * 5)
+        self.assertEqual(evidence["researchBandRoster"], roster.species_count)
         # the message must show the re-derivation arithmetic, never just repeat "1,500-3,500"
-        self.assertIn("904 x 5 = 4520", findings[0].message)
+        self.assertIn(f"{roster.species_count} x 5 = {roster.species_count * 5}",
+                      findings[0].message)
         self.assertIn("inside/above", findings[0].message)
 
 

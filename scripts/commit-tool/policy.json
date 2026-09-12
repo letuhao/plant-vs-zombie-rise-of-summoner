@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "allowedAuthors": [
+    {
+      "name": "letuhao1994",
+      "email": "letuhao1994@gmail.com"
+    }
+  ],
+  "subjectMaxLen": 72,
+  "forbidAnyTrailers": true,
+  "forbiddenTrailerKeys": [
+    "Co-authored-by",
+    "Co-Authored-By",
+    "Signed-off-by",
+    "Reviewed-by",
+    "Acked-by",
+    "Suggested-by",
+    "Helped-by",
+    "Generated-by",
+    "Assisted-by",
+    "Committed-by",
+    "Reported-by",
+    "Tested-by",
+    "Approved-by"
+  ],
+  "forbiddenAuthorNameSubstrings": [
+    "cursor",
+    "claude",
+    "anthropic",
+    "openai",
+    "copilot",
+    "chatgpt",
+    "gemini",
+    "composer",
+    "devtools",
+    "agent",
+    "bot"
+  ],
+  "forbiddenAuthorEmailSubstrings": [
+    "cursor.com",
+    "cursor.so",
+    "anthropic.com",
+    "openai.com",
+    "github.com/apps",
+    "noreply.github.com",
+    "users.noreply",
+    "copilot",
+    "chatgpt",
+    "claude.ai",
+    "gemini.google"
+  ],
+  "forbiddenMessagePatterns": [
+    "(?i)\\bco-authored-by\\b",
+    "(?i)\\bsigned-off-by\\b",
+    "(?i)\\bgenerated-by\\b",
+    "(?i)\\bassisted-by\\b",
+    "(?i)\\bai[- ]generated\\b",
+    "(?i)\\bwritten by (an? )?(ai|agent|llm|claude|cursor|copilot|chatgpt)\\b",
+    "(?i)\\bmade with\\s+(cursor|claude|copilot|chatgpt)\\b",
+    "(?i)\\bcursor\\s+agent\\b",
+    "(?i)\\bclaude\\s+code\\b",
+    "(?i)\\bgenerated with\\b",
+    "(?i)\\bagents?\\s+assert\\b",
+    "(?i)\\bagents?\\s+turn\\b",
+    "(?i)\\boperator\\s*\\+\\s*agent\\b"
+  ]
+}

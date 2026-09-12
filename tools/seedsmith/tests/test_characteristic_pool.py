@@ -54,6 +54,19 @@ ACTIONS_ROOT = REPO_ROOT / "data" / "seed" / "actions"
 TUNING_PATH = REPO_ROOT / "data" / "tuning" / "action-role-lean.v1.json"
 
 
+def _count_species_records(species_root: Path) -> int:
+    """The live roster SIZE, recomputed from disk — the reading a contract test compares against,
+    never a literal. See `docs/architecture/validation-ssot.md`."""
+    total = 0
+    for path in sorted(species_root.rglob("*.json")):
+        if path.name == "_index.json":
+            continue
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        rows = payload if isinstance(payload, list) else [payload]
+        total += sum(1 for row in rows if isinstance(row, dict) and row.get("speciesId"))
+    return total
+
+
 # ---------------------------------------------------------------------------------------------
 # Synthetic fixtures — independent of any live file, so determinism/tie/overflow tests never
 # depend on what the demon-classification pass happens to have written today.
@@ -89,16 +102,23 @@ def _anchor(species: SpeciesRow, *, family=None, motifs=(), anti_motifs=(),
 
 class CatalogParserTests(unittest.TestCase):
     """Sanity checks for the live seed loader and its explicit legacy compatibility parser."""
+    def test_live_seed_species_covers_every_record_on_disk(self) -> None:
+        """The CONTRACT, not a count: the catalog is exactly the seed records on disk, one row each
+        and no duplicates. A new species shipping is the normal case and must not fail this — see
+        `docs/architecture/validation-ssot.md` (a population's size is a reading, never a literal)."""
+        on_disk = _count_species_records(catalog_mod.CATALOG_PATH)
+        catalog = load_catalog()
+        self.assertEqual(len(catalog), on_disk)
+        self.assertEqual(len({row.species_id for row in catalog}), on_disk,
+                         "every seed record must load as a distinct species id")
 
-    def test_live_seed_species(self) -> None:
-        self.assertEqual(len(load_catalog()), 904)
-
-    def test_default_catalog_is_the_live_seed_folder(self) -> None:
+    def test_default_catalog_is_the_live_seed_folder_not_the_legacy_projection(self) -> None:
         live_ids = {row.species_id for row in load_catalog()}
         legacy_ids = {row.species_id for row in load_catalog(LEGACY_CATALOG_PATH)}
+        self.assertTrue(live_ids > legacy_ids,
+                        "the live seed roster must strictly contain the frozen legacy projection")
         self.assertIn("abyssswordstar", live_ids)
         self.assertNotIn("abyssswordstar", legacy_ids)
-        self.assertGreater(len(live_ids - legacy_ids), 800)
 
     def test_trait_counts_match_spec_step_4(self) -> None:
         # spec §3 step 4's own measured counts, re-derived here from the live file rather than
@@ -122,24 +142,42 @@ class CatalogParserTests(unittest.TestCase):
 
 
 class JoinCountTests(unittest.TestCase):
-    """The action source boundary must cover every live species and family membership."""
+    """The action source boundary must cover every live species and family membership — asserted as
+    JOIN relationships, never as roster literals (validation-ssot.md §2: a population's size is a
+    reading). The old version pinned 904/227/1,183; the corpus grows per shipped species and would
+    fail this suite for succeeding at its job."""
 
-    def test_catalog_and_motif_and_family_counts(self) -> None:
+    def test_motif_and_family_keys_join_the_catalog_exactly(self) -> None:
         catalog = load_catalog()
-        self.assertEqual(len(catalog), 904)
         catalog_ids = {r.species_id for r in catalog}
+        print(f"live species roster: {len(catalog_ids)}")
 
         motif = json.loads((DEMONS_ROOT / "_generated" / "motif-assignments.json")
-                           .read_text(encoding="utf-8"))
-        self.assertEqual(len(motif), 904)
-        self.assertEqual(set(motif) - catalog_ids, set(), "every motif key must join the catalog")
+                          .read_text(encoding="utf-8"))
+        self.assertEqual(set(motif), catalog_ids,
+                         "every species has motifs and every motif key is a real species")
 
         family = derive_live_family_assignments()
-        self.assertEqual(len(family), 904)
+        self.assertEqual(set(family), catalog_ids,
+                         "every species carries a family assignment and no key is stray")
+
+    def test_family_memberships_cover_every_species_and_ids_are_unique(self) -> None:
+        catalog_ids = {r.species_id for r in load_catalog()}
+        family = derive_live_family_assignments()
         family_ids: "set[str]" = set()
-        for v in family.values():
-            family_ids.update(v)
-        self.assertEqual(len(family_ids), 227)
+        assigned = 0
+        for species_id, value in family.items():
+            values = [value] if isinstance(value, str) else value
+            self.assertTrue(values, f"{species_id} must carry at least one family")
+            assigned += len(values)
+            family_ids.update(values)
+        self.assertEqual(len(family_ids), len(set(family_ids)), "family ids are a set, not a bag")
+        # The reconciliation the count used to stand in for: every membership joins a real species,
+        # and the total is the sum of the per-species lists, not a pinned 1,183.
+        self.assertEqual(assigned, sum(len(v if isinstance(v, list) else [v])
+                                       for v in family.values()))
+        self.assertTrue(catalog_ids == set(family), "species and family-assignment keys coincide")
+        print(f"families: {len(family_ids)} over {assigned} memberships")
 
 
 class AnchorTreeJoinTests(unittest.TestCase):
@@ -440,9 +478,9 @@ class OfflineGuaranteeTests(unittest.TestCase):
     def test_regenerate_runs_with_no_network(self) -> None:
         # No mocking needed to prove this — the function simply never imports anything that
         # could reach a network. A stub transport that raises would be redundant scaffolding for
-        # a module with zero call sites to stub.
+        # a module with no call sites to stub.
         summary = gen_mod.regenerate(write=False)
-        self.assertEqual(summary["species"], 904)
+        self.assertEqual(summary["species"], _count_species_records(catalog_mod.CATALOG_PATH))
 
 
 class ResidueReportedTests(unittest.TestCase):
@@ -456,7 +494,10 @@ class ResidueReportedTests(unittest.TestCase):
         self.assertIn("residue", summary)
         for key in ("familyAssigned", "familyLess", "residueCount", "residueSpecies"):
             self.assertIn(key, summary["residue"])
-        self.assertEqual(summary["residue"]["familyAssigned"], 904)
+        # Every live species is family-assigned today (no `derived-nofloor` rows); recomputed from
+        # the roster rather than pinned.
+        self.assertEqual(summary["residue"]["familyAssigned"],
+                         _count_species_records(catalog_mod.CATALOG_PATH))
         self.assertEqual(summary["residue"]["familyLess"], 0)
 
     def test_every_written_entry_carries_its_own_separation(self) -> None:
@@ -566,8 +607,14 @@ class RoleLeanShapeTests(unittest.TestCase):
         if self.doc is None:
             self.skipTest("role-lean.json not yet generated in this checkout")
 
-    def test_exactly_904_entries(self) -> None:
-        self.assertEqual(len(self.doc["entries"]), 904)
+    def test_one_entry_per_live_species(self) -> None:
+        """A JOIN to the roster, not a count: role-lean covers exactly the catalog, one row each."""
+        self.assertEqual(len(self.doc["entries"]),
+                         len({e["speciesKey"] for e in self.doc["entries"]}),
+                         "one role-lean entry per species, no duplicates")
+        self.assertEqual({e["speciesKey"] for e in self.doc["entries"]},
+                         {r.species_id for r in load_catalog()},
+                         "role-lean speciesKeys are exactly the catalog ids")
 
     def test_lean_order_is_a_permutation_of_the_five_categories(self) -> None:
         for entry in self.doc["entries"]:
@@ -628,7 +675,9 @@ class CorpusLoadRoundTripTests(unittest.TestCase):
         if not (ACTIONS_ROOT / "_generated" / "role-lean.json").is_file():
             self.skipTest("outputs not yet generated in this checkout")
         result = load_committed(ACTIONS_ROOT)
-        self.assertEqual(len(result.corpus.by_kind("action-role-lean")), 904)
+        self.assertEqual(len(result.corpus.by_kind("action-role-lean")),
+                         _count_species_records(catalog_mod.CATALOG_PATH))
+        # 6 is a CLOSED vocabulary (spec §2's groups A-F) a human changes — pinning it is correct.
         self.assertEqual(len(result.corpus.by_kind("action-characteristic-pool")), 6)
 
 

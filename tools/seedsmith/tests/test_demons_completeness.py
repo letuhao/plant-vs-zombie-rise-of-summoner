@@ -1,11 +1,13 @@
 """Task 10 (seedsmith-content-standard, content-completeness-demons) — the missing-field metric
-and backfill wiring for demon species, proven against the REAL, committed 904-species corpus, not a
-synthetic fixture (spec-content-completeness-demons.md §7).
+and backfill wiring for demon species, proven against the REAL, committed species corpus (not a
+synthetic fixture) and asserted as CONTRACT relationships, never a pinned roster size — the roster
+grows per shipped species (docs/architecture/validation-ssot.md).
 
     python -m pytest tools/seedsmith/tests/test_demons_completeness.py -q
 """
 from __future__ import annotations
 
+import json
 import unittest
 from pathlib import Path
 
@@ -33,10 +35,19 @@ class LoadSpeciesCorpusTests(unittest.TestCase):
     """§7 worked example 1: `load_species_corpus` bridges the bare-array shape `Corpus.load()`
     cannot parse (spec §2)."""
 
-    def test_loads_all_904_real_species_entries(self) -> None:
+    def test_loads_every_real_species_record(self) -> None:
+        """Contract, not count: the loader bridges the bare-array shape and yields one entry per
+        on-disk record. The roster grows per shipped species (validation-ssot.md)."""
         corpus = load_species_corpus(LIVE_DEMONS_ROOT)
         entries = corpus.by_kind(SPECIES_KIND)
-        self.assertEqual(len(entries), 904)
+        on_disk = sum(
+            len([r for r in (payload if isinstance(payload, list) else [payload])
+                 if isinstance(r, dict) and r.get("speciesId")])
+            for payload in (json.loads(p.read_text(encoding="utf-8"))
+                            for p in sorted((LIVE_DEMONS_ROOT / "species").rglob("*.json"))
+                            if p.name != "_index.json"))
+        self.assertEqual(len(entries), on_disk)
+        self.assertEqual(len({e.get("speciesId") for e in entries}), on_disk)
 
     def test_a_real_known_species_id_resolves_with_its_real_fields(self) -> None:
         corpus = load_species_corpus(LIVE_DEMONS_ROOT)
@@ -47,7 +58,7 @@ class LoadSpeciesCorpusTests(unittest.TestCase):
 
     def test_no_real_species_entry_has_a_flavor_field_today(self) -> None:
         # The real, un-fabricated finding spec-content-completeness-demons.md §1 predicts: this
-        # program has not generated species flavor text yet, so every one of the 904 is missing it.
+        # program has not generated species flavor text yet, so every loaded species is missing it.
         corpus = load_species_corpus(LIVE_DEMONS_ROOT)
         with_flavor = [e for e in corpus.by_kind(SPECIES_KIND) if e.get("flavor")]
         self.assertEqual(with_flavor, [])
@@ -63,7 +74,8 @@ class LoadSpeciesCorpusTests(unittest.TestCase):
 
         load_species_corpus(LIVE_DEMONS_ROOT, into=corpus)
         self.assertEqual(len(corpus.by_kind("demon")), demon_count_before)
-        self.assertEqual(len(corpus.by_kind(SPECIES_KIND)), 904)
+        self.assertGreater(len(corpus.by_kind(SPECIES_KIND)), 0,
+                           "species entries were added onto the existing corpus")
 
 
 @unittest.skipUnless(LIVE_DEMONS_ROOT.is_dir(), "live demons corpus not present in this checkout")
@@ -76,18 +88,21 @@ class ContentFieldMissingAgainstRealCorpusTests(unittest.TestCase):
     def tearDown(self) -> None:
         clear_registry()
 
-    def test_reports_904_of_904_missing_flavor(self) -> None:
+    def test_reports_every_species_missing_flavor(self) -> None:
         ensure_completeness_registered()
         corpus = load_species_corpus(LIVE_DEMONS_ROOT)
         registry = MetricRegistry()
         registry.register(ContentFieldMissing())
         findings = run_all(registry, Ctx(corpus=corpus, adapter=None))
 
+        total = len(corpus.by_kind(SPECIES_KIND))
         self.assertEqual(len(findings), 1)
         finding = findings[0]
         self.assertEqual(finding.subject, f"{DOMAIN}:{SPECIES_KIND}")
-        self.assertEqual(finding.evidence["missingCount"], 904)
-        self.assertEqual(finding.evidence["totalCount"], 904)
+        # Reconciles to the corpus it was handed, never a literal. The gap today is total (no species
+        # flavor authored yet); the CONTRACT is that missingCount + presentCount == totalCount.
+        self.assertEqual(finding.evidence["missingCount"], total)
+        self.assertEqual(finding.evidence["totalCount"], total)
         self.assertEqual(finding.evidence["field"], SPECIES_FLAVOR_FIELD)
 
 
@@ -117,7 +132,7 @@ class MissingSpeciesIdsBackfillWiringTests(unittest.TestCase):
     def setUp(self) -> None:
         corpus = load_species_corpus(LIVE_DEMONS_ROOT)
         self.real_anchors = [e.data for e in corpus.by_kind(SPECIES_KIND)]
-        self.assertEqual(len(self.real_anchors), 904, "sanity: real corpus scale")
+        self.assertGreater(len(self.real_anchors), 0, "sanity: real corpus is non-empty")
 
     def test_every_real_species_id_is_a_no_op_not_missing(self) -> None:
         real_ids = [a["speciesId"] for a in self.real_anchors]
