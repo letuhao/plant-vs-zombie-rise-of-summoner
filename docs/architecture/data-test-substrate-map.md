@@ -21,7 +21,60 @@ costs SSD writes. Spike-proven this session: ATTACH across memory DBs works; `Op
 shared memory fails; a process-wide `ClearAllPools` leaves an **open keeper** alive; reads are ~29×
 faster in memory.
 
-## 2. The modules
+## 2. The test inventory (scanned 2026-09-12, before the modules were fixed)
+
+Scanned every `tests/**/*.cs`. This is the evidence the spec must cover, not a guess.
+
+| Measure | Count |
+|---|---|
+| Test files touching substrate patterns | **384** |
+| Files that construct `RpgStore` | **196** / **210** sites |
+| Files that create a temp dir (the leak surface) | **230** |
+| — in the four approved test projects | **209** (Data 134, Server 55, Core 17, E2E 3) |
+| — **outside** the boundary (Guard 9, Launcher 9, AtomImporter 3) | **21** |
+| `Directory.Delete` sites with an empty `catch { }` | **153 of 154** in Data.Tests |
+| `[Fact]`/`[Theory]` in scope | Data 1,249 · Server 399 · Core 8,292 · E2E 219 |
+
+### The four substrate classes (every store file lands in exactly one)
+
+| Class | Files | What they need | Substrate |
+|---|---|---|---|
+| **A — pure store** | **191** | SQL round-trips, constraints, upserts, watermarks. No assertion about a file. | memory |
+| **B — archive** | **2** (`ColdArchiveCompactionTests`, `StoragePurgeTests`) | archive `*.sqlite` slices written, listed, verified, trimmed; purge deletes real files | memory-capable, but needs module 5's abstraction |
+| **C — temp-only, no store** | **35** | subprocess fixtures, guard probes, seed-file writes | mostly stays file (see below) |
+| **D — file-semantics** | **3 smoke/legacy** | see the file-bound set | **file** |
+
+### The genuinely file-bound set — **five** files, not one
+
+The scan found two the ideal under-counted, because they assert file/WAL behaviour directly:
+
+| File | What it asserts that only a file can |
+|---|---|
+| `LegacyMonoMigratorTests` | reads a real `rpg.sqlite`; asserts a **disk backup sidecar** |
+| `RpgStoreDalSmokeTests` | **`AssertWal`**: `PRAGMA journal_mode` returns `'wal'`; `File.Exists(HotPath/MediaPath)` |
+| `RpgStoreSmokeTests` | `File.Exists(HotPath/MediaPath)`; legacy-hot-present no-op |
+| `ColdArchiveCompactionTests` | archive slices on disk (`File.Exists`, `EnumerateFiles`) |
+| `StoragePurgeTests` | purge deletes real archive files; path-escape guard |
+
+**This is why the inventory step matters.** The smoke tests assert WAL mode and file existence —
+behaviour an in-memory DB cannot reproduce (`journal_mode` degrades to `memory`, proven). They are
+**not** in the ideal's original "~5–8" guess by accident; they are exactly the class the spec must
+**exclude from memory on purpose** and name, rather than migrate and break.
+
+### What the scan corrects in this map
+
+1. **The in-scope store surface is 209 temp-creating files, not "~210 sites" loosely.** Module 3's
+   real count is **A (191) + B (2) + D (3) = 196 files**, over 209 temp creators.
+2. **`archive` is 2 files, not "a tail"** — but its `src` cost is unchanged (four writers + purge).
+3. **21 temp-dir creators sit outside the approved boundary** (Guard 9, Launcher 9, AtomImporter 3).
+   They leak too. Whether they are in this program is an **owner scope question** (module 7 below).
+4. **A 6th substrate class exists that the ideal missed: C-temp-only (35 files).** They are not
+   store tests; most write a *fixture* or drive a subprocess. They should **not** move to the store
+   helper — a different (smaller) concern.
+
+---
+
+## 3. The modules
 
 | # | Module id | Responsibility | Depends on |
 |---|---|---|---|
@@ -64,13 +117,22 @@ memory-storage-plan
 
 **Why this order.** Module 1 is the whole unlock and is independently verifiable (an in-memory store
 round-trips SQL). Module 2 makes disposal leak-proof *before* any test migrates, so the migration
-cannot re-introduce a leak. Data.Tests alone (145 of 210 sites) is the proving ground — if the shape
-is wrong it is found against the smallest blast radius. The probe lands **before** the remaining
-projects migrate, so the rest is guarded as it moves. `archive-target` is sequenced after the probe
-so it cannot delay the bulk win; `substrate-standard` is last because it documents a shape that must
-already exist and be enforced.
+cannot re-introduce a leak. Data.Tests alone (134 temp creators, 145 store sites) is the proving
+ground — if the shape is wrong it is found against the smallest blast radius. The probe lands
+**before** the remaining projects migrate, so the rest is guarded as it moves. `archive-target` is
+sequenced after the probe so it cannot delay the bulk win; `substrate-standard` is last because it
+documents a shape that must already exist and be enforced.
 
-## 3. What the program deliberately does not do
+### The file-bound exclusion is part of module 3, not a failure
+
+Module 3 must **not** migrate the five file-bound files to memory. It must move them onto the
+helper's `CreateFileBacked()` path, which fixes their leak (clear pools → delete, failure not
+swallowed) *without* changing what they assert. `RpgStoreDalSmokeTests`'s `AssertWal` and the two
+`File.Exists` smoke assertions are **real coverage of the production file substrate**; converting
+them to memory would delete that coverage. The spec states this explicitly so a future session does
+not "finish the migration" by breaking them.
+
+## 4. What the program deliberately does not do
 
 | Excluded | Why |
 |---|---|
@@ -81,8 +143,21 @@ already exist and be enforced.
 | One shared in-memory DB wiped between tests | xUnit runs in parallel; a shared DB is cross-test interference. |
 | Re-tune CI runtime in this program | Orthogonal (e.g. `ZombossAdaptiveStoreTests` 30× `Init()`); a separate concern. |
 | Change production server storage | `RpgStore(dataDir)` and `FUSIONRPG_DATA` stay file-backed. |
+| Migrate the 35 temp-only (class C) files | They are not store tests; most write a fixture or drive a subprocess. A different, smaller concern. |
+| Migrate the 5 file-bound files to memory | `AssertWal` / `File.Exists` / legacy sidecar are real coverage of the production file substrate. They get the leak-proof file helper, not memory. |
 
-## 4. Amendments this program owes before it builds
+### Scope question the scan surfaced (owner decision)
+
+**21 temp-dir creators leak outside this program's boundary** — `FusionRpg.Guard.Tests` (9),
+`FusionRpg.Launcher.Tests` (9), `FusionRpg.AtomImporter.Tests` (3). They create temp dirs and swallow
+deletes, so they leak on every run exactly like the store tests did. They are not in the six modules
+because they are not SQL-store tests, and three of them are **outside the approved test paths**
+(Guard/Launcher/AtomImporter). Options: (a) leave them to a later program, (b) widen this program's
+`paths` and add a 7th module `non-store-temp-cleanup`, or (c) apply only the shared leak-proof
+delete helper (no memory) to them. The scan is why this is visible now instead of after the store
+work ships.
+
+## 5. Amendments this program owes before it builds
 
 Listed so they are not discovered mid-task. All are reviewed changes to documents that win over a spec.
 
@@ -92,7 +167,7 @@ Listed so they are not discovered mid-task. All are reviewed changes to document
 | [data-architecture.md](data-architecture.md) §1/§6 | State that `RpgStore` has a storage plan; that the DAL boundary is unchanged (all SQL still in Data); and that a shared-cache memory DB cannot be opened read-only | `substrate-standard` |
 | [contributing/session-boundary.md](contributing/session-boundary.md) | None. Noted only because the drift checker currently reports a `tasks/sessions/**` glob overlap between this record and `session-boundary-standard-20260912-a3f2` — see Handoff | — |
 
-## 5. Related
+## 6. Related
 
 - Ideal: [data-test-substrate-ideal.md](data-test-substrate-ideal.md) — spike-audited, rev 2
 - The DAL law: [data-architecture.md](data-architecture.md) §6 · `scripts/guard-dal.ps1`
