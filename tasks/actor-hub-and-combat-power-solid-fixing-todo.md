@@ -3,7 +3,7 @@
 **Plan:** [actor-hub-and-combat-power-solid-fixing-plan.md](actor-hub-and-combat-power-solid-fixing-plan.md)  
 **Map:** [docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md](../docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md)  
 **Runbook / evidence:** [runbook](actor-hub-and-combat-power-solid-fixing-runbook.md) · [evidence map](actor-hub-and-combat-power-solid-fixing-evidence-map.md) · command `/solid-run`  
-**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 + Wave 2 complete (T1-T11 done). Wave 3: T12 BLOCKED (honest gap — depends on `aptitude-sheet` program's unbuilt `unique-lawn-wire`, out of this program's own implementation scope per its own spec's locked boundary); T13 done; T14 deferred (depends on T12). Wave 4 in progress: T15-T16 done; T17-T19 next.
+**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 + Wave 2 complete (T1-T11 done). Wave 3: T12 BLOCKED (honest gap — depends on `aptitude-sheet` program's unbuilt `unique-lawn-wire`, out of this program's own implementation scope per its own spec's locked boundary); T13 done; T14 deferred (depends on T12). Wave 4 in progress: T15-T16 done; T17 closed (honest negative — no real per-instance Θ exists; one real dead-fallback bug fixed); T18-T19 next.
 
 ---
 
@@ -433,14 +433,16 @@
 **Spec:** `unique-theta-wire`  
 **Description:** Expose real `theta` on unique aptitude/GET when known; chip shows `Θ` only from wire — never invent from specimenLevel.
 
+**Status note:** Investigated in full; "expose real theta" is an **honest negative, not forced** — no genuine per-`UniqueActor`-instance Θ exists anywhere (the only real provider Θ is player-account-scoped; a per-specimen `Θ_actor` is a named, deliberately-deferred gap owned by `delve-battle-profile`/`power-index`, not this task). Exposing the account value under a specimen's name would trade one fabrication for another. See evidence 17.1.
+
 **Acceptance criteria:**
-- [ ] Unique wire carries real theta when known.
-- [ ] Chip shows `Θ` only from wire.
-- [ ] No `theta ?? specimenLevel` on aptitude scope path.
+- [ ] Unique wire carries real theta when known. — honestly not possible today; no such value exists (evidence 17.1)
+- [x] Chip shows `Θ` only from wire. — already true (T10); no code path shows a ladder-index glyph without one
+- [x] No `theta ?? specimenLevel` on aptitude scope path. — real defect found and fixed: `AptitudesTab.tsx:119` still had this exact pattern (a permanent no-op, since `theta` is never populated); removed
 
 **Verification:**
-- [ ] Server filter `Aptitude|UniqueActor|Theta`
-- [ ] `npm test -- --run foldAptitudesSurfaceVm`
+- [x] Server filter `Aptitude|UniqueActor|Theta` — no server change made (nothing real to add); confirmed via investigation, not skipped
+- [x] `npm test -- --run foldAptitudesSurfaceVm` — 5/5, plus `AptitudesTab`/`AptitudesPage` 14/14 total
 
 **Dependencies:** T10  
 **Files likely touched:** Aptitude endpoints, DTO, FE fold  

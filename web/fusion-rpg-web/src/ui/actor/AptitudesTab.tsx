@@ -116,13 +116,19 @@ export function AptitudesTab({
     );
   }
 
-  const theta = unique.data.theta ?? unique.data.specimenLevel;
+  // unique-theta-wire (T17): no genuine per-instance Θ exists to prefer here -- unique GET never
+  // populates `theta` (confirmed: the only real, provider-computed Θ is player-account-scoped,
+  // ServerPowerIndexProvider.ActorIndex reads only ctx.PlayerId; a composed per-specimen Θ_actor is
+  // a separate, deliberately-deferred architecture gap, ActorThetaSeam/BattleModels.ThetaActor,
+  // "shape-only," unwired). `unique.data.theta ?? unique.data.specimenLevel` was therefore always a
+  // no-op fallback dressed up as a preference -- exactly the fabrication shape chip-honesty (T10)
+  // banned, even though it never changed the rendered value. specimenLevel is the only honest input.
   return (
     <AptitudesConsoleHost
       mode="unique"
       surface={surface}
       budget={unique.data.budget}
-      theta={theta}
+      theta={unique.data.specimenLevel}
       serverShares={unique.data.shares}
       commanderAddOn="Commander contribution is read-only on the lawn"
       playerId={playerId}
