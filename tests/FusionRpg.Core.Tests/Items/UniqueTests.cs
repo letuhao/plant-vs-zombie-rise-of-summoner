@@ -613,13 +613,14 @@ public class UniqueTests
     /// assumed, because the lane doc still says otherwise and a builder reading only the lane would
     /// author around a wall that is gone.
     ///
-    /// <para>Sim moved too, mechanism-wiring E5 (2026-09-06): `None → Partial`, not `Full` — the fold
-    /// (`ActorDerivedLookup`) honours `Flat`/`Increased` and not `Replace`/`Flag`
-    /// (`EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial`). Renamed from
-    /// `..._is_still_refused_for_sim`, which is no longer true.</para>
+    /// <para>Sim moved too: mechanism-wiring E5 (2026-09-06) opened `None → Partial` — the fold
+    /// (`ActorDerivedLookup`) honoured `Flat`/`Increased` and not `Replace`/`Flag`
+    /// (`EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial`) — then sim-hub-parity
+    /// (T15, 2026-09-13) closed the gap to `Full`. Renamed from `..._is_still_refused_for_sim`, then
+    /// from `..._and_partially_in_sim`, neither of which stayed true.</para>
     /// </summary>
     [Fact]
-    public void A_stat_derived_identity_atom_binds_on_lawn_and_battle_and_partially_in_sim()
+    public void A_stat_derived_identity_atom_binds_fully_on_lawn_battle_and_sim()
     {
         var derived = AtomKindRegistry.Get("stat.derived");
         Assert.NotNull(derived);
@@ -627,9 +628,10 @@ public class UniqueTests
         Assert.Equal(RuntimeState.Full, derived.SupportIn(RuntimeId.Battle));
 
         // Sim opened to Partial (mechanism-wiring E5, 2026-09-06) once ActorDerivedLookup's
-        // contribution fold gave it a real, if partial, consumer -- Full is reachable only by routing
-        // that fold through the real DerivedComposer rather than a plain OverlayAdd sum.
-        Assert.Equal(RuntimeState.Partial, derived.SupportIn(RuntimeId.Sim));
+        // contribution fold gave it a real, if partial, consumer, then to Full (sim-hub-parity, T15,
+        // 2026-09-13) once that fold routed through the real DerivedComposer instead of a plain
+        // OverlayAdd sum.
+        Assert.Equal(RuntimeState.Full, derived.SupportIn(RuntimeId.Sim));
     }
 
     /// <summary>

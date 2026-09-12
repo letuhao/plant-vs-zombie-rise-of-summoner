@@ -171,15 +171,18 @@ public class EquipRuntimeTests
     public void Sim_runtime_opens_partially_and_the_spec_says_why()
     {
         // mechanism-wiring E5 (2026-09-06): SimEffectHost gained a real consumer -- ActorDerivedLookup's
-        // contribution fold, reached via SimEffectHost/FoundationHarness.ContributeDerived. `Partial`,
-        // not `Full`: the fold is a plain sum (ActorDerivedSnapshot.OverlayAdd) that honours
-        // Flat/Increased and not Replace/Flag (EffectOfflineKitTests.
-        // The_four_derived_ops_decide_Full_versus_Partial). `tools/CombatSim` (which drives
-        // FoundationHarness, not this class) can therefore simulate an item's Flat/Increased channels
-        // today; a Replace/Flag-authored item still composes wrong there until the fold routes through
-        // the real DerivedComposer. Renamed from "..._stays_None_...", which is no longer true.
+        // contribution fold, reached via SimEffectHost/FoundationHarness.ContributeDerived. Opened
+        // `Partial`, not `Full`, at first: the fold was a plain sum (ActorDerivedSnapshot.OverlayAdd)
+        // that honoured Flat/Increased and not Replace/Flag (EffectOfflineKitTests.
+        // The_four_derived_ops_decide_Full_versus_Partial). sim-hub-parity (T15, 2026-09-13) closed that
+        // gap: the fold now routes through DerivedComposer.ComposeChannelWithBaseline, the SAME op-aware
+        // fold every other runtime uses, so `tools/CombatSim` (which drives FoundationHarness, not this
+        // class) can now simulate ANY op an item authors, not just Flat/Increased. Method name kept
+        // (renamed from "..._stays_None_..." once already; this is its second history note, not a
+        // second rename) to avoid drifting two out-of-program doc references
+        // (item-todo.md, spec-equip-runtime.md) that cite it by name.
         var kind = AtomKindRegistry.Get("stat.derived")!;
-        Assert.Equal(RuntimeState.Partial, kind.SupportIn(RuntimeId.Sim));
+        Assert.Equal(RuntimeState.Full, kind.SupportIn(RuntimeId.Sim));
         Assert.Equal(RuntimeState.Full, kind.SupportIn(RuntimeId.Battle));
         Assert.Equal(RuntimeState.Full, kind.SupportIn(RuntimeId.Lawn));
     }

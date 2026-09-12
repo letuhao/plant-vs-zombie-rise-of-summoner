@@ -43,7 +43,7 @@ From `the-loops.md` / `the-game.md`: Rise of Summoner is **RPG + empire building
 | ActorHub lawn/sheet compose | `ActorHub.Resolve` / Server `UniqueActorHubCompose` | Sole Hot end-state |
 | BattleStatComposer production | `BattleEngine.cs:38` · header debt comment | **Grandfathered dual compose** — Wave 1 fuse retires |
 | ProveAptitude dual-engine | `tools/ProveAptitude/Program.cs` | Flip to Hub-only after fuse |
-| Server PassiveTreeTuningHub | `Program.cs` Configure | Server **Built**; Injector not |
+| Server PassiveTreeTuningHub | `Program.cs` Configure | Server **Built**; Injector never needs it (T13 fans the atoms over HTTP instead) |
 | Atom path for some equip EffectIds | `UniqueEquipmentCatalog.cs:62-69` | Real atom map beside stub Items — stubs **deleted** in W5+ |
 | PlaceholderBattle **tuning knobs** | `WorldTuning.cs` `PlaceholderBattleTuning` | Die with resolver deletion |
 | Sheet “stub” state label | `DerivedSheetChannelMeta` StateStub | Honest UI for unhydrated Θ — **not** a combat stub |
@@ -52,7 +52,7 @@ From `the-loops.md` / `the-game.md`: Rise of Summoner is **RPG + empire building
 
 | Gap | Evidence | Disposition |
 |---|---|---|
-| Injector PassiveTree never configured | `InjectorLoop` / `GateCounterHost` / `TreeBoundAtoms` | W3 `lawn-tree-hydrate` — finish |
+| ~~Injector PassiveTree never configured~~ | `TreeBoundAtoms.cs` doc comment, `TreeBoundAtomsCache.cs` | **CLOSED** (T13, 2026-09-13) — not by configuring `PassiveTreeTuningHub` in the Injector process (still Server-only, correctly), but by a thin HTTP fetch+cache (`GET /api/passive-tree/bound-atoms/{playerId}`) mirroring the aptitude cache's own shape |
 | TurnEngine / DistrictAssault → PlaceholderBattleResolver | `TurnEngine.cs:139` · `DistrictAssaultResolver` early returns | **W5+ delete stub**; world combat → **new program** (not this map’s Hub-fed assault) |
 | Intel `Strength(entity)` via placeholder | `IntelRecorder.cs:146` | **B4 drop** with stub delete; real weight → `world-actor-combat` |
 | Battle / Delve Θ aliased to Level | `BattleStatComposer` · `ActorThetaSeam` | **W5+ fold** (`unique-theta-wire` / related) — wire real Θ or delete alias fiction |
@@ -66,7 +66,7 @@ From `the-loops.md` / `the-game.md`: Rise of Summoner is **RPG + empire building
 | `PlaceholderBattleResolver` | **W5+ delete** — track **new world-combat program** |
 | Bound Writer abs | W3 `bound-loadout-hub` — finish SOLID |
 | ChannelMods / battle ignore-op / dual compose | W1 — finish SOLID |
-| Sim Partial vs Full | W4 `sim-hub-parity` — finish or delete Partial fiction per that spec |
+| ~~Sim Partial vs Full~~ | **CLOSED** (T15 `sim-hub-parity`, 2026-09-13) — `ActorDerivedLookup.Resolve` now folds per channel via `DerivedComposer.ComposeChannelWithBaseline`, the same op-aware fold every other runtime uses; `AtomKindRegistry`'s `stat.derived` Sim cell is `Full` |
 
 ---
 

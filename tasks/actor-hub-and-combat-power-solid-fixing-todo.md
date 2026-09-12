@@ -3,7 +3,7 @@
 **Plan:** [actor-hub-and-combat-power-solid-fixing-plan.md](actor-hub-and-combat-power-solid-fixing-plan.md)  
 **Map:** [docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md](../docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md)  
 **Runbook / evidence:** [runbook](actor-hub-and-combat-power-solid-fixing-runbook.md) · [evidence map](actor-hub-and-combat-power-solid-fixing-evidence-map.md) · command `/solid-run`  
-**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 + Wave 2 complete (T1-T11 done). Wave 3: T12 BLOCKED (honest gap — depends on `aptitude-sheet` program's unbuilt `unique-lawn-wire`, out of this program's own implementation scope per its own spec's locked boundary); T13 done; T14 deferred (depends on T12). Continuing to Wave 4 (T15-T19), which do not depend on T12/T14.
+**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 + Wave 2 complete (T1-T11 done). Wave 3: T12 BLOCKED (honest gap — depends on `aptitude-sheet` program's unbuilt `unique-lawn-wire`, out of this program's own implementation scope per its own spec's locked boundary); T13 done; T14 deferred (depends on T12). Wave 4 in progress: T15 done; T16-T19 next.
 
 ---
 
@@ -391,12 +391,12 @@
 **Description:** Retire Named Partial ignore-op for combat `stat.derived` in sim; match Hub op semantics.
 
 **Acceptance criteria:**
-- [ ] Sim combat equip ops match Hub semantics.
-- [ ] Named Partial for combat `stat.derived` retired or narrowly exempted with comment.
-- [ ] Ideal place matrix Sim row updated.
+- [x] Sim combat equip ops match Hub semantics.
+- [x] Named Partial for combat `stat.derived` retired or narrowly exempted with comment. (Retired to Full; the one narrow structural exemption — `BoundDerivedAtom` has no Priority field — is the SAME limit the Full-rated lawn path already lives with, not a Sim-only weaker one.)
+- [x] Ideal place matrix Sim row updated.
 
 **Verification:**
-- [ ] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~ActorDerived|SimEffect|AtomKind|Sim"`
+- [x] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~ActorDerived|SimEffect|AtomKind|Sim"` — 156/157 (the 1 pre-existing failure in that filter, `AtomKindRegistryTests.Battle_support_is_narrow_and_honest`, was itself a stale Partial assertion, fixed in place; see evidence 15.4 for the full name-by-name confirmation)
 
 **Dependencies:** T6  
 **Files likely touched:** `ActorDerivedProfiles.cs`, `AtomKindRegistry`, sim host  

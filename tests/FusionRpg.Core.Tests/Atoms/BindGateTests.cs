@@ -156,10 +156,11 @@ public class BindGateTests
         //   battle  — E12 (2026-08-23), `BattleStatComposer` reads bound atoms at squad build
         //   lawn    — decisions.md "Derived-write lawn executor" (2026-08-30), `AtomDerivedSubsystem`
         //   sim     — mechanism-wiring E5 (2026-09-06), `ActorDerivedLookup`'s contribution fold —
-        //             Partial, not Full (the fold is a plain sum: Flat/Increased compose correctly,
-        //             Replace/Flag do not — EffectOfflineKitTests.
+        //             opened Partial (plain-sum fold, Replace/Flag silently wrong), sim-hub-parity
+        //             (T15, 2026-09-13) closed the gap to Full (op-aware fold via DerivedComposer.
+        //             ComposeChannelWithBaseline — EffectOfflineKitTests.
         //             The_four_derived_ops_decide_Full_versus_Partial). BindGate accepts Partial like
-        //             Full — it only rejects None outright and PlanOnly on a non-planner host.
+        //             Full either way — it only rejects None outright and PlanOnly on a non-planner host.
         var atom = Atom("stat.derived", "{\"channel\":\"combat.power.fire\",\"op\":\"flat\",\"amount\":5}");
 
         foreach (var runtime in new[] { RuntimeId.Battle, RuntimeId.Lawn, RuntimeId.Sim })
