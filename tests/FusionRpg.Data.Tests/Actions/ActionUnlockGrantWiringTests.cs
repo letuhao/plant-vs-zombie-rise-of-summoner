@@ -90,6 +90,7 @@ public class ActionUnlockGrantWiringTests : IDisposable
     /// <summary>Acceptance: "a level gain that crosses N thresholds in one award attempts N rolls,
     /// each pricing independently." Three distinct actions, `AlwaysAccepts`-shaped tuning (every roll
     /// succeeds) — a level gain crossing >= 3 thresholds must grant all three, not one.</summary>
+    [Trait("Category", "Heavy")]
     [Fact]
     public void ALevelGainCrossingMultipleThresholdsAttemptsOneRollPerLevelGained()
     {

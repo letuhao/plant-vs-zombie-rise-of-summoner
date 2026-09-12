@@ -8,6 +8,7 @@ using Xunit;
 
 namespace FusionRpg.Data.Tests;
 
+[Trait("Category", "DiskSemantics")]
 public class ColdArchiveCompactionTests : IDisposable
 {
     readonly string _dir;

@@ -97,6 +97,7 @@ public class ItemSetStoreTests : IDisposable
         return instanceId;
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void The_real_shipped_corpus_round_trips_through_the_three_tables()
     {
@@ -128,6 +129,7 @@ public class ItemSetStoreTests : IDisposable
             s => Assert.StartsWith("flavor.set.", s.FlavourKey!, StringComparison.Ordinal));
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void The_import_is_idempotent_and_replaces_rather_than_accumulating()
     {

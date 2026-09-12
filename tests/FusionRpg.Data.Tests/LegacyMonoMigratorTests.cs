@@ -5,6 +5,7 @@ using Xunit;
 
 namespace FusionRpg.Data.Tests;
 
+[Trait("Category", "DiskSemantics")]
 public class LegacyMonoMigratorTests
 {
     [Fact]

@@ -73,6 +73,7 @@ public class ActionStockSpendStoreTests : IDisposable
         Assert.Equal(0, _store.StockQty(Player, "consumable.k1-001")); // never negative
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void A_stack_the_player_has_never_held_refuses_rather_than_creating_a_row()
     {
@@ -82,6 +83,7 @@ public class ActionStockSpendStoreTests : IDisposable
         Assert.Equal(0, _store.StockQty(Player, "consumable.k9-999"));
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void A_partial_stack_refuses_whole_rather_than_taking_what_is_there()
     {

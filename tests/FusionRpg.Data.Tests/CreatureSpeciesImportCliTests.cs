@@ -23,6 +23,7 @@ namespace FusionRpg.Data.Tests;
 /// anyway, so the retry was dead code). It remains a separate process with its own statics and
 /// composition root — the cold-process property this test exists for is unchanged.</para>
 /// </summary>
+[Trait("Category", "DiskSemantics")]
 public class CreatureSpeciesImportCliTests : IDisposable
 {
     readonly string _dbDir;

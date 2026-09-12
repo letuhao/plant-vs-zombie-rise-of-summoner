@@ -391,6 +391,7 @@ public class AtomImportTests : IDisposable
 
     // ---- files on disk ---------------------------------------------------------------------------------
 
+    [Trait("Category", "DiskSemantics")]
     [Fact]
     public void A_seed_tree_on_disk_imports_end_to_end()
     {

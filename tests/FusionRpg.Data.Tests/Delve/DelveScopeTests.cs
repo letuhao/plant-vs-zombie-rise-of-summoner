@@ -85,6 +85,7 @@ public class DelveScopeTests : IDisposable
     // Profiles (Core, exercised through the real registries).
     // -----------------------------------------------------------------------------------------
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void A_rolled_delve_graph_validates_under_the_delve_profile()
     {
@@ -101,6 +102,7 @@ public class DelveScopeTests : IDisposable
         Assert.Contains("unknown sector type", ex.Message);
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void FirstLight_under_the_delve_profile_refuses_rule_1_the_other_way()
     {

@@ -6,6 +6,7 @@ using Xunit;
 
 namespace FusionRpg.Data.Tests;
 
+[Trait("Category", "DiskSemantics")]
 public class StoragePurgeTests : IDisposable
 {
     readonly string _dir;

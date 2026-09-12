@@ -82,6 +82,7 @@ public class ContentHashStoreTests : IDisposable
         Assert.Equal(Hash(a), Hash(b));
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void Insert_order_does_not_change_the_hash()
     {
@@ -105,6 +106,7 @@ public class ContentHashStoreTests : IDisposable
         Assert.Equal(Hash(s), Hash(s));
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void An_empty_catalog_is_a_specific_recognisable_hash_not_an_accident()
     {
@@ -208,6 +210,7 @@ public class ContentHashStoreTests : IDisposable
         Assert.Equal(before, Hash(s));
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void One_magnitude_changed_by_one_moves_the_hash()
     {
@@ -234,6 +237,7 @@ public class ContentHashStoreTests : IDisposable
         Assert.NotEqual(before, Hash(s));
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void A_container_edit_moves_the_hash()
     {

@@ -12,6 +12,7 @@ namespace FusionRpg.Data.Tests;
 /// ASP.NET host, since the routine itself (not the one line of DI wiring around it) is where the
 /// decision logic lives.
 /// </summary>
+[Trait("Category", "DiskSemantics")]
 public class SeedImportRunnerTests : IDisposable
 {
     readonly DataTestStore _testStore;

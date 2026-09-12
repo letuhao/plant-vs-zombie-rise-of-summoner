@@ -25,6 +25,7 @@ public class TreeStateVolumeTests : IDisposable
         _testStore.Dispose();
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void Two_thousand_actors_times_forty_nodes_stores_exactly_eighty_thousand_rows()
     {

@@ -8,6 +8,7 @@ using Xunit;
 
 namespace FusionRpg.Data.Tests;
 
+[Trait("Category", "DiskSemantics")]
 public class RpgStoreDalSmokeTests : IDisposable
 {
     readonly string _dir;

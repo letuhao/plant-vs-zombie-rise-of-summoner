@@ -15,6 +15,7 @@ namespace FusionRpg.Data.Tests;
 /// concurrent session's own in-progress work as of this writing — this file's own fixtures are fully
 /// isolated from that).
 /// </summary>
+[Trait("Category", "DiskSemantics")]
 public class PassiveTreeImportRunnerTests : IDisposable
 {
     readonly DataTestStore _testStore;
