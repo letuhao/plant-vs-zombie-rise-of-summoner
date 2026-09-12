@@ -9,7 +9,7 @@
 
 ## In one sentence
 
-The **altar** is where you spend **souls** to pull new demons into the roster — pity is shown so you always know how close the next strong pull is.
+The **altar** is where you spend **souls** to pull new creatures into the roster — pity is shown so you always know how close the next strong pull is.
 
 ---
 
@@ -19,10 +19,10 @@ These words get guessed wrong. Read them once before the rest of the page.
 
 | Word | What it actually means here |
 |---|---|
-| **Altar** | The summon surface in the control room (Summon / Demons). Not a lawn plant, not a world-map building. |
+| **Altar** | The summon surface in the control room (Summon / Creatures). Not a lawn plant, not a world-map building. |
 | **Pull** | One spend of souls that adds a specimen. Costs are on screen — this guide does not invent numbers. |
 | **Pity** | Progress toward a stronger result. Shown on the altar so the bank does not feel like a black box. |
-| **Gacha** | Random pulls for new demons. One intake path — [wild joins](wild-joins.md) and capture are others. |
+| **Gacha** | Random pulls for new creatures. One intake path — [wild joins](wild-joins.md) and capture are others. |
 
 **Also true:**
 
@@ -54,7 +54,7 @@ You watch pity climb so strong pulls are readable, not hidden.
 
 ## What the altar is not
 
-It is not the only way to get demons.
+It is not the only way to get creatures.
 
 It is not Fusion (`F`) — fusion merges specimens you already have.
 
@@ -63,7 +63,7 @@ It is not Fusion (`F`) — fusion merges specimens you already have.
 ## What you do (first time)
 
 1. Check souls on the HUD after a lawn match or other play.
-2. Open Summon / Demons and read the pity and cost on screen.
+2. Open Summon / Creatures and read the pity and cost on screen.
 3. Pull once when you can afford it, then open Creatures (`C`) to meet the new specimen.
 
 > Stop when altar ≠ fusion is clear. Bind next: [pacts and loyalty](pacts-loyalty.md).

@@ -35,7 +35,7 @@ public static class EncounterTuningLoader
 {
     const string File = "encounter.v1.json";
 
-    /// <summary>demon-threat.v1.json's own ten rung ids (:3-14) — a different vocabulary from the
+    /// <summary>creature-threat.v1.json's own ten rung ids (:3-14) — a different vocabulary from the
     /// dungeon difficulty rungs; threatWindow.bossFloorRung picks from this list, never the other.</summary>
     static readonly string[] ThreatRungIds =
     {
@@ -61,7 +61,7 @@ public static class EncounterTuningLoader
         var threatWindowEl = Obj(root, "threatWindow", "$");
         var bossFloorRung = Str(threatWindowEl, "bossFloorRung", "threatWindow");
         if (!ThreatRungIds.Contains(bossFloorRung, StringComparer.Ordinal))
-            throw new EncounterTuningRejection($"{File}: threatWindow.bossFloorRung '{bossFloorRung}' is not one of demon-threat.v1.json's ten rung ids.");
+            throw new EncounterTuningRejection($"{File}: threatWindow.bossFloorRung '{bossFloorRung}' is not one of creature-threat.v1.json's ten rung ids.");
 
         var spreadEl = Obj(root, "spread", "$");
         var spread = new Dictionary<string, long>(StringComparer.Ordinal);

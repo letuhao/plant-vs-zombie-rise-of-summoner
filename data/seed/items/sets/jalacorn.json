@@ -25,7 +25,7 @@
       "id": "set.jalacorn-001",
       "nameKey": "set.boiling-kernel-launcher",
       "name": "Boiling Kernel Launcher",
-      "themeKey": "demon.jalacorn",
+      "themeKey": "creature.jalacorn",
       "members": [
         {
           "role": "armament-primary",

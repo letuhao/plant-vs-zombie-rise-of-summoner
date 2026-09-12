@@ -6,7 +6,7 @@ Module id `battle-death-attribution-events` in the [battle-timeline capability m
 
 ## Objective
 
-Attach authoritative killer identity to existing `plant.die` and `zombie.die` report events produced by server-owned battles. This gives web and standalone battles a deterministic source for unique-demon kill rewards without asking the injector to infer or capture a deferred Unity death.
+Attach authoritative killer identity to existing `plant.die` and `zombie.die` report events produced by server-owned battles. This gives web and standalone battles a deterministic source for unique-creature kill rewards without asking the injector to infer or capture a deferred Unity death.
 
 Success means that a lethal interaction resolved by `BattleEngine` carries the attacker's stable actor key through `BattleEventRec` and the existing `BattleReportEmitter` maps it to the report's synthetic `web:{matchKey}:{n}` pointer. Attackerless deaths remain explicitly unattributed.
 
@@ -18,7 +18,7 @@ engine/emitter tests cover the identity and pointer mapping.
 
 1. `BattleEngine` is authoritative only for server-owned web, expedition, and other standalone battles.
 2. Live PvZ lawn runs remain Unity-authoritative for HP and lifetime. Their captured `plant.die`/`zombie.die` event is not replaced or duplicated by this module.
-3. Unique-demon XP settlement consumes an attributed report event through the existing receipt transaction; this module does not add a second XP ledger or a new progression curve.
+3. Unique-creature XP settlement consumes an attributed report event through the existing receipt transaction; this module does not add a second XP ledger or a new progression curve.
 4. The existing event kinds remain the vocabulary. `killerPtr` is an additive payload field, not a new event kind.
 
 ## Contract

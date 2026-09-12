@@ -17,7 +17,7 @@ filename** — read this table.
 | `squad-harness` | Six-vs-wave balance measurement. Answers D33's scope mismatch: every existing number is a 1v1 duel, the game fields six | — |
 | `mechanism-wiring` | The four inert lines that make mechanism nodes executable and *scorable*. §3.5 proved these are the only node class that rescues a focus build | — |
 | `tree-plan` | Stage 1, deterministic. Topology (10 tiers × 2 branches, 40 nodes, **rootless**), tier ladder, budgets, shape archetypes, potency ceiling (**182‰ of one branch**, derived — corrected 2026-09-05, R5; the retired 91‰-of-total form silently double-counted), the property vocabulary, and the plan schema handed downstream | — |
-| `gate-counters` | **Added 2026-09-05 (D37), shipped 2026-09-06 (G6).** The two gate quantities that did not exist: `status_applied.<id>` (owned by nobody) and `element_mastery` (owned by a module the demon program never scheduled). Counters, their persistence, and the `PointBudget` binding. **Both now `carrier` — R-G1's own block is cleared; `passive-tree-todo.md` J1 tracks the separate plan-emission-CLI gap that still blocks 30 of 42 trees (D51: was 27 of 39), 1,200 nodes (was 1,080)** | — |
+| `gate-counters` | **Added 2026-09-05 (D37), shipped 2026-09-06 (G6).** The two gate quantities that did not exist: `status_applied.<id>` (owned by nobody) and `element_mastery` (owned by a module the creature program never scheduled). Counters, their persistence, and the `PointBudget` binding. **Both now `carrier` — R-G1's own block is cleared; `passive-tree-todo.md` J1 tracks the separate plan-emission-CLI gap that still blocks 30 of 42 trees (D51: was 27 of 39), 1,200 nodes (was 1,080)** | — |
 | `tree-catalog` | The baked artifact. Node record shape, id stability, catalog versioning, the freeze line, the load path | `tree-plan` |
 | `tree-language` | Stage 2. What the language stage may choose, from which closed vocabularies, under which quotas, behind which validation gates | `tree-plan` |
 | `tree-binder` | Stage 3, deterministic. Budget share → stored coefficient, atom composition, channel legality, conversion refusal | `tree-plan`, `tree-language`, `tree-catalog` |
@@ -63,7 +63,7 @@ both directions:**
 So: **run A10a now, gate `tree-language --write` on it, and treat A10b as a separate item with an unowned prerequisite.**
 
 **A tree's gate quantity must exist before that tree's content is generated** (§13.4). Today only
-the 12 primary trees have one. `element_mastery` belongs to the demon program's `aspect-scope`
+the 12 primary trees have one. `element_mastery` belongs to the creature program's `aspect-scope`
 module; `status_applied` belongs to nobody yet. Generating the elemental and status corpus first
 buys **1,080 nodes at tier 0**.
 

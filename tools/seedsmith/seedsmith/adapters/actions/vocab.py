@@ -160,7 +160,7 @@ def load_family_map_keys() -> "frozenset[str]":
     checkout where A-S0 has not yet run degrades to "nothing known" rather than raising — but as of
     2026-09-11 the file is live: 904 species over 227 family ids. ⛔ **RE-MEASURED 2026-09-11:** this
     docstring previously said "53 species over 19 family ids, matching the spec's measured numbers",
-    which was the legacy `DemonSpeciesCatalog.Generated.cs` projection. A species may now map to more
+    which was the legacy `CreatureSpeciesCatalog.Generated.cs` projection. A species may now map to more
     than one family (626 one, 277 two, 1 three), so the value is a LIST, never a scalar."""
     path = REPO_ROOT / "data" / "seed" / "actions" / "_generated" / "family-map.json"
     if not path.is_file():
@@ -176,7 +176,7 @@ def load_family_map_keys() -> "frozenset[str]":
     # Keep previously committed family-scoped action rows loadable while the live
     # seed roster evolves its family vocabulary. This compatibility registry is
     # seed data, never a runtime or SQLite projection.
-    registry_path = REPO_ROOT / "data" / "seed" / "demons" / "_registry" / "families.v1.json"
+    registry_path = REPO_ROOT / "data" / "seed" / "creatures" / "_registry" / "families.v1.json"
     if registry_path.is_file():
         registry = _load_json(registry_path)
         family_ids.update(str(family_id) for family_id in (registry.get("families") or {}).keys())

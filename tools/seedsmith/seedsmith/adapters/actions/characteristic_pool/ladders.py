@@ -1,7 +1,7 @@
 """Closed vocabularies transcribed from C#, in one leaf module so nothing can drift apart.
 
 **Why a leaf module.** These constants are transcriptions of C# enums/arrays that have no JSON
-export, so they are "code, not data" (the same discipline `adapters/demons/registries.py` states for
+export, so they are "code, not data" (the same discipline `adapters/creatures/registries.py` states for
 itself). Two callers need them — `catalog.py` (the roster loader) and `curation.py` (the trait
 bridge). `catalog.py` imports `curation.py` for `curated_traits`, so `curation.py` importing
 `catalog.py` back would be a cycle. A leaf module both import from breaks the cycle **and** removes
@@ -18,7 +18,7 @@ __all__ = [
     "RARITY_LADDER", "RARITY_ORDINAL", "TRAIT_POOL", "COMBAT_TRAITS", "PERSONALITY_TRAITS",
 ]
 
-# `DemonRarityIds.ToId` — src/FusionRpg.Core/Demons/DemonRarity.cs:16-27 (enum declaration order,
+# `CreatureRarityIds.ToId` — src/FusionRpg.Core/Creatures/CreatureRarity.cs:16-27 (enum declaration order,
 # which the C# enum makes the ordinal — never re-derive an ordinal by sorting strings).
 RARITY_LADDER: "tuple[str, ...]" = (
     "chaff", "sprout", "grafted", "cultivated", "fused",
@@ -26,7 +26,7 @@ RARITY_LADDER: "tuple[str, ...]" = (
 )
 RARITY_ORDINAL = {rid: i for i, rid in enumerate(RARITY_LADDER)}
 
-# `DemonTraitCatalog.All` — src/FusionRpg.Core/Demons/DemonTraitCatalog.cs:11-30. The closed
+# `CreatureTraitCatalog.All` — src/FusionRpg.Core/Creatures/CreatureTraitCatalog.cs:11-30. The closed
 # 14-member trait pool (spec §3 step 4's own citation), never re-derived from a species scan, so a
 # species whose `TraitPool` happens to omit one this run does not silently shrink the vocabulary.
 TRAIT_POOL: "tuple[str, ...]" = (
@@ -34,8 +34,8 @@ TRAIT_POOL: "tuple[str, ...]" = (
     "loyal", "greedy", "bloodthirsty", "coward", "genius", "void-touched", "chaos-marked",
 )
 
-# `DemonTraitPoolCuration.Combat` / `.Personality` — the two closed sub-pools its FNV fallback picks
-# from, in their declared order (`DemonTraitPoolCuration.cs:28-31`). Order is load-bearing: the
+# `CreatureTraitPoolCuration.Combat` / `.Personality` — the two closed sub-pools its FNV fallback picks
+# from, in their declared order (`CreatureTraitPoolCuration.cs:28-31`). Order is load-bearing: the
 # fallback's `% Length` picks depend on it.
 COMBAT_TRAITS: "tuple[str, ...]" = (
     "berserker", "regenerator", "soul-eater", "critical-hunter", "guardian", "swift",

@@ -13,7 +13,7 @@ export function EmptyState({
   /** GG-17 ("empty states teach and offer the next action"): an optional CTA — typically a
    * `<Button>` — rendered under the hint. No existing caller passes this yet, so it stays a
    * no-op for them; it exists for the first case that needs a real, clickable next step rather
-   * than text alone (G4: Pacts' "bind a demon's contract from the Demons roster" hint). */
+   * than text alone (G4: Pacts' "bind a creature's contract from the Creatures roster" hint). */
   action?: ReactNode;
   className?: string;
   testId?: string;

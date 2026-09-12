@@ -49,7 +49,7 @@ npm test -- --run AptitudesLayer
 | Action | Duty |
 |---|---|
 | Open from Pacts with `speciesId` | Mode B console |
-| Adjust draft | Within DemonType budget |
+| Adjust draft | Within CreatureType budget |
 | Confirm | `allocate-decision-strip` → respec (or free first-override) with price shown in **`species-build-chrome`** — **no band-3 ConfirmDialog** (S2/GG-63) |
 | Cancel | Discard draft (`aptitude.reset`); fiction **Cancel** (S8) |
 | Free first-override / free revert | Still go through Confirm/Cancel; price chip shows **Free** — no silent parallel Save POST |
@@ -79,7 +79,7 @@ Commander tab inside AptitudesLayer = Mode C (same recipe) — A4 collapse.
   decision-strip Confirm (S2).
 - **Ask first:** New empire nav door beyond Pacts layer.
 - **Never:** `POST /api/aptitudes/species/allocate`; edit species from UniqueActor sheet;
-  Hub UniqueDemon fill from favour; ConfirmDialog for draft Confirm; split Activate client sequence.
+  Hub UniqueCreature fill from favour; ConfirmDialog for draft Confirm; split Activate client sequence.
 
 ---
 

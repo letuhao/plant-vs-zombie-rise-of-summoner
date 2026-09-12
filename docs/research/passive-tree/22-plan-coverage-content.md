@@ -138,7 +138,7 @@ Delivering tasks: **D3** (the 20-tree pilot), **D5** (the tree card), **F4** (th
 - **Escalation.** §6.2's five rungs are the mechanism that turns a reviewer's *"no"* into an action —
   node reject (~3 calls), tree reject (120 calls), cell reject in the plan, batch reject → reprompt,
   owner escalation. §6.3's acceptance numbers decide which rung fires. Checkpoint F's bullet
-  *"escalations resolved"* assumes all of it. **Rung 4 is not hypothetical — the demon corpus took it
+  *"escalations resolved"* assumes all of it. **Rung 4 is not hypothetical — the creature corpus took it
   three times** (`spec-tree-review.md:435`). Without the ladder, a rejected tree in phase F has
   nowhere to go but a hand edit, which §6.1 forbids.
 - **Incremental re-review.** §8's opening line is the module's own objective: *"make the second pass
@@ -176,7 +176,7 @@ own planner, its own uniqueness gate, its own authoring bill and a hard blocker.
 | §5.1 — `PassiveTree/SpeciesUniqueness`, three findings, reverse index, gates none until calibrated | **MISSING** | — |
 | §6 — `codexSummary` passes the schema audit (≤140 chars, no number, no channel id) | **MISSING** | — |
 | §7.3 — families are **excluded from the roster** until a closed taxonomy exists | **MISSING** | 698 open tokens; a boundary with no task |
-| §8.1 point 2 — the `UniqueDemon` binding lands **before** the census | **MISSING** | *"A reviewer judging 840 cards against a ladder that reads zero is judging the writing, not the tree"* |
+| §8.1 point 2 — the `UniqueCreature` binding lands **before** the census | **MISSING** | *"A reviewer judging 840 cards against a ladder that reads zero is judging the writing, not the tree"* |
 | Success criterion 7 — the plan regenerates byte-identically; `PassiveTreeGen --check` | **MISSING** | D4 asserts it for the generic corpus only |
 
 **4 COVERED · 5 PARTIAL · 11 MISSING.**
@@ -205,7 +205,7 @@ Delivering tasks: **E1–E4**.
 | §8 — printed exclusions: both sides, same winner, inert not un-unlocked | **PARTIAL** | E3 covers the render. The Level-0 count, the filter, the toast (GG-16) and *never a modal* are not named |
 | §15/§17 Q1 — the **naming** decision applied to player text | **PARTIAL** | Tracked as a non-blocking ask; no task applies the authored names. See §6 below |
 | §2.2 / §3 — **Level 0b: the bloodline pin** | **MISSING** | The species tree's *spend* route is not in the plan |
-| §3 — the **Demon Codex** read route (and the ask-first `DemonsPage.tsx:367-388` volume fix it hangs off) | **MISSING** | **The species-tree route named in your brief has no task at all** |
+| §3 — the **Creature Codex** read route (and the ask-first `CreaturesPage.tsx:367-388` volume fix it hangs off) | **MISSING** | **The species-tree route named in your brief has no task at all** |
 | §5.3 — a shared plan carries **no price**; an imported plan is priced on arrival; the URL grammar | **MISSING** | Tests 18–19 |
 | §6 — **Focus**: the line, `1/H` prose, moves while editing, no fourteenth unit class | **MISSING** | Success criterion 6 and tests 14–15. E3 cites §6 and delivers none of it |
 | §7.2 part 1 — name the rule in the fiction, once, where it first matters | **MISSING** | — |
@@ -227,7 +227,7 @@ Ranked by what it costs to discover them late. Paste straight in.
 
 ### P1 · D0: `passive-tree-targets.v1.json` — the file three specs read
 **Spec:** `spec-tree-language.md` §4.3; `spec-tree-review.md` §6.3; `spec-species-tree.md` §3.2, §5.3.
-**Description:** The declared target file, shaped like `data/tuning/demon-roster-targets.v1.json` —
+**Description:** The declared target file, shaped like `data/tuning/creature-roster-targets.v1.json` —
 integer per-mille throughout, a `_note` recording provenance, **no axis listing its own members**.
 Holds the six quota axes' weights, `legitimateSkew` (empty, every row needs a `_why`), the gate
 thresholds, `exclusion.targetShareMilli`, `speciesUniqueAffixMin`, the tier-2/3 sample sizes and the
@@ -268,7 +268,7 @@ count against `archetypes[].mechNodes[t]`, both directions, plus `mechNodes[10] 
 `CellOccupancy`, `ExclusionRate`, `ExclusionResolvable`, `NearDuplicate` (local exact Jaccard,
 **not** the shared MinHash), `NameCollision`, `UnresolvedCount`.
 **Acceptance:**
-- [ ] `UnresolvedCount` is the **only** metric at `gates = True`, promoted with `demon_roster.py:357-370`'s reason recorded
+- [ ] `UnresolvedCount` is the **only** metric at `gates = True`, promoted with `creature_roster.py:357-370`'s reason recorded
 - [ ] `QuotaDrift` catches a mutated brief because it re-derives rather than reads
 - [ ] `MechanismRamp` is a count, not a threshold — a threshold implementation fails on `broad-and-flat` tiers 4–7
 - [ ] `ExclusionResolvable` reports **`NOT_MEASURED`** while the atom-tag registry is unbuilt (§5.1), cited by name and never by ordinal
@@ -364,7 +364,7 @@ table.
 - [ ] Query state survives closing the layer (GG-51)
 - [ ] A locked tier's reason is queried **by text, not by `title`**, and names both routes
 - [ ] *"2 of your traits are not working"* filters to exactly those
-**Depends on:** E1, and — for the Codex route — the ask-first fix to `DemonsPage.tsx:367-388`'s
+**Depends on:** E1, and — for the Codex route — the ask-first fix to `CreaturesPage.tsx:367-388`'s
 volume defect (840 DOM subtrees against a 240 threshold), which is another program's file.
 **Scope:** M. **Phase:** E.
 
@@ -407,13 +407,13 @@ on a re-recorded row, and **pass two cannot run without it**, while F3 budgets 2
 - [ ] `provenance-supersede` is either built or recorded in the plan's Risks table as blocking pass 2
 **Depends on:** F4, A2. **Scope:** M. **Phase:** F.
 
-### P13 · C5: the `UniqueDemon` binding, before the species census
+### P13 · C5: the `UniqueCreature` binding, before the species census
 **Spec:** `spec-species-tree.md` §8.1 point 2.
-**Description:** Nothing in `src/` passes `AllocationScope.UniqueDemon` to `PointBudget.PointsFor`
+**Description:** Nothing in `src/` passes `AllocationScope.UniqueCreature` to `PointBudget.PointsFor`
 or `CheckScope`. Its twin already ships — `SpeciesAllocation.cs:35,62` does exactly this for
-`DemonType`, including the index transform `PointBudget.DemonTypeSourceFromLevel`.
+`CreatureType`, including the index transform `PointBudget.CreatureTypeSourceFromLevel`.
 **Acceptance:**
-- [ ] Specimen level reaches an aptitude budget at `UniqueDemon` scope, mirroring the `DemonType` transform
+- [ ] Specimen level reaches an aptitude budget at `UniqueCreature` scope, mirroring the `CreatureType` transform
 - [ ] A species tree's tier ladder reads non-zero on an actor with a levelled specimen
 **Verification:** a reviewer opening a species card sees a live ladder, not zeros.
 **Depends on:** C3. **Scope:** S. **Phase:** C or F, **before F4's census**.

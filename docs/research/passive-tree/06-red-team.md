@@ -28,7 +28,7 @@ I did not read in full, it says so.
 | F5 | **High** | D20 ships **one** tier ladder against **four incommensurable** gate quantities, three of which do not exist in `src/` | `PointBudget.cs:13-15`; zero `src/` hits for `element_mastery` / almanac XP; `RpgStore.cs:433-440` | One `req()` per gate quantity, in that quantity's own units, named per tree category |
 | F6 | **High** | The tree roster is not 40–60. Counted: 12 + 6 + 21 + **699 distinct `family` strings**, and no canonical family enum exists | `Aptitude.cs:40-51`; `ActorElementTypes.cs:3-11`; `StatusCatalogBootstrap.cs` (21 registrations); corpus count in §7 | Decide the family taxonomy first; D23 becomes a shared node pool plus a small per-species unique cap |
 | F7 | **Medium** | D18 contradicts a locked decision, and misprices a respec that is already free and unpriced today | `decisions.md:103`; `RespecPolicy.cs:11-20`; `aptitudes.v5.json:30`; `AptitudeEndpoints.cs:30-56` | Keep the locked "a resource fighting also costs" wording or change the lock explicitly; scale the price off `Θ`; say which scope a reset covers |
-| F8 | **Medium** | D21's real cost is not storage — it is the per-battle read path and an already-unpaged roster DTO | `WebMatchService.cs:414-417`; `RpgStore.Aptitudes.cs:116-118`; `RpgStore.Demons.cs:154-171`; `ContractPolicy.cs:166-176` | One batched per-squad tree-state read; page the roster DTO before tree state joins it |
+| F8 | **Medium** | D21's real cost is not storage — it is the per-battle read path and an already-unpaged roster DTO | `WebMatchService.cs:414-417`; `RpgStore.Aptitudes.cs:116-118`; `RpgStore.Creatures.cs:154-171`; `ContractPolicy.cs:166-176` | One batched per-squad tree-state read; page the roster DTO before tree state joins it |
 | F9 | **Medium** | §4's "power ∝ effort" property is quoted, not proved — nothing says the node bonus is quadratic in soul level, and §8 says it reads `P(Θ)` | `passive-tree-ideal.md:240-250` vs `:341-343`; `ssot-power-scale.md:691-704` | State the bonus function; if it reads a per-node soul index, open the `ssot-power-scale.md` §10 row in the same change |
 | F10 | **Low** | Five doc-integrity defects, one load-bearing (D20 cites a section that does not exist), plus a list of unpriced work | `passive-tree-ideal.md:52` cites §3.4; headings jump 3.3 → 3.5; `:77` vs D5; `:300` vs §10.1; §7 skips items 4–5 | Write §3.4 or fold D20's justification into §3.5; propagate D5 and D24 |
 
@@ -162,7 +162,7 @@ fifth value landing is *caught*. `tests/FusionRpg.Core.Tests/Items/ItemPowerRead
 firing, not a test to update.
 
 **(c) A `status_mastery` scope cannot name a status.** FACT — `AptitudeAllocation.cs:8` declares
-`enum AllocationScope { Commander, DemonType, Aspect, UniqueDemon }`; `:103` does
+`enum AllocationScope { Commander, CreatureType, Aspect, UniqueCreature }`; `:103` does
 `Enum.GetValues<AllocationScope>()` into `AllScopes`, and `Total`/`GrandTotal`/`Share` (`:49-85`) iterate
 it. `AptitudeAllocation.Single` (`:38-39`) throws on any id that is not one of the twelve aptitudes. So a
 fifth scope is automatically summed into the **aptitude** share vector, and its points must be labelled
@@ -199,10 +199,10 @@ self-spent only. Gear-granted points add power, never focus."* The stated reason
 off-build drop must never lower your multiplier.
 
 **The exploit.** D2 (`:34`) lists four acquisition sources: skill points, aptitude thresholds,
-items/affixes, demon aspect. The amendment names **only gear**. So:
+items/affixes, creature aspect. The amendment names **only gear**. So:
 
 > Self-spend 100% of your skill points in one tree → `H_points = 1` → `F = Fmax`.
-> Take all your breadth from gear, aptitude thresholds and demon aspect.
+> Take all your breadth from gear, aptitude thresholds and creature aspect.
 > You now hold a twelve-tree build **and** the pure build's focus multiplier.
 
 That strictly dominates an honest pure build: same `F`, more total tree power. The trap D8's amendment
@@ -211,7 +211,7 @@ closed on one source is wide open on the other three — and it is worse on the 
 - **Aptitude-threshold grants are self-directed.** A player choosing where aptitude points go is choosing
   which trees receive free tree points. Calling those "not self-spent" is a fiction; the player spent
   something, just in a different currency.
-- **Demon-aspect grants** are per-actor, and under D21 every actor has its own tree state — so "whose `H`
+- **Creature-aspect grants** are per-actor, and under D21 every actor has its own tree state — so "whose `H`
   do they enter" is not even asked.
 
 **Fix.** `H` should read every point the player *chose*, and exclude only points the player did not
@@ -234,13 +234,13 @@ no defined meaning for a threshold grant.
 |---|---|---|---|
 | Primary (12) | `Θ_player` → aptitude points | **Yes** | `AptitudeEndpoints.cs:47` (`powerIndex.ActorIndex`) |
 | Elemental (6) | `element_mastery` | **No** | `PointBudget.cs:15` — *"does not exist yet"*; zero `src/` hits outside comments |
-| Demon family | almanac XP | **No** | Zero `src/` hits; `rpg_demon_codex` has no xp column (`RpgStore.cs:433-440`) |
-| Demon species | specimen level | **Yes** | `rpg_unique_actors.level` (`RpgStore.cs:395`) |
+| Creature family | almanac XP | **No** | Zero `src/` hits; `rpg_creature_codex` has no xp column (`RpgStore.cs:433-440`) |
+| Creature species | specimen level | **Yes** | `rpg_unique_actors.level` (`RpgStore.cs:395`) |
 | Status (21) | — | **No scope, no quantity** | `passive-tree-ideal.md:280` |
 
 **(a) §5's own warning is understated.** It flags status trees as *"the one category this mapping does not
 cover"* (`:280`). In fact **three of five categories have no working gate today** — elemental and
-demon-family trees have a *scope* but no *source*, which is the same practical hole. `PointBudget.cs:15`
+creature-family trees have a *scope* but no *source*, which is the same practical hole. `PointBudget.cs:15`
 already says the Aspect source does not exist. §5 read *"three of four scopes ship today"* (`:277`) as if
 the scopes were the gates. They are not: the scopes are rate rows; the sources are what a gate reads.
 
@@ -248,8 +248,8 @@ the scopes were the gates. They are not: the scopes are rate rows; the sources a
 primary tree, 85 *specimen levels* for a species tree, 85 units of an unbuilt mastery counter for an
 elemental tree and 85 units of unbuilt almanac XP for a family tree. Four quantities, four growth rates,
 one shared table silently asserting they are interchangeable. FACT that they are not: the shipped rate
-table already prices the scopes differently on purpose — `commander: 3, demonType: 4, aspect: 4,
-uniqueDemon: 6` (`aptitudes.v5.json:24-27`) — and `PointBudgetTests.cs:78-95` asserts that ordering as a
+table already prices the scopes differently on purpose — `commander: 3, creatureType: 4, aspect: 4,
+uniqueCreature: 6` (`aptitudes.v5.json:24-27`) — and `PointBudgetTests.cs:78-95` asserts that ordering as a
 real claim about the data, not about arithmetic.
 
 Worked consequence: a Θ=30 commander holds 90 aptitude points and reaches tier 6 only by spending
@@ -273,15 +273,15 @@ one index — and that normalisation is itself a power-shaped scale needing a re
 | Aptitudes | **12** | `src/FusionRpg.Core/Stats/Aptitudes/Aptitude.cs:40-51` (4 per posture) |
 | Elements | **6** | `src/FusionRpg.Core/Stats/Derived/ActorElementTypes.cs:3-11` |
 | Statuses | **21** | `src/FusionRpg.Core/Status/StatusCatalogBootstrap.cs` — 21 `Register`/`RegisterWithOptions` calls |
-| Demon families | **699 distinct strings** | counted over 503 species files / 841 entries in `data/seed/demons/species/` |
+| Creature families | **699 distinct strings** | counted over 503 species files / 841 entries in `data/seed/creatures/species/` |
 | Species | **841** | same count; matches §9 exactly |
 
-There is **no canonical family vocabulary in `src/`** — `grep -rn "DemonFamily\|enum.*Family" src` returns
+There is **no canonical family vocabulary in `src/`** — `grep -rn "CreatureFamily\|enum.*Family" src` returns
 only `RpgEffectFamily`, an unrelated type. `family` is free text in the seeds with a long tail: `undead`
 64, `artillery-flora` 17, `fungal-artillery` 16, then hundreds of near-singletons (`carnivorous flora` 9,
 `vessel-flora` 9, …).
 
-So D9's *"each demon family"* (`:41`) resolves to either **0** family trees (n = 39) or **699** of them
+So D9's *"each creature family"* (`:41`) resolves to either **0** family trees (n = 39) or **699** of them
 (n = 738). `n ≈ 40–60` is not reachable from the shipped corpus without a taxonomy decision nobody has
 made. INFERENCE: this is the same defect class §9 documents for aptitude/element skew — a free-text
 LLM-authored field being read later as though it were a closed vocabulary.
@@ -308,8 +308,8 @@ direct tension and neither names the other.
 
 1. **Decide the family taxonomy before the roster.** A canonical ~20–40 family enum, with the 699 strings
    mapped onto it, makes `n ≈ 60–80` real rather than aspirational. It is independently needed anyway:
-   the `DemonType` scope key is a `typeId` (`RpgStore.Aptitudes.cs:26-28`), which is neither a `family`
-   nor a `species_id`, so demon-family trees have no key in the shipped scope model today.
+   the `CreatureType` scope key is a `typeId` (`RpgStore.Aptitudes.cs:26-28`), which is neither a `family`
+   nor a `species_id`, so creature-family trees have no key in the shipped scope model today.
 2. **Restructure D23 as a shared pool plus a small unique cap.** A species tree draws most nodes from a
    reviewed pool keyed on its (primary, element, status) triple and carries perhaps 3 genuinely unique
    nodes. That is 2,523 unique nodes instead of 24,389 — a tenth of the review cost — while keeping the
@@ -355,8 +355,8 @@ change to a shipped free endpoint, not a reuse of an existing charge.
 
 **One thing D18 does not say, and D21 makes it matter.** Is a "full reset" scoped to one
 `(scope, scopeKey)` or global? Under D21 each actor has its own tree state, so the difference is resetting
-one demon versus resetting the entire roster in one transaction — and the shipped store is per-key by
-construction (`SaveAllocation(scope, scopeKey, …)`). At a 2,000-demon roster a global reset is 2,000
+one creature versus resetting the entire roster in one transaction — and the shipped store is per-key by
+construction (`SaveAllocation(scope, scopeKey, …)`). At a 2,000-creature roster a global reset is 2,000
 delete-and-reinsert transactions under one lock. This is answerable, so it is a task rather than a risk:
 pick per-actor and price it per-actor.
 
@@ -381,8 +381,8 @@ public static int Capacity(int purchasedSlots) => BaseSlots + Math.Max(0, purcha
 public static bool CanBuySlot(int purchasedSlots) => true;
 ```
 
-And **unbound** demons are free and unlimited: `RpgStore.Contracts.cs:82` notes that a specimen *"simply
-arrives unbound when capacity is full."* D21 says *every* actor carries tree state, and an unbound demon
+And **unbound** creatures are free and unlimited: `RpgStore.Contracts.cs:82` notes that a specimen *"simply
+arrives unbound when capacity is full."* D21 says *every* actor carries tree state, and an unbound creature
 is still an actor. D21's own "~50 trees × ~29 skills … per actor" arithmetic is right per actor and wrong
 about how many actors exist.
 
@@ -391,12 +391,12 @@ allocation read: `WebMatchService.AptitudeChannelMods` (`:414-417`) does a singl
 `LoadAllocation(Commander, "player:{id}")`. D21 turns that into one read per actor, and every
 `LoadAllocation` takes the global `lock (_gate)` and opens a **fresh connection**
 (`RpgStore.Aptitudes.cs:116-118`). A naive per-(actor, tree) read is `N × n` round-trips per battle setup
-— at a 6-demon squad and n = 39 that is 273 lock-serialized queries before the first turn, on the
+— at a 6-creature squad and n = 39 that is 273 lock-serialized queries before the first turn, on the
 standalone path where battles *are* the loop. This is the concrete "what breaks first" answer.
 
-**(c) The roster DTO is already unpaged.** FACT — `RpgStore.Demons.cs:154-171`: `ListDemonRoster` selects
-every non-retired specimen for a player with no `LIMIT` and no cursor, and `DemonEndpoints.cs:43-47`
-returns it whole. At a 2,012 roster that response is already large, and the "compare my demons' builds"
+**(c) The roster DTO is already unpaged.** FACT — `RpgStore.Creatures.cs:154-171`: `ListCreatureRoster` selects
+every non-retired specimen for a player with no `LIMIT` and no cursor, and `CreatureEndpoints.cs:43-47`
+returns it whole. At a 2,012 roster that response is already large, and the "compare my creatures' builds"
 screen D21 implies is precisely the surface that would join tree state onto it.
 
 **RECALL, flagged as unverified in-repo:** ASP.NET Core SignalR's default `MaximumReceiveMessageSize` is
@@ -406,7 +406,7 @@ screen D21 implies is precisely the surface that would join tree state onto it.
 and any future injector→server hub invocation carrying tree state inherits it.
 
 **Fix.** Batch: one `LoadTreeState(playerId)` returning every actor's sparse entries in a single query,
-shaped the way the design already intends the rows to be. Page `ListDemonRoster` before tree state joins
+shaped the way the design already intends the rows to be. Page `ListCreatureRoster` before tree state joins
 it. Neither is hard; neither is budgeted.
 
 ---
@@ -471,7 +471,7 @@ them is costed in the ideal:
 | Prior art §3.1 | The effective-tree-count surface (*"effective trees: 2.3 → +17%"*). Without it `F` is unfelt — and D24 §10.2 item 3 has now made that an acceptance criterion rather than a nice-to-have, which is a task, not an open risk |
 | F2 | A second balance gate that can score mechanism nodes |
 | D23 | ~24,389 unique authored-and-reviewed nodes, or the restructure in F6 |
-| F6 | A canonical demon-family taxonomy over 699 free-text strings |
+| F6 | A canonical creature-family taxonomy over 699 free-text strings |
 
 ---
 
@@ -480,7 +480,7 @@ them is costed in the ideal:
 Attacked and could not break. This list is as useful as the findings.
 
 - **§9's corpus measurement is exactly right.** Re-counted independently over
-  `data/seed/demons/species/`: **503 files, 841 entries**; `Onslaught` 332 (39.5%), `Bulwark` 133,
+  `data/seed/creatures/species/`: **503 files, 841 entries**; `Onslaught` 332 (39.5%), `Bulwark` 133,
   `Retribution` 113, … `Ferocity` 2 (0.2%); `earth` 379 (45.1%), `air` 56 (6.7%). Every figure in §9's
   table matches. The 166:1 ratio and the *"decouple thematic favour from mechanical lock"* corollary are
   the strongest paragraphs in the document.

@@ -25,7 +25,7 @@
       "id": "set.superdancepolzombie-001",
       "nameKey": "set.the-pole-dancing-king",
       "name": "The Pole-Dancing King",
-      "themeKey": "demon.superdancepolzombie",
+      "themeKey": "creature.superdancepolzombie",
       "members": [
         {
           "role": "armament-primary",

@@ -1,5 +1,5 @@
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Dungeon.Tuning;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
@@ -91,7 +91,7 @@ public static class Encounter
     public static EncounterHalf Build(
         EncounterAnchor anchor, int roomTheta, ElementTypeId? climate, RaidModeTuning raid,
         DifficultyRungTuning rung, ulong seed, IReadOnlyList<ConcreteAnchor> corpus,
-        EncounterTuning tuning, DemonThreatTuning threatTuning,
+        EncounterTuning tuning, CreatureThreatTuning threatTuning,
         AptitudeTuning? aptitudeTuning = null, PowerTuning? powerTuning = null)
     {
         if (anchor is null) throw new ArgumentNullException(nameof(anchor));
@@ -195,19 +195,19 @@ public static class Encounter
     /// <summary>θ_enemy = Θ_room + thetaOffset(species) — the sum nothing computes today
     /// (spec §3). Every other field is a plain pass-through, matching `WaveCatalog.Enemies`'s own
     /// established shape exactly.</summary>
-    static BattleActorSetup Emit(ConcreteAnchor a, int roomTheta, DemonThreatTuning threatTuning, int n)
+    static BattleActorSetup Emit(ConcreteAnchor a, int roomTheta, CreatureThreatTuning threatTuning, int n)
     {
         var theta = checked(roomTheta + threatTuning.OffsetFor(a.ThreatBand));
         return new BattleActorSetup
         {
-            Key = $"wave:{n}", Side = "wave", SpeciesId = a.SpeciesId, TypeId = a.DemonTypeId, Level = theta,
+            Key = $"wave:{n}", Side = "wave", SpeciesId = a.SpeciesId, TypeId = a.CreatureTypeId, Level = theta,
             ElementPrimary = a.ElementPrimary, ElementSecondary = a.ElementSecondary, TraitIds = a.TraitPool,
             MaxHp = BattleRuleset.BaseHp(theta), Atk = BattleRuleset.BaseAtk(theta),
             Defense = BattleRuleset.BaseDefense(theta), AttackIntervalMs = a.AttackIntervalMs,
         };
     }
 
-    static ConcreteAnchor ResolveBoss(EncounterAnchor anchor, IReadOnlyList<ConcreteAnchor> corpus, EncounterTuning tuning, DemonThreatTuning threatTuning)
+    static ConcreteAnchor ResolveBoss(EncounterAnchor anchor, IReadOnlyList<ConcreteAnchor> corpus, EncounterTuning tuning, CreatureThreatTuning threatTuning)
     {
         if (anchor.BossSpeciesRef is not { } bossRef)
             throw new InvalidOperationException("a boss-formation encounter anchor must carry a bossSpeciesRef.");
@@ -217,7 +217,7 @@ public static class Encounter
             throw new InvalidOperationException($"boss '{bossRef}' has no threatBand — never the rung-4 default.");
 
         var floorRung = threatTuning.Thresholds.FirstOrDefault(t => string.Equals(t.Id, tuning.ThreatWindowBossFloorRung, StringComparison.Ordinal))
-            ?? throw new InvalidOperationException($"threatWindow.bossFloorRung '{tuning.ThreatWindowBossFloorRung}' has no rung in demon-threat.v1.json.");
+            ?? throw new InvalidOperationException($"threatWindow.bossFloorRung '{tuning.ThreatWindowBossFloorRung}' has no rung in creature-threat.v1.json.");
         if (bossRung < floorRung.Rung)
             throw new InvalidOperationException(
                 $"boss '{bossRef}' is rung {bossRung} ('{boss.ThreatBand}'), below the boss floor rung {floorRung.Rung} ('{floorRung.Id}').");

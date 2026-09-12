@@ -25,7 +25,7 @@
       "id": "set.marigold-001",
       "nameKey": "set.marigold-radiance",
       "name": "Marigold Radiance",
-      "themeKey": "demon.marigold",
+      "themeKey": "creature.marigold",
       "members": [
         {
           "role": "armament-primary",

@@ -77,7 +77,7 @@ flowchart TB
 |---|---|---|---|---|
 | **Hot** | Same process as capture (no Server await) | Injector `EffectBag` + **Funnel** + **ActorHub** (derived at Apply) + **StatusRuntime** (design) | Writer / StatusExecutor / Intent / FA10 **Add** | 5% freeze on hit; DoT pulse; ICD; counter burst |
 
-**Aptitude input (2026-09-12):** Bound UniqueActor Hot must resolve `commander + UniqueDemon(instanceId)` into ActorHub — same shape as sheet compose. Species fallback is for empire generals only. Divergent lawn vs sheet aptitude input for one Bound specimen is an FSM/Hub defect ([combat-power-number-ideal.md](combat-power-number-ideal.md)).
+**Aptitude input (2026-09-12):** Bound UniqueActor Hot must resolve `commander + UniqueCreature(instanceId)` into ActorHub — same shape as sheet compose. Species fallback is for empire generals only. Divergent lawn vs sheet aptitude input for one Bound specimen is an FSM/Hub defect ([combat-power-number-ideal.md](combat-power-number-ideal.md)).
 
 | **Cold** | Seconds OK | Server UniqueActor + Data | Never directly — **pushes grants/loadout**; Hot applies later | Equip item, level-up mod defs, roster deploy templates |
 | **Intent** | Human / director scale OK | Server feature → `pvz.*` | Injector after MatchRuntime Admit | Extra spawn, unique deploy Create |

@@ -1,6 +1,6 @@
 using System.Linq;
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Data;
 using Xunit;
 

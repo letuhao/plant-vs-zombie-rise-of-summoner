@@ -1,4 +1,4 @@
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -19,9 +19,9 @@ public sealed class RpgApiFactory : WebApplicationFactory<Program>
     }
 
     /// <summary>
-    /// demon-lawn-deploy T1.6 found this whole suite's own server could never start: `Program.cs:322`
-    /// (`catalog-runtime`'s 2026-09-05 flip) now calls `DemonSpeciesCatalog.Configure(store.
-    /// BuildDemonSpeciesSnapshot())`, which throws on an empty roster — and a fresh `DataDir` has NEVER
+    /// creature-lawn-deploy T1.6 found this whole suite's own server could never start: `Program.cs:322`
+    /// (`catalog-runtime`'s 2026-09-05 flip) now calls `CreatureSpeciesCatalog.Configure(store.
+    /// BuildCreatureSpeciesSnapshot())`, which throws on an empty roster — and a fresh `DataDir` has NEVER
     /// had `species-import` run against it. Confirmed pre-existing and suite-wide, not specific to any
     /// one test file: `StorageE2ETests.cs` (untouched by this program) failed identically, 0/7, before
     /// this fix. Seeded here, once per collection fixture (a NEW `RpgStore` instance against the SAME
@@ -32,7 +32,7 @@ public sealed class RpgApiFactory : WebApplicationFactory<Program>
     /// </summary>
     void SeedSpeciesRoster()
     {
-        var dir = Path.Combine(RepoRoot(), "data", "generated", "demons");
+        var dir = Path.Combine(RepoRoot(), "data", "generated", "creatures");
         var files = Directory.EnumerateFiles(dir, "*.json")
             .Where(p => !Path.GetFileName(p).StartsWith('_'));
         var species = files.Select(ConcreteSpeciesSeedReader.ParseFile).ToList();
@@ -47,9 +47,9 @@ public sealed class RpgApiFactory : WebApplicationFactory<Program>
                 "RpgApiFactory.SeedSpeciesRoster failed: " + string.Join("; ", outcome.Errors));
     }
 
-    // Marker is src/FusionRpg.Injector, NOT data/generated/demons — the same choice
+    // Marker is src/FusionRpg.Injector, NOT data/generated/creatures — the same choice
     // ConcreteSpeciesSeedReaderTests.cs's own RepoRoot() already made, and for the same reason found
-    // here the hard way: an MSBuild content-copy rule creates an EMPTY data/generated/demons under the
+    // here the hard way: an MSBuild content-copy rule creates an EMPTY data/generated/creatures under the
     // test's own bin output, so that marker alone stops the upward search one level too early.
     static string RepoRoot()
     {

@@ -44,7 +44,7 @@ patterns. So the thing being built is not a class system in the usual sense — 
 space and the machinery that turns a point in it into a channel value**.
 
 **54 tasks · 10 phases · 10 checkpoints · no task larger than M (≤5 files).** One external dependency
-(`aspect-scope`, owned by the demon program).
+(`aspect-scope`, owned by the creature program).
 
 ---
 
@@ -82,7 +82,7 @@ Three consequences, and they shape the whole plan:
 | 10 | `guard-economy` | 7 | [spec-guard-economy.md](../docs/architecture/class-system/spec-guard-economy.md) |
 | 11 | `zomboss-patterns` | 7 | [spec-zomboss-patterns.md](../docs/architecture/class-system/spec-zomboss-patterns.md) |
 | 12 | `residual-fit` | 8 | [spec-residual-fit.md](../docs/architecture/class-system/spec-residual-fit.md) |
-| — | **`aspect-scope`** | **external** | [demons/spec-aspect-scope.md](../docs/architecture/demons/spec-aspect-scope.md) — **demon program owns it** |
+| — | **`aspect-scope`** | **external** | [creatures/spec-aspect-scope.md](../docs/architecture/creatures/spec-aspect-scope.md) — **creature program owns it** |
 
 ---
 
@@ -101,7 +101,7 @@ Taken 2026-08-26 unless noted. None is reopened by this plan.
 | 7 | **The seam is `IActorStatSubsystem`**, not `ClassStatPlugin` (wrong pipeline) |
 | 8 | **The composers stay separate** — battle takes `ChannelMods`, the way `StarPolicy` already feeds progression stats in |
 | 9 | **`poise` is the sixth resource**; `ReciprocalPoints` + `AptitudePoints` join the `UnitClass` ledger |
-| 10 | **`aspect-scope` belongs to the demon program**; `point-economy` ships 3-of-4 scopes until it lands |
+| 10 | **`aspect-scope` belongs to the creature program**; `point-economy` ships 3-of-4 scopes until it lands |
 | 11 | **Cap-parity in `ChannelMods` belongs to `battle-adoption`, external to this program** — same shape as decision 10. `BattleStatComposer`'s `ChannelMods` consumption applies no cap at all, for any producer, and `spec-aptitude-resolve.md §8` forbids this program from changing that composer's logic. Found 2026-08-27 building P2.6's cross-composer proof: every one of the twelve aptitudes, at full share, disagrees between engines on any `SumIncreased`-capped channel (`status.resist.*` etc.) — latent until `point-economy` (Phase 6) gives a player something to fund, real the day it does. Written up in `docs/architecture/combat/spec-battle-adoption.md` (three resolution options, undecided) and `.remember/now.md`. **This program's own gates check what this program's own modules control** — a `ChannelMods` cap producer this program does not own being wired up is not this program's to build or block on, the same way `aspect-scope` not landing does not block `point-economy` shipping three of four scopes.
 | 12 | **G3 (the `atk` double-count guard) is a forward-looking safeguard, not a same-day tuning fix.** `spec-aptitude-resolve.md §2a.1`'s "red today" claim was traced 2026-08-27 (P3.2) against the live dispatch (`ConditionalOverlayCombatMath.Finalize`) and does not hold: overlay mode strictly replaces vanilla's computation per hit, never adds to it, and never reads `EntityFinal.Atk` — so `Might`/`Ferocity` funding both `combat.power.omni` and `progression.bonus.atk` does not compound in the shipped overlay pipeline today. The rule stays (G3 stays in `guard-class-system.ps1`, `data/tuning/aptitudes.v1.json` stays as `class-system-ideal.md §4` originally designed it) because it protects against a real future case — `battle-adoption`'s own (unbuilt) mapping table would make `BattleActorSetup.Atk` the exact double-counted input the guard already names. G3 reporting red on the shipped file is the correct, permanent state until `battle-adoption` ships or the design changes — same carve-out shape as decision 11, and it does not block Checkpoint 3.
 
@@ -292,7 +292,7 @@ streams* says **"freeze first, move last"** — a mover inside a freezer's windo
 consumes the first's consumer readings rather than repeating them over the same families.
 
 **`aspect-scope` is not on this critical path.** `point-economy` ships three scopes and lights up the
-fourth when the demon program delivers.
+fourth when the creature program delivers.
 
 **Decision 11's cap-parity gap is not on this critical path either — added 2026-08-27.** The module
 graph (§4) never made `deterministic-core` (Phase 4) depend on `aptitude-resolve`'s full cross-composer

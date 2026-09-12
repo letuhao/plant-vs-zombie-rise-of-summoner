@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Seed UniqueDemon + commander allocation + one Even preset for aptitude-sheet UI review.
+  Seed UniqueCreature + commander allocation + one Even preset for aptitude-sheet UI review.
 
 .DESCRIPTION
   Uses existing debug/product APIs (no new endpoints):

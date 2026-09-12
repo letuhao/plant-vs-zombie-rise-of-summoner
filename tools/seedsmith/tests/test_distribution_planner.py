@@ -100,7 +100,7 @@ class RunTuningLoadTests(unittest.TestCase):
     def test_meta_states_untuned(self) -> None:
         doc = json.loads(RUN_TUNING_PATH.read_text(encoding="utf-8"))
         self.assertEqual(doc["_meta"]["default"], "full-live-seed-roster")
-        self.assertIn("live demon species seed folder", doc["_meta"]["note"])
+        self.assertIn("live creature species seed folder", doc["_meta"]["note"])
 
     def test_stale_citation_avoidNeighbourK_is_shipped_but_unused(self) -> None:
         """**A found spec self-contradiction, documented rather than silently resolved either
@@ -244,7 +244,7 @@ class FamilyMotifDerivationTests(unittest.TestCase):
         self.assertEqual(basis, "intersection")
 
     def test_every_family_intersects_nonempty_against_real_data(self) -> None:
-        fam_path = REPO_ROOT / "data" / "seed" / "demons" / "_generated" / "family-assignments.json"
+        fam_path = REPO_ROOT / "data" / "seed" / "creatures" / "_generated" / "family-assignments.json"
         lean_path = ACTIONS_ROOT / "_generated" / "role-lean.json"
         if not fam_path.is_file() or not lean_path.is_file():
             self.skipTest("A-S0 outputs not yet generated in this checkout")
@@ -268,7 +268,7 @@ class FamilyMotifDerivationTests(unittest.TestCase):
         """The histogram is a READING of the current family map (it moves as species ship), so the
         contract is reconciliation: bin counts sum to the distinct-family count, and the membership
         total is the per-species sum — never a pinned `{7:1, ...}` snapshot (validation-ssot.md)."""
-        fam_path = REPO_ROOT / "data" / "seed" / "demons" / "_generated" / "family-assignments.json"
+        fam_path = REPO_ROOT / "data" / "seed" / "creatures" / "_generated" / "family-assignments.json"
         if not fam_path.is_file():
             self.skipTest("family-assignments.json not present in this checkout")
         family_assignments = json.loads(fam_path.read_text(encoding="utf-8"))
@@ -980,7 +980,7 @@ class DryRunAndOfflineTests(unittest.TestCase):
             with patch.object(gen_mod, "SMOKE_GATE_EVIDENCE_PATH", gate_path):
                 summary = gen_mod.regenerate(
                     actions_root=tmp_path / "actions",
-                    demons_root=REPO_ROOT / "data" / "seed" / "demons",
+                    creatures_root=REPO_ROOT / "data" / "seed" / "creatures",
                     full_flag=True, write=False)
             self.assertFalse((tmp_path / "actions" / "_briefs" / "round-1.json").exists())
             self.assertFalse(summary["written"])
@@ -1093,7 +1093,7 @@ class DeterminismTests(unittest.TestCase):
     """Spec §5 'Determinism', acceptance #9."""
 
     def test_plan_round_pure_function_is_repeatable(self) -> None:
-        species_anchor = {"a": dp.SpeciesAnchorRow("a", "fam", "fire", "chaff", "demon.a",
+        species_anchor = {"a": dp.SpeciesAnchorRow("a", "fam", "fire", "chaff", "creature.a",
                                                     ("m1", "m2"), ())}
         weights_by_key = {("species", "a"): _weights(), ("family", "fam"): _weights()}
         kwargs = dict(

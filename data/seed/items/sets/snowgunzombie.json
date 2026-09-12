@@ -25,7 +25,7 @@
       "id": "set.snowgunzombie-001",
       "nameKey": "set.frostbite-volley",
       "name": "Frostbite Volley",
-      "themeKey": "demon.snowgunzombie",
+      "themeKey": "creature.snowgunzombie",
       "members": [
         {
           "role": "armament-primary",

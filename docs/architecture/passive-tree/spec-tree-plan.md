@@ -108,7 +108,7 @@ tier is 1**. Every tier-1 node is a root of its own branch.
 | Roster | `n` | Corpus |
 |---|---:|---:|
 | Closed rosters readable today (12 aptitudes + 6 elements + 24 statuses) | 42 | **1,680** |
-| With a closed demon-family roster at `F = 19` (D27's shipped roster, once curated) | 61 | 2,440 |
+| With a closed creature-family roster at `F = 19` (D27's shipped roster, once curated) | 61 | 2,440 |
 
 `39 × 40 = 1,560` is the figure D29 states — right at the time D29 was written, for the 21-status
 roster then readable. **D51 (2026-09-06) grew the status roster to 24** (three `nerve.*` statuses
@@ -770,7 +770,7 @@ exclusion can key on it — D14's own example is *"no effect if the damage is co
 **FACT, `:22-27`** — the table `PointBudget` actually reads:
 
 ```json
-"aptitudePointsPerThetaMilliByScope": { "commander": 3, "demonType": 4, "aspect": 4, "uniqueDemon": 6 }
+"aptitudePointsPerThetaMilliByScope": { "commander": 3, "creatureType": 4, "aspect": 4, "uniqueCreature": 6 }
 ```
 
 **Despite the name, "Milli" does not divide.** `PointBudget.PointsFor` is
@@ -795,7 +795,7 @@ been built yet, back when this table was written:
 | `primary` (12) | `aptitude.<Id>@Commander` | ✅ shipped — `PointBudget.PointsFor(AllocationScope.Commander, …)` | shipped |
 | `elemental` (6) | `element_mastery.<id>@Aspect` | ✅ **shipped 2026-09-06.** `ElementMasterySource.AptitudePointEquivalents`, registered at `GateCounterEndpoints.cs:107`, live-probed end to end (task G6) — `gate-evidence.v1.json`'s `elementMastery` row reads `carrier` | shipped |
 | `status` (24) | `status_applied.<id>` — **outside `AllocationScope`** (D35) | ✅ **shipped 2026-09-06.** `StatusAppliedSource.AptitudePointEquivalents`, registered at `GateCounterEndpoints.cs:104`, live-probed end to end (task G6) — `gate-evidence.v1.json`'s `statusApplied` row reads `carrier`. Count grew 21 -> 24 (D51: three `nerve.*` statuses accepted) | shipped |
-| `family` (`F`) | `species_level@DemonType` | ✅ rate shipped, source via `PointBudget.DemonTypeSourceFromLevel` | shipped |
+| `family` (`F`) | `species_level@CreatureType` | ✅ rate shipped, source via `PointBudget.CreatureTypeSourceFromLevel` | shipped |
 
 **Superseded by the above, 2026-09-06 — the ⛔ rows this table used to carry are gone, but that does
 NOT mean elemental/status trees generate today.** `gate-counters` shipping removed R-G1's own block.
@@ -876,7 +876,7 @@ matches the ideal's own build order — *"one wave per gate quantity as it lands
 | 0 | 12 `primary` | 480 | nothing — shipped today |
 | 1 | 6 `elemental` | 240 | **`gate-counters`** landing `element_mastery` (D37) — a wave-0 sibling of this module, not an unscheduled dependency on another program |
 | 2 | 21 `status` | 840 | **`gate-counters`** landing the `status_applied.<id>` counter (D37). D35 left it without a home; D37 gave it one |
-| 3 | `F` `family` | 40·`F` | a closed demon-family roster (§9 item 5) |
+| 3 | `F` `family` | 40·`F` | a closed creature-family roster (§9 item 5) |
 
 The wave a tree sits in is **derived from `gateState`, never hand-assigned** — so the day
 `element_mastery` gets a carrier, one evidence row moves and 240 nodes become generable without a
@@ -1109,7 +1109,7 @@ graph invariant.
 | `plan_hash_excludes_emitted_utc` | Otherwise every run is drift |
 | `roster_counts_are_read_never_typed` | Greps this module's source for a bare `12`, `6`, `21`, `53`, `16`, `13`, `7` |
 | `a_missing_roster_mirror_refuses` | Exit 2 naming the file — never an empty axis, never a default |
-| `absent_family_roster_emits_pending_not_silence` | `demonFamilies: []` **and** a `_pending` entry, so `F = 0` is visible |
+| `absent_family_roster_emits_pending_not_silence` | `creatureFamilies: []` **and** a `_pending` entry, so `F = 0` is visible |
 | `quota_marginals_are_exact` | Every axis's emitted counts sum to `N` and match an independent re-derivation |
 | `overridden_draws_return_to_the_pool` | §8 step 5 — force every elemental tree's element and assert the residual axis stays on target |
 | `no_conversion_node_carries_budget` | D16 stays at zero until `element.convert` lands (D56, `spec-element-conversion.md`) |
@@ -1219,10 +1219,10 @@ emit, filled by `tree-language`; the stage-2 emit gate refuses a plan with an un
 | `_provenance.emittedUtc` | string | FROZEN, **excluded from `planHash`** |
 | `_provenance.inputs[]` | `{path, sha256}` | FROZEN — every mirror and tuning file |
 | `_provenance.tuning` | `{domain, version, sha256}` × 2 | FROZEN |
-| `_pending[]` | string[] | FROZEN — declared absences (e.g. `"demonFamilies"`), never silence |
+| `_pending[]` | string[] | FROZEN — declared absences (e.g. `"creatureFamilies"`), never silence |
 | `planHash` | string | FROZEN — sha256 over canonical manifest minus `_provenance`, plus the sorted per-tree hashes |
-| `roster.aptitudes[]` / `.elements[]` / `.statuses[]` / `.demonFamilies[]` | string[] | FROZEN — read from mirrors |
-| `roster.counts` | `{aptitudes, elements, statuses, demonFamilies, trees}` | FROZEN — emitted so `n` is visible without counting |
+| `roster.aptitudes[]` / `.elements[]` / `.statuses[]` / `.creatureFamilies[]` | string[] | FROZEN — read from mirrors |
+| `roster.counts` | `{aptitudes, elements, statuses, creatureFamilies, trees}` | FROZEN — emitted so `n` is visible without counting |
 | `ladder.tierCount` | int | FROZEN — structural |
 | `ladder.branches[]` | string[2] | FROZEN — `["off", "def"]`, the tokens the node id uses |
 | `ladder.gateCurrency` | enum, one legal value | FROZEN — **`"aptitudePoints"`**. Any other value is refused (`R-G0`, §2) |
@@ -1249,7 +1249,7 @@ emit, filled by `tree-language`; the stage-2 emit gate refuses a plan with an un
 |---|---|---|---|
 | `treeId` | string | FROZEN | `tree.<category>.<subject>` — the dotted id, and the file name: `data/seed/passive-tree/plan/<treeId>.v1.json`. **`.v1.json`, not `.json`** — one character, and a consumer opening the wrong one gets a missing file rather than an unfilled hole |
 | `treeSlug` | string | FROZEN | `<category>-<subject>`, **no dot** — the dotted `treeId` is illegal inside a `container_id` body, so node ids compose from this (§Node ids) |
-| `category` | enum(5) | FROZEN | **`primary`\|`elemental`\|`status`\|`family`\|`species`** (R7). This module emits only the first four; `species-tree` emits the fifth. ~~`aptitude`\|`element`\|`demonFamily`~~ are superseded renames — the catalog's `TreeRecord` and `tree-review`'s stratum axis both already use the five |
+| `category` | enum(5) | FROZEN | **`primary`\|`elemental`\|`status`\|`family`\|`species`** (R7). This module emits only the first four; `species-tree` emits the fifth. ~~`aptitude`\|`element`\|`creatureFamily`~~ are superseded renames — the catalog's `TreeRecord` and `tree-review`'s stratum axis both already use the five |
 | `subject` | string | FROZEN | the roster entry |
 | `gateQuantity` | string | FROZEN | opaque; never resolved here (§7) |
 | `gateIndexKind` | enum | FROZEN | which conversion `tree-resolve` owes |
@@ -1354,7 +1354,7 @@ of these inputs, each hashed into `_provenance.inputs`:
 | `data/seed/statuses/roster.json` (21) | **owed — this module emits it** |
 | `data/seed/atoms/vocabulary.json` (7 / 16 / 13) | **owed — this module emits it** |
 | `data/seed/derived-stats/catalog.json` (53 family entries, verified) | actor hub, shipped |
-| `data/seed/demons/families/roster.json` | **absent — `F = 0`, declared in `_pending`** |
+| `data/seed/creatures/families/roster.json` | **absent — `F = 0`, declared in `_pending`** |
 | `data/tuning/passive-tree.v{n}.json` | this module (its keys), `tree-resolve` and `tree-state` (theirs) |
 | `data/tuning/passive-tree-targets.v{n}.json` | this module |
 | `plannerVersion` | this module |
@@ -1446,7 +1446,7 @@ section so nobody copies one up here.
 | `gates.nearDuplicateRate.maxSharePermille` | ‰ | 5 |
 
 No axis lists its own members here — a `rosterNote` records where each is read from, matching
-`demon-roster-targets.v1.json`.
+`creature-roster-targets.v1.json`.
 
 ### Structural, in code, with the comment that says why
 
@@ -1536,7 +1536,7 @@ either as a requirement above or as a named other module's.
 | 2 | `data/seed/atoms/vocabulary.json` — the 7 / 16 / 13 mirror | this module emits it | emitting `propertyVocabulary` |
 | 3 | A **§10 cost-ladder row for `req(t)`** in `ssot-power-scale.md` | the power SSOT | shipping. Row 6's precedent (`XpToNext`) is exact: a threshold on an already-`Θ`-derived quantity that never multiplies a magnitude |
 | 4 | A **§11.10 content-breadth row** for the ten authored tiers | the caps register | shipping. The honest verdict: nothing is refused, and past `Θ ≈ 300` growth moves to the uncapped soul track — but §11.10a is explicit that a breadth verdict expires when its premise does, and generated content is exactly that premise |
-| 5 | A closed demon-family roster, or D27's curation sequenced | owner / build order | `F > 0`. Not a blocker on emitting a plan for the 42 closed-roster trees |
+| 5 | A closed creature-family roster, or D27's curation sequenced | owner / build order | `F > 0`. Not a blocker on emitting a plan for the 42 closed-roster trees |
 | 6 | `mechanism-wiring`'s four inert lines | wave 0 sibling | nothing here, but without them the mechanism budget buys nodes nothing can score (§4) |
 | 7 | ~~`gate-counters`' two quantities — `element_mastery` and `status_applied.<id>` (D37)~~ **— RESOLVED 2026-09-06.** Both read `carrier` in `gate-evidence.v1.json` (G6, live-probed). **Superseding blocker, tracked as `passive-tree-todo.md` J1:** `elemental_tree_spec()`/`status_tree_spec()` factory functions do not exist in `emit.py` | wave 0 sibling, then J1 | nothing here — `--emit` plans a `pending` tree for free. Gate-counters no longer gates generation waves 1 and 2 (1,200 of the 1,680 generic nodes, §7.1) — J1's missing factories do |
 
@@ -1618,7 +1618,7 @@ gets re-asked.
 
 **Not open — tasks with owners, listed so they are not mistaken for questions:** the two roster
 mirrors (§9 items 1–2, this module's own work); the `ssot-power-scale.md` rows (items 3–4, reviewed
-changes with the argument already written above); the demon-family roster (item 5, D27 sequences it
+changes with the argument already written above); the creature-family roster (item 5, D27 sequences it
 as build-order work); the `tierCount`-structural-vs-tunable disagreement between the ideal §14 and
 doc 02 §9.1 (resolved in §Tunables, with the reason).
 

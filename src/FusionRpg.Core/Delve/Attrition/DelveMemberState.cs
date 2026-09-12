@@ -3,7 +3,7 @@ using FusionRpg.Core.Battle;
 namespace FusionRpg.Core.Delve.Attrition;
 
 /// <summary>
-/// `delve-attrition` D2.17 (spec-delve-attrition.md §1) — one demon between rooms. <see cref="Pools"/>
+/// `delve-attrition` D2.17 (spec-delve-attrition.md §1) — one creature between rooms. <see cref="Pools"/>
 /// carries all six resource ids — `hp` included — so the battle's `Hp` and the pool have one owner
 /// (never a second, drift-prone source of truth for the same seat). <see cref="NerveStacks"/> is the
 /// counter `StatusRuntime` has no field for (P3, `decisions.md:115`) — the staged `nerve` status is

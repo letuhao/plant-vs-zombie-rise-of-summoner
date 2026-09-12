@@ -774,7 +774,7 @@ gate, and several may already be solved or already rejected.
 
 - **`PlantMixTreeManager.MixTreeStatistics`** — the host game computes `TotalMixRecipes`, `MaxTreeDepth`,
   `BasicPlantCount`, `PlantWithMostChildren`, `MaxChildrenCount` over its own recipe graph. That is very close to
-  the roster-metric shape a generator would want for a demon fusion tree.
+  the roster-metric shape a generator would want for a creature fusion tree.
 - **`AddRecipe` vs `AddOrderedRecipe`** — the host game found it necessary to have both an unordered and an
   order-sensitive recipe form. A fusion system that assumes commutativity is making a choice, not observing one.
 - **`TryGetDisMix` (un-fusion)** — the host game ships a decompose-back-to-parents path with its own

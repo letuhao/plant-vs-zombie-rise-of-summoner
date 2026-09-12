@@ -25,7 +25,7 @@
       "id": "set.emeraldumbrella-001",
       "nameKey": "set.emerald-cabbage-shell",
       "name": "Emerald Cabbage Shell",
-      "themeKey": "demon.emeraldumbrella",
+      "themeKey": "creature.emeraldumbrella",
       "members": [
         {
           "role": "armament-primary",

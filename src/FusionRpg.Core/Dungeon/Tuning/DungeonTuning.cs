@@ -25,7 +25,7 @@ public sealed record NerveTuning(
 
 public sealed record WildOutcomeRow(long JoinsMilli, long TakesLeavesMilli, long FleesMilli, long AttacksMilli);
 
-public sealed record WildOfferPreference(string Souls, string Spirit, string Item, string Demon);
+public sealed record WildOfferPreference(string Souls, string Spirit, string Item, string Creature);
 
 public sealed record WildTideTuning(bool Enabled, IReadOnlyList<int> ShiftRungs);
 
@@ -130,10 +130,10 @@ public static class DungeonTuningLoader
     // in this file, not that one spelling of it is banned and its plural slips through.
     static readonly string[] DayHourMinuteMs = { "Day", "Days", "Hour", "Hours", "Minute", "Minutes", "Ms" };
 
-    /// <summary>The five <c>DemonPersonality</c> enum members (<c>ContractPolicy.cs:18-25</c>),
+    /// <summary>The five <c>CreaturePersonality</c> enum members (<c>ContractPolicy.cs:18-25</c>),
     /// lowercased — "Personality keys = contracts.v1.json personalityRates members, checked at
     /// load" (spec-dungeon-registries.md). Copied as strings rather than an enum reference so
-    /// Dungeon.Tuning does not take a compile dependency on Demons.Contracts for five words.</summary>
+    /// Dungeon.Tuning does not take a compile dependency on Creatures.Contracts for five words.</summary>
     static readonly IReadOnlyList<string> PersonalityIds = new[] { "loyal", "stoic", "proud", "calculating", "feral" };
 
     public static DungeonTuning Parse(string json, DungeonRegistries registries)
@@ -327,8 +327,8 @@ public static class DungeonTuningLoader
             var p = Obj(offerPrefEl, personality, "wild.offerPreference");
             var path = $"wild.offerPreference.{personality}";
             var offer = new WildOfferPreference(
-                Str(p, "souls", path), Str(p, "spirit", path), Str(p, "item", path), Str(p, "demon", path));
-            foreach (var v in new[] { offer.Souls, offer.Spirit, offer.Item, offer.Demon })
+                Str(p, "souls", path), Str(p, "spirit", path), Str(p, "item", path), Str(p, "creature", path));
+            foreach (var v in new[] { offer.Souls, offer.Spirit, offer.Item, offer.Creature })
                 if (v is not ("craves" or "accepts" or "scorns"))
                     throw new DungeonTuningRejection($"{File}: {path} values must be craves · accepts · scorns, found '{v}'.");
             wildOfferPreference[personality] = offer;

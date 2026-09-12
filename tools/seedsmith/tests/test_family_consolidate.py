@@ -1,9 +1,9 @@
-"""Tests for seedsmith.adapters.demons.family.consolidate (spec-family-consolidate.md, wave D2)."""
+"""Tests for seedsmith.adapters.creatures.family.consolidate (spec-family-consolidate.md, wave D2)."""
 from __future__ import annotations
 
 import pytest
 
-from seedsmith.adapters.demons.family.consolidate import (
+from seedsmith.adapters.creatures.family.consolidate import (
     FamilyCandidateInput,
     canonical_key,
     consolidate,
@@ -92,14 +92,14 @@ def test_two_candidates_differing_only_in_native_label_still_merge():
 # ---- Multi-membership and zero-membership ------------------------------------------------------
 
 
-def test_blocked_demon_contributes_no_candidate_and_gets_zero_families():
-    # A `blocked` demon (basis="blocked" in family-extract) never becomes a FamilyCandidateInput
+def test_blocked_creature_contributes_no_candidate_and_gets_zero_families():
+    # A `blocked` creature (basis="blocked" in family-extract) never becomes a FamilyCandidateInput
     # at all — it simply has no row here. Confirmed by omission rather than a special value.
     result = consolidate([C("a", "nut", "A")])
-    assert "blocked-demon" not in result.assignments
+    assert "blocked-creature" not in result.assignments
 
 
-def test_a_demon_with_candidates_from_two_heads_gets_both_families():
+def test_a_creature_with_candidates_from_two_heads_gets_both_families():
     candidates = [C("a", "wall-nut", "A"), C("a", "shell", "A")]
     result = consolidate(candidates, synonyms={})
     assert len(result.assignments["a"]) == 2
@@ -123,7 +123,7 @@ def test_a_family_id_present_in_the_registry_is_never_renamed_or_repositioned():
     assert second.families[shell_id]["canonicalKey"] == "shell"
 
 
-def test_adding_a_new_demon_and_rereading_leaves_existing_ids_unchanged_new_appended_at_end():
+def test_adding_a_new_creature_and_rereading_leaves_existing_ids_unchanged_new_appended_at_end():
     first = consolidate([C("a", "wall-nut", "A")], synonyms={})
     second = consolidate(
         [C("a", "wall-nut", "A"), C("z", "shell", "Z")],
@@ -147,7 +147,7 @@ def test_an_existing_family_with_no_candidate_this_run_is_still_carried_forward_
 
 def test_generic_relational_suffixes_do_not_become_the_family_head():
     """The exact labels `google/gemma-4-26b-a4b-qat` produced unprompted on the first real
-    84-demon extraction run. Each pair below is semantically ONE family; before the fix, the
+    84-creature extraction run. Each pair below is semantically ONE family; before the fix, the
     suffix (not the theme word) became the head, so `ice-attackers`/`ice-family` split into two
     separate families instead of merging into one."""
     candidates = [
@@ -217,7 +217,7 @@ def test_the_family_pipeline_has_a_committed_entrypoint():
     2026-08-31 run used scratch scripts that live nowhere.
 
     Third instance of one defect: G1.3 recorded it for motifs, G4.3 fixed it for commander effects."""
-    from seedsmith.adapters.demons import generate_families
+    from seedsmith.adapters.creatures import generate_families
 
     assert callable(generate_families.run)
 
@@ -225,8 +225,8 @@ def test_the_family_pipeline_has_a_committed_entrypoint():
 def test_families_is_reachable_from_the_documented_cli():
     from seedsmith.report.cli import build_parser
 
-    args = build_parser().parse_args(["demons", "families", "--dry-run"])
-    assert args.demon_command == "families" and args.dry_run is True
+    args = build_parser().parse_args(["creatures", "families", "--dry-run"])
+    assert args.creature_command == "families" and args.dry_run is True
 
 
 def test_writing_is_refused_while_downstream_content_is_bound():
@@ -234,7 +234,7 @@ def test_writing_is_refused_while_downstream_content_is_bound():
     window closes when G4 writes its first row.**"* G4 has since written 84 commander effects, so
     re-deriving families can move an id and silently invalidate three layers of committed,
     append-only content. The entrypoint must refuse by default, and say what is at stake."""
-    from seedsmith.adapters.demons.generate_families import bound_artifacts, run
+    from seedsmith.adapters.creatures.generate_families import bound_artifacts, run
 
     bound = bound_artifacts()
     assert bound, "no downstream artifacts found — the fixture moved; re-measure before trusting this"
@@ -243,7 +243,7 @@ def test_writing_is_refused_while_downstream_content_is_bound():
 
 def test_the_refusal_names_every_bound_artifact_and_the_recovery_path(capsys):
     """A refusal that does not say what to do next just gets worked around."""
-    from seedsmith.adapters.demons.generate_families import run
+    from seedsmith.adapters.creatures.generate_families import run
 
     run(["--write"])
     out = capsys.readouterr().out
@@ -256,7 +256,7 @@ def test_the_refusal_names_every_bound_artifact_and_the_recovery_path(capsys):
 def test_dry_run_makes_no_model_calls_and_still_reports_the_batching():
     import socket
 
-    from seedsmith.adapters.demons.generate_families import run
+    from seedsmith.adapters.creatures.generate_families import run
 
     real = socket.socket.connect
 
@@ -277,7 +277,7 @@ def test_writing_persists_all_three_family_artifacts_or_none():
     `themes.v1.json` already taught this program once."""
     import inspect
 
-    from seedsmith.adapters.demons import generate_families
+    from seedsmith.adapters.creatures import generate_families
 
     src = inspect.getsource(generate_families.run)
     body = src.split("if args.write:")[1]

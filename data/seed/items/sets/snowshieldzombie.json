@@ -25,7 +25,7 @@
       "id": "set.snowshieldzombie-001",
       "nameKey": "set.champion-s-snowdrift",
       "name": "Champion's Snowdrift",
-      "themeKey": "demon.snowshieldzombie",
+      "themeKey": "creature.snowshieldzombie",
       "members": [
         {
           "role": "core-guard",

@@ -35,7 +35,7 @@ claimed — no round declares success against a metric it did not evaluate.
 | **`gates` starts `False` for every new metric**; promotion is a deliberate, later, separate act | `metrics/model.py:85` and its comment at `:8-9` |
 | A metric whose `needs` are unmet reports `NOT_MEASURED`, never a pass — silence and success stay distinguishable | `metrics/model.py:10-11`, `Severity.NOT_MEASURED` at `:34` |
 | An existing coverage/dedup/distribution metric family to model on | `metrics/coverage.py`, `metrics/dedup.py`, `metrics/distribution.py`, `metrics/corpus_coverage.py` |
-| The runner and its `--gate` / `--json` surface | `report/cli.py:154` (`cmd_report`), flags at `:778-780` and `:793-795` ⛔ **corrected 2026-09-03: `:728-741` is `_cmd_demons_diff_legacy`, not the runner** |
+| The runner and its `--gate` / `--json` surface | `report/cli.py:154` (`cmd_report`), flags at `:778-780` and `:793-795` ⛔ **corrected 2026-09-03: `:728-741` is `_cmd_creatures_diff_legacy`, not the runner** |
 | The in-game closed-loop pairing assertion this report mirrors | `EnablerPayoffCoverage.cs:21-34` |
 | The rung table the rung-band axis is indexed against | `data/tuning/action-rungs.v1.json` |
 

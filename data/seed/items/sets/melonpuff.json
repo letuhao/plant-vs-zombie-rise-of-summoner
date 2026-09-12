@@ -25,7 +25,7 @@
       "id": "set.melonpuff-001",
       "nameKey": "set.melon-burst-cannon",
       "name": "Melon Burst Cannon",
-      "themeKey": "demon.melonpuff",
+      "themeKey": "creature.melonpuff",
       "members": [
         {
           "role": "armament-primary",

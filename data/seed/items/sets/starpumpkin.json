@@ -25,7 +25,7 @@
       "id": "set.starpumpkin-001",
       "nameKey": "set.starfruit-sun-glow",
       "name": "Starfruit Sun-Glow",
-      "themeKey": "demon.starpumpkin",
+      "themeKey": "creature.starpumpkin",
       "members": [
         {
           "role": "armament-primary",

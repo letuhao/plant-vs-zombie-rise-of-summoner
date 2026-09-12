@@ -63,14 +63,14 @@ otherwise. Never `float` for a magnitude. A number a balance pass would change l
 > *"we have seedsmith generate seed → in game runtime read and **make it version** → use it and random
 > generator to generate list of atom effect → atom effect make concrete effect list for each effect
 > container. an effect container is anything that contain effect like item, action, passive skill,
-> trait, aura, unique demon, specie demon."*
+> trait, aura, unique creature, specie creature."*
 
 And, on how the layers stack:
 
-> *"roll only make when player create, it will not change. gacha, summon demon is different, it own
-> specie base effects but it have it own effect too. unique demon aka actor is more special because it
+> *"roll only make when player create, it will not change. gacha, summon creature is different, it own
+> specie base effects but it have it own effect too. unique creature aka actor is more special because it
 > own specie + summon/gacha + trait + passive skill + equiped items. **you can associate that specie
-> demon like race in some rpg game.**"*
+> creature like race in some rpg game.**"*
 
 And on who owns the numbers:
 
@@ -79,7 +79,7 @@ And on who owns the numbers:
 > affix, prefix, set bonus, rarity bonus … action container have lesser too, maybe 1 to 5. **so feature
 > define tunable variable and balance by them self.**"*
 
-**The race analogy is the load-bearing sentence.** A species passive is not a demon's identity — it is
+**The race analogy is the load-bearing sentence.** A species passive is not a creature's identity — it is
 the floor every member of that species stands on, and everything individual is layered above it.
 
 ---
@@ -132,7 +132,7 @@ and **absorbs today's `mods_json` grant blobs**."* Nothing has.
 So `instance-producer` is **not** lighting up an empty system. It is standing up a second effect path
 beside a working one, and the two must not both feed an actor. That makes `mods_json` a **migration
 concern, not merely a wiring one** — and it is exactly the "equipped items" line in the owner's own list
-of what a unique demon carries. Recorded here because the earlier framing would have let a build session
+of what a unique creature carries. Recorded here because the earlier framing would have let a build session
 discover it at the worst moment.
 
 ### REAL GAP — what genuinely does not exist
@@ -140,7 +140,7 @@ discover it at the worst moment.
 | Gap | Why it is real, not wiring |
 |---|---|
 | **no per-kind roll policy or count bands** | The owner's numbers (species 0-1 → 7-10, item much higher, action 1-5) exist nowhere. No tuning file declares them, per kind or at all |
-| **no species → container mapping** | `species-passive.{speciesId}` is a legal `container_id` and not one exists. Nothing maps a demon species to a container |
+| **no species → container mapping** | `species-passive.{speciesId}` is a legal `container_id` and not one exists. Nothing maps a creature species to a container |
 | **no player-creation expansion step** | Nothing anywhere rolls a per-player roster at profile creation. There is no such hook |
 | **`omni` is refused in an element slot** | `ActorElementTypes.cs:84` throws *"Element slot 'X' cannot use omni."* `omni` exists as a registered channel (`status.power.omni`, `status.resist.omni`) but a single atom that writes all six `combat.*` element channels is **not expressible today**. §4.3 explains why that matters |
 | **`stat.derived` is quarantined** | The kind an effect would most naturally use to write a derived channel is not wired end to end |
@@ -183,21 +183,21 @@ onto the existing six, **no grammar change**.
 | action | `skill` | active: its atoms declare a trigger |
 | passive skill | `skill` | passive: `stat.modify` / `stat.derived`, which **must declare no trigger** — authoring one is `TriggerNotAllowed` |
 | aura | `world-buff` or `patron` | by source |
-| **specie demon** | `species-passive` | **the race layer** |
-| **unique demon** | **not a kind — the ACTOR** | its effect list is the union of every container bound to it |
+| **specie creature** | `species-passive` | **the race layer** |
+| **unique creature** | **not a kind — the ACTOR** | its effect list is the union of every container bound to it |
 
-**A unique demon is never generated as a container.** Containers are generated and *bound*. This
+**A unique creature is never generated as a container.** Containers are generated and *bound*. This
 follows directly from *"Items have no behaviour. Actors do."*
 
-### 3.3 Three tiers of demon, and what each carries
+### 3.3 Three tiers of creature, and what each carries
 
 The race analogy, made concrete:
 
 | | Species passive | Own roll | Trait | Passive skill | Items | Title / commander |
 |---|---|---|---|---|---|---|
 | **Lawn spawn** (non-unique) | ✅ shared | — | — | — | — | ✅ commander buff |
-| **Summoned / gacha demon** | ✅ shared | ✅ its own | — | — | — | ✅ |
-| **Unique demon** (actor) | ✅ shared | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Summoned / gacha creature** | ✅ shared | ✅ its own | — | — | — | ✅ |
+| **Unique creature** (actor) | ✅ shared | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 **The species instance is rolled once per player, at player creation, and never changes.** Every
 conezombie that player ever meets reads the same frozen instance — one row, no per-spawn allocation on
@@ -214,7 +214,7 @@ So the **mechanism** is shared — one producer, one `Instantiator`, one instanc
 
 | Kind | Owner's stated band | Lives in |
 |---|---|---|
-| `species-passive` | 0-1 at rung 1 → **7-10 at rung 10** | `data/tuning/demon-species-effects.v1.json` |
+| `species-passive` | 0-1 at rung 1 → **7-10 at rung 10** | `data/tuning/creature-species-effects.v1.json` |
 | `item` | much higher — affix + prefix + set + rarity bonus | the item program's own tuning |
 | `skill` (action) | ~1-5, *"we will fine tune later"* | the action program's own tuning |
 | `trait` · `patron` · `world-buff` | not yet stated | their own |
@@ -241,7 +241,7 @@ Owner, 2026-09-01, clarifying Q7:
 
 **Three consequences worth stating.**
 
-**No model ever runs on a player's machine.** Seedsmith is a development tool (demon-seed Q10), so
+**No model ever runs on a player's machine.** Seedsmith is a development tool (creature-seed Q10), so
 everything a model decided is already frozen into committed JSON before the game is packaged.
 
 **The seed is release content, not a database.** It ships as files and is imported, which is exactly
@@ -634,12 +634,12 @@ superseding it: eligibility answers *may this affix appear here* (binary); L0 an
 
 ---
 
-## 6. The per-feature atom pipeline — and the one demon-seed forgot
+## 6. The per-feature atom pipeline — and the one creature-seed forgot
 
 Owner, 2026-09-01, answering what looked like a units question and correcting the scope instead:
 
 > *"better to make atom specific for each feature and we need make pipelines for it too. **so we really
-> miss these pipeline on our specie generator — we just generate demon species without ship atom
+> miss these pipeline on our specie generator — we just generate creature species without ship atom
 > container for it.** other feature need make they own pipeline. we will generate atom seed for specie
 > **after** other pipeline complete, because they need data from specie seed like family, rarity, favor,
 > lore."*
@@ -659,18 +659,18 @@ is what stops "elemental mastery" being authored once for items and again for sp
 pipeline therefore does two things: it may **author affixes specific to its domain**, and it **assigns
 which affixes its containers are eligible for** by choosing tags. It does not fork the library.
 
-### 6.2 ⛔ The gap the owner just found in `demon-seed`
+### 6.2 ⛔ The gap the owner just found in `creature-seed`
 
 **He is right, and it is a real gap in a map that has already been written.**
-[demon-seed-map.md](demon-seed-map.md)'s fourteen modules take an almanac entry all the way to a
+[creature-seed-map.md](creature-seed-map.md)'s fourteen modules take an almanac entry all the way to a
 per-player concrete species — anchors, threat bands, rarity, stats, import, runtime — and **not one of
 them produces an effect container.** `species-passive.{speciesId}` is a legal `container_id`; zero
 exist; nothing in that map creates one.
 
-So a demon generated by that program has an element, an aptitude, a rarity and a full stat block, and
+So a creature generated by that program has an element, an aptitude, a rarity and a full stat block, and
 **does nothing**. The gap was invisible because every module in the map was individually correct.
 
-`demon-seed` gains a module — provisionally `species-effects` — and it sits **after `anchor-emit`**,
+`creature-seed` gains a module — provisionally `species-effects` — and it sits **after `anchor-emit`**,
 for the reason the owner gave: it consumes anchor output.
 
 ### 6.3 What the species atom pipeline reads, and what each input constrains
@@ -704,15 +704,15 @@ it can reliably say *"a fire drake's fire-power affix is **core**, its ice-resis
 **occasional**."* A tuning table turns three ordinals into three weights, and a balance pass retunes all
 904 species with one file edit instead of a regeneration run.
 
-### 6.5 Two prerequisites, and one of them is not demon-seed's
+### 6.5 Two prerequisites, and one of them is not creature-seed's
 
 The pipeline cannot run until **both** exist:
 
-1. the anchors — `anchor-emit`, inside `demon-seed`
-2. **an affix library to choose from** — which is `effect-pipeline`'s, not demon-seed's
+1. the anchors — `anchor-emit`, inside `creature-seed`
+2. **an affix library to choose from** — which is `effect-pipeline`'s, not creature-seed's
 
 That second one is the real sequencing consequence of §6.1's split, and it is worth stating plainly:
-**`demon-seed` cannot finish on its own.** Its species will have no effects until this program ships an
+**`creature-seed` cannot finish on its own.** Its species will have no effects until this program ships an
 affix library and a schema for containers to reference it.
 
 ### 6.6 Prefix and suffix are two pools, not one
@@ -753,7 +753,7 @@ a downstream session does not reopen them.
 
 | | Question | Answer |
 |---|---|---|
-| **Q1** | where does a summoned demon's personal roll live? | a **`trait` container** — **but see Q10**, which corrects what that means. The answer was underspecified: `traits_json` already exists |
+| **Q1** | where does a summoned creature's personal roll live? | a **`trait` container** — **but see Q10**, which corrects what that means. The answer was underspecified: `traits_json` already exists |
 | **Q2** | what fills `RollSeed`? | a **per-player world seed**, hashed with the target id |
 | **Q3** | do count bands count rolls or atoms? | *superseded* — answered as a scope correction: bands are **per feature**, and each feature owns an atom pipeline (§6) |
 | **Q4** | should `omni` become a fan-out variant? | *superseded by §5* — with a channel-selection layer the workaround is unnecessary. `omni` stays a registered channel; `ActorElementTypes.cs:84`'s refusal in an element slot stands |
@@ -872,26 +872,26 @@ correctly flag it as an illegal cap.
 
 ### Q10 — `traits_json` answers *which*; the container answers *what it does* (2026-09-01)
 
-**Q1 was underspecified, and the owner caught it: *"trait is built by demon fusion."*** There are not
+**Q1 was underspecified, and the owner caught it: *"trait is built by creature fusion."*** There are not
 three populations of "trait". There are **four**, and the fourth is shipped and in save data:
 
 | Population | Where | Status |
 |---|---|---|
 | `TraitBattleCatalog`'s 14 | code | 1 migrated to a container (`critical-hunter`); **13 blocked** on event dispatch, the kind ceiling, the turn kernel, and the AI/rewards layers |
-| `DemonSpeciesDef.TraitPool` | the species | string ids — the source pool a roll draws from |
-| **`traits_json`** | `RpgStore.Demons.cs:69`, on the demon row | **shipped, live, in save data** |
+| `CreatureSpeciesDef.TraitPool` | the species | string ids — the source pool a roll draws from |
+| **`traits_json`** | `RpgStore.Creatures.cs:69`, on the creature row | **shipped, live, in save data** |
 | Q1's summon-rolled container | proposed | — |
 
 `FusionRoller.Roll` inherits parent traits and `RollPromotionTraits` grows them on promotion, both
-writing `traits_json` as a list of ids validated against `DemonTraitCatalog`. **That is a working
-system.** So `traits_json` and a trait binding would be two answers to *"what traits does this demon
+writing `traits_json` as a list of ids validated against `CreatureTraitCatalog`. **That is a working
+system.** So `traits_json` and a trait binding would be two answers to *"what traits does this creature
 have"* — the two-sources-of-truth defect.
 
 **The rule that resolves it:**
 
-> **`traits_json` is the source of truth for *which* traits a demon has.
+> **`traits_json` is the source of truth for *which* traits a creature has.
 > A `trait.{traitId}` container is *what that trait does*.
-> A demon's trait bindings are DERIVED from `traits_json`, never stored beside it.**
+> A creature's trait bindings are DERIVED from `traits_json`, never stored beside it.**
 
 Four consequences, and all of them shrink the work:
 
@@ -899,8 +899,8 @@ Four consequences, and all of them shrink the work:
 - **No save migration.** `traits_json` is untouched.
 - **The blocked thirteen stop blocking.** A trait id with no container binds nothing — the same
   inert-but-correct state the whole effect layer is in today, lighting up when its container is authored.
-- **Summon rolls need no new kind.** A summoned demon's personal roll writes trait ids into
-  `traits_json`, which `demon-summoning` (V1) already claims to do. Q1 becomes a far smaller change.
+- **Summon rolls need no new kind.** A summoned creature's personal roll writes trait ids into
+  `traits_json`, which `creature-summoning` (V1) already claims to do. Q1 becomes a far smaller change.
 
 **A convergence worth recording:** `FusionRoller.cs:27` already does
 `SeededRng.DeriveStream(seed, "fusion:traits")` — **§5.4's per-layer named RNG streams already exist in
@@ -931,7 +931,7 @@ document, not a decision this program may make on its own.
 | [effect-atom/definitions.md](effect-atom/definitions.md) | a **slot** declaration, and the pool's unit becoming an **affix** (a bundle) rather than a single atom | §5.3 |
 | [effect-atom/definitions.md](effect-atom/definitions.md) | the **resolution order** and the **per-layer RNG streams** stated normatively | §5.4 |
 | [item/ssot-rarity.md](item/ssot-rarity.md) | rarity governs a band **per affix class**, not one count | §6.6 |
-| [demon-seed-map.md](demon-seed-map.md) | a fifteenth module, `species-effects` — already flagged in its §3a | §6.2 |
+| [creature-seed-map.md](creature-seed-map.md) | a fifteenth module, `species-effects` — already flagged in its §3a | §6.2 |
 
 **Timing is the argument for doing all six now:** no containers exist yet. Today each is a schema edit;
 after content each is a migration of everything ever authored.
@@ -1053,7 +1053,7 @@ D3 rolls elite-pack affixes per encounter precisely because identical trash goes
 deliberately gives that up for legibility and for zero per-spawn allocation on the Unity main thread.
 
 **Q1's answer already makes the reversal free.** An elite is an actor with **one extra `trait`
-binding** — the same mechanism a summoned demon uses for its personal roll. So "elites get their own
+binding** — the same mechanism a summoned creature uses for its personal roll. So "elites get their own
 roll" can be added later with **no schema change and no migration**, which is the strongest possible
 form of a deferred decision.
 
@@ -1095,6 +1095,6 @@ exists — which is the same timing argument §8 makes about every amendment it 
 - [effect-atom/atom-family-library.md](effect-atom/atom-family-library.md) — 28 families → ~980 rows
 - [item/ssot-rarity.md](item/ssot-rarity.md) §3.3 — the ten rungs and their pool-roll bands
 - [item/seed-contract.md](item/seed-contract.md) — the seed law
-- [demon-seed-ideal.md](demon-seed-ideal.md) §7 — the species-passive container, already decomposed
+- [creature-seed-ideal.md](creature-seed-ideal.md) §7 — the species-passive container, already decomposed
 - [../research/arpg-effects/](../research/arpg-effects/) — stacking, procs, ailments, crit
 - [../research/ai-native-generation/README.md](../research/ai-native-generation/README.md) — the contract rules

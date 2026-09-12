@@ -9,7 +9,7 @@ import { TitleScreen } from "./TitleScreen";
 // GG-38: entry loads the Sanctum only. Lawn (Phaser) and World (Phaser dual-plane map island) are the
 // two heaviest dependencies in the tree (tech-stack.md §2 / T3) and neither is needed to reach the
 // Sanctum — each becomes its own chunk, fetched only when its route is actually visited.
-const DemonsPage = lazy(() => import("@/features/demons/DemonsPage").then((m) => ({ default: m.DemonsPage })));
+const CreaturesPage = lazy(() => import("@/features/creatures/CreaturesPage").then((m) => ({ default: m.CreaturesPage })));
 const LawnStage = lazy(() => import("@/stages/lawn/LawnStage").then((m) => ({ default: m.LawnStage })));
 const ActorLadderDemoPage = lazy(() =>
   import("@/ui/actor/ActorLadderDemoPage").then((m) => ({ default: m.ActorLadderDemoPage }))
@@ -133,10 +133,10 @@ export function AppRoutes() {
         />
         <Route path="roster" element={<Navigate to="/sanctum?panel=creatures" replace />} />
         <Route
-          path="demons"
+          path="creatures"
           element={
-            <Suspense fallback={<ChunkFallback testId="chunk-fallback-demons" />}>
-              <DemonsPage />
+            <Suspense fallback={<ChunkFallback testId="chunk-fallback-creatures" />}>
+              <CreaturesPage />
             </Suspense>
           }
         />

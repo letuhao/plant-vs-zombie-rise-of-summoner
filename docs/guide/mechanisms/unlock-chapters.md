@@ -81,7 +81,7 @@ Chapters keep lawn-first onboarding while still promising the whole war over tim
 ## Common mix-ups
 
 **I reached Dave 20 — where are Expeditions?**  
-Expeditions unlock on the live beat (bound demon), not on this Vision table yet.
+Expeditions unlock on the live beat (bound creature), not on this Vision table yet.
 
 **Are the Dave numbers final?**  
 They are the product map. Balance data will own the live thresholds later.

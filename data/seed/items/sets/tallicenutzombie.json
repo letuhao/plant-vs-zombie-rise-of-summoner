@@ -25,7 +25,7 @@
       "id": "set.tallicenutzombie-001",
       "nameKey": "set.eternal-frost-debate",
       "name": "Eternal Frost Debate",
-      "themeKey": "demon.tallicenutzombie",
+      "themeKey": "creature.tallicenutzombie",
       "members": [
         {
           "role": "armament-primary",

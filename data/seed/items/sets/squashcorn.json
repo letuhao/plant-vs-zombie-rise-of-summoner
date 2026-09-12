@@ -25,7 +25,7 @@
       "id": "set.squashcorn-001",
       "nameKey": "set.corn-husk-volley",
       "name": "Corn Husk Volley",
-      "themeKey": "demon.squashcorn",
+      "themeKey": "creature.squashcorn",
       "members": [
         {
           "role": "armament-primary",

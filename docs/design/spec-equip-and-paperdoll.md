@@ -30,10 +30,10 @@ the same slot wearing two vocabularies — this is the single load-bearing decis
 because if the display word were the stored value, an affix pool authored for helmets would need
 authoring twice. The paper-doll must never let its slot art or its label leak into the id it binds to.
 
-**Frame is a declared field, never derived from faction.** `DemonSpeciesDef.Side` conflates capture
+**Frame is a declared field, never derived from faction.** `CreatureSpeciesDef.Side` conflates capture
 side with body — the roster already contains zombie-side entries with plant bodies
 (`peashooterzombie`, `cherrynutzombie`), verified at
-[`DemonSpeciesCatalog.cs:11`](../../src/FusionRpg.Core/Demons/DemonSpeciesCatalog.cs). A paper-doll that
+[`CreatureSpeciesCatalog.cs:11`](../../src/FusionRpg.Core/Creatures/CreatureSpeciesCatalog.cs). A paper-doll that
 infers frame from side would draw a plant body on a specimen whose faction says zombie, or vice versa.
 
 ---
@@ -95,7 +95,7 @@ icon, because differentiating them would undo the only thing that justifies the 
 
 [ssot-equip-slots.md §2.10](../architecture/item/ssot-equip-slots.md): roles open on actor **level**,
 read from `rpg_unique_actors.level` — the column already exists and already advances. A new specimen
-starts with **four** slots, not fifteen, which directly answers the *"twenty demons × twelve slots is a
+starts with **four** slots, not fifteen, which directly answers the *"twenty creatures × twelve slots is a
 gearing chore"* worry: a bench specimen needs four items, and only actors you actually level reach all
 fifteen.
 
@@ -236,7 +236,7 @@ so"*, with the display requirement stated as part of the pick, not a nicety:
 [x] I checked decisions.md for a lock covering this (Game GUI row; decisions.md:90 on actions being
     battle-mode only, cited directly).
 [x] Every factual claim cites file:line or a document section.
-[x] I verified claims against CODE where code exists — DemonSpeciesCatalog.cs:11 for the frame/faction
+[x] I verified claims against CODE where code exists — CreatureSpeciesCatalog.cs:11 for the frame/faction
     conflation, AtomKindRegistry.cs for the 11-of-12 battle-consumer claim, CooldownLedger.cs:8 for
     the dedup rule; the 56-roll hybrid sum was recomputed independently this session, not copied.
 [x] I read the surrounding section of every rule I quoted.

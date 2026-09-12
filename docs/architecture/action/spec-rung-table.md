@@ -23,7 +23,7 @@ number that is not in this table does not have permission to exist."* **Row 7 al
 > Affix tier ladder `m_t = m1 × 1.75^(t−1)`, geometric, 5 rungs. *"Bounded at t5 (9.4× total). A
 > **within-item quality ladder in relative space** — it never sees a level. §2's theorem does not apply."*
 
-The unlock ladder is the same shape one level up: a **within-demon-type quality ladder in relative space**.
+The unlock ladder is the same shape one level up: a **within-creature-type quality ladder in relative space**.
 So it is built from two shipped mechanisms — the `1.75` magnitude ladder and `pool_rolls` breadth — rather
 than a third.
 
@@ -129,7 +129,7 @@ Every source of actions needs a rung, and that must not become three private cur
 
 | Source | Rung from | Capped? |
 |---|---|---|
-| Demon-type levelling (`A11`) | `min(earnCount, cap)` | **cap**, tunable |
+| Creature-type levelling (`A11`) | `min(earnCount, cap)` | **cap**, tunable |
 | Item grant | the item's rarity / tier ladder | no |
 | Passive skill, variant | that system's own tier | no |
 | Future mechanisms | **declare a mapping at registration** | no |

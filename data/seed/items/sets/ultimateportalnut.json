@@ -25,7 +25,7 @@
       "id": "set.ultimateportalnut-001",
       "nameKey": "set.temporal-husk",
       "name": "Temporal Husk",
-      "themeKey": "demon.ultimateportalnut",
+      "themeKey": "creature.ultimateportalnut",
       "members": [
         {
           "role": "core-guard",

@@ -7,20 +7,20 @@
 
 ---
 
-## Phase 0 — Truth + UniqueDemon write (Wave 0)
+## Phase 0 — Truth + UniqueCreature write (Wave 0)
 
 - [x] **AS-0.1** Stale-doc amend (D5) — `stale-doc-amend`
   - Accept: actor-sheet aptitudes-tab, class-system allocation-surface, guide aptitudes, menu queue P4 claim aptitude-sheet; no active commander-only-v1 claims
   - Accept (G1): `aptitude-sheet-ideal.md` hand-off points at map + `docs/architecture/aptitude-sheet/`
-  - Verify: `rg -n "commander-scope|commander scope only|UniqueDemon.*out of scope" docs/` (struck/superseded OK)
+  - Verify: `rg -n "commander-scope|commander scope only|UniqueCreature.*out of scope" docs/` (struck/superseded OK)
   - Files: docs listed in `spec-stale-doc-amend.md`
   - Deps: None
   - Scope: S
 
-- [x] **AS-0.2** UniqueDemon GET/POST + FE hooks — `unique-allocate`
-  - Accept: `GET /api/aptitudes/unique/{instanceId}` returns persisted shares + budget/leftover (no EffectiveUnique); `POST .../unique/allocate` saves UniqueDemon; overspend 409; empty legal; ownership checks
+- [x] **AS-0.2** UniqueCreature GET/POST + FE hooks — `unique-allocate`
+  - Accept: `GET /api/aptitudes/unique/{instanceId}` returns persisted shares + budget/leftover (no EffectiveUnique); `POST .../unique/allocate` saves UniqueCreature; overspend 409; empty legal; ownership checks
   - Accept: FE `useUniqueAptitudes` / `useSaveUniqueAptitudes` (names flexible)
-  - Accept (G2): after POST, `LoadAllocation(UniqueDemon, instanceId)` equals saved shares; unique hooks unused by Mode C commander path; shares/budget/leftover are `long` (no float magnitudes)
+  - Accept (G2): after POST, `LoadAllocation(UniqueCreature, instanceId)` equals saved shares; unique hooks unused by Mode C commander path; shares/budget/leftover are `long` (no float magnitudes)
   - Verify: `dotnet test tests\FusionRpg.Server.Tests --filter UniqueAptitude`; curl GET/POST
   - Files: `AptitudeEndpoints.cs`, RpgStore aptitudes, `web/.../lib/bus/*`, Server.Tests
   - Deps: None (parallel with 0.1)
@@ -52,7 +52,7 @@
 
 ### Checkpoint 0
 
-- [x] Unique GET/POST curl green; empty UniqueDemon legal
+- [x] Unique GET/POST curl green; empty UniqueCreature legal
 - [x] Scoped SignalR on unique allocate; FE species typing present
 - [x] D5 `rg` clean; icons + posture packs load
 - [x] Review Phase 0 before lawn wire
@@ -61,9 +61,9 @@
 
 ## Phase 1 — Lawn + presentation contracts (Wave 1)
 
-- [ ] **AS-1.1** Injector Bound UniqueDemon apply — `unique-lawn-wire`
-  - Accept: Bound Hot resolve = commander + UniqueDemon(instanceId); generals stay commander+species; fetch via **unique GET only** (S4); empty unique legal
-  - Accept (G6): Bound unique sharing a species id with a general still resolves `commander+UniqueDemon`, never empire species shares
+- [ ] **AS-1.1** Injector Bound UniqueCreature apply — `unique-lawn-wire`
+  - Accept: Bound Hot resolve = commander + UniqueCreature(instanceId); generals stay commander+species; fetch via **unique GET only** (S4); empty unique legal
+  - Accept (G6): Bound unique sharing a species id with a general still resolves `commander+UniqueCreature`, never empire species shares
   - Verify: Injector/Core unit; live probe after allocate+AptitudesUpdated; `.\scripts\guard-secondary-no-unity.ps1`
   - Files: `RpgClient.cs`, `CheatState.cs`, Hot resolve path
   - Deps: AS-0.2, AS-0.3
@@ -94,7 +94,7 @@
 
 ### Checkpoint 1
 
-- [ ] Bound unique lawn reflects UniqueDemon after allocate+reload
+- [ ] Bound unique lawn reflects UniqueCreature after allocate+reload
 - [x] Fold fixtures show leftover + decision in-band
 - [x] Piece landmark tests green; HTML drafts present
 - [x] Review Phase 1 before hosts
@@ -104,7 +104,7 @@
 ## Phase 2 — Hosts (Wave 2)
 
 - [x] **AS-2.1** ActorSheet role gate Mode A/C — `host-role-gate`
-  - Accept: creature → UniqueDemon draft/Confirm; commander → commander; thin RecipeMount; shell mirror Confirm/**Cancel** (S8); no DemonType write from sheet
+  - Accept: creature → UniqueCreature draft/Confirm; commander → commander; thin RecipeMount; shell mirror Confirm/**Cancel** (S8); no CreatureType write from sheet
   - Accept (G8): scope-chip title/fiction matches Mode A vs C
   - Accept: Activate path = `POST /api/aptitude-presets/activate` only when presets wired (Done gated on AS-3.5)
   - Verify: `npm test -- --run AptitudesTab ActorPanel`
@@ -174,9 +174,9 @@
 
 ### Checkpoint 3 — program Done
 
-- [x] Map success criteria checklist all met (or explicitly deferred items only A6/E6 keep-aligned) — FE A/B/C + presets proven; AS-1.1 Bound UniqueDemon lawn wire remains injector
+- [x] Map success criteria checklist all met (or explicitly deferred items only A6/E6 keep-aligned) — FE A/B/C + presets proven; AS-1.1 Bound UniqueCreature lawn wire remains injector
 - [x] Guards: DAL green (this stream); secondary-no-unity N/A for FE-only
-- [ ] Live: Bound unique after Activate/allocate shows UniqueDemon
+- [ ] Live: Bound unique after Activate/allocate shows UniqueCreature
 - [ ] Menu queue P4 Aptitudes evidence noted on map/queue
 
 ---

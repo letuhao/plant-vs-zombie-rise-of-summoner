@@ -25,7 +25,7 @@
       "id": "set.garlicgatling-001",
       "nameKey": "set.pea-pod-gatling",
       "name": "Pea-Pod Gatling",
-      "themeKey": "demon.garlicgatling",
+      "themeKey": "creature.garlicgatling",
       "members": [
         {
           "role": "armament-primary",

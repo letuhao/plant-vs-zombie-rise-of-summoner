@@ -10,7 +10,7 @@
     data/seed/actions/type-weights.json                  A-T1 — categoryMilli, for quota recompute
     data/tuning/action-corpus-run.v1.json                round counts (generalCount/perFamilyCount/
                                                           perSpeciesCount) and mode
-    data/seed/demons/species/**/*.json                      live species/family membership
+    data/seed/creatures/species/**/*.json                      live species/family membership
     data/seed/items/affix-families/*.json                the 98-family namespace
     data/seed/actions/pairings.json                      read-only; today's 5 out-of-namespace ids
 
@@ -49,11 +49,11 @@ from ...metrics.action_coverage import (
     ALL_ACTION_COVERAGE_CLOSED_METRICS, ALL_ACTION_COVERAGE_OPEN_METRICS,
 )
 
-__all__ = ["run", "regenerate", "ACTIONS_ROOT", "DEMONS_ROOT"]
+__all__ = ["run", "regenerate", "ACTIONS_ROOT", "CREATURES_ROOT"]
 
 REPO_ROOT = Path(__file__).resolve().parents[5]
 ACTIONS_ROOT = REPO_ROOT / "data" / "seed" / "actions"
-DEMONS_ROOT = REPO_ROOT / "data" / "seed" / "demons"
+CREATURES_ROOT = REPO_ROOT / "data" / "seed" / "creatures"
 TYPE_WEIGHTS_PATH = ACTIONS_ROOT / "type-weights.json"
 PAIRINGS_PATH = ACTIONS_ROOT / "pairings.json"
 
@@ -68,7 +68,7 @@ def _family_members(family_assignments: dict) -> "dict[str, list[str]]":
     return {fam: sorted(v) for fam, v in members.items()}
 
 
-def _build_ctx(*, actions_root: Path, demons_root: Path, catalog_path: Path,
+def _build_ctx(*, actions_root: Path, creatures_root: Path, catalog_path: Path,
               type_weights_path: Path, run_tuning_path: Path,
               family_assignments_path: "Path | None", pairings_path: Path,
               round_no: int) -> ActionCoverageCtx:
@@ -77,7 +77,7 @@ def _build_ctx(*, actions_root: Path, demons_root: Path, catalog_path: Path,
 
     using_live_families = family_assignments_path is None
     if using_live_families:
-        live_species_root = catalog_path if catalog_path.is_dir() else demons_root / "species"
+        live_species_root = catalog_path if catalog_path.is_dir() else creatures_root / "species"
         family_assignments = derive_live_family_assignments(live_species_root)
     else:
         family_assignments = json.loads(family_assignments_path.read_text(encoding="utf-8"))
@@ -137,7 +137,7 @@ def _build_ctx(*, actions_root: Path, demons_root: Path, catalog_path: Path,
     )
 
 
-def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_ROOT,
+def regenerate(*, actions_root: Path = ACTIONS_ROOT, creatures_root: Path = CREATURES_ROOT,
               catalog_path: Path = CATALOG_PATH, type_weights_path: "Path | None" = None,
               run_tuning_path: Path = RUN_TUNING_PATH, family_assignments_path: "Path | None" = None,
               pairings_path: "Path | None" = None, round_no: int = 1, write: bool = True) -> dict:
@@ -147,7 +147,7 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
     pairings_path = pairings_path or PAIRINGS_PATH
 
     cov = _build_ctx(
-        actions_root=actions_root, demons_root=demons_root, catalog_path=catalog_path,
+        actions_root=actions_root, creatures_root=creatures_root, catalog_path=catalog_path,
         type_weights_path=type_weights_path, run_tuning_path=run_tuning_path,
         family_assignments_path=family_assignments_path, pairings_path=pairings_path,
         round_no=round_no,

@@ -25,7 +25,7 @@
       "id": "set.submarine-b2-001",
       "nameKey": "set.edgar-s-unyielding-design",
       "name": "Edgar's Unyielding Design",
-      "themeKey": "demon.submarine_b2",
+      "themeKey": "creature.submarine_b2",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.cherrymine-001",
       "nameKey": "set.sprouting-spud-bomb",
       "name": "Sprouting Spud Bomb",
-      "themeKey": "demon.cherrymine",
+      "themeKey": "creature.cherrymine",
       "members": [
         {
           "role": "armament-primary",

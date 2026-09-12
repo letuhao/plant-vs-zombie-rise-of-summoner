@@ -25,7 +25,7 @@
       "id": "set.silvergarlic-001",
       "nameKey": "set.silver-garlic",
       "name": "Silver Garlic",
-      "themeKey": "demon.silvergarlic",
+      "themeKey": "creature.silvergarlic",
       "members": [
         {
           "role": "armament-primary",

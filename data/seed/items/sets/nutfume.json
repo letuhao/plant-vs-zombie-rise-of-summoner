@@ -25,7 +25,7 @@
       "id": "set.nutfume-001",
       "nameKey": "set.nut-shell-spore-guard",
       "name": "Nut-Shell Spore Guard",
-      "themeKey": "demon.nutfume",
+      "themeKey": "creature.nutfume",
       "members": [
         {
           "role": "core-guard",

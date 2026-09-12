@@ -25,7 +25,7 @@
       "id": "set.jacksondriverboss-001",
       "nameKey": "set.the-final-encore",
       "name": "The Final Encore",
-      "themeKey": "demon.jacksondriverboss",
+      "themeKey": "creature.jacksondriverboss",
       "members": [
         {
           "role": "armament-primary",

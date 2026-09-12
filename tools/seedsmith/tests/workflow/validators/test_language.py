@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from seedsmith.workflow.validators.language import language_consistency
 
-# The real, committed text from data/seed/dungeon/events/event.bargain-demon.allpeater-001.json —
+# The real, committed text from data/seed/dungeon/events/event.bargain-creature.allpeater-001.json —
 # English motifs, Chinese fragments ("火力", "分配") spliced in mid-sentence.
 REAL_DUNGEON_DEFECT_FLAVOR = (
     "A towering silhouette of smoke and embers coalesces in the center of the chamber. It offers "

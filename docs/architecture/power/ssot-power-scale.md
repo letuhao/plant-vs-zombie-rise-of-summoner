@@ -300,7 +300,7 @@ appears in code.
 | `Wz` | Zomboss level | **1000** | Content side, parity with Dave by default |
 | `Wm` | map depth | **5000** (=5.0) | `mapLevel(M) = Wm · DangerBand(M)`. Shipped bands run 0–6 (`SectorTypeCatalog`: homeworld 0, stable 1, barren 2, rich/nexus 3, storm/warcamp 4, boss-lair 6), so a boss-lair is worth **30 Θ** against the whole 5-tier size ladder's 25 — the deepest sector edges out the widest world, which is the intended shape. Confirmable by the world program; it no longer blocks |
 | `Ww` | world size tier | **5000** (=5.0) | Five tiers, ~8 → ~128 nodes; a tier step is worth 5 levels of opposition |
-| `thetaOffset` | species threat rung (**additive, not a coefficient**) | **0–40**, ten rungs | Not `weight × axis` like the rows above — a per-rung integer added directly into `Θ` before `P(Θ)` is applied. Sourced from `demon-threat.v1.json` (`threat-band`, `demon-seed` module 4), never a formula: the captured PvZ stat distribution is lumpy, not smooth, so a fitted curve would empty half the rungs. `P(Θ)` is applied once, downstream, by `species-generator` — the offset is never scaled a second time |
+| `thetaOffset` | species threat rung (**additive, not a coefficient**) | **0–40**, ten rungs | Not `weight × axis` like the rows above — a per-rung integer added directly into `Θ` before `P(Θ)` is applied. Sourced from `creature-threat.v1.json` (`threat-band`, `creature-seed` module 4), never a formula: the captured PvZ stat distribution is lumpy, not smooth, so a fitted curve would empty half the rungs. `P(Θ)` is applied once, downstream, by `species-generator` — the offset is never scaled a second time |
 
 **None of these is a considered balance decision.** They are defensible starting points chosen so the
 system is runnable, exactly as `tier-bands.v1.json` says of its own values: *"working values chosen to
@@ -609,8 +609,8 @@ actually landed, the same "assigned at the moment they land" rule D8's own note 
 | 4 | `RpgXpPowerScale.ForKill` | stub `1.0` | `RpgXpPowerScale.cs:9` | **Deleted.** Its documented future job ("scale kill XP by zombie power") is `Θ_content` |
 | 5 | `LoamPolicy.DevelopmentUpkeepPerLevel = 5` | linear | `LoamPolicy.cs:30` | **Economy magnitude — scales on `P(Θ)` only if its matching faucet does** (§10.4) |
 | 6 | `XpToNext = first + (L−1)·step` | arithmetic | `Progression/RpgProgression.cs:43` | **Kept, unchanged in SHAPE.** It is the *cost* ladder, not a power ladder — see §10.5. **Type corrected 2026-09-04:** `double` → `long` end to end (curve, awards, `RpgActorState.Xp`, DTOs, and the `xp`/`delta` columns) — XP is a persisted magnitude and CLAUDE.md's rule had never been applied to it ([progression-shape-audit-2026-09-04.md](../../research/progression-shape-audit-2026-09-04.md) §4.1) |
-| 26 | `SpeciesXpCurve.XpToNext = first + (L−1)·step` | arithmetic, identical shape to row 6 | `Progression/SpeciesProgression.cs:53` | **Added 2026-09-05 (`species-build` T1.1, module 3 `species-xp`).** Same verdict as row 6, same reason: a *cost* ladder for how much XP a demon SPECIES' own per-player level needs, not a power ladder — only its ratio against `P(Θ)` matters (§10.5). A separate row rather than reusing row 6 because it reads its own tunable pair (`SpeciesProgressionTuning.CurveFirst/CurveStep`, `data/tuning/species-progression.v1.json`), not `RpgXpCurve`'s — a species' own pace is this program's own balance surface, deliberately not shared with plant/zombie/player type progression (`SpeciesActorState` is a parallel type to `RpgActorState` for the same reason, per the class's own doc comment). `long` end to end from the day it shipped, so it carries none of row 6's own pre-2026-09-04 `double` history. |
-| 27 | Specimen (unique-demon) level — the `xp`/`level` pair on `rpg_unique_actors` | arithmetic, identical shape to row 6 | `Sqlite/RpgStore.UniqueActors.cs` (`AwardUniqueActorXpUnlocked`), curve row `xpCurve.specimen` in `data/tuning/progression.v1.json` | **Added 2026-09-05 (effort-power reconciliation M1, [08-effort-power-reconciliation.md](../../research/passive-tree/08-effort-power-reconciliation.md) §2).** Same verdict as row 6: a *cost* ladder, not a power ladder — only its ratio against `P(Θ)` matters (§10.5). **Recorded because it was corrected, not because it was found compliant.** The level used to be drained by a hardcoded `while (xp >= 100.0)` loop — a flat 100 XP per level, no tuning row, no `RpgXpCurve` call — while the resulting `level` reached the shared ladder unchanged (`BattleModels.cs:169-175` treats it as `Θ` directly; ~~`WebMatchService.cs:339-352`~~ `WebMatchService.cs:396-403` — re-cited 2026-09-05, the lines drifted — feeds it `s.Actor.Level`). A flat cost against a quadratic reward makes specimen power quadratic **in effort**, where §10.5's whole promise is linear: cumulative cost `100L` against the player line's `≈22.5L²`, so at level 1,000 a specimen level bought the same `P(Θ)` for ~1/225th of the effort, and the ratio widened with every level rather than sitting at a constant a balance pass could absorb. It now reads `RpgXpCurve.XpToNext` with its own `(first, step)` row alongside `plant`/`zombie`/`player`; `first = 100` reproduces the old flat cost exactly at level 1, so early pace is unchanged and only the late-game divergence moved. **This is the only ladder in the repo the sweep found broken rather than merely unlisted** — it was invisible to `guard-power.ps1` because it lives in `FusionRpg.Data`, where the `f(level)` heuristic does not match a store method |
+| 26 | `SpeciesXpCurve.XpToNext = first + (L−1)·step` | arithmetic, identical shape to row 6 | `Progression/SpeciesProgression.cs:53` | **Added 2026-09-05 (`species-build` T1.1, module 3 `species-xp`).** Same verdict as row 6, same reason: a *cost* ladder for how much XP a creature SPECIES' own per-player level needs, not a power ladder — only its ratio against `P(Θ)` matters (§10.5). A separate row rather than reusing row 6 because it reads its own tunable pair (`SpeciesProgressionTuning.CurveFirst/CurveStep`, `data/tuning/species-progression.v1.json`), not `RpgXpCurve`'s — a species' own pace is this program's own balance surface, deliberately not shared with plant/zombie/player type progression (`SpeciesActorState` is a parallel type to `RpgActorState` for the same reason, per the class's own doc comment). `long` end to end from the day it shipped, so it carries none of row 6's own pre-2026-09-04 `double` history. |
+| 27 | Specimen (unique-creature) level — the `xp`/`level` pair on `rpg_unique_actors` | arithmetic, identical shape to row 6 | `Sqlite/RpgStore.UniqueActors.cs` (`AwardUniqueActorXpUnlocked`), curve row `xpCurve.specimen` in `data/tuning/progression.v1.json` | **Added 2026-09-05 (effort-power reconciliation M1, [08-effort-power-reconciliation.md](../../research/passive-tree/08-effort-power-reconciliation.md) §2).** Same verdict as row 6: a *cost* ladder, not a power ladder — only its ratio against `P(Θ)` matters (§10.5). **Recorded because it was corrected, not because it was found compliant.** The level used to be drained by a hardcoded `while (xp >= 100.0)` loop — a flat 100 XP per level, no tuning row, no `RpgXpCurve` call — while the resulting `level` reached the shared ladder unchanged (`BattleModels.cs:169-175` treats it as `Θ` directly; ~~`WebMatchService.cs:339-352`~~ `WebMatchService.cs:396-403` — re-cited 2026-09-05, the lines drifted — feeds it `s.Actor.Level`). A flat cost against a quadratic reward makes specimen power quadratic **in effort**, where §10.5's whole promise is linear: cumulative cost `100L` against the player line's `≈22.5L²`, so at level 1,000 a specimen level bought the same `P(Θ)` for ~1/225th of the effort, and the ratio widened with every level rather than sitting at a constant a balance pass could absorb. It now reads `RpgXpCurve.XpToNext` with its own `(first, step)` row alongside `plant`/`zombie`/`player`; `first = 100` reproduces the old flat cost exactly at level 1, so early pace is unchanged and only the late-game divergence moved. **This is the only ladder in the repo the sweep found broken rather than merely unlisted** — it was invisible to `guard-power.ps1` because it lives in `FusionRpg.Data`, where the `f(level)` heuristic does not match a store method |
 
 Row 17 (`RpgProgressionSubsystem`'s `level`-gated bonus flats, found latent by class-system P1.13,
 2026-08-26) is **retired, not merely re-verdicted** — class-system P3.3 (2026-08-27) deleted the stub
@@ -635,8 +635,8 @@ nobody "unifies" them into `Θ` by mistake.
 | 13 | `PowerScalar.Of` — geomean over 5 categories | geometric mean | `PowerReads.cs:38` | **Display only, and it has no production caller.** Never a balance input |
 | 15 | `double` in stat composition (14 sites) | IEEE-754 | `CombatDerivedReader`, `ElementHub`, `StatModifier`, `CombatPolicies` | **Decided 2026-08-23: it stands** — §10.7 |
 | 14 | `maxTierAt(itemLevel)` — t3@8, t4@18, t5@32 | step function | `Items/IlvlTierLadder.cs` (spec: `ssot-generation.md` §4.1) | Gates tier *access* by content level. A gate, not a magnitude |
-| 16 | `PatronPolicy.AuraMilli(rarity, star, level, pTheta)` | `flatPart(rarityBase + perStar·star + level, clamped at AuraClampMilli)` + `pThetaTermMilli(= PThetaKMilli/1000 · P(Θ))`, uncapped | `PatronPolicy.cs:37` | **Two axes now, on separate owners.** `flatPart` is unchanged since `power-guard`'s G2 sweep (T4.1, 2026-08-24) — `level` there is the *patron demon's own* level, hard-clamped, unrelated to the ladder. **`pThetaTermMilli` is a NEW, reviewed read of the actor's real `Θ` via `PowerLadder.Value`, added by aura-skill T22 (owner sign-off 2026-08-30)** so the patron aura stops being permanently capped at content depth — it calls the shared `PowerLadder`, not a private `f(level)`, so §10's anti-duplication clause is satisfied. `AuraClampMilli` still bounds `flatPart` only; the `Θ` term is intentionally uncapped, matching this repo's no-hard-ceiling rule |
-| 18 | `thetaOffset` — species threat rung | table lookup, ten rungs, 0–40 | `data/tuning/demon-threat.v1.json` via `threat-band` (`demon-seed` module 4) | **Added 2026-09-01 (`seed-to-concrete` T0.1).** Lives *inside* `Θ` itself, additive, before `P(Θ)` runs — not a bounded display value scaled a second time. Table-driven because the captured PvZ stat distribution is lumpy: a fitted curve would put most of the roster in two rungs and leave others empty (`spec-threat-band.md` §3). `blocked`/`inferred` species never silently collapse to rung 1 |
+| 16 | `PatronPolicy.AuraMilli(rarity, star, level, pTheta)` | `flatPart(rarityBase + perStar·star + level, clamped at AuraClampMilli)` + `pThetaTermMilli(= PThetaKMilli/1000 · P(Θ))`, uncapped | `PatronPolicy.cs:37` | **Two axes now, on separate owners.** `flatPart` is unchanged since `power-guard`'s G2 sweep (T4.1, 2026-08-24) — `level` there is the *patron creature's own* level, hard-clamped, unrelated to the ladder. **`pThetaTermMilli` is a NEW, reviewed read of the actor's real `Θ` via `PowerLadder.Value`, added by aura-skill T22 (owner sign-off 2026-08-30)** so the patron aura stops being permanently capped at content depth — it calls the shared `PowerLadder`, not a private `f(level)`, so §10's anti-duplication clause is satisfied. `AuraClampMilli` still bounds `flatPart` only; the `Θ` term is intentionally uncapped, matching this repo's no-hard-ceiling rule |
+| 18 | `thetaOffset` — species threat rung | table lookup, ten rungs, 0–40 | `data/tuning/creature-threat.v1.json` via `threat-band` (`creature-seed` module 4) | **Added 2026-09-01 (`seed-to-concrete` T0.1).** Lives *inside* `Θ` itself, additive, before `P(Θ)` runs — not a bounded display value scaled a second time. Table-driven because the captured PvZ stat distribution is lumpy: a fitted curve would put most of the roster in two rungs and leave others empty (`spec-threat-band.md` §3). `blocked`/`inferred` species never silently collapse to rung 1 |
 | 19 | Action unlock ladder — `effectiveRung(n) = min(earnCount, rungCap)` | ratchet, capped at `rungCap` | `data/tuning/action-unlock.v1.json` via `UnlockLadder.EffectiveRung` | **Added 2026-09-03 (A-U1, `spec-rung-semantics.md`).** Input is `earnCount` (a per-holder counter, never `Θ`), so this is not a level curve and never collapses into `Θ`. `rungCap` bounds it — a soft, tunable ceiling (§11.2). **Distinct from `ActionRow.Rung`** — the AUTHORED value `StructureBudgetGuard` reads, which fixes structure and is a property of the content, not of who holds it (§3.1's "two readings, both named"); this row is only the HOLDER-derived reading, wrapped as `EffectiveRung` so the two cannot re-merge |
 | 20 | `PowerLadder.Value(Θ) = C + A·Θ + B·Θ(Θ−1)/2` | triangular, integer-exact, overflow throws | `Power/PowerLadder.cs` | **Promoted from the mirror 2026-09-05.** This is *the* ladder §4 specifies, and it carried an `inventory.json` row (`power-plan` T1.2) that §10 never had. Listed so the mirror mirrors something. It is not an exception to the anti-duplication clause — it is what every other row defers to |
 | 21 | `ChannelLadder` — per-channel proportional `B_ch` | triangular, one `B` per channel | `Power/ChannelLadder.cs` | **Promoted from the mirror 2026-09-05** (`power-plan` T2.1). Row 20's shape with a per-channel `B`, so a channel's growth is a *share* of the one ladder and never a second curve |
@@ -961,7 +961,7 @@ Cannot overflow and cannot wall anything, because their domain is closed.
 
 | Cap | Value | What it is |
 |---|---|---|
-| `ContractPolicy.LoyaltyMax` / `DeployFloor` | 1000 / 200 | Loyalty is a 0–1000 track; below 200 a demon refuses to deploy |
+| `ContractPolicy.LoyaltyMax` / `DeployFloor` | 1000 / 200 | Loyalty is a 0–1000 track; below 200 a creature refuses to deploy |
 | `ContractPolicy.DailyGainCap` | 60 | Loyalty gain per day — a rate on a bounded track |
 | `StatusPolicy.CategoryResistCap` | 0.95 | Resistance can never reach 100% |
 | `StatusPolicy.MinNetFactor` / `ApplyScaleFloor` | 0 / 1.0 | Floors, not ceilings |
@@ -1047,7 +1047,7 @@ souls-per-minute rather than souls-per-match. A cap could never express that; a 
 does it for free.
 
 > **Ownership.** This SSOT specifies the **shape**, because multiplying by `contentScale` is the power
-> contract (PS-2: scaled exactly once). The demon/economy stream owns the **constants** — and they are
+> contract (PS-2: scaled exactly once). The creature/economy stream owns the **constants** — and they are
 > today's, so there is nothing owed before `caps-reconcile` can proceed.
 
 **PvZ item drops (2/run, 12/day) — also removed** (owner, 2026-08-23). An earlier draft of this
@@ -1085,7 +1085,7 @@ storage, not progress being deleted. Level 40,000 survives having its first 10,0
 
 ### 11.9 Not caps at all
 
-`DemonSpeciesCatalog.DemonTypeIdFloor` 10,000 is an **id namespace offset** — it keeps demon type ids
+`CreatureSpeciesCatalog.CreatureTypeIdFloor` 10,000 is an **id namespace offset** — it keeps creature type ids
 clear of game type ids. `ContentValidation.DriftFloor` 1 is a **tolerance floor** for the power-drift
 test. `OverlaySwitchLayout.MinScale` 1 is a minimum, not a maximum. Listed because a naïve grep for
 `Max|Cap|Floor|Limit` returns them and someone will otherwise re-triage them every sweep.
@@ -1094,7 +1094,7 @@ test. `OverlaySwitchLayout.MinScale` 1 is a minimum, not a maximum. Listed becau
 
 | Cap | Value | Verdict |
 |---|---|---|
-| `DemonSpeciesGenerator` species cap | ~~24~~ **removed 2026-08-31** | **Was a real ceiling; this row's original verdict was wrong.** See §11.10a |
+| `CreatureSpeciesGenerator` species cap | ~~24~~ **removed 2026-08-31** | **Was a real ceiling; this row's original verdict was wrong.** See §11.10a |
 | `ShieldPolicy.MaxShieldsPerActor` | 3 | **Design, not progression.** A stacking rule — three layers, drained outer-to-core. Removing it changes shield strategy, not how far a player can get |
 | Affix tier ladder | 5 rungs | **No conflict** — §10.2 row 7. Bounded, level-free, relative |
 | Rarity ladder | 10 rungs | **No conflict.** The ladder's *length* is content; `contentScale` multiplies what a rung is worth |
@@ -1117,9 +1117,9 @@ judged.
 
 **2. "More species is content work" stopped being true.** That premise assumed per-species content is
 hand-authored, so a bigger roster meant proportionally more human effort — a scheduling limit, not a
-mechanical one. The seedsmith demons feature
+mechanical one. The seedsmith creatures feature
 ([`seedsmith-map.md`](../seedsmith-map.md) §3b) exists precisely to *generate* item, action, aspect
-and commander content per demon. Once content is derived, the cap stops bounding effort and bounds
+and commander content per creature. Once content is derived, the cap stops bounding effort and bounds
 only **how much of the game the overlay can represent**.
 
 That second point is the general lesson: **a cap's verdict depends on a premise about how the
@@ -1127,13 +1127,13 @@ surrounding system works, and it expires when that premise does.** A row marked 
 correct as of the reasoning beside it, not permanently.
 
 **Resolution.** `Generate(captured, maxSpecies)` now takes `int? maxSpecies = null` meaning *no
-limit* — every captured species becomes a demon, so a PVZ update that adds almanac entries adds
-demons with no code change. An explicit positive limit stays available for test fixtures and sampling
+limit* — every captured species becomes a creature, so a PVZ update that adds almanac entries adds
+creatures with no code change. An explicit positive limit stays available for test fixtures and sampling
 runs; a non-positive one throws. There is no default ceiling to restore.
 
 **Second, smaller ceiling found in the same pass, and closed (owner, 2026-08-31).** `RarityForRank`
 granted Legendary to `rank < 2` — **absolute**, while Epic and Rare were proportional (`count / 6`,
-`count / 4`). Uncapping the roster exposed it: on a 900-demon roster that is two legendary demons in
+`count / 4`). Uncapping the roster exposed it: on a 900-creature roster that is two legendary creatures in
 the world, while every other tier grows. It is now proportional too, `Math.Max(2, count / 12)`.
 
 **The divisor is not a new balance number.** `1/12` is the ratio the flat `2` already implied on the

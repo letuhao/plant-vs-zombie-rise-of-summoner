@@ -127,7 +127,7 @@ Four connections, each mirroring one that already exists for atoms:
 
 **What would overturn it:** a decision that coefficients should not be player-visible content at all —
 that they belong to the build rather than the catalog. Then the answer is a generated C# table with a
-`--check` gate, the `DemonSpeciesGen` shape, and `power_coefficient` leaves the content hash. Nothing
+`--check` gate, the `CreatureSpeciesGen` shape, and `power_coefficient` leaves the content hash. Nothing
 in the repo argues for that today, and `ContentHashRegistry` V3 argues against it.
 
 ### 4.2 A non-additive composition for the pairs that need it

@@ -15,7 +15,7 @@ public class ZombossCommanderAllocationTests
         {
           "schemaVersion": 1, "version": 1,
           "grant": { "aptitudePointsPerTheta": 3, "skillPointsPerTheta": 1 },
-          "pointEconomy": { "aptitudePointsPerThetaMilliByScope": { "commander": 1, "demonType": 4, "aspect": 4, "uniqueDemon": 6 }, "respecPrice": 10 }, "guardEconomy": { "flatCommitCost": 50, "absorbDrainSharePermille": 300, "riposteShareCapPermille": 400 }, "mitigation": { "scaleMilli": 1000, "families": ["combat.defense", "combat.dodge", "combat.parry", "combat.block", "combat.absorption", "combat.heal"] },
+          "pointEconomy": { "aptitudePointsPerThetaMilliByScope": { "commander": 1, "creatureType": 4, "aspect": 4, "uniqueCreature": 6 }, "respecPrice": 10 }, "guardEconomy": { "flatCommitCost": 50, "absorbDrainSharePermille": 300, "riposteShareCapPermille": 400 }, "mitigation": { "scaleMilli": 1000, "families": ["combat.defense", "combat.dodge", "combat.parry", "combat.block", "combat.absorption", "combat.heal"] },
           "read": { "contest": { "spanPoints": 100.0, "shareExponentMilli": 1000 }, "magnitude": { "shareExponentMilli": 1000 } },
           "recovery": { "scaleMilli": 374, "targetRecoveryShareMilli": 670, "families": ["resource.regen"] },
           "familyRead": { "combat.power": "magnitude" },
@@ -96,13 +96,13 @@ public class ZombossCommanderAllocationTests
     public void Refresh_takesTheScopeAsAnArgument_notAHardCodedCommanderConstant()
     {
         // species-build-todo.md T4.5: a Zomboss pattern is a named allocation, not a player's commander
-        // build -- resolving under DemonType must land in the DemonType scope bucket, not Commander's.
-        var tuning = CommanderRateOneTuning(); // demonType rate = 4 (vs commander's 1) -- budget = 1000*4 = 4000
+        // build -- resolving under CreatureType must land in the CreatureType scope bucket, not Commander's.
+        var tuning = CommanderRateOneTuning(); // creatureType rate = 4 (vs commander's 1) -- budget = 1000*4 = 4000
         var source = new ZombossCommanderAllocation("force-pure");
-        source.Refresh(AllocationScope.DemonType, theta: 1000, tuning);
+        source.Refresh(AllocationScope.CreatureType, theta: 1000, tuning);
 
         var result = source.Resolve(new StatContext());
-        Assert.Equal(1584, result.PointsAt(AllocationScope.DemonType, "Might")); // 4000 * 396 / 1000
+        Assert.Equal(1584, result.PointsAt(AllocationScope.CreatureType, "Might")); // 4000 * 396 / 1000
         Assert.Equal(0, result.PointsAt(AllocationScope.Commander, "Might")); // never leaks into Commander
     }
 
@@ -112,7 +112,7 @@ public class ZombossCommanderAllocationTests
         // Spec test 5, re-asserted at the wiring layer (ZombossPatternTests.cs already proves the math
         // on ZombossPattern.ToAllocation directly) -- this is what makes that property REACHABLE.
         var tuning = CommanderRateOneTuning();
-        foreach (var scope in new[] { AllocationScope.Commander, AllocationScope.DemonType, AllocationScope.Aspect, AllocationScope.UniqueDemon })
+        foreach (var scope in new[] { AllocationScope.Commander, AllocationScope.CreatureType, AllocationScope.Aspect, AllocationScope.UniqueCreature })
         foreach (var patternId in ZombossPatterns.All)
         {
             var source = new ZombossCommanderAllocation(patternId);

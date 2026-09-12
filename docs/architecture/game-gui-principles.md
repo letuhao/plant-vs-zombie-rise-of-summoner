@@ -44,7 +44,7 @@ state they left. Replacing the stage is reserved for genuinely leaving the sessi
 
 **Why.** This is the definitional property of a game interface, and the rule this document was
 commissioned around: *a game is a screen that has a menu that can open anywhere.* A player mid-wave
-who wants to check a demon's loyalty must not lose the wave to do it.
+who wants to check a creature's loyalty must not lose the wave to do it.
 
 **Forbids.** Routing to a sibling screen in order to look at something. Unmounting the board to
 render a table. "Go to the Roster page first, then come back."
@@ -195,7 +195,7 @@ to the bare stage URL.
 
 ### GG-9 — One canonical home per concept
 
-**Rule.** Each concept (a specimen, a demon, an item, a run) has exactly one authoritative surface.
+**Rule.** Each concept (a specimen, a creature, an item, a run) has exactly one authoritative surface.
 Other surfaces link into it; they do not re-implement it.
 
 **Why.** Duplicated surfaces drift, and the player learns to distrust both.
@@ -378,7 +378,7 @@ asked to remember or type an identifier.
 
 ### GG-25 — Show the thing, not a row about the thing
 
-**Rule.** Game objects (specimens, demons, items, sectors) are presented with their art, name, and
+**Rule.** Game objects (specimens, creatures, items, sectors) are presented with their art, name, and
 the two or three numbers that matter. Tables are for logs and ledgers, not for a collection.
 
 **Why.** A creature collection rendered as a `DataTable` is the clearest possible statement that this
@@ -558,7 +558,7 @@ separate tree, behind an explicit developer mode, off by default. They are not l
 they do not appear in the game's navigation.
 
 **Why.** The present nav mixes `IconDump`, `AlmanacText`, `Types`, `Runs`, `PvzActivity` and `Status`
-with `Roster`, `World`, `Demons` and `Expeditions` at one flat level under a heading that reads
+with `Roster`, `World`, `Creatures` and `Expeditions` at one flat level under a heading that reads
 `AUDIT`. The tool and the game are the same surface, so the game inherits the tool's feel.
 
 **Forbids.** A player-visible link to a dump page. Debug vocabulary leaking into player copy (GG-23).
@@ -996,7 +996,7 @@ new dated one, or trust the checks.
 | GG-37 anchoring | **Fail** | `max-w-[1100px]` left-aligned; a third of a 1440px viewport unused |
 | GG-38 weight | **Fail** | Single 2.77 MB chunk (705 KB gz), zero code splitting |
 | GG-39 offline of the game | **Pass** | Surfaces render with the injector absent |
-| GG-40 two trees | **Fail** | `IconDump` / `AlmanacText` / `Types` / `Runs` sit beside `Roster` / `Demons` under a heading reading `AUDIT` |
+| GG-40 two trees | **Fail** | `IconDump` / `AlmanacText` / `Types` / `Runs` sit beside `Roster` / `Creatures` under a heading reading `AUDIT` |
 
 Also outstanding and unattributed to a single rule: no favicon (404 on every load), and icon 404s
 render as broken images with no fallback.

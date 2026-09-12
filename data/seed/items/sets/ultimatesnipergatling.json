@@ -25,7 +25,7 @@
       "id": "set.ultimatesnipergatling-001",
       "nameKey": "set.perfect-war-god",
       "name": "Perfect War God",
-      "themeKey": "demon.ultimatesnipergatling",
+      "themeKey": "creature.ultimatesnipergatling",
       "members": [
         {
           "role": "armament-primary",

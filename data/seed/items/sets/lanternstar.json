@@ -25,7 +25,7 @@
       "id": "set.lanternstar-001",
       "nameKey": "set.starlight-carambola",
       "name": "Starlight Carambola",
-      "themeKey": "demon.lanternstar",
+      "themeKey": "creature.lanternstar",
       "members": [
         {
           "role": "armament-primary",

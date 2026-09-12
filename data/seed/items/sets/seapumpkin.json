@@ -25,7 +25,7 @@
       "id": "set.seapumpkin-001",
       "nameKey": "set.fungal-patchwork",
       "name": "Fungal Patchwork",
-      "themeKey": "demon.seapumpkin",
+      "themeKey": "creature.seapumpkin",
       "members": [
         {
           "role": "armament-primary",

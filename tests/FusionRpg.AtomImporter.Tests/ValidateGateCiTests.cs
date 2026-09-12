@@ -150,13 +150,9 @@ public class ValidateGateCiTests
                 CreateNoWindow = true
             };
             psi.EnvironmentVariables.Remove("FUSIONRPG_DATA");
-            using var proc = Process.Start(psi)!;
-            var stdout = proc.StandardOutput.ReadToEnd();
-            var stderr = proc.StandardError.ReadToEnd();
-            var exited = proc.WaitForExit(120_000);
+            var (exitCode, stdout, stderr) = ExternalProcess.Run(psi, 120_000, "AtomImporter did not exit within 120s");
 
-            Assert.True(exited, "AtomImporter did not exit within 120s");
-            Assert.Equal(2, proc.ExitCode);
+            Assert.Equal(2, exitCode);
             Assert.Contains("no database directory", stdout + stderr, StringComparison.Ordinal);
         }
         finally { TryDelete(seedRoot); TryDelete(cwd); }
@@ -175,12 +171,7 @@ public class ValidateGateCiTests
             UseShellExecute = false,
             CreateNoWindow = true
         };
-        using var proc = Process.Start(psi)!;
-        var stdout = proc.StandardOutput.ReadToEnd();
-        var stderr = proc.StandardError.ReadToEnd();
-        var exited = proc.WaitForExit(120_000);
-        Assert.True(exited, "AtomImporter did not exit within 120s");
-        return (proc.ExitCode, stdout, stderr);
+        return ExternalProcess.Run(psi, 120_000, "AtomImporter did not exit within 120s");
     }
 
     static string FreshTempDir(string label)

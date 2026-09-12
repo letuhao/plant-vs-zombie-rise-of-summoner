@@ -52,7 +52,7 @@ public class DelveProjectionEndpointTests : IDisposable
     }
 
     // This assembly's own [ModuleInitializer] (PowerAndAptitudeTuningTestBootstrap.cs) covers
-    // Power/Aptitude/DerivedStat/Rung/Aura/Items/DemonSpeciesCatalog only -- DungeonTuningHub is
+    // Power/Aptitude/DerivedStat/Rung/Aura/Items/CreatureSpeciesCatalog only -- DungeonTuningHub is
     // NOT among them (confirmed by reading that file directly), and DelveEndpoints.HandleGetDelve
     // reads it via DungeonTuningHub.Tuning. Configured here from the REAL shipped
     // data/tuning/dungeon.v3.json, matching DungeonHubTestBootstrap's own established convention in

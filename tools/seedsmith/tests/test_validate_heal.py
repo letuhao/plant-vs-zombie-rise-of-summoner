@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 
-from seedsmith.adapters.demons.anchor.permute import _seed_int, order_for
+from seedsmith.adapters.creatures.anchor.permute import _seed_int, order_for
 from seedsmith.adapters.actions import generate_validate_heal as entrypoint
 from seedsmith.adapters.actions.validate_heal.derive import (
     VoteSample,

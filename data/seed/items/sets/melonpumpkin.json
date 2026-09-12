@@ -25,7 +25,7 @@
       "id": "set.melonpumpkin-001",
       "nameKey": "set.melon-shell-volley",
       "name": "Melon Shell Volley",
-      "themeKey": "demon.melonpumpkin",
+      "themeKey": "creature.melonpumpkin",
       "members": [
         {
           "role": "armament-primary",

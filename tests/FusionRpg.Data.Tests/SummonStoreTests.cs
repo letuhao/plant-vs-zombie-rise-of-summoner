@@ -1,5 +1,5 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Data;
 using Xunit;
 
@@ -30,8 +30,8 @@ public class SummonStoreTests : IDisposable
         var (ok, _, outcome) = _store.ExecuteSummon(1, SummonBannerCatalog.StandardRift, 10, "c-ten", 42, null);
         Assert.True(ok);
         Assert.Equal(10, outcome!.Specimens.Count);
-        Assert.Equal(10, _store.ListDemonRoster(1).Items.Count);
-        Assert.True(_store.ListDemonCodex(1).Entries.Count >= 1);
+        Assert.Equal(10, _store.ListCreatureRoster(1).Items.Count);
+        Assert.True(_store.ListCreatureCodex(1).Entries.Count >= 1);
         // Spent 900; discovery rewards may add back — assert via totals.
         Assert.Equal(900, _store.GetSoulBalance(1).SpentTotal);
         Assert.True(outcome.Pity.PullsSinceSunwoven <= 10);
@@ -49,7 +49,7 @@ public class SummonStoreTests : IDisposable
         Assert.True(replay!.Replayed);
         Assert.Equal(first!.Specimens.Select(s => s.Profile.InstanceId), replay.Specimens.Select(s => s.Profile.InstanceId));
         Assert.Equal(balanceAfter, _store.GetSoulBalance(1).Balance);
-        Assert.Equal(10, _store.ListDemonRoster(1).Items.Count); // no extra mints
+        Assert.Equal(10, _store.ListCreatureRoster(1).Items.Count); // no extra mints
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class SummonStoreTests : IDisposable
         var (ok, reason, _) = _store.ExecuteSummon(1, SummonBannerCatalog.StandardRift, 1, "c-broke", 7, null);
         Assert.False(ok);
         Assert.Equal("souls.insufficient", reason);
-        Assert.Empty(_store.ListDemonRoster(1).Items);
+        Assert.Empty(_store.ListCreatureRoster(1).Items);
         Assert.Equal(PityState.Fresh, _store.GetSummonPity(1));
         Assert.Equal(50, _store.GetSoulBalance(1).Balance);
     }
@@ -88,8 +88,8 @@ public class SummonStoreTests : IDisposable
         }
 
         // Atomic-or-nothing: no specimens, no codex, no pity, no log, spend rolled back.
-        Assert.Empty(_store.ListDemonRoster(1).Items);
-        Assert.Empty(_store.ListDemonCodex(1).Entries);
+        Assert.Empty(_store.ListCreatureRoster(1).Items);
+        Assert.Empty(_store.ListCreatureCodex(1).Entries);
         Assert.Equal(PityState.Fresh, _store.GetSummonPity(1));
         Assert.Equal(10_000, _store.GetSoulBalance(1).Balance);
         var (ok, _, outcome) = _store.ExecuteSummon(1, SummonBannerCatalog.StandardRift, 10, "c-crash", 42, null);
@@ -134,20 +134,20 @@ public class SummonStoreTests : IDisposable
     [Fact]
     public void Codex_milestones_pay_at_50_and_90_percent_once()
     {
-        var all = FusionRpg.Core.Demons.DemonSpeciesCatalog.All;
+        var all = FusionRpg.Core.Creatures.CreatureSpeciesCatalog.All;
         var half = (all.Count + 1) / 2;            // ceil 50 %
         var ninety = (all.Count * 9 + 9) / 10;     // ceil 90 %
 
         // Pre-discover exactly the half threshold, then one pull triggers the half milestone.
         foreach (var s in all.Take(half))
-            _store.UpsertDemonCodex(1, s.SpeciesId, DemonCodexStates.Discovered);
+            _store.UpsertCreatureCodex(1, s.SpeciesId, CreatureCodexStates.Discovered);
         _store.ExecuteSummon(1, SummonBannerCatalog.StandardRift, 1, "c-m1", 3, null);
         var ledger = _store.ListSoulLedger(1, 300);
         Assert.Single(ledger.Items, i => i.Reason == SoulEarnPolicy.Reasons.Milestone && i.RefId == "half");
 
         // Cross the 90 % line: full milestone lands; a further pull re-awards neither.
         foreach (var s in all.Take(ninety))
-            _store.UpsertDemonCodex(1, s.SpeciesId, DemonCodexStates.Discovered);
+            _store.UpsertCreatureCodex(1, s.SpeciesId, CreatureCodexStates.Discovered);
         _store.ExecuteSummon(1, SummonBannerCatalog.StandardRift, 1, "c-m2", 4, null);
         _store.ExecuteSummon(1, SummonBannerCatalog.StandardRift, 1, "c-m3", 5, null);
         ledger = _store.ListSoulLedger(1, 300);
@@ -163,6 +163,6 @@ public class SummonStoreTests : IDisposable
         _store.TrySpendSouls(1, 100, SoulEarnPolicy.Reasons.Summon, "c-collide");
         Assert.Throws<InvalidOperationException>(() =>
             _store.ExecuteSummon(1, SummonBannerCatalog.StandardRift, 1, "c-collide", 7, null));
-        Assert.Empty(_store.ListDemonRoster(1).Items);
+        Assert.Empty(_store.ListCreatureRoster(1).Items);
     }
 }

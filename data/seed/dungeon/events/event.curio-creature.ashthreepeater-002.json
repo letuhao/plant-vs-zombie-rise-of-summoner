@@ -1,0 +1,41 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.curio-creature.ashthreepeater-002",
+  "flavor": "A heavy, obsidian hourglass sits atop a pedestal of weeping marble. The sand within does not fall; instead, it drifts upward in a slow, rhythmic pulse, defying the laws of gravity. There is a sense of 彻底 stillness surrounding the object, as if the very air has forgotten how to move.",
+  "kind": "curio",
+  "name": "The Unfinished Hourglass",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party discovers a relic that manipulates the local flow of time, presenting a risk of temporal displacement.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.ashthreepeater"
+}

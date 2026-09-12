@@ -1,11 +1,11 @@
 {
   "slug": "patron",
-  "title": "Patron demon",
+  "title": "Patron creature",
   "status": "WIP",
   "kicker": "Roster and summoning · summon and fusion",
   "pillar": {"text": "Creatures", "href": "creatures.md"},
   "loopLine": "Summon and fusion",
-  "hook": "**WIP:** name one demon your **patron** so its element colours the army — switching costs souls.",
+  "hook": "**WIP:** name one creature your **patron** so its element colours the army — switching costs souls.",
   "blindSpots": [
     {"term": "WIP", "meaning": "Designed and partly forged. Simulation paths exist; the live lawn aura is still unfinished."},
     {"term": "Patron", "meaning": "One chosen specimen whose element tints side presence — not a second commander title by itself."},
@@ -20,7 +20,7 @@
     {
       "title": "What it will be",
       "paras": [
-        "Pick one demon from the roster as patron.",
+        "Pick one creature from the roster as patron.",
         "Its element becomes the army’s tint; changing that choice costs souls."
       ]
     },

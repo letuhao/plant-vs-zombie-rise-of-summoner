@@ -25,7 +25,7 @@
       "id": "set.tanglekelp-001",
       "nameKey": "set.the-drowned-entanglement",
       "name": "The Drowned Entanglement",
-      "themeKey": "demon.tanglekelp",
+      "themeKey": "creature.tanglekelp",
       "members": [
         {
           "role": "armament-primary",

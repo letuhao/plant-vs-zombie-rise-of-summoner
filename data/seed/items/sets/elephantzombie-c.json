@@ -25,7 +25,7 @@
       "id": "set.elephantzombie-c-001",
       "nameKey": "set.research-cactus",
       "name": "Research Cactus",
-      "themeKey": "demon.elephantzombie_c",
+      "themeKey": "creature.elephantzombie_c",
       "members": [
         {
           "role": "armament-primary",

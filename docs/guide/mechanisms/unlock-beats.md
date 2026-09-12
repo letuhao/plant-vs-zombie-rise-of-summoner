@@ -19,7 +19,7 @@ These words get guessed wrong. Read them once before the rest of the page.
 
 | Word | What it actually means here |
 |---|---|
-| **Beat** | A play milestone (first item, first demon you can fuse, first bound demon…). Not a music beat, not Dave’s level number. |
+| **Beat** | A play milestone (first item, first creature you can fuse, first bound creature…). Not a music beat, not Dave’s level number. |
 | **Unlock ladder** | The live order those beats open layers. Today this ladder is beat-based, not level-gated. |
 | **Locked** | You can see the layer on the rail; you cannot use it yet. The UI should say what unlocks it. |
 | **Dave-level chapters** | A Vision drip of features by Dave’s level. Not what gates the live rail today — see [unlock chapters](unlock-chapters.md). |
@@ -39,9 +39,9 @@ What opens the rail in this build:
 |---|---|
 | Creatures, Commanders | Session start |
 | Relics | You hold your first item |
-| Fusion | You have a demon you can fuse |
+| Fusion | You have a creature you can fuse |
 | Pacts | A contract is first offered |
-| Expeditions | You have a bound demon to field |
+| Expeditions | You have a bound creature to field |
 | Almanac, Chronicle | After your first run |
 
 > Delve travel (Vision) unlocks when you have found a domain — not on this live table yet.
@@ -76,8 +76,8 @@ That chapter map will drip complexity by level later. Until then, play beats rul
 
 ## Common mix-ups
 
-**Why is Fusion locked when I have demons?**  
-You need a demon the lab can actually fuse. Owning a roster is not always enough.
+**Why is Fusion locked when I have creatures?**  
+You need a creature the lab can actually fuse. Owning a roster is not always enough.
 
 **I hit Dave level 10 — where are Relics?**  
 Dave chapters are Vision. Relics open when you hold your first item (this page’s table).

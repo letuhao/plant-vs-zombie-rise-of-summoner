@@ -25,7 +25,7 @@
       "id": "set.jackboxpumpkin-001",
       "nameKey": "set.jack-o-lantern-shell",
       "name": "Jack-o'-Lantern Shell",
-      "themeKey": "demon.jackboxpumpkin",
+      "themeKey": "creature.jackboxpumpkin",
       "members": [
         {
           "role": "armament-primary",

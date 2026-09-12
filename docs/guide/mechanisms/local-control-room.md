@@ -28,7 +28,7 @@ These words get guessed wrong. Read them once before the walkthrough.
 **Also true:**
 
 - Rise of Summoner does **not** replace Plants vs. Zombies: Fusion. You point the launcher at a **legal** install of that pack.
-- When a menu says **Fusion**, it usually means merging two demons into a stronger form — not the host pack’s product name.
+- When a menu says **Fusion**, it usually means merging two creatures into a stronger form — not the host pack’s product name.
 
 ---
 
@@ -117,7 +117,7 @@ After early unlocks, yes for many RPG and empire features. Lawn matches still ne
 **“The menu says Fusion — is that the host pack?”**  
 Usually no. In Rise of Summoner menus, Fusion is the specimen-merge action. The host pack’s full name is Plants vs. Zombies: Fusion — introduce it once when you install, then treat lawn = those matches.
 
-**“Will an update wipe my demons?”**  
+**“Will an update wipe my creatures?”**  
 Updating Rise of Summoner is designed to keep your save folder. It does not download or patch the lawn game binary. If something looks wrong after an update, check the runbook and SUPPORT — do not reinstall the lawn pack hoping that fixes the RPG save.
 
 ---

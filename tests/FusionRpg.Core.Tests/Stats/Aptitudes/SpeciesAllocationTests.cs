@@ -3,10 +3,10 @@ using Xunit;
 
 namespace FusionRpg.Core.Tests.Stats.Aptitudes;
 
-/// <summary>`species-build` T2.1 (module 5, `demon-type-allocation`) — the pure baseline math.
+/// <summary>`species-build` T2.1 (module 5, `creature-type-allocation`) — the pure baseline math.
 /// Uses the real shipped `aptitudes.v8.json` (same convention as `SpeciesCatalogDiffTests`' own
 /// `RepoRoot()` helper) rather than constructing the whole `AptitudeTuning` record inline — only
-/// `PointEconomy.AptitudePointsPerThetaMilliByScope[DemonType]` is actually read by this code path
+/// `PointEconomy.AptitudePointsPerThetaMilliByScope[CreatureType]` is actually read by this code path
 /// (the sibling table D55 did not touch). v5 -> v6 (passive-tree C6, 2026-09-06) tracks
 /// RpgHost.cs/Program.cs so "the real shipped tuning" stays true; v6 -> v7 (D55, 2026-09-06) same.</summary>
 public class SpeciesAllocationTests
@@ -25,7 +25,7 @@ public class SpeciesAllocationTests
     static readonly AptitudeTuning RealTuning = AptitudeTuningLoader.Parse(
         File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "aptitudes.v8.json")));
 
-    static long DemonTypeRate => RealTuning.PointEconomy.AptitudePointsPerThetaMilliByScope[AllocationScope.DemonType];
+    static long CreatureTypeRate => RealTuning.PointEconomy.AptitudePointsPerThetaMilliByScope[AllocationScope.CreatureType];
 
     static readonly Dictionary<string, long> ThreeWaySplit = new(StringComparer.Ordinal)
     {
@@ -35,7 +35,7 @@ public class SpeciesAllocationTests
     [Fact]
     public void Baseline_at_level_one_is_empty_never_a_ceiling()
     {
-        // budget-source's own zero-at-level-1 rule (T0.4): DemonTypeSourceFromLevel(1) = 0.
+        // budget-source's own zero-at-level-1 rule (T0.4): CreatureTypeSourceFromLevel(1) = 0.
         var result = SpeciesAllocation.Baseline(ThreeWaySplit, speciesLevel: 1, RealTuning);
         Assert.Same(AptitudeAllocation.Empty, result);
     }
@@ -48,17 +48,17 @@ public class SpeciesAllocationTests
     }
 
     [Fact]
-    public void Baseline_scales_the_plans_shares_by_the_demonType_budget()
+    public void Baseline_scales_the_plans_shares_by_the_creatureType_budget()
     {
-        const long level = 21; // DemonTypeSourceFromLevel(21) = 20
+        const long level = 21; // CreatureTypeSourceFromLevel(21) = 20
         var result = SpeciesAllocation.Baseline(ThreeWaySplit, level, RealTuning);
-        var budget = 20 * DemonTypeRate;
+        var budget = 20 * CreatureTypeRate;
 
-        Assert.Equal(budget, result.TotalForScope(AllocationScope.DemonType));
+        Assert.Equal(budget, result.TotalForScope(AllocationScope.CreatureType));
         // Largest-remainder rounding, but the ORDER of shares (500:300:200) must still hold at this scale.
-        var might = result.PointsAt(AllocationScope.DemonType, "Might");
-        var vigor = result.PointsAt(AllocationScope.DemonType, "Vigor");
-        var fortitude = result.PointsAt(AllocationScope.DemonType, "Fortitude");
+        var might = result.PointsAt(AllocationScope.CreatureType, "Might");
+        var vigor = result.PointsAt(AllocationScope.CreatureType, "Vigor");
+        var fortitude = result.PointsAt(AllocationScope.CreatureType, "Fortitude");
         Assert.True(might > vigor && vigor > fortitude, $"expected Might({might}) > Vigor({vigor}) > Fortitude({fortitude})");
     }
 
@@ -68,8 +68,8 @@ public class SpeciesAllocationTests
         // A level chosen so 1000-permille shares against the real rate force a non-round division.
         const long level = 8; // source = 7
         var result = SpeciesAllocation.Baseline(ThreeWaySplit, level, RealTuning);
-        var budget = 7 * DemonTypeRate;
-        Assert.Equal(budget, result.TotalForScope(AllocationScope.DemonType));
+        var budget = 7 * CreatureTypeRate;
+        Assert.Equal(budget, result.TotalForScope(AllocationScope.CreatureType));
     }
 
     [Fact]

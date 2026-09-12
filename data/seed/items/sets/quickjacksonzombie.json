@@ -25,7 +25,7 @@
       "id": "set.quickjacksonzombie-001",
       "nameKey": "set.strict-baton",
       "name": "Strict Baton",
-      "themeKey": "demon.quickjacksonzombie",
+      "themeKey": "creature.quickjacksonzombie",
       "members": [
         {
           "role": "armament-primary",

@@ -30,7 +30,7 @@
     font-family: var(--font-mono); font-size: 8px; font-weight: 800; color: var(--text); }
   .rolepip { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border-control);
     background: var(--panel); font-size: 8px; display: grid; place-items: center; }
-  .rolepip[data-role="demon"] { border-color: var(--rarity-4); }
+  .rolepip[data-role="creature"] { border-color: var(--rarity-4); }
   .rolepip[data-role="commander"] { border-color: var(--lawn-hot); }
   .shieldrow { display: flex; align-items: center; gap: 2px; height: 6px; min-width: 48px; }
   .shieldrow .track { flex: 1; height: 100%; background: var(--panel-inset); border-radius: var(--r-pill);
@@ -115,7 +115,7 @@
           <!-- Identity (highest local Y) -->
           <div class="hudrow">
             <span class="tierframe" data-tier="elite" title="Elite tier frame">E</span>
-            <span class="rolepip" data-role="demon" title="Bound demon specimen">S</span>
+            <span class="rolepip" data-role="creature" title="Bound creature specimen">S</span>
             <span class="lvlbadge" title="Level band (not raw Θ)">42</span>
           </div>
           <!-- Status strip -->
@@ -144,7 +144,7 @@
         <tr><th class="fam">Row</th><th>Channel</th><th class="fam">Answers at a glance</th></tr>
       </thead>
       <tbody>
-        <tr><td class="fam">Identity</td><td>Shape · icon · badge</td><td class="fam">Is this a boss? A unique demon? How strong (band)?</td></tr>
+        <tr><td class="fam">Identity</td><td>Shape · icon · badge</td><td class="fam">Is this a boss? A unique creature? How strong (band)?</td></tr>
         <tr><td class="fam">Resources</td><td>Color · gradient fill</td><td class="fam">Does it have shield? Which element? How much left?</td></tr>
         <tr><td class="fam">Statuses</td><td>Icon · tint</td><td class="fam">What effects are on it? Is it CC'd?</td></tr>
       </tbody>
@@ -196,7 +196,7 @@
           <td>Specimen type or mark</td>
           <td class="fam">
             <span class="demo">
-              <span class="rolepip" data-role="demon">👿</span> bound demon
+              <span class="rolepip" data-role="creature">👿</span> bound creature
               <span class="rolepip" data-role="commander">🧑‍🌾</span> commander mark
             </span>
           </td>
@@ -338,7 +338,7 @@
       <thead><tr><th class="fam">Priority (high → low)</th><th class="fam">Slot</th></tr></thead>
       <tbody>
         <tr><td>1</td><td class="fam">CC glyph / frozen status</td></tr>
-        <tr><td>2</td><td class="fam">Commander mark · unique/demon pip</td></tr>
+        <tr><td>2</td><td class="fam">Commander mark · unique/creature pip</td></tr>
         <tr><td>3</td><td class="fam">Shield segments</td></tr>
         <tr><td>4</td><td class="fam">Top N status tokens</td></tr>
         <tr><td>5</td><td class="fam">Level badge · tier frame</td></tr>
@@ -361,7 +361,7 @@
         <li>Unity: shield bar only (<code>ShieldBarPool</code>)</li>
         <li>Phaser: HP bar, no RPG shield</li>
         <li>Web: text <code>Shield: N/M</code> + partial status chips</li>
-        <li>No boss/demon/level read on unit</li>
+        <li>No boss/creature/level read on unit</li>
         <li>Three code paths, no shared model</li>
       </ul>
       <div class="unitmock" style="margin-top:var(--sp-3)">
@@ -415,7 +415,7 @@
   <h2>G · What this plate settles</h2>
   <ul>
     <li>Three-row anatomy and visual channel assignment (identity / resources / statuses).</li>
-    <li>Legend mapping slot types to player questions (boss? demon? shield? status?).</li>
+    <li>Legend mapping slot types to player questions (boss? creature? shield? status?).</li>
     <li>Dual-render expectation: Unity world + Phaser canvas from one fold model.</li>
     <li>Overflow and priority rules when many effects compete for space.</li>
     <li>Explicit boundary vs match HUD, ActorPanel, and status VFX.</li>
@@ -509,7 +509,7 @@
         <div class="unitmock" style="margin-top:var(--sp-3)">
           <div class="hudstack hudstack--above">
             <div class="hudrow">
-              <span class="rolepip" data-role="demon">👿</span>
+              <span class="rolepip" data-role="creature">👿</span>
               <span class="lvlbadge">17</span>
             </div>
             <div class="hudrow">
@@ -526,7 +526,7 @@
         <div class="unitmock" style="margin-top:var(--sp-3)">
           <div class="hudstack hudstack--above">
             <div class="hudrow">
-              <span class="rolepip" data-role="demon">👿</span>
+              <span class="rolepip" data-role="creature">👿</span>
               <span class="lvlbadge">17</span>
             </div>
             <div class="hudrow">
@@ -547,7 +547,7 @@
       <tbody>
         <tr><td class="fam">Horde</td><td class="fam">CC + top statuses without per-tile Inspector</td><td class="fam">Partial VFX; text chips if selected</td></tr>
         <tr><td class="fam">Elite + shield</td><td class="fam">Element blocking damage + effect ids</td><td class="fam">Shield fill only; no element on bar</td></tr>
-        <tr><td class="fam">Bound demon</td><td class="fam">Role pip on unit sprite</td><td class="fam">Inspector only when clicked</td></tr>
+        <tr><td class="fam">Bound creature</td><td class="fam">Role pip on unit sprite</td><td class="fam">Inspector only when clicked</td></tr>
         <tr><td class="fam">Phaser spectator</td><td class="fam">Parity with Unity HUD</td><td class="fam">HP bar only — drift</td></tr>
       </tbody>
     </table>

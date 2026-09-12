@@ -1,6 +1,6 @@
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons.Contracts;
-using FusionRpg.Core.Demons.Fusion;
+using FusionRpg.Core.Creatures.Contracts;
+using FusionRpg.Core.Creatures.Fusion;
 using FusionRpg.Core.Stats;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.Stats.Derived.Subsystems;

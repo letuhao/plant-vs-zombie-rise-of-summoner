@@ -25,7 +25,7 @@
       "id": "set.pot-001",
       "nameKey": "set.roof-garden",
       "name": "Roof Garden",
-      "themeKey": "demon.pot",
+      "themeKey": "creature.pot",
       "members": [
         {
           "role": "armament-primary",

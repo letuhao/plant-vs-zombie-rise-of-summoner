@@ -25,7 +25,7 @@
       "id": "set.icecabbage-001",
       "nameKey": "set.frostbound-cabbage-launcher",
       "name": "Frostbound Cabbage Launcher",
-      "themeKey": "demon.icecabbage",
+      "themeKey": "creature.icecabbage",
       "members": [
         {
           "role": "armament-primary",

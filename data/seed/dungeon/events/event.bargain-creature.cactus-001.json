@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.bargain-creature.cactus-001",
+  "flavor": "A towering, desiccated 仙人掌 stands in the center of the chamber, its skin hardened like rusted iron. From its crown, a rhythmic, mechanical thrumming begins, as if a pressurized engine is preparing to 发射 a volley of needles into the dark. A voice, dry as desert sand, offers to sharpen your resolve at the cost of your vitality.",
+  "kind": "bargain",
+  "name": "The Needle-Spined Pact",
+  "outcomes": [
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.warding",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "medium"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party encounters a sentient, mechanical desert entity that demands biological essence in exchange for combat prowess.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.cactus"
+}

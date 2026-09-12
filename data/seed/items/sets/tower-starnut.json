@@ -25,7 +25,7 @@
       "id": "set.tower-starnut-001",
       "nameKey": "set.starfruit-nut-shell",
       "name": "Starfruit Nut Shell",
-      "themeKey": "demon.tower_starnut",
+      "themeKey": "creature.tower_starnut",
       "members": [
         {
           "role": "armament-primary",

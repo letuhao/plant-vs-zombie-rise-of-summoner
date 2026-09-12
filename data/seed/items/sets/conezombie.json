@@ -25,7 +25,7 @@
       "id": "set.conezombie-001",
       "nameKey": "set.frozen-roadblock",
       "name": "Frozen Roadblock",
-      "themeKey": "demon.conezombie",
+      "themeKey": "creature.conezombie",
       "members": [
         {
           "role": "armament-primary",

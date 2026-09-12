@@ -1,7 +1,7 @@
-> ⛔ **SUPERSEDED 2026-09-06.** This module (RB4) targeted the demon-species roster on a
+> ⛔ **SUPERSEDED 2026-09-06.** This module (RB4) targeted the creature-species roster on a
 > causal theory that did not survive tracing the real code: species characteristics never
 > reach the action-corpus's atom-family pool (see `roster-balance-map.md` §0 for the full
-> correction). The real bug lives in the 98 atom/affix families' USAGE, not in demon
+> correction). The real bug lives in the 98 atom/affix families' USAGE, not in creature
 > species data, which measures healthy on its own axes. **This module was never built.**
 > Superseded by `spec-usage-stats.md` (FC1) and `spec-usage-direction.md` (FC3). Kept
 > for the record — the reasoning inside is not wrong on its own terms, it was aimed at the
@@ -31,7 +31,7 @@ side effect of measuring.
 
 ⛔ **CORRECTED 2026-09-06 — the roster is CLOSED, so `reassign` is the PRIMARY tool.** An earlier
 draft said *"`add` is strongly preferred"*; checking the data is what found that wrong.
-`data/seed/demons/_dump/almanac/` holds **904 rows dumped from the real game**
+`data/seed/creatures/_dump/almanac/` holds **904 rows dumped from the real game**
 (`pvz-fusion-almanac-3.6.1`), and every species row carries a `gameTypeId` into that set. **A species
 cannot be invented — it must be a creature that exists in PvZ Fusion.** So `add` is renamed
 **`classify`** and is capped at the **~138 almanac rows not yet in the corpus**; everything beyond
@@ -149,7 +149,7 @@ is a content-ownership decision, not a balance one.
 
 **Never:** write to the species corpus (that is RB5, behind its own gate); reassign without evidence;
 break a tie on input order; invent a species name, flavour or identity — the plan describes
-*characteristics wanted*, and the existing `demon-seed` generator authors the actual species.
+*characteristics wanted*, and the existing `creature-seed` generator authors the actual species.
 
 ## Success criteria
 
@@ -159,4 +159,4 @@ break a tie on input order; invent a species name, flavour or identity — the p
       `vote-split`; a planted evidence-free reassign is refused.
 - [ ] Shuffling the input row order produces a byte-identical plan.
 - [ ] The plan reports projected post-plan evenness per axis, and flags when it still misses RB2.
-- [ ] Zero writes to `data/seed/demons/species/**`, asserted by test.
+- [ ] Zero writes to `data/seed/creatures/species/**`, asserted by test.

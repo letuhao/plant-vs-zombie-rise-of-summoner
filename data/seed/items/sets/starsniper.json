@@ -25,7 +25,7 @@
       "id": "set.starsniper-001",
       "nameKey": "set.starfall-volley",
       "name": "Starfall Volley",
-      "themeKey": "demon.starsniper",
+      "themeKey": "creature.starsniper",
       "members": [
         {
           "role": "armament-primary",

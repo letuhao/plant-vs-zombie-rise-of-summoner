@@ -7,7 +7,7 @@
 `--answers <file>` replaying a hand-authored answer — and refused outright without it
 (`docs/architecture/item-seedgen/spec-set-charm-live-endpoint.md`). This file proves the second,
 real transport: `--endpoint <url>` reaches `pipeline.llm_caller.call_model` through
-`setgen.run.live_caller`, the exact pattern `effects generate`/`demons generate` already use, and
+`setgen.run.live_caller`, the exact pattern `effects generate`/`creatures generate` already use, and
 the refusal narrows correctly — `--write` still refuses with NEITHER flag, but no longer refuses
 with `--endpoint` alone.
 
@@ -188,7 +188,7 @@ class CliFlagTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             ledger = Path(tmp) / "set-charm-gen.ledger.json"
             ledger.write_text(json.dumps({"done": {
-                "charm-species-demon.allpeater": {"outcome": "done"},
+                "charm-species-creature.allpeater": {"outcome": "done"},
             }}), encoding="utf-8")
             args = _generate_args(kind="charm", population="species", dry_run=True, write=False,
                                   out_dir="")

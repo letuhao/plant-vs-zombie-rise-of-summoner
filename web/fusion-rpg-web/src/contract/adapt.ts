@@ -1,5 +1,5 @@
 import type { ContractRowDto } from "@/lib/bus/contracts";
-import type { DemonProfileDto } from "@/lib/bus/demons";
+import type { CreatureProfileDto } from "@/lib/bus/creatures";
 import type {
   ArmouryPageDto,
   ArmouryRowDto,
@@ -309,7 +309,7 @@ export function adaptRelic(dto: RelicDto): ContainerView {
   };
 }
 
-export function adaptContract(row: ContractRowDto, profile: DemonProfileDto): ContractView {
+export function adaptContract(row: ContractRowDto, profile: CreatureProfileDto): ContractView {
   return {
     instanceId: row.instanceId,
     speciesId: profile.speciesId,

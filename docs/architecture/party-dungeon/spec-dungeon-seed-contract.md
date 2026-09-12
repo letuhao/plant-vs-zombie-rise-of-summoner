@@ -2,7 +2,7 @@
 
 Status: **APPROVED by the owner 2026-09-05 (wave 1) — written against code; not built.** Wave 1, second module.
 
-Module id `dungeon-seed-contract` in the [party-dungeon map](../party-dungeon-map.md) (row 2). Depends on `dungeon-registries` (the seven JSON registries under `data/seed/dungeon/_registry/` and the two tuning schemas). External: demon-seed module 7 `threat-audit` (a `threatBand` on every species anchor — 657 of 841 lack it, `audit-2026-09-05.md` §1(i)), and [item/seed-contract.md](../item/seed-contract.md) as the parent law every rule below specialises. Anchor template copied from [demon-seed/spec-anchor-contract.md](../demon-seed/spec-anchor-contract.md). Model calls: **the pipelines only**; the planner, the audit and the emit are model-free.
+Module id `dungeon-seed-contract` in the [party-dungeon map](../party-dungeon-map.md) (row 2). Depends on `dungeon-registries` (the seven JSON registries under `data/seed/dungeon/_registry/` and the two tuning schemas). External: creature-seed module 7 `threat-audit` (a `threatBand` on every species anchor — 657 of 841 lack it, `audit-2026-09-05.md` §1(i)), and [item/seed-contract.md](../item/seed-contract.md) as the parent law every rule below specialises. Anchor template copied from [creature-seed/spec-anchor-contract.md](../creature-seed/spec-anchor-contract.md). Model calls: **the pipelines only**; the planner, the audit and the emit are model-free.
 
 ## Objective
 
@@ -33,7 +33,7 @@ Success looks like: `python -m seedsmith dungeon plan --dry-run` prints the §7 
 
 PLANNED exists because a wrong ordinal that resolves to a Θ delta is as invisible as a wrong number (S1-6). Every PLANNED field's description ends *"The planner always supplies this; a value different from the brief is a defect, not a choice."* — which is also its `none` statement: PLANNED enums never admit `none` because the planner never leaves them empty.
 
-Every id is PLANNED: the planner mints `<kind>.<cell>-<nnn>` from the cell and a sequence that continues from the high-water mark (seed-contract §7.3). The model never writes an id — four tracking-id defects in the item build (seedsmith-map Appendix A row 6) are the reason. Every anchor carries `_provenance` and `_derived` exactly as `data/seed/demons/species/plant/aerial-flora.json` does; `reason` (AUTHORED free text) is the model's own account of its picks. Negative clauses are abbreviated in the tables; the schema carries them in full and `every_description_names_what_the_field_is_not` enforces their presence. The review's G-pass drafted five clauses (audit §4, G9); that working text is not in the tree, so they are re-derived here on the fields the finding named rather than quoted.
+Every id is PLANNED: the planner mints `<kind>.<cell>-<nnn>` from the cell and a sequence that continues from the high-water mark (seed-contract §7.3). The model never writes an id — four tracking-id defects in the item build (seedsmith-map Appendix A row 6) are the reason. Every anchor carries `_provenance` and `_derived` exactly as `data/seed/creatures/species/plant/aerial-flora.json` does; `reason` (AUTHORED free text) is the model's own account of its picks. Negative clauses are abbreviated in the tables; the schema carries them in full and `every_description_names_what_the_field_is_not` enforces their presence. The review's G-pass drafted five clauses (audit §4, G9); that working text is not in the tree, so they are re-derived here on the fields the finding named rather than quoted.
 
 **1.1 Domain** — `domains/<id>.json`. Cell: climate (6) × dangerBand (4) = 24.
 
@@ -47,7 +47,7 @@ Every id is PLANNED: the planner mints `<kind>.<cell>-<nnn>` from the cell and a
 |`permadeathFromRung`|VALIDATED, optional (added by `domain-catalog` §Drift 4, 2026-09-05)|a rung id from `difficulty-rungs.v1.json`, or absent — absent means `difficulty.permadeathFromRung` (the tuning default, `spec-difficulty-ladder.md` §4); a domain may only RAISE the gate above the default|not a permadeath flag; not a number; never lower than the tuning default|
 | `entry` | PLANNED | `once · many` (R2) · planner supplies | not "how long" — size is the layout's |
 | `layoutTemplateId` | PLANNED | a `layouts/` id, rotated per cell | not chosen for theme fit |
-| `bossSpeciesRef` | VALIDATED | species ids with `threatBand ∈ {tyrant … calamity}` (`demon-threat.v1.json` rungs 7–10), inlined per climate · no `none`: every domain has a boss | not the retinue; not a HypnoAlly flag |
+| `bossSpeciesRef` | VALIDATED | species ids with `threatBand ∈ {tyrant … calamity}` (`creature-threat.v1.json` rungs 7–10), inlined per climate · no `none`: every domain has a boss | not the retinue; not a HypnoAlly flag |
 |`firstClearRef`|VALIDATED, optional (added by `unique-pipeline` §5, 2026-09-05)|a rung-80+ `deterministic` unique container id (`item.<slug>`), or `none` — the `dungeon-clear` first-clear grant names it by id (decision 13: *"granted by id and never categorically"*); instantiated at `Θ_boss` on its own stream, banked at the clear|not a table; not a role or frame; never a weight|
 | `retinueFamily` | VALIDATED | `families.v1.json` · `none` legal (boss stands alone) | not the boss's own family by default |
 | `roomPalette` | VALIDATED, refs | ≥ 1 `rooms/` id per room kind the layout can place · no `none` | not an ordering — the roll picks per cell |
@@ -99,7 +99,7 @@ Every id is PLANNED: the planner mints `<kind>.<cell>-<nnn>` from the cell and a
 | `questId`, `objectiveTemplate`, `scope` | PLANNED | `objective-templates.v1.json` (9); `delve · domain · roster` | template is not the reward |
 | `name`, `flavor` | AUTHORED | free text | — |
 | `targetRef` | VALIDATED | a **kind** ref (room kind, event kind, species family) · `none` legal for count-only templates | not an id, never a number |
-| `countBand` | AUTHORED, **voted** | `few · some · most · all` → `quests.countBand.*Milli` · **`none` legal and required on the six count-less templates** (`kill-boss · extract-with-item-kind · bring-demon-home-alive · finish-under-hunger · survive-no-downed · spend-no-provision` — added by `delve-quests` §1, 2026-09-05) | not a difficulty — `all` on a short layout is easy |
+| `countBand` | AUTHORED, **voted** | `few · some · most · all` → `quests.countBand.*Milli` · **`none` legal and required on the six count-less templates** (`kill-boss · extract-with-item-kind · bring-creature-home-alive · finish-under-hunger · survive-no-downed · spend-no-provision` — added by `delve-quests` §1, 2026-09-05) | not a difficulty — `all` on a short layout is easy |
 | `rewardBand` | AUTHORED, **voted** | the tier-window ordinals in `quests.rewardBand.*` | not souls, not an item |
 | `repeatScope` | AUTHORED | as events | — |
 | `prereqRefs`, `chainRef` | VALIDATED, same-kind refs | `none` legal | not unlocks — quests reward, never unlock (ideal §11.3) |
@@ -127,11 +127,11 @@ Every id is PLANNED: the planner mints `<kind>.<cell>-<nnn>` from the cell and a
 
 ### 2. The schema audit — four shapes, a stem check, a spelled-number list
 
-`numeric_audit` (`adapters/demons/anchor/audit.py:83-136`) already rejects a bare `number`/`integer`, a `pattern` matching every digit probe (`:34`, `:53-63`), an all-numeric-string `enum` (`:66-73`) and a deny-listed name (`:26-32`, `:76-80`). The dungeon audit reuses it and adds:
+`numeric_audit` (`adapters/creatures/anchor/audit.py:83-136`) already rejects a bare `number`/`integer`, a `pattern` matching every digit probe (`:34`, `:53-63`), an all-numeric-string `enum` (`:66-73`) and a deny-listed name (`:26-32`, `:76-80`). The dungeon audit reuses it and adds:
 
 - **Stem check** — any property name matching `*weight*` or `*chance*` (case-insensitive, anywhere in the name) is refused. `weightBand` dies here (S2-12); `dropBand` is the one frequency vocabulary.
 - **Spelled-number list** — an `enum` containing any of `one … ten` as a member is refused; the fix is a true band with a `{min,max}` tuning row (`countBand: lone`) or an allow-listed structural int with a comment (`phaseCount`).
-- **Allow-list**, pinned by test: `{manifestCost}` for this adapter — the one structural count the consumable already carries, with the "never enters balance arithmetic" comment, beside demons' `gameTypeId` (`schema.py:81`). Phase count and retinue size are NOT integers on any anchor: phasing is the `none · breakpoint · escalating` band and retinue is a slot `countBand` (reconciled with `spec-dungeon-registries.md`).
+- **Allow-list**, pinned by test: `{manifestCost}` for this adapter — the one structural count the consumable already carries, with the "never enters balance arithmetic" comment, beside creatures' `gameTypeId` (`schema.py:81`). Phase count and retinue size are NOT integers on any anchor: phasing is the `none · breakpoint · escalating` band and retinue is a slot `countBand` (reconciled with `spec-dungeon-registries.md`).
 - **PLANNED `const` check** — the per-call schema carries every PLANNED field as `const`; a schema exposing a PLANNED field as a free `enum` fails the audit.
 - **Metadata excluded** — `_provenance`/`_derived` are skipped as `emit.py:30-44` skips `_`-prefixed keys; their version ints are not anchor content.
 
@@ -250,11 +250,11 @@ tools/seedsmith/tests/test_dungeon_{contract,order,planner,idempotency,budget}.p
 docs/architecture/party-dungeon/spec-dungeon-seed-contract.md   (this file)
 ```
 
-Descriptions live apart from the shape, as the demon anchor does — they change far more often.
+Descriptions live apart from the shape, as the creature anchor does — they change far more often.
 
 ## Code style
 
-Match `adapters/demons/anchor/*`: frozen tuples for vocabularies, `SCREAMING_CASE` constants, `OWNERSHIP` dict as the single level table (`schema.py:57-72`), docstrings naming this spec. One room, as emitted:
+Match `adapters/creatures/anchor/*`: frozen tuples for vocabularies, `SCREAMING_CASE` constants, `OWNERSHIP` dict as the single level table (`schema.py:57-72`), docstrings naming this spec. One room, as emitted:
 
 ```json
 {
@@ -331,13 +331,13 @@ The committed corpora under `data/seed/dungeon/` and their schemas (`contract --
 ```
 [x] Subsystems: seedsmith adapters/planner/pipeline; the dungeon seed corpora; item seed-contract.
 [x] Read this session: party-dungeon-map, ideal §10/§11.1/§11.3/§11.4/§11.5/§11.7/§11.9/§11.10, audit-2026-09-05,
-    seedsmith-design skill, ai-native README, item/seed-contract §1-§8, demon-seed spec-anchor-contract,
+    seedsmith-design skill, ai-native README, item/seed-contract §1-§8, creature-seed spec-anchor-contract,
     structure-seed-ideal §3-§6, seedsmith-map §2/§3d, spec-pipeline, spec-quality-gates, spec-planner,
-    spec-workflow-runtime, spec-budget, spec-adapter-demons §1-§2, spec-expeditions (format).
+    spec-workflow-runtime, spec-budget, spec-adapter-creatures §1-§2, spec-expeditions (format).
 [x] decisions.md: rows at :113-116 appended 2026-09-05; none locks a seed shape.
 [x] Every code claim cites file:line (base.py, registry.py, audit.py, schema.py, emit.py, permute.py,
     ordering.py, motif.py, field_echo.py, dedup.py, model.py, cli.py, items/kinds.py, SlotTypeCatalog.cs,
-    ActorElementTypes.cs, PredicateNode.cs, bands.v1.json, demon-threat.v1.json, ssot-power-scale.md).
+    ActorElementTypes.cs, PredicateNode.cs, bands.v1.json, creature-threat.v1.json, ssot-power-scale.md).
 [x] Verified against code, not comments (e.g. dropBand's five members read from bands.v1.json:453-459).
 [x] Surrounding sections read for every quoted rule.
 [ ] Tested constraints: nothing was run — this spec changes no code; no golden or suite is claimed to move.

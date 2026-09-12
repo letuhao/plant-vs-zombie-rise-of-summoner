@@ -4,7 +4,7 @@ using FusionRpg.Core.Battle;
 using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.Battle.Siege;
 using FusionRpg.Core.Battle.Timeline;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.World.District;
 
 namespace FusionRpg.Core.World.Turn;
@@ -347,7 +347,7 @@ public sealed class DistrictAssaultResolver : IBattleResolver
             var effectiveHp = Math.Max(0, member.Hp - member.Wounds);
             if (effectiveHp <= 0) continue; // already gone -- never fielded
 
-            var species = DemonSpeciesCatalog.Get(member.SpeciesId);
+            var species = CreatureSpeciesCatalog.Get(member.SpeciesId);
             var key = $"{entity.EntityId}:{i}";
             keys.Add(key);
 
@@ -356,7 +356,7 @@ public sealed class DistrictAssaultResolver : IBattleResolver
                 Key = key,
                 Side = side,
                 SpeciesId = member.SpeciesId,
-                TypeId = species.DemonTypeId,
+                TypeId = species.CreatureTypeId,
                 Level = member.Level,
                 ElementPrimary = species.ElementPrimary,
                 ElementSecondary = species.ElementSecondary,

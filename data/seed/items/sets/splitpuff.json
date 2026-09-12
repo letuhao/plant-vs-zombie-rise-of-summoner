@@ -25,7 +25,7 @@
       "id": "set.splitpuff-001",
       "nameKey": "set.spore-pod-volley",
       "name": "Spore-Pod Volley",
-      "themeKey": "demon.splitpuff",
+      "themeKey": "creature.splitpuff",
       "members": [
         {
           "role": "armament-primary",

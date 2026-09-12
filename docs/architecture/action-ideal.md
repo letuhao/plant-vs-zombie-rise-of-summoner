@@ -37,7 +37,7 @@ work, not an open question.
 
 | | Decision | Where |
 |---|---|---|
-| **1** | **Three kinds of action.** Basic (3, free) · innate (1, free, per demon type) · earned skills (**5 equipped slots**) | §1 |
+| **1** | **Three kinds of action.** Basic (3, free) · innate (1, free, per creature type) · earned skills (**5 equipped slots**) | §1 |
 | **2** | **Basic actions cost no loadout capacity** — they are *intrinsic*, so there is nothing for a cap to count | §1.2 |
 | **3** | **Guard is a STANCE, not a reaction.** Continuous while enabled; every other action, movement included, is refused while it holds | §2.2 |
 | **4** | **Actions are seeded, never handcrafted.** An action is an `effect_container` with a weighted pool — shipped machinery, not new | §3.0 |
@@ -49,7 +49,7 @@ work, not an open question.
 | **10** | **Duration rides the ladder**, with a bound that is **relative, never absolute** | §5 |
 | **11** | **Cost rides rung and `Θ`; cooldown rides rung only.** Cooldown is ticks, not a magnitude | §6 |
 | **12** | **Cost span > power span.** This is the mechanism that makes FOCUS a build rather than flavour | §6.1 |
-| **13** | **A demon type is a weight vector over the five shipped action-categories** — not a third vocabulary | §7.2 |
+| **13** | **A creature type is a weight vector over the five shipped action-categories** — not a third vocabulary | §7.2 |
 | **14** | **PvZ samples the frame clock into integer ticks.** Real time drives; wall-clock is never stored | §5.3 |
 | **15** | **Complexity = referencing state you did not create**, never atom count | §8.1 |
 | **16** | **A rung buys STRUCTURE as well as numbers** — a rung-10 action plays differently, not just harder | §8.3 |
@@ -100,7 +100,7 @@ part.
 | Kind | Count | Costs loadout capacity? | Where it comes from |
 |---|---|---|---|
 | **Basic** — attack · guard · move | 3 | **no** | intrinsic on every species row |
-| **Innate** | 1 | **no** — a free sixth | the actor's demon type |
+| **Innate** | 1 | **no** — a free sixth | the actor's creature type |
 | **Earned skill** | **5 equipped** | yes — this is the scarcity | the unlock ladder (§3) and any paid source (§3.4) |
 
 ### 1.1 ⚠️ "Slot" is already taken, and it means something else
@@ -157,7 +157,7 @@ is the private-`f(x)` defect the power SSOT exists to end.
 
 **The attack needs no new machinery to be type-flavoured.** A5's basic-attack adoption already takes
 element components from `attacker.AttackComponents`, so *"becomes element damage"* is a **stat and
-trait change on the actor**, not a different action row. One row; the demon type and its passives
+trait change on the actor**, not a different action row. One row; the creature type and its passives
 change what it does. Range parameters are authored now and inert until the board exists — and with no
 board **every range check passes**, which is the line the byte-identity proof rests on.
 
@@ -357,7 +357,7 @@ curves.
 
 | Source | Rung from | Capped? |
 |---|---|---|
-| Demon-type levelling | `min(earnCount, cap)` | **cap**, tunable |
+| Creature-type levelling | `min(earnCount, cap)` | **cap**, tunable |
 | Item grant | the item's rarity / tier ladder | no |
 | Passive skill, variant | that system's own tier | no |
 | Future mechanisms | **declare a mapping at registration** | no |
@@ -393,7 +393,7 @@ have permission to exist."* One row already covers this shape — **row 7**:
 > **within-item quality ladder in relative space** — it never sees a level. §2's theorem does not
 > apply."*
 
-The unlock ladder is the same shape one level up: a **within-demon-type quality ladder in relative
+The unlock ladder is the same shape one level up: a **within-creature-type quality ladder in relative
 space**. So it is built from two shipped mechanisms — the `1.75^(t−1)` magnitude ladder and `pool_rolls`
 breadth — rather than a third.
 
@@ -435,7 +435,7 @@ itself as knowingly ~12.5% wrong on crit-rate × crit-damage and on the element 
 ladder that combination *will* roll. The rung budget check needs either E10's marginal read or a `group`
 exclusion so one container cannot roll both halves.
 
-**Demon-type level is not a `Θ` axis.** `Θ_actor` has exactly five axes (power SSOT §5) and this is not
+**Creature-type level is not a `Θ` axis.** `Θ_actor` has exactly five axes (power SSOT §5) and this is not
 one. The unlock ladder stays **local** — row 7's precedent — or it is a proposal for a sixth axis, which
 is a reviewed change to that document.
 
@@ -557,7 +557,7 @@ guess that survives review because nothing looks wrong with it."*
 | `sharePermille` per channel — [spec-numerics.md](seedsmith/spec-numerics.md) §2 calls this *the entire tunable surface*, and **refuses to guess one** | identity: name, flavour, the concept embodied (LLM) |
 | the rung table (§4.1) | structure: which atoms, via pool + weights + `group` (deterministic, shipped) |
 | `p1`, `delta`, `floor`, `cap` | every magnitude (deterministic, `numerics`) |
-| per-demon-type category weights | |
+| per-creature-type category weights | |
 
 ### 7.2 The categories already exist — twice — and a third is the defect
 
@@ -566,7 +566,7 @@ guess that survives review because nothing looks wrong with it."*
 | `action-category` | `attack · defense · support · movement · status` | `skill.cooldown.{category}`, `skill.effectiveness.{category}` |
 | `tags_json` | `offensive · defensive · heal · buff · debuff · movement · summon · utility` | action selection — *"AI reads tags, never internals"* |
 
-> **A demon type is a weight vector over the five shipped action-categories, plus its element/aspect
+> **A creature type is a weight vector over the five shipped action-categories, plus its element/aspect
 > bias.** One small authored row per type. A fire type weights `attack`; a warden type weights
 > `defense`. Each type's unlocks *feel* like that type with zero handcrafting, and no third vocabulary
 > is created.
@@ -576,8 +576,8 @@ guess that survives review because nothing looks wrong with it."*
 **Owner, 2026-08-27, on why a rot-conditional action is hard to actually use:**
 
 > *"rot is one of 21 statuses, it needs 3 conditions to apply so it should be cheaper 3 or 4 times. A
-> defence demon can be rotted (low rot resistance). An attack demon carries a rot status action or passive.
-> And that attack demon can attack the target defence demon."*
+> defence creature can be rotted (low rot resistance). An attack creature carries a rot status action or passive.
+> And that attack creature can attack the target defence creature."*
 
 Pricing handles the *discount* — that is §8.6 and E9's four-factor chain. **It does not handle whether the
 combination exists at all**, and that is a generation problem:
@@ -703,7 +703,7 @@ Axis G is not a vocabulary gap — targeting is an `rpg_action` column (`target_
 `max_range`, `anchor_source`). It was simply **left out of the generation surface**.
 
 Adding it costs nothing and is a whole variation dimension: the same atom list at single-target, at
-`eachTarget`, and at a `Square` area is three genuinely different actions. **The demon-type weight vector
+`eachTarget`, and at a `Square` area is three genuinely different actions. **The creature-type weight vector
 (§7.2) should weight target shapes alongside categories.**
 
 ### 8.5 Linkage is a TRIGGER CHAIN, and the event already carries the number

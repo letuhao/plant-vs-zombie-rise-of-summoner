@@ -25,7 +25,7 @@
       "id": "set.machinenutzombie-001",
       "nameKey": "set.kinetic-bowling-core",
       "name": "Kinetic Bowling Core",
-      "themeKey": "demon.machinenutzombie",
+      "themeKey": "creature.machinenutzombie",
       "members": [
         {
           "role": "armament-primary",

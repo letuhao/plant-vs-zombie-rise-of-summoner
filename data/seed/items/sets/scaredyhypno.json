@@ -25,7 +25,7 @@
       "id": "set.scaredyhypno-001",
       "nameKey": "set.spore-partner",
       "name": "Spore Partner",
-      "themeKey": "demon.scaredyhypno",
+      "themeKey": "creature.scaredyhypno",
       "members": [
         {
           "role": "armament-primary",

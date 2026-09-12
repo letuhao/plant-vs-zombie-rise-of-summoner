@@ -25,7 +25,7 @@
       "id": "set.ultimatemeloncannon-001",
       "nameKey": "set.absolute-zero-battery",
       "name": "Absolute Zero Battery",
-      "themeKey": "demon.ultimatemeloncannon",
+      "themeKey": "creature.ultimatemeloncannon",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.caltroppot-001",
       "nameKey": "set.nut-shell-pot",
       "name": "Nut Shell Pot",
-      "themeKey": "demon.caltroppot",
+      "themeKey": "creature.caltroppot",
       "members": [
         {
           "role": "armament-primary",

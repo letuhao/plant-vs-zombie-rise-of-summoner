@@ -11,7 +11,7 @@ namespace FusionRpg.Core.Tests.Battle;
 /// <summary>aura-skill T21a: the real, production `IOwnSideOracle` for the mechanical case (plant vs.
 /// zombie, mind-control-adjusted) — `AlwaysRelationOracle` (`DebugScopeRuntime.cs`) is a debug-only
 /// stub that answers the same relation for every ptr; this replaces it in production. Deliberately
-/// does not attempt demon-specimen ownership (a separate, harder, unbuilt bridge — T21b).</summary>
+/// does not attempt creature-specimen ownership (a separate, harder, unbuilt bridge — T21b).</summary>
 public class MechanicalOwnSideOracleTests
 {
     static BoardEntitySnap Plant(string ptr, bool mindControlled = false) =>

@@ -13,7 +13,7 @@ Ship an **operator/script prove** that the program’s SSOT holds without a live
 
 1. **Post-fuse battle Hub** channel totals ≡ sheet Hub for same UniqueActor inputs (equip/aptitude/tree).
 2. **Standing** rises when a membership combat channel (e.g. high dodge / cooldown) rises via Hub writers — not when only Θ rises.
-3. **Bound lawn** aptitude input matches Server UniqueDemon compose (`lawn-aptitude-parity`).
+3. **Bound lawn** aptitude input matches Server UniqueCreature compose (`lawn-aptitude-parity`).
 
 Success: one script (extend ProveAptitude or sibling `prove-hub-combat`) exits 0 on green fixtures; documented in runbook; CI optional job or owner pre-merge check.
 
@@ -56,7 +56,7 @@ dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~ProveHub|Sta
 |---|---|
 | Tool | Battle Hub vs sheet Hub zero delta on fixture |
 | Tool | Θ-only change → Standing unchanged; dodge grant → Standing up |
-| Unit | Bound UniqueDemon ≠ empire species |
+| Unit | Bound UniqueCreature ≠ empire species |
 
 ---
 

@@ -27,7 +27,7 @@ import copy
 from typing import Any, Mapping, Sequence
 
 from ....pipeline.model import BLOCKED_FIELD
-from ...demons.anchor.permute import order_for
+from ...creatures.anchor.permute import order_for
 
 __all__ = [
     "SYSTEM_PROMPT", "FAMILY_ACTION_SCHEMA", "schema_for_call",
@@ -58,7 +58,7 @@ SYSTEM_PROMPT = (
 # The schema. Every `description` string below is copied byte-for-byte from spec-family-propose
 # .md SS2's own JSONC block (review F19, 2026-09-03) -- written there specifically so this build
 # would not have to (re-)derive them, each modelled on the hardened `blocked` description at
-# `adapters/demons/anchor/prompts.py:74-82`.
+# `adapters/creatures/anchor/prompts.py:74-82`.
 #
 # Both `atomFamilies.items.enum` and `motifsExpressed.items.enum` ship EMPTY here on purpose: the
 # real enums are filled at call time -- `atomFamilies` from the brief's own `allowedAtomFamilies`,
@@ -178,7 +178,7 @@ _REQUIRED_FAMILY_DERIVATION_KEYS: "tuple[str, ...]" = (
 #: The species-scoped signals spec SS3 names explicitly: "a brief carrying `anchor.speciesKey`,
 #: species motifs or an element token raises." `distribution_planner/derive.py:490-513`'s own
 #: `brief_anchor` shows the real schema has no field literally called `speciesKey` -- `themeKey`
-#: (e.g. `"demon.cherrybomb"`) is the real analog, populated ONLY for `species` scope and always
+#: (e.g. `"creature.cherrybomb"`) is the real analog, populated ONLY for `species` scope and always
 #: `None` for `family`/`general` scope, exactly mirroring how `anchor.motifs`/`anchor.element` are
 #: populated only for species. `speciesKey` itself is still checked below, defensively, in case a
 #: future schema revision adds it literally -- it can never fire against today's real data, but a
@@ -262,7 +262,7 @@ def build_context(brief: Mapping[str, Any], *, sample_index: int,
     brief was rendered from. Raises per `_require_family_anchor`/`_require_slot` (acceptance #5)
     before reading anything else off `brief`.
 
-    `sample_index` is IN this call, never bolted on after (`adapters/demons/anchor/permute.py`'s
+    `sample_index` is IN this call, never bolted on after (`adapters/creatures/anchor/permute.py`'s
     own module docstring) -- and it seeds TWO independent permutations here, one per enum field
     (`"atomFamilies"` and `"motifsExpressed"`), so three votes over three identical orders is
     never possible for either.

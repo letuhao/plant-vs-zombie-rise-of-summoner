@@ -1,6 +1,6 @@
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Battle.Timeline;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Stats.Derived;
 using Xunit;
 
@@ -13,7 +13,7 @@ namespace FusionRpg.Core.Tests.Battle;
 /// </summary>
 public class SpeciesTempoTests
 {
-    // The real, shipped anchors (data/tuning/demon-shape.v1.json) and the real TurnDefaultSpeed
+    // The real, shipped anchors (data/tuning/creature-shape.v1.json) and the real TurnDefaultSpeed
     // (data/tuning/derived-stats.v2.json) — read as literals here because ContractTuningTestBootstrap
     // configures DerivedStatPolicy from the identical working set (tunables-ssot.md §7.2: "construct
     // one inline; no fixture files"), so this is the SAME 100 the assembly-wide bootstrap loads.

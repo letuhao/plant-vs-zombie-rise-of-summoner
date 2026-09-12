@@ -2,7 +2,7 @@
 
 **Lens:** handed the proposal and told to build it — what is wrong, overstated, or unmeasured?
 **Method:** adversarial re-reading plus **execution**: dependency inspection, an offline socket guard,
-an 8-demon judgement-quality run against the real local model, and a corpus text-composition count.
+an 8-creature judgement-quality run against the real local model, and a corpus text-composition count.
 **Date:** 2026-09-01. **Eight findings.** One invalidates a headline recommendation; two close open
 questions with data; one is a defect in already-shipped code.
 
@@ -13,7 +13,7 @@ questions with data; one is a defect in already-shipped code.
 **The claim (v3 §6):** build `lore-enrich` first, because *"the taxonomy is thin because the input
 text is thin."*
 
-**Measured, and the diagnosis is wrong.** Counting `flavorInfo` across all 84 demons:
+**Measured, and the diagnosis is wrong.** Counting `flavorInfo` across all 84 creatures:
 
 | | chars | share |
 |---|---|---|
@@ -23,7 +23,7 @@ text is thin."*
 The text is **not thin — it is diluted.** `motif-derive` draws 70% of its input from a stat table, so
 it produces stat vocabulary rather than themes. Real committed output:
 
-| demon | derived motifs | what they actually mean |
+| creature | derived motifs | what they actually mean |
 |---|---|---|
 | `bucketnutzombie` | `一类`, `击杀` | **"armour-class one"**, "kill" |
 | `cherrynut` | `伤害`, `僵尸` | "damage", **"zombie"** — a word in nearly every entry |
@@ -36,7 +36,7 @@ non-reproducible script."*
 
 **Correction:** insert **W-0 — restrict motif derivation to prose** (drop `label：value` lines and
 `特点`/`特性`/`弱点`/`融合配方` blocks; prefer `flavorIntroduce`, which is pure lore and present for
-**18/84** demons). Deterministic, no model, no cost, testable. **It precedes every generation
+**18/84** creatures). Deterministic, no model, no cost, testable. **It precedes every generation
 workflow**, and it likely shrinks W-E's value substantially — re-evaluate W-E only after W-0's
 motifs are visible.
 
@@ -44,7 +44,7 @@ motifs are visible.
 
 ## R2 — ✅ Q3 CLOSED by measurement: local Gemma-26B **is** sufficient for judgement work
 
-The proposal deferred this as *"wants measuring."* Measured — 8 demons chosen for having **both**
+The proposal deferred this as *"wants measuring."* Measured — 8 creatures chosen for having **both**
 motifs and anti-motifs (the hard case: a negative constraint), constrained decoding on, running the
 same deterministic validators the workflow would:
 
@@ -89,7 +89,7 @@ R3 is downstream of R1: garbage motifs in, shoehorned prose out.
 (`name`), and `Distribution/MotifSharing` **depends on that distinction** to exclude tautological
 pairs (audit A2).
 
-`lore-enrich` writes **synthetic** flavour text. If a demon then derives motifs from that text and
+`lore-enrich` writes **synthetic** flavour text. If a creature then derives motifs from that text and
 records `basis="text"`, the corpus can no longer distinguish *evidence* from *invention* — and the
 tautology detector silently starts trusting generated text as ground truth.
 
@@ -102,7 +102,7 @@ purposes. The proposal omitted this entirely.
 ## R5 — ⛔ The SQLite checkpointer contradicts an existing, documented precedent
 
 v3 §5 proposes `SqliteSaver` for checkpointing. But
-[`spec-demon-corpus-emit.md:28-30`](../spec-demon-corpus-emit.md) established the opposite reasoning
+[`spec-creature-corpus-emit.md:28-30`](../spec-creature-corpus-emit.md) established the opposite reasoning
 when it chose C# over Python **specifically to keep SQL out of `tools/`**:
 
 > *"SQL belongs inside `FusionRpg.Data`. `guard-dal.ps1` would not catch a violation here — it scans
@@ -125,7 +125,7 @@ correct**: `guard-dal` and the SQL invariant protect the **shipped game's** data
 
 ⚠️ **Scope, so it cannot creep:** authorises `sqlite3` for **checkpoint state in `tools/seedsmith/`
 only**. Python still may **not** read the game's SQLite (`types`, `almanac_seed`, `recipes`) — that
-stays C#-through-the-DAL per `demon-corpus-emit`, for that spec's own stated reason.
+stays C#-through-the-DAL per `creature-corpus-emit`, for that spec's own stated reason.
 
 ---
 

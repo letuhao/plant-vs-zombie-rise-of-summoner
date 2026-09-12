@@ -25,7 +25,7 @@
       "id": "set.portalnut-001",
       "nameKey": "set.chronos-nut",
       "name": "Chronos Nut",
-      "themeKey": "demon.portalnut",
+      "themeKey": "creature.portalnut",
       "members": [
         {
           "role": "armament-primary",

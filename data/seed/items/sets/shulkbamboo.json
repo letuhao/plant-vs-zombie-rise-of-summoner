@@ -25,7 +25,7 @@
       "id": "set.shulkbamboo-001",
       "nameKey": "set.steel-leaf-barrier",
       "name": "Steel-Leaf Barrier",
-      "themeKey": "demon.shulkbamboo",
+      "themeKey": "creature.shulkbamboo",
       "members": [
         {
           "role": "core-guard",

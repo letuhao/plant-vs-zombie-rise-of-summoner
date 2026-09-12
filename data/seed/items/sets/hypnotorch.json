@@ -25,7 +25,7 @@
       "id": "set.hypnotorch-001",
       "nameKey": "set.torchlight-stump",
       "name": "Torchlight Stump",
-      "themeKey": "demon.hypnotorch",
+      "themeKey": "creature.hypnotorch",
       "members": [
         {
           "role": "armament-primary",

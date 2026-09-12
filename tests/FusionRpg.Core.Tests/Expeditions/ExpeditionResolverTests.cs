@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Expeditions;
 using Xunit;
 
@@ -86,15 +86,15 @@ public class ExpeditionResolverTests
         for (ulong seed = 0; seed < 40; seed++)
         {
             var r = ExpeditionResolver.Resolve("warpath-20h", Squad(5), seed, 10);
-            foreach (var tick in r.Ticks.Where(t => t.Kind == ExpeditionTickKinds.WildDemonMet))
+            foreach (var tick in r.Ticks.Where(t => t.Kind == ExpeditionTickKinds.WildCreatureMet))
             {
-                var species = DemonSpeciesCatalog.Get(tick.WildSpeciesId!);
-                Assert.NotEqual(DemonAcquisition.CaptureOnly, species.Acquisition);
-                Assert.NotEqual(DemonRarity.Sunwoven, species.BaseRarity);
+                var species = CreatureSpeciesCatalog.Get(tick.WildSpeciesId!);
+                Assert.NotEqual(CreatureAcquisition.CaptureOnly, species.Acquisition);
+                Assert.NotEqual(CreatureRarity.Sunwoven, species.BaseRarity);
             }
 
             foreach (var join in r.Rewards.WildJoins)
-                Assert.True(DemonSpeciesCatalog.IsKnown(join.SpeciesId));
+                Assert.True(CreatureSpeciesCatalog.IsKnown(join.SpeciesId));
         }
     }
 
@@ -105,7 +105,7 @@ public class ExpeditionResolverTests
         Assert.True(r.Rewards.EventSouls >= 0);
         Assert.All(r.Rewards.Materials, m =>
         {
-            Assert.True(DemonMaterialCatalog.IsKnown(m.MaterialId), m.MaterialId);
+            Assert.True(CreatureMaterialCatalog.IsKnown(m.MaterialId), m.MaterialId);
             Assert.True(m.Qty > 0);
         });
         Assert.True(r.Rewards.SpecimenXpPerBattleWon > 0);
@@ -141,7 +141,7 @@ public class ExpeditionResolverTests
     }
 
     /// <summary>spec-rarity-migration.md §4: `ShardCommon`/`ShardRare` are string LITERALS, invisible
-    /// to every grep for `DemonRarity` — they do not mention the enum and would survive a future
+    /// to every grep for `CreatureRarity` — they do not mention the enum and would survive a future
     /// widening untouched, pointing at materials that no longer exist. This pins them against the
     /// live catalog directly rather than trusting the rename was applied everywhere it needed to be.
     /// Reflection over the private consts (not a text-file scan) so the check tracks the compiled
@@ -155,8 +155,8 @@ public class ExpeditionResolverTests
             var field = type.GetField(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
             Assert.True(field is not null, $"{type.FullName} no longer declares a const named {name}");
             var value = (string)field!.GetValue(null)!;
-            Assert.Contains(value, DemonMaterialCatalog.All);
-            Assert.DoesNotContain(value, LegacyDemonRarityIds.ForwardMap.Keys.Select(id => "shard." + id));
+            Assert.Contains(value, CreatureMaterialCatalog.All);
+            Assert.DoesNotContain(value, LegacyCreatureRarityIds.ForwardMap.Keys.Select(id => "shard." + id));
         }
     }
 
@@ -186,7 +186,7 @@ public class ExpeditionResolverTests
     // Why the roster touches this golden at all — a DIFFERENT class from every re-bless
     // above — those were serialization shape or magnitude churn with the roster fixed. This one is
     // a genuine content change. WildBand (ExpeditionResolver.cs:231) picks wild enemies from
-    // DemonSpeciesCatalog.All filtered by rarity and ordered by SpeciesId, then indexes with
+    // CreatureSpeciesCatalog.All filtered by rarity and ordered by SpeciesId, then indexes with
     // rng.NextInt(band.Count). Regenerating the catalog uncapped took it from 24 to 84 species, so
     // both the band's contents and its size changed and a different enemy is legitimately rolled.
     // Verified it is selection, not a determinism break: Same_inputs_resolve_identically and the
@@ -205,7 +205,7 @@ public class ExpeditionResolverTests
     // Re-blessed 2026-09-07 (combat-unification Phase 7 F1, owner decision: hybrid.
     // secondaryWeightMilli 0 -> 300) — checked before re-blessing, not assumed: `Squad()` above uses
     // a fixed synthetic "test-species" with no catalog-backed ElementSecondary, so the player side of
-    // every resolve is unaffected. The wild-enemy side (`WildBand`, real `DemonSpeciesCatalog.All`)
+    // every resolve is unaffected. The wild-enemy side (`WildBand`, real `CreatureSpeciesCatalog.All`)
     // is not — 21/841 real species carry a genuine secondary element (measured live 2026-09-07), and
     // any of the four rolls landing one now embeds a real two-component `elementPayload` on that
     // enemy's own `BattleSetup` where it carried one component before, which is exactly what moves

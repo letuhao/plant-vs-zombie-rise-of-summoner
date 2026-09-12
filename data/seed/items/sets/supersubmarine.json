@@ -25,7 +25,7 @@
       "id": "set.supersubmarine-001",
       "nameKey": "set.corporate-deep-sea-driver",
       "name": "Corporate Deep-Sea Driver",
-      "themeKey": "demon.supersubmarine",
+      "themeKey": "creature.supersubmarine",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.cherryscaredy-001",
       "nameKey": "set.cherry-panic-burst",
       "name": "Cherry Panic Burst",
-      "themeKey": "demon.cherryscaredy",
+      "themeKey": "creature.cherryscaredy",
       "members": [
         {
           "role": "armament-primary",

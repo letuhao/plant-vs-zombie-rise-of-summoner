@@ -1,0 +1,45 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "dark",
+  "eligibility": null,
+  "eventId": "event.bargain-creature.cabbagepult-001",
+  "flavor": "A bloated, moss-covered 僵尸 sits atop a pile of rotting 卷心菜, clutching a heavy stone 投手. He offers to launch a volley of enchanted seeds at your enemies, but he demands a portion of your vitality to fuel the growth.",
+  "kind": "bargain",
+  "name": "The Gardener's Pitch",
+  "outcomes": [
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.warding",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.warding",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party encounters a specialized undead merchant offering tactical artillery in exchange for life force.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.cabbagepult"
+}

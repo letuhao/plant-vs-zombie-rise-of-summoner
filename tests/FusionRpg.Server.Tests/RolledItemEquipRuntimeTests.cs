@@ -3,7 +3,7 @@ using FusionRpg.Core.Actions.Eligibility;
 using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Actions.Unlock;
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Items;
 using FusionRpg.Core.Items.Grants;
@@ -49,11 +49,11 @@ public class RolledItemEquipRuntimeTests : IDisposable
         var tuningDir = Path.Combine(FindRepoRoot(), "data", "tuning");
         string Read(string name) => File.ReadAllText(Path.Combine(tuningDir, name));
         SummoningTuningHub.Configure(SummoningTuningLoader.Parse(Read("summoning.v1.json")));
-        FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
-            FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(Read("contracts.v1.json")));
+        FusionRpg.Core.Creatures.Contracts.ContractPolicy.Configure(
+            FusionRpg.Core.Creatures.Contracts.ContractTuningLoader.Parse(Read("contracts.v1.json")));
         SoulEarnPolicy.Configure(SoulEarnTuningLoader.Parse(Read("souls.v1.json")));
-        FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
-            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(Read("fusion.v2.json")));
+        FusionRpg.Core.Creatures.Fusion.StarPolicy.Configure(
+            FusionRpg.Core.Creatures.Fusion.FusionTuningLoader.Parse(Read("fusion.v2.json")));
         FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(Read("progression.v1.json")));
         FusionRpg.Core.Battle.BattleTuningHub.Configure(

@@ -25,7 +25,7 @@
       "id": "set.flagfootball-001",
       "nameKey": "set.general-s-gridiron",
       "name": "General's Gridiron",
-      "themeKey": "demon.flagfootball",
+      "themeKey": "creature.flagfootball",
       "members": [
         {
           "role": "armament-primary",

@@ -203,7 +203,7 @@ public class DraughtManifestTests
 
     static BattleActorSetup Member(string key) => new()
     {
-        Key = key, Side = "squad", SpeciesId = "demon.test", Level = 10, MaxHp = 1000, Atk = 100,
+        Key = key, Side = "squad", SpeciesId = "creature.test", Level = 10, MaxHp = 1000, Atk = 100,
     };
 
     [Fact]

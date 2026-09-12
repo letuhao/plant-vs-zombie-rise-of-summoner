@@ -1,5 +1,5 @@
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Progression;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Data;
@@ -37,19 +37,19 @@ public class AllocationStoreTests : IDisposable
         // loaded independently, must not bleed into each other.
         var commander = AptitudeAllocation.Single(AllocationScope.Commander, "Might", 12)
                        + AptitudeAllocation.Single(AllocationScope.Commander, "Vigor", 30);
-        var uniqueDemon = AptitudeAllocation.Single(AllocationScope.UniqueDemon, "Bulwark", 55);
+        var uniqueCreature = AptitudeAllocation.Single(AllocationScope.UniqueCreature, "Bulwark", 55);
 
         _store.SaveAllocation(AllocationScope.Commander, "player:1", commander);
-        _store.SaveAllocation(AllocationScope.UniqueDemon, "instance:abc", uniqueDemon);
+        _store.SaveAllocation(AllocationScope.UniqueCreature, "instance:abc", uniqueCreature);
 
         var loadedCommander = _store.LoadAllocation(AllocationScope.Commander, "player:1");
-        var loadedUnique = _store.LoadAllocation(AllocationScope.UniqueDemon, "instance:abc");
+        var loadedUnique = _store.LoadAllocation(AllocationScope.UniqueCreature, "instance:abc");
 
         Assert.Equal(12, loadedCommander.PointsAt(AllocationScope.Commander, "Might"));
         Assert.Equal(30, loadedCommander.PointsAt(AllocationScope.Commander, "Vigor"));
-        Assert.Equal(0, loadedCommander.PointsAt(AllocationScope.UniqueDemon, "Bulwark")); // no bleed
+        Assert.Equal(0, loadedCommander.PointsAt(AllocationScope.UniqueCreature, "Bulwark")); // no bleed
 
-        Assert.Equal(55, loadedUnique.PointsAt(AllocationScope.UniqueDemon, "Bulwark"));
+        Assert.Equal(55, loadedUnique.PointsAt(AllocationScope.UniqueCreature, "Bulwark"));
         Assert.Equal(0, loadedUnique.PointsAt(AllocationScope.Commander, "Might")); // no bleed
     }
 
@@ -107,7 +107,7 @@ public class AllocationStoreTests : IDisposable
     [Fact]
     public void ScopeToText_andBack_roundTripsForAllFourScopes()
     {
-        foreach (var scope in new[] { AllocationScope.Commander, AllocationScope.DemonType, AllocationScope.Aspect, AllocationScope.UniqueDemon })
+        foreach (var scope in new[] { AllocationScope.Commander, AllocationScope.CreatureType, AllocationScope.Aspect, AllocationScope.UniqueCreature })
             Assert.Equal(scope, RpgStore.ScopeFromText(RpgStore.ScopeToText(scope)));
     }
 
@@ -158,9 +158,9 @@ public class AllocationStoreTests : IDisposable
         Assert.Equal(0, loaded.GrandTotal());
     }
 
-    // ---- species-build T2.1/T2.2 (demon-type-allocation) --------------------------------------
+    // ---- species-build T2.1/T2.2 (creature-type-allocation) --------------------------------------
 
-    const int FumeshroomDemonTypeId = 60007;
+    const int FumeshroomCreatureTypeId = 60007;
 
     static string RepoRoot()
     {
@@ -182,7 +182,7 @@ public class AllocationStoreTests : IDisposable
     static AllocationStoreTests()
     {
         // Global, unscoped (SpeciesBuildPlanCatalog has no test-scoping mechanism, unlike
-        // DemonSpeciesCatalog's UseScoped) -- safe because this is the only file in the assembly that
+        // CreatureSpeciesCatalog's UseScoped) -- safe because this is the only file in the assembly that
         // touches it. Configured once via this static ctor, matching SpeciesProgressionTuningHub's own
         // "construct one inline" convention for a hub with no fixture file behind it.
         SpeciesBuildPlanCatalog.Configure(new Dictionary<string, IReadOnlyDictionary<string, long>>(StringComparer.Ordinal)
@@ -197,7 +197,7 @@ public class AllocationStoreTests : IDisposable
     /// <summary>Writes a species-progression row directly (bypassing the real XP curve entirely) —
     /// this file is testing `EffectiveSpeciesAllocation`'s own composition logic, not re-proving
     /// `species-xp`'s leveling pipeline (already covered in `SpeciesProgressionTests.cs`).</summary>
-    void SeedSpeciesLevel(long playerId, int demonTypeId, long level, string speciesId)
+    void SeedSpeciesLevel(long playerId, int creatureTypeId, long level, string speciesId)
     {
         using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
@@ -207,7 +207,7 @@ public class AllocationStoreTests : IDisposable
             VALUES ($p, 'species', $tid, $lvl, 0, $lvl, 0, 0, $now, $sk);
             """;
         cmd.Parameters.AddWithValue("$p", playerId);
-        cmd.Parameters.AddWithValue("$tid", demonTypeId);
+        cmd.Parameters.AddWithValue("$tid", creatureTypeId);
         cmd.Parameters.AddWithValue("$lvl", level);
         cmd.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));
         cmd.Parameters.AddWithValue("$sk", speciesId);
@@ -218,15 +218,15 @@ public class AllocationStoreTests : IDisposable
     public void EffectiveSpeciesAllocation_withNoOverride_resolvesToThePlansBaseline_notZero()
     {
         var player = _store.CreatePlayer("SpeciesAllocBaseline");
-        SeedSpeciesLevel(player.Id, FumeshroomDemonTypeId, level: 21, "fumeshroom"); // source = 20
+        SeedSpeciesLevel(player.Id, FumeshroomCreatureTypeId, level: 21, "fumeshroom"); // source = 20
 
         var effective = _store.EffectiveSpeciesAllocation(player.Id, "fumeshroom", RealTuning);
 
         // The silent-zero risk the spec calls out by name: a never-overridden species must NOT read
         // AptitudeAllocation.Empty once it has a real level.
-        Assert.True(effective.TotalForScope(AllocationScope.DemonType) > 0);
-        Assert.True(effective.PointsAt(AllocationScope.DemonType, "Might")
-            > effective.PointsAt(AllocationScope.DemonType, "Vigor"));
+        Assert.True(effective.TotalForScope(AllocationScope.CreatureType) > 0);
+        Assert.True(effective.PointsAt(AllocationScope.CreatureType, "Might")
+            > effective.PointsAt(AllocationScope.CreatureType, "Vigor"));
     }
 
     [Fact]
@@ -236,49 +236,49 @@ public class AllocationStoreTests : IDisposable
         // No SeedSpeciesLevel call at all -- GetRpgActor returns null, EffectiveSpeciesAllocation
         // must default to level 1, matching RpgActorState's own default (RpgStore.Progression.cs).
         var effective = _store.EffectiveSpeciesAllocation(player.Id, "fumeshroom", RealTuning);
-        Assert.Equal(0, effective.TotalForScope(AllocationScope.DemonType));
+        Assert.Equal(0, effective.TotalForScope(AllocationScope.CreatureType));
     }
 
     [Fact]
     public void EffectiveSpeciesAllocation_override_replaces_the_baseline_wholesale()
     {
         var player = _store.CreatePlayer("SpeciesAllocOverride");
-        SeedSpeciesLevel(player.Id, FumeshroomDemonTypeId, level: 21, "fumeshroom");
+        SeedSpeciesLevel(player.Id, FumeshroomCreatureTypeId, level: 21, "fumeshroom");
         var baseline = _store.EffectiveSpeciesAllocation(player.Id, "fumeshroom", RealTuning);
-        Assert.True(baseline.PointsAt(AllocationScope.DemonType, "Fortitude") > 0); // present in the baseline
+        Assert.True(baseline.PointsAt(AllocationScope.CreatureType, "Fortitude") > 0); // present in the baseline
 
         // A DIFFERENT vector spending the same budget on ONE aptitude only -- if override merely
         // layered onto the baseline, Fortitude would still show up; a true replace zeroes it.
-        var budget = baseline.TotalForScope(AllocationScope.DemonType);
-        var wholeVectorOverride = AptitudeAllocation.Single(AllocationScope.DemonType, "Ferocity", budget);
-        _store.SaveAllocation(AllocationScope.DemonType, SpeciesAllocation.ScopeKey(player.Id, "fumeshroom"), wholeVectorOverride);
+        var budget = baseline.TotalForScope(AllocationScope.CreatureType);
+        var wholeVectorOverride = AptitudeAllocation.Single(AllocationScope.CreatureType, "Ferocity", budget);
+        _store.SaveAllocation(AllocationScope.CreatureType, SpeciesAllocation.ScopeKey(player.Id, "fumeshroom"), wholeVectorOverride);
 
         var effective = _store.EffectiveSpeciesAllocation(player.Id, "fumeshroom", RealTuning);
-        Assert.Equal(budget, effective.PointsAt(AllocationScope.DemonType, "Ferocity"));
-        Assert.Equal(0, effective.PointsAt(AllocationScope.DemonType, "Might"));
-        Assert.Equal(0, effective.PointsAt(AllocationScope.DemonType, "Fortitude"));
+        Assert.Equal(budget, effective.PointsAt(AllocationScope.CreatureType, "Ferocity"));
+        Assert.Equal(0, effective.PointsAt(AllocationScope.CreatureType, "Might"));
+        Assert.Equal(0, effective.PointsAt(AllocationScope.CreatureType, "Fortitude"));
     }
 
     [Fact]
     public void EffectiveSpeciesAllocation_deletingTheOverride_returnsExactlyTheBaseline_forFree()
     {
         var player = _store.CreatePlayer("SpeciesAllocRevert");
-        SeedSpeciesLevel(player.Id, FumeshroomDemonTypeId, level: 21, "fumeshroom");
+        SeedSpeciesLevel(player.Id, FumeshroomCreatureTypeId, level: 21, "fumeshroom");
         var baseline = _store.EffectiveSpeciesAllocation(player.Id, "fumeshroom", RealTuning);
 
-        var budget = baseline.TotalForScope(AllocationScope.DemonType);
-        _store.SaveAllocation(AllocationScope.DemonType, SpeciesAllocation.ScopeKey(player.Id, "fumeshroom"),
-            AptitudeAllocation.Single(AllocationScope.DemonType, "Ferocity", budget));
-        Assert.NotEqual(baseline.PointsAt(AllocationScope.DemonType, "Might"),
-            _store.EffectiveSpeciesAllocation(player.Id, "fumeshroom", RealTuning).PointsAt(AllocationScope.DemonType, "Might"));
+        var budget = baseline.TotalForScope(AllocationScope.CreatureType);
+        _store.SaveAllocation(AllocationScope.CreatureType, SpeciesAllocation.ScopeKey(player.Id, "fumeshroom"),
+            AptitudeAllocation.Single(AllocationScope.CreatureType, "Ferocity", budget));
+        Assert.NotEqual(baseline.PointsAt(AllocationScope.CreatureType, "Might"),
+            _store.EffectiveSpeciesAllocation(player.Id, "fumeshroom", RealTuning).PointsAt(AllocationScope.CreatureType, "Might"));
 
         // "Deleting the row" == saving Empty (SaveAllocation's own delete-then-insert-nonzero shape
         // leaves no rows for an all-zero save) -- reverting is free, no soul cost, no separate API.
-        _store.SaveAllocation(AllocationScope.DemonType, SpeciesAllocation.ScopeKey(player.Id, "fumeshroom"), AptitudeAllocation.Empty);
+        _store.SaveAllocation(AllocationScope.CreatureType, SpeciesAllocation.ScopeKey(player.Id, "fumeshroom"), AptitudeAllocation.Empty);
 
         var reverted = _store.EffectiveSpeciesAllocation(player.Id, "fumeshroom", RealTuning);
         foreach (var apt in AptitudeCatalog.All)
-            Assert.Equal(baseline.PointsAt(AllocationScope.DemonType, apt.Id), reverted.PointsAt(AllocationScope.DemonType, apt.Id));
+            Assert.Equal(baseline.PointsAt(AllocationScope.CreatureType, apt.Id), reverted.PointsAt(AllocationScope.CreatureType, apt.Id));
     }
 
     [Fact]
@@ -286,26 +286,26 @@ public class AllocationStoreTests : IDisposable
     {
         var alice = _store.CreatePlayer("SpeciesAllocAlice");
         var bob = _store.CreatePlayer("SpeciesAllocBob");
-        SeedSpeciesLevel(alice.Id, FumeshroomDemonTypeId, level: 21, "fumeshroom");
-        SeedSpeciesLevel(bob.Id, FumeshroomDemonTypeId, level: 21, "fumeshroom");
+        SeedSpeciesLevel(alice.Id, FumeshroomCreatureTypeId, level: 21, "fumeshroom");
+        SeedSpeciesLevel(bob.Id, FumeshroomCreatureTypeId, level: 21, "fumeshroom");
 
-        var budget = _store.EffectiveSpeciesAllocation(alice.Id, "fumeshroom", RealTuning).TotalForScope(AllocationScope.DemonType);
-        _store.SaveAllocation(AllocationScope.DemonType, SpeciesAllocation.ScopeKey(alice.Id, "fumeshroom"),
-            AptitudeAllocation.Single(AllocationScope.DemonType, "Ferocity", budget));
+        var budget = _store.EffectiveSpeciesAllocation(alice.Id, "fumeshroom", RealTuning).TotalForScope(AllocationScope.CreatureType);
+        _store.SaveAllocation(AllocationScope.CreatureType, SpeciesAllocation.ScopeKey(alice.Id, "fumeshroom"),
+            AptitudeAllocation.Single(AllocationScope.CreatureType, "Ferocity", budget));
 
         var aliceEffective = _store.EffectiveSpeciesAllocation(alice.Id, "fumeshroom", RealTuning);
         var bobEffective = _store.EffectiveSpeciesAllocation(bob.Id, "fumeshroom", RealTuning);
 
-        Assert.Equal(budget, aliceEffective.PointsAt(AllocationScope.DemonType, "Ferocity"));
-        Assert.Equal(0, bobEffective.PointsAt(AllocationScope.DemonType, "Ferocity")); // Bob still reads his own baseline
-        Assert.True(bobEffective.PointsAt(AllocationScope.DemonType, "Might") > 0);
+        Assert.Equal(budget, aliceEffective.PointsAt(AllocationScope.CreatureType, "Ferocity"));
+        Assert.Equal(0, bobEffective.PointsAt(AllocationScope.CreatureType, "Ferocity")); // Bob still reads his own baseline
+        Assert.True(bobEffective.PointsAt(AllocationScope.CreatureType, "Might") > 0);
     }
 
     [Fact]
-    public void ScopesSum_anActorWithBothCommanderAndDemonType_readsTheSum_shareTakenOnTheSum()
+    public void ScopesSum_anActorWithBothCommanderAndCreatureType_readsTheSum_shareTakenOnTheSum()
     {
         var player = _store.CreatePlayer("SpeciesAllocScopeSum");
-        SeedSpeciesLevel(player.Id, FumeshroomDemonTypeId, level: 21, "fumeshroom");
+        SeedSpeciesLevel(player.Id, FumeshroomCreatureTypeId, level: 21, "fumeshroom");
         _store.SaveAllocation(AllocationScope.Commander, "player:" + player.Id,
             AptitudeAllocation.Single(AllocationScope.Commander, "Might", 40));
 
@@ -314,7 +314,7 @@ public class AllocationStoreTests : IDisposable
         var combined = commander + species;
 
         var mightTotal = combined.Total("Might");
-        Assert.Equal(40 + species.PointsAt(AllocationScope.DemonType, "Might"), mightTotal);
+        Assert.Equal(40 + species.PointsAt(AllocationScope.CreatureType, "Might"), mightTotal);
         // Share is taken on the SUM's grand total, not either scope's alone (AptitudeAllocation's own
         // "scopes sum before share" contract) -- a regression here would silently reintroduce
         // per-scope shares.

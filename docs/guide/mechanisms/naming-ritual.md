@@ -55,7 +55,7 @@ Treat any early naming or binding UI as temporary until this ritual owns the fir
 
 Without a naming beat, the first screen becomes a list of systems.
 
-With it, the war starts as “this demon is yours,” then the rail opens around that story.
+With it, the war starts as “this creature is yours,” then the rail opens around that story.
 
 ---
 
@@ -71,7 +71,7 @@ With it, the war starts as “this demon is yours,” then the rail opens around
 
 ## Common mix-ups
 
-**Is my game broken because nothing forced me to name a demon?**  
+**Is my game broken because nothing forced me to name a creature?**  
 No. The guided ritual is WIP. You can still play.
 
 **Is this the same as save select?**  

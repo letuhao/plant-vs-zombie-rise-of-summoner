@@ -25,7 +25,7 @@
       "id": "set.scaredyblover-001",
       "nameKey": "set.shy-spore-mimic",
       "name": "Shy Spore Mimic",
-      "themeKey": "demon.scaredyblover",
+      "themeKey": "creature.scaredyblover",
       "members": [
         {
           "role": "armament-primary",

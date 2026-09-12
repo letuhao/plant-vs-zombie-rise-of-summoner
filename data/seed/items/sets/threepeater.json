@@ -25,7 +25,7 @@
       "id": "set.threepeater-001",
       "nameKey": "set.triple-line-launcher",
       "name": "Triple-Line Launcher",
-      "themeKey": "demon.threepeater",
+      "themeKey": "creature.threepeater",
       "members": [
         {
           "role": "armament-primary",

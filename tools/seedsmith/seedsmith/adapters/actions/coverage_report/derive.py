@@ -53,12 +53,12 @@ __all__ = [
     "CellGroup", "partition_accepted", "build_cell_groups", "cell_entries",
     "cell_occupancy_findings", "thin_cell_findings", "quota_drift_findings",
     "enabler_payoff_coverage_findings", "pairing_reach_findings", "atom_family_namespace_findings",
-    "species_collision_findings", "singleton_share_findings", "structure_enforceability_findings",
+    "species_collision_findings", "species_coverage_findings", "singleton_share_findings",
+    "structure_enforceability_findings",
     "roster_reconciliation_findings", "flavour_quality_findings", "semantic_neighbour_findings",
     "next_round_targets", "Verdict", "compute_verdict", "corpus_hash", "build_envelope",
     "canonical_dump",
-    "TOLERANCE_UNITS", "SIGNATURE_ACTIONS_PER_SPECIES", "RESEARCH_BAND_UNITS",
-    "RESEARCH_BAND_ROSTER",
+    "TOLERANCE_UNITS", "RESEARCH_BAND_UNITS", "RESEARCH_BAND_ROSTER",
 ]
 
 _GENERAL_SUBJECT_KEY = "general"          # the general scope's one pseudo-subject
@@ -229,7 +229,7 @@ def cell_entries(groups: "Sequence[CellGroup]", *, round_no: int) -> "list[dict]
 
 
 # ---------------------------------------------------------------------------------------------
-# §3 step 3 — the ten CLOSED metrics. Every function returns `Finding`s directly (never raises);
+# §3 step 3 — the eleven CLOSED metrics. Every function returns `Finding`s directly (never raises);
 # `metrics/action_coverage.py`'s `Metric.run` methods are thin one-line wrappers over these.
 # ---------------------------------------------------------------------------------------------
 
@@ -441,6 +441,55 @@ def species_collision_findings(metric_id: str, cov: ActionCoverageCtx) -> "list[
     return findings
 
 
+def species_coverage_findings(metric_id: str, cov: ActionCoverageCtx) -> "list[Finding]":
+    """**The per-species coverage gate — the granularity the scope-aggregate cells cannot see (G3).**
+
+    ⛔ **The defect this closes, measured 2026-09-12.** `cellOccupancy`/`thinCell` gate on
+    `cell.<scope>.<category>.<band>`, which at species scope is ONE aggregate over all 904 species:
+    `cell.species.attack.1-10` had quota 976 (= 904 x 5 x 21.6%). That number can be satisfied by
+    spreading 976 attack rows over ~100 species (9-10 each) while **804 species hold no attack
+    action** — and the cell would read perfect. Measured at the time: **828 of 904 species had zero
+    accepted actions, and no metric reported it.** A scope-aggregate cell is structurally blind to
+    per-subject distribution; this metric is the per-subject view the design needs and the
+    `next-target` derivation (`next_round_targets`, which already names individual species) already
+    assumed.
+
+    **What it asserts (the CONTRACT, not a population count).** Every live species id that the ctx
+    knows about must have at least one accepted row. The roster is a POPULATION
+    ([validation-ssot.md](../../../../../docs/architecture/validation-ssot.md)): the metric never
+    compares a *count* to a literal; it compares the *set of species with zero rows* to the empty
+    set. Adding a species makes the requirement grow, which is correct — the new species is simply
+    another subject that must be covered.
+
+    **One Finding per uncovered species**, naming that species, so the same rows feed the top-up
+    loop as explicit work orders. Severity GAP: an uncovered species is a real hole, not a note.
+
+    **Which species ids count as required.** `cov.family_ids` carries the authored atom-family
+    namespace, not species ids, so the required roster is derived from `subject_category_counts`:
+    every `("species", speciesId)` key the quota was recomputed for IS a planned species subject
+    (`recompute_subject_category_counts` builds exactly the catalog ids). That keeps this metric's
+    universe identical to the planner's, with no second roster read and no way for the two to
+    disagree."""
+    required = {key for (scope, key) in cov.subject_category_counts if scope == "species"}
+    covered = {row["scopeKey"] for row in cov.accepted_rows
+               if row.get("scope") == "species" and row.get("scopeKey")}
+    uncovered = sorted(required - covered)
+    return [
+        Finding(
+            metric=metric_id, severity=Severity.GAP, subject=species_id,
+            message=f"species {species_id!r}: no accepted action — {len(covered)} of "
+                    f"{len(required)} species have at least one; the scope-aggregate cells "
+                    f"(cellOccupancy/thinCell) cannot see a missing species",
+            evidence={"speciesKey": species_id, "coveredSpecies": len(covered),
+                      "requiredSpecies": len(required)},
+            assertion=f"{species_id!r} has >= 1 accepted action row",
+            remedy="next-round target for this species, or raise perSpeciesCount / generalCount "
+                   "so its planned briefs are drawn and accepted",
+        )
+        for species_id in uncovered
+    ]
+
+
 def singleton_share_findings(metric_id: str, cov: ActionCoverageCtx) -> "list[Finding]":
     """Median rows per occupied mechanical cell (the `(scope, category, rungBand, pairingRole)`
     literal partition, spec §3 step 1) and the singleton share, against the research target of
@@ -509,14 +558,24 @@ def structure_enforceability_findings(metric_id: str, cov: ActionCoverageCtx) ->
 # The research band is historical context. The live roster and the per-species count are read from
 # the seed tree and `action-corpus-run.v1.json`; neither may be rejected because it differs from the
 # old projection used by the original spec.
-SIGNATURE_ACTIONS_PER_SPECIES = 3
 RESEARCH_BAND_UNITS = (1500, 3500)
 RESEARCH_BAND_ROSTER = 904
 
 def roster_reconciliation_findings(
     metric_id: str, roster: RosterCounts, accepted_corpus_size: int,
-    signature_actions_per_species: int = SIGNATURE_ACTIONS_PER_SPECIES,
+    signature_actions_per_species: int,
 ) -> "list[Finding]":
+    """⛔ **`signature_actions_per_species` is REQUIRED, with no default (2026-09-12, G4).** It used
+    to default to a module constant `SIGNATURE_ACTIONS_PER_SPECIES = 3`, which restated the SEALED
+    ideal's *"3 signature actions per species"* (B1) as though it were the shipped value. The shipped
+    `action-corpus-run.v1.json` sets `perSpeciesCount: 5`, so the default was wrong, and it was dead
+    — the one caller (`metrics/action_coverage.py`) always passes `cov.per_species_count`. A wrong
+    default that happens never to be reached is worse than no default: it is a second, contradictory
+    source of truth that the next reader trusts. Making the parameter required means the tuning file
+    is the only place this number lives, and a future caller cannot silently get `3`.
+
+    `signatureTierEstimate` is therefore always `roster.species_count x` the LIVE tuning count, so
+    the reconciliation message reports the corpus this run is actually sized for."""
     if signature_actions_per_species < 0:
         raise ValueError("signature_actions_per_species must be non-negative")
     signature_tier_estimate = roster.species_count * signature_actions_per_species

@@ -360,7 +360,7 @@ Content is integer ‰. Players do not think in ‰. Four rules, and the first o
 **Rule 1 — the conversion is already shipped; adopt it, do not write a second one.**
 
 ```ts
-// web/fusion-rpg-web/src/features/demons/patronView.ts:23
+// web/fusion-rpg-web/src/features/creatures/patronView.ts:23
 const pct = (milli: number) => `${(milli / 10).toFixed(1).replace(/\.0$/, "")}%`;
 ```
 
@@ -489,8 +489,8 @@ choice is visible rather than surprising.
 |---|---|
 | i18n is **out of scope for web v1** | [docs/web/spec.md:105](../../web/spec.md) |
 | No i18n library anywhere in the web app | grep over `web/fusion-rpg-web/src` and `package.json` — no `i18next`, no `react-intl`, no locale files |
-| Display strings are **hardcoded English literals in C#** | [DemonTraitCatalog.cs:13-29](../../../src/FusionRpg.Core/Demons/DemonTraitCatalog.cs) — `new("berserker", "Berserker", …, "Hits harder as its own health falls.")` |
-| Display strings are **also hardcoded Chinese literals in C#** | [DemonSpeciesCatalog.Generated.cs:14-23](../../../src/FusionRpg.Core/Demons/DemonSpeciesCatalog.Generated.cs) — `Name = "钻石套娃僵尸"`, captured from game data, with no English counterpart and no key |
+| Display strings are **hardcoded English literals in C#** | [CreatureTraitCatalog.cs:13-29](../../../src/FusionRpg.Core/Creatures/CreatureTraitCatalog.cs) — `new("berserker", "Berserker", …, "Hits harder as its own health falls.")` |
+| Display strings are **also hardcoded Chinese literals in C#** | [CreatureSpeciesCatalog.Generated.cs:14-23](../../../src/FusionRpg.Core/Creatures/CreatureSpeciesCatalog.Generated.cs) — `Name = "钻石套娃僵尸"`, captured from game data, with no English counterpart and no key |
 | Captured game text with Unity markup already reaches the UI | [almanacText.ts:1-10](../../../web/fusion-rpg-web/src/lib/almanacText.ts) strips `<color=…>`, `<b>`, `<size=…>`; its test asserts on Chinese input ([almanacText.test.ts:6-8](../../../web/fusion-rpg-web/src/lib/almanacText.test.ts)) |
 | The lanes have already started using keys | I1's `rarity.display_key` ([ssot-rarity.md:409](ssot-rarity.md)); G1's `flavour_key` ([ssot-uniques.md:581](ssot-uniques.md)) |
 
@@ -506,7 +506,7 @@ a display contract must not inherit and must not extend.
 | **L1** | Every player-visible string this lane produces is a **key plus an argument bag**, resolved by one function at the render boundary. `item.affix.vitality` + `{ value: 45, unit: "hp" }` |
 | **L2** | The v1 key catalog is **one file with English values**. No per-language table, no fallback chain, no locale negotiation. Those cost nothing to add later and real complexity now |
 | **L3** | Content-authored display text lives in a **`_key` column, never a literal** — the rule I1 and G1 already adopted, extended to templates and to I5's `item_set.display_name` (§9.5) |
-| **L4** | **Captured game text is a fourth category and is never keyed.** It is passthrough, it stays in whatever language the game shipped it in, it goes through `stripTmpRichText`, and it is rendered **visually quoted** so a player is not confused by a language change mid-card. `DemonSpeciesCatalog`'s Chinese names are this category |
+| **L4** | **Captured game text is a fourth category and is never keyed.** It is passthrough, it stays in whatever language the game shipped it in, it goes through `stripTmpRichText`, and it is rendered **visually quoted** so a player is not confused by a language change mid-card. `CreatureSpeciesCatalog`'s Chinese names are this category |
 
 **The substitution grammar, decided now because it constrains every one of the ~110 strings.**
 
@@ -522,7 +522,7 @@ a display contract must not inherit and must not extend.
 | **S2** | **No string concatenation outside a template.** A line is one template and one substitution pass | Gluing a sign, a number and a noun in code is how the unit gets dropped, and how RTL and measure-word languages break |
 | **S3** | **Pluralisation is declared per key, never inferred.** A key that can pluralise carries variants selected by CLDR category; a key that cannot declares `plural: none` and is validated as such (§6) | The naive `+ "s"` is the thing being prevented |
 | **S4** | **Only three key families take plural variants**: socket count, set piece count, charge count. Everything else renders a number beside an invariant noun | Counted, not assumed: `45 hp`, `12 fire power`, `4.0 s` are all invariant in English |
-| **S5** | Numbers go through the platform formatter, never interpolation | Already done in one place — `toLocaleString()` at [DemonsPage.tsx:235](../../../web/fusion-rpg-web/src/features/demons/DemonsPage.tsx) — so make it the rule rather than the exception |
+| **S5** | Numbers go through the platform formatter, never interpolation | Already done in one place — `toLocaleString()` at [CreaturesPage.tsx:235](../../../web/fusion-rpg-web/src/features/creatures/CreaturesPage.tsx) — so make it the rule rather than the exception |
 
 **Why S3/S4 are written this precisely, given the tree already contains Chinese:** Chinese has one
 plural category and uses measure words, so `{count} sockets` becomes `{count} 个插槽`. The named-placeholder
@@ -1075,14 +1075,14 @@ without a second *renderer*.
 
 **How it happens.** English-only ships, strings get glued in components because it is faster, and by the
 time a second language is wanted the retrofit is a month of finding `"+" + value + " " + noun`. The tree
-is already carrying the precondition: Chinese literals in `DemonSpeciesCatalog.Generated.cs` and English
-literals in `DemonTraitCatalog.cs`, both hardcoded, with i18n out of scope in the web spec.
+is already carrying the precondition: Chinese literals in `CreatureSpeciesCatalog.Generated.cs` and English
+literals in `CreatureTraitCatalog.cs`, both hardcoded, with i18n out of scope in the web spec.
 
 **Prevented by:** S1–S5 (§3.6). One language, but every string is a key with a named-placeholder
 template, and §6.3 case 6 asserts the plural policy so it cannot quietly rot into `+ "s"`.
 
-**Not prevented, and stated:** this lane's rules bind *this lane's* strings. `DemonTraitCatalog`'s
-English literals and `DemonSpeciesCatalog`'s Chinese ones are outside it, and bringing them behind keys
+**Not prevented, and stated:** this lane's rules bind *this lane's* strings. `CreatureTraitCatalog`'s
+English literals and `CreatureSpeciesCatalog`'s Chinese ones are outside it, and bringing them behind keys
 is a separate, small, unscheduled job (§9.18).
 
 ### 8.8 The card grows until it is a spreadsheet
@@ -1219,11 +1219,11 @@ same reason adding an atom kind is. The compact line is the pressure valve — a
 
 18. **The web stream** — **one renderer, two hosts.** The SPA is the only item-card renderer; both
     overlay hosts load it ([overlay-spec.md:15](../../launcher/overlay-spec.md)). No Unity IMGUI item
-    card. Two consequences: the shared per-mille helper moves out of `features/demons/patronView.ts`
+    card. Two consequences: the shared per-mille helper moves out of `features/creatures/patronView.ts`
     into a shared display module and `patronView` calls it; and `RosterPage.tsx`'s three-slot,
     type-the-id equip UI (`:33-34`, `:274-300`) is replaced rather than extended when I2's fifteen roles
-    land. Separately and outside this lane: `DemonTraitCatalog`'s English literals and
-    `DemonSpeciesCatalog`'s Chinese ones should eventually move behind keys (§8.7).
+    land. Separately and outside this lane: `CreatureTraitCatalog`'s English literals and
+    `CreatureSpeciesCatalog`'s Chinese ones should eventually move behind keys (§8.7).
 
 ---
 

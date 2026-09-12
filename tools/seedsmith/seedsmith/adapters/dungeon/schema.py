@@ -19,7 +19,7 @@ from .kinds import DOMAIN, ROOM, LAYOUT, EVENT, QUEST, ENCOUNTER, SUPPLY_EXTENSI
 from . import registries as _reg
 
 ELEMENTS = ("fire", "ice", "air", "earth", "light", "dark")  # ActorElementTypes.cs:3-11
-THREAT_BAND = (  # demon-threat.v1.json:3-14
+THREAT_BAND = (  # creature-threat.v1.json:3-14
     "nuisance", "pest", "marauder", "raider", "warden",
     "scourge", "tyrant", "harbinger", "cataclysm", "calamity",
 )
@@ -36,7 +36,7 @@ BOSS_PHASE_TRIGGER = ("hp-threshold", "round", "ally-down", "none")
 REACH = ("melee", "short", "long", "siege", "none")
 TARGET_PREFERENCE = ("frontline", "backline", "swarm", "elite", "structure", "indiscriminate", "none")
 ATTACK_TEMPO = ("ponderous", "slow", "steady", "quick", "flurry", "none")
-POSTURE = ("Force", "Finesse", "Bastion")  # AptitudeCatalog postures, demons/anchor/schema.py precedent
+POSTURE = ("Force", "Finesse", "Bastion")  # AptitudeCatalog postures, creatures/anchor/schema.py precedent
 
 # The one structural integer this adapter allow-lists (§2): manifestCost, a dispatch-time count
 # already carried by the base consumable record — never balance arithmetic.

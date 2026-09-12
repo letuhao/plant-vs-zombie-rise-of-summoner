@@ -25,7 +25,7 @@
       "id": "set.portaldoom-001",
       "nameKey": "set.blight-of-despair",
       "name": "Blight of Despair",
-      "themeKey": "demon.portaldoom",
+      "themeKey": "creature.portaldoom",
       "members": [
         {
           "role": "armament-primary",

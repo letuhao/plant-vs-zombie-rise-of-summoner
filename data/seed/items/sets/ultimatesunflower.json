@@ -25,7 +25,7 @@
       "id": "set.ultimatesunflower-001",
       "nameKey": "set.molten-eye",
       "name": "Molten Eye",
-      "themeKey": "demon.ultimatesunflower",
+      "themeKey": "creature.ultimatesunflower",
       "members": [
         {
           "role": "armament-primary",

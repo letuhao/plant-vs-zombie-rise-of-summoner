@@ -25,7 +25,7 @@
       "id": "set.bigchomper-001",
       "nameKey": "set.the-maw-s-hunger",
       "name": "The Maw's Hunger",
-      "themeKey": "demon.bigchomper",
+      "themeKey": "creature.bigchomper",
       "members": [
         {
           "role": "armament-primary",

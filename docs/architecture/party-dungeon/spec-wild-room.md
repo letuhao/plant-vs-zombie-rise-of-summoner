@@ -18,14 +18,14 @@ row on actions (A3) and the `consumable` kind (D27) — map `:97`. Gate **G4** (
 
 The runtime half of recruit, capture and summon inside a delve, built so that no path into the roster is ever cheaper than
 the altar. A `wild` room is a `pack` encounter with a **disposition**; before the fight the party may **talk** — a fixed verb
-set, one answer per step, every roll on a named stream; a demon that `joins` is minted at `θ = Θ_room + thetaOffset`,
+set, one answer per step, every roll on a named stream; a creature that `joins` is minted at `θ = Θ_room + thetaOffset`,
 teleports home at once and binds if a slot is free (decision 12). **Capture** is a corpus action on a weakened enemy;
 success withdraws the target alive, pays no `KillEarn`, mints the same way. The **altar** is one pull on the shipped
 `SummonRoller` from unbanked souls, delivered at extraction. The **cage** is a recruit offer with no fight. **Remembers**
 is a read over the delve log.
 
 Success looks like: a `wary` pack at `Θ_room 70` is offered souls at `OfferFloor(70) = PullPrice(70) × 1500 / 1000` from
-the unbanked ledger, draws `joins` on `dungeon:wild:{r}:{c}:1`, mints a `θ 83` demon with `Origin = "delve"` bound into a
+the unbanked ledger, draws `joins` on `dungeon:wild:{r}:{c}:1`, mints a `θ 83` creature with `Origin = "delve"` bound into a
 free slot, and replays byte-identically; a capture at 22 % hp on the battle's `capture` stream withdraws the target, the
 report shows `Retreated`, `KillsFrom` pays nothing; an altar pull advances the player's one pity row and is a haul row
 until `CloseDelve(Extracted)` mints it, forfeited on a wipe; every battle, expedition, world and summon golden holds.
@@ -36,7 +36,7 @@ until `CloseDelve(Extracted)` mints it, forfeited on a wipe; every battle, exped
   `SoulSinkPolicy`, paid from unbanked souls; spirit, supply and released-contract offers priced as equivalents. The bind
   stays free; teleport-home stands. Altar pulls are **at-risk haul on the delve ledger, delivered at extraction** (decision
   12 named recruits and captures only)."*
-- **Decision 12 (§11.9 box, `:1694-1698`):** *"Recruited and captured demons teleport home at once, bound if a contract slot
+- **Decision 12 (§11.9 box, `:1694-1698`):** *"Recruited and captured creatures teleport home at once, bound if a contract slot
   is free — not a pack cell, not a party slot. Never at risk in the delve, never usable in it. The §11.6 guard against
   'recruit beats fight' therefore rests entirely on the costs (no `KillEarn`, no XP, a seal or an offer spent) and on the
   encounter roll's rarity shape … the spec must keep both."*
@@ -60,14 +60,14 @@ until `CloseDelve(Extracted)` mints it, forfeited on a wipe; every battle, exped
 A `wild` archetype carries `dispositionBase` (VALIDATED, voted — `eager · open · wary · hostile`, seed contract `:68`;
 vocabulary `disposition.v1.json`, registries `:77`) and an `encounterRef` of formation `pack` (`:69`). **The disposition is
 the room's, not the species'**: 0 of 841 species anchors carry a `disposition` or `temperament` field (counted from
-`data/seed/demons/species/` this session; the anchor schema has neither).
+`data/seed/creatures/species/` this session; the anchor schema has neither).
 
 `DispositionCatalog` gives the band its ordinal `0..3` (`eager` = 0). The **effective band** is the base plus five one-step
 shifts in `{−1, 0, +1}` (positive = toward `hostile`): the rung's `wildDispositionShiftRungs`; the Δ band's
 `wild.deltaShiftRungs[band]`; the offer's preference (§2); `remembers` (§8); the stance verb (§2) — clamped to `[0, 3]`, an
 index into a four-member registry, exempt and commented. The pack is `Encounter.Build(...)` at entry whether or not a fight
 follows, so `leave` cannot re-roll it (`spec-encounter-generator.md:60, :284-290`); each enemy's `θ` is its
-`BattleActorSetup.Level` (`BattleModels.cs:14`). `HypnoAlly` (`DemonRarity.cs:41-45`) is a lawn expression, never read here.
+`BattleActorSetup.Level` (`BattleModels.cs:14`). `HypnoAlly` (`CreatureRarity.cs:41-45`) is a lawn expression, never read here.
 **Θ_party** is the commander's composed `Θ_actor` via `IPowerIndexProvider.ActorIndex(StatContext)` (`IPowerIndexProvider.cs:15`)
 — `dungeon-loot` §1's read, never a mean; `Δ = θ_pack − Θ_party` (`θ_pack` the highest enemy `Level`), banded on
 `wild.deltaBands[]` (four signed Θ edges → `far-below · below · even · above · far-above`). The actor-side composition is
@@ -86,10 +86,10 @@ decision `{seq, kind: "talk", partyIndex, payload: {surface: "wild", roomId, spe
 | `offer:souls` | unbanked ≥ `OfferFloor(Θ_room)` — a host ledger check, not a leaf (`spec-supplies-and-objects.md:181`) | preference (§3) | outcome draw |
 | `offer:spirit` | the offering member's `pools["spirit"]` ≥ the equivalent (§3) | preference | outcome draw |
 | `offer:supply:{tag}` | `HoldsStock(Self, tag-bearing supply, 1)` over the pack (`PredicateNode.cs:32`; `spec-event-deck.md:227`) | preference | **refuses `delve.price-undesigned` in v1** (§3) |
-| `offer:contract` | a releasable bound demon at home whose equivalent ≥ the floor (§3) | preference | outcome draw |
+| `offer:contract` | a releasable bound creature at home whose equivalent ≥ the floor (§3) | preference | outcome draw |
 | `fight` · `leave` | always | — | `DelveBattle.Run` on the drawn pack · room consumed, no souls |
 
-**Capture-only species never `join` by talk**: a pack carrying `DemonAcquisition.CaptureOnly` (`DemonRarity.cs:32-38`) offers
+**Capture-only species never `join` by talk**: a pack carrying `CreatureAcquisition.CaptureOnly` (`CreatureRarity.cs:32-38`) offers
 no `offer:*` — the expedition coin already excludes them (`ExpeditionResolver.cs:238-243`); capture (§5) is their path. **No
 binding slot** refuses every `offer:*` before any soul moves (`wild.no-slot`), read as `CountBoundContractsUnlocked <
 ContractPolicy.Capacity(purchasedSlots)` — the mint's own auto-bind test (`RpgStore.Contracts.cs:100-101`; `ContractPolicy.cs:171`).
@@ -105,8 +105,8 @@ inert until supply prices exist (§3).
 **Autopilot** answers `fight`; under `wild.autopilot.rule = leave-hostile` it answers `leave` when the band after the rung's
 shift is `hostile` — the rung speaks through its shift, no rung bool. Closed ids; unknown refuses at load. Autopilot never
 offers. **Personality** for the talk is `ContractPolicy.PersonalityFor("dungeon:wild:{r}:{c}")` (`:195-196`). **Drift:** the
-ideal wants it *"recorded on the mint"* (`:1384`), but a minted demon's is `PersonalityFor(instanceId)` over a fresh `Guid`
-(`RpgStore.Demons.cs:45`) with no column — v1 accepts the mismatch; a mint override is filed on `demon-system-map.md`, ask-first.
+ideal wants it *"recorded on the mint"* (`:1384`), but a minted creature's is `PersonalityFor(instanceId)` over a fresh `Guid`
+(`RpgStore.Creatures.cs:45`) with no column — v1 accepts the mismatch; a mint override is filed on `creature-system-map.md`, ask-first.
 
 ### 3. Offer pricing and the floor
 
@@ -125,27 +125,27 @@ never a soul number in `dungeon.v1.json` (S2-10). Both functions are `dungeon-lo
 | `souls` | `OfferFloor(Θ_room)` — the floor **is** the price | `SpendUnbanked(delveId, price, "wild:{r}:{c}")` (`spec-dungeon-loot.md:214`); no overdraft (P6) |
 | `spirit` | `OfferFloor × 1000 / wild.offer.spiritPerSoulMilli` spirit units | `TrySpend` on `pools["spirit"]`, all-or-nothing (`ResourcePoolState.cs:64-78`); a spend, not harm — **no nerve stacks** (attrition §4's table is closed); `ExhaustionPolicy.Sync` after |
 | `supply:{tag}` | the supply's DERIVED price at `Θ_room` | `pack.drop{by: use}` (`spec-loot-pack.md:79`) — **wiring gap:** item-side price DERIVED, none built (`spec-dungeon-loot.md:193-195`); refuses `delve.price-undesigned` until it lands |
-| `contract` | `ContractPolicy.RitualPrice(rarity, Θ_room, power) × loyalty / LoyaltyMax` (`ContractPolicy.cs:161-166`; `contracts.v1.json:51-62`), widen, divide last | `ReleaseContract` (`RpgStore.Contracts.cs:331-368`, its blockers `:353-360`); the demon stays owned, unbound — a real sink; its freed slot is what the recruit binds into |
+| `contract` | `ContractPolicy.RitualPrice(rarity, Θ_room, power) × loyalty / LoyaltyMax` (`ContractPolicy.cs:161-166`; `contracts.v1.json:51-62`), widen, divide last | `ReleaseContract` (`RpgStore.Contracts.cs:331-368`, its blockers `:353-360`); the creature stays owned, unbound — a real sink; its freed slot is what the recruit binds into |
 
 **Why the floor sits above the pull.** A recruit mints at `θ_enemy` (§4) while every pull mints at the shipped `level 1`
-(`RpgStore.Demons.cs:53`) — price parity alone would still favour the talk. The floor equalises price, the
+(`RpgStore.Creatures.cs:53`) — price parity alone would still favour the talk. The floor equalises price, the
 `takesLeaves`/`flees`/`attacks` rows price the expectation, and `soulsMilliOfPullPrice` starts at **1500‰**, above the
 minimum, so a wild room's expected value sits beside the altar's. A knob, settled by §Testing's EV property.
 
 ### 4. Recruit minting and teleport-home
 
 On `joins` (or a cage `open` that joins), in the room-close transaction of `RpgStore.Delve.cs`: debit, then
-`MintDemonUnlocked(db, playerId, spec, now, out newlyDiscovered)` (`RpgStore.Demons.cs:29-94`) — **the one mint every
+`MintCreatureUnlocked(db, playerId, spec, now, out newlyDiscovered)` (`RpgStore.Creatures.cs:29-94`) — **the one mint every
 acquisition uses** (summons `RpgStore.Summons.cs:104`, expeditions `RpgStore.Expeditions.cs:344`, fusion `RpgStore.Fusion.cs:218`):
 the `Roster` row, the profile, the codex upsert and **the free auto-bind** (`:85-88` → `AutoBindNewSpecimenUnlocked`,
 `RpgStore.Contracts.cs:85-105`: a free slot binds at `bindLoyalty 300`, `contracts.v1.json:12`; capacity full writes nothing).
 Teleport-home is that write — `Roster` at once, never in the pack or a party (decision 12). No cell, no `KillEarn`, no XP
 (`spec-loot-pack.md:19`; `spec-dungeon-loot.md:72-77`).
 
-**Drift — no shipped capture path exists.** `Origin` lists `capture` (`spec-demon-core.md:29`) and it is never written (zero
-hits under `Core/Demons/` and `RpgStore.Demons.cs`; `demon-capture` is *"later"*, `demon-system-map.md:65`); the map row's
-*"path the shipped capture uses"* is `MintDemonUnlocked`, whose `DemonMintSpec` (`DemonDtos.cs:58-70`) has **no `Level`** and
-whose INSERT hard-codes `level 1` (`:53`). **Filed on `demon-system-map.md` (`demon-core`), additive:** `long? Level` on the
+**Drift — no shipped capture path exists.** `Origin` lists `capture` (`spec-creature-core.md:29`) and it is never written (zero
+hits under `Core/Creatures/` and `RpgStore.Creatures.cs`; `creature-capture` is *"later"*, `creature-system-map.md:65`); the map row's
+*"path the shipped capture uses"* is `MintCreatureUnlocked`, whose `CreatureMintSpec` (`CreatureDtos.cs:58-70`) has **no `Level`** and
+whose INSERT hard-codes `level 1` (`:53`). **Filed on `creature-system-map.md` (`creature-core`), additive:** `long? Level` on the
 spec, `$level = spec.Level ?? 1` — null is today's line for every caller. The recruit's spec: identity from the pack's
 `ConcreteSpecies` row (`ConcreteSpecies.cs:15-68`), `Rarity = BaseRarity`, `TraitIds = SummonRoller.RollTraits(species, rarity,
 rng)` on `dungeon:wild:{r}:{c}:traits` (`SummonRoller.cs:183-198`, *"shared by summons and wild joins"*), `Origin = "delve"`
@@ -197,15 +197,15 @@ ask-first). `banner = SummonBannerCatalog.TryGet(altar.bannerId)` (`:44`) — ex
 `publish.py summoning` plus one `Of(...)` line. Starting shape `element-focus`, `focus = domain.climate` — the domain-focus
 banner (`ideal:1428-1429`; `PickWeighted`, `:162-181`). `altar.poolFromDomain` is loaded (T5) and **inert at `false`**:
 `RollSpecies` pools the whole summonable catalog (`:152-153`); a domain pool is *"one filter argument, not a new roller"*
-(`ideal:1373`) — an optional trailing `Func<DemonSpeciesDef, bool>? poolFilter` on `Roll`, null = today's line, filed.
+(`ideal:1373`) — an optional trailing `Func<CreatureSpeciesDef, bool>? poolFilter` on `Roll`, null = today's line, filed.
 
 **Price** `PullPrice(Θ_room)` via `SpendUnbanked` in the same transaction (dungeon-loot §6 *altar pull*). **Pity rides:**
 `ReadPityUnlocked`/`WritePityUnlocked` on `rpg_summon_pity` (`RpgStore.Summons.cs:94, :150, :197-215`) are per player and
-cross-banner (`spec-demon-summoning.md:24`), so the altar reads and writes the Sanctum's one row. The `rng` is
+cross-banner (`spec-creature-summoning.md:24`), so the altar reads and writes the Sanctum's one row. The `rng` is
 `dungeon:altar:{r}:{c}:{n}` off the delve seed, `n` the pull ordinal at that altar — replay-safe, never `PullSummon`'s
-`Guid`-rolled `rngSeed` (`:29`). **The result is haul, not a demon:** the `SummonRollResult` (`SummonRoller.cs:17-21`) is
+`Guid`-rolled `rngSeed` (`:29`). **The result is haul, not a creature:** the `SummonRollResult` (`SummonRoller.cs:17-21`) is
 written as `parties_json[p].haul[] += {kind: "pull", speciesId, rarity, variant, traitIds, r, c, n}` (`spec-delve-scope.md:72`)
-— **no `UniqueActor` and no phase** until `CloseDelve(Extracted)`, where `RpgStore.Delve` calls `MintDemonUnlocked` per row
+— **no `UniqueActor` and no phase** until `CloseDelve(Extracted)`, where `RpgStore.Delve` calls `MintCreatureUnlocked` per row
 (`Origin = "delve"`, `Level` null — a pull is a pull), the free auto-bind and discovery souls as the summon path pays them
 (`RpgStore.Summons.cs:118-125`). `Wiped` drops the rows with the haul (`spec-loot-pack.md:88`); the pity advance and the
 spend stand — the pull happened, only delivery was at risk (R5). No pack cell. No phase ask is needed.
@@ -218,7 +218,7 @@ at first entry, `NextPerMille() < wild.cageMilli` on `dungeon:wild:{r}:{c}:cage`
 seated, the object is projected, `rpg_delve_rooms.resolved_kind = 'cage'` records it (event-deck's column,
 `spec-delve-scope.md:85`; `cage` filed as a legal value). The occupant is one species drawn on the same stream from the wild
 pool (`WildBand`'s filter, `ExpeditionResolver.cs:238-243`: never `CaptureOnly`, never the top rung) at `θ = Θ_room +
-thetaOffset`, `dispositionBase` shifted **one band toward `eager`** — a caged demon wants out; a rule, not a knob. `open` is
+thetaOffset`, `dispositionBase` shifted **one band toward `eager`** — a caged creature wants out; a rule, not a knob. `open` is
 §2's tree **without `fight` and `threaten`**, same refusals, same mint, same memory. One-shot. Deterministic over
 `(seed, r, c, tuning)`; no anchor field, no event row, no model.
 
@@ -255,7 +255,7 @@ All in `data/tuning/dungeon.v1.json` through `dungeon-registries`' T5 loader; ne
 every value a starting shape. **Read:** `wild.outcome.*` (eager 600/200/150/50 · open 400/250/250/100 · wary 200/300/300/200
 · hostile 0/250/250/500 as `joins/takesLeaves/flees/attacks`); `wild.deltaBands[]` (`[−15, −5, 5, 15]` Θ);
 `wild.deltaShiftRungs[]` (`[−1, 0, 0, +1, +1]`); `wild.offerPreference.{loyal,stoic,proud,calculating,feral}.{souls,spirit,item,
-demon}` (`craves · accepts · scorns` → −1/0/+1; keys = `contracts.v1.json:32-38`); `wild.offer.soulsMilliOfPullPrice` (1500);
+creature}` (`craves · accepts · scorns` → −1/0/+1; keys = `contracts.v1.json:32-38`); `wild.offer.soulsMilliOfPullPrice` (1500);
 `wild.provisionOverrideTag` (`bait`); `wild.tide.*` (`false`, loaded, unread — v1 off, `ideal:1387`);
 `difficulty.rungs[].wildDispositionShiftRungs` (0 through `very-hard`, +1 from `nightmare`); `capture.usableBelowMilli` (300);
 `capture.chanceMilli[hpBand][deltaBand]` (low `700/550/400/250/100` · half `450/350/250/150/50` · high `200/150/100/50/0`);
@@ -288,7 +288,7 @@ demon}` (`craves · accepts · scorns` → −1/0/+1; keys = `contracts.v1.json:
 ```powershell
 dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Delve.Wild"                                  # goldens, properties, refusals
 dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Battle|FullyQualifiedName~Expedition|FullyQualifiedName~Summon"   # hashes and the roller untouched
-dotnet test tests\FusionRpg.Data.Tests  --filter "FullyQualifiedName~Delve|FullyQualifiedName~Demon|FullyQualifiedName~Contract"
+dotnet test tests\FusionRpg.Data.Tests  --filter "FullyQualifiedName~Delve|FullyQualifiedName~Creature|FullyQualifiedName~Contract"
 .\scripts\guard-dal.ps1 ; .\scripts\guard-funnel-delta.ps1 ; .\scripts\guard-power.ps1
 python scripts\audit-magic-numbers.py --domain dungeon ; python scripts\audit-overflow.py
 ```
@@ -299,15 +299,15 @@ python scripts\audit-magic-numbers.py --domain dungeon ; python scripts\audit-ov
 src/FusionRpg.Core/Delve/Wild/
   Disposition.cs   ordinal + five shifts, the commented [0,3] rail    TalkTree.cs       verbs, eligibility, Step(...) pure, autopilot
   OfferPricing.cs  four equivalents over DelvePrices (calls only)      WildOutcome.cs    the draw on dungeon:wild:{r}:{c}:{seq}
-  RecruitMint.cs   DemonMintSpec builder — Origin, Level θ_enemy       CaptureAction.cs  act.capture resolver; CaptureChance; CaptureAttempts
+  RecruitMint.cs   CreatureMintSpec builder — Origin, Level θ_enemy       CaptureAction.cs  act.capture resolver; CaptureChance; CaptureAttempts
   AltarPull.cs     one Roll on SummonRoller; PendingPull haul rows     Cage.cs · WildMemory.cs · WildRefusal.cs
 src/FusionRpg.Core/Battle/BattleRunState.cs    → CaptureRng, one DeriveStream line beside RidersRng (:199)
 src/FusionRpg.Data/Sqlite/RpgStore.Delve.cs    → talk/offer transaction; PullAtAltar; pending pulls minted in CloseDelve(Extracted)
 src/FusionRpg.Server/DelveWildEndpoints.cs     → POST …/rooms/{id}/talk · …/pray · …/cage
 tests/FusionRpg.Core.Tests/Delve/Wild/ · tests/FusionRpg.Data.Tests/Delve/
-FILED, NOT EDITED HERE: DemonMintSpec.Level + RpgStore.Demons.cs:53 (demon-core); SummonRoller.Roll poolFilter (demon-summoning, inert);
+FILED, NOT EDITED HERE: CreatureMintSpec.Level + RpgStore.Creatures.cs:53 (creature-core); SummonRoller.Roll poolFilter (creature-summoning, inert);
   the runner's second code-backed action id (action-map); four stream names (delve-graph-roll); two key fixes + five keys
-  (dungeon-registries); `cage` as a resolved_kind value (delve-scope); a personality mint override (demon-contracts, ask-first)
+  (dungeon-registries); `cage` as a resolved_kind value (delve-scope); a personality mint override (creature-contracts, ask-first)
 UNTOUCHED: SummonRoller's rates and pity (SummonRoller.cs:83-136), SummonBannerCatalog ids, LootPipeline, BattleEngine's round order
 ```
 
@@ -382,7 +382,7 @@ public static bool CaptureSucceeds(CaptureFacts f, CaptureTuning t, SeededRng ca
 - **Never:** a second roller beside `SummonRoller` or a second pity stock; an offer below the altar floor; a free recruit or a
   bind that bypasses `AutoBindNewSpecimenUnlocked`; a battle-engine special case for capture (no `actionId == "act.capture"`
   under `Core/Battle/`); `HypnoAlly` read for anything; a wall clock; a number from a model; a recruit in a pack cell or a
-  party slot; `KillEarn` or XP for a captured or recruited demon; `wild.joinMilli`, `altar.pullPriceSouls` or any soul literal
+  party slot; `KillEarn` or XP for a captured or recruited creature; `wild.joinMilli`, `altar.pullPriceSouls` or any soul literal
   in `dungeon.v1.json`; a `float` magnitude; SQL outside `FusionRpg.Data`.
 
 ## Success criteria (G4, `party-dungeon-map.md:160`)
@@ -406,10 +406,10 @@ per-party talk rows and per-party pull haul with one shared pity.
 
 ## Drift found this session (report, not fixed here)
 
-- **No `Demons/Summoning/` folder** — the files are `Demons/SummonRoller.cs`, `SummoningTuning.cs`, `SummonBannerCatalog.cs`;
+- **No `Creatures/Summoning/` folder** — the files are `Creatures/SummonRoller.cs`, `SummoningTuning.cs`, `SummonBannerCatalog.cs`;
   `SummoningTuning.cs:5` and `:56` are as the brief says. **`RpgStore.UniqueActors.cs`:** `TryRetireUniqueActor :189-222`
   matches; the W4 observer is `:224-268`, `RecoverToRosterUnlocked :316-336` (one line off) — the **lawn's** event path, not a
-  demon-capture path. **`ApplyContractResults :459`** is `RpgStore.Contracts.cs:459-495`; `ContractPolicy.cs` has no such member.
+  creature-capture path. **`ApplyContractResults :459`** is `RpgStore.Contracts.cs:459-495`; `ContractPolicy.cs` has no such member.
 - **Species anchors carry no disposition** (0 of 841; no schema field) — the owner is the archetype's `dispositionBase`.
   **No shipped capture** (§4). **Research:** `06-summoner-minion-fusion-rpg.md:272-285, :1070-1072` carries SMT's negotiation
   *inputs* and says no datamined formula exists; the ideal's §3.2/§11.6 numbers (`:1451-1460`) are the provenance.
@@ -419,17 +419,17 @@ per-party talk rows and per-party pull haul with one shared pity.
 ## Design-gate checklist
 
 ```
-[x] Subsystems: demon summoning (roller, banners, pity), demon contracts (slots, loyalty, release), demon core (mint, origin),
+[x] Subsystems: creature summoning (roller, banners, pity), creature contracts (slots, loyalty, release), creature core (mint, origin),
     actions (rows, relation, predicates, cost rows), battle kernel (streams, Retreated), soul economy (SoulSinkPolicy),
     party dungeon (registries, loot prices, attrition pools, event log), tunables.
 [x] Read this session, in order: party-dungeon-map.md (row 13, G4, external deps :97-99); the twelve APPROVED specs in full;
     ideal §0, §3, §4.7-4.9, §8 box, §10, §11.6 in full, §11.9 box, §11.10 R1-R12; audit §1(e), S2-3, S2-9, S2-10, §4 N9/R-series,
     §5 #3, §7; spec-expeditions.md (format); decisions.md :113-116.
 [x] Every code claim cites file:line opened this session (SummonRoller, SummoningTuning, SummonBannerCatalog, SoulSinkPolicy,
-    WeightedChoice, SeededRng, AtomRandom, PredicateNode, DemonRarity, DemonSpeciesCatalog, ConcreteSpecies, SpeciesExpander,
-    ContractPolicy, RpgStore.Contracts/.Demons/.Summons/.Expeditions/.UniqueActors, UniqueActorDtos, DemonDtos, ActionRow,
+    WeightedChoice, SeededRng, AtomRandom, PredicateNode, CreatureRarity, CreatureSpeciesCatalog, ConcreteSpecies, SpeciesExpander,
+    ContractPolicy, RpgStore.Contracts/.Creatures/.Summons/.Expeditions/.UniqueActors, UniqueActorDtos, CreatureDtos, ActionRow,
     ActionTargetSpec, ActionCompiler, RelationKind, BattleRunState, BattleEngine, BattleModels, ExpeditionResolver,
-    ExpeditionEndpoints, IPowerIndexProvider, four tuning files, three demon docs, research 06). Drift in its own section.
+    ExpeditionEndpoints, IPowerIndexProvider, four tuning files, three creature docs, research 06). Drift in its own section.
 [x] Verified against CODE, not comments: the roller's Summonable filter and count guard; the mint's level 1 and auto-bind; the
     capacity test; the pity read/write; the three Withdraw lines; the wild pool filter; PersonalityFor's key derivation; the
     zero-hit grep for a written "capture" origin; the anchor count. Surrounding sections read for every quoted rule (R5 with
@@ -442,6 +442,6 @@ per-party talk rows and per-party pull haul with one shared pity.
     wiring gaps named as gaps: supply prices (item-side) and the seal cost row (A3).
 [x] Propagations landed 2026-09-05 (verification pass): registries carries the two key corrections and the four new keys;
     delve-graph-roll reserves the wild and altar streams; delve-scope lists `cage` as a `resolved_kind` value;
-    demon-system-map.md and action-map.md carry the filed rows (`DemonMintSpec.Level`, `poolFilter`, personality
+    creature-system-map.md and action-map.md carry the filed rows (`CreatureMintSpec.Level`, `poolFilter`, personality
     override, `act.capture`).
 ```

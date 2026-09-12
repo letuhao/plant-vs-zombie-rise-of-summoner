@@ -344,7 +344,7 @@ board could ever move."*
 
 ---
 
-## 8. Innate — 5, one per demon-type archetype
+## 8. Innate — 5, one per creature-type archetype
 
 Free, outside the 5 equipped, and per [action-ideal.md](../action-ideal.md) §1.3 the innate **climbs** with
 earn history rather than sitting at a fixed rung. Shown here at rung 2.

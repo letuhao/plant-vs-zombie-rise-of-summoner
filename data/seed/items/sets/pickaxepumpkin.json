@@ -25,7 +25,7 @@
       "id": "set.pickaxepumpkin-001",
       "nameKey": "set.magnetic-gourd-guard",
       "name": "Magnetic Gourd Guard",
-      "themeKey": "demon.pickaxepumpkin",
+      "themeKey": "creature.pickaxepumpkin",
       "members": [
         {
           "role": "armament-primary",

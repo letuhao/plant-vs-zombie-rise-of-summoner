@@ -25,7 +25,7 @@
       "id": "set.doomkelp-001",
       "nameKey": "set.entangling-ruin",
       "name": "Entangling Ruin",
-      "themeKey": "demon.doomkelp",
+      "themeKey": "creature.doomkelp",
       "members": [
         {
           "role": "armament-primary",

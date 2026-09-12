@@ -32,6 +32,7 @@ from seedsmith.adapters.actions.coverage_report.ctx import (  # noqa: E402
     ActionCoverageCtx, RosterCounts,
 )
 from seedsmith.adapters.actions.distribution_planner.derive import WeightsRow  # noqa: E402
+from seedsmith.adapters.actions.load import load_committed  # noqa: E402
 from seedsmith.adapters.actions.vocab import load_family_ids  # noqa: E402
 from seedsmith.metrics.action_coverage import (  # noqa: E402
     ALL_ACTION_COVERAGE_CLOSED_METRICS, ALL_ACTION_COVERAGE_OPEN_METRICS,
@@ -618,7 +619,15 @@ class RealNonzeroAcceptedReportTests(unittest.TestCase):
 
     def test_a_real_run_reports_the_real_accepted_corpus_and_an_explicit_non_pass_verdict(self) -> None:
         summary = gen_mod.regenerate(write=False)
-        self.assertEqual(summary["acceptedCorpusSize"], 138)
+        # The accepted corpus is a POPULATION (it grows every round and every promotion), so its
+        # size is a reading, never a literal (validation-ssot.md). Assert the CONTRACT instead:
+        # the report measured SOME real content, and that number reconciles to the committed corpus
+        # plus this round's survivors.
+        self.assertGreater(summary["acceptedCorpusSize"], 0)
+        committed = load_committed(gen_mod.ACTIONS_ROOT)
+        committed_rows = committed.corpus.by_kind("action-seed")
+        self.assertGreater(len(committed_rows), 0)
+        self.assertGreaterEqual(summary["acceptedCorpusSize"], len(committed_rows))
         self.assertNotEqual(summary["verdict"], "pass")
         # 3 scopes x 5 categories = 15 (scope, category, rungBand) groups; 45 is the exploded
         # per-pairingRole cell ROW count in the written report's `entries` (cell_entries below).
@@ -628,10 +637,92 @@ class RealNonzeroAcceptedReportTests(unittest.TestCase):
         # measure, so nothing degrades to NOT_MEASURED any more (contrast the old empty-corpus
         # pin: `["action.corpus.singletonShare"]`).
         self.assertEqual(summary["notMeasuredMetrics"], [])
-        # The real gaps this expanded batch's own thin corpus actually has -- named explicitly
-        # (acceptance #3), never silently absorbed into a green verdict.
+        # The real gaps this thin corpus actually has -- named explicitly (acceptance #3), never
+        # silently absorbed into a green verdict. `speciesCoverage` (G3, 2026-09-12) joins them: the
+        # corpus names a fraction of the 904-species roster, which the scope-aggregate cells cannot
+        # see.
         self.assertEqual(sorted(summary["gapMetrics"]),
-                         ["action.corpus.enablerPayoffCoverage", "action.corpus.thinCell"])
+                         ["action.corpus.enablerPayoffCoverage", "action.corpus.speciesCoverage",
+                          "action.corpus.thinCell"])
+
+
+class SpeciesCoverageMetricTests(unittest.TestCase):
+    """G3 (2026-09-12): the per-SUBJECT coverage gate. A scope-aggregate cell
+    (`cell.species.attack.1-10`, quota 976 over 904 species) can pass while hundreds of species hold
+    nothing, so this metric asserts every PLANNED species subject has at least one accepted row."""
+
+    @staticmethod
+    def _ctx(subject_keys: "list[str]", accepted_scope_keys: "list[str]") -> ActionCoverageCtx:
+        subject_counts = {("species", k): {"attack": 1} for k in subject_keys}
+        return ActionCoverageCtx(
+            accepted_rows=tuple({"scope": "species", "scopeKey": k, "category": "attack",
+                                 "targetMode": "self", "relation": "enemy", "pairingRole": "none",
+                                 "atomFamilies": ["atom.might"], "rungBand": [1, 10],
+                                 "structureAxes": []}
+                                for k in accepted_scope_keys),
+            quota_by_scope_category={("species", "attack"): len(subject_keys)},
+            subject_category_counts=subject_counts,
+            family_ids=frozenset({"atom.might"}),
+            pairing_table={},
+            roster=RosterCounts(species_count=len(subject_keys), family_count=1,
+                                family_assigned_count=len(subject_keys)))
+
+    def test_an_uncovered_species_is_a_gap_naming_that_species(self) -> None:
+        ctx = self._ctx(["alpha", "beta", "gamma"], ["alpha"])
+        findings = cr.species_coverage_findings("m", ctx)
+        self.assertEqual(sorted(f.subject for f in findings), ["beta", "gamma"])
+        self.assertTrue(all(f.severity == Severity.GAP for f in findings))
+        for f in findings:
+            self.assertEqual(f.evidence["coveredSpecies"], 1)
+            self.assertEqual(f.evidence["requiredSpecies"], 3)
+
+    def test_full_coverage_produces_no_findings(self) -> None:
+        ctx = self._ctx(["alpha", "beta"], ["alpha", "beta", "gamma"])
+        self.assertEqual(cr.species_coverage_findings("m", ctx), [])
+
+    def test_it_is_scope_aggregate_blind_by_construction(self) -> None:
+        """The point of the metric: a fully-satisfied aggregate cell coexists with uncovered
+        species. The cell here has count == quota, yet 2 of 3 species are uncovered."""
+        ctx = self._ctx(["alpha", "beta", "gamma"], ["alpha"])
+        findings = cr.species_coverage_findings("m", ctx)
+        self.assertEqual(len(findings), 2, "the aggregate is satisfied; the species are not")
+
+    def test_required_universe_comes_from_the_quota_subjects(self) -> None:
+        """It must use exactly the planner's subjects, not a second roster read — a species the
+        quota was not recomputed for is not this metric's to require."""
+        ctx = self._ctx(["alpha", "beta"], [])
+        self.assertEqual({f.subject for f in cr.species_coverage_findings("m", ctx)},
+                         {"alpha", "beta"})
+
+    def test_deterministic(self) -> None:
+        ctx = self._ctx(["beta", "alpha"], [])
+        self.assertEqual(cr.species_coverage_findings("m", ctx),
+                         cr.species_coverage_findings("m", ctx))
+
+
+class SignatureCountIsRequiredNotDefaultedTests(unittest.TestCase):
+    """G4 (2026-09-12): `signature_actions_per_species` had a module-constant default of 3 (the
+    SEALED ideal's B1 number) while the shipped tuning sets `perSpeciesCount: 5`. The default was
+    dead — the one caller always passes the tuning value — but a wrong default that is never reached
+    is a second, contradictory source of truth. It is now a REQUIRED parameter."""
+
+    def test_no_module_constant_exists(self) -> None:
+        self.assertFalse(hasattr(cr, "SIGNATURE_ACTIONS_PER_SPECIES"),
+                         "the contradictory default constant must be gone")
+
+    def test_the_parameter_is_required(self) -> None:
+        import inspect
+        sig = inspect.signature(cr.roster_reconciliation_findings)
+        self.assertIs(inspect.Parameter.empty,
+                      sig.parameters["signature_actions_per_species"].default,
+                      "a default would let a future caller silently get the wrong count")
+
+    def test_the_metric_passes_the_live_tuning_count(self) -> None:
+        """The registered metric must read `cov.per_species_count`, never a literal."""
+        from seedsmith.metrics.action_coverage import RosterReconciliationMetric
+        import inspect
+        src = inspect.getsource(RosterReconciliationMetric.run)
+        self.assertIn("per_species_count", src)
 
 
 if __name__ == "__main__":

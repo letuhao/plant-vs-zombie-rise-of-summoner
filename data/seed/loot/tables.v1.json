@@ -6,7 +6,7 @@
     "contractVersion": 1,
     "sourceRef": "docs/architecture/item/spec-drop-volume.md (item module 11), Correction 1; ssot-generation.md 5.1",
     "note": "The GENERATED drop-table shape -- real integer weights, real counts, real affix_channel. Distinct on purpose from data/seed/items/drop-tables/, which is the seedsmith's AUTHORED input (entry-shapes.md 9: a dropBand where a weight belongs, a qtyCurve where a count belongs) and whose band-to-row generator is stage-1b infrastructure that does not exist yet.",
-    "calibration": "Every yield below is spec-drop-volume.md Correction 1's, at Theta = 20 where volumeScaleMilli = 1000 permille = x1.0. Nothing here is expressed per day: the game has no day axis (verified -- the only per-day concepts in Core are the demon-contract timers), so I12's '20-30 equipment items per day' is restated per content event at the pin. The behavioural target it was derived from is unchanged: the player looks at 100% of equipment drops and keeps 20-35% of them.",
+    "calibration": "Every yield below is spec-drop-volume.md Correction 1's, at Theta = 20 where volumeScaleMilli = 1000 permille = x1.0. Nothing here is expressed per day: the game has no day axis (verified -- the only per-day concepts in Core are the creature-contract timers), so I12's '20-30 equipment items per day' is restated per content event at the pin. The behavioural target it was derived from is unchanged: the player looks at 100% of equipment drops and keeps 20-35% of them.",
     "noCap": "There is no drop cap, no inventory ceiling and no per-run or per-period limit anywhere in this file or in src/FusionRpg.Core/Items/Drops/. D26 puts that mechanism outside this program permanently."
   },
   "tables": [

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ContractRowDto } from "@/lib/bus/contracts";
-import type { DemonProfileDto } from "@/lib/bus/demons";
+import type { CreatureProfileDto } from "@/lib/bus/creatures";
 import type { RunItem, UniqueActorDto } from "@/lib/bus/types";
 import type { RelicDto } from "@/lib/bus/types";
 import { mockUniqueActor } from "@/test/mocks";
@@ -88,7 +88,7 @@ describe("adaptContract", () => {
     upkeepPerDay: 3,
     deployable: true
   };
-  const profile: DemonProfileDto = {
+  const profile: CreatureProfileDto = {
     instanceId: "d1",
     speciesId: "sp-imp",
     rarity: "rare",
@@ -103,7 +103,7 @@ describe("adaptContract", () => {
     revision: 1
   };
 
-  it("joins the contract row and the demon profile by instanceId", () => {
+  it("joins the contract row and the creature profile by instanceId", () => {
     const view = adaptContract(row, profile);
     expect(view.instanceId).toBe("d1");
     expect(view.speciesId).toBe("sp-imp");

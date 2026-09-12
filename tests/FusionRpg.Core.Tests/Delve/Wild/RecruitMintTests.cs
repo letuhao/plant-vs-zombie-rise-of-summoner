@@ -1,23 +1,23 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Delve.Wild;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Stats.Derived;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Delve.Wild;
 
 /// <summary>D4.5 (spec-wild-room.md §4) — `RecruitMint.Build`: a mint test asserting `Origin` and a
-/// test pinning today's level-1 behaviour so `DemonMintSpec.Level` landing becomes visible (the
+/// test pinning today's level-1 behaviour so `CreatureMintSpec.Level` landing becomes visible (the
 /// todo's own two Verify lines).</summary>
 public class RecruitMintTests
 {
-    static ConcreteSpecies Species(string speciesId = "demon.ember-imp") => new()
+    static ConcreteSpecies Species(string speciesId = "creature.ember-imp") => new()
     {
         SpeciesId = speciesId,
         Side = "zombie",
         GameTypeId = 77,
-        Rarity = DemonRarity.Cultivated,
+        Rarity = CreatureRarity.Cultivated,
         ElementPrimary = ElementTypeId.Fire,
         ElementSecondary = ElementTypeId.Dark,
     };
@@ -65,7 +65,7 @@ public class RecruitMintTests
     public void Build_leaves_Variant_at_the_DTOs_own_default_nothing_is_invented()
     {
         var spec = RecruitMint.Build(Species(), Traits, "delve", thetaEnemy: 83);
-        Assert.Equal("normal", spec.Variant); // DemonMintSpec's own default, never set by this function
+        Assert.Equal("normal", spec.Variant); // CreatureMintSpec's own default, never set by this function
     }
 
     [Fact]
@@ -76,13 +76,13 @@ public class RecruitMintTests
         Assert.Throws<ArgumentException>(() => RecruitMint.Build(Species(), Traits, "", 83));
     }
 
-    // ---- Pins today's level-1 behaviour so DemonMintSpec.Level landing becomes visible ----
+    // ---- Pins today's level-1 behaviour so CreatureMintSpec.Level landing becomes visible ----
 
     [Fact]
     public void Two_different_thetaEnemy_values_produce_field_identical_specs_today_pins_the_named_gap()
     {
-        // Spec: "Level = θ_enemy" is what SHOULD happen; DemonMintSpec has no Level field yet, so
-        // thetaEnemy cannot possibly affect the returned spec today. Once DemonMintSpec.Level lands
+        // Spec: "Level = θ_enemy" is what SHOULD happen; CreatureMintSpec has no Level field yet, so
+        // thetaEnemy cannot possibly affect the returned spec today. Once CreatureMintSpec.Level lands
         // and this function's BODY is updated to thread thetaEnemy through it, THIS assertion must
         // start failing -- that failure is the signal the fix landed, per this file's own comment.
         var species = Species();
@@ -102,12 +102,12 @@ public class RecruitMintTests
     }
 
     [Fact]
-    public void DemonMintSpec_genuinely_has_no_Level_property_yet_the_gap_is_proven_not_assumed()
+    public void CreatureMintSpec_genuinely_has_no_Level_property_yet_the_gap_is_proven_not_assumed()
     {
-        // The load-bearing form of "the fix is visible when it lands": if DemonMintSpec.Level is ever
+        // The load-bearing form of "the fix is visible when it lands": if CreatureMintSpec.Level is ever
         // added, this reflection check starts failing immediately, forcing RecruitMint.Build's own
         // body to be updated in the same change rather than silently leaving thetaEnemy unused.
-        var property = typeof(DemonMintSpec).GetProperty("Level");
+        var property = typeof(CreatureMintSpec).GetProperty("Level");
         Assert.Null(property);
     }
 }

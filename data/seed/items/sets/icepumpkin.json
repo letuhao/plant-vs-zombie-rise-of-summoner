@@ -25,7 +25,7 @@
       "id": "set.icepumpkin-001",
       "nameKey": "set.frozen-spore-core",
       "name": "Frozen Spore Core",
-      "themeKey": "demon.icepumpkin",
+      "themeKey": "creature.icepumpkin",
       "members": [
         {
           "role": "armament-primary",

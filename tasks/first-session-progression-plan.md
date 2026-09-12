@@ -9,7 +9,7 @@ empire species progression and automatic allocation → level 4 → one determin
 It does not revive the legacy sunflower/bind flow, add a save system, add a world-map unlock, or create a
 second progression curve.
 
-The plan is grounded against the design gate's architecture, standalone, demon-source, data, economy,
+The plan is grounded against the design gate's architecture, standalone, creature-source, data, economy,
 commander/item, and FE rows. The key existing seams are `RpgStore.Init`/`EnsureHotSchema` and the single
 Data ingest transaction (`src/FusionRpg.Data/Sqlite/RpgStore.cs:46-98`), existing progression and XP
 projection (`src/FusionRpg.Data/Sqlite/RpgStore.Progression.cs`), typed activity provenance
@@ -119,7 +119,7 @@ onboarding evidence.
 | Risk | Impact | Mitigation |
 |---|---:|---|
 | A replay settles facts twice and mints duplicate Souls/item rewards | High | Source-result correlation plus checkpoint/reward receipt uniqueness inside one SQLite transaction; replay tests before API work |
-| A missing or forged source claim awards empire species XP | High | Require parsed `demon.progression.v1:general:<species>` and verify side/type species match; store invalid claims as `untrusted` |
+| A missing or forged source claim awards empire species XP | High | Require parsed `creature.progression.v1:general:<species>` and verify side/type species match; store invalid claims as `untrusted` |
 | Web/simulation results satisfy a lawn checkpoint | High | Central PvZ profile predicate in evaluator and joined-run tests for `webrpg-1` |
 | Dave item is forced through a unique specimen API | High | Implement the commander-owned scope first; explicit refusal test for fabricated Dave instance ids |
 | Existing saves lack the new table or have partial old state | Medium | Additive `CREATE TABLE IF NOT EXISTS` migration, empty view for Player 1, and boot/restart tests |

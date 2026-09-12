@@ -7,7 +7,7 @@ namespace FusionRpg.Tools.ElementEnumGen;
 /// <summary>
 /// Emits the generated replacement for <c>EffectSeedCatalog.CreateAll()</c> (E23/E11 Step 4,
 /// completeness-audit.md B2) — literal C# object construction, the same style
-/// <c>DemonSpeciesCatalog.Generated.cs</c> already uses, never embedded JSON parsed at runtime.
+/// <c>CreatureSpeciesCatalog.Generated.cs</c> already uses, never embedded JSON parsed at runtime.
 /// Core must not hold a runtime content loader; a checked-in generated file is not one.
 /// </summary>
 public static class EffectCatalogGen

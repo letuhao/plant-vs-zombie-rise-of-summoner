@@ -24,7 +24,7 @@ Rise of Summoner is RPG + empire building. Features live in the **RPG layer** (A
 
 ## What this is
 
-When a player asks “how strong is this demon?”, the answer is a **combat power number**: a **matrix price** over **combat-affecting** derived stats — **~196** element-typed combat channels (`CombatChannelFamilies` × omni+elements) **plus** combat-support outside that roster (e.g. `skill.cooldown.*`), loaded from **tuning coefficient tables**, composed the way E9 already prices channel-grouped grants. (Total registered derived may be ~261+; that full registry is **not** the combat roster.)
+When a player asks “how strong is this creature?”, the answer is a **combat power number**: a **matrix price** over **combat-affecting** derived stats — **~196** element-typed combat channels (`CombatChannelFamilies` × omni+elements) **plus** combat-support outside that roster (e.g. `skill.cooldown.*`), loaded from **tuning coefficient tables**, composed the way E9 already prices channel-grouped grants. (Total registered derived may be ~261+; that full registry is **not** the combat roster.)
 
 **Product rule:** every combat-affecting derived raises that number. An actor with **100000 evasion** and **100 omni attack** is still **very high power** (magnitude × coeff). Omni attack is one family among many. Combat-support (e.g. `skill.cooldown.*`) counts. Drop / magic-find / experience-bonus style stats are **non-combat** — they must **not** raise combat power (examples may be unimplemented; the class still exists).
 
@@ -60,20 +60,20 @@ That number is **not**:
 | E9 price + ActorPowerCache | `CostFunction`, `CoefficientTable`, `ActorPowerCache.Compose(AtomRow[])` — channel-grouped price; **no** Derived-snapshot overload |
 | Coeff / trigger tuning | `data/seed/power/coefficients.v1.json`; DB via `RpgStore.Power` — generic `stat.derived` row prices all such channels equally (undifferentiated $/point) |
 | Sheet Standing projection | `UniqueActorHubCompose.ProjectStanding` → `ActorStandingDto`; FE Condition tab (`foldConditionSurfaceVm` standing-radar / bars) |
-| UniqueActor Hub aptitude input (sheet/battle) | `UniqueActorHubCompose.Build`: `commander + UniqueDemon(instanceId)` — never DemonType (`UniqueActorHubCompose.cs` ~43–60) |
+| UniqueActor Hub aptitude input (sheet/battle) | `UniqueActorHubCompose.Build`: `commander + UniqueCreature(instanceId)` — never CreatureType (`UniqueActorHubCompose.cs` ~43–60) |
 | Aptitude → derived on sheet | `AptitudeSubsystem` via Hub; audit tests expect `aptitude.*` on `combat.power.omni` |
 | Lawn Hot uses ActorHub | `EntityApply` → `CheatState.ActorHub.Resolve` — Hub is present; aptitude **input** is the gap |
 | Bound ptr→instanceId binding | `MatchUniqueBindingsFacet.TryGetByPtr` exists; aptitude Hot never joins it today |
-| Demon ownership lock | `decisions.md` Demon progression source (2026-09-08) — unique never empire species fallback |
+| Creature ownership lock | `decisions.md` Creature progression source (2026-09-08) — unique never empire species fallback |
 | ActorHub sole Hot compose | `decisions.md` ActorHub sole Hot compose gate (2026-09-07 + 2026-09-12 amend) |
-| unique-lawn-wire **spec** (intent) | [aptitude-sheet/spec-unique-lawn-wire.md](aptitude-sheet/spec-unique-lawn-wire.md) — Bound = commander+UniqueDemon |
+| unique-lawn-wire **spec** (intent) | [aptitude-sheet/spec-unique-lawn-wire.md](aptitude-sheet/spec-unique-lawn-wire.md) — Bound = commander+UniqueCreature |
 | Item `PowerScalar` | Production via `ItemPowerReads.CardPower` (E10 “no production caller” comment is stale) |
 
 ### Wiring gap
 
 | Gap | Evidence | Why not a wall |
 |---|---|---|
-| **HF-lawn** — Bound lawn aptitude input omits UniqueDemon | Lawn **does** use ActorHub; `CheatState.SpeciesAllocation` = commander + species by `typeId` only (`CheatState.cs` ~157–162). Bound bindings unused for aptitude | Spec `unique-lawn-wire` + Server Hub path exist. **Severity:** wiring that **violates** sole-Hot + ownership — not “Hub missing on lawn” / not UniqueActor FSM absent |
+| **HF-lawn** — Bound lawn aptitude input omits UniqueCreature | Lawn **does** use ActorHub; `CheatState.SpeciesAllocation` = commander + species by `typeId` only (`CheatState.cs` ~157–162). Bound bindings unused for aptitude | Spec `unique-lawn-wire` + Server Hub path exist. **Severity:** wiring that **violates** sole-Hot + ownership — not “Hub missing on lawn” / not UniqueActor FSM absent |
 | **HF-standing** — Standing ignores aptitude (and other non-atom Hub combat writers) | `ProjectStanding` = equip + tree atoms only (~237–246); Hub Derived includes aptitude | See **Standing fold lock (D2)** below — synthetic `AtomRow`s + membership filter, then same `Compose` |
 | **HF-chip** — Aptitudes scope chip **is** specimen level labeled “power” | Unique GET has **no `theta`**; FE `theta ?? specimenLevel` → ``power ${n}`` (`AptitudeEndpoints`, `AptitudesTab`, `foldAptitudesSurfaceVm`) | Copy / fold honesty; do not put combat power on this chip until HF-standing |
 | **HF-copy** — surfaces that treat omni attack as “the power” | Design drift risk | Player “combat power” = O+S+C Standing compose |
@@ -115,7 +115,7 @@ That number is **not**:
 
 | Place | Aptitude | Equip | Tree | Classification |
 |---|---|---|---|---|
-| Sheet Hub Derived | Built UniqueDemon | Built shared atoms | Built Server | Compliant |
+| Sheet Hub Derived | Built UniqueCreature | Built shared atoms | Built Server | Compliant |
 | Sheet Standing | Wiring → `standing-compose` (W2) | Built | Built | Specced |
 | Lawn Hot Hub | Wiring → `lawn-aptitude-parity` (W3) | Built grants→Hub | Wiring → `lawn-tree-hydrate` (W3) | Specced |
 | Bound loadout | — | Wrong use → `bound-loadout-hub` (W3) | — | Specced |
@@ -129,18 +129,18 @@ That number is **not**:
 
 1. Contribute once — no private combat-number fold per feature.
 2. Read once — consume Hub (post-fusion: battle too).
-3. Entity class changes **allocation identity** only (Bound UniqueDemon vs empire species) — never which composer exists.
+3. Entity class changes **allocation identity** only (Bound UniqueCreature vs empire species) — never which composer exists.
 4. Temporary packaging during fusion migration may exist; **end-state is Hub only**.
 
 ### One Hub aptitude identity (all modes)
 
 | Entity | Aptitude input into Hub |
 |---|---|
-| Bound UniqueActor | `commander + UniqueDemon(instanceId)` |
-| Empire general | `commander + DemonType(species)` |
+| Bound UniqueActor | `commander + UniqueCreature(instanceId)` |
+| Empire general | `commander + CreatureType(species)` |
 | Commander aura host | Commander only |
 
-Lawn Hot **already** resolves through ActorHub. If Bound lawn feeds `commander + species` while the sheet feeds `commander + UniqueDemon`, **consumers share Hub; aptitude input does not** — wiring that violates sole Hot + ownership (HF-lawn). Join Bound `instanceId` when `TryGetByPtr` hits.
+Lawn Hot **already** resolves through ActorHub. If Bound lawn feeds `commander + species` while the sheet feeds `commander + UniqueCreature`, **consumers share Hub; aptitude input does not** — wiring that violates sole Hot + ownership (HF-lawn). Join Bound `instanceId` when `TryGetByPtr` hits.
 
 ### Combat-affecting membership (D2 filter)
 
@@ -232,7 +232,7 @@ Do not rediscover these in a later session:
 |---|---|---|
 | **HF-chip** | Wiring | Scope chip: `Lv`; optional `Θ`; never bare “power” for level |
 | **HF-standing** | Wiring + filter | Synthetics + membership filter → `ActorPowerCache.Compose` |
-| **HF-lawn** | Wiring (SSOT) | Bound → UniqueDemon via unique GET + `TryGetByPtr` |
+| **HF-lawn** | Wiring (SSOT) | Bound → UniqueCreature via unique GET + `TryGetByPtr` |
 | **HF-copy** | Docs | “combat power” = O+S+C Standing |
 | **HF-bound-loadout** | Wrong use | Bound combat via Hub/atoms — not Writer-absolute beside Hub |
 | **HF-battle-tree** | Wiring / debt | Wire `Battle.TreeAtomSource` into composer or delete dead slot (prefer fuse into Hub) |

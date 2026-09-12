@@ -25,7 +25,7 @@
       "id": "set.submarine-c-001",
       "nameKey": "set.submerged-missile-engine",
       "name": "Submerged Missile Engine",
-      "themeKey": "demon.submarine_c",
+      "themeKey": "creature.submarine_c",
       "members": [
         {
           "role": "armament-primary",

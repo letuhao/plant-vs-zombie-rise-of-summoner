@@ -37,7 +37,7 @@
       "title": "Why it matters",
       "paras": [
         "Without a naming beat, the first screen becomes a list of systems.",
-        "With it, the war starts as “this demon is yours,” then the rail opens around that story."
+        "With it, the war starts as “this creature is yours,” then the rail opens around that story."
       ]
     }
   ],
@@ -49,7 +49,7 @@
   ],
   "doNote": "Stop when you know the ritual is coming, not broken. Home: [Sanctum](sanctum). Specimens: [persistent specimens](specimens).",
   "mixUps": [
-    {"q": "Is my game broken because nothing forced me to name a demon?", "a": "No. The guided ritual is WIP. You can still play."},
+    {"q": "Is my game broken because nothing forced me to name a creature?", "a": "No. The guided ritual is WIP. You can still play."},
     {"q": "Is this the same as save select?", "a": "No. Save select names the summoner. This ritual names the first creature."},
     {"q": "Will it lock the rail forever?", "a": "No. The design opens one clear next step, then the rest of the hall."},
     {"q": "Does Vision Dave 1 include this?", "a": "Dave 1 is lawn and Sanctum basics. The naming ritual is its own first-session WIP beat."}

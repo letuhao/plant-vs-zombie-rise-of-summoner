@@ -4,7 +4,7 @@ using Xunit;
 namespace FusionRpg.Core.Tests.Match;
 
 /// <summary>
-/// demon-lawn-deploy T2.4 — the per-match run-state holder, plus an end-to-end mirror of
+/// creature-lawn-deploy T2.4 — the per-match run-state holder, plus an end-to-end mirror of
 /// <c>MatchHost.CheckLawnDeployTrigger</c>'s own logic (the real method lives in the Injector project
 /// and cannot be unit tested directly — same reasoning as `MatchCommanderSnapshotTests.cs`'s own
 /// `HostApplyWithSnapshot` helper). Proves the FULL wiring — roster snapshot + tuning + run-state +

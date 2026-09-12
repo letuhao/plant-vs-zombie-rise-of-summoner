@@ -25,7 +25,7 @@
       "id": "set.kelpfume-001",
       "nameKey": "set.undead-kelp-lash",
       "name": "Undead Kelp Lash",
-      "themeKey": "demon.kelpfume",
+      "themeKey": "creature.kelpfume",
       "members": [
         {
           "role": "armament-primary",

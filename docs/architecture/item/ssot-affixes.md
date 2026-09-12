@@ -1234,7 +1234,7 @@ Numbered, each naming the lane, each a thing I8 cannot decide alone.
 
 7. **Does the roster-scale gear question (item-ideal §8) change the affix design?** The ideal says it must
    be answered before slot counts freeze. If the answer is "a small deployable squad", 3 + 3 and 15 slots
-   are fine. If it is "twenty demons all geared", the per-actor suffix budget in §8.5 becomes the binding
+   are fine. If it is "twenty creatures all geared", the per-actor suffix budget in §8.5 becomes the binding
    constraint on the whole item system and I8 should be re-read with that in mind.
 
 ---

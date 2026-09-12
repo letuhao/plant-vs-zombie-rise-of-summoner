@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Delve;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Dungeon.Registry;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.World;
@@ -57,8 +57,8 @@ public class DelveWildEndpointsTests : IDisposable
         var tuningDir = Path.Combine(FindRepoRoot(), "data", "tuning");
         string Read(string name) => File.ReadAllText(Path.Combine(tuningDir, name));
         // Server.Tests' own PowerAndAptitudeTuningTestBootstrap module initializer configures
-        // Power/Aptitude/DerivedStat/Rung/Aura/Items/DemonSpeciesCatalog only -- ContractPolicy (the
-        // auto-bind TalkJoin's own MintDemonUnlocked performs), SoulEarnPolicy (discovery souls) and
+        // Power/Aptitude/DerivedStat/Rung/Aura/Items/CreatureSpeciesCatalog only -- ContractPolicy (the
+        // auto-bind TalkJoin's own MintCreatureUnlocked performs), SoulEarnPolicy (discovery souls) and
         // SummoningTuningHub (the roller + banner catalog PullAtAltar reaches) need their own
         // configure, matching every other class in this assembly that reaches a Policy the shared
         // bootstrap does not cover (WorldBindWardenEndpointTests.cs's own identical comment, for
@@ -66,12 +66,12 @@ public class DelveWildEndpointsTests : IDisposable
         // dependency: SummonRoller.RollTraits -> FusionRoller.SlotsFor -> StarPolicy.Tuning, only
         // reached by /pray (a real roll), never by /talk|/cage (TalkJoin's spec already carries
         // fixed, caller-supplied traits, so it never calls RollTraits at all).
-        FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
-            FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(Read("contracts.v1.json")));
+        FusionRpg.Core.Creatures.Contracts.ContractPolicy.Configure(
+            FusionRpg.Core.Creatures.Contracts.ContractTuningLoader.Parse(Read("contracts.v1.json")));
         SoulEarnPolicy.Configure(SoulEarnTuningLoader.Parse(Read("souls.v1.json")));
         SummoningTuningHub.Configure(SummoningTuningLoader.Parse(Read("summoning.v1.json")));
-        FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
-            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(Read("fusion.v2.json")));
+        FusionRpg.Core.Creatures.Fusion.StarPolicy.Configure(
+            FusionRpg.Core.Creatures.Fusion.FusionTuningLoader.Parse(Read("fusion.v2.json")));
         _tuningConfigured = true;
     }
 
@@ -114,10 +114,10 @@ public class DelveWildEndpointsTests : IDisposable
         return delve!.DelveId;
     }
 
-    static readonly DemonSpeciesDef WildSpecies = DemonSpeciesCatalog.All
-        .First(s => s.Acquisition != DemonAcquisition.CaptureOnly && s.TraitPool.Count > 0);
+    static readonly CreatureSpeciesDef WildSpecies = CreatureSpeciesCatalog.All
+        .First(s => s.Acquisition != CreatureAcquisition.CaptureOnly && s.TraitPool.Count > 0);
 
-    static DemonMintSpec JoinSpec() => new()
+    static CreatureMintSpec JoinSpec() => new()
     {
         SpeciesId = WildSpecies.SpeciesId, Side = WildSpecies.Side, GameTypeId = WildSpecies.GameTypeId,
         Rarity = WildSpecies.BaseRarity.ToId(), Variant = "normal",
@@ -173,7 +173,7 @@ public class DelveWildEndpointsTests : IDisposable
 
         Assert.Equal(200, StatusOf(result));
         Assert.Equal(200, _store.LoadDelve(delveId)!.SoulsUnbanked);
-        Assert.Single(_store.ListDemonRoster(_playerId).Items);
+        Assert.Single(_store.ListCreatureRoster(_playerId).Items);
     }
 
     [Fact]
@@ -187,7 +187,7 @@ public class DelveWildEndpointsTests : IDisposable
             _store, (_, _) => true);
 
         Assert.Equal(409, StatusOf(result));
-        Assert.Empty(_store.ListDemonRoster(_playerId).Items); // refused, minted nothing
+        Assert.Empty(_store.ListCreatureRoster(_playerId).Items); // refused, minted nothing
     }
 
     [Fact]
@@ -240,7 +240,7 @@ public class DelveWildEndpointsTests : IDisposable
         var entry = Assert.Single(party.Haul);
         Assert.Equal(0, entry.Row); // r0c0's own real RowIndex/ColIndex, resolved server-side, never client-supplied
         Assert.Equal(0, entry.Col);
-        Assert.Empty(_store.ListDemonRoster(_playerId).Items); // "no UniqueActor... until Extracted"
+        Assert.Empty(_store.ListCreatureRoster(_playerId).Items); // "no UniqueActor... until Extracted"
     }
 
     [Fact]

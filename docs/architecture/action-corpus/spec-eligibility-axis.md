@@ -41,7 +41,7 @@ question those fields describe. **A corpus with no eligibility surface is conten
 | The only `scope` in the action layer is **effect** scope, an unrelated concept | **built** | `ActionRow.cs:72` — `ActionScopeRow(ActionId, AtomId, ActionEffectScope)`, defaulting to `EachTarget`. **Do not overload it** |
 | `UnlockLadder` / `UnlockState` | **built, fully tested** | and reachable only from tests, because nothing can compute a candidate set |
 | `SpeciesBasics.SpeciesKey` is an **opaque key**, deliberately not a catalog join | **built** | `ActionRow.cs:83` states this |
-| Family assignments are keyed on the **catalog `SpeciesId`, lowercased** | **built**, and it joins | `data/seed/demons/_generated/family-assignments.json` — ⛔ **CORRECTED 2026-09-03, RE-MEASURED 2026-09-11.** This row said *"keyed on demon ids, not `species_key`"* and called the join **mismatched**. Re-measured 2026-09-03 on the legacy catalog: **53 keys, every one an exact `SpeciesId` of `DemonSpeciesCatalog.Generated.cs` (84 rows), already lowercase, no species with two families, 19 distinct families.** ⛔ **LIVE ROSTER 2026-09-11:** the pipeline now reads `data/seed/demons/species/**/*.json` and projects `family-map.json` with **904 keys**, **1,183 memberships**, **227 consolidated families** (626 species one family, 277 two, 1 three). A species may now carry more than one family, so a consumer must treat the value as a collection, not a scalar. The join is still a dictionary lookup, not a repair job |
+| Family assignments are keyed on the **catalog `SpeciesId`, lowercased** | **built**, and it joins | `data/seed/creatures/_generated/family-assignments.json` — ⛔ **CORRECTED 2026-09-03, RE-MEASURED 2026-09-11.** This row said *"keyed on creature ids, not `species_key`"* and called the join **mismatched**. Re-measured 2026-09-03 on the legacy catalog: **53 keys, every one an exact `SpeciesId` of `CreatureSpeciesCatalog.Generated.cs` (84 rows), already lowercase, no species with two families, 19 distinct families.** ⛔ **LIVE ROSTER 2026-09-11:** the pipeline now reads `data/seed/creatures/species/**/*.json` and projects `family-map.json` with **904 keys**, **1,183 memberships**, **227 consolidated families** (626 species one family, 277 two, 1 three). A species may now carry more than one family, so a consumer must treat the value as a collection, not a scalar. The join is still a dictionary lookup, not a repair job |
 | Whether `scope`/`scopeKey` is a column or a table | ⛔ **an open decision** the ideal §6 defers | — |
 
 **Sorted: real gap**, and the only one in this program that no amount of content generation can route
@@ -96,7 +96,7 @@ Two fields on the action row:
 
 **`scope` is a closed enum in code**, following every other action vocabulary. **`scopeKey` is an opaque
 string**, matching `SpeciesKey`'s existing discipline — the action layer deliberately does not join into
-the demon catalog, and this module must not be the thing that introduces that coupling.
+the creature catalog, and this module must not be the thing that introduces that coupling.
 
 **Column, not table.** Every action has exactly one scope; a table would model a many-to-many that does
 not exist, and would make the candidate-set query a join instead of a filter. **The ideal deferred this
@@ -126,14 +126,14 @@ candidates(actor) = { a : a.scope = general }
   Three facts make this the derived answer rather than a preference, all re-measured 2026-09-03:
 
   1. **The keys already are the canonical species key.** `family-assignments.json` holds **53** keys;
-     every one is an exact `SpeciesId` from `DemonSpeciesCatalog.Generated.cs`, and every one is
+     every one is an exact `SpeciesId` from `CreatureSpeciesCatalog.Generated.cs`, and every one is
      already lowercase. Zero keys fall outside the catalog.
   2. **`spec-characteristic-pool.md:98` already declares that key canonical** — *"The canonical
      species key is the catalog `SpeciesId`, lowercase. The anchor tree is joined on
-     `speciesId.lower()`."* A-S0 is the module that reads the demon seed, so the projection is
+     `speciesId.lower()`."* A-S0 is the module that reads the creature seed, so the projection is
      emitted **there** and this module consumes a committed file. That is why no coupling is
      introduced: the action layer reads a seed file, exactly as it reads every other one, and never
-     references `DemonSpeciesCatalog`.
+     references `CreatureSpeciesCatalog`.
   3. **The relation is a function.** ⛔ **CORRECTED 2026-09-11:** on the legacy 53-species projection
      every value was a one-element list over 19 families, so `familyOf` could return a scalar. The live
      roster breaks that assumption — `family-map.json` now holds 904 keys with 626 one-element, 277
@@ -217,7 +217,7 @@ working eligibility system and one that silently grants every species action to 
    wrong. ⛔ **DECIDED 2026-09-03 (owner removed themselves as a gate)** — §3.2 states the mapping,
    its source file, its three measured justifications and its two refusals.
 5b. **The unknown-family refusal lives in A-C1, not here.** ⛔ **DECIDED 2026-09-03 (owner removed
-   themselves as a gate).** §3.1 and §4 forbid this module joining the demon catalog; test 6 required a
+   themselves as a gate).** §3.1 and §4 forbid this module joining the creature catalog; test 6 required a
    load-time refusal for an unknown family, which needs the family list. Both hold if the check runs
    where the vocabulary checks already run: `spec-corpus-loader.md` §3 step 5 refuses an unknown member
    of every closed vocabulary against the code of record, and `scopeKey` is already one of A-C1's
@@ -227,7 +227,7 @@ working eligibility system and one that silently grants every species action to 
    rather than wrong. **Reasoning:** the refusal is not weakened — it moves to the layer that already
    owns refusals and already has the list, and it costs this module no dependency it spent §4 forbidding.
    **What would overturn it:** the family list becoming a generated C# constant, or `ActionRow` gaining a
-   real foreign key to the demon catalog — at either point the refusal can move into the action layer
+   real foreign key to the creature catalog — at either point the refusal can move into the action layer
    for free, and it should.
 6. `UnlockState.TryAccept` is exercised from a real candidate set in at least one test.
 7. `ActionEffectScope` is unchanged.
@@ -250,6 +250,6 @@ working eligibility system and one that silently grants every species action to 
 |---|---|
 | **Depends on** | Nothing. **Should be built first in this program** — six specs already reference `scopeKey` as a field |
 | **Blocks** | Every generation stage in a practical sense: the corpus is unusable without it |
-| **seedsmith D2** | ⛔ **RE-MEASURED 2026-09-11:** on the legacy catalog family assignments covered **53 of 84** species and were keyed on demon ids. The live roster has **904 species, 1,183 memberships over 227 families**, so `familyOf` returns a non-empty set for every live species and the family tier reaches all of them; the open work is thin families and multi-family consumers, not missing assignments |
+| **seedsmith D2** | ⛔ **RE-MEASURED 2026-09-11:** on the legacy catalog family assignments covered **53 of 84** species and were keyed on creature ids. The live roster has **904 species, 1,183 memberships over 227 families**, so `familyOf` returns a non-empty set for every live species and the family tier reaches all of them; the open work is thin families and multi-family consumers, not missing assignments |
 | **effect-pipeline module 8** | `eligibility-tags` — a different axis on a different entity. Keep them apart |
 | **`action-corpus-ideal.md` §6** | Deferred the column-vs-table decision; §3.1 makes it with a stated reason |

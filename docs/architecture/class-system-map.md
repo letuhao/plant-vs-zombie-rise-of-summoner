@@ -74,12 +74,12 @@ Stable kebab-case ids. Referenced by every downstream plan and task.
 | 6 | `aptitude-resolve` | Aptitude points → derived channels, through the two read functions, as a registered **`IActorStatSubsystem`**. Wired into the actor's derived composition | `aptitude-tuning` · **`distribution-reconcile`** |
 | 7 | `deterministic-core` | The closed form, in `FusionRpg.Core`: per-round mixture → first passage → win probability | `aptitude-tuning` |
 | 8 | `balance-guard` | Balance as a CI assertion, not a periodic exercise. **Two halves with different standing** — see §4b. Runs in microseconds because it never simulates | `deterministic-core` · `aptitude-resolve` |
-| 9 | `point-economy` | **FOUR point budgets, commander SMALLEST → unique LARGEST** (ideal §7c.2), one per allocation scope (commander / demon type / aspect / unique demon — ideal §7c), allocation persistence per scope, and **respec pricing** — free build has no class price, so respec cost is the only friction left holding a build together (ideal §7b.5) | `aptitude-resolve` |
+| 9 | `point-economy` | **FOUR point budgets, commander SMALLEST → unique LARGEST** (ideal §7c.2), one per allocation scope (commander / creature type / aspect / unique creature — ideal §7c), allocation persistence per scope, and **respec pricing** — free build has no class price, so respec cost is the only friction left holding a build together (ideal §7b.5) | `aptitude-resolve` |
 | 10 | `guard-economy` | `poise` as one ratio: drains ∝ what the guard stopped, regenerates per-tick sized against peer pressure, and **converts on release into a riposte** (ideal §5b.3, §8.3, §8.9) | `aptitude-resolve` · **`poise-resource`** |
 | 11 | `zomboss-patterns` | Named allocations as **content**, resolved by id like `FactionPolicies.Resolve`. The class layer, moved off the player and onto the AI (ideal §6). **Newly symmetric with the player** now that allocation is per-actor across four scopes | `aptitude-resolve` |
 | 12 | `residual-fit` | Simulate what the core cannot express, measure the gap, fit the config to close it. **First two steps are fixed, not open**: (1) re-measure with elements LIVE (ideal §7c.7), (2) make `stamina` bind — it is free today and is the top reservation for 9 of 12 aptitudes (ideal §8.1b/§8.1d) | `balance-guard` · `point-economy` |
 | 13 | `real-data-collect` | Phase 9's own store for V5's resolve-time metrics (P9.1). **Authorized and built 2026-08-27** — owner picked Option B (file-based JSONL log) via `/goal`'s `AskUserQuestion`; `decisions.md` "Class system real-data collection" row landed; `scripts/collect-class-system-realrun.ps1` built and proven against a live server (2/2 tests). **Does not cover per-matchup outcomes** (P9.2's own input) — see module 14 | `residual-fit` |
-| 14 | `aptitude-allocation-surface` | The first player-reachable way to spend aptitude points (commander scope). **Authorized and built 2026-08-27** — owner directive ("you should complete the plan") after a completeness audit found `point-economy`'s own persistence (P6.1-P6.4) had zero production callers. `src/FusionRpg.Server/AptitudeEndpoints.cs` (REST) + `WebMatchService.AptitudeChannelMods`'s new real-allocation read wire + `src/layers/aptitudes/AptitudesLayer.tsx` (web UI, 8th rail entry) — closes the gap module 13 named. Every expedition battle a player runs now carries real aptitude signal once they allocate. `DemonType`/`UniqueDemon`/`Aspect` scopes and priced respec are named, undecided follow-ups (spec §6 "ask first") | `point-economy` |
+| 14 | `aptitude-allocation-surface` | The first player-reachable way to spend aptitude points (commander scope). **Authorized and built 2026-08-27** — owner directive ("you should complete the plan") after a completeness audit found `point-economy`'s own persistence (P6.1-P6.4) had zero production callers. `src/FusionRpg.Server/AptitudeEndpoints.cs` (REST) + `WebMatchService.AptitudeChannelMods`'s new real-allocation read wire + `src/layers/aptitudes/AptitudesLayer.tsx` (web UI, 8th rail entry) — closes the gap module 13 named. Every expedition battle a player runs now carries real aptitude signal once they allocate. `CreatureType`/`UniqueCreature`/`Aspect` scopes and priced respec are named, undecided follow-ups (spec §6 "ask first") | `point-economy` |
 
 **Build order:**
 
@@ -142,7 +142,7 @@ it down is what makes it reviewable:
 > survive only as **Zomboss AI patterns**. **Twelve aptitudes** are the RPG primary stats and are
 > **sources, not registered channels** — an aptitude is never in `DerivedStatCatalog`, because `share`
 > normalises over the actor's own total and a granted aptitude would silently dilute the other eleven.
-> An actor's allocation is the **sum of four scopes** (commander → demon type → aspect → unique demon),
+> An actor's allocation is the **sum of four scopes** (commander → creature type → aspect → unique creature),
 > weighted **commander smallest, unique largest** — a commander allocation replicates across the whole
 > roster, so a dominant one is the worst case. `share` is taken **on the sum**, never per scope.
 > Two read functions, both PS-3: **contests read a `Θ`-free share; magnitudes read `P(Θ)`** — one
@@ -184,14 +184,14 @@ program's two land — and one of the three was owed before this program existed
 ### 2b ⛔ One external dependency, owned by another program
 
 **`aspect-scope` left this program on 2026-08-26, by owner decision.** It is the actor's element typing
-made an allocation tier — `point-economy`'s **third scope**. Every file it edits belongs to the demon
-program (`DemonSpeciesCatalog`, `DemonSpeciesGenerator`, the generated catalog), and that program's
-`demon-core` already owns *"species link, rarity, variants, trait slots, **element typing**"*.
+made an allocation tier — `point-economy`'s **third scope**. Every file it edits belongs to the creature
+program (`CreatureSpeciesCatalog`, `CreatureSpeciesGenerator`, the generated catalog), and that program's
+`creature-core` already owns *"species link, rarity, variants, trait slots, **element typing**"*.
 
 | | |
 |---|---|
-| Spec | [demons/spec-aspect-scope.md](demons/spec-aspect-scope.md) — written here, moved there intact |
-| Owner | **demon program** ([demon-system-map.md](demon-system-map.md)) |
+| Spec | [creatures/spec-aspect-scope.md](creatures/spec-aspect-scope.md) — written here, moved there intact |
+| Owner | **creature program** ([creature-system-map.md](creature-system-map.md)) |
 | This program's role | **requester.** It supplies the requirement, the byte-identical migration path and the tests; it does not schedule the work |
 | Cost accepted | **`point-economy` scope 3 waits on another program's queue.** The other three scopes are unblocked, so that module ships three-of-four and lights up the fourth when the tier lands |
 
@@ -245,7 +245,7 @@ with a green test beside it. The three that block this program:
 
 | Evidence | Says |
 |---|---|
-| [StarPolicy.cs:6](../../src/FusionRpg.Core/Demons/Fusion/StarPolicy.cs) | *"ChannelMods — **never engine changes** (battle goldens stay byte-identical)"* — a progression system already feeds battle actors this way. Aptitudes become the **fifth** `ChannelMods` producer |
+| [StarPolicy.cs:6](../../src/FusionRpg.Core/Creatures/Fusion/StarPolicy.cs) | *"ChannelMods — **never engine changes** (battle goldens stay byte-identical)"* — a progression system already feeds battle actors this way. Aptitudes become the **fifth** `ChannelMods` producer |
 | [battle/spec-readiness-model.md](battle/spec-readiness-model.md) | T3 hit **this exact divergence** (*"`BattleStatComposer`'s separate known-channel set… not the same as being a real stat"*) and kept the composers separate — registering `turn.*` in **both** |
 | [battle-timeline-map.md](battle-timeline-map.md) | Stat composition is **not in the battle program's scope**, and **T5 is a byte-identical freezer**. `decisions.md`'s *Golden ordering across streams*: a mover overlapping a freezer makes the freezer's proof worthless |
 
@@ -405,7 +405,7 @@ eventually turns §4b's soft red green.
 | **Actions** | `Focus`'s balance fix is **delegated** to this layer by owner decision (ideal §8.1c) — flattening `Focus` into damage would trade a gameplay mechanism for a measurable number. Also what makes `stamina` bind | [action-map.md](action-map.md) — approved 2026-08-22, unbuilt |
 | **Cooldowns / readiness** | Three of `Focus`'s largest coefficients (`skill.cooldown.*`) are unmeasurable because **neither engine has cooldowns** | [battle-timeline-map.md](battle-timeline-map.md) |
 | **Active skills, elements, flavour** | Rule: **an aptitude reaches a MECHANISM, never a FLAVOUR** (ideal §4.1). Aptitudes stop at `omni`; every element slot and every per-status id belongs to the skill layer — **168 of 259 channels, 65%** | Skill / item layer |
-| **Traits and starting skills** | **Derived** from `aspect`, never authored per aspect — one generator argument, not a content project (ideal §7c.4) | `aspect-scope` defines the seam; the content is the demon program's |
+| **Traits and starting skills** | **Derived** from `aspect`, never authored per aspect — one generator argument, not a content project (ideal §7c.4) | `aspect-scope` defines the seam; the content is the creature program's |
 | **`element_mastery`** | Per-element progression, handed over by `derived-stats` §7. **Module 1 decides its home; it does not build it** | This program names it; a later module builds it |
 | **Party / contagion** | `status.*.contagion` is unmeasurable in a 1v1 — there is no second host | Party simulation, unbuilt |
 | **Items and affixes** | The other half of the 66%. An aptitude sets breadth; items carry depth | Item program |

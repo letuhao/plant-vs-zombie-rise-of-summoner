@@ -3,14 +3,14 @@ using System.Text.Json;
 namespace FusionRpg.Core.Effects.Atoms;
 
 /// <summary>
-/// One demon-seed variant's resolution-parameter shift (Q12, `spec-resolution-order.md` "Variant
+/// One creature-seed variant's resolution-parameter shift (Q12, `spec-resolution-order.md` "Variant
 /// shifts", `ssot-rarity.md` §3.6). A variant nudges <see cref="Resolver.Resolve"/>'s own
 /// parameters — it never authors a new container or atom: rarity buys breadth and tier ceiling,
 /// never magnitude directly, and letting a variant multiply a magnitude would make rarity dominant
 /// and destroy the overlap that rule exists to protect.
 /// </summary>
-/// <param name="VariantId">The demon-seed anchor's own variant name — <c>"ancient"</c>,
-/// <c>"mutated"</c>, etc. (<see cref="Demons.DemonSpeciesCatalog.KnownVariants"/>'s vocabulary,
+/// <param name="VariantId">The creature-seed anchor's own variant name — <c>"ancient"</c>,
+/// <c>"mutated"</c>, etc. (<see cref="Creatures.CreatureSpeciesCatalog.KnownVariants"/>'s vocabulary,
 /// minus <c>"normal"</c>, which has no shift row — the caller passes <c>null</c> instead).</param>
 /// <param name="TierWindowShift">Added to both <c>MinTier</c> and <c>MaxTier</c> before the t5
 /// clamp — a uniform shift, so a valid (non-inverted) window stays valid after shifting.</param>

@@ -341,12 +341,12 @@ def check_gate3_plan_reachability(tree_id: str, nodes: "list[dict]", tier_count:
 
 class SilentEmptyRosterRefusal(PlanInvariantError):
     """`_pending[]`'s own contract: "declared absences ... never silence". An empty
-    `roster.demonFamilies` (or any other roster axis) that is NOT named in `_pending` is refused —
+    `roster.creatureFamilies` (or any other roster axis) that is NOT named in `_pending` is refused —
     the failure mode this guards is a roster mirror going missing and the plan generating anyway
     against an empty axis with nothing to show for it."""
 
 
-def check_pending_declared_for_empty_rosters(plan: dict, axes: "tuple[str, ...]" = ("demonFamilies",)) -> None:
+def check_pending_declared_for_empty_rosters(plan: dict, axes: "tuple[str, ...]" = ("creatureFamilies",)) -> None:
     roster = plan.get("roster", {})
     pending = set(plan.get("_pending", []))
     for axis in axes:

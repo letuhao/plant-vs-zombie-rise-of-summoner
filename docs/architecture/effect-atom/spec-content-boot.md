@@ -50,7 +50,7 @@ public void LoadContentIntoRuntime()
   consume; `PowerTables.Current` (`CoefficientTable.cs:166`) is what `CostFunction`/`ActorPowerCache`
   consume. E20 wrote no consumer — it connected the ones that existed.
 - **One caller, in the server.** `src/FusionRpg.Server/Program.cs:145`, immediately after
-  `Init()` on line 141 and before the demon catalogs are forced. The C1 boot sweep
+  `Init()` on line 141 and before the creature catalogs are forced. The C1 boot sweep
   (`ClearSessionScopedBindings`, `CountOrphanInstances`) was added to the same block later in the same
   session (`Program.cs:163-168`).
 - **The deploy step.** `scripts/deploy-play.ps1:217-220` runs

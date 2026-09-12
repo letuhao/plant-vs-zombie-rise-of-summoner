@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Activity;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.Data;
@@ -26,7 +26,7 @@ public sealed partial class RpgStore
     /// vanilla-PvZ soul award byte-identical to pre-T3.6 behavior (contentScale(20) = 1.000 exactly)
     /// — an explicit, documented placeholder, never a silent unscaled default.
     /// </summary>
-    const int VanillaPvzKillAndRunTheta = Core.Demons.SoulSinkPolicy.VanillaPvzTheta;
+    const int VanillaPvzKillAndRunTheta = Core.Creatures.SoulSinkPolicy.VanillaPvzTheta;
 
     /// <summary>
     /// Soul earns from a freshly inserted Activity fact — called inside the fact's own transaction
@@ -50,11 +50,11 @@ public sealed partial class RpgStore
                     _killEarnMemo[key] = counted;
                 }
 
-                // Patron bonus (spec-patron-demon.md): +1 on every 10th earning kill, uncapped since
+                // Patron bonus (spec-patron-creature.md): +1 on every 10th earning kill, uncapped since
                 // T3.6. Gated so the audited unpatroned shape stays byte-identical; the patron check
                 // is a PK point lookup, not a scan (review-C1 discipline).
                 delta = HasPatronUnlocked(db, playerId)
-                    ? Core.Demons.Patron.PatronPolicy.KillEarnWithPatron(counted, VanillaPvzKillAndRunTheta, tuning)
+                    ? Core.Creatures.Patron.PatronPolicy.KillEarnWithPatron(counted, VanillaPvzKillAndRunTheta, tuning)
                     : SoulEarnPolicy.KillEarn(VanillaPvzKillAndRunTheta, tuning);
                 if (delta > 0)
                     _killEarnMemo[key] = counted + 1;

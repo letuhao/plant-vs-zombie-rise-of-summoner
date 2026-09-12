@@ -25,7 +25,7 @@
       "id": "set.superpogozombie-001",
       "nameKey": "set.melon-skin-longshot",
       "name": "Melon Skin Longshot",
-      "themeKey": "demon.superpogozombie",
+      "themeKey": "creature.superpogozombie",
       "members": [
         {
           "role": "armament-primary",

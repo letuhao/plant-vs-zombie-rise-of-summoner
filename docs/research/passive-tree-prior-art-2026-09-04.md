@@ -77,7 +77,7 @@ Fix: `H` reads *self-spent* points only; gear-granted points add power, never fo
 
 ### 2.3 Exclusion: our "blocking" vs LE's printed no-op
 
-The owner deferred *"demon species tree will define how to block."* LE already shipped an answer.
+The owner deferred *"creature species tree will define how to block."* LE already shipped an answer.
 
 **FACT (LE official Mage tree page):**
 
@@ -197,8 +197,8 @@ conversion nodes must be authored against it.
 |---|---|---|
 | R1 | **Reconsider D11** — items grant *points*, not node unlocks (LE model). Removes the tier-gate special case entirely | D11 |
 | R2 | **`H` reads self-spent points only** — gear-granted points add power, never focus | D8 |
-| R3 | **Exclusion must be property-based, never named-pair** — the only form that survives generation | D13, demon species round |
-| R4 | **Adopt LE's escalation ladder** (Reroute → Precedence → Nullification) and keep exclusions rare (~2% of nodes) | demon species round |
+| R3 | **Exclusion must be property-based, never named-pair** — the only form that survives generation | D13, creature species round |
+| R4 | **Adopt LE's escalation ladder** (Reroute → Precedence → Nullification) and keep exclusions rare (~2% of nodes) | creature species round |
 | R5 | **Price the respec dependency** created by cross-unlock — cascade, block, or grandfather | open item |
 | R6 | **Equalize expected value, not shape** — the plan emits budget + shape archetype per tree | D13 |
 | R7 | **Bound node potency explicitly** — no node so strong it forces a build (EHG's own constraint) | D13 |

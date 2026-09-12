@@ -1,8 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Data;
@@ -18,7 +18,7 @@ namespace FusionRpg.Server.Tests;
 /// <summary>aptitude-sheet AS-3.1 / AS-3.2 — <c>/api/aptitude-presets</c> against a real in-process host.</summary>
 public class AptitudePresetEndpointsTests : IAsyncLifetime
 {
-    const int FumeshroomDemonTypeId = 60007;
+    const int FumeshroomCreatureTypeId = 60007;
 
     string _dir = "";
     RpgStore _store = null!;
@@ -46,7 +46,7 @@ public class AptitudePresetEndpointsTests : IAsyncLifetime
         FusionRpg.Core.Progression.SpeciesProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.SpeciesProgressionTuningLoader.Parse(
                 File.ReadAllText(Path.Combine(RepoTuningDir(), "species-progression.v1.json"))));
-        DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        CreatureSpeciesCatalog.ConfigureFromCompiledDefault();
         SpeciesBuildPlanCatalog.Configure(new Dictionary<string, IReadOnlyDictionary<string, long>>(StringComparer.Ordinal)
         {
             ["fumeshroom"] = new Dictionary<string, long>(StringComparer.Ordinal)
@@ -309,7 +309,7 @@ public class AptitudePresetEndpointsTests : IAsyncLifetime
     [Fact]
     public async Task Activate_species_uses_priced_respec_and_rolls_back_on_insufficient_souls()
     {
-        SeedSpeciesLevel(_playerId, FumeshroomDemonTypeId, level: 21, "fumeshroom");
+        SeedSpeciesLevel(_playerId, FumeshroomCreatureTypeId, level: 21, "fumeshroom");
         var presetId = await CreateEvenPresetAsync("SpeciesEven");
 
         // First activate is free (first override) — establish an override so the next is priced.
@@ -351,7 +351,7 @@ public class AptitudePresetEndpointsTests : IAsyncLifetime
 
         var beforeActive = _store.GetAptitudePresetActive(_playerId, "species", "fumeshroom");
         Assert.Equal(presetId, beforeActive!.PresetId);
-        var beforeAlloc = _store.LoadAllocation(AllocationScope.DemonType,
+        var beforeAlloc = _store.LoadAllocation(AllocationScope.CreatureType,
             SpeciesAllocation.ScopeKey(_playerId, "fumeshroom"));
 
         var second = await _http.PostAsJsonAsync("/api/aptitude-presets/activate", new
@@ -367,13 +367,13 @@ public class AptitudePresetEndpointsTests : IAsyncLifetime
 
         var afterActive = _store.GetAptitudePresetActive(_playerId, "species", "fumeshroom");
         Assert.Equal(presetId, afterActive!.PresetId); // unchanged — no half-active
-        var afterAlloc = _store.LoadAllocation(AllocationScope.DemonType,
+        var afterAlloc = _store.LoadAllocation(AllocationScope.CreatureType,
             SpeciesAllocation.ScopeKey(_playerId, "fumeshroom"));
-        Assert.Equal(beforeAlloc.TotalForScope(AllocationScope.DemonType),
-            afterAlloc.TotalForScope(AllocationScope.DemonType));
+        Assert.Equal(beforeAlloc.TotalForScope(AllocationScope.CreatureType),
+            afterAlloc.TotalForScope(AllocationScope.CreatureType));
     }
 
-    void SeedSpeciesLevel(long playerId, int demonTypeId, long level, string scopeKey)
+    void SeedSpeciesLevel(long playerId, int creatureTypeId, long level, string scopeKey)
     {
         using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
@@ -383,7 +383,7 @@ public class AptitudePresetEndpointsTests : IAsyncLifetime
             VALUES ($p, 'species', $tid, $lvl, 0, $lvl, 0, 0, $now, $sk);
             """;
         cmd.Parameters.AddWithValue("$p", playerId);
-        cmd.Parameters.AddWithValue("$tid", demonTypeId);
+        cmd.Parameters.AddWithValue("$tid", creatureTypeId);
         cmd.Parameters.AddWithValue("$lvl", level);
         cmd.Parameters.AddWithValue("$sk", scopeKey);
         cmd.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));

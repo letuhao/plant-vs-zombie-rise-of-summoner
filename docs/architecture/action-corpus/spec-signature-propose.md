@@ -21,9 +21,9 @@ It forces the ordering **P1 ∥ P2 → P3**.
 2. **Three pipelines, not one parameterised stage.** P-general (role + slot, no anchor), P-family (family
    motifs/anti-motifs/themes), P-signature (species motifs + element + its family's output).
 3. **Permute every enum**, seeded from `(entity_id, field, sample_index)` — `sample_index` **inside** the
-   seed, or three votes are one sample (`adapters/demons/anchor/permute.py:16-30`).
+   seed, or three votes are one sample (`adapters/creatures/anchor/permute.py:16-30`).
 4. **Majority-vote only load-bearing fields.** 1-1-1 → `unresolved`, never the first option
-   (`adapters/demons/anchor/vote.py:23-40`).
+   (`adapters/creatures/anchor/vote.py:23-40`).
 5. **Every enum description carries a negative clause** saying what the field is NOT. `none` is a value; a
    missing key is a defect.
 6. **TRANSIENT ≠ QUALITY.** A pause is transient — replay, no new call. Name the defect when re-prompting;
@@ -39,7 +39,7 @@ It forces the ordering **P1 ∥ P2 → P3**.
 
 | Thing | Evidence |
 |---|---|
-| Species motif anchors — **904 live species**, each with `motifs`, `antiMotifs`, `basis` | `data/seed/demons/_generated/motif-assignments.json` (⛔ **RE-MEASURED 2026-09-11:** 904 live keys; the 84-key figure was the legacy `DemonSpeciesCatalog.Generated.cs` projection) |
+| Species motif anchors — **904 live species**, each with `motifs`, `antiMotifs`, `basis` | `data/seed/creatures/_generated/motif-assignments.json` (⛔ **RE-MEASURED 2026-09-11:** 904 live keys; the 84-key figure was the legacy `CreatureSpeciesCatalog.Generated.cs` projection) |
 | Family assignments — **904 species, 1,183 memberships, 227 consolidated families** | `data/seed/actions/_generated/family-map.json` (⛔ **RE-MEASURED 2026-09-11:** the old `family-assignments.json` 53/19 figure was the legacy projection) |
 | `SpeciesBasics.InnateActionId` — per species, nullable, validated, assembled, persisted | `Actions/ActionRow.cs:87` · `Actions/ActionValidator.cs:107-115` · `Actions/Grants/ActionSetAssembler.cs:60-61` · `FusionRpg.Data/Sqlite/RpgStore.Actions.cs:546-549` |
 | Closed action vocabularies | `ActionEnums.cs:26-49`, `ActionTargetSpec.cs:14-33`, `:42-48` |
@@ -75,7 +75,7 @@ always asserted *"every property has a `description` containing a negative claus
 mechanically over the schema"*, and **the schema carried no `description` key at all**, so the
 assertion had nothing to assert over. They are written here, in the schema, because a description that
 lives in prose beside a schema is a description the audit cannot read. Each follows the hardened
-`blocked` description at `adapters/demons/anchor/prompts.py:74-82`, rewritten after a real local model
+`blocked` description at `adapters/creatures/anchor/prompts.py:74-82`, rewritten after a real local model
 filled that field with `"plant"` on 2026-09-01 (`prompts.py:64-70`): normal case first, then the
 exception, then what must **not** go in the field. `differentiator`'s was already drafted in prose
 below; it is now where the audit can read it.

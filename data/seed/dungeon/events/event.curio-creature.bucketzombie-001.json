@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.curio-creature.bucketzombie-001",
+  "flavor": "Resting upon a stone plinth is an inkstone carved from black jade, yet it bleeds a thick, viscous shadow. As you approach, the ink begins to swirl into the shape of a frantic, grasping hand, as if the very spirit of a poet suffering from 江郎才尽 is trying to claw its way out of the dried pigment.",
+  "kind": "curio",
+  "name": "The Scholar's Hollowed Inkstone",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party encounters a cursed relic of a failed scholar.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.bucketzombie"
+}

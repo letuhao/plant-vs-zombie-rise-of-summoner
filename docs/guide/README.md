@@ -77,13 +77,13 @@ Checklist of named features (Shipped / WIP / Vision). For **how each system work
 | Creature sheet | Full specimen panel — overview, progression, actions, gear | WIP | Creatures | [Creatures](creatures.md) |
 | Souls | Earn from play; spend to summon and bind | Shipped | HUD + altar | [Teach guide](site/mechanisms/souls.html) · [Creatures](creatures.md) |
 | Essence | Element-matched materials for fusion and some buildings | Shipped | Fusion / rift | [Teach guide](site/mechanisms/essence.html) · [Creatures](creatures.md) · [The rift](the-rift.md) |
-| Summoning altar | Spend souls for new demons; pity shown on the altar | Shipped | Summon / Demons | [Creatures](creatures.md) |
-| Pacts and loyalty | Bind demons to slots; neglect them and they refuse | Shipped | Pacts | [Creatures](creatures.md) |
+| Summoning altar | Spend souls for new creatures; pity shown on the altar | Shipped | Summon / Creatures | [Creatures](creatures.md) |
+| Pacts and loyalty | Bind creatures to slots; neglect them and they refuse | Shipped | Pacts | [Creatures](creatures.md) |
 | Tribute on pacts | Keep contracts paid; overdue tribute is leverage | Shipped | Pacts | [Creatures](creatures.md) |
 | Fusion | Merge specimens into stronger forms; discover recipes | Shipped | Fusion | [Creatures](creatures.md) |
-| Patron demon | One demon’s element colours the army | WIP | Patron choice | [Creatures](creatures.md) |
-| Wild joins | Demons that join without an altar pull | Shipped | Creatures / world | [Creatures](creatures.md) · [mechanisms/wild-joins.md](mechanisms/wild-joins.md) |
-| In-run capture | Weaken and catch demons during play | WIP | Lawn / delves | [Creatures](creatures.md) · [The lawn](the-lawn.md) |
+| Patron creature | One creature’s element colours the army | WIP | Patron choice | [Creatures](creatures.md) |
+| Wild joins | Creatures that join without an altar pull | Shipped | Creatures / world | [Creatures](creatures.md) · [mechanisms/wild-joins.md](mechanisms/wild-joins.md) |
+| In-run capture | Weaken and catch creatures during play | WIP | Lawn / delves | [Creatures](creatures.md) · [The lawn](the-lawn.md) |
 | Six elements + omni | Fire, ice, air, earth, light, dark — real matchups | Shipped | Combat everywhere | [Combat](combat.md) |
 | Shields, crit, resistance | Layered defence and hits that can fail or land hard | Shipped | Lawn and battles | [Combat](combat.md) |
 | Statuses | Butter, freeze, chill, poison, hypno, wither, contagions, and more | Shipped | Combat | [Combat](combat.md) |
@@ -95,7 +95,7 @@ Checklist of named features (Shipped / WIP / Vision). For **how each system work
 | Interactive battles | Turn-based fights you play yourself — initiative, reactions | WIP | Battle stage | [Combat](combat.md) · [Expeditions](expeditions.md) |
 | Live lawn mirror | Watch the 12×5 board in the browser while a match runs | Shipped | Lawn | [The lawn](the-lawn.md) |
 | Unit HUD on the lawn | Identity, shield, and statuses above each unit | Shipped | Lawn | [The lawn](the-lawn.md) |
-| Bound demons on the lawn | Deploy roster demons into a lawn run | Shipped | Lawn | [The lawn](the-lawn.md) |
+| Bound creatures on the lawn | Deploy roster creatures into a lawn run | Shipped | Lawn | [The lawn](the-lawn.md) |
 | Lawn as first core loop | First thing you play; feeds souls, XP, almanac, deploy | Shipped | Lawn | [The lawn](the-lawn.md) · [The loops](the-loops.md) |
 | Lawn blessing | A real lawn run charges stronger soul earn on web play | WIP | After a lawn run | [The lawn](the-lawn.md) |
 | Lawn trophies | Cosmetic prestige from lawn play — never stats | WIP | After lawn play | [The lawn](the-lawn.md) |
@@ -129,7 +129,7 @@ Checklist of named features (Shipped / WIP / Vision). For **how each system work
 | Passive trees | Spend souls into trees for identity and risk | Vision | Builds | [Relics and builds](relics-and-builds.md) |
 | Commanders | Choose who leads the next lawn run | WIP | Commanders | [Relics and builds](relics-and-builds.md) |
 | Commander auras | Side-wide presence from the leader you chose | WIP | Commanders | [Relics and builds](relics-and-builds.md) |
-| Type and specimen XP | Plants, zombies, and demons grow from work done | Shipped | Chronicle / roster | [Almanac](almanac.md) |
+| Type and specimen XP | Plants, zombies, and creatures grow from work done | Shipped | Chronicle / roster | [Almanac](almanac.md) |
 | Almanac dossiers | Meet it in play → it files itself | Shipped | Almanac | [Almanac](almanac.md) |
 | Chronicle | Run history, progression, lasting record | Shipped | Chronicle | [Almanac](almanac.md) |
 | New world — keep who you are | End a world and start another; roster and souls bank, loam and holdings do not | Shipped (fiction) | Prestige / new map | [The game](the-game.md) · [mechanisms/new-world-prestige.md](mechanisms/new-world-prestige.md) |

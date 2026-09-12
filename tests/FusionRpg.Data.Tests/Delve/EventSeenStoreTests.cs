@@ -110,12 +110,12 @@ public class EventSeenStoreTests : IDisposable
     {
         var delveId = CreateOneDelve(1, "domain.fire-shallow-001", "delve-mr-2", "corr-mr-2");
         _store.MarkRoom(delveId, "r0c0", visited: true, resolvedKind: "event",
-            eventId: "event.bargain-demon.allpeater-001", resolvedArchetypeId: "room.fight-none-001");
+            eventId: "event.bargain-creature.allpeater-001", resolvedArchetypeId: "room.fight-none-001");
 
         var room = _store.LoadDelveRooms(delveId).Single(r => r.SectorId == "r0c0");
         Assert.True(room.Visited);
         Assert.Equal("event", room.ResolvedKind);
-        Assert.Equal("event.bargain-demon.allpeater-001", room.EventId);
+        Assert.Equal("event.bargain-creature.allpeater-001", room.EventId);
         Assert.Equal("room.fight-none-001", room.ResolvedArchetypeId);
     }
 

@@ -2,10 +2,10 @@
 in the entire base-defense program.** Reuses three already-shipped, already-tested SDK pieces
 verbatim (Law 1 — no second implementation of any of them):
 
-- `seedsmith.adapters.demons.anchor.permute.order_for` — deterministic per-`(entity_id, field,
+- `seedsmith.adapters.creatures.anchor.permute.order_for` — deterministic per-`(entity_id, field,
   sample_index)` enum shuffling (`sampleIndex` INSIDE the seed, or three votes are one sample with
   extra steps).
-- `seedsmith.adapters.demons.anchor.vote.resolve_vote` / `resolve_set_vote` — majority-vote
+- `seedsmith.adapters.creatures.anchor.vote.resolve_vote` / `resolve_set_vote` — majority-vote
   resolution, `1-1-1` -> `unresolved`, never option one; the SET variant closes the exact
   "whole-value equality discards real per-member agreement" bug `[[affix-authoring-vote-bug]]`
   already found and fixed for a different pipeline.
@@ -23,8 +23,8 @@ import json
 from dataclasses import dataclass
 from typing import Any, Sequence
 
-from ..demons.anchor.permute import order_for
-from ..demons.anchor.vote import SetVoteResult, VoteResult, resolve_set_vote, resolve_vote
+from ..creatures.anchor.permute import order_for
+from ..creatures.anchor.vote import SetVoteResult, VoteResult, resolve_set_vote, resolve_vote
 from ...pipeline.llm_caller import LlmCallerConfig, call_model
 from .anchor.schema import ACQUISITION_PATH, DESCRIPTIONS, ROLE
 
@@ -158,7 +158,7 @@ class ConstrainedDecodingNotProven(Exception):
 
 def prove_constrained_decoding(config: LlmCallerConfig = LlmCallerConfig(), caller=call_model) -> dict:
     """One real call, with a HOSTILE prompt (asks for prose, a code fence, and an out-of-enum
-    value) and a real schema restricting the answer to a closed 2-value enum. Mirrors the demon
+    value) and a real schema restricting the answer to a closed 2-value enum. Mirrors the creature
     pipeline's own already-measured proof (2026-09-01, same default model) exactly, retargeted at
     this program's own `role` field. Returns the raw response and whether it parsed as valid,
     in-enum JSON — the caller (or the module's own `if __name__` block) decides what to do with a

@@ -25,7 +25,7 @@
       "id": "set.greengargantuar-001",
       "nameKey": "set.the-swarm-s-conduit",
       "name": "The Swarm's Conduit",
-      "themeKey": "demon.greengargantuar",
+      "themeKey": "creature.greengargantuar",
       "members": [
         {
           "role": "armament-primary",

@@ -810,7 +810,7 @@ Compose honesty: `FlatReplace` channels ship `composeKind` on the sheet **and** 
 
 ### 8.2 Bound UniqueActor Hot aptitude input (2026-09-12)
 
-**Bound UniqueActor** Hot aptitude allocation is **UniqueDemon-keyed** (`commander + UniqueDemon(instanceId)`), matching Server `UniqueActorHubCompose`. **Empire DemonType / species** allocation is for **empire generals** only. A Bound unique that falls through to species on the injector while the sheet uses UniqueDemon is an **out-of-order sole Hot compose** failure — dual resolve is a defect, not an optional lawn gap. See [combat-power-number-ideal.md](combat-power-number-ideal.md) (HF-lawn) and [aptitude-sheet/spec-unique-lawn-wire.md](aptitude-sheet/spec-unique-lawn-wire.md). Spawn ownership: `decisions.md` Demon progression source and spawn ownership (2026-09-08).
+**Bound UniqueActor** Hot aptitude allocation is **UniqueCreature-keyed** (`commander + UniqueCreature(instanceId)`), matching Server `UniqueActorHubCompose`. **Empire CreatureType / species** allocation is for **empire generals** only. A Bound unique that falls through to species on the injector while the sheet uses UniqueCreature is an **out-of-order sole Hot compose** failure — dual resolve is a defect, not an optional lawn gap. See [combat-power-number-ideal.md](combat-power-number-ideal.md) (HF-lawn) and [aptitude-sheet/spec-unique-lawn-wire.md](aptitude-sheet/spec-unique-lawn-wire.md). Spawn ownership: `decisions.md` Creature progression source and spawn ownership (2026-09-08).
 
 ### 8.3 One compose / dual-engine debt (2026-09-12)
 

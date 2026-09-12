@@ -25,7 +25,7 @@
       "id": "set.lilypad-001",
       "nameKey": "set.lotus-bloom-cultivation",
       "name": "Lotus Bloom Cultivation",
-      "themeKey": "demon.lilypad",
+      "themeKey": "creature.lilypad",
       "members": [
         {
           "role": "armament-primary",

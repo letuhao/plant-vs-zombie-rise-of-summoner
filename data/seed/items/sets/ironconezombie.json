@@ -25,7 +25,7 @@
       "id": "set.ironconezombie-001",
       "nameKey": "set.silver-grey-siphon",
       "name": "Silver-Grey Siphon",
-      "themeKey": "demon.ironconezombie",
+      "themeKey": "creature.ironconezombie",
       "members": [
         {
           "role": "armament-primary",

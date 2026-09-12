@@ -1,6 +1,6 @@
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Battle.Timeline;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Battle.Timeline;
@@ -54,9 +54,9 @@ public class TurnOrderRecordTests
     [Fact]
     public void AKnownSpeciesResolvesToItsRealDisplayNameNeverTheActorKey()
     {
-        DemonSpeciesCatalog.ConfigureFromCompiledDefault();
-        var realSpeciesId = DemonSpeciesCatalog.All[0].SpeciesId;
-        var realName = DemonSpeciesCatalog.All[0].Name;
+        CreatureSpeciesCatalog.ConfigureFromCompiledDefault();
+        var realSpeciesId = CreatureSpeciesCatalog.All[0].SpeciesId;
+        var realName = CreatureSpeciesCatalog.All[0].Name;
 
         var setup = new BattleSetup
         {

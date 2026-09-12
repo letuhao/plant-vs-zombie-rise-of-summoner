@@ -25,7 +25,7 @@
       "id": "set.peafume-001",
       "nameKey": "set.pea-spore-launcher",
       "name": "Pea Spore Launcher",
-      "themeKey": "demon.peafume",
+      "themeKey": "creature.peafume",
       "members": [
         {
           "role": "armament-primary",

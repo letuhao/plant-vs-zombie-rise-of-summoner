@@ -25,7 +25,7 @@
       "id": "set.ironcorn-001",
       "nameKey": "set.maize-pellet-spitter",
       "name": "Maize Pellet Spitter",
-      "themeKey": "demon.ironcorn",
+      "themeKey": "creature.ironcorn",
       "members": [
         {
           "role": "armament-primary",

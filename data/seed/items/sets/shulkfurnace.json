@@ -25,7 +25,7 @@
       "id": "set.shulkfurnace-001",
       "nameKey": "set.steel-leaf-furnace",
       "name": "Steel Leaf Furnace",
-      "themeKey": "demon.shulkfurnace",
+      "themeKey": "creature.shulkfurnace",
       "members": [
         {
           "role": "armament-primary",

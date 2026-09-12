@@ -25,7 +25,7 @@
       "id": "set.twinshulk-001",
       "nameKey": "set.twin-steel-leaf",
       "name": "Twin Steel Leaf",
-      "themeKey": "demon.twinshulk",
+      "themeKey": "creature.twinshulk",
       "members": [
         {
           "role": "armament-primary",

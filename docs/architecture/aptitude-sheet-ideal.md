@@ -3,12 +3,12 @@
 **Status:** idea **enriched** (E1–E8); map/specs **synced + strengthened S1–S10** ([aptitude-sheet-map.md](aptitude-sheet-map.md)).
 Do not implement from the ideal alone — `/plan` next.  
 **Program id:** `aptitude-sheet` (ActorSheet **Aptitudes** tab under `gui-lego` + `actor-sheet` / class-system;
-shared console also hosts **empire species-build** for general demons).  
+shared console also hosts **empire species-build** for general creatures).  
 **Procedure:** [idea-ui-phase.md](idea-ui-phase.md) → amend `/spec` → `/plan`.  
 **Owner briefs:** (1) surface is low/cheap — no VFX, thin info, no icons → multi-piece frame;
 (2) **commander-only allocate is a critical defect** — Aptitudes must support **every UniqueActor**,
 not only the commander pool;
-(3) **shared aptitude panel with empire DemonType / species-build** — lawn general demons fall back
+(3) **shared aptitude panel with empire CreatureType / species-build** — lawn general creatures fall back
 to per-player-per-species allocation and need the same posture/tile/inspect grammar (owner, 2026-09-10);
 (4) **allocate chrome is incomplete** — remaining points, Confirm/Cancel, auto-assign;
 (5) **build presets need a serious own container + BE** — open from Aptitudes, create/setup,
@@ -34,13 +34,13 @@ select, activate; **distribution chart**; **fixed + percent min/max**; **species
 | Loop / place | Role |
 |---|---|
 | **Spine A — Level up and power** | Free-build aptitude points are how power spreads without a class |
-| **Place — Sanctum / lawn (ActorSheet)** | Band-2 sheet: UniqueActor → UniqueDemon; commander role → commander pool |
-| **Place — Empire / species (Pacts layer)** | Same console bound to **speciesId**: empire species-build for **all general demons** of that species on lawn and later world map |
+| **Place — Sanctum / lawn (ActorSheet)** | Band-2 sheet: UniqueActor → UniqueCreature; commander role → commander pool |
+| **Place — Empire / species (Pacts layer)** | Same console bound to **speciesId**: empire species-build for **all general creatures** of that species on lawn and later world map |
 
 This is **not** a new top-level route. It is one **aptitudes-console** recipe mounted by thin hosts
 (role-keyed ActorSheet tab vs Pacts/`AptitudesLayer` species host), plus the allocate **and lawn apply**
 seams those hosts need — so the UI stops lying that only the commander pool is real, stops shipping a
-second god panel for species, and does not “save UniqueDemon” while the lawn still ignores it.
+second god panel for species, and does not “save UniqueCreature” while the lawn still ignores it.
 
 ---
 
@@ -50,16 +50,16 @@ second god panel for species, and does not “save UniqueDemon” while the lawn
    (`aptitude-catalog`, `aptitudes.v*.json`, `/api/aptitudes/*`, `AllocationScope`). They are never
    blocked by Plant or Zombie Unity fields. “The lawn can’t show Might” is the wrong frame.
 2. **Four allocation scopes sum — commander is not the only spend surface.** Class-system lock:
-   an actor’s allocation is **commander → DemonType → Aspect → UniqueDemon**, weighted commander
+   an actor’s allocation is **commander → CreatureType → Aspect → UniqueCreature**, weighted commander
    smallest / unique largest (`decisions.md` Class system; `class-system-ideal.md` §7c). A UniqueActor
    sheet that can only edit commander shares is **product-false**, not “v1 honesty.”
 3. **Progression source isolation (decisions 2026-09-08).** Unique specimens and Commanders **never**
-   receive empire species fallback. General lawn demons with `EmpireGeneral` consume
+   receive empire species fallback. General lawn creatures with `EmpireGeneral` consume
    `EffectiveSpeciesAllocation(playerId, speciesId)`. The shared panel must not blur those writes.
 4. **One presentation console, three host bindings — not one write API.** Shared Lego pieces; scope
    mode chooses key + read/write seam. Species writes stay on **species-build respec** (priced);
-   UniqueDemon on specimen allocate; Commander on existing roster-wide endpoints.
-5. **Allocate “works” only if the right runtime applies it.** Server Hub/battle consuming UniqueDemon
+   UniqueCreature on specimen allocate; Commander on existing roster-wide endpoints.
+5. **Allocate “works” only if the right runtime applies it.** Server Hub/battle consuming UniqueCreature
    does not prove the Injector lawn Bound path does. Mode A Done includes lawn wire.
 6. **A game is a stage with layers, not a document with pages (GG-1).** Aptitudes open as a layer /
    sheet over the stage. Do not invent a sibling `/aptitudes` product page to “fix” the tab.
@@ -73,7 +73,7 @@ second god panel for species, and does not “save UniqueDemon” while the lawn
    Fat chunk → split; do not ban libs.
 10. **No engine vocabulary on the player surface.** No raw posture ids (`force`), no channel ids,
     no “fed by combat.power.fire” as product chrome — fiction readings + catalog displayNames
-    (“Sunflower’s build”, not `AllocationScope.DemonType`).
+    (“Sunflower’s build”, not `AllocationScope.CreatureType`).
 11. **HTML draft fidelity.** Author `docs/design/gui-lego/pieces/*.html` + recipe before treating
     React as done. Dual hosts (`AptitudesTab`, `AptitudesPage`, `SpeciesBuildPanel`) collapse to
     **one** composition with different bindings.
@@ -86,8 +86,8 @@ End-to-end truth for player allocate — not “does a store row exist.”
 
 | Mode | BE player API | FE host today | Runtime consumer | Bucket |
 |---|---|---|---|---|
-| **A UniqueDemon** | **Missing** GET/POST | ActorSheet `AptitudesTab` still commander (`AptitudesTab.tsx`; ignores `instanceId`) | Server Hub/battle **yes** (`UniqueActorHubCompose.cs` ~43–60; `WebMatchService` unique channel mods); **Injector lawn no** (`RpgClient.RefreshCommanderAllocationAsync` ~401–441; `CheatState.SpeciesAllocation` = commander+species only) | **Wiring gap / critical** (API + FE + lawn wire) |
-| **B DemonType** | **Built** — `GET /api/aptitudes/species/{playerId}/{speciesId}` (effective + baseline); write `POST /api/species-build/respec` + price GET (`AptitudeEndpoints.cs` ~67–73; `SpeciesBuildEndpoints.cs`) | `SpeciesBuildPanel` / `useSpeciesBuild` — parallel god UI; also via `AptitudesLayer` from Pacts | Injector + lawn generals **yes** | BE **Built**; FE **Built, defective** presentation |
+| **A UniqueCreature** | **Missing** GET/POST | ActorSheet `AptitudesTab` still commander (`AptitudesTab.tsx`; ignores `instanceId`) | Server Hub/battle **yes** (`UniqueActorHubCompose.cs` ~43–60; `WebMatchService` unique channel mods); **Injector lawn no** (`RpgClient.RefreshCommanderAllocationAsync` ~401–441; `CheatState.SpeciesAllocation` = commander+species only) | **Wiring gap / critical** (API + FE + lawn wire) |
+| **B CreatureType** | **Built** — `GET /api/aptitudes/species/{playerId}/{speciesId}` (effective + baseline); write `POST /api/species-build/respec` + price GET (`AptitudeEndpoints.cs` ~67–73; `SpeciesBuildEndpoints.cs`) | `SpeciesBuildPanel` / `useSpeciesBuild` — parallel god UI; also via `AptitudesLayer` from Pacts | Injector + lawn generals **yes** | BE **Built**; FE **Built, defective** presentation |
 | **C Commander** | **Built** — `GET /api/aptitudes/{playerId}`; `POST /api/aptitudes/allocate` hardcoded Commander | AptitudesTab (wrong default for specimens), AptitudesPage, AptitudesLayer commander tab | Injector + Hub **yes** | **Built**; **Built, defective** as UniqueActor sheet SSOT |
 
 ```text
@@ -95,8 +95,8 @@ FE today                    BE today                         Runtime today
 ─────────                   ────────                         ─────────────
 AptitudesTab ─────────────► GET/POST Commander ────────────► Injector Cmd+Species
 SpeciesBuildPanel ────────► Species GET + respec ──────────► Injector Cmd+Species
-                            UniqueDemon GET/POST MISSING ──► Server Hub Cmd+Unique
-                                                             Injector Bound unique: NO UniqueDemon
+                            UniqueCreature GET/POST MISSING ──► Server Hub Cmd+Unique
+                                                             Injector Bound unique: NO UniqueCreature
 ```
 
 **SignalR today:** `AptitudesUpdated` payload is `{ playerId }` only
@@ -107,7 +107,7 @@ speciesAptitudes queries (`hub-provider.tsx` ~144–150) — no unique/specimen 
 levelled species (`AptitudeEndpoints.ProjectState` ~101–110), but FE `AptitudesState` omits that
 wire field (`types.ts` ~449–457) — type/wiring gap for Mode B consumers that might share the bus.
 
-**No player GET returns UniqueDemon shares today** — not sheet DTO, not commander GET, not species GET.
+**No player GET returns UniqueCreature shares today** — not sheet DTO, not commander GET, not species GET.
 
 ---
 
@@ -115,11 +115,11 @@ wire field (`types.ts` ~449–457) — type/wiring gap for Mode B consumers that
 
 ### D1 — Mode A is free-build, not species-effective
 
-Species GET returns **effective** shares (persisted DemonType override if nonzero total, else computed
+Species GET returns **effective** shares (persisted CreatureType override if nonzero total, else computed
 plan baseline via `EffectiveSpeciesAllocation`). Unique Hub uses **raw**
-`LoadAllocation(UniqueDemon, instanceId)` — empty means **no unique contribution** (commander only).
+`LoadAllocation(UniqueCreature, instanceId)` — empty means **no unique contribution** (commander only).
 
-`UniqueDemonAllocation.Baseline` exists for **passive-tree point gates** (specimen level → budget),
+`UniqueCreatureAllocation.Baseline` exists for **passive-tree point gates** (specimen level → budget),
 **not** to auto-fill combat allocation. Mode A GET = **persisted shares + specimen budget / leftover /
 specimenLevel (and Θ as needed)**. Do **not** invent `EffectiveUnique` / Hub auto-baseline without a
 separate ADR that changes Hub math.
@@ -128,24 +128,24 @@ separate ADR that changes Hub math.
 
 | ActorPanel role | Aptitudes mode |
 |---|---|
-| UniqueActor / creature (`instanceId` present) | **Mode A** UniqueDemon |
+| UniqueActor / creature (`instanceId` present) | **Mode A** UniqueCreature |
 | Commander (`role === "commander"`) | **Mode C** commander allocate |
 
-`ActorPanel.tsx` already distinguishes commander vs `instanceId` (~74–76). Demanding UniqueDemon on
+`ActorPanel.tsx` already distinguishes commander vs `instanceId` (~74–76). Demanding UniqueCreature on
 Dave’s sheet is wrong. Mode C remains legal on the **commander** sheet and on Pacts; illegal as the
 default for a UniqueActor Aptitudes tab.
 
 ### D3 — “Allocate works” includes lawn apply for Bound uniques
 
 Shipping Mode A API+FE alone still leaves lawn Bound specimens on Injector `SpeciesAllocationSource`
-(commander+species). Server Hub proving UniqueDemon for sheet/battle is **not** lawn proof.
+(commander+species). Server Hub proving UniqueCreature for sheet/battle is **not** lawn proof.
 
-**Amended 2026-09-12:** until Bound Hot uses UniqueDemon, this is an **FSM / ActorHub split** —
+**Amended 2026-09-12:** until Bound Hot uses UniqueCreature, this is an **FSM / ActorHub split** —
 same Hub consumers, different aptitude input — not “lawn unfinished while sheet Done.” Dual resolve
 is out of order under the sole Hot compose gate. Vocabulary for combat power vs level/Θ:
 [combat-power-number-ideal.md](combat-power-number-ideal.md) (HF-lawn).
 
-**Done gate:** module **`aptitude-unique-lawn-wire`** — Injector cache + resolve UniqueDemon per Bound
+**Done gate:** module **`aptitude-unique-lawn-wire`** — Injector cache + resolve UniqueCreature per Bound
 `instanceId` on aptitude reload / bind (same reload cadence as commander/species). In-program; not a
 silent “Hub already does it.”
 
@@ -153,7 +153,7 @@ silent “Hub already does it.”
 
 | Mode | Write |
 |---|---|
-| A | UniqueDemon allocate POST — never species |
+| A | UniqueCreature allocate POST — never species |
 | B | `POST /api/species-build/respec` only — **never** reopen free `/api/aptitudes/species/allocate` |
 | C | Existing commander allocate |
 
@@ -166,8 +166,8 @@ First `/spec` wave must overturn (not leave contradicting Done):
 
 | Doc | Stale claim |
 |---|---|
-| [actor-sheet/spec-aptitudes-tab.md](actor-sheet/spec-aptitudes-tab.md) | “v1 allocate = commander scope”; UniqueDemon out of scope |
-| [class-system/spec-aptitude-allocation-surface.md](class-system/spec-aptitude-allocation-surface.md) | commander-only; UniqueDemon waits on specimen picker |
+| [actor-sheet/spec-aptitudes-tab.md](actor-sheet/spec-aptitudes-tab.md) | “v1 allocate = commander scope”; UniqueCreature out of scope |
+| [class-system/spec-aptitude-allocation-surface.md](class-system/spec-aptitude-allocation-surface.md) | commander-only; UniqueCreature waits on specimen picker |
 | [guide/mechanisms/aptitudes.md](../guide/mechanisms/aptitudes.md) | commander-scope live; other scopes still ahead |
 
 ---
@@ -213,7 +213,7 @@ Do **not** nest a band-3 dialog for Confirm (GG-63). In-console strip + optional
 |---|---|
 | **Auto-assign** | Fills the **draft** only (never a silent POST). Rules: Even · Posture lean · **Active preset** · **Species favour** (Mode A/B, D14). Then player uses **Confirm**. Overspend refused. |
 | **Apply to draft** (preset console) | Loads materialized shares into draft only; **Confirm** on aptitudes console finishes |
-| **Activate** (preset console) | Sets **active** for this binding **and** commits live allocation immediately: Mode A → UniqueDemon POST; Mode C → commander POST; Mode B → **priced** `species-build/respec` with **price shown before Activate** (same law as Confirm). Aptitudes Confirm strip is **not** used for this path |
+| **Activate** (preset console) | Sets **active** for this binding **and** commits live allocation immediately: Mode A → UniqueCreature POST; Mode C → commander POST; Mode B → **priced** `species-build/respec` with **price shown before Activate** (same law as Confirm). Aptitudes Confirm strip is **not** used for this path |
 
 No new private power curve — shares still under PointBudget after D13 materialize.
 
@@ -223,7 +223,7 @@ No new private power curve — shares still under PointBudget after D13 material
 |---|---|---|
 | **E1** | Activate commits vs Confirm strip | Split verbs — see D8 rewrite |
 | **E2** | D13 clamps can break sum-to-budget | **Leftover unspent is legal**; no silent redistribute into other aptitudes. Chart/preview shows leftover. Refuse only when one aptitude has `lo > hi` |
-| **E3** | D1 empty UniqueDemon vs D14 favour | Favour is **New-preset / Auto-assign seed only** — never Hub EffectiveUnique / never auto-fill combat |
+| **E3** | D1 empty UniqueCreature vs D14 favour | Favour is **New-preset / Auto-assign seed only** — never Hub EffectiveUnique / never auto-fill combat |
 | **E4** | D12 chart grammar open | Lock **recharts donut** for 12 aptitudes (posture theme colors as segment groups). Optional small posture stacked bar only — not pie/radar as peers |
 | **E5** | Template sum underspecified | On Save: target **permille must sum to exactly 1000**. Abs min/max are constraints at materialize — not a second sum SSOT |
 | **E6** | Active + level-up | Active = remembered intent; **no auto rematerialize on level-up** in Wave 1. Player Auto-assign / re-Activate. Defer “keep aligned” |
@@ -247,7 +247,7 @@ player-preset format.
 ##### Preset product shape (ideal lock)
 
 **Player language:** “Build presets” on the Aptitudes screen — save a lean, open the library, pick
-one, activate it on **this** demon / commander / species binding.
+one, activate it on **this** creature / commander / species binding.
 
 **Container:** `aptitude-preset-console` — nested layer over ActorSheet / AptitudesLayer (GG-1).
 Depth: stage → sheet/layer → preset console ≤ **3** (GG-10). Not a sibling `/presets` route.
@@ -317,19 +317,19 @@ Editor: dual fields for fix number and/or percent; labels like “Might 120 · 1
 |---|---|---|
 | Classified favour → plan | `SpeciesBuildPlanner.cs`; anchors `AptitudePrimary`/`Secondary` | **Built** |
 | Shipped vectors | `_species-build-plan.json`; `SpeciesBuildPlanCatalog.SharesFor` (`Program.cs` ~137–144) | **Built** |
-| Species/Unique baseline helpers | `EffectiveSpeciesAllocation`; `UniqueDemonAllocation.Baseline` | **Built** (gates / species path — **not** Mode A Hub fill) |
+| Species/Unique baseline helpers | `EffectiveSpeciesAllocation`; `UniqueCreatureAllocation.Baseline` | **Built** (gates / species path — **not** Mode A Hub fill) |
 | Preset UI default = favour | — | **Wiring gap** |
 
 **Lock — default seed (New preset / Auto-assign “Species favour”):**
 
 | Binding | Default template |
 |---|---|
-| Mode A UniqueDemon (`speciesId` known) | `SpeciesBuildPlanCatalog.SharesFor(speciesId)` — fiction “Species favour” |
-| Mode B DemonType | Same plan — shipped favour |
+| Mode A UniqueCreature (`speciesId` known) | `SpeciesBuildPlanCatalog.SharesFor(speciesId)` — fiction “Species favour” |
+| Mode B CreatureType | Same plan — shipped favour |
 | Mode C / no species | System **Even** — never invent a species favour |
 
 **E3:** Favour seeds the **editor / Auto-assign draft** only. It does **not** make UniqueActor Hub
-auto-apply plan shares (D1 free-build: empty UniqueDemon until player spends / Activates).
+auto-apply plan shares (D1 free-build: empty UniqueCreature until player spends / Activates).
 Copy-on-edit into player library; never mutate the generated plan file from UI.
 
 ##### Preset BE (serious — Real gap today)
@@ -386,18 +386,18 @@ Amended: pieces · surface-vm · host-role-gate · species-host.
 
 1. **Wrong sheet scope** — UniqueActor Aptitudes edits commander only.
 2. **Second species UI** — generals’ empire build lives in a mute parallel panel.
-3. **Save without lawn apply** — UniqueDemon can be persisted and shown on Server Hub while Injector
+3. **Save without lawn apply** — UniqueCreature can be persisted and shown on Server Hub while Injector
    Bound uniques still resolve commander+species only.
 
 ### Architecture audit (what is true today)
 
 | Layer | What exists | Verdict |
 |---|---|---|
-| **Math / SSOT** | `AllocationScope { Commander, DemonType, Aspect, UniqueDemon }` (`AptitudeAllocation.cs`); PointBudget per scope; unique largest weight | **Built** |
-| **Persistence** | `LoadAllocation` / `SaveAllocation`; UniqueDemon keyed by `instanceId` | **Built** |
-| **Unique budget helper** | `UniqueDemonAllocation` / `PointBudget.UniqueDemonSourceFromLevel` | **Built** (gates / budget; not Hub auto-fill — D1) |
-| **Hub / sheet / battle** | `UniqueActorHubCompose` commander + UniqueDemon; never DemonType on unique path | **Built** |
-| **Injector lawn aptitude** | Commander + species only (`RpgClient` ~401–441; `CheatState.SpeciesAllocation`) | **Wiring gap** for Bound UniqueDemon — D3 |
+| **Math / SSOT** | `AllocationScope { Commander, CreatureType, Aspect, UniqueCreature }` (`AptitudeAllocation.cs`); PointBudget per scope; unique largest weight | **Built** |
+| **Persistence** | `LoadAllocation` / `SaveAllocation`; UniqueCreature keyed by `instanceId` | **Built** |
+| **Unique budget helper** | `UniqueCreatureAllocation` / `PointBudget.UniqueCreatureSourceFromLevel` | **Built** (gates / budget; not Hub auto-fill — D1) |
+| **Hub / sheet / battle** | `UniqueActorHubCompose` commander + UniqueCreature; never CreatureType on unique path | **Built** |
+| **Injector lawn aptitude** | Commander + species only (`RpgClient` ~401–441; `CheatState.SpeciesAllocation`) | **Wiring gap** for Bound UniqueCreature — D3 |
 | **Empire general fallback** | `EmpireGeneral` → `EffectiveSpeciesAllocation` | **Built** |
 | **Player write (commander)** | `POST /api/aptitudes/allocate` → Commander | **Built**; defective as UniqueActor default |
 | **Player read (commander)** | `GET /api/aptitudes/{playerId}` (+ nested effective species map) | **Built** |
@@ -409,24 +409,24 @@ Amended: pieces · surface-vm · host-role-gate · species-host.
 
 ### Proposed fix (ideal lock — for `/spec` to detail)
 
-**One `aptitudes-console` with scope modes**, role-keyed hosts, scoped SignalR, and lawn UniqueDemon wire.
+**One `aptitudes-console` with scope modes**, role-keyed hosts, scoped SignalR, and lawn UniqueCreature wire.
 
 #### Mode A — Specimen (UniqueActor / creature sheet)
 
-**Edits UniqueDemon for the selected `instanceId`.** Free-build (D1). Not used for commander role (D2).
+**Edits UniqueCreature for the selected `instanceId`.** Free-build (D1). Not used for commander role (D2).
 
 | Seam | Proposed duty |
 |---|---|
 | **GET** | `GET /api/aptitudes/unique/{instanceId}` → **persisted** shares + budget + leftover + specimenLevel (Θ as needed). No effective-baseline fill |
-| **POST** | `POST /api/aptitudes/unique/allocate` `{ instanceId, shares }` → `SaveAllocation(UniqueDemon, instanceId, …)`; 409 overspend never clamps |
+| **POST** | `POST /api/aptitudes/unique/allocate` `{ instanceId, shares }` → `SaveAllocation(UniqueCreature, instanceId, …)`; 409 overspend never clamps |
 | **SignalR** | `scope: unique` + `instanceId` + `playerId` |
 | **FE host** | `AptitudesTab` when ActorPanel has creature `instanceId`; refuse allocate with no specimen |
-| **`aptitude-scope-chip`** | Fiction: **this demon’s build**. Optional read-only commander contribution (A5b) |
-| **`leftover-gauge`** | UniqueDemon leftover for this specimen |
-| **Lawn wire** | `aptitude-unique-lawn-wire` — Injector applies UniqueDemon for Bound `instanceId` (D3) |
-| **Must not** | Load/write DemonType as this specimen’s spend; invent EffectiveUnique without ADR |
+| **`aptitude-scope-chip`** | Fiction: **this creature’s build**. Optional read-only commander contribution (A5b) |
+| **`leftover-gauge`** | UniqueCreature leftover for this specimen |
+| **Lawn wire** | `aptitude-unique-lawn-wire` — Injector applies UniqueCreature for Bound `instanceId` (D3) |
+| **Must not** | Load/write CreatureType as this specimen’s spend; invent EffectiveUnique without ADR |
 
-#### Mode B — Species (empire / general demons)
+#### Mode B — Species (empire / general creatures)
 
 **Same pieces, keyed by `speciesId`.** BE already Built; presentation collapses onto the console.
 
@@ -438,7 +438,7 @@ Amended: pieces · surface-vm · host-role-gate · species-host.
 | **FE host** | **Locked:** collapse `SpeciesBuildPanel` into shared console under existing **Pacts → `AptitudesLayer`** door (`PactsLayer.tsx` already mounts the layer with `speciesId`). Lawn species glance = Wave 2 optional, not first door |
 | **`aptitude-scope-chip`** | Fiction: **“{SpeciesName}’s build”** |
 | **Species-only chrome** | Baseline vs override, respec **price before confirm**, revert-to-shipped **free** |
-| **`leftover-gauge`** | DemonType leftover from species level / PointBudget |
+| **`leftover-gauge`** | CreatureType leftover from species level / PointBudget |
 
 #### Mode C — Commander (commander sheet + Pacts; not UniqueActor default)
 
@@ -454,14 +454,14 @@ Amended: pieces · surface-vm · host-role-gate · species-host.
 
 | Reject | Why |
 |---|---|
-| Keep commander-only “until UniqueDemon later” | Critical defect; Hub already sums UniqueDemon |
+| Keep commander-only “until UniqueCreature later” | Critical defect; Hub already sums UniqueCreature |
 | API+FE Mode A without lawn wire | Lie #3 — save without lawn apply (D3) |
 | EffectiveUnique / Hub auto-baseline | Changes combat math; needs ADR (D1) |
-| UniqueDemon allocate on commander sheet | Role gate (D2) |
+| UniqueCreature allocate on commander sheet | Role gate (D2) |
 | Edit all four scopes on one board | Noise; Aspect blocked; modes exclusive per host |
-| DemonType write on UniqueActor tab | Isolation lock |
-| Infer UniqueDemon from typeId / speciesId | Decisions forbid type→progression inference |
-| FE-only fake specimen shares | Must hit `SaveAllocation(UniqueDemon, instanceId)` |
+| CreatureType write on UniqueActor tab | Isolation lock |
+| Infer UniqueCreature from typeId / speciesId | Decisions forbid type→progression inference |
+| FE-only fake specimen shares | Must hit `SaveAllocation(UniqueCreature, instanceId)` |
 | Second god TSX for species forever | Shared panel; BE ready |
 | Reopen free species allocate POST | Bypasses respec pricing |
 | Thin SignalR `{ playerId }` forever | Dual/triple hosts need scope+key (D4) |
@@ -470,10 +470,10 @@ Amended: pieces · surface-vm · host-role-gate · species-host.
 
 ## What this is (player language)
 
-When you open **Aptitudes** on a UniqueActor, you shape **that demon’s** free-build: three
-postures, twelve named aptitudes, leftover UniqueDemon points, inspect fiction — with optional
+When you open **Aptitudes** on a UniqueActor, you shape **that creature’s** free-build: three
+postures, twelve named aptitudes, leftover UniqueCreature points, inspect fiction — with optional
 honesty that a small commander-wide allocation still adds on top. Spending those points must also
-matter when that demon is Bound on the lawn.
+matter when that creature is Bound on the lawn.
 
 When you open **Aptitudes** for a **species** (from Pacts / species build), you see and can override
 **that species’ empire build** — the same board language — knowing every lawn general of that
@@ -494,8 +494,8 @@ save that the lawn ignores.
 | Finding | Evidence |
 |---|---|
 | Four-scope enum + PointBudget | `AptitudeAllocation.cs`; tuning `aptitudes.v8.json` |
-| UniqueDemon persist + budget helper | store; `UniqueDemonAllocation.cs` (D1: not Hub auto-fill) |
-| Hub/battle sums commander + UniqueDemon | `UniqueActorHubCompose.cs` ~42–60 |
+| UniqueCreature persist + budget helper | store; `UniqueCreatureAllocation.cs` (D1: not Hub auto-fill) |
+| Hub/battle sums commander + UniqueCreature | `UniqueActorHubCompose.cs` ~42–60 |
 | Empire general → species allocation on lawn | `spec-general-empire-fallback.md`; injector species cache |
 | Commander allocate GET/POST + 409 | `AptitudeEndpoints.cs` ~26–58, 95–121 |
 | Species GET + respec POST/price | `AptitudeEndpoints.cs` ~67–73; `SpeciesBuildEndpoints.cs` |
@@ -511,9 +511,9 @@ save that the lawn ignores.
 
 | Finding | Evidence | Note |
 |---|---|---|
-| **UniqueDemon player GET/POST missing** | No `/api/aptitudes/unique*` | Critical — Mode A API |
+| **UniqueCreature player GET/POST missing** | No `/api/aptitudes/unique*` | Critical — Mode A API |
 | ActorSheet creature tab → commander hooks | `AptitudesTab.tsx` | Wire Mode A; commander role → Mode C |
-| **Injector Bound unique ignores UniqueDemon** | `RpgClient` ~401–441; `CheatState.SpeciesAllocation` | **`aptitude-unique-lawn-wire` Done gate** |
+| **Injector Bound unique ignores UniqueCreature** | `RpgClient` ~401–441; `CheatState.SpeciesAllocation` | **`aptitude-unique-lawn-wire` Done gate** |
 | Species FE second panel | `SpeciesBuildPanel` vs tab | Collapse onto console Mode B via AptitudesLayer |
 | FE `AptitudesState` omits nested species map | `types.ts` ~449–457 | Bus honesty for Mode B |
 | SignalR payload thin | `{ playerId }` only | D4 — scope + key |
@@ -529,7 +529,7 @@ save that the lawn ignores.
 | Per-posture theme packs + VFX | `bucket-aptitude.json` vfx null |
 | RecipeMount thin hosts | god compositions |
 | Species-mode Lego chrome (baseline / price / revert) | must land as piece slots |
-| UniqueDemon allocate API + FE + lawn wire | Critical defects above |
+| UniqueCreature allocate API + FE + lawn wire | Critical defects above |
 | **Aptitude build-preset library + activate API** | No store/endpoints today | **D9** |
 | **`aptitude-preset-console` gallery/editor** | No recipe/pieces | **D9** |
 | **`preset-distribution-chart`** | — | **D12** |
@@ -555,7 +555,7 @@ save that the lawn ignores.
 |---|---|---|---|
 | **0** | **Commander-only — can’t build UniqueActors** | `unique-allocate` (map id; ideal alias `aptitude-unique-allocate`) + FE draft keyed by `instanceId` + scope chip + role gate | **Wiring gap / critical** |
 | **0b** | **Generals / species build is a second mute panel** | `aptitudes-console` Mode B + collapse `SpeciesBuildPanel` under Pacts/`AptitudesLayer` + respec chrome | **Wiring + presentation** (BE Built) |
-| **0c** | **Saved UniqueDemon ignored on lawn Bound** | `aptitude-unique-lawn-wire` (Injector cache/resolve per Bound `instanceId`) | **Wiring gap / critical** |
+| **0c** | **Saved UniqueCreature ignored on lawn Bound** | `aptitude-unique-lawn-wire` (Injector cache/resolve per Bound `instanceId`) | **Wiring gap / critical** |
 | **8** | Can’t clearly distribute | `aptitude-tile` harden + Mode A wire | Built, defective |
 | **9** | Remaining points invisible | `leftover-gauge` in console (**D6**) | Wiring / Built, defective |
 | **10** | No Confirm/Cancel on screen | `allocate-decision-strip` (**D7**, draft path **E1**) | Wiring / Built, defective |
@@ -606,7 +606,7 @@ chip row. Full synergy Vision stays out.
 
 ## The shape — chosen frame (multi-piece, unique designs)
 
-**Chosen:** `aptitudes-console` (modes A/B/C) + **lawn UniqueDemon wire** + **`aptitude-preset-console`**
+**Chosen:** `aptitudes-console` (modes A/B/C) + **lawn UniqueCreature wire** + **`aptitude-preset-console`**
 (own nested container + BE).  
 Rejected: restyle-only; thin preset chip bar as sole preset UI; Vision full synergy inside this
 program; silent auto-POST; footer-only leftover.
@@ -644,8 +644,8 @@ program; silent auto-POST; footer-only leftover.
 | **`species-build-chrome`** (Mode B) | Baseline vs override, price chip, free revert | Species-build tunables |
 | **`posture-balance`** (optional) | Points per posture on this binding | recharts; deferred OK |
 | **`aptitudes-layout`** | Landmarks / no surplus scroll | Structural CSS |
-| **`aptitude-unique-allocate`** | GET/POST UniqueDemon by `instanceId` | Map id **`unique-allocate`** (S9) — Server + FE Done gate |
-| **`aptitude-unique-lawn-wire`** | Injector Bound UniqueDemon apply | Map id **`unique-lawn-wire`** (S9) — unique GET only (S4) |
+| **`aptitude-unique-allocate`** | GET/POST UniqueCreature by `instanceId` | Map id **`unique-allocate`** (S9) — Server + FE Done gate |
+| **`aptitude-unique-lawn-wire`** | Injector Bound UniqueCreature apply | Map id **`unique-lawn-wire`** (S9) — unique GET only (S4) |
 | **`aptitude-species-host`** | Thin Mode B mount; retire parallel panel chrome | Map id **`species-host`** |
 
 **Rejected shapes**
@@ -657,7 +657,7 @@ program; silent auto-POST; footer-only leftover.
 | Icons-only tiles | Owlcat failure |
 | Commander-only UniqueActor allocate | **Critical defect** |
 | Four-scope write board on one tab | Aspect blocked; modes exclusive |
-| DemonType on UniqueActor tab | Isolation lock |
+| CreatureType on UniqueActor tab | Isolation lock |
 | Keep `SpeciesBuildPanel` forever-separate | Owner: shared panel |
 | Mode A without lawn wire | Lie #3 (D3) |
 | Footer-only leftover / Confirm | Owner can’t find remaining points or Confirm (**D6/D7**) |
@@ -678,7 +678,7 @@ program; silent auto-POST; footer-only leftover.
 | DisplayName, role, reading, **icon**, posture | `aptitude-catalog.v{n}.json` — add icon |
 | Posture titles | Catalog / locale — not raw `force` |
 | Paint / VFX | `themes/packs/posture-*.json` |
-| UniqueDemon budget from specimen level | `PointBudget.UniqueDemonSourceFromLevel` |
+| UniqueCreature budget from specimen level | `PointBudget.UniqueCreatureSourceFromLevel` |
 | Species respec price / decay | `data/tuning/species-build.v{n}.json` (unchanged ownership) |
 | Soft max presets per player | `data/tuning/aptitudes.v{n}.json` (or aptitude-presets tuning) |
 | Default / soft abs max per aptitude (e.g. 1000) | Same tuning — balance surface |
@@ -699,7 +699,7 @@ species favour is **read**, never rewritten by player save.
 - Eighth rail entry dedicated only to Aptitudes.
 - Exact lucide keys per aptitude.
 - Whether commander contribution readout is a chip line or inspect footnote (spec chooses).
-- Changing Hub to auto-apply UniqueDemon baseline (requires ADR — D1).
+- Changing Hub to auto-apply UniqueCreature baseline (requires ADR — D1).
 - Full synergy **build presets** (patron + relics + aptitudes + field) — Vision, other program.
 - Exact abs max tunable numbers beyond “lives in tuning / preset policy” (E8).
 - Exact system seed preset names beyond Even / three posture leans / Species favour.
@@ -719,14 +719,14 @@ leftover legal after D13 (E2/A18); donut chart (E4/A15); favour seed-only (E3/A1
 | **A2** | Three **posture theme packs** with unique VFX? | **Yes** |
 | **A3** | Inspect shows **fed family displayNames** in Wave 1? | Yes |
 | **A4** | Collapse `AptitudesPage` / Layer into the same recipe? | Yes |
-| **A5** | ~~UniqueDemon later?~~ **OVERTURNED** — UniqueDemon allocate required for UniqueActor sheet | **Done gate** |
+| **A5** | ~~UniqueCreature later?~~ **OVERTURNED** — UniqueCreature allocate required for UniqueActor sheet | **Done gate** |
 | **A5b** | Show read-only commander contribution on UniqueActor board? | Yes |
 | **A6** | `posture-balance` in Wave 1 or defer? | Defer |
 | **A7** | Keep commander allocate UI (Dave/Pacts) + commander sheet Mode C? | **Yes — keep Mode C** where role-keyed |
 | **A8** | Shared console includes **species / empire mode**? | **Yes — folded**; Done gate |
 | **A8b** | First species host door? | **Locked:** collapse `SpeciesBuildPanel` into shared console under existing **Pacts → AptitudesLayer**; lawn glance Wave 2 |
-| **A9** | Injector UniqueDemon apply for Bound lawn uniques in-program Done gate? | **Yes** (`aptitude-unique-lawn-wire`) |
-| **A10** | Commander ActorSheet uses Mode C (not UniqueDemon)? | **Yes** (D2) |
+| **A9** | Injector UniqueCreature apply for Bound lawn uniques in-program Done gate? | **Yes** (`aptitude-unique-lawn-wire`) |
+| **A10** | Commander ActorSheet uses Mode C (not UniqueCreature)? | **Yes** (D2) |
 | **A11** | Leftover + Confirm/Cancel **in console band** (D6/D7), not footer-only? | **Yes** — Done gate |
 | **A12** | Auto-assign in Wave 1 (draft-only fill, D8)? | **Yes** — Done gate |
 | **A13** | Serious aptitude **build preset console + BE** (D9), not thin chip bar? | **Yes** — Done gate; Vision full loadout stays out |
@@ -747,7 +747,7 @@ Not “can we show aptitudes?” — and not only “pretty Lego tiles.”
 Activate for commit, auto-assign, a real build-preset console with donut chart and abs/‰ caps,
 species favour as seed, leftover legal after clamps, and lawn apply — or stay a mute half-screen?**
 
-**Done gates:** UniqueDemon allocate · species Mode B · lawn wire · leftover+decision · auto-assign ·
+**Done gates:** UniqueCreature allocate · species Mode B · lawn wire · leftover+decision · auto-assign ·
 **preset API + console + Activate (E1)** · **donut chart (D12/E4)** · **dual abs/‰ + leftover legal
 (D13/E2)** · **species favour seed (D14/E3)** · multi-piece frame · D5 docs · E5 sum-1000 · E6 no
 level-up autorespec.

@@ -25,7 +25,7 @@
       "id": "set.cherryfume-001",
       "nameKey": "set.cherry-burst-spore",
       "name": "Cherry Burst Spore",
-      "themeKey": "demon.cherryfume",
+      "themeKey": "creature.cherryfume",
       "members": [
         {
           "role": "armament-primary",

@@ -27,7 +27,7 @@ subset — matching (rather than overriding) `generate_commander_effects.py`'s o
 precedent's caution against silently destroying already-good content, (4) the i18n-ready storage
 shape (English content + a stable key; explicitly NOT a translation mechanism), (5) a
 BIDIRECTIONAL language-contamination check, generalizing the real, proven `language_consistency`
-validator (`workflow/validators/language.py:26`, wired into demons + passive-tree) — its current
+validator (`workflow/validators/language.py:26`, wired into creatures + passive-tree) — its current
 form only catches CJK-motif-in/mixed-output-out; the real dungeon defect ran the opposite
 direction and would survive an unfixed port of it.
 **Acceptance:**
@@ -126,10 +126,10 @@ Latin prose in generated output regardless of which language the input motifs us
 - [x] A real fixture reproducing the actual dungeon defect shape (English motifs, an output field
       containing a CJK fragment) is caught by the fixed validator — the existing CJK-motif direction
       (`commander_effect.py`'s own real historical incident) still passes unchanged — proven with
-      the REAL committed text of `event.bargain-demon.allpeater-001.json`'s own `flavor` field
+      the REAL committed text of `event.bargain-creature.allpeater-001.json`'s own `flavor` field
 - [x] The fixed validator is registered in `core`'s own missing-field/quality check family (Task 3's
       registry) as `Content/LanguageContamination`, reachable through any domain's own
-      `CompletenessSpec` registration — not left as a demons/passive-tree-only import
+      `CompletenessSpec` registration — not left as a creatures/passive-tree-only import
 **Verification:** `python -m pytest tools/seedsmith/tests/workflow/validators/test_language.py
 tools/seedsmith/tests/test_content_completeness.py -q` → 11 passed. No prior test file existed for
 `language_consistency` at all (confirmed by grep) — both directions are new coverage, not an
@@ -258,11 +258,11 @@ yet wired into a live `--adapter actions` CLI path), at
 
 ---
 
-## Phase 3 — `content-completeness-demons`
+## Phase 3 — `content-completeness-creatures`
 
-### Task 9: Write `content-completeness-demons`'s own module spec — ✅ DONE 2026-09-08
-**Description:** `docs/architecture/seedsmith-content-standard/spec-content-completeness-demons.md`.
-Demons already write real `_provenance` (`data/seed/demons/species/plant/aerial-flora.json:8-18`)
+### Task 9: Write `content-completeness-creatures`'s own module spec — ✅ DONE 2026-09-08
+**Description:** `docs/architecture/seedsmith-content-standard/spec-content-completeness-creatures.md`.
+Creatures already write real `_provenance` (`data/seed/creatures/species/plant/aerial-flora.json:8-18`)
 but have no missing-field metric at all. This spec is narrower than actions' — provenance exists,
 only the metric + backfill wiring is new.
 **Acceptance:**
@@ -272,30 +272,30 @@ only the metric + backfill wiring is new.
       explicitly disqualified — it's the threat-classification model's own audit trail, citing raw
       stat numbers (e.g. real `PotatoMine.reason`: "...1800 damage with a radius of 0.74
       blocks..."). Decision: register a NEW `flavor` field, matching this program's universal
-      convention, distinct from `demon_coverage.py`/`demon_roster.py`'s own closed-loop
+      convention, distinct from `creature_coverage.py`/`creature_roster.py`'s own closed-loop
       classification axes
 **Verification:** spec written; full evidence at
-[seedsmith-content-standard-phase3-demons-evidence.md](seedsmith-content-standard-phase3-demons-evidence.md).
+[seedsmith-content-standard-phase3-creatures-evidence.md](seedsmith-content-standard-phase3-creatures-evidence.md).
 **Dependencies:** Checkpoint 0. **Scope:** S.
 
-### Task 10: Build demons' own completeness adoption — ✅ DONE 2026-09-08
-**Description:** Register the missing-field predicate; wire the shared backfill loop to demons' own
+### Task 10: Build creatures' own completeness adoption — ✅ DONE 2026-09-08
+**Description:** Register the missing-field predicate; wire the shared backfill loop to creatures' own
 existing `_provenance`-stamped content.
 **Acceptance:**
 - [x] The new metric runs against the real 904-species committed corpus, reporting real findings —
-      real CLI run: `[GAP] Content/FieldMissing — demons:species: 904 of 904 ... have no 'flavor'`.
+      real CLI run: `[GAP] Content/FieldMissing — creatures:species: 904 of 904 ... have no 'flavor'`.
       A real second gap found and fixed en route: `Corpus.load()` requires a `{kind,entries}`
       wrapper no species file has (bare JSON arrays) — silently saw 0 entries; fixed via
       `load_species_corpus`, additive onto the existing loader, not a rewrite of it
-- [x] A resumed demon-species generation run backfills only genuinely missing/stale entries —
+- [x] A resumed creature-species generation run backfills only genuinely missing/stale entries —
       proven by EQUIVALENCE, not by rewriting the real, live, lock-bearing `run/runner.py`: the
       shared engine's `plan_missing` (via a thin wrapper) reproduces `runner.py`'s own real
       `already_done` filter byte-for-byte against the full real 904-entry corpus (a no-op at full
       scale) plus a held-out synthetic id (correctly the only one planned)
-**Verification:** `python -m pytest tools/seedsmith/tests/test_demons_completeness.py -q` → 9
-passed; combined with Core + demons anchor/adapter suites → 65 passed. Full evidence at
-[seedsmith-content-standard-phase3-demons-evidence.md](seedsmith-content-standard-phase3-demons-evidence.md).
-**Dependencies:** Task 9. **Files:** `adapters/demons/completeness.py` (new), `report/cli.py`.
+**Verification:** `python -m pytest tools/seedsmith/tests/test_creatures_completeness.py -q` → 9
+passed; combined with Core + creatures anchor/adapter suites → 65 passed. Full evidence at
+[seedsmith-content-standard-phase3-creatures-evidence.md](seedsmith-content-standard-phase3-creatures-evidence.md).
+**Dependencies:** Task 9. **Files:** `adapters/creatures/completeness.py` (new), `report/cli.py`.
 **Scope:** M.
 
 ---
@@ -326,7 +326,7 @@ re-invented dungeon-specific.
 **Description:** Wire `DungeonProvenance` to actually stamp committed content; register Task 4b's
 own fixed missing-field/contamination predicate for this domain.
 **Acceptance:**
-- [x] `event.bargain-demon.allpeater-001.json` regenerated clean, confirmed by directly reading the
+- [x] `event.bargain-creature.allpeater-001.json` regenerated clean, confirmed by directly reading the
       file after the fix. Real before/after: the local model endpoint was confirmed reachable
       (`curl` → HTTP 200) and a real, targeted, schema-constrained model call repaired just the
       `flavor` field (not a full event redraw — reasoned and disclosed as the proportionate fix for
@@ -346,7 +346,7 @@ real failures first, then fixed). Full evidence, including 4 more named-but-unfi
 [seedsmith-content-standard-phase4-dungeon-evidence.md](seedsmith-content-standard-phase4-dungeon-evidence.md).
 **Dependencies:** Task 11. **Files:** `adapters/dungeon/completeness.py` (new),
 `adapters/dungeon/emit.py`, `report/cli.py`,
-`data/seed/dungeon/events/event.bargain-demon.allpeater-001.json`. **Scope:** M.
+`data/seed/dungeon/events/event.bargain-creature.allpeater-001.json`. **Scope:** M.
 
 ---
 
@@ -448,17 +448,17 @@ skipped.
 - [x] Every domain's own missing-field metric runs clean or reports real, named gaps against its
       real committed corpus — items (byte-identical to `FlavourMissing`: charm 30/71, consumable
       63/63, gem 60/60, set 24/32, unique 32/154), actions (0 findings post-generation, detector
-      proven to fire on a synthetic gap), demons (904/904 missing `flavor`, a real, honest finding —
+      proven to fire on a synthetic gap), creatures (904/904 missing `flavor`, a real, honest finding —
       no generation stage exists yet to close it), dungeon (0 findings on the real 54-event corpus)
 - [x] A resumed run on each domain is a no-op on already-good content (proven, not assumed) — items
       (existing `RunLedger.plan` behavior, explicitly kept over the generic wrapper), actions
       (`plan()` returns `[]` post-generation, proven with an unreachable `LlmCallerConfig` so the
-      test would fail loudly if it ever tried a real call), demons (byte-for-byte equivalence to
+      test would fail loudly if it ever tried a real call), creatures (byte-for-byte equivalence to
       `runner.py`'s own real filter at full 904-entry scale), dungeon (its own generation
       orchestrator does not exist yet — named honestly in Phase 4's evidence, not fabricated)
 - [x] The dungeon Chinese-fragment defect is confirmed fixed by direct file inspection — a real,
       targeted model call (local endpoint confirmed reachable first) fixed
-      `event.bargain-demon.allpeater-001.json`'s `flavor` field; verified clean via
+      `event.bargain-creature.allpeater-001.json`'s `flavor` field; verified clean via
       `language_consistency` and by reading the file directly; a real failing-before/passing-after
       test pair captured the fix
 - [x] A real node's name/flavor renders in the live web UI, sourced from the real catalog — proven
@@ -467,7 +467,7 @@ skipped.
       outstanding gap (blocked on a concurrent session's transient `FusionRpg.Core` build break at
       the time of writing — not silently skipped)
 
-**Real gaps found across all 5 phases, named honestly rather than hidden**: demons has no
+**Real gaps found across all 5 phases, named honestly rather than hidden**: creatures has no
 generation stage for its own new `flavor` field yet (904/904 genuinely missing, by design — this
 program adds detection, not a fifth new generator); dungeon has no generation orchestrator at all
 connecting `pipelines.py` to `emit.py` (only the one defect event was hand-repaired via a targeted
@@ -479,7 +479,7 @@ explicitly not claimed as done above.
 
 **Full evidence logs**: [Phase 1/items](seedsmith-content-standard-phase1-items-evidence.md),
 [Phase 2/actions](seedsmith-content-standard-phase2-actions-evidence.md),
-[Phase 3/demons](seedsmith-content-standard-phase3-demons-evidence.md),
+[Phase 3/creatures](seedsmith-content-standard-phase3-creatures-evidence.md),
 [Phase 4/dungeon](seedsmith-content-standard-phase4-dungeon-evidence.md). Phase 5/passive-tree's
 own evidence lives inline in Tasks 13-15 above (no separate log file — built directly in this
 session, not delegated).
@@ -601,7 +601,7 @@ step is unproven, named honestly rather than silently claimed.
       "Vortex of the Unyielding Wind"; dark → "The Hollowed Husk"; spark → "Conductive Aegis".
 - [x] Every generated node across every domain this program touched carries real, current content —
       or a real, named, reported gap, never a silent placeholder: items (byte-identical detection,
-      real gaps reported), actions (24/24 real content, 0 gaps), demons (904/904 real, honest gap —
+      real gaps reported), actions (24/24 real content, 0 gaps), creatures (904/904 real, honest gap —
       no generation stage built, named not hidden), dungeon (0 gaps on 54 real events, 1 live defect
       fixed), passive-tree nodes (real content across all 42 trees' own node files, pre-existing
       this program), passive-tree identity (41/42, 1 honest gap as above)
@@ -613,7 +613,7 @@ step is unproven, named honestly rather than silently claimed.
 - [x] The storage shape is confirmed i18n-ready by inspection (a stable key exists per record;
       adding a locale subtree later requires no schema change) — no locale has actually been added,
       by design. Every new field across all 7 modules is a plain string on a per-record JSON
-      document (items' `flavor`, actions' `description`, demons' `flavor`, dungeon's `flavor`,
+      document (items' `flavor`, actions' `description`, creatures' `flavor`, dungeon's `flavor`,
       passive-tree's node `name`/`flavor` and tree-level `name`/`description`) — none couples to
       English structurally, and every domain's own file convention (`data/seed/<domain>/...`)
       already supports a sibling `i18n/<locale>/` subtree with zero schema change, confirmed by

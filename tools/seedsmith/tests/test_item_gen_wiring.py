@@ -55,7 +55,7 @@ def _build_theme() -> Theme:
 
 def _species_theme() -> Theme:
     return Theme(
-        theme_key="demon.testspecies", species_id="testspecies", display_name="Test Species",
+        theme_key="creature.testspecies", species_id="testspecies", display_name="Test Species",
         motifs=("iron", "patience"), anti_motifs=(), expression_item="material and form",
         basis="text", rarity=None, retired=False, population="species")
 
@@ -130,7 +130,7 @@ def _set_plan(subject_count: int = 1) -> RunPlan:
 def _charm_plan() -> RunPlan:
     theme = _species_theme()
     return RunPlan(subjects=[Subject(
-        subject_id="charm-species-demon.testspecies", kind="charm", population="species",
+        subject_id="charm-species-creature.testspecies", kind="charm", population="species",
         theme_key=theme.theme_key, entry_id="charm.(axis-group)-NNN for testspecies",
         brief=brief_mod.build_charm_brief(theme, TUNING, VOCAB))], held=[], already_done=[])
 
@@ -145,8 +145,8 @@ def _answer_file(kind: str, population: str, mapping: dict) -> answers_mod.Answe
 class TransportTests(unittest.TestCase):
     def test_the_transport_module_cannot_reach_the_network(self):
         """The replay path must be provably offline, not merely intended to be. Asserted by module
-        text, the same structural discipline `nothing_in_the_generator_writes_the_demons_corpus`
-        already uses for the demon corpus."""
+        text, the same structural discipline `nothing_in_the_generator_writes_the_creatures_corpus`
+        already uses for the creature corpus."""
         source = (Path(answers_mod.__file__)).read_text(encoding="utf-8")
         body = source.split('"""', 2)[-1]      # skip the header, which discusses llm_caller
         for banned in ("llm_caller", "urllib", "requests", "socket", "http"):
@@ -673,14 +673,14 @@ class SetMemberBindingTests(unittest.TestCase):
         import tempfile
         with tempfile.TemporaryDirectory() as tmp:
             plan = _set_plan()
-            plan.held = [("demon.something", "basis=name")]
+            plan.held = [("creature.something", "basis=name")]
             result = authored_mod.run_batch(
                 plan=plan,
                 answers=_answer_file("set", "build",
                                      {plan.subjects[0].subject_id: _clean_set_answer()}),
                 tuning=TUNING, vocabulary=VOCAB, out_dir=Path(tmp) / "sets", kind="set",
                 population="build", authored_utc="1970-01-01T00:00:00Z", model="fixture")
-            self.assertEqual(result.report.held_partitions, ["demon.something"])
+            self.assertEqual(result.report.held_partitions, ["creature.something"])
             self.assertIs(result.report.verdict, Verdict.NOT_MEASURED)
 
 
@@ -864,7 +864,7 @@ class Module13DefectsFixedTests(unittest.TestCase):
         28 -> 50 singletons, max unchanged.
 
         56 -> 58 same day: a continuation run (freeing one exact-name collision, `'Triple-Line
-        Volley'` on both `demon.allpeater` and `demon.threepeater`, for a fresh regenerate) hit a
+        Volley'` on both `creature.allpeater` and `creature.threepeater`, for a fresh regenerate) hit a
         FIFTH real bug the same run found — `authored.run_batch` starting `done = {}` fresh every
         call and `write_ledger` doing a full overwrite meant the continuation's own ledger write
         erased the first run's entries outright (their seed files stayed on disk, untouched, but a
@@ -881,7 +881,7 @@ class Module13DefectsFixedTests(unittest.TestCase):
         fixed run itself net-added 3 more subjects, and separately reproduced 'Triple-Line
         Volley' again (this model converges on the same name for near-identical `species` themes
         at `temperature=0.2`) plus a second such collision, `'Glacial Spike Volley'` on
-        `demon.snowgatling`/`demon.snowpeashooter` — both resolved by re-running just those two
+        `creature.snowgatling`/`creature.snowpeashooter` — both resolved by re-running just those two
         subjects through `run_batch`'s existing injectable `call` at `temperature=0.9`, no
         schema/CLI change needed. Measured directly, not derived: 55 -> 59 cells, 52 -> 57
         singletons, max unchanged."""

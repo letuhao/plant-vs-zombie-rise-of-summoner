@@ -15,7 +15,7 @@ public static class SpeciesTempoProjection
     /// <paramref name="defaultSpeed"/> and never throws — the structural floor
     /// <see cref="Timeline.TurnReadiness.EffectiveRate"/> requires (it DIVIDES by speed and throws on
     /// <c>&lt;= 0</c>), and the honest default for a species this projection has never heard of
-    /// (`DemonSpeciesDef.AttackIntervalMs` defaults to 0 for exactly this reason). PS-8 exempt
+    /// (`CreatureSpeciesDef.AttackIntervalMs` defaults to 0 for exactly this reason). PS-8 exempt
     /// (`ssot-power-scale.md` §11.4: "for a denominator the overflow risk inverts to small values") —
     /// this is a termination guard on a divisor, not a progression ceiling.</summary>
     public static long SpeedFor(long attackIntervalMs, long referenceIntervalMs, long defaultSpeed)

@@ -25,7 +25,7 @@
       "id": "set.ultimatejacksondriver-001",
       "nameKey": "set.the-grand-tour-rig",
       "name": "The Grand Tour Rig",
-      "themeKey": "demon.ultimatejacksondriver",
+      "themeKey": "creature.ultimatejacksondriver",
       "members": [
         {
           "role": "armament-primary",

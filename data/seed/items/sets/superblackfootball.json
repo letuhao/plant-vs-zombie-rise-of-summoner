@@ -25,7 +25,7 @@
       "id": "set.superblackfootball-001",
       "nameKey": "set.black-olive-bastion",
       "name": "Black Olive Bastion",
-      "themeKey": "demon.superblackfootball",
+      "themeKey": "creature.superblackfootball",
       "members": [
         {
           "role": "armament-primary",

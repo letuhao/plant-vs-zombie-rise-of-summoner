@@ -30,7 +30,7 @@ REAL_TEMPLATES = {
     "gather-curio-kind": {"targetKind": "curio-kind", "sinkAvoidance": False},
     "kill-boss": {"targetKind": "boss", "sinkAvoidance": False},
     "extract-with-item-kind": {"targetKind": "item-kind", "sinkAvoidance": False},
-    "bring-demon-home-alive": {"targetKind": "none", "sinkAvoidance": False},
+    "bring-creature-home-alive": {"targetKind": "none", "sinkAvoidance": False},
     "finish-under-hunger": {"targetKind": "none", "sinkAvoidance": True},
     "survive-no-downed": {"targetKind": "none", "sinkAvoidance": True},
     "spend-no-provision": {"targetKind": "none", "sinkAvoidance": True},

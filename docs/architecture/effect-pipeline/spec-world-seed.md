@@ -6,7 +6,7 @@
 ## Objective
 
 A per-player world seed: created once at player creation, shown in the UI, and composed with a stream
-name and a target id to produce every per-player roll this program and `demon-seed` make.
+name and a target id to produce every per-player roll this program and `creature-seed` make.
 
 ```text
 hash(worldSeed, streamName, targetId)
@@ -22,7 +22,7 @@ per-feature seed each.
 ### Why this exists as its own module and not a field on the player row
 
 The seed alone is not the module; the **derivation contract** is. Every downstream consumer (module 2's
-resolver, `demon-seed` module 16's `player-materialise`) must derive the SAME way, or two runtimes
+resolver, `creature-seed` module 16's `player-materialise`) must derive the SAME way, or two runtimes
 disagree on the same seed — the exact failure `resolution-order`'s named-stream design exists to
 prevent one layer down. This module is the one place that owns `hash(worldSeed, streamName, targetId)`,
 so every consumer calls it rather than reimplementing it.
@@ -76,7 +76,7 @@ tests/FusionRpg.Core.Tests/Atoms/WorldSeedTests.cs   new
 
 ```csharp
 // The ONE place hash(worldSeed, streamName, targetId) is computed. Every per-player generator
-// (this program's resolver, demon-seed's player-materialise) calls this - never reimplements it,
+// (this program's resolver, creature-seed's player-materialise) calls this - never reimplements it,
 // or two runtimes derive the same seed two different ways.
 ```
 

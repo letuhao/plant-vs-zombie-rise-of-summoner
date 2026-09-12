@@ -25,7 +25,7 @@
       "id": "set.laserumbrella-001",
       "nameKey": "set.luminous-spore-parasite",
       "name": "Luminous Spore Parasite",
-      "themeKey": "demon.laserumbrella",
+      "themeKey": "creature.laserumbrella",
       "members": [
         {
           "role": "armament-primary",

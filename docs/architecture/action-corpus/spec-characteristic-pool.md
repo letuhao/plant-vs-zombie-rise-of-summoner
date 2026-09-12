@@ -7,7 +7,7 @@
 It owns the closed characteristic pool every later stage draws its brief fields from, and the
 **species role lean** — the A2 hybrid: a family-level floor, a deterministic derivation that
 differentiates within the family, and a measured **residue** where the derivation does not separate.
-It reads the demon seed and **never invents an anchor**. Where a species has no family, no motif or no
+It reads the creature seed and **never invents an anchor**. Where a species has no family, no motif or no
 theme, that absence is recorded as an absence.
 
 ## The four constraints this module is bound by (map §3, restated inline)
@@ -19,7 +19,7 @@ theme, that absence is recorded as an absence.
    spends zero of it, and its output must be reviewable before a single token is spent.
 3. **The roster is the live species seed folder.** Measured 2026-09-10: 904 species records,
    227 consolidated families, and 1,183 family memberships under
-   `data/seed/demons/species/**/*.json`. Generated C# and `_generated` projections are not action
+   `data/seed/creatures/species/**/*.json`. Generated C# and `_generated` projections are not action
    inputs. Per-species counts are tunables.
 4. **C1's family-access widening is gated** on three things that do not exist. So the pool this module
    emits carries **structure axes** as the tier differentiator, and its `allowedAtomFamilies` is the
@@ -31,23 +31,23 @@ theme, that absence is recorded as an absence.
 
 | Thing | Count / evidence |
 |---|---|
-| Live species catalog with element, rarity and traits | **904 records**, `data/seed/demons/species/**/*.json` |
-| Motif anchors (`motifs`, `antiMotifs`, `basis`, `tautological`) | **904 keys**, `data/seed/demons/_generated/motif-assignments.json`; joins the live roster **100%** |
+| Live species catalog with element, rarity and traits | **904 records**, `data/seed/creatures/species/**/*.json` |
+| Motif anchors (`motifs`, `antiMotifs`, `basis`, `tautological`) | **904 keys**, `data/seed/creatures/_generated/motif-assignments.json`; joins the live roster **100%** |
 | Family assignments | **904 keys** over **227 consolidated families**, derived from each live record's `family` field; **1,183 memberships** |
-| Theme registry with `themeKey` = `demon.<speciesId>` | **84 themes**, `data/seed/demons/_registry/themes.v1.json`; `expression.action` = *"tempo and effect shape — how fast, how it lands"* |
+| Theme registry with `themeKey` = `creature.<speciesId>` | **84 themes**, `data/seed/creatures/_registry/themes.v1.json`; `expression.action` = *"tempo and effect shape — how fast, how it lands"* |
 | Closed vocabularies | 5 categories `ActionEnums.cs:26-33` · 8 tags `:39-49` · 3 kinds `:10-15` · 6 target modes `ActionTargetSpec.cs:16-32` · 4 area shapes `:41-47` · 6 elements `ActorElementTypes.cs:3-11` · 21 statuses `StatusCatalogBootstrap.cs:16-58` · 10 rungs with `structureBudget` `data/tuning/action-rungs.v1.json` |
-| Rarity ladder, 10 rungs, ordinal is rank | `DemonRarity.cs:16-27` |
-| Legacy band to ladder map (`common→Chaff`, `rare→Cultivated`, `epic→Heirloom`, `legendary→Sunwoven`) | `DemonRarity.cs:95-100` |
+| Rarity ladder, 10 rungs, ordinal is rank | `CreatureRarity.cs:16-27` |
+| Legacy band to ladder map (`common→Chaff`, `rare→Cultivated`, `epic→Heirloom`, `legendary→Sunwoven`) | `CreatureRarity.cs:95-100` |
 
 ### Wiring gap
 
 | Thing | Evidence |
 |---|---|
-| The classified species anchor tree covers **28** species, its ids are PascalCase (`CherryBomb`), and **0** match the lowercase motif keys directly — 19 match after `lower()` | `data/seed/demons/species/_index.json` (28 entries); measured 2026-09-03 |
+| The classified species anchor tree covers **28** species, its ids are PascalCase (`CherryBomb`), and **0** match the lowercase motif keys directly — 19 match after `lower()` | `data/seed/creatures/species/_index.json` (28 entries); measured 2026-09-03 |
 | **9** of those 28 anchors are not catalog species at all (`armedgargantuar`, `balloonzombie`, `bigchomper`, `doomshroom`, `drownzombie`, `jacksonzombie`, `potatomine`, `smallpuff`, `snorklezombie`) | measured |
 | The four-way join (catalog ∩ motif ∩ family ∩ anchor) is **8 species** | measured |
 | `attackTempo` is `"steady"` for all 28 anchors — a field with one value carries no signal | measured |
-| The themes registry restates rarity in the **legacy band** vocabulary (`common`/`rare`/`epic`/`legendary`), and the counts match the catalog ladder exactly (42/21/14/7) | measured; map at `DemonRarity.cs:95-100` |
+| The themes registry restates rarity in the **legacy band** vocabulary (`common`/`rare`/`epic`/`legendary`), and the counts match the catalog ladder exactly (42/21/14/7) | measured; map at `CreatureRarity.cs:95-100` |
 
 ### Real gap
 
@@ -60,11 +60,11 @@ There is no characteristic pool and no role lean. `type-weights.json` is named i
 
 | Path | For |
 |---|---|
-| `data/seed/demons/species/**/*.json` | the roster, element, rarity, traits, and family membership |
-| `data/seed/demons/_generated/motif-assignments.json` | motifs, antiMotifs, basis |
-| `data/seed/demons/_generated/family-assignments.json` | family |
-| `data/seed/demons/_registry/themes.v1.json` | `themeKey`, `expression.action` |
-| `data/seed/demons/species/**/*.json` | live species records and optional anchor enrichment (aptitude, posture, reach, targetPreference) |
+| `data/seed/creatures/species/**/*.json` | the roster, element, rarity, traits, and family membership |
+| `data/seed/creatures/_generated/motif-assignments.json` | motifs, antiMotifs, basis |
+| `data/seed/creatures/_generated/family-assignments.json` | family |
+| `data/seed/creatures/_registry/themes.v1.json` | `themeKey`, `expression.action` |
+| `data/seed/creatures/species/**/*.json` | live species records and optional anchor enrichment (aptitude, posture, reach, targetPreference) |
 | `data/tuning/action-rungs.v1.json` | rung windows and `structureBudget` |
 | `data/tuning/action-role-lean.v1.json` | **new** — the derivation weights, per-mille |
 
@@ -95,7 +95,7 @@ ideal keeps its dated record and is no longer the source.
 | Group | Fields | Source vocabulary | Who picks |
 |---|---|---|---|
 | **A · Scope + anchor** | `scope` (`general`/`family`/`species`), `scopeKey` | `spec-eligibility-axis.md` §3.1 | planner |
-| **B · Identity context** | `family`, `motifs[]`, `antiMotifs[]`, `element`, `themeKey`, `rarity` | catalog + `motif-assignments.json` + `family-assignments.json` + `themes.v1.json`; 6 elements `ActorElementTypes.cs:3-11`; 10 rarity rungs `DemonRarity.cs:16-27` | read from the seed |
+| **B · Identity context** | `family`, `motifs[]`, `antiMotifs[]`, `element`, `themeKey`, `rarity` | catalog + `motif-assignments.json` + `family-assignments.json` + `themes.v1.json`; 6 elements `ActorElementTypes.cs:3-11`; 10 rarity rungs `CreatureRarity.cs:16-27` | read from the seed |
 | **C · Mechanical slot** | `category` (5), `targetMode` (6), `areaShape` (4), `relation` (4), `kind` (3), `rungBand` | `ActionEnums.cs`, `ActionTargetSpec.cs`, `data/tuning/action-rungs.v1.json` | **planner** |
 | **D · Pool constraints** | `allowedAtomFamilies[]`, `forbiddenAtomFamilies[]`, `structureAxes[]` | the **98** authored affix families (`data/seed/items/affix-families/*.json`); `RungRow.StructureBudget` | planner |
 | **E · Pairing role** | `pairingRole` = `enabler` \| `payoff` \| **`none`**, plus **`pairedPayoffFamily`** when `payoff` — **an ATOM FAMILY, never a status** | `data/seed/actions/pairings.json` via `EnablerPayoffPairings` | **planner** |
@@ -107,9 +107,9 @@ ideal keeps its dated record and is no longer the source.
    key as a defect** (`spec-review-2026-09-03.md:28`), and A-C1's envelope, A-S1 §3 step 6, A-S3's
    fingerprint and A-S5's metrics all already say `enabler | payoff | none`. `neutral` exists nowhere
    in the program but this table.
-2. **`threatBand` removed from group B.** It is real, but it belongs to the **demon-seed** program
+2. **`threatBand` removed from group B.** It is real, but it belongs to the **creature-seed** program
    (`spec-anchor-contract.md:51`, `spec-threat-band.md:33`) and it fails three separate tests for
-   membership here. It is **not on the catalog** this module reads — `DemonSpeciesCatalog.Generated.cs`
+   membership here. It is **not on the catalog** this module reads — `CreatureSpeciesCatalog.Generated.cs`
    has no such field — so it reaches only the 28-entry anchor tree, while live species records
    supply family membership directly.
    Its own spec says it *"sets the `Theta` offset, so it scales every magnitude the species ever has"*
@@ -126,7 +126,7 @@ ideal keeps its dated record and is no longer the source.
   "id": "lean.cherrybomb",
   "speciesKey": "cherrybomb",
   "family": "cherry",                 // null when unassigned; derived from the live seed record
-  "themeKey": "demon.cherrybomb",
+  "themeKey": "creature.cherrybomb",
   "element": { "primary": "fire", "secondary": "none" },
   "rarity": "cultivated",             // the LADDER id, never the legacy band
   "motifs": ["樱桃", "爆炸"], "antiMotifs": [],
@@ -151,7 +151,7 @@ ideal keeps its dated record and is no longer the source.
    because the live species seed folder is the roster while the anchor tree is a partial enrichment. Motifs come from
    `motif-assignments.json`. Family comes from `family-assignments.json` or is `null`. `themeKey` comes
    from the theme registry. If the theme registry's `rarity` is a legacy band, it is mapped through
-   `DemonRarity.cs:95-100` and never carried forward in the legacy vocabulary.
+   `CreatureRarity.cs:95-100` and never carried forward in the legacy vocabulary.
 3. **Family floor.** For each of the 227 consolidated families, the floor lean is the category ordering produced by
    summing its members' signal scores (step 4) and ranking.
 
@@ -160,7 +160,7 @@ ideal keeps its dated record and is no longer the source.
    `leanSource: "floor"`, `separation: 0`"* — which discarded a derivation this module already has
    for any family-less live species. Step 4's signals exist for **all 904** live records: the trait pool is
    populated on every catalog row (measured 2026-09-03 — 84 rows, **zero** with an empty pool,
-   `DemonSpeciesCatalog.Generated.cs:14+`), `ElementPrimary` is set on every row, and `BaseRarity` is
+   `CreatureSpeciesCatalog.Generated.cs:14+`), `ElementPrimary` is set on every row, and `BaseRarity` is
    set on every row. Absence of a *family* is not absence of a *signal*.
 
    The rule, restated:
@@ -218,7 +218,7 @@ ideal keeps its dated record and is no longer the source.
      `greedy` 15, `genius` 14, `bloodthirsty` 14, `chaos-marked` 12, `void-touched` 9, `immortal` 7).
      Each trait carries one weighted category row in the tuning file.
    - **element**, primary and secondary (`ActorElementTypes.cs:3-11`).
-   - **rarity rung ordinal** (`DemonRarity.cs:16-27`), as a tie-shaping term only.
+   - **rarity rung ordinal** (`CreatureRarity.cs:16-27`), as a tie-shaping term only.
    - **anchor enrichment where present** — `posture`, `reach`, `targetPreference`. `attackTempo` is
      **excluded by measurement**: it is `"steady"` on all 28 anchors and therefore carries no signal.
 

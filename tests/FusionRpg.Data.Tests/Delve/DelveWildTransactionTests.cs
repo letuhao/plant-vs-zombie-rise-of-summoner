@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Delve;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Dungeon.Registry;
 using FusionRpg.Core.Dungeon.Tuning;
 using FusionRpg.Core.Stats.Derived;
@@ -102,12 +102,12 @@ public class DelveWildTransactionTests : IDisposable
         return delve!;
     }
 
-    static readonly DemonSpeciesDef WildSpecies = DemonSpeciesCatalog.All
-        .First(s => s.Acquisition != DemonAcquisition.CaptureOnly && s.TraitPool.Count > 0);
+    static readonly CreatureSpeciesDef WildSpecies = CreatureSpeciesCatalog.All
+        .First(s => s.Acquisition != CreatureAcquisition.CaptureOnly && s.TraitPool.Count > 0);
 
     /// <summary>What `RecruitMint.Build` would have assembled for a real wild join — `Rarity =
     /// BaseRarity` (its own doc comment, verbatim), `Origin = "delve"`.</summary>
-    static DemonMintSpec JoinSpec(DemonSpeciesDef species) => new()
+    static CreatureMintSpec JoinSpec(CreatureSpeciesDef species) => new()
     {
         SpeciesId = species.SpeciesId, Side = species.Side, GameTypeId = species.GameTypeId,
         Rarity = species.BaseRarity.ToId(), Variant = "normal",
@@ -132,7 +132,7 @@ public class DelveWildTransactionTests : IDisposable
         Assert.Equal(200, _store.LoadDelve(delve.DelveId)!.SoulsUnbanked);
         Assert.Equal("delve", specimen!.Profile.Origin);
         Assert.Equal(WildSpecies.SpeciesId, specimen.Profile.SpeciesId);
-        // spec §4: "the free auto-bind" -- MintDemonUnlocked's own AutoBindNewSpecimenUnlocked already ran.
+        // spec §4: "the free auto-bind" -- MintCreatureUnlocked's own AutoBindNewSpecimenUnlocked already ran.
         var contracts = _store.ListContracts(1);
         Assert.Contains(contracts, c => c.InstanceId == specimen.Actor.InstanceId && c.Bound);
     }
@@ -142,7 +142,7 @@ public class DelveWildTransactionTests : IDisposable
     {
         var delve = CreateDelve();
         _store.AccrueUnbanked(delve.DelveId, 100, "seed");
-        var before = _store.ListDemonRoster(1).Items.Count;
+        var before = _store.ListCreatureRoster(1).Items.Count;
 
         var (ok, reason, specimen, soulsLeft) = _store.TalkJoin(delve.DelveId, 1, 300, "wild:0:0", JoinSpec(WildSpecies));
 
@@ -151,7 +151,7 @@ public class DelveWildTransactionTests : IDisposable
         Assert.Null(specimen);
         Assert.Equal(100, soulsLeft);
         Assert.Equal(100, _store.LoadDelve(delve.DelveId)!.SoulsUnbanked);
-        Assert.Equal(before, _store.ListDemonRoster(1).Items.Count);
+        Assert.Equal(before, _store.ListCreatureRoster(1).Items.Count);
     }
 
     [Fact]
@@ -169,7 +169,7 @@ public class DelveWildTransactionTests : IDisposable
         var balance1 = _store.GetSoulBalance(1).Balance;
         var (ok2, reason2, specimen2, _) = _store.TalkJoin(delve.DelveId, 1, 100, "wild:0:1", JoinSpec(WildSpecies));
         Assert.True(ok2, reason2);
-        Assert.NotEqual(specimen1!.Actor.InstanceId, specimen2!.Actor.InstanceId); // a second, distinct demon
+        Assert.NotEqual(specimen1!.Actor.InstanceId, specimen2!.Actor.InstanceId); // a second, distinct creature
         Assert.Equal(balance1, _store.GetSoulBalance(1).Balance); // no SECOND discovery award
     }
 
@@ -190,7 +190,7 @@ public class DelveWildTransactionTests : IDisposable
     {
         var delve = CreateDelve();
         _store.AccrueUnbanked(delve.DelveId, 1_000, "seed");
-        var rosterBefore = _store.ListDemonRoster(1).Items.Count;
+        var rosterBefore = _store.ListCreatureRoster(1).Items.Count;
 
         var expectedPrice = FusionRpg.Core.Delve.Loot.DelvePrices.PullPrice(100, 70, FusionRpg.Core.Power.PowerTuningHub.Tuning);
 
@@ -210,7 +210,7 @@ public class DelveWildTransactionTests : IDisposable
         Assert.Equal(0, entry.Col);
         Assert.Equal(1, entry.N);
         // "no UniqueActor... until CloseDelve(Extracted)"
-        Assert.Equal(rosterBefore, _store.ListDemonRoster(1).Items.Count);
+        Assert.Equal(rosterBefore, _store.ListCreatureRoster(1).Items.Count);
     }
 
     [Fact]
@@ -277,7 +277,7 @@ public class DelveWildTransactionTests : IDisposable
         Assert.True(ok, reason);
         var pityAfter = _store.GetSummonPity(1);
 
-        var banner = FusionRpg.Core.Demons.SummonBannerCatalog.TryGet("standard-rift")!;
+        var banner = FusionRpg.Core.Creatures.SummonBannerCatalog.TryGet("standard-rift")!;
         var rng = FusionRpg.Core.Battle.SeededRng.DeriveStream(Seed, "dungeon:altar:3:4:1");
         var (independentResults, independentPity) = SummonRoller.Roll(banner, null, 1, pityBefore, rng);
 
@@ -297,7 +297,7 @@ public class DelveWildTransactionTests : IDisposable
         _store.AccrueUnbanked(delve.DelveId, 10_000, "seed");
         var (pullOk, pullReason, result, _) = _store.PullAtAltar(delve.DelveId, 0, 0, 0, 70, "standard-rift", null);
         Assert.True(pullOk, pullReason);
-        var rosterBefore = _store.ListDemonRoster(1).Items.Count;
+        var rosterBefore = _store.ListCreatureRoster(1).Items.Count;
         var balanceBefore = _store.GetSoulBalance(1).Balance;
         // The SAME CloseDelve(tuning) call also fires the pre-existing D3.16 loot-earn hook against
         // this delve's own leftover souls_unbanked -- computed independently here so the assertion
@@ -310,12 +310,12 @@ public class DelveWildTransactionTests : IDisposable
         var closed = _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
 
         Assert.True(closed);
-        var roster = _store.ListDemonRoster(1).Items;
+        var roster = _store.ListCreatureRoster(1).Items;
         Assert.Equal(rosterBefore + 1, roster.Count);
         Assert.Contains(roster, r => r.Profile.SpeciesId == result!.SpeciesId && r.Profile.Origin == "delve");
         Assert.Empty(_store.LoadDelve(delve.DelveId)!.Parties.Single(p => p.EntityId == 0).Haul);
         // discovery souls fire on the haul mint exactly as a normal summon's would (RpgStore.Summons.cs:118-125).
-        var species = DemonSpeciesCatalog.Get(result!.SpeciesId);
+        var species = CreatureSpeciesCatalog.Get(result!.SpeciesId);
         var expectedDiscovery = SoulEarnPolicy.DiscoveryDelta(species.BaseRarity);
         Assert.Equal(balanceBefore + lootEarn.Kills + lootEarn.Victory + expectedDiscovery, _store.GetSoulBalance(1).Balance);
     }
@@ -328,12 +328,12 @@ public class DelveWildTransactionTests : IDisposable
         var (pullOk, pullReason, _, soulsAfterPull) = _store.PullAtAltar(delve.DelveId, 0, 0, 0, 70, "standard-rift", null);
         Assert.True(pullOk, pullReason);
         var pityAfterPull = _store.GetSummonPity(1);
-        var rosterBefore = _store.ListDemonRoster(1).Items.Count;
+        var rosterBefore = _store.ListCreatureRoster(1).Items.Count;
 
         var closed = _store.CloseDelve(delve.DelveId, DelveStates.Wiped, archiveNow: false, _tuning);
 
         Assert.True(closed);
-        Assert.Equal(rosterBefore, _store.ListDemonRoster(1).Items.Count); // nothing minted
+        Assert.Equal(rosterBefore, _store.ListCreatureRoster(1).Items.Count); // nothing minted
         Assert.Empty(_store.LoadDelve(delve.DelveId)!.Parties.Single(p => p.EntityId == 0).Haul); // dropped
         Assert.Equal(pityAfterPull, _store.GetSummonPity(1)); // "the pity advance... stand"
         // "the spend... stand[s]" -- the pull's own debit (already lower than the seeded 10,000) is
@@ -350,10 +350,10 @@ public class DelveWildTransactionTests : IDisposable
         Assert.True(_store.PullAtAltar(delve.DelveId, 0, 0, 0, 70, "standard-rift", null).Ok);
 
         Assert.True(_store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning));
-        var rosterAfterFirst = _store.ListDemonRoster(1).Items.Count;
+        var rosterAfterFirst = _store.ListCreatureRoster(1).Items.Count;
 
         Assert.True(_store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning));
-        Assert.Equal(rosterAfterFirst, _store.ListDemonRoster(1).Items.Count);
+        Assert.Equal(rosterAfterFirst, _store.ListCreatureRoster(1).Items.Count);
     }
 
     [Fact]

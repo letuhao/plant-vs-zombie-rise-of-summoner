@@ -25,7 +25,7 @@
       "id": "set.silversunflower-001",
       "nameKey": "set.silver-sun-harvest",
       "name": "Silver Sun Harvest",
-      "themeKey": "demon.silversunflower",
+      "themeKey": "creature.silversunflower",
       "members": [
         {
           "role": "armament-primary",

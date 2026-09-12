@@ -25,7 +25,7 @@
       "id": "set.minerzombie-001",
       "nameKey": "set.tunneler-s-gourd",
       "name": "Tunneler's Gourd",
-      "themeKey": "demon.minerzombie",
+      "themeKey": "creature.minerzombie",
       "members": [
         {
           "role": "armament-primary",

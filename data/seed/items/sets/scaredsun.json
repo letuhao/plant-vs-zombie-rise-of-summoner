@@ -25,7 +25,7 @@
       "id": "set.scaredsun-001",
       "nameKey": "set.sun-dappled-spore-worker",
       "name": "Sun-Dappled Spore-Worker",
-      "themeKey": "demon.scaredsun",
+      "themeKey": "creature.scaredsun",
       "members": [
         {
           "role": "armament-secondary",

@@ -549,7 +549,7 @@ overload to preserve since `Resolve` already carries two optional trailing param
       wearing a row's clothes. **Exactness is now a declared field on each row.** Verified by direct
       token scan and by the guard itself.
     - **Suite:** Forecast + ModeProfile filters **50/50**. Full Core **3 failed / 5613 passed** — every
-      failure inherited from the demon/world-stage streams (which fixed 11 of their 14 while this ran),
+      failure inherited from the creature/world-stage streams (which fixed 11 of their 14 while this ran),
       **zero beyond baseline**. `M1 = 0`; overflow A1/A2 clean; four boundary guards green.
 
 - [x] **B20: T6 interactive turns** — **DONE 2026-09-04** *(spec first; shipped with B21)*
@@ -700,11 +700,11 @@ overload to preserve since `Resolve` already carries two optional trailing param
       untested forever (the same reason `TimelineDrive` and `EntityWriteGate` live in Core). It holds
       no Unity type, and the kernel purity scan covers it: **53/53** with the guard included.
     - **Suite:** full Core **3 failed / 5796 passed** — the world-stage `loamUnits` pair and the known
-      `DemonQualityReport` parallel-load flake. Goldens **40/40**; `M1 = 0`; overflow A1/A2 clean; four
+      `CreatureQualityReport` parallel-load flake. Goldens **40/40**; `M1 = 0`; overflow A1/A2 clean; four
       guards green.
     - ⚠️ **The stale-tool-binary finding bit a second time and is worth carrying forward.** Before
-      rebuilding `tools/`, this run showed **9** failures; six were `ProveAptitude`/`DemonQualityReport`/
-      `DemonSpeciesGenExplain` tests shelling out to binaries stale against the current Core. Rebuilding
+      rebuilding `tools/`, this run showed **9** failures; six were `ProveAptitude`/`CreatureQualityReport`/
+      `CreatureSpeciesGenExplain` tests shelling out to binaries stale against the current Core. Rebuilding
       the eleven tools returned the suite to 3. **Any Core change invalidates every tool binary that
       references it, and tests that invoke tools with `--no-build` will report false regressions until
       they are rebuilt.**
@@ -1011,7 +1011,7 @@ Spec: [spec-timeline-tunables.md](../docs/architecture/battle/spec-timeline-tuna
 > **Core 14 failed / 5382 passed · Data 2 failed / 669 passed · Guard 165/165 green.**
 > This matches the audit's stated 14/2 contract exactly. Attribution corrected: the 14 Core reds are
 > `SpeciesExpanderTests` (7), `SpeciesCatalogDiffTests` (5) and `UnitClassContractParityTests` (2);
-> Data's 2 are `DemonSpeciesImportCliTests`. The item-todo note had the last two suites swapped.
+> Data's 2 are `CreatureSpeciesImportCliTests`. The item-todo note had the last two suites swapped.
 >
 > ⛔ **A defect was found and fixed before the baseline could be trusted.** The first full run reported
 > **16** red, including `ExpeditionResolverTests.Tier_goldens_are_locked` — an expedition golden, which
@@ -1036,7 +1036,7 @@ Spec: [spec-timeline-tunables.md](../docs/architecture/battle/spec-timeline-tuna
 > that touched no production code. **The item stream did not move the expedition goldens.** Byte-identical by acceptance: this phase
 relocates values between code and config without changing one, so **a moved golden is a defect in the
 ⚠️ **Baseline superseded 2026-09-04 — re-measure, never assume.** The 14/2 figure below was true when
-this phase started and is not now: the demon and world-stage streams fixed most of theirs mid-run, so
+this phase started and is not now: the creature and world-stage streams fixed most of theirs mid-run, so
 the tree stands at **2 red Core / 3 red Data**, Guard **171/171**. And **any Core change invalidates
 every `tools/` binary that references it** — six tests that shell out with `--no-build` reported false
 regressions until the eleven tools were rebuilt. Rebuild tools, then measure, then compare.
@@ -1139,12 +1139,12 @@ inherited from other streams — compare against those, not zero.**
       `audit-magic-numbers.py` **M1 = 0, M2 = 0, M4 = 0**.
     - ⚠️ **Two more allocation-test flakes observed and quantified, not silenced.**
       `Atoms.PredicateCompilerTests.Evaluating_allocates_nothing` and
-      `Demons.DemonQualityReportTests.A_perfectly_even_split_reports_entropy_1_00` each failed once in
+      `Creatures.CreatureQualityReportTests.A_perfectly_even_split_reports_entropy_1_00` each failed once in
       a full run and passed alone; **four consecutive full runs then came back at exactly 14 with
       nothing beyond baseline**. Same family as B28's `ValueSpecTests` finding — they assert
       `GC.GetAllocatedBytesForCurrentThread()`, which is thread-local, so no parallel test can move it;
       the mechanism is tiered re-JIT inside the measured loop, and adding tests raises the odds by
-      raising load. Recorded for the atom/demon programs. **The bar stays 14, re-verified by
+      raising load. Recorded for the atom/creature programs. **The bar stays 14, re-verified by
       repetition rather than by one lucky run.**
 
 - [x] **B30: the retained constants say why they are not tunable** — **DONE 2026-09-04**
@@ -1505,7 +1505,7 @@ Phase 7 for the published defaults. **B31–B35 are independent of Phase 6; only
       `~WaveCatalog`, `~ModeProfile` with the flip live.
     - ⚠️ **The "14/2" baseline in this line is stale and should not be used again** — see the note at
       the head of this file. Measured this run: **10 Core reds**, all attributable to other streams
-      (demons 4, atoms 3, class-system 2, actor-hub 1) and all red before this work; Guard **170/171**,
+      (creatures 4, atoms 3, class-system 2, actor-hub 1) and all red before this work; Guard **170/171**,
       its one red the known class-system dominance drift.
     - ⛔ **A final full-suite pass could not be completed**: `src/FusionRpg.Core/World/Turn/TurnEngine.cs`
       is being edited concurrently by the world-stage stream (file changed twice while these runs were

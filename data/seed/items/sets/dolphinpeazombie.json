@@ -25,7 +25,7 @@
       "id": "set.dolphinpeazombie-001",
       "nameKey": "set.dolphin-s-echo",
       "name": "Dolphin's Echo",
-      "themeKey": "demon.dolphinpeazombie",
+      "themeKey": "creature.dolphinpeazombie",
       "members": [
         {
           "role": "armament-primary",

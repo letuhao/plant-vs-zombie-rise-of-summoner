@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Contracts;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
 using Xunit;
@@ -38,12 +38,12 @@ public class ContractRegressionTests : IDisposable
         try { Directory.Delete(_dir, true); } catch { /* temp */ }
     }
 
-    static readonly DemonSpeciesDef Species = DemonSpeciesCatalog.All
-        .First(s => s.Acquisition != DemonAcquisition.CaptureOnly && s.TraitPool.Count > 0);
+    static readonly CreatureSpeciesDef Species = CreatureSpeciesCatalog.All
+        .First(s => s.Acquisition != CreatureAcquisition.CaptureOnly && s.TraitPool.Count > 0);
 
     string Mint(long playerId = 1)
     {
-        var (specimen, _) = _store.MintDemon(playerId, new DemonMintSpec
+        var (specimen, _) = _store.MintCreature(playerId, new CreatureMintSpec
         {
             SpeciesId = Species.SpeciesId,
             Side = Species.Side,
@@ -79,7 +79,7 @@ public class ContractRegressionTests : IDisposable
         var result = _store.SettleContracts(1, Day0.AddDays(3));
         Assert.Equal(3, result.DaysSettled);
         Assert.Equal(due, result.SoulsPaid);          // day 1 paid...
-        Assert.Equal(2, result.DemonsDecayed);        // ...days 2 and 3 could not, so faith eroded
+        Assert.Equal(2, result.CreaturesDecayed);        // ...days 2 and 3 could not, so faith eroded
         Assert.Equal(0, _store.GetSoulBalance(1).Balance);
 
         foreach (var id in ids)
@@ -102,13 +102,13 @@ public class ContractRegressionTests : IDisposable
         var result = _store.SettleContracts(1, Day0.AddDays(1));
         Assert.Equal(0, result.SoulsPaid);                          // all-or-nothing
         Assert.Equal(due - 1, _store.GetSoulBalance(1).Balance);    // the remainder is untouched
-        Assert.Equal(1, result.DemonsDecayed);
+        Assert.Equal(1, result.CreaturesDecayed);
     }
 
     /// <summary>
     /// Review fix: an already-paid day must not be treated as an unpaid one. The ledger's dedupe key
     /// is the record of payment — if the charge is refused because that day is already on the books,
-    /// the demons have been paid for and must not decay.
+    /// the creatures have been paid for and must not decay.
     /// </summary>
     [Fact]
     public void A_day_already_on_the_ledger_is_paid_not_unpaid()
@@ -125,7 +125,7 @@ public class ContractRegressionTests : IDisposable
 
         var result = _store.SettleContracts(1, Day0.AddDays(1));
 
-        Assert.Equal(0, result.DemonsDecayed);                       // paid, so no erosion
+        Assert.Equal(0, result.CreaturesDecayed);                       // paid, so no erosion
         Assert.Equal(ContractPolicy.BindLoyalty, _store.GetContract(id)!.Loyalty);
         Assert.Equal(afterPrepay, _store.GetSoulBalance(1).Balance); // and charged exactly once
     }
@@ -188,7 +188,7 @@ public class ContractRegressionTests : IDisposable
     }
 
     [Fact]
-    public void A_consumed_demon_cannot_be_re_contracted()
+    public void A_consumed_creature_cannot_be_re_contracted()
     {
         var id = Mint();
         Assert.True(_store.TryRetireUniqueActor(id).Ok);
@@ -222,13 +222,13 @@ public class ContractRegressionTests : IDisposable
 
         // The warden property (SSOT §11.1a): the Nth slot costs strictly more than the (N-1)th,
         // arbitrarily far past the old ceiling -- because of the price, never because of a cap.
-        Assert.True(ContractPolicy.NextSlotPrice(purchases, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning) > ContractPolicy.NextSlotPrice(purchases - 1, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning));
+        Assert.True(ContractPolicy.NextSlotPrice(purchases, FusionRpg.Core.Creatures.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning) > ContractPolicy.NextSlotPrice(purchases - 1, FusionRpg.Core.Creatures.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning));
     }
 
     [Fact]
-    public void Migration_prefers_the_stronger_demon_when_rarity_ties()
+    public void Migration_prefers_the_stronger_creature_when_rarity_ties()
     {
-        // Fill every slot with older demons first, so age alone would keep the newcomers out.
+        // Fill every slot with older creatures first, so age alone would keep the newcomers out.
         for (var i = 0; i < ContractPolicy.BaseSlots; i++) Mint();
         var weak = Mint();
         var strong = Mint();
@@ -241,7 +241,7 @@ public class ContractRegressionTests : IDisposable
 
         Assert.Equal(ContractPolicy.BaseSlots, _store.CountBoundContracts(1));
         // Same rarity, same stars: level breaks the tie, and it outranks seniority.
-        Assert.True(_store.GetContract(strong)!.Bound, "the levelled demon must win a slot");
+        Assert.True(_store.GetContract(strong)!.Bound, "the levelled creature must win a slot");
         Assert.Null(_store.GetContract(weak));
     }
 }

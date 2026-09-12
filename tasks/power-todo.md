@@ -31,7 +31,7 @@ Baseline: **0 critical, 92 A3, 14 A7**.
 
 - [x] **P0.4 — Widen the LADDER bucket to `long`** — done 2026-08-23. All 56 triaged LADDER sites
   widened across `Core`, `Contracts`, `Data`, `Injector` (Stats/EntityBaseline, SimModels, StatMath,
-  Battle/*, Demons/Patron/PatronPolicy, Effects/Atoms/Power/*, World/*, Contracts/Dtos+WorldDtos+
+  Battle/*, Creatures/Patron/PatronPolicy, Effects/Atoms/Power/*, World/*, Contracts/Dtos+WorldDtos+
   EffectDtos, Injector/GameDumps+EntityStatWriter+CheatActions+GameHooks). Two dead-code sites deleted
   instead of widened (`UnityStatWriter`, `StatSystem`'s `int` `ScaleCurrentHp` overload — both zero
   callers, same shape as `IProgressionPowerProvider`). Fixed SSOT §11.2a's three narrowing casts
@@ -846,8 +846,8 @@ Baseline: **0 critical, 92 A3, 14 A7**.
     `data/tuning/*.v1.json` provenance instead of a bare comment — a stronger form of the same
     transparency obligation, not a gap). The ones that stayed bare code constants
     (`ResourceDeltaMath.MailboxCap`, `WorldEndpoints.MaxCommandsPerSubmit`, `ContentHash.MaxJsonDepth`,
-    `DemonSpeciesCatalog.DemonTypeIdFloor`, `ContentValidation.DriftFloor`,
-    `DemonSpeciesGenerator.DefaultMaxSpecies`, `CapPolicyConfig.MaxLivingBullets`,
+    `CreatureSpeciesCatalog.CreatureTypeIdFloor`, `ContentValidation.DriftFloor`,
+    `CreatureSpeciesGenerator.DefaultMaxSpecies`, `CapPolicyConfig.MaxLivingBullets`,
     `PerfEndpoints.Cap`) were checked individually — every one carries an explanatory comment either on
     its own line or in its immediately enclosing class doc. Independently corroborated: the
     magic-numbers audit (which enforces the same "every surviving const needs a reason" obligation
@@ -872,9 +872,9 @@ Baseline: **0 critical, 92 A3, 14 A7**.
     **15/15** · `E2E.Tests` → **194/194** · `Guard.Tests` → **73/73** · `CheatCore.Tests` → **40/40** ·
     all 6 guards OK · `audit-overflow.py` → 0 critical, A3 unchanged at 21 · `audit-magic-numbers.py
     --summary` → **0/0/0/0 repo-wide**
-  - Files: `src/FusionRpg.Core/Demons/SoulEarnPolicy.cs`, `SoulEarnTuning.cs`,
-    `src/FusionRpg.Core/Demons/Patron/PatronPolicy.cs`, `PatronTuning.cs`,
-    `src/FusionRpg.Core/Demons/Contracts/ContractPolicy.cs`, `ContractTuning.cs`,
+  - Files: `src/FusionRpg.Core/Creatures/SoulEarnPolicy.cs`, `SoulEarnTuning.cs`,
+    `src/FusionRpg.Core/Creatures/Patron/PatronPolicy.cs`, `PatronTuning.cs`,
+    `src/FusionRpg.Core/Creatures/Contracts/ContractPolicy.cs`, `ContractTuning.cs`,
     `src/FusionRpg.Data/Sqlite/RpgStore.Souls.cs`, `src/FusionRpg.Server/ContractEndpoints.cs`,
     `data/tuning/{souls,patron,contracts}.v1.json`, all 3 `ContractTuningTestBootstrap.cs` ·
     tests: `SoulEarnPolicyTests.cs`, `PatronPolicyTests.cs`, `ContractPolicyTests.cs` (Core.Tests),
@@ -908,7 +908,7 @@ Baseline: **0 critical, 92 A3, 14 A7**.
   - **G2 — no private `f(level)`, with the false-positive survey the spec itself demands, actually
     run, not assumed.** First real run found 3 hits. Two genuine, reviewed false positives, not
     silently allowlisted: `PatronPolicy.AuraMilli(rarity, star, level)` — `level` there is the *patron
-    demon's own* level, a different axis from the actor's `Θ`, never previously reviewed against the
+    creature's own* level, a different axis from the actor's `Θ`, never previously reviewed against the
     SSOT — **added as a new row (§10.2 #16) to `ssot-power-scale.md` itself**, not just to a script
     allowlist, because the doc's own opening line requires it ("adding a row is a reviewed change to
     this document, not a convenience"); mirrored into `inventory.json`. `RpgProgression.XpToNext`/
@@ -1110,7 +1110,7 @@ Baseline **329**: M1 111 · M2 80 · M3 88 · M4 50, across 37 balance-surface f
   literals the tool would never flag — migrated for consistency with SSOT §11.7a, which names
   `KillDelta` explicitly as a term in the future earn formula.
   - Verify: `--domain patron` **0/0/0/0** (was 8). `SoulEarnPolicy`'s 9 findings gone from the
-    `demons` bucket (17→8; the remaining 8 are `SummonBannerCatalog`/`SummonRoller`, untouched, a
+    `creatures` bucket (17→8; the remaining 8 are `SummonBannerCatalog`/`SummonRoller`, untouched, a
     later task's scope). Full suite green: Core 2971, Data 470, E2E 194, Server.Tests 15, Guard 73 =
     3723, 0 failures
 - [x] **M.4 — `status`, `fusion`, `shield`, `overlay`, `stats`, `combat`, `expeditions`** — done
@@ -1176,7 +1176,7 @@ Baseline **329**: M1 111 · M2 80 · M3 88 · M4 50, across 37 balance-surface f
   from 329 to 157, and this task's own text ("largest count... deliberately last") assumed vfx was
   the only domain left. It wasn't: **18 more domains, 90 more findings**, across files the plan never
   named — `battle` (11, including 8 M1 in `TraitBattleCatalog.cs`, the highest-severity category),
-  `demons`-extra, `fx`, `effects`, `fusionrpg.core/injector/server/cheatcore` (the tool's catch-all
+  `creatures`-extra, `fx`, `effects`, `fusionrpg.core/injector/server/cheatcore` (the tool's catch-all
   buckets for unnamed folders), `services`, `progression`, `ai`, `policies`, `hud`, `lawn`, `match`,
   `sqlite`, `diagnostics`, `host`. Per `/goal`'s own rule, a stale plan's undercount is not a
   boundary the audit defines — the tool's live output is. Folded into this task rather than treated
@@ -1204,7 +1204,7 @@ Baseline **329**: M1 111 · M2 80 · M3 88 · M4 50, across 37 balance-surface f
   RulesetVersion bump to change, a separate, orthogonal governance concern the migration doesn't
   remove. `BattleStatComposer`'s two affinity divisors. `EngineVersion`/`RulesetVersion` stay
   structural consts (identity, not magnitude).
-  **`summoning`** (spec-demon-summoning.md — a genuinely separate corner of `Demons/` from
+  **`summoning`** (spec-creature-summoning.md — a genuinely separate corner of `Creatures/` from
   contracts/souls/patron/fusion): `data/tuning/summoning.v1.json` — `SummonBannerCatalog`'s 2 banners'
   costs/focus-weight, `SummonRoller`'s 8 pity/rarity consts.
   **`effects`** (Core `Effects/` — distinct from `vfx`/`fx`): `data/tuning/effects.v1.json` —
@@ -1340,7 +1340,7 @@ Not a blocker — Phases 0, M and D are authorized and need nothing from anyone.
   verified 2026-08-24 (T1.1 through T3.6, Checkpoints 1-3 all passed). This checkbox went stale
   behind the work it gates — flipped here rather than left implying the work below it never started.
 
-**Welcome, not owed:** the world program may confirm or move `Wm = 5` · the demon/economy stream may
+**Welcome, not owed:** the world program may confirm or move `Wm = 5` · the creature/economy stream may
 retune the soul constants it already owns (unchanged today, so silence is a valid answer).
 
 **Everything else from this session is decided** — the earn formula (SSOT §11.7a), `Wm`, the §10.4

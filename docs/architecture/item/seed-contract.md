@@ -1,7 +1,7 @@
 # The item seed contract — what gets authored, and what gets computed
 
 **Status:** Proposed 2026-08-22, revised the same day after a fan-out safety audit. **Contract for a
-data build, authoring authorized as of 2026-09-01** (`seed-to-concrete` T0.6/Phase 1 — `demon-seed`
+data build, authoring authorized as of 2026-09-01** (`seed-to-concrete` T0.6/Phase 1 — `creature-seed`
 and `effect-pipeline` author against this contract starting Phase 1). The prior wording — *"Nothing is
 authorized to be authored from it yet"* — was found by the `seed-to-concrete` plan audit to contradict
 its own dependents: Phases 1-2 of that plan author seeds against this contract, which the old line
@@ -36,7 +36,7 @@ data/seed/items/**.json   →   generators   →   data/generated/items/**.json 
 Three consequences:
 
 1. **Anything a formula can compute is not authored.** Otherwise two sources of truth exist and diverge.
-2. **Generated output is checked in.** The precedent is `tools/DemonCatalogGen`, whose emitted catalog is
+2. **Generated output is checked in.** The precedent is `tools/CreatureCatalogGen`, whose emitted catalog is
    committed and reviewable. A generated row nobody can diff is a row nobody can review.
 3. **Adding a computed field later costs zero authored files.** A new formula reads existing authored
    inputs and emits a new column. Every seed file on disk stays valid and untouched. §8 is the list.

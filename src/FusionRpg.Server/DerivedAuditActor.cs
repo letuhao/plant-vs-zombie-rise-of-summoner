@@ -46,9 +46,9 @@ public static class DerivedAuditActor
         var actor = store.EnsureUniqueActorForAudit(pid, InstanceId, "plant", TypeId, AuditSeedSpecimenLevel);
 
         var commander = BroadAllocation(AllocationScope.Commander);
-        var unique = BroadAllocation(AllocationScope.UniqueDemon);
+        var unique = BroadAllocation(AllocationScope.UniqueCreature);
         store.SaveAllocation(AllocationScope.Commander, AptitudeEndpoints.ScopeKey(pid), commander);
-        store.SaveAllocation(AllocationScope.UniqueDemon, actor.InstanceId, unique);
+        store.SaveAllocation(AllocationScope.UniqueCreature, actor.InstanceId, unique);
 
         BindMultiChannelEquip(store, actor.InstanceId);
         TrySeedTreeNodes(store, pid);

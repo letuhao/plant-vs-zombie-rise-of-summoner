@@ -56,7 +56,7 @@ public sealed class QuestCatalog
     /// already takes for its own closed set.</summary>
     public static readonly IReadOnlyList<string> CountLessTemplates = new[]
     {
-        "kill-boss", "extract-with-item-kind", "bring-demon-home-alive",
+        "kill-boss", "extract-with-item-kind", "bring-creature-home-alive",
         "finish-under-hunger", "survive-no-downed", "spend-no-provision",
     };
 

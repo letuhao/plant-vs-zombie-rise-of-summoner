@@ -43,7 +43,7 @@ dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Expedition|G
 | `BattleEngine.cs` | Build Derived via `ActorHub.Resolve` / `ResolveDerived` (or shared helper used by sheet) — **not** `BattleStatComposer.Compose` |
 | `BattleStatComposer.cs` | Delete after parity; temporarily thin wrapper → Hub only if needed for one PR |
 | Battle baseline seed | Level/defense/tempo/resource seed become Hub subsystems or documented Hub baseline contributors (same numbers, one gate) |
-| `UniqueActorHubCompose` / battle squad builders | Same aptitude identity rules: Bound UniqueDemon vs empire species |
+| `UniqueActorHubCompose` / battle squad builders | Same aptitude identity rules: Bound UniqueCreature vs empire species |
 | `guard-actor-hub.ps1` | Drop battle grandfather; Compose callers under `src/` = 0 |
 | Docs | `actor-hub-ssot` §8.3 debt → **retired**; BattleStatComposer header gone with class |
 
@@ -51,7 +51,7 @@ dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Expedition|G
 
 | Input | Hub contribution |
 |---|---|
-| Aptitude | `AptitudeSubsystem` (commander + UniqueDemon or DemonType per entity class) |
+| Aptitude | `AptitudeSubsystem` (commander + UniqueCreature or CreatureType per entity class) |
 | Equip | `AtomDerivedSubsystem` via `EquippedBoundAtoms` / cold-equip-one |
 | Tree | Bound tree atoms (Wave 1: wire for battle actors that have bindings; lawn hydrate is Wave 3) |
 | Star/Loyalty/draught/injury/Zomboss | From `channelmods-hub` |

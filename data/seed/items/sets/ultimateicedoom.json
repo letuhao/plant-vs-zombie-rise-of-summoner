@@ -25,7 +25,7 @@
       "id": "set.ultimateicedoom-001",
       "nameKey": "set.glacial-spore-sovereign",
       "name": "Glacial Spore Sovereign",
-      "themeKey": "demon.ultimateicedoom",
+      "themeKey": "creature.ultimateicedoom",
       "members": [
         {
           "role": "armament-primary",

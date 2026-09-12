@@ -1,5 +1,5 @@
 using FusionRpg.Core.Delve.Encounter;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Stats.Derived;
 using Xunit;
@@ -196,7 +196,7 @@ public class SlotFilterTests
     // ---- ConcreteAnchor.From ----
 
     [Fact]
-    public void ConcreteAnchor_From_computes_DemonTypeId_from_the_floor_plus_gameTypeId()
+    public void ConcreteAnchor_From_computes_CreatureTypeId_from_the_floor_plus_gameTypeId()
     {
         var anchor = new AnchorRow(
             SpeciesId: "x", Rarity: "common", ThreatBand: "raider", AptitudePrimary: "Might",
@@ -212,7 +212,7 @@ public class SlotFilterTests
 
         var joined = ConcreteAnchor.From(anchor, species, RealAnchorCorpusFixture.ThreatTuning);
 
-        Assert.Equal(FusionRpg.Core.Demons.DemonSpeciesCatalog.DemonTypeIdFloor + 42, joined.DemonTypeId);
+        Assert.Equal(FusionRpg.Core.Creatures.CreatureSpeciesCatalog.CreatureTypeIdFloor + 42, joined.CreatureTypeId);
         Assert.Equal(EncounterReach.Short, joined.Reach);
         Assert.Equal(TargetPreference.Frontline, joined.TargetPreference);
         Assert.Equal(4, joined.ThreatRung); // raider

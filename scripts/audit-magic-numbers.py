@@ -203,7 +203,7 @@ LITERAL_RE = re.compile(r"(?<![\w.\"])(-?\d[\d_]*(?:\.\d+)?)(?![\w.\"])")
 def domain_of(path):
     p = path.replace("\\", "/")
     for key in ("Contracts", "Loam", "Patron", "Fusion", "Shield", "Vfx", "Status", "Battle",
-                "Overlay", "Ai", "Match", "Combat", "Expeditions", "Progression", "Demons",
+                "Overlay", "Ai", "Match", "Combat", "Expeditions", "Progression", "Creatures",
                 "World", "Effects", "Stats"):
         if "/%s/" % key in p or p.endswith("/%s.cs" % key):
             return key.lower()

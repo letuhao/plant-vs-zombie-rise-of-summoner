@@ -25,7 +25,7 @@
       "id": "set.ifvstar-001",
       "nameKey": "set.magnetic-star-gourd",
       "name": "Magnetic Star-Gourd",
-      "themeKey": "demon.ifvstar",
+      "themeKey": "creature.ifvstar",
       "members": [
         {
           "role": "armament-primary",

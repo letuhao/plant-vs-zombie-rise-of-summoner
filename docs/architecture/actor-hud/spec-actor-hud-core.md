@@ -109,7 +109,7 @@ public sealed record ActorHudStatusToken(
 Identity row slot priority when rows compete for space (unity/phaser use same ordering):
 
 1. CC glyph / frozen status
-2. Unique/demon pip
+2. Unique/creature pip
 3. Shield segments
 4. Top N status tokens
 5. Level badge · tier frame

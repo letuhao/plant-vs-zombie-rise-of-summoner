@@ -25,7 +25,7 @@
       "id": "set.enumvalue268-001",
       "nameKey": "set.lavender-haze",
       "name": "Lavender Haze",
-      "themeKey": "demon.enumvalue268",
+      "themeKey": "creature.enumvalue268",
       "members": [
         {
           "role": "armament-primary",

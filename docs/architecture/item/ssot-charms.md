@@ -54,7 +54,7 @@ grants nothing while it merely sits in the bag. It has no role, no equip slot, n
 and it is never worn by a body.
 
 Equipment answers *"what is this specimen?"* A charm answers *"what is this run?"* Those are different
-questions asked at different moments — gearing a demon is sticky and per-actor; picking a pouch is a
+questions asked at different moments — gearing a creature is sticky and per-actor; picking a pouch is a
 plan you make when you dispatch. Keeping them separate is the entire reason both mechanics can exist
 without one eating the other.
 
@@ -147,7 +147,7 @@ Equipment binds to an actor; inventory belongs to the player. Four answers, four
 | **A** | **Commander only** | a commander actor's `entity:` | Charms are a 14th–16th equip slot with a different name. The commander does not exist yet — `players` is `(id, name, created_utc)` (`src/FusionRpg.Data/Sqlite/RpgStore.cs:85-89`) — so this invents an actor to hold a mechanic |
 | **B** | **Every deployed actor, individually** | one `entity:` binding per deployed actor | Correct scope per actor, but N bindings created and withdrawn per run, and `entity:` is explicitly **session-scoped and never durable** (`src/FusionRpg.Core/Effects/Atoms/OwnerScope.cs:38`, definitions §6). A binder rebuilds them on every deploy |
 | **C** | **The squad, as one run-scoped binding** | `player:{id}`, one binding per charm | Charms are the run's dial. One binding, one withdraw, one audit row. Inventory ownership and binding scope agree |
-| **D** | **Per-actor charm pouches** | per-specimen | Charms become equipment without slots. The ideal already flags roster scale as the unsolved economic question — 20 demons × 12 slots = 240 items (item-ideal §8) — and this makes it 20 × (12 + 3) |
+| **D** | **Per-actor charm pouches** | per-specimen | Charms become equipment without slots. The ideal already flags roster scale as the unsolved economic question — 20 creatures × 12 slots = 240 items (item-ideal §8) — and this makes it 20 × (12 + 3) |
 
 **Recommendation: C.** One binding per attuned charm, at `player:{id}`, created at run start and
 withdrawn at run end.

@@ -25,7 +25,7 @@
       "id": "set.hypnopot-001",
       "nameKey": "set.enchanting-urn",
       "name": "Enchanting Urn",
-      "themeKey": "demon.hypnopot",
+      "themeKey": "creature.hypnopot",
       "members": [
         {
           "role": "armament-primary",

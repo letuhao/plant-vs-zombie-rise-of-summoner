@@ -1,7 +1,7 @@
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Battle.Ai;
 using FusionRpg.Core.Delve.Encounter;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Dungeon.Tuning;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
@@ -39,7 +39,7 @@ public class BossBuildTests
     static readonly AptitudeTuning AptitudeTuning =
         AptitudeTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "aptitudes.v2.json")));
     static readonly PowerTuning PowerTuning = PowerTuningHub.Tuning; // PowerTuningHub IS configured whole-assembly (ContractTuningTestBootstrap's own [ModuleInitializer])
-    static readonly DemonThreatTuning ThreatTuning = RealAnchorCorpusFixture.ThreatTuning;
+    static readonly CreatureThreatTuning ThreatTuning = RealAnchorCorpusFixture.ThreatTuning;
     static readonly EncounterTuning Tuning = EncounterTuningHub.Tuning;
     static readonly RaidModeTuning Solo = DungeonTuningHub.Tuning.RaidModes["solo"];
     static readonly RaidModeTuning Quad = DungeonTuningHub.Tuning.RaidModes["quad"];

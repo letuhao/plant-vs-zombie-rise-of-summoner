@@ -5,7 +5,7 @@ the level that `budget-source` turns into points.
 
 ## Objective
 
-A demon species must have a **per-player level**. Today the repo levels a *PvZ type* per player — real,
+A creature species must have a **per-player level**. Today the repo levels a *PvZ type* per player — real,
 shipped, and lawn-only — and levels a *specimen* per player. Neither is a species.
 
 This module supplies the species level, from **two sources**, because standalone-first requires the
@@ -19,8 +19,8 @@ closed, and nothing about that level is a private curve.
 ### 1. The identity question — decide it, do not assume it
 
 `rpg_actor_progression(player_id, kind, type_id)` already levels `plant`/`zombie` types
-(`RpgStore.cs:355-368`), and `LawnElementIndex` already maps `(Side, GameTypeId) → DemonSpeciesDef`
-(`src/FusionRpg.Core/Demons/LawnElementIndex.cs`). So a species level *could* be a **join** onto the
+(`RpgStore.cs:355-368`), and `LawnElementIndex` already maps `(Side, GameTypeId) → CreatureSpeciesDef`
+(`src/FusionRpg.Core/Creatures/LawnElementIndex.cs`). So a species level *could* be a **join** onto the
 existing type level rather than new state.
 
 **It cannot be only a join, for two reasons that must be checked against code before building:**
@@ -28,7 +28,7 @@ existing type level rather than new state.
 - **The non-lawn sources have no PvZ type at all.** An expedition battle awards to a specimen and a
   species, never to a `PlantType` int. A join has nothing to join on.
 - **`(Side, GameTypeId)` is not guaranteed unique.** `LawnElementIndex`'s own comment records that
-  `Validate` enforces unique `SpeciesId`/`DemonTypeId` but **not** unique `(Side, GameTypeId)`, and
+  `Validate` enforces unique `SpeciesId`/`CreatureTypeId` but **not** unique `(Side, GameTypeId)`, and
   resolves collisions by dropping the loser. A dropped species could never level through a join.
 
 **Therefore: species progression is its own row, and the lawn's existing type XP is *projected* onto

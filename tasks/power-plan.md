@@ -192,6 +192,6 @@ the per-task evidence (T1.1 through T4.2, Checkpoints 0–4/M/D all passed). Not
 remains open.
 
 Two inputs stayed *welcome* rather than *owed* throughout, and remain so: the world program may still
-confirm or move `Wm` (a weight in a tuning file either way), and the demon/economy stream may still
+confirm or move `Wm` (a weight in a tuning file either way), and the creature/economy stream may still
 retune the soul constants it already owns (they shipped unchanged, so silence was and is a valid
 answer).

@@ -1,13 +1,13 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Contracts;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
 
 namespace FusionRpg.Server;
 
 /// <summary>
-/// Contracts (spec-demon-contracts.md): binding slots and loyalty. Every read settles first — the
+/// Contracts (spec-creature-contracts.md): binding slots and loyalty. Every read settles first — the
 /// tribute clock is lazy, so "look at your contracts" is also "bring the books up to date".
 /// </summary>
 public static class ContractEndpoints
@@ -86,7 +86,7 @@ public static class ContractEndpoints
             {
                 daysSettled = result.DaysSettled,
                 soulsPaid = result.SoulsPaid,
-                demonsDecayed = result.DemonsDecayed,
+                creaturesDecayed = result.CreaturesDecayed,
                 state = ProjectState(store, pid)
             });
         });
@@ -124,12 +124,12 @@ public static class ContractEndpoints
         var state = store.GetContractState(playerId);
         var purchased = state?.PurchasedSlots ?? 0;
         var contracts = store.ListContracts(playerId);
-        var rarities = store.ListDemonRoster(playerId).Items
+        var rarities = store.ListCreatureRoster(playerId).Items
             .ToDictionary(s => s.Profile.InstanceId, s => s.Profile.Rarity, StringComparer.Ordinal);
 
         var rows = contracts.Select(c =>
         {
-            DemonRarityIds.TryParse(
+            CreatureRarityIds.TryParse(
                 rarities.TryGetValue(c.InstanceId, out var r) ? r : "chaff", out var rarity);
             return new
             {
@@ -154,7 +154,7 @@ public static class ContractEndpoints
                 // Same pin the store charges at (SoulSinkPolicy.VanillaPvzTheta), so the quoted
                 // price and the debited price can never disagree.
                 nextSlotPrice = ContractPolicy.NextSlotPrice(
-                    purchased, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta,
+                    purchased, FusionRpg.Core.Creatures.SoulSinkPolicy.VanillaPvzTheta,
                     FusionRpg.Core.Power.PowerTuningHub.Tuning),
                 canBuy = ContractPolicy.CanBuySlot(purchased),
                 // T3.6 (spec-caps-reconcile.md §2.3): ContractPolicy.MaxSlots is deleted -- price is

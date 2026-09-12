@@ -52,7 +52,7 @@ npm test -- --run aptitude-auto
 | `species-favour` | Species favour | Mode A/B only: load **favour GET** `sharesPermille`, scale to budget — **E3 seed only** |
 
 Mode C: no `species-favour` (use Even / posture / active). Overspend refused before draft apply.
-Empty UniqueDemon / empty commander stays empty until player Confirm or Activate — favour never
+Empty UniqueCreature / empty commander stays empty until player Confirm or Activate — favour never
 writes Hub (**E3**).
 
 ### Favour consumption (S1 / S7)

@@ -47,7 +47,7 @@ against code during this pass — both recorded in §7.**
 | **Per-unit levels** | ⬜ (two-tier upgrade plants only) | Seed packets, L1–10, then 200 Mastery levels | 5 tiers: 220 fragments + 850,000 coins, flat 150/200/250/300% | **3 / 12 teams** — ECLISE tiers, Fusion upgrades, Gardendless clones | Abyss upgrades +150/+300/+900%, scaled to 5% at Odyssey rarity | Arknights: level + elite + mastery + module (4 axes) | ✅ `P(Θ)` ladder, owner-committed 2026-08-24 ([power-map](../../architecture/power-map.md)) |
 | **Levelling buys behaviour, not just stats** | — | **No** — one exception (Mastery chance-to-boost) | Authored skill rider per tier | ECLISE tiers are explicit **sidegrades** | Rarity-scaled costs | SMT: skill inheritance at fusion | ✅ atoms/affixes are the behaviour layer ([effect-atom-map](../../architecture/effect-atom-map.md)) |
 | **Levelling can reduce cost** | ⬜ | **Yes** — `Cost` is a per-level array (Sunflower 50→25 at L8) | — | — | — | — | ⬜ no cost-side channel |
-| **Rarity ladder** | ⬜ | ⬜ | Store colour tiers | **2 / 12** | `CardLevel` = White/Green/Blue/Purple/Gold/Red (**6**, verified in binary) | PvZ Heroes: 6 tiers, buys text not stats | ✅ **10 rungs**, Chaff→Almanac, verified in `DemonRarity.cs` |
+| **Rarity ladder** | ⬜ | ⬜ | Store colour tiers | **2 / 12** | `CardLevel` = White/Green/Blue/Purple/Gold/Red (**6**, verified in binary) | PvZ Heroes: 6 tiers, buys text not stats | ✅ **10 rungs**, Chaff→Almanac, verified in `CreatureRarity.cs` |
 | **Rarity separate from upgrade state** | — | — | — | — | **Yes** — `CardLevel` *and* a separate `UI.Quality` axis | Genshin: rarity vs refinement | ✅ rarity vs affix roll are independent |
 | **Equipment / attachments** | ⬜ | ⬜ | Pendants (4 quality steps) | **1 / 12** (official only) | ⬜ | PoE / Diablo affix items | ✅ affixes built (`AffixLibraryGenerator`, `AffixValidator`, `Resolver`); **📋 sockets/sets are specced only** — [`spec-sockets-and-sets.md`](../../design/spec-sockets-and-sets.md) has no code behind it (corrected 2026-09-02) |
 | **Ongoing upkeep on owned units** | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | WC3 upkeep: 3-bracket income tax, **the only first-party rationale doc found** | ✅ contracts: binding slots, loyalty, daily tribute |
@@ -119,7 +119,7 @@ studied reference.
 
 | Property | **PVZ Fusion (from its binary)** | **SMT / Persona** | **Here** |
 |---|---|---|---|
-| Recipe form | `AddRecipe` (unordered) **and** `AddOrderedRecipe` | Race chart + level rule | `DemonRecipeCatalog` |
+| Recipe form | `AddRecipe` (unordered) **and** `AddOrderedRecipe` | Race chart + level rule | `CreatureRecipeCatalog` |
 | Is it a table or a rule? | **Table**, in named partitions (`FirstMix`, `PuffMix`, `FogPlant`, `RoofPlant`, `InitTravel`, `SpecialPlant`) | **Both** — chart picks race, `levelA + levelB ≤ 2·(levelR − 1)` picks the individual | Table + rarity policy |
 | Why the rule works | — | **`(race, level)` is a primary key — zero collisions across all five games' tables (computed)** | — |
 | Randomised recipes | ✅ `_recipes_random`, `UpdateRandomMix()` — **regenerated at runtime** | ⬜ (fusion *accidents* only) | ⬜ |
@@ -127,7 +127,7 @@ studied reference.
 | Recursive / depth-aware | ✅ `PlantMixTreeNode.{Depth, IsBasicPlant, AllDescendants}` | Implicit | ✅ tiered |
 | Multiple routes to one result | ✅ `GetMixPaths` returns `List<List<PlantType>>` | ✅ | — |
 | Engine-computed roster metrics | ✅ `MixTreeStatistics{TotalMixRecipes, MaxTreeDepth, BasicPlantCount, MaxChildrenCount}` | — | Seedsmith computes externally |
-| Result stats | Authored per result (inference) | Authored per demon | **Deterministic species stats; effects roll per player** |
+| Result stats | Authored per result (inference) | Authored per creature | **Deterministic species stats; effects roll per player** |
 
 **Three capabilities the host game ships that this project does not have vocabulary for: un-fusion, a
 runtime-regenerated recipe table, and multiple routes to the same result.** Recorded as observation.

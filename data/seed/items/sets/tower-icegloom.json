@@ -25,7 +25,7 @@
       "id": "set.tower-icegloom-001",
       "nameKey": "set.frost-mist-spore",
       "name": "Frost Mist Spore",
-      "themeKey": "demon.tower_icegloom",
+      "themeKey": "creature.tower_icegloom",
       "members": [
         {
           "role": "armament-primary",

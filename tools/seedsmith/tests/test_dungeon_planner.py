@@ -128,31 +128,31 @@ class SelectPlanningThemesTests(unittest.TestCase):
 
     def test_never_selects_a_retired_theme(self) -> None:
         fixture = {
-            "demon.a": {"rarity": "common", "retired": True, "motifs": ["x", "y"], "antiMotifs": []},
-            "demon.b": {"rarity": "common", "retired": False, "motifs": ["x", "y"], "antiMotifs": []},
+            "creature.a": {"rarity": "common", "retired": True, "motifs": ["x", "y"], "antiMotifs": []},
+            "creature.b": {"rarity": "common", "retired": False, "motifs": ["x", "y"], "antiMotifs": []},
         }
         chosen = select_planning_themes(fixture, per_rarity=2)
-        self.assertEqual(chosen, ("demon.b",))
+        self.assertEqual(chosen, ("creature.b",))
 
     def test_ignores_source_only_fallback_rarities(self) -> None:
         fixture = {
-            "demon.common": {"rarity": "common", "retired": False, "motifs": ["x", "y"],
+            "creature.common": {"rarity": "common", "retired": False, "motifs": ["x", "y"],
                              "antiMotifs": []},
-            "demon.fallback": {"rarity": "almanac", "retired": False,
+            "creature.fallback": {"rarity": "almanac", "retired": False,
                                "motifs": ["x", "y"], "antiMotifs": []},
         }
-        self.assertEqual(select_planning_themes(fixture, per_rarity=2), ("demon.common",))
+        self.assertEqual(select_planning_themes(fixture, per_rarity=2), ("creature.common",))
 
     def test_picks_alphabetically_first_within_a_band_not_by_richness(self) -> None:
         # A theme with a longer combined motif+antiMotif list must NOT win over an
         # alphabetically-earlier one -- the monoculture failure mode this function exists to avoid.
         fixture = {
-            "demon.z-rich": {"rarity": "common", "retired": False,
+            "creature.z-rich": {"rarity": "common", "retired": False,
                               "motifs": ["a", "b", "c", "d", "e"], "antiMotifs": ["f", "g", "h"]},
-            "demon.a-plain": {"rarity": "common", "retired": False, "motifs": ["x", "y"], "antiMotifs": []},
+            "creature.a-plain": {"rarity": "common", "retired": False, "motifs": ["x", "y"], "antiMotifs": []},
         }
         chosen = select_planning_themes(fixture, per_rarity=1)
-        self.assertEqual(chosen, ("demon.a-plain",))
+        self.assertEqual(chosen, ("creature.a-plain",))
 
 
 class AllocateEventTargetsTests(unittest.TestCase):

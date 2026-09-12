@@ -12,7 +12,7 @@ namespace FusionRpg.Core.Tests.Actions;
 /// <para><c>EligibilityAxisTests</c> already proves the <b>mechanism</b> thoroughly, but every one of
 /// its scope cases is a synthetic row. Nothing read the <b>shipped, committed</b> content, so a
 /// `family`/`species` row whose `scopeKey` had gone stale — the exact risk S5 was parked on while the
-/// demon corpus was being re-classified — would have resolved to nothing, silently, and no test would
+/// creature corpus was being re-classified — would have resolved to nothing, silently, and no test would
 /// have said a word.</para>
 ///
 /// <para>This file closes S5's two acceptance clauses against the real files:
@@ -66,7 +66,7 @@ public class AuthoredEligibilityResolvesTests
     static HashSet<string> LoadableFamilyIds()
     {
         var families = RealFamilyMap().Values.SelectMany(v => v).ToList();
-        var registryPath = Path.Combine(RepoRoot(), "data", "seed", "demons", "_registry", "families.v1.json");
+        var registryPath = Path.Combine(RepoRoot(), "data", "seed", "creatures", "_registry", "families.v1.json");
         if (File.Exists(registryPath))
         {
             using var doc = JsonDocument.Parse(File.ReadAllText(registryPath));
@@ -92,7 +92,7 @@ public class AuthoredEligibilityResolvesTests
     /// ⭐ **S5 clause 1 — every authored scope key names something that exists.**
     ///
     /// <para>A `family` row's key must be a family the map actually assigns, and a `species` row's key
-    /// must be a species the demon catalog actually ships. A dangling key is not a crash: the row
+    /// must be a species the creature catalog actually ships. A dangling key is not a crash: the row
     /// simply never joins any candidate set, so the action is authored, shipped, and unreachable.
     /// That is the failure this asserts against, and it is invisible without a check like this.</para>
     /// </summary>
@@ -102,7 +102,7 @@ public class AuthoredEligibilityResolvesTests
         var rows = AuthoredRows();
         var families = LoadableFamilyIds();
 
-        var indexPath = Path.Combine(RepoRoot(), "data", "seed", "demons", "species", "_index.json");
+        var indexPath = Path.Combine(RepoRoot(), "data", "seed", "creatures", "species", "_index.json");
         var species = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(indexPath))!
             .Keys.Select(k => k.ToLowerInvariant())
             .ToHashSet(StringComparer.Ordinal);
@@ -123,7 +123,7 @@ public class AuthoredEligibilityResolvesTests
                 case "species":
                     speciesRows++;
                     if (r.ScopeKey is null || !species.Contains(r.ScopeKey))
-                        dangling.Add($"{r.Id}: species '{r.ScopeKey}' is not in the demon catalog");
+                        dangling.Add($"{r.Id}: species '{r.ScopeKey}' is not in the creature catalog");
                     break;
             }
         }

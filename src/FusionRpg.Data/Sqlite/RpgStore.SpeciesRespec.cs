@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Stats.Aptitudes;
 using Microsoft.Data.Sqlite;
 
@@ -160,7 +160,7 @@ public sealed partial class RpgStore
         var (everTouched, storedCount, lastUtc) = ReadSpeciesRespecRowUnlocked(db, playerId, speciesId);
         var effectiveCount = DecayedRespecCount(storedCount, DateTimeOffset.Parse(lastUtc), now, tuning.RespecDecayDays);
 
-        var isRevert = newOverride.TotalForScope(AllocationScope.DemonType) == 0;
+        var isRevert = newOverride.TotalForScope(AllocationScope.CreatureType) == 0;
         // "First override" means this species has NEVER been touched by this economy before --
         // NOT merely "the override happens to read empty right now." Reading the latter off
         // LoadAllocation would let revert-then-reoverride bypass every future price forever (revert
@@ -187,7 +187,7 @@ public sealed partial class RpgStore
                 mark.ExecuteNonQuery();
             }
             // No spend, no counter movement -- a free action leaves the churn clock untouched.
-            SaveAllocationUnlocked(db, tx, AllocationScope.DemonType, scopeKey, newOverride);
+            SaveAllocationUnlocked(db, tx, AllocationScope.CreatureType, scopeKey, newOverride);
             return new SpeciesRespecOutcome(true, "", false, 0, effectiveCount, ReadSoulBalanceUnlocked(db, playerId));
         }
 
@@ -235,7 +235,7 @@ public sealed partial class RpgStore
             cmd.ExecuteNonQuery();
         }
 
-        SaveAllocationUnlocked(db, tx, AllocationScope.DemonType, scopeKey, newOverride);
+        SaveAllocationUnlocked(db, tx, AllocationScope.CreatureType, scopeKey, newOverride);
         return new SpeciesRespecOutcome(true, "", true, price.Amount, newCount, ReadSoulBalanceUnlocked(db, playerId));
     }
 }

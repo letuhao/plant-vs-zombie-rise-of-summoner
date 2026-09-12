@@ -214,7 +214,7 @@ through this pipeline (additive, defaulted empty, every other kind untouched).
 Prose-scale near-duplicates cluster around Jaccard 0.5-0.6 (sentences sharing a topic), well below
 the ~0.8+ range 5-gram/8-band/4-row LSH reliably catches. Run live against the real corpus, LSH
 missed its own clearest pair entirely. A kind with a prose dedup field is bounded in the low
-thousands at worst (`commander-effect`'s ceiling is ~900 demons), where direct all-pairs Jaccard
+thousands at worst (`commander-effect`'s ceiling is ~900 creatures), where direct all-pairs Jaccard
 over the exact shingle sets is cheap and has no recall to trade away — so 6.2b compares directly and
 does **not** route through MinHash+LSH. The two techniques solve different scale problems; picking
 the wrong one for prose scale is how a check ships and does not fire.

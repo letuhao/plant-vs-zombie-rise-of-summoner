@@ -116,7 +116,7 @@ is a prerequisite for it; several later modules depend on IT). **`enhancement-mi
       coverage in `seedsmith.numerics`. CLI wiring (`--kind affix-family`) deliberately deferred —
       `cmd_items`'s `generate` handler is set/charm-specific and needs its own integration pass.
 - [x] **T11** — ✅ **Built 2026-09-07, content gap CLOSED same day.** `materialgen/vocab.py`
-      reconstructs the real 27-id issuable vocabulary by walking `DemonRarity.cs`/`DemonRarityLadder.cs`/
+      reconstructs the real 27-id issuable vocabulary by walking `CreatureRarity.cs`/`CreatureRarityLadder.cs`/
       `ActorElementTypes.cs`/`MaterialCatalog.cs`'s own enums (never hand-typed), pinned by
       `assert len(ISSUABLE) == 27`. **Verified:** 27/27 tests pass. **Real finding, then fixed for
       real**: the shipped `materials.json` had 4 legacy shard entries but ZERO of the 10 real rarity-
@@ -415,7 +415,7 @@ originally-assumed `affix-families-gen`) are materials/sockets/consumables/base-
       (`droptable.d1-013`) referencing `role: "standard"`. This is NOT a base-types-gen coverage gap the
       way `hybrid` is — the recursive scan found 20 real `role: "standard"` entries, every one carrying
       `"enabled": false` and an explicit `retiredReason` citing **D14** (`item-ideal.md`, 2026-09-04:
-      "the commander is another unique demon, not a 16th equip slot... the generator emits nothing into
+      "the commander is another unique creature, not a 16th equip slot... the generator emits nothing into
       it... retired, not deleted"). `role: "standard"` is DELIBERATELY, permanently unfillable by a
       already-ruled design decision, not an accidental vocabulary hole. So `droptable.d1-013`'s
       reference (and the 2 pre-existing, non-generated rows doing the same) is a genuine **drop-table
@@ -438,7 +438,7 @@ originally-assumed `affix-families-gen`) are materials/sockets/consumables/base-
       per-role directional "lean" correlated across the twelve-role hybrid core, spending a shared
       permille budget across both pure frames' ladders) that the spec itself says is blocked on **X1's
       `frame-classify`** stage, which "exists only as a proposal... no code, no output, nothing in
-      `data/seed/demons/_registry/`" — and states in its own words: *"the cheap insurance is one
+      `data/seed/creatures/_registry/`" — and states in its own words: *"the cheap insurance is one
       command, and it is not this module's to run: run X1, count the hybrids, then decide how much of
       D11 to buy."* Confirms (more strongly than the earlier "vocabulary gap" framing) that this is a
       real, sequenced, owner/X1-gated feature — not a wiring gap this session could fix by adding

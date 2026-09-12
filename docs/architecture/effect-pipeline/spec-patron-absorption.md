@@ -46,8 +46,8 @@ continuous input.
 > - **`CurveInput` has three members — `Level`, `Rarity`, `Tier`
 >   (`src/FusionRpg.Core/Effects/Atoms/CurveTable.cs:4-9`). There is no `Star`.**
 > - **More decisively, `AuraMilli` takes four inputs, not one.** Its signature is
->   `AuraMilli(DemonRarity rarity, int star, long level, int pTheta, PowerTuning)`
->   (`src/FusionRpg.Core/Demons/Patron/PatronPolicy.cs:53`), and its body is
+>   `AuraMilli(CreatureRarity rarity, int star, long level, int pTheta, PowerTuning)`
+>   (`src/FusionRpg.Core/Creatures/Patron/PatronPolicy.cs:53`), and its body is
 >   `clamp(rarityBase + perStar×star + level, 0, cap) + K×P(Θ)/1000` (`:56-64`). **A `CurveTable` is a
 >   1-D interpolation over a single input.** No single curve — and no `CurveInput` member — can
 >   reproduce a four-input expression with a clamp and a `P(Θ)` term inside it.
@@ -219,14 +219,14 @@ whose id is not in the registry throws, naming the unknown ref — never silentl
 
 Not named anywhere in this file's original text, found this session while scoping the actual
 implementation: `AuraMilli`'s four inputs (`rarity`, `star`, `level`, `pTheta`) all belong to
-**whichever specific demon a given player has currently designated as patron** — genuinely different
-per player, and changing over that demon's own lifetime (promotion changes `star`; leveling changes
+**whichever specific creature a given player has currently designated as patron** — genuinely different
+per player, and changing over that creature's own lifetime (promotion changes `star`; leveling changes
 `level`). `AtomCompiler.Compile`'s own `ownerLevel`/`ownerTheta` parameters
 (`src/FusionRpg.Core/Effects/Atoms/AtomCompiler.cs:27-35`) are each a single value for the WHOLE
 compile call — they answer "what is the level/Θ of the ONE owner this push is for," which is exactly
-right for a species' own base stats or one demon's own equipment, but Patron's aura is resolved
+right for a species' own base stats or one creature's own equipment, but Patron's aura is resolved
 **inside a push that may also carry the player's own, unrelated level/Θ** (the same multi-owner union
-`AtomPushService.OwnersForPlayer` now builds, `seed-to-concrete` T6.1) — the patron demon's own
+`AtomPushService.OwnersForPlayer` now builds, `seed-to-concrete` T6.1) — the patron creature's own
 rarity/star/level/Θ are not the same numbers as the player's.
 
 **Corrected the same day, before any code was written** — freezing these four inputs onto a
@@ -283,7 +283,7 @@ tests/FusionRpg.Core.Tests/Effects/PatronAbsorptionGridEqualityTests.cs   new �
    now-redundant `PatronRuntimeState.TryGet`+`BeginMatch`/`EndMatch` freeze, since nothing reads
    `MatchAura` once `PatronAuraOverlay.cs` is gone. The plugin keeps a `TryGet` gate (skip granting for
    a player with no patron at all) — that's the only surviving use of `PatronRuntimeState` here.
-3. The grid-equality test's real path is `tests/FusionRpg.Core.Tests/Demons/Patron/
+3. The grid-equality test's real path is `tests/FusionRpg.Core.Tests/Creatures/Patron/
    PatronAbsorptionGridEqualityTests.cs`, not `.../Effects/...` — that path collided with production
    `FusionRpg.Core.Effects` (C# namespace search stops at the first segment match), breaking
    `TreeAtomSourceTests.cs`. A real, self-caught regression; fixed by relocating, not by working around
@@ -335,5 +335,5 @@ before this fix, all independently traced to an unrelated `vocabulary.json` seed
 concurrent session's own in-flight World-subsystem edits — none Patron-related).
 
 The "promotion" scenario in the third test's name is exercised as a patron **switch** to a
-different-element demon instead of a real fusion star-up — proves the identical "nothing is cached
+different-element creature instead of a real fusion star-up — proves the identical "nothing is cached
 between pushes" property far more reliably than depending on fusion RNG/thresholds for a test fixture.

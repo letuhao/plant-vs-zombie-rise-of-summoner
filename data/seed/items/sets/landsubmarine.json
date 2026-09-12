@@ -25,7 +25,7 @@
       "id": "set.landsubmarine-001",
       "nameKey": "set.abyssal-trench-call",
       "name": "Abyssal Trench Call",
-      "themeKey": "demon.landsubmarine",
+      "themeKey": "creature.landsubmarine",
       "members": [
         {
           "role": "armament-primary",

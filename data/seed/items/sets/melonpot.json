@@ -25,7 +25,7 @@
       "id": "set.melonpot-001",
       "nameKey": "set.watermelon-pot",
       "name": "Watermelon Pot",
-      "themeKey": "demon.melonpot",
+      "themeKey": "creature.melonpot",
       "members": [
         {
           "role": "armament-primary",

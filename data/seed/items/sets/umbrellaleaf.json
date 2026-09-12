@@ -25,7 +25,7 @@
       "id": "set.umbrellaleaf-001",
       "nameKey": "set.spore-umbrella-parasite",
       "name": "Spore-Umbrella Parasite",
-      "themeKey": "demon.umbrellaleaf",
+      "themeKey": "creature.umbrellaleaf",
       "members": [
         {
           "role": "armament-primary",

@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Activity;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Progression;
 using FusionRpg.Data;
 using Xunit;
@@ -10,23 +10,23 @@ namespace FusionRpg.Data.Tests;
 /// <summary>`species-build` T1.1/T1.2/T1.3 (module 3, `species-xp`) — the storage half. Species
 /// levelling reuses `rpg_actor_progression`/`rpg_xp_ledger` via <c>kind='species'</c>
 /// (spec-species-xp.md §1 Option A, confirmed against this exact file before committing: `type_id`
-/// carries <c>DemonSpeciesDef.DemonTypeId</c>, already unique per species). The pure curve/tuning
+/// carries <c>CreatureSpeciesDef.CreatureTypeId</c>, already unique per species). The pure curve/tuning
 /// surface is covered in `FusionRpg.Core.Tests.Progression.SpeciesProgressionTests`; this file proves
 /// the lawn projection (T1.2), the run-completion term (T1.3), and the `!pvzGame` conditional's two
 /// directions. T1.4 (the expedition/game-closed source) lives in its own file next to
 /// `RpgStore.Expeditions.cs`.
 ///
-/// <para>Real roster ids used below (compiled default, `DemonSpeciesCatalog.ConfigureFromCompiledDefault`,
-/// confirmed against `DemonSpeciesCatalog.Generated.cs`): plant GameTypeId 7 = 'fumeshroom'
-/// (DemonTypeId 60007); zombie GameTypeId 3 = 'polevaulterzombie' (DemonTypeId 10003) — the SAME
+/// <para>Real roster ids used below (compiled default, `CreatureSpeciesCatalog.ConfigureFromCompiledDefault`,
+/// confirmed against `CreatureSpeciesCatalog.Generated.cs`): plant GameTypeId 7 = 'fumeshroom'
+/// (CreatureTypeId 60007); zombie GameTypeId 3 = 'polevaulterzombie' (CreatureTypeId 10003) — the SAME
 /// GameTypeId as plant 'wallnut' but on a different <c>Side</c>, so the two keys never collide.</para>
 /// </summary>
 public class SpeciesProgressionTests : IDisposable
 {
     const int FumeshroomGameTypeId = 7;
-    const int FumeshroomDemonTypeId = 60007;
+    const int FumeshroomCreatureTypeId = 60007;
     const int PolevaulterGameTypeId = 3;
-    const int PolevaulterDemonTypeId = 10003;
+    const int PolevaulterCreatureTypeId = 10003;
 
     readonly string _dir;
     readonly RpgStore _store;
@@ -52,12 +52,12 @@ public class SpeciesProgressionTests : IDisposable
         {
             Kind = PvzActivityKinds.PlantPlaced,
             RunId = 1,
-            SourceKind = "demon.progression.v1", SourceId = "general:fumeshroom",
+            SourceKind = "creature.progression.v1", SourceId = "general:fumeshroom",
             PayloadJson = """{"type":7}""",
             DedupeKey = "place-1"
         });
 
-        var species = _store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomDemonTypeId);
+        var species = _store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomCreatureTypeId);
         Assert.NotNull(species);
         // A single placement is well below the L1->L2 threshold (60 xp, 4 xp/placement) -- proves
         // the row exists and accrued XP without needing a level-up in this assertion.
@@ -65,9 +65,9 @@ public class SpeciesProgressionTests : IDisposable
         Assert.Equal(4, species.Xp);
 
         // The species resolved must match LawnElementIndex's own answer for (Side, GameTypeId).
-        var index = new LawnElementIndex(DemonSpeciesCatalog.All);
+        var index = new LawnElementIndex(CreatureSpeciesCatalog.All);
         Assert.True(index.TryGet("plant", FumeshroomGameTypeId, out var expected));
-        Assert.Equal(FumeshroomDemonTypeId, expected.DemonTypeId);
+        Assert.Equal(FumeshroomCreatureTypeId, expected.CreatureTypeId);
 
         // The existing plant-TYPE row (kind='plant') stays untouched alongside it.
         var plantType = _store.GetRpgActor(player.Id, RpgActorKinds.Plant, FumeshroomGameTypeId);
@@ -82,14 +82,14 @@ public class SpeciesProgressionTests : IDisposable
         {
             Kind = PvzActivityKinds.PlantPlaced,
             RunId = 1,
-            SourceKind = "demon.progression.v1", SourceId = "general:fumeshroom",
+            SourceKind = "creature.progression.v1", SourceId = "general:fumeshroom",
             PayloadJson = """{"type":7}""",
             DedupeKey = "same-fact"
         };
         _store.AppendPvzActivityFact(player.Id, req);
         _store.AppendPvzActivityFact(player.Id, req);
 
-        var species = _store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomDemonTypeId);
+        var species = _store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomCreatureTypeId);
         Assert.NotNull(species);
         Assert.Equal(4, species!.Xp); // one placement's worth, not two
     }
@@ -102,12 +102,12 @@ public class SpeciesProgressionTests : IDisposable
         {
             Kind = PvzActivityKinds.ZombieSpawned,
             RunId = 1,
-            SourceKind = "demon.progression.v1", SourceId = "general:polevaulterzombie",
+            SourceKind = "creature.progression.v1", SourceId = "general:polevaulterzombie",
             PayloadJson = """{"type":3}""",
             DedupeKey = "spawn-1"
         });
 
-        var species = _store.GetRpgActor(player.Id, RpgActorKinds.Species, PolevaulterDemonTypeId);
+        var species = _store.GetRpgActor(player.Id, RpgActorKinds.Species, PolevaulterCreatureTypeId);
         Assert.NotNull(species);
         Assert.Equal(4, species!.Xp);
     }
@@ -122,7 +122,7 @@ public class SpeciesProgressionTests : IDisposable
             {
                 Kind = PvzActivityKinds.PlantPlaced,
                 RunId = 1,
-                SourceKind = "demon.progression.v1", SourceId = "general:fumeshroom",
+                SourceKind = "creature.progression.v1", SourceId = "general:fumeshroom",
                 PayloadJson = """{"type":7}""",
                 DedupeKey = $"place-{i}"
             });
@@ -135,7 +135,7 @@ public class SpeciesProgressionTests : IDisposable
             DedupeKey = "match-end-1"
         });
 
-        var species = _store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomDemonTypeId);
+        var species = _store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomCreatureTypeId);
         Assert.NotNull(species);
         // 5 placements x 4 + ONE run-completion x 100 = 120 TOTAL EARNED, never 5x100=500 (would
         // mean it fired per placement) and never <120 (would mean the run term never fired at all).
@@ -150,7 +150,7 @@ public class SpeciesProgressionTests : IDisposable
         var player = _store.CreatePlayer("SpeciesRunReplay");
         _store.AppendPvzActivityFact(player.Id, new PvzActivityAppendRequest
         {
-            Kind = PvzActivityKinds.PlantPlaced, RunId = 1, SourceKind = "demon.progression.v1", SourceId = "general:fumeshroom",
+            Kind = PvzActivityKinds.PlantPlaced, RunId = 1, SourceKind = "creature.progression.v1", SourceId = "general:fumeshroom",
             PayloadJson = """{"type":7}""", DedupeKey = "place-1"
         });
         var matchEnd = new PvzActivityAppendRequest
@@ -161,7 +161,7 @@ public class SpeciesProgressionTests : IDisposable
         _store.AppendPvzActivityFact(player.Id, matchEnd);
         _store.AppendPvzActivityFact(player.Id, matchEnd); // replay of the identical fact
 
-        var species = _store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomDemonTypeId);
+        var species = _store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomCreatureTypeId);
         Assert.Equal(4 + 100, TotalEarned(species!));
     }
 
@@ -175,19 +175,19 @@ public class SpeciesProgressionTests : IDisposable
         {
             _store.AppendPvzActivityFact(player.Id, new PvzActivityAppendRequest
             {
-            Kind = PvzActivityKinds.PlantPlaced, RunId = 1, SourceKind = "demon.progression.v1", SourceId = "general:fumeshroom",
+            Kind = PvzActivityKinds.PlantPlaced, RunId = 1, SourceKind = "creature.progression.v1", SourceId = "general:fumeshroom",
             PayloadJson = """{"type":7}""",
                 DedupeKey = $"heavy-{i}"
             });
         }
-        var placementsOnlyXp = TotalEarned(_store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomDemonTypeId)!);
+        var placementsOnlyXp = TotalEarned(_store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomCreatureTypeId)!);
 
         _store.AppendPvzActivityFact(player.Id, new PvzActivityAppendRequest
         {
             Kind = PvzActivityKinds.MatchEnded, RunId = 1, PayloadJson = """{"result":"victory"}""",
             DedupeKey = "heavy-match-end"
         });
-        var totalXp = TotalEarned(_store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomDemonTypeId)!);
+        var totalXp = TotalEarned(_store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomCreatureTypeId)!);
         var runAward = totalXp - placementsOnlyXp;
 
         Assert.True(runAward > placementsOnlyXp,
@@ -217,7 +217,7 @@ public class SpeciesProgressionTests : IDisposable
             Payload = new
             {
                 type = FumeshroomGameTypeId,
-                sourceKind = DemonProgressionSource.ContractKind,
+                sourceKind = CreatureProgressionSource.ContractKind,
                 sourceId = "general:fumeshroom"
             }
         });
@@ -225,7 +225,7 @@ public class SpeciesProgressionTests : IDisposable
         var plantType = _store.GetRpgActor(player.Id, RpgActorKinds.Plant, FumeshroomGameTypeId);
         Assert.Null(plantType); // the existing rule holds: web-mode never levels a PvZ almanac type
 
-        var species = _store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomDemonTypeId);
+        var species = _store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomCreatureTypeId);
         Assert.NotNull(species); // the new rule: a species row is not a PvZ almanac type
         Assert.Equal(4, species!.Xp);
     }
@@ -247,7 +247,7 @@ public class SpeciesProgressionTests : IDisposable
             Payload = new
             {
                 type = FumeshroomGameTypeId,
-                sourceKind = DemonProgressionSource.ContractKind,
+                sourceKind = CreatureProgressionSource.ContractKind,
                 sourceId = "unique:not-a-general-claim"
             }
         });
@@ -255,7 +255,7 @@ public class SpeciesProgressionTests : IDisposable
         var fact = _store.ListPvzActivityFacts(player.Id)!.Items.Single(x => x.Kind == PvzActivityKinds.PlantPlaced);
         Assert.Equal("untrusted", fact.SourceKind);
         Assert.Equal("invalid-claim", fact.SourceId);
-        Assert.Null(_store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomDemonTypeId));
+        Assert.Null(_store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomCreatureTypeId));
     }
 
     [Fact]
@@ -278,7 +278,7 @@ public class SpeciesProgressionTests : IDisposable
         var fact = _store.ListPvzActivityFacts(player.Id)!.Items.Single(x => x.Kind == PvzActivityKinds.PlantPlaced);
         Assert.Equal("capture", fact.SourceKind);
         Assert.Equal("plant.place", fact.SourceId);
-        Assert.Null(_store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomDemonTypeId));
+        Assert.Null(_store.GetRpgActor(player.Id, RpgActorKinds.Species, FumeshroomCreatureTypeId));
     }
 
     [Fact]
@@ -288,22 +288,22 @@ public class SpeciesProgressionTests : IDisposable
         // unique, and the collision resolves deterministically (lowest SpeciesId wins) rather than
         // crashing. T1.2's own acceptance: the loser must not be permanently unlevellable -- it just
         // isn't reachable through THIS source, which this test proves is a silent skip, not a throw.
-        var winner = MakeSpecies("aaa-winner", demonTypeId: 70001, side: "plant", gameTypeId: 999);
-        var loser = MakeSpecies("zzz-loser", demonTypeId: 70002, side: "plant", gameTypeId: 999);
+        var winner = MakeSpecies("aaa-winner", creatureTypeId: 70001, side: "plant", gameTypeId: 999);
+        var loser = MakeSpecies("zzz-loser", creatureTypeId: 70002, side: "plant", gameTypeId: 999);
 
-        using var _ = DemonSpeciesCatalog.UseScoped(new[] { winner, loser });
+        using var _ = CreatureSpeciesCatalog.UseScoped(new[] { winner, loser });
 
         var player = _store.CreatePlayer("SpeciesCollision");
         var ex = Record.Exception(() => _store.AppendPvzActivityFact(player.Id, new PvzActivityAppendRequest
         {
-            Kind = PvzActivityKinds.PlantPlaced, RunId = 1, SourceKind = "demon.progression.v1", SourceId = "general:aaa-winner",
+            Kind = PvzActivityKinds.PlantPlaced, RunId = 1, SourceKind = "creature.progression.v1", SourceId = "general:aaa-winner",
             PayloadJson = """{"type":999}""",
             DedupeKey = "collide-1"
         }));
         Assert.Null(ex);
 
-        Assert.NotNull(_store.GetRpgActor(player.Id, RpgActorKinds.Species, winner.DemonTypeId));
-        Assert.Null(_store.GetRpgActor(player.Id, RpgActorKinds.Species, loser.DemonTypeId));
+        Assert.NotNull(_store.GetRpgActor(player.Id, RpgActorKinds.Species, winner.CreatureTypeId));
+        Assert.Null(_store.GetRpgActor(player.Id, RpgActorKinds.Species, loser.CreatureTypeId));
     }
 
     /// <summary>Reconstructs lifetime XP earned from a snapshot's (Level, Xp) pair via
@@ -313,18 +313,18 @@ public class SpeciesProgressionTests : IDisposable
     static long TotalEarned(RpgActorProgressionDto dto) =>
         RpgXpCurve.TotalToReach(RpgActorKinds.Species, dto.Level) + dto.Xp;
 
-    static DemonSpeciesDef MakeSpecies(string speciesId, int demonTypeId, string side, int gameTypeId) => new()
+    static CreatureSpeciesDef MakeSpecies(string speciesId, int creatureTypeId, string side, int gameTypeId) => new()
     {
         SpeciesId = speciesId,
         Name = speciesId,
         Side = side,
         GameTypeId = gameTypeId,
-        DemonTypeId = demonTypeId,
+        CreatureTypeId = creatureTypeId,
         ElementPrimary = FusionRpg.Core.Stats.Derived.ElementTypeId.Fire,
         ElementSecondary = null,
-        BaseRarity = DemonRarity.Chaff,
-        DeployMode = DemonDeployMode.PlantAvatar,
-        Acquisition = DemonAcquisition.Summonable,
+        BaseRarity = CreatureRarity.Chaff,
+        DeployMode = CreatureDeployMode.PlantAvatar,
+        Acquisition = CreatureAcquisition.Summonable,
         Variants = new[] { "normal" },
         TraitPool = Array.Empty<string>()
     };

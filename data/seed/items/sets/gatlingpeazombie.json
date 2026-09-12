@@ -25,7 +25,7 @@
       "id": "set.gatlingpeazombie-001",
       "nameKey": "set.public-executioner",
       "name": "Public Executioner",
-      "themeKey": "demon.gatlingpeazombie",
+      "themeKey": "creature.gatlingpeazombie",
       "members": [
         {
           "role": "armament-primary",

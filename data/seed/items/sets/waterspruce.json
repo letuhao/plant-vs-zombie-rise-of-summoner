@@ -25,7 +25,7 @@
       "id": "set.waterspruce-001",
       "nameKey": "set.frostfire-spitter",
       "name": "Frostfire Spitter",
-      "themeKey": "demon.waterspruce",
+      "themeKey": "creature.waterspruce",
       "members": [
         {
           "role": "armament-primary",

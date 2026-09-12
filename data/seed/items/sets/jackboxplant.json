@@ -25,7 +25,7 @@
       "id": "set.jackboxplant-001",
       "nameKey": "set.explosive-bloom-box",
       "name": "Explosive Bloom Box",
-      "themeKey": "demon.jackboxplant",
+      "themeKey": "creature.jackboxplant",
       "members": [
         {
           "role": "armament-primary",

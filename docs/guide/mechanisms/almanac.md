@@ -56,7 +56,7 @@ Reference material, open over any stage:
 | **Ring and statuses** | Elements and statuses as they become player-visible. |
 | **Recipes** | Fusion recipes you uncover sit beside dossiers. |
 
-> Codex milestones for demons reward exploration. Web-only players can still claim completion milestones without every exclusive lawn capture.
+> Codex milestones for creatures reward exploration. Web-only players can still claim completion milestones without every exclusive lawn capture.
 
 ---
 

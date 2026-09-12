@@ -69,7 +69,7 @@ not a veto on these packages.
 | `actor-surface-catalog` | Versioned `*-catalog.v{n}.json` + `actor-sheet.v1.json`. Pure parsers. Host inject (`ConfigureAll` on Server + Injector). Core register-from-object. `GET /api/catalogs/derived-surface` shipped; full `GET /api/catalogs/actor-surface` fan-in still open. Load-reject unknown kinds. HUD tokens from status/resource catalogs. | — | [spec-actor-surface-catalog.md](actor-sheet/spec-actor-surface-catalog.md) |
 | `actor-sheet-shell` | Near-fullscreen band-2 panel; header; InspectSplit; leftover sticky footer; tab bar iterates catalog kinds; shared widgets (StatRow, …); `PanelShell` size variant. Esc pops. | `actor-surface-catalog` | [spec-actor-sheet-shell.md](actor-sheet/spec-actor-sheet-shell.md) |
 | `condition-tab` | HP radial + shield overlay, resource meters from resource-catalog, Standing, live status glyphs. | `actor-sheet-shell` | [spec-condition-tab.md](actor-sheet/spec-condition-tab.md) |
-| `aptitudes-tab` | Tiles from aptitude-catalog, leftover Confirm — **superseded allocate scope** by [aptitude-sheet-map.md](aptitude-sheet-map.md) (UniqueDemon Mode A / commander Mode C). | `actor-sheet-shell` | [spec-aptitudes-tab.md](actor-sheet/spec-aptitudes-tab.md) |
+| `aptitudes-tab` | Tiles from aptitude-catalog, leftover Confirm — **superseded allocate scope** by [aptitude-sheet-map.md](aptitude-sheet-map.md) (UniqueCreature Mode A / commander Mode C). | `actor-sheet-shell` | [spec-aptitudes-tab.md](actor-sheet/spec-aptitudes-tab.md) |
 | `derived-tab` | StatRows from **`GET /api/catalogs/derived-surface`** joined to **`/sheet`**. Six states. **Harden program:** [derived-cook-map.md](derived-cook-map.md). | `actor-sheet-shell` | [spec-derived-tab.md](actor-sheet/spec-derived-tab.md) |
 | `shield-tab` | Segmented stack + omni rows. **Program:** [shield-sheet-map.md](shield-sheet-map.md). Noun **Shield**. | `actor-sheet-shell` | [spec-shield-tab.md](actor-sheet/spec-shield-tab.md) |
 | `status-tab` | Glyphs from status-catalog. | `actor-sheet-shell` | [spec-status-tab.md](actor-sheet/spec-status-tab.md) |
@@ -121,7 +121,7 @@ Lawn Band B still obeys GG-60. HUD glyphs resolve status-catalog `hudToken`/`col
 - **Promote** — owner: ignore.
 - **Action corpus / costs / targeting** — sealed; Kit shows slots.
 - **Aspect-scope aptitude** — reverted.
-- **UniqueDemon allocate POST** — open product question; commander leftover recommended for v1.
+- **UniqueCreature allocate POST** — open product question; commander leftover recommended for v1.
 - **Moving `ItemRole` off the C# enum** — item program owns append-only `registryVersion`.
 - **Hot-reload** without process restart.
 - **A third channel classification** — six render states + thirteen `UnitClass` only.

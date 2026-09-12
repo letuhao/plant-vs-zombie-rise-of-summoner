@@ -57,7 +57,7 @@
       "group": "B",
       "id": "pool.b-identity-context",
       "name": "Identity context",
-      "sourceVocabulary": "catalog + motif-assignments.json + family-assignments.json + themes.v1.json; 6 elements ActorElementTypes.cs:3-11; 10 rarity rungs DemonRarity.cs:16-27",
+      "sourceVocabulary": "catalog + motif-assignments.json + family-assignments.json + themes.v1.json; 6 elements ActorElementTypes.cs:3-11; 10 rarity rungs CreatureRarity.cs:16-27",
       "whoPicks": "read from the seed"
     },
     {

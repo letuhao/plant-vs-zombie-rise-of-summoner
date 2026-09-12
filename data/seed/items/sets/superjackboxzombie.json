@@ -25,7 +25,7 @@
       "id": "set.superjackboxzombie-001",
       "nameKey": "set.jester-king-s-decree",
       "name": "Jester King's Decree",
-      "themeKey": "demon.superjackboxzombie",
+      "themeKey": "creature.superjackboxzombie",
       "members": [
         {
           "role": "armament-primary",

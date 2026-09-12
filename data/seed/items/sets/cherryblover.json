@@ -25,7 +25,7 @@
       "id": "set.cherryblover-001",
       "nameKey": "set.cherry-impact",
       "name": "Cherry Impact",
-      "themeKey": "demon.cherryblover",
+      "themeKey": "creature.cherryblover",
       "members": [
         {
           "role": "armament-primary",

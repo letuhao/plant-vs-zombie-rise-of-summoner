@@ -127,7 +127,7 @@ public class QuestPreflightTests
     public void CheckEnoughNonSinkAnchors_passes_a_pool_with_enough_non_sink_anchors()
     {
         var templates = ObjectiveTemplateCatalog.All;
-        var pool = new[] { Row("q1", "kill-boss"), Row("q2", "bring-demon-home-alive"), Row("q3", "finish-under-hunger") };
+        var pool = new[] { Row("q1", "kill-boss"), Row("q2", "bring-creature-home-alive"), Row("q3", "finish-under-hunger") };
         QuestPreflight.CheckEnoughNonSinkAnchors("domain.forest", pool, templates, offeredAtEntry: 2); // does not throw
     }
 
@@ -276,7 +276,7 @@ public class QuestPreflightTests
         var domain = RealDomain();
         var layouts = RealLayoutCatalog();
         var bossGate = new PredicateNode.Leaf(LeafId.RoomKindIs, Subject.Target, Value: 99); // 99 == MinimalCorpus's own BossRoomKindOrdinal
-        var pool = new[] { Row("q1", "kill-boss", predicate: bossGate), Row("q2", "bring-demon-home-alive") };
+        var pool = new[] { Row("q1", "kill-boss", predicate: bossGate), Row("q2", "bring-creature-home-alive") };
         var corpus = MinimalCorpus(domain, pool);
 
         var ex = Assert.Throws<QuestRefusal>(() => QuestPreflight.Run(corpus, new[] { domain }, layouts, Tuning));
@@ -296,7 +296,7 @@ public class QuestPreflightTests
     {
         var domain = RealDomain();
         var layouts = RealLayoutCatalog();
-        var pool = new[] { Row("q1", "kill-boss", rewardBand: "modest"), Row("q2", "bring-demon-home-alive") };
+        var pool = new[] { Row("q1", "kill-boss", rewardBand: "modest"), Row("q2", "bring-creature-home-alive") };
         var invertedLadder = new[] { Rung("grafted", 1), Rung("sprout", 2) }; // swapped vs. real ordinal order -- inverts "modest"'s real window
         var corpus = MinimalCorpus(domain, pool) with { Ladder = invertedLadder };
 
@@ -325,7 +325,7 @@ public class QuestPreflightTests
     {
         var domain = RealDomain();
         var layouts = RealLayoutCatalog();
-        var pool = new[] { Row("q1", "kill-boss", rewardBand: "modest"), Row("q2", "bring-demon-home-alive") };
+        var pool = new[] { Row("q1", "kill-boss", rewardBand: "modest"), Row("q2", "bring-creature-home-alive") };
         var corpus = MinimalCorpus(domain, pool) with { Ladder = Ladder }; // this file's own staple/frequent/occasional fixture -- never resolves "sprout"
 
         var ex = Assert.Throws<QuestRefusal>(() => QuestPreflight.Run(corpus, new[] { domain }, layouts, Tuning));
@@ -351,7 +351,7 @@ public class QuestPreflightTests
         var pool = new[]
         {
             Row("q1", "kill-boss", rewardBand: "modest"),
-            Row("q2", "bring-demon-home-alive", rewardBand: "fair"),
+            Row("q2", "bring-creature-home-alive", rewardBand: "fair"),
             Row("q3", "survive-no-downed", rewardBand: "rich"),
         };
         var corpus = MinimalCorpus(domain, pool) with { Ladder = realLadder };
@@ -425,10 +425,10 @@ public class QuestPreflightTests
     {
         var domain = RealDomain();
         var layouts = RealLayoutCatalog();
-        // kill-boss and bring-demon-home-alive are both non-sink and always-satisfiable (QuestOffer's
+        // kill-boss and bring-creature-home-alive are both non-sink and always-satisfiable (QuestOffer's
         // own "the other five... hold on every valid graph" set) -- one of the two is always eligible
         // in slot 0 regardless of rung, so the offer always fills to offeredAtEntry (2).
-        var pool = new[] { Row("q1", "kill-boss"), Row("q2", "bring-demon-home-alive"), Row("q3", "finish-under-hunger") };
+        var pool = new[] { Row("q1", "kill-boss"), Row("q2", "bring-creature-home-alive"), Row("q3", "finish-under-hunger") };
         var corpus = MinimalCorpus(domain, pool);
 
         QuestPreflight.Run(corpus, new[] { domain }, layouts, Tuning); // does not throw
@@ -443,7 +443,7 @@ public class QuestPreflightTests
     {
         var domains = DomainSeedFile.LoadAll(DungeonTestFiles.DomainsDir());
         var layouts = RealLayoutCatalog();
-        var pool = new[] { Row("q1", "kill-boss"), Row("q2", "bring-demon-home-alive") };
+        var pool = new[] { Row("q1", "kill-boss"), Row("q2", "bring-creature-home-alive") };
         var poolByDomain = domains.ToDictionary(d => d.DomainId, IReadOnlyList<QuestRow> (d) => pool, StringComparer.Ordinal);
         var corpus = MinimalCorpus(domains[0], pool) with { QuestPoolByDomainId = poolByDomain };
 

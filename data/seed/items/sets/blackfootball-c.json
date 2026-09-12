@@ -25,7 +25,7 @@
       "id": "set.blackfootball-c-001",
       "nameKey": "set.subordinate-s-vow",
       "name": "Subordinate's Vow",
-      "themeKey": "demon.blackfootball_c",
+      "themeKey": "creature.blackfootball_c",
       "members": [
         {
           "role": "armament-primary",

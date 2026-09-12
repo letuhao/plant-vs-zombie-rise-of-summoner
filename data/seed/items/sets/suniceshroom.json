@@ -25,7 +25,7 @@
       "id": "set.suniceshroom-001",
       "nameKey": "set.melting-sun-frost",
       "name": "Melting Sun-Frost",
-      "themeKey": "demon.suniceshroom",
+      "themeKey": "creature.suniceshroom",
       "members": [
         {
           "role": "armament-primary",

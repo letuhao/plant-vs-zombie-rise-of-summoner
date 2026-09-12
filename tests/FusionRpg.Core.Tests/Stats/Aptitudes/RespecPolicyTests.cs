@@ -1,4 +1,4 @@
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Stats.Aptitudes;
 using Xunit;
 

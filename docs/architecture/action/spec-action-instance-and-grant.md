@@ -39,7 +39,7 @@ Traced directly against shipped code, not assumed from module names:
    derived from the brief's own stable `id`, so two servers importing the same corpus produce
    byte-identical content, and re-running the import is idempotent by construction.
 4. `ExecuteSummon` (`RpgStore.Summons.cs:28-174`, the only production specimen-mint path) grants a
-   new demon **zero** actions — and per point 3, **this is correct today, not a gap**: the unlock
+   new creature **zero** actions — and per point 3, **this is correct today, not a gap**: the unlock
    ladder's own contract (`spec-unlock-ladder.md`) prices `earnCount` as *"successful acquisitions ...
    only when a slot was free"* — a fresh Level-1 specimen with `EarnCount = 0` has earned nothing yet
    by design. **The real gap is that nothing ever advances `EarnCount` for a real specimen**, because
@@ -53,7 +53,7 @@ Traced directly against shipped code, not assumed from module names:
    where it is actually raised (`RpgStore.Progression.cs:155-156`, `RpgXpApply.Apply(kind, state,
    delta, playerId, typeId, reason)`). **This event is player- or species-mastery-scoped, keyed by
    `(playerId, kind, typeId)` — it carries no specimen `instanceId` at all.** A specific summoned
-   demon's own level lives on a completely different, direct path:
+   creature's own level lives on a completely different, direct path:
    `RpgStore.AwardUniqueActorXpUnlocked(db, instanceId, delta)` (`RpgStore.UniqueActors.cs:1333-1368`)
    computes `level` inline (a plain loop against `RpgXpCurve.XpToNext(RpgActorKinds.Specimen, level)`)
    and writes it directly with **no event raised, no callback, no extension seam of any kind** — its

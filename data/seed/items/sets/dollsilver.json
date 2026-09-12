@@ -25,7 +25,7 @@
       "id": "set.dollsilver-001",
       "nameKey": "set.silver-matryoshka",
       "name": "Silver Matryoshka",
-      "themeKey": "demon.dollsilver",
+      "themeKey": "creature.dollsilver",
       "members": [
         {
           "role": "armament-primary",

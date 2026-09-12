@@ -27,7 +27,7 @@ export function OnboardingReveal({ playerId, onOpenCommanders }: { playerId: num
       <h2 className="mt-1 font-display text-xl text-text">{TITLES[current.checkpointId] ?? "Progress unlocked"}</h2>
       <p className="mt-1 text-sm text-muted">
         {current.checkpointId === "level-3-general-species"
-          ? "Every ordinary demon in this lawn run now benefits from your empire’s species progression."
+          ? "Every ordinary creature in this lawn run now benefits from your empire’s species progression."
           : "This reward is saved automatically and is ready on your commander sheet."}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">

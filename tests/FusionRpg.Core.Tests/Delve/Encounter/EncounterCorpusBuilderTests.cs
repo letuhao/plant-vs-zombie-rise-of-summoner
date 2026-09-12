@@ -1,5 +1,5 @@
 using FusionRpg.Core.Delve.Encounter;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Tests.Dungeon;
@@ -21,9 +21,9 @@ public class EncounterCorpusBuilderTests
         AptitudeTuningLoader.Parse(File.ReadAllText(Path.Combine(DungeonTestFiles.RepoRoot(), "data", "tuning", "aptitudes.v2.json")));
     static readonly PowerTuning RealPower =
         PowerTuningLoader.Parse(File.ReadAllText(Path.Combine(DungeonTestFiles.RepoRoot(), "data", "tuning", "power-scale.v2.json")));
-    static readonly DemonShapeTuning RealShape =
-        DemonShapeTuningLoader.Parse(File.ReadAllText(Path.Combine(DungeonTestFiles.RepoRoot(), "data", "tuning", "demon-shape.v1.json")));
-    static readonly DemonThreatTuning RealThreat = RealAnchorCorpusFixture.ThreatTuning;
+    static readonly CreatureShapeTuning RealShape =
+        CreatureShapeTuningLoader.Parse(File.ReadAllText(Path.Combine(DungeonTestFiles.RepoRoot(), "data", "tuning", "creature-shape.v1.json")));
+    static readonly CreatureThreatTuning RealThreat = RealAnchorCorpusFixture.ThreatTuning;
 
     [Fact]
     public void Build_null_arguments_throw()

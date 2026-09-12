@@ -25,7 +25,7 @@
       "id": "set.ironballoonzombie2-001",
       "nameKey": "set.the-elder-s-collective",
       "name": "The Elder's Collective",
-      "themeKey": "demon.ironballoonzombie2",
+      "themeKey": "creature.ironballoonzombie2",
       "members": [
         {
           "role": "armament-primary",

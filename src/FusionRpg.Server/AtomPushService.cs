@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Match;
 using FusionRpg.Core.Stats;
@@ -182,7 +182,7 @@ public sealed class AtomPushService
         var actor = _store.GetUniqueActor(specimenOwners[0].Key);
         if (actor is null) return null;
 
-        var index = new LawnElementIndex(DemonSpeciesCatalog.All);
+        var index = new LawnElementIndex(CreatureSpeciesCatalog.All);
         if (!index.TryGet(actor.Side, actor.TypeId, out var species)) return null;
 
         return (species.ElementPrimary, species.ElementSecondary);

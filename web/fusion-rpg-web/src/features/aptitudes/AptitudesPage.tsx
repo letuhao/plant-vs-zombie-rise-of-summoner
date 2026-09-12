@@ -5,7 +5,7 @@ import { Banner, Button, EmptyState, Field, NumberInput, Panel, StatBar } from "
 
 /**
  * spec-aptitude-allocation-surface.md — the first player-reachable way to spend aptitude points.
- * Commander scope only (applies to every demon fielded); the twelve ids come straight off the
+ * Commander scope only (applies to every creature fielded); the twelve ids come straight off the
  * server's own response, never a separately-hardcoded catalog mirror. Free respec today (POST a
  * different body any time) — pricing it is a named follow-up, not built here.
  *
@@ -39,7 +39,7 @@ export function AptitudesPage() {
   return (
     <Page
       title="Primary stats"
-      description="Spend commander points across the twelve aptitudes. Applies to every demon you field."
+      description="Spend commander points across the twelve aptitudes. Applies to every creature you field."
       testId="aptitudes-page"
     >
       {error && <Banner tone="error">{error}</Banner>}

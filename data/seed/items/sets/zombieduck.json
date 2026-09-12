@@ -25,7 +25,7 @@
       "id": "set.zombieduck-001",
       "nameKey": "set.lifebuoy-undead",
       "name": "Lifebuoy Undead",
-      "themeKey": "demon.zombieduck",
+      "themeKey": "creature.zombieduck",
       "members": [
         {
           "role": "armament-primary",

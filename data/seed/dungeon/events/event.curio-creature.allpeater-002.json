@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.curio-creature.allpeater-002",
+  "flavor": "A heavy, obsidian weight hangs from a silver chain, suspended mid-air without support. As you approach, the pendulum begins to swing in a rhythmic, hypnotic pattern, its surface shifting through a rapid 切换 of colors that seem to rewrite the very light in the room.",
+  "kind": "curio",
+  "name": "The Prismatic Pendulum",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.resilience",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party encounters a relic that alters the local reality's operational mode.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.allpeater"
+}

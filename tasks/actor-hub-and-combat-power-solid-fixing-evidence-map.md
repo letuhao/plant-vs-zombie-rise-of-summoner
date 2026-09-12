@@ -34,9 +34,9 @@ Legend: `PENDING` · `PASS` · `FAIL` · `N/A`
 
 | # | Criterion | Command | Executed result | Artifact |
 |---|---|---|---|---|
-| 2.1 | UniqueDemon aptitude, Zomboss, draught, expedition injury, boss kit contribute via Hub/atoms | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Aptitude\|Draught\|Expedition\|BossBuild\|Zomboss"` | PENDING | — |
+| 2.1 | UniqueCreature aptitude, Zomboss, draught, expedition injury, boss kit contribute via Hub/atoms | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Aptitude\|Draught\|Expedition\|BossBuild\|Zomboss"` | PENDING | — |
 | 2.2 | Species aptitude via same Hub aptitude path, or proven unused/deleted | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Aptitude"` | PENDING | — |
-| 2.3 | Full-set parity fixtures (Zomboss, draught, injury, boss kit, UniqueDemon aptitude) | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Aptitude\|Draught\|Expedition\|BossBuild\|Zomboss"` | PENDING | — |
+| 2.3 | Full-set parity fixtures (Zomboss, draught, injury, boss kit, UniqueCreature aptitude) | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Aptitude\|Draught\|Expedition\|BossBuild\|Zomboss"` | PENDING | — |
 | 2.4 | No production path requires `BattleChannelMod` for these after fuse (shim OK until T6) | `.\scripts\guard-actor-hub.ps1` | PENDING | — |
 | 2.5 | Server `ChannelMods\|Aptitude\|BuildSquad` green | `dotnet test tests/FusionRpg.Server.Tests` | PENDING | — |
 
@@ -175,11 +175,11 @@ Legend: `PENDING` · `PASS` · `FAIL` · `N/A`
 
 | # | Criterion | Command | Executed result | Artifact |
 |---|---|---|---|---|
-| 12.1 | After unique allocate + AptitudesUpdated, Bound unique Hot includes UniqueDemon shares | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~SpeciesAllocation\|UniqueDemon\|Bound"` | PENDING | — |
+| 12.1 | After unique allocate + AptitudesUpdated, Bound unique Hot includes UniqueCreature shares | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~SpeciesAllocation\|UniqueCreature\|Bound"` | PENDING | — |
 | 12.2 | Fetch path is unique GET only (S4) | same filter | PENDING | — |
-| 12.3 | General lawn demons unchanged (species path) | same filter | PENDING | — |
+| 12.3 | General lawn creatures unchanged (species path) | same filter | PENDING | — |
 | 12.4 | Regression: unique sharing species id with a general does not inherit empire allocation | same filter | PENDING | — |
-| 12.5 | Parity prove: Bound lawn input matches Server UniqueDemon compose | same filter + live probe | PENDING | — |
+| 12.5 | Parity prove: Bound lawn input matches Server UniqueCreature compose | same filter + live probe | PENDING | — |
 | 12.6 | HF-lawn ticked on ideal / maps | doc read + checkbox diff | PENDING | — |
 | 12.7 | aptitude-sheet `unique-lawn-wire` Done before closing | doc read (`aptitude-sheet-todo`) | PENDING | — |
 | 12.8 | `guard-secondary-no-unity` green | `.\scripts\guard-secondary-no-unity.ps1` | PENDING | — |
@@ -210,7 +210,7 @@ Legend: `PENDING` · `PASS` · `FAIL` · `N/A`
 
 | # | Criterion | Command | Executed result | Artifact |
 |---|---|---|---|---|
-| CP3.1 | Lawn UniqueDemon + tree + Bound loadout Done | Wave 3 filters + guards | PENDING | — |
+| CP3.1 | Lawn UniqueCreature + tree + Bound loadout Done | Wave 3 filters + guards | PENDING | — |
 
 ---
 
@@ -259,7 +259,7 @@ Legend: `PENDING` · `PASS` · `FAIL` · `N/A`
 | 19.1 | Script exists and documented (`prove-hub-combat.ps1` or successor) | `Test-Path scripts\prove-hub-combat.ps1` | PENDING | — |
 | 19.2 | Post-fuse battle Hub totals ≡ sheet Hub for same inputs (equip/aptitude/tree) | `.\scripts\prove-hub-combat.ps1` | PENDING | — |
 | 19.3 | Standing rises when a membership combat channel rises — not when only Θ rises | `.\scripts\prove-hub-combat.ps1` | PENDING | — |
-| 19.4 | Bound lawn aptitude input matches Server UniqueDemon compose | `.\scripts\prove-hub-combat.ps1` | PENDING | — |
+| 19.4 | Bound lawn aptitude input matches Server UniqueCreature compose | `.\scripts\prove-hub-combat.ps1` | PENDING | — |
 | 19.5 | Ideal handoff prove path checked / runbook linked | doc read | PENDING | — |
 
 ### Checkpoint: Wave 4 complete
@@ -327,7 +327,7 @@ Legend: `PENDING` · `PASS` · `FAIL` · `N/A`
 | PD.2 | No new private ChannelMods combat writers; known producers migrated | `.\scripts\guard-actor-hub.ps1` | PENDING | — |
 | PD.3 | Cold equip rolled/atom — stub not SSOT | `rg -n "stub\.atk_ring\|butter_bead\|hp_charm" src` | PENDING | — |
 | PD.4 | Standing membership + synthetics; chip never labels level "power" | `Standing` filter + `foldAptitudesSurfaceVm` | PENDING | — |
-| PD.5 | Bound lawn UniqueDemon + Bound loadout via Hub | Wave 3 filters | PENDING | — |
+| PD.5 | Bound lawn UniqueCreature + Bound loadout via Hub | Wave 3 filters | PENDING | — |
 | PD.6 | Sim Full; D4 coeffs; unique Θ; stale docs gone | Wave 4 rows | PENDING | — |
 | PD.7 | `prove-hub-combat` green | `.\scripts\prove-hub-combat.ps1` | PENDING | — |
 | PD.8 | Placeholder + intel Strength deleted; `world-actor-combat` tracked | Wave 5 rows | PENDING | — |

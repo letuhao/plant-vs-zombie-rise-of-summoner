@@ -25,7 +25,7 @@
       "id": "set.hypnogarlic-001",
       "nameKey": "set.alluring-bulb",
       "name": "Alluring Bulb",
-      "themeKey": "demon.hypnogarlic",
+      "themeKey": "creature.hypnogarlic",
       "members": [
         {
           "role": "armament-primary",

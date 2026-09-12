@@ -28,15 +28,15 @@ public class ExpeditionStoreTests : IDisposable
     }
 
     // DeployMode != HypnoAlly: this file's subject is expedition/PvZ-deploy soft-locking, unrelated to
-    // demon-lawn-deploy T1.4's DeployMode — excluding HypnoAlly keeps `TryBeginUniqueDeploy` calls here
+    // creature-lawn-deploy T1.4's DeployMode — excluding HypnoAlly keeps `TryBeginUniqueDeploy` calls here
     // from incidentally tripping T1.4's own deploy.hypno-ally-not-implemented refusal.
-    static readonly FusionRpg.Core.Demons.DemonSpeciesDef CatalogSpecies =
-        FusionRpg.Core.Demons.DemonSpeciesCatalog.All.First(s =>
-            s.Side == "zombie" && s.DeployMode != FusionRpg.Core.Demons.DemonDeployMode.HypnoAlly);
+    static readonly FusionRpg.Core.Creatures.CreatureSpeciesDef CatalogSpecies =
+        FusionRpg.Core.Creatures.CreatureSpeciesCatalog.All.First(s =>
+            s.Side == "zombie" && s.DeployMode != FusionRpg.Core.Creatures.CreatureDeployMode.HypnoAlly);
 
     string Mint()
     {
-        var (specimen, _) = _store.MintDemon(1, new DemonMintSpec
+        var (specimen, _) = _store.MintCreature(1, new CreatureMintSpec
         {
             SpeciesId = CatalogSpecies.SpeciesId,
             Side = "zombie",
@@ -148,13 +148,13 @@ public class ExpeditionStoreTests : IDisposable
     [Fact]
     public void Materials_accumulate_and_validate_ids()
     {
-        _store.AddDemonMaterials(1, new[] { ("essence.fire", 3L), ("shard.rare", 1L) });
-        _store.AddDemonMaterials(1, new[] { ("essence.fire", 2L) });
-        var shelf = _store.ListDemonMaterials(1);
+        _store.AddCreatureMaterials(1, new[] { ("essence.fire", 3L), ("shard.rare", 1L) });
+        _store.AddCreatureMaterials(1, new[] { ("essence.fire", 2L) });
+        var shelf = _store.ListCreatureMaterials(1);
         Assert.Equal(5, shelf.Single(m => m.MaterialId == "essence.fire").Qty);
         Assert.Equal(1, shelf.Single(m => m.MaterialId == "shard.rare").Qty);
 
         Assert.ThrowsAny<Exception>(() =>
-            _store.AddDemonMaterials(1, new[] { ("essence.plasma", 1L) }));
+            _store.AddCreatureMaterials(1, new[] { ("essence.plasma", 1L) }));
     }
 }

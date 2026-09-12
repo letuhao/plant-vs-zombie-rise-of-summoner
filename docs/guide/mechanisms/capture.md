@@ -9,7 +9,7 @@
 
 ## In one sentence
 
-**WIP:** weaken a wild demon in a run and attempt to **catch** it — a hunt intake beside the altar and wild joins.
+**WIP:** weaken a wild creature in a run and attempt to **catch** it — a hunt intake beside the altar and wild joins.
 
 ---
 
@@ -21,7 +21,7 @@ These words get guessed wrong. Read them once before the rest of the page.
 |---|---|
 | **WIP** | Not finished. You should not expect a reliable capture button on every lawn yet. |
 | **Capture** | Pressure a target in play, then attempt to add it as a specimen — not an altar pull. |
-| **Wild** | A demon you meet in a run that is not already on your roster. |
+| **Wild** | A creature you meet in a run that is not already on your roster. |
 | **Lawn-only finds** | Design allows a small slice of species as lawn finds (never legendaries forever gated that way), with web paths so web-only play can still finish milestones. |
 
 **Also true:**

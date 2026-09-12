@@ -25,7 +25,7 @@
       "id": "set.lotusbamboo-001",
       "nameKey": "set.winter-bamboo-bastion",
       "name": "Winter Bamboo Bastion",
-      "themeKey": "demon.lotusbamboo",
+      "themeKey": "creature.lotusbamboo",
       "members": [
         {
           "role": "armament-primary",

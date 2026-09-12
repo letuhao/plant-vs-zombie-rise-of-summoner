@@ -1,6 +1,6 @@
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons.Contracts;
-using FusionRpg.Core.Demons.Fusion;
+using FusionRpg.Core.Creatures.Contracts;
+using FusionRpg.Core.Creatures.Fusion;
 
 namespace FusionRpg.Core.Stats.Derived.Subsystems;
 
@@ -13,8 +13,8 @@ public readonly record struct StarLoyaltyContribution(int Star, int Loyalty, int
 /// <summary>
 /// channelmods-hub (Wave 1a) — the ONE formula for the two squad-build producers that used to
 /// invent combat magnitudes privately in <c>WebMatchService.StarChannelMods</c> /
-/// <c>LoyaltyChannelMods</c>. Star ranks (spec-demon-fusion.md F8) and contract loyalty
-/// (spec-demon-contracts.md G7) are flat per-mille shares of the actor's level base stats; the
+/// <c>LoyaltyChannelMods</c>. Star ranks (spec-creature-fusion.md F8) and contract loyalty
+/// (spec-creature-contracts.md G7) are flat per-mille shares of the actor's level base stats; the
 /// arithmetic is identical whether it reaches battle as an ordinary ChannelMod (shim until
 /// <c>battle-hub-fuse</c>) or a Hub derived contribution (sheet / post-fuse battle).
 ///

@@ -9,7 +9,7 @@
 
 1. Concrete elements + presentation from `element-catalog`. Omni is baseline, **not** a seventh type
    chip on the actor.
-2. Actor’s two concrete types from DemonProfile / UniqueActor.
+2. Actor’s two concrete types from CreatureProfile / UniqueActor.
 3. Mastery StatRows from derived-stat-catalog element-expanded families where present.
 
 ---

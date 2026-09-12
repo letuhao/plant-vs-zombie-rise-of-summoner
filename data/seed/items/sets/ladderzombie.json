@@ -25,7 +25,7 @@
       "id": "set.ladderzombie-001",
       "nameKey": "set.escalator-zombie",
       "name": "Escalator Zombie",
-      "themeKey": "demon.ladderzombie",
+      "themeKey": "creature.ladderzombie",
       "members": [
         {
           "role": "armament-primary",

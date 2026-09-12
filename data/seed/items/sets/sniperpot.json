@@ -25,7 +25,7 @@
       "id": "set.sniperpot-001",
       "nameKey": "set.sniper-pot",
       "name": "Sniper Pot",
-      "themeKey": "demon.sniperpot",
+      "themeKey": "creature.sniperpot",
       "members": [
         {
           "role": "armament-primary",

@@ -529,7 +529,7 @@ named that exact outcome as the correct fallback rather than inventing numbers.
   twice in this final pass — see below — the other 20 unchanged and green throughout).
 - `pytest tools/seedsmith/tests` (full suite) — **3371 passed, 14 failed, 1 skipped.** All 14
   failures are pre-existing, unrelated affix-family/item-corpus-count assertions (`test_usage_stats`,
-  `test_sampling_quality`, `test_distribution_planner`, `test_demon_themes`, `test_nodegen_vocab`,
+  `test_sampling_quality`, `test_distribution_planner`, `test_creature_themes`, `test_nodegen_vocab`,
   `test_actions_adapter`, `test_coverage_report`, `test_dungeon_registries`, `test_items_adapter`) —
   **proven, not assumed**: re-ran the same 3 representative failures with this session's own changes
   fully `git stash`-ed out, and they failed identically against the stashed-clean tree, confirming

@@ -25,7 +25,7 @@
       "id": "set.ultimatekirovzombie-001",
       "nameKey": "set.ascending-pilot-core",
       "name": "Ascending Pilot Core",
-      "themeKey": "demon.ultimatekirovzombie",
+      "themeKey": "creature.ultimatekirovzombie",
       "members": [
         {
           "role": "core-guard",

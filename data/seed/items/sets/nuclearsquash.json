@@ -25,7 +25,7 @@
       "id": "set.nuclearsquash-001",
       "nameKey": "set.meltdown-gourd",
       "name": "Meltdown Gourd",
-      "themeKey": "demon.nuclearsquash",
+      "themeKey": "creature.nuclearsquash",
       "members": [
         {
           "role": "armament-primary",

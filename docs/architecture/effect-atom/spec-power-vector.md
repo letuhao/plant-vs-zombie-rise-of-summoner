@@ -82,9 +82,9 @@ right instinct and the wrong shape, because **a competent user cannot reach most
 worked example, on `hasStatus(rot)`:
 
 > *"rot is one of 21 statuses, it needs 3 conditions to apply so it should be cheaper 3 or 4 times. A
-> defence demon **can be** rotted (low rot resistance). An attack demon **carries** a rot status action or
-> passive. And that attack demon **can attack** the target defence demon. So to apply x2 damage on a rotted
-> demon is not easy."*
+> defence creature **can be** rotted (low rot resistance). An attack creature **carries** a rot status action or
+> passive. And that attack creature **can attack** the target defence creature. So to apply x2 damage on a rotted
+> creature is not easy."*
 
 Three independent gates, and each one multiplies:
 
@@ -160,13 +160,13 @@ have this layer manufacturing the defect it was brought in to remove.
 
 #### ⛔ Pricing alone cannot fix it — the pool must correlate enabler and payoff
 
-**`rot` is 1 of 21 statuses.** If a demon type's pool weights statuses independently, a rot-conditional
+**`rot` is 1 of 21 statuses.** If a creature type's pool weights statuses independently, a rot-conditional
 payoff and a rot applier almost never land in the same ten-action pool, let alone the same five-slot
 loadout. The discount would then be **paid for a combination the generator never assembles** — a real
 discount on an unreal capability, which is worse than not discounting at all.
 
 > **A generated pool that offers a conditional payoff must also offer its enabler.** That is a generation
-> constraint on the demon-type weight vector, not a pricing one, and no `predicateFrequency` value can
+> constraint on the creature-type weight vector, not a pricing one, and no `predicateFrequency` value can
 > substitute for it.
 
 See [action-ideal.md](../action-ideal.md) §7.2 — the type weight vector gains **enabler/payoff pairing**

@@ -26,10 +26,10 @@ public class ExpeditionRewardApplyTests : IDisposable
         try { Directory.Delete(_dir, true); } catch { /* temp */ }
     }
 
-    static readonly FusionRpg.Core.Demons.DemonSpeciesDef CatalogSpecies =
-        FusionRpg.Core.Demons.DemonSpeciesCatalog.All.First(s => s.Side == "zombie");
+    static readonly FusionRpg.Core.Creatures.CreatureSpeciesDef CatalogSpecies =
+        FusionRpg.Core.Creatures.CreatureSpeciesCatalog.All.First(s => s.Side == "zombie");
 
-    DemonMintSpec Spec() => new()
+    CreatureMintSpec Spec() => new()
     {
         SpeciesId = CatalogSpecies.SpeciesId,
         Side = "zombie",
@@ -44,7 +44,7 @@ public class ExpeditionRewardApplyTests : IDisposable
     [Fact]
     public void Reward_apply_is_exactly_once_across_retries()
     {
-        var (specimen, _) = _store.MintDemon(1, Spec());
+        var (specimen, _) = _store.MintCreature(1, Spec());
         var instanceId = specimen.Actor.InstanceId;
         var (_, _, row) = _store.DispatchExpedition(1, "reward-1", "scout-30m", new[] { instanceId }, 1);
 
@@ -58,7 +58,7 @@ public class ExpeditionRewardApplyTests : IDisposable
         Assert.True(first.Applied);
         Assert.Single(first.Minted);
         var balance = _store.GetSoulBalance(1).Balance;
-        var xp = _store.ListDemonRoster(1).Items.Single(s => s.Profile.InstanceId == instanceId).Actor.Xp;
+        var xp = _store.ListCreatureRoster(1).Items.Single(s => s.Profile.InstanceId == instanceId).Actor.Xp;
         Assert.Equal(120, balance);
         Assert.Equal(30.0, xp);
 
@@ -68,9 +68,9 @@ public class ExpeditionRewardApplyTests : IDisposable
         Assert.Equal("expedition.closed", retry.Reason);
         Assert.Empty(retry.Minted);
         Assert.Equal(balance, _store.GetSoulBalance(1).Balance);
-        Assert.Equal(xp, _store.ListDemonRoster(1).Items.Single(s => s.Profile.InstanceId == instanceId).Actor.Xp);
-        Assert.Equal(2, _store.ListDemonMaterials(1).Single(m => m.MaterialId == "shard.common").Qty);
-        Assert.Equal(2, _store.ListDemonRoster(1).Items.Count); // original + one wild join, never two
+        Assert.Equal(xp, _store.ListCreatureRoster(1).Items.Single(s => s.Profile.InstanceId == instanceId).Actor.Xp);
+        Assert.Equal(2, _store.ListCreatureMaterials(1).Single(m => m.MaterialId == "shard.common").Qty);
+        Assert.Equal(2, _store.ListCreatureRoster(1).Items.Count); // original + one wild join, never two
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class ExpeditionRewardApplyTests : IDisposable
         // for one ceiling, and the silent one is on the reward path." Now both throw on the SAME
         // dynamic headroom, proven here by pushing balance to within 100 of long.MaxValue via the
         // audited AwardSouls path, then asking the expedition path for more than that headroom.
-        var (specimen, _) = _store.MintDemon(1, Spec());
+        var (specimen, _) = _store.MintCreature(1, Spec());
         var (_, _, row) = _store.DispatchExpedition(1, "reward-headroom", "scout-30m", new[] { specimen.Actor.InstanceId }, 1);
 
         _store.AwardSouls(1, long.MaxValue - 100, "seed", "near-ceiling");
@@ -91,7 +91,7 @@ public class ExpeditionRewardApplyTests : IDisposable
             EventSouls: 1000, // headroom is only 100 -- this must be refused, not shorted to 100
             Materials: Array.Empty<(string, long)>(),
             SpecimenXp: Array.Empty<(string, long)>(),
-            WildMints: Array.Empty<DemonMintSpec>());
+            WildMints: Array.Empty<CreatureMintSpec>());
 
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             _store.ApplyExpeditionRewards(row!.Id, 1, ExpeditionStates.Collected, rewards));
@@ -105,13 +105,13 @@ public class ExpeditionRewardApplyTests : IDisposable
     [Fact]
     public void Bad_material_in_rewards_applies_nothing()
     {
-        var (specimen, _) = _store.MintDemon(1, Spec());
+        var (specimen, _) = _store.MintCreature(1, Spec());
         var (_, _, row) = _store.DispatchExpedition(1, "reward-2", "scout-30m", new[] { specimen.Actor.InstanceId }, 1);
 
         Assert.ThrowsAny<Exception>(() => _store.ApplyExpeditionRewards(
             row!.Id, 1, ExpeditionStates.Collected,
             new RpgStore.ExpeditionRewardApply(50, new[] { ("essence.plasma", 1L) },
-                Array.Empty<(string, long)>(), Array.Empty<DemonMintSpec>())));
+                Array.Empty<(string, long)>(), Array.Empty<CreatureMintSpec>())));
 
         // Validation failed before the transaction: still open, still collectable, no souls.
         Assert.Equal(ExpeditionStates.Dispatched, _store.TryGetExpedition(row!.Id)!.State);
@@ -123,17 +123,17 @@ public class ExpeditionRewardApplyTests : IDisposable
     {
         // 2026-08-21 review I5: surviving log/expedition rows would resurrect matches for wiped
         // players against recycled AUTOINCREMENT run ids on the next boot sweep.
-        var (specimen, _) = _store.MintDemon(1, Spec());
+        var (specimen, _) = _store.MintCreature(1, Spec());
         _store.DispatchExpedition(1, "reset-exp", "scout-30m", new[] { specimen.Actor.InstanceId }, 1);
         _store.AppendWebMatchLog(1, "reset-log", "reset-match", "{}", 1, 1, 1, 1);
-        _store.AddDemonMaterials(1, new[] { ("shard.common", 1L) });
+        _store.AddCreatureMaterials(1, new[] { ("shard.common", 1L) });
 
         _store.Reset();
 
         Assert.Empty(_store.ListUnresolvedWebMatches());
         Assert.Null(_store.TryGetWebMatchLog(1, "reset-log"));
         Assert.Empty(_store.ListExpeditions(1));
-        Assert.Empty(_store.ListDemonMaterials(1));
+        Assert.Empty(_store.ListCreatureMaterials(1));
         Assert.False(_store.HasActiveExpeditionMembership(specimen.Actor.InstanceId));
     }
 

@@ -25,7 +25,7 @@
       "id": "set.driverzombie-001",
       "nameKey": "set.corporate-sledger",
       "name": "Corporate Sledger",
-      "themeKey": "demon.driverzombie",
+      "themeKey": "creature.driverzombie",
       "members": [
         {
           "role": "armament-primary",

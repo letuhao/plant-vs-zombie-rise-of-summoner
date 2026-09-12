@@ -42,8 +42,8 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
             AptitudeTuningLoader.Parse(File.ReadAllText(LatestAptitudesPath())));
         FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "progression.v1.json"))));
-        FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
-            FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "contracts.v1.json"))));
+        FusionRpg.Core.Creatures.Contracts.ContractPolicy.Configure(
+            FusionRpg.Core.Creatures.Contracts.ContractTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "contracts.v1.json"))));
         FusionRpg.Core.Status.StatusPolicy.Configure(
             FusionRpg.Core.Status.StatusTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "status.v1.json"))));
         FusionRpg.Core.Stats.Derived.StatsTuningHub.Configure(
@@ -51,8 +51,8 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
         // species-build `battle-allocation` (module 10, path 4): this endpoint now resolves a species
         // allocation too (SpeciesAllocationSource), so its own fixture needs the same roster/tuning a
         // real server configures at startup -- brought in line here rather than relying on another
-        // test class in the same process happening to have configured DemonSpeciesCatalog first.
-        FusionRpg.Core.Demons.DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        // test class in the same process happening to have configured CreatureSpeciesCatalog first.
+        FusionRpg.Core.Creatures.CreatureSpeciesCatalog.ConfigureFromCompiledDefault();
         FusionRpg.Core.Progression.SpeciesProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.SpeciesProgressionTuningLoader.Parse(
                 File.ReadAllText(Path.Combine(RepoTuningDir(), "species-progression.v1.json"))));
@@ -231,14 +231,14 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
     [Fact]
     public async Task Get_sheet_joins_species_name_nickname_and_element_typing_for_a_real_specimen()
     {
-        var species = FusionRpg.Core.Demons.DemonSpeciesCatalog.All
+        var species = FusionRpg.Core.Creatures.CreatureSpeciesCatalog.All
             .First(s => s.ElementSecondary != null && s.Side == "plant");
-        var minted = _store.MintDemon(_playerId, new FusionRpg.Contracts.DemonMintSpec
+        var minted = _store.MintCreature(_playerId, new FusionRpg.Contracts.CreatureMintSpec
         {
             SpeciesId = species.SpeciesId,
             Side = species.Side,
             GameTypeId = species.GameTypeId,
-            Rarity = FusionRpg.Core.Demons.DemonRarityIds.ToId(species.BaseRarity),
+            Rarity = FusionRpg.Core.Creatures.CreatureRarityIds.ToId(species.BaseRarity),
             Variant = "normal",
             ElementPrimary = species.ElementPrimary.ToElementId(),
             ElementSecondary = species.ElementSecondary?.ToElementId(),

@@ -71,7 +71,7 @@
   ],
   "doNote": "Stop when new world ≠ soft reset of Dave. Related: [loam](loam), [souls](souls).",
   "mixUps": [
-    {"q": "Does a new world delete my demons?", "a": "No. Roster banks. You lose the map’s holdings and loam."},
+    {"q": "Does a new world delete my creatures?", "a": "No. Roster banks. You lose the map’s holdings and loam."},
     {"q": "Do souls reset?", "a": "No. Souls and essence bank across worlds."},
     {"q": "Can I keep loam?", "a": "No. Loam never banks."},
     {"q": "Is this a paid prestige layer?", "a": "No. Play is local with no payments — new world is the place loop."},

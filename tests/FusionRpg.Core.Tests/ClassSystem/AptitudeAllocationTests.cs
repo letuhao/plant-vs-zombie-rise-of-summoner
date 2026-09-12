@@ -21,7 +21,7 @@ public class AptitudeAllocationTests
     public void AdditionIsCommutative()
     {
         var a = AptitudeAllocation.Single(AllocationScope.Commander, "Might", 30);
-        var b = AptitudeAllocation.Single(AllocationScope.UniqueDemon, "Vigor", 70);
+        var b = AptitudeAllocation.Single(AllocationScope.UniqueCreature, "Vigor", 70);
 
         var ab = a + b;
         var ba = b + a;
@@ -35,7 +35,7 @@ public class AptitudeAllocationTests
     public void AdditionIsAssociative()
     {
         var a = AptitudeAllocation.Single(AllocationScope.Commander, "Might", 10);
-        var b = AptitudeAllocation.Single(AllocationScope.DemonType, "Might", 20);
+        var b = AptitudeAllocation.Single(AllocationScope.CreatureType, "Might", 20);
         var c = AptitudeAllocation.Single(AllocationScope.Aspect, "Might", 30);
 
         var left = (a + b) + c;
@@ -49,7 +49,7 @@ public class AptitudeAllocationTests
     {
         var alloc = AptitudeAllocation.Single(AllocationScope.Commander, "Might", 25)
                   + AptitudeAllocation.Single(AllocationScope.Aspect, "Vigor", 25)
-                  + AptitudeAllocation.Single(AllocationScope.UniqueDemon, "Focus", 50);
+                  + AptitudeAllocation.Single(AllocationScope.UniqueCreature, "Focus", 50);
 
         var sum = alloc.Shares().Values.Sum();
         Assert.Equal(1.0, sum, 12);
@@ -61,7 +61,7 @@ public class AptitudeAllocationTests
         // Two DIFFERENT scopes both fund Might, nothing else funded anywhere -- share must read 100%
         // off the SUM across scopes, not off either scope considered alone.
         var alloc = AptitudeAllocation.Single(AllocationScope.Commander, "Might", 50)
-                  + AptitudeAllocation.Single(AllocationScope.UniqueDemon, "Might", 50);
+                  + AptitudeAllocation.Single(AllocationScope.UniqueCreature, "Might", 50);
 
         Assert.Equal(100, alloc.Total("Might"));
         Assert.Equal(1.0, alloc.Share("Might"));

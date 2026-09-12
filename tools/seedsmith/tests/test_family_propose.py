@@ -17,7 +17,7 @@ back through the same deterministic vote/hash logic (`finalize_candidate` -> `ca
 functions in this whole module that DO call a model, per their own docstrings).
 
 Real, live repo data (`data/seed/actions/_briefs/round-1.json`, A-S1's shipped output, and
-`data/seed/demons/_generated/family-assignments.json`) is used for determinism/shape/permutation/
+`data/seed/creatures/_generated/family-assignments.json`) is used for determinism/shape/permutation/
 roster tests, matching every prior action-corpus module's own fixture discipline this session;
 synthetic, in-memory briefs are used for planted violations, vote resolution, and the anchor/slot
 raises, so those tests do not depend on today's real round happening to contain a matching case.
@@ -62,13 +62,13 @@ from seedsmith.adapters.actions.family_propose.derive import (  # noqa: E402
     finalize_candidate,
 )
 from seedsmith.adapters.actions import generate_family_actions as gen_mod  # noqa: E402
-from seedsmith.adapters.demons.anchor.permute import order_for  # noqa: E402
-from seedsmith.adapters.demons.anchor.vote import SetVoteResult  # noqa: E402
+from seedsmith.adapters.creatures.anchor.permute import order_for  # noqa: E402
+from seedsmith.adapters.creatures.anchor.vote import SetVoteResult  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REAL_BRIEFS_PATH = REPO_ROOT / "data" / "seed" / "actions" / "_briefs" / "round-1.json"
 REAL_FAMILY_ASSIGNMENTS_PATH = (
-    REPO_ROOT / "data" / "seed" / "demons" / "_generated" / "family-assignments.json"
+    REPO_ROOT / "data" / "seed" / "creatures" / "_generated" / "family-assignments.json"
 )
 RUN_TUNING_PATH = REPO_ROOT / "data" / "tuning" / "action-corpus-run.v1.json"
 
@@ -221,7 +221,7 @@ class FamilyAnchorRaiseTests(unittest.TestCase):
     def test_species_scoped_anchor_content_raises(self):
         base_anchor = dict(make_brief()["anchor"])
         for key, value in (("element", "fire"), ("motifs", ["fire"]),
-                          ("themeKey", "demon.cherrybomb"), ("speciesKey", "cherrybomb")):
+                          ("themeKey", "creature.cherrybomb"), ("speciesKey", "cherrybomb")):
             with self.subTest(key=key):
                 anchor = dict(base_anchor)
                 anchor[key] = value
@@ -286,7 +286,7 @@ class BuildBriefContentTests(unittest.TestCase):
         text = build_brief(context)
         self.assertIn("cherry", text)  # the family anchor IS meant to appear
         lowered = text.lower()
-        for token in ("fire", "cultivated", "demon.", "element:", "species:"):
+        for token in ("fire", "cultivated", "creature.", "element:", "species:"):
             self.assertNotIn(token, lowered)
 
     def test_family_motifs_render_in_permuted_order_matching_order_for(self):

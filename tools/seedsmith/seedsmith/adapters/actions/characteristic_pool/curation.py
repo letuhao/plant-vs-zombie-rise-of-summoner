@@ -1,18 +1,18 @@
 """seedsmith.adapters.actions.characteristic_pool.curation — the closed-trait bridge.
 
 **The defect this module exists to fix, found by direct measurement 2026-09-11.** The action
-pipeline scores a species' *traits* against the closed 14-member `DemonTraitCatalog` pool
+pipeline scores a species' *traits* against the closed 14-member `CreatureTraitCatalog` pool
 (`TRAIT_POOL` in `catalog.py`, and `_TRAIT_CATEGORY` in `derive.py`). That was correct when the
-roster was the 84-row `DemonSpeciesCatalog.Generated.cs`, whose `TraitPool` arrays held those
-exact 14 ids. The roster is now the live seed folder (`data/seed/demons/species/**/*.json`), whose
+roster was the 84-row `CreatureSpeciesCatalog.Generated.cs`, whose `TraitPool` arrays held those
+exact 14 ids. The roster is now the live seed folder (`data/seed/creatures/species/**/*.json`), whose
 `traits` field is **open, free-form flavor text** — measured 2026-09-11: **2,312 distinct tokens**
 across 904 species, of which exactly **one** (`guardian`, once) is a closed-pool member. Every
 other species therefore contributed **zero** trait signal, and the derivation collapsed: 673 of 904
 species landed on `separation == 0` and only 11 distinct `leanOrder`s existed across the whole
 roster. The per-species differentiation the whole action corpus rests on was effectively absent.
 
-The runtime already solved this exact problem. `DemonTraitPoolCuration.PickFor(speciesId, rarity,
-gameTypeId)` (`src/FusionRpg.Core/Demons/Generation/DemonTraitPoolCuration.cs`) bridges a live
+The runtime already solved this exact problem. `CreatureTraitPoolCuration.PickFor(speciesId, rarity,
+gameTypeId)` (`src/FusionRpg.Core/Creatures/Generation/CreatureTraitPoolCuration.cs`) bridges a live
 species' open flavor text to the closed gameplay vocabulary, and
 `ConcreteSpeciesSeedReader.cs:103` is its real caller. This module mirrors that bridge so the
 Python pipeline scores the **same closed trait pool the game actually uses**, rather than a
@@ -21,7 +21,7 @@ vocabulary the live seed does not speak.
 **Why this reads the frozen `.cs` rather than a committed JSON projection.** There is no committed
 artifact carrying the curated pool — the curation runs in C# at snapshot-build time and is never
 written to `data/generated/`. The two inputs it needs are both frozen and committed:
-`DemonSpeciesLegacyTraitPoolOverlap.Generated.cs` (its own header: "Never regenerated from that
+`CreatureSpeciesLegacyTraitPoolOverlap.Generated.cs` (its own header: "Never regenerated from that
 source again — it is gone. This file is now itself the frozen source of truth for this one-time
 port.") and the FNV-1a fallback algorithm. `catalog.py` already establishes the precedent of
 parsing a `.cs` source for a roster (`_load_legacy_catalog`), so this is the same discipline, not a
@@ -46,18 +46,18 @@ __all__ = ["curated_traits", "LEGACY_TRAIT_OVERLAP_PATH"]
 
 REPO_ROOT = Path(__file__).resolve().parents[6]
 LEGACY_TRAIT_OVERLAP_PATH = (
-    REPO_ROOT / "src" / "FusionRpg.Core" / "Demons" / "Generation"
-    / "DemonSpeciesLegacyTraitPoolOverlap.Generated.cs"
+    REPO_ROOT / "src" / "FusionRpg.Core" / "Creatures" / "Generation"
+    / "CreatureSpeciesLegacyTraitPoolOverlap.Generated.cs"
 )
 
-# `DemonTraitPoolCuration.Combat` / `.Personality` and the rarity ladder are read from `ladders.py`
+# `CreatureTraitPoolCuration.Combat` / `.Personality` and the rarity ladder are read from `ladders.py`
 # — the one shared transcription — rather than re-declared here. The 2026-09-11 review found the
 # ladder duplicated in this file with no guard; a second copy that drifts silently shifts the
 # `Heirloom` threshold below and changes which species get an essence trait.
 _COMBAT = COMBAT_TRAITS
 _PERSONALITY = PERSONALITY_TRAITS
-_HEIRLOOM_ORDINAL = RARITY_ORDINAL["heirloom"]      # `DemonRarityLadder.AtLeast(rarity, Heirloom)`
-_TOP_RUNG = RARITY_LADDER[-1]                       # `DemonRarityLadder.IsTopRung` -> Almanac
+_HEIRLOOM_ORDINAL = RARITY_ORDINAL["heirloom"]      # `CreatureRarityLadder.AtLeast(rarity, Heirloom)`
+_TOP_RUNG = RARITY_LADDER[-1]                       # `CreatureRarityLadder.IsTopRung` -> Almanac
 
 _ENTRY_RE = re.compile(r'\["(?P<id>[a-z0-9]+)"\]\s*=\s*new\[\]\s*\{\s*(?P<body>[^}]*)\}')
 _TRAIT_RE = re.compile(r'"([a-z-]+)"')
@@ -75,7 +75,7 @@ def _legacy_overlap() -> "dict[str, tuple[str, ...]]":
 
 
 def _fnv1a(type_id: int, salt: str) -> int:
-    """`DemonTraitPoolCuration.Hash` — FNV-1a over the salt then the type id, 32-bit unsigned,
+    """`CreatureTraitPoolCuration.Hash` — FNV-1a over the salt then the type id, 32-bit unsigned,
     copied verbatim (the C# class itself copied it from the deleted legacy generator for the same
     cross-boundary reason: an algorithm is not a data file, and there is nothing left to reference)."""
     h = 2166136261
@@ -88,9 +88,9 @@ def _fnv1a(type_id: int, salt: str) -> int:
 
 
 def curated_traits(species_id: str, rarity: str, game_type_id: int) -> "tuple[str, ...]":
-    """The closed `DemonTraitCatalog` pool for one live species — the exact pool the game gives it.
+    """The closed `CreatureTraitCatalog` pool for one live species — the exact pool the game gives it.
 
-    Mirrors `DemonTraitPoolCuration.PickFor`: the frozen legacy port-forward wins by species id
+    Mirrors `CreatureTraitPoolCuration.PickFor`: the frozen legacy port-forward wins by species id
     when present; every other species gets the deterministic FNV pick (two guaranteed slots plus a
     third combat trait when distinct), with an essence trait at `Heirloom` and up and `immortal` at
     the top rung. `species_id` is normalised to lower case, matching the C# `Trim().ToLowerInvariant()`

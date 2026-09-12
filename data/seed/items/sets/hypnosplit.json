@@ -25,7 +25,7 @@
       "id": "set.hypnosplit-001",
       "nameKey": "set.item",
       "name": "魅惑裂荚射手",
-      "themeKey": "demon.hypnosplit",
+      "themeKey": "creature.hypnosplit",
       "members": [
         {
           "role": "armament-primary",

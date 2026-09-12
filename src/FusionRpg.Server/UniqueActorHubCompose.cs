@@ -1,7 +1,7 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.ActorSurface;
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Effects.Atoms.Power;
 using FusionRpg.Core.Power;
@@ -43,9 +43,9 @@ public static class UniqueActorHubCompose
         var commanderAllocation = store.LoadAllocation(
             AllocationScope.Commander, AptitudeEndpoints.ScopeKey(actor.PlayerId));
         // A unique specimen is a dedicated progression source. Its aptitude input is keyed by the
-        // specimen instance and never falls back to the empire-wide DemonType allocation; general
+        // specimen instance and never falls back to the empire-wide CreatureType allocation; general
         // lawn spawns resolve that fallback at their own spawn seam instead.
-        var uniqueAllocation = store.LoadAllocation(AllocationScope.UniqueDemon, specimenId);
+        var uniqueAllocation = store.LoadAllocation(AllocationScope.UniqueCreature, specimenId);
         IReadOnlyList<BoundDerivedAtom> BoundAtoms(StatContext _)
         {
             var list = new List<BoundDerivedAtom>();
@@ -57,7 +57,7 @@ public static class UniqueActorHubCompose
         // channelmods-hub: star/loyalty reach the sheet through the SAME producer battle uses
         // (StarLoyaltyBonus), so the two cannot drift. Read once — a specimen's star and its
         // contract loyalty are durable per-actor values, and Build runs per sheet/derived read.
-        var profile = store.GetDemonProfile(specimenId);
+        var profile = store.GetCreatureProfile(specimenId);
         var loyalty = store.GetContract(specimenId)?.Loyalty ?? 0;
         StarLoyaltyContribution StarLoyalty(StatContext _) =>
             new(profile?.Star ?? 0, loyalty, level);
@@ -80,11 +80,11 @@ public static class UniqueActorHubCompose
         var primaryFinal = hub.Stats.Resolve(ctx);
         var (snapshot, contributions) = hub.ResolveDerivedWithContributions(ctx);
         var powerIndex = new Power.ServerPowerIndexProvider(store, PowerTuningHub.Tuning);
-        var profile = store.GetDemonProfile(actor.InstanceId);
+        var profile = store.GetCreatureProfile(actor.InstanceId);
         var speciesName = profile != null
-            && DemonSpeciesCatalog.IsConfigured
-            && DemonSpeciesCatalog.IsKnown(profile.SpeciesId)
-            ? DemonSpeciesCatalog.Get(profile.SpeciesId).Name
+            && CreatureSpeciesCatalog.IsConfigured
+            && CreatureSpeciesCatalog.IsKnown(profile.SpeciesId)
+            ? CreatureSpeciesCatalog.Get(profile.SpeciesId).Name
             : null;
         var displayName = string.IsNullOrWhiteSpace(profile?.Nickname) ? speciesName : profile!.Nickname;
         var roleLabel = string.Equals(actor.Side, "zombie", StringComparison.OrdinalIgnoreCase) ? "Zombie" : "Plant";

@@ -25,7 +25,7 @@
       "id": "set.chomper-001",
       "nameKey": "set.grasping-gullet",
       "name": "Grasping Gullet",
-      "themeKey": "demon.chomper",
+      "themeKey": "creature.chomper",
       "members": [
         {
           "role": "armament-primary",

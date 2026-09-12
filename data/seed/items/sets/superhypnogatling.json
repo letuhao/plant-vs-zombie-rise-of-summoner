@@ -25,7 +25,7 @@
       "id": "set.superhypnogatling-001",
       "nameKey": "set.pea-shot-charmer",
       "name": "Pea-Shot Charmer",
-      "themeKey": "demon.superhypnogatling",
+      "themeKey": "creature.superhypnogatling",
       "members": [
         {
           "role": "armament-primary",

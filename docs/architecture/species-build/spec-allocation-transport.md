@@ -1,7 +1,7 @@
 # Spec: `allocation-transport`
 
 Module 6 in the [species-build capability map](../species-build-map.md). **Depends on `resolver-memo`
-(1) and `demon-type-allocation` (5).**
+(1) and `creature-type-allocation` (5).**
 
 ## Objective
 
@@ -11,7 +11,7 @@ a live entity to a species — **is already built**.
 
 | Piece | State |
 |---|---|
-| `(Side, GameTypeId) → DemonSpeciesDef` | **built** — `LawnElementIndex`, already hosted injector-side |
+| `(Side, GameTypeId) → CreatureSpeciesDef` | **built** — `LawnElementIndex`, already hosted injector-side |
 | `StatContext` carries `Side` and `TypeId` | **built** — `StatContext.cs:15-16`, stamped at `StatContextFactory.cs:22-25,50-53` |
 | Per-entity derived contribution on the lawn | **built and normal** — `AtomDerivedSubsystem` already resolves per entity from `ctx` |
 | The payload | **wiring gap** — `/api/aptitudes/{playerId}` returns a flat share map hard-coded to `Commander` (`RpgClient.cs:363-374`), with no species dimension |

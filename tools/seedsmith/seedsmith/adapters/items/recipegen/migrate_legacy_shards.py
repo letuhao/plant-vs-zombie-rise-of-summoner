@@ -10,7 +10,7 @@ itself can never reproduce this defect — but it also can never repair it, sinc
 recipes (`recipe.031`/`032`), never re-authors the 30 pre-existing hand-authored ones. This module is
 the missing other half: detect legacy cost lines in an existing corpus, and rewrite them in place.
 
-Mapping mirrors `LegacyDemonRarityIds.ForwardMap` (`src/FusionRpg.Core/Demons/DemonRarity.cs:94-99`)
+Mapping mirrors `LegacyCreatureRarityIds.ForwardMap` (`src/FusionRpg.Core/Creatures/CreatureRarity.cs:94-99`)
 exactly, verified live against source, never re-derived: each legacy band maps to its LOWEST new-
 ladder rung (spec-rarity-migration.md §4 point 4), so no player gains value on migration.
 """
@@ -23,7 +23,7 @@ from typing import Any
 
 from . import run as run_mod
 
-#: LegacyDemonRarityIds.ForwardMap, mirrored exactly — one-way, legacy -> new ladder. Never the
+#: LegacyCreatureRarityIds.ForwardMap, mirrored exactly — one-way, legacy -> new ladder. Never the
 #: reverse; new content is never authored in legacy ids (materialgen.vocab.require_issuable already
 #: refuses that at generation time).
 LEGACY_SHARD_FORWARD_MAP: "dict[str, str]" = {
@@ -116,7 +116,7 @@ def apply_to_real_corpus(
             "(MaterialCatalog.IsLegacyShardId / MaterialUnissuableRule via MaterialRecipeCatalog.Load "
             "-- these recipes could never be paid). Migrated via "
             "seedsmith.adapters.items.recipegen.migrate_legacy_shards, mirroring "
-            "LegacyDemonRarityIds.ForwardMap exactly (each legacy band maps to its lowest new-ladder "
+            "LegacyCreatureRarityIds.ForwardMap exactly (each legacy band maps to its lowest new-ladder "
             "rung, spec-rarity-migration.md sec4 point 4): common->chaff, rare->cultivated, "
             "epic->heirloom, legendary->sunwoven. No live model call -- a mechanical id rewrite, no "
             "prompt involved, same 'hand-authored, no model' precedent recipegen's own trial-1 "
@@ -125,7 +125,7 @@ def apply_to_real_corpus(
         "promptVersion": "n/a-mechanical-migration",
         "model": _AMENDMENT_BATCH,
         "authoredUtc": authored_utc,
-        "sourceRef": "docs/architecture/demon-seed/spec-rarity-migration.md#4",
+        "sourceRef": "docs/architecture/creature-seed/spec-rarity-migration.md#4",
         "entries": sorted({f.entry_id for f in findings}),
     }
     new_meta = {**new_doc["_meta"],

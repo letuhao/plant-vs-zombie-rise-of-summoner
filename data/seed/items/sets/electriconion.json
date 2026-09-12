@@ -25,7 +25,7 @@
       "id": "set.electriconion-001",
       "nameKey": "set.conductive-husk",
       "name": "Conductive Husk",
-      "themeKey": "demon.electriconion",
+      "themeKey": "creature.electriconion",
       "members": [
         {
           "role": "armament-primary",

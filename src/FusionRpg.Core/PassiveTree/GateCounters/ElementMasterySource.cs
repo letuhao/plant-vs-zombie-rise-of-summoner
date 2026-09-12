@@ -10,7 +10,7 @@ namespace FusionRpg.Core.PassiveTree.GateCounters;
 ///
 /// <para><b>Never routed through the class system's per-scope aptitude-point budget calculator, keyed
 /// to its Aspect allocation scope.</b> §5.3 (OQ2, closed 2026-09-05) resolved this in favour of
-/// <c>element_mastery</c> owning its own tunable rather than sharing the demon program's unmeasured
+/// <c>element_mastery</c> owning its own tunable rather than sharing the creature program's unmeasured
 /// Aspect rate — spec-gate-counters.md §10's project-structure table still names the superseded route
 /// in its one-line description; this file implements the CLOSED decision in §5.3, not that stale table
 /// row. <see cref="GateCounterBoundaryGuardTests"/> is extended to scan this file for exactly that

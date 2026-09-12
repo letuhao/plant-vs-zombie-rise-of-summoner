@@ -1,5 +1,5 @@
 """`affix-authoring` (effect-pipeline module 9, spec-affix-authoring.md). Thin wiring only,
-matching `demon_anchor.py`'s own shape exactly (A6's own warning: a second pipeline SHAPE here
+matching `creature_anchor.py`'s own shape exactly (A6's own warning: a second pipeline SHAPE here
 would be the fork this program's own reused-machinery discipline exists to prevent) — this module
 carries no `StateGraph(` call of its own, only `build_generation_graph`.
 """
@@ -33,7 +33,7 @@ def state_for_affix(
     subject_id: str, eligible_atoms: "list[str]", *, theme_hint: str = "",
 ) -> dict:
     """Renders the brief via `build_brief` — never assembled ad hoc at the call site, the same
-    discipline `demon_anchor.py`'s own `state_for_pipeline` already established."""
+    discipline `creature_anchor.py`'s own `state_for_pipeline` already established."""
     context = build_context(eligible_atoms, theme_hint=theme_hint)
     brief = build_brief(context)
     return new_state(subject_id, brief=brief, context=context)

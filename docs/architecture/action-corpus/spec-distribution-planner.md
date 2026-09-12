@@ -111,7 +111,7 @@ One entry per brief:
   "scope": "species", "scopeKey": "cherrybomb",
   "anchor": {                                   // group B — READ from the seed, never invented
     "family": "cherry", "element": "fire", "rarity": "cultivated",
-    "themeKey": "demon.cherrybomb",
+    "themeKey": "creature.cherrybomb",
     "motifs": ["樱桃", "爆炸"], "antiMotifs": [],
     // family scope only — DERIVED here, §3 step 2b. Present as a key on every family brief,
     // possibly empty; absent is a defect.

@@ -1,6 +1,6 @@
 using System.Text.Json;
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Expeditions;
 using FusionRpg.Core.Progression;
 using Microsoft.Data.Sqlite;
@@ -15,7 +15,7 @@ public sealed record ExpeditionRow(
         JsonSerializer.Deserialize<List<string>>(SquadJson) ?? new List<string>();
 }
 
-public sealed record DemonMaterialRow(string MaterialId, long Qty);
+public sealed record CreatureMaterialRow(string MaterialId, long Qty);
 
 public static class ExpeditionStates
 {
@@ -56,13 +56,13 @@ public sealed partial class RpgStore
             foreach (var id in squadInstanceIds)
             {
                 var actor = ReadUniqueActorUnlocked(db, id);
-                if (actor is null || actor.PlayerId != playerId || ReadDemonProfileUnlocked(db, id) is null)
+                if (actor is null || actor.PlayerId != playerId || ReadCreatureProfileUnlocked(db, id) is null)
                     return (false, "squad.unknown-specimen", null);
                 if (!string.Equals(actor.Phase, UniqueActorPhases.Roster, StringComparison.Ordinal))
                     return (false, "specimen.deployed", null);
                 if (HasActiveExpeditionMembershipUnlocked(db, id))
                     return (false, "specimen.on-expedition", null);
-                // Contracts gate every path that fields a demon (spec-demon-contracts.md).
+                // Contracts gate every path that fields a creature (spec-creature-contracts.md).
                 var contract = ContractViewUnlocked(db, playerId, id);
                 if (!contract.Bound) return (false, "specimen.unbound", null);
                 if (!contract.Deployable) return (false, "specimen.insubordinate", null);
@@ -202,13 +202,13 @@ public sealed partial class RpgStore
         }
     }
 
-    public void AddDemonMaterials(long playerId, IReadOnlyList<(string MaterialId, long Qty)> drops)
+    public void AddCreatureMaterials(long playerId, IReadOnlyList<(string MaterialId, long Qty)> drops)
     {
         if (drops.Count == 0) return;
         foreach (var (materialId, qty) in drops)
         {
-            if (!DemonMaterialCatalog.IsKnown(materialId))
-                throw new ArgumentException($"Unknown demon material id '{materialId}'.");
+            if (!CreatureMaterialCatalog.IsKnown(materialId))
+                throw new ArgumentException($"Unknown creature material id '{materialId}'.");
             if (qty <= 0)
                 throw new ArgumentException($"Material qty must be positive ({materialId}).");
         }
@@ -217,12 +217,12 @@ public sealed partial class RpgStore
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
-            AddDemonMaterialsUnlocked(db, playerId, drops);
+            AddCreatureMaterialsUnlocked(db, playerId, drops);
             tx.Commit();
         }
     }
 
-    internal void AddDemonMaterialsUnlocked(
+    internal void AddCreatureMaterialsUnlocked(
         SqliteConnection db, long playerId, IReadOnlyList<(string MaterialId, long Qty)> drops)
     {
         var now = DateTime.UtcNow.ToString("o");
@@ -230,7 +230,7 @@ public sealed partial class RpgStore
         {
             using var cmd = db.CreateCommand();
             cmd.CommandText = """
-                INSERT INTO rpg_demon_materials(player_id, material_id, qty, updated_utc)
+                INSERT INTO rpg_creature_materials(player_id, material_id, qty, updated_utc)
                 VALUES($p,$m,$q,$t)
                 ON CONFLICT(player_id, material_id)
                 DO UPDATE SET qty = qty + $q, updated_utc = $t;
@@ -243,21 +243,21 @@ public sealed partial class RpgStore
         }
     }
 
-    public List<DemonMaterialRow> ListDemonMaterials(long playerId)
+    public List<CreatureMaterialRow> ListCreatureMaterials(long playerId)
     {
         lock (_gate)
         {
             using var db = OpenUnlocked();
             using var cmd = db.CreateCommand();
             cmd.CommandText = """
-                SELECT material_id, qty FROM rpg_demon_materials
+                SELECT material_id, qty FROM rpg_creature_materials
                 WHERE player_id=$p AND qty > 0 ORDER BY material_id;
                 """;
             cmd.Parameters.AddWithValue("$p", playerId);
             using var r = cmd.ExecuteReader();
-            var list = new List<DemonMaterialRow>();
+            var list = new List<CreatureMaterialRow>();
             while (r.Read())
-                list.Add(new DemonMaterialRow(r.GetString(0), r.GetInt64(1)));
+                list.Add(new CreatureMaterialRow(r.GetString(0), r.GetInt64(1)));
             return list;
         }
     }
@@ -266,14 +266,14 @@ public sealed partial class RpgStore
         long EventSouls,
         IReadOnlyList<(string MaterialId, long Qty)> Materials,
         IReadOnlyList<(string InstanceId, long Xp)> SpecimenXp,
-        IReadOnlyList<DemonMintSpec> WildMints);
+        IReadOnlyList<CreatureMintSpec> WildMints);
 
     /// <summary>
     /// Exactly-once reward application: ONE transaction gated on the Dispatched→terminal state
     /// transition. If the expedition is already closed, nothing applies and nothing is written —
     /// a crashed collect retries safely (battle ingests replay by correlation upstream).
     /// </summary>
-    public (bool Applied, string Reason, List<DemonSpecimenDto> Minted) ApplyExpeditionRewards(
+    public (bool Applied, string Reason, List<CreatureSpecimenDto> Minted) ApplyExpeditionRewards(
         long expeditionId, long playerId, string state, ExpeditionRewardApply rewards,
         DateTimeOffset? utcNow = null)
     {
@@ -281,8 +281,8 @@ public sealed partial class RpgStore
             throw new ArgumentException($"Invalid terminal expedition state '{state}'.");
         foreach (var (materialId, qty) in rewards.Materials)
         {
-            if (!DemonMaterialCatalog.IsKnown(materialId))
-                throw new ArgumentException($"Unknown demon material id '{materialId}'.");
+            if (!CreatureMaterialCatalog.IsKnown(materialId))
+                throw new ArgumentException($"Unknown creature material id '{materialId}'.");
             if (qty <= 0)
                 throw new ArgumentException($"Material qty must be positive ({materialId}).");
         }
@@ -294,7 +294,7 @@ public sealed partial class RpgStore
             var now = utcNow ?? DateTimeOffset.UtcNow;
 
             if (!CloseExpeditionUnlocked(db, expeditionId, state, now))
-                return (false, "expedition.closed", new List<DemonSpecimenDto>());
+                return (false, "expedition.closed", new List<CreatureSpecimenDto>());
 
             if (rewards.EventSouls > 0)
             {
@@ -304,12 +304,12 @@ public sealed partial class RpgStore
                 GuardSoulAwardOrThrow(ReadSoulBalanceUnlocked(db, playerId).Balance, rewards.EventSouls);
                 AppendSoulLedgerUnlocked(db, playerId, 0,
                     rewards.EventSouls,
-                    Core.Demons.SoulEarnPolicy.Reasons.Expedition, null, null,
+                    Core.Creatures.SoulEarnPolicy.Reasons.Expedition, null, null,
                     "exp:" + expeditionId, now.UtcDateTime.ToString("o"));
             }
 
             if (rewards.Materials.Count > 0)
-                AddDemonMaterialsUnlocked(db, playerId, rewards.Materials);
+                AddCreatureMaterialsUnlocked(db, playerId, rewards.Materials);
 
             foreach (var (instanceId, xp) in rewards.SpecimenXp)
             {
@@ -328,21 +328,21 @@ public sealed partial class RpgStore
                 }
             }
 
-            var minted = new List<DemonSpecimenDto>();
+            var minted = new List<CreatureSpecimenDto>();
             foreach (var spec in rewards.WildMints)
             {
                 var stamp = now.UtcDateTime.ToString("o");
-                minted.Add(MintDemonUnlocked(db, playerId, spec, stamp, out var speciesNewlyDiscovered));
+                minted.Add(MintCreatureUnlocked(db, playerId, spec, stamp, out var speciesNewlyDiscovered));
                 // One discovery policy across acquisition paths (2026-08-21 review S5): a species
                 // first met on an expedition pays the same bonus a summon would; the shared
                 // `species:{id}` dedupe keeps it once-ever no matter which path lands first.
                 if (speciesNewlyDiscovered
-                    && Core.Demons.DemonRarityIds.TryParse(spec.Rarity, out var mintRarity))
+                    && Core.Creatures.CreatureRarityIds.TryParse(spec.Rarity, out var mintRarity))
                 {
-                    var reward = Core.Demons.SoulEarnPolicy.DiscoveryDelta(mintRarity);
+                    var reward = Core.Creatures.SoulEarnPolicy.DiscoveryDelta(mintRarity);
                     if (reward > 0)
                         AppendSoulLedgerUnlocked(db, playerId, 0, reward,
-                            Core.Demons.SoulEarnPolicy.Reasons.Discovery,
+                            Core.Creatures.SoulEarnPolicy.Reasons.Discovery,
                             "species", spec.SpeciesId, "species:" + spec.SpeciesId, stamp);
                 }
             }
@@ -353,13 +353,13 @@ public sealed partial class RpgStore
     }
 
     /// <summary>`species-build` T1.4 — the direct `instance_id -> species_id` link
-    /// (`rpg_demon_profiles`, set once at mint and never renamed), used instead of reconstructing the
+    /// (`rpg_creature_profiles`, set once at mint and never renamed), used instead of reconstructing the
     /// species from `rpg_unique_actors.type_id` (which stores the PvZ `GameTypeId`, not
-    /// `DemonTypeId`, and could collide across sides) — this FK has no such ambiguity.</summary>
+    /// `CreatureTypeId`, and could collide across sides) — this FK has no such ambiguity.</summary>
     static string? ReadSpeciesIdForInstanceUnlocked(SqliteConnection db, string instanceId)
     {
         using var cmd = db.CreateCommand();
-        cmd.CommandText = "SELECT species_id FROM rpg_demon_profiles WHERE instance_id=$id;";
+        cmd.CommandText = "SELECT species_id FROM rpg_creature_profiles WHERE instance_id=$id;";
         cmd.Parameters.AddWithValue("$id", instanceId);
         return cmd.ExecuteScalar() as string;
     }

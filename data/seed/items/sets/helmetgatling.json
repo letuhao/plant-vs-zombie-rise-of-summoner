@@ -25,7 +25,7 @@
       "id": "set.helmetgatling-001",
       "nameKey": "set.zombie-blitz",
       "name": "Zombie Blitz",
-      "themeKey": "demon.helmetgatling",
+      "themeKey": "creature.helmetgatling",
       "members": [
         {
           "role": "armament-primary",

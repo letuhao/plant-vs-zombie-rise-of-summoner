@@ -204,7 +204,7 @@ def mechanical_favour_weights_milli(
 
 
 def _seed_int(key: str) -> int:
-    """`blake2b(key, digest_size=8)` — the same construction `adapters.demons.anchor.permute.py`'s
+    """`blake2b(key, digest_size=8)` — the same construction `adapters.creatures.anchor.permute.py`'s
     own `_seed_int` uses (there, seeded per-field-per-sample; here, seeded per-species), so a species'
     own rank among its peers depends on ITS id alone, never on its position in the caller's list."""
     digest = hashlib.blake2b(key.encode("utf-8"), digest_size=8).digest()

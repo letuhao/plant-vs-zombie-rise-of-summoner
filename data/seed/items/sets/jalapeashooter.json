@@ -25,7 +25,7 @@
       "id": "set.jalapeashooter-001",
       "nameKey": "set.spike-volley",
       "name": "Spike Volley",
-      "themeKey": "demon.jalapeashooter",
+      "themeKey": "creature.jalapeashooter",
       "members": [
         {
           "role": "armament-primary",

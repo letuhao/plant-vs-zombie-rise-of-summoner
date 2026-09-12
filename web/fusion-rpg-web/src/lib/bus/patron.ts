@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getJson, sendJson } from "./rest";
 
-// ---- DTOs (spec-patron-demon.md wire shapes) ----
+// ---- DTOs (spec-patron-creature.md wire shapes) ----
 
 export type PatronAuraDto = {
   elementPrimary: string;

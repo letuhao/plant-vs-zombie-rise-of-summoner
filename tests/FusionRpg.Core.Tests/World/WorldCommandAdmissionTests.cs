@@ -150,7 +150,7 @@ public class WorldCommandAdmissionTests
 
     // world-stage W28: `bind-warden` — names a sector, carries the binding id, needs no entity.
 
-    static WorldCommand BindWarden(string commander, string? sectorId, string? wardenId = "demon-1") => new()
+    static WorldCommand BindWarden(string commander, string? sectorId, string? wardenId = "creature-1") => new()
     {
         CommanderId = commander, CommandId = "c-bind", Kind = WorldCommandKinds.BindWarden,
         SectorId = sectorId, WardenId = wardenId

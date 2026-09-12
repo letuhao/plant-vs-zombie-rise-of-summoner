@@ -25,7 +25,7 @@
       "id": "set.icedoom-001",
       "nameKey": "set.world-ending-spore",
       "name": "World-Ending Spore",
-      "themeKey": "demon.icedoom",
+      "themeKey": "creature.icedoom",
       "members": [
         {
           "role": "armament-primary",

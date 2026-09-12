@@ -6,15 +6,15 @@ public static class RpgActorKinds
     public const string Plant = "plant";
     public const string Zombie = "zombie";
 
-    /// <summary>`species-build` T1.1 — a demon SPECIES' own per-player level (module 3, `species-xp`),
+    /// <summary>`species-build` T1.1 — a creature SPECIES' own per-player level (module 3, `species-xp`),
     /// distinct from the `Plant`/`Zombie` PvZ-TYPE rows above: those key on the PvZ engine's own type
     /// id and are read by other things today, so they stay untouched. A species row keys on
-    /// <c>DemonSpeciesDef.DemonTypeId</c> (the disjoint ≥10000 id space, already unique per species —
-    /// `DemonSpeciesCatalog.Validate`) — spec-species-xp.md §1 Option A: reuse
+    /// <c>CreatureSpeciesDef.CreatureTypeId</c> (the disjoint ≥10000 id space, already unique per species —
+    /// `CreatureSpeciesCatalog.Validate`) — spec-species-xp.md §1 Option A: reuse
     /// <c>rpg_actor_progression</c>/<c>rpg_xp_ledger</c> with a new `kind`, never a second store.</summary>
     public const string Species = "species";
 
-    /// <summary>A unique demon INSTANCE's own level (`rpg_unique_actors`), distinct from
+    /// <summary>A unique creature INSTANCE's own level (`rpg_unique_actors`), distinct from
     /// <see cref="Species"/>, which is the per-player level of a species TYPE. Added 2026-09-05 by the
     /// effort-power reconciliation: this level feeds the same quadratic `P(Theta)` as every other, but
     /// its cost was a flat, hardcoded 100 XP per level, which made specimen power quadratic IN EFFORT

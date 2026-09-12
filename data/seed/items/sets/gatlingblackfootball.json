@@ -25,7 +25,7 @@
       "id": "set.gatlingblackfootball-001",
       "nameKey": "set.stagnant-lead-volley",
       "name": "Stagnant Lead Volley",
-      "themeKey": "demon.gatlingblackfootball",
+      "themeKey": "creature.gatlingblackfootball",
       "members": [
         {
           "role": "armament-primary",

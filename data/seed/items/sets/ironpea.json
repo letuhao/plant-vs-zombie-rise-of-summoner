@@ -25,7 +25,7 @@
       "id": "set.ironpea-001",
       "nameKey": "set.iron-barrel-peashooter",
       "name": "Iron-Barrel Peashooter",
-      "themeKey": "demon.ironpea",
+      "themeKey": "creature.ironpea",
       "members": [
         {
           "role": "armament-primary",

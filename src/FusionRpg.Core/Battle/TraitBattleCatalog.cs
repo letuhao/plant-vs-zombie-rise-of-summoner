@@ -1,4 +1,4 @@
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Battle;
@@ -7,7 +7,7 @@ namespace FusionRpg.Core.Battle;
 /// How a trait acts in web battles. Funnel-routed traits are stat modifiers and HP mutations on
 /// the battle funnel; engine behaviors (targeting, retreat, report multipliers) are engine
 /// semantics outside the FA vocabulary BY DESIGN — FA opcodes describe board operations, not
-/// battle AI (demon-standalone-plan.md §Refinement). Contracts later layers obedience on the
+/// battle AI (creature-standalone-plan.md §Refinement). Contracts later layers obedience on the
 /// same trait keys.
 /// </summary>
 public enum TraitBattleMechanism

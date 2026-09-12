@@ -25,7 +25,7 @@
       "id": "set.endoflamezombie-001",
       "nameKey": "set.crimson-lotus-betrayal",
       "name": "Crimson Lotus Betrayal",
-      "themeKey": "demon.endoflamezombie",
+      "themeKey": "creature.endoflamezombie",
       "members": [
         {
           "role": "armament-primary",

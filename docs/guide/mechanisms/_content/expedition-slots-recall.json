@@ -10,7 +10,7 @@
     {"term": "Slot", "meaning": "A parallel expedition berth. You start with a few and grow into more as the system allows — not infinite dispatches."},
     {"term": "Recall", "meaning": "Pull an expedition home before the timer ends. Rewards pro-rate to completed ticks."},
     {"term": "Pro-rate", "meaning": "You take what completed so far — not a full payout and not a wipe of the run."},
-    {"term": "Live task", "meaning": "A demon already out on an expedition (or another live assignment) cannot be double-booked."}
+    {"term": "Live task", "meaning": "A creature already out on an expedition (or another live assignment) cannot be double-booked."}
   ],
   "alsoTrue": [
     "Recall anytime is intentional — leave early, take earned so far. Nothing expires if you forget to collect.",
@@ -21,7 +21,7 @@
       "title": "What it is",
       "paras": [
         "Parallelism is gated by expedition slots — you grow from a few to more as you progress.",
-        "Recall is the escape hatch when you need those demons back before the timer ends."
+        "Recall is the escape hatch when you need those creatures back before the timer ends."
       ]
     },
     {
@@ -43,7 +43,7 @@
       "groups": [
         {
           "title": "On the Expeditions layer",
-          "intro": "Open Expeditions (`E`) after you have a bound demon.",
+          "intro": "Open Expeditions (`E`) after you have a bound creature.",
           "steps": [
             "Look at how many slots are free versus filled.",
             "Dispatch into an empty slot.",
@@ -65,7 +65,7 @@
     {"q": "Can I run unlimited expeditions at once?", "a": "No. Slots gate parallelism. You grow into more over time."},
     {"q": "Does recall give the full reward?", "a": "No. You get what completed ticks earned — leave early, take less."},
     {"q": "Do unfinished rewards expire?", "a": "No. Collect when ready; nothing times out from neglect."},
-    {"q": "Can I put the same demon on two slots?", "a": "No. Demons on a live task are not free to dispatch again."}
+    {"q": "Can I put the same creature on two slots?", "a": "No. Creatures on a live task are not free to dispatch again."}
   ],
   "next": ["expeditions"],
   "related": ["expeditions", "specimens", "wild-joins"],

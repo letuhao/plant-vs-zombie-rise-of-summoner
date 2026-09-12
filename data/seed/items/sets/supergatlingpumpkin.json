@@ -25,7 +25,7 @@
       "id": "set.supergatlingpumpkin-001",
       "nameKey": "set.jack-o-machine",
       "name": "Jack-o'-Machine",
-      "themeKey": "demon.supergatlingpumpkin",
+      "themeKey": "creature.supergatlingpumpkin",
       "members": [
         {
           "role": "armament-primary",

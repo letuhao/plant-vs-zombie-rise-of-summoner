@@ -138,11 +138,7 @@ public class ClassSystemBaselineRegenTests
             CreateNoWindow = true,
             WorkingDirectory = repoRoot
         };
-        using var p = Process.Start(psi)!;
-        var stdout = p.StandardOutput.ReadToEnd();
-        var stderr = p.StandardError.ReadToEnd();
-        Assert.True(p.WaitForExit(180_000), "regen script timed out");
-        return (p.ExitCode, stdout, stderr);
+        return ExternalProcess.Run(psi, 180_000, "regen script timed out");
     }
 
     static string FindRepoRoot()

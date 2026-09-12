@@ -27,8 +27,8 @@ POWER_BANDS = frozenset({"medium"})
 OVERRIDE_TAGS = frozenset({"herbs"})
 
 THEMES = {
-    "demon.a": {"motifs": ["motifA1", "motifA2"], "antiMotifs": ["banA"]},
-    "demon.b": {"motifs": ["motifB1", "motifB2", "motifB3", "motifB4"], "antiMotifs": []},
+    "creature.a": {"motifs": ["motifA1", "motifA2"], "antiMotifs": ["banA"]},
+    "creature.b": {"motifs": ["motifB1", "motifB2", "motifB3", "motifB4"], "antiMotifs": []},
 }
 
 
@@ -64,23 +64,23 @@ def _kwargs():
 
 class RunEventDrawsTests(unittest.TestCase):
     def test_one_call_per_slot_no_vote(self) -> None:
-        cell = Cell("dungeon-event", ("curio", "demon.a"), "curio-demon.a")
-        fake = FakeCall([_event("event.curio-demon.a-001", "curio", "demon.a", flavor="Uses motifA1 here.")])
-        results = run_event_draws([cell], {"curio-demon.a": ["event.curio-demon.a-001"]}, call=fake, **_kwargs())
+        cell = Cell("dungeon-event", ("curio", "creature.a"), "curio-creature.a")
+        fake = FakeCall([_event("event.curio-creature.a-001", "curio", "creature.a", flavor="Uses motifA1 here.")])
+        results = run_event_draws([cell], {"curio-creature.a": ["event.curio-creature.a-001"]}, call=fake, **_kwargs())
 
         self.assertEqual(len(fake.calls), 1)
         self.assertEqual(len(results), 1)
         self.assertIsNotNone(results[0].entry)
-        self.assertEqual(results[0].entry["eventId"], "event.curio-demon.a-001")
+        self.assertEqual(results[0].entry["eventId"], "event.curio-creature.a-001")
 
     def test_a_target_two_cell_makes_two_independent_calls_with_different_motif_briefs(self) -> None:
-        cell = Cell("dungeon-event", ("curio", "demon.b"), "curio-demon.b")
-        ids = ["event.curio-demon.b-001", "event.curio-demon.b-002"]
+        cell = Cell("dungeon-event", ("curio", "creature.b"), "curio-creature.b")
+        ids = ["event.curio-creature.b-001", "event.curio-creature.b-002"]
         fake = FakeCall([
-            _event(ids[0], "curio", "demon.b", name="Title One", flavor="Uses motifB1 here."),
-            _event(ids[1], "curio", "demon.b", name="Title Two", flavor="Uses motifB2 here."),
+            _event(ids[0], "curio", "creature.b", name="Title One", flavor="Uses motifB1 here."),
+            _event(ids[1], "curio", "creature.b", name="Title Two", flavor="Uses motifB2 here."),
         ])
-        results = run_event_draws([cell], {"curio-demon.b": ids}, call=fake, **_kwargs())
+        results = run_event_draws([cell], {"curio-creature.b": ids}, call=fake, **_kwargs())
 
         self.assertEqual(len(fake.calls), 2)
         self.assertEqual(len(results), 2)
@@ -88,19 +88,19 @@ class RunEventDrawsTests(unittest.TestCase):
         self.assertTrue(all(r.entry is not None for r in results))
 
     def test_an_empty_target_cell_produces_zero_results(self) -> None:
-        cell = Cell("dungeon-event", ("curio", "demon.a"), "curio-demon.a")
+        cell = Cell("dungeon-event", ("curio", "creature.a"), "curio-creature.a")
         fake = FakeCall([])
-        results = run_event_draws([cell], {"curio-demon.a": []}, call=fake, **_kwargs())
+        results = run_event_draws([cell], {"curio-creature.a": []}, call=fake, **_kwargs())
         self.assertEqual(results, [])
         self.assertEqual(len(fake.calls), 0)
 
     def test_a_motif_coverage_rejection_triggers_a_quality_retry_that_then_succeeds(self) -> None:
-        cell = Cell("dungeon-event", ("curio", "demon.a"), "curio-demon.a")
+        cell = Cell("dungeon-event", ("curio", "creature.a"), "curio-creature.a")
         fake = FakeCall([
-            _event("event.curio-demon.a-001", "curio", "demon.a", flavor="No motif word appears here at all."),
-            _event("event.curio-demon.a-001", "curio", "demon.a", flavor="Now it uses motifA1 properly."),
+            _event("event.curio-creature.a-001", "curio", "creature.a", flavor="No motif word appears here at all."),
+            _event("event.curio-creature.a-001", "curio", "creature.a", flavor="Now it uses motifA1 properly."),
         ])
-        results = run_event_draws([cell], {"curio-demon.a": ["event.curio-demon.a-001"]}, call=fake, **_kwargs())
+        results = run_event_draws([cell], {"curio-creature.a": ["event.curio-creature.a-001"]}, call=fake, **_kwargs())
 
         self.assertEqual(len(fake.calls), 2)  # first rejected, second accepted
         self.assertIsNotNone(results[0].entry)
@@ -109,26 +109,26 @@ class RunEventDrawsTests(unittest.TestCase):
         self.assertIn("rejected", fake.calls[1][1].lower())
 
     def test_an_anti_motif_violation_also_triggers_a_quality_retry(self) -> None:
-        cell = Cell("dungeon-event", ("curio", "demon.a"), "curio-demon.a")
+        cell = Cell("dungeon-event", ("curio", "creature.a"), "curio-creature.a")
         fake = FakeCall([
-            _event("event.curio-demon.a-001", "curio", "demon.a", flavor="Uses motifA1 but also banA, forbidden."),
-            _event("event.curio-demon.a-001", "curio", "demon.a", flavor="Uses motifA1 cleanly this time."),
+            _event("event.curio-creature.a-001", "curio", "creature.a", flavor="Uses motifA1 but also banA, forbidden."),
+            _event("event.curio-creature.a-001", "curio", "creature.a", flavor="Uses motifA1 cleanly this time."),
         ])
-        results = run_event_draws([cell], {"curio-demon.a": ["event.curio-demon.a-001"]}, call=fake, **_kwargs())
+        results = run_event_draws([cell], {"curio-creature.a": ["event.curio-creature.a-001"]}, call=fake, **_kwargs())
         self.assertEqual(len(fake.calls), 2)
         self.assertIsNotNone(results[0].entry)
 
     def test_a_name_collision_within_the_same_run_triggers_a_quality_retry(self) -> None:
-        cell_a = Cell("dungeon-event", ("curio", "demon.a"), "curio-demon.a")
-        cell_b = Cell("dungeon-event", ("trap", "demon.a"), "trap-demon.a")
+        cell_a = Cell("dungeon-event", ("curio", "creature.a"), "curio-creature.a")
+        cell_b = Cell("dungeon-event", ("trap", "creature.a"), "trap-creature.a")
         fake = FakeCall([
-            _event("event.curio-demon.a-001", "curio", "demon.a", name="The Crimson Stage", flavor="Uses motifA1."),
-            _event("event.trap-demon.a-001", "trap", "demon.a", name="The Crimson Stage", flavor="Uses motifA1 too."),
-            _event("event.trap-demon.a-001", "trap", "demon.a", name="A Genuinely Different Title", flavor="Uses motifA1 as well."),
+            _event("event.curio-creature.a-001", "curio", "creature.a", name="The Crimson Stage", flavor="Uses motifA1."),
+            _event("event.trap-creature.a-001", "trap", "creature.a", name="The Crimson Stage", flavor="Uses motifA1 too."),
+            _event("event.trap-creature.a-001", "trap", "creature.a", name="A Genuinely Different Title", flavor="Uses motifA1 as well."),
         ])
         results = run_event_draws(
             [cell_a, cell_b],
-            {"curio-demon.a": ["event.curio-demon.a-001"], "trap-demon.a": ["event.trap-demon.a-001"]},
+            {"curio-creature.a": ["event.curio-creature.a-001"], "trap-creature.a": ["event.trap-creature.a-001"]},
             call=fake, **_kwargs())
 
         self.assertEqual(len(fake.calls), 3)  # cell_a: 1 call; cell_b: rejected once, then accepted
@@ -137,22 +137,22 @@ class RunEventDrawsTests(unittest.TestCase):
         self.assertIn("already used", fake.calls[2][1])
 
     def test_existing_names_seeds_the_collision_set_across_batches(self) -> None:
-        cell = Cell("dungeon-event", ("curio", "demon.a"), "curio-demon.a")
+        cell = Cell("dungeon-event", ("curio", "creature.a"), "curio-creature.a")
         fake = FakeCall([
-            _event("event.curio-demon.a-001", "curio", "demon.a", name="An Old Title", flavor="Uses motifA1."),
-            _event("event.curio-demon.a-001", "curio", "demon.a", name="A Fresh Title", flavor="Uses motifA1 too."),
+            _event("event.curio-creature.a-001", "curio", "creature.a", name="An Old Title", flavor="Uses motifA1."),
+            _event("event.curio-creature.a-001", "curio", "creature.a", name="A Fresh Title", flavor="Uses motifA1 too."),
         ])
         results = run_event_draws(
-            [cell], {"curio-demon.a": ["event.curio-demon.a-001"]}, call=fake,
+            [cell], {"curio-creature.a": ["event.curio-creature.a-001"]}, call=fake,
             existing_names=["An Old Title"], **_kwargs())
         self.assertEqual(len(fake.calls), 2)
         self.assertEqual(results[0].entry["name"], "A Fresh Title")
 
     def test_exhausting_every_retry_leaves_the_slot_unresolved_never_a_silent_bad_answer(self) -> None:
-        cell = Cell("dungeon-event", ("curio", "demon.a"), "curio-demon.a")
-        bad = _event("event.curio-demon.a-001", "curio", "demon.a", flavor="Never mentions a motif at all.")
+        cell = Cell("dungeon-event", ("curio", "creature.a"), "curio-creature.a")
+        bad = _event("event.curio-creature.a-001", "curio", "creature.a", flavor="Never mentions a motif at all.")
         fake = FakeCall([bad] * (MAX_QUALITY_RETRY + 1))
-        results = run_event_draws([cell], {"curio-demon.a": ["event.curio-demon.a-001"]}, call=fake, **_kwargs())
+        results = run_event_draws([cell], {"curio-creature.a": ["event.curio-creature.a-001"]}, call=fake, **_kwargs())
 
         self.assertEqual(len(fake.calls), MAX_QUALITY_RETRY + 1)
         self.assertIsNone(results[0].entry)
@@ -162,16 +162,16 @@ class RunEventDrawsTests(unittest.TestCase):
         class NeverParses:
             def __call__(self, *args, **kwargs) -> str:
                 return "not json"
-        cell = Cell("dungeon-event", ("curio", "demon.a"), "curio-demon.a")
-        results = run_event_draws([cell], {"curio-demon.a": ["event.curio-demon.a-001"]},
+        cell = Cell("dungeon-event", ("curio", "creature.a"), "curio-creature.a")
+        results = run_event_draws([cell], {"curio-creature.a": ["event.curio-creature.a-001"]},
                                    call=NeverParses(), **_kwargs())
         self.assertIsNone(results[0].entry)
         self.assertEqual(results[0].reason, "insufficient_valid_samples")
 
     def test_never_calls_the_real_transport_when_a_stub_is_supplied(self) -> None:
-        cell = Cell("dungeon-event", ("curio", "demon.a"), "curio-demon.a")
-        fake = FakeCall([_event("event.curio-demon.a-001", "curio", "demon.a", flavor="Uses motifA1.")])
-        results = run_event_draws([cell], {"curio-demon.a": ["event.curio-demon.a-001"]}, call=fake, **_kwargs())
+        cell = Cell("dungeon-event", ("curio", "creature.a"), "curio-creature.a")
+        fake = FakeCall([_event("event.curio-creature.a-001", "curio", "creature.a", flavor="Uses motifA1.")])
+        results = run_event_draws([cell], {"curio-creature.a": ["event.curio-creature.a-001"]}, call=fake, **_kwargs())
         self.assertIsNotNone(results[0].entry)
 
 

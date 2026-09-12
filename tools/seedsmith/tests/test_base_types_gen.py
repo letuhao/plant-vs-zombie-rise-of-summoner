@@ -363,7 +363,7 @@ def test_assemble_entry_refuses_empty_tags():
 def test_real_corpus_socket_max_never_exceeds_module_16s_ceiling():
     """`role == "standard"` is excluded here, not overlooked: `humanoid-standard.json`'s own entry
     carries `role: "standard"`, `enabled: false`, and a `retiredReason` citing D14 ("the commander
-    is another unique demon, not a 16th equip slot ... the generator emits nothing into it") —
+    is another unique creature, not a 16th equip slot ... the generator emits nothing into it") —
     module 16's `sockets.v1.json` deliberately has no ceiling row for it either (its own
     `socketCeilingNote`: "`standard` is deliberately ABSENT, not zero"). Confirms this generator's
     own scope decision (30 role-frames, `standard` excluded) matches a real, already-recorded

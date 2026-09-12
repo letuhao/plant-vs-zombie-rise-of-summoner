@@ -169,19 +169,19 @@ is proven.
 
 ---
 
-## 4. How this interleaves with `demon-seed`
+## 4. How this interleaves with `creature-seed`
 
 **Neither program can finish alone**, and pretending otherwise is how one of them stalls at its last task.
 
 | | Needs from the other |
 |---|---|
-| `demon-seed` module 15 `species-effects` | this program's **affix library, slot mechanism, container schema** — modules 1, 3, 8 |
-| `demon-seed` module 16 `player-materialise` | this program's **resolver and producer** — modules 2, 4, 7 |
-| this program's module 9 `affix-authoring` | nothing from demon-seed — it authors against the atom library |
+| `creature-seed` module 15 `species-effects` | this program's **affix library, slot mechanism, container schema** — modules 1, 3, 8 |
+| `creature-seed` module 16 `player-materialise` | this program's **resolver and producer** — modules 2, 4, 7 |
+| this program's module 9 `affix-authoring` | nothing from creature-seed — it authors against the atom library |
 
-**The join is: `effect-pipeline` 1-4 + 7-8 → `demon-seed` 15 → `demon-seed` 16.** The two absorptions
+**The join is: `effect-pipeline` 1-4 + 7-8 → `creature-seed` 15 → `creature-seed` 16.** The two absorptions
 (5, 6) are **not** on that path — they are independent migrations that can run in parallel. Everything before that in
-`demon-seed` (anchors, stats, import, catalog) runs independently and does not wait.
+`creature-seed` (anchors, stats, import, catalog) runs independently and does not wait.
 
 ---
 
@@ -209,7 +209,7 @@ Every row is a change to a document that **wins over any spec**.
 | `item/ssot-rarity.md` | rarity bands **per affix class**, not one count | module 1 |
 | `item/seed-contract.md` §2.1 | `affixClass` derivation extended to bundles: **a mixed bundle consumes one of each budget** | module 1 |
 | `effect-atom-map.md` E6 | its *"absorbs today's `mods_json` grant blobs"* promise stops being aspirational and names module 5 | module 5 |
-| `demons/spec-patron-demon.md` | the aura becomes a `patron.*` container; the SIM equality proof is its acceptance gate | module 6 |
+| `creatures/spec-patron-creature.md` | the aura becomes a `patron.*` container; the SIM equality proof is its acceptance gate | module 6 |
 | **`action/spec-action-seeding.md` (A13)** | it quotes *"Rarity selects the `pool_rolls` count and the tier window… No third mechanism"* as its own foundation (`:42-43`). Splitting `pool_rolls` per affix class changes that foundation, and A13 is an **approved** spec — **found 2026-09-01; it was missing from this table** | module 1 |
 | `AGENTS.md` no-caps rule | the variant tier shift **saturates at t5** — a *structural* limit (no t6 row exists), exempt but **required to say so in a comment** | module 2 |
 
@@ -241,7 +241,7 @@ plus eight files; after content, each is a migration of everything ever authored
 - Ideal: [effect-pipeline-ideal.md](effect-pipeline-ideal.md) — 784 lines, nine questions closed, seven attacks
 - [effect-atom-map.md](effect-atom-map.md) — line 213 names this program's reason to exist
 - [effect-atom/definitions.md](effect-atom/definitions.md) — **wins over every spec here**
-- [demon-seed-map.md](demon-seed-map.md) — the first consumer; its modules 15 and 16 gate on this
+- [creature-seed-map.md](creature-seed-map.md) — the first consumer; its modules 15 and 16 gate on this
 - [../research/arpg-effects/](../research/arpg-effects/) · [../research/ai-native-generation/](../research/ai-native-generation/)
 
 ## 9. Filed by the item program (2026-09-06)

@@ -243,7 +243,7 @@ def test_corpus_holds_no_numbers():
         assert defects == [], f"{row['id']}'s anchor has numeric field(s): {defects}"
 
 
-ALMANAC_ROOT = REPO_ROOT / "data" / "seed" / "demons" / "_dump" / "almanac"
+ALMANAC_ROOT = REPO_ROOT / "data" / "seed" / "creatures" / "_dump" / "almanac"
 
 
 def _normalize(s: str) -> str:
@@ -254,7 +254,7 @@ def _real_pvz_type_names() -> "set[str]":
     # The REAL almanac dump (`typeName`, e.g. "Peashooter", "PotatoMine") -- decision 43's actual
     # concern is reusing an EXISTING PLANT'S IDENTITY, not any incidental English-word overlap.
     # Whole-identity, normalized-EXACT matching (not substring, not word-token): an earlier draft
-    # of this test checked the repo's own GENERATED demon-species corpus by decomposed word, and
+    # of this test checked the repo's own GENERATED creature-species corpus by decomposed word, and
     # produced two real false positives ("convoy-depot" flagged via "pot", "mine" flagged via
     # itself) because that corpus is this repo's OWN invented content abstracted from PvZ, drawing
     # on generic English words ("Pot", "Mine" are real SPECIES ids there) -- not "the PvZ corpus"
@@ -270,9 +270,9 @@ def _real_pvz_type_names() -> "set[str]":
 
 
 def test_no_pvz_plant_appears_in_the_corpus():
-    # decision 43: static plants stay demons: "the PvZ corpus is not available for reuse here."
+    # decision 43: static plants stay creatures: "the PvZ corpus is not available for reuse here."
     # Checked against the REAL PvZ Fusion almanac dump (not a hand-typed guess-list, and not this
-    # repo's own generated demon-species corpus, which is a different, already-abstracted thing).
+    # repo's own generated creature-species corpus, which is a different, already-abstracted thing).
     real_names = _real_pvz_type_names()
     assert real_names, "sanity check: the almanac dump should not be empty"
     for row in ALL_ROWS:

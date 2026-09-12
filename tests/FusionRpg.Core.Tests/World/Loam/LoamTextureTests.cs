@@ -359,7 +359,7 @@ public class LoamTextureTests
         var warded = new WorldSector
         {
             SectorId = "warded", TypeId = "stable", OwnerFactionId = "dave", StabilityMilli = 1000,
-            DevelopmentLevel = 10, WardenBindingId = "demon-1",
+            DevelopmentLevel = 10, WardenBindingId = "creature-1",
             Slots = new[] { new WorldSlot { SlotIndex = 0, SlotTypeId = SlotTypeCatalog.WildlandSlotTypeId } }
         };
         var world = new WorldState { Factions = new[] { Dave() }, Sectors = new[] { HomeWithRootbed(), warded } };
@@ -384,7 +384,7 @@ public class LoamTextureTests
         var warded = new WorldSector
         {
             SectorId = "warded", TypeId = "stable", OwnerFactionId = "dave", StabilityMilli = 1000,
-            DevelopmentLevel = 50, WardenBindingId = "demon-1",
+            DevelopmentLevel = 50, WardenBindingId = "creature-1",
             Slots = new[] { new WorldSlot { SlotIndex = 0, SlotTypeId = SlotTypeCatalog.WildlandSlotTypeId } }
         };
         var frontier = new WorldSector
@@ -419,7 +419,7 @@ public class LoamTextureTests
         var warded = new WorldSector
         {
             SectorId = "warded", TypeId = "stable", OwnerFactionId = "dave", StabilityMilli = 500,
-            LoamStock = 10_000, WardenBindingId = "demon-1",
+            LoamStock = 10_000, WardenBindingId = "creature-1",
             Slots = new[] { Rootbed() }
         };
         var world = new WorldState { Factions = new[] { Dave() }, Sectors = new[] { warded } };
@@ -436,7 +436,7 @@ public class LoamTextureTests
         var warded = new WorldSector
         {
             SectorId = "warded", TypeId = "stable", OwnerFactionId = "zomboss", StabilityMilli = 1000,
-            WardenBindingId = "demon-1",
+            WardenBindingId = "creature-1",
             Slots = new[] { new WorldSlot { SlotIndex = 0, SlotTypeId = "seat", GuardState = GuardState.Cleared } }
         };
         var raider = new WorldEntity

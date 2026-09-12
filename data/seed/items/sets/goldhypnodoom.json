@@ -25,7 +25,7 @@
       "id": "set.goldhypnodoom-001",
       "nameKey": "set.gluttonous-spore-husk",
       "name": "Gluttonous Spore Husk",
-      "themeKey": "demon.goldhypnodoom",
+      "themeKey": "creature.goldhypnodoom",
       "members": [
         {
           "role": "armament-primary",

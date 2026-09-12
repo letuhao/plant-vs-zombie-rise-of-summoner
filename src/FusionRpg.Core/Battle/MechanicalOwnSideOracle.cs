@@ -10,11 +10,11 @@ namespace FusionRpg.Core.Battle;
 /// that answers the same relation for every ptr; this is its real replacement.
 ///
 /// <para><b>Deliberately NOT the specimen-ownership bridge.</b> `BattlefieldOwnSideReactor`'s own doc
-/// comment names a SECOND, harder half of this problem: when a demon SPECIMEN exists, ownership needs
+/// comment names a SECOND, harder half of this problem: when a creature SPECIMEN exists, ownership needs
 /// a Cold-plane `player_id` read that does not exist anywhere in Core today
 /// (buff-debuff-scope-ideal.md §4.1/§2.3, confirmed by direct search — no such read path exists). That
 /// half is `buff-debuff-scope-todo.md:249-250`'s own named, separate, unscoped gap — a larger,
-/// standalone bridge for the demon program, not something this task silently half-builds. This oracle
+/// standalone bridge for the creature program, not something this task silently half-builds. This oracle
 /// answers correctly for every entity that IS mechanical (every plant and zombie on a lawn run,
 /// mind-controlled or not) and is honest about not answering the specimen-ownership question at all.
 /// </para>

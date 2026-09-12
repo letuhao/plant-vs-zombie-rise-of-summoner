@@ -37,8 +37,8 @@ from typing import Callable, Mapping, Sequence
 
 from ....pipeline.llm_caller import LlmCallerConfig, call_with_self_heal
 from ....pipeline.model import BLOCKED_FIELD
-from ...demons.anchor.permute import order_for
-from ...demons.anchor.vote import (SetVoteResult, VoteRecord, VoteResult, disagreement_rate,
+from ...creatures.anchor.permute import order_for
+from ...creatures.anchor.vote import (SetVoteResult, VoteRecord, VoteResult, disagreement_rate,
                                    resolve_set_vote, resolve_vote)
 from .gates import BriefContext, run_g1, run_g2, run_g3
 from .schemas import SCHEMAS_BY_PIPELINE, VOTED_FIELDS_BY_PIPELINE
@@ -97,7 +97,7 @@ def verify_permutation(brief_id: str, field_name: str, options: Sequence[str],
 def resolve_vote_field(brief_id: str, field_name: str, options: Sequence[str],
                        samples: Sequence[VoteSample]) -> VoteResult:
     """Verifies all three samples' permutations (part 1), then resolves the vote over their
-    `chosen_value`s (`resolve_vote`, reused from `demons.anchor.vote` --- never reimplemented).
+    `chosen_value`s (`resolve_vote`, reused from `creatures.anchor.vote` --- never reimplemented).
     `confidence` and `value` come ONLY from this call, never read from a model field (binding
     constraint 4)."""
     if len(samples) != 3:

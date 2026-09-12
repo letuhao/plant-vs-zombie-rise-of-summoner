@@ -17,19 +17,19 @@
    renders a who-picker menu, because the feature that would need one doesn't exist yet.
    → This module cannot remove code that doesn't exist. It closes as **verification**: confirm both
    replacements landed cleanly and nothing old was left reachable, not as its own removal work.
-2. **`DemonsPage` is a real, larger legacy candidate, deliberately left as an open question, not a
-   decision.** [`DemonsPage.tsx`](../../web/fusion-rpg-web/src/features/demons/DemonsPage.tsx) is a
+2. **`CreaturesPage` is a real, larger legacy candidate, deliberately left as an open question, not a
+   decision.** [`CreaturesPage.tsx`](../../web/fusion-rpg-web/src/features/creatures/CreaturesPage.tsx) is a
    full "Summon panel, pity counters, reveal with nickname/lock, Active/Reserve roster, Codex" page
-   (its own doc comment), still directly routed at `/demons` — unlike almost every other legacy route
+   (its own doc comment), still directly routed at `/creatures` — unlike almost every other legacy route
    in `routes.tsx`, which already redirects into a Sanctum panel. It has a working nickname mechanism
-   (`useSetDemonNickname`) that Creatures' own actor adapter still lacks. It plausibly overlaps
+   (`useSetCreatureNickname`) that Creatures' own actor adapter still lacks. It plausibly overlaps
    "actor selection," but hiding a full summon/roster/codex feature is a materially bigger action than
    what "hide the first-run/actor-selection entry point" was scoped and approved to mean — and nothing
-   in the owner's own framing named it. **Recommendation: leave `DemonsPage` and its `/demons` route
+   in the owner's own framing named it. **Recommendation: leave `CreaturesPage` and its `/creatures` route
    untouched in this module** — same treatment as the four already-named legacy surfaces (Relics,
    Pacts, Sector, Metrics/Chronicle) — and revisit it explicitly if/when the broader legacy-migration
    program (already deferred per the map's "Explicitly not in this program" section) picks it up.
-   Correct me now if the owner intends `/demons` in scope here; I'll proceed with "leave it" otherwise.
+   Correct me now if the owner intends `/creatures` in scope here; I'll proceed with "leave it" otherwise.
 
 ## Objective
 
@@ -39,7 +39,7 @@ once a real consumer exists) actor-selection for scope-picking. Not a removal ta
 per the Assumptions above; a confirmation pass, sized to what was actually found.
 
 **Success is measurable:** no reachable path in the app shows the old "Bind your first creature" /
-"Open Creatures" copy; `DemonsPage` and every other already-named legacy surface remain deliberately
+"Open Creatures" copy; `CreaturesPage` and every other already-named legacy surface remain deliberately
 untouched and are named as such, not silently swept in.
 
 ## Design
@@ -54,7 +54,7 @@ Two checks, not two builds:
    a competing who-picker. If grounding for a future consumer module later finds one, that module
    handles its own migration — not retroactively assigned to this one.
 
-No new component, no new route change, no `DemonsPage` work — per Assumption 2.
+No new component, no new route change, no `CreaturesPage` work — per Assumption 2.
 
 ## Commands
 
@@ -86,9 +86,9 @@ N/A — no new code expected under the Assumptions above.
 
 ## Boundaries
 
-- **Always:** verify via search before claiming anything is clear; name `DemonsPage` explicitly as
+- **Always:** verify via search before claiming anything is clear; name `CreaturesPage` explicitly as
   untouched rather than silently ignoring it.
-- **Ask first:** touching `/demons`, `DemonsPage.tsx`, or its route — explicitly out of scope per
+- **Ask first:** touching `/creatures`, `CreaturesPage.tsx`, or its route — explicitly out of scope per
   Assumption 2 unless the owner says otherwise.
 - **Never:** remove or hide a legacy surface this module didn't name and get confirmed.
 
@@ -96,5 +96,5 @@ N/A — no new code expected under the Assumptions above.
 
 1. Zero matches for the old first-run copy anywhere in the tree after `onboarding-first-run` ships.
 2. No competing actor-selection UI found for `actor-menu-scope-picker` to have displaced.
-3. `DemonsPage`/`/demons` and the four already-named legacy surfaces remain explicitly, deliberately
+3. `CreaturesPage`/`/creatures` and the four already-named legacy surfaces remain explicitly, deliberately
    untouched — named in the report, not silently skipped.

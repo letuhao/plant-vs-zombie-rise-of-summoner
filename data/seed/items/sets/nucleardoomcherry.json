@@ -25,7 +25,7 @@
       "id": "set.nucleardoomcherry-001",
       "nameKey": "set.nuclear-cherry",
       "name": "Nuclear Cherry",
-      "themeKey": "demon.nucleardoomcherry",
+      "themeKey": "creature.nucleardoomcherry",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.pickaxezombie-001",
       "nameKey": "set.the-unreachable-pyramid",
       "name": "The Unreachable Pyramid",
-      "themeKey": "demon.pickaxezombie",
+      "themeKey": "creature.pickaxezombie",
       "members": [
         {
           "role": "armament-primary",

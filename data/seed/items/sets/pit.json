@@ -25,7 +25,7 @@
       "id": "set.pit-001",
       "nameKey": "set.the-pit-s-maw",
       "name": "The Pit's Maw",
-      "themeKey": "demon.pit",
+      "themeKey": "creature.pit",
       "members": [
         {
           "role": "armament-primary",

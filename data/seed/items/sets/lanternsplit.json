@@ -25,7 +25,7 @@
       "id": "set.lanternsplit-001",
       "nameKey": "set.relay-beam-array",
       "name": "Relay Beam Array",
-      "themeKey": "demon.lanternsplit",
+      "themeKey": "creature.lanternsplit",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.ultimatewintermelon-001",
       "nameKey": "set.glacial-melon-volley",
       "name": "Glacial Melon Volley",
-      "themeKey": "demon.ultimatewintermelon",
+      "themeKey": "creature.ultimatewintermelon",
       "members": [
         {
           "role": "armament-primary",

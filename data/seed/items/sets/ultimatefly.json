@@ -25,7 +25,7 @@
       "id": "set.ultimatefly-001",
       "nameKey": "set.laser-drone-array",
       "name": "Laser Drone Array",
-      "themeKey": "demon.ultimatefly",
+      "themeKey": "creature.ultimatefly",
       "members": [
         {
           "role": "armament-primary",

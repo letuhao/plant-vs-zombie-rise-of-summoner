@@ -37,9 +37,9 @@ public sealed class OnboardingCheckpointEvaluatorTests
     {
         var noSource = Input(level: 3, first: true);
         var unique = Input(level: 3, first: true,
-            sources: new OnboardingSourceEvidence("ZombieSpawned", "demon.progression.v1", "unique:specimen:1"));
+            sources: new OnboardingSourceEvidence("ZombieSpawned", "creature.progression.v1", "unique:specimen:1"));
         var valid = Input(level: 3, first: true,
-            sources: new OnboardingSourceEvidence("ZombieSpawned", "demon.progression.v1", "general:basic-zombie"));
+            sources: new OnboardingSourceEvidence("ZombieSpawned", "creature.progression.v1", "general:basic-zombie"));
 
         Assert.Empty(OnboardingCheckpointEvaluator.Evaluate(noSource).NewlyEligible);
         Assert.Empty(OnboardingCheckpointEvaluator.Evaluate(unique).NewlyEligible);
@@ -54,7 +54,7 @@ public sealed class OnboardingCheckpointEvaluatorTests
         {
             new OnboardingSourceEvidence("ZombieSpawned", null, null, TypeId: 7),
             new OnboardingSourceEvidence("ZombieSpawned", "opaque", "general:basic-zombie", TypeId: 7),
-            new OnboardingSourceEvidence("ZombieSpawned", "demon.progression.v1", "commander:dave", TypeId: 7),
+            new OnboardingSourceEvidence("ZombieSpawned", "creature.progression.v1", "commander:dave", TypeId: 7),
         };
 
         var result = OnboardingCheckpointEvaluator.Evaluate(Input(level: 3, first: true, sources: evidence));
@@ -67,9 +67,9 @@ public sealed class OnboardingCheckpointEvaluatorTests
     public void A_single_result_can_unlock_ordered_checkpoints_but_equipment_waits_for_level_four()
     {
         var levelThree = Input(level: 3, result: "won",
-            sources: new OnboardingSourceEvidence("ZombieSpawned", "demon.progression.v1", "general:basic-zombie"));
+            sources: new OnboardingSourceEvidence("ZombieSpawned", "creature.progression.v1", "general:basic-zombie"));
         var levelFour = Input(level: 4, result: "victory",
-            sources: new OnboardingSourceEvidence("ZombieSpawned", "demon.progression.v1", "general:basic-zombie"));
+            sources: new OnboardingSourceEvidence("ZombieSpawned", "creature.progression.v1", "general:basic-zombie"));
 
         Assert.Equal(
             [OnboardingCheckpointIds.FirstWinDave, OnboardingCheckpointIds.Level3GeneralSpecies],
@@ -84,7 +84,7 @@ public sealed class OnboardingCheckpointEvaluatorTests
     public void Earned_checkpoints_are_not_reissued_and_equipment_waits_for_both_prerequisites()
     {
         var input = Input(level: 4, result: "victory", first: true, species: true,
-            sources: new OnboardingSourceEvidence("ZombieSpawned", "demon.progression.v1", "general:basic-zombie"));
+            sources: new OnboardingSourceEvidence("ZombieSpawned", "creature.progression.v1", "general:basic-zombie"));
 
         var result = OnboardingCheckpointEvaluator.Evaluate(input);
 

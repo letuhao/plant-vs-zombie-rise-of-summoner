@@ -25,7 +25,7 @@
       "id": "set.icelaserumbrella-001",
       "nameKey": "set.frost-spike-parasite",
       "name": "Frost-Spike Parasite",
-      "themeKey": "demon.icelaserumbrella",
+      "themeKey": "creature.icelaserumbrella",
       "members": [
         {
           "role": "armament-primary",

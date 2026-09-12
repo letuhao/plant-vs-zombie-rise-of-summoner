@@ -18,7 +18,7 @@ ideal.)
 |---|---|---|
 | **stock** | An empire quantity — loam, essence, souls | `resource` is taken by `resource-hub-ssot.md` for the **actor pools**; different scope entirely. **Corrected 2026-09-04: there are six, not five** — `poise` was registered 2026-08-26 (class-system, `poise-resource`), three days after this document was written, and the count was never re-checked. The *distinction* this row draws is the load-bearing part and it stands; see §8's narrowed rejection, which this row is the evidence for |
 | **loam** | The stock that keeps ground real | New. Collides with nothing in `src/`, the web app, or `docs/` |
-| **the Fracture** | The force that unmakes unanchored ground | `chaos` collides with the `chaos-marked` demon trait (`TraitBattleCatalog.cs:86`), and "fracture" is already the codebase's word (`SectorTypeCatalog.cs:8`) |
+| **the Fracture** | The force that unmakes unanchored ground | `chaos` collides with the `chaos-marked` creature trait (`TraitBattleCatalog.cs:86`), and "fracture" is already the codebase's word (`SectorTypeCatalog.cs:8`) |
 | **rootworks** | `StructureKind.LoamSource` — the category of things that make loam | `anchor` is the effect-atom layer's (`AnchorResolver`, `AnchorOrigin`, 20 files) |
 | **handicap** | A declared per-faction balance multiplier | `cheat` is `FusionRpg.CheatCore`'s — and a hidden fudge cannot survive replay |
 | **world** | One map run. Ending one and starting another **is** the progression loop | No new noun needed — `rpg_worlds.state` already exists |
@@ -34,7 +34,7 @@ for fusion, in the same table a map currency would have used. Loam absorbed that
 |---|---|---|
 | **Loam** | Position — holding ground, and eventually building on it | **World.** Never banks |
 | **Souls** | Roster power — summons, contracts, rituals | **Player.** `rpg_soul_ledger` |
-| **Essence** ×6 | Fusion, element-matched and deliberately non-substitutable | **Player.** `rpg_demon_materials` |
+| **Essence** ×6 | Fusion, element-matched and deliberately non-substitutable | **Player.** `rpg_creature_materials` |
 
 ### The P4 test, run — and the answer is three (2026-08-23)
 
@@ -126,7 +126,7 @@ out to be the same line that decides it.
 
 | Carries to the next world | Dies with the world |
 |---|---|
-| Demons, roster, contracts, codex | Territory and every structure on it |
+| Creatures, roster, contracts, codex | Territory and every structure on it |
 | Souls, essence, materials — **banked** | Loam, and **any haul not banked** |
 
 - **Success = take Zomboss's capital.** Not conquest: a deficit baseline gives every empire a natural
@@ -228,7 +228,7 @@ throttles the faucets that fill it.
 | Mechanic | Verdict |
 |---|---|
 | **Deep root**, **scorched root**, granaries, waystations | **Safe.** World-scoped; lost at map end |
-| **Wardens** | **Needs its cure, and it has one:** binding a warden permanently consumes a `demon-contracts` **binding slot** — already Soul-priced, already scarce, already shipped. Each warden permanently shrinks your deployable roster, so the Nth is genuinely dearer than the first |
+| **Wardens** | **Needs its cure, and it has one:** binding a warden permanently consumes a `creature-contracts` **binding slot** — already Soul-priced, already scarce, already shipped. Each warden permanently shrinks your deployable roster, so the Nth is genuinely dearer than the first |
 | **The Unmade** | **Closed — see §7a.** They *are* a farm, deliberately. Throttled by loam (farming burns it), by depletion, and by their own spread |
 | **Soul conduits** | **Safe.** Throttled by loam (§5) |
 
@@ -317,7 +317,7 @@ effects have never landed).
 a side-scoped battle budget is permitted, a per-actor pool is not* · loam grades or tiers (**P7**,
 and no `min(x,y)` bottleneck so also **P4**) · the Fracture
 as a commanding faction (a third brain to produce what a spread pass gives free — it is a *field*) ·
-per-demon loam upkeep (contracts already charge a daily soul tribute) · randomised yields (determinism
+per-creature loam upkeep (contracts already charge a daily soul tribute) · randomised yields (determinism
 survives it; *planning* does not — variance belongs in announced surges).
 
 **Territory is light in the dark.** `StabilityMilli` is a shipped 0–1000 per sector that already
@@ -346,4 +346,4 @@ never read this file.
 | `combat-handoff` | **World-battle rewards are Tier-2 only.** If a world battle ever pays loam, §7a's farming throttle collapses in one line of another program's spec |
 | `world-generator` | Zomboss's capital must be **reachable and takeable at equilibrium empire size** — very different from "the map must be holdable" (§4). And a map must mix habitable and barren ground, or the settlement rule has no teeth |
 | `sector-development` | Development must raise yield **faster** than it raises upkeep, or nobody will ever develop (**A8**) |
-| `demon-contracts` | A warden permanently consumes a binding slot (§7). That is the cure that keeps wardens from becoming free |
+| `creature-contracts` | A warden permanently consumes a binding slot (§7). That is the cure that keeps wardens from becoming free |

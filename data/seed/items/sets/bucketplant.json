@@ -25,7 +25,7 @@
       "id": "set.bucketplant-001",
       "nameKey": "set.verdant-iron-husk",
       "name": "Verdant Iron Husk",
-      "themeKey": "demon.bucketplant",
+      "themeKey": "creature.bucketplant",
       "members": [
         {
           "role": "armament-primary",

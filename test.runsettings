@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Repo-wide test hang guard.
+
+  Why this exists: a local `dotnet test` has NO per-test timeout by default
+  (TestSessionTimeout defaults to 0 = infinite), and this repo had no .runsettings at
+  all. Only CI passed the blame-hang flags, so a deadlocked test locally produced no
+  output, no exit code and no report — an agent's tool call simply blocked until its own
+  timeout (observed: 1h30). The sequential `Process.StandardOutput.ReadToEnd()` then
+  `StandardError.ReadToEnd()` deadlock in several tests is the underlying cause; see
+  tests/FusionRpg.Core.Tests/TestSupport/ExternalProcess.cs for the concurrent-drain fix.
+
+  This file is auto-applied to every `*.Tests` project by Directory.Build.props, so a
+  local run is bounded and names the offending test even when CI flags are forgotten.
+
+  TestSessionTimeout: hard cap on the whole test session (ms). Kill, never hang forever.
+  CollectDumpOnTestSessionHang: kill the hung testhost + children after TestTimeout and
+    let the blame logger emit Sequence.xml naming the last-started / never-finished test.
+    HangDumpType=None: kill only, no multi-hundred-MB dump.
+-->
+<RunSettings>
+  <RunConfiguration>
+    <TestSessionTimeout>1200000</TestSessionTimeout>
+  </RunConfiguration>
+
+  <LoggerRunSettings>
+    <Loggers>
+      <Logger friendlyName="blame" enabled="True" />
+    </Loggers>
+  </LoggerRunSettings>
+
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="blame" enabled="True">
+        <Configuration>
+          <CollectDumpOnTestSessionHang TestTimeout="5min" HangDumpType="None" />
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

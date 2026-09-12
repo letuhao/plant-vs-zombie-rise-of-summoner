@@ -25,7 +25,7 @@
       "id": "set.polevaulterzombie-001",
       "nameKey": "set.pole-vaulting-corpse",
       "name": "Pole-Vaulting Corpse",
-      "themeKey": "demon.polevaulterzombie",
+      "themeKey": "creature.polevaulterzombie",
       "members": [
         {
           "role": "armament-primary",

@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Contracts;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
 using Xunit;
@@ -8,7 +8,7 @@ using Xunit;
 namespace FusionRpg.Data.Tests;
 
 /// <summary>
-/// L42 (spec-loam-texture.md): `BindAsWarden` extends `demon-contracts`' shipped binding machinery
+/// L42 (spec-loam-texture.md): `BindAsWarden` extends `creature-contracts`' shipped binding machinery
 /// with one new rule — the resulting bind is permanent. Same capacity check, same upkeep fee as an
 /// ordinary `BindContract`; `ReleaseContract` refuses it unconditionally, for the life of the world.
 /// </summary>
@@ -33,12 +33,12 @@ public class WardenContractTests : IDisposable
         try { Directory.Delete(_dir, true); } catch { /* temp */ }
     }
 
-    static readonly DemonSpeciesDef Species = DemonSpeciesCatalog.All
-        .First(s => s.Acquisition != DemonAcquisition.CaptureOnly && s.TraitPool.Count > 0);
+    static readonly CreatureSpeciesDef Species = CreatureSpeciesCatalog.All
+        .First(s => s.Acquisition != CreatureAcquisition.CaptureOnly && s.TraitPool.Count > 0);
 
     string Mint()
     {
-        var (specimen, _) = _store.MintDemon(1, new DemonMintSpec
+        var (specimen, _) = _store.MintCreature(1, new CreatureMintSpec
         {
             SpeciesId = Species.SpeciesId,
             Side = Species.Side,
@@ -53,7 +53,7 @@ public class WardenContractTests : IDisposable
         return specimen.Actor.InstanceId;
     }
 
-    string MintOverflowDemon()
+    string MintOverflowCreature()
     {
         for (var i = _store.CountBoundContracts(1); i < ContractPolicy.BaseSlots; i++) Mint();
         var id = Mint();
@@ -61,8 +61,8 @@ public class WardenContractTests : IDisposable
         return id;
     }
 
-    /// <summary>An unbound demon with a free capacity slot waiting — <see cref="Mint"/> auto-binds
-    /// up to base capacity, so an ordinary bindable demon needs a slot freed first, the same setup
+    /// <summary>An unbound creature with a free capacity slot waiting — <see cref="Mint"/> auto-binds
+    /// up to base capacity, so an ordinary bindable creature needs a slot freed first, the same setup
     /// `ContractOpsTests`'s own binding test uses.</summary>
     string MintUnboundWithFreeSlot()
     {
@@ -92,7 +92,7 @@ public class WardenContractTests : IDisposable
     [Fact]
     public void Binding_a_warden_refuses_when_capacity_is_full_and_writes_nothing()
     {
-        var id = MintOverflowDemon();
+        var id = MintOverflowCreature();
         var before = _store.GetSoulBalance(1).Balance;
 
         var bind = _store.BindAsWarden(1, id, Day0);

@@ -26,7 +26,7 @@ vi.mock("@/lib/bus", () => ({
   useRespecSpecies: () => ({ mutateAsync: vi.fn(), isPending: false })
 }));
 
-vi.mock("@/lib/bus/demons", () => ({
+vi.mock("@/lib/bus/creatures", () => ({
   newCorrelationId: () => "corr-1"
 }));
 

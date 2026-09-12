@@ -25,7 +25,7 @@
       "id": "set.startorch-001",
       "nameKey": "set.star-stump-volley",
       "name": "Star-Stump Volley",
-      "themeKey": "demon.startorch",
+      "themeKey": "creature.startorch",
       "members": [
         {
           "role": "armament-primary",

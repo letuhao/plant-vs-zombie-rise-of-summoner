@@ -2,7 +2,7 @@ using FusionRpg.Core.Delve.Domains;
 using FusionRpg.Core.Delve.Encounter;
 using FusionRpg.Core.Delve.Events;
 using FusionRpg.Core.Delve.Roll;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Dungeon.Registry;
 using FusionRpg.Core.Dungeon.Tuning;
 using FusionRpg.Core.Power;
@@ -68,18 +68,18 @@ public class DomainRealPipelineTests : IDisposable
     static string LayoutsDir() => Path.Combine(RepoRoot(), "data", "seed", "dungeon", "layouts");
     static string EventsDir() => Path.Combine(RepoRoot(), "data", "seed", "dungeon", "events");
     static string EncountersDir() => Path.Combine(RepoRoot(), "data", "seed", "dungeon", "encounters");
-    static string SpeciesDir() => Path.Combine(RepoRoot(), "data", "seed", "demons", "species");
+    static string SpeciesDir() => Path.Combine(RepoRoot(), "data", "seed", "creatures", "species");
 
     static readonly DungeonTuning RealDungeonTuning = DungeonTuningHub.Tuning;
     static readonly EncounterTuning RealEncounterTuning = EncounterTuningHub.Tuning;
-    static readonly DemonThreatTuning RealThreat =
-        DemonThreatTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "demon-threat.v1.json")));
+    static readonly CreatureThreatTuning RealThreat =
+        CreatureThreatTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "creature-threat.v1.json")));
     static readonly AptitudeTuning RealAptitudes =
         AptitudeTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "aptitudes.v2.json")));
     static readonly PowerTuning RealPower =
         PowerTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "power-scale.v2.json")));
-    static readonly DemonShapeTuning RealShape =
-        DemonShapeTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "demon-shape.v1.json")));
+    static readonly CreatureShapeTuning RealShape =
+        CreatureShapeTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "creature-shape.v1.json")));
 
     static LayoutTemplateCatalog RealLayoutCatalog()
     {
@@ -212,7 +212,7 @@ public class DomainRealPipelineTests : IDisposable
         // (`EVENT_KIND_FIRST_SHIP`'s own comment) is about a FUTURE multi-chapter arc design, not
         // about shipping more standalone beats -- the two already-shipped story events are already
         // exactly that shape. Generated 2 more standalone `story` events via the SAME real pipeline
-        // (`run_event_draws`, real local-model call, `event.story-demon.cactus-001` /
+        // (`run_event_draws`, real local-model call, `event.story-creature.cactus-001` /
         // `dolldiamond-001`, 4 distinct themes total now) and widened all 12 real `wild` rooms'
         // `eventPool` to the full 4-event set (the identical "widen by union, zero new anchors, only
         // wild left thin" pattern the first pass already used for the other six kinds). Row 7's

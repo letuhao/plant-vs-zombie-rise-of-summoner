@@ -25,7 +25,7 @@
       "id": "set.cactusnut-001",
       "nameKey": "set.cactus-nut",
       "name": "Cactus Nut",
-      "themeKey": "demon.cactusnut",
+      "themeKey": "creature.cactusnut",
       "members": [
         {
           "role": "armament-primary",

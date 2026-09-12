@@ -9,7 +9,7 @@ namespace FusionRpg.Data.Tests;
 /// <summary>
 /// T5.6 (`player-materialise`, `spec-player-materialise.md` §3/§7) — the transactional half:
 /// <c>RpgStore.MaterialisePlayerSpecies</c> really writes `player_species` + `effect_instance` rows,
-/// once per player, append-only, all-or-nothing. <see cref="Demons.MaterialiseTests"/>-equivalent
+/// once per player, append-only, all-or-nothing. <see cref="Creatures.MaterialiseTests"/>-equivalent
 /// purity/reproducibility already lives in `FusionRpg.Core.Tests` (T5.5) against the pure
 /// <c>SpeciesMaterialiser</c> — this file proves the DAL wrapper actually persists what that produces,
 /// and the four properties only a real database can prove: append-only, all-or-nothing, a retune
@@ -252,7 +252,7 @@ public class PlayerMaterialiseTests : IDisposable
     /// player's own roster is stable across sessions"), proven end to end against REAL committed
     /// content for the first time (2026-09-06) — every test above uses <c>SeedSpecies</c>, a
     /// synthetic fixture; this imports the REAL `data/seed/effects/affixes/all.json` (T7.1's own real
-    /// 10-affix catalog) and the REAL `data/seed/demons/species-effects/**` pilot batch (T5.3's own
+    /// 10-affix catalog) and the REAL `data/seed/creatures/species-effects/**` pilot batch (T5.3's own
     /// real 3-species content, `entry_for`'s bug-fixed output) through the exact same
     /// `AtomSeedFile.Collect` → `RpgStore.ImportContent` path a live server uses, not a hand-built row.
     ///
@@ -269,7 +269,7 @@ public class PlayerMaterialiseTests : IDisposable
             .Where(f => !Path.GetFileName(f).Equals("vocabulary.json", StringComparison.OrdinalIgnoreCase));
         var affixFiles = Directory.GetFiles(Path.Combine(repoRoot, "data", "seed", "effects", "affixes"), "*.json");
         var speciesEffectFiles = Directory.GetFiles(
-            Path.Combine(repoRoot, "data", "seed", "demons", "species-effects"), "*.json", SearchOption.AllDirectories);
+            Path.Combine(repoRoot, "data", "seed", "creatures", "species-effects"), "*.json", SearchOption.AllDirectories);
 
         var files = atomFiles.Concat(affixFiles).Concat(speciesEffectFiles)
             .Select(f => (Path: f, Json: File.ReadAllText(f)));
@@ -297,7 +297,7 @@ public class PlayerMaterialiseTests : IDisposable
         Assert.Equal(3, roster2.Count);
 
         // Each player's own roster is non-empty and real (an instance actually exists per row) —
-        // the "species effects" half of Checkpoint 7's demon-summon line, independent of trait roll
+        // the "species effects" half of Checkpoint 7's creature-summon line, independent of trait roll
         // or commander buff, which remain their own, separately-tracked gaps.
         Assert.All(roster1, r => Assert.NotNull(_store.GetInstance(r.InstanceId)));
         Assert.All(roster2, r => Assert.NotNull(_store.GetInstance(r.InstanceId)));

@@ -25,7 +25,7 @@
       "id": "set.ironsquash-001",
       "nameKey": "set.heavy-gourd-shell",
       "name": "Heavy Gourd Shell",
-      "themeKey": "demon.ironsquash",
+      "themeKey": "creature.ironsquash",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.doomgarlic-001",
       "nameKey": "set.the-devouring-bulb",
       "name": "The Devouring Bulb",
-      "themeKey": "demon.doomgarlic",
+      "themeKey": "creature.doomgarlic",
       "members": [
         {
           "role": "armament-primary",

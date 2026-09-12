@@ -106,26 +106,26 @@ if __name__ == "__main__":
     unittest.main()
 
 
-# ---- `seedsmith demons` (added 2026-09-01) -------------------------------------------------------
+# ---- `seedsmith creatures` (added 2026-09-01) -------------------------------------------------------
 #
 # ⛔ Two of the audit's own `Verify` lines named commands that did not exist:
-# `python -m seedsmith demons motifs` (G1.3) and
-# `python -m seedsmith demons generate --kind commander-effect` (G4.3). Both FAILED when actually
+# `python -m seedsmith creatures motifs` (G1.3) and
+# `python -m seedsmith creatures generate --kind commander-effect` (G4.3). Both FAILED when actually
 # executed during the final-proof pass — the real entrypoints were reachable only as
-# `python -m seedsmith.adapters.demons.<module>`. Same defect D1.4 already caught once ("the real
+# `python -m seedsmith.adapters.creatures.<module>`. Same defect D1.4 already caught once ("the real
 # CLI — `report` from the spec's own example doesn't exist"). Fixed by making the documented claim
 # true, per P6's own precedent, rather than editing the Verify line down to match.
 
 
-def test_demons_subcommand_is_registered_with_both_verbs():
+def test_creatures_subcommand_is_registered_with_both_verbs():
     from seedsmith.report.cli import build_parser
 
     parser = build_parser()
-    for argv in (["demons", "motifs"], ["demons", "themes"],
-                 ["demons", "theme-refresh"],
-                 ["demons", "generate", "--kind", "commander-effect"]):
+    for argv in (["creatures", "motifs"], ["creatures", "themes"],
+                 ["creatures", "theme-refresh"],
+                 ["creatures", "generate", "--kind", "commander-effect"]):
         args = parser.parse_args(argv)
-        assert args.command == "demons"
+        assert args.command == "creatures"
         assert callable(args.func)
 
 
@@ -133,7 +133,7 @@ def test_theme_refresh_public_command_reads_the_complete_roster(capsys):
     """A stale theme snapshot must be repairable through the documented CLI, not a private module path."""
     from seedsmith.report.cli import EXIT_CLEAN, main
 
-    assert main(["demons", "themes", "--dry-run"]) == EXIT_CLEAN
+    assert main(["creatures", "themes", "--dry-run"]) == EXIT_CLEAN
     report = json.loads(capsys.readouterr().out)
     assert report["dryRun"] is True
     # Contract: every species input produced a theme. The roster size is a reading, so assert the
@@ -150,34 +150,34 @@ def test_species_item_plan_refuses_when_theme_coverage_is_stale(capsys):
     from seedsmith.adapters.items.setgen import themes as themes_mod
     from seedsmith.report.cli import EXIT_CANNOT_RUN, main
 
-    stale = SimpleNamespace(species=904, themes=903, uncovered=("new-demon",), orphaned=())
+    stale = SimpleNamespace(species=904, themes=903, uncovered=("new-creature",), orphaned=())
     with patch.object(themes_mod, "coverage_report", return_value=stale):
         assert main(["items", "generate", "--kind", "set", "--population", "species",
                      "--dry-run"]) == EXIT_CANNOT_RUN
     assert "theme registry is stale" in capsys.readouterr().err
 
 
-def test_demons_requires_a_verb():
-    """`seedsmith demons` alone must be a usage error, not a silent no-op."""
+def test_creatures_requires_a_verb():
+    """`seedsmith creatures` alone must be a usage error, not a silent no-op."""
     import pytest
 
     from seedsmith.report.cli import build_parser
 
     with pytest.raises(SystemExit):
-        build_parser().parse_args(["demons"])
+        build_parser().parse_args(["creatures"])
 
 
-def test_demons_generate_refuses_a_kind_with_no_generator():
+def test_creatures_generate_refuses_a_kind_with_no_generator():
     from seedsmith.report.cli import EXIT_CANNOT_RUN, build_parser
 
-    args = build_parser().parse_args(["demons", "generate", "--kind", "aspect"])
+    args = build_parser().parse_args(["creatures", "generate", "--kind", "aspect"])
     assert args.func(args) == EXIT_CANNOT_RUN, (
         "an unbuilt kind must refuse loudly — `aspect` is blocked on another program (plan §D-F2), "
         "and silently generating nothing would read as success")
 
 
 def test_importing_the_cli_does_not_require_langgraph():
-    """⛔ Load-bearing. `demons generate` pulls in the workflow package, and `langgraph` is an
+    """⛔ Load-bearing. `creatures generate` pulls in the workflow package, and `langgraph` is an
     OPTIONAL extra — the measurement half of seedsmith must keep running on a base install
     (verified live: 470 passed with the extra absent). A top-level import in `cli.py` would make
     plain `seedsmith check` fail for every base-install user.
@@ -192,11 +192,11 @@ def test_importing_the_cli_does_not_require_langgraph():
     top_level = [ln for ln in source.splitlines()
                  if ln.startswith(("import ", "from ")) and "langgraph" in ln]
     assert top_level == [], f"cli.py imports langgraph at module level: {top_level}"
-    assert "generate_commander_effects" not in source.split("def cmd_demons")[0], (
-        "the generator must be imported inside cmd_demons, not at module scope")
+    assert "generate_commander_effects" not in source.split("def cmd_creatures")[0], (
+        "the generator must be imported inside cmd_creatures, not at module scope")
 
 
-# ---- --pipeline as an execution-scope flag (2026-09-04, demon-corpus-self-heal B1) --------------
+# ---- --pipeline as an execution-scope flag (2026-09-04, creature-corpus-self-heal B1) --------------
 #
 # Real bug found live: `rerun --pipeline kit-shape --species Peashooter,SunFlower,WallNut` silently
 # did a FULL 8-pipeline reclassification of all 3 (49 calls, not the expected 3) — `--species` won

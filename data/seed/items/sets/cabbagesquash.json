@@ -25,7 +25,7 @@
       "id": "set.cabbagesquash-001",
       "nameKey": "set.cabbage-artillery",
       "name": "Cabbage Artillery",
-      "themeKey": "demon.cabbagesquash",
+      "themeKey": "creature.cabbagesquash",
       "members": [
         {
           "role": "armament-primary",

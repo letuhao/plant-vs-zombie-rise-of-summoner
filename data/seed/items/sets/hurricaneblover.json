@@ -25,7 +25,7 @@
       "id": "set.hurricaneblover-001",
       "nameKey": "set.hurricane-clover",
       "name": "Hurricane Clover",
-      "themeKey": "demon.hurricaneblover",
+      "themeKey": "creature.hurricaneblover",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.cherryshooterzombie-001",
       "nameKey": "set.cherry-shotgun-heir",
       "name": "Cherry Shotgun Heir",
-      "themeKey": "demon.cherryshooterzombie",
+      "themeKey": "creature.cherryshooterzombie",
       "members": [
         {
           "role": "armament-primary",

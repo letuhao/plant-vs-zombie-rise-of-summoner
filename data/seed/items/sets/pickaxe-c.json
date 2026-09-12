@@ -25,7 +25,7 @@
       "id": "set.pickaxe-c-001",
       "nameKey": "set.alloyed-grave-retinue",
       "name": "Alloyed Grave Retinue",
-      "themeKey": "demon.pickaxe_c",
+      "themeKey": "creature.pickaxe_c",
       "members": [
         {
           "role": "armament-primary",

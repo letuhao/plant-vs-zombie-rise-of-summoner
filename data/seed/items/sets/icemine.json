@@ -25,7 +25,7 @@
       "id": "set.icemine-001",
       "nameKey": "set.frost-burst-spud",
       "name": "Frost-Burst Spud",
-      "themeKey": "demon.icemine",
+      "themeKey": "creature.icemine",
       "members": [
         {
           "role": "armament-primary",

@@ -6,7 +6,7 @@ using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.Battle.Timeline;
-using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Creatures.Contracts;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived.Subsystems;
 using FusionRpg.Data;
@@ -380,7 +380,7 @@ public sealed class WebMatchService
         foreach (var instanceId in setup.Squad.Select(a => a.SpecimenId).Where(id => !string.IsNullOrEmpty(id)).Distinct(StringComparer.Ordinal))
         {
             uniqueShares[instanceId!] = _store.LoadAllocation(
-                FusionRpg.Core.Stats.Aptitudes.AllocationScope.UniqueDemon, instanceId!).Shares();
+                FusionRpg.Core.Stats.Aptitudes.AllocationScope.UniqueCreature, instanceId!).Shares();
         }
         events.Add(new EventEnvelope
         {
@@ -481,7 +481,7 @@ public sealed class WebMatchService
             && squadInstanceIds.Distinct(StringComparer.Ordinal).Count() != squadInstanceIds.Count)
             return (false, "squad.duplicate", null, none);
 
-        // Contracts gate fielding (spec-demon-contracts.md). Settling first is what keeps an
+        // Contracts gate fielding (spec-creature-contracts.md). Settling first is what keeps an
         // un-migrated player from being refused everything; on any day already settled it is a
         // single read, so this is not a billing loop on the battle path.
         _store.SettleContracts(playerId);
@@ -490,11 +490,11 @@ public sealed class WebMatchService
         bool Bound(string id) => contracts.TryGetValue(id, out var c) && c.Bound;
         bool Deployable(string id) => contracts.TryGetValue(id, out var c) && c.Deployable;
 
-        var roster = _store.ListDemonRoster(playerId).Items;
-        List<DemonSpecimenDto> picked;
+        var roster = _store.ListCreatureRoster(playerId).Items;
+        List<CreatureSpecimenDto> picked;
         if (squadInstanceIds is { Count: > 0 })
         {
-            picked = new List<DemonSpecimenDto>();
+            picked = new List<CreatureSpecimenDto>();
             foreach (var id in squadInstanceIds)
             {
                 var specimen = roster.FirstOrDefault(s =>
@@ -529,7 +529,7 @@ public sealed class WebMatchService
         for (var i = 0; i < picked.Count; i++)
         {
             var s = picked[i];
-            var species = FusionRpg.Core.Demons.DemonSpeciesCatalog.Get(s.Profile.SpeciesId);
+            var species = FusionRpg.Core.Creatures.CreatureSpeciesCatalog.Get(s.Profile.SpeciesId);
             var level = (int)Math.Max(1, s.Actor.Level);
 
             // item module 4/5's own "deploy" moment (RpgStore.MaterializeRolledEquipRuntime's own doc) —
@@ -549,7 +549,7 @@ public sealed class WebMatchService
                 // wiring was built. A real, previously-unnoticed structural gap, not a hypothetical one.
                 SpecimenId = s.Profile.InstanceId,
                 SpeciesId = species.SpeciesId,
-                TypeId = species.DemonTypeId,
+                TypeId = species.CreatureTypeId,
                 Level = level,
                 ElementPrimary = species.ElementPrimary,
                 ElementSecondary = species.ElementSecondary,
@@ -560,7 +560,7 @@ public sealed class WebMatchService
                 ChannelMods = StarChannelMods(s.Profile.Star, level)
                     .Concat(LoyaltyChannelMods(
                         contracts.TryGetValue(s.Profile.InstanceId, out var c) ? c.Loyalty : 0, level))
-                    .Concat(UniqueDemonAptitudeChannelMods(level, playerId, _store, s.Profile.InstanceId, commanderAllocation))
+                    .Concat(UniqueCreatureAptitudeChannelMods(level, playerId, _store, s.Profile.InstanceId, commanderAllocation))
                     .ToList(),
                 EquippedActionIds = EquippedActionIdsFor(s.Profile.InstanceId, _store),
             });
@@ -571,7 +571,7 @@ public sealed class WebMatchService
 
     /// <summary>
     /// Star ranks reach battles ONLY here — flat per-mille shares of the level stats on the omni
-    /// channels (spec-demon-fusion.md F8). The engine and its goldens never change; stars are
+    /// channels (spec-creature-fusion.md F8). The engine and its goldens never change; stars are
     /// ordinary ChannelMods in the setup. Floored at `star` so low-level stars still register.
     /// </summary>
     public static IReadOnlyList<BattleChannelMod> StarChannelMods(int star, int level)
@@ -589,7 +589,7 @@ public sealed class WebMatchService
 
     /// <summary>
     /// Loyalty reaches battles the same way stars do — flat per-mille shares of the level stats on
-    /// the omni channels, never an engine change (spec-demon-contracts.md G7). The Bound band pays
+    /// the omni channels, never an engine change (spec-creature-contracts.md G7). The Bound band pays
     /// +0‰ by design, so a fresh contract cannot move a single golden hash.
     /// </summary>
     public static IReadOnlyList<BattleChannelMod> LoyaltyChannelMods(int loyalty, int level)
@@ -614,7 +614,7 @@ public sealed class WebMatchService
     /// <para><b>species-build `battle-allocation` (module 10).</b> <paramref name="speciesId"/> and
     /// <paramref name="commanderAllocation"/> are both optional and trailing — every existing call site
     /// (4 in `AptitudeChannelModsTests`) keeps compiling and behaving identically, resolving Commander
-    /// alone. When a species is supplied, its EFFECTIVE DemonType allocation
+    /// alone. When a species is supplied, its EFFECTIVE CreatureType allocation
     /// (`RpgStore.EffectiveSpeciesAllocation`) is merged with the commander allocation into ONE
     /// `AptitudeAllocation` via `operator+` and resolved with a SINGLE `ResolveForBattle` call — never
     /// resolved per scope and concatenated (`AptitudeAllocation.cs`'s own "scopes sum before share,
@@ -640,10 +640,10 @@ public sealed class WebMatchService
             FusionRpg.Core.Stats.Derived.DerivedStatRegistry.CreateDefault());
     }
 
-    /// <summary>Dedicated unique-demon battle input. A specimen receives the commander layer plus
-    /// its own persisted UniqueDemon allocation; the empire species fallback is intentionally not
+    /// <summary>Dedicated unique-creature battle input. A specimen receives the commander layer plus
+    /// its own persisted UniqueCreature allocation; the empire species fallback is intentionally not
     /// consulted for this source.</summary>
-    public static IReadOnlyList<BattleChannelMod> UniqueDemonAptitudeChannelMods(
+    public static IReadOnlyList<BattleChannelMod> UniqueCreatureAptitudeChannelMods(
         int level, long playerId, RpgStore store, string instanceId,
         FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation? commanderAllocation = null)
     {
@@ -652,7 +652,7 @@ public sealed class WebMatchService
         var commander = commanderAllocation ?? store.LoadAllocation(
             FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId));
         var unique = store.LoadAllocation(
-            FusionRpg.Core.Stats.Aptitudes.AllocationScope.UniqueDemon, instanceId.Trim());
+            FusionRpg.Core.Stats.Aptitudes.AllocationScope.UniqueCreature, instanceId.Trim());
         var ladder = new FusionRpg.Core.Power.PowerLadder(FusionRpg.Core.Power.PowerTuningHub.Tuning);
         return FusionRpg.Core.Stats.Aptitudes.AptitudeResolver.ResolveForBattle(
             commander + unique, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning, ladder, level,
@@ -667,7 +667,7 @@ public sealed class WebMatchService
     /// contract `RpgStore.GetLoadoutOrAutoEquip`'s own doc comment states).
     ///
     /// <para>Loadout stays keyed on <see cref="OwnerKind.Entity"/> + the specimen's own instance id,
-    /// matching `LoadoutStoreTests.cs`'s own convention for "one demon's loadout, independent of who
+    /// matching `LoadoutStoreTests.cs`'s own convention for "one creature's loadout, independent of who
     /// currently owns it" — unchanged, since a loadout PREFERENCE is not permanent progress: losing one
     /// on a session boundary degrades gracefully to auto-equip, never to nothing.</para>
     ///

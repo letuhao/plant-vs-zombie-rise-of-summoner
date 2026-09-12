@@ -1,5 +1,5 @@
 using FusionRpg.Core.Delve.Encounter;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Dungeon.Tuning;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
@@ -29,7 +29,7 @@ namespace FusionRpg.Core.Tests.Delve.Encounter;
 /// </summary>
 public class EncounterSeedContentTests
 {
-    static readonly DemonThreatTuning ThreatTuning = RealAnchorCorpusFixture.ThreatTuning;
+    static readonly CreatureThreatTuning ThreatTuning = RealAnchorCorpusFixture.ThreatTuning;
     static readonly EncounterTuning Tuning = EncounterTuningHub.Tuning;
     static readonly RaidModeTuning Solo = DungeonTuningHub.Tuning.RaidModes["solo"];
     static readonly DifficultyRungTuning Hard = DungeonTuningHub.Tuning.Rungs["hard"];
@@ -86,7 +86,7 @@ public class EncounterSeedContentTests
     /// <summary>
     /// Real, measured 2026-09-07: the classified subset is not just small (184/841) but heavily
     /// skewed toward `reach: short` (43 distinct (aptitude, reach, targetPreference) combos, "short"
-    /// dominating the top of the distribution; a direct scan of `data/seed/demons/species/*.json`
+    /// dominating the top of the distribution; a direct scan of `data/seed/creatures/species/*.json`
     /// found only ONE real combo pairs `melee` with anything, `(Retribution, melee, backline)` at
     /// count 4) — while this batch's own authored `slots[]` lean `melee`/`frontline` for the SAME
     /// reason the model leaned there for posture before the structural fix: a strong, unprompted

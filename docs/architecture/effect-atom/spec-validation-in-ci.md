@@ -95,7 +95,7 @@ text.
 gate):** *claimed* by a named module, a *named follow-up*, or *accepted as-is with the reason*.
 
 - **[CLAIMED — E47 `validate-gate-ci`] `--validate` runs in CI nowhere.** Verified by reading `.github/workflows/ci.yml`: the only tool
-  invocations are `DemonSpeciesGen --check` (`:50`), `DemonCorpusDump --verify` (`:130`) and
+  invocations are `CreatureSpeciesGen --check` (`:50`), `CreatureCorpusDump --verify` (`:130`) and
   `ItemSeedValidator` (`:136`). What E24 wired into CI is **B5** — the two missing test projects, plus
   the guard — while **B4**'s gate is reachable only from a hand-run command line and from its own unit
   and seam tests. The module's name overstates what shipped; one `ci.yml` step would close it.

@@ -25,7 +25,7 @@
       "id": "set.puffsquash-001",
       "nameKey": "set.crushing-gourd",
       "name": "Crushing Gourd",
-      "themeKey": "demon.puffsquash",
+      "themeKey": "creature.puffsquash",
       "members": [
         {
           "role": "armament-primary",

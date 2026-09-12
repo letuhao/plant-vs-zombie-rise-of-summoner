@@ -30,7 +30,7 @@ public sealed record SquadBuild(string Id, string Kind, IReadOnlyList<AptitudeAl
 /// the shape <c>tree-state</c> is designing for.</para>
 ///
 /// <para><b>Shipped</b> is today's actual production shape: <c>WebMatchService.AptitudeChannelMods</c>
-/// merges only the Commander and DemonType scopes (§1.1), so two squad members of the same species
+/// merges only the Commander and CreatureType scopes (§1.1), so two squad members of the same species
 /// cannot differ today -- every actor on a team effectively replicates the commander's allocation. This
 /// harness cannot reach <c>RpgStore</c> (§13 "Never"), so it reproduces that shape in memory by
 /// collapsing the per-actor list onto its first entry, replicated six times.</para>

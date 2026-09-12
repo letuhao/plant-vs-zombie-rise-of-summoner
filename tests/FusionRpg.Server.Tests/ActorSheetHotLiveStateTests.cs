@@ -47,8 +47,8 @@ public class ActorSheetHotLiveStateTests : IAsyncLifetime
         FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(
                 File.ReadAllText(Path.Combine(RepoTuningDir(), "progression.v1.json"))));
-        FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
-            FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(
+        FusionRpg.Core.Creatures.Contracts.ContractPolicy.Configure(
+            FusionRpg.Core.Creatures.Contracts.ContractTuningLoader.Parse(
                 File.ReadAllText(Path.Combine(RepoTuningDir(), "contracts.v1.json"))));
         FusionRpg.Core.Status.StatusPolicy.Configure(
             FusionRpg.Core.Status.StatusTuningLoader.Parse(
@@ -56,7 +56,7 @@ public class ActorSheetHotLiveStateTests : IAsyncLifetime
         FusionRpg.Core.Stats.Derived.StatsTuningHub.Configure(
             FusionRpg.Core.Stats.Derived.StatsTuningLoader.Parse(
                 File.ReadAllText(Path.Combine(RepoTuningDir(), "stats.v1.json"))));
-        FusionRpg.Core.Demons.DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        FusionRpg.Core.Creatures.CreatureSpeciesCatalog.ConfigureFromCompiledDefault();
         FusionRpg.Core.Progression.SpeciesProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.SpeciesProgressionTuningLoader.Parse(
                 File.ReadAllText(Path.Combine(RepoTuningDir(), "species-progression.v1.json"))));

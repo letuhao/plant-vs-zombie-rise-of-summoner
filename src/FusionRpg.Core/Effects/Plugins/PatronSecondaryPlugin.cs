@@ -1,10 +1,10 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons.Patron;
+using FusionRpg.Core.Creatures.Patron;
 
 namespace FusionRpg.Core.Effects.Plugins;
 
 /// <summary>
-/// Patron aura (spec-patron-demon.md): grants the match-scoped marker at match start, gated on the
+/// Patron aura (spec-patron-creature.md): grants the match-scoped marker at match start, gated on the
 /// player having any patron designated at all. Grant-only Secondary discipline — no overlay, ever.
 ///
 /// <para>The grant's magnitude (patron-absorption, `seed-to-concrete` T6.2, 2026-09-06) now comes

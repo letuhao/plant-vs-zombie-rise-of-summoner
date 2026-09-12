@@ -1,11 +1,11 @@
-"""Tests for seedsmith.adapters.demons.anchor (spec-anchor-contract.md, demon-seed module 2)."""
+"""Tests for seedsmith.adapters.creatures.anchor (spec-anchor-contract.md, creature-seed module 2)."""
 from __future__ import annotations
 
 import copy
 
-from seedsmith.adapters.demons.anchor.audit import numeric_audit
-from seedsmith.adapters.demons.anchor.descriptions import DESCRIPTIONS
-from seedsmith.adapters.demons.anchor.schema import (
+from seedsmith.adapters.creatures.anchor.audit import numeric_audit
+from seedsmith.adapters.creatures.anchor.descriptions import DESCRIPTIONS
+from seedsmith.adapters.creatures.anchor.schema import (
     ALLOWLISTED_INTEGER_FIELDS,
     build_anchor_schema,
 )

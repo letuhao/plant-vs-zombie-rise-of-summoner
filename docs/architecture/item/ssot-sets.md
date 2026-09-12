@@ -153,7 +153,7 @@ There are two deliberately different shapes:
 1. **Composable sets** (`general` and `family`) are optional pieces of a mixed
    build. Their role count grows only through an approved set-planning template,
    and the template reserves non-set build space.
-2. **Species-bound unique sets** (`unique-species`) are unique-demon loadouts.
+2. **Species-bound unique sets** (`unique-species`) are unique-creature loadouts.
    Their parameterized member-role counts are ten and fifteen: ten is a
    signature kit, fifteen is a complete kit. Neither is offered as a generic
    set, and neither is eligible for a hybrid body.
@@ -175,17 +175,17 @@ set-level power curve. A missing template means no set subject is planned.
 |---|---:|---:|---|
 | `general` | 2 | 4 | A splashable broad-theme set. Later set-progression templates may add roles and thresholds while retaining policy-reserved non-set space. |
 | `family` | 5 | 3 | A coherent declared-family set. Later templates may add roles while retaining policy-reserved non-set space. |
-| `unique-species` | 10 or 15 | exactly 2 | A species-bound unique-demon kit. Its thresholds are 2 and its parameterized final member-role count. |
+| `unique-species` | 10 or 15 | exactly 2 | A species-bound unique-creature kit. Its thresholds are 2 and its parameterized final member-role count. |
 
 Eligibility is not inferred from the class label. I11's static set-identity
 contract requires a `family` set to name its exact actor family and requires a
-`unique-species` set to name its exact unique-demon species and forbid hybrid
+`unique-species` set to name its exact unique-creature species and forbid hybrid
 bodies. `general` and `family` sets remain the set classes a hybrid may use.
 The requirement is checked before assignment; it is not a dormant set-bonus
 condition or a faction alias.
 
 The unique-species two-tier default is intentional. There are already 900+
-potential demon-species subjects, so a ten- or fifteen-piece kit must not
+potential creature-species subjects, so a ten- or fifteen-piece kit must not
 also multiply into a long bonus ladder. Its early threshold gives the species
 identity; its second threshold rewards completing the fixed template.
 
@@ -199,7 +199,7 @@ Hard rules:
   The planner rejects a template that consumes those roles; it does not clamp a
   generated set after the fact.
 - **A unique-species set claims exactly the template's declared ten- or
-  fifteen-role map for its one declared unique demon species.** It is invalid
+  fifteen-role map for its one declared unique creature species.** It is invalid
   if any role is absent, duplicated, or not equip-legal for that species
   (`UniqueSetIncompleteRoleMap`). The fifteen-role variant must cover the
   complete body map; the ten-role signature variant must not silently expand.
@@ -244,7 +244,7 @@ it has more member rows.
 **4. A composable set may not own both weapons.** A `general` or `family` set
 may claim at most one of `armament-primary` / `armament-secondary`; those roles
 remain the player's mixed-build identity. A unique-species set may claim both
-only because the kit is bound to one non-hybrid unique demon and cannot be used
+only because the kit is bound to one non-hybrid unique creature and cannot be used
 as a generic two-weapon package. The wrong class/role combination is
 `SetRoleForbidden`.
 
@@ -267,7 +267,7 @@ stat filler and nothing else, and the "choice" would be fake.
 There is **no cap on the number of composable sets** a wearer may be partially in. The slot and
 class-policy reservation are the limits. A ten-role unique-species signature set may leave roles for
 ordinary equipment, while its fifteen-role form deliberately leaves none; neither is hybrid-eligible
-or promises the composable partial-set pattern. Their player promise is a coherent unique-demon kit,
+or promises the composable partial-set pattern. Their player promise is a coherent unique-creature kit,
 not a set of interchangeable splashes.
 
 ### 3.7 Frames — can a set span them, and can a hybrid complete one?
@@ -293,7 +293,7 @@ sets with *more* freedom than a pure frame, because it can mix: a humanoid `embe
 `ember-bark` completes two roles of Ember Legion on one body. Since membership is keyed on the member
 container and not on the wearer's frame, that works with no special case at all.
 
-A unique-species set is body-bound instead. It names one declared unique demon
+A unique-species set is body-bound instead. It names one declared unique creature
 species, selects either its ten-role signature map or its complete fifteen-role
 map, and **refuses hybrid bodies**. This is a static identity requirement, not a
 missing hybrid member or a reduced threshold. Hybrids retain the complete
@@ -474,7 +474,7 @@ A `set_id` ending in `-NN` would collide with a tier id, so the grammar forbids 
 
 **A set tier binds to exactly the owner scope its member pieces are bound to, and never to `match`.**
 
-The wearer wears the set; the squad does not. Binding a tier at `match` would silently turn one demon's
+The wearer wears the set; the squad does not. Binding a tier at `match` would silently turn one creature's
 gear into a team buff, and it would make the §3.5 budget cap unenforceable because the denominator — one
 actor's slots — would no longer be the thing being paid. A tier binding aimed anywhere but the wearer's
 own scope is `ScopeUnsupported`.
@@ -669,7 +669,7 @@ fire shield rares cannot roll.
 
 ### 6.2 A hybrid running two partial sets
 
-A hybrid demon with 13 slots (OD3), wearing:
+A hybrid creature with 13 slots (OD3), wearing:
 
 - `item.ember-helm` (humanoid base) in head-protective
 - `item.ember-bark` (plant base) in core-protective
@@ -798,7 +798,7 @@ the complete recount-trigger list in §4.5, and detectable because every tier bi
     *structure* does not have to change. Both are ask-first under E5's boundaries.
 12. **Whoever names the durable wearer scope — the largest external dependency.** A set tier binds at its
     pieces' owner scope. The seven scopes are `match` · `plant:N` · `zombie:N` · `entity:HEX` ·
-    `player:N` · `sector:N` · `slot:N`, and **none is a durable per-actor scope for a demon or a
+    `player:N` · `sector:N` · `slot:N`, and **none is a durable per-actor scope for a creature or a
     commander**: `entity:` bindings are session-scoped and never durable (E6, Boundaries), and there is
     no commander actor at all (item-ideal §3). Every lane that binds equipment is blocked on this, not
     only this one — but this lane is blocked twice, once for the pieces and once for the tiers.
@@ -822,7 +822,7 @@ Decisions deliberately not made here.
    (item-ideal §4). A plant-only set is a frame restriction and works today. A *zombie-faction* set —
    which a plant-bodied `peashooterzombie` could wear — is a second restriction axis nothing in this
    design supports or forbids.
-5. **Roster scale.** Twenty demons × 4-piece sets is 80 set pieces before anyone is fully geared. The
+5. **Roster scale.** Twenty creatures × 4-piece sets is 80 set pieces before anyone is fully geared. The
    ideal's §8 open economic question — scarce gear, disposable gear, or a small deployable squad — hits
    this lane harder than most, because a set is only satisfying if it can actually be completed on the
    actors that matter.

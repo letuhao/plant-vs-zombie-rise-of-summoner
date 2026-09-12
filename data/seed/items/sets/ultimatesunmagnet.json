@@ -25,7 +25,7 @@
       "id": "set.ultimatesunmagnet-001",
       "nameKey": "set.luminous-spore-core",
       "name": "Luminous Spore Core",
-      "themeKey": "demon.ultimatesunmagnet",
+      "themeKey": "creature.ultimatesunmagnet",
       "members": [
         {
           "role": "core-guard",

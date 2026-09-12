@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Data;
@@ -173,8 +173,8 @@ public class AptitudeEndpointsTests : IAsyncLifetime
         Assert.Equal(spend, postBody!.Shares["Might"]);
         Assert.Equal(0, postBody.Leftover);
 
-        var loaded = _store.LoadAllocation(AllocationScope.UniqueDemon, actor.InstanceId);
-        Assert.Equal(spend, loaded.PointsAt(AllocationScope.UniqueDemon, "Might"));
+        var loaded = _store.LoadAllocation(AllocationScope.UniqueCreature, actor.InstanceId);
+        Assert.Equal(spend, loaded.PointsAt(AllocationScope.UniqueCreature, "Might"));
         Assert.Equal(0, loaded.PointsAt(AllocationScope.Commander, "Might"));
 
         var getAfter = await (await _http.GetAsync($"/api/aptitudes/unique/{actor.InstanceId}"))
@@ -195,8 +195,8 @@ public class AptitudeEndpointsTests : IAsyncLifetime
         var after = await (await _http.GetAsync($"/api/aptitudes/unique/{actor.InstanceId}"))
             .Content.ReadFromJsonAsync<UniqueAptitudesStateDto>();
         Assert.Equal(0, after!.Shares["Might"]);
-        Assert.Equal(0, _store.LoadAllocation(AllocationScope.UniqueDemon, actor.InstanceId)
-            .PointsAt(AllocationScope.UniqueDemon, "Might"));
+        Assert.Equal(0, _store.LoadAllocation(AllocationScope.UniqueCreature, actor.InstanceId)
+            .PointsAt(AllocationScope.UniqueCreature, "Might"));
     }
 
     [Fact]
@@ -241,8 +241,8 @@ public class AptitudeEndpointsTests : IAsyncLifetime
     [Fact]
     public async Task Get_sendsOnlyTheSpeciesThePlayerHasActuallyLevelled()
     {
-        const int fumeshroomDemonTypeId = 60007;
-        DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        const int fumeshroomCreatureTypeId = 60007;
+        CreatureSpeciesCatalog.ConfigureFromCompiledDefault();
         SpeciesBuildPlanCatalog.Configure(new Dictionary<string, IReadOnlyDictionary<string, long>>(StringComparer.Ordinal)
         {
             ["fumeshroom"] = new Dictionary<string, long>(StringComparer.Ordinal) { ["Might"] = 700, ["Vigor"] = 300 }
@@ -260,7 +260,7 @@ public class AptitudeEndpointsTests : IAsyncLifetime
                 VALUES ($p, 'species', $tid, 21, 0, 21, 0, 0, $now, 'fumeshroom');
                 """;
             cmd.Parameters.AddWithValue("$p", _playerId);
-            cmd.Parameters.AddWithValue("$tid", fumeshroomDemonTypeId);
+            cmd.Parameters.AddWithValue("$tid", fumeshroomCreatureTypeId);
             cmd.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));
             cmd.ExecuteNonQuery();
         }

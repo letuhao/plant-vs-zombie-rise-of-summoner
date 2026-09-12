@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Contracts;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
 using Xunit;
@@ -36,12 +36,12 @@ public class ContractSettleTests : IDisposable
         try { Directory.Delete(_dir, true); } catch { /* temp */ }
     }
 
-    static readonly DemonSpeciesDef Species = DemonSpeciesCatalog.All
-        .First(s => s.Acquisition != DemonAcquisition.CaptureOnly && s.TraitPool.Count > 0);
+    static readonly CreatureSpeciesDef Species = CreatureSpeciesCatalog.All
+        .First(s => s.Acquisition != CreatureAcquisition.CaptureOnly && s.TraitPool.Count > 0);
 
     string Mint()
     {
-        var (specimen, _) = _store.MintDemon(1, new DemonMintSpec
+        var (specimen, _) = _store.MintCreature(1, new CreatureMintSpec
         {
             SpeciesId = Species.SpeciesId,
             Side = Species.Side,
@@ -107,7 +107,7 @@ public class ContractSettleTests : IDisposable
         var result = _store.SettleContracts(1, Day0.AddDays(1));
         Assert.Equal(1, result.DaysSettled);
         Assert.Equal(0, result.SoulsPaid);
-        Assert.Equal(2, result.DemonsDecayed);
+        Assert.Equal(2, result.CreaturesDecayed);
         Assert.Equal(0, _store.GetSoulBalance(1).Balance);   // nothing spent, nothing owed forward
 
         foreach (var id in ids)
@@ -128,7 +128,7 @@ public class ContractSettleTests : IDisposable
         _store.SettleContracts(1, Day0.AddDays(30));
         var row = _store.GetContract(id)!;
         Assert.Equal(ContractPolicy.DeployFloor, row.Loyalty);
-        // Still deployable: neglect costs a demon everything it earned, never the right to be fielded.
+        // Still deployable: neglect costs a creature everything it earned, never the right to be fielded.
         Assert.True(row.Deployable);
     }
 
@@ -151,7 +151,7 @@ public class ContractSettleTests : IDisposable
     }
 
     [Fact]
-    public void A_player_with_no_bound_demons_owes_nothing()
+    public void A_player_with_no_bound_creatures_owes_nothing()
     {
         _store.EnsureContractsMigrated(1, Day0);
         var before = _store.GetSoulBalance(1).Balance;

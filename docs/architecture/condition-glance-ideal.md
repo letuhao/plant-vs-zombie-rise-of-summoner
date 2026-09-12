@@ -18,7 +18,7 @@ separate recipe (`derived-console`).
 | Loop / place | Role |
 |---|---|
 | **Spine A — Level up and power** | Progression gauge + Standing (`PowerVector`) are the specimen power glance |
-| **Spine B — Demon summon and fusion** | Species / phase / element identity of a bound UniqueActor |
+| **Spine B — Creature summon and fusion** | Species / phase / element identity of a bound UniqueActor |
 | **Place — Lawn / Sanctum (ActorSheet)** | Band-2 layer over the stage: inspect a specimen without leaving the stage |
 
 This is **not** a new product loop and **not** a new top-level route. It is how the Condition
@@ -55,7 +55,7 @@ React host with ad-hoc CSS.
 
 ## What this is (player language)
 
-When you open a demon’s sheet on **Condition**, you should see at a glance: how close they are to
+When you open a creature’s sheet on **Condition**, you should see at a glance: how close they are to
 the next level, what species and elements they are, how full their six pools are (with a real HP
 radial and optional shield ring), how their five Standing axes sit, what live effects are on them,
 and whether a shield is up — without scrolling sideways, without reading developer footnotes, and

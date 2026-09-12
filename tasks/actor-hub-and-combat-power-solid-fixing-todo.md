@@ -48,12 +48,12 @@
 ### Task 2: Migrate aptitude / Zomboss / draught / injury / kit → Hub
 
 **Spec:** `channelmods-hub`  
-**Description:** Finish ChannelMods combat writers: UniqueDemon aptitude, Zomboss pattern, draught projection, expedition injury, boss kit — all Hub/atoms.
+**Description:** Finish ChannelMods combat writers: UniqueCreature aptitude, Zomboss pattern, draught projection, expedition injury, boss kit — all Hub/atoms.
 
 **Acceptance criteria:**
-- [ ] UniqueDemon aptitude, Zomboss, draught, expedition injury, and boss kit contribute through Hub/atoms.
+- [ ] UniqueCreature aptitude, Zomboss, draught, expedition injury, and boss kit contribute through Hub/atoms.
 - [ ] Species aptitude (`AptitudeChannelMods`) contributes via the same Hub aptitude path **or** is proven unused/deleted.
-- [ ] Parity tests prove channel totals match pre-migration ChannelMods for the same fixtures — coverage for **Zomboss, draught, expedition injury, and boss kit** (full set), plus UniqueDemon aptitude.
+- [ ] Parity tests prove channel totals match pre-migration ChannelMods for the same fixtures — coverage for **Zomboss, draught, expedition injury, and boss kit** (full set), plus UniqueCreature aptitude.
 - [ ] No production path **requires** `BattleChannelMod` for these after fuse (shim OK until T6).
 
 **Verification:**
@@ -126,7 +126,7 @@
 ### Task 5: BattleEngine compose via ActorHub
 
 **Spec:** `battle-hub-fuse`  
-**Description:** Replace `BattleStatComposer.Compose` at `BattleEngine` (and delve/siege/web callers) with ActorHub Resolve/ResolveDerived + AppliedCombat merge. Aptitude identity matches sheet (Bound UniqueDemon vs empire species).
+**Description:** Replace `BattleStatComposer.Compose` at `BattleEngine` (and delve/siege/web callers) with ActorHub Resolve/ResolveDerived + AppliedCombat merge. Aptitude identity matches sheet (Bound UniqueCreature vs empire species).
 
 **Acceptance criteria:**
 - [ ] `BattleEngine` reads Hub Derived only (no Compose call).
@@ -304,19 +304,19 @@
 ### Task 12: Lawn aptitude parity Done gate
 
 **Spec:** `lawn-aptitude-parity` (+ `aptitude-sheet` `unique-lawn-wire`)  
-**Description:** Ensure Bound Hot = `commander + UniqueDemon(instanceId)`; empire = species. Implementation in unique-lawn-wire; tick this program’s Done gate + HF-lawn.
+**Description:** Ensure Bound Hot = `commander + UniqueCreature(instanceId)`; empire = species. Implementation in unique-lawn-wire; tick this program’s Done gate + HF-lawn.
 
 **Acceptance criteria:**
-- [ ] After unique allocate + AptitudesUpdated, Bound unique Hot includes UniqueDemon shares.
+- [ ] After unique allocate + AptitudesUpdated, Bound unique Hot includes UniqueCreature shares.
 - [ ] Fetch path is unique GET only (S4).
-- [ ] General lawn demons unchanged (species path).
+- [ ] General lawn creatures unchanged (species path).
 - [ ] Regression: unique with same species id as a general does not inherit empire allocation.
-- [ ] Parity prove: Bound lawn aptitude input matches Server UniqueDemon compose.
+- [ ] Parity prove: Bound lawn aptitude input matches Server UniqueCreature compose.
 - [ ] HF-lawn ticked on ideal / maps.
 - [ ] aptitude-sheet `unique-lawn-wire` Done (or listed open criteria closed) before closing this task.
 
 **Verification:**
-- [ ] Core filter `SpeciesAllocation|UniqueDemon|Bound`
+- [ ] Core filter `SpeciesAllocation|UniqueCreature|Bound`
 - [ ] `.\scripts\guard-secondary-no-unity.ps1`
 - [ ] Live Bound unique allocate probe (optional owner step)
 
@@ -376,7 +376,7 @@
 
 ## Checkpoint: Wave 3 complete
 
-- [ ] Lawn UniqueDemon + tree + Bound loadout Done
+- [ ] Lawn UniqueCreature + tree + Bound loadout Done
 - [ ] Owner review before Wave 4
 
 ---
@@ -467,13 +467,13 @@
 ### Task 19: Prove Hub combat script
 
 **Spec:** `prove-hub-combat`  
-**Description:** Operator script: Hub battle ≡ sheet; Standing membership; Bound lawn UniqueDemon — no BattleStatComposer SSOT.
+**Description:** Operator script: Hub battle ≡ sheet; Standing membership; Bound lawn UniqueCreature — no BattleStatComposer SSOT.
 
 **Acceptance criteria:**
 - [ ] Script exists and documented (`prove-hub-combat.ps1` or extend `prove-aptitude.ps1`).
 - [ ] Post-fuse battle Hub channel totals ≡ sheet Hub for same UniqueActor inputs (equip/aptitude/tree).
 - [ ] Standing rises when a membership combat channel rises via Hub writers — not when only Θ rises.
-- [ ] Bound lawn aptitude input matches Server UniqueDemon compose.
+- [ ] Bound lawn aptitude input matches Server UniqueCreature compose.
 - [ ] Ideal handoff prove path checked / runbook linked.
 
 **Verification:**
@@ -593,7 +593,7 @@
 - [ ] No new private ChannelMods combat writers; known producers migrated
 - [ ] Cold equip rolled/atom — stub not SSOT
 - [ ] Standing membership + synthetics; chip never labels level “power”
-- [ ] Bound lawn UniqueDemon + Bound loadout via Hub
+- [ ] Bound lawn UniqueCreature + Bound loadout via Hub
 - [ ] Sim Full; D4 coeffs; unique Θ; stale docs gone
 - [ ] `prove-hub-combat` green
 - [ ] Placeholder + intel Strength deleted; `world-actor-combat` tracked

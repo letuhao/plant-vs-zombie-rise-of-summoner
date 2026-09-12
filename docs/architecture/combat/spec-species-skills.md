@@ -82,16 +82,16 @@ Which species hold which actions is **eligibility**, and `A-E1 eligibility-axis`
 `Actions/Eligibility/ActionEligibility.cs` evaluates it. This module **consumes** that; it does not
 add a mapping table.
 
-⛔ **Sequencing constraint, and it is real.** The demon species SSOT is mid-regeneration: the id
-scheme changed (186 deletions / 289 additions uncommitted under `data/seed/demons/species/`, 14 Core
-tests red on renamed anchors), and `demon-corpus-self-heal` still has four open items including two
+⛔ **Sequencing constraint, and it is real.** The creature species SSOT is mid-regeneration: the id
+scheme changed (186 deletions / 289 additions uncommitted under `data/seed/creatures/species/`, 14 Core
+tests red on renamed anchors), and `creature-corpus-self-heal` still has four open items including two
 model reruns. **Authoring species→action eligibility rows against those ids today means redoing them
 after.** So this module splits:
 
 | Half | Depends on the species corpus | Ships when |
 |---|---|---|
 | **The two reads** (§1, §2) | **No** — they read an actor's channels, whatever produced them | Immediately |
-| **Authored eligibility content** | **Yes** | After `demon-corpus-self-heal` closes its four |
+| **Authored eligibility content** | **Yes** | After `creature-corpus-self-heal` closes its four |
 
 The first half is what closes the reader gap and un-reds `class-system`'s readiness gate. The second
 half is content, and content waits for stable ids.

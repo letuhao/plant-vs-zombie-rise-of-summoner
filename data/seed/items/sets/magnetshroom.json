@@ -25,7 +25,7 @@
       "id": "set.magnetshroom-001",
       "nameKey": "set.magnetic-spore-husk",
       "name": "Magnetic Spore Husk",
-      "themeKey": "demon.magnetshroom",
+      "themeKey": "creature.magnetshroom",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.firesunshroom-b-001",
       "nameKey": "set.item",
       "name": "萤火阳光菇",
-      "themeKey": "demon.firesunshroom_b",
+      "themeKey": "creature.firesunshroom_b",
       "members": [
         {
           "role": "armament-primary",

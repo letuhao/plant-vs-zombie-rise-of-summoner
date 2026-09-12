@@ -38,10 +38,10 @@ to actually have is only visible between trees (§3.3).
 | Elements | 6 | 40 | 240 |
 | Statuses | 24 (D51, 2026-09-06: was 21) | 40 | 960 |
 | **Shared subtotal** | **42** | | **1,680** |
-| Demon species | **840** | 40 | **33,600** |
+| Creature species | **840** | 40 | **33,600** |
 | **Total** | **882** | | **35,280** |
 
-**FACT, counted 2026-09-05.** `data/seed/demons/species/` holds **840** anchor entries across **502**
+**FACT, counted 2026-09-05.** `data/seed/creatures/species/` holds **840** anchor entries across **502**
 non-`_` files, **840** distinct species ids, and `_index.json` carries **840** keys. Species tree size
 is 40, not 29: D30 as amended defers to D10's one-shape rule and D29's 10 tiers × 2 branches
 (`passive-tree-ideal.md:62`).
@@ -88,9 +88,9 @@ Three levers, and the second is worth more than the other two combined.
 | **One full pass** | **≈ 34** | |
 | Building the card and the corpus sheet | 10–15, one time | §5. Every input is already committed |
 
-**Budget two to three passes, not one.** The demon corpus needed **three** corpus-wide reprompts after
+**Budget two to three passes, not one.** The creature corpus needed **three** corpus-wide reprompts after
 its first run completed — `attackTempo` (entropy 0.00), `rarity` (59‰ unresolved → 17‰, 2,584 calls,
-~106 min, `tasks/demon-corpus-self-heal-todo.md:281`), and `sunwoven` (0/840 → 4, after the bar was
+~106 min, `tasks/creature-corpus-self-heal-todo.md:281`), and `sunwoven` (0/840 → 4, after the bar was
 rewritten, `:355-370`). So the realistic human cost of the first catalog is **≈ 78–117 hours**,
 front-loaded, and steady state after that is `O(diff)` (§6).
 
@@ -120,14 +120,14 @@ step that gets skipped, so it goes first.
 | **C. Tree census** | 882 trees (D51: was 879) | *"every tree was looked at by a person"* | that every **node** was read |
 
 **D30's value is per-species recognition, and recognition does not pool.** *"It does not need to be
-distinguishable from 903 others; it needs to feel like that demon"*
+distinguishable from 903 others; it needs to feel like that creature"*
 (`03-llm-stage-contract.md:973`). No sample of 60 trees certifies 882 identities. So A and B are
 quality-control instruments **for the generator** — they tell you whether to *start* the census — and
 **C is the only design that discharges D24 for a species catalog.**
 
 **Say this in the acceptance record, in these words:** *"Every tree was judged. Individual nodes carry
 the machine's gates plus a sampled human rate with a ±5% margin."* Do **not** write *"the catalog was
-reviewed"* unqualified. That unqualified sentence is precisely the overclaim the demon baseline made.
+reviewed"* unqualified. That unqualified sentence is precisely the overclaim the creature baseline made.
 
 ### 3. The sampling design
 
@@ -159,7 +159,7 @@ ceiling-rounded sample size.
 |---|---:|---|
 | Nodes carrying an **exclusion** | ≤ 1,055 (the 30‰ `exclusionRate` cap; D40's target is ~2%, i.e. ~703 — the budget is sized on the cap) | D14's whole mechanism, and **all three forms including `nullification`** (D40). A wrong predicate is a silent no-op the player never sees fire |
 | Nodes the run **escalated** — `FAILED:<reason>` after bounded repair | small | Already known-bad; the machine asked for a person |
-| Nodes with an **unresolved vote** (a 1-1-1 split) | ≤ 50‰ by gate | The demon run's **695** two-to-one splits were resolved by majority and no human adjudicated one. Do not repeat that |
+| Nodes with an **unresolved vote** (a 1-1-1 split) | ≤ 50‰ by gate | The creature run's **695** two-to-one splits were resolved by majority and no human adjudicated one. Do not repeat that |
 | Every entry in the **review queue** | should be zero | §7 — a queue nobody counts is a hiding place |
 
 **Tier 2 — CLUSTER SAMPLE over trees, for the generator's health.** Draw **60 trees**, read each whole
@@ -225,7 +225,7 @@ These are the properties those gates close outright:
 | **Id grammar, stability, collisions** | **`PassiveTree/NameCollision`**, plus `tree-catalog`'s `IdRefused` | `IdRefused`; `name_collision` against `takenNames` |
 | **Length, field echo, subject-name echo, language mixing** | **Text style** | Measured defects with mechanical signatures — *7 of 8 outputs began `"DOCTRINE: "`*, *87% code-switched* |
 | **Idempotence, determinism, offline** | **Idempotence** · **Offline guarantee** | Byte-hash comparison |
-| **Balance in real combat** | — | `tools/CombatSim` drives the real dispatcher; `DemonQualityReport` §4 is the working precedent at 840-entry scale |
+| **Balance in real combat** | — | `tools/CombatSim` drives the real dispatcher; `CreatureQualityReport` §4 is the working precedent at 840-entry scale |
 
 ✅ **`PassiveTree/TreeEqualValue` is OWNED — resolved 2026-09-05.** It is not among
 `tree-language`'s 24 because it is not a language-stage gate. `spec-tree-plan.md` §3.2 claims and
@@ -281,7 +281,7 @@ properties, and where each is paid for:
 | **H1** | **Name ↔ effect coherence** — does "Kindling Wrath" plausibly mean *this* effect? | Uniqueness and well-formedness are provable. Meaning is not a property of the string | 2, 3 |
 | **H2** | **Flavour quality** — is the line worth reading? | Ruled OPEN-loop in code | 2 |
 | **H3** | **Is a mechanism node interesting?** | **Decomposes, and half is machine-checkable.** *"Does it change anything measurable"* → simulate in `CombatSim` and read the win-share delta. *"Is it legible and worth building toward"* → human | sim + tiers 1–2 |
-| **H4** | **Species recognition** — does this tree read as *that* demon? | The point of D23/D30, with no referent but the lore | **census** |
+| **H4** | **Species recognition** — does this tree read as *that* creature? | The point of D23/D30, with no referent but the lore | **census** |
 | **H5** | **Corpus-scale sameness** — are 882 trees (D51: was 879) secretly one tree? | Lexical dedup catches copies; this failure is 882 *different* sentences expressing one idea | tier 2 + the corpus sheet |
 
 **H5 is the failure this corpus is most likely to have, and the one no per-node review can ever
@@ -325,7 +325,7 @@ One card per tree, one screen, no scrolling.
 
 The header, the anchor sentence and the traits are read straight out of the committed anchor — the
 example above is `SnorkleZombie`'s real `reason`, `traits`, `family` and `rarity` from
-`data/seed/demons/species/zombie/undead.json`. **The card costs nothing to assemble, because every
+`data/seed/creatures/species/zombie/undead.json`. **The card costs nothing to assemble, because every
 judgement input is already committed.**
 
 #### 5.2 Six design rules, each earned
@@ -452,8 +452,8 @@ have been rejected.
 | **4. Batch reject → REPROMPT** | the tier-2 reject count reaches the acceptance number, **or** any tier-1 census finding is systemic | **Stop. Fix the prompt.** Redeploy corpus-wide at pipeline scope | ~1 call per unit |
 | **5. Owner escalation** | a decision the plan cannot make; a `legitimateSkew` question. ~~a `nullification` exclusion appears~~ — **withdrawn 2026-09-05 (D40)**: the form is sanctioned, so its mere existence escalates nothing. A nullification whose **presentation** fails (§6.4 rule 2) is a reject, not an escalation | Queue it. Do not resolve it inside the run | — |
 
-**Rung 4 is not hypothetical — it is what the demon corpus actually did, three times**
-(`tasks/demon-corpus-self-heal-todo.md:270-370`). It costs about one call per unit at pipeline scope,
+**Rung 4 is not hypothetical — it is what the creature corpus actually did, three times**
+(`tasks/creature-corpus-self-heal-todo.md:270-370`). It costs about one call per unit at pipeline scope,
 **which is exactly why it is affordable to be strict.**
 
 #### 6.3 The acceptance numbers
@@ -468,7 +468,7 @@ From §3.1, for a 60-tree tier-2 sample:
 | ≥ 3 | 12.42% | **Batch reject (rung 4).** More than one tree in ten is bad — fix the prompt |
 
 ⚠ **These are starting values and must say so in the file that holds them**, exactly as
-`demon-roster-targets.v1.json`'s own `_note` does, and for `distribution.py:97-98`'s stated reason:
+`creature-roster-targets.v1.json`'s own `_note` does, and for `distribution.py:97-98`'s stated reason:
 *"nobody can name a correct Pielou value in advance."* They are calibrated on the pilot (§8) and they
 live in `data/tuning/passive-tree-targets.v1.json` — **the balance surface is data**, not a report.
 
@@ -488,14 +488,14 @@ a single held partition denies a pass.** A tree lot is unshippable when any of:
    **hard finding, and it denies the lot a pass.** `PassiveTree/ExclusionRate` reports the rate; the
    presentation check is `PassiveTree/ExclusionPresentation`, and unlike the rate it gates.
 3. `PassiveTree/UnresolvedCount` exceeds 50‰ — the one metric promoted to `gates=True`, for
-   `demon_roster.py:357-370`'s stated reason: gating the *rate* stops a full run early.
+   `creature_roster.py:357-370`'s stated reason: gating the *rate* stops a full run early.
 4. Any tier-1 census population is **unread**. A census is not a sample; partial is failure.
 5. The tier-2 acceptance number is reached (§6.3).
 6. `QuotaDrift` exceeds tolerance **in either direction** — overshoot is a defect too.
 7. Any node is unreachable, or any prerequisite is unsatisfiable.
 8. **Any `_`-prefixed file under a seed root holds an entry** (§7).
 9. The concrete catalog does not regenerate byte-identically from unchanged seeds — `--check`, the
-   shipped pattern at `tools/DemonSpeciesGen/Program.cs:17`: *"compare against what is on disk; write
+   shipped pattern at `tools/CreatureSpeciesGen/Program.cs:17`: *"compare against what is on disk; write
    nothing; exit 1 if anything differs."* Without it, *"identical for every player"* is a claim about
    one build machine.
 
@@ -522,14 +522,14 @@ which is what the presentation gate is for.
 
 ### 7. The `_`-prefix blind spot — a named gate
 
-**FACT, verified this session.** `tools/DemonQualityReport/Program.cs:77` skips any file whose name
+**FACT, verified this session.** `tools/CreatureQualityReport/Program.cs:77` skips any file whose name
 begins with `_`:
 
 ```csharp
 if (Path.GetFileName(file).StartsWith('_')) continue; // notes/exemplars, matching AtomImporter's own convention
 ```
 
-`data/seed/demons/species/zombie/_needs-review.json` begins with `_`. It holds one entry: a stale
+`data/seed/creatures/species/zombie/_needs-review.json` begins with `_`. It holds one entry: a stale
 2026-09-02 copy of `SnorkleZombie`, while `_index.json` points at a newer 2026-09-04 copy in
 `zombie/undead.json`. The two disagree:
 
@@ -653,14 +653,14 @@ picks it up without a second entry point.
 
 ## Code style
 
-Match `metrics/demon_roster.py`: a metric is a class, returns typed findings with a severity and a
+Match `metrics/creature_roster.py`: a metric is a class, returns typed findings with a severity and a
 loop kind, declares its `needs`, and **never prints**.
 
 ```python
 class HiddenFileCountMetric(Metric):
     """Every `_`-prefixed file under a seed root, counted WITHOUT the skip that hides it.
 
-    `DemonQualityReport/Program.cs:77` skips `_`-prefixed files - a convention borrowed from
+    `CreatureQualityReport/Program.cs:77` skips `_`-prefixed files - a convention borrowed from
     AtomImporter that silently became a hole: one stale SnorkleZombie duplicate survived inside
     `zombie/_needs-review.json` while the tool reported "840 indexed - clean". A gate with an
     exclusion rule has a blind spot the size of that rule, so this metric is defined by NOT
@@ -808,7 +808,7 @@ fourth was answerable and is answered further below.
    person's time not worth spending on it.
 3. ~~**What manual-correction rate is acceptable?**~~ **CLOSED 2026-09-06 by D49: higher tolerance,
    2–3%.** §6.1 makes hand correction legal and stamped; above some rate it means the prompt is wrong.
-   The demon corpus's rate was 3 entries in 840 (~0.4%) — but that was a floor set by how little was
+   The creature corpus's rate was 3 entries in 840 (~0.4%) — but that was a floor set by how little was
    reviewed, not a ceiling set by quality, and the owner chose not to hold this program to that
    unproven floor.
 ### Closed 2026-09-05

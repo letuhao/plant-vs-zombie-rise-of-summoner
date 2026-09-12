@@ -25,7 +25,7 @@
       "id": "set.superblackhorse-001",
       "nameKey": "set.black-olive-cavalry",
       "name": "Black Olive Cavalry",
-      "themeKey": "demon.superblackhorse",
+      "themeKey": "creature.superblackhorse",
       "members": [
         {
           "role": "armament-primary",

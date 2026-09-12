@@ -81,7 +81,7 @@ class DescriptionTests(unittest.TestCase):
                 self.assertIn(field, DESCRIPTIONS, f"{kind_spec.kind}.{field} has no description")
 
     def test_every_description_names_what_it_is_not(self) -> None:
-        # A negative clause is present -- looked for by the same substring the demons precedent
+        # A negative clause is present -- looked for by the same substring the creatures precedent
         # uses to prove the sentence exists, not to validate its prose quality.
         missing = [f for f, text in DESCRIPTIONS.items() if "NOT" not in text and "not " not in text.lower()]
         self.assertEqual(missing, [], f"fields with no negative clause: {missing}")
@@ -237,15 +237,15 @@ class AdapterRegistrationTests(unittest.TestCase):
         self.assertEqual(DungeonAdapter().channels(), [])
 
     def test_registries_returns_a_real_registry_set(self) -> None:
-        # 9 dungeon-native files + 2 cross-program theme files (`demons.themes`/`demons.motifs`,
-        # D1.10's 2026-09-07 correction: `theme` reads the demon-seed program's own already-shipped
+        # 9 dungeon-native files + 2 cross-program theme files (`creatures.themes`/`creatures.motifs`,
+        # D1.10's 2026-09-07 correction: `theme` reads the creature-seed program's own already-shipped
         # registry rather than a dungeon-authored one) = 11.
         registries = DungeonAdapter().registries()
         self.assertIsInstance(registries, RegistrySet)
         self.assertEqual(len(registries.versions), 11)
         self.assertTrue(registries.is_legal("roomKind", "boss"))
         self.assertFalse(registries.is_legal("roomKind", "not-a-real-kind"))
-        self.assertTrue(registries.is_legal("theme", "demon.allpeater"))
+        self.assertTrue(registries.is_legal("theme", "creature.allpeater"))
         self.assertFalse(registries.is_legal("theme", "not-a-real-theme"))
 
 

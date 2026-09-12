@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Activity;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Progression;
 using Microsoft.Data.Sqlite;
 
@@ -34,7 +34,7 @@ public sealed partial class RpgStore
             if (award.Kind == RpgActorKinds.Species && !IsEmpireGeneralSource(sourceKind, sourceId, factKind, typeId))
                 continue;
             // Web-mode runs never level PvZ almanac type actors (audit 2026-08-21) —
-            // player-kind XP still flows (one economy); demon specimen XP is expedition-owned.
+            // player-kind XP still flows (one economy); creature specimen XP is expedition-owned.
             // species-build T1.2: a species row is NOT a PvZ almanac type (spec-species-xp.md §2's
             // ⛔ callout) — this rule exists to protect `plant`/`zombie` kind rows specifically, so it
             // must not widen to skip Species too, or standalone/web-mode species levelling breaks.
@@ -61,7 +61,7 @@ public sealed partial class RpgStore
         // type). `runId` of 0/null has no real run scope to query, so it's skipped rather than
         // silently pooling unrelated placements under a shared "run 0" bucket.
         if (factKind == PvzActivityKinds.MatchEnded && runId is { } rid && rid != 0
-            && SpeciesProgressionTuningHub.IsConfigured && DemonSpeciesCatalog.IsConfigured)
+            && SpeciesProgressionTuningHub.IsConfigured && CreatureSpeciesCatalog.IsConfigured)
         {
             foreach (var d in ApplyRunCompletionSpeciesAwardsUnlocked(db, playerId, rid, t, factId))
             {
@@ -80,8 +80,8 @@ public sealed partial class RpgStore
         SqliteConnection db, long playerId, long runId, string t, long? factId)
     {
         var seen = new HashSet<string>(StringComparer.Ordinal);
-        var fielded = new List<DemonSpeciesDef>();
-        var index = new LawnElementIndex(DemonSpeciesCatalog.All);
+        var fielded = new List<CreatureSpeciesDef>();
+        var index = new LawnElementIndex(CreatureSpeciesCatalog.All);
 
         using (var cmd = db.CreateCommand())
         {
@@ -114,7 +114,7 @@ public sealed partial class RpgStore
         {
             var dedupe = $"run-complete:{runId}:{species.SpeciesId}";
             var d = TryApplyXpUnlocked(
-                db, playerId, RpgActorKinds.Species, species.DemonTypeId, runId, t,
+                db, playerId, RpgActorKinds.Species, species.CreatureTypeId, runId, t,
                 SpeciesProgressionTuningHub.Tuning.RunCompletionAward, RpgXpReasons.SpeciesRunComplete,
                 dedupe, factId, payloadJson: null, scopeKey: species.SpeciesId);
             if (d is { } item) results.Add(item);
@@ -124,16 +124,16 @@ public sealed partial class RpgStore
 
     static bool IsEmpireGeneralSource(string? sourceKind, string? sourceId, string? factKind = null, int? typeId = null)
     {
-        if (!string.Equals(sourceKind, DemonProgressionSource.EmpireGeneralKind, StringComparison.Ordinal)
+        if (!string.Equals(sourceKind, CreatureProgressionSource.EmpireGeneralKind, StringComparison.Ordinal)
             || string.IsNullOrWhiteSpace(sourceId)) return false;
         try
         {
-            if (DemonProgressionSource.Parse(sourceKind!, sourceId) is not DemonProgressionSource.EmpireGeneralSource general)
+            if (CreatureProgressionSource.Parse(sourceKind!, sourceId) is not CreatureProgressionSource.EmpireGeneralSource general)
                 return false;
             if (factKind is not (PvzActivityKinds.PlantPlaced or PvzActivityKinds.ZombieSpawned)) return true;
-            if (typeId is not { } tid || !DemonSpeciesCatalog.IsConfigured) return false;
+            if (typeId is not { } tid || !CreatureSpeciesCatalog.IsConfigured) return false;
             var side = factKind == PvzActivityKinds.PlantPlaced ? "plant" : "zombie";
-            return new LawnElementIndex(DemonSpeciesCatalog.All).TryGet(side, tid, out var species)
+            return new LawnElementIndex(CreatureSpeciesCatalog.All).TryGet(side, tid, out var species)
                 && string.Equals(species.SpeciesId, general.SpeciesId, StringComparison.Ordinal);
         }
         catch (InvalidOperationException) { return false; }
@@ -315,7 +315,7 @@ public sealed partial class RpgStore
         cmd.Parameters.AddWithValue("$u", DateTime.UtcNow.ToString("o"));
         // scope_key (species-build T1.1): a human-readable key alongside type_id for kind='species'
         // rows — NULL for every other kind, and NULL here means "leave the column's default alone"
-        // (DemonTypeId never repeats across species, so nothing keys off this column, only reads it).
+        // (CreatureTypeId never repeats across species, so nothing keys off this column, only reads it).
         cmd.Parameters.AddWithValue("$sk", (object?)scopeKey ?? DBNull.Value);
         cmd.ExecuteNonQuery();
     }
@@ -440,7 +440,7 @@ public sealed partial class RpgStore
     /// EVER fielded (a `kind='species'` row exists the first time a placement or expedition win awards
     /// it any XP, `EnsureActorRowUnlocked`) — the small, levelled subset the aptitude payload actually
     /// sends, never the full 829-row corpus. Reads `scope_key` (T1.1's own human-readable column)
-    /// rather than reconstructing speciesId from `type_id` (`DemonTypeId`), which would need a reverse
+    /// rather than reconstructing speciesId from `type_id` (`CreatureTypeId`), which would need a reverse
     /// catalog lookup this store has no reason to own.</summary>
     public IReadOnlyList<string> ListLevelledSpeciesIds(long playerId)
     {

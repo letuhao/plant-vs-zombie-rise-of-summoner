@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "fire",
+  "eligibility": null,
+  "eventId": "event.curio-creature.ashthreepeater-001",
+  "flavor": "Propped against a blackened pillar, a recurve bow rests in a pile of fine grey soot. The wood is 烧焦, yet the string hums with a violent, rhythmic tension as if waiting for a 射手 to draw it. A faint scent of ozone and sulfur clings to the air.",
+  "kind": "curio",
+  "name": "The Scorched Longbow",
+  "outcomes": [
+    {
+      "consequence": "none",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.warding",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "none",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party discovers a relic of a fallen vanguard.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.ashthreepeater"
+}

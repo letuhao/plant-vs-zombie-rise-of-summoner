@@ -88,7 +88,7 @@ Defined on The game — fortress vs homeworld.
 
 ## Common mix-ups
 
-**Does a new world delete my demons?**  
+**Does a new world delete my creatures?**  
 No. Roster banks. You lose the map’s holdings and loam.
 
 **Do souls reset?**  

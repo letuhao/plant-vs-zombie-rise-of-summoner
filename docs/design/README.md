@@ -209,7 +209,7 @@ implements; anything missing from here is missing from the kit by definition.
 > **⚠ This table is incomplete and the sentence above is why it matters.** The extraction swept eight
 > documents and missed [`architecture/item/`](../architecture/item/),
 > [`architecture/action/`](../architecture/action/), the shield spec, and 29 specs under
-> `battle/ combat/ standalone/ world/ demons/`. **29 entities are absent**, including the entire item
+> `battle/ combat/ standalone/ world/ creatures/`. **29 entities are absent**, including the entire item
 > presentation contract. Because "missing from here is missing from the kit by definition" is true, the
 > omission propagated through the kit, the plates, the 14 modules and the sealed contract with nothing
 > able to catch it. Register: [gap-audit-2026-08-22.md](gap-audit-2026-08-22.md). **Re-running step 1
@@ -227,7 +227,7 @@ implements; anything missing from here is missing from the kit by definition.
 | **Resource** | [resource-hub-ssot.md](../architecture/resource-hub-ssot.md) — six locked ids (incl. `poise`), registry shape (§5) | Token · Meter · Row |
 | **Power vector** | definitions.md §7 — 5 categories + scalar | Token · Chip · Card |
 | **Sector / lane / legion** | [world-map-program.md](../architecture/world-map-program.md) | Token · Chip · Card · Panel |
-| **Demon + contract** | [demon-system-map.md](../architecture/demon-system-map.md) | Chip · Row · Card · Panel |
+| **Creature + contract** | [creature-system-map.md](../architecture/creature-system-map.md) | Chip · Row · Card · Panel |
 | **Run / wave** | [match-runtime.md](../architecture/match-runtime.md) | Row · Card |
 
 ### ~~Known conflict~~ — resolved 2026-08-22

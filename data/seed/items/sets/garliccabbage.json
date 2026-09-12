@@ -25,7 +25,7 @@
       "id": "set.garliccabbage-001",
       "nameKey": "set.garlic-cabbage-cannon",
       "name": "Garlic Cabbage Cannon",
-      "themeKey": "demon.garliccabbage",
+      "themeKey": "creature.garliccabbage",
       "members": [
         {
           "role": "armament-primary",

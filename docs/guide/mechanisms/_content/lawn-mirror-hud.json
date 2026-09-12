@@ -59,7 +59,7 @@
     "Open Lawn and confirm a moving 12×5 mirror.",
     "Point at one unit HUD and name identity, shield, or a status chip."
   ],
-  "doNote": "Parent loop: [lawn match](lawn-match). Field demons onto that board: [bound demon deploy](lawn-deploy).",
+  "doNote": "Parent loop: [lawn match](lawn-match). Field creatures onto that board: [bound creature deploy](lawn-deploy).",
   "mixUps": [
     {"q": "Is the mirror a second game I play with the mouse?", "a": "You observe and issue high-level orders. The lawn game still owns the board physics."},
     {"q": "Do I need to open a detail panel for every status?", "a": "No. Unit HUD is built for glance reading under pressure."},

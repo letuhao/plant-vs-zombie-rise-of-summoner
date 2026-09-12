@@ -25,7 +25,7 @@
       "id": "set.cherrysplit-001",
       "nameKey": "set.ruptured-cherry-husk",
       "name": "Ruptured Cherry Husk",
-      "themeKey": "demon.cherrysplit",
+      "themeKey": "creature.cherrysplit",
       "members": [
         {
           "role": "armament-primary",

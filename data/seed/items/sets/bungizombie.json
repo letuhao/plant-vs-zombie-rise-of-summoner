@@ -25,7 +25,7 @@
       "id": "set.bungizombie-001",
       "nameKey": "set.bungee-zombie-s-plunge",
       "name": "Bungee Zombie's Plunge",
-      "themeKey": "demon.bungizombie",
+      "themeKey": "creature.bungizombie",
       "members": [
         {
           "role": "armament-primary",

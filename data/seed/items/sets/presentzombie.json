@@ -25,7 +25,7 @@
       "id": "set.presentzombie-001",
       "nameKey": "set.blind-box-sale",
       "name": "Blind Box Sale",
-      "themeKey": "demon.presentzombie",
+      "themeKey": "creature.presentzombie",
       "members": [
         {
           "role": "armament-primary",

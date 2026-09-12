@@ -22,8 +22,8 @@ public sealed record LawnDeployEventRunState(IReadOnlySet<string> FiredCaseIds, 
 }
 
 /// <summary>
-/// demon-lawn-deploy T2.2/T2.3 (spec-lawn-deploy-events.md) — decides, once per call, whether a
-/// plant-side unique-demon deploy becomes available this instant. Mirrors <see cref="Delve.Events.AmbushDraw"/>'s
+/// creature-lawn-deploy T2.2/T2.3 (spec-lawn-deploy-events.md) — decides, once per call, whether a
+/// plant-side unique-creature deploy becomes available this instant. Mirrors <see cref="Delve.Events.AmbushDraw"/>'s
 /// own pure-function-over-state shape exactly: every tunable arrives as a parameter (never a bare
 /// literal, never a static-hub read internally), and randomness is derived per <c>(matchSeed, caseId)</c>
 /// via <see cref="Battle.SeededRng.DeriveStream"/> — never <c>System.Random</c>, never wall-clock.
@@ -43,7 +43,7 @@ public static class LawnDeployEventEvaluator
         if (tuning is null) throw new ArgumentNullException(nameof(tuning));
         if (runState is null) throw new ArgumentNullException(nameof(runState));
 
-        // No eligible demon to offer -- nothing this evaluator could usefully fire for, regardless of
+        // No eligible creature to offer -- nothing this evaluator could usefully fire for, regardless of
         // how loudly the board state itself is asking for backup.
         if (roster.Eligible.Count == 0) return LawnDeployEventResult.NoFire;
         if (runState.TotalFired >= tuning.MaxFiresPerRun) return LawnDeployEventResult.NoFire;

@@ -25,7 +25,7 @@
       "id": "set.superkelp-001",
       "nameKey": "set.uncrowned-king",
       "name": "Uncrowned King",
-      "themeKey": "demon.superkelp",
+      "themeKey": "creature.superkelp",
       "members": [
         {
           "role": "armament-primary",

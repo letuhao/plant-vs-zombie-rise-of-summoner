@@ -1,7 +1,7 @@
-> ⛔ **SUPERSEDED 2026-09-06.** This module (RB5) targeted the demon-species roster on a
+> ⛔ **SUPERSEDED 2026-09-06.** This module (RB5) targeted the creature-species roster on a
 > causal theory that did not survive tracing the real code: species characteristics never
 > reach the action-corpus's atom-family pool (see `roster-balance-map.md` §0 for the full
-> correction). The real bug lives in the 98 atom/affix families' USAGE, not in demon
+> correction). The real bug lives in the 98 atom/affix families' USAGE, not in creature
 > species data, which measures healthy on its own axes. **This module was never built.**
 > Superseded by `spec-usage-stats.md` (FC1) and `spec-usage-direction.md` (FC3). Kept
 > for the record — the reasoning inside is not wrong on its own terms, it was aimed at the
@@ -16,7 +16,7 @@
 
 **Apply an approved rebalance plan to the real corpus — reversibly, with provenance, and never
 inventing identity.** This is the only module in the program that writes to
-`data/seed/demons/species/**`, and it is last on purpose: everything before it is measurement and
+`data/seed/creatures/species/**`, and it is last on purpose: everything before it is measurement and
 proposal, which are safe to run at any time.
 
 ## Design
@@ -24,15 +24,15 @@ proposal, which are safe to run at any time.
 ### It never authors a species
 
 An `add` move says *"a species with these characteristics is needed"*. It does **not** write one.
-Authoring identity — name, flavour, the actual creature — belongs to the existing `demon-seed`
-generator (`DemonSpeciesGen` / `classify-pipelines`), which already does it and already has the
+Authoring identity — name, flavour, the actual creature — belongs to the existing `creature-seed`
+generator (`CreatureSpeciesGen` / `classify-pipelines`), which already does it and already has the
 prompts, the vote machinery and the quality gates for it.
 
 This is the program's own Law 2: **deterministic code decides the shape; the model writes the
 identity.** A rebalance module that started naming creatures would be the exact boundary violation
 the whole architecture exists to prevent.
 
-So `add` emits a **request** — a structured "wanted" row the demon-seed generator consumes:
+So `add` emits a **request** — a structured "wanted" row the creature-seed generator consumes:
 
 ```jsonc
 { "move": "add", "cellId": "aptitude=Ferocity|element=air|posture=Finesse",
@@ -98,7 +98,7 @@ tools/seedsmith/seedsmith/adapters/roster/apply/writer.py     new — the sole c
 tools/seedsmith/seedsmith/adapters/roster/apply/reverse.py    new — reverse-plan emission
 tools/seedsmith/seedsmith/adapters/roster/generate_apply.py   new — CLI entry point
 data/seed/roster/_plans/applied-<round>.json                  new — what was applied, and its reverse
-data/seed/demons/species/**                                   edit — ONLY by this module
+data/seed/creatures/species/**                                   edit — ONLY by this module
 tools/seedsmith/tests/test_plan_apply.py                      new
 ```
 
@@ -147,6 +147,6 @@ per move; create an illegal axis value; write without a matching `corpusHash`; r
 - [ ] Apply → reverse restores the corpus to an identical hash, proven by test.
 - [ ] A stale `corpusHash` is refused, naming the mismatch.
 - [ ] Every `reassign` leaves a `_rebalance` record preserving the previous value and its reason.
-- [ ] `add` moves emit requests consumed by the existing demon-seed generator; this module authors no
+- [ ] `add` moves emit requests consumed by the existing creature-seed generator; this module authors no
       identity.
-- [ ] A guard proves this is the only module writing `data/seed/demons/species/**`.
+- [ ] A guard proves this is the only module writing `data/seed/creatures/species/**`.

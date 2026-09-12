@@ -122,7 +122,7 @@ means.** `item-ideal.md` §2h.1 (2026-09-04):
 
 ⚠ **And the size of this module's bill is unmeasured.** D11's whole apparatus serves hybrid bodies, and
 **the hybrid population has never been counted.** X1's `frame-classify` stage exists only as a proposal
-(`seedsmith-map.md:237-245`) — no code, no output, nothing in `data/seed/demons/_registry/`. So the
+(`seedsmith-map.md:237-245`) — no code, no output, nothing in `data/seed/creatures/_registry/`. So the
 apparatus currently serves **the commander plus an unknown number of the ~904 species**.
 
 > ⭐ **The cheap insurance is one command, and it is not this module's to run: run X1, count the hybrids,

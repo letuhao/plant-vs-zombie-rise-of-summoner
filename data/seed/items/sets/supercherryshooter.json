@@ -25,7 +25,7 @@
       "id": "set.supercherryshooter-001",
       "nameKey": "set.cherry-burst",
       "name": "Cherry Burst",
-      "themeKey": "demon.supercherryshooter",
+      "themeKey": "creature.supercherryshooter",
       "members": [
         {
           "role": "armament-primary",

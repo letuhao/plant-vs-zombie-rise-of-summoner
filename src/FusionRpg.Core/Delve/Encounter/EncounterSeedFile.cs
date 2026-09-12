@@ -1,5 +1,5 @@
 using System.Text.Json;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Stats.Aptitudes;
 
 namespace FusionRpg.Core.Delve.Encounter;
@@ -23,7 +23,7 @@ namespace FusionRpg.Core.Delve.Encounter;
 /// pins bossSpeciesRef at runtime" (§1.6), so it stays `null` here; a real domain-catalog caller
 /// supplies it later.</para>
 ///
-/// <para><b>`threatWindow` band names resolve to real rungs via <see cref="DemonThreatTuning"/></b>
+/// <para><b>`threatWindow` band names resolve to real rungs via <see cref="CreatureThreatTuning"/></b>
 /// (passed in, never re-read from disk here) — the seed contract's own ten threat nouns, while
 /// `EncounterAnchor.ThreatWindow` is `(int FloorRung, int CeilRung)` (`SlotFilter.cs:109`).</para>
 ///
@@ -53,11 +53,11 @@ public static class EncounterSeedFile
         ["none"] = BossPhaseKind.None, ["breakpoint"] = BossPhaseKind.Breakpoint, ["escalating"] = BossPhaseKind.Escalating,
     };
 
-    static int RungFor(string threatBand, DemonThreatTuning tuning)
+    static int RungFor(string threatBand, CreatureThreatTuning tuning)
     {
         foreach (var t in tuning.Thresholds)
             if (string.Equals(t.Id, threatBand, StringComparison.Ordinal)) return t.Rung;
-        throw new InvalidOperationException($"threatBand '{threatBand}' has no rung in demon-threat.v1.json");
+        throw new InvalidOperationException($"threatBand '{threatBand}' has no rung in creature-threat.v1.json");
     }
 
     static EncounterSlot ReadSlot(JsonElement el)
@@ -69,7 +69,7 @@ public static class EncounterSeedFile
         return new EncounterSlot(posture, reach, targetPreference, countBand);
     }
 
-    public static IReadOnlyList<EncounterAnchor> LoadAll(string encountersDir, DemonThreatTuning threatTuning)
+    public static IReadOnlyList<EncounterAnchor> LoadAll(string encountersDir, CreatureThreatTuning threatTuning)
     {
         if (encountersDir is null) throw new ArgumentNullException(nameof(encountersDir));
         if (threatTuning is null) throw new ArgumentNullException(nameof(threatTuning));
@@ -89,7 +89,7 @@ public static class EncounterSeedFile
     /// carries no id (this file's own class doc comment) — <see cref="LoadAll"/> alone cannot answer
     /// "which anchor does this id mean." Reads the SAME entries through the SAME <see cref="ReadEntry"/>
     /// helper, additionally keyed by the one field <see cref="LoadAll"/> reads and discards.</summary>
-    public static IReadOnlyDictionary<string, EncounterAnchor> LoadAllById(string encountersDir, DemonThreatTuning threatTuning)
+    public static IReadOnlyDictionary<string, EncounterAnchor> LoadAllById(string encountersDir, CreatureThreatTuning threatTuning)
     {
         if (encountersDir is null) throw new ArgumentNullException(nameof(encountersDir));
         if (threatTuning is null) throw new ArgumentNullException(nameof(threatTuning));
@@ -106,7 +106,7 @@ public static class EncounterSeedFile
         return byId;
     }
 
-    static EncounterAnchor ReadEntry(JsonElement root, DemonThreatTuning threatTuning)
+    static EncounterAnchor ReadEntry(JsonElement root, CreatureThreatTuning threatTuning)
     {
         var formation = Enum.Parse<Formation>(root.GetProperty("formation").GetString()!, ignoreCase: true);
         var elementSpread = Enum.Parse<ElementSpreadMode>(root.GetProperty("elementSpread").GetString()!, ignoreCase: true);

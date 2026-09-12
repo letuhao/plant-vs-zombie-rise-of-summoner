@@ -25,7 +25,7 @@
       "id": "set.hypnojalapeno-001",
       "nameKey": "set.crimson-betrayal",
       "name": "Crimson Betrayal",
-      "themeKey": "demon.hypnojalapeno",
+      "themeKey": "creature.hypnojalapeno",
       "members": [
         {
           "role": "armament-primary",

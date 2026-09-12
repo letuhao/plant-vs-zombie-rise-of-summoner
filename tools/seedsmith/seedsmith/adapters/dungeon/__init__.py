@@ -54,7 +54,7 @@ class DungeonAdapter:
         return RegistrySet(vocabularies=load_vocabularies(), versions=load_versions())
 
     def channels(self):
-        # Deliberately empty, same reasoning as demons/items adapters carrying no dungeon-owned
+        # Deliberately empty, same reasoning as creatures/items adapters carrying no dungeon-owned
         # magnitude: no seed file here carries a number (spec §"Numeric types") — every magnitude
         # is resolved by the consuming C# module from dungeon.v1.json/encounter.v1.json, never
         # authored or generated in a seed.

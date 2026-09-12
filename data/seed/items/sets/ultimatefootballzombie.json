@@ -25,7 +25,7 @@
       "id": "set.ultimatefootballzombie-001",
       "nameKey": "set.the-last-stand",
       "name": "The Last Stand",
-      "themeKey": "demon.ultimatefootballzombie",
+      "themeKey": "creature.ultimatefootballzombie",
       "members": [
         {
           "role": "armament-primary",

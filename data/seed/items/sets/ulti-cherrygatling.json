@@ -25,7 +25,7 @@
       "id": "set.ulti-cherrygatling-001",
       "nameKey": "set.the-verdant-cipher",
       "name": "The Verdant Cipher",
-      "themeKey": "demon.ulti_cherrygatling",
+      "themeKey": "creature.ulti_cherrygatling",
       "members": [
         {
           "role": "armament-primary",

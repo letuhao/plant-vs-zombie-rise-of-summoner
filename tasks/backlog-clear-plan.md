@@ -185,7 +185,7 @@ Checkpoints sit after phases 1, 3, 5, 7 and 10 — see the todo.
 
 ## Not in this plan
 
-- **Owner live runs** (~15): vfx-v3 + vfx-identity-batch6 trials, shield stress, demon PT7,
+- **Owner live runs** (~15): vfx-v3 + vfx-identity-batch6 trials, shield stress, creature PT7,
   buff-debuff T11, injector-stub W3, actor-hud live polish, world-map playtests, perf 300/600/1000z,
   commander-surface deploy smoke. These need the game on the owner's machine.
 - **class-system P9.3/P9.4** — verified this session, not assumed: `ResidualFitLoop` has no

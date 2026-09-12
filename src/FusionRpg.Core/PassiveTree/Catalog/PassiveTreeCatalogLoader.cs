@@ -46,7 +46,7 @@ public static class PassiveTreeCatalogLoader
         ["primary"] = TreeCategory.Primary,
         ["elemental"] = TreeCategory.Elemental,
         ["status"] = TreeCategory.Status,
-        ["demonFamily"] = TreeCategory.Family,
+        ["creatureFamily"] = TreeCategory.Family,
         ["family"] = TreeCategory.Family,
         ["species"] = TreeCategory.Species,
     };

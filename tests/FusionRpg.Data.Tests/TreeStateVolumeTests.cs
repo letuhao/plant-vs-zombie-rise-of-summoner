@@ -39,8 +39,8 @@ public class TreeStateVolumeTests : IDisposable
             var nodes = new Dictionary<string, long>();
             for (var n = 0; n < nodesPerActor; n++)
                 nodes[$"skill.might-off-t1-n{n}"] = 0;
-            keys[a] = (AllocationScope.UniqueDemon, $"instance:{a}");
-            _store.SaveTreeNodeState(AllocationScope.UniqueDemon, $"instance:{a}", nodes);
+            keys[a] = (AllocationScope.UniqueCreature, $"instance:{a}");
+            _store.SaveTreeNodeState(AllocationScope.UniqueCreature, $"instance:{a}", nodes);
         }
 
         // The REAL total row count in the table -- not just the sum over the keys this test wrote,
@@ -72,8 +72,8 @@ public class TreeStateVolumeTests : IDisposable
         var keys = new (AllocationScope, string)[200];
         for (var i = 0; i < 200; i++)
         {
-            keys[i] = (AllocationScope.UniqueDemon, $"instance:{i}");
-            _store.SaveTreeNodeState(AllocationScope.UniqueDemon, $"instance:{i}",
+            keys[i] = (AllocationScope.UniqueCreature, $"instance:{i}");
+            _store.SaveTreeNodeState(AllocationScope.UniqueCreature, $"instance:{i}",
                 new Dictionary<string, long> { ["a"] = bigSoulLevel + i });
         }
 
@@ -81,6 +81,6 @@ public class TreeStateVolumeTests : IDisposable
 
         Assert.Equal(200, batch.Count);
         for (var i = 0; i < 200; i++)
-            Assert.Equal(bigSoulLevel + i, batch[(AllocationScope.UniqueDemon, $"instance:{i}")]["a"]);
+            Assert.Equal(bigSoulLevel + i, batch[(AllocationScope.UniqueCreature, $"instance:{i}")]["a"]);
     }
 }

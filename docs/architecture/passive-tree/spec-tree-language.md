@@ -146,7 +146,7 @@ result than the reverse order, and that is a property of the authoring, not a bu
 
 #### 4.1 What it exists to prevent, measured
 
-The shipped demon corpus is the counter-example. With the enum open — eight pipelines each free to
+The shipped creature corpus is the counter-example. With the enum open — eight pipelines each free to
 pick any of 12 aptitudes and any of 6 elements — 840 indexed entries came out at Onslaught 332 (39.5%) against
 Ferocity 2 (0.2%): a **166:1 skew** against a uniform 8.3%, and `earth` alone at 45.1% against a
 uniform 16.7% (ideal §9, re-verified in [03](../../research/passive-tree/03-llm-stage-contract.md) §5.1).
@@ -216,7 +216,7 @@ uniform.
 
 #### 4.3 The target file
 
-`data/tuning/passive-tree-targets.v1.json`, shaped like `data/tuning/demon-roster-targets.v1.json`
+`data/tuning/passive-tree-targets.v1.json`, shaped like `data/tuning/creature-roster-targets.v1.json`
 (integer per-mille throughout, a `_note` recording provenance and what is fitted). **No axis lists its
 own members** — aptitudes are read from `data/seed/aptitudes/roster.json`, elements from
 `data/seed/elements/roster.json`, statuses from the status catalog mirror, so a thirteenth aptitude
@@ -327,7 +327,7 @@ vote calls        1,680 x 1 voted field x (3 - 1)        =  3,360
                                                             5,040 calls
 ```
 
-At the demon run's measured rate (16,272 calls ≈ 14 h locally) that is **≈ 4.3 h** — about a quarter of
+At the creature run's measured rate (16,272 calls ≈ 14 h locally) that is **≈ 4.3 h** — about a quarter of
 a run this repo has already done twice. **D30's 840 species trees at 40 nodes each are a separate
 ~100,800 calls and belong to `species-tree`, not here.**
 
@@ -456,7 +456,7 @@ data/generated/passive-tree/<treeId>.json    CONCRETE — coefficients, checked 
 **There is no per-player materialise stage for trees** (D24). `data/generated/` is the end of the
 chain and the same bytes reach every player — which is the one place the binding
 seed → concrete → per-player principle stops at the second arrow, on the same split
-`DESIGN-GATE.md:45` already states for demon species stats.
+`DESIGN-GATE.md:45` already states for creature species stats.
 
 ### 7. Validation gates, ordered by when they fire
 
@@ -482,7 +482,7 @@ seed → concrete → per-player principle stops at the second arrow, on the sam
 | 18 | **`PassiveTree/ExclusionRate`** | exclusion count / node count, and the form split across all four values | rate over target, a predicate naming a node id, or a `nullification` missing any of §5.2's three requirements — **the form itself is legal (D40); what fails is an unprinted or one-sided one** |
 | 19 | **`PassiveTree/ExclusionResolvable`** | every predicate key against the plan's `propertyVocabulary`, then `EligibilityRule.Validate` (`:74-95`) | unknown key, or `UnsatisfiablePool` |
 | 20 | **`PassiveTree/NearDuplicate`** | `setgen/dedup.py`'s local exact Jaccard, deliberately **not** the shared MinHash | the shared MinHash over-reports 7× on real pairs (`dedup.py:6-16`) — gating on it would fail every run for the wrong reason |
-| 21 | **`PassiveTree/NameCollision`** | `name_collision` (`validators/field_echo.py:69-94`) against `takenNames`, plus `dedup.dedup_report` | measured: **83 of 83** commander effects were once named identically to their demon, caught by a corpus metric and not by any per-item check |
+| 21 | **`PassiveTree/NameCollision`** | `name_collision` (`validators/field_echo.py:69-94`) against `takenNames`, plus `dedup.dedup_report` | measured: **83 of 83** commander effects were once named identically to their creature, caught by a corpus metric and not by any per-item check |
 | 22 | **⭐ `PassiveTree/UnresolvedCount`** | per-voted-field `unresolved` rate | **the one promoted to `gates=True`** — §7.1 |
 | 23 | **Run verdict** | `RunReport.verdict` (`setgen/verdict.py:83-96`) | `FAIL` beats `NOT_MEASURED`; a held partition alone denies a `PASS` |
 | 24 | **Offline guarantee** | `tools/seedsmith/tests/test_offline_guarantee.py` — the transport stub **raises** on an unexpected call | any test that reaches a model |
@@ -497,7 +497,7 @@ checkmark on it.
 
 **`PassiveTree/UnresolvedCount`.** Everything else runs and reports.
 
-The template is `demon_roster.py:369` — the only metric in the repo at `gates = True` today — and its
+The template is `creature_roster.py:369` — the only metric in the repo at `gates = True` today — and its
 justification (`:357-365`) transfers exactly: an unresolved field silently produced zero-stat species,
 so *"gating the RATE here stops a full run early — before spending thousands of model calls."* The
 same is true of `affixIds`: an unresolved node has no effect for `tree-binder` to price, so a run that

@@ -35,12 +35,9 @@ public class DalGuardTests
             UseShellExecute = false,
             CreateNoWindow = true
         };
-        using var p = Process.Start(psi)!;
-        var stdout = p.StandardOutput.ReadToEnd();
-        var stderr = p.StandardError.ReadToEnd();
-        Assert.True(p.WaitForExit(60_000), "guard script timed out");
-        Assert.True(p.ExitCode == 0,
-            $"guard failed exit={p.ExitCode}\nstdout:\n{stdout}\nstderr:\n{stderr}");
+        var (exit, stdout, stderr) = ExternalProcess.Run(psi, 60_000, "guard script timed out");
+        Assert.True(exit == 0,
+            $"guard failed exit={exit}\nstdout:\n{stdout}\nstderr:\n{stderr}");
         Assert.Contains("DAL GUARD OK", stdout, StringComparison.Ordinal);
     }
 
@@ -70,11 +67,8 @@ public class DalGuardTests
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
-            using var p = Process.Start(psi)!;
-            var stdout = p.StandardOutput.ReadToEnd();
-            var stderr = p.StandardError.ReadToEnd();
-            Assert.True(p.WaitForExit(60_000), "guard script timed out");
-            Assert.True(p.ExitCode != 0,
+            var (exit, stdout, stderr) = ExternalProcess.Run(psi, 60_000, "guard script timed out");
+            Assert.True(exit != 0,
                 $"expected fail exit, got 0\nstdout:\n{stdout}\nstderr:\n{stderr}");
             Assert.Contains("DAL GUARD FAILED", stdout, StringComparison.Ordinal);
         }

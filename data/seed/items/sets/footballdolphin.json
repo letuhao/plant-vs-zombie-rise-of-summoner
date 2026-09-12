@@ -25,7 +25,7 @@
       "id": "set.footballdolphin-001",
       "nameKey": "set.dolphin-gridiron",
       "name": "Dolphin Gridiron",
-      "themeKey": "demon.footballdolphin",
+      "themeKey": "creature.footballdolphin",
       "members": [
         {
           "role": "armament-primary",

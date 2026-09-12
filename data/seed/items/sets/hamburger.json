@@ -25,7 +25,7 @@
       "id": "set.hamburger-001",
       "nameKey": "set.secret-sauce-spikes",
       "name": "Secret Sauce Spikes",
-      "themeKey": "demon.hamburger",
+      "themeKey": "creature.hamburger",
       "members": [
         {
           "role": "armament-primary",

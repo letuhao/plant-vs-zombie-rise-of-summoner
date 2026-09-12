@@ -25,7 +25,7 @@
       "id": "set.gatlingdoomscaredy-001",
       "nameKey": "set.cowardly-bullet-spitter",
       "name": "Cowardly Bullet-Spitter",
-      "themeKey": "demon.gatlingdoomscaredy",
+      "themeKey": "creature.gatlingdoomscaredy",
       "members": [
         {
           "role": "armament-primary",

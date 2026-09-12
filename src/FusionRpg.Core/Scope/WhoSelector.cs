@@ -11,7 +11,7 @@ public enum WhoKind
 {
     Target = 0,
     Type,
-    UniqueDemon,
+    UniqueCreature,
     Relation,
 }
 
@@ -21,7 +21,7 @@ public static class WhoKinds
     {
         WhoKind.Target => "target",
         WhoKind.Type => "type",
-        WhoKind.UniqueDemon => "uniqueDemon",
+        WhoKind.UniqueCreature => "uniqueCreature",
         WhoKind.Relation => "relation",
         _ => "",
     };
@@ -32,7 +32,7 @@ public static class WhoKinds
         {
             case "target": kind = WhoKind.Target; return true;
             case "type": kind = WhoKind.Type; return true;
-            case "uniqueDemon": kind = WhoKind.UniqueDemon; return true;
+            case "uniqueCreature": kind = WhoKind.UniqueCreature; return true;
             case "relation": kind = WhoKind.Relation; return true;
             default: kind = default; return false;
         }
@@ -58,7 +58,7 @@ public sealed record WhoSelector
     public IReadOnlyList<int>? TypeIds { get; init; }
 
     /// <summary>
-    /// For <see cref="WhoKind.UniqueDemon"/> — a durable specimen instance id, resolved through
+    /// For <see cref="WhoKind.UniqueCreature"/> — a durable specimen instance id, resolved through
     /// <c>MatchUniqueBindingsFacet</c> (battlefield) or <c>WorldState.Entities[].Members[]</c>
     /// (world map) depending on <see cref="WhereScope"/>.
     /// </summary>

@@ -25,7 +25,7 @@
       "id": "set.obsidianwheat-001",
       "nameKey": "set.obsidian-barley",
       "name": "Obsidian Barley",
-      "themeKey": "demon.obsidianwheat",
+      "themeKey": "creature.obsidianwheat",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.lanternblover-001",
       "nameKey": "set.trifolium-radiance",
       "name": "Trifolium Radiance",
-      "themeKey": "demon.lanternblover",
+      "themeKey": "creature.lanternblover",
       "members": [
         {
           "role": "armament-primary",

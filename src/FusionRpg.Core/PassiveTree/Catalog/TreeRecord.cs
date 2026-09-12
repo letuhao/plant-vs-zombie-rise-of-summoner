@@ -2,7 +2,7 @@ namespace FusionRpg.Core.PassiveTree.Catalog;
 
 /// <summary>Which roster a tree came from. Five, per ruling R7 — species is a category, not a
 /// variant. `tree-plan` emits only the first four today; the importer maps its tokens
-/// (`aptitude`->`Primary`, `demonFamily`->`Family`) and refuses any token outside the map, naming
+/// (`aptitude`->`Primary`, `creatureFamily`->`Family`) and refuses any token outside the map, naming
 /// it (spec-tree-catalog.md §2.1).</summary>
 public enum TreeCategory
 {

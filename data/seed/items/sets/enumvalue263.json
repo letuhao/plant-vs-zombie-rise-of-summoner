@@ -25,7 +25,7 @@
       "id": "set.enumvalue263-001",
       "nameKey": "set.the-primordial-silt",
       "name": "The Primordial Silt",
-      "themeKey": "demon.enumvalue263",
+      "themeKey": "creature.enumvalue263",
       "members": [
         {
           "role": "armament-primary",

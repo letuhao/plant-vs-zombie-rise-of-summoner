@@ -25,7 +25,7 @@
       "id": "set.projectilezombie-001",
       "nameKey": "set.thunderous-shell",
       "name": "Thunderous Shell",
-      "themeKey": "demon.projectilezombie",
+      "themeKey": "creature.projectilezombie",
       "members": [
         {
           "role": "armament-primary",

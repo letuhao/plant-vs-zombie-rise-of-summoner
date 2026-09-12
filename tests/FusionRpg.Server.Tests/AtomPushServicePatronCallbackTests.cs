@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Contracts;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
@@ -31,7 +31,7 @@ public class AtomPushServicePatronCallbackTests : IDisposable
 
     public AtomPushServicePatronCallbackTests()
     {
-        // MintDemon's real call chain auto-binds a contract for the new specimen, which needs these
+        // MintCreature's real call chain auto-binds a contract for the new specimen, which needs these
         // three policies configured — not covered by this assembly's [ModuleInitializer] bootstrap,
         // same combination BuildSquadEquippedActionsTests.cs already needs for the same reason.
         var tuningDir = Path.Combine(RepoRoot(), "data", "tuning");
@@ -44,8 +44,8 @@ public class AtomPushServicePatronCallbackTests : IDisposable
         Core.Progression.ProgressionTuningHub.Configure(
             Core.Progression.ProgressionTuningLoader.Parse(Read("progression.v1.json")));
         // The real AuraMilli formula itself — the whole point of this suite.
-        Core.Demons.Patron.PatronPolicy.Configure(
-            Core.Demons.Patron.PatronTuningLoader.Parse(Read("patron.v1.json")));
+        Core.Creatures.Patron.PatronPolicy.Configure(
+            Core.Creatures.Patron.PatronTuningLoader.Parse(Read("patron.v1.json")));
 
         _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-patron-push-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_dir);
@@ -95,14 +95,14 @@ public class AtomPushServicePatronCallbackTests : IDisposable
         throw new DirectoryNotFoundException("repo root");
     }
 
-    static readonly DemonSpeciesDef FireSpecies = DemonSpeciesCatalog.All
-        .First(s => s.ElementPrimary.ToElementId() == "fire" && s.Acquisition != DemonAcquisition.CaptureOnly);
-    static readonly DemonSpeciesDef DarkSpecies = DemonSpeciesCatalog.All
-        .First(s => s.ElementPrimary.ToElementId() == "dark" && s.Acquisition != DemonAcquisition.CaptureOnly);
+    static readonly CreatureSpeciesDef FireSpecies = CreatureSpeciesCatalog.All
+        .First(s => s.ElementPrimary.ToElementId() == "fire" && s.Acquisition != CreatureAcquisition.CaptureOnly);
+    static readonly CreatureSpeciesDef DarkSpecies = CreatureSpeciesCatalog.All
+        .First(s => s.ElementPrimary.ToElementId() == "dark" && s.Acquisition != CreatureAcquisition.CaptureOnly);
 
-    string Mint(DemonSpeciesDef species)
+    string Mint(CreatureSpeciesDef species)
     {
-        var (specimen, _) = _store.MintDemon(1, new DemonMintSpec
+        var (specimen, _) = _store.MintCreature(1, new CreatureMintSpec
         {
             SpeciesId = species.SpeciesId,
             Side = species.Side,
@@ -130,8 +130,8 @@ public class AtomPushServicePatronCallbackTests : IDisposable
     [Fact]
     public void A_player_with_a_patron_set_gets_the_real_live_aura_baked_into_the_push()
     {
-        var demon = Mint(FireSpecies);
-        Assert.True(_store.SetPatron(1, demon, "corr-1").Ok);
+        var creature = Mint(FireSpecies);
+        Assert.True(_store.SetPatron(1, creature, "corr-1").Ok);
         var expected = PatronEndpoints.Compute(_store, 1);
         Assert.NotNull(expected);
 
@@ -160,8 +160,8 @@ public class AtomPushServicePatronCallbackTests : IDisposable
         // merges only its Defs — PatronSecondaryPlugin's own existing grant (GrantId "patron:aura")
         // must stay the SOLE grant, or the actor would carry two grants naming the same EffectId and
         // double the aura (GrantedDerivedAtomReader has no de-dup across grants).
-        var demon = Mint(FireSpecies);
-        Assert.True(_store.SetPatron(1, demon, "corr-2").Ok);
+        var creature = Mint(FireSpecies);
+        Assert.True(_store.SetPatron(1, creature, "corr-2").Ok);
 
         var payload = _push.Build(PlayerOwner(1), Lawn(), matchSeed: 1);
 

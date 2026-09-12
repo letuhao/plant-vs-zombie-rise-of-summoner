@@ -18,11 +18,11 @@ Teach guide: [HTML](site/mechanisms/local-control-room.html) · [Markdown](mecha
 
 ## The loop
 
-1. **Lawn** — play a lawn match. Souls, experience, and almanac entries land in your save. Deploy demons you raised.
+1. **Lawn** — play a lawn match. Souls, experience, and almanac entries land in your save. Deploy creatures you raised.
 2. **Power** — Dave levels. Specimens and species grow from work they did. Spend points into free-build aptitudes.
-3. **Summon and fuse** — spend souls at the altar; keep demons loyal with pacts; merge duplicates into stronger forms.
+3. **Summon and fuse** — spend souls at the altar; keep creatures loyal with pacts; merge duplicates into stronger forms.
 4. **Items** — find relics, vault them, equip and craft (**WIP** as a full armoury; opens as a chapter in the Vision unlock ladder).
-5. **Idle** — dispatch spare demons on expeditions; collect later. No stamina.
+5. **Idle** — dispatch spare creatures on expeditions; collect later. No stamina.
 6. **Empire** — march the map, farm and hunt ground, hold loam, defend the Seat when the war reaches home.
 7. **Return home** — every run ends at the Sanctum. Check what came back. Go again.
 
@@ -47,7 +47,7 @@ You start on the lawn. After the first chapter, unlocked web features stay fully
 1. Start the launcher (or your usual local deploy). The browser control room opens.
 2. Create or pick a **save** at the door.
 3. Land in the **Sanctum** — your hall.
-4. When a lawn match is running, open the **Lawn** stage. Play a match. Deploy bound demons when you have them.
+4. When a lawn match is running, open the **Lawn** stage. Play a match. Deploy bound creatures when you have them.
 5. Spend souls at the altar when you have them. Open layers as they unlock.
 6. Travel to the **World** map when you are ready to march a legion (map travel is open in this build; deeper empire verbs and Dave-level chapters are **Vision**).
 
@@ -76,9 +76,9 @@ Today’s rail opens on **beats**, not Dave’s level:
 |---|---|
 | Creatures, Commanders | Session start |
 | Relics | When you hold your first item |
-| Fusion | Once you have a demon to fuse |
+| Fusion | Once you have a creature to fuse |
 | Pacts | When a contract is first offered |
-| Expeditions | Once you have a bound demon to field |
+| Expeditions | Once you have a bound creature to field |
 | Almanac, Chronicle | After your first run |
 
 ### Unlock chapters — Dave’s level (**Vision**)

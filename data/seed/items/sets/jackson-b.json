@@ -25,7 +25,7 @@
       "id": "set.jackson-b-001",
       "nameKey": "set.the-grand-stage",
       "name": "The Grand Stage",
-      "themeKey": "demon.jackson_b",
+      "themeKey": "creature.jackson_b",
       "members": [
         {
           "role": "armament-primary",

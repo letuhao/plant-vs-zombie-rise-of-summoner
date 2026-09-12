@@ -171,7 +171,7 @@ stop at `omni`.* `element_mastery` is per-element by definition
 is `base + element_mastery × k`). A per-element progression axis is the flavour tier.
 
 > **Verdict: `element_mastery` belongs to the `aspect` tier** — the element typing that
-> [`aspect-scope`](../demons/spec-aspect-scope.md) is moving off the species (ideal §7c.4). It is that tier's
+> [`aspect-scope`](../creatures/spec-aspect-scope.md) is moving off the species (ideal §7c.4). It is that tier's
 > progression axis, not a thirteenth aptitude.
 
 **Two conditions handed forward with it**, so whoever builds it does not have to rediscover them:
@@ -212,7 +212,7 @@ dotnet run --no-build -- marginal -a force-ns,finesse-ns,bastion-ns --theta 100
 src/FusionRpg.Core/Stats/Aptitudes/Aptitude.cs             the closed enum + id strings
 src/FusionRpg.Core/Stats/Aptitudes/AptitudeCatalog.cs      id -> posture, role, one-line reading
 src/FusionRpg.Core/Stats/Aptitudes/AptitudeAllocation.cs   the value type: points, sum, share
-src/FusionRpg.Core/Stats/Aptitudes/AllocationScope.cs      commander | demonType | aspect | uniqueDemon
+src/FusionRpg.Core/Stats/Aptitudes/AllocationScope.cs      commander | creatureType | aspect | uniqueCreature
 tests/FusionRpg.Core.Tests/Stats/Aptitudes/AptitudeCatalogTests.cs
 tests/FusionRpg.Core.Tests/Stats/Aptitudes/AptitudeAllocationTests.cs
 ```
@@ -267,7 +267,7 @@ public sealed record AptitudeAllocation
    build for free and make `point-economy`'s first point worthless. The zero guard is a **structural
    limit** (division by zero is a crash, not a balance outcome), exempt from PS-8 and commented as such.
 4. **The four scopes SUM before `share` is taken.** Computing `share` per scope and combining afterwards
-   is a different and wrong game: a commander point and a unique-demon point would not be
+   is a different and wrong game: a commander point and a unique-creature point would not be
    interchangeable, and ideal §7c.2's weighting would be applied twice.
 
 ---

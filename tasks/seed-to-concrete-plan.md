@@ -1,13 +1,13 @@
 # Implementation plan: `seed-to-concrete`
 
-**Spans two capability maps** — [demon-seed-map.md](../docs/architecture/demon-seed-map.md) (18 modules,
+**Spans two capability maps** — [creature-seed-map.md](../docs/architecture/creature-seed-map.md) (18 modules,
 2026-09-05: modules 17-18 added §3b after the real `catalog-runtime` flip found fusion recipes could not
 scale past 84 species)
 and [effect-pipeline-map.md](../docs/architecture/effect-pipeline-map.md) (10 modules). 28 modules,
 **67 tasks, 10 phases, 11 checkpoints.**
 
 > **Why one plan and not two.** Both maps say it in their own words: *"neither program can finish
-> alone."* `demon-seed` 15-16 gate on `effect-pipeline` 1-4 and 7-8, and the phases genuinely
+> alone."* `creature-seed` 15-16 gate on `effect-pipeline` 1-4 and 7-8, and the phases genuinely
 > interleave — Phase 5 is a single vertical slice made of modules from both. Two plans would split that
 > slice down the middle and hide the only dependency that matters.
 >
@@ -21,7 +21,7 @@ and [effect-pipeline-map.md](../docs/architecture/effect-pipeline-map.md) (10 mo
 
 ## Overview
 
-Turn every one of ~904 captured PvZ species into a demon that has an identity, a stat block, and
+Turn every one of ~904 captured PvZ species into a creature that has an identity, a stat block, and
 **effects that differ per player** — with no model ever choosing a number, and no player's machine ever
 calling a model.
 
@@ -40,7 +40,7 @@ calling a model.
 - **The LLM writes identity; deterministic code writes magnitude.** Enforced by a mechanical schema
   audit, not by review.
 - **Two layers.** Species *stats* are deterministic and shared; only *effects* roll. This is what keeps
-  `WaveCatalog`, `DemonRecipeCatalog`, `DemonMaterialCatalog` and `LaneCost` free of player context.
+  `WaveCatalog`, `CreatureRecipeCatalog`, `CreatureMaterialCatalog` and `LaneCost` free of player context.
 - **Four resolution layers**, in this order: `slots → affixes → atoms → tiers → values`, each with its
   own named RNG stream.
 - **`traits_json` answers *which*; a `trait.{id}` container answers *what it does*.** Fusion needs no
@@ -58,11 +58,11 @@ calling a model.
 | **2** | 904 classified anchors exist, and their distribution is measured | ds 6-9, 14 |
 | **3** | ⭐ **The effect runtime is no longer inert** — one container rolls, binds, and executes | ep 1-4 |
 | **3.5** | ⭐ **One species walks the whole chain** — an automated seam test, stubs where modules are missing | — |
-| **4** | Demons have stats in the game; the compiled catalog is gone | ds 10-13 |
-| **5** | ⭐ **A demon does something, and two players' demons differ** | ep 7-8, ds 15-16 |
+| **4** | Creatures have stats in the game; the compiled catalog is gone | ds 10-13 |
+| **5** | ⭐ **A creature does something, and two players' creatures differ** | ep 7-8, ds 15-16 |
 | **6** | The two legacy effect paths are absorbed; one path remains | ep 5-6 |
 | **7** | Named multi-atom affixes exist | ep 9-10 |
-| **8** | ⭐ Fusion recipes scale past the real 829-species roster — `DemonRecipeCatalog`'s old crash-prone live algorithm is gone from the running game | ds 17-18 |
+| **8** | ⭐ Fusion recipes scale past the real 829-species roster — `CreatureRecipeCatalog`'s old crash-prone live algorithm is gone from the running game | ds 17-18 |
 
 **Phase 3 does not depend on Phases 1-2** — it needs no anchors, only a fixture container. If two
 streams are ever available, that is the split.
@@ -96,7 +96,7 @@ highest-information task in this plan, and it can fail in ways no amount of desi
 the new path is proven, because two risks in one change is how a proof becomes a post-mortem.
 
 **Phase 8 was not planned up front — it exists because Phase 4's own `catalog-runtime` flip found a
-real defect the original 26-module scope never anticipated.** `DemonRecipeCatalog.Build()`'s
+real defect the original 26-module scope never anticipated.** `CreatureRecipeCatalog.Build()`'s
 deterministic, same-rung-below fusion assignment held at the old compiled 84-species roster (no rarity
 rung ever had more outputs than its input rung's pairing capacity) and stopped holding at 829: 20
 eligible top-rarity outputs need unique pairs from just 4 candidates one rung down, a hard `C(4,2)=6`
@@ -118,7 +118,7 @@ anything else in this plan — it is purely additive at the end.
 | `patron-absorption` moves a number and invalidates the patron program's standing SIM results | High | Acceptance is a before/after equality test across the **full** (rarity × star × level × Θ) grid, not a spot check |
 | `catalog-runtime` changes how 9 shipped call sites get data | High | Diff test against the compiled roster **while both exist**; deletion only after it passes; a real lawn run is a required acceptance step, not optional |
 | The full classification run (~16,000 calls, ~14 h) fails mid-way | Medium | `run-control` is built *before* the run (T2.8-2.9), and T2.11 runs a 20-species subset first |
-| `rarity-migration` silently changes meaning — `>= DemonRarity.Rare` becomes 90% of the roster, not 75% | High | A guard test forbids relational comparisons against named members and bare int casts; the fusion output set is pinned by rung |
+| `rarity-migration` silently changes meaning — `>= CreatureRarity.Rare` becomes 90% of the roster, not 75% | High | A guard test forbids relational comparisons against named members and bare int casts; the fusion output set is pinned by rung |
 | The 8 `poolRolls` files grow before T3.2 lands | Low now, compounding | Measured: 8 files today. Every container authored before Phase 3 adds to it |
 | The walking skeleton's stubs hide a real seam defect | Medium | Its stub count is **printed**, so the remaining gap is visible rather than assumed; Checkpoint 5 requires zero stubs left |
 | A metric ships with no declared target and becomes an opinion | Medium | Each metrics task asserts its targets live in tuning — the item corpus once ran three waves with nine empty partitions and green validators |
@@ -156,7 +156,7 @@ python scripts\audit-magic-numbers.py --summary
 input drawn from more than one rarity rung below its output, only possible for the real corpus's
 `Almanac` deficits) need its own cost-table adjustment, or does the existing fixed per-rarity price
 stand as-is? `spec-fusion-recipe-generator.md` §4a names this "Ask first: game balance" per
-`spec-demon-fusion.md`'s own boundaries, and ships with "no change, exposure accepted as negligible
+`spec-creature-fusion.md`'s own boundaries, and ships with "no change, exposure accepted as negligible
 (14 recipes)" as its default — tracked here so it is decided once, not discovered by a player finding
 the cheapest gap-fill recipe first. Not a gate on T8.3 or Checkpoint 8.
 

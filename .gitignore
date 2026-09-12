@@ -117,7 +117,7 @@ node_modules/
 .remember/
 artifacts/
 
-/data/seed/demons/_runs/
+/data/seed/creatures/_runs/
 
 # Action-corpus mid pipeline (pre-acceptance scratch / A-P3 briefs). Final delivery stays
 # tracked: committed-round-*.json, _briefs/, _reports/, _generated/, _rounds/*/survivors.json

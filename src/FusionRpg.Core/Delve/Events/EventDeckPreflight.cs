@@ -202,9 +202,9 @@ public static class EventDeckPreflight
     /// <para><b>The `nerve.*` conjunct — built, whole-corpus.</b> `nerve.*`
     /// (<c>NerveStatusIds.For</c>, `Delve/Attrition/NervePolicy.cs`) is an EXCLUSIVELY-DERIVED
     /// projection: <c>NervePolicy.Sync</c> is the only writer — "at most one `nerve.*` instance per
-    /// demon, never a status field" applied by ordinary content (that class's own doc comment). A
+    /// creature, never a status field" applied by ordinary content (that class's own doc comment). A
     /// `status.apply` atom targeting it from ANY container anywhere — an item, a passive node, an event
-    /// outcome, a demon unique — breaks the same sync-ownership invariant identically, so this conjunct
+    /// outcome, a creature unique — breaks the same sync-ownership invariant identically, so this conjunct
     /// is genuinely global, not event-deck-scoped, and there is no narrower mechanism to scope it to: an
     /// event outcome names only <c>(Family, PowerBand)</c> (<see cref="EventEffectRef"/>,
     /// `EventRow.cs:12`), never a container id — that record's own doc comment: "a def row loaded here

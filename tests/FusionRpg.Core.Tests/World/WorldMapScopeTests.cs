@@ -5,7 +5,7 @@ namespace FusionRpg.Core.Tests.World;
 
 /// <summary>
 /// T12/T13 (buff-debuff-scope-todo.md Phase 4). `ScopeModifierMilli` follows
-/// `UpkeepHandicapMilli`'s exact hashing precedent; own-side/unique-demon resolution reuse
+/// `UpkeepHandicapMilli`'s exact hashing precedent; own-side/unique-creature resolution reuse
 /// `WorldEntity.OwnerFactionId`/`Members[].InstanceId` directly.
 /// </summary>
 public class WorldMapScopeTests
@@ -55,7 +55,7 @@ public class WorldMapScopeTests
     }
 
     [Fact]
-    public void Unique_demon_resolves_by_walking_Members_for_a_matching_InstanceId()
+    public void Unique_creature_resolves_by_walking_Members_for_a_matching_InstanceId()
     {
         var world = BaseWorld() with
         {
@@ -81,7 +81,7 @@ public class WorldMapScopeTests
     }
 
     [Fact]
-    public void Unique_demon_resolves_null_when_the_specimen_has_no_legion_presence()
+    public void Unique_creature_resolves_null_when_the_specimen_has_no_legion_presence()
     {
         var world = BaseWorld();
         Assert.Null(WorldMapScopeExecutor.FindEntityForInstance(world, "inst-nowhere"));

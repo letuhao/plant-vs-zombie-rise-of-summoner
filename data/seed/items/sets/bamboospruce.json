@@ -25,7 +25,7 @@
       "id": "set.bamboospruce-001",
       "nameKey": "set.winter-bamboo-volley",
       "name": "Winter Bamboo Volley",
-      "themeKey": "demon.bamboospruce",
+      "themeKey": "creature.bamboospruce",
       "members": [
         {
           "role": "armament-primary",

@@ -34,7 +34,7 @@ the exact defect the atom program exists to stop"* (`spec-action-seeding.md:101`
 | Six target modes; the four area shapes apply **only** under `Area` | `ActionTargetSpec.cs:16-32`, `:41-47` |
 | `Area` is board-gated at roll time — an `Area` candidate is not even eligible while no board exists | `ActionSeeder.cs:51-53` |
 | Six elements | `ActorElementTypes.cs:3-11` |
-| Per-species element and rarity for all 84 | `DemonSpeciesCatalog.Generated.cs:14+` |
+| Per-species element and rarity for all 84 | `CreatureSpeciesCatalog.Generated.cs:14+` |
 | The tuning-file shape this module follows (`schemaVersion`, `version`, `_meta`, rows) | `data/tuning/action-rungs.v1.json:1-12` |
 | `WeightedChoice.Pick` — the shipped **runtime generator's** weighted pick, over a caller-supplied `targetShapePool` | `ActionSeeder.cs:37,55` |
 | `ActionRow.Targeting` — an **authored** `ActionTargetSpec` on the shipped row, compiled once and cached | `ActionRow.cs:40`; `CompiledAction.cs:27` |
@@ -208,7 +208,7 @@ rebuild — which is why these are rows and not constants.
 | **Planted violation — hard gate** | a species row with a category at 0 is legal, and a test asserts the generator still treats that category as *reachable*, so a zero weight never becomes a family-access gate |
 | **Largest remainder** | a hand-built vector whose exact division leaves 3 remainder units distributes them to the three largest fractions, and shuffling the input order changes nothing |
 | **Overflow** | the normalisation widens before multiplying; a synthetic vector at the top of the range does not overflow, and a forced overflow **throws** |
-| **Roster coverage** | the emitted rows **join the live roster exactly** — one `species` row per catalog id and one `family` row per family id, recomputed from the seed (no duplicates, no stray keys). ⛔ **CORRECTED 2026-09-11 (twice):** the row first asserted **84 species / 19 family rows** (the legacy `DemonSpeciesCatalog.Generated.cs` projection), then was "fixed" to **904 / 227** — still a population literal, which the corpus outgrows every time a species ships. Per [validation-ssot.md](../../architecture/validation-ssot.md) the test now asserts the **join** and prints the scale; see its current row counts on a live measurement, never as an assertion |
+| **Roster coverage** | the emitted rows **join the live roster exactly** — one `species` row per catalog id and one `family` row per family id, recomputed from the seed (no duplicates, no stray keys). ⛔ **CORRECTED 2026-09-11 (twice):** the row first asserted **84 species / 19 family rows** (the legacy `CreatureSpeciesCatalog.Generated.cs` projection), then was "fixed" to **904 / 227** — still a population literal, which the corpus outgrows every time a species ships. Per [validation-ssot.md](../../architecture/validation-ssot.md) the test now asserts the **join** and prints the scale; see its current row counts on a live measurement, never as an assertion |
 | **Offline guarantee** | the suite passes with the transport stubbed to raise |
 
 ## 6. Acceptance criteria

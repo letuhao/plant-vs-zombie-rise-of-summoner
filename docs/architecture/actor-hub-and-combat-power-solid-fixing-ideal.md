@@ -145,7 +145,7 @@ From `the-loops.md` / `the-game.md`: Rise of Summoner is **RPG + empire building
 | **World** today | Map entities: sector/lane, stance, `Members` with crude `Hp/Wounds/Level` | Honest RPG combat weight or Hub-fed force power |
 | **Missing program** | World-side actor/force state that can feed combat + intel from the same truth as Hub (and mid-campaign persistence) | — |
 
-Placeholder `Hp×Level` was a fake bridge across that missing layer. Deleting it is correct; inventing Strength from Hub without world force state would still be a lie for most world entities (species-only members, no UniqueDemon instance).
+Placeholder `Hp×Level` was a fake bridge across that missing layer. Deleting it is correct; inventing Strength from Hub without world force state would still be a lie for most world entities (species-only members, no UniqueCreature instance).
 
 ### Still open
 

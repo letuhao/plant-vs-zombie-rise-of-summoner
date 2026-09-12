@@ -1,0 +1,19 @@
+{
+  "session": "test-hang-guard-20260912-b7c4",
+  "program": "contributing-standards",
+  "problem": "Local C# test runs hang silently for 1h30 with no report: add a repo-wide hang guard (test.runsettings + Directory.Build.props) and replace the unreachable-timeout sequential ReadToEnd() pipe deadlock in test subprocess helpers with concurrent draining",
+  "mode": "direct",
+  "branch": "features/derived-stat-extension",
+  "worktree": null,
+  "paths": [
+    "test.runsettings",
+    "Directory.Build.props",
+    "tests/FusionRpg.Guard.Tests/**",
+    "tests/FusionRpg.AtomImporter.Tests/**",
+    "tests/FusionRpg.Core.Tests/TestSupport/ExternalProcess.cs",
+    "tests/FusionRpg.Core.Tests/Creatures/CreatureSpeciesGenExplainTests.cs",
+    "tests/FusionRpg.Core.Tests/Creatures/CreatureQualityReportTests.cs"
+  ],
+  "started": "2026-09-12T10:24:00Z",
+  "status": "active"
+}

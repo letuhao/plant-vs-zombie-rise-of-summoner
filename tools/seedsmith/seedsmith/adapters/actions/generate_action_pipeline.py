@@ -1,4 +1,4 @@
-"""Run the staged action-corpus pipeline against the live demon seed roster."""
+"""Run the staged action-corpus pipeline against the live creature seed roster."""
 from __future__ import annotations
 
 import argparse

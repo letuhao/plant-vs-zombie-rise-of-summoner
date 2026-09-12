@@ -1,5 +1,5 @@
 using System.Reflection;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Items;
 using FusionRpg.Core.Items.Materials;
 using FusionRpg.Core.Stats.Derived;
@@ -22,7 +22,7 @@ public class MaterialVocabularyTests
 
         // The counts the spec's §1 table publishes, each measured off the shipped roster it derives
         // from rather than transcribed: 10 rungs, 2 frames x 4 grades, 6 concrete elements, 3 verbs.
-        Assert.Equal(DemonRarityLadder.RungCount, all.Count(i => i.StartsWith("shard.", StringComparison.Ordinal)));
+        Assert.Equal(CreatureRarityLadder.RungCount, all.Count(i => i.StartsWith("shard.", StringComparison.Ordinal)));
         Assert.Equal(8, all.Count(i => i.StartsWith("substrate.", StringComparison.Ordinal)));
         Assert.Equal(ElementRoster.Concrete.Count, all.Count(i => i.StartsWith("essence.", StringComparison.Ordinal)));
         Assert.Equal(3, all.Count(i => i.StartsWith("catalyst.", StringComparison.Ordinal)));
@@ -39,7 +39,7 @@ public class MaterialVocabularyTests
     {
         // The platform state spec-salvage-craft.md verified I9's "four bands ship" claim FALSE
         // against, pinned here so a regression is loud.
-        foreach (var rarity in DemonRarityLadder.All)
+        foreach (var rarity in CreatureRarityLadder.All)
             Assert.True(MaterialCatalog.IsIssuable(MaterialCatalog.ShardId(rarity)), rarity.ToId());
 
         foreach (var legacy in new[] { "shard.common", "shard.rare", "shard.epic", "shard.legendary" })
@@ -50,8 +50,8 @@ public class MaterialVocabularyTests
             Assert.DoesNotContain(legacy, MaterialCatalog.All);
         }
 
-        // And the sixteen shipped ids are REUSED from DemonMaterialCatalog, not re-minted here.
-        foreach (var id in DemonMaterialCatalog.All)
+        // And the sixteen shipped ids are REUSED from CreatureMaterialCatalog, not re-minted here.
+        foreach (var id in CreatureMaterialCatalog.All)
             Assert.True(MaterialCatalog.IsIssuable(id), id);
     }
 

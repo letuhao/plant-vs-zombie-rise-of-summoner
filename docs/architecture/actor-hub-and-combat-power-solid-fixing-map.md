@@ -16,7 +16,7 @@
 2. **Wave 1 = fuse first.** Do not ship Standing/chip/copy/lawn honesty before dual compose is retired (or sequenced so those modules only contribute/consume Hub).
 3. **Q5 full membership** — breaking OK; fix stale dependents after Hub foundation (they fail to build).
 4. **Q7 stub is debt** — Cold equip: rolled/atom path; Wave 5 deletes stub catalog as usable SSOT.
-5. Lawn Bound UniqueDemon implementation stays [`aptitude-sheet/spec-unique-lawn-wire.md`](aptitude-sheet/spec-unique-lawn-wire.md) — this program adds parity Done criteria only (**no fork**).
+5. Lawn Bound UniqueCreature implementation stays [`aptitude-sheet/spec-unique-lawn-wire.md`](aptitude-sheet/spec-unique-lawn-wire.md) — this program adds parity Done criteria only (**no fork**).
 6. Standing exclude: `progression.*`, loot/MF/XP class, **`resource.max.*` / `resource.regen.*`**.
 7. Standing include: all `IsCombatChannel` (~196) + `skill.cooldown.*` + `skill.effectiveness.*` + `status.power.*` / `status.resist.*` that combat Apply reads.
 8. Fuse may move battle/expedition goldens — **one** `RulesetVersion` bump under `battle-hub-fuse` (today `= 4`).
@@ -33,7 +33,7 @@
 1. **Retire the SOLID defect** — dual compose (ActorHub vs `BattleStatComposer`) and private ChannelMods combat writers.
 2. **One Cold equip path** — rolled / atom bindings; delete stub equip as usable SSOT.
 3. **Honest combat power** — Standing via synthetics + full membership filter; chip/copy vocabulary; D4 coeffs (Wave 4).
-4. **Lawn / loadout parity** — Bound UniqueDemon + tree hydrate + Bound loadout via Hub (after fuse).
+4. **Lawn / loadout parity** — Bound UniqueCreature + tree hydrate + Bound loadout via Hub (after fuse).
 5. **Close non-world place-matrix leftovers** — Sim Full, unique Θ wire, prove scripts, stale dual-compose docs (Wave 4).
 6. **Stub hygiene (Wave 5)** — delete PlaceholderBattleResolver / intel Strength fiction / leftover stubs; **track** `world-actor-combat`.
 
@@ -73,7 +73,7 @@ Pointer only: [actor-hub-and-combat-power-solid-fixing-ideal.md](actor-hub-and-c
 | Standing synthetics → Compose | `standing-compose` | Naive Hub snapshot (imports Θ) |
 | Chip Lv / Θ copy | `chip-honesty` | Level labeled “power” |
 | Combat power = O+S+C | `copy-surfaces` | Omni glance as “the power” |
-| Bound lawn UniqueDemon | `aptitude-sheet` `unique-lawn-wire` + `lawn-aptitude-parity` | Second lawn-wire spec |
+| Bound lawn UniqueCreature | `aptitude-sheet` `unique-lawn-wire` + `lawn-aptitude-parity` | Second lawn-wire spec |
 | Injector tree hydrate | `lawn-tree-hydrate` | Battle-only tree |
 | Bound loadout via Hub | `bound-loadout-hub` | Writer-absolute beside Hub |
 | Sim Full combat ops | `sim-hub-parity` | Leave Named Partial forever for combat equip |
@@ -91,7 +91,7 @@ Pointer only: [actor-hub-and-combat-power-solid-fixing-ideal.md](actor-hub-and-c
 
 | Module id | Responsibility | Depends on | Spec | Wave |
 |---|---|---|---|---|
-| `channelmods-hub` | Migrate Star/Loyalty/Aptitude/UniqueDemon/Zomboss/Draught/Expedition injury writers to Hub/atoms | — | [spec-channelmods-hub.md](actor-hub-and-combat-power-solid-fixing/spec-channelmods-hub.md) | 1 |
+| `channelmods-hub` | Migrate Star/Loyalty/Aptitude/UniqueCreature/Zomboss/Draught/Expedition injury writers to Hub/atoms | — | [spec-channelmods-hub.md](actor-hub-and-combat-power-solid-fixing/spec-channelmods-hub.md) | 1 |
 | `cold-equip-one` | Sole Cold equip = rolled atom bindings; retire stub catalog as end-state | — | [spec-cold-equip-one.md](actor-hub-and-combat-power-solid-fixing/spec-cold-equip-one.md) | 1 |
 | `battle-hub-fuse` | Retire `BattleStatComposer`; BattleEngine (+ delve/siege/web) compose via ActorHub | channelmods-hub · cold-equip-one | [spec-battle-hub-fuse.md](actor-hub-and-combat-power-solid-fixing/spec-battle-hub-fuse.md) | 1 |
 | `battle-ops-parity` | Equip ops match Hub; tree via Hub; retire dead `TreeAtomSource` battle slot | battle-hub-fuse | [spec-battle-ops-parity.md](actor-hub-and-combat-power-solid-fixing/spec-battle-ops-parity.md) | 1 |
@@ -99,7 +99,7 @@ Pointer only: [actor-hub-and-combat-power-solid-fixing-ideal.md](actor-hub-and-c
 | `standing-compose` | HF-standing synthetics + filter → `ActorPowerCache.Compose` | combat-membership | [spec-standing-compose.md](actor-hub-and-combat-power-solid-fixing/spec-standing-compose.md) | 2 |
 | `chip-honesty` | HF-chip: `Lv` / optional `Θ` — never level as “power” | standing-compose | [spec-chip-honesty.md](actor-hub-and-combat-power-solid-fixing/spec-chip-honesty.md) | 2 |
 | `copy-surfaces` | HF-copy: player “combat power” = O+S+C | standing-compose | [spec-copy-surfaces.md](actor-hub-and-combat-power-solid-fixing/spec-copy-surfaces.md) | 2 |
-| `lawn-aptitude-parity` | Done gate for Bound UniqueDemon Hot vs sheet | battle-hub-fuse · unique-lawn-wire | [spec-lawn-aptitude-parity.md](actor-hub-and-combat-power-solid-fixing/spec-lawn-aptitude-parity.md) | 3 |
+| `lawn-aptitude-parity` | Done gate for Bound UniqueCreature Hot vs sheet | battle-hub-fuse · unique-lawn-wire | [spec-lawn-aptitude-parity.md](actor-hub-and-combat-power-solid-fixing/spec-lawn-aptitude-parity.md) | 3 |
 | `lawn-tree-hydrate` | Injector PassiveTree → Hub | battle-hub-fuse | [spec-lawn-tree-hydrate.md](actor-hub-and-combat-power-solid-fixing/spec-lawn-tree-hydrate.md) | 3 |
 | `bound-loadout-hub` | Bound combat via Hub/atoms — not Writer abs | lawn-aptitude-parity | [spec-bound-loadout-hub.md](actor-hub-and-combat-power-solid-fixing/spec-bound-loadout-hub.md) | 3 |
 | `sim-hub-parity` | Sim combat Derived Full ops via Hub; retire Named Partial fork | battle-hub-fuse | [spec-sim-hub-parity.md](actor-hub-and-combat-power-solid-fixing/spec-sim-hub-parity.md) | 4 |
@@ -168,7 +168,7 @@ flowchart TB
 - [ ] No new private ChannelMods combat writers; known producers migrated to Hub.
 - [ ] Cold equip player path uses rolled/atom bindings — stub not the SSOT.
 - [ ] Standing includes Hub combat writers via membership filter; chip never labels level “power”.
-- [ ] Bound lawn UniqueDemon parity + Bound loadout via Hub.
+- [ ] Bound lawn UniqueCreature parity + Bound loadout via Hub.
 - [ ] Sim combat ops Full via Hub; D4 coeffs tunable; unique Θ on wire when known; stale dual-compose docs gone.
 - [ ] `prove-hub-combat` green.
 - [ ] PlaceholderBattleResolver + placeholder intel Strength **deleted**; `world-actor-combat` tracked (no world combat Done claim).

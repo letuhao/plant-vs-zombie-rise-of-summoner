@@ -119,7 +119,7 @@ export function DerivedTab({
 
   const loading = sheet.isLoading;
   const hasSheet = (sheet.data?.derived?.length ?? 0) > 0;
-  // DC-9: sheet-only when projection ready — lean only for UniqueDemon Pending honesty.
+  // DC-9: sheet-only when projection ready — lean only for UniqueCreature Pending honesty.
   const sheetProjectionReady =
     hasSheet &&
     (sheet.data?.derived?.some(

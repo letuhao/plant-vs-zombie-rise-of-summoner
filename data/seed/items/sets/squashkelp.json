@@ -25,7 +25,7 @@
       "id": "set.squashkelp-001",
       "nameKey": "set.drowned-grave-vine",
       "name": "Drowned Grave-Vine",
-      "themeKey": "demon.squashkelp",
+      "themeKey": "creature.squashkelp",
       "members": [
         {
           "role": "armament-primary",

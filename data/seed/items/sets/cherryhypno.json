@@ -25,7 +25,7 @@
       "id": "set.cherryhypno-001",
       "nameKey": "set.cherry-zombie-marksman",
       "name": "Cherry Zombie Marksman",
-      "themeKey": "demon.cherryhypno",
+      "themeKey": "creature.cherryhypno",
       "members": [
         {
           "role": "armament-primary",

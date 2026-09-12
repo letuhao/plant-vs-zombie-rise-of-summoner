@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "fire",
+  "eligibility": null,
+  "eventId": "event.encounter-event-creature.allpeater-001",
+  "flavor": "A massive, pulsating vein of crimson energy connects the four corners of the chamber to a central, obsidian monolith. As the combatants approach, the air grows heavy with the scent of ozone and iron. The monolith begins to hum, its surface rippling like liquid shadow, seemingly ready to channel a massive burst of concentrated 火力 toward the nearest living soul.",
+  "kind": "encounter-event",
+  "name": "The Altar of Divided Essence",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party must decide whether to sacrifice their own vitality to empower their strikes or risk being caught in the monolith's discharge.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.allpeater"
+}

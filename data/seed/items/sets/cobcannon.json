@@ -25,7 +25,7 @@
       "id": "set.cobcannon-001",
       "nameKey": "set.corn-cannon",
       "name": "Corn Cannon",
-      "themeKey": "demon.cobcannon",
+      "themeKey": "creature.cobcannon",
       "members": [
         {
           "role": "armament-primary",

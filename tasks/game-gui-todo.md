@@ -84,7 +84,7 @@ System on an empty stack. Tab cycles within the top layer only.
 
 **Acceptance:**
 - [x] `Pending<T>` has three states — `known` / `absent` / `pending` — and `pending` carries a non-empty reason — `src/contract/pending.ts`
-- [x] Contract covers all eleven entities in the ladder matrix (`src/contract/types.ts`) — the actual eleven rungs are `docs/design/README.md` §6's list (Atom, Container, Actor, Status, Element, Channel, Resource, Power, Sector, "Demon + contract", Run — confirmed via research, since `game-gui-principles.md` itself never enumerates them, only `README.md` §6 does). Field depth varies honestly by what exists server-side today: Actor/Run/Contract have real adapters (`adapt.ts`) against `UniqueActorDto`/`RunItem`/`ContractRowDto`+`DemonProfileDto`; Atom/Container/Status/Element/Channel/Resource/Power are typed but mostly `Pending` since no server endpoint produces them yet (grounded per-field in the nine `spec-*.md` docs, not invented); Sector is declared for vocabulary completeness only — no adapter, since World (T16) is excluded this phase
+- [x] Contract covers all eleven entities in the ladder matrix (`src/contract/types.ts`) — the actual eleven rungs are `docs/design/README.md` §6's list (Atom, Container, Actor, Status, Element, Channel, Resource, Power, Sector, "Creature + contract", Run — confirmed via research, since `game-gui-principles.md` itself never enumerates them, only `README.md` §6 does). Field depth varies honestly by what exists server-side today: Actor/Run/Contract have real adapters (`adapt.ts`) against `UniqueActorDto`/`RunItem`/`ContractRowDto`+`CreatureProfileDto`; Atom/Container/Status/Element/Channel/Resource/Power are typed but mostly `Pending` since no server endpoint produces them yet (grounded per-field in the nine `spec-*.md` docs, not invented); Sector is declared for vocabulary completeness only — no adapter, since World (T16) is excluded this phase
 - [x] A check fails if any `pending` reason is empty or missing — `contractGuard.findEmptyPendingReasons`/`assertNoEmptyPendingReasons`, a runtime walk (reasons are dynamic values, not statically greppable) exercised against real `adaptActor`/`adaptRun`/`adaptContract` output
 - [x] A check fails if any file under `stages/`, `layers/` or `ui/` imports a REST DTO type — `contractGuard.scanForRestDtoImports`, scoped to type-only imports from `@/lib/bus...` (a value/hook import like `useUniqueActor` is legitimate and not flagged); `contract/` itself is exempt since DTO→view adaptation is its job
 
@@ -282,7 +282,7 @@ and rejection — and a failure says what changed, including "nothing".
 **Acceptance:**
 - [x] A persisted setting gates it; default off; `` ` `` opens it when enabled — `devMode.ts` (`localStorage` key `fusionrpg.devMode`), gate defaults off; `?devmode=1`/`?devmode=0` flips and persists it then strips itself from the URL (one-time switch, not addressable state like `?dev=`); backtick only registers a global verb (`DevTreeHost.tsx`) once the gate is on
 - [x] All nine surfaces reachable inside it; their old routes redirect — `DeveloperTree.tsx`'s `DEV_SURFACES` (status/stats/pvz-activity/icon-dump/almanac-dump/cheats/sim/log/runs) each render their unchanged v1 page component inside a shared `PanelShell`; `routes.tsx`'s `DEV_ROUTE_REDIRECTS` sends all nine old routes (plus `/metrics` → `runs`) to `#/sanctum?dev=<id>`
-- [x] It is absent from player navigation — `AuditNav.tsx` rewritten to the 11 real player-facing links only (PvzStats, Progression, Types, Recipes, Lawn, World, Roster, Demons, Expeditions, Fusion, Storage); live-verified and covered by `dev-tree.spec.ts`'s "none of the nine developer surfaces appear in player navigation"
+- [x] It is absent from player navigation — `AuditNav.tsx` rewritten to the 11 real player-facing links only (PvzStats, Progression, Types, Recipes, Lawn, World, Roster, Creatures, Expeditions, Fusion, Storage); live-verified and covered by `dev-tree.spec.ts`'s "none of the nine developer surfaces appear in player navigation"
 - [x] It obeys the stack, Esc, focus and volume rules; presentation rules do not apply — built on the same `PanelShell` every other band-2 layer uses (push/pop into `useLayerStack`, Esc via the shared keymap, Radix focus trap/restore); engine vocabulary (raw `typeId`, JSON blocks, etc.) is untouched inside the nine pages per GG-40–42 — this task only changes how they're *reached*, not what they render
 
 **Real bugs found and fixed while proving this task, not just documented:**
@@ -310,7 +310,7 @@ chunk (measured directly, not the tech-stack.md baseline of 712.9 kB gz — that
 this session's own additions); every stage, layer and dev page was a plain top-level import.
 
 **What shipped:**
-- `routes.tsx` — `LawnStage` (Phaser), `WorldPage` (`@xyflow/react`), `StoragePage`, `DemonsPage`,
+- `routes.tsx` — `LawnStage` (Phaser), `WorldPage` (`@xyflow/react`), `StoragePage`, `CreaturesPage`,
   `ActorLadderDemoPage` converted to `React.lazy()`, each behind its own `<Suspense>` with a shared
   `ChunkFallback`. `SanctumStage` stays a static import — it's the entry stage, not deferred work.
 - `DeveloperTree.tsx` — all nine dev pages converted to `React.lazy()`; the active tab's page
@@ -402,7 +402,7 @@ default per-dynamic-import splitting already gets the behavior that matters).
 
 ### ✅ Checkpoint E — lean and swept
 - [x] Navigation carries player layers only — `AuditNav.tsx` holds exactly five links (Lawn,
-  World, Roster, Demons, Storage); the nine dev surfaces (T12) and every conditionally-locked rail
+  World, Roster, Creatures, Storage); the nine dev surfaces (T12) and every conditionally-locked rail
   layer (Relics/Fusion/Expeditions/Pacts, T14/T15/T17; PvzStats/Progression/Types/Recipes, T19) are
   gone, reachable only from the dev tree or the Sanctum rail respectively
 - [x] Entry chunk within budget; heavy deps lazy or gone — T13: 127.1 KB gz entry (budget 180 KB),
@@ -525,16 +525,16 @@ backend slice added, owner-approved)
 acceptance criteria ("a deployed *creature* cannot be fused") and its plate reference (02 §C:
 two bound plants/zombies fuse into one, both consumed) both assume *creature*-domain fusion.
 Checking the backend before writing anything found the opposite: `FusionEndpoints.cs` is real,
-already fully built, and already **shipped** (`spec-demon-fusion.md`: "Status: shipped
-2026-08-21") — but it's an entirely different system, **Demon** fusion (star merge / promotion /
+already fully built, and already **shipped** (`spec-creature-fusion.md`: "Status: shipped
+2026-08-21") — but it's an entirely different system, **Creature** fusion (star merge / promotion /
 recipe breeding, souls+shard+essence costs, a discovery codex with silhouetted undiscovered
 recipes) with no relationship to UniqueActor creatures at all. There is no creature-fusion
 backend, the same gap shape as T14's Relics — except here a complete real system for a
 *different* domain already exists, including its own FE (`features/fusion/FusionPage.tsx`,
 `lib/bus/fusion.ts`), just as a standalone route rather than a stage layer. Put to the owner
 directly rather than guessing and burning real effort building the wrong one; answer: **build the
-real Demon fusion lab**, rewriting this task's acceptance criteria to match what's actually real
-(Pacts/Demons-adjacent, not Creatures-adjacent) instead of the plate's creature mockup.
+real Creature fusion lab**, rewriting this task's acceptance criteria to match what's actually real
+(Pacts/Creatures-adjacent, not Creatures-adjacent) instead of the plate's creature mockup.
 
 **What shipped:** `FusionLayer.tsx` — a thin `PanelShell` wrapper around the existing, unchanged
 `FusionPage.tsx`, matching T12's own precedent for hosting an already-working page inside the new
@@ -544,20 +544,20 @@ the developer tree already uses). Old `/fusion` route now redirects to `/sanctum
 — reachable from the Sanctum rail once unlocked, not a permanent nav entry (Roster/Creatures kept
 its link because Creatures, unlike Fusion, is unconditionally available from session start).
 `railState.ts`'s Fusion unlock condition was real but wrong-domain (`hasDuplicateSpecies`, a
-creature check that had no other consumer and is now deleted) — replaced with `hasAnyDemon`,
-threaded from a real `useDemonRoster` query the same way T14 threaded `hasAnyRelic`.
+creature check that had no other consumer and is now deleted) — replaced with `hasAnyCreature`,
+threaded from a real `useCreatureRoster` query the same way T14 threaded `hasAnyRelic`.
 
 **Acceptance (rewritten to match the real system, per the owner's decision above):**
 - [x] Reachable as a band-2 layer over the Sanctum, not a standalone route — `F` opens it once
   unlocked, Esc closes it, the Sanctum stage stays mounted throughout; live-verified in a real
-  browser against a real seeded player with two real minted demons
-- [x] Unlocks from real state, not a constant — locked with zero demons, unlocked the moment
-  `useDemonRoster` returns at least one; live-verified both states
+  browser against a real seeded player with two real minted creatures
+- [x] Unlocks from real state, not a constant — locked with zero creatures, unlocked the moment
+  `useCreatureRoster` returns at least one; live-verified both states
 - [x] The real fusion mechanics work end to end through the new shell — star merge, promotion,
-  and recipe modes all render from `FusionPage`'s own real hooks; selecting a base demon produces
-  a real, server-computed cost preview immediately (live-verified: selecting a legendary demon as
+  and recipe modes all render from `FusionPage`'s own real hooks; selecting a base creature produces
+  a real, server-computed cost preview immediately (live-verified: selecting a legendary creature as
   base priced a star merge at 50 souls / 1 legendary shard / 1 air essence, exactly matching
-  `spec-demon-fusion.md`'s cost table) — nothing about the fusion mechanics themselves needed to
+  `spec-creature-fusion.md`'s cost table) — nothing about the fusion mechanics themselves needed to
   change, only how the page is reached
 - [x] The recipe book's discovery/silhouette mechanic (undiscovered recipes show only a rarity
   band, never the output species) renders correctly inside the new shell — live-verified
@@ -565,29 +565,29 @@ threaded from a real `useDemonRoster` query the same way T14 threaded `hasAnyRel
 **Real bug avoided by checking first, not found by luck:** if T14's `RelicsLayer` pattern
 (mounting the layer unconditionally, `open` just toggling `PanelShell`) had been copy-pasted
 blindly onto `FusionPage` without checking what it actually pulls in, its several real
-`useQuery`/`useMutation` hooks (demons/expeditions/fusion/patron — four separate `lib/bus`
+`useQuery`/`useMutation` hooks (creatures/expeditions/fusion/patron — four separate `lib/bus`
 modules, none of them the ones T14 already mocked) would need mocking in
 `SanctumStage.test.tsx`'s existing `vi.mock("@/lib/bus", ...)` for the *whole* module. Confirmed
 instead — matching `DeveloperTree.test.tsx`'s established T12 precedent — that these hooks
 degrade gracefully with no live server in jsdom rather than crashing, so no additional mocking
-was needed beyond the one new `useDemonRoster` call `SanctumStage.tsx` itself makes.
+was needed beyond the one new `useCreatureRoster` call `SanctumStage.tsx` itself makes.
 
 **Verify:**
 - [x] `npm test` — `FusionLayer.test.tsx` (2: renders the real lab inside the shared shell, Esc
   closes without unmounting whatever is behind it), `railState.test.ts` updated (Fusion unlocks on
-  `hasAnyDemon`, not a duplicate species), `SanctumStage.test.tsx` updated (`useDemonRoster`
+  `hasAnyCreature`, not a duplicate species), `SanctumStage.test.tsx` updated (`useCreatureRoster`
   mocked, the stale duplicate-species test rewritten); full suite 550/550 green — including
   `fusionView.test.ts` and every other pre-existing Fusion-adjacent test, untouched and still
   passing, since `FusionPage`'s own internals were not modified
-- [x] `npm run test:e2e` — new `fusion.spec.ts` (3): locked with no demons, `F` opens it once a
-  demon exists with the Sanctum staying mounted and Esc closing it, `/fusion` redirects into the
+- [x] `npm run test:e2e` — new `fusion.spec.ts` (3): locked with no creatures, `F` opens it once a
+  creature exists with the Sanctum staying mounted and Esc closing it, `/fusion` redirects into the
   layer and the standing AuditNav link is gone; full e2e suite green except the World failure
   (confirmed pre-existing and unrelated, same as T14 — T16 excluded this phase)
 - [x] Visual: live-verified (Chrome DevTools MCP against a real, isolated scratch backend with
-  `FUSIONRPG_SIM=1`, two real demons minted via the SIM-only test endpoint — never the owner's
-  save-data server) — the lab renders fully real inside the new shell: real player, real demon
+  `FUSIONRPG_SIM=1`, two real creatures minted via the SIM-only test endpoint — never the owner's
+  save-data server) — the lab renders fully real inside the new shell: real player, real creature
   names from the species catalog, star pips, all three mode tabs, a live server-computed cost
-  preview the instant a base demon is selected, and the recipe book's real silhouette rendering
+  preview the instant a base creature is selected, and the recipe book's real silhouette rendering
 
 **Dependencies:** none in practice (the "T14" dependency in the original row was about UI-pattern
 reuse for a creature-domain comparison view that turned out not to apply once the real backend
@@ -620,10 +620,10 @@ start from, not a task to run now:**
 ### Task 17: Expeditions and Pacts
 
 **Same domain pattern as T14/T15, confirmed rather than assumed.** Checking the backend before
-writing anything found both systems already real and already shipped, in the Demon domain, not
-Creatures: `ExpeditionsPage.tsx` dispatches `useDemonRoster` specimens against real tiers
+writing anything found both systems already real and already shipped, in the Creature domain, not
+Creatures: `ExpeditionsPage.tsx` dispatches `useCreatureRoster` specimens against real tiers
 (`ExpeditionEndpoints.cs`/`spec-expeditions.md`), and the contract/loyalty/tribute mechanic the
-plate calls "Pacts" already lives — real, working — inside `DemonsPage.tsx`'s Roster tab
+plate calls "Pacts" already lives — real, working — inside `CreaturesPage.tsx`'s Roster tab
 (`contractView.ts`, `ContractEndpoints.cs`). Plate 03 §C's own creature names (Sporeling/Ashkell)
 and a relic reward (Ashen Reliquary) are the same pre-pivot flavor text T14/T15 already found —
 illustrative, not a literal spec of what exists. No new question was needed this time: the
@@ -631,12 +631,12 @@ pattern from the last two tasks (build against what's real) already answered it.
 corrected in passing:** the previous unlock row's own note called out Expeditions' *"first sector
 held"* condition as merely hard to live-demo without World — checking the real system found the
 deeper issue: that condition is wrong-domain, not just hard to demonstrate. The real system has no
-sector dependency anywhere; the actual gate is having a bound demon to field.
+sector dependency anywhere; the actual gate is having a bound creature to field.
 
 **What shipped:**
 - `ExpeditionsLayer.tsx` — thin `PanelShell` wrapper around the unchanged, already-real
   `ExpeditionsPage.tsx`, same pattern as T15's `FusionLayer`.
-- `PactsLayer.tsx` — new, focused, real: built from the same real hooks/helpers `DemonsPage.tsx`
+- `PactsLayer.tsx` — new, focused, real: built from the same real hooks/helpers `CreaturesPage.tsx`
   already uses (`contractView.ts`'s `conditionOf`/`fieldingBlockReason`/`loyaltyFraction`,
   `useBindContract`/`useReleaseContract`/`usePerformRitual`/`useBuyContractSlot`,
   `usePatron`/`useSetPatron`), not a duplicate contract system — a dedicated view over the real
@@ -648,7 +648,7 @@ sector dependency anywhere; the actual gate is having a bound demon to field.
   notice a return without the player reopening the layer) with a diff-against-what-it's-already-
   announced guard, so a return that was already due when the session started badges silently
   (old news) while one that becomes due afterward toasts exactly once.
-- `railState.ts`: Expeditions' unlock replaced with real `hasAnyBoundDemon` (World's `hasHeldASector`
+- `railState.ts`: Expeditions' unlock replaced with real `hasAnyBoundCreature` (World's `hasHeldASector`
   deleted — no other consumer); the rail's badge mechanism (previously hardcoded to Chronicle only)
   generalized to also carry Expeditions' returned-count.
 - `routes.tsx`/`AuditNav.tsx`: `/expeditions` now redirects to `/sanctum?panel=expeditions`
@@ -672,7 +672,7 @@ sector dependency anywhere; the actual gate is having a bound demon to field.
   identical poll), `ExpeditionsLayer.test.tsx` (2), `PactsLayer.test.tsx` (5: empty state, content
   vs overdue rendering with the reason inline, Ritual calls the real mutation with the right args,
   the patron's real aura renders and only a non-patron gets the Make-patron affordance, Esc
-  without unmounting), `railState.test.ts` updated (Expeditions unlocks on `hasAnyBoundDemon`,
+  without unmounting), `railState.test.ts` updated (Expeditions unlocks on `hasAnyBoundCreature`,
   badges on `returnedExpeditionCount`, a still-locked Expeditions never badges),
   `SanctumStage.test.tsx` updated for the new mocks; full suite 562/562 green
 - [x] `npm run test:e2e` — new `expeditions-pacts.spec.ts` (6): Expeditions locked/unlocked/open/Esc,
@@ -680,9 +680,9 @@ sector dependency anywhere; the actual gate is having a bound demon to field.
   locked/unlocked/open/reason-inline/Esc; full e2e suite green except the World failure (confirmed
   pre-existing and unrelated, same as T14/T15 — T16 excluded this phase)
 - [x] Visual: live-verified (Chrome DevTools MCP against a real, isolated scratch backend with
-  `FUSIONRPG_SIM=1`, a real demon minted and bound via SIM-only test endpoints and the real
+  `FUSIONRPG_SIM=1`, a real creature minted and bound via SIM-only test endpoints and the real
   `/api/contracts/bind` call — never the owner's save-data server) — Pacts renders the real bound
-  demon with a real loyalty bar and capacity line; clicking "Make patron" fired the real mutation
+  creature with a real loyalty bar and capacity line; clicking "Make patron" fired the real mutation
   and the panel updated with a real server-computed aura ("+6.1% air power · +3% defense");
   Expeditions renders the real tier list and a real dispatch picker. Confirmed no horizontal
   overflow at the one width the visual-inspection tooling stayed responsive for this pass (~502px)
@@ -700,7 +700,7 @@ sector dependency anywhere; the actual gate is having a bound demon to field.
 ### Task 18: Battle stage — ⛔ EXCLUDED THIS PHASE, 2026-08-24
 
 **Owner decision:** checking the real backend before writing anything — the same discipline that
-caught T14/T15/T17's creature-vs-demon domain mismatches — found something categorically
+caught T14/T15/T17's creature-vs-creature domain mismatches — found something categorically
 different here, not another relabeling. The plate specs a fully interactive turn-based UI: a live
 grid with range/targeting, an initiative track, and an action bar the player clicks through
 turn-by-turn, with GG-15's acknowledge-immediately-authority-later split as a core mechanic.
@@ -1325,7 +1325,7 @@ creature) shipped — confirmed by reading `SanctumStage.tsx` in full: its body 
 - [x] "The map table" summary card renders, honestly `Pending` for sector-held count — this plan's
   own resolved open question 2 already settles that as the correct treatment, not a new decision.
 - [x] "Tonight" panel lists real expedition-return and fusable-pair prompts, sourced from the same
-  `useExpeditionReturnWatcher` / demon-roster data already wired into the rail's own badge.
+  `useExpeditionReturnWatcher` / creature-roster data already wired into the rail's own badge.
 - [x] `FocusCard`'s priority rule is implemented for real against live contract/expedition/roster
   state — not just the two branches that exist today.
 - [x] "Start a run" CTA renders with an honest destination stated inline — T21 (Loadout) is excluded
@@ -1350,7 +1350,7 @@ it exceeds five files.
 nothing pending) — checked in that priority order, plus a new `SanctumHome.tsx` for the always-visible
 composed body (creature strip / map table / Tonight / Start a run) once at least one creature is
 bound. Three of the plate's stated four priority tiers are real: overdue tribute
-(`useContracts`+`conditionOf`, same resolution `PactsLayer.tsx` already does for a demon's name) and a
+(`useContracts`+`conditionOf`, same resolution `PactsLayer.tsx` already does for a creature's name) and a
 returned expedition (`useExpeditionReturnWatcher`, already wired for the rail's own badge). The fourth
 tier — a fusable pair — was deliberately **not** built: star-merge and recipe fusion both have
 server-computed eligibility (`FusionPage.tsx`'s own preview call, cap- and recipe-specific), so "two of
@@ -1604,7 +1604,7 @@ per layer (T30a Expeditions / T30b Almanac / T30c Pacts) if built across multipl
   `lib/bus/expeditions.ts`'s own type. Stated inline via a code comment and left off the active card;
   the real results row already exists on the post-collect `reveal` panel, unchanged. "Empty berth"
   (implies one shared capacity number) doesn't map onto this app's real model either — squad slots are
-  per-tier (`tier.squadSlots`), not roster-wide — so the header subtitle uses "N demons available"
+  per-tier (`tier.squadSlots`), not roster-wide — so the header subtitle uses "N creatures available"
   (`roster.length − lockedIds.size`, real) instead of "N berths free" (would be invented), and no
   dashed "Empty berth" card was added. A live screenshot caught a real bug before landing: the
   subtitle's "away" count used the raw active total instead of subtracting the returned ones (looked
@@ -1621,11 +1621,11 @@ per layer (T30a Expeditions / T30b Almanac / T30c Pacts) if built across multipl
   (side by side, matching the plate's `minmax(0,1fr) minmax(0,1fr)`), and each card gained a
   `PactPortrait` — an initial in a rarity-tinted frame, reusing the existing `--color-rarity-*` tokens
   (no art registry exists yet, per game-gui-map.md assumption 6, so this is the same honest substitute
-  `ActorFrame` already uses for creatures) mapped from the demon's real `profile.rarity`
+  `ActorFrame` already uses for creatures) mapped from the creature's real `profile.rarity`
   (`common|rare|epic|legendary`). Action rows gained `flex-wrap` so the narrower 2-column card doesn't
   overflow. `PactsLayer.test.tsx` +1 (grid + rarity-tint assertions, 8/8 green); e2e (expeditions-pacts
   Pacts suite) unaffected, 65/65 total. Live-screenshotted (scratch Playwright script with mocked
-  contracts/demons data) against plates 03 §C and 03 §D at 1280×720 — no overflow, correct colours,
+  contracts/creatures data) against plates 03 §C and 03 §D at 1280×720 — no overflow, correct colours,
   correct status pills.
 
 ---

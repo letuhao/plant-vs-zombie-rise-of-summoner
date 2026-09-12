@@ -29,8 +29,8 @@ public interface IGateQuantitySource
 /// <summary>
 /// The actor identity an <see cref="IGateQuantitySource"/> resolves a quantity for -- today just the
 /// player-scoped <see cref="GateOwnerKey"/> every counter already credits against (§2's "whose
-/// progress? the player's, not the individual demon's"). A record so task G4 (or a later
-/// <c>UniqueDemon</c>-scoped source, G7) can widen it with additional fields without breaking this
+/// progress? the player's, not the individual creature's"). A record so task G4 (or a later
+/// <c>UniqueCreature</c>-scoped source, G7) can widen it with additional fields without breaking this
 /// contract's callers.
 /// </summary>
 public readonly record struct GateActorContext(GateOwnerKey Owner);

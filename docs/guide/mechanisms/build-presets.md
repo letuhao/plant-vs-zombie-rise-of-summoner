@@ -78,7 +78,7 @@ No — feature not shipped.
 - Next: [Commanders](commanders.md)
 - [Free-build aptitudes](aptitudes.md)
 - [Relics armoury](relics-armoury.md)
-- [Patron demon](patron.md)
+- [Patron creature](patron.md)
 - Pillar: [Relics and builds](../relics-and-builds.md)
 - Fancy skim: [Vision site — Mechanisms](../site/index.html#mechanisms)
 - [Mechanism index](README.md)

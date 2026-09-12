@@ -601,7 +601,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, golden vessel shaped like a blooming sunflower, forged from solidified sunlight and packed with endless, shimmering seeds.",
-      "notes": "themeKey: demon.twinflower"
+      "notes": "themeKey: creature.twinflower"
     },
     {
       "id": "charm.econ-022",
@@ -625,7 +625,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, petal-shaped coin of solid silver, inlaid with a single, brilliant diamond at its center.",
-      "notes": "themeKey: demon.marigold"
+      "notes": "themeKey: creature.marigold"
     },
     {
       "id": "charm.econ-023",
@@ -649,7 +649,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A dense, translucent sphere of amber-colored mycelium that pulses with stored sunlight, swelling in size as it absorbs ambient energy.",
-      "notes": "themeKey: demon.bigsunshroom"
+      "notes": "themeKey: creature.bigsunshroom"
     },
     {
       "id": "charm.econ-024",
@@ -673,7 +673,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A multifaceted diamond container that holds a hidden treasure within its brilliant, shifting facets.",
-      "notes": "themeKey: demon.diamondrandomzombie"
+      "notes": "themeKey: creature.diamondrandomzombie"
     },
     {
       "id": "charm.econ-025",
@@ -697,7 +697,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, calcified lotus bulb that leaks thick, nutrient-rich ichor, turning every fallen foe into a blooming patch of red.",
-      "notes": "themeKey: demon.endoflame"
+      "notes": "themeKey: creature.endoflame"
     },
     {
       "id": "charm.econ-026",
@@ -728,7 +728,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A pulsating, necrotized fungal mass that pulses with a sickly golden light, offering immense vitality at the cost of stability.",
-      "notes": "themeKey: demon.goldhypnodoom",
+      "notes": "themeKey: creature.goldhypnodoom",
       "uniqueCarry": true
     },
     {
@@ -760,7 +760,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, notched pickaxe head forged from Netherite, stamped with a glowing permit of ownership.",
-      "notes": "themeKey: demon.pickaxe_a",
+      "notes": "themeKey: creature.pickaxe_a",
       "uniqueCarry": true
     },
     {
@@ -785,7 +785,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A ceramic vessel overflowing with unnaturally vibrant, oversized petals that seem to pulse with the rhythm of a grand announcement.",
-      "notes": "themeKey: demon.scaredypot"
+      "notes": "themeKey: creature.scaredypot"
     },
     {
       "id": "charm.econ-029",
@@ -809,7 +809,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, butter-slicked corn kernel encased in a thin layer of gold, shaped like a minted coin.",
-      "notes": "themeKey: demon.silvercorn"
+      "notes": "themeKey: creature.silvercorn"
     },
     {
       "id": "charm.econ-030",
@@ -833,7 +833,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A rapid-blooming sunflower core encased in a polished golden frame that pulses with warmth.",
-      "notes": "themeKey: demon.silversunflower"
+      "notes": "themeKey: creature.silversunflower"
     },
     {
       "id": "charm.econ-031",
@@ -864,7 +864,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, ticking sphere of solid gold, suspended by silver wires that pulse with the rhythm of a heartbeat.",
-      "notes": "themeKey: demon.silverumbrella",
+      "notes": "themeKey: creature.silverumbrella",
       "uniqueCarry": true
     },
     {
@@ -896,7 +896,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A silver-cast parcel containing the preserved remains of a high-value corpse, wrapped in heavy metal chains.",
-      "notes": "themeKey: demon.silverzombie",
+      "notes": "themeKey: creature.silverzombie",
       "uniqueCarry": true
     },
     {
@@ -928,7 +928,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A crystalline gift box containing frozen botanical specimens, offered at a steep discount to those who can withstand the chill.",
-      "notes": "themeKey: demon.snowpresent",
+      "notes": "themeKey: creature.snowpresent",
       "uniqueCarry": true
     },
     {
@@ -953,7 +953,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A translucent, glowing bulb that pulses with warmth, containing concentrated solar essence and fertile soil.",
-      "notes": "themeKey: demon.tower_sunshroom"
+      "notes": "themeKey: creature.tower_sunshroom"
     },
     {
       "id": "charm.econ-035",
@@ -977,7 +977,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, petal-shaped medallion cast from solid gold, perpetually shedding fine, shimmering pollen that smells of minted coins.",
-      "notes": "themeKey: demon.twinmarigold"
+      "notes": "themeKey: creature.twinmarigold"
     },
     {
       "id": "charm.econ-036",
@@ -1008,7 +1008,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A network of translucent, pulsing veins encased in a calcified, rot-blackened husk, constantly twitching as if searching for a pulse to drain.",
-      "notes": "themeKey: demon.ultimatekelp",
+      "notes": "themeKey: creature.ultimatekelp",
       "uniqueCarry": true
     },
     {
@@ -1043,7 +1043,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A delicate, ice-carved swan figurine that, when held, commands the relentless march of the undead.",
-      "notes": "themeKey: demon.blacktrainzombie",
+      "notes": "themeKey: creature.blacktrainzombie",
       "uniqueCarry": true
     },
     {
@@ -1071,7 +1071,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A jagged shard of emerald jade, carved into the likeness of a spiked desert dweller, drifts weightlessly through the ether. Its core is a concentrated vortex of swirling jade dust and pressurized wind, contained within a translucent, needle-streaked crystalline shell.",
-      "notes": "themeKey: demon.cactusblover"
+      "notes": "themeKey: creature.cactusblover"
     },
     {
       "id": "charm.econ-039",
@@ -1095,7 +1095,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A dense, interlocking lattice of hardened cactus needles and thick, waxy membranes that forms a protective dome over the unit.",
-      "notes": "themeKey: demon.cactusumbrella"
+      "notes": "themeKey: creature.cactusumbrella"
     },
     {
       "id": "charm.econ-040",
@@ -1119,7 +1119,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A pressurized, crimson-stained fungal bulb that releases thick, fragrant clouds of explosive pollen upon impact.",
-      "notes": "themeKey: demon.cherryfume"
+      "notes": "themeKey: creature.cherryfume"
     },
     {
       "id": "charm.econ-041",
@@ -1143,7 +1143,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, starch-filled bulb encased in a pressurized cherry-blossom shell, ready to burst upon rapid maturation.",
-      "notes": "themeKey: demon.cherrymine"
+      "notes": "themeKey: creature.cherrymine"
     },
     {
       "id": "charm.econ-042",
@@ -1174,7 +1174,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, ink-stained newsprint wrapped around a leaden cylinder, vibrating with the rhythmic thud of a printing press.",
-      "notes": "themeKey: demon.cherrypaperz95",
+      "notes": "themeKey: creature.cherrypaperz95",
       "uniqueCarry": true
     },
     {
@@ -1206,7 +1206,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A polished wooden vessel shaped like a blooming cherry branch, containing concentrated nectar that accelerates the flow of resources.",
-      "notes": "themeKey: demon.cherrypot",
+      "notes": "themeKey: creature.cherrypot",
       "uniqueCarry": true
     },
     {
@@ -1234,7 +1234,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A semi-ripe cherry-colored fungal bulb, suspended by thick, sticky filaments, ready to detonate upon impact.",
-      "notes": "themeKey: demon.cherrypuff"
+      "notes": "themeKey: creature.cherrypuff"
     },
     {
       "id": "charm.econ-045",
@@ -1265,7 +1265,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A dense, explosive sphere of pulpy cherry-flesh encased in a thick, protective pumpkin rind.",
-      "notes": "themeKey: demon.cherrypumpkin",
+      "notes": "themeKey: creature.cherrypumpkin",
       "uniqueCarry": true
     },
     {
@@ -1297,7 +1297,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A swollen, weeping sac of fermented crimson, pulsing with the rhythmic tremor of a hungry, necrotic heart.",
-      "notes": "themeKey: demon.cherryshooter",
+      "notes": "themeKey: creature.cherryshooter",
       "uniqueCarry": true
     },
     {
@@ -1329,7 +1329,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A jagged, crimson-stained shell of fermented pulp and splintered pits, pulsing with a restless, necrotic pressure.",
-      "notes": "themeKey: demon.cherrysplit",
+      "notes": "themeKey: creature.cherrysplit",
       "uniqueCarry": true
     },
     {
@@ -1361,7 +1361,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A jagged, hollowed engine block of calcified cherry-wood and rusted iron, still twitching with the kinetic energy of a dying star.",
-      "notes": "themeKey: demon.cherrysubmarine",
+      "notes": "themeKey: creature.cherrysubmarine",
       "uniqueCarry": true
     },
     {
@@ -1386,7 +1386,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A glowing, resinous knot of cherry-wood and eternal flame, pulsing with the rhythm of a growing forest.",
-      "notes": "themeKey: demon.cherrytorch"
+      "notes": "themeKey: creature.cherrytorch"
     },
     {
       "id": "charm.econ-050",
@@ -1410,7 +1410,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A translucent, bulbous container shaped like a wide, toothy maw, filled with a viscous, bubbling digestive fluid that provides sustenance to those nearby.",
-      "notes": "themeKey: demon.chomperpumpkin"
+      "notes": "themeKey: creature.chomperpumpkin"
     },
     {
       "id": "charm.econ-051",
@@ -1441,7 +1441,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A pressed, bruised petal encased in amber-like resin, pulsing with the concentrated vitality of a dying field.",
-      "notes": "themeKey: demon.chrysantheautumn",
+      "notes": "themeKey: creature.chrysantheautumn",
       "uniqueCarry": true
     },
     {
@@ -1473,7 +1473,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, pressurized canister made of hardened corn husks and brass, designed to launch golden kernels with explosive force.",
-      "notes": "themeKey: demon.cobcannon",
+      "notes": "themeKey: creature.cobcannon",
       "uniqueCarry": true
     },
     {
@@ -1505,7 +1505,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A blunt, rubbery cylinder that refuses to acknowledge its own failure.",
-      "notes": "themeKey: demon.conezombieduck",
+      "notes": "themeKey: creature.conezombieduck",
       "uniqueCarry": true
     },
     {
@@ -1530,7 +1530,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A cluster of floating, butter-slicked kernels that drift through the air to provide sustenance.",
-      "notes": "themeKey: demon.cornblover"
+      "notes": "themeKey: creature.cornblover"
     },
     {
       "id": "charm.econ-055",
@@ -1554,7 +1554,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, grease-slicked pouch filled with bouncing kernels that spill out with rhythmic force.",
-      "notes": "themeKey: demon.corncabbage"
+      "notes": "themeKey: creature.corncabbage"
     },
     {
       "id": "charm.econ-056",
@@ -1578,7 +1578,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A collection of spent, polished brass casings that rattle with the rhythm of a firing pin.",
-      "notes": "themeKey: demon.cornpot"
+      "notes": "themeKey: creature.cornpot"
     },
     {
       "id": "charm.econ-057",
@@ -1609,7 +1609,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, fungal-encrusted base of decayed corn-stalks and zombie-flesh, designed to launch spores in exchange for stability.",
-      "notes": "themeKey: demon.cornpuff",
+      "notes": "themeKey: creature.cornpuff",
       "uniqueCarry": true
     },
     {
@@ -1644,7 +1644,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "由僵尸组织而成的伞叶，覆有厚重的腐肉层，能将冲击击退并定格在原地。",
-      "notes": "themeKey: demon.cornumbrella",
+      "notes": "themeKey: creature.cornumbrella",
       "uniqueCarry": true
     },
     {
@@ -1676,7 +1676,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A dense, pulsating mass of fermented starch and necrotic matter, held together by the sheer force of concentrated decay.",
-      "notes": "themeKey: demon.deathmine",
+      "notes": "themeKey: creature.deathmine",
       "uniqueCarry": true
     },
     {
@@ -1708,7 +1708,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A jagged, unstable cluster of mimic-diamonds that pulses with the rhythm of a sudden windfall, though its very presence invites a catastrophic collapse.",
-      "notes": "themeKey: demon.diamondimitater",
+      "notes": "themeKey: creature.diamondimitater",
       "uniqueCarry": true
     },
     {
@@ -1740,7 +1740,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A dense, faceted kernel of earth-grown diamond, hard as a mountain and rich as a treasury.",
-      "notes": "themeKey: demon.diamondpotatonut",
+      "notes": "themeKey: creature.diamondpotatonut",
       "uniqueCarry": true
     },
     {
@@ -1772,7 +1772,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A geometric prism of light, shaped like a world within a world, crafted from the essence of a zombie's radiant spirit.",
-      "notes": "themeKey: demon.dolldiamond",
+      "notes": "themeKey: creature.dolldiamond",
       "uniqueCarry": true
     },
     {
@@ -1797,7 +1797,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A polished, white-pearl shell shaped like a leaping dolphin, spinning rapidly to release a rhythmic pulse of wealth.",
-      "notes": "themeKey: demon.dolphinpeazombie"
+      "notes": "themeKey: creature.dolphinpeazombie"
     },
     {
       "id": "charm.econ-064",
@@ -1828,7 +1828,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, water-logged ledger bound in preserved skin, containing the unpaid wages of those who serve the deep.",
-      "notes": "themeKey: demon.dolphinrider",
+      "notes": "themeKey: creature.dolphinrider",
       "uniqueCarry": true
     },
     {
@@ -1860,7 +1860,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A scorched, three-lobed vessel of calcified ash and drifting down, releasing a cloud of choking soot upon every strike.",
-      "notes": "themeKey: demon.doomblover",
+      "notes": "themeKey: creature.doomblover",
       "uniqueCarry": true
     },
     {
@@ -1892,7 +1892,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, hand-cranked piston made of calcified fungal matter that forces a continuous, devastating stream of spores across the entire battlefield.",
-      "notes": "themeKey: demon.doomfume",
+      "notes": "themeKey: creature.doomfume",
       "uniqueCarry": true
     },
     {
@@ -1924,7 +1924,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A swollen, pungent bulb of fermented remains that ruptures with a violent, stinking pop upon impact.",
-      "notes": "themeKey: demon.doomgarlic",
+      "notes": "themeKey: creature.doomgarlic",
       "uniqueCarry": true
     },
     {
@@ -1956,7 +1956,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, four-chambered fungal canister, pulsating with the pressure of a thousand spent shells.",
-      "notes": "themeKey: demon.doomgatling",
+      "notes": "themeKey: creature.doomgatling",
       "uniqueCarry": true
     },
     {
@@ -1991,7 +1991,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A dormant, swollen bulb of concentrated spice that pulses with internal heat, waiting for the moment of total combustion.",
-      "notes": "themeKey: demon.doomjalapeno",
+      "notes": "themeKey: creature.doomjalapeno",
       "uniqueCarry": true
     },
     {
@@ -2023,7 +2023,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A mass of dark, suffocating aquatic flora that constricts and drains the life from everything it touches.",
-      "notes": "themeKey: demon.doomkelp",
+      "notes": "themeKey: creature.doomkelp",
       "uniqueCarry": true
     },
     {
@@ -2055,7 +2055,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A dense, lead-lined shell containing a pulsating, radioactive kernel that absorbs kinetic impact to fuel its internal reaction.",
-      "notes": "themeKey: demon.doomnut",
+      "notes": "themeKey: creature.doomnut",
       "uniqueCarry": true
     },
     {
@@ -2080,7 +2080,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A pulsating, heavy vessel of organic matter and volatile energy, shaped like a hollowed pumpkin and filled with a glowing, pressurized sludge.",
-      "notes": "themeKey: demon.doompumpkin"
+      "notes": "themeKey: creature.doompumpkin"
     },
     {
       "id": "charm.econ-073",
@@ -2111,7 +2111,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A pulsating, bulbous fungal mass that rhythmically expands and contracts, releasing microscopic, explosive spores that sense the vibrations of the dying.",
-      "notes": "themeKey: demon.doomseed",
+      "notes": "themeKey: creature.doomseed",
       "uniqueCarry": true
     },
     {
@@ -2143,7 +2143,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "化作流星坠向地面，在毁灭的撞击中砸出财富的裂痕。",
-      "notes": "themeKey: demon.doomstar",
+      "notes": "themeKey: creature.doomstar",
       "uniqueCarry": true
     },
     {
@@ -2168,7 +2168,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A cluster of tiny, pressurized green spheres that pulse with kinetic energy, ready to burst.",
-      "notes": "themeKey: demon.doublepuff"
+      "notes": "themeKey: creature.doublepuff"
     },
     {
       "id": "charm.econ-078",
@@ -2192,7 +2192,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A pair of twin-barreled conduits of polished obsidian and tempered brass, pulsing with a rhythmic, mechanical thrum of pressurized shadow.",
-      "notes": "themeKey: demon.doubleshooter"
+      "notes": "themeKey: creature.doubleshooter"
     },
     {
       "id": "charm.econ-079",
@@ -2223,7 +2223,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, continuous stream of reinforced plating that surges forward like a flood of iron.",
-      "notes": "themeKey: demon.driver_a",
+      "notes": "themeKey: creature.driver_a",
       "uniqueCarry": true
     },
     {
@@ -2255,7 +2255,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A massive, rotating cogwheel forged from rusted battleship plating and pulsating with necrotic energy, driving the relentless advance of the undead legion.",
-      "notes": "themeKey: demon.driver_c",
+      "notes": "themeKey: creature.driver_c",
       "uniqueCarry": true
     },
     {
@@ -2287,7 +2287,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, rusted iron ram, shaped like a jagged three-pronged spear, designed to tip the balance of any formation.",
-      "notes": "themeKey: demon.drown_c",
+      "notes": "themeKey: creature.drown_c",
       "uniqueCarry": true
     },
     {
@@ -2312,7 +2312,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, three-pronged iron rammer that channels the momentum of a driver's charge into a singular, crushing impact.",
-      "notes": "themeKey: demon.drownpult_b"
+      "notes": "themeKey: creature.drownpult_b"
     },
     {
       "id": "charm.econ-083",
@@ -2343,7 +2343,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, multi-pronged relic forged from the reinforced plating of a snow-beast's harness, used by elite drivers to stabilize their charge.",
-      "notes": "themeKey: demon.drownpult_c",
+      "notes": "themeKey: creature.drownpult_c",
       "uniqueCarry": true
     },
     {
@@ -2378,7 +2378,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, three-pronged iron gavel that pours out endless supplies of munitions to satisfy the court's hunger.",
-      "notes": "themeKey: demon.drownpultzombie",
+      "notes": "themeKey: creature.drownpultzombie",
       "uniqueCarry": true
     },
     {
@@ -2410,7 +2410,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A pulsating, translucent onion bulb filled with crackling blue currents that draws energy from the fallen to fuel the next strike.",
-      "notes": "themeKey: demon.electriconion",
+      "notes": "themeKey: creature.electriconion",
       "uniqueCarry": true
     },
     {
@@ -2442,7 +2442,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, leather-bound tome encased in a massive, ivory-carved elephantine frame, used by researchers to catalog the movements of gargantuan entities.",
-      "notes": "themeKey: demon.elephantzombie",
+      "notes": "themeKey: creature.elephantzombie",
       "uniqueCarry": true
     },
     {
@@ -2474,7 +2474,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, leather-bound tome bound in desiccated skin, perpetually trembling with the fury of a scholar denied his quietude.",
-      "notes": "themeKey: demon.elitepaperzombie",
+      "notes": "themeKey: creature.elitepaperzombie",
       "uniqueCarry": true
     },
     {
@@ -2506,7 +2506,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A swirling, condensed sphere of molten nectar and hardened pollen, pulsing with the rhythm of a thousand blooming strikes.",
-      "notes": "themeKey: demon.endoflamegirl",
+      "notes": "themeKey: creature.endoflamegirl",
       "uniqueCarry": true
     },
     {
@@ -2538,7 +2538,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A shifting arrangement of obsidian-rimmed cards that fold into a hollowed, glowing pumpkin-shaped vessel, allowing any actor to draw from a shared well of essence.",
-      "notes": "themeKey: demon.endpumpiner",
+      "notes": "themeKey: creature.endpumpiner",
       "uniqueCarry": true
     },
     {
@@ -2570,7 +2570,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, shifting mass of unformed loam that absorbs the weight of the world to fuel its own expansion.",
-      "notes": "themeKey: demon.enumvalue261",
+      "notes": "themeKey: creature.enumvalue261",
       "uniqueCarry": true
     },
     {
@@ -2595,7 +2595,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, unformed mass of primordial loam that pulses with the crushing weight of the deep earth.",
-      "notes": "themeKey: demon.enumvalue263"
+      "notes": "themeKey: creature.enumvalue263"
     },
     {
       "id": "charm.econ-095",
@@ -2619,7 +2619,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A translucent, shimmering silhouette of a decayed wanderer, trailing ethereal ribbons of lavender smoke that pulse like a slow, rhythmic heartbeat.",
-      "notes": "themeKey: demon.enumvalue268"
+      "notes": "themeKey: creature.enumvalue268"
     },
     {
       "id": "charm.econ-096",
@@ -2650,7 +2650,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, jagged slab of petrified marrow and iron-veined stone, pulsing with the violent urge to leap through any barrier.",
-      "notes": "themeKey: demon.eternalzombie_b",
+      "notes": "themeKey: creature.eternalzombie_b",
       "uniqueCarry": true
     },
     {
@@ -2682,7 +2682,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, rhythmic vibration of unformed loam that anchors the soul to the planet's foundation.",
-      "notes": "themeKey: demon.extract_single",
+      "notes": "themeKey: creature.extract_single",
       "uniqueCarry": true
     },
     {
@@ -2710,7 +2710,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, bulbous seed pod encased in scorched bark, designed to burst upon impact.",
-      "notes": "themeKey: demon.firecannon"
+      "notes": "themeKey: creature.firecannon"
     },
     {
       "id": "charm.econ-099",
@@ -2744,7 +2744,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A tightly wound bundle of crimson silk and sulfurous cord, crackling with the restless energy of a storm held in check.",
-      "notes": "themeKey: demon.firecracker",
+      "notes": "themeKey: creature.firecracker",
       "uniqueCarry": true
     },
     {
@@ -2772,7 +2772,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A pressurized, glowing fungal bulb that constantly emits a thick, heated haze.",
-      "notes": "themeKey: demon.firegloom"
+      "notes": "themeKey: creature.firegloom"
     },
     {
       "id": "charm.econ-101",
@@ -2799,7 +2799,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A jagged, starch-filled core encased in a translucent, crackling shell that reflects the violent energy within.",
-      "notes": "themeKey: demon.firemine"
+      "notes": "themeKey: creature.firemine"
     },
     {
       "id": "charm.econ-102",
@@ -2834,7 +2834,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A molten, cracked glass monocle that radiates intense heat, causing every shot to splinter into a spray of burning embers.",
-      "notes": "themeKey: demon.firesniper",
+      "notes": "themeKey: creature.firesniper",
       "uniqueCarry": true
     },
     {
@@ -2866,7 +2866,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A dense, glowing mass of concentrated vegetable matter and solar heat, where individual sparks merge into a singular, heavy essence.",
-      "notes": "themeKey: demon.firesquash",
+      "notes": "themeKey: creature.firesquash",
       "uniqueCarry": true
     },
     {
@@ -2898,7 +2898,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A swirling, translucent orb containing the restless echoes of the fallen, drifting with an indifferent grace.",
-      "notes": "themeKey: demon.footballboss",
+      "notes": "themeKey: creature.footballboss",
       "uniqueCarry": true
     },
     {
@@ -2926,7 +2926,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A frozen, translucent sphere that emits rhythmic frost-shattered shockwaves.",
-      "notes": "themeKey: demon.frozenpear"
+      "notes": "themeKey: creature.frozenpear"
     },
     {
       "id": "charm.econ-106",
@@ -2957,7 +2957,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A massive, slab-like fragment of calcified bone and graveyard soil, heavy enough to crush the very ground it rests upon, indifferent to the carnage it leaves in its wake.",
-      "notes": "themeKey: demon.gargantuar",
+      "notes": "themeKey: creature.gargantuar",
       "uniqueCarry": true
     },
     {
@@ -2989,7 +2989,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A cluster of three decaying leaves, pulsing with the rhythm of a restless tomb.",
-      "notes": "themeKey: demon.garlicblover",
+      "notes": "themeKey: creature.garlicblover",
       "uniqueCarry": true
     },
     {
@@ -3014,7 +3014,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A hollowed, bulbous fungal vessel that continuously emits a thick, garlic-scented vapor, obscuring the air with pungent spores.",
-      "notes": "themeKey: demon.garlicfume"
+      "notes": "themeKey: creature.garlicfume"
     },
     {
       "id": "charm.econ-109",
@@ -3038,7 +3038,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A dense, layered nut encased in a sharp, aromatic skin that provides a sudden burst of flavor upon the first bite.",
-      "notes": "themeKey: demon.garlicnut"
+      "notes": "themeKey: creature.garlicnut"
     },
     {
       "id": "charm.econ-110",
@@ -3062,7 +3062,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A cluster of dried, garlic-scented seed pods that rhythmically snap open, releasing pressurized pea-like projectiles.",
-      "notes": "themeKey: demon.garlicsplit"
+      "notes": "themeKey: creature.garlicsplit"
     },
     {
       "id": "charm.econ-111",
@@ -3096,7 +3096,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A rigid, fibrous parasol woven from dried garlic skins and necrotic fibers, designed to push back the encroaching dead.",
-      "notes": "themeKey: demon.garlicumbrella",
+      "notes": "themeKey: creature.garlicumbrella",
       "uniqueCarry": true
     },
     {
@@ -3121,7 +3121,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A polished brass cylinder filled with swelling, green-tinted pellets that pulse with kinetic potential.",
-      "notes": "themeKey: demon.gatlingpea"
+      "notes": "themeKey: creature.gatlingpea"
     },
     {
       "id": "charm.econ-113",
@@ -3152,7 +3152,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A porous, calcified fungal cap that continuously exhales a thick, obscuring haze to mask the growth of its kin.",
-      "notes": "themeKey: demon.gloomshroom",
+      "notes": "themeKey: creature.gloomshroom",
       "uniqueCarry": true
     },
     {
@@ -3177,7 +3177,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A specialized, pressurized vessel crafted from tightly wound, necrotic cabbage leaves and zombie sinew, designed to launch organic projectiles with sudden force.",
-      "notes": "themeKey: demon.goldcabbage"
+      "notes": "themeKey: creature.goldcabbage"
     },
     {
       "id": "charm.econ-115",
@@ -3208,7 +3208,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, golden bulb of garlic, etched with jagged lines like a row of teeth, smelling of ancient rot and wealth.",
-      "notes": "themeKey: demon.goldgarlic",
+      "notes": "themeKey: creature.goldgarlic",
       "uniqueCarry": true
     },
     {
@@ -3233,7 +3233,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, rectangular vessel of gilded metal, filled with compressed layers of shimmering cards that can be recycled into raw essence.",
-      "notes": "themeKey: demon.goldscarypot"
+      "notes": "themeKey: creature.goldscarypot"
     },
     {
       "id": "charm.econ-117",
@@ -3257,7 +3257,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, metallic umbrella handle carved from fossilized bone, used to hurl small, restless spirits at the enemy.",
-      "notes": "themeKey: demon.goldumbrella"
+      "notes": "themeKey: creature.goldumbrella"
     },
     {
       "id": "charm.econ-118",
@@ -3281,7 +3281,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A high-density, holographic shell of volcanic glass that flickers with light.",
-      "notes": "themeKey: demon.holographicplant"
+      "notes": "themeKey: creature.holographicplant"
     },
     {
       "id": "charm.econ-119",
@@ -3315,7 +3315,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A swirling, unstable mass of decaying clover leaves that pulls enemies into its vortex.",
-      "notes": "themeKey: demon.hurricaneblover",
+      "notes": "themeKey: creature.hurricaneblover",
       "uniqueCarry": true
     },
     {
@@ -3340,7 +3340,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A translucent, violet-capped bulb that pulses with a rhythmic, intoxicating scent.",
-      "notes": "themeKey: demon.hypnogarlic"
+      "notes": "themeKey: creature.hypnogarlic"
     },
     {
       "id": "charm.econ-121",
@@ -3371,7 +3371,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A swirling vortex of violet smoke and jagged obsidian shards that strikes with the sudden, betraying sting of a broken promise.",
-      "notes": "themeKey: demon.hypnopeashooter",
+      "notes": "themeKey: creature.hypnopeashooter",
       "uniqueCarry": true
     },
     {
@@ -3399,7 +3399,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A frozen, crystalline seed pod that pulses with a rhythmic, frost-laden tremor, ready to shatter into a thousand piercing shards.",
-      "notes": "themeKey: demon.icebean"
+      "notes": "themeKey: creature.icebean"
     },
     {
       "id": "charm.econ-123",
@@ -3426,7 +3426,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, bulbous fungal pod encased in frost, designed to launch frozen spores with immense force.",
-      "notes": "themeKey: demon.icecannon"
+      "notes": "themeKey: creature.icecannon"
     },
     {
       "id": "charm.econ-124",
@@ -3450,7 +3450,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A frozen, translucent bloom that pulses with a rhythmic, restorative chill.",
-      "notes": "themeKey: demon.icelotus"
+      "notes": "themeKey: creature.icelotus"
     },
     {
       "id": "charm.econ-125",
@@ -3481,7 +3481,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A complex assembly of interlocking brass gears and copper wiring, pulsing with the rhythmic efficiency of a masterwork machine.",
-      "notes": "themeKey: demon.ifvpumpkin",
+      "notes": "themeKey: creature.ifvpumpkin",
       "uniqueCarry": true
     },
     {
@@ -3506,7 +3506,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A dense, olive-shaped canister forged from hardened fungal matter, designed to rupture and release pressurized spores.",
-      "notes": "themeKey: demon.ironfume"
+      "notes": "themeKey: creature.ironfume"
     },
     {
       "id": "charm.econ-127",
@@ -3530,7 +3530,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A crude, fraying knot of coarse twine and mismatched fabric scraps, smelling faintly of damp earth and old stuffing.",
-      "notes": "themeKey: demon.jackbox_a"
+      "notes": "themeKey: creature.jackbox_a"
     },
     {
       "id": "charm.econ-128",
@@ -3564,7 +3564,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A plush, star-shaped fruit made of colorful felt and glitter, which bursts into a shower of confetti upon impact.",
-      "notes": "themeKey: demon.jackboxstar",
+      "notes": "themeKey: creature.jackboxstar",
       "uniqueCarry": true
     },
     {
@@ -3596,7 +3596,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A polished rod of solid gold that emits a blinding, rhythmic flash whenever the conductor strikes a beat.",
-      "notes": "themeKey: demon.jackson_c",
+      "notes": "themeKey: creature.jackson_c",
       "uniqueCarry": true
     },
     {
@@ -3621,7 +3621,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A pair of polished, twin-barreled wooden canisters, shaped like rounded peas, designed to launch rapid-fire bursts.",
-      "notes": "themeKey: demon.jaladoubleshooter"
+      "notes": "themeKey: creature.jaladoubleshooter"
     },
     {
       "id": "charm.econ-131",
@@ -3653,7 +3653,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A volatile, pressurized seed casing that launches itself with impatient fury, reclaiming its original position through explosive momentum.",
-      "notes": "themeKey: demon.jalasquashzombie",
+      "notes": "themeKey: creature.jalasquashzombie",
       "uniqueCarry": true
     },
     {
@@ -3685,7 +3685,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A preserved mass of water-logged peat and decayed vegetation, shaped into a heavy, unmoving knot that anchors the spirit to the earth.",
-      "notes": "themeKey: demon.kelppuff",
+      "notes": "themeKey: creature.kelppuff",
       "uniqueCarry": true
     },
     {
@@ -3717,7 +3717,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A pulsating, bio-synthetic mass of sediment and organic tissue that shifts its density to mimic the surrounding terrain.",
-      "notes": "themeKey: demon.landsubmarine",
+      "notes": "themeKey: creature.landsubmarine",
       "uniqueCarry": true
     },
     {
@@ -3742,7 +3742,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, ceramic pot that radiates a soft, constant glow, acting as a vessel for life-giving light.",
-      "notes": "themeKey: demon.lanternpot"
+      "notes": "themeKey: creature.lanternpot"
     },
     {
       "id": "charm.econ-135",
@@ -3773,7 +3773,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A polished obsidian cylinder that hums with a low-frequency resonance, capturing the final vibrations of a target before they fade into silence.",
-      "notes": "themeKey: demon.legionsniperzombie",
+      "notes": "themeKey: creature.legionsniperzombie",
       "uniqueCarry": true
     },
     {
@@ -3805,7 +3805,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A dense formation of hardened winter shoots, interlocking like a living barricade to secure the perimeter.",
-      "notes": "themeKey: demon.lotusbamboo",
+      "notes": "themeKey: creature.lotusbamboo",
       "uniqueCarry": true
     },
     {
@@ -3840,7 +3840,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A crystalline vessel containing frozen legumes that refracts kinetic energy into wealth.",
-      "notes": "themeKey: demon.magicsnowpea2",
+      "notes": "themeKey: creature.magicsnowpea2",
       "uniqueCarry": true
     },
     {
@@ -3865,7 +3865,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A dense, magnetic fungal mass that constantly emits a thick, metallic smog, pulling nearby debris into its core.",
-      "notes": "themeKey: demon.magnetfume"
+      "notes": "themeKey: creature.magnetfume"
     },
     {
       "id": "charm.econ-139",
@@ -3897,7 +3897,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A dense, star-shaped mass of magnetized starfruit pulp that pulls nearby resources toward the commander's center.",
-      "notes": "themeKey: demon.magnetstar",
+      "notes": "themeKey: creature.magnetstar",
       "uniqueCarry": true
     },
     {
@@ -3925,7 +3925,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A swirling mass of fine sand and dry grass that dances unpredictably, making it difficult for any eyes to track its true path.",
-      "notes": "themeKey: demon.minisandmonster"
+      "notes": "themeKey: creature.minisandmonster"
     },
     {
       "id": "charm.econ-141",
@@ -3949,7 +3949,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A protective dome crafted from hardened, overlapping nut-shells and reinforced with thick, waxy leaves.",
-      "notes": "themeKey: demon.nutumbrella"
+      "notes": "themeKey: creature.nutumbrella"
     },
     {
       "id": "charm.econ-142",
@@ -3973,7 +3973,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A rhythmic transformation of dark stalks that bloom into wealth.",
-      "notes": "themeKey: demon.obsidianwheat"
+      "notes": "themeKey: creature.obsidianwheat"
     },
     {
       "id": "charm.econ-143",
@@ -3997,7 +3997,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, earthen tuber that erupts from the soil to launch explosive pea-shrapnel.",
-      "notes": "themeKey: demon.peamine"
+      "notes": "themeKey: creature.peamine"
     },
     {
       "id": "charm.econ-144",
@@ -4028,7 +4028,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A geometric monolith of shifting sand and void-glass, pulsing with the rhythm of a gateway that leads only to what was lost.",
-      "notes": "themeKey: demon.pickaxezombie",
+      "notes": "themeKey: creature.pickaxezombie",
       "uniqueCarry": true
     },
     {
@@ -4060,7 +4060,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A swirling, translucent orb of displaced air and fractured time, pulsing with the rhythm of a dying dimension.",
-      "notes": "themeKey: demon.portalballoonzombie",
+      "notes": "themeKey: creature.portalballoonzombie",
       "uniqueCarry": true
     },
     {
@@ -4096,7 +4096,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A shifting, translucent vessel containing a single, hyper-accelerated seed that exists in multiple moments at once.",
-      "notes": "themeKey: demon.portalpea",
+      "notes": "themeKey: creature.portalpea",
       "uniqueCarry": true
     },
     {
@@ -4121,7 +4121,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A common, easily stepped-on mass of vegetable matter that feels quite ordinary.",
-      "notes": "themeKey: demon.potatosquash"
+      "notes": "themeKey: creature.potatosquash"
     },
     {
       "id": "charm.econ-149",
@@ -4152,7 +4152,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A shimmering, translucent seed that seems to exist in two places at once, appearing to drill through the fabric of time to find its old friend.",
-      "notes": "themeKey: demon.protalzombie",
+      "notes": "themeKey: creature.protalzombie",
       "uniqueCarry": true
     },
     {
@@ -4185,7 +4185,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A rigid, polished conductor's baton crafted from heavy, dark ebony, used to enforce the rhythm of the dance academy's most disciplined movements.",
-      "notes": "themeKey: demon.quickjacksonzombie",
+      "notes": "themeKey: creature.quickjacksonzombie",
       "uniqueCarry": true
     },
     {
@@ -4210,7 +4210,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A pressurized, bulbous vessel of thick, greyish fungal matter that emits a constant, low-pressure mist of fine spores.",
-      "notes": "themeKey: demon.scaredfume"
+      "notes": "themeKey: creature.scaredfume"
     },
     {
       "id": "charm.econ-152",
@@ -4241,7 +4241,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, pulsating mass of wet iron filings and digestive enzymes, held together by a constant, rhythmic magnetic pull.",
-      "notes": "themeKey: demon.seamagnet",
+      "notes": "themeKey: creature.seamagnet",
       "uniqueCarry": true
     },
     {
@@ -4273,7 +4273,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A spinning, serrated disc of petrified leaf-matter, pulsing with the restless energy of a restless grave.",
-      "notes": "themeKey: demon.shulkflower",
+      "notes": "themeKey: creature.shulkflower",
       "uniqueCarry": true
     },
     {
@@ -4305,7 +4305,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, silver-plated clove that refuses to bruise, even under the heaviest bite.",
-      "notes": "themeKey: demon.silvergarlic",
+      "notes": "themeKey: creature.silvergarlic",
       "uniqueCarry": true
     },
     {
@@ -4330,7 +4330,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A tiny, bulbous fungal cap that continuously releases a fine mist of concentrated spores.",
-      "notes": "themeKey: demon.smallpuff"
+      "notes": "themeKey: creature.smallpuff"
     },
     {
       "id": "charm.econ-156",
@@ -4361,7 +4361,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A frozen, translucent sphere containing the inner essence of a thousand zombies, ensuring that even the smallest fragment contributes to the whole.",
-      "notes": "themeKey: demon.snowbucketzombie",
+      "notes": "themeKey: creature.snowbucketzombie",
       "uniqueCarry": true
     },
     {
@@ -4389,7 +4389,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A small, frosted cylinder of compressed ice, shaped like a miniature magazine, containing four jagged icicle shards.",
-      "notes": "themeKey: demon.snowgatlingpuff"
+      "notes": "themeKey: creature.snowgatlingpuff"
     },
     {
       "id": "charm.econ-158",
@@ -4413,7 +4413,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A dense, pulsating mound of fungal matter that continuously sheds spores to saturate the battlefield.",
-      "notes": "themeKey: demon.spreadfume"
+      "notes": "themeKey: creature.spreadfume"
     },
     {
       "id": "charm.econ-159",
@@ -4447,7 +4447,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A jagged splinter of steel-bark, still vibrating from the force of a thousand piercing shots.",
-      "notes": "themeKey: demon.spruceshulk",
+      "notes": "themeKey: creature.spruceshulk",
       "uniqueCarry": true
     },
     {
@@ -4472,7 +4472,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A hard, hollowed-out gourd shell filled with dense, nutrient-rich nut-meat and ancient ink.",
-      "notes": "themeKey: demon.squashnut"
+      "notes": "themeKey: creature.squashnut"
     },
     {
       "id": "charm.econ-161",
@@ -4496,7 +4496,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A jagged, five-pointed shard of celestial brass, forged from the core of a dying comet, pulses with a rhythmic, directional hum.",
-      "notes": "themeKey: demon.starfruit"
+      "notes": "themeKey: creature.starfruit"
     },
     {
       "id": "charm.econ-162",
@@ -4527,7 +4527,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "由坠落星辰的残骸锻造而成，其核心不断引动着天际的流星轨迹，使每一次合击都如同星辰坠落般精准且沉重。",
-      "notes": "themeKey: demon.starsniper",
+      "notes": "themeKey: creature.starsniper",
       "uniqueCarry": true
     },
     {
@@ -4559,7 +4559,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A jagged, unpolished shard of scrap metal and discarded circuitry, salvaged with total disregard for safety or structural integrity.",
-      "notes": "themeKey: demon.submarine_b2",
+      "notes": "themeKey: creature.submarine_b2",
       "uniqueCarry": true
     },
     {
@@ -4591,7 +4591,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A translucent, cherry-shaped orb containing a swirling, explosive solar core that pulses with the rhythm of a restless grave.",
-      "notes": "themeKey: demon.sunbomb",
+      "notes": "themeKey: creature.sunbomb",
       "uniqueCarry": true
     },
     {
@@ -4623,7 +4623,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A translucent, four-chambered glass canister containing concentrated sunlight and fungal spores, designed to discharge in rapid bursts.",
-      "notes": "themeKey: demon.sungatlingpuff",
+      "notes": "themeKey: creature.sungatlingpuff",
       "uniqueCarry": true
     },
     {
@@ -4648,7 +4648,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A translucent, amber-hued pumpkin shell that captures sunlight to fuel production.",
-      "notes": "themeKey: demon.sunpumpkin"
+      "notes": "themeKey: creature.sunpumpkin"
     },
     {
       "id": "charm.econ-167",
@@ -4679,7 +4679,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "由半熟的樱桃果肉与黄铜枪管熔铸而成，每一次震动都散发着甜腻的火药味。",
-      "notes": "themeKey: demon.supercherrygatling",
+      "notes": "themeKey: creature.supercherrygatling",
       "uniqueCarry": true
     },
     {
@@ -4704,7 +4704,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "由无数颗微小的豌豆弹丸组成的金属圆筒，在震动中不断喷射出密集的弹幕。",
-      "notes": "themeKey: demon.supergatling"
+      "notes": "themeKey: creature.supergatling"
     },
     {
       "id": "charm.econ-169",
@@ -4735,7 +4735,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A carved, grinning skull mounted on a wooden pole, used to broadcast a terrifying cheer that bolsters the undead ranks.",
-      "notes": "themeKey: demon.superjackboxzombie",
+      "notes": "themeKey: creature.superjackboxzombie",
       "uniqueCarry": true
     },
     {
@@ -4760,7 +4760,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "由无数分裂的果实核心组成，在投掷时会因概率波动而产生连射的震荡。",
-      "notes": "themeKey: demon.supermelon"
+      "notes": "themeKey: creature.supermelon"
     },
     {
       "id": "charm.econ-171",
@@ -4784,7 +4784,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, spring-loaded claw forged from compressed permafrost and beast-king sinew, designed to anchor the decisive strike.",
-      "notes": "themeKey: demon.supersnowmonsterzombie"
+      "notes": "themeKey: creature.supersnowmonsterzombie"
     },
     {
       "id": "charm.econ-172",
@@ -4808,7 +4808,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, brass-barreled mechanism that cycles through three distinct grooves, ejecting dense, green-tinted pellets in rapid, rhythmic bursts.",
-      "notes": "themeKey: demon.superthreegatling"
+      "notes": "themeKey: creature.superthreegatling"
     },
     {
       "id": "charm.econ-173",
@@ -4832,7 +4832,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A wooden staff carved from a peach branch, bristling with sharpened jade needles that pulse with directional energy.",
-      "notes": "themeKey: demon.swordstar"
+      "notes": "themeKey: creature.swordstar"
     },
     {
       "id": "charm.econ-175",
@@ -4856,7 +4856,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A cluster of three rigid, emerald-veined stalks that pulse with kinetic energy, ready to discharge concentrated organic slugs.",
-      "notes": "themeKey: demon.threekelp"
+      "notes": "themeKey: creature.threekelp"
     },
     {
       "id": "charm.econ-176",
@@ -4880,7 +4880,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, reinforced clay pedestal that stabilizes the shooter's stance and amplifies the impact of every shot.",
-      "notes": "themeKey: demon.threepot"
+      "notes": "themeKey: creature.threepot"
     },
     {
       "id": "charm.econ-177",
@@ -4904,7 +4904,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A hollowed pumpkin rind fused to a charred tree stump, containing a flickering, eternal flame.",
-      "notes": "themeKey: demon.torchpumpkin"
+      "notes": "themeKey: creature.torchpumpkin"
     },
     {
       "id": "charm.econ-178",
@@ -4935,7 +4935,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, jagged fragment of a fallen star that smashes into the ground with devastating force.",
-      "notes": "themeKey: demon.tower_doomstar",
+      "notes": "themeKey: creature.tower_doomstar",
       "uniqueCarry": true
     },
     {
@@ -4960,7 +4960,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A translucent, amber-hued sphere containing a concentrated spark of midday light, pulsing with the rhythm of a growing stem.",
-      "notes": "themeKey: demon.tower_peasunflower"
+      "notes": "themeKey: creature.tower_peasunflower"
     },
     {
       "id": "charm.econ-180",
@@ -4984,7 +4984,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A trio of earthen ridges that erupt from the soil to launch heavy starch-shells.",
-      "notes": "themeKey: demon.tower_threemine"
+      "notes": "themeKey: creature.tower_threemine"
     },
     {
       "id": "charm.econ-181",
@@ -5011,7 +5011,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A dense, dark mass of obsidian-like plating that pulses with cold, violet flames, designed to facilitate a relentless barrage of fire.",
-      "notes": "themeKey: demon.ultimatebiggatling"
+      "notes": "themeKey: creature.ultimatebiggatling"
     },
     {
       "id": "charm.econ-182",
@@ -5045,7 +5045,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A massive, jagged cluster of frozen needles that erupts from the ground, raining down a relentless storm of ice to overwhelm the battlefield.",
-      "notes": "themeKey: demon.ultimatecactus",
+      "notes": "themeKey: creature.ultimatecactus",
       "uniqueCarry": true
     },
     {
@@ -5077,7 +5077,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A jagged, obsidian-like shard forged from the calcified remains of a fallen legion, pulsing with the desperate heat of a final stand.",
-      "notes": "themeKey: demon.ultimatefootballzombie",
+      "notes": "themeKey: creature.ultimatefootballzombie",
       "uniqueCarry": true
     },
     {
@@ -5102,7 +5102,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A cluster of hyper-dense, floating cherry pits encased in a translucent, pressurized resin, vibrating in perfect unison to stabilize the trajectory of every shot fired.",
-      "notes": "themeKey: demon.ultimategatlingblover"
+      "notes": "themeKey: creature.ultimategatlingblover"
     },
     {
       "id": "charm.econ-185",
@@ -5133,7 +5133,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, unyielding slab of blackened tungsten, forged to stand alone against the tide.",
-      "notes": "themeKey: demon.ultimatehorse2",
+      "notes": "themeKey: creature.ultimatehorse2",
       "uniqueCarry": true
     },
     {
@@ -5165,7 +5165,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A spinning prism of condensed radiance that captures stray light and converts it into pure kinetic momentum.",
-      "notes": "themeKey: demon.ultimatelanternsplit",
+      "notes": "themeKey: creature.ultimatelanternsplit",
       "uniqueCarry": true
     },
     {
@@ -5197,7 +5197,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A cluster of pungent, split garlic cloves that scatter upon impact, releasing a cloud of flavorful essence.",
-      "notes": "themeKey: demon.ultimatemelon",
+      "notes": "themeKey: creature.ultimatemelon",
       "uniqueCarry": true
     },
     {
@@ -5229,7 +5229,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A pulsating, glowing gourd fragment that pulses with the rhythm of the earth, pulling essence from the recently departed.",
-      "notes": "themeKey: demon.ultimatepumpkin",
+      "notes": "themeKey: creature.ultimatepumpkin",
       "uniqueCarry": true
     },
     {
@@ -5254,7 +5254,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "由亚种火炬塑成的尖刺子弹，在战斗中不断迸发。",
-      "notes": "themeKey: demon.ultimatestartorch"
+      "notes": "themeKey: creature.ultimatestartorch"
     },
     {
       "id": "charm.econ-190",
@@ -5285,7 +5285,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A dense, shifting mass of calcified remains that points the way through sheer momentum.",
-      "notes": "themeKey: demon.vectorplant",
+      "notes": "themeKey: creature.vectorplant",
       "uniqueCarry": true
     },
     {
@@ -5310,7 +5310,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, succulent-shaped vessel of thick aloe resin, containing a miniature pine-shaped ember that absorbs moisture into glowing droplets.",
-      "notes": "themeKey: demon.waterfurnace"
+      "notes": "themeKey: creature.waterfurnace"
     },
     {
       "id": "charm.econ-192",
@@ -5334,7 +5334,7 @@
       "suffixRolls": 1,
       "tags": [],
       "flavor": "A heavy, stitched leather sphere embedded with rotating, jagged blades that churn through the earth as it rolls.",
-      "notes": "themeKey: demon.yellowfootball"
+      "notes": "themeKey: creature.yellowfootball"
     },
     {
       "id": "charm.econ-193",
@@ -5365,7 +5365,7 @@
       "suffixRolls": 0,
       "tags": [],
       "flavor": "A heavy, fossilized nut encased in necrotic resin, shaped like a sphere and etched with legends of impending doom.",
-      "notes": "themeKey: demon.zombieloonnut",
+      "notes": "themeKey: creature.zombieloonnut",
       "uniqueCarry": true
     }
   ]

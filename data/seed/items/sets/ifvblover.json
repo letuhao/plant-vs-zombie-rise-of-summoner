@@ -25,7 +25,7 @@
       "id": "set.ifvblover-001",
       "nameKey": "set.spore-strike-squad",
       "name": "Spore Strike Squad",
-      "themeKey": "demon.ifvblover",
+      "themeKey": "creature.ifvblover",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.hypnofume-001",
       "nameKey": "set.spore-cloud-corpse",
       "name": "Spore-Cloud Corpse",
-      "themeKey": "demon.hypnofume",
+      "themeKey": "creature.hypnofume",
       "members": [
         {
           "role": "armament-primary",

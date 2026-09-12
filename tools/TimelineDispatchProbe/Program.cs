@@ -316,7 +316,7 @@ Check("OptingOutDoesNotMutateTheCachedCatalogRow", BattleModeProfileCatalog.Clas
     // the six ids, so `ActorResourcePools.CreateFull` built a 0-capacity pool and `PoiseLedger.TryCommit`
     // correctly, honestly declined every counter at any spend > 0. The probe asserted that decline
     // (`waveHpReacting == waveHpNoLane`) and deliberately refused to "fix" it by inventing a channel
-    // value, on the grounds that sizing a demon's poise was a balance decision out of RL2's scope.
+    // value, on the grounds that sizing a creature's poise was a balance decision out of RL2's scope.
     //
     // `BattleStatComposer` now seeds all six pools from a per-mille share of the shipped HP ladder
     // (spec-battle-resources.md §2.2), so the input exists and the counter FIRES. The assertion

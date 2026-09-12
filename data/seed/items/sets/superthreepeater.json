@@ -25,7 +25,7 @@
       "id": "set.superthreepeater-001",
       "nameKey": "set.phoenix-rebirth",
       "name": "Phoenix Rebirth",
-      "themeKey": "demon.superthreepeater",
+      "themeKey": "creature.superthreepeater",
       "members": [
         {
           "role": "armament-primary",

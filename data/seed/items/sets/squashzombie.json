@@ -25,7 +25,7 @@
       "id": "set.squashzombie-001",
       "nameKey": "set.squash-s-last-stand",
       "name": "Squash's Last Stand",
-      "themeKey": "demon.squashzombie",
+      "themeKey": "creature.squashzombie",
       "members": [
         {
           "role": "armament-primary",

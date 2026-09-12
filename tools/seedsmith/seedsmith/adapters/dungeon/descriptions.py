@@ -1,5 +1,5 @@
 """Prose for every dungeon anchor field (D1.6, spec-dungeon-seed-contract.md §1) — the reliability
-mechanism, not documentation (demons/anchor/descriptions.py's own rationale, restated here because
+mechanism, not documentation (creatures/anchor/descriptions.py's own rationale, restated here because
 enum selection is the most bias-prone task shape there is regardless of which corpus it is in).
 Every entry states what the field means and an explicit negative clause — most lifted near-verbatim
 from the spec's own "Is not" column, which the spec's own §1 preamble says the schema must "carry
@@ -36,7 +36,7 @@ DESCRIPTIONS: dict = {
     "firstClearRef": ("An optional rung-80-or-above deterministic unique container id granted, by id, on "
                       "this domain's first clear — or 'none'. NOT a table and NOT a role or frame: it "
                       "names one exact item, never a category, and it is never a weight."),
-    "retinueFamily": ("The demon family the boss's retinue draws from, or 'none' if the boss stands alone. "
+    "retinueFamily": ("The creature family the boss's retinue draws from, or 'none' if the boss stands alone. "
                       "NOT the boss's own family by default — a boss may command a retinue from a "
                       "different lineage entirely."),
     "roomPalette": ("At least one room-archetype id per room kind this domain's layout can place. NOT an "
@@ -145,7 +145,7 @@ DESCRIPTIONS: dict = {
                  "never a number."),
     "countBand": ("How much of the target this quest asks for — few, some, most, or all — voted. 'none' "
                  "is legal and REQUIRED on the six count-less templates (kill-boss, extract-with-item-"
-                 "kind, bring-demon-home-alive, finish-under-hunger, survive-no-downed, spend-no-"
+                 "kind, bring-creature-home-alive, finish-under-hunger, survive-no-downed, spend-no-"
                  "provision). NOT a difficulty rating — 'all' on a short layout is easy, not hard."),
     "rewardBand": ("Which tier-window reward ordinal (modest, fair, or rich) this quest pays out on "
                   "completion — voted. NOT souls and NOT an item; it names a window the loot pipeline "

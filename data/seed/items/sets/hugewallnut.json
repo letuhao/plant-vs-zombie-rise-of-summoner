@@ -25,7 +25,7 @@
       "id": "set.hugewallnut-001",
       "nameKey": "set.bastion-nut",
       "name": "Bastion Nut",
-      "themeKey": "demon.hugewallnut",
+      "themeKey": "creature.hugewallnut",
       "members": [
         {
           "role": "core-guard",

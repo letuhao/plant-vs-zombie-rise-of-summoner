@@ -25,7 +25,7 @@
       "id": "set.icepuff-001",
       "nameKey": "set.frost-spore-launcher",
       "name": "Frost Spore Launcher",
-      "themeKey": "demon.icepuff",
+      "themeKey": "creature.icepuff",
       "members": [
         {
           "role": "armament-primary",

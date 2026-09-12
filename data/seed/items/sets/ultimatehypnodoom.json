@@ -25,7 +25,7 @@
       "id": "set.ultimatehypnodoom-001",
       "nameKey": "set.unfettered-mycelium",
       "name": "Unfettered Mycelium",
-      "themeKey": "demon.ultimatehypnodoom",
+      "themeKey": "creature.ultimatehypnodoom",
       "members": [
         {
           "role": "armament-primary",

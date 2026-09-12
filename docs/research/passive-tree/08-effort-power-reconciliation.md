@@ -36,16 +36,16 @@ of **reward per unit of effort**.
 |---|---|---|---|---|---|
 | 1 | **Player XP → level → Θ → P(Θ)** | `100 + 45(N−1)` XP, at a flat 12 XP/kill ([RpgProgression.cs:49-56](../../../src/FusionRpg.Core/Progression/RpgProgression.cs), [progression.v1.json:9-20](../../../data/tuning/progression.v1.json)) | `P(L) ≈ 0.2L²` ([PowerLadder.cs:34-38](../../../src/FusionRpg.Core/Power/PowerLadder.cs)) | `0.2L² / 1.875L² ≈ 0.107` per kill, constant | **LINEAR** ✅ the §10.5 promise, exactly |
 | 2 | **Specimen level → P(Θ)** | **flat 100 XP, every level** ([RpgStore.UniqueActors.cs:872-877](../../../src/FusionRpg.Data/Sqlite/RpgStore.UniqueActors.cs)) | `P(level)` — the same ladder ([BattleModels.cs:169-175](../../../src/FusionRpg.Core/Battle/BattleModels.cs), fed `s.Actor.Level` at [WebMatchService.cs:339-352](../../../src/FusionRpg.Server/WebMatchService.cs)) | `2×10⁻⁵ · E` — rises linearly forever | **ACCELERATING** ⛔ live defect |
-| 3 | **Soul faucet** | — (a faucet) | `KillDelta × contentScale(Θ) ∝ Θ²` ([SoulEarnPolicy.cs:74-80](../../../src/FusionRpg.Core/Demons/SoulEarnPolicy.cs)) | quadratic in depth | **ACCELERATING** — inert today, Θ pinned at 20 ([RpgStore.Souls.cs:29](../../../src/FusionRpg.Data/Sqlite/RpgStore.Souls.cs)) |
-| 4 | **Soul sinks** (pull / slot / ritual / upkeep / fusion) | pull `100` flat ([summoning.v1.json:11](../../../data/tuning/summoning.v1.json)); slot `300(n+1)` ([ContractPolicy.cs:171-172](../../../src/FusionRpg.Core/Demons/Contracts/ContractPolicy.cs)); ritual, upkeep, promotion — rarity tables ([contracts.v1.json](../../../data/tuning/contracts.v1.json), [fusion.v1.json](../../../data/tuning/fusion.v1.json)) | +1 pull / +1 slot / +1 rung | **every sink is Θ-free** | **FLAT** ⛔ mismatched to row 3 |
+| 3 | **Soul faucet** | — (a faucet) | `KillDelta × contentScale(Θ) ∝ Θ²` ([SoulEarnPolicy.cs:74-80](../../../src/FusionRpg.Core/Creatures/SoulEarnPolicy.cs)) | quadratic in depth | **ACCELERATING** — inert today, Θ pinned at 20 ([RpgStore.Souls.cs:29](../../../src/FusionRpg.Data/Sqlite/RpgStore.Souls.cs)) |
+| 4 | **Soul sinks** (pull / slot / ritual / upkeep / fusion) | pull `100` flat ([summoning.v1.json:11](../../../data/tuning/summoning.v1.json)); slot `300(n+1)` ([ContractPolicy.cs:171-172](../../../src/FusionRpg.Core/Creatures/Contracts/ContractPolicy.cs)); ritual, upkeep, promotion — rarity tables ([contracts.v1.json](../../../data/tuning/contracts.v1.json), [fusion.v1.json](../../../data/tuning/fusion.v1.json)) | +1 pull / +1 slot / +1 rung | **every sink is Θ-free** | **FLAT** ⛔ mismatched to row 3 |
 | 5 | **Contract slots** | `300N` souls, cumulative `150N²` | +1 roster slot, each worth `P(Θ)` once filled | slots `∝ √(souls)`; legion power `∝ √E · P(Θ)` | **ACCELERATING** (compound of 3 + 4) |
 | 6 | **Aptitude points** | `3` per Θ, linear, uncapped ([PointBudget.cs:31-39](../../../src/FusionRpg.Core/Stats/Aptitudes/PointBudget.cs), [aptitudes.v5.json:23-28](../../../data/tuning/aptitudes.v5.json)) | `k · share^γ · P(Θ)`, and `share` is `points_i / Σpoints` ([AptitudeReadFunctions.cs:48-68](../../../src/FusionRpg.Core/Stats/Aptitudes/AptitudeReadFunctions.cs), [AptitudeAllocation.cs:81-85](../../../src/FusionRpg.Core/Stats/Aptitudes/AptitudeAllocation.cs)) | **zero** at a fixed distribution | **FLAT-CAPPED** — deliberate; it is a distribution dial, not a magnitude ladder |
 | 7 | **Action unlock rungs** | attempts to the Nth earn `= 1/chance(N−1)`, `chance = 500‰·0.88ⁿ` floored at `1‰` ([UnlockLadder.cs:41-53](../../../src/FusionRpg.Core/Actions/Unlock/UnlockLadder.cs), [action-unlock.v1.json:11-16](../../../data/tuning/action-unlock.v1.json)) — geometric, then ~1,000 attempts each past earn 50 | `rung = min(n, 10)`; `qPower = 1.75^((r−1)/2)` ([action-rungs.v2.json:6](../../../data/tuning/action-rungs.v2.json)) | rises to rung 10, then **zero** | **FLAT-CAPPED** — documented soft window (§11.2) |
 | 8 | **Enhancement `+X`** | expected attempts `= 1/success(n)`, `1000‰ → 200‰` then held ([EnhancePolicy.cs:69-77](../../../src/FusionRpg.Core/Items/Mutation/EnhancePolicy.cs), [enhancement.v1.json:20-22](../../../data/tuning/enhancement.v1.json)); the material cost curve is **not built** | `gain(n) = cap·n/(n+8)` — asymptotic ([EnhancePolicy.cs:85-91](../../../src/FusionRpg.Core/Items/Mutation/EnhancePolicy.cs)) | marginal gain `∝ 1/n²`, total bounded by `cap` | **DECAYING** — deliberate (§4a), but has **no §10 row** ⛔ |
-| 9 | **Star merge** | `SacrificesForStar(n) = n+1`, cumulative `n(n+3)/2` ([StarPolicy.cs:28-33](../../../src/FusionRpg.Core/Demons/Fusion/StarPolicy.cs)) | `30‰ · star · BaseAtk(level)` — **linear in star** ([fusion.v1.json:18](../../../data/tuning/fusion.v1.json), [WebMatchService.cs:369-382](../../../src/FusionRpg.Server/WebMatchService.cs)) | `60/(n+3)` — a 2× worse deal at star 5 than star 1 | **DECAYING** — the same index mismatch as D20, bounded at 5 rungs |
-| 10 | **Demon rarity promotion** | **flat** `200` souls / 3 shards / 3 essence at every rung ([fusion.v1.json:20](../../../data/tuning/fusion.v1.json)) | +1 rung → higher star cap and fusion slots | rises with rung | **ACCELERATING** — and it contradicts `recipeCost` in the same file, which escalates `150 → 1000` |
+| 9 | **Star merge** | `SacrificesForStar(n) = n+1`, cumulative `n(n+3)/2` ([StarPolicy.cs:28-33](../../../src/FusionRpg.Core/Creatures/Fusion/StarPolicy.cs)) | `30‰ · star · BaseAtk(level)` — **linear in star** ([fusion.v1.json:18](../../../data/tuning/fusion.v1.json), [WebMatchService.cs:369-382](../../../src/FusionRpg.Server/WebMatchService.cs)) | `60/(n+3)` — a 2× worse deal at star 5 than star 1 | **DECAYING** — the same index mismatch as D20, bounded at 5 rungs |
+| 10 | **Creature rarity promotion** | **flat** `200` souls / 3 shards / 3 essence at every rung ([fusion.v1.json:20](../../../data/tuning/fusion.v1.json)) | +1 rung → higher star cap and fusion slots | rises with rung | **ACCELERATING** — and it contradicts `recipeCost` in the same file, which escalates `150 → 1000` |
 | 11 | **Loam development** | authored `5`/level upkeep ([LoamPolicy.cs:52-53](../../../src/FusionRpg.Core/World/Loam/LoamPolicy.cs)) | yield `6`/level ([DevelopmentYield.cs:26-32](../../../src/FusionRpg.Core/World/Growth/DevelopmentYield.cs)) | net **+1 per level**, flat forever | **LINEAR** ✅ and `Θ`-invariant by decision (§10.4) |
-| 12 | **Loyalty** | `15`/win, capped `60`/UTC day, decay `25`/day ([ContractPolicy.cs:141-154](../../../src/FusionRpg.Core/Demons/Contracts/ContractPolicy.cs), [contracts.v1.json:9-24](../../../data/tuning/contracts.v1.json)) | flat band bonuses `0/15/35/60‰` | bounded 0–1000 | **FLAT-CAPPED** — bounded ratio, §11.6 exempt |
+| 12 | **Loyalty** | `15`/win, capped `60`/UTC day, decay `25`/day ([ContractPolicy.cs:141-154](../../../src/FusionRpg.Core/Creatures/Contracts/ContractPolicy.cs), [contracts.v1.json:9-24](../../../data/tuning/contracts.v1.json)) | flat band bonuses `0/15/35/60‰` | bounded 0–1000 | **FLAT-CAPPED** — bounded ratio, §11.6 exempt |
 | 13 | **Affix tier ladder** | — (generation-time) | `m₁ × 1.75^(t−1)`, 5 rungs ([FamilyExpansion.cs:82-91](../../../src/FusionRpg.Core/Effects/Atoms/Generation/FamilyExpansion.cs)) | n/a — relative, level-free | **documented exception**, §10 row 7 ✅ |
 | 14 | **Ilvl → tier gate** | — | `MaxTierAt(ilvl)`, steps at 1/8/18/32 ([IlvlTierLadder.cs:10-22](../../../src/FusionRpg.Core/Items/IlvlTierLadder.cs)) | n/a — a gate | **documented exception**, §10 row 14 ✅ |
 | 15 | **Drop volume** | — | `base + slope·(Θ − pin)` — **linear in Θ** ([DropVolume.cs:35-42](../../../src/FusionRpg.Core/Items/Drops/DropVolume.cs)) | items/hour `∝ √E` | **DECAYING in count, deliberate** (D18) — but has **no §10 row** |
@@ -55,7 +55,7 @@ of **reward per unit of effort**.
 ([AptitudeTuning.cs:20](../../../src/FusionRpg.Core/Stats/Aptitudes/AptitudeTuning.cs),
 [PointBudget.cs:13,15](../../../src/FusionRpg.Core/Stats/Aptitudes/PointBudget.cs)). Almanac XP — zero
 code hits repo-wide; `Almanac` in `src/` is a rarity rung
-([DemonRarityLadder.cs:12](../../../src/FusionRpg.Core/Demons/DemonRarityLadder.cs)), not a counter.
+([CreatureRarityLadder.cs:12](../../../src/FusionRpg.Core/Creatures/CreatureRarityLadder.cs)), not a counter.
 Status mastery — three hits, all under `docs/research/`. **FACT**, greps run this session.
 
 ---
@@ -108,12 +108,12 @@ them.
 
 ### M2. The soul faucet scales on `P(Θ)`; every soul sink is `Θ`-free ⛔ LATENT
 
-**FACT.** The faucet: [SoulEarnPolicy.cs:74-80](../../../src/FusionRpg.Core/Demons/SoulEarnPolicy.cs)
+**FACT.** The faucet: [SoulEarnPolicy.cs:74-80](../../../src/FusionRpg.Core/Creatures/SoulEarnPolicy.cs)
 multiplies `KillDelta` / `VictoryDelta` / `DefeatDelta` by `ContentScale.Milli(Θ, tuning)`.
 
 **FACT.** Every sink, checked one by one: summon pull `costPerPull: 100`
 ([summoning.v1.json:11](../../../data/tuning/summoning.v1.json)); contract slot
-`SlotPriceStep × (n+1)` ([ContractPolicy.cs:171-172](../../../src/FusionRpg.Core/Demons/Contracts/ContractPolicy.cs));
+`SlotPriceStep × (n+1)` ([ContractPolicy.cs:171-172](../../../src/FusionRpg.Core/Creatures/Contracts/ContractPolicy.cs));
 loyalty ritual and daily upkeep, per-rarity tables ([contracts.v1.json:39-62](../../../data/tuning/contracts.v1.json));
 star merge `50`, promotion `200`, recipes `150–1000` ([fusion.v1.json:19-31](../../../data/tuning/fusion.v1.json)).
 **None reads `Θ`.** Corroborated by the complete `ContentScale.` call-site list — it reaches two
@@ -162,7 +162,7 @@ one sentence now and a re-balance later.
 ### M4. Star merge pays linearly for a triangular cost ⚠ LOW STAKES
 
 **FACT.** Cost: `SacrificesForStar(n) = n + 1`
-([StarPolicy.cs:28-33](../../../src/FusionRpg.Core/Demons/Fusion/StarPolicy.cs)), cumulative
+([StarPolicy.cs:28-33](../../../src/FusionRpg.Core/Creatures/Fusion/StarPolicy.cs)), cumulative
 `n(n+3)/2`. Reward: `perStarPowerMilli = 30`, applied as `30‰ · star · BaseAtk(level)`
 ([fusion.v1.json:18](../../../data/tuning/fusion.v1.json),
 [WebMatchService.cs:369-382](../../../src/FusionRpg.Server/WebMatchService.cs)) — **linear in star**.
@@ -195,8 +195,8 @@ The charter's sharpest question, and the audit confirms red team F5 in full.
 |---|---|---|---|
 | Aptitude points | `Commander` | `PointsFor(Commander, Θ_player, …) = 3·Θ` ([PointBudget.cs:31-39](../../../src/FusionRpg.Core/Stats/Aptitudes/PointBudget.cs)); the only production caller is [AptitudeEndpoints.cs:47-48,81-82](../../../src/FusionRpg.Server/AptitudeEndpoints.cs) | `∝ √E` (Θ = daveLevel, and level `∝ √XP`) |
 | Element mastery | `Aspect` | **does not exist** — three comment hits, no counter, no store, no endpoint | — |
-| Almanac XP | `DemonType` | **does not exist** — zero code hits repo-wide | — |
-| Specimen level | `UniqueDemon` | `rpg_unique_actors.level`, flat 100 XP per level (M1) | `∝ E` |
+| Almanac XP | `CreatureType` | **does not exist** — zero code hits repo-wide | — |
+| Specimen level | `UniqueCreature` | `rpg_unique_actors.level`, flat 100 XP per level (M1) | `∝ E` |
 
 **INFERENCE — one `req(t)` cannot be meaningful across these.** `req(6) = 105` under D26 means: 105
 aptitude points concentrated in a single aptitude (reachable near Θ≈35 only if the player spends
@@ -207,7 +207,7 @@ sources do not exist, and the two that do grow at **different exponents in effor
 
 **The rate table cannot fix it, and it is worth being explicit about why.**
 [aptitudes.v5.json:23-28](../../../data/tuning/aptitudes.v5.json) ships
-`{commander: 3, demonType: 4, aspect: 4, uniqueDemon: 6}`, and
+`{commander: 3, creatureType: 4, aspect: 4, uniqueCreature: 6}`, and
 [AptitudeTuning.cs:16-24](../../../src/FusionRpg.Core/Stats/Aptitudes/AptitudeTuning.cs) states that
 *"this module ships the RATE table only, never the sources."* A rate **multiplies** a source; it
 cannot equalise two sources whose growth exponents differ. `6 × E` and `3 × √E` diverge whatever the
@@ -272,7 +272,7 @@ audit did not look at.
 
 ### P3. Soul earns are `int` on a path `contentScale` multiplies ⚠
 
-**FACT.** [SoulEarnPolicy.cs:74,79](../../../src/FusionRpg.Core/Demons/SoulEarnPolicy.cs) return `int`,
+**FACT.** [SoulEarnPolicy.cs:74,79](../../../src/FusionRpg.Core/Creatures/SoulEarnPolicy.cs) return `int`,
 through [ContentScale.cs:24-35](../../../src/FusionRpg.Core/Power/ContentScale.cs), whose signature is
 `Apply(int rolledValue, long contentScaleMilli) → int` with `checked((int)…)`. The balance is `long`
 ([RpgStore.cs:508-516](../../../src/FusionRpg.Data/Sqlite/RpgStore.cs), all `INTEGER`).
@@ -419,7 +419,7 @@ action rung cap (§11.2, a soft content window); the contest reads' linearity in
 ## 8. Design-gate checklist
 
 ```
-[x] Subsystems identified: power, progression, economy/souls, demons/contracts/fusion,
+[x] Subsystems identified: power, progression, economy/souls, creatures/contracts/fusion,
     items/enhancement, aptitudes, actions, world/loam, data/persistence.
 [x] Read this session, in full: DESIGN-GATE.md; power/ssot-power-scale.md (all of it, §10 and
     §11 included); power-map.md; tunables-ssot.md §1-3; passive-tree-ideal.md §3.5, §4, §5, §11;
@@ -475,7 +475,7 @@ The defect: cumulative sacrifices to star `n` are `C(n) = n(n+3)/2` (triangular)
 than star 1. Same shape as the passive tree's tier-ladder defect, and the same fix.
 
 `StarPolicy.StarPowerMilli(n) = perStar · n(n+3) / (ReferenceStar + 3)`, anchored at star 5 so **no
-demon at or below the old cap changes value**. That divisor is derived from the anchor, not tuned.
+creature at or below the old cap changes value**. That divisor is derived from the anchor, not tuned.
 
 | star | 1 | 2 | 3 | 4 | **5** | 6 | 7 | 8 | 9 | 10 |
 |---|---|---|---|---|---|---|---|---|---|---|

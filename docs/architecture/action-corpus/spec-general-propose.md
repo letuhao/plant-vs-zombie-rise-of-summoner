@@ -20,9 +20,9 @@ whole identity, and it is why this cannot be `A-P2` with a `scope` flag.
 2. **Three pipelines, not one parameterised stage.** P-general (role + slot, no anchor), P-family (family
    motifs/anti-motifs/themes), P-signature (species motifs + element + its family's output).
 3. **Permute every enum**, seeded from `(entity_id, field, sample_index)` — `sample_index` **inside** the
-   seed, or three votes are one sample (`adapters/demons/anchor/permute.py:16-30`).
+   seed, or three votes are one sample (`adapters/creatures/anchor/permute.py:16-30`).
 4. **Majority-vote only load-bearing fields.** 1-1-1 → `unresolved`, never the first option
-   (`adapters/demons/anchor/vote.py:23-40`).
+   (`adapters/creatures/anchor/vote.py:23-40`).
 5. **Every enum description carries a negative clause** saying what the field is NOT. `none` is a value; a
    missing key is a defect.
 6. **TRANSIENT ≠ QUALITY.** A pause is transient — replay, no new call. Name the defect when re-prompting;
@@ -45,8 +45,8 @@ whole identity, and it is why this cannot be `A-P2` with a `scope` flag.
 | Rung table, 10 rows, `structureBudget` per row | `data/tuning/action-rungs.v1.json:11-20` |
 | `ActionSeeder.Generate` → `Instantiator.Draw` (the one roll, Law 1) | `src/FusionRpg.Core/Actions/Seeding/ActionSeeder.cs:32-66` |
 | Schema audit rejecting numeric fields **and** a missing `blocked` escape | `tools/seedsmith/seedsmith/pipeline/model.py:53-99` |
-| Option permutation seeded on `(id, field, sample_index)` | `tools/seedsmith/seedsmith/adapters/demons/anchor/permute.py:16-30` |
-| Vote resolution: 3-0 `high`, 2-1 `split` + minority, 1-1-1 `unresolved` | `tools/seedsmith/seedsmith/adapters/demons/anchor/vote.py:23-40` |
+| Option permutation seeded on `(id, field, sample_index)` | `tools/seedsmith/seedsmith/adapters/creatures/anchor/permute.py:16-30` |
+| Vote resolution: 3-0 `high`, 2-1 `split` + minority, 1-1-1 `unresolved` | `tools/seedsmith/seedsmith/adapters/creatures/anchor/vote.py:23-40` |
 | Bounded self-heal that names the defect | `tools/seedsmith/seedsmith/pipeline/llm_caller.py:207-236` |
 | The stage shape this spec copies — system prompt, schema, `build_context`, `build_brief`, `entry_for`, validators | `tools/seedsmith/seedsmith/adapters/effects/affix/prompts.py:26-112` |
 | `--dry-run` / `--count` entrypoint precedent | `tools/seedsmith/seedsmith/adapters/effects/affix/generate_affixes.py:74-96` |
@@ -77,7 +77,7 @@ always asserted *"every property has a `description`, and every one contains a n
 asserted mechanically"*, and **the schema carried no `description` key at all**, so the assertion had
 nothing to assert over. They are written here, in the schema, because a description that lives in
 prose beside a schema is a description the audit cannot read. Each is modelled on the hardened
-`blocked` description at `adapters/demons/anchor/prompts.py:74-82` — the one that was rewritten after
+`blocked` description at `adapters/creatures/anchor/prompts.py:74-82` — the one that was rewritten after
 a real local model filled the field with `"plant"` on 2026-09-01 (`prompts.py:64-70`): state the
 normal case first, then the exception, then say plainly what must **not** go in the field.
 
@@ -158,7 +158,7 @@ something real to be measured against.
 - **`blocked` is required**, because `audit_schema` rejects a top-level schema without it
   (`pipeline/model.py:92-97`) and because a model with no way to decline invents instead. Its description
   states the empty-string convention explicitly, with a worked example of each case — the exact defect a real
-  local model hit on 2026-09-01 (`adapters/demons/anchor/prompts.py:61-83`).
+  local model hit on 2026-09-01 (`adapters/creatures/anchor/prompts.py:61-83`).
 - **`confidence` is NOT a model field.** §16 of the ideal shows it in the return block; the vote resolver
   writes it (`vote.py:16-20`). A model grading its own certainty is a self-report, not a measurement.
 

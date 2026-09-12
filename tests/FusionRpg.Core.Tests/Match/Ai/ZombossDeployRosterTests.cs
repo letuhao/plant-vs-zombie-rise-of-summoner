@@ -1,4 +1,4 @@
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Match.Ai;
 using Xunit;
 
@@ -8,37 +8,37 @@ namespace FusionRpg.Core.Tests.Match.Ai;
 /// from the level's own data (wave number + catalog), never hand-authored per level.</summary>
 public class ZombossDeployRosterTests
 {
-    static DemonSpeciesDef Species(string id, DemonRarity rarity, DemonAcquisition acquisition) => new()
+    static CreatureSpeciesDef Species(string id, CreatureRarity rarity, CreatureAcquisition acquisition) => new()
     {
         SpeciesId = id,
         Name = id,
         Side = "zombie",
         BaseRarity = rarity,
         Acquisition = acquisition,
-        DeployMode = DemonDeployMode.PlantAvatar,
+        DeployMode = CreatureDeployMode.PlantAvatar,
     };
 
     static readonly ZombossWaveRarityCeiling[] Ceilings =
     {
-        new(1, DemonRarity.Sprout),
-        new(5, DemonRarity.Cultivated),
-        new(10, DemonRarity.Almanac),
+        new(1, CreatureRarity.Sprout),
+        new(5, CreatureRarity.Cultivated),
+        new(10, CreatureRarity.Almanac),
     };
 
     [Fact]
     public void RarityCeilingForWave_returns_the_lowest_rung_before_the_first_threshold()
     {
-        Assert.Equal(DemonRarity.Sprout, ZombossDeployRoster.RarityCeilingForWave(0, Ceilings));
+        Assert.Equal(CreatureRarity.Sprout, ZombossDeployRoster.RarityCeilingForWave(0, Ceilings));
     }
 
     [Fact]
     public void RarityCeilingForWave_advances_exactly_at_each_threshold()
     {
-        Assert.Equal(DemonRarity.Sprout, ZombossDeployRoster.RarityCeilingForWave(4, Ceilings));
-        Assert.Equal(DemonRarity.Cultivated, ZombossDeployRoster.RarityCeilingForWave(5, Ceilings));
-        Assert.Equal(DemonRarity.Cultivated, ZombossDeployRoster.RarityCeilingForWave(9, Ceilings));
-        Assert.Equal(DemonRarity.Almanac, ZombossDeployRoster.RarityCeilingForWave(10, Ceilings));
-        Assert.Equal(DemonRarity.Almanac, ZombossDeployRoster.RarityCeilingForWave(999, Ceilings));
+        Assert.Equal(CreatureRarity.Sprout, ZombossDeployRoster.RarityCeilingForWave(4, Ceilings));
+        Assert.Equal(CreatureRarity.Cultivated, ZombossDeployRoster.RarityCeilingForWave(5, Ceilings));
+        Assert.Equal(CreatureRarity.Cultivated, ZombossDeployRoster.RarityCeilingForWave(9, Ceilings));
+        Assert.Equal(CreatureRarity.Almanac, ZombossDeployRoster.RarityCeilingForWave(10, Ceilings));
+        Assert.Equal(CreatureRarity.Almanac, ZombossDeployRoster.RarityCeilingForWave(999, Ceilings));
     }
 
     [Fact]
@@ -46,9 +46,9 @@ public class ZombossDeployRosterTests
     {
         var catalog = new[]
         {
-            Species("low", DemonRarity.Chaff, DemonAcquisition.Summonable),
-            Species("mid", DemonRarity.Cultivated, DemonAcquisition.Summonable),
-            Species("high", DemonRarity.Almanac, DemonAcquisition.Summonable),
+            Species("low", CreatureRarity.Chaff, CreatureAcquisition.Summonable),
+            Species("mid", CreatureRarity.Cultivated, CreatureAcquisition.Summonable),
+            Species("high", CreatureRarity.Almanac, CreatureAcquisition.Summonable),
         };
 
         var result = ZombossDeployRoster.AvailableSpeciesFor(waveNumber: 3, catalog, Ceilings);
@@ -61,9 +61,9 @@ public class ZombossDeployRosterTests
     {
         var catalog = new[]
         {
-            Species("summonable-one", DemonRarity.Chaff, DemonAcquisition.Summonable),
-            Species("capture-only-one", DemonRarity.Chaff, DemonAcquisition.CaptureOnly),
-            Species("event-only-one", DemonRarity.Chaff, DemonAcquisition.EventOnly),
+            Species("summonable-one", CreatureRarity.Chaff, CreatureAcquisition.Summonable),
+            Species("capture-only-one", CreatureRarity.Chaff, CreatureAcquisition.CaptureOnly),
+            Species("event-only-one", CreatureRarity.Chaff, CreatureAcquisition.EventOnly),
         };
 
         var result = ZombossDeployRoster.AvailableSpeciesFor(waveNumber: 3, catalog, Ceilings);
@@ -76,8 +76,8 @@ public class ZombossDeployRosterTests
     {
         var catalog = new[]
         {
-            Species("plant-avatar-one", DemonRarity.Chaff, DemonAcquisition.Summonable) with { DeployMode = DemonDeployMode.PlantAvatar },
-            Species("hypno-ally-one", DemonRarity.Chaff, DemonAcquisition.Summonable) with { DeployMode = DemonDeployMode.HypnoAlly },
+            Species("plant-avatar-one", CreatureRarity.Chaff, CreatureAcquisition.Summonable) with { DeployMode = CreatureDeployMode.PlantAvatar },
+            Species("hypno-ally-one", CreatureRarity.Chaff, CreatureAcquisition.Summonable) with { DeployMode = CreatureDeployMode.HypnoAlly },
         };
 
         var result = ZombossDeployRoster.AvailableSpeciesFor(waveNumber: 3, catalog, Ceilings);
@@ -90,7 +90,7 @@ public class ZombossDeployRosterTests
     {
         var catalog = new[]
         {
-            Species("dual-flagged", DemonRarity.Chaff, DemonAcquisition.Summonable | DemonAcquisition.CaptureOnly),
+            Species("dual-flagged", CreatureRarity.Chaff, CreatureAcquisition.Summonable | CreatureAcquisition.CaptureOnly),
         };
 
         var result = ZombossDeployRoster.AvailableSpeciesFor(waveNumber: 3, catalog, Ceilings);
@@ -103,8 +103,8 @@ public class ZombossDeployRosterTests
     {
         var catalog = new[]
         {
-            Species("b-species", DemonRarity.Chaff, DemonAcquisition.Summonable),
-            Species("a-species", DemonRarity.Chaff, DemonAcquisition.Summonable),
+            Species("b-species", CreatureRarity.Chaff, CreatureAcquisition.Summonable),
+            Species("a-species", CreatureRarity.Chaff, CreatureAcquisition.Summonable),
         };
 
         var first = ZombossDeployRoster.AvailableSpeciesFor(3, catalog, Ceilings);

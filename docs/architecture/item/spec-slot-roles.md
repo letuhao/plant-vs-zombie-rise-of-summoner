@@ -41,14 +41,14 @@ not a wall.
 
 `frame` (`humanoid | plant | hybrid`) **exists on no species type**, and by D19's reasoning it is not
 ours to declare — a frame describes a *body*, exactly as an aptitude vector describes a species.
-**Resolved 2026-09-03: seedsmith's demon pipeline classifies it** ([item-map.md](../item-map.md) §3.1).
+**Resolved 2026-09-03: seedsmith's creature pipeline classifies it** ([item-map.md](../item-map.md) §3.1).
 
-⚠ **Frame must publish independently of theme status.** `spec-demon-themes.md` makes publishing a
-theme for a `basis = blocked` demon a **Never** — but a species can lack a *flavour* judgement while
+⚠ **Frame must publish independently of theme status.** `spec-creature-themes.md` makes publishing a
+theme for a `basis = blocked` creature a **Never** — but a species can lack a *flavour* judgement while
 still having a *body*. A species with no frame has no roles, no base types, and cannot be geared.
 
-**And frame is not `Side`.** `DemonSpeciesDef.Side` conflates faction with body
-(`DemonSpeciesCatalog.cs:11`), and the shipped roster already breaks it: `peashooterzombie`,
+**And frame is not `Side`.** `CreatureSpeciesDef.Side` conflates faction with body
+(`CreatureSpeciesCatalog.cs:11`), and the shipped roster already breaks it: `peashooterzombie`,
 `ironpeazombie`, `cherrynutzombie` and `bucketnutzombie` are zombie-**side** with plant **bodies**.
 Deriving frame from `Side` is the failure item-ideal §4 exists to prevent.
 
@@ -119,7 +119,7 @@ shipped registry** — the twelve-role core at 800‰ stands and the source is c
 
 > ⚠ **A counter-proposal was withdrawn with its evidence.** I argued for keeping the shipped thirteen
 > on the grounds that hybrids are ~6% of the species population. That figure came from
-> `themes.v1.json`'s **84** entries; `data/seed/demons/species/` holds **386**. The registry is a stale
+> `themes.v1.json`'s **84** entries; `data/seed/creatures/species/` holds **386**. The registry is a stale
 > snapshot of a generated corpus (now filed as a seedsmith defect — [seedsmith-map.md](../seedsmith-map.md)
 > §3c-ter), so the proportion was fiction. **Never derive a design proportion from a snapshot of a
 > generated corpus.**
@@ -179,7 +179,7 @@ breakthrough or quest system can close slots without a schema migration or a con
 mitigation for *"gearing a new specimen is a chore"*, and D2 turns it off while D1 declines to own
 the problem. The predicate's existence is what makes that reversible.
 
-### D14 — The commander is another unique demon, and `standard` is a live contradiction
+### D14 — The commander is another unique creature, and `standard` is a live contradiction
 
 No 16th slot. **`standard` stays declared**, and D14's disposition is *"nothing generates into it"* —
 the same disposition seedsmith gave its `environment` kind, and for the same reason: the row costs
@@ -370,7 +370,7 @@ is exactly the error this revision corrects.
       and `HYBRID_FRAME_CITATION` all naming the same twelve, and the 18-set disposition recorded.
 - [ ] D3's rationale is the §2h.1 wording (**generalism priced and rewarded**), not the cheat framing,
       and no number moved as a result.
-- [ ] `frame` is consumed from the demon pipeline, never computed from `Side`, and exists for every
+- [ ] `frame` is consumed from the creature pipeline, never computed from `Side`, and exists for every
       gearable species including those with no published theme.
 - [ ] The unlock predicate ships, defaults to open, and is provably closable without a migration.
 - [ ] `standard` is declared, **the generator emits nothing into it**, and the 20 legacy entries are

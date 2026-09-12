@@ -21,9 +21,9 @@ that second job belongs to `A-P3`, which is why these are two pipelines and not 
 2. **Three pipelines, not one parameterised stage.** P-general (role + slot, no anchor), P-family (family
    motifs/anti-motifs/themes), P-signature (species motifs + element + its family's output).
 3. **Permute every enum**, seeded from `(entity_id, field, sample_index)` — `sample_index` **inside** the
-   seed, or three votes are one sample (`adapters/demons/anchor/permute.py:16-30`).
+   seed, or three votes are one sample (`adapters/creatures/anchor/permute.py:16-30`).
 4. **Majority-vote only load-bearing fields.** 1-1-1 → `unresolved`, never the first option
-   (`adapters/demons/anchor/vote.py:23-40`).
+   (`adapters/creatures/anchor/vote.py:23-40`).
 5. **Every enum description carries a negative clause** saying what the field is NOT. `none` is a value; a
    missing key is a defect.
 6. **TRANSIENT ≠ QUALITY.** A pause is transient — replay, no new call. Name the defect when re-prompting;
@@ -41,8 +41,8 @@ that second job belongs to `A-P3`, which is why these are two pipelines and not 
 
 | Thing | Evidence |
 |---|---|
-| Family assignments — **904 species across 227 consolidated family tokens** | `data/seed/demons/species/**/*.json` (measured 2026-09-10; values are lists of family tokens, e.g. `bucketnutzombie: ["bucket"]`) |
-| Motif assignments — **904 species**, each with `motifs`, `antiMotifs`, `basis`, `tautological` | `data/seed/demons/_generated/motif-assignments.json` (904 keys) |
+| Family assignments — **904 species across 227 consolidated family tokens** | `data/seed/creatures/species/**/*.json` (measured 2026-09-10; values are lists of family tokens, e.g. `bucketnutzombie: ["bucket"]`) |
+| Motif assignments — **904 species**, each with `motifs`, `antiMotifs`, `basis`, `tautological` | `data/seed/creatures/_generated/motif-assignments.json` (904 keys) |
 | Closed action vocabularies (5 categories, 6 target modes, 4 shapes, 8 tags) | `ActionEnums.cs:26-49`, `ActionTargetSpec.cs:14-33`, `:42-48` |
 | Rung table with per-row `structureBudget` | `data/tuning/action-rungs.v1.json:11-20` |
 | Schema audit — numeric fields **and** a missing `blocked` escape both rejected | `pipeline/model.py:53-99` |
@@ -86,7 +86,7 @@ always asserted *"every property has a `description` and every description conta
 — asserted mechanically over the schema"*, and **the schema carried no `description` key at all**.
 They are written here, in the schema, because a description that lives in prose beside a schema is a
 description the audit cannot read. Each follows the hardened `blocked` description at
-`adapters/demons/anchor/prompts.py:74-82`, rewritten after a real local model filled that field with
+`adapters/creatures/anchor/prompts.py:74-82`, rewritten after a real local model filled that field with
 `"plant"` on 2026-09-01 (`prompts.py:64-70`): normal case first, then the exception, then what must
 **not** go in the field.
 
@@ -339,7 +339,7 @@ from.
 2. **Every live species has a family now.** ⛔ **RE-MEASURED 2026-09-11:** all **904** live species
    carry at least one family (**1,183** memberships over **227** consolidated families; 626 species one,
    277 two, 1 three). The old "84 species carry motifs, 53 carry a family, 31 unassigned" note described
-   the legacy `DemonSpeciesCatalog.Generated.cs` projection and no longer holds — there are zero
+   the legacy `CreatureSpeciesCatalog.Generated.cs` projection and no longer holds — there are zero
    family-less live species, so every species does receive a family-scoped brief. A coverage report
    still states the membership counts, but the gap being watched for is now thin families, not missing
    ones.

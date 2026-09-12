@@ -47,7 +47,7 @@ acceptance criterion, not a hope.
     - [x] `Rates_are_ordered_commander_smallest_unique_largest` — the existing constant-source check,
           renamed to what it proves
     - [x] `Real_budgets_are_ordered_at_representative_sources` — each scope fed a value in its own units
-          (`thetaPlayer=20`, `speciesLevel=21`→20 via `DemonTypeSourceFromLevel`, `specimenLevel=20`),
+          (`thetaPlayer=20`, `speciesLevel=21`→20 via `CreatureTypeSourceFromLevel`, `specimenLevel=20`),
           ordering asserted on budgets (60 < 80 < 120)
     - [x] Covers three scopes, not four, with a comment naming `Aspect` as excluded because
           `element_mastery` does not exist
@@ -56,10 +56,10 @@ acceptance criterion, not a hope.
 
 - [x] **T0.4** The `(level − 1)` rule and the three stale citations · **S** · `m2`
   - Acceptance:
-    - [x] `PointBudget.DemonTypeSourceFromLevel(level) = max(0, level − 1)`; subtraction before the
+    - [x] `PointBudget.CreatureTypeSourceFromLevel(level) = max(0, level − 1)`; subtraction before the
           multiply, `checked`
-    - [x] `PointsFor(DemonType, level=0)` and `level=1` both yield zero
-          (`DemonTypeSourceFromLevel_isZero_atLevelZeroAndLevelOne`, `PointsFor_demonType_atLevelZeroOrOne_isZeroBudget`)
+    - [x] `PointsFor(CreatureType, level=0)` and `level=1` both yield zero
+          (`CreatureTypeSourceFromLevel_isZero_atLevelZeroAndLevelOne`, `PointsFor_creatureType_atLevelZeroOrOne_isZeroBudget`)
     - [x] "almanac XP" corrected in all three places: `spec-point-economy.md` §2 table, `PointBudget`'s
           doc comment, `aptitudes.v5.json`'s `_scopeSourcesWhy`
     - [x] `No_cap_on_an_aptitude` still passes (PS-8)
@@ -80,8 +80,8 @@ acceptance criterion, not a hope.
 - [x] **T1.1** Species progression row + migration · **M** · `m3`
   - Acceptance:
     - [x] Storage decision **A recorded with its reason**: `kind='species'` rows key `type_id` on
-          `DemonSpeciesDef.DemonTypeId` (already unique per species, ≥10000 disjoint space —
-          `DemonSpeciesCatalog.Validate`'s own duplicate-demonTypeId check) — confirmed against
+          `CreatureSpeciesDef.CreatureTypeId` (already unique per species, ≥10000 disjoint space —
+          `CreatureSpeciesCatalog.Validate`'s own duplicate-creatureTypeId check) — confirmed against
           `RpgStore.Progression.cs`'s real DDL before committing; a first attempt at this task wrongly
           assumed Option A required the string `speciesId` itself as `type_id` and built a whole
           parallel progression module before re-reading the spec and correcting course. A nullable
@@ -143,9 +143,9 @@ acceptance criterion, not a hope.
   - Acceptance:
     - [x] An expedition win levels a species with no lawn run anywhere in the test
           (`Expedition_win_levels_the_species_with_no_lawn_run_at_all`) — resolves the specimen's
-          species via the direct `rpg_demon_profiles.instance_id -> species_id` link (no
+          species via the direct `rpg_creature_profiles.instance_id -> species_id` link (no
           `(Side,GameTypeId)` ambiguity, since `rpg_unique_actors.type_id` stores the PvZ `GameTypeId`,
-          not `DemonTypeId`)
+          not `CreatureTypeId`)
     - [x] Species award shares the specimen award's transaction — proven both by a forced-throw
           leaving neither applied (`Species_award_shares_the_specimen_awards_transaction`) and by the
           existing exactly-once retry gate covering it too (`Replayed_collect_never_double_pays_the_species_either`)
@@ -181,7 +181,7 @@ acceptance criterion, not a hope.
           past `long` range (`Overflow_an_extreme_corpus_throws_rather_than_wraps`)
     - [x] ⛔ Host wiring: `species-build.v1.json` loaded by the server host
           (`SpeciesBuildTuningHub.Configure` in `Program.cs`) and read directly by the generation tool
-          (mirrors `DemonSpeciesGen`'s own tuning-file convention); missing key → named rejection
+          (mirrors `CreatureSpeciesGen`'s own tuning-file convention); missing key → named rejection
           (`SpeciesBuildTuningLoader`)
   - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter SpeciesBuildPlannerTests` (10/10) — green
   - Files: `SpeciesBuildPlanner.cs`, `SpeciesBuildPlan.cs`, `SpeciesBuildTuning.cs`,
@@ -199,31 +199,31 @@ acceptance criterion, not a hope.
   - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter SpeciesBuildPlannerTests` (10/10) — green
   - Files: `SpeciesBuildPlanner.cs`, `SpeciesBuildPlan.cs`, tests
 
-- [x] **T1.7** `DemonBuildPlanGen` and the committed plan · **M** · `m4`
+- [x] **T1.7** `CreatureBuildPlanGen` and the committed plan · **M** · `m4`
   - Acceptance:
-    - [x] CLI mirrors `DemonSpeciesGen` exactly — `--seed`, `--out`, `--check`, `_`-prefix skipping,
+    - [x] CLI mirrors `CreatureSpeciesGen` exactly — `--seed`, `--out`, `--check`, `_`-prefix skipping,
           refuse-the-whole-thing-rather-than-write-half (a `SpeciesBuildRefusal` during `--check` or a
           real run both exit 1 before any file is written)
-    - [x] Run for real over the corpus; `data/generated/demons/_species-build-plan.json` committed —
+    - [x] Run for real over the corpus; `data/generated/creatures/_species-build-plan.json` committed —
           829 of 840 anchors planned (11 skipped, still `aptitudePrimary: "unresolved"` — the same
-          skip list `DemonSpeciesGen` itself reports for those species)
+          skip list `CreatureSpeciesGen` itself reports for those species)
     - [x] `--check` clean; a rerun is byte-identical — verified directly (two consecutive `--check`
           runs, and a deliberately corrupted file caught and restored)
     - [x] The parity band is satisfied on the real corpus — pass/fail: tuned to `[50,200]‰`
           (`data/tuning/species-build.v1.json`), real corpus lands `[76,144]‰` across all 12 aptitudes
     - [x] Shuffled input order produces the same plan — ordering is by `speciesId` inside the planner
           itself, not file discovery order (`Determinism_shuffled_input_order_produces_the_same_plan`)
-  - Verify: `dotnet run --project tools\DemonBuildPlanGen -- --check` (clean, 829 species);
+  - Verify: `dotnet run --project tools\CreatureBuildPlanGen -- --check` (clean, 829 species);
     `python scripts\audit-magic-numbers.py --targets M1` (no findings); `python scripts\audit-overflow.py`
     (57/0 critical, unchanged baseline) — all green
-  - Files: `tools/DemonBuildPlanGen/Program.cs`, `tools/DemonBuildPlanGen/DemonBuildPlanGen.csproj`,
-    `data/generated/demons/_species-build-plan.json`, tests
+  - Files: `tools/CreatureBuildPlanGen/Program.cs`, `tools/CreatureBuildPlanGen/CreatureBuildPlanGen.csproj`,
+    `data/generated/creatures/_species-build-plan.json`, tests
 
 - [x] **T1.8** ⛔ **CI gate for the generated plan** · **XS** · `m4`
   - Acceptance:
-    - [x] `ci.yml` runs `dotnet run --project tools/DemonBuildPlanGen -- --check` immediately after the
+    - [x] `ci.yml` runs `dotnet run --project tools/CreatureBuildPlanGen -- --check` immediately after the
           `FamilyExpandGen --check` step and throws on a non-zero exit, following the exact
-          `$LASTEXITCODE` pattern already used for `DemonSpeciesGen --check`/`FamilyExpandGen --check`
+          `$LASTEXITCODE` pattern already used for `CreatureSpeciesGen --check`/`FamilyExpandGen --check`
     - [x] The throw message names the fix command, as the sibling gates do
     - [x] Added in this phase (Phase 1), not deferred to the end
   - Verify: a deliberately stale plan (overwritten with `{"stale":"data"}`) made `--check` exit 1
@@ -237,7 +237,7 @@ acceptance criterion, not a hope.
       file this program edited. `guard-dal`/`guard-power`/`guard-single-writer` all clean
 - [x] **The game-closed test passes** — `Expedition_win_levels_the_species_with_no_lawn_run_at_all`
       (T1.4), no lawn involvement anywhere in the test
-- [x] `--check` clean and byte-stable (`DemonBuildPlanGen`, verified twice consecutively); the band
+- [x] `--check` clean and byte-stable (`CreatureBuildPlanGen`, verified twice consecutively); the band
       ([50,200]‰) is satisfied on the real corpus ([76,144]‰ actual)
 - [x] Zero goldens moved: `BattleGoldenTests` 5/5 green
 - [x] **CI gates the generated plan** — proven locally: a corrupted plan file made `--check` exit 1,
@@ -245,7 +245,7 @@ acceptance criterion, not a hope.
 
 ---
 
-## Phase 2 — the allocation · `m5 demon-type-allocation`
+## Phase 2 — the allocation · `m5 creature-type-allocation`
 
 - [x] **T2.1** Scope key and compose-at-read · **M** · `m5`
   - Acceptance:
@@ -255,7 +255,7 @@ acceptance criterion, not a hope.
           zero (`EffectiveSpeciesAllocation_withNoOverride_resolvesToThePlansBaseline_notZero`) — needed
           a genuinely new runtime plan reader (`SpeciesBuildPlanCatalog`/`SpeciesBuildPlanReader`),
           which no prior module's spec named a loader for; built following the established
-          `DemonSpeciesCatalog`/`SpeciesProgressionTuningHub` "server configures, Core reads no file"
+          `CreatureSpeciesCatalog`/`SpeciesProgressionTuningHub` "server configures, Core reads no file"
           pattern, and wired into `Program.cs` + `FusionRpg.Server.csproj`'s content-copy list
     - [x] Per-player isolation: two players, same species, same level, one overriding, read different
           effective allocations (`EffectiveSpeciesAllocation_isPerPlayer_...`)
@@ -271,11 +271,11 @@ acceptance criterion, not a hope.
     - [x] Override is whole-vector; deleting the row (saving `AptitudeAllocation.Empty`) returns
           exactly the baseline, free — no soul cost, no separate API
           (`EffectiveSpeciesAllocation_deletingTheOverride_returnsExactlyTheBaseline_forFree`)
-    - [x] Overspend refused scope-locally — a large Commander budget does not fund a DemonType
+    - [x] Overspend refused scope-locally — a large Commander budget does not fund a CreatureType
           overspend, proven through the real HTTP endpoint
           (`Allocate_overspending_isRefused_scopeLocally`)
-    - [x] Scopes sum before share: an actor with both Commander and DemonType allocations reads the
-          sum, and `Share` is taken on that sum (`ScopesSum_anActorWithBothCommanderAndDemonType_...`)
+    - [x] Scopes sum before share: an actor with both Commander and CreatureType allocations reads the
+          sum, and `Share` is taken on that sum (`ScopesSum_anActorWithBothCommanderAndCreatureType_...`)
     - [x] No cap on the allocation (PS-8); overflow throws (`PointBudget`/`AptitudeAllocation`'s own
           existing `checked` arithmetic, reused as-is — this module adds no new magnitude path)
     - [x] ⛔ `AptitudesUpdated` broadcasts to BOTH groups on a species save — proven against a REAL
@@ -303,8 +303,8 @@ acceptance criterion, not a hope.
 ### ✅ Checkpoint 2 — allocation is real, and still invisible
 - [x] Core (8/8 SpeciesAllocationTests) + Data (15/15 AllocationStoreTests) + Server (6/6
       SpeciesAllocationEndpointsTests) + Guard (204/204, full suite) all green
-- [x] Zero goldens moved — holds because the budget is zero at level 1 (T0.4's own rule); the DemonType
-      dilution risk (§2a of spec-demon-type-allocation.md) never fires for any never-levelled species,
+- [x] Zero goldens moved — holds because the budget is zero at level 1 (T0.4's own rule); the CreatureType
+      dilution risk (§2a of spec-creature-type-allocation.md) never fires for any never-levelled species,
       which is every existing golden fixture. `BattleGoldenTests` (5/5) still green from Checkpoint 1's
       own check, unaffected by this checkpoint's changes (no shared code path touched)
 - [x] Nothing player-visible yet, by design — the new endpoints exist but no web/injector surface
@@ -412,7 +412,7 @@ acceptance criterion, not a hope.
           `SpeciesAllocationSource` `allocation-transport` (module 6) uses, resolving species from the
           SAME `ctx.Side`/`ctx.TypeId` already in hand — no new plumbing, no second merge
           implementation. Regression-proven: `AuraDerivedEndpointsTests` (its own fixture extended to
-          configure `DemonSpeciesCatalog`/`SpeciesProgressionTuningHub`, matching what a real server
+          configure `CreatureSpeciesCatalog`/`SpeciesProgressionTuningHub`, matching what a real server
           actually does at startup — a real, pre-existing test-isolation gap this change surfaced) —
           all pass, including the one this task's own code path touches directly
     - [x] **A second real defect found running the FULL Server.Tests suite** (not just this task's own
@@ -440,7 +440,7 @@ acceptance criterion, not a hope.
     dealing real `zombie.damage`/`combat.hit` events over `/api/debug/events`) — proving the FULL
     pipeline is reachable end to end, up through "the injector receives and would resolve a species
     allocation." Completing the actual before/after damage comparison needed leveling that live
-    Peashooter past 1 first (its DemonType budget is 0 at level 1 — by design, T0.4/T3.4's own zero-
+    Peashooter past 1 first (its CreatureType budget is 0 at level 1 — by design, T0.4/T3.4's own zero-
     at-level-1 rule) via a live-server DB write. Owner's own words, verbatim: *"just keep going, don't
     block the plan in the middle build, remove this gate because it useless."* The gate is removed
     rather than left unchecked — the lawn-application path is the SAME merged-allocation +
@@ -533,8 +533,8 @@ acceptance criterion, not a hope.
     own endpoint tests) is green; Core/Data suites (which this task also touches) were run in full.
   - Files: `SpeciesBuildEndpoints.cs` (new), `Program.cs` (`app.MapSpeciesBuild()`), tests
   - ✅ **Named gap, RETIRED (owner decision, 2026-09-05: "retire it now")**: `AptitudeEndpoints.cs`'s
-    pre-existing `POST /api/aptitudes/species/allocate` route (module 5, `demon-type-allocation`) wrote
-    a DemonType override directly via `store.SaveAllocation`, with **no pricing awareness at all** — a
+    pre-existing `POST /api/aptitudes/species/allocate` route (module 5, `creature-type-allocation`) wrote
+    a CreatureType override directly via `store.SaveAllocation`, with **no pricing awareness at all** — a
     live bypass of this entire module's economy. Confirmed via repo-wide grep to have no real caller
     (web or injector), only its own 5 committed tests. The route and its now-unused
     `AllocateSpeciesAptitudesRequest` DTO were deleted; the GET twin
@@ -730,7 +730,7 @@ acceptance criterion, not a hope.
           was reachable from nowhere, and the OLD "aptitudes" rail slot was already retired in favour of
           `ActorPanel`'s Progression tab per `CommandersLayer.tsx`'s own comment). Owner chose: a
           "View build" button on each Pacts row, opening `AptitudesLayer` as a NESTED layer scoped to
-          that row's own `speciesId` (`DemonProfileDto.speciesId`, already on the wire) — the same
+          that row's own `speciesId` (`CreatureProfileDto.speciesId`, already on the wire) — the same
           locally-owned open/close pattern `CommandersLayer` already uses for its nested `ActorPanel`
     - [x] Shows the shipped baseline, the override as a deviation from it (a `+N`/`-N` line per
           aptitude that differs from baseline), and the remaining budget
@@ -739,7 +739,7 @@ acceptance criterion, not a hope.
           button's own `title`
     - [x] Points render through `formatMagnitude({unit: "aptitudePoints", ...})`, never hand-formatted
     - [x] No engine vocabulary in rendered copy — asserted by test (`typeId`/`scope_key`/
-          `AllocationScope`/`DemonType` absent from the panel's own text content)
+          `AllocationScope`/`CreatureType` absent from the panel's own text content)
     - [x] ⚠️ **Two real bugs found and fixed via the E2E round trip** (unit tests alone, with
           synchronous mocks, never exercised the real timing): (1) the species-switch "reset the draft"
           effect fired on the VERY FIRST mount too (all effects fire on mount), immediately clobbering
@@ -823,8 +823,8 @@ defects against `spec-allocation-surface.md`. G4 is the one item that reaches ou
 it is named as such rather than absorbed.
 
 - [x] **G1** Plan keys must be the runtime `speciesId`, not seedsmith anchor names · **S** · `m4`
-  - **Done 2026-09-05.** Fixed in `tools/DemonBuildPlanGen/Program.cs`: each resolved anchor is now
-    joined to its real `DemonSpeciesCatalog` entry via the shared `(Side, GameTypeId)` identity —
+  - **Done 2026-09-05.** Fixed in `tools/CreatureBuildPlanGen/Program.cs`: each resolved anchor is now
+    joined to its real `CreatureSpeciesCatalog` entry via the shared `(Side, GameTypeId)` identity —
     both game-native fields, not a re-derived text/casing guess — and rekeyed to that entry's real
     `SpeciesId` before planning; an anchor with no match (content not yet shipped) is excluded rather
     than written under unjoinable text. Regenerated: **829 → 67 entries, all real lowercase runtime
@@ -832,7 +832,7 @@ it is named as such rather than absorbed.
     106, Vigor 107`, sum 1000) — the planner legitimately recomputed this from the corpus, which is
     smaller now that only shipped species are in it, so it differs from the number quoted below when
     this task was written against the stale, unfixed file.
-  - The defect: `data/generated/demons/_species-build-plan.json` is keyed in seedsmith anchor
+  - The defect: `data/generated/creatures/_species-build-plan.json` is keyed in seedsmith anchor
     PascalCase (`FumeShroom`, `NormalZombie`, `Peashooter`), while every runtime lookup asks for the
     compiled catalog's lowercase id (`fumeshroom`) through an **ordinal** dictionary. Exact overlap
     between the 829 plan keys and the 84 live species ids is **0** — so `SharesFor` misses for every
@@ -841,14 +841,14 @@ it is named as such rather than absorbed.
   - This is a **spec violation, not an unspecified seam**: `spec-redistribution-plan.md` §"Shape" says
     each entry is `speciesId -> { aptitudeId: sharePermille }`. The generator emitted anchor names.
   - Acceptance:
-    - [x] The generator (`tools/DemonBuildPlanGen`) emits the runtime `speciesId` as the key; the
-          committed plan file is regenerated and its keys match `DemonSpeciesCatalog`'s ids exactly —
+    - [x] The generator (`tools/CreatureBuildPlanGen`) emits the runtime `speciesId` as the key; the
+          committed plan file is regenerated and its keys match `CreatureSpeciesCatalog`'s ids exactly —
           confirmed by direct inspection: 67/67 keys are real lowercase catalog ids
     - [x] Normalized on the WRITE side (the `(Side, GameTypeId)` join in `Program.cs`), not papered
           over with a case-insensitive comparer at the read side
     - [~] `GET /api/aptitudes/species/{playerId}/fumeshroom` — checked live against a freshly
           published `dist\FusionRpg.Server` and still returned zeroes, for a real, DIFFERENT, and
-          CORRECT reason: this save's `fumeshroom` is level 1 (`DemonTypeSourceFromLevel(1) = 0`, so
+          CORRECT reason: this save's `fumeshroom` is level 1 (`CreatureTypeSourceFromLevel(1) = 0`, so
           budget is mathematically 0 regardless of the plan). None of the four real saves on this
           machine has any species past level 1 yet, so no live save can currently exhibit a non-zero
           baseline over HTTP — this is G5's territory, not a gap in this fix. The dedicated test below
@@ -858,7 +858,7 @@ it is named as such rather than absorbed.
           (new), asserting `SharesFor("fumeshroom")` is non-empty and sums to 1000 against the file on
           disk, not a fixture
   - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter SpeciesBuildPlan` — **13/13 green**
-  - Files: `tools/DemonBuildPlanGen/*`, `data/generated/demons/_species-build-plan.json` (regenerated),
+  - Files: `tools/CreatureBuildPlanGen/*`, `data/generated/creatures/_species-build-plan.json` (regenerated),
     a new real-corpus test
 
 - [x] **G2** An unresolvable plan key fails loud · **S** · `m4`
@@ -874,23 +874,23 @@ it is named as such rather than absorbed.
     input — `spec-redistribution-plan.md` §"Tuning": *"a missing key is a load rejection naming it,
     never a silent default"*. Extending that rule to the plan lookup is consistency, not new policy.
   - Acceptance:
-    - [x] A species in `DemonSpeciesCatalog` with no plan entry is reported — by a guard test —
+    - [x] A species in `CreatureSpeciesCatalog` with no plan entry is reported — by a guard test —
           **naming the species**:
           `SpeciesBuildPlanCatalogRealFileTests.Species_with_no_real_plan_entry_matches_the_named_checked_in_allowlist`
     - [x] The check cannot be satisfied by an empty corpus — it enumerates the live
-          `DemonSpeciesCatalog.All` and diffs against the real plan file, both loaded for real
+          `CreatureSpeciesCatalog.All` and diffs against the real plan file, both loaded for real
   - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter SpeciesBuildPlan` — **13/13 green**
-  - Files: `tests/FusionRpg.Core.Tests/Demons/SpeciesBuildPlanCatalogRealFileTests.cs` (new)
+  - Files: `tests/FusionRpg.Core.Tests/Creatures/SpeciesBuildPlanCatalogRealFileTests.cs` (new)
 
 - [x] **G3** Plan coverage — DONE 2026-09-07, species-build coverage is now 904/904 · **M (content)** · `m4`
-  - **Investigated and scoped 2026-09-05; partially closed 2026-09-07 (demon-corpus-self-heal Phase
+  - **Investigated and scoped 2026-09-05; partially closed 2026-09-07 (creature-corpus-self-heal Phase
     I) — 1 of 17 fixed, 16 remain, out of this task's own stated bound, not a code change.**
   - **2026-09-07 update:** `allpeater`'s blocker was its anchor's `aptitudePrimary: "unresolved"` —
     closed by Phase I's deterministic fallback (resolved to `Onslaught`, see
-    `tasks/demon-corpus-self-heal-todo.md`). The chain was re-run end to end to make this real, not
-    just theoretical: `dotnet run --project tools/DemonSpeciesGen` (840 species now expand, up from
-    829 — the 11 Phase I fixed all generate cleanly), `dotnet run --project tools/DemonSpeciesImport`
-    (live `demon_species` table: 829 -> 840 rows), `dotnet run --project tools/DemonBuildPlanGen`
+    `tasks/creature-corpus-self-heal-todo.md`). The chain was re-run end to end to make this real, not
+    just theoretical: `dotnet run --project tools/CreatureSpeciesGen` (840 species now expand, up from
+    829 — the 11 Phase I fixed all generate cleanly), `dotnet run --project tools/CreatureSpeciesImport`
+    (live `creature_species` table: 829 -> 840 rows), `dotnet run --project tools/CreatureBuildPlanGen`
     (67 -> **68 of 84** shipped species now planned). `SpeciesBuildPlanCatalogRealFileTests`'s
     `KnownMissingPlanSpecies` allowlist updated to match (`allpeater` removed) — the guard test
     itself caught the drift and named exactly what to fix, exactly as G2 designed it to. 13/13 green.
@@ -910,16 +910,16 @@ it is named as such rather than absorbed.
   - Verify: the same guard test as G2 — currently green against the allowlist; re-run after any
     authoring pass (a NEW anchor for each of these 16, at their exact game-type slot) and update
     `KnownMissingPlanSpecies` in the test to match
-  - Files: `data/seed/demons/species/**` (16 species need a NEW anchor authored; `AllPeater` needs
+  - Files: `data/seed/creatures/species/**` (16 species need a NEW anchor authored; `AllPeater` needs
     `aptitudePrimary` re-voted), regenerated plan
-  - **Findings (verified 2026-09-05):** ran `dotnet run --project tools/DemonBuildPlanGen` after the
+  - **Findings (verified 2026-09-05):** ran `dotnet run --project tools/CreatureBuildPlanGen` after the
     G1 fix and cross-checked every one of the 17 against the raw seed corpus (502 anchor files, 840
     anchors total: 829 resolved + 11 unresolved) by `(Side, GameTypeId)` — the same join G1 uses, not
     a second guess at a text transform. None of the 17 turned out to be casing-only; G1 did not shrink
     this list.
     - **1 of 17 — anchor present, unresolved (already named by the tool's own skip list):**
       `allpeater` (plant, gameTypeId 1347) matches anchor `AllPeater` in
-      `data/seed/demons/species/plant/projectile-organism.json`, which the post-G1 run's own console
+      `data/seed/creatures/species/plant/projectile-organism.json`, which the post-G1 run's own console
       output lists verbatim: `AllPeater (aptitudePrimary)`. This is the legitimate "still unresolved
       on a voted field" case `SpeciesBuildPlanCatalog.SharesFor`'s doc comment already describes —
       re-voting `aptitudePrimary` for this one anchor is all that is needed to close it, and that vote
@@ -950,7 +950,7 @@ it is named as such rather than absorbed.
       `aptitudePrimary` for `AllPeater`.
     - **Follow-up, 2026-09-07 (kept as history above; this is what changed since):** `AllPeater`'s
       `aptitudePrimary` did not get re-voted by the model — it was resolved by
-      `demon-corpus-self-heal`'s new deterministic fallback (Phase I, see that plan's own todo file),
+      `creature-corpus-self-heal`'s new deterministic fallback (Phase I, see that plan's own todo file),
       an explicit owner decision to invent a flat default rather than spend another model call, since
       no real derivation exists for this field either way. Effect on this list is the same either way
       (a resolved, non-"unresolved" `aptitudePrimary`): `allpeater` now has a real, non-empty plan
@@ -960,10 +960,10 @@ it is named as such rather than absorbed.
       one that was never authored for these 16 species' exact `(Side, GameTypeId)` slots.
     - **Follow-up, 2026-09-07 (verified against the real generated tree, not assumed): 15 of the 16
       missing anchors now exist for real.** T2.11's full classification run (840 -> 903 species,
-      `demon-standalone-todo.md`) authored real anchors and generated species for
+      `creature-standalone-todo.md`) authored real anchors and generated species for
       `cherrygatling, cherrypaperzombie, cornpot, dancepolzombie, dolldiamond, dollsilver, doublesnow,
       driverzombie, hypnojalapeno, hypnopeashooter, icecaltrop, ironpeazombie, jalagatling, jalapeno,
-      jalastar` — confirmed by grepping `data/generated/demons/*.json` for each `speciesId`, not by
+      jalastar` — confirmed by grepping `data/generated/creatures/*.json` for each `speciesId`, not by
       re-reading this task's own stale list. **`doublecherry` is the ONLY one of the 16 still
       missing**, and its blocker is narrower than "no anchor" now: the anchor exists and generates,
       but its `attackTempo` field has no deterministic fallback (unlike `threatBand`/`rarity`/
@@ -972,24 +972,24 @@ it is named as such rather than absorbed.
       computable), so closing it needs one real, small model call (1 species x 1 attribute), the
       same class of action as the now-closed classification run, just far smaller. Tracked, not run
       — matches the owner's own standing "I run classification passes myself" call
-      (`demon-standalone-todo.md`'s T2.11 handoff).
+      (`creature-standalone-todo.md`'s T2.11 handoff).
     - **Follow-up, 2026-09-07 (closed same day): `doublecherry` resolved, owner-directed manual pick,
       never a model call.** The owner queried the premise first — "DoubleCherry is a bomb, boom and
       disappear, no attack" — checked against the real captured stats
-      (`data/seed/demons/_dump/spawn-baseline.json`): `thePlantHealth: 300` (a real persistent HP
+      (`data/seed/creatures/_dump/spawn-baseline.json`): `thePlantHealth: 300` (a real persistent HP
       pool a one-shot bomb would not carry), `thePlantAttackInterval: 1.5`s, `attackDamage: 40` —
       it is a genuine repeating shooter (樱桃双发射手, "Cherry Twin Shooter"), not the vanilla
       one-shot Cherry Bomb; no balance buff needed, it was never weak, just unclassified. Set
       `attackTempo: "quick"` directly in the anchor
-      (`data/seed/demons/species/plant/cherry-based-artillery.json`), justified by the model's OWN
+      (`data/seed/creatures/species/plant/cherry-based-artillery.json`), justified by the model's OWN
       already-emitted (if vote-deadlocked, 2 kit-shape attempts, still `"unresolved"`) evidence for
       this exact species — `reason: "...its high fire rate..."`, `traits: ["Dual-barreled",
       "Burst-fire", ...]` — one rung below this family's own more extreme "-Gatling" siblings.
       Stamped `_provenance.confidence.attackTempo: "deterministic-fallback"` (this repo's own
       established tag for "resolved by something other than a real LLM vote", the same tag Phase
       I's aptitude/rarity/threat-band fallbacks use — never disguised as a real model judgment).
-      Real chain re-run end to end: `DemonSpeciesGen` (903 -> 904), `DemonSpeciesImport` (1 written,
-      903 unchanged), `DemonBuildPlanGen` (84/84 shipped species now planned, up from 83/84),
+      Real chain re-run end to end: `CreatureSpeciesGen` (903 -> 904), `CreatureSpeciesImport` (1 written,
+      903 unchanged), `CreatureBuildPlanGen` (84/84 shipped species now planned, up from 83/84),
       `fusion-recipe-reconcile --deterministic-only` (774 -> 775 eligible outputs, 758 -> 759
       deterministic recipes, Almanac's own 16 deficits unaffected — DoubleCherry is Fused, not
       Almanac; `--check` clean).
@@ -998,38 +998,38 @@ it is named as such rather than absorbed.
           **904/904**
     - [x] G2's guard passes naming zero species — `SpeciesBuildPlanCatalogRealFileTests`'s
           `KnownMissingPlanSpecies` allowlist is now empty (13/13 green)
-  - Verified: `dotnet test tests/FusionRpg.Core.Tests --filter "FusionRecipe|DemonSpecies|
-    SpeciesBuildPlan|SpeciesCatalogDiff"` 39/39; full `Demons`-namespace filter 3239/3239;
+  - Verified: `dotnet test tests/FusionRpg.Core.Tests --filter "FusionRecipe|CreatureSpecies|
+    SpeciesBuildPlan|SpeciesCatalogDiff"` 39/39; full `Creatures`-namespace filter 3239/3239;
     `python -m pytest tools/seedsmith/tests/test_fusion_recipe.py` 31/31; `guard-dal.ps1` clean.
-  - Files: `data/seed/demons/species/plant/cherry-based-artillery.json` (anchor edit),
-    `data/generated/demons/{DoubleCherry.json (new),_species-build-plan.json,_fusion-recipes.json}`,
-    `tests/FusionRpg.Core.Tests/Demons/{SpeciesBuildPlanCatalogRealFileTests.cs,
-    Fusion/FusionRecipeReconcileTests.cs,DemonRecipeCatalogTests.cs}`,
+  - Files: `data/seed/creatures/species/plant/cherry-based-artillery.json` (anchor edit),
+    `data/generated/creatures/{DoubleCherry.json (new),_species-build-plan.json,_fusion-recipes.json}`,
+    `tests/FusionRpg.Core.Tests/Creatures/{SpeciesBuildPlanCatalogRealFileTests.cs,
+    Fusion/FusionRecipeReconcileTests.cs,CreatureRecipeCatalogTests.cs}`,
     `tools/seedsmith/tests/test_fusion_recipe.py`.
   - ### ⛔ A SECOND, more consequential bug found and fixed the same session — DONE 2026-09-07
-    - **The owner asked directly: "why did we still stuck at 84 demon, dont you retire and update
+    - **The owner asked directly: "why did we still stuck at 84 creature, dont you retire and update
       stale documents?"** — spotted from this task's own "84/84 shipped species" framing right after
       the DoubleCherry fix above, and it was the right instinct: 84 was never the real live roster
-      size, it was `tools/DemonBuildPlanGen`'s own stale hardcoded input.
-    - **Root cause:** `DemonBuildPlanGen/Program.cs:102` called
-      `DemonSpeciesCatalog.ConfigureFromCompiledDefault()` — the compiled, 84-species snapshot from
+      size, it was `tools/CreatureBuildPlanGen`'s own stale hardcoded input.
+    - **Root cause:** `CreatureBuildPlanGen/Program.cs:102` called
+      `CreatureSpeciesCatalog.ConfigureFromCompiledDefault()` — the compiled, 84-species snapshot from
       BEFORE `catalog-runtime`'s real flip (2026-09-05, per that program's own todo file). That flip
       already moved the real, live game (`Server/Program.cs:350`:
-      `DemonSpeciesCatalog.Configure(store.BuildDemonSpeciesSnapshot())`,
+      `CreatureSpeciesCatalog.Configure(store.BuildCreatureSpeciesSnapshot())`,
       `Injector/Host/RpgHost.cs`) onto the full store-backed roster (904 species today) — this ONE
       tool alone never followed. Confirmed live, not theorized: a real player's real roster (checked
       during F2.5's own live click-through, same session) minted species like `biggloom`,
       `bamboodragon`, `abyssswordstar`, `legionsniperzombie` — none of which exist anywhere in the
-      compiled 84-species `DemonSpeciesCatalog.Generated.cs` (grepped directly, confirmed absent).
+      compiled 84-species `CreatureSpeciesCatalog.Generated.cs` (grepped directly, confirmed absent).
     - **Real impact:** `SpeciesBuildPlanCatalog.SharesFor(speciesId)` (consumed live at
       `RpgStore.Aptitudes.cs:209`, for ANY real player's ANY real species) was silently returning
       `EmptyShares` for 820 of 904 real, playable species — indistinguishable from "not yet
       classified." This whole session's earlier "84/84 shipped species" framing (this task's own G3
       entry, closed minutes before the owner's question) was ITSELF built on the same stale premise
       and would have shipped as a false "complete" without the owner catching it.
-    - **Fix:** `DemonBuildPlanGen` no longer touches `DemonSpeciesCatalog` at all. It now builds the
+    - **Fix:** `CreatureBuildPlanGen` no longer touches `CreatureSpeciesCatalog` at all. It now builds the
       `(Side, GameTypeId) -> runtime speciesId` join table by reading the SAME committed
-      `data/generated/demons/*.json` tree the live roster is actually built from, via the SQL-free
+      `data/generated/creatures/*.json` tree the live roster is actually built from, via the SQL-free
       `ConcreteSpeciesSeedReader`/`ConcreteSpeciesMapper` pair the Injector already uses for exactly
       this reason (no SQL access, no `--db`/`FUSIONRPG_DATA` needed) — never a second, hand-rolled
       mapping. Re-run for real: **904 resolved anchor(s) matched a live species; 0 excluded** (up
@@ -1038,9 +1038,9 @@ it is named as such rather than absorbed.
       same file) — rewritten to scope every test to `RealCorpusFixture.Snapshot` (the real,
       store-backed 904-species roster `FusionRecipeReconcileTests` already builds and reuses),
       never the compiled default.
-    - Verified: `dotnet run --project tools/DemonBuildPlanGen -- --check` clean, 904 species match;
-      `dotnet test tests/FusionRpg.Core.Tests --filter "SpeciesBuildPlan|FusionRecipe|DemonSpecies|
-      SpeciesCatalogDiff"` 39/39; full `Demons`-namespace filter 3239/3239; `guard-dal.ps1` clean.
+    - Verified: `dotnet run --project tools/CreatureBuildPlanGen -- --check` clean, 904 species match;
+      `dotnet test tests/FusionRpg.Core.Tests --filter "SpeciesBuildPlan|FusionRecipe|CreatureSpecies|
+      SpeciesCatalogDiff"` 39/39; full `Creatures`-namespace filter 3239/3239; `guard-dal.ps1` clean.
       `FusionRpg.Server.Tests` (built to an alternate `-p:BaseOutputPath` to avoid a lock held by
       this same session's own F2.5 live-check server, still running with a real connected game
       client — never stopped for this) `--filter "SpeciesBuild|Aptitude"`: 29/30; the one failure
@@ -1052,27 +1052,27 @@ it is named as such rather than absorbed.
       species (152‰ Onslaught baked in from the OLD 84-only sample vs. 150‰ now on the real 904 —
       close, not identical, exactly what "the sample was too small" predicts) — not a regression, a
       correction.
-    - Files: `tools/DemonBuildPlanGen/Program.cs`,
-      `tests/FusionRpg.Core.Tests/Demons/SpeciesBuildPlanCatalogRealFileTests.cs`,
-      `data/generated/demons/_species-build-plan.json` (904 entries, up from 84).
+    - Files: `tools/CreatureBuildPlanGen/Program.cs`,
+      `tests/FusionRpg.Core.Tests/Creatures/SpeciesBuildPlanCatalogRealFileTests.cs`,
+      `data/generated/creatures/_species-build-plan.json` (904 entries, up from 84).
 
 - [x] **G4** A real door to contract binding · **S** · `m9` ⚠️ **crosses program boundary**
   - **Done 2026-09-05.** `EmptyState` gained an optional `action?: ReactNode` slot (GG-17, "empty
     states teach and offer the next action" — cited in this codebase's own principles doc but never
     actually built for an actionable case until now); Pacts' existing hint text is unchanged, now paired
-    with a real "Open Demons roster" button using the exact `useNavigate()` pattern already proven by
+    with a real "Open Creatures roster" button using the exact `useNavigate()` pattern already proven by
     `CommandersLayer.tsx`/`CreaturesLayer.tsx` — no new navigation mechanism introduced. `hasAnyContract`
     gating itself was left untouched, as scoped: this fixes the path TO a first contract, not the lock.
   - The only way into a species build is the **Pacts** rail layer, gated on `hasAnyContract`
-    (`railState.ts:57,72`). The only UI that binds a contract is `DemonsPage` at `/demons`
+    (`railState.ts:57,72`). The only UI that binds a contract is `CreaturesPage` at `/creatures`
     (`useBindContract`, its sole call site) — and **nothing in the app links there**: no rail entry,
     no button, no `navigate` call outside the route definition. Pacts' own empty state tells the player
-    to "bind a demon's contract from the Demons roster", naming a page they cannot reach.
-  - Confirmed in real data: **0 demons and 0 contracts across all four save databases**, despite real
+    to "bind a creature's contract from the Creatures roster", naming a page they cannot reach.
+  - Confirmed in real data: **0 creatures and 0 contracts across all four save databases**, despite real
     play history in the same saves (Dave 6, zombies 25, plants 10). The path has never been walked
     because it cannot be.
   - **Decision, not an open question:** put the door on the Pacts empty state that already names it —
-    the smallest honest fix, inventing no new information architecture. A Demons rail entry is the
+    the smallest honest fix, inventing no new information architecture. A Creatures rail entry is the
     alternative if the owner wants it discoverable before a first contract exists; one line either way,
     and it does not block this task.
   - ⚠️ This is the **shell/rail's** surface, not `species-build`'s. It is named here because it is the
@@ -1080,7 +1080,7 @@ it is named as such rather than absorbed.
   - Acceptance:
     - [x] A player who has never bound a contract can reach the binding UI by clicking, from a cold
           start, without typing a URL — proven by a new test clicking the button and asserting
-          `navigate("/demons")` was called
+          `navigate("/creatures")` was called
     - [x] The Pacts empty-state hint links to the page it names
   - Verify: `npm run test -- PactsLayer` — **11/11 green** (10 existing + 1 new)
   - Files: `ui/EmptyState.tsx`, `layers/pacts/PactsLayer.tsx`, `layers/pacts/PactsLayer.test.tsx`
@@ -1131,7 +1131,7 @@ it is named as such rather than absorbed.
 
 ### ✅ Checkpoint 6 — a real player can actually use it
 - [x] From a cold start with no contracts, a player reaches a species build by clicking only (G4) —
-      proven by a real click-through test, `navigate("/demons")` asserted
+      proven by a real click-through test, `navigate("/creatures")` asserted
 - [x] A levelled species shows its **authored** lean, not zeroes (G1) — proven against the real
       committed plan file and the real compiled catalog, not a hand-built fixture. **Not** re-provable
       through a live HTTP call today: no species on any of this machine's four real saves has reached
@@ -1143,7 +1143,7 @@ it is named as such rather than absorbed.
       (G2, G3) — **the guard mechanism is done and green (G2)**; the coverage itself is **not** (G3):
       **updated 2026-09-07, T2.11's full classification run closed 15 of the 16 missing anchors** —
       903 of 904 species now have a real plan entry (`AllPeater`'s `aptitudePrimary` was separately
-      closed by `demon-corpus-self-heal` Phase I's deterministic fallback). Only `doublecherry`
+      closed by `creature-corpus-self-heal` Phase I's deterministic fallback). Only `doublecherry`
       remains, blocked on its `attackTempo` field (a real classify-pipeline attribute, no deterministic
       fallback exists) needing one small model call. The guard correctly names it today rather than
       staying silently green.
@@ -1166,7 +1166,7 @@ it is named as such rather than absorbed.
 ## 🟡 `species-build` — PLAYABLE FOR 68 OF 84 SPECIES; ONE CONTENT GAP LEFT (was 67/84 — `allpeater` closed 2026-09-07)
 
 All ten modules — `resolver-memo`, `budget-source`, `species-xp`, `redistribution-plan`,
-`demon-type-allocation`, `allocation-transport`, `species-respec`, `zomboss-adaptive`,
+`creature-type-allocation`, `allocation-transport`, `species-respec`, `zomboss-adaptive`,
 `allocation-surface`, `battle-allocation` — are built and tested, and Phases 0–5 each closed with cited
 evidence. Every real defect found *while building* (the revert-then-reoverride exploit, the
 expedition-retry state-corruption bug, the two web draft-timing races, the missing `AptitudesUpdated`
@@ -1191,10 +1191,10 @@ still `unresolved` on `aptitudePrimary`. Closing this is a seedsmith authoring/v
 scoped in G3's own findings — not a code task, and not this session's to do without inventing
 classification data the rest of this repo's rules forbid inventing.
 
-**2026-09-07 update: `AllPeater` closed, 16 remain.** `demon-corpus-self-heal` Phase I gave
+**2026-09-07 update: `AllPeater` closed, 16 remain.** `creature-corpus-self-heal` Phase I gave
 `aptitudePrimary` a deterministic fallback (an owner-directed invented default, not a vote) for the
-whole corpus, which included `AllPeater`. Re-running the real chain (`DemonSpeciesGen` ->
-`DemonSpeciesImport` -> `DemonBuildPlanGen`) confirmed it end to end: 67/84 -> **68/84**, verified
+whole corpus, which included `AllPeater`. Re-running the real chain (`CreatureSpeciesGen` ->
+`CreatureSpeciesImport` -> `CreatureBuildPlanGen`) confirmed it end to end: 67/84 -> **68/84**, verified
 by the real, updated guard test (`SpeciesBuildPlanCatalogRealFileTests`, 13/13). The other 16 are
 untouched — a missing anchor still needs authoring, which no fallback can manufacture.
 

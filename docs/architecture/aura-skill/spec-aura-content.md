@@ -130,7 +130,7 @@ Two further facts make element slots **broken**, not merely equal, for this feat
 
 **`PatronAuraOverlay` is not a counter-precedent.** Its element *is* its content — `PatronPolicy.cs:5-6`:
 *"per-mille combat bonuses on **the patron's element channels**."* The conditionality is the intended
-flavour of a patron demon's identity. An **aptitude** has no element; Might and Bulwark are not
+flavour of a patron creature's identity. An **aptitude** has no element; Might and Bulwark are not
 elements. The matching precedent is `BattleStatComposer.cs:8-11`: *"**level formulas fill the omni
 halves**, element affinity fills the actor's own element channels."* An aptitude aura is universal.
 

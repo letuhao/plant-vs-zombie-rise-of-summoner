@@ -46,7 +46,7 @@ public class TreeRespecStoreTests : IDisposable
         _store.AwardSouls(PlayerId, 1000, "seed", "bank-1");
         _store.SaveTreeNodeState(AllocationScope.Commander, "player:1",
             new Dictionary<string, long> { ["skill.might-off-t1-n0"] = 0 });
-        _store.SaveTreeNodeState(AllocationScope.UniqueDemon, "instance:1",
+        _store.SaveTreeNodeState(AllocationScope.UniqueCreature, "instance:1",
             new Dictionary<string, long> { ["skill.might-off-t1-n0"] = 0 });
 
         var outcome = _store.RespecTreeState(PlayerId, AllocationScope.Commander, "player:1", "r-1");
@@ -54,7 +54,7 @@ public class TreeRespecStoreTests : IDisposable
         Assert.True(outcome.Ok, outcome.Reason);
         Assert.Empty(_store.LoadTreeState(AllocationScope.Commander, "player:1"));
         // The OTHER scope key is untouched -- a respec is never a roster-wide reset.
-        Assert.NotEmpty(_store.LoadTreeState(AllocationScope.UniqueDemon, "instance:1"));
+        Assert.NotEmpty(_store.LoadTreeState(AllocationScope.UniqueCreature, "instance:1"));
     }
 
     [Fact] // respec_is_never_refused

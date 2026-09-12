@@ -12,8 +12,8 @@ Read this session, in the contract's §5 order: [item-ideal.md](../item-ideal.md
 `src/FusionRpg.Core/Effects/Atoms/ContainerRow.cs`,
 `src/FusionRpg.Core/Effects/Atoms/Instantiator.cs`,
 `src/FusionRpg.Core/Effects/Atoms/CurveTable.cs`,
-`src/FusionRpg.Core/Demons/DemonRarity.cs`, `src/FusionRpg.Core/Demons/SummonRoller.cs`,
-`src/FusionRpg.Core/Demons/DemonMaterialCatalog.cs`.
+`src/FusionRpg.Core/Creatures/CreatureRarity.cs`, `src/FusionRpg.Core/Creatures/SummonRoller.cs`,
+`src/FusionRpg.Core/Creatures/CreatureMaterialCatalog.cs`.
 
 **Everything numeric in §3.5 and §7 was simulated, not asserted.** The overlap this lane claims is a
 measured property of the proposed bands, and the method is written down so it can be re-run.
@@ -69,7 +69,7 @@ This lane is unusual: the table it owns **shipped, empty, and unread.**
 | The roll path reads the **container's** `pool_rolls`, never the rarity row's | `Instantiator.cs:128,139` |
 | `CurveInput.Rarity` exists in shipped code — a curve *can* scale a magnitude by rarity ordinal | `CurveTable.cs:4-9` |
 | `effect_instance` has **no rarity column**. Rarity currently lives on the template only | `RpgStore.AtomInstances.cs:56-63` |
-| `DemonRarity` is a four-value C# enum, hard-coded into summon rates, pity, fusion trait slots, soul earn, and the `shard.{rarity}` material ids | `DemonRarity.cs:3-9`; `SummonRoller.cs:22-30`; `DemonMaterialCatalog.cs:18` |
+| `CreatureRarity` is a four-value C# enum, hard-coded into summon rates, pity, fusion trait slots, soul earn, and the `shard.{rarity}` material ids | `CreatureRarity.cs:3-9`; `SummonRoller.cs:22-30`; `CreatureMaterialCatalog.cs:18` |
 | Summon pity already ships: `PityState(PullsSinceEpic, PullsSinceLegendary)`, epic hard 25, legendary soft ramp from 41, hard 55, 10-pull rare floor | `SummonRoller.cs:8-30,63-80` |
 
 Three consequences drive the whole design:
@@ -296,7 +296,7 @@ implementable without contradicting the rule below.
 
 | Option | Shape | Verdict |
 |---|---|---|
-| **A — four rungs, shared with `DemonRarity`** | common / rare / epic / legendary | Rejected as *items shrinking to four*. It defies OD4's "long ladder" for zero item-side gain. **The mirror move — `DemonRarity` growing to this document's ten — was reversed into acceptance 2026-09-01** (§4.3, T0.2): the five consumers named here (summon rates, pity thresholds, `FusionRoller.SlotsFor`, `SoulEarnPolicy.DiscoveryDelta`, `shard.{rarity}`) are exactly `demon-seed` T4.1–T4.3's task list, done as a reviewed migration rather than avoided |
+| **A — four rungs, shared with `CreatureRarity`** | common / rare / epic / legendary | Rejected as *items shrinking to four*. It defies OD4's "long ladder" for zero item-side gain. **The mirror move — `CreatureRarity` growing to this document's ten — was reversed into acceptance 2026-09-01** (§4.3, T0.2): the five consumers named here (summon rates, pity thresholds, `FusionRoller.SlotsFor`, `SoulEarnPolicy.DiscoveryDelta`, `shard.{rarity}`) are exactly `creature-seed` T4.1–T4.3's task list, done as a reviewed migration rather than avoided |
 | **B — five rungs, D2 shape** | normal / magic / rare / set / unique | Rejected. Familiar, but it mixes a *power* axis with two *authoring* axes (set, unique), which is exactly the confusion §3.6 exists to prevent |
 | **C — ten-rung staircase** ✅ | §3.3 | **Recommended.** Longest legible chain the machinery admits (§3.4), and the alternating steps give a one-sentence upgrade story |
 | **D — no rungs, a continuous quality score** | one 0–1000 number | Rejected. Maximum gradation, zero legibility: nothing to name in a tooltip, nothing for I12 to weight, nothing for I4/I6 to key a budget on. A score without rungs moves the whole registry problem into a formula |
@@ -332,36 +332,36 @@ design ships without it (§9.13).
 |---|---|
 | Parallel ladders per category (gear / gem / charm / material) | Rejected. Four palettes, four sort orders, and an unanswerable "is an epic gem better than a Fused sword" |
 | **One ladder; every category free to use a subset of the rungs** ✅ | **Recommended.** The `ordinal` orders everything, and the count/tier columns are simply unread by categories with no pool (§6.2) |
-| Share `DemonRarity` | Rejected — §4.1 option A |
+| Share `CreatureRarity` | Rejected — §4.1 option A |
 
 **Non-equipment, concretely.** Materials, gems, charms and consumables all use the same ten rungs; they
 read only `ordinal`, `color_hex`, `pip_count` and `display_key`, because those are the columns whose
 consumer (the UI) always exists. Nothing forces every category to use all ten — materials will
 plausibly stop at 70.
 
-**Reversed 2026-09-01 (`seed-to-concrete` T0.2, owner Q24: *"Migrate `DemonRarity` to 10 values
-now"*).** Demons no longer keep a separate four-value ladder — they adopt this document's own
+**Reversed 2026-09-01 (`seed-to-concrete` T0.2, owner Q24: *"Migrate `CreatureRarity` to 10 values
+now"*).** Creatures no longer keep a separate four-value ladder — they adopt this document's own
 ten-rung ladder directly, the same `rarity_id`/ordinal/colour/pip columns every other category reads
-(§4.3's "one ladder; every category free to use a subset of the rungs" already covers this; demons
-simply stop being the one holdout). The reason to reverse: `demon-seed` (T4.1 `rarity-migration`)
-needs demon rarity on the same closed inventory `power-scale` and `threat-band` already read from, and
+(§4.3's "one ladder; every category free to use a subset of the rungs" already covers this; creatures
+simply stop being the one holdout). The reason to reverse: `creature-seed` (T4.1 `rarity-migration`)
+needs creature rarity on the same closed inventory `power-scale` and `threat-band` already read from, and
 a second four-value ladder living beside it was exactly the "two ladders that can be confused" problem
-§3.3's design was built to avoid — it just took until the demon program actually needed magnitude
+§3.3's design was built to avoid — it just took until the creature program actually needed magnitude
 parity with items to become visible.
 
-The four-row band map below is **kept as a migration shim only** — the lookup `DemonMigration.LegacyRarityToRung`
-uses once, at data-migration time (T4.3), to place every existing `DemonRarity.{Common,Rare,Epic,Legendary}`
+The four-row band map below is **kept as a migration shim only** — the lookup `CreatureMigration.LegacyRarityToRung`
+uses once, at data-migration time (T4.3), to place every existing `CreatureRarity.{Common,Rare,Epic,Legendary}`
 value onto the new ten-rung ladder. It is not a permanent wall between two systems, and no new code
 may branch on it after the migration completes:
 
-| Old `DemonRarity` | New rung (ordinal) | Migration rule |
+| Old `CreatureRarity` | New rung (ordinal) | Migration rule |
 |---|---|---|
 | `Common` | 10–30 | maps to the band's **lowest** rung (`chaff`, ordinal 10) — nobody gains value on migration |
 | `Rare` | 40–60 | maps to `cultivated`, ordinal 40 |
 | `Epic` | 70–80 | maps to `heirloom`, ordinal 70 |
 | `Legendary` | 90–100 | maps to `sunwoven`, ordinal 90 |
 
-T4.1's guard test (forbidding bare int↔`DemonRarity` casts and relational comparisons against named
+T4.1's guard test (forbidding bare int↔`CreatureRarity` casts and relational comparisons against named
 members) is what keeps this shim from becoming a silent second ladder again.
 
 ### 4.4 THE REGISTRY — a table, not a widening row
@@ -397,7 +397,7 @@ the key name, and the constraint the value must satisfy.
 | `drop_weight_default` | baseline weight per source | I12 | **I12** | ✅ set — item-ideal.md's ten-rung re-derivation, `data/tuning/item-rarity.v1.json` |
 | `pity_guarded` | 0/1 — does a counter guarantee this rung | I12 | **I1** picks the rungs, **I12** the thresholds | set — 1 at 70 and 90 (§3.8) |
 | `power_ceiling` | ‰-of-top price share, for module 9's `ceilingFor` | I3 (D11 lint) | **I1** | ✅ **set — provisional**, ratio-exact under a uniform coefficient rescale (item-ideal.md §2h.2 #8) |
-| `salvage_yield` | material quantity on salvage | I9 / I13 | **I9** | awaiting — must **not** reuse `shard.{DemonRarity}` ids (§9.8) |
+| `salvage_yield` | material quantity on salvage | I9 / I13 | **I9** | awaiting — must **not** reuse `shard.{CreatureRarity}` ids (§9.8) |
 | ~~`charm_potency`~~ | — | — | — | ✅ **NOT REGISTERED (item-ideal.md 2026-09-04, `rarity-bands`).** I10 defines it; `spec-set-charm-gen.md` never reads it. SC7 forbids registering a key ahead of its consumer — module 13 registers it **with** its consumer when it needs it |
 | — | **nothing.** Rarity is not an equip gate | I11 | **I1** | set — negative registration |
 
@@ -753,8 +753,8 @@ are drawn and which tiers are legal. A rung-n+1 draw is a superset draw from the
    operation log**, so SC5's *origin seed + ordered ops* reproduction actually holds (§3.7).
 7. **I7 — reroll cost must scale with affix count, not with rung alone.** §8.1's entire defence against
    dead low rungs depends on a low-rung item being cheap to craft *on*.
-8. **I9 — a salvage material namespace that does not overload `shard.{DemonRarity}`.**
-   `DemonMaterialCatalog.cs:18` generates `shard.common|rare|epic|legendary` from the *demon* ladder.
+8. **I9 — a salvage material namespace that does not overload `shard.{CreatureRarity}`.**
+   `CreatureMaterialCatalog.cs:18` generates `shard.common|rare|epic|legendary` from the *creature* ladder.
    Item salvage keyed on a ten-rung ladder needs its own ids — this lane suggests
    `dust.{item_rarity_id}` — and reusing `shard.*` would silently fuse two ladders that §4.3 keeps
    apart.

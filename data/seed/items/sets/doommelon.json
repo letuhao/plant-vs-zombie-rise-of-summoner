@@ -25,7 +25,7 @@
       "id": "set.doommelon-001",
       "nameKey": "set.cinder-crater",
       "name": "Cinder Crater",
-      "themeKey": "demon.doommelon",
+      "themeKey": "creature.doommelon",
       "members": [
         {
           "role": "armament-primary",

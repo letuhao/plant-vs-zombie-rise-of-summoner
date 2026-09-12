@@ -5,7 +5,7 @@ import type { Pending } from "./pending";
  * (`src/lib/bus/*.ts`) directly (game-gui-map.md's contract section, T4's
  * guard). Authored against the eleven-entity ladder in
  * `docs/design/README.md` §6: Atom, Container, Actor, Status, Element,
- * Channel, Resource, Power, Sector, Contract (the SSOT's "Demon + contract"
+ * Channel, Resource, Power, Sector, Contract (the SSOT's "Creature + contract"
  * rung), Run.
  *
  * That entity list is itself flagged incomplete (item/ and action/ were
@@ -891,8 +891,8 @@ export type TurnEventView = {
 };
 
 // ===========================================================================
-// 10. Contract — the SSOT's "Demon + contract" rung. Chip · Row · Card · Panel.
-//     DTO-grounded already (ContractRowDto + DemonProfileDto joined by
+// 10. Contract — the SSOT's "Creature + contract" rung. Chip · Row · Card · Panel.
+//     DTO-grounded already (ContractRowDto + CreatureProfileDto joined by
 //     instanceId) — the gap here is compositional, not missing fields.
 // ===========================================================================
 
@@ -906,7 +906,7 @@ export type ContractView = {
   personality: string;
   upkeepPerDay: number;
   deployable: boolean;
-  displayName: Pending<string>; // species catalog name, joined separately (DemonCatalogDto)
+  displayName: Pending<string>; // species catalog name, joined separately (CreatureCatalogDto)
 };
 
 // ===========================================================================
@@ -1324,7 +1324,7 @@ export type QuestView = {
  *
  * **No unified "extraction result" producer exists** — confirmed: `ExtractionSettlement`,
  * `DelveSoulLedger` and `DelveLoot.InstantiateBossFirstClearGrant` (first-clear grants) are three
- * separate producers with no glue; "level-ups" and "joins" (§7's "Drops · level-ups · a wild demon
+ * separate producers with no glue; "level-ups" and "joins" (§7's "Drops · level-ups · a wild creature
  * joining · a first clear") have no producer anywhere at the extraction boundary at all. Every one of
  * those stays `Pending`, named, rather than invented.
  */

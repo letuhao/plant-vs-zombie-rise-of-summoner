@@ -80,7 +80,7 @@ that already exists:
 ElementOf(ptrKey) :=
   1. cache hit?                    -> return it.        cache key = (MatchKey, ptrKey)
   2. board lookup                  -> (side, gameTypeId)
-  3. (side, gameTypeId) -> species -> DemonSpeciesDef
+  3. (side, gameTypeId) -> species -> CreatureSpeciesDef
   4. def                           -> ActorElementTypes.Create(primary, secondary == primary ? null : secondary)
   5. miss at 2 or 3                -> ActorElementTypes.Neutral, reported once per (MatchKey, typeId)
   cache and return.
@@ -94,23 +94,23 @@ per-hit board scan the 2026-08 perf audit blamed is the very line the element lo
 it removes the scan from the hit path for **both** the element resolve and the `side` the patron aura
 rides on (`:33-34`).
 
-**Step 3's key is `(Side, GameTypeId)`, and that pair is unique.** `DemonSpeciesDef` carries `Side` and
-`GameTypeId` (`src/FusionRpg.Core/Demons/DemonSpeciesCatalog.cs:11-14`), and across the 84 shipped
+**Step 3's key is `(Side, GameTypeId)`, and that pair is unique.** `CreatureSpeciesDef` carries `Side` and
+`GameTypeId` (`src/FusionRpg.Core/Creatures/CreatureSpeciesCatalog.cs:11-14`), and across the 84 shipped
 species **no `(side, gameTypeId)` pair repeats** — checked mechanically against
-`DemonSpeciesCatalog.Generated.cs`, 84 rows, 84 distinct pairs. `GameTypeId` alone is **not** unique
+`CreatureSpeciesCatalog.Generated.cs`, 84 rows, 84 distinct pairs. `GameTypeId` alone is **not** unique
 (`polevaulterzombie` and `wallnut` are both `3`), so a `typeId`-only key would silently give plants
 zombie elements.
 
-> **The roster is store-backed and can change.** `DemonSpeciesCatalog.All` reads what `species-import`
-> wrote (`DemonSpeciesCatalog.cs:44-47`) and `Validate` enforces unique `SpeciesId` and unique
-> `DemonTypeId` — **not** unique `(Side, GameTypeId)`. So the index this module builds must state its
+> **The roster is store-backed and can change.** `CreatureSpeciesCatalog.All` reads what `species-import`
+> wrote (`CreatureSpeciesCatalog.cs:44-47`) and `Validate` enforces unique `SpeciesId` and unique
+> `CreatureTypeId` — **not** unique `(Side, GameTypeId)`. So the index this module builds must state its
 > tie-break rather than assume one: **on a duplicate pair, take the lowest `SpeciesId` by ordinal and
 > report the collision once at index build.** Deterministic beats arbitrary, and a reported collision
 > is a roster defect someone can fix.
 
 **Step 4 mirrors `BattleEngine.cs:36-38` verbatim**, and the collapse rule is belt-and-braces on this
-path: `DemonSpeciesCatalog.Validate` already refuses `secondary == primary`
-(`DemonSpeciesCatalog.cs:95-96`), so a species-sourced element can never hit it. **Write it anyway** —
+path: `CreatureSpeciesCatalog.Validate` already refuses `secondary == primary`
+(`CreatureSpeciesCatalog.cs:95-96`), so a species-sourced element can never hit it. **Write it anyway** —
 §2.2's rule is that the two runtimes construct identically, and a corner case one side handles and the
 other does not is how they drift.
 

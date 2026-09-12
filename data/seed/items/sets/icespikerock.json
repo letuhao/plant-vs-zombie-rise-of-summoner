@@ -25,7 +25,7 @@
       "id": "set.icespikerock-001",
       "nameKey": "set.glacial-spike-sovereign",
       "name": "Glacial Spike Sovereign",
-      "themeKey": "demon.icespikerock",
+      "themeKey": "creature.icespikerock",
       "members": [
         {
           "role": "armament-primary",

@@ -260,7 +260,7 @@ produced an anchored affix is gone, and the item is no longer reproducible from 
 | Resource | What exists | Where |
 |---|---|---|
 | **Souls** — the soft currency | `rpg_soul_balances` / `rpg_soul_ledger`, with an atomic idempotent spend keyed on `(player, reason, correlationId)` | `src/FusionRpg.Data/Sqlite/RpgStore.Souls.cs:178-215` |
-| **Materials** — the gating resource | `rpg_demon_materials(player_id, material_id, qty)`, seeded with `essence.{element}` and `shard.{rarity}` | `src/FusionRpg.Data/Sqlite/RpgStore.cs:520`; `src/FusionRpg.Core/Demons/DemonMaterialCatalog.cs:17,19` |
+| **Materials** — the gating resource | `rpg_creature_materials(player_id, material_id, qty)`, seeded with `essence.{element}` and `shard.{rarity}` | `src/FusionRpg.Data/Sqlite/RpgStore.cs:520`; `src/FusionRpg.Core/Creatures/CreatureMaterialCatalog.cs:17,19` |
 
 `TrySpendSouls` refuses without writing, and a replayed correlation returns the original success without
 double-spending (`RpgStore.Souls.cs:191-201`). That is exactly the semantics a recorded reroll operation
@@ -405,7 +405,7 @@ cost. That is an owner call (§13.7), not mine.
 | `effect_container.pool_rolls / min_tier / max_tier / rarity` | The invariant a reroll must preserve |
 | `effect_instance.roll_seed / catalog_revision / origin` | Origin state. **`origin` is not rewritten** — an item that dropped stays `drop`; how it changed afterwards is the log's job |
 | `rpg_soul_ledger` idempotent spend | Payment, in one transaction with the log append |
-| `rpg_demon_materials` | Material spend |
+| `rpg_creature_materials` | Material spend |
 
 ### 7.2 What is new
 
@@ -775,7 +775,7 @@ before charging, which is SC6 applied to a player-facing action rather than to a
 5. **Where does the bench live?** SC8 says every mechanic must work with the PvZ game closed, which this
    does. But may a player reroll *during* a lawn session? §9.3 says no while a match is live. That is my
    call and it is reversible.
-6. **Roster-scale economy.** The ideal's §8 question lands hard here: twenty demons × twelve slots is 240
+6. **Roster-scale economy.** The ideal's §8 question lands hard here: twenty creatures × twelve slots is 240
    items. At these prices, rerolling is a thing you do to two or three items, ever. If the intent is that
    most equipped gear gets optimised, every number in §5 is an order of magnitude too high. **This should
    be answered before I9 fixes costs.**
@@ -796,7 +796,7 @@ before charging, which is SC6 applied to a player-facing action rather than to a
 [x] Every factual claim about the repo cites file:line.
 [x] I verified claims against CODE, not comments — Instantiator.Draw, Instantiator.Freeze,
     ContainerValidator, AtomRejection, BindGate, RpgStore.AtomInstances DDL and the orphan
-    sweep, RpgStore.Souls.TrySpendSouls, DemonMaterialCatalog were all opened.
+    sweep, RpgStore.Souls.TrySpendSouls, CreatureMaterialCatalog were all opened.
 [x] I read the surrounding section of every rule I quoted.
 [ ] I tested (not assumed) any constraint I am reporting. **Gap: no test suite was run.** The
     reason-code count (34 today) is read from AtomKindRegistryTests.cs:33, not executed. The

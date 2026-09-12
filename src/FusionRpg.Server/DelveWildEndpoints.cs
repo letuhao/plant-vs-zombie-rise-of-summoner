@@ -20,7 +20,7 @@ namespace FusionRpg.Server;
 /// `TalkTree.Step(...) → TalkStep` that does not exist in the tree (confirmed by reading the file in
 /// full). What IS real and closed is `RpgStore.TalkJoin`'s own debit+mint transaction — so these two
 /// routes are narrowly scoped to COMMITTING an already-resolved `joins` outcome (the caller supplies
-/// the already-assembled <see cref="DemonMintSpec"/> and price, exactly what
+/// the already-assembled <see cref="CreatureMintSpec"/> and price, exactly what
 /// `RecruitMint.Build`/`OfferPricing` would have produced upstream), not to resolving a talk turn
 /// from a bare verb choice. A real player-facing `talk`/`cage` panel needs that missing orchestrator
 /// built first — a genuine, precise, additional gap, named here rather than silently assumed away or
@@ -152,7 +152,7 @@ public static class DelveWildEndpoints
         public long PartyEntityId { get; set; }
         public long Price { get; set; }
         public string? SinkKey { get; set; }
-        public DemonMintSpec? Spec { get; set; }
+        public CreatureMintSpec? Spec { get; set; }
     }
 
     public sealed class DelveWildPrayRequest

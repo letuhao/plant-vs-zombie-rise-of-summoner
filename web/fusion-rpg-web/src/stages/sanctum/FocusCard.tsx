@@ -5,7 +5,7 @@ import { Button } from "@/ui";
 export type OverdueContract = {
   instanceId: string;
   /** Resolved display name — the caller does the roster/species lookup (same one `PactsLayer.tsx`
-   * already does), `FocusCard` never reaches into demon data itself. */
+   * already does), `FocusCard` never reaches into creature data itself. */
   name: string;
 };
 

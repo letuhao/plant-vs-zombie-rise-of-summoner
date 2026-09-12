@@ -265,7 +265,7 @@ passes admission and reveals nothing. A test asserts `MovementPolicy.Dowse == Pr
 - **Recruitment and the `Growth` no-op** (`TurnEngine.cs:196-200`) — `sector-development`'s.
 - **Server-side standing orders.** `MarchResolver.cs:29-30` re-issues a standing order whole each
   turn and the client resubmits; that is a real gap (§2.3) and not this module's.
-- **Contract capacity, soul pricing or the non-releasable rule.** Shipped in `demon-contracts` and
+- **Contract capacity, soul pricing or the non-releasable rule.** Shipped in `creature-contracts` and
   read as-is (`RpgStore.Contracts.cs:283-326`).
 - **A cede *forecast* UI.** The number already exists (`WorldSectorDto.WillReleaseNextTurn`,
   `WorldDtos.cs:125`); drawing it is `world-inspector`'s.

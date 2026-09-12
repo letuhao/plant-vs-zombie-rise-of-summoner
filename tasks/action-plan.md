@@ -303,7 +303,7 @@ verifying against code rather than trusting the first plausible design** — see
   producing shared content every holder receives identically — a materially simpler design.
 - The same spec then hooked `ILevelChangeHandler`/`LevelChangePipeline` as the grant trigger — until
   checking `LevelChangeEvent`'s own fields showed it carries no specimen identity at all (it is
-  player/species-mastery-scoped). A specific summoned demon's own level lives on a completely
+  player/species-mastery-scoped). A specific summoned creature's own level lives on a completely
   different, callback-free path, `RpgStore.AwardUniqueActorXpUnlocked`, corrected to hook there.
 - `spec-cost-scaling-holder-rung.md` (A23) is a genuinely new module, not anticipated when A19 was
   built: `spec-rung-semantics.md` §3.1 already decided that cost/cooldown scaling must read the
@@ -427,7 +427,7 @@ something A25 needed to solve to prove its own contribution. Asserted directly i
 
 **Full regression, run for real, every failure traced to a specific verified cause**: `Core.Tests`
 12637/12658 (20 already-documented + 1 confirmed-flaky via isolation and whole-class re-runs),
-`Data.Tests` 1115/1118 (1 pre-existing + 2 from a different concurrent "demon-lawn-deploy" session's
+`Data.Tests` 1115/1118 (1 pre-existing + 2 from a different concurrent "creature-lawn-deploy" session's
 own untracked, in-progress test file — confirmed via `git status`, not assumed), `Server.Tests`
 285/311 (25 already-traced + 1 from that same concurrent session's untracked work, now touching a
 second test project). Full detail: `action-todo.md` §16, T62.5.

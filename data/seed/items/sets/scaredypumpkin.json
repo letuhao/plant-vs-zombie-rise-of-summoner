@@ -25,7 +25,7 @@
       "id": "set.scaredypumpkin-001",
       "nameKey": "set.courageous-gourd",
       "name": "Courageous Gourd",
-      "themeKey": "demon.scaredypumpkin",
+      "themeKey": "creature.scaredypumpkin",
       "members": [
         {
           "role": "core-guard",

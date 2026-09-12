@@ -13,7 +13,7 @@ named player-scoped library discipline. **Not** aura `LoadoutEndpoints` (GET/POS
 Persist player **aptitude build presets** (twelve-aptitude share templates + D13 constraints),
 activation per allocate binding, **materialize(budget)** with leftover-legal clamps, and
 **transactional Activate**. Expose species favour as **target permille** for New/Auto-assign seed —
-never as Hub UniqueDemon baseline (**E3**).
+never as Hub UniqueCreature baseline (**E3**).
 
 ---
 
@@ -113,7 +113,7 @@ body: { playerId, presetId, scope, scopeKey, /* budget context as needed */ }
 1. Materialize preset to binding budget (D13/E2).
 2. Set active `(scope, scopeKey) → presetId`.
 3. Commit allocation:
-   - Mode A (`unique` / `instanceId`) → UniqueDemon allocate
+   - Mode A (`unique` / `instanceId`) → UniqueCreature allocate
    - Mode C (`commander`) → commander allocate
    - Mode B (`species` / `speciesId`) → **existing** priced `species-build/respec` path (same
      pricing/correlation rules — do not fork)

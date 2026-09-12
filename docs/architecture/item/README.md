@@ -12,8 +12,8 @@ authorized.** Twenty-four documents, no code, no schema, no task list yet.
 > points, rarity-gated (D8). **D9–D12 followed the same day:** R2 closes by per-atom compatibility; one band table with a per-runtime
 > scalar; base types differ by **directional profile *and* implicit** (the lint that makes D3 work); and
 > **sets/charms are GENERATED at roster scale** — ~2,168 of them from ~3 authored rows, through
-> seedsmith's `demon-themes` registry. **D13–D15:** the item program **builds E9** (the power model — three lanes were blocked on it); the
-> **commander is just another unique demon** for now, so `standard`, artifacts and commander sets leave
+> seedsmith's `creature-themes` registry. **D13–D15:** the item program **builds E9** (the power model — three lanes were blocked on it); the
+> **commander is just another unique creature** for now, so `standard`, artifacts and commander sets leave
 > scope — which closes `sets` §10.1, `charms` §10.3 and `sockets` §10.3 at a stroke; and **rarity is the
 > quality of a set's member pieces, not a property of the set** — 36 build set families, not 360.
 >
@@ -25,7 +25,7 @@ authorized.** Twenty-four documents, no code, no schema, no task list yet.
 > **D16–D19 completed the round:** the ~110 lane picks are **ratified as a batch** (reversible, reopened
 > only when one bites); the **dead tail is accepted** — a species set exists because the species does;
 > **drop volume reads `Θ`**, so the item program adds no private loot curve; and **I11 splits** — the
-> equip gate stays, per-species aptitude vectors go to the demon program. That last one exposed a real
+> equip gate stays, per-species aptitude vectors go to the creature program. That last one exposed a real
 > ownership gap: **which atoms a generated set or charm grants has no lane.**
 >
 > **D20–D25 (socket combinations, 2026-09-03):** the mechanism already existed in I4 §4.4 — what changed
@@ -74,8 +74,8 @@ other lanes"*.
 | I7 | [ssot-reroll.md](ssot-reroll.md) | Temper / Reforge / Imprint |
 | I8 | [ssot-affixes.md](ssot-affixes.md) | The prefix/suffix system, tier bands, role×family legality |
 | I9 | [ssot-materials-crafting.md](ssot-materials-crafting.md) | Materials, crafting, salvage, **the cost vocabulary** |
-| I10 | [ssot-charms.md](ssot-charms.md) | Bonuses from unequipped inventory. ⚠ **D12: one charm per demon species, generated** |
-| I11 | [ssot-requirements.md](ssot-requirements.md) | The equip gate — **frame + level only** after D19. ⚠ The gate itself has no module yet; folded into item module 4 `equip-assign`. ⚠ **Its per-species attribute vectors move to the demon program**; the stale `5 attributes × 24 species` sizing leaves with them |
+| I10 | [ssot-charms.md](ssot-charms.md) | Bonuses from unequipped inventory. ⚠ **D12: one charm per creature species, generated** |
+| I11 | [ssot-requirements.md](ssot-requirements.md) | The equip gate — **frame + level only** after D19. ⚠ The gate itself has no module yet; folded into item module 4 `equip-assign`. ⚠ **Its per-species attribute vectors move to the creature program**; the stale `5 attributes × 24 species` sizing leaves with them |
 | I12 | [ssot-generation.md](ssot-generation.md) | The drop → instance pipeline and drop tables |
 | I13 | [ssot-inventory.md](ssot-inventory.md) | Storage, stacking, salvage, lifecycle, comparison |
 
@@ -104,7 +104,7 @@ Mechanics the first round did not own.
 
 ## What is settled
 
-- **Frame, not faction, is the key.** `humanoid` / `plant` / `hybrid`, because `DemonSpeciesDef.Side`
+- **Frame, not faction, is the key.** `humanoid` / `plant` / `hybrid`, because `CreatureSpeciesDef.Side`
   conflates body with allegiance and the roster already contains Fusion hybrids.
 - **15 equip roles per pure frame**, named twice — one role table, two vocabularies — so the affix
   library is authored once. Hybrid gets 13 and may mix base types.

@@ -45,8 +45,8 @@ public class UniqueActorAtomRepushTests : IAsyncLifetime
         var tuningPath = Path.Combine(FindRepoRoot(), "data", "tuning", "progression.v1.json");
         ProgressionTuningHub.Configure(ProgressionTuningLoader.Parse(File.ReadAllText(tuningPath)));
         var soulTuningPath = Path.Combine(FindRepoRoot(), "data", "tuning", "souls.v1.json");
-        FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
-            FusionRpg.Core.Demons.SoulEarnTuningLoader.Parse(File.ReadAllText(soulTuningPath)));
+        FusionRpg.Core.Creatures.SoulEarnPolicy.Configure(
+            FusionRpg.Core.Creatures.SoulEarnTuningLoader.Parse(File.ReadAllText(soulTuningPath)));
 
         var dir = Path.Combine(Path.GetTempPath(), "fusionrpg-unique-repush-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(dir);

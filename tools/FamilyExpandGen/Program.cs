@@ -6,7 +6,7 @@ using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Effects.Atoms.Generation;
 using FusionRpg.Core.Power;
 
-// E43 family-expand generator (spec-family-expand.md §3.1, decided 2026-09-03 — the DemonSpeciesGen
+// E43 family-expand generator (spec-family-expand.md §3.1, decided 2026-09-03 — the CreatureSpeciesGen
 // --check pattern). Reads every authored affix-family definition
 // (data/seed/items/affix-families/*.json) and the tier-bands balance surface
 // (data/seed/items/_tuning/tier-bands.v{n}.json, LATEST version — TierBandsFile.FindLatestPath, fixed

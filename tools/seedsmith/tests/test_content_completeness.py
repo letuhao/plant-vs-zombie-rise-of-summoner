@@ -102,7 +102,7 @@ class ByteIdenticalToFlavourMissingTests(unittest.TestCase):
 
 class LanguageContaminationMetricTests(unittest.TestCase):
     """Task 4b's second acceptance bullet: the fixed bidirectional check must be reachable through
-    `core`'s own registry, not left as a demons/passive-tree-only import."""
+    `core`'s own registry, not left as a creatures/passive-tree-only import."""
 
     REAL_DUNGEON_DEFECT_FLAVOR = (
         "A towering silhouette of smoke and embers coalesces in the center of the chamber. It "
@@ -121,7 +121,7 @@ class LanguageContaminationMetricTests(unittest.TestCase):
 
     def _corpus_with(self, flavor: str) -> Corpus:
         corpus = Corpus()
-        corpus.add(Entry(id="event.bargain-demon.allpeater-001", kind="event",
+        corpus.add(Entry(id="event.bargain-creature.allpeater-001", kind="event",
                          partition="dungeon", path="events/x.json",
                          data={"flavor": flavor}))
         return corpus
@@ -133,7 +133,7 @@ class LanguageContaminationMetricTests(unittest.TestCase):
         findings = run_all(registry, Ctx(corpus=corpus, adapter=None))
 
         self.assertEqual(len(findings), 1)
-        self.assertEqual(findings[0].subject, "dungeon:event.bargain-demon.allpeater-001")
+        self.assertEqual(findings[0].subject, "dungeon:event.bargain-creature.allpeater-001")
 
     def test_clean_english_flavor_produces_no_findings(self) -> None:
         corpus = self._corpus_with("The bone grows dense and heavy under the weight of struggle.")

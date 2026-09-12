@@ -9,7 +9,7 @@ namespace FusionRpg.Core.Tests.Battle;
 
 /// <summary>
 /// base-defense `combatant-kind` (spec-combatant-kind.md): a structure enters a battle without
-/// behaving like a demon — never takes a turn, never keeps a battle alive, but is a real, targetable,
+/// behaving like a creature — never takes a turn, never keeps a battle alive, but is a real, targetable,
 /// damageable participant. Every test here is proven through <see cref="BattleEngine.Resolve"/>'s
 /// public surface or the <see cref="BattleEngine.HeldActionIdsForTest"/> seam added alongside it —
 /// <c>BattleRunState</c> itself stays private/nested per B13's own deviation note, and nothing in the

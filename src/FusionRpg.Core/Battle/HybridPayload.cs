@@ -15,7 +15,7 @@ namespace FusionRpg.Core.Battle;
 /// returns exactly the single full-weight primary component the engine built before E3 existed — same
 /// shape, same 1.0 — so every golden is unmoved. Raising it is a balance decision
 /// <c>combat-unification-todo.md</c> marks <b>ask-first</b>, and it <b>moves the expedition
-/// goldens</b>: wave demons carry a real <c>ElementSecondary</c> (<c>WaveCatalog.cs:115</c>) even
+/// goldens</b>: wave creatures carry a real <c>ElementSecondary</c> (<c>WaveCatalog.cs:115</c>) even
 /// though the hand-built battle goldens do not.</para>
 /// </summary>
 public static class HybridPayload

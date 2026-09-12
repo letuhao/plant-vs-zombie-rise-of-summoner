@@ -25,7 +25,7 @@
       "id": "set.potatonut-001",
       "nameKey": "set.cracked-nut-shell",
       "name": "Cracked Nut Shell",
-      "themeKey": "demon.potatonut",
+      "themeKey": "creature.potatonut",
       "members": [
         {
           "role": "armament-primary",

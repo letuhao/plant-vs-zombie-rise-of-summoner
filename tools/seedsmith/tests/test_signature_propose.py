@@ -74,8 +74,8 @@ from seedsmith.adapters.actions.signature_propose.derive import (  # noqa: E402
 )
 from seedsmith.adapters.actions import generate_signature_actions as gen_mod  # noqa: E402
 from seedsmith.adapters.actions import generate_brief_assembly as ba_gen_mod  # noqa: E402
-from seedsmith.adapters.demons.anchor.permute import order_for  # noqa: E402
-from seedsmith.adapters.demons.anchor.vote import VoteResult  # noqa: E402
+from seedsmith.adapters.creatures.anchor.permute import order_for  # noqa: E402
+from seedsmith.adapters.creatures.anchor.vote import VoteResult  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REAL_PLAN_PATH = REPO_ROOT / "data" / "seed" / "actions" / "_briefs" / "round-1.json"
@@ -99,7 +99,7 @@ def make_brief(**overrides) -> dict:
         "scope": "species", "scopeKey": "cherrybomb",
         "anchor": {
             "family": "cherry", "element": "fire", "rarity": "heirloom",
-            "themeKey": "demon.cherrybomb",
+            "themeKey": "creature.cherrybomb",
             "motifs": ["bomb", "fire"], "antiMotifs": ["protect", "roof"],
         },
         "slot": {"category": "attack", "targetMode": "self", "areaShape": None,
@@ -1076,7 +1076,7 @@ class BriefAssemblyProvenanceForwardingTests(unittest.TestCase):
                     "id": "brief.species.x.001", "briefId": "brief.species.x.001", "scope": "species",
                     "scopeKey": "x",
                     "anchor": {"family": None, "element": "fire", "rarity": "chaff",
-                              "themeKey": "demon.x", "motifs": [], "antiMotifs": []},
+                              "themeKey": "creature.x", "motifs": [], "antiMotifs": []},
                     "slot": {"category": "attack", "targetMode": "single", "areaShape": None,
                             "relation": "enemy", "kind": None, "rungBand": [1, 10]},
                     "pool": {"allowedAtomFamilies": [], "forbiddenAtomFamilies": []},

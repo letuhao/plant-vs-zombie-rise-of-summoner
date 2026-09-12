@@ -25,7 +25,7 @@
       "id": "set.garlic-001",
       "nameKey": "set.garlic-grave",
       "name": "Garlic Grave",
-      "themeKey": "demon.garlic",
+      "themeKey": "creature.garlic",
       "members": [
         {
           "role": "armament-primary",

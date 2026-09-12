@@ -2,15 +2,15 @@
 
 **Status:** Shipped (summon, bind, fuse, roster, essence, tribute) · patron and capture **WIP** · creature sheet **WIP** · world events **Vision**
 
-**Loop:** spine B — demon summon and fusion. See [The loops](the-loops.md).
+**Loop:** spine B — creature summon and fusion. See [The loops](the-loops.md).
 
 ---
 
-## Demons are individuals
+## Creatures are individuals
 
-A demon is not another copy of a unit. Every one is a **specimen** — its own identity, level, gear, traits, element, rarity, variant, and history. Duplicates are not dust. They have a job: fusion material, trait donors, star merges.
+A creature is not another copy of a unit. Every one is a **specimen** — its own identity, level, gear, traits, element, rarity, variant, and history. Duplicates are not dust. They have a job: fusion material, trait donors, star merges.
 
-You collect **creatures**. You raise **specimens**. The ones you summon and bind are **demons**. This page is the roster RPG — the summon and fusion spine that every place feeds.
+You collect **creatures**. You raise **specimens**. The ones you summon and bind are **creatures**. This page is the roster RPG — the summon and fusion spine that every place feeds.
 ---
 
 ## Creature sheet (**WIP**)
@@ -31,7 +31,7 @@ Together with **loam** on the map, those are the three stocks of the war. See [T
 
 ## Summon
 
-Spend **souls** at the altar. Pulls bring new demons into the roster. Pity progress is shown on the altar — you always know how close the next strong pull is.
+Spend **souls** at the altar. Pulls bring new creatures into the roster. Pity progress is shown on the altar — you always know how close the next strong pull is.
 
 Gacha is one path, never the only one. Expeditions can return wild joins. Capture on the lawn and in delves is **WIP**.
 
@@ -39,7 +39,7 @@ Gacha is one path, never the only one. Expeditions can return wild joins. Captur
 
 ## Bind (pacts) and tribute
 
-Assign demons to **contract slots**. Keep them loyal. Loyalty decays under daily upkeep. Neglect a demon long enough and it **refuses to deploy**.
+Assign creatures to **contract slots**. Keep them loyal. Loyalty decays under daily upkeep. Neglect a creature long enough and it **refuses to deploy**.
 
 **Tribute** is part of the pact. Keep contracts paid. An overdue tribute is leverage — you cannot renegotiate your way out of paying what you owe while it is due. Renegotiation returns when the books are clear.
 
@@ -60,7 +60,7 @@ Fusion materials (**essence**) come from play and expeditions.
 
 ## Patron
 
-Name one demon your **patron**. Its element colours the army. Switching costs souls.
+Name one creature your **patron**. Its element colours the army. Switching costs souls.
 
 **In this build:** the patron path exists in simulation; the live lawn aura is still **WIP**.
 
@@ -68,7 +68,7 @@ Name one demon your **patron**. Its element colours the army. Switching costs so
 
 ## Deploy
 
-Bound demons go where the war needs them:
+Bound creatures go where the war needs them:
 
 - Onto the **lawn** as plant-side avatars (most species), or as hypno-zombie allies for designated boss-class species
 - Onto **expeditions** as a squad
@@ -80,7 +80,7 @@ A specimen on an expedition is soft-locked from lawn deploy and the reverse — 
 
 ## Capture and the wider world
 
-**WIP:** weaken a demon in a run and attempt a capture. Some species are lawn-only finds (a small slice of the catalog, never legendaries), with web paths that still let a web-only player finish milestones.
+**WIP:** weaken a creature in a run and attempt a capture. Some species are lawn-only finds (a small slice of the catalog, never legendaries), with web paths that still let a web-only player finish milestones.
 
 **Vision:** world events, roaming bosses, blood moons, factions, raids — the ecology that makes rare discoveries feel earned.
 
@@ -89,9 +89,9 @@ A specimen on an expedition is soft-locked from lawn deploy and the reverse — 
 ## Design rules you can feel
 
 1. Gacha never replaces gameplay.
-2. Low-rarity demons keep value.
+2. Low-rarity creatures keep value.
 3. Fusion opens possibilities, not only numbers.
-4. Demons have personality, loyalty, history — they are not equipment.
-5. The world should contain demons worth hunting.
+4. Creatures have personality, loyalty, history — they are not equipment.
+5. The world should contain creatures worth hunting.
 
 Next: [Combat](combat.md) · [Expeditions](expeditions.md) · [The lawn](the-lawn.md) · [The loops](the-loops.md).

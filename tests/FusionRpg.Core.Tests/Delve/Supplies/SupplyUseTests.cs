@@ -48,7 +48,7 @@ public class SupplyUseTests
     [Fact]
     public void Rest_use_of_a_held_restore_supply_fires_and_names_the_decrement()
     {
-        var outcome = SupplyUse.Use("demon-a", 2, false, Supply(), ConsumableClass.Restore, UseContext.Rest,
+        var outcome = SupplyUse.Use("creature-a", 2, false, Supply(), ConsumableClass.Restore, UseContext.Rest,
             StockOf(("item.ration", 1)));
         Assert.True(outcome.Ok, outcome.Reason);
         Assert.Equal("item.ration", outcome.DecrementContainerId);
@@ -60,7 +60,7 @@ public class SupplyUseTests
     [Fact]
     public void Curio_use_of_a_held_supply_also_fires_the_same_way_as_rest()
     {
-        var outcome = SupplyUse.Use("demon-a", 0, false, Supply(), ConsumableClass.Restore, UseContext.Curio,
+        var outcome = SupplyUse.Use("creature-a", 0, false, Supply(), ConsumableClass.Restore, UseContext.Curio,
             StockOf(("item.ration", 1)));
         Assert.True(outcome.Ok, outcome.Reason);
     }
@@ -70,7 +70,7 @@ public class SupplyUseTests
     [Fact]
     public void Revive_on_a_downed_member_at_rest_fires()
     {
-        var outcome = SupplyUse.Use("demon-a", 0, memberDowned: true, Supply("item.revive-tonic"),
+        var outcome = SupplyUse.Use("creature-a", 0, memberDowned: true, Supply("item.revive-tonic"),
             ConsumableClass.Revive, UseContext.Rest, StockOf(("item.revive-tonic", 1)));
         Assert.True(outcome.Ok, outcome.Reason);
     }
@@ -78,7 +78,7 @@ public class SupplyUseTests
     [Fact]
     public void Revive_on_a_member_not_downed_refuses_target_not_downed()
     {
-        var outcome = SupplyUse.Use("demon-a", 0, memberDowned: false, Supply("item.revive-tonic"),
+        var outcome = SupplyUse.Use("creature-a", 0, memberDowned: false, Supply("item.revive-tonic"),
             ConsumableClass.Revive, UseContext.Rest, StockOf(("item.revive-tonic", 1)));
         Assert.False(outcome.Ok);
         Assert.Equal("supply.target-not-downed", outcome.Reason);
@@ -87,7 +87,7 @@ public class SupplyUseTests
     [Fact]
     public void Revive_at_curio_refuses_even_on_a_downed_member()
     {
-        var outcome = SupplyUse.Use("demon-a", 0, memberDowned: true, Supply("item.revive-tonic"),
+        var outcome = SupplyUse.Use("creature-a", 0, memberDowned: true, Supply("item.revive-tonic"),
             ConsumableClass.Revive, UseContext.Curio, StockOf(("item.revive-tonic", 1)));
         Assert.False(outcome.Ok);
         Assert.Equal("supply.revive-not-at-curio", outcome.Reason);
@@ -96,7 +96,7 @@ public class SupplyUseTests
     [Fact]
     public void Revive_at_battle_on_a_downed_member_fires()
     {
-        var outcome = SupplyUse.Use("demon-a", 0, memberDowned: true, Supply("item.revive-tonic"),
+        var outcome = SupplyUse.Use("creature-a", 0, memberDowned: true, Supply("item.revive-tonic"),
             ConsumableClass.Revive, UseContext.Battle, StockOf(("item.revive-tonic", 1)));
         Assert.True(outcome.Ok, outcome.Reason);
     }
@@ -107,7 +107,7 @@ public class SupplyUseTests
     public void Battle_use_of_a_non_revive_supply_refuses_while_the_item_cost_row_is_unbuilt()
     {
         Assert.False(FusionRpg.Core.Actions.CrossProgramLandedFlags.ItemCostRowLanded); // the precondition this test relies on
-        var outcome = SupplyUse.Use("demon-a", 0, false, Supply(), ConsumableClass.Restore, UseContext.Battle,
+        var outcome = SupplyUse.Use("creature-a", 0, false, Supply(), ConsumableClass.Restore, UseContext.Battle,
             StockOf(("item.ration", 1)));
         Assert.False(outcome.Ok);
         Assert.Equal("supply.battle-cost-row-unbuilt", outcome.Reason);
@@ -116,7 +116,7 @@ public class SupplyUseTests
     [Fact]
     public void Battle_revive_is_exempt_from_the_item_cost_gate_it_never_rides_the_action_layer()
     {
-        var outcome = SupplyUse.Use("demon-a", 0, memberDowned: true, Supply("item.revive-tonic"),
+        var outcome = SupplyUse.Use("creature-a", 0, memberDowned: true, Supply("item.revive-tonic"),
             ConsumableClass.Revive, UseContext.Battle, StockOf(("item.revive-tonic", 1)));
         Assert.True(outcome.Ok, outcome.Reason);
     }
@@ -129,7 +129,7 @@ public class SupplyUseTests
         var calls = new List<(string, long)>();
         Func<string, long, bool> spy = (id, qty) => { calls.Add((id, qty)); return true; };
 
-        SupplyUse.Use("demon-a", 0, false, Supply(), ConsumableClass.Restore, UseContext.Rest, spy);
+        SupplyUse.Use("creature-a", 0, false, Supply(), ConsumableClass.Restore, UseContext.Rest, spy);
 
         var call = Assert.Single(calls);
         Assert.Equal(("item.ration", 1L), call);

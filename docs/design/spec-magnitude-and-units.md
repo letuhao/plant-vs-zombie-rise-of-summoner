@@ -238,7 +238,7 @@ nothing and hides nothing — the raw magnitude is still on the face of the card
 
 **R1 — per-mille never reaches the player.** Content is integer ‰
 ([definitions.md §2](../architecture/effect-atom/definitions.md)). Adopt the **shipped** helper rather
-than writing a second one — [patronView.ts:23](../../web/fusion-rpg-web/src/features/demons/patronView.ts):
+than writing a second one — [patronView.ts:23](../../web/fusion-rpg-web/src/features/creatures/patronView.ts):
 divide by 10, one decimal, trim a trailing `.0`. It moves into the shared display module and
 `patronView` calls it instead of owning it.
 

@@ -20,7 +20,7 @@ import {
   adaptItemCompare,
   adaptRelic
 } from "@/contract/adapt";
-import { useSpeciesIndex } from "@/lib/bus/demons";
+import { useSpeciesIndex } from "@/lib/bus/creatures";
 import { absent, known, pendingWithReason } from "@/contract/pending";
 import type { ArmouryRowView, ItemRoleId, PieceSetDisclosureView } from "@/contract/types";
 
@@ -146,8 +146,8 @@ export function RelicsLayer({
   /**
    * ⛔ **The equip target is named, never a GUID** (item-content `item-naming` T3). A unique actor
    * carries `side` + `typeId` and no name of its own (`adaptActor` marks `displayName` pending, and
-   * no route serves one), so the real name comes from the demon species catalog, which authors one
-   * per (side, gameTypeId) and is the same index the demons, fusion and expedition pages already
+   * no route serves one), so the real name comes from the creature species catalog, which authors one
+   * per (side, gameTypeId) and is the same index the creatures, fusion and expedition pages already
    * read. React Query dedupes it — the catalog is fetched once per session.
    *
    * A type the catalog does not carry falls back to `plant #37`, the SAME shape

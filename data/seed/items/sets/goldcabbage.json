@@ -25,7 +25,7 @@
       "id": "set.goldcabbage-001",
       "nameKey": "set.brass-cabbage-launcher",
       "name": "Brass Cabbage Launcher",
-      "themeKey": "demon.goldcabbage",
+      "themeKey": "creature.goldcabbage",
       "members": [
         {
           "role": "armament-primary",

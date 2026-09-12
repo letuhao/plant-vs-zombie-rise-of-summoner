@@ -25,7 +25,7 @@
       "id": "set.threenut-001",
       "nameKey": "set.high-nut-launcher",
       "name": "High Nut Launcher",
-      "themeKey": "demon.threenut",
+      "themeKey": "creature.threenut",
       "members": [
         {
           "role": "armament-primary",

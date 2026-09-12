@@ -45,8 +45,8 @@ than the lane documents describe**, and three modules below exist only to *consu
 | `ProduceAndBind` **called in production** | `RpgStore.UniqueActors.cs:756` | The atom runtime is not inert |
 | `stat.derived` executing on battle **and** lawn | `AtomKindRegistry.cs:253` | Any affix the catalogue can express is bindable |
 | `OwnerKind.UniqueActor` — the durable per-actor scope | `Effects/Atoms/OwnerScope.cs` | Equipment has an owner to name |
-| The `rarity` **table and its per-class columns** — ⚠ **and it has ZERO rows** | `RpgStore.Containers.cs:54-61`; `data/seed/rarity/README.md` (*"Empty on purpose"*) | The ten rungs that *ship* are the `DemonRarity` enum, ordinals **0–9 consecutive** (§2f.1 F3). Module 7 **seeds the table**; it does not build one |
-| The demon **theme registry** — demons publish, items consume, one-way | `data/seed/demons/_registry/themes.v1.json`, seedsmith D4 | `set-charm-gen`'s upstream exists |
+| The `rarity` **table and its per-class columns** — ⚠ **and it has ZERO rows** | `RpgStore.Containers.cs:54-61`; `data/seed/rarity/README.md` (*"Empty on purpose"*) | The ten rungs that *ship* are the `CreatureRarity` enum, ordinals **0–9 consecutive** (§2f.1 F3). Module 7 **seeds the table**; it does not build one |
+| The creature **theme registry** — creatures publish, items consume, one-way | `data/seed/creatures/_registry/themes.v1.json`, seedsmith D4 | `set-charm-gen`'s upstream exists |
 | Twelve aptitudes | `Stats/Aptitudes/Aptitude.cs:40-51` | D8's target vocabulary |
 
 ---
@@ -58,7 +58,7 @@ when this map was drafted.
 
 | # | Dependency | Owner | Status |
 |---|---|---|---|
-| **X1** | **`frame` (humanoid / plant / hybrid) exists on no species type**, and `slot-roles` and `base-types` both key on it. By D19's reasoning it is not ours to declare — a frame describes a *body*, exactly as an aptitude vector describes a species | **seedsmith's demon pipeline** | ✅ **Resolved 2026-09-03: seedsmith classifies it**, as a new `frame-classify` stage beside `family-extract` and `motif-derive`, published through the theme registry items already consume. See §3.1 |
+| **X1** | **`frame` (humanoid / plant / hybrid) exists on no species type**, and `slot-roles` and `base-types` both key on it. By D19's reasoning it is not ours to declare — a frame describes a *body*, exactly as an aptitude vector describes a species | **seedsmith's creature pipeline** | ✅ **Resolved 2026-09-03: seedsmith classifies it**, as a new `frame-classify` stage beside `family-extract` and `motif-derive`, published through the theme registry items already consume. See §3.1 |
 | X2 | **`E42 units-correction`** gates band → number resolution | content-stack, gate G3 | ✅ **DONE / gate CLOSED 2026-09-03** (`content-stack-todo.md:15,24`). ⚠ But `ssot-affixes.md` was **explicitly out of E42's scope**, so the item-side residue is unresolved. Was: **Does not block authoring** — `seed-contract.md` §3's band rule closes the units trap by construction |
 | X3 | **`ActionSeeder.Generate` has zero callers** | action corpus | Gates `granted-actions` (19) only. ✅ **D36: ordinary external dependency, no action required of us.** `action-corpus` is under active construction by another owner — we consume a production caller when one ships. ⛔ **Do not file requests against their map, propose amendments to their scope, or infer their schedule from their documents** |
 | **X5** | ⭐ **The content ladder must keep growing.** Item level *is* content level (`ssot-generation.md` §4.1); content stops at level 10 today. **D29: the ladder is unbounded** — tier saturates at t5 and `contentScale` carries growth past it | **world map · wave catalog · event generator** | Added 2026-09-03. This is the loop D26 says is not ours: gear → harder realm → gear. We supply the middle arrow only |
@@ -67,14 +67,14 @@ when this map was drafted.
 | **X4** | ⭐ **L0 — pool composition by power class × channel.** Without it, a trash drop and a boss drop roll the same affixes, and sets/sockets/uniques/crafting are redundant paths (`effect-pipeline-ideal.md` §5.6) | **effect-pipeline**, modules 11–12 | Added by owner decision 2026-09-03. ⚠ **SPECCED** (`effect-pipeline/spec-affix-channel-weights.md`), unbuilt. It names **six** channel suppliers, so it gates item modules **11, 13, 15, 16 and 17** — not two. ⛔ **And modules 11 and 13 both consume *and* supply it, which is a two-way edge** — both of which *supply channels to it* rather than merely consuming it |
 
 **X1 is stated as a dependency and not a task on purpose.** Declaring `frame` in this program would put
-one program's content in another's schema — the boundary error `spec-demon-themes.md` §2.1 refused when
-it declined to make items a demons kind.
+one program's content in another's schema — the boundary error `spec-creature-themes.md` §2.1 refused when
+it declined to make items a creatures kind.
 
 ### 3.1 X1's resolution — `frame-classify`, a new seedsmith stage
 
 > **Owner, 2026-09-03:** seedsmith classifies frame, *"like families and motifs."*
 
-**Why this is better than the three alternatives, and not merely cheaper.** The demon pipeline already
+**Why this is better than the three alternatives, and not merely cheaper.** The creature pipeline already
 reads each species' name and flavour text and returns a judgement about what it *is* — that is exactly
 what `family-extract` and `motif-derive` do. **Frame is the same kind of judgement**, and it needs the
 same honesty machinery: a `basis` field recording whether the answer came from the name or the text,
@@ -85,16 +85,16 @@ with `blocked` a legal answer.
 | Input | the species' own name and flavour text — the corpus `family-extract` already reads |
 | Output | one of **three enum values**, never a number (`audit_schema` rejects numerics mechanically) |
 | Honesty | carries `basis`, exactly as family labels do |
-| Publication | the demon pipeline's one-way registry items already consume. ⚠ **Frame must publish independently of theme status** — `spec-demon-themes.md` makes publishing a theme for a `basis=blocked` demon a **Never**, and a species can lack a *flavour* judgement while still having a *body*. Frame is a body fact; it is not gated on theme confidence |
-| Scale | **840** species with no hand-authoring — the property that made the classifier worth building. ⚠ Re-measured 2026-09-06 off `data/seed/demons/species/_index.json` (840 species across 502 *family* files); this row read *"~904"* until then, a stale snapshot of a corpus the demon stream regenerates. **Count it, never quote it from memory** — the plan's own standing rule |
+| Publication | the creature pipeline's one-way registry items already consume. ⚠ **Frame must publish independently of theme status** — `spec-creature-themes.md` makes publishing a theme for a `basis=blocked` creature a **Never**, and a species can lack a *flavour* judgement while still having a *body*. Frame is a body fact; it is not gated on theme confidence |
+| Scale | **840** species with no hand-authoring — the property that made the classifier worth building. ⚠ Re-measured 2026-09-06 off `data/seed/creatures/species/_index.json` (840 species across 502 *family* files); this row read *"~904"* until then, a stale snapshot of a corpus the creature stream regenerates. **Count it, never quote it from memory** — the plan's own standing rule |
 
 ⭐ **It also solves the conflation item-ideal §4 warns about, rather than inheriting it.**
-`DemonSpeciesDef.Side` carries faction *and* body in one field, and the roster already contains Fusion
+`CreatureSpeciesDef.Side` carries faction *and* body in one field, and the roster already contains Fusion
 hybrids that break it — `peashooterzombie`, `ironpeazombie`, `cherrynutzombie`, `bucketnutzombie` are
 zombie-**side** with plant **bodies**. A classifier reading the flavour text can see that; a field
 derived from `Side` cannot. **`hybrid` stops being an edge case and becomes a classification outcome.**
 
-**Rejected, with reasons:** a hand-set field on `DemonSpeciesDef` (correct owner, but ~904 rows by hand
+**Rejected, with reasons:** a hand-set field on `CreatureSpeciesDef` (correct owner, but ~904 rows by hand
 and an unscheduled queue); an item-side `item_species_frame` mapping table (unblocks now, but a second
 place species truth lives, which can silently disagree); and this program adding the field itself
 (fastest, but it overrules the same D19 boundary reasoning that just moved I11's per-species vectors
@@ -136,7 +136,7 @@ Twenty-one. Model calls in **two** (13 and 21).
 |---|---|---|---|---|
 | 11 | [`drop-volume`](item/spec-drop-volume.md) | I12's drop tables. **Volume reads `Θ` linearly; quality keeps reading `P(Θ)` through rarity/tier. No private loot curve. D18.** ⭐ Supplies the `drop` / `boss` **channel** to effect-pipeline's L0 (**X4**) | — | 6, 7, 8, **X4** |
 | 12 | [`threshold-grants`](item/spec-threshold-grants.md) | One mechanism: *count equipped things matching a predicate → grant a container at breakpoints, at `UniqueActor` scope*. **Serves sets, charms, and D3's frame-mix bonus** — three consumers, one machine | — | 4, 9 |
-| 13 | ⭐ [`set-charm-gen`](item/spec-set-charm-gen.md) | The seedsmith pipeline: 36 build set families + 1 set and 1 charm per species, consuming the demon theme registry. **Owns set/charm atom effect distribution** — §2c #2's ownerless capability, now **answered in part by L0**: the `set` and `socket` channels are what make a set bonus worth collecting. **Capped to the 12 hybrid-core roles before generation, not validated after** (§2c #1) | **yes** | 8, 12, **X4** |
+| 13 | ⭐ [`set-charm-gen`](item/spec-set-charm-gen.md) | The seedsmith pipeline: 36 build set families + 1 set and 1 charm per species, consuming the creature theme registry. **Owns set/charm atom effect distribution** — §2c #2's ownerless capability, now **answered in part by L0**: the `set` and `socket` channels are what make a set bonus worth collecting. **Capped to the 12 hybrid-core roles before generation, not validated after** (§2c #1) | **yes** | 8, 12, **X4** |
 
 ### Sinks — the half that stops the museum
 
@@ -188,7 +188,7 @@ not duplicated here.
 ### Dependency graph
 
 ```text
-X1 (demon program: frame)
+X1 (creature program: frame)
  └─► slot-roles ─┬─► base-types ──────────┐
                  ├─► affix-legality ◄── rarity-bands
                  │        │                │
@@ -260,8 +260,8 @@ untestable, and `enhance-reroll` needs `item-power-reads` to know what a "better
 |---|---|
 | Rolling an item | `Resolver` + `InstanceProducer` already do it. This program *calls* them |
 | The affix schema, the resolution order, the affix library | `effect-pipeline` modules 1–3, built |
-| Declaring `frame` on a species | X1 — demon-program data, by D19's own reasoning |
-| Per-species aptitude vectors | D19 — moved to the demon program with the rest of I11's species data |
+| Declaring `frame` on a species | X1 — creature-program data, by D19's own reasoning |
+| Per-species aptitude vectors | D19 — moved to the creature program with the rest of I11's species data |
 | Commander-specific gear — `standard` atoms, **artifacts**, commander sets | **D14.** Reserved, blocked on a commander role/class system that does not exist |
 | Trading, durability, transmog, item-level squishes | item-ideal §10 |
 | Inventory-management minigame | D5 — *"we will add inventory management mini game in future"* |
@@ -269,7 +269,7 @@ untestable, and `enhance-reroll` needs `item-power-reads` to know what a "better
 | **Metering the player — drop caps, inventory ceilings, cost curves that rise with player power** | ⭐ **D26.** The item system balances items against each other; it does not balance the game. Content pacing, encounter volume and difficulty belong to the world map, battle engine and event generator |
 | **How deep the content ladder goes** | **X5.** Item level *is* content level; we consume it, we do not set it |
 | **PoE-style socket *links*** — a support gem modifying only the skill it is linked to | ⭐ **D25**, recorded here so the reservation lives somewhere durable (it previously existed only as two one-line mentions inside specs). It is **skill modification**, not combination-unlocks-a-bonus, and belongs with `granted-actions` and the action layer |
-| **Per-species aptitude vectors and their growth curves** | **D19** — they describe a species, so they moved to the demon program with the rest of its species data |
+| **Per-species aptitude vectors and their growth curves** | **D19** — they describe a species, so they moved to the creature program with the rest of its species data |
 
 ---
 
@@ -293,7 +293,7 @@ untestable, and `enhance-reroll` needs `item-power-reads` to know what a "better
 - [item-ideal.md](item-ideal.md) — intent, **twenty-nine rulings (§2b, §2f)**, the platform reconciliation (§2a), the verified defects (§2e)
 - [item/README.md](item/README.md) — the seventeen lane SSOTs, four decisions, the defect register
 - [effect-pipeline-map.md](effect-pipeline-map.md) — the roll machinery this consumes, modules 1–4 built
-- [seedsmith/spec-demon-themes.md](seedsmith/spec-demon-themes.md) — `set-charm-gen`'s upstream
+- [seedsmith/spec-creature-themes.md](seedsmith/spec-creature-themes.md) — `set-charm-gen`'s upstream
 - [power/ssot-power-scale.md](power/ssot-power-scale.md) — `Θ` and `P(Θ)`; D18 puts drop volume on it
 
 ## 9. Filed by the party-dungeon program (2026-09-05)

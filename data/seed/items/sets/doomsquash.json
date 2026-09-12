@@ -25,7 +25,7 @@
       "id": "set.doomsquash-001",
       "nameKey": "set.wildgrowth-spore-burst",
       "name": "Wildgrowth Spore-Burst",
-      "themeKey": "demon.doomsquash",
+      "themeKey": "creature.doomsquash",
       "members": [
         {
           "role": "armament-primary",

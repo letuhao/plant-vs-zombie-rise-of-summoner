@@ -277,7 +277,7 @@ src/FusionRpg.Core/Delve/Loot/   DelveLoot.cs · DelveSoulLedger.cs · DelvePric
                                  RarityShift.cs · DropResult.cs · DungeonLootTableGen.cs (→ data/generated/loot/dungeon.v1.json)
 src/FusionRpg.Core/Items/Drops/  LootCorrelation.cs (+3 arms) · DropTableValidator.cs (+3 kinds) · LootPipeline.cs :306
                                  (RefId when BaseTypeSetFor supplied) — the item program's files, filed on item-map.md
-src/FusionRpg.Core/Demons/SoulEarnPolicy.cs   Reasons.Delve
+src/FusionRpg.Core/Creatures/SoulEarnPolicy.cs   Reasons.Delve
 src/FusionRpg.Data/Sqlite/RpgStore.Delve.cs   souls_unbanked, theta_run; Accrue/Spend/RecordClear; CloseDelve earn
 src/FusionRpg.Server/DelveEndpoints.cs        merchant buy; extraction summary rows (the altar is wild-room's call)
 tests/FusionRpg.Core.Tests/Delve/Loot/ · tests/FusionRpg.Data.Tests/Delve/

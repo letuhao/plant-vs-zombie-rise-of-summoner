@@ -25,7 +25,7 @@
       "id": "set.seamine-water-001",
       "nameKey": "set.hydro-tuber-surge",
       "name": "Hydro-Tuber Surge",
-      "themeKey": "demon.seamine_water",
+      "themeKey": "creature.seamine_water",
       "members": [
         {
           "role": "armament-primary",

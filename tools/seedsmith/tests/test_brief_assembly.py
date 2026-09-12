@@ -46,7 +46,7 @@ def _plan_brief(species_key: str, *, family: "str | None" = None,
     return {
         "id": brief_id, "briefId": brief_id, "scope": "species", "scopeKey": species_key,
         "anchor": {
-            "family": family, "element": "fire", "rarity": "chaff", "themeKey": f"demon.{species_key}",
+            "family": family, "element": "fire", "rarity": "chaff", "themeKey": f"creature.{species_key}",
             "motifs": list(motifs), "antiMotifs": list(anti_motifs),
         },
         "slot": {
@@ -126,7 +126,7 @@ class FamilyLessSpeciesTests(unittest.TestCase):
 
     def test_live_family_assignments_cover_the_live_roster(self) -> None:
         """Family membership is derived from the live species seed folder, not stale generated
-        demon artifacts."""
+        creature artifacts."""
         catalog = load_catalog(CATALOG_PATH)
         assignments = derive_live_family_assignments(CATALOG_PATH)
         self.assertEqual(set(assignments), {row.species_id for row in catalog})

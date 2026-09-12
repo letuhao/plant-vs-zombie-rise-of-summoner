@@ -25,7 +25,7 @@
       "id": "set.snowconezombie-001",
       "nameKey": "set.glacial-insulation",
       "name": "Glacial Insulation",
-      "themeKey": "demon.snowconezombie",
+      "themeKey": "creature.snowconezombie",
       "members": [
         {
           "role": "armament-primary",

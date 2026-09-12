@@ -25,7 +25,7 @@
       "id": "set.suncaltrop-001",
       "nameKey": "set.solar-spikes",
       "name": "Solar Spikes",
-      "themeKey": "demon.suncaltrop",
+      "themeKey": "creature.suncaltrop",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.supermachinenut-001",
       "nameKey": "set.nut-shell-assembly",
       "name": "Nut-Shell Assembly",
-      "themeKey": "demon.supermachinenut",
+      "themeKey": "creature.supermachinenut",
       "members": [
         {
           "role": "core-guard",

@@ -24,7 +24,7 @@ wrong by collapsing the two:
 | **Workflow definition** | *Inside ONE generation: what steps, what state, when to branch/retry/resume?* | **This module. Nothing does it today** |
 
 Today layer 2 is a hand-rolled serial `for` loop in
-[`family/extract.py`](../../../tools/seedsmith/seedsmith/adapters/demons/family/extract.py) — no state
+[`family/extract.py`](../../../tools/seedsmith/seedsmith/adapters/creatures/family/extract.py) — no state
 model, no branching, no checkpoint, no resume, no concurrency. Repeating that shape across every
 future generator is the problem this module ends.
 
@@ -56,7 +56,7 @@ accumulate. State therefore carries **ids and small structs**, never message his
 
 ```python
 class GenerationState(TypedDict):
-    subject_id: str            # the demon
+    subject_id: str            # the creature
     brief: str                 # assembled once, by briefkit
     draft: dict | None         # the current candidate
     defects: list[str]         # from the last validate pass — drives repair
@@ -113,7 +113,7 @@ load-bearing, not decorative.
 release."* `guard-dal`'s SQL invariant protects the **shipped game's** data layer; `tools/seedsmith/`
 is dev tooling that never ships. **Scope is pinned: `sqlite3` here is for checkpoint state only.**
 Python still never reads the game's SQLite (`types`, `almanac_seed`, `recipes`) — that stays
-C#-through-the-DAL per [`spec-demon-corpus-emit.md`](spec-demon-corpus-emit.md), for that spec's own
+C#-through-the-DAL per [`spec-creature-corpus-emit.md`](spec-creature-corpus-emit.md), for that spec's own
 reason, which shipping does not affect.
 
 ### 2.6 Fan-out with bounded concurrency

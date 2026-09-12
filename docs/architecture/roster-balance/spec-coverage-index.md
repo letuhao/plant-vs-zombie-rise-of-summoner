@@ -1,7 +1,7 @@
-> ⛔ **SUPERSEDED 2026-09-06.** This module (RB3) targeted the demon-species roster on a
+> ⛔ **SUPERSEDED 2026-09-06.** This module (RB3) targeted the creature-species roster on a
 > causal theory that did not survive tracing the real code: species characteristics never
 > reach the action-corpus's atom-family pool (see `roster-balance-map.md` §0 for the full
-> correction). The real bug lives in the 98 atom/affix families' USAGE, not in demon
+> correction). The real bug lives in the 98 atom/affix families' USAGE, not in creature
 > species data, which measures healthy on its own axes. **This module was never built.**
 > Superseded by `spec-usage-stats.md` (FC1) and `spec-usage-direction.md` (FC3). Kept
 > for the record — the reasoning inside is not wrong on its own terms, it was aimed at the

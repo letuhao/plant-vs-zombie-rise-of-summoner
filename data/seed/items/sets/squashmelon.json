@@ -25,7 +25,7 @@
       "id": "set.squashmelon-001",
       "nameKey": "set.splintering-corpse-shot",
       "name": "Splintering Corpse-Shot",
-      "themeKey": "demon.squashmelon",
+      "themeKey": "creature.squashmelon",
       "members": [
         {
           "role": "armament-primary",

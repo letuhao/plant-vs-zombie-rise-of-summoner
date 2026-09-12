@@ -25,7 +25,7 @@
       "id": "set.gatlingpaper-c-001",
       "nameKey": "set.cherry-pie-reckoning",
       "name": "Cherry Pie Reckoning",
-      "themeKey": "demon.gatlingpaper_c",
+      "themeKey": "creature.gatlingpaper_c",
       "members": [
         {
           "role": "armament-primary",

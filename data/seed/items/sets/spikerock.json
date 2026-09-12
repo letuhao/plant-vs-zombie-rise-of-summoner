@@ -25,7 +25,7 @@
       "id": "set.spikerock-001",
       "nameKey": "set.spike-king-s-thicket",
       "name": "Spike King's Thicket",
-      "themeKey": "demon.spikerock",
+      "themeKey": "creature.spikerock",
       "members": [
         {
           "role": "armament-primary",

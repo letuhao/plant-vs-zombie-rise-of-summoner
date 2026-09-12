@@ -25,7 +25,7 @@
       "id": "set.ironpuff-001",
       "nameKey": "set.iron-spore-launcher",
       "name": "Iron-Spore Launcher",
-      "themeKey": "demon.ironpuff",
+      "themeKey": "creature.ironpuff",
       "members": [
         {
           "role": "armament-primary",

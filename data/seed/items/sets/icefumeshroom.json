@@ -25,7 +25,7 @@
       "id": "set.icefumeshroom-001",
       "nameKey": "set.frost-spore-vent",
       "name": "Frost-Spore Vent",
-      "themeKey": "demon.icefumeshroom",
+      "themeKey": "creature.icefumeshroom",
       "members": [
         {
           "role": "armament-primary",

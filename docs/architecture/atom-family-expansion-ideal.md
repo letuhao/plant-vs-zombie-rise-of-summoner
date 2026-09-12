@@ -43,7 +43,7 @@ Closed here rather than left as a silent gap:
 - **`action-ideal.md` §1.3, `action/spec-action-seeding.md` §3** — read directly. §1.3's "no second
   curve" rule is about action power never getting a private per-action rung/level curve outside the
   shared `rung(n)` system — unrelated to atom families, no conflict. §3's "inventing a third vocabulary
-  is the exact defect the atom program exists to stop" is about demon TYPES not needing a new taxonomy
+  is the exact defect the atom program exists to stop" is about creature TYPES not needing a new taxonomy
   beyond the closed action-category/tag/kind/target-mode set — also unrelated; this program consumes an
   *existing* field (`atomFamilies[]`) the action corpus already has, never adds a new vocabulary to it.
   No conflict found in either doc.

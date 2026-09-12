@@ -36,7 +36,7 @@ public class RealColdProcessTests
     /// `dotnet run`'s own implicit build races every OTHER concurrent `dotnet build`/`dotnet run`
     /// touching the SAME shared output DLLs — a transient MSBuild file-lock, not a defect in this
     /// tool or this test. Confirmed real, not hypothetical, under heavy multi-session load
-    /// (2026-09-06, `DemonSpeciesImportCliTests.cs`'s own identical fix, same day). `dotnet`'s own
+    /// (2026-09-06, `CreatureSpeciesImportCliTests.cs`'s own identical fix, same day). `dotnet`'s own
     /// fixed phrase for "the implicit build failed" is the reliable retry signal: it can only come
     /// from the CLI's own build step, never from AtomImporter's own business logic.
     ///
@@ -45,7 +45,7 @@ public class RealColdProcessTests
     /// <c>WaitForExit</c> — the classic .NET process-redirection deadlock: if the child fills its OS
     /// stderr pipe buffer while this thread is still blocked reading stdout, the child blocks writing
     /// to a full pipe nobody is draining and the whole test hangs forever (reproduced for real the
-    /// same day in `DemonSpeciesImportCliTests.cs`'s identical pattern — a 17-minute run that never
+    /// same day in `CreatureSpeciesImportCliTests.cs`'s identical pattern — a 17-minute run that never
     /// finished). Fixed by draining both streams asynchronously via
     /// <c>OutputDataReceived</c>/<c>ErrorDataReceived</c>, the standard fix for this exact hazard.</para>
     /// </summary>

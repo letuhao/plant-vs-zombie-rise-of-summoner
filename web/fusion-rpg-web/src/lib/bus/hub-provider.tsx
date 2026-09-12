@@ -80,7 +80,7 @@ export function HubProvider({ children }: { children: ReactNode }) {
       void qc.invalidateQueries({ queryKey: ["pvzActivityFacts"] });
       // Soul earns ride the fact transaction (spec-soul-economy) — refresh balances with facts.
       void qc.invalidateQueries({ queryKey: ["souls"] });
-      void qc.invalidateQueries({ queryKey: ["demonSummonState"] });
+      void qc.invalidateQueries({ queryKey: ["creatureSummonState"] });
     };
 
     const onRpgProgressionUpdated = (msg: { playerId?: number } | null) => {
@@ -103,18 +103,18 @@ export function HubProvider({ children }: { children: ReactNode }) {
       void qc.invalidateQueries({ queryKey: ["iconDumps"] });
     };
 
-    const onDemonsUpdated = () => {
-      void qc.invalidateQueries({ queryKey: ["demonRoster"] });
-      void qc.invalidateQueries({ queryKey: ["demonCodex"] });
-      void qc.invalidateQueries({ queryKey: ["demonSummonState"] });
+    const onCreaturesUpdated = () => {
+      void qc.invalidateQueries({ queryKey: ["creatureRoster"] });
+      void qc.invalidateQueries({ queryKey: ["creatureCodex"] });
+      void qc.invalidateQueries({ queryKey: ["creatureSummonState"] });
       // Expeditions ride specimen state: locks, wild-join mints, and materials all land here.
       void qc.invalidateQueries({ queryKey: ["expeditions"] });
-      void qc.invalidateQueries({ queryKey: ["demonMaterials"] });
+      void qc.invalidateQueries({ queryKey: ["creatureMaterials"] });
     };
 
     const onSoulsUpdated = () => {
       void qc.invalidateQueries({ queryKey: ["souls"] });
-      void qc.invalidateQueries({ queryKey: ["demonSummonState"] });
+      void qc.invalidateQueries({ queryKey: ["creatureSummonState"] });
     };
 
     const onAlmanacTextUpdated = () => {
@@ -134,7 +134,7 @@ export function HubProvider({ children }: { children: ReactNode }) {
     };
 
     // species-build-todo.md T5.1 — real gap found and fixed while wiring the species-build panel:
-    // the SERVER has broadcast "AptitudesUpdated" since `demon-type-allocation` (module 5) shipped,
+    // the SERVER has broadcast "AptitudesUpdated" since `creature-type-allocation` (module 5) shipped,
     // but nothing on the web side ever subscribed to it (confirmed by direct grep across this whole
     // assembly). Every `useAptitudes`/species-aptitudes query relied entirely on its own
     // `refetchInterval` fallback, which is disabled whenever the hub IS connected — so a commander or
@@ -192,7 +192,7 @@ export function HubProvider({ children }: { children: ReactNode }) {
     c.on("PvzActivityUpdated", onPvzActivityUpdated);
     c.on("RpgProgressionUpdated", onRpgProgressionUpdated);
     c.on("TypeIconUpdated", onTypeIconUpdated);
-    c.on("DemonsUpdated", onDemonsUpdated);
+    c.on("CreaturesUpdated", onCreaturesUpdated);
     c.on("SoulsUpdated", onSoulsUpdated);
     c.on("AlmanacTextUpdated", onAlmanacTextUpdated);
     c.on("CommandersUpdated", onCommandersUpdated);
@@ -229,7 +229,7 @@ export function HubProvider({ children }: { children: ReactNode }) {
       c.off("RpgProgressionUpdated", onRpgProgressionUpdated);
       c.off("TypeIconUpdated", onTypeIconUpdated);
       c.off("AlmanacTextUpdated", onAlmanacTextUpdated);
-      c.off("DemonsUpdated", onDemonsUpdated);
+      c.off("CreaturesUpdated", onCreaturesUpdated);
       c.off("SoulsUpdated", onSoulsUpdated);
       c.off("CommandersUpdated", onCommandersUpdated);
       c.off("AptitudesUpdated", onAptitudesUpdated);

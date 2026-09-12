@@ -3,7 +3,7 @@
 **Program:** `actor-hub-and-combat-power-solid-fixing` · **Map:** [../actor-hub-and-combat-power-solid-fixing-map.md](../actor-hub-and-combat-power-solid-fixing-map.md)  
 **Ideal:** HF-channelmods-writers · SOLID §2.15 · ActorHub sole Hot  
 **Wave:** 1 (before `battle-hub-fuse`)  
-**Code anchors:** `WebMatchService.StarChannelMods` / `LoyaltyChannelMods` / `UniqueDemonAptitudeChannelMods` / `ApplyZombossPattern` (~455–668) · `AptitudeResolver.ResolveForBattle` · `DraughtProjection.Apply` · `ExpeditionResolver.ApplyInjuries` · `BossBuild.ResolveKit`/`ApplyKit` · `IActorStatSubsystem` / `AptitudeSubsystem` / `AtomDerivedSubsystem`
+**Code anchors:** `WebMatchService.StarChannelMods` / `LoyaltyChannelMods` / `UniqueCreatureAptitudeChannelMods` / `ApplyZombossPattern` (~455–668) · `AptitudeResolver.ResolveForBattle` · `DraughtProjection.Apply` · `ExpeditionResolver.ApplyInjuries` · `BossBuild.ResolveKit`/`ApplyKit` · `IActorStatSubsystem` / `AptitudeSubsystem` / `AtomDerivedSubsystem`
 
 ---
 
@@ -11,7 +11,7 @@
 
 Private `BattleChannelMod` writers that invent combat magnitudes (`combat.power.omni`, defense, aptitude edges, draughts, injuries, Zomboss kits) must **stop** feeding a parallel battle fold. They **contribute through ActorHub** (subsystems and/or bound atoms with GG-49 SourceIds) so battle/delve/siege/web consume the same numbers as lawn/sheet after fuse.
 
-Success: Star / Loyalty / unique-demon aptitude / Zomboss pattern / draught / expedition injury magnitudes appear on Hub Derived with attributed SourceIds; new `new BattleChannelMod(` under `src/` outside the guard allowlist fails CI.
+Success: Star / Loyalty / unique-creature aptitude / Zomboss pattern / draught / expedition injury magnitudes appear on Hub Derived with attributed SourceIds; new `new BattleChannelMod(` under `src/` outside the guard allowlist fails CI.
 
 ---
 
@@ -49,7 +49,7 @@ dotnet test tests/FusionRpg.Server.Tests --filter "FullyQualifiedName~ChannelMod
 |---|---|---|
 | Star | `StarChannelMods` → omni power/defense | e.g. `star:{rank}` or documented peer |
 | Loyalty | `LoyaltyChannelMods` | e.g. `loyalty:{rank}` |
-| UniqueDemon aptitude | `UniqueDemonAptitudeChannelMods` → `ResolveForBattle` | Existing `aptitude.*` via `AptitudeSubsystem` |
+| UniqueCreature aptitude | `UniqueCreatureAptitudeChannelMods` → `ResolveForBattle` | Existing `aptitude.*` via `AptitudeSubsystem` |
 | Species aptitude (unused by BuildSquad) | `AptitudeChannelMods` | Same Hub aptitude path |
 | Zomboss wave | `ApplyZombossPattern` Concat | Pattern → allocation → Hub |
 | Draught | `DraughtProjection.Apply` | Atom / grant SourceId |
@@ -88,7 +88,7 @@ Trait/Equip atom sources folded at Compose today become Hub `AtomDerivedSubsyste
 
 ## Success criteria
 
-- [ ] Star, Loyalty, UniqueDemon aptitude, Zomboss, draught, expedition injury contribute through Hub/atoms (or documented one-release shim deleted in fuse).
+- [ ] Star, Loyalty, UniqueCreature aptitude, Zomboss, draught, expedition injury contribute through Hub/atoms (or documented one-release shim deleted in fuse).
 - [ ] Guard allowlist for ChannelMods producers only contains files still awaiting fuse delete — shrinks to empty after `battle-hub-fuse`.
 - [ ] Parity tests prove channel totals match pre-migration ChannelMods for the same fixtures.
 - [ ] No production code path **requires** `BattleChannelMod` for these writers after fuse.

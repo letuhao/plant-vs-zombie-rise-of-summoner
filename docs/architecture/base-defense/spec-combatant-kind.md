@@ -7,7 +7,7 @@
 
 ## Objective
 
-**Let a structure enter a battle without behaving like a demon.**
+**Let a structure enter a battle without behaving like a creature.**
 
 Owner decision 4: buildings and obstacles are a **new kind of actor** — no level, no equipment, no
 aura, but they have traits and actions. Two consequences the battle kernel does not currently allow
@@ -90,7 +90,7 @@ public CombatantKind Kind { get; init; } = CombatantKind.Animate;
 
 public enum CombatantKind
 {
-    /// <summary>A demon, a legion member, anything that takes turns. Index 0, so the default is
+    /// <summary>A creature, a legion member, anything that takes turns. Index 0, so the default is
     /// today's behaviour for every existing caller.</summary>
     Animate,
 
@@ -175,7 +175,7 @@ if (setup.Kind == CombatantKind.Structure && actions.Count == 0) return NoAction
 ### 6. What a structure does not get
 
 Owner decision 4, restated so it is not lost: structures **have no level, cannot be equipped, and do
-not receive aura, buff or debuff** — those scopes serve demon-kind actors.
+not receive aura, buff or debuff** — those scopes serve creature-kind actors.
 
 This module enforces the first two by construction (`Level` is unread for structures; `SpecimenId` is
 null so `EquipAtomSource.ModsFor` resolves to nothing). **The buff/debuff scope question is not solved

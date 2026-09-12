@@ -25,7 +25,7 @@
       "id": "set.yellowfootball-001",
       "nameKey": "set.yellow-rugby-zombie",
       "name": "Yellow Rugby Zombie",
-      "themeKey": "demon.yellowfootball",
+      "themeKey": "creature.yellowfootball",
       "members": [
         {
           "role": "armament-primary",

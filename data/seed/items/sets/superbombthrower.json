@@ -25,7 +25,7 @@
       "id": "set.superbombthrower-001",
       "nameKey": "set.miniature-zeppelin",
       "name": "Miniature Zeppelin",
-      "themeKey": "demon.superbombthrower",
+      "themeKey": "creature.superbombthrower",
       "members": [
         {
           "role": "armament-primary",

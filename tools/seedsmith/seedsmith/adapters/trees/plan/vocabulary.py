@@ -47,17 +47,17 @@ class Roster:
 
 
 def load_family_roster_or_pending(seed_root: "Path | None" = None) -> "tuple[tuple[str, ...], bool]":
-    """`roster.demonFamilies[]` (spec-tree-plan.md's frozen schema table) — UNLIKE `aptitudes`/
+    """`roster.creatureFamilies[]` (spec-tree-plan.md's frozen schema table) — UNLIKE `aptitudes`/
     `elements`/`statuses`, an absent family mirror is not `EXIT_CANNOT_RUN`: task C1's own acceptance
-    bullet 9 requires a manifest missing the family roster to emit `_pending: ["demonFamilies"]`
+    bullet 9 requires a manifest missing the family roster to emit `_pending: ["creatureFamilies"]`
     instead, so `F = 0` is visible rather than silent. Returns `(families, pending)` — `pending`
     is `True` only when the mirror file itself is missing (a malformed one still raises, same as
     every other roster read, since that is a real data defect and not a declared absence).
 
-    Reads `data/seed/demons/_registry/families.v1.json`'s `families` map, keyed by canonical key —
-    the same registry the demon program already ships (19 entries as of 2026-09)."""
+    Reads `data/seed/creatures/_registry/families.v1.json`'s `families` map, keyed by canonical key —
+    the same registry the creature program already ships (19 entries as of 2026-09)."""
     root = seed_root or (REPO_ROOT / "data" / "seed")
-    path = root / "demons" / "_registry" / "families.v1.json"
+    path = root / "creatures" / "_registry" / "families.v1.json"
     if not path.exists():
         return (), True
     doc = _read_json(path)

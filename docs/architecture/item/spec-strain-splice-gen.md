@@ -226,8 +226,8 @@ python -m seedsmith check ..\..\data\seed\items --adapter items --metric Coverag
 ```
 
 ⚠ **No `items` subcommand exists.** `build_parser` (`tools/seedsmith/seedsmith/report/cli.py:776-901`)
-registers only `check`, `report`, `metrics`, `demons`, `effects`. Module 13 adds the group; this module
-extends it. 102 entries is small enough not to need the `demons run` resume harness (`:869-871`), but the
+registers only `check`, `report`, `metrics`, `creatures`, `effects`. Module 13 adds the group; this module
+extends it. 102 entries is small enough not to need the `creatures run` resume harness (`:869-871`), but the
 gem-supply precheck below must run **before** the first call, not after.
 
 ## Project structure

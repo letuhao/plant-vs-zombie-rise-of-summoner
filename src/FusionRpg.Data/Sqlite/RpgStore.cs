@@ -5,7 +5,7 @@ using FusionRpg.Data.Abstractions;
 using FusionRpg.Data.Policies;
 using FusionRpg.Data.Sqlite;
 using FusionRpg.Data.Sqlite.Migrations;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.Data;
@@ -476,7 +476,7 @@ public sealed partial class RpgStore : IRpgDb
               instance_id TEXT NOT NULL PRIMARY KEY,
               mods_json TEXT NOT NULL DEFAULT '{}'
             );
-            CREATE TABLE IF NOT EXISTS rpg_demon_profiles (
+            CREATE TABLE IF NOT EXISTS rpg_creature_profiles (
               instance_id TEXT NOT NULL PRIMARY KEY,
               species_id TEXT NOT NULL,
               rarity TEXT NOT NULL,
@@ -490,7 +490,7 @@ public sealed partial class RpgStore : IRpgDb
               created_utc TEXT NOT NULL,
               revision INTEGER NOT NULL DEFAULT 0
             );
-            CREATE TABLE IF NOT EXISTS rpg_demon_codex (
+            CREATE TABLE IF NOT EXISTS rpg_creature_codex (
               player_id INTEGER NOT NULL,
               species_id TEXT NOT NULL,
               state TEXT NOT NULL,
@@ -498,14 +498,14 @@ public sealed partial class RpgStore : IRpgDb
               updated_utc TEXT NOT NULL,
               PRIMARY KEY (player_id, species_id)
             );
-            CREATE TABLE IF NOT EXISTS rpg_demon_lineage (
+            CREATE TABLE IF NOT EXISTS rpg_creature_lineage (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               instance_id TEXT NOT NULL,
               event TEXT NOT NULL,
               detail_json TEXT NOT NULL DEFAULT '{}',
               t TEXT NOT NULL
             );
-            CREATE INDEX IF NOT EXISTS ix_rpg_demon_lineage_instance ON rpg_demon_lineage(instance_id, id);
+            CREATE INDEX IF NOT EXISTS ix_rpg_creature_lineage_instance ON rpg_creature_lineage(instance_id, id);
             CREATE TABLE IF NOT EXISTS rpg_fusion_log (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               player_id INTEGER NOT NULL,
@@ -529,7 +529,7 @@ public sealed partial class RpgStore : IRpgDb
               set_utc TEXT NOT NULL,
               revision INTEGER NOT NULL DEFAULT 0
             );
-            CREATE TABLE IF NOT EXISTS rpg_demon_contracts (
+            CREATE TABLE IF NOT EXISTS rpg_creature_contracts (
               instance_id TEXT NOT NULL PRIMARY KEY,
               player_id INTEGER NOT NULL,
               bound INTEGER NOT NULL DEFAULT 0,
@@ -541,8 +541,8 @@ public sealed partial class RpgStore : IRpgDb
               gain_today INTEGER NOT NULL DEFAULT 0,
               revision INTEGER NOT NULL DEFAULT 0
             );
-            CREATE INDEX IF NOT EXISTS ix_rpg_demon_contracts_bound
-              ON rpg_demon_contracts(player_id) WHERE bound = 1;
+            CREATE INDEX IF NOT EXISTS ix_rpg_creature_contracts_bound
+              ON rpg_creature_contracts(player_id) WHERE bound = 1;
             CREATE TABLE IF NOT EXISTS rpg_contract_state (
               player_id INTEGER NOT NULL PRIMARY KEY,
               purchased_slots INTEGER NOT NULL DEFAULT 0,
@@ -630,7 +630,7 @@ public sealed partial class RpgStore : IRpgDb
             );
             CREATE INDEX IF NOT EXISTS ix_rpg_expedition_members_active
               ON rpg_expedition_members(instance_id) WHERE active = 1;
-            CREATE TABLE IF NOT EXISTS rpg_demon_materials (
+            CREATE TABLE IF NOT EXISTS rpg_creature_materials (
               player_id INTEGER NOT NULL,
               material_id TEXT NOT NULL,
               qty INTEGER NOT NULL DEFAULT 0,
@@ -642,7 +642,7 @@ public sealed partial class RpgStore : IRpgDb
         EnsureColumn(db, "pvz_activity_rollups", "schema_version", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "rpg_actor_progression", "through_ledger_id", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "rpg_actor_progression", "xp_by_reason_json", "TEXT");
-        // demon-lawn-deploy T4.2: preserve correlation/pointer identity on migrated lawn sessions so
+        // creature-lawn-deploy T4.2: preserve correlation/pointer identity on migrated lawn sessions so
         // the partial unique indexes can reject two open bindings for one run identity.
         EnsureColumn(db, "rpg_unique_lawn_sessions", "correlation_id", "TEXT");
         EnsureColumn(db, "rpg_unique_lawn_sessions", "ptr", "TEXT");
@@ -658,15 +658,15 @@ public sealed partial class RpgStore : IRpgDb
               WHERE ptr IS NOT NULL AND ptr <> '';
             """);
         // species-build T1.1 (spec-species-xp.md §1 Option A): kind='species' rows key on
-        // DemonSpeciesDef.DemonTypeId in the existing type_id column (already unique per species) —
+        // CreatureSpeciesDef.CreatureTypeId in the existing type_id column (already unique per species) —
         // this nullable text column carries the human-readable speciesId alongside it, so a row can be
         // read back without a roster round-trip. Every other kind leaves it NULL.
         EnsureColumn(db, "rpg_actor_progression", "scope_key", "TEXT");
-        EnsureColumn(db, "rpg_demon_profiles", "star", "INTEGER NOT NULL DEFAULT 0");
-        EnsureColumn(db, "rpg_demon_profiles", "promoted", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(db, "rpg_creature_profiles", "star", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(db, "rpg_creature_profiles", "promoted", "INTEGER NOT NULL DEFAULT 0");
         // Wardens (spec-loam-texture.md): a permanent, non-releasable bind — the same capacity slot
         // as an ordinary contract, flagged so ReleaseContract can refuse it unconditionally.
-        EnsureColumn(db, "rpg_demon_contracts", "warden", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(db, "rpg_creature_contracts", "warden", "INTEGER NOT NULL DEFAULT 0");
         // battle-adoption: platform stamp for the cross-arch replay guard, and the sweep's
         // terminal state. Both live HERE, after rpg_web_match_log's own CREATE — an ALTER
         // above it would throw "no such table" on every fresh database.
@@ -714,8 +714,8 @@ public sealed partial class RpgStore : IRpgDb
         // remaining honest gap (party-dungeon-todo.md D4.12, 2026-09-07).
         EnsureBaseTypeSchemaUnlocked(db);
         // material_recipe / material_recipe_cost / rpg_material_spend_log — I9 §6.1–6.2,
-        // salvage-craft (module 14). The material INVENTORY table (rpg_demon_materials) is DDL'd
-        // above with the demon tables and is deliberately not renamed here.
+        // salvage-craft (module 14). The material INVENTORY table (rpg_creature_materials) is DDL'd
+        // above with the creature tables and is deliberately not renamed here.
         EnsureMaterialSchemaUnlocked(db);
         // effect_instance_op + the five mutation head columns + effect_instance_atom.suppressed --
         // D2 §9, enhance-reroll (module 15). Must run AFTER EnsureAtomInstanceSchemaUnlocked, whose
@@ -783,11 +783,11 @@ public sealed partial class RpgStore : IRpgDb
         EnsureActionUnlockSchemaUnlocked(db);
         // rpg_player_commander — default lawn commander (commander-surface default-persistence).
         EnsurePlayerCommanderSchemaUnlocked(db);
-        // demon_species + demon_species_magnitude — species-generator's committed output, imported
-        // (spec-species-generator.md, demon-seed module 12/13, T4.6).
+        // creature_species + creature_species_magnitude — species-generator's committed output, imported
+        // (spec-species-generator.md, creature-seed module 12/13, T4.6).
         EnsureSpeciesSchemaUnlocked(db);
         // player_species — the rolled roster per player, append-only (spec-player-materialise.md,
-        // demon-seed module 16, T5.6).
+        // creature-seed module 16, T5.6).
         EnsurePlayerSpeciesSchemaUnlocked(db);
         // rpg_species_respec — species-build-todo.md T4.2, spec-species-respec.md. Per-species churn
         // counter + decay clock; decayed on read, never a timer.
@@ -860,16 +860,16 @@ public sealed partial class RpgStore : IRpgDb
                              // rows below both carry a comment about. Ahead of rpg_unique_actors.
                              "DELETE FROM rpg_item_assignment;",
                              "DELETE FROM rpg_unique_equipment;", "DELETE FROM rpg_unique_stat_mods;",
-                             "DELETE FROM rpg_demon_profiles;", "DELETE FROM rpg_demon_codex;",
+                             "DELETE FROM rpg_creature_profiles;", "DELETE FROM rpg_creature_codex;",
                              "DELETE FROM rpg_soul_ledger;", "DELETE FROM rpg_soul_balances;",
                              "DELETE FROM rpg_summon_log;", "DELETE FROM rpg_summon_pity;",
                              "DELETE FROM rpg_web_match_log;",
                              "DELETE FROM rpg_expeditions;", "DELETE FROM rpg_expedition_members;",
-                             "DELETE FROM rpg_demon_materials;",
-                             "DELETE FROM rpg_demon_lineage;", "DELETE FROM rpg_fusion_log;",
+                             "DELETE FROM rpg_creature_materials;",
+                             "DELETE FROM rpg_creature_lineage;", "DELETE FROM rpg_fusion_log;",
                              "DELETE FROM rpg_fusion_discovery;", "DELETE FROM rpg_patron;",
                              "DELETE FROM rpg_player_commander;",
-                             "DELETE FROM rpg_demon_contracts;", "DELETE FROM rpg_contract_state;",
+                             "DELETE FROM rpg_creature_contracts;", "DELETE FROM rpg_contract_state;",
                              "DELETE FROM rpg_unique_actors;",
                              "DELETE FROM rpg_unique_lawn_xp_receipts;",
                              "DELETE FROM rpg_unique_lawn_sessions;",
@@ -1568,12 +1568,12 @@ public sealed partial class RpgStore : IRpgDb
                 // grammars; treating every contract source as a unique claim would silently
                 // rewrite valid empire-general facts to `untrusted`.
                 var isUniqueClaim = false;
-                if (string.Equals(sourceKind, DemonProgressionSource.ContractKind, StringComparison.Ordinal))
+                if (string.Equals(sourceKind, CreatureProgressionSource.ContractKind, StringComparison.Ordinal))
                 {
                     try
                     {
-                        isUniqueClaim = DemonProgressionSource.Parse(sourceKind, sourceId)
-                            is DemonProgressionSource.UniqueSpecimenSource;
+                        isUniqueClaim = CreatureProgressionSource.Parse(sourceKind, sourceId)
+                            is CreatureProgressionSource.UniqueSpecimenSource;
                     }
                     catch (FormatException) { /* malformed claims fail closed in progression */ }
                 }
@@ -1737,10 +1737,10 @@ public sealed partial class RpgStore : IRpgDb
         if (!hasExplicitClaim && !string.IsNullOrWhiteSpace(instanceId) && isDedicatedExtra)
         {
             var occurrence = TryString(payload, "correlationId") ?? dedupe;
-            if (IsOwnedUniqueSourceUnlocked(db, playerId, DemonProgressionSource.UniqueSpecimenKind,
+            if (IsOwnedUniqueSourceUnlocked(db, playerId, CreatureProgressionSource.UniqueSpecimenKind,
                     $"unique:{instanceId}:{occurrence}"))
             {
-                var source = DemonProgressionSource.UniqueSpecimen(instanceId!, occurrence);
+                var source = CreatureProgressionSource.UniqueSpecimen(instanceId!, occurrence);
                 sourceKind = source.Kind;
                 sourceId = source.Id;
             }
@@ -1792,11 +1792,11 @@ public sealed partial class RpgStore : IRpgDb
         if (ReadActorStateUnlocked(db, playerId, FusionRpg.Core.Progression.RpgActorKinds.Player, 0).Level < 3
             || ReadOnboardingCheckpointUnlocked(
                 db, playerId, FusionRpg.Core.Onboarding.OnboardingCheckpointIds.Level3GeneralSpecies) is not null
-            || !DemonSpeciesCatalog.IsConfigured)
+            || !CreatureSpeciesCatalog.IsConfigured)
             return;
 
-        var index = new LawnElementIndex(DemonSpeciesCatalog.All);
-        DemonSpeciesDef? species = null;
+        var index = new LawnElementIndex(CreatureSpeciesCatalog.All);
+        CreatureSpeciesDef? species = null;
         long sourceFactId = 0;
         using (var facts = db.CreateCommand())
         {
@@ -1834,7 +1834,7 @@ public sealed partial class RpgStore : IRpgDb
 
         if (species is null) return;
         var speciesState = ReadActorStateUnlocked(db, playerId,
-            FusionRpg.Core.Progression.RpgActorKinds.Species, species.DemonTypeId);
+            FusionRpg.Core.Progression.RpgActorKinds.Species, species.CreatureTypeId);
         // Allocation is a projection of the already-applied species row. Hosts configure the
         // aptitude/plan hubs at startup; capture-only fixtures may omit them, so an empty map is
         // explicit rather than a fabricated stat distribution.
@@ -1842,13 +1842,13 @@ public sealed partial class RpgStore : IRpgDb
         try
         {
             var baseline = FusionRpg.Core.Stats.Aptitudes.SpeciesAllocation.Baseline(
-                FusionRpg.Core.Demons.Generation.SpeciesBuildPlanCatalog.SharesFor(species.SpeciesId),
+                FusionRpg.Core.Creatures.Generation.SpeciesBuildPlanCatalog.SharesFor(species.SpeciesId),
                 speciesState.Level,
                 FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning);
             foreach (var aptitude in FusionRpg.Core.Stats.Aptitudes.AptitudeCatalog.All)
             {
                 var points = baseline.PointsAt(
-                    FusionRpg.Core.Stats.Aptitudes.AllocationScope.DemonType, aptitude.Id);
+                    FusionRpg.Core.Stats.Aptitudes.AllocationScope.CreatureType, aptitude.Id);
                 if (points > 0) allocation[aptitude.Id] = points;
             }
         }
@@ -1861,7 +1861,7 @@ public sealed partial class RpgStore : IRpgDb
         {
             checkpointId = FusionRpg.Core.Onboarding.OnboardingCheckpointIds.Level3GeneralSpecies,
             speciesId = species.SpeciesId,
-            demonTypeId = species.DemonTypeId,
+            creatureTypeId = species.CreatureTypeId,
             sourceFactId,
             speciesLevel = speciesState.Level,
             speciesXp = speciesState.Xp,
@@ -3570,13 +3570,13 @@ public sealed partial class RpgStore : IRpgDb
 
     static bool IsMatchingEmpireGeneralClaim(string? sourceKind, string? sourceId, string side, int typeId)
     {
-        if (!string.Equals(sourceKind, DemonProgressionSource.ContractKind, StringComparison.Ordinal)
-            || string.IsNullOrWhiteSpace(sourceId) || !DemonSpeciesCatalog.IsConfigured) return false;
+        if (!string.Equals(sourceKind, CreatureProgressionSource.ContractKind, StringComparison.Ordinal)
+            || string.IsNullOrWhiteSpace(sourceId) || !CreatureSpeciesCatalog.IsConfigured) return false;
         try
         {
-            if (DemonProgressionSource.Parse(sourceKind!, sourceId!)
-                is not DemonProgressionSource.EmpireGeneralSource general) return false;
-            return new LawnElementIndex(DemonSpeciesCatalog.All).TryGet(side, typeId, out var species)
+            if (CreatureProgressionSource.Parse(sourceKind!, sourceId!)
+                is not CreatureProgressionSource.EmpireGeneralSource general) return false;
+            return new LawnElementIndex(CreatureSpeciesCatalog.All).TryGet(side, typeId, out var species)
                 && string.Equals(general.SpeciesId, species.SpeciesId, StringComparison.Ordinal);
         }
         catch (InvalidOperationException) { return false; }
@@ -3585,11 +3585,11 @@ public sealed partial class RpgStore : IRpgDb
 
     bool IsOwnedUniqueSourceUnlocked(SqliteConnection db, long playerId, string sourceKind, string sourceId)
     {
-        if (!string.Equals(sourceKind, DemonProgressionSource.UniqueSpecimenKind, StringComparison.Ordinal))
+        if (!string.Equals(sourceKind, CreatureProgressionSource.UniqueSpecimenKind, StringComparison.Ordinal))
             return true;
         try
         {
-            if (DemonProgressionSource.Parse(sourceKind, sourceId) is not DemonProgressionSource.UniqueSpecimenSource unique)
+            if (CreatureProgressionSource.Parse(sourceKind, sourceId) is not CreatureProgressionSource.UniqueSpecimenSource unique)
                 return false;
             var actor = ReadUniqueActorUnlocked(db, unique.InstanceId);
             return actor is not null && actor.PlayerId == playerId

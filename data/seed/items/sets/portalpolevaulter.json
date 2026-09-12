@@ -25,7 +25,7 @@
       "id": "set.portalpolevaulter-001",
       "nameKey": "set.void-stilt-spectator",
       "name": "Void-Stilt Spectator",
-      "themeKey": "demon.portalpolevaulter",
+      "themeKey": "creature.portalpolevaulter",
       "members": [
         {
           "role": "armament-primary",

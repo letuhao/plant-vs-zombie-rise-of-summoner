@@ -19,7 +19,7 @@ These words get guessed wrong. Read them once before the rest of the page.
 
 | Word | What it actually means here |
 |---|---|
-| **Essence** | A **material stock** in your save, split by element. Not souls, not loam, not a demon’s health. |
+| **Essence** | A **material stock** in your save, split by element. Not souls, not loam, not a creature’s health. |
 | **Element-matched** | A fusion that wants fire essence will not take ice essence instead. The colour (element) is the point of the bottleneck. |
 | **Bank** | Essence stays with your summoner across worlds — same idea as souls. [Loam](loam.md) does not. |
 | **Fusion** | Merging specimens in the Fusion lab (`F`). That is the main place you spend essence today. |

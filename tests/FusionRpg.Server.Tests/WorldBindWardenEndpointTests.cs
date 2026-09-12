@@ -1,8 +1,8 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Contracts;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.Builder;
@@ -18,7 +18,7 @@ namespace FusionRpg.Server.Tests;
 /// <summary>
 /// world-stage W29: the `POST /api/world/{worldId}/bind-warden` endpoint — the first production
 /// caller of <see cref="RpgStore.BindAsWarden"/>. Proves the documented two-step failure mode: step 1
-/// (the demon-contract bind) is not rolled back when step 2 (filing the world order) fails, and the
+/// (the creature-contract bind) is not rolled back when step 2 (filing the world order) fails, and the
 /// correct client response — retrying the whole call — lands cleanly on both idempotent paths
 /// without a double soul charge or a duplicate command row.
 /// </summary>
@@ -30,8 +30,8 @@ public class WorldBindWardenEndpointTests : IAsyncLifetime
     HttpClient _http = null!;
     const string WorldId = "w29-bind-warden";
 
-    static readonly DemonSpeciesDef Species = DemonSpeciesCatalog.All
-        .First(s => s.Acquisition != DemonAcquisition.CaptureOnly && s.TraitPool.Count > 0);
+    static readonly CreatureSpeciesDef Species = CreatureSpeciesCatalog.All
+        .First(s => s.Acquisition != CreatureAcquisition.CaptureOnly && s.TraitPool.Count > 0);
 
     public async Task InitializeAsync()
     {
@@ -77,14 +77,14 @@ public class WorldBindWardenEndpointTests : IAsyncLifetime
         try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
     }
 
-    /// <summary>An unbound demon with a free capacity slot — <c>MintDemon</c> auto-binds up to base
-    /// capacity, so a plain bindable demon needs a slot freed first, matching
+    /// <summary>An unbound creature with a free capacity slot — <c>MintCreature</c> auto-binds up to base
+    /// capacity, so a plain bindable creature needs a slot freed first, matching
     /// <c>WardenContractTests.cs</c>'s own established fixture.</summary>
     string MintUnboundWithFreeSlot()
     {
         string Mint()
         {
-            var (specimen, _) = _store.MintDemon(1, new DemonMintSpec
+            var (specimen, _) = _store.MintCreature(1, new CreatureMintSpec
             {
                 SpeciesId = Species.SpeciesId,
                 Side = Species.Side,
@@ -181,7 +181,7 @@ public class WorldBindWardenEndpointTests : IAsyncLifetime
         FusionRpg.Core.World.Ai.WorldAiPolicy.Configure(
             FusionRpg.Core.World.Ai.WorldAiTuningLoader.Parse(Read("ai.v2.json")));
         // Server.Tests' own PowerAndAptitudeTuningTestBootstrap module initializer configures
-        // Power/Aptitude/DerivedStat/Rung/Aura only — ContractPolicy (this file's own MintDemon /
+        // Power/Aptitude/DerivedStat/Rung/Aura only — ContractPolicy (this file's own MintCreature /
         // BindAsWarden fixtures) needs its own configure, matching every other Policy this file reads.
         ContractPolicy.Configure(ContractTuningLoader.Parse(Read("contracts.v1.json")));
         _tuningConfigured = true;

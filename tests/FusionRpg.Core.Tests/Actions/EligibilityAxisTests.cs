@@ -211,8 +211,8 @@ public class EligibilityAxisTests
     }
 
     /// <summary>The real committed projection (§3.2, decided 2026-09-03; ⛔ re-measured 2026-09-11):
-    /// the file is A-S0's live projection of the demon species corpus (`derive_live_family_assignments`
-    /// over `data/seed/demons/species/`), NOT the legacy 53-species `_generated/family-assignments.json`.
+    /// the file is A-S0's live projection of the creature species corpus (`derive_live_family_assignments`
+    /// over `data/seed/creatures/species/`), NOT the legacy 53-species `_generated/family-assignments.json`.
     /// Live shape: 904 species over 227 consolidated families, with multi-family membership (a species
     /// reaching more than one family is the reason the projection is a relation). Every key must be a
     /// real shipped species — read from disk, not asserted from memory.</summary>
@@ -229,7 +229,7 @@ public class EligibilityAxisTests
         Assert.All(map.Values, v => Assert.NotEmpty(v));
 
         // Every key is a shipped species id (the projection cannot invent one).
-        var indexPath = Path.Combine(repoRoot, "data", "seed", "demons", "species", "_index.json");
+        var indexPath = Path.Combine(repoRoot, "data", "seed", "creatures", "species", "_index.json");
         var species = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(indexPath))!
             .Keys.Select(k => k.ToLowerInvariant()).ToHashSet(StringComparer.Ordinal);
         var unknown = map.Keys.Where(k => !species.Contains(k)).ToList();

@@ -22,16 +22,16 @@ CATEGORIES structurally, which the weight's per-mille value then scales (exactly
 term — see its `roleLeanMatch`/`motifCoverage`/etc, each independently formula-derived before any
 weight touches it. `traitCategoryMilli` etc. are this module's version of those per-term weights,
 not the source of the differentiation itself.) No such trait -> category (or element -> category,
-or posture -> category) table exists anywhere in the shipped codebase — `DemonTraitCatalog.cs`
+or posture -> category) table exists anywhere in the shipped codebase — `CreatureTraitCatalog.cs`
 carries only a `Blurb` (free prose), and there is no crosswalk from `ActorElementTypes` to
 `ActionCategory`. `SIGNAL_CATEGORY` below is this module's own, and it is a genuine editorial
 judgment call, not a citation. It IS grounded in the closest real, already-shipped facts available:
-- trait -> category: each trait's own `Blurb` in `DemonTraitCatalog.cs:11-30` (an attacking blurb
+- trait -> category: each trait's own `Blurb` in `CreatureTraitCatalog.cs:11-30` (an attacking blurb
   reads as `attack`, a shielding one as `defense`, and so on).
 - element -> category: no textual grounding exists; assigned to spread the 6 elements evenly
   across the 5 categories rather than left flat (a flat element block would silently return this
   module to the same all-tie problem for any species whose only differentiator was element).
-- posture -> category: `seedsmith/adapters/demons/anchor/schema.py`'s own `APTITUDE_POSTURE` and
+- posture -> category: `seedsmith/adapters/creatures/anchor/schema.py`'s own `APTITUDE_POSTURE` and
   `validators/anchor.py`'s own rule ("Bastion IS the guard posture") directly hand `Bastion ->
   defense`; `Force`'s member aptitudes (Might/Fortitude/Vigor/Onslaught) read as `attack`;
   `Finesse`'s (Agility/Composure/Pierce/Focus) as `movement`.
@@ -48,7 +48,7 @@ a rebalance would want to move a signal to a different category; everything down
 **⛔ REVISED 2026-09-11 (owner-authorized, measured).** The original map sent `soul-eater` and
 `loyal` and `greedy` all to `support` and `coward` to `defense`. Once the closed-trait bridge
 (`curation.py`) started feeding real traits, that clustering left 539 of 904 species at
-`separation == 0`. Four cells moved to the category their own `DemonTraitCatalog.cs` blurb actually
+`separation == 0`. Four cells moved to the category their own `CreatureTraitCatalog.cs` blurb actually
 describes — `soul-eater` *"feeds on fallen enemies"* → `support` (sustain), `coward` *"prefers to
 survive"* → `movement` (retreat), `loyal` *"stands by its summoner"* → `defense` (protect),
 `greedy` *"chases the richest prize"* → `status` (tactical) — and the result was measured over the
@@ -199,7 +199,7 @@ def build_species_anchor(
         family=(families[0] if families else None),
         motifs=tuple(motif_row.get("motifs") or ()),
         anti_motifs=tuple(motif_row.get("antiMotifs") or ()),
-        theme_key=f"demon.{species.species_id}",
+        theme_key=f"creature.{species.species_id}",
         anchor=anchor_by_lower.get(species.species_id),
     )
 

@@ -25,7 +25,7 @@
       "id": "set.cherrymagnet-001",
       "nameKey": "set.cherry-magnetic-spore",
       "name": "Cherry Magnetic Spore",
-      "themeKey": "demon.cherrymagnet",
+      "themeKey": "creature.cherrymagnet",
       "members": [
         {
           "role": "armament-primary",

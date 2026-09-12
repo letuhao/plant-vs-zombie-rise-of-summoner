@@ -25,7 +25,7 @@
       "id": "set.torchspike-001",
       "nameKey": "set.blazing-spikes",
       "name": "Blazing Spikes",
-      "themeKey": "demon.torchspike",
+      "themeKey": "creature.torchspike",
       "members": [
         {
           "role": "armament-primary",

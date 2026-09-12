@@ -25,7 +25,7 @@
       "id": "set.superlevatation-001",
       "nameKey": "set.pilot-s-cockpit",
       "name": "Pilot's Cockpit",
-      "themeKey": "demon.superlevatation",
+      "themeKey": "creature.superlevatation",
       "members": [
         {
           "role": "armament-primary",

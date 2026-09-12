@@ -25,7 +25,7 @@
       "id": "set.lotusaloes-001",
       "nameKey": "set.aloe-healer-s-bloom",
       "name": "Aloe Healer's Bloom",
-      "themeKey": "demon.lotusaloes",
+      "themeKey": "creature.lotusaloes",
       "members": [
         {
           "role": "armament-primary",

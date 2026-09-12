@@ -22,8 +22,8 @@ def anchor_with_attempts(species_id, attempts) -> dict:
             "_provenance": {"basis": "observed", "attempts": attempts}}
 
 
-def ctx_with(anchors, *, demon_dump=None) -> Ctx:
-    return Ctx(corpus=Corpus(), adapter=None, demon_anchors=anchors, demon_dump=demon_dump)
+def ctx_with(anchors, *, creature_dump=None) -> Ctx:
+    return Ctx(corpus=Corpus(), adapter=None, creature_anchors=anchors, creature_dump=creature_dump)
 
 
 # --- disagreement rate -----------------------------------------------------------------------
@@ -109,7 +109,7 @@ def test_threat_audit_queue_never_gates():
     # The review queue (review_queue.py) is a plain data structure with no `loop`/`gates`
     # attributes at all — it cannot be registered into MetricRegistry, so it structurally
     # cannot appear in any --gate pass/fail decision. This test pins that by construction.
-    from seedsmith.adapters.demons.anchor.review_queue import ThreatAuditReviewEntry
+    from seedsmith.adapters.creatures.anchor.review_queue import ThreatAuditReviewEntry
     assert not hasattr(ThreatAuditReviewEntry, "loop")
     assert not hasattr(ThreatAuditReviewEntry, "gates")
     pipeline_health_ids = {m.id for m in ALL_PIPELINE_HEALTH_METRICS}

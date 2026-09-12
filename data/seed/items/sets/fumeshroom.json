@@ -25,7 +25,7 @@
       "id": "set.fumeshroom-001",
       "nameKey": "set.iron-gate-spore",
       "name": "Iron Gate Spore",
-      "themeKey": "demon.fumeshroom",
+      "themeKey": "creature.fumeshroom",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.vectorplant-001",
       "nameKey": "set.the-marching-dirge",
       "name": "The Marching Dirge",
-      "themeKey": "demon.vectorplant",
+      "themeKey": "creature.vectorplant",
       "members": [
         {
           "role": "armament-primary",

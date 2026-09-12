@@ -11,14 +11,14 @@ export type WardenRefusalReason =
   | "contract.already-bound"
   | "specimen.missing";
 
-function refusalSentence(reason: WardenRefusalReason, demonName: string): string {
+function refusalSentence(reason: WardenRefusalReason, creatureName: string): string {
   switch (reason) {
     case "capacity.full":
       return "Every binding slot is taken.";
     case "souls.insufficient":
       return "You cannot pay the fee.";
     case "contract.already-bound":
-      return `${demonName} is already under an ordinary contract.`;
+      return `${creatureName} is already under an ordinary contract.`;
     case "specimen.missing":
       return "This should never be reachable — the specimen is missing.";
     default: {
@@ -31,7 +31,7 @@ function refusalSentence(reason: WardenRefusalReason, demonName: string): string
 export type BindWardenDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  demonName: string;
+  creatureName: string;
   sectorName: string;
   /** Binding slots used **after** this bind would count, out of the capacity — e.g. `7` of `8`. */
   slotsUsedAfterBind: number;
@@ -58,7 +58,7 @@ export type BindWardenDialogProps = {
 export function BindWardenDialog({
   open,
   onOpenChange,
-  demonName,
+  creatureName,
   sectorName,
   slotsUsedAfterBind,
   slotsCapacity,
@@ -127,14 +127,14 @@ export function BindWardenDialog({
       }
     >
       {refusal ? (
-        <p data-testid="warden-refusal">{refusalSentence(refusal, demonName)}</p>
+        <p data-testid="warden-refusal">{refusalSentence(refusal, creatureName)}</p>
       ) : step === 1 ? (
         <>
           <p data-testid="warden-permanence">
-            {demonName} will never leave your roster, never take another contract, and can never be
+            {creatureName} will never leave your roster, never take another contract, and can never be
             released — not for souls, not by retiring it, not ever.
           </p>
-          <p data-testid="warden-keep-ground">You keep the ground. You do not keep the demon.</p>
+          <p data-testid="warden-keep-ground">You keep the ground. You do not keep the creature.</p>
           <ul data-testid="warden-rows">
             <li data-testid="warden-row-permanent">The binding becomes permanent.</li>
             <li data-testid="warden-row-slot">
@@ -152,7 +152,7 @@ export function BindWardenDialog({
         <>
           <p data-testid="warden-arithmetic">
             You have {balance} souls. The fee is {fee} and the upkeep is {upkeepPerDay} a day. After
-            tonight you cannot pay {demonName} — an unpaid warden is still bound, and you would be
+            tonight you cannot pay {creatureName} — an unpaid warden is still bound, and you would be
             carrying a debt you cannot release your way out of.
           </p>
           <label data-testid="warden-bind-label">

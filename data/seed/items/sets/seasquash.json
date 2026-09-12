@@ -25,7 +25,7 @@
       "id": "set.seasquash-001",
       "nameKey": "set.squash-gourd-vessel",
       "name": "Squash Gourd Vessel",
-      "themeKey": "demon.seasquash",
+      "themeKey": "creature.seasquash",
       "members": [
         {
           "role": "armament-primary",

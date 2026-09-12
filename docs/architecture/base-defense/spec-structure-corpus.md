@@ -12,10 +12,10 @@
 This is `structure-seed-ideal.md` §3's load-bearing difference, and decision 43 confirmed the premise
 it rests on:
 
-> *"The demon pipeline **classifies** an existing corpus … A structure corpus has to be **invented**.
+> *"The creature pipeline **classifies** an existing corpus … A structure corpus has to be **invented**.
 > There is no almanac of trenches."*
 
-and, because static plants stay demons (decision 43):
+and, because static plants stay creatures (decision 43):
 
 > *"the PvZ corpus is **not** available for reuse here … **So the source material is the design
 > research, not a datamine**: base-defense §5.18's seventeen historical works reduced to four obstacle

@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.encounter-event-creature.cactus-001",
+  "flavor": "In the center of the chamber stands a massive, bloated 仙人掌 that pulses with a rhythmic, internal light. As the combatants clash, the entity begins to shudder, its thick skin splitting to reveal a pressurized core that looks ready to 发射 its jagged, needle-filled contents across the battlefield.",
+  "kind": "encounter-event",
+  "name": "The Spiny Artillery",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.resilience",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "To force players to decide between positioning for high damage or retreating to avoid area-of-effect hazards.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.cactus"
+}

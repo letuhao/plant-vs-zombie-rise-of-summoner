@@ -14,7 +14,7 @@ jobs:
   test:
     runs-on: windows-latest
     # 2026-09-06: a real, reproduced .NET process-redirection deadlock (fixed the same day in
-    # DemonSpeciesImportCliTests.cs/RealColdProcessTests.cs) hung a local test run for 17+ minutes
+    # CreatureSpeciesImportCliTests.cs/RealColdProcessTests.cs) hung a local test run for 17+ minutes
     # with no diagnostic naming the stuck test. GitHub Actions' own default job timeout is 6 hours —
     # a future hang of this shape would silently burn most of a day's CI minutes before failing.
     # This bound is generous for the real runtime (normally well under it) and only exists to fail
@@ -67,18 +67,18 @@ jobs:
       - name: species-generator staleness guard (seed-to-concrete T4.5/Checkpoint 4)
         shell: pwsh
         run: |
-          # species-generator (demon-seed module 12) commits its generated tree
-          # (data/generated/demons/**) to the repo — --check regenerates every real classified
+          # species-generator (creature-seed module 12) commits its generated tree
+          # (data/generated/creatures/**) to the repo — --check regenerates every real classified
           # anchor and fails if any file on disk differs, catching a hand-edited generated file or a
           # tuning change nobody re-ran the generator for (spec-species-generator.md §7).
-          dotnet run --project tools/DemonSpeciesGen -- --check
-          if ($LASTEXITCODE -ne 0) { throw "DemonSpeciesGen --check found the generated tree stale — run 'dotnet run --project tools/DemonSpeciesGen' and commit the result" }
+          dotnet run --project tools/CreatureSpeciesGen -- --check
+          if ($LASTEXITCODE -ne 0) { throw "CreatureSpeciesGen --check found the generated tree stale — run 'dotnet run --project tools/CreatureSpeciesGen' and commit the result" }
 
       - name: family-expand staleness guard (E43, spec-family-expand.md §3.1/§5 test 2)
         shell: pwsh
         run: |
           # FamilyExpandGen commits its generated tree (data/seed/atoms/generated/**) to the repo,
-          # same DemonSpeciesGen --check pattern above — --check regenerates every atom row from the
+          # same CreatureSpeciesGen --check pattern above — --check regenerates every atom row from the
           # 98 authored affix families + tier-bands.v1.json and fails if any generated file on disk
           # differs, or if a generated file's source family no longer exists.
           dotnet run --project tools/FamilyExpandGen -- --check
@@ -88,18 +88,18 @@ jobs:
         shell: pwsh
         run: |
           # redistribution-plan (species-build module 4) commits its generated plan
-          # (data/generated/demons/_species-build-plan.json) to the repo, same DemonSpeciesGen
+          # (data/generated/creatures/_species-build-plan.json) to the repo, same CreatureSpeciesGen
           # --check pattern above — --check replans the whole real corpus and fails if the committed
           # file differs, OR if the replanned corpus falls outside the shipped parity band (Phase 3's
           # own refusal, exit 1) — a near-miss never ships silently.
-          dotnet run --project tools/DemonBuildPlanGen -- --check
-          if ($LASTEXITCODE -ne 0) { throw "DemonBuildPlanGen --check found the plan stale or out of band — run 'dotnet run --project tools/DemonBuildPlanGen' and commit the result" }
+          dotnet run --project tools/CreatureBuildPlanGen -- --check
+          if ($LASTEXITCODE -ne 0) { throw "CreatureBuildPlanGen --check found the plan stale or out of band — run 'dotnet run --project tools/CreatureBuildPlanGen' and commit the result" }
 
       - name: passive-tree catalog staleness guard (H9, spec-tree-binder.md §"Commands")
         shell: pwsh
         run: |
           # tools/TreeBinder commits its generated catalog (data/generated/passive-tree/**) to the
-          # repo, same DemonSpeciesGen/FamilyExpandGen --check pattern above — --check rebinds every
+          # repo, same CreatureSpeciesGen/FamilyExpandGen --check pattern above — --check rebinds every
           # committed plan+seed pair and fails if any generated file on disk differs. Distinct from
           # `seedsmith trees plan --check` (the PLAN's own byte-identity check, Python side, not yet
           # wired into this workflow either) — this is the CATALOG half, C# side, one step lower in
@@ -213,7 +213,7 @@ jobs:
           dotnet run --project tools/AtomImporter -c Release -- --check --validate --db "$env:RUNNER_TEMP/atom-validate-db"
           if ($LASTEXITCODE -ne 0) { throw "content validation gate failed - see the lint / power drift lines above" }
 
-      - name: Demon corpus dump is self-consistent (seed-to-concrete T1.2)
+      - name: Creature corpus dump is self-consistent (seed-to-concrete T1.2)
         shell: pwsh
         run: |
           # `--verify` is DB-free by design (spec-corpus-dump.md) — decisions.md rules out a real
@@ -221,8 +221,8 @@ jobs:
           # here. This re-hashes the committed payload files on disk and checks them against
           # _manifest.json's declared hash and counts — it catches a hand-edit or a bad merge, not
           # drift against the live game (that is the owner-run `--check` against a real database).
-          dotnet run --project tools/DemonCorpusDump -c Release -- --verify data/seed/demons/_dump
-          if ($LASTEXITCODE -ne 0) { throw "demon corpus dump under data/seed/demons/_dump is not self-consistent with its own manifest — see output above" }
+          dotnet run --project tools/CreatureCorpusDump -c Release -- --verify data/seed/creatures/_dump
+          if ($LASTEXITCODE -ne 0) { throw "creature corpus dump under data/seed/creatures/_dump is not self-consistent with its own manifest — see output above" }
 
       - name: Validate item seed corpus
         shell: pwsh
@@ -236,7 +236,7 @@ jobs:
         run: |
           # G0.1 (spec-dependency-baseline.md): seedsmith declared ZERO dependencies until
           # 2026-09-01, so this job ran against whatever the runner happened to have. `jieba` was
-          # imported by adapters/demons/motifs.py and declared nowhere — a fresh clone failed
+          # imported by adapters/creatures/motifs.py and declared nowhere — a fresh clone failed
           # test_motif_derive.py with ModuleNotFoundError. Installing from the committed lockfile
           # makes the environment reproducible instead of ambient.
           python -m pip install --upgrade pip
@@ -270,14 +270,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "item seed corpus has reachability gaps" }
         working-directory: tools/seedsmith
 
-      - name: Demon anchor contract audits clean (seed-to-concrete T1.7 / Checkpoint 1)
+      - name: Creature anchor contract audits clean (seed-to-concrete T1.7 / Checkpoint 1)
         shell: pwsh
         run: |
           # Mechanical, per spec-anchor-contract.md §4: a numeric field anywhere in the resolved
           # species-anchor schema poisons every downstream classification row, so this gates CI
           # unconditionally rather than starting measure-only like a balance metric would.
-          python -m seedsmith demons contract --audit
-          if ($LASTEXITCODE -ne 0) { throw "demon anchor contract has a numeric-smuggling finding — see output above" }
+          python -m seedsmith creatures contract --audit
+          if ($LASTEXITCODE -ne 0) { throw "creature anchor contract has a numeric-smuggling finding — see output above" }
         working-directory: tools/seedsmith
 
       - name: Structure anchor contract audits clean (base-defense structure-schema, module 23)
@@ -285,65 +285,65 @@ jobs:
         run: |
           # Mechanical, per spec-structure-schema.md §4: the module's whole point is that this audit
           # fails the build rather than warning, so it gates CI unconditionally, the same way the
-          # demon anchor contract step above does for its own schema.
+          # creature anchor contract step above does for its own schema.
           python -m seedsmith structures contract --audit
           if ($LASTEXITCODE -ne 0) { throw "structure anchor contract has a numeric-smuggling finding — see output above" }
         working-directory: tools/seedsmith
 
-      - name: Demon corpus-coverage metrics (seed-to-concrete T1.10)
+      - name: Creature corpus-coverage metrics (seed-to-concrete T1.10)
         shell: pwsh
         run: |
-          # --demon-dump only (no --corpus): isolates the two demon-dump metrics from the item
+          # --creature-dump only (no --corpus): isolates the two creature-dump metrics from the item
           # corpus's own EmptyPartition/Balance/Distribution families, which need a real --corpus
           # to mean anything and would otherwise report noise here.
-          python -m seedsmith report --gate --demon-dump ../../data/seed/demons/_dump
-          if ($LASTEXITCODE -ne 0) { throw "demon corpus-coverage metrics found a gated finding — see output above" }
+          python -m seedsmith report --gate --creature-dump ../../data/seed/creatures/_dump
+          if ($LASTEXITCODE -ne 0) { throw "creature corpus-coverage metrics found a gated finding — see output above" }
         working-directory: tools/seedsmith
 
-      - name: Demon roster metrics gate (seed-to-concrete T2.10/T2.12/Checkpoint 2)
+      - name: Creature roster metrics gate (seed-to-concrete T2.10/T2.12/Checkpoint 2)
         shell: pwsh
         run: |
           # T2.12's own original note said this would "break CI with no anchor tree yet" — stale as
-          # of 2026-09-06: the real anchor tree (data/seed/demons/species/**, 504 tracked files,
+          # of 2026-09-06: the real anchor tree (data/seed/creatures/species/**, 504 tracked files,
           # 829-840 real classified species depending on which run) has been committed for a while
           # now, and this command needs no model call and no network access, only the committed
-          # tree + data/tuning/demon-roster-targets.v1.json. Verified directly before wiring it in,
+          # tree + data/tuning/creature-roster-targets.v1.json. Verified directly before wiring it in,
           # not assumed: run against the real committed tree, exits 0 (14 real GAP findings, all
           # `gates=False` informational — none `gates=True`), so wiring it in cannot break the build
           # today. If a future roster change ever DOES trip an armed gate, that is this step doing
           # its job, not a regression in this step itself.
-          python -m seedsmith demons metrics --gate
-          if ($LASTEXITCODE -ne 0) { throw "demon roster metrics found a gated finding — see output above" }
+          python -m seedsmith creatures metrics --gate
+          if ($LASTEXITCODE -ne 0) { throw "creature roster metrics found a gated finding — see output above" }
         working-directory: tools/seedsmith
 
-      - name: Fusion-recipe seed staleness guard (demon-seed module 17/T8.3, spec-fusion-recipe-generator.md §3)
+      - name: Fusion-recipe seed staleness guard (creature-seed module 17/T8.3, spec-fusion-recipe-generator.md §3)
         shell: pwsh
         run: |
-          # Same DemonSpeciesGen/DemonBuildPlanGen --check pattern above, for the one link in this
+          # Same CreatureSpeciesGen/CreatureBuildPlanGen --check pattern above, for the one link in this
           # chain that did NOT have its own explicit gate until 2026-09-07: fusion-recipe-reconcile
-          # commits data/generated/demons/_fusion-recipes.json to the repo, and growing the species
+          # commits data/generated/creatures/_fusion-recipes.json to the repo, and growing the species
           # corpus (a new anchor, a self-heal fallback resolving a field, a tuning change) can shift
           # which species are eligible fusion outputs/inputs without anyone touching this file by
-          # hand. Found live the hard way: demon-corpus-self-heal Phase I's aptitudePrimary fallback
+          # hand. Found live the hard way: creature-corpus-self-heal Phase I's aptitudePrimary fallback
           # (11 species) silently desynced this exact committed seed (709->713 eligible outputs,
           # 695->699 deterministic recipes) until a full test run caught it by accident. `--check`
           # re-runs the real deterministic pass AND reuses (never re-derives) every already-resolved
           # gap-fill pick via its own per-deficit corpusContentHash freeze, so this never needs a
           # live model call to stay green — a real drift always has a one-line fix: re-run
-          # `python -m seedsmith.adapters.demons.fusion.reconcile` and commit the result.
-          python -m seedsmith.adapters.demons.fusion.reconcile --check
-          if ($LASTEXITCODE -ne 0) { throw "fusion-recipe seed is stale — run 'python -m seedsmith.adapters.demons.fusion.reconcile' (from tools/seedsmith) and commit the result" }
+          # `python -m seedsmith.adapters.creatures.fusion.reconcile` and commit the result.
+          python -m seedsmith.adapters.creatures.fusion.reconcile --check
+          if ($LASTEXITCODE -ne 0) { throw "fusion-recipe seed is stale — run 'python -m seedsmith.adapters.creatures.fusion.reconcile' (from tools/seedsmith) and commit the result" }
         working-directory: tools/seedsmith
 
-      - name: Demon preflight, CI mode (seed-to-concrete T1.8 — checks 1-4/7-9, no local model)
+      - name: Creature preflight, CI mode (seed-to-concrete T1.8 — checks 1-4/7-9, no local model)
         shell: pwsh
         run: |
           # --skip-model is CI's own escape hatch (spec-dump-preflight.md's own Commands section)
           # and is never legal before a real generation run — run-control (module 9) refuses a
           # preflight record written with skipModel=true. This step only proves checks 1-4/7-9
           # stay green; it never authorizes a run.
-          python -m seedsmith demons preflight --skip-model
-          if ($LASTEXITCODE -ne 0) { throw "demon preflight (checks 1-4, 7-9) failed — see output above" }
+          python -m seedsmith creatures preflight --skip-model
+          if ($LASTEXITCODE -ne 0) { throw "creature preflight (checks 1-4, 7-9) failed — see output above" }
         working-directory: tools/seedsmith
 
       - name: Web unit tests

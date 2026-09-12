@@ -25,7 +25,7 @@
       "id": "set.hypnorepeater-001",
       "nameKey": "set.dual-pea-shooter",
       "name": "Dual Pea Shooter",
-      "themeKey": "demon.hypnorepeater",
+      "themeKey": "creature.hypnorepeater",
       "members": [
         {
           "role": "armament-primary",

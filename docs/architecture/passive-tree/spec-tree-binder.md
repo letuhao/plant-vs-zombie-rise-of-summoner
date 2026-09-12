@@ -724,7 +724,7 @@ python scripts/audit-magic-numbers.py --summary
 
 `--explain` prints the whole chain for one node — plan input, anchor pin, formula, rounding, stored
 `kMicro`, the `UnitClass` check and its verdict. It is how a balance question gets answered without
-reading the code, by the `DemonSpeciesGen --explain` precedent.
+reading the code, by the `CreatureSpeciesGen --explain` precedent.
 
 ## Project structure
 

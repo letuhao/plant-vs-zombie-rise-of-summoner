@@ -102,7 +102,7 @@ Core-side PassiveTree suite through phase E); all four boundary guards
 ### ✅ A2: `data/tuning/passive-tree-targets.v1.json` — BUILT + VERIFIED 2026-09-06
 **Spec:** `spec-tree-plan.md` §8; `spec-tree-language.md` §4.3; `spec-tree-review.md` §6.3;
 `spec-species-tree.md` §3.2, §5.3.
-**Description:** The declared target file, shaped like `data/tuning/demon-roster-targets.v1.json` —
+**Description:** The declared target file, shaped like `data/tuning/creature-roster-targets.v1.json` —
 integer per-mille throughout, a `_note` recording provenance, **no axis listing its own members**. It
 holds the six quota axes' weights, `legitimateSkew` (empty), the gate thresholds,
 `exclusion.targetShareMilli`, `speciesUniqueAffixMin`, the tier-2/3 sample sizes and the acceptance
@@ -355,8 +355,8 @@ PowerLadder tests green (20 existing + 10 new). `audit-overflow.py` unchanged at
 
 **A second concurrent-editing finding, transient.** Mid-verification, the WHOLE `FusionRpg.Core.Tests`
 project briefly failed to BUILD (not just run) on an unrelated file,
-`Demons/Fusion/FusionRecipeReconcileTests.cs` referencing a `DemonRecipeCatalog.BuildForTest` method
-that did not exist at that instant. `git diff --stat` showed `DemonRecipeCatalog.cs` mid-edit with a
+`Creatures/Fusion/FusionRecipeReconcileTests.cs` referencing a `CreatureRecipeCatalog.BuildForTest` method
+that did not exist at that instant. `git diff --stat` showed `CreatureRecipeCatalog.cs` mid-edit with a
 320-insertion, 47-deletion uncommitted diff — another active session's in-progress work landing a new
 method. Resolved itself on retry seconds later. Recorded because a whole-project build failure is a
 more severe signal than a test failure and is worth distinguishing from a real regression when it
@@ -464,9 +464,9 @@ query via an OR-chain over `(scope, scope_key)` pairs (SQLite has no tuple `IN`)
 pass. The order-independence lemma is a named test, not prose.
 21 new tests (11 `TreeUnlockCost` + 10 `RpgStore.PassiveTree`), all green. Wired into
 `EnsureHotSchema` and `Reset()`. Full `FusionRpg.Data.Tests`: 897 passed, 2 failed
-(`DemonSpeciesImportCliTests`) — confirmed via `git status` to be the SAME concurrent session's
-active demon-fusion work (now with new untracked files:
-`FusionRecipeDistributionIndex.cs`, `tools/DemonRecipeDistributionIndex/`), not this task.
+(`CreatureSpeciesImportCliTests`) — confirmed via `git status` to be the SAME concurrent session's
+active creature-fusion work (now with new untracked files:
+`FusionRecipeDistributionIndex.cs`, `tools/CreatureRecipeDistributionIndex/`), not this task.
 `guard-dal`/`guard-single-writer` PASS; `audit-overflow.py`/`audit-magic-numbers.py` clean.
 
 **Re-verified independently, same-day audit pass.** The paragraph above already existed and holds up;
@@ -524,7 +524,7 @@ itself owes). 45 tests across `TierGateTests.cs` (12), `ConcentrationTests.cs` (
 and `audit-magic-numbers.py --targets M1/M2` show zero hits against any B6 file. Full
 `FusionRpg.Core.Tests` run: 7662 passed, 21 pre-existing failures verified via `git status`/`git diff`
 to be caused by another active session's uncommitted work in `BattleStatComposer.cs` (party-dungeon
-`ThetaActor` change), `DemonRecipeCatalog.cs`, and related trait/content-validation/expedition files —
+`ThetaActor` change), `CreatureRecipeCatalog.cs`, and related trait/content-validation/expedition files —
 none touch `PassiveTree/`, none regressed by this task.
 
 ### ✅ Checkpoint B — the spine
@@ -568,7 +568,7 @@ it through the same registry.
       empty tier, and an orphan node (unreachable from the tree's root set) each refuse naming the tree
       and the offending node. Lives here, not in Phase H, because the gate reads the plan and nothing
       `tree-language` produces
-- [x] A manifest missing the family roster emits `_pending: ["demonFamilies"]` (or the relevant token),
+- [x] A manifest missing the family roster emits `_pending: ["creatureFamilies"]` (or the relevant token),
       never silent generation against an empty roster — `absent_family_roster_emits_pending_not_silence`
 **Verification:** a hand-authored fourth archetype that widens the gradient is refused naming the tier
 and the two archetypes. The two deleted tests stay deleted —
@@ -622,7 +622,7 @@ are live"* is a schedule note in prose today; `R-G1` is a refusal in code.
 `tools/seedsmith/seedsmith/adapters/trees/plan/emit.py`, `invariants.py`, tests.
 
 **Evidence:** `data/seed/passive-tree/gate-evidence.v1.json` is the checked-in evidence row (4 entries:
-`aptitudePoints`/`demonTypeLevel` = carrier, `elementMastery`/`statusApplied` = pending) — the ONLY
+`aptitudePoints`/`creatureTypeLevel` = carrier, `elementMastery`/`statusApplied` = pending) — the ONLY
 path (`gates.py`'s `load_gate_evidence`/`resolve_gate_state`) that turns a `gateIndexKind` into a
 `gateState`; the planner itself resolves nothing. R-G1 exits 3 (`PendingGateGenerationRefusal`,
 matching `report/cli.py`'s existing `PlanInvariantError`→exit-3 contract), naming the tree and missing
@@ -651,7 +651,7 @@ does nothing.
 **Acceptance:**
 - [x] `scaleAxis` is stored as a function of `UnitClass` and disagreement is refused naming both; a
       sigmoid channel never carries `PTheta`
-- [x] The five-value `category` enum, and the importer's map from the plan's `aptitude`/`demonFamily`
+- [x] The five-value `category` enum, and the importer's map from the plan's `aptitude`/`creatureFamily`
       tokens — any token outside the map is refused naming it
 - [x] `exclusionForm` and `excludeProps` disagreeing is refused; an `IdMismatch` is kept **as
       authored**, never rewritten; `soulCurveId` is a curve reference, never a formula (D3)
@@ -672,7 +672,7 @@ per §2.4's table and refuses naming both values on disagreement
 (`A_sigmoid_channel_carrying_PTheta_is_refused_the_silent_failure_class`); `TreeCategory` has exactly
 five members and `CategoryTokenMap` refuses any token outside it by name — independently cross-checked
 against `tools/seedsmith/seedsmith/adapters/trees/plan/emit.py:131,152`, which really does emit
-`"primary"`/`"family"` etc. rather than the spec's own prose tokens (`aptitude`/`demonFamily`),
+`"primary"`/`"family"` etc. rather than the spec's own prose tokens (`aptitude`/`creatureFamily`),
 confirming the defensive dual-mapping is load-bearing, not decorative; both `exclusionForm`/
 `excludeProps` disagreement directions refuse; `IdMismatch` quotes the id exactly as authored; and
 `soulCurveId` is checked against a `curve.<id>` reference pattern, refusing any formula/expression
@@ -783,18 +783,18 @@ guards pass (independently re-run).
 **Spec:** `spec-tree-state.md` §3, §8 (D34).
 **Description:** The scope table on `pointEconomy`, mirroring `AptitudePointsPerThetaMilliByScope` one
 line above it, and `PointBudget.SkillPointsFor` as the sibling of `PointsFor`. Without it every actor's
-budget reads `Θ_player` and fifty demons own the generic catalog at the calibration point.
+budget reads `Θ_player` and fifty creatures own the generic catalog at the calibration point.
 **Acceptance:**
 - [x] `pointEconomy.skillPointsPerThetaMilliByScope` ships in `aptitudes.v{n+1}.json` with
       `commander = 11`; the other three carry a stated guess, labelled unmeasured (**closed 2026-09-06
-      by D55, shipped in `aptitudes.v7.json`: `demonType = 15`, `aspect = 15`, `uniqueDemon = 22`,
+      by D55, shipped in `aptitudes.v7.json`: `creatureType = 15`, `aspect = 15`, `uniqueCreature = 22`,
       proportional to the sibling `{3,4,4,6}` ratio against commander's `11` — still explicitly a
       shipped guess, not a measurement, per the spec's own posture; `squad-harness` may move any of
       the three later without reopening this spec**)
 - [x] `SkillPointsFor` is the same shape as `PointsFor`: `checked`, `long`, no cap, negative source
       rejected
 - [x] A missing rate is a load rejection naming it
-- [x] `every_actor_reads_its_own_scope_budget` — a demon reading `Θ_player` fails
+- [x] `every_actor_reads_its_own_scope_budget` — a creature reading `Θ_player` fails
 **Verification:** four scopes resolve to four budgets from one actor set.
 **Depends on:** A1, B5. **Scope:** M. **Files:**
 `src/FusionRpg.Core/Stats/Aptitudes/PointBudget.cs`, `data/tuning/aptitudes.v{n+1}.json`.
@@ -810,7 +810,7 @@ have rejected `aptitudes.v1–v5.json` and ~16 pre-existing inline test fixtures
 — resolved by making the container OPTIONAL when absent (empty dict, never a guessed value) but just as
 strict once present (all four scopes required, named rejection on a partial table), documented in both
 `AptitudePointEconomy`'s and the loader's own doc comments. `every_actor_reads_its_own_scope_budget`
-proves scope isolation (a demon reading a commander-scoped rate fails). Verified independently
+proves scope isolation (a creature reading a commander-scoped rate fails). Verified independently
 (re-run, not just trusted): 202/205 Core.Tests aptitude-filtered tests pass (3 failures are the
 pre-existing `ProveAptitudeJsonEmitTests`/`BattleStatComposer.Configure` cluster, unrelated — confirmed
 via `git status` tracing to another session's uncommitted party-dungeon `ThetaActor` change, matching
@@ -828,7 +828,7 @@ B6's `H` reads it; nothing supplies it today.
 - [x] The projection is the **final allocation**, not points paid and not a purchase order
 - [x] A node counts once, at 1 — never weighted by what it cost
 - [x] A tree with no self-bought node is **absent** from the vector, never present at zero
-- [x] The exclusion of item-granted, aptitude-threshold and demon-aspect unlocks is a **stated rule**
+- [x] The exclusion of item-granted, aptitude-threshold and creature-aspect unlocks is a **stated rule**
       with its own test, so widening it later moves a golden instead of starting an investigation
 **Verification:** the same node set built two ways yields one identical vector; the store-side half of
 `tree-resolve` test 6c.
@@ -862,7 +862,7 @@ becoming a pure penalty.
 - [x] Three grep tests: no `Math.Min` on the price, no narrowing cast on the budget, no `CanUnlock`
       that can return false — each named, each with the PS-8 exemption comment beside it
 - [x] A seam test proves the battle path never loops the single-key loader, and tree state is not
-      joined onto the unpaged `ListDemonRoster`
+      joined onto the unpaged `ListCreatureRoster`
 - [x] 2,000 actors × 40 nodes stores 80,000 rows, not ≈3.4 million (D51, 2026-09-06: 24 statuses not
       21, 1,680-node generic catalog, was ≈3.1 million against the 1,560-node corpus: 2,000 × 1,680 =
       3,360,000 vs 2,000 × 1,560 = 3,120,000), proven by a row count; `long` on both sides, `checked`
@@ -882,7 +882,7 @@ files, not a task-C6-owned file like `PointBudget.cs`) and respect a "PS-8 exemp
 genuinely structural bounds (verified live: the C8 volume fix below needed exactly this exemption, and
 the guard correctly flagged it until the comment was added, then passed once it was) — plus two seam
 tests: no file outside `RpgStore.PassiveTree.cs` calls the single-key `LoadTreeState`, and
-`ListDemonRoster` (`RpgStore.Demons.cs`) never references `rpg_tree_node_state`/`LoadTreeState`.
+`ListCreatureRoster` (`RpgStore.Creatures.cs`) never references `rpg_tree_node_state`/`LoadTreeState`.
 `TreeStateVolumeTests.cs` (Data.Tests) proves 2,000×40 = exactly 80,000 rows via a real `COUNT(*)`
 against the live db (not just a batch-read sum, so a hypothetical cross-join defect writing rows under
 untouched keys would still be caught) plus a 64-bit soul-level round-trip at that volume.
@@ -1248,7 +1248,7 @@ claim two paragraphs up, which was true at 12-tree scale but not at 42.**
    bounds. `run.py`'s own `run_g1` (the shared, cross-program schema-shape checker gate 13 re-runs
    against the persisted composite) has no explicit `len(affixIds) <= 3` check anywhere in this
    module — confirmed by grep, not assumed — so this composite passed gate 13 uncaught. **Not fixed
-   here**: `run_g1` is a shared utility other generators (actions, demons) also depend on (its own
+   here**: `run_g1` is a shared utility other generators (actions, creatures) also depend on (its own
    doc comment names a hardcoded actions-specific assumption already), so widening its array-length
    checking is real, scoped, cross-program work of its own, not a rushed addition to an already large
    session — and the failure mode is NOT silent: tree-binder's own R6 check is exactly the
@@ -1966,13 +1966,13 @@ measured, which breaks the "shuffling moves no surviving cell" acceptance bullet
 simulation. Zero files changed outside `tools/SquadHarness/`/`tests/FusionRpg.SquadHarness.Tests/`
 — independently confirmed via `git status`: the only new (`??`) entries are those two directories; the
 many pre-existing `M` files across `src/`/`data/` predate this task (this session's own earlier C6/D3/
-D7/G1 work plus another concurrent session's combat/demon-fusion edits). 23 tests, all green
+D7/G1 work plus another concurrent session's combat/creature-fusion edits). 23 tests, all green
 (independently re-verified). `dotnet build` 0/0 on both projects. `audit-overflow.py --targets A3` /
 `audit-magic-numbers.py --targets M1`: zero hits. All four boundary guards pass (independently re-run).
 
 ### ✅ F1b: measure the shipped commander-replicated allocation shape alongside D21's — BUILT + VERIFIED 2026-09-06 (all 4, bullet 3 was a stale checkbox, not a real gap)
 **Spec:** `spec-squad-harness.md` §1.1, §14 open question 2.
-**Description:** Today `WebMatchService.AptitudeChannelMods` merges only Commander + DemonType scopes,
+**Description:** Today `WebMatchService.AptitudeChannelMods` merges only Commander + CreatureType scopes,
 so two squad members of the same species cannot differ — every actor effectively replicates the
 commander's allocation. F1's roster builds D21's per-actor shape in memory. This task adds a second
 roster-construction mode that instead replicates one allocation across all six actors (the *shipped*
@@ -2953,47 +2953,47 @@ injector credit → 5s accumulator flush → `POST /api/gate-counters/credit` �
 Raw window JSON: `_g6-refresh-only.json` / `_g6-fresh-credit.json` (session scratchpad, not checked in —
 numbers are transcribed above in full).
 
-### ✅ G7: The `UniqueDemon` scope binding — BUILT + VERIFIED 2026-09-06
+### ✅ G7: The `UniqueCreature` scope binding — BUILT + VERIFIED 2026-09-06
 **Spec:** `spec-species-tree.md` §8.1 point 2.
-**Description:** Nothing in `src/` passes `AllocationScope.UniqueDemon` to `PointBudget.PointsFor` or
-`CheckScope`. Its twin already ships — `SpeciesAllocation.cs:35,62` does exactly this for `DemonType`,
-including the index transform `PointBudget.DemonTypeSourceFromLevel`. Without it, a reviewer judging 840
+**Description:** Nothing in `src/` passes `AllocationScope.UniqueCreature` to `PointBudget.PointsFor` or
+`CheckScope`. Its twin already ships — `SpeciesAllocation.cs:35,62` does exactly this for `CreatureType`,
+including the index transform `PointBudget.CreatureTypeSourceFromLevel`. Without it, a reviewer judging 840
 species cards against a ladder that reads zero is judging the writing, not the tree.
 **Acceptance:**
-- [x] Specimen level reaches an aptitude budget at `UniqueDemon` scope, mirroring the `DemonType`
+- [x] Specimen level reaches an aptitude budget at `UniqueCreature` scope, mirroring the `CreatureType`
       transform
 - [x] A species tree's tier ladder reads non-zero on an actor with a levelled specimen
 **Verification:** a reviewer opening a species card sees a live ladder, not zeros.
 **Depends on:** G4, C6. **Scope:** S.
 
-**Evidence:** Added `PointBudget.UniqueDemonSourceFromLevel(specimenLevel) => Math.Max(0, specimenLevel
-- 1)` — the exact mirror of `DemonTypeSourceFromLevel`, floored at zero so a freshly-created specimen
+**Evidence:** Added `PointBudget.UniqueCreatureSourceFromLevel(specimenLevel) => Math.Max(0, specimenLevel
+- 1)` — the exact mirror of `CreatureTypeSourceFromLevel`, floored at zero so a freshly-created specimen
 (`RpgStore.CreateUniqueActor` starts every specimen at level 1, never 0) reads exactly zero points, not
-a ceiling nobody earned. Built `UniqueDemonAllocation.cs` (new, sibling file rather than a scope
-parameter bolted onto `SpeciesAllocation` — `UniqueDemon` is keyed by `instanceId`, one specimen,
+a ceiling nobody earned. Built `UniqueCreatureAllocation.cs` (new, sibling file rather than a scope
+parameter bolted onto `SpeciesAllocation` — `UniqueCreature` is keyed by `instanceId`, one specimen,
 `SpeciesAllocation` by `(playerId, speciesId)`, a species TYPE — different identity grammar, matching
 `PointBudget.cs`'s own precedent of keeping `PointsFor`/`SkillPointsFor` separately explicit despite
 near-identical shape) — `Baseline` computes the source via the new transform, the budget via
-`PointBudget.PointsFor(AllocationScope.UniqueDemon, ...)`, then splits across the plan's share vector
+`PointBudget.PointsFor(AllocationScope.UniqueCreature, ...)`, then splits across the plan's share vector
 with the same widen-before-multiply (`checked { product = budget * sharePermille; }`) and
 largest-remainder rounding `SpeciesAllocation.Baseline` already uses.
 
 **The real end-to-end proof, read directly and confirmed genuine — not a unit test of the budget
-function in isolation:** `UniqueDemonSpeciesTreeGateTests.cs`'s two tests wire the REAL pieces in the
-real order a species tree's own resolve would use: specimen level → `UniqueDemonSourceFromLevel` →
-`PointBudget.PointsFor` (via `UniqueDemonAllocation.Baseline`) → the resulting points fed into the REAL
+function in isolation:** `UniqueCreatureSpeciesTreeGateTests.cs`'s two tests wire the REAL pieces in the
+real order a species tree's own resolve would use: specimen level → `UniqueCreatureSourceFromLevel` →
+`PointBudget.PointsFor` (via `UniqueCreatureAllocation.Baseline`) → the resulting points fed into the REAL
 `TierGate.Reached` against the REAL shipped `data/tuning/passive-tree.v1.json` req-scale — the exact
-call `PassiveTreeEndpoints.cs:142` makes for the shared corpus today, now proven for `UniqueDemon`. A
-level-21 specimen (`UniqueDemonSourceFromLevel(21) = 20`) reaches `tierReached > 0`; a never-levelled
+call `PassiveTreeEndpoints.cs:142` makes for the shared corpus today, now proven for `UniqueCreature`. A
+level-21 specimen (`UniqueCreatureSourceFromLevel(21) = 20`) reaches `tierReached > 0`; a never-levelled
 level-1 specimen stays at exactly tier 0 — both assertions independently re-run by me and confirmed
 green.
 
 **Independently re-verified by me:** `dotnet build src/FusionRpg.Core` 0/0. Ran the four affected test
-files directly (`UniqueDemonAllocationTests`/`UniqueDemonSpeciesTreeGateTests`/`PointBudgetTests`/
+files directly (`UniqueCreatureAllocationTests`/`UniqueCreatureSpeciesTreeGateTests`/`PointBudgetTests`/
 `SpeciesAllocationTests`) → 38/38 green. Full `dotnet test tests/FusionRpg.Core.Tests --filter
 "FullyQualifiedName~PassiveTree"` → 398/398 green (was 396 before G7, +2 in this namespace). Read
 `PointBudget.cs`'s diff directly and confirmed the ONLY change attributable to G7 is the new
-`UniqueDemonSourceFromLevel` method — a `SkillPointsFor` method also visible in the diff is
+`UniqueCreatureSourceFromLevel` method — a `SkillPointsFor` method also visible in the diff is
 pre-existing, uncommitted content from an earlier task (tree-state C6, cited in its own doc comment),
 not something G7 added; correctly not claimed as this task's own work. All four boundary guards +
 `guard-power.ps1` green. `audit-overflow.py --targets A3` / `audit-magic-numbers.py --targets M1`:
@@ -3254,7 +3254,7 @@ was never the thing under test here and needed no code change, only a bigger cor
 GATING_METRICS` dict (six entries, already H1-tested, answers "does this gate have a threshold" not "is
 this gate hard-promoted") — the agent's resolution ships the INVARIANT (exactly one `gates=True` metric
 per family) enforced against whatever registry a caller hands it, proven against today's real
-`DemonRoster` registry (already holds) and a synthetic PassiveTree fixture standing in for H4's future
+`CreatureRoster` registry (already holds) and a synthetic PassiveTree fixture standing in for H4's future
 end state. Confirmed correct both by reading the code and by the live `--gate` refusal reproducing
 exactly the stated error text.
 
@@ -3311,7 +3311,7 @@ count against `archetypes[].mechNodes[t]`, both directions, plus `mechNodes[10] 
 the shared MinHash), `NameCollision`, `UnresolvedCount`.
 **Acceptance:**
 - [x] `UnresolvedCount` is the **only** metric at `gates = True`, promoted with
-      `demon_roster.py:357-370`'s reason recorded
+      `creature_roster.py:357-370`'s reason recorded
 - [x] `QuotaDrift` catches a mutated brief because it re-derives rather than reads
 - [x] `MechanismRamp` is a **count**, not a threshold — a threshold implementation fails on
       `broad-and-flat` tiers 4–7
@@ -3324,7 +3324,7 @@ mechanism, a duplicated name across 300 trees.
 
 **Evidence:** All eight metrics built in `passive_tree.py` (33 new tests,
 `test_passive_tree_metrics.py`), each following the shared `Metric`/`Finding` shape
-`demon_roster.py` already establishes, never a private one. `QuotaDrift` re-derives via
+`creature_roster.py` already establishes, never a private one. `QuotaDrift` re-derives via
 `nodegen.quota.quota_for_plan` fresh on every call rather than trusting a caller-supplied value —
 tested with both a corpus-wide skew and a "lying declared-quota annotation" fixture proving a mutated
 brief cannot fool it. `MechanismRampMetric` is an exact per-tier integer count with a doc comment
@@ -3418,7 +3418,7 @@ directory (which does exist, with three real committed files:
 (confirmed separately via a direct filesystem search). The acceptance bullet's literal "non-zero
 `visitedFileCount` … over the real seed roots" is therefore not satisfiable against TODAY's actual
 committed data — not because the metric is wrong, but because there is currently nothing parked to
-find. This mirrors the demon-corpus incident the metric's own docstring cites
+find. This mirrors the creature-corpus incident the metric's own docstring cites
 (`zombie/_needs-review.json`) as its motivating precedent, but that incident was in a DIFFERENT corpus;
 the passive-tree corpus has never (yet) had a file parked this way. Left honestly unchecked rather than
 reinterpreted or silently marked done — this bullet will start passing the moment either a real file is
@@ -3679,9 +3679,9 @@ any of this session's edits). `dotnet build src/FusionRpg.Server` / `src/FusionR
 **Acceptance:**
 - [x] **480 nodes emitted, generated, bound and committed — the live-boot proof this bullet was
       blocked on now RUNS CLEAN end to end, 2026-09-07.** 478/480 generated (2 evidenced holdouts,
-      unchanged, see above). The `DemonSpeciesCatalog.Configure received an empty species roster`
+      unchanged, see above). The `CreatureSpeciesCatalog.Configure received an empty species roster`
       blocker named below was fixed for real, not routed around: `dotnet run --project
-      tools/DemonSpeciesImport -- --db src/FusionRpg.Server/data` populated that isolated dev
+      tools/CreatureSpeciesImport -- --db src/FusionRpg.Server/data` populated that isolated dev
       database (904 species written) — the SAME command the tool's own usage line already
       documents, run against a local, isolated dev data directory nothing else had open (confirmed
       via `tasklist`/`netstat` before touching it: the owner's own live `dist/FusionRpg.Server.exe`
@@ -3799,7 +3799,7 @@ any of this session's edits). `dotnet build src/FusionRpg.Server` / `src/FusionR
       further edit) is what actually proves idempotence, and it is clean.
 - [x] **The catalog's own `--check` staleness gate runs in CI, distinct from the plan's byte-identity
       check — BUILT 2026-09-07.** New `.github/workflows/ci.yml` step "passive-tree catalog staleness
-      guard," mirroring the EXACT `DemonSpeciesGen`/`FamilyExpandGen`/`DemonBuildPlanGen --check`
+      guard," mirroring the EXACT `CreatureSpeciesGen`/`FamilyExpandGen`/`CreatureBuildPlanGen --check`
       pattern already established for every other generated-and-committed artifact in this repo:
       `dotnet run --project tools/TreeBinder -- --check`, non-zero exit throws with a remedy message
       naming the exact regenerate-and-commit command. Genuinely distinct from the PLAN's own
@@ -4003,7 +4003,7 @@ action-selection program) — unrelated to tree-language, not fixed, named rathe
 **Owner request, 2026-09-06: add parallel execution to `run_language_stage`, scoped correctly (their own
 words) — "only make it run parallel in some sub pipeline that already support parallel, not every sub
 pipeline can run parallel."** `workflow/runner.py`'s existing `run_many`/`MAX_WORKERS=4` pattern (already
-used by the demon/affix generators) cannot be reused directly — it is tied to a LangGraph-style
+used by the creature/affix generators) cannot be reused directly — it is tied to a LangGraph-style
 `app.invoke()` interface `nodegen` never adopted. The REAL constraint the sibling-ordering fix
 introduced: a magnitude node's brief now depends on already-accepted mechanism siblings from THE SAME
 TIER, so nodes cannot all run concurrently — only nodes that share no such dependency can. Building a
@@ -4889,10 +4889,10 @@ to confirm both self-caught guard violations are genuinely fixed, not just claim
 collection anywhere — a bloodline is pinned to its creature's sheet.
 **Acceptance:**
 - [x] A bloodline is pinned to its creature's sheet and **never enters a browse**
-- [x] The Demon Codex read route reaches a species tree from the creature, not from a list
+- [x] The Creature Codex read route reaches a species tree from the creature, not from a list
 - [x] The route degrades correctly when the bloodline is undiscovered — silhouette only there
 **Verification:** a fixture actor with one discovered and one undiscovered bloodline renders both states.
-**Depends on:** I4. **Scope:** M. **Ask first:** the Codex route hangs off `DemonsPage.tsx:367-388`'s
+**Depends on:** I4. **Scope:** M. **Ask first:** the Codex route hangs off `CreaturesPage.tsx:367-388`'s
 volume defect (840 DOM subtrees against a 240 threshold), which is another program's file — see the asks
 table. **Resolved per the table's own stated default: "I5 ships without the Codex entry point and the
 route is added after."**
@@ -4907,7 +4907,7 @@ route's pure derivation — `bloodlineDiscoveryOf`/`isBloodlineKnown`/`bloodline
 checked BEFORE the report is ever consulted, so a prefetched/cached report can never leak through an
 undiscovered bloodline — proven by a dedicated "leak case" test (`bloodlineReadState("undiscovered",
 known(tree()))` still resolves to silhouette). Built `BloodlineTree.tsx` (the Codex read-route
-component: silhouette/pending/empty/known states, reusing `DemonsPage.tsx`'s own established
+component: silhouette/pending/empty/known states, reusing `CreaturesPage.tsx`'s own established
 discovered/silhouette idiom by convention, read-only, not edited), exporting `PathBrowse.tsx`'s
 existing `PathCard` for reuse rather than duplicating tree-card rendering.
 
@@ -5283,7 +5283,7 @@ standing rule for owner-only gates.
 ## Owner decisions batch, 2026-09-06 — every genuinely open question across all 12 module specs
 
 Compiled by re-reading every spec's own "Open questions" section (all 12 have one), filtering out
-already-closed items and one that was stale-but-answered (species-tree's `UniqueDemon` question,
+already-closed items and one that was stale-but-answered (species-tree's `UniqueCreature` question,
 fixed the same pass — G7 already shipped it). The owner cleared every genuinely open, decidable item
 in one sitting rather than leaving them scattered across specs to be re-discovered piecemeal.
 
@@ -5294,13 +5294,13 @@ in one sitting rather than leaving them scattered across specs to be re-discover
 | D59 | tree-catalog §OQ3 | May a node author a bake-time-resolved (L2) slot? | **Yes, allowed.** ⚠ Renumbered from D46 2026-09-07 — that number was already taken by `spec-squad-harness.md`'s own, older 2026-09-05 decision ("mirror squads decide"), a real ID collision this audit found; squad-harness's D46 is untouched and keeps its number |
 | D47 | squad-harness §OQ2 | Measure the shipped allocation shape too, not just D21's? | **Yes — measure both shapes** |
 | D48 | tree-review §OQ2 | Two-reviewer agreement pass wanted? | **No — single reviewer is enough** |
-| D49 | tree-review §OQ3 | Acceptable manual-correction rate? | **Higher tolerance, 2–3%** (not the demon corpus's unproven ~0.4% floor) |
+| D49 | tree-review §OQ3 | Acceptable manual-correction rate? | **Higher tolerance, 2–3%** (not the creature corpus's unproven ~0.4% floor) |
 | D50 | mechanism-wiring §OQ2 | Take `aura-skill` T13's per-round recompose job? | **Yes, take it now** — pending `aura-skill`'s own ack when that program starts |
 | D51 | map (filed 2026-09-06) | Accept the live registry's 24 statuses (was 21)? | **Yes — re-bake every mirror/plan, update every "39"/"1,560" citation to 42/1,680** |
 | D52 | map (filed 2026-09-06) | Accept the live registry's `channelFamily`=54 (was 53)? | **Yes — same re-bake pass as D51** |
 | D53 | tree-binder §OQ1 | `treeShareMilli` real value? | **1000 (100%)** — trees are the full power budget today, not a placeholder pending a competing system |
 | D54 | tree-plan §OQ1 | `budget.treeTotalPoints` posture? | **Ship a flagged guess now**, re-measure once mechanism-wiring/squad-harness produce real data |
-| D55 | tree-state §OQ3 | `skillPointsPerThetaMilliByScope` for `demonType`/`aspect`/`uniqueDemon`? | **Proportional to the sibling `{3,4,4,6}` ratio against commander=11**: `demonType≈15, aspect≈15, uniqueDemon=22` (rounded up, matching D38's own rounding convention) |
+| D55 | tree-state §OQ3 | `skillPointsPerThetaMilliByScope` for `creatureType`/`aspect`/`uniqueCreature`? | **Proportional to the sibling `{3,4,4,6}` ratio against commander=11**: `creatureType≈15, aspect≈15, uniqueCreature=22` (rounded up, matching D38's own rounding convention) |
 | D56 | tree-binder §OQ2 | 17th atom kind (conversion) — prioritize or defer? | **Neither — write a real spec for it now** (owner's own words: "why don't we make spec to cover it?") rather than leave it as a bare priority call |
 | D57 | tree-language §OQ2 | `legitimateSkew` real rule? | **1.5× uniform, on any near-uniform axis** — the spec's own worked example (`earth`) promoted to the actual rule |
 | D58 | tree-catalog §OQ1 | Where does soul level enter `CurveInput`? | **Add a 4th `CurveInput` member** for soul level explicitly (a real E2 review, not folded into `Level`) |
@@ -5308,7 +5308,7 @@ in one sitting rather than leaving them scattered across specs to be re-discover
 **Still correctly unresolved — blocked on unrun measurement, not a decision the owner could make yet
 (unchanged by this batch):** the real per-tree review rate (needs H8's pilot), whether D15's
 equal-budget rule changes once S4 lands, `w`'s real value (needs the harness to learn the soul
-track), stance groups for elemental/status/demon-family trees.
+track), stance groups for elemental/status/creature-family trees.
 
 **Implementation status of this batch, tracked here rather than only in chat:** D44/D45/D46/D47/D48/
 D49/D50/D53/D54/D57 are pure spec-text confirmations or small, contained changes — landed. D51/D52
@@ -5364,18 +5364,18 @@ if it still needs one, per that row's own updated note.
 
 **D55 — BUILT + VERIFIED 2026-09-06.** Published via
 `python tools/tuning/publish.py aptitudes --label "D55: skillPointsPerThetaMilliByScope proportional
-to the {3,4,4,6} ratio against commander=11" pointEconomy.skillPointsPerThetaMilliByScope.demonType=15
+to the {3,4,4,6} ratio against commander=11" pointEconomy.skillPointsPerThetaMilliByScope.creatureType=15
 pointEconomy.skillPointsPerThetaMilliByScope.aspect=15
-pointEconomy.skillPointsPerThetaMilliByScope.uniqueDemon=22` — `aptitudes.v6.json -> v7.json`, v6 kept
+pointEconomy.skillPointsPerThetaMilliByScope.uniqueCreature=22` — `aptitudes.v6.json -> v7.json`, v6 kept
 on disk for revert. Every hardcoded `aptitudes.v6.json` reference migrated to `v7.json` across
 production (`Program.cs:163`, `RpgHost.cs:156`) and tests (`AptitudeTuningTests.cs`,
-`PointBudgetTests.cs`, `UniqueDemonSpeciesTreeGateTests.cs`, `SpeciesAllocationTests.cs`,
-`UniqueDemonAllocationTests.cs`, `AllocationStoreTests.cs`,
+`PointBudgetTests.cs`, `UniqueCreatureSpeciesTreeGateTests.cs`, `SpeciesAllocationTests.cs`,
+`UniqueCreatureAllocationTests.cs`, `AllocationStoreTests.cs`,
 `tools/seedsmith/tests/test_tree_state_band.py`) — confirmed zero remaining `aptitudes.v6.json` code
 references via repo-wide grep (the only surviving hits are frozen historical record: `content-stack-
 todo.md`'s own past-tense note, two `docs/research/class-system/_baseline-*.json` one-time measurement
 snapshots, and `ProveAptitude/Program.cs`'s own independent, untouched `aptitudes.v2.json` pin).
-`AptitudeTuningTests.cs` gained three new assertions pinning the shipped demonType/aspect/uniqueDemon
+`AptitudeTuningTests.cs` gained three new assertions pinning the shipped creatureType/aspect/uniqueCreature
 rates directly. `spec-tree-state.md` §3, its file-citation table, and its Open questions #3 / Ask-first
 boundary all updated to the closed, shipped state — plus two adjacent stale items found and fixed in
 the same pass (the `respecPrice` file-version citation, and the D45 "own separate counter" ask-first
@@ -5572,7 +5572,7 @@ gate state notwithstanding. Also the count grew: D51 accepted 24 statuses (was 2
       endpoint, `element_mastery.fire@Aspect`/`status_applied.blight`) is already complete proof for
       any tree carrying those exact strings, real-bound-content or synthetic alike — but importing the
       REAL bound corpus into a REAL running server and observing it live end-to-end has not happened
-      (attempted once already, blocked by an unrelated, pre-existing `DemonSpeciesCatalog` gap in the
+      (attempted once already, blocked by an unrelated, pre-existing `CreatureSpeciesCatalog` gap in the
       source-tree's own local dev data, see the commit-wiring bullet above). This bullet stays open on
       that live-integration gap alone, not on the underlying logic, which is proven**
 - [ ] The same gate bar as H9: every gate green, the gating metric measured — **the gate is now
@@ -5761,7 +5761,7 @@ COMMITTED ladder is asserted to agree with a fresh computation (this is what cau
 in the first place — a hand-typed table can drift silently; a test that recomputes it cannot), every
 `resolve_tier2_verdict` branch (accept / accept-with-finding / batch-reject / beyond-the-ladder /
 n=90-computed-fresh / same-draw-twice-identical). Full seedsmith suite re-run: 3138 passed (up from
-3126), same 13 pre-existing item/demon/actions/sampling corpus-drift failures (the affix-family count
+3126), same 13 pre-existing item/creature/actions/sampling corpus-drift failures (the affix-family count
 grew again, 109→112, further unrelated concurrent growth), zero new failures.
 
 **`sample.py` (the three tiers) BUILT + VERIFIED the same day, completing this task.** New
@@ -5796,7 +5796,7 @@ fact rather than a bug: `might`'s own 40 nodes resolve to 40 DISTINCT quota cell
 correctly returns all 40 for a requested n=20 — coverage over the exact target when strata outnumber
 it, exactly as designed; the test asserts this real, now-understood behavior rather than a wrong
 assumption caught mid-build. All 22 pass. Full seedsmith suite re-run: 3160 passed (up from 3138),
-same 13 pre-existing, unrelated item/demon/actions/sampling corpus-drift failures, zero new ones.
+same 13 pre-existing, unrelated item/creature/actions/sampling corpus-drift failures, zero new ones.
 
 **Acceptance:**
 - [x] Draws go through `sampling.stratified_sample` — **no second sampler is written** — both
@@ -5820,7 +5820,7 @@ same 13 pre-existing, unrelated item/demon/actions/sampling corpus-drift failure
 ### ✅ J3: Escalation, the verdict queue, and the unshippable list — BUILT + VERIFIED 2026-09-07
 **Spec:** `spec-tree-review.md` §6.1, §6.2, §6.4.
 **Description:** Rungs 0–5 — node reject (~3 calls), tree reject (120 calls), cell reject in the plan,
-batch reject → reprompt, owner escalation. **Rung 4 is not hypothetical: the demon corpus took it three
+batch reject → reprompt, owner escalation. **Rung 4 is not hypothetical: the creature corpus took it three
 times.** Without the ladder, a rejected tree has nowhere to go but a hand edit, which §6.1 forbids.
 
 **Scope boundary, stated plainly rather than silently narrowed.** This task's own FOUR acceptance
@@ -6026,7 +6026,7 @@ alternates from the same quota — the shape that makes the 166× defect impossi
 forced override; `FavourDrift`.
 
 **`roster.py` — real data checked FIRST, and it found the blind spot live, not hypothetically.**
-Before writing anything, `data/seed/demons/species/_index.json` was read directly: **904** keys
+Before writing anything, `data/seed/creatures/species/_index.json` was read directly: **904** keys
 today, not the spec's own 2026-09-05 count of 840 (the corpus grew) — confirming the code must never
 hardcode a count. `load_roster()` walks `_index.json` (a flat `{speciesId: relativePath}` map) plus
 every `.json` file under the species root with NO `_`-prefix skip, cross-checks the two, and raises
@@ -6034,7 +6034,7 @@ every `.json` file under the species root with NO `_`-prefix skip, cross-checks 
 define-it, and indexed-twice (a species defined in more than one file). **The real corpus, checked
 directly, still carries the exact blind spot §2.1 names**: `SnorkleZombie` is indexed at
 `zombie/undead.json` but ALSO fully defined (never indexed) in `zombie/_needs-review.json` — a live,
-un-fixed duplicate `tools/DemonQualityReport/Program.cs:77`'s own `_`-skip convention cannot see.
+un-fixed duplicate `tools/CreatureQualityReport/Program.cs:77`'s own `_`-skip convention cannot see.
 `RealCorpusTests.test_the_real_corpus_still_carries_the_snorklezombie_parked_duplicate` runs
 `load_roster()` against the REAL committed tree (no fixture) and asserts it raises naming
 `SnorkleZombie` — proving the fix works against the actual defect, not a synthetic stand-in of it.
@@ -6114,7 +6114,7 @@ independent of the affixIds subject; both populations report independently in th
 passed, up from the pre-J5 3208 by exactly the 37 new tests added at that point; once more after the
 `UnresolvedCountMetric` extension and its own 5 new tests — 3250 passed): same 13 pre-existing,
 already-documented, unrelated failures both times (item affix-family count growth 100→112,
-demon-themes, distribution-planner, sampling-quality, usage-stats), zero new ones either run. 42 new
+creature-themes, distribution-planner, sampling-quality, usage-stats), zero new ones either run. 42 new
 tests total across `roster.py` (12), `plan.py` (17), `FavourDriftMetric` (8) and the
 `UnresolvedCountMetric` extension (5).
 
@@ -6362,7 +6362,7 @@ isolation:**
    read inside this foundational module, the same dependency-direction reasoning as above), and
    `gate_quantity` reuses the `aptitudePoints` evidence row with a disclosed caveat: that row's own
    `evidence` field (`gate-evidence.v1.json`, checked directly) cites `PointBudget.PointsFor(
-   AllocationScope.Commander, ...)` — Commander, not `UniqueDemon` — so its `"carrier"` state is
+   AllocationScope.Commander, ...)` — Commander, not `UniqueCreature` — so its `"carrier"` state is
    REUSED evidence, not new evidence for this scope; §8.1 itself reasons this reuse is safe
    ("generating the species corpus early does not strand it") and assigns the real binding fix to
    `tree-state`, not this module.
@@ -6468,7 +6468,7 @@ absence with nothing to regress against; re-check this the moment any family-tre
       built here**
 - [x] The run is resumable — with no duplicate provenance row, proven by a real mid-run kill test
       against a real 40-node species plan (above). *(The literal `run start/pause/resume/rerun`
-      CLI VERB SET this bullet's own wording echoes is `demons run`'s own, a different program —
+      CLI VERB SET this bullet's own wording echoes is `creatures run`'s own, a different program —
       passive-tree's generic trees have never had that CLI surface either, only the lower-level
       ledger-backed `run_language_stage` primitive this bullet's own substance is actually about;
       species trees now share that identical primitive, proven directly rather than assumed.)*
@@ -6592,12 +6592,12 @@ assumed safe: read the parked file's own content directly — a SINGLE entry, `v
 `aptitudePrimary: "unresolved"`, `posture: "unresolved"` — a self-declared REJECTED low-confidence
 generation draft, not a competing live alternative to the real, indexed `zombie/undead.json` entry.
 Exactly the historical incident `HiddenFileCountMetric`'s own docstring already narrates
-(`DemonQualityReport`'s `_`-skip convention hiding a stale parked duplicate). **Fixed**: removed the
-one stale file (`data/seed/demons/species/zombie/_needs-review.json`, tracked, committed, zero
+(`CreatureQualityReport`'s `_`-skip convention hiding a stale parked duplicate). **Fixed**: removed the
+one stale file (`data/seed/creatures/species/zombie/_needs-review.json`, tracked, committed, zero
 uncommitted diff before deletion — the same "confirmed genuinely dead, not silently assumed"
 discipline already applied to `nerve.json` earlier this session). `load_roster()` now loads all 904
 real species cleanly, confirmed directly. This is real, load-bearing progress beyond passive-tree's
-own scope — it unblocks EVERY roster-wide operation this program (and the demon program) ever
+own scope — it unblocks EVERY roster-wide operation this program (and the creature program) ever
 runs, not just this one batch.
 
 With the roster now loadable, `assign_favour_cells(roster.species_ids, species_targets)` was run
@@ -6957,19 +6957,19 @@ deleted) so the table stays the complete historical record, matching this file's
 | Ask | Default if unanswered | Resolver |
 |---|---|---|
 | ~~The 17th atom kind (D16)~~ | **CLOSED 2026-09-06 by D56 — not "the 17th" (that slot was already taken by base-defense's unrelated `structure.place` the same day): [`spec-element-conversion.md`](../docs/architecture/passive-tree/spec-element-conversion.md) specs an 18th kind + 9th attach point (`Element`/`element.convert`). Spec-complete, tracked as task J11, not yet built.** | — |
-| ~~`demonType` / `aspect` / `uniqueDemon` point rates~~ | **CLOSED 2026-09-06 by D55: `{15, 15, 22}`, derived from the sibling `{3,4,4,6}` ratio against commander=11. Shipped in `aptitudes.v7.json`, migrated across every hardcoded reference, verified by a real test run.** | — |
+| ~~`creatureType` / `aspect` / `uniqueCreature` point rates~~ | **CLOSED 2026-09-06 by D55: `{15, 15, 22}`, derived from the sibling `{3,4,4,6}` ratio against commander=11. Shipped in `aptitudes.v7.json`, migrated across every hardcoded reference, verified by a real test run.** | — |
 | ~~`legitimateSkew` rows~~ | **CLOSED 2026-09-06 by D57: 1.5× uniform, on any near-uniform axis — D32's own `earth` worked example promoted to the actual rule.** | — |
 | Player-facing naming | Spec vocabulary until authored; **I10 applies the names when they land** | Owner, before I3 ships text — **still open** |
 | ~~Does `mechanism-wiring` take `aura-skill` T13's live-toggle scope?~~ | **CLOSED 2026-09-06 by D50: yes, take it now — and it had already shipped** (`BattleRunState.RecomposeDerivedForAllActors`, task E3), pending only `aura-skill`'s own ack when that program starts. | — |
 | ~~Is the transfer verdict scored against mirror squads or authored waves?~~ | **CLOSED 2026-09-05** (`spec-squad-harness.md`'s own D46, pre-dating the 2026-09-06 batch by a day — not the same D46 as `tree-catalog`'s bake-time-slot decision, which was renumbered D59 to resolve the collision): mirror squads decide; waves reported beside, no longer a verdict prerequisite. | — |
 | Does D15's equal-budget rule change once S4's evidence lands? | Keep the equal-budget rule | **S4 (F6) has now run and found a structural non-resolution, not an answer — see the new task F7 (`tasks/passive-tree-plan.md` Phase F). This row stays open, re-pointed at F7 instead of F6.** |
 | ~~Is tree respec priced off its own soul counter or the species counter?~~ | **CLOSED 2026-09-06 by D45: its own, separate counter.** | — |
-| The `DemonsPage.tsx:367-388` volume defect the Codex route hangs off | I5 ships without the Codex entry point and the route is added after | Owner — another program's file — **still open** |
+| The `CreaturesPage.tsx:367-388` volume defect the Codex route hangs off | I5 ships without the Codex entry point and the route is added after | Owner — another program's file — **still open** |
 | ~~What does "the tier below is unlocked" mean?~~ | **CLOSED 2026-09-06 by D44: ≥1 node owned in the tier below, same branch** (preserves D10's two-branch identity, rewards a single-branch dive). **This row's own original framing — "for the skill-wallet calibration" — was investigated 2026-09-07 and does not hold: `TierGate.Reached` (`src/FusionRpg.Core/PassiveTree/Resolve/TierGate.cs:16-30`), read directly, takes one scalar `aptitudePoints` with no branch or node-ownership parameter at all, and `spec-tree-state.md` §2.2's own `firstPoints`/`stepPoints` derivation is calibrated only against tier width `k`, never against a tier-below-unlock condition. D44's reading stands as the answer to the concept it names — it just was never coupled to the skill wallet or to `firstPoints`/`stepPoints`, and no recompute of either is owed. Full trace in `spec-tree-state.md`'s own closure note.** | — |
 | Auto-drafting a species-derived starter plan when a creature is bound (`spec-tree-surface.md` §15) | Do not auto-draft — I5/I8 ship with no starter-plan generation; the player lays out their own build from an empty draft | Owner, after I8 ships — **still open** |
 | Shipping shareable build codes as a marketed feature (stable catalog-version stamp + decoder guarantee), vs. the plain URL-reflects-open-layers mechanism I8 already builds under GG-8 | I8 ships only the GG-8 behavior (see I8's scope-boundary bullet); no "share" UI affordance until this is answered | Owner, before any "share" UI is added — **still open** |
 
-**Genuinely still open: four** (player-facing naming, the `DemonsPage` volume defect, auto-drafting a
+**Genuinely still open: four** (player-facing naming, the `CreaturesPage` volume defect, auto-drafting a
 starter plan, shareable build codes) **plus one re-scoped** (D15's rule, now pointed at F7 rather than
 F6). None of the four block any task in flight — each already has a default I5/I8/I10 or the owner's
 own working assumption carries until answered.

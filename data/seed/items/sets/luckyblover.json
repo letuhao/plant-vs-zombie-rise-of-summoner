@@ -25,7 +25,7 @@
       "id": "set.luckyblover-001",
       "nameKey": "set.four-leaf-wind",
       "name": "Four-Leaf Wind",
-      "themeKey": "demon.luckyblover",
+      "themeKey": "creature.luckyblover",
       "members": [
         {
           "role": "armament-primary",

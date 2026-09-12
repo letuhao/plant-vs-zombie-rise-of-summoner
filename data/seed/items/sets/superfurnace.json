@@ -25,7 +25,7 @@
       "id": "set.superfurnace-001",
       "nameKey": "set.eternal-hearth",
       "name": "Eternal Hearth",
-      "themeKey": "demon.superfurnace",
+      "themeKey": "creature.superfurnace",
       "members": [
         {
           "role": "armament-primary",

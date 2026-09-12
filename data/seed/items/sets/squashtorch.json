@@ -25,7 +25,7 @@
       "id": "set.squashtorch-001",
       "nameKey": "set.stump-torch-sprout",
       "name": "Stump-Torch Sprout",
-      "themeKey": "demon.squashtorch",
+      "themeKey": "creature.squashtorch",
       "members": [
         {
           "role": "armament-primary",

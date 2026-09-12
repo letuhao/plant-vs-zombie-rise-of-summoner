@@ -25,7 +25,7 @@
       "id": "set.portalcorn-001",
       "nameKey": "set.temporal-maize-launcher",
       "name": "Temporal Maize Launcher",
-      "themeKey": "demon.portalcorn",
+      "themeKey": "creature.portalcorn",
       "members": [
         {
           "role": "armament-primary",

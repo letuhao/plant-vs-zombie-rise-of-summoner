@@ -29,7 +29,7 @@ function party(partyIndex: number, entityId: number, haulCount: number): PartyVi
     members: [member(`m-${entityId}-1`)],
     pack: pendingWithReason("test"),
     haul: Array.from({ length: haulCount }, (_, i) => ({
-      kind: "demon",
+      kind: "creature",
       speciesId: "sp-1",
       rarity: "common",
       variant: "base",

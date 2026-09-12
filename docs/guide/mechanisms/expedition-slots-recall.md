@@ -22,7 +22,7 @@ These words get guessed wrong. Read them once before the rest of the page.
 | **Slot** | A parallel expedition berth. You start with a few and grow into more as the system allows — not infinite dispatches. |
 | **Recall** | Pull an expedition home before the timer ends. Rewards pro-rate to completed ticks. |
 | **Pro-rate** | You take what completed so far — not a full payout and not a wipe of the run. |
-| **Live task** | A demon already out on an expedition (or another live assignment) cannot be double-booked. |
+| **Live task** | A creature already out on an expedition (or another live assignment) cannot be double-booked. |
 
 **Also true:**
 
@@ -35,7 +35,7 @@ These words get guessed wrong. Read them once before the rest of the page.
 
 Parallelism is gated by expedition slots — you grow from a few to more as you progress.
 
-Recall is the escape hatch when you need those demons back before the timer ends.
+Recall is the escape hatch when you need those creatures back before the timer ends.
 
 ---
 
@@ -61,7 +61,7 @@ Two controls around the same dispatch loop:
 
 ### On the Expeditions layer
 
-Open Expeditions (`E`) after you have a bound demon.
+Open Expeditions (`E`) after you have a bound creature.
 
 1. Look at how many slots are free versus filled.
 2. Dispatch into an empty slot.
@@ -92,8 +92,8 @@ No. You get what completed ticks earned — leave early, take less.
 **Do unfinished rewards expire?**  
 No. Collect when ready; nothing times out from neglect.
 
-**Can I put the same demon on two slots?**  
-No. Demons on a live task are not free to dispatch again.
+**Can I put the same creature on two slots?**  
+No. Creatures on a live task are not free to dispatch again.
 
 ---
 

@@ -25,7 +25,7 @@
       "id": "set.cabbagefume-001",
       "nameKey": "set.spore-ball-striker",
       "name": "Spore-Ball Striker",
-      "themeKey": "demon.cabbagefume",
+      "themeKey": "creature.cabbagefume",
       "members": [
         {
           "role": "armament-primary",

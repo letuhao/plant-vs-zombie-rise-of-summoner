@@ -1,5 +1,5 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons.Materialise;
+using FusionRpg.Core.Creatures.Materialise;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Power;
 using Microsoft.Data.Sqlite;
@@ -24,7 +24,7 @@ public sealed record PlayerSpeciesMaterialiseOutcome(
 }
 
 /// <summary>
-/// `player-materialise` (T5.6, `spec-player-materialise.md` §3/§7, demon-seed module 16) — the
+/// `player-materialise` (T5.6, `spec-player-materialise.md` §3/§7, creature-seed module 16) — the
 /// transactional half. <see cref="SpeciesMaterialiser"/> (Core, pure) does the rolling; this file
 /// owns the one place the roster becomes durable: `player_species`, one row per (player, species),
 /// pointing at an `effect_instance` row materialised through the exact same tables every other
@@ -245,20 +245,20 @@ public sealed partial class RpgStore
     }
 
     /// <summary>
-    /// WAVE F2.2 (demon-standalone, 2026-09-07): what a sacrificed specimen actually rolled — for
+    /// WAVE F2.2 (creature-standalone, 2026-09-07): what a sacrificed specimen actually rolled — for
     /// fusion inheritance (F2.1's <see cref="FusionRpg.Core.Effects.Atoms.ForcedPoolPick"/>, F2.4's
-    /// player-facing picker), never the species' generic pool. `spec-demon-fusion.md` names the gap
+    /// player-facing picker), never the species' generic pool. `spec-creature-fusion.md` names the gap
     /// directly: <i>"Recipe inputs are SPECIMENS of those species... All inputs consumed"</i> — the
     /// specimen's own roll was consumed, never inspected, until now.
     ///
     /// <para>Resolves through the exact same tables every other lookup already uses: the specimen's
-    /// own <see cref="UniqueActorDto.PlayerId"/> + <see cref="DemonProfileDto.SpeciesId"/> key
+    /// own <see cref="UniqueActorDto.PlayerId"/> + <see cref="CreatureProfileDto.SpeciesId"/> key
     /// `player_species` (the SAME per-player, per-species row <see cref="ListPlayerSpecies"/> lists),
     /// whose `InstanceId` resolves through <see cref="GetInstance"/> like any other instance — no
     /// second read path invented for fusion.</para>
     ///
     /// <para><c>null</c> is the honest "nothing to inherit from" outcome — the specimen doesn't
-    /// exist, carries no demon profile, or this player has never materialised that species (no
+    /// exist, carries no creature profile, or this player has never materialised that species (no
     /// `species-passive.{id}` content yet, or `player-materialise` simply has not run for it) —
     /// never a fabricated empty roll presented as real.</para>
     /// </summary>
@@ -266,7 +266,7 @@ public sealed partial class RpgStore
     {
         var actor = GetUniqueActor(specimenInstanceId);
         if (actor is null) return null;
-        var profile = GetDemonProfile(specimenInstanceId);
+        var profile = GetCreatureProfile(specimenInstanceId);
         if (profile is null) return null;
 
         var instanceMap = ListPlayerSpeciesInstanceMapUnlocked(actor.PlayerId);
@@ -309,7 +309,7 @@ public sealed partial class RpgStore
     }
 
     /// <summary>Every species with real content today, read off `effect_container` rather than
-    /// `demon_species` — the roster to materialise is "what has an effect to roll," and a species can
+    /// `creature_species` — the roster to materialise is "what has an effect to roll," and a species can
     /// exist in the shared stat catalog before `species-effects` (T5.3) ships its own container.</summary>
     IReadOnlyList<string> ListSpeciesPassiveContainerIdsUnlocked()
     {

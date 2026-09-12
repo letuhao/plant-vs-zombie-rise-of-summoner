@@ -25,7 +25,7 @@
       "id": "set.caltrop-001",
       "nameKey": "set.spike-tire-husk",
       "name": "Spike Tire Husk",
-      "themeKey": "demon.caltrop",
+      "themeKey": "creature.caltrop",
       "members": [
         {
           "role": "armament-primary",

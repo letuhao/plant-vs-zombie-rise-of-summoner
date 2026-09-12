@@ -25,7 +25,7 @@
       "id": "set.bigsunshroom-001",
       "nameKey": "set.solar-spore-cache",
       "name": "Solar Spore Cache",
-      "themeKey": "demon.bigsunshroom",
+      "themeKey": "creature.bigsunshroom",
       "members": [
         {
           "role": "armament-primary",

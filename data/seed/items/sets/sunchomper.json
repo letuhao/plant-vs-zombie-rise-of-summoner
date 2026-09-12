@@ -25,7 +25,7 @@
       "id": "set.sunchomper-001",
       "nameKey": "set.sun-mouth-completion",
       "name": "Sun-Mouth Completion",
-      "themeKey": "demon.sunchomper",
+      "themeKey": "creature.sunchomper",
       "members": [
         {
           "role": "armament-primary",

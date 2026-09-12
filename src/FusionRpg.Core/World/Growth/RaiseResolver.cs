@@ -1,4 +1,4 @@
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.World.Movement;
 using FusionRpg.Core.World.Turn;
@@ -144,7 +144,7 @@ public static class RaiseResolver
     /// <summary>
     /// Which species a sector recruits is the sector's climate (spec-sector-development.md §1,
     /// world-graph-ideal.md:488) — no new selection mechanism: this reuses
-    /// <see cref="DemonSpeciesCatalog"/>'s existing <c>ElementPrimary</c> field, the same catalog
+    /// <see cref="CreatureSpeciesCatalog"/>'s existing <c>ElementPrimary</c> field, the same catalog
     /// <c>BannerElement.Of</c> (`Movement/LaneCost.cs`) already reads to go the other way
     /// (species → element). Deterministic, not rolled: the zombie-side species whose primary
     /// element matches, lowest by <c>SpeciesId</c> ordinal — pure, so a replay never disagrees with
@@ -158,7 +158,7 @@ public static class RaiseResolver
     {
         var element = climate ?? ElementTypeId.Dark;
 
-        var candidate = DemonSpeciesCatalog.All
+        var candidate = CreatureSpeciesCatalog.All
             .Where(s => string.Equals(s.Side, "zombie", StringComparison.Ordinal) && s.ElementPrimary == element)
             .OrderBy(s => s.SpeciesId, StringComparer.Ordinal)
             .FirstOrDefault();

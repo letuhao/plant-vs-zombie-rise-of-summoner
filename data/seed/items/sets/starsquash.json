@@ -25,7 +25,7 @@
       "id": "set.starsquash-001",
       "nameKey": "set.crushed-star-fruit-husk",
       "name": "Crushed Star-Fruit Husk",
-      "themeKey": "demon.starsquash",
+      "themeKey": "creature.starsquash",
       "members": [
         {
           "role": "armament-primary",

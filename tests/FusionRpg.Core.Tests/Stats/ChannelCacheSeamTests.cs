@@ -14,7 +14,7 @@ public class ChannelCacheSeamTests
 {
     static BattleActorSetup Actor() => new()
     {
-        Key = "squad:0", Side = "squad", SpeciesId = "demon.test", Level = 5,
+        Key = "squad:0", Side = "squad", SpeciesId = "creature.test", Level = 5,
         MaxHp = 500, Atk = 40, Defense = 20,
     };
 

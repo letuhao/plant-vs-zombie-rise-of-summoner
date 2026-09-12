@@ -60,8 +60,8 @@
     </Content>
     <!-- catalog-runtime's Injector-side flip (seed-to-concrete, 2026-09-06) — see the .39 project's
          own comment for the full rationale; identical rule, kept in sync across all three hosts. -->
-    <Content Include="..\..\data\generated\demons\*.json" Exclude="..\..\data\generated\demons\_*.json">
-      <Link>data\generated\demons\%(Filename)%(Extension)</Link>
+    <Content Include="..\..\data\generated\creatures\*.json" Exclude="..\..\data\generated\creatures\_*.json">
+      <Link>data\generated\creatures\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

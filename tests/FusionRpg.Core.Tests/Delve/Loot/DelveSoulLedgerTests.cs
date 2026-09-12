@@ -1,6 +1,6 @@
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Delve.Loot;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Power;
 using Xunit;
 

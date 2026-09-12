@@ -2,7 +2,7 @@
 (spec-distribution-planner.md). Reads:
 
     data/seed/actions/_generated/role-lean.json       (A-S0 — species anchor + family membership)
-    data/seed/demons/species/**/*.json                      (live species and family fields)
+    data/seed/creatures/species/**/*.json                      (live species and family fields)
     data/seed/actions/type-weights.json                (A-T1 — categoryMilli/targetModeMilli/...)
     data/tuning/action-rungs.v1.json                   (the 10-row rung table)
     data/tuning/action-corpus-run.v1.json              (this module's OWN new tuning file)
@@ -48,11 +48,11 @@ from .distribution_planner.tuning import (
 from .dedup_select.derive import parse_candidate
 from .vocab import load_family_ids
 
-__all__ = ["run", "regenerate", "is_passing_quality_gate", "ACTIONS_ROOT", "DEMONS_ROOT"]
+__all__ = ["run", "regenerate", "is_passing_quality_gate", "ACTIONS_ROOT", "CREATURES_ROOT"]
 
 REPO_ROOT = Path(__file__).resolve().parents[5]
 ACTIONS_ROOT = REPO_ROOT / "data" / "seed" / "actions"
-DEMONS_ROOT = REPO_ROOT / "data" / "seed" / "demons"
+CREATURES_ROOT = REPO_ROOT / "data" / "seed" / "creatures"
 RUNGS_PATH = REPO_ROOT / "data" / "tuning" / "action-rungs.v1.json"
 ROLE_LEAN_PATH = ACTIONS_ROOT / "_generated" / "role-lean.json"
 TYPE_WEIGHTS_PATH = ACTIONS_ROOT / "type-weights.json"
@@ -185,7 +185,7 @@ def _corpus_hash(role_lean_corpus_hash: str, type_weights_lean_hash: str, run_tu
     return hashlib.sha256(blob).hexdigest()
 
 
-def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_ROOT,
+def regenerate(*, actions_root: Path = ACTIONS_ROOT, creatures_root: Path = CREATURES_ROOT,
               catalog_path: Path = CATALOG_PATH, role_lean_path: Path = ROLE_LEAN_PATH,
               family_assignments_path: "Path | None" = None, type_weights_path: "Path | None" = None,
               rungs_path: Path = RUNGS_PATH, run_tuning_path: Path = RUN_TUNING_PATH,
@@ -215,7 +215,7 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
 
     using_live_families = family_assignments_path is None
     if using_live_families:
-        live_species_root = catalog_path if catalog_path.is_dir() else demons_root / "species"
+        live_species_root = catalog_path if catalog_path.is_dir() else creatures_root / "species"
         family_assignments = derive_live_family_assignments(live_species_root)
     else:
         family_assignments = json.loads(family_assignments_path.read_text(encoding="utf-8"))

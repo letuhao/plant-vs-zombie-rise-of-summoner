@@ -35,7 +35,7 @@ Phase 4  world-map-scope      T12-T13  (needs scope-model only; independent of P
    existing first. No partial version a dependent module could build against — matches this repo's own
    `P0.1`-shaped precedent (`action-plan.md` §1.1: *"no seam, this one really is first"*).
 2. **`membership-events` before `battlefield-scope`'s own-side task, not before the whole module.**
-   `battlefield-scope`'s target/type/unique-demon WHO-values (T7) need nothing from `membership-events`
+   `battlefield-scope`'s target/type/unique-creature WHO-values (T7) need nothing from `membership-events`
    and could ship first if reordered — this plan sequences `membership-events` as Phase 2 anyway so
    Phase 3 never has an internal wait, but the dependency itself is narrow (T8 only), matching this
    session's own `T29 *(after P0.5)*`-shaped annotation rather than forcing a phase split.
@@ -59,7 +59,7 @@ restated here so the boundary travels with the plan, matching this program's own
 
 ### Phase 1 — `scope-model` (T1-T4)
 
-The vocabulary: `WhereScope` (Battlefield/WorldMap), `WhoSelector` (target/type/unique-demon/relation),
+The vocabulary: `WhereScope` (Battlefield/WorldMap), `WhoSelector` (target/type/unique-creature/relation),
 the `(kind, where, who, host)` compatibility table, and the `RelationKind` extraction into
 `FusionRpg.Contracts` this module's own audit surfaced as real, necessary, shipped-code-touching work
 (not an implementation detail to discover later).
@@ -76,10 +76,10 @@ comment there, never real handling).
 Two hosts sharing one grant-issuing front end, per the audit's central finding: SIM (new
 `BattleEffectHost` reader wiring, this session's own A18a-e pattern reused a fourth time) and live PvZ
 (no new reader — the injector's own overlay/Funnel path already works, proven by patron.aura; this
-module's live-PvZ job is grant-shape correctness only). Closes with a LIVE gate matching patron-demon's
+module's live-PvZ job is grant-shape correctness only). Closes with a LIVE gate matching patron-creature's
 own precedent — SIM-passing is tracked as done; the LIVE gate is owner-only and does not block calling
 the SIM half complete. **Resolved, owner, 2026-08-29:** asked directly whether to run the LIVE gate now
-or track it separately — the owner chose to track it separately, explicitly matching `patron-demon`'s
+or track it separately — the owner chose to track it separately, explicitly matching `patron-creature`'s
 own standing "SIM shipped, LIVE owner gate open" status rather than treating it as a program blocker.
 
 ### Phase 4 — `world-map-scope` (T12-T13)
@@ -110,10 +110,10 @@ commands, record the result, continue*. The only stop is a failing test.
 **`battlefield-scope`'s live-PvZ half is unverified against a real match until the LIVE gate runs.**
 SIM passing is real proof of the grant-issuing logic, but the injector's own overlay path reading these
 specific grants correctly is only proven by precedent (patron.aura), not by this program's own tests.
-Matches patron-demon's own accepted risk shape exactly — flagged, not hidden. **Resolved, owner,
+Matches patron-creature's own accepted risk shape exactly — flagged, not hidden. **Resolved, owner,
 2026-08-29:** this cannot be executed or observed by an assistant session (it needs a human watching a
 real, rendered game window) — asked directly, and the owner chose to track it separately rather than
-treat it as a blocker, the same standing shape `patron-demon` has carried for over a week in this repo.
+treat it as a blocker, the same standing shape `patron-creature` has carried for over a week in this repo.
 
 **`world-map-scope` crosses a real, standing caution** (`DESIGN-GATE.md` §1, World map row) under
 explicit owner authorization scoped to this program only. A `decisions.md` line recording that

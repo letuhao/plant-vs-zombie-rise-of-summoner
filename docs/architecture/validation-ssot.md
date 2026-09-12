@@ -18,11 +18,11 @@ fails, the "fix" is to change `904` to `905`, and it goes green again having cau
 actually did was add a mandatory chore to every seed extension — and train the next reader to edit the
 expected value instead of asking what the number *means*.
 
-In the SeedSmith generation pipelines this is worse than a chore. **The demon-seed corpus is a
+In the SeedSmith generation pipelines this is worse than a chore. **The creature-seed corpus is a
 population: it grows whenever a new species ships, and that is the normal case, not an event.** A
 pinned literal makes the pipeline look broken every time it succeeds at its job. The owner's own words:
 
-> *"the corpus will extend frequently when new demon species ship — it affects all seed — so the number
+> *"the corpus will extend frequently when new creature species ship — it affects all seed — so the number
 > of seed will never a constant, it change every day."*
 
 This is the same defect the repo already logged once, from the other side: a session proposed
@@ -42,7 +42,7 @@ the rest is mechanics.
 |---|---|---|
 | What it is | An enum / registry the *code* owns. It changes only when a developer edits a declaration | A set that grows when *content* ships (species, families, items, anchors, corpus rows) |
 | Cardinality | **Constant** — pin it | **A reading** — never pin it |
-| Examples | `ActionCategory` (5) · `ActionTargetMode` (6) · 18 atom kinds · 9 attach points · 13 triggers · 6 `resource.*` ids · `DemonRarity` ladder (10) · the 14-trait `DemonTraitPool` · `AREA_SHAPES` · `PAIRING_ROLES` · `RELATIONS` | species (904 today) · family memberships (1,183) · consolidated families (227) · anchors · briefs (6,655) · accepted/rejected rows · description text · `atomFamilies` picks |
+| Examples | `ActionCategory` (5) · `ActionTargetMode` (6) · 18 atom kinds · 9 attach points · 13 triggers · 6 `resource.*` ids · `CreatureRarity` ladder (10) · the 14-trait `CreatureTraitPool` · `AREA_SHAPES` · `PAIRING_ROLES` · `RELATIONS` | species (904 today) · family memberships (1,183) · consolidated families (227) · anchors · briefs (6,655) · accepted/rejected rows · description text · `atomFamilies` picks |
 | A test may assert | The exact count and the exact members — **and say why the number is the contract** | Only the **contract** (§2). If a reader needs the scale, use a canary (§4) |
 | If it changes | The test *should* fail — a declaration moved and a human must review it | The test *must not* fail — content shipped, which is the point |
 

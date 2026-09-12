@@ -25,7 +25,7 @@
       "id": "set.kelppuff-001",
       "nameKey": "set.the-rotting-tether",
       "name": "The Rotting Tether",
-      "themeKey": "demon.kelppuff",
+      "themeKey": "creature.kelppuff",
       "members": [
         {
           "role": "armament-primary",

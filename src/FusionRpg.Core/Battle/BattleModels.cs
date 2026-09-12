@@ -3,13 +3,13 @@ using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Battle;
 
-/// <summary>One combatant entering a battle — a demon specimen snapshot or a wave enemy.</summary>
+/// <summary>One combatant entering a battle — a creature specimen snapshot or a wave enemy.</summary>
 public sealed record BattleActorSetup
 {
     public string Key { get; init; } = "";                 // stable within the battle (e.g. "squad:0", "wave:3")
     public string Side { get; init; } = "";                // "squad" | "wave"
     public string SpeciesId { get; init; } = "";
-    public int TypeId { get; init; }                        // demon type id (disjoint space) for event emission
+    public int TypeId { get; init; }                        // creature type id (disjoint space) for event emission
     public int Level { get; init; } = 1;
 
     /// <summary>Alias for <see cref="Level"/> — the actor's Θ (content-authoring, T2.3,
@@ -30,11 +30,11 @@ public sealed record BattleActorSetup
     /// <summary>The `rpg_unique_actor` this setup represents — its own stable `instance_id` string,
     /// matching `OwnerScope.UniqueActor`'s key exactly (never a numeric id) — for module 5's equipment
     /// lookup (`EquipAtomSource.ModsFor`). Null for a setup with no durable specimen behind it (a wave
-    /// demon, an expedition roster entry, a test fixture); equipment resolves to nothing.
+    /// creature, an expedition roster entry, a test fixture); equipment resolves to nothing.
     /// <see cref="JsonIgnoreAttribute"/> for the identical reason <see cref="Index"/> already carries
     /// one: expedition tier resolution serializes this record as part of its own golden hash, and a
     /// specimen id — always null there, since expeditions build setups from wave/species data, never a
-    /// real owned demon — is not semantically part of what that hash locks. Found the same way
+    /// real owned creature — is not semantically part of what that hash locks. Found the same way
     /// <see cref="Index"/>'s comment describes: a first draft without this moved
     /// `ExpeditionResolverTests.Tier_goldens_are_locked`'s hash.</summary>
     [JsonIgnore]
@@ -221,7 +221,7 @@ public sealed record PhaseGrant(long HpThresholdMilli, string ContainerInstanceI
 /// </summary>
 public enum CombatantKind
 {
-    /// <summary>A demon, a legion member, anything that takes turns. Index 0, so the default is
+    /// <summary>A creature, a legion member, anything that takes turns. Index 0, so the default is
     /// today's behaviour for every existing caller.</summary>
     Animate,
 

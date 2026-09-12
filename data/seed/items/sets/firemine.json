@@ -25,7 +25,7 @@
       "id": "set.firemine-001",
       "nameKey": "set.luminous-tuber-core",
       "name": "Luminous Tuber Core",
-      "themeKey": "demon.firemine",
+      "themeKey": "creature.firemine",
       "members": [
         {
           "role": "armament-primary",

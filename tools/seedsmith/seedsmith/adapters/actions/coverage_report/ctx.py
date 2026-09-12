@@ -1,8 +1,8 @@
-"""seedsmith.adapters.actions.coverage_report.ctx — `ActionCoverageCtx`, the bundle the twelve
+"""seedsmith.adapters.actions.coverage_report.ctx — `ActionCoverageCtx`, the bundle the thirteen
 action-coverage metrics (`seedsmith/metrics/action_coverage.py`) read from `Ctx.action_coverage`
 (A-S5, spec-coverage-report.md §2).
 
-Lives beside `derive.py` rather than inside `metrics/`, same split `adapters/demons/dump_ctx.py`'s
+Lives beside `derive.py` rather than inside `metrics/`, same split `adapters/creatures/dump_ctx.py`'s
 own docstring states: loading and composing action-specific JSON is adapter knowledge, not
 something the generic `metrics` package should know how to do. This module holds only the plain
 data bundle — no I/O. The real-file loader lives in the sibling entrypoint
@@ -17,7 +17,7 @@ from typing import Mapping, Sequence
 
 @dataclass(frozen=True)
 class RosterCounts:
-    """The live roster, measured from the demon seed folder. `family_count` is every family id
+    """The live roster, measured from the creature seed folder. `family_count` is every family id
     with at least one assigned member; `family_assigned_count` is the sum of member counts across
     those families (a species may belong to more than one family, so this can exceed
     `species_count`'s own share that has a family at all — the same distinction
@@ -29,9 +29,9 @@ class RosterCounts:
 
 @dataclass(frozen=True)
 class ActionCoverageCtx:
-    """Everything the twelve metrics in `metrics/action_coverage.py` read. Built once per report
+    """Everything the thirteen metrics in `metrics/action_coverage.py` read. Built once per report
     run (real or synthetic) and handed to every metric via `Ctx.action_coverage` — the same
-    "load once, hand to every metric" shape `DemonDumpCtx` already established for T1.10.
+    "load once, hand to every metric" shape `CreatureDumpCtx` already established for T1.10.
 
     `accepted_rows`: the corpus this report measures — A-S3's survivors plus whatever is already
     committed under `data/seed/actions/` (A-C1's own load). A partial smoke corpus is legal while

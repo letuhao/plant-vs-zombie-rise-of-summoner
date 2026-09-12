@@ -25,7 +25,7 @@
       "id": "set.ultimatebigchomper-001",
       "nameKey": "set.the-devouring-maw",
       "name": "The Devouring Maw",
-      "themeKey": "demon.ultimatebigchomper",
+      "themeKey": "creature.ultimatebigchomper",
       "members": [
         {
           "role": "armament-primary",

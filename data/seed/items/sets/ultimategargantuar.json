@@ -25,7 +25,7 @@
       "id": "set.ultimategargantuar-001",
       "nameKey": "set.obsidian-core-legion",
       "name": "Obsidian Core Legion",
-      "themeKey": "demon.ultimategargantuar",
+      "themeKey": "creature.ultimategargantuar",
       "members": [
         {
           "role": "armament-primary",

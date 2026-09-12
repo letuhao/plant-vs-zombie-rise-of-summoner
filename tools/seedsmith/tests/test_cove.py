@@ -40,7 +40,7 @@ def test_subjective_questions_are_rejected_mechanically():
 
 
 def test_source_grounded_questions_are_accepted():
-    assert is_source_grounded("According to the source, what does this demon do?")
+    assert is_source_grounded("According to the source, what does this creature do?")
     assert is_source_grounded("What does the source say about its defence?")
 
 
@@ -52,7 +52,7 @@ def test_a_contradiction_escalates_and_never_auto_repairs():
                          "draftContradictsSource": True,
                          "contradiction": "draft says it defends"},
         questions_for=lambda d: ["what does the source say it does?"],
-        source_of=lambda c: "the demon explodes", enabled=True)
+        source_of=lambda c: "the creature explodes", enabled=True)
     out = node({"draft": {"doctrine": "it defends"}, "context": {}})
     assert out["outcome"] == "escalated"
     assert out["verified"] is False
@@ -63,7 +63,7 @@ def test_a_consistent_draft_verifies():
     node = make_cove_node(ask=lambda **k: {"answerFromSource": "it defends",
                                            "draftContradictsSource": False},
                           questions_for=lambda d: ["what does the source say it does?"],
-                          source_of=lambda c: "the demon defends", enabled=True)
+                          source_of=lambda c: "the creature defends", enabled=True)
     assert node({"draft": {"doctrine": "it defends"}, "context": {}}) == {"verified": True}
 
 

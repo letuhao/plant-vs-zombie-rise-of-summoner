@@ -25,7 +25,7 @@
       "id": "set.ultimatehelmetgatling-001",
       "nameKey": "set.six-shot-rain",
       "name": "Six-Shot Rain",
-      "themeKey": "demon.ultimatehelmetgatling",
+      "themeKey": "creature.ultimatehelmetgatling",
       "members": [
         {
           "role": "armament-primary",

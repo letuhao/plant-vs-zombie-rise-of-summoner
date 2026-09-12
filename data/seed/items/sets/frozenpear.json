@@ -25,7 +25,7 @@
       "id": "set.frozenpear-001",
       "nameKey": "set.frozen-impact",
       "name": "Frozen Impact",
-      "themeKey": "demon.frozenpear",
+      "themeKey": "creature.frozenpear",
       "members": [
         {
           "role": "armament-primary",

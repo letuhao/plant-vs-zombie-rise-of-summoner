@@ -13,7 +13,7 @@ namespace FusionRpg.Data.Tests.Actions;
 /// shared shape (`AwardUniqueActorXp` here; the expedition reward apply mirrors it identically).
 ///
 /// <para>`UnlockTuningPolicy`/`ActionFamilyMapPolicy` are process-wide statics (matching
-/// `RungPolicy`/`DemonSpeciesCatalog`'s own established shape) — configured once here, never reset,
+/// `RungPolicy`/`CreatureSpeciesCatalog`'s own established shape) — configured once here, never reset,
 /// the same convention every other `*Policy`/`*Hub` in this codebase already follows. Every EXISTING
 /// XP-award test in this project is unaffected regardless, because `TryRollActionUnlocks` no-ops
 /// whenever `UnlockTuningPolicy.Tuning` is unset — this file is what turns it on.</para>

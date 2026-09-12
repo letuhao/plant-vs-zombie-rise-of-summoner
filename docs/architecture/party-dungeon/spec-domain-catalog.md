@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS rpg_domain_progress (
   revision INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (player_id, domain_id));
 ```
 
-The `rpg_demon_codex` shape (`RpgStore.cs:435-442`) without a timestamp, because no rule reads one; highest rung cleared is
+The `rpg_creature_codex` shape (`RpgStore.cs:435-442`) without a timestamp, because no rule reads one; highest rung cleared is
 derived from `clears_json`, never stored. `RpgStore.cs:734-769`'s reset list gains the table ahead of `rpg_delves`.
 
 **5a. Unlock.** Inside `RpgStore.Delve.CloseDelve` — the writer every sibling names — on `Extracted` **and** attrition §9's
@@ -398,8 +398,8 @@ public static IReadOnlyList<DomainOfferDto> For(IReadOnlyList<ProgressRow> progr
    (`very-easy` refused). This spec follows the map and budget (§7); the `≥ mid` clause is the line to correct.
 4. Ladder §4 says a seed *"may carry `permadeathFromRung`"*; the approved anchor table has no such field — nullable here, filed.
    `audit:86-88` (*"a wipe leaves the domain open"*) predates R12; R12's `sealOnWipe: true` default wins (§4).
-5. **Nothing exists yet:** `data/seed/dungeon/` absent; `data/generated/` holds only `demons/`; `adapters/registry.py:13-15` registers
-   `items`, `demons`, `actions` — no `dungeon`; no file under `tools/seedsmith/seedsmith/` mentions "dungeon". Every
+5. **Nothing exists yet:** `data/seed/dungeon/` absent; `data/generated/` holds only `creatures/`; `adapters/registry.py:13-15` registers
+   `items`, `creatures`, `actions` — no `dungeon`; no file under `tools/seedsmith/seedsmith/` mentions "dungeon". Every
    `python -m seedsmith dungeon …` command is the seed contract's promise, unbuilt.
 6. `item_first_clear.player_id` is `TEXT` (`RpgStore.Loot.cs:135`) while `rpg_*` player ids are `INTEGER`; `HasFirstClear(string, …)`
    (`:325`) takes the string — the host converts once. The only world-creation endpoint is SIM-only (`test.MapPost("/world/create")`,

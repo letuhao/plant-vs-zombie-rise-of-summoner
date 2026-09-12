@@ -11,7 +11,7 @@
 
 ## Overview
 
-Retire dual compose (ActorHub vs `BattleStatComposer`), migrate ChannelMods combat writers into Hub, ship one Cold equip atom path, make Standing / chip / copy honest, finish lawn UniqueDemon + tree + Bound loadout parity, close sim/Θ/docs/prove gaps, then **delete** world combat stubs and track **`world-actor-combat`** (out of scope — no Hub assault build here).
+Retire dual compose (ActorHub vs `BattleStatComposer`), migrate ChannelMods combat writers into Hub, ship one Cold equip atom path, make Standing / chip / copy honest, finish lawn UniqueCreature + tree + Bound loadout parity, close sim/Θ/docs/prove gaps, then **delete** world combat stubs and track **`world-actor-combat`** (out of scope — no Hub assault build here).
 
 **Build order:** Wave 1 fuse-first → Wave 2 Standing → Wave 3 lawn → Wave 4 prove matrix → Wave 5 stub hygiene.
 
@@ -110,7 +110,7 @@ T3–T4 cold-equip  ──┼──► T5–T6 fuse ──► T7 ops
 | W1a — migrate writers + cold path | T1–T4 | Guard still allows BattleStatComposer; ChannelMods allowlist only DEBT shims; cold SourceIds + single-rebuild |
 | W1b — fuse + ops | T5–T7 | No production `BattleStatComposer.Compose`; guard green; one RulesetVersion bump; ops Full |
 | W2 — Standing honesty | T8–T11 | Standing includes aptitude; chip not “power”; O+S+C label |
-| W3 — Lawn / loadout | T12–T14 | Bound UniqueDemon Hot; injector tree; Bound loadout via Hub/Funnel |
+| W3 — Lawn / loadout | T12–T14 | Bound UniqueCreature Hot; injector tree; Bound loadout via Hub/Funnel |
 | W4 — Matrix / prove | T15–T19 | Sim Full; coeffs; Θ wire; docs clean; prove script green |
 | W5 — Stub hygiene | T20–T23 | Placeholder gone; intel Strength dropped; stubs deleted; `world-actor-combat` tracked |
 

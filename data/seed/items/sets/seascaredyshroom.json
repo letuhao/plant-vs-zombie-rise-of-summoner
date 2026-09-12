@@ -25,7 +25,7 @@
       "id": "set.seascaredyshroom-001",
       "nameKey": "set.cowardly-snail-shell",
       "name": "Cowardly Snail Shell",
-      "themeKey": "demon.seascaredyshroom",
+      "themeKey": "creature.seascaredyshroom",
       "members": [
         {
           "role": "armament-primary",

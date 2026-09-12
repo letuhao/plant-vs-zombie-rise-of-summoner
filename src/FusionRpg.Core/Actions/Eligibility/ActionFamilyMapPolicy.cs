@@ -3,7 +3,7 @@ namespace FusionRpg.Core.Actions.Eligibility;
 /// <summary>
 /// T59.7 (spec-action-instance-and-grant.md §4): the process-wide, configured-once
 /// <c>speciesKey → familyId</c> map <see cref="ActionEligibility.Candidates"/> needs, mirroring
-/// <c>RungPolicy</c>/<c>DemonSpeciesCatalog</c>'s own "no built-in default, configure once at
+/// <c>RungPolicy</c>/<c>CreatureSpeciesCatalog</c>'s own "no built-in default, configure once at
 /// startup" shape exactly. `FamilyMap` itself stays a pure parser (no I/O); this is the seam that
 /// lets `RpgStore` (which cannot read `AppContext.BaseDirectory`-relative content files itself) reach
 /// the SAME map `FusionRpg.Server`'s startup already loads, without threading a new parameter through

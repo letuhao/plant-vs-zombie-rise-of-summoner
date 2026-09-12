@@ -41,7 +41,7 @@ public sealed class SpeciesAllocationSource
     /// `LawnElementIndex.TryGet` wrapped to also report whether the index itself has been configured
     /// (`LawnElementResolverHost`'s own state). Injected, never a hard dependency — a test supplies a
     /// fake covering all three outcomes with no `LawnElementIndex` involved.</param>
-    /// <param name="resolveSpeciesAllocation">`speciesId → effective DemonType allocation` — in
+    /// <param name="resolveSpeciesAllocation">`speciesId → effective CreatureType allocation` — in
     /// production, the injector's own cached-by-speciesId dictionary (`allocation-transport`'s own
     /// cache, refreshed at the existing commander-cache cadence), never a server round trip.</param>
     /// <param name="resolveCommanderAllocation">`playerId? → Commander allocation` — in production,

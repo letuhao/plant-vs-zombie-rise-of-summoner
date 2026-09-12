@@ -28,7 +28,7 @@ const COLOR_NAMES = new Set([
   "ok", "warn", "bad", "bad-solid", "info",
   "border", "border-control", "border-strong",
   "el-fire", "el-ice", "el-air", "el-earth", "el-light", "el-dark", "el-omni",
-  "side-plant", "side-zombie", "side-demon",
+  "side-plant", "side-zombie", "side-creature",
   "rarity-1", "rarity-2", "rarity-3", "rarity-4", "rarity-5",
   "rarity-chaff", "rarity-sprout", "rarity-grafted", "rarity-cultivated", "rarity-fused",
   "rarity-chimeric", "rarity-heirloom", "rarity-firstseed", "rarity-sunwoven", "rarity-almanac",

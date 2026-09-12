@@ -25,7 +25,7 @@
       "id": "set.corncaltrop-001",
       "nameKey": "set.butter-spikes",
       "name": "Butter Spikes",
-      "themeKey": "demon.corncaltrop",
+      "themeKey": "creature.corncaltrop",
       "members": [
         {
           "role": "armament-primary",

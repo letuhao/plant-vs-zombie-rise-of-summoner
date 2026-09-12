@@ -10,7 +10,7 @@ const mockUseUniqueActors = vi.fn();
 const mockUseRuns = vi.fn();
 const mockUseSoulBalance = vi.fn();
 const mockUseRelics = vi.fn();
-const mockUseDemonRoster = vi.fn();
+const mockUseCreatureRoster = vi.fn();
 const mockUseCommanders = vi.fn();
 
 // Almanac/Chronicle mount CatalogPage/RecipesPage/MetricsPage/RpgProgressionPage/PvzStatsPage
@@ -29,7 +29,7 @@ vi.mock("@/lib/bus", async (importOriginal) => {
     useRuns: () => mockUseRuns(),
     useSoulBalance: () => mockUseSoulBalance(),
     useRelics: () => mockUseRelics(),
-    useDemonRoster: () => mockUseDemonRoster(),
+    useCreatureRoster: () => mockUseCreatureRoster(),
     useCommanders: () => mockUseCommanders(),
     useSpeciesIndex: () => new Map(),
     useUniqueEquipment: () => ({ data: { items: [] } }),
@@ -77,7 +77,7 @@ beforeEach(() => {
     data: { playerId: 1, balance: 250, earnedTotal: 250, spentTotal: 0, revision: 1, updatedUtc: "" }
   });
   mockUseRelics.mockReturnValue({ data: { items: [] } });
-  mockUseDemonRoster.mockReturnValue({ data: { items: [] } });
+  mockUseCreatureRoster.mockReturnValue({ data: { items: [] } });
   mockUseCommanders.mockReturnValue({ data: commanderListView });
   mockUseContracts.mockReturnValue({
     data: {
@@ -223,8 +223,8 @@ describe("SanctumStage — with a bound creature", () => {
     expect(screen.getByTestId("sanctum-home")).toBeInTheDocument();
   });
 
-  it("Fusion unlocks once the player has a demon to fuse (T15)", () => {
-    mockUseDemonRoster.mockReturnValue({
+  it("Fusion unlocks once the player has a creature to fuse (T15)", () => {
+    mockUseCreatureRoster.mockReturnValue({
       data: { items: [{ profile: { instanceId: "d1" }, actor: { level: 1 } }] }
     });
     renderWithProviders(<SanctumStage />, { withGlobalKeys: true });
@@ -233,9 +233,9 @@ describe("SanctumStage — with a bound creature", () => {
 
   // T26 (plate 01 §C): "overdue tribute beats a returned expedition beats ... 'start a run'."
   describe("T26 — the focus card's priority rule", () => {
-    it("an overdue pact outranks everything else, and names the real demon", () => {
+    it("an overdue pact outranks everything else, and names the real creature", () => {
       mockUseUniqueActors.mockReturnValue({ data: oneActor });
-      mockUseDemonRoster.mockReturnValue({
+      mockUseCreatureRoster.mockReturnValue({
         data: { items: [{ profile: { instanceId: "d1", speciesId: "sp-imp", nickname: null }, actor: { level: 5 } }] }
       });
       mockUseContracts.mockReturnValue({
@@ -255,7 +255,7 @@ describe("SanctumStage — with a bound creature", () => {
     it("clicking the overdue-tribute CTA opens the real Pacts layer", async () => {
       const user = userEvent.setup();
       mockUseUniqueActors.mockReturnValue({ data: oneActor });
-      mockUseDemonRoster.mockReturnValue({
+      mockUseCreatureRoster.mockReturnValue({
         data: { items: [{ profile: { instanceId: "d1", speciesId: "sp-imp", nickname: null }, actor: { level: 5 } }] }
       });
       mockUseContracts.mockReturnValue({

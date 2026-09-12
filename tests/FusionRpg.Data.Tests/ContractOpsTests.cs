@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Contracts;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
 using Xunit;
@@ -33,12 +33,12 @@ public class ContractOpsTests : IDisposable
         try { Directory.Delete(_dir, true); } catch { /* temp */ }
     }
 
-    static readonly DemonSpeciesDef Species = DemonSpeciesCatalog.All
-        .First(s => s.Acquisition != DemonAcquisition.CaptureOnly && s.TraitPool.Count > 0);
+    static readonly CreatureSpeciesDef Species = CreatureSpeciesCatalog.All
+        .First(s => s.Acquisition != CreatureAcquisition.CaptureOnly && s.TraitPool.Count > 0);
 
     string Mint()
     {
-        var (specimen, _) = _store.MintDemon(1, new DemonMintSpec
+        var (specimen, _) = _store.MintCreature(1, new CreatureMintSpec
         {
             SpeciesId = Species.SpeciesId,
             Side = Species.Side,
@@ -53,8 +53,8 @@ public class ContractOpsTests : IDisposable
         return specimen.Actor.InstanceId;
     }
 
-    /// <summary>Fills every base slot, then mints one more — the returned demon is unbound.</summary>
-    string MintOverflowDemon()
+    /// <summary>Fills every base slot, then mints one more — the returned creature is unbound.</summary>
+    string MintOverflowCreature()
     {
         for (var i = _store.CountBoundContracts(1); i < ContractPolicy.BaseSlots; i++) Mint();
         var id = Mint();
@@ -88,7 +88,7 @@ public class ContractOpsTests : IDisposable
     [Fact]
     public void Binding_refuses_when_capacity_is_full_and_writes_nothing()
     {
-        var id = MintOverflowDemon();
+        var id = MintOverflowCreature();
         var before = _store.GetSoulBalance(1).Balance;
 
         var bind = _store.BindContract(1, id, Day0);
@@ -99,7 +99,7 @@ public class ContractOpsTests : IDisposable
     }
 
     [Fact]
-    public void Release_keeps_the_loyalty_the_demon_earned()
+    public void Release_keeps_the_loyalty_the_creature_earned()
     {
         var id = Mint();
         _store.SetLoyaltyForTest(id, 750);
@@ -133,7 +133,7 @@ public class ContractOpsTests : IDisposable
         var id = Mint();
         _store.SetLoyaltyForTest(id, 150);                     // insubordinate: defeats put it here
         var personality = _store.GetContract(id)!.Personality;
-        var price = ContractPolicy.RitualPrice(Species.BaseRarity, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning);
+        var price = ContractPolicy.RitualPrice(Species.BaseRarity, FusionRpg.Core.Creatures.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning);
         var before = _store.GetSoulBalance(1).Balance;
 
         var ritual = _store.PerformRitual(1, id, "corr-ritual-1", Day0);
@@ -150,9 +150,9 @@ public class ContractOpsTests : IDisposable
     }
 
     [Fact]
-    public void Ritual_refuses_an_unbound_demon()
+    public void Ritual_refuses_an_unbound_creature()
     {
-        var unbound = MintOverflowDemon();
+        var unbound = MintOverflowCreature();
         var refusal = _store.PerformRitual(1, unbound, "corr-r2", Day0);
         Assert.False(refusal.Ok);
         Assert.Equal("contract.unbound", refusal.Reason);
@@ -194,7 +194,7 @@ public class ContractOpsTests : IDisposable
     [Fact]
     public void A_bought_slot_widens_capacity_for_the_next_mint()
     {
-        var overflow = MintOverflowDemon();
+        var overflow = MintOverflowCreature();
         _store.BuyContractSlot(1, "slot-widen", Day0);
         var bind = _store.BindContract(1, overflow, Day0);
         Assert.True(bind.Ok, bind.Reason);
