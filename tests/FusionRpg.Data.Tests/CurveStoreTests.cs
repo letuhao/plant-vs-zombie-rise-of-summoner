@@ -11,21 +11,16 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class CurveStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public CurveStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-curves-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static CurvePoint[] Points(params (int X, int Milli)[] p) =>
         p.Select(t => new CurvePoint(t.X, t.Milli)).ToArray();

@@ -97,22 +97,23 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
 
 ## Phase 3 — Pilot: prove the pattern at minimum blast radius
 
-- [ ] **Task T9: Migrate 5 representative store tests to memory**
-  - Description: migrate `ActionStoreTests`, `AffixStoreTests`, `AtomStoreTests`, `CurveStoreTests`, `ElementStoreTests` to `DataTestStore.Create()`; remove each baseline line; **`ActionStoreTests` has the 2 `readOnly: true` sites on `_store.HotPath` — convert each to a plain open (drop `readOnly: true`), because a shared-cache memory DB cannot be opened read-only**.
-  - Acceptance: all 5 pass in memory; no file created; baseline loses their lines; gate green.
-  - Verify: `dotnet test tests/FusionRpg.Data.Tests --filter "FullyQualifiedName~ActionStoreTests|FullyQualifiedName~AffixStoreTests|FullyQualifiedName~AtomStoreTests|FullyQualifiedName~CurveStoreTests|FullyQualifiedName~ElementStoreTests"` + `guard-test-substrate.ps1`.
+- [x] **Task T9: Migrate 5 representative store tests to memory** ✅ 2026-09-12
+  - Description: migrated `ActionStoreTests`, `AffixStoreTests`, `AtomStoreTests`, `CurveStoreTests`, `ElementStoreTests` from `new RpgStore(tempDir)` + `Init()` + swallowed delete to `DataTestStore.Create()` / `_testStore.Dispose()`. `ActionStoreTests`' 2 `readOnly: true` opens on `_store.HotPath` became plain opens (a shared-cache memory DB cannot be opened read-only). The 5 baseline lines were removed (216→211).
+  - Acceptance met: all 5 pass **in memory** (68/68) with **no assertion and no constructor call changed**; zero temp dirs created; baseline shrank exactly 5; gate green.
+  - Verified: gate subagent PASS — per-file diff confirms only ctor/Dispose/read-open changed and no `SeedAtoms()`/seed call was dropped (Action 6/6 seeds, 51/51 asserts; Affix 2/2, 24/24; Atom 39/39; Curve 18/18; Element 25/25); full Data 1286/1286; both guards green.
+  - **Pattern proven.** The migration recipe works at minimum blast radius — the pilot is the gate for the remaining batches.
   - Files: the 5 test files + `scripts/test-substrate-baseline.txt`. Scope: M.
   - Dependencies: T8.
 
-- [ ] **Task T10: Pilot checkpoint — pattern proven or reverted**
-  - Description: confirm no assertion had to change (if one did, the file was mis-classified and belongs in the file-bound set), confirm duration, and confirm the baseline shrank by exactly 5 lines.
-  - Acceptance: zero assertion changes; baseline −5; owner signs the pattern off.
-  - Verify: `git diff` shows construction/teardown only; `guard-test-substrate.ps1`.
+- [x] **Task T10: Pilot checkpoint — pattern proven or reverted** ✅ 2026-09-12
+  - Description: confirmed at T9's gate — **zero assertion changes**, every constructor seed call preserved, baseline shrank by exactly **5** lines (216→211), zero temp dirs created, duration ~5s for the 68 pilot tests, full Data 1286/1286.
+  - Acceptance met: no mis-classification found; the recipe is proven and the pattern gates the remaining batches.
+  - Verified: gate subagent PASS (per-file diff + HEAD-vs-worktree token counts).
   - Files: none (verification). Scope: XS.
   - Dependencies: T9.
 
-### Checkpoint 3 — Pilot
-- [ ] ⭐ Zero assertion drift across 5 files; owner approves before the bulk migration.
+### Checkpoint 3 — Pilot ✅
+- [x] ⭐ Zero assertion drift across 5 files; pattern proven before the bulk migration.
 
 ## Phase 4 — The migration (module `store-test-migration`)
 

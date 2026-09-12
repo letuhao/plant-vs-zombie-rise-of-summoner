@@ -10,21 +10,16 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class AtomStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public AtomStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-atoms-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     /// <summary>A valid `stat.modify` atom — a permanent modifier, so it carries no trigger.</summary>
     static AtomRow Vitality(int tier = 1, string variant = "") => new()

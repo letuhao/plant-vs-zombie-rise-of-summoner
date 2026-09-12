@@ -12,16 +12,14 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class ActionStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly string _realAtomId;
 
     public ActionStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-actions-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _realAtomId = SeedContainerAndAtom("skill.test", "atom.real");
         SeedContainerAndAtom("skill.act-attack-container", "atom.attack-hit");
         SeedContainerAndAtom("skill.act-guard-container", "atom.guard-status");
@@ -29,10 +27,7 @@ public class ActionStoreTests : IDisposable
         SeedContainerAndAtom("skill.innate-rot-burst-container", "atom.rot-burst");
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     /// <summary>Returns the derived atom id actually stored, since <c>AtomRow.DeriveId</c> owns the grammar.</summary>
     string SeedContainerAndAtom(string containerId, string family)
@@ -204,7 +199,7 @@ public class ActionStoreTests : IDisposable
         // The correction from item/ssot-granted-actions.md §5.5 item 5, made unforgettable: a
         // granted action has no instance and no rolls, so `effect_binding` cannot be reused. Asserted
         // directly on the live schema, not the store's own C# API surface.
-        using var db = SqliteConnectionFactory.Open(_store.HotPath, readOnly: true);
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "PRAGMA table_info(rpg_action_grant);";
         using var r = cmd.ExecuteReader();
@@ -228,7 +223,7 @@ public class ActionStoreTests : IDisposable
         // something the author of this test never thought to list -- this asserts the CLOSED set
         // instead, so ANY future column addition fails here first, forcing a deliberate re-read of
         // item 9 rather than a silent schema drift into "a second action system."
-        using var db = SqliteConnectionFactory.Open(_store.HotPath, readOnly: true);
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "PRAGMA table_info(rpg_action_grant);";
         using var r = cmd.ExecuteReader();

@@ -23,9 +23,7 @@ tests/FusionRpg.Data.Tests/Actions/ActionCorpusImporterTests.cs : swallowed-dele
 tests/FusionRpg.Data.Tests/Actions/ActionCorpusRealContentQualityTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Actions/ActionUnlockGrantWiringTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Actions/ActionUnlocksStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/ActionStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/AffixImportPathTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/AffixStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/AllocationStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/AlmanacSeedEnrichmentTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/AlmanacSeedTests.cs : swallowed-delete, temp-store
@@ -33,7 +31,6 @@ tests/FusionRpg.Data.Tests/AptitudePresetStoreTests.cs : swallowed-delete, temp-
 tests/FusionRpg.Data.Tests/AtomImportTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/AtomInstanceStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/AtomRowWiringTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/AtomStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/BindResolutionTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/ChannelPolicyStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/ColdArchiveCompactionTests.cs : swallowed-delete, temp-store
@@ -51,7 +48,6 @@ tests/FusionRpg.Data.Tests/CreatureLawnDeployMagnitudeTests.cs : swallowed-delet
 tests/FusionRpg.Data.Tests/CreatureLawnDeployTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/CreatureSpeciesImportCliTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/CreatureStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/CurveStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Delve/BossFirstClearGrantTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Delve/DelveAttritionSettlementTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Delve/DelveGraphRollRoundTripTests.cs : swallowed-delete, temp-store
@@ -64,7 +60,6 @@ tests/FusionRpg.Data.Tests/Delve/EventSeenStoreTests.cs : swallowed-delete, temp
 tests/FusionRpg.Data.Tests/Delve/Quests/QuestRewardBankingCloseDelveTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Delve/Quests/QuestRewardBankingComposabilityTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Delve/WebMatchDecisionsTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/ElementStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/EligibilityAxisMigrationTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/ExpeditionRewardApplyTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/ExpeditionStoreTests.cs : swallowed-delete, temp-store
