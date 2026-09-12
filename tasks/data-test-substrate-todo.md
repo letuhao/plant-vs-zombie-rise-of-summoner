@@ -35,10 +35,10 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - Files: `docs/architecture/decisions.md`. Scope: XS.
   - Dependencies: none — spec approved 2026-09-12.
 
-- [ ] **Task T2: `SqliteConnectionFactory` memory-URI branch**
-  - Description: `Open(path, readOnly)` detects a `file:…mode=memory&cache=shared` URI and opens it without `Path.GetFullPath`/`CreateDirectory`/forced `ReadWriteCreate`; add `MemoryUri(name)` helper; omit WAL on memory; **throw** on `readOnly:true` + memory.
-  - Acceptance: a memory URI opens and round-trips SQL; a file path behaves exactly as before; read-only+memory throws a named error.
-  - Verify: `dotnet test tests/FusionRpg.Data.Tests --filter FullyQualifiedName~MemoryStoragePlan` + `guard-dal.ps1` (SQL stays in Data).
+- [x] **Task T2: `SqliteConnectionFactory` memory-URI branch** ✅ 2026-09-12
+  - Description: `MemoryUri(name)` builds `file:{name}?mode=memory&cache=shared`; `IsMemoryUri` detects it; `Open` routes a memory URI to `OpenMemory` (no `Path.GetFullPath`/`CreateDirectory`/forced `ReadWriteCreate`), which omits WAL (no-op on memory) and **throws** on `readOnly: true`. The file branch is byte-identical.
+  - Acceptance met: a memory URI opens and round-trips SQL through two connections; a file path still creates its file/dir exactly as before; read-only+memory throws `InvalidOperationException` naming memory.
+  - Verified: `MemoryStoragePlanTests` 5/5; full Data suite 1,264/1,264; Server suite 404/404; `guard-dal.ps1` + `guard-test-substrate.ps1` green.
   - Files: `src/FusionRpg.Data/Sqlite/SqliteConnectionFactory.cs`, `tests/FusionRpg.Data.Tests/MemoryStoragePlanTests.cs`. Scope: S.
   - Dependencies: T1.
 
