@@ -6,7 +6,7 @@
       "family": "atom.prec-focus",
       "tier": 1,
       "kind": "stat.derived",
-      "name": "precision T1",
+      "name": "Focused Aim T1",
       "params": {
         "channel": {
           "pool": "pool.element-accuracy",
@@ -31,7 +31,7 @@
       "family": "atom.prec-focus",
       "tier": 2,
       "kind": "stat.derived",
-      "name": "precision T2",
+      "name": "Focused Aim T2",
       "params": {
         "channel": {
           "pool": "pool.element-accuracy",
@@ -56,7 +56,7 @@
       "family": "atom.prec-focus",
       "tier": 3,
       "kind": "stat.derived",
-      "name": "precision T3",
+      "name": "Focused Aim T3",
       "params": {
         "channel": {
           "pool": "pool.element-accuracy",
@@ -81,7 +81,7 @@
       "family": "atom.prec-focus",
       "tier": 4,
       "kind": "stat.derived",
-      "name": "precision T4",
+      "name": "Focused Aim T4",
       "params": {
         "channel": {
           "pool": "pool.element-accuracy",
@@ -106,7 +106,7 @@
       "family": "atom.prec-focus",
       "tier": 5,
       "kind": "stat.derived",
-      "name": "precision T5",
+      "name": "Focused Aim T5",
       "params": {
         "channel": {
           "pool": "pool.element-accuracy",
