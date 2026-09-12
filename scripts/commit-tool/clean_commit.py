@@ -28,6 +28,11 @@ from validate import (  # noqa: E402
 REQUIRED_HOOKS_PATH = ".githooks"
 MCP_ENV_FLAG = "REPO_GIT_MCP"
 
+# Windows: a GUI host (VS Code extension) has no console, so spawning a child without
+# CREATE_NO_WINDOW makes Windows allocate one — a flashing window that steals focus.
+# git spawns sh.exe for .githooks, so this matters for every commit, not just the CLI.
+NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
 
 @dataclass
 class CommitResult:
@@ -50,6 +55,7 @@ def repo_root() -> Path:
             # default) can block forever on Windows when git touches stdin, hanging the tool
             # call until the client times out with -32001. Git never needs our stdin.
             stdin=subprocess.DEVNULL,
+            creationflags=NO_WINDOW,
             cwd=str(TOOL_DIR),
         )
         return Path(out.strip())
@@ -68,6 +74,8 @@ def run_git(args: list[str], *, env: dict[str, str] | None = None) -> subprocess
         # blocks the whole tool call. Hooks git spawns (prepare-commit-msg, commit-msg) inherit
         # this DEVNULL in turn, so they cannot block on stdin either.
         stdin=subprocess.DEVNULL,
+        # No console flash: git spawns sh.exe for the hooks, and this host has no console.
+        creationflags=NO_WINDOW,
     )
 
 

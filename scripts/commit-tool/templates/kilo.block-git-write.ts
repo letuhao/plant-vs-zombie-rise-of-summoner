@@ -21,6 +21,14 @@ function commandFromArgs(args: Record<string, unknown>): string {
   return typeof c === "string" ? c : "";
 }
 
+/**
+ * Cheap pre-filter: the policy script only has something to say about commands that
+ * mention git/gh or the owner-only commit helper. Anything else (ls, dotnet test, npm,
+ * pytest…) can skip the spawn entirely — which also avoids a Windows console flash per
+ * command. Deliberately conservative: any doubt falls through to the real check.
+ */
+const POLICY_RELEVANT = /(?:^|[\s;|&"'`(])(?:git|gh)(?:\.exe)?\b|commit-tool[/\\]clean_commit\.py/i;
+
 const BlockGitWrite = async (): Promise<Hooks> => ({
   "tool.execute.before": async (input, output) => {
     const tool = (input.tool || "").toLowerCase();
@@ -28,11 +36,15 @@ const BlockGitWrite = async (): Promise<Hooks> => ({
       return;
     }
     const cmd = commandFromArgs(output.args || {});
-    if (!cmd) return;
+    if (!cmd || !POLICY_RELEVANT.test(cmd)) return;
 
     const script = path.join(projectRoot(), "scripts", "commit-tool", "block_git_write.py");
     const r = spawnSync("python", [script, "--command", cmd, "--format", "exit"], {
       encoding: "utf8",
+      // The extension host has no console. Without windowsHide, Windows allocates a
+      // console for this python child on every git/gh tool call, stealing focus with a
+      // flashing window. Keep it fully hidden.
+      windowsHide: true,
     });
     if (r.status === 2) {
       throw new Error(

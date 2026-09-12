@@ -16,6 +16,9 @@ from pathlib import Path
 TOOL_DIR = Path(__file__).resolve().parent
 DEFAULT_POLICY = TOOL_DIR / "policy.json"
 
+# Windows: hide the child console (a GUI host has none; spawning without this flashes a window).
+NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
 # Git trailer line: Key: value  (also accepts Key=value)
 TRAILER_LINE = re.compile(r"^([A-Za-z0-9][A-Za-z0-9-]{0,49})[:=]\s+\S")
 IDENT_RE = re.compile(r"^(?P<name>.+?)\s+<(?P<email>[^>]+)>(?:\s+\d+\s+[+-]\d+)?\s*$")
@@ -68,7 +71,7 @@ def git_var(name: str) -> str:
         # A child inheriting it can block forever on Windows and hang the tool call.
         out = subprocess.check_output(
             ["git", "var", name], text=True, stderr=subprocess.DEVNULL,
-            stdin=subprocess.DEVNULL,
+            stdin=subprocess.DEVNULL, creationflags=NO_WINDOW,
         )
     except (subprocess.CalledProcessError, FileNotFoundError) as exc:
         raise RuntimeError(f"git var {name} failed: {exc}") from exc

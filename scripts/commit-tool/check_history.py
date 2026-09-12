@@ -12,6 +12,7 @@ sys.path.insert(0, str(TOOL_DIR))
 
 from validate import (  # noqa: E402
     DEFAULT_POLICY,
+    NO_WINDOW,
     load_policy,
     validate_identity,
     validate_message,
@@ -20,7 +21,8 @@ from validate import (  # noqa: E402
 
 def git_lines(args: list[str]) -> list[str]:
     out = subprocess.check_output(
-        ["git", *args], text=True, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
+        ["git", *args], text=True, stderr=subprocess.DEVNULL,
+        stdin=subprocess.DEVNULL, creationflags=NO_WINDOW)
     return [ln for ln in out.splitlines() if ln.strip()]
 
 
@@ -37,6 +39,7 @@ def check_commit(sha: str, policy: dict) -> list[str]:
         ["git", "show", "-s", "--format=%an%n%ae%n%cn%n%ce%n%B", sha],
         text=True,
         stdin=subprocess.DEVNULL,
+        creationflags=NO_WINDOW,
     )
     parts = meta.split("\n", 4)
     if len(parts) < 5:
@@ -71,6 +74,7 @@ def main(argv: list[str] | None = None) -> int:
                     text=True,
                     stderr=subprocess.DEVNULL,
                     stdin=subprocess.DEVNULL,
+                    creationflags=NO_WINDOW,
                 )
                 rev_range = candidate
                 break
