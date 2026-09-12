@@ -10,11 +10,14 @@ using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.Data;
 
-public sealed partial class RpgStore : IRpgDb
+public sealed partial class RpgStore : IRpgDb, IDisposable
 {
     private readonly string _dataDir;
     private readonly string _hotPath;
     private readonly string _mediaPath;
+    private readonly bool _inMemory;
+    private SqliteConnection? _hotKeeper;
+    private SqliteConnection? _mediaKeeper;
     private readonly object _gate = new();
     private static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
@@ -23,18 +26,79 @@ public sealed partial class RpgStore : IRpgDb
     public string DataDir => _dataDir;
     public string HotPath => _hotPath;
     public string MediaPath => _mediaPath;
-    public string ArchiveDir => Path.Combine(_dataDir, "archive");
+
+    /// <summary>
+    /// The cold-archive directory. File plans resolve it under <see cref="DataDir"/>; a memory plan has
+    /// no directory, so reading this **throws** rather than resolving a bogus cwd-relative path (the
+    /// class of invisible file leak this storage plan exists to end).
+    /// </summary>
+    public string ArchiveDir =>
+        _inMemory
+            ? throw new InvalidOperationException(
+                "A memory store has no archive directory. Archive entry points are file-only until the " +
+                "archive-target module makes the archive target memory-capable.")
+            : Path.Combine(_dataDir, "archive");
     HashSet<long>? _activityNotifyBatch;
     List<RpgProgressionDirty>? _progressionNotifyBatch;
     HashSet<long>? _closedRunNotifyBatch;
 
     /// <param name="dataDir">Directory holding <c>rpg-hot.sqlite</c> + <c>rpg-media.sqlite</c>.</param>
-    public RpgStore(string dataDir)
+    /// <param name="inMemory">
+    /// When true, the store runs against two uniquely-named shared-memory databases and
+    /// <paramref name="dataDir"/> is ignored entirely (it is never resolved to a path). Defaults to
+    /// false, so every existing <c>new RpgStore(dataDir)</c> call binds unchanged.
+    /// </param>
+    public RpgStore(string dataDir, bool inMemory = false)
+        : this(RpgStoreOptions.For(dataDir, inMemory))
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(dataDir);
-        _dataDir = Path.GetFullPath(dataDir);
-        _hotPath = Path.Combine(_dataDir, LegacyMonoMigrator.HotFileName);
-        _mediaPath = Path.Combine(_dataDir, LegacyMonoMigrator.MediaFileName);
+    }
+
+    /// <summary>Full-customization constructor: see <see cref="RpgStoreOptions"/>.</summary>
+    public RpgStore(RpgStoreOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        options.Resolve();
+        _inMemory = options.InMemory;
+
+        if (_inMemory)
+        {
+            // A memory plan owns no directory. Unique names per store keep parallel tests isolated.
+            var id = Guid.NewGuid().ToString("N");
+            _hotPath = SqliteConnectionFactory.MemoryUri(options.HotName ?? "rpg-hot-" + id);
+            _mediaPath = SqliteConnectionFactory.MemoryUri(options.MediaName ?? "rpg-media-" + id);
+            _dataDir = "";
+
+            // Keepers hold the shared-memory databases open for this store's lifetime; without them
+            // the DBs would vanish when the last transient connection closed.
+            _hotKeeper = SqliteConnectionFactory.Open(_hotPath);
+            _mediaKeeper = SqliteConnectionFactory.Open(_mediaPath);
+        }
+        else
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(options.DataDir);
+            _dataDir = Path.GetFullPath(options.DataDir!);
+            _hotPath = Path.Combine(_dataDir, LegacyMonoMigrator.HotFileName);
+            _mediaPath = Path.Combine(_dataDir, LegacyMonoMigrator.MediaFileName);
+        }
+    }
+
+    /// <summary>
+    /// Convenience factory for the 95% case: an in-memory store with unique database names. Sugar over
+    /// <see cref="RpgStore(RpgStoreOptions)"/>.
+    /// </summary>
+    public static RpgStore InMemory() => new(new RpgStoreOptions { InMemory = true });
+
+    /// <summary>
+    /// Releases the keeper connections held by a memory plan. A no-op for the file plan (no keepers),
+    /// so production behavior is unchanged; the DI singleton at <c>Program.cs</c> calling this at
+    /// shutdown is harmless.
+    /// </summary>
+    public void Dispose()
+    {
+        _hotKeeper?.Dispose();
+        _hotKeeper = null;
+        _mediaKeeper?.Dispose();
+        _mediaKeeper = null;
     }
 
     public static readonly string[] MetricNames =
@@ -45,10 +109,16 @@ public sealed partial class RpgStore : IRpgDb
 
     public void Init()
     {
-        Directory.CreateDirectory(_dataDir);
-        Directory.CreateDirectory(ArchiveDir);
-        LegacyMonoMigrator.TryMigrate(_dataDir, Console.Out);
-        LegacyMonoMigrator.HealOrphanMediaTables(_dataDir, Console.Out);
+        // The four file-only steps are skipped under the memory plan: there is no directory to
+        // create and no legacy file to migrate. Everything else below is unchanged, so a memory
+        // store is schema-identical to a file store.
+        if (!_inMemory)
+        {
+            Directory.CreateDirectory(_dataDir);
+            Directory.CreateDirectory(ArchiveDir);
+            LegacyMonoMigrator.TryMigrate(_dataDir, Console.Out);
+            LegacyMonoMigrator.HealOrphanMediaTables(_dataDir, Console.Out);
+        }
 
         using (var db = Open())
         {
@@ -925,7 +995,7 @@ public sealed partial class RpgStore : IRpgDb
                 }
                 try { Exec(media, "DELETE FROM sqlite_sequence;"); } catch { /* not created yet */ }
             }
-            if (Directory.Exists(ArchiveDir))
+            if (!_inMemory && Directory.Exists(ArchiveDir))
             {
                 SqliteConnection.ClearAllPools();
                 foreach (var f in Directory.EnumerateFiles(ArchiveDir))

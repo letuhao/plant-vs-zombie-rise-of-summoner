@@ -42,11 +42,11 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - Files: `src/FusionRpg.Data/Sqlite/SqliteConnectionFactory.cs`, `tests/FusionRpg.Data.Tests/MemoryStoragePlanTests.cs`. Scope: S.
   - Dependencies: T1.
 
-- [ ] **Task T3: `RpgStoreOptions` + three doors + keepers + `Dispose`**
-  - Description: public `RpgStoreOptions` record (`DataDir`, `InMemory`, `HotName`, `MediaName`) + `For`/`Resolve` (Resolve throws on a URI under the file plan); one private plan ctor that opens keepers iff memory; replace `RpgStore(string)` with `(string, bool = false)`; public `RpgStore(RpgStoreOptions)`; static `RpgStore.InMemory()`; implement `IDisposable` (file plan no-op).
-  - Acceptance: all three doors build an init-able store; production `new RpgStore(dir)` binds unchanged; `Dispose` releases keepers.
-  - Verify: Data build + `MemoryStoragePlanTests`.
-  - Files: `src/FusionRpg.Data/Sqlite/RpgStore.cs`, `tests/FusionRpg.Data.Tests/MemoryStoragePlanTests.cs`. Scope: M.
+- [x] **Task T3: `RpgStoreOptions` + three doors + keepers + `Dispose`** ✅ 2026-09-12
+  - Description: public `RpgStoreOptions` record (`DataDir`, `InMemory`, `HotName`, `MediaName`) with `For`/`Resolve` (Resolve throws on a `file:`/`mode=memory` URI under the file plan); one private path resolution; the string ctor became `(string dataDir, bool inMemory = false)` so existing calls bind unchanged; public `RpgStore(RpgStoreOptions)`; static `RpgStore.InMemory()`; `IDisposable` releasing the two keepers (file plan no-op); memory stores get unique DB names per instance (no singleton).
+  - Acceptance met: all three doors build an init-able store; production `new RpgStore(dir)` path computation unchanged; `Dispose` releases keepers; `inMemory:true` ignores and never creates `dataDir`.
+  - Verified: gate subagent PASS — focused 9/9, full Data 1273/1273, both guards green, scope clean; keeper release proven by reflection probe.
+  - Files: `src/FusionRpg.Data/Sqlite/RpgStore.cs`, `src/FusionRpg.Data/Sqlite/RpgStoreOptions.cs`, `tests/FusionRpg.Data.Tests/RpgStoreStoragePlanTests.cs`. Scope: M.
   - Dependencies: T2.
 
 - [ ] **Task T4: `Init()` skip + archive throw + `Reset()` in memory**
