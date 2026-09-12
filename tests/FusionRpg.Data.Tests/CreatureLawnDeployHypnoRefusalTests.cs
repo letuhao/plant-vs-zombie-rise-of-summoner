@@ -14,20 +14,18 @@ namespace FusionRpg.Data.Tests;
 /// real — matching that program's own "named refusal over an unverified guess" discipline.</summary>
 public class CreatureLawnDeployHypnoRefusalTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public CreatureLawnDeployHypnoRefusalTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-hypno-refusal-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     // Queried by DeployMode, not a hardcoded id — this test project's own global bootstrap configures

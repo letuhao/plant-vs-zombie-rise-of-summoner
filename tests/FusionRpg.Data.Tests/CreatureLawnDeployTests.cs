@@ -4,6 +4,7 @@ using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
+using FusionRpg.Data.Sqlite;
 using Microsoft.Data.Sqlite;
 using Xunit;
 
@@ -20,22 +21,17 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class CreatureLawnDeployTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public CreatureLawnDeployTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-lawndeploy-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         ImportRealTraitSeed();
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     void ImportRealTraitSeed()
     {
@@ -105,15 +101,16 @@ public class CreatureLawnDeployTests : IDisposable
     }
 
     /// <summary>Simulates what `RpgStore.Fusion.cs`'s real `PromotionUnlocked` does to `traits_json` —
-    /// an in-place update on the SAME instanceId — via a direct SQL write against the same db file,
-    /// deliberately bypassing the full fusion economy (souls/materials/star-cap climb) that a real
-    /// promotion needs, since THIS test's own subject is the reconciler's reaction to a changed
-    /// `traits_json`, not promotion's own mechanics (already covered by `FusionStoreTests.cs`'s
+    /// an in-place update on the SAME instanceId — via a direct SQL write against the store's own
+    /// hot database, deliberately bypassing the full fusion economy (souls/materials/star-cap climb)
+    /// that a real promotion needs, since THIS test's own subject is the reconciler's reaction to a
+    /// changed `traits_json`, not promotion's own mechanics (already covered by `FusionStoreTests.cs`'s
     /// `Promotion_gates_on_max_stars_and_runs_once`).</summary>
     void SimulatePromotionTraitChange(string instanceId, IReadOnlyList<string> newTraitIds)
     {
-        using var db = new SqliteConnection($"Data Source={Path.Combine(_dir, "rpg-hot.sqlite")}");
-        db.Open();
+        // Use the store's HotPath, not a constructed file path: under the memory plan that is the
+        // shared-memory URI, and a Path.Combine(_dir, "rpg-hot.sqlite") would not exist.
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "UPDATE rpg_creature_profiles SET traits_json = $t WHERE instance_id = $id;";
         cmd.Parameters.AddWithValue("$t", JsonSerializer.Serialize(newTraitIds));

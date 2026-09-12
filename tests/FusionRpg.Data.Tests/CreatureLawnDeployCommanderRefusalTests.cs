@@ -14,20 +14,18 @@ namespace FusionRpg.Data.Tests;
 /// (RpgStore.UniqueActors.cs, TryBeginUniqueDeploy) for the full reasoning.</summary>
 public class CreatureLawnDeployCommanderRefusalTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public CreatureLawnDeployCommanderRefusalTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-lawndeploy-refusal-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     // DeployMode != HypnoAlly: this file tests Patron refusal (T1.1), a concern unrelated to

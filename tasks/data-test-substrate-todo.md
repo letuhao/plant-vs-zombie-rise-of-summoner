@@ -144,7 +144,10 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - Migrated all 8; `ChannelPolicyStoreTests`' read-only open → plain open; `ContentHashStoreTests`' local `NewStore()` → helper-backed (`List<DataTestStore>`), so its 25 call sites each get an independent in-memory store.
   - Verified: gate PASS — focused 103/103, zero assertions dropped (18/37/18/41/9/42/28/45 all unchanged), every constructor seed preserved (`Seed()`, `SeedAtoms()`, `AwardSouls(...)`), baseline 203→195 (−8), no old-prefix temp dirs, both guards green, full Data 1287/1287.
   - Deps: T10. Scope: M.
-- [ ] **Task T13: Data.Tests root batch C** (8: ContractRegression, ContractSettle, ContractStore, CreatureLawnDeployCommanderRefusal, CreatureLawnDeployHypnoRefusal, CreatureLawnDeployMagnitude, CreatureLawnDeploy, CreatureStore) — Deps: T10. Scope: M.
+- [x] **Task T13: Data.Tests root batch C** (8: ContractRegression, ContractSettle, ContractStore, CreatureLawnDeployCommanderRefusal, CreatureLawnDeployHypnoRefusal, CreatureLawnDeployMagnitude, CreatureLawnDeploy, CreatureStore) ✅ 2026-09-12
+  - Migrated all 8. **`CreatureLawnDeployTests` had a third shape the pilot didn't cover:** its `SimulatePromotionTraitChange` opened the raw hot file by path (`new SqliteConnection($"Data Source={Path.Combine(_dir, "rpg-hot.sqlite")}")`) — now `SqliteConnectionFactory.Open(_store.HotPath)`, which is memory-safe. No other file touched a raw path.
+  - Verified: gate PASS on all substantive criteria — focused 42/42, zero assertions dropped (41/25/20/9/10/8/12/33 unchanged), seeds preserved (`AwardSouls` ×3, `ImportRealTraitSeed()`), baseline 195→187 (−8), no batch-C temp dirs, both guards green, full Data 1287/1287.
+  - Deps: T10. Scope: M.
 - [ ] **Task T14: Data.Tests root batch D** (8: EligibilityAxisMigration, ExpeditionRewardApply, ExpeditionStore, FusionInheritancePicks, FusionStore, GateCounterSeed, GetMaxEventId, InstanceProducerStore) — Deps: T10. Scope: M.
   - **Excludes** the pilot's `CurveStoreTests`/`ElementStoreTests` (already migrated by T9).
 - [ ] **Task T15: Data.Tests root batch E** (8: GateCounterStore, LoadoutStore, LoamPersistence, OnboardingCheckpointStore, OnboardingProjection, PassiveTreeState, SoulLedgerTrim, SoulStore) — **read-only: `GateCounterStoreTests`** — Deps: T10. Scope: M.

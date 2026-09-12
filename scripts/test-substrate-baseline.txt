@@ -23,15 +23,7 @@ tests/FusionRpg.Data.Tests/Actions/ActionUnlockGrantWiringTests.cs : swallowed-d
 tests/FusionRpg.Data.Tests/Actions/ActionUnlocksStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/AtomImportTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/ColdArchiveCompactionTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/ContractRegressionTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/ContractSettleTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/ContractStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/CreatureLawnDeployCommanderRefusalTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/CreatureLawnDeployHypnoRefusalTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/CreatureLawnDeployMagnitudeTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/CreatureLawnDeployTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/CreatureSpeciesImportCliTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/CreatureStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Delve/BossFirstClearGrantTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Delve/DelveAttritionSettlementTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Delve/DelveGraphRollRoundTripTests.cs : swallowed-delete, temp-store
