@@ -1,3 +1,4 @@
+using FusionRpg.Data.Sqlite;
 using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.Data.Tests;
@@ -21,18 +22,43 @@ public sealed class DataTestStore : IDisposable, IAsyncDisposable
     /// <summary>The file-backed data directory, or <c>null</c> for the memory plan.</summary>
     public string? DataDir { get; }
 
-    DataTestStore(RpgStore store, string? dataDir)
+    readonly string? _hotName;
+    readonly string? _mediaName;
+
+    DataTestStore(RpgStore store, string? dataDir, string? hotName = null, string? mediaName = null)
     {
         Store = store;
         DataDir = dataDir;
+        _hotName = hotName;
+        _mediaName = mediaName;
     }
 
     /// <summary>An in-memory store with unique database names, initialized and ready to use.</summary>
     public static DataTestStore Create()
     {
-        var store = RpgStore.InMemory();
+        // Names are generated here (not inside InMemory()) so Reopen() can address the same
+        // databases; a shared-memory DB is shared by name.
+        var id = Guid.NewGuid().ToString("N");
+        var hotName = "rpg-hot-" + id;
+        var mediaName = "rpg-media-" + id;
+        var store = new RpgStore(new RpgStoreOptions { InMemory = true, HotName = hotName, MediaName = mediaName });
         store.Init();
-        return new DataTestStore(store, dataDir: null);
+        return new DataTestStore(store, dataDir: null, hotName, mediaName);
+    }
+
+    /// <summary>
+    /// A **second** store over the same storage, initialized and ready to use — the memory equivalent
+    /// of "a fresh process restart sees what the last one committed". For the memory plan it addresses
+    /// the same named databases (kept alive by this helper's keepers); for the file plan, the same
+    /// directory. The caller owns the returned store and must dispose it.
+    /// </summary>
+    public RpgStore Reopen()
+    {
+        var store = DataDir is not null
+            ? new RpgStore(DataDir)
+            : new RpgStore(new RpgStoreOptions { InMemory = true, HotName = _hotName!, MediaName = _mediaName! });
+        store.Init();
+        return store;
     }
 
     /// <summary>

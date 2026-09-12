@@ -16,20 +16,12 @@ tests/FusionRpg.Core.Tests/Creatures/SpeciesCatalogDiffTests.cs : swallowed-dele
 tests/FusionRpg.Core.Tests/Match/ModsAbsorptionTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Core.Tests/Scope/ScopeArchitectureTests.cs : swallowed-delete
 tests/FusionRpg.Core.Tests/Scope/ScopePurityGuardTests.cs : swallowed-delete
-tests/FusionRpg.Data.Tests/ActionCatalogBuilderTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/ActionCatalogStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Actions/ActionContainerEffectResolverFactoryTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Actions/ActionCorpusImporterTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Actions/ActionCorpusRealContentQualityTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Actions/ActionUnlockGrantWiringTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Actions/ActionUnlocksStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/AffixImportPathTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/AllocationStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/AlmanacSeedEnrichmentTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/AlmanacSeedTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/AptitudePresetStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/AtomImportTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/AtomInstanceStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/AtomRowWiringTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/BindResolutionTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/ChannelPolicyStoreTests.cs : swallowed-delete, temp-store

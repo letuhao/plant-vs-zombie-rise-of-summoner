@@ -74,6 +74,18 @@ public class DataTestStoreTests
     }
 
     [Fact]
+    public void Reopen_sees_what_the_previous_store_committed()
+    {
+        using var test = DataTestStore.Create();
+        Assert.True(test.Store.UpsertAtom(Atom("atom.vitality")).IsOk);
+
+        // A fresh store over the same storage must see the committed row — the memory equivalent of
+        // "survives a process restart".
+        using var reopened = test.Reopen();
+        Assert.NotEmpty(reopened.ListAtoms());
+    }
+
+    [Fact]
     public void A_file_store_dispose_deletes_its_directory_cleanly()
     {
         var test = DataTestStore.CreateFileBacked();

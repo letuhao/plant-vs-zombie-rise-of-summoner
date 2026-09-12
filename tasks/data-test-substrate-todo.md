@@ -134,7 +134,12 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
 >
 > **Exclude `CreatureSpeciesImportCliTests.cs`** (owned by `cold-process-test-build-e5b1`).
 
-- [ ] **Task T11: Data.Tests root batch A** (8: ActionCatalogBuilder, ActionCatalogStore, AffixImportPath, AllocationStore, AlmanacSeedEnrichment, AlmanacSeed, AptitudePreset, AtomInstance) — **read-only: `AllocationStoreTests`** — Deps: T10. Scope: M.
+- [x] **Task T11: Data.Tests root batch A** (8: ActionCatalogBuilder, ActionCatalogStore, AffixImportPath, AllocationStore, AlmanacSeedEnrichment, AlmanacSeed, AptitudePreset, AtomInstance) — **read-only: `AllocationStoreTests`** ✅ 2026-09-12
+  - Migrated all 8 to `DataTestStore.Create()` / helper dispose; `AllocationStoreTests`' read-only open became a plain open; `AptitudePresetStoreTests`' reopen uses the new `_testStore.Reopen()`; `ActionCatalogStoreTests`' local `NewStore()` helper is now helper-backed.
+  - **The batch surfaced two shapes the pilot did not cover, so `DataTestStore` gained `Reopen()`** (address the same named memory DBs — the memory equivalent of a process restart), proven by `Reopen_sees_what_the_previous_store_committed` (non-vacuous). This preserves the "fresh store sees committed data" assertion in memory instead of mis-classifying those files as file-bound.
+  - A real defect was caught by running the batch rather than trusting the edit: the read-only conversion for `AllocationStoreTests` had not applied (the replace ran before that file was migrated), and `Schema_storesInputsOnly_noResolvedChannelValueColumn` failed until fixed.
+  - Verified: gate PASS — focused 93/93, no assertion/seed dropped (per-file token counts), baseline 211→203, `Reopen()` proven, full Data 1287/1287, both guards green.
+  - Deps: T10. Scope: M.
 - [ ] **Task T12: Data.Tests root batch B** (8: AtomRowWiring, BindResolution, ChannelPolicyStore, ContainerStore, ContentBoot, ContentHashStore, ContractGate, ContractOps) — **read-only: `ChannelPolicyStoreTests`** — Deps: T10. Scope: M.
 - [ ] **Task T13: Data.Tests root batch C** (8: ContractRegression, ContractSettle, ContractStore, CreatureLawnDeployCommanderRefusal, CreatureLawnDeployHypnoRefusal, CreatureLawnDeployMagnitude, CreatureLawnDeploy, CreatureStore) — Deps: T10. Scope: M.
 - [ ] **Task T14: Data.Tests root batch D** (8: EligibilityAxisMigration, ExpeditionRewardApply, ExpeditionStore, FusionInheritancePicks, FusionStore, GateCounterSeed, GetMaxEventId, InstanceProducerStore) — Deps: T10. Scope: M.
