@@ -64,7 +64,12 @@ def parse_ident(ident: str) -> tuple[str, str]:
 
 def git_var(name: str) -> str:
     try:
-        out = subprocess.check_output(["git", "var", name], text=True, stderr=subprocess.DEVNULL)
+        # stdin=DEVNULL: this runs inside the MCP server, whose stdin is the JSON-RPC pipe.
+        # A child inheriting it can block forever on Windows and hang the tool call.
+        out = subprocess.check_output(
+            ["git", "var", name], text=True, stderr=subprocess.DEVNULL,
+            stdin=subprocess.DEVNULL,
+        )
     except (subprocess.CalledProcessError, FileNotFoundError) as exc:
         raise RuntimeError(f"git var {name} failed: {exc}") from exc
     return out.strip()

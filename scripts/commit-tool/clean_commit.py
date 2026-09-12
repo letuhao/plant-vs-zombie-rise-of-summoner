@@ -46,6 +46,10 @@ def repo_root() -> Path:
             ["git", "rev-parse", "--show-toplevel"],
             text=True,
             stderr=subprocess.DEVNULL,
+            # The MCP server's stdin IS the JSON-RPC pipe. A child that inherits it (the
+            # default) can block forever on Windows when git touches stdin, hanging the tool
+            # call until the client times out with -32001. Git never needs our stdin.
+            stdin=subprocess.DEVNULL,
             cwd=str(TOOL_DIR),
         )
         return Path(out.strip())
@@ -58,7 +62,13 @@ def repo_root() -> Path:
 
 
 def run_git(args: list[str], *, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(["git", *args], text=True, capture_output=True, env=env, check=False)
+    return subprocess.run(
+        ["git", *args], text=True, capture_output=True, env=env, check=False,
+        # Never inherit the MCP server's stdin (see repo_root): a git process that reads it
+        # blocks the whole tool call. Hooks git spawns (prepare-commit-msg, commit-msg) inherit
+        # this DEVNULL in turn, so they cannot block on stdin either.
+        stdin=subprocess.DEVNULL,
+    )
 
 
 def staged_paths() -> list[str]:

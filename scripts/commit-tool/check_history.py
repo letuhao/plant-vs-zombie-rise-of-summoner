@@ -19,7 +19,8 @@ from validate import (  # noqa: E402
 
 
 def git_lines(args: list[str]) -> list[str]:
-    out = subprocess.check_output(["git", *args], text=True, stderr=subprocess.DEVNULL)
+    out = subprocess.check_output(
+        ["git", *args], text=True, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
     return [ln for ln in out.splitlines() if ln.strip()]
 
 
@@ -35,6 +36,7 @@ def check_commit(sha: str, policy: dict) -> list[str]:
     meta = subprocess.check_output(
         ["git", "show", "-s", "--format=%an%n%ae%n%cn%n%ce%n%B", sha],
         text=True,
+        stdin=subprocess.DEVNULL,
     )
     parts = meta.split("\n", 4)
     if len(parts) < 5:
@@ -68,6 +70,7 @@ def main(argv: list[str] | None = None) -> int:
                     ["git", "rev-list", "--count", candidate],
                     text=True,
                     stderr=subprocess.DEVNULL,
+                    stdin=subprocess.DEVNULL,
                 )
                 rev_range = candidate
                 break
