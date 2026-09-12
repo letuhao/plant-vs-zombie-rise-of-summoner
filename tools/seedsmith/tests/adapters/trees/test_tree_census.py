@@ -131,21 +131,29 @@ class ReconciliationTests(unittest.TestCase):
 
 
 class OrphanTests(unittest.TestCase):
-    def test_a_generated_node_absent_from_the_seed_document_is_reported(self) -> None:
+    def test_a_generated_node_absent_from_the_plan_is_a_defect(self) -> None:
+        plan = _plan("t", [("skill.t-t1-n0", "magnitude", 1)])
+        gen = _generated([("skill.t-t1-n0", [_atom()]), ("skill.t-t9-n9", [_atom()])], [])
+        row = census_mod.census_tree("t", plan, _seed([]), gen)
+        self.assertEqual(row.orphan_generated_node_ids, ("skill.t-t9-n9",))
+
+    def test_a_plan_node_with_no_seed_record_is_never_generated_not_an_orphan(self) -> None:
+        # The wither case: 39 of 40 generated, one plan node the language stage never reached.
         plan = _plan("t", [("skill.t-t1-n0", "magnitude", 1), ("skill.t-t9-n1", "mechanism", 9)])
         seed = _seed([("skill.t-t1-n0", ["atom.might"])])
-        gen = _generated(
-            bound=[("skill.t-t1-n0", [_atom()])],
-            refused=[("skill.t-t9-n1", "affix 'x' does not exist in the shipped seed content")])
+        gen = _generated([("skill.t-t1-n0", [_atom()])],
+                         [("skill.t-t9-n1", "affix 'x' does not exist in the shipped seed content")])
         row = census_mod.census_tree("t", plan, seed, gen)
-        self.assertEqual(row.generated_without_seed_document, ("skill.t-t9-n1",))
+        self.assertEqual(row.orphan_generated_node_ids, ())
+        self.assertEqual(row.never_generated_node_ids, ("skill.t-t9-n1",))
 
-    def test_no_orphans_reported_when_the_seed_document_is_absent(self) -> None:
-        # A tree the language stage has not touched has no seed doc at all -- every generated id is
-        # "not in the seed", which is not an orphan but simply an unstarted tree.
+    def test_never_generated_reported_when_the_seed_document_is_absent(self) -> None:
+        # A tree the language stage has not touched has no seed doc at all -- every plan node is
+        # not-yet-generated, which is an unstarted tree, not a defect.
         plan = _plan("t", [("skill.t-t1-n0", "magnitude", 1)])
         row = census_mod.census_tree("t", plan, None, _generated([("skill.t-t1-n0", [_atom()])], []))
-        self.assertEqual(row.generated_without_seed_document, ())
+        self.assertEqual(row.never_generated_node_ids, ("skill.t-t1-n0",))
+        self.assertEqual(row.orphan_generated_node_ids, ())
 
 
 class RefusalBucketTests(unittest.TestCase):
@@ -233,6 +241,60 @@ class FormatTextTests(unittest.TestCase):
         self.assertIn("by node class", text)
         self.assertIn("mechanism by tier", text)
         self.assertIn("mechanism", text)
+
+
+class RealCorpusEnvelopeTests(unittest.TestCase):
+    """Runs against the COMMITTED corpus, so the envelope below is stable across generations and
+    content growth; no count of nodes, trees, or affixes is asserted (that is a reading, not a
+    contract). The one thing that must never be true — a generated node the corpus never planned —
+    is checked in both directions.
+    """
+
+    def setUp(self) -> None:
+        from seedsmith.adapters.trees import census as c
+        if not (c.DEFAULT_OUT_ROOT / "might.json").is_file() and not (
+                c.DEFAULT_SEED_ROOT / "passive-tree" / "plan").is_dir():
+            self.skipTest("committed passive-tree corpus not present")
+
+    def test_the_committed_corpus_has_no_true_orphans(self) -> None:
+        result = census_mod.census()
+        offenders = [(t.tree_id, t.orphan_generated_node_ids)
+                     for t in result.trees if t.orphan_generated_node_ids]
+        self.assertEqual(offenders, [],
+                         "a generated node exists that no plan node declares — the binder emitted an id nobody planned")
+
+    def test_expected_reconciles_to_bound_plus_refused(self) -> None:
+        # The plan is the authoritative population, and the binder enumerates EVERY plan node — so
+        # `bound + refused` must equal it exactly. A tree that does not reconcile has a seed, plan, or
+        # binder inconsistency hiding in it, the exact class the census exists to surface.
+        result = census_mod.census()
+        for row in result.trees:
+            self.assertEqual(
+                row.expected_nodes, row.bound_nodes + row.refused_nodes,
+                f"{row.tree_id}: plan={row.expected_nodes} bound={row.bound_nodes} "
+                f"refused={row.refused_nodes} unaccounted={row.unaccounted_nodes}")
+
+    def test_no_never_generated_node_is_reported_as_bound(self) -> None:
+        # A plan node the language stage has not generated has no affixIds, so the binder can only
+        # refuse it — it is a SUBSET of `refused`, never an extra bucket. The first version of this
+        # envelope added it beside `bound + refused` and immediately disagreed with `wither`
+        # (plan=40 vs 5+35+1=41), which is what caught the modelling error.
+        result = census_mod.census()
+        for row in result.trees:
+            overlap = set(row.never_generated_node_ids) & set(row.bound_node_ids)
+            self.assertEqual(overlap, set(),
+                             f"{row.tree_id}: ungenerated node(s) reported as bound: {sorted(overlap)}")
+
+    def test_the_binder_refuses_every_ungenerated_node_rather_than_dropping_it(self) -> None:
+        # Population-level form of the same rule, and the one that stays true as content grows:
+        # total refused must be at least the never-generated population. A tree that silently drops
+        # ungenerated nodes instead of reporting them would fail here.
+        result = census_mod.census()
+        for row in result.trees:
+            self.assertGreaterEqual(
+                row.refused_nodes, row.never_generated_count,
+                f"{row.tree_id}: {row.never_generated_count} ungenerated node(s) but only "
+                f"{row.refused_nodes} refusal(s) — the binder dropped a node")
 
 
 if __name__ == "__main__":

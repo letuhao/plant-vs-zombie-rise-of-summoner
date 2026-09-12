@@ -19,6 +19,14 @@ stage, never re-derived here:
   - the BOUND report (`data/generated/passive-tree/<treeId>.json`, `tree-binder`'s output) — what
     actually bound, refused, and priced.
 
+**Two different "missing node" states, never conflated.** A node in `bound`/`refused` that is absent
+from the PLAN is a real defect (`orphan_generated_node_ids` — the binder emitted an id nobody planned).
+A node in the PLAN that has no seed record is the opposite: normal class E, a not-yet-generated node
+in a partly-run corpus (`never_generated_node_ids`), which the binder correctly refuses. The 2026-09-11
+baseline reported the second as if it were the first; the 2026-09-12 pass measured the whole corpus
+and found **zero** true orphans and exactly **one** never-generated node (`wither`'s
+`skill.wither-def-t9-n1`, 39 of 40).
+
 **Expected comes from the PLAN, never the seed.** A seed document is partial by construction (it holds
 only accepted nodes), so using it as the denominator would make a partly-generated tree look fully
 bound. The plan is the skeleton; `bound + refused` should reconcile to it, and where it does not, that
@@ -98,7 +106,9 @@ class TreeCensus:
     bound_mechanism_by_tier: "tuple[int, ...]"
 
     unspent_budget_share_milli: int
-    generated_without_seed_document: "tuple[str, ...]"
+    orphan_generated_node_ids: "tuple[str, ...]"
+    never_generated_node_ids: "tuple[str, ...]"
+    bound_node_ids: "tuple[str, ...]"
     chosen_affix_ids: "tuple[str, ...]"
 
     @property
@@ -116,6 +126,10 @@ class TreeCensus:
     @property
     def inert_share_permille(self) -> int:
         return _permille(self.bound_without_priced_atoms, self.bound_nodes)
+
+    @property
+    def never_generated_count(self) -> int:
+        return len(self.never_generated_node_ids)
 
 
 def _permille(numerator: int, denominator: int) -> int:
@@ -196,8 +210,19 @@ def census_tree(
     orphans = tuple(sorted(
         node_id for node_id in
         {str(n.get("nodeId", "")) for n in bound} | {str(r.get("nodeId", "")) for r in refused}
-        if seed_ids and node_id not in seed_ids
+        if node_id and node_id not in plan_class_by_id
     ))
+
+    # A plan node with no seed record and no accepted ledger outcome is NOT an orphan and NOT a
+    # defect: it is a node the language stage has not generated yet (class E, an incomplete run).
+    # The seed document is partial by construction, so this is the normal state of a partly-run
+    # corpus and the binder refuses it correctly (`affixIds must be 1..3, got 0`). It is reported
+    # because it is the honest denominator for "how much of this tree is real" — never because it
+    # is wrong. An empty plan makes the comparison meaningless, so it is skipped, not reported as
+    # every-node-ungenerated.
+    never_generated = tuple(sorted(
+        node_id for node_id in plan_class_by_id if node_id not in seed_ids
+    )) if plan_class_by_id else ()
 
     max_tier = max(
         list(expected_mechanism_by_tier) + list(bound_mechanism_by_tier) + [0],
@@ -223,7 +248,9 @@ def census_tree(
         expected_mechanism_by_tier=tuple(expected_mechanism_by_tier.get(t, 0) for t in range(1, max_tier + 1)),
         bound_mechanism_by_tier=tuple(bound_mechanism_by_tier.get(t, 0) for t in range(1, max_tier + 1)),
         unspent_budget_share_milli=int((generated or {}).get("totalUnspentBudgetShareMilli", 0)),
-        generated_without_seed_document=orphans,
+        orphan_generated_node_ids=orphans,
+        never_generated_node_ids=never_generated,
+        bound_node_ids=tuple(sorted(str(n.get("nodeId", "")) for n in bound)),
         chosen_affix_ids=tuple(sorted(chosen_affix_ids)),
     )
 
@@ -330,7 +357,8 @@ class DistributionCensus:
                     "expectedMechanismByTier": list(t.expected_mechanism_by_tier),
                     "boundMechanismByTier": list(t.bound_mechanism_by_tier),
                     "unspentBudgetShareMilli": t.unspent_budget_share_milli,
-                    "generatedWithoutSeedDocument": list(t.generated_without_seed_document),
+                    "orphanGeneratedNodeIds": list(t.orphan_generated_node_ids),
+                    "neverGeneratedNodeIds": list(t.never_generated_node_ids),
                     "chosenAffixIds": list(t.chosen_affix_ids),
                 }
                 for t in self.trees
@@ -394,13 +422,21 @@ class DistributionCensus:
                          f"{pct(t.bind_permille):>7}  mech {t.bound_mechanism}/{t.expected_mechanism}"
                          f"  inert {t.bound_without_priced_atoms}")
 
-        orphans = [(t.tree_id, t.generated_without_seed_document)
-                   for t in self.trees if t.generated_without_seed_document]
+        orphans = [(t.tree_id, t.orphan_generated_node_ids)
+                   for t in self.trees if t.orphan_generated_node_ids]
         if orphans:
             lines.append("")
-            lines.append("generated nodes with no seed document (orphans)")
+            lines.append("DEFECT — generated nodes with no plan node (the binder emitted an unknown id)")
             for tree_id, ids in orphans:
                 lines.append(f"  {tree_id}: {', '.join(ids)}")
+
+        never = [(t.tree_id, t.never_generated_node_ids)
+                 for t in self.trees if t.never_generated_node_ids]
+        if never:
+            lines.append("")
+            lines.append("plan nodes the language stage has not generated yet (class E; not a defect)")
+            for tree_id, ids in never:
+                lines.append(f"  {tree_id}: {len(ids)} node(s) — {', '.join(ids)}")
 
         mismatched = [t for t in self.trees if t.unaccounted_nodes != 0]
         if mismatched:

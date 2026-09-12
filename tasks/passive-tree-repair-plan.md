@@ -43,7 +43,8 @@ to get the current reading; every phase reports its delta against this one.
 > by category:    elemental 15.4%  primary 19.1%  status 14.2%
 > mechanism by tier:  t3 28→1  t4 84→2  t5 84→1  t6 84→0  t7 84→1  t8 140→3  t9 168→7  t10 168→3
 > refusal buckets:    affixNotGenerated 1356  ·  opMore 54  ·  other 4
-> orphans:            wither: skill.wither-def-t9-n1
+> orphans:            none (the 2026-09-11 "wither orphan" was a not-yet-generated plan node, class E)
+> never-generated:    wither: skill.wither-def-t9-n1 (planned but never accepted)
 > ```
 
 ### 1.1 Headline
@@ -138,9 +139,12 @@ expander refuses 94 families before atoms ever exist:
 - **Corpus drift (class D).** `family-expand.g-armour.json`, `.g-precision.json`, `.g-tempo.json` are
   stale against their source families — `FamilyExpandGen --check` exits 1. The committed atom corpus
   does not match the committed family corpus.
-- **Orphan generated node.** `skill.wither-def-t9-n1` exists in `data/generated/passive-tree/wither.json`
-  but in no seed document (`wither` seed = 39 nodes, generated = 40). Evidence of an unrecorded
-  re-generation.
+- **Not-yet-generated plan node (class E, not a defect).** `skill.wither-def-t9-n1` is in
+  `wither`'s plan but in no seed document (39 of 40). The 2026-09-12 pass measured the whole corpus in
+  both directions and found **zero** true orphans (no generated id outside a plan) and exactly this
+  **one** ungenerated node. The binder correctly refuses it (`affixIds must be 1..3, got 0`); the
+  census now reports it separately as `never_generated_node_ids`, and the 2026-09-11 baseline's
+  "orphan" label was wrong.
 - **Zero v3 seeds.** `PROMPT_VERSION` is `tree-language/3`, but no seed document carries it — 20
   `mixed`, 22 `/1`, 5 `/2`. The provenance fix from the prior session has never been exercised on the
   corpus.
