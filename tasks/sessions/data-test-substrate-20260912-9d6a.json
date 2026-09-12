@@ -1,0 +1,21 @@
+{
+  "session": "data-test-substrate-20260912-9d6a",
+  "program": "data-test-substrate",
+  "problem": "Build in-memory store substrate + probe",
+  "mode": "direct",
+  "branch": "features/derived-stat-extension",
+  "worktree": null,
+  "paths": [
+    "src/FusionRpg.Data/**",
+    "tests/FusionRpg.Data.Tests/**",
+    "tests/FusionRpg.Server.Tests/**",
+    "tests/FusionRpg.E2E.Tests/**",
+    "tests/FusionRpg.Core.Tests/**",
+    "scripts/data-test-*.ps1",
+    "docs/architecture/data-architecture.md",
+    "docs/architecture/data-test-substrate-ideal.md",
+    "tasks/sessions/data-test-substrate-*.json"
+  ],
+  "started": "2026-09-12T11:06:58Z",
+  "status": "active"
+}
