@@ -49,6 +49,19 @@ powershell -File scripts/commit-tool/install_hooks.ps1
 powershell -File scripts/commit-tool/install_hooks.ps1 -InstallShim
 ```
 
+### If `repo-git.commit` reports `Request timed out` (-32001)
+
+The MCP server is a **per-session stdio child**, not a daemon — the client starts it on demand
+(cold start <1s) and it needs no "always run" setup. A `-32001` on `commit` while
+`validate_message` answers in milliseconds is a **hang inside the tool call**, and the usual cause
+is a child process inheriting the server's stdin (the JSON-RPC pipe) and blocking on it. Every git
+subprocess in the tool must pass `stdin=subprocess.DEVNULL` (fixed in `clean_commit.repo_root` /
+`run_git`, `validate.git_var`, `check_history`). The commit may still land even when the reply
+times out — check `git log` before retrying.
+
+**After editing anything under `scripts/commit-tool/`, reload the MCP server** (restart the IDE /
+reconnect `repo-git`). An already-running session keeps the old code until then.
+
 That copies **local gitignored** configs from `scripts/commit-tool/templates/` into `.cursor/`, `.claude/`, `.kilo/`, `.agents/`, and `.mcp.json`. Those trees stay out of git — do not carve them into the repo.
 
 Then:
