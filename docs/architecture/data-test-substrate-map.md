@@ -1,8 +1,8 @@
 # Capability map: `data-test-substrate`
 
-**Status:** proposed 2026-09-12, after [data-test-substrate-ideal.md](data-test-substrate-ideal.md)
-(idea phase, spike-audited). **Six modules.** Not a spec yet — the human reviews module boundaries,
-dependency direction and build order here before any `spec-<module-id>.md` is written.
+**Status:** approved 2026-09-12, after [data-test-substrate-ideal.md](data-test-substrate-ideal.md)
+(idea phase, spike-audited). **Six modules.** All six module specs are written (see §6), the plan and
+task list exist, and the docs are complete — so the build phase may start.
 
 > **The program in one sentence.** A Data test must run against SQLite in RAM, because a file path
 > was the only constructor the store had — so the store gains an in-memory storage plan, the tests
@@ -164,17 +164,17 @@ covers `tests/**` regardless of project, and each must shrink as its project is 
 separate `non-store-temp-cleanup` module is therefore **not needed** — the gate plus the existing
 baseline reaches them without widening this program's `paths`.
 
-## 5. Amendments this program owes before it builds
+## 5. Amendments this program owed before it built — all landed
 
-Listed so they are not discovered mid-task. All are reviewed changes to documents that win over a spec.
+Listed so they are not discovered mid-task. All are reviewed changes to documents that win over a spec. **Every row is now landed**, so the docs are complete before the build phase starts.
 
-| Document | Change | Status / owed by |
+| Document | Change | Status |
 |---|---|---|
 | `docs/contributing/testing-standard.md` | The binding standard (R1–R5) + the gate | ✅ **Landed 2026-09-12** (`7183a59e`) |
 | `scripts/guard-test-substrate.ps1` + `scripts/test-substrate-baseline.txt` | The hard gate + the shrinking ratchet | ✅ **Landed 2026-09-12** (`7183a59e`); wired into `deploy-play.ps1`, `ci.yml`, Guard.Tests |
 | `AGENTS.md` / `CLAUDE.md` | A pointer to the standard and the gate | ✅ **Edited locally 2026-09-12** — both gitignored/untracked, so the durable record is the standard, not the pointer |
-| [decisions.md](decisions.md) | A new row locking the store's **storage plan** seam (file default; memory is test-first) — locks behavior, so it needs an ADR row first | owed by `memory-storage-plan` |
-| [data-architecture.md](data-architecture.md) §1/§6 | State that `RpgStore` has a storage plan; the DAL boundary is unchanged (all SQL still in Data); and a shared-cache memory DB cannot be opened read-only | owed by `substrate-standard` |
+| [decisions.md](decisions.md) | The row locking the store's **storage plan** seam (file default; memory is test-first) | ✅ **Landed 2026-09-12** (`decisions.md:84`, beside the SQLite / DAL rows) |
+| [data-architecture.md](data-architecture.md) §1/§6 | State that `RpgStore` has a storage plan; the DAL boundary is unchanged (all SQL still in Data); and a shared-cache memory DB cannot be opened read-only | ✅ **Content landed 2026-09-12** (§1 "Storage plan", §6 DAL paragraph); final reconcile against the shipped code at the T23 gate |
 
 ## 6. Related
 
@@ -191,4 +191,4 @@ Listed so they are not discovered mid-task. All are reviewed changes to document
 - The DAL law: [data-architecture.md](data-architecture.md) §6 · `scripts/guard-dal.ps1`
 - The validation standard this probe must obey (assert the relationship, never a population count):
   [validation-ssot.md](validation-ssot.md)
-- Plan/todo (Phase 2, not yet written): `tasks/data-test-substrate-plan.md` · `tasks/data-test-substrate-todo.md`
+- Plan/todo (written 2026-09-12, 37 tasks / 6 phases / 6 checkpoints): `tasks/data-test-substrate-plan.md` · `tasks/data-test-substrate-todo.md`

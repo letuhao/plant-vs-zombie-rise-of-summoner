@@ -1,6 +1,11 @@
 # Data test substrate — the ideal
 
-**Status:** idea phase, 2026-09-12 (rev 2 — audited against a live spike). Not a spec. No build authorized.
+**Status:** graduated 2026-09-12 — see below. This doc is the reasoning trail: **it is not the spec,
+and it is not the contract** (the six specs under `data-test-substrate/` are).
+**Graduated 2026-09-12:** the capability map and all six module specs are written
+([map](data-test-substrate-map.md); specs under `data-test-substrate/`), the hard gate shipped
+(`7183a59e`), and the plan + task list exist (`tasks/data-test-substrate-{plan,todo}.md`). This ideal
+is kept as the reasoning trail; **the specs are the contract and the build may proceed**.
 
 The problem: the local C# test suite writes **~1.6 MB of SQLite per test** to the OS temp
 directory and then fails to delete it. One full run leaked **30,978 directories / 65.5 GB**; the

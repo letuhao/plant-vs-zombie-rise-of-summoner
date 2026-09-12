@@ -28,11 +28,11 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
 
 ## Phase 1 — Foundation: an in-memory store (module `memory-storage-plan`)
 
-- [ ] **Task T1: ADR row — the storage plan seam**
-  - Description: add a `decisions.md` row locking "RpgStore has a storage plan: file default, memory is a first-class test substrate" (the module owes this before it locks behavior). Point the Data/architecture-map row at the spec.
-  - Acceptance: `decisions.md` carries the row; no existing locked row contradicts it.
-  - Verify: doc read-through + `grep` the new row.
-  - Files: `docs/architecture/decisions.md`, `docs/architecture/data-architecture.md`. Scope: XS.
+- [x] **Task T1: ADR row — the storage plan seam** ✅ 2026-09-12
+  - Description: added the `decisions.md` row "`RpgStore` storage plan (2026-09-12)" beside the SQLite / DAL-single-gate rows; it locks file-default + memory-as-test-substrate, the three public doors, independent instances (no singleton), the URI-throw, the read-only limitation, and links the spec + standard.
+  - Acceptance met: `decisions.md` carries the row; no existing locked row contradicts it (the SQLite + DAL rows are untouched and the new row restates the DAL boundary as unchanged).
+  - Verified: row read at `decisions.md:84`.
+  - Files: `docs/architecture/decisions.md`. Scope: XS.
   - Dependencies: none — spec approved 2026-09-12.
 
 - [ ] **Task T2: `SqliteConnectionFactory` memory-URI branch**
@@ -185,10 +185,10 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
 
 ## Phase 6 — The standard binds (module `substrate-standard`)
 
-- [ ] **Task T23: `data-architecture.md` amendment**
-  - Description: state the store's storage plan, that the DAL boundary is unchanged, and that a shared-cache memory DB cannot be opened read-only; cross-link `testing-standard.md`.
-  - Acceptance: the doc describes the shipped shape; no stale claim.
-  - Verify: doc read-through + `decisions.md` consistency.
+- [ ] **Task T23: `data-architecture.md` amendment** — doc content ✅ written 2026-09-12; final reconcile after build
+  - Description: added §1's **Storage plan (2026-09-12)** subsection (file vs memory, the three doors, independent instances, the URI-throw, the read-only limitation, the four skipped `Init()` steps) and §6's **the storage plan does not move the DAL boundary** paragraph (both plans keep SQL in Data; `IDisposable` added).
+  - Acceptance: the doc describes the shipped shape; no stale claim. **The docs now describe the *specified* shape; the box closes when the built code matches it** (`Substrate-standard` is the last module, so this reconciles against the shipped implementation at the final gate).
+  - Verify: doc read-through + `decisions.md` consistency; re-read after T22 to confirm every sentence matches the shipped code.
   - Files: `docs/architecture/data-architecture.md`. Scope: XS.
   - Dependencies: T19b, T22.
 
