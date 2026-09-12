@@ -198,6 +198,14 @@ if ($ClassSystemExit -ne 0) {
     }
 }
 
+# Default test profile: the store suite minus the file-bound (`DiskSemantics`) and long (`Heavy`)
+# cases — no SSD writes and no multi-minute test on the dev loop. One place owns the filter
+# (scripts/test-fast.ps1); the `full` profile runs unfiltered in CI/nightly/release. Standard:
+# docs/contributing/testing-standard.md.
+Write-Host "==> Default test profile (test-fast.ps1)"
+& (Join-Path $Root "scripts\test-fast.ps1")
+if ($LASTEXITCODE -ne 0) { throw "default test profile failed — see output above" }
+
 Write-Host "==> Building $LoaderHost injector ($GameProfile) into $PluginDir"
 & (Join-Path $Root "scripts\guard-game-profile.ps1") -GameDir $GameDir -ExpectedProfile $GameProfile
 if ($LASTEXITCODE -ne 0) { throw "game-profile guard failed" }

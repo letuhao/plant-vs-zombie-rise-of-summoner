@@ -192,6 +192,29 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "test-substrate-leak-alarm.ps1 failed — a test run left a temp dir or rpg-*.sqlite behind" }
           # ANCHOR(T28): profiles wiring appends after this step. Do not reorder the steps above.
 
+      - name: Test profiles (T28 — CI is the `full` profile by construction)
+        shell: pwsh
+        run: |
+          # T28 added no filtering here on purpose: every `dotnet test` call above runs UNFILTERED,
+          # so CI already IS the `full` profile — the `DiskSemantics` (file-bound) and `Heavy` (>=20s)
+          # tests run here, which is exactly the point (ephemeral cloud disk, correctness costs
+          # nothing). `scripts/test-fast.ps1` (`default`) is the LOCAL/agent loop only and is never
+          # used in CI, so CI cannot accidentally inherit the dev filter. The leak alarm step above
+          # also runs on `full` for the same reason.
+          #
+          # Guard (do not edit blindly): this assertion fails if someone later adds a --filter to a
+          # `dotnet test` call in this workflow, which would silently drop disk/heavy coverage.
+          $filters = Select-String -Path .github/workflows/ci.yml -Pattern 'dotnet test.*--filter' |
+              Where-Object {
+                  $_.Line.TrimStart().StartsWith('dotnet test') -and
+                  $_.Line -notmatch '--filter\s+"Category=BalanceGuard"'
+              }
+          if ($filters) {
+              $filters | ForEach-Object { Write-Host "$($_.LineNumber): $($_.Line.Trim())" }
+              throw "CI test step gained a --filter — CI must stay the unfiltered full profile (only the BalanceGuard step is filtered)"
+          }
+          Write-Host "CI test calls are unfiltered = full profile (DiskSemantics + Heavy included)."
+
       - name: Boundary guards (AGENTS.md — combat writes, Secondary-Unity boundary, Funnel deltas, DAL)
         shell: pwsh
         run: |

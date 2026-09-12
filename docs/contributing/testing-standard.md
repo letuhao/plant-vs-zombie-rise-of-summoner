@@ -85,3 +85,50 @@ why any line was **added**.
 This standard covers `tests/**`. The store migration (in-memory substrate) is the
 [data-test-substrate](../architecture/data-test-substrate-map.md) program; this gate lands first so
 no new violation can be introduced while that migration proceeds.
+
+---
+
+## 6. Test profiles
+
+Not every test belongs on every run. A test whose **subject is the disk** (WAL mode, a legacy
+`rpg.sqlite` migration and its sidecar, archive slices, purge) or that takes **≥20s** earns a trait
+so it can be excluded from the routine loop and run where the disk is cheap and the wait is
+acceptable — CI, nightly, and the release gate. Nothing is deleted or weakened: a tagged test still
+runs in `full`.
+
+### The two categories
+
+| Category | Meaning | Where |
+|---|---|---|
+| `DiskSemantics` | The file **is** the thing under test — it must write a real fixture tree. | Excluded from `default`; runs in `full`/nightly/gate. |
+| `Heavy` | ≥20s or cold-process or long-run, with no disk requirement. | Excluded from `default`; runs in `full`/nightly/gate. |
+
+A test is tagged at the **class** level when every method qualifies, at the **method** level when
+only some do. When both could apply, `DiskSemantics` wins — it is the stronger statement, and either
+exclusion removes the test from the default profile.
+
+### The four profiles
+
+| Profile | Where | Command |
+|---|---|---|
+| **default** | local dev, agents, `deploy-play.ps1` | `.\scripts\test-fast.ps1` → `dotnet test <proj> --filter "Category!=DiskSemantics&Category!=Heavy"` |
+| **full** | CI pull-request | `dotnet test <proj> -c Release` (no filter) |
+| **gate** | `release.yml` tags | `dotnet test <proj>` (no filter), required |
+| **nightly** | `.github/workflows/nightly.yml` | `dotnet test <proj>` (no filter) |
+
+**The default lives in exactly one place.** `scripts/test-fast.ps1` owns the filter, so a developer
+and an agent cannot drift. `deploy-play.ps1` calls it. CI keeps calling `dotnet test` directly with
+**no** filter, so CI is `full` by construction and can never accidentally inherit the dev default.
+A negative filter includes uncategorized tests, so only the *excluded* tests need a trait.
+
+### The guards run on `full` only
+
+**`guard-test-substrate.ps1` (the static gate) and `test-substrate-leak-alarm.ps1` (the runtime
+alarm) run against the `full` profile, never the default.** The default profile *intentionally*
+writes the file-bound directories — those are the `DiskSemantics` tests — so a disk-leak alarm run
+around it would either false-positive every time or need an ever-growing allowlist. The static gate
+reads source and is profile-independent, but it is paired with the alarm for the same "one run, both
+halves" reason. **Do not "optimize" either guard onto the fast profile.**
+
+`full` is the only profile that catches a disk regression — hence the nightly workflow: it reruns
+everything unfiltered within a day, instead of waiting for a release tag.

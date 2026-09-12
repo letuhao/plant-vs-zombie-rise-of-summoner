@@ -142,12 +142,39 @@ public void A_seed_tree_on_disk_imports_end_to_end() { … }
 
 ## Success criteria
 
-1. `scripts/test-fast.ps1` runs the suite minus `DiskSemantics` and `Heavy`, and **writes no disk**.
-2. `full` (CI/`release.yml`/nightly) runs everything; CI is unfiltered.
+1. `scripts/test-fast.ps1` runs the suite minus `DiskSemantics` and `Heavy`, printing its filter.
+   **"writes no disk" is a *later* criterion** — see the ordering note below; it holds only once the
+   migration (T18b–T18f) has retired the 102 files that are neither tagged nor migrated.
+2. `full` (CI/`release.yml`/nightly) runs everything; CI is unfiltered (asserted by a T28 step).
 3. The two categories exist and are documented in `testing-standard.md` with the profile table.
 4. The guards run only on `full`.
 5. No test is deleted, and every tagged file's assertion count is unchanged.
 6. A nightly workflow exists so a disk regression is caught within a day.
+
+## Ordering note (a real defect found in this spec's own first version)
+
+**The default profile does not become disk-free when the profiles land — only when the migration
+finishes.** At T28 (2026-09-12) the baseline still held **102 files with `temp-store`** that are
+*neither* `DiskSemantics` nor `Heavy`: they are simply not yet migrated (T18b–T18f: Items 20,
+Server 49, Delve 12, Actions 5, DataRoot 6, Core 4, PassiveTree 3, E2E 3). The filter is correct, but
+those tests stay in the default profile and still write.
+
+Proven, not assumed: an isolated run of `ArmouryTests` in a private temp root leaked **14**
+`fusionrpg-armoury-*` dirs; the leak alarm around `test-fast.ps1` reported **436** survivors.
+
+**Two consequences this spec now states explicitly:**
+
+1. **Tagging cannot substitute for migrating.** Profiles keep the *file-bound* tests out of the dev
+   loop; they do nothing for a test that merely *has not been migrated yet*. The migration is the fix;
+   the profile is the safety net for what legitimately stays on disk.
+2. **A class whose constructor writes needs class-level tagging.** Method-level `Heavy` on
+   `ActionUnlockGrantWiringTests` still leaked, because its **ctor** creates
+   `fusionrpg-action-unlock-wiring-*` and its `Dispose` swallows — the untagged methods run in the
+   default profile and write. Either tag such a class wholesale or migrate its ctors.
+
+**Sequencing, corrected:** T26/T27 (tags) → T28 (machinery, provable now) → **T18b–T18f (make the
+default genuinely quiet)** → T29 (checkpoint, re-run the alarm and expect **0**). A future session
+must not mark "default writes no disk" done before T18f lands.
 
 ## Numeric types / Tunables / ActorHub gate
 

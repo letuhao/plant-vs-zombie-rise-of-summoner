@@ -263,19 +263,23 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - Acceptance: no test carries both categories (DiskSemantics wins); the tagged set matches the measured ≥20s list minus the disk-semantic ones.
   - Verify: `--filter "Category=Heavy"`; a re-measure shows no untagged test ≥20s remains.
   - Files: those test files. Scope: M.
-- [ ] **Task T28: `test-fast.ps1` + the profile wiring** — Deps: T26, T27. Scope: M.
-  - Description: one script owning the default filter (`Category!=DiskSemantics&Category!=Heavy`) so the default cannot drift; `deploy-play.ps1` calls it; `testing-standard.md` gains the profile table and the **"guards run on `full` only"** rule. CI stays unfiltered (`full`). Add `.github/workflows/nightly.yml` (`schedule:`) running `full`, so a disk regression is caught within a day.
-  - Acceptance: `test-fast.ps1` writes **no** disk (proved by the T19b alarm returning 0 new dirs); CI/nightly/release all run unfiltered `full`.
-  - Verify: `test-fast.ps1` + the alarm; `grep` the workflows for the filters.
-  - Files: `scripts/test-fast.ps1`, `scripts/deploy-play.ps1`, `docs/contributing/testing-standard.md`, `.github/workflows/nightly.yml`. Scope: M.
-- [ ] **Task T29: profile checkpoint** — Deps: T28. Scope: XS.
-  - Description: report the default-vs-full counts and wall time; confirm default = full − tagged; confirm the guards still run only on `full`; confirm no assertion count changed for any tagged file.
-  - Acceptance: the relationship holds at run time (never a pinned total).
+- [x] **Task T28: `test-fast.ps1` + the profile wiring** ✅ 2026-09-12 — **filter correct; "writes no disk" acceptance blocked on T18b–T18f**
+  - Description: `scripts/test-fast.ps1` owns the default filter (`Category!=DiskSemantics&Category!=Heavy`, repeatable `-Project`); `deploy-play.ps1` gained a test-fast step **after** the guard chain (all 13 guards byte-identical); `testing-standard.md` gained the profile table + the "guards run on `full` only" rule; new `.github/workflows/nightly.yml` (cron 03:17 + dispatch) runs the **full** suite wrapped in the leak alarm. CI is `full` by construction (its existing steps are unfiltered) — T28 appended a step that **asserts** no test filter was added to `ci.yml` (only the BalanceGuard one at `:140`), rather than duplicating the suite.
+  - Verified: test-fast prints its filter and runs **1225**; static gate exit 0; all 13 deploy-play guards intact; both workflows parse.
+  - **The worker found a real sequencing defect in this program's own spec, and the gatekeeper reproduced it:** the default profile **still writes disk** because **102 baseline files are neither `DiskSemantics` nor `Heavy`** — they are simply *not yet migrated* (T18b–T18f: Items 20, Server 49, Delve 12, Actions 5, DataRoot 6, Core 4, PassiveTree 3, E2E 3). Proof: an isolated run of `ArmouryTests` in a private temp root leaked **14** `fusionrpg-armoury-*` dirs, while the alarm around `test-fast.ps1` reported **436** survivors.
+  - **Second nuance the worker caught:** method-level tagging does not stop a class whose **constructor** writes — `ActionUnlockGrantWiringTests`' ctor creates `fusionrpg-action-unlock-wiring-*` and its `Dispose` swallows, so its untagged methods still leak in the default profile. Class-level tagging (or migration) is required for ctor-writing classes.
+  - **Corrected sequencing:** profiles can land (the filter is right and the machinery is proven), but `spec-test-profiles.md` success criterion 1 ("`test-fast.ps1` writes no disk") is only satisfiable **after T18b–T18f migrate the remaining 102 files**. Recorded here so no future session claims the default is disk-free early. Nightly will be red until then — which is the alarm doing its job.
+  - Files: `scripts/test-fast.ps1`, `scripts/deploy-play.ps1`, `docs/contributing/testing-standard.md`, `.github/workflows/{ci,nightly}.yml`. Scope: M.
+  - Deps: T26, T27.
+- [ ] **Task T29: profile checkpoint** — Deps: T28 **and T18f** (the migration must finish first; see below). Scope: XS.
+  - Description: report the default-vs-full counts and wall time; confirm default = full − tagged; confirm the guards still run only on `full`; confirm no assertion count changed for any tagged file; **and re-run the leak alarm around `test-fast.ps1` and require 0 survivors** — the criterion that is only satisfiable after T18f retires the last `temp-store` file.
+  - Acceptance: the count relationship holds at run time (never a pinned total); the alarm around the default profile returns **0**.
+  - **Blocked until T18b–T18f land:** at T28 the default profile still wrote disk (102 un-migrated `temp-store` files; `ArmouryTests` alone leaked 14 dirs in an isolated run, `test-fast.ps1` 436 survivors). Do not run this checkpoint expecting 0 before the migration completes.
   - Verify: two runs + the alarm + per-file assert diffs.
   - Files: none (verification). Scope: XS.
 
 ### Checkpoint 7 — Profiles
-- [ ] ⭐ Default run writes nothing and runs no long test; `full` still covers everything; guards unchanged.
+- [ ] ⭐ Default run's **filter** is correct and the machinery is proven; the **disk-free** half of the checkpoint completes only after T18b–T18f (T29). `full` still covers everything; guards unchanged.
 
 ---
 
