@@ -1,4 +1,6 @@
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Data.Sqlite;
+using Microsoft.Data.Sqlite;
 using Xunit;
 
 namespace FusionRpg.Data.Tests;
@@ -77,6 +79,49 @@ public class DataTestStoreTests
         // The helper must not become a new violation: it appears in no baseline line.
         var baseline = File.ReadAllText(Path.Combine(RepoRoot(), "scripts", "test-substrate-baseline.txt"));
         Assert.DoesNotContain("DataTestStore", baseline, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_file_store_with_a_pooled_connection_still_deletes_after_ClearAllPools()
+    {
+        var test = DataTestStore.CreateFileBacked();
+        var dir = test.DataDir!;
+
+        // A connection returned to the pool keeps the file handle open. The helper's dispose must
+        // clear pools before deleting, or this would leak (the 65.5 GB failure mode).
+        using (var pooled = SqliteConnectionFactory.Open(test.Store.HotPath))
+        {
+            using var cmd = pooled.CreateCommand();
+            cmd.CommandText = "SELECT 1;";
+            cmd.ExecuteScalar();
+        }
+
+        test.Dispose();
+
+        Assert.False(Directory.Exists(dir), "the helper must delete its dir even with a pooled handle");
+    }
+
+    [Fact]
+    public void A_failed_file_cleanup_throws_rather_than_being_swallowed()
+    {
+        var test = DataTestStore.CreateFileBacked();
+        var dir = test.DataDir!;
+
+        // An open handle with FileShare.None makes a file inside the dir undeletable, so
+        // Directory.Delete must fail. The helper must let that failure surface (R3).
+        var blocker = Path.Combine(dir, "blocker.lock");
+        var fs = new FileStream(blocker, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+        try
+        {
+            Assert.ThrowsAny<IOException>(() => test.Dispose());
+        }
+        finally
+        {
+            fs.Dispose();
+            SqliteConnection.ClearAllPools();
+            if (Directory.Exists(dir))
+                Directory.Delete(dir, recursive: true);
+        }
     }
 
     static string RepoRoot()

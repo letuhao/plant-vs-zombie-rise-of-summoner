@@ -77,11 +77,11 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - Dependencies: T5.
   - **Known gap → T7:** the "failed delete throws" runtime behavior is not yet proven by a test (static inspection only). T7 owns it.
 
-- [ ] **Task T7: Leak-proof file cleanup (the R3 rule, mechanized)**
-  - Description: `CreateFileBacked()`'s dispose does `SqliteConnection.ClearAllPools()` then `Directory.Delete`, and a **failure throws** (asserted, never swallowed). No `catch { }`.
-  - Acceptance: a held-open file store still deletes after `ClearAllPools`; a simulated failure surfaces as an exception.
-  - Verify: `DataTestStoreTests` (cleanup-failure case).
-  - Files: `tests/FusionRpg.Data.Tests/DataTestStore.cs`, `DataTestStoreTests.cs`. Scope: S.
+- [x] **Task T7: Leak-proof file cleanup (the R3 rule, mechanized)** ✅ 2026-09-12
+  - Description: T6 already implemented the throwing delete; this task **proves** it at runtime. Added two tests to `DataTestStoreTests`: `A_file_store_with_a_pooled_connection_still_deletes_after_ClearAllPools` (a pooled connection holds the file handle; the helper still deletes) and `A_failed_file_cleanup_throws_rather_than_being_swallowed` (a `FileShare.None` blocker file makes `Directory.Delete` throw `IOException`, which the helper lets surface).
+  - Acceptance met: a held-open file store still deletes after `ClearAllPools`; a simulated failure surfaces as an exception. The failure test is **not vacuous** — reintroducing a `catch { }` makes it fail (proven by temporarily doing so, then reverting).
+  - Verified: gate subagent PASS — focused 7/7 stable across 3 runs, full Data 1284/1284, both guards green, `DataTestStore.cs` byte-identical to HEAD, no leaked dir.
+  - Files: `tests/FusionRpg.Data.Tests/DataTestStoreTests.cs`. Scope: S.
   - Dependencies: T6.
 
 - [ ] **Task T8: Helper proof tests**
