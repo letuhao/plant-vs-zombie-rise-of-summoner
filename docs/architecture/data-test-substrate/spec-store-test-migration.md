@@ -83,6 +83,29 @@ Converting these to memory would **delete real coverage**. They move onto `Creat
 fixes their leak without changing what they assert (module `archive-target` moves the archive two to
 memory later; the legacy + smoke three stay file permanently).
 
+**Finding from T14 (2026-09-12) — the classifier missed a second kind of file-bound case.** Class A
+("pure store") was defined by *what the test asserts*, but a memory-bound test can also reach a file
+**through the store's own API**: the archive entry points (`TrimSoulLedgerTails`,
+`CompactAfterRunClosed`, `PromoteClosedRunCapture`, `TrimHotTailsNow`, `DeleteArchives`,
+`PurgeClosedRunCapture`, `DeleteClosedRuns`) are file-backed by construction and **throw**
+`StorePlanException` on a memory store (module `memory-storage-plan` §5). A store test that calls one
+is file-bound even though its assertions are about ledger arithmetic.
+
+The census (2026-09-12) found **3 mis-classified store files**: `ExpeditionRewardApplyTests` (1 of its
+6 tests — `Soul_trim_keeps_a_mixed_earn_spend_ledger_consistent`), `SoulLedgerTrimTests`, and
+`WebGameIsolationTests` (the last two are still temp-backed in the baseline and **must** use
+`CreateFileBacked()` when their batches run, or they throw). `CompactionWorkerTests` (E2E) is **not**
+one of them — the census flagged it on a call-site match, but it uses a `FakeHotCompactor` and never
+constructs an `RpgStore`, so it is not a store test and must not be migrated. The rule for the real ones:
+
+- If **only some methods** in a class need the archive (e.g. `ExpeditionRewardApplyTests` — 1 of 6),
+  that method uses its own `DataTestStore.CreateFileBacked()` and the class stays memory.
+- If the **class's subject is the archive**, it moves to the Tier-3 file-bound set.
+
+This is the pilot's value restated: a per-file assertion count is not enough; a migration batch must
+also scan for archive entry-point calls. `docs/architecture/data-test-substrate-map.md` §2's classifier
+is corrected to include "calls a `RequireFileArchive`-guarded entry point" as a file-bound signal.
+
 ### 5. Exclusions
 
 - `tests/FusionRpg.Data.Tests/CreatureSpeciesImportCliTests.cs` — owned by session

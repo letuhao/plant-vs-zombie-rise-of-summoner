@@ -14,22 +14,17 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class EligibilityAxisMigrationTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public EligibilityAxisMigrationTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-eligibility-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         SeedContainerAndAtom("skill.test");
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     /// <summary>Same shape as <c>ActionStoreTests</c>' own helper — <see cref="RpgStore.UpsertAction"/>
     /// validates the container exists before it will accept a row at all.</summary>
@@ -124,88 +119,68 @@ public class EligibilityAxisMigrationTests : IDisposable
     [Fact]
     public void A_pre_module_database_gains_the_new_columns_and_still_loads_with_their_defaults()
     {
-        var freshDir = Path.Combine(Path.GetTempPath(), "fusionrpg-eligibility-premigration-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(freshDir);
-        try
+        // The memory equivalent of "a save from before the migration existed": hand-build the OLD
+        // rpg_action shape (pre-A-E1) and one row through raw SQL before Init runs, then boot in
+        // memory. No file is created.
+        using var test = DataTestStore.CreateWithPreInitHot(seed =>
         {
-            var dbFile = Path.Combine(freshDir, "rpg-hot.sqlite");
+            using var create = seed.CreateCommand();
+            create.CommandText = """
+                CREATE TABLE rpg_action (
+                  action_id TEXT NOT NULL PRIMARY KEY,
+                  name TEXT NOT NULL DEFAULT '',
+                  kind TEXT NOT NULL,
+                  rung INTEGER NOT NULL DEFAULT 0,
+                  tags_json TEXT NOT NULL DEFAULT '[]',
+                  enabled INTEGER NOT NULL DEFAULT 1,
+                  revision INTEGER NOT NULL DEFAULT 0,
+                  grantable INTEGER NOT NULL DEFAULT 0,
+                  default_attack_eligible INTEGER NOT NULL DEFAULT 0,
+                  container_id TEXT NOT NULL,
+                  time_cost_ticks INTEGER NOT NULL DEFAULT 0,
+                  speed_channel TEXT NOT NULL DEFAULT '',
+                  cooldown_channel TEXT,
+                  windup_ticks INTEGER NOT NULL DEFAULT 0,
+                  resolve_offsets_json TEXT NOT NULL DEFAULT '[0]',
+                  recovery_ticks INTEGER NOT NULL DEFAULT 0,
+                  commitment TEXT NOT NULL DEFAULT 'LateBound',
+                  interruptible TEXT NOT NULL DEFAULT 'OnCC',
+                  interrupt_refund_milli INTEGER NOT NULL DEFAULT 0,
+                  slot_consuming INTEGER NOT NULL DEFAULT 1,
+                  priority_band INTEGER NOT NULL DEFAULT 0,
+                  cooldown_class TEXT NOT NULL DEFAULT 'None',
+                  cooldown_key TEXT,
+                  cooldown_ticks INTEGER NOT NULL DEFAULT 0,
+                  starts_at TEXT NOT NULL DEFAULT 'Resolve',
+                  interrupt_cooldown_milli INTEGER NOT NULL DEFAULT 1000,
+                  target_spec_json TEXT,
+                  min_range INTEGER NOT NULL DEFAULT 0,
+                  max_range INTEGER NOT NULL DEFAULT 0,
+                  range_channel TEXT,
+                  requires_line_of_sight INTEGER NOT NULL DEFAULT 0,
+                  conditions_json TEXT
+                );
+                """;
+            create.ExecuteNonQuery();
 
-            // Hand-build the OLD rpg_action shape (pre-A-E1) and one row through raw SQL —
-            // RpgStore's own schema helper cannot be asked to skip its own new columns, so this
-            // simulates "a save from before the migration existed" the only way that is actually
-            // possible: a real CREATE TABLE that never named them, with every enum-backed column
-            // given the SAME cased value a real UpsertAction write always supplies (Commitment.
-            // LateBound.ToString() etc.) — a hand-authored SQL DEFAULT casing accident is a
-            // pre-existing, unrelated quirk this test must not depend on to prove its own point.
-            using (var db = new SqliteConnection($"Data Source={dbFile}"))
-            {
-                db.Open();
-                using var create = db.CreateCommand();
-                create.CommandText = """
-                    CREATE TABLE rpg_action (
-                      action_id TEXT NOT NULL PRIMARY KEY,
-                      name TEXT NOT NULL DEFAULT '',
-                      kind TEXT NOT NULL,
-                      rung INTEGER NOT NULL DEFAULT 0,
-                      tags_json TEXT NOT NULL DEFAULT '[]',
-                      enabled INTEGER NOT NULL DEFAULT 1,
-                      revision INTEGER NOT NULL DEFAULT 0,
-                      grantable INTEGER NOT NULL DEFAULT 0,
-                      default_attack_eligible INTEGER NOT NULL DEFAULT 0,
-                      container_id TEXT NOT NULL,
-                      time_cost_ticks INTEGER NOT NULL DEFAULT 0,
-                      speed_channel TEXT NOT NULL DEFAULT '',
-                      cooldown_channel TEXT,
-                      windup_ticks INTEGER NOT NULL DEFAULT 0,
-                      resolve_offsets_json TEXT NOT NULL DEFAULT '[0]',
-                      recovery_ticks INTEGER NOT NULL DEFAULT 0,
-                      commitment TEXT NOT NULL DEFAULT 'LateBound',
-                      interruptible TEXT NOT NULL DEFAULT 'OnCC',
-                      interrupt_refund_milli INTEGER NOT NULL DEFAULT 0,
-                      slot_consuming INTEGER NOT NULL DEFAULT 1,
-                      priority_band INTEGER NOT NULL DEFAULT 0,
-                      cooldown_class TEXT NOT NULL DEFAULT 'None',
-                      cooldown_key TEXT,
-                      cooldown_ticks INTEGER NOT NULL DEFAULT 0,
-                      starts_at TEXT NOT NULL DEFAULT 'Resolve',
-                      interrupt_cooldown_milli INTEGER NOT NULL DEFAULT 1000,
-                      target_spec_json TEXT,
-                      min_range INTEGER NOT NULL DEFAULT 0,
-                      max_range INTEGER NOT NULL DEFAULT 0,
-                      range_channel TEXT,
-                      requires_line_of_sight INTEGER NOT NULL DEFAULT 0,
-                      conditions_json TEXT
-                    );
-                    """;
-                create.ExecuteNonQuery();
+            using var insert = seed.CreateCommand();
+            insert.CommandText = """
+                INSERT INTO rpg_action (action_id, name, kind, container_id, speed_channel)
+                VALUES ('action.legacy.001', 'Pre-migration action', 'basic', '', 'speed');
+                """;
+            insert.ExecuteNonQuery();
+        });
 
-                using var insert = db.CreateCommand();
-                insert.CommandText = """
-                    INSERT INTO rpg_action (action_id, name, kind, container_id, speed_channel)
-                    VALUES ('action.legacy.001', 'Pre-migration action', 'basic', '', 'speed');
-                    """;
-                insert.ExecuteNonQuery();
-            }
-
-            // A real boot: RpgStore.Init() runs EnsureActionSchemaUnlocked, whose CREATE TABLE IF
-            // NOT EXISTS is a no-op against the table above and whose EnsureColumn calls add the six
-            // new columns underneath the pre-existing row.
-            var store = new RpgStore(freshDir);
-            store.Init();
-
-            var read = store.GetAction("action.legacy.001");
-            Assert.NotNull(read);
-            Assert.Equal(EligibilityScope.General, read!.Scope);
-            Assert.Null(read.ScopeKey);
-            Assert.Null(read.Category);
-            Assert.Equal(PairingRole.None, read.PairingRole);
-            Assert.Empty(read.StructureAxes);
-            Assert.Empty(read.AtomFamilies);
-            Assert.Null(read.RungBand);
-        }
-        finally
-        {
-            try { Directory.Delete(freshDir, true); } catch { /* temp */ }
-        }
+        // Init ran EnsureActionSchemaUnlocked: its CREATE TABLE IF NOT EXISTS was a no-op against the
+        // table above, and its EnsureColumn calls added the six new columns underneath the old row.
+        var read = test.Store.GetAction("action.legacy.001");
+        Assert.NotNull(read);
+        Assert.Equal(EligibilityScope.General, read!.Scope);
+        Assert.Null(read.ScopeKey);
+        Assert.Null(read.Category);
+        Assert.Equal(PairingRole.None, read.PairingRole);
+        Assert.Empty(read.StructureAxes);
+        Assert.Empty(read.AtomFamilies);
+        Assert.Null(read.RungBand);
     }
 }

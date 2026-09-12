@@ -86,6 +86,32 @@ public class DataTestStoreTests
     }
 
     [Fact]
+    public void CreateWithPreInitHot_seeds_a_legacy_schema_that_Init_migrates_in_memory()
+    {
+        // The memory equivalent of "a save written by an older build": a table created before Init
+        // ran. Init must then run its additive migration over it — with no file.
+        using var test = DataTestStore.CreateWithPreInitHot(seed =>
+        {
+            using var cmd = seed.CreateCommand();
+            cmd.CommandText = "CREATE TABLE legacy_probe(id INTEGER PRIMARY KEY, name TEXT);";
+            cmd.ExecuteNonQuery();
+            cmd.CommandText = "INSERT INTO legacy_probe(name) VALUES('before-init');";
+            cmd.ExecuteNonQuery();
+        });
+
+        // The pre-Init row survived Init, and the full schema was layered on top.
+        using var db = SqliteConnectionFactory.Open(test.Store.HotPath);
+        using var probe = db.CreateCommand();
+        probe.CommandText = "SELECT name FROM legacy_probe;";
+        Assert.Equal("before-init", probe.ExecuteScalar());
+
+        probe.CommandText = "SELECT count(*) FROM sqlite_master WHERE type='table';";
+        Assert.True(Convert.ToInt64(probe.ExecuteScalar()) > 50, "Init must layer the full schema");
+
+        Assert.False(File.Exists(test.Store.HotPath), "no file may be created");
+    }
+
+    [Fact]
     public void A_file_store_dispose_deletes_its_directory_cleanly()
     {
         var test = DataTestStore.CreateFileBacked();

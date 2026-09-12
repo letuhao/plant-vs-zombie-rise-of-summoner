@@ -62,6 +62,33 @@ public sealed class DataTestStore : IDisposable, IAsyncDisposable
     }
 
     /// <summary>
+    /// A memory store whose hot database was hand-seeded **before** <c>Init()</c> ran — the memory
+    /// equivalent of "a save written by an older build". <paramref name="seedHot"/> receives an open
+    /// connection to the hot database (the store's own keeper keeps it alive) and can create a legacy
+    /// table shape; the returned store then <c>Init()</c>s over it, so additive-migration paths
+    /// (<c>EnsureColumn</c>) are exercised exactly as they are against a real file. Nothing touches
+    /// the disk.
+    /// </summary>
+    public static DataTestStore CreateWithPreInitHot(Action<SqliteConnection> seedHot)
+    {
+        ArgumentNullException.ThrowIfNull(seedHot);
+
+        var id = Guid.NewGuid().ToString("N");
+        var hotName = "rpg-hot-" + id;
+        var mediaName = "rpg-media-" + id;
+
+        // Construct first: the store's keepers must be open before we seed, or the shared-memory
+        // database would vanish the moment the seeding connection closed.
+        var store = new RpgStore(new RpgStoreOptions { InMemory = true, HotName = hotName, MediaName = mediaName });
+        using (var seed = SqliteConnectionFactory.Open(store.HotPath))
+        {
+            seedHot(seed);
+        }
+        store.Init();
+        return new DataTestStore(store, dataDir: null, hotName, mediaName);
+    }
+
+    /// <summary>
     /// A real-file store in a unique directory under the test output root, initialized and ready to
     /// use. Dispose deletes the directory; a failed delete throws.
     /// </summary>

@@ -14,7 +14,7 @@ namespace FusionRpg.Data.Tests;
 /// <c>GateCounterStoreTests.cs</c> (a real temp-directory SQLite store, not a mock).</summary>
 public class GateCounterSeedTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     static readonly GateCountersTuning Tuning = new(
@@ -27,15 +27,13 @@ public class GateCounterSeedTests : IDisposable
 
     public GateCounterSeedTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-gatecounterseed-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     /// <summary>Gives "player:1" a deep primary tree -- 275 Commander-scope points, spec §3.3's own
