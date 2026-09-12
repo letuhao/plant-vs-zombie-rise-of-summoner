@@ -145,8 +145,31 @@ outside the four test projects (they are baselined and ratcheted by the gate, no
 
 ## Parallelization
 
-- **Safe to parallelize after T8:** the Data.Tests migration batches (T11–T14) touch disjoint folders.
-- **Must be sequential:** T2→T3→T4→T5 (one seam), T6→T7→T8 (one helper), T20→T21 (one abstraction).
-- **Needs coordination:** T18d (Server) boots a `WebApplication`; T18e (E2E) shares `ci.yml` with the
-  `cold-process-test-build` session; T18/T16 exclude `CreatureSpeciesImportCliTests.cs`, which that
-  session owns.
+**The fan-out protocol is binding for any multi-agent wave:**
+[data-test-substrate/fan-out-protocol.md](../docs/architecture/data-test-substrate/fan-out-protocol.md).
+It names the three collision points — `scripts/test-substrate-baseline.txt` (contiguous lines; two
+batches conflict at the boundary), `AGENTS.md`/`CLAUDE.md` (gitignored; 36 tests use `AGENTS.md` as
+their repo-root marker), and `.github/workflows/ci.yml` (T19b + T28) — and gives each exactly one
+writer. Subagents follow the recipe, run their focused filter + the read-only gate, and **report**;
+the gatekeeper session deletes the baseline lines, runs the independent gate, and commits.
+
+**Blockers cleared 2026-09-12 (Wave 0):** `.kilo/setup-script.ps1` now copies `AGENTS.md` +
+`CLAUDE.md` into every new worktree (verified: parses, and an existing worktree has neither file so
+the copy fires); the single-writer rule is recorded; the 124.6s test is fixed to 0.52s.
+
+**Wave shape (owner decision: clean the blocks, then fan out everything):**
+
+| Wave | Agents | Work | Collision risk |
+|---|---|---|---|
+| **1** | 3 parallel | T26/T27 tags · T19b leak alarm (owns the `ci.yml` edit) · T28 profiles (appends after T19b) | none — disjoint files, no baseline, sub-second gates |
+| **2** | at most 1 migration + 1 `src/`-only | T18b–T18f migration (baseline is **serial**) beside T20a (`src/…/Archive/**`, disjoint) | bounded — one baseline writer |
+| **3** | serial | T29 checkpoint, T23/T24 final gate | run on a quiet machine (full suite) |
+
+- **Parallel-safe after T10:** T11–T18c (disjoint Data.Tests folders) — but each shares the baseline,
+  so they serialize through the gatekeeper.
+- **Must be sequential:** T2→T5 (one seam), T6→T8 (one helper), T20a→T20b (one abstraction).
+- **Needs coordination:** T18d (Server, boots `WebApplication`), T18e (E2E), T19b/T28 (`ci.yml`).
+
+**Honest limit:** the migration is bottlenecked by the single baseline file and a ~6-minute full-suite
+gate per task, on a box already carrying other agent streams (measured CPU 74%, 30 node processes, 4
+worktrees). Fan-out realistically buys ~2x, mostly from Wave 1 — not 5x.
