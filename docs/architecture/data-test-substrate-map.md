@@ -157,15 +157,24 @@ because they are not SQL-store tests, and three of them are **outside the approv
 delete helper (no memory) to them. The scan is why this is visible now instead of after the store
 work ships.
 
+**Resolved by the gate, not deferred.** The `disk-write-probe` module was promoted ahead of the
+migration and landed as `scripts/guard-test-substrate.ps1` (committed `7183a59e`), so all 21
+out-of-boundary leakers are now **baselined and ratcheted** rather than silently leaking: the gate
+covers `tests/**` regardless of project, and each must shrink as its project is touched. The
+separate `non-store-temp-cleanup` module is therefore **not needed** — the gate plus the existing
+baseline reaches them without widening this program's `paths`.
+
 ## 5. Amendments this program owes before it builds
 
 Listed so they are not discovered mid-task. All are reviewed changes to documents that win over a spec.
 
-| Document | Change | Owed by |
+| Document | Change | Status / owed by |
 |---|---|---|
-| [decisions.md](decisions.md) | A new row locking the store's **storage plan** seam (file default; memory is test-first) — this locks behavior, so it needs an ADR row first | `memory-storage-plan` |
-| [data-architecture.md](data-architecture.md) §1/§6 | State that `RpgStore` has a storage plan; that the DAL boundary is unchanged (all SQL still in Data); and that a shared-cache memory DB cannot be opened read-only | `substrate-standard` |
-| [contributing/session-boundary.md](contributing/session-boundary.md) | None. Noted only because the drift checker currently reports a `tasks/sessions/**` glob overlap between this record and `session-boundary-standard-20260912-a3f2` — see Handoff | — |
+| `docs/contributing/testing-standard.md` | The binding standard (R1–R5) + the gate | ✅ **Landed 2026-09-12** (`7183a59e`) |
+| `scripts/guard-test-substrate.ps1` + `scripts/test-substrate-baseline.txt` | The hard gate + the shrinking ratchet | ✅ **Landed 2026-09-12** (`7183a59e`); wired into `deploy-play.ps1`, `ci.yml`, Guard.Tests |
+| `AGENTS.md` / `CLAUDE.md` | A pointer to the standard and the gate | ✅ **Edited locally 2026-09-12** — both gitignored/untracked, so the durable record is the standard, not the pointer |
+| [decisions.md](decisions.md) | A new row locking the store's **storage plan** seam (file default; memory is test-first) — locks behavior, so it needs an ADR row first | owed by `memory-storage-plan` |
+| [data-architecture.md](data-architecture.md) §1/§6 | State that `RpgStore` has a storage plan; the DAL boundary is unchanged (all SQL still in Data); and a shared-cache memory DB cannot be opened read-only | owed by `substrate-standard` |
 
 ## 6. Related
 
