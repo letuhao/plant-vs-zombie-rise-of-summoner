@@ -17,6 +17,11 @@
   CollectDumpOnTestSessionHang: kill the hung testhost + children after TestTimeout and
     let the blame logger emit Sequence.xml naming the last-started / never-finished test.
     HangDumpType=None: kill only, no multi-hundred-MB dump.
+
+  TestTimeout is 10min, not 5: two retry-loop tests (RealColdProcessTests,
+  CreatureSpeciesImportCliTests) may legitimately spend 3 x 120s + 5s + 10s = 375s
+  (6.25min) under heavy parallel build contention — a 5min cap would kill a PASSING
+  test as a false hang. 10min still bounds a real hang to a useful wait.
 -->
 <RunSettings>
   <RunConfiguration>
@@ -33,7 +38,7 @@
     <DataCollectors>
       <DataCollector friendlyName="blame" enabled="True">
         <Configuration>
-          <CollectDumpOnTestSessionHang TestTimeout="5min" HangDumpType="None" />
+          <CollectDumpOnTestSessionHang TestTimeout="10min" HangDumpType="None" />
         </Configuration>
       </DataCollector>
     </DataCollectors>
