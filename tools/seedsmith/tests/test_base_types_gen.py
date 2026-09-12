@@ -689,3 +689,79 @@ def test_cli_force_is_an_accepted_alias_for_overwrite(tmp_path, monkeypatch, cap
     exit_code = run_mod.main(["--role", "armament-primary", "--frame", "humanoid", "--band", "a",
                              "--force", "basetype-draw-armament-primary-humanoid-a-000"])
     assert exit_code == 0
+
+
+# ---- corpus-wide name collision guard (2026-09-12) ---------------------------------------------
+
+def test_collision_key_folds_case_and_punctuation():
+    assert run_mod.collision_key("Tungsten Spiker") == run_mod.collision_key("tungsten  spiker")
+    assert run_mod.collision_key("Weighted Censer") == run_mod.collision_key("Weighted-Censer")
+
+
+def test_load_corpus_names_spans_every_partition_not_just_one(tmp_path):
+    base_types_dir = tmp_path / "base-types"
+    base_types_dir.mkdir()
+    (base_types_dir / "humanoid-armament-primary-a.json").write_text(json.dumps(
+        {"entries": [{"id": "item.a-001", "name": "Tungsten Spiker"}]}), encoding="utf-8")
+    (base_types_dir / "humanoid-armament-primary-b.json").write_text(json.dumps(
+        {"entries": [{"id": "item.b-001", "name": "Weighted Censer"}]}), encoding="utf-8")
+
+    names = run_mod.load_corpus_names(base_types_dir=base_types_dir)
+    assert names[run_mod.collision_key("Tungsten Spiker")] == "item.a-001"
+    assert names[run_mod.collision_key("Weighted Censer")] == "item.b-001"
+
+
+def test_run_draws_reasks_once_then_refuses_a_corpus_wide_name_collision(tmp_path):
+    """The defect this closes: 65 display names shipped twice across partitions because the brief
+    only listed the current partition's names. The corpus-wide map now makes the second draw refuse
+    rather than persist a duplicate."""
+    ledger = RunLedger(tmp_path / "ledger.json")
+    base_types_dir = tmp_path / "base-types"
+    plan = run_mod.plan_run(role="armament-primary", frame="humanoid", band="a", count=1,
+                            ledger=ledger, base_types_dir=base_types_dir)
+
+    taken = {"tungsten spiker": "item.humanoid-main-hand-a-001"}
+    calls = {"n": 0}
+
+    def stubborn_call(brief: str, schema: dict) -> dict:
+        calls["n"] += 1
+        cls = schema["properties"]["class"]["enum"][0]
+        fam = schema["properties"]["implicitFamily"]["enum"][0]
+        return {"name": "Tungsten Spiker", "flavor": "f", "class": cls,
+                "implicitFamily": fam, "tags": ["light"]}
+
+    fresh, blocked = run_mod.run_draws(plan, ledger=ledger, call=stubborn_call,
+                                       corpus_names=dict(taken))
+
+    assert fresh == {}
+    assert calls["n"] == 2  # original ask + one repair ask
+    assert any("already exists in the base-type corpus" in b["reason"] for b in blocked.values())
+
+
+def test_run_draws_accepts_a_distinct_repair_answer(tmp_path):
+    ledger = RunLedger(tmp_path / "ledger.json")
+    base_types_dir = tmp_path / "base-types"
+    plan = run_mod.plan_run(role="armament-primary", frame="humanoid", band="a", count=1,
+                            ledger=ledger, base_types_dir=base_types_dir)
+
+    taken = {"tungsten spiker": "item.humanoid-main-hand-a-001"}
+    answers = iter(["Tungsten Spiker", "Honed Hatchet"])
+
+    def call(brief: str, schema: dict) -> dict:
+        cls = schema["properties"]["class"]["enum"][0]
+        fam = schema["properties"]["implicitFamily"]["enum"][0]
+        return {"name": next(answers), "flavor": "f", "class": cls,
+                "implicitFamily": fam, "tags": ["light"]}
+
+    fresh, blocked = run_mod.run_draws(plan, ledger=ledger, call=call, corpus_names=dict(taken))
+    assert blocked == {}
+    assert [e["name"] for e in fresh.values()] == ["Honed Hatchet"]
+
+
+def test_run_draws_without_corpus_names_stays_backward_compatible(tmp_path):
+    """The parameter is opt-in: an existing caller that passes no map keeps the old behaviour."""
+    ledger = RunLedger(tmp_path / "ledger.json")
+    plan = run_mod.plan_run(role="armament-primary", frame="humanoid", band="a", count=1,
+                            ledger=ledger, base_types_dir=tmp_path / "base-types")
+    fresh, blocked = run_mod.run_draws(plan, ledger=ledger, call=_fake_call(name="Tungsten Spiker"))
+    assert len(fresh) == 1 and blocked == {}
