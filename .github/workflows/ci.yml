@@ -179,6 +179,19 @@ jobs:
           dotnet test tests/FusionRpg.E2E.Tests/FusionRpg.E2E.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 10min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.E2E.Tests failed" }
 
+      - name: Test-substrate leak alarm (disk-write-probe, T19b)
+        shell: pwsh
+        run: |
+          # The static gate above (`guard-test-substrate.ps1`) only refuses a bad SOURCE pattern.
+          # This wraps the Data suite (the one that accumulated 65.5 GB of temp dirs) so a run that
+          # ACTUALLY leaves a `fusionrpg-*` temp dir or an `rpg-*.sqlite` under a test output root is
+          # red too, even if the source pattern changed. Set-diff, never a count (`validation-ssot.md`):
+          # a pre-existing dir is not read as a leak and an equal count cannot pass while membership
+          # differs. `--no-build` reuses the Release build from the step above.
+          .\scripts\test-substrate-leak-alarm.ps1 -Run { dotnet test tests/FusionRpg.Data.Tests/FusionRpg.Data.Tests.csproj -c Release --verbosity minimal --no-build }
+          if ($LASTEXITCODE -ne 0) { throw "test-substrate-leak-alarm.ps1 failed — a test run left a temp dir or rpg-*.sqlite behind" }
+          # ANCHOR(T28): profiles wiring appends after this step. Do not reorder the steps above.
+
       - name: Boundary guards (AGENTS.md — combat writes, Secondary-Unity boundary, Funnel deltas, DAL)
         shell: pwsh
         run: |
