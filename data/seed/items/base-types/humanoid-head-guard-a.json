@@ -30,7 +30,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -102,7 +102,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.immunity",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -138,7 +138,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.stoicism",
+        "family": "atom.mending",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -174,7 +174,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -210,7 +210,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -246,7 +246,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.immunity",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -319,7 +319,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -355,7 +355,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.stoicism",
+        "family": "atom.mending",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -392,7 +392,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.padding",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -428,7 +428,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -465,7 +465,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.mending",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -501,7 +501,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -537,7 +537,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -573,7 +573,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.immunity",
         "powerBand": "medium"
       },
       "socketMax": 0,
@@ -609,7 +609,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -645,7 +645,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -681,7 +681,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -717,7 +717,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.mending",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -753,7 +753,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -789,7 +789,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -825,7 +825,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -861,7 +861,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.mending",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -897,7 +897,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.immunity",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -933,7 +933,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -969,7 +969,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "low"
       },
       "socketMax": 2,

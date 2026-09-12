@@ -433,23 +433,24 @@ def test_real_corpus_implicit_families_are_all_in_the_real_registry_slate():
                 f"(the per-frame slate, classes.v3.json)")
 
 
-def test_the_real_corpus_is_already_disjoint_per_role_frame():
-    """The D11 clause-1 corpus state. Expected RED until the S3 re-slate generation run lands:
-    this is the seedsmith-side twin of the Core test, so the generator's own suite shows the same
-    debt rather than only the C# one."""
+def test_the_real_corpus_implicit_families_resolve_against_its_frame_slate():
+    """Every shipped entry names a family its own (role, frame) slate allows. RED until the S3
+    re-slate run lands; this is the seedsmith-side twin of the Core D11 test."""
     import glob
-    by_role = {}
+    offenders = []
     for path in glob.glob(str(REAL_CORPUS_DIR / "*.json")):
         doc = json.loads(Path(path).read_text(encoding="utf-8"))
         for entry in doc["entries"]:
-            role, frame, fam = entry.get("role"), entry.get("frame"), entry["implicit"]["family"]
-            if role is None or frame is None:
+            if entry.get("enabled") is False:
                 continue
-            by_role.setdefault(role, {}).setdefault(frame, set()).add(fam)
-    overlaps = {r: sorted(f["humanoid"] & f["plant"])
-                for r, f in by_role.items() if "humanoid" in f and "plant" in f}
-    overlaps = {r: v for r, v in overlaps.items() if v and r != "standard"}
-    assert overlaps == {}, f"roles whose frames still share an implicit family: {overlaps}"
+            role, frame = entry.get("role"), entry.get("frame")
+            if role is None or frame is None or role == "standard":
+                continue
+            legal = set(tuning_mod.load_legal_implicit_families(role, frame))
+            fam = entry["implicit"]["family"]
+            if fam not in legal:
+                offenders.append(f"{entry['id']} ({role}/{frame}): {fam}")
+    assert offenders == [], f"{len(offenders)} entries outside their frame slate:\n" + "\n".join(offenders[:20])
 
 
 # ---------------------------------------------------------------------------------------------
@@ -820,3 +821,97 @@ def test_run_draws_without_corpus_names_stays_backward_compatible(tmp_path):
                             ledger=ledger, base_types_dir=tmp_path / "base-types")
     fresh, blocked = run_mod.run_draws(plan, ledger=ledger, call=_fake_call(name="Tungsten Spiker"))
     assert len(fresh) == 1 and blocked == {}
+
+
+# ---- S3: D11 clause-1 re-slate verb (2026-09-12) -----------------------------------------------
+
+def test_reslate_plan_moves_every_entry_onto_its_own_frame_slate(tmp_path):
+    """The repair must be correct by construction: after applying it, no entry sits outside its
+    (role, frame) slate, which — because the two frame slates are disjoint — means D11 clause 1
+    cannot fail."""
+    from seedsmith.adapters.items.basetypegen import reslate
+
+    base = tmp_path / "base-types"
+    base.mkdir()
+    # armament-primary/humanoid legal slate is the burst half; put a PLANT family on a humanoid row.
+    (base / "humanoid-armament-primary-a.json").write_text(json.dumps({"entries": [
+        {"id": "item.humanoid-main-hand-a-001", "role": "armament-primary", "frame": "humanoid",
+         "class": "blade", "implicit": {"family": "atom.might", "powerBand": "medium"},
+         "tags": ["light"]},
+    ]}), encoding="utf-8")
+
+    report = reslate.plan_reslate(base_types_dir=base)
+    assert len(report.changed) == 1
+    change = report.changed[0]
+    humanoid = set(tuning_mod.load_legal_implicit_families("armament-primary", "humanoid"))
+    assert change.old_family == "atom.might"
+    assert change.new_family in humanoid
+
+    written = reslate.apply_reslate(report, base_types_dir=base)
+    assert written == 1
+    after = json.loads((base / "humanoid-armament-primary-a.json").read_text(encoding="utf-8"))
+    entry = after["entries"][0]
+    assert entry["implicit"]["family"] in humanoid
+    assert entry["implicit"]["powerBand"] == "medium"   # preserved
+    assert entry["id"] == "item.humanoid-main-hand-a-001"  # identity preserved (seed-contract 7.2)
+
+
+def test_reslate_is_deterministic():
+    from seedsmith.adapters.items.basetypegen import reslate
+    a = reslate.plan_reslate()
+    b = reslate.plan_reslate()
+    assert [(c.entry_id, c.new_family) for c in a.changed] == \
+           [(c.entry_id, c.new_family) for c in b.changed]
+
+
+def test_reslate_leaves_a_legal_entry_alone(tmp_path):
+    from seedsmith.adapters.items.basetypegen import reslate
+    base = tmp_path / "base-types"
+    base.mkdir()
+    legal = tuning_mod.load_legal_implicit_families("armament-primary", "humanoid")[0]
+    (base / "humanoid-armament-primary-a.json").write_text(json.dumps({"entries": [
+        {"id": "item.humanoid-main-hand-a-001", "role": "armament-primary", "frame": "humanoid",
+         "class": "blade", "implicit": {"family": legal, "powerBand": "medium"}, "tags": ["light"]},
+    ]}), encoding="utf-8")
+    report = reslate.plan_reslate(base_types_dir=base)
+    assert report.changed == () and report.already_legal == 1
+
+
+def test_reslate_spreads_moved_rows_across_the_slate(tmp_path):
+    """A repair that piled every moved row onto one family would satisfy the letter of the rule and
+    destroy corpus variety; the pick spreads by current usage."""
+    from seedsmith.adapters.items.basetypegen import reslate
+    base = tmp_path / "base-types"
+    base.mkdir()
+    entries = [
+        {"id": f"item.humanoid-main-hand-a-{i:03d}", "role": "armament-primary", "frame": "humanoid",
+         "class": "blade", "implicit": {"family": "atom.butter", "powerBand": "medium"},
+         "tags": ["light"]}
+        for i in range(1, 13)
+    ]
+    (base / "humanoid-armament-primary-a.json").write_text(json.dumps({"entries": entries}),
+                                                           encoding="utf-8")
+    report = reslate.plan_reslate(base_types_dir=base)
+    used = {c.new_family for c in report.changed}
+    slate = set(tuning_mod.load_legal_implicit_families("armament-primary", "humanoid"))
+    assert used <= slate
+    assert len(used) > 1, "all moved rows collapsed onto one family"
+
+
+def test_the_real_corpus_is_already_disjoint_per_role_frame_after_the_reslate():
+    """S3 landed: the real corpus now satisfies D11 clause 1."""
+    import glob
+    by_role = {}
+    for path in glob.glob(str(REAL_CORPUS_DIR / "*.json")):
+        doc = json.loads(Path(path).read_text(encoding="utf-8"))
+        for entry in doc["entries"]:
+            if entry.get("enabled") is False:
+                continue
+            role, frame, fam = entry.get("role"), entry.get("frame"), entry["implicit"]["family"]
+            if role is None or frame is None or role == "standard":
+                continue
+            by_role.setdefault(role, {}).setdefault(frame, set()).add(fam)
+    overlaps = {r: sorted(f["humanoid"] & f["plant"])
+                for r, f in by_role.items() if "humanoid" in f and "plant" in f}
+    overlaps = {r: v for r, v in overlaps.items() if v}
+    assert overlaps == {}, f"roles whose frames still share an implicit family: {overlaps}"

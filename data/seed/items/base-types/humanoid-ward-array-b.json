@@ -30,7 +30,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -67,7 +67,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -105,7 +105,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -142,7 +142,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -180,7 +180,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -217,7 +217,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -254,7 +254,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -292,7 +292,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -329,7 +329,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "trivial"
       },
       "socketMax": 3,
@@ -366,7 +366,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -404,7 +404,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -441,7 +441,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -479,7 +479,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -515,7 +515,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -551,7 +551,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-capacity",
         "powerBand": "medium"
       },
       "socketMax": 3,
@@ -587,7 +587,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-regen",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -623,7 +623,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-capacity",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -659,7 +659,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -695,7 +695,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.mending",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -731,7 +731,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-capacity",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -803,7 +803,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -910,7 +910,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 1,

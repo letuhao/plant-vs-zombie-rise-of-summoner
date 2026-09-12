@@ -72,7 +72,70 @@ public static class FrameDirectionCheck
                 ctx.CorpusError("FrameImplicitNotDisjoint", "spec-base-types.md D11 clause 1",
                     $"role '{role}': humanoid and plant implicit families are not disjoint — shared: {string.Join(", ", overlap)}");
         }
+
+        EmitFlavourDriftWarnings(ctx);
     }
+
+    /// <summary>
+    /// D11's prose half (`spec-base-types.md` "Ask first"): an entry keeps its name and flavor while
+    /// its `implicit.family` changes, so prose written for one family can end up over another. A
+    /// re-slate therefore leaves drift behind, and the spec names this module's job as a WARNING
+    /// only — *"the authoring fleet ... this module emits an `ImplicitFlavourDrift` warning per
+    /// entry; it does not call a model"*. So re-flavouring is NOT done here; the warning makes the
+    /// debt visible to the fleet that owns it.
+    ///
+    /// <para><b>How drift is detected without a model.</b> Each family's own display name
+    /// (`affix-families` entries) is its vocabulary. A row is flagged when its `flavor` mentions a
+    /// word from a DIFFERENT family's vocabulary and none from its own — prose that names the thing
+    /// the entry no longer is. That is a conservative signal: it misses silent prose, and it
+    /// deliberately does not flag a row whose prose is family-neutral.</para>
+    /// </summary>
+    static void EmitFlavourDriftWarnings(ValidationContext ctx)
+    {
+        var vocabulary = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
+        foreach (var entry in ctx.Entries)
+        {
+            if (entry.File.Kind != "affix-family") continue;
+            var familyId = entry.AsString("id");
+            var display = entry.AsString("name");
+            if (familyId is null || display is null) continue;
+            vocabulary[familyId] = Words(display);
+        }
+        if (vocabulary.Count == 0) return;
+
+        // A word shared by many families is not evidence of anything; require a distinctive word.
+        var wordFamilyCount = new Dictionary<string, int>(StringComparer.Ordinal);
+        foreach (var words in vocabulary.Values)
+            foreach (var w in words)
+                wordFamilyCount[w] = wordFamilyCount.GetValueOrDefault(w) + 1;
+
+        foreach (var entry in ctx.Entries)
+        {
+            if (entry.File.Kind != "base-type") continue;
+            if (entry.File.IsExemplar) continue;
+            if (entry.Node["enabled"] is JsonValue en && en.TryGetValue<bool>(out var enabled) && !enabled) continue;
+
+            var family = FamilyOf(entry);
+            var flavor = entry.AsString("flavor");
+            if (family is null || string.IsNullOrWhiteSpace(flavor)) continue;
+            if (!vocabulary.TryGetValue(family, out var own)) continue;
+
+            var words = Words(flavor);
+            if (words.Overlaps(own)) continue; // prose already names its own family — fine
+
+            var foreign = words.Where(w => wordFamilyCount.GetValueOrDefault(w) == 1
+                                           && vocabulary.Any(kv => kv.Key != family && kv.Value.Contains(w)))
+                .OrderBy(w => w, StringComparer.Ordinal).ToList();
+            if (foreign.Count > 0)
+                ctx.Warn(entry, "ImplicitFlavourDrift", "spec-base-types.md D11 (flavour half)",
+                    $"'{entry.Label}': flavor names '{foreign[0]}', from another family, while the "
+                    + $"entry's implicit is '{family}' — owed a re-flavour by the authoring fleet");
+        }
+    }
+
+    static HashSet<string> Words(string text) =>
+        new(System.Text.RegularExpressions.Regex.Matches(text.ToLowerInvariant(), "[a-z]{4,}")
+            .Select(m => m.Value), StringComparer.Ordinal);
 
     static string? FamilyOf(SeedEntry e) =>
         e.Node["implicit"] is JsonObject implicitObj && implicitObj["family"] is JsonValue f && f.TryGetValue<string>(out var s)

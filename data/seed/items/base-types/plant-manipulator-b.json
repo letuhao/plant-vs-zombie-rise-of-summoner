@@ -30,7 +30,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -181,7 +181,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.searing-strike",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -256,7 +256,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -406,7 +406,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.searing-strike",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -443,7 +443,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.searing-strike",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -481,7 +481,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.cruelty",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -517,7 +517,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -553,7 +553,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.searing-strike",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -589,7 +589,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.cruelty",
+        "family": "atom.deathblast",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -625,7 +625,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.cruelty",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -661,7 +661,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.cruelty",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -697,7 +697,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.deathblast",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -733,7 +733,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.searing-strike",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -769,7 +769,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.cruelty",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -805,7 +805,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.cruelty",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -841,7 +841,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.cruelty",
+        "family": "atom.deathblast",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -877,7 +877,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.cruelty",
+        "family": "atom.searing-strike",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -913,7 +913,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.cruelty",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -949,7 +949,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.cruelty",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -985,7 +985,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.cruelty",
+        "family": "atom.deathblast",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -1021,7 +1021,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.cruelty",
+        "family": "atom.searing-strike",
         "powerBand": "medium"
       },
       "socketMax": 2,

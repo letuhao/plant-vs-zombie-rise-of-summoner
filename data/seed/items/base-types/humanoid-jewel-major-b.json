@@ -65,7 +65,7 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -136,7 +136,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -242,7 +242,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -453,7 +453,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -489,7 +489,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.midas",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -525,7 +525,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 0,
@@ -561,7 +561,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -597,7 +597,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.midas",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -633,7 +633,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.midas",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -669,7 +669,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 0,
@@ -741,7 +741,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -776,7 +776,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.midas",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -812,7 +812,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 0,
@@ -847,7 +847,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -883,7 +883,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -919,7 +919,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -954,7 +954,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.midas",
         "powerBand": "medium"
       },
       "socketMax": 0,
@@ -990,7 +990,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 1,

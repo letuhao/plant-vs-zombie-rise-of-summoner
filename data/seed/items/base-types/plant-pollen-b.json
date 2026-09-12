@@ -67,7 +67,7 @@
       "class": "bulb",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -104,7 +104,7 @@
       "class": "bulb",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -327,7 +327,7 @@
       "class": "graft",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,

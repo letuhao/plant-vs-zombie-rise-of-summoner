@@ -137,7 +137,7 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.gravemaking",
+        "family": "atom.cherry-bloom",
         "powerBand": "high"
       },
       "socketMax": 1,
@@ -281,7 +281,7 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.gravemaking",
+        "family": "atom.firelining",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -318,7 +318,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.gravemaking",
+        "family": "atom.cherry-bloom",
         "powerBand": "high"
       },
       "socketMax": 2,

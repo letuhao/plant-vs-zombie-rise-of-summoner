@@ -136,7 +136,7 @@
       "class": "torc",
       "band": "a",
       "implicit": {
-        "family": "atom.gravemaking",
+        "family": "atom.cherry-bloom",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -276,7 +276,7 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.gravemaking",
+        "family": "atom.cherry-bloom",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -312,7 +312,7 @@
       "class": "torc",
       "band": "a",
       "implicit": {
-        "family": "atom.gravemaking",
+        "family": "atom.firelining",
         "powerBand": "low"
       },
       "socketMax": 1,

@@ -400,7 +400,7 @@
       "class": "censer",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.retribution",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -763,7 +763,7 @@
       "class": "lash",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.retribution",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -799,7 +799,7 @@
       "class": "lash",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.retribution",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -834,7 +834,7 @@
       "class": "lash",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.retribution",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -870,7 +870,7 @@
       "class": "lash",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.retribution",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -905,7 +905,7 @@
       "class": "lash",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.retribution",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -941,7 +941,7 @@
       "class": "lash",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.retribution",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -977,7 +977,7 @@
       "class": "lash",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.retribution",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -1013,7 +1013,7 @@
       "class": "lash",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.warded",
         "powerBand": "medium"
       },
       "socketMax": 0,

@@ -30,7 +30,7 @@
       "class": "leather",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -66,7 +66,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -102,7 +102,7 @@
       "class": "leather",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -138,7 +138,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -174,7 +174,7 @@
       "class": "cloth",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -210,7 +210,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -246,7 +246,7 @@
       "class": "leather",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -282,7 +282,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -318,7 +318,7 @@
       "class": "cloth",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -354,7 +354,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -390,7 +390,7 @@
       "class": "cloth",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.cruelty",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -426,7 +426,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "medium"
       },
       "socketMax": 2,

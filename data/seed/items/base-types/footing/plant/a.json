@@ -67,7 +67,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -141,7 +141,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -215,7 +215,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -289,7 +289,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -363,7 +363,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -437,7 +437,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,

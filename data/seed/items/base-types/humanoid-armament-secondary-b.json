@@ -66,7 +66,7 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -140,7 +140,7 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -213,7 +213,7 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -286,7 +286,7 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 3,
@@ -359,7 +359,7 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -432,7 +432,7 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 3,
@@ -469,7 +469,7 @@
       "class": "focus",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -685,7 +685,7 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -757,7 +757,7 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -793,7 +793,7 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -829,7 +829,7 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -865,7 +865,7 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 3,
@@ -901,7 +901,7 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -937,7 +937,7 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -973,7 +973,7 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 3,
@@ -1009,7 +1009,7 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 1,

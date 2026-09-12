@@ -67,7 +67,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.stoicism",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -104,7 +104,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -140,7 +140,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -177,7 +177,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.immunity",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -214,7 +214,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -288,7 +288,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -325,7 +325,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -363,7 +363,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -399,7 +399,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.immunity",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -436,7 +436,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -473,7 +473,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.vitality",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -509,7 +509,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -582,7 +582,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.stoicism",
         "powerBand": "medium"
       },
       "socketMax": 0,
@@ -618,7 +618,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.vitality",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -654,7 +654,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.stalwart",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -690,7 +690,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -726,7 +726,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.stoicism",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -762,7 +762,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.vitality",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -798,7 +798,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -907,7 +907,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.stalwart",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -943,7 +943,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 1,

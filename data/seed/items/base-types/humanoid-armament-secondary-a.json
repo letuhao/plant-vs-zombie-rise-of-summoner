@@ -30,7 +30,7 @@
       "class": "focus",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -66,7 +66,7 @@
       "class": "focus",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -139,7 +139,7 @@
       "class": "focus",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -211,7 +211,7 @@
       "class": "focus",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -284,7 +284,7 @@
       "class": "bulwark",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -320,7 +320,7 @@
       "class": "bulwark",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -429,7 +429,7 @@
       "class": "bulwark",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -466,7 +466,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.might",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -502,7 +502,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -538,7 +538,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -574,7 +574,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 0,
@@ -610,7 +610,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.might",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -646,7 +646,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -682,7 +682,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -718,7 +718,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -754,7 +754,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.might",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -790,7 +790,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -826,7 +826,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -862,7 +862,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -898,7 +898,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.might",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -934,7 +934,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 1,

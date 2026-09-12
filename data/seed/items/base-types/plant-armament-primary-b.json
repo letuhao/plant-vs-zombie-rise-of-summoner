@@ -30,7 +30,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -67,7 +67,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -105,7 +105,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.shield-pen",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -142,7 +142,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -179,7 +179,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -217,7 +217,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.shield-pen",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -254,7 +254,7 @@
       "class": "seedpod",
       "band": "b",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -291,7 +291,7 @@
       "class": "seedpod",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -329,7 +329,7 @@
       "class": "seedpod",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.shield-pen",
         "powerBand": "low"
       },
       "socketMax": 4,
@@ -367,7 +367,7 @@
       "class": "seedpod",
       "band": "b",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.shield-pen",
         "powerBand": "low"
       },
       "socketMax": 4,
@@ -404,7 +404,7 @@
       "class": "seedpod",
       "band": "b",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 4,
@@ -441,7 +441,7 @@
       "class": "seedpod",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.searing-strike",
         "powerBand": "trivial"
       },
       "socketMax": 4,
@@ -478,7 +478,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.shield-pen",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -513,7 +513,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -548,7 +548,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.searing-strike",
         "powerBand": "medium"
       },
       "socketMax": 4,
@@ -583,7 +583,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.elemental-power",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -618,7 +618,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.shield-pen",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -653,7 +653,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
       "socketMax": 4,
@@ -688,7 +688,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -723,7 +723,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.elemental-power",
+        "family": "atom.shield-pen",
         "powerBand": "medium"
       },
       "socketMax": 3,
@@ -758,7 +758,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.elemental-power",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
       "socketMax": 4,
@@ -793,7 +793,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.elemental-power",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -829,7 +829,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.elemental-power",
+        "family": "atom.searing-strike",
         "powerBand": "medium"
       },
       "socketMax": 3,
@@ -865,7 +865,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.shield-pen",
         "powerBand": "medium"
       },
       "socketMax": 4,
@@ -900,7 +900,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.elemental-power",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -936,7 +936,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.shield-pen",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -972,7 +972,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.searing-strike",
         "powerBand": "medium"
       },
       "socketMax": 4,
@@ -1008,7 +1008,7 @@
       "class": "nozzle",
       "band": "b",
       "implicit": {
-        "family": "atom.elemental-power",
+        "family": "atom.searing-strike",
         "powerBand": "medium"
       },
       "socketMax": 2,

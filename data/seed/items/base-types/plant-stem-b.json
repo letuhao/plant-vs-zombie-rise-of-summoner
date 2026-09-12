@@ -67,7 +67,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -104,7 +104,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -217,7 +217,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -293,7 +293,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -330,7 +330,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 4,
@@ -441,7 +441,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "trivial"
       },
       "socketMax": 4,

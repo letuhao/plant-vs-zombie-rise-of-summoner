@@ -67,7 +67,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -104,7 +104,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -142,7 +142,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -180,7 +180,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.immunity",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -218,7 +218,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -293,7 +293,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -330,7 +330,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -367,7 +367,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -405,7 +405,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.immunity",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -442,7 +442,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.stoicism",
         "powerBand": "trivial"
       },
       "socketMax": 3,
@@ -480,7 +480,7 @@
       "class": "husk",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -516,7 +516,7 @@
       "class": "husk",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -552,7 +552,7 @@
       "class": "husk",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.vitality",
         "powerBand": "medium"
       },
       "socketMax": 3,
@@ -588,7 +588,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.stoicism",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -624,7 +624,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -660,7 +660,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -696,7 +696,7 @@
       "class": "husk",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.vitality",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -732,7 +732,7 @@
       "class": "husk",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.stalwart",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -768,7 +768,7 @@
       "class": "husk",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 3,

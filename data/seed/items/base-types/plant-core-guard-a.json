@@ -67,7 +67,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -142,7 +142,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -216,7 +216,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -292,7 +292,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -367,7 +367,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -442,7 +442,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -479,7 +479,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -515,7 +515,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -551,7 +551,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -588,7 +588,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "medium"
       },
       "socketMax": 0,
@@ -624,7 +624,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -660,7 +660,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -697,7 +697,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -734,7 +734,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.regeneration",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -770,7 +770,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.regeneration",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -806,7 +806,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -842,7 +842,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -878,7 +878,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -914,7 +914,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.regeneration",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -950,7 +950,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -986,7 +986,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -1023,7 +1023,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.regeneration",
         "powerBand": "medium"
       },
       "socketMax": 0,

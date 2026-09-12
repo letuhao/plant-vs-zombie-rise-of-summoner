@@ -30,7 +30,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -102,7 +102,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -138,7 +138,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -212,7 +212,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -357,7 +357,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -431,7 +431,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "trivial"
       },
       "socketMax": 2,
