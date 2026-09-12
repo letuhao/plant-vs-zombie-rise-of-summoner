@@ -179,6 +179,11 @@ Listed so they are not discovered mid-task. All are reviewed changes to document
 ## 6. Related
 
 - Ideal: [data-test-substrate-ideal.md](data-test-substrate-ideal.md) — spike-audited, rev 2
+- **Module spec (written 2026-09-12):**
+  [data-test-substrate/spec-memory-storage-plan.md](data-test-substrate/spec-memory-storage-plan.md)
+  — module 1, the whole unlock. Its audit caught a real defect in this program's own first draft of
+  the seam (`new RpgStore(uri)` cannot work through the production constructor), which is exactly what
+  the spec phase exists to find
 - The DAL law: [data-architecture.md](data-architecture.md) §6 · `scripts/guard-dal.ps1`
 - The validation standard this probe must obey (assert the relationship, never a population count):
   [validation-ssot.md](validation-ssot.md)

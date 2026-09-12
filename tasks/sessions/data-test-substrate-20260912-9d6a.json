@@ -19,6 +19,7 @@
     ".github/workflows/ci.yml",
     "docs/architecture/data-architecture.md",
     "docs/architecture/data-test-substrate-*.md",
+    "docs/architecture/data-test-substrate/**",
     "docs/contributing/testing-standard.md",
     "AGENTS.md",
     "CLAUDE.md",
