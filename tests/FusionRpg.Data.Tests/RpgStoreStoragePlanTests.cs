@@ -153,8 +153,36 @@ public class RpgStoreStoragePlanTests
         using var store = RpgStore.InMemory();
         store.Init();
 
-        var ex = Assert.Throws<InvalidOperationException>(() => store.ArchiveDir);
+        var ex = Assert.Throws<StorePlanException>(() => store.ArchiveDir);
         Assert.Contains("memory", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Every_archive_entry_point_throws_a_StorePlanException_on_a_memory_store()
+    {
+        using var store = RpgStore.InMemory();
+        store.Init();
+
+        // Every filesystem-backed archive surface must fail loudly under the memory plan; none may
+        // silently resolve a cwd-relative path and write there.
+        Assert.Throws<StorePlanException>(() => store.PromoteClosedRunCapture(1));
+        Assert.Throws<StorePlanException>(() => store.CompactAfterRunClosed(null));
+        Assert.Throws<StorePlanException>(() => store.TrimHotTailsNow());
+        Assert.Throws<StorePlanException>(() => store.TrimSoulLedgerTails());
+        Assert.Throws<StorePlanException>(() => store.DeleteArchives(Array.Empty<string>()));
+        Assert.Throws<StorePlanException>(() => store.PurgeClosedRunCapture(Array.Empty<long>()));
+        Assert.Throws<StorePlanException>(() => store.DeleteClosedRuns(Array.Empty<long>()));
+    }
+
+    [Fact]
+    public void StorePlanException_is_an_InvalidOperationException_and_names_the_memory_plan()
+    {
+        using var store = RpgStore.InMemory();
+        store.Init();
+
+        var ex = Assert.Throws<StorePlanException>(() => store.DeleteArchives(Array.Empty<string>()));
+        Assert.IsAssignableFrom<InvalidOperationException>(ex);
+        Assert.Contains("memory plan", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

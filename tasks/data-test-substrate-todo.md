@@ -49,11 +49,11 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - Files: `src/FusionRpg.Data/Sqlite/RpgStore.cs`, `src/FusionRpg.Data/Sqlite/RpgStoreOptions.cs`, `tests/FusionRpg.Data.Tests/RpgStoreStoragePlanTests.cs`. Scope: M.
   - Dependencies: T2.
 
-- [ ] **Task T4: `Init()` skip + archive throw + `Reset()` in memory**
-  - Description: under the memory plan skip `CreateDirectory`/`ArchiveDir`/`LegacyMonoMigrator.TryMigrate`/`HealOrphanMediaTables`; make every archive entry point (4 writers, purge, `PromoteClosedRunCapture`) throw a dedicated named exception; `Reset()` clears in place and re-`Init()`s without touching the filesystem.
-  - Acceptance: memory `Init()` creates no file; archive call throws (not a cwd write); `Reset()` leaves an empty usable store with no file.
-  - Verify: `MemoryStoragePlanTests` (archive-throw + reset cases).
-  - Files: `src/FusionRpg.Data/Sqlite/RpgStore.cs`, `RpgStore.Compaction.cs`, `RpgStore.Storage.cs`, `MemoryStoragePlanTests.cs`. Scope: M.
+- [x] **Task T4: `Init()` skip + archive throw + `Reset()` in memory** ✅ 2026-09-12
+  - Description: `Init()` skips the four file-only steps under the memory plan; `ArchiveDir` and **every** archive entry point (`PromoteClosedRunCapture`, `CompactAfterRunClosed`, `TrimHotTailsNow`, `TrimSoulLedgerTails`, `DeleteArchives`, `PurgeClosedRunCapture`, `DeleteClosedRuns`) throw a dedicated **`StorePlanException`** before any early-return or filesystem work, so none can silently resolve a cwd-relative path; `Reset()` skips the filesystem archive branch and re-`Init()`s.
+  - Acceptance met: memory `Init()` creates no file; every archive entry point throws `StorePlanException` (an `InvalidOperationException` naming the memory plan); `Reset()` leaves an empty usable store with no file; the file plan's archive still creates/reads (22/22 archive/purge/soul tests).
+  - Verified: gate subagent PASS — focused 11/11, full Data 1275/1275, both guards green, scope clean.
+  - Files: `src/FusionRpg.Data/Sqlite/{RpgStore,StorePlanException}.cs`, `RpgStore.Compaction.cs`, `RpgStore.Storage.cs`, `tests/FusionRpg.Data.Tests/RpgStoreStoragePlanTests.cs`. Scope: M.
   - Dependencies: T3.
 
 - [ ] **Task T5: Module-1 proof tests (the module's Definition of Done)**

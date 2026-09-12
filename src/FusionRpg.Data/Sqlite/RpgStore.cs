@@ -34,10 +34,26 @@ public sealed partial class RpgStore : IRpgDb, IDisposable
     /// </summary>
     public string ArchiveDir =>
         _inMemory
-            ? throw new InvalidOperationException(
-                "A memory store has no archive directory. Archive entry points are file-only until the " +
-                "archive-target module makes the archive target memory-capable.")
+            ? throw ArchiveUnavailable()
             : Path.Combine(_dataDir, "archive");
+
+    /// <summary>
+    /// The one place the "file-backed operation on a memory store" failure is constructed, so every
+    /// archive entry point throws the same named type with the same explanation.
+    /// </summary>
+    StorePlanException ArchiveUnavailable() =>
+        new("A memory plan has no filesystem archive; archive entry points are file-only until the " +
+            "archive-target module makes the archive target memory-capable.");
+
+    /// <summary>
+    /// Throws <see cref="StorePlanException"/> when this store is in-memory, i.e. any filesystem-backed
+    /// archive operation must not proceed. Call at the top of every archive entry point.
+    /// </summary>
+    void RequireFileArchive()
+    {
+        if (_inMemory)
+            throw ArchiveUnavailable();
+    }
     HashSet<long>? _activityNotifyBatch;
     List<RpgProgressionDirty>? _progressionNotifyBatch;
     HashSet<long>? _closedRunNotifyBatch;
