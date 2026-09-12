@@ -81,6 +81,12 @@ public static class CheatCommandRunner
                 _ = RpgHost.Client.RefreshCommanderSnapshotCacheAsync();
             return;
         }
+        if (name is "passive-tree.bound-atoms.reload")
+        {
+            if (RpgHost.Client != null)
+                _ = RpgHost.Client.RefreshTreeBoundAtomsAsync();
+            return;
+        }
         if (name is "lawn-deploy.roster.reload")
         {
             if (RpgHost.Client != null)

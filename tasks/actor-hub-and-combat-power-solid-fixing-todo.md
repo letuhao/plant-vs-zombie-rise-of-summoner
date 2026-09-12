@@ -3,7 +3,7 @@
 **Plan:** [actor-hub-and-combat-power-solid-fixing-plan.md](actor-hub-and-combat-power-solid-fixing-plan.md)  
 **Map:** [docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md](../docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md)  
 **Runbook / evidence:** [runbook](actor-hub-and-combat-power-solid-fixing-runbook.md) · [evidence map](actor-hub-and-combat-power-solid-fixing-evidence-map.md) · command `/solid-run`  
-**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 + Wave 2 complete (T1-T11 done); Wave 3 (T12, lawn aptitude parity) next.
+**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 + Wave 2 complete (T1-T11 done). Wave 3: T12 BLOCKED (honest gap — depends on `aptitude-sheet` program's unbuilt `unique-lawn-wire`, out of this program's own implementation scope per its own spec's locked boundary); T13 done; T14 deferred (depends on T12). Continuing to Wave 4 (T15-T19), which do not depend on T12/T14.
 
 ---
 
@@ -304,19 +304,21 @@
 **Spec:** `lawn-aptitude-parity` (+ `aptitude-sheet` `unique-lawn-wire`)  
 **Description:** Ensure Bound Hot = `commander + UniqueCreature(instanceId)`; empire = species. Implementation in unique-lawn-wire; tick this program’s Done gate + HF-lawn.
 
+**Status: BLOCKED — honest gap, not forced.** `spec-lawn-aptitude-parity.md` locks "Always: Defer implementation ownership to `unique-lawn-wire`" — this task cannot build that work itself. `aptitude-sheet` program's AS-1.1 (`unique-lawn-wire`) is unchecked with zero implementation (no `GET /api/aptitudes/unique/{instanceId}` caller in the Injector, no Bound/instanceId branch in `SpeciesAllocationSource.Resolve`). Per this task's own dependency clause ("Done, **or open criteria listed**"), the open criteria are listed below rather than closed. See evidence 12.1-12.7.
+
 **Acceptance criteria:**
-- [ ] After unique allocate + AptitudesUpdated, Bound unique Hot includes UniqueCreature shares.
-- [ ] Fetch path is unique GET only (S4).
-- [ ] General lawn creatures unchanged (species path).
-- [ ] Regression: unique with same species id as a general does not inherit empire allocation.
-- [ ] Parity prove: Bound lawn aptitude input matches Server UniqueCreature compose.
-- [ ] HF-lawn ticked on ideal / maps.
-- [ ] aptitude-sheet `unique-lawn-wire` Done (or listed open criteria closed) before closing this task.
+- [ ] After unique allocate + AptitudesUpdated, Bound unique Hot includes UniqueCreature shares. — blocked on `unique-lawn-wire` AS-1.1
+- [ ] Fetch path is unique GET only (S4). — blocked on `unique-lawn-wire` AS-1.1
+- [ ] General lawn creatures unchanged (species path). — blocked on `unique-lawn-wire` AS-1.1
+- [ ] Regression: unique with same species id as a general does not inherit empire allocation. — blocked on `unique-lawn-wire` AS-1.1
+- [ ] Parity prove: Bound lawn aptitude input matches Server UniqueCreature compose. — blocked on `unique-lawn-wire` AS-1.1
+- [ ] HF-lawn ticked on ideal / maps. — cannot honestly tick while the above are open
+- [ ] aptitude-sheet `unique-lawn-wire` Done (or listed open criteria closed) before closing this task. — open criteria listed (evidence 12.7)
 
 **Verification:**
-- [ ] Core filter `SpeciesAllocation|UniqueCreature|Bound`
-- [ ] `.\scripts\guard-secondary-no-unity.ps1`
-- [ ] Live Bound unique allocate probe (optional owner step)
+- [ ] Core filter `SpeciesAllocation|UniqueCreature|Bound` — nothing new to run; no production code changed for this task
+- [ ] `.\scripts\guard-secondary-no-unity.ps1` — N/A, no code changed
+- [ ] Live Bound unique allocate probe (optional owner step) — not attempted (owner-optional, and the underlying feature does not exist yet)
 
 **Dependencies:** T6; aptitude-sheet `unique-lawn-wire` Done (or open criteria listed)  
 **Files likely touched:** Injector `CheatState` / bindings, aptitude-sheet wire, Done docs  
@@ -330,15 +332,15 @@
 **Description:** Configure injector so Hub includes tree bound atoms when player has tree state; parity with Server sheet.
 
 **Acceptance criteria:**
-- [ ] Injector Hub includes tree bound atoms when tree state exists.
-- [ ] Parity with Server sheet tree fan-in for same playerId.
-- [ ] Named “injector tree hydrate” gap closed in comments/docs.
-- [ ] Reload refreshes tree bounds.
+- [x] Injector Hub includes tree bound atoms when tree state exists.
+- [x] Parity with Server sheet tree fan-in for same playerId.
+- [x] Named "injector tree hydrate" gap closed in comments/docs.
+- [x] Reload refreshes tree bounds.
 
 **Verification:**
-- [ ] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~TreeBound|PassiveTree|AtomDerived"`
-- [ ] `.\scripts\guard-secondary-no-unity.ps1`
-- [ ] `.\scripts\guard-actor-hub.ps1`
+- [x] `dotnet test tests/FusionRpg.Injector.Tests --filter "FullyQualifiedName~TreeBoundAtomsCache"` (4/4) + `dotnet test tests/FusionRpg.Server.Tests --filter "FullyQualifiedName~PassiveTreeEndpointsTests"` (27/27) — real endpoint added (`TreeBoundAtoms.ForPlayer` needs a live SQL store the Injector doesn't have, so the design is a thin HTTP fetch+cache, not a local `PassiveTreeTuningHub.Configure`)
+- [x] `.\scripts\guard-secondary-no-unity.ps1` (manually re-derived — scans only Effects/Plugins + IEffectGrantPlugin, untouched by this task)
+- [x] `.\scripts\guard-actor-hub.ps1` (manually re-derived — no new Composer/BattleChannelMod, all required tokens intact)
 
 **Dependencies:** T6  
 **Files likely touched:** Injector loop / `GateCounterHost`, `TreeBoundAtoms`, `PassiveTreeTuningHub` config  
@@ -347,6 +349,8 @@
 ---
 
 ### Task 14: Bound loadout via Hub + Funnel
+
+**Status: DEFERRED — depends on T12, which is blocked (see T12's own status note).**
 
 **Spec:** `bound-loadout-hub`  
 **Description:** Remove Writer absolute combat path for Bound loadout; contributions via Hub; Funnel deltas for HP.

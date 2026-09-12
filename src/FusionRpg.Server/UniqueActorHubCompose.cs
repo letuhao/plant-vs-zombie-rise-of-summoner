@@ -18,7 +18,8 @@ namespace FusionRpg.Server;
 /// Sole Server Hot compose entry for UniqueActor sheet/derived — ActorHub only, FULL durable fan-in
 /// (progression + aptitude + equip atoms + passive tree). Status (<c>l2b.derived</c>) stays
 /// Injector-only (Hot session). BattleStatComposer stays locked-separate (ADR 2026-09-07).
-/// Injector tree hydrate is a named wiring gap — PassiveTreeTuningHub is Server-only today.
+/// Injector tree hydrate (T13, 2026-09-13): CLOSED via HTTP fan-in, not a local
+/// PassiveTreeTuningHub configure — see <see cref="TreeBoundAtoms"/>'s own doc comment.
 /// </summary>
 public static class UniqueActorHubCompose
 {
