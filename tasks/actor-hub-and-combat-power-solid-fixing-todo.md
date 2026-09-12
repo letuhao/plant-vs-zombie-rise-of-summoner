@@ -3,7 +3,7 @@
 **Plan:** [actor-hub-and-combat-power-solid-fixing-plan.md](actor-hub-and-combat-power-solid-fixing-plan.md)  
 **Map:** [docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md](../docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md)  
 **Runbook / evidence:** [runbook](actor-hub-and-combat-power-solid-fixing-runbook.md) · [evidence map](actor-hub-and-combat-power-solid-fixing-evidence-map.md) · command `/solid-run`  
-**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 + Wave 2 complete (T1-T11 done). Wave 3: T12 BLOCKED (honest gap — depends on `aptitude-sheet` program's unbuilt `unique-lawn-wire`, out of this program's own implementation scope per its own spec's locked boundary); T13 done; T14 deferred (depends on T12). Wave 4 in progress: T15 done; T16-T19 next.
+**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 + Wave 2 complete (T1-T11 done). Wave 3: T12 BLOCKED (honest gap — depends on `aptitude-sheet` program's unbuilt `unique-lawn-wire`, out of this program's own implementation scope per its own spec's locked boundary); T13 done; T14 deferred (depends on T12). Wave 4 in progress: T15-T16 done; T17-T19 next.
 
 ---
 
@@ -409,16 +409,18 @@
 **Spec:** `standing-coeff-tuning`  
 **Description:** Family/mask coeffs in tuning JSON so dodge is Survivability-weighted; magic-number audit clean.
 
+**Note on data location (deviation from the file list below, documented not silent):** investigation found `data/seed/power/coefficients.v1.json` is NOT the live runtime source for `ActorPowerCache`/`CostFunction` pricing — `PowerTables.Authored()` (C#, `CoefficientTable.cs`) is, and already carries the SAME "data rather than a constant, deliberately" justification for a different existing row type (`PowerInteractionRow`/`AuthoredInteractions()`) that the new `PowerCategoryOverrideRow`/`AuthoredCategoryOverrides()` follows exactly. The JSON file is swept by the generic atom importer for a separate, not-yet-wired E44 sweep/fitting concern (spec-power-sweep.md), not read by this pricing pipeline at all. Extending the actually-live table is authoring the balance surface in its established home, not skipping the tunables-ssot rule.
+
 **Acceptance criteria:**
-- [ ] Tunable family/mask coeffs live and loaded.
-- [ ] High dodge still raises combat power; Survivability axis identity improved.
-- [ ] `python scripts/audit-magic-numbers.py` clean on new Policy surfaces.
-- [ ] Missing coeff row → load reject or documented structural default.
-- [ ] Standing vector fixtures re-blessed once if vectors move.
+- [x] Tunable family/mask coeffs live and loaded. (As authored `PowerCategoryOverrideRow`s in `PowerTables.Authored()`, the pricing pipeline's real live table — see note above.)
+- [x] High dodge still raises combat power; Survivability axis identity improved.
+- [x] `python scripts/audit-magic-numbers.py` clean on new Policy surfaces.
+- [x] Missing coeff row → load reject or documented structural default. (Documented structural default: absent override falls back to `kind.Categories`, never throws, never a silent zero-category.)
+- [x] Standing vector fixtures re-blessed once if vectors move. (N/A — no hardcoded Standing-vector golden exists; see evidence 16.5.)
 
 **Verification:**
-- [ ] Core filter `ActorPower|Coefficient|Standing`
-- [ ] `python scripts/audit-magic-numbers.py --summary`
+- [x] Core filter `ActorPower|Coefficient|Standing`
+- [x] `python scripts/audit-magic-numbers.py --summary`
 
 **Dependencies:** T9  
 **Files likely touched:** `data/seed/power/coefficients.v1.json`, E9/CostFunction, RpgStore.Power  

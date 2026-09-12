@@ -1,5 +1,6 @@
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Effects.Atoms.Power;
+using FusionRpg.Core.Stats.Derived;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Atoms;
@@ -260,5 +261,49 @@ public class ActorPowerTests
         var total = chain.Aggregate(PowerVector.Zero, (acc, a) => acc + CostFunction.Price(a).Power);
 
         Assert.True(total.Total > 0);
+    }
+
+    // ---- T16: standing-coeff-tuning — per-family category override, not a kind-wide trisect --------
+
+    static AtomRow DerivedAtom(string channel, long amount, string family) =>
+        Atom("stat.derived", $$"""{"channel":"{{channel}}","op":"flat","amount":{{amount}}}""", family);
+
+    [Fact]
+    public void Dodge_prices_entirely_as_Survivability_not_trisected()
+    {
+        var priced = ActorPowerCache.Compose(new[] { DerivedAtom(DerivedStatChannels.CombatDodgeOmni, 100, "atom.dodge") });
+
+        Assert.True(priced.Survivability > 0);
+        Assert.Equal(0, priced.Offense);
+        Assert.Equal(0, priced.Control);
+    }
+
+    [Fact]
+    public void Combat_power_omni_prices_entirely_as_Offense_the_attacker_half_of_the_same_contest()
+    {
+        // combat.power/combat.defense and combat.accuracy/combat.dodge are the SAME contest pairs
+        // (DerivedStatChannels.CombatFamilyClassification) -- proving both halves land on opposite,
+        // single axes is what proves this is a real two-way split, not dodge alone getting lucky.
+        var priced = ActorPowerCache.Compose(new[] { DerivedAtom(DerivedStatChannels.CombatPowerFire, 100, "atom.power") });
+
+        Assert.True(priced.Offense > 0);
+        Assert.Equal(0, priced.Survivability);
+        Assert.Equal(0, priced.Control);
+    }
+
+    [Fact]
+    public void An_unmapped_stat_derived_channel_still_trisects_exactly_as_before()
+    {
+        // Regression: a stat.derived channel with no authored family override (there is no such thing
+        // among the 28 combat families today, but the fallback path must still work for whatever the
+        // registry expands to next) falls back to the kind's own Offense|Survivability|Control split,
+        // byte-identical to pre-T16 behaviour.
+        var priced = ActorPowerCache.Compose(new[] { DerivedAtom("stat.derived.unmapped-test-channel", 90, "atom.unmapped") });
+
+        Assert.True(priced.Offense > 0);
+        Assert.True(priced.Survivability > 0);
+        Assert.True(priced.Control > 0);
+        Assert.Equal(priced.Offense, priced.Survivability);
+        Assert.Equal(priced.Survivability, priced.Control);
     }
 }

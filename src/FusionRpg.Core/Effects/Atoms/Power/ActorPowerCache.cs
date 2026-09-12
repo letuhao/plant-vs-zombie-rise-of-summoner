@@ -99,7 +99,11 @@ public sealed class ActorPowerCache
             var normalisedMilli =
                 PowerMath.DivRound((long)magnitude * PowerMath.One, Math.Max(1, coeff.ReferenceScale));
             var points = PowerMath.MulMilli(normalisedMilli, coeff.CoeffMilli);
-            total += PowerVector.FromCategory(kind.Categories, points);
+            // standing-coeff-tuning (T16): a per-family override (e.g. dodge -> Survivability only)
+            // takes the channel's price where the kind's own categories would otherwise trisect it;
+            // absent an override, behavior is byte-identical to before this task.
+            var category = t.CategoryOverrideFor(kindId, channel) ?? kind.Categories;
+            total += PowerVector.FromCategory(category, points);
             channelPoints[(kindId, channel)] = points;
         }
 
