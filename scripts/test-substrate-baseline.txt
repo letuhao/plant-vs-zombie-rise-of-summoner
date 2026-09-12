@@ -61,16 +61,8 @@ tests/FusionRpg.Data.Tests/LegacyMonoMigratorTests.cs : swallowed-delete, temp-s
 tests/FusionRpg.Data.Tests/PassiveTree/TreeCatalogImportTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/PassiveTree/TreeCatalogMigrationTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/PassiveTree/TreeStateReconcilerStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/PassiveTreeImportRunnerTests.cs : swallowed-delete
-tests/FusionRpg.Data.Tests/PatronStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/PlayerMaterialiseTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/PowerCoefficientImportTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/PowerStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/RpgStoreDalSmokeTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/RpgStoreSmokeTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/RunPoolStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/SeedImportRunnerTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/ShardRungsMigrationTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/SpeciesExpeditionTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/SpeciesImportStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/SpeciesProgressionTests.cs : swallowed-delete, temp-store

@@ -1,6 +1,7 @@
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Power;
 using FusionRpg.Data;
+using FusionRpg.Data.Sqlite;
 using Microsoft.Data.Sqlite;
 using Xunit;
 
@@ -17,21 +18,16 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class PlayerMaterialiseTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public PlayerMaterialiseTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-playermat-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     // Same fixed pin theta/tuning InstanceProducerStoreTests.cs already established for this store.
     static readonly PowerTuning Tuning = PowerTuning.Build(
@@ -213,10 +209,9 @@ public class PlayerMaterialiseTests : IDisposable
         SeedSpecies("peashooter", 20); // atom removed below, forcing Compose to reject this one
         var player = _store.CreatePlayer("Owner");
 
-        var hotPath = Path.Combine(_dir, "rpg-hot.sqlite");
-        using (var raw = new SqliteConnection($"Data Source={hotPath}"))
+        var hotPath = _store.HotPath;
+        using (var raw = SqliteConnectionFactory.Open(hotPath))
         {
-            raw.Open();
             using var cmd = raw.CreateCommand();
             cmd.CommandText = "DELETE FROM effect_atom WHERE atom_id = 'atom.peashooter-vitality.t1';";
             cmd.ExecuteNonQuery();
