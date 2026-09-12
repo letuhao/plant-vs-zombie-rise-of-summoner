@@ -77,11 +77,23 @@ function stampRevision(payload: PiecePayload, revision: number): PiecePayload {
   return payload;
 }
 
+/**
+ * chip-honesty (T10) — this chip names level/ladder index only, never "power": combat power is
+ * Standing's word (`copy-surfaces`), owned by Condition, not this chip. Commander's `theta` input is
+ * genuine progression Θ (`AptitudesState.theta` is never a level fallback), so it earns the ladder
+ * name (spelled "Ladder", never the raw `Θ` glyph — `vocabularyGuard.ts`'s BANNED_SYMBOLS bans that
+ * character from player text repo-wide, GG-23: "the power index — a name on screen, never this
+ * letter"; the wire's own name for this magnitude is `ladderIndex`). Unique/species feed a
+ * level-shaped number (`specimenLevel`, or species `level` re-used as this same prop) and get `Lv`
+ * until `unique-theta-wire` (T17) lands a real, non-fallback Θ for Mode A.
+ */
 function scopeFiction(mode: AptitudesMode, theta: number | undefined): { title: string; subtitle: string } {
-  const power = theta != null ? `power ${theta}` : "power —";
-  if (mode === "unique") return { title: "Unique specimen", subtitle: power };
-  if (mode === "species") return { title: "Species build", subtitle: power };
-  return { title: "Commander", subtitle: power };
+  const subtitle = mode === "commander"
+    ? (theta != null ? `Ladder ${theta}` : "Ladder —")
+    : (theta != null ? `Lv ${theta}` : "Lv —");
+  if (mode === "unique") return { title: "Unique specimen", subtitle };
+  if (mode === "species") return { title: "Species build", subtitle };
+  return { title: "Commander", subtitle };
 }
 
 function postureTheme(postureId: string): ThemeRef {

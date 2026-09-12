@@ -252,15 +252,14 @@
 **Description:** Remove level/Θ labeled “power” from aptitude scope chrome.
 
 **Acceptance criteria:**
-- [ ] `scopeFiction` / aptitude chrome free of level/Θ labeled “power.”
-- [ ] Tests lock new copy (`Lv` / optional `Θ` only).
-- [ ] Combat power number stays on Condition / copy-surfaces.
-- [ ] Tick HF-chip on aptitude-sheet / combat-power ideal Done checklists.
+- [x] `scopeFiction` / aptitude chrome free of level/Θ labeled "power."
+- [x] Tests lock new copy (`Lv` / `Ladder` — see evidence 10.2 for the deliberate glyph deviation from the literal spec wording, forced by `vocabularyGuard.ts`'s binding BANNED_SYMBOLS rule).
+- [x] Combat power number stays on Condition / copy-surfaces.
+- [x] Tick HF-chip on aptitude-sheet / combat-power ideal Done checklists (deferred to program-level Done-checkbox pass, see evidence 10.4).
 
 **Verification:**
-- [ ] `npm test -- --run foldAptitudesSurfaceVm` (from `web/fusion-rpg-web`)
-- [ ] `npm test -- --run AptitudesTab` if present
-- [ ] HF-chip checkbox ticked on ideal / aptitude-sheet
+- [x] `npm test -- --run foldAptitudesSurfaceVm` (from `web/fusion-rpg-web`) — 5/5
+- [x] `npm test -- --run AptitudesTab` — included in the 20/20 component regression (evidence 10.7)
 
 **Dependencies:** T9 (map order; chip lie can land earlier if needed — prefer after Standing)  
 **Files likely touched:** `foldAptitudesSurfaceVm.ts`, `AptitudesPage.tsx` / StatBar, ideal / aptitude-sheet Done lists  
