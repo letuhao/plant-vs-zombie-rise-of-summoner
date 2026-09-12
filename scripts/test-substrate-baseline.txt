@@ -22,15 +22,7 @@ tests/FusionRpg.Data.Tests/Actions/ActionCorpusRealContentQualityTests.cs : swal
 tests/FusionRpg.Data.Tests/Actions/ActionUnlockGrantWiringTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Actions/ActionUnlocksStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/AtomImportTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/AtomRowWiringTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/BindResolutionTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/ChannelPolicyStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/ColdArchiveCompactionTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/ContainerStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/ContentBootTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/ContentHashStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/ContractGateTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/ContractOpsTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/ContractRegressionTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/ContractSettleTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/ContractStoreTests.cs : swallowed-delete, temp-store

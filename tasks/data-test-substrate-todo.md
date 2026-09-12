@@ -140,7 +140,10 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - A real defect was caught by running the batch rather than trusting the edit: the read-only conversion for `AllocationStoreTests` had not applied (the replace ran before that file was migrated), and `Schema_storesInputsOnly_noResolvedChannelValueColumn` failed until fixed.
   - Verified: gate PASS — focused 93/93, no assertion/seed dropped (per-file token counts), baseline 211→203, `Reopen()` proven, full Data 1287/1287, both guards green.
   - Deps: T10. Scope: M.
-- [ ] **Task T12: Data.Tests root batch B** (8: AtomRowWiring, BindResolution, ChannelPolicyStore, ContainerStore, ContentBoot, ContentHashStore, ContractGate, ContractOps) — **read-only: `ChannelPolicyStoreTests`** — Deps: T10. Scope: M.
+- [x] **Task T12: Data.Tests root batch B** (8: AtomRowWiring, BindResolution, ChannelPolicyStore, ContainerStore, ContentBoot, ContentHashStore, ContractGate, ContractOps) — **read-only: `ChannelPolicyStoreTests`** ✅ 2026-09-12
+  - Migrated all 8; `ChannelPolicyStoreTests`' read-only open → plain open; `ContentHashStoreTests`' local `NewStore()` → helper-backed (`List<DataTestStore>`), so its 25 call sites each get an independent in-memory store.
+  - Verified: gate PASS — focused 103/103, zero assertions dropped (18/37/18/41/9/42/28/45 all unchanged), every constructor seed preserved (`Seed()`, `SeedAtoms()`, `AwardSouls(...)`), baseline 203→195 (−8), no old-prefix temp dirs, both guards green, full Data 1287/1287.
+  - Deps: T10. Scope: M.
 - [ ] **Task T13: Data.Tests root batch C** (8: ContractRegression, ContractSettle, ContractStore, CreatureLawnDeployCommanderRefusal, CreatureLawnDeployHypnoRefusal, CreatureLawnDeployMagnitude, CreatureLawnDeploy, CreatureStore) — Deps: T10. Scope: M.
 - [ ] **Task T14: Data.Tests root batch D** (8: EligibilityAxisMigration, ExpeditionRewardApply, ExpeditionStore, FusionInheritancePicks, FusionStore, GateCounterSeed, GetMaxEventId, InstanceProducerStore) — Deps: T10. Scope: M.
   - **Excludes** the pilot's `CurveStoreTests`/`ElementStoreTests` (already migrated by T9).
