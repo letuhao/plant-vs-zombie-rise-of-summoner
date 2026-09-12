@@ -197,10 +197,12 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - Files: `scripts/test-substrate-baseline.txt`. Scope: M.
   - Dependencies: T11–T18f.
 
-- [ ] **Task T19b: runtime leak alarm — module `disk-write-probe`'s second half**
-  - Description: the shipped gate (`guard-test-substrate.ps1`) is **static only**. Add `scripts/test-substrate-leak-alarm.ps1`: snapshot the test temp root (count + the `fusionrpg-*` dirs) **before** a full test run, run it, snapshot **after**, and **fail** if any `fusionrpg-*` dir survives or any `rpg-*.sqlite` was created outside the file-bound tmp dirs. Assert the **delta** (`before == after` / `0 new`) — never a population count (`validation-ssot.md`). Wire into CI after the test step (not `deploy-play.ps1`, which does not run the suite).
-  - Acceptance: on a clean post-migration tree the alarm passes; planting a store test that leaks a temp dir makes it **fail**; planted-`rpg-*.sqlite` makes it fail.
-  - Verify: run the alarm around a focused `dotnet test`, then with a planted leaking test (must fail), then remove it (must pass); `guard-test-substrate.ps1` unchanged.
+- [x] **Task T19b: runtime leak alarm — module `disk-write-probe`'s second half** ✅ 2026-09-12 (commit `9408d67a`)
+  - Description: the shipped gate (`guard-test-substrate.ps1`) is **static only**. Added `scripts/test-substrate-leak-alarm.ps1`: snapshot the OS temp root's `fusionrpg-*` dirs and the test-output `rpg-*.sqlite` files, run a supplied `-Run` block, snapshot after, and **fail** if any temp dir survived or any sqlite was left. It compares **membership (set diff), never a count** (`validation-ssot.md`), and names each survivor. Wired into `ci.yml` after the test step, with an `ANCHOR(T28)` comment.
+  - Acceptance met: pass case exits 0; a planted leaking test exits 1 naming the exact dir; a planted sqlite leaker exits 1 naming the path. The static gate and its baseline are byte-identical.
+  - Verified: gatekeeper re-ran all three cases independently (including the fail case naming `fusionrpg-gateleak-<guid>`), cleaned up the probes, and confirmed `guard-test-substrate.ps1` still exits 0.
+  - Files: `scripts/test-substrate-leak-alarm.ps1`, `.github/workflows/ci.yml`. Scope: M.
+  - Dependencies: T19.
   - Files: `scripts/test-substrate-leak-alarm.ps1`, `.github/workflows/ci.yml` (shared with `cold-process-test-build-e5b1` — coordinate). Scope: M.
   - Dependencies: T19 (the suite must be leak-proof before an alarm can pass).
 
@@ -253,12 +255,12 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - `RpgStoreStoragePlanTests.Memory_stores_are_independent_under_parallel_creation` was the repo's single slowest test at **124.6s** (24 parallel stores × full 46-table `Init()`). Split into: 24 concurrent *constructions* asserting 48 distinct DB names (no `Init` needed), + 4 initialized stores each asserting `Assert.Single` (stronger than the old distinct-count). **Measured 0.52s (240x)**.
   - Deps: T5. Scope: XS.
 
-- [ ] **Task T26: tag `DiskSemantics`** — Deps: T6. Scope: M.
+- [x] **Task T26: tag `DiskSemantics`** (51 methods) ✅ 2026-09-12 (commit `630df206`) — Deps: T6. Scope: M.
   - Description: add `[Trait("Category","DiskSemantics")]` to the file-bound set — the 5 file-bound classes (`RpgStoreDalSmokeTests`, `RpgStoreSmokeTests`, `LegacyMonoMigratorTests`, `ColdArchiveCompactionTests`, `StoragePurgeTests`), `CreatureSpeciesImportCliTests`, and the real-corpus fixture classes (`SeedImportRunnerTests`, `PassiveTreeImportRunnerTests`, and `AtomImportTests`' disk case at method level). Class-level when every method qualifies, method-level when only some do.
   - Acceptance: each tagged file's `Assert.` count is unchanged; `--filter "Category=DiskSemantics"` returns exactly the tagged set; no untagged test lost.
   - Verify: `dotnet test … --filter "Category=DiskSemantics"` + per-file assert-count diff vs HEAD.
   - Files: those test files. Scope: M.
-- [ ] **Task T27: tag `Heavy`** — Deps: T26. Scope: M.
+- [x] **Task T27: tag `Heavy`** (12 methods) ✅ 2026-09-12 (commit `630df206`) — Deps: T26. Scope: M.
   - Description: tag the ≥20s / long-run tests that are **not** disk-semantic, from the measured list: `Actions/ActionUnlockGrantWiringTests` (110s), `TreeStateVolumeTests.Two_thousand_actors…` (56s), the long `ContentHashStoreTests` cases, `Items/ItemSetStoreTests` corpus round-trips, `Items/ActionStockSpendStoreTests`, `Delve/DelveScopeTests` long cases. Method-level where only some methods qualify.
   - Acceptance: no test carries both categories (DiskSemantics wins); the tagged set matches the measured ≥20s list minus the disk-semantic ones.
   - Verify: `--filter "Category=Heavy"`; a re-measure shows no untagged test ≥20s remains.
