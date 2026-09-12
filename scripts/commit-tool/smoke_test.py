@@ -94,6 +94,33 @@ def main() -> int:
     # hooksPath should be set after install; if unset, assert returns errors (ok either way)
     _ = assert_hooks_path()
 
+    # Hang guards (2026-09-12): every git child is bounded, and a stall becomes an error
+    # result rather than hanging the MCP call until the client's -32001.
+    import clean_commit as cc  # noqa: E402
+    from validate import GIT_TIMEOUT_SECONDS as _validate_timeout  # noqa: E402
+
+    expect(isinstance(_validate_timeout, (int, float)) and _validate_timeout > 0,
+           f"validate timeout must be a positive number, got {_validate_timeout!r}")
+    expect(cc.GIT_TIMEOUT_SECONDS == _validate_timeout,
+           "clean_commit and validate must share one git timeout (no drift)")
+
+    # Force a sub-millisecond timeout to prove the path, not wait 120s for it.
+    saved = cc.GIT_TIMEOUT_SECONDS
+    try:
+        cc.GIT_TIMEOUT_SECONDS = 0.001
+        cp = cc.run_git(["status", "--porcelain"])
+        expect(cp.returncode == 124, f"timed-out git must return 124, got {cp.returncode}")
+        expect("timed out" in (cp.stderr or ""), f"timed-out git must explain itself: {cp.stderr!r}")
+    finally:
+        cc.GIT_TIMEOUT_SECONDS = saved
+
+    # The MCP server reloads its own modules per call, so an edit applies without an IDE
+    # restart (the proven stale-server -32001 cause).
+    server_src = (TOOL_DIR / "mcp_server.py").read_text(encoding="utf-8")
+    expect("_reload_tool_modules" in server_src, "mcp_server must reload tool modules")
+    expect(server_src.count("_reload_tool_modules()") >= 3,
+           "both tools must call _reload_tool_modules (definition + 2 calls)")
+
     data = json.loads((TOOL_DIR / "policy.json").read_text(encoding="utf-8"))
     expect(data.get("schemaVersion") == 1, "schemaVersion")
 

@@ -19,6 +19,7 @@ if str(TOOL_DIR) not in sys.path:
 
 from validate import (  # noqa: E402
     DEFAULT_POLICY,
+    GIT_TIMEOUT_SECONDS,
     allowed_pairs,
     load_policy,
     validate_commit_context,
@@ -32,6 +33,22 @@ MCP_ENV_FLAG = "REPO_GIT_MCP"
 # CREATE_NO_WINDOW makes Windows allocate one — a flashing window that steals focus.
 # git spawns sh.exe for .githooks, so this matters for every commit, not just the CLI.
 NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
+# Hard ceiling on any git child (shared with validate.py so the policy and the commit
+# path cannot drift). Without it a stalled git (a hook blocked on a lock, a network path,
+# an inherited handle) hangs the tool call forever, and the client only surfaces that as
+# a generic -32001 "Request timed out" with no diagnosis. With it, the stall becomes an
+# ordinary CommitResult error the caller can actually read.
+
+
+def _timed_out(args: list[str], timeout: float) -> subprocess.CompletedProcess[str]:
+    """Convert a git timeout into a normal non-zero result so callers do not hang."""
+    return subprocess.CompletedProcess(
+        ["git", *args],
+        124,
+        "",
+        f"git timed out after {timeout}s: git {' '.join(args)}",
+    )
 
 
 @dataclass
@@ -57,9 +74,10 @@ def repo_root() -> Path:
             stdin=subprocess.DEVNULL,
             creationflags=NO_WINDOW,
             cwd=str(TOOL_DIR),
+            timeout=GIT_TIMEOUT_SECONDS,
         )
         return Path(out.strip())
-    except (subprocess.CalledProcessError, FileNotFoundError):
+    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
         # MCP servers often start with cwd outside the repo — fall back from tool path.
         candidate = TOOL_DIR.parent.parent
         if (candidate / ".git").exists() or (candidate / ".githooks").exists():
@@ -68,15 +86,20 @@ def repo_root() -> Path:
 
 
 def run_git(args: list[str], *, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        ["git", *args], text=True, capture_output=True, env=env, check=False,
-        # Never inherit the MCP server's stdin (see repo_root): a git process that reads it
-        # blocks the whole tool call. Hooks git spawns (prepare-commit-msg, commit-msg) inherit
-        # this DEVNULL in turn, so they cannot block on stdin either.
-        stdin=subprocess.DEVNULL,
-        # No console flash: git spawns sh.exe for the hooks, and this host has no console.
-        creationflags=NO_WINDOW,
-    )
+    try:
+        return subprocess.run(
+            ["git", *args], text=True, capture_output=True, env=env, check=False,
+            # Never inherit the MCP server's stdin (see repo_root): a git process that reads it
+            # blocks the whole tool call. Hooks git spawns (prepare-commit-msg, commit-msg) inherit
+            # this DEVNULL in turn, so they cannot block on stdin either.
+            stdin=subprocess.DEVNULL,
+            # No console flash: git spawns sh.exe for the hooks, and this host has no console.
+            creationflags=NO_WINDOW,
+            timeout=GIT_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        # Return an ordinary failure instead of hanging the JSON-RPC call until -32001.
+        return _timed_out(args, GIT_TIMEOUT_SECONDS)
 
 
 def staged_paths() -> list[str]:

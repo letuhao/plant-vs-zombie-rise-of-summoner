@@ -12,6 +12,7 @@ sys.path.insert(0, str(TOOL_DIR))
 
 from validate import (  # noqa: E402
     DEFAULT_POLICY,
+    GIT_TIMEOUT_SECONDS,
     NO_WINDOW,
     load_policy,
     validate_identity,
@@ -22,14 +23,14 @@ from validate import (  # noqa: E402
 def git_lines(args: list[str]) -> list[str]:
     out = subprocess.check_output(
         ["git", *args], text=True, stderr=subprocess.DEVNULL,
-        stdin=subprocess.DEVNULL, creationflags=NO_WINDOW)
+        stdin=subprocess.DEVNULL, creationflags=NO_WINDOW, timeout=GIT_TIMEOUT_SECONDS)
     return [ln for ln in out.splitlines() if ln.strip()]
 
 
 def commits_in_range(rev_range: str) -> list[str]:
     try:
         return git_lines(["rev-list", "--reverse", rev_range])
-    except subprocess.CalledProcessError:
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
         return []
 
 
@@ -40,6 +41,7 @@ def check_commit(sha: str, policy: dict) -> list[str]:
         text=True,
         stdin=subprocess.DEVNULL,
         creationflags=NO_WINDOW,
+        timeout=GIT_TIMEOUT_SECONDS,
     )
     parts = meta.split("\n", 4)
     if len(parts) < 5:
@@ -75,10 +77,11 @@ def main(argv: list[str] | None = None) -> int:
                     stderr=subprocess.DEVNULL,
                     stdin=subprocess.DEVNULL,
                     creationflags=NO_WINDOW,
+                    timeout=GIT_TIMEOUT_SECONDS,
                 )
                 rev_range = candidate
                 break
-            except subprocess.CalledProcessError:
+            except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
                 continue
         if not rev_range:
             rev_range = "HEAD"

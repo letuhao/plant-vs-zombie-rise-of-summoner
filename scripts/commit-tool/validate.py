@@ -19,6 +19,10 @@ DEFAULT_POLICY = TOOL_DIR / "policy.json"
 # Windows: hide the child console (a GUI host has none; spawning without this flashes a window).
 NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
+# Hard ceiling on any git child, so a stall surfaces as an error instead of hanging the
+# JSON-RPC tool call until the client gives up with a generic -32001.
+GIT_TIMEOUT_SECONDS = 120
+
 # Git trailer line: Key: value  (also accepts Key=value)
 TRAILER_LINE = re.compile(r"^([A-Za-z0-9][A-Za-z0-9-]{0,49})[:=]\s+\S")
 IDENT_RE = re.compile(r"^(?P<name>.+?)\s+<(?P<email>[^>]+)>(?:\s+\d+\s+[+-]\d+)?\s*$")
@@ -69,11 +73,12 @@ def git_var(name: str) -> str:
     try:
         # stdin=DEVNULL: this runs inside the MCP server, whose stdin is the JSON-RPC pipe.
         # A child inheriting it can block forever on Windows and hang the tool call.
+        # timeout: a stalled git becomes an ordinary error instead of an unbounded hang.
         out = subprocess.check_output(
             ["git", "var", name], text=True, stderr=subprocess.DEVNULL,
-            stdin=subprocess.DEVNULL, creationflags=NO_WINDOW,
+            stdin=subprocess.DEVNULL, creationflags=NO_WINDOW, timeout=GIT_TIMEOUT_SECONDS,
         )
-    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as exc:
         raise RuntimeError(f"git var {name} failed: {exc}") from exc
     return out.strip()
 
