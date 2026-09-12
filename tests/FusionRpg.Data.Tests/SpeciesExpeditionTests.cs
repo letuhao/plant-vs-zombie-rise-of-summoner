@@ -11,20 +11,18 @@ namespace FusionRpg.Data.Tests;
 /// fallback. The game-closed path awards the specimen only; species progression is lawn-general-only.</summary>
 public class SpeciesExpeditionTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public SpeciesExpeditionTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-species-exp-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     // Same "pick one from the real roster" convention as ExpeditionRewardApplyTests, decoupled from

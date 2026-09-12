@@ -7,21 +7,19 @@ namespace FusionRpg.Data.Tests;
 
 public class SummonStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public SummonStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-summon-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _store.AwardSouls(1, 10_000, SoulEarnPolicy.Reasons.Seed, "test-bankroll");
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     [Fact]

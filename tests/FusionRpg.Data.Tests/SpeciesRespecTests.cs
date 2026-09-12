@@ -11,17 +11,15 @@ namespace FusionRpg.Data.Tests;
 /// never-a-cap, and the shipped ledger path.</summary>
 public class SpeciesRespecTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     const string SpeciesId = "peashooter";
     const long PlayerId = 1;
 
     public SpeciesRespecTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-respec-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         SpeciesBuildTuningHub.Configure(new SpeciesBuildTuning(
             SchemaVersion: 1, Version: 1,
@@ -34,7 +32,7 @@ public class SpeciesRespecTests : IDisposable
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     static AptitudeAllocation Build(long points) =>

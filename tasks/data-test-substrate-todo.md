@@ -167,7 +167,10 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - Verified: gate PASS — focused 70/70, zero assertions/methods/seeds dropped, baseline 171→163 (−8), both guards green, **two consecutive full-suite runs 1288/1288**. A single earlier `Failed: 1` did not reproduce across two clean runs and named no test; no shared state exists (each store is its own named memory DB), so it is treated as transient and left for the T19b runtime alarm to catch if it recurs.
   - **Excludes `CreatureSpeciesImportCliTests.cs`** (owned by `cold-process-test-build-20260912-e5b1`) — untouched.
   - Deps: T10. Scope: M.
-- [ ] **Task T17: Data.Tests root batch G** (8: SpeciesExpedition, SpeciesImportStore, SpeciesProgression, SpeciesRespec, SpecimenMaterialisedRoll, StructureInstanceStore, SummonStore, TreeStateVolume) — **read-only: `TreeStateVolumeTests`** — Deps: T10. Scope: M.
+- [x] **Task T17: Data.Tests root batch G** (8: SpeciesExpedition, SpeciesImportStore, SpeciesProgression, SpeciesRespec, SpecimenMaterialisedRoll, StructureInstanceStore, SummonStore, TreeStateVolume) — **read-only: `TreeStateVolumeTests`** ✅ 2026-09-12
+  - Migrated all 8; `TreeStateVolumeTests`' read-only open → plain open. Constructor tuning/seed calls preserved (`SpeciesBuildTuningHub.Configure`, `AwardSouls`).
+  - Verified: gate PASS — focused 54/54, zero assertions/methods/seeds dropped, no `new RpgStore(`/`GetTempPath`/`catch {`/`readOnly:` remains in any of the 8, baseline 163→155 (−8), both guards green, full Data 1288/1288, no new old-prefix temp dirs.
+  - Deps: T10. Scope: M.
 - [ ] **Task T18: Data.Tests root batch H** (8: UniqueActorStore, UniqueEquipmentAtomBinding, WardenContract, WatermarkSmoke, WebGameIsolation, WebMatchStore, WorldAiAcceptance, WorldAiCommit) — Deps: T10. Scope: M.
   - The remainder (World*/Xp/Zomboss store tests, `Sqlite/**`, `Items/**`, `Delve/**`, `Actions/**`, remaining `PassiveTree/**`) is sub-divided in T18a–T18c so no task is XL.
 
