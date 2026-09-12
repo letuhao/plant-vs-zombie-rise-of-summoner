@@ -17,6 +17,30 @@
 3. **Push is owner-only.** No MCP push tool; shell gates deny `git push` and `gh pr create` / `gh release create`.
 4. No `Co-authored-by` / vendor watermark trailers. Author must match `scripts/commit-tool/policy.json`.
 
+## When and what to commit
+
+**Commit what you changed, when the change is done — often, in small coherent pieces.**
+
+1. **One logical change per commit.** A subsystem change plus its test plus its doc/tuning update is
+   one commit. Two unrelated fixes are two.
+2. **Commit at the end of each verified increment**, not at the end of the session. If a task has
+   three landable pieces, commit three times. A long uncommitted stretch is how work is lost to a
+   context reset or a crashed run.
+3. **Pass `paths` explicitly.** `repo-git.commit(paths=[...])` stages exactly the files this change
+   touched; leave `all=false`. Use `all=true` only when the entire tree is one stream's work — this
+   repo runs parallel programs, so a broad `-a` can sweep another stream's half-finished files.
+4. **Leave other streams' files alone.** `git status` will show unrelated dirty files; do not include
+   them and do not revert them. A concurrent stream's uncommitted work is not yours to touch.
+5. **Verify before you commit.** Run the subsystem's test/lint/guard. If it cannot run, say so in the
+   message body and do not present the commit as a finished, green change.
+6. **Message:** imperative subject (~72 chars) focused on *why*; add a body when the subject is not
+   enough. No trailers, no vendor names, no file-list-only subjects.
+7. **Never commit** secrets, game binaries, `data/`, `dist/`, machine-local paths (`H:\Games\...`), or
+   gitignored local config (`.kilo/`, `.claude/`, `.cursor/`, `.agents/`, `AGENTS.md`, `CLAUDE.md`).
+8. **Commit at task boundaries** — when each task in a plan/runbook completes, before a long
+   unattended run, and before switching programs. A correction after the fact is a **new commit**, not
+   an amend: do not rewrite history.
+
 ## One-time setup
 
 ```powershell
