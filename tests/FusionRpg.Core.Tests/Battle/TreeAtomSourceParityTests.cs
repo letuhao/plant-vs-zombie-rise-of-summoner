@@ -8,13 +8,17 @@ using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.Stats.Derived.Subsystems;
 using Xunit;
 using LawnTreeAtomSource = FusionRpg.Core.PassiveTree.Resolve.TreeAtomSource;
-using BattleTreeAtomSource = FusionRpg.Core.Battle.TreeAtomSource;
 
 namespace FusionRpg.Core.Tests.Battle;
 
-/// <summary>Task D6 — `Battle.TreeAtomSource` (spec-tree-resolve.md §2.1, §2.2, §12 tests 15-16).
-/// Proves lawn and battle resolve to the same totals for one actor, that attribution reaches the
-/// lawn's contributions unchanged, and that no new subsystem/order band is introduced.</summary>
+/// <summary>Task D6 — battle-ops-parity (T7) deleted the dead <c>Battle.TreeAtomSource.ModsFor</c>
+/// adapter (zero production callers -- <c>BattleStatComposer</c>, the only thing that could have
+/// consumed a "third producer slot," was itself deleted in battle-hub-fuse T6). Tree contributions
+/// reach battle the same way equip does now: <see cref="LawnTreeAtomSource.BoundAtomsFor"/> already
+/// returns <see cref="BoundDerivedAtom"/> -- the exact type <see cref="BattleHubInputs.BoundAtoms"/>
+/// wants -- so there is no adapter left to write; the lawn's own resolve feeds
+/// <see cref="BattleHubCompose"/> directly. This file now proves that capability, not a deleted
+/// static's own arithmetic.</summary>
 public class TreeAtomSourceParityTests
 {
     static string RepoRoot()
@@ -47,27 +51,31 @@ public class TreeAtomSourceParityTests
                     Array.Empty<string>(), ExclusionForm.None, null, true, null),
             });
 
-    [Fact] // "Lawn_and_battle_resolve_to_the_same_totals for one actor"
-    public void Lawn_and_battle_resolve_to_the_same_totals_for_one_actor()
+    static BattleActorSetup BattleSetupWith(IReadOnlyList<BoundDerivedAtom>? gear) => new()
+    {
+        Key = "s1", Side = "squad", SpeciesId = "spec", TypeId = 1, Level = 5,
+        MaxHp = 100, Atk = 50, Defense = 20,
+        HubInputs = gear is null ? null : new BattleHubInputs { BoundAtoms = gear },
+    };
+
+    [Fact]
+    public void Lawn_and_battle_hub_resolve_to_the_same_total_for_one_actor()
     {
         var tree = FlatTree(kMicro: 7_000_000, channelId: DerivedStatChannels.CombatPowerOmni); // -> 7.0 exactly
         var owned = new HashSet<string> { "skill.might-off-t3-n0" };
         var tuning = RealPowerTuning();
 
-        var lawn = LawnTreeAtomSource.BoundAtomsFor(tree, owned, tierReached: 10, thetaNode: 100, tuning, fMilli: 1000);
-        var battle = FusionRpg.Core.Battle.TreeAtomSource.ModsFor(tree, owned, tierReached: 10, thetaNode: 100, tuning, fMilli: 1000);
+        var bound = LawnTreeAtomSource.BoundAtomsFor(tree, owned, tierReached: 10, thetaNode: 100, tuning, fMilli: 1000);
 
-        var lawnTotal = 0.0;
-        foreach (var a in lawn) if (a.Channel == DerivedStatChannels.CombatPowerOmni) lawnTotal += a.Amount;
-        var battleTotal = 0L;
-        foreach (var m in battle) if (m.ChannelId == DerivedStatChannels.CombatPowerOmni) battleTotal += m.Amount;
-
+        var lawnTotal = bound.Where(a => a.Channel == DerivedStatChannels.CombatPowerOmni).Sum(a => a.Amount);
         Assert.Equal(7.0, lawnTotal);
-        Assert.Equal(7L, battleTotal);
-        Assert.Equal(lawnTotal, battleTotal); // the actual parity claim: same total, same actor
+
+        var bare = BattleHubCompose.Compose(BattleSetupWith(null)).Get(DerivedStatChannels.CombatPowerOmni);
+        var geared = BattleHubCompose.Compose(BattleSetupWith(bound)).Get(DerivedStatChannels.CombatPowerOmni);
+        Assert.Equal(lawnTotal, geared - bare); // the actual parity claim: the same total reaches battle Hub
     }
 
-    [Fact] // attribution reaches ChannelContributions (the lawn's DerivedContributionBag) unchanged
+    [Fact]
     public void Attribution_reaches_the_lawn_contribution_bag_unchanged_via_the_shared_fan_in()
     {
         var tree = FlatTree(kMicro: 3_000_000, channelId: DerivedStatChannels.CombatDefenseOmni);
@@ -90,48 +98,52 @@ public class TreeAtomSourceParityTests
         Assert.Equal(3.0, one.Value);
     }
 
-    [Fact] // "No new subsystem, no new order band, and the existing three registrations are not evicted"
-    public void Battle_composition_uses_no_new_subsystem_it_is_a_third_producer_slot_like_the_other_two()
+    [Fact]
+    public void Battle_composition_uses_no_new_subsystem_the_same_AtomDerivedSubsystem_carries_tree_and_equip()
     {
-        // BattleChannelMod carries no SourceId at all -- the SAME shape TraitAtomSource/EquipAtomSource
-        // already emit, proving this is a projection into the EXISTING battle seam, never a new one.
+        // battle-ops-parity T7: no adapter, no third producer slot -- tree atoms are BoundDerivedAtom,
+        // fed into the SAME HubInputs.BoundAtoms field / AtomDerivedSubsystem equip already uses.
         var tree = FlatTree(kMicro: 1_000_000, channelId: DerivedStatChannels.CombatPowerOmni);
         var owned = new HashSet<string> { "skill.might-off-t3-n0" };
-        var mods = FusionRpg.Core.Battle.TreeAtomSource.ModsFor(tree, owned, 10, 100, RealPowerTuning(), fMilli: 1000);
+        var bound = LawnTreeAtomSource.BoundAtomsFor(tree, owned, 10, 100, RealPowerTuning(), fMilli: 1000);
 
-        var mod = Assert.Single(mods);
-        Assert.IsType<BattleChannelMod>(mod);
-        // BattleChannelMod's own shape (ChannelId, Amount) -- no third field for a subsystem id or
-        // order band to hide in.
-        Assert.Equal(DerivedStatChannels.CombatPowerOmni, mod.ChannelId);
+        var atom = Assert.Single(bound);
+        Assert.IsType<BoundDerivedAtom>(atom);
+        Assert.Equal(DerivedStatChannels.CombatPowerOmni, atom.Channel);
+        Assert.Equal("tree.might.skill.might-off-t3-n0", atom.SourceId); // GG-49 attribution carried straight through, no adapter to drop it
     }
 
     [Fact]
-    public void An_unowned_node_contributes_no_battle_mods()
+    public void An_unowned_node_contributes_nothing_to_battle_hub()
     {
         var tree = FlatTree(kMicro: 5_000_000, channelId: DerivedStatChannels.CombatPowerOmni);
-        var mods = FusionRpg.Core.Battle.TreeAtomSource.ModsFor(
-            tree, new HashSet<string>(), tierReached: 10, thetaNode: 100, RealPowerTuning(), fMilli: 1000);
-        Assert.Empty(mods);
+        var bound = LawnTreeAtomSource.BoundAtomsFor(tree, new HashSet<string>(), tierReached: 10, thetaNode: 100, RealPowerTuning(), fMilli: 1000);
+        Assert.Empty(bound);
+
+        var bare = BattleHubCompose.Compose(BattleSetupWith(null)).Get(DerivedStatChannels.CombatPowerOmni);
+        var withEmptyTree = BattleHubCompose.Compose(BattleSetupWith(bound)).Get(DerivedStatChannels.CombatPowerOmni);
+        Assert.Equal(bare, withEmptyTree);
     }
 
     /// <summary>Task D7, bullet 3: "`F` multiplies every tree-derived contribution... IN BOTH READ
-    /// MODES." Battle never re-applies `F` itself (`Battle.TreeAtomSource.ModsFor` forwards `fMilli`
-    /// into the lawn's `BoundAtomsFor` and only rounds double-&gt;long) -- so the battle mod must equal
-    /// the lawn amount, F-scaled, rounded once.</summary>
+    /// MODES." Battle no longer runs its own rounding step at all (the deleted
+    /// <c>Battle.TreeAtomSource.ModsFor</c> used to be the one place that did) -- the lawn's own
+    /// <c>BoundAtomsFor</c> amount reaches <see cref="BattleHubCompose"/> exactly, F-scaled once.</summary>
     [Fact]
-    public void F_reaches_the_battle_mod_the_same_way_it_reaches_the_lawn_amount()
+    public void F_reaches_battle_hub_the_same_way_it_reaches_the_lawn_amount()
     {
         var tree = FlatTree(kMicro: 5_000_000, channelId: DerivedStatChannels.CombatPowerOmni); // -> 5.0 before F
         var owned = new HashSet<string> { "skill.might-off-t3-n0" };
         var tuning = RealPowerTuning();
 
         var lawnNoF = LawnTreeAtomSource.BoundAtomsFor(tree, owned, 10, 100, tuning, fMilli: 1000)[0].Amount;
-        var lawnWithF = LawnTreeAtomSource.BoundAtomsFor(tree, owned, 10, 100, tuning, fMilli: 1200)[0].Amount;
-        var battleWithF = FusionRpg.Core.Battle.TreeAtomSource.ModsFor(tree, owned, 10, 100, tuning, fMilli: 1200)[0].Amount;
+        var lawnWithF = LawnTreeAtomSource.BoundAtomsFor(tree, owned, 10, 100, tuning, fMilli: 1200);
 
         Assert.Equal(5.0, lawnNoF);
-        Assert.Equal(6.0, lawnWithF); // 5.0 * 1.2 -- F genuinely reached the lawn amount
-        Assert.Equal(6L, battleWithF); // and the SAME F-scaled amount reached the battle mod, rounded once
+        Assert.Equal(6.0, lawnWithF[0].Amount); // 5.0 * 1.2 -- F genuinely reached the lawn amount
+
+        var bare = BattleHubCompose.Compose(BattleSetupWith(null)).Get(DerivedStatChannels.CombatPowerOmni);
+        var geared = BattleHubCompose.Compose(BattleSetupWith(lawnWithF)).Get(DerivedStatChannels.CombatPowerOmni);
+        Assert.Equal(6.0, geared - bare); // and the SAME F-scaled amount reached battle Hub, exactly
     }
 }

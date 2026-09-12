@@ -535,8 +535,15 @@ public static class AtomKindRegistry
                 // nothing forever, which is the exact failure this module exists to prevent.
                 //
                 // BATTLE re-opened 2026-08-23 by E12, which ships the first consumer:
-                // `BattleStatComposer` reads bound stat.derived atoms at squad build, through
-                // `TraitAtomSource`.
+                // `BattleStatComposer` read bound stat.derived atoms at squad build, through
+                // `TraitAtomSource`. That composer's own additive-only ChannelMods loop made this
+                // claim thinner than it read, though — it summed every op the same way, so Full for
+                // Battle was really only true for Flat/Increased content, exactly the "Partial" defect
+                // the Sim note below names for itself. battle-hub-fuse (T6) + battle-ops-parity (T7)
+                // closed that gap for real: `BattleStatComposer` is deleted, `BattleHubCompose`
+                // composes through the SAME `ActorHub`/`DerivedComposer` every other surface uses, so
+                // Battle honours FlatReplace/MaxPriorityFlag/SumIncreased identically to Lawn now —
+                // Full is no longer a claim ahead of the code, it is what the code does.
                 //
                 // LAWN re-opened 2026-08-30 (decisions.md, "Derived-write lawn executor" — owner
                 // approved) now that it, too, has a real consumer: `AtomDerivedSubsystem`, an

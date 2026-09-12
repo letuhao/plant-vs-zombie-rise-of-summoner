@@ -3,7 +3,7 @@
 **Plan:** [actor-hub-and-combat-power-solid-fixing-plan.md](actor-hub-and-combat-power-solid-fixing-plan.md)  
 **Map:** [docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md](../docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md)  
 **Runbook / evidence:** [runbook](actor-hub-and-combat-power-solid-fixing-runbook.md) · [evidence map](actor-hub-and-combat-power-solid-fixing-evidence-map.md) · command `/solid-run`  
-**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — T1-T6 done (Wave 1a + 1b's composer deletion), T7 next.
+**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 complete (T1-T7 done); Wave 2 (T8, Standing honesty) next, pending the owner-review gate this checkpoint still lists.
 
 ---
 
@@ -177,17 +177,17 @@
 **Description:** Battle equip uses Hub op-aware atoms; tree via Hub; delete unused `Battle.TreeAtomSource` Compose slot.
 
 **Acceptance criteria:**
-- [ ] Battle equip path Hub op-aware only (no flat ignore-op SSOT).
-- [ ] Remove `EquipAtomSource.ModsFor` ignore-op battle fold (or equivalent dead path).
-- [ ] Unknown op skipped visibly — not coerced to flat.
-- [ ] Tree reaches battle actors via Hub when bindings exist.
-- [ ] Unused `TreeAtomSource` Compose slot gone.
-- [ ] AtomKind Battle Full for `stat.derived` matches tests.
-- [ ] No Partial lie in battle equip comments without an owned follow-up.
+- [x] Battle equip path Hub op-aware only (no flat ignore-op SSOT).
+- [x] Remove `EquipAtomSource.ModsFor` ignore-op battle fold (or equivalent dead path).
+- [x] Unknown op skipped visibly — not coerced to flat.
+- [x] Tree reaches battle actors via Hub when bindings exist.
+- [x] Unused `TreeAtomSource` Compose slot gone.
+- [x] AtomKind Battle Full for `stat.derived` matches tests.
+- [x] No Partial lie in battle equip comments without an owned follow-up.
 
 **Verification:**
-- [ ] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Equip|TreeAtom|AtomDerived|Battle"`
-- [ ] `.\scripts\guard-actor-hub.ps1`
+- [x] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Equip|TreeAtom|AtomDerived|Battle"`
+- [x] `.\scripts\guard-actor-hub.ps1` (manually re-derived — sandbox blocks direct powershell invocation from this worktree-isolated session, see evidence 7.8)
 
 **Dependencies:** T5–T6  
 **Files likely touched:** `EquipAtomSource.cs` (`ModsFor` / `DerivedAtomsFor`), `TreeAtomSource`, AtomKind registry, Hub tree readers  
@@ -198,7 +198,7 @@
 ## Checkpoint: Wave 1 complete
 
 - [x] Dual compose retired; guard green
-- [ ] Ops parity Done
+- [x] Ops parity Done
 - [ ] Owner review before Standing wave
 
 ---

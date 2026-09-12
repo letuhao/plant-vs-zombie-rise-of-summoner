@@ -2,9 +2,11 @@
 # (ADR 2026-09-07; dual-compose exception overturned 2026-09-12 as architectural debt;
 # battle-hub-fuse T6 deleted BattleStatComposer -- BattleHubCompose/ActorHub is the only path now).
 #
-# Listed ChannelMods producers (EquipAtomSource/TraitAtomSource/TreeAtomSource) remain: they still
-# feed the Hub subsystems their BattleChannelMod-shaped rows. NEW parallel composers and NEW
-# BattleChannelMod producer files outside that list fail this guard. Do not copy the battle path.
+# Listed ChannelMods producer (TraitAtomSource) remains: it still feeds BattleTraitSubsystem its
+# BattleChannelMod-shaped rows. battle-ops-parity T7 deleted the other two former entries
+# (EquipAtomSource.ModsFor, Battle.TreeAtomSource) as proven-dead ignore-op folds -- equip and tree
+# now reach battle exclusively as op-aware BoundDerivedAtom via HubInputs.BoundAtoms. NEW parallel
+# composers and NEW BattleChannelMod producer files outside the allowlist fail this guard.
 #
 # Usage (repo root): .\scripts\guard-actor-hub.ps1
 param(
@@ -97,9 +99,7 @@ if (Test-Path $Src) {
 # to also carry (AptitudeResolver.ResolveForBattle, WebMatchService's 4 methods, BossBuild.ResolveKit,
 # DraughtProjection.Apply) — proven zero production callers, so they are gone, not merely allowlisted.
 $allowChannelModProducers = @(
-    '[\\/]FusionRpg\.Core[\\/]Battle[\\/]EquipAtomSource\.cs$',
     '[\\/]FusionRpg\.Core[\\/]Battle[\\/]TraitAtomSource\.cs$',
-    '[\\/]FusionRpg\.Core[\\/]Battle[\\/]TreeAtomSource\.cs$',
     '[\\/]obj[\\/]',
     '[\\/]bin[\\/]'
 )

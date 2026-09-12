@@ -1,6 +1,7 @@
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Stats.Derived.Subsystems;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Battle;
@@ -15,10 +16,17 @@ public class EquipRuntimeTests
     // battle-hub-fuse T6: equipment reaches battle as Hub inputs (bound atoms resolved through the
     // same FromResolver projection production uses), never a composer static. No shared state, so
     // no Dispose reset is needed.
+    //
+    // battle-ops-parity T7: resolved by SpecimenId, never Key -- production (EquippedBoundAtoms,
+    // WebMatchService) always resolves a specimen's equip atoms by its SpecimenId (the durable
+    // assignment scope), and every fixture below sets a distinct Key ("squad:0") while varying
+    // SpecimenId, so keying off Key here would resolve every actor's atoms identically regardless of
+    // which specimen it actually is -- found and fixed live in this session: the earlier `setup.Key`
+    // read a constant across every fixture and silently produced zero atoms.
     static BattleActorSetup WithBoundAtoms(BattleActorSetup setup, EquipAtomSource source) => setup with
     {
         HubInputs = (setup.HubInputs ?? new BattleHubInputs())
-            with { BoundAtoms = source.DerivedAtomsFor(setup.Key) }
+            with { BoundAtoms = setup.SpecimenId is { } specimenId ? source.DerivedAtomsFor(specimenId) : Array.Empty<BoundDerivedAtom>() }
     };
 
     static BattleActorSetup Actor(string? specimenId, int level = 5) => new()
