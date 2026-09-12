@@ -1,9 +1,10 @@
 # Guard: player combat/derived compose must go through ActorHub — sole Hot gate
-# (ADR 2026-09-07; dual-compose exception overturned 2026-09-12 as architectural debt).
+# (ADR 2026-09-07; dual-compose exception overturned 2026-09-12 as architectural debt;
+# battle-hub-fuse T6 deleted BattleStatComposer -- BattleHubCompose/ActorHub is the only path now).
 #
-# Existing BattleStatComposer + listed ChannelMods producers = grandfathered debt until fusion.
-# NEW parallel composers, NEW BattleStatComposer.Compose call sites under src/, and NEW
-# BattleChannelMod producer files fail this guard. Do not copy the battle path.
+# Listed ChannelMods producers (EquipAtomSource/TraitAtomSource/TreeAtomSource) remain: they still
+# feed the Hub subsystems their BattleChannelMod-shaped rows. NEW parallel composers and NEW
+# BattleChannelMod producer files outside that list fail this guard. Do not copy the battle path.
 #
 # Usage (repo root): .\scripts\guard-actor-hub.ps1
 param(
@@ -59,11 +60,12 @@ foreach ($full in $serverTargets) {
 }
 
 # Ban new private *Composer* types that touch Derived / AppliedCombat outside allowlist.
-# Allowlist = Hub-path DerivedComposer + grandfathered BattleStatComposer debt + orthogonal Pvz sheet.
+# Allowlist = Hub-path DerivedComposer + orthogonal Pvz sheet. BattleStatComposer is gone (T6);
+# BattleHubCompose lives under Stats/Derived-adjacent Battle/ but composes via ActorHub itself, so
+# it never trips the DerivedModifier/ContributeDerived/AppliedCombat/BattleChannelMod match below.
 # Other *Composer* names (HUD, corpus, items, power index, …) are fine unless they touch combat derive.
 $allowComposer = @(
     '[\\/]FusionRpg\.Core[\\/]Stats[\\/]Derived[\\/]',
-    '[\\/]FusionRpg\.Core[\\/]Battle[\\/]BattleStatComposer\.cs',
     '[\\/]FusionRpg\.Core[\\/]Stats[\\/]PvzStatsSheetComposer\.cs',
     '[\\/]FusionRpg\.Core[\\/]Stats[\\/]StatComposer\.cs',
     '[\\/]obj[\\/]',
@@ -86,36 +88,18 @@ if (Test-Path $Src) {
     }
 }
 
-# Production BattleStatComposer.Compose call sites under src/ — only BattleEngine (grandfathered debt).
-# Tests/tools may call Compose; new src/ callers fail (do not widen the debt graph).
-$allowBattleComposeCallers = @(
-    '[\\/]FusionRpg\.Core[\\/]Battle[\\/]BattleEngine\.cs$',
-    '[\\/]FusionRpg\.Core[\\/]Battle[\\/]BattleStatComposer\.cs$'
-)
-if (Test-Path $Src) {
-    Get-ChildItem -Path $Src -Recurse -Filter "*.cs" -ErrorAction SilentlyContinue | ForEach-Object {
-        $full = $_.FullName
-        foreach ($pat in $allowBattleComposeCallers) {
-            if ($full -match $pat) { return }
-        }
-        if ($full -match '[\\/](obj|bin)[\\/]') { return }
-        $rel = $full.Substring($Root.Length).TrimStart('\', '/')
-        $code = Get-CodeLines (Get-Content -LiteralPath $full -Raw)
-        if ($code -match 'BattleStatComposer\.Compose\s*\(') {
-            $failures += "${rel}: BattleStatComposer.Compose outside BattleEngine — new debt call sites forbidden (fuse into ActorHub)"
-        }
-    }
-}
+# BattleStatComposer.Compose no longer exists anywhere (deleted in T6) — no call-site check needed;
+# any reintroduction is a straight compile error, a stronger guarantee than a text-match guard gave.
 
-# BattleChannelMod construction = private combat fold into battle composer. Grandfathered debt files only.
+# BattleChannelMod construction = still-live producers feeding the Hub subsystems their rows
+# (EquipAtomSource/TraitAtomSource/TreeAtomSource — BattleTraitSubsystem etc. read *.ModsFor and
+# convert BattleChannelMod -> DerivedModifier). T6 deleted the composer-only producers this list used
+# to also carry (AptitudeResolver.ResolveForBattle, WebMatchService's 4 methods, BossBuild.ResolveKit,
+# DraughtProjection.Apply) — proven zero production callers, so they are gone, not merely allowlisted.
 $allowChannelModProducers = @(
     '[\\/]FusionRpg\.Core[\\/]Battle[\\/]EquipAtomSource\.cs$',
     '[\\/]FusionRpg\.Core[\\/]Battle[\\/]TraitAtomSource\.cs$',
     '[\\/]FusionRpg\.Core[\\/]Battle[\\/]TreeAtomSource\.cs$',
-    '[\\/]FusionRpg\.Core[\\/]Stats[\\/]Aptitudes[\\/]AptitudeResolver\.cs$',
-    '[\\/]FusionRpg\.Core[\\/]Expeditions[\\/]ExpeditionResolver\.cs$',
-    '[\\/]FusionRpg\.Core[\\/]Items[\\/]Consumables[\\/]DraughtProjection\.cs$',
-    '[\\/]FusionRpg\.Server[\\/]WebMatchService\.cs$',
     '[\\/]obj[\\/]',
     '[\\/]bin[\\/]'
 )

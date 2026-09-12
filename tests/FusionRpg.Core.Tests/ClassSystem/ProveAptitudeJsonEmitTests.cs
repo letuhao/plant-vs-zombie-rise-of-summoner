@@ -6,9 +6,10 @@ using Xunit;
 namespace FusionRpg.Core.Tests.ClassSystem;
 
 /// <summary>class-system-todo.md P2.6 / V3 — `tools/ProveAptitude` drives a real resolve on both
-/// engines (overlay `DerivedComposer`, battle `BattleStatComposer`) for the same allocation/Theta and
-/// asserts they agree. Runs the real `dotnet run` invocation (shared fixture, same pattern as
-/// <see cref="CombatSimJsonEmitTests"/> — a cold `dotnet run` is the expensive part).</summary>
+/// engines (overlay `DerivedComposer`, battle `BattleHubCompose` since battle-hub-fuse T6) for the
+/// same allocation/Theta and asserts they agree. Runs the real `dotnet run` invocation (shared
+/// fixture, same pattern as <see cref="CombatSimJsonEmitTests"/> — a cold `dotnet run` is the
+/// expensive part).</summary>
 public class ProveAptitudeJsonEmitTests : IClassFixture<ProveAptitudeJsonEmitTests.Fixture>
 {
     readonly Fixture _fx;
@@ -43,25 +44,44 @@ public class ProveAptitudeJsonEmitTests : IClassFixture<ProveAptitudeJsonEmitTes
     }
 
     [Fact]
-    public void UnfilteredRun_surfacesTheKnownCapAsymmetryGap_documentedNotHidden()
+    public void UnfilteredRun_theOldCapAsymmetryGapIsClosed_byTheHubFuse()
     {
-        // Deliberately NOT Checkpoint 2's scope -- proves the gap this program's own comment records
-        // is real and still open, so a future accidental "fix" that makes it silently pass again is
-        // itself something worth noticing. BattleStatComposer applies no cap on ANY ChannelMods
-        // contribution (confirmed zero `Cap(` calls in that file) — a SumIncreased-kind capped channel
-        // (status.resist.*) will disagree once contribution clears the overlay-side cap. P3.1's to
-        // inherit, not fixable by touching BattleStatComposer's compose logic (spec §8).
-        Assert.True(_fx.UnfilteredExit != 0, "expected the unfiltered run to fail on the known cap-asymmetry gap");
+        // Deliberately NOT Checkpoint 2's scope. Until battle-hub-fuse (T6), the battle side's
+        // ChannelMods loop was unconditionally additive with no cap at all (confirmed: zero `Cap(`
+        // calls in the deleted BattleStatComposer.cs), so a SumIncreased-kind capped channel
+        // (status.resist.*) disagreed once a contribution cleared the overlay-side cap. T6 replaced
+        // that loop with AptitudeSubsystem -> the same AptitudeResolver.Resolve call the overlay path
+        // makes, through the Hub's own DerivedComposer -- both sides now apply the identical cap, so
+        // every status.* channel this allocation touches is confirmed zero-delta, not merely assumed.
+        var root = _fx.UnfilteredDoc!.RootElement;
+        foreach (var statusChannel in new[] { "status.resist.cc", "status.resist.dot", "status.resist.contagion" })
+        {
+            var delta = root.GetProperty("Deltas").GetProperty(statusChannel).GetDouble();
+            Assert.Equal(0.0, delta, 9);
+        }
+
+        // The channel Checkpoint 2 actually cares about must still agree in the unfiltered run too.
+        var powerDelta = root.GetProperty("Deltas").GetProperty("combat.power.omni").GetDouble();
+        Assert.Equal(0.0, powerDelta, 9);
+    }
+
+    [Fact]
+    public void UnfilteredRun_stillDisagreesOnResourceMax_becauseBattleAlwaysSeedsAResourceBaseline()
+    {
+        // The REMAINING, different gap: BattleHubCompose unconditionally registers
+        // ResourceBaselineSubsystem (every battle actor needs its six resource pools seeded,
+        // independent of whether an aptitude allocation is present), so the battle side's
+        // resource.max.* totals are baseline + the aptitude edge's own contribution. The overlay side
+        // (a bare DerivedComposer.Compose(overlayMods) with no subsystems registered at all) carries
+        // only the aptitude edge. This is not new: the deleted BattleStatComposer.Compose seeded the
+        // identical unconditional resource baseline (battle-resources, 2026-09-05), so this comparison
+        // artifact predates the fuse -- T6 did not introduce it and this tool's own scope (the
+        // aptitude seam alone, per its class doc) does not fix it.
         var root = _fx.UnfilteredDoc!.RootElement;
         Assert.False(root.GetProperty("Pass").GetBoolean());
 
-        var resistCc = root.GetProperty("Deltas").GetProperty("status.resist.cc").GetDouble();
-        Assert.NotEqual(0.0, resistCc);
-
-        // The channel Checkpoint 2 actually cares about must still agree even in the unfiltered run —
-        // the gap is scoped to specific (capped) channels, not a wholesale breakdown.
-        var powerDelta = root.GetProperty("Deltas").GetProperty("combat.power.omni").GetDouble();
-        Assert.Equal(0.0, powerDelta, 9);
+        var maxHunger = root.GetProperty("Deltas").GetProperty("resource.max.hunger").GetDouble();
+        Assert.NotEqual(0.0, maxHunger);
     }
 
     public sealed class Fixture : IDisposable

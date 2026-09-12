@@ -1,4 +1,3 @@
-using FusionRpg.Core.Battle;
 using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Items.Consumables;
@@ -16,7 +15,8 @@ namespace FusionRpg.Core.Items.Consumables;
 /// <param name="Channel">A derived-stat channel id, e.g. <c>combat.power.fire</c>.</param>
 /// <param name="Amount">
 /// <b><c>long</c>, because it is a magnitude</b> (AGENTS.md), and signed only so the type can carry a
-/// drawback later; <see cref="Apply"/> refuses a negative one today — see there.
+/// drawback later; <see cref="DraughtProjection.ToDerivedModifiers"/> refuses a non-positive one today
+/// via its shared <c>Validate</c> — see there.
 /// </param>
 public readonly record struct DraughtMod(string ContainerId, string Channel, long Amount);
 
@@ -25,11 +25,12 @@ public readonly record struct DraughtMod(string ContainerId, string Channel, lon
 /// than a binding in v1.
 ///
 /// <para>The scopes are seven and <b>there is no <c>actor:{instanceId}</c></b> (definitions §6), so a
-/// per-specimen draught cannot be a binding. It does not need to be: <c>BattleActorSetup.ChannelMods</c>
-/// is documented as "additive derived-channel adjustments (trait stat mods, equipment later)" and the
-/// expedition resolver already drives exactly this road for injuries —
-/// <c>ExpeditionResolver.ApplyInjuries</c> appends a <see cref="BattleChannelMod"/> to each victim
-/// before the battles resolve.</para>
+/// per-specimen draught cannot be a binding. It does not need to be: it reaches the actor as an
+/// attributed Hub contribution instead (<see cref="ToDerivedModifiers"/> via
+/// <see cref="Subsystems.DraughtSubsystem"/>), the same road <c>ExpeditionResolver.ApplyInjuries</c>
+/// already drives for injuries — setting <c>BattleHubInputs.Injuries</c> on each victim before the
+/// battles resolve, since battle-hub-fuse (T6) retired the pre-folded <c>ChannelMods</c> form both
+/// used to take.</para>
 ///
 /// <para><b>A draught is the same transform with the opposite sign. That is the whole v1 runtime.</b></para>
 ///
@@ -40,12 +41,12 @@ public readonly record struct DraughtMod(string ContainerId, string Channel, lon
 public static class DraughtProjection
 {
     /// <summary>
-    /// channelmods-hub T2 — the Hub twin of <see cref="Apply"/>: the same validated manifest as
-    /// attributed <c>Flat</c> derived contributions (one per draught, source
-    /// <c>grant:draught:{ContainerId}</c> through <see cref="ContributionSourceIds.Grant"/> — GG-49
-    /// has no draught family, and the plan's Ask-first default reuses families already in use).
-    /// <see cref="Subsystems.DraughtSubsystem"/> contributes these on the Hub path; battle keeps
-    /// consuming <see cref="Apply"/> until battle-hub-fuse.
+    /// channelmods-hub T2 — the same validated manifest as attributed <c>Flat</c> derived
+    /// contributions (one per draught, source <c>grant:draught:{ContainerId}</c> through
+    /// <see cref="ContributionSourceIds.Grant"/> — GG-49 has no draught family, and the plan's
+    /// Ask-first default reuses families already in use).
+    /// <see cref="Subsystems.DraughtSubsystem"/> contributes these on the Hub path — battle-hub-fuse
+    /// T6 deleted the old <c>BattleChannelMod</c> adapter this replaced (zero production callers).
     /// </summary>
     public static IReadOnlyList<DerivedModifier> ToDerivedModifiers(IReadOnlyList<DraughtMod> draughts)
     {
@@ -70,36 +71,6 @@ public static class DraughtProjection
                     "defect and throws rather than being clamped to nothing");
         }
         return draughts;
-    }
-
-    /// <summary>
-    /// Append every manifest draught to every squad member, returning a new list. Pure: the input
-    /// setups are not mutated, matching <c>ApplyInjuries</c> exactly.
-    ///
-    /// <para>⛔ <b>A non-positive amount is refused rather than applied.</b> A draught that lowers a
-    /// channel is an injury wearing a potion's name, and the resolver already has a road for those
-    /// with its own sign; silently accepting one here would let a content bug read as a mechanic. The
-    /// refusal throws rather than clamps, per AGENTS.md — a clamp would turn "your draught did
-    /// nothing" into a bug with no symptom.</para>
-    ///
-    /// <para>// DEBT — channelmods-hub: one-release <c>BattleChannelMod</c> adapter; the Hub twin is
-    /// <see cref="ToDerivedModifiers"/> via <see cref="Subsystems.DraughtSubsystem"/>. Delete in
-    /// battle-hub-fuse (T6).</para>
-    /// </summary>
-    public static IReadOnlyList<BattleActorSetup> Apply(
-        IReadOnlyList<BattleActorSetup> squad,
-        IReadOnlyList<DraughtMod> draughts)
-    {
-        if (squad is null) throw new ArgumentNullException(nameof(squad));
-        draughts = Validate(draughts);
-        if (draughts.Count == 0) return squad;
-
-        return squad.Select(s =>
-        {
-            var mods = s.ChannelMods.ToList();
-            foreach (var d in draughts) mods.Add(new BattleChannelMod(d.Channel, d.Amount));
-            return s with { ChannelMods = mods };
-        }).ToList();
     }
 
     /// <summary>

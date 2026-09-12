@@ -98,7 +98,7 @@ public class SpeciesTempoTests
 
     /// <summary>
     /// End-to-end: `WaveCatalog` carries a species' interval onto `BattleActorSetup`, and
-    /// `BattleStatComposer.Compose` projects it into `turn.speed` -- the production path, not a
+    /// `BattleHubCompose.Compose` projects it into `turn.speed` -- the production path, not a
     /// synthetic channel mod (the gap `B39` could only prove around).
     /// </summary>
     [Fact]
@@ -107,8 +107,8 @@ public class SpeciesTempoTests
         var setupA = new BattleActorSetup { Key = "a", MaxHp = 100, AttackIntervalMs = Flurry };  // fast
         var setupB = new BattleActorSetup { Key = "b", MaxHp = 100, AttackIntervalMs = Ponderous }; // slow
 
-        var derivedA = BattleStatComposer.Compose(setupA);
-        var derivedB = BattleStatComposer.Compose(setupB);
+        var derivedA = BattleHubCompose.Compose(setupA);
+        var derivedB = BattleHubCompose.Compose(setupB);
 
         var speedA = derivedA.Get(DerivedTurnChannels.Speed);
         var speedB = derivedB.Get(DerivedTurnChannels.Speed);
@@ -118,8 +118,8 @@ public class SpeciesTempoTests
         // so an initiative roll cannot be passing this by luck.
         var setupC = new BattleActorSetup { Key = "c", MaxHp = 100, AttackIntervalMs = Ponderous };
         var setupD = new BattleActorSetup { Key = "d", MaxHp = 100, AttackIntervalMs = Flurry };
-        var speedC = BattleStatComposer.Compose(setupC).Get(DerivedTurnChannels.Speed);
-        var speedD = BattleStatComposer.Compose(setupD).Get(DerivedTurnChannels.Speed);
+        var speedC = BattleHubCompose.Compose(setupC).Get(DerivedTurnChannels.Speed);
+        var speedD = BattleHubCompose.Compose(setupD).Get(DerivedTurnChannels.Speed);
         Assert.True(speedD > speedC);
     }
 }

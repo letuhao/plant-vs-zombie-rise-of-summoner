@@ -133,12 +133,11 @@ public static class Encounter
             if (anchor.BossKit is { } kit)
             {
                 // D2.4: pattern -> allocation -> Hub inputs, plus the one signature action from
-                // round 1. battle-hub-fuse T5: the kit reaches battle as inputs (resolved through
-                // the Hub twin), not pre-folded ChannelMods — ApplyKit keeps the action half with
-                // empty mods. Re-writes the just-emitted boss setup in place (it is always index 0,
-                // EmitAndTrack having just added it above).
+                // round 1. battle-hub-fuse T6: the kit reaches battle as inputs only — ApplyKit no
+                // longer takes a ChannelMods parameter at all. Re-writes the just-emitted boss setup
+                // in place (it is always index 0, EmitAndTrack having just added it above).
                 var allocation = BossBuild.ResolveKitAllocation(kit.PatternId, enemies[0].Level, aptitudeTuning!);
-                enemies[0] = BossBuild.ApplyKit(enemies[0], Array.Empty<BattleChannelMod>(), kit.SignatureAction)
+                enemies[0] = BossBuild.ApplyKit(enemies[0], kit.SignatureAction)
                     with
                     {
                         HubInputs = (enemies[0].HubInputs ?? new BattleHubInputs()) with { Aptitude = allocation }

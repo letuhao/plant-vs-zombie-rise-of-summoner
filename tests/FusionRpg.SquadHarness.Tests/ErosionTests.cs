@@ -137,7 +137,7 @@ public class ErosionTests
         Assert.Equal(one * 10, ten);
     }
 
-    // ---- pure-ish: ApplyStatic (one BattleStatComposer.Compose call, no BattleEngine) --------------
+    // ---- pure-ish: ApplyStatic (one BattleHubCompose.Compose call, no BattleEngine) --------------
 
     static BattleActorSetup MinimalSetup(IReadOnlyList<BattleChannelMod>? mods = null) => new()
     {
@@ -169,7 +169,7 @@ public class ErosionTests
         var setup = MinimalSetup(); // Defense = 500
         var eroded = Erosion.ApplyStatic(setup, amount: 10_000); // far more than the 500 baseline
 
-        var snap = BattleStatComposer.Compose(eroded);
+        var snap = BattleHubCompose.Compose(eroded);
         Assert.Equal(0.0, snap.Get(DerivedStatChannels.CombatDefenseOmni));
         // Every other defensive channel floors at (its own registered default) zero too, never negative.
         foreach (var channel in Erosion.DefensiveChannels)
@@ -181,11 +181,11 @@ public class ErosionTests
     {
         TuningBootstrap.Configure();
         var setup = MinimalSetup(); // Defense = 500
-        var baselineSnap = BattleStatComposer.Compose(setup);
+        var baselineSnap = BattleHubCompose.Compose(setup);
         var baselineDefense = baselineSnap.Get(DerivedStatChannels.CombatDefenseOmni);
 
         var eroded = Erosion.ApplyStatic(setup, amount: 50);
-        var erodedSnap = BattleStatComposer.Compose(eroded);
+        var erodedSnap = BattleHubCompose.Compose(eroded);
         Assert.Equal(baselineDefense - 50, erodedSnap.Get(DerivedStatChannels.CombatDefenseOmni));
     }
 
@@ -202,13 +202,13 @@ public class ErosionTests
     [Fact]
     public void ApplyStatic_throws_on_an_unknown_channel_id_through_the_shipped_composer_validation()
     {
-        // Not this class's own check -- BattleStatComposer.Compose's own "unknown channel -> throw"
+        // Not this class's own check -- BattleHubCompose.Compose's own "unknown channel -> throw"
         // (spec §10.1's own citation). Proven here so a future edit to DefensiveChannels that
         // introduces a typo fails loudly rather than silently no-op'ing.
         TuningBootstrap.Configure();
         var badMod = new BattleChannelMod("combat.not.a.real.channel", -1);
         var setup = MinimalSetup(new[] { badMod });
-        Assert.Throws<ArgumentException>(() => BattleStatComposer.Compose(setup));
+        Assert.Throws<ArgumentException>(() => BattleHubCompose.Compose(setup));
     }
 
     // ---- integration: real BattleEngine, trivial trial counts -------------------------------------
@@ -259,8 +259,8 @@ public class ErosionTests
         var baseSetup = SquadMatch.ToActorSetup("squad:0", "squad", attacker, theta: 60);
         var withSetup = baseSetup with { ChannelMods = baseSetup.ChannelMods.Concat(mods).ToList() };
 
-        var baseline = BattleStatComposer.Compose(baseSetup).Get(DerivedStatChannels.CombatCritRateOmni);
-        var boosted = BattleStatComposer.Compose(withSetup).Get(DerivedStatChannels.CombatCritRateOmni);
+        var baseline = BattleHubCompose.Compose(baseSetup).Get(DerivedStatChannels.CombatCritRateOmni);
+        var boosted = BattleHubCompose.Compose(withSetup).Get(DerivedStatChannels.CombatCritRateOmni);
         Assert.Equal(baseline + 150.0, boosted);
     }
 

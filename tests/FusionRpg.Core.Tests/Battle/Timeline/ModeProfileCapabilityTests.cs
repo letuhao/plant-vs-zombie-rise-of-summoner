@@ -86,7 +86,9 @@ public class ModeProfileCapabilityTests
     [Fact]
     public void The_ruleset_version_is_unchanged_by_adding_a_fifth_profile()
     {
-        Assert.Equal(4, BattleRuleset.RulesetVersion);
+        // battle-hub-fuse (2026-09-13): RulesetVersion 4 -> 5 -- an unrelated bump, but this test's
+        // own claim (adding a profile alone does not move the version) still holds at the new value.
+        Assert.Equal(5, BattleRuleset.RulesetVersion);
     }
 
     [Fact]

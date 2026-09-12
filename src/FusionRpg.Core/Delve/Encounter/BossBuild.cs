@@ -31,31 +31,15 @@ namespace FusionRpg.Core.Delve.Encounter;
 /// </summary>
 public static class BossBuild
 {
-    /// <summary>Pattern → `AptitudeAllocation` (via <see cref="PointBudget.PointsFor"/> and
+    /// <summary>
+    /// battle-hub-fuse T5 — pattern → `AptitudeAllocation` (via <see cref="PointBudget.PointsFor"/> and
     /// <see cref="ZombossPattern.ToAllocation"/>, `ZombossCommanderAllocation`'s own established
-    /// two-step) → `ChannelMods` (via <see cref="AptitudeResolver.ResolveForBattle"/>, the SAME Core
-    /// call `WebMatchService.AptitudeChannelMods` makes for the squad — never that store-backed
-    /// wrapper itself, which needs an `RpgStore` this module must never touch, per §9's "no store").
+    /// two-step), exposed so encounter builders attach it as <see cref="BattleHubInputs.Aptitude"/>
+    /// instead of pre-folded `ChannelMods` (battle-hub-fuse T6 deleted the old `ResolveKit`/
+    /// `AptitudeResolver.ResolveForBattle` pair this replaced — zero production callers by then).
     /// <see cref="AllocationScope.Commander"/>, matching `ZombossCommanderAllocation`'s own doc: "the
     /// two differ only in WHERE the allocation comes from... never in the shape the hot path
-    /// consumes" — a Zomboss pattern IS this scope, the same one a player's commander build reads.</summary>
-    public static IReadOnlyList<BattleChannelMod> ResolveKit(string patternId, int thetaBoss, AptitudeTuning aptitudeTuning, PowerTuning powerTuning)
-    {
-        // DEBT — channelmods-hub: one-release BattleChannelMod producer; the Hub twin is
-        // AptitudeResolver.Resolve over the same pattern allocation. Delete in battle-hub-fuse (T6).
-        if (string.IsNullOrEmpty(patternId)) throw new ArgumentException("patternId is required.", nameof(patternId));
-        if (aptitudeTuning is null) throw new ArgumentNullException(nameof(aptitudeTuning));
-        if (powerTuning is null) throw new ArgumentNullException(nameof(powerTuning));
-
-        var allocation = ResolveKitAllocation(patternId, thetaBoss, aptitudeTuning);
-        var ladder = new PowerLadder(powerTuning);
-        return AptitudeResolver.ResolveForBattle(allocation, aptitudeTuning, ladder, thetaBoss, DerivedStatRegistry.CreateDefault());
-    }
-
-    /// <summary>
-    /// battle-hub-fuse T5 — the pattern allocation behind <see cref="ResolveKit"/>, exposed so
-    /// encounter builders attach it as <see cref="BattleHubInputs.Aptitude"/> instead of the
-    /// pre-folded <c>ChannelMods</c>. Same two-step, one formula, no second derivation.
+    /// consumes" — a Zomboss pattern IS this scope, the same one a player's commander build reads.
     /// </summary>
     public static AptitudeAllocation ResolveKitAllocation(string patternId, int thetaBoss, AptitudeTuning aptitudeTuning)
     {
@@ -67,18 +51,17 @@ public static class BossBuild
         return commander.Resolve(null!); // the hot-path delegate shape -- the StatContext parameter is never read
     }
 
-    /// <summary>Applies the kit's `ChannelMods` and the `signatureAction` (one id, from round 1 —
-    /// §5: "`signatureAction` is one action id in `EquippedActionIds`... from round 1") to an
-    /// already-emitted boss setup. Every other field on <paramref name="boss"/> is untouched.</summary>
-    public static BattleActorSetup ApplyKit(BattleActorSetup boss, IReadOnlyList<BattleChannelMod> channelMods, string signatureAction)
+    /// <summary>Applies the kit's `signatureAction` (one id, from round 1 — §5: "`signatureAction` is
+    /// one action id in `EquippedActionIds`... from round 1") to an already-emitted boss setup. Every
+    /// other field on <paramref name="boss"/> is untouched. battle-hub-fuse T6 dropped the
+    /// `channelMods` parameter: the kit's aptitude reaches battle via <see cref="ResolveKitAllocation"/>
+    /// into <see cref="BattleHubInputs.Aptitude"/> (Encounter.cs), never through this method.</summary>
+    public static BattleActorSetup ApplyKit(BattleActorSetup boss, string signatureAction)
     {
-        // DEBT — channelmods-hub: sets BattleChannelMod directly; post-fuse the kit flows through
-        // the Hub twin. Delete in battle-hub-fuse (T6).
         if (boss is null) throw new ArgumentNullException(nameof(boss));
-        if (channelMods is null) throw new ArgumentNullException(nameof(channelMods));
         if (string.IsNullOrEmpty(signatureAction)) throw new ArgumentException("signatureAction is required.", nameof(signatureAction));
 
-        return boss with { ChannelMods = channelMods, EquippedActionIds = new[] { signatureAction } };
+        return boss with { EquippedActionIds = new[] { signatureAction } };
     }
 
     /// <summary>The HP-threshold list alone (per mille of max HP) for a phase kind — `none` is empty,

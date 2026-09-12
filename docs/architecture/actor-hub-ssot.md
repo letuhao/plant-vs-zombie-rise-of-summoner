@@ -812,11 +812,11 @@ Compose honesty: `FlatReplace` channels ship `composeKind` on the sheet **and** 
 
 **Bound UniqueActor** Hot aptitude allocation is **UniqueCreature-keyed** (`commander + UniqueCreature(instanceId)`), matching Server `UniqueActorHubCompose`. **Empire CreatureType / species** allocation is for **empire generals** only. A Bound unique that falls through to species on the injector while the sheet uses UniqueCreature is an **out-of-order sole Hot compose** failure — dual resolve is a defect, not an optional lawn gap. See [combat-power-number-ideal.md](combat-power-number-ideal.md) (HF-lawn) and [aptitude-sheet/spec-unique-lawn-wire.md](aptitude-sheet/spec-unique-lawn-wire.md). Spawn ownership: `decisions.md` Creature progression source and spawn ownership (2026-09-08).
 
-### 8.3 One compose / dual-engine debt (2026-09-12)
+### 8.3 One compose / dual-engine debt — retired 2026-09-13 (`battle-hub-fuse` T6)
 
-**End state:** ActorHub is the **only** compose gate for actor combat derived / AppliedCombat in every place (lawn, sheet, battle, delve, siege, sim). Contribute via `IActorStatSubsystem` / registered atom readers; read Hub only.
+**End state (shipped):** ActorHub is the **only** compose gate for actor combat derived / AppliedCombat in every place (lawn, sheet, battle, delve, siege, sim). Contribute via `IActorStatSubsystem` / registered atom readers; read Hub only.
 
-**Debt:** `BattleStatComposer` + private `BattleChannelMod` producers (Star/Loyalty/etc.) are **grandfathered architectural debt** — the 2026-09-07 “stays separate” ADR exception was **overturned** as a SOLID/DRY defect, not intentional SSOT. Fusion into Hub is **mandatory** (program `/spec` owed). Until then: do not copy; new `*Composer*` / ChannelMods combat writers / new `BattleStatComposer.Compose` call sites under `src/` fail `scripts/guard-actor-hub.ps1`. Ideal: [combat-power-number-ideal.md](combat-power-number-ideal.md). ADR: `decisions.md` ActorHub sole Hot compose gate.
+**Former debt, now fused:** `BattleStatComposer` is **deleted** — `BattleEngine` and every delve/siege/web/expedition caller compose through `BattleHubCompose` (ActorHub) exclusively. The 2026-09-07 "stays separate" ADR exception was overturned as a SOLID/DRY defect (2026-09-12) and fused the next day: `guard-actor-hub.ps1`'s ChannelMods-producer allowlist is trimmed to the three files still legitimately feeding Hub subsystems their rows (`EquipAtomSource`/`TraitAtomSource`/`TreeAtomSource` — `BattleChannelMod` is a shared value shape both the deleted composer and the Hub subsystems read, not composer-only debt). A compile error is now the guarantee that a `BattleStatComposer.Compose` call site cannot reappear; the guard's former text-match check for it is gone. Ideal: [combat-power-number-ideal.md](combat-power-number-ideal.md). ADR: `decisions.md` ActorHub sole Hot compose gate (fused note).
 
 ---
 

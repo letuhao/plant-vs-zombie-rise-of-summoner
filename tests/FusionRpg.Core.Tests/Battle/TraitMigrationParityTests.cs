@@ -97,8 +97,8 @@ public class TraitMigrationParityTests
         // changes. The prediction the spec asked for is now a measurement.
         var actor = Actor(Trait);
 
-        var viaOldCatalog = BattleStatComposer.Compose(actor, PreMigration());
-        var viaAtoms = BattleStatComposer.Compose(actor, MigratedFromSeed());
+        var viaOldCatalog = BattleHubCompose.Compose(actor, PreMigration());
+        var viaAtoms = BattleHubCompose.Compose(actor, MigratedFromSeed());
 
         AssertSameSnapshot(viaOldCatalog, viaAtoms);
     }
@@ -119,7 +119,7 @@ public class TraitMigrationParityTests
         // The migration is only real if the old home is empty. If both still supplied it, the trait
         // would be double-counted the moment anything read them together.
         Assert.Empty(TraitBattleCatalog.Get(Trait).ChannelMods);
-        Assert.Equal(new[] { PreMigrationMod }, BattleStatComposer.Traits.ModsFor(Trait));
+        Assert.Equal(new[] { PreMigrationMod }, BattleHubCompose.Traits.ModsFor(Trait));
     }
 
     [Fact]
@@ -146,8 +146,8 @@ public class TraitMigrationParityTests
     public void A_trait_with_the_migrated_one_reads_higher_crit_than_one_without()
     {
         // Proves the migrated path does something, so parity is not two zeros agreeing.
-        var withTrait = BattleStatComposer.Compose(Actor(Trait), MigratedFromSeed());
-        var without = BattleStatComposer.Compose(Actor(), MigratedFromSeed());
+        var withTrait = BattleHubCompose.Compose(Actor(Trait), MigratedFromSeed());
+        var without = BattleHubCompose.Compose(Actor(), MigratedFromSeed());
 
         Assert.Equal(
             without.Get(DerivedStatChannels.CombatCritRateOmni) + 150,
@@ -179,8 +179,8 @@ public class TraitMigrationParityTests
         var actor = Actor("regenerator", "soul-eater", "guardian", "swift");
 
         AssertSameSnapshot(
-            BattleStatComposer.Compose(actor, TraitAtomSource.CatalogOnly),
-            BattleStatComposer.Compose(actor, MigratedFromSeed()));
+            BattleHubCompose.Compose(actor, TraitAtomSource.CatalogOnly),
+            BattleHubCompose.Compose(actor, MigratedFromSeed()));
     }
 
     // ---- the kind that had to re-open --------------------------------------------------------------

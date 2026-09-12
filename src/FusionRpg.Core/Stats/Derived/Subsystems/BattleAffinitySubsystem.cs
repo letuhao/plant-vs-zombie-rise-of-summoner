@@ -5,12 +5,12 @@ using FusionRpg.Core.Stats;
 namespace FusionRpg.Core.Stats.Derived.Subsystems;
 
 /// <summary>
-/// battle-hub-fuse T5 — Hub twin of <c>BattleStatComposer.AddAffinity</c>: the actor's own element
-/// channels carry Atk/Defense shares by the same divisors. Re-home only, including the integer
-/// division (a <c>long / int</c> computed as <c>long</c> first, exactly like the composer).
+/// battle-hub-fuse T5 — Hub twin of the deleted composer's <c>AddAffinity</c>: the actor's own
+/// element channels carry Atk/Defense shares by the same divisors. Re-home only, including the
+/// integer division (a <c>long / int</c> computed as <c>long</c> first, exactly like the composer did).
 ///
-/// <para>Reads the same <c>BattleStatComposer</c> tuning statics the composer reads; T6 relocates
-/// them with the composer's deletion (tracked follow-up). Order 100 — FlatSum-commutative.</para>
+/// <para>battle-hub-fuse T6 — reads <see cref="BattleTuningHub.Tuning"/> directly, the composer's own
+/// former home for these divisors. Order 100 — FlatSum-commutative.</para>
 /// </summary>
 public sealed class BattleAffinitySubsystem : IActorStatSubsystem
 {
@@ -29,13 +29,13 @@ public sealed class BattleAffinitySubsystem : IActorStatSubsystem
         const string source = ContributionSourceIds.BattleBaseline;
         if (primary is { } p)
         {
-            mods.Add(new DerivedModifier($"combat.power.{p.ToElementId()}", DerivedModifierOp.Flat, atk / BattleStatComposer.PrimaryAffinityDivisor, SourceId: source));
-            mods.Add(new DerivedModifier($"combat.defense.{p.ToElementId()}", DerivedModifierOp.Flat, defense / BattleStatComposer.PrimaryAffinityDivisor, SourceId: source));
+            mods.Add(new DerivedModifier($"combat.power.{p.ToElementId()}", DerivedModifierOp.Flat, atk / BattleTuningHub.Tuning.PrimaryAffinityDivisor, SourceId: source));
+            mods.Add(new DerivedModifier($"combat.defense.{p.ToElementId()}", DerivedModifierOp.Flat, defense / BattleTuningHub.Tuning.PrimaryAffinityDivisor, SourceId: source));
         }
         if (secondary is { } s)
         {
-            mods.Add(new DerivedModifier($"combat.power.{s.ToElementId()}", DerivedModifierOp.Flat, atk / BattleStatComposer.SecondaryAffinityDivisor, SourceId: source));
-            mods.Add(new DerivedModifier($"combat.defense.{s.ToElementId()}", DerivedModifierOp.Flat, defense / BattleStatComposer.SecondaryAffinityDivisor, SourceId: source));
+            mods.Add(new DerivedModifier($"combat.power.{s.ToElementId()}", DerivedModifierOp.Flat, atk / BattleTuningHub.Tuning.SecondaryAffinityDivisor, SourceId: source));
+            mods.Add(new DerivedModifier($"combat.defense.{s.ToElementId()}", DerivedModifierOp.Flat, defense / BattleTuningHub.Tuning.SecondaryAffinityDivisor, SourceId: source));
         }
     }
 }

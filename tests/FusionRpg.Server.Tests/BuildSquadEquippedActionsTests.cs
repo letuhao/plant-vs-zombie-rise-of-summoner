@@ -422,15 +422,17 @@ public class BuildSquadEquippedActionsTests : IDisposable
 
     /// <summary>
     /// `equip-atom-source-not-wired` (action-plan.md §5, found 2026-09-06, fixed 2026-09-07):
-    /// `BattleStatComposer.Equipment` defaulted to `EquipAtomSource.None` forever -- no production
-    /// caller ever called `UseEquipment`. Closed in production by <c>Program.cs</c> →
+    /// the old `BattleStatComposer.Equipment` global defaulted to `EquipAtomSource.None` forever --
+    /// no production caller ever called `UseEquipment`. Closed in production by <c>Program.cs</c> →
     /// <c>EquippedBoundAtoms.SourceFromStore</c> → <c>EquipAtomSource.FromEquippedResolver</c>
-    /// (<c>equip:{role}:{itemRef}</c>).
+    /// (<c>equip:{role}:{itemRef}</c>); battle-hub-fuse T6 deleted that global entirely, so this
+    /// fixture now feeds the resolved atoms through <see cref="BattleHubInputs.BoundAtoms"/> per-setup
+    /// instead (the same shape <c>EquipRuntimeTests</c> uses), not a global static.
     ///
     /// <para>This fixture still drives <c>FromResolver</c> (legacy flatten →
     /// <c>equip:unknown:{atomId}</c>) to prove battle compose accepts that shape; it is <b>not</b>
-    /// the Program.cs production contract. It proves an equipped atom reaches
-    /// <c>BattleStatComposer.Compose</c> and changes a derived channel by the declared magnitude.</para>
+    /// the Program.cs production contract. It proves a real store-backed equipped atom reaches
+    /// <c>BattleHubCompose.Compose</c> and changes a derived channel by the declared magnitude.</para>
     ///
     /// <para><b>Why a synthetic atom+container, not a real catalogued item.</b> Every real, shipped
     /// item today (`data/seed/containers/unique-equip.json`) wraps a `stat.modify` atom, never
@@ -448,7 +450,7 @@ public class BuildSquadEquippedActionsTests : IDisposable
     /// "amount":150}`) -- a fixed, unrolled magnitude, exactly like this fixture's.</para>
     /// </summary>
     [Fact]
-    public void A_real_equipped_items_atom_reaches_BattleStatComposer_through_the_real_production_resolver()
+    public void A_real_equipped_items_atom_reaches_BattleHubCompose_through_the_real_production_resolver()
     {
         // A real registered stat.derived channel (DerivedStatRegistry.RegisterDefaults,
         // DerivedComposeKind.FlatSum -- accepts "flat"), not an arbitrary string: AtomRowValidator's
@@ -497,7 +499,7 @@ public class BuildSquadEquippedActionsTests : IDisposable
 
         // Legacy FromResolver flatten (equip:unknown:{atomId}) — not Program.cs production
         // (EquippedBoundAtoms → FromEquippedResolver). Locks that battle still accepts this shape.
-        BattleStatComposer.UseEquipment(EquipAtomSource.FromResolver(specimenId =>
+        var source = EquipAtomSource.FromResolver(specimenId =>
         {
             var resolution = _store.ResolveBindings(
                 new OwnerScope(OwnerKind.UniqueActor, specimenId), new BindContext(RuntimeId.Battle));
@@ -505,28 +507,22 @@ public class BuildSquadEquippedActionsTests : IDisposable
             var flattened = new List<AtomRow>();
             foreach (var atoms in resolution.AtomsByBinding.Values) flattened.AddRange(atoms);
             return flattened;
-        }));
-        try
-        {
-            var geared = BattleStatComposer.Compose(new BattleActorSetup
-            {
-                Key = "squad:0", Side = "squad", SpeciesId = "spec", TypeId = 1, Level = 5,
-                SpecimenId = instanceId, MaxHp = 100, Atk = 50, Defense = 20,
-            });
-            var bare = BattleStatComposer.Compose(new BattleActorSetup
-            {
-                Key = "squad:0", Side = "squad", SpeciesId = "spec", TypeId = 1, Level = 5,
-                SpecimenId = null, MaxHp = 100, Atk = 50, Defense = 20,
-            });
+        });
 
-            // Exact arithmetic, not just "changed" -- proves the declared magnitude flows through
-            // unmodified, not merely that some unrelated value moved.
-            Assert.Equal(bare.Get(channel) + amount, geared.Get(channel));
-        }
-        finally
+        var geared = BattleHubCompose.Compose(new BattleActorSetup
         {
-            // A GLOBAL static -- must not leak into any other test in this assembly.
-            BattleStatComposer.ResetEquipment();
-        }
+            Key = "squad:0", Side = "squad", SpeciesId = "spec", TypeId = 1, Level = 5,
+            SpecimenId = instanceId, MaxHp = 100, Atk = 50, Defense = 20,
+            HubInputs = new BattleHubInputs { BoundAtoms = source.DerivedAtomsFor(instanceId) },
+        });
+        var bare = BattleHubCompose.Compose(new BattleActorSetup
+        {
+            Key = "squad:0", Side = "squad", SpeciesId = "spec", TypeId = 1, Level = 5,
+            SpecimenId = null, MaxHp = 100, Atk = 50, Defense = 20,
+        });
+
+        // Exact arithmetic, not just "changed" -- proves the declared magnitude flows through
+        // unmodified, not merely that some unrelated value moved.
+        Assert.Equal(bare.Get(channel) + amount, geared.Get(channel));
     }
 }

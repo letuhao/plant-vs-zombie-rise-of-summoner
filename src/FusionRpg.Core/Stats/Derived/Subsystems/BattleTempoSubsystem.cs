@@ -5,9 +5,9 @@ using FusionRpg.Core.Stats;
 namespace FusionRpg.Core.Stats.Derived.Subsystems;
 
 /// <summary>
-/// battle-hub-fuse T5 — Hub twin of the composer's <c>turn.speed</c> seed
+/// battle-hub-fuse T5 — Hub twin of the deleted composer's <c>turn.speed</c> seed
 /// (<c>SpeciesTempoProjection.SpeedFor</c> over the setup's own attack interval). Re-home only:
-/// the same <c>BattleTuningHub</c> reference interval the composer reads.
+/// the same <see cref="BattleTuningHub"/> reference interval the composer used to read.
 ///
 /// <para>Minus the channel's registry <c>DefaultValue</c>: the old composer seeds this channel
 /// absolutely (<c>FromValues</c>), while Hub compose adds the default underneath every
@@ -38,7 +38,7 @@ public sealed class BattleTempoSubsystem : IActorStatSubsystem
         mods.Add(new DerivedModifier(DerivedTurnChannels.Speed, DerivedModifierOp.Flat,
             SpeciesTempoProjection.SpeedFor(
                 _attackIntervalMs(ctx),
-                BattleStatComposer.TuningInstance.SpeciesTempoReferenceIntervalMs,
+                BattleTuningHub.Tuning.SpeciesTempoReferenceIntervalMs,
                 DerivedStatPolicy.TurnDefaultSpeed) - baseline,
             SourceId: ContributionSourceIds.BattleBaseline));
     }

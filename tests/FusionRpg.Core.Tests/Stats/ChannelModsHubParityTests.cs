@@ -83,8 +83,32 @@ public class ChannelModsHubParityTests
 
         var hub = SumHub(AptitudeResolver.Resolve(allocation, AptitudeTuning, ladder, theta, Registry()));
 
-        Assert.Equal(new Dictionary<string, long>(StringComparer.Ordinal), hub);
+        Assert.Equal(CapturedAptitudeHub, hub);
     }
+
+    // Captured this session (battle-hub-fuse T6, immediately after ResolveForBattle's deletion) —
+    // Hub's own output for FundedAllocation() at theta=100, pinned as the literal the class doc
+    // comment above always meant to carry. A drift here is a real behavior change, not a stale test.
+    static readonly Dictionary<string, long> CapturedAptitudeHub = new(StringComparer.Ordinal)
+    {
+        ["combat.power.omni"] = 4417, ["combat.accuracy.omni"] = 60, ["combat.crit.rate.omni"] = 60,
+        ["combat.crit.damage.omni"] = 60, ["progression.bonus.maxHp"] = 26770, ["progression.bonus.atk"] = 20077,
+        ["progression.bonus.defense"] = 13385, ["progression.bonus.arm2"] = 10708, ["skill.effectiveness.attack"] = 34,
+        ["resource.max.hp"] = 57555, ["resource.regen.hp"] = 277, ["resource.max.stamina"] = 81647,
+        ["resource.regen.stamina"] = 1460, ["resource.max.qi"] = 28108, ["resource.regen.qi"] = 703,
+        ["resource.max.hunger"] = 47516, ["resource.regen.hunger"] = 525, ["resource.max.spirit"] = 14053,
+        ["resource.regen.spirit"] = 351, ["status.power.omni"] = 21, ["status.power.dot"] = 44,
+        ["status.power.cc"] = 31, ["status.power.contagion"] = 31, ["status.resist.omni"] = 31,
+        ["status.resist.dot"] = 85, ["status.resist.cc"] = 31, ["status.resist.contagion"] = 76,
+        ["status.duration.omni"] = 21, ["status.duration.dot"] = 39, ["status.duration.cc"] = 39,
+        ["status.duration.contagion"] = 39, ["status.durationReduction.omni"] = 35, ["status.durationReduction.dot"] = 68,
+        ["status.durationReduction.cc"] = 39, ["status.durationReduction.contagion"] = 131, ["status.intensity.omni"] = 28,
+        ["status.intensity.dot"] = 73, ["status.intensity.cc"] = 65, ["status.intensity.contagion"] = 39,
+        ["status.intensityReduction.omni"] = 40, ["status.intensityReduction.dot"] = 102, ["status.intensityReduction.cc"] = 39,
+        ["status.intensityReduction.contagion"] = 126, ["combat.defense.omni"] = 1205, ["combat.absorption.omni"] = 5,
+        ["combat.reduction.omni"] = 1, ["combat.crit.resist.omni"] = 20, ["combat.crit.resist.damage.omni"] = 20,
+        ["combat.shield.toughness.omni"] = 2677, ["combat.shield.capacity.omni"] = 73616, ["combat.shield.regen.omni"] = 451,
+    };
 
     [Fact]
     public void KitResolve_matches_retired_ResolveKit_per_channel()
@@ -96,8 +120,33 @@ public class ChannelModsHubParityTests
 
         var hub = SumHub(AptitudeResolver.Resolve(allocation, AptitudeTuning, ladder, thetaBoss, Registry()));
 
-        Assert.Equal(new Dictionary<string, long>(StringComparer.Ordinal), hub);
+        Assert.Equal(CapturedKitHub, hub);
     }
+
+    // Captured this session (battle-hub-fuse T6) — Hub's own output for the "force-pure" pattern
+    // allocation at thetaBoss=127, pinned as the literal.
+    static readonly Dictionary<string, long> CapturedKitHub = new(StringComparer.Ordinal)
+    {
+        ["combat.power.omni"] = 6566, ["combat.accuracy.omni"] = 76, ["combat.crit.rate.omni"] = 55,
+        ["combat.crit.damage.omni"] = 55, ["combat.penetration.omni"] = 5, ["combat.amplification.omni"] = 1,
+        ["combat.parry.break.omni"] = 14, ["combat.parry.shred.omni"] = 364, ["combat.block.break.omni"] = 14,
+        ["combat.block.shred.omni"] = 364, ["combat.reflect.rate.omni"] = 7, ["combat.reflect.damage.omni"] = 54,
+        ["progression.bonus.maxHp"] = 11894, ["progression.bonus.atk"] = 26168, ["progression.bonus.arm2"] = 7930,
+        ["skill.effectiveness.attack"] = 32, ["resource.max.hp"] = 78463, ["resource.regen.hp"] = 1032,
+        ["resource.max.stamina"] = 102939, ["resource.regen.stamina"] = 1837, ["resource.max.qi"] = 39648,
+        ["resource.regen.qi"] = 992, ["resource.max.hunger"] = 92214, ["resource.regen.hunger"] = 1633,
+        ["resource.max.spirit"] = 19824, ["resource.regen.spirit"] = 495, ["status.power.omni"] = 22,
+        ["status.power.dot"] = 52, ["status.power.cc"] = 31, ["status.power.contagion"] = 67,
+        ["status.resist.omni"] = 23, ["status.resist.dot"] = 40, ["status.resist.cc"] = 31,
+        ["status.resist.contagion"] = 64, ["status.duration.omni"] = 38, ["status.duration.dot"] = 100,
+        ["status.duration.cc"] = 40, ["status.duration.contagion"] = 100, ["status.durationReduction.omni"] = 27,
+        ["status.durationReduction.dot"] = 55, ["status.durationReduction.cc"] = 40, ["status.durationReduction.contagion"] = 73,
+        ["status.intensity.omni"] = 31, ["status.intensity.dot"] = 71, ["status.intensity.cc"] = 64,
+        ["status.intensity.contagion"] = 105, ["status.intensityReduction.omni"] = 21, ["status.intensityReduction.dot"] = 40,
+        ["status.intensityReduction.cc"] = 40, ["status.intensityReduction.contagion"] = 55, ["combat.absorption.omni"] = 1,
+        ["combat.reduction.omni"] = 3, ["combat.crit.resist.omni"] = 11, ["combat.crit.resist.damage.omni"] = 11,
+        ["combat.shield.toughness.omni"] = 1982, ["combat.shield.capacity.omni"] = 54516, ["combat.shield.regen.omni"] = 334,
+    };
 
     [Fact]
     public void ZombossPatternResolve_matches_retired_Concat_per_channel()
@@ -109,8 +158,33 @@ public class ChannelModsHubParityTests
 
         var hub = SumHub(AptitudeResolver.Resolve(allocation, AptitudeTuning, ladder, level, Registry()));
 
-        Assert.Equal(new Dictionary<string, long>(StringComparer.Ordinal), hub);
+        Assert.Equal(CapturedZombossHub, hub);
     }
+
+    // Captured this session (battle-hub-fuse T6) — Hub's own output for the "bastion-pure" pattern
+    // allocation at level=42, pinned as the literal.
+    static readonly Dictionary<string, long> CapturedZombossHub = new(StringComparer.Ordinal)
+    {
+        ["combat.power.omni"] = 983, ["combat.accuracy.omni"] = 75, ["combat.crit.rate.omni"] = 121,
+        ["combat.crit.damage.omni"] = 121, ["combat.parry.rate.omni"] = 21, ["combat.parry.strength.omni"] = 121,
+        ["combat.block.rate.omni"] = 21, ["combat.block.strength.omni"] = 121, ["progression.bonus.maxHp"] = 2062,
+        ["progression.bonus.atk"] = 3687, ["progression.bonus.defense"] = 4197, ["progression.bonus.arm1"] = 2159,
+        ["skill.cooldown.defense"] = 27, ["skill.effectiveness.attack"] = 38, ["skill.effectiveness.defense"] = 21,
+        ["skill.effectiveness.support"] = 25, ["skill.effectiveness.status"] = 25, ["combat.heal.power"] = 2212,
+        ["resource.max.hp"] = 17190, ["resource.regen.hp"] = 76, ["resource.max.stamina"] = 13808,
+        ["resource.regen.stamina"] = 325, ["resource.max.qi"] = 13272, ["resource.regen.qi"] = 299,
+        ["resource.max.hunger"] = 12415, ["resource.regen.hunger"] = 222, ["resource.max.spirit"] = 7939,
+        ["resource.regen.spirit"] = 114, ["status.power.omni"] = 23, ["status.power.dot"] = 78,
+        ["status.power.cc"] = 57, ["status.power.contagion"] = 37, ["status.resist.omni"] = 23,
+        ["status.resist.dot"] = 52, ["status.resist.cc"] = 36, ["status.resist.contagion"] = 37,
+        ["status.duration.omni"] = 25, ["status.duration.dot"] = 72, ["status.duration.cc"] = 90,
+        ["status.duration.contagion"] = 54, ["status.durationReduction.omni"] = 21, ["status.durationReduction.dot"] = 40,
+        ["status.durationReduction.cc"] = 40, ["status.durationReduction.contagion"] = 57, ["status.intensity.omni"] = 31,
+        ["status.intensity.dot"] = 121, ["status.intensity.cc"] = 80, ["status.intensity.contagion"] = 40,
+        ["status.intensityReduction.omni"] = 38, ["status.intensityReduction.dot"] = 95, ["status.intensityReduction.cc"] = 76,
+        ["status.intensityReduction.contagion"] = 74, ["combat.defense.omni"] = 305, ["combat.absorption.omni"] = 6,
+        ["combat.reduction.omni"] = 0, ["combat.shield.toughness.omni"] = 162, ["combat.shield.capacity.omni"] = 2429,
+    };
 
     [Fact]
     public void DraughtTwin_maps_manifest_one_to_one_with_attributed_source_ids()

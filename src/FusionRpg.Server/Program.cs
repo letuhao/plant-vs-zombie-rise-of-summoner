@@ -748,12 +748,11 @@ if (clearedBindings > 0)
 var orphanInstances = app.Services.GetRequiredService<RpgStore>().CountOrphanInstances();
 if (orphanInstances > 0)
     Console.WriteLine($"[atoms] {orphanInstances} orphan instance(s) remain after the boot sweep");
-// `equip-atom-source-not-wired` (action-plan.md §5) + GG-49 equip SourceId (2026-09-08):
-// BattleStatComposer and UniqueActorHubCompose share EquippedBoundAtoms so battle ModsFor and
-// sheet DerivedAtomsFor mint equip:{role}:{itemRef}, never bare atom ids / equip:unknown.
-var equipStore = app.Services.GetRequiredService<RpgStore>();
-FusionRpg.Core.Battle.BattleStatComposer.UseEquipment(
-    EquippedBoundAtoms.SourceFromStore(equipStore));
+// battle-hub-fuse T6: the old global BattleStatComposer.UseEquipment(EquippedBoundAtoms
+// .SourceFromStore(...)) resolver is deleted with the composer -- it fed nothing once BattleEngine
+// moved to BattleHubCompose in T5 (BattleHubCompose reads per-actor setup.HubInputs.BoundAtoms, not
+// a global default). Wiring a real per-actor EquippedBoundAtoms source into battle setups' HubInputs
+// is T7's named scope ("Battle equip path Hub op-aware only"), not re-created here.
 app.UseCors();
 app.UseDefaultFiles();
 app.UseStaticFiles();

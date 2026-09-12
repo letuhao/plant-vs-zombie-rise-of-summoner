@@ -273,8 +273,15 @@ public static class BattleRuleset
     /// rate does, and PS-3 still does not apply to these hashes. Adopted because the subtractive
     /// shape floors damage at zero once defense outruns offense -- total immunity, the same defect
     /// removed from ampFactor in the same session, measured at 17.1% of LANDED hits dealing
-    /// nothing. Divisive approaches zero asymptotically and never reaches it.</summary>
-    public const int RulesetVersion = 4;
+    /// nothing. Divisive approaches zero asymptotically and never reaches it.
+    /// v5 (battle-hub-fuse, 2026-09-13): BattleStatComposer is deleted; BattleEngine composes through
+    /// BattleHubCompose (ActorHub) exclusively. T5's own pre-delete parity matrix proved Hub ==
+    /// composer channel-for-channel (exact on battle channels, narrowing-bounded on funded aptitude
+    /// channels, three adopted op-divergences on status.resist.{dot,cc,contagion} capped at 0.95 vs
+    /// the old uncapped raw sums) -- this bump is the single, approved (Ask-first table) marker for
+    /// that engine-shape change, not a magnitude retune. Any golden whose hash embeds RulesetVersion
+    /// moves by construction and is re-blessed once alongside this bump, never per-golden thereafter.</summary>
+    public const int RulesetVersion = 5;
 
     static BattleTuning? _tuning;
 

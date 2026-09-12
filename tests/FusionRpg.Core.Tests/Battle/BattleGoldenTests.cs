@@ -54,10 +54,19 @@ public class BattleGoldenTests
     // same session, measured over 50,000 simulated fights at 17.1% of LANDED hits dealing nothing.
     // Divisive approaches zero asymptotically and never reaches it. Negative defense still
     // amplifies (mirrored branch), so glass profiles are unaffected in kind.
-    const string StompHash = "1523E697B5F110F43530710FCD795470A69FAA5876FC32021DD74955E3DEAB50";
-    const string CloseHash = "EEA316E877EC270BD4CDE0A2C18FCEC15026843670F34F5DACA8B77303FAC63F";
-    const string WipeHash = "4AB4D8D26FECC8A068D2A1E231EF567793183DF164B2E818C430EF6505B59684";
-    const string SeedSweepHash = "A06B6BF14199B40BD76879680E39927EDB0BFBEF5DE632182F49472497FD2450";
+    //
+    // Re-blessed 2026-09-13 at RulesetVersion 5 (battle-hub-fuse T6): BattleStatComposer is deleted;
+    // BattleEngine composes exclusively through BattleHubCompose (ActorHub). The hash moves on the
+    // version stamp alone (BattleReport.RulesetVersion is part of the hashed payload), independent of
+    // whether any actual magnitude changed — and T5's own pre-delete parity matrix already proved Hub
+    // == old composer channel-for-channel on these exact fixtures (exact on battle channels; these
+    // goldens carry no traits/statuses touching the three narrowing-bounded aptitude channels, so no
+    // magnitude moved either). `Golden_outcomes_hold_their_shapes` stayed green, unchanged: stomp is
+    // still Victory, wipe still Defeat, the coward still walks away.
+    const string StompHash = "A9F81373914D17148CFBEB4A813F8AED7412F09DADBF1A6549AECC688BFE7984";
+    const string CloseHash = "2734593679CC89F6E1DDC81064FB1A7923B3D0D986B1E52C2D538AECACB085EC";
+    const string WipeHash = "C618D457325049DE0B931BED7B77AC4CB24C88D538E24A81C8545E2276C717F5";
+    const string SeedSweepHash = "38CCD2CDEF7C5009928B288700ED2938D31F21109159B2789A648EF2C1E5782F";
 
     static BattleActorSetup Actor(string key, string side, int level,
         ElementTypeId? elem = null, params string[] traits) => new()

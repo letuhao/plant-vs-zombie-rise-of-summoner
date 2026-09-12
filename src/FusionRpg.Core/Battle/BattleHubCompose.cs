@@ -22,6 +22,16 @@ namespace FusionRpg.Core.Battle;
 /// </summary>
 public static class BattleHubCompose
 {
+    /// <summary>Where trait channel mods are read from when a caller does not pass one (E12, re-homed
+    /// off the deleted <c>BattleStatComposer.Traits</c> in T6). Defaults to the migrated set, which
+    /// supplies `critical-hunter` and falls through to `TraitBattleCatalog` for the other thirteen.</summary>
+    public static TraitAtomSource Traits { get; private set; } = TraitAtomSource.Shipped();
+
+    public static void UseTraits(TraitAtomSource source) =>
+        Traits = source ?? throw new ArgumentNullException(nameof(source));
+
+    public static void ResetTraits() => Traits = TraitAtomSource.Shipped();
+
     public static ActorDerivedSnapshot Compose(BattleActorSetup setup, TraitAtomSource? traits = null)
     {
         if (setup is null) throw new ArgumentNullException(nameof(setup));
@@ -32,7 +42,7 @@ public static class BattleHubCompose
         hub.Register(new BattleBaselineSubsystem(_ => (theta, setup.Defense)));
         hub.Register(new BattleAffinitySubsystem(_ =>
             (setup.Atk, setup.Defense, setup.ElementPrimary, setup.ElementSecondary)));
-        hub.Register(new BattleTraitSubsystem(traits ?? BattleStatComposer.Traits, _ => setup.TraitIds));
+        hub.Register(new BattleTraitSubsystem(traits ?? Traits, _ => setup.TraitIds));
         hub.Register(new BattleTempoSubsystem(_ => setup.AttackIntervalMs));
         hub.Register(new ResourceBaselineSubsystem(new FixedPowerIndexProvider(theta)));
 

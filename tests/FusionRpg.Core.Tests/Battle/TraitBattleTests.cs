@@ -119,8 +119,8 @@ public class TraitBattleTests
     [Fact]
     public void Critical_hunter_mods_ride_the_composed_snapshot()
     {
-        var snap = BattleStatComposer.Compose(Actor("squad:0", "squad", traits: new[] { "critical-hunter" }));
-        var plain = BattleStatComposer.Compose(Actor("squad:0", "squad"));
+        var snap = BattleHubCompose.Compose(Actor("squad:0", "squad", traits: new[] { "critical-hunter" }));
+        var plain = BattleHubCompose.Compose(Actor("squad:0", "squad"));
         Assert.True(CombatDerivedReader.CritRate(snap, ElementTypeId.Fire)
                     > CombatDerivedReader.CritRate(plain, ElementTypeId.Fire));
     }
