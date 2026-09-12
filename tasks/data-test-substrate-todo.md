@@ -84,14 +84,15 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - Files: `tests/FusionRpg.Data.Tests/DataTestStoreTests.cs`. Scope: S.
   - Dependencies: T6.
 
-- [ ] **Task T8: Helper proof tests**
-  - Description: memory store no-file; file store deletes cleanly; failure-not-swallowed; helper introduces **no** `guard-test-substrate` baseline entry.
-  - Acceptance: all helper assertions pass; gate has no line for the helper.
-  - Verify: `guard-test-substrate.ps1` + `DataTestStoreTests`.
+- [x] **Task T8: Helper proof tests** ✅ 2026-09-12
+  - Description: each helper criterion now has its own DAMP test — memory store no-file (`Create_creates_no_temp_directory`, `Create_returns_an_initialized_memory_store_that_round_trips_sql`), file store deletes cleanly (`A_file_store_dispose_deletes_its_directory_cleanly`, added here), failure-not-swallowed (`A_failed_file_cleanup_throws_rather_than_being_swallowed`), and no `guard-test-substrate` baseline entry (`Memory_helper_adds_no_substrate_gate_entry`).
+  - Acceptance met: all helper assertions pass; the baseline has no `DataTestStore` line.
+  - Verified: gate re-run PASS after the concurrent-worktree regression was cleared — focused 8/8, full Data 1286/1286, both guards green, no leaked dir.
   - Files: `tests/FusionRpg.Data.Tests/DataTestStoreTests.cs`. Scope: S.
   - Dependencies: T7.
+  - **Process note:** this test was swept into the concurrent `59ff9941` ("add stale files") commit by another stream before it could get its own increment; content is in HEAD and green, but the per-task rollback boundary for T8 is not clean.
 
-### Checkpoint 2 — Helper
+### Checkpoint 2 — Helper ✅
 - [ ] Helper green; gate still green; owner reviews the helper API before the migration.
 
 ## Phase 3 — Pilot: prove the pattern at minimum blast radius
