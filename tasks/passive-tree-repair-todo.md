@@ -49,17 +49,30 @@ category, and by tree** — an aggregate hides the mechanism collapse.
 - [ ] Binder crash, `FamilyExpandGen --check` drift, and the `wither` orphan are captured verbatim
 **Depends on:** none. **Scope:** S.
 
-### P0.2: Add focused failing tests that reproduce R2–R4 and R7–R9
-**Spec:** repair skill §8. **Description:** each defect gets a test that fails on today's code and runs
-in seconds — no corpus aggregate:
-(a) a `more` op never reaches `Enum.TryParse` failure; (b) a pool-shaped `channel` never throws
-unhandled; (c) a bound atom's kind is one `TreeAtomSource` reads; (d) a `status.apply` family expands
-to a row with the `statusMagnitudeAndDuration` ladder; (e) `params.op` is read only for kinds that own
-a modifier op; (f) a Flat family on a curve-less channel refuses by **name**, not by crash.
+### P0.2: Name the focused regression test each fix must ship
+**Spec:** repair skill §8. **Description:** CI runs whole test projects and this repo has no
+`Skip`-a-known-failure convention, so a committed red test breaks the build. **Each regression test
+therefore lands WITH its fix, in the same commit** (repair skill §5 step 4: "add/update focused
+regression tests that would fail on the old code"). This task fixes the *list* — what test proves what
+— so every later fix task knows its acceptance test before it edits code:
+
+| Defect | Test (must fail on the pre-fix code) |
+|---|---|
+| R1 vocabulary | `permitted_for_branch(b) ⊆ resolvable_family_ids` for all three tags |
+| R2 `More` | a `more`-op atom resolves end to end; never reaches an `Enum.TryParse` failure |
+| R3 pool channel | a pool-shaped `channel` resolves or refuses as a `BindRefusal`, never throws |
+| R4 kind parity | a bound node's `KindId` is one the resolve path reads, for **both** kinds |
+| R5 mechanism | a tier 8–10 mechanism node reaches `NodeAtom` and contributes |
+| R7 mechanism kinds | a `status.apply` family expands with the `statusMagnitudeAndDuration` ladder |
+| R8 `Replace`/`Flag` | the chosen semantics are named; no magnitude invented |
+| R9 board/economy verb | `params.op` is read as a modifier only for kinds that own one |
+| R10 curve | a Flat family on a curve-less channel refuses by name, not by crash |
+
 **Acceptance:**
-- [ ] Each defect has a named failing test citing `file:line`
-- [ ] No test asserts a corpus count (population, not constant)
-**Depends on:** P0.1. **Scope:** M.
+- [ ] Each fix task below names its test, and the test is committed in the same commit as the fix
+- [ ] No test asserts a corpus count — the envelope/contract only
+- [ ] No test is committed in a failing state
+**Depends on:** P0.1. **Scope:** S (the list; the tests ride with their fixes).
 
 ### P0.3: Propagate the stale counts the specs still carry
 **Spec:** DESIGN-GATE §3 evidence rule 6. **Description:** `spec-tree-language.md` §3 still says

@@ -115,18 +115,18 @@ it is now §6.2's size signal.
 
 | # | Vocabulary | Declared at | **Counted** | Note |
 |---|---|---|---:|---|
-| 1 | Atom **attach points** | `AtomKind.cs:8-30` (enum), `AtomKindRegistry.cs:21` (`AttachPointCount`) | **7** | `Stat · Resource · Status · Shield · Board · Match · Ui` |
-| 2 | Atom **kinds** | `AtomKindRegistry.cs:31` (`KindCount`), rows `:476-869` | **16** | Derived from the affix; never asked |
+| 1 | Atom **attach points** | `AtomKind.cs:8-30` (enum), `AtomKindRegistry.cs:21` (`AttachPointCount`) | **9** | counted 2026-09-12: `AtomKindRegistry.AttachPointCount` == `Enum.GetValues<AttachPoint>().Length` (`AtomKindRegistryTests.cs:38`) |
+| 2 | Atom **kinds** | `AtomKindRegistry.cs:31` (`KindCount`), rows `:476-869` | **18** | counted 2026-09-12: `AtomKindRegistry.KindCount` == `All.Count` (`AtomKindRegistryTests.cs:37`) |
 | 3 | Atom **triggers** | `AtomKind.cs:95-99` (`AtomTriggers.All`), `AtomKindRegistry.cs:36` | **13 declared, 11 authorable** | `OnGranted`/`OnRemoved` are runtime lifecycle states no kind may carry (`AtomKind.cs:104-111`) |
-| 4 | **Elements** | `ActorElementTypes.cs:3-11`, roster `:21-29` | **6** (+ the `omni` sentinel, `:19`) | |
-| 5 | **Statuses** | `StatusCatalogBootstrap.cs:16-58` | **21** | 8 engine wraps + 8 overlay-authored + 5 contagion |
+| 4 | **Elements** | `ActorElementTypes.cs:3-11`, roster `:21-29` | **6** (+ the `omni` sentinel, `:19`) | counted 2026-09-12: `roster.elements` == 6 in the committed manifest |
+| 5 | **Statuses** | `StatusCatalogBootstrap.cs:16-58` | **24** | counted 2026-09-12: `roster.statuses` == 24 in the committed manifest; the bootstrap's own doc says "the 24 locked status ids" |
 | 6 | **Aptitudes / postures** | `Aptitude.cs:38-51` / `:11` | **12 / 3** | The count is a *product* (`PostureCount × PerPosture`, `:30-35`), never typed |
-| 7 | **Derived stat channels** | `DerivedStatRegistry.cs` | **267 registered + 9 open prefix families** | 267 asserted in four test files (`StatTaxonomyTests.cs:183`, `AtomCatalogSsotDriftTests.cs:46`, `ElementHubDocDriftTests.cs:73`, `SeedCatalogTests.cs:28`); the 9 prefixes resolve dynamically in `TryResolveChannel` (`:318-388`) |
+| 7 | **Derived stat channels** | `DerivedStatRegistry.cs` | **269 registered + 9 open prefix families** | counted 2026-09-12: `AllRegistered.Count == 269` (`StatTaxonomyTests.cs:185`); the 9 prefixes resolve dynamically in `TryResolveChannel` (`:318-388`) |
 | 8 | **Primary stat channels** | `ModifierOp.cs:68-75` (`StatChannels.All`) | **23** | `stat.modify`'s vocabulary |
 | 9 | **`UnitClass`** | `StatClass.cs:29-100` | **13** | The class's own doc comment at `:26` still says *"ten-class"* — stale by three. Counted, not quoted |
 | 10 | **`StatClass`** | `StatClass.cs:7-22` | **4** | `Contest \| Race \| Pool \| Feeder`, explicitly orthogonal to `UnitClass` |
-| 11 | **Affix families** (the roll unit) | `data/seed/items/affix-families/*.json` — 15 files | **98** | Counted this session |
-| 12 | **Affix tag values** | the same 98 families | **3** | `offensive` 41 · `defensive` 40 · `utility` 17. See §5.1 |
+| 11 | **Affix families** (the roll unit) | `data/seed/items/affix-families/*.json` — 16 files | **125** | counted 2026-09-12: entries with `kind == "affix-family"` across the directory |
+| 12 | **Affix tag values** | the same 125 families | **7** | counted 2026-09-12: `offensive` 58 · `defensive` 47 · `utility` 19 · `sturdy` 5 · `arcane` 4 · `mechanical` 3 · `metal` 2. 112 families carry one tag, 13 carry more than one. See §5.1 |
 
 **Two classifications of a channel already exist and both are normative** — the 13-class `UnitClass`
 ledger and the sheet's six render states. This module invents no third; it does not classify channels
@@ -255,8 +255,10 @@ property space: atom tags."* **Half of that is true and the false half is load-b
 - `AtomRow.TagsJson` is `string = "{}"` (`AtomRow.cs:40`), and `AtomRowValidator.cs:184` checks only
   *"is this a JSON object"* — no membership check, unlike every other atom param, which uses
   `ParamDef.Vocabulary`.
-- Counted this session: the 98 affix families under `data/seed/items/affix-families/` carry exactly
-  **three** distinct tag values — `offensive` 41, `defensive` 40, `utility` 17. That is one axis, and
+- Counted this session: the 125 affix families under `data/seed/items/affix-families/` carry
+  **seven** distinct tag values — `offensive` 58, `defensive` 47, `utility` 19, `sturdy` 5,
+  `arcane` 4, `mechanical` 3, `metal` 2. Only the first three are branch-shaped; the other four are
+  category tags that do not map to a node's branch at all. That is one axis, and
   it is not enough to write a single interesting exclusion.
 
 **So the property space this module keys on is `tree-plan`'s `propertyVocabulary`, emitted before any
@@ -691,10 +693,10 @@ D35.
     passive-tree-map.md, passive-tree-ideal.md (full), research 02/03/04,
     effect-atom/definitions.md (referenced sections), design/spec-magnitude-and-units.md §3,
     design/spec-derived-stat-sheet.md (§1/§3 via the research notes).
-[x] Counts verified BY COUNTING in src/ this session, not quoted:
-    7 attach points, 16 kinds, 13 triggers (11 authorable), 6 elements, 21 statuses,
-    12 aptitudes / 3 postures, 267 derived channels + 9 open prefix families,
-    23 primary channels, 13 UnitClass, 4 StatClass, 98 affix families, 3 tag values.
+[x] Counts verified BY COUNTING in src/ this session, not quoted (re-counted 2026-09-12):
+    9 attach points, 18 kinds, 13 triggers (11 authorable), 6 elements, 24 statuses,
+    12 aptitudes / 3 postures, 269 derived channels + 9 open prefix families,
+    23 primary channels, 13 UnitClass, 4 StatClass, 125 affix families, 7 tag values.
 [x] Every factual claim cites file:line.
 [x] I verified claims against CODE, not comments — StatClass.cs:26 still says "ten-class"
     over a 13-member enum, and AtomKindRegistry.cs:6 still says "5 attach points, 12 kinds"

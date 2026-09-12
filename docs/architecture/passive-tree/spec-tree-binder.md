@@ -56,14 +56,14 @@ no *"the atom layer is unreachable"* caveat to carry into this module.
 
 | | Counted | Declaration | Guard |
 |---|---:|---|---|
-| Attach points | **8** (was 7) | `AtomKind.cs:8-43`; `AtomKindRegistry.cs:21` | `AtomKindRegistryTests.cs:31` pins the const to `Enum.GetValues` |
-| Kinds | **17** (was 16) | `AtomKindRegistry.cs:36`; 17 `new(` rows | `AtomKindRegistryTests.cs:30` pins the const to `All.Count` |
-| Triggers | **13 declared, 11 authorable** | `AtomKind.cs:95-99`; `AtomKindRegistry.cs:41` | `AtomKindRegistryTests.cs:112` pins the const to `All.Length` |
+| Attach points | **9** | `AtomKind.cs:8-43`; `AtomKindRegistry.cs:21` | `AtomKindRegistryTests.cs:38` pins the const to `Enum.GetValues` |
+| Kinds | **18** | `AtomKindRegistry.cs:31`; 18 `new(` rows | `AtomKindRegistryTests.cs:37` pins the const to `All.Count` |
+| Triggers | **13 declared, 11 authorable** | `AtomKind.cs:103-119`; `AtomKindRegistry.cs:36` | `AtomKindRegistryTests.cs:125` pins the const to `All.Length` |
 | Elements | **6** (+ `omni` sentinel) | `ActorElementTypes.cs:3-11`, `:19-29` | |
 | Statuses | **24** (D51, 2026-09-06: was 21) | `StatusCatalogBootstrap.cs:16-67` | resolved fresh per `Validate` (`AtomKindRegistry.cs:87-91`) |
 | Aptitudes / postures | **12 / 3** | `Aptitude.cs:38-51` / `:11` | the count is a product (`:30-35`), never typed |
 | Primary stat channels | **23** | `ModifierOp.cs:68-75` | `stat.modify`'s vocabulary (`AtomKindRegistry.cs:71`) |
-| Derived stat channels | **267 registered + 9 open prefix families** | `DerivedStatRegistry`; prefixes at `:318-388` | 267 asserted in four test files (`StatTaxonomyTests.cs:183`, `AtomCatalogSsotDriftTests.cs:46`, `ElementHubDocDriftTests.cs:73`, `SeedCatalogTests.cs:28`); resolved fresh per `Validate` (`AtomKindRegistry.cs:84-85`) so the vocabulary widens with no guard edit |
+| Derived stat channels | **269 registered + 9 open prefix families** | `DerivedStatRegistry`; prefixes at `:318-388` | counted 2026-09-12: `AllRegistered.Count == 269` (`StatTaxonomyTests.cs:185`); resolved fresh per `Validate` (`AtomKindRegistry.cs:84-85`) so the vocabulary widens with no guard edit |
 | `UnitClass` | **13** | `StatClass.cs:29-100` | ⚠ the enum's own doc comment at `:26` still says *"ten-class"* — stale by three |
 | `StatClass` | **4** | `StatClass.cs:7-22` | explicitly *"orthogonal to `UnitClass`"* |
 | Predicate leaves | **12** | `PredicateNode.cs:17-31` | depth ≤ 4, ≤ 16 nodes |
@@ -729,8 +729,8 @@ reading the code, by the `DemonSpeciesGen --explain` precedent.
 ## Project structure
 
 **This module is C#, not Python, and the reason is a rule rather than a preference.** It must read
-`DerivedStatRegistry` for the 267 + 9 channel vocabulary, `AtomKindRegistry` for the 17 kinds (as of
-2026-09-06; see [`spec-element-conversion.md`](spec-element-conversion.md) §0 for the current count)
+`DerivedStatRegistry` for the 269 + 9 channel vocabulary, `AtomKindRegistry` for the 18 kinds (counted
+2026-09-12; see [`spec-element-conversion.md`](spec-element-conversion.md) §0 for the current count)
 and their param schemas, and `power-scale.v{n}.json`'s pins — all of which are C# SSOTs. The
 `species-generator` precedent says it outright: *"Never … reimplement `Magnitude` in Python."*
 
@@ -907,7 +907,7 @@ ships whether or not Sim can score it.
 | **D15** | `treeBudgetMilli = 1000` for every tree, so equal expected value survives the bake regardless of archetype — the shape never enters the sum |
 | **D16** | §7 — the binder refuses to price a conversion node until a reviewed kind is added, names the unspent budget, and fails the run rather than substituting. **D56 (2026-09-06) answered "which kind": [`spec-element-conversion.md`](spec-element-conversion.md) — an 18th kind, not a 17th (the 17th, `structure.place`, landed for an unrelated reason the same day; see that spec's §0)** |
 | **D20 / D26** | Honoured by **deferring to `tree-plan`**, which is where the linear tier column is emitted and asserted. This module multiplies the emitted share by an anchor and does not re-derive the ladder — the old `tierWeight(t) = t` reconstruction was a second copy of that arithmetic and disagreed with the first (§3.3, R4) |
-| **D22** | Every node composes from the shipped vocabulary (17 kinds, 13 triggers as of 2026-09-06 — see [`spec-element-conversion.md`](spec-element-conversion.md) §0). No passive-specific effect vocabulary exists here |
+| **D22** | Every node composes from the shipped vocabulary (18 kinds, 13 triggers counted 2026-09-12 — see [`spec-element-conversion.md`](spec-element-conversion.md) §0). No passive-specific effect vocabulary exists here |
 | **D24** | The catalog stores a **coefficient, not a magnitude** — the single choice that makes one static, byte-identical, shared catalog correct for every player at every `Θ` |
 | **D40** | §7.3 — all three exclusion forms bind normally. Nullification is a per-actor runtime no-op that keeps its coefficient; the **form** is carried through to `NodeRecord` because the load path and the surface branch on it, and the *only* bake-time refusal in this module remains D16's conversion node |
 | **D29** | 10 tiers × 2 branches is why the denominator carries `branches = 2`. §3.5's re-derivation against the shipped archetypes' real shares shows the per-mille defect is not a rounding complaint at all: it stores `0` |
@@ -933,14 +933,14 @@ module does about an exclusion, which is nothing, and says so because the neighb
     CLAUDE.md's overflow table, AGENTS.md's hard boundaries.
 [x] I checked decisions.md for a lock covering this — "Atom attach points" (:112) and
     "Class system" (:103) both apply and are honoured.
-[x] Counts verified BY COUNTING in src/ this session: 7 attach points, 16 kinds, 13 triggers
-    (11 authorable), 6 elements, 21 statuses, 12 aptitudes / 3 postures, 23 primary channels,
-    267 derived + 9 open prefix families, 13 UnitClass, 4 StatClass, 12 predicate leaves,
-    5 LowerIsBetter primary channels.
+[x] Counts verified BY COUNTING in src/ this session (re-counted 2026-09-12): 9 attach points, 18
+    kinds, 13 triggers (11 authorable), 6 elements, 24 statuses, 12 aptitudes / 3 postures,
+    23 primary channels, 269 derived + 9 open prefix families, 13 UnitClass, 4 StatClass,
+    12 predicate leaves, 5 LowerIsBetter primary channels.
 [x] Every factual claim cites file:line.
 [x] I verified claims against CODE, not comments — StatClass.cs:26 says "ten-class" over a
-    13-member enum, and AtomKindRegistry.cs:6 says "5 attach points, 12 kinds" fifteen lines
-    above consts of 7 and 16.
+    13-member enum, and AtomKindRegistry.cs:6 used to say "5 attach points, 12 kinds" fifteen
+    lines above consts of 9 and 18 (corrected in code 2026-09-12).
 [x] 2026-09-05 audit fold, re-verified in code THIS session: power-scale.v2.json's atk/defense/hp
     pins (92 / 22 / 680, so the anchors are 135 and 32); TryReflect's single caller
     (CombatDamageDispatcher.DispatchInstant) and the absence of any Battle caller;

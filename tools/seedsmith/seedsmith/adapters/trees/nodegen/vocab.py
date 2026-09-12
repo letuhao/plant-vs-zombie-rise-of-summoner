@@ -7,10 +7,12 @@ design proportion from a snapshot of a generated corpus — count it, or don't q
 this module" — so this module reads the SAME `data/seed/items/affix-families/*.json` the item
 program already ships, rather than authoring a tree-specific effect library.
 
-Counted this session (§3 row 11-12, §5.1): **98 families**, exactly **three** distinct `tags`
-values — `offensive` 41, `defensive` 40, `utility` 17. That third count is the honest finding §5.1
-records: it is not enough vocabulary to key an exclusion predicate on by itself, which is why
-`exclusion.py` keys on the plan's own `propertyVocabulary` instead of these tags.
+Counted 2026-09-12 (§3 row 11-12, §5.1): **125 families**, **seven** distinct `tags` values —
+`offensive` 58, `defensive` 47, `utility` 19, `sturdy` 5, `arcane` 4, `mechanical` 3, `metal` 2
+(112 families carry one tag, 13 carry more than one). Only the first three are branch-shaped; the
+other four are category tags, which is the honest finding §5.1 records: the tag vocabulary is not
+enough to key an exclusion predicate on by itself, which is why `exclusion.py` keys on the plan's own
+`propertyVocabulary` instead of these tags.
 
 **`permitted_for_branch` is the narrowest cut this stage can honestly make today.** A node's
 `QuotaCell` (`quota.py`, task H3) allocates a `trigger`/`element`/`status`/`channelFamily` — the
@@ -87,7 +89,7 @@ class AffixVocabulary:
         never the finer six-axis `QuotaCell` cut, which needs the not-yet-built atom-tag registry
         (this module's own docstring). Held, never widened, if nothing matches: an empty result
         means the corpus has no affix tagged for this branch at all, which is a vocabulary defect
-        to surface, not paper over with the whole 98-family list."""
+        to surface, not paper over with the whole 125-family list."""
         if branch not in ("offensive", "defensive"):
             raise ValueError(f"permitted_for_branch: branch must be 'offensive' or 'defensive', "
                              f"got {branch!r}")
