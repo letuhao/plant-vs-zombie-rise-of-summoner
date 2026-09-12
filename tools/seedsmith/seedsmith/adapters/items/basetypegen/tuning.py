@@ -26,7 +26,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[6]
 CORE_REGISTRY = REPO_ROOT / "data" / "seed" / "items" / "_registry" / "core.v1.json"
-CLASSES_REGISTRY = REPO_ROOT / "data" / "seed" / "items" / "_registry" / "classes.v2.json"
+CLASSES_REGISTRY = REPO_ROOT / "data" / "seed" / "items" / "_registry" / "classes.v3.json"
 TAGS_REGISTRY = REPO_ROOT / "data" / "seed" / "items" / "_registry" / "tags.v1.json"
 NAMING_REGISTRY = REPO_ROOT / "data" / "seed" / "items" / "_registry" / "naming.v1.json"
 SOCKETS_TUNING = REPO_ROOT / "data" / "tuning" / "sockets.v1.json"
@@ -103,20 +103,38 @@ def load_class_choices(role: str, frame: str, path: "Path | None" = None) -> "tu
     return tuple(sorted(ids))
 
 
-def load_legal_implicit_families(role: str, path: "Path | None" = None) -> "tuple[str, ...]":
-    """The closed `implicit.family` vocabulary for `role`, read from
-    `classes.v2.json.implicitSlates[role].legalFamilies` — the SAME registry acceptance #5 asks
-    this generator's output to resolve against. `affix-families-gen`'s own corpus is the wider
-    universe `atom.*` ids are minted from; this slate is the role-scoped SUBSET of it a base type's
-    implicit may legally name (seed-contract.md's own per-role gating), never the whole corpus.
+def load_legal_implicit_families(role: str, frame: str, path: "Path | None" = None) -> "tuple[str, ...]":
+    """The closed `implicit.family` vocabulary for `(role, frame)`, read from
+    `classes.v3.json.implicitSlates[role].legalFamiliesByFrame[frame]` — the SAME registry
+    acceptance #5 asks this generator's output to resolve against.
+
+    ⛔ **2026-09-12 (D11 clause 1).** This used to return `classes.v2.json`'s role-wide
+    `legalFamilies` for every frame. Because both frames were offered the identical set and told only
+    to "pick the family that best fits", they drifted into the same picks, and D11 clause 1
+    (humanoid and plant implicit sets must be DISJOINT) failed in 7 roles. The v3 registry carries a
+    per-frame `legalFamiliesByFrame`, split by the rule recorded on each slate's own `splitRule`
+    (humanoid = burst/offence, plant = sustain/defence — CORRELATED across every role per
+    item-ideal 2f.2). The role-wide `legalFamilies` stays the union for readers that only need
+    membership.
+
+    `standard` is D14 out of scope and its two frame sets are declared IDENTICAL on purpose; the
+    corpus never ships standard base types, and D11 clause 1 skips the role.
     """
     doc = json.loads((path or CLASSES_REGISTRY).read_text(encoding="utf-8"))
     slate = doc["implicitSlates"].get(role)
     if slate is None:
         raise UnknownRoleError(
-            f"role {role!r} has no implicitSlates entry in classes.v2.json — known roles: "
+            f"role {role!r} has no implicitSlates entry in classes.v3.json — known roles: "
             f"{sorted(doc['implicitSlates'])}")
-    return tuple(slate["legalFamilies"])
+    by_frame = slate.get("legalFamiliesByFrame")
+    if by_frame is None:
+        # Backward-compatible with a v2-shaped document (tests pass a fixture path): fall back to
+        # the role-wide union rather than crash, since membership legality is unchanged.
+        return tuple(slate["legalFamilies"])
+    if frame not in by_frame:
+        raise UnknownRoleError(
+            f"frame {frame!r} has no slate for role {role!r}; frames present: {sorted(by_frame)}")
+    return tuple(by_frame[frame])
 
 
 def load_tag_vocab(path: "Path | None" = None) -> "tuple[str, ...]":

@@ -1,0 +1,1085 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": 5,
+  "frozen": true,
+  "_meta": {
+    "purpose": "Frozen v1 registry consumed by the 60 base-type authoring partitions. Owns two things: the VALIDATED `class` ladders (seed-contract.md §2), and the legal-implicit slate per role. No magnitudes anywhere in this file (seed-contract.md §3) — rungs, orderings, references and tags only.",
+    "sources": [
+      "docs/architecture/item/seed-contract.md",
+      "docs/architecture/item/ssot-item-categories.md",
+      "docs/architecture/item/ssot-equip-slots.md",
+      "docs/architecture/effect-atom/atom-family-library.md",
+      "docs/architecture/item/atom-layer-handoff.md"
+    ],
+    "roleIds": [
+      "armament-primary",
+      "core-guard",
+      "ward-array",
+      "armament-secondary",
+      "jewel-major",
+      "manipulator",
+      "mantle",
+      "head-guard",
+      "girdle",
+      "sense",
+      "footing",
+      "infusion",
+      "retinue",
+      "jewel-minor-a",
+      "jewel-minor-b"
+    ],
+    "designNotes": [
+      "Every implicit family listed as legal for a role is tier-equal in strength to every other family on that role's slate — same nominal tier band, same op class. This is enforced by construction, not by a number: no family using the `More` operator (atom.bulwark, atom.savagery) appears on any implicit slate anywhere in this file, because a `More` implicit would categorically outclass a `Flat` or `Increased` implicit at the same tier. Those two families are reserved for rolled affixes only.",
+      "A family is excluded from every implicit slate below if it cannot bind today, per atom-layer-handoff.md and atom-family-library.md — not silently dropped, but named with its reason so a later module (E12, the channel-extension spec, the status payload work) knows exactly what to re-open. See `excludedFamilies.global` and each role's `excludedForRole`.",
+      "Four roles (`ward-array`, `mantle`, `head-guard`, `sense`) have their entire §2.3-named family cluster excluded today, because every one of those clusters is `stat.derived` (elemental_defense, stoicism, padding, stalwart, immunity, precision, keen_edge) or a still-quarantined shield family. Each carries a small stopgap slate drawn from generic, already-bindable families so the role is not unfillable, plus an explicit note that this is temporary.",
+      "D35 (2026-09-04, item-ideal.md rarity...base-types module): the 32-family global exclusion list is re-derived against AtomKindRegistry.cs, not copied from v1's designNotes. Fifteen families carried the stale reason 'stat.derived -- quarantined None/None/None (D6)' -- that quarantine ended 2026-09-02 (atom-family-library.md S3.2's own banner: RuntimeSupportMatrix is Full/Full/None, Lawn and Battle both bindable). Those fifteen are lifted from the global list and from every role's excludedForRole, and added back to legalFamilies wherever they were excluded for a specific role. atom.susceptibility stays excluded (zero readers, a different reason). Five roles were on a full stopgap slate for this reason (ward-array, mantle, head-guard, sense, footing); three more had a partial exclusion lifted (armament-primary, manipulator, standard).",
+      "registryVersion 5 (D11 clause 1, 2026-09-12): each role carries legalFamiliesByFrame, splitting the role's legal slate into a humanoid set and a plant set so the two frames draw DISJOINT implicit families. Rule (owner, Option C): semantic where the role has both a burst-signed and a sustain-signed family (humanoid = burst/offence, plant = sustain/defence); a deterministic half-split on the sorted slate for a single-sided role, since a role whose whole slate is one axis has no semantic split. legalFamilies stays as the union for readers that only need membership. D11 widened (item-ideal 2f.2) requires the preference be CORRELATED across roles, which is why humanoid is burst and plant is sustain in every block, never role-by-role."
+    ]
+  },
+  "excludedFamilies": {
+    "global": [
+      {
+        "family": "atom.susceptibility",
+        "reason": "stat.derived, and declared with zero readers today — not authored at all until it has a consumer (atom-family-library.md §3.2)."
+      },
+      {
+        "family": "atom.warding",
+        "reason": "G8 — stat.modify on `defense` is legal only at match owner scope. A per-item implicit at any body role binds to nothing and rejects ScopeUnsupported, or is silently dead pre-guard. Reserved for the commander's `standard` slot only."
+      },
+      {
+        "family": "atom.resilience",
+        "reason": "G8 — identical to atom.warding, same defense channel, same match-only scope."
+      },
+      {
+        "family": "atom.plating",
+        "reason": "writes arm1/arm1Max, a Unity field that exists only on the zombie side, independent of item frame. Not a general per-frame implicit."
+      },
+      {
+        "family": "atom.carapace",
+        "reason": "writes arm2/arm2Max, same zombie-only-field issue as atom.plating."
+      },
+      {
+        "family": "atom.quickening",
+        "reason": "attackInterval is a promoted-but-unshipped channel (atom-family-library.md §5) — no composer or Writer case exists yet."
+      },
+      {
+        "family": "atom.flourishing",
+        "reason": "produceInterval is a promoted-but-unshipped channel, same as atom.quickening."
+      },
+      {
+        "family": "atom.swiftness",
+        "reason": "zombieSpeed is a promoted-but-unshipped channel, and it is zombie-side besides."
+      },
+      {
+        "family": "atom.bulwark",
+        "reason": "maxHp More — excluded from every implicit slate to preserve tier-equality (see designNotes). Reserved for rolled affixes at rare tier only."
+      },
+      {
+        "family": "atom.savagery",
+        "reason": "atk More — same tier-equality exclusion as atom.bulwark."
+      },
+      {
+        "family": "atom.embering",
+        "reason": "status.apply — needs a Unity CC branch; ApplyStatusToZombie has no case for `ember` today."
+      },
+      {
+        "family": "atom.scalding",
+        "reason": "status.apply — needs a Unity CC branch for `jala`."
+      },
+      {
+        "family": "atom.entangling",
+        "reason": "status.apply — needs a Unity CC branch for `kelp`."
+      },
+      {
+        "family": "atom.rallying",
+        "reason": "status.apply — needs a StatusPayloadKind.ModifyStat consumer, which has zero implementations today."
+      },
+      {
+        "family": "atom.exposing",
+        "reason": "status.apply — needs the same ModifyStat consumer as atom.rallying."
+      },
+      {
+        "family": "atom.commanding",
+        "reason": "status.apply — needs the same ModifyStat consumer as atom.rallying."
+      },
+      {
+        "family": "atom.shattering",
+        "reason": "status.apply — needs the same ModifyStat consumer as atom.rallying."
+      }
+    ]
+  },
+  "classLadders": {
+    "armour": {
+      "rungCount": 4,
+      "rungCountRationale": "Four rungs matches the item-level band structure already frozen at four bands (ssot-item-categories.md §5.3/§D), so a class rung and a band rung are the same granularity. Fewer than four collapses two of the nine armour-bearing roles' base types into indistinguishable weight classes; more than four would give an item-level band nothing new to say once the class ladder already outran it.",
+      "humanoid": [
+        {
+          "id": "cloth",
+          "frame": "humanoid",
+          "rung": 1,
+          "nameKey": "class.armour.cloth",
+          "identity": "Spun and quilted cloth — cheap, quick to move in, and the first thing anyone wears.",
+          "roles": [
+            "core-guard",
+            "ward-array",
+            "manipulator",
+            "mantle",
+            "head-guard",
+            "girdle",
+            "sense",
+            "footing",
+            "infusion"
+          ],
+          "tags": [
+            "light"
+          ]
+        },
+        {
+          "id": "leather",
+          "frame": "humanoid",
+          "rung": 2,
+          "nameKey": "class.armour.leather",
+          "identity": "Cured leather and boiled hide, flexible enough for a scout and tough enough for a soldier.",
+          "roles": [
+            "core-guard",
+            "ward-array",
+            "manipulator",
+            "mantle",
+            "head-guard",
+            "girdle",
+            "sense",
+            "footing",
+            "infusion"
+          ],
+          "tags": [
+            "medium-light"
+          ]
+        },
+        {
+          "id": "scale",
+          "frame": "humanoid",
+          "rung": 3,
+          "nameKey": "class.armour.scale",
+          "identity": "Overlapping metal or horn scale, articulated for motion without giving up coverage.",
+          "roles": [
+            "core-guard",
+            "ward-array",
+            "manipulator",
+            "mantle",
+            "head-guard",
+            "girdle",
+            "sense",
+            "footing",
+            "infusion"
+          ],
+          "tags": [
+            "medium-heavy"
+          ]
+        },
+        {
+          "id": "plate",
+          "frame": "humanoid",
+          "rung": 4,
+          "nameKey": "class.armour.plate",
+          "identity": "Forged plate, rigid and total — the heaviest thing a body can still move in.",
+          "roles": [
+            "core-guard",
+            "ward-array",
+            "manipulator",
+            "mantle",
+            "head-guard",
+            "girdle",
+            "sense",
+            "footing",
+            "infusion"
+          ],
+          "tags": [
+            "heavy"
+          ]
+        }
+      ],
+      "plant": [
+        {
+          "id": "fibre",
+          "frame": "plant",
+          "rung": 1,
+          "nameKey": "class.armour.fibre",
+          "identity": "Woven stem-fibre and pith, light enough to sway in the wind it grows in.",
+          "roles": [
+            "core-guard",
+            "ward-array",
+            "manipulator",
+            "mantle",
+            "head-guard",
+            "girdle",
+            "sense",
+            "footing",
+            "infusion"
+          ],
+          "tags": [
+            "light",
+            "organic",
+            "rooted"
+          ]
+        },
+        {
+          "id": "husk",
+          "frame": "plant",
+          "rung": 2,
+          "nameKey": "class.armour.husk",
+          "identity": "A dried outer husk, papery but layered — the plant's first real shell.",
+          "roles": [
+            "core-guard",
+            "ward-array",
+            "manipulator",
+            "mantle",
+            "head-guard",
+            "girdle",
+            "sense",
+            "footing",
+            "infusion"
+          ],
+          "tags": [
+            "medium-light",
+            "organic",
+            "rooted"
+          ]
+        },
+        {
+          "id": "bark",
+          "frame": "plant",
+          "rung": 3,
+          "nameKey": "class.armour.bark",
+          "identity": "Living bark, rough and load-bearing, grown to take a hit and keep standing.",
+          "roles": [
+            "core-guard",
+            "ward-array",
+            "manipulator",
+            "mantle",
+            "head-guard",
+            "girdle",
+            "sense",
+            "footing",
+            "infusion"
+          ],
+          "tags": [
+            "medium-heavy",
+            "organic",
+            "rooted"
+          ]
+        },
+        {
+          "id": "heartwood",
+          "frame": "plant",
+          "rung": 4,
+          "nameKey": "class.armour.heartwood",
+          "identity": "Dense heartwood from the trunk's core, nearly stone and just as slow to give.",
+          "roles": [
+            "core-guard",
+            "ward-array",
+            "manipulator",
+            "mantle",
+            "head-guard",
+            "girdle",
+            "sense",
+            "footing",
+            "infusion"
+          ],
+          "tags": [
+            "heavy",
+            "organic",
+            "rooted"
+          ]
+        }
+      ]
+    },
+    "weapon": {
+      "rungCount": 3,
+      "rungCountRationale": "Three rungs is the minimum spread that gives armament-primary a real light/medium/ranged-heavy choice, and it matches the frozen weapon class lists in ssot-item-categories.md §5.3 exactly (3 humanoid, 3 plant). Rungs are ordered by combat role, not raw damage number, so the same rung means the same fighting style on both frames.",
+      "humanoid": [
+        {
+          "id": "blade",
+          "frame": "humanoid",
+          "rung": 1,
+          "nameKey": "class.weapon.blade",
+          "identity": "An edged weapon built for reach and speed — the identity slot's fastest option.",
+          "roles": [
+            "armament-primary",
+            "armament-secondary"
+          ],
+          "tags": [
+            "light",
+            "melee"
+          ]
+        },
+        {
+          "id": "blunt",
+          "frame": "humanoid",
+          "rung": 2,
+          "nameKey": "class.weapon.blunt",
+          "identity": "A hafted, weighted weapon that trades speed for raw force per swing.",
+          "roles": [
+            "armament-primary",
+            "armament-secondary"
+          ],
+          "tags": [
+            "medium",
+            "melee"
+          ]
+        },
+        {
+          "id": "launcher",
+          "frame": "humanoid",
+          "rung": 3,
+          "nameKey": "class.weapon.launcher",
+          "identity": "A braced, mounted-feeling armament that throws its damage instead of swinging it.",
+          "roles": [
+            "armament-primary",
+            "armament-secondary"
+          ],
+          "tags": [
+            "heavy",
+            "ranged"
+          ]
+        }
+      ],
+      "plant": [
+        {
+          "id": "lash",
+          "frame": "plant",
+          "rung": 1,
+          "nameKey": "class.weapon.lash",
+          "identity": "A thorned, whip-fast vine strike — the plant frame's answer to a blade.",
+          "roles": [
+            "armament-primary",
+            "armament-secondary"
+          ],
+          "tags": [
+            "light",
+            "melee",
+            "organic",
+            "rooted"
+          ]
+        },
+        {
+          "id": "seedpod",
+          "frame": "plant",
+          "rung": 2,
+          "nameKey": "class.weapon.seedpod",
+          "identity": "A heavy lobbed seedpod, trading rate of fire for weight per payload.",
+          "roles": [
+            "armament-primary",
+            "armament-secondary"
+          ],
+          "tags": [
+            "medium",
+            "ranged",
+            "organic",
+            "rooted"
+          ]
+        },
+        {
+          "id": "nozzle",
+          "frame": "plant",
+          "rung": 3,
+          "nameKey": "class.weapon.nozzle",
+          "identity": "A braced firing aperture grown for sustained, heavy discharge.",
+          "roles": [
+            "armament-primary",
+            "armament-secondary"
+          ],
+          "tags": [
+            "heavy",
+            "ranged",
+            "organic",
+            "rooted"
+          ]
+        }
+      ]
+    },
+    "offhand": {
+      "rungCount": 2,
+      "rungCountRationale": "The off-hand's entire mechanical question is binary — does it guard, or does it not (ssot-item-categories.md §5.3: 'guarding classes only'; ssot-equip-slots.md §2.3: 'defensive or amplifying'). Two rungs express exactly that split; a third would invent a category the source documents never describe.",
+      "humanoid": [
+        {
+          "id": "focus",
+          "frame": "humanoid",
+          "rung": 1,
+          "nameKey": "class.offhand.focus",
+          "identity": "A light implement — orb, tome, or wand — that channels rather than blocks.",
+          "roles": [
+            "armament-secondary"
+          ],
+          "tags": [
+            "light",
+            "no-guard"
+          ]
+        },
+        {
+          "id": "bulwark",
+          "frame": "humanoid",
+          "rung": 2,
+          "nameKey": "class.offhand.bulwark",
+          "identity": "A braced shield — the answering half's heaviest and only guaranteed-guarding option.",
+          "roles": [
+            "armament-secondary"
+          ],
+          "tags": [
+            "heavy",
+            "guarding"
+          ]
+        }
+      ],
+      "plant": [
+        {
+          "id": "censer",
+          "frame": "plant",
+          "rung": 1,
+          "nameKey": "class.offhand.censer",
+          "identity": "A light secretion vessel — spores or resin — that answers with effect, not mass.",
+          "roles": [
+            "armament-secondary"
+          ],
+          "tags": [
+            "light",
+            "no-guard",
+            "organic",
+            "rooted"
+          ]
+        },
+        {
+          "id": "thornguard",
+          "frame": "plant",
+          "rung": 2,
+          "nameKey": "class.offhand.thornguard",
+          "identity": "A woven mass of hardened thorn, grown specifically to take the hit the core cannot.",
+          "roles": [
+            "armament-secondary"
+          ],
+          "tags": [
+            "heavy",
+            "guarding",
+            "organic",
+            "rooted"
+          ]
+        }
+      ]
+    },
+    "jewel": {
+      "rungCount": 3,
+      "rungCountRationale": "Three rungs echoes the minor-jewel tier cap of 3 already set by ssot-equip-slots.md §2.5 — the class ladder offers exactly as much 'degree' gradation as the tier system above it supports. Ordered by potency/commitment (light claim → bold statement → binding pact), not by mass, since jewelry has no weight-class tradition to borrow.",
+      "humanoid": [
+        {
+          "id": "signet",
+          "frame": "humanoid",
+          "rung": 1,
+          "nameKey": "class.jewel.signet",
+          "identity": "A small marking ring — the lightest, subtlest claim on the jewel budget.",
+          "roles": [
+            "jewel-major",
+            "jewel-minor-a",
+            "jewel-minor-b",
+            "retinue"
+          ],
+          "tags": [
+            "light"
+          ]
+        },
+        {
+          "id": "torc",
+          "frame": "humanoid",
+          "rung": 2,
+          "nameKey": "class.jewel.torc",
+          "identity": "An open wrap of worked metal at the neck or arm, bolder and heavier than a ring.",
+          "roles": [
+            "jewel-major",
+            "jewel-minor-a",
+            "jewel-minor-b",
+            "retinue"
+          ],
+          "tags": [
+            "medium"
+          ]
+        },
+        {
+          "id": "seal",
+          "frame": "humanoid",
+          "rung": 3,
+          "nameKey": "class.jewel.seal",
+          "identity": "A bound and weighted seal — the jewel ladder's heaviest, most committed pick.",
+          "roles": [
+            "jewel-major",
+            "jewel-minor-a",
+            "jewel-minor-b",
+            "retinue"
+          ],
+          "tags": [
+            "heavy"
+          ]
+        }
+      ],
+      "plant": [
+        {
+          "id": "spore",
+          "frame": "plant",
+          "rung": 1,
+          "nameKey": "class.jewel.spore",
+          "identity": "A released spore capsule — the lightest, most ephemeral claim on the jewel budget.",
+          "roles": [
+            "jewel-major",
+            "jewel-minor-a",
+            "jewel-minor-b",
+            "retinue"
+          ],
+          "tags": [
+            "light",
+            "organic",
+            "rooted"
+          ]
+        },
+        {
+          "id": "bulb",
+          "frame": "plant",
+          "rung": 2,
+          "nameKey": "class.jewel.bulb",
+          "identity": "A stored-energy bulb, bolder and heavier than a loose spore.",
+          "roles": [
+            "jewel-major",
+            "jewel-minor-a",
+            "jewel-minor-b",
+            "retinue"
+          ],
+          "tags": [
+            "medium",
+            "organic",
+            "rooted"
+          ]
+        },
+        {
+          "id": "graft",
+          "frame": "plant",
+          "rung": 3,
+          "nameKey": "class.jewel.graft",
+          "identity": "A permanently grafted scion — the jewel ladder's heaviest, most committed bond.",
+          "roles": [
+            "jewel-major",
+            "jewel-minor-a",
+            "jewel-minor-b",
+            "retinue"
+          ],
+          "tags": [
+            "heavy",
+            "organic",
+            "rooted"
+          ]
+        }
+      ]
+    },
+    "standard": {
+      "rungCount": 2,
+      "rungCountRationale": "Two rungs, not four. Commander gear is single-band in v1 — it is not item-level tiered — so a four-rung ladder would have nothing to distinguish. Two rungs give the role a plain field version and a ceremonial one, which is the only distinction the fiction actually supports.",
+      "humanoid": [
+        {
+          "id": "field-standard",
+          "frame": "humanoid",
+          "rung": 1,
+          "nameKey": "class.standard.field",
+          "identity": "Cloth and a pole. Carried because someone has to.",
+          "legalRoles": [
+            "standard"
+          ],
+          "tagImplications": [
+            "light",
+            "organic"
+          ]
+        },
+        {
+          "id": "ceremonial-standard",
+          "frame": "humanoid",
+          "rung": 2,
+          "nameKey": "class.standard.ceremonial",
+          "identity": "Weighted, gilded, meant to be seen from the back rank.",
+          "legalRoles": [
+            "standard"
+          ],
+          "tagImplications": [
+            "medium",
+            "metal"
+          ]
+        }
+      ],
+      "plant": [
+        {
+          "id": "withy-totem",
+          "frame": "plant",
+          "rung": 1,
+          "nameKey": "class.standard.withy",
+          "identity": "Green wood bent and bound while it still gives.",
+          "legalRoles": [
+            "standard"
+          ],
+          "tagImplications": [
+            "light",
+            "organic"
+          ]
+        },
+        {
+          "id": "heartwood-totem",
+          "frame": "plant",
+          "rung": 2,
+          "nameKey": "class.standard.heartwood",
+          "identity": "Cut from a trunk that outlived three gardens.",
+          "legalRoles": [
+            "standard"
+          ],
+          "tagImplications": [
+            "medium",
+            "organic"
+          ]
+        }
+      ],
+      "addedWave": "0c",
+      "addedReason": "The commander standard role exists in core.v1.json roles.commanderOnly but had no class ladder and no implicit slate, so a pilot partition could not write a legal class field and emitted none. Found by the pilot, which is what the pilot is for."
+    }
+  },
+  "implicitSlates": {
+    "armament-primary": {
+      "identity": "What this actor hits with — raw attack, on-hit and on-death riders.",
+      "legalFamilies": [
+        "atom.deathblast",
+        "atom.elemental-power",
+        "atom.ferocity",
+        "atom.might",
+        "atom.searing-strike",
+        "atom.shield-pen"
+      ],
+      "legalFamiliesByFrame": {
+        "humanoid": [
+          "atom.deathblast",
+          "atom.elemental-power",
+          "atom.ferocity"
+        ],
+        "plant": [
+          "atom.might",
+          "atom.searing-strike",
+          "atom.shield-pen"
+        ]
+      },
+      "excludedForRole": [],
+      "splitRule": "index"
+    },
+    "core-guard": {
+      "identity": "The hit-point pool itself.",
+      "legalFamilies": [
+        "atom.fortitude",
+        "atom.mending",
+        "atom.regeneration",
+        "atom.vitality"
+      ],
+      "legalFamiliesByFrame": {
+        "humanoid": [
+          "atom.fortitude",
+          "atom.mending"
+        ],
+        "plant": [
+          "atom.regeneration",
+          "atom.vitality"
+        ]
+      },
+      "excludedForRole": [],
+      "splitRule": "index"
+    },
+    "ward-array": {
+      "identity": "The depleting outer layer, spent before HP.",
+      "legalFamilies": [
+        "atom.mending",
+        "atom.shield-capacity",
+        "atom.shield-regen",
+        "atom.shield-toughness",
+        "atom.warded"
+      ],
+      "legalFamiliesByFrame": {
+        "humanoid": [
+          "atom.mending",
+          "atom.shield-capacity",
+          "atom.shield-regen"
+        ],
+        "plant": [
+          "atom.shield-toughness",
+          "atom.warded"
+        ]
+      },
+      "excludedForRole": [
+        {
+          "family": "atom.plating",
+          "reason": "zombie-only Unity field, not a general frame implicit."
+        },
+        {
+          "family": "atom.carapace",
+          "reason": "zombie-only Unity field, not a general frame implicit."
+        }
+      ],
+      "splitRule": "index"
+    },
+    "armament-secondary": {
+      "identity": "The answering half — reflect, block, parry, or a second armament.",
+      "legalFamilies": [
+        "atom.ferocity",
+        "atom.lifesteal",
+        "atom.might",
+        "atom.retribution",
+        "atom.warded"
+      ],
+      "legalFamiliesByFrame": {
+        "humanoid": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "plant": [
+          "atom.lifesteal",
+          "atom.retribution",
+          "atom.warded"
+        ]
+      },
+      "excludedForRole": [],
+      "splitRule": "semantic"
+    },
+    "jewel-major": {
+      "identity": "The strongest single non-weapon affix source; a build's signature stat.",
+      "legalFamilies": [
+        "atom.ferocity",
+        "atom.fortitude",
+        "atom.lifesteal",
+        "atom.midas",
+        "atom.might",
+        "atom.vitality"
+      ],
+      "legalFamiliesByFrame": {
+        "humanoid": [
+          "atom.ferocity",
+          "atom.midas",
+          "atom.might"
+        ],
+        "plant": [
+          "atom.fortitude",
+          "atom.lifesteal",
+          "atom.vitality"
+        ]
+      },
+      "excludedForRole": [],
+      "splitRule": "semantic"
+    },
+    "manipulator": {
+      "identity": "Rate and follow-through — how often and how hard, not how accurately.",
+      "legalFamilies": [
+        "atom.bloodletting",
+        "atom.cruelty",
+        "atom.deathblast",
+        "atom.searing-strike"
+      ],
+      "legalFamiliesByFrame": {
+        "humanoid": [
+          "atom.bloodletting",
+          "atom.cruelty"
+        ],
+        "plant": [
+          "atom.deathblast",
+          "atom.searing-strike"
+        ]
+      },
+      "excludedForRole": [
+        {
+          "family": "atom.quickening",
+          "reason": "the role's own §2.3 description names attack interval; excluded globally, pending channel promotion."
+        }
+      ],
+      "splitRule": "index"
+    },
+    "mantle": {
+      "identity": "Elemental mitigation and status cleansing.",
+      "legalFamilies": [
+        "atom.cleansing",
+        "atom.elemental-defense",
+        "atom.fortitude",
+        "atom.immunity",
+        "atom.stalwart",
+        "atom.vitality"
+      ],
+      "legalFamiliesByFrame": {
+        "humanoid": [
+          "atom.cleansing",
+          "atom.elemental-defense",
+          "atom.fortitude"
+        ],
+        "plant": [
+          "atom.immunity",
+          "atom.stalwart",
+          "atom.vitality"
+        ]
+      },
+      "excludedForRole": [],
+      "splitRule": "index"
+    },
+    "head-guard": {
+      "identity": "Resistance to being disabled — crit resist, crit-damage padding, status resist and immunity.",
+      "legalFamilies": [
+        "atom.immunity",
+        "atom.mending",
+        "atom.padding",
+        "atom.stalwart",
+        "atom.stoicism",
+        "atom.vitality"
+      ],
+      "legalFamiliesByFrame": {
+        "humanoid": [
+          "atom.immunity",
+          "atom.mending",
+          "atom.padding"
+        ],
+        "plant": [
+          "atom.stalwart",
+          "atom.stoicism",
+          "atom.vitality"
+        ]
+      },
+      "excludedForRole": [],
+      "splitRule": "index"
+    },
+    "girdle": {
+      "identity": "The resource role — actor resource pools, regen, and economy.",
+      "legalFamilies": [
+        "atom.midas",
+        "atom.regeneration",
+        "atom.sunbloom"
+      ],
+      "legalFamiliesByFrame": {
+        "humanoid": [
+          "atom.midas",
+          "atom.sunbloom"
+        ],
+        "plant": [
+          "atom.regeneration"
+        ]
+      },
+      "excludedForRole": [],
+      "splitRule": "semantic"
+    },
+    "sense": {
+      "identity": "Finding the opening — accuracy and crit rate.",
+      "legalFamilies": [
+        "atom.ferocity",
+        "atom.keen-edge",
+        "atom.might",
+        "atom.precision"
+      ],
+      "legalFamiliesByFrame": {
+        "humanoid": [
+          "atom.ferocity",
+          "atom.keen-edge"
+        ],
+        "plant": [
+          "atom.might",
+          "atom.precision"
+        ]
+      },
+      "excludedForRole": [],
+      "splitRule": "index"
+    },
+    "footing": {
+      "identity": "Standing — humanoid evasion/movement/initiative; plant stability/regeneration/resource draw.",
+      "legalFamilies": [
+        "atom.evasion",
+        "atom.regeneration",
+        "atom.vitality"
+      ],
+      "legalFamiliesByFrame": {
+        "humanoid": [
+          "atom.evasion",
+          "atom.regeneration"
+        ],
+        "plant": [
+          "atom.vitality"
+        ]
+      },
+      "excludedForRole": [
+        {
+          "family": "atom.swiftness",
+          "reason": "the role's own §2.3 description names movement; excluded globally, pending channel promotion, and zombie-side besides."
+        }
+      ],
+      "splitRule": "index"
+    },
+    "infusion": {
+      "identity": "What your hits inflict — the status.apply cluster.",
+      "legalFamilies": [
+        "atom.affliction",
+        "atom.blighting",
+        "atom.bloodletting",
+        "atom.bonding",
+        "atom.buttering",
+        "atom.chilling",
+        "atom.freezing",
+        "atom.marking",
+        "atom.mesmerizing",
+        "atom.rotting",
+        "atom.sparking",
+        "atom.sporing",
+        "atom.venomous",
+        "atom.withering"
+      ],
+      "legalFamiliesByFrame": {
+        "humanoid": [
+          "atom.affliction",
+          "atom.bonding",
+          "atom.buttering",
+          "atom.chilling",
+          "atom.freezing",
+          "atom.mesmerizing",
+          "atom.venomous"
+        ],
+        "plant": [
+          "atom.blighting",
+          "atom.bloodletting",
+          "atom.marking",
+          "atom.rotting",
+          "atom.sparking",
+          "atom.sporing",
+          "atom.withering"
+        ]
+      },
+      "excludedForRole": [
+        {
+          "family": "atom.embering",
+          "reason": "needs a Unity CC branch for `ember`."
+        },
+        {
+          "family": "atom.scalding",
+          "reason": "needs a Unity CC branch for `jala`."
+        },
+        {
+          "family": "atom.entangling",
+          "reason": "needs a Unity CC branch for `kelp`."
+        }
+      ],
+      "splitRule": "semantic-status-kind"
+    },
+    "retinue": {
+      "identity": "What else is on the board because of you — spawns, board actions, grid and terrain operations.",
+      "legalFamilies": [
+        "atom.cherry-bloom",
+        "atom.dooming",
+        "atom.firelining",
+        "atom.flash-freeze",
+        "atom.gardener",
+        "atom.gravedigging",
+        "atom.gravemaking",
+        "atom.summoner",
+        "atom.terraforming",
+        "atom.volley"
+      ],
+      "legalFamiliesByFrame": {
+        "humanoid": [
+          "atom.cherry-bloom",
+          "atom.dooming",
+          "atom.firelining",
+          "atom.summoner",
+          "atom.volley"
+        ],
+        "plant": [
+          "atom.flash-freeze",
+          "atom.gardener",
+          "atom.gravedigging",
+          "atom.gravemaking",
+          "atom.terraforming"
+        ]
+      },
+      "excludedForRole": [],
+      "splitRule": "semantic"
+    },
+    "jewel-minor-a": {
+      "identity": "Degree, not direction — small, tier-capped, deliberately weak.",
+      "legalFamilies": [
+        "atom.ferocity",
+        "atom.fortitude",
+        "atom.lifesteal",
+        "atom.midas",
+        "atom.might",
+        "atom.vitality"
+      ],
+      "legalFamiliesByFrame": {
+        "humanoid": [
+          "atom.ferocity",
+          "atom.midas",
+          "atom.might"
+        ],
+        "plant": [
+          "atom.fortitude",
+          "atom.lifesteal",
+          "atom.vitality"
+        ]
+      },
+      "excludedForRole": [],
+      "splitRule": "semantic"
+    },
+    "jewel-minor-b": {
+      "identity": "Identical twin of jewel-minor-a, and that is the point and the cost.",
+      "legalFamilies": [
+        "atom.ferocity",
+        "atom.fortitude",
+        "atom.lifesteal",
+        "atom.midas",
+        "atom.might",
+        "atom.vitality"
+      ],
+      "legalFamiliesByFrame": {
+        "humanoid": [
+          "atom.ferocity",
+          "atom.midas",
+          "atom.might"
+        ],
+        "plant": [
+          "atom.fortitude",
+          "atom.lifesteal",
+          "atom.vitality"
+        ]
+      },
+      "excludedForRole": [],
+      "splitRule": "semantic"
+    },
+    "standard": {
+      "identity": "What the whole squad gains by seeing it. This role binds at match owner-scope, so its atoms reach every ally rather than the wearer.",
+      "legalFamilies": [
+        "atom.elemental-defense",
+        "atom.might",
+        "atom.resilience",
+        "atom.vitality",
+        "atom.warding"
+      ],
+      "legalFamiliesByFrame": {
+        "humanoid": [
+          "atom.elemental-defense",
+          "atom.might",
+          "atom.resilience",
+          "atom.vitality",
+          "atom.warding"
+        ],
+        "plant": [
+          "atom.elemental-defense",
+          "atom.might",
+          "atom.resilience",
+          "atom.vitality",
+          "atom.warding"
+        ]
+      },
+      "excludedForRole": [],
+      "splitRule": "declared-identical (D14: standard/commander gear out of scope)"
+    }
+  },
+  "frozenUtc": "2026-09-04",
+  "frozenNote": "FROZEN v4. v3 corrected a spelling mismatch only. v4 re-derives the global exclusion list against AtomKindRegistry.cs (D35): 15 stale D6-quarantine exclusions lifted, legalFamilies widened on 8 roles. No family removed, no role removed, no ladder changed -- purely additive.",
+  "minCompatibleVersion": 1,
+  "minCompatibleNote": "v4 only WIDENS legalFamilies and shrinks excludedFamilies -- every family legal under v1/v2/v3 stays legal under v4. An entry authored against an older version remains valid.",
+  "stage1aFrozen": "Stage 1a authored and validated at 0 errors (205 entries, 25 files). From here a change to this registry invalidates authored content unless minCompatibleVersion says otherwise.",
+  "v3Note": "v3 (2026-08-23, owner-approved): atom.elemental_defense -> atom.elemental-defense. The registry carried snake_case where every authored id is kebab-case. The same split already produced ten invisible broken references in gems and socket-words, because ReferenceCheck's id pattern did not match an underscore and so never resolved them at all. Additive spelling correction; no vocabulary added or removed, so minCompatibleVersion is unchanged.",
+  "v4Note": "v4 (2026-09-04, D35, owner-approved): re-derive the 32-family global exclusion list against AtomKindRegistry.cs instead of the frozen v1 designNotes snapshot. See _meta.designNotes for the full accounting."
+}

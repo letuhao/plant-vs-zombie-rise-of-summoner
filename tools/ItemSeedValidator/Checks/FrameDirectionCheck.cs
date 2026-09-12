@@ -13,11 +13,23 @@ public static class FrameDirectionCheck
 {
     public static void Run(ValidationContext ctx)
     {
+        // classes.v3.json (2026-09-12) adds a per-frame slate alongside the role-wide union. The
+        // authority for an entry is ITS FRAME's set, so read that first and fall back to the union
+        // for a v2-shaped fixture.
         var legalByRole = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
+        var legalByRoleFrame = new Dictionary<(string Role, string Frame), HashSet<string>>();
         if (ctx.Registries.Classes["implicitSlates"] is JsonObject slates)
             foreach (var slate in slates)
                 if (slate.Value is JsonObject node)
-                    legalByRole[slate.Key] = RegistrySet.Strings(node["legalFamilies"]).ToHashSet(StringComparer.Ordinal);
+                {
+                    legalByRole[slate.Key] =
+                        RegistrySet.Strings(node["legalFamilies"]).ToHashSet(StringComparer.Ordinal);
+                    if (node["legalFamiliesByFrame"] is JsonObject byFrame)
+                        foreach (var frameEntry in byFrame)
+                            if (frameEntry.Value is JsonArray arr)
+                                legalByRoleFrame[(slate.Key, frameEntry.Key)] =
+                                    RegistrySet.Strings(arr).ToHashSet(StringComparer.Ordinal);
+                }
 
         var byRoleFrame = new Dictionary<(string Role, string Frame), List<SeedEntry>>();
         foreach (var entry in ctx.Entries)
@@ -31,9 +43,15 @@ public static class FrameDirectionCheck
             if (role is null || frame is null) continue;
 
             var family = FamilyOf(entry);
-            if (family is not null && legalByRole.TryGetValue(role, out var legal) && !legal.Contains(family))
-                ctx.Error(entry, "ImplicitFamilyNotLegalForRole", "classes.v2.json implicitSlates",
-                    $"'{entry.Label}': implicit family '{family}' is not in role '{role}''s legalFamilies");
+            // The entry's own FRAME slate is the contract when the registry carries one; the
+            // role-wide union is the fallback so an older fixture still validates.
+            var hasFrameSlate = legalByRoleFrame.TryGetValue((role, frame), out var frameLegal);
+            var legal = hasFrameSlate ? frameLegal! : legalByRole.GetValueOrDefault(role);
+            if (family is not null && legal is not null && !legal.Contains(family))
+                ctx.Error(entry, "ImplicitFamilyNotLegalForRole",
+                    hasFrameSlate ? "classes.v3.json legalFamiliesByFrame" : "classes.v2.json implicitSlates",
+                    $"'{entry.Label}': implicit family '{family}' is not in role '{role}' frame "
+                    + $"'{frame}''s legal slate");
 
             var key = (role, frame);
             if (!byRoleFrame.TryGetValue(key, out var list)) byRoleFrame[key] = list = new List<SeedEntry>();

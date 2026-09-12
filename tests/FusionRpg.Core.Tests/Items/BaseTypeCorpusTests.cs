@@ -24,7 +24,7 @@ public class BaseTypeCorpusTests
     }
 
     static JsonDocument LoadClasses() =>
-        JsonDocument.Parse(File.ReadAllText(Path.Combine(RepoRoot(), "data", "seed", "items", "_registry", "classes.v2.json")));
+        JsonDocument.Parse(File.ReadAllText(Path.Combine(RepoRoot(), "data", "seed", "items", "_registry", "classes.v3.json")));
 
     static FrameLeanTable LoadLeans() =>
         FrameLean.Parse(File.ReadAllText(Path.Combine(RepoRoot(), "data", "seed", "items", "_registry", "frame-lean.v1.json")));
