@@ -156,7 +156,11 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - **Latent, must be handled in their batches:** `SoulLedgerTrimTests` and `WebGameIsolationTests` call archive entry points and will throw unless they use `CreateFileBacked()` (flagged in T15/T18). The spec's census is corrected accordingly (`CompactionWorkerTests` is a false positive — a `FakeHotCompactor`, not a store test).
   - Deps: T10. Scope: M.
   - **Excludes** the pilot's `CurveStoreTests`/`ElementStoreTests` (already migrated by T9).
-- [ ] **Task T15: Data.Tests root batch E** (8: GateCounterStore, LoadoutStore, LoamPersistence, OnboardingCheckpointStore, OnboardingProjection, PassiveTreeState, SoulLedgerTrim, SoulStore) — **read-only: `GateCounterStoreTests`** — Deps: T10. Scope: M.
+- [x] **Task T15: Data.Tests root batch E** (8: GateCounterStore, LoadoutStore, LoamPersistence, OnboardingCheckpointStore, OnboardingProjection, PassiveTreeState, SoulLedgerTrim, SoulStore) — **read-only: `GateCounterStoreTests`** ✅ 2026-09-12
+  - Migrated all 8. `LoadoutStoreTests`' reopen → `_testStore.Reopen()`; the two `Onboarding*` files' **field-initializer** `_dir` shape handled; `GateCounterStoreTests`' read-only open → plain open.
+  - **`SoulLedgerTrimTests` is Tier-3 file-bound** (as the T14 finding predicted): its subject IS the filesystem archive, so it uses `CreateFileBacked()` and its 3 archive assertions now target `_testStore.DataDir!`, keeping the exact same globs (`souls-a1-*.sqlite` Single, `souls-*.sqlite` zero). The gate independently confirmed those assertions are non-vacuous (they would fail if trim wrote no slice).
+  - Verified: gate PASS — focused 59/59, zero assertions dropped (17/25/9/39/8/21/10/44), all seed calls preserved, baseline 179→171 (−8), no batch-E temp dirs, both guards green, full Data 1288/1288.
+  - Deps: T10. Scope: M.
   - **Excludes** `PassiveTreeImportRunnerTests`, `SeedImportRunnerTests`, `CreatureSpeciesImportCliTests` (separate subprocess/fixture cases — T16).
 - [ ] **Task T16: Data.Tests root batch F — subprocess/fixture store tests** (PassiveTreeImportRunner, SeedImportRunner, PatronStore, PlayerMaterialise, PowerCoefficientImport, PowerStore, RunPoolStore, ShardRungsMigration — 8) — Deps: T10. Scope: M.
   - **Excludes `CreatureSpeciesImportCliTests.cs`** — owned by `cold-process-test-build-20260912-e5b1`.

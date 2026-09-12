@@ -9,20 +9,16 @@ namespace FusionRpg.Data.Tests;
 
 public sealed class OnboardingCheckpointStoreTests : IDisposable
 {
-    readonly string _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-onboarding-" + Guid.NewGuid().ToString("N"));
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public OnboardingCheckpointStoreTests()
     {
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     [Fact]
     public void Player_one_starts_with_an_empty_checkpoint_view()

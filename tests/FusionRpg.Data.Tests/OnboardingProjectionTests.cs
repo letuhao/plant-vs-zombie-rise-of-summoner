@@ -7,20 +7,16 @@ namespace FusionRpg.Data.Tests;
 
 public sealed class OnboardingProjectionTests : IDisposable
 {
-    readonly string _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-onboarding-api-" + Guid.NewGuid().ToString("N"));
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public OnboardingProjectionTests()
     {
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     [Fact]
     public void Projection_exposes_authoritative_rows_and_player_level()

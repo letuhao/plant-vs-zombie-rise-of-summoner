@@ -14,21 +14,16 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class LoadoutStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public LoadoutStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-loadouts-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     string SeedContainerAndAtom(string containerId, string family)
     {
@@ -198,8 +193,7 @@ public class LoadoutStoreTests : IDisposable
         var result = _store.SetLoadout(Actor, new[] { "skill.a" }, isHeld: _ => true, isMidRun: () => false);
         Assert.True(result.Ok);
 
-        var reopened = new RpgStore(_dir);
-        reopened.Init();
+        var reopened = _testStore.Reopen();
         var loaded = reopened.GetLoadout(Actor);
 
         Assert.NotNull(loaded);
