@@ -211,12 +211,12 @@
 **Description:** Ship closed include/exclude predicate matching map §7; Standing must not use `IsCombatChannel` alone.
 
 **Acceptance criteria:**
-- [ ] `CombatPowerMembership` (or named peer) with include/exclude tests.
-- [ ] No Standing path uses `IsCombatChannel` alone.
-- [ ] Documented list matches map assumption §7.
+- [x] `CombatPowerMembership` (or named peer) with include/exclude tests.
+- [x] No Standing path uses `IsCombatChannel` alone.
+- [x] Documented list matches map assumption §7.
 
 **Verification:**
-- [ ] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~CombatPowerMembership|IsCombatChannel|Standing"`
+- [x] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~CombatPowerMembership|IsCombatChannel|Standing"`
 
 **Dependencies:** T6  
 **Files likely touched:** new membership type near `DerivedStatChannels` / power, tests  
