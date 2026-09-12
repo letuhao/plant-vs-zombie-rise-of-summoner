@@ -296,6 +296,99 @@ class RealCorpusEnvelopeTests(unittest.TestCase):
                 f"{row.tree_id}: {row.never_generated_count} ungenerated node(s) but only "
                 f"{row.refused_nodes} refusal(s) — the binder dropped a node")
 
+    def test_every_tree_reports_a_known_vintage_state(self) -> None:
+        # The closed classification must cover every tree: an unclassified vintage is a bug in the
+        # classifier (a new sentinel it does not know), and this fails the day one appears rather
+        # than silently reporting "current". The STATE is asserted, never a count of trees.
+        result = census_mod.census()
+        known = {"current", "mixed", "stale", "pre-provenance"}
+        for row in result.trees:
+            self.assertIn(row.vintage_state, known, f"{row.tree_id}: unknown vintage state")
+
+    def test_a_current_tree_never_lists_stale_records(self) -> None:
+        result = census_mod.census()
+        for row in result.trees:
+            if row.vintage_state == "current":
+                self.assertEqual(row.stale_vintage_node_ids, (),
+                                 f"{row.tree_id}: current vintage with stale records")
+
+
+class VintageTests(unittest.TestCase):
+    """Task P1.3. `build_seed_document` stamps the caller's CURRENT vintage as the document value when
+    every record predates the per-record field, so the document stamp alone can read "current" over
+    stale content. Classification therefore reads the per-node map first.
+    """
+
+    def test_a_document_stamped_with_the_live_vintage_is_current(self) -> None:
+        self.assertEqual(census_mod.classify_vintage("tree-language/3", "tree-language/3"), "current")
+
+    def test_a_document_stamped_with_an_older_vintage_is_stale(self) -> None:
+        self.assertEqual(census_mod.classify_vintage("tree-language/1", "tree-language/3"), "stale")
+
+    def test_the_mixed_sentinel_is_mixed(self) -> None:
+        self.assertEqual(census_mod.classify_vintage("mixed", "tree-language/3"), "mixed")
+
+    def test_no_stamp_is_pre_provenance(self) -> None:
+        self.assertEqual(census_mod.classify_vintage("", "tree-language/3"), "pre-provenance")
+
+    def test_no_stamp_and_no_expected_vintage_is_current(self) -> None:
+        # The pre-vintage program state: nothing stamped, nothing expected -- not stale.
+        self.assertEqual(census_mod.classify_vintage("", ""), "current")
+
+    def test_a_current_document_stamp_over_pre_provenance_records_reads_mixed(self) -> None:
+        # The lie the emit docstring documents: document says the live vintage, but a node in the
+        # per-node map has no vintage (a failed re-roll kept its pre-provenance prior).
+        plan = _plan("t", [("skill.t-t1-n0", "magnitude", 1), ("skill.t-t1-n1", "magnitude", 1)])
+        seed = {
+            "treeId": "t",
+            "nodes": [
+                {"id": "skill.t-t1-n0", "affixIds": ["atom.might"], "promptVersion": "tree-language/3"},
+                {"id": "skill.t-t1-n1", "affixIds": ["atom.might"]},
+            ],
+            "_provenance": {
+                "promptVersion": "tree-language/3",
+                "promptVersionByNode": {"skill.t-t1-n0": "tree-language/3", "skill.t-t1-n1": ""},
+            },
+        }
+        row = census_mod.census_tree("t", plan, seed, _generated([], []),
+                                     current_vintage="tree-language/3")
+        self.assertEqual(row.vintage_state, "mixed")
+        self.assertEqual(row.stale_vintage_node_ids, ("skill.t-t1-n1",))
+
+    def test_per_node_vintages_override_a_stale_document_stamp(self) -> None:
+        plan = _plan("t", [("skill.t-t1-n0", "magnitude", 1)])
+        seed = {
+            "treeId": "t",
+            "nodes": [{"id": "skill.t-t1-n0", "affixIds": ["atom.might"]}],
+            "_provenance": {
+                "promptVersion": "tree-language/1",
+                "promptVersionByNode": {"skill.t-t1-n0": "tree-language/3"},
+            },
+        }
+        row = census_mod.census_tree("t", plan, seed, _generated([], []),
+                                     current_vintage="tree-language/3")
+        self.assertEqual(row.stale_vintage_node_ids, ())
+        self.assertEqual(row.vintage_state, "stale")  # document stamp is still the old one
+
+    def test_a_pre_provenance_document_reports_every_node_stale(self) -> None:
+        plan = _plan("t", [("skill.t-t1-n0", "magnitude", 1), ("skill.t-t1-n1", "magnitude", 1)])
+        seed = _seed([("skill.t-t1-n0", ["atom.might"]), ("skill.t-t1-n1", ["atom.might"])])
+        row = census_mod.census_tree("t", plan, seed, _generated([], []),
+                                     current_vintage="tree-language/3")
+        self.assertEqual(row.vintage_state, "pre-provenance")
+        self.assertEqual(len(row.stale_vintage_node_ids), 2)
+
+    def test_by_vintage_counts_every_tree_state(self) -> None:
+        plans = [_plan(t, [("skill.t-t1-n0", "magnitude", 1)]) for t in ("a", "b")]
+        docs = [
+            {**_seed([]), "_provenance": {"promptVersion": "tree-language/3"}},
+            {**_seed([]), "_provenance": {"promptVersion": "tree-language/1"}},
+        ]
+        rows = tuple(census_mod.census_tree(t, p, d, _generated([], []), current_vintage="tree-language/3")
+                     for t, p, d in zip(("a", "b"), plans, docs))
+        result = census_mod.DistributionCensus(trees=rows, by_reason={}, by_reason_class={})
+        self.assertEqual(result.by_vintage(), {"current": 1, "stale": 1})
+
 
 if __name__ == "__main__":
     unittest.main()

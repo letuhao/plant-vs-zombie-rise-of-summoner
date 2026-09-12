@@ -63,6 +63,45 @@ _REFUSAL_PATTERNS: "tuple[tuple[str, str], ...]" = (
 _MECHANISM = "mechanism"
 _MAGNITUDE = "magnitude"
 
+#: Per-record provenance vintages that are legitimate states of a corpus, never "current". Matched by
+#: value, not enumerated as constants, so a new brief vintage never needs an edit here — only the
+#: CURRENT one is special-cased, and it is read live from `brief.PROMPT_VERSION`.
+_VINTAGE_MIXED = "mixed"
+_VINTAGE_PRE_PROVENANCE = "pre-provenance"
+
+
+def current_prompt_version() -> str:
+    """The vintage a fresh generation stamps today, read from the brief that owns it. Imported
+    lazily so this module stays importable (and testable) without the brief's model-facing surface,
+    and so a caller can never accidentally duplicate the literal."""
+    from .nodegen import brief
+
+    return brief.PROMPT_VERSION
+
+
+def classify_vintage(stamped: str, current: str) -> str:
+    """One seed document's provenance state, as a closed classification (task P1.3):
+
+    - ``current`` — every record carries the live vintage.
+    - ``mixed`` — records disagree (a resumed run replaying pre-provenance records beside new ones);
+      the document stamp is the literal ``mixed`` sentinel and hides exactly which nodes are stale.
+    - ``pre-provenance`` — no record carries any vintage (the legacy shape: content generated before
+      the per-record field existed). A document stamp that equals the CURRENT vintage while its
+      records are pre-provenance is precisely the lie `build_seed_document`'s own note documents; it
+      is reported as ``pre-provenance`` here, never as current.
+    - ``stale`` — every record agrees, but on a vintage older than the live one.
+
+    An empty `stamped` with an empty `current` is `current`, not stale: both say "no provenance
+    expected", which is the pre-vintage program state.
+    """
+    if stamped == current:
+        return "current"
+    if stamped == _VINTAGE_MIXED:
+        return _VINTAGE_MIXED
+    if not stamped:
+        return _VINTAGE_PRE_PROVENANCE
+    return "stale"
+
 
 def classify_refusal(reason: str) -> str:
     """The coarse bucket for one `tree-binder` refusal reason. `other` is a real answer, not a
@@ -110,6 +149,9 @@ class TreeCensus:
     never_generated_node_ids: "tuple[str, ...]"
     bound_node_ids: "tuple[str, ...]"
     chosen_affix_ids: "tuple[str, ...]"
+    document_vintage: str
+    vintage_state: str
+    stale_vintage_node_ids: "tuple[str, ...]"
 
     @property
     def mechanism_bind_permille(self) -> int:
@@ -130,6 +172,10 @@ class TreeCensus:
     @property
     def never_generated_count(self) -> int:
         return len(self.never_generated_node_ids)
+
+    @property
+    def is_current_vintage(self) -> bool:
+        return self.vintage_state == "current"
 
 
 def _permille(numerator: int, denominator: int) -> int:
@@ -162,8 +208,15 @@ def census_tree(
     plan_raw: Mapping[str, Any],
     seed_doc: "Mapping[str, Any] | None",
     generated: "Mapping[str, Any] | None",
+    *,
+    current_vintage: str = "",
 ) -> TreeCensus:
-    """One tree, from its three committed artifacts. Pure: no file I/O, no cross-tree reads."""
+    """One tree, from its three committed artifacts. Pure: no file I/O, no cross-tree reads.
+
+    `current_vintage` is the live brief vintage (`brief.PROMPT_VERSION`); the default empty string is
+    for a caller that only wants the shape, and makes every stamped document read `current` (no
+    provenance expected). Pass the real value to classify staleness.
+    """
     plan_nodes = list(plan_raw.get("nodes") or [])
     plan_class_by_id: "dict[str, str]" = {}
     plan_tier_by_id: "dict[str, int]" = {}
@@ -206,6 +259,30 @@ def census_tree(
     chosen_affix_ids: "set[str]" = set()
     for node in seed_nodes:
         chosen_affix_ids.update(str(a) for a in (node.get("affixIds") or []))
+
+    provenance = (seed_doc or {}).get("_provenance") or {}
+    document_vintage = str(provenance.get("promptVersion", ""))
+    per_node_vintage = provenance.get("promptVersionByNode") or {}
+    # The per-node vintages are authoritative, and the rule is exactly `nodegen.run.plan_run._stale`'s
+    # own: a record is stale when its effective vintage differs from the live one, and an EMPTY
+    # effective vintage is pre-provenance — stale, never current. That last point matters because
+    # `build_seed_document` stamps the caller's CURRENT vintage as the document value when every
+    # record predates the per-record field, so trusting the document stamp would report content that
+    # was generated under an older brief as current. Effective vintage: the node's own recorded value
+    # when present, else the document stamp.
+    def _effective(node: Mapping[str, Any]) -> str:
+        node_id = str(node.get("id", ""))
+        if node_id in per_node_vintage:
+            return str(per_node_vintage[node_id] or "")
+        return document_vintage
+
+    stale_vintage_node_ids = tuple(sorted(
+        str(node.get("id", "")) for node in seed_nodes
+        if current_vintage and _effective(node) != current_vintage
+    ))
+    vintage_state = classify_vintage(document_vintage, current_vintage)
+    if vintage_state == "current" and stale_vintage_node_ids:
+        vintage_state = _VINTAGE_MIXED
 
     orphans = tuple(sorted(
         node_id for node_id in
@@ -252,6 +329,9 @@ def census_tree(
         never_generated_node_ids=never_generated,
         bound_node_ids=tuple(sorted(str(n.get("nodeId", "")) for n in bound)),
         chosen_affix_ids=tuple(sorted(chosen_affix_ids)),
+        document_vintage=document_vintage,
+        vintage_state=vintage_state,
+        stale_vintage_node_ids=stale_vintage_node_ids,
     )
 
 
@@ -305,6 +385,20 @@ class DistributionCensus:
                              "bindPermille": _permille(bound, expected)}
         return out
 
+    def by_vintage(self) -> "dict[str, int]":
+        counts: "Counter[str]" = Counter(t.vintage_state for t in self.trees)
+        return dict(sorted(counts.items()))
+
+    def stale_vintage_trees(self) -> "tuple[TreeCensus, ...]":
+        """Every tree whose content is not the current brief vintage — the input a completion gate
+        needs (task P1.3). A stale tree is not a defect in the corpus's *content*; it is content
+        generated under an older brief, which only a re-roll can refresh, so this is the scope a
+        regeneration pass must cover. Reported separately from `orphanGeneratedNodeIds`, which IS a
+        defect: conflating "needs a re-roll" with "wrong" is how a real defect gets batched into a
+        routine regeneration and disappears.
+        """
+        return tuple(t for t in self.trees if t.vintage_state != "current")
+
     def by_tier_mechanism(self) -> "dict[int, dict[str, int]]":
         tiers = range(1, 1 + max(
             (len(t.expected_mechanism_by_tier) for t in self.trees), default=0))
@@ -337,6 +431,7 @@ class DistributionCensus:
             "byTierMechanism": {str(k): v for k, v in self.by_tier_mechanism().items()},
             "byReason": dict(sorted(self.by_reason.items())),
             "byReasonClass": dict(sorted(self.by_reason_class.items())),
+            "byVintage": self.by_vintage(),
             "trees": [
                 {
                     "treeId": t.tree_id, "category": t.category, "archetype": t.archetype,
@@ -360,6 +455,9 @@ class DistributionCensus:
                     "orphanGeneratedNodeIds": list(t.orphan_generated_node_ids),
                     "neverGeneratedNodeIds": list(t.never_generated_node_ids),
                     "chosenAffixIds": list(t.chosen_affix_ids),
+                    "documentVintage": t.document_vintage,
+                    "vintageState": t.vintage_state,
+                    "staleVintageNodeIds": list(t.stale_vintage_node_ids),
                 }
                 for t in self.trees
             ],
@@ -438,6 +536,17 @@ class DistributionCensus:
             for tree_id, ids in never:
                 lines.append(f"  {tree_id}: {len(ids)} node(s) — {', '.join(ids)}")
 
+        lines.append("")
+        lines.append("provenance vintage (the brief vintage a fresh generation would stamp today)")
+        for state, count in self.by_vintage().items():
+            lines.append(f"  {state:<16} {count} tree(s)")
+        stale = [t for t in self.stale_vintage_trees()]
+        if stale:
+            total_stale = sum(len(t.stale_vintage_node_ids) for t in stale)
+            lines.append(f"  {total_stale} record(s) across {len(stale)} tree(s) are not the current "
+                         f"vintage — a fresh `trees generate` re-rolls them, and the document stamp "
+                         f"cannot see it (per-node provenance is authoritative)")
+
         mismatched = [t for t in self.trees if t.unaccounted_nodes != 0]
         if mismatched:
             lines.append("")
@@ -467,14 +576,20 @@ def census(
     seed_root: "Path | None" = None,
     out_root: "Path | None" = None,
     tree_ids: "Sequence[str] | None" = None,
+    *,
+    current_vintage: "str | None" = None,
 ) -> DistributionCensus:
     """Read the three committed artifact families for every planned tree and compute the
     distribution. Missing artifacts are a legitimate reading (`MISSING` verdict, zero bound), not an
     error — a tree the binder has never run is a real, reportable state.
+
+    `current_vintage` defaults to the live `brief.PROMPT_VERSION`; pass `""` to classify provenance
+    without asserting a target vintage.
     """
     seed = seed_root or DEFAULT_SEED_ROOT
     out = out_root or DEFAULT_OUT_ROOT
     ids = list(tree_ids) if tree_ids is not None else planned_tree_ids(seed)
+    vintage = current_prompt_version() if current_vintage is None else current_vintage
 
     rows: "list[TreeCensus]" = []
     by_reason: "Counter[str]" = Counter()
@@ -486,7 +601,8 @@ def census(
             continue
         seed_doc = _load_json(seed / "passive-tree" / "nodes" / f"{tree_id}.json")
         generated = _load_json(out / f"{tree_id}.json")
-        rows.append(census_tree(tree_id, plan_raw, seed_doc, generated))
+        rows.append(census_tree(tree_id, plan_raw, seed_doc, generated,
+                                current_vintage=vintage))
         for refused in (generated or {}).get("refused") or []:
             reason = str(refused.get("reason", ""))
             by_reason[reason] += 1
@@ -498,6 +614,7 @@ def census(
 
 __all__ = [
     "REPO_ROOT", "DEFAULT_SEED_ROOT", "DEFAULT_OUT_ROOT",
-    "classify_refusal", "TreeCensus", "DistributionCensus",
+    "classify_refusal", "current_prompt_version", "classify_vintage",
+    "TreeCensus", "DistributionCensus",
     "census_tree", "planned_tree_ids", "census",
 ]

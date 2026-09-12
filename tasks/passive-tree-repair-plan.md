@@ -45,6 +45,7 @@ to get the current reading; every phase reports its delta against this one.
 > refusal buckets:    affixNotGenerated 1356  ·  opMore 54  ·  other 4
 > orphans:            none (the 2026-09-11 "wither orphan" was a not-yet-generated plan node, class E)
 > never-generated:    wither: skill.wither-def-t9-n1 (planned but never accepted)
+> vintage:            mixed 20 · stale 22 · current 0 — 1,066 records need a re-roll under `tree-language/3`
 > ```
 
 ### 1.1 Headline
