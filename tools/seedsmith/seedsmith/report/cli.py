@@ -1567,6 +1567,8 @@ def cmd_trees(args: argparse.Namespace) -> int:
         return _cmd_trees_generate(args)
     if args.trees_command == "review":
         return _cmd_trees_review(args)
+    if args.trees_command == "census":
+        return _cmd_trees_census(args)
 
     print(f"unknown trees command {args.trees_command!r}")
     return EXIT_CANNOT_RUN
@@ -1880,6 +1882,42 @@ def _run_tree_equal_value(plans: "list[dict]", tuning_doc: dict) -> "str | None"
     except plan_invariants.PlanInvariantError as ex:
         return str(ex)
     return None
+
+
+def _cmd_trees_census(args: argparse.Namespace) -> int:
+    """`seedsmith trees census [--json]` (task P0.1, tasks/passive-tree-repair-plan.md §1).
+
+    Prints the passive-tree DISTRIBUTION, not an aggregate: bind rate by node class, by tier (for
+    mechanism), by category and by tree, plus the refusal buckets, the inert-bound count, the unspent
+    budget and any orphaned generated node. The 2026-09-11 aggregate (`266/1680 bound`) hid the
+    defect that actually matters — mechanism binds at 2.1% while magnitude binds at 29.5%, so tiers
+    8-10, which the plan authors as 100% mechanism, produce nothing. This command is what makes that
+    visible in one run, so every later repair phase reports a delta against a fixed baseline.
+
+    It measure-only: exit 0 unless the corpus could not be read at all (`EXIT_CANNOT_RUN`). It never
+    gates and never writes a corpus file — a later phase's gate diffs two runs of it.
+    """
+    from ..adapters.trees import census as census_mod
+
+    seed_root = Path(args.seed_root) if args.seed_root else None
+    out_root = Path(args.out_root) if args.out_root else None
+    tree_ids = [args.tree] if args.tree else None
+    try:
+        result = census_mod.census(seed_root, out_root, tree_ids)
+    except (OSError, json.JSONDecodeError) as ex:
+        print(f"seedsmith: passive-tree census could not read the corpus: {ex}", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    if not result.trees:
+        print("seedsmith: no committed tree plans found — run `trees plan --emit` first",
+              file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    if args.json:
+        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+    else:
+        print(result.format_text())
+    return EXIT_CLEAN
 
 
 def _cmd_trees_plan(args: argparse.Namespace) -> int:
@@ -2938,6 +2976,18 @@ def build_parser() -> argparse.ArgumentParser:
         "--review-dir", dest="review_dir", default="",
         help="override where <lot>.json's sheetReads/entries are read from (default "
              "data/seed/passive-tree/_review)")
+    trees_census = trees_sub.add_parser(
+        "census", help="print the passive-tree distribution, not an aggregate (task P0.1, "
+                       "tasks/passive-tree-repair-plan.md §1)")
+    trees_census.add_argument("--json", action="store_true",
+                              help="emit the full census as JSON (per-tree rows included)")
+    trees_census.add_argument("--tree", default="", help="a single tree id (default: every planned tree)")
+    trees_census.add_argument("--seed-root", dest="seed_root", default="",
+                              help="override the seed root the committed plan/nodes are read under "
+                                   "(default data/seed)")
+    trees_census.add_argument("--out-root", dest="out_root", default="",
+                              help="override where tree-binder's bound reports are read from "
+                                   "(default data/generated/passive-tree)")
     trees.set_defaults(func=cmd_trees)
 
     numerics = sub.add_parser(

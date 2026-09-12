@@ -357,11 +357,12 @@ nothing real:
      `targetShapePool`, alongside `Instantiator.Draw` (`ActionSeeder.cs:47`). It is untouched, and it
      is not on the corpus's bind path. Nothing new rolls.
    - **A-T1's vectors keep a real consumer, deterministic and plan-side**: this step allocates
-     `targetMode` across a subject's briefs by **largest remainder over `targetModeMilli`**, exactly
-     as step 3 allocates `category` over `categoryMilli` — `long`, widened before the multiply,
-     divided by 1000 last, exactly once, ties on the declared member order
-     (`ActionTargetSpec.cs:14-33`). `areaShapeMilli` is consulted **only** for briefs allocated
-     `area`, and it allocates by largest remainder too.
+     `targetMode` with the SAME **scope-level engine as step 3** — `apportion_axis` over the scope
+     aggregate, exact column quota, deficit-greedy per-subject fill (see AC4b for why the original
+     per-subject largest remainder was inert at `count == 5`). `areaShapeMilli` is consulted **only**
+     for briefs allocated `area`, via `apportion_area_shapes`, weighted by each subject's area-slot
+     count and spread over the scope. All arithmetic is `long`, widened before multiplying, divided
+     last, ties on the declared member order (`ActionTargetSpec.cs:14-33`).
    - **The board gate is not duplicated.** `ActionSeeder.cs:51-53` keeps owning the roll-time board
      gate; a corpus brief allocated `area` that reaches a boardless context is refused at bind time by
      `ActionValidator`'s existing `AreaRequiresBoard` rule, which is unchanged.
@@ -605,7 +606,7 @@ constraint, which is binding, and not by a field name, which drifts.
 | **Pairing vocabulary** | every `pairedPayoffFamily` is a key of `pairings.json` and every forced enabler is a member of `EnablersOf` it; a brief carrying a **status id** in that field is refused, naming the field |
 | **Structure axes — union-to-ceiling** | the assignable sets are asserted as literals: general **2**, family **5**, signature **6**; a brief naming `reaction` is **refused**, and one naming `restriction` carries `structureEnforced: false` |
 | **Family motifs derived** | every family-scoped brief carries `familyMotifs`, `familyAntiMotifs` and `familyMotifBasis` as keys; all current consolidated families resolve deterministically against live data |
-| **Target shape allocation** | `targetMode` counts per subject equal the largest-remainder allocation of A-T1's `targetModeMilli` exactly, and `areaShapeMilli` is consulted only for briefs allocated `area` |
+| **Target shape allocation** | `targetMode` counts per subject come from the SAME scope-level `apportion_axis` allocation as `category` (exact column quota, spread per subject), and `areaShape` from `apportion_area_shapes` weighted by each subject's area-slot count — never a per-subject largest-remainder split, which was inert at `count == 5` (see AC4b). Asserted: `targetMode`/`areaShape` column sums equal the scope aggregate apportionment, and every closed-axis member is reachable when slots allow (`area` and all four shapes) |
 | **Casing** | every emitted `category`, `targetMode`, `areaShape` and `relation` round-trips through `ActionCategories.TryParse` / `ActionTargetModes.TryParse` / `ActionAreaShapes.TryParse` / `RelationKinds.TryParse`; `"Area"` is refused |
 | **Planted violation — family widening** | a tuning file that narrows `allowedAtomFamilies` per tier while any of constraint 4's three gates is absent is **refused**, naming the missing gate |
 | **Planted violation — multiplicative pair** | a plan allowing `atom.keen-edge` and `atom.cruelty` in one brief is refused, naming both; the same holds for their `Replace` twins `atom.prec-verdict` / `atom.prec-reckoning`, and the pairs are read from `multiplicativePairs` rather than hard-coded (§3 step 7) |
@@ -629,6 +630,19 @@ constraint, which is binding, and not by a field name, which drifts.
 4b. Every brief's `targetMode` and `areaShape` are **authored** (§3 step 4a) and every value parses
    through the code of record's own `TryParse` — `"self" "single" "multi" "rolledTarget" "all" "area"`
    (`ActionTargetSpec.cs:103-112`) and `"row" "column" "square" "rectangle"` (`:134-141`).
+   ⛔ **CORRECTED 2026-09-12 (measured defect).** `targetMode` and the conditional `areaShape`
+   sub-vector are allocated by the **same scope-level engine as `category`** (`apportion_axis` /
+   `apportion_area_shapes`), not by a per-subject largest-remainder split. The old per-subject method
+   was inert at `count == 5` for the **six-member** `targetMode`: the lowest-weight member
+   (`area`) needs weight >= 400 per-mille to win a slot and the shipped vector tops out at 167, so
+   `area` received **0 slots for all 1,131 subjects** — `targetMode: area` and all four area shapes
+   were unreachable at family and species scope (0 of 6,655 briefs). One level down, `areaShape` at a
+   subject's own area count of 0 or 1 tied all four shapes and the declared-order tie-break picked
+   `row` every time (measured 750/750 species, 188/188 family). After the fix: `area` is reachable
+   (750 species / 188 family slots, per-round) and all four shapes are reachable with exact quota
+   (species 188/188/187/187, family 47/47/47/47). Acceptance: the `targetMode` and `areaShape`
+   column sums equal the largest-remainder apportionment of the scope aggregate, and every member of
+   the closed axis is reachable when its slot count allows.
 5. Every `payoff` brief has an `enabler` brief with the same `pairedPayoffFamily` in the same
    `(scope, scopeKey)` group; every `pairedPayoffFamily` is a key of `pairings.json`; `role: "none"`
    is present as a key on every brief that has neither role. ⛔ **CORRECTED 2026-09-03 (review F7)** —

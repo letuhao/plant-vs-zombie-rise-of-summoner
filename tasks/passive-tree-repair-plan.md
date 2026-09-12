@@ -22,10 +22,29 @@ nothing and, where it binds, contributes nothing to combat.**
 Commands actually run, not quoted:
 
 ```powershell
+# the one command every later phase diffs against (task P0.1)
+$env:PYTHONPATH="tools/seedsmith"; python -m seedsmith trees census          # frozen baseline below
+$env:PYTHONPATH="tools/seedsmith"; python -m seedsmith trees census --json   # same numbers, machine-readable
 dotnet run --project tools/TreeBinder -- --check      # crash, exit -532462766
 dotnet run --project tools/FamilyExpandGen -- --check # 3 stale files, exit 1
 python -m seedsmith check --family PassiveTree        # corpus-side metrics
 ```
+
+**Frozen baseline revision:** `0dc1bf3f` (the commit this census first ran at). The numbers below are
+a READING of the corpus at that revision — never a constant a test may assert. Re-run `trees census`
+to get the current reading; every phase reports its delta against this one.
+
+> **Baseline (revision 0dc1bf3f)**
+> ```
+> trees=42  expected=1680  bound=266  refused=1414  unaccounted=0  overall=15.8%
+> boundWithPricedAtoms=158  boundWithoutPricedAtoms=108  pricedAtoms=206  unspentBudgetShareMilli=75697
+>
+> by node class:  mechanism 18/840 (2.1%)   magnitude 248/840 (29.5%)
+> by category:    elemental 15.4%  primary 19.1%  status 14.2%
+> mechanism by tier:  t3 28→1  t4 84→2  t5 84→1  t6 84→0  t7 84→1  t8 140→3  t9 168→7  t10 168→3
+> refusal buckets:    affixNotGenerated 1356  ·  opMore 54  ·  other 4
+> orphans:            wither: skill.wither-def-t9-n1
+> ```
 
 ### 1.1 Headline
 

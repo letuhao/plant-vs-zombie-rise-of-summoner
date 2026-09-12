@@ -343,72 +343,132 @@ class LargestRemainderAndExpandTests(unittest.TestCase):
 
 
 class TwoLevelAllocationTests(unittest.TestCase):
-    """The 2026-09-11 engine fix: scope-level exact quota + lean-aware per-subject repair. Replaces
-    the per-subject largest-remainder split, which was measured inert at `count == 5` (needs weight
-    >= 400 per-mille for a 2nd slot; the shipped scale tops out at 266, so all 1,131 subjects got
-    the identical 1/1/1/1/1 vector)."""
+    """The scope-level allocation engine. It replaced the per-subject largest-remainder split, which
+    was measured inert at `count == 5` (a member needs weight >= 400 per-mille for a 2nd slot; the
+    shipped `base=1000, step=250` tops out at 267, so all 1,131 subjects got the identical
+    `1/1/1/1/1` vector on category and, on the six-member `targetMode`, always dropped `area`)."""
 
     @staticmethod
-    def _rows(n: int, *, lean: str = "attack") -> "list[tuple[str, dict]]":
+    def _rows(n: int, *, lean: str = "attack", order=None) -> "list[tuple[str, dict]]":
+        order = order or CATEGORIES
         rows = []
         for i in range(n):
-            milli = {c: 200 for c in CATEGORIES}
-            milli[lean] += 60
-            milli["status"] -= 60
+            milli = {c: 200 for c in order}
+            if lean in milli:
+                milli[lean] += 60
+                other = next(c for c in reversed(order) if c != lean)
+                milli[other] -= 60
             rows.append((f"s{i:03d}", milli))
         return rows
 
     def test_every_row_sums_to_count(self) -> None:
         for count in (1, 2, 3, 5, 8, 25):
-            alloc = dp.apportion_categories(self._rows(37), count)
+            alloc = dp.apportion_axis(self._rows(37), count, CATEGORIES)
             for key, counts in alloc.items():
                 self.assertEqual(sum(counts.values()), count, key)
 
     def test_column_sums_equal_scope_quota_exactly(self) -> None:
         rows = self._rows(37)
         for count in (1, 3, 5, 10):
-            alloc = dp.apportion_categories(rows, count)
+            alloc = dp.apportion_axis(rows, count, CATEGORIES)
             col = {c: sum(v[c] for v in alloc.values()) for c in CATEGORIES}
             aggregate = {c: sum(m[c] for _, m in rows) for c in CATEGORIES}
             expected = dp.largest_remainder_apportion(aggregate, CATEGORIES, count * len(rows))
             self.assertEqual(col, expected, f"count={count}")
 
     def test_not_flat_at_the_shipped_count(self) -> None:
-        alloc = dp.apportion_categories(self._rows(40), 5)
+        alloc = dp.apportion_axis(self._rows(40), 5, CATEGORIES)
         self.assertGreater(len({tuple(sorted(v.items())) for v in alloc.values()}), 1)
 
     def test_lean_head_wins_extra_slots_when_quota_permits(self) -> None:
-        alloc = dp.apportion_categories(self._rows(60, lean="attack"), 5)
+        alloc = dp.apportion_axis(self._rows(60, lean="attack"), 5, CATEGORIES)
         winners = sum(1 for v in alloc.values() if v["attack"] >= 2)
         self.assertGreater(winners, 0, "an attack-leaning roster must place extra attack briefs")
 
     def test_deterministic(self) -> None:
         rows = self._rows(50)
-        self.assertEqual(dp.apportion_categories(rows, 5), dp.apportion_categories(rows, 5))
+        self.assertEqual(dp.apportion_axis(rows, 5, CATEGORIES),
+                         dp.apportion_axis(rows, 5, CATEGORIES))
 
     def test_empty_and_zero_count(self) -> None:
-        self.assertEqual(dp.apportion_categories([], 5), {})
-        alloc = dp.apportion_categories(self._rows(4), 0)
+        self.assertEqual(dp.apportion_axis([], 5, CATEGORIES), {})
+        alloc = dp.apportion_axis(self._rows(4), 0, CATEGORIES)
         self.assertTrue(all(v == {c: 0 for c in CATEGORIES} for v in alloc.values()))
 
-    def test_large_per_subject_count_does_not_trip_the_guard(self) -> None:
-        """The repair bound must be the provable `count * n` swaps (each swap cuts the L1 drift by
-        2), not a heuristic smaller than it. The old bound `4*n*len(order)+len(order)` was below the
-        real worst case once `count > 2*len(order)`, i.e. a latent false `did not converge` throw at
-        a large per-subject count. Exercise a count well past that threshold with a lopsided roster
-        that forces many repairs."""
+    def test_target_mode_is_generic_over_any_axis(self) -> None:
+        """`apportion_axis` must work for the SIX-member `targetMode` axis, not just five
+        categories — the bug was that targetMode still used the inert per-subject method."""
+        rows = self._rows(60, lean="area", order=TARGET_MODES)
+        alloc = dp.apportion_axis(rows, 5, TARGET_MODES)
+        col = {m: sum(v[m] for v in alloc.values()) for m in TARGET_MODES}
+        aggregate = {m: sum(mm[m] for _, mm in rows) for m in TARGET_MODES}
+        self.assertEqual(col, dp.largest_remainder_apportion(aggregate, TARGET_MODES, 5 * len(rows)))
+        self.assertTrue(all(sum(v.values()) == 5 for v in alloc.values()))
+        self.assertGreater(sum(1 for v in alloc.values() if v["area"] > 0), 0)
+
+    def test_no_large_per_subject_count_guard_to_trip(self) -> None:
+        """The deficit-greedy fill has no swap-repair guard; it is exact by construction at any
+        count. Exercise a large per-subject count with a lopsided roster."""
         rows = []
         for i in range(120):
             milli = {c: 50 for c in CATEGORIES}
             milli["attack" if i % 2 == 0 else "defense"] += 750
             rows.append((f"s{i:03d}", milli))
         for count in (40, 120, 200):
-            alloc = dp.apportion_categories(rows, count)
+            alloc = dp.apportion_axis(rows, count, CATEGORIES)
             for key, counts in alloc.items():
                 self.assertEqual(sum(counts.values()), count, key)
             col = {c: sum(v[c] for v in alloc.values()) for c in CATEGORIES}
             aggregate = {c: sum(m[c] for _, m in rows) for c in CATEGORIES}
             self.assertEqual(col, dp.largest_remainder_apportion(aggregate, CATEGORIES, count * len(rows)))
+
+
+class AreaShapeAllocationTests(unittest.TestCase):
+    """`apportion_area_shapes` — the third level of the same defect. `areaShape` is a conditional
+    sub-vector consulted only for `targetMode == "area"`; per-subject largest remainder at a subject's
+    own area count (0 or 1 at family/species scope) tied all four shapes and the declared-order
+    tie-break always picked `row` — measured 750/750 species and 188/188 family area briefs were
+    `row`, so `column`/`square`/`rectangle` were unreachable."""
+
+    @staticmethod
+    def _rows(n: int) -> "list[tuple[str, dict]]":
+        return [(f"s{i:03d}", {s: 250 for s in AREA_SHAPES}) for i in range(n)]
+
+    def test_all_four_shapes_reachable_when_slots_allow(self) -> None:
+        rows = self._rows(40)
+        slots = {key: 1 for key, _ in rows}
+        alloc = dp.apportion_area_shapes(rows, slots)
+        col = {s: sum(v[s] for v in alloc.values()) for s in AREA_SHAPES}
+        self.assertEqual(set(col), set(AREA_SHAPES))
+        self.assertTrue(all(n > 0 for n in col.values()),
+                        f"every shape must be reachable, got {col}")
+
+    def test_per_subject_sums_to_the_area_slot_count(self) -> None:
+        rows = self._rows(30)
+        slots = {key: (i % 3) for i, (key, _) in enumerate(rows)}
+        alloc = dp.apportion_area_shapes(rows, slots)
+        for key, _ in rows:
+            self.assertEqual(sum(alloc[key].values()), slots[key], key)
+
+    def test_zero_area_slots_are_never_consulted(self) -> None:
+        rows = self._rows(10)
+        alloc = dp.apportion_area_shapes(rows, {key: 0 for key, _ in rows})
+        self.assertTrue(all(v == {s: 0 for s in AREA_SHAPES} for v in alloc.values()))
+
+    def test_exact_scope_quota(self) -> None:
+        rows = self._rows(37)
+        slots = {key: (1 if i % 2 else 2) for i, (key, _) in enumerate(rows)}
+        alloc = dp.apportion_area_shapes(rows, slots)
+        col = {s: sum(v[s] for v in alloc.values()) for s in AREA_SHAPES}
+        total = sum(slots.values())
+        aggregate = {s: sum(mm[s] * slots[key] for key, mm in rows) for s in AREA_SHAPES}
+        self.assertEqual(col, dp.largest_remainder_apportion(aggregate, AREA_SHAPES, total))
+
+    def test_deterministic(self) -> None:
+        rows = self._rows(25)
+        slots = {key: 1 for key, _ in rows}
+        self.assertEqual(dp.apportion_area_shapes(rows, slots),
+                         dp.apportion_area_shapes(rows, slots))
 
     def test_one_implementation_backs_both_apportioners(self) -> None:
         """`largest_remainder_count` and `largest_remainder_apportion` must round and tie-break

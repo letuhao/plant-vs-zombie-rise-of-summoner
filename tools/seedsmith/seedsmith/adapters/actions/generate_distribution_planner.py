@@ -65,7 +65,11 @@ BRIEFS_DIR = ACTIONS_ROOT / "_briefs"
 #:   1 — 2026-09-11: initial explicit version; the ordinal-spreading fix in `expand_counts` (marginals
 #:       unchanged, emitted order changed) is the change that motivated making the algorithm
 #:       versioned at all.
-ALGORITHM_VERSION = 1
+#:   2 — 2026-09-12: generalized scope-level allocation. `apportion_axis` (deficit-greedy) now also
+#:       drives `targetMode`, and `apportion_area_shapes` drives `areaShape`. `area` and its four
+#:       shapes were unreachable at family/species scope before this (0 of 6,655 briefs); now ~750
+#:       species / ~188 family briefs carry them. Marginals change, so the version must move.
+ALGORITHM_VERSION = 2
 
 # A-S5 writes the round-scoped quality-gate report at this path. The full-run gate below checks the
 # report's measured verdict, not mere file presence.

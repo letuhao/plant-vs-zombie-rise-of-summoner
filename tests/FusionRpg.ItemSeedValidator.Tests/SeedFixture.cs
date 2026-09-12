@@ -86,7 +86,10 @@ public static class SeedFixture
           "groups": [{ "groupId": "g.life", "stem": "life", "existingFamilies": ["vitality"] }]
         },
         "uniques": { "bandAssignment": [{ "rungBandLowOrdinal": 70, "themeIds": ["ember-harvest"] }] },
-        "sets": { "themeIds": ["ember-harvest"] },
+        "sets": {
+          "themeIds": ["ember-harvest"],
+          "buildThemeIds": ["ember-harvest-offense"]
+        },
         "charms": {
           "axisGroups": [{ "axisGroupId": "econ", "axes": ["economy"] }],
           "resonanceNote": "reserve charm.res-economy-2 and charm.res-economy-3"

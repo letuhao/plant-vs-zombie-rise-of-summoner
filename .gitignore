@@ -164,4 +164,5 @@ _tmp_reflect/
 test-results/
 .kilo/
 .mcp.json
+kilo.json
 plant-vs-zombie-rise-of-summoner.code-workspace

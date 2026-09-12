@@ -1,0 +1,467 @@
+{
+  "_meta": {
+    "assemblyGateRejectCount": 0,
+    "candidateSetHash": "45f5b2dd5bfe10e4874f94328a623bf7069c7bf353edc4d3838cc23fb28c8881",
+    "differentiatorNoneRate": 0.0,
+    "disagreementRate": {},
+    "partition": "rounds",
+    "preflight": "skipped",
+    "restrictionUncheckedCount": 0,
+    "round": 2000
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "briefHash": "7d61a28e87e180ddf95af02eee18c970b3256db72a62349178da336c27fd1beb",
+        "briefsCorpusHash": "945e899bbe90aa5f61e2db7bb09f2ab3d4f48240e907a92801d3ab33df3b79d1",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.chilling",
+            "atom.freezing"
+          ],
+          [
+            "atom.blighting",
+            "atom.rotting"
+          ],
+          [
+            "atom.affliction",
+            "atom.sporing"
+          ]
+        ]
+      },
+      "briefId": "brief.general.general.020",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.affliction|atom.blighting|atom.chilling|atom.freezing|atom.rotting|atom.sporing"
+    },
+    {
+      "_provenance": {
+        "briefHash": "57956304ef3925fe54b170083c6b5fbdd6235883327ea9355d5902a0f8224175",
+        "briefsCorpusHash": "945e899bbe90aa5f61e2db7bb09f2ab3d4f48240e907a92801d3ab33df3b79d1",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.mesmerizing",
+            "atom.sporing"
+          ],
+          [
+            "atom.ferocity",
+            "atom.volley"
+          ],
+          [
+            "atom.might",
+            "atom.swiftness"
+          ]
+        ]
+      },
+      "briefId": "brief.general.general.026",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.ferocity|atom.mesmerizing|atom.might|atom.sporing|atom.swiftness|atom.volley"
+    },
+    {
+      "_provenance": {
+        "briefHash": "e47f7267d36958a0c1a0e1bdf815cd6842ccdb068933ff79527df9deae9d3b56",
+        "briefsCorpusHash": "945e899bbe90aa5f61e2db7bb09f2ab3d4f48240e907a92801d3ab33df3b79d1",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1",
+        "samplePicks": [
+          [
+            "atom.affliction",
+            "atom.sporing"
+          ],
+          [
+            "atom.chilling"
+          ],
+          [
+            "atom.blighting",
+            "atom.rotting"
+          ]
+        ]
+      },
+      "briefId": "brief.general.general.040",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.affliction|atom.blighting|atom.chilling|atom.rotting|atom.sporing"
+    },
+    {
+      "_provenance": {
+        "briefHash": "6e7f52456170b262f5da417e17ce52bb8a5377fc845f4458d34224db51626989",
+        "briefsCorpusHash": "945e899bbe90aa5f61e2db7bb09f2ab3d4f48240e907a92801d3ab33df3b79d1",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.chill-punisher",
+            "atom.chilling"
+          ],
+          [
+            "atom.cherry-bloom"
+          ],
+          [
+            "atom.prec-focus"
+          ]
+        ]
+      },
+      "briefId": "brief.family.academic.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.cherry-bloom|atom.chill-punisher|atom.chilling|atom.prec-focus"
+    },
+    {
+      "_provenance": {
+        "briefHash": "c4c724c4b2c95555b7ae6b7ef42558d318373e5c2e18dd8c62ed6218c9ae7bcd",
+        "briefsCorpusHash": "945e899bbe90aa5f61e2db7bb09f2ab3d4f48240e907a92801d3ab33df3b79d1",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": null,
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.shld-toughness"
+          ],
+          [
+            "atom.sust-husk"
+          ],
+          [
+            "atom.ward-harden"
+          ]
+        ]
+      },
+      "briefId": "brief.species.abyssswordstar.002",
+      "candidateId": null,
+      "confidence": {
+        "atomFamilies": "unresolved",
+        "differentiator": "high"
+      },
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.shld-toughness",
+          "atom.sust-husk",
+          "atom.ward-harden"
+        ],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "6184a6a2a258f3e5a21656ce6898cb8f646362832f0336fee1f1f078ff0d12df",
+        "briefsCorpusHash": "945e899bbe90aa5f61e2db7bb09f2ab3d4f48240e907a92801d3ab33df3b79d1",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": null,
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.sust-husk"
+          ],
+          [
+            "atom.arm-plate"
+          ],
+          [
+            "atom.sust-callus"
+          ]
+        ]
+      },
+      "briefId": "brief.species.acientsunnut.002",
+      "candidateId": null,
+      "confidence": {
+        "atomFamilies": "unresolved",
+        "differentiator": "high"
+      },
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.arm-plate",
+          "atom.sust-callus",
+          "atom.sust-husk"
+        ],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "3150f5cf6f8413d208d1c304d93a06405eb70a184c1052e4df1ad7f6bfbc9690",
+        "briefsCorpusHash": "945e899bbe90aa5f61e2db7bb09f2ab3d4f48240e907a92801d3ab33df3b79d1",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": null,
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.shld-toughness"
+          ],
+          [
+            "atom.evd-husk"
+          ],
+          [
+            "atom.ward-link"
+          ]
+        ]
+      },
+      "briefId": "brief.species.allpeater.002",
+      "candidateId": null,
+      "confidence": {
+        "atomFamilies": "unresolved",
+        "differentiator": "high"
+      },
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.evd-husk",
+          "atom.shld-toughness",
+          "atom.ward-link"
+        ],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "73f4cbfd53b3e46423493387b8555ac091f44c8b21e918486a6e1ce70b572963",
+        "briefsCorpusHash": "945e899bbe90aa5f61e2db7bb09f2ab3d4f48240e907a92801d3ab33df3b79d1",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": null,
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.elpw-override"
+          ],
+          [
+            "atom.elpw-overflow"
+          ],
+          [
+            "atom.tempo-pulse"
+          ]
+        ]
+      },
+      "briefId": "brief.species.allpeater.003",
+      "candidateId": null,
+      "confidence": {
+        "atomFamilies": "unresolved",
+        "differentiator": "split"
+      },
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.elpw-overflow",
+          "atom.elpw-override",
+          "atom.tempo-pulse"
+        ],
+        "differentiator": "atoms"
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "c93fd70e69d4ce708464699fd13892bc3dd11c4e757e246117c6c0d4d3d8d4e5",
+        "briefsCorpusHash": "945e899bbe90aa5f61e2db7bb09f2ab3d4f48240e907a92801d3ab33df3b79d1",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": null,
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.elpw-overflow"
+          ],
+          [
+            "atom.elpw-surfeit"
+          ],
+          [
+            "atom.tempo-pulse"
+          ]
+        ]
+      },
+      "briefId": "brief.species.allpeater.005",
+      "candidateId": null,
+      "confidence": {
+        "atomFamilies": "unresolved",
+        "differentiator": "split"
+      },
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.elpw-overflow",
+          "atom.elpw-surfeit",
+          "atom.tempo-pulse"
+        ],
+        "differentiator": "atoms"
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "72b7b88090190430e50af79bec7cfcf81307e7ad67cb1e8a2d026c502ed2d8d9",
+        "briefsCorpusHash": "945e899bbe90aa5f61e2db7bb09f2ab3d4f48240e907a92801d3ab33df3b79d1",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": null,
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.warded"
+          ],
+          [
+            "atom.warding"
+          ],
+          [
+            "atom.elpw-surge"
+          ]
+        ]
+      },
+      "briefId": "brief.species.apple.001",
+      "candidateId": null,
+      "confidence": {
+        "atomFamilies": "unresolved",
+        "differentiator": "high"
+      },
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.elpw-surge",
+          "atom.warded",
+          "atom.warding"
+        ],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "9fab3f1acd0e5f5b595adf9fdbda724a558b30a5a373367a0ad9539afc698eb0",
+        "briefsCorpusHash": "945e899bbe90aa5f61e2db7bb09f2ab3d4f48240e907a92801d3ab33df3b79d1",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": null,
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.ward-harden"
+          ],
+          [
+            "atom.mending",
+            "atom.warded"
+          ],
+          [
+            "atom.ward-ward"
+          ]
+        ]
+      },
+      "briefId": "brief.species.apple.002",
+      "candidateId": null,
+      "confidence": {
+        "atomFamilies": "unresolved",
+        "differentiator": "split"
+      },
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.mending",
+          "atom.ward-harden",
+          "atom.ward-ward",
+          "atom.warded"
+        ],
+        "differentiator": "atoms"
+      }
+    }
+  ],
+  "kind": "action-review",
+  "schemaVersion": 1
+}

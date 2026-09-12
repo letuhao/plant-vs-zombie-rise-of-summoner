@@ -1,0 +1,82 @@
+{
+  "_meta": {
+    "assemblyGateRejectCount": 0,
+    "candidateSetHash": "45f5b2dd5bfe10e4874f94328a623bf7069c7bf353edc4d3838cc23fb28c8881",
+    "differentiatorNoneRate": 0.0,
+    "disagreementRate": {},
+    "partition": "rounds",
+    "preflight": "skipped",
+    "restrictionUncheckedCount": 0,
+    "round": 2000
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "briefHash": "68a8fac2ef923a110664426bd40d37158a0631515f0582018eee102e68062d7f",
+        "briefsCorpusHash": "945e899bbe90aa5f61e2db7bb09f2ab3d4f48240e907a92801d3ab33df3b79d1",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.001",
+      "candidateId": null,
+      "confidence": null,
+      "draft": null,
+      "outcome": "blocked",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "1618ff4cfee1a9755db25e68c6f712fd32c6951b1f97ea0149960e7daedb0af0",
+        "briefsCorpusHash": "945e899bbe90aa5f61e2db7bb09f2ab3d4f48240e907a92801d3ab33df3b79d1",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.academic.001",
+      "candidateId": null,
+      "confidence": null,
+      "draft": null,
+      "outcome": "blocked",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "b7ed4dc2a0483e34f72e0bd84fa6d1b9f78ba2f0b998b3a9e3a5ddec1e6d74e9",
+        "briefsCorpusHash": "945e899bbe90aa5f61e2db7bb09f2ab3d4f48240e907a92801d3ab33df3b79d1",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.alchemical.004",
+      "candidateId": null,
+      "confidence": null,
+      "draft": null,
+      "outcome": "blocked",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    }
+  ],
+  "kind": "action-review",
+  "schemaVersion": 1
+}

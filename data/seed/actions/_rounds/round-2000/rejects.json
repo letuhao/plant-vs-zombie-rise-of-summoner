@@ -1,0 +1,104 @@
+{
+  "_meta": {
+    "candidateSetHash": "c5b63fc51cb9d244ec8ff9afb1a2419934dfdacf3cd0d5fe4431f0c81209f473",
+    "corpusHash": "a428db55391f9c46c10393317d61ad2c54e8431679efc520468d80e7ab1db25a",
+    "partition": "rounds",
+    "round": 2000,
+    "tuningVersion": 1
+  },
+  "entries": [
+    {
+      "candidateId": "action.family.afflicted.003",
+      "collidedWith": "action.family.academic.001",
+      "id": "reject.round-2000.0001",
+      "reason": "identical fingerprint",
+      "tier": 1
+    },
+    {
+      "candidateId": "action.family.alchemical.001",
+      "collidedWith": "action.general.0018",
+      "id": "reject.round-2000.0002",
+      "reason": "identical fingerprint",
+      "tier": 1
+    },
+    {
+      "candidateId": "action.general.0022",
+      "collidedWith": "action.general.0015",
+      "id": "reject.round-2000.0003",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0044",
+      "collidedWith": "action.general.0005",
+      "id": "reject.round-2000.0004",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0045",
+      "collidedWith": "action.general.0006",
+      "id": "reject.round-2000.0005",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0047",
+      "collidedWith": "action.general.0001",
+      "id": "reject.round-2000.0006",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0048",
+      "collidedWith": "action.general.0003",
+      "id": "reject.round-2000.0007",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0049",
+      "collidedWith": "action.general.0004",
+      "id": "reject.round-2000.0008",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0050",
+      "collidedWith": "action.general.0015",
+      "id": "reject.round-2000.0009",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0052",
+      "collidedWith": "action.general.0024",
+      "id": "reject.round-2000.0010",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0053",
+      "collidedWith": "action.general.0025",
+      "id": "reject.round-2000.0011",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0054",
+      "collidedWith": "action.general.0026",
+      "id": "reject.round-2000.0012",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.species.allpeater.003",
+      "collidedWith": "action.species.allpeater.001",
+      "id": "reject.round-2000.0013",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    }
+  ],
+  "kind": "action-reject",
+  "schemaVersion": 1
+}
