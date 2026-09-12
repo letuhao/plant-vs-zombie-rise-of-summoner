@@ -447,24 +447,28 @@ public sealed class WebMatchService
     /// </summary>
     public BattleSetup ApplyZombossPattern(long playerId, BattleSetup baseSetup, long theta, ulong seed)
     {
+        // DEBT — channelmods-hub: one-release BattleChannelMod concat over the pattern allocation;
+        // the Hub twin is AptitudeResolver.Resolve over the same ZombossCommanderAllocation.
+        // Delete in battle-hub-fuse (T6).
         var tuning = FusionRpg.Core.Battle.Ai.ZombossAdaptiveTuningHub.Tuning;
         var level = WaveCatalog.Get(baseSetup.WaveId).ContentIndex;
         var selection = _store.SelectZombossPattern(playerId, level, seed, tuning);
 
         var zomboss = new FusionRpg.Core.Battle.Ai.ZombossCommanderAllocation(selection.PatternId);
         zomboss.Refresh(FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, theta, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning);
-        var mods = FusionRpg.Core.Stats.Aptitudes.AptitudeResolver.ResolveForBattle(
-            zomboss.Resolve(new FusionRpg.Core.Stats.StatContext()),
-            FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning,
-            new FusionRpg.Core.Power.PowerLadder(FusionRpg.Core.Power.PowerTuningHub.Tuning),
-            level,
-            FusionRpg.Core.Stats.Derived.DerivedStatRegistry.CreateDefault());
+        // battle-hub-fuse T5: the pattern reaches wave actors as Hub inputs (resolved through the
+        // Hub aptitude twin at the actors' own content level, exactly the ladder input the old
+        // concat used), not pre-folded ChannelMods.
+        var patternAllocation = zomboss.Resolve(new FusionRpg.Core.Stats.StatContext());
 
         return baseSetup with
         {
             ZombossPatternId = selection.PatternId,
             ZombossEncounterIndex = selection.EncounterIndex,
-            Wave = baseSetup.Wave.Select(a => a with { ChannelMods = a.ChannelMods.Concat(mods).ToList() }).ToList(),
+            Wave = baseSetup.Wave.Select(a => a with
+            {
+                HubInputs = (a.HubInputs ?? new BattleHubInputs()) with { Aptitude = patternAllocation }
+            }).ToList(),
         };
     }
 
@@ -557,11 +561,19 @@ public sealed class WebMatchService
                 MaxHp = BattleRuleset.BaseHp(level),
                 Atk = BattleRuleset.BaseAtk(level),
                 Defense = BattleRuleset.BaseDefense(level),
-                ChannelMods = StarChannelMods(s.Profile.Star, level)
-                    .Concat(LoyaltyChannelMods(
-                        contracts.TryGetValue(s.Profile.InstanceId, out var c) ? c.Loyalty : 0, level))
-                    .Concat(UniqueCreatureAptitudeChannelMods(level, playerId, _store, s.Profile.InstanceId, commanderAllocation))
-                    .ToList(),
+                // battle-hub-fuse T5: producers reach battle as Hub inputs (resolved through the
+                // Hub twins), not pre-folded ChannelMods. The DEBT-tagged ChannelMods adapters stay
+                // for tests until T6 deletes them with the composer.
+                HubInputs = new BattleHubInputs
+                {
+                    Aptitude = commanderAllocation + _store.LoadAllocation(
+                        FusionRpg.Core.Stats.Aptitudes.AllocationScope.UniqueCreature, s.Profile.InstanceId),
+                    BoundAtoms = EquippedBoundAtoms.DerivedFromStore(_store, s.Profile.InstanceId),
+                    StarLoyalty = new FusionRpg.Core.Stats.Derived.Subsystems.StarLoyaltyContribution(
+                        s.Profile.Star,
+                        contracts.TryGetValue(s.Profile.InstanceId, out var c) ? c.Loyalty : 0,
+                        level),
+                },
                 EquippedActionIds = EquippedActionIdsFor(s.Profile.InstanceId, _store),
             });
         }
@@ -579,6 +591,7 @@ public sealed class WebMatchService
         // channelmods-hub: formula re-homed to the shared StarLoyaltyBonus (Core), which the Hub
         // StarLoyaltySubsystem also uses — so sheet and battle cannot drift. This method stays a
         // BattleChannelMod adapter until battle-hub-fuse retires the battle-side consumption.
+        // DEBT — channelmods-hub: one-release adapter; delete in battle-hub-fuse (T6).
         if (StarLoyaltyBonus.Star(star, level) is not { } s) return Array.Empty<BattleChannelMod>();
         return new[]
         {
@@ -594,6 +607,8 @@ public sealed class WebMatchService
     /// </summary>
     public static IReadOnlyList<BattleChannelMod> LoyaltyChannelMods(int loyalty, int level)
     {
+        // DEBT — channelmods-hub: one-release adapter over the shared StarLoyaltyBonus (Core);
+        // delete in battle-hub-fuse (T6) once battle consumes the Hub path.
         if (StarLoyaltyBonus.Loyalty(loyalty, level) is not { } l) return Array.Empty<BattleChannelMod>();
         return new[]
         {
@@ -628,6 +643,9 @@ public sealed class WebMatchService
         string? speciesId = null,
         FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation? commanderAllocation = null)
     {
+        // DEBT — channelmods-hub: proven zero production callers (tests only); the Hub twin is
+        // AptitudeSubsystem via AptitudeResolver.Resolve. Delete or re-home callers in
+        // battle-hub-fuse (T6).
         var commander = commanderAllocation ?? store.LoadAllocation(
             FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId));
         var species = string.IsNullOrEmpty(speciesId)
@@ -647,6 +665,9 @@ public sealed class WebMatchService
         int level, long playerId, RpgStore store, string instanceId,
         FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation? commanderAllocation = null)
     {
+        // DEBT — channelmods-hub: one-release BattleChannelMod adapter over commander+unique
+        // allocation; the Hub twin is AptitudeSubsystem via AptitudeResolver.Resolve. Delete in
+        // battle-hub-fuse (T6).
         if (string.IsNullOrWhiteSpace(instanceId))
             throw new ArgumentException("instanceId must not be empty", nameof(instanceId));
         var commander = commanderAllocation ?? store.LoadAllocation(

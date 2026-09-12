@@ -63,6 +63,16 @@ public sealed record BattleActorSetup
     /// <summary>Additive derived-channel adjustments (tests, traits, one-offs). Equipment enters via <see cref="EquipAtomSource"/> when <c>SpecimenId</c> is set — do not also mirror equip here. Integer amounts only.</summary>
     public IReadOnlyList<BattleChannelMod> ChannelMods { get; init; } = Array.Empty<BattleChannelMod>();
 
+    /// <summary>
+    /// battle-hub-fuse T5 — Hub inputs the builders resolved for this actor (aptitude allocation,
+    /// bound atoms, star/loyalty, draughts, injuries). <c>BattleHubCompose</c> reads these instead
+    /// of pre-folded <c>ChannelMods</c>; null (the default) means baseline + affinity + traits +
+    /// tempo only. <c>WhenWritingDefault</c> keeps every existing golden byte-identical: expedition
+    /// tier resolution serializes this record before any builder attaches inputs.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public BattleHubInputs? HubInputs { get; init; }
+
     /// <summary>Statuses applied attacker-less at battle start (test seams now, trait/attack riders later).</summary>
     public IReadOnlyList<BattleStatusSpec> InitialStatuses { get; init; } = Array.Empty<BattleStatusSpec>();
 

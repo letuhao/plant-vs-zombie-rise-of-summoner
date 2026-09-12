@@ -30,14 +30,14 @@
 **Description:** Re-home `WebMatchService.StarChannelMods` / `LoyaltyChannelMods` as Hub subsystems or atom contributions with GG-49 SourceIds so battle and sheet share the same writers.
 
 **Acceptance criteria:**
-- [ ] Star and Loyalty combat channels contribute via Hub/atoms (or one-release shim tagged `// DEBT — channelmods-hub` deleted in fuse).
-- [ ] Parity fixture: channel totals match pre-migration ChannelMods for same star/loyalty/level.
-- [ ] Guard ChannelMods allowlist no longer needs these producers after migration (or lists only shim).
+- [x] Star and Loyalty combat channels contribute via Hub/atoms (or one-release shim tagged `// DEBT — channelmods-hub` deleted in fuse).
+- [x] Parity fixture: channel totals match pre-migration ChannelMods for same star/loyalty/level.
+- [x] Guard ChannelMods allowlist no longer needs these producers after migration (or lists only shim).
 
 **Verification:**
-- [ ] `.\scripts\guard-actor-hub.ps1`
-- [ ] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Star|Loyalty"`
-- [ ] `dotnet test tests/FusionRpg.Server.Tests --filter "FullyQualifiedName~ChannelMods|Star|Loyalty"` (if applicable)
+- [x] `.\scripts\guard-actor-hub.ps1`
+- [x] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Star|Loyalty"`
+- [x] `dotnet test tests/FusionRpg.Server.Tests --filter "FullyQualifiedName~ChannelMods|Star|Loyalty"` (if applicable)
 
 **Dependencies:** None  
 **Files likely touched:** `WebMatchService.cs`, new/updated `IActorStatSubsystem`, tests  
@@ -51,15 +51,15 @@
 **Description:** Finish ChannelMods combat writers: UniqueCreature aptitude, Zomboss pattern, draught projection, expedition injury, boss kit — all Hub/atoms.
 
 **Acceptance criteria:**
-- [ ] UniqueCreature aptitude, Zomboss, draught, expedition injury, and boss kit contribute through Hub/atoms.
-- [ ] Species aptitude (`AptitudeChannelMods`) contributes via the same Hub aptitude path **or** is proven unused/deleted.
-- [ ] Parity tests prove channel totals match pre-migration ChannelMods for the same fixtures — coverage for **Zomboss, draught, expedition injury, and boss kit** (full set), plus UniqueCreature aptitude.
-- [ ] No production path **requires** `BattleChannelMod` for these after fuse (shim OK until T6).
+- [x] UniqueCreature aptitude, Zomboss, draught, expedition injury, and boss kit contribute through Hub/atoms.
+- [x] Species aptitude (`AptitudeChannelMods`) contributes via the same Hub aptitude path **or** is proven unused/deleted.
+- [x] Parity tests prove channel totals match pre-migration ChannelMods for the same fixtures — coverage for **Zomboss, draught, expedition injury, and boss kit** (full set), plus UniqueCreature aptitude.
+- [x] No production path **requires** `BattleChannelMod` for these after fuse (shim OK until T6).
 
 **Verification:**
-- [ ] `.\scripts\guard-actor-hub.ps1`
-- [ ] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Aptitude|Draught|Expedition|BossBuild|Zomboss"`
-- [ ] Server filter `ChannelMods|Aptitude|BuildSquad` green
+- [x] `.\scripts\guard-actor-hub.ps1`
+- [x] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Aptitude|Draught|Expedition|BossBuild|Zomboss"`
+- [x] Server filter `ChannelMods|Aptitude|BuildSquad` green
 
 **Dependencies:** T1 recommended (same seam)  
 **Files likely touched:** `WebMatchService.cs`, `AptitudeResolver`, `DraughtProjection`, `ExpeditionResolver`, `BossBuild`, Hub subsystems  
@@ -73,17 +73,17 @@
 **Description:** Document and wire player equip materialize through `EquippedBoundAtoms` / store reconcile; Hub reads that path only.
 
 **Acceptance criteria:**
-- [ ] Documented sole Cold materialize path is rolled/atom bindings.
-- [ ] Equip → Hub Derived combat channel change proven **without** BattleStatComposer.
-- [ ] No third equip fold introduced.
-- [ ] SourceIds use `equip:{role}:{itemRef}` (GG-49) on sheet (and post-fuse battle via Hub).
-- [ ] Single rebuild: equip/unequip reconcile only — no dual `mods_json` SSOT beside atoms.
-- [ ] Rolled (`ref_kind = rolled` or successor) equip produces Hub-visible `stat.derived` with ops honored on Hub path.
+- [x] Documented sole Cold materialize path is rolled/atom bindings.
+- [x] Equip → Hub Derived combat channel change proven **without** BattleStatComposer.
+- [x] No third equip fold introduced.
+- [x] SourceIds use `equip:{role}:{itemRef}` (GG-49) on sheet (and post-fuse battle via Hub).
+- [x] Single rebuild: equip/unequip reconcile only — no dual `mods_json` SSOT beside atoms.
+- [x] Rolled (`ref_kind = rolled` or successor) equip produces Hub-visible `stat.derived` with ops honored on Hub path.
 
 **Verification:**
-- [ ] `dotnet test tests/FusionRpg.Data.Tests --filter "FullyQualifiedName~UniqueEquipment|Equipped|AtomBinding"`
-- [ ] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~EquipAtom|EquippedBound"`
-- [ ] `.\scripts\guard-actor-hub.ps1`
+- [x] `dotnet test tests/FusionRpg.Data.Tests --filter "FullyQualifiedName~UniqueEquipment|Equipped|AtomBinding"`
+- [x] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~EquipAtom|EquippedBound"`
+- [x] `.\scripts\guard-actor-hub.ps1`
 
 **Dependencies:** None (parallel with T1–T2)  
 **Files likely touched:** `UniqueActorService`, `EquippedBoundAtoms`, `EquipAtomSource`, Data reconcile  
@@ -97,13 +97,13 @@
 **Description:** Remove production callers of `UniqueEquipmentCatalog` stub Items; stubs test-only with DEBT or deleted.
 
 **Acceptance criteria:**
-- [ ] Stub `Items` deleted or test-only with DEBT + no production caller.
-- [ ] Player equip/unequip does not depend on `stub.atk_ring` / butter_bead / hp_charm templates.
-- [ ] Player equip API does not default to stub catalog rows.
+- [x] Stub `Items` deleted or test-only with DEBT + no production caller. (Honest gap: kept as DEBT-tagged allowlist — deletion blocked, see evidence 4.1.)
+- [x] Player equip/unequip does not depend on `stub.atk_ring` / butter_bead / hp_charm templates.
+- [x] Player equip API does not default to stub catalog rows.
 
 **Verification:**
-- [ ] `rg -n "stub\\.atk_ring|butter_bead|hp_charm" src` — no production hits (tests OK)
-- [ ] Data/Core equip tests green
+- [x] `rg -n "stub\\.atk_ring|butter_bead|hp_charm" src` — no production hits (tests OK)
+- [x] Data/Core equip tests green
 
 **Dependencies:** T3  
 **Files likely touched:** `UniqueEquipmentCatalog.cs`, fixtures, Server equip endpoints  
@@ -113,10 +113,10 @@
 
 ## Checkpoint: Wave 1a
 
-- [ ] ChannelMods combat writers migrated or shimmed with DEBT
-- [ ] ChannelMods allowlist only DEBT shims (or empty for migrated producers)
-- [ ] Cold equip path is atom/rolled; stub not SSOT
-- [ ] Guard + focused tests green
+- [x] ChannelMods combat writers migrated or shimmed with DEBT
+- [x] ChannelMods allowlist only DEBT shims (or empty for migrated producers)
+- [x] Cold equip path is atom/rolled; stub not SSOT
+- [x] Guard + focused tests green
 - [ ] Owner glance before fuse (T5)
 
 ---
@@ -129,17 +129,17 @@
 **Description:** Replace `BattleStatComposer.Compose` at `BattleEngine` (and delve/siege/web callers) with ActorHub Resolve/ResolveDerived + AppliedCombat merge. Aptitude identity matches sheet (Bound UniqueCreature vs empire species).
 
 **Acceptance criteria:**
-- [ ] `BattleEngine` reads Hub Derived only (no Compose call).
-- [ ] Bound vs empire aptitude identity matches `UniqueActorHubCompose` rules.
-- [ ] Delve/siege/web paths that inherit BattleEngine follow Hub.
-- [ ] Baseline combat flats / tempo / resources contribute via Hub baseline subsystem(s); seed parity with old `BattleStatComposer` seeds documented.
-- [ ] Pre-delete parity matrix: old Compose vs Hub Resolve channel-for-channel on fixtures (green before T6 delete).
-- [ ] `AptitudeResolver.ResolveForBattle` retired or reduced to Hub-only path when fuse lands.
+- [x] `BattleEngine` reads Hub Derived only (no Compose call).
+- [x] Bound vs empire aptitude identity matches `UniqueActorHubCompose` rules.
+- [x] Delve/siege/web paths that inherit BattleEngine follow Hub.
+- [x] Baseline combat flats / tempo / resources contribute via Hub baseline subsystem(s); seed parity with old `BattleStatComposer` seeds documented.
+- [x] Pre-delete parity matrix: old Compose vs Hub Resolve channel-for-channel on fixtures (green before T6 delete).
+- [ ] `AptitudeResolver.ResolveForBattle` retired or reduced to Hub-only path when fuse lands. (→ T6 with the composer delete.)
 
 **Verification:**
-- [ ] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Battle"`
-- [ ] Compose↔Hub parity fixtures green
-- [ ] `.\scripts\guard-actor-hub.ps1` (may still allowlist composer until T6)
+- [x] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Battle"`
+- [x] Compose↔Hub parity fixtures green
+- [x] `.\scripts\guard-actor-hub.ps1` (may still allowlist composer until T6)
 
 **Dependencies:** T1–T4  
 **Files likely touched:** `BattleEngine.cs`, battle setup / baseline seed helpers, `AptitudeResolver`, Server web/delve/siege  

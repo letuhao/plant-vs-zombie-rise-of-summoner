@@ -243,18 +243,40 @@ public static class ExpeditionResolver
             .OrderBy(s => s.SpeciesId, StringComparer.Ordinal)
             .ToList();
 
+    /// <summary>
+    /// channelmods-hub T2 — the Hub twin of <see cref="ApplyInjuries"/>: one victim's injury count
+    /// as attributed <c>Flat</c> derived contributions on <c>combat.power.omni</c> (source
+    /// <c>grant:injury:{actorKey}</c> through <see cref="ContributionSourceIds.Grant"/> — GG-49 has
+    /// no injury family, and the plan's Ask-first default reuses families already in use).
+    /// <see cref="Derived.Subsystems.ExpeditionInjurySubsystem"/> contributes these on the Hub path;
+    /// battles keep consuming <see cref="ApplyInjuries"/> until battle-hub-fuse.
+    /// Re-home only: the per-injury magnitude below is byte-for-byte <see cref="ApplyInjuries"/>'s.
+    /// </summary>
+    public static IReadOnlyList<DerivedModifier> InjuryDerivedModifiers(string actorKey, int count, long atk)
+    {
+        if (count <= 0) return Array.Empty<DerivedModifier>();
+        var source = ContributionSourceIds.Grant($"injury:{actorKey}");
+        return Enumerable.Range(0, count).Select(_ => new DerivedModifier(
+            DerivedStatChannels.CombatPowerOmni, DerivedModifierOp.Flat,
+            -Math.Max(1, atk / InjuryPowerDivisor), SourceId: source)).ToList();
+    }
+
+    // battle-hub-fuse T5: injuries reach battle as Hub inputs (resolved through the
+    // ExpeditionInjurySubsystem twin), not pre-folded ChannelMods. The map is snapshotted — the
+    // plan keeps accumulating later ticks into `injuries`, and this battle must keep its own view.
+    // (The old BattleChannelMod append is retired with the composer in T6.)
     static IReadOnlyList<BattleActorSetup> ApplyInjuries(
         IReadOnlyList<BattleActorSetup> squad, Dictionary<string, int> injuries)
     {
         if (injuries.Count == 0) return squad;
+        var snapshot = new Dictionary<string, int>(injuries, StringComparer.Ordinal);
         return squad.Select(s =>
         {
-            if (!injuries.TryGetValue(s.Key, out var count) || count == 0) return s;
-            var mods = s.ChannelMods.ToList();
-            for (var i = 0; i < count; i++)
-                mods.Add(new BattleChannelMod(
-                    DerivedStatChannels.CombatPowerOmni, -Math.Max(1, s.Atk / InjuryPowerDivisor)));
-            return s with { ChannelMods = mods };
+            if (!snapshot.TryGetValue(s.Key, out var count) || count == 0) return s;
+            return s with
+            {
+                HubInputs = (s.HubInputs ?? new BattleHubInputs()) with { Injuries = snapshot }
+            };
         }).ToList();
     }
 }

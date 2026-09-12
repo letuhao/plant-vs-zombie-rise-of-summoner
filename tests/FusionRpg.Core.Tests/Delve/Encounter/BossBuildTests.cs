@@ -45,20 +45,28 @@ public class BossBuildTests
     static readonly RaidModeTuning Quad = DungeonTuningHub.Tuning.RaidModes["quad"];
     static readonly DifficultyRungTuning Hard = DungeonTuningHub.Tuning.Rungs["hard"];
 
-    // ---- ResolveKit ----
+    // ---- ResolveKitAllocation + Resolve (battle-hub-fuse T6: the BattleChannelMod ResolveKit
+    // producer is deleted; the kit reaches battle as this allocation through the Hub twin) ----
+
+    static IReadOnlyList<DerivedModifier> ResolveKitMods(string patternId, int thetaBoss) =>
+        AptitudeResolver.Resolve(
+            BossBuild.ResolveKitAllocation(patternId, thetaBoss, AptitudeTuning),
+            AptitudeTuning,
+            new PowerLadder(PowerTuning),
+            thetaBoss,
+            DerivedStatRegistry.CreateDefault());
 
     [Fact]
     public void ResolveKit_returns_a_nonempty_ChannelMods_list_for_a_real_pattern()
     {
-        var mods = BossBuild.ResolveKit("force-pure", thetaBoss: 127, AptitudeTuning, PowerTuning);
-        Assert.NotEmpty(mods);
+        Assert.NotEmpty(ResolveKitMods("force-pure", thetaBoss: 127));
     }
 
     [Fact]
     public void ResolveKit_is_deterministic_same_inputs_same_ChannelMods()
     {
-        var a = BossBuild.ResolveKit("bastion-pure", 100, AptitudeTuning, PowerTuning);
-        var b = BossBuild.ResolveKit("bastion-pure", 100, AptitudeTuning, PowerTuning);
+        var a = ResolveKitMods("bastion-pure", 100);
+        var b = ResolveKitMods("bastion-pure", 100);
         Assert.Equal(a, b);
     }
 
@@ -67,15 +75,15 @@ public class BossBuildTests
     {
         // Not asserting exact magnitudes (that's AptitudeResolver's own test surface) -- just that
         // BossBuild actually threads theta through rather than ignoring it.
-        var low = BossBuild.ResolveKit("finesse-pure", 50, AptitudeTuning, PowerTuning);
-        var high = BossBuild.ResolveKit("finesse-pure", 500, AptitudeTuning, PowerTuning);
+        var low = ResolveKitMods("finesse-pure", 50);
+        var high = ResolveKitMods("finesse-pure", 500);
         Assert.NotEqual(low, high);
     }
 
     [Fact]
     public void ResolveKit_rejects_an_unknown_pattern_id()
     {
-        Assert.Throws<ArgumentException>(() => BossBuild.ResolveKit("not-a-real-pattern", 100, AptitudeTuning, PowerTuning));
+        Assert.Throws<ArgumentException>(() => BossBuild.ResolveKitAllocation("not-a-real-pattern", 100, AptitudeTuning));
     }
 
     [Fact]

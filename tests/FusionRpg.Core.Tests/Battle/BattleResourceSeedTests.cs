@@ -34,7 +34,7 @@ public class BattleResourceSeedTests
     [Fact]
     public void EverySeededResourceChannelIsDerivedFromResourceIds()
     {
-        var snap = BattleStatComposer.Compose(Actor());
+        var snap = BattleHubCompose.Compose(Actor());
 
         foreach (var id in DerivedStatChannels.ResourceIds)
         {
@@ -52,7 +52,7 @@ public class BattleResourceSeedTests
     public void HpMaxMirrorsSetupMaxHpRatherThanDerivingASecondNumber()
     {
         var setup = Actor(maxHp: 4321);
-        var snap = BattleStatComposer.Compose(setup);
+        var snap = BattleHubCompose.Compose(setup);
         Assert.Equal(4321, (long)snap.Get(DerivedStatChannels.ResourceMax("hp")));
     }
 
@@ -64,7 +64,7 @@ public class BattleResourceSeedTests
         const int share = 500;   // battle-resources.v1.json poolShareMilli.poise
         foreach (var theta in new[] { 1, 5, 20, 100 })
         {
-            var snap = BattleStatComposer.Compose(Actor(level: theta));
+            var snap = BattleHubCompose.Compose(Actor(level: theta));
             var expected = BattleRuleset.BaseHp(theta) * share / 1000;
             Assert.Equal(expected, (long)snap.Get(DerivedStatChannels.ResourceMax("poise")));
         }
@@ -79,7 +79,7 @@ public class BattleResourceSeedTests
     public void APoolBuiltFromASeededSnapshotCanAffordTheShippedPoiseSpend()
     {
         const long poiseSpend = 100;   // reaction-lane.v1.json poiseSpend
-        var snap = BattleStatComposer.Compose(Actor(level: 20));
+        var snap = BattleHubCompose.Compose(Actor(level: 20));
         var pools = ActorResourcePools.CreateFull(snap, atTick: 0);
 
         Assert.True(pools.Resolve("poise", 0, snap) >= poiseSpend,
@@ -99,7 +99,7 @@ public class BattleResourceSeedTests
         const long poiseSpend = 100;
         const long ticksPerRound = 300;   // action-timing.v1.json: basic attack alone is 150 + 50
 
-        var seeded = BattleStatComposer.Compose(Actor(level: 20));
+        var seeded = BattleHubCompose.Compose(Actor(level: 20));
 
         // Same actor, but with regen forced to 1/tick -- the smallest value RegenPerTick can express,
         // since it rounds the channel to a whole long.
@@ -164,3 +164,4 @@ public class BattleResourceSeedTests
         Assert.Contains("hp", ex.Message);
     }
 }
+

@@ -1650,11 +1650,12 @@ public sealed partial class RpgStore
     /// is now wanted is produced+bound.</para>
     ///
     /// <para>Only items <see cref="FusionRpg.Core.Match.UniqueEquipmentCatalog.TryGetAtomBackedContainerId"/>
-    /// maps take this path. Everything else (today, only `stub.hp_charm` — its `fx.entity_atk` effect
-    /// id has no real atom behind it) keeps flowing through the legacy `mods_json` grant
-    /// (<see cref="RebuildUniqueModsFromEquipmentUnlocked"/>, called just before this, unchanged) —
-    /// the two paths never grant the same slot twice because the catalog map is the single source of
-    /// which path an item takes.</para>
+    /// maps take this path. As of the 2026-09-06 migration every shipped <c>EffectId</c> maps —
+    /// including <c>fx.entity_atk</c>, which binds through the deliberately empty
+    /// <c>item.fx-entity-atk</c> container (a preserved no-op, not a magnitude) — so the legacy
+    /// <c>mods_json</c> grant path below stays live in code for a future item with no atom yet, but
+    /// nothing shipped today reaches it. The two paths never grant the same slot twice because the
+    /// catalog map is the single source of which path an item takes.</para>
     /// </summary>
     void ReconcileUniqueEquipmentAtomBindingsUnlocked(SqliteConnection db, string instanceId)
     {

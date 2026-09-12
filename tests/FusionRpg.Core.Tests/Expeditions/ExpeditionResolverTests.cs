@@ -4,6 +4,7 @@ using System.Text.Json;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Expeditions;
+using FusionRpg.Core.Stats.Derived;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Expeditions;
@@ -125,7 +126,16 @@ public class ExpeditionResolverTests
             if (laterBattle == null) continue;
 
             var member = laterBattle.Setup.Squad.Single(s => s.Key == injury.InjuredKey);
-            Assert.Contains(member.ChannelMods, m => m.Amount < 0);
+            // battle-hub-fuse T5: injuries ride as Hub inputs, not ChannelMods appends — and the
+            // debuff reaches the composed snapshot through the ExpeditionInjurySubsystem twin.
+            var injuries = member.HubInputs?.Injuries;
+            Assert.NotNull(injuries);
+            Assert.True(injuries!.TryGetValue(injury.InjuredKey!, out var count) && count > 0,
+                "injured member must carry a positive injury count in its Hub inputs");
+            var divisor = ExpeditionTuningHub.Tuning.EventRoll.InjuryPowerDivisor;
+            var expected = (double)(count * -Math.Max(1, member.Atk / divisor));
+            Assert.Equal(expected,
+                BattleHubCompose.Compose(member).Get(DerivedStatChannels.CombatPowerOmni, 0));
             return; // proven
         }
 

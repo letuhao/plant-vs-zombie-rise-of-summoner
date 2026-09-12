@@ -41,16 +41,30 @@ public static class BossBuild
     /// consumes" — a Zomboss pattern IS this scope, the same one a player's commander build reads.</summary>
     public static IReadOnlyList<BattleChannelMod> ResolveKit(string patternId, int thetaBoss, AptitudeTuning aptitudeTuning, PowerTuning powerTuning)
     {
+        // DEBT — channelmods-hub: one-release BattleChannelMod producer; the Hub twin is
+        // AptitudeResolver.Resolve over the same pattern allocation. Delete in battle-hub-fuse (T6).
         if (string.IsNullOrEmpty(patternId)) throw new ArgumentException("patternId is required.", nameof(patternId));
         if (aptitudeTuning is null) throw new ArgumentNullException(nameof(aptitudeTuning));
         if (powerTuning is null) throw new ArgumentNullException(nameof(powerTuning));
 
-        var commander = new ZombossCommanderAllocation(patternId); // throws if patternId is unknown -- ZombossPatterns.Resolve's own loud-over-silent
-        commander.Refresh(AllocationScope.Commander, thetaBoss, aptitudeTuning);
-        var allocation = commander.Resolve(null!); // the hot-path delegate shape -- the StatContext parameter is never read
-
+        var allocation = ResolveKitAllocation(patternId, thetaBoss, aptitudeTuning);
         var ladder = new PowerLadder(powerTuning);
         return AptitudeResolver.ResolveForBattle(allocation, aptitudeTuning, ladder, thetaBoss, DerivedStatRegistry.CreateDefault());
+    }
+
+    /// <summary>
+    /// battle-hub-fuse T5 — the pattern allocation behind <see cref="ResolveKit"/>, exposed so
+    /// encounter builders attach it as <see cref="BattleHubInputs.Aptitude"/> instead of the
+    /// pre-folded <c>ChannelMods</c>. Same two-step, one formula, no second derivation.
+    /// </summary>
+    public static AptitudeAllocation ResolveKitAllocation(string patternId, int thetaBoss, AptitudeTuning aptitudeTuning)
+    {
+        if (string.IsNullOrEmpty(patternId)) throw new ArgumentException("patternId is required.", nameof(patternId));
+        if (aptitudeTuning is null) throw new ArgumentNullException(nameof(aptitudeTuning));
+
+        var commander = new ZombossCommanderAllocation(patternId); // throws if patternId is unknown -- ZombossPatterns.Resolve's own loud-over-silent
+        commander.Refresh(AllocationScope.Commander, thetaBoss, aptitudeTuning);
+        return commander.Resolve(null!); // the hot-path delegate shape -- the StatContext parameter is never read
     }
 
     /// <summary>Applies the kit's `ChannelMods` and the `signatureAction` (one id, from round 1 —
@@ -58,6 +72,8 @@ public static class BossBuild
     /// already-emitted boss setup. Every other field on <paramref name="boss"/> is untouched.</summary>
     public static BattleActorSetup ApplyKit(BattleActorSetup boss, IReadOnlyList<BattleChannelMod> channelMods, string signatureAction)
     {
+        // DEBT — channelmods-hub: sets BattleChannelMod directly; post-fuse the kit flows through
+        // the Hub twin. Delete in battle-hub-fuse (T6).
         if (boss is null) throw new ArgumentNullException(nameof(boss));
         if (channelMods is null) throw new ArgumentNullException(nameof(channelMods));
         if (string.IsNullOrEmpty(signatureAction)) throw new ArgumentException("signatureAction is required.", nameof(signatureAction));

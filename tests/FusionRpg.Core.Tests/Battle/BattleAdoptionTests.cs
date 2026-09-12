@@ -121,9 +121,9 @@ public class BattleResolverParityTests
             Components = first.ElementPrimary is { } e
                 ? new[] { new ElementPayloadComponent(e, 1.0) }
                 : Array.Empty<ElementPayloadComponent>(),
-            Attacker = new CombatActorSnapshot(BattleStatComposer.Compose(first),
+            Attacker = new CombatActorSnapshot(BattleHubCompose.Compose(first),
                 ActorElementTypes.Create(first.ElementPrimary)),
-            Defender = new CombatActorSnapshot(BattleStatComposer.Compose(second),
+            Defender = new CombatActorSnapshot(BattleHubCompose.Compose(second),
                 ActorElementTypes.Create(second.ElementPrimary)),
             Profile = CombatProfile.BattleSim
         }, rng);
@@ -172,3 +172,4 @@ public class BattleResolverParityTests
         Assert.Equal(4, BattleRuleset.RulesetVersion);
     }
 }
+

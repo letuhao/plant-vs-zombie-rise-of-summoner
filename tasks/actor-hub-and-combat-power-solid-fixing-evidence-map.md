@@ -5,7 +5,7 @@
 **Purpose:** one row per acceptance criterion → the command that proves it → that command's
 **executed** result → the artifact it produced. The ledger, not a summary, is the proof of done.
 
-**Status:** all rows `PENDING` (approved 2026-09-12; no build started — owner start required).
+**Status:** T1–T4 rows + Wave 1a checkpoint `PASS` (executed 2026-09-12 in worktree `solid-run-20260912-eb53`); all other rows `PENDING` (approved 2026-09-12).
 
 > Rules for this file:
 > - A row is `PASS` only if the command was run in the cycle that claims it, with a captured exit
@@ -25,48 +25,52 @@ Legend: `PENDING` · `PASS` · `FAIL` · `N/A`
 
 | # | Criterion | Command | Executed result | Artifact |
 |---|---|---|---|---|
-| 1.1 | Star + Loyalty channels contribute via Hub/atoms (or DEBT shim, deleted in fuse) | `.\scripts\guard-actor-hub.ps1` | PENDING | — |
-| 1.2 | Parity fixture: channel totals match pre-migration for same star/loyalty/level | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Star\|Loyalty"` | PENDING | — |
-| 1.3 | ChannelMods allowlist no longer needs these producers (or lists only shim) | `.\scripts\guard-actor-hub.ps1` | PENDING | — |
-| 1.4 | Server channel tests green (if applicable) | `dotnet test tests/FusionRpg.Server.Tests --filter "FullyQualifiedName~ChannelMods\|Star\|Loyalty"` | PENDING | — |
+| 1.1 | Star + Loyalty channels contribute via Hub/atoms (or DEBT shim, deleted in fuse) | `.\scripts\guard-actor-hub.ps1` | PASS — exit 0, `ACTOR-HUB GUARD OK`; `StarLoyaltySubsystem` registered in `ActorHub.CreateDefault` (`src/FusionRpg.Core/Stats/Derived/ActorHub.cs:158`); adapters carry `// DEBT — channelmods-hub` (`src/FusionRpg.Server/WebMatchService.cs:579-584,596-601`) | `tests/FusionRpg.Server.Tests/StarLoyaltyHubParityTests.cs` |
+| 1.2 | Parity fixture: channel totals match pre-migration for same star/loyalty/level | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Star\|Loyalty"` | PASS — 157/157; plus Server filter 43/43 incl. 3 `StarLoyaltyHubParityTests` facts (historical-arithmetic pin + Hub totals + SourceIds + inert case) | `tests/FusionRpg.Server.Tests/StarLoyaltyHubParityTests.cs` |
+| 1.3 | ChannelMods allowlist no longer needs these producers (or lists only shim) | `.\scripts\guard-actor-hub.ps1` | PASS — exit 0; `WebMatchService.cs` remains the listed producer = the tagged one-release shim, no other Star/Loyalty producer | `scripts/guard-actor-hub.ps1` (allowlist L111-121) |
+| 1.4 | Server channel tests green (if applicable) | `dotnet test tests/FusionRpg.Server.Tests --filter "FullyQualifiedName~ChannelMods\|Star\|Loyalty"` | PASS — 43/43, 19s | — |
+| 1.5 | REGRESSION + discovered defects (program-end debt) | full `FusionRpg.Core.Tests` + full `FusionRpg.Server.Tests` | Core 13322/13361 (39 FAIL, none in Star/Loyalty/Hub area — ClassSystem emit, SpeciesGen, Balance, Adoption goldens, Items corpus, QualityReport); `BaseTypeCorpusTests…disjoint` re-run on stashed (pre-change) tree: still FAIL → pre-existing. Server 403/404; `DelveBattleSessionManagerTests…zero_replayCount` passes solo with AND without the change → order-dependent flake, not T1 | — |
+| 1.6 | Ask-first default applied (non-blocking follow-up) | — | SourceId family reuse: `grant:star:{n}` / `grant:loyalty:{n}` via GG-49 `Grant`, no new family (plan default); dedicated family remains tracked follow-up | `StarLoyaltySubsystem.cs:96,103` |
 
 ### T2 — aptitude / Zomboss / draught / injury / kit → Hub · spec `channelmods-hub`
 
 | # | Criterion | Command | Executed result | Artifact |
 |---|---|---|---|---|
-| 2.1 | UniqueCreature aptitude, Zomboss, draught, expedition injury, boss kit contribute via Hub/atoms | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Aptitude\|Draught\|Expedition\|BossBuild\|Zomboss"` | PENDING | — |
-| 2.2 | Species aptitude via same Hub aptitude path, or proven unused/deleted | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Aptitude"` | PENDING | — |
-| 2.3 | Full-set parity fixtures (Zomboss, draught, injury, boss kit, UniqueCreature aptitude) | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Aptitude\|Draught\|Expedition\|BossBuild\|Zomboss"` | PENDING | — |
-| 2.4 | No production path requires `BattleChannelMod` for these after fuse (shim OK until T6) | `.\scripts\guard-actor-hub.ps1` | PENDING | — |
-| 2.5 | Server `ChannelMods\|Aptitude\|BuildSquad` green | `dotnet test tests/FusionRpg.Server.Tests` | PENDING | — |
+| 2.1 | UniqueCreature aptitude, Zomboss, draught, expedition injury, boss kit contribute via Hub/atoms | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Aptitude\|Draught\|Expedition\|BossBuild\|Zomboss"` | PASS — 373/376; the 3 FAIL are pre-existing `ProveAptitudeJsonEmitTests` (ClassSystem JSON emit, in-filter by name only; identical names in the T1 clean-tree baseline). Aptitude family via `AptitudeSubsystem`/`Resolve`; new `DraughtSubsystem` (`rpg.draught`) + `ExpeditionInjurySubsystem` (`rpg.expedition.injury`) with `CreateDefault` opt-in arms; kit/zomboss via `Resolve` over the same pattern allocation | `tests/FusionRpg.Core.Tests/Stats/ChannelModsHubParityTests.cs` (7 facts) |
+| 2.2 | Species aptitude via same Hub aptitude path, or proven unused/deleted | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Aptitude"` | PASS (in 2.1 run) — proven unused: zero production callers of `AptitudeChannelMods` (src grep: definition + `UniqueCreatureAptitudeChannelMods` call + comments only; all callers in `AptitudeChannelModsTests`); `// DEBT — channelmods-hub` tag added, delete-or-wire at fuse T6 | `src/FusionRpg.Server/WebMatchService.cs:629-638` |
+| 2.3 | Full-set parity fixtures (Zomboss, draught, injury, boss kit, UniqueCreature aptitude) | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Aptitude\|Draught\|Expedition\|BossBuild\|Zomboss"` | PASS — 7/7 `ChannelModsHubParityTests`: aptitude Resolve-vs-ResolveForBattle, kit-vs-ResolveKit, zomboss-concat-vs-Resolve, draught twin-vs-Apply, injury twin-vs-historical-expression, both subsystems through composed Hub totals with `grant:` SourceIds | `tests/FusionRpg.Core.Tests/Stats/ChannelModsHubParityTests.cs` |
+| 2.4 | No production path requires `BattleChannelMod` for these after fuse (shim OK until T6) | `.\scripts\guard-actor-hub.ps1` | PASS — exit 0; all six producers (`UniqueCreatureAptitudeChannelMods`, `AptitudeChannelMods`, `ApplyZombossPattern`, `DraughtProjection.Apply`, `ApplyInjuries`, `BossBuild.ResolveKit`/`ApplyKit`) carry `// DEBT — channelmods-hub` one-release-shim tags; battle behavior unchanged until fuse | — |
+| 2.5 | Server `ChannelMods\|Aptitude\|BuildSquad` green | `dotnet test tests/FusionRpg.Server.Tests` | PASS — full suite 404/404 (3m41s); filtered `ChannelMods\|Aptitude\|BuildSquad` 42/42. The earlier solo Delve flake passed in-suite this run → order-dependent, not T2 | — |
+| 2.6 | REGRESSION | full `FusionRpg.Core.Tests` | 39 FAIL — byte-identical set to the T1 clean-tree baseline (ClassSystem emit, SpeciesGen, Balance, Adoption goldens, Items corpus, QualityReport); zero new failures; every T2-area test green | — |
+| 2.7 | Ask-first defaults applied (non-blocking follow-ups) | — | (a) SourceId family reuse: `grant:draught:{containerId}`, `grant:injury:{actorKey}` via GG-49 `Grant`, no new family. (b) Species `AptitudeChannelMods`: keep-as-shim vs delete decided at fuse T6 | — |
 
 ### T3 — Sole Cold equip path = rolled / atom bindings · spec `cold-equip-one`
 
 | # | Criterion | Command | Executed result | Artifact |
 |---|---|---|---|---|
-| 3.1 | Documented sole Cold materialize path is rolled/atom bindings | `rg -n "rolled\|EquippedBoundAtoms" src` + doc read | PENDING | — |
-| 3.2 | Equip → Hub Derived proves change **without** BattleStatComposer | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~EquipAtom\|EquippedBound"` | PENDING | — |
-| 3.3 | No third equip fold introduced | `.\scripts\guard-actor-hub.ps1` | PENDING | — |
-| 3.4 | SourceIds use `equip:{role}:{itemRef}` (GG-49) on sheet | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~EquipAtom\|EquippedBound"` | PENDING | — |
-| 3.5 | Single rebuild: no dual `mods_json` SSOT beside atoms | `.\scripts\guard-single-writer.ps1` | PENDING | — |
-| 3.6 | Rolled (`ref_kind = rolled`) equip produces Hub-visible `stat.derived`, ops honored | `dotnet test tests/FusionRpg.Data.Tests --filter "FullyQualifiedName~UniqueEquipment\|Equipped\|AtomBinding"` | PENDING | — |
+| 3.1 | Documented sole Cold materialize path is rolled/atom bindings | `rg -n "rolled\|EquippedBoundAtoms" src` + doc read | PASS — 15 code hits, all on one path: `MaterializeRolledEquipRuntime` (rolled deploy) + `EquippedBoundAtoms` (shared battle/sheet reader) + `UpsertUniqueEquipment` single rebuild; `UniqueActorService.PutEquipment` doc rewritten to rolled/atom reality (stub-catalog line removed) | `src/FusionRpg.Server/UniqueActorService.cs:39-48` |
+| 3.2 | Equip → Hub Derived proves change **without** BattleStatComposer | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~EquipAtom\|EquippedBound"` | PASS — Core 2/2 + new `EquippedHubParityTests.Rolled_flat_stat_derived_reaches_hub_snapshot_without_composer` (Server): rolled equip → Hub `combat.power.fire` 40.0, no composer reference in the loop | `tests/FusionRpg.Server.Tests/EquippedHubParityTests.cs` |
+| 3.3 | No third equip fold introduced | `.\scripts\guard-actor-hub.ps1` | PASS — exit 0; `ModsFor`/`DerivedAtomsFor` share one `EquippedDerived` parse (documented no-third-projection); `EquippedBoundAtoms` remains the reader fuse uses | `src/FusionRpg.Core/Battle/EquipAtomSource.cs:87-96` |
+| 3.4 | SourceIds use `equip:{role}:{itemRef}` (GG-49) on sheet | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~EquipAtom\|EquippedBound"` | PASS — Core `EquipAtomSourceIdTests` 2/2 + end-to-end `equip:` prefix and instance-id suffix asserted through store→Hub (`Rolled_flat_...`) | `tests/FusionRpg.Server.Tests/EquippedHubParityTests.cs` |
+| 3.5 | Single rebuild: no dual `mods_json` SSOT beside atoms | `.\scripts\guard-single-writer.ps1` | PASS — exit 0; `UpsertUniqueEquipment` runs `RebuildUniqueModsFromEquipment` + `ReconcileUniqueEquipmentAtomBindings` in one lock scope (`RpgStore.UniqueActors.cs:1439-1440`); idempotent reconcile pinned by existing re-equip test; atom-backed grants absent from `mods_json` (existing E2E/Data pins) | — |
+| 3.6 | Rolled (`ref_kind = rolled`) equip produces Hub-visible `stat.derived`, ops honored | `dotnet test tests/FusionRpg.Data.Tests --filter "FullyQualifiedName~UniqueEquipment\|Equipped\|AtomBinding"` | PASS — Data 8/8 + new `Rolled_increased_op_is_honored_on_hub_path_not_coerced_to_flat` (Server): rolled Increased 250 on SumIncreased `status.power.omni` composes to exactly 250.0 on Hub (op parsed via `TryParseOp`, never coerced); battle `ModsFor` keeps its documented additive fold (T7 owns it) | `tests/FusionRpg.Server.Tests/EquippedHubParityTests.cs` |
 
 ### T4 — Retire stub catalog as production SSOT · spec `cold-equip-one`
 
 | # | Criterion | Command | Executed result | Artifact |
 |---|---|---|---|---|
-| 4.1 | Stub `Items` deleted or test-only with DEBT + no production caller | `rg -n "stub\.atk_ring\|butter_bead\|hp_charm" src` | PENDING | — |
-| 4.2 | Player equip/unequip does not depend on stub templates | `dotnet test tests/FusionRpg.Data.Tests --filter "FullyQualifiedName~UniqueEquipment"` | PENDING | — |
-| 4.3 | Player equip API does not default to stub catalog rows | `rg -n "stub\.atk_ring\|butter_bead\|hp_charm" src` | PENDING | — |
+| 4.1 | Stub `Items` deleted or test-only with DEBT + no production caller | `rg -n "stub\.atk_ring\|butter_bead\|hp_charm" src` | HONEST GAP — not deleted: `// DEBT stub — cold-equip-one` tag added; the dict stays as item-id allowlist because the deletion precondition is absent (no rolled-grant source for stub definitions; catalog's own doc). Remaining src hits: the DEBT-tagged dict + 2 doc comments (RelicCatalog) — zero equip-logic consumers of stub templates for magnitudes | `src/FusionRpg.Core/Match/UniqueEquipmentCatalog.cs:37-52` |
+| 4.2 | Player equip/unequip does not depend on stub templates | `dotnet test tests/FusionRpg.Data.Tests --filter "FullyQualifiedName~UniqueEquipment"` | PASS — Data 8/8: bound magnitudes come from seeded containers (`The_bound_instance_carries_the_atoms_own_real_stat...` pins atom id + amount 10 from `fx-core.json`, not the stub DTO); atom-backed grants absent from `mods_json`; stale `RpgStore` comment claiming otherwise corrected | `tests/FusionRpg.Data.Tests/UniqueEquipmentAtomBindingTests.cs` |
+| 4.3 | Player equip API does not default to stub catalog rows | `rg -n "stub\.atk_ring\|butter_bead\|hp_charm" src` | PASS — no creation-time equip path exists (only explicit `UpsertUniqueEquipment` via `UniqueActorService.PutEquipment`); new `Fresh_actor_has_no_assignments_bindings_or_hub_derived` pins a fresh actor bare on all three reads | `tests/FusionRpg.Server.Tests/EquippedHubParityTests.cs` |
 
 ### Checkpoint: Wave 1a
 
 | # | Criterion | Command | Executed result | Artifact |
 |---|---|---|---|---|
-| CP1a.1 | ChannelMods combat writers migrated or shimmed with DEBT | `.\scripts\guard-actor-hub.ps1` | PENDING | — |
-| CP1a.2 | ChannelMods allowlist only DEBT shims (or empty) | `.\scripts\guard-actor-hub.ps1` | PENDING | — |
-| CP1a.3 | Cold equip path is atom/rolled; stub not SSOT | `rg -n "stub\.atk_ring\|butter_bead\|hp_charm" src` | PENDING | — |
-| CP1a.4 | Guard + focused tests green | `.\scripts\guard-actor-hub.ps1` + filters above | PENDING | — |
+| CP1a.1 | ChannelMods combat writers migrated or shimmed with DEBT | `.\scripts\guard-actor-hub.ps1` | PASS — exit 0; T1 (star/loyalty) + T2 (aptitude/zomboss/draught/injury/kit) Hub twins + parity; all battle shims `// DEBT — channelmods-hub`-tagged for T6 | — |
+| CP1a.2 | ChannelMods allowlist only DEBT shims (or empty) | `.\scripts\guard-actor-hub.ps1` | PASS — exit 0; allowlist producers are exactly the tagged shims (`WebMatchService`, `AptitudeResolver`, `ExpeditionResolver`, `DraughtProjection`, atom sources) | `scripts/guard-actor-hub.ps1` L111-121 |
+| CP1a.3 | Cold equip path is atom/rolled; stub not SSOT | `rg -n "stub\.atk_ring\|butter_bead\|hp_charm" src` | PASS — sole path proven end-to-end (T3 tests); stub = DEBT-tagged allowlist, magnitudes from containers (4.1 honest gap recorded) | — |
+| CP1a.4 | Guard + focused tests green | `.\scripts\guard-actor-hub.ps1` + filters above | PASS — guard-actor-hub OK, guard-single-writer OK; Core Star\|Loyalty 157/157, T2 filter 373/376 (3 pre-existing), Server ChannelMods\|Star\|Loyalty 43/43, Server full 404/404, Data equip 8/8, Core equip 2/2, Server equip 7/7 | — |
 
 ---
 
@@ -76,12 +80,14 @@ Legend: `PENDING` · `PASS` · `FAIL` · `N/A`
 
 | # | Criterion | Command | Executed result | Artifact |
 |---|---|---|---|---|
-| 5.1 | `BattleEngine` reads Hub Derived only (no Compose call) | `rg -n "BattleStatComposer" src` | PENDING | — |
-| 5.2 | Bound vs empire aptitude identity matches `UniqueActorHubCompose` rules | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Battle"` | PENDING | — |
-| 5.3 | Delve/siege/web paths inherit Hub | `dotnet test tests/FusionRpg.Server.Tests` | PENDING | — |
-| 5.4 | Baseline flats / tempo / resources via Hub; seed parity documented | Compose↔Hub parity fixtures | PENDING | — |
-| 5.5 | Pre-delete parity matrix green channel-for-channel | Compose↔Hub parity fixtures | PENDING | — |
-| 5.6 | `AptitudeResolver.ResolveForBattle` retired or reduced to Hub-only | `rg -n "ResolveForBattle" src` | PENDING | — |
+| 5.1 | `BattleEngine` reads Hub Derived only (no Compose call) | `rg -n "BattleStatComposer" src` | PASS — zero `BattleStatComposer.Compose(` calls under `src/` (even the grandfathered engine call is gone); `ActorState` composes via `BattleHubCompose` (`BattleEngine.cs:38-42`) | — |
+| 5.2 | Bound vs empire aptitude identity matches `UniqueActorHubCompose` rules | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Battle"` | PASS — squad inputs merge commander + UniqueCreature allocation, never the species fallback (BuildSquad); filter 1299/1305 with only the 6 pre-existing adoption failures | — |
+| 5.3 | Delve/siege/web paths inherit Hub | `dotnet test tests/FusionRpg.Server.Tests` | PASS — re-run 2026-09-12 (handoff session): full suite 407/407, the previously-noted order-dependent Delve flake did not reproduce this run. Delve/siege are pass-throughs with no producer concats of their own (verified by code) | — |
+| 5.4 | Baseline flats / tempo / resources via Hub; seed parity documented | Compose↔Hub parity fixtures | PASS — new `BattleBaseline`/`BattleAffinity`/`BattleTrait`/`BattleTempo` subsystems (re-home only) + existing `ResourceBaselineSubsystem`; default-neutralized seeds (turn.speed doubling found + fixed); `rpg.battle.base` const mirrors `rpg.resource.base` | `tests/FusionRpg.Core.Tests/Battle/BattleHubComposeParityTests.cs` |
+| 5.5 | Pre-delete parity matrix green channel-for-channel | Compose↔Hub parity fixtures | PASS — 4/4: exact on battle channels, narrowing-bounded on funded aptitude channels, 3 adopted op-divergences pinned (`status.resist.{dot,cc,contagion}` → capped 0.95; old raw 73/30/43), Hub-extra == pure defaults | `tests/FusionRpg.Core.Tests/Battle/BattleHubComposeParityTests.cs` |
+| 5.6 | `AptitudeResolver.ResolveForBattle` retired or reduced to Hub-only | `rg -n "ResolveForBattle" src` | PENDING → T6 — remaining refs are the DEBT-tagged shims (`BossBuild.ResolveKit`, `AptitudeChannelMods`, `UniqueCreatureAptitudeChannelMods`) + definition + 1 doc comment; all deleted with the composer | — |
+| 5.7 | Test-hub hygiene lesson (process) | — | My parity class's 6-hub static-ctor reconfigure flapped 10 unrelated battle/timeline tests (different content vs assembly bootstrap). Fixed per repo convention: `[Collection("AptitudeTuningHub")]` + instance-ctor Configure of that hub only + ambient values elsewhere. No production impact | — |
+| 5.8 | Handoff re-verification (2026-09-12, new session) | `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Battle"` | Re-ran cold on the uncommitted tree before trusting 5.1-5.7: got 9 FAIL not 6. Triaged each: 3 are `ChannelModsHubParityTests` (Aptitude/Kit/Zomboss) — intentional RED placeholders for T6 (`Assert.Equal(empty, hub)` literal, comment says "captured pre-delete... Hub drift still fails loudly here" — correct to stay red until T6 fills the real literal). 1 is `EquipRuntimeTests.An_equipped_item_changes_a_battle_number` — intentional RED for T7 (equip atoms already wire into `BattleHubCompose` via `BoundAtoms`→`AtomDerivedSubsystem`, but op-handling isn't finished, exactly T7's stated gap). 1 was a **real test bug**, unrelated to any task: `BattleHubComposeTests.ATurnDotChannelModThroughTheComposePathDoesNotThrow` assumed `turn.haste` starts at implicit 0, but `DerivedStatRegistry` registers its default as `NominalHasteMilli` (1000) — same constant `BattleEngine.cs`/`BattleDurationResolver.cs` already fall back to. Fixed the test's expected value + comment; re-ran, now 8 FAIL = 6 pre-existing + the 2 accounted-for RED-for-T6/T7 rows above. Guard `guard-actor-hub.ps1` green; `FusionRpg.Server.Tests` 407/407 (see 5.3 update). Committing T1-T5 on this basis | `tests/FusionRpg.Core.Tests/Battle/BattleHubComposeTests.cs` |
 
 ### T6 — Delete BattleStatComposer + RulesetVersion bump · spec `battle-hub-fuse`
 

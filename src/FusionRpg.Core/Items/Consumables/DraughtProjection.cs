@@ -1,4 +1,5 @@
 using FusionRpg.Core.Battle;
+using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Items.Consumables;
 
@@ -39,23 +40,24 @@ public readonly record struct DraughtMod(string ContainerId, string Channel, lon
 public static class DraughtProjection
 {
     /// <summary>
-    /// Append every manifest draught to every squad member, returning a new list. Pure: the input
-    /// setups are not mutated, matching <c>ApplyInjuries</c> exactly.
-    ///
-    /// <para>⛔ <b>A non-positive amount is refused rather than applied.</b> A draught that lowers a
-    /// channel is an injury wearing a potion's name, and the resolver already has a road for those
-    /// with its own sign; silently accepting one here would let a content bug read as a mechanic. The
-    /// refusal throws rather than clamping, per AGENTS.md — a clamp would turn "your draught did
-    /// nothing" into a bug with no symptom.</para>
+    /// channelmods-hub T2 — the Hub twin of <see cref="Apply"/>: the same validated manifest as
+    /// attributed <c>Flat</c> derived contributions (one per draught, source
+    /// <c>grant:draught:{ContainerId}</c> through <see cref="ContributionSourceIds.Grant"/> — GG-49
+    /// has no draught family, and the plan's Ask-first default reuses families already in use).
+    /// <see cref="Subsystems.DraughtSubsystem"/> contributes these on the Hub path; battle keeps
+    /// consuming <see cref="Apply"/> until battle-hub-fuse.
     /// </summary>
-    public static IReadOnlyList<BattleActorSetup> Apply(
-        IReadOnlyList<BattleActorSetup> squad,
-        IReadOnlyList<DraughtMod> draughts)
+    public static IReadOnlyList<DerivedModifier> ToDerivedModifiers(IReadOnlyList<DraughtMod> draughts)
     {
-        if (squad is null) throw new ArgumentNullException(nameof(squad));
-        draughts ??= Array.Empty<DraughtMod>();
-        if (draughts.Count == 0) return squad;
+        var list = Validate(draughts);
+        return list.Select(d => new DerivedModifier(
+            d.Channel, DerivedModifierOp.Flat, d.Amount,
+            SourceId: ContributionSourceIds.Grant($"draught:{d.ContainerId}"))).ToList();
+    }
 
+    static IReadOnlyList<DraughtMod> Validate(IReadOnlyList<DraughtMod> draughts)
+    {
+        draughts ??= Array.Empty<DraughtMod>();
         foreach (var d in draughts)
         {
             if (string.IsNullOrWhiteSpace(d.Channel))
@@ -67,6 +69,30 @@ public static class DraughtProjection
                     "ApplyInjuries with the OPPOSITE sign (§5.4), so a non-positive amount is a content " +
                     "defect and throws rather than being clamped to nothing");
         }
+        return draughts;
+    }
+
+    /// <summary>
+    /// Append every manifest draught to every squad member, returning a new list. Pure: the input
+    /// setups are not mutated, matching <c>ApplyInjuries</c> exactly.
+    ///
+    /// <para>⛔ <b>A non-positive amount is refused rather than applied.</b> A draught that lowers a
+    /// channel is an injury wearing a potion's name, and the resolver already has a road for those
+    /// with its own sign; silently accepting one here would let a content bug read as a mechanic. The
+    /// refusal throws rather than clamps, per AGENTS.md — a clamp would turn "your draught did
+    /// nothing" into a bug with no symptom.</para>
+    ///
+    /// <para>// DEBT — channelmods-hub: one-release <c>BattleChannelMod</c> adapter; the Hub twin is
+    /// <see cref="ToDerivedModifiers"/> via <see cref="Subsystems.DraughtSubsystem"/>. Delete in
+    /// battle-hub-fuse (T6).</para>
+    /// </summary>
+    public static IReadOnlyList<BattleActorSetup> Apply(
+        IReadOnlyList<BattleActorSetup> squad,
+        IReadOnlyList<DraughtMod> draughts)
+    {
+        if (squad is null) throw new ArgumentNullException(nameof(squad));
+        draughts = Validate(draughts);
+        if (draughts.Count == 0) return squad;
 
         return squad.Select(s =>
         {

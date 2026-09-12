@@ -78,6 +78,12 @@ public static class BattleStatComposer
         "BattleStatComposer.Configure(...) has not run. The affinity divisors read " +
         "data/tuning/battle.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.");
 
+    /// <summary>
+    /// battle-hub-fuse T5 — Core-internal read of the configured tuning for the Hub twins
+    /// (tempo reference interval). Dies with the composer in T6; do not widen.
+    /// </summary>
+    internal static BattleTuning TuningInstance => Tuning;
+
     /// <summary>Affinity share of Atk/Defense granted on the actor's own element channels.</summary>
     public static int PrimaryAffinityDivisor => Tuning.PrimaryAffinityDivisor;     // +25% on the primary element
     public static int SecondaryAffinityDivisor => Tuning.SecondaryAffinityDivisor; // +12.5% on the secondary element

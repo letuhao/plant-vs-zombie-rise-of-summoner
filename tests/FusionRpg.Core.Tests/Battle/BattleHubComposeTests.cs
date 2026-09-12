@@ -6,7 +6,7 @@ using Xunit;
 
 namespace FusionRpg.Core.Tests.Battle;
 
-public class BattleStatComposerTests
+public class BattleHubComposeTests
 {
     static BattleActorSetup Actor(string key, string side, int level = 5,
         ElementTypeId? elem = null, ElementTypeId? elemSecondary = null,
@@ -29,7 +29,7 @@ public class BattleStatComposerTests
     public void Composed_channel_reads_match_CombatDerivedReader()
     {
         var setup = Actor("squad:0", "squad", level: 4, elem: ElementTypeId.Fire, elemSecondary: ElementTypeId.Ice);
-        var snap = BattleStatComposer.Compose(setup);
+        var snap = BattleHubCompose.Compose(setup);
 
         // battle-adoption mapping: Atk is the resolver's BASE, so power.omni is 0 (double-count
         // ban); Defense KEEPS its omni channel; affinity shares stay on both sides.
@@ -51,7 +51,7 @@ public class BattleStatComposerTests
     public void Untyped_actor_reads_omni_only()
     {
         var setup = Actor("squad:0", "squad", level: 3);
-        var snap = BattleStatComposer.Compose(setup);
+        var snap = BattleHubCompose.Compose(setup);
         Assert.Equal(0, (int)snap.Get(DerivedStatChannels.CombatPowerOmni));   // Atk = request base
         Assert.Equal(0, (int)CombatDerivedReader.Power(snap, ElementTypeId.Fire));
         Assert.Equal(setup.Defense, (int)CombatDerivedReader.Defense(snap, ElementTypeId.Dark));
@@ -66,7 +66,7 @@ public class BattleStatComposerTests
             new BattleChannelMod(DerivedStatChannels.CombatDodgeOmni, 50),
             new BattleChannelMod(DerivedStatChannels.CombatPowerFire, 30)
         });
-        var snap = BattleStatComposer.Compose(setup);
+        var snap = BattleHubCompose.Compose(setup);
         Assert.Equal(BattleRuleset.BaseDodge(5) + 250, (int)CombatDerivedReader.Dodge(snap, ElementTypeId.Fire));
         Assert.Equal(30, (int)CombatDerivedReader.Power(snap, ElementTypeId.Fire));   // mods only — no Atk base
     }
@@ -79,7 +79,7 @@ public class BattleStatComposerTests
         // actor must compose to exactly 0 -- byte-for-byte the same as the accessor's old hardcoded
         // return, proving this wiring changed nothing observable until content actually targets it.
         var setup = Actor("squad:0", "squad");
-        var snap = BattleStatComposer.Compose(setup);
+        var snap = BattleHubCompose.Compose(setup);
         Assert.Equal(0, (int)snap.Get(DerivedStatChannels.AiAggression));
     }
 
@@ -93,7 +93,7 @@ public class BattleStatComposerTests
             new BattleChannelMod(DerivedStatChannels.AiAggression, 1),
             new BattleChannelMod(DerivedStatChannels.AiAggression, 1)
         });
-        var snap = BattleStatComposer.Compose(setup);
+        var snap = BattleHubCompose.Compose(setup);
         Assert.Equal(2, (int)snap.Get(DerivedStatChannels.AiAggression));
     }
 
@@ -101,7 +101,7 @@ public class BattleStatComposerTests
     public void Unknown_mod_channel_rejects()
     {
         var setup = Actor("squad:0", "squad", mods: new[] { new BattleChannelMod("combat.power.plasma", 10) });
-        Assert.Throws<ArgumentException>(() => BattleStatComposer.Compose(setup));
+        Assert.Throws<ArgumentException>(() => BattleHubCompose.Compose(setup));
     }
 
     [Fact]
@@ -191,27 +191,30 @@ public class BattleStatComposerTests
         // not throw." Before P0.5, turn.speed/turn.haste were unregistered, so BattleStatComposer's
         // KnownChannels check would have rejected this mod as unknown.
         //
-        // `battle-tempo` `tempo-content` (2026-09-05) corrected this test's own original assumption,
-        // found by actually running it for the first time this session (Core.Tests was blocked when
-        // tempo-content landed, so this staleness was invisible until now): `turn.haste` still starts
-        // at an implicit 0 (a ChannelMod overlays additively on that), but `turn.speed` no longer does
-        // -- `BattleStatComposer.Compose` now seeds it from `SpeciesTempoProjection.SpeedFor` (spec-
-        // tempo-content.md §2.1, so `B39`'s readiness ordering has something other than a shared
-        // constant to tie on), which falls back to `DerivedStatPolicy.TurnDefaultSpeed` for any actor
-        // with no authored `AttackIntervalMs` (this test's own `Actor()` helper, unchanged). The mod
-        // still overlays additively -- on that seed, not on an implicit 0.
+        // `battle-tempo` `tempo-content` (2026-09-05) corrected this test's own original assumption
+        // for `turn.speed`: `BattleStatComposer.Compose` seeds it from `SpeciesTempoProjection.SpeedFor`
+        // (spec-tempo-content.md §2.1), falling back to `DerivedStatPolicy.TurnDefaultSpeed` for any
+        // actor with no authored `AttackIntervalMs` (this test's own `Actor()` helper, unchanged).
+        //
+        // `battle-hub-fuse` T5 (2026-09-12) found the same was already true of `turn.haste`, just via
+        // a different route: `DerivedStatRegistry` registers its `DefaultValue` as
+        // `DerivedTurnChannels.NominalHasteMilli` (not 0), and Hub compose adds every channel's
+        // registered default underneath every contribution (`BattleTempoSubsystem`'s own doc comment).
+        // No subsystem overlays `turn.haste` for this setup, so the mod overlays on that registered
+        // default -- never on an implicit 0, matching how `BattleEngine`/`BattleDurationResolver`
+        // already treat an unset haste as `NominalHasteMilli` elsewhere in this codebase.
         var setup = Actor("squad:0", "squad", mods: new[]
         {
             new BattleChannelMod(DerivedTurnChannels.Speed, 50),
             new BattleChannelMod(DerivedTurnChannels.Haste, -200),
         });
 
-        var snap = BattleStatComposer.Compose(setup);
+        var snap = BattleHubCompose.Compose(setup);
 
         // tempo-content's own seed (TurnDefaultSpeed, for an actor with no authored AttackIntervalMs)
         // plus the mod's own 50 -- read from the same tunable this composer itself reads, never
         // hardcoded, so this stays correct if the tunable's value ever changes.
         Assert.Equal(DerivedStatPolicy.TurnDefaultSpeed + 50, (int)snap.Get(DerivedTurnChannels.Speed));
-        Assert.Equal(-200, (int)snap.Get(DerivedTurnChannels.Haste)); // implicit 0 + the mod's own -200
+        Assert.Equal(DerivedTurnChannels.NominalHasteMilli - 200, (int)snap.Get(DerivedTurnChannels.Haste));
     }
 }
