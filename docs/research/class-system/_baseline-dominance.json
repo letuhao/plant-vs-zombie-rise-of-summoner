@@ -1,535 +1,540 @@
-{
-  "model": "D:\\Works\\source\\plant-vs-zombie-rise-of-summoner\\data\\tuning\\aptitudes.v8.json",
-  "theta": 100,
-  "chains": [
-    {
-      "startedFrom": "force",
-      "steps": [
-        {
-          "index": 0,
-          "winAgainstPrev": 0,
-          "distToPrev": 0,
-          "points": {
-            "Might": 39.627599007881706,
-            "Vigor": 15,
-            "Onslaught": 15.333468485232851,
-            "Retribution": 30.03893354638362
-          }
-        },
-        {
-          "index": 1,
-          "winAgainstPrev": 0.9363186725705737,
-          "distToPrev": 24.97002266879675,
-          "points": {
-            "Might": 15,
-            "Vigor": 15,
-            "Onslaught": 15,
-            "Retribution": 55.01791139086257
-          }
-        },
-        {
-          "index": 2,
-          "winAgainstPrev": 0.9999999999998964,
-          "distToPrev": 40.02015468774334,
-          "points": {
-            "Might": 15,
-            "Vigor": 55.02239798462411,
-            "Onslaught": 15,
-            "Retribution": 15
-          }
-        },
-        {
-          "index": 3,
-          "winAgainstPrev": 0.5180363393964411,
-          "distToPrev": 2.268808090129813,
-          "points": {
-            "Might": 17.257811498683274,
-            "Vigor": 52.742593303047755,
-            "Onslaught": 15,
-            "Retribution": 15
-          }
-        }
-      ],
-      "cycleStart": 2,
-      "cycleLength": 1,
-      "isCycle": false,
-      "isFixedPoint": true
-    },
-    {
-      "startedFrom": "finesse",
-      "steps": [
-        {
-          "index": 0,
-          "winAgainstPrev": 0,
-          "distToPrev": 0,
-          "points": {
-            "Agility": 42.916909513479034,
-            "Composure": 39.08309407010993,
-            "Pierce": 15,
-            "Focus": 3
-          }
-        },
-        {
-          "index": 1,
-          "winAgainstPrev": 0.956768601883055,
-          "distToPrev": 52.00144383822784,
-          "points": {
-            "Agility": 15,
-            "Composure": 15,
-            "Pierce": 67.00288409286672,
-            "Focus": 3
-          }
-        },
-        {
-          "index": 2,
-          "winAgainstPrev": 0.5000024295580419,
-          "distToPrev": 0.0004141886797981442,
-          "points": {
-            "Agility": 15,
-            "Composure": 15,
-            "Pierce": 67.00371247022632,
-            "Focus": 3
-          }
-        }
-      ],
-      "cycleStart": 1,
-      "cycleLength": 1,
-      "isCycle": false,
-      "isFixedPoint": true
-    },
-    {
-      "startedFrom": "bastion",
-      "steps": [
-        {
-          "index": 0,
-          "winAgainstPrev": 0,
-          "distToPrev": 0,
-          "points": {
-            "Bulwark": 17.969565204115067,
-            "Fortitude": 16.955542304906217,
-            "Precision": 24.774440540019718,
-            "Ferocity": 40.30045195095898
-          }
-        },
-        {
-          "index": 1,
-          "winAgainstPrev": 0.6113275742762043,
-          "distToPrev": 22.47012348993817,
-          "points": {
-            "Bulwark": 40.43981268492586,
-            "Fortitude": 15,
-            "Precision": 15,
-            "Ferocity": 29.560435296819364
-          }
-        },
-        {
-          "index": 2,
-          "winAgainstPrev": 0.5000036474973365,
-          "distToPrev": 0.1422458690271462,
-          "points": {
-            "Bulwark": 40.58214034934596,
-            "Fortitude": 15,
-            "Precision": 15,
-            "Ferocity": 29.418271223185172
-          }
-        }
-      ],
-      "cycleStart": 1,
-      "cycleLength": 1,
-      "isCycle": false,
-      "isFixedPoint": true
-    }
-  ],
-  "dominanceMatrix": {
-    "names": [
-      "Might",
-      "Fortitude",
-      "Vigor",
-      "Onslaught",
-      "Agility",
-      "Composure",
-      "Pierce",
-      "Focus",
-      "Bulwark",
-      "Retribution",
-      "Precision",
-      "Ferocity"
-    ],
-    "wins": [
-      [
-        0.5,
-        0.9895457758063642,
-        0.2921518406658441,
-        0.708824435817536,
-        0.9975280765658525,
-        0.9882165358152415,
-        0.7632571286212176,
-        0.9997115943421067,
-        0.9045035181937515,
-        0.018103308658922346,
-        0.9990274403872696,
-        0.8549611891098836
-      ],
-      [
-        0.010454224193635786,
-        0.5,
-        0,
-        0.020880881201863433,
-        0.9114103446204526,
-        0.7902587665385418,
-        0.062074446340662504,
-        0.9969040668697815,
-        0.068132237720407,
-        5.8310829267382847E-05,
-        0.8482057537345223,
-        0.19886845329385205
-      ],
-      [
-        0.7078481593341559,
-        1,
-        0.5,
-        0.9103786091858327,
-        1,
-        1,
-        0.5602376549608363,
-        1,
-        1,
-        1,
-        1,
-        0.9933712949360699
-      ],
-      [
-        0.29117556418246404,
-        0.9791191187981365,
-        0.08962139081416731,
-        0.5,
-        0.9891342183273666,
-        0.9815881264330276,
-        0.555638662351941,
-        0.9982442083095622,
-        0.8233540026294657,
-        0.001857198575923369,
-        0.9889287788275798,
-        0.721702184633809
-      ],
-      [
-        0.0024719234341475382,
-        0.08858965537954744,
-        0,
-        0.010865781672633468,
-        0.5,
-        0.26226525083995816,
-        0.014632054950619311,
-        0.8709541374347585,
-        0.004042913924791891,
-        1.783823758400027E-05,
-        0.1429250081968526,
-        0.08586794131840803
-      ],
-      [
-        0.011783464184758563,
-        0.20974123346145823,
-        0,
-        0.01841187356697238,
-        0.7377347491600419,
-        0.5,
-        0.05819240760318051,
-        0.9782034118211479,
-        0.01231361450027818,
-        1.6448760021992026E-05,
-        0.5760690030208404,
-        0.20703114404187206
-      ],
-      [
-        0.23674287137878236,
-        0.9379255536593375,
-        0.4397623450391636,
-        0.44436133764805896,
-        0.9853679450493806,
-        0.9418075923968194,
-        0.5,
-        0.9976787520333693,
-        0.744123855919317,
-        0.9066238173401774,
-        0.9825914709511667,
-        0.681975599268489
-      ],
-      [
-        0.000288405657893398,
-        0.0030959331302185533,
-        0,
-        0.0017557916904378246,
-        0.12904586256524148,
-        0.021796588178852105,
-        0.0023212479666306907,
-        0.5,
-        4.149167537376153E-05,
-        3.8331700674132385E-06,
-        0.04435735509828176,
-        0.010843794150727393
-      ],
-      [
-        0.09549648180624853,
-        0.931867762279593,
-        0,
-        0.17664599737053427,
-        0.995957086075208,
-        0.9876863854997218,
-        0.25587614408068304,
-        0.9999585083246263,
-        0.5,
-        0.023321640914104713,
-        0.9760157307938899,
-        0.6332167471853309
-      ],
-      [
-        0.9818966913410776,
-        0.9999416891707327,
-        0,
-        0.9981428014240766,
-        0.999982161762416,
-        0.999983551239978,
-        0.09337618265982262,
-        0.9999961668299326,
-        0.9766783590858953,
-        0.5,
-        0.9999999842369611,
-        0.996553380949537
-      ],
-      [
-        0.0009725596127303504,
-        0.15179424626547766,
-        0,
-        0.011071221172420154,
-        0.8570749918031474,
-        0.42393099697915954,
-        0.01740852904883322,
-        0.9556426449017182,
-        0.02398426920611002,
-        1.5763038929694773E-08,
-        0.5,
-        0.12262556512496198
-      ],
-      [
-        0.1450388108901164,
-        0.801131546706148,
-        0.006628705063930096,
-        0.278297815366191,
-        0.914132058681592,
-        0.7929688559581279,
-        0.318024400731511,
-        0.9891562058492727,
-        0.3667832528146691,
-        0.0034466190504629513,
-        0.8773744348750381,
-        0.5
-      ]
-    ],
-    "unending": [
-      [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ],
-      [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    ]
-  },
-  "dominantCorners": [
-    "Vigor"
-  ],
-  "coverage": {
-    "elementAxis": "neutral",
-    "actionsActive": false,
-    "reservedFamilies": [
-      "move.range",
-      "resource.efficiency.hp",
-      "resource.efficiency.hunger",
-      "resource.efficiency.poise",
-      "resource.efficiency.qi",
-      "resource.efficiency.spirit",
-      "resource.efficiency.stamina",
-      "resource.max.hunger",
-      "resource.max.poise",
-      "resource.max.qi",
-      "resource.max.spirit",
-      "resource.max.stamina",
-      "resource.regen.hunger",
-      "resource.regen.poise",
-      "resource.regen.qi",
-      "resource.regen.spirit",
-      "resource.regen.stamina",
-      "skill.cooldown.attack",
-      "skill.cooldown.defense",
-      "skill.cooldown.movement",
-      "skill.cooldown.status",
-      "skill.cooldown.support",
-      "skill.effectiveness.attack",
-      "skill.effectiveness.defense",
-      "skill.effectiveness.movement",
-      "skill.effectiveness.status",
-      "skill.effectiveness.support"
-    ]
-  }
+﻿{
+    "model":  "data/tuning/aptitudes.v8.json",
+    "theta":  100,
+    "chains":  [
+                   {
+                       "startedFrom":  "force",
+                       "steps":  [
+                                     {
+                                         "index":  0,
+                                         "winAgainstPrev":  0,
+                                         "distToPrev":  0,
+                                         "points":  {
+                                                        "Might":  39.627599007881706,
+                                                        "Vigor":  15,
+                                                        "Onslaught":  15.333468485232851,
+                                                        "Retribution":  30.03893354638362
+                                                    }
+                                     },
+                                     {
+                                         "index":  1,
+                                         "winAgainstPrev":  0.9363186725705737,
+                                         "distToPrev":  24.97002266879675,
+                                         "points":  {
+                                                        "Might":  15,
+                                                        "Vigor":  15,
+                                                        "Onslaught":  15,
+                                                        "Retribution":  55.01791139086257
+                                                    }
+                                     },
+                                     {
+                                         "index":  2,
+                                         "winAgainstPrev":  0.9999999999998964,
+                                         "distToPrev":  40.02015468774334,
+                                         "points":  {
+                                                        "Might":  15,
+                                                        "Vigor":  55.02239798462411,
+                                                        "Onslaught":  15,
+                                                        "Retribution":  15
+                                                    }
+                                     },
+                                     {
+                                         "index":  3,
+                                         "winAgainstPrev":  0.5180363393964411,
+                                         "distToPrev":  2.268808090129813,
+                                         "points":  {
+                                                        "Might":  17.257811498683274,
+                                                        "Vigor":  52.742593303047755,
+                                                        "Onslaught":  15,
+                                                        "Retribution":  15
+                                                    }
+                                     }
+                                 ],
+                       "cycleStart":  2,
+                       "cycleLength":  1,
+                       "isCycle":  false,
+                       "isFixedPoint":  true
+                   },
+                   {
+                       "startedFrom":  "finesse",
+                       "steps":  [
+                                     {
+                                         "index":  0,
+                                         "winAgainstPrev":  0,
+                                         "distToPrev":  0,
+                                         "points":  {
+                                                        "Agility":  42.916909513479034,
+                                                        "Composure":  39.08309407010993,
+                                                        "Pierce":  15,
+                                                        "Focus":  3
+                                                    }
+                                     },
+                                     {
+                                         "index":  1,
+                                         "winAgainstPrev":  0.956768601883055,
+                                         "distToPrev":  52.00144383822784,
+                                         "points":  {
+                                                        "Agility":  15,
+                                                        "Composure":  15,
+                                                        "Pierce":  67.00288409286672,
+                                                        "Focus":  3
+                                                    }
+                                     },
+                                     {
+                                         "index":  2,
+                                         "winAgainstPrev":  0.5000024295580419,
+                                         "distToPrev":  0.0004141886797981442,
+                                         "points":  {
+                                                        "Agility":  15,
+                                                        "Composure":  15,
+                                                        "Pierce":  67.00371247022632,
+                                                        "Focus":  3
+                                                    }
+                                     }
+                                 ],
+                       "cycleStart":  1,
+                       "cycleLength":  1,
+                       "isCycle":  false,
+                       "isFixedPoint":  true
+                   },
+                   {
+                       "startedFrom":  "bastion",
+                       "steps":  [
+                                     {
+                                         "index":  0,
+                                         "winAgainstPrev":  0,
+                                         "distToPrev":  0,
+                                         "points":  {
+                                                        "Bulwark":  17.969565204115067,
+                                                        "Fortitude":  16.955542304906217,
+                                                        "Precision":  24.774440540019718,
+                                                        "Ferocity":  40.30045195095898
+                                                    }
+                                     },
+                                     {
+                                         "index":  1,
+                                         "winAgainstPrev":  0.6113275742762043,
+                                         "distToPrev":  22.47012348993817,
+                                         "points":  {
+                                                        "Bulwark":  40.43981268492586,
+                                                        "Fortitude":  15,
+                                                        "Precision":  15,
+                                                        "Ferocity":  29.560435296819364
+                                                    }
+                                     },
+                                     {
+                                         "index":  2,
+                                         "winAgainstPrev":  0.5000036474973365,
+                                         "distToPrev":  0.1422458690271462,
+                                         "points":  {
+                                                        "Bulwark":  40.58214034934596,
+                                                        "Fortitude":  15,
+                                                        "Precision":  15,
+                                                        "Ferocity":  29.418271223185172
+                                                    }
+                                     }
+                                 ],
+                       "cycleStart":  1,
+                       "cycleLength":  1,
+                       "isCycle":  false,
+                       "isFixedPoint":  true
+                   }
+               ],
+    "dominanceMatrix":  {
+                            "names":  [
+                                          "Might",
+                                          "Fortitude",
+                                          "Vigor",
+                                          "Onslaught",
+                                          "Agility",
+                                          "Composure",
+                                          "Pierce",
+                                          "Focus",
+                                          "Bulwark",
+                                          "Retribution",
+                                          "Precision",
+                                          "Ferocity"
+                                      ],
+                            "wins":  [
+                                         [
+                                             0.5,
+                                             0.9999997237657295,
+                                             0.9999998122945545,
+                                             0.9978038721448618,
+                                             0.9999998272236097,
+                                             0.9999997866180224,
+                                             0.980660373563121,
+                                             0.9999998471422171,
+                                             0.9999995006478029,
+                                             0.1255689964795973,
+                                             1,
+                                             0.9741444808812216
+                                         ],
+                                         [
+                                             2.7623427045764259E-07,
+                                             0.5,
+                                             1,
+                                             5.5225033432748649E-05,
+                                             1,
+                                             1,
+                                             4.7054534327961584E-05,
+                                             1,
+                                             1,
+                                             0,
+                                             1,
+                                             5.7861932850511444E-05
+                                         ],
+                                         [
+                                             1.8770544552015878E-07,
+                                             0,
+                                             0.5,
+                                             2.9690703854889922E-05,
+                                             0.6649429116429121,
+                                             1.7843148614749005E-06,
+                                             2.4143169921386765E-05,
+                                             0.9988370806558781,
+                                             0.0003918691434378063,
+                                             0,
+                                             0.31104234799105096,
+                                             2.6541393248202816E-05
+                                         ],
+                                         [
+                                             0.00219612785513823,
+                                             0.9999447749665673,
+                                             0.9999703092961452,
+                                             0.5,
+                                             0.9999746721480893,
+                                             0.9999688975905039,
+                                             0.2476903657939954,
+                                             0.9999791341894574,
+                                             0.9998139851155357,
+                                             1.0961455942926079E-06,
+                                             1,
+                                             0.3922414319708755
+                                         ],
+                                         [
+                                             1.7277639036139547E-07,
+                                             0,
+                                             0.3350570883570879,
+                                             2.5327851910617039E-05,
+                                             0.5,
+                                             1.0570746789007046E-06,
+                                             2.1607218644859039E-05,
+                                             0.9859665177697271,
+                                             0.0003844141379824584,
+                                             0,
+                                             0.024073393202814042,
+                                             2.5149822613146355E-05
+                                         ],
+                                         [
+                                             2.1338197758735689E-07,
+                                             0,
+                                             0.9999982156851386,
+                                             3.1102409496053252E-05,
+                                             0.9999989429253211,
+                                             0.5,
+                                             2.9804081323137055E-05,
+                                             0.9999999900726617,
+                                             0.0006805622254958399,
+                                             0,
+                                             0.9999999358711206,
+                                             3.4639564502447762E-05
+                                         ],
+                                         [
+                                             0.01933962643687903,
+                                             0.999952945465672,
+                                             0.9999758568300786,
+                                             0.7523096342060046,
+                                             0.9999783927813551,
+                                             0.9999701959186769,
+                                             0.5,
+                                             0.9999816763820775,
+                                             0.9999043904841413,
+                                             0.9999554378642475,
+                                             1,
+                                             0.6158705430998188
+                                         ],
+                                         [
+                                             1.5285778287577045E-07,
+                                             0,
+                                             0.0011629193441219376,
+                                             2.0865810542614049E-05,
+                                             0.014033482230272898,
+                                             9.92733834026538E-09,
+                                             1.8323617922533231E-05,
+                                             0.5,
+                                             0.0003526514631167488,
+                                             0,
+                                             0.0013511855997422328,
+                                             1.9740740678786395E-05
+                                         ],
+                                         [
+                                             4.9935219709196232E-07,
+                                             0,
+                                             0.9996081308565622,
+                                             0.00018601488446434722,
+                                             0.9996155858620175,
+                                             0.9993194377745042,
+                                             9.5609515858741112E-05,
+                                             0.9996473485368833,
+                                             0.5,
+                                             0,
+                                             1,
+                                             0.00015074465621028876
+                                         ],
+                                         [
+                                             0.8744310035204027,
+                                             1,
+                                             1,
+                                             0.9999989038544057,
+                                             1,
+                                             1,
+                                             4.4562135752490573E-05,
+                                             1,
+                                             1,
+                                             0.5,
+                                             1,
+                                             0.9996879095572466
+                                         ],
+                                         [
+                                             0,
+                                             0,
+                                             0.6889576520089491,
+                                             0,
+                                             0.9759266067971859,
+                                             6.412887942897072E-08,
+                                             0,
+                                             0.9986488144002578,
+                                             0,
+                                             0,
+                                             0.5,
+                                             0
+                                         ],
+                                         [
+                                             0.025855519118778314,
+                                             0.9999421380671495,
+                                             0.9999734586067518,
+                                             0.6077585680291244,
+                                             0.9999748501773869,
+                                             0.9999653604354976,
+                                             0.38412945690018124,
+                                             0.9999802592593212,
+                                             0.9998492553437897,
+                                             0.0003120904427533766,
+                                             1,
+                                             0.5
+                                         ]
+                                     ],
+                            "unending":  [
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ]
+                                         ]
+                        },
+    "dominantCorners":  [
+
+                        ],
+    "coverage":  {
+                     "elementAxis":  "neutral",
+                     "actionsActive":  false,
+                     "reservedFamilies":  [
+                                              "move.range",
+                                              "resource.efficiency.hp",
+                                              "resource.efficiency.hunger",
+                                              "resource.efficiency.poise",
+                                              "resource.efficiency.qi",
+                                              "resource.efficiency.spirit",
+                                              "resource.efficiency.stamina",
+                                              "resource.max.hunger",
+                                              "resource.max.poise",
+                                              "resource.max.qi",
+                                              "resource.max.spirit",
+                                              "resource.max.stamina",
+                                              "resource.regen.hunger",
+                                              "resource.regen.poise",
+                                              "resource.regen.qi",
+                                              "resource.regen.spirit",
+                                              "resource.regen.stamina",
+                                              "skill.cooldown.attack",
+                                              "skill.cooldown.defense",
+                                              "skill.cooldown.movement",
+                                              "skill.cooldown.status",
+                                              "skill.cooldown.support",
+                                              "skill.effectiveness.attack",
+                                              "skill.effectiveness.defense",
+                                              "skill.effectiveness.movement",
+                                              "skill.effectiveness.status",
+                                              "skill.effectiveness.support"
+                                          ],
+                     "tuningSync":  "dominanceMatrix/dominantCorners updated 2026-08-27 (Checkpoint 8) -- measured via tools/DominanceBaseline (FusionRpg.Core.DominanceGuard/TerminationGuard, the SAME production resolver TerminationGuard.Assert uses), which reads the LIVE data/tuning/aptitudes.v8.json config automatically, no internal copy. Independently corroborated by DominanceGuardTests.cs\u0027s own Measure_theRealTwelveCornerShape_matchesTheCheckedInBaselinesEmptyDominantCorners and docs/research/class-residual-2026-08-27.md\u0027s P8.5 section (same headline finding: no absolute dominant corner, Retribution near-dominant at 10 of 11, loses only to Pierce). chains above is ALSO fresh, closing the one remaining gap: trinity now runs with --models pointed at this same live data/tuning/aptitudes.v8.json file (never tools/CombatSim\u0027s own internal v1 POC copy), and that tool\u0027s own resolver (AptitudeTuning.ToModel) was ported the same day to apply the AptitudeMitigation dial the way Core\u0027s AptitudeResolver.EffectiveKMilli does (ResolverMatchesSimulatorTests.cs, P3.4) -- so this is a best-response CHASE (BestResponse.Chase, a search DominanceGuard has no equivalent for and so cannot reproduce the way dominanceMatrix/ dominantCorners are overlaid above) against the real shipped config, not a stale internal copy. coverage.elementAxis stays \"neutral\" deliberately, not as a residual gap: dominanceMatrix/dominantCorners/chains all spike individual APTITUDES, and aptitudes feed combat.power.omni only by design (class-system-ideal.md 4.1 rule 2 -- \"an aptitude reaches a MECHANISM, never a FLAVOUR\"; elements are a flavour axis, so any aptitude-to-element mapping would be arbitrary, which is exactly the rule this file\u0027s OWN elements-live measurement lives in _baseline-residual.json instead, at the ARCHETYPE/posture level, where FORCE/FINESSE/BASTION do carry a real element)."
+                 },
+    "_meta":  {
+                  "measuredAt":  "2026-09-12T11:26:59.1825393Z",
+                  "conditions":  "dominanceMatrix/dominantCorners: data/tuning/aptitudes.v8.json (live, via FusionRpg.Core.DominanceGuard -- P8.2/P8.3\u0027s stamina bind + mitigation dial). chains: ALSO data/tuning/aptitudes.v8.json now (live, via tools/CombatSim trinity --models, that tool\u0027s own resolver ported 2026-08-27 to apply the mitigation dial too). All twelve spiked corners, Theta=100, seed 20260826 — elementAxis neutral BY DESIGN (aptitudes are element-blind, class-system-ideal.md 4.1 rule 2 -- not a gap; see coverage.tuningSync), action economy off."
+              }
 }

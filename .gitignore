@@ -166,3 +166,4 @@ test-results/
 .mcp.json
 kilo.json
 plant-vs-zombie-rise-of-summoner.code-workspace
+.opencode/

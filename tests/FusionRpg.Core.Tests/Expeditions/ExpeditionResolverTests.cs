@@ -212,10 +212,18 @@ public class ExpeditionResolverTests
     // this hash. The resolver's own RNG stream and which enemy gets picked are unaffected — only the
     // embedded setup's own shape changed, the same class of move this golden's own history already
     // names as expected, not a regression signal.
-    const string ScoutHash = "DFC5BC6405D3985CDA41BDEAFC593D0B0F3B344379E7003AAEEE6A5569CA8182";
-    const string ForageHash = "01305D2A48438E873E83CD8575BEFB80351C651E109A556DBBBA7759DDA3DCD8";
+    // Re-blessed 2026-09-12 (vocabulary rename: the domain word for a summoned specimen becomes
+    // "creature", reserving the old word for a future sub-race) — the resolved `WildCreatureMet`
+    // tick's own `Kind` string is serialized into this hash, and it moved from "wild-demon-met" to
+    // "wild-creature-met". Proven the sole cause, not assumed: restoring the old wire string in
+    // `ExpeditionTickKinds.WildCreatureMet` reproduced these exact three previous hashes, and `hunt`
+    // is unchanged below because none of its rolls landed a wild-meet tick. The resolver's own math,
+    // RNG stream, and which enemy is picked are all unaffected — only one serialized literal moved,
+    // the same class of shape churn this golden's own history already names as expected.
+    const string ScoutHash = "9DAC80588AD80CA004AAF659DA89F44A0E9C0644FF50E9C35F9FC1497DC571EB";
+    const string ForageHash = "D9ED9324519BBEACC17C28E73F571161548E86C3AEF86565CB8AACB396FC738A";
     const string HuntHash = "68F5FC90E0DBB0E6704623FBA5ACD2A86D573804F0D6ECE8672E4FE0C308FB91";
-    const string WarpathHash = "F1C4A2FA9CD6A296BE0A204A366BE37D97F8BFAE2CD36140409FBA658CFD2453";
+    const string WarpathHash = "842F2760E07097565396B44E53DC26E60993CCE787FAEC9CE864F39D553A8FA6";
 
     [Fact]
     public void Tier_goldens_are_locked()

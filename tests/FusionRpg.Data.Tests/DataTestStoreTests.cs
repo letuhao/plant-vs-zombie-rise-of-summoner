@@ -74,6 +74,18 @@ public class DataTestStoreTests
     }
 
     [Fact]
+    public void A_file_store_dispose_deletes_its_directory_cleanly()
+    {
+        var test = DataTestStore.CreateFileBacked();
+        var dir = test.DataDir!;
+        Assert.True(Directory.Exists(dir));
+
+        test.Dispose();
+
+        Assert.False(Directory.Exists(dir), "dispose must delete the file store's directory");
+    }
+
+    [Fact]
     public void Memory_helper_adds_no_substrate_gate_entry()
     {
         // The helper must not become a new violation: it appears in no baseline line.
