@@ -163,3 +163,4 @@ _tmp_reflect/
 .pytest-seedsmith-basetemp2/
 test-results/
 .kilo/
+.mcp.json

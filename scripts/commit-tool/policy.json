@@ -39,6 +39,7 @@
   "forbiddenAuthorEmailSubstrings": [
     "cursor.com",
     "cursor.so",
+    "cursoragent@",
     "anthropic.com",
     "openai.com",
     "github.com/apps",

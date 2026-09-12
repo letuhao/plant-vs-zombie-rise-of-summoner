@@ -1,17 +1,7 @@
 #!/usr/bin/env python3
-"""Clean commit entry point — the only commit path agents may use.
+"""Shared perform_commit library + owner/debug CLI.
 
-Forces an allowlisted author/committer, rejects vendor trailers / watermark
-phrasing, and never passes agent-injected GIT_* identity env through.
-
-Usage (repo root):
-  python scripts/commit-tool/clean_commit.py -m "Fix overflow in SoulEarnPolicy"
-  python scripts/commit-tool/clean_commit.py -m "Add delve loot table" -- path/a path/b
-  python scripts/commit-tool/clean_commit.py -F message.txt
-  python scripts/commit-tool/clean_commit.py -m "..." --all
-  python scripts/commit-tool/clean_commit.py -m "..." --amend   # only when policy allows amend
-
-Exit codes: 0 ok, 1 policy/git failure, 2 usage error.
+Agents must commit via MCP repo-git.commit (not this CLI).
 """
 from __future__ import annotations
 
@@ -20,6 +10,7 @@ import os
 import subprocess
 import sys
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 
 TOOL_DIR = Path(__file__).resolve().parent
@@ -34,10 +25,36 @@ from validate import (  # noqa: E402
     validate_message,
 )
 
+REQUIRED_HOOKS_PATH = ".githooks"
+MCP_ENV_FLAG = "REPO_GIT_MCP"
+
+
+@dataclass
+class CommitResult:
+    ok: bool
+    errors: list[str]
+    hash: str | None = None
+    subject: str | None = None
+    author: str | None = None
+    stdout: str = ""
+    stderr: str = ""
+
 
 def repo_root() -> Path:
-    out = subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True)
-    return Path(out.strip())
+    try:
+        out = subprocess.check_output(
+            ["git", "rev-parse", "--show-toplevel"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+            cwd=str(TOOL_DIR),
+        )
+        return Path(out.strip())
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        # MCP servers often start with cwd outside the repo — fall back from tool path.
+        candidate = TOOL_DIR.parent.parent
+        if (candidate / ".git").exists() or (candidate / ".githooks").exists():
+            return candidate
+        raise
 
 
 def run_git(args: list[str], *, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
@@ -51,79 +68,77 @@ def staged_paths() -> list[str]:
     return [ln for ln in cp.stdout.splitlines() if ln.strip()]
 
 
-def build_commit_env(name: str, email: str) -> dict[str, str]:
-    """Pin author/committer and strip common agent trailer injectors."""
-    env = os.environ.copy()
-    # Force identity — do not trust ambient GIT_AUTHOR_* from the agent shell.
-    env["GIT_AUTHOR_NAME"] = name
-    env["GIT_AUTHOR_EMAIL"] = email
-    env["GIT_COMMITTER_NAME"] = name
-    env["GIT_COMMITTER_EMAIL"] = email
-    # Prevent template / trailer helpers from appending Co-authored-by.
-    env.pop("GIT_EDITOR", None)
-    env.pop("SEQUENCE_EDITOR", None)
-    # Some harnesses inject via these:
-    for key in list(env):
-        if key.upper().startswith("GIT_TRAILER") or key.upper().startswith("TRAILER_"):
-            env.pop(key, None)
-    return env
-
-
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Commit with allowlisted identity and anti-watermark message checks"
-    )
-    parser.add_argument("-m", "--message", help="Commit message")
-    parser.add_argument("-F", "--file", type=Path, help="Read commit message from file")
-    parser.add_argument("--policy", type=Path, default=DEFAULT_POLICY)
-    parser.add_argument("--all", "-a", action="store_true", help="git commit -a (tracked modifications)")
-    parser.add_argument("--amend", action="store_true", help="Amend HEAD (still re-validates message)")
-    parser.add_argument(
-        "--allow-empty",
-        action="store_true",
-        help="Pass --allow-empty through (still validates message/identity)",
-    )
-    parser.add_argument(
-        "paths",
-        nargs="*",
-        help="Optional paths to `git add` before commit",
-    )
-    args = parser.parse_args(argv)
-
-    if bool(args.message) == bool(args.file):
-        parser.error("provide exactly one of -m/--message or -F/--file")
-
-    try:
-        root = repo_root()
-    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
-        print(f"clean-commit: not a git repo / git missing: {exc}", file=sys.stderr)
-        return 2
-
-    os.chdir(root)
-    policy = load_policy(args.policy)
+def resolve_author(policy: dict) -> tuple[str, str]:
     pairs = allowed_pairs(policy)
     name, email = pairs[0]
     if len(pairs) > 1:
-        # Prefer exact match to current git user.email if it is allowlisted.
         cp = run_git(["config", "--get", "user.email"])
         current_email = (cp.stdout or "").strip().lower()
         for n, e in pairs:
             if e == current_email:
-                name, email = n, e
-                break
+                return n, e
+    return name, email
 
-    if args.file:
-        message = args.file.read_text(encoding="utf-8")
-    else:
-        message = args.message or ""
 
-    # Message-only check first for fast feedback
+def assert_hooks_path() -> list[str]:
+    """Refuse commits unless this repo uses .githooks."""
+    cp = run_git(["config", "--get", "core.hooksPath"])
+    raw = (cp.stdout or "").strip().replace("\\", "/")
+    if not raw:
+        return [
+            "core.hooksPath is unset; run: powershell -File scripts/commit-tool/install_hooks.ps1"
+        ]
+    # Accept ".githooks", "githooks" relative, or absolute path ending in .githooks
+    normalized = raw.rstrip("/")
+    if normalized == REQUIRED_HOOKS_PATH or normalized.endswith("/" + REQUIRED_HOOKS_PATH):
+        return []
+    return [f"core.hooksPath must be '{REQUIRED_HOOKS_PATH}'; got {raw!r}"]
+
+
+def build_commit_env(name: str, email: str) -> dict[str, str]:
+    """Pin author/committer; set REPO_GIT_MCP so an optional PATH shim allows the forward."""
+    env = os.environ.copy()
+    env["GIT_AUTHOR_NAME"] = name
+    env["GIT_AUTHOR_EMAIL"] = email
+    env["GIT_COMMITTER_NAME"] = name
+    env["GIT_COMMITTER_EMAIL"] = email
+    env[MCP_ENV_FLAG] = "1"
+    env.pop("GIT_EDITOR", None)
+    env.pop("SEQUENCE_EDITOR", None)
+    for key in list(env):
+        upper = key.upper()
+        if upper.startswith("GIT_TRAILER") or upper.startswith("TRAILER_"):
+            env.pop(key, None)
+    return env
+
+
+def perform_commit(
+    message: str,
+    *,
+    paths: list[str] | None = None,
+    all_tracked: bool = False,
+    amend: bool = False,
+    allow_empty: bool = False,
+    policy_path: Path | None = None,
+) -> CommitResult:
+    """Validate + commit with allowlisted identity. Never passes --no-verify."""
+    try:
+        root = repo_root()
+    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+        return CommitResult(ok=False, errors=[f"not a git repo / git missing: {exc}"])
+
+    os.chdir(root)
+    policy = load_policy(policy_path or DEFAULT_POLICY)
+
+    hook_errors = assert_hooks_path()
+    if hook_errors:
+        return CommitResult(ok=False, errors=hook_errors)
+
+    name, email = resolve_author(policy)
+
     msg_errors = validate_message(message, policy)
     if msg_errors:
-        print("clean-commit: message rejected:", file=sys.stderr)
-        for e in msg_errors:
-            print(f"  - {e}", file=sys.stderr)
-        return 1
+        return CommitResult(ok=False, errors=msg_errors)
 
     ident_errors = validate_commit_context(
         message,
@@ -134,32 +149,36 @@ def main(argv: list[str] | None = None) -> int:
         committer_email=email,
         check_git_vars=False,
     )
+    # validate_commit_context includes message errors again — de-dupe
     if ident_errors:
-        print("clean-commit: identity rejected:", file=sys.stderr)
-        for e in ident_errors:
-            print(f"  - {e}", file=sys.stderr)
-        return 1
+        # Filter to identity-only if message already checked
+        only_ident = [e for e in ident_errors if e not in msg_errors]
+        if only_ident:
+            return CommitResult(ok=False, errors=only_ident)
 
-    if args.paths:
-        add = run_git(["add", "--", *args.paths])
+    if paths:
+        add = run_git(["add", "--", *paths])
         if add.returncode != 0:
-            print(add.stderr or add.stdout, file=sys.stderr)
-            return 1
-
-    if not args.amend and not args.allow_empty and not args.all:
-        if not staged_paths():
-            print(
-                "clean-commit: nothing staged. Pass paths, use --all, or git add first.",
-                file=sys.stderr,
+            return CommitResult(
+                ok=False,
+                errors=[(add.stderr or add.stdout or "git add failed").strip()],
             )
-            return 1
+
+    if not amend and not allow_empty and not all_tracked:
+        try:
+            if not staged_paths():
+                return CommitResult(
+                    ok=False,
+                    errors=["nothing staged; pass paths, use all=true, or git add first"],
+                )
+        except RuntimeError as exc:
+            return CommitResult(ok=False, errors=[str(exc)])
 
     with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False, suffix=".msg") as fh:
         fh.write(message.strip() + "\n")
         msg_path = fh.name
 
     try:
-        # -c trailer.* clears common auto-trailer injectors without touching signing.
         commit_args = [
             "-c",
             "trailer.ifexists=",
@@ -168,30 +187,92 @@ def main(argv: list[str] | None = None) -> int:
             msg_path,
             "--cleanup=strip",
         ]
-        if args.all:
+        if all_tracked:
             commit_args.append("-a")
-        if args.amend:
+        if amend:
             commit_args.append("--amend")
-        if args.allow_empty:
+        if allow_empty:
             commit_args.append("--allow-empty")
 
         env = build_commit_env(name, email)
         cp = run_git(commit_args, env=env)
         if cp.returncode != 0:
-            sys.stderr.write(cp.stderr or cp.stdout or "git commit failed\n")
-            return 1
-        if cp.stdout:
-            sys.stdout.write(cp.stdout)
-        # Show resulting identity once
-        show = run_git(["log", "-1", "--format=%h %an <%ae>%n%s"])
+            return CommitResult(
+                ok=False,
+                errors=[(cp.stderr or cp.stdout or "git commit failed").strip()],
+                stderr=cp.stderr or "",
+                stdout=cp.stdout or "",
+            )
+
+        show = run_git(["log", "-1", "--format=%H%n%s%n%an <%ae>"])
+        commit_hash = subject = author = None
         if show.returncode == 0:
-            sys.stdout.write(show.stdout)
-        return 0
+            lines = show.stdout.splitlines()
+            if len(lines) >= 3:
+                commit_hash, subject, author = lines[0], lines[1], lines[2]
+            elif lines:
+                commit_hash = lines[0]
+
+        return CommitResult(
+            ok=True,
+            errors=[],
+            hash=commit_hash,
+            subject=subject,
+            author=author,
+            stdout=cp.stdout or "",
+            stderr=cp.stderr or "",
+        )
     finally:
         try:
             os.unlink(msg_path)
         except OSError:
             pass
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Owner/debug clean commit. Agents must use MCP repo-git.commit instead."
+        )
+    )
+    parser.add_argument("-m", "--message", help="Commit message")
+    parser.add_argument("-F", "--file", type=Path, help="Read commit message from file")
+    parser.add_argument("--policy", type=Path, default=DEFAULT_POLICY)
+    parser.add_argument("--all", "-a", action="store_true", help="git commit -a")
+    parser.add_argument("--amend", action="store_true", help="Amend HEAD")
+    parser.add_argument("--allow-empty", action="store_true")
+    parser.add_argument("paths", nargs="*", help="Optional paths to git add before commit")
+    args = parser.parse_args(argv)
+
+    if bool(args.message) == bool(args.file):
+        parser.error("provide exactly one of -m/--message or -F/--file")
+
+    if args.file:
+        message = args.file.read_text(encoding="utf-8")
+    else:
+        message = args.message or ""
+
+    result = perform_commit(
+        message,
+        paths=list(args.paths) if args.paths else None,
+        all_tracked=args.all,
+        amend=args.amend,
+        allow_empty=args.allow_empty,
+        policy_path=args.policy,
+    )
+    if not result.ok:
+        print("clean-commit: rejected:", file=sys.stderr)
+        for e in result.errors:
+            print(f"  - {e}", file=sys.stderr)
+        if result.stderr:
+            sys.stderr.write(result.stderr)
+        return 1
+    if result.stdout:
+        sys.stdout.write(result.stdout)
+    if result.hash:
+        print(f"{result.hash[:12]} {result.author}")
+        print(result.subject or "")
+    return 0
 
 
 if __name__ == "__main__":

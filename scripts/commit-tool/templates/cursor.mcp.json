@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "repo-git": {
+      "command": "python",
+      "args": [
+        "${workspaceFolder}/scripts/commit-tool/mcp_server.py"
+      ]
+    }
+  }
+}

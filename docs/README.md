@@ -16,7 +16,7 @@ spec, plan, proposal, or ADR — and read the documents its §1 row names for yo
 | **Before any design work** | **[DESIGN-GATE.md](DESIGN-GATE.md)** — mandatory reading gate + topic index |
 | **Anyone new** | [architecture/software-architecture.md](architecture/software-architecture.md) (whole system, one page) · [architecture/data-architecture.md](architecture/data-architecture.md) (all data, one page) |
 | **Players** | **[guide/](guide/)** (**product vision SSOT** — [vision site](guide/site/), [brief feature list](guide/features.md), loops, catalog) · [runbook/players.md](runbook/players.md) (install) · [SUPPORT.md](../SUPPORT.md) · [Releases](https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/releases) |
-| **Contributors** | [../CONTRIBUTING.md](../CONTRIBUTING.md) · [contributing/dev-setup.md](contributing/dev-setup.md) · [contributing/architecture-map.md](contributing/architecture-map.md) |
+| **Contributors** | [../CONTRIBUTING.md](../CONTRIBUTING.md) · [contributing/dev-setup.md](contributing/dev-setup.md) · [contributing/architecture-map.md](contributing/architecture-map.md) · [contributing/agent-git.md](contributing/agent-git.md) |
 
 Then architecture → protocol → module specs → [local-dev runbook](runbook/local-dev.md).
 

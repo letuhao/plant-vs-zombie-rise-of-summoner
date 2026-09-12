@@ -13,17 +13,14 @@ Write like a teammate, not a template engine.
 - Do **not** use extra commit trailers, bot attribution lines, or watermark phrasing (`agent assert`, `agent turn`, and similar) in docs or history.
 - Commit subjects: imperative, concise, focused on *why*. Example: `Add XP watermark repair path for trimmed ledgers`.
 
-**Automated assistants:** may commit **only** through the clean-commit tool (never raw `git commit`):
+**Automated assistants:** commit **only** via MCP `repo-git.commit` (never raw `git commit` / `git push`). Full policy: [docs/contributing/agent-git.md](docs/contributing/agent-git.md).
 
 ```powershell
-powershell -File scripts/commit-tool/install_hooks.ps1   # once per clone
-python scripts/commit-tool/clean_commit.py -m "Fix overflow in SoulEarnPolicy"
-python scripts/commit-tool/clean_commit.py -m "Add delve loot table" -- path/a path/b
+powershell -File scripts/commit-tool/install_hooks.ps1   # once per clone (copies local gitignored MCP/hooks)
+# Agent path: MCP tool repo-git.commit — not git commit, not clean_commit.py
 ```
 
-That tool forces the allowlisted author/committer from `scripts/commit-tool/policy.json`, rejects `Co-authored-by` / vendor watermark text, and pairs with `.githooks/commit-msg` plus a Cursor shell gate so raw `git commit` cannot sneak trailers in. Push remains owner-only unless you explicitly ask for it.
-
-**Humans** may still use normal git; the commit-msg hook still rejects watermark trailers and non-allowlisted authors.
+Push remains **owner-only**. Humans may use normal git or `clean_commit.py`; `.githooks` still rejects watermark trailers and non-allowlisted authors. Host configs under `.cursor/` / `.claude/` / `.kilo/` / `.agents/` / `.mcp.json` stay gitignored — templates live in `scripts/commit-tool/templates/`.
 
 ## Quick start (developers)
 

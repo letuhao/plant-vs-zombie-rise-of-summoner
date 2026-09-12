@@ -28,6 +28,14 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
+      - name: commit-tool policy smoke + history check
+        shell: pwsh
+        run: |
+          python scripts/commit-tool/smoke_test.py
+          if ($LASTEXITCODE -ne 0) { throw "commit-tool smoke failed" }
+          python scripts/commit-tool/check_history.py --max 30
+          if ($LASTEXITCODE -ne 0) { throw "commit-tool check_history failed — watermark/author policy" }
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:

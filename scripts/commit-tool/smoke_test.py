@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
-"""Smoke checks for commit-tool validators (no git writes)."""
+"""Smoke checks for commit-tool (no permanent git writes)."""
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 TOOL_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOL_DIR))
 
+from block_git_write import deny_reason_for  # noqa: E402
+from strip_watermarks import strip_file  # noqa: E402
 from validate import load_policy, validate_identity, validate_message  # noqa: E402
 
 
@@ -19,23 +23,43 @@ def expect(cond: bool, msg: str) -> None:
 
 def main() -> int:
     policy = load_policy(TOOL_DIR / "policy.json")
-    name, email = policy["allowedAuthors"][0]["name"], policy["allowedAuthors"][0]["email"]
+    name = policy["allowedAuthors"][0]["name"]
+    email = policy["allowedAuthors"][0]["email"]
 
-    expect(validate_message("Fix overflow in SoulEarnPolicy\n", policy) == [], "clean message should pass")
+    expect(validate_message("Fix overflow in SoulEarnPolicy\n", policy) == [], "clean message")
     bad = validate_message(
         "Fix thing\n\nCo-authored-by: Cursor <cursoragent@cursor.com>\n",
         policy,
     )
-    expect(any("trailer" in e.lower() or "co-authored" in e.lower() for e in bad), f"expected trailer reject, got {bad}")
+    expect(len(bad) > 0, f"trailer reject: {bad}")
+    expect(len(validate_message("AI-generated fix\n", policy)) > 0, "watermark phrase")
+    expect(validate_identity(name, email, policy, role="author") == [], "allowlisted")
+    expect(len(validate_identity("Cursor Agent", "cursoragent@cursor.com", policy, role="author")) > 0, "vendor author")
 
-    bad2 = validate_message("AI-generated fix for the lawn\n", policy)
-    expect(len(bad2) > 0, "watermark phrase should fail")
+    # block_git_write
+    expect(deny_reason_for("git commit -m x") is not None, "deny commit")
+    expect(deny_reason_for("npm test && git commit -m x --no-verify") is not None, "deny chained")
+    expect(deny_reason_for("git -c core.hooksPath=/dev/null commit -m x") is not None, "deny hooksPath")
+    expect(deny_reason_for("git push origin main") is not None, "deny push")
+    expect(deny_reason_for("gh pr create --title t") is not None, "deny gh pr")
+    expect(deny_reason_for("python scripts/commit-tool/clean_commit.py -m x") is not None, "deny clean_commit")
+    expect(deny_reason_for("git status") is None, "allow status")
+    expect(deny_reason_for("git check-attr eol -- .githooks/commit-msg") is None, "allow check-attr path")
+    expect(deny_reason_for("git diff --cached") is None, "allow diff")
 
-    expect(validate_identity(name, email, policy, role="author") == [], "allowlisted author")
-    bad_id = validate_identity("Cursor Agent", "cursoragent@cursor.com", policy, role="author")
-    expect(len(bad_id) > 0, "vendor author must fail")
+    # strip watermarks
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False, suffix=".msg") as fh:
+        fh.write("Subject\n\nCo-authored-by: Cursor <cursoragent@cursor.com>\n")
+        path = Path(fh.name)
+    try:
+        strip_file(path)
+        text = path.read_text(encoding="utf-8")
+        expect("Co-authored-by" not in text, f"strip failed: {text!r}")
+        expect("Subject" in text, "kept subject")
+    finally:
+        path.unlink(missing_ok=True)
 
-    # Cursor gate unit check
+    # Cursor gate JSON
     import importlib.util
 
     gate_path = TOOL_DIR / "cursor" / "gate_git_commit.py"
@@ -43,18 +67,42 @@ def main() -> int:
     assert spec and spec.loader
     gate = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(gate)
+    out = subprocess.check_output(
+        [sys.executable, str(gate_path)],
+        input=json.dumps({"command": "git commit -m x"}),
+        text=True,
+    )
+    expect(json.loads(out)["permission"] == "deny", "cursor deny")
+    out2 = subprocess.check_output(
+        [sys.executable, str(gate_path)],
+        input=json.dumps({"command": "git status"}),
+        text=True,
+    )
+    expect(json.loads(out2)["permission"] == "allow", "cursor allow")
 
-    expect(gate.RAW_COMMIT.search('git commit -m "x"') is not None, "raw commit detect")
-    expect(gate.RAW_COMMIT.search("git check-attr eol -- .githooks/commit-msg") is None, "path false positive")
-    expect(gate.CLEAN.search('python scripts/commit-tool/clean_commit.py -m "x"') is not None, "clean detect")
-    expect(gate.CLEAN.search('git commit -m "x"') is None, "clean must not match raw")
-    expect(gate.decide("git commit -m x")["permission"] == "deny", "decide deny")
-    expect(gate.decide("git check-attr eol -- .githooks/commit-msg")["permission"] == "allow", "decide allow path")
-    expect(gate.decide('python scripts/commit-tool/clean_commit.py -m x')["permission"] == "allow", "decide allow clean")
+    # Claude-style exit codes
+    r = subprocess.run(
+        [sys.executable, str(TOOL_DIR / "block_git_write.py"), "--command", "git push", "--format", "claude"],
+        capture_output=True,
+        text=True,
+    )
+    expect(r.returncode == 2, f"claude deny exit={r.returncode}")
 
-    # policy file is valid JSON with schemaVersion
+    # MCP validate_message path without needing server running
+    from clean_commit import assert_hooks_path  # noqa: E402
+
+    # hooksPath should be set after install; if unset, assert returns errors (ok either way)
+    _ = assert_hooks_path()
+
     data = json.loads((TOOL_DIR / "policy.json").read_text(encoding="utf-8"))
     expect(data.get("schemaVersion") == 1, "schemaVersion")
+
+    # Templates present (tracked); live .mcp.json is gitignored and installer-copied
+    root = TOOL_DIR.parent.parent
+    expect((TOOL_DIR / "templates" / "mcp.json").is_file(), "templates/mcp.json")
+    expect("repo-git" in (TOOL_DIR / "templates" / "mcp.json").read_text(encoding="utf-8"), "mcp server name")
+    expect((TOOL_DIR / "mcp_server.py").is_file(), "mcp_server.py")
+    expect((TOOL_DIR / "block_git_write.py").is_file(), "block_git_write.py")
 
     print("commit-tool smoke: ok")
     return 0
