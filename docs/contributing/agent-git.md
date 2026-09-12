@@ -12,7 +12,8 @@
 ## Rules
 
 1. **Agents must not** run `git commit`, `git push`, `git merge` / `rebase` / `cherry-pick` (commit-creating), or `python scripts/commit-tool/clean_commit.py`.
-2. **Agents may commit only** via MCP server **`repo-git`** tool **`commit`**, and only when the user asks.
+2. **Agents may commit** via MCP server **`repo-git`** tool **`commit`**, as part of finishing a task
+   without waiting to be asked. No other commit path.
 3. **Push is owner-only.** No MCP push tool; shell gates deny `git push` and `gh pr create` / `gh release create`.
 4. No `Co-authored-by` / vendor watermark trailers. Author must match `scripts/commit-tool/policy.json`.
 
