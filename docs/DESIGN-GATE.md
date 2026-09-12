@@ -27,7 +27,7 @@ The right column is the thing sessions actually get wrong; read it as a warning,
 
 | If you are about to touch… | You MUST have read | What sessions get wrong |
 |---|---|---|
-| **Anything at all** | [architecture/software-architecture.md](architecture/software-architecture.md) · [architecture/decisions.md](architecture/decisions.md) · §2 invariant **15 (SOLID)** | Proposing something already locked in `decisions.md`. Citing “PO / ADR said so” to fork a SOLID-violating parallel path = **fail this gate** — owner confirmation does not convert a SOLID defect into intentional design |
+| **Anything at all** | [architecture/software-architecture.md](architecture/software-architecture.md) · [architecture/decisions.md](architecture/decisions.md) · §2 invariant **15 (SOLID)** · [contributing/session-boundary.md](contributing/session-boundary.md) (boundary record before first edit) | Proposing something already locked in `decisions.md`. Citing “PO / ADR said so” to fork a SOLID-violating parallel path = **fail this gate** — owner confirmation does not convert a SOLID defect into intentional design. Starting to edit without a recorded session boundary (mode/branch/`paths`) can cross another active session — read every `tasks/sessions/*.json` and run `scripts/session-boundary-check.ps1` first |
 | **Product vision / what the game is / which loops exist** | [guide/the-game.md](guide/the-game.md) · [guide/the-loops.md](guide/the-loops.md) · `decisions.md` **Product vision** row | Re-pitching the genre (lawn overlay, “world afterward,” Fusion as mere extension). The player guide is the product-vision SSOT; architecture owns system invariants (including gameless-first as capability). A feature must name a loop on `the-loops.md` — do not invent a parallel pitch. Do not collapse standalone-first to delete it |
 | **How the injector talks to the game** | [architecture/event-pipeline-v2-ssot.md](architecture/event-pipeline-v2-ssot.md) · [architecture/overlay-control-loops.md](architecture/overlay-control-loops.md) | **Record-then-drain.** Hooks record a struct and return; effects are decided later in a budgeted drain, and records carry to the next frame. G5: worst case degrades to **delayed effects, never frame drops**. Never argue a design from "it must complete inside the frame" |
 | **Where logic may live (server vs injector)** | [architecture/overlay-control-loops.md](architecture/overlay-control-loops.md) · [architecture/pvz-middle-layer.md](architecture/pvz-middle-layer.md) | **The RPG never reads PvZ's current state and never guesses it.** Two async systems. The RPG observes *past* events and contributes a **signed delta** later. It does not compute damage at the moment of the hit |
@@ -177,6 +177,9 @@ Paste and complete before presenting any design work.
 
 ```
 [ ] I identified the subsystem(s) this touches.
+[ ] I established and recorded this session's boundary (contributing/session-boundary.md):
+    one problem, mode/branch chosen by the owner, and the `paths` I own — before any edit.
+    `.\scripts\session-boundary-check.ps1` is clean.
 [ ] I read every doc in the §1 row(s) for those subsystems, this session.
 [ ] I checked decisions.md for a lock covering this.
 [ ] Every factual claim cites file:line.

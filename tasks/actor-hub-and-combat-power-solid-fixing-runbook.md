@@ -12,6 +12,11 @@ plan owns *what* to build; this file owns *how the work is sequenced and proven*
 
 ## 1. Ground rules (unchanged from AGENTS.md)
 
+- **Establish the session boundary first.** `/session-start` reads
+  [docs/contributing/session-boundary.md](../docs/contributing/session-boundary.md), checks every
+  active record for crossing, asks the owner for mode/branch/one-problem/`paths`, and writes
+  `tasks/sessions/<session>.json`. A clean `.\scripts\session-boundary-check.ps1` is the precondition
+  for editing. One session = one problem; `paths` fences edits and is the commit list.
 - **Commit via MCP, on the current branch.** Agents commit each verified increment with
   `repo-git.commit` (explicit `paths`, never `all`) without waiting to be asked; raw `git
   commit`/`add`/`merge`/`push` stay blocked, and push is owner-only. Worktrees commit their own

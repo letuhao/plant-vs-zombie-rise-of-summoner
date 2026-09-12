@@ -1,0 +1,14 @@
+{
+  "session": "example-program-20260912-aaaa",
+  "program": "<program-id from AGENTS.md, e.g. actor-hub-and-combat-power-solid-fixing>",
+  "problem": "<the one problem this session solves>",
+  "mode": "direct",
+  "branch": "features/derived-stat-extension",
+  "worktree": null,
+  "paths": [
+    "src/FusionRpg.Core/Some/Path/**",
+    "tests/FusionRpg.Core.Tests/Some/Path/**"
+  ],
+  "started": "2026-09-12T00:00:00Z",
+  "status": "active"
+}
