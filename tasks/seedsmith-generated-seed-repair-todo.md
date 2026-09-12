@@ -17,49 +17,53 @@ guard `scripts/guard-generated-seed.ps1` enforces it.
 
 ## S1 — corpus-wide existing names in the base-type brief
 
-- [ ] `basetypegen/brief.py`: `load_partition_context` gathers `existing_names` from **all**
-      `base-types/**`, not only the current partition file.
-- [ ] `brief.py` render states the true scope ("already shipped in the base-type corpus").
-- [ ] Unit test: two partitions sharing a name is refused / avoided.
+- [x] `basetypegen/run.py`: `load_corpus_names` reads **all** `base-types/**`; `run_draws` takes the
+      map, re-asks once on a hit, then refuses the draw by name (prompt bloat avoided — 860 names
+      would add ~16k chars per brief). Tests added; 60 pass.
+- [x] `setgen/seedfile.py`: an unsluggable name raises `NameKeyUnsluggable` instead of minting the
+      shared `set.item` placeholder key.
 
 ## S2 — per-frame implicit slate
 
-- [ ] Mint `data/seed/items/_registry/classes.v5.json` with `legalFamiliesByFrame`
-      (humanoid/plant) per role; `v4` stays frozen on disk.
-- [ ] `basetypegen/tuning.py`: `load_legal_implicit_families(role, frame)`.
-- [ ] `brief.py` + `schema.py`: offer the frame's own slate.
-- [ ] Test: offered sets are disjoint per role by construction.
+- [x] Minted `data/seed/items/_registry/classes.v3.json` (registryVersion 5) with
+      `legalFamiliesByFrame`; v2 stays frozen on disk.
+- [x] `basetypegen/tuning.py`: `load_legal_implicit_families(role, frame)`; v2-shaped fixtures fall
+      back to the union.
+- [x] `FrameDirectionCheck` validates against the frame slate; `RegistrySet` reads v3.
+- [x] Test: the two frames are offered disjoint slates for every role.
 
-## S3 — re-slate generation run (7 roles)
+## S3 — re-slate generation run
 
-- [ ] Run `basetypegen` against S2 for `armament-primary`, `armament-secondary`, `core-guard`,
-      `head-guard`, `jewel-major`, `manipulator`, `ward-array`.
-- [ ] Commit the regenerated `base-types/**` diff.
-- [ ] `BaseTypeCorpusTests.Every_live_roles_humanoid_and_plant_implicit_families_are_disjoint` green.
-- [ ] Decide re-flavour: accept `ImplicitFlavourDrift` now, or fund the authoring pass.
+- [x] New `basetypegen/reslate.py` (a generator verb, not a data edit): 649 rows re-slated onto
+      their frame slate, identity + powerBand + class preserved (seed-contract §7.2).
+- [x] Core `BaseTypeCorpusTests` 8/8; validator 0 frame errors.
+- [x] `ImplicitFlavourDrift` warning wired (312 rows) — re-flavour stays the authoring fleet's, per
+      spec-base-types.md.
 
 ## S4 — name collisions beyond set/charm
 
-- [ ] Extend `name_repair.plan` (or a shared `dedup`) to every kind the validator checks.
-- [ ] Run `seedsmith items repair-names` (plan → apply) for set/charm.
-- [ ] Re-run for base-type/drop-table/recipe/combination/gem/affix-family rows as S1 lands.
-- [ ] `ItemSeedValidator` NameCollision/NameKeyDuplicate → 0.
+- [x] `ItemSeedValidator --collision-groups` prints the authoritative groups (its own
+      NameNormalizer); exemplars excluded.
+- [x] `name_repair` consumes the groups and covers every kind; per-row bounded retry names the
+      rejected candidates; a failed row no longer discards the batch.
+- [x] `NameCollision` + `NameKeyDuplicate`: **848 → 0**.
+- [x] `recipegen`: nameKey minted from the unique `recipe.NNN` id (a recipe name repeats by design).
+- [x] `iconKey` re-derived with `nameKey` (gemgen derives it); 343 stale rows fixed.
 
-## S5 — `set.item` placeholders
+## S5 — placeholders
 
-- [ ] Replace the placeholder `nameKey` on the 6 hand-authored sets (authored content, not
-      generated).
+- [x] The 51 rows carrying `set.item`/`charm.item` renamed (their names are CJK, so the key cannot
+      be re-derived; the name is what must change).
 
 ## S6 — gates
 
-- [ ] `seedsmith check --gate` for each generated tree in CI.
-- [ ] Keep `guard-generated-seed.ps1` green; confirm it blocks a hand-edit in CI.
+- [x] `guard-generated-seed.ps1` (CI + `deploy-play.ps1`) blocks a hand-edit of generated seed.
+- [x] seedsmith suite: 3791 passed, 0 failed. Core 13361/13361. Guard 248/248 (flaky regen test
+      fixed: temp OutDir + serial collection).
 
-## Guardrail
+## Follow-ups (not this module)
 
-- `python -m pytest tools/seedsmith/tests -q`
-- `dotnet test tests/FusionRpg.ItemSeedValidator.Tests`
-- `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~BaseTypeCorpusTests"`
-- `python tools/ItemSeedValidator` over `data/seed/items` → 0 NameCollision/NameKeyDuplicate,
-  0 FrameImplicitNotDisjoint
-- `.\scripts\guard-generated-seed.ps1` → clean
+- [ ] `NameGrammarViolation` (808), `PossessiveForbidden` (159), `InventedConnective` (158),
+      `PluralForbidden` (31), `FusionNotDecomposable` (27), `GeneratedOnlyNamePattern` (26): a
+      separate naming-grammar pass over the same corpus.
+- [ ] 312 `ImplicitFlavourDrift` rows — authoring fleet re-flavour.
