@@ -66,14 +66,6 @@ tests/FusionRpg.Data.Tests/RpgStoreSmokeTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Sqlite/PlayerCommanderStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/StoragePurgeTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/TreeRespecStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/UniqueActorStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/UniqueEquipmentAtomBindingTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/WardenContractTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/WatermarkSmokeTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/WebGameIsolationTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/WebMatchStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/WorldAiAcceptanceTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/WorldAiCommitTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/WorldCommandRoundTripPropertyTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/WorldCommandStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/WorldCommandTurnGuardTests.cs : swallowed-delete, temp-store
