@@ -60,10 +60,15 @@ public class CreatureSpeciesImportCliTests : IDisposable
         proc.BeginOutputReadLine();
         proc.BeginErrorReadLine();
 
-        // 60s is far above the real runtime (~1s) and exists only to fail with a name instead of
-        // hanging. The old 120s cap was sized for the implicit build this path no longer performs.
-        var exited = proc.WaitForExit(60_000);
-        Assert.True(exited, "CreatureSpeciesImport did not exit within 60s");
+        // Sized from measurement, not guesswork (2026-09-12): this launches a real cold process that
+        // imports the real committed tree, so its runtime scales with disk/CPU contention. Measured
+        // ~3.5s isolated, but 31s and 41.5s inside a full-suite run while this machine had four
+        // concurrent agent streams (CPU ~79%) — roughly a 12x inflation. The old 60s cap sat just
+        // above that, so a slightly heavier run failed intermittently at full-suite scale while
+        // passing in isolation. 300s keeps ~7x headroom over the measured worst case (and stays well
+        // under the 10min per-test cap in test.runsettings); it still fails with a name, never hangs.
+        var exited = proc.WaitForExit(300_000);
+        Assert.True(exited, "CreatureSpeciesImport did not exit within 300s");
         // Drains any output still in flight after the process handle reports exited — otherwise a
         // race can read a truncated tail (WaitForExit(int) does not itself guarantee the async
         // stream callbacks have all fired yet).
