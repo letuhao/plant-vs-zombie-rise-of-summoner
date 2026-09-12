@@ -22,6 +22,10 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+        with:
+          # guard-generated-seed needs the commit's parent to build its diff; the default
+          # depth-1 checkout has none, which would make the guard silently see no changes.
+          fetch-depth: 2
 
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
@@ -195,6 +199,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "guard-dal.ps1 failed — SQL appeared outside FusionRpg.Data" }
           .\scripts\guard-test-substrate.ps1
           if ($LASTEXITCODE -ne 0) { throw "guard-test-substrate.ps1 failed — a test leaked a temp store or swallowed a temp-delete" }
+          # Generated seed is regenerated, never hand-edited (AGENTS.md / CLAUDE.md hard rule).
+          # Compare the pushed commit against its parent; a single-commit depth or a root commit
+          # falls back to inspecting the working tree, which is clean on CI.
+          $seedRange = if (git rev-parse --verify HEAD~1 2>$null) { "HEAD~1..HEAD" } else { $null }
+          if ($seedRange) { .\scripts\guard-generated-seed.ps1 -Range $seedRange }
+          else { .\scripts\guard-generated-seed.ps1 }
+          if ($LASTEXITCODE -ne 0) { throw "guard-generated-seed.ps1 failed — a generated seed file was hand-edited without changing its generator" }
 
       - name: Content validation gate (E47)
         shell: pwsh
