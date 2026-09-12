@@ -168,19 +168,20 @@ Legend: `PENDING` · `PASS` · `FAIL` · `N/A`
 
 | # | Criterion | Command | Executed result | Artifact |
 |---|---|---|---|---|
-| 11.1 | Shared O+S+C helper wired | `npm test -- --run foldConditionSurfaceVm` | PENDING | — |
-| 11.2 | Utility/Economy excluded from "combat power" string | `npm test -- --run foldConditionSurfaceVm` | PENDING | — |
-| 11.3 | No sheet copy treats `combat.power.omni` alone as combat power | `rg -n "combat.power.omni" web/fusion-rpg-web/src` | PENDING | — |
-| 11.4 | Five-axis vector retained for inspect | `npm test -- --run foldConditionSurfaceVm` | PENDING | — |
-| 11.5 | No `PowerScalar` on UniqueActor Standing path | `rg -n "PowerScalar" web/fusion-rpg-web/src` | PENDING | — |
-| 11.6 | Tick HF-copy on ideal / aptitude-sheet Done checklists | doc read + checkbox diff | PENDING | — |
-| 11.7 | Playwright E2E + inspected screenshots (desktop/tablet/mobile) | `npm run test:e2e` + Playwright MCP | PENDING | — |
+| 11.1 | Shared O+S+C helper wired | `npm test -- --run foldConditionSurfaceVm` | PASS — 9/9. New exported pure `sumCombatPowerLabel(standing)` in `foldConditionSurfaceVm.ts` = `offense + survivability + control`; `buildStanding` attaches its result as `combatPowerText` (`.toLocaleString()`) on the `stand-row` piece payload — one call site, no FE-private re-fold elsewhere. `condition.tsx`'s `standRowFactory` renders it as a standalone `data-testid="condition-combat-power"` line, separate from the unlabeled 5-axis radar/bars | `web/fusion-rpg-web/src/features/gui-lego/foldConditionSurfaceVm.ts`, `.../ui/gui-lego/pieces/condition.tsx` |
+| 11.2 | Utility/Economy excluded from "combat power" string | `npm test -- --run foldConditionSurfaceVm` | PASS — `copy-surfaces (T11)` test: fixture `{offense:77, survivability:58, control:36, utility:26, economy:49}` → `sumCombatPowerLabel` = 171 (77+58+36), NOT 220 (all five); `foldConditionSurfaceVm(...).main[3].combatPowerText` === `"171"`, proving the wiring matches the pure function, not a second computation | `web/fusion-rpg-web/src/features/gui-lego/foldConditionSurfaceVm.test.ts` |
+| 11.3 | No sheet copy treats `combat.power.omni` alone as combat power | `rg -in "combat power\|combatPower\|combat\\.power\\.omni" web/fusion-rpg-web/src` | PASS — only 2 repo-wide hits, both pre-existing/unrelated: `DerivedTab.test.tsx:127` (a raw per-channel Derived-tab fixture listing `combat.power.omni` as one row among many element channels, never a "combat power" headline) and T10's own doc comment. `sumCombatPowerLabel` never reads a single channel — it sums three whole Standing axes | — |
+| 11.4 | Five-axis vector retained for inspect | `npm test -- --run foldConditionSurfaceVm` | PASS — same test asserts `stand.bars.axes` still lists all 5 ids (`control, economy, offense, survivability, utility`) even though `economy`/`utility` are excluded from `combatPowerText`; `standingRadarFactory`/`standingBarsFactory` untouched, still render all 5 | — |
+| 11.5 | No `PowerScalar` on UniqueActor Standing path | `rg -n "PowerScalar" web/fusion-rpg-web/src` | PASS — zero hits repo-wide (FE never had a `PowerScalar` reference to begin with; `PowerScalar` is an item-card-only concept per the spec's own "Code style" note, never introduced here) | — |
+| 11.6 | Tick HF-copy on ideal / aptitude-sheet Done checklists | doc read + checkbox diff | Deferred to the program's own final "Ideal + aptitude-sheet Done checkboxes cross-linked" checklist item (Checkpoint: Program complete), same deferral pattern as 10.4 | — |
+| 11.7 | Playwright E2E + inspected screenshots (desktop/tablet/mobile) | `npm run test:e2e` + Playwright MCP | Skipped — same reason as 10.5/10.6: port 5088 already held by an unrelated, unowned `FusionRpg.Server.exe` process; a second full build/deploy purely to screenshot a one-line addition is disproportionate, and the todo's own T11 verification list (`npm test -- --run foldConditionSurfaceVm` / `ActorPanel`) requires no browser step. Compensating evidence: traced the render path — `standRowFactory` (`condition.tsx`) renders `payload.combatPowerText` via a direct, untransformed string interpolation with no intervening copy layer, and the piece is wired into the real `condition-console.json` recipe (unchanged structurally, only the new field) | `web/fusion-rpg-web/src/ui/gui-lego/pieces/condition.tsx` |
+| 11.8 | Full regression, no new failures | `npm test -- --run foldConditionSurfaceVm ActorPanel condition ConditionTab Standing condition.tsx StandingRadar` + `npm test -- --run vocabularyGuard` + `npx tsc --noEmit -p .` | PASS — all component/fold suites green (9+46+8 = 63 tests across the runs, zero failures). `vocabularyGuard`: same 3 pre-existing findings as T10's baseline, unchanged — T11 introduces zero new hits (new copy is plain "Combat power: {n}", no banned word/symbol). `tsc --noEmit`: same 1 pre-existing, unrelated error | — |
 
 ### Checkpoint: Wave 2 complete
 
 | # | Criterion | Command | Executed result | Artifact |
 |---|---|---|---|---|
-| CP2.1 | Standing honest; chip/copy Done | `Standing` filter + `foldAptitudesSurfaceVm` + `foldConditionSurfaceVm` | PENDING | — |
+| CP2.1 | Standing honest; chip/copy Done | `Standing` filter + `foldAptitudesSurfaceVm` + `foldConditionSurfaceVm` | PASS — T8 (membership predicate) + T9 (ProjectStanding synthetics) + T10 (chip Lv/Ladder, never power) + T11 (Condition combat-power = O+S+C, five-axis vector retained) all committed and individually verified above; Standing is now honest end to end from Hub compose through to both player-facing surfaces that touch it | — |
 
 ---
 

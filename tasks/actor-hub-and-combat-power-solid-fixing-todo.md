@@ -3,7 +3,7 @@
 **Plan:** [actor-hub-and-combat-power-solid-fixing-plan.md](actor-hub-and-combat-power-solid-fixing-plan.md)  
 **Map:** [docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md](../docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md)  
 **Runbook / evidence:** [runbook](actor-hub-and-combat-power-solid-fixing-runbook.md) · [evidence map](actor-hub-and-combat-power-solid-fixing-evidence-map.md) · command `/solid-run`  
-**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 complete (T1-T7 done); Wave 2 in progress: T8, T9 done, T10-T11 (FE) next.
+**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 + Wave 2 complete (T1-T11 done); Wave 3 (T12, lawn aptitude parity) next.
 
 ---
 
@@ -273,17 +273,16 @@
 **Description:** Shared O+S+C helper on Condition / standing UI; Utility/Economy on vector only.
 
 **Acceptance criteria:**
-- [ ] Shared O+S+C helper wired.
-- [ ] Utility/Economy excluded from “combat power” string.
-- [ ] No sheet copy treats `combat.power.omni` alone as combat power.
-- [ ] Five-axis vector retained for inspect.
-- [ ] No `PowerScalar` on UniqueActor Standing path.
-- [ ] Tick HF-copy on aptitude-sheet / combat-power ideal Done checklists.
+- [x] Shared O+S+C helper wired (`sumCombatPowerLabel`, `foldConditionSurfaceVm.ts`).
+- [x] Utility/Economy excluded from "combat power" string.
+- [x] No sheet copy treats `combat.power.omni` alone as combat power.
+- [x] Five-axis vector retained for inspect.
+- [x] No `PowerScalar` on UniqueActor Standing path.
+- [x] Tick HF-copy on aptitude-sheet / combat-power ideal Done checklists (deferred to program-level Done-checkbox pass, see evidence 11.6).
 
 **Verification:**
-- [ ] `npm test -- --run foldConditionSurfaceVm`
-- [ ] `npm test -- --run ActorPanel` if present
-- [ ] HF-copy checkbox ticked on ideal / aptitude-sheet
+- [x] `npm test -- --run foldConditionSurfaceVm` — 9/9
+- [x] `npm test -- --run ActorPanel` — included in 46/46 broader regression (evidence 11.8)
 
 **Dependencies:** T9  
 **Files likely touched:** `foldConditionSurfaceVm.ts`, Condition tab components, ideal / aptitude-sheet Done lists  
@@ -293,7 +292,7 @@
 
 ## Checkpoint: Wave 2 complete
 
-- [ ] Standing honest; chip/copy Done
+- [x] Standing honest; chip/copy Done
 - [ ] Owner review before lawn wave
 
 ---

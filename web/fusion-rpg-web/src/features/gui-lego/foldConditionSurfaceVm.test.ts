@@ -3,7 +3,7 @@ import { known, pendingWithReason } from "@/contract/pending";
 import type { ActorView } from "@/contract/types";
 import { PLAYER_PENDING } from "@/contract/adapt";
 import { actorSurfaceFixture } from "@/lib/bus/actorSurface";
-import { foldConditionSurfaceVm } from "./foldConditionSurfaceVm";
+import { foldConditionSurfaceVm, sumCombatPowerLabel } from "./foldConditionSurfaceVm";
 
 function actor(): ActorView {
   return {
@@ -243,5 +243,38 @@ describe("foldConditionSurfaceVm", () => {
     const strip = (vm.main[3] as { statusStrip?: { title?: string; phase?: string } }).statusStrip;
     expect(strip?.phase).toBe("ready");
     expect(strip?.title).toBe("Effects");
+  });
+
+  it("copy-surfaces (T11): combat power label is Offense + Survivability + Control only", () => {
+    const standing = { offense: 77, survivability: 58, control: 36, utility: 26, economy: 49 };
+    expect(sumCombatPowerLabel(standing)).toBe(171);
+
+    const vm = foldConditionSurfaceVm({
+      data: actor(),
+      sheet: baseSheet(),
+      surface: actorSurfaceFixture(),
+      selectedPoolId: "hp",
+      availability: "ready",
+      revision: 1
+    });
+    const stand = vm.main[3] as { combatPowerText?: string | null; bars?: { axes?: { id: string }[] } };
+    expect(stand.combatPowerText).toBe("171");
+    // Five-axis vector retained for inspect — Utility/Economy still present, just excluded from the label.
+    expect(stand.bars?.axes?.map((a) => a.id).sort()).toEqual(
+      ["control", "economy", "offense", "survivability", "utility"].sort()
+    );
+  });
+
+  it("copy-surfaces (T11): Standing pending never fabricates a combat power number", () => {
+    const vm = foldConditionSurfaceVm({
+      data: actor(),
+      sheet: null,
+      surface: actorSurfaceFixture(),
+      selectedPoolId: "hp",
+      availability: "ready",
+      revision: 1
+    });
+    const stand = vm.main[3] as { combatPowerText?: string | null };
+    expect(stand.combatPowerText).toBeNull();
   });
 });
