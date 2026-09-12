@@ -546,8 +546,8 @@
     },
     {
       "id": "item.plant-leaves-b-015",
-      "nameKey": "base.serrated-thistle-whip",
-      "name": "Serrated Thistle-Whip",
+      "nameKey": "base-type.jagged-thistle-whip",
+      "name": "Jagged Thistle-Whip",
       "frame": "plant",
       "role": "manipulator",
       "class": "fibre",
@@ -557,7 +557,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.serrated-thistle-whip",
+      "iconKey": "icon.base-type.jagged-thistle-whip",
       "flavorKey": "flavor.base.serrated-thistle-whip",
       "flavor": "A length of flexible, thorn-studded vine designed to lash out and catch an opponent's momentum. Its jagged edges are perfect for tearing through soft tissue.",
       "tags": [
@@ -618,8 +618,8 @@
     },
     {
       "id": "item.plant-leaves-b-017",
-      "nameKey": "base.thorned-scion",
-      "name": "Thorned Scion",
+      "nameKey": "base-type.spiked-scion",
+      "name": "Spiked Scion",
       "frame": "plant",
       "role": "manipulator",
       "class": "fibre",
@@ -629,7 +629,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.thorned-scion",
+      "iconKey": "icon.base-type.spiked-scion",
       "flavorKey": "flavor.base.thorned-scion",
       "flavor": "A sharpened, whip-like shoot that lashes out with predatory intent. Its surface is coated in microscopic, jagged barbs designed to catch and tear.",
       "tags": [
@@ -654,8 +654,8 @@
     },
     {
       "id": "item.plant-leaves-b-018",
-      "nameKey": "base.thorned-scion",
-      "name": "Thorned Scion",
+      "nameKey": "base-type.jagged-sprout",
+      "name": "Jagged Sprout",
       "frame": "plant",
       "role": "manipulator",
       "class": "fibre",
@@ -665,7 +665,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.thorned-scion",
+      "iconKey": "icon.base-type.jagged-sprout",
       "flavorKey": "flavor.base.thorned-scion",
       "flavor": "A jagged, whip-like shoot hardened by concentrated sap. It lashes out with a predatory precision designed to find the gaps in armor.",
       "tags": [
@@ -690,8 +690,8 @@
     },
     {
       "id": "item.plant-leaves-b-019",
-      "nameKey": "base.serrated-thistle-whip",
-      "name": "Serrated Thistle-Whip",
+      "nameKey": "base-type.spined-thistle-whip",
+      "name": "Spined Thistle-Whip",
       "frame": "plant",
       "role": "manipulator",
       "class": "fibre",
@@ -701,7 +701,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.serrated-thistle-whip",
+      "iconKey": "icon.base-type.spined-thistle-whip",
       "flavorKey": "flavor.base.serrated-thistle-whip",
       "flavor": "A length of flexible, thorn-studded vine designed to lash out and tear through soft tissue. Its jagged edges are perfectly suited for spreading toxins or drawing blood.",
       "tags": [
@@ -762,8 +762,8 @@
     },
     {
       "id": "item.plant-leaves-b-021",
-      "nameKey": "base.coiled-tendril",
-      "name": "Coiled Tendril",
+      "nameKey": "base-type.spiral-vine",
+      "name": "Spiral Vine",
       "frame": "plant",
       "role": "manipulator",
       "class": "fibre",
@@ -773,7 +773,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.coiled-tendril",
+      "iconKey": "icon.base-type.spiral-vine",
       "flavorKey": "flavor.base.coiled-tendril",
       "flavor": "A spring-loaded length of fibrous vine designed to lash out and ensnare a target's momentum.",
       "tags": [
@@ -798,8 +798,8 @@
     },
     {
       "id": "item.plant-leaves-b-022",
-      "nameKey": "base.coiled-tendril",
-      "name": "Coiled Tendril",
+      "nameKey": "base-type.curled-frond",
+      "name": "Curled Frond",
       "frame": "plant",
       "role": "manipulator",
       "class": "fibre",
@@ -809,7 +809,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.coiled-tendril",
+      "iconKey": "icon.base-type.curled-frond",
       "flavorKey": "flavor.base.coiled-tendril",
       "flavor": "A supple, spring-loaded length of vine designed to lash out and ensnare a target's momentum.",
       "tags": [
@@ -834,8 +834,8 @@
     },
     {
       "id": "item.plant-leaves-b-023",
-      "nameKey": "base.coiled-tendril",
-      "name": "Coiled Tendril",
+      "nameKey": "base-type.spiral-leaf",
+      "name": "Spiral Leaf",
       "frame": "plant",
       "role": "manipulator",
       "class": "fibre",
@@ -845,7 +845,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.coiled-tendril",
+      "iconKey": "icon.base-type.spiral-leaf",
       "flavorKey": "flavor.base.coiled-tendril",
       "flavor": "A supple, spring-loaded length of vine designed to lash out and ensnare targets from a distance.",
       "tags": [
@@ -870,8 +870,8 @@
     },
     {
       "id": "item.plant-leaves-b-024",
-      "nameKey": "base.coiled-tendril",
-      "name": "Coiled Tendril",
+      "nameKey": "base-type.twisted-shoot",
+      "name": "Twisted Shoot",
       "frame": "plant",
       "role": "manipulator",
       "class": "fibre",
@@ -881,7 +881,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.coiled-tendril",
+      "iconKey": "icon.base-type.twisted-shoot",
       "flavorKey": "flavor.base.coiled-tendril",
       "flavor": "A supple, spring-loaded length of vine designed to lash out and ensnare a target's momentum.",
       "tags": [
@@ -942,8 +942,8 @@
     },
     {
       "id": "item.plant-leaves-b-026",
-      "nameKey": "base.coiled-tendril",
-      "name": "Coiled Tendril",
+      "nameKey": "base-type.spiral-vine-fragment",
+      "name": "Spiral Vine Fragment",
       "frame": "plant",
       "role": "manipulator",
       "class": "fibre",
@@ -953,7 +953,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.coiled-tendril",
+      "iconKey": "icon.base-type.spiral-vine-fragment",
       "flavorKey": "flavor.base.coiled-tendril",
       "flavor": "A spring-loaded length of fibrous vine designed to lash out and ensnare a target's momentum.",
       "tags": [
@@ -978,8 +978,8 @@
     },
     {
       "id": "item.plant-leaves-b-027",
-      "nameKey": "base.coiled-tendril",
-      "name": "Coiled Tendril",
+      "nameKey": "base-type.curled-foliage-scrap",
+      "name": "Curled Foliage Scrap",
       "frame": "plant",
       "role": "manipulator",
       "class": "fibre",
@@ -989,7 +989,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.coiled-tendril",
+      "iconKey": "icon.base-type.curled-foliage-scrap",
       "flavorKey": "flavor.base.coiled-tendril",
       "flavor": "A supple, spring-loaded length of vine designed to lash out and ensnare a target's momentum.",
       "tags": [
@@ -1014,8 +1014,8 @@
     },
     {
       "id": "item.plant-leaves-b-028",
-      "nameKey": "base.coiled-tendril",
-      "name": "Coiled Tendril",
+      "nameKey": "base-type.curled-leaf-segment",
+      "name": "Curled Leaf Segment",
       "frame": "plant",
       "role": "manipulator",
       "class": "fibre",
@@ -1025,7 +1025,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.coiled-tendril",
+      "iconKey": "icon.base-type.curled-leaf-segment",
       "flavorKey": "flavor.base.coiled-tendril",
       "flavor": "A spring-loaded length of flexible vine designed to lash out and ensnare a target's momentum.",
       "tags": [

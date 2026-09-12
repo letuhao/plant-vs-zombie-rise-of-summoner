@@ -455,8 +455,8 @@
     },
     {
       "id": "item.plant-canopy-a-013",
-      "nameKey": "base.verdant-canopy",
-      "name": "Verdant Canopy",
+      "nameKey": "base-type.emerald-canopy",
+      "name": "Emerald Canopy",
       "frame": "plant",
       "role": "mantle",
       "class": "husk",
@@ -466,7 +466,7 @@
         "powerBand": "trivial"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.verdant-canopy",
+      "iconKey": "icon.base-type.emerald-canopy",
       "flavorKey": "flavor.base.verdant-canopy",
       "flavor": "A dense, overlapping arrangement of broad leaves woven into a protective layer. It provides a wide area of coverage against the elements.",
       "tags": [
@@ -491,8 +491,8 @@
     },
     {
       "id": "item.plant-canopy-a-014",
-      "nameKey": "base.verdant-canopy",
-      "name": "Verdant Canopy",
+      "nameKey": "base-type.lush-overgrowth",
+      "name": "Lush Overgrowth",
       "frame": "plant",
       "role": "mantle",
       "class": "husk",
@@ -502,7 +502,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.verdant-canopy",
+      "iconKey": "icon.base-type.lush-overgrowth",
       "flavorKey": "flavor.base.verdant-canopy",
       "flavor": "A dense, overlapping arrangement of broad leaves woven into a protective overhead shield. It provides a lush, living barrier against the elements.",
       "tags": [
@@ -527,8 +527,8 @@
     },
     {
       "id": "item.plant-canopy-a-015",
-      "nameKey": "base.verdant-canopy",
-      "name": "Verdant Canopy",
+      "nameKey": "base-type.lush-foliage",
+      "name": "Lush Foliage",
       "frame": "plant",
       "role": "mantle",
       "class": "husk",
@@ -538,7 +538,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.verdant-canopy",
+      "iconKey": "icon.base-type.lush-foliage",
       "flavorKey": "flavor.base.verdant-canopy",
       "flavor": "A dense, overlapping arrangement of broad leaves woven into a protective overhead shield. It provides a thick layer of shade that buffers the wearer from the elements.",
       "tags": [
@@ -563,8 +563,8 @@
     },
     {
       "id": "item.plant-canopy-a-016",
-      "nameKey": "base.verdant-canopy",
-      "name": "Verdant Canopy",
+      "nameKey": "base-type.mossy-canopy-shard",
+      "name": "Mossy Canopy Shard",
       "frame": "plant",
       "role": "mantle",
       "class": "husk",
@@ -574,7 +574,7 @@
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.verdant-canopy",
+      "iconKey": "icon.base-type.mossy-canopy-shard",
       "flavorKey": "flavor.base.verdant-canopy",
       "flavor": "A dense, overlapping arrangement of broad leaves woven into a protective overhead shield. It provides a thick layer of shade that deflects the harshness of the elements.",
       "tags": [
@@ -599,8 +599,8 @@
     },
     {
       "id": "item.plant-canopy-a-017",
-      "nameKey": "base.verdant-canopy",
-      "name": "Verdant Canopy",
+      "nameKey": "base-type.emerald-foliage",
+      "name": "Emerald Foliage",
       "frame": "plant",
       "role": "mantle",
       "class": "husk",
@@ -610,7 +610,7 @@
         "powerBand": "trivial"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.verdant-canopy",
+      "iconKey": "icon.base-type.emerald-foliage",
       "flavorKey": "flavor.base.verdant-canopy",
       "flavor": "A dense, overlapping arrangement of broad leaves designed to shield the wearer from the elements. Its thick veins pulse with a slow, rhythmic sap.",
       "tags": [
@@ -635,8 +635,8 @@
     },
     {
       "id": "item.plant-canopy-a-018",
-      "nameKey": "base.verdant-canopy",
-      "name": "Verdant Canopy",
+      "nameKey": "base-type.mossy-overhang",
+      "name": "Mossy Overhang",
       "frame": "plant",
       "role": "mantle",
       "class": "husk",
@@ -646,7 +646,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.verdant-canopy",
+      "iconKey": "icon.base-type.mossy-overhang",
       "flavorKey": "flavor.base.verdant-canopy",
       "flavor": "A dense, overlapping arrangement of broad leaves woven into a protective layer. It provides a lush, living shield against the elements.",
       "tags": [
@@ -671,8 +671,8 @@
     },
     {
       "id": "item.plant-canopy-a-019",
-      "nameKey": "base.verdant-canopy",
-      "name": "Verdant Canopy",
+      "nameKey": "base-type.chlorophyll-veil",
+      "name": "Chlorophyll Veil",
       "frame": "plant",
       "role": "mantle",
       "class": "husk",
@@ -682,7 +682,7 @@
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.verdant-canopy",
+      "iconKey": "icon.base-type.chlorophyll-veil",
       "flavorKey": "flavor.base.verdant-canopy",
       "flavor": "A dense, overlapping arrangement of broad leaves woven into a protective overhead shield. It provides a lush, living barrier against the elements.",
       "tags": [
@@ -707,8 +707,8 @@
     },
     {
       "id": "item.plant-canopy-a-020",
-      "nameKey": "base.verdant-canopy",
-      "name": "Verdant Canopy",
+      "nameKey": "base-type.lush-foliage-cluster",
+      "name": "Lush Foliage Cluster",
       "frame": "plant",
       "role": "mantle",
       "class": "husk",
@@ -718,7 +718,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.verdant-canopy",
+      "iconKey": "icon.base-type.lush-foliage-cluster",
       "flavorKey": "flavor.base.verdant-canopy",
       "flavor": "A dense, overlapping weave of broad leaves designed to catch the light and shield the wearer from the elements.",
       "tags": [
@@ -779,8 +779,8 @@
     },
     {
       "id": "item.plant-canopy-a-022",
-      "nameKey": "base.lichenous-shroud",
-      "name": "Lichenous Shroud",
+      "nameKey": "base-type.verdant-veil",
+      "name": "Verdant Veil",
       "frame": "plant",
       "role": "mantle",
       "class": "husk",
@@ -790,7 +790,7 @@
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.lichenous-shroud",
+      "iconKey": "icon.base-type.verdant-veil",
       "flavorKey": "flavor.base.lichenous-shroud",
       "flavor": "A thick, damp layer of moss and fungal growth woven into a heavy fabric. It clings to the wearer like a living, breathing second skin.",
       "tags": [
@@ -815,8 +815,8 @@
     },
     {
       "id": "item.plant-canopy-a-023",
-      "nameKey": "base.lichenous-shroud",
-      "name": "Lichenous Shroud",
+      "nameKey": "base-type.mossy-mantle",
+      "name": "Mossy Mantle",
       "frame": "plant",
       "role": "mantle",
       "class": "husk",
@@ -826,7 +826,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.lichenous-shroud",
+      "iconKey": "icon.base-type.mossy-mantle",
       "flavorKey": "flavor.base.lichenous-shroud",
       "flavor": "A thick, damp layer of moss and fungal growth woven into a dense mat. It clings to the wearer to dampen impact and absorb moisture.",
       "tags": [
@@ -887,8 +887,8 @@
     },
     {
       "id": "item.plant-canopy-a-025",
-      "nameKey": "base.lichenous-shroud",
-      "name": "Lichenous Shroud",
+      "nameKey": "base-type.fungal-shroud",
+      "name": "Fungal Shroud",
       "frame": "plant",
       "role": "mantle",
       "class": "husk",
@@ -898,7 +898,7 @@
         "powerBand": "trivial"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.lichenous-shroud",
+      "iconKey": "icon.base-type.fungal-shroud",
       "flavorKey": "flavor.base.lichenous-shroud",
       "flavor": "A thick, damp layer of moss and fungal growth woven into a dense mat. It clings to the wearer, absorbing the impact of sudden strikes.",
       "tags": [
@@ -923,8 +923,8 @@
     },
     {
       "id": "item.plant-canopy-a-026",
-      "nameKey": "base.lichenous-shroud",
-      "name": "Lichenous Shroud",
+      "nameKey": "base-type.mossy-veil",
+      "name": "Mossy Veil",
       "frame": "plant",
       "role": "mantle",
       "class": "husk",
@@ -934,7 +934,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.lichenous-shroud",
+      "iconKey": "icon.base-type.mossy-veil",
       "flavorKey": "flavor.base.lichenous-shroud",
       "flavor": "A thick, damp layer of moss and creeping lichen woven into a dense mat. It clings to the wearer to dampen the impact of sudden strikes.",
       "tags": [
@@ -959,8 +959,8 @@
     },
     {
       "id": "item.plant-canopy-a-027",
-      "nameKey": "base.lichenous-shroud",
-      "name": "Lichenous Shroud",
+      "nameKey": "base-type.verdant-mantle",
+      "name": "Verdant Mantle",
       "frame": "plant",
       "role": "mantle",
       "class": "husk",
@@ -970,7 +970,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.lichenous-shroud",
+      "iconKey": "icon.base-type.verdant-mantle",
       "flavorKey": "flavor.base.lichenous-shroud",
       "flavor": "A thick, damp layer of moss and fungal growth woven into a heavy fabric. It clings to the wearer like a living, breathing second skin.",
       "tags": [
@@ -995,8 +995,8 @@
     },
     {
       "id": "item.plant-canopy-a-028",
-      "nameKey": "base.lichenous-shroud",
-      "name": "Lichenous Shroud",
+      "nameKey": "base-type.verdant-moss-veil",
+      "name": "Verdant Moss-Veil",
       "frame": "plant",
       "role": "mantle",
       "class": "husk",
@@ -1006,7 +1006,7 @@
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.lichenous-shroud",
+      "iconKey": "icon.base-type.verdant-moss-veil",
       "flavorKey": "flavor.base.lichenous-shroud",
       "flavor": "A thick, moss-covered layer of woven vines and broad leaves that dampens the impact of incoming strikes. It clings to the wearer like a living, breathing second skin.",
       "tags": [

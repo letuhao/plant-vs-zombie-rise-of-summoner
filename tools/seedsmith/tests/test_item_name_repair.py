@@ -114,13 +114,23 @@ class NameRepairTests(unittest.TestCase):
 class RealCorpusPlanTests(unittest.TestCase):
     """The real plan, computed from the validator's own --collision-groups output."""
 
-    def test_the_real_plan_is_non_empty_and_covers_every_colliding_kind(self) -> None:
-        repairs = name_repair.plan()
-        self.assertTrue(repairs, "the real corpus has collisions, so the plan must not be empty")
-        kinds = {r.kind for r in repairs}
-        # At least the two kinds the original tool never reached because it exact-matched only
-        # sets+charms and found zero.
-        self.assertTrue(kinds & {"base-type", "drop-table", "gem", "combination", "set", "charm"})
+    def test_the_real_plan_matches_the_validators_remaining_collisions(self) -> None:
+        """⛔ CORRECTED 2026-09-12. This used to assert the plan was NON-EMPTY, which was true only
+        while the 2026-09-12 repair was outstanding: the plan is the outstanding work, so an empty
+        plan is the SUCCESS state once every collision is fixed. Asserting non-emptiness would fail
+        on a clean corpus and, worse, invite re-introducing a collision to satisfy it. The invariant
+        is that the plan agrees with the validator: every remaining group (other than a nameKey
+        group whose rows the deterministic key pass handles) produces exactly the losing rows."""
+        groups = name_repair.collision_groups()
+        repairs = name_repair.plan(groups=groups)
+        expected = sum(len(g.get("members") or ()) - 1 for g in groups
+                       if len(g.get("members") or ()) > 1)
+        # A nameKey group only needs a rename when the key is a placeholder (an unsluggable name);
+        # otherwise repair_name_keys covers it, so the plan is a subset of the raw losing count.
+        self.assertLessEqual(len(repairs), expected)
+        if groups:
+            kinds = {r.kind for r in repairs}
+            self.assertTrue(kinds, "collisions exist, so the plan must name the kinds to repair")
 
     def test_no_plan_row_is_its_own_keeper(self) -> None:
         for repair in name_repair.plan():

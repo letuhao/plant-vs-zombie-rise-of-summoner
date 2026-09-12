@@ -541,8 +541,8 @@
     },
     {
       "id": "item.plant-muzzle-b-015",
-      "nameKey": "base.spined-pod-caster",
-      "name": "Spined Pod-Caster",
+      "nameKey": "base-type.thorned-spore-launcher",
+      "name": "Thorned Spore-Launcher",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -552,7 +552,7 @@
         "powerBand": "medium"
       },
       "socketMax": 4,
-      "iconKey": "icon.base.spined-pod-caster",
+      "iconKey": "icon.base-type.thorned-spore-launcher",
       "flavorKey": "flavor.base.spined-pod-caster",
       "flavor": "A thick, fibrous husk lined with serrated protrusions designed to launch hardened organic projectiles at high velocity.",
       "tags": [
@@ -576,8 +576,8 @@
     },
     {
       "id": "item.plant-muzzle-b-016",
-      "nameKey": "base.thorned-spore-caster",
-      "name": "Thorned Spore-Caster",
+      "nameKey": "base-type.fungal-volley-gun",
+      "name": "Fungal Volley-Gun",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -587,7 +587,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.thorned-spore-caster",
+      "iconKey": "icon.base-type.fungal-volley-gun",
       "flavorKey": "flavor.base.thorned-spore-caster",
       "flavor": "A bulbous, calcified pod that rhythmically pulses with internal pressure. It releases a fine mist of caustic spores through a jagged, fibrous aperture.",
       "tags": [
@@ -611,8 +611,8 @@
     },
     {
       "id": "item.plant-muzzle-b-017",
-      "nameKey": "base.spined-pod-caster",
-      "name": "Spined Pod-Caster",
+      "nameKey": "base-type.prickly-seed-slinger",
+      "name": "Prickly Seed-Slinger",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -622,7 +622,7 @@
         "powerBand": "low"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.spined-pod-caster",
+      "iconKey": "icon.base-type.prickly-seed-slinger",
       "flavorKey": "flavor.base.spined-pod-caster",
       "flavor": "A thick, fibrous husk lined with serrated protrusions designed to launch hardened organic projectiles at high velocity.",
       "tags": [
@@ -646,8 +646,8 @@
     },
     {
       "id": "item.plant-muzzle-b-018",
-      "nameKey": "base.thorned-spore-caster",
-      "name": "Thorned Spore-Caster",
+      "nameKey": "base-type.fungal-volley-caster",
+      "name": "Fungal Volley-Caster",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -657,7 +657,7 @@
         "powerBand": "low"
       },
       "socketMax": 4,
-      "iconKey": "icon.base.thorned-spore-caster",
+      "iconKey": "icon.base-type.fungal-volley-caster",
       "flavorKey": "flavor.base.thorned-spore-caster",
       "flavor": "A dense, bulbous pod encased in a lattice of hardened briars. It releases concentrated bursts of toxic particulate through a narrow, fibrous aperture.",
       "tags": [
@@ -681,8 +681,8 @@
     },
     {
       "id": "item.plant-muzzle-b-019",
-      "nameKey": "base.thorned-spore-caster",
-      "name": "Thorned Spore-Caster",
+      "nameKey": "base-type.fungal-spore-driver",
+      "name": "Fungal Spore-Driver",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -692,7 +692,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.thorned-spore-caster",
+      "iconKey": "icon.base-type.fungal-spore-driver",
       "flavorKey": "flavor.base.thorned-spore-caster",
       "flavor": "A dense, bulbous pod encased in a lattice of hardened briars. It releases concentrated bursts of toxic particulate through a narrow, fibrous aperture.",
       "tags": [
@@ -716,8 +716,8 @@
     },
     {
       "id": "item.plant-muzzle-b-020",
-      "nameKey": "base.thorned-spore-caster",
-      "name": "Thorned Spore-Caster",
+      "nameKey": "base-type.spore-launcher",
+      "name": "Spore Launcher",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -727,7 +727,7 @@
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.thorned-spore-caster",
+      "iconKey": "icon.base-type.spore-launcher",
       "flavorKey": "flavor.base.thorned-spore-caster",
       "flavor": "A dense, bulbous pod encased in a lattice of calcified briars. It releases a fine mist of caustic spores through a narrow, fibrous aperture.",
       "tags": [
@@ -751,8 +751,8 @@
     },
     {
       "id": "item.plant-muzzle-b-021",
-      "nameKey": "base.thorned-spore-caster",
-      "name": "Thorned Spore-Caster",
+      "nameKey": "base-type.fungal-spore-launcher",
+      "name": "Fungal Spore-Launcher",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -762,7 +762,7 @@
         "powerBand": "low"
       },
       "socketMax": 4,
-      "iconKey": "icon.base.thorned-spore-caster",
+      "iconKey": "icon.base-type.fungal-spore-launcher",
       "flavorKey": "flavor.base.thorned-spore-caster",
       "flavor": "A dense, bulbous growth that rhythmically expels clouds of caustic particulate. It requires constant moisture to maintain its internal pressure.",
       "tags": [
@@ -929,8 +929,8 @@
     },
     {
       "id": "item.plant-muzzle-b-026",
-      "nameKey": "base.thrumming-spore-lance",
-      "name": "Thrumming Spore-Lance",
+      "nameKey": "base-type.resonating-spore-lance",
+      "name": "Resonating Spore-Lance",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -940,7 +940,7 @@
         "powerBand": "low"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.thrumming-spore-lance",
+      "iconKey": "icon.base-type.resonating-spore-lance",
       "flavorKey": "flavor.base.thrumming-spore-lance",
       "flavor": "A long, hollowed stalk of hardened cellulose that vibrates with the pressure of internal gases. It serves as a focused conduit for rapid-fire botanical projectiles.",
       "tags": [
@@ -965,8 +965,8 @@
     },
     {
       "id": "item.plant-muzzle-b-027",
-      "nameKey": "base.thrumming-spore-lance",
-      "name": "Thrumming Spore-Lance",
+      "nameKey": "base-type.vibrating-spore-lance",
+      "name": "Vibrating Spore-Lance",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -976,7 +976,7 @@
         "powerBand": "medium"
       },
       "socketMax": 4,
-      "iconKey": "icon.base.thrumming-spore-lance",
+      "iconKey": "icon.base-type.vibrating-spore-lance",
       "flavorKey": "flavor.base.thrumming-spore-lance",
       "flavor": "A long, hollowed stalk that vibrates with the internal pressure of volatile fungal spores. It channels kinetic energy through its tapered tip to launch projectiles with sudden, violent force.",
       "tags": [
@@ -1001,8 +1001,8 @@
     },
     {
       "id": "item.plant-muzzle-b-028",
-      "nameKey": "base.thrumming-spore-cask",
-      "name": "Thrumming Spore-Cask",
+      "nameKey": "base-type.resonating-spore-cask",
+      "name": "Resonating Spore-Cask",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -1012,7 +1012,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.thrumming-spore-cask",
+      "iconKey": "icon.base-type.resonating-spore-cask",
       "flavorKey": "flavor.base.thrumming-spore-cask",
       "flavor": "A dense, bulbous growth that vibrates with internal pressure, ready to rupture at the slightest trigger.",
       "tags": [

@@ -495,8 +495,8 @@
     },
     {
       "id": "item.humanoid-off-hand-a-014",
-      "nameKey": "base.weighted-censer",
-      "name": "Weighted Censer",
+      "nameKey": "base-type.incense-burner",
+      "name": "Incense Burner",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -506,7 +506,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.weighted-censer",
+      "iconKey": "icon.base-type.incense-burner",
       "flavorKey": "flavor.base.weighted-censer",
       "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse thick clouds of incense or caustic vapors.",
       "tags": [
@@ -531,8 +531,8 @@
     },
     {
       "id": "item.humanoid-off-hand-a-015",
-      "nameKey": "base.weighted-censer",
-      "name": "Weighted Censer",
+      "nameKey": "base-type.ritual-thurible",
+      "name": "Ritual Thurible",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -542,7 +542,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.weighted-censer",
+      "iconKey": "icon.base-type.ritual-thurible",
       "flavorKey": "flavor.base.weighted-censer",
       "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse thick clouds of incense or caustic salts.",
       "tags": [
@@ -567,8 +567,8 @@
     },
     {
       "id": "item.humanoid-off-hand-a-016",
-      "nameKey": "base.weighted-censer",
-      "name": "Weighted Censer",
+      "nameKey": "base-type.lead-bound-censer",
+      "name": "Lead-Bound Censer",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -578,9 +578,9 @@
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.weighted-censer",
+      "iconKey": "icon.base-type.lead-bound-censer",
       "flavorKey": "flavor.base.weighted-censer",
-      "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse thick clouds of incense or caustic salts.",
+      "flavor": "A heavy, dense vessel designed to swing with significant momentum.",
       "tags": [
         "metal",
         "medium",
@@ -603,8 +603,8 @@
     },
     {
       "id": "item.humanoid-off-hand-a-017",
-      "nameKey": "base.weighted-censer",
-      "name": "Weighted Censer",
+      "nameKey": "base-type.lead-lined-censer",
+      "name": "Lead-Lined Censer",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -614,9 +614,9 @@
         "powerBand": "trivial"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.weighted-censer",
+      "iconKey": "icon.base-type.lead-lined-censer",
       "flavorKey": "flavor.base.weighted-censer",
-      "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse thick clouds of incense or caustic vapors.",
+      "flavor": "A heavy, dense vessel designed to keep the smoke low and the ritual steady.",
       "tags": [
         "metal",
         "utility",
@@ -639,8 +639,8 @@
     },
     {
       "id": "item.humanoid-off-hand-a-018",
-      "nameKey": "base.weighted-censer",
-      "name": "Weighted Censer",
+      "nameKey": "base-type.heavy-pendulum-censer",
+      "name": "Heavy Pendulum Censer",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -650,7 +650,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.weighted-censer",
+      "iconKey": "icon.base-type.heavy-pendulum-censer",
       "flavorKey": "flavor.base.weighted-censer",
       "flavor": "A heavy metal vessel designed to swing rhythmically, trailing thick plumes of sanctified smoke.",
       "tags": [
@@ -675,8 +675,8 @@
     },
     {
       "id": "item.humanoid-off-hand-a-019",
-      "nameKey": "base.weighted-censer",
-      "name": "Weighted Censer",
+      "nameKey": "base-type.heavy-incense-burner",
+      "name": "Heavy Incense Burner",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -686,7 +686,7 @@
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.weighted-censer",
+      "iconKey": "icon.base-type.heavy-incense-burner",
       "flavorKey": "flavor.base.weighted-censer",
       "flavor": "A heavy metal vessel designed to swing rhythmically, trailing thick plumes of incense to mask the scent of battle.",
       "tags": [
@@ -711,8 +711,8 @@
     },
     {
       "id": "item.humanoid-off-hand-a-020",
-      "nameKey": "base.weighted-censer",
-      "name": "Weighted Censer",
+      "nameKey": "base-type.lead-bound-thurible",
+      "name": "Lead-Bound Thurible",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -722,7 +722,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.weighted-censer",
+      "iconKey": "icon.base-type.lead-bound-thurible",
       "flavorKey": "flavor.base.weighted-censer",
       "flavor": "A heavy metal vessel designed to swing rhythmically, trailing thick plumes of incense to mask the scent of battle.",
       "tags": [
@@ -783,8 +783,8 @@
     },
     {
       "id": "item.humanoid-off-hand-a-022",
-      "nameKey": "base.iron-bound-censer",
-      "name": "Iron-Bound Censer",
+      "nameKey": "base-type.silver-wrought-censer",
+      "name": "Silver-Wrought Censer",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -794,7 +794,7 @@
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.iron-bound-censer",
+      "iconKey": "icon.base-type.silver-wrought-censer",
       "flavorKey": "flavor.base.iron-bound-censer",
       "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse thick, choking clouds of incense or caustic salts.",
       "tags": [
@@ -819,8 +819,8 @@
     },
     {
       "id": "item.humanoid-off-hand-a-023",
-      "nameKey": "base.iron-bound-censer",
-      "name": "Iron-Bound Censer",
+      "nameKey": "base-type.silver-etched-censer",
+      "name": "Silver-Etched Censer",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -830,7 +830,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.iron-bound-censer",
+      "iconKey": "icon.base-type.silver-etched-censer",
       "flavorKey": "flavor.base.iron-bound-censer",
       "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse incense or caustic vapors.",
       "tags": [
@@ -855,8 +855,8 @@
     },
     {
       "id": "item.humanoid-off-hand-a-024",
-      "nameKey": "base.iron-bound-censer",
-      "name": "Iron-Bound Censer",
+      "nameKey": "base-type.engraved-censer",
+      "name": "Engraved Censer",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -866,7 +866,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.iron-bound-censer",
+      "iconKey": "icon.base-type.engraved-censer",
       "flavorKey": "flavor.base.iron-bound-censer",
       "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse thick clouds of incense or caustic vapors.",
       "tags": [
@@ -891,8 +891,8 @@
     },
     {
       "id": "item.humanoid-off-hand-a-025",
-      "nameKey": "base.iron-bound-censer",
-      "name": "Iron-Bound Censer",
+      "nameKey": "base-type.warding-censer",
+      "name": "Warding Censer",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -902,9 +902,9 @@
         "powerBand": "trivial"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.iron-bound-censer",
+      "iconKey": "icon.base-type.warding-censer",
       "flavorKey": "flavor.base.iron-bound-censer",
-      "flavor": "A heavy, perforated vessel designed to swing rhythmically to release thick clouds of incense or caustic vapors.",
+      "flavor": "A heavy vessel designed to cast thick, protective smoke.",
       "tags": [
         "metal",
         "heavy",
@@ -927,8 +927,8 @@
     },
     {
       "id": "item.humanoid-off-hand-a-026",
-      "nameKey": "base.iron-bound-censer",
-      "name": "Iron-Bound Censer",
+      "nameKey": "base-type.gilded-censer",
+      "name": "Gilded Censer",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -938,7 +938,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.iron-bound-censer",
+      "iconKey": "icon.base-type.gilded-censer",
       "flavorKey": "flavor.base.iron-bound-censer",
       "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse incense or caustic vapors.",
       "tags": [
@@ -999,8 +999,8 @@
     },
     {
       "id": "item.humanoid-off-hand-a-028",
-      "nameKey": "base.iron-bound-censer",
-      "name": "Iron-Bound Censer",
+      "nameKey": "base-type.heavy-iron-censer",
+      "name": "Heavy Iron Censer",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -1010,9 +1010,9 @@
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.iron-bound-censer",
+      "iconKey": "icon.base-type.heavy-iron-censer",
       "flavorKey": "flavor.base.iron-bound-censer",
-      "flavor": "A heavy, perforated vessel designed to swing rhythmically to disperse incense or caustic vapors. Its weight makes it a formidable tool for crushing blows.",
+      "flavor": "A weighted vessel designed to swing rhythmically during ritualistic chants.",
       "tags": [
         "metal",
         "heavy",

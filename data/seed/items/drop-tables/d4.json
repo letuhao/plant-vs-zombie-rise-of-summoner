@@ -447,8 +447,8 @@
     },
     {
       "id": "droptable.d4-011",
-      "nameKey": "droptable.overgrowth-cache",
-      "name": "Overgrowth Cache",
+      "nameKey": "drop-table.thicket-bound-crate",
+      "name": "Thicket-Bound Crate",
       "sourceAllow": [
         "web"
       ],
@@ -527,8 +527,8 @@
     },
     {
       "id": "droptable.d4-012",
-      "nameKey": "droptable.sunken-reliquary",
-      "name": "Sunken Reliquary",
+      "nameKey": "drop-table.submerged-relic-cache",
+      "name": "Submerged Relic Cache",
       "sourceAllow": [
         "web"
       ],
@@ -607,8 +607,8 @@
     },
     {
       "id": "droptable.d4-013",
-      "nameKey": "droptable.verdant-husk",
-      "name": "Verdant Husk",
+      "nameKey": "drop-table.jadeous-carapace",
+      "name": "Jadeous Carapace",
       "sourceAllow": [
         "web"
       ],
@@ -687,8 +687,8 @@
     },
     {
       "id": "droptable.d4-014",
-      "nameKey": "droptable.verdant-echo-cache",
-      "name": "Verdant Echo Cache",
+      "nameKey": "drop-table.jade-reverberation-cache",
+      "name": "Jade Reverberation Cache",
       "sourceAllow": [
         "web"
       ],
@@ -767,8 +767,8 @@
     },
     {
       "id": "droptable.d4-015",
-      "nameKey": "droptable.verdant-overgrowth",
-      "name": "Verdant Overgrowth",
+      "nameKey": "drop-table.lush-undergrowth",
+      "name": "Lush Undergrowth",
       "sourceAllow": [
         "web"
       ],
@@ -847,8 +847,8 @@
     },
     {
       "id": "droptable.d4-016",
-      "nameKey": "droptable.overgrowth-cache",
-      "name": "Overgrowth Cache",
+      "nameKey": "drop-table.thicket-s-bounty",
+      "name": "Thicket's Bounty",
       "sourceAllow": [
         "web"
       ],
@@ -927,8 +927,8 @@
     },
     {
       "id": "droptable.d4-018",
-      "nameKey": "droptable.aetheric-husk",
-      "name": "Aetheric Husk",
+      "nameKey": "drop-table.astral-shell",
+      "name": "Astral Shell",
       "sourceAllow": [
         "web"
       ],
@@ -1007,8 +1007,8 @@
     },
     {
       "id": "droptable.d4-019",
-      "nameKey": "droptable.verdant-reliquary",
-      "name": "Verdant Reliquary",
+      "nameKey": "drop-table.emerald-cache",
+      "name": "Emerald Cache",
       "sourceAllow": [
         "web"
       ],
@@ -1087,8 +1087,8 @@
     },
     {
       "id": "droptable.d4-021",
-      "nameKey": "droptable.overgrowth-cache",
-      "name": "Overgrowth Cache",
+      "nameKey": "drop-table.thicket-bound-coffer",
+      "name": "Thicket-Bound Coffer",
       "sourceAllow": [
         "web"
       ],
@@ -1167,8 +1167,8 @@
     },
     {
       "id": "droptable.d4-022",
-      "nameKey": "droptable.verdant-reliquary",
-      "name": "Verdant Reliquary",
+      "nameKey": "drop-table.jade-repository",
+      "name": "Jade Repository",
       "sourceAllow": [
         "web"
       ],
@@ -1247,8 +1247,8 @@
     },
     {
       "id": "droptable.d4-023",
-      "nameKey": "droptable.verdant-overgrowth",
-      "name": "Verdant Overgrowth",
+      "nameKey": "drop-table.emerald-overgrowth",
+      "name": "Emerald Overgrowth",
       "sourceAllow": [
         "web"
       ],
@@ -1406,8 +1406,8 @@
     },
     {
       "id": "droptable.d4-025",
-      "nameKey": "droptable.verdant-reliquary",
-      "name": "Verdant Reliquary",
+      "nameKey": "drop-table.jade-reliquary",
+      "name": "Jade Reliquary",
       "sourceAllow": [
         "web"
       ],

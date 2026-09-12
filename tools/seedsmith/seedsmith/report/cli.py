@@ -872,7 +872,8 @@ def _cmd_items_repair_names(args: argparse.Namespace) -> int:
         repairs = repairs[:args.limit]
     payload = {"write": bool(args.write), "repairs": [
         {"entryId": repair.entry_id, "kind": repair.kind, "oldName": repair.old_name,
-         "keeperId": repair.keeper_id, "brief": name_repair.brief(repair)}
+         "keeperId": repair.keeper_id,
+         "brief": name_repair.brief(repair, cluster_size=repair.cluster_size)}
         for repair in repairs]}
     if not args.write:
         print(json.dumps(payload, ensure_ascii=False, indent=2))
@@ -892,24 +893,64 @@ def _cmd_items_repair_names(args: argparse.Namespace) -> int:
         if not isinstance(answers, dict):
             print("seedsmith: repair-names answers must be a JSON object keyed by entry id", file=sys.stderr)
             return EXIT_REFUSED
+        failed: "list[dict]" = []
     else:
         transport = resolve_live_transport(args.endpoint, args.model)
         if not transport.endpoint:
             print("seedsmith: repair-names --write needs --answers or a live endpoint", file=sys.stderr)
             return EXIT_REFUSED
         caller = live_answer_caller(transport)
-        try:
-            answers = {repair.entry_id: caller(name_repair.brief(repair), name_repair.schema())
-                       for repair in repairs}
-        except (RuntimeError, ValueError, json.JSONDecodeError) as exc:
-            print(f"seedsmith: repair-names model call failed — {exc}", file=sys.stderr)
+        # Per-row resilience with a bounded retry. A single out-of-vocabulary answer ("Evasion"
+        # when "Evasion" already ships) used to abort the WHOLE batch, discarding every good answer
+        # generated before it — and a local model needs a second try far more often than a whole
+        # batch needs discarding. A row that still fails after the retries is reported with its
+        # reason and skipped, never silently written.
+        answers: dict = {}
+        failed: "list[dict]" = []
+        taken: "set[str]" = set()
+        for repair in repairs:
+            prompt = name_repair.brief(repair, cluster_size=repair.cluster_size)
+            attempted: "list[str]" = []
+            for attempt in (1, 2, 3, 4, 5):
+                try:
+                    answer = caller(prompt, name_repair.schema())
+                    name_repair.validate_answers((repair,), {repair.entry_id: answer},
+                                                 items_root=root, extra_taken=taken)
+                    answers[repair.entry_id] = answer
+                    taken.add(str(answer.get("name", "")).strip())
+                    break
+                except (ValueError, json.JSONDecodeError) as exc:
+                    last = str(exc)
+                    attempted.append(str(answer.get("name", "")) if isinstance(answer, dict) else "?")
+                    # Name the rejected candidates explicitly. A local model repeats "Verdant
+                    # Reliquary" or a CJK name indefinitely when only told "already exists"; the
+                    # concrete refusal list is what breaks the loop. The CJK rows additionally need
+                    # to be told the name must be ASCII (the key is derived from it).
+                    prompt = (
+                        name_repair.brief(repair, cluster_size=repair.cluster_size)
+                        + f"\n\nYour previous answers were refused: {', '.join(attempted)}.\n"
+                        + "Return a DIFFERENT name that is NOT any of those and is not already in the "
+                        + "game. Use ONLY English words from the game's own vocabulary — no CJK "
+                        + "characters, because the id key is derived from the name.\n")
+                    if attempt == 5:
+                        failed.append({"entryId": repair.entry_id, "reason": last})
+                except RuntimeError as exc:
+                    # A transport failure is not the row's fault; report and continue.
+                    failed.append({"entryId": repair.entry_id, "reason": f"model call failed: {exc}"})
+                    break
+        if not answers:
+            print(f"seedsmith: repair-names produced no usable answers ({len(failed)} failed)",
+                  file=sys.stderr)
             return EXIT_CANNOT_RUN
+        # Only the rows with a valid answer are applied; the rest stay for the next run.
+        repairs = tuple(r for r in repairs if r.entry_id in answers)
     try:
         changed = name_repair.apply(repairs, answers, write=True, items_root=root)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"seedsmith: repair-names failed — {exc}", file=sys.stderr)
         return EXIT_CANNOT_RUN
-    print(json.dumps({**payload, "changed": [str(path) for path in changed]}, ensure_ascii=False, indent=2))
+    print(json.dumps({**payload, "changed": [str(path) for path in changed],
+                      "failed": failed}, ensure_ascii=False, indent=2))
     return EXIT_CLEAN
 
 

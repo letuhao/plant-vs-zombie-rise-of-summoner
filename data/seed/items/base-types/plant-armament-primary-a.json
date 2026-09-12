@@ -538,8 +538,8 @@
     },
     {
       "id": "item.plant-muzzle-a-015",
-      "nameKey": "base.pulsing-spore-cask",
-      "name": "Pulsing Spore-Cask",
+      "nameKey": "base-type.spore-cask",
+      "name": "Spore-Cask",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -549,7 +549,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.pulsing-spore-cask",
+      "iconKey": "icon.base-type.spore-cask",
       "flavorKey": "flavor.base.pulsing-spore-cask",
       "flavor": "A fleshy, distended bulb that rhythmically expands and contracts, ready to eject its contents with sudden force.",
       "tags": [
@@ -573,8 +573,8 @@
     },
     {
       "id": "item.plant-muzzle-a-016",
-      "nameKey": "base.spore-clogged-spout",
-      "name": "Spore-Clogged Spout",
+      "nameKey": "base-type.fungal-choked-nozzle",
+      "name": "Fungal-Choked Nozzle",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -584,7 +584,7 @@
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.spore-clogged-spout",
+      "iconKey": "icon.base-type.fungal-choked-nozzle",
       "flavorKey": "flavor.base.spore-clogged-spout",
       "flavor": "A thick, calcified stem that has been repurposed to channel volatile fungal gases through a narrow aperture.",
       "tags": [
@@ -608,8 +608,8 @@
     },
     {
       "id": "item.plant-muzzle-a-017",
-      "nameKey": "base.pulsing-spore-cask",
-      "name": "Pulsing Spore-Cask",
+      "nameKey": "base-type.rhythmic-spore-cask",
+      "name": "Rhythmic Spore-Cask",
       "frame": "plant",
       "role": "armament-primary",
       "class": "seedpod",
@@ -619,7 +619,7 @@
         "powerBand": "trivial"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.pulsing-spore-cask",
+      "iconKey": "icon.base-type.rhythmic-spore-cask",
       "flavorKey": "flavor.base.pulsing-spore-cask",
       "flavor": "A fleshy, bulbous vessel that rhythmically expands and contracts, preparing to eject its volatile contents.",
       "tags": [
@@ -678,8 +678,8 @@
     },
     {
       "id": "item.plant-muzzle-a-019",
-      "nameKey": "base.pulsing-spore-cask",
-      "name": "Pulsing Spore-Cask",
+      "nameKey": "base-type.vibrating-spore-cask",
+      "name": "Vibrating Spore-Cask",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -689,7 +689,7 @@
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.pulsing-spore-cask",
+      "iconKey": "icon.base-type.vibrating-spore-cask",
       "flavorKey": "flavor.base.pulsing-spore-cask",
       "flavor": "A fleshy, distended bulb that rhythmically expands and contracts, ready to vent its pressurized contents in a sudden burst.",
       "tags": [
@@ -713,8 +713,8 @@
     },
     {
       "id": "item.plant-muzzle-a-020",
-      "nameKey": "base.spore-clogged-spout",
-      "name": "Spore-Clogged Spout",
+      "nameKey": "base-type.mycelium-blocked-vent",
+      "name": "Mycelium-Blocked Vent",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -724,7 +724,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.spore-clogged-spout",
+      "iconKey": "icon.base-type.mycelium-blocked-vent",
       "flavorKey": "flavor.base.spore-clogged-spout",
       "flavor": "A thick, calcified stem that has been hollowed out by fungal growth to channel pressurized gases.",
       "tags": [
@@ -818,8 +818,8 @@
     },
     {
       "id": "item.plant-muzzle-a-023",
-      "nameKey": "base.turgid-stamen",
-      "name": "Turgid Stamen",
+      "nameKey": "base-type.swollen-anther",
+      "name": "Swollen Anther",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -829,7 +829,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.turgid-stamen",
+      "iconKey": "icon.base-type.swollen-anther",
       "flavorKey": "flavor.base.turgid-stamen",
       "flavor": "A swollen, fleshy protrusion that acts as a natural pressure vessel for volatile botanical fluids.",
       "tags": [
@@ -853,8 +853,8 @@
     },
     {
       "id": "item.plant-muzzle-a-024",
-      "nameKey": "base.turgid-stamen",
-      "name": "Turgid Stamen",
+      "nameKey": "base-type.engorged-filament",
+      "name": "Engorged Filament",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -864,7 +864,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.turgid-stamen",
+      "iconKey": "icon.base-type.engorged-filament",
       "flavorKey": "flavor.base.turgid-stamen",
       "flavor": "A swollen, fleshy protrusion that swells with internal pressure before discharging its contents in a violent burst.",
       "tags": [
@@ -923,8 +923,8 @@
     },
     {
       "id": "item.plant-muzzle-a-026",
-      "nameKey": "base.thorned-spore-caster",
-      "name": "Thorned Spore-Caster",
+      "nameKey": "base-type.spore-burst-launcher",
+      "name": "Spore-Burst Launcher",
       "frame": "plant",
       "role": "armament-primary",
       "class": "nozzle",
@@ -934,7 +934,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.thorned-spore-caster",
+      "iconKey": "icon.base-type.spore-burst-launcher",
       "flavorKey": "flavor.base.thorned-spore-caster",
       "flavor": "A rigid, hollowed stem reinforced with calcified bark, designed to eject pressurized fungal matter through a jagged aperture.",
       "tags": [

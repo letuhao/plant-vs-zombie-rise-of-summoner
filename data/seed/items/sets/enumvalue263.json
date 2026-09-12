@@ -23,8 +23,8 @@
   "entries": [
     {
       "id": "set.enumvalue263-001",
-      "nameKey": "set.the-primordial-silt",
-      "name": "The Primordial Silt",
+      "nameKey": "set.ancient-sediment",
+      "name": "Ancient Sediment",
       "themeKey": "creature.enumvalue263",
       "members": [
         {

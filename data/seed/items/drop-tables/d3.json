@@ -655,8 +655,8 @@
     },
     {
       "id": "droptable.d3-011",
-      "nameKey": "droptable.verdant-husk",
-      "name": "Verdant Husk",
+      "nameKey": "drop-table.chlorophyll-shell",
+      "name": "Chlorophyll Shell",
       "sourceAllow": [
         "web"
       ],
@@ -735,8 +735,8 @@
     },
     {
       "id": "droptable.d3-012",
-      "nameKey": "droptable.sunken-reliquary",
-      "name": "Sunken Reliquary",
+      "nameKey": "drop-table.abyssal-cache",
+      "name": "Abyssal Cache",
       "sourceAllow": [
         "web"
       ],
@@ -815,8 +815,8 @@
     },
     {
       "id": "droptable.d3-013",
-      "nameKey": "droptable.verdant-reliquary",
-      "name": "Verdant Reliquary",
+      "nameKey": "drop-table.jade-cache",
+      "name": "Jade Cache",
       "sourceAllow": [
         "web"
       ],
@@ -895,8 +895,8 @@
     },
     {
       "id": "droptable.d3-014",
-      "nameKey": "droptable.verdant-echo-cache",
-      "name": "Verdant Echo Cache",
+      "nameKey": "drop-table.emerald-resonance-cache",
+      "name": "Emerald Resonance Cache",
       "sourceAllow": [
         "web"
       ],
@@ -975,8 +975,8 @@
     },
     {
       "id": "droptable.d3-015",
-      "nameKey": "droptable.overgrowth-cache",
-      "name": "Overgrowth Cache",
+      "nameKey": "drop-table.thicketed-crate",
+      "name": "Thicketed Crate",
       "sourceAllow": [
         "web"
       ],
@@ -1055,8 +1055,8 @@
     },
     {
       "id": "droptable.d3-016",
-      "nameKey": "droptable.verdant-overgrowth",
-      "name": "Verdant Overgrowth",
+      "nameKey": "drop-table.lush-thicket",
+      "name": "Lush Thicket",
       "sourceAllow": [
         "web"
       ],
@@ -1135,8 +1135,8 @@
     },
     {
       "id": "droptable.d3-017",
-      "nameKey": "droptable.verdant-husk",
-      "name": "Verdant Husk",
+      "nameKey": "drop-table.overgrown-shell",
+      "name": "Overgrown Shell",
       "sourceAllow": [
         "web"
       ],
@@ -1215,8 +1215,8 @@
     },
     {
       "id": "droptable.d3-018",
-      "nameKey": "droptable.aetheric-husk",
-      "name": "Aetheric Husk",
+      "nameKey": "drop-table.ethereal-husk",
+      "name": "Ethereal Husk",
       "sourceAllow": [
         "web"
       ],
@@ -1294,8 +1294,8 @@
     },
     {
       "id": "droptable.d3-019",
-      "nameKey": "droptable.verdant-reliquary",
-      "name": "Verdant Reliquary",
+      "nameKey": "drop-table.emerald-reliquary",
+      "name": "Emerald Reliquary",
       "sourceAllow": [
         "web"
       ],
@@ -1374,8 +1374,8 @@
     },
     {
       "id": "droptable.d3-022",
-      "nameKey": "droptable.overgrown-reliquary",
-      "name": "Overgrown Reliquary",
+      "nameKey": "drop-table.thicket-casket",
+      "name": "Thicket Casket",
       "sourceAllow": [
         "web"
       ],
@@ -1454,8 +1454,8 @@
     },
     {
       "id": "droptable.d3-023",
-      "nameKey": "droptable.overgrowth-cache",
-      "name": "Overgrowth Cache",
+      "nameKey": "drop-table.verdant-relic-crate",
+      "name": "Verdant Relic Crate",
       "sourceAllow": [
         "web"
       ],
@@ -1534,8 +1534,8 @@
     },
     {
       "id": "droptable.d3-024",
-      "nameKey": "droptable.verdant-overgrowth",
-      "name": "Verdant Overgrowth",
+      "nameKey": "drop-table.emerald-tanglement",
+      "name": "Emerald Tanglement",
       "sourceAllow": [
         "web"
       ],

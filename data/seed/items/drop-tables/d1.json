@@ -1680,8 +1680,8 @@
     },
     {
       "id": "droptable.d1-016",
-      "nameKey": "droptable.overgrowth-cache",
-      "name": "Overgrowth Cache",
+      "nameKey": "drop-table.thicket-crate",
+      "name": "Thicket Crate",
       "sourceAllow": [
         "web"
       ],
@@ -1760,8 +1760,8 @@
     },
     {
       "id": "droptable.d1-017",
-      "nameKey": "droptable.verdant-husk",
-      "name": "Verdant Husk",
+      "nameKey": "drop-table.mossy-shell",
+      "name": "Mossy Shell",
       "sourceAllow": [
         "web"
       ],
@@ -2000,8 +2000,8 @@
     },
     {
       "id": "droptable.d1-023",
-      "nameKey": "droptable.overgrowth-cache",
-      "name": "Overgrowth Cache",
+      "nameKey": "drop-table.verdant-bundle",
+      "name": "Verdant Bundle",
       "sourceAllow": [
         "web"
       ],
@@ -2080,8 +2080,8 @@
     },
     {
       "id": "droptable.d1-025",
-      "nameKey": "droptable.overgrown-reliquary",
-      "name": "Overgrown Reliquary",
+      "nameKey": "drop-table.mossy-reliquary",
+      "name": "Mossy Reliquary",
       "sourceAllow": [
         "web"
       ],

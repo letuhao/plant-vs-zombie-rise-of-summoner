@@ -501,8 +501,8 @@
     },
     {
       "id": "item.humanoid-face-b-014",
-      "nameKey": "base.polished-monocle",
-      "name": "Polished Monocle",
+      "nameKey": "base-type.silver-rimmed-lens",
+      "name": "Silver-Rimmed Lens",
       "frame": "humanoid",
       "role": "sense",
       "class": "cloth",
@@ -512,7 +512,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.polished-monocle",
+      "iconKey": "icon.base-type.silver-rimmed-lens",
       "flavorKey": "flavor.base.polished-monocle",
       "flavor": "A singular, high-clarity lens mounted to a delicate frame, designed to sharpen the wearer's perception of subtle movements.",
       "tags": [
@@ -537,8 +537,8 @@
     },
     {
       "id": "item.humanoid-face-b-015",
-      "nameKey": "base.polished-monocle",
-      "name": "Polished Monocle",
+      "nameKey": "base-type.crystal-lens",
+      "name": "Crystal Lens",
       "frame": "humanoid",
       "role": "sense",
       "class": "leather",
@@ -548,7 +548,7 @@
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.polished-monocle",
+      "iconKey": "icon.base-type.crystal-lens",
       "flavorKey": "flavor.base.polished-monocle",
       "flavor": "A singular, high-clarity lens mounted to a fine metal frame. It is designed to sharpen the wearer's perception of subtle movements.",
       "tags": [
@@ -573,8 +573,8 @@
     },
     {
       "id": "item.humanoid-face-b-016",
-      "nameKey": "base.polished-monocle",
-      "name": "Polished Monocle",
+      "nameKey": "base-type.silver-eyeglass",
+      "name": "Silver Eyeglass",
       "frame": "humanoid",
       "role": "sense",
       "class": "leather",
@@ -584,7 +584,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.polished-monocle",
+      "iconKey": "icon.base-type.silver-eyeglass",
       "flavorKey": "flavor.base.polished-monocle",
       "flavor": "A singular, high-clarity lens mounted to a rigid frame, designed to sharpen the wearer's perception of subtle movements.",
       "tags": [
@@ -644,8 +644,8 @@
     },
     {
       "id": "item.humanoid-face-b-018",
-      "nameKey": "base.polished-monocle",
-      "name": "Polished Monocle",
+      "nameKey": "base-type.glass-lens",
+      "name": "Glass Lens",
       "frame": "humanoid",
       "role": "sense",
       "class": "cloth",
@@ -655,7 +655,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.polished-monocle",
+      "iconKey": "icon.base-type.glass-lens",
       "flavorKey": "flavor.base.polished-monocle",
       "flavor": "A singular, crystal-clear lens mounted to a fine metal frame. It focuses the wearer's perception onto a single point of interest.",
       "tags": [
@@ -680,8 +680,8 @@
     },
     {
       "id": "item.humanoid-face-b-019",
-      "nameKey": "base.polished-monocle",
-      "name": "Polished Monocle",
+      "nameKey": "base-type.glass-eyelet",
+      "name": "Glass Eyelet",
       "frame": "humanoid",
       "role": "sense",
       "class": "leather",
@@ -691,7 +691,7 @@
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.polished-monocle",
+      "iconKey": "icon.base-type.glass-eyelet",
       "flavorKey": "flavor.base.polished-monocle",
       "flavor": "A singular, high-clarity lens mounted to a rigid frame. It focuses the wearer's perception toward minute details and subtle movements.",
       "tags": [
@@ -715,8 +715,8 @@
     },
     {
       "id": "item.humanoid-face-b-020",
-      "nameKey": "base.polished-monocle",
-      "name": "Polished Monocle",
+      "nameKey": "base-type.silver-spectacles",
+      "name": "Silver Spectacles",
       "frame": "humanoid",
       "role": "sense",
       "class": "leather",
@@ -726,7 +726,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.polished-monocle",
+      "iconKey": "icon.base-type.silver-spectacles",
       "flavorKey": "flavor.base.polished-monocle",
       "flavor": "A singular, high-clarity lens mounted to a fine frame, designed to sharpen the focus of the wearer's primary sensory input.",
       "tags": [
@@ -786,8 +786,8 @@
     },
     {
       "id": "item.humanoid-face-b-022",
-      "nameKey": "base.lensed-cowl",
-      "name": "Lensed Cowl",
+      "nameKey": "base-type.glass-visor",
+      "name": "Glass Visor",
       "frame": "humanoid",
       "role": "sense",
       "class": "leather",
@@ -797,7 +797,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.lensed-cowl",
+      "iconKey": "icon.base-type.glass-visor",
       "flavorKey": "flavor.base.lensed-cowl",
       "flavor": "A heavy leather hood fitted with a series of rotating glass lenses to sharpen the wearer's perception.",
       "tags": [
@@ -858,8 +858,8 @@
     },
     {
       "id": "item.humanoid-face-b-024",
-      "nameKey": "base.lensed-cowl",
-      "name": "Lensed Cowl",
+      "nameKey": "base-type.prismatic-visage",
+      "name": "Prismatic Visage",
       "frame": "humanoid",
       "role": "sense",
       "class": "leather",
@@ -869,7 +869,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.lensed-cowl",
+      "iconKey": "icon.base-type.prismatic-visage",
       "flavorKey": "flavor.base.lensed-cowl",
       "flavor": "A heavy leather hood fitted with a series of rotating glass prisms to filter light and sharpen focus.",
       "tags": [
@@ -894,8 +894,8 @@
     },
     {
       "id": "item.humanoid-face-b-025",
-      "nameKey": "base.lensed-cowl",
-      "name": "Lensed Cowl",
+      "nameKey": "base-type.crystal-monocle",
+      "name": "Crystal Monocle",
       "frame": "humanoid",
       "role": "sense",
       "class": "leather",
@@ -905,7 +905,7 @@
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.lensed-cowl",
+      "iconKey": "icon.base-type.crystal-monocle",
       "flavorKey": "flavor.base.lensed-cowl",
       "flavor": "A heavy leather hood fitted with various magnifying crystals to sharpen the wearer's perception of the world.",
       "tags": [
@@ -930,8 +930,8 @@
     },
     {
       "id": "item.humanoid-face-b-026",
-      "nameKey": "base.lensed-cowl",
-      "name": "Lensed Cowl",
+      "nameKey": "base-type.prism-visage",
+      "name": "Prism Visage",
       "frame": "humanoid",
       "role": "sense",
       "class": "leather",
@@ -941,7 +941,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.lensed-cowl",
+      "iconKey": "icon.base-type.prism-visage",
       "flavorKey": "flavor.base.lensed-cowl",
       "flavor": "A heavy hood fitted with a series of rotating crystalline lenses for filtering light and motion.",
       "tags": [
@@ -965,8 +965,8 @@
     },
     {
       "id": "item.humanoid-face-b-027",
-      "nameKey": "base.lensed-cowl",
-      "name": "Lensed Cowl",
+      "nameKey": "base-type.prism-mask",
+      "name": "Prism Mask",
       "frame": "humanoid",
       "role": "sense",
       "class": "leather",
@@ -976,7 +976,7 @@
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.lensed-cowl",
+      "iconKey": "icon.base-type.prism-mask",
       "flavorKey": "flavor.base.lensed-cowl",
       "flavor": "A heavy leather hood fitted with various magnifying crystals and adjustable shutters to sharpen the wearer's perception.",
       "tags": [
@@ -1001,8 +1001,8 @@
     },
     {
       "id": "item.humanoid-face-b-028",
-      "nameKey": "base.lensed-cowl",
-      "name": "Lensed Cowl",
+      "nameKey": "base-type.prism-visor",
+      "name": "Prism Visor",
       "frame": "humanoid",
       "role": "sense",
       "class": "leather",
@@ -1012,7 +1012,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.lensed-cowl",
+      "iconKey": "icon.base-type.prism-visor",
       "flavorKey": "flavor.base.lensed-cowl",
       "flavor": "A heavy leather hood fitted with a series of rotating glass apertures to filter light and focus sight.",
       "tags": [

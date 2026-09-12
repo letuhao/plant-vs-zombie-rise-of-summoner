@@ -630,8 +630,8 @@
         }
       ],
       "minSockets": 4,
-      "name": "Vengeful Bastion",
-      "nameKey": "combination.splice-fortitude-ferocity",
+      "name": "Relentless Bulwark",
+      "nameKey": "combination.relentless-bulwark",
       "shape": "splice"
     },
     {
@@ -871,8 +871,8 @@
         }
       ],
       "minSockets": 4,
-      "name": "Kinetic Bastion",
-      "nameKey": "combination.splice-might-bulwark",
+      "name": "Kinetic Aegis",
+      "nameKey": "combination.kinetic-aegis",
       "shape": "splice"
     },
     {
@@ -1013,8 +1013,8 @@
         }
       ],
       "minSockets": 4,
-      "name": "Kinetic Impact",
-      "nameKey": "combination.splice-might-fortitude",
+      "name": "Forceful Surge",
+      "nameKey": "combination.forceful-surge",
       "shape": "splice"
     },
     {
@@ -1147,8 +1147,8 @@
         }
       ],
       "minSockets": 4,
-      "name": "Kinetic Bastion",
-      "nameKey": "combination.splice-might-vigor",
+      "name": "Impact Aegis",
+      "nameKey": "combination.impact-aegis",
       "shape": "splice"
     },
     {
@@ -1342,8 +1342,8 @@
         }
       ],
       "minSockets": 4,
-      "name": "Shatter-Guard",
-      "nameKey": "combination.splice-pierce-bulwark",
+      "name": "Bulwark Breach",
+      "nameKey": "combination.bulwark-breach",
       "shape": "splice"
     },
     {
@@ -1538,8 +1538,8 @@
         }
       ],
       "minSockets": 4,
-      "name": "Kinetic Bastion",
-      "nameKey": "combination.splice-vigor-agility",
+      "name": "Swift Aegis",
+      "nameKey": "combination.swift-aegis",
       "shape": "splice"
     },
     {
@@ -1692,8 +1692,8 @@
         }
       ],
       "minSockets": 4,
-      "name": "Kinetic Bastion",
-      "nameKey": "combination.splice-vigor-onslaught",
+      "name": "Vigorous Surge",
+      "nameKey": "combination.vigorous-surge",
       "shape": "splice"
     },
     {

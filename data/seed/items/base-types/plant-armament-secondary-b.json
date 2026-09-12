@@ -467,8 +467,8 @@
     },
     {
       "id": "item.plant-thorn-b-013",
-      "nameKey": "base.barbed-siphon",
-      "name": "Barbed Siphon",
+      "nameKey": "base-type.thorned-siphon",
+      "name": "Thorned Siphon",
       "frame": "plant",
       "role": "armament-secondary",
       "class": "lash",
@@ -478,7 +478,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.barbed-siphon",
+      "iconKey": "icon.base-type.thorned-siphon",
       "flavorKey": "flavor.base.barbed-siphon",
       "flavor": "A hollowed, woody stem tipped with serrated needles designed to puncture and drain.",
       "tags": [
@@ -503,8 +503,8 @@
     },
     {
       "id": "item.plant-thorn-b-014",
-      "nameKey": "base.barbed-siphon",
-      "name": "Barbed Siphon",
+      "nameKey": "base-type.serrated-bramble-spike",
+      "name": "Serrated Bramble-Spike",
       "frame": "plant",
       "role": "armament-secondary",
       "class": "lash",
@@ -514,7 +514,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.barbed-siphon",
+      "iconKey": "icon.base-type.serrated-bramble-spike",
       "flavorKey": "flavor.base.barbed-siphon",
       "flavor": "A hollowed, woody stem tipped with jagged, inward-curving needles. It is designed to puncture skin and drink deeply.",
       "tags": [
@@ -539,8 +539,8 @@
     },
     {
       "id": "item.plant-thorn-b-015",
-      "nameKey": "base.barbed-siphon",
-      "name": "Barbed Siphon",
+      "nameKey": "base-type.thorned-siphon-stem",
+      "name": "Thorned Siphon Stem",
       "frame": "plant",
       "role": "armament-secondary",
       "class": "lash",
@@ -550,7 +550,7 @@
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.barbed-siphon",
+      "iconKey": "icon.base-type.thorned-siphon-stem",
       "flavorKey": "flavor.base.barbed-siphon",
       "flavor": "A hollowed, woody stem tipped with jagged, inward-curving needles. It is designed to puncture and drain.",
       "tags": [
@@ -611,8 +611,8 @@
     },
     {
       "id": "item.plant-thorn-b-017",
-      "nameKey": "base.barbed-siphon",
-      "name": "Barbed Siphon",
+      "nameKey": "base-type.serrated-siphon-spike",
+      "name": "Serrated Siphon-Spike",
       "frame": "plant",
       "role": "armament-secondary",
       "class": "lash",
@@ -622,7 +622,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.barbed-siphon",
+      "iconKey": "icon.base-type.serrated-siphon-spike",
       "flavorKey": "flavor.base.barbed-siphon",
       "flavor": "A hollowed, woody stem tipped with jagged, inward-curving needles. It is designed to puncture skin and drink deeply.",
       "tags": [
@@ -647,8 +647,8 @@
     },
     {
       "id": "item.plant-thorn-b-018",
-      "nameKey": "base.barbed-siphon",
-      "name": "Barbed Siphon",
+      "nameKey": "base-type.serrated-thistle",
+      "name": "Serrated Thistle",
       "frame": "plant",
       "role": "armament-secondary",
       "class": "lash",
@@ -658,7 +658,7 @@
         "powerBand": "low"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.barbed-siphon",
+      "iconKey": "icon.base-type.serrated-thistle",
       "flavorKey": "flavor.base.barbed-siphon",
       "flavor": "A hollowed, vascular stem tipped with jagged, needle-like protrusions. It is designed to puncture and drain.",
       "tags": [
@@ -683,8 +683,8 @@
     },
     {
       "id": "item.plant-thorn-b-019",
-      "nameKey": "base.barbed-siphon",
-      "name": "Barbed Siphon",
+      "nameKey": "base-type.jagged-thistle-needle",
+      "name": "Jagged Thistle-Needle",
       "frame": "plant",
       "role": "armament-secondary",
       "class": "lash",
@@ -694,7 +694,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.barbed-siphon",
+      "iconKey": "icon.base-type.jagged-thistle-needle",
       "flavorKey": "flavor.base.barbed-siphon",
       "flavor": "A hollowed, woody stem tipped with jagged, inward-curving needles. It is designed to puncture and drain.",
       "tags": [
@@ -719,8 +719,8 @@
     },
     {
       "id": "item.plant-thorn-b-020",
-      "nameKey": "base.barbed-siphon",
-      "name": "Barbed Siphon",
+      "nameKey": "base-type.jagged-spore-stem",
+      "name": "Jagged Spore-Stem",
       "frame": "plant",
       "role": "armament-secondary",
       "class": "lash",
@@ -730,7 +730,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.barbed-siphon",
+      "iconKey": "icon.base-type.jagged-spore-stem",
       "flavorKey": "flavor.base.barbed-siphon",
       "flavor": "A hollowed, calcified vine designed to puncture skin and drink deep. It pulses with a rhythmic, hungry cadence.",
       "tags": [
@@ -755,8 +755,8 @@
     },
     {
       "id": "item.plant-thorn-b-021",
-      "nameKey": "base.coiled-tendril",
-      "name": "Coiled Tendril",
+      "nameKey": "base-type.spiral-bramble",
+      "name": "Spiral Bramble",
       "frame": "plant",
       "role": "armament-secondary",
       "class": "lash",
@@ -766,7 +766,7 @@
         "powerBand": "low"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.coiled-tendril",
+      "iconKey": "icon.base-type.spiral-bramble",
       "flavorKey": "flavor.base.coiled-tendril",
       "flavor": "A whip-like length of fibrous, thorn-studded vine that lashes out with rhythmic, predatory intent.",
       "tags": [
@@ -827,8 +827,8 @@
     },
     {
       "id": "item.plant-thorn-b-023",
-      "nameKey": "base.coiled-tendril",
-      "name": "Coiled Tendril",
+      "nameKey": "base-type.barbed-spiral-vine",
+      "name": "Barbed Spiral Vine",
       "frame": "plant",
       "role": "armament-secondary",
       "class": "lash",
@@ -838,7 +838,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.coiled-tendril",
+      "iconKey": "icon.base-type.barbed-spiral-vine",
       "flavorKey": "flavor.base.coiled-tendril",
       "flavor": "A whip-like length of dense, vascular vine that lashes out with sudden, predatory intent. It remains tightly wound until the moment of impact.",
       "tags": [
@@ -863,8 +863,8 @@
     },
     {
       "id": "item.plant-thorn-b-024",
-      "nameKey": "base.coiled-bramble-whip",
-      "name": "Coiled Bramble-Whip",
+      "nameKey": "base-type.serpentine-vine-thorn",
+      "name": "Serpentine Vine-Thorn",
       "frame": "plant",
       "role": "armament-secondary",
       "class": "lash",
@@ -874,7 +874,7 @@
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.coiled-bramble-whip",
+      "iconKey": "icon.base-type.serpentine-vine-thorn",
       "flavorKey": "flavor.base.coiled-bramble-whip",
       "flavor": "A length of flexible, thorn-studded vine that lashes out with predatory intent. It remains tightly wound until the moment of impact.",
       "tags": [
@@ -899,8 +899,8 @@
     },
     {
       "id": "item.plant-thorn-b-025",
-      "nameKey": "base.coiled-bramble-whip",
-      "name": "Coiled Bramble-Whip",
+      "nameKey": "base-type.twisted-bramble-sting",
+      "name": "Twisted Bramble-Sting",
       "frame": "plant",
       "role": "armament-secondary",
       "class": "lash",
@@ -910,7 +910,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.coiled-bramble-whip",
+      "iconKey": "icon.base-type.twisted-bramble-sting",
       "flavorKey": "flavor.base.coiled-bramble-whip",
       "flavor": "A length of flexible, thorn-studded vine that lashes out with predatory intent. Its serrated edges are designed to catch and tear rather than merely puncture.",
       "tags": [
@@ -1007,8 +1007,8 @@
     },
     {
       "id": "item.plant-thorn-b-028",
-      "nameKey": "base.splintered-bramble-whip",
-      "name": "Splintered Bramble-Whip",
+      "nameKey": "base-type.thorny-vine-whip",
+      "name": "Thorny Vine-Whip",
       "frame": "plant",
       "role": "armament-secondary",
       "class": "lash",
@@ -1018,7 +1018,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.splintered-bramble-whip",
+      "iconKey": "icon.base-type.thorny-vine-whip",
       "flavorKey": "flavor.base.splintered-bramble-whip",
       "flavor": "A length of tightly wound, razor-edged vines that lashes out with unpredictable, jagged momentum.",
       "tags": [

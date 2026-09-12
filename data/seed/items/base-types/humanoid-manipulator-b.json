@@ -455,8 +455,8 @@
     },
     {
       "id": "item.humanoid-hands-b-013",
-      "nameKey": "base.etched-gauntlet",
-      "name": "Etched Gauntlet",
+      "nameKey": "base-type.carved-gauntlet",
+      "name": "Carved Gauntlet",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "plate",
@@ -466,7 +466,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.etched-gauntlet",
+      "iconKey": "icon.base-type.carved-gauntlet",
       "flavorKey": "flavor.base.etched-gauntlet",
       "flavor": "A heavy, articulated sleeve designed to channel precise, lethal movements through the fingertips.",
       "tags": [
@@ -563,8 +563,8 @@
     },
     {
       "id": "item.humanoid-hands-b-016",
-      "nameKey": "base.etched-gauntlet",
-      "name": "Etched Gauntlet",
+      "nameKey": "base-type.chiseled-vambraces",
+      "name": "Chiseled Vambraces",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "plate",
@@ -574,7 +574,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.etched-gauntlet",
+      "iconKey": "icon.base-type.chiseled-vambraces",
       "flavorKey": "flavor.base.etched-gauntlet",
       "flavor": "A heavy, articulated sleeve designed to channel precise, lethal movements through the fingertips.",
       "tags": [
@@ -599,8 +599,8 @@
     },
     {
       "id": "item.humanoid-hands-b-017",
-      "nameKey": "base.serrated-gauntlet",
-      "name": "Serrated Gauntlet",
+      "nameKey": "base-type.razor-edge-bracers",
+      "name": "Razor-Edge Bracers",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "leather",
@@ -610,7 +610,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.serrated-gauntlet",
+      "iconKey": "icon.base-type.razor-edge-bracers",
       "flavorKey": "flavor.base.serrated-gauntlet",
       "flavor": "A heavy, jagged sleeve designed to catch and tear through resistance with every striking motion.",
       "tags": [
@@ -634,8 +634,8 @@
     },
     {
       "id": "item.humanoid-hands-b-018",
-      "nameKey": "base.etched-gauntlet",
-      "name": "Etched Gauntlet",
+      "nameKey": "base-type.inscribed-gauntlet",
+      "name": "Inscribed Gauntlet",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "plate",
@@ -645,7 +645,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.etched-gauntlet",
+      "iconKey": "icon.base-type.inscribed-gauntlet",
       "flavorKey": "flavor.base.etched-gauntlet",
       "flavor": "A heavy, articulated sleeve designed to channel precise, lethal movements through the fingertips.",
       "tags": [
@@ -670,8 +670,8 @@
     },
     {
       "id": "item.humanoid-hands-b-019",
-      "nameKey": "base.etched-manacles",
-      "name": "Etched Manacles",
+      "nameKey": "base-type.engraved-shackles",
+      "name": "Engraved Shackles",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "plate",
@@ -681,7 +681,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.etched-manacles",
+      "iconKey": "icon.base-type.engraved-shackles",
       "flavorKey": "flavor.base.etched-manacles",
       "flavor": "Heavy iron restraints designed to bind a target's movements while the wearer exerts total control.",
       "tags": [
@@ -706,8 +706,8 @@
     },
     {
       "id": "item.humanoid-hands-b-020",
-      "nameKey": "base.etched-manacles",
-      "name": "Etched Manacles",
+      "nameKey": "base-type.inscribed-fetters",
+      "name": "Inscribed Fetters",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "plate",
@@ -717,7 +717,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.etched-manacles",
+      "iconKey": "icon.base-type.inscribed-fetters",
       "flavorKey": "flavor.base.etched-manacles",
       "flavor": "Heavy iron restraints designed to channel and direct the kinetic energy of a forceful strike.",
       "tags": [
@@ -777,8 +777,8 @@
     },
     {
       "id": "item.humanoid-hands-b-022",
-      "nameKey": "base.serrated-vambrace",
-      "name": "Serrated Vambrace",
+      "nameKey": "base-type.notched-bracer",
+      "name": "Notched Bracer",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "leather",
@@ -788,7 +788,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.serrated-vambrace",
+      "iconKey": "icon.base-type.notched-bracer",
       "flavorKey": "flavor.base.serrated-vambrace",
       "flavor": "A forearm guard lined with jagged, inward-facing teeth designed to catch and tear at anything within reach.",
       "tags": [
@@ -848,8 +848,8 @@
     },
     {
       "id": "item.humanoid-hands-b-024",
-      "nameKey": "base.serrated-cestus",
-      "name": "Serrated Cestus",
+      "nameKey": "base-type.jagged-cestus",
+      "name": "Jagged Cestus",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "leather",
@@ -859,7 +859,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.serrated-cestus",
+      "iconKey": "icon.base-type.jagged-cestus",
       "flavorKey": "flavor.base.serrated-cestus",
       "flavor": "A heavy, reinforced wrap designed to turn a simple strike into a jagged, tearing motion.",
       "tags": [
@@ -883,8 +883,8 @@
     },
     {
       "id": "item.humanoid-hands-b-025",
-      "nameKey": "base.serrated-vambrace",
-      "name": "Serrated Vambrace",
+      "nameKey": "base-type.jagged-bone-gauntlet",
+      "name": "Jagged Bone Gauntlet",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "leather",
@@ -894,7 +894,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.serrated-vambrace",
+      "iconKey": "icon.base-type.jagged-bone-gauntlet",
       "flavorKey": "flavor.base.serrated-vambrace",
       "flavor": "A forearm guard lined with jagged, inward-facing teeth designed to catch and tear at anything within reach.",
       "tags": [
@@ -918,8 +918,8 @@
     },
     {
       "id": "item.humanoid-hands-b-026",
-      "nameKey": "base.serrated-vambrace",
-      "name": "Serrated Vambrace",
+      "nameKey": "base-type.serrated-bone-bracer",
+      "name": "Serrated Bone Bracer",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "leather",
@@ -929,7 +929,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.serrated-vambrace",
+      "iconKey": "icon.base-type.serrated-bone-bracer",
       "flavorKey": "flavor.base.serrated-vambrace",
       "flavor": "A forearm guard lined with jagged, inward-facing teeth designed to catch and tear as it is pulled across a target.",
       "tags": [
@@ -953,8 +953,8 @@
     },
     {
       "id": "item.humanoid-hands-b-027",
-      "nameKey": "base.serrated-cestus",
-      "name": "Serrated Cestus",
+      "nameKey": "base-type.spiked-cestus",
+      "name": "Spiked Cestus",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "leather",
@@ -964,7 +964,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.serrated-cestus",
+      "iconKey": "icon.base-type.spiked-cestus",
       "flavorKey": "flavor.base.serrated-cestus",
       "flavor": "A heavy, reinforced wrap designed to turn a simple strike into a jagged, tearing motion.",
       "tags": [

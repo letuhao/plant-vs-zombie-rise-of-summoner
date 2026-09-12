@@ -510,8 +510,8 @@
     },
     {
       "id": "item.plant-sheath-b-014",
-      "nameKey": "base.fibrous-scabbard",
-      "name": "Fibrous Scabbard",
+      "nameKey": "base-type.woven-stem-case",
+      "name": "Woven Stem-Case",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
@@ -521,7 +521,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.fibrous-scabbard",
+      "iconKey": "icon.base-type.woven-stem-case",
       "flavorKey": "flavor.base.fibrous-scabbard",
       "flavor": "A tightly woven sleeve of reinforced plant matter designed to house a blade or ritual tool. It provides a stable conduit for channeling protective energies.",
       "tags": [
@@ -546,8 +546,8 @@
     },
     {
       "id": "item.plant-sheath-b-015",
-      "nameKey": "base.fibrous-scabbard",
-      "name": "Fibrous Scabbard",
+      "nameKey": "base-type.lignified-sheath",
+      "name": "Lignified Sheath",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
@@ -557,7 +557,7 @@
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.fibrous-scabbard",
+      "iconKey": "icon.base-type.lignified-sheath",
       "flavorKey": "flavor.base.fibrous-scabbard",
       "flavor": "A tightly woven sleeve of reinforced plant matter designed to house a ceremonial blade. It hums with a faint, protective resonance.",
       "tags": [
@@ -582,8 +582,8 @@
     },
     {
       "id": "item.plant-sheath-b-016",
-      "nameKey": "base.fibrous-scabbard",
-      "name": "Fibrous Scabbard",
+      "nameKey": "base-type.woven-plant-guard",
+      "name": "Woven Plant Guard",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
@@ -593,7 +593,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.fibrous-scabbard",
+      "iconKey": "icon.base-type.woven-plant-guard",
       "flavorKey": "flavor.base.fibrous-scabbard",
       "flavor": "A tightly woven sleeve of reinforced plant matter designed to hold a blade or staff in place. Its layered structure helps dampen vibrations and stabilize the contents.",
       "tags": [
@@ -618,8 +618,8 @@
     },
     {
       "id": "item.plant-sheath-b-017",
-      "nameKey": "base.fibrous-scabbard",
-      "name": "Fibrous Scabbard",
+      "nameKey": "base-type.woven-husk",
+      "name": "Woven Husk",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
@@ -629,7 +629,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.fibrous-scabbard",
+      "iconKey": "icon.base-type.woven-husk",
       "flavorKey": "flavor.base.fibrous-scabbard",
       "flavor": "A tightly woven sleeve of reinforced plant matter designed to house a blade or ritual tool. It provides a protective layer that hums with a faint, stabilizing energy.",
       "tags": [
@@ -654,8 +654,8 @@
     },
     {
       "id": "item.plant-sheath-b-018",
-      "nameKey": "base.fibrous-scabbard",
-      "name": "Fibrous Scabbard",
+      "nameKey": "base-type.braided-stem-case",
+      "name": "Braided Stem-Case",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
@@ -665,7 +665,7 @@
         "powerBand": "low"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.fibrous-scabbard",
+      "iconKey": "icon.base-type.braided-stem-case",
       "flavorKey": "flavor.base.fibrous-scabbard",
       "flavor": "A tightly woven sleeve of reinforced plant matter designed to cradle a blade or staff. It provides a stable conduit for channeling protective energies.",
       "tags": [
@@ -690,8 +690,8 @@
     },
     {
       "id": "item.plant-sheath-b-019",
-      "nameKey": "base.fibrous-scabbard",
-      "name": "Fibrous Scabbard",
+      "nameKey": "base-type.braided-husk-sheath",
+      "name": "Braided Husk-Sheath",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
@@ -701,7 +701,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.fibrous-scabbard",
+      "iconKey": "icon.base-type.braided-husk-sheath",
       "flavorKey": "flavor.base.fibrous-scabbard",
       "flavor": "A tightly woven sleeve of reinforced plant matter designed to house a blade or ritual tool. It provides a stable conduit for channeling protective energies.",
       "tags": [
@@ -726,8 +726,8 @@
     },
     {
       "id": "item.plant-sheath-b-020",
-      "nameKey": "base.fibrous-scabbard",
-      "name": "Fibrous Scabbard",
+      "nameKey": "base-type.woven-reed-scabbard",
+      "name": "Woven Reed Scabbard",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
@@ -737,7 +737,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.fibrous-scabbard",
+      "iconKey": "icon.base-type.woven-reed-scabbard",
       "flavorKey": "flavor.base.fibrous-scabbard",
       "flavor": "A tightly woven sleeve of reinforced plant matter designed to house a blade or ritual tool. It provides a stable conduit for channeling protective energies.",
       "tags": [
@@ -762,8 +762,8 @@
     },
     {
       "id": "item.plant-sheath-b-021",
-      "nameKey": "base.verdant-scabbard",
-      "name": "Verdant Scabbard",
+      "nameKey": "base-type.sprouting-vine-scabbard",
+      "name": "Sprouting Vine Scabbard",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
@@ -773,7 +773,7 @@
         "powerBand": "low"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.verdant-scabbard",
+      "iconKey": "icon.base-type.sprouting-vine-scabbard",
       "flavorKey": "flavor.base.verdant-scabbard",
       "flavor": "A hollowed, living stem reinforced with hardened sap to protect a delicate warding core.",
       "tags": [
@@ -798,8 +798,8 @@
     },
     {
       "id": "item.plant-sheath-b-022",
-      "nameKey": "base.verdant-scabbard",
-      "name": "Verdant Scabbard",
+      "nameKey": "base-type.overgrown-scabbard",
+      "name": "Overgrown Scabbard",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
@@ -809,7 +809,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.verdant-scabbard",
+      "iconKey": "icon.base-type.overgrown-scabbard",
       "flavorKey": "flavor.base.verdant-scabbard",
       "flavor": "A hollowed length of living vine, woven tightly to cradle a blade in constant, restorative moisture.",
       "tags": [
@@ -834,8 +834,8 @@
     },
     {
       "id": "item.plant-sheath-b-023",
-      "nameKey": "base.verdant-scabbard",
-      "name": "Verdant Scabbard",
+      "nameKey": "base-type.chlorophyll-stained-sheath",
+      "name": "Chlorophyll-Stained Sheath",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
@@ -845,7 +845,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.verdant-scabbard",
+      "iconKey": "icon.base-type.chlorophyll-stained-sheath",
       "flavorKey": "flavor.base.verdant-scabbard",
       "flavor": "A hollowed, living stem reinforced with hardened sap to protect a delicate warding core.",
       "tags": [
@@ -870,8 +870,8 @@
     },
     {
       "id": "item.plant-sheath-b-024",
-      "nameKey": "base.verdant-scabbard",
-      "name": "Verdant Scabbard",
+      "nameKey": "base-type.verdant-sprout-sheath",
+      "name": "Verdant Sprout-Sheath",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
@@ -881,7 +881,7 @@
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.verdant-scabbard",
+      "iconKey": "icon.base-type.verdant-sprout-sheath",
       "flavorKey": "flavor.base.verdant-scabbard",
       "flavor": "A hollowed, living stem reinforced with hardened sap to protect the blade within. It pulses with a faint, rhythmic vitality.",
       "tags": [
@@ -906,8 +906,8 @@
     },
     {
       "id": "item.plant-sheath-b-025",
-      "nameKey": "base.verdant-scabbard",
-      "name": "Verdant Scabbard",
+      "nameKey": "base-type.mossy-scabbard",
+      "name": "Mossy Scabbard",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
@@ -917,9 +917,9 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.verdant-scabbard",
+      "iconKey": "icon.base-type.mossy-scabbard",
       "flavorKey": "flavor.base.verdant-scabbard",
-      "flavor": "A hollowed stem reinforced with living sap, designed to cradle a blade within a protective layer of cellulose.",
+      "flavor": "A sheath weathered by damp forest air.",
       "tags": [
         "organic",
         "defensive",
@@ -942,8 +942,8 @@
     },
     {
       "id": "item.plant-sheath-b-026",
-      "nameKey": "base.verdant-scabbard",
-      "name": "Verdant Scabbard",
+      "nameKey": "base-type.verdant-sprout-case",
+      "name": "Verdant Sprout-Case",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
@@ -953,7 +953,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.verdant-scabbard",
+      "iconKey": "icon.base-type.verdant-sprout-case",
       "flavorKey": "flavor.base.verdant-scabbard",
       "flavor": "A hollowed length of living vine, woven tightly to cradle a blade within a protective layer of sap and leaf.",
       "tags": [
@@ -978,8 +978,8 @@
     },
     {
       "id": "item.plant-sheath-b-027",
-      "nameKey": "base.verdant-scabbard",
-      "name": "Verdant Scabbard",
+      "nameKey": "base-type.mossy-vine-scabbard",
+      "name": "Mossy Vine Scabbard",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
@@ -989,7 +989,7 @@
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.verdant-scabbard",
+      "iconKey": "icon.base-type.mossy-vine-scabbard",
       "flavorKey": "flavor.base.verdant-scabbard",
       "flavor": "A hollowed, living stem reinforced with hardened sap to protect a ceremonial blade.",
       "tags": [

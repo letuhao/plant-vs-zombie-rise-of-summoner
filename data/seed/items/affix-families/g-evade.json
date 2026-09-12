@@ -492,8 +492,8 @@
     },
     {
       "id": "atom.evd-shift",
-      "nameKey": "affix.evade",
-      "name": "Evade",
+      "nameKey": "affix-family.agility",
+      "name": "Agility",
       "frames": [
         "humanoid",
         "plant"

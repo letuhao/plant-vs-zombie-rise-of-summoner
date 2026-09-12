@@ -502,8 +502,8 @@
     },
     {
       "id": "item.plant-crown-a-014",
-      "nameKey": "base.thickened-bract",
-      "name": "Thickened Bract",
+      "nameKey": "base-type.dense-bract",
+      "name": "Dense Bract",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
@@ -513,7 +513,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.thickened-bract",
+      "iconKey": "icon.base-type.dense-bract",
       "flavorKey": "flavor.base.thickened-bract",
       "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the wearer's brow from overhead strikes.",
       "tags": [
@@ -575,8 +575,8 @@
     },
     {
       "id": "item.plant-crown-a-016",
-      "nameKey": "base.thickened-bract",
-      "name": "Thickened Bract",
+      "nameKey": "base-type.hardened-bract",
+      "name": "Hardened Bract",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
@@ -586,7 +586,7 @@
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.thickened-bract",
+      "iconKey": "icon.base-type.hardened-bract",
       "flavorKey": "flavor.base.thickened-bract",
       "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the wearer's brow from overhead strikes.",
       "tags": [
@@ -611,8 +611,8 @@
     },
     {
       "id": "item.plant-crown-a-017",
-      "nameKey": "base.thickened-bract",
-      "name": "Thickened Bract",
+      "nameKey": "base-type.reinforced-bract",
+      "name": "Reinforced Bract",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
@@ -622,7 +622,7 @@
         "powerBand": "trivial"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.thickened-bract",
+      "iconKey": "icon.base-type.reinforced-bract",
       "flavorKey": "flavor.base.thickened-bract",
       "flavor": "A dense, overlapping arrangement of waxy leaves designed to deflect blows away from the wearer's brow.",
       "tags": [
@@ -647,8 +647,8 @@
     },
     {
       "id": "item.plant-crown-a-018",
-      "nameKey": "base.thickened-bract",
-      "name": "Thickened Bract",
+      "nameKey": "base-type.sturdy-bract",
+      "name": "Sturdy Bract",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
@@ -658,7 +658,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.thickened-bract",
+      "iconKey": "icon.base-type.sturdy-bract",
       "flavorKey": "flavor.base.thickened-bract",
       "flavor": "A dense, overlapping arrangement of reinforced leaves designed to shield the wearer's brow from overhead strikes.",
       "tags": [
@@ -683,8 +683,8 @@
     },
     {
       "id": "item.plant-crown-a-019",
-      "nameKey": "base.thickened-bract",
-      "name": "Thickened Bract",
+      "nameKey": "base-type.gnarled-bract",
+      "name": "Gnarled Bract",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
@@ -694,7 +694,7 @@
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.thickened-bract",
+      "iconKey": "icon.base-type.gnarled-bract",
       "flavorKey": "flavor.base.thickened-bract",
       "flavor": "A dense, overlapping arrangement of reinforced leaves designed to shield the wearer's brow from overhead strikes.",
       "tags": [
@@ -719,8 +719,8 @@
     },
     {
       "id": "item.plant-crown-a-020",
-      "nameKey": "base.thickened-bract",
-      "name": "Thickened Bract",
+      "nameKey": "base-type.coiled-bract",
+      "name": "Coiled Bract",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
@@ -730,7 +730,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.thickened-bract",
+      "iconKey": "icon.base-type.coiled-bract",
       "flavorKey": "flavor.base.thickened-bract",
       "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the wearer's brow from overhead strikes.",
       "tags": [
@@ -791,8 +791,8 @@
     },
     {
       "id": "item.plant-crown-a-022",
-      "nameKey": "base.coiled-tendril",
-      "name": "Coiled Tendril",
+      "nameKey": "base-type.twisted-vine",
+      "name": "Twisted Vine",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
@@ -802,7 +802,7 @@
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.coiled-tendril",
+      "iconKey": "icon.base-type.twisted-vine",
       "flavorKey": "flavor.base.coiled-tendril",
       "flavor": "A dense, spring-like arrangement of braided vines designed to absorb the shock of a heavy blow. It wraps tightly around the brow to stabilize the wearer.",
       "tags": [
@@ -900,8 +900,8 @@
     },
     {
       "id": "item.plant-crown-a-025",
-      "nameKey": "base.coiled-tendril",
-      "name": "Coiled Tendril",
+      "nameKey": "base-type.spiral-sprout",
+      "name": "Spiral Sprout",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
@@ -911,7 +911,7 @@
         "powerBand": "trivial"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.coiled-tendril",
+      "iconKey": "icon.base-type.spiral-sprout",
       "flavorKey": "flavor.base.coiled-tendril",
       "flavor": "A dense, spring-like arrangement of braided vines designed to absorb the impact of a heavy blow. It wraps firmly around the brow to stabilize the wearer.",
       "tags": [
@@ -936,8 +936,8 @@
     },
     {
       "id": "item.plant-crown-a-026",
-      "nameKey": "base.coiled-tendril",
-      "name": "Coiled Tendril",
+      "nameKey": "base-type.spiral-shoot",
+      "name": "Spiral Shoot",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
@@ -947,7 +947,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.coiled-tendril",
+      "iconKey": "icon.base-type.spiral-shoot",
       "flavorKey": "flavor.base.coiled-tendril",
       "flavor": "A dense, spring-like arrangement of braided vines designed to absorb the impact of a heavy blow. It wraps snugly around the brow to stabilize the wearer.",
       "tags": [
@@ -1008,8 +1008,8 @@
     },
     {
       "id": "item.plant-crown-a-028",
-      "nameKey": "base.coiled-thistle-crown",
-      "name": "Coiled Thistle-Crown",
+      "nameKey": "base-type.twisted-thistle-crown",
+      "name": "Twisted Thistle-Crown",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
@@ -1019,7 +1019,7 @@
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.coiled-thistle-crown",
+      "iconKey": "icon.base-type.twisted-thistle-crown",
       "flavorKey": "flavor.base.coiled-thistle-crown",
       "flavor": "A dense ring of interlocking, thorned vines designed to deflect downward strikes. It sits low upon the brow, blending seamlessly into the wearer's natural growth.",
       "tags": [

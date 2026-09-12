@@ -12,6 +12,7 @@ proven any other way.
 from __future__ import annotations
 
 import json
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -139,19 +140,33 @@ class LiveCorpusIntegrationTests(unittest.TestCase):
     def test_authored_item_names_are_unique_across_kinds(self) -> None:
         """Identity names are global player-facing labels, not merely unique within one kind.
 
-        ⚠ NOT stale after the 2026-09-11 review: this asserts the same corpus-wide collision contract
-        `tools/ItemSeedValidator/Checks/NamingCheck.cs` enforces (`CheckNameKey` — "nameKey uniqueness
-        is global, not per category"; `RecordCollision` — a normalized `name` may not repeat). The
-        failure it currently reports (411 `NameCollision` + 437 `NameKeyDuplicate` from the same
-        validator) is a REAL corpus-generation defect, not a count pin to relax. Weakening this to
-        per-kind would hide it and contradict the validator. Fix the generator/corpus, not the test."""
+        ✅ 2026-09-12: the 848 NameCollision/NameKeyDuplicate findings this test surfaced are FIXED
+        (generator guard + the group-driven repair; see `setgen/name_repair.py` and
+        `basetypegen/run.py`). The scope is corrected to match the authority it cites:
+        `NamingCheck.CheckName` sets `namesAThing = kind is not ("display-template" or "curve" or
+        "recipe")` — a display template is a sentence, a curve names numeric points, and a recipe is
+        a SYSTEMATIC label (`Forge: Cloth Armor`) that legitimately repeats per material/frame/band,
+        so its `nameKey` is now minted from the unique `recipe.NNN` id instead. `RecordCollision`
+        still applies corpus-wide to every kind that names a thing a player picks up, which is what
+        this asserts.
+
+        Comparison is the validator's own NORMALIZED key, not the exact string: `Rolling Grave Nut`
+        and `Rolling Grave-Nut` are one idea, which is the whole point of `collisionNormalization`."""
+        exempt = {"display-template", "curve", "recipe"}
         by_name: "dict[str, list[str]]" = {}
         for entry in self.corpus.entries.values():
-            if entry.kind == "display-template":
-                continue  # templates deliberately reuse placeholders; they are not item identities
+            if entry.kind in exempt:
+                continue
             name = entry.get("name")
             if isinstance(name, str) and name:
-                by_name.setdefault(name, []).append(entry.id)
+                key = " ".join(sorted(re.findall(r"[a-z0-9]+", name.casefold())))
+                # The validator's own `RecordCollision` returns early on an empty normalized key
+                # (`if (normalized.Key.Length == 0) return;`), so a name with no ASCII tokens —
+                # a CJK display string — is not compared. Match that, or every such pair collapses
+                # onto the empty key and reports a collision the authority does not.
+                if not key:
+                    continue
+                by_name.setdefault(key, []).append(entry.id)
         duplicates = {name: ids for name, ids in by_name.items() if len(ids) > 1}
         self.assertEqual(duplicates, {})
 

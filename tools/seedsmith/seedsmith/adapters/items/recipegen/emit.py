@@ -68,8 +68,12 @@ def slug_from_name(name: str) -> str:
     return slug
 
 
-def name_key_for(slug: str) -> str:
-    return f"recipe.{slug}"
+def name_key_for(token: str) -> str:
+    """`recipe.<token>` — callers pass the unique `recipe.NNN` id, not a display-name slug.
+
+    A recipe's display name repeats by design (one per material/frame/band), so the name cannot
+    carry uniqueness; the id can, and the key adds no information beyond it (2026-09-12)."""
+    return f"recipe.{token}"
 
 
 def recipe_id(seq: int) -> str:
@@ -172,7 +176,14 @@ def assemble_entry(answer: Mapping[str, Any], *, seq: int,
 
     entry: "dict[str, Any]" = {
         "id": minted_id,
-        "nameKey": name_key_for(slug),
+        # ⛔ 2026-09-12: `nameKey` used to be `recipe.<slug of the display name>`. A recipe's name
+        # is deliberately systematic and REPEATS — `Temper: Sunwoven Reinforcement` is a real,
+        # distinct row per material/frame/band (recipe.033/034/044 share it and differ in
+        # costLines, soulsCostBand and frame) — so slugging the name produced 30
+        # NameKeyDuplicate findings across 4 keys. The id is the recipe's identity and is unique by
+        # construction (`recipe.NNN`), and nothing consumes a recipe `nameKey` (only the validator
+        # reads it), so the key is minted from the id.
+        "nameKey": name_key_for(minted_id),
         "name": name,
         "operation": operation,
         "outputKind": output_kind,

@@ -23,8 +23,8 @@
   "entries": [
     {
       "id": "set.doomseed-001",
-      "nameKey": "set.item",
-      "name": "毁灭菇孢子",
+      "nameKey": "set.doomseed-spore-cluster",
+      "name": "Doomseed Spore Cluster",
       "themeKey": "creature.doomseed",
       "members": [
         {
