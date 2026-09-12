@@ -12,8 +12,10 @@ plan owns *what* to build; this file owns *how the work is sequenced and proven*
 
 ## 1. Ground rules (unchanged from AGENTS.md)
 
-- **Git is hands-off.** No agent runs `git commit`/`add`/`merge`/`push`. Worktrees are integrated by
-  the owner (Apply or merge). Each wave checkpoint hands the owner a one-line message + paths.
+- **Commit via MCP, on the current branch.** Agents commit each verified increment with
+  `repo-git.commit` (explicit `paths`, never `all`) without waiting to be asked; raw `git
+  commit`/`add`/`merge`/`push` stay blocked, and push is owner-only. Worktrees commit their own
+  slice; the owner merges the worktree branches between waves.
 - **No pre-work hard gate.** Waves start when the previous wave's evidence rows are executed.
 - **The `RulesetVersion` bump is already approved.** The single bump (`= 4` → `= 5`) and golden
   re-bless are locked by the plan (T6); the run executes them without a fresh approval.
