@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
+using FusionRpg.Core.Tests.TestSupport;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Creatures;
@@ -85,13 +86,8 @@ public class CreatureQualityReportTests
                 UseShellExecute = false,
                 CreateNoWindow = true,
             };
-            using var proc = Process.Start(psi)!;
-            var stdout = proc.StandardOutput.ReadToEnd();
-            var stderr = proc.StandardError.ReadToEnd();
-            var exited = proc.WaitForExit(120_000);
-
-            Assert.True(exited, "CreatureQualityReport did not exit within 120s");
-            Assert.True(proc.ExitCode == 0, $"expected exit 0, got {proc.ExitCode}\nstdout:\n{stdout}\nstderr:\n{stderr}");
+            var (exitCode, stdout, stderr) = ExternalProcess.Run(psi, 120_000, "CreatureQualityReport did not exit within 120s");
+            Assert.True(exitCode == 0, $"expected exit 0, got {exitCode}\nstdout:\n{stdout}\nstderr:\n{stderr}");
 
             // Section 1: the duplicate and the two clean species are all named.
             Assert.Contains("CleanPlant", stdout, StringComparison.Ordinal);
@@ -176,13 +172,8 @@ public class CreatureQualityReportTests
                 UseShellExecute = false,
                 CreateNoWindow = true,
             };
-            using var proc = Process.Start(psi)!;
-            var stdout = proc.StandardOutput.ReadToEnd();
-            var stderr = proc.StandardError.ReadToEnd();
-            var exited = proc.WaitForExit(120_000);
-
-            Assert.True(exited, "CreatureQualityReport did not exit within 120s");
-            Assert.True(proc.ExitCode == 0, $"expected exit 0, got {proc.ExitCode}\nstdout:\n{stdout}\nstderr:\n{stderr}");
+            var (exitCode, stdout, stderr) = ExternalProcess.Run(psi, 120_000, "CreatureQualityReport did not exit within 120s");
+            Assert.True(exitCode == 0, $"expected exit 0, got {exitCode}\nstdout:\n{stdout}\nstderr:\n{stderr}");
 
             var sideLine = stdout.Split('\n').Single(l => l.TrimStart().StartsWith("side "));
             Assert.Contains("2/2", sideLine, StringComparison.Ordinal);

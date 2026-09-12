@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Linq;
+using FusionRpg.Core.Tests.TestSupport;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Creatures;
@@ -27,13 +28,8 @@ public class CreatureSpeciesGenExplainTests
             UseShellExecute = false,
             CreateNoWindow = true,
         };
-        using var proc = Process.Start(psi)!;
-        var stdout = proc.StandardOutput.ReadToEnd();
-        var stderr = proc.StandardError.ReadToEnd();
-        var exited = proc.WaitForExit(120_000);
-
-        Assert.True(exited, "CreatureSpeciesGen --explain did not exit within 120s");
-        Assert.True(proc.ExitCode == 0, $"expected exit 0, got {proc.ExitCode}\nstdout:\n{stdout}\nstderr:\n{stderr}");
+        var (exitCode, stdout, stderr) = ExternalProcess.Run(psi, 120_000, "CreatureSpeciesGen --explain did not exit within 120s");
+        Assert.True(exitCode == 0, $"expected exit 0, got {exitCode}\nstdout:\n{stdout}\nstderr:\n{stderr}");
 
         // Every real input this species' derivation reads, named in the transcript — the audit trail
         // the spec's own §8 promises ("a balance question gets answered without reading the code").
@@ -71,13 +67,8 @@ public class CreatureSpeciesGenExplainTests
                 UseShellExecute = false,
                 CreateNoWindow = true,
             };
-            using var proc = Process.Start(psi)!;
-            var stdout = proc.StandardOutput.ReadToEnd();
-            var stderr = proc.StandardError.ReadToEnd();
-            var exited = proc.WaitForExit(120_000);
-
-            Assert.True(exited, "CreatureSpeciesGen --export-legacy did not exit within 120s");
-            Assert.True(proc.ExitCode == 0, $"expected exit 0, got {proc.ExitCode}\nstdout:\n{stdout}\nstderr:\n{stderr}");
+            var (exitCode, stdout, stderr) = ExternalProcess.Run(psi, 120_000, "CreatureSpeciesGen --export-legacy did not exit within 120s");
+            Assert.True(exitCode == 0, $"expected exit 0, got {exitCode}\nstdout:\n{stdout}\nstderr:\n{stderr}");
             Assert.True(File.Exists(outPath), "export wrote no file");
 
             using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(outPath));
