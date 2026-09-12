@@ -18,14 +18,22 @@
     let the blame logger emit Sequence.xml naming the last-started / never-finished test.
     HangDumpType=None: kill only, no multi-hundred-MB dump.
 
-  TestTimeout is 10min, not 5: two retry-loop tests (RealColdProcessTests,
-  CreatureSpeciesImportCliTests) may legitimately spend 3 x 120s + 5s + 10s = 375s
-  (6.25min) under heavy parallel build contention — a 5min cap would kill a PASSING
-  test as a false hang. 10min still bounds a real hang to a useful wait.
+  Both values are sized from measured data, not guesswork:
+
+  TestSessionTimeout 30min — the longest project here is FusionRpg.Data.Tests, measured at
+  ~6.5min wall for its full 1259-test run. 30min leaves ~4.5x headroom for this repo's
+  documented heavy parallel load without letting a genuinely stuck session run for hours.
+
+  TestTimeout 10min (per test) — the slowest legitimate single test measured is ~107s
+  (Data.Tests ActionUnlockGrantWiringTests; Core.Tests also has a ~105s case — see the .trx
+  `duration` attributes). 10min leaves ~5x headroom over that. It was briefly raised from
+  5min to cover a 3 x 120s retry loop in two cold-process tests; that retry was removed
+  2026-09-12 (those tests now launch a prebuilt apphost in ~0.7s), but the cap stays at
+  10min for the 107s cases above. A real hang still fails in a useful time and names the test.
 -->
 <RunSettings>
   <RunConfiguration>
-    <TestSessionTimeout>1200000</TestSessionTimeout>
+    <TestSessionTimeout>1800000</TestSessionTimeout>
   </RunConfiguration>
 
   <LoggerRunSettings>

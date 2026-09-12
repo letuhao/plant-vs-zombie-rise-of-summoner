@@ -3,13 +3,23 @@ using Xunit;
 
 namespace FusionRpg.AtomImporter.Tests;
 
-/// <summary>A real, cold `dotnet run` of the tool as a genuinely separate process — every other test
+/// <summary>A real, cold run of the tool as a genuinely separate process — every other test
 /// in this project runs in-process inside the test host, which already has every tuning hub
 /// configured globally (`ContractTuningTestBootstrap`'s `[ModuleInitializer]`), so none of them could
 /// ever catch a missing `Configure(...)` call the standalone binary itself needs. Found for real
 /// 2026-08-30 running an actual deploy: `RpgStore`'s static ctor (T2's `ComposeKindRegistry`) needs
 /// `DerivedStatPolicy.Tuning`, and this tool never configured it — the in-process test suite was
 /// 21/21 green the whole time this was broken.</summary>
+///
+/// <para><b>Why the apphost and not `dotnet run` (2026-09-12):</b> `dotnet run` performs an implicit
+/// MSBuild build, which races every concurrent `dotnet build`/`dotnet test` touching the same
+/// `FusionRpg.Core.dll`/`FusionRpg.Data.dll` outputs — a transient MSB3026/MSB3027 file lock, not a
+/// defect in this tool or this test. The old code papered over that with a 3-attempt retry (375s
+/// worst case) and still left the test depending on a build it never arranged. This project already
+/// has a `ProjectReference` to AtomImporter, so the test host's own build produces the tool's apphost
+/// beside the test dll; the test now launches that directly. It is still a separate process with its
+/// own statics and composition root — the cold-process property this test exists for is unchanged —
+/// but there is no build, no lock race, and so no retry is needed.</para>
 public class RealColdProcessTests
 {
     [Fact]
@@ -33,57 +43,37 @@ public class RealColdProcessTests
     }
 
     /// <summary>
-    /// `dotnet run`'s own implicit build races every OTHER concurrent `dotnet build`/`dotnet run`
-    /// touching the SAME shared output DLLs — a transient MSBuild file-lock, not a defect in this
-    /// tool or this test. Confirmed real, not hypothetical, under heavy multi-session load
-    /// (2026-09-06, `CreatureSpeciesImportCliTests.cs`'s own identical fix, same day). `dotnet`'s own
-    /// fixed phrase for "the implicit build failed" is the reliable retry signal: it can only come
-    /// from the CLI's own build step, never from AtomImporter's own business logic.
-    ///
-    /// <para><b>A second, more serious defect found the same day:</b> the pre-existing code called
-    /// <c>proc.StandardOutput.ReadToEnd()</c> then <c>proc.StandardError.ReadToEnd()</c> before
-    /// <c>WaitForExit</c> — the classic .NET process-redirection deadlock: if the child fills its OS
-    /// stderr pipe buffer while this thread is still blocked reading stdout, the child blocks writing
-    /// to a full pipe nobody is draining and the whole test hangs forever (reproduced for real the
-    /// same day in `CreatureSpeciesImportCliTests.cs`'s identical pattern — a 17-minute run that never
-    /// finished). Fixed by draining both streams asynchronously via
-    /// <c>OutputDataReceived</c>/<c>ErrorDataReceived</c>, the standard fix for this exact hazard.</para>
+    /// Launches the tool apphost the test host's own build produced (see the class doc), so a
+    /// transient MSBuild file-lock race is structurally impossible and no retry is needed. The working
+    /// directory must be the repo root: AtomImporter's own <c>FindUp("data", "seed")</c> walks up from
+    /// it, so the test exercises that real default rather than passing a seed path explicitly.
     /// </summary>
     static (int ExitCode, string Stdout, string Stderr) RunCold(string repoRoot, string dbDir)
     {
-        const int maxAttempts = 3;
-        for (var attempt = 1; ; attempt++)
-        {
-            var psi = new ProcessStartInfo
-            {
-                FileName = "dotnet",
-                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "AtomImporter")}\" -c Release -- --db \"{dbDir}\"",
-                WorkingDirectory = repoRoot,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-            var stdout = new System.Text.StringBuilder();
-            var stderr = new System.Text.StringBuilder();
-            using var proc = new Process { StartInfo = psi, EnableRaisingEvents = true };
-            proc.OutputDataReceived += (_, e) => { if (e.Data != null) stdout.AppendLine(e.Data); };
-            proc.ErrorDataReceived += (_, e) => { if (e.Data != null) stderr.AppendLine(e.Data); };
-            proc.Start();
-            proc.BeginOutputReadLine();
-            proc.BeginErrorReadLine();
-            var exited = proc.WaitForExit(120_000);
-            Assert.True(exited, "AtomImporter did not exit within 120s");
-            proc.WaitForExit(); // drain any async callbacks still in flight after the exit signal
+        var psi = ToolStartInfo(repoRoot, arguments: $"--db \"{dbDir}\"");
 
-            var stdoutText = stdout.ToString();
-            var isTransientBuildFailure = proc.ExitCode != 0 &&
-                stdoutText.Contains("The build failed. Fix the build errors", StringComparison.Ordinal);
-            if (!isTransientBuildFailure || attempt >= maxAttempts)
-                return (proc.ExitCode, stdoutText, stderr.ToString());
+        // 60s is far above the real runtime (~0.5s) and exists only to fail with a name instead of
+        // hanging. The old 120s cap was sized for the implicit build this path no longer performs.
+        return ExternalProcess.Run(psi, 60_000, "AtomImporter did not exit within 60s");
+    }
 
-            Thread.Sleep(TimeSpan.FromSeconds(5 * attempt));
-        }
+    /// <summary>
+    /// The tool the test project references, resolved from the test's own output directory. Prefer the
+    /// apphost — a true standalone executable, exactly what a deploy runs — and fall back to
+    /// <c>dotnet &lt;dll&gt;</c> on hosts that do not emit one. Neither path builds.
+    /// </summary>
+    static ProcessStartInfo ToolStartInfo(string repoRoot, string arguments)
+    {
+        var dir = AppContext.BaseDirectory;
+        var apphost = Path.Combine(dir, OperatingSystem.IsWindows() ? "AtomImporter.exe" : "AtomImporter");
+        var dll = Path.Combine(dir, "AtomImporter.dll");
+
+        Assert.True(File.Exists(apphost) || File.Exists(dll),
+            $"AtomImporter was not built beside the test dll ({dir}); the test project's ProjectReference should have produced it");
+
+        return File.Exists(apphost)
+            ? new ProcessStartInfo { FileName = apphost, Arguments = arguments, WorkingDirectory = repoRoot, CreateNoWindow = true }
+            : new ProcessStartInfo { FileName = "dotnet", Arguments = $"\"{dll}\" {arguments}", WorkingDirectory = repoRoot, CreateNoWindow = true };
     }
 
     static string FindRepoRoot()

@@ -5,10 +5,23 @@ using Xunit;
 namespace FusionRpg.Data.Tests;
 
 /// <summary>
-/// T4.6's own CLI-level acceptance line: "a stale generated tree refuses." A real, cold
-/// `dotnet run` of `tools/CreatureSpeciesImport`, the same pattern `AtomImporter.Tests`'
-/// `RealColdProcessTests.cs` already established — `SpeciesImportStoreTests.cs` covers the DAL half
-/// (`RpgStore.ImportSpecies`) directly; this covers the pre-flight only the CLI itself runs.
+/// T4.6's own CLI-level acceptance line: "a stale generated tree refuses." A real, cold run of
+/// `tools/CreatureSpeciesImport` as a genuinely separate process, the same pattern
+/// `AtomImporter.Tests`' `RealColdProcessTests.cs` already established — `SpeciesImportStoreTests.cs`
+/// covers the DAL half (`RpgStore.ImportSpecies`) directly; this covers the pre-flight only the CLI
+/// itself runs.
+///
+/// <para><b>Why the apphost and not `dotnet run` (2026-09-12):</b> this test used to launch
+/// `dotnet run --no-restore --no-build`, which needs a prebuilt tool. Nothing in the build or CI ever
+/// built `CreatureSpeciesImport` — it was referenced by no test project and CI had no `dotnet build`
+/// step — so from a clean checkout the tool apphost did not exist and both tests failed with
+/// "cannot find the file specified". It only ever passed where the tool happened to have been built
+/// by hand. The test project now references the tool, so the test host's own build produces the
+/// apphost beside the test dll, and the test launches it directly. That also removes the old
+/// 3-attempt retry: the retry guarded an implicit-build MSB3026/MSB3027 file-lock race, and with no
+/// `dotnet run` there is no build to race (the `--no-build` form could never produce that failure
+/// anyway, so the retry was dead code). It remains a separate process with its own statics and
+/// composition root — the cold-process property this test exists for is unchanged.</para>
 /// </summary>
 public class CreatureSpeciesImportCliTests : IDisposable
 {
@@ -26,68 +39,56 @@ public class CreatureSpeciesImportCliTests : IDisposable
     }
 
     /// <summary>
-    /// `dotnet run`'s own implicit build races every OTHER concurrent `dotnet build`/`dotnet run`
-    /// touching the SAME shared `FusionRpg.Core.dll`/`FusionRpg.Data.dll` output — a transient
-    /// MSBuild file-lock (`MSB3026`/`MSB3027`, "is being used by another process"), not a defect in
-    /// this CLI or this test. Confirmed real, not hypothetical: reproduced 2026-09-06 under heavy
-    /// multi-session load, both failures' own captured stdout showing exactly this. `dotnet`'s own
-    /// fixed phrase for "the implicit build failed" — <c>"The build failed. Fix the build errors"</c>
-    /// — is the reliable signal to retry on: it can ONLY come from the CLI's own build step, never
-    /// from `CreatureSpeciesImport`'s own business logic (a build that fails never lets the app start,
-    /// so the app's real stdout/stderr, e.g. "written"/"stale", can never contain it either).
-    ///
-    /// <para><b>A second, more serious defect found while adding the retry above (2026-09-06):</b> the
-    /// pre-existing code called <c>proc.StandardOutput.ReadToEnd()</c> then
-    /// <c>proc.StandardError.ReadToEnd()</c> <i>before</i> <c>WaitForExit</c> — the classic .NET
-    /// process-redirection deadlock (learn.microsoft.com/dotnet/api/system.diagnostics.process.standardoutput):
-    /// if the child fills its OS stderr pipe buffer (e.g. a build spewing many MSB3026 retry warnings)
-    /// while this thread is still blocked reading stdout, the child blocks writing to a full pipe
-    /// nobody is draining, stdout never reaches EOF because the child never exits, and the whole test
-    /// hangs forever — reproduced for real the same day (a 17-minute run that never reached the
-    /// second test). Fixed by draining both streams asynchronously via
-    /// <c>OutputDataReceived</c>/<c>ErrorDataReceived</c>, the standard fix for this exact hazard.</para>
+    /// Launches the tool apphost the test host's own build produced (see the class doc). Drains both
+    /// streams asynchronously: the sequential `StandardOutput.ReadToEnd()` then
+    /// `StandardError.ReadToEnd()` before `WaitForExit` that this file once used is the classic .NET
+    /// process-redirection deadlock — if the child fills its stderr pipe buffer while the parent is
+    /// still blocked reading stdout, both stall forever (reproduced for real 2026-09-06 in a
+    /// 17-minute run that never finished). The working directory must be the repo root: the tool's own
+    /// <c>FindUp("data", ...)</c> walks up from it, so the test exercises that real default.
     /// </summary>
     static (int ExitCode, string Stdout, string Stderr) Run(string repoRoot, string args)
     {
-        const int maxAttempts = 3;
-        for (var attempt = 1; ; attempt++)
-        {
-            var psi = new ProcessStartInfo
-            {
-                FileName = "dotnet",
-                // The test host already built the tool's dependency graph.  A child `dotnet run`
-                // must not perform an implicit restore here: this environment deliberately denies
-                // the user NuGet.Config, and the restore adds no coverage to a CLI behaviour test.
-                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "CreatureSpeciesImport")}\" --no-restore --no-build -- {args}",
-                WorkingDirectory = repoRoot,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            };
-            var stdout = new System.Text.StringBuilder();
-            var stderr = new System.Text.StringBuilder();
-            using var proc = new Process { StartInfo = psi, EnableRaisingEvents = true };
-            proc.OutputDataReceived += (_, e) => { if (e.Data != null) stdout.AppendLine(e.Data); };
-            proc.ErrorDataReceived += (_, e) => { if (e.Data != null) stderr.AppendLine(e.Data); };
-            proc.Start();
-            proc.BeginOutputReadLine();
-            proc.BeginErrorReadLine();
-            var exited = proc.WaitForExit(120_000);
-            Assert.True(exited, "CreatureSpeciesImport did not exit within 120s");
-            // Drains any output still in flight after the process handle reports exited — otherwise a
-            // race can read a truncated tail (WaitForExit(int) does not itself guarantee the async
-            // stream callbacks have all fired yet).
-            proc.WaitForExit();
+        var psi = ToolStartInfo(repoRoot, args);
 
-            var stdoutText = stdout.ToString();
-            var isTransientBuildFailure = proc.ExitCode != 0 &&
-                stdoutText.Contains("The build failed. Fix the build errors", StringComparison.Ordinal);
-            if (!isTransientBuildFailure || attempt >= maxAttempts)
-                return (proc.ExitCode, stdoutText, stderr.ToString());
+        var stdout = new System.Text.StringBuilder();
+        var stderr = new System.Text.StringBuilder();
+        using var proc = new Process { StartInfo = psi, EnableRaisingEvents = true };
+        proc.OutputDataReceived += (_, e) => { if (e.Data != null) stdout.AppendLine(e.Data); };
+        proc.ErrorDataReceived += (_, e) => { if (e.Data != null) stderr.AppendLine(e.Data); };
+        proc.Start();
+        proc.BeginOutputReadLine();
+        proc.BeginErrorReadLine();
 
-            Thread.Sleep(TimeSpan.FromSeconds(5 * attempt));
-        }
+        // 60s is far above the real runtime (~1s) and exists only to fail with a name instead of
+        // hanging. The old 120s cap was sized for the implicit build this path no longer performs.
+        var exited = proc.WaitForExit(60_000);
+        Assert.True(exited, "CreatureSpeciesImport did not exit within 60s");
+        // Drains any output still in flight after the process handle reports exited — otherwise a
+        // race can read a truncated tail (WaitForExit(int) does not itself guarantee the async
+        // stream callbacks have all fired yet).
+        proc.WaitForExit();
+
+        return (proc.ExitCode, stdout.ToString(), stderr.ToString());
+    }
+
+    /// <summary>
+    /// The tool the test project references, resolved from the test's own output directory. Prefer the
+    /// apphost — a true standalone executable, exactly what a deploy runs — and fall back to
+    /// <c>dotnet &lt;dll&gt;</c> on hosts that do not emit one. Neither path builds.
+    /// </summary>
+    static ProcessStartInfo ToolStartInfo(string repoRoot, string args)
+    {
+        var dir = AppContext.BaseDirectory;
+        var apphost = Path.Combine(dir, OperatingSystem.IsWindows() ? "CreatureSpeciesImport.exe" : "CreatureSpeciesImport");
+        var dll = Path.Combine(dir, "CreatureSpeciesImport.dll");
+
+        Assert.True(File.Exists(apphost) || File.Exists(dll),
+            $"CreatureSpeciesImport was not built beside the test dll ({dir}); the test project's ProjectReference should have produced it");
+
+        return File.Exists(apphost)
+            ? new ProcessStartInfo { FileName = apphost, Arguments = args, WorkingDirectory = repoRoot, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false }
+            : new ProcessStartInfo { FileName = "dotnet", Arguments = $"\"{dll}\" {args}", WorkingDirectory = repoRoot, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
     }
 
     [Fact]

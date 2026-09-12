@@ -1,0 +1,18 @@
+{
+  "session": "cold-process-test-build-20260912-e5b1",
+  "program": "contributing-standards",
+  "problem": "Cold-process tool tests race an implicit MSBuild build (dotnet run) and one carries a retry loop for a build failure its --no-build path cannot produce. Make the tool a normal ProjectReference of its test project and launch the built apphost directly, so no test spawns a build: no MSBuild lock race, no retry, lower timeout.",
+  "mode": "direct",
+  "branch": "features/derived-stat-extension",
+  "worktree": null,
+  "paths": [
+    "tests/FusionRpg.AtomImporter.Tests/**",
+    "tests/FusionRpg.Data.Tests/CreatureSpeciesImportCliTests.cs",
+    "tools/CreatureSpeciesImport/CreatureSpeciesImport.csproj",
+    "test.runsettings",
+    ".github/workflows/ci.yml",
+    "tasks/sessions/cold-process-test-build-20260912-e5b1.json"
+  ],
+  "started": "2026-09-12T11:09:00Z",
+  "status": "active"
+}

@@ -110,11 +110,12 @@ jobs:
       - name: Balance guard (class-system-todo.md P5.3 — termination HARD, dominance-mechanism HARD, dominance-verdict SOFT)
         shell: pwsh
         run: |
-          # `--blame-hang-timeout 10min` (raised from 5min 2026-09-12): two retry-loop tests
-          # (RealColdProcessTests, CreatureSpeciesImportCliTests) may legitimately spend
-          # 3 x 120s + 5s + 10s = 375s (6.25min) under heavy parallel build contention; a 5min cap
-          # could kill a PASSING test and report it as a hang. Keep this aligned with the
-          # test.runsettings TestTimeout so local and CI behave the same.
+          # `--blame-hang-timeout 10min` (raised from 5min 2026-09-12): the slowest legitimate
+          # single test measured here is ~107s (Data.Tests ActionUnlockGrantWiringTests; Core.Tests
+          # also has a ~105s case), so 10min leaves ~5x headroom. It was briefly raised to cover a
+          # 3 x 120s retry loop in two cold-process tests; that retry was removed 2026-09-12 (those
+          # tests now launch a prebuilt apphost in ~0.7s), but the cap stays for the 107s cases.
+          # Keep this aligned with the test.runsettings TestTimeout so local and CI behave the same.
           #
           # Deliberately its OWN step, not folded into "Restore / test (.NET)" below: that step runs
           # ten `dotnet test` calls in one script with no exit-code check between them, so only the
