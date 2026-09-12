@@ -110,6 +110,12 @@ jobs:
       - name: Balance guard (class-system-todo.md P5.3 — termination HARD, dominance-mechanism HARD, dominance-verdict SOFT)
         shell: pwsh
         run: |
+          # `--blame-hang-timeout 10min` (raised from 5min 2026-09-12): two retry-loop tests
+          # (RealColdProcessTests, CreatureSpeciesImportCliTests) may legitimately spend
+          # 3 x 120s + 5s + 10s = 375s (6.25min) under heavy parallel build contention; a 5min cap
+          # could kill a PASSING test and report it as a hang. Keep this aligned with the
+          # test.runsettings TestTimeout so local and CI behave the same.
+          #
           # Deliberately its OWN step, not folded into "Restore / test (.NET)" below: that step runs
           # ten `dotnet test` calls in one script with no exit-code check between them, so only the
           # LAST one determines the step's pass/fail (confirmed against a real CI run, 2026-08-24 —
@@ -126,7 +132,7 @@ jobs:
           # (HARD by design — a violation SHOULD fail CI) and DominanceGuard's MECHANISM tests only
           # (returns without throwing, coverage populated, no clock applied — code regressions, safe to
           # block on regardless of what the verdict itself says).
-          dotnet test tests/FusionRpg.Core.Tests/FusionRpg.Core.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min --filter "Category=BalanceGuard"
+          dotnet test tests/FusionRpg.Core.Tests/FusionRpg.Core.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 10min --filter "Category=BalanceGuard"
           if ($LASTEXITCODE -ne 0) { throw "balance-guard: a termination invariant or dominance-guard-mechanism test failed — see output above" }
 
       - name: Restore / test (.NET)
@@ -139,33 +145,33 @@ jobs:
           # swallowed because E2E.Tests, the last call, also happened to fail that day). Every call
           # below now checks its own exit code and throws immediately, matching every other step in
           # this file — a failure in project #3 no longer waits to be masked by project #10.
-          dotnet test tests/FusionRpg.Core.Tests/FusionRpg.Core.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          dotnet test tests/FusionRpg.Core.Tests/FusionRpg.Core.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 10min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.Core.Tests failed" }
-          dotnet test tests/FusionRpg.Data.Tests/FusionRpg.Data.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          dotnet test tests/FusionRpg.Data.Tests/FusionRpg.Data.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 10min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.Data.Tests failed" }
-          dotnet test tests/FusionRpg.CheatCore.Tests/FusionRpg.CheatCore.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          dotnet test tests/FusionRpg.CheatCore.Tests/FusionRpg.CheatCore.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 10min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.CheatCore.Tests failed" }
-          dotnet test tests/FusionRpg.Guard.Tests/FusionRpg.Guard.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          dotnet test tests/FusionRpg.Guard.Tests/FusionRpg.Guard.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 10min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.Guard.Tests failed" }
-          dotnet test tests/FusionRpg.Launcher.Tests/FusionRpg.Launcher.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          dotnet test tests/FusionRpg.Launcher.Tests/FusionRpg.Launcher.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 10min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.Launcher.Tests failed" }
-          dotnet test tests/FusionRpg.ItemSeedValidator.Tests/FusionRpg.ItemSeedValidator.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          dotnet test tests/FusionRpg.ItemSeedValidator.Tests/FusionRpg.ItemSeedValidator.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 10min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.ItemSeedValidator.Tests failed" }
-          dotnet test tests/FusionRpg.AtomImporter.Tests/FusionRpg.AtomImporter.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          dotnet test tests/FusionRpg.AtomImporter.Tests/FusionRpg.AtomImporter.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 10min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.AtomImporter.Tests failed" }
-          dotnet test tests/FusionRpg.ElementEnumGen.Tests/FusionRpg.ElementEnumGen.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          dotnet test tests/FusionRpg.ElementEnumGen.Tests/FusionRpg.ElementEnumGen.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 10min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.ElementEnumGen.Tests failed" }
           # Wired in 2026-09-06 (seed-to-concrete) -- found never in CI via CiWiringGuardTests, verified
           # green in isolation before adding (FusionRpg.PassiveTreeRosterGen.Tests held back: one
           # pre-existing, unrelated content-drift failure at the time -- data/seed/statuses/roster.json
           # is stale against a "nerve" status family another stream added; not this program's to fix).
-          dotnet test tests/FusionRpg.SquadHarness.Tests/FusionRpg.SquadHarness.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          dotnet test tests/FusionRpg.SquadHarness.Tests/FusionRpg.SquadHarness.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 10min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.SquadHarness.Tests failed" }
-          dotnet test tests/FusionRpg.TreeBinder.Tests/FusionRpg.TreeBinder.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          dotnet test tests/FusionRpg.TreeBinder.Tests/FusionRpg.TreeBinder.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 10min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.TreeBinder.Tests failed" }
-          dotnet test tests/FusionRpg.Server.Tests/FusionRpg.Server.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          dotnet test tests/FusionRpg.Server.Tests/FusionRpg.Server.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 10min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.Server.Tests failed" }
-          dotnet test tests/FusionRpg.E2E.Tests/FusionRpg.E2E.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          dotnet test tests/FusionRpg.E2E.Tests/FusionRpg.E2E.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 10min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.E2E.Tests failed" }
 
       - name: Boundary guards (AGENTS.md — combat writes, Secondary-Unity boundary, Funnel deltas, DAL)
