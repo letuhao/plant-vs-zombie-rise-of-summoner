@@ -14,6 +14,18 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
 > file it fixes; a stale line fails the gate (`testing-standard.md` R4). A batch that adds a line is a
 > review event.
 
+## Phase 0 — Module specs (gated workflow: Specify precedes Plan/Tasks per module)
+
+> Only `memory-storage-plan` has a spec. Each module below owes one **before its implementation tasks
+> start** (a checkpoint, not a gate — the contract is already fixed by the plan + map, so nothing
+> external can block it). Each is small: it documents an approved contract.
+
+- [ ] **Task T0a: spec-test-store-helper.md** — the helper's contract (factories, dispose semantics, failure-is-failure). Owed before T6. Scope: XS.
+- [ ] **Task T0b: spec-store-test-migration.md** — the migration contract (the recipe, the read-only conversion, the baseline shrink, the file-bound exclusion set). Owed before T9. Scope: S.
+- [ ] **Task T0c: spec-disk-write-probe.md** — the probe contract (static gate already shipped; document the runtime leak alarm + 0-file assertion and the delta-not-count rule). Owed before T19b. Scope: S.
+- [ ] **Task T0d: spec-archive-target.md** — the archive-target abstraction contract (create/open/list/exists/delete over file|memory; the four writers + purge). Owed before T20a. Scope: M.
+- [ ] **Task T0e: spec-substrate-standard.md** — the standard's contract (R1–R5 already shipped; the `data-architecture.md` amendment + the no-read-only-memory rule). Owed before T23. Scope: S.
+
 ## Phase 1 — Foundation: an in-memory store (module `memory-storage-plan`)
 
 - [ ] **Task T1: ADR row — the storage plan seam**
@@ -83,9 +95,9 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
 ## Phase 3 — Pilot: prove the pattern at minimum blast radius
 
 - [ ] **Task T9: Migrate 5 representative store tests to memory**
-  - Description: migrate `ActionStoreTests`, `AffixStoreTests`, `AtomStoreTests`, `CurveStoreTests`, `ElementStoreTests` to `DataTestStore.Create()`; remove each baseline line; the 3 read-only sites in these files switch to a plain open.
+  - Description: migrate `ActionStoreTests`, `AffixStoreTests`, `AtomStoreTests`, `CurveStoreTests`, `ElementStoreTests` to `DataTestStore.Create()`; remove each baseline line; **`ActionStoreTests` has the 2 `readOnly: true` sites on `_store.HotPath` — convert each to a plain open (drop `readOnly: true`), because a shared-cache memory DB cannot be opened read-only**.
   - Acceptance: all 5 pass in memory; no file created; baseline loses their lines; gate green.
-  - Verify: `dotnet test tests/FusionRpg.Data.Tests --filter "FullyQualifiedName~ActionStoreTests|...~AffixStoreTests|...~AtomStoreTests|...~CurveStoreTests|...~ElementStoreTests"` + `guard-test-substrate.ps1`.
+  - Verify: `dotnet test tests/FusionRpg.Data.Tests --filter "FullyQualifiedName~ActionStoreTests|FullyQualifiedName~AffixStoreTests|FullyQualifiedName~AtomStoreTests|FullyQualifiedName~CurveStoreTests|FullyQualifiedName~ElementStoreTests"` + `guard-test-substrate.ps1`.
   - Files: the 5 test files + `scripts/test-substrate-baseline.txt`. Scope: M.
   - Dependencies: T8.
 
@@ -101,24 +113,39 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
 
 ## Phase 4 — The migration (module `store-test-migration`)
 
-> Every task: replace the temp-dir ctor with `DataTestStore.Create()`, replace `Dispose`'s swallowed delete, delete each fixed file's `scripts/test-substrate-baseline.txt` line. **Exclude `CreatureSpeciesImportCliTests.cs`** (owned by `cold-process-test-build-e5b1`).
+> **The migration recipe (every batch task does exactly this):**
+> 1. `new RpgStore(<temp dir>)` (+ `Directory.CreateDirectory`) → `DataTestStore.Create()`.
+> 2. `Dispose`'s `try { Directory.Delete(...) } catch { }` → the helper's dispose (delete the whole
+>    temp-dir block).
+> 3. **`SqliteConnectionFactory.Open(_store.HotPath, readOnly: true)` → plain open**
+>    (`SqliteConnectionFactory.Open(_store.HotPath)`) — a shared-cache memory DB cannot be opened
+>    read-only. **Keep** read-only if the file is file-bound (only `ColdArchiveCompactionTests` is).
+>    The 9 memory-bound sites and the batch that owns each:
+>    `AllocationStoreTests` (T11) · `ChannelPolicyStoreTests` (T12) · `GateCounterStoreTests` (T15) ·
+>    `TreeStateVolumeTests` (T17) · `ItemGrantStoreTests` (T18b) · `DomainImportTests`,
+>    `DomainProgressStoreTests` (T18c) · `ActionStoreTests` ×2 (T9, the pilot).
+> 4. Delete each fixed file's line from `scripts/test-substrate-baseline.txt` (the ratchet only shrinks).
+> 5. Run the batch's `dotnet test` filter + `guard-test-substrate.ps1`; the gate must pass with the
+>    baseline **smaller**, and no assertion outside steps 1–3 may change.
+>
+> **Exclude `CreatureSpeciesImportCliTests.cs`** (owned by `cold-process-test-build-e5b1`).
 
-- [ ] **Task T11: Data.Tests root batch A** (8: ActionCatalogBuilder, ActionCatalogStore, AffixImportPath, AllocationStore, AlmanacSeedEnrichment, AlmanacSeed, AptitudePreset, AtomInstance) — Deps: T10. Scope: M.
-- [ ] **Task T12: Data.Tests root batch B** (8: AtomRowWiring, BindResolution, ChannelPolicyStore, ContainerStore, ContentBoot, ContentHashStore, ContractGate, ContractOps) — Deps: T10. Scope: M.
+- [ ] **Task T11: Data.Tests root batch A** (8: ActionCatalogBuilder, ActionCatalogStore, AffixImportPath, AllocationStore, AlmanacSeedEnrichment, AlmanacSeed, AptitudePreset, AtomInstance) — **read-only: `AllocationStoreTests`** — Deps: T10. Scope: M.
+- [ ] **Task T12: Data.Tests root batch B** (8: AtomRowWiring, BindResolution, ChannelPolicyStore, ContainerStore, ContentBoot, ContentHashStore, ContractGate, ContractOps) — **read-only: `ChannelPolicyStoreTests`** — Deps: T10. Scope: M.
 - [ ] **Task T13: Data.Tests root batch C** (8: ContractRegression, ContractSettle, ContractStore, CreatureLawnDeployCommanderRefusal, CreatureLawnDeployHypnoRefusal, CreatureLawnDeployMagnitude, CreatureLawnDeploy, CreatureStore) — Deps: T10. Scope: M.
 - [ ] **Task T14: Data.Tests root batch D** (8: EligibilityAxisMigration, ExpeditionRewardApply, ExpeditionStore, FusionInheritancePicks, FusionStore, GateCounterSeed, GetMaxEventId, InstanceProducerStore) — Deps: T10. Scope: M.
   - **Excludes** the pilot's `CurveStoreTests`/`ElementStoreTests` (already migrated by T9).
-- [ ] **Task T15: Data.Tests root batch E** (8: GateCounterStore, LoadoutStore, LoamPersistence, OnboardingCheckpointStore, OnboardingProjection, PassiveTreeState, SoulLedgerTrim, SoulStore) — Deps: T10. Scope: M.
+- [ ] **Task T15: Data.Tests root batch E** (8: GateCounterStore, LoadoutStore, LoamPersistence, OnboardingCheckpointStore, OnboardingProjection, PassiveTreeState, SoulLedgerTrim, SoulStore) — **read-only: `GateCounterStoreTests`** — Deps: T10. Scope: M.
   - **Excludes** `PassiveTreeImportRunnerTests`, `SeedImportRunnerTests`, `CreatureSpeciesImportCliTests` (separate subprocess/fixture cases — T16).
 - [ ] **Task T16: Data.Tests root batch F — subprocess/fixture store tests** (PassiveTreeImportRunner, SeedImportRunner, PatronStore, PlayerMaterialise, PowerCoefficientImport, PowerStore, RunPoolStore, ShardRungsMigration — 8) — Deps: T10. Scope: M.
   - **Excludes `CreatureSpeciesImportCliTests.cs`** — owned by `cold-process-test-build-20260912-e5b1`.
-- [ ] **Task T17: Data.Tests root batch G** (8: SpeciesExpedition, SpeciesImportStore, SpeciesProgression, SpeciesRespec, SpecimenMaterialisedRoll, StructureInstanceStore, SummonStore, TreeStateVolume) — Deps: T10. Scope: M.
+- [ ] **Task T17: Data.Tests root batch G** (8: SpeciesExpedition, SpeciesImportStore, SpeciesProgression, SpeciesRespec, SpecimenMaterialisedRoll, StructureInstanceStore, SummonStore, TreeStateVolume) — **read-only: `TreeStateVolumeTests`** — Deps: T10. Scope: M.
 - [ ] **Task T18: Data.Tests root batch H** (8: UniqueActorStore, UniqueEquipmentAtomBinding, WardenContract, WatermarkSmoke, WebGameIsolation, WebMatchStore, WorldAiAcceptance, WorldAiCommit) — Deps: T10. Scope: M.
   - The remainder (World*/Xp/Zomboss store tests, `Sqlite/**`, `Items/**`, `Delve/**`, `Actions/**`, remaining `PassiveTree/**`) is sub-divided in T18a–T18c so no task is XL.
 
 - [ ] **Task T18a: root remainder + Sqlite/** (WorldCommand*, WorldStore, WorldTurnCommit, WorldTwentyTurnCheckpoint, WorldWaveOneAcceptance, WorldSeedStore, WorldGraphDiff, WorldCommandTurnGuard + `Sqlite/PlayerCommanderStoreTests` ≈ 9) — Deps: T10. Scope: M.
-- [ ] **Task T18b: Items/** (23 files → 3 sub-batches of ~8) — Deps: T10. Scope: M ×3.
-- [ ] **Task T18c: Delve/** (13) + Actions/** (5) + remaining PassiveTree/** (2) → 3 sub-batches of ~7 — Deps: T10. Scope: M ×3.
+- [ ] **Task T18b: Items/** (23 files → 3 sub-batches of ~8) — **read-only: `ItemGrantStoreTests`** — Deps: T10. Scope: M ×3.
+- [ ] **Task T18c: Delve/** (13) + Actions/** (5) + remaining PassiveTree/** (2) → 3 sub-batches of ~7 — **read-only: `DomainImportTests`, `DomainProgressStoreTests`** — Deps: T10. Scope: M ×3.
 - [ ] **Task T18d: Server.Tests (54 A-tier)** — each boots a `WebApplication`/store directly; migrate construction + teardown in 7 sub-batches of ~8 — Deps: T10. Scope: M ×7 (never one XL task).
 - [ ] **Task T18e: E2E (4 A-tier) + Core.Tests (4 store sites)** — Deps: T10. Scope: S.
 - [ ] **Task T18f: the 5 file-bound classes to `CreateFileBacked()`** (`LegacyMonoMigratorTests`, `RpgStoreDalSmokeTests`, `RpgStoreSmokeTests`, `ColdArchiveCompactionTests`, `StoragePurgeTests`) — fix the leak **without** changing their file/WAL assertions — Deps: T10. Scope: M.
@@ -129,6 +156,13 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - Verify: `guard-test-substrate.ps1` + full suites + a temp-root count before/after.
   - Files: `scripts/test-substrate-baseline.txt`. Scope: M.
   - Dependencies: T11–T18f.
+
+- [ ] **Task T19b: runtime leak alarm — module `disk-write-probe`'s second half**
+  - Description: the shipped gate (`guard-test-substrate.ps1`) is **static only**. Add `scripts/test-substrate-leak-alarm.ps1`: snapshot the test temp root (count + the `fusionrpg-*` dirs) **before** a full test run, run it, snapshot **after**, and **fail** if any `fusionrpg-*` dir survives or any `rpg-*.sqlite` was created outside the file-bound tmp dirs. Assert the **delta** (`before == after` / `0 new`) — never a population count (`validation-ssot.md`). Wire into CI after the test step (not `deploy-play.ps1`, which does not run the suite).
+  - Acceptance: on a clean post-migration tree the alarm passes; planting a store test that leaks a temp dir makes it **fail**; planted-`rpg-*.sqlite` makes it fail.
+  - Verify: run the alarm around a focused `dotnet test`, then with a planted leaking test (must fail), then remove it (must pass); `guard-test-substrate.ps1` unchanged.
+  - Files: `scripts/test-substrate-leak-alarm.ps1`, `.github/workflows/ci.yml` (shared with `cold-process-test-build-e5b1` — coordinate). Scope: M.
+  - Dependencies: T19 (the suite must be leak-proof before an alarm can pass).
 
 ### Checkpoint 4 — Migration
 - [ ] ⭐ Baseline strictly smaller; no new violation; owner reviews the delta before the archive tail.
@@ -156,7 +190,7 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - Acceptance: the doc describes the shipped shape; no stale claim.
   - Verify: doc read-through + `decisions.md` consistency.
   - Files: `docs/architecture/data-architecture.md`. Scope: XS.
-  - Dependencies: T19, T22.
+  - Dependencies: T19b, T22.
 
 - [ ] **Task T24: Final gate**
   - Description: full CI-equivalent run, all guards, `dotnet test` for every touched project; report duration and temp-dir delta; confirm the gate is green with the final (smallest) baseline.

@@ -51,18 +51,20 @@ all 216 pre-existing violations, so **no new violation can be introduced while t
 ## Dependency graph
 
 ```text
+T0a..T0e module specs (each before its module's first task)
 T1 decisions.md ADR ─┐
                      ├─► T2 factory memory-URI branch ─► T3 store plan + keepers + Dispose ─► T4 Init/Reset/archive-throw ─► T5 module-1 tests
                      │
 T5 ─► T6 helper core (Create/CreateFileBacked/Dispose) ─► T7 helper cleanup (ClearAllPools + assert) ─► T8 helper tests
 T8 ─► T9 pilot migration (5 files) ─► T10 checkpoint-verify
-T10 ─► T11..T18f migration batches (Data.Tests folders, Server, E2E, Core, file-bound tail) ─► T19 checkpoint-verify
-T5 ─► T20 archive-target abstraction ─► T21 archive tests to memory ─► T22 checkpoint-verify
-T19,T22 ─► T23 standard + data-architecture.md amendment ─► T24 final gate
+T10 ─► T11..T18f migration batches (Data.Tests folders, Server, E2E, Core, file-bound tail) ─► T19 checkpoint-verify ─► T19b runtime leak alarm
+T5 ─► T20a archive-target abstraction ─► T20b memory target + writers ─► T21 archive tests to memory ─► T22 checkpoint-verify
+T19b,T22 ─► T23 standard + data-architecture.md amendment ─► T24 final gate
 ```
 
-Build order follows the graph. T1 is a doc unlock; T2–T5 are the foundation; T6–T8 the helper;
-T9–T19 the migration; T20–T22 the archive tail; T23–T24 the standard and final gate.
+Build order follows the graph. T0a–T0e are the module specs the gated workflow requires before their
+implementation; T1 is a doc unlock; T2–T5 are the foundation; T6–T8 the helper; T9–T19 the migration;
+T19b the runtime probe; T20–T22 the archive tail; T23–T24 the standard and final gate.
 
 ---
 
@@ -70,10 +72,11 @@ T9–T19 the migration; T20–T22 the archive tail; T23–T24 the standard and f
 
 | Phase | Slice — what is demonstrably true at the end | Tasks |
 |---|---|---|
+| **0** | Every module has a spec before its implementation (the gated workflow's per-module Specify) | T0a–T0e |
 | **1** | An in-memory `RpgStore` works end-to-end with no file on disk; production path byte-identical | T1–T5 |
 | **2** | One leak-proof test helper exists; a failed temp-delete is a failure, not a swallow | T6–T8 |
 | **3** | ⭐ **The proving ground** — 5 store tests run in memory; the pattern is proven at minimum blast radius | T9–T10 |
-| **4** | ⭐ **The migration** — every in-memory-safe store test runs on RAM; the file-bound 5 use the leak-proof file helper | T11–T19 |
+| **4** | ⭐ **The migration** — every in-memory-safe store test runs on RAM; the file-bound 5 use the leak-proof file helper; a runtime alarm proves zero leaks | T11–T19b |
 | **5** | Archive slices are memory-capable too (module 5, optional) | T20–T22 |
 | **6** | The standard is binding, documented, and the whole suite is leak-proof | T23–T24 |
 
@@ -87,6 +90,7 @@ the leak-proof file helper), and the bulk win is already delivered by Phases 1�
 | Risk | Impact | Mitigation |
 |---|---|---|
 | A migrated test asserts a file/WAL property that memory cannot reproduce | High | The scan already classified every file (`data-test-substrate-map.md` §2); the 5 file-bound classes are explicitly excluded, and the pilot (T9) catches a mis-classification early |
+| **A migrated test re-opens `_store.HotPath` with `readOnly: true`** — 9 sites across 8 files; a shared-cache memory DB **cannot** be opened read-only (proven), so each throws once the store is in memory | High | Each batch that contains one of the 9 sites converts it to a **plain open** (remove only `readOnly: true`; the read stays a read). The 9 sites are named in T11/T12/T15/T17/T18b/T18c and the pilot's T9. This is a per-file edit, not a global replacement — the file-bound `ColdArchiveCompactionTests` keeps its read-only open because it reads a real archive file |
 | The migration silently re-introduces a leak | High | The gate (`guard-test-substrate.ps1`) baselines + ratchets; each batch task must **shrink** the baseline line for the files it fixes, and the gate fails on a stale line (`testing-standard.md` R4) |
 | Parallel test regression (cross-test DB interference) | High | T5 includes a `Parallel.For` independence test before any migration; unique per-instance names are structural, not convention |
 | `ClearAllPools` in one test killing another's DB | Med | Proven an open keeper survives it; T5 asserts this explicitly |
@@ -95,8 +99,25 @@ the leak-proof file helper), and the bulk win is already delivered by Phases 1�
 | Archive abstraction grows past the cut point | Med | T20 is scoped to the 4 writers + purge; Phase 5 is cuttable |
 | `IDisposable` on the production type changes DI shutdown | Low | File plan's `Dispose` is a no-op; verified `Program.cs:332` calls it harmlessly |
 
-## Out of scope (spec/ideal-locked)
+## Module specs owed (audit 2026-09-12)
 
+The map says each module gets a `spec-<module-id>.md` and the gated workflow says Specify precedes
+Plan/Tasks **per module**. Only `memory-storage-plan` has a spec; **five are owed**. They are tracked
+as tasks (T0a–T0e) and must land **before their module's implementation tasks start** — each is small
+because the module's contract is already fixed by this plan and the map.
+
+| Module | Spec | Owed before |
+|---|---|---|
+| `test-store-helper` | `spec-test-store-helper.md` | T6 |
+| `store-test-migration` | `spec-store-test-migration.md` | T9 |
+| `disk-write-probe` | `spec-disk-write-probe.md` (the static gate landed; document the runtime alarm) | T19b |
+| `archive-target` | `spec-archive-target.md` | T20a |
+| `substrate-standard` | `spec-substrate-standard.md` (the standard landed; spec the remaining amendment) | T23 |
+
+This is a **checkpoint**, not a gate: each spec is written from an already-approved contract, so no
+external decision can block it, and its implementation task simply does not start until it is written.
+
+## Out of scope (spec/ideal-locked)
 Deleting the suite; fixing the leak while keeping files; transaction-rollback isolation (store commits
 internally); EF in-memory provider or mocking `IRpgDb`; one shared wiped DB; re-tuning CI runtime
 (e.g. `ZombossAdaptiveStoreTests`' 30× `Init()`); production server storage; the 21 temp-leakers
