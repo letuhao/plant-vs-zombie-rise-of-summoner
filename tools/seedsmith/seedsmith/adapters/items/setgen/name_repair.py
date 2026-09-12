@@ -1,19 +1,33 @@
-"""Explicit repair for persisted duplicate set/charm display names.
+"""Explicit repair for persisted duplicate item display names, across every colliding kind.
 
-Generation rejects a new collision before it writes.  This module handles the older corpus rows
-that predate that guard: it changes only a losing row's surface name, derived name key and optional
-flavour.  Set members, charm class, atoms and every other gameplay field stay byte-for-byte intact.
+Generation rejects a new collision before it writes. This module handles the older corpus rows that
+predate that guard: it changes only a losing row's surface `name`, its derived `nameKey`, and
+optionally its `flavor`. Class, atoms, costs, tiers, members and every other gameplay field stay
+byte-for-byte intact.
+
+⛔ **Why the groups come from the validator, not from this module.** The collision rule is
+`naming.v1.json`'s normalization (lowercase, tokenize, whole-token resolution, drop connectives,
+sort, compare) implemented in `tools/ItemSeedValidator/Naming/NameNormalizer.cs`. Reimplementing
+that in Python would fork the authority: a repair computed against a slightly different algorithm
+could leave the validator still reporting collisions, or rename rows that never collided. So the
+plan consumes `dotnet run --project tools/ItemSeedValidator -- <root> --collision-groups`, which
+prints the authoritative groups using that exact normalizer.
+
+**Scope (2026-09-12).** Originally `sets` + `charms` only, matched on the exact casefolded string —
+which found 0 rows, because the real rule is token-set based ("Rolling Grave Nut" collides with
+"Rolling Grave-Nut"). It now covers every kind the validator checks and uses its groups.
 """
 from __future__ import annotations
 
 import json
 import os
+import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from .seedfile import ITEM_SEED_ROOT, derive_name_key
+from .seedfile import ITEM_SEED_ROOT, derive_name_key, NameKeyUnsluggable
 
 
 @dataclass(frozen=True)
@@ -25,37 +39,69 @@ class NameRepair:
     keeper_id: str
 
 
-def plan(items_root: Path | None = None) -> tuple[NameRepair, ...]:
-    """Keep the lexically first id in each collision and return every later row to rename."""
+def collision_groups(items_root: Path | None = None, *,
+                     validator_project: "Path | None" = None) -> "list[dict]":
+    """The validator's authoritative collision groups. Raises RuntimeError if the tool cannot run,
+    because a repair planned against a guessed grouping is worse than no repair."""
     root = Path(items_root or ITEM_SEED_ROOT)
-    rows: list[tuple[str, str, Path, str]] = []
-    for directory_name, kind in (("sets", "set"), ("charms", "charm")):
-        for path in sorted((root / directory_name).glob("*.json")):
-            try:
-                document = json.loads(path.read_text(encoding="utf-8"))
-            except (OSError, json.JSONDecodeError):
-                continue
-            if document.get("kind") != kind:
-                continue
-            for row in document.get("entries") or ():
-                if not isinstance(row, dict):
-                    continue
-                entry_id, name = row.get("id"), row.get("name")
-                if isinstance(entry_id, str) and isinstance(name, str) and name.strip():
-                    rows.append((entry_id, kind, path, name.strip()))
-    by_name: dict[str, list[tuple[str, str, Path, str]]] = {}
-    for row in rows:
-        by_name.setdefault(row[3].casefold(), []).append(row)
-    repairs: list[NameRepair] = []
-    for group in by_name.values():
-        ordered = sorted(group, key=lambda row: row[0])
-        if len(ordered) < 2:
+    project = validator_project or _default_validator_project(root)
+    if project is None or not project.exists():
+        raise RuntimeError(f"ItemSeedValidator project not found near {root}")
+    proc = subprocess.run(
+        ["dotnet", "run", "--project", str(project), "--", str(root), "--collision-groups"],
+        capture_output=True, text=True, cwd=str(root.parents[2]),
+        stdin=subprocess.DEVNULL,  # never inherit the caller's stdin (MCP pipe)
+    )
+    if proc.returncode != 0 or not proc.stdout.strip():
+        raise RuntimeError(f"collision-groups failed ({proc.returncode}): {proc.stderr.strip()[:400]}")
+    return json.loads(proc.stdout).get("groups", [])
+
+
+def _default_validator_project(root: Path) -> "Path | None":
+    for parent in [root, *root.parents]:
+        candidate = parent / "tools" / "ItemSeedValidator" / "ItemSeedValidator.csproj"
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def plan(items_root: Path | None = None, *, groups: "list[dict] | None" = None) -> "tuple[NameRepair, ...]":
+    """Keep the lexically first id in each authoritative collision group; return every later row."""
+    root = Path(items_root or ITEM_SEED_ROOT)
+    groups = groups if groups is not None else collision_groups(items_root=root)
+
+    # id -> (path, kind, name); built once so each losing row can be located.
+    index: "dict[str, tuple[Path, str, str]]" = {}
+    for path in sorted(root.glob("**/*.json")):
+        if path.name.startswith("_") or "_exemplars" in path.parts or "_runs" in path.parts:
             continue
-        keeper = ordered[0][0]
-        repairs.extend(NameRepair(entry_id=entry_id, kind=kind, path=path,
-                                  old_name=name, keeper_id=keeper)
-                       for entry_id, kind, path, name in ordered[1:])
-    return tuple(sorted(repairs, key=lambda repair: repair.entry_id))
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        kind = document.get("kind")
+        for row in document.get("entries") or ():
+            if not isinstance(row, dict):
+                continue
+            entry_id, name = row.get("id"), row.get("name")
+            if isinstance(entry_id, str) and isinstance(name, str) and name.strip():
+                index[entry_id] = (path, str(kind or ""), name.strip())
+
+    repairs: "list[NameRepair]" = []
+    for group in groups:
+        members = sorted(group.get("members") or [], key=lambda m: m.get("id") or "")
+        if len(members) < 2:
+            continue
+        keeper = members[0]["id"]
+        for member in members[1:]:
+            entry_id = member.get("id")
+            located = index.get(entry_id)
+            if located is None:
+                continue
+            path, kind, name = located
+            repairs.append(NameRepair(entry_id=entry_id, kind=kind, path=path,
+                                      old_name=name, keeper_id=keeper))
+    return tuple(sorted(repairs, key=lambda r: r.entry_id))
 
 
 def schema() -> dict[str, Any]:
@@ -78,43 +124,52 @@ Current duplicate name: `{repair.old_name}`
 The name is already kept by `{repair.keeper_id}`.
 
 Return JSON only: a specific, distinct replacement `name`, and optionally a replacement `flavor`.
-Do not mention ids, costs, tiers, mechanics, or numbers. The new name must not be a close reuse of
-`{repair.old_name}`."""
+The new name must be a legal {repair.kind} name (a thing a player picks up, not a sentence or an
+id), must not reuse the old name's idea in a different word order, and must not mention ids, costs,
+tiers, mechanics, or numbers."""
 
 
-def validate_answers(repairs: tuple[NameRepair, ...], answers: dict[str, dict], *,
-                     items_root: Path | None = None) -> dict[str, dict]:
+def validate_answers(repairs: "tuple[NameRepair, ...]", answers: dict[str, dict], *,
+                     items_root: Path | None = None) -> "dict[str, dict]":
     expected = {repair.entry_id for repair in repairs}
     if set(answers) != expected:
-        raise ValueError(f"name-repair answers must name exactly {sorted(expected)}")
-    # The keeper retains every old duplicate name, so none of those names may be recycled by a
-    # losing row (even when the answer happens to name its own former surface text).
+        missing = sorted(expected - set(answers))
+        extra = sorted(set(answers) - expected)
+        raise ValueError(f"name-repair answers must name exactly the {len(expected)} losing rows "
+                         f"(missing {missing[:5]}, unexpected {extra[:5]})")
     current_names = _current_names(Path(items_root or ITEM_SEED_ROOT))
-    clean: dict[str, dict] = {}
+    clean: "dict[str, dict]" = {}
     for repair in repairs:
         answer = answers[repair.entry_id]
         name = answer.get("name") if isinstance(answer, dict) else None
         flavor = answer.get("flavor") if isinstance(answer, dict) else None
         if not isinstance(name, str) or not name.strip():
             raise ValueError(f"{repair.entry_id}: replacement name is empty")
+        if flavor is not None and not isinstance(flavor, str):
+            raise ValueError(f"{repair.entry_id}: flavor must be a string when present")
         normalized = name.strip().casefold()
         if normalized in current_names:
             raise ValueError(f"{repair.entry_id}: replacement name {name!r} already exists")
-        if flavor is not None and not isinstance(flavor, str):
-            raise ValueError(f"{repair.entry_id}: flavor must be a string when present")
         current_names.add(normalized)
-        clean[repair.entry_id] = {"name": name.strip(), **({"flavor": flavor} if flavor is not None else {})}
+        # A name the grammar cannot slug cannot mint a legal nameKey; catch it here rather than at
+        # the write, where a partial apply would be worse.
+        try:
+            derive_name_key(repair.kind, name.strip())
+        except NameKeyUnsluggable as exc:
+            raise ValueError(f"{repair.entry_id}: {exc}") from exc
+        clean[repair.entry_id] = {"name": name.strip(),
+                                  **({"flavor": flavor} if flavor is not None else {})}
     return clean
 
 
-def apply(repairs: tuple[NameRepair, ...], answers: dict[str, dict], *, write: bool,
-          items_root: Path | None = None) -> tuple[Path, ...]:
+def apply(repairs: "tuple[NameRepair, ...]", answers: dict[str, dict], *, write: bool,
+          items_root: Path | None = None) -> "tuple[Path, ...]":
     """Apply validated answers, preserving every field unrelated to player-facing identity."""
     clean = validate_answers(repairs, answers, items_root=items_root)
-    by_path: dict[Path, list[NameRepair]] = {}
+    by_path: "dict[Path, list[NameRepair]]" = {}
     for repair in repairs:
         by_path.setdefault(repair.path, []).append(repair)
-    changed: list[Path] = []
+    changed: "list[Path]" = []
     for path, path_repairs in by_path.items():
         document = json.loads(path.read_text(encoding="utf-8"))
         for row in document.get("entries") or ():
@@ -132,16 +187,22 @@ def apply(repairs: tuple[NameRepair, ...], answers: dict[str, dict], *, write: b
 
 
 def _current_names(root: Path) -> set[str]:
-    return {
-        name.casefold() for directory_name in ("sets", "charms")
-        for path in (root / directory_name).glob("*.json")
-        for document in [_load(path)] if document is not None
-        for row in document.get("entries") or () if isinstance(row, dict)
-        for name in [row.get("name")] if isinstance(name, str) and name.strip()
-    }
+    names: set[str] = set()
+    for path in root.glob("**/*.json"):
+        if path.name.startswith("_") or "_runs" in path.parts:
+            continue
+        document = _load(path)
+        if document is None:
+            continue
+        for row in document.get("entries") or ():
+            if isinstance(row, dict):
+                name = row.get("name")
+                if isinstance(name, str) and name.strip():
+                    names.add(name.strip().casefold())
+    return names
 
 
-def _load(path: Path) -> dict | None:
+def _load(path: Path) -> "dict | None":
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
