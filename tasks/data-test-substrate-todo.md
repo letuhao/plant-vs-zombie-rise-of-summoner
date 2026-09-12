@@ -69,12 +69,13 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
 
 ## Phase 2 — The test helper (module `test-store-helper`)
 
-- [ ] **Task T6: `DataTestStore` core**
-  - Description: `DataTestStore.Create()` (memory) and `CreateFileBacked()` (file semantics), wrapping `RpgStore`, holding keepers for the store's lifetime, implementing `IDisposable`/`IAsyncDisposable`.
-  - Acceptance: both factories return an init-able store; `Create()` creates no temp dir; `CreateFileBacked()` uses a unique temp dir.
-  - Verify: `dotnet test tests/FusionRpg.Data.Tests --filter FullyQualifiedName~DataTestStore`.
+- [x] **Task T6: `DataTestStore` core** ✅ 2026-09-12
+  - Description: `DataTestStore` wraps `RpgStore` with two factories — `Create()` (in-memory, `Init()`ed, no temp dir) and `CreateFileBacked()` (unique dir under the test output root, initialized) — and implements `IDisposable`/`IAsyncDisposable`. Its file-plan dispose clears SQLite pools before `Directory.Delete` and has **no catch**.
+  - Acceptance met: both factories return an init-able store; `Create()` creates no temp dir and no file; `CreateFileBacked()` uses a unique dir; dispose leaks nothing (gate-verified 0 surviving `teststore-*` dirs); no gate baseline entry.
+  - Verified: gate subagent PASS — focused 5/5, full Data 1282/1282, both guards green, scope clean.
   - Files: `tests/FusionRpg.Data.Tests/DataTestStore.cs`, `tests/FusionRpg.Data.Tests/DataTestStoreTests.cs`. Scope: S.
   - Dependencies: T5.
+  - **Known gap → T7:** the "failed delete throws" runtime behavior is not yet proven by a test (static inspection only). T7 owns it.
 
 - [ ] **Task T7: Leak-proof file cleanup (the R3 rule, mechanized)**
   - Description: `CreateFileBacked()`'s dispose does `SqliteConnection.ClearAllPools()` then `Directory.Delete`, and a **failure throws** (asserted, never swallowed). No `catch { }`.
