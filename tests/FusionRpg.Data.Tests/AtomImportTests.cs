@@ -15,20 +15,24 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class AtomImportTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
+    // One test writes a real seed tree on disk; that directory is the importer's subject, so it stays
+    // a real temp dir. Only the store is in memory.
+    readonly string _dir;
 
     public AtomImportTests()
     {
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-import-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
+        Directory.Delete(_dir, recursive: true);
     }
 
     // ---- fixtures -----------------------------------------------------------------------------

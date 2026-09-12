@@ -13,21 +13,19 @@ namespace FusionRpg.Data.Tests;
 /// advancement, and the delayed-reveal lookup.</summary>
 public class ZombossAdaptiveStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     const long PlayerId = 1;
 
     public ZombossAdaptiveStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-zomboss-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     static ZombossAdaptiveTuning Tuning(int loseStreakThreshold = 3, long counterBiasPermille = 600,

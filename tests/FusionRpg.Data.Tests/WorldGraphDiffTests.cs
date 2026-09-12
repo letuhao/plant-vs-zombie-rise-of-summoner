@@ -14,23 +14,21 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class WorldGraphDiffTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     const string WorldId = "diff-test";
 
     public WorldGraphDiffTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-worldgraphdiff-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         var (ok, reason, _) = _store.CreateWorld(1, WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, 1, WorldId));
         Assert.True(ok, reason);
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     [Fact]
