@@ -14,17 +14,17 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
 > file it fixes; a stale line fails the gate (`testing-standard.md` R4). A batch that adds a line is a
 > review event.
 
-## Phase 0 — Module specs (gated workflow: Specify precedes Plan/Tasks per module)
+## Phase 0 — Module specs ✅ COMPLETE (2026-09-12)
 
-> Only `memory-storage-plan` has a spec. Each module below owes one **before its implementation tasks
-> start** (a checkpoint, not a gate — the contract is already fixed by the plan + map, so nothing
-> external can block it). Each is small: it documents an approved contract.
+> All six module specs are written under `docs/architecture/data-test-substrate/`. Every module id in
+> the map now traces to a spec, so the gated workflow's per-module Specify is satisfied before any
+> build phase.
 
-- [ ] **Task T0a: spec-test-store-helper.md** — the helper's contract (factories, dispose semantics, failure-is-failure). Owed before T6. Scope: XS.
-- [ ] **Task T0b: spec-store-test-migration.md** — the migration contract (the recipe, the read-only conversion, the baseline shrink, the file-bound exclusion set). Owed before T9. Scope: S.
-- [ ] **Task T0c: spec-disk-write-probe.md** — the probe contract (static gate already shipped; document the runtime leak alarm + 0-file assertion and the delta-not-count rule). Owed before T19b. Scope: S.
-- [ ] **Task T0d: spec-archive-target.md** — the archive-target abstraction contract (create/open/list/exists/delete over file|memory; the four writers + purge). Owed before T20a. Scope: M.
-- [ ] **Task T0e: spec-substrate-standard.md** — the standard's contract (R1–R5 already shipped; the `data-architecture.md` amendment + the no-read-only-memory rule). Owed before T23. Scope: S.
+- [x] **Task T0a: spec-test-store-helper.md** — the helper's contract (factories, dispose semantics, failure-is-failure).
+- [x] **Task T0b: spec-store-test-migration.md** — the migration contract (the recipe, the read-only conversion, the baseline shrink, the file-bound exclusion set).
+- [x] **Task T0c: spec-disk-write-probe.md** — the probe contract (static gate shipped; the runtime leak alarm + 0-file assertion + delta-not-count rule).
+- [x] **Task T0d: spec-archive-target.md** — the archive-target abstraction contract (create/open/list/exists/delete over file|memory; the four writers + purge).
+- [x] **Task T0e: spec-substrate-standard.md** — the standard's contract (R1–R5 shipped; the `data-architecture.md` amendment + the no-read-only-memory rule).
 
 ## Phase 1 — Foundation: an in-memory store (module `memory-storage-plan`)
 

@@ -99,23 +99,20 @@ the leak-proof file helper), and the bulk win is already delivered by Phases 1�
 | Archive abstraction grows past the cut point | Med | T20 is scoped to the 4 writers + purge; Phase 5 is cuttable |
 | `IDisposable` on the production type changes DI shutdown | Low | File plan's `Dispose` is a no-op; verified `Program.cs:332` calls it harmlessly |
 
-## Module specs owed (audit 2026-09-12)
+## Module specs (written 2026-09-12 — all six complete)
 
 The map says each module gets a `spec-<module-id>.md` and the gated workflow says Specify precedes
-Plan/Tasks **per module**. Only `memory-storage-plan` has a spec; **five are owed**. They are tracked
-as tasks (T0a–T0e) and must land **before their module's implementation tasks start** — each is small
-because the module's contract is already fixed by this plan and the map.
+Plan/Tasks **per module**. All six now exist under `docs/architecture/data-test-substrate/`, so no
+implementation task starts against an unspecified contract:
 
-| Module | Spec | Owed before |
+| Module | Spec | Status |
 |---|---|---|
-| `test-store-helper` | `spec-test-store-helper.md` | T6 |
-| `store-test-migration` | `spec-store-test-migration.md` | T9 |
-| `disk-write-probe` | `spec-disk-write-probe.md` (the static gate landed; document the runtime alarm) | T19b |
-| `archive-target` | `spec-archive-target.md` | T20a |
-| `substrate-standard` | `spec-substrate-standard.md` (the standard landed; spec the remaining amendment) | T23 |
-
-This is a **checkpoint**, not a gate: each spec is written from an already-approved contract, so no
-external decision can block it, and its implementation task simply does not start until it is written.
+| `memory-storage-plan` | [`spec-memory-storage-plan.md`](../docs/architecture/data-test-substrate/spec-memory-storage-plan.md) | ✅ written (audit caught the `new RpgStore(uri)` defect) |
+| `test-store-helper` | [`spec-test-store-helper.md`](../docs/architecture/data-test-substrate/spec-test-store-helper.md) | ✅ written |
+| `store-test-migration` | [`spec-store-test-migration.md`](../docs/architecture/data-test-substrate/spec-store-test-migration.md) | ✅ written (read-only conversion + file-bound set) |
+| `disk-write-probe` | [`spec-disk-write-probe.md`](../docs/architecture/data-test-substrate/spec-disk-write-probe.md) | ✅ written (static shipped; runtime alarm specified) |
+| `archive-target` | [`spec-archive-target.md`](../docs/architecture/data-test-substrate/spec-archive-target.md) | ✅ written (the deepest module, explicitly cuttable) |
+| `substrate-standard` | [`spec-substrate-standard.md`](../docs/architecture/data-test-substrate/spec-substrate-standard.md) | ✅ written (R1–R5 shipped; amendment specified) |
 
 ## Out of scope (spec/ideal-locked)
 Deleting the suite; fixing the leak while keeping files; transaction-rollback isolation (store commits
