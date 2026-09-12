@@ -25,6 +25,7 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
 - [x] **Task T0c: spec-disk-write-probe.md** — the probe contract (static gate shipped; the runtime leak alarm + 0-file assertion + delta-not-count rule).
 - [x] **Task T0d: spec-archive-target.md** — the archive-target abstraction contract (create/open/list/exists/delete over file|memory; the four writers + purge).
 - [x] **Task T0e: spec-substrate-standard.md** — the standard's contract (R1–R5 shipped; the `data-architecture.md` amendment + the no-read-only-memory rule).
+- [x] **Task T0f: spec-test-profiles.md** (added 2026-09-12 by owner decision) — the profile contract: two categories (`DiskSemantics`, `Heavy`), four profiles (default/full/gate/nightly), the verified filter semantics, and the rule that the guards run only on `full`.
 
 ## Phase 1 — Foundation: an in-memory store (module `memory-storage-plan`)
 
@@ -240,6 +241,41 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
 
 ### Checkpoint 6 — Complete
 - [ ] ⭐ All acceptance criteria met; leak impossible to reintroduce silently; owner reviews for merge.
+
+## Phase 7 — Test profiles (module `test-profiles`, T25–T29)
+
+> **Owner decision 2026-09-12:** the default dev/agent run must write nothing to disk and run no long
+> test; the file-bound + heavy set runs in CI, nightly, and at the release gate. Tagging and migration
+> are complementary — T18b–T18f still migrate what *can* be memory, so it writes nothing in *every*
+> profile. Spec: [spec-test-profiles.md](../docs/architecture/data-test-substrate/spec-test-profiles.md).
+
+- [x] **Task T25: fix the suite's slowest test** ✅ 2026-09-12 (commit `d2f42a06`)
+  - `RpgStoreStoragePlanTests.Memory_stores_are_independent_under_parallel_creation` was the repo's single slowest test at **124.6s** (24 parallel stores × full 46-table `Init()`). Split into: 24 concurrent *constructions* asserting 48 distinct DB names (no `Init` needed), + 4 initialized stores each asserting `Assert.Single` (stronger than the old distinct-count). **Measured 0.52s (240x)**.
+  - Deps: T5. Scope: XS.
+
+- [ ] **Task T26: tag `DiskSemantics`** — Deps: T6. Scope: M.
+  - Description: add `[Trait("Category","DiskSemantics")]` to the file-bound set — the 5 file-bound classes (`RpgStoreDalSmokeTests`, `RpgStoreSmokeTests`, `LegacyMonoMigratorTests`, `ColdArchiveCompactionTests`, `StoragePurgeTests`), `CreatureSpeciesImportCliTests`, and the real-corpus fixture classes (`SeedImportRunnerTests`, `PassiveTreeImportRunnerTests`, and `AtomImportTests`' disk case at method level). Class-level when every method qualifies, method-level when only some do.
+  - Acceptance: each tagged file's `Assert.` count is unchanged; `--filter "Category=DiskSemantics"` returns exactly the tagged set; no untagged test lost.
+  - Verify: `dotnet test … --filter "Category=DiskSemantics"` + per-file assert-count diff vs HEAD.
+  - Files: those test files. Scope: M.
+- [ ] **Task T27: tag `Heavy`** — Deps: T26. Scope: M.
+  - Description: tag the ≥20s / long-run tests that are **not** disk-semantic, from the measured list: `Actions/ActionUnlockGrantWiringTests` (110s), `TreeStateVolumeTests.Two_thousand_actors…` (56s), the long `ContentHashStoreTests` cases, `Items/ItemSetStoreTests` corpus round-trips, `Items/ActionStockSpendStoreTests`, `Delve/DelveScopeTests` long cases. Method-level where only some methods qualify.
+  - Acceptance: no test carries both categories (DiskSemantics wins); the tagged set matches the measured ≥20s list minus the disk-semantic ones.
+  - Verify: `--filter "Category=Heavy"`; a re-measure shows no untagged test ≥20s remains.
+  - Files: those test files. Scope: M.
+- [ ] **Task T28: `test-fast.ps1` + the profile wiring** — Deps: T26, T27. Scope: M.
+  - Description: one script owning the default filter (`Category!=DiskSemantics&Category!=Heavy`) so the default cannot drift; `deploy-play.ps1` calls it; `testing-standard.md` gains the profile table and the **"guards run on `full` only"** rule. CI stays unfiltered (`full`). Add `.github/workflows/nightly.yml` (`schedule:`) running `full`, so a disk regression is caught within a day.
+  - Acceptance: `test-fast.ps1` writes **no** disk (proved by the T19b alarm returning 0 new dirs); CI/nightly/release all run unfiltered `full`.
+  - Verify: `test-fast.ps1` + the alarm; `grep` the workflows for the filters.
+  - Files: `scripts/test-fast.ps1`, `scripts/deploy-play.ps1`, `docs/contributing/testing-standard.md`, `.github/workflows/nightly.yml`. Scope: M.
+- [ ] **Task T29: profile checkpoint** — Deps: T28. Scope: XS.
+  - Description: report the default-vs-full counts and wall time; confirm default = full − tagged; confirm the guards still run only on `full`; confirm no assertion count changed for any tagged file.
+  - Acceptance: the relationship holds at run time (never a pinned total).
+  - Verify: two runs + the alarm + per-file assert diffs.
+  - Files: none (verification). Scope: XS.
+
+### Checkpoint 7 — Profiles
+- [ ] ⭐ Default run writes nothing and runs no long test; `full` still covers everything; guards unchanged.
 
 ---
 

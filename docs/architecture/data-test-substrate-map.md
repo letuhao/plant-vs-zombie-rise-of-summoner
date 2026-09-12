@@ -84,6 +84,40 @@ behaviour an in-memory DB cannot reproduce (`journal_mode` degrades to `memory`,
 | 4 | `disk-write-probe` | **The guard.** A CI/guard check that counts the test temp root before/after a run and fails on any survivor, plus a `0` `rpg-*.sqlite` assertion for the in-memory suite. A regression to disk is caught at the line. | 2 |
 | 5 | `archive-target` | **Optional follow-on.** An archive-*target* abstraction (create / open / list / exists / delete) threaded through the four compaction writers and purge, so archive slices can also be memory-backed. Without it, archive tests stay file-backed. | 1 |
 | 6 | `substrate-standard` | The binding standard: store tests default to in-memory; disk only when the thing under test is a file; cleanup failure is a failure; never swallow a temp-delete. Plus the `data-architecture.md` amendment and the "no read-only memory open" rule. | 1, 3, 4 |
+| 7 | `test-profiles` | **Owner decision 2026-09-12.** Two xUnit categories (`DiskSemantics`, `Heavy`) and four run profiles, so the **default dev/agent run writes nothing to disk and runs no long test**; the file-bound and heavy set runs in CI, nightly, and at the release gate. Adds no `src` change; tags only the tests being *excluded* (a negative filter was verified to include uncategorized tests, so nothing else needs a trait). | 6 |
+
+**Why `test-profiles` exists (module 7), with the measurements behind it.** The owner asked: *do we
+really need disk-writing tests at all?* The measured answer is "a few, and they were never the
+problem":
+
+- **102 of the 132 baseline files still build a store from a temp path** — they write disk on every
+  run. The migration retires that per batch; the profile stops the *file-bound remainder* from
+  running by default.
+- **16 of 1,288 Data tests are ≥20s** (summed ~619s). The single slowest test in the whole suite was
+  `Memory_stores_are_independent_under_parallel_creation` at **124.6s**, which did 24 complete schema
+  builds to prove a property that needed none — fixed to **0.52s** (committed `d2f42a06`).
+- **The flake that blocked three gates in a row was a cold-process disk test**
+  (`CreatureSpeciesImportCliTests`) whose subprocess cap blew under parallel load while passing in
+  isolation. In a default profile it simply does not run — the flake leaves the dev loop.
+
+**Profiles (default is the quiet one):**
+
+| Profile | Where it runs | Contains |
+|---|---|---|
+| **default** | local dev, agents, `deploy-play.ps1` | everything **except** `DiskSemantics` and `Heavy` — no disk writes, no ≥20s tests |
+| **full** | CI (pull request) | everything (cloud runners have ephemeral disks, so correctness there costs nothing) |
+| **full + gate** | `release.yml` (tags) | everything, required before a release |
+| **nightly** | a `schedule:` workflow (new) | everything, so a disk regression is caught within a day rather than at release |
+
+**Why "release gate only" alone would be wrong.** Gating disk tests *solely* on release leaves a disk
+regression undiscovered for weeks. CI and nightly keep them covered without touching the developer's
+SSD, which is the actual complaint.
+
+**Tagging and migrating are complementary, not alternatives** (owner chose both): a test that *can*
+run in memory is still migrated so it writes nothing in **every** profile (T18b–T18f continue), while
+a test whose subject genuinely *is* a file — WAL journal mode, legacy `rpg.sqlite` migration + sidecar,
+archive slices and purge — earns `DiskSemantics` and runs at the gate. Deleting them would trade an SSD
+problem for a correctness problem.
 
 **Why `archive-target` is its own module and separable.** The spike proves archive *can* be memory,
 but the code addresses it straight through the filesystem — four writers each do
@@ -179,13 +213,14 @@ Listed so they are not discovered mid-task. All are reviewed changes to document
 ## 6. Related
 
 - Ideal: [data-test-substrate-ideal.md](data-test-substrate-ideal.md) — spike-audited, rev 2
-- **Module specs (all six written 2026-09-12):**
+- **Module specs (all seven written 2026-09-12):**
   [spec-memory-storage-plan.md](data-test-substrate/spec-memory-storage-plan.md) ·
   [spec-test-store-helper.md](data-test-substrate/spec-test-store-helper.md) ·
   [spec-store-test-migration.md](data-test-substrate/spec-store-test-migration.md) ·
   [spec-disk-write-probe.md](data-test-substrate/spec-disk-write-probe.md) ·
   [spec-archive-target.md](data-test-substrate/spec-archive-target.md) ·
-  [spec-substrate-standard.md](data-test-substrate/spec-substrate-standard.md)
+  [spec-substrate-standard.md](data-test-substrate/spec-substrate-standard.md) ·
+  [spec-test-profiles.md](data-test-substrate/spec-test-profiles.md)
   — every module id now traces to a spec, so the gated workflow's per-module Specify is satisfied
   before any build phase
 - The DAL law: [data-architecture.md](data-architecture.md) §6 · `scripts/guard-dal.ps1`

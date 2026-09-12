@@ -60,11 +60,15 @@ T8 ─► T9 pilot migration (5 files) ─► T10 checkpoint-verify
 T10 ─► T11..T18f migration batches (Data.Tests folders, Server, E2E, Core, file-bound tail) ─► T19 checkpoint-verify ─► T19b runtime leak alarm
 T5 ─► T20a archive-target abstraction ─► T20b memory target + writers ─► T21 archive tests to memory ─► T22 checkpoint-verify
 T19b,T22 ─► T23 standard + data-architecture.md amendment ─► T24 final gate
+T5 ─► T25 fix the 124.6s test (done)
+T6 ─► T26 tag DiskSemantics ─► T27 tag Heavy ─► T28 test-fast.ps1 + profiles (CI full, nightly, release gate) ─► T29 profile checkpoint
 ```
 
 Build order follows the graph. T0a–T0e are the module specs the gated workflow requires before their
 implementation; T1 is a doc unlock; T2–T5 are the foundation; T6–T8 the helper; T9–T19 the migration;
-T19b the runtime probe; T20–T22 the archive tail; T23–T24 the standard and final gate.
+T19b the runtime probe; T20–T22 the archive tail; T23–T24 the standard and final gate; T25–T29 the
+test profiles (owner decision 2026-09-12 — the default dev/agent run writes nothing and runs no long
+test).
 
 ---
 
@@ -72,16 +76,24 @@ T19b the runtime probe; T20–T22 the archive tail; T23–T24 the standard and f
 
 | Phase | Slice — what is demonstrably true at the end | Tasks |
 |---|---|---|
-| **0** | Every module has a spec before its implementation (the gated workflow's per-module Specify) | T0a–T0e |
+| **0** | Every module has a spec before its implementation (the gated workflow's per-module Specify) | T0a–T0f |
 | **1** | An in-memory `RpgStore` works end-to-end with no file on disk; production path byte-identical | T1–T5 |
 | **2** | One leak-proof test helper exists; a failed temp-delete is a failure, not a swallow | T6–T8 |
 | **3** | ⭐ **The proving ground** — 5 store tests run in memory; the pattern is proven at minimum blast radius | T9–T10 |
 | **4** | ⭐ **The migration** — every in-memory-safe store test runs on RAM; the file-bound 5 use the leak-proof file helper; a runtime alarm proves zero leaks | T11–T19b |
-| **5** | Archive slices are memory-capable too (module 5, optional) | T20–T22 |
+| **5** | Archive slices are memory-capable too (module 5) | T20–T22 |
 | **6** | The standard is binding, documented, and the whole suite is leak-proof | T23–T24 |
+| **7** | ⭐ **Quiet default** — local dev/agents write nothing to disk and run no ≥20s test, while CI/nightly/release still run everything | T25–T29 |
 
 **Phase 5 is separable.** Cutting T20–T22 leaves only the 2 archive test classes file-backed (through
-the leak-proof file helper), and the bulk win is already delivered by Phases 1–4.
+the leak-proof file helper), and the bulk win is already delivered by Phases 1–4. **Owner chose to keep
+it**: with module 7 those tests would still be `DiskSemantics`, but memory-capable archive removes the
+write entirely rather than merely deferring it to the gate.
+
+**Phase 7 is the owner's "dev loop must not be harmful" answer.** It does not delete coverage: the
+tagged tests still run in CI, nightly, and at the release gate. It exists because the measurements
+showed the cost was real — 102 baseline files still wrote disk, 16 tests ran ≥20s, and the single
+worst test (124.6s, this program's own) has been fixed to 0.52s.
 
 ---
 
