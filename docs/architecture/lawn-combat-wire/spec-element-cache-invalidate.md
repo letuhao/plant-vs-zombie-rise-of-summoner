@@ -62,12 +62,25 @@ lag. Mirror the existing match-change clear's shape; do not add a second cache.
 Every edge that changes what a ptr's `(side, elements)` resolves to. The spec is not done until each
 has a test.
 
-| # | Trigger | Today |
+**Corrected 2026-09-13 during build — rows 2 and 3 described the opposite of what the code does.**
+
+| # | Trigger | Reality |
 |---|---|---|
 | 1 | Match change (`matchKey`) | **handled** — wholesale clear |
-| 2 | Hypno / charm — zombie becomes plant-side | **missing** — this module |
-| 3 | Entity death + IL2CPP ptr reuse — a new creature at the same address | must not inherit the old entry; verify against the existing `ForgetEntity` ordering (`GameHooks.cs:664/676`) |
-| 4 | Species/element retune mid-run (`reforge-world`) | confirm whether a catalog revision bump must invalidate; if it cannot happen mid-match, say so explicitly rather than leaving it unexamined |
+| 2 | Hypno / charm | **NOT a trigger, and wiring one would be a regression.** The cached `side` is *object kind*, not allegiance: `InjectorEntityRegistry.CollectSnaps` writes `"plant"`/`"zombie"` as literals and carries control state separately as `MindControlled`, which `MechanicalOwnSideOracle.cs:50` folds in **at read time** (*"mind control flips which side an entity fights FOR, not which side it visually belongs to"*). Flipping it here would make `_index.TryGet("plant", zombieTypeId)` **miss**, degrading every charmed zombie to Neutral element, and would break `GateCounterHost.ResolveOwnerFromPtr`, which depends on spawn kind. Left uninvalidated, with a test asserting the absence so it is not "fixed" back |
+| 3 | Entity death + IL2CPP ptr reuse | **This was the real defect.** `ForgetEntity` cleared `Applied`, `EntityStatWriter`, `CheatState.Stats` and both HUD caches — but not the element cache, so a reused pointer inherited the dead entity's species element. Now wired at `GameHooks.cs:1293` |
+| 4 | Species/element retune mid-run (`reforge-world`) | **Cannot fire**, proven by two tests: `reforge-world` re-rolls one *player's* rolled species rows and never touches `CreatureSpeciesCatalog`, which is configured once per host (`RpgHost.cs:125`) and documented immutable for the process lifetime |
+
+**Also fixed in the same pass:** split cache keys — `GateCounterHost` passed `CombatPtr.Normalize(ptr)`
+while both combat bridges passed the raw `key`, so one entity held **two entries under two spellings**.
+An invalidation would have cleared one and left the other serving a dead entity. Keys are canonical
+inside the resolver now.
+
+**Found, not fixed — worth its own task:** `LawnElementResolverHost.Resolve` calls `BoardFactsFor(key)`
+**eagerly on every call**, before consulting the cache, then passes the already-computed result as the
+`Func`. The `Func` was designed to be lazy so the board scan only runs on a miss — so the cache
+currently saves the element-map lookup but **not** the board scan it exists to remove. Fixing it means
+caching `typeId` too, which is a behaviour change rather than a tidy-up.
 
 ## Boundaries
 
