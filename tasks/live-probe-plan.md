@@ -75,6 +75,9 @@ Lead agent
 | Worker B's tool works against Mode A but Mode B's async poll never actually reaches a real game in testing | Tool ships un-provable against its own headline claim | Task 8 requires a recorded manual Mode B run (even a minimal one) before Checkpoint 2, not just Mode A automation |
 | `actor-hub-live-proof` finds T14 still broken (expected, per the known incident) | Could be mistaken for this plan failing | Named explicitly in the spec's own success criteria — an honest FAIL, correctly reported and left for `bound-loadout-hub` to fix, is this phase succeeding at its actual job, not failing it |
 | Owner's terminal/session availability for Tasks 9-12 | Phase 2 could stall indefinitely | Not a hard gate — Tasks 1-8 (both build modules) ship and are useful regardless of when Phase 2 runs; Phase 2 waits on the owner's own schedule, never blocks the rest of this plan from being marked done up to Checkpoint 1 |
+| Repeated `-Mode B` runs mint real, permanent `UniqueActor` roster rows on whatever player account runs them | A dev/test account accumulates junk specimens forever | Task 6 makes cleanup (`POST .../retire`) the default after a run, with an explicit opt-out for deliberate inspection |
+| A `debug.board-stats` poll timeout gets misread as "live-engine half failed to match" | Masks "no signal at all" (game/board/ptr wrong) as if it were "signal received, values wrong" — two different defects needing different fixes | Task 6 requires the two failure kinds be reported distinctly |
+| This session's own paths declaration didn't cover `live-probe`'s files until this coverage audit caught it | Another concurrent session's boundary check could have missed that these paths were in use | Fixed same-day: `tasks/sessions/solid-run-20260912-eb53.json`'s `paths` amended with a dated, explained addition, not a silent expansion |
 
 ## Open questions
 

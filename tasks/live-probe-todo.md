@@ -88,6 +88,12 @@ today").
 - [ ] Guard green against real `DebugEndpoints.cs`, zero exemptions
 - [ ] `Guard.Tests` regression fixtures pass, including the corrected-rule regression case
 - [ ] Wired into `deploy-play.ps1`; docs updated
+- [ ] `deploy-play.ps1`'s full guard set still runs clean end to end with the new guard added — not
+      just the new guard in isolation (a wiring mistake in Task 3 could break the whole script's
+      execution order, not only fail to add the new check)
+- [ ] `git status` on `scripts/deploy-play.ps1`/`docs/DESIGN-GATE.md` checked clean of any OTHER
+      session's concurrent edits before Task 3 starts (both are shared, high-traffic files this repo
+      has already seen concurrent-session collisions on this session)
 - [ ] Lead reviewed the actual diff + test output, not just Worker A's summary
 
 ---
@@ -128,6 +134,11 @@ dict), `POST /api/items/equip` (with `SpecimenId`, `InstanceId`, `Role` all popu
 - [ ] Runs all 5 steps against a real Server (no game/Injector needed) and reports the persisted state
       read back matches what was allocated/equipped.
 - [ ] Refuses to run if a caller passes a non-empty `LoadoutJson` override.
+- [ ] A real endpoint refusal (any 4xx — insufficient souls, over-budget aptitude, unknown item, etc.)
+      at any step is reported as a DISTINCT failure kind ("step N refused: <server's own reason>"),
+      never conflated with an assertion mismatch (persisted value != expected). An implementer or CI
+      run must be able to tell "the server said no" from "the server said yes but the numbers are
+      wrong" at a glance.
 
 **Verification:**
 - [ ] `dotnet run --project tools/ProveLiveProbe -- -Mode A ...` against a real running
@@ -152,6 +163,14 @@ the debug shortcut; after step 5, send `debug.board-stats` for the deployed ptr 
       here against the real acquire step).
 - [ ] Reports persisted-state and live-engine halves as two distinct labeled sections.
 - [ ] Exits 0 only when both halves match; exits non-zero naming which half failed otherwise.
+- [ ] A `debug.board-stats` poll that times out (no live board, wrong ptr, injector disconnected
+      mid-run) is reported as its own distinct failure kind ("live-engine read timed out after Ns"),
+      never silently read as "live-engine half FAILED to match" — those are different facts (no
+      answer vs. a wrong answer) and must not collapse into one message.
+- [ ] After a Mode B run (pass or fail), the tool offers/performs cleanup: `POST /api/unique/actors/
+      {id}/retire` for the specimen it minted — real summon/allocate/equip cycles otherwise
+      accumulate permanent roster junk on whatever player account runs this repeatedly. A `-NoCleanup`
+      flag may skip it for a deliberate follow-up inspection, but cleanup is the default.
 
 **Verification:**
 - [ ] `dotnet run --project tools/ProveLiveProbe -- -Mode B ...` against a real running Server + real
@@ -192,17 +211,24 @@ if still reachable) and confirm a live-engine-half FAIL is reported, not a pass.
 
 **Acceptance criteria:**
 - [ ] Offline unit tests green, no live server required.
+- [ ] A source-scan test proves the tool's own boundary rule: the ONLY `/api/debug/*` routes
+      referenced anywhere in `tools/ProveLiveProbe`'s source are the identity-only acquire shortcut
+      and `debug.board-stats`'s read — the same class of guard `debug-scope-guard` applies to
+      `DebugEndpoints.cs` itself, applied here to this tool's own client code so a later change can't
+      quietly add a fabrication-shaped debug call without a test catching it.
 - [ ] Manual incident-catching run recorded in this file (what was run, what it reported) once
       performed — this specific check needs a live game+server, so it may land at Checkpoint 1b as an
       honest "not yet run" if no live session is available yet, never silently skipped.
 
 **Verification:**
-- [ ] `dotnet test tools/ProveLiveProbe.Tests` (or wherever the offline tests live) → green
+- [ ] `dotnet test tools/ProveLiveProbe.Tests` → green
 - [ ] The manual incident-catching run's output, pasted or summarized in this file
 
 **Dependencies:** Task 7
-**Files:** a new `tools/ProveLiveProbe.Tests` project (or `tests/FusionRpg.Core.Tests` if the DTO
-logic is factored to be host-agnostic enough to live there instead)
+**Files:** new project `tools/ProveLiveProbe.Tests` — **decided here, not left open**: a separate
+project (not folded into `tests/FusionRpg.Core.Tests`), since the tool's HTTP-client/CLI code has no
+reason to live in or depend on `FusionRpg.Core`'s own test assembly, and keeping it separate mirrors
+`tools/ProveHubCombat`'s own standalone-tool convention
 **Estimated scope:** S
 
 ---
