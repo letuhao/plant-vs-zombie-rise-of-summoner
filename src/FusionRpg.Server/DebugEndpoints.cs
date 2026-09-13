@@ -205,11 +205,21 @@ public static class DebugEndpoints
 
             var recentBoardEnds = CountRecentEventsOfKind(store, "board.end", TimeSpan.FromSeconds(CyclingWindowSec));
 
-            var latestMatchResult = FindLatestKind(store, "match.result");
-            var latestMatchLose = FindLatestKind(store, "match.lose");
-            var latestMatchWin = FindLatestKind(store, "match.win");
-            var latestBoardEconomy = FindLatestKind(store, "board.economy");
-            var latestCatalogZombies = FindLatestKind(store, "catalog.zombies");
+            // Real bug found live 2026-09-14: a fresh game process (new injector.hello) sitting idle
+            // at the main menu read as "Defeated", because the classifier read a match.result event
+            // from a PREVIOUS, already-dead game process -- nothing invalidated it. Same fix
+            // FindLatestLiveBoardStart already applies to board.start: any lifecycle signal older
+            // than the newest injector.hello belongs to a process that is gone and must not describe
+            // the current one. Compare by event Id (monotonic), not by parsed timestamp.
+            var latestHello = FindLatestKind(store, "injector.hello");
+            EventEnvelope? DiscardIfBeforeHello(EventEnvelope? ev) =>
+                ev is not null && latestHello is not null && ev.Id < latestHello.Id ? null : ev;
+
+            var latestMatchResult = DiscardIfBeforeHello(FindLatestKind(store, "match.result"));
+            var latestMatchLose = DiscardIfBeforeHello(FindLatestKind(store, "match.lose"));
+            var latestMatchWin = DiscardIfBeforeHello(FindLatestKind(store, "match.win"));
+            var latestBoardEconomy = DiscardIfBeforeHello(FindLatestKind(store, "board.economy"));
+            var latestCatalogZombies = DiscardIfBeforeHello(FindLatestKind(store, "catalog.zombies"));
 
             var resultTime = ParseT(latestMatchResult);
             var loseTime = ParseT(latestMatchLose);
@@ -330,8 +340,13 @@ public static class DebugEndpoints
             // (restart) overlay -- no sanctioned debug command exists for that yet, so a real player
             // or operator still needs to click through it or return to the main menu; named honestly
             // here rather than assumed fixed.
+            // Same staleness guard as /lawn/state: a match.result from a dead, previous game process
+            // must never trigger a reset against the current one.
             var defeatReset = false;
+            var latestHelloForDefeat = FindLatestKind(store, "injector.hello");
             var latestResult = FindLatestKind(store, "match.result");
+            if (latestResult is not null && latestHelloForDefeat is not null && latestResult.Id < latestHelloForDefeat.Id)
+                latestResult = null;
             if (latestResult is not null && string.Equals(PayloadString(latestResult.Payload, "result"), "defeat", StringComparison.OrdinalIgnoreCase))
             {
                 await Send(hub, inbox, "debug.reset-board", new { });

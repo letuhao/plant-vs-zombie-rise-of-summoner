@@ -174,6 +174,34 @@ public class LawnStateEndpointTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task MatchResultFromBeforeLatestInjectorHello_isDiscarded_reportsUnknownNotDefeated()
+    {
+        // Real bug found live 2026-09-14: a fresh game process (new injector.hello) sitting idle at
+        // the main menu read as "Defeated", because the classifier read a match.result event from a
+        // PREVIOUS, already-dead game process with nothing invalidating it. Same fix
+        // FindLatestLiveBoardStart already applies to board.start: any lifecycle signal older than
+        // the newest injector.hello belongs to a process that is gone.
+        Insert("match.result", new { result = "defeat" }, DateTime.UtcNow.AddMinutes(-10));
+        Insert("injector.hello", new { game = "pvzrh-3.9", version = "1.0.0" });
+        var resp = await _http.GetAsync("/api/debug/lawn/state");
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.NotEqual("Defeated", body!["state"].ToString());
+        Assert.Equal("Unknown", body["state"].ToString());
+    }
+
+    [Fact]
+    public async Task MatchResultAfterLatestInjectorHello_stillReportsDefeated()
+    {
+        // The guard must not over-correct: a defeat from the CURRENT process (after the latest
+        // hello) is still real and must still be reported.
+        Insert("injector.hello", new { game = "pvzrh-3.9", version = "1.0.0" }, DateTime.UtcNow.AddSeconds(-10));
+        Insert("match.result", new { result = "defeat" });
+        var resp = await _http.GetAsync("/api/debug/lawn/state");
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.Equal("Defeated", body!["state"].ToString());
+    }
+
+    [Fact]
     public async Task ThreeRecentBoardEnds_reportsCycling()
     {
         for (var i = 0; i < 3; i++) Insert("board.end", new { });
