@@ -1401,13 +1401,48 @@ public static class DebugActions
             }
 
             var matchSnap = Match.MatchHost.Runtime.ToSnapshot();
-            dump["matchPhase"] = matchSnap.Phase.ToString();
-            dump["plantCount"] = matchSnap.PlantCount;
-            dump["zombieCount"] = matchSnap.ZombieCount;
+            var phase = matchSnap.Phase.ToString();
+            dump["matchPhase"] = phase;
+            dump["matchPhaseNote"] = "MatchHost.Runtime's own tracked FSM -- can desync from the real " +
+                "game after a server restart (real incident 2026-09-14: reported InMatch with living " +
+                "entities while the operator's screen showed a genuine defeat). Cross-checked below " +
+                "against real Unity object counts -- trust those over this phase when they disagree.";
 
-            dump["liveState"] = board != null
-                ? (string.Equals(matchSnap.Phase.ToString(), "Paused", StringComparison.Ordinal) ? "Paused" : "InMatch")
-                : (init != null ? "SeedPickerOrPersistentInitBoard" : "AtMainMenuOrNoBoard");
+            // Real counts from the live Unity objects (same FindObjectsOfType approach
+            // DebugRuntime.BoardEntityStats already uses for debug.board-stats), NOT
+            // MatchHost.Runtime's tracked counters -- those can desync from the real board (see note
+            // above and matchSnap.PlantCount/ZombieCount, deliberately not used here anymore).
+            var realPlantCount = 0;
+            var realZombieCount = 0;
+            try { realPlantCount = UnityEngine.Object.FindObjectsOfType<Plant>().Count(p => p != null && p.thePlantType != PlantType.Nothing); } catch { }
+            try { realZombieCount = UnityEngine.Object.FindObjectsOfType<Zombie>().Count(z => z != null && z.theZombieType != ZombieType.Nothing); } catch { }
+            dump["plantCount"] = realPlantCount;
+            dump["zombieCount"] = realZombieCount;
+
+            // A phase claiming an active match with zero real living entities is itself evidence of
+            // the desync named above -- surfaced explicitly rather than silently trusted or silently
+            // overridden (zero entities does not ALWAYS mean the match ended -- e.g. between waves --
+            // so this is a flag to investigate, not an automatic re-classification).
+            var phaseClaimsActive = phase is "InMatch" or "Paused" or "Starting";
+            dump["phaseMismatch"] = phaseClaimsActive && realPlantCount == 0 && realZombieCount == 0;
+
+            // Real bug found live 2026-09-14: a defeated board (Board.Instance still alive, the
+            // game's own overlay not yet torn down) reported "InMatch" because this only checked
+            // hasBoard, never matchPhase -- MatchRuntime.Apply had already driven the phase to Idle
+            // (via board.end/match.result) while the Board object itself still existed. board!=null
+            // is necessary but not sufficient for "a match is actually running"; the phase FSM is the
+            // authority on that -- except when phaseMismatch is true above, in which case neither
+            // signal alone is trustworthy and a caller should treat liveState as unconfirmed.
+            dump["liveState"] = board == null
+                ? (init != null ? "SeedPickerOrPersistentInitBoard" : "AtMainMenuOrNoBoard")
+                : phase switch
+                {
+                    "Paused" => "Paused",
+                    "InMatch" => "InMatch",
+                    "Starting" => "Starting",
+                    "Idle" or "Ending" => "MatchEndedBoardStillAlive",
+                    _ => phase
+                };
             dump["ok"] = true;
             DebugRuntime.Emit("debug.game-state", dump);
         }
