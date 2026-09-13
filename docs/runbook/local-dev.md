@@ -114,6 +114,30 @@ SQLite for this session: `dist/FusionRpg.Server/data/rpg-hot.sqlite` + `rpg-medi
 
 Do not use the Simulator tab in the same session as the real injector.
 
+## 7. Live-probe tool (`tools/ProveLiveProbe`)
+
+The real 6-step live-probe recipe (spec: `docs/architecture/live-probe/spec-live-probe-tool.md`) —
+acquire, allocate, equip, deploy, persisted-state read-back, and (Mode B only) a live-engine read —
+run as real HTTP against a running `FusionRpg.Server`, never a fabricated actor and never an
+`ok:true` response taken as proof on its own.
+
+```powershell
+# Mode A -- persisted-state only (steps 1-5): Server up, no game/Injector needed
+.\scripts\prove-live-probe.ps1 -Mode A -PlayerId 1 -Side plant -TypeId <id> `
+    -AptitudeId Might -AptitudePoints 30 -Role <slot> -ItemInstanceId <owned-item-id>
+
+# Mode B -- full 6-step proof: real summon + live match/board + Injector connected required.
+# Cold-start the lawn first via the `live-lawn-quick-start` skill (enter level 1, lab-overlay,
+# target ptr) -- Mode B refuses outright if step 1 is given the Mode-A-only debug shortcut, since
+# that shortcut's synthetic ptr never exists on a real board.
+.\scripts\prove-live-probe.ps1 -Mode B -PlayerId 1 -Side plant -BannerId <banner-id> `
+    -AptitudeId Might -AptitudePoints 30 -Role <slot> -ItemInstanceId <owned-item-id> -TimeoutSec 30
+```
+
+Exits 0 only when persisted state and (Mode B) the live engine both agree; a non-zero exit always
+names which of the two halves failed, and whether it was a real server refusal, a value mismatch, or
+a poll timeout — never one merged pass/fail boolean.
+
 ## End-to-end check (real game)
 
 1. Start server (and Vite only if you are editing UI).
