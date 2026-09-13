@@ -345,7 +345,7 @@ public static class CheatState
                          "H-ANYWHERE", "H-NOCD-CARD", "H-NOCD-GLOVE", "H-NOCD-HAMMER", "H-NOCD-WHEEL", "H-MOWER-INF",
                          "SYS-EMIT-PROOF", "SYS-DAMAGE-FX", "SYS-ELEMENT-FX",
                          "SYS-LIMHEALTH-GATE", "SYS-LIMHEALTH-OBSERVE",
-                         "OVERLAY-COMBAT", "DEBUG-LEVEL-ENTRY"
+                         "OVERLAY-COMBAT", "DEBUG-LEVEL-ENTRY", "LAWN-BASIC-ATTACK"
                      })
                 T(id);
 
@@ -377,6 +377,9 @@ public static class CheatState
             // effect-runtime/_prove-overlay-combat.json); promoted per spec-overlay-combat-enable.md
             // §7's own "only after the proof" rule.
             Get("OVERLAY-COMBAT").Enabled = true;
+            // lawn-combat-wire T10/T12's shared kill switch — default ON, same reasoning as
+            // OVERLAY-COMBAT immediately above.
+            Get("LAWN-BASIC-ATTACK").Enabled = true;
             // Schema defaults are not user-set; Effective* applies display defaults when IsSet=false.
         }
         SyncLocalStatsFromEntries();

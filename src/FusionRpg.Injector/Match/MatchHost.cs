@@ -137,6 +137,21 @@ public static class MatchHost
 
                 _runtime.Apply(kind, payload);
 
+                // lawn-combat-wire T10 (spec-basic-attack-grant.md): "bind on the spawn edge... keyed
+                // on the board fold" — right after the board-fold Apply above, for every plant/zombie
+                // spawn, general creature included (no branch here excludes one for lacking a
+                // binding). Recorded, not bound synchronously: LawnBasicAttackGrantBinder.Tick drains
+                // once per frame so a mass-spawn wave pays for one board resolve, not N.
+                if (string.Equals(kind, "plant.spawn", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(kind, "zombie.spawn", StringComparison.OrdinalIgnoreCase))
+                {
+                    var spawnPtr = payload != null && payload.TryGetValue("ptr", out var ptrObj)
+                        ? ptrObj?.ToString()
+                        : null;
+                    TryEffect("LawnBasicAttackGrantQueue",
+                        () => Effects.LawnBasicAttackGrantBinder.QueueSpawn(spawnPtr));
+                }
+
                 var bound = _runtime.ConsumeLastBound();
                 if (bound != null)
                 {

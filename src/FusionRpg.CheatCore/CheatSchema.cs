@@ -103,6 +103,10 @@ public static class CheatSchema
         // effect-runtime/_prove-overlay-combat.json); promoted per spec-overlay-combat-enable.md
         // §7's own "only after the proof" rule.
         T("OVERLAY-COMBAT", true);
+        // lawn-combat-wire T10/T12's shared kill switch (lawn-combat-wire-plan.md): default ON, same
+        // reasoning as OVERLAY-COMBAT above — the risk it exists for is a measured perf breach, not
+        // an a-priori doubt. FUSIONRPG_LAWN_BASIC_ATTACK=0 forces it off regardless of this default.
+        T("LAWN-BASIC-ATTACK", true);
 
         Cfg("D-DMG-%", 1, "slider");
         Extra("D-DMG-SET"); Extra("D-TYPE-SWAP");

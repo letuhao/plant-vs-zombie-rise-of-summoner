@@ -219,6 +219,23 @@ public static class EffectRuntime
         return g;
     }
 
+    /// <summary>
+    /// lawn-combat-wire T10: the SAME <c>Bag.Grant</c> call <see cref="Grant"/> makes, minus its
+    /// per-call <c>debug.effect.granted</c> telemetry emit. `DebugRuntime.Emit` is unconditional (no
+    /// `SessionActive` gate, unlike <c>MaybeEmitCombatPacketTrace</c>) and always routes through
+    /// `GameHooks.Emit` — `MatchHost.Apply` + `EffectRuntime.OnCapture` + a queued
+    /// `RpgHost.Client.Enqueue` network payload. That is fine for a rare, manual cheat/debug grant
+    /// (<see cref="Grant"/>'s existing callers); it is exactly the "N synchronous heavy operations on a
+    /// mass spawn" this program's own acceptance criteria refuse for a grant bound once per lawn actor.
+    /// Never a second grant route — still <c>Ensure</c>d, still <c>Bag.Grant</c>, still the one gate
+    /// every Secondary caller shares.
+    /// </summary>
+    public static EffectGrant GrantQuiet(EffectGrantDto dto)
+    {
+        Ensure();
+        return Bag.Grant(dto);
+    }
+
     public static bool Withdraw(string grantId)
     {
         Ensure();

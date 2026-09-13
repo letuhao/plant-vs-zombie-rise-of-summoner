@@ -49,6 +49,9 @@ public static class GameHooks
     {
         // Backstop: any records still pending at a match edge drain before state clears.
         try { Effects.EventDrainHost.FlushAllAndReset(); } catch { }
+        // lawn-combat-wire T10: a ptr queued for a basic-attack grant bind in a match that ended
+        // before its next drain must not bind against the NEXT match's board.
+        try { Effects.LawnBasicAttackGrantBinder.ClearPending(); } catch { }
         Effects.InjectorEntityRegistry.Clear();
         Effects.InjectorBoardSnapshot.Invalidate();
         Applied.Clear();
