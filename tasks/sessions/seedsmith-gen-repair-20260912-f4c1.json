@@ -21,5 +21,6 @@
   ],
   "sharedNote": "Owner decision 2026-09-12: everything-green scope (A+B+C). Owns tools/seedsmith + data/seed/items. Never stage the other session's tests/FusionRpg.Data.Tests/** or src/FusionRpg.Data/** files.",
   "started": "2026-09-12T17:20:00Z",
-  "status": "active"
+  "status": "merged",
+  "closedNote": "Completed: S1-S6 generator-first repair (name guard, per-frame slate classes.v3.json, 649-row re-slate, 848->0 name collisions, placeholder rows, CI gate). Commits 9d358207 cef4bc38 533749c3 9b4f3033 fae533a5 1a45dbfe 562d0df7 2e1b2f8c."
 }

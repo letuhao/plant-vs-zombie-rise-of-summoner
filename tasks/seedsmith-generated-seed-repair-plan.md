@@ -1,6 +1,17 @@
 # Seedsmith generator repair — items corpus (investigation + plan)
 
-**Status:** investigation complete; plan awaiting owner go.
+**Status: COMPLETE (2026-09-12).** All of S1–S6 landed; see the todo for per-item evidence. Outcomes
+differed from the first draft in four ways, recorded here so the reasoning is not lost:
+
+- **S2 registry shape:** the frozen v4 was `classes.v2.json`, so the additive per-frame slate is
+  **`classes.v3.json`** (registryVersion 5), keeping the existing mint-as-a-new-file convention.
+- **S3 re-slate volume:** 649 rows, not 428 — the frame slate is the closed vocabulary now, so every
+  row outside its own frame's set is repaired, not only the rows on an overlapping family.
+- **S3 re-flavour:** NOT done here. `spec-base-types.md` assigns re-flavouring to the authoring fleet
+  and says this module emits an `ImplicitFlavourDrift` warning only; the warning now reports 312 rows.
+- **S4 recipe keys:** an extra generator defect surfaced — `recipe.nameKey` was a slug of a display
+  name that repeats by design, so it is minted from the unique `recipe.NNN` id now. A rename that
+  updated `nameKey` also had to re-derive `iconKey` (`icon.<nameKey>`).
 **Trigger:** a session set out to hand-edit generated seed data to clear failing tests. The owner
 stopped it and asked for the generator-first rule plus a hard gate. This file records why the
 hand-edit was wrong and what the generator must become.

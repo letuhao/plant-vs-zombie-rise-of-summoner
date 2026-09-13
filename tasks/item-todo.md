@@ -2516,14 +2516,14 @@ draft this list was written from:**
       `cosmetic` — no consumer ever planned), matching `ssot-item-categories.md`'s own "v1" column
       exactly, not the narrower "four have no consumer today" framing spec-base-types.md's prose uses
       for a different purpose (SC7's shipped-vs-not distinction)
-- [ ] ⏸ **`ImplicitFlavourDrift` warning per re-slated entry — deferred, named, not silently skipped.**
-      359 entries' `implicit.family` changed; a mechanical reassignment can leave an entry's `name`/
-      `flavor` prose describing its OLD family (spec's own anticipated cost: *"an entry keeps its name
-      and prose while its implicit family changes... this module emits a warning; it does not call a
-      model"*). The drift set itself **is captured** (359 entries, `{id, role, frame, from, to, name,
-      flavor}`, scratch JSON from the migration run) but wiring it into `ItemSeedValidator` as a
-      standing warning, and handing the list to the authoring fleet, is not yet done — real remaining
-      work, not scope creep to invent
+- [x] ✅ **`ImplicitFlavourDrift` warning per re-slated entry — wired 2026-09-12.**
+      `FrameDirectionCheck.EmitFlavourDriftWarnings` reports **312 rows** against each family's own
+      display vocabulary (a row whose `flavor` names another family's word while its implicit moved),
+      and `ItemSeedValidator` emits it as a named warning rather than a silent edit. The 649-row
+      re-slate was applied by `basetypegen/reslate.py` (a generator verb — the corpus is seedsmith
+      output, never hand-edited). Handing the list to the authoring fleet for the actual re-flavour
+      remains theirs per `spec-base-types.md`: *"the authoring fleet ... this module emits an
+      `ImplicitFlavourDrift` warning; it does not call a model."*
 - [ ] ⏸ **`ContentValidation.cs:73`'s null-ceiling skip — not this module's to fix.** Named in the old
       todo wording as this module's; re-reading `spec-base-types.md` in fact names **module 9 alone**
       as owner of the `power_ceiling`-gated `corner-matrix` mode (`spec-base-types.md:228`: *"module 9.
@@ -9154,7 +9154,7 @@ entirely, and modules 6/8's eight phantom-implicit-family bullets (a concurrent 
 | `frame-lean.v1.json`: ten `(ladder, frame)` blocks, eight authored, `standard` null | ✅ | 5 ladders × 2 frames = 10 declared, `standard` pair explicitly `null`; every humanoid block `burst`, every plant `sustain`; channels are `maxHp`/`atk`/`combat.dodge.omni`/`combat.crit.damage.omni`/`combat.crit.resist.damage.omni` — no `plating`/`carapace` |
 | Channel-split dominance lint green for all twelve hybrid-core roles | ✅ | `BaseTypeCorpusTests` re-run green this pass |
 | `item_category` ten rows, six `declareOnly` | ✅ | Counted: 10 rows, 6 `declareOnly` |
-| ⏸ `ImplicitFlavourDrift` warning not wired | ✅ **blocker current** | Zero occurrences of `ImplicitFlavourDrift` in any `.cs`; it exists only in `spec-base-types.md` and this file |
+| ✅ `ImplicitFlavourDrift` warning **wired** (2026-09-12) | ✅ **resolved** | `FrameDirectionCheck.EmitFlavourDriftWarnings` reports 312 rows; the re-flavour pass itself stays the authoring fleet's per `spec-base-types.md` |
 | ⏸ `ContentValidation.cs:73`'s null-ceiling skip is module 9's | ✅ **blocker current, and this bullet's line number is the correct one** | `:73` is `if (ceilingFor(container.Rarity!) is not { } ceiling) continue;`. Checkpoint 2, `item-plan.md`'s risk row and `spec-rarity-bands.md:379` all say `:71`, which is now the `foreach` brace |
 
 ### Module 8 `affix-legality` (P2.3) — **two real defects found and fixed**

@@ -22,5 +22,6 @@
   ],
   "sharedNote": "Owner decision 2026-09-12: work on the current branch alongside data-test-substrate rather than take a worktree. Overlap is intentional; commit with explicit paths and never stage the other session's uncommitted files.",
   "started": "2026-09-12T08:36:00Z",
-  "status": "active"
+  "status": "merged",
+  "closedNote": "Completed: session-boundary standard (policy, per-session records, drift checker, /session-start, worktree setup) plus the commit-tool stdin-hang and console-focus fixes."
 }
