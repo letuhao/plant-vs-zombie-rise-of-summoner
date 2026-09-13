@@ -15,7 +15,7 @@
 # lets you hard-refresh and confirm FE fixes without -RestartServer.
 # Server data (rpg-hot / rpg-media) lives next to the published exe: dist\FusionRpg.Server\data\
 # Runs guard-single-writer.ps1 + guard-dal.ps1 + guard-test-substrate.ps1 + guard-generated-seed.ps1 + guard-secondary-no-unity.ps1 + guard-funnel-delta.ps1 + guard-actor-hub.ps1
-# + guard-overflow.ps1 + guard-magic-numbers.ps1 + guard-power.ps1 + guard-stat-pairs.ps1
+# + guard-debug-scope.ps1 + guard-overflow.ps1 + guard-magic-numbers.ps1 + guard-power.ps1 + guard-stat-pairs.ps1
 # + guard-class-system.ps1 before build.
 param(
     [ValidateSet("BepInEx", "MelonLoader")]
@@ -158,6 +158,10 @@ if ($LASTEXITCODE -ne 0) { throw "funnel delta guard failed" }
 Write-Host "==> ActorHub gate guard"
 & (Join-Path $Root "scripts\guard-actor-hub.ps1")
 if ($LASTEXITCODE -ne 0) { throw "actor-hub guard failed" }
+
+Write-Host "==> Debug-scope guard"
+& (Join-Path $Root "scripts\guard-debug-scope.ps1")
+if ($LASTEXITCODE -ne 0) { throw "debug-scope guard failed" }
 
 Write-Host "==> Overflow guard"
 & (Join-Path $Root "scripts\guard-overflow.ps1")

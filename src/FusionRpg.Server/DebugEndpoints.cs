@@ -39,6 +39,7 @@ public static class DebugEndpoints
     {
         var g = app.MapGroup("/api/debug");
 
+        // Game Injector Debug
         g.MapPost("/session/start", async (JsonElement? body, EventIngest ingest, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {
             var b = BodyOrEmpty(body);
@@ -74,7 +75,11 @@ public static class DebugEndpoints
             return Results.Ok(new { ok = true });
         });
 
+        // RPG Server Debug
+        // (in-memory server mirror only, no injector relay and no RpgStore read -- ambiguous by
+        // the guard's own rule, reads DebugSessionState which is never live-game state)
         g.MapGet("/session", () => Results.Ok(DebugSessionState.Snapshot()));
+        // Game Injector Debug
         g.MapGet("/snapshot", async (IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {
             await Send(hub, inbox, "debug.snapshot", new { });
@@ -86,6 +91,7 @@ public static class DebugEndpoints
             });
         });
 
+        // RPG Server Debug
         g.MapGet("/events", (RpgStore store, int limit = 200, long afterId = 0, string? kinds = null, string? scenarioId = null) =>
         {
             var items = store.ListEvents(Math.Clamp(limit, 1, 500), afterId);
@@ -102,6 +108,7 @@ public static class DebugEndpoints
             return Results.Ok(new { items });
         });
 
+        // Game Injector Debug
         g.MapPost("/setup/skip", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {
             var b = BodyOrEmpty(body);
@@ -132,8 +139,14 @@ public static class DebugEndpoints
             return Results.Ok(new { ok = true, method, acknowledgement = ack.Payload });
         });
 
+        // RPG Server Debug
+        // (in-memory catalog read only, no injector relay and no RpgStore read)
         g.MapGet("/scenarios", () => Results.Ok(new { items = DebugScenarios.AllIds }));
 
+        // Game Injector Debug
+        // every route below through /effects/reload relays to the Injector somewhere in its body
+        // (some also do real store/session bookkeeping alongside the relay -- legitimate
+        // orchestration, not a violation; see spec-debug-scope-guard.md).
         g.MapPost("/scenario/{id}", async (string id, JsonElement? body, EventIngest ingest, IHubContext<RpgHub> hub, InjectorCommandInbox inbox, EffectGrantSession grants) =>
         {
             var b = BodyOrEmpty(body);
@@ -427,6 +440,8 @@ public static class DebugEndpoints
             });
         });
 
+        // RPG Server Debug
+        // (in-memory session-grant reads only, no injector relay and no RpgStore read)
         g.MapGet("/effects/session-grants", (EffectGrantSession grants) =>
             Results.Ok(new { count = grants.Count, grants = grants.Snapshot() }));
 
@@ -454,6 +469,7 @@ public static class DebugEndpoints
         // without a new profile. Pure DAL, no injector round trip. Gated the same way every other
         // `/api/debug/*` route is: Program.cs only calls `app.MapDebug()` on a loopback bind (or
         // FUSIONRPG_DEBUG_REMOTE=1) — this endpoint lives in the SAME route group, not a second gate.
+        // RPG Server Debug
         g.MapPost("/reforge-world", (JsonElement? body, RpgStore store, EventIngest ingest) =>
         {
             var b = BodyOrEmpty(body);
@@ -498,6 +514,8 @@ public static class DebugEndpoints
             });
         });
 
+        // Game Injector Debug
+        // both this and /fire-spawn-extra delegate to AcceptDebugSpawnExtra, which relays
         g.MapPost("/spawn-extra", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {
             var result = await AcceptDebugSpawnExtra(BodyOrEmpty(body), store, hub, inbox, reasonDefault: "debug");
@@ -515,6 +533,7 @@ public static class DebugEndpoints
             return await AcceptDebugSpawnExtra(b, store, hub, inbox, reasonDefault: "debug.fire");
         });
 
+        // RPG Server Debug
         // Derived sheet audit: real UniqueActor → Hub → /sheet (never a synthetic 269 paint).
         g.MapPost("/derived-audit-actor", (JsonElement? body, RpgStore store) =>
         {
@@ -550,6 +569,7 @@ public static class DebugEndpoints
             }
         });
 
+        // Game Injector Debug
         g.MapPost("/arm/{kind}", async (string kind, JsonElement? body, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {
             var payload = JsonSerializer.SerializeToElement(MergeKind(BodyOrEmpty(body), kind));

@@ -139,6 +139,12 @@ State explicitly, per probe:
   work.
 - `AGENTS.md`/`CLAUDE.md` point here rather than restating the rule (same convention as
   [`testing-standard.md`](testing-standard.md) §4).
-- No automated guard enforces this today — it is a review discipline, the same way `DESIGN-GATE.md`
-  itself is. A future guard (e.g. flagging a debug endpoint that both accepts fabricated stats AND
-  never reads `RpgStore`) is a reasonable follow-up, not yet built.
+- `scripts/guard-debug-scope.ps1` (spec:
+  [`live-probe/spec-debug-scope-guard.md`](../architecture/live-probe/spec-debug-scope-guard.md), wired
+  into `deploy-play.ps1`) mechanically classifies every route handler in `DebugEndpoints.cs` as
+  Game-Injector-Debug-shaped or RPG-Server-Debug-shaped — any relay call to the Injector anywhere in a
+  handler body makes it Game-Injector-Debug-shaped, full stop, regardless of what real persisted-write
+  work the same handler also does. It also checks each route's `// Game Injector Debug` /
+  `// RPG Server Debug` banner comment against that computed classification, so a route that drifts
+  from its own banner (or a stale banner miscategorizing a route) fails CI instead of misleading the
+  next reader. `tests/FusionRpg.Guard.Tests/DebugScopeGuardTests.cs` carries the regression fixtures.
