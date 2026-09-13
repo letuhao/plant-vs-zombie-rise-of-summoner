@@ -27,4 +27,3 @@ tests/FusionRpg.Launcher.Tests/MelonHostGapTests.cs : swallowed-delete
 tests/FusionRpg.Launcher.Tests/PlayerPackOverlayProbeTests.cs : swallowed-delete
 tests/FusionRpg.Launcher.Tests/PlayerPackProbeTests.cs : swallowed-delete
 tests/FusionRpg.Launcher.Tests/PortPickerTests.cs : swallowed-delete
-tests/FusionRpg.Server.Tests/BaseTypeSocketMaxCorpusTests.cs : swallowed-delete

@@ -22,6 +22,18 @@ $ErrorActionPreference = "Stop"
 # only the excluded tests carry a trait.
 $Filter = "Category!=DiskSemantics&Category!=Heavy"
 
+# The STATIC substrate gate runs here, unlike the runtime leak alarm. The gate reads SOURCE, so it is
+# profile-independent and cannot false-positive on the file-bound dirs the default profile legitimately
+# writes — it simply refuses a test that swears a temp delete or builds a store from a temp path. That
+# is what makes the default loop self-guarding: a leaking test cannot be added and then run unnoticed.
+# The RUNTIME alarm deliberately stays on `full` (it would flag those same intentional writes).
+Write-Host "==> Test-substrate gate (static, profile-independent)"
+& (Join-Path $Root "scripts\guard-test-substrate.ps1")
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "DEFAULT PROFILE REFUSED: guard-test-substrate.ps1 failed — a test leaks or swears a temp delete." -ForegroundColor Red
+    exit $LASTEXITCODE
+}
+
 # No -Project: the four store test projects (Data first — it holds the majority of store sites).
 $DefaultProjects = @(
     "tests/FusionRpg.Data.Tests/FusionRpg.Data.Tests.csproj",

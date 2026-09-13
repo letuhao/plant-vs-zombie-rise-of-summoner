@@ -3,6 +3,13 @@ using Xunit;
 
 namespace FusionRpg.Server.Tests;
 
+/// <summary>
+/// File-bound by subject: the thing under test is the corpus LOADER's nested-partition walk, so the
+/// fixture is a real directory tree on disk, not a store. It uses no SQLite, so the substrate gate's
+/// `temp-store` rule does not apply; the one thing it was doing wrong was swallowing a failed delete
+/// (testing-standard R3) — a failed cleanup is a failure, never `catch { }`.
+/// </summary>
+[Trait("Category", "DiskSemantics")]
 public sealed class BaseTypeSocketMaxCorpusTests
 {
     [Fact]
@@ -25,7 +32,7 @@ public sealed class BaseTypeSocketMaxCorpusTests
         }
         finally
         {
-            try { Directory.Delete(root, recursive: true); } catch { /* temp directory */ }
+            Directory.Delete(root, recursive: true);
         }
     }
 }
