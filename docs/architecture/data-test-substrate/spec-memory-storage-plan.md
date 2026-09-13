@@ -171,7 +171,8 @@ so this is a test-facing property, and a test must never assert it is a real pat
 
 ### 6. What is deliberately NOT here
 
-- **Archive** stays file-addressed. Making it memory is module `archive-target`, a separate refactor.
+- **Archive** stays file-addressed permanently. Making it memory was module `archive-target`, which the
+  owner **cut on 2026-09-13** (its benefit no longer justified the refactor — see the map's module 5).
   A memory store that calls an archive entry point **throws** (§5), and the archive tests are
   file-bound (`data-test-substrate-map.md` §2).
 - **`Reset()`** (`:837`) calls `ClearAllPools()` and deletes archive files (`:928-935`) then re-`Init()`.
@@ -332,16 +333,16 @@ Recorded verbatim in intent, so downstream tasks do not re-litigate them:
    instance and parallelism scales to cores (§3). This is a hard requirement, stated in the success
    criteria (#5).
 4. **Archive call on a memory store (Q4) — dedicated exception with a named message (recommended).**
-   → **Adopted.** A distinct `StorePlanException` (or dedicated `InvalidOperationException`) whose
-   message names the memory plan and points at the `archive-target` module. It must **not** no-op and
-   must **not** resolve a cwd-relative path.
+   → **Adopted.** A distinct `StorePlanException` whose message names the memory plan and states archive
+   is file-only. It must **not** no-op and must **not** resolve a cwd-relative path.
 
 **No open questions remain for this module.** The audit-resolved items (URI trap, archive throw,
 `DataDir == ""`, schema idempotency) are in §1/§4/§5 and are enforced by tests, not prose.
 
 ## Deliberate non-decisions (deferred, not open)
 
-- Whether `archive-target` eventually supports a memory archive — separate module.
+- Whether a future program revives `archive-target` to support a memory archive. **Cut by the owner
+  2026-09-13**; the spec remains the contract.
 - Whether `RpgStoreOptions` grows past the four fields above — add fields when a real consumer needs
   one, not speculatively (but the type is public now, per Q1, so this is additive and non-breaking).
 

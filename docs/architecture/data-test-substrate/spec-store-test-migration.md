@@ -15,7 +15,7 @@ classes; this module is the execution of that classification:
 | Class | Files | Substrate |
 |---|---|---|
 | **A — pure store** | 191 in scope (129 Data.Tests + 54 Server + 4 E2E + 4 Core) | memory |
-| **B — archive** | 2 (`ColdArchiveCompactionTests`, `StoragePurgeTests`) | file until `archive-target`, then memory |
+| **B — archive** | 2 (`ColdArchiveCompactionTests`, `StoragePurgeTests`) | **file permanently** — `DiskSemantics`-tagged, leak-proof via the file helper (`archive-target` was cut 2026-09-13) |
 | **C — temp-only, no store** | 35 | **not migrated** (not store tests) |
 | **D — file-semantics** | 3 smoke/legacy | file, leak-proof helper |
 
@@ -80,8 +80,9 @@ Five classes keep real files **and** get the helper's leak-proof file path:
 | `StoragePurgeTests` | purge deletes real archive files |
 
 Converting these to memory would **delete real coverage**. They move onto `CreateFileBacked()`, which
-fixes their leak without changing what they assert (module `archive-target` moves the archive two to
-memory later; the legacy + smoke three stay file permanently).
+fixes their leak without changing what they assert. **All six stay file permanently** — `archive-target`,
+which would have moved the two archive classes to memory, was **cut by the owner on 2026-09-13** (its
+benefit no longer justified refactoring production archive code).
 
 **Finding from T14 (2026-09-12) — the classifier missed a second kind of file-bound case.** Class A
 ("pure store") was defined by *what the test asserts*, but a memory-bound test can also reach a file

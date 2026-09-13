@@ -247,21 +247,38 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
 ### Checkpoint 4 — Migration
 - [x] ⭐ Baseline strictly smaller (216 → 26); no new violation; the runtime alarm reports 0 survivors.
 
-## Phase 5 — Archive target (module `archive-target`, optional)
+## Phase 5 — Archive target (module `archive-target`) — ⛔ CUT BY OWNER 2026-09-13
 
-- [ ] **Task T20a: archive-target abstraction + file impl** — Deps: T5. Scope: M.
-  - Description: the `IArchiveStore`-shaped abstraction (create/open/list/exists/delete) plus the file-backed implementation; no behavior change yet.
-- [ ] **Task T20b: thread the abstraction through the 4 writers + purge; add the memory target** — Deps: T20a. Scope: M.
-  - Description: replace the direct `Directory.CreateDirectory(ArchiveDir)`/`Path.Combine`/`Open(absPath)` at `Compaction.cs:140,276,484,623` and the resolver at `:711` + purge (`Storage.cs:258-288`) with the abstraction; add the memory target; the memory store's archive entry points stop throwing once its target is memory-capable.
-  - Acceptance: archive slices created and read on a memory target; file plan byte-identical.
-  - Verify: Data tests + `guard-test-substrate.ps1`.
-  - Files: `RpgStore.Compaction.cs`, `RpgStore.Storage.cs`, the abstraction.
+**The module is deliberately not built.** When the owner chose to keep it (2026-09-12) its premise was
+true; by 2026-09-13 every part of that premise had changed, so the owner cut it. The reasoning is
+recorded here because "cut" must be a decision with evidence, not a silent omission.
 
-- [ ] **Task T21: Archive tests to memory** (`ColdArchiveCompactionTests`, `StoragePurgeTests`) — Deps: T20. Scope: M.
-- [ ] **Task T22: Archive checkpoint** — slices prove on memory; the file-bound set drops from 5 to 3 (legacy + 2 smoke). Deps: T21. Scope: XS.
+| The decision's premise (2026-09-12) | The measured state (2026-09-13) |
+|---|---|
+| The two archive classes wrote disk on **every dev run** | **`DiskSemantics`-tagged** (T26) → excluded from the default profile; they run only at `full`/nightly/gate |
+| Their cleanup **swallowed** failures | **`DataTestStore.CreateFileBacked()`** (T18f) → leak-proof: clears pools, a failed delete throws |
+| They ran in the local dev loop | The default profile (`test-fast.ps1`) excludes them; the alarm around it reports **0 survivors** |
+
+So the refactor's entire remaining benefit is *"two already-excluded, already-leak-proof classes run in
+RAM instead of ephemeral CI disk"* — no SSD saving, no dev-loop saving. Against that: **793 lines of
+production archive data-movement code** would change — 4 writers, `ResolveArchiveAbsPath` (`:708`), the
+purge path, a path-escape security guard, **15 `File.Delete` sites**, and **15 file-system assertions**
+across the two tests. That is real risk to a data-movement path for no remaining benefit. The plan
+itself already classed Phase 5 as **separable/cuttable**; this is that cut, taken on evidence.
+
+**Consequence, stated plainly:** the file-bound set stays at **six** classes (the five store ones plus
+`CreatureSpeciesImportCliTests`), not three. `ColdArchiveCompactionTests` and `StoragePurgeTests` keep
+real files and the `DiskSemantics` trait, permanently, and remain leak-proof through the file helper.
+A future program can still build `IArchiveTarget` — [spec-archive-target.md](../docs/architecture/data-test-substrate/spec-archive-target.md)
+is written and remains the contract; it simply is not needed for this program's goal.
+
+- [x] **Task T20a: archive-target abstraction + file impl** — ⛔ cut (not built)
+- [x] **Task T20b: thread the abstraction through the 4 writers + purge; add the memory target** — ⛔ cut
+- [x] **Task T21: Archive tests to memory** — ⛔ cut; the two classes stay `DiskSemantics` + file-bound
+- [x] **Task T22: Archive checkpoint** — ⛔ cut; the file-bound set is documented above as six, not three
 
 ### Checkpoint 5 — Archive
-- [ ] Archive tests on memory; the remaining file-bound set is legacy + the 2 WAL/file smoke tests.
+- [x] ⛔ Cut by owner 2026-09-13: archive stays file-bound and `DiskSemantics`; the leak-proof file helper already removes the only defect it had (leaked, swallowed cleanup).
 
 ## Phase 6 — The standard binds (module `substrate-standard`)
 

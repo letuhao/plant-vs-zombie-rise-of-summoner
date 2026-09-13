@@ -182,8 +182,8 @@ Not applicable — test tooling. No magnitude, no `data/tuning/` key, no stat su
 
 ## Open questions
 
-None. Owner decided 2026-09-12: extend with module 7, keep `archive-target`, two categories, fix the
-124s test now (done).
+None. Owner decided 2026-09-12: extend with module 7, two categories, fix the 124s test now (done).
+(Owner also first chose to keep `archive-target`, then **cut it on 2026-09-13** once its premise changed.)
 
 ## Gate checklist (DESIGN-GATE §5)
 

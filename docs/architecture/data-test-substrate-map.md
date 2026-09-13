@@ -82,7 +82,7 @@ behaviour an in-memory DB cannot reproduce (`journal_mode` degrades to `memory`,
 | 2 | `test-store-helper` | One shared fixture/helper (`DataTestStore.Create()` memory default, `CreateFileBacked()` for file semantics) that constructs the store, holds the keepers, and disposes them; a failed temp-delete in file mode is a **failure, not a swallowed catch**. Test-only. | 1 |
 | 3 | `store-test-migration` | Move the store sites onto the helper: **Data.Tests first** (145), then Server.Tests (55), E2E (6), Core.Tests (4). Bodies keep their assertions; only construction/teardown move. Includes the 10 `Open(readOnly:true)` sites switching to a plain in-memory open. | 1, 2 |
 | 4 | `disk-write-probe` | **The guard.** A CI/guard check that counts the test temp root before/after a run and fails on any survivor, plus a `0` `rpg-*.sqlite` assertion for the in-memory suite. A regression to disk is caught at the line. | 2 |
-| 5 | `archive-target` | **Optional follow-on.** An archive-*target* abstraction (create / open / list / exists / delete) threaded through the four compaction writers and purge, so archive slices can also be memory-backed. Without it, archive tests stay file-backed. | 1 |
+| 5 | `archive-target` | **Cut by owner 2026-09-13.** An archive-*target* abstraction (create / open / list / exists / delete) threaded through the four compaction writers and purge, so archive slices can also be memory-backed. Without it, archive tests stay file-backed. | 1 |
 | 6 | `substrate-standard` | The binding standard: store tests default to in-memory; disk only when the thing under test is a file; cleanup failure is a failure; never swallow a temp-delete. Plus the `data-architecture.md` amendment and the "no read-only memory open" rule. | 1, 3, 4 |
 | 7 | `test-profiles` | **Owner decision 2026-09-12.** Two xUnit categories (`DiskSemantics`, `Heavy`) and four run profiles, so the **default dev/agent run writes nothing to disk and runs no long test**; the file-bound and heavy set runs in CI, nightly, and at the release gate. Adds no `src` change; tags only the tests being *excluded* (a negative filter was verified to include uncategorized tests, so nothing else needs a trait). | 6 |
 
@@ -119,20 +119,32 @@ a test whose subject genuinely *is* a file — WAL journal mode, legacy `rpg.sql
 archive slices and purge — earns `DiskSemantics` and runs at the gate. Deleting them would trade an SSD
 problem for a correctness problem.
 
-**Why `archive-target` is its own module and separable.** The spike proves archive *can* be memory,
-but the code addresses it straight through the filesystem — four writers each do
-`Directory.CreateDirectory(ArchiveDir)` + `Path.Combine` (`RpgStore.Compaction.cs:140,276,484,623`),
-`WriteCaptureArchiveFile(absPath, …)` opens that path (`:348-353`), and purge does
-`Path.GetFullPath(Path.Combine(_dataDir, uri…))` (`:711`). That is a real refactor, not a branch.
-It also has a genuine cut point: modules 1–4 reach essentially all 210 store sites and remove the
-bulk of the writes without it. Cutting 5 leaves only the archive/purge tests file-backed.
+**Why `archive-target` was its own module, and why the owner cut it (2026-09-13).** The spike proves
+archive *can* be memory, but the code addresses it straight through the filesystem — four writers each
+do `Directory.CreateDirectory(ArchiveDir)` + `Path.Combine` (`RpgStore.Compaction.cs:143-145,279-281,
+487-489,626-628`), `WriteCaptureArchiveFile(absPath, …)` opens that path (`:351-353`), the resolver is
+`ResolveArchiveAbsPath` (`:708`), and purge deletes real files. That is a real refactor, not a branch —
+so the module was correctly separable.
+
+**It was cut on evidence, not skipped.** Its whole benefit was to make two test classes memory-capable,
+but by the time the rest of the program landed those two classes had already stopped being a problem:
+they are `DiskSemantics`-tagged (T26, so the default dev profile never runs them) and they are
+**leak-proof** through `DataTestStore.CreateFileBacked()` (T18f, so a failed cleanup throws instead of
+swallowing). The remaining gain — running two already-excluded, already-clean classes in RAM instead of
+ephemeral CI disk — does not justify changing 793 lines of production archive data-movement (15
+`File.Delete` sites and a path-escape guard) plus rewriting 15 file-system assertions. The full
+reasoning and the per-premise before/after table are in `tasks/data-test-substrate-todo.md` Phase 5.
+
+**Consequence:** the file-bound set stays at six classes, not three; archive stays file-bound and
+`DiskSemantics` permanently. [spec-archive-target.md](data-test-substrate/spec-archive-target.md)
+remains the contract should a future program want it.
 
 ### Dependency graph
 
 ```text
 memory-storage-plan ──┬──► test-store-helper ──┬──► store-test-migration ──► substrate-standard
                       │                         └──► disk-write-probe ──────► substrate-standard
-                      └──► archive-target ─────────► store-test-migration   (archive/purge sites only)
+                      └──► (archive-target — CUT 2026-09-13)
 ```
 
 No cycles. Every arrow points one way.
@@ -144,7 +156,6 @@ memory-storage-plan
   -> test-store-helper
   -> store-test-migration   (Data.Tests only — the proving ground)
   -> disk-write-probe
-  -> archive-target          (optional; gates only the archive/purge slice of 3)
   -> store-test-migration   (Server.Tests, E2E, Core.Tests)
   -> substrate-standard
 ```
@@ -153,9 +164,10 @@ memory-storage-plan
 round-trips SQL). Module 2 makes disposal leak-proof *before* any test migrates, so the migration
 cannot re-introduce a leak. Data.Tests alone (134 temp creators, 145 store sites) is the proving
 ground — if the shape is wrong it is found against the smallest blast radius. The probe lands
-**before** the remaining projects migrate, so the rest is guarded as it moves. `archive-target` is
-sequenced after the probe so it cannot delay the bulk win; `substrate-standard` is last because it
-documents a shape that must already exist and be enforced.
+**before** the remaining projects migrate, so the rest is guarded as it moves.
+`substrate-standard` is last because it documents a shape that must already exist and be enforced.
+(`archive-target` was sequenced between the probe and the second migration wave; it was **cut
+2026-09-13**, so the order above is the shipped one.)
 
 ### The file-bound exclusion is part of module 3, not a failure
 

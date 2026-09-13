@@ -49,7 +49,7 @@ Add to the Data doc, in its own words:
   `guard-dal.ps1` still passes. The memory branch is one URI test in `SqliteConnectionFactory`, not a
   second data path.
 - **A shared-cache memory DB cannot be opened read-only.** A fact worth recording: the 9 test read-only
-  sites became plain opens, and a memory store's archive entry points throw until `archive-target`.
+  sites became plain opens, and a memory store's archive entry points throw `StorePlanException` (archive is file-only by decision — `archive-target` was cut 2026-09-13).
 
 ### 3. Cross-linking
 
