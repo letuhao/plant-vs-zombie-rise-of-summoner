@@ -256,7 +256,7 @@ public class TimelinePurityGuardTests
         }
         finally
         {
-            try { Directory.Delete(tmp, true); } catch { /* temp */ }
+            Directory.Delete(tmp, true);
         }
     }
 
@@ -507,7 +507,7 @@ public class TimelinePurityGuardTests
 
     static void Cleanup(string dir)
     {
-        try { Directory.Delete(dir, true); } catch { /* temp */ }
+        Directory.Delete(dir, true);
     }
 
     [Fact]
@@ -526,7 +526,7 @@ public class TimelinePurityGuardTests
         }
         finally
         {
-            try { Directory.Delete(tmp, true); } catch { /* temp */ }
+            Directory.Delete(tmp, true);
         }
     }
 }

@@ -2,6 +2,7 @@ using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.E2E.Tests;
 
@@ -74,6 +75,15 @@ public sealed class RpgApiFactory : WebApplicationFactory<Program>
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
-        try { Directory.Delete(DataDir, true); } catch { /* temp */ }
+
+        // Genuinely file-bound: WebApplicationFactory boots the real server, which reads
+        // FUSIONRPG_DATA from disk. So this keeps a real dir, but is leak-proof -- pools hold the
+        // sqlite handle, and a failed delete is a test failure, never a swallow (testing-standard R3).
+        if (disposing)
+        {
+            SqliteConnection.ClearAllPools();
+            if (Directory.Exists(DataDir))
+                Directory.Delete(DataDir, recursive: true);
+        }
     }
 }

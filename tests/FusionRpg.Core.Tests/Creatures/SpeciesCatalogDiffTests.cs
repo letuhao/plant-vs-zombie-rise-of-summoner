@@ -3,6 +3,7 @@ using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Data;
+using FusionRpg.Data.Tests;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Creatures;
@@ -56,16 +57,14 @@ public class SpeciesCatalogDiffTests
             .Single(a => a.SpeciesId == speciesId);
     }
 
-    /// <summary>A real temp store with the two real classified anchors on disk imported through the
-    /// full, real `SpeciesExpander` -> `RpgStore.ImportSpecies` pipeline — not a hand-built fixture.</summary>
+    /// <summary>A real store with the two real classified anchors imported through the full, real
+    /// `SpeciesExpander` -> `RpgStore.ImportSpecies` pipeline — not a hand-built fixture. Runs in
+    /// memory: the pipeline is identical, only the substrate differs.</summary>
     static IReadOnlyList<CreatureSpeciesDef> RealStoreBackedSnapshot()
     {
-        var dir = Path.Combine(Path.GetTempPath(), "fusionrpg-catalogdiff-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(dir);
-        try
+        using var testStore = DataTestStore.Create();
         {
-            var store = new RpgStore(dir);
-            store.Init();
+            var store = testStore.Store;
 
             var species = new[]
             {
@@ -76,10 +75,6 @@ public class SpeciesCatalogDiffTests
             Assert.True(outcome.IsOk, string.Join("; ", outcome.Errors));
 
             return store.BuildCreatureSpeciesSnapshot();
-        }
-        finally
-        {
-            try { Directory.Delete(dir, recursive: true); } catch { /* temp dir */ }
         }
     }
 

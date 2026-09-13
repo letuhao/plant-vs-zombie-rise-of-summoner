@@ -1,6 +1,7 @@
 using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Stats.Derived;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Core.Tests.Creatures;
 
@@ -144,12 +145,12 @@ public class ConcreteSpeciesSeedReaderTests
     {
         var concrete = RealCommittedSpecies();
 
-        var dir = Path.Combine(Path.GetTempPath(), "fusionrpg-injector-flip-diff-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(dir);
-        try
+        // Runs in memory: the subject is the reader-vs-store roster comparison, not the substrate, and
+        // `RealCorpusFixture` runs the identical ImportSpecies -> BuildCreatureSpeciesSnapshot pipeline
+        // on `DataTestStore.Create()`. A file store here would be needless disk churn (standard R1).
+        using var testStore = DataTestStore.Create();
         {
-            var store = new FusionRpg.Data.RpgStore(dir);
-            store.Init();
+            var store = testStore.Store;
             var outcome = store.ImportSpecies(concrete);
             Assert.True(outcome.IsOk, string.Join("; ", outcome.Errors));
 
@@ -170,10 +171,6 @@ public class ConcreteSpeciesSeedReaderTests
             var (onlyServer, onlyInjector) = Core.Creatures.Generation.SpeciesDiff.Coverage(serverRoster, injectorRoster);
             Assert.Empty(onlyServer);
             Assert.Empty(onlyInjector);
-        }
-        finally
-        {
-            try { Directory.Delete(dir, recursive: true); } catch { /* temp dir */ }
         }
     }
 }

@@ -2,6 +2,7 @@ using System.Text.Json;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Match;
 using FusionRpg.Data;
+using FusionRpg.Data.Tests;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Match;
@@ -22,24 +23,19 @@ namespace FusionRpg.Core.Tests.Match;
 /// </summary>
 public class ModsAbsorptionTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly long _playerId;
 
     public ModsAbsorptionTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-mods-absorption-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _playerId = _store.GetCurrentPlayerId();
         ImportRealSeedTree();
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     void ImportRealSeedTree()
     {

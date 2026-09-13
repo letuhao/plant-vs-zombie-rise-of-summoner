@@ -3,6 +3,7 @@ using FusionRpg.Core.Stats;
 using FusionRpg.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.E2E.Tests;
 
@@ -67,10 +68,8 @@ public class ChannelPolicyE2ETests
     {
         // A throwaway store, not the shared fixture — this flips "atk" to lower-is-better, which is
         // fictional test content, not a real balance change, and must not leak into the other 28
-        // classes sharing the fixture's database.
-        var tempDir = Path.Combine(Path.GetTempPath(), "fusionrpg-e22-seam-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(tempDir);
-        try
+        // classes sharing the fixture's database. In memory it is isolated by construction.
+        using var throwaway = DataTestStore.Create();
         {
             const string seedJson = """
                 {
@@ -84,8 +83,7 @@ public class ChannelPolicyE2ETests
             var collected = AtomSeedFile.Collect(new[] { ("audit-e22.json", seedJson) });
             Assert.True(collected.IsOk, string.Join("; ", collected.Errors));
 
-            var tempStore = new RpgStore(tempDir);
-            tempStore.Init();
+            var tempStore = throwaway.Store;
             var outcome = tempStore.ImportContent(collected.Content);
             Assert.True(outcome.IsOk, string.Join("; ", outcome.Errors));
 
@@ -94,19 +92,13 @@ public class ChannelPolicyE2ETests
             Assert.Equal(ChannelDirection.LowerIsBetter, StatChannels.DirectionOf(StatChannels.Atk));
             Assert.True(StatChannels.IsLowerBetter(StatChannels.Atk));
         }
-        finally
-        {
-            ChannelPolicyTable.ResetToEmpty();
-            try { Directory.Delete(tempDir, recursive: true); } catch { /* temp dir */ }
-        }
+        ChannelPolicyTable.ResetToEmpty();
     }
 
     [Fact]
     public void An_unknown_channel_is_refused_by_the_real_import_not_silently_accepted()
     {
-        var tempDir = Path.Combine(Path.GetTempPath(), "fusionrpg-e22-refuse-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(tempDir);
-        try
+        using var throwaway = DataTestStore.Create();
         {
             const string seedJson = """
                 {
@@ -120,16 +112,11 @@ public class ChannelPolicyE2ETests
             var collected = AtomSeedFile.Collect(new[] { ("audit-e22-bad.json", seedJson) });
             Assert.True(collected.IsOk, string.Join("; ", collected.Errors));
 
-            var tempStore = new RpgStore(tempDir);
-            tempStore.Init();
+            var tempStore = throwaway.Store;
             var outcome = tempStore.ImportContent(collected.Content);
 
             Assert.False(outcome.IsOk);
             Assert.Contains(outcome.Errors, e => e.ToString().Contains("fireRate", StringComparison.Ordinal));
-        }
-        finally
-        {
-            try { Directory.Delete(tempDir, recursive: true); } catch { /* temp dir */ }
         }
     }
 }

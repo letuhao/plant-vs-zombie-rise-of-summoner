@@ -209,7 +209,15 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - **The gate found a real false positive in the T19b alarm**, fixed here: on a shared machine a *concurrent* process creates/removes its own `fusionrpg-*` dirs inside the alarm's window (measured: 108 "survivors" that all belonged to a concurrent Data.Tests run). Added `-IsolateTemp`, which gives the wrapped run its own private temp root; verified it still **detects** a planted leak (exit 1, naming the dir) and passes clean (exit 0).
   - Files: 54 under `tests/FusionRpg.Server.Tests/`, `scripts/test-substrate-baseline.txt`, `scripts/test-substrate-leak-alarm.ps1`. Scope: M ×7.
   - Deps: T10, seam fix.
-- [ ] **Task T18e: E2E (4 A-tier) + Core.Tests (4 store sites)** — Deps: T10. Scope: S.
+- [x] **Task T18e: E2E (3) + Core.Tests (11)** ✅ 2026-09-12
+  - Migrated the 3 E2E files and the 11 Core.Tests lines. `ChannelPolicyE2ETests`/`ContentBootE2ETests` use a memory throwaway store (their throwaway-ness is the point); **`RpgApiFactory` stays file-bound** — `WebApplicationFactory<Program>` boots the real server, which reads `FUSIONRPG_DATA` (`Program.cs:327`) — but its dispose is now leak-proof (`ClearAllPools` before delete, no swallow). `CorpusDumpTests` keeps a real `_dump` output tree (its subject) with the store in memory; the 7 class-C Core files had their fixture deletes un-swallowed (R3).
+  - **The gate caught two real defects in this task's own work, both fixed:**
+    1. `ConcreteSpeciesSeedReaderTests` used `CreateFileBacked()` where **memory suffices** — the identical `ImportSpecies → BuildCreatureSpeciesSnapshot` pipeline runs on `DataTestStore.Create()` in `RealCorpusFixture`, so the file store was needless disk churn (R1). Moved to memory.
+    2. §7 of the standard pinned literal per-project counts (Guard 10 / Launcher 8) which were wrong on arrival (both are 9) — **exactly the population-count anti-pattern this repo bans**. §7 now describes groups by membership, no counts.
+  - Also added the helper source link to `FusionRpg.Core.Tests.csproj` and `FusionRpg.E2E.Tests.csproj` (the same seam pattern).
+  - Verified: gate PASS round 2 — Core **13,364/13,364**, Data **1,288/1,288**, E2E 212/219 (7 proven pre-existing: 5 checked-in fixture JSONs absent from the tree + 2 unrelated DTO/catalog failures, all store-free, reproduced on a pristine HEAD clone), 14 files zero drift, baseline **42→29**, both guards green.
+  - Files: 11 Core + 3 E2E + 2 csprojs + baseline + standard. Scope: S→M.
+  - Deps: T10, seam fix.
 - [ ] **Task T18f: the 5 file-bound classes to `CreateFileBacked()`** (`LegacyMonoMigratorTests`, `RpgStoreDalSmokeTests`, `RpgStoreSmokeTests`, `ColdArchiveCompactionTests`, `StoragePurgeTests`) — fix the leak **without** changing their file/WAL assertions — Deps: T10. Scope: M.
 
 - [ ] **Task T19: Migration checkpoint — the whole suite is leak-proof**

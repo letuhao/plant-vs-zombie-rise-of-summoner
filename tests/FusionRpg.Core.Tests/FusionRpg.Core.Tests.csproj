@@ -54,6 +54,7 @@
     <Compile Include="..\..\src\FusionRpg.Injector\Stats\InjectorDerivedOverride.cs" Link="Injector\InjectorDerivedOverride.cs" />
     <Compile Include="..\..\src\FusionRpg.Injector\Hud\ActorHudCache.cs" Link="Injector\ActorHudCache.cs" />
     <Compile Include="..\..\src\FusionRpg.Injector\Hud\ActorHudUniqueFlags.cs" Link="Injector\ActorHudUniqueFlags.cs" />
+    <Compile Include="..\FusionRpg.Data.Tests\DataTestStore.cs" Link="TestSupport\DataTestStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\fixtures\effects\**\*" Link="fixtures\effects\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />

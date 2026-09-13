@@ -5,26 +5,13 @@
 tests/FusionRpg.AtomImporter.Tests/RealColdProcessTests.cs : swallowed-delete
 tests/FusionRpg.AtomImporter.Tests/SeedScannerTests.cs : swallowed-delete
 tests/FusionRpg.AtomImporter.Tests/ValidateGateCiTests.cs : swallowed-delete
-tests/FusionRpg.Core.Tests/Actions/ActionsPurityGuardTests.cs : swallowed-delete
-tests/FusionRpg.Core.Tests/Battle/Timeline/ModeProfileArchitectureTests.cs : swallowed-delete
-tests/FusionRpg.Core.Tests/Battle/Timeline/VirtualTimeCoreTests.cs : swallowed-delete
-tests/FusionRpg.Core.Tests/Creatures/ConcreteSpeciesSeedReaderTests.cs : swallowed-delete
-tests/FusionRpg.Core.Tests/Creatures/CorpusDumpTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Core.Tests/Creatures/CreatureQualityReportTests.cs : swallowed-delete
-tests/FusionRpg.Core.Tests/Creatures/Fusion/RealCorpusFixture.cs : swallowed-delete, temp-store
-tests/FusionRpg.Core.Tests/Creatures/SpeciesCatalogDiffTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Core.Tests/Match/ModsAbsorptionTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Core.Tests/Scope/ScopeArchitectureTests.cs : swallowed-delete
-tests/FusionRpg.Core.Tests/Scope/ScopePurityGuardTests.cs : swallowed-delete
 tests/FusionRpg.Data.Tests/ColdArchiveCompactionTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/CreatureSpeciesImportCliTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/LegacyMonoMigratorTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/RpgStoreDalSmokeTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/RpgStoreSmokeTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/StoragePurgeTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.E2E.Tests/ChannelPolicyE2ETests.cs : swallowed-delete, temp-store
-tests/FusionRpg.E2E.Tests/ContentBootE2ETests.cs : swallowed-delete, temp-store
-tests/FusionRpg.E2E.Tests/RpgApiFactory.cs : swallowed-delete, temp-store
+tests/FusionRpg.E2E.Tests/RpgApiFactory.cs : temp-store
 tests/FusionRpg.Guard.Tests/ActorHubGuardTests.cs : swallowed-delete
 tests/FusionRpg.Guard.Tests/ClassSystemGuardTests.cs : swallowed-delete
 tests/FusionRpg.Guard.Tests/DalGuardTests.cs : swallowed-delete

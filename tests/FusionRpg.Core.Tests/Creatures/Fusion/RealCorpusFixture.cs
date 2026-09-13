@@ -3,6 +3,7 @@ using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Data;
+using FusionRpg.Data.Tests;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Creatures.Fusion;
@@ -58,19 +59,13 @@ internal static class RealCorpusFixture
         }
         Assert.True(species.Count > 700, $"expected the real corpus to resolve well over 700 species, got {species.Count} — seed data may have moved");
 
-        var dir = Path.Combine(Path.GetTempPath(), "fusionrpg-realcorpus-test-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(dir);
-        try
+        // The real corpus import runs in memory; only the parsed species list crosses the boundary.
+        using var testStore = DataTestStore.Create();
         {
-            var store = new RpgStore(dir);
-            store.Init();
+            var store = testStore.Store;
             var outcome = store.ImportSpecies(species);
             Assert.True(outcome.IsOk, string.Join("; ", outcome.Errors));
             return store.BuildCreatureSpeciesSnapshot();
-        }
-        finally
-        {
-            try { Directory.Delete(dir, recursive: true); } catch { /* temp dir */ }
         }
     }
 }

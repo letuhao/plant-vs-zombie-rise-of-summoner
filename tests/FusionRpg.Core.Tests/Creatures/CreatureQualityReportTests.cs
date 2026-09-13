@@ -116,7 +116,7 @@ public class CreatureQualityReportTests
         }
         finally
         {
-            try { Directory.Delete(tmpDir, recursive: true); } catch { /* best-effort cleanup */ }
+            Directory.Delete(tmpDir, recursive: true);
         }
     }
 
@@ -164,7 +164,7 @@ public class CreatureQualityReportTests
         }
         finally
         {
-            try { Directory.Delete(tmpDir, recursive: true); } catch { /* best-effort cleanup */ }
+            Directory.Delete(tmpDir, recursive: true);
         }
     }
 }

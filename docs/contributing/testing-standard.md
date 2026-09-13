@@ -132,3 +132,49 @@ halves" reason. **Do not "optimize" either guard onto the fast profile.**
 
 `full` is the only profile that catches a disk regression — hence the nightly workflow: it reruns
 everything unfiltered within a day, instead of waiting for a release tag.
+
+---
+
+## 7. The baseline register — every remaining line and why
+
+`scripts/test-substrate-baseline.txt` is the ratchet. It holds `path : code` lines with **no inline
+comments** (the parser splits on `:` and would read a comment as part of the code), so the *reasons*
+live here. After T18b–T18e (2026-09-12) every remaining line falls into four honest groups. The groups
+are described by **membership, not by a count** — a pinned total is a population reading that goes
+stale the moment a file is fixed or a test project changes, which is the anti-pattern
+[validation-ssot.md](../architecture/validation-ssot.md) bans.
+
+### Group 1 — file-bound by subject (`tests/FusionRpg.Data.Tests`)
+
+| File | Why it keeps real files |
+|---|---|
+| `RpgStoreDalSmokeTests` | asserts `PRAGMA journal_mode == 'wal'`; memory has no WAL |
+| `RpgStoreSmokeTests` | asserts `File.Exists(HotPath/MediaPath)` |
+| `LegacyMonoMigratorTests` | migrates a real legacy `rpg.sqlite` and asserts a disk sidecar |
+| `ColdArchiveCompactionTests` | archive `*.sqlite` slices written/listed/verified on disk |
+| `StoragePurgeTests` | purge deletes real archive files |
+| `CreatureSpeciesImportCliTests` | launches a cold subprocess that imports the real committed tree (owned by the `cold-process-test-build` session) |
+
+These are **excluded from the default profile** via `DiskSemantics` (T26) and run at `full`/nightly/gate.
+They must **not** be converted to memory — that would delete real coverage (`substrate-standard` R2).
+
+### Group 2 — file-bound host (`tests/FusionRpg.E2E.Tests`)
+
+`RpgApiFactory.cs : temp-store` — a `WebApplicationFactory<Program>` boots the **real server**, which
+reads `FUSIONRPG_DATA` from disk. Its dispose is leak-proof (clears pools, does not swallow), but it
+cannot be memory without changing production `Program.cs`, which this program does not touch.
+
+### Group 3 — class-C, not a store test (`tests/FusionRpg.Server.Tests`)
+
+`BaseTypeSocketMaxCorpusTests.cs : swallowed-delete` — no `new RpgStore(`; it writes a real nested
+JSON fixture tree for `BaseTypeSocketMaxCorpus.Load(root)`. A fixture-leak fix, not a store migration.
+
+### Group 4 — outside this program's boundary
+
+`FusionRpg.Guard.Tests`, `FusionRpg.Launcher.Tests`, `FusionRpg.AtomImporter.Tests`. These are **not
+store tests** and not in the four test projects this program owns; their `swallowed-delete` lines are
+baselined and ratcheted by the gate but not migrated here. A future program can take them.
+
+**The ratchet only shrinks.** Fixing any line above requires removing it; a stale line fails the gate.
+Adding a line is a review event requiring a stated reason — and if the file is genuinely file-bound,
+it belongs in a group above, not silently added.

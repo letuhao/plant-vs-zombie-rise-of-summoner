@@ -21,4 +21,9 @@
     <ProjectReference Include="..\..\src\FusionRpg.Server\FusionRpg.Server.csproj" />
     <ProjectReference Include="..\..\src\FusionRpg.Contracts\FusionRpg.Contracts.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- The shared store test helper (see FusionRpg.Server.Tests.csproj for the same link). It lets an
+         E2E host run against an in-memory store instead of a temp data dir on disk. -->
+    <Compile Include="..\FusionRpg.Data.Tests\DataTestStore.cs" Link="TestSupport\DataTestStore.cs" />
+  </ItemGroup>
 </Project>
