@@ -77,10 +77,19 @@ Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5 · **L** multi-run.
   - **The mechanism is proven**: the transient top-up row `action.species.caltropnut.004` carried `atom.sporing`, a real enabler of `atom.rot-punisher` (`pairings.json`), so drawing accepted content in `caltropnut`'s anchor closes its gap. **No lasting artifact** — the round's scratch was deleted (it was untracked temp state, never promoted), so the committed corpus still measures the same 2 gaps (`caltropnut`, `snowgatling`). The closure is reproducible by running the round for real, not a persisted edit.
   - **Gate finding fixed (the real deliverable).** The gate review found the refreshed round-1 report measured **191 rows for a 179-row corpus**: `_rounds/round-1/survivors.json` still held 12 full rows, **11 of whose ids were already promoted into `committed-round-2000.json`** (G5's S6 run promoted them without reducing *round-1's* file — S6 only marks the round it promotes). A-S5 merged committed + non-`promoted` survivors with **no id-level guard**, so those 11 were double-counted (191 rows / 180 distinct), inflating every cell and disagreeing with round-2000's report (179) about the same baseline. **Fixed** in `generate_coverage_report._build_ctx`: one row per id, the committed (promoted, authoritative) copy winning. Round-1 now measures **180** = 179 committed + 1 genuinely-new survivor (`action.family.academic.004`). `AcceptedCorpusIsOneRowPerIdTests` (4) pins it.
   - Also refreshed both committed reports: verdict `not-clean` → `pass`. **This unblocks `mode: "full"`**: `refuse_full_run_if_ungated('full', True, gate)` now returns instead of raising. That is Phase 1's payoff — the deadlock is broken.
-- [ ] **T3.2** Run the top-up round to convergence; confirm `thinCell`'s shortfall shrinks and `quotaDrift` stays clean · **M**
-  - Partially demonstrated: a bounded top-up round planned **exactly** the 6 named shortfall briefs, which is the shrink mechanism. Full convergence needs many rounds (6,490 shortfall units at ~66% yield), which is a multi-hour run and the owner's call.
-- [ ] **T3.3** Run `mode: "full"` once reachable; record the honest verdict · **L**
-  - **Now reachable** (T3.1). The run itself is hours of local model time and a large tracked-data diff; left for the owner to trigger.
+- [ ] **T3.2** Run the top-up round to convergence; confirm `thinCell`'s shortfall shrinks and `quotaDrift` stays clean · **M** — ⏸ **DEFERRED (owner-gated)**
+  - **Deferred, not blocked by code.** The mechanism is built and proven (a bounded top-up planned exactly the 6 named shortfall briefs; `quotaDrift` stays clean by construction). Full convergence is **6,490 shortfall units at the measured ~66% yield** — dozens of model hours across many rounds, which saved policy reserves for the owner: *"a full action-corpus run requires mode: 'full' plus a passing A-S5 gate, and the owner decides when to fully run."* The bounded-stop criterion (`convergence_decision`) is in place to govern that run whenever the owner starts it.
+- [ ] **T3.3** Run `mode: "full"` once reachable; record the honest verdict · **L** — ⏸ **DEFERRED (owner-gated)**
+  - **Now reachable** (verified: `refuse_full_run_if_ungated('full', True, gate)` does not raise; the round-1 report is a passing gate). The run itself is the multi-day full corpus and is the owner's call, per the same policy.
+
+---
+
+## Status: COMPLETE except the two owner-gated real runs
+
+Phases 0, 0b, 1, 2 and T3.1 are done and gated. T3.2/T3.3 are deferred because they are long
+model runs the owner explicitly reserves. **The program's engineering goal is met**: the distribution
+engine is exact on every axis, the verdict honours `gates`, the `S5 → S1` top-up loop exists with a
+bounded stop, and `mode: "full"` is reachable instead of deadlocked.
 
 ---
 
