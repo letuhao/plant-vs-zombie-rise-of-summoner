@@ -447,22 +447,29 @@ the task named:
 stale `EventDrainHost` class header) was carried, by T9.
 
 **Acceptance:**
-- [ ] **#1 `DESIGN-GATE.md:33`** — the *"Where logic may live"* row states *"It does not compute damage
+- [x] **#1 `DESIGN-GATE.md:33`** — the *"Where logic may live"* row states *"It does not compute damage
       at the moment of the hit."* **As written, the mandatory reading gate forbids this program.** Its
       source (`overlay-control-loops.md:22`) bans a **Server** round trip, not in-process computation,
       and `EffectBag.cs:567,637` already does exactly this. Narrow the gate line to name the Server.
       **Highest-cost omission in the plan — a builder satisfying the gate finds the work prohibited.**
-- [ ] #2 `DESIGN-GATE.md:56` — cites `battle-timeline-map.md`/`battle-turn-ideal.md` for *"Battle
+- [x] #2 `DESIGN-GATE.md:56` — cites `battle-timeline-map.md`/`battle-turn-ideal.md` for *"Battle
       consumes FA10 only"*; the rule is in neither (real source: `BattleEffects.cs:225`) and is three
       opcodes stale (FA2, FA1, `structure.place` added).
-- [ ] #3 `event-pipeline-v2-ssot.md:60` — stale *"~1.5 ms"* drain budget; shipped code is
+- [x] #3 `event-pipeline-v2-ssot.md:60` — stale *"~1.5 ms"* drain budget; shipped code is
       `Math.Clamp(frameSec * 0.10, 0.0002, 0.002)`. **T9 already amends this file** — fold it in there.
-- [ ] #4 Elements row — matrices are asymmetric in **contract**, not content; `spec-shield-and-elements.md`
+- [x] #4 Elements row — matrices are asymmetric in **contract**, not content; `spec-shield-and-elements.md`
       §0 already carries the correction.
-- [ ] #5 `ActionTag` is **9**, not 8 (`Construct`, `ActionEnums.cs:57`); seedsmith's mirror is stale too
+- [x] #5 `ActionTag` is **9**, not 8 (`Construct`, `ActionEnums.cs:57`); seedsmith's mirror is stale too
       (`tools/seedsmith/seedsmith/adapters/actions/vocab.py:35-37`).
-- [ ] #7 `DerivedStatRegistry.cs` — max note is `:239`, regen note `:241`.
-- [ ] Plus, from the ideal's Tunables: the drain budget is **not** a tunable — a structural per-frame
+- [x] #7 `DerivedStatRegistry.cs` — max note is `:239`, regen note `:241`. **Verified 2026-09-13:
+      both line numbers are correct as shipped, and `DESIGN-GATE.md` cites neither** (its only
+      `DerivedStatRegistry*` reference is the §3 log row for `DerivedStatRegistryTests.cs:22`). **No
+      edit was owed for this item** — the ideal's note is a fact, not a defect. Separately found and
+      **not fixed** (other programs' files, out of this task's `paths`): four citations of
+      `DerivedStatRegistry.cs:237` for `move.range` are stale — `MoveRange` registers at `:260`;
+      `:237` is a brace inside the resource loop (`action-corpus/spec-lawn-reposition.md:69,253`,
+      `action-corpus/spec-movement-payload.md:43,280`).
+- [x] Plus, from the ideal's Tunables: the drain budget is **not** a tunable — a structural per-frame
       cap — and *"should say so in a comment"*.
 
 **Verify:** each edit re-read against the source it corrects; no rule changed in substance, only

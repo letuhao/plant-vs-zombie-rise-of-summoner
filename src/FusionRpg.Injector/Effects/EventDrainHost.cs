@@ -10,13 +10,14 @@ namespace FusionRpg.Injector.Effects;
 /// Hot-kind hooks call the TryRecord* helpers instead of running the effect pipeline inline;
 /// the drain executes from <c>InjectorLoop.Tick</c> under the frame budget.
 ///
-/// Off (default until Task 10 wires the tick): every hook falls through to the legacy Emit
-/// path, so behavior is byte-identical. During a debug session the legacy path is also used —
-/// prove packs need full payload fidelity (spec test group 6).
+/// ON by default since Task 10 wired the tick (<c>InjectorLoop.ApplyEventPipelineMode</c> sets
+/// <see cref="Enabled"/> unless <c>FUSIONRPG_EVENT_V2=0</c>). When off, every hook falls through
+/// to the legacy Emit path, so behavior is byte-identical. During a debug session the legacy path
+/// is also used — prove packs need full payload fidelity (spec test group 6).
 /// </summary>
 public static class EventDrainHost
 {
-    /// <summary>Master switch — flipped by InjectorLoop startup once the drain tick runs (T10). Env kill: FUSIONRPG_EVENT_V2=0.</summary>
+    /// <summary>Master switch — set true by InjectorLoop startup (T10 shipped), i.e. ON by default. Env kill: FUSIONRPG_EVENT_V2=0.</summary>
     public static bool Enabled { get; set; }
 
     static EventDrain? _drain;
@@ -144,6 +145,11 @@ public static class EventDrainHost
     /// <summary>
     /// Per-frame drain (plan Task 10): budget = 10% of the measured frame time (spec decision
     /// #3), clamped to [0.2ms, 2ms]. Session mode drains unbudgeted and uncoalesced.
+    /// CAP RATIONALE (ssot-power-scale.md §11 / tunables-ssot.md): the clamp below is a STRUCTURAL
+    /// per-frame cap, not a progression ceiling and not a balance tunable — it bounds how long the
+    /// drain may hold the Unity main thread inside one frame, is derived from that frame's own
+    /// measured time, and exhausting it carries records to the next frame (G5: delayed effects,
+    /// never frame drops). Hardcoded on purpose; it has no `data/tuning` row.
     /// Shares one board freeze with the TickDots call that follows.
     /// </summary>
     public static void Tick(float unscaledDeltaTime)

@@ -110,9 +110,13 @@ class ClosedVocabularyTests(unittest.TestCase):
     def test_five_categories(self) -> None:
         self.assertEqual(CATEGORIES, {"attack", "defense", "support", "movement", "status"})
 
-    def test_eight_tags(self) -> None:
+    def test_nine_tags(self) -> None:
+        # Closed vocabulary the C# code owns (ActionEnums.cs `ActionTag`) — pinning the exact set is
+        # the contract, and widening it is a reviewed change. `construct` added 2026-09-13 to match
+        # `ActionTag.Construct` (shipped with base-defense `siege-construction`); the mirror was stale.
         self.assertEqual(TAGS, {
             "offensive", "defensive", "heal", "buff", "debuff", "movement", "summon", "utility",
+            "construct",
         })
 
     def test_six_target_modes(self) -> None:

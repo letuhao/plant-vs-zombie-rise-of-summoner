@@ -32,8 +32,11 @@ ACTION_KINDS = frozenset({"basic", "innate", "skill"})
 CATEGORIES = frozenset({"attack", "defense", "support", "movement", "status"})
 
 # ActionTags.Name — ActionEnums.cs:152-163 (spec cites :128-139 — stale).
+# `construct` added 2026-09-13 to match ActionEnums.cs:47-57 (`ActionTag.Construct`, shipped with
+# base-defense `siege-construction`); this mirror had nine members' worth of source and only eight.
 TAGS = frozenset({
     "offensive", "defensive", "heal", "buff", "debuff", "movement", "summon", "utility",
+    "construct",
 })
 
 # ActionTargetModes.Name — src/FusionRpg.Core/Actions/ActionTargetSpec.cs:103-112 (matches the

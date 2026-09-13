@@ -57,7 +57,15 @@ at all.
 
 ### 3.3 Drain (once per frame, budgeted)
 
-- Runs from `InjectorLoop.Tick`, FIFO, under a time budget (default ~1.5 ms, configurable).
+- Runs from `InjectorLoop.Tick`, FIFO, under a time budget of **10% of the measured frame time,
+  clamped to [0.2 ms, 2 ms]** — `Math.Clamp(frameSec * 0.10, 0.0002, 0.002)`
+  (`EventDrainHost.cs:145-157`). Session mode drains unbudgeted and uncoalesced.
+  **This budget is a structural per-frame cap, not a tunable** — it is derived from the frame the
+  drain is running inside, so it is exempt from the balance-surface rule (`tunables-ssot.md`) and
+  from the no-hard-caps rule (`ssot-power-scale.md` §11, per-frame caps clause): changing it changes
+  whether the drain fits in a frame, never how the game feels. It is therefore **hardcoded and not
+  configurable**. *(Corrected 2026-09-13: this line read "default ~1.5 ms, configurable", which was
+  never what shipped.)*
 - Budget exhausted → remaining records carry to next frame (bounded backlog; overflow policy:
   coalesce harder, then drop droppable kinds with a counter, never drop death/board lifecycle).
 - Dict payloads are built **only here**, and only for consumers that need them (transport batch,
