@@ -8,15 +8,13 @@ namespace FusionRpg.Data.Tests.Items;
 
 public class AssignmentStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public AssignmentStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-assign-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         Assert.True(_store.UpsertAtom(new AtomRow
         {
@@ -31,10 +29,7 @@ public class AssignmentStoreTests : IDisposable
         }).IsOk);
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static readonly PowerTuning Tuning = PowerTuning.Build(
         1, 1, 80_000, 0, 20, 680,
@@ -56,8 +51,7 @@ public class AssignmentStoreTests : IDisposable
         var instanceId = SeedInstance();
         _store.SaveAssignment("s7", ItemRole.ArmamentPrimary, "rolled", instanceId);
 
-        var reopened = new RpgStore(_dir);
-        reopened.Init();
+        var reopened = _testStore.Reopen();
 
         var rows = reopened.ListAssignments("s7");
         var row = Assert.Single(rows);

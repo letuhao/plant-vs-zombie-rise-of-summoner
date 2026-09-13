@@ -35,13 +35,63 @@ function Get-Baseline {
     return $map
 }
 
-# Strip // line comments, /* */ block comments, and string literals so a comment that mentions a
-# banned pattern is not a violation (same discipline as guard-dal.ps1's comment skip).
+# Strip // line comments, /* */ block comments, and string literals in ONE pass, so a comment that
+# mentions a banned pattern is not a violation (same discipline as guard-dal.ps1's comment skip).
+#
+# ONE PASS IS LOAD-BEARING, and this is a fixed defect: the first version stripped block comments
+# before line comments with a regex, so a `/**` inside prose (e.g. the path literal
+# `data/seed/items/charms/**` in a doc comment) opened a phantom block comment whose match ran
+# forward to the next real `*/` -- often 150+ lines below -- deleting the ctor and Dispose from the
+# scanned text and making a real swallowed delete INVISIBLE. 15 test files contain such prose, so the
+# gate silently passed on them; two (CharmCarryStoreTests, ItemSetStoreTests) really were violating.
+# A single left-to-right scan cannot do that: it consumes a `//` line to EOL and a `/* */` block to
+# its own closing marker, whichever comes first, and never lets one comment type eat the other.
 function Strip-Comments {
     param([string]$Text)
-    $t = [regex]::Replace($Text, '/\*.*?\*/', ' ', [System.Text.RegularExpressions.RegexOptions]::Singleline)
-    $t = [regex]::Replace($t, '(?m)//.*$', ' ')
-    return $t
+    $sb = [System.Text.StringBuilder]::new($Text.Length)
+    $i = 0
+    $n = $Text.Length
+    while ($i -lt $n) {
+        $c = $Text[$i]
+
+        # // line comment -> to end of line
+        if ($c -eq '/' -and $i + 1 -lt $n -and $Text[$i + 1] -eq '/') {
+            while ($i -lt $n -and $Text[$i] -ne "`n") { $i++ }
+            continue
+        }
+
+        # /* block comment -> to its own closing marker
+        if ($c -eq '/' -and $i + 1 -lt $n -and $Text[$i + 1] -eq '*') {
+            $i += 2
+            while ($i + 1 -lt $n -and -not ($Text[$i] -eq '*' -and $Text[$i + 1] -eq '/')) { $i++ }
+            $i = [Math]::Min($n, $i + 2)
+            [void]$sb.Append(' ')
+            continue
+        }
+
+        # "..." / '...' string or char literal -> skip it, so a banned token inside a literal (or a
+        # `*/` inside a string, which previously mis-paired with a later `/*`) is not scanned either.
+        if ($c -eq '"' -or $c -eq "'") {
+            $quote = $c
+            $i++
+            # @"..." verbatim and """" raw strings: treat a doubled quote as an escape.
+            while ($i -lt $n) {
+                if ($Text[$i] -eq '\' -and $quote -eq '"') { $i += 2; continue }
+                if ($Text[$i] -eq $quote) {
+                    if ($i + 1 -lt $n -and $Text[$i + 1] -eq $quote) { $i += 2; continue }
+                    $i++
+                    break
+                }
+                $i++
+            }
+            [void]$sb.Append('""')
+            continue
+        }
+
+        [void]$sb.Append($c)
+        $i++
+    }
+    return $sb.ToString()
 }
 
 # Find every Directory.Delete whose immediately-enclosing catch block is empty / comment-only.

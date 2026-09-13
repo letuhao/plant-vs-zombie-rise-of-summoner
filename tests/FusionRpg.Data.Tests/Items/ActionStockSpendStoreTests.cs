@@ -18,20 +18,18 @@ public class ActionStockSpendStoreTests : IDisposable
 {
     const string Player = "player-1";
 
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ActionStockSpendStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-stockspend-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     static StockDemand[] One(string id, long qty = 1) => new[] { new StockDemand(id, qty) };

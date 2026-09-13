@@ -2,6 +2,7 @@ using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Items;
 using FusionRpg.Core.Items.Thresholds;
 using FusionRpg.Data;
+using FusionRpg.Data.Sqlite;
 using Xunit;
 
 namespace FusionRpg.Data.Tests.Items;
@@ -13,21 +14,16 @@ namespace FusionRpg.Data.Tests.Items;
 /// </summary>
 public class ItemSetStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ItemSetStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-sets-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static string RepoRoot()
     {
@@ -304,9 +300,7 @@ public class ItemSetStoreTests : IDisposable
 
     IReadOnlyList<string> Columns(string table)
     {
-        var path = Path.Combine(_dir, "rpg-hot.sqlite");
-        using var db = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={path}");
-        db.Open();
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = $"PRAGMA table_info({table});";
         using var r = cmd.ExecuteReader();

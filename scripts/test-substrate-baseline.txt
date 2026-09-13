@@ -31,31 +31,11 @@ tests/FusionRpg.Data.Tests/Delve/DelveScopeTests.cs : swallowed-delete, temp-sto
 tests/FusionRpg.Data.Tests/Delve/DelveWildTransactionTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Delve/Domains/DomainImportTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Delve/Domains/DomainProgressStoreTests.cs : swallowed-delete, temp-store
+tests/FusionRpg.Data.Tests/Delve/Domains/DomainRealPipelineTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Delve/EventSeenStoreTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Delve/Quests/QuestRewardBankingCloseDelveTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Delve/Quests/QuestRewardBankingComposabilityTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/Delve/WebMatchDecisionsTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/ActionStockSpendStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/ArmouryTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/AssignmentStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/BaseTypeStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/DropTableStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/EquipRuntimeStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/InstanceOpTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/ItemCardStoreTests.cs : swallowed-delete
-tests/FusionRpg.Data.Tests/Items/ItemGrantStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/ItemSocketStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/ItemUniqueStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/LootContentViewStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/MaterializeRolledEquipRuntimeTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/MaterialSpendTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/MintGrantStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/OwnershipTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/RarityBandsStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/RarityPowerBudgetStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/RelicRowMigrationTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/RunDraughtStoreTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Items/SlotRolesTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/LegacyMonoMigratorTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/PassiveTree/TreeCatalogImportTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/PassiveTree/TreeCatalogMigrationTests.cs : swallowed-delete, temp-store
@@ -110,8 +90,11 @@ tests/FusionRpg.Server.Tests/DelveWildEndpointsTests.cs : swallowed-delete, temp
 tests/FusionRpg.Server.Tests/DerivedAuditEndpointsTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Server.Tests/DistrictAssaultCommandWireTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Server.Tests/GateCounterEndpointsTests.cs : swallowed-delete, temp-store
+tests/FusionRpg.Server.Tests/ItemCardEndpointsTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Server.Tests/ItemEquipEndpointsTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Server.Tests/ItemWorkbenchEndpointsTests.cs : temp-store
+tests/FusionRpg.Server.Tests/ItemInsertElementTests.cs : swallowed-delete, temp-store
+tests/FusionRpg.Server.Tests/ItemPreviewEndpointsTests.cs : swallowed-delete, temp-store
+tests/FusionRpg.Server.Tests/ItemWorkbenchEndpointsTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Server.Tests/LawnQuickStartEndpointTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Server.Tests/LoadoutEndpointsTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Server.Tests/MultiOwnerPushTests.cs : swallowed-delete, temp-store
@@ -119,6 +102,7 @@ tests/FusionRpg.Server.Tests/OnboardingEndpointsTests.cs : swallowed-delete, tem
 tests/FusionRpg.Server.Tests/PassiveTreeEndpointsTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Server.Tests/ReforgeWorldEndpointTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Server.Tests/RolledItemEquipRuntimeTests.cs : swallowed-delete, temp-store
+tests/FusionRpg.Server.Tests/SpeciesAllocationEndpointsTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Server.Tests/SpeciesBuildEndpointsTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Server.Tests/StaleBoardStartTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Server.Tests/UniqueActorAtomRepushTests.cs : swallowed-delete, temp-store
@@ -126,6 +110,7 @@ tests/FusionRpg.Server.Tests/WalkingSkeletonTests.cs : swallowed-delete, temp-st
 tests/FusionRpg.Server.Tests/WorldBindWardenEndpointTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Server.Tests/WorldCalendarProjectionTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Server.Tests/WorldCedeForecastTests.cs : swallowed-delete, temp-store
+tests/FusionRpg.Server.Tests/WorldCommandReasonGateTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Server.Tests/WorldEntityProjectionTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Server.Tests/WorldMarchCostProjectionTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Server.Tests/WorldProspectingProjectionTests.cs : swallowed-delete, temp-store

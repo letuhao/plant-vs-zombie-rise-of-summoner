@@ -1,5 +1,6 @@
 using FusionRpg.Core.Items.Consumables;
 using FusionRpg.Data;
+using FusionRpg.Data.Sqlite;
 using Microsoft.Data.Sqlite;
 using Xunit;
 
@@ -16,21 +17,16 @@ public class RunDraughtStoreTests : IDisposable
 {
     const string Player = "player-1";
 
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public RunDraughtStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-consumables-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static ConsumableDefRow Def(string id, string group = "atom.might|", int cost = 1) =>
         new(id, ConsumableClass.Draught, new[] { UseContext.Dispatch }, 3, group, cost);
@@ -300,8 +296,6 @@ public class RunDraughtStoreTests : IDisposable
 
     SqliteConnection OpenRead()
     {
-        var db = new SqliteConnection($"Data Source={Path.Combine(_dir, "rpg-hot.sqlite")}");
-        db.Open();
-        return db;
+        return SqliteConnectionFactory.Open(_store.HotPath);
     }
 }
