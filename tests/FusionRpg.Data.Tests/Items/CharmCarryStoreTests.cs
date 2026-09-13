@@ -1,5 +1,6 @@
 using FusionRpg.Core.Items.Thresholds;
 using FusionRpg.Data;
+using FusionRpg.Data.Sqlite;
 using Microsoft.Data.Sqlite;
 using Xunit;
 
@@ -12,21 +13,16 @@ namespace FusionRpg.Data.Tests.Items;
 /// </summary>
 public class CharmCarryStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public CharmCarryStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-charms-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static string RepoRoot()
     {
@@ -241,8 +237,7 @@ public class CharmCarryStoreTests : IDisposable
         AttuneThree();
         Assert.True(_store.OpenCharmRunHold("expedition", 1, "p1", SnapshotOf("p1")).Ok);
 
-        using var db = new SqliteConnection($"Data Source={Path.Combine(_dir, "rpg-hot.sqlite")}");
-        db.Open();
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
             INSERT INTO charm_run_hold
@@ -346,8 +341,7 @@ public class CharmCarryStoreTests : IDisposable
 
     long CountRows(string sql)
     {
-        using var db = new SqliteConnection($"Data Source={Path.Combine(_dir, "rpg-hot.sqlite")}");
-        db.Open();
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = sql;
         return Convert.ToInt64(cmd.ExecuteScalar() ?? 0L);

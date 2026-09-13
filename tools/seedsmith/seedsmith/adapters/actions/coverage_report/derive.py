@@ -699,6 +699,7 @@ class Verdict:
     evaluated_metrics: "tuple[str, ...]"
     not_measured_metrics: "tuple[str, ...]"
     gap_metrics: "tuple[str, ...]"
+    gating_metrics: "tuple[str, ...]" = ()
 
     def to_dict(self) -> dict:
         return {
@@ -706,11 +707,32 @@ class Verdict:
             "evaluatedMetrics": list(self.evaluated_metrics),
             "notMeasuredMetrics": list(self.not_measured_metrics),
             "gapMetrics": list(self.gap_metrics),
+            "gatingMetrics": list(self.gating_metrics),
         }
 
 
 def compute_verdict(closed_findings: "Sequence[Finding]", closed_metric_ids: "Sequence[str]",
-                    mode: str) -> Verdict:
+                    mode: str, gating_metric_ids: "Sequence[str]" = (),
+                    ) -> Verdict:
+    """**The verdict, gated on `gates` — not on the mere existence of a GAP (T1.2, 2026-09-12).**
+
+    `spec-metrics.md` §4 fixes the calibration order: *"New metric → `gates=False`, runs, reports.
+    Then a threshold goes into `budget` and `gates` flips."* So a GAP from an UNPROMOTED metric is a
+    reading plus a next-round work order, never a gate — and `spec-coverage-report.md` §3 step 6 says
+    `pass` requires every **gating** CLOSED metric green. This function previously ignored the flag
+    and treated any GAP as `not-clean`, which (with all eleven action metrics shipping unpromoted)
+    made every verdict non-clean and the full-run gate unreachable by construction.
+
+    **What blocks, precisely:**
+    - `NOT_MEASURED` on **any** CLOSED metric → never clean, gating or not. An absent check must stay
+      distinguishable from a pass (`spec §4`), and it is not a threshold question.
+    - `GAP` on a metric in `gating_metric_ids` → not clean.
+    - `GAP` on any other metric → reported in `gap_metrics`, does not block. `gating_metric_ids` is
+      the caller's `{m.id for m in registry.all() if m.gates}` — the same set `report/cli.py` builds
+      for `--gate`, so A-S5's verdict and the general reporter cannot disagree about what gates.
+
+    The full GAP list is ALWAYS returned and always written to the report; promotion changes only
+    whether a GAP flips the verdict, never whether it is visible."""
     by_metric: "dict[str, list[Finding]]" = {mid: [] for mid in closed_metric_ids}
     for f in closed_findings:
         by_metric.setdefault(f.metric, []).append(f)
@@ -721,9 +743,11 @@ def compute_verdict(closed_findings: "Sequence[Finding]", closed_metric_ids: "Se
     gap = tuple(sorted(
         mid for mid, fs in by_metric.items()
         if any(f.severity is Severity.GAP for f in fs)))
+    gating = tuple(sorted(set(gating_metric_ids)))
     evaluated = tuple(sorted(by_metric))
 
-    clean = not not_measured and not gap
+    gating_gap = tuple(sorted(set(gap) & set(gating)))
+    clean = not not_measured and not gating_gap
     if clean and mode == "full":
         verdict = "pass"
     elif clean:
@@ -732,7 +756,8 @@ def compute_verdict(closed_findings: "Sequence[Finding]", closed_metric_ids: "Se
         verdict = "not-clean"
 
     return Verdict(verdict=verdict, evaluated_metrics=evaluated,
-                   not_measured_metrics=not_measured, gap_metrics=gap)
+                   not_measured_metrics=not_measured, gap_metrics=gap,
+                   gating_metrics=gating)
 
 
 # ---------------------------------------------------------------------------------------------

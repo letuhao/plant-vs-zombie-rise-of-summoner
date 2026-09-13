@@ -11,25 +11,18 @@ namespace FusionRpg.Data.Tests.Delve;
 /// </summary>
 public class WebMatchDecisionsTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
+    readonly RpgStore _store;
 
     public WebMatchDecisionsTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-webmatch-decisions-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
-    RpgStore NewStore()
-    {
-        var store = new RpgStore(_dir);
-        store.Init();
-        return store;
-    }
+    RpgStore NewStore() => _store;
 
     [Fact]
     public void WriteWebMatchDecisions_round_trips_a_trace_and_AppendWebMatchLog_records_the_profile_id()
@@ -68,11 +61,11 @@ public class WebMatchDecisionsTests : IDisposable
     {
         // The exact pre-D2.15 shape: every rpg_web_match_log column up to decisions_json, minted by
         // hand rather than through RpgStore, matching EligibilityAxisMigrationTests' own "a real
-        // CREATE TABLE that never named them" precedent for EnsureColumn migrations.
-        using (var db = new SqliteConnection($"Data Source={Path.Combine(_dir, "rpg-hot.sqlite")}"))
+        // CREATE TABLE that never named them" precedent for EnsureColumn migrations. Built in memory
+        // via CreateWithPreInitHot: the legacy table shape is seeded before Init.
+        using var test = DataTestStore.CreateWithPreInitHot(seed =>
         {
-            db.Open();
-            using var cmd = db.CreateCommand();
+            using var cmd = seed.CreateCommand();
             cmd.CommandText = """
                 CREATE TABLE rpg_web_match_log (
                   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -98,9 +91,9 @@ public class WebMatchDecisionsTests : IDisposable
                 VALUES (9, 'pre-existing-corr', 'pre-existing-key', '{}', '99', 1, 1, 1, '2026-01-01T00:00:00Z');
                 """;
             cmd.ExecuteNonQuery();
-        }
+        });
 
-        var store = NewStore(); // Init()'s EnsureColumn must add profile_id without disturbing the row above
+        var store = test.Store; // Init()'s EnsureColumn must add profile_id without disturbing the row above
         var migrated = store.TryGetWebMatchLog(playerId: 9, correlationId: "pre-existing-corr");
 
         Assert.NotNull(migrated);

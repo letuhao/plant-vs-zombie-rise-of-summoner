@@ -4,10 +4,11 @@ using FusionRpg.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
+using FusionRpg.Data.Sqlite;
 
 namespace FusionRpg.Server.Tests;
 
@@ -22,7 +23,7 @@ namespace FusionRpg.Server.Tests;
 /// </summary>
 public class WorldCedeForecastTests : IAsyncLifetime
 {
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
@@ -36,10 +37,8 @@ public class WorldCedeForecastTests : IAsyncLifetime
     {
         WorldPolicyTestBootstrap.EnsureConfigured();
 
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-w26-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         var port = GetFreeTcpPort();
         var baseUrl = $"http://127.0.0.1:{port}";
@@ -78,8 +77,7 @@ public class WorldCedeForecastTests : IAsyncLifetime
         // *contributor* (120 loam/turn per sector at the real shipped tuning), not a drag. The extra
         // danger compensates exactly (`DevelopmentYieldPerLevel(6) / DangerUpkeepPerBand(3) == 2` at
         // the real configured tuning), reproducing this fixture's original pre-W55 shortfall.
-        using var db = new SqliteConnection($"Data Source={_store.HotPath}");
-        db.Open();
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         foreach (var sectorId in DaveSectors)
         {
             using var cmd = db.CreateCommand();
@@ -99,8 +97,7 @@ public class WorldCedeForecastTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        SqliteConnection.ClearAllPools();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     async Task<JsonElement> StateFor(string faction) =>

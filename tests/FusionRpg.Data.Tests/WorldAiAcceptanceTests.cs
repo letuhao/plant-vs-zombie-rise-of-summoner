@@ -22,20 +22,18 @@ public class WorldAiAcceptanceTests : IDisposable
     const int Turns = 20;
     const ulong Seed = 90210;
 
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public WorldAiAcceptanceTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-ai-accept-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     /// <summary>

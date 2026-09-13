@@ -51,6 +51,19 @@ class OutDirRefused(ValueError):
     """The requested write target is the shipped corpus and the caller did not say so."""
 
 
+class NameKeyUnsluggable(ValueError):
+    """A display name produced no ASCII slug, so no legal `nameKey` can be derived from it.
+
+    ⛔ 2026-09-12: `_slugify` used to fall back to the literal `"item"`, which turned every
+    non-Latin name into the SAME key — six shipped sets (Chinese display names, `set.item`) proved
+    it: `^[a-z0-9.-]+$` is satisfied, uniqueness is silently destroyed, and a whole-corpus
+    NameKeyDuplicate finding is the only visible symptom. A name the grammar cannot slug is a
+    content defect, so it is refused by name rather than masked with a placeholder key. The
+    registry's own rule (`seed-contract.md` §6) is that the string may be free text but the KEY
+    must be `^[a-z0-9.-]+$`; a free-text name therefore still needs an ASCII identity, and this
+    class is how the emitter says so."""
+
+
 _NAME_KEY_SLUG_RE = re.compile(r"[^a-z0-9]+")
 
 
@@ -59,11 +72,12 @@ def _slugify(name: str) -> str:
     one hyphen, no leading/trailing hyphen. Mirrors `trees.nodegen.run._slugify` exactly (same
     real 2026-09-06 finding that motivated it there: never trust the model to derive its own
     `nameKey` from its own `name` — see `derive_name_key`'s own docstring for this module's own,
-    worse incident on the same field). Never returns an empty string — `"item"` if `name` collapses
-    to nothing (pure punctuation), since every `nameKey` pattern in this program requires at least
-    one character after the kind prefix."""
-    slug = _NAME_KEY_SLUG_RE.sub("-", name.strip().lower()).strip("-")
-    return slug or "item"
+    worse incident on the same field).
+
+    Returns `""` for a name with no ASCII alphanumeric content (e.g. a pure-CJK or
+    pure-punctuation name). The caller decides whether that is fatal — it is, for a shipped key;
+    see `NameKeyUnsluggable`."""
+    return _NAME_KEY_SLUG_RE.sub("-", name.strip().lower()).strip("-")
 
 
 def derive_name_key(kind: str, name: str) -> str:
@@ -89,8 +103,17 @@ def derive_name_key(kind: str, name: str) -> str:
     `_derive_unique_name_key` shows the shape one would take) — out of scope for this fix, which
     exists to close the degenerate-generation incident, not to add a capability this module never
     had.
+
+    ⛔ **2026-09-12:** the empty-slug fallback is gone (see `NameKeyUnsluggable`). A name with no
+    ASCII content raises rather than minting the shared placeholder `"item"` key that shipped six
+    `set.item` duplicates.
     """
-    return f"{kind}.{_slugify(name)}"
+    slug = _slugify(name)
+    if not slug:
+        raise NameKeyUnsluggable(
+            f"name {name!r} produced no ASCII slug, so no legal `{kind}.<slug>` nameKey exists; "
+            "the display string may be free text but its key must match ^[a-z0-9.-]+$")
+    return f"{kind}.{slug}"
 
 
 def resolve_out_dir(out_dir: "str | Path", *, allow_production_tree: bool = False) -> Path:

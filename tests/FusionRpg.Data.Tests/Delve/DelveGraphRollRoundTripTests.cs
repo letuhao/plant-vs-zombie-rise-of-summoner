@@ -18,7 +18,7 @@ namespace FusionRpg.Data.Tests.Delve;
 /// </summary>
 public class DelveGraphRollRoundTripTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly RoomTypeCatalog _roomTypes;
     readonly DoorTypeCatalog _doorTypes;
@@ -26,10 +26,8 @@ public class DelveGraphRollRoundTripTests : IDisposable
 
     public DelveGraphRollRoundTripTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-delve-roundtrip-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         var repoRoot = FindRepoRoot();
         var registries = DungeonRegistryLoader.LoadAll(Path.Combine(repoRoot, "data", "seed", "dungeon", "_registry"));
@@ -38,10 +36,7 @@ public class DelveGraphRollRoundTripTests : IDisposable
         _tuning = DungeonTuningLoader.Parse(File.ReadAllText(Path.Combine(repoRoot, "data", "tuning", "dungeon.v3.json")), registries);
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static string FindRepoRoot()
     {

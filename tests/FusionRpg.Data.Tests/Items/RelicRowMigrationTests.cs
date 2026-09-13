@@ -3,6 +3,7 @@ using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Items;
 using FusionRpg.Core.Match;
 using FusionRpg.Data;
+using FusionRpg.Data.Sqlite;
 using Microsoft.Data.Sqlite;
 using Xunit;
 
@@ -26,29 +27,23 @@ namespace FusionRpg.Data.Tests.Items;
 /// </summary>
 public class RelicRowMigrationTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly long _playerId;
 
     public RelicRowMigrationTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-relicmig-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _playerId = _store.GetCurrentPlayerId();
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     SqliteConnection OpenRaw()
     {
-        var c = new SqliteConnection($"Data Source={_store.HotPath}");
-        c.Open();
-        return c;
+        // The store's own HotPath (a memory URI under the memory plan), not a constructed file path.
+        return SqliteConnectionFactory.Open(_store.HotPath);
     }
 
     /// <summary>Write a row in the pre-migration shape, exactly as the retired writer did.</summary>
@@ -239,8 +234,7 @@ public class RelicRowMigrationTests : IDisposable
         var a = NewActor();
         WriteLegacyRow(a, "armor", "relic.tidewrack_band");
 
-        var reopened = new RpgStore(_dir);
-        reopened.Init();
+        var reopened = _testStore.Reopen();
 
         var row = Assert.Single(reopened.ListUniqueEquipment(a));
         Assert.Equal("armor", row.Slot);

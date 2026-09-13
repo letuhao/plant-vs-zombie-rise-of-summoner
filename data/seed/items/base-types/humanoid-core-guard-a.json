@@ -30,7 +30,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -102,7 +102,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -138,7 +138,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -212,7 +212,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -357,7 +357,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -431,7 +431,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -497,8 +497,8 @@
     },
     {
       "id": "item.humanoid-torso-a-014",
-      "nameKey": "base.reinforced-breastplate",
-      "name": "Reinforced Breastplate",
+      "nameKey": "base-type.plated-cuirass",
+      "name": "Plated Cuirass",
       "frame": "humanoid",
       "role": "core-guard",
       "class": "plate",
@@ -508,7 +508,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.reinforced-breastplate",
+      "iconKey": "icon.base-type.plated-cuirass",
       "flavorKey": "flavor.base.reinforced-breastplate",
       "flavor": "A heavy slab of layered steel designed to absorb the brunt of a direct impact. It sits firmly against the chest to protect the vital organs of the vanguard.",
       "tags": [
@@ -533,8 +533,8 @@
     },
     {
       "id": "item.humanoid-torso-a-015",
-      "nameKey": "base.reinforced-breastplate",
-      "name": "Reinforced Breastplate",
+      "nameKey": "base-type.steel-hauberk",
+      "name": "Steel Hauberk",
       "frame": "humanoid",
       "role": "core-guard",
       "class": "plate",
@@ -544,7 +544,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.reinforced-breastplate",
+      "iconKey": "icon.base-type.steel-hauberk",
       "flavorKey": "flavor.base.reinforced-breastplate",
       "flavor": "A heavy slab of layered steel designed to deflect direct kinetic impact away from the vital organs. It is the foundation upon which a defender's resolve is built.",
       "tags": [
@@ -570,8 +570,8 @@
     },
     {
       "id": "item.humanoid-torso-a-016",
-      "nameKey": "base.reinforced-breastplate",
-      "name": "Reinforced Breastplate",
+      "nameKey": "base-type.heavy-breastplate",
+      "name": "Heavy Breastplate",
       "frame": "humanoid",
       "role": "core-guard",
       "class": "plate",
@@ -581,7 +581,7 @@
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.reinforced-breastplate",
+      "iconKey": "icon.base-type.heavy-breastplate",
       "flavorKey": "flavor.base.reinforced-breastplate",
       "flavor": "A heavy slab of layered steel designed to deflect direct strikes away from the vital organs. It sits snugly against the chest to ensure maximum mobility for the defender.",
       "tags": [
@@ -607,8 +607,8 @@
     },
     {
       "id": "item.humanoid-torso-a-017",
-      "nameKey": "base.reinforced-breastplate",
-      "name": "Reinforced Breastplate",
+      "nameKey": "base-type.heavy-plated-cuirass",
+      "name": "Heavy Plated Cuirass",
       "frame": "humanoid",
       "role": "core-guard",
       "class": "plate",
@@ -618,7 +618,7 @@
         "powerBand": "trivial"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.reinforced-breastplate",
+      "iconKey": "icon.base-type.heavy-plated-cuirass",
       "flavorKey": "flavor.base.reinforced-breastplate",
       "flavor": "A heavy slab of layered steel designed to deflect direct blows away from the vital organs. It sits firmly against the chest to provide a stable foundation for heavy armor.",
       "tags": [
@@ -681,8 +681,8 @@
     },
     {
       "id": "item.humanoid-torso-a-019",
-      "nameKey": "base.reinforced-breastplate",
-      "name": "Reinforced Breastplate",
+      "nameKey": "base-type.bulwark-chestguard",
+      "name": "Bulwark Chestguard",
       "frame": "humanoid",
       "role": "core-guard",
       "class": "plate",
@@ -692,7 +692,7 @@
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.reinforced-breastplate",
+      "iconKey": "icon.base-type.bulwark-chestguard",
       "flavorKey": "flavor.base.reinforced-breastplate",
       "flavor": "A heavy slab of layered steel designed to deflect direct strikes away from the vital organs. It sits firmly against the chest, providing a rigid barrier against blunt force.",
       "tags": [
@@ -718,8 +718,8 @@
     },
     {
       "id": "item.humanoid-torso-a-020",
-      "nameKey": "base.reinforced-breastplate",
-      "name": "Reinforced Breastplate",
+      "nameKey": "base-type.layered-bastion-vest",
+      "name": "Layered Bastion Vest",
       "frame": "humanoid",
       "role": "core-guard",
       "class": "plate",
@@ -729,7 +729,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.reinforced-breastplate",
+      "iconKey": "icon.base-type.layered-bastion-vest",
       "flavorKey": "flavor.base.reinforced-breastplate",
       "flavor": "A heavy slab of layered steel designed to absorb the brunt of a direct impact. It sits snugly against the chest to distribute weight across the shoulders.",
       "tags": [
@@ -827,8 +827,8 @@
     },
     {
       "id": "item.humanoid-torso-a-023",
-      "nameKey": "base.laminated-pectoral",
-      "name": "Laminated Pectoral",
+      "nameKey": "base-type.reinforced-chestplate",
+      "name": "Reinforced Chestplate",
       "frame": "humanoid",
       "role": "core-guard",
       "class": "leather",
@@ -838,7 +838,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.laminated-pectoral",
+      "iconKey": "icon.base-type.reinforced-chestplate",
       "flavorKey": "flavor.base.laminated-pectoral",
       "flavor": "Thick layers of treated hide and hardened resin designed to absorb heavy impacts to the chest.",
       "tags": [
@@ -863,8 +863,8 @@
     },
     {
       "id": "item.humanoid-torso-a-024",
-      "nameKey": "base.plated-carapace",
-      "name": "Plated Carapace",
+      "nameKey": "base-type.reinforced-shell",
+      "name": "Reinforced Shell",
       "frame": "humanoid",
       "role": "core-guard",
       "class": "plate",
@@ -874,7 +874,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.plated-carapace",
+      "iconKey": "icon.base-type.reinforced-shell",
       "flavorKey": "flavor.base.plated-carapace",
       "flavor": "A heavy, segmented shell designed to distribute impact across the torso. It provides a rigid barrier against crushing blows.",
       "tags": [
@@ -899,8 +899,8 @@
     },
     {
       "id": "item.humanoid-torso-a-025",
-      "nameKey": "base.plated-carapace",
-      "name": "Plated Carapace",
+      "nameKey": "base-type.heavy-aegis-plate",
+      "name": "Heavy Aegis Plate",
       "frame": "humanoid",
       "role": "core-guard",
       "class": "plate",
@@ -910,7 +910,7 @@
         "powerBand": "trivial"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.plated-carapace",
+      "iconKey": "icon.base-type.heavy-aegis-plate",
       "flavorKey": "flavor.base.plated-carapace",
       "flavor": "A rigid, segmented shell designed to distribute impact across the torso. It provides a solid foundation for heavy defensive layering.",
       "tags": [
@@ -935,8 +935,8 @@
     },
     {
       "id": "item.humanoid-torso-a-026",
-      "nameKey": "base.plated-carapace",
-      "name": "Plated Carapace",
+      "nameKey": "base-type.heavy-plate-vest",
+      "name": "Heavy Plate Vest",
       "frame": "humanoid",
       "role": "core-guard",
       "class": "plate",
@@ -946,7 +946,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.plated-carapace",
+      "iconKey": "icon.base-type.heavy-plate-vest",
       "flavorKey": "flavor.base.plated-carapace",
       "flavor": "A heavy, segmented shell designed to distribute impact across the torso. It provides a rigid barrier against crushing blows.",
       "tags": [
@@ -972,8 +972,8 @@
     },
     {
       "id": "item.humanoid-torso-a-027",
-      "nameKey": "base.laminated-pectoral",
-      "name": "Laminated Pectoral",
+      "nameKey": "base-type.hardened-breastplate",
+      "name": "Hardened Breastplate",
       "frame": "humanoid",
       "role": "core-guard",
       "class": "leather",
@@ -983,7 +983,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.laminated-pectoral",
+      "iconKey": "icon.base-type.hardened-breastplate",
       "flavorKey": "flavor.base.laminated-pectoral",
       "flavor": "Thick layers of treated hide and hardened resin designed to absorb the impact of heavy blows. It sits snugly against the chest to distribute weight evenly.",
       "tags": [
@@ -1008,8 +1008,8 @@
     },
     {
       "id": "item.humanoid-torso-a-028",
-      "nameKey": "base.laminated-pectoral",
-      "name": "Laminated Pectoral",
+      "nameKey": "base-type.plated-breastplate",
+      "name": "Plated Breastplate",
       "frame": "humanoid",
       "role": "core-guard",
       "class": "leather",
@@ -1019,7 +1019,7 @@
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.laminated-pectoral",
+      "iconKey": "icon.base-type.plated-breastplate",
       "flavorKey": "flavor.base.laminated-pectoral",
       "flavor": "Thick layers of treated leather and hardened resin designed to absorb the impact of blunt strikes. It sits snugly against the chest to provide a stable foundation for heavy armor.",
       "tags": [

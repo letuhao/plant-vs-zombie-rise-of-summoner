@@ -8,6 +8,7 @@ using FusionRpg.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -22,7 +23,7 @@ namespace FusionRpg.Server.Tests;
 /// instead of the anonymous response body.</summary>
 public class DelveWildEndpointsTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly long _playerId;
     readonly RoomTypeCatalog _rooms;
@@ -32,10 +33,8 @@ public class DelveWildEndpointsTests : IDisposable
     public DelveWildEndpointsTests()
     {
         ConfigureWildTuningOnce();
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-delve-wild-endpoints-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _playerId = _store.GetCurrentPlayerId();
 
         var repoRoot = FindRepoRoot();
@@ -46,7 +45,7 @@ public class DelveWildEndpointsTests : IDisposable
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     static bool _tuningConfigured;

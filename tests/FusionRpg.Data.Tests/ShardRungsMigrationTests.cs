@@ -18,20 +18,18 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class ShardRungsMigrationTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ShardRungsMigrationTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-shardrungs-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     [Fact]

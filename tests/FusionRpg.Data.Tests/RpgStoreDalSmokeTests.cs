@@ -8,23 +8,23 @@ using Xunit;
 
 namespace FusionRpg.Data.Tests;
 
+[Trait("Category", "DiskSemantics")]
 public class RpgStoreDalSmokeTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
+    readonly string _dir;
 
     public RpgStoreDalSmokeTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-dal-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        // File-bound: this class asserts WAL journal mode and real hot/media files, so it keeps a real
+        // dir -- through the leak-proof helper (R2/R3).
+        _testStore = DataTestStore.CreateFileBacked();
+        _store = _testStore.Store;
+        _dir = _testStore.DataDir!;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     [Fact]
     public void Init_leaves_journal_mode_wal_on_hot_and_media()

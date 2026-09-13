@@ -22,6 +22,10 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+        with:
+          # guard-generated-seed needs the commit's parent to build its diff; the default
+          # depth-1 checkout has none, which would make the guard silently see no changes.
+          fetch-depth: 2
 
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
@@ -175,6 +179,42 @@ jobs:
           dotnet test tests/FusionRpg.E2E.Tests/FusionRpg.E2E.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 10min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.E2E.Tests failed" }
 
+      - name: Test-substrate leak alarm (disk-write-probe, T19b)
+        shell: pwsh
+        run: |
+          # The static gate above (`guard-test-substrate.ps1`) only refuses a bad SOURCE pattern.
+          # This wraps the Data suite (the one that accumulated 65.5 GB of temp dirs) so a run that
+          # ACTUALLY leaves a `fusionrpg-*` temp dir or an `rpg-*.sqlite` under a test output root is
+          # red too, even if the source pattern changed. Set-diff, never a count (`validation-ssot.md`):
+          # a pre-existing dir is not read as a leak and an equal count cannot pass while membership
+          # differs. `--no-build` reuses the Release build from the step above.
+          .\scripts\test-substrate-leak-alarm.ps1 -Run { dotnet test tests/FusionRpg.Data.Tests/FusionRpg.Data.Tests.csproj -c Release --verbosity minimal --no-build }
+          if ($LASTEXITCODE -ne 0) { throw "test-substrate-leak-alarm.ps1 failed — a test run left a temp dir or rpg-*.sqlite behind" }
+          # ANCHOR(T28): profiles wiring appends after this step. Do not reorder the steps above.
+
+      - name: Test profiles (T28 — CI is the `full` profile by construction)
+        shell: pwsh
+        run: |
+          # T28 added no filtering here on purpose: every `dotnet test` call above runs UNFILTERED,
+          # so CI already IS the `full` profile — the `DiskSemantics` (file-bound) and `Heavy` (>=20s)
+          # tests run here, which is exactly the point (ephemeral cloud disk, correctness costs
+          # nothing). `scripts/test-fast.ps1` (`default`) is the LOCAL/agent loop only and is never
+          # used in CI, so CI cannot accidentally inherit the dev filter. The leak alarm step above
+          # also runs on `full` for the same reason.
+          #
+          # Guard (do not edit blindly): this assertion fails if someone later adds a --filter to a
+          # `dotnet test` call in this workflow, which would silently drop disk/heavy coverage.
+          $filters = Select-String -Path .github/workflows/ci.yml -Pattern 'dotnet test.*--filter' |
+              Where-Object {
+                  $_.Line.TrimStart().StartsWith('dotnet test') -and
+                  $_.Line -notmatch '--filter\s+"Category=BalanceGuard"'
+              }
+          if ($filters) {
+              $filters | ForEach-Object { Write-Host "$($_.LineNumber): $($_.Line.Trim())" }
+              throw "CI test step gained a --filter — CI must stay the unfiltered full profile (only the BalanceGuard step is filtered)"
+          }
+          Write-Host "CI test calls are unfiltered = full profile (DiskSemantics + Heavy included)."
+
       - name: Boundary guards (AGENTS.md — combat writes, Secondary-Unity boundary, Funnel deltas, DAL)
         shell: pwsh
         run: |
@@ -195,6 +235,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "guard-dal.ps1 failed — SQL appeared outside FusionRpg.Data" }
           .\scripts\guard-test-substrate.ps1
           if ($LASTEXITCODE -ne 0) { throw "guard-test-substrate.ps1 failed — a test leaked a temp store or swallowed a temp-delete" }
+          # Generated seed is regenerated, never hand-edited (AGENTS.md / CLAUDE.md hard rule).
+          # Compare the pushed commit against its parent; a single-commit depth or a root commit
+          # falls back to inspecting the working tree, which is clean on CI.
+          $seedRange = if (git rev-parse --verify HEAD~1 2>$null) { "HEAD~1..HEAD" } else { $null }
+          if ($seedRange) { .\scripts\guard-generated-seed.ps1 -Range $seedRange }
+          else { .\scripts\guard-generated-seed.ps1 }
+          if ($LASTEXITCODE -ne 0) { throw "guard-generated-seed.ps1 failed — a generated seed file was hand-edited without changing its generator" }
 
       - name: Content validation gate (E47)
         shell: pwsh

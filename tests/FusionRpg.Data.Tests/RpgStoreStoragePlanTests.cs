@@ -121,17 +121,32 @@ public class RpgStoreStoragePlanTests
     [Fact]
     public void Memory_stores_are_independent_under_parallel_creation()
     {
-        // No singleton, no shared DB: every store gets its own unique names and its own rows.
-        var results = new System.Collections.Concurrent.ConcurrentBag<string>();
-        System.Threading.Tasks.Parallel.For(0, 24, i =>
+        // No singleton, no shared DB. Property 1 — every store gets its OWN databases, even when
+        // constructed concurrently. A full schema build per store is expensive (46 tables), and this
+        // half needs only construction, so it does not Init; the schema build is exercised by every
+        // other test in this file and the wider suite.
+        var dbNames = new System.Collections.Concurrent.ConcurrentBag<string>();
+        System.Threading.Tasks.Parallel.For(0, 24, _ =>
+        {
+            using var store = RpgStore.InMemory();
+            dbNames.Add(store.HotPath);
+            dbNames.Add(store.MediaPath);
+        });
+        Assert.Equal(48, dbNames.Distinct().Count());
+
+        // Property 2 — their rows do not cross, under parallelism. Four initialized stores (not 24)
+        // is enough to prove no shared database: each writes one row and must see only its own.
+        var tiers = new System.Collections.Concurrent.ConcurrentBag<long>();
+        System.Threading.Tasks.Parallel.For(0, 4, i =>
         {
             using var store = RpgStore.InMemory();
             store.Init();
-            Assert.True(store.UpsertAtom(Atom("atom.vitality", 1 + (i % 5))).IsOk);
-            foreach (var a in store.ListAtoms()) results.Add($"{i}:{a.Tier}");
+            Assert.True(store.UpsertAtom(Atom("atom.vitality", 1 + i)).IsOk);
+            var rows = store.ListAtoms();
+            Assert.Single(rows);
+            tiers.Add(rows.Single().Tier);
         });
-
-        Assert.Equal(24, results.Distinct().Count());
+        Assert.Equal(4, tiers.Distinct().Count());
     }
 
     [Fact]

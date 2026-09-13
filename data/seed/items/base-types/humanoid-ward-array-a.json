@@ -30,7 +30,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -65,7 +65,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -100,7 +100,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -135,7 +135,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -205,7 +205,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -276,7 +276,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -311,7 +311,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -346,7 +346,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -381,7 +381,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-capacity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -416,7 +416,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -480,18 +480,18 @@
     },
     {
       "id": "item.humanoid-shoulders-a-014",
-      "nameKey": "base.reinforced-pauldron",
-      "name": "Reinforced Pauldron",
+      "nameKey": "base-type.plated-spaulder",
+      "name": "Plated Spaulder",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.reinforced-pauldron",
+      "iconKey": "icon.base-type.plated-spaulder",
       "flavorKey": "flavor.base.reinforced-pauldron",
       "flavor": "A heavy, articulated piece of plating designed to protect the clavicle and upper arm from incoming kinetic impact.",
       "tags": [
@@ -516,18 +516,18 @@
     },
     {
       "id": "item.humanoid-shoulders-a-015",
-      "nameKey": "base.reinforced-pauldron",
-      "name": "Reinforced Pauldron",
+      "nameKey": "base-type.heavy-pauldron",
+      "name": "Heavy Pauldron",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.reinforced-pauldron",
+      "iconKey": "icon.base-type.heavy-pauldron",
       "flavorKey": "flavor.base.reinforced-pauldron",
       "flavor": "A heavy, articulated plating designed to deflect kinetic impact away from the neck and collarbone.",
       "tags": [
@@ -552,18 +552,18 @@
     },
     {
       "id": "item.humanoid-shoulders-a-016",
-      "nameKey": "base.reinforced-pauldron",
-      "name": "Reinforced Pauldron",
+      "nameKey": "base-type.steel-mantle",
+      "name": "Steel Mantle",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-capacity",
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.reinforced-pauldron",
+      "iconKey": "icon.base-type.steel-mantle",
       "flavorKey": "flavor.base.reinforced-pauldron",
       "flavor": "A heavy, articulated piece of plating designed to protect the collarbone and upper arm from kinetic impact.",
       "tags": [
@@ -588,18 +588,18 @@
     },
     {
       "id": "item.humanoid-shoulders-a-017",
-      "nameKey": "base.reinforced-pauldron",
-      "name": "Reinforced Pauldron",
+      "nameKey": "base-type.plated-pauldron",
+      "name": "Plated Pauldron",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-regen",
         "powerBand": "trivial"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.reinforced-pauldron",
+      "iconKey": "icon.base-type.plated-pauldron",
       "flavorKey": "flavor.base.reinforced-pauldron",
       "flavor": "A heavy, articulated piece of plating designed to protect the collarbone and upper arm from kinetic impact.",
       "tags": [
@@ -624,18 +624,18 @@
     },
     {
       "id": "item.humanoid-shoulders-a-018",
-      "nameKey": "base.reinforced-pauldron",
-      "name": "Reinforced Pauldron",
+      "nameKey": "base-type.heavy-guard",
+      "name": "Heavy Guard",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.reinforced-pauldron",
+      "iconKey": "icon.base-type.heavy-guard",
       "flavorKey": "flavor.base.reinforced-pauldron",
       "flavor": "A heavy, articulated piece of plating designed to protect the clavicle and upper arm from kinetic impact.",
       "tags": [
@@ -660,18 +660,18 @@
     },
     {
       "id": "item.humanoid-shoulders-a-019",
-      "nameKey": "base.reinforced-pauldron",
-      "name": "Reinforced Pauldron",
+      "nameKey": "base-type.heavy-plated-shoulder-guard",
+      "name": "Heavy-Plated Shoulder Guard",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-capacity",
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.reinforced-pauldron",
+      "iconKey": "icon.base-type.heavy-plated-shoulder-guard",
       "flavorKey": "flavor.base.reinforced-pauldron",
       "flavor": "A heavy, articulated plate designed to deflect kinetic impact away from the neck and collarbone.",
       "tags": [
@@ -696,18 +696,18 @@
     },
     {
       "id": "item.humanoid-shoulders-a-020",
-      "nameKey": "base.reinforced-pauldron",
-      "name": "Reinforced Pauldron",
+      "nameKey": "base-type.heavy-spaulder",
+      "name": "Heavy Spaulder",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.mending",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.reinforced-pauldron",
+      "iconKey": "icon.base-type.heavy-spaulder",
       "flavorKey": "flavor.base.reinforced-pauldron",
       "flavor": "A heavy, layered plating designed to deflect kinetic impact away from the neck and collarbone.",
       "tags": [
@@ -739,7 +739,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.mending",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -768,18 +768,18 @@
     },
     {
       "id": "item.humanoid-shoulders-a-022",
-      "nameKey": "base.etched-mantle",
-      "name": "Etched Mantle",
+      "nameKey": "base-type.engraved-pauldrons",
+      "name": "Engraved Pauldrons",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-capacity",
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.etched-mantle",
+      "iconKey": "icon.base-type.engraved-pauldrons",
       "flavorKey": "flavor.base.etched-mantle",
       "flavor": "A heavy piece of articulated plating etched with protective sigils to deflect incoming kinetic energy.",
       "tags": [
@@ -804,8 +804,8 @@
     },
     {
       "id": "item.humanoid-shoulders-a-023",
-      "nameKey": "base.etched-mantle",
-      "name": "Etched Mantle",
+      "nameKey": "base-type.carved-spaulders",
+      "name": "Carved Spaulders",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
@@ -815,7 +815,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.etched-mantle",
+      "iconKey": "icon.base-type.carved-spaulders",
       "flavorKey": "flavor.base.etched-mantle",
       "flavor": "A heavy, layered piece of protective plating etched with geometric patterns to stabilize local energy fields.",
       "tags": [
@@ -840,18 +840,18 @@
     },
     {
       "id": "item.humanoid-shoulders-a-024",
-      "nameKey": "base.etched-mantle",
-      "name": "Etched Mantle",
+      "nameKey": "base-type.chiseled-spaulders",
+      "name": "Chiseled Spaulders",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-regen",
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.etched-mantle",
+      "iconKey": "icon.base-type.chiseled-spaulders",
       "flavorKey": "flavor.base.etched-mantle",
       "flavor": "A heavy piece of layered plating etched with geometric sigils designed to disperse kinetic impact.",
       "tags": [
@@ -876,18 +876,18 @@
     },
     {
       "id": "item.humanoid-shoulders-a-025",
-      "nameKey": "base.etched-mantle",
-      "name": "Etched Mantle",
+      "nameKey": "base-type.chiseled-epaulettes",
+      "name": "Chiseled Epaulettes",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-regen",
         "powerBand": "trivial"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.etched-mantle",
+      "iconKey": "icon.base-type.chiseled-epaulettes",
       "flavorKey": "flavor.base.etched-mantle",
       "flavor": "A heavy piece of layered plating etched with geometric patterns designed to disperse kinetic impact.",
       "tags": [
@@ -912,18 +912,18 @@
     },
     {
       "id": "item.humanoid-shoulders-a-026",
-      "nameKey": "base.etched-mantle",
-      "name": "Etched Mantle",
+      "nameKey": "base-type.engraved-pauldron",
+      "name": "Engraved Pauldron",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.etched-mantle",
+      "iconKey": "icon.base-type.engraved-pauldron",
       "flavorKey": "flavor.base.etched-mantle",
       "flavor": "A heavy, layered piece of protective plating etched with geometric patterns designed to disperse kinetic impact.",
       "tags": [
@@ -948,18 +948,18 @@
     },
     {
       "id": "item.humanoid-shoulders-a-027",
-      "nameKey": "base.etched-mantle",
-      "name": "Etched Mantle",
+      "nameKey": "base-type.inscribed-mantle",
+      "name": "Inscribed Mantle",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-capacity",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.etched-mantle",
+      "iconKey": "icon.base-type.inscribed-mantle",
       "flavorKey": "flavor.base.etched-mantle",
       "flavor": "A heavy, layered piece of plating etched with protective sigils designed to deflect incoming kinetic force.",
       "tags": [
@@ -984,18 +984,18 @@
     },
     {
       "id": "item.humanoid-shoulders-a-028",
-      "nameKey": "base.etched-mantle",
-      "name": "Etched Mantle",
+      "nameKey": "base-type.chiseled-spaulets",
+      "name": "Chiseled Spaulets",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-regen",
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.etched-mantle",
+      "iconKey": "icon.base-type.chiseled-spaulets",
       "flavorKey": "flavor.base.etched-mantle",
       "flavor": "A heavy piece of layered metalwork designed to distribute kinetic impact across the collarbone. Its surface is etched with geometric patterns to help stabilize protective fields.",
       "tags": [

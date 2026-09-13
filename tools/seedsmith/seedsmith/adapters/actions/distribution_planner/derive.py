@@ -859,6 +859,96 @@ def plan_subject(*, scope: str, scope_key: "str | None", count: int, weights: We
     return briefs
 
 
+def _plan_top_up(
+        *, top_up: "Mapping[tuple[str, str | None], Mapping[str, int]]",
+        species_anchor: "Mapping[str, SpeciesAnchorRow]",
+        weights_by_key: "Mapping[tuple[str, str], WeightsRow]",
+        rung_table: "Mapping[int, tuple[str, ...]]", allowed_families: "tuple[str, ...]",
+        forbidden_pair_ids: "tuple[str, ...]", multiplicative_pairs: "Sequence[tuple[str, str]]",
+        pairing_table: "Mapping[str, Sequence[str]]", corpus_hash: str, tuning_version: int,
+        round_no: int, prompt_version: int, neighbours_for, avoid_neighbour_k: int) -> "list[dict]":
+    """T2.2's shortfall-only plan. One `plan_subject` call per subject NAMED in `top_up`, its count
+    equal to that subject's named shortfall (`sum(want.values())`), its category counts equal to the
+    `want` map itself — so a top-up round plans exactly what round n reported missing and nothing
+    else.
+
+    Subject order is the caller's `top_up` iteration order, normalised to a total order (species in
+    seed order is not required here because the set is usually tiny and the subject keys are unique);
+    we sort by `(scope rank, scope_key)` so the result is a pure function of the mapping's CONTENT,
+    never of its insertion order.
+
+    An unknown subject, an unknown category, or a non-positive want is refused by name — a top-up
+    report that names something this planner cannot plan means the report is stale or from a
+    different roster, and silently dropping it would under-plan without saying so.
+
+    The `targetMode`/`areaShape` sub-vectors are split within the shortfall by the subject's own
+    weights (`largest_remainder_count`, correct at any count) rather than the scope-level allocator:
+    a top-up round has no scope-wide aggregate to apportion, and a shortfall is typically 1-3 units,
+    where the per-subject split is exact and total. Each brief is an ordinary brief (`plan_subject`),
+    so nothing downstream needs a special case."""
+    scope_rank = {"general": 0, "family": 1, "species": 2}
+
+    def key_order(item):
+        (scope, scope_key), _want = item
+        if scope not in scope_rank:
+            raise ValueError(f"top-up names an unknown scope {scope!r}")
+        return (scope_rank[scope], scope_key or "")
+
+    briefs: "list[dict]" = []
+    for (scope, scope_key), want in sorted(top_up.items(), key=key_order):
+        # Zero-fill every category: `plan_subject` requires the full vector (it validates the sum),
+        # and a shortfall of 0 in a category is a real, meaningful zero here.
+        counts = {c: 0 for c in CATEGORIES}
+        for category, n in want.items():
+            if category not in CATEGORIES:
+                raise ValueError(f"top-up for {scope}/{scope_key!r} names unknown category "
+                                 f"{category!r}")
+            if not isinstance(n, int) or isinstance(n, bool) or n <= 0:
+                raise ValueError(f"top-up for {scope}/{scope_key!r}/{category} is not a positive "
+                                 f"count: {n!r}")
+            counts[category] += n
+        count = sum(counts.values())
+        if count == 0:
+            continue
+
+        if scope == "general":
+            weights = GENERAL_WEIGHTS
+            anchor = brief_anchor("general", None, None)
+        elif scope == "species":
+            row = species_anchor.get(scope_key)
+            weights = weights_by_key.get(("species", scope_key))
+            if row is None or weights is None:
+                raise ValueError(f"top-up names unknown species {scope_key!r} — the report does not "
+                                 f"match the live roster")
+            anchor = brief_anchor("species", scope_key, row)
+        else:                                   # family
+            weights = weights_by_key.get(("family", scope_key))
+            if weights is None:
+                raise ValueError(f"top-up names unknown family {scope_key!r} — the report does not "
+                                 f"match the live family namespace")
+            anchor = brief_anchor("family", scope_key, None)
+
+        target_counts = largest_remainder_count(weights.target_mode_milli, TARGET_MODES, count)
+        area_count = target_counts.get("area", 0)
+        area_counts = (largest_remainder_count(weights.area_shape_milli, AREA_SHAPES, area_count)
+                       if area_count else {k: 0 for k in AREA_SHAPES})
+        briefs.extend(plan_subject(
+            scope=scope, scope_key=scope_key, count=count, weights=weights,
+            rung_table=rung_table, allowed_families=allowed_families,
+            forbidden_pair_ids=forbidden_pair_ids, multiplicative_pairs=multiplicative_pairs,
+            pairing_table=pairing_table, anchor=anchor, corpus_hash=corpus_hash,
+            tuning_version=tuning_version, round_no=round_no, prompt_version=prompt_version,
+            accepted_neighbours=neighbours_for(scope, scope_key),
+            avoid_neighbour_k=avoid_neighbour_k,
+            category_counts=counts, target_mode_counts=target_counts,
+            area_shape_counts=area_counts,
+        ))
+    for b in briefs:
+        validate_rung_band(b["scope"], b["slot"]["rungBand"])
+    validate_pairing_coverage(briefs)
+    return briefs
+
+
 def plan_round(*, species_ids: "Sequence[str]", family_members: "Mapping[str, Sequence[str]]",
                species_anchor: "Mapping[str, SpeciesAnchorRow]",
                weights_by_key: "Mapping[tuple[str, str], WeightsRow]",
@@ -869,7 +959,9 @@ def plan_round(*, species_ids: "Sequence[str]", family_members: "Mapping[str, Se
                corpus_hash: str, tuning_version: int, round_no: int = 1,
                prompt_version: int = 1,
                accepted_neighbours_by_group: "Mapping[tuple[str, str | None], Sequence[tuple[str, FingerprintComponents]]] | None" = None,
-               avoid_neighbour_k: int = 0) -> "list[dict]":
+               avoid_neighbour_k: int = 0,
+               top_up: "Mapping[tuple[str, str | None], Mapping[str, int]] | None" = None,
+               ) -> "list[dict]":
     """§3 steps 2-9 over the whole roster. Subject order: general (one pseudo-subject), then the
     every live species in seed order (`species_ids`, as the caller already ordered it), then the
     consolidated families in sorted order (a total order over family ids — neither dict nor filesystem
@@ -880,12 +972,31 @@ def plan_round(*, species_ids: "Sequence[str]", family_members: "Mapping[str, Se
     empty `avoidNeighbours` list (measured 2026-09-11: 0 of 5,680). The accepted corpus is the
     caller's job to read (`generate_distribution_planner._accepted_neighbours_by_group`), grouped by
     `(scope, scopeKey)`; round 1 legitimately reads none, and `avoid_neighbour_k` comes from A-S3's
-    `action-dedup.v1.json` via `load_dedup_k` (default 8)."""
+    `action-dedup.v1.json` via `load_dedup_k` (default 8).
+
+    **`top_up` is the `S5 → S1` edge (T2.2, 2026-09-12).** When supplied, it REPLACES the base
+    per-subject plan with exactly the shortfall it names: `{(scope, scopeKeyOrNone): {category:
+    want}}` from round n's report. A top-up round plans only what is still missing — round n's
+    accepted rows already persist in the committed corpus and already count against the quota, so
+    re-planning the base would regenerate rows that were already accepted. A subject absent from
+    `top_up` is covered and gets nothing. `None` (the round-1 default) plans the full base exactly as
+    before, so this path is additive and inert until a report is passed."""
     allowed_families, forbidden_pair_ids = build_pool(family_ids, multiplicative_pairs)
     groups = accepted_neighbours_by_group or {}
 
     def neighbours_for(scope: str, scope_key: "str | None"):
         return groups.get((scope, scope_key), ())
+
+    # T2.2 — top-up mode: plan only the named shortfall, keyed by (scope, scopeKey).
+    if top_up is not None:
+        return _plan_top_up(
+            top_up=top_up, species_anchor=species_anchor, weights_by_key=weights_by_key,
+            rung_table=rung_table, allowed_families=allowed_families,
+            forbidden_pair_ids=forbidden_pair_ids, multiplicative_pairs=multiplicative_pairs,
+            pairing_table=pairing_table, corpus_hash=corpus_hash, tuning_version=tuning_version,
+            round_no=round_no, prompt_version=prompt_version,
+            neighbours_for=neighbours_for, avoid_neighbour_k=avoid_neighbour_k,
+        )
 
     briefs: "list[dict]" = []
 

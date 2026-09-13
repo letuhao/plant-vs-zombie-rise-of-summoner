@@ -104,7 +104,7 @@
       "class": "spore",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -215,7 +215,7 @@
       "class": "bulb",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -326,7 +326,7 @@
       "class": "graft",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -400,7 +400,7 @@
       "class": "graft",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,

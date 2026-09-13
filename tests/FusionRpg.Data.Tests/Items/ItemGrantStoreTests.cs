@@ -18,21 +18,19 @@ namespace FusionRpg.Data.Tests.Items;
 /// </summary>
 public class ItemGrantStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ItemGrantStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-item-grants-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         SeedSkillContainer("skill.test");
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     void SeedSkillContainer(string containerId)
@@ -101,7 +99,7 @@ public class ItemGrantStoreTests : IDisposable
     [Fact]
     public void The_item_side_carries_no_cooldown_cost_target_or_condition_column()
     {
-        using var db = SqliteConnectionFactory.Open(_store.HotPath, readOnly: true);
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "PRAGMA table_info(item_granted_action);";
         using var r = cmd.ExecuteReader();

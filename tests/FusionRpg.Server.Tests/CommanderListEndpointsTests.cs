@@ -5,19 +5,21 @@ using FusionRpg.Core.Aura;
 using FusionRpg.Core.Commanders;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Data;
+using FusionRpg.Data.Sqlite;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
 /// <summary>commander-surface commander-list-api: empire filter, loadout intersect runtime active aura.</summary>
 public class CommanderListEndpointsTests : IAsyncLifetime
 {
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
@@ -27,10 +29,8 @@ public class CommanderListEndpointsTests : IAsyncLifetime
     {
         AuraRuntimeEndpoints.ResetForTests();
 
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-cmdlist-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _playerId = _store.GetCurrentPlayerId();
 
         AuraTuningHub.Configure(
@@ -59,7 +59,7 @@ public class CommanderListEndpointsTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     void Equip(params string[] auraIds) =>
@@ -137,7 +137,7 @@ public class CommanderListEndpointsTests : IAsyncLifetime
     public async Task List_corrupt_default_row_reads_implicit_Dave_in_envelope()
     {
         Assert.True(_store.SetDefaultLawnCommanderId(_playerId, CommanderId.Dave.ToStableId()).Ok);
-        using (var db = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_store.HotPath}"))
+        using (var db = SqliteConnectionFactory.Open(_store.HotPath))
         {
             db.Open();
             using var cmd = db.CreateCommand();

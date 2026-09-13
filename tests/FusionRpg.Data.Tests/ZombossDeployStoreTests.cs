@@ -7,20 +7,18 @@ namespace FusionRpg.Data.Tests;
 /// Zomboss player row, and minting a fresh specimen under it via the real `MintCreature` primitive.</summary>
 public class ZombossDeployStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ZombossDeployStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-zomboss-deploy-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     static readonly FusionRpg.Core.Creatures.CreatureSpeciesDef CatalogSpecies =

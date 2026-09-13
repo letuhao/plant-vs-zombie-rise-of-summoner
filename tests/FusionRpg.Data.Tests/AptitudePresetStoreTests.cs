@@ -8,24 +8,19 @@ namespace FusionRpg.Data.Tests;
 /// <summary>aptitude-sheet AS-3.1 — RpgStore aptitude preset library (item-loadout discipline).</summary>
 public class AptitudePresetStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly long _playerId;
 
     public AptitudePresetStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-aptpreset-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _playerId = _store.GetCurrentPlayerId();
         AptitudePresetTuningHub.Configure(new AptitudePresetTuning(1, 1, SoftMaxPresets: 32, DefaultRowAbsMax: 1000));
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static List<RpgAptitudePresetEntryRow> EvenRows(string presetId)
     {
@@ -65,9 +60,8 @@ public class AptitudePresetStoreTests : IDisposable
             EvenRows(id), isCreate: true);
         Assert.Equal("", reason);
 
-        // Survive process restart = new store on the same DB files (item-loadout discipline).
-        var reopened = new RpgStore(_dir);
-        reopened.Init();
+        // Survive process restart = a fresh store over the same storage sees the committed presets.
+        var reopened = _testStore.Reopen();
         var listed = reopened.ListAptitudePresets(_playerId);
         Assert.Single(listed);
         Assert.Equal("Even", listed[0].Name);

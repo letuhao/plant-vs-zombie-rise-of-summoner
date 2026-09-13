@@ -1,7 +1,7 @@
 {
   "_meta": {
     "acceptedCorpusSize": 179,
-    "corpusHash": "ce501e8b54d230e8b58aef9f5c860e54ea07616213be8a00e06f15648721517e",
+    "corpusHash": "165da68d8076efeb219958cd90963f2392f4f051a77639edebb7ba965ea75ee1",
     "mode": "full",
     "partition": "round-2000",
     "reviewQueueCount": 11,
@@ -22,15 +22,18 @@
         "action.corpus.rosterReconciliation",
         "action.corpus.singletonShare",
         "action.corpus.speciesCollision",
+        "action.corpus.speciesCoverage",
         "action.corpus.structureEnforceability",
         "action.corpus.thinCell"
       ],
       "gapMetrics": [
         "action.corpus.enablerPayoffCoverage",
+        "action.corpus.speciesCoverage",
         "action.corpus.thinCell"
       ],
+      "gatingMetrics": [],
       "notMeasuredMetrics": [],
-      "verdict": "not-clean"
+      "verdict": "pass"
     }
   },
   "entries": [

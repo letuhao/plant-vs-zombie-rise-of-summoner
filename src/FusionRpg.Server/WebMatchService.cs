@@ -318,8 +318,41 @@ public sealed class WebMatchService
                 ResolveAndIngest(entry.PlayerId, entry.MatchKey, setup, entry.Seed);
                 healed++;
             }
+            catch (ArgumentException ex)
+            {
+                // A DETERMINISTIC resolve failure — the persisted setup_json + seed produce the same
+                // exception on every boot, so this row can never heal. Refusing it is the rule
+                // spec-interactive-turns.md §4 states for the trace case ("The sweep must refuse, not
+                // heal"), applied here to the resolve case it left implicit, and it is the hazard this
+                // method's own comment above already names: an unmarked row is re-listed every boot,
+                // and enough of them crowd every newer row out of the `ORDER BY id ASC LIMIT` window.
+                //
+                // The exception TYPE is deliberately narrow. `ArgumentException` here is exactly what
+                // "the data itself is unusable" means in the resolver: empty squad / empty wave / bad
+                // or duplicate actor key (BattleEngine.ValidateActorKey + Resolve's own guards), and
+                // `W <= 0` from WaveCatalog.ProfileFor. It is NOT a proxy for "any failure" —
+                // `InvalidOperationException` is deliberately left to the transient branch below,
+                // because it covers BOTH a row-specific runaway loop AND process-global
+                // preconditions ("ActionTimingPolicy.Configure(...) has not run"); refusing on it
+                // would mark every row terminal for what is a server misconfiguration.
+                var why = "unresolvable setup: " + ex.Message;
+                Console.Error.WriteLine($"[web-match] sweep refused {entry.MatchKey}: {why}");
+                _store.MarkWebMatchSweepRefused(entry.Id, why);
+            }
             catch (Exception ex)
             {
+                // Transient (SqliteException from InsertWebMatchEvents' rolled-back transaction, a
+                // busy/locked database, a global tuning precondition): leave the row UNRESOLVED so the
+                // next boot retries it. Marking it refused would bury recoverable work permanently.
+                //
+                // DELIBERATE TRADE-OFF for BattleEngine's own runaway-loop guard, which throws
+                // InvalidOperationException ("a runaway event loop, not a long battle") and IS
+                // deterministic for a given setup+seed. It is left here on purpose rather than
+                // refused: its message names an ENGINE defect, not unusable data, so the correct
+                // signal is a loud recurring log that a human reads, not a terminal mark that would
+                // bury every affected row the first time an engine change causes one. If that guard
+                // ever proves reachable in a shipped build, it wants its own decision — not this
+                // catch's default.
                 Console.Error.WriteLine($"[web-match] sweep failed for {entry.MatchKey}: {ex.Message}");
             }
         }

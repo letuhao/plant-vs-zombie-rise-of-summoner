@@ -37,20 +37,18 @@ namespace FusionRpg.Data.Tests.Items;
 /// </summary>
 public class ItemCardStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ItemCardStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-itemcard-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     // ---- the real corpus ------------------------------------------------------------------------------
@@ -864,23 +862,14 @@ public class ItemCardStoreTests : IDisposable
     [Fact]
     public void The_card_renders_from_item_display_template_rows_and_refuses_without_them()
     {
-        var freshDir = Path.Combine(Path.GetTempPath(), "fusionrpg-itemcard-nodisplay-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(freshDir);
-        try
-        {
-            var f = SeedWorld();
-            Assert.NotEmpty(_store.ListDisplayTemplates());
+        var f = SeedWorld();
+        Assert.NotEmpty(_store.ListDisplayTemplates());
 
-            // Same store, same item, but ask for a family the table does not have: the lookup the DAL
-            // handed over returns null and the renderer refuses rather than printing a raw id.
-            var input = _store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f))!;
-            Assert.Null(input.LookupTemplate("atom.not-a-family"));
-            Assert.NotNull(input.LookupTemplate(
-                f.Atoms.First(a => _store.GetDisplayTemplate(a.FamilyId) is not null).FamilyId));
-        }
-        finally
-        {
-            try { Directory.Delete(freshDir, recursive: true); } catch { /* temp dir */ }
-        }
+        // Same store, same item, but ask for a family the table does not have: the lookup the DAL
+        // handed over returns null and the renderer refuses rather than printing a raw id.
+        var input = _store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f))!;
+        Assert.Null(input.LookupTemplate("atom.not-a-family"));
+        Assert.NotNull(input.LookupTemplate(
+            f.Atoms.First(a => _store.GetDisplayTemplate(a.FamilyId) is not null).FamilyId));
     }
 }

@@ -4,6 +4,7 @@ using FusionRpg.Core.Effects.Atoms.Power;
 using FusionRpg.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.E2E.Tests;
 
@@ -97,10 +98,9 @@ public class ContentBootE2ETests
         // cannot be un-added, and this test's job is to add one that does not exist shipped. Using the
         // fixture's real database would leave a permanent stray row for the other 28 classes sharing
         // it. The chain under test — Collect → ImportContent → LoadContentIntoRuntime — is identical
-        // either way; only which SQLite file it runs against differs.
-        var tempDir = Path.Combine(Path.GetTempPath(), "fusionrpg-e20-seam-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(tempDir);
-        try
+        // either way; only which store it runs against differs, and in memory it is isolated by
+        // construction.
+        using var throwaway = DataTestStore.Create();
         {
             const string seedJson = """
                 {
@@ -114,8 +114,7 @@ public class ContentBootE2ETests
             var collected = AtomSeedFile.Collect(new[] { ("audit-e20.json", seedJson) });
             Assert.True(collected.IsOk, string.Join("; ", collected.Errors));
 
-            var tempStore = new RpgStore(tempDir);
-            tempStore.Init();
+            var tempStore = throwaway.Store;
             var outcome = tempStore.ImportContent(collected.Content);
             Assert.True(outcome.IsOk, string.Join("; ", outcome.Errors));
 
@@ -124,11 +123,7 @@ public class ContentBootE2ETests
             Assert.Contains(ElementTable.Current.Elements, e => e.ElementId == "audit-e20");
             Assert.DoesNotContain(ElementTable.Shipped().Elements, e => e.ElementId == "audit-e20");
         }
-        finally
-        {
-            ElementTable.ResetToShipped();
-            PowerTables.ResetToAuthored();
-            try { Directory.Delete(tempDir, recursive: true); } catch { /* temp dir */ }
-        }
+        ElementTable.ResetToShipped();
+        PowerTables.ResetToAuthored();
     }
 }

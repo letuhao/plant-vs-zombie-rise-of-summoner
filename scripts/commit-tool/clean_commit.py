@@ -10,7 +10,7 @@ import os
 import subprocess
 import sys
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 TOOL_DIR = Path(__file__).resolve().parent
@@ -62,7 +62,49 @@ class CommitResult:
     stderr: str = ""
 
 
-def repo_root() -> Path:
+@dataclass
+class MergeResult:
+    ok: bool
+    errors: list[str]
+    fast_forward: bool = False
+    already_up_to_date: bool = False
+    conflicts: list[str] = field(default_factory=list)
+    hash: str | None = None
+    subject: str | None = None
+    author: str | None = None
+    stdout: str = ""
+    stderr: str = ""
+
+
+def main_repo_root() -> Path:
+    """The repo checkout this tool lives in (the main worktree, not a linked one)."""
+    return TOOL_DIR.parent.parent
+
+
+def resolve_worktree_path(value: str | Path) -> Path:
+    """Absolute path for a commit target worktree.
+
+    A relative value is anchored to the main checkout (where scripts/commit-tool lives),
+    not to the server process cwd, so `worktree=".kilo/worktrees/<id>"` is stable no matter
+    where the MCP server was started.
+    """
+    path = Path(value)
+    if not path.is_absolute():
+        path = main_repo_root() / path
+    return path
+
+
+def repo_root(cwd: str | Path | None = None) -> Path:
+    """`git rev-parse --show-toplevel` for cwd (default: this tool's checkout).
+
+    `cwd` is how a linked worktree commits its own branch: git resolves the worktree root
+    and the shared `.git/config` still supplies `core.hooksPath`. When `cwd` is passed it is
+    an *explicit* target and must resolve in its own checkout — the main-checkout fallback
+    below is only for the implicit case (an MCP server started outside the repo). Falling
+    back for an explicit target would silently commit the wrong branch.
+    """
+    start = Path(cwd).resolve() if cwd else TOOL_DIR
+    explicit = cwd is not None
     try:
         out = subprocess.check_output(
             ["git", "rev-parse", "--show-toplevel"],
@@ -73,11 +115,13 @@ def repo_root() -> Path:
             # call until the client times out with -32001. Git never needs our stdin.
             stdin=subprocess.DEVNULL,
             creationflags=NO_WINDOW,
-            cwd=str(TOOL_DIR),
+            cwd=str(start),
             timeout=GIT_TIMEOUT_SECONDS,
         )
         return Path(out.strip())
     except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+        if explicit:
+            raise
         # MCP servers often start with cwd outside the repo — fall back from tool path.
         candidate = TOOL_DIR.parent.parent
         if (candidate / ".git").exists() or (candidate / ".githooks").exists():
@@ -161,10 +205,18 @@ def perform_commit(
     amend: bool = False,
     allow_empty: bool = False,
     policy_path: Path | None = None,
+    worktree: str | Path | None = None,
 ) -> CommitResult:
-    """Validate + commit with allowlisted identity. Never passes --no-verify."""
+    """Validate + commit with allowlisted identity. Never passes --no-verify.
+
+    `worktree` targets a linked worktree (any git worktree checkout, including
+    `.kilo/worktrees/<id>`): git resolves that checkout's toplevel and commits its current
+    branch. The linked worktree shares `.git/config`, so `core.hooksPath=.githooks` still
+    runs this repo's commit-msg policy hook. Omit it to commit the main checkout.
+    """
     try:
-        root = repo_root()
+        start = resolve_worktree_path(worktree) if worktree else None
+        root = repo_root(start)
     except (subprocess.CalledProcessError, FileNotFoundError) as exc:
         return CommitResult(ok=False, errors=[f"not a git repo / git missing: {exc}"])
 
@@ -270,6 +322,119 @@ def perform_commit(
             pass
 
 
+def perform_merge(
+    branch: str,
+    *,
+    worktree: str | Path | None = None,
+    ff_only: bool = False,
+    policy_path: Path | None = None,
+) -> MergeResult:
+    """Merge `branch` into the current branch of `worktree` (default: main checkout).
+
+    `git merge` never rewrites existing history: it can only advance the current branch
+    by folding in a sibling branch's already-committed work, and `branch` itself is never
+    touched (owner decision, 2026-09-13 — see block_git_write.py). No strategy/`-X` options
+    are exposed and `--no-verify` is never passed, keeping the surface as narrow as `commit`.
+
+    Refuses outright (no git state changed) if:
+    - the target checkout has ANY uncommitted changes (tracked or untracked) — a merge must
+      never land on top of someone else's in-progress edits, agent or human;
+    - `branch` does not resolve to a real ref in this checkout;
+    - HEAD is detached.
+
+    On conflict: leaves the conflicted merge exactly as git left it (no auto-`--abort`) and
+    reports the conflicted paths — finishing it needs a real `git commit` / `merge --continue`,
+    which stays blocked for agent shells, so this is always a hand-back to the owner.
+    """
+    try:
+        start = resolve_worktree_path(worktree) if worktree else None
+        root = repo_root(start)
+    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+        return MergeResult(ok=False, errors=[f"not a git repo / git missing: {exc}"])
+
+    os.chdir(root)
+    policy = load_policy(policy_path or DEFAULT_POLICY)
+
+    hook_errors = assert_hooks_path()
+    if hook_errors:
+        return MergeResult(ok=False, errors=hook_errors)
+
+    branch_name = (branch or "").strip()
+    if not branch_name:
+        return MergeResult(ok=False, errors=["branch is required"])
+
+    head = run_git(["symbolic-ref", "-q", "--short", "HEAD"])
+    if head.returncode != 0 or not (head.stdout or "").strip():
+        return MergeResult(ok=False, errors=["HEAD is detached; check out a branch first"])
+    current_branch = head.stdout.strip()
+
+    verify = run_git(["rev-parse", "--verify", "--quiet", branch_name + "^{commit}"])
+    if verify.returncode != 0:
+        return MergeResult(ok=False, errors=[f"unknown branch/ref: {branch_name!r}"])
+
+    dirty = run_git(["status", "--porcelain"])
+    if dirty.returncode != 0:
+        return MergeResult(ok=False, errors=[(dirty.stderr or "git status failed").strip()])
+    if (dirty.stdout or "").strip():
+        return MergeResult(
+            ok=False,
+            errors=[
+                f"{current_branch} has uncommitted changes; merge refuses to run "
+                "against a dirty tree (commit, or set the changes aside, first)"
+            ],
+        )
+
+    before = run_git(["rev-parse", "HEAD"])
+    before_sha = (before.stdout or "").strip()
+
+    name, email = resolve_author(policy)
+    env = build_commit_env(name, email)
+
+    merge_args = ["merge", branch_name, "--no-edit"]
+    if ff_only:
+        merge_args.append("--ff-only")
+    cp = run_git(merge_args, env=env)
+
+    if cp.returncode != 0:
+        conflict = run_git(["diff", "--name-only", "--diff-filter=U"])
+        conflicts = [ln for ln in (conflict.stdout or "").splitlines() if ln.strip()]
+        return MergeResult(
+            ok=False,
+            errors=[(cp.stderr or cp.stdout or "git merge failed").strip()],
+            conflicts=conflicts,
+            stdout=cp.stdout or "",
+            stderr=cp.stderr or "",
+        )
+
+    output = cp.stdout or ""
+    already_up_to_date = "Already up to date" in output
+    after = run_git(["rev-parse", "HEAD"])
+    after_sha = (after.stdout or "").strip()
+    fast_forward = (not already_up_to_date) and ("Fast-forward" in output)
+
+    commit_hash = subject = author = None
+    if not already_up_to_date and after_sha != before_sha:
+        show = run_git(["log", "-1", "--format=%H%n%s%n%an <%ae>"])
+        if show.returncode == 0:
+            lines = show.stdout.splitlines()
+            if len(lines) >= 3:
+                commit_hash, subject, author = lines[0], lines[1], lines[2]
+            elif lines:
+                commit_hash = lines[0]
+
+    return MergeResult(
+        ok=True,
+        errors=[],
+        fast_forward=fast_forward,
+        already_up_to_date=already_up_to_date,
+        hash=commit_hash,
+        subject=subject,
+        author=author,
+        stdout=output,
+        stderr=cp.stderr or "",
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=(
@@ -282,6 +447,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--all", "-a", action="store_true", help="git commit -a")
     parser.add_argument("--amend", action="store_true", help="Amend HEAD")
     parser.add_argument("--allow-empty", action="store_true")
+    parser.add_argument(
+        "--worktree",
+        help="Commit a linked worktree (path absolute or relative to the main checkout)",
+    )
     parser.add_argument("paths", nargs="*", help="Optional paths to git add before commit")
     args = parser.parse_args(argv)
 
@@ -296,10 +465,11 @@ def main(argv: list[str] | None = None) -> int:
     result = perform_commit(
         message,
         paths=list(args.paths) if args.paths else None,
-        all_tracked=args.all,
-        amend=args.amend,
-        allow_empty=args.allow_empty,
+        all_tracked=bool(args.all),
+        amend=bool(args.amend),
+        allow_empty=bool(args.allow_empty),
         policy_path=args.policy,
+        worktree=args.worktree,
     )
     if not result.ok:
         print("clean-commit: rejected:", file=sys.stderr)

@@ -15,22 +15,28 @@ namespace FusionRpg.Data.Tests;
 /// concurrent session's own in-progress work as of this writing — this file's own fixtures are fully
 /// isolated from that).
 /// </summary>
+[Trait("Category", "DiskSemantics")]
 public class PassiveTreeImportRunnerTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
+    // The import runner's subject is a real generated-corpus directory on disk, so the fixture base
+    // stays a real temp dir (the "disk is the thing under test" case); only the store is in memory.
+    readonly string _dir;
 
     public PassiveTreeImportRunnerTests()
     {
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-treeimport-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
+        if (Directory.Exists(_dir))
+            Directory.Delete(_dir, recursive: true);
     }
 
     // ---- fixtures -----------------------------------------------------------------------------
@@ -142,7 +148,7 @@ public class PassiveTreeImportRunnerTests : IDisposable
         }
         finally
         {
-            try { Directory.Delete(searchStart, recursive: true); } catch { /* temp dir */ }
+            Directory.Delete(searchStart, recursive: true);
         }
     }
 
@@ -164,7 +170,7 @@ public class PassiveTreeImportRunnerTests : IDisposable
         }
         finally
         {
-            try { Directory.Delete(isolated, recursive: true); } catch { /* temp dir */ }
+            Directory.Delete(isolated, recursive: true);
         }
     }
 
@@ -185,7 +191,7 @@ public class PassiveTreeImportRunnerTests : IDisposable
         }
         finally
         {
-            try { Directory.Delete(searchStart, recursive: true); } catch { /* temp dir */ }
+            Directory.Delete(searchStart, recursive: true);
         }
     }
 
@@ -213,7 +219,7 @@ public class PassiveTreeImportRunnerTests : IDisposable
         }
         finally
         {
-            try { Directory.Delete(searchStart, recursive: true); } catch { /* temp dir */ }
+            Directory.Delete(searchStart, recursive: true);
         }
     }
 
@@ -240,7 +246,7 @@ public class PassiveTreeImportRunnerTests : IDisposable
         }
         finally
         {
-            try { Directory.Delete(searchStart, recursive: true); } catch { /* temp dir */ }
+            Directory.Delete(searchStart, recursive: true);
         }
     }
 
@@ -276,7 +282,7 @@ public class PassiveTreeImportRunnerTests : IDisposable
         }
         finally
         {
-            try { Directory.Delete(searchStart, recursive: true); } catch { /* temp dir */ }
+            Directory.Delete(searchStart, recursive: true);
         }
     }
 }

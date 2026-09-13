@@ -64,7 +64,7 @@ public static class TreeBinderRun
             try { anchor = ChannelAnchor.ForChannel(r.ChannelId, powerTuning); }
             catch (ChannelAnchor.UnknownChannelPin) { continue; } // same scope gap, different door
 
-            var op = ParseOp(r.Op, input.NodeId, r.ChannelId);
+            var op = ParseOp(r.Op, r.KindId, input.NodeId, r.ChannelId);
             var kMicro = CoefficientBinder.Bind(input.TreeShareMilli, input.TreeBudgetMilli,
                 input.BudgetShareMilli, anchor, input.Branches);
 
@@ -80,11 +80,17 @@ public static class TreeBinderRun
         return new BoundNode(input.NodeId, atoms);
     }
 
-    static NodeAtomOp ParseOp(string op, string nodeId, string channelId) =>
+    /// <summary>Parses the wire op string into the typed enum, refusing anything the vocabulary does
+    /// not know. `more` IS known (task P4.2 added it: `stat.modify` supports it — `AtomKindRegistry
+    /// .cs:517`), so an unknown op here means a genuinely bad string, not a derived-side `More`.
+    /// A derived-side `More` is a different, still-loud refusal: it names §6 M3 and is raised by
+    /// <see cref="ChannelLegality.CheckBind"/> at the bottom of the loop, the same check the catalog
+    /// loader applies at load — so the rule lives in one place rather than a third copy here.</summary>
+    static NodeAtomOp ParseOp(string op, string kindId, string nodeId, string channelId) =>
         Enum.TryParse<NodeAtomOp>(op, ignoreCase: true, out var parsed)
             ? parsed
-            : throw new BindRefusal($"node '{nodeId}': channel '{channelId}' op '{op}' is not one of " +
-                "Flat|Increased|Replace|Flag (§6 M3 -- there is no More on the derived side)");
+            : throw new BindRefusal($"node '{nodeId}': channel '{channelId}' has unknown op '{op}' " +
+                "on kind '" + kindId + "' (Flat|Increased|More|Replace|Flag)");
 
     /// <summary>
     /// Binds a whole tree's worth of nodes, batching every refusal into one

@@ -2209,8 +2209,8 @@
     },
     {
       "id": "charm.off-ctrl-087",
-      "nameKey": "charm.item",
-      "name": "粘稠减速带",
+      "nameKey": "charm.viscous-residue",
+      "name": "Viscous Residue",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "control",
@@ -2228,7 +2228,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "A thick, yellow, viscous slab of butter that clings to the ground, making movement impossible for enemies.",
+      "flavor": "A thick, clinging substance left behind by heavy machinery.",
       "notes": "themeKey: creature.corncaltrop"
     },
     {
@@ -2284,8 +2284,8 @@
     },
     {
       "id": "charm.off-ctrl-090",
-      "nameKey": "charm.item",
-      "name": "僵尸之感",
+      "nameKey": "charm.necrotic-resonance",
+      "name": "Necrotic Resonance",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "control",
@@ -2316,7 +2316,7 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "A petrified, nut-like relic that forces a sudden, overwhelming realization upon the mind, freezing the soul in place.",
+      "flavor": "A lingering vibration from the restless dead.",
       "notes": "themeKey: creature.cornnut",
       "uniqueCarry": true
     },
@@ -2411,8 +2411,8 @@
     },
     {
       "id": "charm.off-ctrl-095",
-      "nameKey": "charm.item",
-      "name": "毁灭樱桃之核",
+      "nameKey": "charm.void-infused-cherry-pit",
+      "name": "Void-Infused Cherry Pit",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "offense",
@@ -2437,7 +2437,7 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "由深红色的樱桃果实与破碎的毁灭晶体交织而成，其核心不断释放着毁灭性的能量波动。",
+      "flavor": "A kernel of darkness encased in a sweet, crystalline shell.",
       "notes": "themeKey: creature.doomcherry",
       "uniqueCarry": true
     },
@@ -2559,8 +2559,8 @@
     },
     {
       "id": "charm.off-ctrl-101",
-      "nameKey": "charm.item",
-      "name": "毁灭豌豆射手之友",
+      "nameKey": "charm.obsidian-spore-catalyst",
+      "name": "Obsidian Spore Catalyst",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "offense",
@@ -2586,14 +2586,14 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "由坚硬的豌豆外壳与闪烁着毁灭光芒的藤蔓编织而成，它在颤抖中紧贴着指挥官，仿佛在寻求保护，却又在关键时刻释放出毁灭性的力量。",
+      "flavor": "A dense, dark fragment that hums with the rhythm of a heavy heartbeat.",
       "notes": "themeKey: creature.doompeashooter",
       "uniqueCarry": true
     },
     {
       "id": "charm.off-ctrl-102",
-      "nameKey": "charm.item",
-      "name": "余烬之光",
+      "nameKey": "charm.cinder-wrought-core",
+      "name": "Cinder-Wrought Core",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "offense",
@@ -2617,7 +2617,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "A glass-encased filament of dying embers that pulses with a sudden, violent burst of concentrated light.",
+      "flavor": "A fragment of a dying star, encased in hardened ash.",
       "notes": "themeKey: creature.doomplantern"
     },
     {
@@ -2940,8 +2940,8 @@
     },
     {
       "id": "charm.off-ctrl-114",
-      "nameKey": "charm.cabbage-volley-core",
-      "name": "Cabbage Volley Core",
+      "nameKey": "charm.brass-cabbage",
+      "name": "Brass Cabbage",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "offense",
@@ -2959,7 +2959,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "A dense, layered sphere of tightly wound green leaves that pulses with kinetic energy, ready to burst upon impact.",
+      "flavor": "A heavy, metallic vegetable that packs a punch.",
       "notes": "themeKey: creature.firecabbage"
     },
     {
@@ -4832,8 +4832,8 @@
     },
     {
       "id": "charm.off-ctrl-185",
-      "nameKey": "charm.item",
-      "name": "极冰豆弹射器",
+      "nameKey": "charm.frostbite-shard",
+      "name": "Frostbite Shard",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "offense",
@@ -5461,8 +5461,8 @@
     },
     {
       "id": "charm.off-ctrl-211",
-      "nameKey": "charm.item",
-      "name": "会长压扁土豆",
+      "nameKey": "charm.crushed-spud-essence",
+      "name": "Crushed Spud Essence",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "control",
@@ -5487,7 +5487,7 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "A flattened, squashed tuberous mass that refuses to move from its spot.",
+      "flavor": "A concentrated burst of starch and pressure.",
       "notes": "themeKey: creature.potatosquashbody",
       "uniqueCarry": true
     },
@@ -5595,8 +5595,8 @@
     },
     {
       "id": "charm.off-ctrl-216",
-      "nameKey": "charm.item",
-      "name": "毁灭者的同伴",
+      "nameKey": "charm.void-touched-fragment",
+      "name": "Void-Touched Fragment",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "offense",
@@ -5614,7 +5614,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "由无数细小的毁灭性孢子凝聚而成的箭镞，在使用者挥动手臂时会伴随轻微的震颤，仿佛在渴望着下一个目标。",
+      "flavor": "A jagged shard that hums with the resonance of a dying star.",
       "notes": "themeKey: creature.scaredydoom"
     },
     {
@@ -5780,8 +5780,8 @@
     },
     {
       "id": "charm.off-ctrl-224",
-      "nameKey": "charm.frost-spore-reliquary",
-      "name": "Frost-Spore Reliquary",
+      "nameKey": "charm.glacial-spore-vessel",
+      "name": "Glacial Spore Vessel",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "control",
@@ -7713,8 +7713,8 @@
     },
     {
       "id": "charm.off-ctrl-296",
-      "nameKey": "charm.item",
-      "name": "熔炉之眼",
+      "nameKey": "charm.obsidian-core-fragment",
+      "name": "Obsidian Core Fragment",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "offense",
@@ -7742,7 +7742,7 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "由熔炼而成的黄铜弹壳与睁开的巨眼交织，在生产线中不断吐出灼热的子弹。",
+      "flavor": "A jagged shard of solidified volcanic essence, pulsing with a dim, internal heat.",
       "notes": "themeKey: creature.ultimatesunflower",
       "uniqueCarry": true
     },
@@ -9858,8 +9858,8 @@
     },
     {
       "id": "charm.off-ctrl-374",
-      "nameKey": "charm.item",
-      "name": "漂流者救生圈",
+      "nameKey": "charm.drifter-s-buoyancy",
+      "name": "Drifter's Buoyancy",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "control",
@@ -9884,7 +9884,7 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "由半透明的凝胶状物质與腐朽的菌絲編織而成，形狀如同漂浮在深海中的救生圈，散發著微弱的幽光。",
+      "flavor": "A buoyant relic that keeps one's spirit afloat amidst the currents.",
       "notes": "themeKey: creature.seahypno",
       "uniqueCarry": true
     },
@@ -10683,8 +10683,8 @@
     },
     {
       "id": "charm.off-ctrl-405",
-      "nameKey": "charm.item",
-      "name": "重力锚定底座",
+      "nameKey": "charm.void-tethered-stabilizer",
+      "name": "Void-Tethered Stabilizer",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "control",
@@ -10709,7 +10709,7 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "A massive, reinforced tungsten base designed to absorb the violent recoil of high-velocity kinetic discharge.",
+      "flavor": "A heavy, humming device designed to lock an object's position in space.",
       "notes": "themeKey: creature.ultimateexplodecannon",
       "uniqueCarry": true
     },
@@ -10902,8 +10902,8 @@
     },
     {
       "id": "charm.off-ctrl-412",
-      "nameKey": "charm.item",
-      "name": "帝果の催生球",
+      "nameKey": "charm.imperial-spore-core",
+      "name": "Imperial Spore Core",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "control",
@@ -10928,7 +10928,7 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "A heavy, pulsating fruit-shaped orb that drips with concentrated solar nectar, forcing rapid cellular expansion in all nearby life.",
+      "flavor": "A concentrated essence of rapid cellular growth, pulsing with an unnatural rhythm.",
       "notes": "themeKey: creature.ultimatesunnut",
       "uniqueCarry": true
     },

@@ -23,8 +23,8 @@
   "entries": [
     {
       "id": "set.hypnosplit-001",
-      "nameKey": "set.item",
-      "name": "魅惑裂荚射手",
+      "nameKey": "set.hypnosplit-fragment",
+      "name": "Hypnosplit Fragment",
       "themeKey": "creature.hypnosplit",
       "members": [
         {
@@ -80,7 +80,7 @@
           ]
         }
       ],
-      "flavor": "The pod bursts with a mesmerizing scent, releasing a volley of emerald seeds that seek their mark.",
+      "flavor": "A fractured shard that pulses with a rhythmic, hypnotic cadence.",
       "tags": [],
       "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
     }

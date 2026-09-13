@@ -30,7 +30,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.keen-edge",
+        "family": "atom.precision",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -67,7 +67,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -104,7 +104,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.keen-edge",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -141,7 +141,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.precision",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -178,7 +178,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.keen-edge",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -215,7 +215,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.precision",
         "powerBand": "high"
       },
       "socketMax": 1,
@@ -252,7 +252,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.keen-edge",
+        "family": "atom.precision",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -289,7 +289,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -326,7 +326,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.keen-edge",
+        "family": "atom.precision",
         "powerBand": "high"
       },
       "socketMax": 1,
@@ -363,7 +363,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -400,7 +400,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.keen-edge",
+        "family": "atom.might",
         "powerBand": "extreme"
       },
       "socketMax": 1,
@@ -437,7 +437,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.precision",
         "powerBand": "high"
       },
       "socketMax": 1,

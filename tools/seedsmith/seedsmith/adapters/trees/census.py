@@ -63,6 +63,17 @@ _REFUSAL_PATTERNS: "tuple[tuple[str, str], ...]" = (
 _MECHANISM = "mechanism"
 _MAGNITUDE = "magnitude"
 
+#: The one kind `PassiveTree.Resolve.TreeAtomSource.BoundAtomsFor` reads. That function skips every
+#: atom whose `KindId` is not this one (`if (atom.KindId != "stat.derived") continue;`), so a bound
+#: `stat.modify` atom is PRICED and never READ — it contributes exactly zero to a live actor.
+#:
+#: <para>**Readable is not the same as priced, and the census exists because they differ.** The
+#: 2026-09-13 measurement found 407 bound nodes whose atoms were 100% `stat.modify` — every one
+#: priced, every one dropped. Counting `node.atoms` non-empty as "contributing" reported 243 healthy
+#: nodes where the truth was 0. This constant is the census's copy of the resolver's own predicate; it
+#: is asserted against the resolver source in the test suite so the two cannot drift.</para>
+READABLE_KIND_ID = "stat.derived"
+
 #: Per-record provenance vintages that are legitimate states of a corpus, never "current". Matched by
 #: value, not enumerated as constants, so a new brief vintage never needs an edit here — only the
 #: CURRENT one is special-cased, and it is read live from `brief.PROMPT_VERSION`.
@@ -136,6 +147,9 @@ class TreeCensus:
     bound_with_priced_atoms: int
     bound_without_priced_atoms: int
     priced_atom_count: int
+    bound_with_readable_atoms: int
+    readable_atom_count: int
+    bound_atoms_by_kind: "Mapping[str, int]"
 
     expected_mechanism: int
     bound_mechanism: int
@@ -168,6 +182,15 @@ class TreeCensus:
     @property
     def inert_share_permille(self) -> int:
         return _permille(self.bound_without_priced_atoms, self.bound_nodes)
+
+    @property
+    def unreadable_share_permille(self) -> int:
+        """The share of BOUND nodes the resolver actually drops — the repair skill's own §0.1
+        definition of the expensive failure: *"a bound node whose `kindId` is not the one
+        `TreeAtomSource` reads contributes exactly zero — the most expensive failure in this seam,
+        because it is silent."* Distinct from `inert_share_permille`, which counts zero-priced
+        atoms: a node can be fully priced and still 100% unreadable (the 2026-09-13 finding)."""
+        return _permille(self.bound_nodes - self.bound_with_readable_atoms, self.bound_nodes)
 
     @property
     def never_generated_count(self) -> int:
@@ -240,6 +263,9 @@ def census_tree(
 
     bound_with_priced_atoms = 0
     priced_atom_count = 0
+    bound_with_readable_atoms = 0
+    readable_atom_count = 0
+    bound_by_kind: "Counter[str]" = Counter()
     bound_mechanism = 0
     bound_mechanism_by_tier = Counter()
     for node in bound:
@@ -248,6 +274,12 @@ def census_tree(
         if atoms:
             bound_with_priced_atoms += 1
             priced_atom_count += len(atoms)
+        readable = [a for a in atoms if str(a.get("kindId", "")) == READABLE_KIND_ID]
+        if readable:
+            bound_with_readable_atoms += 1
+            readable_atom_count += len(readable)
+        for atom in atoms:
+            bound_by_kind[str(atom.get("kindId", ""))] += 1
         if plan_class_by_id.get(node_id) == _MECHANISM:
             bound_mechanism += 1
             bound_mechanism_by_tier[plan_tier_by_id.get(node_id, _tier_of(node_id))] += 1
@@ -318,6 +350,9 @@ def census_tree(
         bound_with_priced_atoms=bound_with_priced_atoms,
         bound_without_priced_atoms=bound_count - bound_with_priced_atoms,
         priced_atom_count=priced_atom_count,
+        bound_with_readable_atoms=bound_with_readable_atoms,
+        readable_atom_count=readable_atom_count,
+        bound_atoms_by_kind=dict(sorted(bound_by_kind.items())),
         expected_mechanism=expected_mechanism,
         bound_mechanism=bound_mechanism,
         expected_magnitude=expected - expected_mechanism,
@@ -360,8 +395,21 @@ class DistributionCensus:
             "boundWithPricedAtoms": sum(t.bound_with_priced_atoms for t in self.trees),
             "boundWithoutPricedAtoms": sum(t.bound_without_priced_atoms for t in self.trees),
             "pricedAtoms": sum(t.priced_atom_count for t in self.trees),
+            "boundWithReadableAtoms": sum(t.bound_with_readable_atoms for t in self.trees),
+            "unreadableBoundNodes": sum(t.bound_nodes - t.bound_with_readable_atoms for t in self.trees),
+            "readableAtoms": sum(t.readable_atom_count for t in self.trees),
             "unspentBudgetShareMilli": sum(t.unspent_budget_share_milli for t in self.trees),
         }
+
+    def bound_atoms_by_kind(self) -> "dict[str, int]":
+        """Every priced atom in the corpus, by kind — the one reading that states whether the binder
+        and the resolver even agree on a kind. `{'stat.modify': N}` with no `stat.derived` means every
+        bound node is silently dropped, no matter how healthy the bind rate looks."""
+        totals: "Counter[str]" = Counter()
+        for tree in self.trees:
+            for kind, count in tree.bound_atoms_by_kind.items():
+                totals[kind] += count
+        return dict(sorted(totals.items(), key=lambda kv: (-kv[1], kv[0])))
 
     def by_class(self) -> "dict[str, dict[str, int]]":
         mech_expected = sum(t.expected_mechanism for t in self.trees)
@@ -439,9 +487,13 @@ class DistributionCensus:
                     "seedNodes": t.seed_nodes,
                     "boundNodes": t.bound_nodes, "refusedNodes": t.refused_nodes,
                     "unaccountedNodes": t.unaccounted_nodes,
-                    "boundWithPricedAtoms": t.bound_with_priced_atoms,
-                    "boundWithoutPricedAtoms": t.bound_without_priced_atoms,
-                    "pricedAtoms": t.priced_atom_count,
+            "boundWithPricedAtoms": t.bound_with_priced_atoms,
+            "boundWithoutPricedAtoms": t.bound_without_priced_atoms,
+            "pricedAtoms": t.priced_atom_count,
+            "boundWithReadableAtoms": t.bound_with_readable_atoms,
+            "readableAtoms": t.readable_atom_count,
+            "unreadableSharePermille": t.unreadable_share_permille,
+            "boundAtomsByKind": dict(t.bound_atoms_by_kind),
                     "bindPermille": t.bind_permille,
                     "mechanismExpected": t.expected_mechanism,
                     "mechanismBound": t.bound_mechanism,
@@ -479,6 +531,22 @@ class DistributionCensus:
                      f"boundWithoutPricedAtoms={totals['boundWithoutPricedAtoms']}  "
                      f"pricedAtoms={totals['pricedAtoms']}  "
                      f"unspentBudgetShareMilli={totals['unspentBudgetShareMilli']}")
+        lines.append(f"boundWithReadableAtoms={totals['boundWithReadableAtoms']}  "
+                     f"unreadableBoundNodes={totals['unreadableBoundNodes']}  "
+                     f"readableAtoms={totals['readableAtoms']}  "
+                     f"readable={pct(_permille(totals['boundNodes'] - totals['unreadableBoundNodes'], totals['boundNodes']))} of bound")
+
+        by_kind = self.bound_atoms_by_kind()
+        lines.append("")
+        lines.append("bound atoms by kind (the binder's priced set)")
+        if not by_kind:
+            lines.append("  (none)")
+        for kind, count in by_kind.items():
+            mark = "" if kind == READABLE_KIND_ID else "   <- NOT read by the resolver (dropped silently)"
+            lines.append(f"  {kind or '(empty)'}: {count}{mark}")
+        if by_kind and READABLE_KIND_ID not in by_kind:
+            lines.append(f"  DEFECT: no '{READABLE_KIND_ID}' atom bound — every bound node contributes zero "
+                         f"even though the bind rate looks healthy (task R4/P4.3)")
 
         lines.append("")
         lines.append("bind rate by node class")

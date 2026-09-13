@@ -33,8 +33,12 @@ Two constraints worth recording, both verified:
   file — so the plan rejects it rather than corrupting it.
 - **A shared-cache memory DB cannot be opened read-only** (`SqliteConnectionFactory.Open(…,
   readOnly: true)` fails). Store tests read the memory DB through a plain open; the only remaining
-  read-only opens read real archive files. On a memory store, archive entry points **throw** until the
-  `archive-target` module makes the archive target memory-capable.
+  read-only opens read real archive files. On a memory store, archive entry points **throw**
+  (`StorePlanException`). Archive is **file-only by decision**: the `archive-target` module that would
+  have made the archive memory-capable was **cut by the owner on 2026-09-13** (its benefit no longer
+  justified refactoring production archive code — see
+  [data-test-substrate-map.md](data-test-substrate-map.md) module 5). The two archive test classes stay
+  file-bound and `DiskSemantics`-tagged, and are leak-proof through the file helper.
 
 The memory plan skips the four file-only `Init()` steps (`CreateDirectory(_dataDir)` /
 `CreateDirectory(ArchiveDir)` / `LegacyMonoMigrator.TryMigrate` / `HealOrphanMediaTables`) and nothing

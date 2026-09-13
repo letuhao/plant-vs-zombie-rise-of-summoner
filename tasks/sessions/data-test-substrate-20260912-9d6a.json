@@ -12,6 +12,8 @@
     "tests/FusionRpg.E2E.Tests/**",
     "tests/FusionRpg.Core.Tests/**",
     "tests/FusionRpg.Guard.Tests/**",
+    "web/fusion-rpg-web/src/stages/world/fixtures/**",
+    "web/fusion-rpg-web/e2e/fixtures/**",
     "scripts/data-test-*.ps1",
     "scripts/guard-test-substrate.ps1",
     "scripts/test-substrate-baseline.txt",
@@ -25,8 +27,13 @@
     "CLAUDE.md",
     "tasks/data-test-substrate-plan.md",
     "tasks/data-test-substrate-todo.md",
-    "tasks/sessions/data-test-substrate-*.json"
+    "tasks/sessions/data-test-substrate-*.json",
+    "src/FusionRpg.Server/WebMatchService.cs"
   ],
   "started": "2026-09-12T11:06:58Z",
-  "status": "active"
+  "status": "merged",
+  "sharedWith": [
+    "session-boundary-standard-20260912-a3f2"
+  ],
+  "sharedNote": "Owner decision 2026-09-12: shared boundary on features/derived-stat-extension. This session owns src/FusionRpg.Data + tests/FusionRpg.Data.Tests; the contributing-standards session takes tests/FusionRpg.Core.Tests balance-tool launch + scripts/commit-tool. Commit explicit paths only."
 }

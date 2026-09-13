@@ -100,7 +100,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.withering",
+        "family": "atom.affliction",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -422,7 +422,7 @@
       "class": "scale",
       "band": "a",
       "implicit": {
-        "family": "atom.withering",
+        "family": "atom.bonding",
         "powerBand": "low"
       },
       "socketMax": 1,

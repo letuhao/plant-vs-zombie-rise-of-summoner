@@ -23,8 +23,8 @@
   "entries": [
     {
       "id": "set.fumeshroom-001",
-      "nameKey": "set.iron-gate-spore",
-      "name": "Iron Gate Spore",
+      "nameKey": "set.fume-spore",
+      "name": "Fume Spore",
       "themeKey": "creature.fumeshroom",
       "members": [
         {

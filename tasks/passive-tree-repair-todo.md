@@ -21,6 +21,51 @@ and be correct on both read modes; "battle-only first pass" is not an option.
 `python scripts/audit-magic-numbers.py` 0 M1/M2 attributable to the task. For `tools/seedsmith` work,
 add `python -m pytest tools/seedsmith/tests/adapters/trees`.
 
+---
+
+## ▶ RESUME HERE (state at 2026-09-13, `/build full` run)
+
+**Committed and gated:** P0.1, P0.1b, P0.2, P0.3, P1.1, P1.2, P1.3, P4.1, P4.2, P4.3a.
+Commits: `d352a027` `52ad4948` `bbe47eb1` `c82d6f5a` `c3ef3d9a` `bd5b651b` `38286a0d` `4e21bc2f`
+(`ab1a1b56` cleanup) `1d76131f`.
+
+**Measured gain from Phase 4:** `op 'more'` refusals 80 → 0; the binder no longer crashes; live bind
+rate 15.8% → 24.2%. **But `readable = 0.0% of bound`** — every bound atom is `stat.modify` and the
+resolver reads only `stat.derived`, so the tree still contributes nothing in play. That is P4.3.
+
+**The run stopped on two §4 blockers, both genuine (not tooling failures):**
+
+1. **P2.1 — the mechanism-kind magnitude anchors are authored nowhere.** `bands.v1.json`'s
+   `statusMagnitudeAndDuration` group has ratios (chance 1.75‰, duration 1.4‰) but no `formula` and no
+   `sharePermilleOwnership`; its own worked example says *"illustrative, inherited, not balanced"*;
+   `spec-numerics.md:210-212` says those shares are *"specced when their families are resolved"*; and
+   `tier-bands.v5.json` has **no** per-family chance/duration surface. No non-magnitude family carries
+   an explicit `amount` either (checked: 51 families, 0 with `amount`). The registry's own rule is
+   *"reject at import, not guess one"*, so inventing the anchor IS the defect. **Needs:** the owner (or
+   the power program) to publish the anchors — a `power-scale.v3` curve for the magnitude kinds (R10)
+   **and** a chance/duration anchor for `status.apply`. Nothing downstream of P2.1 is reachable until
+   this exists.
+
+2. **P4.3 — the two frozen specs disagree on the kind a tree node carries.**
+   `spec-tree-resolve.md` §2.1 + the plan's `channelFamily` quota axis say **`stat.derived`**; the
+   binder and the whole committed corpus are **`stat.modify`** (261 atk + 76 defense, 0 derived), and
+   `Resolve/TreeAtomSource` skips every one. The owner's *direction* is on record ("both, unified"),
+   but the **mechanism** is not: the derived route needs P5 + P3 (both blocked by #1), and the primary
+   route needs a new producer path that locks behavior and therefore a `decisions.md` row first.
+
+**Concrete ask for the owner (smallest unblocking set):**
+- publish the missing balance anchors (chance/duration for `status.apply`; curves for the 20
+  curve-less channels) so Phase 2–3 can run; **or** say "exclude the mechanism kinds from the tree
+  vocabulary for now" and the plan re-scopes to magnitude-only.
+- decide P4.3's route: **(A)** derived-only per `spec-tree-resolve` §2.1 (once P2/P3/P5 land), or
+  **(B)** lock a primary producer path in `decisions.md` (the equipment/`BuildEquip` shape).
+
+**First thing to re-check on resume:** the shipped `progression.bonus.atk → atk` bridge
+(`ActorHub.MergeAppliedCombat`, `EntityApply.cs:404`) — if a derived-channel atom on
+`progression.bonus.atk` reaches a live `atk`, option A is sufficient and option B is unnecessary.
+
+---
+
 **Standing rule:** a task that edits generated seed/generated JSON **without** a `src/` or
 `tools/seedsmith` code change is not a repair. If the only change is data, it is class D/E and must
 cite the code evidence that the pipeline is already correct.
@@ -44,10 +89,10 @@ genuinely resolves.
 transcript, so every later phase reports a delta. It must report bind rate **by class, by tier, by
 category, and by tree** — an aggregate hides the mechanism collapse.
 **Acceptance:**
-- [ ] One command prints: trees, expected/bound/refused, by-class bind rate, by-tier mechanism %, by-tree bind rate, refusal buckets, unspent‰
-- [ ] The baseline is recorded with the exact commands and git revision
-- [ ] Binder crash, `FamilyExpandGen --check` drift, and the `wither` ungenerated node are captured verbatim
-**Depends on:** none. **Scope:** S.
+- [x] One command prints: trees, expected/bound/refused, by-class bind rate, by-tier mechanism %, by-tree bind rate, refusal buckets, unspent‰
+- [x] The baseline is recorded with the exact commands and git revision
+- [x] Binder crash, `FamilyExpandGen --check` drift, and the `wither` ungenerated node are captured verbatim
+**Depends on:** none. **Scope:** S. **Done:** `d352a027` — `seedsmith trees census [--json]`.
 
 ### P0.2: Name the focused regression test each fix must ship
 **Spec:** repair skill §8. **Description:** CI runs whole test projects and this repo has no
@@ -69,19 +114,18 @@ regression tests that would fail on the old code"). This task fixes the *list* �
 | R10 curve | a Flat family on a curve-less channel refuses by name, not by crash |
 
 **Acceptance:**
-- [ ] Each fix task below names its test, and the test is committed in the same commit as the fix
-- [ ] No test asserts a corpus count — the envelope/contract only
-- [ ] No test is committed in a failing state
-**Depends on:** P0.1. **Scope:** S (the list; the tests ride with their fixes).
+- [x] Each fix task below names its test, and the test is committed in the same commit as the fix
+- [x] No test asserts a corpus count — the envelope/contract only
+- [x] No test is committed in a failing state
+**Depends on:** P0.1. **Scope:** S (the list; the tests ride with their fixes). **Done:** `d352a027` (census), `52ad4948` (re-counts).
 
 ### P0.3: Propagate the stale counts the specs still carry
 **Spec:** DESIGN-GATE §3 evidence rule 6. **Description:** `spec-tree-language.md` §3 still says
 16 kinds / 7 attach points / 98 affix families / 21 statuses; live it is 18 / 9 / 125 / 24. Correct
 the citations in the specs this program touches, naming the counting command each time.
-**Acceptance:**
-- [ ] `spec-tree-language.md` §3 and `spec-tree-binder.md` §2 counted tables match a fresh count
-- [ ] Every corrected number names what was counted, not where it was quoted from
-**Depends on:** none. **Scope:** S.
+- [x] `spec-tree-language.md` §3 and `spec-tree-binder.md` §2 counted tables match a fresh count
+- [x] Every corrected number names what was counted, not where it was quoted from
+**Depends on:** none. **Scope:** S. **Done:** `52ad4948`.
 
 ---
 
@@ -93,11 +137,10 @@ the citations in the specs this program touches, naming the counting command eac
 generator did, fix the code if the generator is wrong, and regenerate through the real CLI. **Record
 which of the two it was** — a stale generated file with a correct generator is class D; the reverse is
 class A.
-**Acceptance:**
-- [ ] Root cause classified A or D with `file:line` evidence
-- [ ] `dotnet run --project tools/FamilyExpandGen -- --check` exits **0**
-- [ ] The three files were regenerated by the CLI, never hand-edited
-**Depends on:** P0.1. **Scope:** S.
+- [x] Root cause classified A or D with `file:line` evidence (two class D renames + one class B line-ending)
+- [x] `dotnet run --project tools/FamilyExpandGen -- --check` exits **0**
+- [x] The three files were regenerated by the CLI, never hand-edited
+**Depends on:** P0.1. **Scope:** S. **Done:** `bbe47eb1`.
 
 ### P1.2: Classify the `wither` ungenerated plan node and add the envelope check
 **Spec:** repair skill §2 (distinguish PASS/FAIL/NOT_MEASURED), §3 (class E). **Description:** measured
@@ -108,10 +151,10 @@ refuses correctly. The P0.1 census initially mislabeled it an "orphan"; this tas
 semantics (done in the census) and decides whether to finish the node through the real CLI now or
 leave it for the Phase 8 regeneration.
 **Acceptance:**
-- [ ] The census reports `orphanGeneratedNodeIds` (defect) and `neverGeneratedNodeIds` (class E) separately
-- [ ] Whole-corpus both-direction reconciliation is 0 true orphans, and a check fails if one appears
-- [ ] The decision on `skill.wither-def-t9-n1` is recorded: finish via real CLI, or regenerate in P8
-**Depends on:** P1.1. **Scope:** S.
+- [x] The census reports `orphanGeneratedNodeIds` (defect) and `neverGeneratedNodeIds` (class E) separately
+- [x] Whole-corpus both-direction reconciliation is 0 true orphans, and a check fails if one appears
+- [x] The decision on `skill.wither-def-t9-n1` is recorded: it is left for the Phase 8 regeneration (it is one node, the whole corpus is being re-rolled there anyway, and finishing it now would spend model calls on a node that regeneration replaces)
+**Depends on:** P1.1. **Scope:** S. **Done:** `c82d6f5a`.
 
 ### P1.3: Establish uniform current provenance
 **Spec:** `spec-tree-language.md` §5.1; PRIOR-SESSION work on `PROMPT_VERSION`. **Description:**
@@ -120,16 +163,42 @@ leave it for the Phase 8 regeneration.
 the corpus must be re-generated under a uniform current version (it must, before Phase 8), and add the
 guard that prevents a stale vintage from being reported as healthy.
 **Acceptance:**
-- [ ] The intended vintage is stated, with the command that shows it
-- [ ] A check fails when a seed document's vintage is stale or `mixed`
-- [ ] The regeneration scope is written down for Phase 8
-**Depends on:** P1.1. **Scope:** S.
+- [x] The intended vintage is stated, with the command that shows it (`trees census` → `tree-language/3`; 1,066 records are not current)
+- [x] A check fails when a seed document's vintage is stale or `mixed` (classification + real-corpus envelope tests; `stale_vintage_trees()` is the gate input)
+- [x] The regeneration scope is written down for Phase 8 (all 42 trees; the 1,066 stale records are the re-roll scope)
+**Depends on:** P1.1. **Scope:** S. **Done:** `c3ef3d9a`.
 
 ---
 
 ## Phase 2 — expander: non-magnitude kinds (R7, R8)
 
-### P2.1: Teach `FamilyExpansion` the mechanism-kind formulas
+### P2.1: Teach `FamilyExpansion` the mechanism-kind formulas — ⛔ DEFERRED (needs an owner balance decision)
+
+**Verified 2026-09-13 during `/build full`. This is a data gap, not a code gap — do not implement by
+inventing a number.** The formulas' *shape* is locked, but their *anchors* are authored nowhere:
+
+- `bands.v1.json` → `powerBand.channelFamilyGroups.statusMagnitudeAndDuration` has **no `formula` and
+  no `sharePermilleOwnership`** key. It gives `twoLadderRule` (chance 1.75‰, duration 1.4‰ *mandatory*),
+  a `memberFamilies` list, and a `workedExample` whose own `status` field reads
+  **`"illustrative, inherited, not balanced"`**. There is no `m1` anchor for chance or duration.
+- `docs/architecture/seedsmith/spec-numerics.md:210-212` states the other three groups (incl.
+  `statusMagnitudeAndDuration`) **"have locked formulas and need their own shares… specced when their
+  families are resolved."** The shares do not exist.
+- `data/seed/items/_tuning/tier-bands.v5.json` has **no per-family chance/duration override surface**
+  (keys are only `baseSharePermille`, `channelWeightPermille`, `opWeightPermille`), and
+  `bands.v1.json`'s own `note` says a rider's family-specific chance ladder is *"recorded in the
+  family's own tier-bands input, never this registry's default."*
+- `sharePermilleOwnership` states the binding rule: *"A generator with no authored share for a channel
+  must reject at import, not guess one."* The existing tool already follows it — `Program.cs:130-138`
+  returns `null` for a channel with no `BattleRuleset` curve and refuses honestly.
+
+**The owner decision (plan §6 A1/A5):** author the missing anchors as a new published balance surface
+— a `power-scale.v3.json` curve for the magnitude kinds (already R10/P3.1) **and** a chance/duration
+anchor for `status.apply` (new; not currently in any plan item). Until it exists, the honest behavior
+is the status quo: refuse by name. **Deferred as a §4 "spec genuinely silent on a product decision"
+stop; P4.1 was taken instead (eligible, independent, and on the critical path).**
+
+### P2.1 (original task text, retained for reference): Teach `FamilyExpansion` the mechanism-kind formulas
 **Spec:** `bands.v1.json` `statusMagnitudeAndDuration` + `familiesOutOfFourWaySplit`;
 `spec-family-expand.md`; `spec-mechanism-wiring.md`. **Ask first** (owner confirms the formula
 reading). **Description:** `TryReferenceBaseM1` (`FamilyExpansion.cs:253-284`) refuses everything whose
@@ -220,25 +289,89 @@ registered channel families** — verify which is true before adding a pool.
 unhandled exception, killing the run. A pool must resolve to a concrete channel deterministically
 (§3.2's roll rules) or refuse as a named `BindRefusal`.
 **Acceptance:**
-- [ ] `tools/TreeBinder --check` completes on all 42 trees without an unhandled exception
-- [ ] A pool-shaped channel is resolved with the §3.2 rule named, or refused as a `BindRefusal`
-- [ ] A test proves both paths; `--check` no longer crashes
-**Depends on:** P0.2. **Scope:** M.
+- [x] `tools/TreeBinder --check` completes on all 42 trees without an unhandled exception
+- [x] A pool-shaped channel is resolved with the §3.2 rule named, or refused as a `BindRefusal`
+- [x] A test proves both paths; `--check` no longer crashes
+**Depends on:** P0.2. **Scope:** M. **Done:** gate PASS 2026-09-13. Chosen disposition: **refuse by
+name**, not resolve — `spec-channel-pool.md` §4 makes the roll effect-pipeline module 2's, and §3.4
+prices a pool as `count × weighted_mean(member)`, so a bake-time pick would store a number the roll can
+contradict. Verified: `--check` exits 1 (stale corpus, separate task) with **0 unhandled exceptions**
+and 289 pool channels named; AffixComposerTests 10/10; PassiveTree 405/405; 4 guards green. Gate noted
+the malformed-channel assertion was only weakly discriminating (word "channel") and the boxes were
+unticked at gate time — both fixed in this commit.
 
 ### P4.2: Add `More` to the tree op vocabulary (R2)
-**Spec:** `spec-tree-catalog.md` §2.3; `AtomKindRegistry.cs:517`. **Ask first — owner leans yes.**
-**Description:** `stat.modify` legally supports `More` and it is priced (550‰); `NodeAtomOp` lacks it,
-so 6 generated families throw at `TreeBinderRun.cs:84`. Add `More`, thread it through
-`TreeBinderRun`, `TreeAtomSource` (both projections), `TreeBinderExplain`, `PassiveTreeCatalogLoader`,
-and prove the derived-side absence (`AtomDerivedSubsystem.TryParseOp`) is unchanged.
+**Spec:** `spec-tree-catalog.md` §2.3; `AtomKindRegistry.cs:517`. **Owner chose: add the member**
+(Bundle C). **Description:** `stat.modify` legally supports `More` and it is priced (550‰); `NodeAtomOp`
+lacked it, so every `more`-op node was refused at `TreeBinderRun.ParseOp`. Add `More`, and move the
+derived-side M3 rule from a *structural* property (the member's absence) to a **named, kind-aware
+refusal at both the load path and the bind path** — otherwise adding the member would silently convert
+a loud refusal into the silent drop `TreeAtomSource.BoundAtomsFor` performs when
+`AtomDerivedSubsystem.TryParseOp` fails.
 **Acceptance:**
-- [ ] A `more`-op atom parses to a real op end to end and is priced
-- [ ] The 54 `op 'more'` refusals drop to **0**
-- [ ] A source-shape test proves `TreeAtomSource` handles `More` in both read modes
-- [ ] `NodeAtom`'s doc comment states which kinds own which ops (it currently overclaims one shared set)
-**Depends on:** P4.1. **Scope:** M.
+- [x] A `more`-op atom parses to a real op end to end and is priced (`A_more_op_stat_modify_atom_parses_binds_and_is_priced` asserts `NodeAtomOp.More` and `kMicro > 0`)
+- [x] The `op 'more'` refusals drop to **0** (measured 80 → 0 on the live binder; live bind rate 15.8% → 24.2%)
+- [x] A source-shape test proves both read modes map every `NodeAtomOp` including `More` (`Both_read_modes_map_every_NodeAtomOp_including_More`)
+- [x] `NodeAtom`'s doc comment states which kinds own which ops
+- [x] M3 stays LOUD at both sites: `Derived_atom_with_a_more_op_is_refused_by_name_at_load` (loader) and the bind arm in `ChannelLegalityTests`; both proven to FAIL when the arms are mutated out
+**Depends on:** P4.1. **Scope:** M. **Done:** gate PASS 2026-09-13 (round 2; round 1 was FAIL for missing
+loader/pricing/source-shape tests and a stale doc comment, all fixed). Verified: focused 101/101,
+full Core.Tests green (`13369/13369` as read at the gate — a reading, and it moves as other streams add
+tests), `op 'more'` 80 → 0 with 0 unhandled exceptions, 6 guards green.
 
-### P4.3: Make binder and resolver agree on kind, for both kinds (R4)
+### P4.3a: Census counts READABLE atoms, not priced ones — DONE `4e21bc2f`
+
+**Found while investigating P4.3, and it is the program's own instrument lying.** The P0.1 census's
+"inert" metric counted atoms the binder *priced*, but the resolver reads only `stat.derived` — so 243
+bound nodes reported healthy while contributing nothing. By the repair skill's own §0.1 definition
+("bound nodes carrying zero READABLE atoms"), the real number is **266/266 unreadable, readable 0.0%
+of bound**. Fixed: `bound_with_readable_atoms`, `bound_atoms_by_kind`, `unreadable_share_permille`,
+a named `DEFECT` line when no readable kind binds, and a test asserting `READABLE_KIND_ID` against the
+resolver source so the census cannot drift from the thing it measures. 37 census tests, 545 tree tests.
+
+### P4.3: Make binder and resolver agree on kind, for both kinds (R4) — ⛔ DEFERRED (architecture fork)
+
+**Owner direction is on record** (Bundle C; plan §6 A1: *"both, unified — one battle engine, the lawn
+and battle read modes are not split"*). **What is NOT specified is the mechanism, and the two specs
+give opposite answers:**
+
+- `spec-tree-resolve.md` §2.1: a tree node carries **`stat.derived`**; the plan's own quota axis agrees
+  (`channelFamily` is drawn from the derived-stat catalog — `progression.bonus.atk`, `combat.power.omni`,
+  per `spec-tree-plan.md:739`).
+- The committed corpus is **100% `stat.modify`**: 22 of 30 generated families are `stat.modify`, the
+  binder prices primary channels for them, and a fresh bind produces `stat.modify/atk: 261`,
+  `stat.modify/defense: 76`, `stat.derived: 0`. `Resolve/TreeAtomSource.BoundAtomsFor` skips every one.
+
+**Both routes to "both kinds" leave this task's scope:**
+- **Derived half** needs the language stage to draw from the quota cell's *derived* `channelFamily`
+  rather than a branch tag (R1/P5) **and** the 8 `stat.derived` families' pool channels resolved
+  (P3.3) — P4.1 chose `refuse` for pools, so they cannot bind yet.
+- **Primary half** needs a NEW producer path (compile the node's `stat.modify` atoms to grants the way
+  `ActionContainerEffectResolverFactory.BuildEquip` does for equipment, then deliver via FA1
+  `ModifyStat`/`BattleStatModifierLedger`). That locks behavior, so AGENTS.md requires a
+  `decisions.md` row first — an architecture change, not a task-sized fix. The shipped
+  `progression.bonus.atk → atk` bridge (`ActorHub.MergeAppliedCombat`, `EntityApply.cs:404`) may
+  make the derived route sufficient, which is the first thing to check — but deciding that is not a
+  build-run's call when two frozen specs disagree.
+
+**This is a §4 stop: "the spec is genuinely silent on a product decision."** Unblocking order:
+P2.1's anchor → P3 → P5 → then P4.3 becomes implementable as the derived route, or the owner locks the
+primary-producer route in `decisions.md` and it becomes its own program.
+
+**Measured detail (2026-09-13, live bind):**
+
+```
+fresh bind (tools/TreeBinder --out):  bound=407  onlyModify=243  onlyDerived=0  empty=164
+bound atoms by kind/channel:          stat.modify/atk: 261   stat.modify/defense: 76
+                                      stat.derived: 0
+resolve path (Resolve/TreeAtomSource.BoundAtomsFor):  `if (atom.KindId != "stat.derived") continue;`
+```
+
+100% of bound tree atoms are dropped by the resolver. The committed census reads 266 bound (lower
+than the live 407 because the committed corpus is older than the current generator), of which
+`readable=0.0%` — the number P4.3a's fix made visible.
+
+### P4.3 (original task text, retained for reference): Make binder and resolver agree on kind, for both kinds (R4)
 **Spec:** `spec-tree-binder.md` §4.1; `spec-tree-resolve.md` §2.1, §12 test 15. **Owner answered:
 unified.** **Description:** the binder prices `stat.modify` (primary channels); `TreeAtomSource` reads
 only `stat.derived`. Per the owner, the tree contributes through **both** — `stat.derived` via the

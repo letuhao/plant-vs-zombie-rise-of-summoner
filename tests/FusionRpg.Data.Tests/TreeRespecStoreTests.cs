@@ -11,16 +11,14 @@ namespace FusionRpg.Data.Tests;
 /// `TreeRespecPolicy`'s shape.</summary>
 public class TreeRespecStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     const long PlayerId = 1;
 
     public TreeRespecStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-treerespec-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         var repoRoot = RepoRoot();
         PassiveTreeTuningHub.Configure(PassiveTreeTuningLoader.Parse(
@@ -37,7 +35,7 @@ public class TreeRespecStoreTests : IDisposable
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     [Fact] // respec_clears_one_scope_key_only

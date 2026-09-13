@@ -257,6 +257,44 @@ public class TreeBinderRunTests
         Assert.Empty(bound.Atoms);
     }
 
+    // ---- 6. P4.2 -- a `more` op on a stat.modify atom parses, binds and is PRICED ----------------
+
+    /// <summary>P4.2 (R2). The defect: `NodeAtomOp` had no `More`, so `ParseOp` refused every
+    /// `more`-op node — but `stat.modify` legitimately supports `more` (`AtomKindRegistry.cs:517`), and
+    /// the language stage picked such affixes on real nodes. This proves the whole bind path now works
+    /// end to end for that case: the string `"more"` parses to <see cref="NodeAtomOp.More"/>, the node
+    /// binds (not refuses), and the atom carries a non-zero `kMicro` — i.e. it is PRICED, not merely
+    /// accepted. The same op on a `stat.derived` atom must still refuse (M3); that half is
+    /// `ChannelLegalityTests`'.</summary>
+    [Fact]
+    public void A_more_op_stat_modify_atom_parses_binds_and_is_priced()
+    {
+        var affixId = "affix.synthetic.more";
+        var atomId = "atom.synthetic.more";
+        var affix = new AffixRow(affixId, null, new[] { new AffixRefRow(0, atomId) });
+        var atom = new AtomRow
+        {
+            AtomId = atomId,
+            KindId = "stat.modify",
+            FamilyId = atomId,
+            Tier = 1,
+            Name = "synthetic more",
+            ParamsJson = """{"channel":"atk","op":"more","amount":{"min":1,"max":1}}""",
+            WhenJson = "{}",
+        };
+        var affixes = new Dictionary<string, AffixRow> { [affixId] = affix };
+        var atoms = new Dictionary<string, AtomRow> { [atomId] = atom };
+        var node = new BindInputNode("skill.might-off-t5-n0", 1000, 1000, 45, 2,
+            new[] { affixId }, ExclusionForm.None, DeliberateHole: false);
+
+        var bound = TreeBinderRun.BindNode(node, affixes, atoms, RealPowerTuning());
+
+        var boundAtom = Assert.Single(bound.Atoms);
+        Assert.Equal(NodeAtomOp.More, boundAtom.Op);
+        Assert.Equal("atk", boundAtom.ChannelId);
+        Assert.True(boundAtom.KMicro > 0, "a bound atom must be priced, not merely accepted");
+    }
+
     static SeedContent LoadRealSeedContent()
     {
         var root = RepoRoot();

@@ -599,3 +599,13 @@ frame"*) that cannot be met through the channel currently named.
 species corpus at *"~904 species"*. Measured 2026-09-06 off `data/seed/creatures/species/_index.json`:
 **840** species across **502** family files. The item program has corrected its own side; this map's
 number is yours to change or keep.
+
+---
+
+## Filed by the `species-gear-chain` initiative (2026-09-13)
+
+Asks raised by [species-gear-chain-map.md](species-gear-chain-map.md) and its module specs. **Nothing here is built or approved** — each is an ask-first boundary this program owns, filed so it is visible to the owner rather than living only in the requesting map.
+
+| # | Ask | Requesting module | Evidence |
+|---|---|---|---|
+| 1 | ⛔ **`themes.v2.json` + migration** for `data/seed/creatures/_registry/themes.v1.json` — 84 of 904 rows carry retired four-value rarity ids | ``ladder-consistency-repair`` | A normal re-run **preserves** them by design (`generate_themes.py:42-43`, append-only), and `--rebuild`'s sanction was conditional on *"nothing is bound to these keys yet"* — **844 set entries are now bound to `creature.*` keys.** Owner decision 2026-09-13: publish v2. ⭐ The migration changes **a field inside a row, not a key**, so no binding breaks |

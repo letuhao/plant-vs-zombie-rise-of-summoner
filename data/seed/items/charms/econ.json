@@ -2116,8 +2116,8 @@
     },
     {
       "id": "charm.econ-075",
-      "nameKey": "charm.item",
-      "name": "陨星坠落之核",
+      "nameKey": "charm.meteorite-fragment",
+      "name": "Meteorite Fragment",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "economy",
@@ -2142,7 +2142,7 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "化作流星坠向地面，在毁灭的撞击中砸出财富的裂痕。",
+      "flavor": "A dense, pulsating shard of celestial debris that hums with kinetic energy.",
       "notes": "themeKey: creature.doomstar",
       "uniqueCarry": true
     },
@@ -4417,8 +4417,8 @@
     },
     {
       "id": "charm.econ-159",
-      "nameKey": "charm.item",
-      "name": "旋鋼杉之遺",
+      "nameKey": "charm.steel-grain-essence",
+      "name": "Steel-Grain Essence",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "economy",
@@ -4446,7 +4446,7 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "A jagged splinter of steel-bark, still vibrating from the force of a thousand piercing shots.",
+      "flavor": "A fragment of hardened timber, infused with the resilience of tempered steel.",
       "notes": "themeKey: creature.spruceshulk",
       "uniqueCarry": true
     },
@@ -4500,8 +4500,8 @@
     },
     {
       "id": "charm.econ-162",
-      "nameKey": "charm.item",
-      "name": "坠落星轨引力器",
+      "nameKey": "charm.void-drift-siphon",
+      "name": "Void-Drift Siphon",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "economy",
@@ -4526,7 +4526,7 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "由坠落星辰的残骸锻造而成，其核心不断引动着天际的流星轨迹，使每一次合击都如同星辰坠落般精准且沉重。",
+      "flavor": "A device designed to harvest the kinetic residue of passing celestial bodies.",
       "notes": "themeKey: creature.starsniper",
       "uniqueCarry": true
     },
@@ -4652,8 +4652,8 @@
     },
     {
       "id": "charm.econ-167",
-      "nameKey": "charm.item",
-      "name": "未熟樱桃连射匣",
+      "nameKey": "charm.crimson-burst-core",
+      "name": "Crimson Burst Core",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "economy",
@@ -4678,14 +4678,14 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "由半熟的樱桃果肉与黄铜枪管熔铸而成，每一次震动都散发着甜腻的火药味。",
+      "flavor": "A concentrated essence of cherry-red energy, pulsing with rapid potential.",
       "notes": "themeKey: creature.supercherrygatling",
       "uniqueCarry": true
     },
     {
       "id": "charm.econ-168",
-      "nameKey": "charm.item",
-      "name": "豌豆弹幕匣",
+      "nameKey": "charm.verdant-sprout-capsule",
+      "name": "Verdant Sprout Capsule",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "economy",
@@ -4703,7 +4703,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "由无数颗微小的豌豆弹丸组成的金属圆筒，在震动中不断喷射出密集的弹幕。",
+      "flavor": "A concentrated essence of growth, pulsing with rhythmic vitality.",
       "notes": "themeKey: creature.supergatling"
     },
     {
@@ -4740,8 +4740,8 @@
     },
     {
       "id": "charm.econ-170",
-      "nameKey": "charm.item",
-      "name": "籽实连射器",
+      "nameKey": "charm.verdant-seed-spitter",
+      "name": "Verdant Seed-Spitter",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "economy",
@@ -4759,7 +4759,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "由无数分裂的果实核心组成，在投掷时会因概率波动而产生连射的震荡。",
+      "flavor": "A rhythmic mechanism that pulses with the heartbeat of the forest.",
       "notes": "themeKey: creature.supermelon"
     },
     {
@@ -5234,8 +5234,8 @@
     },
     {
       "id": "charm.econ-189",
-      "nameKey": "charm.item",
-      "name": "尖刺子弹塑成物",
+      "nameKey": "charm.jagged-shard-fragment",
+      "name": "Jagged Shard Fragment",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "economy",

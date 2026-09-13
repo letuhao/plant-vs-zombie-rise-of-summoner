@@ -14,20 +14,18 @@ namespace FusionRpg.Data.Tests;
 /// `PointBudgetTests.cs`) or `RespecPolicy`'s (P6.3, unbuilt).</summary>
 public class AllocationStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public AllocationStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-aptalloc-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     [Fact]
@@ -127,7 +125,7 @@ public class AllocationStoreTests : IDisposable
         // Asserted directly on the live schema, not on the store's own C# API surface -- a resolved
         // value could otherwise sneak in as an extra column nothing in this test file's own method
         // calls would ever exercise.
-        using var db = SqliteConnectionFactory.Open(_store.HotPath, readOnly: true);
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "PRAGMA table_info(rpg_aptitude_allocation);";
         using var r = cmd.ExecuteReader();

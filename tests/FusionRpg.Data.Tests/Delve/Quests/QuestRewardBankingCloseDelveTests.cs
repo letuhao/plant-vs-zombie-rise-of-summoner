@@ -31,7 +31,7 @@ namespace FusionRpg.Data.Tests.Delve.Quests;
 /// </summary>
 public class QuestRewardBankingCloseDelveTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly RoomTypeCatalog _rooms;
     readonly DoorTypeCatalog _doors;
@@ -40,10 +40,8 @@ public class QuestRewardBankingCloseDelveTests : IDisposable
 
     public QuestRewardBankingCloseDelveTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-quest-reward-close-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         var repoRoot = FindRepoRoot();
         var registries = DungeonRegistryLoader.LoadAll(Path.Combine(repoRoot, "data", "seed", "dungeon", "_registry"));
@@ -52,10 +50,7 @@ public class QuestRewardBankingCloseDelveTests : IDisposable
         _tuning = DungeonTuningLoader.Parse(File.ReadAllText(Path.Combine(repoRoot, "data", "tuning", "dungeon.v3.json")), registries);
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static string FindRepoRoot()
     {

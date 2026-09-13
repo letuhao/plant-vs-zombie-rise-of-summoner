@@ -893,8 +893,8 @@
     },
     {
       "id": "charm.surv-util-036",
-      "nameKey": "charm.item",
-      "name": "平安果",
+      "nameKey": "charm.verdant-core-fragment",
+      "name": "Verdant Core Fragment",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "survivability",
@@ -912,7 +912,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "A polished, jade-like fruit carved from solid emerald, pulsing with a soft, protective light that wards off misfortune.",
+      "flavor": "A pulsating shard of life-sustaining essence.",
       "notes": "themeKey: creature.apple"
     },
     {
@@ -1192,8 +1192,8 @@
     },
     {
       "id": "charm.surv-util-048",
-      "nameKey": "charm.item",
-      "name": "托付之翼",
+      "nameKey": "charm.vanguard-s-remnant",
+      "name": "Vanguard's Remnant",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "utility",
@@ -1214,7 +1214,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "由精密的航空合金与加固的补救组件构成的飞行器残骸，承载着对最后生机的托付。",
+      "flavor": "A fragment of a shield that refused to shatter, even when the world did.",
       "notes": "themeKey: creature.boatimp"
     },
     {
@@ -1759,8 +1759,8 @@
     },
     {
       "id": "charm.surv-util-071",
-      "nameKey": "charm.item",
-      "name": "研究所选拔样本",
+      "nameKey": "charm.scavenged-specimen-vial",
+      "name": "Scavenged Specimen Vial",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "survivability",
@@ -1778,7 +1778,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "由研究所精心培育的仙人掌纤维编织而成，其尖锐的刺状结构象征着被选中的优秀个体。",
+      "flavor": "A reinforced glass container used to preserve biological traces from the wasteland.",
       "notes": "themeKey: creature.elephantzombie_c"
     },
     {
@@ -1893,8 +1893,8 @@
     },
     {
       "id": "charm.surv-util-076",
-      "nameKey": "charm.item",
-      "name": "萤火阳光菇·萤光璀璨",
+      "nameKey": "charm.luminescent-sporecap",
+      "name": "Luminescent Sporecap",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "utility",
@@ -2411,8 +2411,8 @@
     },
     {
       "id": "charm.surv-util-098",
-      "nameKey": "charm.item",
-      "name": "银灰色之物",
+      "nameKey": "charm.shattered-silver-husk",
+      "name": "Shattered Silver Husk",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "survivability",
@@ -2430,7 +2430,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "A silver-grey, uncomprehending mass of scavenged debris that hungrily absorbs the essence of the fallen.",
+      "flavor": "A dull, metallic shell that hums with a faint, rhythmic vibration.",
       "notes": "themeKey: creature.ironconezombie"
     },
     {
@@ -2483,8 +2483,8 @@
     },
     {
       "id": "charm.surv-util-101",
-      "nameKey": "charm.item",
-      "name": "不锈钢意志",
+      "nameKey": "charm.stainless-resolve",
+      "name": "Stainless Resolve",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "survivability",
@@ -2502,7 +2502,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "全副武装的金属外壳反射着冰冷的光芒，这种坚不可摧的信心让僵尸在冲锋时显得无懈可击。",
+      "flavor": "A tempered spirit that refuses to bend under pressure.",
       "notes": "themeKey: creature.ironpeadoorzombie"
     },
     {
@@ -3071,8 +3071,8 @@
     },
     {
       "id": "charm.surv-util-125",
-      "nameKey": "charm.item",
-      "name": "三叶坚果悬浮护身符",
+      "nameKey": "charm.three-leaf-nut-shell",
+      "name": "Three-Leaf Nut Shell",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "survivability",
@@ -3090,13 +3090,13 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "A cluster of three polished nut-shells that orbit the commander in a slow, rhythmic dance, emitting a faint hum of protection.",
+      "flavor": "A sturdy, leafy casing that offers a layer of protection.",
       "notes": "themeKey: creature.nutblover"
     },
     {
       "id": "charm.surv-util-126",
-      "nameKey": "charm.item",
-      "name": "坚果大蘑菇",
+      "nameKey": "charm.nutty-spore-core",
+      "name": "Nutty Spore Core",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "survivability",
@@ -3114,7 +3114,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "A heavy, nut-encased fungal cap that serves as a sturdy shield for the collective.",
+      "flavor": "A dense, concentrated essence of fungal growth and nut shells.",
       "notes": "themeKey: creature.nutfume"
     },
     {
@@ -3200,8 +3200,8 @@
     },
     {
       "id": "charm.surv-util-130",
-      "nameKey": "charm.item",
-      "name": "玄钢地刺王",
+      "nameKey": "charm.obsidian-spire",
+      "name": "Obsidian Spire",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "survivability",
@@ -3227,8 +3227,8 @@
     },
     {
       "id": "charm.surv-util-131",
-      "nameKey": "charm.item",
-      "name": "下界合金铆钉",
+      "nameKey": "charm.netherite-rivet",
+      "name": "Netherite Rivet",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "survivability",
@@ -3275,8 +3275,8 @@
     },
     {
       "id": "charm.surv-util-133",
-      "nameKey": "charm.item",
-      "name": "松木暖炉",
+      "nameKey": "charm.pine-ember-hearth",
+      "name": "Pine Ember Hearth",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "survivability",
@@ -3297,7 +3297,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "A hollowed pine log containing a glowing ember, radiating warmth to stave off the biting frost.",
+      "flavor": "A small, glowing warmth salvaged from the forest floor.",
       "notes": "themeKey: creature.pinefurnace"
     },
     {
@@ -4381,8 +4381,8 @@
     },
     {
       "id": "charm.surv-util-178",
-      "nameKey": "charm.item",
-      "name": "脱下的中世纪盔甲",
+      "nameKey": "charm.scavenged-plate-fragment",
+      "name": "Scavenged Plate Fragment",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "survivability",
@@ -4407,14 +4407,14 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "A heavy, rusted breastplate stripped from a fallen knight, smelling of ancient earth and old battles.",
+      "flavor": "A heavy, dented piece of steel salvaged from a fallen knight.",
       "notes": "themeKey: creature.supergargantuar",
       "uniqueCarry": true
     },
     {
       "id": "charm.surv-util-179",
-      "nameKey": "charm.item",
-      "name": "帝果之重",
+      "nameKey": "charm.imperial-decree-of-the-fallen",
+      "name": "Imperial Decree of the Fallen",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "survivability",
@@ -4618,8 +4618,8 @@
     },
     {
       "id": "charm.surv-util-187",
-      "nameKey": "charm.item",
-      "name": "高坚果壳",
+      "nameKey": "charm.sturdy-nut",
+      "name": "Sturdy Nut",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "survivability",
@@ -4637,7 +4637,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "A dense, towering shell of hardened nut-matter, offering a satisfyingly crunchy texture to those who strike it.",
+      "flavor": "A dense, unyielding layer of protection.",
       "notes": "themeKey: creature.tallfirenut"
     },
     {
@@ -4996,8 +4996,8 @@
     },
     {
       "id": "charm.surv-util-202",
-      "nameKey": "charm.item",
-      "name": "樱桃战神之壳",
+      "nameKey": "charm.crimson-husk-of-survival",
+      "name": "Crimson Husk of Survival",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "survivability",
@@ -5015,7 +5015,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "由坚硬的樱桃果核与不朽的金属编织而成，象征着前排战神那不可撼动的意志与一体的防御阵列。",
+      "flavor": "A hardened shell infused with the essence of a thousand cherry blossoms.",
       "notes": "themeKey: creature.ultimatechomper"
     },
     {
@@ -5112,8 +5112,8 @@
     },
     {
       "id": "charm.surv-util-206",
-      "nameKey": "charm.item",
-      "name": "世界の王冠",
+      "nameKey": "charm.eternal-core-fragment",
+      "name": "Eternal Core Fragment",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "utility",
@@ -5138,7 +5138,7 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "A miniature, polished orb of obsidian that reflects the entire horizon, held by a tiny, elegant silver stem.",
+      "flavor": "A pulsating shard of ancient technology that hums with a rhythmic, life-sustaining energy.",
       "notes": "themeKey: creature.ultimateimpking",
       "uniqueCarry": true
     },
@@ -5328,8 +5328,8 @@
     },
     {
       "id": "charm.surv-util-214",
-      "nameKey": "charm.item",
-      "name": "埃德加的儒雅讲义",
+      "nameKey": "charm.edgar-s-survival-manual",
+      "name": "Edgar's Survival Manual",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "utility",
@@ -5454,8 +5454,8 @@
     },
     {
       "id": "charm.surv-util-218",
-      "nameKey": "charm.item",
-      "name": "盛鋼蓮之寒枝",
+      "nameKey": "charm.frost-etched-steel-petal",
+      "name": "Frost-Etched Steel Petal",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "survivability",
@@ -5473,13 +5473,13 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "A frozen sprig of steel-hardened spruce, perpetually dusted with a layer of crystalline frost that never melts.",
+      "flavor": "A shard of steel frozen mid-bloom, retaining a biting chill.",
       "notes": "themeKey: creature.ultimatespruce"
     },
     {
       "id": "charm.surv-util-219",
-      "nameKey": "charm.item",
-      "name": "光錐の残滓",
+      "nameKey": "charm.echo-of-survival",
+      "name": "Echo of Survival",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "utility",
@@ -5504,7 +5504,7 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "A glowing, translucent cone of solidified sunlight, pulsing with the restless energy of a thousand suns, yet cold as a grave.",
+      "flavor": "A lingering resonance of a life once lived.",
       "notes": "themeKey: creature.ultimatesungatlingpuff",
       "uniqueCarry": true
     },
@@ -6025,8 +6025,8 @@
     },
     {
       "id": "charm.surv-util-242",
-      "nameKey": "charm.item",
-      "name": "绒毛丧尸群",
+      "nameKey": "charm.fuzz-clad-swarm-core",
+      "name": "Fuzz-Clad Swarm Core",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "utility",
@@ -6044,7 +6044,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "由无数团绒绒的、带着腐朽气息的草茎组成的乌合之众，它们在感知到威胁时会集体蠕动，形成一种难以捉摸的应对姿态。",
+      "flavor": "A dense, pulsating mass of matted fur and relentless hunger.",
       "notes": "themeKey: creature.cattaillour"
     },
     {
@@ -6596,8 +6596,8 @@
     },
     {
       "id": "charm.surv-util-262",
-      "nameKey": "charm.item",
-      "name": "埃德加的和平遗骸",
+      "nameKey": "charm.edgar-s-silent-relic",
+      "name": "Edgar's Silent Relic",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "survivability",
@@ -6623,7 +6623,7 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "由锈蚀的机械零件与僵尸组织构成的巨大圆环，其表面刻满了象征和平的齿轮纹路，散发着一种令人放松的、甚至有些掉以轻心的陈旧气息。",
+      "flavor": "A fragment of stillness amidst the chaos.",
       "notes": "themeKey: creature.irongargantuar",
       "uniqueCarry": true
     },
@@ -6875,8 +6875,8 @@
     },
     {
       "id": "charm.surv-util-271",
-      "nameKey": "charm.ignited-stump-core",
-      "name": "Ignited Stump-Core",
+      "nameKey": "charm.ember-husk",
+      "name": "Ember Husk",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "survivability",
@@ -7348,8 +7348,8 @@
     },
     {
       "id": "charm.surv-util-290",
-      "nameKey": "charm.item",
-      "name": "核爆樱桃·爆裂弹壳",
+      "nameKey": "charm.crimson-shrapnel-burst",
+      "name": "Crimson Shrapnel Burst",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "utility",
@@ -7377,7 +7377,7 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "A massive, heavy-caliber casing forged from condensed cherry-core, designed to release a catastrophic burst of kinetic energy upon impact.",
+      "flavor": "A concentrated cherry-red core that detonates upon impact.",
       "notes": "themeKey: creature.nucleardoomcherry",
       "uniqueCarry": true
     },
@@ -7407,8 +7407,8 @@
     },
     {
       "id": "charm.surv-util-292",
-      "nameKey": "charm.item",
-      "name": "玄钢棘壳",
+      "nameKey": "charm.obsidian-thistle",
+      "name": "Obsidian Thistle",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "utility",
@@ -8618,8 +8618,8 @@
     },
     {
       "id": "charm.surv-util-338",
-      "nameKey": "charm.item",
-      "name": "霜融之核",
+      "nameKey": "charm.permafrost-core",
+      "name": "Permafrost Core",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "survivability",
@@ -8637,7 +8637,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "由层层堆叠的寒冰菌丝与凝固的阳光结晶组成，随着时间流逝，其核心会缓慢释放出消融一切的寒气。",
+      "flavor": "A crystalline fragment that refuses to yield to the warmth of the sun.",
       "notes": "themeKey: creature.suniceshroom"
     },
     {
@@ -8851,8 +8851,8 @@
     },
     {
       "id": "charm.surv-util-347",
-      "nameKey": "charm.item",
-      "name": "螺纹植被集成核",
+      "nameKey": "charm.threaded-core-fragment",
+      "name": "Threaded Core Fragment",
       "charmClass": "standard",
       "apCost": 2,
       "axis": "utility",
@@ -8870,7 +8870,7 @@
       "prefixRolls": 1,
       "suffixRolls": 1,
       "tags": [],
-      "flavor": "由大量坚果状的机械零件与生长中的植物纤维融合而成，形成了一层厚重的装甲层。",
+      "flavor": "A dense, spiraled component salvaged from ancient utility modules.",
       "notes": "themeKey: creature.supermachineshardplant"
     },
     {
@@ -9770,8 +9770,8 @@
     },
     {
       "id": "charm.surv-util-383",
-      "nameKey": "charm.item",
-      "name": "永别之刃刻印",
+      "nameKey": "charm.eternal-void-sigil",
+      "name": "Eternal Void Sigil",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "survivability",
@@ -9808,8 +9808,8 @@
     },
     {
       "id": "charm.surv-util-384",
-      "nameKey": "charm.item",
-      "name": "大地脈動の星形楔",
+      "nameKey": "charm.tectonic-core-fragment",
+      "name": "Tectonic Core Fragment",
       "charmClass": "signet",
       "apCost": 5,
       "axis": "utility",
@@ -9834,7 +9834,7 @@
       "prefixRolls": 0,
       "suffixRolls": 0,
       "tags": [],
-      "flavor": "地表の震動を糧とし、周期的に現れる星の力を呼び覚ます重厚な楔。",
+      "flavor": "A jagged shard pulsing with the rhythmic tremors of the deep earth.",
       "notes": "themeKey: creature.ultimatestar",
       "uniqueCarry": true
     },

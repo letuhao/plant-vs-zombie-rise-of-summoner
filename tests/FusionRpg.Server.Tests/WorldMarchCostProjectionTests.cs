@@ -8,6 +8,8 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
+using FusionRpg.Data.Sqlite;
 
 namespace FusionRpg.Server.Tests;
 
@@ -19,7 +21,7 @@ namespace FusionRpg.Server.Tests;
 /// </summary>
 public class WorldMarchCostProjectionTests : IAsyncLifetime
 {
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
@@ -30,10 +32,8 @@ public class WorldMarchCostProjectionTests : IAsyncLifetime
     {
         ConfigureWorldTuningOnce();
 
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-w9-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         var port = GetFreeTcpPort();
         var baseUrl = $"http://127.0.0.1:{port}";
@@ -64,15 +64,12 @@ public class WorldMarchCostProjectionTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        SqliteConnection.ClearAllPools();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     SqliteConnection OpenHot()
     {
-        var db = new SqliteConnection($"Data Source={_store.HotPath}");
-        db.Open();
-        return db;
+        return SqliteConnectionFactory.Open(_store.HotPath);
     }
 
     void Exec(string sql, params (string Name, object Value)[] parameters)

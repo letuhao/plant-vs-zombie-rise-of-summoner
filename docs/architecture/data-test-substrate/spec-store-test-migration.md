@@ -15,7 +15,7 @@ classes; this module is the execution of that classification:
 | Class | Files | Substrate |
 |---|---|---|
 | **A — pure store** | 191 in scope (129 Data.Tests + 54 Server + 4 E2E + 4 Core) | memory |
-| **B — archive** | 2 (`ColdArchiveCompactionTests`, `StoragePurgeTests`) | file until `archive-target`, then memory |
+| **B — archive** | 2 (`ColdArchiveCompactionTests`, `StoragePurgeTests`) | **file permanently** — `DiskSemantics`-tagged, leak-proof via the file helper (`archive-target` was cut 2026-09-13) |
 | **C — temp-only, no store** | 35 | **not migrated** (not store tests) |
 | **D — file-semantics** | 3 smoke/legacy | file, leak-proof helper |
 
@@ -80,8 +80,32 @@ Five classes keep real files **and** get the helper's leak-proof file path:
 | `StoragePurgeTests` | purge deletes real archive files |
 
 Converting these to memory would **delete real coverage**. They move onto `CreateFileBacked()`, which
-fixes their leak without changing what they assert (module `archive-target` moves the archive two to
-memory later; the legacy + smoke three stay file permanently).
+fixes their leak without changing what they assert. **All six stay file permanently** — `archive-target`,
+which would have moved the two archive classes to memory, was **cut by the owner on 2026-09-13** (its
+benefit no longer justified refactoring production archive code).
+
+**Finding from T14 (2026-09-12) — the classifier missed a second kind of file-bound case.** Class A
+("pure store") was defined by *what the test asserts*, but a memory-bound test can also reach a file
+**through the store's own API**: the archive entry points (`TrimSoulLedgerTails`,
+`CompactAfterRunClosed`, `PromoteClosedRunCapture`, `TrimHotTailsNow`, `DeleteArchives`,
+`PurgeClosedRunCapture`, `DeleteClosedRuns`) are file-backed by construction and **throw**
+`StorePlanException` on a memory store (module `memory-storage-plan` §5). A store test that calls one
+is file-bound even though its assertions are about ledger arithmetic.
+
+The census (2026-09-12) found **3 mis-classified store files**: `ExpeditionRewardApplyTests` (1 of its
+6 tests — `Soul_trim_keeps_a_mixed_earn_spend_ledger_consistent`), `SoulLedgerTrimTests`, and
+`WebGameIsolationTests` (the last two are still temp-backed in the baseline and **must** use
+`CreateFileBacked()` when their batches run, or they throw). `CompactionWorkerTests` (E2E) is **not**
+one of them — the census flagged it on a call-site match, but it uses a `FakeHotCompactor` and never
+constructs an `RpgStore`, so it is not a store test and must not be migrated. The rule for the real ones:
+
+- If **only some methods** in a class need the archive (e.g. `ExpeditionRewardApplyTests` — 1 of 6),
+  that method uses its own `DataTestStore.CreateFileBacked()` and the class stays memory.
+- If the **class's subject is the archive**, it moves to the Tier-3 file-bound set.
+
+This is the pilot's value restated: a per-file assertion count is not enough; a migration batch must
+also scan for archive entry-point calls. `docs/architecture/data-test-substrate-map.md` §2's classifier
+is corrected to include "calls a `RequireFileArchive`-guarded entry point" as a file-bound signal.
 
 ### 5. Exclusions
 

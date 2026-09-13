@@ -200,12 +200,13 @@ is a prerequisite for it; several later modules depend on IT). **`enhancement-mi
       47/47 passing.
 - [x] **T18** — ✅ **Verified 2026-09-07 (same reconciliation).** `implicit.family` resolves against
       Phase 2's real affix-family corpus — not via a separate `items validate --deps` CLI (never built
-      for this module specifically, matching T21's own noted gap), but read fresh every call from
-      `classes.v2.json`'s `implicitSlates[role].legalFamilies` (itself populated from
-      `affix-families-gen`'s real corpus) via `tuning.py`'s own role-registry loader; an illegal family
+      for this module specifically, matching T21's own noted gap), but read fresh every call from the
+      role registry's `implicitSlates[role]` slates (`classes.v2.json` when this was verified; its
+      successor `classes.v3.json` splits them per frame, 2026-09-12) via `tuning.py`'s own
+      role-registry loader; an illegal family
       is refused, not silently accepted (`emit.py:109-111`,
       `test_assemble_entry_refuses_an_illegal_class_or_family`,
-      `test_real_corpus_implicit_families_are_all_in_the_real_registry_slate`).
+      `test_real_corpus_implicit_families_are_all_in_the_real_registry_frameslate`).
 - [x] **T19** — ✅ **Verified 2026-09-07 (same reconciliation).** `enhanceTrack[].family` resolves
       against Phase 2's real, CURRENT `enhancement-milestones-gen` corpus via
       `tuning.load_milestone_families()` — read fresh every call, never a hardcoded copy (module 11's

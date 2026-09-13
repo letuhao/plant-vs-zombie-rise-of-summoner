@@ -7,6 +7,7 @@ using FusionRpg.Core.Dungeon.Registry;
 using FusionRpg.Core.World;
 using FusionRpg.Data;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -19,7 +20,7 @@ namespace FusionRpg.Server.Tests;
 /// </summary>
 public class DelveBattleSessionManagerTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly long _playerId;
     readonly RoomTypeCatalog _rooms;
@@ -29,10 +30,8 @@ public class DelveBattleSessionManagerTests : IDisposable
     {
         DelveBattleTuningTestFixture.ConfigureRealBattleTuning();
 
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-delve-battle-mgr-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _playerId = _store.GetCurrentPlayerId();
 
         var repoRoot = FindRepoRoot();
@@ -43,7 +42,7 @@ public class DelveBattleSessionManagerTests : IDisposable
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     static string FindRepoRoot()

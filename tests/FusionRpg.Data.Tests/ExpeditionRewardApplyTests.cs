@@ -10,20 +10,18 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class ExpeditionRewardApplyTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ExpeditionRewardApplyTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-expreward-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     static readonly FusionRpg.Core.Creatures.CreatureSpeciesDef CatalogSpecies =
@@ -149,24 +147,30 @@ public class ExpeditionRewardApplyTests : IDisposable
     [Fact]
     public void Soul_trim_keeps_a_mixed_earn_spend_ledger_consistent()
     {
-        for (var i = 0; i < 20; i++)
-            _store.AwardSouls(1, 100, "seed", "mixed-earn-" + i);
-        for (var i = 0; i < 5; i++)
-            Assert.True(_store.TrySpendSouls(1, 50, "summon", "mixed-spend-" + i).Ok);
+        // This one case exercises `TrimSoulLedgerTails`, a filesystem-backed archive entry point
+        // (the overflow lands in a segment archive under `archive/`), so its subject IS the file
+        // substrate — it uses the leak-proof file-backed helper rather than the class's memory store.
+        using var file = DataTestStore.CreateFileBacked();
+        var store = file.Store;
 
-        var before = _store.GetSoulBalance(1);
+        for (var i = 0; i < 20; i++)
+            store.AwardSouls(1, 100, "seed", "mixed-earn-" + i);
+        for (var i = 0; i < 5; i++)
+            Assert.True(store.TrySpendSouls(1, 50, "summon", "mixed-spend-" + i).Ok);
+
+        var before = store.GetSoulBalance(1);
         Assert.Equal(20 * 100 - 5 * 50, before.Balance);
 
-        _store.TrimSoulLedgerTails(retainOverride: 8);
+        store.TrimSoulLedgerTails(retainOverride: 8);
 
-        var after = _store.GetSoulBalance(1);
+        var after = store.GetSoulBalance(1);
         Assert.Equal(before.Balance, after.Balance);
         Assert.Equal(before.EarnedTotal, after.EarnedTotal);
         Assert.Equal(before.SpentTotal, after.SpentTotal);
-        Assert.Equal(8, _store.ListSoulLedger(1, 100).Items.Count);
+        Assert.Equal(8, store.ListSoulLedger(1, 100).Items.Count);
 
         // Post-trim economy still works end to end.
-        _store.AwardSouls(1, 10, "seed", "post-trim");
-        Assert.Equal(after.Balance + 10, _store.GetSoulBalance(1).Balance);
+        store.AwardSouls(1, 10, "seed", "post-trim");
+        Assert.Equal(after.Balance + 10, store.GetSoulBalance(1).Balance);
     }
 }

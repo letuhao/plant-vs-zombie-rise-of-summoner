@@ -1,5 +1,6 @@
 using FusionRpg.Core.Commanders;
 using FusionRpg.Data;
+using FusionRpg.Data.Sqlite;
 using Microsoft.Data.Sqlite;
 using Xunit;
 
@@ -8,26 +9,20 @@ namespace FusionRpg.Data.Tests;
 /// <summary>commander-surface default-persistence: implicit Dave, round-trip, corrupt read, reset.</summary>
 public class PlayerCommanderStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public PlayerCommanderStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-commander-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static long ReadRevision(string hotPath, long playerId)
     {
-        using var db = new SqliteConnection($"Data Source={hotPath}");
-        db.Open();
+        using var db = SqliteConnectionFactory.Open(hotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "SELECT revision FROM rpg_player_commander WHERE player_id=$p;";
         cmd.Parameters.AddWithValue("$p", playerId);
@@ -36,8 +31,7 @@ public class PlayerCommanderStoreTests : IDisposable
 
     static long ReadRowCount(string hotPath)
     {
-        using var db = new SqliteConnection($"Data Source={hotPath}");
-        db.Open();
+        using var db = SqliteConnectionFactory.Open(hotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "SELECT COUNT(*) FROM rpg_player_commander;";
         return (long)(cmd.ExecuteScalar() ?? 0L);
@@ -45,8 +39,7 @@ public class PlayerCommanderStoreTests : IDisposable
 
     static bool TableExists(string hotPath, string tableName)
     {
-        using var db = new SqliteConnection($"Data Source={hotPath}");
-        db.Open();
+        using var db = SqliteConnectionFactory.Open(hotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "SELECT 1 FROM sqlite_master WHERE type='table' AND name=$n LIMIT 1;";
         cmd.Parameters.AddWithValue("$n", tableName);
@@ -110,9 +103,8 @@ public class PlayerCommanderStoreTests : IDisposable
     public void Corrupt_stored_id_reads_as_implicit_Dave()
     {
         Assert.True(_store.SetDefaultLawnCommanderId(1, CommanderId.Dave.ToStableId()).Ok);
-        using (var db = new SqliteConnection($"Data Source={_store.HotPath}"))
+        using (var db = SqliteConnectionFactory.Open(_store.HotPath))
         {
-            db.Open();
             using var cmd = db.CreateCommand();
             cmd.CommandText =
                 "UPDATE rpg_player_commander SET default_lawn_commander_id='not-a-commander' WHERE player_id=1;";

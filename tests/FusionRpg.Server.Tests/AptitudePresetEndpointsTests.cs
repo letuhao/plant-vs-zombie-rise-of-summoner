@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -20,7 +21,7 @@ public class AptitudePresetEndpointsTests : IAsyncLifetime
 {
     const int FumeshroomCreatureTypeId = 60007;
 
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
@@ -28,10 +29,8 @@ public class AptitudePresetEndpointsTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-aptpreset-ep-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _playerId = _store.GetCurrentPlayerId();
 
         PowerTuningHub.Configure(
@@ -84,7 +83,7 @@ public class AptitudePresetEndpointsTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     static List<object> EvenRows()

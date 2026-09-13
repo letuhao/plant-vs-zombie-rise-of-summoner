@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "acceptedCorpusSize": 138,
-    "corpusHash": "71fde52b5db971faac71633e72ec7863fe31489bdaccc67bc2929287f51415d9",
+    "acceptedCorpusSize": 180,
+    "corpusHash": "df6f711bfb3d4d918aa4d91a04025e951d790609231ec8cfddcfa6edea96fcf5",
     "mode": "full",
     "partition": "round-1",
     "reviewQueueCount": 0,
@@ -11,7 +11,7 @@
       "species": 904
     },
     "round": 1,
-    "tuningVersion": 2,
+    "tuningVersion": 3,
     "verdict": {
       "evaluatedMetrics": [
         "action.corpus.atomFamilyNamespace",
@@ -22,25 +22,28 @@
         "action.corpus.rosterReconciliation",
         "action.corpus.singletonShare",
         "action.corpus.speciesCollision",
+        "action.corpus.speciesCoverage",
         "action.corpus.structureEnforceability",
         "action.corpus.thinCell"
       ],
       "gapMetrics": [
         "action.corpus.enablerPayoffCoverage",
+        "action.corpus.speciesCoverage",
         "action.corpus.thinCell"
       ],
+      "gatingMetrics": [],
       "notMeasuredMetrics": [],
-      "verdict": "not-clean"
+      "verdict": "pass"
     }
   },
   "entries": [
     {
       "category": "attack",
-      "count": 0,
+      "count": 4,
       "id": "cell.round-1.family.attack.1-7.enabler",
       "kindOfEntry": "cell",
       "pairingRole": "enabler",
-      "quota": 227,
+      "quota": 244,
       "rungBand": [
         1,
         7
@@ -50,11 +53,11 @@
     },
     {
       "category": "attack",
-      "count": 9,
+      "count": 12,
       "id": "cell.round-1.family.attack.1-7.none",
       "kindOfEntry": "cell",
       "pairingRole": "none",
-      "quota": 227,
+      "quota": 244,
       "rungBand": [
         1,
         7
@@ -64,11 +67,11 @@
     },
     {
       "category": "attack",
-      "count": 0,
+      "count": 4,
       "id": "cell.round-1.family.attack.1-7.payoff",
       "kindOfEntry": "cell",
       "pairingRole": "payoff",
-      "quota": 227,
+      "quota": 244,
       "rungBand": [
         1,
         7
@@ -78,11 +81,11 @@
     },
     {
       "category": "defense",
-      "count": 0,
+      "count": 2,
       "id": "cell.round-1.family.defense.1-7.enabler",
       "kindOfEntry": "cell",
       "pairingRole": "enabler",
-      "quota": 227,
+      "quota": 231,
       "rungBand": [
         1,
         7
@@ -96,7 +99,7 @@
       "id": "cell.round-1.family.defense.1-7.none",
       "kindOfEntry": "cell",
       "pairingRole": "none",
-      "quota": 227,
+      "quota": 231,
       "rungBand": [
         1,
         7
@@ -110,7 +113,7 @@
       "id": "cell.round-1.family.defense.1-7.payoff",
       "kindOfEntry": "cell",
       "pairingRole": "payoff",
-      "quota": 227,
+      "quota": 231,
       "rungBand": [
         1,
         7
@@ -120,11 +123,11 @@
     },
     {
       "category": "movement",
-      "count": 1,
+      "count": 0,
       "id": "cell.round-1.family.movement.1-7.enabler",
       "kindOfEntry": "cell",
       "pairingRole": "enabler",
-      "quota": 227,
+      "quota": 213,
       "rungBand": [
         1,
         7
@@ -138,7 +141,7 @@
       "id": "cell.round-1.family.movement.1-7.none",
       "kindOfEntry": "cell",
       "pairingRole": "none",
-      "quota": 227,
+      "quota": 213,
       "rungBand": [
         1,
         7
@@ -152,7 +155,7 @@
       "id": "cell.round-1.family.movement.1-7.payoff",
       "kindOfEntry": "cell",
       "pairingRole": "payoff",
-      "quota": 227,
+      "quota": 213,
       "rungBand": [
         1,
         7
@@ -166,7 +169,21 @@
       "id": "cell.round-1.family.status.1-7.enabler",
       "kindOfEntry": "cell",
       "pairingRole": "enabler",
-      "quota": 227,
+      "quota": 230,
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "thin": true
+    },
+    {
+      "category": "status",
+      "count": 2,
+      "id": "cell.round-1.family.status.1-7.none",
+      "kindOfEntry": "cell",
+      "pairingRole": "none",
+      "quota": 230,
       "rungBand": [
         1,
         7
@@ -177,24 +194,10 @@
     {
       "category": "status",
       "count": 1,
-      "id": "cell.round-1.family.status.1-7.none",
-      "kindOfEntry": "cell",
-      "pairingRole": "none",
-      "quota": 227,
-      "rungBand": [
-        1,
-        7
-      ],
-      "scope": "family",
-      "thin": true
-    },
-    {
-      "category": "status",
-      "count": 0,
       "id": "cell.round-1.family.status.1-7.payoff",
       "kindOfEntry": "cell",
       "pairingRole": "payoff",
-      "quota": 227,
+      "quota": 230,
       "rungBand": [
         1,
         7
@@ -208,7 +211,7 @@
       "id": "cell.round-1.family.support.1-7.enabler",
       "kindOfEntry": "cell",
       "pairingRole": "enabler",
-      "quota": 227,
+      "quota": 217,
       "rungBand": [
         1,
         7
@@ -222,7 +225,7 @@
       "id": "cell.round-1.family.support.1-7.none",
       "kindOfEntry": "cell",
       "pairingRole": "none",
-      "quota": 227,
+      "quota": 217,
       "rungBand": [
         1,
         7
@@ -232,11 +235,11 @@
     },
     {
       "category": "support",
-      "count": 1,
+      "count": 0,
       "id": "cell.round-1.family.support.1-7.payoff",
       "kindOfEntry": "cell",
       "pairingRole": "payoff",
-      "quota": 227,
+      "quota": 217,
       "rungBand": [
         1,
         7
@@ -250,7 +253,7 @@
       "id": "cell.round-1.general.attack.1-4.enabler",
       "kindOfEntry": "cell",
       "pairingRole": "enabler",
-      "quota": 5,
+      "quota": 200,
       "rungBand": [
         1,
         4
@@ -260,11 +263,11 @@
     },
     {
       "category": "attack",
-      "count": 1,
+      "count": 6,
       "id": "cell.round-1.general.attack.1-4.none",
       "kindOfEntry": "cell",
       "pairingRole": "none",
-      "quota": 5,
+      "quota": 200,
       "rungBand": [
         1,
         4
@@ -278,7 +281,7 @@
       "id": "cell.round-1.general.attack.1-4.payoff",
       "kindOfEntry": "cell",
       "pairingRole": "payoff",
-      "quota": 5,
+      "quota": 200,
       "rungBand": [
         1,
         4
@@ -288,11 +291,11 @@
     },
     {
       "category": "defense",
-      "count": 0,
+      "count": 1,
       "id": "cell.round-1.general.defense.1-4.enabler",
       "kindOfEntry": "cell",
       "pairingRole": "enabler",
-      "quota": 5,
+      "quota": 200,
       "rungBand": [
         1,
         4
@@ -302,11 +305,11 @@
     },
     {
       "category": "defense",
-      "count": 2,
+      "count": 6,
       "id": "cell.round-1.general.defense.1-4.none",
       "kindOfEntry": "cell",
       "pairingRole": "none",
-      "quota": 5,
+      "quota": 200,
       "rungBand": [
         1,
         4
@@ -320,7 +323,7 @@
       "id": "cell.round-1.general.defense.1-4.payoff",
       "kindOfEntry": "cell",
       "pairingRole": "payoff",
-      "quota": 5,
+      "quota": 200,
       "rungBand": [
         1,
         4
@@ -330,11 +333,11 @@
     },
     {
       "category": "movement",
-      "count": 0,
+      "count": 1,
       "id": "cell.round-1.general.movement.1-4.enabler",
       "kindOfEntry": "cell",
       "pairingRole": "enabler",
-      "quota": 5,
+      "quota": 200,
       "rungBand": [
         1,
         4
@@ -344,11 +347,11 @@
     },
     {
       "category": "movement",
-      "count": 2,
+      "count": 6,
       "id": "cell.round-1.general.movement.1-4.none",
       "kindOfEntry": "cell",
       "pairingRole": "none",
-      "quota": 5,
+      "quota": 200,
       "rungBand": [
         1,
         4
@@ -362,7 +365,7 @@
       "id": "cell.round-1.general.movement.1-4.payoff",
       "kindOfEntry": "cell",
       "pairingRole": "payoff",
-      "quota": 5,
+      "quota": 200,
       "rungBand": [
         1,
         4
@@ -376,27 +379,27 @@
       "id": "cell.round-1.general.status.1-4.enabler",
       "kindOfEntry": "cell",
       "pairingRole": "enabler",
-      "quota": 5,
+      "quota": 200,
       "rungBand": [
         1,
         4
       ],
       "scope": "general",
-      "thin": false
+      "thin": true
     },
     {
       "category": "status",
-      "count": 5,
+      "count": 6,
       "id": "cell.round-1.general.status.1-4.none",
       "kindOfEntry": "cell",
       "pairingRole": "none",
-      "quota": 5,
+      "quota": 200,
       "rungBand": [
         1,
         4
       ],
       "scope": "general",
-      "thin": false
+      "thin": true
     },
     {
       "category": "status",
@@ -404,13 +407,13 @@
       "id": "cell.round-1.general.status.1-4.payoff",
       "kindOfEntry": "cell",
       "pairingRole": "payoff",
-      "quota": 5,
+      "quota": 200,
       "rungBand": [
         1,
         4
       ],
       "scope": "general",
-      "thin": false
+      "thin": true
     },
     {
       "category": "support",
@@ -418,7 +421,7 @@
       "id": "cell.round-1.general.support.1-4.enabler",
       "kindOfEntry": "cell",
       "pairingRole": "enabler",
-      "quota": 5,
+      "quota": 200,
       "rungBand": [
         1,
         4
@@ -428,11 +431,11 @@
     },
     {
       "category": "support",
-      "count": 2,
+      "count": 6,
       "id": "cell.round-1.general.support.1-4.none",
       "kindOfEntry": "cell",
       "pairingRole": "none",
-      "quota": 5,
+      "quota": 200,
       "rungBand": [
         1,
         4
@@ -442,11 +445,11 @@
     },
     {
       "category": "support",
-      "count": 0,
+      "count": 1,
       "id": "cell.round-1.general.support.1-4.payoff",
       "kindOfEntry": "cell",
       "pairingRole": "payoff",
-      "quota": 5,
+      "quota": 200,
       "rungBand": [
         1,
         4
@@ -460,7 +463,7 @@
       "id": "cell.round-1.species.attack.1-10.enabler",
       "kindOfEntry": "cell",
       "pairingRole": "enabler",
-      "quota": 904,
+      "quota": 976,
       "rungBand": [
         1,
         10
@@ -470,11 +473,11 @@
     },
     {
       "category": "attack",
-      "count": 54,
+      "count": 55,
       "id": "cell.round-1.species.attack.1-10.none",
       "kindOfEntry": "cell",
       "pairingRole": "none",
-      "quota": 904,
+      "quota": 976,
       "rungBand": [
         1,
         10
@@ -488,7 +491,7 @@
       "id": "cell.round-1.species.attack.1-10.payoff",
       "kindOfEntry": "cell",
       "pairingRole": "payoff",
-      "quota": 904,
+      "quota": 976,
       "rungBand": [
         1,
         10
@@ -502,7 +505,7 @@
       "id": "cell.round-1.species.defense.1-10.enabler",
       "kindOfEntry": "cell",
       "pairingRole": "enabler",
-      "quota": 904,
+      "quota": 926,
       "rungBand": [
         1,
         10
@@ -516,7 +519,7 @@
       "id": "cell.round-1.species.defense.1-10.none",
       "kindOfEntry": "cell",
       "pairingRole": "none",
-      "quota": 904,
+      "quota": 926,
       "rungBand": [
         1,
         10
@@ -530,7 +533,7 @@
       "id": "cell.round-1.species.defense.1-10.payoff",
       "kindOfEntry": "cell",
       "pairingRole": "payoff",
-      "quota": 904,
+      "quota": 926,
       "rungBand": [
         1,
         10
@@ -544,7 +547,7 @@
       "id": "cell.round-1.species.movement.1-10.enabler",
       "kindOfEntry": "cell",
       "pairingRole": "enabler",
-      "quota": 904,
+      "quota": 850,
       "rungBand": [
         1,
         10
@@ -554,11 +557,11 @@
     },
     {
       "category": "movement",
-      "count": 9,
+      "count": 12,
       "id": "cell.round-1.species.movement.1-10.none",
       "kindOfEntry": "cell",
       "pairingRole": "none",
-      "quota": 904,
+      "quota": 850,
       "rungBand": [
         1,
         10
@@ -572,7 +575,7 @@
       "id": "cell.round-1.species.movement.1-10.payoff",
       "kindOfEntry": "cell",
       "pairingRole": "payoff",
-      "quota": 904,
+      "quota": 850,
       "rungBand": [
         1,
         10
@@ -586,7 +589,7 @@
       "id": "cell.round-1.species.status.1-10.enabler",
       "kindOfEntry": "cell",
       "pairingRole": "enabler",
-      "quota": 904,
+      "quota": 908,
       "rungBand": [
         1,
         10
@@ -596,11 +599,11 @@
     },
     {
       "category": "status",
-      "count": 11,
+      "count": 13,
       "id": "cell.round-1.species.status.1-10.none",
       "kindOfEntry": "cell",
       "pairingRole": "none",
-      "quota": 904,
+      "quota": 908,
       "rungBand": [
         1,
         10
@@ -614,7 +617,7 @@
       "id": "cell.round-1.species.status.1-10.payoff",
       "kindOfEntry": "cell",
       "pairingRole": "payoff",
-      "quota": 904,
+      "quota": 908,
       "rungBand": [
         1,
         10
@@ -628,7 +631,7 @@
       "id": "cell.round-1.species.support.1-10.enabler",
       "kindOfEntry": "cell",
       "pairingRole": "enabler",
-      "quota": 904,
+      "quota": 860,
       "rungBand": [
         1,
         10
@@ -638,11 +641,11 @@
     },
     {
       "category": "support",
-      "count": 7,
+      "count": 9,
       "id": "cell.round-1.species.support.1-10.none",
       "kindOfEntry": "cell",
       "pairingRole": "none",
-      "quota": 904,
+      "quota": 860,
       "rungBand": [
         1,
         10
@@ -656,7 +659,7 @@
       "id": "cell.round-1.species.support.1-10.payoff",
       "kindOfEntry": "cell",
       "pairingRole": "payoff",
-      "quota": 904,
+      "quota": 860,
       "rungBand": [
         1,
         10
@@ -671,57 +674,12 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "academic",
-      "want": 1
-    },
-    {
-      "because": "cell.family.defense.1-7.none is thin",
-      "category": "defense",
-      "id": "target.round-2.family.academic.defense",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "academic",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.attack.1-7.none is thin",
       "category": "attack",
       "id": "target.round-2.family.afflicted.attack",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "afflicted",
-      "want": 1
-    },
-    {
-      "because": "cell.family.defense.1-7.none is thin",
-      "category": "defense",
-      "id": "target.round-2.family.afflicted.defense",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "afflicted",
-      "want": 1
-    },
-    {
-      "because": "cell.family.movement.1-7.none is thin",
-      "category": "movement",
-      "id": "target.round-2.family.afflicted.movement",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "afflicted",
-      "want": 1
-    },
-    {
-      "because": "cell.family.status.1-7.none is thin",
-      "category": "status",
-      "id": "target.round-2.family.afflicted.status",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "afflicted",
-      "want": 1
-    },
-    {
-      "because": "cell.family.support.1-7.none is thin",
-      "category": "support",
-      "id": "target.round-2.family.afflicted.support",
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "afflicted",
@@ -734,88 +692,7 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "alchemical",
-      "want": 1
-    },
-    {
-      "because": "cell.family.defense.1-7.none is thin",
-      "category": "defense",
-      "id": "target.round-2.family.alchemical.defense",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "alchemical",
-      "want": 1
-    },
-    {
-      "because": "cell.family.movement.1-7.none is thin",
-      "category": "movement",
-      "id": "target.round-2.family.alchemical.movement",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "alchemical",
-      "want": 1
-    },
-    {
-      "because": "cell.family.status.1-7.none is thin",
-      "category": "status",
-      "id": "target.round-2.family.alchemical.status",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "alchemical",
-      "want": 1
-    },
-    {
-      "because": "cell.family.support.1-7.none is thin",
-      "category": "support",
-      "id": "target.round-2.family.alchemical.support",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "alchemical",
-      "want": 1
-    },
-    {
-      "because": "cell.family.attack.1-7.none is thin",
-      "category": "attack",
-      "id": "target.round-2.family.allium.attack",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "allium",
-      "want": 1
-    },
-    {
-      "because": "cell.family.defense.1-7.none is thin",
-      "category": "defense",
-      "id": "target.round-2.family.allium.defense",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "allium",
-      "want": 1
-    },
-    {
-      "because": "cell.family.movement.1-7.none is thin",
-      "category": "movement",
-      "id": "target.round-2.family.allium.movement",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "allium",
-      "want": 1
-    },
-    {
-      "because": "cell.family.status.1-7.none is thin",
-      "category": "status",
-      "id": "target.round-2.family.allium.status",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "allium",
-      "want": 1
-    },
-    {
-      "because": "cell.family.support.1-7.none is thin",
-      "category": "support",
-      "id": "target.round-2.family.allium.support",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "allium",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.attack.1-7.none is thin",
@@ -824,7 +701,7 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "anomaly",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.defense.1-7.none is thin",
@@ -833,30 +710,12 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "anomaly",
-      "want": 1
-    },
-    {
-      "because": "cell.family.movement.1-7.none is thin",
-      "category": "movement",
-      "id": "target.round-2.family.anomaly.movement",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "anomaly",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.status.1-7.none is thin",
       "category": "status",
       "id": "target.round-2.family.anomaly.status",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "anomaly",
-      "want": 1
-    },
-    {
-      "because": "cell.family.support.1-7.none is thin",
-      "category": "support",
-      "id": "target.round-2.family.anomaly.support",
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "anomaly",
@@ -878,16 +737,7 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "aquatic",
-      "want": 1
-    },
-    {
-      "because": "cell.family.movement.1-7.none is thin",
-      "category": "movement",
-      "id": "target.round-2.family.aquatic.movement",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "aquatic",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.status.1-7.none is thin",
@@ -896,16 +746,7 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "aquatic",
-      "want": 1
-    },
-    {
-      "because": "cell.family.support.1-7.none is thin",
-      "category": "support",
-      "id": "target.round-2.family.aquatic.support",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "aquatic",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.attack.1-7.none is thin",
@@ -923,16 +764,7 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "armor",
-      "want": 1
-    },
-    {
-      "because": "cell.family.movement.1-7.none is thin",
-      "category": "movement",
-      "id": "target.round-2.family.armor.movement",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "armor",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.status.1-7.none is thin",
@@ -941,16 +773,7 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "armor",
-      "want": 1
-    },
-    {
-      "because": "cell.family.support.1-7.none is thin",
-      "category": "support",
-      "id": "target.round-2.family.armor.support",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "armor",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.attack.1-7.none is thin",
@@ -959,7 +782,7 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "aromatic",
-      "want": 1
+      "want": 3
     },
     {
       "because": "cell.family.defense.1-7.none is thin",
@@ -971,27 +794,9 @@
       "want": 1
     },
     {
-      "because": "cell.family.movement.1-7.none is thin",
-      "category": "movement",
-      "id": "target.round-2.family.aromatic.movement",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "aromatic",
-      "want": 1
-    },
-    {
       "because": "cell.family.status.1-7.none is thin",
       "category": "status",
       "id": "target.round-2.family.aromatic.status",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "aromatic",
-      "want": 1
-    },
-    {
-      "because": "cell.family.support.1-7.none is thin",
-      "category": "support",
-      "id": "target.round-2.family.aromatic.support",
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "aromatic",
@@ -1013,16 +818,7 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "artifact",
-      "want": 1
-    },
-    {
-      "because": "cell.family.movement.1-7.none is thin",
-      "category": "movement",
-      "id": "target.round-2.family.artifact.movement",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "artifact",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.status.1-7.none is thin",
@@ -1031,16 +827,7 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "artifact",
-      "want": 1
-    },
-    {
-      "because": "cell.family.support.1-7.none is thin",
-      "category": "support",
-      "id": "target.round-2.family.artifact.support",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "artifact",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.attack.1-7.none is thin",
@@ -1049,7 +836,7 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "artillery",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.defense.1-7.none is thin",
@@ -1058,30 +845,12 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "artillery",
-      "want": 1
-    },
-    {
-      "because": "cell.family.movement.1-7.none is thin",
-      "category": "movement",
-      "id": "target.round-2.family.artillery.movement",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "artillery",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.status.1-7.none is thin",
       "category": "status",
       "id": "target.round-2.family.artillery.status",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "artillery",
-      "want": 1
-    },
-    {
-      "because": "cell.family.support.1-7.none is thin",
-      "category": "support",
-      "id": "target.round-2.family.artillery.support",
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "artillery",
@@ -1094,21 +863,12 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "athlete",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.defense.1-7.none is thin",
       "category": "defense",
       "id": "target.round-2.family.athlete.defense",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "athlete",
-      "want": 1
-    },
-    {
-      "because": "cell.family.movement.1-7.none is thin",
-      "category": "movement",
-      "id": "target.round-2.family.athlete.movement",
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "athlete",
@@ -1121,16 +881,7 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "athlete",
-      "want": 1
-    },
-    {
-      "because": "cell.family.support.1-7.none is thin",
-      "category": "support",
-      "id": "target.round-2.family.athlete.support",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "athlete",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.attack.1-7.none is thin",
@@ -1145,15 +896,6 @@
       "because": "cell.family.defense.1-7.none is thin",
       "category": "defense",
       "id": "target.round-2.family.automata.defense",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "automata",
-      "want": 1
-    },
-    {
-      "because": "cell.family.movement.1-7.none is thin",
-      "category": "movement",
-      "id": "target.round-2.family.automata.movement",
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "automata",
@@ -1175,7 +917,7 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "automata",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.attack.1-7.none is thin",
@@ -1193,16 +935,7 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "automaton",
-      "want": 1
-    },
-    {
-      "because": "cell.family.movement.1-7.none is thin",
-      "category": "movement",
-      "id": "target.round-2.family.automaton.movement",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "automaton",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.status.1-7.none is thin",
@@ -1211,16 +944,7 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "automaton",
-      "want": 1
-    },
-    {
-      "because": "cell.family.support.1-7.none is thin",
-      "category": "support",
-      "id": "target.round-2.family.automaton.support",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "automaton",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.attack.1-7.none is thin",
@@ -1235,15 +959,6 @@
       "because": "cell.family.defense.1-7.none is thin",
       "category": "defense",
       "id": "target.round-2.family.avian.defense",
-      "kindOfEntry": "next-target",
-      "scope": "family",
-      "scopeKey": "avian",
-      "want": 1
-    },
-    {
-      "because": "cell.family.movement.1-7.none is thin",
-      "category": "movement",
-      "id": "target.round-2.family.avian.movement",
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "avian",
@@ -1265,7 +980,7 @@
       "kindOfEntry": "next-target",
       "scope": "family",
       "scopeKey": "avian",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.family.attack.1-7.none is thin",
@@ -10832,7 +10547,7 @@
       "kindOfEntry": "next-target",
       "scope": "general",
       "scopeKey": null,
-      "want": 2
+      "want": 192
     },
     {
       "because": "cell.general.defense.1-4.none is thin",
@@ -10841,7 +10556,7 @@
       "kindOfEntry": "next-target",
       "scope": "general",
       "scopeKey": null,
-      "want": 3
+      "want": 193
     },
     {
       "because": "cell.general.movement.1-4.none is thin",
@@ -10850,7 +10565,16 @@
       "kindOfEntry": "next-target",
       "scope": "general",
       "scopeKey": null,
-      "want": 3
+      "want": 193
+    },
+    {
+      "because": "cell.general.status.1-4.none is thin",
+      "category": "status",
+      "id": "target.round-2.general.general.status",
+      "kindOfEntry": "next-target",
+      "scope": "general",
+      "scopeKey": null,
+      "want": 194
     },
     {
       "because": "cell.general.support.1-4.none is thin",
@@ -10859,7 +10583,7 @@
       "kindOfEntry": "next-target",
       "scope": "general",
       "scopeKey": null,
-      "want": 3
+      "want": 193
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
@@ -10871,57 +10595,12 @@
       "want": 1
     },
     {
-      "because": "cell.species.attack.1-10.none is thin",
-      "category": "attack",
-      "id": "target.round-2.species.acientsunnut.attack",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "acientsunnut",
-      "want": 1
-    },
-    {
       "because": "cell.species.defense.1-10.none is thin",
       "category": "defense",
       "id": "target.round-2.species.acientsunnut.defense",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "acientsunnut",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.acientsunnut.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "acientsunnut",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.acientsunnut.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "acientsunnut",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.acientsunnut.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "acientsunnut",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.allpeater.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "allpeater",
       "want": 1
     },
     {
@@ -10955,33 +10634,6 @@
       "because": "cell.species.defense.1-10.none is thin",
       "category": "defense",
       "id": "target.round-2.species.apple.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "apple",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.apple.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "apple",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.apple.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "apple",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.apple.support",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "apple",
@@ -11492,22 +11144,13 @@
       "want": 1
     },
     {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.biggatling.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "biggatling",
-      "want": 1
-    },
-    {
       "because": "cell.species.status.1-10.none is thin",
       "category": "status",
       "id": "target.round-2.species.biggatling.status",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "biggatling",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.support.1-10.none is thin",
@@ -11570,21 +11213,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "bigpumpkin",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
       "category": "defense",
       "id": "target.round-2.species.bigpumpkin.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "bigpumpkin",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.bigpumpkin.movement",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "bigpumpkin",
@@ -11615,7 +11249,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "bigseashroom",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
@@ -11624,30 +11258,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "bigseashroom",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.bigseashroom.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "bigseashroom",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
       "category": "status",
       "id": "target.round-2.species.bigseashroom.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "bigseashroom",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.bigseashroom.support",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "bigseashroom",
@@ -12245,43 +11861,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "blover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.defense.1-10.none is thin",
-      "category": "defense",
-      "id": "target.round-2.species.blover.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "blover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.blover.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "blover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.blover.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "blover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.blover.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "blover",
-      "want": 1
+      "want": 5
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -12380,43 +11960,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "bloverumbrella",
-      "want": 1
-    },
-    {
-      "because": "cell.species.defense.1-10.none is thin",
-      "category": "defense",
-      "id": "target.round-2.species.bloverumbrella.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "bloverumbrella",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.bloverumbrella.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "bloverumbrella",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.bloverumbrella.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "bloverumbrella",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.bloverumbrella.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "bloverumbrella",
-      "want": 1
+      "want": 5
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -12968,15 +12512,6 @@
       "want": 1
     },
     {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.cabbagecannon.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "cabbagecannon",
-      "want": 1
-    },
-    {
       "because": "cell.species.status.1-10.none is thin",
       "category": "status",
       "id": "target.round-2.species.cabbagecannon.status",
@@ -12992,7 +12527,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "cabbagecannon",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -13418,31 +12953,13 @@
       "want": 1
     },
     {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.cactusblover.movement",
+      "because": "cell.species.attack.1-10.none is thin",
+      "category": "attack",
+      "id": "target.round-2.species.cactusblover.attack",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "cactusblover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.cactusblover.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "cactusblover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.cactusblover.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "cactusblover",
-      "want": 1
+      "want": 4
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -13802,7 +13319,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "caltropkelp_water",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
@@ -13811,39 +13328,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "caltropkelp_water",
-      "want": 1
+      "want": 3
     },
     {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.caltropkelp_water.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "caltropkelp_water",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.caltropkelp_water.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "caltropkelp_water",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.caltropkelp_water.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "caltropkelp_water",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.caltropnut.movement",
+      "because": "cell.species.defense.1-10.none is thin",
+      "category": "defense",
+      "id": "target.round-2.species.caltropnut.defense",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "caltropnut",
@@ -14054,7 +13544,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "cattailplant",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
@@ -14063,30 +13553,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "cattailplant",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.cattailplant.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "cattailplant",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
       "category": "status",
       "id": "target.round-2.species.cattailplant.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "cattailplant",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.cattailplant.support",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "cattailplant",
@@ -20003,7 +19475,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "firekelp",
-      "want": 1
+      "want": 3
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
@@ -20012,34 +19484,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "firekelp",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.firekelp.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "firekelp",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.firekelp.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "firekelp",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.firekelp.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "firekelp",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -21092,7 +20537,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "garliccabbage",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
@@ -21101,34 +20546,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "garliccabbage",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.garliccabbage.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garliccabbage",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.garliccabbage.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garliccabbage",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.garliccabbage.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garliccabbage",
-      "want": 1
+      "want": 3
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -21137,7 +20555,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "garliccorn",
-      "want": 1
+      "want": 3
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
@@ -21146,34 +20564,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "garliccorn",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.garliccorn.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garliccorn",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.garliccorn.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garliccorn",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.garliccorn.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garliccorn",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -21434,43 +20825,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "garlicpumpkin",
-      "want": 1
-    },
-    {
-      "because": "cell.species.defense.1-10.none is thin",
-      "category": "defense",
-      "id": "target.round-2.species.garlicpumpkin.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garlicpumpkin",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.garlicpumpkin.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garlicpumpkin",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.garlicpumpkin.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garlicpumpkin",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.garlicpumpkin.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garlicpumpkin",
-      "want": 1
+      "want": 5
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -21608,27 +20963,18 @@
       "want": 1
     },
     {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.garlicthreepeater.movement",
+      "because": "cell.species.attack.1-10.none is thin",
+      "category": "attack",
+      "id": "target.round-2.species.garlicthreepeater.attack",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "garlicthreepeater",
-      "want": 1
+      "want": 2
     },
     {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.garlicthreepeater.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garlicthreepeater",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.garlicthreepeater.support",
+      "because": "cell.species.defense.1-10.none is thin",
+      "category": "defense",
+      "id": "target.round-2.species.garlicthreepeater.defense",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "garlicthreepeater",
@@ -21641,43 +20987,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "garlictorch",
-      "want": 1
-    },
-    {
-      "because": "cell.species.defense.1-10.none is thin",
-      "category": "defense",
-      "id": "target.round-2.species.garlictorch.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garlictorch",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.garlictorch.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garlictorch",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.garlictorch.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garlictorch",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.garlictorch.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garlictorch",
-      "want": 1
+      "want": 5
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -21731,43 +21041,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "garlicumbrella",
-      "want": 1
-    },
-    {
-      "because": "cell.species.defense.1-10.none is thin",
-      "category": "defense",
-      "id": "target.round-2.species.garlicumbrella.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garlicumbrella",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.garlicumbrella.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garlicumbrella",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.garlicumbrella.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garlicumbrella",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.garlicumbrella.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "garlicumbrella",
-      "want": 1
+      "want": 5
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -22388,43 +21662,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "goldgarlic",
-      "want": 1
-    },
-    {
-      "because": "cell.species.defense.1-10.none is thin",
-      "category": "defense",
-      "id": "target.round-2.species.goldgarlic.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "goldgarlic",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.goldgarlic.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "goldgarlic",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.goldgarlic.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "goldgarlic",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.goldgarlic.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "goldgarlic",
-      "want": 1
+      "want": 5
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -23423,43 +22661,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "hurricaneblover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.defense.1-10.none is thin",
-      "category": "defense",
-      "id": "target.round-2.species.hurricaneblover.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "hurricaneblover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.hurricaneblover.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "hurricaneblover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.hurricaneblover.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "hurricaneblover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.hurricaneblover.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "hurricaneblover",
-      "want": 1
+      "want": 5
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -24845,30 +24047,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "icecattail",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.icecattail.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "icecattail",
-      "want": 1
+      "want": 3
     },
     {
       "because": "cell.species.status.1-10.none is thin",
       "category": "status",
       "id": "target.round-2.species.icecattail.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "icecattail",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.icecattail.support",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "icecattail",
@@ -26537,7 +25721,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "ironmelon",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
@@ -26546,30 +25730,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "ironmelon",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.ironmelon.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "ironmelon",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
       "category": "status",
       "id": "target.round-2.species.ironmelon.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "ironmelon",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.ironmelon.support",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "ironmelon",
@@ -26636,16 +25802,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "ironpea",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.ironpea.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "ironpea",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
@@ -26654,16 +25811,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "ironpea",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.ironpea.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "ironpea",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -26891,15 +26039,6 @@
       "want": 1
     },
     {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.ironsquash.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "ironsquash",
-      "want": 1
-    },
-    {
       "because": "cell.species.status.1-10.none is thin",
       "category": "status",
       "id": "target.round-2.species.ironsquash.status",
@@ -26915,7 +26054,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "ironsquash",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -27797,7 +26936,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "jalakelp",
-      "want": 1
+      "want": 3
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
@@ -27806,34 +26945,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "jalakelp",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.jalakelp.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "jalakelp",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.jalakelp.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "jalakelp",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.jalakelp.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "jalakelp",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -28274,21 +27386,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "kelpfume",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
       "category": "defense",
       "id": "target.round-2.species.kelpfume.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "kelpfume",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.kelpfume.movement",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "kelpfume",
@@ -28301,16 +27404,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "kelpfume",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.kelpfume.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "kelpfume",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -28328,16 +27422,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "kelpmine_land",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.kelpmine_land.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "kelpmine_land",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
@@ -28346,16 +27431,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "kelpmine_land",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.kelpmine_land.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "kelpmine_land",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -28364,21 +27440,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "kelpmine_water",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
       "category": "defense",
       "id": "target.round-2.species.kelpmine_water.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "kelpmine_water",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.kelpmine_water.movement",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "kelpmine_water",
@@ -28391,16 +27458,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "kelpmine_water",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.kelpmine_water.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "kelpmine_water",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -28409,7 +27467,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "kelpnut",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
@@ -28418,30 +27476,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "kelpnut",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.kelpnut.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "kelpnut",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
       "category": "status",
       "id": "target.round-2.species.kelpnut.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "kelpnut",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.kelpnut.support",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "kelpnut",
@@ -28463,16 +27503,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "kelppuff",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.kelppuff.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "kelppuff",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
@@ -28481,16 +27512,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "kelppuff",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.kelppuff.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "kelppuff",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -29615,16 +28637,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "lilypad",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.lilypad.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "lilypad",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
@@ -29633,16 +28646,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "lilypad",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.lilypad.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "lilypad",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -30056,21 +29060,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "magicsnowpea2",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
       "category": "defense",
       "id": "target.round-2.species.magicsnowpea2.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "magicsnowpea2",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.magicsnowpea2.movement",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "magicsnowpea2",
@@ -30083,16 +29078,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "magicsnowpea2",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.magicsnowpea2.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "magicsnowpea2",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -34259,7 +33245,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "presentzombie",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
@@ -34268,34 +33254,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "presentzombie",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.presentzombie.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "presentzombie",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.presentzombie.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "presentzombie",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.presentzombie.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "presentzombie",
-      "want": 1
+      "want": 3
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -35717,21 +34676,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seablover",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
       "category": "defense",
       "id": "target.round-2.species.seablover.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seablover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.seablover.movement",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seablover",
@@ -35744,16 +34694,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seablover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.seablover.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seablover",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -35861,16 +34802,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seahypno",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.seahypno.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seahypno",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
@@ -35879,16 +34811,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seahypno",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.seahypno.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seahypno",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -35942,7 +34865,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seamagnet",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
@@ -35951,30 +34874,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seamagnet",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.seamagnet.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seamagnet",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
       "category": "status",
       "id": "target.round-2.species.seamagnet.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seamagnet",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.seamagnet.support",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seamagnet",
@@ -36032,21 +34937,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seamine_water",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
       "category": "defense",
       "id": "target.round-2.species.seamine_water.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seamine_water",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.seamine_water.movement",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seamine_water",
@@ -36059,16 +34955,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seamine_water",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.seamine_water.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seamine_water",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -36077,21 +34964,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seanut",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
       "category": "defense",
       "id": "target.round-2.species.seanut.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seanut",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.seanut.movement",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seanut",
@@ -36104,16 +34982,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seanut",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.seanut.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seanut",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -36167,21 +35036,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seascaredyshroom",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
       "category": "defense",
       "id": "target.round-2.species.seascaredyshroom.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seascaredyshroom",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.seascaredyshroom.movement",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seascaredyshroom",
@@ -36194,16 +35054,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seascaredyshroom",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.seascaredyshroom.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seascaredyshroom",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -36221,16 +35072,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seashroom",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.seashroom.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seashroom",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
@@ -36239,16 +35081,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seashroom",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.seashroom.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seashroom",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -36257,21 +35090,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seasquash",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
       "category": "defense",
       "id": "target.round-2.species.seasquash.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seasquash",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.seasquash.movement",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seasquash",
@@ -36284,16 +35108,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seasquash",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.seasquash.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seasquash",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -36302,7 +35117,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seastarfruit",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
@@ -36311,30 +35126,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seastarfruit",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.seastarfruit.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seastarfruit",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
       "category": "status",
       "id": "target.round-2.species.seastarfruit.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seastarfruit",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.seastarfruit.support",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seastarfruit",
@@ -36356,16 +35153,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seasunshroom",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.seasunshroom.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seasunshroom",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
@@ -36374,16 +35162,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "seasunshroom",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.seasunshroom.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "seasunshroom",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -38615,16 +37394,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "spruceshulk",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.spruceshulk.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "spruceshulk",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
@@ -38633,16 +37403,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "spruceshulk",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.spruceshulk.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "spruceshulk",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -38777,43 +37538,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "squashblover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.defense.1-10.none is thin",
-      "category": "defense",
-      "id": "target.round-2.species.squashblover.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "squashblover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.squashblover.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "squashblover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.squashblover.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "squashblover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.squashblover.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "squashblover",
-      "want": 1
+      "want": 5
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -38867,21 +37592,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "squashkelp",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
       "category": "defense",
       "id": "target.round-2.species.squashkelp.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "squashkelp",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.squashkelp.movement",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "squashkelp",
@@ -38894,16 +37610,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "squashkelp",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.squashkelp.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "squashkelp",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -41648,43 +40355,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "superhurricaneblover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.defense.1-10.none is thin",
-      "category": "defense",
-      "id": "target.round-2.species.superhurricaneblover.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "superhurricaneblover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.superhurricaneblover.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "superhurricaneblover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.status.1-10.none is thin",
-      "category": "status",
-      "id": "target.round-2.species.superhurricaneblover.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "superhurricaneblover",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.superhurricaneblover.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "superhurricaneblover",
-      "want": 1
+      "want": 5
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -41927,16 +40598,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "superkelp",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.superkelp.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "superkelp",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
@@ -41945,16 +40607,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "superkelp",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.superkelp.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "superkelp",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -42278,21 +40931,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "supernutshooter",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
       "category": "defense",
       "id": "target.round-2.species.supernutshooter.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "supernutshooter",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.supernutshooter.movement",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "supernutshooter",
@@ -43322,16 +41966,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "tallnutfootball",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.tallnutfootball.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "tallnutfootball",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
@@ -43403,7 +42038,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "tanglekelp",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
@@ -43412,30 +42047,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "tanglekelp",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.tanglekelp.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "tanglekelp",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
       "category": "status",
       "id": "target.round-2.species.tanglekelp.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "tanglekelp",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.tanglekelp.support",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "tanglekelp",
@@ -43763,7 +42380,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "threekelp",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
@@ -43772,30 +42389,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "threekelp",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.threekelp.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "threekelp",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
       "category": "status",
       "id": "target.round-2.species.threekelp.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "threekelp",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.threekelp.support",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "threekelp",
@@ -45095,7 +43694,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "tower_lilypad",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
@@ -45104,30 +43703,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "tower_lilypad",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.tower_lilypad.movement",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "tower_lilypad",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.status.1-10.none is thin",
       "category": "status",
       "id": "target.round-2.species.tower_lilypad.status",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "tower_lilypad",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.tower_lilypad.support",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "tower_lilypad",
@@ -47822,21 +46403,12 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "ultimatekelp",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.defense.1-10.none is thin",
       "category": "defense",
       "id": "target.round-2.species.ultimatekelp.defense",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "ultimatekelp",
-      "want": 1
-    },
-    {
-      "because": "cell.species.movement.1-10.none is thin",
-      "category": "movement",
-      "id": "target.round-2.species.ultimatekelp.movement",
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "ultimatekelp",
@@ -47849,16 +46421,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "ultimatekelp",
-      "want": 1
-    },
-    {
-      "because": "cell.species.support.1-10.none is thin",
-      "category": "support",
-      "id": "target.round-2.species.ultimatekelp.support",
-      "kindOfEntry": "next-target",
-      "scope": "species",
-      "scopeKey": "ultimatekelp",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",
@@ -49685,7 +48248,7 @@
       "kindOfEntry": "next-target",
       "scope": "species",
       "scopeKey": "wallnut",
-      "want": 1
+      "want": 2
     },
     {
       "because": "cell.species.attack.1-10.none is thin",

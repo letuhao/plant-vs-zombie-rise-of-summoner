@@ -2,6 +2,7 @@ using FusionRpg.Core.Battle;
 using FusionRpg.Core.Battle.Ai;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Data;
+using FusionRpg.Data.Tests;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -20,17 +21,15 @@ namespace FusionRpg.Server.Tests;
 /// on the same broken foundation would fail for a reason that has nothing to do with this module.</summary>
 public class ZombossAdaptiveSeamTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly WebMatchService _service;
     const long PlayerId = 1;
 
     public ZombossAdaptiveSeamTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-zombossseam-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         ZombossAdaptiveTuningHub.Configure(new ZombossAdaptiveTuning(
             SchemaVersion: 1, Version: 1,
@@ -48,7 +47,7 @@ public class ZombossAdaptiveSeamTests : IDisposable
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     static BattleSetup BaseSetup(string waveId = "rift-skirmish") => new()
@@ -84,8 +83,8 @@ public class ZombossAdaptiveSeamTests : IDisposable
         var sawFundedAllocation = false;
         for (ulong seed = 0; seed < 20 && !sawFundedAllocation; seed++)
         {
-            var freshStore = new RpgStore(Path.Combine(Path.GetTempPath(), "fusionrpg-zombossseam-sweep-" + Guid.NewGuid().ToString("N")));
-            freshStore.Init();
+            var sweepStore = DataTestStore.Create();
+            var freshStore = sweepStore.Store;
             var services = new ServiceCollection();
             services.AddLogging();
             services.AddSignalR();
@@ -95,6 +94,7 @@ public class ZombossAdaptiveSeamTests : IDisposable
             var enriched = service.ApplyZombossPattern(PlayerId, BaseSetup("rift-tyrant"), theta: 100_000, seed);
             if (enriched.Wave.All(a => a.HubInputs?.Aptitude?.GrandTotal() > 0))
                 sawFundedAllocation = true;
+            sweepStore.Dispose();
         }
 
         Assert.True(sawFundedAllocation, "no seed out of 20 produced a funded pattern allocation on every wave actor");

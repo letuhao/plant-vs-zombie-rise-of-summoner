@@ -15,7 +15,7 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class ContractRegressionTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     // Midday *today*, not a hard-coded date. `Mint` stamps contract state from the real clock, so a
     // fixed anchor only matches on the day it was written: the day after, every "N days elapsed"
@@ -26,16 +26,14 @@ public class ContractRegressionTests : IDisposable
 
     public ContractRegressionTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-contract-reg-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _store.AwardSouls(1, 300_000, "seed", "reg-bank");
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     static readonly CreatureSpeciesDef Species = CreatureSpeciesCatalog.All

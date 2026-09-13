@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text.Json;
 using FusionRpg.Core.Tests.TestSupport;
 using Xunit;
@@ -185,14 +184,8 @@ public class ResidualFitLoopTests
     static (int Exit, string Stdout, string Stderr) Run(string args)
     {
         var repoRoot = FindRepoRoot();
-        var psi = new ProcessStartInfo
-        {
-            FileName = "dotnet",
-            Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "ResidualFitLoop")}\" -c Release --no-restore --no-build -- {args}",
-            CreateNoWindow = true,
-            WorkingDirectory = repoRoot
-        };
-        return ExternalProcess.Run(psi, 120_000, "ResidualFitLoop invocation timed out");
+        // ProjectReference + apphost (see ToolProcess) — no implicit build, no stale Release output.
+        return ToolProcess.Run(repoRoot, "ResidualFitLoop", args, 120_000);
     }
 
     static string FindRepoRoot()

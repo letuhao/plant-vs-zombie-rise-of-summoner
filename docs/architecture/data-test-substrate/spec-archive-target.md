@@ -1,6 +1,13 @@
 # Spec: `archive-target`
 
-**Module id:** `archive-target` · **Program:** [data-test-substrate](../data-test-substrate-map.md) · **Build order:** 5 of 6 · **Optional** (cuttable)
+**Status: ⛔ NOT BUILT — cut by owner 2026-09-13.** This spec remains the contract should a future
+program want it, but it is **not** part of the shipped data-test-substrate program and its tasks are
+marked cut. The reason is in [the map's module table](../data-test-substrate-map.md) and
+`tasks/data-test-substrate-todo.md` Phase 5: by the time it would have run, the two archive test classes
+were already `DiskSemantics`-excluded from the default profile and leak-proof through the file helper, so
+the refactor's benefit did not justify changing 793 lines of production archive code.
+
+**Module id:** `archive-target` · **Program:** [data-test-substrate](../data-test-substrate-map.md) · **Build order:** 5 of 6 · **CUT**
 **Depends on:** [`memory-storage-plan`](spec-memory-storage-plan.md).
 **Model calls:** none.
 

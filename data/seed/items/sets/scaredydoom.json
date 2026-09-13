@@ -23,8 +23,8 @@
   "entries": [
     {
       "id": "set.scaredydoom-001",
-      "nameKey": "set.item",
-      "name": "毁灭之影",
+      "nameKey": "set.doom-scared-shroud",
+      "name": "Doom-Scared Shroud",
       "themeKey": "creature.scaredydoom",
       "members": [
         {

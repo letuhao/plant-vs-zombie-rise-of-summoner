@@ -30,7 +30,7 @@
       "class": "blade",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.elemental-power",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -66,7 +66,7 @@
       "class": "blade",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.deathblast",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -102,7 +102,7 @@
       "class": "launcher",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.deathblast",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -138,7 +138,7 @@
       "class": "blade",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.elemental-power",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -174,7 +174,7 @@
       "class": "launcher",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.elemental-power",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -210,7 +210,7 @@
       "class": "launcher",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -247,7 +247,7 @@
       "class": "launcher",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.elemental-power",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -284,7 +284,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -320,7 +320,7 @@
       "class": "blade",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -356,7 +356,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.elemental-power",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -392,7 +392,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.elemental-power",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -428,7 +428,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.deathblast",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -501,7 +501,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -573,7 +573,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.elemental-power",
         "powerBand": "medium"
       },
       "socketMax": 0,
@@ -645,7 +645,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -681,7 +681,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.elemental-power",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -710,18 +710,18 @@
     },
     {
       "id": "item.humanoid-main-hand-a-020",
-      "nameKey": "base.heavy-sledge",
-      "name": "Heavy Sledge",
+      "nameKey": "base-type.great-maul",
+      "name": "Great Maul",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.deathblast",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.heavy-sledge",
+      "iconKey": "icon.base-type.great-maul",
       "flavorKey": "flavor.base.heavy-sledge",
       "flavor": "A massive, solid-headed implement designed to deliver devastating kinetic impact through sheer mass.",
       "tags": [
@@ -746,18 +746,18 @@
     },
     {
       "id": "item.humanoid-main-hand-a-021",
-      "nameKey": "base.heavy-sledge",
-      "name": "Heavy Sledge",
+      "nameKey": "base-type.crushing-hammer",
+      "name": "Crushing Hammer",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.ferocity",
         "powerBand": "trivial"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.heavy-sledge",
+      "iconKey": "icon.base-type.crushing-hammer",
       "flavorKey": "flavor.base.heavy-sledge",
       "flavor": "A massive, solid iron head mounted on a reinforced shaft, designed for delivering devastating kinetic impact.",
       "tags": [
@@ -782,18 +782,18 @@
     },
     {
       "id": "item.humanoid-main-hand-a-022",
-      "nameKey": "base.weighted-mace",
-      "name": "Weighted Mace",
+      "nameKey": "base-type.heavy-flail",
+      "name": "Heavy Flail",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.elemental-power",
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.weighted-mace",
+      "iconKey": "icon.base-type.heavy-flail",
       "flavorKey": "flavor.base.weighted-mace",
       "flavor": "A dense, solid core encased in a reinforced metal shell. It relies on pure kinetic momentum to shatter through defenses.",
       "tags": [
@@ -818,18 +818,18 @@
     },
     {
       "id": "item.humanoid-main-hand-a-023",
-      "nameKey": "base.weighted-mace",
-      "name": "Weighted Mace",
+      "nameKey": "base-type.crushing-morningstar",
+      "name": "Crushing Morningstar",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.elemental-power",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.weighted-mace",
+      "iconKey": "icon.base-type.crushing-morningstar",
       "flavorKey": "flavor.base.weighted-mace",
       "flavor": "A solid metal rod capped with a dense, blunt head designed to deliver devastating kinetic impact.",
       "tags": [
@@ -854,18 +854,18 @@
     },
     {
       "id": "item.humanoid-main-hand-a-024",
-      "nameKey": "base.weighted-mace",
-      "name": "Weighted Mace",
+      "nameKey": "base-type.iron-morningstar",
+      "name": "Iron Morningstar",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.deathblast",
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.weighted-mace",
+      "iconKey": "icon.base-type.iron-morningstar",
       "flavorKey": "flavor.base.weighted-mace",
       "flavor": "A solid, unadorned iron head fixed to a reinforced shaft. It relies on pure kinetic momentum to shatter bone and plate alike.",
       "tags": [
@@ -890,18 +890,18 @@
     },
     {
       "id": "item.humanoid-main-hand-a-025",
-      "nameKey": "base.heavy-sledge",
-      "name": "Heavy Sledge",
+      "nameKey": "base-type.maul",
+      "name": "Maul",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.ferocity",
         "powerBand": "trivial"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.heavy-sledge",
+      "iconKey": "icon.base-type.maul",
       "flavorKey": "flavor.base.heavy-sledge",
       "flavor": "A massive, solid iron head mounted on a reinforced shaft. It is designed for delivering devastating kinetic impact through sheer mass.",
       "tags": [
@@ -933,7 +933,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.elemental-power",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -1006,7 +1006,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 0,
@@ -1071,8 +1071,8 @@
     },
     {
       "id": "item.humanoid-main-hand-a-030",
-      "nameKey": "base.tapered-estoc",
-      "name": "Tapered Estoc",
+      "nameKey": "base-type.needle-rapier",
+      "name": "Needle Rapier",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blade",
@@ -1082,7 +1082,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.tapered-estoc",
+      "iconKey": "icon.base-type.needle-rapier",
       "flavorKey": "flavor.base.tapered-estoc",
       "flavor": "A slender, needle-like blade designed to find the narrowest gaps in heavy plate. Its rigid construction favors precision over sweeping cuts.",
       "tags": [
@@ -1142,18 +1142,18 @@
     },
     {
       "id": "item.humanoid-main-hand-a-032",
-      "nameKey": "base.reinforced-spiked-flail",
-      "name": "Reinforced Spiked Flail",
+      "nameKey": "base-type.heavy-morningstar",
+      "name": "Heavy Morningstar",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-pen",
+        "family": "atom.deathblast",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.reinforced-spiked-flail",
+      "iconKey": "icon.base-type.heavy-morningstar",
       "flavorKey": "flavor.base.reinforced-spiked-flail",
       "flavor": "A heavy, rotating weight attached to a thick-link chain, designed to bypass shields through sheer kinetic momentum.",
       "tags": [

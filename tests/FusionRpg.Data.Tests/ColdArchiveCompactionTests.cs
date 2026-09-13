@@ -8,23 +8,24 @@ using Xunit;
 
 namespace FusionRpg.Data.Tests;
 
+[Trait("Category", "DiskSemantics")]
 public class ColdArchiveCompactionTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
+    readonly string _dir;
 
     public ColdArchiveCompactionTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-cold-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        // File-bound: this class's subject IS the on-disk archive (`archive/*.sqlite`), so it keeps a
+        // real dir -- through the leak-proof helper, whose dispose clears SQLite's pool before the
+        // delete and lets a failed delete fail the test (testing-standard R2/R3).
+        _testStore = DataTestStore.CreateFileBacked();
+        _store = _testStore.Store;
+        _dir = _testStore.DataDir!;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     [Fact]
     public void Promote_open_run_refused()

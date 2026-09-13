@@ -305,15 +305,22 @@ class DeriveNameKeyTests(unittest.TestCase):
     def test_never_produces_a_leading_or_trailing_hyphen(self) -> None:
         self.assertEqual(seedfile_mod.derive_name_key("set", "  --Edge--  "), "set.edge")
 
-    def test_pure_punctuation_falls_back_to_a_named_default_not_an_empty_slug(self) -> None:
-        """The real `NAME_KEY_PATTERN` every schema in this program uses requires at least one
-        character after the kind prefix — a bare `set.` would be structurally illegal."""
-        self.assertEqual(seedfile_mod.derive_name_key("set", "!!!"), "set.item")
+    def test_an_unsluggable_name_is_refused_not_given_a_placeholder_key(self) -> None:
+        """⛔ CORRECTED 2026-09-12. This test used to assert `derive_name_key("set", "!!!") ==
+        "set.item"`, and the same `"item"` fallback fired for every non-Latin name — which is how
+        six shipped sets (Chinese display names) all landed on the identical key `set.item`,
+        satisfying the pattern while destroying global uniqueness. `seed-contract.md` §6 says the
+        string may be free text but the KEY must be `^[a-z0-9.-]+$`, so a name with no ASCII
+        content is a content defect, not a reason to mint a shared placeholder. Refuse it by name."""
+        for name in ("!!!", "毁灭豌豆之友", "   "):
+            with self.subTest(name=name):
+                with self.assertRaises(seedfile_mod.NameKeyUnsluggable):
+                    seedfile_mod.derive_name_key("set", name)
 
     def test_the_derived_key_matches_the_real_schema_pattern(self) -> None:
         import re
         pattern = re.compile(r"^[a-z][a-z0-9]*(\.[a-z0-9]+(-[a-z0-9]+)*)+$")
-        for name in ("Stillmarch", "Vengeful Bastion", "Frost & Fire!!", "  --Edge--  ", "!!!"):
+        for name in ("Stillmarch", "Vengeful Bastion", "Frost & Fire!!", "  --Edge--  "):
             with self.subTest(name=name):
                 self.assertRegex(seedfile_mod.derive_name_key("set", name), pattern)
 

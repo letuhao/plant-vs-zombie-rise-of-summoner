@@ -67,3 +67,15 @@ authoring tool from day one, not retrofitted after two gameplay modes already pi
 - `docs/architecture/item/spec-rate-authoring.md`
 - `docs/architecture/world-map-runtime/spec-sector-loot-wiring.md`
 - `docs/architecture/base-defense/spec-siege-loot.md`
+
+---
+
+## Filed by the `species-gear-chain` initiative (2026-09-13)
+
+Asks raised by [species-gear-chain-map.md](species-gear-chain-map.md) and its module specs. **Nothing here is built or approved** — each is an ask-first boundary this program owns, filed so it is visible to the owner rather than living only in the requesting map.
+
+| # | Ask | Requesting module | Evidence |
+|---|---|---|---|
+| 1 | A **ninth `source_kind`** for a creature kill, plus its authored tables | ``creature-drop-tables`` | `source_kind` is a `TEXT` column, so this is vocabulary + content, not a schema migration |
+| 2 | ⛔ **The paired `LootCorrelation.Derive` arm.** `DropTableValidator.cs:52-59` warns in its own comment: *"Each also gains a `LootCorrelation.Derive` arm (`LootPipeline.cs`) — **neither list is complete without the other**"* | ``creature-drop-tables`` | A ninth kind without its arm is a self-documented incompleteness |
+| 3 | ⚠ **Kill attribution is only half-built.** `decisions.md`'s `KillerActorKey` is scoped to *"web/standalone battles where the server owns HP and resolution"*; **on the lawn it carries nothing** | ``creature-drop-tables`` | E1 must key on a source the expedition / delve / wild paths supply. Gameless-first means it works without the lawn |

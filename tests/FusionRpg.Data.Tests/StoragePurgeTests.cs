@@ -6,23 +6,23 @@ using Xunit;
 
 namespace FusionRpg.Data.Tests;
 
+[Trait("Category", "DiskSemantics")]
 public class StoragePurgeTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
+    readonly string _dir;
 
     public StoragePurgeTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-storage-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        // File-bound: this class asserts purge deletes real archive files, so it keeps a real dir --
+        // through the leak-proof helper (R2/R3).
+        _testStore = DataTestStore.CreateFileBacked();
+        _store = _testStore.Store;
+        _dir = _testStore.DataDir!;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     [Fact]
     public void Purge_and_delete_refuse_open_runs()

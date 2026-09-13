@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Linq;
 using FusionRpg.Core.Tests.TestSupport;
 using Xunit;
@@ -6,11 +5,12 @@ using Xunit;
 namespace FusionRpg.Core.Tests.Creatures;
 
 /// <summary>
-/// T4.5's own `--explain` acceptance line: "names every input for one species." A real, cold
-/// `dotnet run` of the tool, same pattern `RealColdProcessTests.cs` (AtomImporter.Tests) already
-/// established — every other test in this file's neighbourhood exercises `SpeciesExpander`
-/// in-process, which proves the MATH but never proves the CLI itself actually prints the audit
-/// trail a balance question would be answered from.
+/// T4.5's own `--explain` acceptance line: "names every input for one species." A real, cold,
+/// separate process, same convention `RealColdProcessTests.cs` (AtomImporter.Tests) established —
+/// every other test in this file's neighbourhood exercises `SpeciesExpander` in-process, which proves
+/// the MATH but never proves the CLI itself actually prints the audit trail a balance question would
+/// be answered from. The tool is a ProjectReference of this test project, so its apphost is launched
+/// directly (see ToolProcess) rather than through an implicit `dotnet run` build.
 /// </summary>
 public class CreatureSpeciesGenExplainTests
 {
@@ -18,17 +18,8 @@ public class CreatureSpeciesGenExplainTests
     public void Explain_names_every_real_input_for_a_real_species()
     {
         var repoRoot = FindRepoRoot();
-        var psi = new ProcessStartInfo
-        {
-            FileName = "dotnet",
-            Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "CreatureSpeciesGen")}\" --no-restore -- --explain Peashooter",
-            WorkingDirectory = repoRoot,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-        };
-        var (exitCode, stdout, stderr) = ExternalProcess.Run(psi, 120_000, "CreatureSpeciesGen --explain did not exit within 120s");
+        var (exitCode, stdout, stderr) = ToolProcess.Run(
+            repoRoot, "CreatureSpeciesGen", "--explain Peashooter", 120_000);
         Assert.True(exitCode == 0, $"expected exit 0, got {exitCode}\nstdout:\n{stdout}\nstderr:\n{stderr}");
 
         // Every real input this species' derivation reads, named in the transcript — the audit trail
@@ -57,17 +48,8 @@ public class CreatureSpeciesGenExplainTests
         var outPath = Path.Combine(Path.GetTempPath(), "fusionrpg-legacy-export-" + Guid.NewGuid().ToString("N") + ".json");
         try
         {
-            var psi = new ProcessStartInfo
-            {
-                FileName = "dotnet",
-                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "CreatureSpeciesGen")}\" --no-restore -- --export-legacy \"{outPath}\"",
-                WorkingDirectory = repoRoot,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            };
-            var (exitCode, stdout, stderr) = ExternalProcess.Run(psi, 120_000, "CreatureSpeciesGen --export-legacy did not exit within 120s");
+            var (exitCode, stdout, stderr) = ToolProcess.Run(
+                repoRoot, "CreatureSpeciesGen", $"--export-legacy \"{outPath}\"", 120_000);
             Assert.True(exitCode == 0, $"expected exit 0, got {exitCode}\nstdout:\n{stdout}\nstderr:\n{stderr}");
             Assert.True(File.Exists(outPath), "export wrote no file");
 

@@ -254,10 +254,10 @@
     },
     {
       "family": "atom.tempo-yield",
-      "iconKey": "icon.gem.bountiful-yield",
+      "iconKey": "icon.gem.abundant-harvest",
       "id": "gem.g2-022",
-      "name": "Bountiful Yield",
-      "nameKey": "gem.bountiful-yield",
+      "name": "Abundant Harvest",
+      "nameKey": "gem.abundant-harvest",
       "powerBand": "high",
       "tags": [
         "utility"
@@ -287,10 +287,10 @@
     },
     {
       "family": "atom.ward-flux",
-      "iconKey": "icon.gem.ward-flux",
+      "iconKey": "icon.gem.flux-core",
       "id": "gem.g2-025",
-      "name": "Ward Flux",
-      "nameKey": "gem.ward-flux",
+      "name": "Flux Core",
+      "nameKey": "gem.flux-core",
       "powerBand": "high",
       "tags": [
         "arcane",

@@ -11,22 +11,21 @@ namespace FusionRpg.Data.Tests;
 /// re-asserted here at volume).</summary>
 public class TreeStateVolumeTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public TreeStateVolumeTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-treevolume-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void Two_thousand_actors_times_forty_nodes_stores_exactly_eighty_thousand_rows()
     {
@@ -46,7 +45,7 @@ public class TreeStateVolumeTests : IDisposable
         // The REAL total row count in the table -- not just the sum over the keys this test wrote,
         // so a hypothetical cross-join defect that also wrote rows under keys never touched here
         // would still be caught.
-        using var db = SqliteConnectionFactory.Open(_store.HotPath, readOnly: true);
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "SELECT COUNT(*) FROM rpg_tree_node_state;";
         var rowCount = (long)cmd.ExecuteScalar()!;

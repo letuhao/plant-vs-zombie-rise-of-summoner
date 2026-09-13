@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text.Json;
 using FusionRpg.Core.Tests.TestSupport;
 using Xunit;
@@ -111,24 +110,14 @@ public class CombatSimJsonEmitTests : IClassFixture<CombatSimJsonEmitTests.Fixtu
 
         static (int Exit, string Stdout, string Stderr) RunCombatSim(string repoRoot, string args)
         {
-            // `-c Release --no-build` is not a speed tweak — it is what stops this test from failing
-            // non-deterministically. Without it `dotnet run` rebuilds CombatSim, which references
-            // FusionRpg.Core, while the parent `dotnet test` invocation still holds Core's compiler
-            // output; the child then dies with CS2012 ("cannot open FusionRpg.Core.dll for writing,
-            // file may be locked by VBCSCompiler"). The test therefore passed when run alone and
-            // failed inside a full-suite run that built first — a red that belongs to no code change
-            // and that silently corrupts any full-suite baseline measurement.
-            // Both sibling subprocess tests in this project (RealDataAggregateTests,
-            // ResolverMatchesSimulatorTests) already invoke their tools exactly this way; this one
-            // was the outlier.
-            var psi = new ProcessStartInfo
-            {
-                FileName = "dotnet",
-            Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "CombatSim")}\" -c Release --no-restore --no-build -- {args}",
-                CreateNoWindow = true,
-                WorkingDirectory = repoRoot
-            };
-            return ExternalProcess.Run(psi, 120_000, "CombatSim invocation timed out");
+            // The old `dotnet run -c Release --no-build` was a workaround, not a speed tweak: without
+            // it the child rebuilt CombatSim (which references Core) while the parent `dotnet test`
+            // still held Core's output, so the child died with CS2012 (file locked by VBCSCompiler) —
+            // red inside a full-suite run, green alone. The apphost pattern removes the problem at the
+            // root: CombatSim is a ProjectReference of this test project, so this test host's own build
+            // produces CombatSim.exe beside the test dll and the test launches it directly — no child
+            // build to race, and no reliance on a pre-existing Release output that a clean clone lacks.
+            return ToolProcess.Run(repoRoot, "CombatSim", args, 120_000);
         }
 
         public void Dispose()

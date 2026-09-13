@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Data;
 using FusionRpg.Tools.CreatureCorpusDump;
+using FusionRpg.Data.Tests;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Creatures;
@@ -13,20 +14,24 @@ namespace FusionRpg.Core.Tests.Creatures;
 /// </summary>
 public class CorpusDumpTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
+    // The dump TREE is the thing this class tests (a real output tree on disk), so the output root
+    // stays a real dir while the store itself runs in memory.
+    readonly string _dir;
 
     public CorpusDumpTests()
     {
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-corpus-dump-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
+        Directory.Delete(_dir, recursive: true);
     }
 
     void SeedDump(string side, int typeId, string? name = null, string? enumName = null, string? info = null)

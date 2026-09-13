@@ -64,19 +64,69 @@ public static class AffixComposer
         if (AtomKindRegistry.Get(row.KindId) is null)
             throw new BindRefusal($"affix '{affixId}' atom '{row.AtomId}' has unregistered kind '{row.KindId}'");
 
-        using var doc = JsonDocument.Parse(row.ParamsJson);
-        var root = doc.RootElement;
-        var channel = root.TryGetProperty("channel", out var chEl) ? chEl.GetString() ?? "" : "";
-        var op = root.TryGetProperty("op", out var opEl) ? opEl.GetString() ?? "" : "";
-
-        string? trigger = null;
-        if (!string.IsNullOrEmpty(row.WhenJson) && row.WhenJson != "{}")
+        JsonDocument doc;
+        try { doc = JsonDocument.Parse(row.ParamsJson); }
+        catch (JsonException ex)
         {
-            using var whenDoc = JsonDocument.Parse(row.WhenJson);
-            if (whenDoc.RootElement.TryGetProperty("trigger", out var trigEl))
-                trigger = trigEl.GetString();
+            // A malformed params blob is a content defect, not a bind-time crash: every other
+            // unreadable input in this class is a named BindRefusal, and a raw JsonException
+            // escaping here would kill the whole tree run (the same class of defect P4.1 fixes
+            // for the pool shape below).
+            throw new BindRefusal($"affix '{affixId}' atom '{row.AtomId}' has unparseable params JSON: {ex.Message}");
         }
+        using (doc)
+        {
+            var root = doc.RootElement;
+            var channel = ReadChannelOrRefuse(affixId, row, root);
+            var op = root.TryGetProperty("op", out var opEl) ? opEl.GetString() ?? "" : "";
 
-        return new ResolvedAtom(row.KindId, channel, op, trigger, null);
+            string? trigger = null;
+            if (!string.IsNullOrEmpty(row.WhenJson) && row.WhenJson != "{}")
+            {
+                using var whenDoc = JsonDocument.Parse(row.WhenJson);
+                if (whenDoc.RootElement.TryGetProperty("trigger", out var trigEl))
+                    trigger = trigEl.GetString();
+            }
+
+            return new ResolvedAtom(row.KindId, channel, op, trigger, null);
+        }
+    }
+
+    /// <summary>
+    /// Reads <c>params.channel</c> in either shape E30 defines — a concrete channel string, or a pool
+    /// reference object (`spec-channel-pool.md` §3.2) — and REFUSES a pool by name rather than
+    /// resolving it here.
+    ///
+    /// <para><b>Why refuse and not resolve.</b> The pool's draw happens at roll time, and
+    /// `spec-channel-pool.md` §4 states plainly that the resolver is not this module's to implement.
+    /// Its price is <c>count × weighted_mean(price(member))</c> (§3.4), not any single member's, so
+    /// picking one member at bake time would store a number the runtime roll can contradict. Refusing
+    /// by name is the honest disposition the plan's own P4.1 acceptance allows ("resolved to a concrete
+    /// channel OR refused as a <c>BindRefusal</c> naming the rule").</para>
+    ///
+    /// <para><b>The defect this replaces.</b> The old line was a bare
+    /// <c>chEl.GetString()</c>, which throws <c>InvalidOperationException</c> on an object — not a
+    /// <c>BindRefusal</c>, so <c>TreeBinderRun.BindTree</c>'s catch never saw it and the entire run died
+    /// (reproduced 2026-09-13: exit <c>-532462766</c> on the first pool-shaped family). Eight generated
+    /// <c>stat.derived</c> families carry this shape and the language stage picked them 461 times, so the
+    /// crash cost the whole corpus, not one tree.</para>
+    /// </summary>
+    static string ReadChannelOrRefuse(string affixId, AtomRow row, JsonElement root)
+    {
+        if (!root.TryGetProperty("channel", out var chEl))
+            return "";
+
+        var read = ChannelRefJson.TryRead(chEl, out var channelRef);
+        if (!read.IsOk)
+            throw new BindRefusal($"affix '{affixId}' atom '{row.AtomId}' has an unreadable 'channel' " +
+                                  $"param: {read.Detail}");
+
+        if (channelRef.IsPool)
+            throw new BindRefusal($"affix '{affixId}' atom '{row.AtomId}' channel is a pool reference " +
+                                  $"('{channelRef.PoolId}', count {channelRef.Count}) — a pool resolves at roll " +
+                                  "time (spec-channel-pool.md §3.2/§3.4), so this bake-time binder cannot " +
+                                  "price it as one concrete channel");
+
+        return channelRef.Concrete ?? "";
     }
 }

@@ -304,3 +304,15 @@ exactly this situation (`passive-tree-todo.md`'s "Non-blocking asks" table does 
 - The tool: [seedsmith-map.md](seedsmith-map.md) — this program is a new feature inside it
 - The law it obeys: [item/seed-contract.md](item/seed-contract.md) §1-§3
 - The atom layer: [effect-atom/definitions.md](effect-atom/definitions.md) — settles the aspect decomposition (ideal §7)
+
+---
+
+## Filed by the `species-gear-chain` initiative (2026-09-13)
+
+Asks raised by [species-gear-chain-map.md](species-gear-chain-map.md) and its module specs. **Nothing here is built or approved** — each is an ask-first boundary this program owns, filed so it is visible to the owner rather than living only in the requesting map.
+
+| # | Ask | Requesting module | Evidence |
+|---|---|---|---|
+| 1 | ⭐ **`species-rank` reconciliation.** An unlisted 19th module already claims a `threatBand × rarity` grid plus fusion/wave/expedition gates — a live overlap with two modules here | `the map` | `spec-species-rank.md:32-34`, `:56-63`; self-filed as GAP-4 in `tasks/creature-seed-todo.md:100-109` |
+| 2 | ⭐ **T-5 is the resolver this program has been waiting on.** `creature-seed-map.md:296` records its last open amendment as ⛔ *"not actually actionable yet… `thetaOffset` has zero consumers anywhere in `src/`"* | ``tier-propagation-contract`` | T-5 is exactly that consumer. This closes the amendment rather than adding one |
+| 3 | A **`ContributionSourceIds` (GG-49 FULL) grammar id** for the species-magnitude atom reader | ``threat-band-fill`, `species-magnitude-synth`` | It reaches the Hub via `AtomDerivedSubsystem` (`ActorHub.cs:168`) — it contributes, it does not fold. **File once for both** |

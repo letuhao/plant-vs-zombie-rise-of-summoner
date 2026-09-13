@@ -28,15 +28,13 @@ namespace FusionRpg.Data.Tests.Actions;
 /// </summary>
 public class ActionCorpusRealContentQualityTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ActionCorpusRealContentQualityTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-action-corpus-real-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         // The one real atom seed file backing the two families the real corpus can actually reach.
         var atomsPath = RepoPath("data", "seed", "atoms", "generated", "family-expand.g-life.json");
@@ -46,10 +44,7 @@ public class ActionCorpusRealContentQualityTests : IDisposable
         Assert.Empty(atomResult.Rejected);
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static string RepoRoot([CallerFilePath] string here = "")
     {

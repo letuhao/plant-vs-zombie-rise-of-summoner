@@ -1720,3 +1720,116 @@ Phase 7 for the published defaults. **B31–B35 are independent of Phase 6; only
     `RulesetVersion` stays **4**. **Every moved golden was predicted in advance — because none moved,
     and exactly the one predicted tripwire tripped.**
   - ✅ Commit drafts handed over per task group; **no git writes** (the repo's hard rule).
+
+---
+
+## Phase 9 — sweep refusal defect (B40) — found 2026-09-13
+
+**A real source defect in B21's own acceptance, found by investigation rather than by a red test** — the
+B21 clause "the boot sweep refuses and marks `Abandoned` … never heals it" was only half-built. Interactive
+rows with an incomplete trace are refused; a row whose **resolve throws** is neither refused nor healed,
+so it is re-listed every boot forever.
+
+**Verdict: SOURCE bug, not a stale test** (case by case below). Evidence:
+- Spec authority: [`spec-interactive-turns.md`](../docs/architecture/battle/spec-interactive-turns.md) §4
+  *"The sweep must refuse, not heal"* — *"A refusal is TERMINAL, not a skip: the row is marked so it leaves
+  the unresolved [set]"*; testing strategy §2 *"refuses and marks … never heals it. Assert the row leaves
+  the unresolved set"*. The spec is **silent** on non-interactive resolve failures, so nothing licenses the
+  current do-nothing catch.
+- The code's own comment (`WebMatchService.cs:244-247`) names this exact hazard for refusals: *"Left
+  unmarked, refused rows are re-listed every boot … crash recovery dies silently while still reporting a
+  clean sweep."*
+- Chronology: the swallow landed **2026-08-21** (`4f147a11`); the tests were written **2026-09-06**
+  (`50fcdf87`) — the tests encode the spec's intent, not the code's behaviour.
+- Reachable in production across a deploy: `setup_json` is authored by the previous build, `WaveCatalog`
+  is code-authored and **not** covered by the content hash, and `ValidateActorKey`'s rules can tighten.
+
+### The defect
+
+`src/FusionRpg.Server/WebMatchService.cs` — `SweepUnresolved`'s catch (lines 321-324) logs and **marks
+nothing**, conflating two different failure kinds:
+
+| Throw source | Type | Deterministic across boots? | Correct handling |
+|---|---|---|---|
+| `BattleEngine.Resolve` (empty squad/wave, bad actor key) | `ArgumentException` | **Yes** — same persisted `setup_json` + seed | **mark refused, terminal** |
+| `WaveCatalog.Get` (unknown wave) | `ArgumentException` | **Yes** | **mark refused, terminal** |
+| `InsertWebMatchEvents` (disk/lock/rollback rethrow `:186`) | `SqliteException` | No — transient | leave unresolved, retry next boot |
+
+### Cases
+
+- [x] **B40.1 — fix the source: split the catch.** ✅ 2026-09-13 `catch (ArgumentException ex)` marks the row refused
+  (`MarkWebMatchSweepRefused`) with a reason naming the failure; a following `catch (Exception ex)` keeps
+  today's log-only retry for transient errors. Acceptance: a row whose setup can never resolve leaves the
+  unresolved window and is not re-resolved on a second sweep; a transient failure still does not.
+  Verify: new focused tests + `WebMatch*Sweep*` + full E2E. Files: `src/FusionRpg.Server/WebMatchService.cs`
+  (the only `src` change). Scope: S.
+  - ⚠️ **Boundary:** `src/FusionRpg.Server/**` is claimed by the active `solid-run-20260912-eb53` session.
+    Coordinate before editing, or take the work in that session's own todo.
+- [x] **B40.2 — `WebMatchInteractiveSweepTests.A_row_with_an_unrecognised_profile_id…`** ✅ 2026-09-13 — already
+  rewritten (2026-09-13, commit `4aa5714f`) to prove "the loop continued" with a **second refusal**
+  instead of a heal it could not produce. Re-verify after B40.1: the row must now be **refused** where the
+  old assertion expected `Assert.Null(RefusalFor(good))` on an unhealable `{}` row. **Stale input, correct
+  intent.**
+- [x] **B40.3 — `WebMatchInteractiveSweepTests.A_row_with_no_profile_id_and_an_unresolvable_wave…`** ✅ 2026-09-13 —
+  its `{}` row asserts `Assert.Null(RefusalFor(row.Corr))` (line 83). After B40.1 an empty-squad row is
+  **refused**, so this assertion becomes stale. Give it a resolvable setup (known wave + real squad) so it
+  exercises its stated subject — "an unresolvable *wave* is not interactive, not refused" — rather than
+  accidentally depending on an empty squad. **Stale input, correct intent.**
+- [x] **B40.4 — `WebMatchContentHashSweepTests` ×3** ✅ 2026-09-13 — `A_registry_version_change_is_not_a_refusal` (:86),
+  `An_unstamped_row_is_not_refused` (:98), `A_row_stamped_with_the_current_content_is_not_refused` (:108)
+  each assert `Assert.Null(RefusalFor(...))` on a `{}` row. Their **subject is the content hash**, not
+  resolve failure; the empty setup is fixture convenience. Give each a resolvable setup so the resolve
+  succeeds and the assertion tests the content verdict alone. **Stale input, correct intent.**
+- [x] **B40.5 — re-check `A_match_logged_against_different_content_is_refused_terminally`** (:56) ✅ 2026-09-13 — it
+  asserts `DoesNotContain` on a `{}` row. The content-hash refusal fires *before* resolve, so it should be
+  unaffected; confirm rather than assume, and make its setup resolvable too if the refusal path ever
+  reaches resolve.
+- [x] **B40.6 — add ONE shared valid-setup builder** ✅ 2026-09-13 — for the two sweep classes. Both build rows inline
+  with `setupJson: "{}"`; after B40.3/B40.4 they need a valid setup (a known `WaveCatalog` wave + a
+  minimal real squad), so the shape lives in one place and a future test cannot silently reintroduce an
+  unhealable row. Verify: no test in either class constructs `setupJson: "{}"` for a row it expects to
+  resolve.
+
+### Acceptance for the phase
+- The sweep marks a deterministically-unresolvable row refused and terminal; a transient failure still
+  retries. Verified by contrast in both directions, not by one green run.
+- Every test in the two sweep classes uses a setup consistent with what it asserts.
+- Full E2E green (currently 219/219) and Server green; no golden moved.
+- **`spec-interactive-turns.md` §4 gains one sentence** naming the non-interactive resolve-failure case
+  explicitly, so the rule is complete rather than inferred.
+
+### ✅ Outcome — B40 DONE 2026-09-13
+
+- **B40.1 (source).** `SweepUnresolved` now has two catches: `catch (ArgumentException ex)` marks the
+  row **refused and terminal** (`MarkWebMatchSweepRefused`, reason `"unresolvable setup: <msg>"`), and
+  `catch (Exception ex)` keeps the log-and-retry for transient failures. The type is deliberately
+  narrow, and the audit during implementation **corrected the todo's own first proposal**
+  (`catch (ArgumentException)` was too broad a rule in spirit): `InvalidOperationException` is left
+  transient on purpose because it covers both a row-specific runaway loop *and* process-global tuning
+  preconditions, and the sweep hashes content **once** for the whole loop — so refusing broadly could
+  have marked every row terminal for a server misconfiguration. The runaway-loop guard's trade-off is
+  documented in the code as a deliberate choice.
+- **B40.3/B40.4 (tests).** All four stale `{}`-input assertions now use a **resolvable** setup from the
+  shared builder. The three content-hash tests and the unresolvable-wave test additionally assert the
+  row **leaves the unresolved window** — the property the old weak `Assert.Null(RefusalFor(...))` could
+  never observe, which is exactly why the defect shipped green.
+- **B40.5.** Confirmed **no change needed**: the content refusal fires at `:296` before the `try` at
+  `:305`, proven by line order and by the captured refusal log. Recorded rather than assumed.
+- **B40.6.** `tests/FusionRpg.E2E.Tests/SweepSetupFixture.cs` builds the setup from the **real**
+  producers (`WebMatchService.BuildSquad` — whose empty-roster synthetic fallback is the production
+  path — and `WaveCatalog`), so the shape cannot drift from what production writes.
+- **Two B40.1 proof tests added** (both non-vacuous): a deterministic failure is refused terminally and
+  is not re-listed on a second sweep; the contrast case proves a resolvable row heals, so the refusal
+  is not blanket. Verified by **temporarily reverting the fix and watching the new test FAIL**, then
+  restoring it.
+- **Spec amended:** `spec-interactive-turns.md` §4 now states the resolve-failure case explicitly,
+  including the deterministic-vs-transient split and the deploy-time reachability.
+- **Verified:** E2E **221/221** (was 219, plus 2 new), Server **404/404**, `guard-dal` +
+  `guard-test-substrate` green. No golden moved.
+- ⚠️ **Boundary:** `src/FusionRpg.Server/WebMatchService.cs` was edited under this session's record with
+  the owner's authorization. The active `solid-run-20260912-eb53` session also claims
+  `src/FusionRpg.Server/**` but had **not** touched this file; its branch's version of the region is
+  byte-identical, and its two commits there change only lines 449-572 (`ApplyZombossPattern`/reveal),
+  so the edit is conflict-free at merge.
+
+### Acceptance for the phase
