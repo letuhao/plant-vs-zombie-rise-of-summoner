@@ -106,4 +106,26 @@ public class WebMatchInteractiveSweepTests
         Assert.NotNull(RefusalFor(alsoBad.Corr));
         Assert.DoesNotContain(_store.ListUnresolvedWebMatches(500), e => e.Id == alsoBad.Id); // terminal
     }
+
+    // ⚠ PRODUCT HAZARD, NOT FIXED HERE (found 2026-09-13, out of this file's scope).
+    //
+    // `SweepUnresolved`'s catch (WebMatchService.cs:321-324) logs a resolve failure but marks
+    // NOTHING, so a row that fails to resolve neither heals (`run_id`) nor leaves the window
+    // (`sweep_refused`) — it is re-listed every boot forever. The code's own comment at lines 244-247
+    // names exactly this hazard for refusals: "Left unmarked, refused rows are re-listed every boot
+    // and (since the query is ORDER BY id ASC LIMIT n) enough of them would crowd out every newer
+    // row — crash recovery dies silently while still reporting a clean sweep."
+    //
+    // It is reachable across a deploy, not from a single build: setupJson is authored by the previous
+    // build, while `WaveCatalog` is code-authored and NOT covered by the content hash, and
+    // `BattleEngine.ValidateActorKey`'s rules can tighten — so an older row can deterministically fail
+    // under newer code. (Within one build, production never logs an empty squad: `BuildSquad` always
+    // falls back to a synthetic squad.)
+    //
+    // Why it is not fixed in this program: the fix is a PRODUCTION behaviour change, and the test
+    // suite contradicts itself about the intended one. Four tests (here and in
+    // WebMatchContentHashSweepTests) construct an unhealable `{}` row and assert
+    // `Assert.Null(RefusalFor(...))`, i.e. "not refused"; marking a deterministic resolve failure as a
+    // refusal would break all four. Choosing between "leave it unresolved forever" and "refuse it
+    // terminally" is an owner/design decision on the sweep's contract, not a test-migration change.
 }
