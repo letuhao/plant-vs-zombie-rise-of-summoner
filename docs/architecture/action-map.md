@@ -934,3 +934,47 @@ dispatched runner atom needs a registered `EffectDef` — `spec-atom-runner.md`'
 separate E19 scope, proven via a real thrown exception naming the exact atom id, not assumed. Full
 trace: `action-plan.md` §4b, `action-todo.md` §16.
 
+## 17. Reopening 2026-09-13 — A26–A32, closing the gap to playable
+
+**Why now.** A completeness audit (idea phase, `docs/architecture/action-playability-ideal.md` +
+`docs/architecture/action-choice-ideal.md`) found the engine (A1–A25, closed) is provably correct and
+provably inert for every real player: `UnlockTuningPolicy.Configure` is never called by the real host,
+so no real level-up ever grants a second real action, and even once it does, which held action fires
+is decided by `action_id` alphabetical order, not rung or build intent. Both ideal docs are the reading
+gate for this section — read them before touching any module below.
+
+| id | Name | What it owns | Depends on |
+|---|---|---|---|
+| **A26** | `unlock-tuning-activation` | One call, `UnlockTuningPolicy.Configure(...)`, added to `Program.cs`'s existing `*Policy.Configure(*TuningLoader.Parse(...))` block (mirrors ~18 sibling calls already there), reading `data/tuning/action-unlock.v1.json` | none — everything downstream (`RpgStore.UniqueActors.cs:1902` onward) is already built and tested |
+| **A27** | `specimen-loadout-endpoints` | `GET/POST /api/actors/{instanceId}/loadout`, scoped `OwnerKind.Entity`/`UniqueActor`, mirroring `LoadoutEndpoints.cs`'s Dave-scoped shape and the equipment endpoint's own `/api/actors/{id}/...` convention. `isHeld` checks the specimen's real granted set, not catalog existence | A26 |
+| **A28** | `unlock-discard-endpoint` | `POST /api/actors/{instanceId}/unlock/discard`, wiring `UnlockDiscardService` (built, T20) to a real soul spend (`RpgStore.Souls.TrySpendSouls`) | A26, A27 |
+| **A29** | `action-corpus-import-completion` | Extends `Program.cs:402`'s literal file list to `committed-round-909/2000.json`, after a schema-compat check against `ActionCorpusImporter` | none, parallel-safe |
+| **A30** | `actions-tab-fe-wiring` | Replaces `ActionsTab.tsx`'s `PLACEHOLDER_ACTIONS` with a real catalog + mutation surface against A27/A28, mirroring the aura wiring already live in the same file | A27, A28 |
+| **A31** | `action-choice-rung-tiebreak` | `ActionTagPreference.Compare`'s tiebreak changes from `action_id` alphabetical to `Rung` descending, `action_id` as final tiebreak only | none — reuses `CompiledAction.Rung`, already computed |
+| **A32** | `action-choice-condition-awareness` | A new, narrow read surfacing whether an action's bound container holds a currently-true conditional payoff, promoting it ahead of a same-rung unconditional peer | A31, A18a (built) |
+
+**A31/A32 supersede an earlier plan to defer this area entirely** — reversed 2026-09-13
+(`action-playability-ideal.md` Q2): with expeditions and siege (the only shipped battle consumers) both
+auto-resolved, action *choice* is not AI polish, it is the only mechanism a build's payoff reaches a
+result through.
+
+Build order: **A26 → {A27, A29, A31 in parallel} → A28 → A30 → A32.**
+
+### 17.1 Checkpoints
+
+- **⛔ Checkpoint M — the ladder is live.** A26: a real specimen's level-up, through the real host,
+  produces a real `rpg_action_grant` row — proven by booting the real `WebApplication`, not by calling
+  `Configure` directly in a test.
+- **⛔ Checkpoint N — a player can see and choose.** A27+A28: a specimen's held/equipped set and a
+  discard are both reachable and mutable over real HTTP.
+- **⛔ Checkpoint O — the FE shows it.** A30: `ActionsTab` renders real state; `PLACEHOLDER_ACTIONS` is
+  gone.
+- **⛔ Checkpoint P — a build changes the outcome.** A31: two same-tag actions of different rung no
+  longer tie-break alphabetically. A32: a live conditional payoff outranks a same-rung unconditional
+  peer.
+
+Specs: `action/spec-unlock-tuning-activation.md` (A26) · `action/spec-specimen-loadout-endpoints.md`
+(A27) · `action/spec-unlock-discard-endpoint.md` (A28) · `action/spec-action-corpus-import-completion.md`
+(A29) · `action/spec-actions-tab-fe-wiring.md` (A30) · `action/spec-action-choice-rung-tiebreak.md` (A31) ·
+`action/spec-action-choice-condition-awareness.md` (A32).
+

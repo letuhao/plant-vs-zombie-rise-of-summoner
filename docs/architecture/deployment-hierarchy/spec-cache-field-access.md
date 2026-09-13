@@ -5,12 +5,31 @@ Module id `cache-field-access`, row 5 of the [deployment-hierarchy map](../deplo
 (wave 1, depends on `corpse-cache` (module 3, spec only — [spec-corpse-cache.md](spec-corpse-cache.md))
 and `cache-decay-void` (module 4, spec only — [spec-cache-decay-void.md](spec-cache-decay-void.md)); external
 `loot-pack` §7 sign-off gates only the wipe-cache half of this spec, not the death-cache half — see
-§Locked anchors). Ideal: [deployment-hierarchy-ideal.md](../deployment-hierarchy-ideal.md) §"Baggage,
+§Locked anchors. **Amended 2026-09-13, later session: also depends on `scoped-inventory-hierarchy`'s
+`legion-cargo` (module 1, spec only — [spec-legion-cargo.md](../scoped-inventory-hierarchy/spec-legion-cargo.md))
+for §2a's claim-into-cargo write — a real, cross-program dependency this module did not have at first
+write, added when the write's true owning module turned out not to exist, see the amendment paragraph
+below.**). Ideal: [deployment-hierarchy-ideal.md](../deployment-hierarchy-ideal.md) §"Baggage,
 revisit loot, and the void" (V1/V3/V4/V5/V6) and §"Corpse-drop, decay, and retrieval" item 3 ("Field
 retrieval"), §"Resolved 2026-09-13 (third clearing round)" items 1/3/4. Consumes
 `party-dungeon/spec-loot-pack.md` in full — its `PackGrid`/`PackArranger`/`PackMoves`/`PackDto`
 interface, read this session both as spec **and** as shipped code (see §What already exists — the two
 disagree in a way worth reporting).
+
+**Amendment 2026-09-13 (later session) — the world-map claim's actual cargo write lands in this
+module, not `cargo-fate`.** §1a below originally named the write into a claiming legion's
+`rpg_world_entity_cargo` as `scoped-inventory-hierarchy/cargo-fate`'s own natural extension. Re-checked
+against `spec-cargo-fate.md` itself this session, fresh, not trusted from the earlier citation: that
+module's own §0 scope-correction closes it to legion-death cargo fate only, and its own "Interface
+exposed to dependents" table states plainly *"None — this is the final module in the map; nothing in
+this program depends on `cargo-fate`."* It never calls, and by its own closed scope will never call, a
+claim-write function — the verb this module named has no owning module anywhere in either program.
+Resolved here instead, since this module already computes the exact reachability check (§1a) that
+gates whether a claim is legal at all; extending that check into a write is a smaller, more natural
+step than inventing a dependency on a module with no reason to run it. §2a below is the new design
+section. This makes this module genuinely, newly dependent on `scoped-inventory-hierarchy/
+spec-legion-cargo.md`'s schema and capacity functions — a real cross-program dependency, named
+plainly, not hidden (see the updated header line below and the Design-gate checklist).
 
 ## Objective
 
@@ -171,16 +190,24 @@ for.
 shape.** §Design 2's `ClaimCorpseCacheUnlocked` places claimed items into the claiming **party's**
 `loot-pack` `PackGrid` — a delve-scoped container this module already depends on. A world-map legion
 has no `PackGrid`; its own carry capacity is `scoped-inventory-hierarchy`'s `legion-cargo` overlay
-(`rpg_world_entity_cargo`, slot+weight), a different program's schema this module does not depend on
-and should not reach into unilaterally. This module therefore specifies the **reachability rule above**
-and confirms the **claim-exclusivity pattern is reusable as-is** (item-level `DELETE … WHERE cache_id =
-? AND seq = ?` + row-count check under `RpgStore`'s single-writer lock, §Design 2/3, already generic
-enough for any claimant shape) for a world-map claim — but the **write into a legion's cargo overlay is
-not built by this module**. It is `scoped-inventory-hierarchy`/`cargo-fate`'s own natural extension:
-that module already owns the legion-cargo schema and already extends `corpse-cache`'s place-kind
-vocabulary in the opposite direction (cargo-out-to-cache on death). Named as a cross-program follow-on
-the same way `corpse-cache`'s own anti-fraud ask is named rather than silently assumed — not a gap to
-be discovered later.
+(`rpg_world_entity_cargo`, slot+weight), a different program's schema. This module therefore specifies
+the **reachability rule above** and reuses the **claim-exclusivity pattern** (item-level `DELETE …
+WHERE cache_id = ? AND seq = ?` + row-count check under `RpgStore`'s single-writer lock, §Design 2/3,
+already generic enough for any claimant shape) for a world-map claim.
+
+**Resolved 2026-09-13, later session — the write into a legion's cargo overlay is built by this
+module, in §2a, not deferred to `cargo-fate`.** The original text here named `scoped-inventory-
+hierarchy`/`cargo-fate` as the natural owner, reasoning that it already owns the `legion-cargo` schema
+and already extends `corpse-cache`'s place-kind vocabulary in the opposite direction (cargo-out-to-
+cache on death). Re-checked directly against `spec-cargo-fate.md` this session (not merely assumed
+symmetric): that module's own §0 scope-correction closes its build to legion-death cargo fate only,
+and its own Interface table states nothing in the program depends on it — it never calls, and by its
+locked scope never will call, a claim-write function. Owning the schema is not the same as owning
+every verb that touches the schema; extending it into a claim write is `cache-field-access`'s own,
+since it is this module that already proves a claim is legal. §2a below is the resolution — this
+module now reads (never modifies) `legion-cargo`'s own capacity-check shape
+(`WeightCapacityUnlocked`/`SlotCapacityUnlocked`) and writes its own rows into `rpg_world_entity_cargo`,
+reusing that table's schema exactly as `legion-cargo`'s own spec defines it.
 
 ### 2. The claim — one transaction, item-level exclusivity, no new lock table
 
@@ -234,6 +261,89 @@ log `AppendDecision` already accepts generically (§Built) — this is not an ed
 `pack.move`/`pack.drop` payload shapes and needs no ask against that program, the same way quest-reward
 banking and altar-haul minting already added their own concerns to the same log without touching
 `pack.*`'s vocabulary.
+
+### 2a. Claim into legion cargo — `world_sector`/`world_lane`, resolved 2026-09-13 (later session)
+
+The world-map counterpart to §Design 2's delve-baggage claim, for the two kinds §1a makes reachable.
+Same transaction shape, same delete-and-check-rowcount exclusivity, same replay-safety table pattern —
+the one real difference is the destination: instead of `PackArranger.Arrange`'s grid/floor placement,
+each claimed row is subject to `legion-cargo`'s own weight/slot capacity gate
+(`spec-legion-cargo.md` §Design 1, 3), reusing that module's own capacity functions rather than
+re-deriving a second capacity formula:
+
+```
+ClaimCorpseCacheIntoCargoUnlocked(db, tx, worldId, entityId, playerId, cacheId, correlationId, now):
+    if a row exists at (cache_id, world_id, entity_id, correlation_id) in the claim log:
+        return the SAME recorded result — never reprocess (replay safety, same shape as §Design 3's
+        rpg_corpse_cache_claim_log; this module's one claim-log table serves both claimant shapes,
+        keyed generically — delve claims by (delve_id, party_index), world claims by (world_id,
+        entity_id) — never a second table)
+
+    assert the caller's own live position matches the cache's place_ref, per §1a's own reachability
+    query — refuse cache.unreachable otherwise; a caller-supplied cacheId is never trusted without
+    this re-check, the same discipline every other refusal in this module already uses
+
+    rows = SELECT seq, kind, instance_id, container_id, qty FROM rpg_corpse_cache_item
+           WHERE cache_id = $cacheId
+    if rows is empty: log an empty claim result, return it (no-op, not an error)
+
+    for each row, in seq order (deterministic — the same tie-break §Design 2's delve claim already uses):
+        weightEach = resolve fresh from the item's own derived weight field (kind='instance') or the
+            container's per-unit weight × qty (kind='stack') — the SAME resolution LoadCargoUnlocked
+            already performs (spec-legion-cargo.md §Design 3/4), never a second weight-computation path
+        weightCapacity = memberCount(entityId) × tuning.CargoWeightPerUnit   -- spec-legion-cargo §1,
+        slotCapacity   = memberCount(entityId) × tuning.CargoSlotsPerUnit    -- read fresh, every row
+        usedWeight = SELECT SUM(weight_each) FROM rpg_world_entity_cargo WHERE world_id=$w AND entity_id=$e
+        usedSlots  = SELECT COUNT(*)         FROM rpg_world_entity_cargo WHERE world_id=$w AND entity_id=$e
+        if usedWeight + weightEach > weightCapacity or usedSlots + 1 > slotCapacity:
+            -- refuses this ONE row, the same cargo.over-weight/cargo.no-slots vocabulary
+            -- LoadCargoUnlocked already uses (spec-legion-cargo.md §Design 3) -- never a renamed
+            -- refusal for what is the identical underlying constraint
+            skip this row -- leave it in rpg_corpse_cache_item, uncleared, for a later claim (by this
+            legion once it frees capacity, or a different legion) to pick up; never a partial insert
+            for a row that does not fit
+            continue
+        DELETE FROM rpg_corpse_cache_item WHERE cache_id = $cacheId AND seq = $seq
+        -- same delete-and-check-rowcount exclusivity as §Design 2/3 -- a second claimant racing the
+        -- same cache simply finds 0 rows for any seq already taken, no separate lock
+        if deleted == 0: continue   -- another claimant already took this row
+        INSERT INTO rpg_world_entity_cargo(world_id, entity_id, seq, kind, instance_id, container_id,
+            qty, weight_each) VALUES (worldId, entityId, nextSeq, row.Kind, row.InstanceId,
+            row.ContainerId, row.Qty, weightEach)
+        -- legion-cargo's own table (spec-legion-cargo.md §Design 2), reused unmodified; nextSeq is a
+        -- freshly minted sequence in the DESTINATION legion's own cargo, never the source cache's seq
+
+    INSERT INTO rpg_corpse_cache_claim_log(cache_id, world_id, entity_id, correlation_id, claimed_utc,
+        result_json) VALUES (...)   -- the replay-safety row checked at the top
+    tx.Commit()
+```
+
+**No `cargo.not-owned` check, unlike an ordinary `LoadCargoUnlocked` call.** A cache item has no
+armoury-resident owner row to be "not owned" against — the reachability check at the top of this
+function is this claim's whole admission gate, matching how §Design 2's delve claim needs no ownership
+check either (`corpse-cache`'s own Locked anchor: `rpg_item.player_id` is untouched by any assignment
+move, so a claimed instance is already owned by the player before the claim).
+
+**Move-never-copy, one transaction.** Every claimed row's cache-side `DELETE` and cargo-side `INSERT`
+commit together or not at all — the identical discipline §Design 2's delve claim already uses, and the
+same precedent `corpse-cache`/`legion-cargo` each independently established for their own moves
+(`spec-corpse-cache.md` §Locked anchors; `spec-legion-cargo.md` §Locked anchors).
+
+**A full legion cannot claim more than it can carry — stated as the actual refusal shape, not a
+whole-claim refusal.** A legion with room for 2 of a 5-item cache claims those 2 and leaves the other 3
+behind, uncleared, for whoever reaches the cache next with room. This differs in mechanism from
+`PackArranger.Arrange`'s own overflow discipline (never lose an item, spill to the floor instead) —
+a legion has no floor to spill to on the world map, so an item that does not fit simply stays in the
+cache rather than spilling anywhere. Both share the same underlying principle: nothing claimed is ever
+destroyed or duplicated by a capacity refusal.
+
+**This module is now, genuinely, dependent on `legion-cargo`'s schema — stated plainly, not hidden.**
+`ClaimCorpseCacheIntoCargoUnlocked` reads `legion-cargo`'s own `WeightCapacityUnlocked`/
+`SlotCapacityUnlocked` functions and writes rows shaped exactly like `LoadCargoUnlocked`'s own INSERT
+(`spec-legion-cargo.md` §Design 2-3) — reused, never re-derived, the same discipline `cargo-transfer`
+already applies to the identical two functions (`spec-cargo-transfer.md` §Design 2's own
+`WithdrawUnlocked`). This module does not modify `rpg_world_entity_cargo`'s schema or either capacity
+function; it only calls them.
 
 ### 3. Why no separate reservation/lock table for cross-party racing
 
@@ -346,11 +456,20 @@ dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Delve.Pack" 
 ## Structure
 
 ```
-src/FusionRpg.Data/Sqlite/RpgStore.CacheFieldAccess.cs   NEW — schema (rpg_corpse_cache_claim_log),
-                                                          ListClaimableCachesUnlocked,
-                                                          ClaimCorpseCacheUnlocked (both callable on an
-                                                          open tx; the public entry opens its own per
-                                                          this file's established lock(_gate) pattern)
+src/FusionRpg.Data/Sqlite/RpgStore.CacheFieldAccess.cs   NEW — schema (rpg_corpse_cache_claim_log, now
+                                                          keyed generically enough for both claimant
+                                                          shapes, §2a), ListClaimableCachesUnlocked,
+                                                          ClaimCorpseCacheUnlocked, and (2026-09-13,
+                                                          later session) ClaimCorpseCacheIntoCargoUnlocked
+                                                          (§2a) — all callable on an open tx; the public
+                                                          entry opens its own per this file's established
+                                                          lock(_gate) pattern
+READS (never modifies, 2026-09-13 amendment): src/FusionRpg.Data/Sqlite/RpgStore.LegionCargo.cs's
+                                                          WeightCapacityUnlocked/SlotCapacityUnlocked
+                                                          functions and rpg_world_entity_cargo's own
+                                                          column shape (scoped-inventory-hierarchy
+                                                          module 1) — a real, new cross-program
+                                                          dependency this module did not have before §2a
 tests/FusionRpg.Data.Tests/CacheFieldAccess/             NEW
 UNTOUCHED: Core/Delve/Pack/* (PackGrid, PackArranger, PackMoves, PackAutopilot, PackDto, PackSettlement
            — this module CALLS PackArranger.Arrange, never edits any of these files); RpgStore.Delve.cs's
@@ -358,7 +477,10 @@ UNTOUCHED: Core/Delve/Pack/* (PackGrid, PackArranger, PackMoves, PackAutopilot, 
            claimed item is ordinary haul from that code's point of view); rpg_corpse_cache/
            rpg_corpse_cache_item schema (module 3's own table — this module only SELECTs and DELETEs
            rows from rpg_corpse_cache_item, never redefines it); rpg_item_assignment/
-           rpg_player_item_assignment (never written by this module, §Design 5)
+           rpg_player_item_assignment (never written by this module, §Design 5); rpg_world_entity_cargo's
+           own schema/capacity functions (legion-cargo's own table — this module only INSERTs rows into
+           it through legion-cargo's own established capacity gate, never redefines the table or the
+           capacity formula, §2a)
 ```
 
 ## Code style
@@ -411,6 +533,21 @@ if (deleted == 0) continue; // another transaction already took this row — not
   `System.Random` — zero hits, proving certain-on-reach is honored, not just asserted in prose.
 - **No auto-re-equip:** after a successful claim and extraction, the claimed instance appears in a
   listable, unassigned state and `rpg_item_assignment` gains no new row for it, for any specimen.
+- **Claim-into-cargo, capacity-gated (2026-09-13, §2a):** a legion with headroom for every row in a
+  `world_sector`/`world_lane` cache claims all of them — the cache empties, `rpg_world_entity_cargo`
+  gains an equal number of rows, both inside one transaction (move-never-copy, proven by count, not
+  just absence of an error).
+- **Claim-into-cargo, partial (§2a):** a legion with room for only some of a cache's rows claims
+  exactly those rows, in `seq` order; the rest stay in `rpg_corpse_cache_item`, unclaimed, available to
+  a later claim — never a whole-claim refusal and never a partial-row insert for a row that does not
+  fit.
+- **Claim-into-cargo refuses unreachable (§2a):** a legion whose live `AtSectorId`/`OnLaneId` does not
+  match the cache's `place_ref` refuses `cache.unreachable`, even when handed a real `cacheId` —
+  proving the reachability re-check is not merely trusting the caller.
+- **Claim-into-cargo replay safety (§2a):** the identical `(cacheId, worldId, entityId, correlationId)`
+  call twice returns the byte-identical result both times, and the second call performs no `DELETE`/no
+  cargo `INSERT` — the same replay-safety proof §Design 2's delve claim already has, extended to the
+  world-map claimant shape.
 
 ## Boundaries
 
@@ -422,15 +559,22 @@ if (deleted == 0) continue; // another transaction already took this row — not
   deliberately does not need this ask, having routed around it via `PackArranger.Arrange` directly — but
   a future session should not add a `from: cache` value to that closed set without one); any change to
   `PackSettlement.Decide`'s wipe branch (that is the `loot-pack` §7 ask, owned by `corpse-cache`'s own
-  wipe path, not this module); the legion-cargo claim write-path (2026-09-13 amendment, §1a) —
-  `scoped-inventory-hierarchy`/`cargo-fate`'s own ask to accept, since it owns the `rpg_world_entity_cargo`
-  schema a claimed `world_sector`/`world_lane` item would need to land in; this module specifies only the
-  reachability rule and the reusable claim-exclusivity pattern, never the write into that overlay.
+  wipe path, not this module); any change to `legion-cargo`'s own `rpg_world_entity_cargo` schema or its
+  `WeightCapacityUnlocked`/`SlotCapacityUnlocked` functions (this module calls them, §2a, and never
+  redefines them — that stays `legion-cargo`'s own surface).
+- **Resolved 2026-09-13, later session:** the legion-cargo claim write-path (§2a) — originally named as
+  `scoped-inventory-hierarchy/cargo-fate`'s own ask to accept; re-checked and found `cargo-fate` never
+  calls, and by its own locked scope never will call, such a function. This module builds the write
+  directly instead, reusing `legion-cargo`'s own capacity-check functions rather than reimplementing
+  them — a real, accepted cross-program dependency on `scoped-inventory-hierarchy/spec-legion-cargo.md`,
+  not an ask left pending elsewhere.
 - **Never:** a second pack grid, footprint table, or stack cap; a probability roll of any kind; a write to
   `rpg_item_assignment`/`rpg_player_item_assignment`; a claim against a non-`Active` delve (for a
   `delve_room` cache) or against a lawn/siege cache (structurally excluded, unchanged); a shared
   claim-log table between this module and `cache-retrieval-mission`; a write into `rpg_world_entity_cargo`
-  (that overlay belongs to `scoped-inventory-hierarchy`, not this module, per §1a).
+  that skips `legion-cargo`'s own capacity gate (§2a always checks `WeightCapacityUnlocked`/
+  `SlotCapacityUnlocked` before every row insert, never a raw, ungated `INSERT`); redefining
+  `rpg_world_entity_cargo`'s own schema (`legion-cargo`'s table, reused here, never owned).
 
 ## Success criteria
 
@@ -447,7 +591,7 @@ if (deleted == 0) continue; // another transaction already took this row — not
 | Claim-key pattern: item-level exclusivity via `DELETE … WHERE cache_id = ? AND seq = ?` + row-count check under `RpgStore`'s existing single-writer `lock(_gate)` (no reservation table); request-replay safety via a `(cache_id, <claimant key>, correlation_id)` log table, this module's own instance being `rpg_corpse_cache_claim_log` keyed `(cache_id, delve_id, party_index, correlation_id)` | `cache-retrieval-mission` (module 6) — mirrors the identical two-part pattern for its own claimant key (an expedition id, not a party key); the two modules never contend for the same cache row simultaneously under the locked V2/V5/V6 shape (module 5 reads only `in_void = 0`, module 6 only `in_void = 1`), so no shared lock or shared table is needed, only a consistent pattern |
 | `ListClaimableCachesUnlocked(delveId, sectorId)` | a future delve-stage FE read surface (wave 5, out of this module's own scope — matches `loot-pack`'s own `PackDto` precedent of leaving the client layer to a later wave) |
 | The finding that `rpg_world_entities.at_sector_id` (written by `MoveParty`) is the party's live-position pointer | feeds back to `corpse-cache` (module 3), whose own spec left this exact pointer untraced as an open item — this module traced it; module 3's own implementation should reconfirm and cite it directly rather than re-deriving it |
-| The `world_sector`/`world_lane` reachability rule (§1a, 2026-09-13) — `WorldEntity.AtSectorId`/`OnLaneId` matched against `place_ref`, plus the reusable claim-exclusivity pattern above | `scoped-inventory-hierarchy`/`cargo-fate` — the natural owner of the actual claim write (into a legion's `rpg_world_entity_cargo` overlay), which this module deliberately does not build (§1a, §Boundaries) |
+| `ClaimCorpseCacheIntoCargoUnlocked` (§2a, 2026-09-13, later session) — the world-map claim-into-cargo write, built by this module rather than deferred | a future delve-stage/world-map FE surface (out of this module's own scope, matching `ListClaimableCachesUnlocked`'s own precedent above); no module in either program calls it today — `cargo-fate` was checked directly and confirmed to have no reason to (§Design 2a amendment) |
 
 ## Design-gate checklist
 
@@ -455,7 +599,10 @@ if (deleted == 0) continue; // another transaction already took this row — not
 [x] Subsystems: delve/party state (Data), item ownership (Data, read-only here), the loot-pack pack
     grid (Core, called not edited) — no Status/ActorHub/World-Step subsystem touched.
 [x] Read this session, in full: deployment-hierarchy-ideal.md (both halves); deployment-hierarchy-map.md;
-    spec-corpse-cache.md; spec-cache-decay-void.md; spec-loot-pack.md.
+    spec-corpse-cache.md; spec-cache-decay-void.md; spec-loot-pack.md. **Later session, second
+    amendment:** spec-cargo-fate.md (full, re-opened fresh to verify its own Interface table rather than
+    trusted from the earlier citation); spec-legion-cargo.md (full — the new cross-program dependency,
+    §2a).
 [x] Code cited by file:line, opened this session: RpgStore.Delve.cs (:77-141, :164-204, :321, :347-350,
     :491, :762-856, :1209-1251, :1619-1641), RpgStore.World.cs (:92-102), RpgStore.Items.cs (:85-98,
     :152-171), Core/Delve/Pack/PackGrid.cs, PackArranger.cs, PackMoves.cs, PackAutopilot.cs, PackDto.cs,
@@ -479,8 +626,13 @@ if (deleted == 0) continue; // another transaction already took this row — not
     §7 sign-off" framing, with the reasoning shown, not asserted.
 [x] Amendment 2026-09-13 (later session): this module's own "delve-only in practice" claim (§Locked
     anchors) is corrected — `world_sector`/`world_lane` caches never flip `in_void` under
-    `cache-decay-void`'s own V5 amendment, so this module now also serves those two kinds (§1a). The
-    claim write-path into a legion's `rpg_world_entity_cargo` overlay is named as
-    `scoped-inventory-hierarchy/cargo-fate`'s own follow-on, not built here, since this module has no
-    dependency on that program's schema.
+    `cache-decay-void`'s own V5 amendment, so this module now also serves those two kinds (§1a).
+[x] Second amendment, same day, later session: the claim write-path into a legion's
+    `rpg_world_entity_cargo` overlay, originally named as `scoped-inventory-hierarchy/cargo-fate`'s own
+    follow-on, is corrected — `spec-cargo-fate.md` was re-opened fresh (not trusted from the earlier
+    citation) and its own Interface table shows nothing in either program depends on it; it was never
+    going to build this verb. Resolved by building `ClaimCorpseCacheIntoCargoUnlocked` in this module
+    instead (§2a), which does make this module newly, genuinely dependent on
+    `scoped-inventory-hierarchy/spec-legion-cargo.md`'s schema and capacity functions — read fresh this
+    session (`spec-legion-cargo.md` §Design 1-4, in full) and cited above, not assumed from house style.
 ```

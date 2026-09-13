@@ -23,7 +23,7 @@ add `python -m pytest tools/seedsmith/tests/adapters/trees`.
 
 ---
 
-## ▶ RESUME HERE (state at 2026-09-13, `/build full` run)
+## ▶ RESUME HERE (state at 2026-09-13, owner decisions landed — plan extended, `/build` not yet resumed)
 
 **Committed and gated:** P0.1, P0.1b, P0.2, P0.3, P1.1, P1.2, P1.3, P4.1, P4.2, P4.3a.
 Commits: `d352a027` `52ad4948` `bbe47eb1` `c82d6f5a` `c3ef3d9a` `bd5b651b` `38286a0d` `4e21bc2f`
@@ -33,36 +33,41 @@ Commits: `d352a027` `52ad4948` `bbe47eb1` `c82d6f5a` `c3ef3d9a` `bd5b651b` `3828
 rate 15.8% → 24.2%. **But `readable = 0.0% of bound`** — every bound atom is `stat.modify` and the
 resolver reads only `stat.derived`, so the tree still contributes nothing in play. That is P4.3.
 
-**The run stopped on two §4 blockers, both genuine (not tooling failures):**
+**Confirmed live this session (`docs/architecture/passive-tree-ideal.md` §17):** the derived-side
+consumption path is already fully built and tested end to end — lawn (`PassiveTree/Resolve/TreeAtomSource.cs`
+→ `AtomDerivedSubsystem` fan-in) **and** battle (`Battle/TreeAtomSource.cs` → `BattleStatComposer`),
+task B6/D6/D7. The Injector's own Hot `ActorHub` was *also* separately fixed to hydrate tree-bound
+derived atoms live (`actor-hub-and-combat-power-solid-fixing` T13, concurrent session) — the derived
+route was NOT the gap; the binder emitting the wrong kind was.
 
-1. **P2.1 — the mechanism-kind magnitude anchors are authored nowhere.** `bands.v1.json`'s
-   `statusMagnitudeAndDuration` group has ratios (chance 1.75‰, duration 1.4‰) but no `formula` and no
-   `sharePermilleOwnership`; its own worked example says *"illustrative, inherited, not balanced"*;
-   `spec-numerics.md:210-212` says those shares are *"specced when their families are resolved"*; and
-   `tier-bands.v5.json` has **no** per-family chance/duration surface. No non-magnitude family carries
-   an explicit `amount` either (checked: 51 families, 0 with `amount`). The registry's own rule is
-   *"reject at import, not guess one"*, so inventing the anchor IS the defect. **Needs:** the owner (or
-   the power program) to publish the anchors — a `power-scale.v3` curve for the magnitude kinds (R10)
-   **and** a chance/duration anchor for `status.apply`. Nothing downstream of P2.1 is reachable until
-   this exists.
+**Both §4 blockers are now RESOLVED by owner decision (2026-09-13):**
 
-2. **P4.3 — the two frozen specs disagree on the kind a tree node carries.**
-   `spec-tree-resolve.md` §2.1 + the plan's `channelFamily` quota axis say **`stat.derived`**; the
-   binder and the whole committed corpus are **`stat.modify`** (261 atk + 76 defense, 0 derived), and
-   `Resolve/TreeAtomSource` skips every one. The owner's *direction* is on record ("both, unified"),
-   but the **mechanism** is not: the derived route needs P5 + P3 (both blocked by #1), and the primary
-   route needs a new producer path that locks behavior and therefore a `decisions.md` row first.
+1. **P2.1 (mechanism-kind anchors) — ANSWERED: publish now.** The power program publishes
+   `power-scale.v3.json` (R10, 20 channels) **and** a new `status.apply` chance/duration anchor. Real
+   work, not yet built — Phase 2/3 are UN-DEFERRED and actionable. See P2.1 below (defer flag removed).
+2. **P4.3 (kind fork) — ANSWERED: both kinds.** Derived route proceeds exactly as originally scoped
+   (P5 + P3 dependency unchanged). Primary route is corrected from the original proposal — **not** a
+   battle-side `FA1`/`BattleStatModifierLedger` bolt-on; it contributes through **`ActorHub`** as a
+   registered `IActorStatSubsystem` (owner's own correction: *"it is actor hub, not battle engine"*),
+   matching the repo's One-ActorHub-compose hard rule. Split out to **Phase 11** below because it is
+   architecturally distinct work (a new Core subsystem, not a binder/resolver change) and because of
+   blocker #3.
+3. **NEW real blocker — `solid-run-20260912-eb53` (worktree `actor-hub-and-combat-power-solid-fixing`).**
+   Actively fusing `ActorHub`/`BattleStatComposer` and relocating subsystem registration
+   (`src/FusionRpg.Core/**`, `scripts/guard-actor-hub.ps1`) — the exact surface Phase 11 needs to
+   register against. Status as read this session: T1–T23 done, "program complete, owner sign-off
+   pending," most recent commit enables agent-shell git merge — **close, not stuck.**
+   **Named resolver:** owner merge of that worktree. **Default if this plan reaches Phase 11 before
+   it merges:** skip Phase 11, ship Phases 0–10 (the derived route reaches full playability on its
+   own), track Phase 11 as a standing follow-up. Phase 11 also needs its own `decisions.md` row
+   (AGENTS.md: an architecture change that locks behavior) — write it only after the merge, against
+   the merged subsystem contract, not before.
 
-**Concrete ask for the owner (smallest unblocking set):**
-- publish the missing balance anchors (chance/duration for `status.apply`; curves for the 20
-  curve-less channels) so Phase 2–3 can run; **or** say "exclude the mechanism kinds from the tree
-  vocabulary for now" and the plan re-scopes to magnitude-only.
-- decide P4.3's route: **(A)** derived-only per `spec-tree-resolve` §2.1 (once P2/P3/P5 land), or
-  **(B)** lock a primary producer path in `decisions.md` (the equipment/`BuildEquip` shape).
-
-**First thing to re-check on resume:** the shipped `progression.bonus.atk → atk` bridge
-(`ActorHub.MergeAppliedCombat`, `EntityApply.cs:404`) — if a derived-channel atom on
-`progression.bonus.atk` reaches a live `atk`, option A is sufficient and option B is unnecessary.
+**L0 added — new Phase 10, not blocked, safe to build in parallel with everything above.**
+`effect-pipeline` modules 11 `affix-power-class` / 12 `affix-channel-weights` — specced 2026-09-03,
+still zero `src/` lines as of today. Not required for playability (P5's own vocabulary-restriction
+task gets the tree readable without it), but the owner asked for it in this round: it fixes the
+narrow, accidental 26-family vocabulary (Herfindahl 0.027) with a principled distribution.
 
 ---
 
@@ -172,10 +177,14 @@ guard that prevents a stale vintage from being reported as healthy.
 
 ## Phase 2 — expander: non-magnitude kinds (R7, R8)
 
-### P2.1: Teach `FamilyExpansion` the mechanism-kind formulas — ⛔ DEFERRED (needs an owner balance decision)
+### P2.1: Teach `FamilyExpansion` the mechanism-kind formulas — ✅ UN-DEFERRED 2026-09-13 (owner: publish anchors now)
 
-**Verified 2026-09-13 during `/build full`. This is a data gap, not a code gap — do not implement by
-inventing a number.** The formulas' *shape* is locked, but their *anchors* are authored nowhere:
+**Owner decision (2026-09-13, /spec round):** publish the missing anchors now (Decision B, "publish
+anchors now" over "rescope to magnitude-only"). This task is actionable; the anchors themselves
+(`power-scale.v3.json`, the `status.apply` chance/duration anchor) are still real work — see P3.1 and
+the new anchor sub-task below. **Verified 2026-09-13 during `/build full`, still accurate. This is a
+data gap, not a code gap — do not implement by inventing a number.** The formulas' *shape* is locked,
+but their *anchors* were authored nowhere as of this reading:
 
 - `bands.v1.json` → `powerBand.channelFamilyGroups.statusMagnitudeAndDuration` has **no `formula` and
   no `sharePermilleOwnership`** key. It gives `twoLadderRule` (chance 1.75‰, duration 1.4‰ *mandatory*),
@@ -192,11 +201,11 @@ inventing a number.** The formulas' *shape* is locked, but their *anchors* are a
   must reject at import, not guess one."* The existing tool already follows it — `Program.cs:130-138`
   returns `null` for a channel with no `BattleRuleset` curve and refuses honestly.
 
-**The owner decision (plan §6 A1/A5):** author the missing anchors as a new published balance surface
-— a `power-scale.v3.json` curve for the magnitude kinds (already R10/P3.1) **and** a chance/duration
-anchor for `status.apply` (new; not currently in any plan item). Until it exists, the honest behavior
-is the status quo: refuse by name. **Deferred as a §4 "spec genuinely silent on a product decision"
-stop; P4.1 was taken instead (eligible, independent, and on the critical path).**
+**The owner decision (plan §6 A1/A5, confirmed again 2026-09-13):** author the missing anchors as a
+new published balance surface — a `power-scale.v3.json` curve for the magnitude kinds (already
+R10/P3.1) **and** a chance/duration anchor for `status.apply` (new sub-task: `P3.1b`, see Phase 3).
+Until the anchor is published, the honest behavior stays the status quo: refuse by name. No longer a
+§4 stop — build P3.1/P3.1b, then this task.
 
 ### P2.1 (original task text, retained for reference): Teach `FamilyExpansion` the mechanism-kind formulas
 **Spec:** `bands.v1.json` `statusMagnitudeAndDuration` + `familiesOutOfFourWaySplit`;
@@ -257,6 +266,18 @@ add a §10.2 row per new curve, and make the generator read the latest.
 - [ ] The 20 `no referenceBaseGameUnits` refusals drop to **0**
 - [ ] `guard-power` passes
 **Depends on:** P2.2. **Scope:** L (cross-program).
+
+### P3.1b: Publish a `status.apply` chance/duration anchor — NEW 2026-09-13 (Decision B)
+**Spec:** `bands.v1.json` `statusMagnitudeAndDuration` (ratios only, chance 1.75‰/duration 1.4‰, no
+base); `spec-numerics.md:210-212` ("specced when their families are resolved"). **Owner: publish now.**
+**Description:** author the missing base/`sharePermilleOwnership` anchor `bands.v1.json` itself says
+does not exist yet, as a reviewed addition (never an in-place edit of the frozen file) — the power
+program's call on the number, this program's call on wiring it into `FamilyExpansion`.
+**Acceptance:**
+- [ ] A published anchor exists for `status.apply` chance AND duration, with the 1.75/1.4 ratios intact
+- [ ] `bands.v1.json` is unedited; the anchor lives in its own reviewed addition/new file
+- [ ] `FamilyExpansion` reads it and the 40 P2.1 refusals for this group drop to 0
+**Depends on:** P3.1. **Scope:** M (cross-program — power program owns the number).
 
 ### P3.2: Publish the missing `opWeightPermille` rows (if any remain)
 **Spec:** `tier-bands` `_tuning`. **Description:** after P2.2/P2.3, re-measure the op refusals. Any
@@ -329,34 +350,26 @@ of bound**. Fixed: `bound_with_readable_atoms`, `bound_atoms_by_kind`, `unreadab
 a named `DEFECT` line when no readable kind binds, and a test asserting `READABLE_KIND_ID` against the
 resolver source so the census cannot drift from the thing it measures. 37 census tests, 545 tree tests.
 
-### P4.3: Make binder and resolver agree on kind, for both kinds (R4) — ⛔ DEFERRED (architecture fork)
+### P4.3: Make binder and resolver agree on kind — DERIVED ROUTE ONLY (R4) — ✅ UN-DEFERRED 2026-09-13
 
-**Owner direction is on record** (Bundle C; plan §6 A1: *"both, unified — one battle engine, the lawn
-and battle read modes are not split"*). **What is NOT specified is the mechanism, and the two specs
-give opposite answers:**
+**Owner decision, 2026-09-13 (/spec round): both kinds, confirmed.** Split in two, because the two
+routes are architecturally different work with a different blocker:
 
-- `spec-tree-resolve.md` §2.1: a tree node carries **`stat.derived`**; the plan's own quota axis agrees
-  (`channelFamily` is drawn from the derived-stat catalog — `progression.bonus.atk`, `combat.power.omni`,
-  per `spec-tree-plan.md:739`).
-- The committed corpus is **100% `stat.modify`**: 22 of 30 generated families are `stat.modify`, the
-  binder prices primary channels for them, and a fresh bind produces `stat.modify/atk: 261`,
-  `stat.modify/defense: 76`, `stat.derived: 0`. `Resolve/TreeAtomSource.BoundAtomsFor` skips every one.
+- **Derived half — THIS task.** The language stage draws from the quota cell's *derived*
+  `channelFamily` rather than a branch tag (R1/P5) **and** the 8 `stat.derived` families' pool
+  channels resolve (P3.3 — P4.1 chose `refuse` for pools at bind time, so they cannot bind until
+  their pool is registered). No architecture change; proceeds once P3/P5 land, same as originally
+  scoped. **This alone reaches full playability** — the lawn+battle consumption path for `stat.derived`
+  is already built and tested (B6/D6/D7), confirmed again this session (`passive-tree-ideal.md` §17).
+- **Primary half — moved to Phase 11**, `P11.1`. Corrected from the original proposal (a
+  `FA1`/`BattleStatModifierLedger` bolt-on): the owner named the mechanism explicitly —
+  *"it is actor hub, not battle engine"* — so the primary contribution registers as an
+  `IActorStatSubsystem` on `ActorHub`, the repo's single compose gate for both lawn and battle
+  (`decisions.md` "ActorHub sole Hot compose gate"). Blocked on the `solid-run-20260912-eb53` merge
+  (see ▶ RESUME HERE) and needs its own `decisions.md` row, written after that merge.
 
-**Both routes to "both kinds" leave this task's scope:**
-- **Derived half** needs the language stage to draw from the quota cell's *derived* `channelFamily`
-  rather than a branch tag (R1/P5) **and** the 8 `stat.derived` families' pool channels resolved
-  (P3.3) — P4.1 chose `refuse` for pools, so they cannot bind yet.
-- **Primary half** needs a NEW producer path (compile the node's `stat.modify` atoms to grants the way
-  `ActionContainerEffectResolverFactory.BuildEquip` does for equipment, then deliver via FA1
-  `ModifyStat`/`BattleStatModifierLedger`). That locks behavior, so AGENTS.md requires a
-  `decisions.md` row first — an architecture change, not a task-sized fix. The shipped
-  `progression.bonus.atk → atk` bridge (`ActorHub.MergeAppliedCombat`, `EntityApply.cs:404`) may
-  make the derived route sufficient, which is the first thing to check — but deciding that is not a
-  build-run's call when two frozen specs disagree.
-
-**This is a §4 stop: "the spec is genuinely silent on a product decision."** Unblocking order:
-P2.1's anchor → P3 → P5 → then P4.3 becomes implementable as the derived route, or the owner locks the
-primary-producer route in `decisions.md` and it becomes its own program.
+No longer a §4 stop for this half. Unblocking order unchanged: P2.1/P3.1/P3.1b's anchor → P3 → P5 →
+this task.
 
 **Measured detail (2026-09-13, live bind):**
 
@@ -371,20 +384,21 @@ resolve path (Resolve/TreeAtomSource.BoundAtomsFor):  `if (atom.KindId != "stat.
 than the live 407 because the committed corpus is older than the current generator), of which
 `readable=0.0%` — the number P4.3a's fix made visible.
 
-### P4.3 (original task text, retained for reference): Make binder and resolver agree on kind, for both kinds (R4)
+### P4.3 (current scope, derived route only — primary route is P11.1)
 **Spec:** `spec-tree-binder.md` §4.1; `spec-tree-resolve.md` §2.1, §12 test 15. **Owner answered:
-unified.** **Description:** the binder prices `stat.modify` (primary channels); `TreeAtomSource` reads
-only `stat.derived`. Per the owner, the tree contributes through **both** — `stat.derived` via the
-`AtomDerivedSubsystem` fan-in, `stat.modify` via the primary producer path the equipment/`BuildEquip`
-seam already proves — and both must reach the one shared engine. Implement both, and remove the
-silent skip that makes a `stat.modify` node inert.
+both kinds — this task builds the derived half; P11.1 builds the primary half.** **Description:** the
+binder must emit `stat.derived` for every node whose plan-assigned `channelFamily` is a derived
+channel (R1/P5's job to align the picker; this task's job to align the emission and remove the silent
+skip `Resolve/TreeAtomSource.BoundAtomsFor` performs today for `stat.modify`).
 **Acceptance:**
-- [ ] Every `NodeAtom.KindId` the binder emits is read by the resolve path for that kind
-- [ ] `stat.modify` and `stat.derived` nodes both move a real channel; neither is silently dropped
+- [ ] Every `NodeAtom.KindId` the binder emits for a derived-family node is `stat.derived`, and is read
+      by `Resolve/TreeAtomSource.BoundAtomsFor`
 - [ ] A `TreeFanInTests`-shape test registers the real subsystems and reads the moved channel back in **lawn and battle**
 - [ ] Lawn and battle totals agree byte-identically (spec-tree-resolve §12 test 15)
+- [ ] No `stat.modify` node is silently dropped either: it is bound and stored (for P11.1 to read),
+      never treated as an error by this task's own path
 **Depends on:** P4.2. **Scope:** L. **Files:**
-`Binding/TreeBinderRun.cs`, `Resolve/TreeAtomSource.cs`, `Battle/TreeAtomSource.cs`, tests.
+`Binding/TreeBinderRun.cs`, `Resolve/TreeAtomSource.cs`, tests.
 
 ---
 
@@ -460,8 +474,9 @@ band, and through the one shared engine.
 ## Phase 8 — regenerate the corpus and re-audit
 
 ### P8.1: Regenerate all 42 trees through the real CLI
-**Spec:** repair skill §6. **Description:** after Phases 1–7, regenerate `data/generated/passive-tree`,
-re-run the language stage (P5.1 changed its vocabulary and P1.3 its vintage), and record scope + why.
+**Spec:** repair skill §6. **Description:** after Phases 1–7 and 12, regenerate
+`data/generated/passive-tree`, re-run the language stage (P5.1 changed its vocabulary, P1.3 its
+vintage, P12.2 what a pool-shaped channel does), and record scope + why.
 **Regeneration is proof, not repair.**
 **Acceptance:**
 - [ ] `tools/TreeBinder --check` exits **0** on the regenerated corpus (byte-reproducible)
@@ -469,7 +484,7 @@ re-run the language stage (P5.1 changed its vocabulary and P1.3 its vintage), an
 - [ ] Every tree's verdict is `Pass`, or `Fail` with a named evidenced reason
 - [ ] `python -m seedsmith check --family PassiveTree` runs with real wired data (not `NOT_MEASURED`)
 - [ ] The hard gate(s) are genuinely measured and green
-**Depends on:** P7.1. **Scope:** L (machine time, resumable).
+**Depends on:** P7.1, P12.3. **Scope:** L (machine time, resumable).
 
 ### P8.2: Re-run the distribution census and prove the gates
 **Spec:** plan §4 gates G1–G10. **Description:** re-run P0.1's command and report the delta for every
@@ -513,16 +528,155 @@ no live suppression. Either land it or file with an owner and a default.
 
 ---
 
+## Phase 10 — NEW 2026-09-13: `effect-pipeline` L0 (affix distribution quality, not blocking)
+
+Not required for playability — P5 gets the tree readable without it. Owner asked for it this round
+because the resolvable vocabulary is narrow and accidental (26 families, Herfindahl 0.027, effective
+≈37 out of 101 chosen ids). **Safe to build in parallel with Phases 2–9**; only `P10.3` feeds back
+into Phase 5's vocabulary.
+
+### P10.1: `affix-power-class` (effect-pipeline module 11) — LLM classification stage
+**Spec:** `docs/architecture/effect-pipeline/spec-affix-power-class.md` (to be written as this task's
+first step — specced only in `effect-pipeline-map.md` today, no module doc exists yet). **Description:**
+classify every affix in the shipped corpus (`data/seed/items/affix-families/*.json`) into one
+closed-enum power class, carrying `basis`. Never a number, never a rate. Content-addressed and
+recorded so a re-run with the same ledger row does not re-call the model.
+**Acceptance:**
+- [ ] Every authored affix has a class + `basis`; the enum is closed; `check` fails on a missing class
+- [ ] Re-running against an unchanged ledger row makes zero model calls
+**Depends on:** none. **Scope:** L. **Files:** new `tools/seedsmith` classification module + spec.
+
+### P10.2: `affix-channel-weights` (effect-pipeline module 12) — deterministic weight policy
+**Spec:** `docs/architecture/effect-pipeline/spec-affix-channel-weights.md` (new, this task).
+**Description:** a deterministic `(powerClass × channel) → weight` table in `data/tuning/`;
+`poolFor(container, channel, rarity)` composes the candidate list L1 draws from. Runs **before** L1,
+consumes no RNG. `data/seed/channel-policy/defaults.json` grows from its current 2-entry stub to the
+six named channels (`drop`/`boss`/`set`/`socket`/`unique`/`craft`).
+**Acceptance:**
+- [ ] `channelWeights[powerClass][channel]` exists for all six named channels
+- [ ] `drop`-channel weight is never exactly zero (0.01% floor); any structural zero carries a comment
+- [ ] Adding L0 shifts no historical roll (proof: replays a fixed seed before/after, diff is empty)
+**Depends on:** P10.1. **Scope:** M.
+
+### P10.3: Tree-language consumes the L0 candidate list (R-2.6)
+**Spec:** `spec-tree-language.md` §4.2. **Description:** `permitted_for_branch` currently offers every
+branch-tagged family regardless of resolvability or fit; make it draw from L0's composed candidate
+list for the node's own `channelFamily`, folded with P5.1's resolvable-set restriction.
+**Acceptance:**
+- [ ] The picker reads L0's candidate list, not the raw branch tag
+- [ ] Concentration (Herfindahl) is re-measured and reported against the P5.3 baseline
+**Depends on:** P10.2, P5.1. **Scope:** M.
+
+---
+
+## Phase 11 — NEW 2026-09-13: ActorHub primary producer (`stat.modify` route) — ⛔ PRE-WORK GATE
+
+**Gate, not a checkpoint — genuinely irreversible.** `solid-run-20260912-eb53`
+(`actor-hub-and-combat-power-solid-fixing`) is fusing `ActorHub`/`BattleStatComposer` and relocating
+subsystem registration on `src/FusionRpg.Core/**` right now. Registering a new `IActorStatSubsystem`
+against that surface mid-fusion is a collision with no clean repair after the fact — this passes both
+"Gates vs. checkpoints" tests (irreversible; no reversible default exists for *how* to register against
+a surface that is being restructured). **Named resolver:** owner, merging that worktree. **Stated
+default if this plan reaches Phase 11 unresolved:** skip it — Phases 0–10 already deliver full
+playability via the derived route — and carry Phase 11 as a tracked, non-blocking follow-up.
+
+### P11.0: Write the `decisions.md` row (AGENTS.md: architecture that locks behavior needs one first)
+**Depends on:** `solid-run-20260912-eb53` merged. **Description:** write the row against the *merged*
+subsystem contract, not the pre-merge one — writing it earlier risks locking against an interface the
+fusion is about to change. Names: the new subsystem, its `ContributionSourceIds` grammar
+(`tree.{treeId}.{nodeId}`), and that it is additive to the derived route, not a replacement.
+**Scope:** S.
+
+### P11.1: Register a new `IActorStatSubsystem` carrying the tree's `stat.modify` atoms
+**Spec:** `actor-hub-ssot.md` §8.1 (SourceId grammar); `decisions.md` "ActorHub sole Hot compose gate".
+**Description:** a new subsystem reads bound `stat.modify` atoms (already stored by P4.3's binder,
+never dropped) and contributes them into `ActorHub.Resolve`/`ResolveDerived`, GG-49 SourceId
+`tree.{treeId}.{nodeId}`. **No BattleStatComposer bolt-on, no private fold** — once solid-run's fusion
+lands, both lawn and battle read Hub output through the same path this subsystem feeds.
+**Acceptance:**
+- [ ] A real `IActorStatSubsystem` is registered, contributing `stat.modify`-kind tree atoms
+- [ ] `guard-actor-hub.ps1` passes — no second composer, no `BattleStatComposer`-only path
+- [ ] A `TreeFanInTests`-shape test proves the contribution reaches Hub output in **both** lawn and
+      battle reads, byte-identical
+**Depends on:** P11.0, P4.3. **Scope:** M–L. **Files:** new `src/FusionRpg.Core/Stats/Derived/Subsystems/*.cs`, `ActorHub.cs` registration, tests.
+
+### P11.2: Live-boot proof — a real allocated primary-kind node changes a number
+**Spec:** `spec-tree-resolve.md` §14 acceptance 1–4a. **Description:** same shape as P7.1/P8.3, scoped
+to a `stat.modify` node specifically, proving the Decision-A "both kinds" promise end to end.
+**Acceptance:**
+- [ ] One owned, gate-open `stat.modify` node changes a real actor number on the lawn
+- [ ] The same node's contribution is visible in a battle read, through Hub, not a bolt-on
+**Depends on:** P11.1. **Scope:** M.
+
+---
+
+## Phase 12 — NEW 2026-09-13 (plan-coverage audit): the real join, not the patch
+
+**Why this exists.** P4.3 (Phase 4) is a minimal hand-patch to the tree's own bespoke
+`Binding/AffixComposer.cs` — real work, and the fastest path to a readable tree, but it keeps a
+second, parallel resolver alive beside the shared `Effects/Atoms/Resolver` (module 2). Per this
+repo's SOLID-is-binding hard rule, extending a bespoke seam is allowed only if the remediation is
+**named and sequenced**, not left implicit — this phase is that naming. It also closes R-1.1 and
+R-3.1–3.3 from the repair report, both dropped when Phase 10/11 were added and caught by this audit.
+**Bonus:** it supersedes P4.1's "refuse by name" disposition for pool-shaped channels —
+`spec-channel-pool.md` §4 already says the roll is module 2's job, so once the tree delegates to it,
+pool nodes stop being a permanent refusal.
+
+### P12.1: Disposition the tree as `effect-pipeline`'s fifth path
+**Spec:** `effect-pipeline-map.md` §1 (currently dispositions four paths — atom layer, `mods_json`,
+patron plugin, aura catalog — with the invariant *"an actor never receives the same source through two
+paths"*). **Description:** add the passive tree as path 5, stating its ownership and relationship to
+the other four, before the code below makes it true.
+**Acceptance:**
+- [ ] `effect-pipeline-map.md` §1 names the tree as a dispositioned path
+- [ ] The "never twice" invariant is restated for it explicitly
+**Depends on:** none. **Scope:** S. **Files:** `docs/architecture/effect-pipeline-map.md`.
+
+### P12.2: Delegate tree-atom resolution to the shared `Resolver` (R-1.1)
+**Spec:** `Effects/Atoms/Resolver.cs` (module 2, five-step order, per-layer RNG streams);
+`spec-tree-binder.md` §4.1. **Description:** `Binding/AffixComposer.Resolve` is a catalog-local copy
+of what `Resolver` already does. Replace or delegate it so there is **one** resolution implementation
+— per D24, this stays a **bake-time, single-resolve** call (never a per-player roll): the tree is
+static content, and `Resolver`'s determinism is what makes baking its output legal at all.
+**Acceptance:**
+- [ ] `AffixComposer.Resolve` is deleted or delegates to `Resolver`; no parallel resolution logic remains
+- [ ] A test asserts emitted `channelId` ∈ the node's own permitted `channelFamily` (R-1.2's mismatch
+      case is a named refusal, never a silent divergence)
+- [ ] Pool-shaped channels resolve through `ChannelPool` (E30) at this same bake-time call, superseding
+      P4.1's "refuse by name" interim disposition — or still refuse, but naming *why Resolver itself*
+      refused, not the tree's own missing capability
+- [ ] All 42 trees still `--check` clean (no unhandled exception regression from P4.1)
+**Depends on:** P12.1, P4.3. **Scope:** L. **Files:** `Binding/AffixComposer.cs`, `Binding/TreeBinderRun.cs`, tests.
+
+### P12.3: Bind the tree as a `skill`-container producer via `InstanceProducer` (R-3.2/3.3)
+**Spec:** `spec-container-schema.md`; `definitions.md:41` (`^skill\.[a-z0-9-]+$`); `ContainerRow.cs:29`.
+**Description:** a node becomes an affix inside a `skill` container, materialized by `InstanceProducer`
+(module 4 — already has production callers elsewhere, per `passive-tree-ideal.md` §13.2's 2026-09-13
+correction) into a real `InstanceRow` + `BindingRow`, instead of the tree's own `NodeAtom` record.
+**Acceptance:**
+- [ ] Container ids follow `definitions.md:41`'s pattern; a load-time validator refuses a malformed one
+- [ ] A node yields a real `InstanceRow` + `BindingRow` through `Resolver`'s five-step order
+- [ ] `--check --family PassiveTree` reads real wired data, not `NOT_MEASURED`
+**Depends on:** P12.2. **Scope:** L. **Files:** `Binding/TreeBinderRun.cs`, `Catalog/NodeAtom.cs` (or its replacement), tests.
+
+**Note for Phase 8:** once Phase 12 lands, P8.1's regeneration picks up any pool-shaped nodes that were
+previously refused. Re-run P8.2's census after Phase 12, not only after Phase 6.
+
+---
+
 ## Ask-first items (owner decisions)
 
 | # | Decision | Owner direction so far | Blocking task |
 |---|---|---|---|
-| A1 | Publish `power-scale.v3.json` for 20 channel families | needs request to power program | P3.1 |
+| A1 | Publish `power-scale.v3.json` for 20 channel families | ✅ **ANSWERED 2026-09-13: publish now** | P3.1 |
 | A2 | `Replace`/`Flag` semantics: bind mechanism-less, or exclude? | owner leans "everything, unified" | P2.3 |
-| A3 | Add `More` to `NodeAtomOp`? | owner leans yes | P4.2 |
+| A3 | Add `More` to `NodeAtomOp`? | ✅ DONE — added, `38286a0d` | P4.2 (closed) |
 | A4 | Mechanism-carriage shape (`kMicro = 0` + real `kindId`, or new field)? | `kMicro = 0` + real `kindId` (default) | P6.1 |
-| A5 | Confirm the `statusMagnitudeAndDuration` reading for all non-magnitude kinds | registry is frozen and explicit | P2.1 |
+| A5 | Confirm the `statusMagnitudeAndDuration` reading for all non-magnitude kinds | ✅ **ANSWERED 2026-09-13: publish the anchor, registry stays frozen** | P2.1, P3.1b |
 | A6 | `tier-bands`/`power-scale` version publication is the power program's call | request + consume, never edit | P3.1, P3.2 |
+| A7 | Kind fork mechanism (not just direction) | ✅ **ANSWERED 2026-09-13: both kinds; primary route via ActorHub `IActorStatSubsystem`, never a battle-side bolt-on** | P4.3, P11.1 |
+| A8 | Include effect-pipeline L0 (modules 11/12) in this program's scope? | ✅ **ANSWERED 2026-09-13: yes, spec and build here** | P10.1–P10.3 |
+| A9 | `decisions.md` row for the ActorHub primary producer | ⛔ **OPEN — write after `solid-run-20260912-eb53` merges**, not before | P11.0 |
 
 ## Gate summary (plan §4)
 
@@ -540,3 +694,6 @@ no live suppression. Either land it or file with an owner and a default.
 | G9 | P8 | corpus byte-reproducible; `check --family PassiveTree` real |
 | G10 | P8 | mechanism class no longer worst; no tree binds 0% |
 | G11 | P9 | balance measured; no tree OP; GAP findings closed or filed |
+| G12 | P10 | L0 classifies + weights the corpus; tree-language consumes it; historical rolls unchanged |
+| G13 | P11 | primary-kind node reaches a real actor number via `ActorHub`, lawn **and** battle, `guard-actor-hub` green |
+| G14 | P12 | tree dispositioned as path 5; `AffixComposer`'s parallel resolve deleted/delegates to `Resolver`; pool channels resolve, not permanently refused |

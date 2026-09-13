@@ -351,3 +351,63 @@ No pre-work gate blocks a phase. T1 is a doc edit inside this program; every oth
 in-program work. The only external coordination (another session's file, shared `ci.yml`) is handled by
 **exclusion + owner coordination**, not by halting — and the archive tail (T20–T22) is a reversible
 default (defer to its own program) if it outgrows its cut point.
+
+
+---
+
+## Phase 8 — Burden audit follow-ups (BU1–BU4) — measured 2026-09-13
+
+**Full report:** [`docs/contributing/test-burden-audit.md`](../docs/contributing/test-burden-audit.md).
+The audit ran all 12 CI projects (~11 min total) plus 16 controlled probes (since removed). It found
+that the suite is 96.7% Data.Tests by summed time, that **Data.Tests is 4.2x slower parallel than
+sequential**, and that the whole thing hinges on a per-test-`Init()` cost — while also proving four
+things it was **not** (see the report's ruled-out table). The probes are gone; the report is the record,
+and it exists so this is not re-derived.
+
+- [ ] **BU1 — fix `EnsureColumn`'s swallowed `ALTER TABLE` (real defect, small).**
+  Description: `RpgStore.EnsureColumn` is `try { ALTER TABLE ... ADD COLUMN ... } catch { }`. On any
+  store where the column already exists it **throws and swallows a real `SqliteException` 41 times per
+  store** — every boot after the first, and every fresh in-memory test store. Measured **1.24ms vs
+  0.13ms** for a `PRAGMA table_info` check = **9.7x**, and it is the `catch { }` swallow class
+  [`testing-standard.md`](../docs/contributing/testing-standard.md) R3 bans, in production code.
+  Acceptance: `EnsureColumn` reads the column set once per table (or the schema method does) and only
+  `ALTER`s what is genuinely missing; no `catch { }`; behaviour identical on a fresh and an existing db.
+  Verify: a test that adds a column to an old schema and reads it back, plus the Data suite.
+  Files: `src/FusionRpg.Data/Sqlite/RpgStore.cs` (+ tests). Scope: S.
+  - ⚠️ **Boundary:** `src/FusionRpg.Data/**` is inside this session's record; `solid-run-20260912-eb53`
+    also claims it, so coordinate (its commits are elsewhere in the file, but confirm before editing).
+- [ ] **BU2 — cap Data.Tests parallelism at 2 threads (4.2x CI win).**
+  Description: measured monotonic curve — 1t 112.6s, **2t 87.0s (optimum)**, 4t 126.4s, 8t 222.1s,
+  16t 303.9s, 32t 367.1s. A pure-CPU control on the same box scaled 6.58x at 8t, so this is the store
+  path, not a busy machine. Apply via `test.runsettings` or the CI invocation (`xUnit.MaxParallelThreads`),
+  and record why in the standard so nobody "restores" the default.
+  Acceptance: Data.Tests wall drops from ~6 min to ~1.5 min in a `full` run; result count unchanged.
+  Verify: two timed full runs, same pass count (currently 1288).
+  Files: `test.runsettings` or `.github/workflows/ci.yml` + `docs/contributing/testing-standard.md`.
+  Scope: XS.
+  - ⚠️ **`test.runsettings` / `Directory.Build.props` belong to the merged `test-hang-guard` session** —
+    the CI invocation is the safer home.
+- [ ] **BU3 — investigate the 46ms `EnsureHotSchema` gap (unproven, do not guess).**
+  Description: extracted SQL runs in ~2.7ms and the 40 sub-methods total 8.66ms, yet `EnsureHotSchema`
+  measures **58ms**; re-`Init` on the same store is 2.2ms, so it is first-time population work. The
+  ~46ms is **unexplained**. Candidates to probe, in order: the 5 single-statement `CREATE INDEX`
+  calls the extractor did not time; whether the store's own `Exec` differs from raw execution in
+  connection/transaction state; whether `lock (_gate)` interacts with the schema path.
+  Acceptance: the gap is either explained with a measurement or explicitly closed as not-worth-it,
+  with the evidence recorded in the report.
+  Verify: a probe that times each of the 5 index statements and the store's `Exec` against raw.
+  Files: none committed (probe) + the report. Scope: S.
+- [ ] **BU4 — re-measure on an idle machine.**
+  Description: every number in the audit is from a box at **~82% CPU with four concurrent worktrees**.
+  The parallel-vs-sequential inversion is robust (monotonic, reproduced, with a CPU control), but the
+  absolute wall times need one clean run before BU2's win is quoted as final.
+  Acceptance: Data.Tests wall reported from a machine with no other agent running.
+  Verify: one timed run with the other worktrees idle.
+  Files: `docs/contributing/test-burden-audit.md` (numbers). Scope: XS.
+
+### What the audit already settled (do not re-test)
+- `ClearAllPools` lock convoy — **no** (with/without identical at every thread count).
+- GC pressure — **no** (260 KB/store, 0-1 gen0).
+- Batch shape / raw DDL / connection open — **no** (linear, cheap).
+- Machine contention — **no** (pure CPU scaled 6.58x on the same box).
+- Core/Server serialization — **deliberate and efficient** (Core: 13,369 tests, mean 4.6ms).

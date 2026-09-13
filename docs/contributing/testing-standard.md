@@ -133,6 +133,23 @@ halves" reason. **Do not "optimize" either guard onto the fast profile.**
 `full` is the only profile that catches a disk regression — hence the nightly workflow: it reruns
 everything unfiltered within a day, instead of waiting for a release tag.
 
+### Wall-clock is its own axis — see the burden audit
+
+The profiles above reduce what runs by *category*. **Test wall-clock is a separate axis, and the
+obvious reading of it is wrong.** [test-burden-audit.md](test-burden-audit.md) (measured 2026-09-13)
+records the two facts that matter before anyone tunes a "slow" test:
+
+1. **Per-test durations in a full-suite TRX are not cost.** Under parallelism they absorb contention —
+   the top 25 Data.Tests classes showed **53×–230× inflation** (median ~160×). Re-measure a suspect
+   test **in isolation** before concluding anything.
+2. **Data.Tests is fastest at ~2 threads, not 32** — 87s vs 367s wall, a **4.2×** difference. A pure-CPU
+   control on the same machine scaled 6.58× at 8 threads, so this is a property of the store path, not
+   of a busy box.
+
+That document also lists the hypotheses **already ruled out with numbers** (`ClearAllPools`,
+shared-cache mode, GC, batch shape, raw DDL, machine load), so they are not re-tested, and the two real
+defects it found (`EnsureColumn`'s swallowed `ALTER TABLE`; the `--no-build` stale-assembly trap).
+
 ---
 
 ## 7. The baseline register — every remaining line and why
