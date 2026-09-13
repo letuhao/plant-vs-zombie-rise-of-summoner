@@ -29,6 +29,9 @@ Start-Process dist\FusionRpg.Server\FusionRpg.Server.exe
 # Confirm before touching anything else
 Invoke-RestMethod http://127.0.0.1:5088/health
 # Expect: ok=true, injectorConnected=true, simEnabled=false
+Invoke-RestMethod http://127.0.0.1:5088/api/debug/lawn/state
+# Read state/asOf/sinceMs before assuming a clean slate -- a prior instance's board can still be
+# Cycling/Defeated/InMatch. See Step 6 and live-probe-standard.md §6.
 ```
 
 If a game process from an earlier test instance is still running, treat it as **the wrong frame**:
@@ -152,6 +155,24 @@ the real cause — both now self-report instead of requiring a manual event-log 
 
 Both checks run automatically inside `/lawn/quick-start` (`DebugEndpoints.cs`) — driving the API by
 hand still needs its own `board.end`/`match.result` check before trusting a poll to resolve.
+
+**Query it directly instead of re-deriving it by hand:**
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:5088/api/debug/lawn/state
+# { state: "InMatch"|"Defeated"|"MatchEnded"|"Cycling"|"Unknown", asOf, sinceMs, recentBoardEnds,
+#   latestMatchResult, note }
+```
+
+Call this **before** reporting any live-probe outcome, not just before a spawn/scenario call. It is
+read-only (no injector relay, no side effects) — safe to call as often as needed. See
+[live-probe-standard.md](../contributing/live-probe-standard.md) §6 for the full rule and the incident
+that produced it: an `{ ok: true }` response and an operator's own eyes disagreed, and there was no
+single query either side could check instead. `state: "Unknown"` cannot tell the main menu apart from
+the seed-picker screen (no passive telemetry fires while `Board` is null), and no state read can see
+what is actually rendered — a defeat overlay can outlive `debug.reset-board` clearing the entities
+behind it. When the question is what a human sees on screen, ask the human; this answers what the
+simulation recorded.
 
 ### Step 7 — Tear down before the next test instance
 

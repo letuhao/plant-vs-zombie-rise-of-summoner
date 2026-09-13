@@ -112,7 +112,46 @@ not claimed as done.
 
 ---
 
-## 6. Definition of done for a live probe
+## 6. Lawn run state awareness — never claim success from a single response
+
+**Why this exists.** 2026-09-14, chasing the `lawn/quick-start` seed-picker/cycling/defeat fixes: an
+agent read `/lawn/quick-start`'s `{ ok: true, targetPtr: ..., plantPtr: ... }` response, with real
+`plant.spawn` events behind it, and reported the board recovered. The operator was looking at the
+actual game at the same moment and saw the vanilla defeat overlay ("重新开始") still on screen. Both
+readings were correct about different layers — the simulation had moved on (the scenario's own reset
+step really did clear and respawn entities), the rendered screen had not — and there was no single,
+queryable fact either side could check instead of one person silently eyeballing the game and the
+other reading an HTTP body. That gap, not either individual reading, was the defect.
+
+**The rule: before reporting a live probe's outcome, query the lawn's actual state — never infer it
+from one response, and never require a human to describe it by eye.** `GET /api/debug/lawn/state`
+(`DebugEndpoints.cs`) exists for exactly this: it classifies the board (`InMatch` / `Defeated` /
+`MatchEnded` / `Cycling` / `Unknown`) from the same event-log signals other debug tooling already
+emits, and reports which event decided it (`asOf`) and how long ago (`sinceMs`) — a "where and when"
+answer traceable to a real timestamp, never a guess.
+
+**What it cannot do — say so, do not paper over it.** `state: "Unknown"` cannot distinguish the main
+menu from the vanilla seed-picker screen: nothing passively telemetered fires while `Board` is null
+(confirmed live — zero `board.start` events across a whole multi-hour session). And no passive state
+query can see what is actually *rendered*: `debug.reset-board` restores API-level spawn capability
+after a defeat, but the game's own defeat/victory overlay has no sanctioned dismiss command today, so
+the simulation and the screen can genuinely disagree for a while. When the question is what a player
+or operator sees, the answer is "ask them" — a state query is not a substitute for eyes on the actual
+game, it is a substitute for guessing when nobody's eyes are on it, or when two parties each have a
+different half of the picture and neither one's half is labeled as partial.
+
+**Every ad-hoc fix to a stuck live run is a debt until it is a tool.** Diagnosing the seed-picker
+screen, the `board.start`-never-fires profile quirk, the cycling-board loop, and the defeat state all
+started as one-off `curl`/event-log archaeology in a single session. Each is now a permanent,
+queryable capability (`lawn/quick-start`'s self-healing steps, `lawn/state`'s classification, or a
+runbook-documented manual sequence) — not a war story repeated next time the same state recurs. When
+the next live-run mistake is found, the fix is the same shape: a metric or endpoint that answers the
+question mechanically, added here and to [live-test-ssot.md](../runbook/live-test-ssot.md) §0/§6, not
+another paragraph of "if you see X, try Y" for a future reader to rediscover by trial and error.
+
+---
+
+## 7. Definition of done for a live probe
 
 Not:
 
@@ -133,7 +172,7 @@ State explicitly, per probe:
 
 ---
 
-## 7. Enforcement
+## 8. Enforcement
 
 - [`DESIGN-GATE.md`](../DESIGN-GATE.md) §1 topic index points here for any debug-API or live-verification
   work.
