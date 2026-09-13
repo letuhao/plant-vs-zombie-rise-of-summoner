@@ -45,6 +45,20 @@ public readonly struct GameEventRec
     public readonly int SourceGrantIdx; // interned grant id; -1 = none; set → never coalesce
     public readonly int MatchKeyIdx;    // interned at record time, never drain time (audit §4c.1)
     public readonly int PairId;         // dealt/taken causal pair of one physical hit; 0 = none
+    /// <summary>
+    /// lawn-hit-attribution (T6): the SWING identity, distinct from <see cref="ActorPtr"/> (now the
+    /// firing creature, not the projectile). For a projectile hit this is the bullet's own pointer —
+    /// one bullet piercing N victims shares one <see cref="SwingPtr"/> across N records, so a future
+    /// consumer (`lawn-hit-entry`) can fire one action trigger for N damage applications (D8). For
+    /// melee, <see cref="IntPtr.Zero"/> — the swing identity there is the existing
+    /// <c>(ActorPtr, Frame)</c> pair, which needs no extra field.
+    /// Optional/trailing on purpose: <c>EventCoalescer.Merge</c> (a different task's file) rebuilds a
+    /// record positionally and does not thread this field through a merge — a coalesced record's swing
+    /// id degrades to the <c>(ActorPtr, Frame)</c> fallback, the same pre-existing behaviour the
+    /// coalescer already has for melee (Frame is not part of its merge key either). Swing-id-aware
+    /// dedup across a coalesced window is `lawn-hit-entry`'s job, not this field's.
+    /// </summary>
+    public readonly IntPtr SwingPtr;
 
     public GameEventRec(
         GameEventKind kind,
@@ -60,7 +74,8 @@ public readonly struct GameEventRec
         byte chainDepth,
         int sourceGrantIdx,
         int matchKeyIdx,
-        int pairId)
+        int pairId,
+        IntPtr swingPtr = default)
     {
         Kind = kind;
         Frame = frame;
@@ -76,6 +91,7 @@ public readonly struct GameEventRec
         SourceGrantIdx = sourceGrantIdx;
         MatchKeyIdx = matchKeyIdx;
         PairId = pairId;
+        SwingPtr = swingPtr;
     }
 
     public bool IsCoalescible => ChainDepth == 0 && SourceGrantIdx < 0;

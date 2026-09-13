@@ -1,7 +1,9 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Combat;
+using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Events;
+using FusionRpg.Core.Stats.Derived;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Events;
@@ -138,5 +140,133 @@ public class EventDrainIntegrationTests
         Assert.NotNull(seen);
         Assert.Equal(EffectTriggers.OnDamageDealt, seen!.Trigger);
         Assert.Equal("plant", seen.Side); // DTO side = attacker, mirroring EffectEventAdapterCore
+    }
+
+    [Fact]
+    public void Entity_grant_bound_to_the_firing_plant_matches_a_projectile_hit()
+    {
+        // Dropped success criterion (lawn-combat-wire-todo.md): "An entity:{ptr} grant bound to the
+        // firing plant matches on a projectile hit" — the precondition `basic-attack-grant` (T10)
+        // rests on. Before T6, a projectile hit's ActorPtr was the BULLET's own ptr, so an
+        // entity:{firingPlantPtr} grant could never match (EffectOwnerKey.MatchesEvent's `entity:`
+        // branch tests ev.ActorPtr / ev.TargetPtr, never the bullet). Recording with the shooter's
+        // ptr as ActorPtr (what EventDrainHost.TryRecordDealtFromBullet now does) fixes this.
+        var firingPlantPtr = new IntPtr(0x5001);
+
+        EffectEventDto? seen = null;
+        var captor = new EventDrain(dto => seen = dto);
+        captor.Record(new GameEventRec(
+            GameEventKind.CombatHit, frame: 1, seq: captor.NextSeq(),
+            actorPtr: firingPlantPtr, targetPtr: new IntPtr(0xB),
+            typeId: 1, targetTypeId: 0, side: GameEventSide.Zombie,
+            amount: -10, hitCount: 1, chainDepth: 0,
+            sourceGrantIdx: -1, matchKeyIdx: -1, pairId: 0,
+            swingPtr: new IntPtr(0xBEEF)));
+        captor.Drain(long.MaxValue);
+        Assert.NotNull(seen);
+        Assert.Equal("5001", seen!.ActorPtr); // the plant, never "BEEF" (the bullet)
+
+        var grant = new EffectGrant { OwnerKey = EffectOwnerKeys.Entity("5001") };
+        Assert.True(EffectOwnerKey.MatchesEvent(grant, seen));
+
+        // Falsifier: a grant bound to the BULLET's own ptr (the pre-fix attacker) must NOT match —
+        // proves this isn't a match-everything degenerate case.
+        var bulletBoundGrant = new EffectGrant { OwnerKey = EffectOwnerKeys.Entity("BEEF") };
+        Assert.False(EffectOwnerKey.MatchesEvent(bulletBoundGrant, seen));
+    }
+
+    [Fact]
+    public void Differential_attacker_power_reaches_the_damage_packet()
+    {
+        // T6 acceptance: "the attacker's own power reaches the packet", proven as a differential —
+        // two different real GameEventRec.ActorPtr values, each resolving to a snapshot with a
+        // DIFFERENT composed combat.power.fire, must yield two different real combat deltas for an
+        // otherwise-identical hit. Exercises the real production chain this task wires:
+        // GameEventRec.ActorPtr -> EventDrain.ToDto -> EffectEventDto.ActorPtr -> DamagePacketBuilder
+        // (packet.ActorPtr = ev.ActorPtr, DamagePacketBuilder.cs:27) -> OverlayCombatMath.Finalize ->
+        // OverlayCombatCalculator. Not "isn't the {Hp=100,MaxHp=100,Atk=10} stub" — that passes even
+        // when the wiring is broken a different way (InjectorCombatBridge.cs:57-59's fallback answers
+        // ANY unresolvable key, stub or not). Accuracy/crit are pinned to a saturating value so the
+        // comparison needs no RNG-seed choreography: CombatProbability.RollSuccess and the sigmoid
+        // both short-circuit to a fixed outcome once probability reaches 1.0 in double precision.
+        var targetPtr = new IntPtr(0xB);
+        const long weakPower = 10;
+        const long strongPower = 400;
+
+        long Deliver(IntPtr attackerPtr, long power)
+        {
+            var attacker = new CombatActorSnapshot(
+                ActorDerivedSnapshot.StubNeutral().Overlay(new[]
+                {
+                    new KeyValuePair<string, double>(DerivedStatChannels.CombatPowerFire, power),
+                    // Saturate hit/crit so the result depends on power alone, never a coin flip.
+                    new KeyValuePair<string, double>(DerivedStatChannels.CombatAccuracyFire, 1_000_000),
+                    new KeyValuePair<string, double>(DerivedStatChannels.CombatCritRateFire, 1_000_000)
+                }),
+                ActorElementTypes.Neutral);
+            var defender = new CombatActorSnapshot(ActorDerivedSnapshot.StubNeutral(), ActorElementTypes.Neutral);
+
+            var math = OverlayCombatMath.Create(
+                (ptr, attackerLess) => attackerLess
+                    ? CombatActorSnapshot.AttackerLess()
+                    : (ptr == "B" ? defender : attacker),
+                rng: new SeededCombatRng(0)); // never actually drawn — both probabilities saturate
+
+            long? result = null;
+            var drain = new EventDrain(dto =>
+            {
+                var packet = DamagePacketBuilder.FromOverlay(
+                    new Dictionary<string, object?>
+                    {
+                        ["channel"] = "hp",
+                        ["amount"] = -100L,
+                        ["elementPayload"] = new List<object?>
+                        {
+                            new Dictionary<string, object?> { ["element"] = "fire", ["weight"] = 1.0 }
+                        }
+                    },
+                    dto);
+                result = math.Finalize(packet.SignedAmount, dto.TargetPtr!, packet, null);
+            });
+
+            drain.Record(new GameEventRec(
+                GameEventKind.CombatHit, frame: 1, seq: drain.NextSeq(),
+                actorPtr: attackerPtr, targetPtr: targetPtr,
+                typeId: 1, targetTypeId: 0, side: GameEventSide.Zombie,
+                amount: -100, hitCount: 1, chainDepth: 0,
+                sourceGrantIdx: -1, matchKeyIdx: -1, pairId: 0));
+            drain.Drain(long.MaxValue);
+
+            Assert.NotNull(result);
+            return result!.Value;
+        }
+
+        var weakerAttackerPtr = new IntPtr(0x1001);
+        var strongerAttackerPtr = new IntPtr(0x2002);
+        var weakDelta = Deliver(weakerAttackerPtr, weakPower);
+        var strongDelta = Deliver(strongerAttackerPtr, strongPower);
+
+        Assert.NotEqual(weakDelta, strongDelta);
+
+        // The weaker attacker's own number must match ITS OWN Hub snapshot computed directly —
+        // not merely "differ from the other" (that alone would pass for any two distinct wrong
+        // numbers too).
+        var expectedWeak = new OverlayCombatCalculator().Compute(
+            new OverlayCombatRequest
+            {
+                BaseOverlayDamage = 100,
+                Components = new[] { new ElementPayloadComponent(ElementTypeId.Fire, 1.0) },
+                Attacker = new CombatActorSnapshot(
+                    ActorDerivedSnapshot.StubNeutral().Overlay(new[]
+                    {
+                        new KeyValuePair<string, double>(DerivedStatChannels.CombatPowerFire, weakPower)
+                    }),
+                    ActorElementTypes.Neutral),
+                Defender = new CombatActorSnapshot(ActorDerivedSnapshot.StubNeutral(), ActorElementTypes.Neutral),
+                ForceHit = true,
+                ForceCrit = true
+            },
+            new SeededCombatRng(0)).SignedDelta;
+        Assert.Equal(expectedWeak, weakDelta);
     }
 }

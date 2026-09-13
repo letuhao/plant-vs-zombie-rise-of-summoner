@@ -165,6 +165,13 @@ public sealed class EffectEventDto
     [JsonPropertyName("sourceGrantId")] public string? SourceGrantId { get; set; }
     /// <summary>Merged physical hits this event represents (v2 coalescing); 1 = a single hit.</summary>
     [JsonPropertyName("hitCount")] public int HitCount { get; set; } = 1;
+    /// <summary>lawn-hit-attribution (T6): the SWING this OnDamageDealt event belongs to — a bullet's
+    /// own ptr (hex) for a projectile hit, or <c>actorPtr:frame</c> for melee. Distinct from
+    /// <see cref="ActorPtr"/> (the firing creature): one swing can carry N dealt events (one bullet
+    /// piercing N victims, or one multi-target bite), all sharing this id, so a future consumer can
+    /// fire one action trigger for N damage applications rather than N triggers. Additive nullable —
+    /// breaks no existing shape, every trigger that predates this field carries null.</summary>
+    [JsonPropertyName("swingId")] public string? SwingId { get; set; }
     /// <summary>E34 (spec-trigger-vocabulary.md §2.2): the wave number for OnWave. Additive nullable —
     /// breaks no existing shape, so FoundationContractVersion.Current stays at its current value.</summary>
     [JsonPropertyName("wave")] public int? Wave { get; set; }

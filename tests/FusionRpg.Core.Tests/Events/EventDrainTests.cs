@@ -31,12 +31,14 @@ public class EventDrainTests
             long target = 0xB,
             byte chainDepth = 0,
             long amount = -10,
-            int pairId = 0)
+            int pairId = 0,
+            long swingPtr = 0)
             => new(kind, frame: 1, seq: Drain.NextSeq(), actorPtr: new IntPtr(0xA),
                 targetPtr: new IntPtr(target), typeId: 1, targetTypeId: 2,
                 side: GameEventSide.Zombie, amount: amount, hitCount: 1,
                 chainDepth: chainDepth, sourceGrantIdx: -1,
-                matchKeyIdx: Drain.InternMatchKey("m1"), pairId: pairId);
+                matchKeyIdx: Drain.InternMatchKey("m1"), pairId: pairId,
+                swingPtr: new IntPtr(swingPtr));
     }
 
     [Fact]
@@ -96,6 +98,48 @@ public class EventDrainTests
         Assert.Equal("B", dto.TargetPtr);
         Assert.Equal("m1", dto.MatchKey);
         Assert.Equal(1, dto.HitCount);
+    }
+
+    [Fact]
+    public void Dto_swing_id_is_the_bullet_ptr_for_a_projectile_hit()
+    {
+        // lawn-hit-attribution (T6): a projectile hit's swing id is the bullet's own ptr, carried
+        // independently of ActorPtr (now the firing creature) — "the record gains a swing-id field"
+        // and "the DTO carries attacker and swing id independently" (spec-lawn-hit-attribution.md).
+        var h = new Harness();
+        h.Drain.Record(h.Rec(swingPtr: 0xC0FFEE));
+        h.Drain.Drain(1000);
+        var dto = Assert.Single(h.Seen);
+        Assert.Equal("A", dto.ActorPtr);
+        Assert.Equal("C0FFEE", dto.SwingId);
+        Assert.NotEqual(dto.ActorPtr, dto.SwingId);
+    }
+
+    [Fact]
+    public void Dto_swing_id_falls_back_to_actor_and_frame_for_melee()
+    {
+        // Melee has no bullet-shaped identity — the swing id derives from (ActorPtr, Frame), the
+        // same identity _meleePairsByTarget/_meleePairsFrame already scope melee bookkeeping by.
+        var h = new Harness();
+        h.Drain.Record(h.Rec()); // no swingPtr — melee-shaped
+        h.Drain.Drain(1000);
+        var dto = Assert.Single(h.Seen);
+        Assert.Equal("A:1", dto.SwingId);
+    }
+
+    [Fact]
+    public void Two_records_sharing_one_swing_id_are_recognisable_as_one_swing()
+    {
+        // The dedupe key `lawn-hit-entry` (T9) will use: a piercing bullet hitting two different
+        // victims records TWO GameEventRecs (one per target) that share ONE swing id.
+        var h = new Harness();
+        h.Drain.Record(h.Rec(target: 0xB, swingPtr: 0xBEEF));
+        h.Drain.Record(h.Rec(target: 0xC, swingPtr: 0xBEEF));
+        h.Drain.Drain(10_000);
+        Assert.Equal(2, h.Seen.Count);
+        Assert.Equal(h.Seen[0].SwingId, h.Seen[1].SwingId);
+        Assert.Equal("BEEF", h.Seen[0].SwingId);
+        Assert.NotEqual(h.Seen[0].TargetPtr, h.Seen[1].TargetPtr);
     }
 
     [Fact]

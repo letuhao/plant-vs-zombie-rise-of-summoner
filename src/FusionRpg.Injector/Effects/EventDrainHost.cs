@@ -27,6 +27,19 @@ public static class EventDrainHost
     static readonly Dictionary<IntPtr, int> _meleePairsByTarget = new();
     static int _meleePairsFrame = -1;
 
+    // lawn-hit-attribution (T6): ambient melee attacker for a multi-target attack whose own Harmony
+    // hook has no target parameter (QingZombie.AttackPlants()/EternalZombie_a.AttackPlants() — the
+    // plural methods take no args, unlike the singular AttackPlant(Plant)). TakeDamage's own hook
+    // knows the target but not the true attacker (damageFrom is unreliable for melee — see the class
+    // comment on ZombieAttackPlant in GameHooks.cs), so the outer attack method's own Prefix/Postfix
+    // brackets who is currently swinging. A single slot is safe: PVZ Fusion drives all combat from the
+    // Unity main thread only, exactly like _meleePairsByTarget/_meleePairsFrame above. Frame-stamped so
+    // a Postfix skipped by an exception in the original method (Harmony does not guarantee a postfix
+    // runs after the patched method throws) cannot leak a stale attacker past its own frame.
+    static IntPtr _ambientMeleeAttackerPtr = IntPtr.Zero;
+    static int _ambientMeleeAttackerTypeId;
+    static int _ambientMeleeAttackerFrame = -1;
+
     public static EventDrain Drain => _drain ??= new EventDrain(EffectRuntime.OnDrained);
 
     /// <summary>Record path active — off in debug sessions (legacy fidelity path instead).</summary>
@@ -41,7 +54,18 @@ public static class EventDrainHost
     /// <summary>Bullet dealt (pea→zombie, projectile→plant). No pair — the taken side is
     /// suppressed at source for bullets (CombatHitEmitPolicy), matching v1.
     /// <paramref name="wasBullet"/> distinguishes "not a bullet → caller records taken" from
-    /// "bullet but ring overflow → drop counted, caller must NOT record taken" (I2).</summary>
+    /// "bullet but ring overflow → drop counted, caller must NOT record taken" (I2).
+    ///
+    /// lawn-hit-attribution (T6): the recorded ATTACKER is the firing creature —
+    /// <c>bullet.from</c> (Plant) or <c>bullet.from_zombie</c> (Zombie), chosen by
+    /// <c>bullet.shootByZombie</c> — never the bullet's own pointer. A bullet ptr has no ActorHub
+    /// baseline, so any Hub resolve on it fell to the stub <c>{Hp=100,MaxHp=100,Atk=10}</c>, and an
+    /// <c>entity:{ptr}</c> grant bound to the firing plant could never match a projectile hit
+    /// (spec-lawn-hit-attribution.md). <c>bullet.fromType</c> is deliberately NOT read here even
+    /// though it is a real field — it is a <c>PlantType</c> id (the engine's own naming, not ours)
+    /// and stays type-scoped for <c>GrantedBulletModifyAtoms</c>'s existing use; this module exists
+    /// precisely because per-INSTANCE attribution was missing. The bullet's own ptr survives as the
+    /// record's <see cref="GameEventRec.SwingPtr"/> — the swing identity, not the attacker.</summary>
     public static bool TryRecordDealtFromBullet(
         byte targetSide, Il2CppObjectBase? damageFrom, IntPtr targetPtr, int targetTypeId, int damage, out bool wasBullet)
     {
@@ -54,30 +78,68 @@ public static class EventDrainHost
         if (bullet == null) return false; // melee is the AttackPlant site's job
         wasBullet = true;
 
-        var fromType = 0;
-        try { fromType = (int)bullet.fromType; } catch { }
+        var shooterPtr = IntPtr.Zero;
+        var shooterTypeId = 0;
+        try
+        {
+            if (bullet.shootByZombie)
+            {
+                var z = bullet.from_zombie;
+                if (z != null)
+                {
+                    shooterPtr = z.Pointer;
+                    try { shooterTypeId = (int)z.theZombieType; } catch { }
+                }
+            }
+            else
+            {
+                var p = bullet.from;
+                if (p != null)
+                {
+                    shooterPtr = p.Pointer;
+                    try { shooterTypeId = (int)p.thePlantType; } catch { }
+                }
+            }
+        }
+        catch { shooterPtr = IntPtr.Zero; }
+
+        // A null shooter is ordinary — the firer already died, or an engine-spawned projectile with
+        // no owner — never an error, and NEVER a fallback to the bullet's own ptr: that would
+        // silently reintroduce the stub-resolve bug this module removes. No RPG contribution; the
+        // caller still treats this as "was a bullet" (wasBullet stays true above) so the vanilla
+        // taken-side record stays suppressed, matching existing bullet policy.
+        if (shooterPtr == IntPtr.Zero) return false;
+
         var d = Drain;
         return d.Record(new GameEventRec(
             GameEventKind.CombatHit, SafeFrame(), d.NextSeq(),
-            actorPtr: bullet.Pointer, targetPtr: targetPtr,
-            typeId: fromType, targetTypeId: targetTypeId, side: targetSide,
+            actorPtr: shooterPtr, targetPtr: targetPtr,
+            typeId: shooterTypeId, targetTypeId: targetTypeId, side: targetSide,
             amount: -Math.Abs(damage), hitCount: 1,
             chainDepth: d.RecordDepth, sourceGrantIdx: -1,
-            matchKeyIdx: d.InternMatchKey(GameHooks.MatchKey), pairId: 0));
+            matchKeyIdx: d.InternMatchKey(GameHooks.MatchKey), pairId: 0,
+            swingPtr: bullet.Pointer));
     }
 
-    /// <summary>Melee dealt (zombie bite). Stamps a pair id that the plant's TakeDamage taken
-    /// record consumes in the same frame — the causal dealt/taken link (SSOT §D3).</summary>
-    public static bool TryRecordMeleeDealt(IntPtr attackerPtr, int attackerTypeId, IntPtr targetPtr, int targetTypeId, int damage)
+    /// <summary>Melee dealt (zombie bite, or a plant-side area melee like Shulkflower's
+    /// AttackEffect). Stamps a pair id that the target's TakeDamage taken record consumes in the
+    /// same frame — the causal dealt/taken link (SSOT §D3). <paramref name="targetSide"/> is the
+    /// SIDE OF THE TARGET (Plant for a zombie bite, Zombie for a plant-side area attack) — widened
+    /// from a hardcoded Plant so this one function serves both directions rather than forking a
+    /// second copy for the reverse attacker/target shape.</summary>
+    public static bool TryRecordMeleeDealt(
+        byte targetSide, IntPtr attackerPtr, int attackerTypeId, IntPtr targetPtr, int targetTypeId, int damage)
     {
         if (!Active || !EffectRuntime.HasOnDamageDealtGrant()) return false;
         var d = Drain;
         var frame = SafeFrame();
         var pair = ++_pairSeq;
+        // swingPtr omitted (defaults to Zero): melee's swing identity is (ActorPtr, Frame),
+        // already on the record — no bullet-shaped identity to carry.
         var ok = d.Record(new GameEventRec(
             GameEventKind.CombatHit, frame, d.NextSeq(),
             actorPtr: attackerPtr, targetPtr: targetPtr,
-            typeId: attackerTypeId, targetTypeId: targetTypeId, side: GameEventSide.Plant,
+            typeId: attackerTypeId, targetTypeId: targetTypeId, side: targetSide,
             amount: -Math.Abs(damage), hitCount: 1,
             chainDepth: d.RecordDepth, sourceGrantIdx: -1,
             matchKeyIdx: d.InternMatchKey(GameHooks.MatchKey), pairId: pair));
@@ -91,6 +153,46 @@ public static class EventDrainHost
             _meleePairsByTarget[targetPtr] = pair;
         }
         return ok;
+    }
+
+    /// <summary>Begins the ambient-attacker bracket for a multi-target attack method with no target
+    /// parameter of its own (see the class-level comment on the static fields above). Called from the
+    /// attack method's own Harmony Prefix.</summary>
+    public static void BeginAmbientMeleeAttacker(IntPtr attackerPtr, int attackerTypeId)
+    {
+        _ambientMeleeAttackerPtr = attackerPtr;
+        _ambientMeleeAttackerTypeId = attackerTypeId;
+        _ambientMeleeAttackerFrame = SafeFrame();
+    }
+
+    /// <summary>Ends the ambient-attacker bracket. Called from the attack method's own Harmony
+    /// Postfix; safe to call even when no bracket is active.</summary>
+    public static void EndAmbientMeleeAttacker()
+    {
+        _ambientMeleeAttackerPtr = IntPtr.Zero;
+        _ambientMeleeAttackerTypeId = 0;
+        _ambientMeleeAttackerFrame = -1;
+    }
+
+    /// <summary>
+    /// Fallback dealt-record for a multi-target melee attack whose own Harmony hook has no target
+    /// parameter to record from directly (QingZombie.AttackPlants / EternalZombie_a.AttackPlants) —
+    /// TakeDamage's own hook knows the target but, per the class comment on ZombieAttackPlant in
+    /// GameHooks.cs, cannot trust <c>damageFrom</c> to name the true attacker for a melee hit. No-ops
+    /// (no exception, no fallback to the target's own ptr) when no ambient attacker is active, when
+    /// the ambient is stale past its own frame (its Postfix never ran — e.g. the patched method
+    /// threw), or when a single-target hook (AttackPlant's own Prefix) already claimed this exact
+    /// target this frame — the ambient path exists only to cover targets that hook never sees, and
+    /// must never double-record one it already did.
+    /// </summary>
+    public static bool TryRecordAmbientMeleeDealt(byte targetSide, IntPtr targetPtr, int targetTypeId, int damage)
+    {
+        if (_ambientMeleeAttackerPtr == IntPtr.Zero) return false;
+        var frame = SafeFrame();
+        if (_ambientMeleeAttackerFrame != frame) return false;
+        if (_meleePairsFrame == frame && _meleePairsByTarget.ContainsKey(targetPtr)) return false;
+        return TryRecordMeleeDealt(
+            targetSide, _ambientMeleeAttackerPtr, _ambientMeleeAttackerTypeId, targetPtr, targetTypeId, damage);
     }
 
     /// <summary>Damage taken (OnDamageTaken trigger). Consumes a same-frame melee pair when the
@@ -230,5 +332,6 @@ public static class EventDrainHost
         _drain.FlushAllAndReset();
         _meleePairsByTarget.Clear();
         _meleePairsFrame = -1;
+        EndAmbientMeleeAttacker();
     }
 }
