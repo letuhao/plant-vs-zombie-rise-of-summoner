@@ -5,9 +5,49 @@
 
 ---
 
-## Phase 0 — Read before building (tasks, not gates)
+## Phase 0 — The ruler, and two reads
 
-Two questions that change what later tasks do. Both are answerable today; neither blocks on anyone.
+### Task 0: `lawn-combat-observer` — the instrument everything else is measured with
+
+**Description:** Build the ruler before the thing it measures. Every later phase reports through it,
+and T13's proofs are read from its output rather than from anyone's eyes or any worker's summary.
+
+**The hard constraint: it must not perturb what it measures.** Two shipped instruments are disqualified
+for exactly that reason — `EmitOverlayBreakdown` only emits **inside** a debug session
+(`InjectorCombatBridge.cs:~88-94`), and a debug session sets `EventDrainHost.Active = false`, disabling
+the path under test; `SessionMode` additionally bypasses coalescing (`EventDrain.cs:216`). An
+instrument that changes behaviour when switched on measures a different system.
+
+**Acceptance:**
+- [ ] Collects, per hit: attacker ptr, victim ptr, swing id, vanilla amount, RPG delta, both elements,
+      matchup relation.
+- [ ] Aggregates per run: hits, swings, **action triggers** (D8 is *measured*: triggers == swings,
+      never victims), stamina spent, regen accrued, exhaustion events, **dropped-record counters**
+      (D9 says zero — the counter is the proof), frame-share sample under a 300z wave.
+- [ ] **Runs with the feature in its shipped configuration** — no debug session, no `SessionMode`, no
+      flag flipped to observe. A test or assertion proves the collection path does not alter
+      `EventDrainHost.Active`.
+- [ ] Emits machine-readable output (a run file), not console prose — so a gate can diff two runs.
+- [ ] Reports **"no data"** distinctly from **"zero"**. A silent empty run is the failure mode this
+      whole program exists to eliminate.
+- [ ] Works before the feature exists: run against today's build it reports vanilla hits with zero RPG
+      delta — that is the **baseline**, and it is captured in this task.
+
+**Verify:** run it against the current build with no feature wired; confirm it reports real vanilla
+hits and an explicit zero-delta, and that `EventDrainHost.Active` was true throughout.
+**Dependencies:** none · **Files:** new tool + a thin script wrapper, mirroring
+`tools/ProveLiveProbe` + `scripts/prove-live-probe.ps1`'s shape · **Scope:** M
+
+> Precedent worth reusing rather than reinventing: `tools/ProveLiveProbe` (built this session) already
+> does real HTTP against a live server and **reports its two halves separately** — persisted state and
+> live engine, never merged into one verdict. That separation is the property that makes it
+> trustworthy; keep it.
+
+---
+
+### Two reads that change what later tasks do
+
+Both are answerable today; neither blocks on anyone.
 
 ### Task 1: Resolve what `atom.fx-overlay-damage` actually resolves as an amount
 
@@ -157,13 +197,18 @@ row, so its cost becomes config. Seed already authored: `data/seed/actions/autho
 
 ---
 
-## Checkpoint 1 — after Tasks 3–7
+## GATE 1 — lead agent, after Tasks 3–7
 
-- [ ] All four test commands green; `audit-overflow.py` clean
-- [ ] **No golden moved** in T4 or T5
+**Lead re-runs every command itself. A worker's report is a claim, not evidence.**
+
+- [ ] Lead re-ran all four test commands and read the real output; `audit-overflow.py` clean
+- [ ] **No golden moved** in T4 or T5 — lead diffed the golden files directly
 - [ ] Battle behaviour byte-identical (T5)
-- [ ] `git status` on shared files (`GameHooks.cs`, `Program.cs`) checked clean of other sessions' work
-- [ ] Each of T3/T4/T5 is independently shippable — confirm none silently depends on another
+- [ ] Lead read each diff: files changed are the files the task named, nothing else moved
+- [ ] `git status` on shared files (`GameHooks.cs`, `Program.cs`) clean of other sessions' work
+- [ ] Negative cases exist — each task naming a falsifier has a test that fails when the code is wrong
+- [ ] Each of T3/T4/T5 independently shippable — none silently depends on another
+- [ ] Observer baseline from T0 still reproduces (the ruler did not drift under these changes)
 
 ---
 
@@ -217,11 +262,14 @@ FSM — a general creature has no binding). Owns the four gates and every correc
 
 ---
 
-## Checkpoint 2 — after Tasks 8–9
+## GATE 2 — lead agent, after Tasks 8–9
 
-- [ ] Guards green; the safety rules are testable **without** a real grant (synthetic grant fixtures)
-- [ ] T9's rules verified before T10 makes them load-bearing — this is the ordering constraint
-- [ ] Reviewer confirms the actual diff, not the summary
+- [ ] Lead re-ran the guards; green
+- [ ] Safety rules verified **without** a real grant (synthetic fixtures) — T9 must stand alone
+- [ ] T9's rules proven before T10 makes them load-bearing — **this gate is the ordering constraint**;
+      the lead does not dispatch T10 until it passes
+- [ ] Lead read the actual diff, not the summary
+- [ ] `ActionTimingPolicy.Configure` ordering verified against host startup, not assumed (T8)
 
 ---
 
@@ -250,24 +298,48 @@ true. The atom already exists purpose-built: `atom.fx-overlay-damage`, `kind: re
 
 ---
 
-### Task 11: `lawn-combat-calibration`
+### Task 11: `lawn-combat-calibration` — **and the tooling to author it**
 
 **Description:** Author the numbers, **derived** from shipped anchors with the arithmetic recorded.
 Calibration, not balance.
 
+**[audit] The sanctioned tool cannot currently do this.** `battle-resources.v1.json`'s own
+`_meta.rebalance` says *"Never hand-edit this file. `python tools/tuning/publish.py battle-resources
+<dotted.key>=<value>` writes `battle-resources.v{n+1}.json`"* — but `publish.py` `_step()`
+**"refuses to invent a new key"** (`tools/tuning/publish.py:129`), and that file has **no regen block
+at all** (`_meta.regenIsAbsentOnPurpose`). So the regen rows cannot be authored by hand *or* by the
+tool. **Extending `publish.py` with an add-key mode is part of this task**, mirroring the existing
+bespoke `--add-rung-power-budget` shape.
+
 **Acceptance:**
-- [ ] T1's answer applied: magnitude authored, or explicitly not authored.
-- [ ] `stamina` cost and lawn regen authored, satisfying `cost ≤ regenPerSecond × 1.5 s` at the pin
-      (a Peashooter's `thePlantAttackInterval` is 1.5).
-- [ ] **Exhaustion stays reachable** under burst fire — otherwise T13 proof 4 cannot run.
+- [ ] T1's answer applied: magnitude authored, or explicitly **not** authored.
+- [ ] `publish.py` gains a sanctioned way to add the regen block; the file is **not** hand-edited.
+- [ ] Output is `battle-resources.v2.json` with v1 kept for revert, per its own convention.
+- [ ] `_meta.regenIsAbsentOnPurpose` is **rewritten** — it currently documents regen's absence as a
+      design position, and shipping regen without updating it leaves the file lying about itself.
+- [ ] **Consumers resolve `v2`** — verified, not assumed.
+- [ ] Cost template (`action-corpus-cost-templates.v1.json`) follows *its* own convention: bump
+      `version`, keep v1 on disk.
+- [ ] `cost ≤ regenPerSecond × 1.5 s` at the pin (a Peashooter's `thePlantAttackInterval` is 1.5).
 - [ ] Every value marked `UNMEASURED` and traceable to a named anchor.
-- [ ] Each target tuning file's own `_meta.rebalance` convention followed (several forbid hand-edits
-      and require `tools/tuning/publish.py`).
 - [ ] **No test pins an exact damage number** — that is a reading, not a contract.
+- [ ] **Resolve the retracted share claim.** The map retracted *"`sharePermille` missing ⇒ throws"*;
+      `spec-lawn-combat-calibration.md` still carries the original assertion in places. Pick one and
+      make spec and map agree.
+
+**Moved out of this task** *(it was circular — the criterion cannot be decided until cost is actually
+charged, which is T12, which depends on T11)*: *"exhaustion stays reachable under burst fire"* now
+belongs to **T12** and **T13 proof 4**.
+
+**⚠ Same hazard as T10: T11 must not land alone.** Cost > 0 with regen unwired (wire 3 lives in T12)
+leaves every lawn actor permanently inert — the map's own *"worse than today's bug"*. T11 and T12 land
+together or neither does.
 
 **Verify:** `dotnet test tests/FusionRpg.Core.Tests --filter "Category=BalanceGuard"`;
-`python tools/tuning/resource_ownership.py --check`
-**Dependencies:** T1, T5, T7 · **Files:** `battle-resources.v1.json`, cost template · **Scope:** S
+`python tools/tuning/resource_ownership.py --check`; re-run a consumer that reads the bumped file
+**Dependencies:** T1, T5, T7 · **Files:** `tools/tuning/publish.py`, `battle-resources.v{n}.json`,
+`action-corpus-cost-templates.v{n}.json` · **Scope:** **M** *(was sized S — wrong once the tooling
+work is counted)*
 
 ---
 
@@ -293,12 +365,14 @@ call site · **Scope:** L
 
 ---
 
-## Checkpoint 3 — after Tasks 10–12
+## GATE 3 — lead agent, after Tasks 10–12
 
-- [ ] Kill switch verified: off ⇒ byte-identical to today
-- [ ] Pool max non-zero (the anti-silent-inert check)
+- [ ] Kill switch verified **by running with it off**: byte-identical to today, not asserted
+- [ ] **Pool max non-zero** — the anti-silent-inert check, run before anything else in this gate
 - [ ] No second cost gate; `guard-actor-hub` green
-- [ ] Reviewer confirms the actual diff and test output
+- [ ] Lead read the actual diff and test output
+- [ ] **Observer reports triggers == swings** on a piercing shot (D8 measured, not argued)
+- [ ] **Observer reports zero dropped effect-bearing records** under a loaded wave (D9 measured)
 
 ---
 
@@ -327,17 +401,104 @@ call site · **Scope:** L
 - [ ] Real numbers recorded, never a boolean. An honest FAIL correctly reported is this task
       succeeding.
 
+**Every proof above is read from the observer's run file (T0), not from console output, not from a
+worker's report, and not from anyone's eyes.**
+
 **Verify:** `Start-Process dist\FusionRpg.Server\FusionRpg.Server.exe`;
 `.\scripts\deploy-play.ps1 -NoServer`; `Invoke-RestMethod http://127.0.0.1:5088/health`;
-`.\scripts\probe-perf.ps1 -Scenario <id> -DurationSec 60`
-**Dependencies:** all · **Files:** none (operational) + `docs/research/perf/` · **Scope:** M
-(real-time, not compute-bound)
+observer run; `.\scripts\probe-perf.ps1 -Scenario <id> -DurationSec 60`
+**Dependencies:** all, incl. **T0** · **Files:** none (operational) + `docs/research/perf/` +
+the observer run file · **Scope:** M (real-time, not compute-bound)
 
 ---
 
-## Checkpoint 4 — program complete
+### Dropped success criteria — [audit] restored to their tasks
 
-- [ ] All seven proofs run with falsifiers, outside a debug session
-- [ ] Perf within ceiling, or shipped behind the kill switch defaulted off
-- [ ] No fabricated evidence at any point — every claim traces to an executed command or a real number
+The first draft of this todo silently dropped eight criteria that exist in the specs. Each is added to
+the task named:
+
+| Criterion (from its spec) | Goes to |
+|---|---|
+| *"The engine's fallback and the seeded row are the same action id"* | **T7** |
+| *"An `entity:{ptr}` grant bound to the firing plant matches on a projectile hit"* — the precondition T10 rests on | **T6** |
+| *"Caller-side `else if` ordering — audit all three sites"* (`GameHooks.cs:750/870/1039`); a debug/telemetry branch can win before the recorder | **T9** |
+| *"Re-entry depth stays 0"* — an overlay apply must not emit a `combat.hit` that nested-flushes the Funnel | **T9** |
+| *"Regen accrues on the 100 ms grid and does not run while paused"* | **T12** |
+| *"Battle unchanged where no cost row is authored for a mode"* | **T12** |
+| *"`HasOnDamageDealtGrant()` true on a live board"* + the Neutral-owner pass-through degenerate case | **T10** |
+| *"`CostLedger.Check` only inspects `OnCommit` rows"* — author the cost `onDeclare` and the gate is **silently vacuous**, the exact failure class this program exists for | **T12**, as an explicit criterion rather than a Code-style note |
+
+---
+
+### Task splits — [audit] two tasks exceed the sizing rule
+
+- **T9 (L)** → **T9a** four gates + swing dedupe · **T9b** never-drop + coalescing (incl. the
+  `event-pipeline-v2-ssot.md` amendment and doc defect #3) · **T9c** liveness, death ordering,
+  ptr-reuse, instakill. T9b is the D9 half and is independently testable.
+- **T12 (L)** → **T12a** pool seeding (`seedResourceBaseline`) + the non-zero-max check ·
+  **T12b** regen as a third kernel kind · **T12c** the `CostLedger` seam and payment. **All three
+  still land together** — the all-or-nothing property is unchanged by splitting the work.
+
+---
+
+### Task 14: The seven doc defects — **one blocks builders outright**
+
+**Description:** The ideal's "Doc defects found while writing this" list had no owner. Only #6 (the
+stale `EventDrainHost` class header) was carried, by T9.
+
+**Acceptance:**
+- [ ] **#1 `DESIGN-GATE.md:33`** — the *"Where logic may live"* row states *"It does not compute damage
+      at the moment of the hit."* **As written, the mandatory reading gate forbids this program.** Its
+      source (`overlay-control-loops.md:22`) bans a **Server** round trip, not in-process computation,
+      and `EffectBag.cs:567,637` already does exactly this. Narrow the gate line to name the Server.
+      **Highest-cost omission in the plan — a builder satisfying the gate finds the work prohibited.**
+- [ ] #2 `DESIGN-GATE.md:56` — cites `battle-timeline-map.md`/`battle-turn-ideal.md` for *"Battle
+      consumes FA10 only"*; the rule is in neither (real source: `BattleEffects.cs:225`) and is three
+      opcodes stale (FA2, FA1, `structure.place` added).
+- [ ] #3 `event-pipeline-v2-ssot.md:60` — stale *"~1.5 ms"* drain budget; shipped code is
+      `Math.Clamp(frameSec * 0.10, 0.0002, 0.002)`. **T9 already amends this file** — fold it in there.
+- [ ] #4 Elements row — matrices are asymmetric in **contract**, not content; `spec-shield-and-elements.md`
+      §0 already carries the correction.
+- [ ] #5 `ActionTag` is **9**, not 8 (`Construct`, `ActionEnums.cs:57`); seedsmith's mirror is stale too
+      (`tools/seedsmith/seedsmith/adapters/actions/vocab.py:35-37`).
+- [ ] #7 `DerivedStatRegistry.cs` — max note is `:239`, regen note `:241`.
+- [ ] Plus, from the ideal's Tunables: the drain budget is **not** a tunable — a structural per-frame
+      cap — and *"should say so in a comment"*.
+
+**Verify:** each edit re-read against the source it corrects; no rule changed in substance, only
+narrowed/corrected to match shipped code.
+**Dependencies:** none — **do #1 first, before any builder reads the gate** · **Files:**
+`docs/DESIGN-GATE.md`, `event-pipeline-v2-ssot.md`, `vocab.py`, `EventDrainHost.cs` · **Scope:** S
+
+---
+
+## ⛔ HUMAN GATE — the only one, after Task 13
+
+**Lead prepares everything and stops.** Server up, injector deployed, board live, ruler running, all
+seven proofs and their falsifiers executed, run file written.
+
+### The ruler decides these — mechanical, already answered before the human looks
+
+- [ ] All seven proofs ran with falsifiers, **outside a debug session** (`EventDrainHost.Active` true
+      throughout — asserted by the observer, not eyeballed)
+- [ ] Triggers == swings; zero dropped effect-bearing records
+- [ ] Fire/Ice differential matches the ratio computed from `matchupShareK` **before** the run
+- [ ] An exhausted actor recovered on the **same ptr**, never a respawn
+- [ ] Frame share under a 300z wave, measured with the trigger-mask **on**
+- [ ] Every number traces to an executed command; no claim rests on a summary
+
+### The human decides these — product calls the numbers cannot make
+
+- [ ] Does the damage **feel** right, or does it trivialise the lawn / do nothing
+- [ ] Is the measured frame cost worth the feature (ceiling ≤ 6% at 300z is a proposal, not a verdict)
+- [ ] Does the elemental VFX read clearly on a busy board
+- [ ] Is the exhaustion cadence a mechanic or an annoyance
+- [ ] **Ship / ship-behind-switch-defaulted-off / stop**
+
+*Eyes are a secondary signal here — visual breakage the instrument has no channel for. Never the
+metric.*
+
+### Program close
+
 - [ ] Deferred items still tracked in the ideal, none silently absorbed or dropped
+- [ ] The observer's run file committed as the program's evidence record
