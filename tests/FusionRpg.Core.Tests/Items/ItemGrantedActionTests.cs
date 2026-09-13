@@ -988,8 +988,10 @@ public class ItemGrantedActionTests
         // Acceptance #1: the composer produces a real, non-fixture row with the shape a grant needs.
         var (row, _) = ComposeRealAction();
         Assert.Equal("action.family.nut.001", row.ActionId);
-        Assert.Equal(ActionKind.Skill, row.Kind); // ActionCorpusComposer stamps every row Skill, never
-                                                   // Basic -- confirmed by reading the composer itself.
+        // action.family.nut.001 authors kindHint: "innate" (committed-round-1.json) -- silently
+        // discarded before lawn-combat-wire T7 (ActionCorpusComposer.cs hardcoded Skill for every
+        // row); the composer now honors it, so this real corpus row composes as Innate, not Skill.
+        Assert.Equal(ActionKind.Innate, row.Kind);
         Assert.True(row.Enabled);
         Assert.True(row.Grantable); // ActionCorpusComposer.cs:148, unconditional.
 

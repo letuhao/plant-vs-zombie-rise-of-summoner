@@ -36,7 +36,8 @@ public static class TuningBootstrap
         string Read(string domain) => File.ReadAllText(Path.Combine(tuningDir, LatestTuningFileName(tuningDir, domain)));
 
         // Same seven hubs tools/HybridViability and tools/DominanceBaseline configure, for the same
-        // reason: AptitudeResolver.ResolveForBattle and the shipped SSOT resolver both read them.
+        // reason: AptitudeSubsystem (battle) and the shipped SSOT resolver (overlay) both read them
+        // through the one shared AptitudeResolver.Resolve call (battle-hub-fuse T6).
         AptitudeTuningHub.Configure(AptitudeTuningLoader.Parse(Read("aptitudes")));
         CombatPolicy.Configure(CombatTuningLoader.Parse(Read("combat")));
         ShieldPolicy.Configure(ShieldTuningLoader.Parse(Read("shield")));
@@ -50,7 +51,7 @@ public static class TuningBootstrap
         PassiveTreeTuningHub.Configure(PassiveTreeTuningLoader.Parse(Read("passive-tree")));
 
         // The hub the duel tools never needed, because they never call BattleEngine.Resolve.
-        // Fans out to TraitBattleCatalog / BattleRuleset / BattleStatComposer / BattleModeProfileCatalog
+        // Fans out to TraitBattleCatalog / BattleRuleset / BattleModeProfileCatalog
         // (BattleTuningHub.Configure's own body) -- without it BattleRuleset.Tuning throws by design.
         BattleTuningHub.Configure(BattleTuningLoader.Parse(Read("battle")));
 

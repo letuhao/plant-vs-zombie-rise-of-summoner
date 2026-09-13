@@ -18,9 +18,9 @@ namespace FusionRpg.Tools.SquadHarness;
 /// </code>
 ///
 /// <para><b>Needs no wiring at all.</b> §11.1: A10a needs neither G1 nor G3 -- <see cref="BattleActorSetup.ChannelMods"/>
-/// is the caller's own additive derived-channel overlay, and <c>BattleStatComposer.Compose</c> already
-/// validates every id against the full registered channel set (throwing on an unknown one). This class
-/// only ever appends to that list; it never touches <c>src/</c>.</para>
+/// is the caller's own additive derived-channel overlay, and <c>BattleHubCompose.Compose</c> already
+/// validates every id against the Hub's own registered channel set (throwing on an unknown one, same
+/// as the deleted composer did). This class only ever appends to that list; it never touches <c>src/</c>.</para>
 ///
 /// <para><b>No new build shape is minted.</b> §10.1: "Both defenders already exist in the duel roster --
 /// the twelve corners and <c>even12</c>." The attacker is one corner, held fixed across all four arms.
@@ -112,11 +112,11 @@ public static class Erosion
     /// class needs to carry.</para>
     ///
     /// <para>Composes <paramref name="setup"/> once (read-only, via the same
-    /// <c>BattleStatComposer.Compose</c> the real match will call again internally) purely to learn each
+    /// <c>BattleHubCompose.Compose</c> the real match will call again internally) purely to learn each
     /// channel's PRE-erosion value, so the subtraction can be clamped correctly regardless of what an
-    /// aptitude allocation already put there -- <c>BattleStatComposer</c>'s own ChannelMods loop is a bare
-    /// additive fold with no clamping of its own (<c>BattleStatComposer.cs:186-191</c>), so a caller that
-    /// wants "never below the floor" has to compute the clamp itself, exactly once, here.</para>
+    /// aptitude allocation already put there -- the caller-overlay ChannelMods loop that both composers
+    /// share is a bare additive fold with no clamping of its own, so a caller that wants "never below
+    /// the floor" has to compute the clamp itself, exactly once, here.</para>
     /// </summary>
     public static BattleActorSetup ApplyStatic(BattleActorSetup setup, long amount)
     {
@@ -125,7 +125,7 @@ public static class Erosion
                 "a negative erosion amount would add mitigation instead of removing it (doc05 §4c direction bound)");
         if (amount == 0) return setup;
 
-        var baseline = BattleStatComposer.Compose(setup);
+        var baseline = BattleHubCompose.Compose(setup);
         var mods = DefensiveChannels
             .Select(ch => new BattleChannelMod(ch, -Math.Min(amount, Math.Max(0L, (long)Math.Round(baseline.Get(ch))))))
             .Where(m => m.Amount != 0)
@@ -321,8 +321,8 @@ public static class Erosion
     /// `stat.derived` atom, scored through this module's OWN measurement pipeline (duel/squad win-rate),
     /// not just at the unit level (`EffectOfflineKitTests`) or the schema-capability level (F2's
     /// `Coverage.cs`). No existing shipped test exercised this before it — `BuildFactory.cs`/`SquadMatch.
-    /// ToActorSetup` build `ChannelMods` purely from `AptitudeResolver.ResolveForBattle`, with no notion
-    /// of a passive-tree node's own bound atom at all.
+    /// ToActorSetup` build the actor's aptitude via <see cref="BattleHubInputs.Aptitude"/> alone
+    /// (battle-hub-fuse T6), with no notion of a passive-tree node's own bound atom at all.
     ///
     /// <para><b>Deliberately NOT full passive-tree-ownership modelling.</b> Wiring "this roster member
     /// owns node X, resolved through the real catalog/binder" into `SquadHarness` would be new,

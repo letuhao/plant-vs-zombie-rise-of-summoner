@@ -81,8 +81,8 @@ Match surrounding World/Core: plain comments, no PlaceholderV2, `// DEBT` only f
 
 ## Success criteria
 
-- [ ] `PlaceholderBattleResolver` removed from production paths.
-- [ ] No silent Hp×Level combat outcomes.
-- [ ] Intel Strength/bands from placeholder weight removed (B4 drop).
-- [ ] Map **Out of scope / Tracked** names `world-actor-combat` (or renamed successor); no claim of Hub world assault Done.
-- [ ] Stub equip not a player-usable SSOT (align `cold-equip-one` Done).
+- [x] `PlaceholderBattleResolver` removed from production paths (T20; file deleted).
+- [x] No silent Hp×Level combat outcomes (T20; every non-district/degenerate case returns the pre-existing refused/no-op `BattleOutcome` instead).
+- [x] Intel Strength/bands' dependency on the deleted placeholder class removed (T21) — **amended, not the literal B4 drop**: the formula was relocated to Intel's own `ForceStrength.Of` rather than zeroed, an owner-decided exception after it was found a real, shipped `ai-commander` AI and a live web UI readout depend on the exact numbers; see `actor-hub-and-combat-power-solid-fixing-ideal.md`'s B4 amendment note and evidence-map T21.2 for the full investigation.
+- [x] Map **Out of scope / Tracked** names `world-actor-combat` (or renamed successor); no claim of Hub world assault Done (T23; re-confirmed repo-wide).
+- [x] Stub equip not a player-usable SSOT (align `cold-equip-one` Done) (T4, re-confirmed clean at T22.2).

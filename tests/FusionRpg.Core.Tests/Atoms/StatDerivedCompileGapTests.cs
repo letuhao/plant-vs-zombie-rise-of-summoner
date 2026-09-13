@@ -115,18 +115,19 @@ public class StatDerivedCompileGapTests
     }
 
     /// <summary><b>Link 4 — `Lawn = Full` is now true end to end, not just "a consumer exists".</b>
-    /// Sim moved too (mechanism-wiring E5, 2026-09-06): `ActorDerivedLookup`'s contribution fold gave
-    /// it a real, if partial, consumer -- `Partial`, not `Full`, because the fold is a plain sum that
-    /// honours `Flat`/`Increased` and not `Replace`/`Flag`
-    /// (`EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial`). Renamed from
-    /// "...and_sim_remains_quarantined", which is no longer true.</summary>
+    /// Sim moved too: mechanism-wiring E5 (2026-09-06) opened `ActorDerivedLookup`'s contribution fold
+    /// to `Partial` (a plain sum honouring `Flat`/`Increased` but not `Replace`/`Flag`), then
+    /// sim-hub-parity (T15, 2026-09-13) closed the gap to `Full` (the SAME op-aware fold every other
+    /// runtime uses — `EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial`). Renamed
+    /// from "...and_sim_remains_quarantined", then from "...and_sim_opens_partially", neither of which
+    /// stayed true.</summary>
     [Fact]
-    public void Link4_lawn_is_served_end_to_end_and_sim_opens_partially()
+    public void Link4_lawn_and_sim_are_both_served_end_to_end()
     {
         var kind = AtomKindRegistry.Get("stat.derived");
         Assert.NotNull(kind);
 
         Assert.Equal(RuntimeState.Full, kind!.Support.Lawn);
-        Assert.Equal(RuntimeState.Partial, kind.Support.Sim);
+        Assert.Equal(RuntimeState.Full, kind.Support.Sim);
     }
 }

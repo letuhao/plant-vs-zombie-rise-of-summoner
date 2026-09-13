@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Text.Json;
 using FusionRpg.CheatCore;
 using FusionRpg.Contracts;
@@ -7,6 +8,7 @@ using FusionRpg.Core.Stats.Derived;
 
 using FusionRpg.Injector.Host;
 using FusionRpg.Injector.Lawn;
+using FusionRpg.Injector.Match;
 using FusionRpg.Injector.Stats;
 
 namespace FusionRpg.Injector;
@@ -56,7 +58,15 @@ public static class CheatState
         // D6's "binds accepted, nothing applied" state.
         // Fully qualified on purpose: a bare `Stats.` here is ambiguous with this class's own
         // `Stats` StatSystem property.
-        boundDerivedAtoms: FusionRpg.Injector.Stats.GrantedDerivedAtoms.For,
+        //
+        // lawn-tree-hydrate (T13): merges in the cached commander-scope shared-tree atoms alongside
+        // the live-grant reader above — two independent Hub combat writers, one delegate, neither
+        // shadowing the other (a node granting the same channel as a live grant folds via the SAME
+        // DerivedComposer both already feed, never a second private sum).
+        boundDerivedAtoms: ctx =>
+            FusionRpg.Injector.Stats.GrantedDerivedAtoms.For(ctx)
+                .Concat(FusionRpg.Injector.Stats.TreeBoundAtomsCache.For(ctx))
+                .ToList(),
         // mechanism-wiring G1's injector half (spec-mechanism-wiring.md §4.1): registers the fourth
         // IActorStatSubsystem so a status's own `stat.<combat.*|status.*>.<op>` writes reach the
         // composed value instead of landing in the primary bag no subsystem reads. Additive next to
@@ -159,7 +169,10 @@ public static class CheatState
         resolveSpeciesAllocation: speciesId => _speciesAllocations.TryGetValue(speciesId, out var a)
             ? a : FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty,
         resolveCommanderAllocation: _ => CommanderAllocation.Resolve(DummyStatContextForCommanderRead),
-        reportUnconfigured: msg => RpgHost.Log.Warning(msg));
+        reportUnconfigured: msg => RpgHost.Log.Warning(msg),
+        resolveBoundInstanceId: ResolveBoundInstanceId,
+        resolveUniqueAllocation: instanceId => _uniqueAllocations.TryGetValue(instanceId, out var u)
+            ? u : FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty);
 
     /// <summary>Called from the transport (`RpgClient.RefreshCommanderAllocationAsync`, extended to
     /// parse the SAME response's new `species` map alongside `shares` — one fetch, both caches, never
@@ -171,6 +184,42 @@ public static class CheatState
         IReadOnlyDictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation> bySpeciesId)
     {
         _speciesAllocations = bySpeciesId ?? throw new ArgumentNullException(nameof(bySpeciesId));
+        Stats.Invalidate();
+    }
+
+    // ---- aptitude-sheet `unique-lawn-wire` (AS-1.1) --------------------------------------------
+
+    /// <summary>Cache `instanceId → effective UniqueCreature allocation`, populated by
+    /// <see cref="ApplyUniqueAllocations"/> from <c>RpgClient</c>'s per-Bound-id
+    /// <c>GET /api/aptitudes/unique/{instanceId}</c> fetch. Mirrors <see cref="_speciesAllocations"/>'s
+    /// own shape exactly — wholesale replace, no incremental merge.</summary>
+    static IReadOnlyDictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation> _uniqueAllocations =
+        new Dictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation>(StringComparer.Ordinal);
+
+    /// <summary>`EntityKey` (the live ptr hex `RpgClient`/`EntityApply` already build every
+    /// `StatContext` with) → the UniqueCreature `instanceId` it is Bound to, or null when this entity
+    /// is not a Bound specimen. Reads the SAME `MatchHost.Runtime` ptr→binding index
+    /// <see cref="FusionRpg.Injector.Match.UniqueBoundLoadout"/> already uses for the absolute-write
+    /// side of a Bound specimen (W5-C) — one ptr index, two consumers, never a second lookup this
+    /// class builds on its own. `Phase != Bound` (PendingSpawn / Cleared) resolves to null, same
+    /// guard <c>UniqueBoundLoadout.TryApply</c> applies for the identical reason: a binding row can
+    /// briefly exist before/after the specimen is actually the live entity behind this ptr.</summary>
+    static string? ResolveBoundInstanceId(string entityKey)
+    {
+        if (string.IsNullOrWhiteSpace(entityKey)) return null;
+        if (!MatchHost.Runtime.TryGetBindingByPtr(entityKey, out var binding) || binding is null)
+            return null;
+        return binding.Phase == FusionRpg.Core.Match.UniqueBindingPhase.Bound ? binding.InstanceId : null;
+    }
+
+    /// <summary>Called from the transport (`RpgClient`'s per-Bound-id unique fetch) after a successful
+    /// round of fetches. Replaces the whole cache — an instanceId no longer Bound this round (the
+    /// specimen was released / died) simply stops being fetched and ages out on the next full replace,
+    /// matching <see cref="ApplySpeciesAllocations"/>'s own contract.</summary>
+    public static void ApplyUniqueAllocations(
+        IReadOnlyDictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation> byInstanceId)
+    {
+        _uniqueAllocations = byInstanceId ?? throw new ArgumentNullException(nameof(byInstanceId));
         Stats.Invalidate();
     }
     static FusionRpg.Core.Power.IPowerIndexProvider? _powerIndex;

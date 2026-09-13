@@ -459,6 +459,59 @@ public class PassiveTreeEndpointsTests : IAsyncLifetime
         await hub.DisposeAsync();
     }
 
+    [Fact]
+    public async Task Get_boundAtoms_unknownPlayer_returns404()
+    {
+        var resp = await _http.GetAsync("/api/passive-tree/bound-atoms/999999");
+        Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
+    }
+
+    [Fact]
+    public async Task Get_boundAtoms_onAFreshPlayer_isEmptyArray_notAnError()
+    {
+        var resp = await _http.GetAsync($"/api/passive-tree/bound-atoms/{_playerId}");
+        Assert.True(resp.IsSuccessStatusCode, await resp.Content.ReadAsStringAsync());
+        var wire = await resp.Content.ReadFromJsonAsync<List<BoundDerivedAtomDto>>();
+        Assert.NotNull(wire);
+        Assert.Empty(wire!);
+    }
+
+    [Fact]
+    public async Task Get_boundAtoms_matches_TreeBoundAtomsForPlayer_calledDirectly()
+    {
+        // lawn-tree-hydrate (T13) -- the Injector has no store, so this HTTP round trip IS its only
+        // path to these atoms; this proves the wire response is a lossless mirror of the same
+        // TreeBoundAtoms.ForPlayer the Server sheet itself already fans into Hub (UniqueActorHubCompose),
+        // not a second, drifting projection. Re-imports the "might" tree with a real stat.derived atom
+        // (the shared TreeJson() fixture's own node atom is deliberately "stat.modify" -- an ignored
+        // kind on this projection, per TreeAtomSource.BoundAtomsFor's own "magnitude-class only" gate --
+        // so it alone would prove nothing here).
+        var outcome = _store.ImportTreeCatalog(new[] { DerivedTreeJson("might", "aptitude.Might@Commander") }, Tuning());
+        Assert.True(outcome.Ok, string.Join("; ", outcome.Refusals));
+
+        SeedAptitudes(("Might", 30)); // opens tier 3 solo (reqScalePoints=5: t3 = 5*3*4/2 = 30)
+        await Post("/api/passive-tree/allocate",
+            new { playerId = _playerId, nodes = new Dictionary<string, long> { ["skill.might-off-t1-n0"] = 0 } });
+
+        var resp = await _http.GetAsync($"/api/passive-tree/bound-atoms/{_playerId}");
+        Assert.True(resp.IsSuccessStatusCode, await resp.Content.ReadAsStringAsync());
+        var wire = await resp.Content.ReadFromJsonAsync<List<BoundDerivedAtomDto>>();
+        Assert.NotNull(wire);
+        Assert.NotEmpty(wire!);
+
+        var powerIndex = new FusionRpg.Server.Power.ServerPowerIndexProvider(_store, PowerTuningHub.Tuning);
+        var direct = FusionRpg.Server.TreeBoundAtoms.ForPlayer(_store, powerIndex, _playerId);
+        Assert.Equal(direct.Count, wire!.Count);
+        foreach (var atom in direct)
+        {
+            Assert.Contains(wire, w =>
+                w.Channel == atom.Channel
+                && w.Op == atom.Op.ToString()
+                && Math.Abs(w.Amount - atom.Amount) < 0.0001
+                && w.SourceId == atom.SourceId);
+        }
+    }
+
     // ---- helpers ---------------------------------------------------------------------------------
 
     async Task<PassiveTreeStateDto> GetState()
@@ -533,6 +586,54 @@ public class PassiveTreeEndpointsTests : IAsyncLifetime
               "kindId": "stat.modify",
               "attachPoint": "Stat",
               "channelId": "atk",
+              "op": "flat",
+              "trigger": null,
+              "whenJson": null,
+              "kMicro": 12345,
+              "scaleAxis": "PTheta",
+              "unitClass": "GameUnits",
+              "soulCurveId": null
+            }
+          ],
+          "excludeProps": [],
+          "exclusionForm": "None",
+          "tagsJson": null,
+          "enabled": true,
+          "retiredAtRevision": null
+        }
+      ]
+    }
+    """;
+
+    /// <summary>Same shape as <see cref="TreeJson"/> but with a real `stat.derived` node atom instead
+    /// of `stat.modify` -- the ONE difference `TreeAtomSource.BoundAtomsFor`'s "magnitude-class only"
+    /// gate actually cares about (T13's own bound-atoms endpoint test).</summary>
+    static string DerivedTreeJson(string treeId, string gateQuantity) => $$"""
+    {
+      "treeId": "{{treeId}}",
+      "category": "primary",
+      "gateQuantity": "{{gateQuantity}}",
+      "shapeArchetype": "broad-and-flat",
+      "tiers": 10,
+      "branches": 2,
+      "nodesPerTier": [2,2,2,2,2,2,2,2,2,2],
+      "catalogVersion": 1,
+      "enabled": true,
+      "nodes": [
+        {
+          "id": "skill.{{treeId}}-off-t1-n0",
+          "branch": "off",
+          "tier": 1,
+          "nodeKey": "n0",
+          "prereqNodeIds": [],
+          "nodeClass": "magnitude",
+          "affixIds": ["affix.a"],
+          "budgetShareMilli": 18,
+          "atoms": [
+            {
+              "kindId": "stat.derived",
+              "attachPoint": "Stat",
+              "channelId": "combat.power.fire",
               "op": "flat",
               "trigger": null,
               "whenJson": null,

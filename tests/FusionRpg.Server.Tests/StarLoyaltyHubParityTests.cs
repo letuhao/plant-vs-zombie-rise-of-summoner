@@ -12,9 +12,11 @@ namespace FusionRpg.Server.Tests;
 /// <summary>
 /// channelmods-hub T1 parity — Star/Loyalty moved out of private <c>BattleChannelMod</c> arithmetic
 /// and into one shared Core formula (<see cref="StarLoyaltyBonus"/>) whose Hub twin
-/// (<see cref="StarLoyaltySubsystem"/>) the sheet consumes. These tests pin both halves:
-/// the adapter still produces the pre-migration numbers, and the Hub subsystem reaches the same
-/// totals on <c>combat.power.omni</c> / <c>combat.defense.omni</c> with attributed GG-49 ids.
+/// (<see cref="StarLoyaltySubsystem"/>) the sheet consumes. The old <c>WebMatchService</c>
+/// <c>BattleChannelMod</c> adapter these tests once compared against is deleted (battle-hub-fuse T6,
+/// proven zero production callers) — these tests now pin the shared formula (<see cref="StarPolicy"/>/
+/// <see cref="ContractPolicy"/> against the historical literal expression) and the Hub subsystem
+/// against that same shared formula, with attributed GG-49 ids.
 /// </summary>
 public class StarLoyaltyHubParityTests
 {
@@ -26,23 +28,22 @@ public class StarLoyaltyHubParityTests
     }
 
     [Fact]
-    public void SharedFormula_matches_pre_migration_adapter_for_star_and_loyalty()
+    public void SharedFormula_matches_the_historical_expression_for_star_and_loyalty()
     {
         ConfigureFusionAndContracts();
 
-        // The adapter IS the shared formula now -- proving it against the historical expression
-        // independently (not calling the adapter twice) is the point: the literal arithmetic here is
-        // copied from the deleted WebMatchService bodies.
+        // The shared formula (StarLoyaltyBonus, both seams read it) proven against the historical
+        // literal expression, independently -- the same discipline the deleted WebMatchService
+        // adapter used to prove.
         for (var star = 1; star <= StarPolicy.MaxStar; star++)
         {
             var level = 33;
             var expectedPower = Math.Max(star, BattleRuleset.BaseAtk(level) * StarPolicy.StarPowerMilli(star) / 1000);
             var expectedDefense = Math.Max(star, BattleRuleset.BaseDefense(level) * StarPolicy.StarDefenseMilli(star) / 1000);
 
-            var mods = WebMatchService.StarChannelMods(star, level);
-            Assert.Equal(2, mods.Count);
-            Assert.Equal(expectedPower, mods[0].Amount);
-            Assert.Equal(expectedDefense, mods[1].Amount);
+            var bonus = StarLoyaltyBonus.Star(star, level)!.Value;
+            Assert.Equal(expectedPower, bonus.Power);
+            Assert.Equal(expectedDefense, bonus.Defense);
         }
 
         // Loyalty, across every rank band including the +0 Bound band.
@@ -51,23 +52,17 @@ public class StarLoyaltyHubParityTests
             var level = 33;
             var rank = ContractPolicy.RankFor(loyalty);
             var milli = ContractPolicy.RankBonusMilli(rank);
-            var expected = milli <= 0
-                ? Array.Empty<(string, long)>()
-                : new[]
-                {
-                    (DerivedStatChannels.CombatPowerOmni,
-                        Math.Max((long)rank - 1, BattleRuleset.BaseAtk(level) * milli / 1000)),
-                    (DerivedStatChannels.CombatDefenseOmni,
-                        Math.Max((long)rank - 1, BattleRuleset.BaseDefense(level) * milli / 1000))
-                };
+            var bonus = StarLoyaltyBonus.Loyalty(loyalty, level);
 
-            var mods = WebMatchService.LoyaltyChannelMods(loyalty, level);
-            Assert.Equal(expected.Length, mods.Count);
-            for (var i = 0; i < expected.Length; i++)
+            if (milli <= 0)
             {
-                Assert.Equal(expected[i].Item1, mods[i].ChannelId);
-                Assert.Equal(expected[i].Item2, mods[i].Amount);
+                Assert.Null(bonus);
+                continue;
             }
+
+            Assert.NotNull(bonus);
+            Assert.Equal(Math.Max((long)rank - 1, BattleRuleset.BaseAtk(level) * milli / 1000), bonus!.Value.Power);
+            Assert.Equal(Math.Max((long)rank - 1, BattleRuleset.BaseDefense(level) * milli / 1000), bonus.Value.Defense);
         }
     }
 
@@ -100,13 +95,6 @@ public class StarLoyaltyHubParityTests
         Assert.Contains($"grant:loyalty:{loyalty}", powerSources);
         foreach (var s in powerSources)
             Assert.False(string.IsNullOrWhiteSpace(s), "GG-49: no unattributed contribution");
-
-        // Channel totals equal the sum of the adapter's two mod groups -- the parity claim.
-        var adapterTotal = WebMatchService.StarChannelMods(star, level)
-            .Concat(WebMatchService.LoyaltyChannelMods(loyalty, level))
-            .Where(m => m.ChannelId == DerivedStatChannels.CombatPowerOmni)
-            .Sum(m => m.Amount);
-        Assert.Equal(adapterTotal, (long)snapshot.Get(DerivedStatChannels.CombatPowerOmni, 0));
     }
 
     [Fact]

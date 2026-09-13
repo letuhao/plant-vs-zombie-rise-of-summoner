@@ -102,7 +102,14 @@ startup than the older BepInEx install), building into that game's `Mods\` folde
 
 The web UI build runs by default (2026-08-30 — it used to be opt-in via `-RebuildUi` and got forgotten,
 leaving a stale FE served for a whole session). Flags: `-LoaderHost` (`MelonLoader`/`BepInEx`), `-NoGame`,
-`-NoServer`, `-NoRebuildUi` (skip the web UI build), `-RestartServer`.
+`-NoServer`, `-NoRebuildUi` (skip the web UI build), `-RestartServer`, `-QuickTest`.
+
+**`-QuickTest` (2026-09-14).** The slowest step by far is the default test profile (`test-fast.ps1`,
+13k+ tests) — a real cost when a redeploy follows a small, already-hand-verified edit. `-QuickTest`
+skips only that step; every boundary guard still runs, and a loud warning prints every time it's used.
+**Never the default, never proof of anything** — re-run without it (or the targeted `dotnet test`
+filters for what you actually touched) before calling a build verified, before a live proof, and
+before commit/merge. It exists to shorten the local iteration loop, not to replace the gate.
 
 **FE always lands in `dist` (2026-09-09):** Vite writes `src/FusionRpg.Server/wwwroot`; the published
 server serves `dist/FusionRpg.Server/wwwroot` (`ContentRoot` = exe dir). If `:5088` is already up,
@@ -113,6 +120,30 @@ Pass `-RestartServer` when you also need a fresh server binary.
 SQLite for this session: `dist/FusionRpg.Server/data/rpg-hot.sqlite` + `rpg-media.sqlite` (beside the published exe; gitignored). Icons/almanac are BLOBs in the media file.
 
 Do not use the Simulator tab in the same session as the real injector.
+
+## 7. Live-probe tool (`tools/ProveLiveProbe`)
+
+The real 6-step live-probe recipe (spec: `docs/architecture/live-probe/spec-live-probe-tool.md`) —
+acquire, allocate, equip, deploy, persisted-state read-back, and (Mode B only) a live-engine read —
+run as real HTTP against a running `FusionRpg.Server`, never a fabricated actor and never an
+`ok:true` response taken as proof on its own.
+
+```powershell
+# Mode A -- persisted-state only (steps 1-5): Server up, no game/Injector needed
+.\scripts\prove-live-probe.ps1 -Mode A -PlayerId 1 -Side plant -TypeId <id> `
+    -AptitudeId Might -AptitudePoints 30 -Role <slot> -ItemInstanceId <owned-item-id>
+
+# Mode B -- full 6-step proof: real summon + live match/board + Injector connected required.
+# Cold-start the lawn first via the `live-lawn-quick-start` skill (enter level 1, lab-overlay,
+# target ptr) -- Mode B refuses outright if step 1 is given the Mode-A-only debug shortcut, since
+# that shortcut's synthetic ptr never exists on a real board.
+.\scripts\prove-live-probe.ps1 -Mode B -PlayerId 1 -Side plant -BannerId <banner-id> `
+    -AptitudeId Might -AptitudePoints 30 -Role <slot> -ItemInstanceId <owned-item-id> -TimeoutSec 30
+```
+
+Exits 0 only when persisted state and (Mode B) the live engine both agree; a non-zero exit always
+names which of the two halves failed, and whether it was a real server refusal, a value mismatch, or
+a poll timeout — never one merged pass/fail boolean.
 
 ## End-to-end check (real game)
 

@@ -1,4 +1,6 @@
+using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
+using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,8 +9,10 @@ using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
-/// <summary>class-system-todo.md P2.5/P9.1 — the battle-path seam, `WebMatchService.AptitudeChannelMods`.
-/// Now reads the real commander-scope allocation via `RpgStore.LoadAllocation`
+/// <summary>class-system-todo.md P2.5/P9.1 — the Hub aptitude path for the squad's commander scope.
+/// battle-hub-fuse T6: the `WebMatchService.AptitudeChannelMods` BattleChannelMod adapter is deleted;
+/// these tests prove the same seam through `AptitudeResolver.Resolve` (the Hub twin BattleHubCompose
+/// reads). Now reads the real commander-scope allocation via `RpgStore.LoadAllocation`
 /// (spec-aptitude-allocation-surface.md, 2026-08-27) instead of hardcoding `AptitudeAllocation.Empty` —
 /// these tests prove BOTH directions: an unset player still resolves inert (the wiring didn't regress
 /// the "zero goldens move" property), and a saved allocation actually reaches the resolved mods (the
@@ -29,14 +33,21 @@ public class AptitudeChannelModsTests : IDisposable
         _testStore.Dispose();
     }
 
+    static IReadOnlyList<DerivedModifier> ResolveCommander(RpgStore store, long playerId, int level) =>
+        AptitudeResolver.Resolve(
+            store.LoadAllocation(AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId)),
+            AptitudeTuningHub.Tuning,
+            new PowerLadder(PowerTuningHub.Tuning),
+            level,
+            DerivedStatRegistry.CreateDefault());
+
     [Fact]
     public void UnsetPlayer_stillProducesNoChannelMods()
     {
         // A player who has never allocated must resolve exactly as inert as the old hardcoded-Empty
         // behavior did -- LoadAllocation's own "load never saved returns empty" contract
         // (AllocationStoreTests.cs), not a special case this seam has to invent.
-        var mods = WebMatchService.AptitudeChannelMods(level: 50, playerId: 999, _store);
-        Assert.Empty(mods);
+        Assert.Empty(ResolveCommander(_store, playerId: 999, level: 50));
     }
 
     [Theory]
@@ -45,7 +56,7 @@ public class AptitudeChannelModsTests : IDisposable
     [InlineData(1000)]
     public void UnsetPlayer_stillProducesNoChannelMods_atAnyLevel(int level)
     {
-        Assert.Empty(WebMatchService.AptitudeChannelMods(level, playerId: 999, _store));
+        Assert.Empty(ResolveCommander(_store, playerId: 999, level));
     }
 
     [Fact]
@@ -58,14 +69,14 @@ public class AptitudeChannelModsTests : IDisposable
         var allocation = AptitudeAllocation.Single(AllocationScope.Commander, "Might", 100_000);
         _store.SaveAllocation(AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId), allocation);
 
-        var mods = WebMatchService.AptitudeChannelMods(level: 50, playerId, _store);
+        var mods = ResolveCommander(_store, playerId, level: 50);
 
         Assert.NotEmpty(mods);
-        Assert.Contains(mods, m => m.ChannelId == FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatPowerOmni);
+        Assert.Contains(mods, m => m.ChannelId == DerivedStatChannels.CombatPowerOmni);
 
         // A DIFFERENT player who never allocated, read through the same store, must still be inert --
         // proves the allocation is scoped per-player (ScopeKey), not accidentally global state.
-        Assert.Empty(WebMatchService.AptitudeChannelMods(level: 50, playerId: 43, _store));
+        Assert.Empty(ResolveCommander(_store, playerId: 43, level: 50));
     }
 
     /// <summary>class-system-todo.md P9.2's own prerequisite, found while building it: rpg_aptitude_

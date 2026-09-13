@@ -76,21 +76,42 @@ $IgnoredNamePatterns = @('\.ledger\.json$', '^data/seed/items/_runs/', '^data/se
                          '_meta\.json$', '/_index\.json$')
 
 function Get-ChangedFiles {
-    $files = New-Object System.Collections.Generic.List[string]
-    if ($Range) {
-        git -C $Root diff --name-only --diff-filter=ACMR $Range 2>$null |
-            ForEach-Object { if ($_) { $files.Add(($_.Trim() -replace '\\', '/')) } }
+    # PS 7's $PSNativeCommandUseErrorActionPreference treats ANY stderr write from a native command as
+    # a terminating error, independent of `2>$null` redirection on the same statement -- a real
+    # incident (2026-09-14): a harmless "CRLF will be replaced by LF" git warning aborted this whole
+    # guard (and the deploy-play.ps1 run calling it) with no further output. Same fix
+    # Sync-ServerWwwroot above already needed for robocopy; git's own line-ending notices are equally
+    # not a real error here.
+    $prevNative = $null
+    if (Test-Path variable:PSNativeCommandUseErrorActionPreference) {
+        $prevNative = $PSNativeCommandUseErrorActionPreference
+        $PSNativeCommandUseErrorActionPreference = $false
     }
-    else {
-        git -C $Root diff --name-only --diff-filter=ACMR $BaseRef 2>$null |
-            ForEach-Object { if ($_) { $files.Add(($_.Trim() -replace '\\', '/')) } }
-        git -C $Root diff --cached --name-only --diff-filter=ACMR 2>$null |
-            ForEach-Object { if ($_) { $files.Add(($_.Trim() -replace '\\', '/')) } }
-        # untracked, non-ignored additions
-        git -C $Root ls-files --others --exclude-standard 2>$null |
-            ForEach-Object { if ($_) { $files.Add(($_.Trim() -replace '\\', '/')) } }
+    # PSNativeCommandUseErrorActionPreference alone was not enough live 2026-09-14 -- the script's own
+    # top-level $ErrorActionPreference="Stop" still turned the stderr write into a terminating error.
+    # Flip both for the duration of the git calls, restore both in finally.
+    $prevAction = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $files = New-Object System.Collections.Generic.List[string]
+        if ($Range) {
+            git -C $Root diff --name-only --diff-filter=ACMR $Range 2>$null |
+                ForEach-Object { if ($_) { $files.Add(($_.Trim() -replace '\\', '/')) } }
+        }
+        else {
+            git -C $Root diff --name-only --diff-filter=ACMR $BaseRef 2>$null |
+                ForEach-Object { if ($_) { $files.Add(($_.Trim() -replace '\\', '/')) } }
+            git -C $Root diff --cached --name-only --diff-filter=ACMR 2>$null |
+                ForEach-Object { if ($_) { $files.Add(($_.Trim() -replace '\\', '/')) } }
+            # untracked, non-ignored additions
+            git -C $Root ls-files --others --exclude-standard 2>$null |
+                ForEach-Object { if ($_) { $files.Add(($_.Trim() -replace '\\', '/')) } }
+        }
+        return $files | Sort-Object -Unique
+    } finally {
+        if ($null -ne $prevNative) { $PSNativeCommandUseErrorActionPreference = $prevNative }
+        $ErrorActionPreference = $prevAction
     }
-    return $files | Sort-Object -Unique
 }
 
 function Test-HasGeneratorProvenance {

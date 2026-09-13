@@ -263,14 +263,23 @@ public static class BattleTuningLoader
 }
 
 /// <summary>Fans one battle.v{n}.json load out to every class that reads it (tunables-ssot.md §7.2 —
-/// hosts inject once; TraitBattleCatalog/BattleRuleset/BattleStatComposer stay independently testable).</summary>
+/// hosts inject once; TraitBattleCatalog/BattleRuleset/BattleHubCompose stay independently testable).</summary>
 public static class BattleTuningHub
 {
+    static BattleTuning? _tuning;
+
     public static void Configure(BattleTuning tuning)
     {
         TraitBattleCatalog.Configure(tuning);
         BattleRuleset.Configure(tuning);
-        BattleStatComposer.Configure(tuning);
         Timeline.BattleModeProfileCatalog.Configure(tuning);
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
     }
+
+    /// <summary>battle-hub-fuse T6 — re-homed off the deleted <c>BattleStatComposer.TuningInstance</c>:
+    /// the affinity divisors and tempo reference interval the Hub subsystems read directly, same
+    /// instance <see cref="Configure"/> just fanned out.</summary>
+    public static BattleTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "BattleTuningHub.Configure(...) has not run. The affinity divisors read " +
+        "data/tuning/battle.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.");
 }

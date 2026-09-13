@@ -207,8 +207,13 @@ export const progressionGaugeFactory: PieceFactory = ({ payload }) => {
   );
 };
 
-export const standRowFactory: PieceFactory = ({ slots }) => (
+export const standRowFactory: PieceFactory = ({ payload, slots }) => (
   <section className="stand-row" data-testid="condition-standing" data-grid-area="stand">
+    {payload.combatPowerText != null ? (
+      <p className="spec-label" data-testid="condition-combat-power">
+        Combat power: {String(payload.combatPowerText)}
+      </p>
+    ) : null}
     {slots.radar}
     <div className="live-col">{slots.live}</div>
   </section>

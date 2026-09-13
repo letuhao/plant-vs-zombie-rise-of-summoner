@@ -47,14 +47,22 @@ public class ActionCorpusImportTests
         public AtomRow? LookupAtom(string id) => _byId.TryGetValue(id, out var a) ? a : null;
     }
 
-    static ActionCorpusCostTemplate FullCostTemplate() => new(new Dictionary<ActionCategory, ActionCorpusCostTemplateRow>
-    {
-        [ActionCategory.Attack] = new("qi", 20, ActionCostTiming.OnCommit),
-        [ActionCategory.Defense] = new("qi", 30, ActionCostTiming.OnCommit),
-        [ActionCategory.Support] = new("qi", 40, ActionCostTiming.OnCommit),
-        [ActionCategory.Movement] = new("qi", 15, ActionCostTiming.OnCommit),
-        [ActionCategory.Status] = new("qi", 35, ActionCostTiming.OnCommit),
-    });
+    static ActionCorpusCostTemplate FullCostTemplate() => new(
+        new Dictionary<ActionCategory, ActionCorpusCostTemplateRow>
+        {
+            [ActionCategory.Attack] = new("qi", 20, ActionCostTiming.OnCommit),
+            [ActionCategory.Defense] = new("qi", 30, ActionCostTiming.OnCommit),
+            [ActionCategory.Support] = new("qi", 40, ActionCostTiming.OnCommit),
+            [ActionCategory.Movement] = new("qi", 15, ActionCostTiming.OnCommit),
+            [ActionCategory.Status] = new("qi", 35, ActionCostTiming.OnCommit),
+        },
+        // T7 (basic-attack-seed): Kind-aware rows, mirroring the real shipped
+        // action-corpus-cost-templates.v1.json's own "kinds" block.
+        new Dictionary<ActionKind, ActionCorpusCostTemplateRow>
+        {
+            [ActionKind.Basic] = new("stamina", 20, ActionCostTiming.OnCommit),
+            [ActionKind.Innate] = new("qi", 25, ActionCostTiming.OnCommit),
+        });
 
     static ActionCorpusBrief SimpleBrief(string id = "action.family.test.001") => new(
         Id: id, Name: "Test Volley", Category: "attack", Scope: "family", ScopeKey: "cactus",
@@ -200,5 +208,69 @@ public class ActionCorpusImportTests
         var result = ActionCorpusComposer.Compose(brief, FullCostTemplate(), RungPolicy.Table, catalog.AtomsInFamily, catalog.LookupAtom);
 
         Assert.Equal(1, result.Row.Rung);
+    }
+
+    // ---- T7 (basic-attack-seed): Kind honoring + Kind-aware cost resolution ----
+
+    /// <summary>The composer's own back-compat guarantee: a brief with no `kindHint` at all (every
+    /// brief authored before this task) still composes to `Kind = Skill` and its cost still comes from
+    /// `Category`, byte-for-byte the pre-T7 behaviour. All the OTHER tests in this file already prove
+    /// this implicitly (none of them set `KindHint`); this one states it as an explicit contract.</summary>
+    [Fact]
+    public void ABriefWithNoKindHintComposesToSkillAndCostsByCategory()
+    {
+        var brief = SimpleBrief(); // KindHint defaults to null
+        var catalog = SimpleCatalog();
+
+        var result = ActionCorpusComposer.Compose(brief, FullCostTemplate(), RungPolicy.Table, catalog.AtomsInFamily, catalog.LookupAtom);
+
+        Assert.Equal(ActionKind.Skill, result.Row.Kind);
+        Assert.Equal("qi", result.Costs[0].ResourceId); // category "attack" -> qi 20, unchanged
+        Assert.Equal(ValueSpec.Of(20), result.Costs[0].AmountSpec);
+    }
+
+    [Fact]
+    public void ABriefWithKindHintBasicComposesToBasicAndCostsStamina()
+    {
+        var brief = SimpleBrief() with { KindHint = ActionKind.Basic };
+        var catalog = SimpleCatalog();
+
+        var result = ActionCorpusComposer.Compose(brief, FullCostTemplate(), RungPolicy.Table, catalog.AtomsInFamily, catalog.LookupAtom);
+
+        Assert.Equal(ActionKind.Basic, result.Row.Kind);
+        Assert.Equal("stamina", result.Costs[0].ResourceId);
+        Assert.Equal(ValueSpec.Of(20), result.Costs[0].AmountSpec);
+    }
+
+    /// <summary>Category is "attack" here too (same as the no-hint test above), and "attack" also
+    /// costs `qi` — proving the Innate row (`qi 25`), not the Category row (`qi 20`), is what actually
+    /// drove this cost.</summary>
+    [Fact]
+    public void ABriefWithKindHintInnateComposesToInnateAndCostsItsOwnQiAmountNotTheCategorysQiAmount()
+    {
+        var brief = SimpleBrief() with { KindHint = ActionKind.Innate }; // Category stays "attack"
+        var catalog = SimpleCatalog();
+
+        var result = ActionCorpusComposer.Compose(brief, FullCostTemplate(), RungPolicy.Table, catalog.AtomsInFamily, catalog.LookupAtom);
+
+        Assert.Equal(ActionKind.Innate, result.Row.Kind);
+        Assert.Equal("qi", result.Costs[0].ResourceId);
+        Assert.Equal(ValueSpec.Of(25), result.Costs[0].AmountSpec); // kinds.innate's 25, not attack's 20
+    }
+
+    /// <summary>A brief whose `kindHint` explicitly names `"skill"` (a real, present value — not an
+    /// absent field) resolves identically to a brief with no `kindHint` at all.</summary>
+    [Fact]
+    public void ABriefWithKindHintExplicitlySkillResolvesTheSameAsNoKindHint()
+    {
+        var withHint = SimpleBrief() with { KindHint = ActionKind.Skill };
+        var withoutHint = SimpleBrief();
+        var catalog = SimpleCatalog();
+
+        var a = ActionCorpusComposer.Compose(withHint, FullCostTemplate(), RungPolicy.Table, catalog.AtomsInFamily, catalog.LookupAtom);
+        var b = ActionCorpusComposer.Compose(withoutHint, FullCostTemplate(), RungPolicy.Table, catalog.AtomsInFamily, catalog.LookupAtom);
+
+        Assert.Equal(b.Row.Kind, a.Row.Kind);
+        Assert.Equal(b.Costs[0], a.Costs[0]);
     }
 }

@@ -142,14 +142,16 @@ public static class ActorDerivedProfiles
 ///
 /// <para><b>The contribution fold (§4.3 step 1).</b> Before this, <see cref="Resolve"/> returned the
 /// pinned snapshot untouched — there was nothing for a bound <c>stat.derived</c> atom to contribute
-/// to, which is exactly why <c>AtomKindRegistry</c>'s Sim cell has stayed <c>None</c>
-/// (decisions.md:106: <i>"Sim stays None — it still has no consumer"</i>). <see cref="AddContribution"/>
-/// registers a <see cref="BoundDerivedAtom"/> per ptr, and <see cref="Resolve"/> folds them onto the
-/// pinned base via <see cref="ActorDerivedSnapshot.OverlayAdd"/> — the same "plain sum is what
-/// FlatSum composing IS" reasoning <c>BattleDerivedModifierLedger</c> already established. A plain
-/// sum honours <c>Flat</c>/<c>Increased</c> and not <c>Replace</c>/<c>Flag</c>, so this fold is
-/// <c>Partial</c>, not <c>Full</c> — deciding which, and moving the registry cell, is E5's job, not
-/// this one's (§4.3 step 4).</para>
+/// to, which is exactly why <c>AtomKindRegistry</c>'s Sim cell stayed <c>None</c>, then E5 flipped it
+/// to <c>Partial</c> once a plain-sum fold existed (decisions.md, "Derived-write lawn executor" owner
+/// decision 2). <see cref="AddContribution"/> registers a <see cref="BoundDerivedAtom"/> per ptr, and
+/// <see cref="Resolve"/> folds them onto the pinned base per channel via
+/// <see cref="DerivedComposer.ComposeChannelWithBaseline"/> — sim-hub-parity (T15, 2026-09-13):
+/// this is now the SAME op-aware fold every other runtime's <see cref="DerivedComposer"/> uses (Flat/
+/// Increased sum, Replace picks highest-priority outright, Flag takes the max), with the pinned
+/// snapshot value standing in for <see cref="DerivedStatDef.DefaultValue"/> — not a second,
+/// independently-drifting reimplementation. This is what let the Sim cell move from <c>Partial</c> to
+/// <c>Full</c>; see <see cref="AtomKindRegistry"/>'s own comment on the `stat.derived` Sim cell.</para>
 ///
 /// <para><b>Deliberately reachable without a bind (§4.3 Verification).</b>
 /// <see cref="AddContribution"/> never asks <see cref="BindGate"/> anything — a caller (a test, or a
@@ -168,6 +170,11 @@ public sealed class ActorDerivedLookup
 
     /// <summary>Bound `stat.derived` contributions, per ptr — the fold's only state.</summary>
     readonly Dictionary<string, List<BoundDerivedAtom>> _contributions = new(StringComparer.Ordinal);
+
+    /// <summary>sim-hub-parity (T15) — held once per lookup instance, same lifetime pattern
+    /// <see cref="ActorHub"/> already uses for its own <see cref="DerivedComposer"/> (constructed once,
+    /// reused per resolve, never rebuilt per call).</summary>
+    readonly DerivedComposer _composer = new();
 
     public void Pin(string? ptr, ActorDerivedSnapshot snapshot)
     {
@@ -203,9 +210,11 @@ public sealed class ActorDerivedLookup
     /// <c>BindContext(RuntimeId.Sim)</c> — §4.3 step 3. Returns the gate's verdict; a caller that gets
     /// <see cref="AtomRejection.IsOk"/> back is expected to translate the accepted rows into
     /// <see cref="BoundDerivedAtom"/>s and fold them via <see cref="AddContribution"/>, exactly as
-    /// <c>GrantedDerivedAtomReader</c> does for the lawn — but that translation has no reachable
-    /// caller today, because the Sim cell for `stat.derived` is <see cref="RuntimeState.None"/> until
-    /// E5 flips it, so every row is refused here first.
+    /// <c>GrantedDerivedAtomReader</c> does for the lawn. <see cref="BindGate.Check"/> only refuses at
+    /// <see cref="RuntimeState.None"/> (and <see cref="RuntimeState.PlanOnly"/> for a non-planner) —
+    /// the Sim cell for `stat.derived` has been <see cref="RuntimeState.Partial"/> since E5 and is
+    /// <see cref="RuntimeState.Full"/> as of sim-hub-parity (T15), so this has accepted rows since E5,
+    /// not merely since this task.
     /// </summary>
     public AtomRejection TryBind(
         IReadOnlyList<AtomRow> atoms, OwnerScope owner, IReadOnlyCollection<string>? overlayKeys = null) =>
@@ -221,7 +230,20 @@ public sealed class ActorDerivedLookup
             : ActorDerivedSnapshot.StubNeutral();
         if (string.IsNullOrEmpty(key) || !_contributions.TryGetValue(key, out var contribs) || contribs.Count == 0)
             return baseSnapshot;
-        return baseSnapshot.OverlayAdd(
-            contribs.Select(c => new KeyValuePair<string, double>(c.Channel, c.Amount)));
+
+        // sim-hub-parity (T15): per-channel op-aware fold via the SAME DerivedComposer every other
+        // runtime uses — the pinned snapshot value stands in for DerivedStatDef.DefaultValue.
+        // BoundDerivedAtom carries no Priority field (AtomDerivedSubsystem's own real conversion
+        // never sets one either, defaulting to 0), so a multi-Replace tie breaks by SourceId — the
+        // same tie-break every OTHER real producer already gets when it, too, leaves Priority default.
+        var mods = contribs
+            .Select(c => new DerivedModifier(c.Channel, c.Op, c.Amount, SourceId: c.SourceId))
+            .ToList();
+        var composed = contribs
+            .Select(c => c.Channel)
+            .Distinct(StringComparer.Ordinal)
+            .Select(channel => new KeyValuePair<string, double>(
+                channel, _composer.ComposeChannelWithBaseline(channel, baseSnapshot.Get(channel), mods)));
+        return baseSnapshot.Overlay(composed);
     }
 }

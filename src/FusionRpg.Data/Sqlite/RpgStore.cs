@@ -2896,7 +2896,26 @@ public sealed partial class RpgStore : IRpgDb, IDisposable
         return list;
     }
 
-    public List<EventEnvelope> ListEvents(int limit, long afterId, long? playerId = null)
+    /// <summary>HTTP-facing: a caller-supplied `limit` is untrusted input, clamped to 500 so a
+    /// response can never be arbitrarily large.</summary>
+    public List<EventEnvelope> ListEvents(int limit, long afterId, long? playerId = null) =>
+        ListEventsCore(Math.Clamp(limit, 1, 500), afterId, playerId);
+
+    /// <summary>Internal server-side scans only (e.g. `DebugEndpoints.cs`'s lifecycle-state helpers)
+    /// -- never wire `limit` here to an HTTP route parameter. Real bug found live 2026-09-14: every
+    /// caller of the public `ListEvents` above that asked for a 2000-row lookback window
+    /// (`FindLatestKind`, `FindLatestLiveBoardStart`, `CountRecentEventsOfKind` in
+    /// `DebugEndpoints.cs`) was silently capped at 500 by that method's own HTTP-safety clamp, and had
+    /// been since before this session -- a long-running dev server's event log outgrew 500 rows
+    /// between two lifecycle signals, and the older one (`injector.hello`, in this incident) fell
+    /// outside the *actual* window while every comment in the codebase still said "2000". A bounded,
+    /// generous ceiling here (not unbounded -- still a local SQLite read, still capped) fixes the
+    /// silent truncation without loosening the real HTTP-facing limit those callers were never meant
+    /// to share.</summary>
+    public List<EventEnvelope> ListEventsForServerScan(int limit, long afterId, long? playerId = null) =>
+        ListEventsCore(Math.Clamp(limit, 1, 5000), afterId, playerId);
+
+    List<EventEnvelope> ListEventsCore(int clampedLimit, long afterId, long? playerId)
     {
         using var db = Open();
         using var cmd = db.CreateCommand();
@@ -2904,7 +2923,7 @@ public sealed partial class RpgStore : IRpgDb, IDisposable
             ? "SELECT id, t, game, kind, payload, match_key, player_id, run_id FROM events WHERE id > $a ORDER BY id ASC LIMIT $l;"
             : "SELECT id, t, game, kind, payload, match_key, player_id, run_id FROM events WHERE id > $a AND player_id = $p ORDER BY id ASC LIMIT $l;";
         cmd.Parameters.AddWithValue("$a", afterId);
-        cmd.Parameters.AddWithValue("$l", Math.Clamp(limit, 1, 500));
+        cmd.Parameters.AddWithValue("$l", clampedLimit);
         if (playerId is { } pid)
             cmd.Parameters.AddWithValue("$p", pid);
         var list = new List<EventEnvelope>();

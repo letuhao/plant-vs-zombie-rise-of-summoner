@@ -216,87 +216,6 @@ public class AptitudeResolverTests
         Assert.Throws<ArgumentNullException>(() => AptitudeResolver.Resolve(allocation, tuning, ladder, 0, null!));
     }
 
-    // ── ResolveForBattle: P2.5's battle-path twin ───────────────────────────────────────────────────
-
-    [Fact]
-    public void ResolveForBattle_mightAllocation_resolvesCombatPowerOmni_asLong()
-    {
-        var allocation = AptitudeAllocation.Single(AllocationScope.Commander, "Might", 100);
-        var ladder = Ladder();
-        var mods = AptitudeResolver.ResolveForBattle(allocation, MinimalTuning(), ladder, theta: 1000, Registry());
-
-        var powerMod = Assert.Single(mods, m => m.ChannelId == "combat.power.omni");
-        var expected = AptitudeReadFunctions.Magnitude(2200, 1.0, 1000, ladder.Value(1000));
-        Assert.Equal(expected, powerMod.Amount);
-    }
-
-    [Fact]
-    public void ResolveForBattle_matchesOverlayResolve_forTheSameMagnitudeEdge()
-    {
-        // Both seams must agree (spec-aptitude-resolve.md §1 "same allocation resolves to
-        // byte-identical channel values" -- the full cross-composer proof is P2.6's, but the shared
-        // arithmetic underneath is provable right here, at the resolver layer, without either composer.
-        var allocation = AptitudeAllocation.Single(AllocationScope.Commander, "Might", 100);
-        var ladder = Ladder();
-        var tuning = MinimalTuning();
-
-        var overlayMods = AptitudeResolver.Resolve(allocation, tuning, ladder, theta: 777, Registry());
-        var battleMods = AptitudeResolver.ResolveForBattle(allocation, tuning, ladder, theta: 777, Registry());
-
-        var overlayPower = Assert.Single(overlayMods, m => m.ChannelId == "combat.power.omni");
-        var battlePower = Assert.Single(battleMods, m => m.ChannelId == "combat.power.omni");
-        Assert.Equal(overlayPower.Value, (double)battlePower.Amount, 9);
-    }
-
-    [Fact]
-    public void ResolveForBattle_emptyAllocation_resolvesToNothing()
-    {
-        var mods = AptitudeResolver.ResolveForBattle(AptitudeAllocation.Empty, MinimalTuning(), Ladder(), theta: 1000, Registry());
-        Assert.Empty(mods);
-    }
-
-    [Fact]
-    public void ResolveForBattle_contestEdge_narrowsToLong()
-    {
-        var allocation = AptitudeAllocation.Single(AllocationScope.Commander, "Might", 100);
-        var mods = AptitudeResolver.ResolveForBattle(allocation, MinimalTuning(), Ladder(), theta: 1000, Registry());
-        var accuracyMod = Assert.Single(mods, m => m.ChannelId == "combat.accuracy.omni");
-        // k=0.5, share=1.0, gamma=1.0, span=100 -> 50.0 exactly -> 50L.
-        Assert.Equal(50L, accuracyMod.Amount);
-    }
-
-    [Fact]
-    public void ResolveForBattle_unregisteredChannel_throws()
-    {
-        var badTuning = AptitudeTuningLoader.Parse("""
-            {
-              "schemaVersion": 1, "version": 1,
-              "grant": { "aptitudePointsPerTheta": 3, "skillPointsPerTheta": 1 },
-              "pointEconomy": { "aptitudePointsPerThetaMilliByScope": { "commander": 3, "creatureType": 4, "aspect": 4, "uniqueCreature": 6 }, "respecPrice": 10 }, "guardEconomy": { "flatCommitCost": 50, "absorbDrainSharePermille": 300, "riposteShareCapPermille": 400 }, "mitigation": { "scaleMilli": 1000, "families": ["combat.defense", "combat.dodge", "combat.parry", "combat.block", "combat.absorption", "combat.heal"] },
-              "read": { "contest": { "spanPoints": 100.0, "shareExponentMilli": 1000 }, "magnitude": { "shareExponentMilli": 1000 } },
-              "recovery": { "scaleMilli": 374, "targetRecoveryShareMilli": 670, "families": ["resource.regen"] },
-              "familyRead": { "not.a.real.family": "magnitude" },
-              "edges": [ { "channel": "not.a.real.family.omni", "source": "Might", "kMilli": 100 } ]
-            }
-            """);
-        var allocation = AptitudeAllocation.Single(AllocationScope.Commander, "Might", 100);
-        Assert.Throws<InvalidOperationException>(() =>
-            AptitudeResolver.ResolveForBattle(allocation, badTuning, Ladder(), theta: 1000, Registry()));
-    }
-
-    [Fact]
-    public void ResolveForBattle_nullArguments_reject()
-    {
-        var allocation = AptitudeAllocation.Empty;
-        var tuning = MinimalTuning();
-        var ladder = Ladder();
-        var registry = Registry();
-        Assert.Throws<ArgumentNullException>(() => AptitudeResolver.ResolveForBattle(null!, tuning, ladder, 0, registry));
-        Assert.Throws<ArgumentNullException>(() => AptitudeResolver.ResolveForBattle(allocation, null!, ladder, 0, registry));
-        Assert.Throws<ArgumentNullException>(() => AptitudeResolver.ResolveForBattle(allocation, tuning, null!, 0, registry));
-        Assert.Throws<ArgumentNullException>(() => AptitudeResolver.ResolveForBattle(allocation, tuning, ladder, 0, null!));
-    }
-
     // ── The recovery-scale dial (class-system-ideal.md §5d) — found missing 2026-08-27 ─────────────
 
     static AptitudeTuning RecoveryTuning() => AptitudeTuningLoader.Parse("""
@@ -328,18 +247,6 @@ public class AptitudeResolverTests
 
         var unscaled = AptitudeReadFunctions.Magnitude(12000, 1.0, 1000, ladder.Value(1000));
         Assert.True(regenMod.Value < unscaled * 0.5, "recovery scale should meaningfully dampen the edge, not merely round it");
-    }
-
-    [Fact]
-    public void ResolveForBattle_recoveryFamilyEdge_appliesTheScaleDialToo()
-    {
-        var allocation = AptitudeAllocation.Single(AllocationScope.Commander, "Vigor", 100);
-        var ladder = Ladder();
-        var mods = AptitudeResolver.ResolveForBattle(allocation, RecoveryTuning(), ladder, theta: 1000, Registry());
-
-        var regenMod = Assert.Single(mods, m => m.ChannelId == "resource.regen.hp");
-        var expected = AptitudeReadFunctions.Magnitude(4488, 1.0, 1000, ladder.Value(1000));
-        Assert.Equal(expected, regenMod.Amount);
     }
 
     [Fact]

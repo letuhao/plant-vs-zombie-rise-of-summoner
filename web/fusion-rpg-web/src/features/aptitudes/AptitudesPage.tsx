@@ -45,7 +45,7 @@ export function AptitudesPage() {
       {error && <Banner tone="error">{error}</Banner>}
 
       <Panel title="Budget" testId="aptitudes-budget">
-        <StatBar label={`${spent} / ${budget} spent · power ${aptitudes.data.theta}`} value={spent} max={Math.max(budget, 1)} />
+        <StatBar label={`${spent} / ${budget} spent · Ladder ${aptitudes.data.theta}`} value={spent} max={Math.max(budget, 1)} />
       </Panel>
 
       <Panel title="Aptitudes" testId="aptitudes-grid">

@@ -33,6 +33,36 @@ public class GameEventRecTests
     }
 
     [Fact]
+    public void SwingPtr_defaults_to_zero_for_melee_shaped_construction()
+    {
+        // lawn-hit-attribution (T6): melee's swing identity is (ActorPtr, Frame), not a stored
+        // pointer — every existing call site that omits swingPtr must keep getting IntPtr.Zero.
+        var rec = new GameEventRec(
+            GameEventKind.CombatHit, frame: 10, seq: 1,
+            actorPtr: new IntPtr(0xA), targetPtr: new IntPtr(0xB),
+            typeId: 3, targetTypeId: 7, side: GameEventSide.Plant,
+            amount: -20, hitCount: 1, chainDepth: 0,
+            sourceGrantIdx: -1, matchKeyIdx: 0, pairId: 5);
+        Assert.Equal(IntPtr.Zero, rec.SwingPtr);
+    }
+
+    [Fact]
+    public void SwingPtr_carries_the_bullet_ptr_when_supplied()
+    {
+        // Projectile hits stamp the bullet's own pointer as the swing identity — distinct from
+        // ActorPtr, which after T6 is the firing creature, not the bullet.
+        var rec = new GameEventRec(
+            GameEventKind.CombatHit, frame: 10, seq: 1,
+            actorPtr: new IntPtr(0xA), targetPtr: new IntPtr(0xB),
+            typeId: 3, targetTypeId: 7, side: GameEventSide.Zombie,
+            amount: -20, hitCount: 1, chainDepth: 0,
+            sourceGrantIdx: -1, matchKeyIdx: 0, pairId: 0,
+            swingPtr: new IntPtr(0xC0FFEE));
+        Assert.Equal(new IntPtr(0xC0FFEE), rec.SwingPtr);
+        Assert.NotEqual(rec.ActorPtr, rec.SwingPtr);
+    }
+
+    [Fact]
     public void Coalescible_requires_no_chain_and_no_source_grant()
     {
         GameEventRec Make(byte depth, int grantIdx) => new(

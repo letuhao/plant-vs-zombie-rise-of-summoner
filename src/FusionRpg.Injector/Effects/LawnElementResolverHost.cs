@@ -31,6 +31,19 @@ public static class LawnElementResolverHost
         return (resolvedSide, typeId, elements);
     }
 
+    /// <summary>
+    /// Leave-board edge: forget ONE actor's cached `(side, elementTypes)` so an IL2CPP pointer reused
+    /// by a new entity inside the SAME match cannot inherit the dead one's species
+    /// (<see cref="LawnElementResolver"/>'s trigger set, item 3). Called from
+    /// <c>GameHooks.ForgetEntity</c> — the single cleanup every death path already funnels through, and
+    /// which runs after the die Emit, so `OnDeath` still sees the dying actor's element.
+    ///
+    /// <para>Never forces the resolver into existence: before the roster is configured there is nothing
+    /// cached to forget, and building one here would cache the empty-index bootstrap resolver that
+    /// <see cref="Resolver"/> deliberately refuses to keep.</para>
+    /// </summary>
+    public static void Invalidate(string? ptrKey) => _resolver?.Invalidate(ptrKey);
+
     static LawnElementResolver Resolver
     {
         get

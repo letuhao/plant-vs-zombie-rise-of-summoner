@@ -106,7 +106,11 @@ public static class CostFunction
         if (StatChannels.IsLowerBetter(channel) && SignOf(atom, kind, pars) > 0)
             points = -points;
 
-        var vector = PowerVector.FromCategory(kind.Categories, points);
+        // standing-coeff-tuning (T16): same per-family override ActorPowerCache.Compose applies — the
+        // two pricing paths must agree on a lone atom's category, or "marginal on an empty actor ≈
+        // stored power" (E10's own invariant) breaks the moment a channel has a family override.
+        var category = t.CategoryOverrideFor(atom.KindId, channel) ?? kind.Categories;
+        var vector = PowerVector.FromCategory(category, points);
 
         // A spawn is worth the body it makes, priced from its own hp/atk rather than treated as base
         // stats worth nothing — else `spawn.entity{hp: 5000}` prices at zero (D3).

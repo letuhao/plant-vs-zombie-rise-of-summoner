@@ -63,6 +63,16 @@ public sealed record BattleActorSetup
     /// <summary>Additive derived-channel adjustments (tests, traits, one-offs). Equipment enters via <see cref="EquipAtomSource"/> when <c>SpecimenId</c> is set — do not also mirror equip here. Integer amounts only.</summary>
     public IReadOnlyList<BattleChannelMod> ChannelMods { get; init; } = Array.Empty<BattleChannelMod>();
 
+    /// <summary>
+    /// battle-hub-fuse T5 — Hub inputs the builders resolved for this actor (aptitude allocation,
+    /// bound atoms, star/loyalty, draughts, injuries). <c>BattleHubCompose</c> reads these instead
+    /// of pre-folded <c>ChannelMods</c>; null (the default) means baseline + affinity + traits +
+    /// tempo only. <c>WhenWritingDefault</c> keeps every existing golden byte-identical: expedition
+    /// tier resolution serializes this record before any builder attaches inputs.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public BattleHubInputs? HubInputs { get; init; }
+
     /// <summary>Statuses applied attacker-less at battle start (test seams now, trait/attack riders later).</summary>
     public IReadOnlyList<BattleStatusSpec> InitialStatuses { get; init; } = Array.Empty<BattleStatusSpec>();
 
@@ -263,8 +273,15 @@ public static class BattleRuleset
     /// rate does, and PS-3 still does not apply to these hashes. Adopted because the subtractive
     /// shape floors damage at zero once defense outruns offense -- total immunity, the same defect
     /// removed from ampFactor in the same session, measured at 17.1% of LANDED hits dealing
-    /// nothing. Divisive approaches zero asymptotically and never reaches it.</summary>
-    public const int RulesetVersion = 4;
+    /// nothing. Divisive approaches zero asymptotically and never reaches it.
+    /// v5 (battle-hub-fuse, 2026-09-13): BattleStatComposer is deleted; BattleEngine composes through
+    /// BattleHubCompose (ActorHub) exclusively. T5's own pre-delete parity matrix proved Hub ==
+    /// composer channel-for-channel (exact on battle channels, narrowing-bounded on funded aptitude
+    /// channels, three adopted op-divergences on status.resist.{dot,cc,contagion} capped at 0.95 vs
+    /// the old uncapped raw sums) -- this bump is the single, approved (Ask-first table) marker for
+    /// that engine-shape change, not a magnitude retune. Any golden whose hash embeds RulesetVersion
+    /// moves by construction and is re-blessed once alongside this bump, never per-golden thereafter.</summary>
+    public const int RulesetVersion = 5;
 
     static BattleTuning? _tuning;
 
@@ -380,17 +397,24 @@ public static class BattleRuleset
     /// `battle-tempo` `battle-resources` — in-battle regen, which is <b>0 for every resource</b>, and
     /// that is a design position rather than an unset placeholder (spec §2.5).
     ///
-    /// <para>Two independent reasons. (1) <see cref="Stats.Derived.ResourceChannelReader.RegenPerTick"/>
-    /// rounds the channel to a whole <c>long</c>, and a round runs several hundred ticks
-    /// (`action-timing.v1.json`: the basic attack alone is 150 wind-up + 50 recovery), so the smallest
-    /// expressible non-zero rate accrues ~300 poise per round against `reaction-lane.v1.json`'s spend
-    /// of 100 — three counters a round, which erases the scarcity the pool exists to create. There is
-    /// no representable value between "nothing" and that. (2) `resource-hub-ssot.md` §11: pools
-    /// "persist across a run and refill <b>at rest</b>" — a battle is not a rest, and a pool that
-    /// refills mid-battle is the per-encounter model the hub explicitly rejects.</para>
+    /// <para>Two independent reasons were originally given. (1) — <b>resolved by S10.1, 2026-09-13</b>
+    /// — the reader used to round the channel to a whole <c>long</c>, so the smallest expressible
+    /// non-zero rate was 1/tick, and a round runs several hundred ticks (`action-timing.v1.json`: the
+    /// basic attack alone is 150 wind-up + 50 recovery), accruing ~300 poise against
+    /// `reaction-lane.v1.json`'s spend of 100 — three counters a round, with nothing representable
+    /// between that and "nothing". <see cref="Stats.Derived.ResourceChannelReader.RegenPerMilleTick"/>
+    /// now reads the rate in per-mille per tick and <see cref="Actions.Cost.ResourcePoolState"/>
+    /// carries the remainder, so 999 rates exist inside that former gap and a rate is no longer
+    /// forced to be coarse. (2) still stands, and is now the whole of the reason: `resource-hub-ssot.md`
+    /// §11 — pools "persist across a run and refill <b>at rest</b>", a battle is not a rest, and a pool
+    /// that refills mid-battle is the per-encounter model the hub explicitly rejects.</para>
     ///
-    /// <para>A method rather than an inlined literal so the reasoning has somewhere to live and a
-    /// future sub-tick unit (spec §10.1) has one place to change.</para>
+    /// <para>So this remains 0, but by the surviving reason rather than by a representation limit.
+    /// Authoring any non-zero rate is a balance act (`lawn-combat-wire` T11), not a wiring change;
+    /// S10.1 made rates <i>expressible</i>, deliberately without authoring one.</para>
+    ///
+    /// <para>A method rather than an inlined literal so the reasoning has somewhere to live and the
+    /// eventual authored rates have one place to land.</para>
     /// </summary>
     public static long BaseResourceRegen(int theta, string resourceId) => 0;
 

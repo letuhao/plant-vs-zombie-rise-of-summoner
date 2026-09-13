@@ -398,16 +398,15 @@ public class AtomKindRegistryTests
         // rule this line has always enforced is unchanged: a runtime opens when, and only when, a
         // consumer exists for it.
         Assert.Equal(RuntimeState.Full, AtomKindRegistry.Get("stat.derived")!.SupportIn(RuntimeId.Lawn));
-        // SIM opened 2026-09-06 (mechanism-wiring E5) to PARTIAL, not Full and not None -- it now has
-        // a consumer (ActorDerivedLookup's contribution fold, reached by SimEffectHost and
-        // FoundationHarness, plus a real BindContext(RuntimeId.Sim) bind site), so `None`'s "no
-        // consumer at all" is no longer true. It is not `Full` either: the fold is a plain sum
-        // (ActorDerivedSnapshot.OverlayAdd) with no notion of DerivedModifierOp, so it honours
-        // Flat/Increased but not Replace/Flag -- proven empirically, against the real DerivedComposer,
-        // by EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial. `Partial` is
-        // definitions.md §9's "executes only through a named side path" -- the named path here is
-        // "Flat/Increased compose correctly; Replace/Flag silently compose as Flat instead."
-        Assert.Equal(RuntimeState.Partial, AtomKindRegistry.Get("stat.derived")!.SupportIn(RuntimeId.Sim));
+        // SIM opened 2026-09-06 (mechanism-wiring E5) to PARTIAL: it had a consumer (ActorDerivedLookup's
+        // contribution fold, reached by SimEffectHost and FoundationHarness, plus a real
+        // BindContext(RuntimeId.Sim) bind site) but the fold was a plain sum (ActorDerivedSnapshot.
+        // OverlayAdd) with no notion of DerivedModifierOp, honouring Flat/Increased but not Replace/Flag.
+        // sim-hub-parity (T15, 2026-09-13) closed that gap: Resolve now folds per channel via
+        // DerivedComposer.ComposeChannelWithBaseline, the SAME op-aware fold every other runtime uses,
+        // proven against the real DerivedComposer by
+        // EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial -- all four ops now match.
+        Assert.Equal(RuntimeState.Full, AtomKindRegistry.Get("stat.derived")!.SupportIn(RuntimeId.Sim));
     }
 
     // The documented channel enum listed four keys effects cannot reach. Pin the real eight.

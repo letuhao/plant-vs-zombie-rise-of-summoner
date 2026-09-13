@@ -84,6 +84,11 @@ public sealed class OverlayCombatMath : ICombatMath
         // uncapped (a magnitude, PS-8) but nothing forbids an authored negative modifier reaching it
         // upstream — the floor at 0 is what actually enforces "never negative" at this boundary.
         var effectiveHeal = Math.Max(0.0, signedAmount + healPower);
-        return (long)Math.Round(effectiveHeal, MidpointRounding.AwayFromZero);
+        // combat-numerics (lawn-combat-wire T4): `checked` so a heal magnitude past `long`'s range
+        // throws (CLAUDE.md: "overflow throws, never wraps") instead of silently narrowing.
+        // `healPower` stays `double` — it is a CombatDerivedReader/ActorDerivedSnapshot channel read,
+        // the same out-of-scope, already-accepted double contract OverlayCombatCalculator's own class
+        // doc documents (audit-overflow.py A7: "decision, not defect").
+        return checked((long)Math.Round(effectiveHeal, MidpointRounding.AwayFromZero));
     }
 }

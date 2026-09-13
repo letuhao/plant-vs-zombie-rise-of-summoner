@@ -71,6 +71,10 @@ public static class CheatCommandRunner
             if (RpgHost.Client != null)
             {
                 _ = RpgHost.Client.RefreshCommanderAllocationAsync();
+                // unique-lawn-wire (AS-1.1): a Bound specimen's own AptitudesUpdated broadcast (scope
+                // "unique") rides the SAME command as commander/species -- one reload signal, three
+                // caches, never a fourth SignalR event.
+                _ = RpgHost.Client.RefreshUniqueAptitudesAsync();
                 _ = RpgHost.Client.RefreshCommanderSnapshotCacheAsync();
             }
             return;
@@ -79,6 +83,12 @@ public static class CheatCommandRunner
         {
             if (RpgHost.Client != null)
                 _ = RpgHost.Client.RefreshCommanderSnapshotCacheAsync();
+            return;
+        }
+        if (name is "passive-tree.bound-atoms.reload")
+        {
+            if (RpgHost.Client != null)
+                _ = RpgHost.Client.RefreshTreeBoundAtomsAsync();
             return;
         }
         if (name is "lawn-deploy.roster.reload")
@@ -311,6 +321,12 @@ public static class CheatCommandRunner
                 break;
             case "debug.snapshot":
                 DebugRuntime.Emit("debug.snapshot", DebugRuntime.Snapshot());
+                break;
+            case "debug.game-state":
+                DebugActions.GameState();
+                break;
+            case "debug.ui-nav":
+                DebugActions.UiNav(p);
                 break;
             case "debug.board-stats":
             {

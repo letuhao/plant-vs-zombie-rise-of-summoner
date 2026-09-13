@@ -29,11 +29,13 @@ public sealed record SquadBuild(string Id, string Kind, IReadOnlyList<AptitudeAl
 /// <para><b>PerActor</b> is D21's shape and F1's own default -- six potentially distinct allocations,
 /// the shape <c>tree-state</c> is designing for.</para>
 ///
-/// <para><b>Shipped</b> is today's actual production shape: <c>WebMatchService.AptitudeChannelMods</c>
-/// merges only the Commander and CreatureType scopes (§1.1), so two squad members of the same species
-/// cannot differ today -- every actor on a team effectively replicates the commander's allocation. This
-/// harness cannot reach <c>RpgStore</c> (§13 "Never"), so it reproduces that shape in memory by
-/// collapsing the per-actor list onto its first entry, replicated six times.</para>
+/// <para><b>Shipped</b> is today's actual production shape: the squad builder merges only the
+/// Commander and CreatureType scopes into each actor's <see cref="BattleHubInputs.Aptitude"/> (§1.1,
+/// battle-hub-fuse T6 re-homed this off the deleted <c>WebMatchService.AptitudeChannelMods</c>), so two
+/// squad members of the same species cannot differ today -- every actor on a team effectively
+/// replicates the commander's allocation. This harness cannot reach <c>RpgStore</c> (§13 "Never"), so
+/// it reproduces that shape in memory by collapsing the per-actor list onto its first entry, replicated
+/// six times.</para>
 /// </summary>
 public enum AllocationShape { PerActor, Shipped }
 

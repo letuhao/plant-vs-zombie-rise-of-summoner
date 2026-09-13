@@ -50,15 +50,38 @@ public class MovementPhaseHaltReportingTests
         CommanderId = Dave, CommandId = "m1", Kind = WorldCommandKinds.Move, EntityId = entityId, LanePath = lanePath
     };
 
+    /// <summary>The attacker always routs, the defender always wins — `actor-hub-and-combat-power-solid-fixing`
+    /// T20 turned Sector-kind contact into an honest no-op, so an explicit resolver manufactures the
+    /// routed precondition this file's halt-then-fall-back test needs.</summary>
+    sealed class AttackerAlwaysRouts : IBattleResolver
+    {
+        public BattleOutcome Resolve(BattleRequest request, IReadOnlyList<WorldEntity> combatants, ulong seed)
+        {
+            var attacker = combatants.Single(e => e.EntityId == request.AttackerEntityId);
+            var defender = combatants.Single(e => e.EntityId == request.DefenderEntityId);
+
+            return new BattleOutcome
+            {
+                BattleId = request.BattleId,
+                WinnerEntityId = defender.EntityId,
+                Sides = new[]
+                {
+                    new BattleSideOutcome { EntityId = defender.EntityId, Survivors = defender.Members },
+                    new BattleSideOutcome { EntityId = attacker.EntityId, Survivors = attacker.Members, Routed = true }
+                }
+            };
+        }
+    }
+
     [Fact]
     public void A_halt_line_reaches_its_owner_and_carries_the_real_sector_it_stopped_in()
     {
         // s2 is held against Dave by a hostile Legion — walking into it during this march halts the
         // legion right there (ZoneOfControl.IsHeldAgainst, MarchResolver.cs:120-126). The same arrival
-        // also triggers a Sector-kind contact fight against the stationary, entrenched blocker; Dave
-        // loses it and falls back down `l-s1-s2` to s1 (world-map, 2026-09-05) — a later effect the
-        // halt line itself predates, since it is written from `moved[entity]`'s position before any
-        // battle resolves.
+        // also triggers a Sector-kind contact fight against the stationary blocker; an explicit
+        // resolver (T20: real Sector-kind contact is now a no-op) routs Dave, who falls back down
+        // `l-s1-s2` to s1 (world-map, 2026-09-05) — a later effect the halt line itself predates,
+        // since it is written from `moved[entity]`'s position before any battle resolves.
         var mover = Legion("e-dave", Dave, "s1");
         var blocker = Legion("e-zomboss", Zomboss, "s2");
         var world = World(mover, blocker);
@@ -66,7 +89,7 @@ public class MovementPhaseHaltReportingTests
         var report = new TurnReport();
         var result = MovementPhase.Run(
             world, new[] { Move("e-dave", "l-s1-s2") }, report, Phase, turn: 1,
-            resolver: PlaceholderBattleResolver.Instance, seed: 1);
+            resolver: new AttackerAlwaysRouts(), seed: 1);
 
         var legion = result.World.Entities.Single(e => e.EntityId == "e-dave");
         Assert.True(legion.Routed);
@@ -99,7 +122,7 @@ public class MovementPhaseHaltReportingTests
         var report = new TurnReport();
         MovementPhase.Run(
             world, new[] { Move("e-dave", "l-s1-s2") }, report, Phase, turn: 1,
-            resolver: PlaceholderBattleResolver.Instance, seed: 1);
+            resolver: DistrictAssaultResolver.Instance, seed: 1);
 
         var arrival = Assert.Single(report.Entries, e => e.Detail.StartsWith(TurnEventKinds.Arrival + ":"));
         Assert.Null(arrival.SectorId);

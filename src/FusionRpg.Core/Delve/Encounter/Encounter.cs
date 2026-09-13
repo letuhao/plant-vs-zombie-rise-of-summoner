@@ -132,11 +132,16 @@ public static class Encounter
 
             if (anchor.BossKit is { } kit)
             {
-                // D2.4: pattern -> allocation -> ChannelMods, plus the one signature action from
-                // round 1. Re-writes the just-emitted boss setup in place (it is always index 0,
-                // EmitAndTrack having just added it above).
-                var channelMods = BossBuild.ResolveKit(kit.PatternId, enemies[0].Level, aptitudeTuning!, powerTuning!);
-                enemies[0] = BossBuild.ApplyKit(enemies[0], channelMods, kit.SignatureAction);
+                // D2.4: pattern -> allocation -> Hub inputs, plus the one signature action from
+                // round 1. battle-hub-fuse T6: the kit reaches battle as inputs only — ApplyKit no
+                // longer takes a ChannelMods parameter at all. Re-writes the just-emitted boss setup
+                // in place (it is always index 0, EmitAndTrack having just added it above).
+                var allocation = BossBuild.ResolveKitAllocation(kit.PatternId, enemies[0].Level, aptitudeTuning!);
+                enemies[0] = BossBuild.ApplyKit(enemies[0], kit.SignatureAction)
+                    with
+                    {
+                        HubInputs = (enemies[0].HubInputs ?? new BattleHubInputs()) with { Aptitude = allocation }
+                    };
             }
 
             // §5 "Retinue... is one more §2 slot" -- count-only, stats at Θ_room like every other

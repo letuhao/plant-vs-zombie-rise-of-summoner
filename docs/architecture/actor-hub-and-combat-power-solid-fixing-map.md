@@ -164,14 +164,14 @@ flowchart TB
 
 ## Done when (program)
 
-- [ ] No production `BattleStatComposer.Compose` under `src/` (guard stays green; allowlist emptied or class deleted).
-- [ ] No new private ChannelMods combat writers; known producers migrated to Hub.
-- [ ] Cold equip player path uses rolled/atom bindings — stub not the SSOT.
-- [ ] Standing includes Hub combat writers via membership filter; chip never labels level “power”.
-- [ ] Bound lawn UniqueCreature parity + Bound loadout via Hub.
-- [ ] Sim combat ops Full via Hub; D4 coeffs tunable; unique Θ on wire when known; stale dual-compose docs gone.
-- [ ] `prove-hub-combat` green.
-- [ ] PlaceholderBattleResolver + placeholder intel Strength **deleted**; `world-actor-combat` tracked (no world combat Done claim).
+- [x] No production `BattleStatComposer.Compose` under `src/` (guard stays green; class deleted entirely, T6 — re-confirmed via direct `ls`/grep, only historical prose citations remain).
+- [x] No new private ChannelMods combat writers; known producers migrated to Hub (T7; only allowlisted `TraitAtomSource.cs` constructs `BattleChannelMod`, re-confirmed).
+- [x] Cold equip player path uses rolled/atom bindings — stub not the SSOT (T4; re-confirmed clean at T22.2).
+- [x] Standing includes Hub combat writers via membership filter; chip never labels level "power" (T9, T10).
+- [ ] Bound lawn UniqueCreature parity + Bound loadout via Hub. **Split:** Bound loadout via Hub is `[x]` done (T13 — Injector PassiveTree → Hub, HTTP fetch+cache); Bound lawn UniqueCreature parity is honestly BLOCKED (T12, re-confirmed at T19-bullet-3) — depends on `aptitude-sheet`'s own unbuilt `unique-lawn-wire` (AS-1.1), a different program's locked boundary, not forced open here.
+- [x] Sim combat ops Full via Hub; D4 coeffs tunable; unique Θ on wire when known (honest negative — no real per-instance Θ exists, see T17); stale dual-compose docs gone.
+- [x] `prove-hub-combat` green (T19; bullet 3 an honest negative, `aptitude-sheet`'s own unbuilt boundary, not this program's to force).
+- [x] `PlaceholderBattleResolver`/`PlaceholderBattleTuning` **deleted** (T20); intel Strength's dependency on the deleted class **removed** — the formula was relocated to Intel's own ownership rather than dropped, an owner-decided amendment to B4's original wording after it was found to depend a real, shipped `ai-commander` AI (see ideal.md B4's amendment note); `world-actor-combat` tracked throughout, no world combat Done claim anywhere in this program's docs (T22: Level-as-Θ alias wiring is likewise an honest negative, locked to `delve-battle-profile`).
 - [ ] Ideal + aptitude-sheet Done checkboxes cross-linked; goldens re-blessed once under fuse bump.
 
 ---

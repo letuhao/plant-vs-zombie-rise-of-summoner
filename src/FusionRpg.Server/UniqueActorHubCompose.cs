@@ -17,8 +17,13 @@ namespace FusionRpg.Server;
 /// <summary>
 /// Sole Server Hot compose entry for UniqueActor sheet/derived — ActorHub only, FULL durable fan-in
 /// (progression + aptitude + equip atoms + passive tree). Status (<c>l2b.derived</c>) stays
-/// Injector-only (Hot session). BattleStatComposer stays locked-separate (ADR 2026-09-07).
-/// Injector tree hydrate is a named wiring gap — PassiveTreeTuningHub is Server-only today.
+/// Injector-only (Hot session). "BattleStatComposer stays locked-separate" (ADR 2026-09-07) is
+/// HISTORICAL — that ADR exception was overturned 2026-09-12 as a SOLID/DRY defect
+/// (`decisions.md` "ActorHub sole Hot compose gate"), and battle-hub-fuse (T6, 2026-09-13) deleted
+/// `BattleStatComposer` entirely: `BattleHubCompose` composes through this SAME `ActorHub`/
+/// `DerivedComposer` every other surface uses. Battle is fused, not merely "no longer locked-separate."
+/// Injector tree hydrate (T13, 2026-09-13): CLOSED via HTTP fan-in, not a local
+/// PassiveTreeTuningHub configure — see <see cref="TreeBoundAtoms"/>'s own doc comment.
 /// </summary>
 public static class UniqueActorHubCompose
 {
@@ -89,7 +94,7 @@ public static class UniqueActorHubCompose
         var displayName = string.IsNullOrWhiteSpace(profile?.Nickname) ? speciesName : profile!.Nickname;
         var roleLabel = string.Equals(actor.Side, "zombie", StringComparison.OrdinalIgnoreCase) ? "Zombie" : "Plant";
         var xpToNext = RpgXpCurve.XpToNext(RpgActorKinds.Specimen, actor.Level);
-        var standing = ProjectStanding(store, actor, powerIndex);
+        var standing = ProjectStanding(store, actor, powerIndex, contributions);
         var resourcePools = ProjectResourcePools(store, actor, snapshot, ctx, powerIndex);
         var (liveStatuses, shieldLayers, shieldSummary) = ProjectHotLive(liveState, actor.InstanceId);
 
@@ -240,17 +245,49 @@ public static class UniqueActorHubCompose
     }
 
     /// <summary>
-    /// Standing = <see cref="PowerVector"/> from durable equip + tree atoms (definitions.md §7).
-    /// Empty grants → Zero vector (ready, not pending).
+    /// standing-compose (T9) — Standing = <see cref="PowerVector"/> from every Hub combat writer
+    /// <see cref="CombatPowerMembership"/> includes, not equip+tree atoms alone (the former
+    /// HF-standing gap: aptitude, star/loyalty, and any future non-atom Hub writer were completely
+    /// unpriced). No second composer, no private aptitude re-fold: <paramref name="contributions"/>
+    /// is the SAME <see cref="DerivedContributionBag"/> <see cref="ProjectSheet"/> already resolved
+    /// off the SAME Hub this method's caller built — this reads it, never recomputes it.
+    ///
+    /// <para><b>Residual, not a naive Hub-snapshot price.</b> Pricing every included channel's Hub
+    /// TOTAL would double-count equip/tree (already priced below as real <c>AtomRow</c>s / synthetics)
+    /// and would still exclude nothing extra, so instead: keep equip/tree exactly as they were, and
+    /// for every membership-included channel, synthesize ONE atom per contribution whose SourceId is
+    /// NOT already carried by an equip (<c>equip:</c>) or tree (<c>tree.</c>) atom — this is exactly
+    /// "the Hub total minus what equip/tree already contributed," computed per-contribution rather
+    /// than as a subtraction, so it can never go negative or hide a sign error. `progression.*` (Θ)
+    /// and resource pools are excluded by <see cref="CombatPowerMembership.Includes"/> itself before
+    /// any SourceId is even inspected — Θ genuinely cannot reach Standing through this path.</para>
     /// </summary>
     static ActorStandingDto ProjectStanding(
-        RpgStore store, UniqueActorDto actor, IPowerIndexProvider powerIndex)
+        RpgStore store, UniqueActorDto actor, IPowerIndexProvider powerIndex,
+        DerivedContributionBag contributions)
     {
-        var atoms = new List<AtomRow>();
-        foreach (var input in EquippedBoundAtoms.InputsFromStore(store, actor.InstanceId))
-            atoms.Add(input.Atom);
-        foreach (var bound in TreeBoundAtoms.ForPlayer(store, powerIndex, actor.PlayerId))
-            atoms.Add(SyntheticStatDerived(bound));
+        var bound = new List<BoundDerivedAtom>();
+        bound.AddRange(EquippedBoundAtoms.DerivedFromStore(store, actor.InstanceId));
+        bound.AddRange(TreeBoundAtoms.ForPlayer(store, powerIndex, actor.PlayerId));
+
+        foreach (var channel in contributions.Channels)
+        {
+            if (!CombatPowerMembership.Includes(channel)) continue;
+            foreach (var c in contributions.ContributionsFor(channel))
+            {
+                if (c.SourceId.StartsWith("equip:", StringComparison.Ordinal)) continue;
+                if (c.SourceId.StartsWith("tree.", StringComparison.Ordinal)) continue;
+                bound.Add(new BoundDerivedAtom(channel, c.Op, c.Value, c.SourceId));
+            }
+        }
+
+        // Equip/tree atoms are NOT pre-filtered above -- an equipped item or tree node can target a
+        // non-combat channel (e.g. resource.max.hp), and Standing must not price that, so every atom
+        // (equip, tree, and the residual synthetics alike) goes through the same membership filter
+        // here, once, per the spec's own locked algorithm.
+        var atoms = CombatPowerMembership.Filter(bound, b => b.Channel)
+            .Select(SyntheticStatDerived)
+            .ToList();
 
         var vector = ActorPowerCache.Compose(atoms);
         return new ActorStandingDto

@@ -74,10 +74,10 @@ public class EquipRuntimeStoreTests : IDisposable
         var atoms = resolution.AtomsByBinding!.Values.SelectMany(a => a).ToList();
 
         var source = EquipAtomSource.FromResolver(_ => atoms);
-        var mods = source.ModsFor("s42");
+        var mods = source.DerivedAtomsFor("s42");
 
         var mod = Assert.Single(mods);
-        Assert.Equal("combat.power.fire", mod.ChannelId);
+        Assert.Equal("combat.power.fire", mod.Channel);
         Assert.Equal(30, mod.Amount);
     }
 

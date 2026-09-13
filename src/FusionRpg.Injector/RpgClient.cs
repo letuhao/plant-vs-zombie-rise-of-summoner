@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -63,6 +64,8 @@ public sealed class RpgClient
         await RefreshStatsAsync().ConfigureAwait(false);
         await RefreshPvzStatsAsync().ConfigureAwait(false);
         await RefreshCommanderAllocationAsync().ConfigureAwait(false);
+        await RefreshUniqueAptitudesAsync().ConfigureAwait(false);
+        await RefreshTreeBoundAtomsAsync().ConfigureAwait(false);
         await RefreshCommanderSnapshotCacheAsync().ConfigureAwait(false);
         await RefreshLawnDeployRosterCacheAsync().ConfigureAwait(false);
         await RefreshPowerIndexAsync().ConfigureAwait(false);
@@ -95,6 +98,14 @@ public sealed class RpgClient
             _hub.On<object>("AptitudesUpdated", _ =>
             {
                 CheatCommandRunner.Enqueue(new CommandDto { Name = "aptitudes.allocation.reload" });
+            });
+            // lawn-tree-hydrate (T13): PassiveTreeEndpoints.cs already broadcasts this to BOTH groups
+            // (line ~150-152) -- the injector simply never listened. A tree spend changes the SAME
+            // commander-scope shared-tree atoms TreeBoundAtomsCache below caches, so it is a Hub
+            // invalidation like AptitudesUpdated, not merely a UI refresh signal.
+            _hub.On<object>("PassiveTreeUpdated", _ =>
+            {
+                CheatCommandRunner.Enqueue(new CommandDto { Name = "passive-tree.bound-atoms.reload" });
             });
             _hub.On<object>("CommandersUpdated", _ =>
             {
@@ -135,6 +146,8 @@ public sealed class RpgClient
                     // allocation/Θ change made during the disconnected window was silently lost until
                     // the next full injector process restart, not just the next reconnect.
                     await RefreshCommanderAllocationAsync().ConfigureAwait(false);
+                    await RefreshUniqueAptitudesAsync().ConfigureAwait(false);
+                    await RefreshTreeBoundAtomsAsync().ConfigureAwait(false);
                     await RefreshCommanderSnapshotCacheAsync().ConfigureAwait(false);
                     await RefreshLawnDeployRosterCacheAsync().ConfigureAwait(false);
                     await RefreshPowerIndexAsync().ConfigureAwait(false);
@@ -439,6 +452,109 @@ public sealed class RpgClient
                 }
             }
             CheatState.ApplySpeciesAllocations(speciesAllocations);
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+        }
+    }
+
+    /// <summary>`unique-lawn-wire` (aptitude-sheet AS-1.1) — S4-locked fetch strategy: one
+    /// <c>GET /api/aptitudes/unique/{instanceId}</c> per currently-Bound specimen (never a `uniques`
+    /// map folded into <see cref="RefreshCommanderAllocationAsync"/>'s response, which the spec
+    /// explicitly rules out). The Bound set comes from the SAME <c>MatchHost.Runtime</c> ptr↔instance
+    /// index <see cref="FusionRpg.Injector.Match.UniqueBoundLoadout"/> already reads — never a second
+    /// tracking structure. Replaces <c>CheatState</c>'s whole unique-allocation cache each call
+    /// (matching <see cref="ApplySpeciesAllocations"/>'s own "wholesale replace" contract): a specimen
+    /// no longer Bound this round simply stops appearing, so its allocation cannot go stale. One dead
+    /// specimen's fetch failing (404 after it was released between snapshot and request, or a
+    /// transient network error) is caught PER INSTANCE and skipped — it must never blank out every
+    /// other still-Bound specimen's already-fetched allocation in the same round. Called at the same
+    /// cadence as <see cref="RefreshCommanderAllocationAsync"/>: session start, reconnect, and the
+    /// server's <c>"AptitudesUpdated"</c> broadcast — never a per-hit poll.</summary>
+    public async Task RefreshUniqueAptitudesAsync()
+    {
+        try
+        {
+            var bound = FusionRpg.Injector.Match.MatchHost.Runtime.ToSnapshot().Bindings
+                .Where(b => b.Phase == FusionRpg.Core.Match.UniqueBindingPhase.Bound)
+                .Select(b => b.InstanceId)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct(StringComparer.Ordinal)
+                .ToArray();
+
+            var byInstanceId = new Dictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation>(StringComparer.Ordinal);
+            foreach (var instanceId in bound)
+            {
+                try
+                {
+                    var json = await Http().GetStringAsync(_base + "/api/aptitudes/unique/" + Uri.EscapeDataString(instanceId))
+                        .ConfigureAwait(false);
+                    using var doc = JsonDocument.Parse(json);
+                    if (!doc.RootElement.TryGetProperty("shares", out var sharesEl) || sharesEl.ValueKind != JsonValueKind.Object)
+                        continue;
+
+                    var allocation = FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty;
+                    foreach (var share in sharesEl.EnumerateObject())
+                    {
+                        if (!share.Value.TryGetInt64(out var points) || points == 0) continue;
+                        allocation += FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Single(
+                            FusionRpg.Core.Stats.Aptitudes.AllocationScope.UniqueCreature, share.Name, points);
+                    }
+                    byInstanceId[instanceId] = allocation;
+                }
+                catch (Exception ex)
+                {
+                    // Per-instance only -- one released/unreachable specimen must not blank the rest.
+                    LastError = ex.Message;
+                }
+            }
+            CheatState.ApplyUniqueAllocations(byInstanceId);
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+        }
+    }
+
+    /// <summary>lawn-tree-hydrate (T13): the transport half of the tree bound-atoms delegate
+    /// <c>CheatState.ActorHub</c> needs. Mirrors <see cref="RefreshCommanderAllocationAsync"/>'s own
+    /// shape exactly (same current-player lookup, same try/catch-to-LastError) — the Injector has no
+    /// SQL store, so <c>TreeBoundAtoms.ForPlayer</c> (SQL-backed) cannot run in-process; this reads
+    /// the one HTTP round trip the Server exposes for it,
+    /// <c>GET /api/passive-tree/bound-atoms/{playerId}</c>, rather than shipping tuning JSON and a
+    /// store into the injector. Called at session start (<see cref="StartAsync"/>), on reconnect, and
+    /// on the same <c>"PassiveTreeUpdated"</c> SignalR broadcast <c>PassiveTreeEndpoints.cs</c> already
+    /// sends on every allocate — never on a per-hit poll.</summary>
+    public async Task RefreshTreeBoundAtomsAsync()
+    {
+        try
+        {
+            var playerJson = await Http().GetStringAsync(_base + "/api/players/current").ConfigureAwait(false);
+            using var playerDoc = JsonDocument.Parse(playerJson);
+            var playerId = playerDoc.RootElement.TryGetProperty("id", out var idEl) && idEl.TryGetInt64(out var pid)
+                ? pid
+                : 0L;
+            if (playerId <= 0) return;
+            var json = await Http().GetStringAsync(_base + "/api/passive-tree/bound-atoms/" + playerId).ConfigureAwait(false);
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.ValueKind != JsonValueKind.Array) return;
+
+            var atoms = new List<FusionRpg.Core.Stats.Derived.Subsystems.BoundDerivedAtom>();
+            foreach (var el in doc.RootElement.EnumerateArray())
+            {
+                var channel = el.TryGetProperty("channel", out var cEl) ? cEl.GetString() : null;
+                var opText = el.TryGetProperty("op", out var oEl) ? oEl.GetString() : null;
+                var sourceId = el.TryGetProperty("sourceId", out var sEl) ? sEl.GetString() : null;
+                if (string.IsNullOrEmpty(channel) || string.IsNullOrEmpty(opText) || string.IsNullOrEmpty(sourceId))
+                    continue;
+                if (!el.TryGetProperty("amount", out var aEl) || !aEl.TryGetDouble(out var amount))
+                    continue;
+                if (!Enum.TryParse<FusionRpg.Core.Stats.Derived.DerivedModifierOp>(opText, ignoreCase: true, out var op))
+                    continue; // an unrecognized op is skipped visibly here, never coerced to Flat
+                atoms.Add(new FusionRpg.Core.Stats.Derived.Subsystems.BoundDerivedAtom(channel, op, amount, sourceId));
+            }
+            FusionRpg.Injector.Stats.TreeBoundAtomsCache.Apply(atoms);
         }
         catch (Exception ex)
         {

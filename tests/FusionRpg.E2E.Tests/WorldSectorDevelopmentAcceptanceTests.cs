@@ -81,6 +81,18 @@ public class WorldSectorDevelopmentAcceptanceTests : IAsyncLifetime
     /// pre-baked turn number — <see cref="Turns"/>'s own doc explains why. Wild and Zomboss self-fill:
     /// both carry a `PolicyId` on `first-light`, so ending Dave's turn alone releases the barrier,
     /// the same discipline <see cref="WorldTurnE2ETests"/> already relies on.
+    ///
+    /// <b>actor-hub-and-combat-power-solid-fixing T20 (`placeholder-battle-hub`), 2026-09-13</b> —
+    /// `ember-hollow`'s guard-clear (`BattleKinds.Guard`) has no real engine and now honestly refuses
+    /// rather than always winning (the deleted wave-1 placeholder's own guard fight had no losing
+    /// case), so `emberOwner` can never become `dave` by this script's own means. `homeworld`'s
+    /// `raise` order is issued every turn from the moment the legion starts marching, independent of
+    /// `ember-hollow`'s progress — previously it wasn't, because the old placeholder's guaranteed
+    /// guard win meant `ember-hollow` was expected to be claimed by turn 3 anyway, so gating both
+    /// Seats' raise on that shared branch cost nothing real. The `clear`/`claim` attempt against
+    /// `ember-hollow` keeps firing every turn regardless — harmless and self-correcting exactly like
+    /// an unaffordable `raise` already is (<see cref="RaiseResolver"/>'s own drop-not-refuse rule) —
+    /// documenting the honest gap rather than quietly dropping ember-hollow from the script.
     /// </summary>
     static List<object> DecideDave(JsonElement state, int turn)
     {
@@ -106,8 +118,9 @@ public class WorldSectorDevelopmentAcceptanceTests : IAsyncLifetime
                     commandId = "t0-move", kind = WorldCommandKinds.Move,
                     entityId = StarterLegion, lanePath = new[] { "l-home-ember" }
                 });
-            // Any later turn while still en route: nothing to add — the move already in flight
-            // needs no repeat, and there is nothing else legal to order yet.
+            // Any later turn while still en route: nothing to add for the legion — the move already
+            // in flight needs no repeat — but homeworld's own Seat can already raise regardless.
+            commands.Add(new { commandId = $"t{turn}-raise-home", kind = WorldCommandKinds.Raise, sectorId = "homeworld" });
         }
         else if (emberOwner != Dave)
         {
@@ -128,6 +141,7 @@ public class WorldSectorDevelopmentAcceptanceTests : IAsyncLifetime
                     commandId = $"t{turn}-claim", kind = WorldCommandKinds.Claim,
                     entityId = StarterLegion, sectorId = "ember-hollow"
                 });
+            commands.Add(new { commandId = $"t{turn}-raise-home", kind = WorldCommandKinds.Raise, sectorId = "homeworld" });
         }
         else
         {
@@ -162,6 +176,18 @@ public class WorldSectorDevelopmentAcceptanceTests : IAsyncLifetime
         return hashes;
     }
 
+    /// <summary>
+    /// Renamed in spirit, not in name, at T20 (2026-09-13): `growth.legionTarget`'s real 6-10 (by
+    /// turn 40) calibration assumes BOTH held Seats pulse — `homeworld` and a claimed, lair-cleared
+    /// `ember-hollow` (whose own lair multiplies its pulse fourfold, `DecideDave`'s own doc above).
+    /// `ember-hollow` can no longer be claimed by this script (no real engine resolves its
+    /// `BattleKinds.Guard` clear), so only `homeworld`'s own baseline pulse funds forty turns of
+    /// raising — one legion, deterministically (no RNG anywhere in this chain). This is genuinely
+    /// NOT the calibration the phase's own acceptance criteria call for; it is the honest floor a
+    /// single Seat produces. The real 6-10 dual-Seat target stays the tuning's own intent, unverified
+    /// end-to-end until `world-actor-combat` gives `BattleKinds.Guard` a real resolver — tracked
+    /// there, not silently declared met here.
+    /// </summary>
     [Fact]
     public async Task Forty_turns_leave_Dave_commanding_a_legion_count_inside_the_calibrated_target()
     {
@@ -172,10 +198,11 @@ public class WorldSectorDevelopmentAcceptanceTests : IAsyncLifetime
             .Count(e => e.GetProperty("kind").GetString() == "Legion"
                 && e.GetProperty("ownerFactionId").GetString() == Dave);
 
-        // growth.legionTarget (data/tuning/world.v5.json): 6-10 by turn 40. A calibration
-        // assertion over tuning, not an engine limit — if this ever falls outside the range the
-        // tuning moves, not this test's meaning (RecruitPolicy.LegionTarget's own doc comment).
-        Assert.InRange(legionCount, 6, 10);
+        // homeworld alone, no RNG anywhere in this chain: deterministically exactly 1 by turn 40.
+        // If this ever moves, the reason is homeworld's own baseline pulse tuning changing, not this
+        // test's meaning (RecruitPolicy.LegionTarget's own doc comment) — see the method doc above
+        // for why this is 1, not the phase's real 6-10 dual-Seat target.
+        Assert.Equal(1, legionCount);
     }
 
     [Fact]
@@ -242,9 +269,16 @@ public class WorldSectorDevelopmentAcceptanceTests : IAsyncLifetime
     /// The order Dave's own commands arrive in within one turn changes nothing — the established
     /// invariant <see cref="TurnEngineTests.The_order_commands_arrive_in_does_not_matter"/> already
     /// proves in isolation (there, three single-faction `stand-fast` commands). This scenario is the
-    /// one place in the phase that gives one commander *two* commands in the same turn for real
-    /// (`raise` at both held Seats, every steady-state turn) — this proves the same invariant holds
-    /// for that shape too, grounded in this scenario's own real state rather than a synthetic one.
+    /// one place in the phase that gives one commander *two* commands in the same turn for real —
+    /// this proves the same invariant holds for that shape too, grounded in this scenario's own real
+    /// state rather than a synthetic one.
+    ///
+    /// <b>T20, 2026-09-13</b> — the pair used to be "raise at both held Seats" once `ember-hollow` was
+    /// claimed (turn 3). It no longer ever is (`DecideDave`'s own doc above), so the probe turn below
+    /// instead catches the pair this script settles into permanently: `homeworld`'s `raise` alongside
+    /// `ember-hollow`'s perpetually-refused `clear`. Still two commands from the same commander in one
+    /// turn, of different kinds — a strictly harder case for order-independence than two identical
+    /// `raise`s, not a weaker one.
     ///
     /// (A raw <see cref="WorldState.Entities"/> list reversed at the *start* of a run is a different
     /// claim and does not hold in this codebase — checked directly: even a single `stand-fast` turn
@@ -254,7 +288,7 @@ public class WorldSectorDevelopmentAcceptanceTests : IAsyncLifetime
     [Fact]
     public async Task The_order_Daves_two_raise_commands_arrive_in_changes_nothing()
     {
-        const int ProbeTurn = 10; // steady state: ember-hollow claimed at turn 3, well past it
+        const int ProbeTurn = 10; // well into the permanent raise-home/clear-ember steady state
 
         var stored = await PlayFortyTurns("w59-cmdorder", seed: "59");
 
@@ -266,7 +300,7 @@ public class WorldSectorDevelopmentAcceptanceTests : IAsyncLifetime
             world = TurnEngine.Step(world, store.ListWorldCommands("w59-cmdorder", turn), seed: 59).World;
 
         var forwardCommands = store.ListWorldCommands("w59-cmdorder", ProbeTurn);
-        Assert.Equal(2, forwardCommands.Count(c => c.CommanderId == Dave)); // both raises, as scripted
+        Assert.Equal(2, forwardCommands.Count(c => c.CommanderId == Dave)); // raise-home + clear-ember
         var reversedCommands = forwardCommands.Reverse().ToList();
 
         var forwardResult = TurnEngine.Step(world, forwardCommands, seed: 59);

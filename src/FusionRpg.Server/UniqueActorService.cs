@@ -36,7 +36,12 @@ public sealed class UniqueActorService
     public UniqueEquipmentListDto? GetEquipment(string instanceId) =>
         _store.GetUniqueEquipment(instanceId);
 
-    /// <summary>Roster-only equip. Rebuilds mods_json grants from stub catalog.
+    /// <summary>Roster-only equip. The sole Cold materialize path is rolled / atom bindings:
+    /// this writes the assignment row, then one rebuild — <c>mods_json</c> refresh plus
+    /// <c>ReconcileUniqueEquipmentAtomBindings</c> — so Hub and battle read the same bound atoms
+    /// through <c>EquippedBoundAtoms</c>. The stub catalog is an item-id allowlist only (DEBT —
+    /// cold-equip-one); combat magnitudes come from the bound atoms' own containers, never from
+    /// stub grant templates.
     ///
     /// <para>⛔ <b><c>slot.claimed_by_item</c> is the symmetric half of the item route's
     /// <c>equip.role-held-by-relic</c></b> (defect R1, fixed 2026-09-06). Two flows write

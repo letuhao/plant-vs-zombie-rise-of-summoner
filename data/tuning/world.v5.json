@@ -73,12 +73,6 @@
       "midpoint": 20000
     }
   ],
-  "placeholderBattle": {
-    "defenderBonusMilli": 1250,
-    "wipeoutRatioMilli": 250,
-    "routWoundMilli": 750,
-    "guardWoundMilli": 100
-  },
   "calendar": {
     "daysPerWeek": 7,
     "weeksPerMonth": 4,

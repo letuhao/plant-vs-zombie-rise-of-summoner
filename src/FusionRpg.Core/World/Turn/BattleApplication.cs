@@ -78,10 +78,13 @@ public static class BattleApplication
     /// the sector it now stands in) and the origin is simply the lane's *other* end.
     ///
     /// A force with neither — a genuine garrison losing a Contact or Siege fight on ground it already
-    /// held at turn start, or the entrenched-bonus defender — has nothing to fall back *from* and
-    /// stays exactly where entrenched combat already left the map, the same distinction
-    /// `PlaceholderBattleResolver`'s own `DefenderBonusMilli` already draws between a legion caught
-    /// marching and one dug in.
+    /// held at turn start, or a district's entrenched defender (<see cref="Battle.Board.SiegeTuningPolicy.Objective"/>'s
+    /// own <c>DistrictDefenderBonusMilli</c>) — has nothing to fall back *from* and stays exactly
+    /// where entrenched combat already left the map, the same distinction the deleted wave-1
+    /// `PlaceholderBattleResolver` once drew between a legion caught marching and one dug in
+    /// (`actor-hub-and-combat-power-solid-fixing` T20 — a fall-back Contact/Siege fight for a
+    /// non-district kind is now a no-op outcome, `Sides.Count == 0`, so `FallBack` is never even
+    /// called for it; only District's real engine still produces a routed side here).
     /// </summary>
     static WorldEntity FallBack(WorldEntity entity, IReadOnlyList<WorldLane> lanes, string? arrivedViaLaneId)
     {

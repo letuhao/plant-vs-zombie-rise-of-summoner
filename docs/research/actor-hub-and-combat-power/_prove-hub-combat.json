@@ -1,0 +1,31 @@
+{
+  "BattleEqualsSheet": {
+    "Channels": [
+      "combat.power.fire",
+      "combat.power.ice"
+    ],
+    "PerChannel": {
+      "combat.power.fire": {
+        "Sheet": 40,
+        "Battle": 40
+      },
+      "combat.power.ice": {
+        "Sheet": 1.4394270000000002,
+        "Battle": 1.4394270000000002
+      }
+    },
+    "Deltas": {
+      "combat.power.fire": 0,
+      "combat.power.ice": 0
+    },
+    "Pass": true
+  },
+  "StandingHonesty": {
+    "ThetaAloneIsZero": true,
+    "CooldownAptitudeSource": "Focus",
+    "CooldownChannel": "skill.cooldown.attack",
+    "CooldownMovedStanding": true,
+    "Pass": true
+  },
+  "Pass": true
+}

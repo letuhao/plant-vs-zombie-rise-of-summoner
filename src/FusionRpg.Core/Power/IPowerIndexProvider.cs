@@ -25,6 +25,17 @@ public sealed class StubPowerIndexProvider : IPowerIndexProvider
     public PowerAxisReport Explain(StatContext ctx) => new(0, Array.Empty<PowerAxisContribution>());
 }
 
+/// <summary>A constant Θ for hosts that already resolved it (battle setups carry their own level).
+/// Mirrors the private fixed provider <c>TerminationGuard</c> already keeps for the same reason.</summary>
+public sealed class FixedPowerIndexProvider : IPowerIndexProvider
+{
+    readonly int _theta;
+    public FixedPowerIndexProvider(int theta) => _theta = theta;
+    public int ActorIndex(StatContext ctx) => _theta;
+    public int ContentIndex(ContentContext ctx) => _theta;
+    public PowerAxisReport Explain(StatContext ctx) => new(_theta, Array.Empty<PowerAxisContribution>());
+}
+
 /// <summary>
 /// Reads an injected snapshot; no I/O (spec-power-index.md §2.2). <see cref="Hydrate"/>/<see cref="Clear"/>
 /// are the one mechanism Core owns — caching strategy, refresh cadence, and invalidation are each

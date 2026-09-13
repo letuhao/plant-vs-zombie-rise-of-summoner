@@ -187,8 +187,6 @@ internal static class ContractTuningTestBootstrap
             new StrengthBandTuning(4_000, 9_999, 7_000),
             new StrengthBandTuning(10_000, 20_000, 20_000),
         },
-        PlaceholderBattle: new PlaceholderBattleTuning(
-            DefenderBonusMilli: 1250, WipeoutRatioMilli: 250, RoutWoundMilli: 750, GuardWoundMilli: 100),
         Calendar: new WorldCalendarTuning(
             DaysPerWeek: 7, WeeksPerMonth: 4,
             SpecialWeekChanceMilli: 250, SpecialMonthChanceMilli: 400, PlagueChanceMilli: 100),

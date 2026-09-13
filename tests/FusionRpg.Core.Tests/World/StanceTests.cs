@@ -187,28 +187,15 @@ public class StanceTests
         Assert.Equal(40, Legion(result.World).Members.First().Wounds);
     }
 
-    [Fact]
-    public void A_dug_in_defender_counts_as_stationary_even_when_nobody_moved()
-    {
-        // `DefenderStationary` false on purpose: with it true this test would pass whether or not
-        // the stance is read at all, which is exactly what it did before.
-        var request = new BattleRequest
-        {
-            BattleId = "b", Kind = BattleKinds.Sector, LocationId = "x",
-            AttackerEntityId = "a", DefenderEntityId = "d", DefenderStationary = false
-        };
-
-        var attacker = Legion(World()) with { EntityId = "a" };
-
-        // Evenly matched, so entrenchment is the only thing that can decide it.
-        var entrenched = Legion(World()) with { EntityId = "d", Stance = "hold" };
-        Assert.Equal("d", PlaceholderBattleResolver.Instance.Resolve(request, new[] { attacker, entrenched }, seed: 1).WinnerEntityId);
-
-        // The control: the same two forces with nobody dug in destroy each other, which is what
-        // proves the assertion above is not passing by accident.
-        var afoot = Legion(World()) with { EntityId = "d", Stance = "march" };
-        Assert.Null(PlaceholderBattleResolver.Instance.Resolve(request, new[] { attacker, afoot }, seed: 1).WinnerEntityId);
-    }
+    // `A_dug_in_defender_counts_as_stationary_even_when_nobody_moved` deleted —
+    // actor-hub-and-combat-power-solid-fixing T20: it unit-tested the deleted
+    // `PlaceholderBattleResolver`'s own entrenchment-multiplier reading of `defender.Stance`/
+    // `DefenderStationary` directly, a mechanic that existed only inside that class for
+    // non-district `BattleKinds`. `DistrictAssaultResolver` now refuses every non-district kind
+    // outright (no invented winner), so there is no successor entrenchment logic for a Sector-kind
+    // fight to test; District's own, separately-tested entrenched-defender bonus
+    // (`SiegeTuningPolicy.Objective.DistrictDefenderBonusMilli`) is a different mechanism, covered
+    // by `DistrictAssaultResolverTests`/the real siege suite, not this one.
 
     // ---- dowse (world-stage W30) ----------------------------------------------------------
 

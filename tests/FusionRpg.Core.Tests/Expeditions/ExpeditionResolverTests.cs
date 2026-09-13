@@ -4,6 +4,7 @@ using System.Text.Json;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Expeditions;
+using FusionRpg.Core.Stats.Derived;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Expeditions;
@@ -125,7 +126,16 @@ public class ExpeditionResolverTests
             if (laterBattle == null) continue;
 
             var member = laterBattle.Setup.Squad.Single(s => s.Key == injury.InjuredKey);
-            Assert.Contains(member.ChannelMods, m => m.Amount < 0);
+            // battle-hub-fuse T5: injuries ride as Hub inputs, not ChannelMods appends — and the
+            // debuff reaches the composed snapshot through the ExpeditionInjurySubsystem twin.
+            var injuries = member.HubInputs?.Injuries;
+            Assert.NotNull(injuries);
+            Assert.True(injuries!.TryGetValue(injury.InjuredKey!, out var count) && count > 0,
+                "injured member must carry a positive injury count in its Hub inputs");
+            var divisor = ExpeditionTuningHub.Tuning.EventRoll.InjuryPowerDivisor;
+            var expected = (double)(count * -Math.Max(1, member.Atk / divisor));
+            Assert.Equal(expected,
+                BattleHubCompose.Compose(member).Get(DerivedStatChannels.CombatPowerOmni, 0));
             return; // proven
         }
 
@@ -220,10 +230,19 @@ public class ExpeditionResolverTests
     // is unchanged below because none of its rolls landed a wild-meet tick. The resolver's own math,
     // RNG stream, and which enemy is picked are all unaffected — only one serialized literal moved,
     // the same class of shape churn this golden's own history already names as expected.
+    // Re-blessed 2026-09-13 (actor-hub fuse T5, solid-run: injuries ride as Hub inputs, not
+    // ChannelMods appends) — proven the sole cause, not assumed: dumped the full hunt-8h/3003
+    // AND warpath-20h/4004 resolutions on both branches and diffed. Ticks identical (same wild
+    // picks, same RNG stream), rewards identical; the ONLY delta is the embedded BattleSetup
+    // injury representation: `ChannelMods: [{combat.power.omni, -7}]` became
+    // `HubInputs.Injuries` (hunt: squad:0/squad:1; warpath: squad:1). Scout/forage rolls never
+    // landed an injury tick, so their hashes are untouched — exactly what a representation-only
+    // move predicts. Sibling determinism tests (Same_inputs_resolve_identically, recall
+    // pro-rating) stayed green unchanged.
     const string ScoutHash = "9DAC80588AD80CA004AAF659DA89F44A0E9C0644FF50E9C35F9FC1497DC571EB";
     const string ForageHash = "D9ED9324519BBEACC17C28E73F571161548E86C3AEF86565CB8AACB396FC738A";
-    const string HuntHash = "68F5FC90E0DBB0E6704623FBA5ACD2A86D573804F0D6ECE8672E4FE0C308FB91";
-    const string WarpathHash = "842F2760E07097565396B44E53DC26E60993CCE787FAEC9CE864F39D553A8FA6";
+    const string HuntHash = "09F61DF428B0CFCAC69A3EE218AD9BFFBDDE23213DCE2B7602FECF9FD7D153B9";
+    const string WarpathHash = "AACF2338C8381E5E53F7A936149B434F1F413542CD01B2FC42B92DADD648143C";
 
     [Fact]
     public void Tier_goldens_are_locked()

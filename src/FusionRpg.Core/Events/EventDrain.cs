@@ -459,7 +459,15 @@ public sealed class EventDrain
                     HitCount = rec.HitCount,
                     ChainDepth = rec.ChainDepth,
                     SourceGrantId = sourceGrant,
-                    Tick = rec.Seq
+                    Tick = rec.Seq,
+                    // lawn-hit-attribution (T6): the SWING identity, separate from ActorPtr (now the
+                    // firing creature). A projectile's own ptr for a bullet hit — one bullet piercing
+                    // N victims shares one SwingId across N dealt records; a melee record has no
+                    // SwingPtr, so this falls back to (ActorPtr, Frame), the same identity
+                    // `_meleePairsByTarget`/`_meleePairsFrame` already scope melee bookkeeping by.
+                    SwingId = rec.SwingPtr != IntPtr.Zero
+                        ? PtrHex(rec.SwingPtr)
+                        : (rec.ActorPtr != IntPtr.Zero ? PtrHex(rec.ActorPtr) + ":" + rec.Frame : null)
                 };
             case GameEventKind.PlantDamage:
             case GameEventKind.ZombieDamage:

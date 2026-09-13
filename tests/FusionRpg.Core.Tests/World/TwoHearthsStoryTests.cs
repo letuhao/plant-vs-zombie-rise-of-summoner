@@ -23,6 +23,25 @@ public class TwoHearthsStoryTests
 {
     const ulong Seed = 999;
 
+    /// <summary>Guard-kind contact resolves as a clean win — `actor-hub-and-combat-power-solid-fixing`
+    /// T20 made `BattleKinds.Guard` one of `DistrictAssaultResolver`'s refused non-district kinds, so
+    /// clearing a slot no longer happens on its own; this stands in so the story below can still reach
+    /// the claim it is really testing.</summary>
+    sealed class GuardAlwaysClears : IBattleResolver
+    {
+        public BattleOutcome Resolve(BattleRequest request, IReadOnlyList<WorldEntity> combatants, ulong seed)
+        {
+            var attacker = combatants.Single(e => e.EntityId == request.AttackerEntityId);
+            return new BattleOutcome
+            {
+                BattleId = request.BattleId,
+                WinnerEntityId = attacker.EntityId,
+                GuardCleared = true,
+                Sides = new[] { new BattleSideOutcome { EntityId = attacker.EntityId, Survivors = attacker.Members } }
+            };
+        }
+    }
+
     static WorldSector Find(WorldState w, string id) => w.Sectors.Single(s => s.SectorId == id);
 
     [Fact]
@@ -43,7 +62,7 @@ public class TwoHearthsStoryTests
         // Clear the one guarded slot, then claim.
         var guarded = Find(world, "hot-ground").Slots.Single(sl => sl.GuardState == GuardState.Intact);
         var clear = new WorldCommand { CommanderId = "dave", CommandId = "clear1", Kind = WorldCommandKinds.Clear, EntityId = "e-dave-legion-1", SectorId = "hot-ground", SlotIndex = guarded.SlotIndex };
-        world = TurnEngine.Step(world, new[] { clear }, Seed).World;
+        world = TurnEngine.Step(world, new[] { clear }, Seed, new GuardAlwaysClears()).World;
         Assert.All(Find(world, "hot-ground").Slots, sl => Assert.NotEqual(GuardState.Intact, sl.GuardState));
 
         var claim = new WorldCommand { CommanderId = "dave", CommandId = "claim1", Kind = WorldCommandKinds.Claim, EntityId = "e-dave-legion-1", SectorId = "hot-ground" };

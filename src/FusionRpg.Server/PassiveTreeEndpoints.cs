@@ -140,6 +140,26 @@ public static class PassiveTreeEndpoints
 
             return Results.Ok(ProjectState(store, powerIndex, playerId, ownedOverride: body.Nodes, aptitudeDeltaById: aptitudeDeltaById));
         });
+
+        // lawn-tree-hydrate (T13) -- the Injector has no SQL store, so it cannot call
+        // TreeBoundAtoms.ForPlayer itself; this is the one HTTP round trip that lets it fan the SAME
+        // commander-scope shared-tree atoms the Server sheet already resolves into its own Hot
+        // ActorHub, mirroring RpgClient.RefreshCommanderAllocationAsync's own shape (GET at session
+        // start + on a SignalR reload broadcast, never a per-frame poll).
+        g.MapGet("/bound-atoms/{playerId:long}", (long playerId, RpgStore store, IPowerIndexProvider powerIndex) =>
+        {
+            if (!store.PlayerExists(playerId)) return Results.NotFound();
+            var atoms = FusionRpg.Server.TreeBoundAtoms.ForPlayer(store, powerIndex, playerId)
+                .Select(a => new BoundDerivedAtomDto
+                {
+                    Channel = a.Channel,
+                    Op = a.Op.ToString(),
+                    Amount = a.Amount,
+                    SourceId = a.SourceId
+                })
+                .ToList();
+            return Results.Ok(atoms);
+        });
     }
 
     static async Task BroadcastBestEffort(IHubContext<RpgHub> hub, long playerId)

@@ -107,7 +107,7 @@ public static class IntelSeed
             .OrderBy(e => e.EntityId, StringComparer.Ordinal)
             .Select(e =>
             {
-                var strength = Turn.PlaceholderBattleResolver.Strength(e);
+                var strength = ForceStrength.Of(e);
                 return new RememberedForce
                 {
                     EntityId = e.EntityId,

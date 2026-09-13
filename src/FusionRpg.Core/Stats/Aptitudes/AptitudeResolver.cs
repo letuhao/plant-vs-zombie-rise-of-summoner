@@ -1,4 +1,3 @@
-using FusionRpg.Core.Battle;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Derived;
 
@@ -7,8 +6,8 @@ namespace FusionRpg.Core.Stats.Aptitudes;
 /// <summary>
 /// spec-aptitude-resolve.md — turns an allocation into derived-channel modifiers, through the two
 /// PS-3 read functions <see cref="AptitudeReadFunctions"/> owns. Pure: no I/O, no statics, no cache
-/// (§5 rule 3 — the second-cheapest option after having none at all is copying `BattleStatComposer`'s
-/// `AsyncLocal` idiom verbatim; this needs neither, since it holds no state between calls).
+/// (§5 rule 3 — the second-cheapest option after having none at all is a per-composer cache idiom;
+/// this needs neither, since it holds no state between calls).
 ///
 /// <para>Every dependency arrives as a parameter — including <see cref="PowerLadder"/> — so this stays
 /// callable with nothing configured globally: the caller (a subsystem, a test, `deterministic-core`)
@@ -60,56 +59,6 @@ public static class AptitudeResolver
 
             mods.Add(new DerivedModifier(edge.Channel, op, value,
                 SourceId: ContributionSourceIds.Aptitude(edge.Source)));
-        }
-
-        return mods;
-    }
-
-    /// <summary>
-    /// The battle-path twin of <see cref="Resolve"/> — spec-aptitude-resolve.md §2a: "this module emits
-    /// one thing and it is adapted at two seams." Same edges, same <see cref="AptitudeReadFunctions"/>
-    /// calls, packaged as <see cref="BattleChannelMod"/> instead of <see cref="DerivedModifier"/> —
-    /// <c>BattleChannelMod.Amount</c> is already `long`, and <c>BattleStatComposer</c>'s ChannelMods
-    /// loop has no op concept at all (always additive, no cap application — true for every other
-    /// producer feeding it, `StarChannelMods`/`LoyaltyChannelMods`/trait mods included, not something
-    /// this method introduces), so there is no compose-kind lookup to do here the way <see cref="Resolve"/>
-    /// needs one. The Contest branch narrows to `long` here (never inside
-    /// <see cref="AptitudeReadFunctions.Contest"/> itself, which stays `double` for every caller) because
-    /// only THIS caller's output type demands it.
-    /// </summary>
-    public static IReadOnlyList<BattleChannelMod> ResolveForBattle(
-        AptitudeAllocation allocation, AptitudeTuning tuning, PowerLadder ladder, int theta, DerivedStatRegistry registry)
-    {
-        if (allocation is null) throw new ArgumentNullException(nameof(allocation));
-        if (tuning is null) throw new ArgumentNullException(nameof(tuning));
-        if (ladder is null) throw new ArgumentNullException(nameof(ladder));
-        if (registry is null) throw new ArgumentNullException(nameof(registry));
-
-        var mods = new List<BattleChannelMod>();
-        long? pTheta = null;
-
-        foreach (var edge in tuning.Edges)
-        {
-            var share = allocation.Share(edge.Source);
-            if (share <= 0.0) continue;
-
-            if (!registry.TryResolveChannel(edge.Channel, out _))
-                throw new InvalidOperationException(
-                    $"aptitude edge targets unregistered channel '{edge.Channel}' (source '{edge.Source}')");
-
-            var kMilli = EffectiveKMilli(tuning, edge);
-            long amount;
-            if (edge.Mode == AptitudeReadMode.Contest)
-            {
-                var contest = AptitudeReadFunctions.Contest(kMilli, share, tuning.Read.Contest.ShareExponentMilli, tuning.Read.Contest.SpanPointsMilli);
-                amount = checked((long)Math.Round(contest, MidpointRounding.AwayFromZero));
-            }
-            else
-            {
-                amount = AptitudeReadFunctions.Magnitude(kMilli, share, tuning.Read.Magnitude.ShareExponentMilli, pTheta ??= ladder.Value(theta));
-            }
-
-            mods.Add(new BattleChannelMod(edge.Channel, amount));
         }
 
         return mods;

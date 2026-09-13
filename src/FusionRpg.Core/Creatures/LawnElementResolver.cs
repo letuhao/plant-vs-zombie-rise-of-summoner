@@ -1,3 +1,4 @@
+using FusionRpg.Core.Combat;
 using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Creatures;
@@ -15,6 +16,33 @@ namespace FusionRpg.Core.Creatures;
 ///
 /// <para><b>A pointer is match-scoped.</b> A later match can hand the same Unity pointer to a different
 /// entity, so the cache clears whenever <c>matchKey</c> changes rather than living for the process.</para>
+///
+/// <para><b>The full trigger set (DESIGN-GATE §2.16).</b> This cache is edge-refreshed, so every edge
+/// that can change what a ptr's <c>(side, elements)</c> resolves to must be enumerated and tested, not
+/// just the one that prompted the fix. There are exactly four candidates and only two of them fire:
+/// <list type="number">
+/// <item><b>Match change</b> — fires. Handled by the wholesale clear in <see cref="Resolve"/>.</item>
+/// <item><b>Hypno / charm</b> — <b>does not fire.</b> The <c>side</c> this cache stores is the actor's
+/// OBJECT KIND, not its allegiance: <c>InjectorEntityRegistry.CollectSnaps</c> writes
+/// <c>Side = "plant"</c> / <c>Side = "zombie"</c> as literals per collection and carries mind control in
+/// the separate <c>BoardEntitySnap.MindControlled</c> flag, which <c>MechanicalOwnSideOracle</c> is the
+/// SSOT for folding in ("mind control flips which side an entity fights FOR, not which side it visually
+/// belongs to"). A hypnotised zombie is still a Zombie with a zombie type id, so its species row is
+/// still the zombie one — flipping this cached side on hypno would make the
+/// <c>(side, gameTypeId)</c> lookup MISS and degrade a charmed zombie to Neutral, and would break
+/// <c>GateCounterHost</c>, which depends on this value being spawn kind (spec-gate-counters.md §2.1's
+/// charm/hypno closing rule).</item>
+/// <item><b>Entity death + IL2CPP pointer reuse</b> — fires, and is what
+/// <see cref="Invalidate"/> exists for. A new entity allocated at a dead one's address inside the same
+/// match must not inherit its entry. <c>GameHooks.ForgetEntity</c> is the single leave-board cleanup
+/// every death path already funnels through, so the invalidation rides there.</item>
+/// <item><b>Catalog revision mid-run</b> — <b>does not fire.</b> The index is built once from
+/// <c>CreatureSpeciesCatalog</c>, which is configured exactly once per host at startup
+/// (<c>SpeciesSnapshot</c>: "loaded once, immutable for the process lifetime... no live reload").
+/// <c>reforge-world</c> re-rolls a PLAYER's rolled species rows in the store and never calls
+/// <c>Configure</c>.</item>
+/// </list>
+/// </para>
 /// </summary>
 public sealed class LawnElementResolver
 {
@@ -40,6 +68,10 @@ public sealed class LawnElementResolver
     /// once a ptr repeats within a match, which is the whole point of the cache.</summary>
     public int BoardLookupCount { get; private set; }
 
+    /// <summary>Entries currently cached — read-only, so a test can prove a per-ptr invalidation
+    /// removed exactly one entry rather than clearing the board's worth of them.</summary>
+    public int CachedPtrCount => _cache.Count;
+
     public (string Side, ActorElementTypes Elements) Resolve(
         string? matchKey, string ptrKey, Func<(string Side, int TypeId)> boardLookup)
     {
@@ -55,15 +87,40 @@ public sealed class LawnElementResolver
             _matchKey = matchKey;
         }
 
-        if (_cache.TryGetValue(ptrKey, out var hit)) return hit;
+        // Keyed on the CANONICAL ptr, not the caller's spelling. The three call sites do not agree on
+        // one: `GateCounterHost` passes `CombatPtr.Normalize(ptr)` while both combat bridges pass the
+        // raw key, so "1A2B" and "1a2b" used to occupy two entries for one entity — which both wastes
+        // a board scan and, more importantly, makes an invalidation by ptr unreliable (it would clear
+        // one spelling and leave the other serving the dead entity). Normalizing here is what makes
+        // `Invalidate` actually hit.
+        var key = CombatPtr.Normalize(ptrKey);
+        if (_cache.TryGetValue(key, out var hit)) return hit;
 
         BoardLookupCount++;
         var (side, typeId) = boardLookup();
         var elements = ElementsFor(side, typeId);
 
         var result = (side, elements);
-        _cache[ptrKey] = result;
+        _cache[key] = result;
         return result;
+    }
+
+    /// <summary>
+    /// Drop ONE actor's cached <c>(side, elements)</c> — the leave-board edge (trigger 3 in the class
+    /// doc's trigger set). Deliberately not a whole-cache clear: a clear on every death would re-resolve
+    /// every actor on the board through <c>boardLookup</c>, which is precisely the per-hit board-scan
+    /// pattern the 2026-08 perf audit blamed for lawn lag and that this cache exists to remove.
+    ///
+    /// <para>Never throws. An unknown, empty or null ptr is a no-op — the caller is a death hook that
+    /// fires for every entity, including ones this resolver was never asked about, so "not cached" is
+    /// the normal case rather than an error.</para>
+    /// </summary>
+    /// <returns><c>true</c> when an entry was actually removed — for tests and diagnostics only; no
+    /// caller is expected to branch on it.</returns>
+    public bool Invalidate(string? ptrKey)
+    {
+        var key = CombatPtr.Normalize(ptrKey);
+        return key.Length != 0 && _cache.Remove(key);
     }
 
     ActorElementTypes ElementsFor(string side, int typeId)

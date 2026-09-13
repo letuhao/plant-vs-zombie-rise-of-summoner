@@ -260,10 +260,40 @@ public class WorldWaveOneAcceptanceTests : IDisposable
     //       session was mid-edit in `Battle/BattleModels.cs`; re-checked only after that file's own
     //       diff stopped changing between runs.
     //
-    // The plan expected one re-bless. Many more were needed since — most recently entry #19 above —
+    //   20. **actor-hub-and-combat-power-solid-fixing `placeholder-battle-hub` (T20), 2026-09-13** —
+    //       `PlaceholderBattleResolver` (the wave-1 Hp×Level "compare weight, apply the loss" stand-in)
+    //       is deleted outright: `DistrictAssaultResolver` no longer delegates a non-district kind, or
+    //       a district request it cannot really simulate, to it — every one of those cases now returns
+    //       the pre-existing "refused, no-op" `BattleOutcome` (no `WinnerEntityId`, no `Sides`) instead
+    //       of inventing a winner from a weight comparison. `TurnEngine.Step`'s own default resolver
+    //       moved from the deleted class to `DistrictAssaultResolver.Instance` to match.
+    //
+    //       **This script's own guard-clears and claims were never real combat — they were this exact
+    //       fiction succeeding for real, every time**, because `PlaceholderBattleResolver.ResolveGuard`
+    //       had no losing case for an attacker with any strength left at all. Turn 1/2's `Clear` at
+    //       `ember-hollow`, turn 3's `Claim` there, turn 9's `Clear` at `ash-waste`, and turn 10's
+    //       `Claim` there all now refuse rather than succeed — there is no real engine for
+    //       `BattleKinds.Guard`/`Sector`/`Lane` yet (tracked, not built, under the provisional
+    //       `world-actor-combat` program this task's own spec names). Cascades further than those five
+    //       turns: Dave's legion never actually holds `ash-waste`, so Zomboss's turn-11/12 march onto
+    //       it at turns 11-12 is no longer a siege of Dave's own ground (it is simply walking onto an
+    //       unclaimed, still-guarded sector, which a Guard entity does not even project zone-of-control
+    //       against) — the `supply.besieged:`/`halt:zoc:` events entries #14/#16 above carefully
+    //       documented for this exact incursion no longer fire either. This is a real, honest
+    //       narrowing of what this specific 20-turn script can prove, not a drift: it is the same
+    //       class of finding as `cold-equip-one`'s stub-equip gap and this program's other stub-hygiene
+    //       tasks, just landing on the flagship wave-1 acceptance scenario instead of a smaller corner.
+    //       `Every_wave_one_verb_fires_somewhere_in_the_twenty_turns` and
+    //       `The_campaign_ends_with_Dave_holding_what_he_took` were updated to match what this script
+    //       can actually still demonstrate; re-scripting it around a real combat kind (`Assault`/
+    //       `BattleKinds.District`) or restoring guard-clear coverage is `world-actor-combat`'s own
+    //       future work, not this program's (`actor-hub-and-combat-power-solid-fixing`'s own spec locks
+    //       "Do not design or ship world stage combat... in this program").
+    //
+    // The plan expected one re-bless. Many more were needed since — most recently entry #20 above —
     // each for a behaviour change or a budgeted field batch rather than a drift, and each recorded
     // here. Protecting the hash in any of them would have meant shipping something known to be wrong.
-    const string GoldenFinalHash = "5a596ea4ffbbc0d3827f77d41840ba40e0530f8787649357400889beb77dd7ed";
+    const string GoldenFinalHash = "601257893d1e80b7d2d8f7e9fe3df738e7e78c7affd139aceeaa4859b671c364";
 
     readonly DataTestStore _testStore;
     readonly RpgStore _store;
@@ -394,6 +424,14 @@ public class WorldWaveOneAcceptanceTests : IDisposable
     IEnumerable<TurnReportEntry> AllEntries(string worldId) =>
         Enumerable.Range(0, Turns).SelectMany(t => _store.GetWorldTurnReport(worldId, t)?.Entries ?? Array.Empty<TurnReportEntry>());
 
+    /// <summary>
+    /// Re-bless entry #20 (T20, `placeholder-battle-hub`): "clear" (a `guard:` battle line), "claim",
+    /// "zone-of-control", and "supply besieged" are gone from the required list. All four depended on
+    /// this script's `Clear`/`Claim` orders actually succeeding against `BattleKinds.Guard`, which had
+    /// no real engine and only ever "worked" because the deleted placeholder's guard fight had no
+    /// losing case. `crossing` (a real `BattleKinds.Lane` contact, resolved honestly as refused rather
+    /// than won) and every non-combat verb below are unaffected and still required.
+    /// </summary>
     [Fact]
     public void Every_wave_one_verb_fires_somewhere_in_the_twenty_turns()
     {
@@ -403,16 +441,7 @@ public class WorldWaveOneAcceptanceTests : IDisposable
         var verbs = new (string Name, Func<TurnReportEntry, bool> Fired)[]
         {
             ("march", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("arrival:")),
-            ("clear", e => e.Kind == TurnReportKinds.Battle && e.Detail.StartsWith("guard:")),
             ("crossing", e => e.Kind == TurnReportKinds.Battle && e.Detail.StartsWith("lane:")),
-            ("claim", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("claim.held:")),
-            ("zone-of-control", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("halt:zoc:")),
-            // base-defense siege-supply F1/F1b (re-bless entry #14): this script's one hostile
-            // incursion stands directly IN ash-waste (first-light's only Seat-less sector), which
-            // now besieges it rather than cutting it off — there is no scripted event left in this
-            // run that produces a genuine `supply.cut:`, so the wave-1 "hostile-blocked supply" verb
-            // is proven by `supply.besieged:` instead.
-            ("supply besieged", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("supply.besieged:")),
             // spec-loam-legions.md (L27): wound-based attrition is retired; a legion beyond supply
             // now burns carried loam (surviving on its reserve) or, if that reserve runs out, is
             // destroyed outright rather than bled slowly.
@@ -475,15 +504,24 @@ public class WorldWaveOneAcceptanceTests : IDisposable
         Assert.Equal(GoldenFinalHash, Play("cp3-golden").Last());
     }
 
+    /// <summary>
+    /// Renamed from `The_campaign_ends_with_Dave_holding_what_he_took` at re-bless entry #20 (T20,
+    /// `placeholder-battle-hub`): Dave's scripted turn-1/2 `Clear` orders at `ember-hollow` targeted
+    /// `BattleKinds.Guard`, which has no real engine and only ever succeeded because the deleted
+    /// placeholder's guard fight had no losing case — his turn-3 `Claim` there now refuses too
+    /// (`claim.guarded`, the sector still shows a live guard). This no longer proves "holding what he
+    /// took"; it pins the honest, refused alternative instead, so a future real Guard engine landing
+    /// under `world-actor-combat` is a deliberate change to this test, not a silent one.
+    /// </summary>
     [Fact]
-    public void The_campaign_ends_with_Dave_holding_what_he_took()
+    public void The_campaign_leaves_the_still_guarded_sector_unclaimed()
     {
         Play("cp3-end");
         var world = _store.LoadWorldState("cp3-end")!;
 
         var ember = world.Sectors.Single(s => s.SectorId == "ember-hollow");
-        Assert.Equal("dave", ember.OwnerFactionId);
-        Assert.Equal(SectorPhase.Held, ember.Phase);
-        Assert.All(ember.Slots, sl => Assert.Equal(GuardState.Cleared, sl.GuardState));
+        Assert.Null(ember.OwnerFactionId);
+        Assert.Equal(GuardState.Intact, ember.Slots[2].GuardState);
+        Assert.Equal(GuardState.Intact, ember.Slots[3].GuardState);
     }
 }

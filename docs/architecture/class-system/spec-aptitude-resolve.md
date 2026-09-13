@@ -113,6 +113,14 @@ combat formula set + one apply path, everywhere."**
 > the fifth producer. **So this module emits one thing and it is adapted at two seams**: a subsystem on
 > the overlay, a `ChannelMods` list on battle. No fourth composition path, and no change to
 > `BattleStatComposer`'s logic.
+>
+> **⛔ HISTORICAL — this whole paragraph is overturned, kept for the record.** The 2026-08-26 decision
+> to keep the composers separate was itself a SOLID/DRY defect, overturned 2026-09-12
+> (`decisions.md` "ActorHub sole Hot compose gate"). `battle-hub-fuse`
+> (`actor-hub-and-combat-power-solid-fixing` T6, 2026-09-13) deleted `BattleStatComposer` entirely:
+> `BattleHubCompose` now composes through the SAME `ActorHub`/`DerivedComposer` the overlay uses, so
+> aptitude resolution has exactly ONE seam today, not two — this module's `DerivedModifier` rows reach
+> battle through `IActorStatSubsystem` the same as everywhere else.
 
 **Why this is not merely tidy.** `residual-fit` compares the closed form against the simulator, and
 `balance-guard` asserts a property of the shipped numbers. If the two composers resolved aptitudes

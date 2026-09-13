@@ -71,10 +71,13 @@ public class MaterialCorpusTests
     [Fact]
     public void A_tuning_that_breaks_D24_is_refused_at_load_not_at_the_first_crafted_socket()
     {
-        var broken = TuningJson().Replace(
+        // Normalize first: the tuning file is LF in the blob but checks out as CRLF
+        // when core.autocrlf=true, which would make the "\n"-literal surgery below a no-op.
+        var tuning = TuningJson().Replace("\r\n", "\n");
+        var broken = tuning.Replace(
             "\"imbue\": {\n      \"owner\": \"sockets (16)\",\n      \"souls\": { \"coefficient\": 50, \"variable\": \"rung\" }",
             "\"imbue\": {\n      \"owner\": \"sockets (16)\",\n      \"souls\": { \"coefficient\": 51, \"variable\": \"rung\" }");
-        Assert.NotEqual(TuningJson(), broken); // the substitution really landed
+        Assert.NotEqual(tuning, broken); // the substitution really landed
         var ex = Assert.Throws<MaterialTuningRejection>(() => MaterialTuning.Parse(broken));
         Assert.Contains("D24", ex.Message);
     }

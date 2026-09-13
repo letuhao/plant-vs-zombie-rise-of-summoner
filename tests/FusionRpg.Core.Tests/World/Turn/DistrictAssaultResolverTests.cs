@@ -48,8 +48,11 @@ public class DistrictAssaultResolverTests
     };
 
     [Fact]
-    public void Non_district_kinds_delegate_to_the_placeholder_unchanged()
+    public void Non_district_kinds_refuse_cleanly_rather_than_inventing_a_winner()
     {
+        // actor-hub-and-combat-power-solid-fixing T20: no engine resolves a non-district kind, so no
+        // winner is invented for one either — the pre-existing "refused" BattleOutcome shape (BattleId
+        // only) is reused, matching what this same resolver already returns for a missing attacker.
         var attacker = Legion("e-a", "player", "s1", ("peashooterzombie", 1, 100));
         var defender = Legion("e-d", "zomboss", "s1", ("normalzombie", 1, 100));
         var request = new BattleRequest
@@ -59,24 +62,25 @@ public class DistrictAssaultResolverTests
         };
         var combatants = new[] { attacker, defender };
 
-        var fromResolver = DistrictAssaultResolver.Instance.Resolve(request, combatants, 1);
-        var fromPlaceholder = PlaceholderBattleResolver.Instance.Resolve(request, combatants, 1);
+        var outcome = DistrictAssaultResolver.Instance.Resolve(request, combatants, 1);
 
-        Assert.Equal(fromPlaceholder.WinnerEntityId, fromResolver.WinnerEntityId);
-        Assert.Equal(fromPlaceholder.Sides.Count, fromResolver.Sides.Count);
+        Assert.Equal("b1", outcome.BattleId);
+        Assert.Null(outcome.WinnerEntityId);
+        Assert.Empty(outcome.Sides);
     }
 
     [Fact]
-    public void District_kind_with_no_board_delegates_to_the_placeholder_unchanged()
+    public void District_kind_with_no_board_refuses_cleanly_rather_than_inventing_a_winner()
     {
         var attacker = Legion("e-a", "player", "s1", ("peashooterzombie", 1, 100));
         var request = DistrictRequest("b1", attacker.EntityId, null, board: null);
         var combatants = new[] { attacker };
 
-        var fromResolver = DistrictAssaultResolver.Instance.Resolve(request, combatants, 1);
-        var fromPlaceholder = PlaceholderBattleResolver.Instance.Resolve(request, combatants, 1);
+        var outcome = DistrictAssaultResolver.Instance.Resolve(request, combatants, 1);
 
-        Assert.Equal(fromPlaceholder.WinnerEntityId, fromResolver.WinnerEntityId);
+        Assert.Equal("b1", outcome.BattleId);
+        Assert.Null(outcome.WinnerEntityId);
+        Assert.Empty(outcome.Sides);
     }
 
     [Fact]

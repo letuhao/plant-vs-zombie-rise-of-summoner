@@ -480,24 +480,28 @@ public sealed class WebMatchService
     /// </summary>
     public BattleSetup ApplyZombossPattern(long playerId, BattleSetup baseSetup, long theta, ulong seed)
     {
+        // DEBT — channelmods-hub: one-release BattleChannelMod concat over the pattern allocation;
+        // the Hub twin is AptitudeResolver.Resolve over the same ZombossCommanderAllocation.
+        // Delete in battle-hub-fuse (T6).
         var tuning = FusionRpg.Core.Battle.Ai.ZombossAdaptiveTuningHub.Tuning;
         var level = WaveCatalog.Get(baseSetup.WaveId).ContentIndex;
         var selection = _store.SelectZombossPattern(playerId, level, seed, tuning);
 
         var zomboss = new FusionRpg.Core.Battle.Ai.ZombossCommanderAllocation(selection.PatternId);
         zomboss.Refresh(FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, theta, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning);
-        var mods = FusionRpg.Core.Stats.Aptitudes.AptitudeResolver.ResolveForBattle(
-            zomboss.Resolve(new FusionRpg.Core.Stats.StatContext()),
-            FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning,
-            new FusionRpg.Core.Power.PowerLadder(FusionRpg.Core.Power.PowerTuningHub.Tuning),
-            level,
-            FusionRpg.Core.Stats.Derived.DerivedStatRegistry.CreateDefault());
+        // battle-hub-fuse T5: the pattern reaches wave actors as Hub inputs (resolved through the
+        // Hub aptitude twin at the actors' own content level, exactly the ladder input the old
+        // concat used), not pre-folded ChannelMods.
+        var patternAllocation = zomboss.Resolve(new FusionRpg.Core.Stats.StatContext());
 
         return baseSetup with
         {
             ZombossPatternId = selection.PatternId,
             ZombossEncounterIndex = selection.EncounterIndex,
-            Wave = baseSetup.Wave.Select(a => a with { ChannelMods = a.ChannelMods.Concat(mods).ToList() }).ToList(),
+            Wave = baseSetup.Wave.Select(a => a with
+            {
+                HubInputs = (a.HubInputs ?? new BattleHubInputs()) with { Aptitude = patternAllocation }
+            }).ToList(),
         };
     }
 
@@ -590,106 +594,24 @@ public sealed class WebMatchService
                 MaxHp = BattleRuleset.BaseHp(level),
                 Atk = BattleRuleset.BaseAtk(level),
                 Defense = BattleRuleset.BaseDefense(level),
-                ChannelMods = StarChannelMods(s.Profile.Star, level)
-                    .Concat(LoyaltyChannelMods(
-                        contracts.TryGetValue(s.Profile.InstanceId, out var c) ? c.Loyalty : 0, level))
-                    .Concat(UniqueCreatureAptitudeChannelMods(level, playerId, _store, s.Profile.InstanceId, commanderAllocation))
-                    .ToList(),
+                // battle-hub-fuse T5: producers reach battle as Hub inputs (resolved through the
+                // Hub twins), not pre-folded ChannelMods. The DEBT-tagged ChannelMods adapters stay
+                // for tests until T6 deletes them with the composer.
+                HubInputs = new BattleHubInputs
+                {
+                    Aptitude = commanderAllocation + _store.LoadAllocation(
+                        FusionRpg.Core.Stats.Aptitudes.AllocationScope.UniqueCreature, s.Profile.InstanceId),
+                    BoundAtoms = EquippedBoundAtoms.DerivedFromStore(_store, s.Profile.InstanceId),
+                    StarLoyalty = new FusionRpg.Core.Stats.Derived.Subsystems.StarLoyaltyContribution(
+                        s.Profile.Star,
+                        contracts.TryGetValue(s.Profile.InstanceId, out var c) ? c.Loyalty : 0,
+                        level),
+                },
                 EquippedActionIds = EquippedActionIdsFor(s.Profile.InstanceId, _store),
             });
         }
 
         return (true, "", squad, picked.Select(p => p.Profile.InstanceId).ToList());
-    }
-
-    /// <summary>
-    /// Star ranks reach battles ONLY here — flat per-mille shares of the level stats on the omni
-    /// channels (spec-creature-fusion.md F8). The engine and its goldens never change; stars are
-    /// ordinary ChannelMods in the setup. Floored at `star` so low-level stars still register.
-    /// </summary>
-    public static IReadOnlyList<BattleChannelMod> StarChannelMods(int star, int level)
-    {
-        // channelmods-hub: formula re-homed to the shared StarLoyaltyBonus (Core), which the Hub
-        // StarLoyaltySubsystem also uses — so sheet and battle cannot drift. This method stays a
-        // BattleChannelMod adapter until battle-hub-fuse retires the battle-side consumption.
-        if (StarLoyaltyBonus.Star(star, level) is not { } s) return Array.Empty<BattleChannelMod>();
-        return new[]
-        {
-            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatPowerOmni, s.Power),
-            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatDefenseOmni, s.Defense)
-        };
-    }
-
-    /// <summary>
-    /// Loyalty reaches battles the same way stars do — flat per-mille shares of the level stats on
-    /// the omni channels, never an engine change (spec-creature-contracts.md G7). The Bound band pays
-    /// +0‰ by design, so a fresh contract cannot move a single golden hash.
-    /// </summary>
-    public static IReadOnlyList<BattleChannelMod> LoyaltyChannelMods(int loyalty, int level)
-    {
-        if (StarLoyaltyBonus.Loyalty(loyalty, level) is not { } l) return Array.Empty<BattleChannelMod>();
-        return new[]
-        {
-            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatPowerOmni, l.Power),
-            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatDefenseOmni, l.Defense)
-        };
-    }
-
-    /// <summary>
-    /// class-system-todo.md P2.5/P9.1 — aptitudes reach battle the same way stars/loyalty do: ordinary
-    /// ChannelMods in the setup, adapted at this one seam, never an engine or composer change
-    /// (spec-aptitude-resolve.md §2a — "this module emits one thing and it is adapted at two seams").
-    /// **Reads the real commander-scope allocation now** (spec-aptitude-allocation-surface.md, 2026-08-27)
-    /// — `point-economy`'s `AllocationStore` is the real per-actor source; a player who has never
-    /// allocated still resolves against `AptitudeAllocation.Empty` (`LoadAllocation`'s own contract on
-    /// an unset key), so this stays exactly as inert as before for every squad it already served.
-    ///
-    /// <para><b>species-build `battle-allocation` (module 10).</b> <paramref name="speciesId"/> and
-    /// <paramref name="commanderAllocation"/> are both optional and trailing — every existing call site
-    /// (4 in `AptitudeChannelModsTests`) keeps compiling and behaving identically, resolving Commander
-    /// alone. When a species is supplied, its EFFECTIVE CreatureType allocation
-    /// (`RpgStore.EffectiveSpeciesAllocation`) is merged with the commander allocation into ONE
-    /// `AptitudeAllocation` via `operator+` and resolved with a SINGLE `ResolveForBattle` call — never
-    /// resolved per scope and concatenated (`AptitudeAllocation.cs`'s own "scopes sum before share,
-    /// never the reverse": two per-scope resolves, later combined, is a different and wrong number).
-    /// <paramref name="commanderAllocation"/> lets `BuildSquad` load the commander row ONCE per squad
-    /// (it is the same for every actor) rather than once per actor — the species read alone stays
-    /// per-actor, since two squad members can be different species.</para>
-    /// </summary>
-    public static IReadOnlyList<BattleChannelMod> AptitudeChannelMods(
-        int level, long playerId, RpgStore store,
-        string? speciesId = null,
-        FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation? commanderAllocation = null)
-    {
-        var commander = commanderAllocation ?? store.LoadAllocation(
-            FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId));
-        var species = string.IsNullOrEmpty(speciesId)
-            ? FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty
-            : store.EffectiveSpeciesAllocation(playerId, speciesId, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning);
-        var merged = commander + species;
-        var ladder = new FusionRpg.Core.Power.PowerLadder(FusionRpg.Core.Power.PowerTuningHub.Tuning);
-        return FusionRpg.Core.Stats.Aptitudes.AptitudeResolver.ResolveForBattle(
-            merged, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning, ladder, level,
-            FusionRpg.Core.Stats.Derived.DerivedStatRegistry.CreateDefault());
-    }
-
-    /// <summary>Dedicated unique-creature battle input. A specimen receives the commander layer plus
-    /// its own persisted UniqueCreature allocation; the empire species fallback is intentionally not
-    /// consulted for this source.</summary>
-    public static IReadOnlyList<BattleChannelMod> UniqueCreatureAptitudeChannelMods(
-        int level, long playerId, RpgStore store, string instanceId,
-        FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation? commanderAllocation = null)
-    {
-        if (string.IsNullOrWhiteSpace(instanceId))
-            throw new ArgumentException("instanceId must not be empty", nameof(instanceId));
-        var commander = commanderAllocation ?? store.LoadAllocation(
-            FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId));
-        var unique = store.LoadAllocation(
-            FusionRpg.Core.Stats.Aptitudes.AllocationScope.UniqueCreature, instanceId.Trim());
-        var ladder = new FusionRpg.Core.Power.PowerLadder(FusionRpg.Core.Power.PowerTuningHub.Tuning);
-        return FusionRpg.Core.Stats.Aptitudes.AptitudeResolver.ResolveForBattle(
-            commander + unique, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning, ladder, level,
-            FusionRpg.Core.Stats.Derived.DerivedStatRegistry.CreateDefault());
     }
 
     /// <summary>

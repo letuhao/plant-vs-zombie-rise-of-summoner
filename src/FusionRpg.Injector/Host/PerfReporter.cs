@@ -36,6 +36,9 @@ public static class PerfReporter
         }
 
         try { window["drain"] = Effects.EventDrainHost.SnapshotStats(); } catch { }
+        // lawn-combat-observer (Task 0, lawn-combat-wire): rides this already-shipped ~5s window —
+        // no new HTTP surface, no new event kind.
+        try { window["lawnCombatObserver"] = Effects.LawnCombatObserverBridge.SnapshotAndReset(); } catch { }
 
         try { LogLine(window); } catch { }
         _ = client?.PostPerfAsync(window);

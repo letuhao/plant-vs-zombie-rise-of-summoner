@@ -39,6 +39,7 @@ public static class DebugEndpoints
     {
         var g = app.MapGroup("/api/debug");
 
+        // Game Injector Debug
         g.MapPost("/session/start", async (JsonElement? body, EventIngest ingest, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {
             var b = BodyOrEmpty(body);
@@ -74,7 +75,11 @@ public static class DebugEndpoints
             return Results.Ok(new { ok = true });
         });
 
+        // RPG Server Debug
+        // (in-memory server mirror only, no injector relay and no RpgStore read -- ambiguous by
+        // the guard's own rule, reads DebugSessionState which is never live-game state)
         g.MapGet("/session", () => Results.Ok(DebugSessionState.Snapshot()));
+        // Game Injector Debug
         g.MapGet("/snapshot", async (IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {
             await Send(hub, inbox, "debug.snapshot", new { });
@@ -86,6 +91,7 @@ public static class DebugEndpoints
             });
         });
 
+        // RPG Server Debug
         g.MapGet("/events", (RpgStore store, int limit = 200, long afterId = 0, string? kinds = null, string? scenarioId = null) =>
         {
             var items = store.ListEvents(Math.Clamp(limit, 1, 500), afterId);
@@ -102,6 +108,7 @@ public static class DebugEndpoints
             return Results.Ok(new { items });
         });
 
+        // Game Injector Debug
         g.MapPost("/setup/skip", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {
             var b = BodyOrEmpty(body);
@@ -132,8 +139,64 @@ public static class DebugEndpoints
             return Results.Ok(new { ok = true, method, acknowledgement = ack.Payload });
         });
 
+        // Game Injector Debug
+        // The unified "what is current game state, right now" probe (2026-09-14). Unlike
+        // /lawn/state (RpgServerDebug, reconstructs a best guess from the event log -- fragile by
+        // construction, see lawn-run-state-machine.md), this ACTIVELY asks the game to read its own
+        // live objects (Board.Instance / InitBoard.Instance / GameAPP.theBoardType / the injector's own
+        // MatchPhase FSM) and reports exactly what it found, synchronously, no history involved. Use
+        // this when the injector is connected and you need ground truth; fall back to /lawn/state when
+        // it is not (or when you need "since when" duration context this probe does not carry).
+        g.MapPost("/game-state", async (RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            if (!store.InjectorConnected)
+                return Results.Conflict(new { ok = false, error = "injector not connected — start the game with the FusionRpg injector loaded" });
+
+            const int timeoutSec = 10; // structural acknowledgement wait, not a balance value
+            var before = store.GetMaxEventId();
+            await Send(hub, inbox, "debug.game-state", new { });
+            var ack = await PollForKind(store, before, "debug.game-state", TimeSpan.FromSeconds(timeoutSec));
+            if (ack is null)
+                return Results.Conflict(new { ok = false, error = $"debug.game-state did not ack within {timeoutSec}s" });
+
+            return Results.Ok(new { ok = true, live = ack.Payload });
+        });
+
+        // Game Injector Debug
+        // Calls one real UIMgr static navigation method, chosen by name (see DebugActions.UiNav for
+        // the full action list -- back-to-menu, enter-main-menu, back-to-game, etc.). Added
+        // 2026-09-14 after debug.enter-level(force:true) never acked live against a defeated-but-
+        // still-alive Board. The first fix attempt (a single hard-coded BackToMenu call) proved live
+        // that this game's menu stack is not flat -- BackToMenu landed on the previous menu layer
+        // (Challenge Mode select), not the true main menu -- so the real fix is exposing every real
+        // navigation entry point and finding the working sequence live, not guessing one.
+        g.MapPost("/ui-nav", async (JsonElement body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            if (!store.InjectorConnected)
+                return Results.Conflict(new { ok = false, error = "injector not connected — start the game with the FusionRpg injector loaded" });
+
+            var action = PayloadString(body, "action");
+            if (string.IsNullOrWhiteSpace(action))
+                return Results.BadRequest(new { ok = false, error = "action is required" });
+
+            const int timeoutSec = 10; // structural acknowledgement wait, not a balance value
+            var before = store.GetMaxEventId();
+            await Send(hub, inbox, "debug.ui-nav", new { action });
+            var ack = await PollForKind(store, before, "debug.ui-nav", TimeSpan.FromSeconds(timeoutSec));
+            if (ack is null)
+                return Results.Conflict(new { ok = false, error = $"debug.ui-nav did not ack within {timeoutSec}s" });
+
+            return Results.Ok(new { ok = true, result = ack.Payload });
+        });
+
+        // RPG Server Debug
+        // (in-memory catalog read only, no injector relay and no RpgStore read)
         g.MapGet("/scenarios", () => Results.Ok(new { items = DebugScenarios.AllIds }));
 
+        // Game Injector Debug
+        // every route below through /effects/reload relays to the Injector somewhere in its body
+        // (some also do real store/session bookkeeping alongside the relay -- legitimate
+        // orchestration, not a violation; see spec-debug-scope-guard.md).
         g.MapPost("/scenario/{id}", async (string id, JsonElement? body, EventIngest ingest, IHubContext<RpgHub> hub, InjectorCommandInbox inbox, EffectGrantSession grants) =>
         {
             var b = BodyOrEmpty(body);
@@ -170,24 +233,234 @@ public static class DebugEndpoints
             }
         });
 
+        // RPG Server Debug
+        // Read-only, no injector relay, no side effects.
+        // Answers exactly the question a live-probe session must never guess or eyeball: what state
+        // is the lawn actually in, and since when. Built 2026-09-14 after a real incident: an agent
+        // read a `/lawn/quick-start` { ok: true } response with real ptrs and declared the board
+        // recovered, while the operator was looking at a still-showing defeat screen. Both were
+        // "right" about different layers -- the simulation had moved on, the screen had not -- and
+        // there was no single query that could have said so instead of one side privately eyeballing
+        // the game and the other reading an HTTP body. This endpoint is that query.
+        // Full model: docs/architecture/live-probe/lawn-run-state-machine.md. Six states by strict
+        // precedence (Cycling > Defeated/Victorious > InMatch > LevelEntryPending > Unknown), built
+        // from every real lifecycle signal the injector emits -- not the three ad hoc ones the first
+        // version of this endpoint shipped with, which is what produced a confusing "Unknown" read
+        // against a genuinely defeated board on 2026-09-14. Read that doc before changing this.
+        g.MapGet("/lawn/state", (RpgStore store) =>
+        {
+            var now = DateTime.UtcNow;
+            DateTime? ParseT(EventEnvelope? e) =>
+                e is not null && DateTime.TryParse(e.T, null, System.Globalization.DateTimeStyles.RoundtripKind, out var t) ? t : null;
+
+            var recentBoardEnds = CountRecentEventsOfKind(store, "board.end", TimeSpan.FromSeconds(CyclingWindowSec));
+
+            // Real bug found live 2026-09-14: a fresh game process (new injector.hello) sitting idle
+            // at the main menu read as "Defeated", because the classifier read a match.result event
+            // from a PREVIOUS, already-dead game process -- nothing invalidated it. Same fix
+            // FindLatestLiveBoardStart already applies to board.start: any lifecycle signal older
+            // than the newest injector.hello belongs to a process that is gone and must not describe
+            // the current one. Compare by event Id (monotonic), not by parsed timestamp.
+            var latestHello = FindLatestKind(store, "injector.hello");
+            EventEnvelope? DiscardIfBeforeHello(EventEnvelope? ev) =>
+                ev is not null && latestHello is not null && ev.Id < latestHello.Id ? null : ev;
+
+            var latestMatchResult = DiscardIfBeforeHello(FindLatestKind(store, "match.result"));
+            var latestMatchLose = DiscardIfBeforeHello(FindLatestKind(store, "match.lose"));
+            var latestMatchWin = DiscardIfBeforeHello(FindLatestKind(store, "match.win"));
+            var latestBoardEconomy = DiscardIfBeforeHello(FindLatestKind(store, "board.economy"));
+            var latestCatalogZombies = DiscardIfBeforeHello(FindLatestKind(store, "catalog.zombies"));
+
+            var resultTime = ParseT(latestMatchResult);
+            var loseTime = ParseT(latestMatchLose);
+            var winTime = ParseT(latestMatchWin);
+            var economyTime = ParseT(latestBoardEconomy);
+            var catalogTime = ParseT(latestCatalogZombies);
+            var resultValue = latestMatchResult is not null ? PayloadString(latestMatchResult.Payload, "result") : null;
+            var resultIsDefeat = string.Equals(resultValue, "defeat", StringComparison.OrdinalIgnoreCase);
+
+            // match.result's own result string is cross-checked against the two unambiguous pulse
+            // events (match.lose/match.win carry no data but cannot be misread) -- whichever real
+            // signal is most recent decides, never "does a terminal event exist anywhere in history".
+            var terminalCandidates = new List<(DateTime Time, EventEnvelope Ev, string State)>();
+            if (resultTime is { } rt) terminalCandidates.Add((rt, latestMatchResult!, resultIsDefeat ? "Defeated" : "Victorious"));
+            if (loseTime is { } lt) terminalCandidates.Add((lt, latestMatchLose!, "Defeated"));
+            if (winTime is { } wt) terminalCandidates.Add((wt, latestMatchWin!, "Victorious"));
+            var terminal = terminalCandidates.Count > 0
+                ? terminalCandidates.OrderByDescending(c => c.Time).First()
+                : ((DateTime Time, EventEnvelope Ev, string State)?)null;
+
+            string state;
+            EventEnvelope? decidingEvent;
+            if (recentBoardEnds >= CyclingBoardEndMinCount)
+            {
+                state = "Cycling";
+                decidingEvent = latestBoardEconomy;
+            }
+            else if (terminal is { } t && (economyTime is null || t.Time > economyTime))
+            {
+                // The newest board-lifecycle signal is a terminal result with nothing newer proving a
+                // fresh board exists since -- the board is in whatever post-match state the game left
+                // it in (debug.reset-board can restore API-level spawning, never the game's own visual
+                // overlay -- see the note below).
+                state = t.State;
+                decidingEvent = t.Ev;
+            }
+            else if (economyTime is not null && now - economyTime < TimeSpan.FromSeconds(30))
+            {
+                state = "InMatch";
+                decidingEvent = latestBoardEconomy;
+            }
+            else if (catalogTime is not null
+                && (economyTime is null || catalogTime > economyTime)
+                && (terminal is null || catalogTime > terminal.Value.Time))
+            {
+                // catalog.zombies fires while the level's zombie list is being initialized, BEFORE
+                // Board.Awake -- the earliest real signal a level entry has begun, likely (not
+                // certain -- see the doc) the seed-picker screen. Medium confidence, named as such.
+                state = "LevelEntryPending";
+                decidingEvent = latestCatalogZombies;
+            }
+            else
+            {
+                // No recent signal of any kind: could be the main menu, the seed-picker screen, a
+                // paused match, or a frozen/crashed injector -- all identical from here. This state is
+                // genuinely ambiguous from passive telemetry alone; say so rather than guess.
+                state = "Unknown";
+                decidingEvent = latestBoardEconomy ?? latestCatalogZombies ?? latestMatchResult;
+            }
+
+            var decidingTime = ParseT(decidingEvent);
+            return Results.Ok(new
+            {
+                state,
+                asOf = decidingEvent?.T,
+                sinceMs = decidingTime is { } dt ? (long?)(now - dt).TotalMilliseconds : null,
+                recentBoardEnds,
+                latestMatchResult = resultValue,
+                injectorConnected = store.InjectorConnected,
+                note = "API/simulation state only. Does NOT confirm what is rendered on screen -- a " +
+                    "defeat/victory overlay can persist after debug.reset-board clears entities, and " +
+                    "state=\"Unknown\" cannot distinguish the main menu, the seed-picker screen, or a " +
+                    "paused match (no passive event fires for any of them; only an active POST " +
+                    "/api/debug/setup/skip probe can partially disambiguate, and it has a side effect). " +
+                    "When the question is what a human sees, ask the human -- this answers what the " +
+                    "simulation has recorded, never a substitute for looking at the actual game. Full " +
+                    "model: docs/architecture/live-probe/lawn-run-state-machine.md."
+            });
+        });
+
+        // Game Injector Debug
         g.MapPost("/lawn/quick-start", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox, EffectGrantSession grants) =>
         {
             var b = BodyOrEmpty(body);
             var levelNumber = IntProp(b, "levelNumber", 1);
             var scenarioId = StrProp(b, "scenario") ?? "lab-overlay";
             var timeoutSec = IntProp(b, "timeoutSec", 45);
+            var sw = System.Diagnostics.Stopwatch.StartNew();
 
             if (!store.InjectorConnected)
                 return Results.Conflict(new { ok = false, error = "injector not connected — start the game with the FusionRpg injector loaded" });
 
+            // Observability gap found live 2026-09-14: a board stuck in a rapid match-end/retry loop
+            // (e.g. a "quick" setup-skip with no real plants placed, so every wave is lost instantly)
+            // produces a confusing "debug.level.enter did not ack" timeout with nothing in the response
+            // pointing at the real cause -- diagnosing it required manually diffing thousands of raw
+            // events by hand. Detect the loop directly and fail fast and loud instead of polling into
+            // it blind. Threshold is a structural safety check, not a balance value: real gameplay does
+            // not lose 3 matches in 10 seconds.
+            var recentBoardEnds = CountRecentEventsOfKind(store, "board.end", TimeSpan.FromSeconds(CyclingWindowSec));
+            if (recentBoardEnds >= CyclingBoardEndMinCount)
+                return Results.Conflict(new
+                {
+                    ok = false,
+                    error = $"board is cycling ({recentBoardEnds} board.end events in the last {CyclingWindowSec}s) — " +
+                        "the match is likely repeatedly ending with no real plants placed; check the game or place real plants before retrying",
+                    recentBoardEnds,
+                    waitedMs = sw.ElapsedMilliseconds
+                });
+
+            // Real bug found live 2026-09-14: after a real defeat (match.result payload
+            // result:"defeat", GameHooks.cs's BoardStatistics.GameOver hook), the old plan here was
+            // debug.reset-board (DeleteAllPlants+DeleteAllZombies) -- proven live to restore
+            // API-level spawn capability, but the operator confirmed the game's own visual "重新开始"
+            // (restart) overlay stayed up regardless: reset-board clears entities on the SAME dead
+            // board, it never leaves it. So on a detected defeat this now skips the mid-entry probe
+            // (we KNOW the old board is dead, not a fresh seed-picker) and forces straight into the
+            // enter-level branch instead.
+            //
+            // Real bug found live 2026-09-14 (third one, same afternoon): forcing debug.enter-level
+            // (force:true bypasses EnterLevel's "board already live" guard entirely) STRAIGHT over the
+            // dead board never acked, twice (once via this endpoint, once via a direct manual retry) --
+            // consistent with the already-documented hazard that forced entry against a live board can
+            // destabilize the engine. The fix is not to force through a live board at all: call the
+            // real UIMgr.BackToMenu() first (DebugActions.ExitToMenu, the same static entry point the
+            // game's own pause/lose menu buttons call, already Harmony-hooked to emit menu.enter) so the
+            // board is actually torn down, THEN a normal (non-forced) enter-level lands cleanly on the
+            // seed-picker exactly like a first launch.
+            // Real bug found live 2026-09-14 (second one, same afternoon): using injector.hello to
+            // guard this was WRONG for an active recovery decision -- restarting the SERVER (not the
+            // game) mints a fresh hello for the SAME still-running game, which discarded a genuinely
+            // current defeat as if it belonged to a dead process, and quick-start then treated the
+            // dead board as live instead of recovering it. The right question is not "did the process
+            // restart" but "is this defeat still the most recent word on the board" -- the same
+            // newest-signal-wins rule /lawn/state's classifier already gets right (see
+            // BoardEconomyAfterDefeat_reportsInMatch_defeatIsStale). Only board.economy proves the
+            // board moved on since; nothing did here, so the defeat stands.
+            var latestResult = FindLatestKind(store, "match.result");
+            var latestEconomyForDefeat = FindLatestKind(store, "board.economy");
+            var defeatDetected = latestResult is not null
+                && string.Equals(PayloadString(latestResult.Payload, "result"), "defeat", StringComparison.OrdinalIgnoreCase)
+                && (latestEconomyForDefeat is null || latestResult.Id > latestEconomyForDefeat.Id);
+            var defeatReset = defeatDetected; // reported field name kept; meaning is now "forced a fresh entry", not "called reset-board"
+
+            // Some game profiles never emit board.start for a board that already exists behind the
+            // seed-picker screen -- confirmed live 2026-09-14 on pvzrh-3.9: several full match cycles
+            // (board.end fired repeatedly), zero board.start events, ever. So a board sitting on the
+            // seed-picker (Board not yet constructed) is invisible to FindLatestLiveBoardStart, and
+            // debug.enter-level's own live-board guard (which checks the Board reference) never
+            // triggers either -- calling EnterGame a second time on an already-mid-entry level is
+            // undefined by the vanilla game and was observed to time out with NO debug.level.enter
+            // event at all, not even a rejection. Probe for this state directly instead of guessing:
+            // debug.skip-setup is spec-sanctioned to call repeatedly (spec-setup-skip.md: "no
+            // automatic double-call fallback... repeated calls are allowed"), so try it before
+            // enter-level. Success (`board:true`) proves a real Board already exists -- either
+            // mid-seed-picker or already in a running match -- and lets quick-start skip straight to
+            // wave-freeze/scenario instead of re-attempting an entry that will only time out.
+            // Skipped entirely when defeatDetected: a defeated board is known-dead, not mid-entry, and
+            // probing it would just waste a round trip before the forced re-entry below regardless.
+            var alreadyMidEntry = false;
+            if (!defeatDetected)
+            {
+                store.MergeCheatField("DEBUG-SETUP-SKIP", true, null);
+                await Send(hub, inbox, "cheat.toggle", new { id = "DEBUG-SETUP-SKIP", enabled = true });
+                var probeBeforeSkip = store.GetMaxEventId();
+                await Send(hub, inbox, "debug.skip-setup", new { method = "quick" });
+                var probeSkipAck = await PollForKind(store, probeBeforeSkip, "debug.setup.skip", TimeSpan.FromSeconds(Math.Min(timeoutSec, 8)));
+                if (probeSkipAck is not null && PayloadBool(probeSkipAck.Payload, "ok")) alreadyMidEntry = true;
+            }
+            var setupSkipOk = false;
+
             var entered = false;
-            var boardStart = FindLatestLiveBoardStart(store);
+            var boardStart = (alreadyMidEntry || defeatDetected) ? null : FindLatestLiveBoardStart(store);
             string? enteredLevelType = null;
 
-            if (boardStart is null)
+            if ((boardStart is null && !alreadyMidEntry) || defeatDetected)
             {
                 store.MergeCheatField("DEBUG-LEVEL-ENTRY", true, null);
                 await Send(hub, inbox, "cheat.toggle", new { id = "DEBUG-LEVEL-ENTRY", enabled = true });
+
+                if (defeatDetected)
+                {
+                    var beforeExit = store.GetMaxEventId();
+                    await Send(hub, inbox, "debug.ui-nav", new { action = "back-to-menu" });
+                    var exitAckTimeoutSec = Math.Min(timeoutSec, 10);
+                    var exitAck = await PollForKind(store, beforeExit, "debug.ui-nav", TimeSpan.FromSeconds(exitAckTimeoutSec));
+                    if (exitAck is null)
+                        return Results.Conflict(new { ok = false, error = $"debug.ui-nav (back-to-menu) did not ack within {exitAckTimeoutSec}s", waitedMs = sw.ElapsedMilliseconds, defeatReset });
+                    if (!PayloadBool(exitAck.Payload, "ok"))
+                        return Results.Conflict(new { ok = false, error = PayloadString(exitAck.Payload, "error") ?? "debug.ui-nav (back-to-menu) rejected", defeatReset });
+                }
 
                 var beforeEnter = store.GetMaxEventId();
                 await Send(hub, inbox, "debug.enter-level", new { levelType = 0, levelNumber, id = 0, name = "" });
@@ -195,7 +468,7 @@ public static class DebugEndpoints
                 var ackTimeoutSec = Math.Min(timeoutSec, 20);
                 var enterAck = await PollForKind(store, beforeEnter, "debug.level.enter", TimeSpan.FromSeconds(ackTimeoutSec));
                 if (enterAck is null)
-                    return Results.Conflict(new { ok = false, error = $"debug.level.enter did not ack within {ackTimeoutSec}s" });
+                    return Results.Conflict(new { ok = false, error = $"debug.level.enter did not ack within {ackTimeoutSec}s", waitedMs = sw.ElapsedMilliseconds, defeatReset });
 
                 var ackOk = PayloadBool(enterAck.Payload, "ok");
                 if (!ackOk)
@@ -233,15 +506,40 @@ public static class DebugEndpoints
                 // SAME live board, which would otherwise look "stale" to the session rule below and
                 // 409 a perfectly good lawn. Found live 2026-08-30, immediately after the session rule
                 // itself was added — the fix for one false positive created a false negative.
+                //
+                // Found live 2026-09-14: on this profile board.start never fires (see the mid-entry
+                // probe comment above) AND the catalog.zombies fallback can come up empty too (a long
+                // enough server session simply scrolls it out of FindLatestKind's lookback window) --
+                // hard-refusing here left a REAL, injector-confirmed live board unusable. The injector
+                // already told us the board is live; treat this exactly like the mid-entry probe's own
+                // "board exists, levelType unresolvable" case instead of a second, inconsistent refusal
+                // for the same underlying situation.
                 if (boardStart is null && string.IsNullOrWhiteSpace(enteredLevelType))
-                    return Results.Conflict(new { ok = false, error = "enter-level reported board already live, but no level metadata was found" });
+                    alreadyMidEntry = true;
             }
 
-            var levelType = boardStart is null
-                ? enteredLevelType ?? ""
-                : PayloadString(boardStart.Payload, "levelType") ?? "";
-            if (BadLevelTypes.Contains(levelType))
+            // alreadyMidEntry has no board.start / enter-level ack to read a levelType from (see the
+            // probe comment above) -- the successful skip-setup probe is itself the live-board proof
+            // in that case, so the Explore/Travel/IZ refusal below is skipped rather than guessed at.
+            var levelType = alreadyMidEntry
+                ? ""
+                : (boardStart is null ? enteredLevelType ?? "" : PayloadString(boardStart.Payload, "levelType") ?? "");
+            if (!alreadyMidEntry && BadLevelTypes.Contains(levelType))
                 return Results.Conflict(new { ok = false, error = $"refusing lab on levelType={levelType} — open Adventure/Challenge day lawn, not Explore/Travel" });
+
+            // EnterGame opens the level, but the real lawn (waves moving, plants/zombies acting) stays
+            // behind the vanilla "Choose Your Plants" seed-picker screen (InitBoard/InGameUI) until that
+            // screen is dismissed. debug.skip-setup (InitBoard.QuickInGame) is the sanctioned dismissal —
+            // call it before any wave/scenario work so a fresh board is never left sitting on that
+            // screen. The proactive probe above already did this when alreadyMidEntry is true; only
+            // call it again for a level we just entered ourselves in this same request.
+            if (!alreadyMidEntry)
+            {
+                var beforeSkip = store.GetMaxEventId();
+                await Send(hub, inbox, "debug.skip-setup", new { method = "quick" });
+                var skipAck = await PollForKind(store, beforeSkip, "debug.setup.skip", TimeSpan.FromSeconds(Math.Min(timeoutSec, 10)));
+                setupSkipOk = skipAck is not null && PayloadBool(skipAck.Payload, "ok");
+            }
 
             await Send(hub, inbox, "debug.wave-freeze", new { enabled = true });
 
@@ -263,7 +561,7 @@ public static class DebugEndpoints
 
             var runDone = await PollForKind(store, beforeScenario, "debug.run-steps.done", TimeSpan.FromSeconds(timeoutSec));
             if (runDone is null)
-                return Results.Conflict(new { ok = false, error = $"scenario '{scenarioId}' steps did not complete within {timeoutSec}s" });
+                return Results.Conflict(new { ok = false, error = $"scenario '{scenarioId}' steps did not complete within {timeoutSec}s", waitedMs = sw.ElapsedMilliseconds, defeatReset });
 
             EventEnvelope? snapshot = null;
             var beforeSnapshot = store.GetMaxEventId();
@@ -298,6 +596,9 @@ public static class DebugEndpoints
                 scenario = scenarioId,
                 targetPtr,
                 plantPtr,
+                setupSkip = setupSkipOk,
+                defeatReset,
+                elapsedMs = sw.ElapsedMilliseconds,
                 note = snapshot is null ? "no board snapshot arrived — targetPtr/plantPtr unavailable" : null
             });
         });
@@ -427,6 +728,8 @@ public static class DebugEndpoints
             });
         });
 
+        // RPG Server Debug
+        // (in-memory session-grant reads only, no injector relay and no RpgStore read)
         g.MapGet("/effects/session-grants", (EffectGrantSession grants) =>
             Results.Ok(new { count = grants.Count, grants = grants.Snapshot() }));
 
@@ -454,6 +757,7 @@ public static class DebugEndpoints
         // without a new profile. Pure DAL, no injector round trip. Gated the same way every other
         // `/api/debug/*` route is: Program.cs only calls `app.MapDebug()` on a loopback bind (or
         // FUSIONRPG_DEBUG_REMOTE=1) — this endpoint lives in the SAME route group, not a second gate.
+        // RPG Server Debug
         g.MapPost("/reforge-world", (JsonElement? body, RpgStore store, EventIngest ingest) =>
         {
             var b = BodyOrEmpty(body);
@@ -498,6 +802,8 @@ public static class DebugEndpoints
             });
         });
 
+        // Game Injector Debug
+        // both this and /fire-spawn-extra delegate to AcceptDebugSpawnExtra, which relays
         g.MapPost("/spawn-extra", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {
             var result = await AcceptDebugSpawnExtra(BodyOrEmpty(body), store, hub, inbox, reasonDefault: "debug");
@@ -515,6 +821,7 @@ public static class DebugEndpoints
             return await AcceptDebugSpawnExtra(b, store, hub, inbox, reasonDefault: "debug.fire");
         });
 
+        // RPG Server Debug
         // Derived sheet audit: real UniqueActor → Hub → /sheet (never a synthetic 269 paint).
         g.MapPost("/derived-audit-actor", (JsonElement? body, RpgStore store) =>
         {
@@ -550,6 +857,7 @@ public static class DebugEndpoints
             }
         });
 
+        // Game Injector Debug
         g.MapPost("/arm/{kind}", async (string kind, JsonElement? body, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {
             var payload = JsonSerializer.SerializeToElement(MergeKind(BodyOrEmpty(body), kind));
@@ -624,6 +932,11 @@ public static class DebugEndpoints
         "Explore", "TravelAdvanture", "Travel", "IZ"
     };
 
+    // Structural safety check, not a balance value: real gameplay does not lose 3 matches in 10
+    // seconds. Shared by /lawn/state and /lawn/quick-start so the two never drift apart.
+    const int CyclingBoardEndMinCount = 3;
+    const int CyclingWindowSec = 10;
+
     static int IntProp(JsonElement obj, string name, int fallback) =>
         obj.ValueKind == JsonValueKind.Object && obj.TryGetProperty(name, out var el) && el.TryGetInt32(out var v)
             ? v : fallback;
@@ -668,7 +981,7 @@ public static class DebugEndpoints
         // file's own comments already state.
         const int windowCapacity = 2000;
         var after = Math.Max(0, max - windowCapacity);
-        var items = store.ListEvents(windowCapacity, after);
+        var items = store.ListEventsForServerScan(windowCapacity, after);
         var starts = items.Where(e => e.Kind == "board.start").ToList();
         if (starts.Count == 0) return null;
         var latestStart = starts[^1];
@@ -694,6 +1007,28 @@ public static class DebugEndpoints
         return latestStart;
     }
 
+    /// <summary>Counts events of `kind` timestamped within the last `window` — the observability check
+    /// that catches a rapidly cycling board (match ending and retrying every second or two, e.g. from
+    /// a "quick" setup-skip with no real plants placed) before quick-start polls into a confusing
+    /// timeout against it. Same bounded-scan shape as <see cref="FindLatestLiveBoardStart"/>; `T` is
+    /// the ISO round-trip string every event is stamped with (`DateTime.UtcNow.ToString("o")`).</summary>
+    static int CountRecentEventsOfKind(RpgStore store, string kind, TimeSpan window)
+    {
+        var max = store.GetMaxEventId();
+        if (max <= 0) return 0;
+        const int windowCapacity = 2000;
+        var after = Math.Max(0, max - windowCapacity);
+        var cutoff = DateTime.UtcNow - window;
+        var count = 0;
+        foreach (var e in store.ListEventsForServerScan(windowCapacity, after))
+        {
+            if (!string.Equals(e.Kind, kind, StringComparison.OrdinalIgnoreCase)) continue;
+            if (DateTime.TryParse(e.T, null, System.Globalization.DateTimeStyles.RoundtripKind, out var t) && t >= cutoff)
+                count++;
+        }
+        return count;
+    }
+
     static EventEnvelope? FindKindAfter(RpgStore store, long afterId, string kind)
     {
         var items = store.ListEvents(500, afterId);
@@ -705,7 +1040,7 @@ public static class DebugEndpoints
         var max = store.GetMaxEventId();
         if (max <= 0) return null;
         const int windowCapacity = 2000;
-        return store.ListEvents(windowCapacity, Math.Max(0, max - windowCapacity))
+        return store.ListEventsForServerScan(windowCapacity, Math.Max(0, max - windowCapacity))
             .LastOrDefault(e => string.Equals(e.Kind, kind, StringComparison.OrdinalIgnoreCase));
     }
 

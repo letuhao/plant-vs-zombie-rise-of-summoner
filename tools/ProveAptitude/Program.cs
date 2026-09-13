@@ -10,6 +10,11 @@ using FusionRpg.Core.Stats.Derived;
 // Follows prove-overlay-combat.ps1's -OutJson/exit-1-on-failure shape; unlike that script, both
 // engines being compared are pure FusionRpg.Core types, so this is a console tool, not a live-game
 // REST probe (V3's own note on why prove-aptitude.ps1 could not be written before this existed).
+//
+// battle-hub-fuse T6: the "battle" side is BattleHubCompose.Compose now (BattleStatComposer and
+// AptitudeResolver.ResolveForBattle are deleted, zero production callers). It routes the SAME
+// AptitudeResolver.Resolve call the overlay side uses through AptitudeSubsystem, so the two engines
+// now share one aptitude-resolve call, not two independently-shaped ones.
 
 string repoRoot = FindRepoRoot();
 string tuningDir = Path.Combine(repoRoot, "data", "tuning");
@@ -24,16 +29,20 @@ DerivedStatPolicy.Configure(DerivedStatTuningLoader.Parse(File.ReadAllText(Path.
 // turnSpeed, and battle-resources seeded all six resource pools via BattleRuleset.Base*, which in turn
 // calls BattleRuleset.BaseHp -> PowerTuningHub.Tuning (the SAME power-scale.v2.json already parsed
 // above into `powerTuning` for the overlay-side PowerLadder -- the battle side reads it through a
-// separate static hub, never through that local instance). BattleStatComposer.Compose now throws
-// "Configure(...) has not run" on every call regardless of which setup fields are populated, so this
-// mirrors Program.cs's own boot sequence exactly (same loaders, same tuning files) rather than
-// inventing a narrower substitute.
+// separate static hub, never through that local instance). BattleHubCompose.Compose (battle-hub-fuse
+// T6's replacement for the deleted BattleStatComposer.Compose) throws the same "Configure(...) has not
+// run" on every call regardless of which setup fields are populated, so this mirrors Program.cs's own
+// boot sequence exactly (same loaders, same tuning files) rather than inventing a narrower substitute.
 FusionRpg.Core.Power.PowerTuningHub.Configure(powerTuning);
 FusionRpg.Core.Battle.BattleTuningHub.Configure(
     FusionRpg.Core.Battle.BattleTuningLoader.Parse(File.ReadAllText(Path.Combine(tuningDir, "battle.v5.json"))));
 FusionRpg.Core.Battle.BattleRuleset.ConfigureResources(
     FusionRpg.Core.Battle.BattleResourceTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "battle-resources.v1.json"))));
+// battle-hub-fuse T6: AptitudeSubsystem (the battle side's new Hub twin) reads AptitudeTuningHub.Tuning
+// directly rather than taking a tuning parameter -- the deleted ResolveForBattle took aptitudeTuning as
+// a plain argument, so this global-hub configure step is new, not a duplicate of an existing one.
+FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(aptitudeTuning);
 
 var ladder = new PowerLadder(powerTuning);
 var registry = DerivedStatRegistry.CreateDefault();
@@ -45,14 +54,16 @@ string? outPath = ArgString(args, "--out", null);
 // Default: unfiltered -- every channel the allocation touches, compared. class-system-todo.md P2.6 /
 // Checkpoint 2 is scoped to "Might -> combat.power.omni" (the one vertical slice P2.4/P2.5 actually
 // built and proved), so its own invocation passes --channels explicitly. Left unfiltered by default
-// because the wider comparison is useful and HONEST: running it that way surfaces a real, pre-existing
-// gap -- BattleStatComposer's ChannelMods loop is unconditionally additive and applies no cap at all
-// (confirmed: zero `Cap(` calls in that file), so a SumIncreased-kind channel with a cap (e.g.
-// status.resist.*, capped at DerivedStatPolicy.CategoryResistCap on the overlay side) will never agree
-// between engines once BOTH sides carry a large enough contribution to hit that cap. Not introduced by
-// this tool or by P2.4/P2.5 -- true for every ChannelMods producer that has ever existed (Star, Loyalty,
-// traits) -- and not fixable here: spec-aptitude-resolve.md §8 forbids changing BattleStatComposer's
-// compose logic. It is P3.1's inheritance ("all twelve, all live channels... zero deltas"), not P2.6's.
+// because the wider comparison is useful and HONEST.
+//
+// battle-hub-fuse T6 closed the gap this comment used to document (P3.1's former inheritance): the old
+// battle path's ChannelMods loop was unconditionally additive with no cap at all, so a SumIncreased-kind
+// capped channel (status.resist.*, capped at DerivedStatPolicy.CategoryResistCap on the overlay side)
+// disagreed once a contribution cleared that cap. The Hub battle path now runs the exact same
+// AptitudeResolver.Resolve call through AptitudeSubsystem -> the Hub's own DerivedComposer, so both
+// sides apply the identical cap. See UnfilteredRun_stillHasKnownDivergences (Core.Tests) for what
+// remains: half-away-from-zero narrowing to `long` on the Contest read mode, real but far smaller than
+// the deleted cap-asymmetry gap.
 var channelFilter = ArgString(args, "--channels", null)?
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
     .ToHashSet(StringComparer.Ordinal);
@@ -65,19 +76,23 @@ var allocation = AptitudeAllocation.Single(AllocationScope.Commander, source, po
 var overlayMods = AptitudeResolver.Resolve(allocation, aptitudeTuning, ladder, theta, registry);
 var overlaySnapshot = new DerivedComposer(registry).Compose(overlayMods);
 
-// Battle path: ResolveForBattle -> BattleActorSetup.ChannelMods -> BattleStatComposer.Compose,
-// exactly what WebMatchService.AptitudeChannelMods feeds into a real squad setup. ElementPrimary/
-// Secondary and TraitIds stay at their record defaults (null / empty), so PrimaryAffinityDivisor/
-// SecondaryAffinityDivisor are never read -- this tool still proves only the aptitude seam, not the
-// whole battle-setup pipeline. BattleTuningHub.Configure/BattleRuleset.ConfigureResources ARE required
-// now, though (see the boot sequence above): Compose's turnSpeed and six-resource-pool seeding read
-// Tuning/ResourceTuning unconditionally on every call, independent of which setup fields are set.
-var battleMods = AptitudeResolver.ResolveForBattle(allocation, aptitudeTuning, ladder, theta, registry);
-var setup = new BattleActorSetup { Key = "prove-aptitude", Side = "squad", Level = theta, ChannelMods = battleMods };
-var battleSnapshot = BattleStatComposer.Compose(setup);
+// Battle path (battle-hub-fuse T6): the allocation reaches battle as a Hub input
+// (BattleHubInputs.Aptitude), resolved through AptitudeSubsystem -> the same AptitudeResolver.Resolve
+// the overlay path calls above -- exactly what WebMatchService's squad builder feeds a real setup.
+// ElementPrimary/Secondary and TraitIds stay at their record defaults (null / empty), so
+// BattleAffinitySubsystem/BattleTraitSubsystem contribute nothing -- this tool still proves only the
+// aptitude seam, not the whole battle-setup pipeline. BattleTuningHub.Configure/
+// BattleRuleset.ConfigureResources ARE required (see the boot sequence above): Compose's turnSpeed and
+// six-resource-pool baseline seeding read Tuning/ResourceTuning unconditionally on every call,
+// independent of which setup fields are set.
+var setup = new BattleActorSetup
+{
+    Key = "prove-aptitude", Side = "squad", Level = theta,
+    HubInputs = new BattleHubInputs { Aptitude = allocation },
+};
+var battleSnapshot = BattleHubCompose.Compose(setup);
 
 var channels = overlayMods.Select(m => m.ChannelId)
-    .Concat(battleMods.Select(m => m.ChannelId))
     .Distinct(StringComparer.Ordinal)
     .Where(c => channelFilter is null || channelFilter.Contains(c))
     .OrderBy(c => c, StringComparer.Ordinal)

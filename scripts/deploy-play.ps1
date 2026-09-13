@@ -8,6 +8,16 @@
 #                                            # a stale wwwroot silently served an old FE build for a
 #                                            # whole session because this used to be opt-in and got
 #                                            # forgotten; opt-out is the only safe default)
+#   .\scripts\deploy-play.ps1 -QuickTest     # (2026-09-14) SKIPS the full test-fast.ps1 gate (13k+
+#                                            # tests, the slowest step by far) for a fast local
+#                                            # redeploy loop. Every boundary guard above it still
+#                                            # runs -- only the test-fast.ps1 call is skipped. Never
+#                                            # the default; never use it to call a build "verified,"
+#                                            # to gate a live proof, or before a commit/merge -- run a
+#                                            # plain `.\scripts\deploy-play.ps1` (or the targeted
+#                                            # `dotnet test` filters for what you touched) first. A
+#                                            # loud warning prints every time this flag is used so it
+#                                            # is never silently relied on.
 # FE landing (2026-09-09): vite writes src\FusionRpg.Server\wwwroot; the running server serves
 # dist\FusionRpg.Server\wwwroot (ContentRoot = exe dir). A running server skips `dotnet publish`
 # (DLL locks), which used to leave dist's FE stale even after a fresh vite build. This script always
@@ -15,7 +25,7 @@
 # lets you hard-refresh and confirm FE fixes without -RestartServer.
 # Server data (rpg-hot / rpg-media) lives next to the published exe: dist\FusionRpg.Server\data\
 # Runs guard-single-writer.ps1 + guard-dal.ps1 + guard-test-substrate.ps1 + guard-generated-seed.ps1 + guard-secondary-no-unity.ps1 + guard-funnel-delta.ps1 + guard-actor-hub.ps1
-# + guard-overflow.ps1 + guard-magic-numbers.ps1 + guard-power.ps1 + guard-stat-pairs.ps1
+# + guard-debug-scope.ps1 + guard-overflow.ps1 + guard-magic-numbers.ps1 + guard-power.ps1 + guard-stat-pairs.ps1
 # + guard-class-system.ps1 before build.
 param(
     [ValidateSet("BepInEx", "MelonLoader")]
@@ -23,7 +33,8 @@ param(
     [switch]$NoGame,
     [switch]$NoServer,
     [switch]$NoRebuildUi,
-    [switch]$RestartServer
+    [switch]$RestartServer,
+    [switch]$QuickTest
 )
 
 $ErrorActionPreference = "Stop"
@@ -159,6 +170,10 @@ Write-Host "==> ActorHub gate guard"
 & (Join-Path $Root "scripts\guard-actor-hub.ps1")
 if ($LASTEXITCODE -ne 0) { throw "actor-hub guard failed" }
 
+Write-Host "==> Debug-scope guard"
+& (Join-Path $Root "scripts\guard-debug-scope.ps1")
+if ($LASTEXITCODE -ne 0) { throw "debug-scope guard failed" }
+
 Write-Host "==> Overflow guard"
 & (Join-Path $Root "scripts\guard-overflow.ps1")
 if ($LASTEXITCODE -ne 0) { throw "overflow guard failed" }
@@ -202,9 +217,17 @@ if ($ClassSystemExit -ne 0) {
 # cases — no SSD writes and no multi-minute test on the dev loop. One place owns the filter
 # (scripts/test-fast.ps1); the `full` profile runs unfiltered in CI/nightly/release. Standard:
 # docs/contributing/testing-standard.md.
-Write-Host "==> Default test profile (test-fast.ps1)"
-& (Join-Path $Root "scripts\test-fast.ps1")
-if ($LASTEXITCODE -ne 0) { throw "default test profile failed — see output above" }
+if ($QuickTest) {
+    Write-Warning "==> -QuickTest: SKIPPING test-fast.ps1 (13k+ tests) -- local iteration only."
+    Write-Warning "    This build is NOT verified. Every boundary guard above still ran, but no"
+    Write-Warning "    regression test did. Re-run without -QuickTest (or the targeted dotnet test"
+    Write-Warning "    filters for what you touched) before treating this as done, before a live"
+    Write-Warning "    proof, and before commit/merge."
+} else {
+    Write-Host "==> Default test profile (test-fast.ps1)"
+    & (Join-Path $Root "scripts\test-fast.ps1")
+    if ($LASTEXITCODE -ne 0) { throw "default test profile failed — see output above" }
+}
 
 Write-Host "==> Building $LoaderHost injector ($GameProfile) into $PluginDir"
 & (Join-Path $Root "scripts\guard-game-profile.ps1") -GameDir $GameDir -ExpectedProfile $GameProfile

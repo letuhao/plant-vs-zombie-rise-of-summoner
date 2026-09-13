@@ -280,6 +280,18 @@ public static class GameCaptureHooks
         }
     }
 
+    /// <summary>
+    /// ⛔ Deliberately does NOT invalidate <c>LawnElementResolverHost</c>, and that is checked by
+    /// <c>LawnElementResolverTests</c>, not left to memory. That cache stores the actor's OBJECT KIND,
+    /// which mind control does not change: <c>InjectorEntityRegistry.CollectSnaps</c> writes
+    /// <c>Side = "zombie"</c> as a literal for every Zombie and carries control state in the separate
+    /// <c>BoardEntitySnap.MindControlled</c> flag, which <c>MechanicalOwnSideOracle</c> is the SSOT for
+    /// folding into an allegiance. A charmed zombie is still a Zombie with a zombie type id, so its
+    /// species row is still the zombie one — re-resolving here would return the identical value at the
+    /// cost of a board scan, and flipping the stored side to "plant" would make the
+    /// <c>(side, gameTypeId)</c> species lookup miss (degrading a charmed zombie to Neutral element)
+    /// and break <c>GateCounterHost</c>, which requires spawn kind by spec-gate-counters.md §2.1.
+    /// </summary>
     [HarmonyPatch(typeof(Zombie), nameof(Zombie.SetMindControl))]
     public static class ZombieMindControl
     {
@@ -760,30 +772,51 @@ public static class GameCaptureHooks
     }
 
     // W3-A: UIMgr.EnterPauseMenu / BackToGame (Assembly-CSharp) — NotifyPaused, not Core Apply kinds.
+    // Real gap found live 2026-09-14 (lawn-run-state-machine.md §1/§3): these four hooks already
+    // existed but emitted no event at all -- NotifyPaused only flips an in-process MatchPhase never
+    // surfaced through /api/debug/events, so a paused match read identically to a running one, and
+    // returning to the main menu was invisible to every live-probe state check. Wiring real emits
+    // into the already-hooked methods below (no new Harmony patch needed) closes both gaps.
     [HarmonyPatch(typeof(UIMgr), nameof(UIMgr.EnterPauseMenu))]
     public static class EnterPauseMenuHook
     {
-        public static void Postfix() => Match.MatchHost.NotifyPaused(true);
+        public static void Postfix()
+        {
+            Match.MatchHost.NotifyPaused(true);
+            Emit("match.pause", new Dictionary<string, object>());
+        }
     }
 
     [HarmonyPatch(typeof(UIMgr), nameof(UIMgr.BackToGame))]
     public static class BackToGameHook
     {
-        public static void Postfix() => Match.MatchHost.NotifyPaused(false);
+        public static void Postfix()
+        {
+            Match.MatchHost.NotifyPaused(false);
+            Emit("match.resume", new Dictionary<string, object>());
+        }
     }
 
     // Escape / in-game pause path may call PauseGame without going through UIMgr first.
     [HarmonyPatch(typeof(InGameUI), nameof(InGameUI.PauseGame))]
     public static class InGamePauseGameHook
     {
-        public static void Postfix() => Match.MatchHost.NotifyPaused(true);
+        public static void Postfix()
+        {
+            Match.MatchHost.NotifyPaused(true);
+            Emit("match.pause", new Dictionary<string, object>());
+        }
     }
 
     // Leaving to menu while Paused: clear overlay pause (Idle/board.end still via Die).
     [HarmonyPatch(typeof(UIMgr), nameof(UIMgr.BackToMenu))]
     public static class BackToMenuClearPauseHook
     {
-        public static void Postfix() => Match.MatchHost.NotifyPaused(false);
+        public static void Postfix()
+        {
+            Match.MatchHost.NotifyPaused(false);
+            Emit("menu.enter", new Dictionary<string, object>());
+        }
     }
 
     [HarmonyPatch(typeof(ItemManager), nameof(ItemManager.SetBucket))]

@@ -121,9 +121,9 @@ public class BattleResolverParityTests
             Components = first.ElementPrimary is { } e
                 ? new[] { new ElementPayloadComponent(e, 1.0) }
                 : Array.Empty<ElementPayloadComponent>(),
-            Attacker = new CombatActorSnapshot(BattleStatComposer.Compose(first),
+            Attacker = new CombatActorSnapshot(BattleHubCompose.Compose(first),
                 ActorElementTypes.Create(first.ElementPrimary)),
-            Defender = new CombatActorSnapshot(BattleStatComposer.Compose(second),
+            Defender = new CombatActorSnapshot(BattleHubCompose.Compose(second),
                 ActorElementTypes.Create(second.ElementPrimary)),
             Profile = CombatProfile.BattleSim
         }, rng);
@@ -168,7 +168,8 @@ public class BattleResolverParityTests
     {
         // The self-arming ban test (CombatSsotContractTests) now runs its armed branch —
         // this is the local assertion that arming actually happened.
-        // T4.2 (power-dial, 2026-08-24): RulesetVersion 2 -> 3.
-        Assert.Equal(4, BattleRuleset.RulesetVersion);
+        // battle-hub-fuse (2026-09-13): RulesetVersion 4 -> 5.
+        Assert.Equal(5, BattleRuleset.RulesetVersion);
     }
 }
+

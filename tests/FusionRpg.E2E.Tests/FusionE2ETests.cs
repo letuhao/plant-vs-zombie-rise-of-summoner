@@ -3,6 +3,7 @@ using System.Text.Json;
 using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Creatures.Fusion;
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Stats.Derived.Subsystems;
 using Xunit;
 
 namespace FusionRpg.E2E.Tests;
@@ -133,15 +134,14 @@ public class FusionE2ETests : IAsyncLifetime
     [Fact]
     public void Star_mods_ride_squad_setups_and_scale_with_stars()
     {
-        // F8 unit shape: stars reach battles only as ordinary ChannelMods on the omni channels.
-        Assert.Empty(FusionRpg.Server.WebMatchService.StarChannelMods(0, 5));
-        var one = FusionRpg.Server.WebMatchService.StarChannelMods(1, 5);
-        var three = FusionRpg.Server.WebMatchService.StarChannelMods(3, 5);
-        Assert.Equal(2, one.Count);
-        Assert.All(one, m => Assert.True(m.Amount >= 1, "low-level stars must still register"));
-        Assert.True(three[0].Amount > one[0].Amount, "more stars, more power");
-        Assert.Equal("combat.power.omni", one[0].ChannelId);
-        Assert.Equal("combat.defense.omni", one[1].ChannelId);
+        // F8 unit shape: stars reach battles as Hub star/loyalty contributions on the omni
+        // channels (battle-hub-fuse T6: the ChannelMods adapters are deleted; same shared formula).
+        Assert.Null(StarLoyaltyBonus.Star(0, 5));
+        var one = StarLoyaltyBonus.Star(1, 5)!.Value;
+        var three = StarLoyaltyBonus.Star(3, 5)!.Value;
+        Assert.True(one.Power >= 1 && one.Defense >= 1, "low-level stars must still register");
+        Assert.True(three.Power > one.Power, "more stars, more power");
+        Assert.True(three.Defense > one.Defense, "more stars, more defense");
     }
 
     /// <summary>
@@ -151,21 +151,20 @@ public class FusionE2ETests : IAsyncLifetime
     [Fact]
     public void Loyalty_mods_are_zero_at_bound_and_climb_with_rank()
     {
-        Assert.Empty(FusionRpg.Server.WebMatchService.LoyaltyChannelMods(
+        Assert.Null(StarLoyaltyBonus.Loyalty(
             FusionRpg.Core.Creatures.Contracts.ContractPolicy.BindLoyalty, 5));
 
-        var sworn = FusionRpg.Server.WebMatchService.LoyaltyChannelMods(450, 5);
-        var devoted = FusionRpg.Server.WebMatchService.LoyaltyChannelMods(900, 5);
-        Assert.Equal(2, sworn.Count);
-        Assert.Equal("combat.power.omni", sworn[0].ChannelId);
-        Assert.Equal("combat.defense.omni", sworn[1].ChannelId);
-        Assert.True(devoted[0].Amount > sworn[0].Amount, "devotion must outweigh a sworn oath");
+        var sworn = StarLoyaltyBonus.Loyalty(450, 5)!.Value;
+        var devoted = StarLoyaltyBonus.Loyalty(900, 5)!.Value;
+        Assert.True(devoted.Power > sworn.Power, "devotion must outweigh a sworn oath");
+        Assert.True(devoted.Defense > sworn.Defense, "devotion must outweigh a sworn oath");
     }
 
     [Fact]
     public void Stars_swing_battles_statistically()
     {
         // The +30‰/star channel mods must move real outcomes, not just decorate setups.
+        // battle-hub-fuse T6: stars ride as Hub inputs through the fused engine path.
         FusionRpg.Core.Battle.BattleActorSetup Actor(string key, string side, int stars) => new()
         {
             Key = key,
@@ -176,7 +175,10 @@ public class FusionE2ETests : IAsyncLifetime
             MaxHp = FusionRpg.Core.Battle.BattleRuleset.BaseHp(5),
             Atk = FusionRpg.Core.Battle.BattleRuleset.BaseAtk(5),
             Defense = FusionRpg.Core.Battle.BattleRuleset.BaseDefense(5),
-            ChannelMods = FusionRpg.Server.WebMatchService.StarChannelMods(stars, 5)
+            HubInputs = new FusionRpg.Core.Battle.BattleHubInputs
+            {
+                StarLoyalty = new StarLoyaltyContribution(stars, 0, 5),
+            }
         };
 
         long starred = 0, plain = 0;
