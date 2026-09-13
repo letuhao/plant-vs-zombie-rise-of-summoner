@@ -25,7 +25,9 @@ static class PreAdoptionFixtures
         var dir = Dir();
         Directory.CreateDirectory(dir);
         var path = Path.Combine(dir, name + ".trace.txt");
-        return File.Exists(path) ? File.ReadAllText(path) : null!;
+        // Fixtures are LF in the blob but check out as CRLF when core.autocrlf=true;
+        // the engine always emits LF, so normalize before comparing.
+        return File.Exists(path) ? File.ReadAllText(path).Replace("\r\n", "\n") : null!;
     }
 
     /// <summary>Compares against the stored fixture, capturing it on first run.</summary>
@@ -40,6 +42,6 @@ static class PreAdoptionFixtures
             return actual;
         }
 
-        return File.ReadAllText(path);
+        return File.ReadAllText(path).Replace("\r\n", "\n");
     }
 }

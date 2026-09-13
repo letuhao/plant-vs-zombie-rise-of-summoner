@@ -19,6 +19,17 @@ cd plant-vs-zombie-rise-of-summoner
 dotnet build
 ```
 
+## Line endings
+
+`.gitattributes` checks out text as LF (`* text=auto eol=lf`). Golden
+fixtures/tuning/seed are LF in the blob and several tests compare bytes exactly,
+so a CRLF working tree fails them for no reason. After changing line-ending
+settings on an existing checkout, re-normalize once:
+
+```powershell
+git add --renormalize .
+```
+
 ## Tests (same commands CI runs)
 
 ```powershell

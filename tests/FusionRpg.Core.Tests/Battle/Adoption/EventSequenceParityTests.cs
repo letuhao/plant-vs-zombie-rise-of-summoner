@@ -52,7 +52,9 @@ public class EventSequenceParityTests
             return actual;
         }
 
-        return File.ReadAllText(path);
+        // Fixtures are LF in the blob but check out as CRLF when core.autocrlf=true;
+        // Serialize joins with LF, so normalize before comparing.
+        return File.ReadAllText(path).Replace("\r\n", "\n");
     }
 
     [Theory]
