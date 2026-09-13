@@ -3,7 +3,11 @@
 **Program:** `live-setup-skip`  
 **Module:** `setup-skip`  
 **Status:** Implemented; `quick` LIVE-proven on `pvzrh-3.9` 2026-09-09. The explicit `button`
-probe remains available for profile comparison.
+probe remains available for profile comparison. **2026-09-14:** `POST /api/debug/lawn/quick-start`
+(`DebugEndpoints.cs`) now calls this command automatically (self-enabling `DEBUG-SETUP-SKIP`)
+immediately after entering the level and before freezing waves or expanding a scenario — closing a
+real wiring gap where quick-start opened the level but left the seed-picker screen up, so waves
+never started and no plant/zombie ever acted. See `docs/runbook/live-test-ssot.md` §0 Step 2.
 
 ## Objective
 

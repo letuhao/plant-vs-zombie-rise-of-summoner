@@ -4,6 +4,133 @@
 
 Related: [debug-pipeline.md](debug-pipeline.md) (API recipes), [level-entry.md](../research/level-entry.md) (enter-level gate), [debug-live-checklist.md](debug-live-checklist.md) / [melon-live-checklist.md](melon-live-checklist.md) (host checklists), [live-test-maintain.md](../contributing/live-test-maintain.md) (enrich/maintain rule). Code route map: [`DebugEndpoints.cs`](../../src/FusionRpg.Server/DebugEndpoints.cs). Protocol table: [rest.md](../protocol/rest.md).
 
+## 0. Golden path — one full Live Probe run, start to finish
+
+**Read this section before running or scripting a Live Probe.** It is the mandatory sequence, in
+order. Each numbered step names the exact API/command, why it exists, and the failure it prevents.
+Sections 1–8 below are reference detail for the pieces this sequence calls; this section is the
+procedure itself.
+
+**Governing rule (unchanged by this section):** a debug call may trigger a real operation but must
+never fabricate its result — see [live-probe-standard.md](../contributing/live-probe-standard.md).
+Nothing here licenses treating a queued HTTP response as proof; every step below is proven by
+polling the resulting event, not by the `{ "ok": true, "queued": 1 }` envelope.
+
+### Step 1 — Redeploy before every new test instance
+
+A stale injector build or a stale running game/server from a prior session is not a valid starting
+state — never reuse one across test instances. Kill it and redeploy clean:
+
+```powershell
+# Server: survives tool-tree cleanup (an assistant tool call's own process does not)
+Start-Process dist\FusionRpg.Server\FusionRpg.Server.exe
+# Injector only — never let deploy-play also restart a server from an assistant session
+.\scripts\deploy-play.ps1 -NoServer
+# Confirm before touching anything else
+Invoke-RestMethod http://127.0.0.1:5088/health
+# Expect: ok=true, injectorConnected=true, simEnabled=false
+```
+
+If a game process from an earlier test instance is still running, treat it as **the wrong frame**:
+close it and start over from a fresh `deploy-play.ps1` deploy, rather than attaching a new test run
+to old process state (a stale `G-TIMEFREEZE`/`G-TIMESCALE`/cheat-toggle carryover from a previous
+session's run is a real, observed failure mode — see the 2026-09-13/14 incident in Step 2).
+
+### Step 2 — Enter the level, then close the seed-picker screen (mandatory UI gate)
+
+`UIMgr.EnterGame` (`POST /api/debug/enter-level`) opens the level, but the vanilla **"Choose Your
+Plants"** seed-picker screen (the panel with the "一起摇滚吧!" / "Let's Rock!" button) stays on
+screen afterward. **While it is open, the match has not started: waves do not spawn, and plants and
+zombies do not act.** This is not cosmetic — it is a hard precondition, and skipping it silently
+produces a "board" that will never generate a single real hit.
+
+Close it with `debug.skip-setup` (`InitBoard.QuickInGame()`), gated behind `DEBUG-SETUP-SKIP`:
+
+```powershell
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/cheats/toggle `
+  -ContentType application/json -Body '{"id":"DEBUG-SETUP-SKIP","enabled":true}'
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/setup/skip `
+  -ContentType application/json -Body '{"method":"quick","timeoutSec":15}'
+# Success: debug.setup.skip { ok: true, board: true, ui: true }
+```
+
+**As of 2026-09-14, `POST /api/debug/lawn/quick-start` does this step for you automatically** — it
+self-enables `DEBUG-SETUP-SKIP` and calls `debug.skip-setup` right after entering the level, before
+freezing waves or running any scenario (`DebugEndpoints.cs`, `/lawn/quick-start` handler). Prefer
+quick-start for a new test instance; call `/setup/skip` directly only when driving `/enter-level`
+by hand or reusing an already-open board outside quick-start.
+
+*Incident this step exists because of (2026-09-13/14):* a live run of `lawn-combat-observer` (T0)
+could not capture a single real vanilla hit against a freshly entered board. The operator's own
+screenshot showed the seed-picker screen still open — `/lawn/quick-start` had entered the level but
+never dismissed it, so the "run" had never actually started. The fix landed in `/lawn/quick-start`
+itself (commit `8224dae4`); this doc section and the standalone `/setup/skip` path remain for any
+flow that does not go through quick-start.
+
+### Step 3 — Freeze waves immediately, before any scenario or spawn work
+
+Vanilla zombie waves must never be allowed to spawn during a controlled test — freeze them the
+moment the run starts, before doing anything else on the board:
+
+```powershell
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/wave-freeze `
+  -ContentType application/json -Body '{"enabled":true}'
+# Assert: debug.wave.freeze { enabled: true }
+```
+
+`/lawn/quick-start` already sequences this immediately after Step 2 and before expanding any
+scenario. If driving the API by hand, do not reorder this after a spawn or scenario call — an
+un-frozen wave can spawn and attack concurrently with a controlled test actor, corrupting attribution.
+
+### Step 4 — Spawn test actors into specific lanes, then verify before executing
+
+Set the target cell before each spawn (`debug.spawn-cell` caches `col`/`row` for the *next* spawn
+call only — set it again before every subsequent spawn into a different lane):
+
+```powershell
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/spawn-cell `
+  -ContentType application/json -Body '{"col":1,"row":2}'
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/spawn-plant `
+  -ContentType application/json -Body '{"type":0}'   # Peashooter at col 1 / row 2
+
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/spawn-cell `
+  -ContentType application/json -Body '{"col":8,"row":2}'
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/spawn-zombie `
+  -ContentType application/json -Body '{"type":0,"mindControl":false}'   # BasicZ at col 8 / row 2
+```
+
+**Do not proceed to the test proper until every spawned actor's identity and location are confirmed**
+— never assume a spawn call succeeded silently:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:5088/api/debug/board-stats
+# plants[]/zombies[] each carry: ptr, typeId, col, row, attack/attackDamage, hp, maxHp
+```
+
+Cross-check every entry against the intended lane and type before executing the test. A spawn that
+landed in the wrong lane, at the wrong type, or not at all (empty `plants`/`zombies` array) is a
+setup failure, not a test result — stop and re-spawn rather than running the test against an
+unverified board.
+
+### Step 5 — Run the test, then read results only from the real event/telemetry path
+
+Never read a "did it work" verdict from an HTTP response body alone. Poll `GET /api/events` (or the
+narrower `GET /api/debug/events`) after recording the pre-test max event id, per §2's cursor pattern
+below — or, for `lawn-combat-wire` specifically, read the `lawn-combat-observer` run file (an
+always-on, non-perturbing instrument; see `tools/LawnCombatObserver`), never console prose and never
+a worker's summary.
+
+### Step 6 — Tear down before the next test instance
+
+End the debug session, then return to Step 1 for the next instance — never layer a new test onto a
+board a previous instance already mutated:
+
+```powershell
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/session/end
+```
+
+---
+
 ## 1. Preflight
 
 | Check | Expect |
@@ -49,7 +176,8 @@ Trap: `afterId=0` + `kinds=` returns the **oldest** matching page — use tip cu
 | Path | What it does | Use when |
 |---|---|---|
 | **Manual** | Operator: main menu → Adventure → day; leave lawn running | **Default reliable** |
-| `POST /api/debug/enter-level` | Gated `UIMgr.EnterGame` | Gate on: cheat `DEBUG-LEVEL-ENTRY` or env `FUSIONRPG_LEVEL_ENTRY=1`. Assert `debug.level.enter ok=true` then `board.start` — HTTP queued ≠ entered |
+| `POST /api/debug/lawn/quick-start` | One-call orchestrator: enter-level → **skip-setup (2026-09-14+)** → wave-freeze → scenario expand → board-snapshot poll | **Preferred for a new test instance** — see §0's golden path |
+| `POST /api/debug/enter-level` | Gated `UIMgr.EnterGame` | Gate on: cheat `DEBUG-LEVEL-ENTRY` or env `FUSIONRPG_LEVEL_ENTRY=1`. Assert `debug.level.enter ok=true` then `board.start` — HTTP queued ≠ entered. Leaves the seed-picker screen open — follow with setup-skip (below) before anything else |
 | `POST /api/debug/scenario/{id}` | Expands named steps on **current** board | Mid-match lab only — does **not** open a level |
 | `POST /api/debug/wave-freeze` | `{ "enabled": true }` | Almost every lab starts here |
 
@@ -58,6 +186,12 @@ Named labs (see `DebugScenarios`): `lab-overlay`, `lab-empty`, `lab-shield-bar`.
 Refuse lab when latest live `board.start` has `levelType` in `Explore`, `Travel*`, `IZ`.
 
 ### Setup panel skip
+
+**As of 2026-09-14, `/lawn/quick-start` performs this step automatically** (self-enables
+`DEBUG-SETUP-SKIP` and calls `debug.skip-setup` right after entering the level, before wave-freeze —
+see §0 Step 2 and `DebugEndpoints.cs`). The manual sequence below is still the correct path when
+driving `/enter-level` directly instead of through quick-start, or when reusing an already-open
+board through the standalone `/setup/skip` probe.
 
 The setup panel can be completed through the host game's own IL2CPP handler. The injector command
 is gated so ordinary player runs do not invoke it. Set the gate before launching the game, then use
