@@ -169,7 +169,7 @@ flowchart TB
 - [ ] Cold equip player path uses rolled/atom bindings — stub not the SSOT.
 - [ ] Standing includes Hub combat writers via membership filter; chip never labels level “power”.
 - [ ] Bound lawn UniqueCreature parity + Bound loadout via Hub.
-- [ ] Sim combat ops Full via Hub; D4 coeffs tunable; unique Θ on wire when known; stale dual-compose docs gone.
+- [x] Sim combat ops Full via Hub; D4 coeffs tunable; unique Θ on wire when known (honest negative — no real per-instance Θ exists, see T17); stale dual-compose docs gone.
 - [ ] `prove-hub-combat` green.
 - [ ] PlaceholderBattleResolver + placeholder intel Strength **deleted**; `world-actor-combat` tracked (no world combat Done claim).
 - [ ] Ideal + aptitude-sheet Done checkboxes cross-linked; goldens re-blessed once under fuse bump.

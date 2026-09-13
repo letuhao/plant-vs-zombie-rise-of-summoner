@@ -3,7 +3,7 @@
 **Plan:** [actor-hub-and-combat-power-solid-fixing-plan.md](actor-hub-and-combat-power-solid-fixing-plan.md)  
 **Map:** [docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md](../docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md)  
 **Runbook / evidence:** [runbook](actor-hub-and-combat-power-solid-fixing-runbook.md) · [evidence map](actor-hub-and-combat-power-solid-fixing-evidence-map.md) · command `/solid-run`  
-**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 + Wave 2 complete (T1-T11 done). Wave 3: T12 BLOCKED (honest gap — depends on `aptitude-sheet` program's unbuilt `unique-lawn-wire`, out of this program's own implementation scope per its own spec's locked boundary); T13 done; T14 deferred (depends on T12). Wave 4 in progress: T15-T16 done; T17 closed (honest negative — no real per-instance Θ exists; one real dead-fallback bug fixed); T18-T19 next.
+**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 + Wave 2 complete (T1-T11 done). Wave 3: T12 BLOCKED (honest gap — depends on `aptitude-sheet` program's unbuilt `unique-lawn-wire`, out of this program's own implementation scope per its own spec's locked boundary); T13 done; T14 deferred (depends on T12). Wave 4 in progress: T15-T18 done (T17 closed as honest negative — no real per-instance Θ exists; one real dead-fallback bug fixed); T19 next.
 
 ---
 
@@ -456,13 +456,13 @@
 **Description:** Overturn “composers stay separate” / adapters-OK forever prose; align §8.3 and decisions with fuse outcome.
 
 **Acceptance criteria:**
-- [ ] Blessing phrases gone or clearly historical.
-- [ ] §8.3 / decisions reflect fuse outcome.
-- [ ] Map Done checkbox for stale docs.
-- [ ] Production code comments / `EquipAtomSource` dual-compose prose overturned (not docs-only).
+- [x] Blessing phrases gone or clearly historical.
+- [x] §8.3 / decisions reflect fuse outcome. (Also fixed a real residual staleness found while re-reading both: the T6-era "trimmed to three files" claim needed the T7 second trim folded in.)
+- [x] Map Done checkbox for stale docs.
+- [x] Production code comments / `EquipAtomSource` dual-compose prose overturned (not docs-only). (Already done at T7; confirmed clean, not assumed.)
 
 **Verification:**
-- [ ] `rg -n "composers stay separate|locked separate from ActorHub|BattleStatComposer stays|adapters OK" docs src --glob "!**/bin/**" --glob "!**/obj/**"` — clean or historical-only
+- [x] `rg -nE "composers stay separate|locked separate from ActorHub|BattleStatComposer stays|adapters OK" docs src --glob "!**/bin/**" --glob "!**/obj/**"` — clean or historical-only (11 hits: 7 this program's own meta-spec rule text, 4 now HISTORICAL-marked)
 
 **Dependencies:** T6  
 **Files likely touched:** docs under architecture / class-system / actor-hub-ssot / decisions; `EquipAtomSource.cs` and related production comments  

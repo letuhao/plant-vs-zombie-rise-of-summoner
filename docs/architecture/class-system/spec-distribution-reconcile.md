@@ -160,6 +160,12 @@ compiler and the runner and appearing in no spec."*
 > **So: fix the documents — including this spec's own earlier verdict, which said WIRE — plus one
 > narrow code item (§3.2a). The composers stay separate, deliberately, and that is now a recorded
 > decision rather than an unexamined divergence.**
+>
+> **⛔ HISTORICAL — overturned 2026-09-12** as a SOLID/DRY defect (`decisions.md` "ActorHub sole Hot
+> compose gate"). `battle-hub-fuse` (`actor-hub-and-combat-power-solid-fixing` T6, 2026-09-13) deleted
+> `BattleStatComposer` and §3.2a's own known-channel-set narrowness with it — battle now composes
+> through the SAME `ActorHub`/`DerivedComposer` as every other surface, so there are no longer two
+> composers to keep separate.
 
 #### 3.2a The one real code item: the known-channel set is narrower than the distribution
 

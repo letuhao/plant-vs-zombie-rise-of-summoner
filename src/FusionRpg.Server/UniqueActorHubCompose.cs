@@ -17,7 +17,11 @@ namespace FusionRpg.Server;
 /// <summary>
 /// Sole Server Hot compose entry for UniqueActor sheet/derived — ActorHub only, FULL durable fan-in
 /// (progression + aptitude + equip atoms + passive tree). Status (<c>l2b.derived</c>) stays
-/// Injector-only (Hot session). BattleStatComposer stays locked-separate (ADR 2026-09-07).
+/// Injector-only (Hot session). "BattleStatComposer stays locked-separate" (ADR 2026-09-07) is
+/// HISTORICAL — that ADR exception was overturned 2026-09-12 as a SOLID/DRY defect
+/// (`decisions.md` "ActorHub sole Hot compose gate"), and battle-hub-fuse (T6, 2026-09-13) deleted
+/// `BattleStatComposer` entirely: `BattleHubCompose` composes through this SAME `ActorHub`/
+/// `DerivedComposer` every other surface uses. Battle is fused, not merely "no longer locked-separate."
 /// Injector tree hydrate (T13, 2026-09-13): CLOSED via HTTP fan-in, not a local
 /// PassiveTreeTuningHub configure — see <see cref="TreeBoundAtoms"/>'s own doc comment.
 /// </summary>
