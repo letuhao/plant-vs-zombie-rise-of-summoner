@@ -6,7 +6,10 @@ namespace FusionRpg.Tools.ProveLiveProbe;
 // These are typed response shapes for endpoints whose SERVER-SIDE handler returns an anonymous object
 // (no named DTO exists in FusionRpg.Contracts or FusionRpg.Server to reference) — read directly from
 // the handler source so field names are verified, not guessed:
-//   - SpawnUniqueActorResult:   CreatureEndpoints.cs MapPost("/debug/spawn-unique-actor", ...)
+//   - SpawnUniqueActorResult:   CreatureEndpoints.cs MapPost("/debug/spawn-unique-actor", ...) under
+//                               its own "/api/creatures" group -> real path
+//                               /api/creatures/debug/spawn-unique-actor (verified live; the route name
+//                               says "debug" but it is not under the server's "/api/debug" group)
 //   - UniqueAptitudeState:      AptitudeEndpoints.cs ProjectUniqueState(...)
 //   - SummonResult:             CreatureEndpoints.cs MapPost("/summon", ...)
 //   - BoardStatsPayload/Entity: FusionRpg.Injector.DebugRuntime.BoardEntityStats()
@@ -14,8 +17,8 @@ namespace FusionRpg.Tools.ProveLiveProbe;
 // case-insensitive) is used for every (de)serialization in this tool, matching ASP.NET Core Minimal
 // API's own default wire casing, so plain PascalCase C# properties round-trip without attributes.
 
-/// <summary>Response of <c>POST /api/debug/spawn-unique-actor</c> (Mode A's acquire, and the ONLY
-/// debug-shortcut acquisition this tool ever calls).</summary>
+/// <summary>Response of <c>POST /api/creatures/debug/spawn-unique-actor</c> (Mode A's acquire, and the
+/// ONLY debug-shortcut acquisition this tool ever calls).</summary>
 public sealed class SpawnUniqueActorResult
 {
     public string InstanceId { get; set; } = "";

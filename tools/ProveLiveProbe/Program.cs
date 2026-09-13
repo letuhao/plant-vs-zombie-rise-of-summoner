@@ -57,35 +57,35 @@ public static class Program
         }
 
         // ---- step 2: allocate ----------------------------------------------------------------------
+        // Steps 2-4 each record their own real outcome (Ok/Refused) but never hard-stop the recipe —
+        // unlike step 1 (no instanceId, nothing downstream can run) a refusal here is still valuable
+        // to see reflected (or not) in step 5's read-back. A live run against a fresh debug-shortcut
+        // specimen found exactly this case for real: the shortcut's own TryAckUniqueSpawn already
+        // leaves the actor ActiveBound, so a subsequent step 4 deploy legitimately 409s
+        // ("phase.activebound") — a real, correctly-reported refusal, not a tool defect, and stopping
+        // the recipe there would have hidden step 5's otherwise-informative read-back.
         var shares = Guardrails.BuildShares(options.AptitudeId, options.AptitudePoints);
         var (allocStep, _) = await client.AllocateAsync(instanceId!, shares);
         persisted.Add(allocStep);
-        if (allocStep.Outcome == StepOutcome.Refused)
-            return await Finish(client, options, persisted, liveEngine, instanceId);
 
         // ---- step 3: equip -------------------------------------------------------------------------
         var (equipStep, _) = await client.EquipAsync(options.PlayerId, instanceId!, options.ItemInstanceId, options.Role);
         persisted.Add(equipStep);
-        if (equipStep.Outcome == StepOutcome.Refused)
-            return await Finish(client, options, persisted, liveEngine, instanceId);
 
         // ---- step 4: deploy ------------------------------------------------------------------------
         var correlationId = Guid.NewGuid().ToString("N");
         var (deployStep, _) = await client.DeployAsync(instanceId!, correlationId, options.Col, options.Row, options.MatchKey);
         persisted.Add(deployStep);
-        if (deployStep.Outcome == StepOutcome.Refused)
-            return await Finish(client, options, persisted, liveEngine, instanceId);
 
         // ---- step 5: persisted-state read-back ----------------------------------------------------
         // Mode B only: the Injector's own ack (Deploying -> ActiveBound, lastPtr populated) is
         // asynchronous, so wait for it here with a bounded timeout, reported as its own distinct
-        // timeout kind if it never lands (see LiveProbeClient.WaitForActiveBoundAsync doc).
+        // timeout kind if it never lands (see LiveProbeClient.WaitForActiveBoundAsync doc). Still not a
+        // hard stop: the read-back below runs either way and shows whatever phase was actually reached.
         if (options.Mode == ProbeMode.B)
         {
             var (waitStep, _) = await client.WaitForActiveBoundAsync(instanceId!, TimeSpan.FromSeconds(options.TimeoutSec));
             persisted.Add(waitStep);
-            if (waitStep.Outcome == StepOutcome.Timeout)
-                return await Finish(client, options, persisted, liveEngine, instanceId);
         }
 
         var (actorStep, actorDto) = await client.GetActorAsync(instanceId!);
@@ -97,6 +97,18 @@ public static class Program
             return await Finish(client, options, persisted, liveEngine, instanceId);
 
         // ---- step 6: live-engine read (Mode B only) -----------------------------------------------
+        // Only attempted when persisted state actually carries a live ptr to look up — polling the
+        // board for a ptr we already know cannot exist would just burn the whole timeout on a
+        // foregone conclusion, and "skipped, no ptr yet" is a more honest report than a manufactured
+        // timeout.
+        if (string.IsNullOrEmpty(actorDto?.LastPtr))
+        {
+            liveEngine.Add(new StepResult("6-live-engine (read)", StepOutcome.Skipped,
+                "no persisted lastPtr available — step 5 never reached ActiveBound with a live ptr, " +
+                "so there is nothing for step 6 to look up on the board"));
+            return await Finish(client, options, persisted, liveEngine, instanceId);
+        }
+
         var beforeId = await EventPoller.FindCurrentMaxEventIdAsync(client);
         var tag = Guid.NewGuid().ToString("N");
         var sendStep = await client.SendBoardStatsAsync(tag);

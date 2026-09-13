@@ -10,9 +10,10 @@ namespace FusionRpg.Tools.ProveLiveProbe;
 /// (<c>Program.cs</c>'s <c>app.MapGet("/api/events", ...)</c>), never
 /// <c>/api/debug/events</c>. That is a deliberate substitution, not an oversight: this tool's own
 /// boundary rule (spec-live-probe-tool.md, tasks/live-probe-todo.md Task 8) caps it at exactly two
-/// <c>/api/debug/*</c> routes (the identity-only <c>spawn-unique-actor</c> shortcut and
-/// <c>board-stats</c> itself) — polling the read side through the generic, non-debug events feed keeps
-/// that count at two while still reading the same underlying event log
+/// debug-shaped routes — the identity-only <c>spawn-unique-actor</c> shortcut (which turns out to live
+/// under <c>/api/creatures/debug/*</c>, not <c>/api/debug/*</c> — see <c>LiveProbeClient</c>'s own
+/// note) and <c>POST /api/debug/board-stats</c> itself — polling the read side through the generic,
+/// non-debug events feed keeps that count at two while still reading the same underlying event log
 /// (<c>RpgStore.ListEvents</c> backs both routes identically).
 /// </summary>
 public static class EventPoller

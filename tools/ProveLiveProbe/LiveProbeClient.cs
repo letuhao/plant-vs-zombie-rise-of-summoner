@@ -13,10 +13,13 @@ namespace FusionRpg.Tools.ProveLiveProbe;
 /// (where the handler answers with a bare anonymous object) a locally-declared DTO whose shape was read
 /// from that handler's own source — see Dtos.cs's header comment. Never a hand-guessed JSON shape.
 ///
-/// <para><b>The two <c>/api/debug/*</c> routes this class calls, and no others</b> — the tool's own
-/// boundary rule (spec-live-probe-tool.md, tasks/live-probe-todo.md Task 8): <c>/api/debug/spawn-unique-
-/// actor</c> (identity-only, Mode A's acquire) and <c>/api/debug/board-stats</c> (read-only send; its
-/// answer is read back over the plain <c>/api/events</c> feed, see <see cref="EventPoller"/>).</para>
+/// <para><b>The two debug-shaped routes this class calls, and no others</b> — the tool's own boundary
+/// rule (spec-live-probe-tool.md, tasks/live-probe-todo.md Task 8): the identity-only acquire shortcut
+/// (<c>POST /api/creatures/debug/spawn-unique-actor</c> — mapped under <c>CreatureEndpoints.cs</c>'s
+/// own <c>/api/creatures</c> group despite the "debug" name, confirmed by a real HTTP call against a
+/// live Server; a literal <c>/api/debug/spawn-unique-actor</c> 405s) and <c>POST /api/debug/board-
+/// stats</c> (read-only send; its answer is read back over the plain <c>/api/events</c> feed, see
+/// <see cref="EventPoller"/>).</para>
 /// </summary>
 public sealed class LiveProbeClient : IDisposable
 {
@@ -84,7 +87,11 @@ public sealed class LiveProbeClient : IDisposable
             Side = side,
             GameTypeId = gameTypeId,
         };
-        var (ok, status, body, raw) = await PostAsync<SpawnUniqueActorResult>("/api/debug/spawn-unique-actor", req);
+        // NOTE: despite the name and the "debug-only" framing in CreatureEndpoints.cs's own comment,
+        // this route is mapped under that file's "/api/creatures" group, NOT "/api/debug" — confirmed
+        // by a real HTTP call against a live Server (a literal "/api/debug/spawn-unique-actor" 405s,
+        // "Allow: GET, HEAD"; this path 200s). Code beats docs/spec text here (DESIGN-GATE.md).
+        var (ok, status, body, raw) = await PostAsync<SpawnUniqueActorResult>("/api/creatures/debug/spawn-unique-actor", req);
         if (!ok)
             return (new StepResult("1-acquire (debug shortcut)", StepOutcome.Refused,
                 $"step 1 refused: HTTP {status} {TryExtractReason(raw) ?? raw}"), null);
