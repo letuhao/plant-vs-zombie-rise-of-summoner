@@ -176,6 +176,17 @@ public static class RpgHost
         FusionRpg.Core.Match.Ai.ZombossDeployTuningHub.Configure(
             FusionRpg.Core.Match.Ai.ZombossDeployTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "zomboss-deploy-ai.v1.json"))));
+        // lawn-combat-wire T8 (spec-lawn-action-bridge.md): without this, the first lawn touch of the
+        // hand-built basic-attack row throws -- ActionTimingDerivation.DeriveBasicAttack (called from
+        // BasicAttackFactory.Create) reads ActionTimingPolicy.Tuning, which throws
+        // InvalidOperationException until Configure has run. Server/Program.cs already does this for
+        // the Battle system; this is the injector's own copy, from the same shipped tuning file
+        // (already copied verbatim by every host .csproj's own `data\tuning\**\*.json` content rule --
+        // no build change needed). Ordered here, before RpgHost.Initialize returns and therefore before
+        // any lawn actor can be granted a basic attack -- never raced against host startup.
+        FusionRpg.Core.Actions.ActionTimingPolicy.Configure(
+            FusionRpg.Core.Actions.ActionTimingTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "action-timing.v1.json"))));
 
         IsInitialized = true;
     }

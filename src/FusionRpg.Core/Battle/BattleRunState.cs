@@ -60,26 +60,15 @@ public static partial class BattleEngine
         /// `new BattleRunState(...)`, by which point every real caller (`BattleEngine.Resolve`) has
         /// already configured tuning — the same timing every other `Policy`/`Tuning` read in this
         /// class already assumes.</para>
+        ///
+        /// <para><b>lawn-combat-wire T8 (spec-lawn-action-bridge.md):</b> the construction itself moved
+        /// out to <see cref="BasicAttackFactory.Create"/> — the ONE public factory shared with
+        /// the injector's own lawn-side construction, so a second hand-built copy of this row can never
+        /// drift from this one. This field's own timing (instance init, not static) is unchanged by
+        /// that move; only where the `new CompiledAction(...)` literal lives changed. Field-level golden:
+        /// <c>BasicAttackFactoryGoldenTests</c> (<c>FusionRpg.Core.Tests</c>).</para>
         /// </summary>
-        readonly CompiledAction BasicAttackCompiled = new(
-            ActionId: BasicAttackEnvelope.ActionId,
-            Kind: ActionKind.Basic,
-            Rung: 0,
-            Tags: new[] { ActionTag.Offensive },
-            Enabled: true,
-            Revision: 0,
-            Grantable: false,
-            DefaultAttackEligible: true,
-            ContainerId: "",
-            Envelope: ActionTimingDerivation.DeriveBasicAttack(BasicAttackEnvelope, ActionTimingPolicy.Tuning),
-            Targeting: TargetSpecCompiler.Compile(BasicAttackTargeting),
-            MinRange: 0,
-            MaxRange: int.MaxValue,
-            RangeChannel: null,
-            RequiresLineOfSight: false,
-            Condition: PredicateCompiler.Always,
-            Costs: Array.Empty<CompiledActionCost>(),
-            Scopes: Array.Empty<ActionScopeRow>());
+        readonly CompiledAction BasicAttackCompiled = BasicAttackFactory.Create(ActionTimingPolicy.Tuning);
 
         /// <summary>`battle-tempo` `timeline-dispatch` (D14): the one field of
         /// <see cref="BasicAttackCompiled"/> the timeline-dispatch action phase needs (the derived
