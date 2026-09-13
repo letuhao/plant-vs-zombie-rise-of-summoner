@@ -29,6 +29,15 @@ dotnet test tests/FusionRpg.Guard.Tests -c Release
 dotnet test tests/FusionRpg.Launcher.Tests -c Release
 ```
 
+**Before concluding a test is slow, read [test-burden-audit.md](test-burden-audit.md).** Two facts it
+records will otherwise cost you the same investigation: per-test durations in a full-suite TRX are
+**contention wall-clock, not cost** (53×–230× inflation), and **Data.Tests is 4.2× faster at ~2 threads
+than at the default 32** on a 32-core box. It also lists the hypotheses already ruled out with numbers,
+so they are not re-tested.
+
+For the routine loop use `.\scripts\test-fast.ps1` (the `default` profile — see
+[testing-standard.md](testing-standard.md) §6), which excludes the disk-writing and long tests.
+
 ## Injector refs (no hardcoded game path)
 
 Set an environment variable to your game folder (must contain `BepInEx\core` and `BepInEx\interop`):

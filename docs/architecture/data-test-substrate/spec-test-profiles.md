@@ -83,6 +83,16 @@ spec so no future session "optimizes" the guards onto the fast profile.
 - Does not change `src/`, `trait`s on production code, or `test.runsettings`.
 - Does not make the default profile the only gate — CI/nightly/release all run `full`.
 
+**Does not own test wall-clock — that is a separate axis, measured separately.** Profiles reduce *what
+runs* by category; they say nothing about how fast the remainder runs. The 2026-09-13 burden audit
+([`docs/contributing/test-burden-audit.md`](../../contributing/test-burden-audit.md)) found two facts a
+reader of this spec needs and would otherwise re-derive the hard way: per-test durations in a full-suite
+TRX are **contention wall-clock, not cost** (53×–230× inflation in Data.Tests), and **Data.Tests is 4.2×
+faster at ~2 threads than at the default 32**. The follow-ups that came out of it — capping Data.Tests
+parallelism, fixing `EnsureColumn`'s swallowed `ALTER TABLE`, and investigating the unexplained ~46ms in
+`EnsureHotSchema` — are tracked as BU1–BU4 in `tasks/data-test-substrate-todo.md` Phase 8, not here,
+because they change `src`/CI rather than the profile contract.
+
 ## Commands
 
 ```powershell

@@ -103,6 +103,34 @@ the record (a new commit, never an amend).
 Python deps for `tools/seedsmith`, runs `npm ci` for the web, and prints what still needs the owner
 (`FUSIONRPG_GAME_DIR` is machine-local and never committed).
 
+### It also copies `AGENTS.md` + `CLAUDE.md` — and that is load-bearing, not a convenience
+
+Both files are **gitignored**, so `git worktree add` never creates them in a new worktree. They are not
+only instructions: **~36 test files use `AGENTS.md` as their repo-root marker** — they walk up from
+`AppContext.BaseDirectory` looking for it and throw `"repo root not found"` without it. A fresh worktree
+without those copies therefore fails those tests for a reason that has nothing to do with the change
+under test.
+
+Found 2026-09-13 when a clone reported 367 Core.Tests failures that were all one missing marker;
+`setup-script.ps1` now copies both files into every new worktree and warns if the main repo lacks them.
+
+### Before editing a file another stream might own
+
+`git status` shows their dirty work; that is information, not permission. Check the concrete overlap
+rather than assuming a whole-file conflict:
+
+1. `git worktree list` and every active record in `tasks/sessions/*.json` — who claims the path.
+2. If they do, compare the **region** on their branch:
+   `git diff <base>..<their-branch> -- <file>`.
+3. Only a real region overlap needs coordination; a file claimed by two sessions but changed in
+   different regions merges cleanly.
+
+Worked example (2026-09-13, `battle-timeline` B40): `src/FusionRpg.Server/WebMatchService.cs` was
+claimed by `solid-run-20260912-eb53`, but its commits touched only lines 449–572 while the edit was at
+321–340, and the catch region was byte-identical on both branches — so the edit merged cleanly and was
+committed without touching their work. **Recording the crossing in your own session record is what makes
+that auditable**, not the assurance that it went fine.
+
 `scripts/session-boundary-check.ps1` validates the records and reports drift:
 
 - a record whose `worktree` no longer exists, or whose `branch` is gone;
