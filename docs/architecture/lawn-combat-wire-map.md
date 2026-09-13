@@ -135,13 +135,28 @@ than today's bug.** So regen is a **fifth** all-or-nothing wire, not an optional
 wires" framing in `basic-attack-cost` is wrong.
 
 **Resolution — superseded 2026-09-13: these now have their own module, `lawn-combat-calibration`.**
-Leaving them as "placeholders somebody authors eventually" was wrong on two counts. First, one of them
-is a **hard blocker**: `atom.fx-overlay-damage` has no row in `action-shares.v1.json` and
-`ActionShareTable` rejects rather than defaults, so the feature throws on first use. Second, a number
-with no derivation is un-arguable — the module requires each value to trace to a named shipped anchor
-(`atom.poison-rider = 300` as the rider precedent, the `atk(Θ=20) = 92` pin, the measured vanilla pea
-at 20 damage / 1.5 s) with the arithmetic recorded in `_meta`. Still `UNMEASURED`, still not a balance
-pass — but derived and traceable rather than invented.
+Leaving them as "placeholders somebody authors eventually" was wrong on two counts.
+
+First — **corrected 2026-09-13, see finding #12 below**: this row originally claimed
+`atom.fx-overlay-damage` was a **hard blocker** because it has no row in `action-shares.v1.json` and
+`ActionShareTable` rejects rather than defaults, "so the feature throws on first use." That is false.
+`ActionShareTable` has **zero production callers** — it belongs to the not-yet-landed seeding pipeline
+(`ActionSeeder.Generate`, itself asserted `ActionCorpusProducerLanded = false`) — so a missing row there
+throws on nothing real; the basic attack's base damage is `attacker.LiveAtk`, never a share read
+through this table. What `lawn-combat-calibration` (T11, built 2026-09-14) actually found is narrower
+and different: `atom.fx-overlay-damage`'s **compiled row carries no `amount` key at all**
+(`EffectAtomCatalog.Generated.cs`, traced in `spec-lawn-combat-calibration.md`'s "RESOLVED" section),
+so it resolves to a hardcoded `0` on every hit — a silent no-op, not a throw. T11 derived and shipped
+`stamina` cost + regen (`battle-resources.v2.json`, `action-corpus-cost-templates.v2.json`); it
+deliberately left this third number **unauthored** (see that spec's "DECIDED" section) because both
+candidate homes for it sit outside a tuning-file change — either dead infrastructure
+(`action-shares.v1.json`) or hand-editing generated atom seed data. A named follow-up
+(`lawn-combat-rider-amount`) owns it.
+
+Second, a number with no derivation is un-arguable — the module requires each value to trace to a
+named shipped anchor (`atom.poison-rider = 300` as the rider precedent, the `atk(Θ=20) = 92` pin, the
+measured vanilla pea at 20 damage / 1.5 s) with the arithmetic recorded in `_meta`. Still `UNMEASURED`,
+still not a balance pass — but derived and traceable rather than invented.
 
 ---
 

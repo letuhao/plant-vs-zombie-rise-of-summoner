@@ -496,6 +496,17 @@ internal static class ContractTuningTestBootstrap
             ["spirit"] = 500,
             ["qi"] = 500,
             ["poise"] = 500,
+        },
+        // Regen share deliberately all-zero -- ambient fixture keeps the pre-T11 baseline
+        // (lawn-combat-wire T11, spec-lawn-combat-calibration.md); the real `stamina=50` share
+        // now lives in the shipped `battle-resources.v2.json`.
+        RegenPerSecondShareMilli: new Dictionary<string, int>(StringComparer.Ordinal)
+        {
+            ["stamina"] = 0,
+            ["hunger"] = 0,
+            ["spirit"] = 0,
+            ["qi"] = 0,
+            ["poise"] = 0,
         });
 
     public static readonly FusionRpg.Core.Actions.ActionTimingTuning DefaultActionTiming = new(

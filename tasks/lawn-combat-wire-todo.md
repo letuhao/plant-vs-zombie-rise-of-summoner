@@ -311,21 +311,30 @@ at all** (`_meta.regenIsAbsentOnPurpose`). So the regen rows cannot be authored 
 tool. **Extending `publish.py` with an add-key mode is part of this task**, mirroring the existing
 bespoke `--add-rung-power-budget` shape.
 
-**Acceptance:**
-- [ ] T1's answer applied: magnitude authored, or explicitly **not** authored.
-- [ ] `publish.py` gains a sanctioned way to add the regen block; the file is **not** hand-edited.
-- [ ] Output is `battle-resources.v2.json` with v1 kept for revert, per its own convention.
-- [ ] `_meta.regenIsAbsentOnPurpose` is **rewritten** — it currently documents regen's absence as a
-      design position, and shipping regen without updating it leaves the file lying about itself.
-- [ ] **Consumers resolve `v2`** — verified, not assumed.
-- [ ] Cost template (`action-corpus-cost-templates.v1.json`) follows *its* own convention: bump
-      `version`, keep v1 on disk.
-- [ ] `cost ≤ regenPerSecond × 1.5 s` at the pin (a Peashooter's `thePlantAttackInterval` is 1.5).
-- [ ] Every value marked `UNMEASURED` and traceable to a named anchor.
-- [ ] **No test pins an exact damage number** — that is a reading, not a contract.
-- [ ] **Resolve the retracted share claim.** The map retracted *"`sharePermille` missing ⇒ throws"*;
-      `spec-lawn-combat-calibration.md` still carries the original assertion in places. Pick one and
-      make spec and map agree.
+**Acceptance (built 2026-09-14):**
+- [x] T1's answer applied: **explicitly NOT authored** (spec's "DECIDED" section) — both candidate
+      homes (dead `ActionShareTable`, or hand-editing generated atom seed data) sit outside a
+      tuning-file change; named follow-up `lawn-combat-rider-amount` owns it.
+- [x] `publish.py` gains a sanctioned way to add the regen block (`--add-regen-block`, mirroring
+      `--add-rung-power-budget`); the file is **not** hand-edited.
+- [x] Output is `battle-resources.v2.json` with v1 kept for revert, per its own convention.
+- [x] `_meta.regenIsAbsentOnPurpose` is **rewritten** — it now documents that `stamina` regenerates
+      and the other four stay an explicit 0, with `_meta.regenDerivation` carrying the arithmetic.
+- [x] **Consumers resolve `v2`** — `src/FusionRpg.Server/Program.cs` (the one real consumer) bumped;
+      every other reader (tests/tools) pins v1 explicitly and stays byte-identical via the parser's
+      absent-block default, verified by `LawnCombatCalibrationGuardTests.V1StillParsesWithNoRegenBlockAndDefaultsEveryShareToZero`.
+- [x] Cost template (`action-corpus-cost-templates.v1.json`) follows *its* own convention: bumped to
+      v2 (`kinds.basic.baseAmountAtRung1` 20 → 25), v1 kept on disk.
+- [x] `cost ≤ regenPerSecond × 1.5 s` at the pin — proven by
+      `LawnCombatCalibrationGuardTests.StaminaCostNeverExceedsSustainableRegenAtThePin`, computed from
+      the real shipped files, never a hardcoded pair.
+- [x] Every value marked `UNMEASURED` and traceable to a named anchor.
+- [x] **No test pins an exact damage number** — the new BalanceGuard tests assert the inequality and
+      the zero/non-zero split, never a literal cost or regen value.
+- [x] **Resolved the retracted share claim.** Both `spec-lawn-combat-calibration.md` (already correct)
+      and `lawn-combat-wire-map.md` (had a stale self-contradicting paragraph, lines ~137-144 — fixed)
+      now agree: `sharePermille`/`ActionShareTable` never blocked anything; the real gap was
+      `atom.fx-overlay-damage`'s missing `amount`, and T11 left it explicitly unauthored.
 
 **Moved out of this task** *(it was circular — the criterion cannot be decided until cost is actually
 charged, which is T12, which depends on T11)*: *"exhaustion stays reachable under burst fire"* now

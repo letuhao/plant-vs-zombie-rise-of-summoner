@@ -17,6 +17,7 @@ Usage (repo root):
     python tools/tuning/publish.py aptitudes "edges[channel=resource.regen.hp,source=Vigor].kMilli=83"
     python tools/tuning/publish.py aptitudes --add-edge "channel=resource.max.poise,source=Bulwark,kMilli=28000"
     python tools/tuning/publish.py action-rungs --add-rung-power-budget 1000
+    python tools/tuning/publish.py battle-resources --add-regen-block "stamina=50,hunger=0,spirit=0,qi=0,poise=0"
 
 `--add-edge` is the one path that ADDS rather than edits, and it exists because a coverage gap could
 not be closed otherwise: `set` refuses to invent a key by design, and the file forbids hand-editing, so
@@ -252,6 +253,88 @@ def add_rung_power_budget(doc, reference_power):
     return added
 
 
+def add_regen_block(doc, spec_raw):
+    """lawn-combat-wire T11 (spec-lawn-combat-calibration.md): add `regenPerSecondShareMilli` --
+    battle-resources.v1.json's own `_meta.regenIsAbsentOnPurpose` names the reason there is no regen
+    block at all: `ResourceChannelReader.RegenPerTick` used to round the channel to a whole `long`,
+    so the smallest expressible non-zero rate accrued ~300 poise per round against a spend of 100 --
+    three counters a round, erasing the scarcity poise exists to create. `resource-subtick` (S10.1,
+    2026-09-13) fixed the unit (per-mille-per-tick, carried rather than rounded), which is what makes
+    this flag possible; it deliberately authored no rate itself.
+
+    Expressed as a per-mille SHARE OF THE POOL, mirroring `poolShareMilli`'s own convention, rather
+    than a flat absolute rate -- a flat number would drift out of proportion at another theta, while
+    a share projects through BaseHp(theta) the same way the pool max already does (one curve, not a
+    second one). Refuses rather than guesses, matching the sibling --add-* flags: the key must not
+    already exist, and the ids given must be EXACTLY `poolShareMilli`'s own id set -- no invented
+    resource, no silently-missing one, the same closed-coverage rule poolShareMilli itself enforces
+    at load (BattleResourceTuningLoader.Parse).
+
+    Usage: --add-regen-block "stamina=50,hunger=0,spirit=0,qi=0,poise=0"
+    """
+    if "regenPerSecondShareMilli" in doc:
+        raise KeyError("'regenPerSecondShareMilli' already exists -- use the set path to change a "
+                       "value, this flag only fills a first-time gap")
+
+    shares = doc.get("poolShareMilli")
+    if not isinstance(shares, dict) or not shares:
+        raise KeyError("'poolShareMilli' is missing or empty -- --add-regen-block is "
+                       "battle-resources-shaped only, and reads its id set to check coverage against")
+
+    given = _parse_selector(spec_raw)
+    required_ids, given_ids = set(shares.keys()), set(given.keys())
+    if given_ids != required_ids:
+        missing = required_ids - given_ids
+        extra = given_ids - required_ids
+        detail = []
+        if missing:
+            detail.append("missing: %s" % ", ".join(sorted(missing)))
+        if extra:
+            detail.append("unknown: %s" % ", ".join(sorted(extra)))
+        raise KeyError("--add-regen-block must cover exactly poolShareMilli's own ids (%s)"
+                       % "; ".join(detail))
+
+    for rid, v in given.items():
+        if isinstance(v, bool) or not isinstance(v, int) or v < 0:
+            raise KeyError("regen share for '%s' must be a non-negative integer permille (got %r)"
+                           % (rid, v))
+
+    # Ordered to match poolShareMilli's own key order -- readability, not semantics (JSON objects are
+    # unordered), so a diff reads id-for-id against the pool shares it derives from.
+    doc["regenPerSecondShareMilli"] = {rid: given[rid] for rid in shares.keys()}
+
+    meta = doc.setdefault("_meta", {})
+    meta["regenIsAbsentOnPurpose"] = (
+        "SUPERSEDED 2026-09-14 (lawn-combat-wire T11, spec-lawn-combat-calibration.md). This used to "
+        "say there was no regen block at all -- ResourceChannelReader.RegenPerTick rounded the channel "
+        "to a whole long, so the smallest expressible non-zero rate accrued ~300 poise per round "
+        "against a spend of 100 (three counters a round, erasing the scarcity poise exists to "
+        "create), and there was nothing representable between that and zero. resource-subtick (S10.1, "
+        "2026-09-13) resolved the REPRESENTATION problem: the reader now carries a per-mille-per-tick "
+        "remainder instead of rounding, so 999 rates exist between nothing and a whole unit. This file "
+        "now authors exactly ONE non-zero regen row -- stamina, for the lawn/battle basic attack -- and "
+        "leaves the other four at 0 deliberately, not by omission: poise's original scarcity argument "
+        "still holds verbatim (nothing changed its spend economics, resource-hub-ssot.md SS11 pools "
+        "'refill AT REST' and a battle/lawn encounter is not a rest), and hunger/spirit/qi have no cost "
+        "mechanism spending them yet, so authoring a rate for them would be inventing a balance number "
+        "nothing consumes. See _meta.regenDerivation for the stamina arithmetic."
+    )
+    meta["regenDerivation"] = (
+        "UNMEASURED, derived at the pin (theta=20, power-scale.v2.json curve.pinValue=680): "
+        "poolMax(20,'stamina') = BaseHp(20) * poolShareMilli.stamina / 1000 = 680 * 500 / 1000 = 340. "
+        "regenPerSecondShareMilli.stamina=50 (5 percent of the pool per second) => "
+        "regenPerSecond(20) = poolMax * 50 / 1000 = 17. A Peashooter's shipped attack interval is "
+        "1.5s (measured live 2026-09-13), so the sustainable spend at the pin is "
+        "17 * 1.5 = 25.5 -- action-corpus-cost-templates kinds.basic.baseAmountAtRung1 is authored "
+        "just under that ceiling (spec-lawn-combat-calibration.md Method #2), so continuous "
+        "single-target fire is sustainable with a thin margin and a genuine burst can still tip it "
+        "into deficit. basic-attack-cost (T12) is the wiring that actually spends it; "
+        "basic-attack-live-proof 4 is where exhaustion-then-recovery gets proven live."
+    )
+
+    return doc["regenPerSecondShareMilli"]
+
+
 def add_inherit_cost_table(doc):
     """creature-standalone WAVE F2.3 (2026-09-07): add `inheritCostByRarity` — a fusion pick's cost is
     read from the PICK'S OWN source rarity, not the fusion output's, so it needs its own table rather
@@ -333,6 +416,11 @@ def main():
     ap.add_argument("--add-inherit-cost-table", action="store_true", dest="add_inherit_cost_table",
                     help="derive and add `inheritCostByRarity` from `recipeCost`'s own souls escalation "
                          "(fusion-shaped only); refuses if the key already exists")
+    ap.add_argument("--add-regen-block", default=None, dest="add_regen_block",
+                    metavar="id=milli,id=milli,...",
+                    help="add `regenPerSecondShareMilli` -- one per-mille-of-pool-per-second regen "
+                         "share per resource id, covering exactly poolShareMilli's own ids "
+                         "(battle-resources-shaped only); refuses if the key already exists")
     ap.add_argument("--label", default="", help="short human note, stored in _meta.rebalanceLabel")
     a = ap.parse_args()
 
@@ -404,6 +492,16 @@ def main():
         for rarity, souls in table.items():
             changes.append(("inheritCostByRarity.%s" % rarity, None, souls))
         print("  %-52s ADDED (%d rung(s))" % ("inheritCostByRarity", len(table)))
+
+    if a.add_regen_block is not None:
+        try:
+            block = add_regen_block(doc, a.add_regen_block)
+        except KeyError as e:
+            print("refused: %s" % e, file=sys.stderr)
+            return 1
+        for rid, v in block.items():
+            changes.append(("regenPerSecondShareMilli.%s" % rid, None, v))
+        print("  %-52s ADDED (%d id(s))" % ("regenPerSecondShareMilli", len(block)))
 
     if not changes:
         print("no changes — nothing published")

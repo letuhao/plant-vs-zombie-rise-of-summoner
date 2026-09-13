@@ -169,9 +169,15 @@ FusionRpg.Core.Battle.BattleTuningHub.Configure(
 // declined every time. Its own file rather than a battle.v{n}.json section because publish.py's
 // `set` path refuses to invent keys, and the file forbids hand-editing
 // (spec-battle-resources.md §2.2a).
+// v1 -> v2 (lawn-combat-wire T11, spec-lawn-combat-calibration.md, 2026-09-14): adds
+// `regenPerSecondShareMilli` — stamina now regenerates (the other four ids stay explicit 0s),
+// published via `tools/tuning/publish.py battle-resources --add-regen-block`, no hand-edit. v1
+// stays on disk for revert; every other reader of this file (tests, tools) still pins v1 directly
+// and gets the old byte-identical zero-regen behaviour, since BattleResourceTuningLoader.Parse
+// treats a missing regen block as an implicit all-zero share.
 FusionRpg.Core.Battle.BattleRuleset.ConfigureResources(
     FusionRpg.Core.Battle.BattleResourceTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "battle-resources.v1.json"))));
+        File.ReadAllText(Path.Combine(tuningDir, "battle-resources.v2.json"))));
 FusionRpg.Core.Battle.Board.SiegeTuningPolicy.Configure(
     FusionRpg.Core.Battle.Board.SiegeTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "siege.v1.json"))));
@@ -394,7 +400,10 @@ store.SeedUniqueEligible(uniqueTuning);
 // live game/injector path -- this runs once, here, before the server accepts any connection.
 if (Environment.GetEnvironmentVariable("FUSIONRPG_ACTION_CORPUS_IMPORT") != "0")
 {
-    var actionCorpusTemplatePath = Path.Combine(AppContext.BaseDirectory, "data", "tuning", "action-corpus-cost-templates.v1.json");
+    // v1 -> v2 (lawn-combat-wire T11, spec-lawn-combat-calibration.md, 2026-09-14): kinds.basic
+    // baseAmountAtRung1 derived from the pool/regen envelope (20 -> 25), published via
+    // tools/tuning/publish.py, no hand-edit. v1 stays on disk for revert.
+    var actionCorpusTemplatePath = Path.Combine(AppContext.BaseDirectory, "data", "tuning", "action-corpus-cost-templates.v2.json");
     if (File.Exists(actionCorpusTemplatePath))
     {
         var actionCostTemplate = FusionRpg.Core.Actions.Corpus.ActionCorpusCostTemplateLoader.Parse(File.ReadAllText(actionCorpusTemplatePath));

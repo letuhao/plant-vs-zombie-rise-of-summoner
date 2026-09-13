@@ -20,8 +20,15 @@ namespace FusionRpg.Core.Tests.Actions;
 /// regen per tick is the quantity-side version of re-arming off "now" — the lost fraction never
 /// comes back and the error compounds. Carrying the remainder makes it zero, forever.</para>
 ///
-/// <para>This module makes rates <b>expressible</b>. It authors none:
-/// <see cref="BattleRuleset.BaseResourceRegen"/> still returns 0, and that is asserted here.</para>
+/// <para>This module makes rates <b>expressible</b>. It authors none itself — every assertion below
+/// still reads 0 through the <b>ambient test fixture</b>
+/// (<see cref="ContractTuningTestBootstrap.DefaultBattleResources"/>), which deliberately stays at
+/// the pre-T11 all-zero baseline so this whole assembly stays byte-identical. `lawn-combat-wire` T11
+/// (spec-lawn-combat-calibration.md, 2026-09-14) is the module that DOES author a rate — `stamina`,
+/// in the real shipped <c>battle-resources.v2.json</c> — so <see cref="BattleRuleset.BaseResourceRegen"/>
+/// itself is no longer an unconditional 0; it now reads <see cref="BattleResourceTuning.RegenShareOf"/>,
+/// which happens to be 0 for every id in this assembly's own fixture. See
+/// <c>LawnCombatCalibrationGuardTests</c> for the test that exercises the real v2 numbers directly.</para>
 /// </summary>
 public class ResourceSubTickRegenTests
 {
@@ -230,13 +237,15 @@ public class ResourceSubTickRegenTests
     // ---------------------------------------------------------------- scope boundary
 
     /// <summary>
-    /// The scope boundary, asserted rather than promised: this module makes rates expressible and
-    /// authors none. Battle stays byte-identical while the regen rows remain absent — proven by the
-    /// shipped compose still reading 0 per-mille and a pool still sitting still across a whole
-    /// battle's worth of ticks. (`BattleGoldenTests` covers the trace-level identity.)
+    /// The scope boundary, asserted rather than promised: this module (resource-subtick) makes rates
+    /// expressible and authors none. Battle stays byte-identical in THIS ASSEMBLY's own ambient
+    /// fixture, which still carries an explicit all-zero regen share for every resource id (T11
+    /// authored a real one only in the shipped `battle-resources.v2.json`, not in this test bootstrap)
+    /// — proven by the shipped compose still reading 0 per-mille and a pool still sitting still across
+    /// a whole battle's worth of ticks. (`BattleGoldenTests` covers the trace-level identity.)
     /// </summary>
     [Fact]
-    public void BattleAuthorsNoRegenAndStaysByteIdenticalWhileTheRowsAreAbsent()
+    public void BattleStaysByteIdenticalUnderThisAssemblysAllZeroRegenFixture()
     {
         foreach (var theta in new[] { 1, 5, 20, 100, 1000 })
             foreach (var id in DerivedStatChannels.ResourceIds)
