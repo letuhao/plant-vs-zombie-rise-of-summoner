@@ -4,9 +4,14 @@ namespace FusionRpg.Core.Events;
 /// Fixed-capacity FIFO for hot-tier event records — event-pipeline-v2 plan Task 4.
 /// Single-threaded by contract (every producer and the drain run on the game's main thread);
 /// appending while a drain is popping is safe — new records land behind the drain cursor and
-/// are seen by the same or next drain pass. Overflow drops the incoming record with a counter:
-/// the hot tier carries only effect triggers (never lifecycle, membership, or XP events, which
-/// bypass the ring entirely), so a drop degrades procs under extreme backlog, never state.
+/// are seen by the same or next drain pass. <see cref="TryAppend"/> refuses (and counts) an
+/// incoming record past capacity — this ring itself does not grow or spill.
+/// <para><b>lawn-hit-entry (T9b, D9) note:</b> a refused record is NOT lost — <see
+/// cref="EventDrain"/>'s own <c>Append</c> (the only production caller) diverts a refusal
+/// straight to its unbounded carry tier instead of dropping it, because the hot tier can now carry
+/// effect-bearing hits (a live grant), not only telemetry. <see cref="Dropped"/> still counts every
+/// refusal as a backlog-pressure signal — a rising rate means the ring is undersized for the
+/// load — it just no longer means the record was lost.</para>
 /// </summary>
 public sealed class GameEventRing
 {
