@@ -99,6 +99,11 @@ public static class TreeAtomSource
     {
         NodeAtomOp.Flat => "flat",
         NodeAtomOp.Increased => "increased",
+        // P4.2: `More` is a real op for `stat.modify`. This mapping is only ever reached for a
+        // `stat.derived` atom (the loop filters on that kind first), where `More` is refused by name
+        // at load and at bind (§6 M3) — so the string is produced for completeness, and
+        // `AtomDerivedSubsystem.TryParseOp` correctly still rejects it if one ever arrives.
+        NodeAtomOp.More => "more",
         NodeAtomOp.Replace => "replace",
         NodeAtomOp.Flag => "flag",
         _ => "",

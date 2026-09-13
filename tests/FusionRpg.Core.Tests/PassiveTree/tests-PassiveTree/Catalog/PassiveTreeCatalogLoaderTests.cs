@@ -250,6 +250,52 @@ public class PassiveTreeCatalogLoaderTests
         Assert.Contains(report.Refusals, r => r.Contains("not-a-real-category"));
     }
 
+    /// <summary>P4.2 (§6 M3) — the load-time arm. Before P4.2 `NodeAtomOp` had no `More`, so a derived
+    /// `"op": "more"` failed `Enum.TryParse` and that WAS the M3 enforcement. P4.2 added the member, so
+    /// this test is what keeps the load-time refusal loud: without the explicit arm in `LoadAtom`, this
+    /// row would load cleanly and then apply nothing forever (`AtomDerivedSubsystem.TryParseOp` has no
+    /// "more" arm) — the exact silent no-op the load path exists to refuse.</summary>
+    [Fact]
+    public void Derived_atom_with_a_more_op_is_refused_by_name_at_load()
+    {
+        var json = MutateFirstNode(ValidTreeJson(), node =>
+        {
+            var atoms = node["atoms"].EnumerateArray().ToList();
+            var atom = atoms[0].EnumerateObject().ToDictionary(p => p.Name, p => p.Value.Clone());
+            atom["kindId"] = JsonSerializer.SerializeToElement("stat.derived");
+            atom["channelId"] = JsonSerializer.SerializeToElement("combat.power.fire");
+            atom["op"] = JsonSerializer.SerializeToElement("more");
+            node["atoms"] = JsonSerializer.SerializeToElement(new[] { atom });
+        });
+
+        var (loaded, report) = PassiveTreeCatalogLoader.Load(json, MakeTuning());
+
+        Assert.False(report.IsOk);
+        var msg = Assert.Single(report.Refusals, r => r.Contains("more"));
+        Assert.Contains("M3", msg);
+        Assert.Contains("derived", msg, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>The other half of P4.2: a `stat.modify` atom may carry `more`, and one that does is
+    /// loaded rather than refused — the load path must agree with `AtomRowValidator.StatOps` and with
+    /// the bind path, or the primary side stays broken while the derived side looks protected.</summary>
+    [Fact]
+    public void Primary_atom_with_a_more_op_loads_cleanly()
+    {
+        var json = MutateFirstNode(ValidTreeJson(), node =>
+        {
+            var atoms = node["atoms"].EnumerateArray().ToList();
+            var atom = atoms[0].EnumerateObject().ToDictionary(p => p.Name, p => p.Value.Clone());
+            atom["op"] = JsonSerializer.SerializeToElement("more");
+            node["atoms"] = JsonSerializer.SerializeToElement(new[] { atom });
+        });
+
+        var (loaded, report) = PassiveTreeCatalogLoader.Load(json, MakeTuning());
+
+        Assert.True(report.IsOk, string.Join("; ", report.Refusals));
+        Assert.Equal(NodeAtomOp.More, loaded!.Nodes[0].Atoms[0].Op);
+    }
+
     [Theory]
     [InlineData(0)]
     [InlineData(4)]

@@ -65,12 +65,17 @@ public static class ChannelLegality
     };
 
     /// <summary>§6 M3, named for the message this rule's own refusal carries: "there is no `More` on
-    /// the derived side" (`AtomKindRegistry.cs:537`, `AtomDerivedSubsystem.TryParseOp`). Derived ops
-    /// are `Flat | Increased | Replace | Flag` — <see cref="NodeAtomOp"/> itself has no `More` member,
-    /// so a node atom authoring `"op": "more"` fails `Enum.TryParse&lt;NodeAtomOp&gt;` at catalog load
-    /// before it ever reaches this class. The refusal is structural (a member that does not exist),
-    /// not a runtime check this class needs to duplicate — <c>ChannelLegalityTests</c> names the rule
-    /// against the shipped enum rather than re-implementing the parse.</summary>
+    /// the derived side" (`AtomKindRegistry.cs:583`, `AtomDerivedSubsystem.TryParseOp`). Derived ops
+    /// are `Flat | Increased | Replace | Flag`.
+    ///
+    /// <para>Enforced at TWO named sites, never left to the enum's shape (task P4.2): the catalog
+    /// loader's own M3 arm (<c>PassiveTreeCatalogLoader.LoadAtom</c>), and
+    /// <see cref="CheckNoMoreOnDerived"/>, reached from <see cref="CheckBind"/> on the bind path.
+    /// Before P4.2 the rule was implicit — <see cref="NodeAtomOp"/> had no `More` member, so
+    /// `Enum.TryParse` failed for a derived `"op": "more"` row. Adding the member (needed because
+    /// `stat.modify` DOES support `more`, and both kinds share this enum) made the implicit refusal
+    /// unavailable, so it is now explicit at both sites; a test in each home proves it stays loud.</para>
+    /// </summary>
     public const string NoMoreOnDerivedRuleName = "M3";
 
     /// <summary>Maps a <see cref="UnitClass"/> to its verdict (§4.1's rule table). Enumerable by
@@ -89,6 +94,30 @@ public static class ChannelLegality
             "ChannelLegality: a UnitClass with no verdict — spec-tree-binder.md §4.1 must name its " +
             "row before this switch can bind it; never fall through to a default"),
     };
+
+    /// <summary>
+    /// §6 <b>M3</b> — the derived-side `More` refusal, named and enforced explicitly (task P4.2).
+    ///
+    /// <para>Before P4.2 this rule was enforced by <see cref="NodeAtomOp"/> simply having no `More`
+    /// member, so `Enum.TryParse` failed at catalog load. That is correct for `stat.derived` but wrong
+    /// for `stat.modify`, which shares the same enum and legitimately supports `more`
+    /// (`AtomKindRegistry.cs:517`) — the shared enum refused 80 real primary nodes. Adding the member
+    /// without this check would silently convert a loud load-time refusal into the silent drop
+    /// <c>TreeAtomSource.BoundAtomsFor</c> performs when `AtomDerivedSubsystem.TryParseOp` fails: the
+    /// node would bind, report as a contribution, and apply nothing. M3 must stay a NAMED refusal at
+    /// both the load path and the bind path, so this is that check — called from
+    /// <see cref="CheckBind"/>, which both sites already go through.</para>
+    /// </summary>
+    static void CheckNoMoreOnDerived(NodeAtom atom)
+    {
+        if (atom.Op != NodeAtomOp.More) return;
+        if (!string.Equals(atom.KindId, "stat.derived", StringComparison.Ordinal)) return;
+
+        throw new BindRefusal(
+            $"channel '{atom.ChannelId}': op '{atom.Op}' is not one of Flat|Increased|Replace|Flag on " +
+            "stat.derived (§6 M3 -- there is no More on the derived side; AtomDerivedSubsystem.TryParseOp " +
+            "has no 'more' arm, so this atom would bind and apply nothing)");
+    }
 
     /// <summary>The scaleAxis a bindable (non-<see cref="Verdict.Refused"/>) verdict requires.
     /// <c>null</c> for <see cref="Verdict.Refused"/>, which accepts no axis at all.</summary>
@@ -112,6 +141,9 @@ public static class ChannelLegality
     /// </summary>
     public static void CheckBind(NodeAtom atom)
     {
+        CheckNoMoreOnDerived(atom); // §6 M3, first: a derived `More` is refused before any axis/class
+                                    // reasoning, so the message names the real rule, not a downstream one
+
         var verdict = VerdictFor(atom.UnitClass);
         if (verdict == Verdict.Refused)
             throw new BindRefusal(

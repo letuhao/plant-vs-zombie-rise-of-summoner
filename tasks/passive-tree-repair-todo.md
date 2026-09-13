@@ -256,17 +256,23 @@ the malformed-channel assertion was only weakly discriminating (word "channel") 
 unticked at gate time — both fixed in this commit.
 
 ### P4.2: Add `More` to the tree op vocabulary (R2)
-**Spec:** `spec-tree-catalog.md` §2.3; `AtomKindRegistry.cs:517`. **Ask first — owner leans yes.**
-**Description:** `stat.modify` legally supports `More` and it is priced (550‰); `NodeAtomOp` lacks it,
-so 6 generated families throw at `TreeBinderRun.cs:84`. Add `More`, thread it through
-`TreeBinderRun`, `TreeAtomSource` (both projections), `TreeBinderExplain`, `PassiveTreeCatalogLoader`,
-and prove the derived-side absence (`AtomDerivedSubsystem.TryParseOp`) is unchanged.
+**Spec:** `spec-tree-catalog.md` §2.3; `AtomKindRegistry.cs:517`. **Owner chose: add the member**
+(Bundle C). **Description:** `stat.modify` legally supports `More` and it is priced (550‰); `NodeAtomOp`
+lacked it, so every `more`-op node was refused at `TreeBinderRun.ParseOp`. Add `More`, and move the
+derived-side M3 rule from a *structural* property (the member's absence) to a **named, kind-aware
+refusal at both the load path and the bind path** — otherwise adding the member would silently convert
+a loud refusal into the silent drop `TreeAtomSource.BoundAtomsFor` performs when
+`AtomDerivedSubsystem.TryParseOp` fails.
 **Acceptance:**
-- [ ] A `more`-op atom parses to a real op end to end and is priced
-- [ ] The 54 `op 'more'` refusals drop to **0**
-- [ ] A source-shape test proves `TreeAtomSource` handles `More` in both read modes
-- [ ] `NodeAtom`'s doc comment states which kinds own which ops (it currently overclaims one shared set)
-**Depends on:** P4.1. **Scope:** M.
+- [x] A `more`-op atom parses to a real op end to end and is priced (`A_more_op_stat_modify_atom_parses_binds_and_is_priced` asserts `NodeAtomOp.More` and `kMicro > 0`)
+- [x] The `op 'more'` refusals drop to **0** (measured 80 → 0 on the live binder; live bind rate 15.8% → 24.2%)
+- [x] A source-shape test proves both read modes map every `NodeAtomOp` including `More` (`Both_read_modes_map_every_NodeAtomOp_including_More`)
+- [x] `NodeAtom`'s doc comment states which kinds own which ops
+- [x] M3 stays LOUD at both sites: `Derived_atom_with_a_more_op_is_refused_by_name_at_load` (loader) and the bind arm in `ChannelLegalityTests`; both proven to FAIL when the arms are mutated out
+**Depends on:** P4.1. **Scope:** M. **Done:** gate PASS 2026-09-13 (round 2; round 1 was FAIL for missing
+loader/pricing/source-shape tests and a stale doc comment, all fixed). Verified: focused 101/101,
+full Core.Tests green (`13369/13369` as read at the gate — a reading, and it moves as other streams add
+tests), `op 'more'` 80 → 0 with 0 unhandled exceptions, 6 guards green.
 
 ### P4.3: Make binder and resolver agree on kind, for both kinds (R4)
 **Spec:** `spec-tree-binder.md` §4.1; `spec-tree-resolve.md` §2.1, §12 test 15. **Owner answered:
