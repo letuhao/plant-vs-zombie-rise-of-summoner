@@ -1,7 +1,7 @@
 # Debug MCP — owner walkthrough
 
 Thin adapter MCP over the repo's real debug surface (spec:
-`docs/architecture/debug-mcp/spec-debug-mcp.md`). Nine tools, stdio default,
+`docs/architecture/debug-mcp/spec-debug-mcp.md`). Ten tools, stdio default,
 local HTTP behind a flag. No domain logic lives here.
 
 ## Install
@@ -25,7 +25,7 @@ python tools/debug-mcp/server.py --transport http --port 8899
 
 Localhost bind only; any other `--host` is refused before serving.
 
-## Inspector walkthrough (do all 9, in order)
+## Inspector walkthrough (do all 10, in order)
 
 ```powershell
 npx @modelcontextprotocol/inspector python tools/debug-mcp/server.py
@@ -59,6 +59,14 @@ npx @modelcontextprotocol/inspector python tools/debug-mcp/server.py
    when a provably clean board matters more than speed. Adapter over
    `scripts/restart-game.ps1` — refuses cleanly if that script is missing
    from the checkout this server runs against.
+10. `debug_game_state` — `{}` reads Board/InitBoard, real Unity Plant/Zombie
+    counts, and `liveState` directly — no event-log history, no polling.
+    Prefer this over `debug_preflight`'s `matchPhase` reading whenever you
+    need to know "is a match really running right now"; `debug_preflight`
+    now cross-checks against it automatically when the route is present and
+    flags a `gameStateCrossCheck`/corrected `fix` on disagreement. Same
+    checkout caveat as `debug_ui_nav` — requires `/game-state` to exist in
+    `DebugEndpoints.cs` in this server's checkout.
 
 ## Scope labels (every response carries one)
 

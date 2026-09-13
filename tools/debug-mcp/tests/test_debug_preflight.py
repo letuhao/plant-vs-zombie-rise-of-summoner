@@ -116,3 +116,61 @@ def test_board_state_only_calls_non_idle_observation_live():
     assert preflight._board_state({"payload": {"match": {"phase": "Idle"}}})[0] == "idle"
     assert preflight._board_state({"payload": {"match": {"phase": "Loading"}}})[0] == "loading"
     assert preflight._board_state({"payload": {"match": {"phase": "InMatch"}}})[0] == "active"
+
+
+def _live_state_request_with_snapshot(phase, game_state_body=None):
+    """Mirrors test_live_state_separates_injector_connection_from_idle_board's own stub shape
+    (the `snapshots` gate is what makes _event_max_id's watermark search converge before the
+    actual debug.snapshot poll begins) -- only adds a POST /api/debug/game-state branch."""
+    snapshots = []
+
+    def request(method, path, params=None):
+        if path == "/health":
+            return {"status": 200, "body": {"ok": True, "injectorConnected": True}}
+        if path == "/api/debug/session":
+            return {"status": 200, "body": {"ok": True}}
+        if method == "POST" and path == "/api/debug/game-state":
+            if game_state_body is None:
+                return {"status": 404, "body": {"raw": "not found"}}
+            return {"status": 200, "body": game_state_body}
+        if path == "/api/debug/snapshot":
+            snapshots.append(True)
+            return {"status": 200, "body": {"ok": True}}
+        if not snapshots and (params or {}).get("afterId", 999) < 9:
+            return {"status": 200, "body": {"items": [{"id": 9}]}}
+        if snapshots and (params or {}).get("afterId") == 9:
+            return {"status": 200, "body": {"items": [{"id": 10, "kind": "debug.snapshot",
+                "matchKey": None, "payload": {"match": {"phase": phase}}}]}}
+        return {"status": 200, "body": {"items": []}}
+    return request
+
+
+def test_game_state_cross_check_unavailable_falls_back_to_snapshot():
+    """Route missing (e.g. not yet merged into this checkout) -- unchanged legacy behavior."""
+    out = preflight.live_state(request=_live_state_request_with_snapshot("InMatch"),
+                               process_probe=lambda: True)
+    assert out["ready"] is True
+    assert "gameStateCrossCheck" not in out["board"]
+
+
+def test_game_state_cross_check_agrees_leaves_ready_unchanged():
+    body = {"ok": True, "live": {"ok": True, "matchPhase": "InMatch", "phaseMismatch": False,
+                                  "plantCount": 1, "zombieCount": 1, "liveState": "InMatch"}}
+    out = preflight.live_state(request=_live_state_request_with_snapshot("InMatch", body),
+                               process_probe=lambda: True)
+    assert out["ready"] is True
+    assert out["board"]["gameStateCrossCheck"]["liveState"] == "InMatch"
+
+
+def test_game_state_cross_check_overrides_stale_snapshot_phase():
+    """Real 2026-09-14 incident: matchPhase said InMatch during a genuine defeat with 0 real
+    entities. The real counts must win, and the fix message must say so."""
+    body = {"ok": True, "live": {"ok": True, "matchPhase": "InMatch", "phaseMismatch": True,
+                                  "plantCount": 0, "zombieCount": 0,
+                                  "liveState": "MatchEndedBoardStillAlive"}}
+    out = preflight.live_state(request=_live_state_request_with_snapshot("InMatch", body),
+                               process_probe=lambda: True)
+    assert out["ready"] is False
+    assert out["board"]["state"] == "active"  # snapshot's own reading, left as-is for reference
+    assert "real Unity object counts" in out["fix"]
+    assert "MatchEndedBoardStillAlive" in out["fix"]

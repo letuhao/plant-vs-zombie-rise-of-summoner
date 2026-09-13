@@ -19,6 +19,7 @@ from tools.debug_preflight import audit as debug_preflight_impl
 from tools.debug_lawn_setup import setup as debug_lawn_setup_impl
 from tools.debug_ui_nav import nav as debug_ui_nav_impl, ACTIONS as _UI_NAV_ACTIONS
 from tools.debug_restart_game import restart as debug_restart_game_impl
+from tools.debug_game_state import state as debug_game_state_impl
 
 mcp = FastMCP("debug-mcp")
 
@@ -92,6 +93,18 @@ def debug_ui_nav(action: str, reason: Optional[str] = None) -> dict:
 def debug_restart_game(timeout_sec: int = 120) -> dict:
     """Scope: local-machine. Adapter over scripts/restart-game.ps1 -- not reimplemented here."""
     return debug_restart_game_impl(timeout_sec)
+
+
+@mcp.tool(description=(
+    "Read the current live game state directly: Board/InitBoard, real Unity Plant/Zombie counts, "
+    "and liveState (InMatch/Paused/MatchEndedBoardStillAlive/etc). Use this, not debug_preflight's "
+    "matchPhase reading, when you need to know 'is a match really running right now' -- flags "
+    "phaseMismatch when the tracked FSM and the real entity counts disagree instead of trusting "
+    "either silently."
+))
+def debug_game_state() -> dict:
+    """Scope: game-injector-debug. Synchronous read of live Unity objects, no event-log history."""
+    return debug_game_state_impl()
 
 
 def resolve_transport(argv=None):

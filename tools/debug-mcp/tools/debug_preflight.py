@@ -261,6 +261,30 @@ def _board_state(snapshot):
     return "active", phase
 
 
+def _try_game_state(request):
+    """Best-effort direct read via POST /api/debug/game-state -- real Unity object counts, not the
+    tracked matchPhase FSM this file's own _board_state/live_state otherwise rely on. Added
+    2026-09-14: live_state's readiness verdict was built entirely on debug.snapshot's matchPhase,
+    the SAME signal proven live the same day to desync from the real game (reported "InMatch" with
+    living entities during a genuine defeat) -- /game-state exists specifically to answer that
+    question correctly, so preflight should prefer it when available instead of repeating the bug
+    it was built to fix. Swallows every exception and any non-2xx/malformed response: the route may
+    not exist yet in the checkout this server runs against (added 2026-09-14, can live only in an
+    unmerged worktree -- see lawn-run-state-machine.md), and a missing cross-check must never break
+    the existing snapshot-based reading, only improve on it when it is actually available."""
+    try:
+        result = request("POST", "/api/debug/game-state")
+    except Exception:  # noqa: BLE001 -- any failure here is "unavailable", never a preflight crash
+        return None
+    if not isinstance(result, dict) or result.get("status", 500) >= 400:
+        return None
+    body = result.get("body")
+    if not isinstance(body, dict) or not body.get("ok"):
+        return None
+    live = body.get("live")
+    return live if isinstance(live, dict) else None
+
+
 def live_state(request=None, process_probe=None, sleep=None, monotonic=None):
     """Compose health + session + fresh snapshot into an honest live verdict.
 
@@ -341,6 +365,29 @@ def live_state(request=None, process_probe=None, sleep=None, monotonic=None):
         result["fix"] = "Open a lawn or use debug_lawn_setup only when you own the board; injector liveness alone is not a live probe"
     elif state == "loading":
         result["fix"] = "Wait for the game to finish loading, then run debug_preflight again"
+
+    game_state = _try_game_state(request)
+    if game_state is not None:
+        real_active = bool(game_state.get("plantCount") or game_state.get("zombieCount")) \
+            and game_state.get("liveState") == "InMatch"
+        result["board"]["gameStateCrossCheck"] = {
+            "liveState": game_state.get("liveState"),
+            "phaseMismatch": game_state.get("phaseMismatch"),
+            "plantCount": game_state.get("plantCount"),
+            "zombieCount": game_state.get("zombieCount"),
+        }
+        if real_active != result["ready"]:
+            # The two signals disagree -- trust the real object counts (game_state), same
+            # correction DebugEndpoints.cs's own /game-state note already documents, and say so
+            # rather than silently overriding one with the other.
+            result["ready"] = real_active
+            result["board"]["state"] = "active" if real_active else result["board"]["state"]
+            result["fix"] = (
+                f"debug.snapshot's matchPhase said {state!r} but real Unity object counts "
+                f"(plants={game_state.get('plantCount')}, zombies={game_state.get('zombieCount')}) "
+                f"say liveState={game_state.get('liveState')!r} -- trusting the real counts "
+                "(see lawn-run-state-machine.md)."
+            )
     return result
 
 
