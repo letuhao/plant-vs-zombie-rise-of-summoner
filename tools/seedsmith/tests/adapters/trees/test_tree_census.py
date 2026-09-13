@@ -114,10 +114,6 @@ class ReadableVsPricedTests(unittest.TestCase):
         self.assertEqual(result.bound_atoms_by_kind(), {"stat.modify": 1})
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class ClassSplitTests(unittest.TestCase):
     def test_mechanism_and_magnitude_bind_rates_are_reported_separately(self) -> None:
         # 2 magnitude (both bound) + 2 mechanism (neither bound): the aggregate is 50%, but the
