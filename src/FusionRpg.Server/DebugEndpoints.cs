@@ -308,8 +308,16 @@ public static class DebugEndpoints
                 // SAME live board, which would otherwise look "stale" to the session rule below and
                 // 409 a perfectly good lawn. Found live 2026-08-30, immediately after the session rule
                 // itself was added — the fix for one false positive created a false negative.
+                //
+                // Found live 2026-09-14: on this profile board.start never fires (see the mid-entry
+                // probe comment above) AND the catalog.zombies fallback can come up empty too (a long
+                // enough server session simply scrolls it out of FindLatestKind's lookback window) --
+                // hard-refusing here left a REAL, injector-confirmed live board unusable. The injector
+                // already told us the board is live; treat this exactly like the mid-entry probe's own
+                // "board exists, levelType unresolvable" case instead of a second, inconsistent refusal
+                // for the same underlying situation.
                 if (boardStart is null && string.IsNullOrWhiteSpace(enteredLevelType))
-                    return Results.Conflict(new { ok = false, error = "enter-level reported board already live, but no level metadata was found" });
+                    alreadyMidEntry = true;
             }
 
             // alreadyMidEntry has no board.start / enter-level ack to read a levelType from (see the

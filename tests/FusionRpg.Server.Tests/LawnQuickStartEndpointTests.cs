@@ -275,6 +275,61 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Post_enterLevelSaysBoardAlreadyLive_butNoLevelMetadataFound_proceedsInstadOfRefusing()
+    {
+        // Real bug found live 2026-09-14: on a profile where board.start never fires, and a
+        // long-running server session had already scrolled catalog.zombies out of
+        // FindLatestKind's lookback window, quick-start used to hard-refuse a board the injector
+        // had JUST confirmed was live ("enter-level reported board already live, but no level
+        // metadata was found") -- treating a real, confirmed-live board as unusable. It must
+        // instead be tolerated the same way the mid-entry probe already tolerates an unresolvable
+        // levelType: proceed to wave-freeze/scenario rather than refuse.
+        _store.Heartbeat(RpgConstants.SourceInjector);
+        var inbox = _app.Services.GetRequiredService<InjectorCommandInbox>();
+
+        var request = _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { scenario = "lab-overlay", timeoutSec = 2 });
+
+        // Answer the proactive mid-entry probe with a genuine "not on the seed-picker" refusal.
+        List<CommandDto> seen = new();
+        for (var i = 0; i < 80 && !seen.Any(c => c.Name == "debug.skip-setup"); i++)
+        {
+            await Task.Delay(25);
+            seen.AddRange(inbox.Drain(int.MaxValue));
+        }
+        Assert.Contains(seen, c => c.Name == "debug.skip-setup");
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "debug.setup.skip",
+            Payload = JsonSerializer.SerializeToElement(new { ok = false, method = "quick", error = "InitBoard.Instance is null" })
+        });
+
+        // Answer debug.enter-level with the real, observed "board already live" rejection -- no
+        // catalog.zombies event is seeded, so the old code's levelType fallback comes up empty.
+        for (var i = 0; i < 80 && !seen.Any(c => c.Name == "debug.enter-level"); i++)
+        {
+            await Task.Delay(25);
+            seen.AddRange(inbox.Drain(int.MaxValue));
+        }
+        Assert.Contains(seen, c => c.Name == "debug.enter-level");
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "debug.level.enter",
+            Payload = JsonSerializer.SerializeToElement(new { ok = false, error = "board already live — return to main menu, or pass force=true (unsafe)" })
+        });
+
+        var resp = await request;
+        Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode); // still an honest run-steps.done timeout
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.DoesNotContain("no level metadata was found", body!["error"].ToString());
+
+        var sentAfter = seen.Concat(inbox.Drain(int.MaxValue)).Select(c => c.Name).ToList();
+        Assert.Contains("debug.wave-freeze", sentAfter);
+        Assert.Contains("debug.run-steps", sentAfter);
+    }
+
+    [Fact]
     public async Task Post_noBoardLive_attemptsEnterLevel_andTimesOutHonestlyWhenNothingAcks()
     {
         _store.Heartbeat(RpgConstants.SourceInjector);
