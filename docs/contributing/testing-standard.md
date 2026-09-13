@@ -90,6 +90,17 @@ no new violation can be introduced while that migration proceeds.
 
 ## 6. Test profiles
 
+### Verification boundaries select before profiles filter
+
+For local agent work, first run `scripts/verify-change.ps1 -Paths <changed files> -Session
+<active-session-id>`. The
+verification registry selects the focused/module/seam checks for those explicit paths; profiles then
+decide whether broad selected checks exclude `DiskSemantics` or `Heavy`. CI/nightly/release remains
+the owner of ordinary unfiltered full evidence. A production path without a registry mapping fails
+fast as a boundary defect; it is never a reason to run every project. A failing selected check is
+diagnosed at its own boundary, never retried as a broad/full suite. Use `-DeletedPaths <former path>`
+for a deletion; the planner can resolve its recorded owner without requiring the file to still exist.
+
 Not every test belongs on every run. A test whose **subject is the disk** (WAL mode, a legacy
 `rpg.sqlite` migration and its sidecar, archive slices, purge) or that takes **≥20s** earns a trait
 so it can be excluded from the routine loop and run where the disk is cheap and the wait is
@@ -111,13 +122,14 @@ exclusion removes the test from the default profile.
 
 | Profile | Where | Command |
 |---|---|---|
-| **default** | local dev, agents, `deploy-play.ps1` | `.\scripts\test-fast.ps1` → `dotnet test <proj> --filter "Category!=DiskSemantics&Category!=Heavy"` |
+| **default** | explicit local broad validation, `deploy-play.ps1` | `.\scripts\test-fast.ps1 -Project <project>` → `dotnet test <proj> --filter "Category!=DiskSemantics&Category!=Heavy"` |
 | **full** | CI pull-request | `dotnet test <proj> -c Release` (no filter) |
 | **gate** | `release.yml` tags | `dotnet test <proj>` (no filter), required |
 | **nightly** | `.github/workflows/nightly.yml` | `dotnet test <proj>` (no filter) |
 
-**The default lives in exactly one place.** `scripts/test-fast.ps1` owns the filter, so a developer
-and an agent cannot drift. `deploy-play.ps1` calls it. CI keeps calling `dotnet test` directly with
+**The default lives in exactly one place.** `scripts/test-fast.ps1` owns the filter, so deliberate
+broad local validation cannot drift. Agents use `verify-change.ps1` first; `deploy-play.ps1` still
+calls the explicit default profile. CI keeps calling `dotnet test` directly with
 **no** filter, so CI is `full` by construction and can never accidentally inherit the dev default.
 A negative filter includes uncategorized tests, so only the *excluded* tests need a trait.
 

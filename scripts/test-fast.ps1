@@ -3,7 +3,7 @@
 # runs no multi-minute case. This is the ONE place that owns the default filter, so the default
 # cannot drift between a developer and an agent. Standard: docs/contributing/testing-standard.md.
 # Usage (repo root):
-#   .\scripts\test-fast.ps1                                             # the 4 store projects
+#   .\scripts\test-fast.ps1 -AllDefault                                 # intentional 4-project broad validation
 #   .\scripts\test-fast.ps1 -Project tests/FusionRpg.Data.Tests         # a directory
 #   .\scripts\test-fast.ps1 -Project tests/FusionRpg.Data.Tests/FusionRpg.Data.Tests.csproj
 #   .\scripts\test-fast.ps1 -Project tests/FusionRpg.Data.Tests, tests/FusionRpg.Server.Tests
@@ -11,6 +11,7 @@
 #   dotnet test <proj> -c Release --blame-hang --blame-hang-timeout 15min
 param(
     [string[]]$Project = @(),
+    [switch]$AllDefault,
     [string]$Configuration = "Release",
     [string]$Root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 )
@@ -55,7 +56,11 @@ function Resolve-TestProject {
     return (Resolve-Path -LiteralPath $full).Path
 }
 
-$requested = if ($Project.Count -gt 0) { $Project } else { $DefaultProjects }
+if ($Project.Count -eq 0 -and -not $AllDefault) {
+    throw "A path-scoped test requires -Project. Use scripts/verify-change.ps1 -Paths <changed files>, or pass -AllDefault for intentional broad local validation."
+}
+if ($Project.Count -gt 0 -and $AllDefault) { throw "Choose -Project or -AllDefault, not both." }
+$requested = if ($AllDefault) { $DefaultProjects } else { $Project }
 $projects = @($requested | ForEach-Object { Resolve-TestProject -Path $_ })
 
 Write-Host "==> Test profile: default (fast)"

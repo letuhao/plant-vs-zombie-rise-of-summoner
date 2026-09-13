@@ -10,6 +10,7 @@ namespace FusionRpg.Data.Tests.Items;
 /// spec-sockets.md §5.2 / D2 §6 — <c>item_socket</c> is the SSOT, and the recipe tables are a
 /// multiset (D41). Against a real SQLite store, not a mock.
 /// </summary>
+[Trait("VerificationId", "data.item-socket")]
 public class ItemSocketStoreTests : IDisposable
 {
     readonly DataTestStore _testStore;

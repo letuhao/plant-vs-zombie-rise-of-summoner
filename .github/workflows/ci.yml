@@ -243,6 +243,14 @@ jobs:
           else { .\scripts\guard-generated-seed.ps1 }
           if ($LASTEXITCODE -ne 0) { throw "guard-generated-seed.ps1 failed — a generated seed file was hand-edited without changing its generator" }
 
+      - name: Verification-boundary integrity
+        shell: pwsh
+        run: |
+          # This is intentionally its own step. Guard scripts use `exit`, so putting it after
+          # another guard in a shared pwsh block could make it unreachable; this script's exit code
+          # directly gates the step.
+          .\scripts\guard-verification-boundaries.ps1
+
       - name: Content validation gate (E47)
         shell: pwsh
         run: |

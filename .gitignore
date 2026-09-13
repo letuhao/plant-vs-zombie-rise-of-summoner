@@ -167,3 +167,5 @@ test-results/
 kilo.json
 plant-vs-zombie-rise-of-summoner.code-workspace
 .opencode/
+tools/sprite-debug/assets/*.png
+tools/sprite-debug/assets/*/*.png
