@@ -1,0 +1,41 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.bargain-creature.dolldiamond-001",
+  "flavor": "In a hollowed-out alcove, a figure made of cracked ceramic sits amidst a pile of discarded limbs. It holds a needle of pure light and offers to stitch a new destiny into your skin, its movements fluid 像是 a puppet dancing on invisible strings.",
+  "kind": "bargain",
+  "name": "The Porcelain Weaver",
+  "outcomes": [
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party encounters a sentient construct offering permanent stat modification in exchange for a significant portion of their current vitality.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.dolldiamond"
+}

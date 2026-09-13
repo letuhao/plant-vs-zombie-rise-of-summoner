@@ -25,7 +25,7 @@
       "id": "set.lanternnut-001",
       "nameKey": "set.luminous-husk",
       "name": "Luminous Husk",
-      "themeKey": "demon.lanternnut",
+      "themeKey": "creature.lanternnut",
       "members": [
         {
           "role": "armament-primary",

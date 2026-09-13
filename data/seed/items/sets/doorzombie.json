@@ -25,7 +25,7 @@
       "id": "set.doorzombie-001",
       "nameKey": "set.iron-gate-hostage",
       "name": "Iron Gate Hostage",
-      "themeKey": "demon.doorzombie",
+      "themeKey": "creature.doorzombie",
       "members": [
         {
           "role": "armament-primary",

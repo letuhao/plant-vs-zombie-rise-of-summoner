@@ -25,7 +25,7 @@
       "id": "set.doomcactus-001",
       "nameKey": "set.cactus-volley",
       "name": "Cactus Volley",
-      "themeKey": "demon.doomcactus",
+      "themeKey": "creature.doomcactus",
       "members": [
         {
           "role": "armament-primary",

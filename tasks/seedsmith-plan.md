@@ -11,7 +11,7 @@ Audit: [seedsmith/review/](../docs/architecture/seedsmith/review/) — 66 findin
 > stays attached to the plan that cites it (S9's mutation tests, S10's CI cutover).
 
 **Status (corrected 2026-09-06): Parts 1-5 are ALL built.** This line said "Part 1 complete, Parts 2-3
-planned, not built" from 2026-08-23 until today — stale since 2026-08-31/09-01, when Part 4 (demons,
+planned, not built" from 2026-08-23 until today — stale since 2026-08-31/09-01, when Part 4 (creatures,
 D1-D4) and Part 5 (generation runtime, G0-G4) both reached their final checkpoints with real evidence
 (committed corpora, passing suites) recorded in their own sections below. Corrected here rather than
 left to mislead the next reader — see `seedsmith-map.md`'s matching correction, found the same way.
@@ -427,11 +427,11 @@ which stays the referential gate.
 
 ---
 
-# Part 4 — Feature 2: demons (D1–D4)
+# Part 4 — Feature 2: creatures (D1–D4)
 
 Map: [seedsmith-map.md](../docs/architecture/seedsmith-map.md) §3b ·
-Ideal: [seedsmith-demons-ideal.md](../docs/architecture/seedsmith-demons-ideal.md) ·
-Spec audit: [review/audit-demons-specs.md](../docs/architecture/seedsmith/review/audit-demons-specs.md)
+Ideal: [seedsmith-creatures-ideal.md](../docs/architecture/seedsmith-creatures-ideal.md) ·
+Spec audit: [review/audit-creatures-specs.md](../docs/architecture/seedsmith/review/audit-creatures-specs.md)
 
 Seven module specs, all written 2026-08-31, **APPROVED by the owner 2026-08-31 — authorized to
 build.** (Parts 1–3's verified-complete state — 299/299 Python, 71/71 `ItemSeedValidator`,
@@ -445,7 +445,7 @@ construction, because the second feature must not rewrite it."* Parts 1–3 asse
 
 ### §D-F1 ⛔ `KindSpec` cannot carry motif expression rules without a core change
 
-`spec-adapter-demons` §2.7 says each `KindSpec` carries how a motif is expressed for that kind, and
+`spec-adapter-creatures` §2.7 says each `KindSpec` carries how a motif is expressed for that kind, and
 that this must be *"data on the kind, not a rule in a prompt, so it is inlined into every brief."*
 
 **Verified against code, not assumed:** `KindSpec`
@@ -455,7 +455,7 @@ that this must be *"data on the kind, not a rule in a prompt, so it is inlined i
 `.reference_fields`.
 
 So §2.7 requires editing `adapters/base.py`, which contradicts the same spec's §1 (*"not one line of
-core code changed"*) and §4 (*"no file outside `adapters/demons/` should need to change"*). Those two
+core code changed"*) and §4 (*"no file outside `adapters/creatures/` should need to change"*). Those two
 claims and §2.7 cannot all hold.
 
 **The spec told us what to do here:** *"If the core needs an edit, that is the finding — record it
@@ -464,7 +464,7 @@ rather than patch around it."* So:
 | Option | Verdict |
 |---|---|
 | **A. Add `motif_expression: str \| None = None` to `KindSpec`** | **Planned default.** Additive with a default, so `items` and `_stub` are untouched and every existing test stays green. The "zero core change" claim becomes **false and is recorded as such** rather than quietly preserved |
-| B. Keep the rules in a demons-local dict | Preserves the slogan, but `briefkit` then cannot reach them without *another* core change to know the accessor exists — the same edit, moved and made less honest |
+| B. Keep the rules in a creatures-local dict | Preserves the slogan, but `briefkit` then cannot reach them without *another* core change to know the accessor exists — the same edit, moved and made less honest |
 | C. Encode them as a `registries()` vocabulary | No core change, but abuses `dict[str, frozenset[str]]` to carry one phrase per kind; the shape lies about what it holds |
 
 **Option A, and D1.3's acceptance criterion is amended to "exactly one core file changes, additively,
@@ -473,8 +473,8 @@ than a preserved slogan.
 
 ### §D-F2 ⛔ D2's `aspect` kind is blocked on another program
 
-`aspect-scope` is approved (2026-08-31) but **not built** — `DemonSpeciesDef` still carries
-`ElementPrimary`/`ElementSecondary`/`TraitPool` on the species. Owner decision: **the demon program
+`aspect-scope` is approved (2026-08-31) but **not built** — `CreatureSpeciesDef` still carries
+`ElementPrimary`/`ElementSecondary`/`TraitPool` on the species. Owner decision: **the creature program
 builds it first.** D1 *declares* the kind (free); nothing generates into it until the tier exists.
 **D2 and D4 are otherwise unblocked** — only aspect generation waits.
 
@@ -484,9 +484,9 @@ The species cap was removed 2026-08-31 (24 → 84 species; see
 [`ssot-power-scale.md`](../docs/architecture/power/ssot-power-scale.md) §11.10a). Consequences this
 plan must respect rather than rediscover:
 
-- **Partitions are a snapshot.** Rarity is recomputed by rank over a growing pool, so a demon changes
+- **Partitions are a snapshot.** Rarity is recomputed by rank over a growing pool, so a creature changes
   tier without moving rank. Any golden or fixture keyed on rarity moves when capture coverage improves.
-- **`n` is a measurement, not a design point.** D3's metrics report `demonCount` beside every figure.
+- **`n` is a measurement, not a design point.** D3's metrics report `creatureCount` beside every figure.
 - **Fixtures must be synthetic.** Part 1's standing rule already says this; here it is load-bearing
   rather than stylistic, because the live roster is no longer a fixed size.
 
@@ -499,20 +499,20 @@ plan must respect rather than rediscover:
 ## Dependency graph
 
 ```
-demon-corpus-emit (C#, no seedsmith dep)
+creature-corpus-emit (C#, no seedsmith dep)
         │
         ▼
-  adapter-demons ──────────────────────────────► [D1 shippable alone: zero model calls]
+  adapter-creatures ──────────────────────────────► [D1 shippable alone: zero model calls]
         │
         ▼
   family-extract ──► family-consolidate ──► motif-derive
                                                   │
                               ┌───────────────────┴───────────────┐
                               ▼                                   ▼
-                        demon-metrics ────── gates ─────────► demon-themes
+                        creature-metrics ────── gates ─────────► creature-themes
 ```
 
-`demon-metrics` **gates** `demon-themes` deliberately: generating themed content from a taxonomy not
+`creature-metrics` **gates** `creature-themes` deliberately: generating themed content from a taxonomy not
 yet checked for tautology (A2) puts the wrong structure into the *item* corpus, which is a far more
 expensive place to find it.
 
@@ -521,27 +521,27 @@ expensive place to find it.
 Vertical, same as Parts 1–3: every task ends with a passing test and, where it produces an artifact,
 that artifact committed. No task is "add the schema" with the consumer in a later task.
 
-**D1 is a shippable slice on its own** — it makes demons queryable by every metric seedsmith already
+**D1 is a shippable slice on its own** — it makes creatures queryable by every metric seedsmith already
 has with **zero model calls**, the same property that made W1 worth shipping alone.
 
 ## Phases and checkpoints
 
 ### Phase D1 — foundation, zero model calls
 
-- **D1.1 — `DemonCorpusBuilder`, pure** · **M** · 2 files
+- **D1.1 — `CreatureCorpusBuilder`, pure** · **M** · 2 files
   Pure `(species, almanacRows, recipeRows) -> entries`. Coverage flags carried through unchanged;
   `lineage` emitted; **`families` never emitted** (§2.4); catalog fields (element, rarity) **absent**.
-  *Deviation from spec §4, deliberate:* tests go in `tests/FusionRpg.Core.Tests/Demons/` rather than a
-  new `FusionRpg.DemonCorpusEmit.Tests` project. The builder is pure Core code, that is where Core's
+  *Deviation from spec §4, deliberate:* tests go in `tests/FusionRpg.Core.Tests/Creatures/` rather than a
+  new `FusionRpg.CreatureCorpusEmit.Tests` project. The builder is pure Core code, that is where Core's
   pure code is tested, and a new project needs a `ci.yml` step — which, per the known CI defect, would
   be masked anyway since only the last `dotnet test` exit code is checked.
 
-- **D1.2 — `tools/DemonCorpusEmit` + committed corpus** · **M** · 2 files + emitted data
+- **D1.2 — `tools/CreatureCorpusEmit` + committed corpus** · **M** · 2 files + emitted data
   Program.cs, DAL reads, deterministic file writing. **Must call `DerivedStatPolicy.Configure` before
-  touching `RpgStore`** — `DemonCatalogGen` did not and could not run at all until 2026-08-31; this
+  touching `RpgStore`** — `CreatureCatalogGen` did not and could not run at all until 2026-08-31; this
   tool must not repeat it.
 
-- **D1.3 — `DemonsAdapter`, five methods** · **M** · 4 files (+1 core, per §D-F1)
+- **D1.3 — `CreaturesAdapter`, five methods** · **M** · 4 files (+1 core, per §D-F1)
   `kinds/dimensions/legal_combinations/registries/channels`. `channels()` empty; no `item`/`action`
   kind; `family` declared with **empty values**; `environment` declared but excluded from coverage.
 
@@ -550,7 +550,7 @@ has with **zero model calls**, the same property that made W1 worth shipping alo
 
 #### ✅ CP-D1 — REACHED 2026-08-31 (full evidence: seedsmith-todo.md's own CP-D1)
 - [x] `python -m pytest -q` full seedsmith suite green, **including `test_stub_adapter.py`** — the row
-      that proves the core did not learn a demon concept
+      that proves the core did not learn a creature concept
 - [x] `dotnet test tests\FusionRpg.Core.Tests` green; `.\scripts\guard-dal.ps1` green
 - [x] Emitter run twice ⇒ **byte-identical** output
 - [x] §D-F1's core change is exactly one additive field, and the finding is written into the spec
@@ -560,7 +560,7 @@ has with **zero model calls**, the same property that made W1 worth shipping alo
 - **D2.1 — `family-extract`** · **M** · 3 files
   Deterministic batching (sorted `speciesId`, fixed windows, **batch size 8** as a structural
   constant); brief assembly; schema carrying `label` + `nativeLabel` + `basis`; `blocked` legal.
-  Keep the **falsifier** test: single-demon batching must produce three distinct labels, proving
+  Keep the **falsifier** test: single-creature batching must produce three distinct labels, proving
   §2.2's batching is real rather than assumed.
 
 - **D2.2 — `family-consolidate`** · **M** · 3 files
@@ -574,57 +574,57 @@ has with **zero model calls**, the same property that made W1 worth shipping alo
 #### ✅ CP-D2 — REACHED 2026-08-31 (full evidence: seedsmith-todo.md's own CP-D2)
 - [x] Every D2 artifact byte-identical across re-runs
 - [x] **Zero real model calls in the suite** — `MockModelServer` only, offline, no credentials
-- [x] `blocked` demons carry no family and no motifs, and this is not an error anywhere
-- [x] Append-only proven: adding a demon leaves existing family and motif ids untouched
+- [x] `blocked` creatures carry no family and no motifs, and this is not an error anywhere
+- [x] Append-only proven: adding a creature leaves existing family and motif ids untouched
 
 ### Phase D3 — measurement (gates D4)
 
-- **D3.1 — `Coverage/DemonUncovered`** · **S** · 2 files
-  Per-demon, with a **per-kind breakdown** in the evidence. A5's exact case asserted: one demon
+- **D3.1 — `Coverage/CreatureUncovered`** · **S** · 2 files
+  Per-creature, with a **per-kind breakdown** in the evidence. A5's exact case asserted: one creature
   uncovered while all its families are covered ⇒ one finding.
 
 - **D3.2 — `Distribution/MotifSharing`** · **S** · 2 files
-  `demonsPerMotif`, `demonCount`, `excludedTautological`, `singleUseMotifs`. `loop = OPEN`, **no
+  `creaturesPerMotif`, `creatureCount`, `excludedTautological`, `singleUseMotifs`. `loop = OPEN`, **no
   verdict field**. The decisive test: a **wholly tautological corpus reports "cannot be measured"**,
   not perfect sharing — without it this metric would be worse than absent, it would be reassuring.
 
 #### ✅ CP-D3 — the gate — REACHED 2026-08-31 (full evidence: seedsmith-todo.md's own CP-D3)
 - [x] Both metrics ship `gates = False`
-- [x] Both live in `metrics/`, and work for a non-demon adapter supplying the same strata
+- [x] Both live in `metrics/`, and work for a non-creature adapter supplying the same strata
 - [x] The tautology test passes — **D4 does not start until it does**
 
 ### Phase D4 — consumption
 
 - **D4.1 — theme registry + items vocabulary** · **M** · 3 files
-  `demons/_registry/themes.v1.json` emitted, append-only, `demon.*`-prefixed. Items' `themeKey`
+  `creatures/_registry/themes.v1.json` emitted, append-only, `creature.*`-prefixed. Items' `themeKey`
   becomes registry-backed. Carries motifs, anti-motifs, expression rules, `basis`, and the `rarity`
   it was published against.
 
 - **D4.2 — coexistence and churn proof** · **S** · tests only
   All **38 existing themed entries** (30 sets + 8 uniques, 5 legacy `theme.*` keys — count corrected
-  2026-08-31, the original 31/39 was off by one) still validate; a retired demon's theme stays
-  resolvable; direction asserted structurally — nothing in `adapters/demons/` reads the items corpus.
+  2026-08-31, the original 31/39 was off by one) still validate; a retired creature's theme stays
+  resolvable; direction asserted structurally — nothing in `adapters/creatures/` reads the items corpus.
 
 #### ✅ CP-D4 — closes the feature — REACHED 2026-08-31 (full evidence: seedsmith-todo.md's own CP-D4)
 - [x] Full seedsmith suite green; full `dotnet test` green; four guard scripts green
-- [x] Exactly **one** file outside `adapters/demons/` changed in D4, and it adds a vocabulary
-- [x] An item can be authored themed to a demon and validates
+- [x] Exactly **one** file outside `adapters/creatures/` changed in D4, and it adds a vocabulary
+- [x] An item can be authored themed to a creature and validates
 
 ## Task summary
 
 | Task | Module | Size | Deps | Model calls |
 |---|---|---|---|---|
-| D1.1 | `demon-corpus-emit` (pure) | M | — | none |
-| D1.2 | `demon-corpus-emit` (tool) | M | D1.1 | none |
-| D1.3 | `adapter-demons` | M | D1.2 | none |
+| D1.1 | `creature-corpus-emit` (pure) | M | — | none |
+| D1.2 | `creature-corpus-emit` (tool) | M | D1.1 | none |
+| D1.3 | `adapter-creatures` | M | D1.2 | none |
 | D1.4 | integration | S | D1.3 | none |
 | D2.1 | `family-extract` | M | D1.4 | faked |
 | D2.2 | `family-consolidate` | M | D2.1 | faked (residue pass only) |
 | D2.3 | `motif-derive` | M | D2.2 | none |
-| D3.1 | `demon-metrics` coverage | S | D2.3 | none |
-| D3.2 | `demon-metrics` sharing | S | D2.3 | none |
-| D4.1 | `demon-themes` | M | CP-D3 | none |
-| D4.2 | `demon-themes` proof | S | D4.1 | none |
+| D3.1 | `creature-metrics` coverage | S | D2.3 | none |
+| D3.2 | `creature-metrics` sharing | S | D2.3 | none |
+| D4.1 | `creature-themes` | M | CP-D3 | none |
+| D4.2 | `creature-themes` proof | S | D4.1 | none |
 
 Eleven tasks, four checkpoints, no task above M.
 
@@ -632,23 +632,23 @@ Eleven tasks, four checkpoints, no task above M.
 
 | Risk | Impact | Mitigation | Outcome (2026-08-31) |
 |---|---|---|---|
-| §D-F1's core change is treated as a failure and worked around with option B or C | Medium | The claim is already recorded as false in this plan; D1.3's criterion is amended so the honest path is the specified one | ✅ Built as planned — one additive `KindSpec.motif_expression` field; `spec-adapter-demons.md` §1/§4 corrected |
-| Extraction yields one family per demon (no sharing), making the whole taxonomy decorative | **High** | D2.1's falsifier test catches it at build time; D3.2's `singleUseMotifs` catches it on real data | ✅ Falsifier passed (batch size 1 → 3 distinct labels, proving batching is real) |
+| §D-F1's core change is treated as a failure and worked around with option B or C | Medium | The claim is already recorded as false in this plan; D1.3's criterion is amended so the honest path is the specified one | ✅ Built as planned — one additive `KindSpec.motif_expression` field; `spec-adapter-creatures.md` §1/§4 corrected |
+| Extraction yields one family per creature (no sharing), making the whole taxonomy decorative | **High** | D2.1's falsifier test catches it at build time; D3.2's `singleUseMotifs` catches it on real data | ✅ Falsifier passed (batch size 1 → 3 distinct labels, proving batching is real) |
 | A2's tautology — motifs and families both derived from the name, every metric green | **High** | `basis` propagates from D2.1 through D2.3; D3.2 excludes those pairs and reports how many it excluded | ✅ The decisive test passed: a wholly-tautological corpus reports "cannot be measured", never perfect sharing |
-| Roster growth silently moves partitions and rarity-keyed fixtures | Medium | §D-F3; synthetic fixtures only; `demonCount` reported beside every figure | ✅ Confirmed live: real `check` run found 3 genuine empty partitions (roster-growth artifact, not a bug) |
+| Roster growth silently moves partitions and rarity-keyed fixtures | Medium | §D-F3; synthetic fixtures only; `creatureCount` reported beside every figure | ✅ Confirmed live: real `check` run found 3 genuine empty partitions (roster-growth artifact, not a bug) |
 | A rarity/theme artifact outlives its evidence once `power-estimate` lands | Medium | Themes record the `rarity` they were published against; provisional tiers are marked | ✅ `PublishedTheme.rarity` proven never re-derived on republish (`test_republishing_never_recomputes...`) |
-| D4 breaks the 38 existing themed entries | **High** | The `demon.*` / `theme.*` prefix split makes collision impossible by construction; D4.2 asserts all 38 | ✅ Verified against the **live** items corpus, not a fixture — all 38 (count corrected from 39) still validate |
+| D4 breaks the 38 existing themed entries | **High** | The `creature.*` / `theme.*` prefix split makes collision impossible by construction; D4.2 asserts all 38 | ✅ Verified against the **live** items corpus, not a fixture — all 38 (count corrected from 39) still validate |
 
 ## Out of scope for Part 4
 
 - **Real model calls.** Same rule as Parts 2–3: every criterion is provable against `MockModelServer`
   or a synthetic fixture. The first real run is a separate, owner-approved act after CP-D4.
-- **`aspect` generation** — blocked on `aspect-scope` being built by the demon program (§D-F2).
+- **`aspect` generation** — blocked on `aspect-scope` being built by the creature program (§D-F2).
 - **`power-estimate` (D5)** — decided 2026-08-31 (LLM tier from almanac text, `basis`-tagged,
   **provisional**), but **not specced**. It also needs a `provisional` marker on the species side,
-  which is demon-program code. Needs its own spec before it can be planned.
+  which is creature-program code. Needs its own spec before it can be planned.
 - **`lore-enrich`** — measured unnecessary as a prerequisite (§D-F4); it remains the answer for
-  `basis = "name"` demons, later.
+  `basis = "name"` creatures, later.
 - **Promoting either D3 metric to `gates = True`** — a separate, later act, per the standing rule.
 
 ---
@@ -667,7 +667,7 @@ question assumed.
 ## Why this feature exists
 
 Part 4 built a **classifier**: 84 species sorted into families, **zero content generated**.
-`Coverage/DemonUncovered` reports 84 gaps because `aspect`, `commander-effect` and `environment` are
+`Coverage/CreatureUncovered` reports 84 gaps because `aspect`, `commander-effect` and `environment` are
 declared kinds nothing writes into. Part 5 is the generator.
 
 ## Decisions already locked (do not re-litigate during the build)
@@ -680,7 +680,7 @@ declared kinds nothing writes into. Part 5 is the generator.
 | Model | **Local Gemma-26B** | 8/8 first-attempt pass, 0/8 anti-motif violations |
 | Motif cleanup instrument | **POS filtering, NOT a frequency floor** | Frequency fails both ways: keeps `为什么` (df 3), risks `樱桃` (df 9) |
 | CoVe | **Specified, NOT built** | Subjective form 1/3 (useless); source-grounded 2/3; root cause is bad motifs, which G1 fixes free |
-| Commander effects per demon | **Exactly one** | 3 generations produced 2 identical names, mean Jaccard 0.52 = synonyms |
+| Commander effects per creature | **Exactly one** | 3 generations produced 2 identical names, mean Jaccard 0.52 = synonyms |
 | `environment` generation | **Cancelled** | Deterministic mapping — `spec-pipeline.md:109` |
 
 ## Dependency graph
@@ -739,15 +739,15 @@ every motif in the corpus. Neither needs LangGraph.
   Keep `n*`/`v*`/`a*`/`i`/`l`; drop `r`/`c`/`d`/`p`/`u`/`t`. `_CJK_STOPWORDS` shrinks to an override.
 - **G1.3 — wire in, regenerate, verify** · **M** · 3 files + regenerated data
   ⚠️ Regeneration **drops** motif ids like `一类` from an append-only vocabulary. Safe **only while no
-  content is bound to them** — true today (84/84 demons have zero content), and it is why G1 precedes
+  content is bound to them** — true today (84/84 creatures have zero content), and it is why G1 precedes
   G4. A reviewed correction, not a routine re-run.
 
 #### ✅ CP-G1
-- [x] `一类`, `伤害`, `优先` gone from the three named regression demons — `bucketnutzombie` `['铁头功','僵尸']`, `cherrynut` `['僵尸','樱桃','喜爱']`, `cactus` `['仙人掌','发射']`; none carries a banned token
+- [x] `一类`, `伤害`, `优先` gone from the three named regression creatures — `bucketnutzombie` `['铁头功','僵尸']`, `cherrynut` `['僵尸','樱桃','喜爱']`, `cactus` `['仙人掌','发射']`; none carries a banned token
 - [x] `为什么`/`是因为`/`不过` dropped by POS; `铁头功`/`坚果` kept — measured on the real narrative: all 5 connectives dropped, all 4 content words kept
 - [x] `可在三种攻击模式之间切换` survives (CJK numeral is not an ASCII digit) — `classify_line` → `prose`; the sibling `伤害：20/1秒` → `mechanical`
 - [x] Determinism and the ≤4-char token guarantee hold — 5 identical runs; 0 of 135 corpus motifs exceed 4 chars
-- [x] Rise in `basis="name"`/`blocked` reported as a **result**, not a failure — 53 `text` / 31 `name`, unchanged by the `l`-tag fix; 0 non-blocked demons left motif-less
+- [x] Rise in `basis="name"`/`blocked` reported as a **result**, not a failure — 53 `text` / 31 `name`, unchanged by the `l`-tag fix; 0 non-blocked creatures left motif-less
 
 ### Phase G2 — workflow runtime (parallel with G1)
 
@@ -793,9 +793,9 @@ every motif in the corpus. Neither needs LangGraph.
   tier-2 pass rate.
 
 #### ✅ CP-G4 — closes the feature
-- [x] Every non-blocked demon has a commander effect; `Coverage/DemonUncovered` falls by that count — `seedsmith check ... --metric Coverage/DemonUncovered` → **no findings** (84 → 0)
-- [x] `blocked` demons generate nothing, provably — `test_a_blocked_demon_is_not_a_subject`
-- [x] An unprefixed id fails corpus load (the `wallnut` collision), asserted — `test_an_unprefixed_id_collides_with_the_demon_and_fails_corpus_load`
+- [x] Every non-blocked creature has a commander effect; `Coverage/CreatureUncovered` falls by that count — `seedsmith check ... --metric Coverage/CreatureUncovered` → **no findings** (84 → 0)
+- [x] `blocked` creatures generate nothing, provably — `test_a_blocked_creature_is_not_a_subject`
+- [x] An unprefixed id fails corpus load (the `wallnut` collision), asserted — `test_an_unprefixed_id_collides_with_the_creature_and_fails_corpus_load`
 - [x] Re-run produces zero new writes — ⛔ **was unmet, now built.** Generator had no skip logic and rewrote all 84 stochastically. Added `_provenance.motifs` + `stale_ids()` + skip-existing; a plain re-run leaves `all.json` **byte-identical** (md5 `00b74afd…` before and after)
 - [x] Quality reported from a read sample, **separately** from the pass rate — the 9 regenerated effects read individually; `normalzombie` 「随处可见的消耗」 → 「无名之辈」
 - [x] Full suite green; four guard scripts green — 480 passed (both venvs); all four `guard-*.ps1` PASS
@@ -806,10 +806,10 @@ Found auditing whether every seedsmith generator — not only `adapter-items`/`t
 deterministic pre-generation coverage/distribution check. `commander-effect` did not: `quality-gates`
 validates per-item only (`motif_coverage`, `field_echo`); nothing watches convergence across the
 84-and-growing corpus, despite the module's own §9 feasibility probe already reproducing the failure
-(3 generations for one demon, Jaccard mean 0.52).
+(3 generations for one creature, Jaccard mean 0.52).
 
 **Verified real before fixing:** ran a direct Jaccard check against the live, already-committed
-`data/seed/demons/commander-effect/all.json` (84 entries) — it already has **two near-duplicate
+`data/seed/creatures/commander-effect/all.json` (84 entries) — it already has **two near-duplicate
 doctrine pairs**, the clearest at Jaccard 0.52 (`doublecherry` / `doubleshooter`, both describing the
 same split-shot mechanic in near-identical sentences), unnoticed since the 2026-09-01 run.
 
@@ -817,14 +817,14 @@ same split-shot mechanic in near-identical sentences), unnoticed since the 2026-
 - `KindSpec.dedup_fields: frozenset[str] = frozenset()` (`adapters/base.py`) — additive, same shape
   as `motif_expression`; every kind before this is untouched.
 - `commander-effect`'s `KindSpec` sets `dedup_fields=frozenset({"doctrine"})`
-  (`adapters/demons/kinds.py`).
+  (`adapters/creatures/kinds.py`).
 - `SemanticDedup` (`seedsmith/metrics/dedup.py`) gained an exact-duplicate check (6.1c) and a
   near-duplicate check (6.2b) over every kind's declared prose field(s), reusing the existing
   shingle machinery.
 - **6.2b compares directly (all-pairs exact Jaccard), not via MinHash+LSH** — verified live that
   8-band/4-row LSH has real recall loss at prose-scale similarity (~0.5), missing the corpus's own
   clearest pair entirely on a first run. A prose-dedup kind is bounded in the low thousands
-  (`commander-effect`'s ceiling ~900 demons), where direct comparison is cheap and exact. Full
+  (`commander-effect`'s ceiling ~900 creatures), where direct comparison is cheap and exact. Full
   account: `spec-analytics.md` §6.2b.
 
 **Acceptance — ✅ both met, BUILT 2026-09-06**
@@ -866,7 +866,7 @@ Sixteen tasks, five checkpoints, no task above M.
 
 ## Out of scope for Part 5
 
-- **`aspect` generation** — blocked on `aspect-scope` being built by the demon program.
+- **`aspect` generation** — blocked on `aspect-scope` being built by the creature program.
 - **`environment` generation** — cancelled; deterministic mapping.
 - **`lore-enrich`** — deferred, and blocked on `basis="enriched"` existing first.
 - **Enabling CoVe or self-consistency** — both specified, both off, both gated on measurement.

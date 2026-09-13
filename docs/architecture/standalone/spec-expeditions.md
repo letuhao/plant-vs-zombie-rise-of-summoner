@@ -2,18 +2,18 @@
 
 Status: **shipped 2026-08-21** — full loop live in SIM/FE (`#/expeditions`); resolver goldens locked per tier.
 
-Module id `expeditions` in the [standalone RPG map](../standalone-rpg-map.md). Depends on `match-source-core` (battles) and the demon V1 modules (specimens to send, Souls to earn). Anchors below were locked by the owner 2026-08-21; the resolver/timer shape follows the plan refinement in [demon-standalone-plan.md](../../../tasks/demon-standalone-plan.md).
+Module id `expeditions` in the [standalone RPG map](../standalone-rpg-map.md). Depends on `match-source-core` (battles) and the creature V1 modules (specimens to send, Souls to earn). Anchors below were locked by the owner 2026-08-21; the resolver/timer shape follows the plan refinement in [creature-standalone-plan.md](../../../tasks/creature-standalone-plan.md).
 
 ## Objective
 
-Send squads of demons on timed expeditions from the web FE, with no game and no injector: dispatch → wait (or recall) → collect a battle-by-battle reveal with events and rewards. This is the first fully playable web loop — the announced ship gate (Checkpoint D).
+Send squads of creatures on timed expeditions from the web FE, with no game and no injector: dispatch → wait (or recall) → collect a battle-by-battle reveal with events and rewards. This is the first fully playable web loop — the announced ship gate (Checkpoint D).
 
-Success looks like: a player dispatches 3 demons on a 4-hour expedition, comes back later, collects, and watches two battles resolve plus a found-souls event — every reward landing through the existing economy, every battle a real pipeline match, all of it provable in SIM with a force-due hook.
+Success looks like: a player dispatches 3 creatures on a 4-hour expedition, comes back later, collects, and watches two battles resolve plus a found-souls event — every reward landing through the existing economy, every battle a real pipeline match, all of it provable in SIM with a force-due hook.
 
 ## Locked anchors (owner, 2026-08-21)
 
 - **Tiers:** 30 m / 4 h / 8 h / 20 h. Squad slots by tier: 2 / 3 / 4 / 5. No stamina or energy system.
-- **Content = chain + events:** 1 / 2 / 3 / 4 battles by tier, plus a boss wave at 20 h; battle ticks interleave with seed-rolled event ticks (`found-souls`, `wild-demon-met`, `injury`).
+- **Content = chain + events:** 1 / 2 / 3 / 4 battles by tier, plus a boss wave at 20 h; battle ticks interleave with seed-rolled event ticks (`found-souls`, `wild-creature-met`, `injury`).
 - **Rewards = all channels:** Souls + player XP via the pipeline (battles are real web matches), specimen XP per battle won, wild-join mints (origin `expedition`), fusion material stubs into a per-player inventory.
 - **Seed-sealed at dispatch;** recall pro-rates at tick boundaries. Specimens on an expedition are soft-locked against PvZ deploy, and vice versa.
 - Soul-ledger tail-trim (the P4 deferral) lands in this wave — expedition volume makes it real.
@@ -31,7 +31,7 @@ An expedition is a fixed tick timeline generated deterministically from `(tier, 
 | `hunt-8h` | 8 h | 8 × 1 h | 3 | 4 |
 | `warpath-20h` | 20 h | 10 × 2 h | 4 + boss | 5 |
 
-Battle ticks are evenly spaced across the timeline (boss on the final tick at 20 h). Every non-battle tick rolls on the `loot` stream: nothing / `found-souls` (tier-scaled Souls) / `wild-demon-met` (a wild-join candidate) / `injury` (a squad member fights the remaining battles with a power debuff — resolver-internal channel mod, no persistent state in V1).
+Battle ticks are evenly spaced across the timeline (boss on the final tick at 20 h). Every non-battle tick rolls on the `loot` stream: nothing / `found-souls` (tier-scaled Souls) / `wild-creature-met` (a wild-join candidate) / `injury` (a squad member fights the remaining battles with a power debuff — resolver-internal channel mod, no persistent state in V1).
 
 ### ExpeditionResolver (Core, pure)
 
@@ -39,13 +39,13 @@ Battle ticks are evenly spaced across the timeline (boss on the final tick at 20
 
 Because the seed is sealed at dispatch, **lazy resolution at collect is provably identical to eager resolution at dispatch** — the server stores no outcome, only `(tier, squad_json, seed)`.
 
-Wild-join pool: non-capture-exclusive, non-legendary species; rarity weights 84/15/1 (‰-scaled), shiny 1/64 (same as summons). Materials are stubs for `demon-fusion`: element essences + rarity shards from a small validated `DemonMaterialCatalog` (unknown ids reject).
+Wild-join pool: non-capture-exclusive, non-legendary species; rarity weights 84/15/1 (‰-scaled), shiny 1/64 (same as summons). Materials are stubs for `creature-fusion`: element essences + rarity shards from a small validated `CreatureMaterialCatalog` (unknown ids reject).
 
 ### Data
 
 - `rpg_expeditions`: id, player_id, correlation_id (UNIQUE per player), state (`Dispatched`/`Collected`/`Recalled`), tier, squad_json, seed, dispatched_utc, due_utc, collected_utc.
 - `rpg_expedition_members`: expedition_id, instance_id — the **soft-lock membership rows** (Cold-plane; no specimen FSM change). Active while the expedition is `Dispatched`. Consulted in BOTH directions: expedition dispatch refuses PvZ-deployed specimens; UniqueActor deploy refuses specimens on an active expedition.
-- `rpg_demon_materials`: player_id, material_id, qty (per-player inventory; qty adds atomically at collect).
+- `rpg_creature_materials`: player_id, material_id, qty (per-player inventory; qty adds atomically at collect).
 - Timers are just `due_utc` — no scheduler, no background jobs. Collect before due refuses; recall any time.
 
 ### Server
@@ -60,7 +60,7 @@ Wild-join pool: non-capture-exclusive, non-legendary species; rarity weights 84/
 
 ### FE
 
-`#/expeditions`: dispatch from the Active roster (slot gating, locked specimens greyed), tier pick, live countdown timers, collect reveal battle-by-battle with event cards, materials shelf. Push updates ride the existing hub (`DemonsUpdated`, `SoulsUpdated`, runs feed).
+`#/expeditions`: dispatch from the Active roster (slot gating, locked specimens greyed), tier pick, live countdown timers, collect reveal battle-by-battle with event cards, materials shelf. Push updates ride the existing hub (`CreaturesUpdated`, `SoulsUpdated`, runs feed).
 
 ## Commands
 
@@ -74,7 +74,7 @@ dotnet test tests\FusionRpg.E2E.Tests       # SIM full loop with force-due
 ## Structure
 
 ```
-src/FusionRpg.Core/Expeditions/   → ExpeditionResolver.cs, ExpeditionTierCatalog.cs, DemonMaterialCatalog.cs
+src/FusionRpg.Core/Expeditions/   → ExpeditionResolver.cs, ExpeditionTierCatalog.cs, CreatureMaterialCatalog.cs
 src/FusionRpg.Data/Sqlite/        → RpgStore.Expeditions.cs (+ schema block), soul tail-trim in RpgStore.Souls.cs
 src/FusionRpg.Server/             → ExpeditionEndpoints.cs
 web/fusion-rpg-web/src/features/expeditions/

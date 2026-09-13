@@ -6,7 +6,7 @@
 
 ## One fight language
 
-Whether the hit lands on the **lawn** or in a **web battle**, the roster you built is the roster that performs. Elements, crits, shields, and statuses resolve through the same combat language — so raising a demon at home means something when you field it.
+Whether the hit lands on the **lawn** or in a **web battle**, the roster you built is the roster that performs. Elements, crits, shields, and statuses resolve through the same combat language — so raising a creature at home means something when you field it.
 
 The lawn game still runs its own pea-and-bite world. Rise of Summoner adds an RPG combat layer on top: typed power, defence, matchups, and timed conditions.
 

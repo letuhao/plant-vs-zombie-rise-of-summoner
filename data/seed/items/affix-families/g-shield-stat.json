@@ -431,10 +431,18 @@
       "id": "atom.shld-toughness",
       "nameKey": "affix.shield-toughness-flag",
       "name": "Shield Toughness Flag",
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
       "kindId": "stat.derived",
       "params": {
         "channel": "combat.shield.toughness.{variant}",
         "op": "Flag"
+      },
+      "variants": {
+        "generate": "elements+omni"
       },
       "roles": [
         "core-guard",
@@ -451,10 +459,18 @@
       "id": "atom.shld-toughness-mod",
       "nameKey": "affix.shield-toughness-replacement",
       "name": "Shield Toughness Replacement",
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
       "kindId": "stat.derived",
       "params": {
         "channel": "combat.shield.toughness.{variant}",
         "op": "Replace"
+      },
+      "variants": {
+        "generate": "elements+omni"
       },
       "roles": [
         "core-guard",

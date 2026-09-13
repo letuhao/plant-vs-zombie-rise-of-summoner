@@ -25,7 +25,7 @@
       "id": "set.cherrysubmarine-001",
       "nameKey": "set.the-relic-engine",
       "name": "The Relic Engine",
-      "themeKey": "demon.cherrysubmarine",
+      "themeKey": "creature.cherrysubmarine",
       "members": [
         {
           "role": "armament-primary",

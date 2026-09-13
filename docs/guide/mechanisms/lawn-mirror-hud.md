@@ -75,7 +75,7 @@ Observe first, then issue orders when you need them:
 2. Open Lawn and confirm a moving 12×5 mirror.
 3. Point at one unit HUD and name identity, shield, or a status chip.
 
-> Parent loop: [lawn match](lawn-match.md). Field demons onto that board: [bound demon deploy](lawn-deploy.md).
+> Parent loop: [lawn match](lawn-match.md). Field creatures onto that board: [bound creature deploy](lawn-deploy.md).
 
 ---
 
@@ -100,7 +100,7 @@ Shield chips appear when overlay shields are present — see [shields, crit, and
 
 ## Related
 
-- Next: [Bound demon deploy](lawn-deploy.md)
+- Next: [Bound creature deploy](lawn-deploy.md)
 - [Lawn match](lawn-match.md)
 - [Statuses](statuses.md)
 - [Shields, crit, and resistance](shields-crit-resist.md)

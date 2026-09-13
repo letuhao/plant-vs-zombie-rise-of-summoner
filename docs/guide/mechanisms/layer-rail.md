@@ -53,7 +53,7 @@ Memorize the verb, not a different shortcut per screen:
 
 ## How it feels
 
-Open Creatures mid-hall, check a demon, close — you are still in the Sanctum.
+Open Creatures mid-hall, check a creature, close — you are still in the Sanctum.
 
 The same C works if you later open the rail from another stage. You do not learn a second UI language.
 

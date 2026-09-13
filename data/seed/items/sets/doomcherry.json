@@ -25,7 +25,7 @@
       "id": "set.doomcherry-001",
       "nameKey": "set.cherry-destruction",
       "name": "Cherry Destruction",
-      "themeKey": "demon.doomcherry",
+      "themeKey": "creature.doomcherry",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.bucketdoom-001",
       "nameKey": "set.cinder-barrel-spore",
       "name": "Cinder Barrel Spore",
-      "themeKey": "demon.bucketdoom",
+      "themeKey": "creature.bucketdoom",
       "members": [
         {
           "role": "armament-primary",

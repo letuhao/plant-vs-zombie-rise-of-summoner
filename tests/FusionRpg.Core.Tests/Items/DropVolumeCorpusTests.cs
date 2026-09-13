@@ -342,21 +342,25 @@ public class DropVolumeCorpusTests
             }
         }
 
-        Assert.Equal(43, tables); // 40 -> 43, 2026-09-07: drop-tables-gen trial batch added 3 tables
+        // CONTRACT, not counts: the drop-table corpus is generator-authored and grows every generation
+        // (43 tables and climbing), so both the table total and the per-kind tallies are stale by
+        // construction. What must hold structurally is that the sweep read a real corpus, that every
+        // kind resolved into the closed enum (asserted per row above), that the two kinds the data-shape
+        // table once omitted are really used, and that availability is DECIDED PER KIND rather than
+        // derived from the corpus size.
+        Assert.True(tables > 0, "the drop-table corpus read returned nothing");
+        Assert.True(counts[DropEntryKind.Unique] > 0, "the corpus must use the two kinds the shape table omitted");
+        Assert.True(counts[DropEntryKind.Charm] > 0, "the corpus must use the two kinds the shape table omitted");
 
-        // The two kinds spec-drop-volume.md's own data-shape table omits are REAL and shipped —
-        // wave R2 added them to entry-shapes.md §9 on 2026-08-23 and the corpus uses them heavily.
-        Assert.Equal(144, counts[DropEntryKind.Unique]);
-        Assert.Equal(61, counts[DropEntryKind.Consumable]); // 60 -> 61, 2026-09-07 trial batch
-        Assert.Equal(70, counts[DropEntryKind.Charm]);
-        Assert.Equal(42, counts[DropEntryKind.Insert]); // 41 -> 42, 2026-09-07 trial batch
-
-        // 315 -> 171 (D4.27, party-dungeon spec-unique-pipeline.md §5, 2026-09-06): `unique` (144) now
-        // resolves through the real `MintUnique` arm -- Insert (41) + Charm (70) + Consumable (60)
-        // stay unavailable (reason moved to the seed-to-concrete generator, 2026-09-07, X7 landed).
-        // 171 -> 173 (2026-09-07): the trial batch's new consumable (+1) and insert (+1) drop refs.
+        // Availability is a property of the KIND, not of how many rows the corpus holds: every row of
+        // an unavailable kind counts toward `unavailable`, and no row of an available kind does.
         var unavailable = counts.Where(kv => !DropTableDraw.IsAvailable(kv.Key)).Sum(kv => kv.Value);
-        Assert.Equal(173, unavailable);
+        var available = counts.Where(kv => DropTableDraw.IsAvailable(kv.Key)).Sum(kv => kv.Value);
+        Assert.Equal(tables > 0 ? counts.Values.Sum() : 0, unavailable + available);
+        Assert.Contains(DropEntryKind.Insert, counts.Keys.Where(k => !DropTableDraw.IsAvailable(k)));
+        Assert.Contains(DropEntryKind.Charm, counts.Keys.Where(k => !DropTableDraw.IsAvailable(k)));
+        Assert.Contains(DropEntryKind.Consumable, counts.Keys.Where(k => !DropTableDraw.IsAvailable(k)));
+        Assert.DoesNotContain(DropEntryKind.Unique, counts.Keys.Where(k => !DropTableDraw.IsAvailable(k)));
     }
 
     [Fact]

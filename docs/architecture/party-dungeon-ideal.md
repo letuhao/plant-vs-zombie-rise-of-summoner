@@ -20,7 +20,7 @@ is the run). Sibling of `base-defense-ideal.md` and `world-graph-ideal.md` §13,
 sketches this feature in one paragraph — this document gives that paragraph its full shape.
 
 **Owner's ask (2026-09-05), verbatim in substance:** a party mode where the commander brings five
-unique demons into a dungeon/domain split into many rooms with a lot of event generation, hunting
+unique creatures into a dungeon/domain split into many rooms with a lot of event generation, hunting
 relics, treasure and a boss. Darkest Dungeon, Persona and Shin Megami Tensei as the reference feel.
 The most hardcore mode in the game — high risk, high reward. Party slots tunable, with three raid
 modes: 1 party, 2 parties, 4 parties.
@@ -66,22 +66,22 @@ Restated here, not linked, because a downstream session reads this document and 
 ## 1. What this is
 
 You pick a **domain** — a lair, a rift, a vault under a sector — and a **raid**: one party of five
-bound demons, or two parties, or four. You provision the raid from your treasury, then descend.
+bound creatures, or two parties, or four. You provision the raid from your treasury, then descend.
 
 The domain is a **graph of rooms** rolled from a seed the moment you commit. You see the rooms one
 lane ahead, the way a legion sees the sector next door. Every room is one thing: an ordinary fight,
-an elite fight, a cache, a curio you can meddle with, a wild demon you can bargain with, a shrine, a
-rest, a merchant, a trap. The deepest room is the **boss**. Between rooms your demons carry their
+an elite fight, a cache, a curio you can meddle with, a wild creature you can bargain with, a shrine, a
+rest, a merchant, a trap. The deepest room is the **boss**. Between rooms your creatures carry their
 wounds, their hunger and their nerve with them — nothing resets until you rest, and rest is a room
 you have to find.
 
 Everything you take is **unbanked** until you walk out. An extraction is available from any room,
 always, but leaving early forfeits the boss and every room past it. A wiped party drops its haul in
-the dark; the domain keeps it. A downed demon is out for the rest of the delve and comes home
+the dark; the domain keeps it. A downed creature is out for the rest of the delve and comes home
 wounded — recovering takes days, and its loyalty remembers the loss.
 
 With two or four parties you split the graph: each party takes a route, clears its own rooms, and
-the routes converge on the boss. The boss fight is the rendezvous — every standing demon from every
+the routes converge on the boss. The boss fight is the rendezvous — every standing creature from every
 party, against a boss and its retinue sized to the raid. A raid can carry more out, and it has more
 to lose.
 
@@ -93,9 +93,9 @@ reads off that one number. There is no separate "hardcore multiplier". Going dee
 
 ## 2. What already exists — the three buckets
 
-Surveyed 2026-09-05 across `src/FusionRpg.Core/{Battle,Expeditions,World,Items,Demons,Effects,
+Surveyed 2026-09-05 across `src/FusionRpg.Core/{Battle,Expeditions,World,Items,Creatures,Effects,
 Power}`, `src/FusionRpg.Data`, `src/FusionRpg.Server`, `data/tuning`, `data/seed`, and the design
-docs named in `DESIGN-GATE.md` §1 for battle, demons, world map, economy, resources, status, items,
+docs named in `DESIGN-GATE.md` §1 for battle, creatures, world map, economy, resources, status, items,
 power, tunables, standalone and GUI.
 
 ### 2.1 The headline
@@ -109,7 +109,7 @@ inside a battle**, and the **stage** the player would play it on.
 Three findings that shape the design more than the rest:
 
 1. **Expeditions are the Delve with the rooms removed.** `ExpeditionResolver` already rolls a seeded
-   chain of ticks — battle, boss battle, quiet, found-souls, wild-demon-met, injury — from
+   chain of ticks — battle, boss battle, quiet, found-souls, wild-creature-met, injury — from
    per-tick RNG streams, with squad slots per tier in data (`expeditions.v1.json:10-13`,
    `squadSlots` 2/3/4/5), a sealed seed that never leaves the server, pro-rated recall, and
    exactly-once reward application. It is a *line* of ticks, not a graph of rooms, and it is
@@ -137,7 +137,7 @@ Three findings that shape the design more than the rest:
 | **Contract gate on every fielding path** | `RpgStore.Expeditions.cs:64-67` — `specimen.unbound`, `specimen.insubordinate`. Loyalty ±15/−10 per win/loss applied at `ExpeditionEndpoints.cs:183` (`ApplyContractResults`); all numbers in `contracts.v1.json` |
 | **Injury as a resolver-internal debuff** | `ExpeditionResolver.cs:145-148` picks a victim; `:246-259` applies `−atk/InjuryPowerDivisor` on `combat.power.omni` for the remaining battles. Spec `spec-expeditions.md:99` names *persistent injuries* as ask-first |
 | **Wild-join and material stubs** | `ExpeditionResolver.cs:121-129` (250‰ join on a wild-met tick, minted with `Origin = "expedition"` at `ExpeditionEndpoints.cs:158`); shards `:97-98`; essence `:134-136`; persisted `RpgStore.Expeditions.cs:231-235` |
-| **Battle side size is unbounded** | `BattleModels.cs:202-206` — two `IReadOnlyList`s; only non-empty and key validation (`BattleEngine.cs:177-197`). A five-demon party is legal input today. Shipped waves already field 4/6/7/6 enemies (`WaveCatalog.cs:115-118`) |
+| **Battle side size is unbounded** | `BattleModels.cs:202-206` — two `IReadOnlyList`s; only non-empty and key validation (`BattleEngine.cs:177-197`). A five-creature party is legal input today. Shipped waves already field 4/6/7/6 enemies (`WaveCatalog.cs:115-118`) |
 | **Θ-driven enemy magnitudes, PS-3 explicit** | `WaveCatalog.cs:144-146` → `BattleRuleset.BaseHp/BaseAtk/BaseDefense(theta)` → `PowerLadder`/`ChannelLadder` off `power-scale.v2.json` (`BattleModels.cs:172-175`); rates read `Θ` directly (`:186-196`) |
 | **Θ_content already composes a sector's danger** | `Power/ContentContext.cs:16` — `ContentContext(DangerBand, WorldTier, ZombossLevel, RealmsAdvanced)`; `PowerIndexComposer.cs:72` applies `Wm` to `DangerBand`. `SectorTypeCatalog.cs:55-102`: homeworld 0 … warcamp 4 … **boss-lair 6** (`Flags = Boss`) |
 | **`hybrid-atb` live in all shipped waves** | `BattleModeProfile.cs:199-206` (W=4, `FixedIncrement`, `EarlyBoundWithFallback`, ActionPoints(2), `OrdersBySpeed`); `WaveCatalog.cs:106-118`. Initiative + AP economy + per-actor turn FSM live in `Resolve` (`BattleEngine.cs:323-452`) |
@@ -182,7 +182,7 @@ Each row names the specific line that is switched off.
 | **The world's battle resolver is never supplied** | `TurnEngine.cs:83` `resolver ?? PlaceholderBattleResolver.Instance`; both call sites pass none | Not the Delve's job, but the same `BattleRequest.Guard` shape is what a room encounter is |
 | **`WebMatchService.cs:339` `const int maxSquad = 6`** | A balance number as a `const`, refused with `squad.toolarge` | The Delve must not copy this; `expeditions.v1.json`'s `squadSlots` is the pattern |
 | **Actor resource pools and exhaustion are built, and battle never constructs them** *(Part II correction — this row was a real gap in the first draft)* | `Actions/Cost/ActorResourcePools.cs:13-25` holds all six pools and *"Seeds every pool from a caller-supplied stored value"*; `ExhaustionPolicy.cs:35` registers `exhaustion.{resourceId}` statuses; `CostLedger` has **zero production constructors** and `Battle/` references pools only inside the uninstantiated timeline lane (`ReactionCounter.cs:39`) | The carry-across-rooms seat exists in the action layer; `BattleEngine.ActorState` (`BattleEngine.cs:23-82`) is the one place that lacks a pools reference |
-| **`Θ_content` is never composed in production** *(Part II)* | `ContentContext` (`Power/ContentContext.cs`) has zero `new ContentContext(` sites in `src/`; `WaveCatalog.cs:115-118` bakes `theta` literals; `WaveCatalog.cs:141` sets `Level = theta` from content only, so the species `thetaOffset` (`SpeciesExpander.cs:66-67`, `speciesBaseTheta: 0` in `demon-shape.v1.json:25`) never reaches a wave enemy — a calamity and a nuisance fight at the same `Θ` today | The Delve is the first production producer of a composed `Θ_content`, and the encounter generator is where `Θ_room + thetaOffset(species)` is finally summed |
+| **`Θ_content` is never composed in production** *(Part II)* | `ContentContext` (`Power/ContentContext.cs`) has zero `new ContentContext(` sites in `src/`; `WaveCatalog.cs:115-118` bakes `theta` literals; `WaveCatalog.cs:141` sets `Level = theta` from content only, so the species `thetaOffset` (`SpeciesExpander.cs:66-67`, `speciesBaseTheta: 0` in `creature-shape.v1.json:25`) never reaches a wave enemy — a calamity and a nuisance fight at the same `Θ` today | The Delve is the first production producer of a composed `Θ_content`, and the encounter generator is where `Θ_room + thetaOffset(species)` is finally summed |
 | **A gate can be shut, never opened** *(Part II)* | `MarchResolver.cs:58-60` refuses `lane.gated` when `GateKeyId != null`; no writer anywhere nulls it or checks a carried key | The Delve's key mechanic is the first writer for the verb the lane nouns already declare |
 
 ### 2.4 Real gap — no mechanism anywhere
@@ -195,7 +195,7 @@ Each row names the specific line that is switched off.
 | **Party identity inside a battle** | `Side` is a bare string `"squad"`/`"wave"` hard-coded in eight engine decisions (`BattleEngine.cs:255, :281, :289, :299, :311, :485, :492-494, :498`); `BattleOutcome` is `Victory/Defeat/Stalemate` only. Two allied parties can already share `"squad"`; telling them apart (economy, auras, report) needs a label |
 | ~~**Actor resource pools in `BattleEngine`**~~ *(Part II: reclassified as a wiring gap — see §2.3. `ActorResourcePools` and `ExhaustionPolicy` are built; only the battle actor lacks a reference to them.)* | `ActorState` carries hp and combat state only (`BattleEngine.cs:23-82`). `resource-hub-ssot.md` §11 says pools *"persist across a run and refill at rest"* — the Delve is the first run that needs that to be true |
 | **A durable wound / recovery timer** | `Recovering → Roster` is one write (`unique-actor-runtime.md:121`); `Retired` is release only. No injury/fatigue state on a specimen. The expedition injury is resolver-internal by design |
-| **A boss or elite flag** | `WaveDef` and `BattleActorSetup` carry no kind discriminator (`WaveCatalog.cs:31`, `BattleModels.cs:7-90`); `demon-threat.v1.json`'s `thetaOffset` reaches `Θ` but nothing marks *this actor is the boss* |
+| **A boss or elite flag** | `WaveDef` and `BattleActorSetup` carry no kind discriminator (`WaveCatalog.cs:31`, `BattleModels.cs:7-90`); `creature-threat.v1.json`'s `thetaOffset` reaches `Θ` but nothing marks *this actor is the boss* |
 | **Wave content is code, not data** | Four hand-written rows at `WaveCatalog.cs:115-118`; no wave/encounter file among the 58 in `data/tuning/`. The Delve authors many encounters and inherits this gap — fix it, do not extend it |
 | **A `delve` stage** | `railState.ts:31` declares `"battle"` with nothing behind it; `information-architecture.md` has four stages and no dungeon. The lawn's Phaser island is PvZ-shaped throughout |
 | **A player-ordered retreat action** | No action, no engine path other than `coward` and wipe/`MaxRounds` |
@@ -326,7 +326,7 @@ boss. It is content in the same sense a sector type is: a catalog row that the g
 
 - **Now:** domains are picked from the Sanctum, exactly the way an expedition tier is picked today —
   the Delve layer lists the domains you have found, their band, their depth and their boss. A domain
-  is *found* by play (an expedition's `WildDemonMet`/`FoundSouls` band gains a `FoundDomain` sibling;
+  is *found* by play (an expedition's `WildCreatureMet`/`FoundSouls` band gains a `FoundDomain` sibling;
   a codex milestone; a first clear of a shallower domain reveals a deeper one).
 - **Later, when `world-stage` lands:** a domain is a `Lair`, `Tear`, `Vault` or `Anomaly` slot on a
   sector you can reach — the catalog rows already exist with no reader (`SlotTypeCatalog.cs:70-76`).
@@ -343,7 +343,7 @@ art (`world-graph-ideal.md:597`).
 
 - **Dimensions per domain tier** — rows (depth), width (columns), path walks — are tunables. The
   shipped expedition ladder is the size reference: a scout-sized delve is ~4 rows, a warpath-sized
-  one ~10–12. Slay the Spire's 7×15 is a 50-fight run and is too long for a five-demon party with
+  one ~10–12. Slay the Spire's 7×15 is a 50-fight run and is too long for a five-creature party with
   persistent wounds; Darkest Dungeon's Short/Medium/Long is the right *ladder*.
 - **Node kinds** are a catalog (like `SectorTypeCatalog`): `fight`, `elite`, `cache`, `curio`,
   `wild`, `shrine`, `rest`, `merchant`, `trap`, `unknown`, `boss`. Each kind is one row with weight,
@@ -427,7 +427,7 @@ already have a normative "pays for" meaning:
 - **`spirit` is the nerve meter.** Horror curios, elite auras and a boss's presence drain it; a
   shrine or a rest restores some. Exhausted spirit is *"identity failure"* in the hub's own words —
   the closest thing this repo has to affliction — and it hooks straight into the thing the
-  summoner already tracks: a demon that comes home with spirit at zero takes the contract's `−10`
+  summoner already tracks: a creature that comes home with spirit at zero takes the contract's `−10`
   loss on top of any battle it lost. Spirit is *"depleted only by harm"* (§2 of the hub); a
   horror event is harm.
 
@@ -454,11 +454,11 @@ to Darkest Dungeon than the recommendation below was.
 | Loss | Shape | Recovery |
 |---|---|---|
 | **Haul** | Unbanked until extraction. A wiped party's haul stays in the domain. | Nothing — this is the risk. Extraction is available from any room, always, and forfeits everything past it |
-| **A downed demon** | `Downed`, out for the rest of the delve (Last Stand shape: the *party* fails only when all are down). A rest room or a revive action stands it back up at a spirit cost | In-delve, by spending a room or an action |
-| **Coming home wounded** | Every demon downed at any point returns in `Recovering` for real days (today that transition is instant), with the contract's `−10` loss applied | Priced time, and — because priced time alone produces XCOM's B-team spiral — **priced souls**: a recovery ritual, the exact shape of `contract-ritual`, shortens it |
+| **A downed creature** | `Downed`, out for the rest of the delve (Last Stand shape: the *party* fails only when all are down). A rest room or a revive action stands it back up at a spirit cost | In-delve, by spending a room or an action |
+| **Coming home wounded** | Every creature downed at any point returns in `Recovering` for real days (today that transition is instant), with the contract's `−10` loss applied | Priced time, and — because priced time alone produces XCOM's B-team spiral — **priced souls**: a recovery ritual, the exact shape of `contract-ritual`, shortens it |
 | **Nerve** | Spirit drained to zero at extraction = a second `−10` | Rest, shrines, the ritual |
 | **Retreat** | Always allowed; costs spirit (DD: +25 stress) and forfeits the boss | — |
-| **Death** | **Not the default.** An opt-in raid modifier, *Oath*, makes a downed demon at extraction `Retired` for real, and in exchange opens bands the domain otherwise refuses — deeper rooms, not a reward multiplier | The player's choice, once, at commit |
+| **Death** | **Not the default.** An opt-in raid modifier, *Oath*, makes a downed creature at extraction `Retired` for real, and in exchange opens bands the domain otherwise refuses — deeper rooms, not a reward multiplier | The player's choice, once, at commit |
 
 The Oath is the Hades/StS-ascension lesson: hardcore is a *rule change the player composes*, not a
 number. Its reward is reached through `Θ`, never through a private bonus.
@@ -478,7 +478,7 @@ loot draw through the pipeline for a `cache`. **No event may write a stat direct
 scoped to the delve (`WhereScope.Battlefield` + a delve owner scope), and the grant is withdrawn at
 extraction.
 
-The **wild** room is the negotiation: a wild demon met in a room can be fought, bargained with
+The **wild** room is the negotiation: a wild creature met in a room can be fought, bargained with
 (spirit or souls), or recruited on the existing `WildJoinResult` path with `Origin = "delve"`. The
 join chance stays the expedition's `wildJoinMilli` shape, in the dungeon tuning file. Moon phases
 and mood are a later seed axis, not a v1 mechanic.
@@ -500,7 +500,7 @@ Squad slots follow `expeditions.v1.json`'s `squadSlots` pattern (per mode, in da
   run on autopilot until steered, with the same seed and the same rewards. Route choice is the raid
   decision — two parties on two routes see and clear more rooms; four parties reach the boss with
   more standing bodies and more unbanked haul.
-- **The boss room is the rendezvous.** Every standing demon from every party forms the squad side.
+- **The boss room is the rendezvous.** Every standing creature from every party forms the squad side.
   The engine accepts an unbounded squad; what changes is `W` (per wave, already content-owned) and
   the **retinue** — the boss brings lieutenants in proportion to the raid, which is enemy *count*
   and therefore encounter design, not a `Θ` change. A party that never reached the boss room is not
@@ -509,10 +509,10 @@ Squad slots follow `expeditions.v1.json`'s `squadSlots` pattern (per mode, in da
   parties already share `"squad"` today; the label is what lets the economy (`PerSide` scope keys
   on `Side` at `BattleEngine.cs:359-360`), commander auras and the report tell them apart. Added
   under the `WhenWritingDefault` precedent, it moves no golden.
-- **Shared failure pool, per Monster Hunter:** the raid fails when no party has a standing demon,
+- **Shared failure pool, per Monster Hunter:** the raid fails when no party has a standing creature,
   not when one party wipes.
 - **The bench-warmer problem** (Radiant Dawn) is answered by the contract economy rather than by
-  design: a 4-party raid needs twenty bound demons paying tribute, so the roster you can afford *is*
+  design: a 4-party raid needs twenty bound creatures paying tribute, so the roster you can afford *is*
   the raid you can field. Capacity is already price-capped, never hard-capped
   (`ContractPolicy.cs:166-177`).
 
@@ -571,7 +571,7 @@ domain, owner `docs/architecture/party-dungeon/` once specced; published by
 | Key | Meaning | Starting shape (not a balance decision) |
 |---|---|---|
 | `raid.modes.{solo,pair,quad}.parties` | party count | 1 / 2 / 4 |
-| `raid.modes.*.squadSlots` | demons per party | 5 (the top expedition tier's number) |
+| `raid.modes.*.squadSlots` | creatures per party | 5 (the top expedition tier's number) |
 | `raid.modes.*.bossRetinuePerParty` | extra lieutenants per party beyond the first | 1 |
 | `raid.modes.*.bossW` | concurrency width in the boss room, overrides the wave | 4 / 6 / 8 |
 | `graph.tiers.{short,medium,long}.rows` | depth | 4 / 7 / 11 |
@@ -586,7 +586,7 @@ domain, owner `docs/architecture/party-dungeon/` once specced; published by
 | `attrition.hunger.perRoom.{fight,elite,event,rest}` | hunger cost per room kind | tunable, rest negative |
 | `attrition.spirit.perElite`, `attrition.spirit.bossPresence`, `attrition.spirit.retreat` | nerve drains | DD +25-stress shape |
 | `attrition.restHealMilli` | HP/hunger/spirit restored at a rest | ‰ of max |
-| `risk.downedRecoveryDelves` *(was `…Days`; owner removed the wall clock after review)* | delves sat out per downed demon — virtual time, never real days | priced-time dial |
+| `risk.downedRecoveryDelves` *(was `…Days`; owner removed the wall clock after review)* | delves sat out per downed creature — virtual time, never real days | priced-time dial |
 | `risk.recoveryRitualSouls` | per rarity, the priced-souls escape | the `contract-ritual` shape |
 | `risk.retreatSpiritCost` | leaving early | — |
 | `risk.oath.bandUnlock` | bands opened by the Oath | +2 |
@@ -614,7 +614,7 @@ asks for.
 | Relics and gear (`LootPipeline`, first production caller) | `P(Θ)` strength, `Θ` count | enhance / temper / reforge / socket / salvage (built); equip-now vs salvage-later is P6's two horizons | per-item `+n`, own axis |
 | Souls per room and per event | `contentScale(Θ)` | provisioning before entry and the in-delve merchant (**new**, priced on the same `contentScale`); recovery ritual (**new**); contract tribute, which rises with the roster a raid demands (built) | same read |
 | Materials, shards, essence | flat, as expeditions | fusion, enhancement (built) | flat |
-| Wild joins | — | tribute per bound demon (built) | — |
+| Wild joins | — | tribute per bound creature (built) | — |
 | Specimen and species XP | cost ladders, rows 6/26/27 | — (progression, not a stock) | — |
 
 The unbanked haul is not a sink and must not be counted as one — a haul lost is a faucet that did
@@ -631,7 +631,7 @@ an *item* category on the ten-rung ladder (materials plausibly stop at 70, per `
 ## 7. What this deliberately does not decide
 
 - **Any number.** §5 gives shapes and starting points; the balance pass owns them.
-- **Species-specific boss kits** and the elite roster — content, through the demon-seed and action
+- **Species-specific boss kits** and the elite roster — content, through the creature-seed and action
   programs, on the existing `HypnoAlly` boss-class species the expeditions spec promised and never
   wired.
 - **Whether expeditions are later re-expressed as auto-resolved delves.** The owner has already said
@@ -681,7 +681,7 @@ decision on the same terms.
 >    above, per domain, tunable.** Owner: *"default option 1 and some specific dungeon hard, very hard
 >    difficult and above will permanent death — make them tunable."* So the rung table gains a
 >    `permadeathFromRung` column and each domain seed may override it; the Oath is the opt-in on rungs
->    below that gate (§11.9 #8). A downed demon on a permadeath rung is `Retired` at extraction; below
+>    below that gate (§11.9 #8). A downed creature on a permadeath rung is `Retired` at extraction; below
 >    it, it is `Recovering` for a tunable count of **delves** (`risk.downedRecoveryDelves` — *amended by the
 >    owner after review, 2026-09-05: the real-time clock is removed; this game has no wall-clock
 >    pacing*) with the `−10` loss and the soul ritual as the priced escape.
@@ -707,12 +707,12 @@ decision on the same terms.
 ## 9. Design-gate checklist
 
 ```
-[x] I identified the subsystem(s) this touches: battle/turns, demons (roster, contracts),
+[x] I identified the subsystem(s) this touches: battle/turns, creatures (roster, contracts),
     expeditions, world map, economy, resources, status, items/rarity/loot, power, tunables,
     standalone, GUI.
 [x] I read every doc in the §1 row(s) for those subsystems, this session — software-architecture,
     decisions, battle-timeline-map, battle-turn-ideal, standalone-rpg-map, world-map-program,
-    world-graph-ideal (§5.1, §7.2, §12, §13, §14), demon-system-map, spec-demon-contracts,
+    world-graph-ideal (§5.1, §7.2, §12, §13, §14), creature-system-map, spec-creature-contracts,
     spec-soul-economy, spec-expeditions (via inventory), economy-principles, resource-hub-ssot,
     status-ssot §9, item/ssot-rarity §3.3/§4.3, ssot-power-scale §5/§10/§11, tunables-ssot,
     game-gui-principles (GG-1, GG-44, GG-52/53), information-architecture §1-§4/§7,
@@ -753,7 +753,7 @@ decision on the same terms.
 - [battle-timeline-map.md](battle-timeline-map.md) T6/T10/T11 — the live-session modules the Delve
   is the second consumer of
 - [item-map.md](item-map.md) — the loot pipeline the Delve is the first caller of
-- [demons/spec-demon-contracts.md](demons/spec-demon-contracts.md) — the gate and the loss rule
+- [creatures/spec-creature-contracts.md](creatures/spec-creature-contracts.md) — the gate and the loss rule
 - [resource-hub-ssot.md](resource-hub-ssot.md) §2, §10, §11
 - [power/ssot-power-scale.md](power/ssot-power-scale.md) §5, §10.3, §11.7a
 - [economy-principles.md](economy-principles.md) P1, P2, P6, P7
@@ -797,8 +797,8 @@ Restated once, inline, because each of the seven sections below leans on them.
 3. **The LLM writes identity; deterministic code writes magnitude.** A wrong enum is visible; `hp:
    4200` is not. Enforced by the four-shape schema audit (numeric-string pattern, numeric enum members,
    deny-listed names, unlisted integers), never by review.
-4. **Invention is not classification.** The demon pipeline classified 502 anchor files that already
-   had names and almanac art (`data/seed/demons/species/`, 415 plant + 87 zombie; the species index
+4. **Invention is not classification.** The creature pipeline classified 502 anchor files that already
+   had names and almanac art (`data/seed/creatures/species/`, 415 plant + 87 zombie; the species index
    lists 840 entries; the "408" older documents cite is stale). Rooms, events, encounters, quests and
    domains **do not exist until someone invents them**, so their failure mode is mode collapse and
    generic flavour — twelve variations of "Dark Crypt" — which majority vote does not catch. Every
@@ -823,9 +823,9 @@ The owner's fourteen, grouped by what they share a generator with:
 | seedsmith map seed generator · in-game map generator, random per run · *(added)* the domain seed | §11.1 |
 | power ladder for dungeon · ten-level difficulty (very easy … impossible) | §11.2 |
 | seedsmith event seed generator · in-game event generator · quest seed generator · in-game quest generator | §11.3 |
-| seedsmith boss kind demon + boss generator · party seed + party generator for enemies · group of enemy + group generator | §11.4 |
+| seedsmith boss kind creature + boss generator · party seed + party generator for enemies · group of enemy + group generator | §11.4 |
 | dungeon interactive object / building / obstacle generator · supply item generator + usable mechanism | §11.5 |
-| recruit / summon / capture demon in dungeon | §11.6 |
+| recruit / summon / capture creature in dungeon | §11.6 |
 | special loot + special item generator + dungeon-specific loot table · Diablo 2 loot pack, arrange minigame, item size | §11.7 |
 
 ### 11.1 Domains, maps, and the per-delve roll
@@ -835,7 +835,7 @@ first corpus was to be authored by hand — *superseded by decision 6: pipelines
 (review record §1(h), S1-6)*.
 
 *Domain anchor* (`domains/<id>.json`): `domainId` (AUTHORED, allocated namespace) · `name`/`flavor`
-(AUTHORED) · `theme` (VALIDATED, the frozen theme registry under `data/seed/demons/_registry/`) ·
+(AUTHORED) · `theme` (VALIDATED, the frozen theme registry under `data/seed/creatures/_registry/`) ·
 `climate` (VALIDATED, `ElementTypeId` or `none`) · `dangerBand` (AUTHORED ordinal `shallow · mid ·
 deep · abyssal` → an integer `DangerBand` via tuning) · `sizeBand` (`short · medium · long`) ·
 `layoutTemplateId` (VALIDATED) · `bossSpeciesRef` (VALIDATED species id in the top threat rungs) ·
@@ -925,7 +925,7 @@ analogue; unreachable rooms — the genre retries, this repo throws.
 modifiers that are not power-shaped at all. A room reads terms that are all built: `DangerBand`
 (`ContentContext.cs`, `PowerIndexComposer.cs:71-74`, `Wm = 5000‰`, §10 row 23), `WorldTier`,
 `ZombossLevel`, `RealmsAdvanced` on the content side with `Wf = Wa` enforced by `ValidateWeights`,
-and the species `thetaOffset` (`demon-threat.v1.json`, ten rungs 0…40, §10 row 18). Worked, at the
+and the species `thetaOffset` (`creature-threat.v1.json`, ten rungs 0…40, §10 row 18). Worked, at the
 shipped weights and `B = 0.4`: a `rich` entrance (band 3), tier 1, two realms, a `raider` species
 (+13) → `Θ_room = 15 + 5 + 50 = 70`, `Θ_enemy = 83`, `P(83) = 3,616` (the enemy's `MaxHp`),
 `contentScale = ×5.32`; the boss room at band 6 → `Θ = 98`, `P = 4,549`, `×6.69` *(the difficulty-ladder spec corrects
@@ -943,7 +943,7 @@ thetaEnemy, …)` and `TryInstantiate(…, int thetaContent, …)` both *require
 **Does a ten-rung difficulty need a new §10 row? No — if a rung is a `DangerBand` delta.** The
 rung table says *"hard = entrance band +1"* and the room's `ContentContext.DangerBand` is
 `entranceBand + rowStep·row + bandDelta`. Row 23 already reads the shipped `int` field; the rung only
-decides what integer goes in. The alternative — a `rungThetaOffset` column like `demon-threat`'s — is a
+decides what integer goes in. The alternative — a `rungThetaOffset` column like `creature-threat`'s — is a
 second name for `Wm·Δband` and would need a row-18-style reviewed amendment; **refused**, because two
 names for one axis is how three curves shipped at once. Choosing the band delta also keeps depth and
 difficulty on one axis: a hard delve is *the same place, deeper*.
@@ -993,7 +993,7 @@ exactly when the gap can only be closed by an axis that enters both sides** — 
 Dave level and runs do — in the SSOT's composition. *(Review:)* today the squad-side contest reads the
 **specimen level** (`BattleStatComposer.cs:108` `theta = setup.Index`, fed from
 `WebMatchService.cs:396-403`), so the actor-side `Θ_actor` composition is a **wiring gap** and, until
-it lands, a +35 gap costs 35 specimen levels per demon on row 27's cost ladder. "Impossible" is a rung that becomes "medium" when the player has earned twenty
+it lands, a +35 gap costs 35 specimen levels per creature on row 27's cost ladder. "Impossible" is a rung that becomes "medium" when the player has earned twenty
 Dave levels — the D3 Torment shape. The ladder must **never** add a content axis that grows with the
 player's own progression (a `bandDelta` tied to `Θ_actor` would be Last Epoch corruption: *"infinitely
 scaling, i.e. eventually unbeatable"*). The player's advantage lives where §4.5 of the SSOT puts it:
@@ -1098,7 +1098,7 @@ prose, `ItemCategoryTable.cs:29`'s unused `"quest"` category, `SlotUnlock.cs:3-1
 `ISlotUnlockRule` implemented by nothing, and `decisions.md:27`'s *"Not RPG quests"* — the lawn
 activity facts are explicitly **not** the quest truth. **The quest anchor:** `objectiveTemplate`
 (VALIDATED, closed: `explore-rooms · cleanse-fights · gather-curio-kind · kill-boss ·
-extract-with-item-kind · bring-demon-home-alive · finish-under-hunger · survive-no-downed ·
+extract-with-item-kind · bring-creature-home-alive · finish-under-hunger · survive-no-downed ·
 spend-no-provision`) · `targetRef` (a **kind**, never a number, or `none`) · `countBand` (`few · some
 · most · all` → N from the domain's row×width; DD's "90% of rooms" is `most`) · `rewardBand` (a tier
 window resolved through `LootPipeline` with a `dungeon-quest` source kind — never a gold number) ·
@@ -1171,15 +1171,15 @@ emits `BattleActorSetup`s exactly as `WaveCatalog.Enemies` does (`WaveCatalog.cs
 from `BattleRuleset.BaseHp/Atk/Defense(θ)` — **where `θ = Θ_room + thetaOffset(species)`**, the sum
 nothing computes today (§11.2). **Corpus facts the generator must refuse loudly, not default:** over
 the anchors on disk, `threatBand` is present on a minority of files (125 of 502 files carry the key;
-the encounter pass counted 657 of 841 index entries without it), and `DemonThreatTuning.OffsetFor`
+the encounter pass counted 657 of 841 index entries without it), and `CreatureThreatTuning.OffsetFor`
 falls back to `inferredDefaultRung` (rung 4, `raider`, +13) for the rest — so a `threatWindow` filter
 would see most of the corpus as `raider`; `reach: siege` has **zero** anchors, so a `siege` slot can
 never fill; `targetPreference` and `RangeCells` have **zero readers in `src/`** — the two role axes
 exist and nothing in battle consumes them (wiring gap).
 
-**Boss is a role, not a species field.** `DemonDeployMode.HypnoAlly` is a **lawn** expression
-(`demon-system-map.md:7`, *"designated boss-class species deploy as hypno-zombie allies"*; assigned by
-rank at `DemonSpeciesGenerator.cs:78`, 120 HypnoAlly / 721 PlantAvatar) — it says how a captured demon
+**Boss is a role, not a species field.** `CreatureDeployMode.HypnoAlly` is a **lawn** expression
+(`creature-system-map.md:7`, *"designated boss-class species deploy as hypno-zombie allies"*; assigned by
+rank at `CreatureSpeciesGenerator.cs:78`, 120 HypnoAlly / 721 PlantAvatar) — it says how a captured creature
 walks on the lawn, not that the species is a delve boss. A boss slot is filled by `threatWindow` from
 the top rungs (tyrant … calamity: 23 anchors today, thin but real) at the room's `boss-lair` band:
 `Θ` = 30 (`Wm·6`) + up to +40, both shipped. **The shipped threat ladder already covers "boss"**;
@@ -1264,7 +1264,7 @@ outcome table. Obstacle, cover, door/gate, trap, totem, altar, barricade → str
 structure anchor **whole** (`structure-seed-ideal.md` §5: `footprint`, `coverTier`, derived
 `obstacleVerbs` from base-defense §5.18's closed eight — BLOCK · SLOW · BLOCK-LOF · COVER · DENY ·
 CHANNEL · CONCEAL · BITE — and decisions 11–15: a new kind of actor, no level, receives nothing, no
-ownership, garrison to use). Chest, shrine-offering, bookcase, iron maiden, corpse, wild-demon bargain
+ownership, garrison to use). Chest, shrine-offering, bookcase, iron maiden, corpse, wild-creature bargain
 → curios, the event deck's rows (§11.3). The validator enforces the line: a row with `obstacleVerbs ≠
 none` or a garrison action is a structure; a row whose only content is an outcome table is an event.
 
@@ -1359,10 +1359,10 @@ bands in `data/tuning/structure-seed.v{n}.json` (**does not exist yet**).
 ### 11.6 Recruit, capture, summon
 
 **Fifteen built rows, four wiring gaps, three real gaps.** Built: the wild-join coin
-(`ExpeditionResolver.cs:121`, `wildJoinMilli` 250‰) minting through `MintDemonUnlocked` with traits
+(`ExpeditionResolver.cs:121`, `wildJoinMilli` 250‰) minting through `MintCreatureUnlocked` with traits
 from `SummonRoller.RollTraits` (*"shared by summons and wild joins"*); a free-string `Origin` with
 `summon`/`fusion`/`expedition` in use and `capture` **reserved and never written**
-(`spec-demon-core.md:29`); the wild pool excluding capture-only species and the top rung; capture-only
+(`spec-creature-core.md:29`); the wild pool excluding capture-only species and the top rung; capture-only
 species as silhouettes (`CaptureOnly`, *"≤15% capture-only, never legendary"*); personality derived,
 never rolled live (`ContractPolicy.cs:195-196` `PersonalityFor(instanceId)`); the three contract
 conditions and the free auto-bind on mint when a slot is free; price-capped capacity
@@ -1387,7 +1387,7 @@ with the talk); **threat vs you** (`Δ = Θ_wild − Θ_party`, a difference-bas
 tunable bands `far below … far above` — SMT's *"cannot recruit above your level"* becomes the *far
 above* row's weights, which may set `joins` to 0‰, a data decision); **tide** (optional, v1 off — one
 ordinal per domain from the seed, Nocturne's Kagutsuchi as the shape); **the offer** (the SMT four:
-souls · spirit via `resource.delta` · a supply from the pack · a released contract from the home roster (*review*: under decision 12 no demon rides in the pack),
+souls · spirit via `resource.delta` · a supply from the pack · a released contract from the home roster (*review*: under decision 12 no creature rides in the pack),
 released — a real sink), with a 5×4 preference table of ordinals (`craves / accepts / scorns`), P5's
 Upbeat-likes-Funny matrix reshaped onto what we own. **Outcome table, ordinals → ‰:** `joins · takes
 and leaves · flees (an essence shed) · attacks (a fight at the room's band, no re-talk)`; the species
@@ -1397,13 +1397,13 @@ guarantees `joins` — SMT V's own rule, *"paying can still fail and refusing ca
 guarantee is Darkest Dungeon's: a provision override, costing pack cells. **What a recruit is:**
 minted at room close with `Origin = "delve"`, traits from `RollTraits`, effects later through the one
 SDK (`player-materialise`). **Recommend: pack cell, unbound, counted as haul** — the Pokémon box, not
-the Diablo mercenary — because the contract gate already refuses an unbound demon on every fielding
+the Diablo mercenary — because the contract gate already refuses an unbound creature on every fielding
 path and binding mid-delve would be free, so a mid-delve fighter is a **free reinforcement**: the exact
 *"recruit is always better than fight"* degenerate. The recruit fights for nobody until extraction,
 binds then if a slot is free, and is **haul** — *"a wiped party drops its haul in the dark"* applies,
 or the wild room is the one risk-free faucet in the Delve.
 
-**Capture — weaken, then bind.** The demon map's row was written for the lawn (*"capture conditions
+**Capture — weaken, then bind.** The creature map's row was written for the lawn (*"capture conditions
 are read Hot, capture resolution is Cold"*); in a delve both facts are a read of `BattleRunState`
 (`ActorState.Hp`, the battle's `StatusRuntime`) — RPG layer, one server-side resolve. **Capture is an
 action in the corpus**, not a verb on the engine: `Relation = Enemy`; usability `and(hpBelowMilli(target,
@@ -1411,7 +1411,7 @@ X), hasStatus(target))` plus `holdsStock(seal)`; cost a **seal** (a `consumable`
 attempt — the item-cost row is the one wiring gap; souls through `SoulSinkPolicy` on the room's Θ is
 the fallback); on success the target leaves the fight alive — the `Retreated` shape from a new producer
 — and the report carries a `captured` row the room-close mints from; **no die event, so no
-`KillEarn`** — a captured demon pays no kill souls, the trade that keeps fighting worth doing. **Roll
+`KillEarn`** — a captured creature pays no kill souls, the trade that keeps fighting worth doing. **Roll
 shape — Pokémon's, as prior art only:** pret/pokeemerald `a = ((3·maxHP − 2·HP)·catchRate·ball·status)
 / (3·maxHP)`, `a ≥ 255` guarantees, else four shakes — **Gen III/IV is a fourth root, `b = 1048560 / √√(16711680 / a)`,
 with status ×2 / ×1.5; the `3/16` exponent and ×2.5 below are Gen V+** (audit §6). Only the shape is used here.
@@ -1433,7 +1433,7 @@ the `HasElementFocus`; the pool filter gains a species predicate from the domain
 `SoulSinkPolicy` on the room's Θ (PS-5); results mint with `Origin = "delve"` into the pack as haul.
 **Pity shared with the Sanctum altar**, per the spec's own *"persist across sessions and banners"* — a
 second pity stock is a second thing to explain for no new decision. What the altar adds is P6's two
-horizons on souls: spend the unbanked haul in the dark, or carry it out. (2) **A demon summoning in
+horizons on souls: spend the unbanked haul in the dark, or carry it out. (2) **A creature summoning in
 battle** (the `runner` slot firing `spawn.entity`) is blocked by one real gap and this document must
 not call it impossible: *"a roster that can change mid-battle … one build serves both"*
 (`base-defense-ideal.md` §3.4). The build: `BattleRunState.Spawn(setup, side, partyIndex)` appending
@@ -1442,7 +1442,7 @@ event, immediately counted by `AnyActive`; plus a Board-atom executor for the ba
 calling its retinue mid-fight is the same gap from the enemy side.
 
 **Economy.** Bound = a daily sink (`baseUpkeepPerDay` per rung × personality, floored at 1); unbound =
-free and frozen; capacity price-capped. **A binding discount for a delve-caught demon — recommend
+free and frozen; capacity price-capped. **A binding discount for a delve-caught creature — recommend
 against**: mint-time bind is already free, and a per-origin upkeep multiplier makes *origin* a power
 axis on the roster economy with no sink beside it. If "a pact struck in the dark" should mean
 something, the lever is **personality** — the recruit's comes from the room and the talk. **A P2 note
@@ -1452,7 +1452,7 @@ whose 12/day tribute is flat while the souls that fund it are `contentScale`-sca
 an existing gap; it does not create it.
 
 **Prior art with numbers:** SMT V — join only at your level or lower, demands escalate and may repeat;
-SMT III — full Kagutsuchi makes demons *"act drunk, raise their attack"* and refuse talk, new phase
+SMT III — full Kagutsuchi makes creatures *"act drunk, raise their attack"* and refuse talk, new phase
 *"calm and easy for conversation"*; fusion accidents 8/256 off full moon, 16/256 on; Persona 5 — the
 published 4×4 personality × answer matrix (Upbeat likes Funny; Irritable likes Serious; Timid likes
 Kind; Gloomy likes Vague), a level gate lifted by Sun rank 10, 21 of 210 Personas (10%) gated behind
@@ -1468,7 +1468,7 @@ pack).
 
 **Tunables:** `wild.outcome.{eager,open,wary,hostile}.{joins,takesLeaves,flees,attacks}Milli`,
 `wild.deltaBands[]`, `wild.deltaShiftRungs[]`, `wild.offerPreference.{personality}.{souls,spirit,item,
-demon}`, `wild.offer.soulsMilliOfRoomYield`, `wild.offer.spiritMilli`, `wild.tide.{enabled,
+creature}`, `wild.offer.soulsMilliOfRoomYield`, `wild.offer.spiritMilli`, `wild.tide.{enabled,
 shiftRungs[]}`, `wild.provisionOverrideTag`, `capture.usableBelowMilli`,
 `capture.chanceMilli[hpBand][deltaBand]`, `capture.statusBonusMilli[countBand]`,
 `capture.sealTierShiftMilli[]`, `capture.failStepBands`, `altar.{bannerId, poolFromDomain,
@@ -1694,7 +1694,7 @@ Retired by Part II: §5's `risk.oath.bandUnlock` (replaced by `domain.maxRungWit
 > 10. **Enemy affixes: a seventh `ContainerKind`, `enemy`**, with its own id prefix.
 > 11. **Formation: 1-D rank on `SideIndex` now, AND the `A10` 2-D board is committed as a later module
 >     of *this* program**, not left to the action program.
-> 12. **Recruited and captured demons teleport home at once, bound if a contract slot is free** — not
+> 12. **Recruited and captured creatures teleport home at once, bound if a contract slot is free** — not
 >     a pack cell, not a party slot. Never at risk in the delve, never usable in it. The §11.6 guard
 >     against "recruit beats fight" therefore rests entirely on the *costs* (no `KillEarn`, no XP, a
 >     seal or an offer spent) and on the encounter roll's rarity shape, not on haul risk; the spec
@@ -1749,10 +1749,10 @@ like the ✅ boxes above; where one amends an earlier decision, the amendment is
 |---|---|---|
 | R1 | A10 battle board (amends decision 11) | **Consume base-defense's `siege-board` + `board-render`.** Decision 11's second half is retracted: the Delve ships 1-D rank now and adopts the board when it lands; rank collapses into column. One note on `action-map.md`; no `decisions.md` row |
 | R2 | Once-entry +7 | **Keep the tunable, with conditions:** the picker shows the effective band *name*, never the delta; the stack rule with rung deltas is written (it stacks); the "very strong items" promise rests on `bossRarityFloor`; `entry: once\|many` is **PLANNED** by the seedsmith budget, never a free model pick |
-| R3 | Permadeath meaning (refines decision 1) | **`downedOnce`:** on a permadeath rung a demon downed at *any point* is `Retired` at extraction even if revived — the revive lets it finish the run, not escape the rule. A wipe Retires the whole party and drops the haul; the named mitigation is cheap replacement at the pull price |
+| R3 | Permadeath meaning (refines decision 1) | **`downedOnce`:** on a permadeath rung a creature downed at *any point* is `Retired` at extraction even if revived — the revive lets it finish the run, not escape the rule. A wipe Retires the whole party and drops the haul; the named mitigation is cheap replacement at the pull price |
 | R4 | Oath unlock key (amends decision 8) | **A clear at `maxRungWithoutOath` itself opens the next rung.** The Oath below the gate stays as opt-in permadeath and a first-clear key, not the unlock mechanism |
 | R5 | Recruit price (refines decision 12) | **The offer floors at the altar pull price at the room's Θ via `SoulSinkPolicy`, paid from unbanked souls;** spirit, supply and released-contract offers priced as equivalents. The bind stays free; teleport-home stands. Altar pulls are **at-risk haul on the delve ledger, delivered at extraction** (decision 12 named recruits and captures only) |
-| R6 | Recovery clock (amends decision 1) | **Virtual time only — a downed demon sits out a tunable number of delves (`risk.downedRecoveryDelves`).** The real-time clock is removed. Owner: *"this game is not a paywall game; we don't limit players by a stamina system like some cheap mobile game."* Principle 6 now holds without a recorded tension |
+| R6 | Recovery clock (amends decision 1) | **Virtual time only — a downed creature sits out a tunable number of delves (`risk.downedRecoveryDelves`).** The real-time clock is removed. Owner: *"this game is not a paywall game; we don't limit players by a stamina system like some cheap mobile game."* Principle 6 now holds without a recorded tension |
 | R7 | Extend-slot drop (refines decision 16) | **Keep the 0.01% as `loot.extendSlotChanceMicro: 100`** on a per-million stream (`CombatProbability.cs:15` precedent); one extend-slot unique counts at a time (`affix.exclusiveTags`); the slot count stays structural with the exemption comment; the rung-9+ fixed core stands |
 | R8 | Rung twins (refines decision 7) | **Every rule rung carries a reward-bearing column; the delta column is unchanged.** Encounter design's `enemyCountDelta` or loot's `rarityFloor`/`rarityShiftBand` step per rung; validator: neighbouring rungs differ in `bandDelta` *or* a reward column, never only a penalty. `hard` is the identity row; modifiers the first table hung on `hard` move one rung up; `depth.bossBand` becomes `depth.bossBandDelta` on the last corridor's band; a rung whose band would clamp on a domain is not offered |
 | R9 | Autopilot and steering switch | **A `siege-ai`-class policy per un-steered party; switching away freezes the fight as a persisted decision log** (base-defense decision 46). "Same seed, same rewards" holds; autopilot is never a competitor to steering |
@@ -1768,7 +1768,7 @@ the best faucet in the game); decision 5's remedy list is replaced by the review
 `WorldValidation.Validate(world, profile)` overload skipping rules 4/5/11/13, room/door catalogs not
 served on `/api/world/catalog`, a `kind='map'` filter in `GetActiveWorld`, and the delve host never
 calling `TurnEngine.Step`); the actor-side `Θ_actor` composition is a wiring gap (§11.2); the
-`threat-audit` run over the 657 anchors without `threatBand` is an external dependency on demon-seed
+`threat-audit` run over the 657 anchors without `threatBand` is an external dependency on creature-seed
 module 7; decision 13's sub-pipeline list is the intent and the tool derives the real order from
 `reference_fields` (review §1(h)); extraction is raid-wide (a party may hold at a rest, never bank);
 the delve stage is the **sixth** and needs a new id `delve` with a Game-GUI `decisions.md` row; the

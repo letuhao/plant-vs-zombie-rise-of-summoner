@@ -210,11 +210,7 @@ public class PowerGuardTests
             UseShellExecute = false,
             CreateNoWindow = true
         };
-        using var p = Process.Start(psi)!;
-        var stdout = p.StandardOutput.ReadToEnd();
-        var stderr = p.StandardError.ReadToEnd();
-        Assert.True(p.WaitForExit(60_000), "guard script timed out");
-        return (p.ExitCode, stdout, stderr);
+        return ExternalProcess.Run(psi, 60_000, "guard script timed out");
     }
 
     static void Cleanup(string fixture)

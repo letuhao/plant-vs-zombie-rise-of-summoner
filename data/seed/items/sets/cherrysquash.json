@@ -25,7 +25,7 @@
       "id": "set.cherrysquash-001",
       "nameKey": "set.cherry-bomb-squash",
       "name": "Cherry Bomb Squash",
-      "themeKey": "demon.cherrysquash",
+      "themeKey": "creature.cherrysquash",
       "members": [
         {
           "role": "armament-primary",

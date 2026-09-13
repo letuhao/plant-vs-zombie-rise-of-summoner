@@ -21,7 +21,7 @@ source this session. INFERENCE = drawn from a fact. RECALL = general knowledge, 
 ### The scale, in one line
 
 **~50 trees × ~29 nodes = ~1,450 nodes, each with two spend tracks = ~2,900 places to spend — one
-shared catalog, applied separately to the commander and every demon a player owns.** At Θ=100 a
+shared catalog, applied separately to the commander and every creature a player owns.** At Θ=100 a
 player holds 100 skill points, so they can unlock **6.9% of it**. The catalog is the size of Path of
 Exile's whole tree (RECALL: ~1,300 nodes) but split into fifty disjoint pieces instead of one map you
 learn once. Full arithmetic and sources in §1.
@@ -38,7 +38,7 @@ Each is a promise to the player, and each names the mechanism that keeps it.
 | **L4** | *"I can lay out a whole build without spending anything."* | The draft → dirty → commit flow already ships for primary stats (`AptitudesPage.tsx:18-38`). The tree extends it. Two things are missing today and must land with it: a **Revert** control, and a **preview of what the draft changes** |
 | **L5** | *"If one of my nodes has stopped working, the game tells me — it does not quietly fix it."* | D14's printed runtime no-op, plus D11's red-invalid state when gear points are withdrawn. Both are printed on the node **before** you spend, and surfaced as a count on the tab when they fire |
 | **L6** | *"I can see the rule I am being scored on."* | The focus multiplier is rendered as a live number that moves while you edit the draft — §5 |
-| **L7** | *"What I learned on my commander is still true on my demons."* | The catalog is shared; only allocation is per-actor (D21). One thing to learn, N places to apply it. §6 |
+| **L7** | *"What I learned on my commander is still true on my creatures."* | The catalog is shared; only allocation is per-actor (D21). One thing to learn, N places to apply it. §6 |
 
 Two supporting promises that fall out of the design and should be stated to the player rather than
 discovered: **respec is total and priced, never partial** (D18 — so there is no orphaned-unlock trap
@@ -78,7 +78,7 @@ inside a tree.**
 ### D21 in one sentence
 
 **A Plan is an object; an actor is where you apply it.** Write a plan once, apply it to any actor,
-and let a newly bound demon arrive with a species-derived plan already sitting in its draft —
+and let a newly bound creature arrive with a species-derived plan already sitting in its draft —
 suggested, never committed. That turns fifty authoring chores into fifty reviews. §6.
 
 ### Did any GUI principle have to bend?
@@ -100,20 +100,20 @@ shipped shape.
 
 ### 1.1 How many trees
 
-D9: *"12 primary + all elemental + all status + each demon family."*
+D9: *"12 primary + all elemental + all status + each creature family."*
 
 | Category | Count | Source |
 |---|---:|---|
 | Primary (aptitudes) | 12 | `decisions.md:103` — *"Twelve aptitudes are the RPG primary stats"* |
 | Elemental | 6 | `ElementRoster.Concrete` — fire, ice, air, earth, light, dark (`src/FusionRpg.Core/Stats/Derived/ActorElementTypes.cs:21-29`) |
 | Status | 21 | `status-ssot.md:227` — *"Locked status catalog (21 named ids)"*. Counted in code: **20** registered in `StatusCatalogBootstrap.cs:16-58`, plus 2 more at `ExhaustionPolicy.cs:70` and `StanceRuntime.cs:39` = 22 live ids. Minor drift, not material here |
-| **Subtotal before demon families** | **39** | |
-| Demon families | **unknown — see below** | |
+| **Subtotal before creature families** | **39** | |
+| Creature families | **unknown — see below** | |
 
-**⚠️ D9's "each demon family" has no roster to read.** Measured across all 841 entries in 503 species
+**⚠️ D9's "each creature family" has no roster to read.** Measured across all 841 entries in 503 species
 files this session: the `family` field holds **699 distinct freeform strings** — `undead` (64),
 `artillery-flora` (17), `fungal-artillery` (16), `explosive-flora` (14), then a long tail of
-one-offs (FACT, script over `data/seed/demons/species/*/*.json`). It is LLM prose, not a curated
+one-offs (FACT, script over `data/seed/creatures/species/*/*.json`). It is LLM prose, not a curated
 vocabulary.
 
 So D9's `n ≈ 40–60` is only reachable if someone curates that 699 down to **1–21 families**. That is
@@ -174,12 +174,12 @@ designed to not be completable"*). Concentration then survives only through the 
 
 ### 1.4 D21 multiplies the state, not the learning
 
-D21 gives the commander and **every demon** its own tree state. The catalog is shared (ideal §7,
+D21 gives the commander and **every creature** its own tree state. The catalog is shared (ideal §7,
 owner decision 1: *"the catalog is shared; only allocation is per-actor"*).
 
 ```text
-31 actors  (commander + 30 demons)  × 1,450 skills = 44,950 per-skill soul levels
-101 actors (commander + 100 demons) × 1,450 skills = 146,450
+31 actors  (commander + 30 creatures)  × 1,450 skills = 44,950 per-skill soul levels
+101 actors (commander + 100 creatures) × 1,450 skills = 146,450
 ```
 
 There is no roster cap to read (PS-8 forbids one), and the species catalog is 841 entries, so the
@@ -392,7 +392,7 @@ level costs, the compose sentence if sources do not simply add, the exclusion pr
 
 | Surface | 10 | 100 | 1,000 |
 |---|---|---|---|
-| All paths | render all | window (the shipped 25–240 tier) | search-first — reachable if demon families are curated wide |
+| All paths | render all | window (the shipped 25–240 tier) | search-first — reachable if creature families are curated wide |
 | One tree's nodes | render all | render all | not reachable — a tree is 2 × 7 tiers by D10 |
 | Nodes flattened across trees | **never rendered** — nodes only exist inside a tree | | |
 
@@ -559,9 +559,9 @@ once; only the *management* cost scales with the roster.
 actor. "Apply" fills that actor's **draft** — it never commits. The player reviews and commits, or
 reverts. This reuses the shipped flow exactly and adds no new authority path.
 
-**3. A newly bound demon arrives with a suggested plan already drafted.** D17 locks a species'
+**3. A newly bound creature arrives with a suggested plan already drafted.** D17 locks a species'
 build-favour triple — primary tree + element + status. That triple is enough to derive a starter plan
-deterministically, with no generation and no LLM. So the per-demon experience is *"here is a sensible
+deterministically, with no generation and no LLM. So the per-creature experience is *"here is a sensible
 build, change what you like, commit"* — a review, not an authoring task.
 
 This is inheritance-from-species done honestly: it is a **suggestion in a draft**, so the player
@@ -576,7 +576,7 @@ what changes. GG-22 (destructive actions confirm and name what is lost) applies 
 
 ### What this does and does not fix
 
-**Fixes:** the authoring cliff. Fifty demons become fifty reviews of a plan the player already
+**Fixes:** the authoring cliff. Fifty creatures become fifty reviews of a plan the player already
 understands.
 
 **Does not fix:** the *spending* cost. Each actor still pays its own points and souls (D21 is
@@ -622,7 +622,7 @@ None of it gates anything. GG-39 holds.
 
 ## 9. Open questions for the owner
 
-1. **The demon-family roster.** D9 says "each demon family", and the corpus has **699 distinct
+1. **The creature-family roster.** D9 says "each creature family", and the corpus has **699 distinct
    freeform family strings** across 841 entries. `n ≈ 40–60` needs that curated to ≤21. Who curates
    it, and is a tree per family or per family *group*? **This blocks the roster existing at all.**
 
@@ -648,7 +648,7 @@ None of it gates anything. GG-39 holds.
 6. **The read-only Almanac view** — same wave as the sheet, or later? Without it, a player cannot
    read about a tree they have not unlocked, which weakens L1 in practice.
 
-7. **Species-derived starter plans** (§7, item 3) — auto-draft on binding a demon, or only on
+7. **Species-derived starter plans** (§7, item 3) — auto-draft on binding a creature, or only on
    request? Auto-draft is friendlier and costs nothing, but it does put a build in front of a player
    who did not ask for one.
 

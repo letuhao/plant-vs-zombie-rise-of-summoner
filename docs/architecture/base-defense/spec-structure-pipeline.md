@@ -23,18 +23,18 @@ with a byte-identical rerun proven by hash.
 
 ---
 
-## ⛔ This is an INVENTION pipeline, and that is not the demon one
+## ⛔ This is an INVENTION pipeline, and that is not the creature one
 
-Decision 43 confirmed static plants stay demons, so — per `structure-seed-ideal.md` §3 — there is no
+Decision 43 confirmed static plants stay creatures, so — per `structure-seed-ideal.md` §3 — there is no
 corpus to classify:
 
-| | Demon (classify) | Structure (**invent**) |
+| | Creature (classify) | Structure (**invent**) |
 |---|---|---|
 | Input | one captured almanac entry per call | a **combination** — (role × slot kind × climate) |
 | Failure mode | mis-assignment; **caught by majority vote** | **mode collapse and generic flavour — vote does not catch it** |
 | Metric loop | closed — a field is populated or it is not | flavour distinctness is **open-loop**, so it produces a **review queue and never a pass** |
 
-**Copying the demon pipeline's shape without noticing this gets all three wrong.** It is stated at the
+**Copying the creature pipeline's shape without noticing this gets all three wrong.** It is stated at the
 top for that reason.
 
 ---

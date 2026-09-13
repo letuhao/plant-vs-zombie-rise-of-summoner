@@ -25,7 +25,7 @@
       "id": "set.pogozombie-001",
       "nameKey": "set.roof-leaper-s-rot",
       "name": "Roof-Leaper's Rot",
-      "themeKey": "demon.pogozombie",
+      "themeKey": "creature.pogozombie",
       "members": [
         {
           "role": "armament-primary",

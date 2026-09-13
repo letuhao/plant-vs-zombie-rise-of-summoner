@@ -5,7 +5,7 @@ using FusionRpg.Core.World;
 namespace FusionRpg.Core.Effects.Atoms;
 
 /// <summary>
-/// The closed vocabulary: 5 attach points, 12 kinds. Eleven map to a shipped FA opcode;
+/// The closed vocabulary: 9 attach points, 18 kinds. Eleven map to a shipped FA opcode;
 /// <c>stat.derived</c> is the one addition, and it earns its place because patron auras, star
 /// merges, expedition injuries, and contract ranks already write derived channels with no opcode.
 ///

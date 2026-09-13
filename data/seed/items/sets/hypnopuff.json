@@ -25,7 +25,7 @@
       "id": "set.hypnopuff-001",
       "nameKey": "set.enchanting-spore-bite",
       "name": "Enchanting Spore Bite",
-      "themeKey": "demon.hypnopuff",
+      "themeKey": "creature.hypnopuff",
       "members": [
         {
           "role": "armament-primary",

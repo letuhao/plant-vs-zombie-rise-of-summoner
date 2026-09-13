@@ -1,0 +1,15 @@
+<Project>
+
+  <!--
+    Apply the repo-wide test hang guard (test.runsettings) to every test project, so a
+    local `dotnet test` cannot block forever with no report. CI passes blame-hang
+    explicitly; this makes the same protection the default for everyone else.
+
+    Gated to *.Tests so non-test projects (src/, tools/) are untouched.
+    RunSettingsFilePath is only read by the VSTest targets, so it does not affect builds.
+  -->
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+    <RunSettingsFilePath>$(MSBuildThisFileDirectory)test.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
+
+</Project>

@@ -25,7 +25,7 @@
       "id": "set.hypnomine-001",
       "nameKey": "set.volatile-spud-core",
       "name": "Volatile Spud Core",
-      "themeKey": "demon.hypnomine",
+      "themeKey": "creature.hypnomine",
       "members": [
         {
           "role": "armament-primary",

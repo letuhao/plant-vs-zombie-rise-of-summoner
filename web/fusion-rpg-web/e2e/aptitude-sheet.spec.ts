@@ -75,7 +75,7 @@ async function mockAptitudeApis(page: import("@playwright/test").Page) {
   });
 }
 
-test.describe("Aptitude sheet Mode A (UniqueDemon)", () => {
+test.describe("Aptitude sheet Mode A (UniqueCreature)", () => {
   for (const vp of VIEWPORTS) {
     test(`visual ${vp.name}: leftover in-band, Cancel fiction, Unique scope`, async ({ page }) => {
       await page.setViewportSize({ width: vp.width, height: vp.height });
@@ -110,7 +110,7 @@ test.describe("Aptitude sheet Mode A (UniqueDemon)", () => {
     });
   }
 
-  test("increment → Confirm posts UniqueDemon allocate; Cancel reverts; obs ring", async ({ page }) => {
+  test("increment → Confirm posts UniqueCreature allocate; Cancel reverts; obs ring", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await mockShell(page);
     await mockAptitudeApis(page);

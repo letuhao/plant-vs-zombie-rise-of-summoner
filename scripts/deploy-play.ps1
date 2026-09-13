@@ -14,7 +14,7 @@
 # mirrors src wwwroot → dist wwwroot after the UI step so -NoServer / "server already up" still
 # lets you hard-refresh and confirm FE fixes without -RestartServer.
 # Server data (rpg-hot / rpg-media) lives next to the published exe: dist\FusionRpg.Server\data\
-# Runs guard-single-writer.ps1 + guard-dal.ps1 + guard-secondary-no-unity.ps1 + guard-funnel-delta.ps1 + guard-actor-hub.ps1
+# Runs guard-single-writer.ps1 + guard-dal.ps1 + guard-test-substrate.ps1 + guard-generated-seed.ps1 + guard-secondary-no-unity.ps1 + guard-funnel-delta.ps1 + guard-actor-hub.ps1
 # + guard-overflow.ps1 + guard-magic-numbers.ps1 + guard-power.ps1 + guard-stat-pairs.ps1
 # + guard-class-system.ps1 before build.
 param(
@@ -139,6 +139,14 @@ Write-Host "==> DAL guard"
 & (Join-Path $Root "scripts\guard-dal.ps1")
 if ($LASTEXITCODE -ne 0) { throw "DAL guard failed" }
 
+Write-Host "==> Test-substrate guard"
+& (Join-Path $Root "scripts\guard-test-substrate.ps1")
+if ($LASTEXITCODE -ne 0) { throw "test-substrate guard failed" }
+
+Write-Host "==> Generated-seed guard"
+& (Join-Path $Root "scripts\guard-generated-seed.ps1")
+if ($LASTEXITCODE -ne 0) { throw "generated-seed guard failed — a generated seed was hand-edited" }
+
 Write-Host "==> Secondary no-Unity guard"
 & (Join-Path $Root "scripts\guard-secondary-no-unity.ps1")
 if ($LASTEXITCODE -ne 0) { throw "secondary no-Unity guard failed" }
@@ -189,6 +197,14 @@ if ($ClassSystemExit -ne 0) {
         throw "CLASS-SYSTEM guard failed"
     }
 }
+
+# Default test profile: the store suite minus the file-bound (`DiskSemantics`) and long (`Heavy`)
+# cases — no SSD writes and no multi-minute test on the dev loop. One place owns the filter
+# (scripts/test-fast.ps1); the `full` profile runs unfiltered in CI/nightly/release. Standard:
+# docs/contributing/testing-standard.md.
+Write-Host "==> Default test profile (test-fast.ps1)"
+& (Join-Path $Root "scripts\test-fast.ps1")
+if ($LASTEXITCODE -ne 0) { throw "default test profile failed — see output above" }
 
 Write-Host "==> Building $LoaderHost injector ($GameProfile) into $PluginDir"
 & (Join-Path $Root "scripts\guard-game-profile.ps1") -GameDir $GameDir -ExpectedProfile $GameProfile

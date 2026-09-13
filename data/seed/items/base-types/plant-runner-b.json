@@ -30,7 +30,7 @@
       "class": "bulb",
       "band": "b",
       "implicit": {
-        "family": "atom.cherry-bloom",
+        "family": "atom.gravemaking",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -135,7 +135,7 @@
       "class": "bulb",
       "band": "b",
       "implicit": {
-        "family": "atom.cherry-bloom",
+        "family": "atom.gravemaking",
         "powerBand": "high"
       },
       "socketMax": 1,
@@ -205,7 +205,7 @@
       "class": "graft",
       "band": "b",
       "implicit": {
-        "family": "atom.cherry-bloom",
+        "family": "atom.flash-freeze",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -380,7 +380,7 @@
       "class": "graft",
       "band": "b",
       "implicit": {
-        "family": "atom.cherry-bloom",
+        "family": "atom.terraforming",
         "powerBand": "medium"
       },
       "socketMax": 2,

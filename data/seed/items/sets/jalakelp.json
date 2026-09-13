@@ -25,7 +25,7 @@
       "id": "set.jalakelp-001",
       "nameKey": "set.blazing-tangled-flora",
       "name": "Blazing Tangled Flora",
-      "themeKey": "demon.jalakelp",
+      "themeKey": "creature.jalakelp",
       "members": [
         {
           "role": "armament-primary",

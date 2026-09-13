@@ -26,7 +26,7 @@ public class TraitMigrationParityTests
     {
         Key = "squad:0",
         Side = "squad",
-        SpeciesId = "demon.test",
+        SpeciesId = "creature.test",
         Level = 5,
         MaxHp = 500,
         Atk = 40,

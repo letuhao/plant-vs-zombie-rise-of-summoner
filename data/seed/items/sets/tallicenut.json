@@ -23,9 +23,9 @@
   "entries": [
     {
       "id": "set.tallicenut-001",
-      "nameKey": "set.glacial-nut-shell",
-      "name": "Glacial Nut Shell",
-      "themeKey": "demon.tallicenut",
+      "nameKey": "set.frost-cracked-husk",
+      "name": "Frost-Cracked Husk",
+      "themeKey": "creature.tallicenut",
       "members": [
         {
           "role": "armament-primary",

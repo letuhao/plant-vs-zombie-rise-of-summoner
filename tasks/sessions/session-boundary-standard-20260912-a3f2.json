@@ -1,0 +1,27 @@
+{
+  "session": "session-boundary-standard-20260912-a3f2",
+  "program": "contributing-standards",
+  "problem": "Audit and add the missing session-boundary standard (record + checker + session-start + worktree setup)",
+  "mode": "direct",
+  "branch": "features/derived-stat-extension",
+  "worktree": null,
+  "paths": [
+    "AGENTS.md",
+    "docs/contributing/session-boundary.md",
+    "docs/contributing/agent-git.md",
+    "scripts/session-boundary-check.ps1",
+    "tasks/sessions/**",
+    ".kilo/command/session-start.md",
+    ".kilo/command/solid-run.md",
+    ".kilo/agent/solid-runner.md",
+    ".kilo/setup-script.ps1",
+    "tasks/actor-hub-and-combat-power-solid-fixing-runbook.md"
+  ],
+  "sharedWith": [
+    "data-test-substrate-20260912-9d6a"
+  ],
+  "sharedNote": "Owner decision 2026-09-12: work on the current branch alongside data-test-substrate rather than take a worktree. Overlap is intentional; commit with explicit paths and never stage the other session's uncommitted files.",
+  "started": "2026-09-12T08:36:00Z",
+  "status": "merged",
+  "closedNote": "Completed: session-boundary standard (policy, per-session records, drift checker, /session-start, worktree setup) plus the commit-tool stdin-hang and console-focus fixes."
+}

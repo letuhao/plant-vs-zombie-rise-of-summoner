@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Contracts;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
 using Xunit;
@@ -12,31 +12,29 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class ContractStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ContractStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-contracts-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _store.AwardSouls(1, 10_000, "seed", "contract-bank");
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
-    static DemonSpeciesDef SpeciesOf(DemonRarity rarity) => DemonSpeciesCatalog.All
-        .First(s => s.BaseRarity == rarity && s.Acquisition != DemonAcquisition.CaptureOnly
+    static CreatureSpeciesDef SpeciesOf(CreatureRarity rarity) => CreatureSpeciesCatalog.All
+        .First(s => s.BaseRarity == rarity && s.Acquisition != CreatureAcquisition.CaptureOnly
                     && s.TraitPool.Count > 0);
 
-    string Mint(DemonRarity rarity = DemonRarity.Chaff)
+    string Mint(CreatureRarity rarity = CreatureRarity.Chaff)
     {
         var species = SpeciesOf(rarity);
-        var (specimen, _) = _store.MintDemon(1, new DemonMintSpec
+        var (specimen, _) = _store.MintCreature(1, new CreatureMintSpec
         {
             SpeciesId = species.SpeciesId,
             Side = species.Side,
@@ -60,7 +58,7 @@ public class ContractStoreTests : IDisposable
         Assert.All(ids, id => Assert.True(_store.GetContract(id)!.Bound));
         Assert.Equal(ContractPolicy.BaseSlots, _store.CountBoundContracts(1));
 
-        // Capacity is full: the next demon is owned but unbound — no row at all is the unbound state.
+        // Capacity is full: the next creature is owned but unbound — no row at all is the unbound state.
         var overflow = Mint();
         Assert.Null(_store.GetContract(overflow));
         Assert.Equal(ContractPolicy.BaseSlots, _store.CountBoundContracts(1));
@@ -88,9 +86,9 @@ public class ContractStoreTests : IDisposable
     public void Migration_binds_best_first_up_to_capacity_and_runs_once()
     {
         var commons = new List<string>();
-        for (var i = 0; i < 14; i++) commons.Add(Mint(DemonRarity.Chaff));
-        var epic = Mint(DemonRarity.Heirloom);
-        var legendary = Mint(DemonRarity.Sunwoven);
+        for (var i = 0; i < 14; i++) commons.Add(Mint(CreatureRarity.Chaff));
+        var epic = Mint(CreatureRarity.Heirloom);
+        var legendary = Mint(CreatureRarity.Sunwoven);
 
         // Rewind to what a pre-contracts database looks like: specimens, no contracts.
         _store.ClearContractsForTest(1);

@@ -25,7 +25,7 @@
       "id": "set.corncabbage-001",
       "nameKey": "set.kernel-launcher",
       "name": "Kernel Launcher",
-      "themeKey": "demon.corncabbage",
+      "themeKey": "creature.corncabbage",
       "members": [
         {
           "role": "armament-primary",

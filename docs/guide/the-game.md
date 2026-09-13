@@ -10,11 +10,11 @@ This page and [The loops](the-loops.md) are the **product vision** for Rise of S
 
 **Rise of Summoner is an RPG plus empire-building game.**
 
-You raise a demon roster, collect and progress gear, grow Dave’s power, and run an empire across a fractured multiverse. Idle expeditions run while you play. The **lawn** is the **first core loop** — what you play first, and what feeds almost everything — not the whole war, and not optional flavor.
+You raise a creature roster, collect and progress gear, grow Dave’s power, and run an empire across a fractured multiverse. Idle expeditions run while you play. The **lawn** is the **first core loop** — what you play first, and what feeds almost everything — not the whole war, and not optional flavor.
 
 You need a legal install of **Plants vs. Zombies: Fusion** (a fan-made Plants vs. Zombies pack, separate from EA’s official titles). Rise of Summoner sits on top of it — it does not replace the lawn game.
 
-You are **Crazy Dave**. Your capital is his **homeworld** — the one timeline still yours. Demons are what the Fracture made of your lawn’s plants and zombies. Penny is how legions reach the other eras at all.
+You are **Crazy Dave**. Your capital is his **homeworld** — the one timeline still yours. Creatures are what the Fracture made of your lawn’s plants and zombies. Penny is how legions reach the other eras at all.
 
 Everything you own lives at home: roster, reserve, altar, fusion lab, almanac, stored haul. That is why defending the homeworld is the spine, not one more objective.
 
@@ -22,7 +22,7 @@ Everything you own lives at home: roster, reserve, altar, fusion lab, almanac, s
 
 ## How we got here
 
-Zomboss’s time machine malfunctioned and scattered its pieces across time and space. He sent zombies through the eras to recover them; Dave chased him with Penny. Where a shard landed, plant and zombie **fused** — that is how demons entered the war.
+Zomboss’s time machine malfunctioned and scattered its pieces across time and space. He sent zombies through the eras to recover them; Dave chased him with Penny. Where a shard landed, plant and zombie **fused** — that is how creatures entered the war.
 
 You chase him through the **rift** — a network of sectors joined by lanes — and you fight on ground that can fade if you neglect it.
 
@@ -43,7 +43,7 @@ Roster, souls, and essence bank across worlds. Loam and the holdings of a failed
 
 ## How the war is played
 
-You start on the **lawn**. You raise demons. You send spare demons on **expeditions**. When you are ready, you step onto the **rift**: adventure on the map, empire on the world stage, crawls in delves, quests and events tying it together.
+You start on the **lawn**. You raise creatures. You send spare creatures on **expeditions**. When you are ready, you step onto the **rift**: adventure on the map, empire on the world stage, crawls in delves, quests and events tying it together.
 
 The control room runs on your machine. Unlocked web features stay playable with the **lawn game** closed once you have opened them — nothing essential stays lawn-only forever. The lawn still feeds almost every spine loop: souls, levels, almanac, deploy, later capture and blessing.
 

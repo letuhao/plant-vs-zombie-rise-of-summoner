@@ -63,7 +63,7 @@ def test_unknown_role_is_refused_not_silently_ignored():
     with pytest.raises(tuning_mod.UnknownRoleError):
         tuning_mod.load_socket_ceiling("not-a-role")
     with pytest.raises(tuning_mod.UnknownRoleError):
-        tuning_mod.load_legal_implicit_families("not-a-role")
+        tuning_mod.load_legal_implicit_families("not-a-role", "humanoid")
 
 
 def test_class_choices_is_the_union_of_every_ladder_a_role_draws_from():
@@ -85,12 +85,36 @@ def test_class_choices_differ_by_frame():
 
 
 def test_legal_implicit_families_matches_the_real_registry_slate():
-    families = tuning_mod.load_legal_implicit_families("armament-primary")
-    assert "atom.might" in families
-    assert "atom.searing-strike" in families
-    # bulwark/savagery are More-op families, globally excluded from every implicit slate.
-    assert "atom.bulwark" not in families
-    assert "atom.savagery" not in families
+    # classes.v3.json splits the role slate BY FRAME (D11 clause 1). `armament-primary` is a
+    # deliberately single-sided role (its whole legal slate is offence), so the split is the
+    # deterministic sorted half-split rather than a semantic one — the point of the test is that the
+    # two halves are drawn from the role's own legal union, are disjoint, and exclude the More-op
+    # families, not which particular offensive family each frame got.
+    reg = json.loads(tuning_mod.CLASSES_REGISTRY.read_text(encoding="utf-8"))
+    union_legal = set(reg["implicitSlates"]["armament-primary"]["legalFamilies"])
+    h = set(tuning_mod.load_legal_implicit_families("armament-primary", "humanoid"))
+    p = set(tuning_mod.load_legal_implicit_families("armament-primary", "plant"))
+    assert h and p
+    assert (h | p) <= union_legal, "a frame slate names a family outside the role's legal union"
+    assert h.isdisjoint(p)
+    assert "atom.deathblast" in (h | p)
+    assert "atom.bulwark" not in (h | p) and "atom.savagery" not in (h | p)
+
+
+def test_the_two_frames_are_offered_disjoint_implicit_families_for_every_role():
+    """D11 clause 1's generator half (classes.v3.json, 2026-09-12): the offered sets must be
+    disjoint by construction, so the model cannot pick its way into the overlap that made the
+    clause fail in 7 roles when both frames were handed the identical role-wide slate."""
+    reg = json.loads(tuning_mod.CLASSES_REGISTRY.read_text(encoding="utf-8"))
+    for role, slate in reg["implicitSlates"].items():
+        if role == "standard":  # D14 out of scope; its pair is declared identical on purpose
+            continue
+        h = set(tuning_mod.load_legal_implicit_families(role, "humanoid"))
+        p = set(tuning_mod.load_legal_implicit_families(role, "plant"))
+        assert h and p, f"{role} has an empty frame slate"
+        assert h.isdisjoint(p), f"{role} offers the same family to both frames: {sorted(h & p)}"
+        # neither side is a strict superset (D11's own dominance clause)
+        assert not h <= p and not p <= h, f"{role} has a superset slate"
 
 
 def test_socket_ceiling_matches_module_16s_real_tuning_table():
@@ -175,7 +199,11 @@ def test_build_base_type_brief_lists_the_partitions_own_closed_vocabularies():
     assert "armament-primary" in text
     assert "main-hand" in text
     assert "blade" in text and "blunt" in text and "launcher" in text
-    assert "atom.might" in text
+    # The brief offers the FRAME's own slate (classes.v3.json), not the role-wide union.
+    frame_slate = set(tuning_mod.load_legal_implicit_families("armament-primary", "humanoid"))
+    assert frame_slate & set(__import__("re").findall(r"atom\.[a-z-]+", text)), \
+        "the brief lists none of this frame's legal implicit families"
+    assert "atom.bulwark" not in text  # More-op family, excluded everywhere
     assert "never chosen by you" not in text
 
 
@@ -285,7 +313,7 @@ def test_resolve_enhance_track_refuses_when_the_real_corpus_has_too_few_families
 def test_assemble_entry_matches_the_real_shipped_entry_shape():
     partition = brief_mod.load_partition_context("armament-primary", "humanoid", "a")
     answer = {"name": "Test Widget", "flavor": "A grounded test object.", "class": "blade",
-             "implicitFamily": "atom.might", "tags": ["light", "offensive"]}
+             "implicitFamily": "atom.deathblast", "tags": ["light", "offensive"]}
     entry = emit_mod.assemble_entry(answer, partition, seq=999)
     real_entry = _load_real("humanoid-armament-primary-a.json")["entries"][0]
     assert set(entry.keys()) == set(real_entry.keys())
@@ -304,17 +332,22 @@ def test_assemble_entry_refuses_an_illegal_class_or_family():
     base_answer = {"name": "Test Widget", "flavor": "x", "tags": ["light"]}
     with pytest.raises(emit_mod.IllegalChoiceError):
         emit_mod.assemble_entry({**base_answer, "class": "not-a-class",
-                                "implicitFamily": "atom.might"}, partition, seq=1)
+                                "implicitFamily": "atom.deathblast"}, partition, seq=1)
     with pytest.raises(emit_mod.IllegalChoiceError):
         emit_mod.assemble_entry({**base_answer, "class": "blade",
                                 "implicitFamily": "atom.not-a-family"}, partition, seq=1)
+    # 2026-09-12: a family legal for the ROLE but not for THIS FRAME is refused too — the per-frame
+    # slate (classes.v3.json) is the closed vocabulary, not the role-wide union.
+    with pytest.raises(emit_mod.IllegalChoiceError):
+        emit_mod.assemble_entry({**base_answer, "class": "blade",
+                                "implicitFamily": "atom.might"}, partition, seq=1)
 
 
 def test_assemble_entry_refuses_an_id_collision():
     partition = brief_mod.load_partition_context(
         "armament-primary", "humanoid", "a", base_types_dir=REAL_CORPUS_DIR)
     answer = {"name": "Test Widget", "flavor": "x", "class": "blade",
-             "implicitFamily": "atom.might", "tags": ["light"]}
+             "implicitFamily": "atom.deathblast", "tags": ["light"]}
     with pytest.raises(emit_mod.IdCollisionError):
         emit_mod.assemble_entry(answer, partition, seq=1)  # -001 already exists in the real file
 
@@ -331,7 +364,7 @@ def test_assemble_entry_reuses_an_existing_partitions_own_enhance_track():
     assert partition.existing_enhance_track == (
         (4, "atom.enhance-vigor"), (12, "atom.enhance-fortify"), (20, "atom.enhance-hardy"))
     answer = {"name": "Test Cuirass", "flavor": "x", "class": "plate",
-             "implicitFamily": "atom.vitality", "tags": ["heavy"]}
+             "implicitFamily": "atom.fortitude", "tags": ["heavy"]}
     entry = emit_mod.assemble_entry(answer, partition, seq=999)
     assert [(t["atLevel"], t["family"]) for t in entry["enhanceTrack"]] == list(
         partition.existing_enhance_track)
@@ -342,7 +375,7 @@ def test_assemble_entry_mints_a_fresh_enhance_track_for_a_brand_new_partition(tm
         "core-guard", "humanoid", "b", base_types_dir=tmp_path / "empty-base-types")
     assert partition.existing_enhance_track is None
     answer = {"name": "Test Cuirass", "flavor": "x", "class": "plate",
-             "implicitFamily": "atom.vitality", "tags": ["heavy"]}
+             "implicitFamily": "atom.fortitude", "tags": ["heavy"]}
     entry = emit_mod.assemble_entry(answer, partition, seq=1)
     assert len(entry["enhanceTrack"]) == 3
 
@@ -350,7 +383,7 @@ def test_assemble_entry_mints_a_fresh_enhance_track_for_a_brand_new_partition(tm
 def test_assemble_entry_refuses_empty_tags():
     partition = brief_mod.load_partition_context("armament-primary", "humanoid", "a")
     answer = {"name": "Test Widget", "flavor": "x", "class": "blade",
-             "implicitFamily": "atom.might", "tags": []}
+             "implicitFamily": "atom.deathblast", "tags": []}
     with pytest.raises(emit_mod.MintRefused):
         emit_mod.assemble_entry(answer, partition, seq=1)
 
@@ -363,7 +396,7 @@ def test_assemble_entry_refuses_empty_tags():
 def test_real_corpus_socket_max_never_exceeds_module_16s_ceiling():
     """`role == "standard"` is excluded here, not overlooked: `humanoid-standard.json`'s own entry
     carries `role: "standard"`, `enabled: false`, and a `retiredReason` citing D14 ("the commander
-    is another unique demon, not a 16th equip slot ... the generator emits nothing into it") —
+    is another unique creature, not a 16th equip slot ... the generator emits nothing into it") —
     module 16's `sockets.v1.json` deliberately has no ceiling row for it either (its own
     `socketCeilingNote`: "`standard` is deliberately ABSENT, not zero"). Confirms this generator's
     own scope decision (30 role-frames, `standard` excluded) matches a real, already-recorded
@@ -387,14 +420,37 @@ def test_real_corpus_implicit_families_are_all_in_the_real_registry_slate():
         doc = json.loads(Path(path).read_text(encoding="utf-8"))
         for entry in doc["entries"]:
             role = entry.get("role")
-            if role is None:
+            frame = entry.get("frame")
+            if role is None or frame is None:
                 continue
             try:
-                legal = set(tuning_mod.load_legal_implicit_families(role))
+                legal = set(tuning_mod.load_legal_implicit_families(role, frame))
             except tuning_mod.UnknownRoleError:
                 continue
             family = entry["implicit"]["family"]
-            assert family in legal, f"{entry['id']} names {family!r}, outside role {role!r}'s slate"
+            assert family in legal, (
+                f"{entry['id']} names {family!r}, outside role {role!r} frame {frame!r}'s slate "
+                f"(the per-frame slate, classes.v3.json)")
+
+
+def test_the_real_corpus_implicit_families_resolve_against_its_frame_slate():
+    """Every shipped entry names a family its own (role, frame) slate allows. RED until the S3
+    re-slate run lands; this is the seedsmith-side twin of the Core D11 test."""
+    import glob
+    offenders = []
+    for path in glob.glob(str(REAL_CORPUS_DIR / "*.json")):
+        doc = json.loads(Path(path).read_text(encoding="utf-8"))
+        for entry in doc["entries"]:
+            if entry.get("enabled") is False:
+                continue
+            role, frame = entry.get("role"), entry.get("frame")
+            if role is None or frame is None or role == "standard":
+                continue
+            legal = set(tuning_mod.load_legal_implicit_families(role, frame))
+            fam = entry["implicit"]["family"]
+            if fam not in legal:
+                offenders.append(f"{entry['id']} ({role}/{frame}): {fam}")
+    assert offenders == [], f"{len(offenders)} entries outside their frame slate:\n" + "\n".join(offenders[:20])
 
 
 # ---------------------------------------------------------------------------------------------
@@ -689,3 +745,173 @@ def test_cli_force_is_an_accepted_alias_for_overwrite(tmp_path, monkeypatch, cap
     exit_code = run_mod.main(["--role", "armament-primary", "--frame", "humanoid", "--band", "a",
                              "--force", "basetype-draw-armament-primary-humanoid-a-000"])
     assert exit_code == 0
+
+
+# ---- corpus-wide name collision guard (2026-09-12) ---------------------------------------------
+
+def test_collision_key_folds_case_and_punctuation():
+    assert run_mod.collision_key("Tungsten Spiker") == run_mod.collision_key("tungsten  spiker")
+    assert run_mod.collision_key("Weighted Censer") == run_mod.collision_key("Weighted-Censer")
+
+
+def test_load_corpus_names_spans_every_partition_not_just_one(tmp_path):
+    base_types_dir = tmp_path / "base-types"
+    base_types_dir.mkdir()
+    (base_types_dir / "humanoid-armament-primary-a.json").write_text(json.dumps(
+        {"entries": [{"id": "item.a-001", "name": "Tungsten Spiker"}]}), encoding="utf-8")
+    (base_types_dir / "humanoid-armament-primary-b.json").write_text(json.dumps(
+        {"entries": [{"id": "item.b-001", "name": "Weighted Censer"}]}), encoding="utf-8")
+
+    names = run_mod.load_corpus_names(base_types_dir=base_types_dir)
+    assert names[run_mod.collision_key("Tungsten Spiker")] == "item.a-001"
+    assert names[run_mod.collision_key("Weighted Censer")] == "item.b-001"
+
+
+def test_run_draws_reasks_once_then_refuses_a_corpus_wide_name_collision(tmp_path):
+    """The defect this closes: 65 display names shipped twice across partitions because the brief
+    only listed the current partition's names. The corpus-wide map now makes the second draw refuse
+    rather than persist a duplicate."""
+    ledger = RunLedger(tmp_path / "ledger.json")
+    base_types_dir = tmp_path / "base-types"
+    plan = run_mod.plan_run(role="armament-primary", frame="humanoid", band="a", count=1,
+                            ledger=ledger, base_types_dir=base_types_dir)
+
+    taken = {"tungsten spiker": "item.humanoid-main-hand-a-001"}
+    calls = {"n": 0}
+
+    def stubborn_call(brief: str, schema: dict) -> dict:
+        calls["n"] += 1
+        cls = schema["properties"]["class"]["enum"][0]
+        fam = schema["properties"]["implicitFamily"]["enum"][0]
+        return {"name": "Tungsten Spiker", "flavor": "f", "class": cls,
+                "implicitFamily": fam, "tags": ["light"]}
+
+    fresh, blocked = run_mod.run_draws(plan, ledger=ledger, call=stubborn_call,
+                                       corpus_names=dict(taken))
+
+    assert fresh == {}
+    assert calls["n"] == 2  # original ask + one repair ask
+    assert any("already exists in the base-type corpus" in b["reason"] for b in blocked.values())
+
+
+def test_run_draws_accepts_a_distinct_repair_answer(tmp_path):
+    ledger = RunLedger(tmp_path / "ledger.json")
+    base_types_dir = tmp_path / "base-types"
+    plan = run_mod.plan_run(role="armament-primary", frame="humanoid", band="a", count=1,
+                            ledger=ledger, base_types_dir=base_types_dir)
+
+    taken = {"tungsten spiker": "item.humanoid-main-hand-a-001"}
+    answers = iter(["Tungsten Spiker", "Honed Hatchet"])
+
+    def call(brief: str, schema: dict) -> dict:
+        cls = schema["properties"]["class"]["enum"][0]
+        fam = schema["properties"]["implicitFamily"]["enum"][0]
+        return {"name": next(answers), "flavor": "f", "class": cls,
+                "implicitFamily": fam, "tags": ["light"]}
+
+    fresh, blocked = run_mod.run_draws(plan, ledger=ledger, call=call, corpus_names=dict(taken))
+    assert blocked == {}
+    assert [e["name"] for e in fresh.values()] == ["Honed Hatchet"]
+
+
+def test_run_draws_without_corpus_names_stays_backward_compatible(tmp_path):
+    """The parameter is opt-in: an existing caller that passes no map keeps the old behaviour."""
+    ledger = RunLedger(tmp_path / "ledger.json")
+    plan = run_mod.plan_run(role="armament-primary", frame="humanoid", band="a", count=1,
+                            ledger=ledger, base_types_dir=tmp_path / "base-types")
+    fresh, blocked = run_mod.run_draws(plan, ledger=ledger, call=_fake_call(name="Tungsten Spiker"))
+    assert len(fresh) == 1 and blocked == {}
+
+
+# ---- S3: D11 clause-1 re-slate verb (2026-09-12) -----------------------------------------------
+
+def test_reslate_plan_moves_every_entry_onto_its_own_frame_slate(tmp_path):
+    """The repair must be correct by construction: after applying it, no entry sits outside its
+    (role, frame) slate, which — because the two frame slates are disjoint — means D11 clause 1
+    cannot fail."""
+    from seedsmith.adapters.items.basetypegen import reslate
+
+    base = tmp_path / "base-types"
+    base.mkdir()
+    # armament-primary/humanoid legal slate is the burst half; put a PLANT family on a humanoid row.
+    (base / "humanoid-armament-primary-a.json").write_text(json.dumps({"entries": [
+        {"id": "item.humanoid-main-hand-a-001", "role": "armament-primary", "frame": "humanoid",
+         "class": "blade", "implicit": {"family": "atom.might", "powerBand": "medium"},
+         "tags": ["light"]},
+    ]}), encoding="utf-8")
+
+    report = reslate.plan_reslate(base_types_dir=base)
+    assert len(report.changed) == 1
+    change = report.changed[0]
+    humanoid = set(tuning_mod.load_legal_implicit_families("armament-primary", "humanoid"))
+    assert change.old_family == "atom.might"
+    assert change.new_family in humanoid
+
+    written = reslate.apply_reslate(report, base_types_dir=base)
+    assert written == 1
+    after = json.loads((base / "humanoid-armament-primary-a.json").read_text(encoding="utf-8"))
+    entry = after["entries"][0]
+    assert entry["implicit"]["family"] in humanoid
+    assert entry["implicit"]["powerBand"] == "medium"   # preserved
+    assert entry["id"] == "item.humanoid-main-hand-a-001"  # identity preserved (seed-contract 7.2)
+
+
+def test_reslate_is_deterministic():
+    from seedsmith.adapters.items.basetypegen import reslate
+    a = reslate.plan_reslate()
+    b = reslate.plan_reslate()
+    assert [(c.entry_id, c.new_family) for c in a.changed] == \
+           [(c.entry_id, c.new_family) for c in b.changed]
+
+
+def test_reslate_leaves_a_legal_entry_alone(tmp_path):
+    from seedsmith.adapters.items.basetypegen import reslate
+    base = tmp_path / "base-types"
+    base.mkdir()
+    legal = tuning_mod.load_legal_implicit_families("armament-primary", "humanoid")[0]
+    (base / "humanoid-armament-primary-a.json").write_text(json.dumps({"entries": [
+        {"id": "item.humanoid-main-hand-a-001", "role": "armament-primary", "frame": "humanoid",
+         "class": "blade", "implicit": {"family": legal, "powerBand": "medium"}, "tags": ["light"]},
+    ]}), encoding="utf-8")
+    report = reslate.plan_reslate(base_types_dir=base)
+    assert report.changed == () and report.already_legal == 1
+
+
+def test_reslate_spreads_moved_rows_across_the_slate(tmp_path):
+    """A repair that piled every moved row onto one family would satisfy the letter of the rule and
+    destroy corpus variety; the pick spreads by current usage."""
+    from seedsmith.adapters.items.basetypegen import reslate
+    base = tmp_path / "base-types"
+    base.mkdir()
+    entries = [
+        {"id": f"item.humanoid-main-hand-a-{i:03d}", "role": "armament-primary", "frame": "humanoid",
+         "class": "blade", "implicit": {"family": "atom.butter", "powerBand": "medium"},
+         "tags": ["light"]}
+        for i in range(1, 13)
+    ]
+    (base / "humanoid-armament-primary-a.json").write_text(json.dumps({"entries": entries}),
+                                                           encoding="utf-8")
+    report = reslate.plan_reslate(base_types_dir=base)
+    used = {c.new_family for c in report.changed}
+    slate = set(tuning_mod.load_legal_implicit_families("armament-primary", "humanoid"))
+    assert used <= slate
+    assert len(used) > 1, "all moved rows collapsed onto one family"
+
+
+def test_the_real_corpus_is_already_disjoint_per_role_frame_after_the_reslate():
+    """S3 landed: the real corpus now satisfies D11 clause 1."""
+    import glob
+    by_role = {}
+    for path in glob.glob(str(REAL_CORPUS_DIR / "*.json")):
+        doc = json.loads(Path(path).read_text(encoding="utf-8"))
+        for entry in doc["entries"]:
+            if entry.get("enabled") is False:
+                continue
+            role, frame, fam = entry.get("role"), entry.get("frame"), entry["implicit"]["family"]
+            if role is None or frame is None or role == "standard":
+                continue
+            by_role.setdefault(role, {}).setdefault(frame, set()).add(fam)
+    overlaps = {r: sorted(f["humanoid"] & f["plant"])
+                for r, f in by_role.items() if "humanoid" in f and "plant" in f}
+    overlaps = {r: v for r, v in overlaps.items() if v}
+    assert overlaps == {}, f"roles whose frames still share an implicit family: {overlaps}"

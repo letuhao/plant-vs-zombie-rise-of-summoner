@@ -4,7 +4,7 @@
 **Status:** Draft — pending owner review.
 
 **Depends on:** nothing · **Blocks:** `battlefield-scope`'s own-side WHO-value completeness only
-(target/type/unique-demon need nothing from this module)
+(target/type/unique-creature need nothing from this module)
 
 ---
 
@@ -47,7 +47,7 @@ silently.
 ## Objective
 
 Emit one well-defined signal — an entity's scope-membership just changed — on exactly three transitions:
-a demon specimen binds (spawns), a demon specimen clears (dies/leaves), and a mind-control state flips
+a creature specimen binds (spawns), a creature specimen clears (dies/leaves), and a mind-control state flips
 (either direction). This module also becomes the first place mind-control state is tracked in
 `MatchState`/`BoardProjection` at all — there is nothing to read that state from today. It does not
 decide what a consumer does with the signal (`battlefield-scope`'s job).

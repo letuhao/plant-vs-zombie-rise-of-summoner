@@ -20,7 +20,7 @@ facts (R7):
 
 1. `tools/seedsmith/` declares **zero** dependencies — no `pyproject.toml`, no `requirements.txt`, no
    lockfile. It has been stdlib-only by convention, and that convention silently broke on
-   2026-09-01 when `jieba` was added to `adapters/demons/motifs.py` (owner-approved) and declared
+   2026-09-01 when `jieba` was added to `adapters/creatures/motifs.py` (owner-approved) and declared
    nowhere. **A fresh clone fails one test today** with `ModuleNotFoundError`.
 2. The ambient conda environment is not a viable base: `pydantic-ai 2.26.0` there requires
    `openai>=2.45.0` against `openai 2.30.0` installed — a real `ImportError`, reproduced.

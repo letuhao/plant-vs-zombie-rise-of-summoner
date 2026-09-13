@@ -25,7 +25,7 @@
       "id": "set.dolldiamond-001",
       "nameKey": "set.world-like-diamond",
       "name": "World-Like Diamond",
-      "themeKey": "demon.dolldiamond",
+      "themeKey": "creature.dolldiamond",
       "members": [
         {
           "role": "armament-primary",

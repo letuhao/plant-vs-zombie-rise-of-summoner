@@ -25,7 +25,7 @@
       "id": "set.iceplantern-001",
       "nameKey": "set.luminous-frost-lantern",
       "name": "Luminous Frost Lantern",
-      "themeKey": "demon.iceplantern",
+      "themeKey": "creature.iceplantern",
       "members": [
         {
           "role": "armament-primary",

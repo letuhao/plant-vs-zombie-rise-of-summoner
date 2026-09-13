@@ -74,8 +74,8 @@ from seedsmith.adapters.actions.signature_propose.derive import (  # noqa: E402
 )
 from seedsmith.adapters.actions import generate_signature_actions as gen_mod  # noqa: E402
 from seedsmith.adapters.actions import generate_brief_assembly as ba_gen_mod  # noqa: E402
-from seedsmith.adapters.demons.anchor.permute import order_for  # noqa: E402
-from seedsmith.adapters.demons.anchor.vote import VoteResult  # noqa: E402
+from seedsmith.adapters.creatures.anchor.permute import order_for  # noqa: E402
+from seedsmith.adapters.creatures.anchor.vote import VoteResult  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REAL_PLAN_PATH = REPO_ROOT / "data" / "seed" / "actions" / "_briefs" / "round-1.json"
@@ -99,7 +99,7 @@ def make_brief(**overrides) -> dict:
         "scope": "species", "scopeKey": "cherrybomb",
         "anchor": {
             "family": "cherry", "element": "fire", "rarity": "heirloom",
-            "themeKey": "demon.cherrybomb",
+            "themeKey": "creature.cherrybomb",
             "motifs": ["bomb", "fire"], "antiMotifs": ["protect", "roof"],
         },
         "slot": {"category": "attack", "targetMode": "self", "areaShape": None,
@@ -1076,7 +1076,7 @@ class BriefAssemblyProvenanceForwardingTests(unittest.TestCase):
                     "id": "brief.species.x.001", "briefId": "brief.species.x.001", "scope": "species",
                     "scopeKey": "x",
                     "anchor": {"family": None, "element": "fire", "rarity": "chaff",
-                              "themeKey": "demon.x", "motifs": [], "antiMotifs": []},
+                              "themeKey": "creature.x", "motifs": [], "antiMotifs": []},
                     "slot": {"category": "attack", "targetMode": "single", "areaShape": None,
                             "relation": "enemy", "kind": None, "rungBand": [1, 10]},
                     "pool": {"allowedAtomFamilies": [], "forbiddenAtomFamilies": []},
@@ -1214,16 +1214,28 @@ class ValidateHealG3NeverPenalisesDifferentiatorNoneTests(unittest.TestCase):
 
 # ---------------------------------------------------------------------------------------------
 # Roster test, not a claim (spec SS4): the plan was sized on real per-species motif/family data
-# read straight from the generated files -- asserted here so those numbers cannot silently drift.
+# read straight from the generated files -- asserted as a JOIN to the live roster, never a pinned
+# size (docs/architecture/validation-ssot.md: a population that grows per shipped species is a
+# reading).
 # ---------------------------------------------------------------------------------------------
 
 class RosterTests(unittest.TestCase):
-    def test_live_roster_and_family_memberships(self):
+    def test_live_roster_and_family_memberships_reconcile(self):
         species = load_catalog(CATALOG_PATH)
         families = derive_live_family_assignments(CATALOG_PATH)
-        self.assertEqual(len(species), 904)
-        self.assertEqual(len(families), len(species))
-        self.assertEqual(sum(len(v) for v in families.values()), 1183)
+        species_ids = {row.species_id for row in species}
+        # JOIN: one family assignment per species, every key a real species, none stray.
+        self.assertEqual(set(families), species_ids)
+        self.assertTrue(all(v for v in families.values()),
+                        "every species carries at least one family")
+        # Every family id is a non-empty string; the membership total is the per-species sum.
+        family_ids = {f for v in families.values() for f in (v if isinstance(v, list) else [v])}
+        self.assertTrue(all(isinstance(f, str) and f for f in family_ids))
+        memberships = sum(len(v if isinstance(v, list) else [v]) for v in families.values())
+        self.assertGreaterEqual(memberships, len(species_ids),
+                                "at least one membership per species")
+        print(f"signature roster: {len(species_ids)} species, {len(family_ids)} families, "
+              f"{memberships} memberships")
 
 
 if __name__ == "__main__":

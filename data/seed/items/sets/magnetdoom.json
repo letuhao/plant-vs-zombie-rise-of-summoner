@@ -25,7 +25,7 @@
       "id": "set.magnetdoom-001",
       "nameKey": "set.magnetic-ruin-spore",
       "name": "Magnetic Ruin Spore",
-      "themeKey": "demon.magnetdoom",
+      "themeKey": "creature.magnetdoom",
       "members": [
         {
           "role": "armament-primary",

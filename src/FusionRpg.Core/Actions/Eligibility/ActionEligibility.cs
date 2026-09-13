@@ -25,17 +25,20 @@ public static class ActionEligibility
     /// catalog, one container, etc.).</param>
     /// <param name="actorSpeciesKey">The acting actor's opaque species key, or <c>null</c> for an
     /// actor with none.</param>
-    /// <param name="familyOf">A load-time <c>speciesKey → familyId</c> lookup (§3.2's decided
-    /// mapping — <see cref="FamilyMap"/> parses its committed source). A miss (actor absent, or the
-    /// actor's family unassigned) must be treated as "no family" by the caller, never guessed.</param>
+    /// <param name="familyOf">A load-time <c>speciesKey → familyIds</c> lookup (§3.2's decided
+    /// mapping — <see cref="FamilyMap"/> parses its committed source). ⛔ CORRECTED 2026-09-11: the
+    /// live projection is a <b>relation</b>, not a function — a species legitimately belongs to more
+    /// than one family under the consolidated 227-family namespace, so the value is a collection and
+    /// a consumer must never take <c>value[0]</c> alone. A miss (actor absent, or the actor's family
+    /// unassigned) is "no family" — treated as empty by the caller, never guessed.</param>
     public static IReadOnlyList<ActionRow> Candidates(
         IEnumerable<ActionRow> actions,
         string? actorSpeciesKey,
-        IReadOnlyDictionary<string, string> familyOf)
+        IReadOnlyDictionary<string, IReadOnlyList<string>> familyOf)
     {
-        string? familyId = null;
-        if (!string.IsNullOrEmpty(actorSpeciesKey))
-            familyOf.TryGetValue(actorSpeciesKey, out familyId);
+        IReadOnlyList<string>? familyIds = null;
+        if (!string.IsNullOrEmpty(actorSpeciesKey) && familyOf.TryGetValue(actorSpeciesKey, out var found))
+            familyIds = found;
 
         var matches = new List<ActionRow>();
         foreach (var a in actions)
@@ -44,8 +47,8 @@ public static class ActionEligibility
             {
                 EligibilityScope.General => true,
                 EligibilityScope.Family =>
-                    !string.IsNullOrEmpty(a.ScopeKey) && !string.IsNullOrEmpty(familyId) &&
-                    string.Equals(a.ScopeKey, familyId, StringComparison.Ordinal),
+                    !string.IsNullOrEmpty(a.ScopeKey) && familyIds is not null &&
+                    familyIds.Any(f => string.Equals(a.ScopeKey, f, StringComparison.Ordinal)),
                 EligibilityScope.Species =>
                     !string.IsNullOrEmpty(a.ScopeKey) && !string.IsNullOrEmpty(actorSpeciesKey) &&
                     string.Equals(a.ScopeKey, actorSpeciesKey, StringComparison.Ordinal),
@@ -60,31 +63,42 @@ public static class ActionEligibility
 }
 
 /// <summary>
-/// A-E1 (spec-eligibility-axis.md §3.2, decided 2026-09-03): the <c>speciesKey → familyId</c> mapping
-/// <see cref="ActionEligibility.Candidates"/> needs, parsed from the committed projection
-/// (<c>data/seed/actions/_generated/family-map.json</c>) of <c>family-assignments.json</c> — a flat
-/// object because the source relation is a function (no species carries two families; the projection
-/// that emitted this file refused any list of length other than 1). This type stays free of I/O, same
+/// A-E1 (spec-eligibility-axis.md §3.2, decided 2026-09-03; ⛔ CORRECTED 2026-09-11): the
+/// <c>speciesKey → familyIds</c> mapping <see cref="ActionEligibility.Candidates"/> needs, parsed from
+/// the committed projection (<c>data/seed/actions/_generated/family-map.json</c>) of
+/// <c>family-assignments.json</c>. The source relation is a <b>relation, not a function</b> — the live
+/// roster carries 626 one-element, 277 two-element and 1 three-element lists over 227 consolidated
+/// families — so the value is a list and a species may reach every family it belongs to. An earlier
+/// revision of this parser refused a list of length other than 1 and a scalar value; that assumption
+/// died with the consolidated namespace and is not restored. This type stays free of I/O, same
 /// discipline as <see cref="EnablerPayoffPairings.Parse"/>: the caller reads the file, this parses the
 /// string.
 /// </summary>
 public static class FamilyMap
 {
-    public static IReadOnlyDictionary<string, string> Parse(string json)
+    public static IReadOnlyDictionary<string, IReadOnlyList<string>> Parse(string json)
     {
         if (string.IsNullOrWhiteSpace(json))
-            return new Dictionary<string, string>(StringComparer.Ordinal);
+            return new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
 
         using var doc = JsonDocument.Parse(json);
         if (doc.RootElement.ValueKind != JsonValueKind.Object)
-            throw new InvalidOperationException("family-map: root must be an object of speciesKey -> familyId");
+            throw new InvalidOperationException("family-map: root must be an object of speciesKey -> [familyId]");
 
-        var map = new Dictionary<string, string>(StringComparer.Ordinal);
+        var map = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
         foreach (var prop in doc.RootElement.EnumerateObject())
         {
-            if (prop.Value.ValueKind != JsonValueKind.String)
-                throw new InvalidOperationException($"family-map: '{prop.Name}' must be a single family id string");
-            map[prop.Name] = prop.Value.GetString()!;
+            if (prop.Value.ValueKind != JsonValueKind.Array)
+                throw new InvalidOperationException($"family-map: '{prop.Name}' must be a list of family id strings");
+            var families = new List<string>();
+            foreach (var f in prop.Value.EnumerateArray())
+            {
+                if (f.ValueKind != JsonValueKind.String)
+                    throw new InvalidOperationException($"family-map: '{prop.Name}' has a non-string family id");
+                var id = f.GetString();
+                if (!string.IsNullOrEmpty(id)) families.Add(id);
+            }
+            map[prop.Name] = families;
         }
         return map;
     }

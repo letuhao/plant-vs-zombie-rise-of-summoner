@@ -25,7 +25,7 @@
       "id": "set.twinflower-001",
       "nameKey": "set.twin-sunflower",
       "name": "Twin Sunflower",
-      "themeKey": "demon.twinflower",
+      "themeKey": "creature.twinflower",
       "members": [
         {
           "role": "armament-primary",

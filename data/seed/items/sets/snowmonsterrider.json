@@ -25,7 +25,7 @@
       "id": "set.snowmonsterrider-001",
       "nameKey": "set.rider-s-frozen-husk",
       "name": "Rider's Frozen Husk",
-      "themeKey": "demon.snowmonsterrider",
+      "themeKey": "creature.snowmonsterrider",
       "members": [
         {
           "role": "armament-primary",

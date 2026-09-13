@@ -25,7 +25,7 @@
       "id": "set.doublecherry-001",
       "nameKey": "set.crimson-nectar-dual-shot",
       "name": "Crimson Nectar Dual-Shot",
-      "themeKey": "demon.doublecherry",
+      "themeKey": "creature.doublecherry",
       "members": [
         {
           "role": "armament-primary",

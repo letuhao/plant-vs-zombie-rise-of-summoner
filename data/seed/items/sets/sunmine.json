@@ -25,7 +25,7 @@
       "id": "set.sunmine-001",
       "nameKey": "set.solar-spud-volley",
       "name": "Solar Spud Volley",
-      "themeKey": "demon.sunmine",
+      "themeKey": "creature.sunmine",
       "members": [
         {
           "role": "armament-primary",

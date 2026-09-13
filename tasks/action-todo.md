@@ -677,7 +677,7 @@ external blockers — see each item's own evidence below. No external blocker re
     just reads `a.Setup.EquippedActionIds` straight through. `WebMatchService.BuildSquad` gained
     `EquippedActionIdsFor(instanceId, store)`: builds `new OwnerScope(OwnerKind.Entity, instanceId)`
     (matching `LoadoutStoreTests.cs`'s own convention — keyed on the SPECIMEN, never the player, since
-    two demons one player owns can carry different loadouts), maps `store.ListGrants(scope)` through
+    two creatures one player owns can carry different loadouts), maps `store.ListGrants(scope)` through
     `store.GetAction(...)` filtered to `ActionKind.Skill` into `AutoEquipCandidate`s, and calls the
     already-built `store.GetLoadoutOrAutoEquip(scope, candidates)` (T21/T22's own real loadout/auto-
     equip resolution — a real loadout row wins, else it auto-equips live from whatever the specimen
@@ -1124,7 +1124,7 @@ external blockers — see each item's own evidence below. No external blocker re
     via `Instantiator.Draw` → roll a target shape via `WeightedChoice`, with `Area` excluded from the
     candidate pool whenever no board exists → compose the name via `ActionNameTemplates`).
   - **Scope, decided by reading the todo's own acceptance line rather than the full spec's wider
-    ambition**: per-demon-type category/element weight vectors (§3, `data/seed/actions/type-
+    ambition**: per-creature-type category/element weight vectors (§3, `data/seed/actions/type-
     weights.json`) and enabler/payoff pairing (§5) are **not** built here — the todo's acceptance line
     names determinism, share rejection, group exclusion, and the area/board gate, and T32 owns
     enabler/payoff coverage as its own separate item. Documented rather than silently dropped.
@@ -2194,7 +2194,7 @@ Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5 · **L** 5-8 (broken down further
     than duplicated. Named A17-A23 sweep + `RungSemanticsTests` + `AuraUpkeepDriverTests`: 113/113
     green. Full `Core.Tests` run: 26 failures, verified via `git status` (not assumed) to trace
     entirely to a different, unrelated, uncommitted stream (Atoms/Patron/Delve/ClassSystem —
-    `DemonSpeciesCatalog.Generated.cs`, `ConstructionActions.cs` (new/untracked), `Compilability.cs`,
+    `CreatureSpeciesCatalog.Generated.cs`, `ConstructionActions.cs` (new/untracked), `Compilability.cs`,
     etc. — none overlapping `CostLedger.cs`/`BattleRunState.cs`/`BattleEngine.cs`), matching and
     extending the SAME drift this session already recorded once today (memory:
     `concurrent-session-atoms-patron-drift-2026-09-06.md`, updated with the current, larger file
@@ -2482,13 +2482,13 @@ Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5 · **L** 5-8 (broken down further
     rather than a shared SQL transaction, since `AwardUniqueActorXpUnlocked`'s own `UPDATE` was
     already a single auto-committing statement with no `BeginTransaction` to share. (2) The catalog
     and family-map delegates the spec's own §4 draft implied would be threaded as NEW parameters are
-    instead two new process-wide static policies mirroring `RungPolicy`/`DemonSpeciesCatalog` exactly
+    instead two new process-wide static policies mirroring `RungPolicy`/`CreatureSpeciesCatalog` exactly
     — `ActionFamilyMapPolicy` (Core) and `UnlockTuningPolicy` (Core) — both **defaulting to
     "byte-identical unless configured"** (empty map / null tuning, skip-the-roll) rather than
     `RungPolicy`'s own "throw if unconfigured": this is the FIRST real production caller of the
     unlock ladder, so throwing would break every unrelated XP-award test across every project that
     never configures it. `RpgStore.TryRollActionUnlocks` (new, private): resolves the specimen's
-    species key from `DemonSpeciesCatalog.All` defensively (try/catch on "not configured" — no
+    species key from `CreatureSpeciesCatalog.All` defensively (try/catch on "not configured" — no
     `IsConfigured` flag exists, and a specimen with no resolvable species is a real, legal case per
     `ActionEligibility`'s own null contract, not a reason to fail the roll), derives a per-specimen
     seed via a local FNV-1a64 (a specimen has no separate "world seed" field; its own stable
@@ -2504,7 +2504,7 @@ Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5 · **L** 5-8 (broken down further
     one of 3 rolls to succeed deterministically; fixed to `DeltaMilli: 1000` (no decay). Acknowledged,
     accepted trade-off: `ActionFamilyMapPolicy`/`UnlockTuningPolicy` are configured once, statically,
     by the new test file — the same "process-wide static, configured once, never reset between tests"
-    convention `RungPolicy`/`DemonSpeciesCatalog`/every `*Hub` in this codebase already uses, with the
+    convention `RungPolicy`/`CreatureSpeciesCatalog`/every `*Hub` in this codebase already uses, with the
     same narrow theoretical cross-test-class parallelization exposure those already carry.
     `ActionUnlockGrantWiringTests.cs` (Data.Tests, 3 tests): a level gain with no imported actions
     still awards XP correctly (no-op is legal); a real level gain grants a real imported action,
@@ -2905,17 +2905,17 @@ tested, and verified for real, not re-deferred.
       (`--filter "FullyQualifiedName~Battle.Siege"`, 180/180) — a flaky, order-dependent full-suite
       artifact, not a regression; it does not reference anything A25 touches.
     - `Data.Tests`: **1115/1118 green, 3 failures.** 1 is the same pre-existing `ItemUniqueStoreTests`
-      defect. The other 2 (`DemonLawnDeployMagnitudeTests.Redeploying_with_the_same_species_writes_no_new_binding`,
+      defect. The other 2 (`CreatureLawnDeployMagnitudeTests.Redeploying_with_the_same_species_writes_no_new_binding`,
       `.A_specimens_species_magnitude_binds_on_first_deploy`) reproduce in isolation too, but
-      `git status` shows `DemonLawnDeployMagnitudeTests.cs` itself as `??` (untracked, never
+      `git status` shows `CreatureLawnDeployMagnitudeTests.cs` itself as `??` (untracked, never
       committed) — a DIFFERENT concurrent session's own brand-new, in-progress test file, whose own
       `SeedMagnitudeContainer` helper authors an invalid `family_id`
-      (`atom.species-magnitude.test-magnitude-demon`, two dots, not kebab-case) — a bug in that
+      (`atom.species-magnitude.test-magnitude-creature`, two dots, not kebab-case) — a bug in that
       session's own fixture, confirmed by direct evidence, not merely by name-matching a theme.
     - `Server.Tests`: **285/311 green, 26 failures.** 25 match Checkpoint L's own already-traced set
       (2 pre-existing, 23 from the siege-ai session's own untracked work). The 1 new name
-      (`DemonLawnDeployAtomPushTests.A_demon_specimens_reconciled_trait_binding_reaches_the_real_atom_push_payload`)
-      is confirmed via `git status` (`??`, untracked) as the SAME demon-lawn-deploy concurrent
+      (`CreatureLawnDeployAtomPushTests.A_creature_specimens_reconciled_trait_binding_reaches_the_real_atom_push_payload`)
+      is confirmed via `git status` (`??`, untracked) as the SAME creature-lawn-deploy concurrent
       session's own in-progress work, now touching a second test project.
   - Command list: `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~ActionContainerEffectResolverFactoryTests"` (7/7),
     `dotnet test tests\FusionRpg.Server.Tests --filter "FullyQualifiedName~BuildSquadEquippedActionsTests"` (6/6),

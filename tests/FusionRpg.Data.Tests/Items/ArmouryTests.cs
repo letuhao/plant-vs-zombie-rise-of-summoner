@@ -13,20 +13,18 @@ namespace FusionRpg.Data.Tests.Items;
 /// </summary>
 public class ArmouryTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ArmouryTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-armoury-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     static readonly PowerTuning Tuning = PowerTuning.Build(
@@ -129,13 +127,37 @@ public class ArmouryTests : IDisposable
                 IgnoreInaccessible = true,
                 AttributesToSkip = FileAttributes.Hidden | FileAttributes.System,
             })
-            .Where(p => !p.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}") &&
-                        !p.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}") &&
-                        !p.Contains($"{Path.DirectorySeparatorChar}.pytest_cache{Path.DirectorySeparatorChar}") &&
-                        !p.Contains($"{Path.DirectorySeparatorChar}.tmp-seedsmith-reconcile{Path.DirectorySeparatorChar}"))
+            .Where(IsScannedSourcePath)
             .ToList();
         Assert.True(matches.Count == 1, $"expected exactly one {fileName}, found {matches.Count}");
         return matches[0];
+    }
+
+    /// <summary>
+    /// True when a path found by a repo-wide scan is the tree's own source, not build output or a
+    /// nested checkout. A managed Agent Manager worktree (or any nested git worktree) lives *inside*
+    /// the repo root and carries its own copy of every source file, so a scan that only skips
+    /// <c>bin</c>/<c>obj</c> finds the file twice as soon as one exists.
+    /// </summary>
+    internal static bool IsScannedSourcePath(string fullPath)
+    {
+        if (string.IsNullOrEmpty(fullPath))
+            return false;
+        foreach (var segment in fullPath.Split(
+                     new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar },
+                     StringSplitOptions.RemoveEmptyEntries))
+        {
+            if (segment.Equals("bin", StringComparison.OrdinalIgnoreCase) ||
+                segment.Equals("obj", StringComparison.OrdinalIgnoreCase) ||
+                segment.Equals(".git", StringComparison.OrdinalIgnoreCase) ||
+                segment.Equals(".kilo", StringComparison.OrdinalIgnoreCase) ||
+                segment.Equals(".claude", StringComparison.OrdinalIgnoreCase) ||
+                segment.Equals(".opencode", StringComparison.OrdinalIgnoreCase) ||
+                segment.Equals(".pytest_cache", StringComparison.OrdinalIgnoreCase) ||
+                segment.Equals(".tmp-seedsmith-reconcile", StringComparison.OrdinalIgnoreCase))
+                return false;
+        }
+        return true;
     }
 
     static string FindSourceDir(string relative)
@@ -307,5 +329,25 @@ public class ArmouryTests : IDisposable
         Assert.Equal("spec-A", cell.SpecimenId);
         Assert.Equal("armament-primary", cell.Role);
         Assert.DoesNotContain("inst-unheld", held.Keys);
+    }
+
+    [Fact]
+    public void Source_scan_ignores_build_output_and_nested_checkouts()
+    {
+        var sep = Path.DirectorySeparatorChar;
+
+        // The tree's own source is scanned.
+        Assert.True(IsScannedSourcePath($"D:{sep}repo{sep}src{sep}FusionRpg.Data{sep}Sqlite{sep}RpgStore.Items.cs"));
+
+        // Build output.
+        Assert.False(IsScannedSourcePath($"D:{sep}repo{sep}tests{sep}bin{sep}Release{sep}RpgStore.Items.cs"));
+        Assert.False(IsScannedSourcePath($"D:{sep}repo{sep}tests{sep}obj{sep}RpgStore.Items.cs"));
+
+        // A nested git checkout / managed worktree carries its own copy of every source file — the
+        // exact case that made a repo-wide scan find two RpgStore.Items.cs.
+        Assert.False(IsScannedSourcePath($"D:{sep}repo{sep}.kilo{sep}worktrees{sep}solid-run{sep}src{sep}FusionRpg.Data{sep}Sqlite{sep}RpgStore.Items.cs"));
+        Assert.False(IsScannedSourcePath($"D:{sep}repo{sep}.claude{sep}worktrees{sep}agent-x{sep}src{sep}RpgStore.Items.cs"));
+        Assert.False(IsScannedSourcePath($"D:{sep}repo{sep}.opencode{sep}src{sep}RpgStore.Items.cs"));
+        Assert.False(IsScannedSourcePath($"D:{sep}repo{sep}.git{sep}modules{sep}RpgStore.Items.cs"));
     }
 }

@@ -25,7 +25,7 @@
       "id": "set.impzombie-001",
       "nameKey": "set.grave-bound-comfort",
       "name": "Grave-Bound Comfort",
-      "themeKey": "demon.impzombie",
+      "themeKey": "creature.impzombie",
       "members": [
         {
           "role": "mantle",

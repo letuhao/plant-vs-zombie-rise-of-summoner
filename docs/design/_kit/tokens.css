@@ -58,7 +58,7 @@
   /* --- sides -------------------------------------------------------------- */
   --side-plant:  #6fbf73;
   --side-zombie: #9b7fb0;
-  --side-demon:  #c96a52;
+  --side-creature:  #c96a52;
 
   /* --- rarity (legacy 5-slot) — a sparse approximation of the real ladder
      below, used by ~90 data-rarity="1".."5" call sites across all eight

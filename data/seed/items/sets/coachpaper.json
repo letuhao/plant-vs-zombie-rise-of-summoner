@@ -25,7 +25,7 @@
       "id": "set.coachpaper-001",
       "nameKey": "set.coach-s-pole",
       "name": "Coach's Pole",
-      "themeKey": "demon.coachpaper",
+      "themeKey": "creature.coachpaper",
       "members": [
         {
           "role": "armament-primary",

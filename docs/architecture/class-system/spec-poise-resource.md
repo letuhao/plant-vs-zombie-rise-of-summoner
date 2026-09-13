@@ -35,7 +35,7 @@ class-system files.
 
 | | `aspect-scope` | `poise-resource` |
 |---|---|---|
-| Is there a program to hand it to? | **Yes** — an active map, and `demon-core` already owns *"species link, rarity, variants, trait slots, element typing"* | **No.** [resource-hub-ssot.md](../resource-hub-ssot.md) is a locked SSOT doc; `resource-hub-ideal.md` is superseded. **No map, no queue, no owning module** |
+| Is there a program to hand it to? | **Yes** — an active map, and `creature-core` already owns *"species link, rarity, variants, trait slots, element typing"* | **No.** [resource-hub-ssot.md](../resource-hub-ssot.md) is a locked SSOT doc; `resource-hub-ideal.md` is superseded. **No map, no queue, no owning module** |
 | What kind of change? | A **migration** of a live schema, with battle-golden risk | **Purely additive** — one array element and one JSON row |
 
 > **The rule is "hand it to the program that owns it", not "never touch another program's files."**

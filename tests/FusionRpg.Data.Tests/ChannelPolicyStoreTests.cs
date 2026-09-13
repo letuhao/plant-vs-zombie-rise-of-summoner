@@ -17,21 +17,16 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class ChannelPolicyStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ChannelPolicyStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-chanpol-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     [Fact]
     public void An_empty_table_reports_the_shipped_policy_for_every_channel()
@@ -180,7 +175,7 @@ public class ChannelPolicyStoreTests : IDisposable
     {
         // effect_channel_policy carries channel_id and direction only -- default_value, cap_milli and
         // compose_kind retired as columns nothing ever read (spec-cap-consolidation.md §1.2, §3).
-        using var db = SqliteConnectionFactory.Open(_store.HotPath, readOnly: true);
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "PRAGMA table_info(effect_channel_policy);";
         using var r = cmd.ExecuteReader();

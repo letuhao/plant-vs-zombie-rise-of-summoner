@@ -25,7 +25,7 @@
       "id": "set.magnetbox-001",
       "nameKey": "set.magnetbox-monolith",
       "name": "Magnetbox Monolith",
-      "themeKey": "demon.magnetbox",
+      "themeKey": "creature.magnetbox",
       "members": [
         {
           "role": "armament-primary",

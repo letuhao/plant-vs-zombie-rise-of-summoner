@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.trap-creature.bucketzombie-001",
+  "flavor": "A heavy, iron-bound chest sits atop a pedestal, its lid slightly ajar. As you step past, the floorboards groan and a desiccated, grey hand erupts from the floorboards, clutching a rusted inkwell. The air grows stale, smelling of old parchment and the rot of a long-dead 僵尸.",
+  "kind": "trap",
+  "name": "The Scholar's Hollow",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.resilience",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "medium"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party triggered a pressure plate while navigating a narrow corridor.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.bucketzombie"
+}

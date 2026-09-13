@@ -25,7 +25,7 @@
       "id": "set.scaredyshroom-001",
       "nameKey": "set.spore-shot-fear",
       "name": "Spore-Shot Fear",
-      "themeKey": "demon.scaredyshroom",
+      "themeKey": "creature.scaredyshroom",
       "members": [
         {
           "role": "armament-primary",

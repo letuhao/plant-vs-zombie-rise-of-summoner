@@ -40,8 +40,8 @@ from ..metrics.content_completeness import (
 )
 from ..adapters.actions.description_backfill import ACTIONS_COMPLETENESS_SPEC
 from ..metrics.corpus_coverage import BasisHistogramMetric, DumpCompletenessMetric
-from ..metrics.demon_coverage import DemonUncoveredMetric
-from ..metrics.demon_roster import ALL_DEMON_ROSTER_METRICS
+from ..metrics.creature_coverage import CreatureUncoveredMetric
+from ..metrics.creature_roster import ALL_CREATURE_ROSTER_METRICS
 from ..metrics.pipeline_health import ALL_PIPELINE_HEALTH_METRICS
 from ..metrics.motif_sharing import MotifSharingMetric
 from ..metrics.passive_tree import TreeEqualValueMetric, ALL_PASSIVE_TREE_METRICS
@@ -118,17 +118,17 @@ def build_registry() -> MetricRegistry:
     registry.register(ContentFieldMissing())
     registry.register(ContentFieldStale())
     registry.register(ContentLanguageContamination())
-    registry.register(DemonUncoveredMetric())
+    registry.register(CreatureUncoveredMetric())
     registry.register(MotifSharingMetric())
     registry.register(DumpCompletenessMetric())
     registry.register(BasisHistogramMetric())
-    for metric_cls in ALL_DEMON_ROSTER_METRICS:
+    for metric_cls in ALL_CREATURE_ROSTER_METRICS:
         registry.register(metric_cls())
     for metric_cls in ALL_PIPELINE_HEALTH_METRICS:
         registry.register(metric_cls())
     registry.register(TreeEqualValueMetric())
     # H4 (spec-tree-language.md §7 gates 15-22): the eight PassiveTree/* corpus metrics, registered
-    # exactly once, matching the ALL_LINKAGE_METRICS/ALL_DEMON_ROSTER_METRICS/ALL_PIPELINE_HEALTH_METRICS
+    # exactly once, matching the ALL_LINKAGE_METRICS/ALL_CREATURE_ROSTER_METRICS/ALL_PIPELINE_HEALTH_METRICS
     # loop pattern above. This is the wiring H4's own evidence named as deliberately left for a later
     # task: the metric classes existed with the correct `gates` attribute, but `--write`'s own registry
     # never carried them, so `assert_exactly_one_hard_gate` always found zero and refused every write.
@@ -177,8 +177,8 @@ def _print_human(findings, *, stream=None) -> None:
 
 def _cmd_check_family(args: argparse.Namespace) -> int:
     """`seedsmith check --family <X> --gate` (spec-tree-language.md §Commands) — a family-scoped
-    check that needs no `corpus_root`/`--adapter` at all, the same shape `_cmd_demons_metrics`
-    already uses for `DemonRoster`. Only `PassiveTree` exists today (task H2); a later family adds
+    check that needs no `corpus_root`/`--adapter` at all, the same shape `_cmd_creatures_metrics`
+    already uses for `CreatureRoster`. Only `PassiveTree` exists today (task H2); a later family adds
     its own branch here rather than a second command.
 
     Exit codes, reusing the shipped four (`cli.py`'s own docstring) rather than inventing new
@@ -395,15 +395,15 @@ def cmd_check(args: argparse.Namespace) -> int:
         from ..adapters.dungeon.completeness import ensure_completeness_registered, load_dungeon_corpus
         ensure_completeness_registered()
         corpus = load_dungeon_corpus(Path(args.corpus_root))
-    elif args.adapter == "demons":
-        # `demon`/`commander-effect` kind files under this root already are real `{kind, entries}`
+    elif args.adapter == "creatures":
+        # `creature`/`commander-effect` kind files under this root already are real `{kind, entries}`
         # documents and load correctly via the generic path below -- but `species/**/*.json` is a
         # bare JSON ARRAY per file (`anchor/emit.py`'s own `render_family_file`), the same shape gap
-        # dungeon has for ALL its kinds. `load_species_corpus` (`adapters/demons/completeness.py`)
+        # dungeon has for ALL its kinds. `load_species_corpus` (`adapters/creatures/completeness.py`)
         # ADDS the one kind the generic loader cannot see on top of what it already loads correctly,
         # rather than replacing the whole load the way dungeon's own bridge does (`seedsmith-
         # content-standard` Task 10).
-        from ..adapters.demons.completeness import ensure_completeness_registered, load_species_corpus
+        from ..adapters.creatures.completeness import ensure_completeness_registered, load_species_corpus
         ensure_completeness_registered()
         try:
             corpus = Corpus.load(Path(args.corpus_root))
@@ -448,7 +448,7 @@ def cmd_check(args: argparse.Namespace) -> int:
     return EXIT_GAP if any(f.severity is Severity.GAP for f in relevant) else EXIT_CLEAN
 
 
-def _load_demon_anchors(anchors_root: Path) -> "list[dict] | None":
+def _load_creature_anchors(anchors_root: Path) -> "list[dict] | None":
     """Reads the `_index.json` an `anchor-emit` tree publishes and loads every family file it
     names, deduplicated by file — the same O(1)-lookup structure `run-control` resumes from."""
     index_path = anchors_root / "_index.json"
@@ -464,14 +464,14 @@ def _load_demon_anchors(anchors_root: Path) -> "list[dict] | None":
 
 
 def cmd_report(args: argparse.Namespace) -> int:
-    """`seedsmith report [--gate] [--corpus DIR --adapter NAME] [--demon-dump DIR]` — runs the
-    FULL registry (every metric family, item-corpus and demon-dump alike) in one pass. Each
+    """`seedsmith report [--gate] [--corpus DIR --adapter NAME] [--creature-dump DIR]` — runs the
+    FULL registry (every metric family, item-corpus and creature-dump alike) in one pass. Each
     metric's own `needs` decides whether it runs against what was actually supplied; a metric
     whose need is absent reports NOT_MEASURED rather than being silently skipped (`run_all`'s own
     contract) — this is the single command T1.10/T2.12/T3.8's own metrics are meant to appear in,
     so a later phase adding a metric family never has to invent a second report command.
 
-    At least one of `--corpus`/`--demon-dump` should normally be given; running with neither is
+    At least one of `--corpus`/`--creature-dump` should normally be given; running with neither is
     legal (every metric reports NOT_MEASURED) but produces no real signal.
     """
     corpus = Corpus() if args.corpus is None else None
@@ -489,26 +489,26 @@ def cmd_report(args: argparse.Namespace) -> int:
               f"(known: {', '.join(known_adapter_names())})", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
-    demon_dump = None
-    if args.demon_dump is not None:
-        from ..adapters.demons.dump_ctx import load_demon_dump_ctx
-        demon_dump = load_demon_dump_ctx(Path(args.demon_dump))
-        if demon_dump is None:
-            print(f"seedsmith: no readable corpus-dump tree at {args.demon_dump}", file=sys.stderr)
+    creature_dump = None
+    if args.creature_dump is not None:
+        from ..adapters.creatures.dump_ctx import load_creature_dump_ctx
+        creature_dump = load_creature_dump_ctx(Path(args.creature_dump))
+        if creature_dump is None:
+            print(f"seedsmith: no readable corpus-dump tree at {args.creature_dump}", file=sys.stderr)
             return EXIT_CANNOT_RUN
 
-    demon_anchors = None
-    if getattr(args, "demon_anchors", None) is not None:
-        demon_anchors = _load_demon_anchors(Path(args.demon_anchors))
-        if demon_anchors is None:
-            print(f"seedsmith: no readable anchor tree at {args.demon_anchors} "
+    creature_anchors = None
+    if getattr(args, "creature_anchors", None) is not None:
+        creature_anchors = _load_creature_anchors(Path(args.creature_anchors))
+        if creature_anchors is None:
+            print(f"seedsmith: no readable anchor tree at {args.creature_anchors} "
                   f"(expected an _index.json)", file=sys.stderr)
             return EXIT_CANNOT_RUN
 
     numerics_ctx = _build_numerics_context(args.adapter, adapter) if args.corpus is not None else None
     budget_rows = derive_all(corpus, adapter) if args.corpus is not None and args.adapter == "items" else None
     ctx = Ctx(corpus=corpus, adapter=adapter, numerics=numerics_ctx, budget=budget_rows,
-             demon_dump=demon_dump, demon_anchors=demon_anchors)
+             creature_dump=creature_dump, creature_anchors=creature_anchors)
 
     registry = build_registry()
     findings = run_all(registry, ctx, metric_ids=args.metric or None)
@@ -552,10 +552,10 @@ def cmd_metrics(args: argparse.Namespace) -> int:
 def cmd_effects(args: argparse.Namespace) -> int:
     """`seedsmith effects generate --kind affix` (T7.1, `affix-authoring`, effect-pipeline module 9).
 
-    Same defect class `cmd_demons`'s own docstring already names (D1.4): a real entrypoint reachable
+    Same defect class `cmd_creatures`'s own docstring already names (D1.4): a real entrypoint reachable
     only as `python -m seedsmith.adapters.effects.affix.generate_affixes` is a documented interface
     that only works if you know the private module path — not an interface. Import deferred for the
-    same reason `cmd_demons` defers its own: `effects generate` pulls in the workflow package, and
+    same reason `cmd_creatures` defers its own: `effects generate` pulls in the workflow package, and
     `langgraph` is an optional extra a base `seedsmith check` install must not require.
     """
     if args.effects_command == "generate":
@@ -726,15 +726,15 @@ def cmd_items(args: argparse.Namespace) -> int:
     }
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 
-    # A stale demon theme registry is an upstream registration defect, not a smaller valid item
+    # A stale creature theme registry is an upstream registration defect, not a smaller valid item
     # population. Without this guard, a newly shipped species absent from themes.v1.json simply
     # disappeared from the set/charm plan while the command still returned success. Refresh the
-    # registry first (`seedsmith demons themes`); never spend model calls on a partial walk.
+    # registry first (`seedsmith creatures themes`); never spend model calls on a partial walk.
     if args.population == "species" and (coverage.uncovered or coverage.orphaned):
         print(
-            "seedsmith: species plan refused — demon theme registry is stale "
+            "seedsmith: species plan refused — creature theme registry is stale "
             f"(uncovered={len(coverage.uncovered)}, orphaned={len(coverage.orphaned)}); "
-            "run `seedsmith demons themes` and retry",
+            "run `seedsmith creatures themes` and retry",
             file=sys.stderr,
         )
         return EXIT_CANNOT_RUN
@@ -872,7 +872,8 @@ def _cmd_items_repair_names(args: argparse.Namespace) -> int:
         repairs = repairs[:args.limit]
     payload = {"write": bool(args.write), "repairs": [
         {"entryId": repair.entry_id, "kind": repair.kind, "oldName": repair.old_name,
-         "keeperId": repair.keeper_id, "brief": name_repair.brief(repair)}
+         "keeperId": repair.keeper_id,
+         "brief": name_repair.brief(repair, cluster_size=repair.cluster_size)}
         for repair in repairs]}
     if not args.write:
         print(json.dumps(payload, ensure_ascii=False, indent=2))
@@ -892,24 +893,64 @@ def _cmd_items_repair_names(args: argparse.Namespace) -> int:
         if not isinstance(answers, dict):
             print("seedsmith: repair-names answers must be a JSON object keyed by entry id", file=sys.stderr)
             return EXIT_REFUSED
+        failed: "list[dict]" = []
     else:
         transport = resolve_live_transport(args.endpoint, args.model)
         if not transport.endpoint:
             print("seedsmith: repair-names --write needs --answers or a live endpoint", file=sys.stderr)
             return EXIT_REFUSED
         caller = live_answer_caller(transport)
-        try:
-            answers = {repair.entry_id: caller(name_repair.brief(repair), name_repair.schema())
-                       for repair in repairs}
-        except (RuntimeError, ValueError, json.JSONDecodeError) as exc:
-            print(f"seedsmith: repair-names model call failed — {exc}", file=sys.stderr)
+        # Per-row resilience with a bounded retry. A single out-of-vocabulary answer ("Evasion"
+        # when "Evasion" already ships) used to abort the WHOLE batch, discarding every good answer
+        # generated before it — and a local model needs a second try far more often than a whole
+        # batch needs discarding. A row that still fails after the retries is reported with its
+        # reason and skipped, never silently written.
+        answers: dict = {}
+        failed: "list[dict]" = []
+        taken: "set[str]" = set()
+        for repair in repairs:
+            prompt = name_repair.brief(repair, cluster_size=repair.cluster_size)
+            attempted: "list[str]" = []
+            for attempt in (1, 2, 3, 4, 5):
+                try:
+                    answer = caller(prompt, name_repair.schema())
+                    name_repair.validate_answers((repair,), {repair.entry_id: answer},
+                                                 items_root=root, extra_taken=taken)
+                    answers[repair.entry_id] = answer
+                    taken.add(str(answer.get("name", "")).strip())
+                    break
+                except (ValueError, json.JSONDecodeError) as exc:
+                    last = str(exc)
+                    attempted.append(str(answer.get("name", "")) if isinstance(answer, dict) else "?")
+                    # Name the rejected candidates explicitly. A local model repeats "Verdant
+                    # Reliquary" or a CJK name indefinitely when only told "already exists"; the
+                    # concrete refusal list is what breaks the loop. The CJK rows additionally need
+                    # to be told the name must be ASCII (the key is derived from it).
+                    prompt = (
+                        name_repair.brief(repair, cluster_size=repair.cluster_size)
+                        + f"\n\nYour previous answers were refused: {', '.join(attempted)}.\n"
+                        + "Return a DIFFERENT name that is NOT any of those and is not already in the "
+                        + "game. Use ONLY English words from the game's own vocabulary — no CJK "
+                        + "characters, because the id key is derived from the name.\n")
+                    if attempt == 5:
+                        failed.append({"entryId": repair.entry_id, "reason": last})
+                except RuntimeError as exc:
+                    # A transport failure is not the row's fault; report and continue.
+                    failed.append({"entryId": repair.entry_id, "reason": f"model call failed: {exc}"})
+                    break
+        if not answers:
+            print(f"seedsmith: repair-names produced no usable answers ({len(failed)} failed)",
+                  file=sys.stderr)
             return EXIT_CANNOT_RUN
+        # Only the rows with a valid answer are applied; the rest stay for the next run.
+        repairs = tuple(r for r in repairs if r.entry_id in answers)
     try:
         changed = name_repair.apply(repairs, answers, write=True, items_root=root)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"seedsmith: repair-names failed — {exc}", file=sys.stderr)
         return EXIT_CANNOT_RUN
-    print(json.dumps({**payload, "changed": [str(path) for path in changed]}, ensure_ascii=False, indent=2))
+    print(json.dumps({**payload, "changed": [str(path) for path in changed],
+                      "failed": failed}, ensure_ascii=False, indent=2))
     return EXIT_CLEAN
 
 
@@ -1338,13 +1379,13 @@ def _cmd_items_combogen_migrate(args: argparse.Namespace) -> int:
     return EXIT_CLEAN if not missing else EXIT_GAP
 
 
-def cmd_demons(args: argparse.Namespace) -> int:
-    """`seedsmith demons <motifs|themes|theme-enrich|generate>` — the demon generation entrypoints.
+def cmd_creatures(args: argparse.Namespace) -> int:
+    """`seedsmith creatures <motifs|themes|theme-enrich|generate>` — the creature generation entrypoints.
 
     ⛔ Why this exists. Two of the audit's own `Verify` lines named commands that did not exist:
-    `python -m seedsmith demons motifs` (G1.3) and
-    `python -m seedsmith demons generate --kind commander-effect` (G4.3). The real entrypoints were
-    reachable only as `python -m seedsmith.adapters.demons.<module>`, so both Verify lines failed
+    `python -m seedsmith creatures motifs` (G1.3) and
+    `python -m seedsmith creatures generate --kind commander-effect` (G4.3). The real entrypoints were
+    reachable only as `python -m seedsmith.adapters.creatures.<module>`, so both Verify lines failed
     when actually executed during the 2026-09-01 final-proof pass.
 
     This is the same defect D1.4 already caught once ("the real CLI — `report` from the spec's own
@@ -1352,11 +1393,11 @@ def cmd_demons(args: argparse.Namespace) -> int:
     true instead, matching P6's own precedent of "making the claim true rather than softening it" —
     a documented interface that only works if you know the private module path is not an interface.
 
-    Imports are deferred: `demons generate` pulls in the workflow package, and `langgraph` is an
+    Imports are deferred: `creatures generate` pulls in the workflow package, and `langgraph` is an
     optional extra. A top-level import would make `seedsmith check` fail on a base install.
     """
-    if args.demon_command == "families":
-        from ..adapters.demons.generate_families import run as run_families
+    if args.creature_command == "families":
+        from ..adapters.creatures.generate_families import run as run_families
         passthrough: "list[str]" = []
         for flag in ("dry_run", "write", "ack"):
             if getattr(args, flag, False):
@@ -1365,28 +1406,28 @@ def cmd_demons(args: argparse.Namespace) -> int:
                      "ack": "--i-have-read-the-append-only-note"}[flag])
         return run_families(passthrough)
 
-    if args.demon_command == "motifs":
+    if args.creature_command == "motifs":
         import json as _json
 
-        from ..adapters.demons.generate_motifs import regenerate
+        from ..adapters.creatures.generate_motifs import regenerate
         print(_json.dumps(regenerate(), ensure_ascii=False, indent=2))
         return EXIT_CLEAN
 
-    if args.demon_command in ("themes", "theme-refresh"):
+    if args.creature_command in ("themes", "theme-refresh"):
         # Keep the documented theme-refresh stage on the public CLI. Calling the private module
         # path was the only way to register a newly observed species, so an item fill could read a
         # stale theme snapshot and quietly plan a partial population. This is deterministic and
         # model-free; --dry-run exercises the complete-roster read without replacing the registry.
         import json as _json
 
-        from ..adapters.demons.generate_themes import regenerate
+        from ..adapters.creatures.generate_themes import regenerate
         summary = regenerate(rebuild=bool(args.rebuild), write=not bool(args.dry_run))
         print(_json.dumps({**summary, "dryRun": bool(args.dry_run)},
                           ensure_ascii=False, indent=2))
         return EXIT_CLEAN
 
-    if args.demon_command == "theme-enrich":
-        from ..adapters.demons import theme_enrich
+    if args.creature_command == "theme-enrich":
+        from ..adapters.creatures import theme_enrich
         passthrough: list[str] = []
         if args.dry_run:
             passthrough.append("--dry-run")
@@ -1398,34 +1439,34 @@ def cmd_demons(args: argparse.Namespace) -> int:
                 passthrough.extend([f"--{flag}", value])
         return theme_enrich.main(passthrough)
 
-    if args.demon_command == "power-parse":
-        return _cmd_demons_power_parse(args)
+    if args.creature_command == "power-parse":
+        return _cmd_creatures_power_parse(args)
 
-    if args.demon_command == "threat-band":
-        return _cmd_demons_threat_band(args)
+    if args.creature_command == "threat-band":
+        return _cmd_creatures_threat_band(args)
 
-    if args.demon_command == "contract":
-        return _cmd_demons_contract(args)
+    if args.creature_command == "contract":
+        return _cmd_creatures_contract(args)
 
-    if args.demon_command == "preflight":
-        return _cmd_demons_preflight(args)
+    if args.creature_command == "preflight":
+        return _cmd_creatures_preflight(args)
 
-    if args.demon_command == "permute":
-        return _cmd_demons_permute(args)
+    if args.creature_command == "permute":
+        return _cmd_creatures_permute(args)
 
-    if args.demon_command == "metrics":
-        return _cmd_demons_metrics(args)
+    if args.creature_command == "metrics":
+        return _cmd_creatures_metrics(args)
 
-    if args.demon_command == "run":
-        return _cmd_demons_run(args)
+    if args.creature_command == "run":
+        return _cmd_creatures_run(args)
 
-    if args.demon_command == "diff-legacy":
-        return _cmd_demons_diff_legacy(args)
+    if args.creature_command == "diff-legacy":
+        return _cmd_creatures_diff_legacy(args)
 
     if args.kind == "anchor":
-        return _cmd_demons_generate_anchor(args)
+        return _cmd_creatures_generate_anchor(args)
 
-    from ..adapters.demons.generate_commander_effects import main as run
+    from ..adapters.creatures.generate_commander_effects import main as run
 
     if args.kind != "commander-effect":
         print(f"unknown kind {args.kind!r}; only 'commander-effect' has a generator today")
@@ -1443,12 +1484,12 @@ def cmd_demons(args: argparse.Namespace) -> int:
     return run(passthrough)
 
 
-def _cmd_demons_power_parse(args: argparse.Namespace) -> int:
-    """`seedsmith demons power-parse --dump <dir> [--report]` (demon-seed module 3,
+def _cmd_creatures_power_parse(args: argparse.Namespace) -> int:
+    """`seedsmith creatures power-parse --dump <dir> [--report]` (creature-seed module 3,
     spec-power-parse.md). Zero model calls: reads the committed `corpus-dump` tree
     (`almanac/plant.json` + `almanac/zombie.json`) and runs the deterministic parse over it.
     """
-    from ..adapters.demons.power.parse import basis_histogram, disagreements, parse_power_seed
+    from ..adapters.creatures.power.parse import basis_histogram, disagreements, parse_power_seed
 
     dump_dir = Path(args.dump)
     plant_path = dump_dir / "almanac" / "plant.json"
@@ -1488,12 +1529,12 @@ def _cmd_demons_power_parse(args: argparse.Namespace) -> int:
     return EXIT_CLEAN
 
 
-def _cmd_demons_threat_band(args: argparse.Namespace) -> int:
-    """`seedsmith demons threat-band --dump <dir> [--histogram]` (demon-seed module 4,
+def _cmd_creatures_threat_band(args: argparse.Namespace) -> int:
+    """`seedsmith creatures threat-band --dump <dir> [--histogram]` (creature-seed module 4,
     spec-threat-band.md). Zero model calls: power-parse's score, looked up in the tuning table.
     """
-    from ..adapters.demons.power.bands import ThreatTuning, classify, histogram
-    from ..adapters.demons.power.parse import parse_power_seed
+    from ..adapters.creatures.power.bands import ThreatTuning, classify, histogram
+    from ..adapters.creatures.power.parse import parse_power_seed
 
     dump_dir = Path(args.dump)
     plant_path = dump_dir / "almanac" / "plant.json"
@@ -1533,12 +1574,12 @@ def _cmd_demons_threat_band(args: argparse.Namespace) -> int:
     return EXIT_CLEAN
 
 
-def _cmd_demons_contract(args: argparse.Namespace) -> int:
-    """`seedsmith demons contract --print|--audit` (demon-seed module 2, spec-anchor-contract.md).
+def _cmd_creatures_contract(args: argparse.Namespace) -> int:
+    """`seedsmith creatures contract --print|--audit` (creature-seed module 2, spec-anchor-contract.md).
     No model calls: prints or numerically audits the resolved anchor schema.
     """
-    from ..adapters.demons.anchor.audit import numeric_audit
-    from ..adapters.demons.anchor.schema import build_anchor_schema
+    from ..adapters.creatures.anchor.audit import numeric_audit
+    from ..adapters.creatures.anchor.schema import build_anchor_schema
 
     schema = build_anchor_schema()
 
@@ -1567,6 +1608,8 @@ def cmd_trees(args: argparse.Namespace) -> int:
         return _cmd_trees_generate(args)
     if args.trees_command == "review":
         return _cmd_trees_review(args)
+    if args.trees_command == "census":
+        return _cmd_trees_census(args)
 
     print(f"unknown trees command {args.trees_command!r}")
     return EXIT_CANNOT_RUN
@@ -1589,7 +1632,7 @@ def _all_roster_specs() -> "list":
     """Every tree spec the roster names — 12 aptitudes, 6 elements, 24 statuses — built through the
     SAME named spec functions `--tree <id>` already uses (`primary_tree_spec`/`elemental_tree_spec`/
     `status_tree_spec`), so the manifest and a single-tree emit can never disagree about one tree's
-    plan. Demon families are deliberately absent: they have no committed plan under
+    plan. Creature families are deliberately absent: they have no committed plan under
     `plan/*.v1.json` and ride the manifest's `_pending` list (spec-tree-plan.md's own `roster`
     block), never `trees[]`."""
     from ..adapters.trees.plan import emit as plan_emit
@@ -1742,7 +1785,7 @@ def _cmd_trees_generate(args: argparse.Namespace) -> int:
         # authored display name yet (tree-language's own naming pass, I10, has not run); `motifs`/
         # `anti_motifs`/`anti_motif_tags` are empty for the same reason a primary/mechanical tree's
         # own `--sample-brief` output already showed "(none named)" — this corpus category has no
-        # motif system, unlike the demon corpus's themed content.
+        # motif system, unlike the creature corpus's themed content.
         overall_outcomes: "dict[str, int]" = {}
         per_tree_reports: "list[dict]" = []
         for tree_id in tree_ids:
@@ -1880,6 +1923,42 @@ def _run_tree_equal_value(plans: "list[dict]", tuning_doc: dict) -> "str | None"
     except plan_invariants.PlanInvariantError as ex:
         return str(ex)
     return None
+
+
+def _cmd_trees_census(args: argparse.Namespace) -> int:
+    """`seedsmith trees census [--json]` (task P0.1, tasks/passive-tree-repair-plan.md §1).
+
+    Prints the passive-tree DISTRIBUTION, not an aggregate: bind rate by node class, by tier (for
+    mechanism), by category and by tree, plus the refusal buckets, the inert-bound count, the unspent
+    budget and any orphaned generated node. The 2026-09-11 aggregate (`266/1680 bound`) hid the
+    defect that actually matters — mechanism binds at 2.1% while magnitude binds at 29.5%, so tiers
+    8-10, which the plan authors as 100% mechanism, produce nothing. This command is what makes that
+    visible in one run, so every later repair phase reports a delta against a fixed baseline.
+
+    It measure-only: exit 0 unless the corpus could not be read at all (`EXIT_CANNOT_RUN`). It never
+    gates and never writes a corpus file — a later phase's gate diffs two runs of it.
+    """
+    from ..adapters.trees import census as census_mod
+
+    seed_root = Path(args.seed_root) if args.seed_root else None
+    out_root = Path(args.out_root) if args.out_root else None
+    tree_ids = [args.tree] if args.tree else None
+    try:
+        result = census_mod.census(seed_root, out_root, tree_ids)
+    except (OSError, json.JSONDecodeError) as ex:
+        print(f"seedsmith: passive-tree census could not read the corpus: {ex}", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    if not result.trees:
+        print("seedsmith: no committed tree plans found — run `trees plan --emit` first",
+              file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    if args.json:
+        print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
+    else:
+        print(result.format_text())
+    return EXIT_CLEAN
 
 
 def _cmd_trees_plan(args: argparse.Namespace) -> int:
@@ -2142,7 +2221,7 @@ def cmd_numerics(args: argparse.Namespace) -> int:
 
 def cmd_structures(args: argparse.Namespace) -> int:
     """`seedsmith structures <contract>` — base-defense structure corpus entrypoints. Mirrors
-    `cmd_demons`'s own dispatch shape exactly (module 23+, spec-structure-schema.md)."""
+    `cmd_creatures`'s own dispatch shape exactly (module 23+, spec-structure-schema.md)."""
     if args.structures_command == "contract":
         return _cmd_structures_contract(args)
 
@@ -2153,8 +2232,8 @@ def cmd_structures(args: argparse.Namespace) -> int:
 def _cmd_structures_contract(args: argparse.Namespace) -> int:
     """`seedsmith structures contract --print|--audit` (base-defense module 23,
     spec-structure-schema.md). No model calls: prints or numerically audits the resolved structure
-    anchor schema — a line-for-line copy of `_cmd_demons_contract` pointed at
-    `adapters.structures.anchor.{schema,audit}` instead of `adapters.demons.anchor.{schema,audit}`.
+    anchor schema — a line-for-line copy of `_cmd_creatures_contract` pointed at
+    `adapters.structures.anchor.{schema,audit}` instead of `adapters.creatures.anchor.{schema,audit}`.
     """
     from ..adapters.structures.anchor.audit import numeric_audit
     from ..adapters.structures.anchor.schema import build_structure_anchor_schema
@@ -2177,11 +2256,11 @@ def _cmd_structures_contract(args: argparse.Namespace) -> int:
     return EXIT_GAP
 
 
-def _cmd_demons_preflight(args: argparse.Namespace) -> int:
-    """`seedsmith demons preflight [--json] [--skip-model]` (demon-seed module 5,
+def _cmd_creatures_preflight(args: argparse.Namespace) -> int:
+    """`seedsmith creatures preflight [--json] [--skip-model]` (creature-seed module 5,
     spec-dump-preflight.md). Refuses to start a run unless every prerequisite is present.
     """
-    from ..adapters.demons.preflight import run_preflight, write_preflight_record
+    from ..adapters.creatures.preflight import run_preflight, write_preflight_record
 
     report = run_preflight(skip_model=args.skip_model)
 
@@ -2210,12 +2289,12 @@ def _cmd_demons_preflight(args: argparse.Namespace) -> int:
     return EXIT_CLEAN if report.full_pass else EXIT_GAP
 
 
-def _cmd_demons_permute(args: argparse.Namespace) -> int:
-    """`seedsmith demons permute --species <id> --field <name>` (demon-seed module 6,
+def _cmd_creatures_permute(args: argparse.Namespace) -> int:
+    """`seedsmith creatures permute --species <id> --field <name>` (creature-seed module 6,
     spec-option-permutation.md) — shows the three deterministic orders a species/field pair would
     see, so a reviewer can see the shuffle without instrumenting a real pipeline call."""
-    from ..adapters.demons.anchor.permute import order_for
-    from ..adapters.demons.anchor.schema import build_anchor_schema
+    from ..adapters.creatures.anchor.permute import order_for
+    from ..adapters.creatures.anchor.schema import build_anchor_schema
 
     schema = build_anchor_schema()
     prop = schema["properties"].get(args.field)
@@ -2232,26 +2311,26 @@ def _cmd_demons_permute(args: argparse.Namespace) -> int:
     return EXIT_CLEAN
 
 
-def _cmd_demons_generate_anchor(args: argparse.Namespace) -> int:
-    """`seedsmith demons generate --kind anchor --pipeline <id> --species <id> [--dry-run]`
-    (demon-seed module 7, spec-classify-pipelines.md). `--dry-run` renders every prompt without
+def _cmd_creatures_generate_anchor(args: argparse.Namespace) -> int:
+    """`seedsmith creatures generate --kind anchor --pipeline <id> --species <id> [--dry-run]`
+    (creature-seed module 7, spec-classify-pipelines.md). `--dry-run` renders every prompt without
     calling — the cheapest way to review a description change across the roster before spending
     hours on a real run. `--all` here is refused on purpose: a real multi-hour run needs the
-    pause/resume/cancel state machine, which is `demons run start --all` (module 9, run-control),
+    pause/resume/cancel state machine, which is `creatures run start --all` (module 9, run-control),
     not this single-shot command.
     """
-    from ..adapters.demons.anchor.prompts import PIPELINES, SpeciesLore, threat_audit_spec_for_basis
-    from ..adapters.demons.dump_ctx import load_demon_dump_ctx
+    from ..adapters.creatures.anchor.prompts import PIPELINES, SpeciesLore, threat_audit_spec_for_basis
+    from ..adapters.creatures.dump_ctx import load_creature_dump_ctx
 
     if args.all:
         print("seedsmith: this command has no run-control (pause/resume/checkpoint) — "
-              "use `seedsmith demons run start --all` instead, or --species with --dry-run "
+              "use `seedsmith creatures run start --all` instead, or --species with --dry-run "
               "to review one species at a time here", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
-    dump_dir = Path(args.dump) if args.dump else Path("../../data/seed/demons/_dump")
-    demon_dump = load_demon_dump_ctx(dump_dir)
-    if demon_dump is None:
+    dump_dir = Path(args.dump) if args.dump else Path("../../data/seed/creatures/_dump")
+    creature_dump = load_creature_dump_ctx(dump_dir)
+    if creature_dump is None:
         print(f"seedsmith: no readable corpus-dump tree at {dump_dir}", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
@@ -2265,7 +2344,7 @@ def _cmd_demons_generate_anchor(args: argparse.Namespace) -> int:
             display_name=row["displayName"], flavor_info=row["flavorInfo"],
             flavor_introduce=row["flavorIntroduce"], enrichment=row.get("enrichment"))
 
-    seed_by_species = {s.side + ":" + str(s.type_id): s for s in demon_dump.seeds}
+    seed_by_species = {s.side + ":" + str(s.type_id): s for s in creature_dump.seeds}
 
     def basis_for(row: dict) -> str:
         s = seed_by_species.get(row["side"] + ":" + str(row["typeId"]))
@@ -2295,7 +2374,7 @@ def _cmd_demons_generate_anchor(args: argparse.Namespace) -> int:
         print(f"seedsmith: species {args.species!r} not found in {dump_dir}", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
-    from ..workflow.graphs.demon_anchor import build_pipeline_graph, state_for_pipeline
+    from ..workflow.graphs.creature_anchor import build_pipeline_graph, state_for_pipeline
 
     row = by_species[args.species]
     lore = lore_for(row)
@@ -2315,7 +2394,7 @@ def _selector_from_args(args: argparse.Namespace) -> "dict":
     `{"kind": "all"}` when nothing more specific is given — `start` already skips
     already-emitted species on its own, so "all" is the right default rather than a refusal.
 
-    `--pipeline` is two DIFFERENT things depending on what else is set (demon-corpus-self-heal B1,
+    `--pipeline` is two DIFFERENT things depending on what else is set (creature-corpus-self-heal B1,
     2026-09-04, found live: `rerun --pipeline kit-shape --species Peashooter,...` silently did a
     FULL 8-pipeline reclassification instead of the intended kit-shape-only smoke test, because
     `--species` won the if-elif chain and `--pipeline`'s own value was discarded entirely). When no
@@ -2346,13 +2425,13 @@ def _selector_from_args(args: argparse.Namespace) -> "dict":
     return selector
 
 
-def _cmd_demons_run(args: argparse.Namespace) -> int:
-    """`seedsmith demons run <start|pause|resume|cancel|rerun|status|overwrite-all> [selector]`
-    (demon-seed module 9, spec-run-control.md). Ties the pure `machine`/`record`/`selectors`
-    modules to the real classification loop via `adapters.demons.run.runner` — every refusal
+def _cmd_creatures_run(args: argparse.Namespace) -> int:
+    """`seedsmith creatures run <start|pause|resume|cancel|rerun|status|overwrite-all> [selector]`
+    (creature-seed module 9, spec-run-control.md). Ties the pure `machine`/`record`/`selectors`
+    modules to the real classification loop via `adapters.creatures.run.runner` — every refusal
     (`RunRefused`) is printed and turned into a non-zero exit, never a silent no-op.
     """
-    from ..adapters.demons.run import runner as run_module
+    from ..adapters.creatures.run import runner as run_module
 
     paths = run_module.RunPaths(
         dump_dir=Path(args.dump) if args.dump else run_module.DEFAULT_DUMP_DIR,
@@ -2381,7 +2460,7 @@ def _cmd_demons_run(args: argparse.Namespace) -> int:
         elif args.run_verb == "overwrite-all":
             if not args.confirm:
                 dump_hash = run_module._compute_dump_hash(paths.dump_dir)
-                from ..adapters.demons.run.record import overwrite_all_token
+                from ..adapters.creatures.run.record import overwrite_all_token
                 print(f"seedsmith: overwrite-all needs --confirm <token>; "
                       f"the token for the current dump is {overwrite_all_token(dump_hash)}", file=sys.stderr)
                 return EXIT_CANNOT_RUN
@@ -2430,19 +2509,19 @@ def _cmd_demons_run(args: argparse.Namespace) -> int:
     return EXIT_CLEAN if record.state in ("completed", "paused", "cancelled") and not record.failed else EXIT_GAP
 
 
-def _cmd_demons_metrics(args: argparse.Namespace) -> int:
-    """`seedsmith demons metrics [--gate] [--grid] [--queue] [--anchors DIR]` (demon-seed module
-    14, spec-roster-metrics.md). A thin wrapper over `DemonRoster/*`'s own registry entries so the
+def _cmd_creatures_metrics(args: argparse.Namespace) -> int:
+    """`seedsmith creatures metrics [--gate] [--grid] [--queue] [--anchors DIR]` (creature-seed module
+    14, spec-roster-metrics.md). A thin wrapper over `CreatureRoster/*`'s own registry entries so the
     spec's literal command line works, without a second metrics engine beside `report`.
     """
-    from ..adapters.demons.anchor.review_queue import read_review_queue
-    from ..metrics.demon_roster import ALL_ELEMENT_PAIRS, GridFillMetric
+    from ..adapters.creatures.anchor.review_queue import read_review_queue
+    from ..metrics.creature_roster import ALL_ELEMENT_PAIRS, GridFillMetric
 
-    anchors_root = Path(args.anchors) if args.anchors else Path("../../data/seed/demons/species")
-    anchors = _load_demon_anchors(anchors_root)
+    anchors_root = Path(args.anchors) if args.anchors else Path("../../data/seed/creatures/species")
+    anchors = _load_creature_anchors(anchors_root)
     if anchors is None:
         print(f"seedsmith: no readable anchor tree at {anchors_root} (expected an _index.json) — "
-              f"run `demons run start --all` first (the full corpus run is a real, hours-long "
+              f"run `creatures run start --all` first (the full corpus run is a real, hours-long "
               f"commitment; run a small --species selector first to prove the mechanism)", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
@@ -2456,10 +2535,10 @@ def _cmd_demons_metrics(args: argparse.Namespace) -> int:
             print(f"  {e.side}:{e.species_id} computed={e.computed_rung_id} verdict={e.verdict} — {e.reason}")
         return EXIT_CLEAN
 
-    ctx = Ctx(corpus=Corpus(), adapter=resolve_adapter("stub"), demon_anchors=anchors)
+    ctx = Ctx(corpus=Corpus(), adapter=resolve_adapter("stub"), creature_anchors=anchors)
     registry = build_registry()
-    demon_ids = [m.id for m in registry.all() if m.family == "DemonRoster"]
-    findings = run_all(registry, ctx, metric_ids=demon_ids)
+    creature_ids = [m.id for m in registry.all() if m.family == "CreatureRoster"]
+    findings = run_all(registry, ctx, metric_ids=creature_ids)
 
     if args.grid:
         grid_findings = [f for f in findings if f.metric == GridFillMetric.id]
@@ -2480,21 +2559,21 @@ def _cmd_demons_metrics(args: argparse.Namespace) -> int:
     return EXIT_GAP if any(f.severity is Severity.GAP for f in findings) else EXIT_CLEAN
 
 
-def _cmd_demons_diff_legacy(args: argparse.Namespace) -> int:
-    """`seedsmith demons diff-legacy --legacy PATH [--anchors DIR]` (T2.7, spec-anchor-emit.md §6).
+def _cmd_creatures_diff_legacy(args: argparse.Namespace) -> int:
+    """`seedsmith creatures diff-legacy --legacy PATH [--anchors DIR]` (T2.7, spec-anchor-emit.md §6).
 
     Closes the "no committed entrypoint" gap `legacy_diff.py`'s own function had — the same class of
     defect `families`/`generate --kind commander-effect` each hit once before this
-    (`cmd_demons`'s own docstring). `--legacy` points at the plain-JSON export
-    `dotnet run --project tools/DemonSpeciesGen -- --export-legacy PATH` produces from the real,
+    (`cmd_creatures`'s own docstring). `--legacy` points at the plain-JSON export
+    `dotnet run --project tools/CreatureSpeciesGen -- --export-legacy PATH` produces from the real,
     compiled, shipped catalog; this module never reads C# source, matching `legacy_diff.py`'s own
     stated boundary.
     """
-    from ..adapters.demons.anchor.legacy_diff import diff_legacy, format_report
+    from ..adapters.creatures.anchor.legacy_diff import diff_legacy, format_report
 
     if not args.legacy:
         print("seedsmith: diff-legacy needs --legacy <path> — produce it with "
-              "`dotnet run --project tools/DemonSpeciesGen -- --export-legacy <path>`", file=sys.stderr)
+              "`dotnet run --project tools/CreatureSpeciesGen -- --export-legacy <path>`", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
     legacy_path = Path(args.legacy)
@@ -2502,15 +2581,15 @@ def _cmd_demons_diff_legacy(args: argparse.Namespace) -> int:
         print(f"seedsmith: no file at {legacy_path}", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
-    anchors_root = Path(args.anchors) if args.anchors else Path("../../data/seed/demons/species")
-    anchors = _load_demon_anchors(anchors_root)
+    anchors_root = Path(args.anchors) if args.anchors else Path("../../data/seed/creatures/species")
+    anchors = _load_creature_anchors(anchors_root)
     if anchors is None:
         print(f"seedsmith: no readable anchor tree at {anchors_root} (expected an _index.json)", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
     import json as _json
     legacy_raw = _json.loads(legacy_path.read_text(encoding="utf-8"))
-    # Case-sensitivity: the compiled catalog's own ids are lowercase (DemonSpeciesCatalog.Validate's
+    # Case-sensitivity: the compiled catalog's own ids are lowercase (CreatureSpeciesCatalog.Validate's
     # own rule), the real anchor's speciesId is the captured TitleCase typeName -- the same mismatch
     # class `_load_families` already found and fixed once this session (runner.py).
     legacy = [{**e, "id": e["id"].lower()} for e in legacy_raw]
@@ -2545,13 +2624,13 @@ def build_parser() -> argparse.ArgumentParser:
     check.set_defaults(func=cmd_check)
 
     report = sub.add_parser(
-        "report", help="run the FULL metric registry (item-corpus and demon-dump metrics alike)")
+        "report", help="run the FULL metric registry (item-corpus and creature-dump metrics alike)")
     report.add_argument("--corpus", default=None, metavar="DIR", help="an item/seed corpus root")
     report.add_argument("--adapter", default="stub")
-    report.add_argument("--demon-dump", dest="demon_dump", default=None, metavar="DIR",
-                        help="a corpus-dump tree root (data/seed/demons/_dump)")
-    report.add_argument("--demon-anchors", dest="demon_anchors", default=None, metavar="DIR",
-                        help="an emitted anchor tree root (data/seed/demons/species)")
+    report.add_argument("--creature-dump", dest="creature_dump", default=None, metavar="DIR",
+                        help="a corpus-dump tree root (data/seed/creatures/_dump)")
+    report.add_argument("--creature-anchors", dest="creature_anchors", default=None, metavar="DIR",
+                        help="an emitted anchor tree root (data/seed/creatures/species)")
     report.add_argument("--gate", action="store_true",
                         help="exit non-zero only for metrics promoted with gates=True")
     report.add_argument("--json", default=None, metavar="PATH")
@@ -2564,60 +2643,60 @@ def build_parser() -> argparse.ArgumentParser:
                          help="print Appendix-A coverage: claimed / known gap / unclaimed")
     metrics.set_defaults(func=cmd_metrics)
 
-    demons = sub.add_parser("demons", help="demon corpus generation entrypoints")
-    demon_sub = demons.add_subparsers(dest="demon_command", required=True)
-    demon_sub.add_parser("motifs", help="re-derive motifs + the motif registry (no model calls)")
-    themes = demon_sub.add_parser(
+    creatures = sub.add_parser("creatures", help="creature corpus generation entrypoints")
+    creature_sub = creatures.add_subparsers(dest="creature_command", required=True)
+    creature_sub.add_parser("motifs", help="re-derive motifs + the motif registry (no model calls)")
+    themes = creature_sub.add_parser(
         "themes", aliases=("theme-refresh",),
         help="refresh the published theme registry over the complete species roster")
     themes.add_argument("--dry-run", action="store_true",
                         help="read and count the complete roster without writing")
     themes.add_argument("--rebuild", action="store_true",
                         help="discard published snapshots and re-derive (reviewed correction only)")
-    enrich = demon_sub.add_parser(
+    enrich = creature_sub.add_parser(
         "theme-enrich", help="generate lore for name-basis themes (model calls; dry-run by default)")
     enrich.add_argument("--dry-run", action="store_true")
     enrich.add_argument("--write", action="store_true")
     enrich.add_argument("--endpoint", default="")
     enrich.add_argument("--model", default="")
-    power_parse = demon_sub.add_parser(
+    power_parse = creature_sub.add_parser(
         "power-parse", help="numeric power seed + basis per species (no model calls)")
     power_parse.add_argument("--dump", required=True, help="corpus-dump tree root")
     power_parse.add_argument("--report", action="store_true",
                              help="print the basis histogram + disagreement list")
-    threat_band = demon_sub.add_parser(
+    threat_band = creature_sub.add_parser(
         "threat-band", help="score -> threat rung -> Theta offset per species (no model calls)")
     threat_band.add_argument("--dump", required=True, help="corpus-dump tree root")
     threat_band.add_argument("--histogram", action="store_true",
                              help="print rung occupancy, including empty rungs")
-    contract = demon_sub.add_parser(
+    contract = creature_sub.add_parser(
         "contract", help="the species anchor JSON Schema — print or numerically audit it")
     contract.add_argument("--print", dest="print_schema", action="store_true",
                           help="print the resolved JSON Schema")
     contract.add_argument("--audit", action="store_true",
                           help="run the numeric-smuggling audit, exit 1 on a finding (default)")
-    preflight = demon_sub.add_parser(
+    preflight = creature_sub.add_parser(
         "preflight", help="the nine run-readiness checks — refuses or asks, never guesses")
     preflight.add_argument("--json", action="store_true", help="machine-readable output")
     preflight.add_argument("--skip-model", dest="skip_model", action="store_true",
                            help="checks 1-4, 7-9 only — CI's escape hatch, refused by run-control before a real run")
-    permute = demon_sub.add_parser(
+    permute = creature_sub.add_parser(
         "permute", help="show the three deterministic option orders for a species/field pair")
     permute.add_argument("--species", required=True)
     permute.add_argument("--field", required=True)
-    dmetrics = demon_sub.add_parser(
+    dmetrics = creature_sub.add_parser(
         "metrics", help="roster-shape metrics over the emitted anchors (element grid, threat/rarity distribution, ...)")
-    dmetrics.add_argument("--anchors", default="", help="anchor tree root (default data/seed/demons/species)")
+    dmetrics.add_argument("--anchors", default="", help="anchor tree root (default data/seed/creatures/species)")
     dmetrics.add_argument("--gate", action="store_true", help="exit non-zero only on gates=True findings")
     dmetrics.add_argument("--grid", action="store_true", help="print the 21x12 occupancy matrix")
     dmetrics.add_argument("--queue", action="store_true", help="print the threat-audit open-loop review queue")
-    fam = demon_sub.add_parser("families", help="extract + consolidate demon families (model calls)")
+    fam = creature_sub.add_parser("families", help="extract + consolidate creature families (model calls)")
     fam.add_argument("--dry-run", dest="dry_run", action="store_true")
     fam.add_argument("--write", action="store_true")
     fam.add_argument("--i-have-read-the-append-only-note", dest="ack", action="store_true")
-    gen = demon_sub.add_parser("generate", help="generate content for a demon kind")
+    gen = creature_sub.add_parser("generate", help="generate content for a creature kind")
     gen.add_argument("--kind", default="commander-effect")
-    gen.add_argument("--only", default="", help="comma-separated demon ids")
+    gen.add_argument("--only", default="", help="comma-separated creature ids")
     gen.add_argument("--stale", action="store_true",
                      help="only entries whose recorded motifs no longer match")
     gen.add_argument("--force", action="store_true", help="regenerate everything")
@@ -2625,18 +2704,18 @@ def build_parser() -> argparse.ArgumentParser:
     gen.add_argument("--workers", type=int, default=0)
     gen.add_argument("--endpoint", default="")
     gen.add_argument("--model", default="")
-    # --kind anchor (demon-seed module 7, classify-pipelines):
+    # --kind anchor (creature-seed module 7, classify-pipelines):
     gen.add_argument("--pipeline", default="", help="one of the 8 classify-pipelines ids (--kind anchor)")
     gen.add_argument("--species", default="", help="a speciesId (--kind anchor)")
-    gen.add_argument("--dump", default="", help="corpus-dump tree root (--kind anchor, default ../../data/seed/demons/_dump)")
-    gen.add_argument("--all", action="store_true", help="refused here — use `demons run start --all` (--kind anchor)")
-    difflegacy = demon_sub.add_parser(
+    gen.add_argument("--dump", default="", help="corpus-dump tree root (--kind anchor, default ../../data/seed/creatures/_dump)")
+    gen.add_argument("--all", action="store_true", help="refused here — use `creatures run start --all` (--kind anchor)")
+    difflegacy = creature_sub.add_parser(
         "diff-legacy",
         help="field agreement between the new classification and the shipped, compiled legacy catalog")
     difflegacy.add_argument("--legacy", default="",
-                            help="path to the JSON `DemonSpeciesGen --export-legacy` produced (required)")
-    difflegacy.add_argument("--anchors", default="", help="anchor tree root (default data/seed/demons/species)")
-    run = demon_sub.add_parser(
+                            help="path to the JSON `CreatureSpeciesGen --export-legacy` produced (required)")
+    difflegacy.add_argument("--anchors", default="", help="anchor tree root (default data/seed/creatures/species)")
+    run = creature_sub.add_parser(
         "run", help="run-control: pause/resume/cancel/rerun/overwrite-all over the anchor classification run")
     run.add_argument("run_verb", choices=("start", "pause", "resume", "cancel", "rerun", "status",
                                           "overwrite-all", "fix-unresolved", "fix-secondary-from-fusion"))
@@ -2649,8 +2728,8 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--unresolved", action="store_true", help="selector: only fields a vote could not settle")
     run.add_argument("--stale", action="store_true", help="selector: only entries whose inputs moved")
     run.add_argument("--confirm", default="", help="overwrite-all: the confirmation token")
-    run.add_argument("--dump", default="", help="corpus-dump tree root (default data/seed/demons/_dump)")
-    run.add_argument("--anchors", default="", help="anchor tree root (default data/seed/demons/species)")
+    run.add_argument("--dump", default="", help="corpus-dump tree root (default data/seed/creatures/_dump)")
+    run.add_argument("--anchors", default="", help="anchor tree root (default data/seed/creatures/species)")
     run.add_argument("--json", action="store_true", help="machine-readable output (status)")
     run.add_argument("--workers", type=int, default=4,
                      help="parallel model-call workers for start/resume/rerun/overwrite-all "
@@ -2659,8 +2738,8 @@ def build_parser() -> argparse.ArgumentParser:
                      help="fix-unresolved/fix-secondary-from-fusion: report what would change without writing anything")
     run.add_argument("--fusion-recipes", default="",
                      help="fix-secondary-from-fusion: path to the committed _fusion-recipes.json "
-                          "(default data/generated/demons/_fusion-recipes.json)")
-    demons.set_defaults(func=cmd_demons)
+                          "(default data/generated/creatures/_fusion-recipes.json)")
+    creatures.set_defaults(func=cmd_creatures)
 
     items = sub.add_parser("items", help="item corpus generation entrypoints (modules 13, 21)")
     items_sub = items.add_subparsers(dest="items_command", required=True)
@@ -2938,6 +3017,18 @@ def build_parser() -> argparse.ArgumentParser:
         "--review-dir", dest="review_dir", default="",
         help="override where <lot>.json's sheetReads/entries are read from (default "
              "data/seed/passive-tree/_review)")
+    trees_census = trees_sub.add_parser(
+        "census", help="print the passive-tree distribution, not an aggregate (task P0.1, "
+                       "tasks/passive-tree-repair-plan.md §1)")
+    trees_census.add_argument("--json", action="store_true",
+                              help="emit the full census as JSON (per-tree rows included)")
+    trees_census.add_argument("--tree", default="", help="a single tree id (default: every planned tree)")
+    trees_census.add_argument("--seed-root", dest="seed_root", default="",
+                              help="override the seed root the committed plan/nodes are read under "
+                                   "(default data/seed)")
+    trees_census.add_argument("--out-root", dest="out_root", default="",
+                              help="override where tree-binder's bound reports are read from "
+                                   "(default data/generated/passive-tree)")
     trees.set_defaults(func=cmd_trees)
 
     numerics = sub.add_parser(

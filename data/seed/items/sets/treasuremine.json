@@ -25,7 +25,7 @@
       "id": "set.treasuremine-001",
       "nameKey": "set.buried-treasure-seekers",
       "name": "Buried Treasure Seekers",
-      "themeKey": "demon.treasuremine",
+      "themeKey": "creature.treasuremine",
       "members": [
         {
           "role": "armament-primary",

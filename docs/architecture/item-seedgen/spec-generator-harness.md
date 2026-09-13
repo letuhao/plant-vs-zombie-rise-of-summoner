@@ -10,7 +10,7 @@ resume logic and dependency checking:
 
 1. **`RunLedger`** — resume/append/reconcile/selective-overwrite for one corpus, generalizing `setgen`'s
    already-proven pattern (`adapters/items/setgen/run.py`: *"Resume is not optional... The ledger is a
-   single JSON file keyed by subject id... reuses [the demon harness's] atomic file lock discipline"*).
+   single JSON file keyed by subject id... reuses [the creature harness's] atomic file lock discipline"*).
 2. **`DependencyValidator`** — a deterministic, cross-corpus reference-resolution engine. **Amended
    2026-09-07, before this module was ever built, after auditing the real content shapes**: a recipe's
    `outputRef` names an exact container id that must exist before the recipe is meaningful
@@ -139,7 +139,7 @@ tools/seedsmith/tests/test_dependency_validator.py       new
 
 ## Code style
 
-`RunLedger`: match `setgen/run.py`'s own shape, reusing the demon harness's atomic-lock primitive.
+`RunLedger`: match `setgen/run.py`'s own shape, reusing the creature harness's atomic-lock primitive.
 `DependencyValidator`: the reference manifest is a plain data structure (a list of
 `(field_path, kind, target_module)` tuples) that each module's own `run.py` supplies — this module never
 introspects another module's schema to guess references; guessing is exactly the ambiguity a declared

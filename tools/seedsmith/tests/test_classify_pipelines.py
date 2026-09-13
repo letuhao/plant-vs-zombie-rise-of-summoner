@@ -1,5 +1,5 @@
 """Tests for the eight `classify-pipelines` graphs and prompts (spec-classify-pipelines.md,
-demon-seed module 7). **No test in this suite calls a real model** — every transport is stubbed,
+creature-seed module 7). **No test in this suite calls a real model** — every transport is stubbed,
 matching the existing `test_offline_guarantee.py` discipline.
 """
 from __future__ import annotations
@@ -8,7 +8,7 @@ import json
 
 import pytest
 
-from seedsmith.adapters.demons.anchor.prompts import (
+from seedsmith.adapters.creatures.anchor.prompts import (
     PIPELINES,
     THREAT_AUDIT_INFERRED_SCHEMA,
     THREAT_AUDIT_MEASURED_SCHEMA,
@@ -23,7 +23,7 @@ from seedsmith.adapters.demons.anchor.prompts import (
 # collection when it's absent; the pure prompt/validator/derive tests above this guard still run.
 pytest.importorskip("langgraph.graph")
 
-from seedsmith.workflow.graphs.demon_anchor import build_pipeline_graph, state_for_pipeline  # noqa: E402
+from seedsmith.workflow.graphs.creature_anchor import build_pipeline_graph, state_for_pipeline  # noqa: E402
 
 LORE = SpeciesLore(
     species_id="peashooter", side="plant", display_name="豌豆射手",
@@ -179,7 +179,7 @@ def test_new_family_value_is_recorded_not_rejected():
     # family has no validator at all — any string list the model returns is accepted verbatim,
     # which IS the "open axis" behaviour (spec §4's family-open row: "none — the axis is open").
     assert "identity" not in __import__(
-        "seedsmith.workflow.graphs.demon_anchor", fromlist=["PIPELINE_VALIDATORS"]
+        "seedsmith.workflow.graphs.creature_anchor", fromlist=["PIPELINE_VALIDATORS"]
     ).PIPELINE_VALIDATORS
 
 

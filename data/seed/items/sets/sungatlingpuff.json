@@ -25,7 +25,7 @@
       "id": "set.sungatlingpuff-001",
       "nameKey": "set.four-shot-spore-light",
       "name": "Four-Shot Spore Light",
-      "themeKey": "demon.sungatlingpuff",
+      "themeKey": "creature.sungatlingpuff",
       "members": [
         {
           "role": "armament-primary",

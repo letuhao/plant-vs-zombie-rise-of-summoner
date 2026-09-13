@@ -25,7 +25,7 @@
       "id": "set.silverzombie-001",
       "nameKey": "set.silvered-reliquary",
       "name": "Silvered Reliquary",
-      "themeKey": "demon.silverzombie",
+      "themeKey": "creature.silverzombie",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.boatimp-001",
       "nameKey": "set.emergency-flight-protocol",
       "name": "Emergency Flight Protocol",
-      "themeKey": "demon.boatimp",
+      "themeKey": "creature.boatimp",
       "members": [
         {
           "role": "armament-primary",

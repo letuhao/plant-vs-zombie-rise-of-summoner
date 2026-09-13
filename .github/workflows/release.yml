@@ -16,7 +16,7 @@ jobs:
   publish:
     runs-on: windows-latest
     # ci.yml's own 2026-09-06 fix, same reason: a real, reproduced .NET process-redirection deadlock
-    # (DemonSpeciesImportCliTests.cs/RealColdProcessTests.cs) can hang a dotnet test call with no
+    # (CreatureSpeciesImportCliTests.cs/RealColdProcessTests.cs) can hang a dotnet test call with no
     # diagnostic — bound the job so a future hang fails fast instead of idling toward GitHub Actions'
     # own 6-hour default.
     timeout-minutes: 60

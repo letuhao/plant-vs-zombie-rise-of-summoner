@@ -25,7 +25,7 @@
       "id": "set.shulkflower-001",
       "nameKey": "set.steel-leaf-rot",
       "name": "Steel-Leaf Rot",
-      "themeKey": "demon.shulkflower",
+      "themeKey": "creature.shulkflower",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.caltropkelp-land-001",
       "nameKey": "set.entangling-earth-spike",
       "name": "Entangling Earth-Spike",
-      "themeKey": "demon.caltropkelp_land",
+      "themeKey": "creature.caltropkelp_land",
       "members": [
         {
           "role": "armament-primary",

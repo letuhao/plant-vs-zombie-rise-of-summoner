@@ -25,7 +25,7 @@
       "id": "set.ultimateplantern-001",
       "nameKey": "set.subspecies-frozen-core",
       "name": "Subspecies Frozen Core",
-      "themeKey": "demon.ultimateplantern",
+      "themeKey": "creature.ultimateplantern",
       "members": [
         {
           "role": "armament-primary",

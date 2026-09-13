@@ -25,7 +25,7 @@
       "id": "set.chompersquash-001",
       "nameKey": "set.the-great-gourd",
       "name": "The Great Gourd",
-      "themeKey": "demon.chompersquash",
+      "themeKey": "creature.chompersquash",
       "members": [
         {
           "role": "armament-primary",

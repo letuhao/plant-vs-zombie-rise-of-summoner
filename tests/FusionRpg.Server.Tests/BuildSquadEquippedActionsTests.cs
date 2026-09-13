@@ -6,12 +6,13 @@ using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Actions.Unlock;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Battle.Timeline;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -25,18 +26,18 @@ namespace FusionRpg.Server.Tests;
 /// </summary>
 public class BuildSquadEquippedActionsTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly WebMatchService _service;
 
-    /// <summary>T59.8: process-wide statics (`RungPolicy`/`DemonSpeciesCatalog`'s own established
+    /// <summary>T59.8: process-wide statics (`RungPolicy`/`CreatureSpeciesCatalog`'s own established
     /// shape), configured once for this whole test class -- an `AlwaysAccepts` tuning (no chance
     /// decay) so a controlled XP award lands an unlock deterministically, never a real random wait.</summary>
     static BuildSquadEquippedActionsTests()
     {
         UnlockTuningPolicy.Configure(new UnlockTuning(
             P1Milli: 1000, DeltaMilli: 1000, FloorMilli: 1000, HeldCap: 10, RungCap: 10, DiscardTaxCoeffMilli: 100));
-        ActionFamilyMapPolicy.Configure(new Dictionary<string, string>());
+        ActionFamilyMapPolicy.Configure(new Dictionary<string, IReadOnlyList<string>>());
     }
 
     public BuildSquadEquippedActionsTests()
@@ -48,14 +49,14 @@ public class BuildSquadEquippedActionsTests : IDisposable
         var tuningDir = Path.Combine(FindRepoRoot(), "data", "tuning");
         string Read(string name) => File.ReadAllText(Path.Combine(tuningDir, name));
         SummoningTuningHub.Configure(SummoningTuningLoader.Parse(Read("summoning.v1.json")));
-        FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
-            FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(Read("contracts.v1.json")));
+        FusionRpg.Core.Creatures.Contracts.ContractPolicy.Configure(
+            FusionRpg.Core.Creatures.Contracts.ContractTuningLoader.Parse(Read("contracts.v1.json")));
         SoulEarnPolicy.Configure(SoulEarnTuningLoader.Parse(Read("souls.v1.json")));
         // RollTraits -> FusionRoller.SlotsFor now reads StarPolicy.Tuning.SlotsByRarity
         // (seed-to-concrete T4.1 moved the old hardcoded switch into fusion.v1.json), so the mint
         // path this test drives needs StarPolicy configured too, exactly like AptitudeChannelModsTests.
-        FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
-            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(Read("fusion.v2.json")));
+        FusionRpg.Core.Creatures.Fusion.StarPolicy.Configure(
+            FusionRpg.Core.Creatures.Fusion.FusionTuningLoader.Parse(Read("fusion.v2.json")));
         // T59.8: AwardUniqueActorXp's own XpToNext call reads RpgXpCurve.Tuning -- not covered by
         // this assembly's [ModuleInitializer] bootstrap either (no prior test in this file awarded
         // specimen XP through a real level-up).
@@ -79,10 +80,8 @@ public class BuildSquadEquippedActionsTests : IDisposable
         FusionRpg.Core.Stats.Derived.StatsTuningHub.Configure(
             FusionRpg.Core.Stats.Derived.StatsTuningLoader.Parse(Read("stats.v1.json")));
 
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-buildsquad-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         var services = new ServiceCollection();
         services.AddLogging();
@@ -105,7 +104,7 @@ public class BuildSquadEquippedActionsTests : IDisposable
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     string SeedSkillAction(string actionId)
@@ -161,8 +160,8 @@ public class BuildSquadEquippedActionsTests : IDisposable
     public void A_specimen_with_no_grant_and_no_loadout_row_auto_equips_from_nothing_but_basics()
     {
         // No SeedSkillAction call at all -- this specimen holds zero skills, exactly the "no
-        // candidates" state most demons are in today (T22's own honest admission: nothing in
-        // production grants an action to a demon instance yet). BuildSquad must still succeed and
+        // candidates" state most creatures are in today (T22's own honest admission: nothing in
+        // production grants an action to a creature instance yet). BuildSquad must still succeed and
         // must not throw reaching for a loadout/rung table that was never configured.
         var (playerId, instanceId) = SummonOneSpecimen(_store, "no-grant", rngSeed: 1);
 
@@ -222,7 +221,7 @@ public class BuildSquadEquippedActionsTests : IDisposable
     [Fact]
     public void Two_specimens_of_the_same_species_carry_independent_loadouts()
     {
-        // Keyed on the specimen's own instance id, never the player -- two demons one player owns
+        // Keyed on the specimen's own instance id, never the player -- two creatures one player owns
         // must not share a loadout just because they share a summon.
         var (playerId, a) = SummonOneSpecimen(_store, "independent-a", rngSeed: 4);
         _store.AwardSouls(playerId, 10_000, SoulEarnPolicy.Reasons.Seed, "test-bankroll-2");

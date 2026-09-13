@@ -25,7 +25,7 @@
       "id": "set.kelptorch-001",
       "nameKey": "set.ignited-aquatic-spore",
       "name": "Ignited Aquatic Spore",
-      "themeKey": "demon.kelptorch",
+      "themeKey": "creature.kelptorch",
       "members": [
         {
           "role": "armament-primary",

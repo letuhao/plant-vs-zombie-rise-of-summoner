@@ -8,7 +8,7 @@
 
 ## First core loop, not the whole war
 
-The lawn is a live **board match** — Plants vs. Zombies on your machine. Rise of Summoner does not replace that game. It watches the board, records what happened, and can send demons you raised back into the fight.
+The lawn is a live **board match** — Plants vs. Zombies on your machine. Rise of Summoner does not replace that game. It watches the board, records what happened, and can send creatures you raised back into the fight.
 
 This is the **first core loop** — what you play first, and what feeds almost every spine loop: souls, levels, almanac, deploy; later capture and blessing. It is not the win condition, and it is not optional flavor.
 
@@ -33,15 +33,15 @@ A normal lawn level ends when the wave ends. Here it leaves something:
 - Kills and victories feed the **soul** ledger
 - Plants and zombies you meet feed **type progression** and the **almanac**
 - Specimens gain **levels** from work they actually did
-- Bound **demons** you deployed fight with the traits and element you gave them
+- Bound **creatures** you deployed fight with the traits and element you gave them
 
 Same save when you return to the Sanctum.
 
 ---
 
-## Deploying demons
+## Deploying creatures
 
-Most demons deploy as **plant-side avatars** — empowered uniques carrying that specimen’s traits and element. Designated boss-class species can deploy as **hypno-zombie allies**.
+Most creatures deploy as **plant-side avatars** — empowered uniques carrying that specimen’s traits and element. Designated boss-class species can deploy as **hypno-zombie allies**.
 
 A specimen already out on an expedition is soft-locked from lawn deploy (and the reverse). No double-dipping.
 
@@ -52,7 +52,7 @@ A specimen already out on an expedition is soft-locked from lawn deploy (and the
 | Role | Fantasy |
 |---|---|
 | **Blessing** | A real lawn run charges stronger soul earn on the next few web expeditions — lawn makes idle better |
-| **Capture** | Weaken a wild demon in a run and attempt to catch it. A small exclusive slice of the catalog; no legendaries gated this way forever |
+| **Capture** | Weaken a wild creature in a run and attempt to catch it. A small exclusive slice of the catalog; no legendaries gated this way forever |
 | **Trophies** | Cosmetic prestige from lawn play — never stats, never a repeatable faucet |
 
 Capture is also a **hunt** beat — see farm, hunt, and defend on [The loops](the-loops.md).

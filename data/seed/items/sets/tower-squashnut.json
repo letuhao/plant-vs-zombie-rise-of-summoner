@@ -25,7 +25,7 @@
       "id": "set.tower-squashnut-001",
       "nameKey": "set.nutty-scholar",
       "name": "Nutty Scholar",
-      "themeKey": "demon.tower_squashnut",
+      "themeKey": "creature.tower_squashnut",
       "members": [
         {
           "role": "armament-primary",

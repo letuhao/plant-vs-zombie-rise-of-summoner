@@ -25,7 +25,7 @@
       "id": "set.abyssswordstar-001",
       "nameKey": "set.celestial-descent",
       "name": "Celestial Descent",
-      "themeKey": "demon.abyssswordstar",
+      "themeKey": "creature.abyssswordstar",
       "members": [
         {
           "role": "armament-primary",

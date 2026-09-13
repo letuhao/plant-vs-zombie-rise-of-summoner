@@ -251,7 +251,7 @@ Each pool must earn its place by answering a *different* question, or it is a se
 |---|---|---|---|
 | `hp` | "Can I survive doing this?" | Healing, regen | The only battle pool today |
 | `sun` | "Can I afford to put something on the board?" | Ticking up over time | `SimEngine` / `SimModels`, lawn side only — never reaches an RPG battle |
-| `soul` | "Can I afford to call on a demon?" | Kills (the `soul-eater` trait already does exactly this) | `SoulEarnPolicy`, expeditions — **meta**-currency, not per-battle |
+| `soul` | "Can I afford to call on a creature?" | Kills (the `soul-eater` trait already does exactly this) | `SoulEarnPolicy`, expeditions — **meta**-currency, not per-battle |
 | `stamina` | "Can my body do this again right now?" | Regen per tick, spent by physical acts | Nothing |
 
 Two of these need a decision the spec must not skip:
@@ -846,9 +846,9 @@ Three built-and-tested pieces have **zero non-test callers** anywhere in `src/`:
 (`Actions/Eligibility/ActionEligibility.cs`, A-E1, 2026-09-03), `ActionSeeder.Generate` (A13/T31,
 2026-08-28), and `RpgStore.UpsertAction`/`UpsertCost` (A1/T30, 2026-08-28). `ExecuteSummon`
 (`RpgStore.Summons.cs:28-174`, the only production entry point that mints a new specimen) writes
-exactly three things — `rpg_unique_actors`, `rpg_demon_profiles`, a contract-slot bind — and grants
+exactly three things — `rpg_unique_actors`, `rpg_creature_profiles`, a contract-slot bind — and grants
 **zero actions**. This is not action-specific: `Instantiator.TryInstantiate`, the shared per-player
-roll SDK every content type (items, demons, actions) is meant to use, has **zero production callers
+roll SDK every content type (items, creatures, actions) is meant to use, has **zero production callers
 for any content type** (`effect-pipeline-ideal.md` §"WIRING GAP — nothing produces an instance").
 
 **The one place this exact pattern already runs in production**: `PUT /actors/{id}/equipment/{slot}` →

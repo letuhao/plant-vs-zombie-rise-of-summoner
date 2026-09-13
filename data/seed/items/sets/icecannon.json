@@ -25,7 +25,7 @@
       "id": "set.icecannon-001",
       "nameKey": "set.glacial-spore-cannon",
       "name": "Glacial Spore Cannon",
-      "themeKey": "demon.icecannon",
+      "themeKey": "creature.icecannon",
       "members": [
         {
           "role": "armament-primary",

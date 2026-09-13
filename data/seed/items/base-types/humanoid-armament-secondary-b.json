@@ -66,7 +66,7 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -140,7 +140,7 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -213,7 +213,7 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -286,7 +286,7 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 3,
@@ -359,7 +359,7 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -432,7 +432,7 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 3,
@@ -462,18 +462,18 @@
     },
     {
       "id": "item.humanoid-off-hand-b-013",
-      "nameKey": "base.weighted-censer",
-      "name": "Weighted Censer",
+      "nameKey": "base-type.ceremonial-thurible",
+      "name": "Ceremonial Thurible",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "focus",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.weighted-censer",
+      "iconKey": "icon.base-type.ceremonial-thurible",
       "flavorKey": "flavor.base.weighted-censer",
       "flavor": "A heavy, perforated metal vessel designed to swing rhythmically to release thick clouds of incense or caustic smoke.",
       "tags": [
@@ -498,8 +498,8 @@
     },
     {
       "id": "item.humanoid-off-hand-b-014",
-      "nameKey": "base.weighted-censer",
-      "name": "Weighted Censer",
+      "nameKey": "base-type.sacred-thurible",
+      "name": "Sacred Thurible",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -509,7 +509,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.weighted-censer",
+      "iconKey": "icon.base-type.sacred-thurible",
       "flavorKey": "flavor.base.weighted-censer",
       "flavor": "A heavy, hollow vessel designed to swing rhythmically to disrupt an enemy's footing. Its thick metal casing carries significant momentum when swung in wide arcs.",
       "tags": [
@@ -534,8 +534,8 @@
     },
     {
       "id": "item.humanoid-off-hand-b-015",
-      "nameKey": "base.weighted-censer",
-      "name": "Weighted Censer",
+      "nameKey": "base-type.lead-weighted-thurible",
+      "name": "Lead-Weighted Thurible",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -545,7 +545,7 @@
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.weighted-censer",
+      "iconKey": "icon.base-type.lead-weighted-thurible",
       "flavorKey": "flavor.base.weighted-censer",
       "flavor": "A heavy, hollow vessel designed to swing rhythmically to disrupt an enemy's footing. Its thick metal walls are built to withstand repeated impacts.",
       "tags": [
@@ -570,8 +570,8 @@
     },
     {
       "id": "item.humanoid-off-hand-b-016",
-      "nameKey": "base.weighted-censer",
-      "name": "Weighted Censer",
+      "nameKey": "base-type.lead-weighted-censer",
+      "name": "Lead-Weighted Censer",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -581,7 +581,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.weighted-censer",
+      "iconKey": "icon.base-type.lead-weighted-censer",
       "flavorKey": "flavor.base.weighted-censer",
       "flavor": "A heavy, perforated metal vessel designed to swing rhythmically to release thick clouds of incense or caustic smoke.",
       "tags": [
@@ -606,8 +606,8 @@
     },
     {
       "id": "item.humanoid-off-hand-b-017",
-      "nameKey": "base.weighted-censer",
-      "name": "Weighted Censer",
+      "nameKey": "base-type.lead-core-censer",
+      "name": "Lead-Core Censer",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -617,7 +617,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.weighted-censer",
+      "iconKey": "icon.base-type.lead-core-censer",
       "flavorKey": "flavor.base.weighted-censer",
       "flavor": "A heavy, hollow vessel designed to swing rhythmically to disrupt an opponent's footing. Its momentum is as much a weapon as its contents.",
       "tags": [
@@ -642,8 +642,8 @@
     },
     {
       "id": "item.humanoid-off-hand-b-018",
-      "nameKey": "base.weighted-censer",
-      "name": "Weighted Censer",
+      "nameKey": "base-type.lead-sealed-censer",
+      "name": "Lead-Sealed Censer",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -653,7 +653,7 @@
         "powerBand": "low"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.weighted-censer",
+      "iconKey": "icon.base-type.lead-sealed-censer",
       "flavorKey": "flavor.base.weighted-censer",
       "flavor": "A heavy, hollow vessel designed to swing rhythmically to disrupt an enemy's footing. Its momentum is as much a weapon as the metal within.",
       "tags": [
@@ -678,18 +678,18 @@
     },
     {
       "id": "item.humanoid-off-hand-b-019",
-      "nameKey": "base.weighted-censer",
-      "name": "Weighted Censer",
+      "nameKey": "base-type.lead-studded-thurible",
+      "name": "Lead-Studded Thurible",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.weighted-censer",
+      "iconKey": "icon.base-type.lead-studded-thurible",
       "flavorKey": "flavor.base.weighted-censer",
       "flavor": "A heavy, perforated metal vessel designed to swing rhythmically to release thick clouds of incense or caustic smoke.",
       "tags": [
@@ -714,8 +714,8 @@
     },
     {
       "id": "item.humanoid-off-hand-b-020",
-      "nameKey": "base.weighted-censer",
-      "name": "Weighted Censer",
+      "nameKey": "base-type.lead-scented-censer",
+      "name": "Lead-Scented Censer",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
@@ -725,7 +725,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.weighted-censer",
+      "iconKey": "icon.base-type.lead-scented-censer",
       "flavorKey": "flavor.base.weighted-censer",
       "flavor": "A heavy, perforated metal vessel designed to swing rhythmically to release thick clouds of incense or caustic fumes.",
       "tags": [
@@ -757,7 +757,7 @@
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -786,18 +786,18 @@
     },
     {
       "id": "item.humanoid-off-hand-b-022",
-      "nameKey": "base.iron-bound-censer",
-      "name": "Iron-Bound Censer",
+      "nameKey": "base-type.iron-clad-thurible",
+      "name": "Iron-Clad Thurible",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.retribution",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.iron-bound-censer",
+      "iconKey": "icon.base-type.iron-clad-thurible",
       "flavorKey": "flavor.base.iron-bound-censer",
       "flavor": "A heavy, perforated vessel designed to swing rhythmically to release thick clouds of incense or caustic salts.",
       "tags": [
@@ -822,18 +822,18 @@
     },
     {
       "id": "item.humanoid-off-hand-b-023",
-      "nameKey": "base.iron-bound-buckler",
-      "name": "Iron-Bound Buckler",
+      "nameKey": "base-type.steel-rimmed-buckler",
+      "name": "Steel-Rimmed Buckler",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.iron-bound-buckler",
+      "iconKey": "icon.base-type.steel-rimmed-buckler",
       "flavorKey": "flavor.base.iron-bound-buckler",
       "flavor": "A small, circular shield reinforced with heavy metal bands. It is designed for quick parries and close-quarters protection.",
       "tags": [
@@ -858,18 +858,18 @@
     },
     {
       "id": "item.humanoid-off-hand-b-024",
-      "nameKey": "base.iron-bound-buckler",
-      "name": "Iron-Bound Buckler",
+      "nameKey": "base-type.reinforced-buckler",
+      "name": "Reinforced Buckler",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.iron-bound-buckler",
+      "iconKey": "icon.base-type.reinforced-buckler",
       "flavorKey": "flavor.base.iron-bound-buckler",
       "flavor": "A small, circular shield reinforced with heavy metal bands, designed for quick parries and close-quarters defense.",
       "tags": [
@@ -894,18 +894,18 @@
     },
     {
       "id": "item.humanoid-off-hand-b-025",
-      "nameKey": "base.iron-bound-buckler",
-      "name": "Iron-Bound Buckler",
+      "nameKey": "base-type.iron-studded-buckler",
+      "name": "Iron-Studded Buckler",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.iron-bound-buckler",
+      "iconKey": "icon.base-type.iron-studded-buckler",
       "flavorKey": "flavor.base.iron-bound-buckler",
       "flavor": "A small, circular plate of reinforced steel designed to catch blows and deflect incoming strikes.",
       "tags": [
@@ -930,18 +930,18 @@
     },
     {
       "id": "item.humanoid-off-hand-b-026",
-      "nameKey": "base.iron-bound-buckler",
-      "name": "Iron-Bound Buckler",
+      "nameKey": "base-type.iron-rimmed-buckler",
+      "name": "Iron-Rimmed Buckler",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.iron-bound-buckler",
+      "iconKey": "icon.base-type.iron-rimmed-buckler",
       "flavorKey": "flavor.base.iron-bound-buckler",
       "flavor": "A small, circular shield reinforced with heavy metal bands. It is designed for quick parries and keeping an opponent at bay.",
       "tags": [
@@ -966,18 +966,18 @@
     },
     {
       "id": "item.humanoid-off-hand-b-027",
-      "nameKey": "base.iron-bound-buckler",
-      "name": "Iron-Bound Buckler",
+      "nameKey": "base-type.iron-reinforced-buckler",
+      "name": "Iron-Reinforced Buckler",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.iron-bound-buckler",
+      "iconKey": "icon.base-type.iron-reinforced-buckler",
       "flavorKey": "flavor.base.iron-bound-buckler",
       "flavor": "A small, reinforced disc designed to catch blows and deflect incoming strikes with a heavy, metallic clang.",
       "tags": [
@@ -1002,18 +1002,18 @@
     },
     {
       "id": "item.humanoid-off-hand-b-028",
-      "nameKey": "base.iron-bound-buckler",
-      "name": "Iron-Bound Buckler",
+      "nameKey": "base-type.heavy-buckler",
+      "name": "Heavy Buckler",
       "frame": "humanoid",
       "role": "armament-secondary",
       "class": "bulwark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.iron-bound-buckler",
+      "iconKey": "icon.base-type.heavy-buckler",
       "flavorKey": "flavor.base.iron-bound-buckler",
       "flavor": "A small, circular plate of reinforced steel designed for quick parries and deflecting incoming strikes.",
       "tags": [

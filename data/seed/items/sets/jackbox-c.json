@@ -25,7 +25,7 @@
       "id": "set.jackbox-c-001",
       "nameKey": "set.the-gilded-shell",
       "name": "The Gilded Shell",
-      "themeKey": "demon.jackbox_c",
+      "themeKey": "creature.jackbox_c",
       "members": [
         {
           "role": "core-guard",

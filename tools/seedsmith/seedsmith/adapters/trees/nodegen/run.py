@@ -54,7 +54,7 @@ from ...actions.validate_heal.gates import run_g1
 from ...actions.validate_heal.preflight import PreflightResult
 from ...actions.validate_heal.preflight import run_preflight as _shared_run_preflight
 from ...actions.validate_heal.schema_audit import audit_descriptions
-from ...demons.anchor.permute import order_for
+from ...creatures.anchor.permute import order_for
 from ....workflow.validators.field_echo import field_echo, name_collision, subject_name_echo
 from ....workflow.validators.language import language_consistency
 from . import brief as brief_mod
@@ -693,7 +693,7 @@ def _resolve_affinity_for_members(members: "Sequence[str]",
     """2026-09-06 real-call finding (`fortitude`, the first real run of a second tree): §6.3's own
     field description pairs `affinity[i]` with `affixIds[i]`, "in the same order" — but the vote
     (§7 gate 11, `resolve_set_vote_field`/`resolve_set_vote`) resolves `affixIds` per-MEMBER, from
-    up to 3 independent samples, and returns the resolved set SORTED (`adapters.demons.anchor.vote
+    up to 3 independent samples, and returns the resolved set SORTED (`adapters.creatures.anchor.vote
     .resolve_set_vote`'s own `tuple(sorted(...))`) — never any one sample's own order, and not
     necessarily even the same LENGTH as sample 0's own pick. The pre-fix code reused sample 0's raw
     `affinity` array positionally, silently assuming the vote's result always matched sample 0's

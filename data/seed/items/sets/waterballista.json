@@ -25,7 +25,7 @@
       "id": "set.waterballista-001",
       "nameKey": "set.frozen-corpse-ballista",
       "name": "Frozen Corpse Ballista",
-      "themeKey": "demon.waterballista",
+      "themeKey": "creature.waterballista",
       "members": [
         {
           "role": "armament-primary",

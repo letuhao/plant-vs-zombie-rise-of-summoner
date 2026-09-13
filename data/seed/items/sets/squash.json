@@ -25,7 +25,7 @@
       "id": "set.squash-001",
       "nameKey": "set.squashed-zombie",
       "name": "Squashed Zombie",
-      "themeKey": "demon.squash",
+      "themeKey": "creature.squash",
       "members": [
         {
           "role": "armament-primary",

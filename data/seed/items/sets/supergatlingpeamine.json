@@ -25,7 +25,7 @@
       "id": "set.supergatlingpeamine-001",
       "nameKey": "set.tuberous-subterranean-volley",
       "name": "Tuberous Subterranean Volley",
-      "themeKey": "demon.supergatlingpeamine",
+      "themeKey": "creature.supergatlingpeamine",
       "members": [
         {
           "role": "armament-primary",

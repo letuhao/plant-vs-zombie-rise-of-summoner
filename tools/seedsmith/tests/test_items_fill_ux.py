@@ -413,7 +413,7 @@ class ItemsFillTests(unittest.TestCase):
     def test_generation_completion_exposes_held_closed_subjects(self) -> None:
         class Plan:
             subjects = ()
-            held = (("demon.alpha", "basis=name"),)
+            held = (("creature.alpha", "basis=name"),)
             complete = False
 
             @staticmethod

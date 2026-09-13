@@ -19,7 +19,7 @@ public class SpeciesAllocationSourceTests
     {
         var source = new SpeciesAllocationSource(
             resolveSpeciesId: (side, typeId) => SpeciesLookupResult.Hit("fumeshroom"),
-            resolveSpeciesAllocation: id => AptitudeAllocation.Single(AllocationScope.DemonType, "Vigor", 40),
+            resolveSpeciesAllocation: id => AptitudeAllocation.Single(AllocationScope.CreatureType, "Vigor", 40),
             resolveCommanderAllocation: pid => AptitudeAllocation.Single(AllocationScope.Commander, "Might", 30),
             reportUnconfigured: _ => Assert.Fail("should not report when the index resolves a hit"));
 
@@ -27,7 +27,7 @@ public class SpeciesAllocationSourceTests
 
         // Merged into ONE AptitudeAllocation, not two independently resolved ones.
         Assert.Equal(30, result.PointsAt(AllocationScope.Commander, "Might"));
-        Assert.Equal(40, result.PointsAt(AllocationScope.DemonType, "Vigor"));
+        Assert.Equal(40, result.PointsAt(AllocationScope.CreatureType, "Vigor"));
         Assert.Equal(70, result.Total("Might") + result.Total("Vigor")); // scopes summed, one total
     }
 
@@ -40,18 +40,18 @@ public class SpeciesAllocationSourceTests
                 ? SpeciesLookupResult.Hit("polevaulterzombie")
                 : SpeciesLookupResult.Hit("wallnut"),
             resolveSpeciesAllocation: id => id == "polevaulterzombie"
-                ? AptitudeAllocation.Single(AllocationScope.DemonType, "Agility", 50)
-                : AptitudeAllocation.Single(AllocationScope.DemonType, "Fortitude", 50),
+                ? AptitudeAllocation.Single(AllocationScope.CreatureType, "Agility", 50)
+                : AptitudeAllocation.Single(AllocationScope.CreatureType, "Fortitude", 50),
             resolveCommanderAllocation: _ => AptitudeAllocation.Empty,
             reportUnconfigured: _ => Assert.Fail("index is always configured in this test"));
 
         var zombie = source.Resolve(Ctx(StatSide.Zombie, 3));
         var plant = source.Resolve(Ctx(StatSide.Plant, 3));
 
-        Assert.Equal(50, zombie.PointsAt(AllocationScope.DemonType, "Agility"));
-        Assert.Equal(0, zombie.PointsAt(AllocationScope.DemonType, "Fortitude"));
-        Assert.Equal(50, plant.PointsAt(AllocationScope.DemonType, "Fortitude"));
-        Assert.Equal(0, plant.PointsAt(AllocationScope.DemonType, "Agility"));
+        Assert.Equal(50, zombie.PointsAt(AllocationScope.CreatureType, "Agility"));
+        Assert.Equal(0, zombie.PointsAt(AllocationScope.CreatureType, "Fortitude"));
+        Assert.Equal(50, plant.PointsAt(AllocationScope.CreatureType, "Fortitude"));
+        Assert.Equal(0, plant.PointsAt(AllocationScope.CreatureType, "Agility"));
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public class SpeciesAllocationSourceTests
         // A real, if incomplete, answer (commander alone) -- not AptitudeAllocation.Empty and not a
         // fabricated species contribution.
         Assert.Equal(15, result.PointsAt(AllocationScope.Commander, "Might"));
-        Assert.Equal(0, result.TotalForScope(AllocationScope.DemonType));
+        Assert.Equal(0, result.TotalForScope(AllocationScope.CreatureType));
     }
 
     [Fact]

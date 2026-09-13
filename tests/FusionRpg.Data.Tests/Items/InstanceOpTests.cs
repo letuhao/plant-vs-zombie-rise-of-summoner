@@ -13,21 +13,16 @@ namespace FusionRpg.Data.Tests.Items;
 /// </summary>
 public class InstanceOpTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public InstanceOpTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-mutation-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static string RepoRoot()
     {
@@ -227,8 +222,7 @@ public class InstanceOpTests : IDisposable
 
         // A second store over the same directory — "persists across sessions", the rpg_summon_pity
         // shape reused.
-        var reopened = new RpgStore(_dir);
-        reopened.Init();
+        var reopened = _testStore.Reopen();
         Assert.Equal(17, reopened.GetInstanceMutationHead(id)!.PityCounter);
     }
 

@@ -12,22 +12,27 @@ namespace FusionRpg.Data.Tests;
 /// ASP.NET host, since the routine itself (not the one line of DI wiring around it) is where the
 /// decision logic lives.
 /// </summary>
+[Trait("Category", "DiskSemantics")]
 public class SeedImportRunnerTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
+    // The self-healing importer's subject is a real seed-corpus directory on disk (the "disk is the
+    // thing under test" case); only the store is in memory.
+    readonly string _dir;
 
     public SeedImportRunnerTests()
     {
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-selfheal-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
+        Directory.Delete(_dir, recursive: true);
     }
 
     // ---- fixtures -----------------------------------------------------------------------------
@@ -76,7 +81,7 @@ public class SeedImportRunnerTests : IDisposable
         }
         finally
         {
-            try { Directory.Delete(searchStart, recursive: true); } catch { /* temp dir */ }
+            Directory.Delete(searchStart, recursive: true);
         }
     }
 
@@ -109,7 +114,7 @@ public class SeedImportRunnerTests : IDisposable
         }
         finally
         {
-            try { Directory.Delete(isolated, recursive: true); } catch { /* temp dir */ }
+            Directory.Delete(isolated, recursive: true);
         }
     }
 
@@ -143,7 +148,7 @@ public class SeedImportRunnerTests : IDisposable
         }
         finally
         {
-            try { Directory.Delete(searchStart, recursive: true); } catch { /* temp dir */ }
+            Directory.Delete(searchStart, recursive: true);
         }
     }
 
@@ -176,7 +181,7 @@ public class SeedImportRunnerTests : IDisposable
         }
         finally
         {
-            try { Directory.Delete(searchStart, recursive: true); } catch { /* temp dir */ }
+            Directory.Delete(searchStart, recursive: true);
         }
     }
 
@@ -203,7 +208,7 @@ public class SeedImportRunnerTests : IDisposable
         }
         finally
         {
-            try { Directory.Delete(searchStart, recursive: true); } catch { /* temp dir */ }
+            Directory.Delete(searchStart, recursive: true);
         }
     }
 
@@ -226,7 +231,7 @@ public class SeedImportRunnerTests : IDisposable
         }
         finally
         {
-            try { Directory.Delete(searchStart, recursive: true); } catch { /* temp dir */ }
+            Directory.Delete(searchStart, recursive: true);
         }
     }
 
@@ -251,7 +256,7 @@ public class SeedImportRunnerTests : IDisposable
         }
         finally
         {
-            try { Directory.Delete(searchStart, recursive: true); } catch { /* temp dir */ }
+            Directory.Delete(searchStart, recursive: true);
         }
     }
 }

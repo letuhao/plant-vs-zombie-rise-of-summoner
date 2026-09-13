@@ -25,7 +25,7 @@
       "id": "set.pumpiner-001",
       "nameKey": "set.jack-o-lantern-gate",
       "name": "Jack-o'-Lantern Gate",
-      "themeKey": "demon.pumpiner",
+      "themeKey": "creature.pumpiner",
       "members": [
         {
           "role": "core-guard",

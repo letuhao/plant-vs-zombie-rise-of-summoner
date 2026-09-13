@@ -25,7 +25,7 @@
       "id": "set.jalapumpkin-001",
       "nameKey": "set.volcanic-gourd-core",
       "name": "Volcanic Gourd Core",
-      "themeKey": "demon.jalapumpkin",
+      "themeKey": "creature.jalapumpkin",
       "members": [
         {
           "role": "armament-primary",

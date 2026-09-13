@@ -1,9 +1,9 @@
 """seedsmith.adapters.actions.validate_heal.preflight --- `--preflight` (spec-validate-heal.md SS6
 hazard 4, acceptance #9c). Stage 0's second half: the schema audit proves the schema FORBIDS a
 number; this proves the server is READING the schema at all. One real call, one probe schema with a
-single-member enum. Modelled closely on `adapters/demons/preflight.py`'s own
+single-member enum. Modelled closely on `adapters/creatures/preflight.py`'s own
 `check_5_and_6_model` (the only other constrained-decoding preflight in this codebase) but scoped
-down to the one check this module owns --- no dump/venv/disk checks, those are the demon-seed
+down to the one check this module owns --- no dump/venv/disk checks, those are the creature-seed
 program's own.
 
 **This is the one item in this module that needs something outside the repo** (a live model

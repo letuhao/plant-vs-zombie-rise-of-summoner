@@ -25,7 +25,7 @@
       "id": "set.cornmelon-001",
       "nameKey": "set.corn-kernel-launcher",
       "name": "Corn Kernel Launcher",
-      "themeKey": "demon.cornmelon",
+      "themeKey": "creature.cornmelon",
       "members": [
         {
           "role": "armament-primary",

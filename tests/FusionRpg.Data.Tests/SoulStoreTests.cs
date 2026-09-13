@@ -1,6 +1,6 @@
 using System.Linq;
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Data;
 using Xunit;
 
@@ -8,20 +8,18 @@ namespace FusionRpg.Data.Tests;
 
 public class SoulStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public SoulStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-souls-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     EventEnvelope Ev(string kind, string matchKey, object payload) => new()

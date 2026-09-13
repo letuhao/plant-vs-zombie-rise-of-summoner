@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { useToastStack } from "@/shell/toastStack";
 
 /**
- * D5.9 (spec-delve-stage.md §7's band-4 row: "Drops · level-ups · a wild demon joining · a first
+ * D5.9 (spec-delve-stage.md §7's band-4 row: "Drops · level-ups · a wild creature joining · a first
  * clear … Queued, never racing band 3: a report arriving while the summary is open waits behind it").
  *
  * **A genuinely separate mechanism from the shell's own `toastStack.ts`, layered on top of it rather

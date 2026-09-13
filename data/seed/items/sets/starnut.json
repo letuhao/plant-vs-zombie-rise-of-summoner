@@ -25,7 +25,7 @@
       "id": "set.starnut-001",
       "nameKey": "set.starfruit-nut",
       "name": "Starfruit Nut",
-      "themeKey": "demon.starnut",
+      "themeKey": "creature.starnut",
       "members": [
         {
           "role": "armament-primary",

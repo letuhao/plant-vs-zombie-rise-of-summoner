@@ -1,5 +1,5 @@
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
 using Xunit;
@@ -9,35 +9,33 @@ namespace FusionRpg.Data.Tests;
 /// <summary>
 /// T4.6 (`species-import`, `RpgStore.Species.cs`) — the DAL half: one bad row writes nothing; a
 /// no-op reimport touches nothing; a species absent from the incoming roster is deleted.
-/// `DemonSpeciesImportTests`/manual runs cover the CLI's own "stale generated tree refuses" pre-flight
+/// `CreatureSpeciesImportTests`/manual runs cover the CLI's own "stale generated tree refuses" pre-flight
 /// (a `Program.cs`-level check this store's own `ImportSpecies` has no reason to duplicate).
 /// </summary>
 public class SpeciesImportStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public SpeciesImportStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-species-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
-    static ConcreteSpecies Species(string id, long power = 362, DemonRarity rarity = DemonRarity.Cultivated) => new()
+    static ConcreteSpecies Species(string id, long power = 362, CreatureRarity rarity = CreatureRarity.Cultivated) => new()
     {
         SpeciesId = id, Rarity = rarity, Theta = 13, PTheta = 452,
         AttackIntervalMs = 1500, AttackIntervalSource = "classified", RangeCells = 5, VariantCount = 2,
         Magnitudes = new Dictionary<string, long> { ["combat.power.omni"] = power, ["resource.max.hp"] = 2712 },
         Side = "plant", GameTypeId = 0, ElementPrimary = ElementTypeId.Earth,
-        ElementSecondary = ElementTypeId.Fire, DeployMode = DemonDeployMode.PlantAvatar,
-        Acquisition = DemonAcquisition.Summonable | DemonAcquisition.EventOnly,
+        ElementSecondary = ElementTypeId.Fire, DeployMode = CreatureDeployMode.PlantAvatar,
+        Acquisition = CreatureAcquisition.Summonable | CreatureAcquisition.EventOnly,
         Variants = new[] { "normal", "mutated" }, TraitPool = new[] { "Projectile-launching", "Defensive" },
     };
 
@@ -53,8 +51,8 @@ public class SpeciesImportStoreTests : IDisposable
         Assert.Equal(0, back.GameTypeId);
         Assert.Equal(ElementTypeId.Earth, back.ElementPrimary);
         Assert.Equal(ElementTypeId.Fire, back.ElementSecondary);
-        Assert.Equal(DemonDeployMode.PlantAvatar, back.DeployMode);
-        Assert.Equal(DemonAcquisition.Summonable | DemonAcquisition.EventOnly, back.Acquisition);
+        Assert.Equal(CreatureDeployMode.PlantAvatar, back.DeployMode);
+        Assert.Equal(CreatureAcquisition.Summonable | CreatureAcquisition.EventOnly, back.Acquisition);
         Assert.Equal(new[] { "normal", "mutated" }, back.Variants);
         Assert.Equal(new[] { "Projectile-launching", "Defensive" }, back.TraitPool);
     }
@@ -63,13 +61,13 @@ public class SpeciesImportStoreTests : IDisposable
     public void A_species_with_no_almanac_row_gets_the_generic_name_fallback_not_a_null()
     {
         // No almanac_seed data exists in a fresh test database — proves the LAST link of the
-        // DisplayName ?? TypeName ?? "Demon {gameTypeId}" fallback chain, mirroring the pre-atom-
-        // layer generator's own precedent (DemonSpeciesGenerator.cs:69).
+        // DisplayName ?? TypeName ?? "Creature {gameTypeId}" fallback chain, mirroring the pre-atom-
+        // layer generator's own precedent (CreatureSpeciesGenerator.cs:69).
         _store.ImportSpecies(new[] { Species("Peashooter") with { GameTypeId = 42 } });
 
         var back = _store.GetSpecies("Peashooter")!;
 
-        Assert.Equal("Demon 42", back.Name);
+        Assert.Equal("Creature 42", back.Name);
     }
 
     [Fact]
@@ -86,12 +84,12 @@ public class SpeciesImportStoreTests : IDisposable
         _store.ImportSpecies(new[] { Species("Peashooter") });
         var outcome = _store.ImportSpecies(new[]
         {
-            Species("Peashooter") with { DeployMode = DemonDeployMode.HypnoAlly },
+            Species("Peashooter") with { DeployMode = CreatureDeployMode.HypnoAlly },
         });
 
         Assert.Equal(1, outcome.Written);
         Assert.Equal(0, outcome.Unchanged);
-        Assert.Equal(DemonDeployMode.HypnoAlly, _store.GetSpecies("Peashooter")!.DeployMode);
+        Assert.Equal(CreatureDeployMode.HypnoAlly, _store.GetSpecies("Peashooter")!.DeployMode);
     }
 
     [Fact]
@@ -105,7 +103,7 @@ public class SpeciesImportStoreTests : IDisposable
 
         var back = _store.GetSpecies("Peashooter");
         Assert.NotNull(back);
-        Assert.Equal(DemonRarity.Cultivated, back!.Rarity);
+        Assert.Equal(CreatureRarity.Cultivated, back!.Rarity);
         Assert.Equal(452, back.PTheta);
         Assert.Equal(362, back.Magnitudes["combat.power.omni"]);
         Assert.Equal(2712, back.Magnitudes["resource.max.hp"]);

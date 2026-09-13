@@ -13,7 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from seedsmith.adapters.base import KindSpec  # noqa: E402
-from seedsmith.adapters.demons import DemonsAdapter  # noqa: E402
+from seedsmith.adapters.creatures import CreaturesAdapter  # noqa: E402
 from seedsmith.adapters.items import ItemsAdapter  # noqa: E402
 from seedsmith.corpus import Corpus  # noqa: E402
 from seedsmith.metrics import Ctx, MetricRegistry, Severity, run_all  # noqa: E402
@@ -229,7 +229,7 @@ class ProseDedupTests(unittest.TestCase):
         self.root = Path(tempfile.mkdtemp())
         self.spec_with_doctrine = KindSpec(
             kind="commander-effect", directory="commander-effect", namespace="commanderEffect",
-            required=frozenset({"id", "nameKey", "name", "demonId"}),
+            required=frozenset({"id", "nameKey", "name", "creatureId"}),
             dedup_fields=frozenset({"doctrine"}),
         )
 
@@ -266,9 +266,9 @@ class ProseDedupTests(unittest.TestCase):
 
     def test_exact_duplicate_prose_text_across_two_entries_is_caught(self) -> None:
         write(self.root, "commander-effect/a.json", "commander-effect", [
-            {"id": "commander-effect.a", "nameKey": "ce.a", "name": "A", "demonId": "a",
+            {"id": "commander-effect.a", "nameKey": "ce.a", "name": "A", "creatureId": "a",
              "doctrine": "The squad focuses fire on the nearest target."},
-            {"id": "commander-effect.b", "nameKey": "ce.b", "name": "B", "demonId": "b",
+            {"id": "commander-effect.b", "nameKey": "ce.b", "name": "B", "creatureId": "b",
              "doctrine": "The squad focuses fire on the nearest target."},
         ])
         corpus = Corpus.load(self.root)
@@ -290,10 +290,10 @@ class ProseDedupTests(unittest.TestCase):
         # effects describing the same split-shot mechanic in near-identical sentences.
         write(self.root, "commander-effect/a.json", "commander-effect", [
             {"id": "commander-effect.doublecherry", "nameKey": "ce.a", "name": "A",
-             "demonId": "doublecherry",
+             "creatureId": "doublecherry",
              "doctrine": "每次发射时，子弹会分裂为两枚，呈扇形向目标区域覆盖。"},
             {"id": "commander-effect.doubleshooter", "nameKey": "ce.b", "name": "B",
-             "demonId": "doubleshooter",
+             "creatureId": "doubleshooter",
              "doctrine": "每次发射时，子弹会分裂为两枚，呈扇形向前方区域扩散。"},
         ])
         corpus = Corpus.load(self.root)
@@ -313,10 +313,10 @@ class ProseDedupTests(unittest.TestCase):
         # legitimate distinct doctrines — the threshold must not flag them.
         write(self.root, "commander-effect/a.json", "commander-effect", [
             {"id": "commander-effect.jalagatling", "nameKey": "ce.a", "name": "A",
-             "demonId": "jalagatling",
+             "creatureId": "jalagatling",
              "doctrine": "通过持续的发射动作，在目标行径路径上留下带有地刺触感的弹道轨迹。"},
             {"id": "commander-effect.jalapeashooter", "nameKey": "ce.b", "name": "B",
-             "demonId": "jalapeashooter",
+             "creatureId": "jalapeashooter",
              "doctrine": "通过连续的发射动作引发地刺般的灼热冲击，对目标造成持续的触感灼伤。"},
         ])
         corpus = Corpus.load(self.root)
@@ -327,13 +327,13 @@ class ProseDedupTests(unittest.TestCase):
         self.assertEqual([f for f in findings if f.evidence["code"] == "ProseNearDuplicate"], [])
 
     def test_real_commander_effect_corpus_reports_exactly_the_known_pair(self) -> None:
-        live_root = Path(__file__).resolve().parents[3] / "data" / "seed" / "demons"
+        live_root = Path(__file__).resolve().parents[3] / "data" / "seed" / "creatures"
         if not live_root.is_dir():
-            self.skipTest("live demons corpus not present in this checkout")
+            self.skipTest("live creatures corpus not present in this checkout")
         corpus = Corpus.load(live_root)
         registry = MetricRegistry()
         registry.register(SemanticDedup())
-        findings = run_all(registry, Ctx(corpus=corpus, adapter=DemonsAdapter()))
+        findings = run_all(registry, Ctx(corpus=corpus, adapter=CreaturesAdapter()))
         near = [f for f in findings if f.evidence["code"] == "ProseNearDuplicate"]
         self.assertEqual(
             [tuple(sorted(f.evidence["entryIds"])) for f in near],

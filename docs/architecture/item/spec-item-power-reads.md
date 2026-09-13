@@ -141,7 +141,7 @@ suppress it until the tolerance tightens). This module ships the number *and* a
 > — so granting points silently drains the other eleven.
 
 **R4 is specified now and inert until its vocabulary lands.** `AllocationScope` is a four-value enum
-(`AptitudeAllocation.cs:8` — `Commander, DemonType, Aspect, UniqueDemon`); there is no item scope, and
+(`AptitudeAllocation.cs:8` — `Commander, CreatureType, Aspect, UniqueCreature`); there is no item scope, and
 there is no `aptitude.*` channel family among the twelve aptitudes (`Stats/Aptitudes/Aptitude.cs:38-52`).
 Both are **other programs'** reviewed vocabulary changes (`item-ideal.md` §2g row 2).
 

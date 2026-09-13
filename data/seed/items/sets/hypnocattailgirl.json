@@ -25,7 +25,7 @@
       "id": "set.hypnocattailgirl-001",
       "nameKey": "set.spectral-torrent",
       "name": "Spectral Torrent",
-      "themeKey": "demon.hypnocattailgirl",
+      "themeKey": "creature.hypnocattailgirl",
       "members": [
         {
           "role": "armament-primary",

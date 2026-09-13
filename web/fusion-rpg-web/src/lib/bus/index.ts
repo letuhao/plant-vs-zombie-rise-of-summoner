@@ -7,7 +7,7 @@ export * from "./aptitudePresets";
 export * from "./hub-provider";
 export * from "./log-store";
 export * from "./cheat-dirty";
-export * from "./demons";
+export * from "./creatures";
 export * from "./commanders";
 export * from "./onboarding";
 export * from "./actorSurface";

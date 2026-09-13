@@ -11,16 +11,14 @@ namespace FusionRpg.Data.Tests;
 /// `TreeRespecPolicy`'s shape.</summary>
 public class TreeRespecStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     const long PlayerId = 1;
 
     public TreeRespecStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-treerespec-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         var repoRoot = RepoRoot();
         PassiveTreeTuningHub.Configure(PassiveTreeTuningLoader.Parse(
@@ -37,7 +35,7 @@ public class TreeRespecStoreTests : IDisposable
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     [Fact] // respec_clears_one_scope_key_only
@@ -46,7 +44,7 @@ public class TreeRespecStoreTests : IDisposable
         _store.AwardSouls(PlayerId, 1000, "seed", "bank-1");
         _store.SaveTreeNodeState(AllocationScope.Commander, "player:1",
             new Dictionary<string, long> { ["skill.might-off-t1-n0"] = 0 });
-        _store.SaveTreeNodeState(AllocationScope.UniqueDemon, "instance:1",
+        _store.SaveTreeNodeState(AllocationScope.UniqueCreature, "instance:1",
             new Dictionary<string, long> { ["skill.might-off-t1-n0"] = 0 });
 
         var outcome = _store.RespecTreeState(PlayerId, AllocationScope.Commander, "player:1", "r-1");
@@ -54,7 +52,7 @@ public class TreeRespecStoreTests : IDisposable
         Assert.True(outcome.Ok, outcome.Reason);
         Assert.Empty(_store.LoadTreeState(AllocationScope.Commander, "player:1"));
         // The OTHER scope key is untouched -- a respec is never a roster-wide reset.
-        Assert.NotEmpty(_store.LoadTreeState(AllocationScope.UniqueDemon, "instance:1"));
+        Assert.NotEmpty(_store.LoadTreeState(AllocationScope.UniqueCreature, "instance:1"));
     }
 
     [Fact] // respec_is_never_refused

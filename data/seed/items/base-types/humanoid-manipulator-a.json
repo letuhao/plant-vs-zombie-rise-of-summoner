@@ -30,7 +30,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -66,7 +66,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -102,7 +102,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -139,7 +139,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -175,7 +175,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "medium"
       },
       "socketMax": 0,
@@ -211,7 +211,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -248,7 +248,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -284,7 +284,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -320,7 +320,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -356,7 +356,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -393,7 +393,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -429,7 +429,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.cruelty",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -494,8 +494,8 @@
     },
     {
       "id": "item.humanoid-hands-a-014",
-      "nameKey": "base.etched-gauntlet",
-      "name": "Etched Gauntlet",
+      "nameKey": "base-type.engraved-gauntlet",
+      "name": "Engraved Gauntlet",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "plate",
@@ -505,7 +505,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.etched-gauntlet",
+      "iconKey": "icon.base-type.engraved-gauntlet",
       "flavorKey": "flavor.base.etched-gauntlet",
       "flavor": "A heavy-duty sleeve of reinforced plating designed to channel precise, lethal movements through the fingertips.",
       "tags": [
@@ -566,8 +566,8 @@
     },
     {
       "id": "item.humanoid-hands-a-016",
-      "nameKey": "base.etched-gauntlet",
-      "name": "Etched Gauntlet",
+      "nameKey": "base-type.engraved-bracers",
+      "name": "Engraved Bracers",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "leather",
@@ -577,7 +577,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.etched-gauntlet",
+      "iconKey": "icon.base-type.engraved-bracers",
       "flavorKey": "flavor.base.etched-gauntlet",
       "flavor": "A heavy-duty sleeve of reinforced material designed to channel precise, lethal movements through the fingertips.",
       "tags": [
@@ -602,8 +602,8 @@
     },
     {
       "id": "item.humanoid-hands-a-017",
-      "nameKey": "base.etched-gauntlet",
-      "name": "Etched Gauntlet",
+      "nameKey": "base-type.inscribed-vambraces",
+      "name": "Inscribed Vambraces",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "plate",
@@ -613,7 +613,7 @@
         "powerBand": "trivial"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.etched-gauntlet",
+      "iconKey": "icon.base-type.inscribed-vambraces",
       "flavorKey": "flavor.base.etched-gauntlet",
       "flavor": "A rigid, articulated sleeve designed to channel precise, lethal movements through the fingertips.",
       "tags": [
@@ -638,8 +638,8 @@
     },
     {
       "id": "item.humanoid-hands-a-018",
-      "nameKey": "base.etched-gauntlet",
-      "name": "Etched Gauntlet",
+      "nameKey": "base-type.etched-bracers",
+      "name": "Etched Bracers",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "leather",
@@ -649,7 +649,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.etched-gauntlet",
+      "iconKey": "icon.base-type.etched-bracers",
       "flavorKey": "flavor.base.etched-gauntlet",
       "flavor": "A heavy, articulated sleeve of reinforced leather designed to channel precise, lethal movements.",
       "tags": [
@@ -674,8 +674,8 @@
     },
     {
       "id": "item.humanoid-hands-a-019",
-      "nameKey": "base.serrated-gauntlet",
-      "name": "Serrated Gauntlet",
+      "nameKey": "base-type.jagged-gauntlet",
+      "name": "Jagged Gauntlet",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "leather",
@@ -685,7 +685,7 @@
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.serrated-gauntlet",
+      "iconKey": "icon.base-type.jagged-gauntlet",
       "flavorKey": "flavor.base.serrated-gauntlet",
       "flavor": "A heavy-duty glove fitted with retractable, razor-sharp ridges designed to catch and tear through flesh.",
       "tags": [
@@ -710,8 +710,8 @@
     },
     {
       "id": "item.humanoid-hands-a-020",
-      "nameKey": "base.serrated-gauntlet",
-      "name": "Serrated Gauntlet",
+      "nameKey": "base-type.notched-gauntlet",
+      "name": "Notched Gauntlet",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "leather",
@@ -721,7 +721,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.serrated-gauntlet",
+      "iconKey": "icon.base-type.notched-gauntlet",
       "flavorKey": "flavor.base.serrated-gauntlet",
       "flavor": "A heavy-duty glove fitted with jagged, inward-facing blades designed to catch and tear through flesh.",
       "tags": [
@@ -781,8 +781,8 @@
     },
     {
       "id": "item.humanoid-hands-a-022",
-      "nameKey": "base.vitreous-manacles",
-      "name": "Vitreous Manacles",
+      "nameKey": "base-type.obsidian-shackles",
+      "name": "Obsidian Shackles",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "leather",
@@ -792,7 +792,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.vitreous-manacles",
+      "iconKey": "icon.base-type.obsidian-shackles",
       "flavorKey": "flavor.base.vitreous-manacles",
       "flavor": "Translucent restraints that seem to tighten whenever the wearer's intent turns toward malice.",
       "tags": [
@@ -817,8 +817,8 @@
     },
     {
       "id": "item.humanoid-hands-a-023",
-      "nameKey": "base.vitreous-manacles",
-      "name": "Vitreous Manacles",
+      "nameKey": "base-type.glass-fetters",
+      "name": "Glass Fetters",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "leather",
@@ -828,7 +828,7 @@
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.vitreous-manacles",
+      "iconKey": "icon.base-type.glass-fetters",
       "flavorKey": "flavor.base.vitreous-manacles",
       "flavor": "Translucent restraints that pulse with a rhythmic, predatory intent. They seem to tighten instinctively when a target's pulse quickens.",
       "tags": [
@@ -853,8 +853,8 @@
     },
     {
       "id": "item.humanoid-hands-a-024",
-      "nameKey": "base.vitreous-manacles",
-      "name": "Vitreous Manacles",
+      "nameKey": "base-type.crystalline-shackles",
+      "name": "Crystalline Shackles",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "leather",
@@ -864,7 +864,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.vitreous-manacles",
+      "iconKey": "icon.base-type.crystalline-shackles",
       "flavorKey": "flavor.base.vitreous-manacles",
       "flavor": "Translucent restraints that seem to tighten whenever the wearer's intent turns toward malice.",
       "tags": [
@@ -889,8 +889,8 @@
     },
     {
       "id": "item.humanoid-hands-a-025",
-      "nameKey": "base.vitreous-manacles",
-      "name": "Vitreous Manacles",
+      "nameKey": "base-type.vitreous-shackles",
+      "name": "Vitreous Shackles",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "leather",
@@ -900,7 +900,7 @@
         "powerBand": "trivial"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.vitreous-manacles",
+      "iconKey": "icon.base-type.vitreous-shackles",
       "flavorKey": "flavor.base.vitreous-manacles",
       "flavor": "Translucent restraints that seem to pulse with a rhythmic, predatory hunger. They tighten instinctively when a target's pulse quickens.",
       "tags": [
@@ -961,8 +961,8 @@
     },
     {
       "id": "item.humanoid-hands-a-027",
-      "nameKey": "base.vitreous-manacles",
-      "name": "Vitreous Manacles",
+      "nameKey": "base-type.glass-bound-shackles",
+      "name": "Glass-Bound Shackles",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "leather",
@@ -972,7 +972,7 @@
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.vitreous-manacles",
+      "iconKey": "icon.base-type.glass-bound-shackles",
       "flavorKey": "flavor.base.vitreous-manacles",
       "flavor": "Translucent restraints that pulse with a rhythmic, predatory intent. They seem to tighten instinctively when a target's pulse quickens.",
       "tags": [
@@ -997,8 +997,8 @@
     },
     {
       "id": "item.humanoid-hands-a-028",
-      "nameKey": "base.vitreous-manacles",
-      "name": "Vitreous Manacles",
+      "nameKey": "base-type.glass-bound-bracers",
+      "name": "Glass-Bound Bracers",
       "frame": "humanoid",
       "role": "manipulator",
       "class": "leather",
@@ -1008,7 +1008,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.vitreous-manacles",
+      "iconKey": "icon.base-type.glass-bound-bracers",
       "flavorKey": "flavor.base.vitreous-manacles",
       "flavor": "Translucent restraints that pulse with a rhythmic, predatory hunger. They seem to tighten instinctively when a target's pulse quickens.",
       "tags": [

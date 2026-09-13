@@ -25,7 +25,7 @@
       "id": "set.submarine-a-001",
       "nameKey": "set.corporate-prototype",
       "name": "Corporate Prototype",
-      "themeKey": "demon.submarine_a",
+      "themeKey": "creature.submarine_a",
       "members": [
         {
           "role": "armament-primary",

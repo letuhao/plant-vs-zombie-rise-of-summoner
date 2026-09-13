@@ -1,0 +1,39 @@
+{
+  "session": "data-test-substrate-20260912-9d6a",
+  "program": "data-test-substrate",
+  "problem": "Build in-memory store substrate + probe",
+  "mode": "direct",
+  "branch": "features/derived-stat-extension",
+  "worktree": null,
+  "paths": [
+    "src/FusionRpg.Data/**",
+    "tests/FusionRpg.Data.Tests/**",
+    "tests/FusionRpg.Server.Tests/**",
+    "tests/FusionRpg.E2E.Tests/**",
+    "tests/FusionRpg.Core.Tests/**",
+    "tests/FusionRpg.Guard.Tests/**",
+    "web/fusion-rpg-web/src/stages/world/fixtures/**",
+    "web/fusion-rpg-web/e2e/fixtures/**",
+    "src/FusionRpg.Server/WebMatchService.cs",
+    "scripts/data-test-*.ps1",
+    "scripts/guard-test-substrate.ps1",
+    "scripts/test-substrate-baseline.txt",
+    "scripts/deploy-play.ps1",
+    ".github/workflows/ci.yml",
+    "docs/architecture/data-architecture.md",
+    "docs/architecture/data-test-substrate-*.md",
+    "docs/architecture/data-test-substrate/**",
+    "docs/contributing/testing-standard.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "tasks/data-test-substrate-plan.md",
+    "tasks/data-test-substrate-todo.md",
+    "tasks/sessions/data-test-substrate-*.json"
+  ],
+  "started": "2026-09-12T11:06:58Z",
+  "status": "merged",
+  "sharedWith": [
+    "session-boundary-standard-20260912-a3f2"
+  ],
+  "sharedNote": "Owner decision 2026-09-12: shared boundary on features/derived-stat-extension. This session owns src/FusionRpg.Data + tests/FusionRpg.Data.Tests; the contributing-standards session takes tests/FusionRpg.Core.Tests balance-tool launch + scripts/commit-tool. Commit explicit paths only."
+}

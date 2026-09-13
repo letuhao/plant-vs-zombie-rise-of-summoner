@@ -25,7 +25,7 @@
       "id": "set.splitpea-001",
       "nameKey": "set.marrow-split-cannon",
       "name": "Marrow-Split Cannon",
-      "themeKey": "demon.splitpea",
+      "themeKey": "creature.splitpea",
       "members": [
         {
           "role": "armament-primary",

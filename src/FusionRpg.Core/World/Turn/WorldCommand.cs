@@ -126,9 +126,9 @@ public sealed record WorldCommand
     public string? StructureId { get; init; }
 
     /// <summary>
-    /// The value a `bind-warden` order writes into `WorldSector.WardenBindingId` — the bound demon
+    /// The value a `bind-warden` order writes into `WorldSector.WardenBindingId` — the bound creature
     /// contract's own instance id, unchanged (spec-loam-texture.md, world-stage W28/W29's two-step
-    /// contract-then-order flow). Opaque to Core: nothing here validates it against a demon roster,
+    /// contract-then-order flow). Opaque to Core: nothing here validates it against a creature roster,
     /// the same way `StructureId` is validated only inside the `build` admission arm, not generically.
     /// </summary>
     public string? WardenId { get; init; }

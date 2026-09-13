@@ -25,7 +25,7 @@
       "id": "set.ultimatetorch-001",
       "nameKey": "set.bullet-shaped-shell",
       "name": "Bullet-Shaped Shell",
-      "themeKey": "demon.ultimatetorch",
+      "themeKey": "creature.ultimatetorch",
       "members": [
         {
           "role": "armament-primary",

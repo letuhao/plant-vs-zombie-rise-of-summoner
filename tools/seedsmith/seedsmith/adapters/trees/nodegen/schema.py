@@ -11,7 +11,7 @@ schema is filled. `build_pipeline` below is this module's own construction site:
 other seedsmith pipeline performs, so a numeric field added here fails the exact same way a numeric
 field added to `items/setgen/schema.py` or `combogen/schema.py` already does.
 
-Unlike `items/setgen`'s program-specific widened list (`adapters/demons/anchor/audit.py`'s own
+Unlike `items/setgen`'s program-specific widened list (`adapters/creatures/anchor/audit.py`'s own
 `MAGNITUDE_DENY_NAMES`), this schema needs no widened deny-list of its own: none of its seven
 required fields (`affixIds`, `affinity`, `exclusion.form`, `exclusion.propertyKeys`, `name`,
 `nameKey`, `flavor`) plus the one open-loop field (`rationale`) collide with the shared floor, and

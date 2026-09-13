@@ -30,7 +30,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -102,7 +102,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.immunity",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -138,7 +138,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.stoicism",
+        "family": "atom.mending",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -174,7 +174,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -210,7 +210,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -246,7 +246,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.immunity",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -319,7 +319,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -355,7 +355,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.stoicism",
+        "family": "atom.mending",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -392,7 +392,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.padding",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -428,7 +428,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -465,7 +465,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.mending",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -501,7 +501,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -530,18 +530,18 @@
     },
     {
       "id": "item.humanoid-head-a-015",
-      "nameKey": "base.reinforced-sallet",
-      "name": "Reinforced Sallet",
+      "nameKey": "base-type.steel-greathelm",
+      "name": "Steel Greathelm",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.reinforced-sallet",
+      "iconKey": "icon.base-type.steel-greathelm",
       "flavorKey": "flavor.base.reinforced-sallet",
       "flavor": "A polished steel helm designed to protect the cranium from downward strikes. Its narrow visor offers a focused field of vision for the vigilant.",
       "tags": [
@@ -566,18 +566,18 @@
     },
     {
       "id": "item.humanoid-head-a-016",
-      "nameKey": "base.reinforced-sallet",
-      "name": "Reinforced Sallet",
+      "nameKey": "base-type.iron-visor",
+      "name": "Iron Visor",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.immunity",
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.reinforced-sallet",
+      "iconKey": "icon.base-type.iron-visor",
       "flavorKey": "flavor.base.reinforced-sallet",
       "flavor": "A polished steel helm designed to protect the cranium from downward strikes. Its narrow visor offers a clear line of sight for the vigilant.",
       "tags": [
@@ -602,18 +602,18 @@
     },
     {
       "id": "item.humanoid-head-a-017",
-      "nameKey": "base.reinforced-sallet",
-      "name": "Reinforced Sallet",
+      "nameKey": "base-type.plated-visor-helm",
+      "name": "Plated Visor Helm",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "trivial"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.reinforced-sallet",
+      "iconKey": "icon.base-type.plated-visor-helm",
       "flavorKey": "flavor.base.reinforced-sallet",
       "flavor": "A polished steel helm designed to protect the skull and neck from downward strikes. Its smooth surface is built to deflect glancing blows away from the eyes.",
       "tags": [
@@ -638,18 +638,18 @@
     },
     {
       "id": "item.humanoid-head-a-018",
-      "nameKey": "base.reinforced-sallet",
-      "name": "Reinforced Sallet",
+      "nameKey": "base-type.plated-visor",
+      "name": "Plated Visor",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.reinforced-sallet",
+      "iconKey": "icon.base-type.plated-visor",
       "flavorKey": "flavor.base.reinforced-sallet",
       "flavor": "A polished steel helm designed to protect the cranium from heavy downward strikes. Its narrow visor offers a focused field of vision for the vigilant.",
       "tags": [
@@ -674,18 +674,18 @@
     },
     {
       "id": "item.humanoid-head-a-019",
-      "nameKey": "base.reinforced-sallet",
-      "name": "Reinforced Sallet",
+      "nameKey": "base-type.steel-ribbed-coif",
+      "name": "Steel-Ribbed Coif",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.reinforced-sallet",
+      "iconKey": "icon.base-type.steel-ribbed-coif",
       "flavorKey": "flavor.base.reinforced-sallet",
       "flavor": "A polished steel helm designed to protect the cranium from downward strikes. Its smooth surface is meant to deflect blows away from the neck.",
       "tags": [
@@ -710,18 +710,18 @@
     },
     {
       "id": "item.humanoid-head-a-020",
-      "nameKey": "base.reinforced-sallet",
-      "name": "Reinforced Sallet",
+      "nameKey": "base-type.steel-lined-coif",
+      "name": "Steel-Lined Coif",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.mending",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.reinforced-sallet",
+      "iconKey": "icon.base-type.steel-lined-coif",
       "flavorKey": "flavor.base.reinforced-sallet",
       "flavor": "A polished steel basin designed to protect the cranium from downward strikes. Its smooth surface is meant to deflect blows away from the neck.",
       "tags": [
@@ -753,7 +753,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -789,7 +789,7 @@
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -818,18 +818,18 @@
     },
     {
       "id": "item.humanoid-head-a-023",
-      "nameKey": "base.plated-gorget",
-      "name": "Plated Gorget",
+      "nameKey": "base-type.steel-gorget",
+      "name": "Steel Gorget",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.plated-gorget",
+      "iconKey": "icon.base-type.steel-gorget",
       "flavorKey": "flavor.base.plated-gorget",
       "flavor": "A rigid collar of interlocking steel designed to protect the throat and jawline from downward strikes.",
       "tags": [
@@ -854,18 +854,18 @@
     },
     {
       "id": "item.humanoid-head-a-024",
-      "nameKey": "base.plated-gorget",
-      "name": "Plated Gorget",
+      "nameKey": "base-type.reinforced-neckguard",
+      "name": "Reinforced Neckguard",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.mending",
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.plated-gorget",
+      "iconKey": "icon.base-type.reinforced-neckguard",
       "flavorKey": "flavor.base.plated-gorget",
       "flavor": "A rigid collar of interlocking metal designed to protect the throat and jawline from downward strikes.",
       "tags": [
@@ -890,18 +890,18 @@
     },
     {
       "id": "item.humanoid-head-a-025",
-      "nameKey": "base.plated-gorget",
-      "name": "Plated Gorget",
+      "nameKey": "base-type.reinforced-neck-guard",
+      "name": "Reinforced Neck Guard",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.immunity",
         "powerBand": "trivial"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.plated-gorget",
+      "iconKey": "icon.base-type.reinforced-neck-guard",
       "flavorKey": "flavor.base.plated-gorget",
       "flavor": "A rigid collar of interlocking metal designed to protect the throat and jawline from downward strikes.",
       "tags": [
@@ -926,18 +926,18 @@
     },
     {
       "id": "item.humanoid-head-a-026",
-      "nameKey": "base.plated-gorget",
-      "name": "Plated Gorget",
+      "nameKey": "base-type.steel-neck-guard",
+      "name": "Steel Neck Guard",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.plated-gorget",
+      "iconKey": "icon.base-type.steel-neck-guard",
       "flavorKey": "flavor.base.plated-gorget",
       "flavor": "A rigid collar of interlocking metal designed to protect the neck and jawline from downward strikes.",
       "tags": [
@@ -962,18 +962,18 @@
     },
     {
       "id": "item.humanoid-head-a-027",
-      "nameKey": "base.plated-gorget",
-      "name": "Plated Gorget",
+      "nameKey": "base-type.steel-collar-plate",
+      "name": "Steel Collar Plate",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.plated-gorget",
+      "iconKey": "icon.base-type.steel-collar-plate",
       "flavorKey": "flavor.base.plated-gorget",
       "flavor": "A rigid collar of interlocking steel designed to protect the throat and jawline from downward strikes.",
       "tags": [

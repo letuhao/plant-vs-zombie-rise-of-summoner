@@ -14,7 +14,7 @@ A tier gate reads a **gate quantity**. Four are named across the program and two
 | Category (R7) | Trees | Gate quantity | State, grepped this session |
 |---|---:|---|---|
 | `primary` | 12 | `aptitude.<Id>@Commander` | ✅ shipped — `PointBudget.PointsFor(AllocationScope.Commander, …)` (`PointBudget.cs:51`) |
-| `family` | `F` | `species_level@DemonType` | ✅ shipped — `PointBudget.DemonTypeSourceFromLevel` (`PointBudget.cs:40`), consumed at `SpeciesAllocation.cs:34-35` |
+| `family` | `F` | `species_level@CreatureType` | ✅ shipped — `PointBudget.CreatureTypeSourceFromLevel` (`PointBudget.cs:40`), consumed at `SpeciesAllocation.cs:34-35` |
 | `elemental` | 6 | `element_mastery.<id>` | ✅ **shipped 2026-09-06.** `ElementMasterySource.AptitudePointEquivalents`, registered at `GateCounterEndpoints.cs:107`, live-probed end to end (task G6) — `gate-evidence.v1.json`'s `elementMastery` row reads `carrier` |
 | `status` | 24 (D51, 2026-09-06: was 21) | `status_applied.<id>` | ✅ **shipped 2026-09-06.** `StatusAppliedSource.AptitudePointEquivalents`, registered at `GateCounterEndpoints.cs:104`, live-probed end to end (task G6) — `gate-evidence.v1.json`'s `statusApplied` row reads `carrier` |
 
@@ -55,7 +55,7 @@ threshold should not mean two different kinds of effort.
 | Whose action? | **Outbound** — applied *by* an actor this player owns | **Outbound** — damage dealt *by* an actor this player owns |
 | Landed or attempted? | **Landed only** | **Landed only, and non-zero** |
 | Per match or lifetime? | **Lifetime, cumulative, never reset** | **Lifetime, cumulative, never reset** |
-| Whose progress? | **The player's**, not the individual demon's | **The player's**, not the individual demon's |
+| Whose progress? | **The player's**, not the individual creature's | **The player's**, not the individual creature's |
 
 Lifetime rather than per-match is not a preference. A per-match counter cannot gate a persistent tree
 at all — `tierReached` would oscillate inside a session — and endless grind is the SSOT other systems
@@ -63,7 +63,7 @@ reconcile to.
 
 Per-player rather than per-specimen because the 42 generic trees (D51: 24 statuses, not 21) are the
 commander's build, the same standing the 12 primary trees already have at `AllocationScope.Commander`.
-A per-specimen counter would restart 30 trees at tier 0 for every new demon. The `owner_kind` column
+A per-specimen counter would restart 30 trees at tier 0 for every new creature. The `owner_kind` column
 in §4.1 is what keeps that reversible.
 
 ### 2.1 `status_applied.<id>` — a fresh landed application, by an actor you own
@@ -162,11 +162,11 @@ ladder stops being one ladder.
 
 ### 3.1 A raw count is the wrong shape, and this repo has already paid for that once
 
-`PointBudget.cs:20-26` records it. The DemonType source was documented as *"type almanac XP"* — an
+`PointBudget.cs:20-26` records it. The CreatureType source was documented as *"type almanac XP"* — an
 **accumulation** — while the other three scopes read an **index**. `PointsFor` multiplies
 `sourceValue × rate` with no unit conversion, so the accumulation *"inverted the locked
 commander-smallest-to-unique-largest ordering by 176× at ordinary play levels."* The fix was
-`DemonTypeSourceFromLevel` (`:40`) — convert to an index first.
+`CreatureTypeSourceFromLevel` (`:40`) — convert to an index first.
 
 `status_applied` and `element_mastery` are accumulations of exactly that kind. **They must reach the
 gate as an index, never as a raw count.**
@@ -315,7 +315,7 @@ window costs a little progress, never correctness, and it can never make an open
 
 ### 5.1 Why the enum is closed to this
 
-`AllocationScope` has exactly four members — `Commander, DemonType, Aspect, UniqueDemon`
+`AllocationScope` has exactly four members — `Commander, CreatureType, Aspect, UniqueCreature`
 (`AptitudeAllocation.cs:8`). D35's ruling is that status trees gate **outside** it, and the reason is
 verifiable in six lines: `AptitudeAllocation.Total()` (`:51-57`) loops `AllScopes` and sums **every**
 member for one aptitude, and `Share()` (`:81-85`) divides that by `GrandTotal()`. That denominator is
@@ -372,14 +372,14 @@ stay put. Sharing it kept a single rate for the Aspect
 | `element_mastery` | `(index − 1) × gateCounters.elementMasteryRatePoints` | D35's reasoning, applied a second time: this module's own key, never `AllocationScope` |
 | `status_applied` | `(index − 1) × gateCounters.statusMasteryRatePoints` | D35 forbids an `AllocationScope`, so the rate is this module's own key |
 
-**`index − 1`, never `index`.** `PointBudget.DemonTypeSourceFromLevel` (`:40`) is the precedent and
+**`index − 1`, never `index`.** `PointBudget.CreatureTypeSourceFromLevel` (`:40`) is the precedent and
 gives the reason in full: *"a never-levelled species… must carry EXACTLY ZERO points."* Here the
 consequence is sharper — index 1 is what every existing save has on day one, and a non-zero value
 would open tier 1 on all 30 trees for free (D51: was 27).
 
 **Neither counter writes `AptitudeAllocation`.** Both read a rate out of their own tunable key and
 return a budget-shaped number — the same *reads, never allocates* shape `PointBudget.PointsFor` uses
-for `DemonType` (`SpeciesAllocation.cs:35`) — but neither constructs an `AptitudeAllocation` row.
+for `CreatureType` (`SpeciesAllocation.cs:35`) — but neither constructs an `AptitudeAllocation` row.
 Writing `AptitudeAllocation.Single(AllocationScope.Aspect, …)` for `element_mastery` would put mastery
 into the share denominator, which is §5.1's whole point; owning a key rather than reading Aspect's
 makes that mistake harder to reach by construction, not just by discipline.
@@ -506,7 +506,7 @@ namespace FusionRpg.Core.PassiveTree.GateCounters;
 ///
 /// <para><b>This repo has already paid for getting it wrong once.</b> <c>PointBudget.cs:20-26</c>: an
 /// accumulation passed where an index was expected inverted the locked scope ordering by 176× at
-/// ordinary play levels. <see cref="Index"/> is this module's <c>DemonTypeSourceFromLevel</c>.</para>
+/// ordinary play levels. <see cref="Index"/> is this module's <c>CreatureTypeSourceFromLevel</c>.</para>
 /// </summary>
 public static class MasteryIndex
 {
@@ -570,7 +570,7 @@ public static class MasteryIndex
     }
 
     /// <summary>Aptitude-point-EQUIVALENTS — the only unit `tree-resolve` ever sees (spec §5.2).
-    /// <c>index − 1</c>, never <c>index</c>, mirroring <c>PointBudget.DemonTypeSourceFromLevel</c>
+    /// <c>index − 1</c>, never <c>index</c>, mirroring <c>PointBudget.CreatureTypeSourceFromLevel</c>
     /// (<c>:40</c>) and for a sharper version of its reason: index 1 is what every existing save
     /// carries on day one, and a non-zero value there would open tier 1 on all 30 trees for free (D51: was 27).
     /// Both operands are already `long`, so the multiply is widened before it happens rather than
@@ -654,7 +654,7 @@ code.
 
 ## 12. The `aspect-scope` collision rule
 
-`element_mastery` has a named future owner: the demon program's `aspect-scope` module
+`element_mastery` has a named future owner: the creature program's `aspect-scope` module
 (`PointBudget.cs:15`). D37 does not cancel that module; it removes the dependency on its schedule. So
 the two can collide, and **the failure mode to prevent is silent double-counting**, not duplication.
 
@@ -725,7 +725,7 @@ search's doubling bound (an overflow bound, not a progression cap).
   (task G5/D43), see §16.** Changing ITS OWN formula still needs asking first; the decision of
   whether to backfill at all no longer does.
 - **Any per-specimen counter.** The `owner_kind` column exists for it; using it is a product decision
-  about whether a new demon starts its status trees at zero.
+  about whether a new creature starts its status trees at zero.
 - **Measuring `A`.** The anchor is a measurement task for `squad-harness` or a telemetry window, and
   its result republishes `c`. It is not a spec edit.
 

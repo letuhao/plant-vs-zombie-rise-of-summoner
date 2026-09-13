@@ -25,7 +25,7 @@
       "id": "set.present-001",
       "nameKey": "set.surprise-gift-box",
       "name": "Surprise Gift Box",
-      "themeKey": "demon.present",
+      "themeKey": "creature.present",
       "members": [
         {
           "role": "armament-primary",

@@ -1,5 +1,101 @@
 {
   "done": {
+    "action.family.academic.001": {
+      "generatedUtc": "2026-09-12T16:02:32.949792+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.family.academic.002": {
+      "generatedUtc": "2026-09-12T16:03:13.693212+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.family.academic.003": {
+      "generatedUtc": "2026-09-12T16:03:16.479843+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.family.afflicted.001": {
+      "generatedUtc": "2026-09-12T16:03:19.513391+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.family.afflicted.002": {
+      "generatedUtc": "2026-09-12T16:03:22.371596+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.family.afflicted.004": {
+      "generatedUtc": "2026-09-12T16:03:25.172955+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.family.afflicted.005": {
+      "generatedUtc": "2026-09-12T16:03:27.918440+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.family.alchemical.002": {
+      "generatedUtc": "2026-09-12T16:03:30.823937+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.family.alchemical.003": {
+      "generatedUtc": "2026-09-12T16:03:33.581417+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.family.alchemical.004": {
+      "generatedUtc": "2026-09-12T16:03:36.310611+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.family.allium.001": {
+      "generatedUtc": "2026-09-12T16:03:39.241249+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.family.allium.002": {
+      "generatedUtc": "2026-09-12T16:03:42.209625+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.family.allium.003": {
+      "generatedUtc": "2026-09-12T16:03:45.095427+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.family.allium.004": {
+      "generatedUtc": "2026-09-12T16:03:48.034435+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.family.allium.005": {
+      "generatedUtc": "2026-09-12T16:03:50.986495+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.family.base.002": {
+      "generatedUtc": "2026-09-12T06:07:09.619172+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
     "action.family.cactus.001": {
       "generatedUtc": "2026-09-07T19:05:00.038835+00:00",
       "model": "google/gemma-4-26b-a4b-qat",
@@ -114,8 +210,272 @@
       "promptVersion": "actions/description-backfill/1",
       "schemaVersion": "action-seed/1"
     },
+    "action.general.0007": {
+      "generatedUtc": "2026-09-12T06:08:04.826562+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0015": {
+      "generatedUtc": "2026-09-12T06:08:07.711684+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0017": {
+      "generatedUtc": "2026-09-12T06:08:10.538991+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0018": {
+      "generatedUtc": "2026-09-12T06:08:13.412865+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0019": {
+      "generatedUtc": "2026-09-12T16:03:54.087826+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0020": {
+      "generatedUtc": "2026-09-12T16:03:56.756795+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0021": {
+      "generatedUtc": "2026-09-12T16:03:59.390402+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0023": {
+      "generatedUtc": "2026-09-12T16:04:02.192687+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0024": {
+      "generatedUtc": "2026-09-12T16:04:04.998891+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0025": {
+      "generatedUtc": "2026-09-12T16:04:07.726888+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0026": {
+      "generatedUtc": "2026-09-12T16:04:10.713819+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0027": {
+      "generatedUtc": "2026-09-12T16:04:14.483592+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0028": {
+      "generatedUtc": "2026-09-12T16:04:17.304420+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0029": {
+      "generatedUtc": "2026-09-12T16:04:20.425078+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0030": {
+      "generatedUtc": "2026-09-12T16:04:23.124704+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0031": {
+      "generatedUtc": "2026-09-12T16:04:26.060766+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0032": {
+      "generatedUtc": "2026-09-12T16:04:28.801226+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0033": {
+      "generatedUtc": "2026-09-12T16:04:31.780447+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0034": {
+      "generatedUtc": "2026-09-12T16:04:34.653030+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0035": {
+      "generatedUtc": "2026-09-12T16:04:37.459680+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0036": {
+      "generatedUtc": "2026-09-12T16:04:40.444746+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0037": {
+      "generatedUtc": "2026-09-12T16:04:43.136147+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0038": {
+      "generatedUtc": "2026-09-12T16:04:46.002921+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0039": {
+      "generatedUtc": "2026-09-12T16:04:48.673487+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0040": {
+      "generatedUtc": "2026-09-12T16:04:52.218977+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0041": {
+      "generatedUtc": "2026-09-12T16:04:55.869827+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0042": {
+      "generatedUtc": "2026-09-12T16:05:02.259202+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0043": {
+      "generatedUtc": "2026-09-12T16:05:07.294886+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0046": {
+      "generatedUtc": "2026-09-12T16:05:13.816120+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.general.0051": {
+      "generatedUtc": "2026-09-12T16:05:18.838697+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.abyssswordstar.001": {
+      "generatedUtc": "2026-09-12T16:05:24.356827+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.abyssswordstar.002": {
+      "generatedUtc": "2026-09-12T16:05:28.953585+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.abyssswordstar.003": {
+      "generatedUtc": "2026-09-12T16:05:31.929504+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.abyssswordstar.004": {
+      "generatedUtc": "2026-09-12T16:05:39.630188+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.acientsunnut.001": {
+      "generatedUtc": "2026-09-12T16:05:47.175239+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.acientsunnut.002": {
+      "generatedUtc": "2026-09-12T16:05:53.102148+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.acientsunnut.003": {
+      "generatedUtc": "2026-09-12T16:06:04.418312+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.acientsunnut.004": {
+      "generatedUtc": "2026-09-12T16:06:09.438513+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
     "action.species.allpeater.001": {
       "generatedUtc": "2026-09-07T19:06:22.117868+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.allpeater.002": {
+      "generatedUtc": "2026-09-12T06:08:16.510689+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.allpeater.004": {
+      "generatedUtc": "2026-09-12T16:06:12.183590+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.apple.001": {
+      "generatedUtc": "2026-09-12T16:06:17.644993+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.apple.002": {
+      "generatedUtc": "2026-09-12T16:06:24.493546+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.apple.003": {
+      "generatedUtc": "2026-09-12T16:06:30.119332+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.ashthreepeater.001": {
+      "generatedUtc": "2026-09-12T06:08:19.372424+00:00",
       "model": "google/gemma-4-26b-a4b-qat",
       "promptVersion": "actions/description-backfill/1",
       "schemaVersion": "action-seed/1"
@@ -138,8 +498,578 @@
       "promptVersion": "actions/description-backfill/1",
       "schemaVersion": "action-seed/1"
     },
+    "action.species.cactus.001": {
+      "generatedUtc": "2026-09-12T06:08:22.206809+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
     "action.species.cactusblover.001": {
       "generatedUtc": "2026-09-07T19:06:36.373148+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.cactusblover.002": {
+      "generatedUtc": "2026-09-12T06:08:25.297152+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.caltrop.001": {
+      "generatedUtc": "2026-09-12T06:08:28.066559+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.caltropnut.001": {
+      "generatedUtc": "2026-09-12T06:08:30.849706+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.caltropnut.002": {
+      "generatedUtc": "2026-09-12T06:08:33.826783+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.cherrybomb.001": {
+      "generatedUtc": "2026-09-12T06:08:36.680707+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.cherrybomb.002": {
+      "generatedUtc": "2026-09-12T06:08:39.605951+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.cherrygatling.001": {
+      "generatedUtc": "2026-09-12T06:08:42.503600+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.cherrynut.001": {
+      "generatedUtc": "2026-09-12T06:08:45.465912+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.cherrynut.002": {
+      "generatedUtc": "2026-09-12T06:08:48.473300+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.cherrynutzombie.001": {
+      "generatedUtc": "2026-09-12T06:08:51.241267+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.cherrynutzombie.002": {
+      "generatedUtc": "2026-09-12T06:08:54.208847+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.cherrypaperzombie.001": {
+      "generatedUtc": "2026-09-12T06:08:57.184437+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.cherrypaperzombie.002": {
+      "generatedUtc": "2026-09-12T06:09:00.103337+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.cherryshooter.001": {
+      "generatedUtc": "2026-09-12T06:09:03.034996+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.cherryshooter.002": {
+      "generatedUtc": "2026-09-12T06:09:05.830848+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.cherrysplit.001": {
+      "generatedUtc": "2026-09-12T06:09:08.704076+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.cherrythreepeater.001": {
+      "generatedUtc": "2026-09-12T06:09:12.129476+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.chomper.001": {
+      "generatedUtc": "2026-09-12T06:09:15.082076+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.conezombie.001": {
+      "generatedUtc": "2026-09-12T06:09:17.821063+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.cornpot.001": {
+      "generatedUtc": "2026-09-12T06:09:20.558867+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.cornpult.001": {
+      "generatedUtc": "2026-09-12T06:09:23.249195+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.dancepolzombie.001": {
+      "generatedUtc": "2026-09-12T06:09:25.946670+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.dancepolzombie.002": {
+      "generatedUtc": "2026-09-12T06:09:28.631169+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.darkthreepeater.001": {
+      "generatedUtc": "2026-09-12T06:09:31.554455+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.dolldiamond.001": {
+      "generatedUtc": "2026-09-12T06:09:34.433287+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.dollgold.001": {
+      "generatedUtc": "2026-09-12T06:09:37.478433+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.dollgold.002": {
+      "generatedUtc": "2026-09-12T06:09:40.449230+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.dollsilver.001": {
+      "generatedUtc": "2026-09-12T06:09:43.388446+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.doomcactus.001": {
+      "generatedUtc": "2026-09-12T06:09:46.355495+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.doomcactus.002": {
+      "generatedUtc": "2026-09-12T06:09:49.252925+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.doublecherry.001": {
+      "generatedUtc": "2026-09-12T06:09:52.402731+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.doublesnow.001": {
+      "generatedUtc": "2026-09-12T06:09:55.304531+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.driverzombie.001": {
+      "generatedUtc": "2026-09-12T06:09:58.088157+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.flagzombie.001": {
+      "generatedUtc": "2026-09-12T06:10:01.160933+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.flagzombie.002": {
+      "generatedUtc": "2026-09-12T06:10:04.187663+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.fumeshroom.001": {
+      "generatedUtc": "2026-09-12T06:10:07.106325+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.garlic.001": {
+      "generatedUtc": "2026-09-12T06:10:09.886866+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.garlicpea.001": {
+      "generatedUtc": "2026-09-12T06:10:12.736882+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.garlicpea.002": {
+      "generatedUtc": "2026-09-12T06:10:15.532367+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.garlicthreepeater.001": {
+      "generatedUtc": "2026-09-12T06:10:18.329123+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.garlicthreepeater.002": {
+      "generatedUtc": "2026-09-12T06:10:21.275511+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.gatlingpea.001": {
+      "generatedUtc": "2026-09-12T06:10:24.097282+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.gatlingpea.002": {
+      "generatedUtc": "2026-09-12T06:10:26.904206+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.hypnochomper.001": {
+      "generatedUtc": "2026-09-12T06:10:29.720425+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.hypnochomper.002": {
+      "generatedUtc": "2026-09-12T06:10:32.567869+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.hypnojalapeno.001": {
+      "generatedUtc": "2026-09-12T06:10:35.534524+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.hypnojalapeno.002": {
+      "generatedUtc": "2026-09-12T06:10:38.499910+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.hypnopeashooter.001": {
+      "generatedUtc": "2026-09-12T06:10:41.467823+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.hypnopeashooter.002": {
+      "generatedUtc": "2026-09-12T06:10:44.201805+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.hypnoshroom.001": {
+      "generatedUtc": "2026-09-12T06:10:46.974300+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.icecaltrop.001": {
+      "generatedUtc": "2026-09-12T06:10:50.075033+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.iceshroom.001": {
+      "generatedUtc": "2026-09-12T06:10:53.140698+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.ironpeazombie.001": {
+      "generatedUtc": "2026-09-12T06:10:56.090516+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.ironpeazombie.002": {
+      "generatedUtc": "2026-09-12T06:10:58.988473+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.jalacaltrop.001": {
+      "generatedUtc": "2026-09-12T06:11:01.690319+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.jalacaltrop.002": {
+      "generatedUtc": "2026-09-12T06:11:04.857964+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.jalagatling.001": {
+      "generatedUtc": "2026-09-12T06:11:07.771928+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.jalapeashooter.001": {
+      "generatedUtc": "2026-09-12T06:11:10.681075+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.jalapeno.001": {
+      "generatedUtc": "2026-09-12T06:11:13.688995+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.lanternchomper.001": {
+      "generatedUtc": "2026-09-12T06:11:16.480285+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.lanternpea.001": {
+      "generatedUtc": "2026-09-12T06:11:19.335985+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.marigold.001": {
+      "generatedUtc": "2026-09-12T06:11:22.271492+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.marigold.002": {
+      "generatedUtc": "2026-09-12T06:11:25.340475+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.melonpult.001": {
+      "generatedUtc": "2026-09-12T06:11:28.274772+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.normalzombie.001": {
+      "generatedUtc": "2026-09-12T06:11:31.108173+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.nutchomper.001": {
+      "generatedUtc": "2026-09-12T06:11:34.237276+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.paperzombie.001": {
+      "generatedUtc": "2026-09-12T06:11:37.025026+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.peachomper.001": {
+      "generatedUtc": "2026-09-12T06:11:39.836281+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.peanut.001": {
+      "generatedUtc": "2026-09-12T06:11:42.902332+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.peasquash.001": {
+      "generatedUtc": "2026-09-12T06:11:45.754075+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.plantern.001": {
+      "generatedUtc": "2026-09-12T06:11:48.708418+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.plantern.002": {
+      "generatedUtc": "2026-09-12T06:11:51.522868+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.polevaulterzombie.001": {
+      "generatedUtc": "2026-09-12T06:11:54.185978+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.pot.001": {
+      "generatedUtc": "2026-09-12T06:11:57.399528+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.pumpkin.001": {
+      "generatedUtc": "2026-09-12T06:12:00.209839+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.scaredyshroom.001": {
+      "generatedUtc": "2026-09-12T06:12:03.012827+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.scaredyshroom.002": {
+      "generatedUtc": "2026-09-12T06:12:05.904723+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.snowgatling.001": {
+      "generatedUtc": "2026-09-12T06:12:08.892959+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.snowgatling.002": {
+      "generatedUtc": "2026-09-12T06:12:11.723947+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.snowpeashooter.001": {
+      "generatedUtc": "2026-09-12T06:12:14.637966+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.snowsplit.001": {
+      "generatedUtc": "2026-09-12T06:12:17.551815+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.squash.001": {
+      "generatedUtc": "2026-09-12T06:12:20.510549+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.starfruit.001": {
+      "generatedUtc": "2026-09-12T06:12:23.410187+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.starpea.001": {
+      "generatedUtc": "2026-09-12T06:12:26.291247+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.starpea.002": {
+      "generatedUtc": "2026-09-12T06:12:29.050927+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.sunchomper.001": {
+      "generatedUtc": "2026-09-12T06:12:31.912724+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.sunflower.001": {
+      "generatedUtc": "2026-09-12T06:12:34.727402+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.sunflower.002": {
+      "generatedUtc": "2026-09-12T06:12:37.535198+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.threepeater.001": {
+      "generatedUtc": "2026-09-12T06:12:40.533975+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.threeplantern.001": {
+      "generatedUtc": "2026-09-12T06:12:43.219604+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.twinflower.001": {
+      "generatedUtc": "2026-09-12T06:12:46.168612+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.twinflower.002": {
+      "generatedUtc": "2026-09-12T06:12:48.925270+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.wallnut.001": {
+      "generatedUtc": "2026-09-12T06:12:51.801153+00:00",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "promptVersion": "actions/description-backfill/1",
+      "schemaVersion": "action-seed/1"
+    },
+    "action.species.wallnut.002": {
+      "generatedUtc": "2026-09-12T06:12:54.585983+00:00",
       "model": "google/gemma-4-26b-a4b-qat",
       "promptVersion": "actions/description-backfill/1",
       "schemaVersion": "action-seed/1"

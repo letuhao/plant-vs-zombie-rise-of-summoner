@@ -25,7 +25,7 @@
       "id": "set.melonumbrella-001",
       "nameKey": "set.watermelon-umbrella",
       "name": "Watermelon Umbrella",
-      "themeKey": "demon.melonumbrella",
+      "themeKey": "creature.melonumbrella",
       "members": [
         {
           "role": "armament-primary",

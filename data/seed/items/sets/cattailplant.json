@@ -25,7 +25,7 @@
       "id": "set.cattailplant-001",
       "nameKey": "set.spore-pod-launcher",
       "name": "Spore-Pod Launcher",
-      "themeKey": "demon.cattailplant",
+      "themeKey": "creature.cattailplant",
       "members": [
         {
           "role": "armament-primary",

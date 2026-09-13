@@ -25,7 +25,7 @@
       "id": "set.lanternpea-001",
       "nameKey": "set.solar-spicule-array",
       "name": "Solar Spicule Array",
-      "themeKey": "demon.lanternpea",
+      "themeKey": "creature.lanternpea",
       "members": [
         {
           "role": "armament-primary",

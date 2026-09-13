@@ -134,7 +134,7 @@ public sealed record AffixMetricsFinding(string Kind, string Id, string Detail, 
 /// two checks here are structural floors, not invented balance numbers). Pure — takes the reports
 /// <see cref="ContentMetrics.FamilyCoverageOf"/>/<see cref="ContentMetrics.ContainerFillRatesOf"/>
 /// already computed, never re-derives them, mirroring every other "measure, then gate" split in this
-/// program (`seedsmith`'s own metric registry, `demons metrics --gate`).
+/// program (`seedsmith`'s own metric registry, `creatures metrics --gate`).
 /// </summary>
 public static class AffixMetricsGateEvaluator
 {
@@ -164,7 +164,7 @@ public static class AffixMetricsGateEvaluator
     }
 
     /// <summary>True only when a finding whose OWN gate is armed exists — the exact `--gate`
-    /// semantics `demons metrics --gate` already established (filter to `gates=True`, not "any
+    /// semantics `creatures metrics --gate` already established (filter to `gates=True`, not "any
     /// finding at all").</summary>
     public static bool AnyGatingFinding(IReadOnlyList<AffixMetricsFinding> findings) =>
         findings.Any(f => f.Gates);

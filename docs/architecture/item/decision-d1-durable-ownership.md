@@ -286,7 +286,7 @@ Three reasons, in order of weight:
    one.
 3. **The cheap change is the reversible one** (§10). B → A later is additive; A → B later is lossy,
    because `effect_binding` has no `player_id`, its `slot` column is unvalidated free text, and its rows
-   would by then be the sole record of what a demon is wearing.
+   would by then be the sole record of what a creature is wearing.
 
 ### 8.2 The rejected case, stated in full
 
@@ -304,7 +304,7 @@ being given up:
 - **The conceptual model in [item-ideal.md](../item-ideal.md) §6.4 — *"Equipping is a binding"* — is
   simply true under A.** Under B that sentence is wrong and must be corrected in R4. Making a document
   wrong is a cost, not a rounding error.
-- **`ListBindings(owner)` answers "what is this demon wearing" in one indexed query.** Under B that
+- **`ListBindings(owner)` answers "what is this creature wearing" in one indexed query.** Under B that
   question is answered by `rpg_item_assignment`, and the binding table answers a *different* question.
   Two tables that both look like "what is equipped" is precisely the confusion the terminology lock in §1
   of the contract exists to prevent.
@@ -319,7 +319,7 @@ debate.** It does not, and building both is §6's Option C, which F8 makes prema
 
 ### 8.3 `actor:{instanceId}` is reserved, not refused
 
-The name is reserved now so no lane invents `specimen:`, `unique:` or `demon:` for the same thing.
+The name is reserved now so no lane invents `specimen:`, `unique:` or `creature:` for the same thing.
 Reopen this decision — as an E6 ask-first change — when **all four** hold:
 
 1. A runtime that executes equipment atoms exists and **has no pointer** to project onto (E12's
@@ -405,7 +405,7 @@ never put durable equip state in `effect_binding`. Blast radius: `OwnerScope.cs`
 definitions §6, E6 §46-52.
 
 **A → B later: expensive and lossy.** Every `actor:` binding written between the choice and the reversal
-is the *sole* record of what a demon wears, and it cannot be reconstructed into an assignment row without
+is the *sole* record of what a creature wears, and it cannot be reconstructed into an assignment row without
 guessing:
 
 - `effect_binding` has **no `player_id`** — ownership must be recovered by joining `owner_key` back to
@@ -434,7 +434,7 @@ migration over the player's inventory.
 | **I13 — [ssot-inventory.md](ssot-inventory.md)** | §2.4 and its ask 11(a) are **accepted as written**; delete the "or add `specimen:{guid}`" alternative. Amend §2.4's projection target to *"`entity:{ptr}` on the lawn; the web-battle target is deferred to E12"* (§4.4 here, per F7/F8). Rename the reserved future scope from `specimen:` to **`actor:`** wherever it appears. Promote §9.1's sweep fix into §5.6's stale table as a **blocking** prerequisite, not a footnote. Ask 11(b) — stock refresh writing `effect_binding` from the importer — is **unaffected** by this decision and still needs its own sign-off |
 | **I2 — [ssot-equip-slots.md](ssot-equip-slots.md)** | §9.1 is **answered: no scope is added.** Rewrite it as *"the durable record is I13's assignment row; the binding is its deploy projection"*. §5.7 **step 3 is unblocked** and its wording changes: `RebuildUniqueModsFromEquipment` does not "start creating and withdrawing `effect_binding` rows" — it reads assignments and emits the same `mods_json` template (M2 above). The proposed new nullable `instance_id` column on `rpg_unique_equipment` is **dropped**: that table is retired by M1, not extended. The §6 row *"A body-slot binding at `entity:` scope expected to survive a restart → `ScopeUnsupported`"* is correct and becomes load-bearing — it is the rule that stops anyone durably persisting a projection |
 | **I5 — [ssot-sets.md](ssot-sets.md)** | §4.4's *"a set tier binds at exactly the owner scope its member pieces are bound to"* **survives unchanged** — it is now a statement about the projection scope, which is uniform by construction. §4.5's recount SQL is **correct as written** but must be re-labelled: it runs **during the deploy projection**, over the just-built binding set, not at equip time. The equip-time write is one assignment row. Ask 12 is **answered**. New requirement: because tiers are derived from a projection that is itself derived, the recount trigger list in §4.5 must add *"deploy"* and drop nothing |
-| **I11 — [ssot-requirements.md](ssot-requirements.md)** | §5.6 is **answered and its conclusion inverted**: *"durable equipment on a demon specimen cannot be expressed by the shipped binding model"* is true, and is no longer a blocker, because durable equipment is not expressed by the binding model at all. Rewrite §5.6 to say the gate reads the wearer from `rpg_unique_actors` + `rpg_item_assignment` and never from an owner key. Ask 4 is closed. The `canEquip(item, specimen)` entry point I13 asks for (its ask 9) is now unambiguous — it takes a specimen id, not an owner scope |
+| **I11 — [ssot-requirements.md](ssot-requirements.md)** | §5.6 is **answered and its conclusion inverted**: *"durable equipment on a creature specimen cannot be expressed by the shipped binding model"* is true, and is no longer a blocker, because durable equipment is not expressed by the binding model at all. Rewrite §5.6 to say the gate reads the wearer from `rpg_unique_actors` + `rpg_item_assignment` and never from an owner key. Ask 4 is closed. The `canEquip(item, specimen)` entry point I13 asks for (its ask 9) is now unambiguous — it takes a specimen id, not an owner scope |
 | **I10 — [ssot-charms.md](ssot-charms.md)** | Least affected: `player:{id}` is a shipped scope and this decision does not touch it. Two consequences. (1) §3.1's recommendation C is **confirmed** — charms bind at `player:{id}`, and the assign/bind split gives the pouch the same shape as equipment: `rpg_item_assignment` with `owner_kind = 'player'` is the durable attunement record, and `charm_run_hold` plus the run-start bindings are its projection. §5's *"attunement is durable intent, not a runtime fact"* is exactly this decision, arrived at independently. (2) I13's ask 10 — *"is that a second projection path?"* — is **answered: yes, and it is the same path with a different owner scope.** One projector, two owner kinds. The `player:` → match-wide stub (`StatApplyScope.cs:82-83,88-92`) remains I10's own blocker and is untouched here |
 
 ---
@@ -449,7 +449,7 @@ migration over the player's inventory.
    content import is severe enough that it may not want to wait for the mutation-contract debate.
 
 3. **Is `actor` the right reserved name?** Alternatives considered: `specimen:` (I13's wording — accurate,
-   but it means "demon" and the commander is not one), `unique:` (matches `rpg_unique_actors` but reads
+   but it means "creature" and the commander is not one), `unique:` (matches `rpg_unique_actors` but reads
    like a rarity), `instance:` (**rejected** — already taken by the legacy grant grammar,
    `StatApplyScope.cs:33-37`, and reusing it would make two vocabularies collide on one string).
 

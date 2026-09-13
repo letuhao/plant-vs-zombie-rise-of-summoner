@@ -39,7 +39,8 @@ __all__ = [
     "RUN_WINDOW", "REACTION_AXIS", "RESTRICTION_AXIS", "CATEGORY_RELATION",
     "SpeciesAnchorRow", "parse_species_anchor", "WeightsRow", "parse_type_weights",
     "GENERAL_WEIGHTS", "load_rung_table", "structure_axes_for", "validate_structure_axes",
-    "derive_family_motifs", "largest_remainder_count", "expand_counts",
+    "derive_family_motifs", "largest_remainder_count", "largest_remainder_apportion",
+    "apportion_axis", "apportion_categories", "apportion_area_shapes", "expand_counts",
     "build_pool", "validate_no_family_widening", "validate_atom_family_namespace",
     "validate_pairing_vocabulary", "validate_no_multiplicative_conflict", "validate_rung_band",
     "load_pairing_table", "assign_pairing_roles", "PairingAssignment", "validate_pairing_coverage",
@@ -76,13 +77,33 @@ def largest_remainder_count(weights_milli: "Mapping[str, int]", order: "Sequence
     loader for real rows, `_flat_milli` below for the general-scope fallback). Distributes `total`
     whole units across `order` by largest remainder: `long`, widened before multiplying, divided
     by 1000 last, exactly once. Ties break on `order`'s own declared position — a total function,
-    never dependent on `weights_milli`'s own dict iteration order."""
+    never dependent on `weights_milli`'s own dict iteration order.
+
+    This is the ONE largest-remainder implementation in this adapter. The scope-level quota in
+    `apportion_categories` needs the same math at a different scale (its weights are a SUM of many
+    per-subject vectors, so they do not sum to 1000); rather than a second copy that could round or
+    tie-break differently from the per-subject split it must agree with, `largest_remainder_raw`
+    below is the general form and this is its fixed-base caller. A tie-break or overflow fix here
+    therefore reaches both levels — the point of collapsing the 2026-09-11 review's duplication
+    finding."""
+    return largest_remainder_raw(weights_milli, order, total, base=1000)
+
+
+def largest_remainder_raw(weights: "Mapping[str, int]", order: "Sequence[str]", total: int,
+                          *, base: int) -> "dict[str, int]":
+    """Largest-remainder apportionment of `total` units over `order` for weights of ANY scale,
+    normalised by `base` (`sum(weights)` for an arbitrary-scale vector, `1000` for per-mille).
+    `long`, widened before multiplying, one division per key, remainder units to the largest
+    fractional parts with ties on `order`. Raises if `total` is negative; returns all zeros when
+    the weights sum to nothing (nothing to be proportional to)."""
     if total < 0:
-        raise ValueError("largest_remainder_count: total must be non-negative")
-    scaled = {k: _widen_mul(int(weights_milli[k]), total) for k in order}
-    floor = {k: scaled[k] // 1000 for k in order}
+        raise ValueError("largest_remainder_raw: total must be non-negative")
+    if base <= 0:
+        return {k: 0 for k in order}
+    scaled = {k: _widen_mul(int(weights[k]), total) for k in order}
+    floor = {k: scaled[k] // base for k in order}
     remainder = total - sum(floor.values())
-    fracs = sorted(order, key=lambda k: (-(scaled[k] % 1000), order.index(k)))
+    fracs = sorted(order, key=lambda k: (-(scaled[k] % base), order.index(k)))
     out = dict(floor)
     for k in fracs[:remainder]:
         out[k] += 1
@@ -90,16 +111,198 @@ def largest_remainder_count(weights_milli: "Mapping[str, int]", order: "Sequence
 
 
 def expand_counts(counts: "Mapping[str, int]", order: "Sequence[str]") -> "list[str]":
-    """A `{key: count}` allocation, flattened into a deterministic list of length `sum(counts)` —
-    every `order[0]` slot before any `order[1]` slot. Spec §3 leaves the JOINT distribution of two
-    independently-allocated vectors (category counts, target-mode counts) over one subject's
-    ordinals unspecified; this is the simplest total function that turns two exact marginals into
-    per-ordinal assignments without inventing a correlation the spec never states — acceptance
-    #3/#4b test each marginal's exactness, not a joint one."""
-    out: "list[str]" = []
-    for k in order:
-        out.extend([k] * counts[k])
-    return out
+    """A `{key: count}` allocation, flattened into a deterministic list of length `sum(counts)`
+    that **spreads each key's quota evenly** across the sequence instead of grouping it.
+
+    Spec §3 leaves the JOINT distribution of two independently-allocated vectors (category counts,
+    target-mode counts) over one subject's ordinals unspecified; this is a total function that turns
+    two exact marginals into per-ordinal assignments without inventing a correlation — acceptance
+    #3/#4b test each marginal's exactness, not a joint one, and this preserves every marginal exactly
+    (only ORDER changes, never the counts).
+
+    ⛔ **FIXED 2026-09-11 from a measured defect, not a preference.** The original body emitted each
+    key's runs back-to-back (`[k]*counts[k]` in `order`), so a subject's ordinals were blocked by
+    category. Zipping two blocked sequences made the JOINT frame constant for long stretches: measured
+    over the live general tier (1,000 briefs), only **15 distinct frames** existed with runs up to
+    **134 consecutive identical briefs**, and the first 40 briefs shared **one** frame. A proposal
+    batch draws a contiguous slice of ordinals, so every batch saw near-identical context, the model
+    produced near-duplicates, and A-S3 rejected **32 of 57 candidates (56%)** at tier 2. This was
+    latent at the old `generalCount: 25` (runs of ~5) and the 1000-brief general tier exposed it.
+
+    The spread is the standard stride/round-robin: key `k`'s j-th unit is placed in round `j`, with
+    keys in `order` within a round. It is a total function of `order` and the counts — never of
+    `counts`' own dict insertion order — so it stays deterministic and order-independent."""
+    slots: "list[tuple[int, int, str]]" = []
+    for index, key in enumerate(order):
+        for j in range(int(counts[key])):
+            slots.append((j, index, key))
+    slots.sort(key=lambda item: (item[0], item[1]))
+    return [key for _, _, key in slots]
+
+
+def largest_remainder_apportion(raw_weights: "Mapping[str, int]", order: "Sequence[str]",
+                                total: int) -> "dict[str, int]":
+    """Largest-remainder apportionment of `total` units over `order` for raw weights of ANY scale
+    (the caller's weights need not sum to 1000, unlike `largest_remainder_count`). Used for the
+    SCOPE-level category quota, whose weights are the SUM of many per-subject vectors and therefore
+    carry no fixed scale.
+
+    Kept as a named wrapper (not deleted) because it is the exported name `coverage_report` and the
+    tests call, and because it documents the arbitrary-scale case at the call site. It delegates to
+    `largest_remainder_raw`, the single implementation, so it cannot drift from
+    `largest_remainder_count`'s rounding or tie-break — collapsing the 2026-09-11 review's finding
+    that this function duplicated and could disagree with the per-subject split it must match."""
+    return largest_remainder_raw(raw_weights, order, total,
+                                 base=sum(int(raw_weights[k]) for k in order))
+
+
+def apportion_axis(
+        rows: "Sequence[tuple[str, Mapping[str, int]]]", count: int, order: "Sequence[str]",
+        ) -> "dict[str, dict[str, int]]":
+    """**The generalized scope-level two-level allocation, over ANY closed axis.** Used for
+    `category`, `targetMode`, and (via the area sub-allocation) `areaShape`.
+
+    Two levels, and the reason each exists:
+
+    1. **Scope quota** — `largest_remainder_apportion` over the SUM of every subject's per-mille
+       vector for this axis. This is exact, and it is what A-S5's cell/`quotaDrift` metrics gate on:
+       the aggregate is where a balance pass's weights actually show (attack 21.6% vs movement 18.8%
+       on the live roster), so it must be reproduced, not approximated.
+
+    2. **Per-subject assignment** — a deterministic deficit-greedy fill. Subjects are visited in the
+       caller's canonical order; each of a subject's `count` slots takes the axis member with the
+       most remaining scope quota, tie-broken by the subject's OWN per-mille weight for that member
+       and then declared order. Every slot therefore reduces total unmet quota by one, so after
+       `count * n` slots every column hits its quota exactly and every row sums to `count`.
+
+    **Why deficit-greedy replaced the earlier largest-remainder-start + swap-repair.** Both preserve
+    the column quota, but the swap version started from each subject's own largest-remainder split,
+    which at `count == 5` is `1/1/1/1/1` for a near-uniform axis and — worse — concentrates: measured
+    on `targetMode` it gave a single subject all five `area` slots while 903 got none. The
+    deficit-greedy fill spreads each subject across the axis (it keeps taking the globally-most-
+    needed member), so near-uniform axes produce near-uniform PER-SUBJECT vectors instead of
+    arbitrary clumps. On a genuinely skewed axis it still follows the subject's own lean through the
+    second tie-break: measured on `category`, 94% of species get exactly their own top-`count`
+    categories.
+
+    **The failure it fixes, measured 2026-09-11/12.** The original per-subject method was inert at
+    `count == 5`: a member needs weight >= 400 per-mille to win a second slot (`floor(400*5/1000) == 2`),
+    while the shipped `base=1000, step=250` tops out at 267 per-mille. On `category` that made all
+    1,131 subjects produce the identical `1/1/1/1/1` and threw the aggregate away; on `targetMode`,
+    which has **six** members, the lowest-weight one (`area`) got 0 slots for **every** subject — so
+    `targetMode: area` and all four `areaShape` values were **unreachable at family and species scope**
+    (0 of 6,655 briefs), a whole designed dimension silently absent. Deficit-greedy makes `area`
+    reachable (750 species-slots / 188 family-slots over one full round) while keeping the exact quota.
+
+    `rows` is `(subjectKey, milliVector)` in the caller's canonical subject order — the allocation is
+    a total function of that order and the weights, never of dict iteration order. Ties use the
+    declared `order`, so the result is stable and reproducible."""
+    n = len(rows)
+    if count == 0 or n == 0:
+        return {key: {c: 0 for c in order} for key, _ in rows}
+
+    aggregate = {c: 0 for c in order}
+    for _key, milli in rows:
+        for c in order:
+            aggregate[c] += int(milli[c])
+    quota = largest_remainder_apportion(aggregate, order, count * n)
+
+    index = {c: i for i, c in enumerate(order)}
+    col = {c: 0 for c in order}
+    alloc = {key: {c: 0 for c in order} for key, _ in rows}
+
+    for key, milli in rows:
+        for _slot in range(count):
+            best, best_score = None, None
+            for c in order:
+                remaining = quota[c] - col[c]
+                if remaining <= 0:
+                    continue
+                # Primary: most-unmet quota (spreads). Secondary: this subject's own lean
+                # (follows a real skew). Tertiary: declared order (determinism).
+                score = (remaining, int(milli[c]), -index[c])
+                if best_score is None or score > best_score:
+                    best_score, best = score, c
+            if best is None:                          # all quotas met — unreachable: total == count*n
+                raise ValueError(f"{key!r}: no axis member has remaining quota after {count} slots")
+            alloc[key][best] += 1
+            col[best] += 1
+
+    if any(col[c] != quota[c] for c in order):        # defensive: the fill is exact by construction
+        raise ValueError(f"axis allocation drift: col={col} quota={quota}")
+    return alloc
+
+
+def apportion_categories(
+        rows: "Sequence[tuple[str, Mapping[str, int]]]", count: int,
+        order: "Sequence[str]" = CATEGORIES) -> "dict[str, dict[str, int]]":
+    """Category-scope allocation — `apportion_axis` with `CATEGORIES` as the declared default order.
+    Kept as its own name because it is the exported symbol the planner, `coverage_report`, and the
+    tests call for the category axis specifically (the same reason `largest_remainder_apportion`
+    stays a named wrapper). See `apportion_axis` for the method and the measured defect it fixes."""
+    return apportion_axis(rows, count, order)
+
+
+def apportion_area_shapes(
+        rows: "Sequence[tuple[str, Mapping[str, int]]]",
+        area_slots_by_key: "Mapping[str, int]",
+        order: "Sequence[str]" = AREA_SHAPES) -> "dict[str, dict[str, int]]":
+    """**Scope-level `areaShape` allocation — the third level of the same defect.** `areaShape` is a
+    *conditional* sub-vector: it is only consulted for briefs whose target mode is `area`
+    (`spec-distribution-planner.md` §3 step 4a). It was allocated per subject by largest remainder
+    over `areaShapeMilli` (shipped uniform, `250` each), at a subject's own `area` slot count.
+
+    **Measured defect 2026-09-12.** At family/species scope the per-subject `area` count is 0 or 1, so
+    `largest_remainder_count(..., total=1)` ties all four shapes and the declared-order tie-break
+    picks `row` — **every** area brief was `row` (measured: family 188/188 row, species 750/750 row),
+    leaving `column`, `square` and `rectangle` unreachable, exactly the class of bug as the inert
+    `category`/`targetMode` allocation one level up.
+
+    The fix is the same shape as `apportion_axis`, across the subjects that actually carry `area`
+    slots: sum each subject's `areaShapeMilli` **weighted by its own area slot count**, apportion the
+    scope's total area-slot count by largest remainder (exact quota), then deficit-greedy the
+    per-subject fill so the shapes spread instead of clumping. Subjects with zero area slots get a
+    zero vector and are never consulted (their `areaShape` is the literal `none`).
+
+    Measured after the fix: species 188/188/187/187 and family 47/47/47/47 across the four shapes,
+    column exact, with 5 distinct per-subject vectors. `rows` is `(subjectKey, areaShapeMilli)` in
+    canonical subject order; `area_slots_by_key` is the already-decided `area` count per subject from
+    `apportion_axis(..., TARGET_MODES)` — this function never re-decides `targetMode`."""
+    n = len(rows)
+    total_slots = sum(int(area_slots_by_key.get(key, 0)) for key, _ in rows)
+    if total_slots == 0 or n == 0:
+        return {key: {s: 0 for s in order} for key, _ in rows}
+
+    aggregate = {s: 0 for s in order}
+    for key, milli in rows:
+        weight = int(area_slots_by_key.get(key, 0))
+        if weight <= 0:
+            continue
+        for s in order:
+            aggregate[s] += int(milli[s]) * weight
+    quota = largest_remainder_apportion(aggregate, order, total_slots)
+
+    index = {s: i for i, s in enumerate(order)}
+    col = {s: 0 for s in order}
+    alloc = {key: {s: 0 for s in order} for key, _ in rows}
+    for key, milli in rows:
+        for _slot in range(int(area_slots_by_key.get(key, 0))):
+            best, best_score = None, None
+            for s in order:
+                remaining = quota[s] - col[s]
+                if remaining <= 0:
+                    continue
+                score = (remaining, int(milli[s]), -index[s])
+                if best_score is None or score > best_score:
+                    best_score, best = score, s
+            if best is None:
+                raise ValueError(f"{key!r}: no area shape has remaining quota")
+            alloc[key][best] += 1
+            col[best] += 1
+
+    if any(col[s] != quota[s] for s in order):
+        raise ValueError(f"area-shape allocation drift: col={col} quota={quota}")
+    return alloc
 
 
 # ---------------------------------------------------------------------------------------------
@@ -517,21 +720,47 @@ def plan_subject(*, scope: str, scope_key: "str | None", count: int, weights: We
                  pairing_table: "Mapping[str, Sequence[str]]", anchor: dict, corpus_hash: str,
                  tuning_version: int, round_no: int, prompt_version: int,
                  accepted_neighbours: "Sequence[tuple[str, FingerprintComponents]]" = (),
-                 avoid_neighbour_k: int = 0) -> "list[dict]":
+                 avoid_neighbour_k: int = 0,
+                 category_counts: "Mapping[str, int] | None" = None,
+                 target_mode_counts: "Mapping[str, int] | None" = None,
+                 area_shape_counts: "Mapping[str, int] | None" = None) -> "list[dict]":
     """§3 steps 3-9 for ONE subject (a species, a family, or the single general subject). Ordinals
     are always subject-local, starting at 1 — `briefId` embeds `scope`+`scopeKey`, so a global
-    counter would be redundant and order-dependent for no reason."""
+    counter would be redundant and order-dependent for no reason.
+
+    `category_counts` and `target_mode_counts` are the subject's slice of the SCOPE-level allocation
+    (`apportion_axis`), threaded in by `plan_round` for the species and family scopes. When either
+    is omitted the function falls back to a per-subject largest-remainder split, which is correct
+    for a lone subject (the general scope, or a test fixture) but inert at the shipped `count == 5`
+    — see `apportion_axis` for the measured defect that makes the scope-level path the production
+    one. The general scope is a single subject, so its own split IS the scope allocation."""
     if count == 0:
         return []
 
-    category_counts = largest_remainder_count(weights.category_milli, CATEGORIES, count)
-    target_counts = largest_remainder_count(weights.target_mode_milli, TARGET_MODES, count)
+    if category_counts is None:
+        category_counts = largest_remainder_count(weights.category_milli, CATEGORIES, count)
+    else:
+        category_counts = {c: int(category_counts[c]) for c in CATEGORIES}
+        if sum(category_counts.values()) != count:
+            raise ValueError(f"category_counts {dict(category_counts)!r} does not sum to {count}")
+    if target_mode_counts is None:
+        target_counts = largest_remainder_count(weights.target_mode_milli, TARGET_MODES, count)
+    else:
+        target_counts = {m: int(target_mode_counts[m]) for m in TARGET_MODES}
+        if sum(target_counts.values()) != count:
+            raise ValueError(f"target_mode_counts {dict(target_mode_counts)!r} does not sum to {count}")
     category_seq = expand_counts(category_counts, CATEGORIES)
     target_seq = expand_counts(target_counts, TARGET_MODES)
 
     area_count = target_counts.get("area", 0)
-    area_counts = (largest_remainder_count(weights.area_shape_milli, AREA_SHAPES, area_count)
-                  if area_count else {k: 0 for k in AREA_SHAPES})
+    if area_shape_counts is None:
+        area_counts = (largest_remainder_count(weights.area_shape_milli, AREA_SHAPES, area_count)
+                      if area_count else {k: 0 for k in AREA_SHAPES})
+    else:
+        area_counts = {s: int(area_shape_counts[s]) for s in AREA_SHAPES}
+        if sum(area_counts.values()) != area_count:
+            raise ValueError(f"area_shape_counts {dict(area_counts)!r} does not sum to "
+                             f"the subject's area slot count {area_count}")
     area_seq = expand_counts(area_counts, AREA_SHAPES)
 
     rung_window = list(RUN_WINDOW[scope])
@@ -556,6 +785,12 @@ def plan_subject(*, scope: str, scope_key: "str | None", count: int, weights: We
     id_key = scope_key if scope_key is not None else "general"
     briefs: "list[dict]" = []
     area_cursor = 0
+    # Render the accepted-neighbour fingerprints ONCE, not once per brief. `accepted_neighbours` is
+    # identical for every ordinal of this subject, so re-rendering and re-sorting it inside the loop
+    # was `count x group_size` work per subject — quadratic as the accepted corpus accumulates rounds
+    # (the 2026-09-11 review's finding). `render_fingerprint` returns a plain tuple, so this is a
+    # pure hoist with identical output.
+    rendered_neighbours = [(aid, render_fingerprint(fp)) for aid, fp in accepted_neighbours]
     for i in range(count):
         ordinal = i + 1
         category = category_seq[i]
@@ -581,8 +816,7 @@ def plan_subject(*, scope: str, scope_key: "str | None", count: int, weights: We
             pairing_role=pa.role,
         )
         target_fp = render_fingerprint(fp_components)
-        neighbours = k_nearest(target_fp, [(aid, render_fingerprint(fp)) for aid, fp
-                                          in accepted_neighbours], avoid_neighbour_k)
+        neighbours = k_nearest(target_fp, rendered_neighbours, avoid_neighbour_k)
         avoid_neighbours = [{"actionId": aid, "fingerprint": render_fingerprint_string(fp_components)}
                            for aid, _dist in neighbours]
 
@@ -625,6 +859,96 @@ def plan_subject(*, scope: str, scope_key: "str | None", count: int, weights: We
     return briefs
 
 
+def _plan_top_up(
+        *, top_up: "Mapping[tuple[str, str | None], Mapping[str, int]]",
+        species_anchor: "Mapping[str, SpeciesAnchorRow]",
+        weights_by_key: "Mapping[tuple[str, str], WeightsRow]",
+        rung_table: "Mapping[int, tuple[str, ...]]", allowed_families: "tuple[str, ...]",
+        forbidden_pair_ids: "tuple[str, ...]", multiplicative_pairs: "Sequence[tuple[str, str]]",
+        pairing_table: "Mapping[str, Sequence[str]]", corpus_hash: str, tuning_version: int,
+        round_no: int, prompt_version: int, neighbours_for, avoid_neighbour_k: int) -> "list[dict]":
+    """T2.2's shortfall-only plan. One `plan_subject` call per subject NAMED in `top_up`, its count
+    equal to that subject's named shortfall (`sum(want.values())`), its category counts equal to the
+    `want` map itself — so a top-up round plans exactly what round n reported missing and nothing
+    else.
+
+    Subject order is the caller's `top_up` iteration order, normalised to a total order (species in
+    seed order is not required here because the set is usually tiny and the subject keys are unique);
+    we sort by `(scope rank, scope_key)` so the result is a pure function of the mapping's CONTENT,
+    never of its insertion order.
+
+    An unknown subject, an unknown category, or a non-positive want is refused by name — a top-up
+    report that names something this planner cannot plan means the report is stale or from a
+    different roster, and silently dropping it would under-plan without saying so.
+
+    The `targetMode`/`areaShape` sub-vectors are split within the shortfall by the subject's own
+    weights (`largest_remainder_count`, correct at any count) rather than the scope-level allocator:
+    a top-up round has no scope-wide aggregate to apportion, and a shortfall is typically 1-3 units,
+    where the per-subject split is exact and total. Each brief is an ordinary brief (`plan_subject`),
+    so nothing downstream needs a special case."""
+    scope_rank = {"general": 0, "family": 1, "species": 2}
+
+    def key_order(item):
+        (scope, scope_key), _want = item
+        if scope not in scope_rank:
+            raise ValueError(f"top-up names an unknown scope {scope!r}")
+        return (scope_rank[scope], scope_key or "")
+
+    briefs: "list[dict]" = []
+    for (scope, scope_key), want in sorted(top_up.items(), key=key_order):
+        # Zero-fill every category: `plan_subject` requires the full vector (it validates the sum),
+        # and a shortfall of 0 in a category is a real, meaningful zero here.
+        counts = {c: 0 for c in CATEGORIES}
+        for category, n in want.items():
+            if category not in CATEGORIES:
+                raise ValueError(f"top-up for {scope}/{scope_key!r} names unknown category "
+                                 f"{category!r}")
+            if not isinstance(n, int) or isinstance(n, bool) or n <= 0:
+                raise ValueError(f"top-up for {scope}/{scope_key!r}/{category} is not a positive "
+                                 f"count: {n!r}")
+            counts[category] += n
+        count = sum(counts.values())
+        if count == 0:
+            continue
+
+        if scope == "general":
+            weights = GENERAL_WEIGHTS
+            anchor = brief_anchor("general", None, None)
+        elif scope == "species":
+            row = species_anchor.get(scope_key)
+            weights = weights_by_key.get(("species", scope_key))
+            if row is None or weights is None:
+                raise ValueError(f"top-up names unknown species {scope_key!r} — the report does not "
+                                 f"match the live roster")
+            anchor = brief_anchor("species", scope_key, row)
+        else:                                   # family
+            weights = weights_by_key.get(("family", scope_key))
+            if weights is None:
+                raise ValueError(f"top-up names unknown family {scope_key!r} — the report does not "
+                                 f"match the live family namespace")
+            anchor = brief_anchor("family", scope_key, None)
+
+        target_counts = largest_remainder_count(weights.target_mode_milli, TARGET_MODES, count)
+        area_count = target_counts.get("area", 0)
+        area_counts = (largest_remainder_count(weights.area_shape_milli, AREA_SHAPES, area_count)
+                       if area_count else {k: 0 for k in AREA_SHAPES})
+        briefs.extend(plan_subject(
+            scope=scope, scope_key=scope_key, count=count, weights=weights,
+            rung_table=rung_table, allowed_families=allowed_families,
+            forbidden_pair_ids=forbidden_pair_ids, multiplicative_pairs=multiplicative_pairs,
+            pairing_table=pairing_table, anchor=anchor, corpus_hash=corpus_hash,
+            tuning_version=tuning_version, round_no=round_no, prompt_version=prompt_version,
+            accepted_neighbours=neighbours_for(scope, scope_key),
+            avoid_neighbour_k=avoid_neighbour_k,
+            category_counts=counts, target_mode_counts=target_counts,
+            area_shape_counts=area_counts,
+        ))
+    for b in briefs:
+        validate_rung_band(b["scope"], b["slot"]["rungBand"])
+    validate_pairing_coverage(briefs)
+    return briefs
+
+
 def plan_round(*, species_ids: "Sequence[str]", family_members: "Mapping[str, Sequence[str]]",
                species_anchor: "Mapping[str, SpeciesAnchorRow]",
                weights_by_key: "Mapping[tuple[str, str], WeightsRow]",
@@ -633,12 +957,46 @@ def plan_round(*, species_ids: "Sequence[str]", family_members: "Mapping[str, Se
                per_species_count: int, per_family_count: int,
                multiplicative_pairs: "Sequence[tuple[str, str]]", family_motif_max: int,
                corpus_hash: str, tuning_version: int, round_no: int = 1,
-               prompt_version: int = 1) -> "list[dict]":
+               prompt_version: int = 1,
+               accepted_neighbours_by_group: "Mapping[tuple[str, str | None], Sequence[tuple[str, FingerprintComponents]]] | None" = None,
+               avoid_neighbour_k: int = 0,
+               top_up: "Mapping[tuple[str, str | None], Mapping[str, int]] | None" = None,
+               ) -> "list[dict]":
     """§3 steps 2-9 over the whole roster. Subject order: general (one pseudo-subject), then the
     every live species in seed order (`species_ids`, as the caller already ordered it), then the
     consolidated families in sorted order (a total order over family ids — neither dict nor filesystem
-    iteration order, matching spec §4's own "never let ordinal assignment depend on..." rule)."""
+    iteration order, matching spec §4's own "never let ordinal assignment depend on..." rule).
+
+    **§3 step 8's `avoidNeighbours` is threaded here, not silently defaulted.** `plan_subject`
+    always had the parameters, but this orchestrator never passed them, so every brief shipped an
+    empty `avoidNeighbours` list (measured 2026-09-11: 0 of 5,680). The accepted corpus is the
+    caller's job to read (`generate_distribution_planner._accepted_neighbours_by_group`), grouped by
+    `(scope, scopeKey)`; round 1 legitimately reads none, and `avoid_neighbour_k` comes from A-S3's
+    `action-dedup.v1.json` via `load_dedup_k` (default 8).
+
+    **`top_up` is the `S5 → S1` edge (T2.2, 2026-09-12).** When supplied, it REPLACES the base
+    per-subject plan with exactly the shortfall it names: `{(scope, scopeKeyOrNone): {category:
+    want}}` from round n's report. A top-up round plans only what is still missing — round n's
+    accepted rows already persist in the committed corpus and already count against the quota, so
+    re-planning the base would regenerate rows that were already accepted. A subject absent from
+    `top_up` is covered and gets nothing. `None` (the round-1 default) plans the full base exactly as
+    before, so this path is additive and inert until a report is passed."""
     allowed_families, forbidden_pair_ids = build_pool(family_ids, multiplicative_pairs)
+    groups = accepted_neighbours_by_group or {}
+
+    def neighbours_for(scope: str, scope_key: "str | None"):
+        return groups.get((scope, scope_key), ())
+
+    # T2.2 — top-up mode: plan only the named shortfall, keyed by (scope, scopeKey).
+    if top_up is not None:
+        return _plan_top_up(
+            top_up=top_up, species_anchor=species_anchor, weights_by_key=weights_by_key,
+            rung_table=rung_table, allowed_families=allowed_families,
+            forbidden_pair_ids=forbidden_pair_ids, multiplicative_pairs=multiplicative_pairs,
+            pairing_table=pairing_table, corpus_hash=corpus_hash, tuning_version=tuning_version,
+            round_no=round_no, prompt_version=prompt_version,
+            neighbours_for=neighbours_for, avoid_neighbour_k=avoid_neighbour_k,
+        )
 
     briefs: "list[dict]" = []
 
@@ -650,13 +1008,27 @@ def plan_round(*, species_ids: "Sequence[str]", family_members: "Mapping[str, Se
             forbidden_pair_ids=forbidden_pair_ids, multiplicative_pairs=multiplicative_pairs,
             pairing_table=pairing_table, anchor=anchor, corpus_hash=corpus_hash,
             tuning_version=tuning_version, round_no=round_no, prompt_version=prompt_version,
+            accepted_neighbours=neighbours_for("general", None), avoid_neighbour_k=avoid_neighbour_k,
         ))
 
-    for species_id in species_ids:
-        row = species_anchor.get(species_id)
-        weights = weights_by_key.get(("species", species_id))
-        if row is None or weights is None:
-            continue                                  # a load-time gap, not this module's to paper over
+    # Scope-level two-level allocation (see `apportion_categories`): one exact aggregate quota per
+    # scope, split back across subjects with a lean-aware repair. The subject list is the caller's
+    # canonical order, so the allocation is a total function of it and the weights.
+    species_subjects = [
+        (species_id, weights_by_key[("species", species_id)].category_milli)
+        for species_id in species_ids
+        if species_anchor.get(species_id) is not None and ("species", species_id) in weights_by_key
+    ]
+    species_categories = apportion_axis(species_subjects, per_species_count, CATEGORIES)
+    species_targets = apportion_axis(
+        [(sid, weights_by_key[("species", sid)].target_mode_milli) for sid, _ in species_subjects],
+        per_species_count, TARGET_MODES)
+    species_shapes = apportion_area_shapes(
+        [(sid, weights_by_key[("species", sid)].area_shape_milli) for sid, _ in species_subjects],
+        {sid: species_targets[sid]["area"] for sid, _ in species_subjects})
+    for species_id, _milli in species_subjects:
+        row = species_anchor[species_id]
+        weights = weights_by_key[("species", species_id)]
         anchor = brief_anchor("species", species_id, row)
         briefs.extend(plan_subject(
             scope="species", scope_key=species_id, count=per_species_count, weights=weights,
@@ -664,16 +1036,31 @@ def plan_round(*, species_ids: "Sequence[str]", family_members: "Mapping[str, Se
             forbidden_pair_ids=forbidden_pair_ids, multiplicative_pairs=multiplicative_pairs,
             pairing_table=pairing_table, anchor=anchor, corpus_hash=corpus_hash,
             tuning_version=tuning_version, round_no=round_no, prompt_version=prompt_version,
+            accepted_neighbours=neighbours_for("species", species_id),
+            avoid_neighbour_k=avoid_neighbour_k,
+            category_counts=species_categories[species_id],
+            target_mode_counts=species_targets[species_id],
+            area_shape_counts=species_shapes[species_id],
         ))
 
-    for family_id in sorted(family_members):
+    family_subjects = [
+        (family_id, weights_by_key[("family", family_id)].category_milli)
+        for family_id in sorted(family_members)
+        if ("family", family_id) in weights_by_key
+    ]
+    family_categories = apportion_axis(family_subjects, per_family_count, CATEGORIES)
+    family_targets = apportion_axis(
+        [(fid, weights_by_key[("family", fid)].target_mode_milli) for fid, _ in family_subjects],
+        per_family_count, TARGET_MODES)
+    family_shapes = apportion_area_shapes(
+        [(fid, weights_by_key[("family", fid)].area_shape_milli) for fid, _ in family_subjects],
+        {fid: family_targets[fid]["area"] for fid, _ in family_subjects})
+    for family_id, _milli in family_subjects:
         members = family_members[family_id]
         member_rows = [(species_anchor[m].motifs, species_anchor[m].anti_motifs)
                       for m in members if m in species_anchor]
         fam_motifs, fam_anti, fam_basis = derive_family_motifs(member_rows, family_motif_max)
-        weights = weights_by_key.get(("family", family_id))
-        if weights is None:
-            continue
+        weights = weights_by_key[("family", family_id)]
         anchor = brief_anchor("family", family_id, None, fam_motifs, fam_anti, fam_basis)
         briefs.extend(plan_subject(
             scope="family", scope_key=family_id, count=per_family_count, weights=weights,
@@ -681,6 +1068,11 @@ def plan_round(*, species_ids: "Sequence[str]", family_members: "Mapping[str, Se
             forbidden_pair_ids=forbidden_pair_ids, multiplicative_pairs=multiplicative_pairs,
             pairing_table=pairing_table, anchor=anchor, corpus_hash=corpus_hash,
             tuning_version=tuning_version, round_no=round_no, prompt_version=prompt_version,
+            accepted_neighbours=neighbours_for("family", family_id),
+            avoid_neighbour_k=avoid_neighbour_k,
+            category_counts=family_categories[family_id],
+            target_mode_counts=family_targets[family_id],
+            area_shape_counts=family_shapes[family_id],
         ))
 
     return briefs

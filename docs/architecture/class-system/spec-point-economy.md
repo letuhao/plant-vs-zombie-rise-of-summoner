@@ -3,11 +3,11 @@
 **Module id:** `point-economy` · **Program:** [class-system-map.md](../class-system-map.md) ·
 **Status: AUTHORIZED 2026-08-26 -- owner's /goal directive commands execution of the class-system plan to completion; supersedes this "awaiting owner review" header, which was never flipped after that directive landed.**
 
-**Depends on:** `aptitude-resolve` · **⛔ externally on `aspect-scope`, owned by the demon program**
+**Depends on:** `aptitude-resolve` · **⛔ externally on `aspect-scope`, owned by the creature program**
 (owner decision 2026-08-26) · **Blocks:** `residual-fit`
 
 > **Scope 3 waits on another program's queue.** That is the accepted cost of correct ownership —
-> every file `aspect-scope` edits is the demon program's. The other three scopes are unblocked, so
+> every file `aspect-scope` edits is the creature program's. The other three scopes are unblocked, so
 > this module can ship three-of-four and light up the fourth when the tier lands.
 
 ---
@@ -33,10 +33,10 @@ bearing. The allocation tiers ride them:
 
 | Tier | Keyed by | Points come from | Reads as |
 |---|---|---|---|
-| **commander** | player | `Θ_player` — daveLevel, realms advanced, run term | **who you are.** Shared by every demon you field |
-| **demon type** | `typeId` | species level — an **index**, `max(0, level − 1)`, never the cumulative XP that produced it. ⛔ **Corrected 2026-09-05 (`species-build` audit A1):** this row previously read "type almanac XP", an *accumulation*. `PointBudget.PointsFor` multiplies `sourceValue × rate` with no unit conversion, so an accumulation here inverted the locked commander-smallest-to-unique-largest ordering by 176× at ordinary play levels (species L12 vs commander Θ20). The other three tiers all read indices (`Θ_player`, `element_mastery`, specimen level); this one now does too — see `PointBudget.DemonTypeSourceFromLevel` | **what a species is.** Shared by every specimen |
-| **aspect** | `(typeId, element)` | `element_mastery` (§10.1) — tier built by the **demon program**, [demons/spec-aspect-scope.md](../demons/spec-aspect-scope.md) | **which strain** |
-| **unique demon** | `instanceId` | specimen level | **this one, that you invested in** |
+| **commander** | player | `Θ_player` — daveLevel, realms advanced, run term | **who you are.** Shared by every creature you field |
+| **creature type** | `typeId` | species level — an **index**, `max(0, level − 1)`, never the cumulative XP that produced it. ⛔ **Corrected 2026-09-05 (`species-build` audit A1):** this row previously read "type almanac XP", an *accumulation*. `PointBudget.PointsFor` multiplies `sourceValue × rate` with no unit conversion, so an accumulation here inverted the locked commander-smallest-to-unique-largest ordering by 176× at ordinary play levels (species L12 vs commander Θ20). The other three tiers all read indices (`Θ_player`, `element_mastery`, specimen level); this one now does too — see `PointBudget.CreatureTypeSourceFromLevel` | **what a species is.** Shared by every specimen |
+| **aspect** | `(typeId, element)` | `element_mastery` (§10.1) — tier built by the **creature program**, [creatures/spec-aspect-scope.md](../creatures/spec-aspect-scope.md) | **which strain** |
+| **unique creature** | `instanceId` | specimen level | **this one, that you invested in** |
 
 **An actor's allocation is the SUM of four** — and `share` is taken on the sum, never per tier
 ([spec-primary-stats.md](spec-primary-stats.md) §6 rule 4). It is additive in exactly the way
@@ -46,12 +46,12 @@ bearing. The allocation tiers ride them:
 
 > **DECIDED 2026-08-26: the commander tier is the SMALLEST and the unique tier the LARGEST.**
 
-**The commander tier applies to every demon you field**, so a dominant commander allocation is the
+**The commander tier applies to every creature you field**, so a dominant commander allocation is the
 worst possible version of the dominance finding — one wrong build, replicated across the whole roster.
 The unique tier applies to one specimen, so a strong unique allocation is **specialisation**, which is
 what makes a team diverse.
 
-> **Per-demon allocation is also what most blunts the dominance problem.** When you field a mix, *"one
+> **Per-creature allocation is also what most blunts the dominance problem.** When you field a mix, *"one
 > corner beats all eleven"* stops being the whole game, because the question becomes which **team** to
 > bring rather than which build to play. That is the summoner fantasy doing balance work — and it is
 > why [spec-balance-guard.md](spec-balance-guard.md)'s soft half is measured per-actor while the game
@@ -124,7 +124,7 @@ data/tuning/aptitudes.v{n}.json                            pointEconomy block ga
 ```
 
 **⛔ CORRECTED 2026-08-27** — the `AllocationStore`/DAL paths above were written before a survey of
-`FusionRpg.Data`'s real conventions: every existing feature (souls, unique actors, demons, contracts,
+`FusionRpg.Data`'s real conventions: every existing feature (souls, unique actors, creatures, contracts,
 channel policy) is a `partial class RpgStore` slice sharing ONE connection/lock/`EnsureHotSchema`/
 `Reset()` pipeline, not a standalone class with its own path. A standalone `Aptitudes/AllocationStore.cs`
 would have forked that pipeline and silently dropped out of `Reset()`. Built as `RpgStore.Aptitudes.cs`
@@ -247,5 +247,5 @@ feeds a contest it reads linearly, if a magnitude it reads `P(Θ)`, never both t
 
 - [class-system-ideal.md](../class-system-ideal.md) §7a.2 (points per `Θ`), §7a.3 (the withdrawn price), §7b.5 (respec), §7c (the four scopes)
 - [unique-actor-runtime.md](../unique-actor-runtime.md) — the three orthogonal ids the tiers ride
-- [spec-aspect-scope.md](../demons/spec-aspect-scope.md) — scope 3
+- [spec-aspect-scope.md](../creatures/spec-aspect-scope.md) — scope 3
 - [tunables-ssot.md](../tunables-ssot.md) · [power/ssot-power-scale.md](../power/ssot-power-scale.md) §11

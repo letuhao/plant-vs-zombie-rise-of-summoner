@@ -25,7 +25,7 @@
       "id": "set.wheat-001",
       "nameKey": "set.the-seasonal-grain",
       "name": "The Seasonal Grain",
-      "themeKey": "demon.wheat",
+      "themeKey": "creature.wheat",
       "members": [
         {
           "role": "armament-primary",

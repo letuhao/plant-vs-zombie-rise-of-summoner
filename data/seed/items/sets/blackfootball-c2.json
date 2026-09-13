@@ -25,7 +25,7 @@
       "id": "set.blackfootball-c2-001",
       "nameKey": "set.black-olive-volley",
       "name": "Black Olive Volley",
-      "themeKey": "demon.blackfootball_c2",
+      "themeKey": "creature.blackfootball_c2",
       "members": [
         {
           "role": "armament-primary",

@@ -1,4 +1,4 @@
-"""Tests for seedsmith.adapters.demons.anchor.derive (spec-classify-pipelines.md §4).
+"""Tests for seedsmith.adapters.creatures.anchor.derive (spec-classify-pipelines.md §4).
 
 T2.11's own real 20-species run (2026-09-02) crashed on `clamp_variant_count` the first time a
 species' `rarity` vote landed on the documented "two repairs, then unresolved" outcome
@@ -7,7 +7,7 @@ case before this file existed.
 """
 from __future__ import annotations
 
-from seedsmith.adapters.demons.anchor.derive import (
+from seedsmith.adapters.creatures.anchor.derive import (
     clamp_variant_count,
     derive_posture,
     derive_pure,
@@ -18,7 +18,7 @@ from seedsmith.adapters.demons.anchor.derive import (
     resolve_unresolved_rarity,
     resolve_unresolved_threat_band,
 )
-from seedsmith.adapters.demons.power.bands import ThreatTuning
+from seedsmith.adapters.creatures.power.bands import ThreatTuning
 
 
 def test_truncates_to_the_bands_high_end():
@@ -91,7 +91,7 @@ def test_derive_pure_false_when_secondary_aptitude_is_unresolved():
     assert derive_pure("Might", "unresolved") is False
 
 
-# ---- resolve_unresolved_threat_band (2026-09-04, demon-corpus-self-heal F1) ---------------------
+# ---- resolve_unresolved_threat_band (2026-09-04, creature-corpus-self-heal F1) ---------------------
 
 def test_a_resolved_threat_band_passes_through_unchanged():
     tuning = ThreatTuning.load()
@@ -103,18 +103,18 @@ def test_a_resolved_threat_band_passes_through_unchanged():
 def test_unresolved_threat_band_resolves_to_the_real_sanctioned_default():
     tuning = ThreatTuning.load()
     value, was_deterministic = resolve_unresolved_threat_band("unresolved", tuning=tuning)
-    # The exact value the real, committed demon-threat.v1.json names — never invented here.
+    # The exact value the real, committed creature-threat.v1.json names — never invented here.
     assert value == tuning.threshold_for_rung(tuning.inferred_default_rung).id
     assert was_deterministic is True
 
 
-# ---- resolve_unresolved_rarity (2026-09-07, demon-corpus-self-heal Phase H, owner-directed) -----
+# ---- resolve_unresolved_rarity (2026-09-07, creature-corpus-self-heal Phase H, owner-directed) -----
 #
 # Rarity is this game's OWN mechanism, not an almanac/PvZ property — when the identity pipeline's
 # vote never converges, the owner's direction is "stronger species are rarer, fall back to a
 # deterministic engine" rather than leave it unresolved forever. The fallback reuses threatBand's
-# own already-validated power banding (demon-threat.v1.json) via a rank-preserving correspondence
-# (demon-rarity-power-fallback.v1.json), never a second independent curve.
+# own already-validated power banding (creature-threat.v1.json) via a rank-preserving correspondence
+# (creature-rarity-power-fallback.v1.json), never a second independent curve.
 
 def test_a_resolved_rarity_passes_through_unchanged():
     mapping = load_rarity_power_fallback()
@@ -140,7 +140,7 @@ def test_unresolved_rarity_stays_unresolved_when_threat_band_has_no_signal_eithe
 
 
 def test_rarity_power_fallback_is_a_rank_preserving_bijection_over_both_closed_ladders():
-    from seedsmith.adapters.demons.anchor.schema import RARITY, THREAT_BAND
+    from seedsmith.adapters.creatures.anchor.schema import RARITY, THREAT_BAND
 
     mapping = load_rarity_power_fallback()
     assert set(mapping.keys()) == set(THREAT_BAND)
@@ -149,7 +149,7 @@ def test_rarity_power_fallback_is_a_rank_preserving_bijection_over_both_closed_l
     assert [mapping[t] for t in THREAT_BAND] == list(RARITY)
 
 
-# ---- resolve_unresolved_aptitude (2026-09-07, demon-corpus-self-heal Phase I, owner-directed) ---
+# ---- resolve_unresolved_aptitude (2026-09-07, creature-corpus-self-heal Phase I, owner-directed) ---
 #
 # No real signal exists for aptitude (measured: F≈1.34 over the species with a computable score,
 # and 10 of the 11 real unresolved species have no computable score at all) — this is a flat,
@@ -168,7 +168,7 @@ def test_unresolved_aptitude_resolves_to_the_flat_default():
 
 
 def test_aptitude_fallback_names_a_real_aptitude():
-    from seedsmith.adapters.demons.anchor.schema import APTITUDES
+    from seedsmith.adapters.creatures.anchor.schema import APTITUDES
 
     default = load_aptitude_fallback()
     assert default in APTITUDES

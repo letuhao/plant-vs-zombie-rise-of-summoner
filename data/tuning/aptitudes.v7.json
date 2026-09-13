@@ -10,7 +10,7 @@
     "rebalance": "Never hand-edit. python tools/tuning/publish.py aptitudes <dotted.key>=<value> writes v{n+1}; the old version stays on disk for revert (tunables-ssot.md T4).",
     "statusEdgesFrozen": "UNFROZEN 2026-08-25: the neutral-point blocker is built (applyShape/applyOffsetK) and the duration/intensity axes are now fed, so these are tunable. BUT the re-solved allocation FAILED its falsification (30.4% max residual, one arrow reversed) - see class-system-ideal.md 5c.13. Treat builds/*.json as UNVERIFIED, not as balance.",
     "rebalanceLabel": "D55: skillPointsPerThetaMilliByScope proportional to the {3,4,4,6} ratio against commander=11",
-    "skillScopeAdded": "v5 -> v6 (passive-tree C6, spec-tree-state.md 3/8, D34): pointEconomy gains skillPointsPerThetaMilliByScope, the SKILL-point sibling of aptitudePointsPerThetaMilliByScope. Without a per-scope table every actor read Theta_player for skill points too, so a demon would get a full commander budget on its own price ladder (D34: 50 demons x 31 nodes at Theta=100 is 1,550, effectively the whole 1,560-node generic catalog). No edges or other values changed from v5."
+    "skillScopeAdded": "v5 -> v6 (passive-tree C6, spec-tree-state.md 3/8, D34): pointEconomy gains skillPointsPerThetaMilliByScope, the SKILL-point sibling of aptitudePointsPerThetaMilliByScope. Without a per-scope table every actor read Theta_player for skill points too, so a creature would get a full commander budget on its own price ladder (D34: 50 creatures x 31 nodes at Theta=100 is 1,550, effectively the whole 1,560-node generic catalog). No edges or other values changed from v5."
   },
   "grant": {
     "_note": "FREE BUILD (owner, 2026-08-25): the player has no class, so there is no class price and no posture surcharge - every point costs one point. The withdrawn price block is class-system-ideal.md 7a.3; what it was FOR now lives entirely in read.*.shareExponentMilli.",
@@ -19,20 +19,20 @@
   },
   "pointEconomy": {
     "_note": "class-system P6.1, spec-point-economy.md 2.2: 'the single number becomes a table' - four allocation-scope rates, additive to (not a replacement of) grant.aptitudePointsPerTheta above, which nothing in production reads today. A SEPARATE block on purpose, matching spec-point-economy.md 5's own project-structure listing.",
-    "_scopeSourcesWhy": "Each scope's rate multiplies a DIFFERENT source value the caller supplies (spec-point-economy.md 2's table) - commander x Theta_player, demonType x species level (an INDEX, max(0, level-1), never the cumulative almanac XP that produced it -- corrected 2026-09-05, species-build audit A1: XP is an accumulation and inverted the locked commander-smallest-to-unique-largest ordering by 176x at ordinary play levels), aspect x element_mastery (owned by the demon program's aspect-scope, not built yet), uniqueDemon x specimen level. This module ships the RATE table only, never the sources.",
-    "_weightsWhy": "UNMEASURED - spec-point-economy.md 8 'Ask first: the four tier weights, before residual-fit has measured them. Shipping a guess is fine; calling it balance is not.' Ordered commander smallest, uniqueDemon largest per 2.1's decision (a dominant commander build replicates across the whole roster); demonType and aspect are legally allowed to tie (spec-point-economy.md 7 test 3: 'commander < type <= aspect < unique'). residual-fit (Phase 8) owns the real values.",
+    "_scopeSourcesWhy": "Each scope's rate multiplies a DIFFERENT source value the caller supplies (spec-point-economy.md 2's table) - commander x Theta_player, creatureType x species level (an INDEX, max(0, level-1), never the cumulative almanac XP that produced it -- corrected 2026-09-05, species-build audit A1: XP is an accumulation and inverted the locked commander-smallest-to-unique-largest ordering by 176x at ordinary play levels), aspect x element_mastery (owned by the creature program's aspect-scope, not built yet), uniqueCreature x specimen level. This module ships the RATE table only, never the sources.",
+    "_weightsWhy": "UNMEASURED - spec-point-economy.md 8 'Ask first: the four tier weights, before residual-fit has measured them. Shipping a guess is fine; calling it balance is not.' Ordered commander smallest, uniqueCreature largest per 2.1's decision (a dominant commander build replicates across the whole roster); creatureType and aspect are legally allowed to tie (spec-point-economy.md 7 test 3: 'commander < type <= aspect < unique'). residual-fit (Phase 8) owns the real values.",
     "aptitudePointsPerThetaMilliByScope": {
       "commander": 3,
-      "demonType": 4,
+      "creatureType": 4,
       "aspect": 4,
-      "uniqueDemon": 6
+      "uniqueCreature": 6
     },
-    "_skillWeightsWhy": "C6, spec-tree-state.md 3/8 (D34/D38): the SKILL-point sibling of aptitudePointsPerThetaMilliByScope above -- required so every actor's skill-point budget reads its OWN scope, never a shared Theta_player (D34's named failure: fifty demons would each get a full commander budget on their own fresh price ladder). commander = 11 is SETTLED, not a guess (D38): 10.40 from the corner-share derivation g = a*corner*step*k^2/s = 3 * 0.54163 * 2 * 16 / 5, rounded up, sized against the MEASURED corner build the harness actually exercises. The other three (demonType, aspect, uniqueDemon) are UNMEASURED GUESSES -- borrowed from aptitudePointsPerThetaMilliByScope's own {4,4,6} placeholder above, same posture as this block's own _weightsWhy (shipping a guess is fine; calling it balance is not). residual-fit / squad-harness owns the real values (spec-tree-state.md open question 3).",
+    "_skillWeightsWhy": "C6, spec-tree-state.md 3/8 (D34/D38): the SKILL-point sibling of aptitudePointsPerThetaMilliByScope above -- required so every actor's skill-point budget reads its OWN scope, never a shared Theta_player (D34's named failure: fifty creatures would each get a full commander budget on their own fresh price ladder). commander = 11 is SETTLED, not a guess (D38): 10.40 from the corner-share derivation g = a*corner*step*k^2/s = 3 * 0.54163 * 2 * 16 / 5, rounded up, sized against the MEASURED corner build the harness actually exercises. The other three (creatureType, aspect, uniqueCreature) are UNMEASURED GUESSES -- borrowed from aptitudePointsPerThetaMilliByScope's own {4,4,6} placeholder above, same posture as this block's own _weightsWhy (shipping a guess is fine; calling it balance is not). residual-fit / squad-harness owns the real values (spec-tree-state.md open question 3).",
     "skillPointsPerThetaMilliByScope": {
       "commander": 11,
-      "demonType": 15,
+      "creatureType": 15,
       "aspect": 15,
-      "uniqueDemon": 22
+      "uniqueCreature": 22
     },
     "_respecWhy": "class-system P6.3, spec-point-economy.md 3/8: UNMEASURED placeholder amount, resource choice (hunger) lives in code (RespecPolicy.cs) as a structural/mechanism decision, not here -- only the AMOUNT is a tunable. 'Ask first' per spec 8; shipped per spec's own 'shipping a guess is fine, calling it balance is not' escape hatch, matching this same block's own tier-weight placeholders above.",
     "respecPrice": 10

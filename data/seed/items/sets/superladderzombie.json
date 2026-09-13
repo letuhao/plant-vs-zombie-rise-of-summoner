@@ -25,7 +25,7 @@
       "id": "set.superladderzombie-001",
       "nameKey": "set.curse-ladder-husk",
       "name": "Curse-Ladder Husk",
-      "themeKey": "demon.superladderzombie",
+      "themeKey": "creature.superladderzombie",
       "members": [
         {
           "role": "armament-primary",

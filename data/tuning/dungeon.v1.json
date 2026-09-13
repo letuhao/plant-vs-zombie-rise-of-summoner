@@ -394,31 +394,31 @@
         "souls": "accepts",
         "spirit": "accepts",
         "item": "accepts",
-        "demon": "scorns"
+        "creature": "scorns"
       },
       "stoic": {
         "souls": "accepts",
         "spirit": "scorns",
         "item": "accepts",
-        "demon": "accepts"
+        "creature": "accepts"
       },
       "proud": {
         "souls": "scorns",
         "spirit": "accepts",
         "item": "craves",
-        "demon": "accepts"
+        "creature": "accepts"
       },
       "calculating": {
         "souls": "craves",
         "spirit": "accepts",
         "item": "accepts",
-        "demon": "accepts"
+        "creature": "accepts"
       },
       "feral": {
         "souls": "accepts",
         "spirit": "craves",
         "item": "scorns",
-        "demon": "accepts"
+        "creature": "accepts"
       }
     },
     "offer": {

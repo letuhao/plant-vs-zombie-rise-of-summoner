@@ -21,7 +21,7 @@ player copy per derived-cook (specs strengthened 2026-09-10).
    `derived-sheet-projection`.
 5. Icons = **`lucide-react`** via CatalogIcon + `glyphRef`.
 6. **Surface = recipe + fold + bus.** Thin `DerivedTab` only.
-7. UniqueDemon baseline omit on lean `/derived` → **Pending** (closed via projection module) — never invent.
+7. UniqueCreature baseline omit on lean `/derived` → **Pending** (closed via projection module) — never invent.
 
 ---
 
@@ -69,9 +69,9 @@ Wire fields: see [spec-derived-sheet-projection.md](../derived-cook/spec-derived
 - Unit: fold + bind + RecipeMount.
 - Contract: cook IA; inspect-split; no player jargon.
 - Always: six states; element-paint-ssot; no god console.
-- Never: third classification; FE CAP literals; invent UniqueDemon baseline.
+- Never: third classification; FE CAP literals; invent UniqueCreature baseline.
 
 ## Open Questions
 
-**Closed 2026-09-10:** UniqueDemon baseline → Pending when omitted (`derived-sheet-projection`).  
+**Closed 2026-09-10:** UniqueCreature baseline → Pending when omitted (`derived-sheet-projection`).  
 **D7** spark/pips deferred — not tab Done gate.

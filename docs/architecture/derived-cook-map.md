@@ -59,7 +59,7 @@ player band.
 
 | Module id | Responsibility | Depends on | Spec |
 |---|---|---|---|
-| `derived-sheet-projection` | BE: extend sheet channel DTO with renderState/cap/unitClass/default; UniqueDemon honesty | ActorHub / sheet compose | [derived-cook/spec-derived-sheet-projection.md](derived-cook/spec-derived-sheet-projection.md) |
+| `derived-sheet-projection` | BE: extend sheet channel DTO with renderState/cap/unitClass/default; UniqueCreature honesty | ActorHub / sheet compose | [derived-cook/spec-derived-sheet-projection.md](derived-cook/spec-derived-sheet-projection.md) |
 | `derived-cook-ia` | BE+catalog: Status L2b reachability; OTHER Shared first-class; drop FE variant hardcodes | cook catalog | [derived-cook/spec-derived-cook-ia.md](derived-cook/spec-derived-cook-ia.md) |
 | `derived-cap-ssot` | Caps from registry/policy on wire; delete FE `KNOWN_CAPS` | projection, tunables | [derived-cook/spec-derived-cap-ssot.md](derived-cook/spec-derived-cap-ssot.md) |
 | `derived-render-states` | Pure cook×sheet → six states only; goldens | projection, cook-ia | [derived-cook/spec-derived-render-states.md](derived-cook/spec-derived-render-states.md) |

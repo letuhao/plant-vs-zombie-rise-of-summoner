@@ -25,7 +25,7 @@
       "id": "set.peachomper-001",
       "nameKey": "set.the-gullet-maw",
       "name": "The Gullet Maw",
-      "themeKey": "demon.peachomper",
+      "themeKey": "creature.peachomper",
       "members": [
         {
           "role": "armament-primary",

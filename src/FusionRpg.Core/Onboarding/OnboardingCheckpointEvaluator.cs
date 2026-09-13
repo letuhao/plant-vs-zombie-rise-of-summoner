@@ -1,5 +1,5 @@
 using FusionRpg.Core.Activity;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 
 namespace FusionRpg.Core.Onboarding;
 
@@ -82,15 +82,15 @@ public static class OnboardingCheckpointEvaluator
         {
             if (evidence.FactKind is not (PvzActivityKinds.PlantPlaced or PvzActivityKinds.ZombieSpawned))
                 continue;
-            if (!string.Equals(evidence.SourceKind, DemonProgressionSource.EmpireGeneralKind,
+            if (!string.Equals(evidence.SourceKind, CreatureProgressionSource.EmpireGeneralKind,
                     StringComparison.Ordinal)
                 || string.IsNullOrWhiteSpace(evidence.SourceId))
                 continue;
 
             try
             {
-                if (DemonProgressionSource.Parse(evidence.SourceKind!, evidence.SourceId!)
-                    is DemonProgressionSource.EmpireGeneralSource)
+                if (CreatureProgressionSource.Parse(evidence.SourceKind!, evidence.SourceId!)
+                    is CreatureProgressionSource.EmpireGeneralSource)
                     return true;
             }
             catch (FormatException) { }

@@ -265,20 +265,18 @@ public class WorldWaveOneAcceptanceTests : IDisposable
     // here. Protecting the hash in any of them would have meant shipping something known to be wrong.
     const string GoldenFinalHash = "5a596ea4ffbbc0d3827f77d41840ba40e0530f8787649357400889beb77dd7ed";
 
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public WorldWaveOneAcceptanceTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-cp3-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     /// <summary>

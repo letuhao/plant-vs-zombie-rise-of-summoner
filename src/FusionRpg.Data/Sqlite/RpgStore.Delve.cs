@@ -18,8 +18,8 @@ public sealed record DelvePartyPackState(int Rows, int Cols, IReadOnlyList<PackC
 
 /// <summary>D4.8 (spec-wild-room.md §6, "Altar pulls as at-risk haul") — one pending altar pull, the
 /// spec's own literal shape: "written as `parties_json[p].haul[] += {kind: "pull", speciesId, rarity,
-/// variant, traitIds, r, c, n}`." <see cref="Rarity"/> is the wire id (<c>DemonRarityIds.ToId</c>),
-/// matching <see cref="FusionRpg.Contracts.DemonMintSpec.Rarity"/>'s own string shape — no separate
+/// variant, traitIds, r, c, n}`." <see cref="Rarity"/> is the wire id (<c>CreatureRarityIds.ToId</c>),
+/// matching <see cref="FusionRpg.Contracts.CreatureMintSpec.Rarity"/>'s own string shape — no separate
 /// enum round-trip between a roll and a mint. <see cref="Row"/>/<see cref="Col"/>/<see cref="N"/> are
 /// the altar's own coordinates and pull ordinal — "the rng is `dungeon:altar:{r}:{c}:{n}`... replay-
 /// safe" (spec, verbatim); nothing else in this schema tracks "how many times has this altar been
@@ -34,7 +34,7 @@ public sealed record DelveHaulEntry(
 /// §1: "a raid is one, two or four parties written in one transaction with the delve").
 ///
 /// <para><b><see cref="Members"/></b> — delve-attrition D2.23 (spec-delve-attrition.md §1, §7:
-/// "each [party] gains `members[]`, one record per demon, read and written only through
+/// "each [party] gains `members[]`, one record per creature, read and written only through
 /// `RpgStore.Delve.cs`"). Nullable, not <see cref="Array.Empty{T}"/>: a party written before this
 /// field existed deserializes to <c>null</c> rather than a lossy empty list a caller could mistake
 /// for "this party genuinely has no members."</para>
@@ -807,7 +807,7 @@ public sealed partial class RpgStore
         var thresholds = tuning.AttritionNerve.StageThresholds;
 
         // R6 (spec-delve-attrition.md §7): every OTHER recovering actor this player owns also ages one
-        // delve, in this SAME transaction — regardless of which demons this particular delve carried.
+        // delve, in this SAME transaction — regardless of which creatures this particular delve carried.
         DecrementAllRecoveringForPlayerUnlocked(db, delve.PlayerId, now);
 
         // No domain-catalog exists yet (Phase 4, unbuilt) to supply a real per-domain permadeath
@@ -907,7 +907,7 @@ public sealed partial class RpgStore
             {
                 GuardSoulAwardOrThrow(balance, earn.Kills);
                 if (AppendSoulLedgerUnlocked(db, delve.PlayerId, 0, earn.Kills,
-                        FusionRpg.Core.Demons.SoulEarnPolicy.Reasons.Kill, "delve", delve.DelveId.ToString(),
+                        FusionRpg.Core.Creatures.SoulEarnPolicy.Reasons.Kill, "delve", delve.DelveId.ToString(),
                         $"delve:{delve.DelveId}:kills", now))
                     balance += earn.Kills;
             }
@@ -916,7 +916,7 @@ public sealed partial class RpgStore
             {
                 GuardSoulAwardOrThrow(balance, earn.Victory);
                 AppendSoulLedgerUnlocked(db, delve.PlayerId, 0, earn.Victory,
-                    FusionRpg.Core.Demons.SoulEarnPolicy.Reasons.Victory, "delve", delve.DelveId.ToString(),
+                    FusionRpg.Core.Creatures.SoulEarnPolicy.Reasons.Victory, "delve", delve.DelveId.ToString(),
                     $"delve:{delve.DelveId}:victory", now);
             }
         }
@@ -933,7 +933,7 @@ public sealed partial class RpgStore
     /// names the spec's FULL stated hook order as also including quest verdicts and domain unlocks,
     /// both separate, still-unbuilt modules — this hook slots in beside the three that already exist,
     /// not ranked against any of them). Spec, verbatim: "no `UniqueActor` and no phase until
-    /// `CloseDelve(Extracted)`, where `RpgStore.Delve` calls `MintDemonUnlocked` per row (`Origin =
+    /// `CloseDelve(Extracted)`, where `RpgStore.Delve` calls `MintCreatureUnlocked` per row (`Origin =
     /// "delve"`, `Level` null — a pull is a pull), the free auto-bind and discovery souls as the summon
     /// path pays them." `Wiped` drops the rows WITH the haul (spec-loot-pack.md `:88`) — the pity
     /// advance and the spend already happened at pull time (<see cref="PullAtAltar"/>) and are NOT
@@ -943,7 +943,7 @@ public sealed partial class RpgStore
     /// `Wiped`) — mirroring <see cref="ApplyLootEarnUnlocked"/>'s own "always reset regardless of
     /// state" shape for `souls_unbanked`. There is no per-row dedupe key the way
     /// <see cref="AppendSoulLedgerUnlocked"/> gives souls their own "a replayed close does not
-    /// double-pay" guarantee — <see cref="MintDemonUnlocked"/> always inserts a fresh row — so a
+    /// double-pay" guarantee — <see cref="MintCreatureUnlocked"/> always inserts a fresh row — so a
     /// replayed `CloseDelve` mints nothing the SECOND time for the identical reason it does not pay
     /// souls twice: nothing is left in the list to re-apply.</para>
     /// </summary>
@@ -958,8 +958,8 @@ public sealed partial class RpgStore
             {
                 foreach (var entry in party.Haul)
                 {
-                    var species = FusionRpg.Core.Demons.DemonSpeciesCatalog.Get(entry.SpeciesId);
-                    var spec = new FusionRpg.Contracts.DemonMintSpec
+                    var species = FusionRpg.Core.Creatures.CreatureSpeciesCatalog.Get(entry.SpeciesId);
+                    var spec = new FusionRpg.Contracts.CreatureMintSpec
                     {
                         SpeciesId = species.SpeciesId,
                         Side = species.Side,
@@ -973,16 +973,16 @@ public sealed partial class RpgStore
                         TraitIds = entry.TraitIds.ToList(),
                         Origin = "delve",
                     };
-                    MintDemonUnlocked(db, delve.PlayerId, spec, now, out var newlyDiscovered);
+                    MintCreatureUnlocked(db, delve.PlayerId, spec, now, out var newlyDiscovered);
 
                     if (newlyDiscovered)
                     {
-                        var reward = FusionRpg.Core.Demons.SoulEarnPolicy.DiscoveryDelta(species.BaseRarity);
+                        var reward = FusionRpg.Core.Creatures.SoulEarnPolicy.DiscoveryDelta(species.BaseRarity);
                         if (reward > 0)
                         {
                             GuardSoulAwardOrThrow(ReadSoulBalanceUnlocked(db, delve.PlayerId).Balance, reward);
                             AppendSoulLedgerUnlocked(db, delve.PlayerId, 0, reward,
-                                FusionRpg.Core.Demons.SoulEarnPolicy.Reasons.Discovery,
+                                FusionRpg.Core.Creatures.SoulEarnPolicy.Reasons.Discovery,
                                 "species", entry.SpeciesId, "species:" + entry.SpeciesId, now);
                         }
                     }
@@ -1338,10 +1338,10 @@ public sealed partial class RpgStore
 
     /// <summary>
     /// D4.8 (spec-wild-room.md §4) — closes <see cref="FusionRpg.Core.Delve.Wild.RecruitMint"/>'s own
-    /// named gap: its doc comment says "actually calling `MintDemonUnlocked` with the spec this
+    /// named gap: its doc comment says "actually calling `MintCreatureUnlocked` with the spec this
     /// returns is D4.8's own, still-unbuilt... job." One transaction: <see cref="SpendUnbankedUnlocked"/>
     /// (the souls debit — §3's `wild:{r}:{c}` sinkKey for a normal join, reused as-is for a cage
-    /// `open` join per §7's "same mint"), then <see cref="MintDemonUnlocked"/> (§4's mint, which
+    /// `open` join per §7's "same mint"), then <see cref="MintCreatureUnlocked"/> (§4's mint, which
     /// already performs the free auto-bind internally), then the SAME discovery-souls-on-first-sight
     /// award every other mint path already pays — `RpgStore.Summons.cs:118-125` (keyed off
     /// `species.BaseRarity`, the species' OWN rarity, not the minted rarity — the two are
@@ -1361,8 +1361,8 @@ public sealed partial class RpgStore
     /// today — `TalkTree.cs`'s real, shipped shape has no such orchestrator, despite the spec's own
     /// §Interface table citing a `TalkTree.Step(...)` that does not exist in the tree).</para>
     /// </summary>
-    public (bool Ok, string Reason, FusionRpg.Contracts.DemonSpecimenDto? Specimen, long SoulsUnbanked) TalkJoin(
-        long delveId, long playerId, long price, string sinkKey, FusionRpg.Contracts.DemonMintSpec spec)
+    public (bool Ok, string Reason, FusionRpg.Contracts.CreatureSpecimenDto? Specimen, long SoulsUnbanked) TalkJoin(
+        long delveId, long playerId, long price, string sinkKey, FusionRpg.Contracts.CreatureMintSpec spec)
     {
         if (spec is null) throw new ArgumentNullException(nameof(spec));
         if (string.IsNullOrWhiteSpace(sinkKey)) throw new ArgumentException("sinkKey required", nameof(sinkKey));
@@ -1376,16 +1376,16 @@ public sealed partial class RpgStore
             if (!ok) { tx.Commit(); return (false, reason, null, soulsUnbanked); }
 
             var now = DateTime.UtcNow.ToString("o");
-            var specimen = MintDemonUnlocked(db, playerId, spec, now, out var newlyDiscovered);
+            var specimen = MintCreatureUnlocked(db, playerId, spec, now, out var newlyDiscovered);
 
             if (newlyDiscovered)
             {
-                var species = FusionRpg.Core.Demons.DemonSpeciesCatalog.Get(spec.SpeciesId);
-                var reward = FusionRpg.Core.Demons.SoulEarnPolicy.DiscoveryDelta(species.BaseRarity);
+                var species = FusionRpg.Core.Creatures.CreatureSpeciesCatalog.Get(spec.SpeciesId);
+                var reward = FusionRpg.Core.Creatures.SoulEarnPolicy.DiscoveryDelta(species.BaseRarity);
                 if (reward > 0)
                 {
                     GuardSoulAwardOrThrow(ReadSoulBalanceUnlocked(db, playerId).Balance, reward);
-                    AppendSoulLedgerUnlocked(db, playerId, 0, reward, FusionRpg.Core.Demons.SoulEarnPolicy.Reasons.Discovery,
+                    AppendSoulLedgerUnlocked(db, playerId, 0, reward, FusionRpg.Core.Creatures.SoulEarnPolicy.Reasons.Discovery,
                         "species", spec.SpeciesId, "species:" + spec.SpeciesId, now);
                 }
             }
@@ -1413,9 +1413,9 @@ public sealed partial class RpgStore
     /// — per player, cross-banner, shared, spec verbatim: "the altar reads and writes the Sanctum's one
     /// row"), then append the haul row via <see cref="AppendPartyHaulUnlocked"/>. No mint yet —
     /// <see cref="ApplyHaulMintUnlocked"/> at `CloseDelve(Extracted)` is where a haul row becomes a
-    /// demon.
+    /// creature.
     /// </summary>
-    public (bool Ok, string Reason, FusionRpg.Core.Demons.SummonRollResult? Result, long SoulsUnbanked) PullAtAltar(
+    public (bool Ok, string Reason, FusionRpg.Core.Creatures.SummonRollResult? Result, long SoulsUnbanked) PullAtAltar(
         long delveId, long partyEntityId, int row, int col, int thetaRoom,
         string altarBannerId, FusionRpg.Core.Stats.Derived.ElementTypeId? focusElement)
     {
@@ -1423,7 +1423,7 @@ public sealed partial class RpgStore
         lock (_gate)
         {
             using var db = OpenUnlocked();
-            var banner = FusionRpg.Core.Demons.SummonBannerCatalog.TryGet(altarBannerId);
+            var banner = FusionRpg.Core.Creatures.SummonBannerCatalog.TryGet(altarBannerId);
             if (banner is null) return (false, FusionRpg.Core.Delve.Wild.AltarRefusal.BannerUnknown, null, 0);
 
             var delve = ReadDelveUnlocked(db, delveId);
@@ -1450,7 +1450,7 @@ public sealed partial class RpgStore
             WritePityUnlocked(db, delve.PlayerId, newPity, now);
 
             var entry = new DelveHaulEntry(
-                "pull", result.SpeciesId, FusionRpg.Core.Demons.DemonRarityIds.ToId(result.Rarity), result.Variant,
+                "pull", result.SpeciesId, FusionRpg.Core.Creatures.CreatureRarityIds.ToId(result.Rarity), result.Variant,
                 result.TraitIds, row, col, n);
             AppendPartyHaulUnlocked(db, delveId, partyEntityId, entry);
 

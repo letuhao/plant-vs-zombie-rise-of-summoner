@@ -111,7 +111,7 @@ One entry per brief:
   "scope": "species", "scopeKey": "cherrybomb",
   "anchor": {                                   // group B — READ from the seed, never invented
     "family": "cherry", "element": "fire", "rarity": "cultivated",
-    "themeKey": "demon.cherrybomb",
+    "themeKey": "creature.cherrybomb",
     "motifs": ["樱桃", "爆炸"], "antiMotifs": [],
     // family scope only — DERIVED here, §3 step 2b. Present as a key on every family brief,
     // possibly empty; absent is a defect.
@@ -254,12 +254,46 @@ nothing real:
    the same absent-versus-empty discipline A-P3 applies to `familyActions`
    (`spec-signature-propose.md:229-231`).
 
-3. **Allocate categories by quota, not by sampling.** For each subject, `count` briefs are split across
-   the five categories by largest remainder over A-T1's `categoryMilli`, computed in `long`, widening
-   before the multiply and dividing by 1000 last, exactly once. Remainder units go to the largest
-   fractional parts, ties breaking on `ActionEnums.cs:119-123`. **The distribution is therefore exact,
-   not approximate**, which is what makes A-S5's question *"is the plan satisfiable?"* rather than
-   *"did the model drift?"*.
+3. **Allocate categories by quota, not by sampling — at SCOPE level, then to subjects.**
+   ⛔ **CORRECTED 2026-09-11 (engine fix, measured).** The original rule split each subject's own
+   `count` across the five categories by largest remainder over that subject's own `categoryMilli`.
+   That method is arithmetically **inert at the shipped `count == 5`**: a category needs weight
+   `>= 400` per-mille to win a second slot (`floor(400·5/1000) == 2`), while A-T1's shipped
+   `base=1000, step=250` normalises to a **maximum of 267** per-mille — so **all 1,131 live subjects
+   produced the identical `1/1/1/1/1` vector** and the aggregate lean was thrown away (measured
+   attack 21.6% vs movement 18.8%). The quantization was even perverse: `count=5` differentiated
+   worse than `count=2` (1 distinct vector vs 10). The rule is now two levels:
+
+   1. **Scope quota.** Sum every subject's `categoryMilli` in the scope and apportion
+      `count × subjects` units by largest remainder over that sum (`largest_remainder_apportion`).
+      This is exact and is the quota A-S5's cell/`quotaDrift` metrics gate on.
+   2. **Subject assignment.** Start from each subject's own largest-remainder split (best row
+      fidelity), then repair the column drift with deterministic swaps: each swap moves one unit
+      from a category over its quota to one under it, choosing the subject whose own lean best
+      matches the move (`milli[under] − milli[over]` maximised, ties on canonical subject order).
+      Every swap cuts the L1 drift by exactly 2, so the repair terminates with column sums equal to
+      the scope quota and every row still summing to `count`.
+
+   All arithmetic is `long`, widened before the multiply, divided by 1000 last, exactly once.
+   Remainder units go to the largest fractional parts, ties breaking on `ActionEnums.cs:119-123`.
+   **The distribution is therefore exact, not approximate** — at both levels — which is what makes
+   A-S5's question *"is the plan satisfiable?"* rather than *"did the model drift?"*. The general
+   scope has one subject, so its scope quota and its subject split coincide and the simpler
+   per-subject rule is correct there.
+
+   **⛔ CORRECTED 2026-09-11 (measured defect) — ordinals SPREAD each marginal, never group it.**
+   Each allocated vector is flattened into the subject's ordinals by **stride/round-robin** (key `k`'s
+   j-th unit lands in round `j`, keys in declared order within a round), not by emitting each key's
+   quota back-to-back. The marginals are preserved exactly — only order changes — so step 9's
+   "ordinals in canonical order" and acceptance #3/#4b still hold. The previous grouped emission made
+   the **joint** `(category, targetMode, …)` frame constant for long stretches: measured over the
+   live 1,000-brief general tier, only **15 distinct frames** existed with runs up to **134
+   consecutive identical briefs**, and the first 40 briefs shared **one** frame. A proposal batch
+   draws a contiguous slice of ordinals, so every batch saw near-identical context and the model
+   produced near-duplicates — A-S3 rejected **32 of 57 candidates (56%)** at tier 2. Spreading raised
+   the general tier to **49 distinct frames** with a longest run of **2** and **35 distinct frames in
+   the first 40**. The defect was latent at the old `generalCount: 25` (runs of ~5); the 1000-brief
+   general tier exposed it.
 4. **Assign the rung window per scope** from tuning: general **1-4**, family **1-7**, signature
    **1-10** — the *ceilings* geometrically even, three rungs apart, each 2.315× the last. Emitted as
    `rungBand`, never as a magnitude.
@@ -323,11 +357,12 @@ nothing real:
      `targetShapePool`, alongside `Instantiator.Draw` (`ActionSeeder.cs:47`). It is untouched, and it
      is not on the corpus's bind path. Nothing new rolls.
    - **A-T1's vectors keep a real consumer, deterministic and plan-side**: this step allocates
-     `targetMode` across a subject's briefs by **largest remainder over `targetModeMilli`**, exactly
-     as step 3 allocates `category` over `categoryMilli` — `long`, widened before the multiply,
-     divided by 1000 last, exactly once, ties on the declared member order
-     (`ActionTargetSpec.cs:14-33`). `areaShapeMilli` is consulted **only** for briefs allocated
-     `area`, and it allocates by largest remainder too.
+     `targetMode` with the SAME **scope-level engine as step 3** — `apportion_axis` over the scope
+     aggregate, exact column quota, deficit-greedy per-subject fill (see AC4b for why the original
+     per-subject largest remainder was inert at `count == 5`). `areaShapeMilli` is consulted **only**
+     for briefs allocated `area`, via `apportion_area_shapes`, weighted by each subject's area-slot
+     count and spread over the scope. All arithmetic is `long`, widened before multiplying, divided
+     last, ties on the declared member order (`ActionTargetSpec.cs:14-33`).
    - **The board gate is not duplicated.** `ActionSeeder.cs:51-53` keeps owning the roll-time board
      gate; a corpus brief allocated `area` that reaches a boardless context is refused at bind time by
      `ActionValidator`'s existing `AreaRequiresBoard` rule, which is unchanged.
@@ -571,7 +606,7 @@ constraint, which is binding, and not by a field name, which drifts.
 | **Pairing vocabulary** | every `pairedPayoffFamily` is a key of `pairings.json` and every forced enabler is a member of `EnablersOf` it; a brief carrying a **status id** in that field is refused, naming the field |
 | **Structure axes — union-to-ceiling** | the assignable sets are asserted as literals: general **2**, family **5**, signature **6**; a brief naming `reaction` is **refused**, and one naming `restriction` carries `structureEnforced: false` |
 | **Family motifs derived** | every family-scoped brief carries `familyMotifs`, `familyAntiMotifs` and `familyMotifBasis` as keys; all current consolidated families resolve deterministically against live data |
-| **Target shape allocation** | `targetMode` counts per subject equal the largest-remainder allocation of A-T1's `targetModeMilli` exactly, and `areaShapeMilli` is consulted only for briefs allocated `area` |
+| **Target shape allocation** | `targetMode` counts per subject come from the SAME scope-level `apportion_axis` allocation as `category` (exact column quota, spread per subject), and `areaShape` from `apportion_area_shapes` weighted by each subject's area-slot count — never a per-subject largest-remainder split, which was inert at `count == 5` (see AC4b). Asserted: `targetMode`/`areaShape` column sums equal the scope aggregate apportionment, and every closed-axis member is reachable when slots allow (`area` and all four shapes) |
 | **Casing** | every emitted `category`, `targetMode`, `areaShape` and `relation` round-trips through `ActionCategories.TryParse` / `ActionTargetModes.TryParse` / `ActionAreaShapes.TryParse` / `RelationKinds.TryParse`; `"Area"` is refused |
 | **Planted violation — family widening** | a tuning file that narrows `allowedAtomFamilies` per tier while any of constraint 4's three gates is absent is **refused**, naming the missing gate |
 | **Planted violation — multiplicative pair** | a plan allowing `atom.keen-edge` and `atom.cruelty` in one brief is refused, naming both; the same holds for their `Replace` twins `atom.prec-verdict` / `atom.prec-reckoning`, and the pairs are read from `multiplicativePairs` rather than hard-coded (§3 step 7) |
@@ -595,6 +630,19 @@ constraint, which is binding, and not by a field name, which drifts.
 4b. Every brief's `targetMode` and `areaShape` are **authored** (§3 step 4a) and every value parses
    through the code of record's own `TryParse` — `"self" "single" "multi" "rolledTarget" "all" "area"`
    (`ActionTargetSpec.cs:103-112`) and `"row" "column" "square" "rectangle"` (`:134-141`).
+   ⛔ **CORRECTED 2026-09-12 (measured defect).** `targetMode` and the conditional `areaShape`
+   sub-vector are allocated by the **same scope-level engine as `category`** (`apportion_axis` /
+   `apportion_area_shapes`), not by a per-subject largest-remainder split. The old per-subject method
+   was inert at `count == 5` for the **six-member** `targetMode`: the lowest-weight member
+   (`area`) needs weight >= 400 per-mille to win a slot and the shipped vector tops out at 167, so
+   `area` received **0 slots for all 1,131 subjects** — `targetMode: area` and all four area shapes
+   were unreachable at family and species scope (0 of 6,655 briefs). One level down, `areaShape` at a
+   subject's own area count of 0 or 1 tied all four shapes and the declared-order tie-break picked
+   `row` every time (measured 750/750 species, 188/188 family). After the fix: `area` is reachable
+   (750 species / 188 family slots, per-round) and all four shapes are reachable with exact quota
+   (species 188/188/187/187, family 47/47/47/47). Acceptance: the `targetMode` and `areaShape`
+   column sums equal the largest-remainder apportionment of the scope aggregate, and every member of
+   the closed axis is reachable when its slot count allows.
 5. Every `payoff` brief has an `enabler` brief with the same `pairedPayoffFamily` in the same
    `(scope, scopeKey)` group; every `pairedPayoffFamily` is a key of `pairings.json`; `role: "none"`
    is present as a key on every brief that has neither role. ⛔ **CORRECTED 2026-09-03 (review F7)** —

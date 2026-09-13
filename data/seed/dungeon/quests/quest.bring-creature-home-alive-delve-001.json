@@ -1,0 +1,13 @@
+{
+  "chainRef": "none",
+  "countBand": "none",
+  "flavor": "The cultists require the essence of a bound entity to complete their ritual, but they insist the vessel remains unbroken. Capture the creature and deliver it to the altar before it expires.",
+  "name": "The Unwilling Passenger",
+  "objectiveTemplate": "bring-creature-home-alive",
+  "prereqRefs": [],
+  "questId": "quest.bring-creature-home-alive-delve-001",
+  "repeatScope": "once-per-player",
+  "rewardBand": "rich",
+  "scope": "delve",
+  "targetRef": "none"
+}

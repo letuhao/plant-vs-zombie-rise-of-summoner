@@ -19,8 +19,8 @@ import json
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping
 
-from ..demons.anchor.permute import order_for
-from ..demons.anchor.vote import resolve_vote
+from ..creatures.anchor.permute import order_for
+from ..creatures.anchor.vote import resolve_vote
 from ...metrics.dedup import canonical_words
 from ...pipeline.llm_caller import DEFAULT_CONFIG, LlmCallerConfig, call_model, extract_json
 from ...workflow.validators.motif import anti_motif_violation, motif_coverage
@@ -369,7 +369,7 @@ def _threatWindow_problems(entry: "dict[str, Any]", threat_band: "tuple[str, ...
     stops the model from naming a floor ordinally ABOVE its own ceiling (`ThreatWindow.Contains`
     is `rung >= floor && rung <= ceil` -- an inverted pair is satisfiable by no rung at all, which
     `SlotFilter.Candidates` would refuse outright as "unfillable"). `threat_band` is ordered lowest
-    to highest (`nuisance` first) by construction (`schema.THREAT_BAND`, `demon-threat.v1.json`'s
+    to highest (`nuisance` first) by construction (`schema.THREAT_BAND`, `creature-threat.v1.json`'s
     own rung order), so ordinal INDEX comparison is exactly rung comparison."""
     window = entry.get("threatWindow") or {}
     floor_rung, ceil_rung = window.get("floorRung"), window.get("ceilRung")

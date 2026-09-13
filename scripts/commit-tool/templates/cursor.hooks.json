@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "python scripts/commit-tool/cursor/gate_git_commit.py",
+        "matcher": "\\bgit(?:\\.exe)?\\b|\\bgh(?:\\.exe)?\\b|commit-tool[/\\\\]clean_commit\\.py",
+        "failClosed": true
+      }
+    ]
+  }
+}

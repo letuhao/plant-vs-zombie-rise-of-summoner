@@ -26,8 +26,8 @@ import json
 from dataclasses import dataclass
 from typing import Any, Callable, Iterable, Mapping
 
-from ...demons.anchor.permute import order_for
-from ...demons.anchor.vote import resolve_vote
+from ...creatures.anchor.permute import order_for
+from ...creatures.anchor.vote import resolve_vote
 from ....metrics.dedup import canonical_words
 from .. import registries as _reg
 from ....pipeline.llm_caller import DEFAULT_CONFIG, LlmCallerConfig, call_model, extract_json

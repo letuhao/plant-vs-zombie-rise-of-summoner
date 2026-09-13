@@ -51,34 +51,69 @@ public class RoleFamilyTableTests
     static IReadOnlyList<RoleFamilyCell> Derive() => RoleFamilyTable.Derive(LoadFamilies(), LoadOverrides(), LoadRelocation());
 
     /// <summary>
-    /// A corpus-count pin, and it exists to catch a family going MISSING. It is expected to move
-    /// upward when the affix-authoring lane ships one: 98 at module 8's build (2026-09-04), 100 after
-    /// `g-punisher.json` landed (2026-09-06, commit 5864231), 109 after the phantom-closure pass the
-    /// same day authored the nine families real content already referenced (seven `status.apply` into
-    /// `g-affliction.json`, two `stat.derived` into `g-elem-power.json`), 112 after an
-    /// `affix-families-gen` trial batch (2026-09-07, `atom.tempo-wildgrowth`/`atom.elpw-surfeit`/
-    /// `atom.shld-absolute`) proved that pipeline end to end — those three are honestly named as
-    /// missing their own display-template pairing (module 10's, not yet authored; see
-    /// `ItemDisplayTests`). Bump it deliberately, with the corpus counted rather than quoted from a
-    /// stale note — a DROP is the defect this guards.
+    /// Contract, not a count: the corpus is generator-authored and grows every generation, so a
+    /// literal family total is stale the moment content ships. What this asserts instead is the
+    /// structural invariant the old number was a proxy for — the corpus file set is non-empty, every
+    /// family parses into the required shape, and family ids are unique (a duplicate id would silently
+    /// collapse two families into one derived cell set). A DROP still fails: an empty parse or a
+    /// duplicate id is the defect, not the total.
     /// </summary>
     [Fact]
     public void The_whole_shipped_affix_family_corpus_loads()
     {
-        Assert.Equal(112, LoadFamilies().Count);
+        var families = LoadFamilies();
+        Assert.NotEmpty(families);
+        // Every family parses with a non-empty id, at least one role, at least one frame, and a side.
+        Assert.All(families, f =>
+        {
+            Assert.False(string.IsNullOrWhiteSpace(f.FamilyId));
+            Assert.NotEmpty(f.Roles);
+            Assert.NotEmpty(f.Frames);
+            Assert.False(string.IsNullOrWhiteSpace(f.Side));
+        });
+        // Unique ids — the invariant a count pin was standing in for.
+        var duplicateIds = families.GroupBy(f => f.FamilyId, StringComparer.Ordinal)
+            .Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+        Assert.Empty(duplicateIds);
     }
 
     [Fact]
     public void The_relocation_artefact_exists_and_covers_every_dropped_family_with_zero_orphans()
     {
+        // The artefact is DERIVED from the corpus, so its row count tracks the corpus and is not a
+        // literal to pin — the generator changes the corpus on every run. Assert the derivation
+        // invariant instead: every (dropped role, family) pair legal in the corpus has at least one
+        // relocation row, and every row's host is genuinely legal on that family (the exact rules
+        // `RoleRelocationRowMissing` / `RoleRelocationHostNotLegal` enforce in ItemSeedValidator).
+        var families = LoadFamilies();
+        var byId = families.ToDictionary(f => f.FamilyId, f => f.Roles, StringComparer.Ordinal);
+
+        var doc = JsonDocument.Parse(File.ReadAllText(Path.Combine(
+            RepoRoot(), "data", "seed", "items", "_registry", "role-relocation.v1.json")));
+        var rows = doc.RootElement.GetProperty("relocations").EnumerateArray()
+            .Select(r => (
+                Dropped: r.GetProperty("droppedRole").GetString()!,
+                Family: r.GetProperty("familyId").GetString()!,
+                Host: r.GetProperty("hostRole").GetString()!))
+            .ToList();
+        Assert.NotEmpty(rows);
+
+        var covered = rows.Select(r => (r.Dropped, r.Family)).ToHashSet();
+        var droppedRoles = new[] { "head-guard", "sense", "ward-array" };
+        foreach (var f in families)
+            foreach (var dropped in droppedRoles.Where(f.Roles.Contains))
+                Assert.True(covered.Contains((dropped, f.FamilyId)),
+                    $"{f.FamilyId} is legal on dropped role '{dropped}' but has no relocation row — "
+                    + "it would keep its full max_tier on every surviving hybrid-core host");
+
+        foreach (var r in rows)
+        {
+            Assert.True(byId.TryGetValue(r.Family, out var roles),
+                $"relocation names '{r.Family}', not a family in the corpus");
+            Assert.Contains(r.Host, roles!);
+        }
+
         var relocation = LoadRelocation();
-        // 619 over the 98-family corpus; 631 once `g-punisher.json`'s two `sense`-legal families got
-        // their 6 surviving hybrid-core hosts each (2026-09-06); 673 once the phantom-closure pass
-        // added seven more `sense`-legal `g-affliction` families the same day, at the same 6 hosts
-        // each (+42). The artefact is DERIVED from the corpus, so this number tracks it -- see
-        // `RoleRelocationRowMissing` in ItemSeedValidator, the check that now refuses a corpus family
-        // with no row rather than letting it keep t5, and which is what caught the 42.
-        Assert.Equal(673, relocation.RowCount);
         Assert.Equal(new[] { "head-guard", "sense", "ward-array" }, relocation.DroppedRoles.OrderBy(s => s));
     }
 
@@ -151,21 +186,24 @@ public class RoleFamilyTableTests
     [Fact]
     public void Item_role_family_is_derived_with_no_authored_cells()
     {
-        // 746 (role, family) pairs come straight from the 112 families' own roles lists, before any
-        // override narrows it -- reproduced here against the raw corpus, not through Derive(), which
-        // additionally applies the minor-jewel removal (2 families x 2 roles = 4 fewer pairs, 742).
-        // Was 656/652 over the 98-family corpus at module 8's build; `g-punisher.json`'s two families
-        // added 7 roles each -> 670/666 (2026-09-06); the phantom-closure pass the same day added
-        // seven `g-affliction` families at 7 roles each (49) plus two `g-elem-power` families at 6
-        // each (12) -> +61 (731/727); the 2026-09-07 `affix-families-gen` trial batch's three new
-        // families (5 roles each) -> +15 (746/742). Moves with the corpus, same rule as the count pin
-        // above.
+        // Contract, not a count: the (role, family) pair total is corpus-derived and moves on every
+        // generation, so pinning it is stale by construction. What matters structurally is that
+        // Derive() produces exactly the corpus's own distinct (role, family) pairs minus the cells the
+        // minor-jewel override removes — no authored cell, no dropped cell, and no phantom cell.
         var families = LoadFamilies();
-        var rawPairs = families.SelectMany(f => f.Roles.Select(r => (Role: r, f.FamilyId))).Distinct().Count();
-        Assert.Equal(746, rawPairs);
+        var rawPairs = families.SelectMany(f => f.Roles.Select(r => (Role: r, Family: f.FamilyId)))
+            .Distinct().ToHashSet();
+        Assert.NotEmpty(rawPairs);
 
-        var derivedPairs = Derive().Select(c => (c.RoleId, c.FamilyId)).Distinct().Count();
-        Assert.Equal(742, derivedPairs);
+        var expected = rawPairs
+            .Where(p => p.Role is not ("jewel-minor-a" or "jewel-minor-b")
+                        || p.Family is not ("atom.bulwark" or "atom.savagery"))
+            .Select(p => (Role: p.Role, Family: p.Family))
+            .ToHashSet();
+
+        var derivedPairs = Derive().Select(c => (Role: c.RoleId, Family: c.FamilyId)).Distinct().ToHashSet();
+        Assert.Equal(expected.OrderBy(x => x.Role).ThenBy(x => x.Family),
+                     derivedPairs.OrderBy(x => x.Role).ThenBy(x => x.Family));
     }
 
     [Fact]

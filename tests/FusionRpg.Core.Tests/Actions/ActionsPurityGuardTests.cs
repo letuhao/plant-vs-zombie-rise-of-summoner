@@ -172,6 +172,6 @@ public class ActionsPurityGuardTests
 
     static void Cleanup(string dir)
     {
-        try { Directory.Delete(dir, true); } catch { /* temp */ }
+        Directory.Delete(dir, true);
     }
 }

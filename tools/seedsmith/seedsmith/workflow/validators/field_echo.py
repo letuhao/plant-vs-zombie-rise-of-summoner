@@ -49,8 +49,8 @@ def subject_name_echo(draft: "Mapping[str, Any]", context: "Mapping[str, Any]") 
     """Reject a `name` that is just the subject's own display name.
 
     ⛔ Found by `SemanticDedup/NearDuplicate` on the FIRST real run, not by any per-item check:
-    **83 of 83** generated commander effects were named identically to their demon
-    (`commander-effect.cactus` named `仙人掌`, same as the demon `cactus`). A per-item validator
+    **83 of 83** generated commander effects were named identically to their creature
+    (`commander-effect.cactus` named `仙人掌`, same as the creature `cactus`). A per-item validator
     cannot see that — it needs the corpus — which is exactly why the corpus-level metric exists.
 
     Same class as `field_echo`, one level out: there the value echoed its FIELD name, here it
@@ -62,14 +62,14 @@ def subject_name_echo(draft: "Mapping[str, Any]", context: "Mapping[str, Any]") 
     name = str(draft.get("name") or "").strip()
     if name and name == subject:
         return [f"field 'name' is just the subject's own name ({name!r}) — give this effect its "
-                f"own distinct name, not the demon's"]
+                f"own distinct name, not the creature's"]
     return []
 
 
 def name_collision(draft: "Mapping[str, Any]", context: "Mapping[str, Any]") -> "list[str]":
     """Reject a `name` already taken by a DIFFERENT subject.
 
-    ⛔ The residue `subject_name_echo` could not reach. After it cut same-as-its-own-demon names
+    ⛔ The residue `subject_name_echo` could not reach. After it cut same-as-its-own-creature names
     from 83 to 6, `SemanticDedup/NearDuplicate` still reported 6 GAPs — all **sibling pairs**
     (`doublecherry`/`doubleshooter`, `dollgold`/`dollsilver`, `pot`/`pumpkin`,
     `starfruit`/`starpea`, `jalapeno`/`jalastar`, `chomper`/`nutchomper`). Siblings share families

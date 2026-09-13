@@ -12,7 +12,7 @@ namespace FusionRpg.Core.Tests.Battle;
 /// (2026-09-04) until Phase 7's owner decision raised it, so the payload was the single full-weight
 /// primary component it had always been, and no golden moved. The weight is a <b>tunable</b> rather
 /// than a hardcoded policy constant, because raising it is not free — it <b>moves the expedition
-/// goldens</b>, since wave demons carry a real `ElementSecondary` (`WaveCatalog.cs:115`) while the
+/// goldens</b>, since wave creatures carry a real `ElementSecondary` (`WaveCatalog.cs:115`) while the
 /// hand-built battle goldens in this test project do not. The value now shipped, 300 (0.7/0.3), is the
 /// exact number the original combat-unification map itself suggested.</para>
 /// </summary>
@@ -40,7 +40,7 @@ public class HybridPayloadTests
     [Fact]
     public void TheShippedTuningIsLiveAt300PerMille()
     {
-        // Phase 7 F1 (2026-09-07, owner decision, demon-mechanism-gaps-ideal.md §2.6): raised off 0
+        // Phase 7 F1 (2026-09-07, owner decision, creature-mechanism-gaps-ideal.md §2.6): raised off 0
         // -- data/tuning/battle.v5.json and this test project's own ContractTuningTestBootstrap
         // fixture both carry 300 now, reusing the value the original combat-unification map itself
         // already suggested (0.7/0.3) rather than inventing a new one.

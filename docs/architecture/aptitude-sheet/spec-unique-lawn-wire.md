@@ -10,17 +10,28 @@
 ## Objective
 
 When a UniqueActor is **Bound** on the lawn, Injector Hot aptitude resolve must include that
-specimen’s **UniqueDemon** allocation (summed with commander), not commander+species only.
+specimen’s **UniqueCreature** allocation (summed with commander), not commander+species only —
+**matching** [`UniqueActorHubCompose`](../../../src/FusionRpg.Server/UniqueActorHubCompose.cs)
+(`commander + UniqueCreature(instanceId)`).
 
-Success: allocate UniqueDemon in UI → SignalR reload → Bound unique on lawn reflects new points.
+Success: allocate UniqueCreature in UI → SignalR reload → Bound unique on lawn reflects new points.
 Server Hub alone is **not** acceptance.
+
+### SSOT / FSM defect (locked, 2026-09-12)
+
+Lawn Hot and UniqueActor sheet/web share **one** ActorHub vocabulary and the same omni /
+`combat.*` consumers. Divergent aptitude input for the same Bound specimen
+(`commander+species` on lawn vs `commander+UniqueCreature` on sheet) is an **ActorHub sole Hot
+compose / FSM defect** — out of order, not a deferrable FE-only gap. See
+[combat-power-number-ideal.md](../combat-power-number-ideal.md) and `decisions.md`
+(ActorHub sole Hot compose gate; Creature progression source and spawn ownership).
 
 ---
 
 ## Tech stack
 
 - Injector: `FusionRpg.Injector` CheatState / RpgClient / match unique bindings
-- Core: `AptitudeAllocation` operator+ ; isolation — Bound unique must **not** merge DemonType
+- Core: `AptitudeAllocation` operator+ ; isolation — Bound unique must **not** merge CreatureType
 - HTTP: **`GET /api/aptitudes/unique/{instanceId}`** from `unique-allocate` (S4)
 
 ---
@@ -40,7 +51,7 @@ dotnet test tests/FusionRpg.Core.Tests --filter SpeciesAllocation
 | Path | Duty |
 |---|---|
 | `RpgClient.cs` | On reload: for each Bound `instanceId`, `GET /api/aptitudes/unique/{instanceId}` |
-| `CheatState.cs` | Cache `instanceId → UniqueDemon allocation`; resolve path for Bound entities |
+| `CheatState.cs` | Cache `instanceId → UniqueCreature allocation`; resolve path for Bound entities |
 | Aptitude Hot resolve | Bound unique: `commander + unique(instanceId)`; general: keep `commander + species` |
 
 ### Fetch strategy (S4 — locked)
@@ -57,11 +68,11 @@ Ask before inventing a third HTTP channel. Do not pull empire species into uniqu
 
 | Entity | Allocation |
 |---|---|
-| Bound UniqueActor | `commander + Load/cache UniqueDemon(instanceId)` |
+| Bound UniqueActor | `commander + Load/cache UniqueCreature(instanceId)` |
 | Empire general | `commander + EffectiveSpecies` (unchanged) |
 | Commander aura host | Commander only (unchanged) |
 
-Empty UniqueDemon cache entry = empty allocation (D1) — still legal.
+Empty UniqueCreature cache entry = empty allocation (D1) — still legal.
 
 ---
 
@@ -86,14 +97,14 @@ Mirror `ApplySpeciesAllocations` dictionary cache shape for uniques; refresh on 
 
 - **Always:** Source isolation (decisions 2026-09-08); Secondary Unity-free; unique GET fetch (S4).
 - **Ask first:** Any HTTP channel beyond unique-allocate GET/POST.
-- **Never:** typeId→UniqueDemon inference; apply UniqueDemon baseline automatically;
+- **Never:** typeId→UniqueCreature inference; apply UniqueCreature baseline automatically;
   extend commander GET with `uniques` map.
 
 ---
 
 ## Success criteria
 
-- [ ] After unique allocate + AptitudesUpdated, Bound unique Hot path includes UniqueDemon shares.
+- [ ] After unique allocate + AptitudesUpdated, Bound unique Hot path includes UniqueCreature shares.
 - [ ] Fetch path is unique GET only (S4).
-- [ ] General lawn demons unchanged (species path).
+- [ ] General lawn creatures unchanged (species path).
 - [ ] Regression: unique with same species id as a general does not inherit empire allocation.

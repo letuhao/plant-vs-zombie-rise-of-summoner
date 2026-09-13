@@ -85,7 +85,7 @@ public class QuestOfferTests
     [Fact]
     public void Structural_templates_are_always_satisfiable_over_an_empty_graph()
     {
-        var pool = new[] { Row("q1", "kill-boss"), Row("q2", "bring-demon-home-alive"), Row("q3", "finish-under-hunger") };
+        var pool = new[] { Row("q1", "kill-boss"), Row("q2", "bring-creature-home-alive"), Row("q3", "finish-under-hunger") };
         var kept = QuestOffer.Satisfiable(pool, Array.Empty<DelveRoomFact>(), NoCurioMatch, NoLootRole, CountBandMilli);
         Assert.Equal(3, kept.Count);
     }
@@ -127,7 +127,7 @@ public class QuestOfferTests
         {
             Row("q1", "cleanse-fights", "fight", "lone"), // unsatisfiable -- no "fight" room
             Row("q2", "kill-boss"),
-            Row("q3", "bring-demon-home-alive"),
+            Row("q3", "bring-creature-home-alive"),
         };
         var templates = ObjectiveTemplateCatalog.All;
         for (long seed = 0; seed < 256; seed++)
@@ -148,7 +148,7 @@ public class QuestOfferTests
     [InlineData("explore-rooms", "several", true)]
     [InlineData("explore-rooms", "few", false)]
     [InlineData("explore-rooms", "lone", false)]
-    [InlineData("bring-demon-home-alive", null, false)]
+    [InlineData("bring-creature-home-alive", null, false)]
     public void IsRiskQuest_matches_the_spec_own_set(string template, string? countBand, bool expected)
     {
         var q = Row("q1", template, countBand: countBand);
@@ -160,7 +160,7 @@ public class QuestOfferTests
     [Fact]
     public void Draw_is_deterministic_same_seed_always_the_same_offer()
     {
-        var pool = new[] { Row("q1", "kill-boss"), Row("q2", "bring-demon-home-alive"), Row("q3", "finish-under-hunger") };
+        var pool = new[] { Row("q1", "kill-boss"), Row("q2", "bring-creature-home-alive"), Row("q3", "finish-under-hunger") };
         var templates = ObjectiveTemplateCatalog.All;
         var a = QuestOffer.Draw(pool, templates, 42, 2, 9, 4, IsHighCountBand);
         var b = QuestOffer.Draw(pool, templates, 42, 2, 9, 4, IsHighCountBand);
@@ -170,7 +170,7 @@ public class QuestOfferTests
     [Fact]
     public void Draw_never_offers_the_same_quest_twice_without_replacement()
     {
-        var pool = new[] { Row("q1", "kill-boss"), Row("q2", "bring-demon-home-alive") };
+        var pool = new[] { Row("q1", "kill-boss"), Row("q2", "bring-creature-home-alive") };
         var templates = ObjectiveTemplateCatalog.All;
         for (long seed = 0; seed < 50; seed++)
         {

@@ -25,7 +25,7 @@
       "id": "set.ultimatejackboxzombie-001",
       "nameKey": "set.queen-s-gift",
       "name": "Queen's Gift",
-      "themeKey": "demon.ultimatejackboxzombie",
+      "themeKey": "creature.ultimatejackboxzombie",
       "members": [
         {
           "role": "armament-primary",

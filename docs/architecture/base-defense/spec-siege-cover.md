@@ -72,7 +72,7 @@ ratio does not. **This is the whole reason decision 35 is architecturally legal.
 
 ⭐ **Take: a unit that ignores the penalty is the counter-play.** HoMM3's Sharpshooter is a whole unit
 identity built out of one exemption — decision 35's *"two types of projectile"*, and a content axis
-both `structure-seed` and the demon corpus can use.
+both `structure-seed` and the creature corpus can use.
 
 ⛔ **Do not take: 50% everywhere.** HoMM3 uses one number for three different situations because it
 was cheap, not because it was right. Ours are three tunables.

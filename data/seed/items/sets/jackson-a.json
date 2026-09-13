@@ -25,7 +25,7 @@
       "id": "set.jackson-a-001",
       "nameKey": "set.dance-of-the-white-shroud",
       "name": "Dance of the White Shroud",
-      "themeKey": "demon.jackson_a",
+      "themeKey": "creature.jackson_a",
       "members": [
         {
           "role": "armament-primary",

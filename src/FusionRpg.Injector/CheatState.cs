@@ -115,24 +115,24 @@ public static class CheatState
     static IReadOnlyDictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation> _speciesAllocations =
         new Dictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation>(StringComparer.Ordinal);
 
-    /// <summary>`(Side, GameTypeId) → speciesId`, lazily built from <c>DemonSpeciesCatalog.All</c> and
+    /// <summary>`(Side, GameTypeId) → speciesId`, lazily built from <c>CreatureSpeciesCatalog.All</c> and
     /// cached for the process lifetime (`catalog-runtime`'s own "loaded once, immutable" rule — the
     /// SAME precedent <c>LawnElementResolverHost</c> already established for the element-resolve case).
-    /// <see cref="FusionRpg.Core.Demons.DemonSpeciesCatalog.IsConfigured"/> is checked FIRST, non-
+    /// <see cref="FusionRpg.Core.Creatures.CreatureSpeciesCatalog.IsConfigured"/> is checked FIRST, non-
     /// throwing, so an un-configured catalog is a distinguishable <see cref="FusionRpg.Core.Stats.Aptitudes.SpeciesLookupResult.NotConfigured"/>
     /// answer rather than an exception or a silent empty-index miss (the exact bootstrap-window hazard
     /// spec-allocation-transport.md calls out by name).</summary>
     static readonly object SpeciesIndexGate = new();
-    static FusionRpg.Core.Demons.LawnElementIndex? _speciesIndex;
+    static FusionRpg.Core.Creatures.LawnElementIndex? _speciesIndex;
 
     static FusionRpg.Core.Stats.Aptitudes.SpeciesLookupResult ResolveSpeciesLookup(StatSide side, int typeId)
     {
-        if (!FusionRpg.Core.Demons.DemonSpeciesCatalog.IsConfigured)
+        if (!FusionRpg.Core.Creatures.CreatureSpeciesCatalog.IsConfigured)
             return FusionRpg.Core.Stats.Aptitudes.SpeciesLookupResult.NotConfigured;
 
-        FusionRpg.Core.Demons.LawnElementIndex index;
+        FusionRpg.Core.Creatures.LawnElementIndex index;
         lock (SpeciesIndexGate)
-            index = _speciesIndex ??= new FusionRpg.Core.Demons.LawnElementIndex(FusionRpg.Core.Demons.DemonSpeciesCatalog.All);
+            index = _speciesIndex ??= new FusionRpg.Core.Creatures.LawnElementIndex(FusionRpg.Core.Creatures.CreatureSpeciesCatalog.All);
 
         var sideText = side == StatSide.Zombie ? "zombie" : "plant";
         return index.TryGet(sideText, typeId, out var species)

@@ -1,7 +1,7 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Battle.Timeline;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Expeditions;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
@@ -49,7 +49,7 @@ public sealed class ExpeditionService
             try
             {
                 await _hub.Clients.Group(RpgConstants.WebGroup)
-                    .SendAsync("DemonsUpdated", new { playerId }).ConfigureAwait(false);
+                    .SendAsync("CreaturesUpdated", new { playerId }).ConfigureAwait(false);
             }
             catch
             {
@@ -73,7 +73,7 @@ public sealed class ExpeditionService
         IReadOnlyList<CollectBattleResult> Battles,
         long SoulsAwarded,
         IReadOnlyList<MaterialDrop> Materials,
-        IReadOnlyList<DemonSpecimenDto> WildJoins,
+        IReadOnlyList<CreatureSpecimenDto> WildJoins,
         IReadOnlyList<(string InstanceId, long Xp)> SpecimenXp);
 
     public async Task<(bool Ok, string Reason, CollectResult? Result)> CollectAsync(
@@ -168,8 +168,8 @@ public sealed class ExpeditionService
         // this layer only maps it onto store writes.
         var wildMints = resolution.Rewards.WildJoins.Select(join =>
         {
-            var species = DemonSpeciesCatalog.Get(join.SpeciesId);
-            return new DemonMintSpec
+            var species = CreatureSpeciesCatalog.Get(join.SpeciesId);
+            return new CreatureMintSpec
             {
                 SpeciesId = species.SpeciesId,
                 Side = species.Side,
@@ -211,7 +211,7 @@ public sealed class ExpeditionService
         try
         {
             await _hub.Clients.Group(RpgConstants.WebGroup)
-                .SendAsync("DemonsUpdated", new { playerId }).ConfigureAwait(false);
+                .SendAsync("CreaturesUpdated", new { playerId }).ConfigureAwait(false);
             await _hub.Clients.Group(RpgConstants.WebGroup)
                 .SendAsync("SoulsUpdated", new { playerId }).ConfigureAwait(false);
         }
@@ -271,7 +271,7 @@ public static class ExpeditionEndpoints
         g.MapGet("/{playerId:long}/materials", (long playerId, RpgStore store) =>
         {
             if (!store.PlayerExists(playerId)) return Results.NotFound();
-            return Results.Ok(new { items = store.ListDemonMaterials(playerId) });
+            return Results.Ok(new { items = store.ListCreatureMaterials(playerId) });
         });
 
         g.MapPost("/dispatch", async (DispatchRequest body, ExpeditionService svc, RpgStore store) =>

@@ -13,14 +13,14 @@ namespace FusionRpg.Data.Tests.Actions;
 /// shared shape (`AwardUniqueActorXp` here; the expedition reward apply mirrors it identically).
 ///
 /// <para>`UnlockTuningPolicy`/`ActionFamilyMapPolicy` are process-wide statics (matching
-/// `RungPolicy`/`DemonSpeciesCatalog`'s own established shape) — configured once here, never reset,
+/// `RungPolicy`/`CreatureSpeciesCatalog`'s own established shape) — configured once here, never reset,
 /// the same convention every other `*Policy`/`*Hub` in this codebase already follows. Every EXISTING
 /// XP-award test in this project is unaffected regardless, because `TryRollActionUnlocks` no-ops
 /// whenever `UnlockTuningPolicy.Tuning` is unset — this file is what turns it on.</para>
 /// </summary>
 public class ActionUnlockGrantWiringTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     static ActionUnlockGrantWiringTests()
@@ -31,21 +31,16 @@ public class ActionUnlockGrantWiringTests : IDisposable
         // deterministically succeed so it can assert on how many grants landed, not on which ones did.
         UnlockTuningPolicy.Configure(new UnlockTuning(
             P1Milli: 1000, DeltaMilli: 1000, FloorMilli: 1000, HeldCap: 10, RungCap: 10, DiscardTaxCoeffMilli: 100));
-        ActionFamilyMapPolicy.Configure(new Dictionary<string, string>());
+        ActionFamilyMapPolicy.Configure(new Dictionary<string, IReadOnlyList<string>>());
     }
 
     public ActionUnlockGrantWiringTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-action-unlock-wiring-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     void SeedAction(string actionId)
     {
@@ -90,6 +85,7 @@ public class ActionUnlockGrantWiringTests : IDisposable
     /// <summary>Acceptance: "a level gain that crosses N thresholds in one award attempts N rolls,
     /// each pricing independently." Three distinct actions, `AlwaysAccepts`-shaped tuning (every roll
     /// succeeds) — a level gain crossing >= 3 thresholds must grant all three, not one.</summary>
+    [Trait("Category", "Heavy")]
     [Fact]
     public void ALevelGainCrossingMultipleThresholdsAttemptsOneRollPerLevelGained()
     {

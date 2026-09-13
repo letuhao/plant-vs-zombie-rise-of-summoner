@@ -25,7 +25,7 @@
       "id": "set.pickaxe-b-001",
       "nameKey": "set.nether-alloy-drill",
       "name": "Nether Alloy Drill",
-      "themeKey": "demon.pickaxe_b",
+      "themeKey": "creature.pickaxe_b",
       "members": [
         {
           "role": "armament-primary",

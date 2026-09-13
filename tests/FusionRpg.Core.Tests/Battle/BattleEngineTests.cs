@@ -1,7 +1,7 @@
 using System.Text.Json;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Combat.Element;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Stats.Derived;
 using Xunit;
 
@@ -140,8 +140,8 @@ public class BattleEngineTests
             Assert.NotEmpty(wave.Enemies);
             foreach (var e in wave.Enemies)
             {
-                Assert.True(DemonSpeciesCatalog.IsKnown(e.SpeciesId));
-                Assert.True(e.TypeId >= DemonSpeciesCatalog.DemonTypeIdFloor);
+                Assert.True(CreatureSpeciesCatalog.IsKnown(e.SpeciesId));
+                Assert.True(e.TypeId >= CreatureSpeciesCatalog.CreatureTypeIdFloor);
                 Assert.True(e.MaxHp > 0 && e.Atk > 0);
             }
         }

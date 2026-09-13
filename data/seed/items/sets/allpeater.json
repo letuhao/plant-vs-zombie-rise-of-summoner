@@ -25,7 +25,7 @@
       "id": "set.allpeater-001",
       "nameKey": "set.triple-line-volley",
       "name": "Triple-Line Volley",
-      "themeKey": "demon.allpeater",
+      "themeKey": "creature.allpeater",
       "members": [
         {
           "role": "armament-primary",

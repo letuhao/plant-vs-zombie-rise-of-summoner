@@ -3,10 +3,10 @@
   "dispositionBase": "open",
   "encounterRef": "encounter.pack-mono-001",
   "eventPool": [
-    "event.story-demon.allpeater-001",
-    "event.story-demon.ashthreepeater-001",
-    "event.story-demon.cactus-001",
-    "event.story-demon.dolldiamond-001"
+    "event.story-creature.allpeater-001",
+    "event.story-creature.ashthreepeater-001",
+    "event.story-creature.cactus-001",
+    "event.story-creature.dolldiamond-001"
   ],
   "flavor": "A thick, oily fog clings to the floor, swirling around the base of a jagged obsidian monolith. From the shadows beyond the light, a rhythmic, wet breathing echoes, accompanied by the faint, rhythmic clinking of heavy iron chains.",
   "hazardBand": "heavy",

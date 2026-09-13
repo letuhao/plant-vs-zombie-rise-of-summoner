@@ -25,7 +25,7 @@
       "id": "set.puffseashroom-001",
       "nameKey": "set.spore-colony-core",
       "name": "Spore Colony Core",
-      "themeKey": "demon.puffseashroom",
+      "themeKey": "creature.puffseashroom",
       "members": [
         {
           "role": "core-guard",

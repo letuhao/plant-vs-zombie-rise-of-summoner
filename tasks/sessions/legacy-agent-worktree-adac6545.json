@@ -1,0 +1,11 @@
+{
+  "session": "legacy-agent-worktree-adac6545",
+  "program": "legacy",
+  "problem": "Abandoned Agent Manager worktree, patch-equivalent to the integration branch (no unique commits). Recorded so session-boundary-check can account for the branch instead of reporting it as drift.",
+  "mode": "worktree",
+  "branch": "worktree-agent-adac6545b213ca549",
+  "worktree": ".claude/worktrees/agent-adac6545b213ca549",
+  "paths": [],
+  "started": "2026-09-05T00:00:00Z",
+  "status": "abandoned"
+}

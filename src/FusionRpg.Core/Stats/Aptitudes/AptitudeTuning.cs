@@ -17,8 +17,8 @@ public sealed record AptitudeGrant(long AptitudePointsPerThetaMilli, long SkillP
 /// purpose, so it never touches that record's own shape or the tests that already prove
 /// `grant.aptitudePointsPerTheta` is required (AptitudeTuningTests.cs). One rate per
 /// <see cref="AllocationScope"/> ("four grants, four sources" — §2.2); the caller supplies each
-/// scope's own source value (`Θ_player` for Commander, almanac XP for DemonType, `element_mastery` for
-/// Aspect, specimen level for UniqueDemon — §2's table) since this module owns the RATE table, never
+/// scope's own source value (`Θ_player` for Commander, almanac XP for CreatureType, `element_mastery` for
+/// Aspect, specimen level for UniqueCreature — §2's table) since this module owns the RATE table, never
 /// the sources themselves. Ordering (commander smallest, unique largest — §2.1) is asserted by
 /// `PointBudgetTests` over the shipped file, not enforced here: a differently-ordered but otherwise
 /// well-formed file is unbalanced, not malformed, and re-ordering it is `residual-fit`'s call.
@@ -211,9 +211,9 @@ public static class AptitudeTuningLoader
                 AptitudePointsPerThetaMilliByScope: new Dictionary<AllocationScope, long>
                 {
                     [AllocationScope.Commander] = PositiveMilli(byScopeEl, "commander", byScopePath),
-                    [AllocationScope.DemonType] = PositiveMilli(byScopeEl, "demonType", byScopePath),
+                    [AllocationScope.CreatureType] = PositiveMilli(byScopeEl, "creatureType", byScopePath),
                     [AllocationScope.Aspect] = PositiveMilli(byScopeEl, "aspect", byScopePath),
-                    [AllocationScope.UniqueDemon] = PositiveMilli(byScopeEl, "uniqueDemon", byScopePath),
+                    [AllocationScope.UniqueCreature] = PositiveMilli(byScopeEl, "uniqueCreature", byScopePath),
                 },
                 RespecPrice: PositiveMilli(pointEconomyEl, "respecPrice", "pointEconomy"),
                 SkillPointsPerThetaMilliByScope: OptionalScopedRates(
@@ -292,9 +292,9 @@ public static class AptitudeTuningLoader
         return new Dictionary<AllocationScope, long>
         {
             [AllocationScope.Commander] = PositiveMilli(el, "commander", path),
-            [AllocationScope.DemonType] = PositiveMilli(el, "demonType", path),
+            [AllocationScope.CreatureType] = PositiveMilli(el, "creatureType", path),
             [AllocationScope.Aspect] = PositiveMilli(el, "aspect", path),
-            [AllocationScope.UniqueDemon] = PositiveMilli(el, "uniqueDemon", path),
+            [AllocationScope.UniqueCreature] = PositiveMilli(el, "uniqueCreature", path),
         };
     }
 

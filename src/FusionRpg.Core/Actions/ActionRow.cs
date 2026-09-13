@@ -78,7 +78,7 @@ public sealed record ActionRow
 
     /// <summary><c>null</c> for <see cref="EligibilityScope.General"/>; a family id for
     /// <see cref="EligibilityScope.Family"/>; a species key for <see cref="EligibilityScope.Species"/>.
-    /// Opaque — never joined against the demon catalog (§4, matching <see cref="SpeciesBasicsRow"/>'s
+    /// Opaque — never joined against the creature catalog (§4, matching <see cref="SpeciesBasicsRow"/>'s
     /// own discipline).</summary>
     public string? ScopeKey { get; init; }
 
@@ -157,7 +157,7 @@ public sealed record ActionGrantRow(
 /// <summary>
 /// The source of an actor's three basics plus its innate (spec-action-model.md §1, §9). A narrow,
 /// action-program-owned table keyed on an opaque `species_key` the caller supplies — deliberately not
-/// a join into the generated demon-species catalog, which this program does not own and must not edit.
+/// a join into the generated creature-species catalog, which this program does not own and must not edit.
 /// </summary>
 public sealed record SpeciesBasicsRow(
     string SpeciesKey, string AttackActionId, string GuardActionId, string MoveActionId, string? InnateActionId);

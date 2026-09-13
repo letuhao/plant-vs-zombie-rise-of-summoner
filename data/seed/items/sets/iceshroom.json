@@ -25,7 +25,7 @@
       "id": "set.iceshroom-001",
       "nameKey": "set.frost-spike-shard",
       "name": "Frost-Spike Shard",
-      "themeKey": "demon.iceshroom",
+      "themeKey": "creature.iceshroom",
       "members": [
         {
           "role": "armament-primary",

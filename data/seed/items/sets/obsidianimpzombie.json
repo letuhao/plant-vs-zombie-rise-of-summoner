@@ -25,7 +25,7 @@
       "id": "set.obsidianimpzombie-001",
       "nameKey": "set.obsidian-imp",
       "name": "Obsidian Imp",
-      "themeKey": "demon.obsidianimpzombie",
+      "themeKey": "creature.obsidianimpzombie",
       "members": [
         {
           "role": "armament-primary",

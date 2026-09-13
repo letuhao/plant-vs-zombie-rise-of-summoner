@@ -25,7 +25,7 @@ What you *do* have:
 
 ## Free-build aptitudes (**Shipped**)
 
-Spend commander points across the twelve. What you allocate reaches every demon you field.
+Spend commander points across the twelve. What you allocate reaches every creature you field.
 
 | Aptitude | Feel |
 |---|---|
@@ -42,9 +42,9 @@ Spend commander points across the twelve. What you allocate reaches every demon 
 | Precision | They cannot dodge |
 | Ferocity | Sometimes it is much worse |
 
-Allocation can stack across commander, species, variant, and the unique demon itself — who you are is the sum of those layers. Priced **respec** is the friction that holds a build together.
+Allocation can stack across commander, species, variant, and the unique creature itself — who you are is the sum of those layers. Priced **respec** is the friction that holds a build together.
 
-**In this build:** commander-scope spend is live (Mode C). UniqueDemon and species-build player
+**In this build:** commander-scope spend is live (Mode C). UniqueCreature and species-build player
 surfaces are under [aptitude-sheet-map.md](architecture/aptitude-sheet-map.md) — not “still ahead.”
 
 ---

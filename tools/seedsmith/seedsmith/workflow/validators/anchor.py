@@ -1,4 +1,4 @@
-"""Cross-field validators for the demon species anchor (spec-classify-pipelines.md §4, Q12:
+"""Cross-field validators for the creature species anchor (spec-classify-pipelines.md §4, Q12:
 "reject and repair, naming the conflict"). Same `(draft, context) -> list[str]` shape every other
 validator in this package uses — `make_validate_node` composes them without change.
 
@@ -10,14 +10,14 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
-from ...adapters.demons.anchor.schema import APTITUDE_POSTURE
+from ...adapters.creatures.anchor.schema import APTITUDE_POSTURE
 
 __all__ = ["posture_resource", "element_distinct", "acquisition_nonzero"]
 
 
 def posture_resource(draft: Mapping[str, Any], context: Mapping[str, Any]) -> "list[str]":
     """`posture` is derived from the already-decided `aptitudePrimary` (passed in `context` by the
-    run orchestrator, since pipeline 3 runs before pipeline 7). A Bastion demon whose
+    run orchestrator, since pipeline 3 runs before pipeline 7). A Bastion creature whose
     `resourceProfile` omits `poise` is incoherent — Bastion IS the guard posture, and poise pays
     for guarding (resource-hub-ssot.md, class-system `poise-resource`)."""
     aptitude_primary = context.get("aptitudePrimary")
@@ -52,8 +52,8 @@ def element_distinct(draft: Mapping[str, Any], context: Mapping[str, Any]) -> "l
 
 
 def acquisition_nonzero(draft: Mapping[str, Any], context: Mapping[str, Any]) -> "list[str]":
-    """`DemonAcquisition.None` is a catalog error (`DemonRarity.cs:11` — `[Flags] enum
-    DemonAcquisition { None = 0, ... }`, and `DemonSpeciesCatalog`'s own validation already throws
+    """`CreatureAcquisition.None` is a catalog error (`CreatureRarity.cs:11` — `[Flags] enum
+    CreatureAcquisition { None = 0, ... }`, and `CreatureSpeciesCatalog`'s own validation already throws
     on it). `acquisition` must name at least one real flag."""
     acquisition = draft.get("acquisition")
     if not acquisition:

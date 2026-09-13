@@ -25,7 +25,7 @@
       "id": "set.ultimatesunnut-001",
       "nameKey": "set.imperial-fruit-harvest",
       "name": "Imperial Fruit Harvest",
-      "themeKey": "demon.ultimatesunnut",
+      "themeKey": "creature.ultimatesunnut",
       "members": [
         {
           "role": "armament-primary",

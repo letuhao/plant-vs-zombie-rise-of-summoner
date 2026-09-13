@@ -25,7 +25,7 @@
       "id": "set.enumvalue267-001",
       "nameKey": "set.the-unformed-loam",
       "name": "The Unformed Loam",
-      "themeKey": "demon.enumvalue267",
+      "themeKey": "creature.enumvalue267",
       "members": [
         {
           "role": "armament-primary",

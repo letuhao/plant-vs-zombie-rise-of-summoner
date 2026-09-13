@@ -72,7 +72,7 @@ describe("AptitudesTab", () => {
     resetAptitudeObsForTests();
   });
 
-  it("Mode A creature uses UniqueDemon scope and catalog icons", () => {
+  it("Mode A creature uses UniqueCreature scope and catalog icons", () => {
     const surface = actorSurfaceFixture();
     render(<AptitudesTab data={actor()} surface={surface} role="creature" />);
     expect(screen.getByTestId("aptitudes-tab")).toHaveAttribute("data-mode", "unique");
@@ -81,7 +81,7 @@ describe("AptitudesTab", () => {
     expect(screen.getByTestId("aptitude-icon-Might")).toBeInTheDocument();
   });
 
-  it("Mode C commander chip fiction differs from UniqueDemon", () => {
+  it("Mode C commander chip fiction differs from UniqueCreature", () => {
     const surface = actorSurfaceFixture();
     render(<AptitudesTab data={actor()} surface={surface} role="commander" />);
     expect(screen.getByTestId("aptitudes-tab")).toHaveAttribute("data-mode", "commander");
@@ -102,7 +102,7 @@ describe("AptitudesTab", () => {
     expect(last?.spent).toBeGreaterThan(20);
   });
 
-  it("Confirm save posts UniqueDemon allocate for Mode A", async () => {
+  it("Confirm save posts UniqueCreature allocate for Mode A", async () => {
     mutateUnique.mockResolvedValue(uniqueData);
     const onDraftState = vi.fn();
     const user = userEvent.setup();

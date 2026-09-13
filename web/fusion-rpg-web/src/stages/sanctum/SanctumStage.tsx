@@ -1,9 +1,9 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useDemonRoster, usePlayers, useRelics, useRuns, useSoulBalance, useSpeciesIndex, useUniqueActors } from "@/lib/bus";
+import { useCreatureRoster, usePlayers, useRelics, useRuns, useSoulBalance, useSpeciesIndex, useUniqueActors } from "@/lib/bus";
 import { useContracts } from "@/lib/bus/contracts";
-import { conditionOf } from "@/features/demons/contractView";
-import { displayName } from "@/features/demons/rosterSplit";
+import { conditionOf } from "@/features/creatures/contractView";
+import { displayName } from "@/features/creatures/rosterSplit";
 import { adaptActor, PLAYER_PENDING } from "@/contract/adapt";
 import { pendingWithReason } from "@/contract/pending";
 import { registerGlobalVerb } from "@/shell/keymap";
@@ -163,13 +163,13 @@ export function SanctumStage() {
 
   const actors = actorsQuery.data?.items ?? [];
   const relicsQuery = useRelics();
-  const demonRosterQuery = useDemonRoster(playerId);
+  const creatureRosterQuery = useCreatureRoster(playerId);
   const speciesById = useSpeciesIndex();
   const { returnedCount } = useExpeditionReturnWatcher(playerId);
 
   // T26's priority banner needs the same "which pact is overdue, and what's its real name"
   // resolution `PactsLayer.tsx` already does — reused here rather than re-derived differently.
-  const bySpecimenId = new Map((demonRosterQuery.data?.items ?? []).map((s) => [s.profile.instanceId, s]));
+  const bySpecimenId = new Map((creatureRosterQuery.data?.items ?? []).map((s) => [s.profile.instanceId, s]));
   const overdueContractRow = (contractsQuery.data?.contracts ?? []).find((c) => conditionOf(c) === "insubordinate");
   const overdueContract = overdueContractRow
     ? (() => {
@@ -184,10 +184,10 @@ export function SanctumStage() {
   const railInputs: RailUnlockInputs = {
     currentStageId: "sanctum",
     hasCompletedARun: (runsQuery.data?.length ?? 0) > 0,
-    hasAnyDemon: (demonRosterQuery.data?.items.length ?? 0) > 0,
+    hasAnyCreature: (creatureRosterQuery.data?.items.length ?? 0) > 0,
     hasAnyContract: (contractsQuery.data?.contracts.length ?? 0) > 0,
     hasAnyRelic: (relicsQuery.data?.items.length ?? 0) > 0,
-    hasAnyBoundDemon: (contractsQuery.data?.contracts.some((c) => c.bound) ?? false),
+    hasAnyBoundCreature: (contractsQuery.data?.contracts.some((c) => c.bound) ?? false),
     returnedExpeditionCount: returnedCount,
     unreadResultCount: 0 // no "unread results" concept exists server-side yet
   };

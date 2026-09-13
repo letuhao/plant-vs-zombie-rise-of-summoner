@@ -25,7 +25,7 @@
       "id": "set.diamondpotatonut-001",
       "nameKey": "set.diamond-nut-shell",
       "name": "Diamond Nut Shell",
-      "themeKey": "demon.diamondpotatonut",
+      "themeKey": "creature.diamondpotatonut",
       "members": [
         {
           "role": "armament-primary",

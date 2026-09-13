@@ -24,7 +24,7 @@ builds one palisade and stops is not a siege.
 The owner's answer, verbatim:
 
 > *"not every buiding cost resource, we can immediately deploy building by assembly them from
-> consumables item... some can be summon by specific demon action... it cost actor resources like qi,
+> consumables item... some can be summon by specific creature action... it cost actor resources like qi,
 > other building cost no resource but actor stamina, hunger and that is kind of action that i mention
 > like digging moat"*
 
@@ -54,7 +54,7 @@ a besieging force that can meaningfully fortify.
 
 - No **building materials** as an empire resource. Owner decision 9: *"empire resouces is missing
   buiding resource, there are no stone, metal and some kind, cannot use soul to summon a wall, that
-  confuse with wallnut demon family."* The owner named this resource **`ironwork`**.
+  confuse with wallnut creature family."* The owner named this resource **`ironwork`**.
 - `shard-vein` (GuardHeavy ×4) and `material-seam` (GuardMedium ×3) **ship in maps and yield nothing**
   — heavily guarded slots that are currently pure decoration. They are `ironwork`'s natural faucet,
   already placed, already balanced by their guards.
@@ -82,7 +82,7 @@ public enum AcquisitionPath
     /// here already. The cost was paid when the item was crafted.</summary>
     Assembled,
 
-    /// <summary>A demon action summons it, paid in `qi`. Actor resource, not empire.</summary>
+    /// <summary>A creature action summons it, paid in `qi`. Actor resource, not empire.</summary>
     Summoned,
 
     /// <summary>Dug, piled, felled. Costs `stamina` and `hunger` and nothing else — the moat the
@@ -139,8 +139,8 @@ It follows `LoamStock`'s shape exactly rather than inventing a second stockpile 
 ```csharp
 /// <summary>
 /// Worked stone and metal — the building material (owner decision 9). Distinct from loam, which is
-/// life-force, and from souls, which are demon currency: "cannot use soul to summon a wall, that
-/// confuse with wallnut demon family."
+/// life-force, and from souls, which are creature currency: "cannot use soul to summon a wall, that
+/// confuse with wallnut creature family."
 ///
 /// <para><b>long</b>, matching LoamStock exactly, and for the reason WorldSector.LoamStock's own
 /// comment records: "the int version silently overflowed into negative upkeep at legal inputs."</para>
@@ -204,12 +204,12 @@ An item consumed via an action carrying a `structure.place` atom (`instant: true
 equippement)"* building role from the owner's round-5 message closing its own loop: your workshops
 make deployable fortifications, and you carry them to the siege.
 
-### 4. `Summoned` — a demon action paid in `qi`
+### 4. `Summoned` — a creature action paid in `qi`
 
 An ordinary action with a `qi` cost and the SAME `structure.place` atom (§3's correction above,
 `instant: true` — a summoned structure is also immediate). **Nothing new needed beyond the atom
 itself**: the action system already validates costs, the resource hub already holds `qi`, and
-`structure-seed` will author which demons can do it.
+`structure-seed` will author which creatures can do it.
 
 This is the seedsmith Law-1 shape working as intended — the container-roll path already exists, so
 authoring the action/container is a **content** question now, not a mechanism build.

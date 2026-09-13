@@ -246,7 +246,7 @@ table.t td { border-bottom: 1px solid var(--border); padding: var(--sp-2); verti
 .side .pip { width: 8px; height: 8px; border-radius: 2px; flex: none; }
 .side[data-side="plant"]  { color: var(--side-plant);  } .side[data-side="plant"]  .pip { background: var(--side-plant); }
 .side[data-side="zombie"] { color: var(--side-zombie); } .side[data-side="zombie"] .pip { background: var(--side-zombie); }
-.side[data-side="demon"]  { color: var(--side-demon);  } .side[data-side="demon"]  .pip { background: var(--side-demon); }
+.side[data-side="creature"]  { color: var(--side-creature);  } .side[data-side="creature"]  .pip { background: var(--side-creature); }
 
 /* --- tier pips ----------------------------------------------------------- */
 .tier { display: inline-flex; align-items: center; gap: 2px; vertical-align: middle; }

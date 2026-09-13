@@ -25,7 +25,7 @@
       "id": "set.garlicmelon-001",
       "nameKey": "set.the-seeded-volley",
       "name": "The Seeded Volley",
-      "themeKey": "demon.garlicmelon",
+      "themeKey": "creature.garlicmelon",
       "members": [
         {
           "role": "armament-primary",

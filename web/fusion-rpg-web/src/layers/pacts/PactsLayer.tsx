@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDemonRoster, usePlayers, useSpeciesIndex } from "@/lib/bus";
-import { newCorrelationId } from "@/lib/bus/demons";
+import { useCreatureRoster, usePlayers, useSpeciesIndex } from "@/lib/bus";
+import { newCorrelationId } from "@/lib/bus/creatures";
 import { usePatron, useSetPatron } from "@/lib/bus/patron";
 import { useBuyContractSlot, useContracts, usePerformRitual, useReleaseContract } from "@/lib/bus/contracts";
 import {
@@ -10,19 +10,19 @@ import {
   fieldingBlockReason,
   loyaltyFraction,
   rankLabel
-} from "@/features/demons/contractView";
-import { displayName } from "@/features/demons/rosterSplit";
-import { auraLabel, auraPreviewMilli } from "@/features/demons/patronView";
+} from "@/features/creatures/contractView";
+import { displayName } from "@/features/creatures/rosterSplit";
+import { auraLabel, auraPreviewMilli } from "@/features/creatures/patronView";
 import { AptitudesLayer } from "@/layers/aptitudes/AptitudesLayer";
 import { PanelShell } from "@/shell/PanelShell";
 import { EmptyState } from "@/ui/EmptyState";
 import { Badge, Banner, Button } from "@/ui";
 
-// T30 (plate 03 §D): a colour-tinted portrait per card. No demon art registry exists (game-gui-map.md
+// T30 (plate 03 §D): a colour-tinted portrait per card. No creature art registry exists (game-gui-map.md
 // assumption 6 — art is out, the registry is in), so this is the same honest substitute
 // `ui/actor/shared.tsx`'s `ActorFrame` already uses for creatures — an initial inside a coloured
-// frame — reusing the existing `--color-rarity-*` tokens rather than inventing a demon-specific
-// palette. Demon rarity is a 4-tier `common|rare|epic|legendary` string (`lib/bus/demons.ts`), not
+// frame — reusing the existing `--color-rarity-*` tokens rather than inventing a creature-specific
+// palette. Creature rarity is a 4-tier `common|rare|epic|legendary` string (`lib/bus/creatures.ts`), not
 // the 5-tier numeric scale those tokens were named for, so this maps onto a rising subset of them.
 const RARITY_TINT: Record<string, string> = {
   common: "border-rarity-1",
@@ -43,9 +43,9 @@ function PactPortrait({ rarity, initial }: { rarity: string; initial: string }) 
 }
 
 /**
- * T17 — the demon contracts layer (plate 03 §D, spec-demon-contracts.md): loyalty, tribute,
+ * T17 — the creature contracts layer (plate 03 §D, spec-creature-contracts.md): loyalty, tribute,
  * Ritual/Release, each carrying its reason inline. The underlying mechanics (`contractView.ts`,
- * the bind/release/ritual/patron mutations) are the same real ones `DemonsPage.tsx` already
+ * the bind/release/ritual/patron mutations) are the same real ones `CreaturesPage.tsx` already
  * uses — this is a dedicated, focused view over them, not a new contract system. The plate's
  * "price" line on a content pact's aura doesn't exist server-side (`patronView.ts`'s aura is a
  * pure benefit, no downside term) — shown honestly as a benefit only, not invented.
@@ -54,7 +54,7 @@ export function PactsLayer({ open, onOpenChange }: { open: boolean; onOpenChange
   const navigate = useNavigate();
   const players = usePlayers();
   const playerId = players.data?.currentPlayerId ?? 0;
-  const roster = useDemonRoster(playerId);
+  const roster = useCreatureRoster(playerId);
   const speciesById = useSpeciesIndex();
   const contracts = useContracts(playerId);
   const patron = usePatron(playerId);
@@ -120,15 +120,15 @@ export function PactsLayer({ open, onOpenChange }: { open: boolean; onOpenChange
         </Banner>
       ) : rows.length === 0 ? (
         // G4 (species-build-todo.md): Pacts stays locked until a first contract exists
-        // (railState.ts's hasAnyContract), and the only UI that binds one lives on `/demons` —
-        // which nothing else in the app links to. This hint already named "the Demons roster";
+        // (railState.ts's hasAnyContract), and the only UI that binds one lives on `/creatures` —
+        // which nothing else in the app links to. This hint already named "the Creatures roster";
         // now it's a real link there instead of just text that mentions it.
         <EmptyState
           title="No pacts yet"
-          hint="Bind a demon's contract from the Demons roster to see it here."
+          hint="Bind a creature's contract from the Creatures roster to see it here."
           action={
-            <Button size="sm" onClick={() => navigate("/demons")} data-testid="pacts-empty-open-demons">
-              Open Demons roster
+            <Button size="sm" onClick={() => navigate("/creatures")} data-testid="pacts-empty-open-creatures">
+              Open Creatures roster
             </Button>
           }
         />
@@ -228,7 +228,7 @@ export function PactsLayer({ open, onOpenChange }: { open: boolean; onOpenChange
                       <Button
                         size="sm"
                         variant="ghost"
-                        title="Frees the slot; the demon keeps its loyalty"
+                        title="Frees the slot; the creature keeps its loyalty"
                         onClick={() => void releaseContract.mutateAsync({ playerId, instanceId: c.instanceId })}
                         data-testid={`pact-release-${c.instanceId}`}
                       >

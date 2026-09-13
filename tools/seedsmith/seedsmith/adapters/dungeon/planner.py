@@ -7,7 +7,7 @@ rule), id minting from a high-water mark (§1's "every id is PLANNED... the plan
 
 **Built 2026-09-07, previously deferred as needing a registry that turned out to already exist:**
 `select_planning_themes`/`allocate_event_targets`/`motif_brief_for_slot` — D1.10's own same-day
-correction found `data/seed/demons/_registry/themes.v1.json` (84 rows) already shipped and wired
+correction found `data/seed/creatures/_registry/themes.v1.json` (84 rows) already shipped and wired
 into `adapters/dungeon/registries.py`'s `load_themes()`, which is what this module's own docstring
 was waiting on ("needs a dungeon motif registry that does not exist yet").
 
@@ -92,12 +92,12 @@ def select_planning_themes(themes: "Mapping[str, dict]", *, per_rarity: int = 2)
 
     Picking by raw motif+antiMotif richness instead was tried and rejected by direct measurement:
     the top 8 by combined richness cluster on one flavor family (six of eight land on `cherry`-
-    themed demons, sharing near-identical motif lists) — exactly the monoculture a planner-fixed
+    themed creatures, sharing near-identical motif lists) — exactly the monoculture a planner-fixed
     SUBSET exists to avoid. Spreading across the registry's own rarity bands needs no judgment call
     (only counting) and cannot repeat that failure mode by construction.
     """
     # Theme refresh can carry a source-only fallback rarity (currently ``almanac``) for species
-    # whose anchor has not published a four-band rarity yet.  That value is valid for the demon
+    # whose anchor has not published a four-band rarity yet.  That value is valid for the creature
     # registry but is not a dungeon planning band; admitting it silently expanded the fixed
     # eight-theme subset to 28 when the roster grew from 84 to 904.  Keep the planner on the
     # dungeon contract's four legal bands and leave unclassified themes available for later

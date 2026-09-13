@@ -117,7 +117,13 @@ node_modules/
 .remember/
 artifacts/
 
-/data/seed/demons/_runs/
+/data/seed/creatures/_runs/
+
+# Action-corpus mid pipeline (pre-acceptance scratch / A-P3 briefs). Final delivery stays
+# tracked: committed-round-*.json, _briefs/, _reports/, _generated/, _rounds/*/survivors.json
+# (+ rejects/review-queue/assembled), and *_runs/*.ledger.json.
+/data/seed/actions/_candidates/
+/data/seed/actions/_rounds/**/p3-briefs.json
 
 *sqlite-shm
 *.sqlite-wal
@@ -133,7 +139,6 @@ artifacts/
 data-out.txt
 *.bak-*
 /web/fusion-rpg-web/tmp/
-package-lock.json
 
 tools/seedsmith/.pytest_cache/
 tools/seedsmith/.ruff_cache/
@@ -146,6 +151,8 @@ tools/seedsmith/.tmp-seedsmith-pytest-audit/
 tools/seedsmith/.tmp-seedsmith-pytest-audit-final/
 tools/seedsmith/.tmp-seedsmith-pytest-audit-full/
 tools/seedsmith/seedsmith.egg-info/
+# Local one-off scratch scripts (hardcoded machine paths) — never commit
+tools/seedsmith/.tmp_*.py
 .pytest_cache/
 .remember/
 .tmp-server-seed-audit-20260910/
@@ -156,6 +163,7 @@ _tmp_reflect/
 .pytest-seedsmith-basetemp2/
 test-results/
 .kilo/
-test-results/
-web/fusion-rpg-web/tmp/
-web/fusion-rpg-web/package-lock.json
+.mcp.json
+kilo.json
+plant-vs-zombie-rise-of-summoner.code-workspace
+.opencode/

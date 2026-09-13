@@ -30,7 +30,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.keen-edge",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -66,7 +66,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.ferocity",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -102,7 +102,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.keen-edge",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -139,7 +139,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.ferocity",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -175,7 +175,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.keen-edge",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -211,7 +211,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.ferocity",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -247,7 +247,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -284,7 +284,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.keen-edge",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -320,7 +320,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.keen-edge",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -357,7 +357,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.ferocity",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -393,7 +393,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -429,7 +429,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.keen-edge",
         "powerBand": "trivial"
       },
       "socketMax": 0,

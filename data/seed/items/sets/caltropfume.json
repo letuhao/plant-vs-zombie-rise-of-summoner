@@ -23,9 +23,9 @@
   "entries": [
     {
       "id": "set.caltropfume-001",
-      "nameKey": "set.spore-burst-spikes",
-      "name": "Spore Burst Spikes",
-      "themeKey": "demon.caltropfume",
+      "nameKey": "set.fungal-shrapnel",
+      "name": "Fungal Shrapnel",
+      "themeKey": "creature.caltropfume",
       "members": [
         {
           "role": "armament-primary",

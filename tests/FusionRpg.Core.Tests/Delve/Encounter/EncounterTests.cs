@@ -1,5 +1,5 @@
 using FusionRpg.Core.Delve.Encounter;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Dungeon.Tuning;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Stats.Derived;
@@ -20,13 +20,13 @@ namespace FusionRpg.Core.Tests.Delve.Encounter;
 /// </summary>
 public class EncounterTests
 {
-    static readonly DemonThreatTuning ThreatTuning = RealAnchorCorpusFixture.ThreatTuning;
+    static readonly CreatureThreatTuning ThreatTuning = RealAnchorCorpusFixture.ThreatTuning;
     static readonly EncounterTuning Tuning = EncounterTuningHub.Tuning;
     static readonly RaidModeTuning Solo = DungeonTuningHub.Tuning.RaidModes["solo"];
     static readonly DifficultyRungTuning Hard = DungeonTuningHub.Tuning.Rungs["hard"]; // the identity row -- every delta 0
 
     // A small, HAND-CONTROLLED fixture corpus, independent of the real (growing) species corpus, so
-    // goldens stay byte-stable regardless of what other work adds to data/seed/demons/species/.
+    // goldens stay byte-stable regardless of what other work adds to data/seed/creatures/species/.
     static ConcreteAnchor A(string id, string threatBand, string aptitude, string reach, string tp, ElementTypeId element) => new()
     {
         SpeciesId = id,

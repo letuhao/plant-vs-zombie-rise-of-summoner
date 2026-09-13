@@ -1,27 +1,28 @@
 using FusionRpg.Contracts;
 using FusionRpg.Data;
 using FusionRpg.Data.Sqlite;
+using Microsoft.Data.Sqlite;
 using Xunit;
 
 namespace FusionRpg.Data.Tests;
 
+[Trait("Category", "DiskSemantics")]
 public class RpgStoreSmokeTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
+    readonly string _dir;
 
     public RpgStoreSmokeTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-data-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        // File-bound: this class asserts File.Exists on the hot/media files, so it keeps a real dir --
+        // through the leak-proof helper (R2/R3).
+        _testStore = DataTestStore.CreateFileBacked();
+        _store = _testStore.Store;
+        _dir = _testStore.DataDir!;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     [Fact]
     public void Init_creates_hot_and_media_sqlite()
@@ -106,14 +107,17 @@ public class RpgStoreSmokeTests : IDisposable
             File.Copy(_store.HotPath, Path.Combine(dir, LegacyMonoMigrator.HotFileName));
             Assert.False(File.Exists(Path.Combine(dir, LegacyMonoMigrator.MediaFileName)));
 
-            var store = new RpgStore(dir);
+            using var store = new RpgStore(dir);
             store.Init();
             Assert.True(File.Exists(store.HotPath));
             Assert.True(File.Exists(store.MediaPath));
         }
         finally
         {
-            try { Directory.Delete(dir, true); } catch { /* temp */ }
+            // Pooling holds the file handle, so clear pools before deleting, and let a failed delete
+            // fail the test -- the swallow here was a live leak (found by the runtime alarm).
+            SqliteConnection.ClearAllPools();
+            Directory.Delete(dir, recursive: true);
         }
     }
 }

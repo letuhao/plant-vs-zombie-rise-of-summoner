@@ -25,7 +25,7 @@
       "id": "set.ultimateswordzombie-001",
       "nameKey": "set.unfading-card-deck",
       "name": "Unfading Card Deck",
-      "themeKey": "demon.ultimateswordzombie",
+      "themeKey": "creature.ultimateswordzombie",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.eternalzombie-a-001",
       "nameKey": "set.gilded-corpse",
       "name": "Gilded Corpse",
-      "themeKey": "demon.eternalzombie_a",
+      "themeKey": "creature.eternalzombie_a",
       "members": [
         {
           "role": "armament-primary",

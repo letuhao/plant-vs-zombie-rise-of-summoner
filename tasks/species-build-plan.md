@@ -14,7 +14,7 @@ the reasoning, and the risks.
 
 ## 1. Overview
 
-Give every demon species its own aptitude allocation, filled automatically from a per-species build
+Give every creature species its own aptitude allocation, filled automatically from a per-species build
 favour as that species levels through play, with the Zomboss doing the same visibly, and a priced
 respec for the player who wants to override it.
 
@@ -55,7 +55,7 @@ Three ordering constraints are real rather than stylistic:
 1. **The two corrections go first (P0).** `resolver-memo` fixes a cost that predates this program; if it
    lands with the species work, a regression in either is attributable to neither, and *"species
    aptitudes made the game slow"* becomes the story of a cost that was already there. `budget-source`
-   must precede anything that computes a `DemonType` budget, or that thing is built on an inverted
+   must precede anything that computes a `CreatureType` budget, or that thing is built on an inverted
    ordering.
 2. **Both read paths land together (P3).** Shipping the lawn without battle creates exactly the
    incoherence module 10 exists to prevent — points earned from expeditions that expeditions do not
@@ -77,7 +77,7 @@ Full acceptance criteria in [species-build-todo.md](species-build-todo.md).
 ### Phase 1 — foundations (modules 3, 4)
 `T1.1` species progression row + migration · `T1.2` lawn projection · `T1.3` the run award and its
 ratio · `T1.4` expedition source (game-closed proof) · `T1.5` planner phases 1–2 · `T1.6` phase 3
-refusal + canonical serializer · `T1.7` `DemonBuildPlanGen` + the committed plan · `T1.8` **CI gate**
+refusal + canonical serializer · `T1.7` `CreatureBuildPlanGen` + the committed plan · `T1.8` **CI gate**
 → **Checkpoint 1**
 
 ### Phase 2 — the allocation (module 5)
@@ -115,7 +115,7 @@ their stated criteria.** Three things no spec lists as a success criterion — b
 | Gap | Why it was invisible | Closed by |
 |---|---|---|
 | ⛔ **No host wiring for three new tuning files.** *Core reads no file — hosts load and inject*, and `aptitudes.v5.json` is `Configure`d in **both** `Program.cs` and `RpgHost.cs`. Three new files had a loader in no task | Each spec lists its tuning file under *project structure*, so it looked owned. Nothing owned **loading** it | Acceptance added to `T1.1`, `T1.5`, `T4.4` — **and the audit narrowed the work**: all three are **server-only**. None needs injector wiring, because the injector never computes a level, never sees the plan (it receives *points*), and never meets the Zomboss |
-| ⛔ **No CI gate for the generated plan.** CI already gates `DemonSpeciesGen --check` and `FamilyExpandGen --check` with a `$LASTEXITCODE` throw; a stale build plan would have shipped silently | The class-system standard says each module wires its own gate *as it lands* — easy to defer to "the end", which is where it gets forgotten | **New task `T1.8`**, in Phase 1 rather than at the end |
+| ⛔ **No CI gate for the generated plan.** CI already gates `CreatureSpeciesGen --check` and `FamilyExpandGen --check` with a `$LASTEXITCODE` throw; a stale build plan would have shipped silently | The class-system standard says each module wires its own gate *as it lands* — easy to defer to "the end", which is where it gets forgotten | **New task `T1.8`**, in Phase 1 rather than at the end |
 | ⛔ **No `AptitudesUpdated` broadcast on a species save.** Without it a respec would not reach the lawn until a match edge | The endpoint already broadcasts for commander saves, so it looked handled | Acceptance added to `T2.2` — **and this repo has already shipped this exact bug once**: a WebGroup-only send left the injector's allocation stale until the next reconnect, found by live probe 2026-08-30 |
 
 Five smaller omissions also closed: the planner's overflow test (`T1.5`), the inertness-preserved and
@@ -139,7 +139,7 @@ error — which is precisely why every suite stayed green.
 | Finding | Why it was invisible | Closed by |
 |---|---|---|
 | ⛔ **Every species baseline is empty.** The generated plan is keyed in seedsmith anchor PascalCase (`FumeShroom`); every runtime lookup asks the compiled catalog's lowercase id (`fumeshroom`) through an **ordinal** dictionary. Exact overlap across 829 plan keys and 84 live species: **0** | `SharesFor` returns `EmptyShares` on a miss by design — no throw, no log. Both suites `Configure` a hand-built plan keyed `"fumeshroom"`, the *lookup* id, so no test ever loaded the shipped file's `"FumeShroom"` against the real roster | `G1` (write the real `speciesId`, per `spec-redistribution-plan.md` §"Shape") and `G2` (fail loud, per that same spec's §"Tuning" rule for a missing key) |
-| ⛔ **No door to the feature.** Pacts is gated on `hasAnyContract`; the only binding UI is `/demons`, which nothing in the app links to. Pacts' empty state names a page the player cannot reach | Each surface is individually correct. The missing thing is a **link between two of them**, which no module owns | `G4` — named as crossing into the shell/rail rather than absorbed as this program's code |
+| ⛔ **No door to the feature.** Pacts is gated on `hasAnyContract`; the only binding UI is `/creatures`, which nothing in the app links to. Pacts' empty state names a page the player cannot reach | Each surface is individually correct. The missing thing is a **link between two of them**, which no module owns | `G4` — named as crossing into the shell/rail rather than absorbed as this program's code |
 | ⛔ **An unlevelled species renders as an unexplained zero panel** — twelve zeroes under the copy "You're running the shipped build", which is false, with the disabled-Save reason hidden in a `title=` tooltip | Budget `max(0, level-1) x 4` is correct math; the *copy* assumes a build exists. Compounds the first finding — two independent causes, one identical broken-looking screen | `G5` |
 | **A failed load renders as "Loading..." forever** — `!state.data` is tested before `isError`, so the error branch and its retry button are unreachable dead code | No test covers the failure path | `G6` |
 | **A priced respec can spend souls with no confirm** — `isFree` falls back to `true` while the price query is pending or errored | The happy path is covered; the pending-price path is not | `G7` |
@@ -199,6 +199,6 @@ The only things deliberately left unset are **tunable values**, which a balance 
 
 **Phase 6 adds no open question either.** `G4` needs one product call — where the door to contract
 binding lives — and it ships with a named default rather than a gate: **put it on the Pacts empty
-state that already names the Demons roster**, the smallest fix that invents no new information
-architecture. A Demons rail entry is the alternative if the owner wants it discoverable before a first
+state that already names the Creatures roster**, the smallest fix that invents no new information
+architecture. A Creatures rail entry is the alternative if the owner wants it discoverable before a first
 contract exists; it is a one-line difference and does not block the task from starting.

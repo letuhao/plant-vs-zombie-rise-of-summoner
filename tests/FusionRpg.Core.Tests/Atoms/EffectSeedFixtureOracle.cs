@@ -68,7 +68,7 @@ public static class EffectSeedCatalog
         "fx.clear_butter", "Clear butter", EffectTriggers.OnDamageDealt,
         EffectActions.ClearStatus, new Dictionary<string, object?> { ["status"] = "butter" });
 
-    /// <summary>Patron aura marker (spec-patron-demon.md): a passive with NO actions — the grant
+    /// <summary>Patron aura marker (spec-patron-creature.md): a passive with NO actions — the grant
     /// is the session-visible lifecycle anchor; magnitudes live in PatronRuntimeState and apply
     /// as a pure compose-time overlay, never through FA stat writes. Unused by CreateAll() and by
     /// every test — kept for byte-identical parity with the pre-migration source, not because

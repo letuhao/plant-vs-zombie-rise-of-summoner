@@ -1,7 +1,7 @@
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Delve.Encounter;
 using FusionRpg.Core.Delve.Roll;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Dungeon.Tuning;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
@@ -54,7 +54,7 @@ public static class DomainEncounterCoverage
         RaidModeTuning raid,
         DifficultyRungTuning rung,
         EncounterTuning tuning,
-        DemonThreatTuning threatTuning,
+        CreatureThreatTuning threatTuning,
         AptitudeTuning aptitudeTuning,
         PowerTuning powerTuning,
         int sampleSeeds,

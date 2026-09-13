@@ -25,7 +25,7 @@
       "id": "set.caltropkelp-water-001",
       "nameKey": "set.entangling-thorns",
       "name": "Entangling Thorns",
-      "themeKey": "demon.caltropkelp_water",
+      "themeKey": "creature.caltropkelp_water",
       "members": [
         {
           "role": "armament-primary",

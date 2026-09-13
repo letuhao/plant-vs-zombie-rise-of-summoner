@@ -265,7 +265,7 @@ Deterministic, total, and pure — no network, no database, no mutation outside 
    here**, against the key set of `data/seed/actions/_generated/family-map.json` (A-S0's projection of
    `family-assignments.json` — 53 species over **19** family ids, measured 2026-09-03). This closes
    `spec-eligibility-axis.md`'s own contradiction: its §3.1 and §4 forbid the action layer joining the
-   demon catalog, while its test 6 wanted a load-time refusal that needs the family list. The refusal
+   creature catalog, while its test 6 wanted a load-time refusal that needs the family list. The refusal
    belongs where every other closed-vocabulary refusal already lives — here — and the C# side keeps
    `scopeKey` opaque, so a stray row is inert (it joins no candidate set) rather than wrong. See
    `spec-eligibility-axis.md` §6 AC5b for the same decision from the other side.

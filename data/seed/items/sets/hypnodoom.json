@@ -25,7 +25,7 @@
       "id": "set.hypnodoom-001",
       "nameKey": "set.spore-of-ruin",
       "name": "Spore of Ruin",
-      "themeKey": "demon.hypnodoom",
+      "themeKey": "creature.hypnodoom",
       "members": [
         {
           "role": "armament-primary",

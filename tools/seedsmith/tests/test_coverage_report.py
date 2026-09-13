@@ -32,10 +32,12 @@ from seedsmith.adapters.actions.coverage_report.ctx import (  # noqa: E402
     ActionCoverageCtx, RosterCounts,
 )
 from seedsmith.adapters.actions.distribution_planner.derive import WeightsRow  # noqa: E402
+from seedsmith.adapters.actions.load import load_committed  # noqa: E402
+from seedsmith.adapters.actions.distribution_planner.tuning import RUN_TUNING_PATH  # noqa: E402
 from seedsmith.adapters.actions.vocab import load_family_ids  # noqa: E402
 from seedsmith.metrics.action_coverage import (  # noqa: E402
     ALL_ACTION_COVERAGE_CLOSED_METRICS, ALL_ACTION_COVERAGE_OPEN_METRICS,
-    EnablerPayoffCoverageMetric, PairingReachMetric,
+    EnablerPayoffCoverageMetric, PairingReachMetric, ThinCellMetric,
 )
 from seedsmith.metrics.model import Ctx, Finding, Loop, Metric, Severity  # noqa: E402
 from seedsmith.metrics.registry import MetricRegistry, run_all  # noqa: E402
@@ -44,6 +46,8 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 FAMILY_IDS = load_family_ids()                                    # the real 98, read fresh
 FAM_A, FAM_B = sorted(FAMILY_IDS)[:2]
 PAIRINGS_PATH = REPO_ROOT / "data" / "seed" / "actions" / "pairings.json"
+REAL_ACTIONS_ROOT = REPO_ROOT / "data" / "seed" / "actions"
+REAL_PLAN_PATH = REAL_ACTIONS_ROOT / "_briefs" / "round-1.json"
 
 
 # ---------------------------------------------------------------------------------------------
@@ -87,6 +91,40 @@ def _simple_ctx(accepted_rows, *, quota_by_scope_category=None, subject_category
         roster=roster or RosterCounts(2, 1, 2),
         review_rows=tuple(review_rows), round_no=round_no, mode=mode,
     )
+
+
+def _build_ctx_with_survivors(*, committed, survivors, round_no=1, tmpdir=None):
+    """Build a real `ActionCoverageCtx` from an isolated on-disk tree, so the accepted-corpus merge
+    (committed + a round's survivors) is exercised exactly as production builds it — never by
+    re-implementing the merge in the test. Everything except the two row sets is copied from the
+    live tree, so the quota recompute and vocabulary stay real."""
+    import shutil
+    root = Path(tmpdir) / "actions"
+    (root / "_rounds" / f"round-{round_no}").mkdir(parents=True, exist_ok=True)
+    real = REAL_ACTIONS_ROOT
+    for name in ("type-weights.json", "pairings.json"):
+        shutil.copy(real / name, root / name)
+    (root / f"committed-round-{round_no}.json").write_text(
+        json.dumps({"schemaVersion": 1, "kind": "action-seed",
+                    "_meta": {"partition": f"round-{round_no}", "round": round_no},
+                    "entries": list(committed)}), encoding="utf-8")
+    (root / "_rounds" / f"round-{round_no}" / "survivors.json").write_text(
+        json.dumps({"schemaVersion": 1, "kind": "action-seed",
+                    "_meta": {"partition": "rounds", "round": round_no},
+                    "entries": list(survivors)}), encoding="utf-8")
+    return gen_mod._build_ctx(
+        actions_root=root, creatures_root=real.parent / "creatures",
+        catalog_path=real.parent / "creatures" / "species",
+        type_weights_path=root / "type-weights.json", run_tuning_path=RUN_TUNING_PATH,
+        family_assignments_path=None, pairings_path=root / "pairings.json", round_no=round_no)
+
+
+class _TempTreeMixin:
+    """A per-test tempdir for the tree-building helpers, torn down automatically."""
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.tmpdir = Path(self._tmp.name)
 
 
 def _closed_registry() -> MetricRegistry:
@@ -155,6 +193,114 @@ class OpenMetricGatesTests(unittest.TestCase):
 # ---------------------------------------------------------------------------------------------
 # Planted violation — unevaluated pass (a genuinely missing input -> NOT_MEASURED, never a pass).
 # ---------------------------------------------------------------------------------------------
+
+class AcceptedCorpusIsOneRowPerIdTests(_TempTreeMixin, unittest.TestCase):
+    """⛔ The 2026-09-12 gate finding (T3.1). The accepted corpus is built as committed rows PLUS a
+    round's non-`promoted` survivors. That filter relies on S6 having MARKED every promoted survivor
+    in that round's own file — but a survivor file can be stale (the id was promoted by a LATER
+    round's S6 run, and this round's file was never reduced to markers). Measured: `round-1/
+    survivors.json` held 11 ids already present in `committed-round-2000.json`, with DIFFERENT
+    payloads, so the report measured 191 rows for a 179-row corpus and the two reports disagreed
+    about the same baseline.
+
+    The invariant the whole pipeline claims is "one id exists in exactly one place". The consumer is
+    where a violation does damage, so A-S5 enforces it here: **one row per id, the committed copy
+    winning** (it is the promoted, authoritative version; `load_committed` already guarantees committed
+    ids are unique). A stale round row is dropped, never merged and never allowed to shadow committed
+    content."""
+
+    def test_a_round_row_duplicating_a_committed_id_is_dropped(self) -> None:
+        ctx = _build_ctx_with_survivors(
+            tmpdir=self.tmpdir,
+            committed=[_row("action.x.001", "species", "x")],
+            survivors=[_row("action.x.001", "species", "x"), _row("action.x.002", "species", "x")])
+        ids = [r["id"] for r in ctx.accepted_rows]
+        self.assertEqual(sorted(ids), ["action.x.001", "action.x.002"],
+                         "the duplicate id appears once")
+
+    def test_the_committed_copy_wins_a_content_conflict(self) -> None:
+        committed_row = dict(_row("action.x.001", "species", "x"), name="committed-wins")
+        stale_row = dict(_row("action.x.001", "species", "x"), name="stale-loses")
+        ctx = _build_ctx_with_survivors(tmpdir=self.tmpdir, committed=[committed_row],
+                                        survivors=[stale_row])
+        self.assertEqual(len(ctx.accepted_rows), 1)
+        self.assertEqual(ctx.accepted_rows[0]["name"], "committed-wins")
+
+    def test_distinct_round_rows_are_kept(self) -> None:
+        ctx = _build_ctx_with_survivors(
+            tmpdir=self.tmpdir,
+            committed=[_row("action.a.001", "species", "a")],
+            survivors=[_row("action.b.001", "species", "b")])
+        self.assertEqual(len(ctx.accepted_rows), 2)
+
+    def test_the_real_reports_measure_the_real_committed_corpus(self) -> None:
+        """The end-to-end contract on the live tree: a real round's report cannot measure more rows
+        than exist once committed plus that round's genuinely-new survivors, and no id repeats."""
+        if not REAL_PLAN_PATH.is_file():
+            self.skipTest("action corpus not present in this checkout")
+        real_root = REAL_ACTIONS_ROOT
+        committed = load_committed(real_root).corpus.by_kind("action-seed")
+        for round_no in (1, 2000):
+            if not (real_root / "_rounds" / f"round-{round_no}" / "survivors.json").is_file():
+                continue
+            ctx = gen_mod._build_ctx(
+                actions_root=real_root, creatures_root=real_root.parent / "creatures",
+                catalog_path=real_root.parent / "creatures" / "species",
+                type_weights_path=real_root / "type-weights.json",
+                run_tuning_path=RUN_TUNING_PATH, family_assignments_path=None,
+                pairings_path=real_root / "pairings.json", round_no=round_no)
+            ids = [r["id"] for r in ctx.accepted_rows]
+            self.assertEqual(len(ids), len(set(ids)),
+                             f"round-{round_no} measured a duplicate id")
+            self.assertGreaterEqual(len(ids), len(committed))
+
+
+class VerdictHonoursGatesTests(unittest.TestCase):
+    """T1.2 (2026-09-12, spec §3 step 6 + `spec-metrics.md` §4): a metric that has NOT been promoted
+    (`gates=False`) reports its GAPs but cannot make the verdict `not-clean`. Promotion is the
+    deliberate act that earns the right to gate, and every action-corpus metric ships unpromoted —
+    so before this, every GAP blocked the verdict and the full-run gate was unreachable by
+    construction. `NOT_MEASURED` stays blocking in every case: an absent check is never a pass."""
+
+    def _verdict(self, findings, *, mode="full", gating=()):
+        ids = [m.id for m in ALL_ACTION_COVERAGE_CLOSED_METRICS]
+        return cr.compute_verdict(findings, ids, mode, gating_metric_ids=gating)
+
+    def test_a_non_gating_gap_does_not_flip_the_verdict(self) -> None:
+        findings = [Finding(metric=ThinCellMetric.id, severity=Severity.GAP, subject="cell.x",
+                            message="short")]
+        verdict = self._verdict(findings, mode="full", gating=())
+        self.assertEqual(verdict.verdict, "pass",
+                         "thinCell is not promoted; its GAP is a reading, not a gate")
+        self.assertIn(ThinCellMetric.id, verdict.gap_metrics,
+                      "the GAP is still reported — it just does not gate")
+
+    def test_a_gating_gap_flips_the_verdict(self) -> None:
+        findings = [Finding(metric=ThinCellMetric.id, severity=Severity.GAP, subject="cell.x",
+                            message="short")]
+        verdict = self._verdict(findings, mode="full", gating=(ThinCellMetric.id,))
+        self.assertEqual(verdict.verdict, "not-clean")
+        self.assertIn(ThinCellMetric.id, verdict.gap_metrics)
+
+    def test_not_measured_blocks_even_when_not_gating(self) -> None:
+        findings = [Finding(metric=PairingReachMetric.id, severity=Severity.NOT_MEASURED,
+                            subject="(suite)", message="missing pairings")]
+        verdict = self._verdict(findings, mode="full", gating=())
+        self.assertNotEqual(verdict.verdict, "pass")
+        self.assertNotEqual(verdict.verdict, "smoke-clean")
+
+    def test_the_verdict_reports_which_metrics_are_gating(self) -> None:
+        """The report must say WHICH metrics can gate, so a reader can tell a real gate from a
+        reading without opening the registry."""
+        verdict = self._verdict([], mode="full", gating=(ThinCellMetric.id,))
+        self.assertEqual(verdict.gating_metrics, (ThinCellMetric.id,))
+
+    def test_shipped_registry_ships_no_gating_action_metrics(self) -> None:
+        """Calibration order (`spec-metrics.md` §4): measure, look, set, gate. Nothing here has been
+        promoted, so with real findings the run verdict is not blocked by an unpromoted metric."""
+        self.assertTrue(all(not m.gates for m in ALL_ACTION_COVERAGE_CLOSED_METRICS),
+                        "no action-corpus metric is promoted yet")
+
 
 class UnevaluatedPassTests(unittest.TestCase):
     def test_missing_pairings_json_yields_not_measured_and_a_non_pass_verdict(self) -> None:
@@ -335,36 +481,43 @@ class ReactionAcceptedTests(unittest.TestCase):
 # ---------------------------------------------------------------------------------------------
 
 class RosterReconciliationTests(unittest.TestCase):
-    def test_a_904_species_count_is_measured_from_the_live_roster(self) -> None:
-        live_roster = RosterCounts(species_count=904, family_count=227,
-                                   family_assigned_count=1183)
+    """The roster reconciliation REPORT is driven by whatever counts it is handed — the test passes
+    its own synthetic counts so the arithmetic (band, estimate, message) is what is pinned, not the
+    live roster size, which grows per shipped species (validation-ssot.md)."""
+
+    def test_reconciliation_reports_the_arithmetic_it_was_given(self) -> None:
+        live_roster = RosterCounts(species_count=900, family_count=220,
+                                   family_assigned_count=1200)
         findings = cr.roster_reconciliation_findings("m", live_roster, accepted_corpus_size=0,
                                                      signature_actions_per_species=5)
         self.assertEqual(len(findings), 1)
         self.assertEqual(findings[0].severity, Severity.NOTE)
-        self.assertIn("904 x 5 = 4520", findings[0].message)
+        self.assertIn("900 x 5 = 4500", findings[0].message)
 
     def test_the_live_seed_roster_re_derives_against_the_run_tuning(self) -> None:
-        """Acceptance #6 — re-verify the roster numbers directly rather than trusting any prompt."""
+        """Acceptance #6 — re-verify the roster numbers directly rather than trusting any prompt.
+        Asserted as a RELATIONSHIP (catalog ↔ family map ↔ reconciliation), never a pinned size."""
         catalog = load_catalog()
         family_assignments = derive_live_family_assignments()
         members = gen_mod._family_members(family_assignments)
         roster = RosterCounts(species_count=len(catalog), family_count=len(members),
                               family_assigned_count=sum(len(v) for v in members.values()))
-        self.assertEqual(roster.species_count, 904)
-        self.assertEqual(roster.family_count, 227)
-        self.assertEqual(roster.family_assigned_count, 1183)
+        self.assertEqual(roster.species_count, len({r.species_id for r in catalog}))
+        self.assertEqual(roster.family_count, len(members))
+        self.assertEqual(roster.family_assigned_count,
+                         sum(len(v if isinstance(v, list) else [v])
+                             for v in family_assignments.values()))
 
         findings = cr.roster_reconciliation_findings("m", roster, accepted_corpus_size=0,
                                                      signature_actions_per_species=5)
         self.assertEqual(len(findings), 1)
         self.assertEqual(findings[0].severity, Severity.NOTE)
         evidence = findings[0].evidence
-        self.assertEqual(evidence["signatureTierEstimate"], 904 * 5)
-        self.assertFalse(evidence["belowBand"])
-        self.assertEqual(evidence["researchBandRoster"], 904)
+        self.assertEqual(evidence["signatureTierEstimate"], roster.species_count * 5)
+        self.assertEqual(evidence["researchBandRoster"], roster.species_count)
         # the message must show the re-derivation arithmetic, never just repeat "1,500-3,500"
-        self.assertIn("904 x 5 = 4520", findings[0].message)
+        self.assertIn(f"{roster.species_count} x 5 = {roster.species_count * 5}",
+                      findings[0].message)
         self.assertIn("inside/above", findings[0].message)
 
 
@@ -609,10 +762,24 @@ class RealNonzeroAcceptedReportTests(unittest.TestCase):
     `SyntheticContentTests`/`OfflineGuaranteeTests` elsewhere in this file exercise it directly --
     this class only ever asserted it against the REAL checkout, which has permanently moved on."""
 
-    def test_a_real_run_reports_the_real_accepted_corpus_and_an_explicit_non_pass_verdict(self) -> None:
+    def test_a_real_run_reports_the_real_accepted_corpus_with_gaps_visible_but_not_gating(self) -> None:
         summary = gen_mod.regenerate(write=False)
-        self.assertEqual(summary["acceptedCorpusSize"], 138)
-        self.assertNotEqual(summary["verdict"], "pass")
+        # The accepted corpus is a POPULATION (it grows every round and every promotion), so its
+        # size is a reading, never a literal (validation-ssot.md). Assert the CONTRACT instead:
+        # the report measured SOME real content, and that number reconciles to the committed corpus
+        # plus this round's survivors.
+        self.assertGreater(summary["acceptedCorpusSize"], 0)
+        committed = load_committed(gen_mod.ACTIONS_ROOT)
+        committed_rows = committed.corpus.by_kind("action-seed")
+        self.assertGreater(len(committed_rows), 0)
+        self.assertGreaterEqual(summary["acceptedCorpusSize"], len(committed_rows))
+        # ⛔ UPDATED 2026-09-12 (T1.2): the run verdict is `pass` now that `gates` decides it — no
+        # action-corpus metric is promoted, so a GAP is a reading and a next-round work order, not a
+        # gate (spec-metrics.md §4; spec §3 step 6). The thin corpus is still VISIBLE: `gapMetrics`
+        # is non-empty and every gap is named. "Non-pass" was the old (pre-fix) semantics.
+        self.assertEqual(summary["verdict"], "pass")
+        self.assertNotEqual(summary["gapMetrics"], [],
+                            "the thin corpus is still reported, it just does not gate")
         # 3 scopes x 5 categories = 15 (scope, category, rungBand) groups; 45 is the exploded
         # per-pairingRole cell ROW count in the written report's `entries` (cell_entries below).
         self.assertEqual(summary["cellCount"], 15)
@@ -621,10 +788,92 @@ class RealNonzeroAcceptedReportTests(unittest.TestCase):
         # measure, so nothing degrades to NOT_MEASURED any more (contrast the old empty-corpus
         # pin: `["action.corpus.singletonShare"]`).
         self.assertEqual(summary["notMeasuredMetrics"], [])
-        # The real gaps this expanded batch's own thin corpus actually has -- named explicitly
-        # (acceptance #3), never silently absorbed into a green verdict.
+        # The real gaps this thin corpus actually has -- named explicitly (acceptance #3), never
+        # silently absorbed into a green verdict. `speciesCoverage` (G3, 2026-09-12) joins them: the
+        # corpus names a fraction of the 904-species roster, which the scope-aggregate cells cannot
+        # see.
         self.assertEqual(sorted(summary["gapMetrics"]),
-                         ["action.corpus.enablerPayoffCoverage", "action.corpus.thinCell"])
+                         ["action.corpus.enablerPayoffCoverage", "action.corpus.speciesCoverage",
+                          "action.corpus.thinCell"])
+
+
+class SpeciesCoverageMetricTests(unittest.TestCase):
+    """G3 (2026-09-12): the per-SUBJECT coverage gate. A scope-aggregate cell
+    (`cell.species.attack.1-10`, quota 976 over 904 species) can pass while hundreds of species hold
+    nothing, so this metric asserts every PLANNED species subject has at least one accepted row."""
+
+    @staticmethod
+    def _ctx(subject_keys: "list[str]", accepted_scope_keys: "list[str]") -> ActionCoverageCtx:
+        subject_counts = {("species", k): {"attack": 1} for k in subject_keys}
+        return ActionCoverageCtx(
+            accepted_rows=tuple({"scope": "species", "scopeKey": k, "category": "attack",
+                                 "targetMode": "self", "relation": "enemy", "pairingRole": "none",
+                                 "atomFamilies": ["atom.might"], "rungBand": [1, 10],
+                                 "structureAxes": []}
+                                for k in accepted_scope_keys),
+            quota_by_scope_category={("species", "attack"): len(subject_keys)},
+            subject_category_counts=subject_counts,
+            family_ids=frozenset({"atom.might"}),
+            pairing_table={},
+            roster=RosterCounts(species_count=len(subject_keys), family_count=1,
+                                family_assigned_count=len(subject_keys)))
+
+    def test_an_uncovered_species_is_a_gap_naming_that_species(self) -> None:
+        ctx = self._ctx(["alpha", "beta", "gamma"], ["alpha"])
+        findings = cr.species_coverage_findings("m", ctx)
+        self.assertEqual(sorted(f.subject for f in findings), ["beta", "gamma"])
+        self.assertTrue(all(f.severity == Severity.GAP for f in findings))
+        for f in findings:
+            self.assertEqual(f.evidence["coveredSpecies"], 1)
+            self.assertEqual(f.evidence["requiredSpecies"], 3)
+
+    def test_full_coverage_produces_no_findings(self) -> None:
+        ctx = self._ctx(["alpha", "beta"], ["alpha", "beta", "gamma"])
+        self.assertEqual(cr.species_coverage_findings("m", ctx), [])
+
+    def test_it_is_scope_aggregate_blind_by_construction(self) -> None:
+        """The point of the metric: a fully-satisfied aggregate cell coexists with uncovered
+        species. The cell here has count == quota, yet 2 of 3 species are uncovered."""
+        ctx = self._ctx(["alpha", "beta", "gamma"], ["alpha"])
+        findings = cr.species_coverage_findings("m", ctx)
+        self.assertEqual(len(findings), 2, "the aggregate is satisfied; the species are not")
+
+    def test_required_universe_comes_from_the_quota_subjects(self) -> None:
+        """It must use exactly the planner's subjects, not a second roster read — a species the
+        quota was not recomputed for is not this metric's to require."""
+        ctx = self._ctx(["alpha", "beta"], [])
+        self.assertEqual({f.subject for f in cr.species_coverage_findings("m", ctx)},
+                         {"alpha", "beta"})
+
+    def test_deterministic(self) -> None:
+        ctx = self._ctx(["beta", "alpha"], [])
+        self.assertEqual(cr.species_coverage_findings("m", ctx),
+                         cr.species_coverage_findings("m", ctx))
+
+
+class SignatureCountIsRequiredNotDefaultedTests(unittest.TestCase):
+    """G4 (2026-09-12): `signature_actions_per_species` had a module-constant default of 3 (the
+    SEALED ideal's B1 number) while the shipped tuning sets `perSpeciesCount: 5`. The default was
+    dead — the one caller always passes the tuning value — but a wrong default that is never reached
+    is a second, contradictory source of truth. It is now a REQUIRED parameter."""
+
+    def test_no_module_constant_exists(self) -> None:
+        self.assertFalse(hasattr(cr, "SIGNATURE_ACTIONS_PER_SPECIES"),
+                         "the contradictory default constant must be gone")
+
+    def test_the_parameter_is_required(self) -> None:
+        import inspect
+        sig = inspect.signature(cr.roster_reconciliation_findings)
+        self.assertIs(inspect.Parameter.empty,
+                      sig.parameters["signature_actions_per_species"].default,
+                      "a default would let a future caller silently get the wrong count")
+
+    def test_the_metric_passes_the_live_tuning_count(self) -> None:
+        """The registered metric must read `cov.per_species_count`, never a literal."""
+        from seedsmith.metrics.action_coverage import RosterReconciliationMetric
+        import inspect
+        src = inspect.getsource(RosterReconciliationMetric.run)
+        self.assertIn("per_species_count", src)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 
 namespace FusionRpg.Core.Match.Ai;
 
@@ -31,7 +31,7 @@ public sealed record ZombossDeployDecision(bool Deploys, string? SpeciesId, stri
 /// "roll a chance, gated by a board-state condition" shape `LawnDeployEventEvaluator` already
 /// established for the player-side trigger, reused rather than inventing a second roll shape for the
 /// zombie side. Second, WHICH candidate wins is ranked by `BaseRarity` (descending) — the strongest
-/// available reinforcement — tie-broken by `SpeciesId` ordinal, matching `DemonRecipeCatalog`'s own
+/// available reinforcement — tie-broken by `SpeciesId` ordinal, matching `CreatureRecipeCatalog`'s own
 /// established tie-break convention for an otherwise-ambiguous species choice. This is deliberately the
 /// simplest scorer that satisfies Assumption 2 ("a deterministic scorer... not a learned model or a
 /// general rules engine") — a genuinely board-state-sensitive ranking (which candidate wins changes
@@ -43,7 +43,7 @@ public static class ZombossDeployPolicy
     public static ZombossDeployDecision Decide(
         ILawnBoardView board,
         IReadOnlyList<string> candidateSpeciesIds,
-        Func<string, DemonRarity> rarityOf,
+        Func<string, CreatureRarity> rarityOf,
         ZombossScorerTuning tuning,
         ulong matchSeed,
         string caseId)
@@ -55,7 +55,7 @@ public static class ZombossDeployPolicy
         if (string.IsNullOrEmpty(caseId)) throw new ArgumentException("caseId must be non-empty", nameof(caseId));
 
         if (candidateSpeciesIds.Count == 0)
-            return ZombossDeployDecision.Decline("no eligible demon in the candidate pool");
+            return ZombossDeployDecision.Decline("no eligible creature in the candidate pool");
 
         var ownCount = 0;
         var enemyCount = 0;

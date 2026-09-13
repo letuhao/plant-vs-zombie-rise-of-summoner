@@ -8,7 +8,7 @@ import { test, expect, type Page, type Route } from "@playwright/test";
  *   2. Viewport sweep (GG-36): every layer at the three declared widths, no horizontal scroll.
  *   3. axe scan (GG-21/GG-30): every layer, zero violations.
  *   4. Old routes: all redirect, none 404. `/world` is a real destination route like `/lawn` or
- *      `/demons`, not a redirect — it now reaches the world stage directly (world-stage routing
+ *      `/creatures`, not a redirect — it now reaches the world stage directly (world-stage routing
  *      work, 2026-09-05; the old `@xyflow/react`-based `WorldPage` it used to exempt is deleted).
  * This file is that check, not a per-task spec — it's Checkpoint F's own gate made durable.
  */
@@ -47,7 +47,7 @@ const relics = {
   ]
 };
 
-const boundDemon = {
+const boundCreature = {
   instanceId: "d1",
   bound: true,
   deployable: true,
@@ -81,17 +81,17 @@ async function mockEverythingUnlocked(page: Page) {
   );
   await page.route("**/api/contracts/**", (route) =>
     fulfillJson(route, {
-      contracts: [boundDemon],
+      contracts: [boundCreature],
       capacity: { used: 1, total: 4, purchasedSlots: 0, nextSlotPrice: 500, canBuy: true, maxSlots: 8 },
       dailyTribute: 5,
       deployFloor: 200,
       loyaltyMax: 1000
     })
   );
-  await page.route("**/api/demons/catalog", (route) => fulfillJson(route, { species: [] }));
-  await page.route("**/api/demons/*/codex", (route) => fulfillJson(route, { entries: [] }));
-  await page.route("**/api/demons/*/summon-state", (route) => fulfillJson(route, { pity: 0 }));
-  await page.route("**/api/demons/*", (route) =>
+  await page.route("**/api/creatures/catalog", (route) => fulfillJson(route, { species: [] }));
+  await page.route("**/api/creatures/*/codex", (route) => fulfillJson(route, { entries: [] }));
+  await page.route("**/api/creatures/*/summon-state", (route) => fulfillJson(route, { pity: 0 }));
+  await page.route("**/api/creatures/*", (route) =>
     fulfillJson(route, {
       playerId: 1,
       items: [

@@ -1,14 +1,14 @@
 """The structure anchor schema (base-defense `structure-schema`, module 23, spec-structure-schema.md).
 Seventeen design-variable fields (plus `structureId`/`family`/`reason` bookkeeping the ideal doc's
 own count did not include, and two DERIVED fields — the identical "N keys for M design variables"
-shape `adapters/demons/anchor/schema.py`'s own top comment already documents for the species anchor).
+shape `adapters/creatures/anchor/schema.py`'s own top comment already documents for the species anchor).
 **The anchor holds no numbers at all.**
 
-Ports `adapters/demons/anchor/schema.py`'s exact pattern (`_enum_prop`/`_flag_array_prop`/
+Ports `adapters/creatures/anchor/schema.py`'s exact pattern (`_enum_prop`/`_flag_array_prop`/
 `_open_array_prop` helpers, an OWNERSHIP dict, `additionalProperties: False`, `required` = every
-key) onto the structure anchor's own 17-field contract, with two additions the demon precedent never
+key) onto the structure anchor's own 17-field contract, with two additions the creature precedent never
 needed: a per-row `_provenance.source` (AUTHORED vs GENERATED — structures mix hand-authored and
-model-written rows in one corpus; demons never did) and `ROLE_TO_STRUCTURE_KIND`, the P3-6 mapping
+model-written rows in one corpus; creatures never did) and `ROLE_TO_STRUCTURE_KIND`, the P3-6 mapping
 from this module's own 10-role vocabulary to the shipped 3-value `StructureKind` C# enum.
 """
 from __future__ import annotations
@@ -19,11 +19,11 @@ from .descriptions import DESCRIPTIONS
 
 # Real, shipped vocabularies — never invented here. Sources:
 #   REQUIRED_SLOT_KIND  src/FusionRpg.Core/World/SlotTypeCatalog.cs:7-28 (SlotKind, 14 values)
-#   ELEMENT             src/FusionRpg.Core/Combat/Element/ElementTable.cs (same 6 as the demon anchor)
+#   ELEMENT             src/FusionRpg.Core/Combat/Element/ElementTable.cs (same 6 as the creature anchor)
 #   RARITY              docs/architecture/item/ssot-rarity.md SS3.3 (ten-rung ladder, shared)
 #   ACQUISITION_PATH    src/FusionRpg.Core/World/Siege/Obstacles.cs:48-61 (AcquisitionPath, 4 values)
-#   REACH               reused verbatim from adapters/demons/anchor/schema.py's own REACH tuple
-#   TEMPO               reused verbatim from adapters/demons/anchor/schema.py's own ATTACK_TEMPO tuple
+#   REACH               reused verbatim from adapters/creatures/anchor/schema.py's own REACH tuple
+#   TEMPO               reused verbatim from adapters/creatures/anchor/schema.py's own ATTACK_TEMPO tuple
 #
 # Vocabularies this module authors fresh, because no C# enum or shared doc owns them yet — each is a
 # defensible first pass per spec-structure-schema.md SS1's own table, not a guess presented as settled:
@@ -114,7 +114,7 @@ CLASSIFIED_FIELDS = frozenset(k for k, v in OWNERSHIP.items() if v in ("AUTHORED
 DERIVED_FIELDS = frozenset(k for k, v in OWNERSHIP.items() if v == "DERIVED")
 
 # No field is an allow-listed integer -- structures carry NO numeric identifier field at all (unlike
-# the demon anchor's `gameTypeId`), so this is deliberately empty rather than omitted, matching
+# the creature anchor's `gameTypeId`), so this is deliberately empty rather than omitted, matching
 # `audit.py`'s own expectation of an explicit (possibly-empty) allow-list.
 ALLOWLISTED_INTEGER_FIELDS: "frozenset[str]" = frozenset()
 

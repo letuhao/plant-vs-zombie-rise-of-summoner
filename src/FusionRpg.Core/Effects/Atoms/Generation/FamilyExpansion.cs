@@ -158,6 +158,22 @@ public static class FamilyExpansion
                 }
             }
 
+            // A bare `status.*` family stem is a catalog FAMILY TEMPLATE, not a concrete channel: the six
+            // status families all carry `expand: status-category`, so the registered vocabulary holds
+            // `status.resist.omni`/`.dot`/`.cc`/`.contagion`, never the bare `status.resist`. Emitting the
+            // stem produced a row AtomRowValidator refuses as an illegal channel (E29's closed
+            // vocabulary) — found live on `atom.ward-ward`, whose `Increased` op slipped past both the
+            // pool check (no `{variant}`) and the Flat-only reference-base check. Refuse it here by name,
+            // the same disposition `atom.stalwart`/`atom.immunity`/`atom.affliction` already get, rather
+            // than emit a row that cannot validate.
+            if (family.KindId == "stat.derived" && IsBareStatusFamilyStem(family.Channel))
+            {
+                refusals.Add(new FamilyRefusal(family.Id,
+                    $"channel '{family.Channel}' is a bare status family template (expand: status-category) — " +
+                    "the concrete segment must be authored (`status.<family>.<category>`)"));
+                continue;
+            }
+
             if (!TryReferenceBaseM1(family, sharePermille, flatReferenceBaseGameUnits, out var m1, out var refuseReason))
             {
                 refusals.Add(new FamilyRefusal(family.Id, refuseReason!));
@@ -241,6 +257,21 @@ public static class FamilyExpansion
 
     static string StemOf(string familyId) =>
         familyId.StartsWith("atom.", StringComparison.Ordinal) ? familyId["atom.".Length..] : familyId;
+
+    /// <summary>
+    /// True when <paramref name="channel"/> is a bare <c>status.&lt;family&gt;</c> stem with no concrete
+    /// category/id segment — the shape <c>derived-stat-catalog.v2.json</c> marks
+    /// <c>expand: status-category</c>, whose real vocabulary members always carry a third segment
+    /// (<c>status.resist.omni</c>). The three shipped families that author this shape
+    /// (<c>atom.stalwart</c>/<c>atom.immunity</c>/<c>atom.affliction</c>) are already refused earlier for
+    /// their own ops; this keeps any future bare-stem family from reaching the writer.
+    /// </summary>
+    static bool IsBareStatusFamilyStem(string channel)
+    {
+        if (!channel.StartsWith("status.", StringComparison.Ordinal) || channel.EndsWith('.')) return false;
+        var rest = channel["status.".Length..];
+        return !rest.Contains('.');
+    }
 
     /// <summary>
     /// <c>m1 = round_legible(sharePermille × referenceBase / 1000)</c> — <paramref name="referenceBase"/>

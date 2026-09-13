@@ -1,17 +1,17 @@
 # Spec: `budget-source`
 
 Module 2 in the [species-build capability map](../species-build-map.md). **No dependencies.** Must land
-before anything computes a `DemonType` budget, or that thing is built on an inverted ordering.
+before anything computes a `CreatureType` budget, or that thing is built on an inverted ordering.
 
 ## Objective
 
-Close audit finding **A1** ([species-build-ideal.md](../species-build-ideal.md) §11): the `DemonType`
+Close audit finding **A1** ([species-build-ideal.md](../species-build-ideal.md) §11): the `CreatureType`
 point budget's declared source is **almanac XP**, which is an *accumulation*, while the other three
 tiers read *indices*. `PointBudget.PointsFor` multiplies `sourceValue × rate` with **no unit
 conversion** — its own tuning doc says so explicitly: *"a shipped rate of `3` means exactly 3 points per
 source unit"* (`AptitudeTuning.cs:26-32`). The result inverts a locked decision:
 
-| Species level | Cumulative plant XP | DemonType budget (× 4) | Commander budget (Θ=20 × 3) | Ratio |
+| Species level | Cumulative plant XP | CreatureType budget (× 4) | Commander budget (Θ=20 × 3) | Ratio |
 |---|---|---|---|---|
 | 10 | 1,872 | 7,488 | 60 | 125× |
 | **12** | **2,640** | **10,560** | **60** | **176×** |
@@ -23,7 +23,7 @@ LARGEST"*, and it exists for a stated reason: a commander allocation replicates 
 so a dominant one is the worst case.
 
 **Owner decision 14: the source is SPECIES LEVEL.** Budget = `speciesLevel × 4`, which restores the
-ordering (`60 < 80 < 120` at L20), makes the tier exactly symmetric with `UniqueDemon` (which already
+ordering (`60 < 80 < 120` at L20), makes the tier exactly symmetric with `UniqueCreature` (which already
 reads "specimen level"), and matches the original framing better than XP did — *"they will earn bonus
 when specie level up"* means points arriving as a visible step, not trickling per placement.
 
@@ -35,7 +35,7 @@ corrections — **plus one arithmetic rule the spec-coverage audit made load-bea
 Added 2026-09-05 by the spec-coverage audit, and it is not a rounding preference.
 
 An unrecorded actor's progression defaults to **`Level = 1`** (`RpgStore.Progression.cs:280`). Under
-`demon-type-allocation`'s compose-at-read baseline, `level × rate` would give **every species in every
+`creature-type-allocation`'s compose-at-read baseline, `level × rate` would give **every species in every
 fixture a non-empty allocation** — including every battle and expedition golden, whose actors would
 silently gain a build nobody authored. `battle-allocation` (module 10) is where that would detonate.
 
@@ -52,7 +52,7 @@ before the multiply so nothing can go negative into a `checked` context.
 ## Design
 
 **Nothing about `PointBudget.PointsFor`'s signature changes.** It takes `sourceValue` and knows only
-the rate; that is correct and stays. What changes is the **declared contract** for what a `DemonType`
+the rate; that is correct and stays. What changes is the **declared contract** for what a `CreatureType`
 caller passes, and the test that is supposed to protect it.
 
 ### The test is the real deliverable
@@ -79,10 +79,10 @@ its own claim, and it stays green straight through a 176× inversion.
    the *budgets*. This is the test that would have caught A1, and the one that protects decision 14.
 
 ⛔ **The new test covers THREE scopes, not four, and says why.** `Aspect`'s source is `element_mastery`,
-which `PointBudget.cs:15` records **does not exist** — it is owned by the demon program's `aspect-scope`
+which `PointBudget.cs:15` records **does not exist** — it is owned by the creature program's `aspect-scope`
 module, which is reverted and not authorized to build. Feeding it an invented value would decide the very
 ordering the test claims to prove — the same defect (a fabricated source) this module exists to fix. So
-the test asserts `commander < demonType < uniqueDemon` over real sources, and carries a comment naming
+the test asserts `commander < creatureType < uniqueCreature` over real sources, and carries a comment naming
 `Aspect` as excluded **because its source does not exist yet**, to be added by whoever builds that tier.
 
 ### Citations that still say "almanac XP"
@@ -92,7 +92,7 @@ wrong source:
 
 | Where | Text to correct |
 |---|---|
-| `docs/architecture/class-system/spec-point-economy.md:37` | the §2 source table row for **demon type** |
+| `docs/architecture/class-system/spec-point-economy.md:37` | the §2 source table row for **creature type** |
 | `src/FusionRpg.Core/Stats/Aptitudes/PointBudget.cs:12-18` | the type's own doc comment listing the four sources |
 | `data/tuning/aptitudes.v5.json` | the `_scopeSourcesWhy` note |
 
@@ -125,7 +125,7 @@ docs/architecture/class-system/spec-point-economy.md         §2 source table ro
 tests/FusionRpg.Core.Tests/Stats/Aptitudes/PointBudgetTests.cs   one test split into two
 ```
 
-**No production code path changes**, because no `DemonType` caller exists yet — which is precisely why
+**No production code path changes**, because no `CreatureType` caller exists yet — which is precisely why
 this is cheap now and expensive later.
 
 ## Code style
@@ -140,9 +140,9 @@ this is cheap now and expensive later.
 ## Testing strategy
 
 1. **`Real_budgets_are_ordered_at_representative_sources`** — the new guard. Deliberately fails if the
-   `DemonType` source is documented back to an accumulation.
+   `CreatureType` source is documented back to an accumulation.
 2. **`Rates_are_ordered_...`** — the old test, renamed to its true claim, kept.
-3. **A regression test pinning the arithmetic**: `PointsFor(DemonType, level, tuning) == level × 4` at a
+3. **A regression test pinning the arithmetic**: `PointsFor(CreatureType, level, tuning) == level × 4` at a
    couple of levels, so a silent rate change is visible.
 4. **No-cap test unchanged** (`No_cap_on_an_aptitude`) — PS-8 still holds; a bigger source must produce
    a proportionally bigger budget, never a clamp.
@@ -159,7 +159,7 @@ this is cheap now and expensive later.
 
 ## Success criteria
 
-1. A test exists that fails if `DemonType`'s source is an accumulation, and passes with species level.
+1. A test exists that fails if `CreatureType`'s source is an accumulation, and passes with species level.
 2. All three "almanac XP" citations are corrected, each carrying the reason.
 3. `guard-power.ps1` green; the linear-index property is stated where a future reader will find it.
 4. Full Core suite green; **zero goldens re-blessed**.

@@ -25,7 +25,7 @@
       "id": "set.ultimateblover-001",
       "nameKey": "set.ultimate-clover",
       "name": "Ultimate Clover",
-      "themeKey": "demon.ultimateblover",
+      "themeKey": "creature.ultimateblover",
       "members": [
         {
           "role": "armament-primary",

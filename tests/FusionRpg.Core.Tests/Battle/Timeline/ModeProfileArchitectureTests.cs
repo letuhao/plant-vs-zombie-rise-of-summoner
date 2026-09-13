@@ -108,7 +108,7 @@ public class ModeProfileArchitectureTests
         }
         finally
         {
-            try { Directory.Delete(tmp, true); } catch { /* temp */ }
+            Directory.Delete(tmp, true);
         }
     }
 
@@ -126,7 +126,7 @@ public class ModeProfileArchitectureTests
         }
         finally
         {
-            try { Directory.Delete(tmp, true); } catch { /* temp */ }
+            Directory.Delete(tmp, true);
         }
     }
 
@@ -153,7 +153,7 @@ public class ModeProfileArchitectureTests
         }
         finally
         {
-            try { Directory.Delete(tmp, true); } catch { /* temp */ }
+            Directory.Delete(tmp, true);
         }
     }
 }

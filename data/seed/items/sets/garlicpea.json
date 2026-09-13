@@ -25,7 +25,7 @@
       "id": "set.garlicpea-001",
       "nameKey": "set.visceral-bile",
       "name": "Visceral Bile",
-      "themeKey": "demon.garlicpea",
+      "themeKey": "creature.garlicpea",
       "members": [
         {
           "role": "armament-primary",

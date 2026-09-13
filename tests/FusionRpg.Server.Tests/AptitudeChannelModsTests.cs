@@ -3,6 +3,7 @@ using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -14,20 +15,18 @@ namespace FusionRpg.Server.Tests;
 /// wire is load-bearing, not dead code that happens to compile).</summary>
 public class AptitudeChannelModsTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public AptitudeChannelModsTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-aptchanmods-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     [Fact]
@@ -91,22 +90,22 @@ public class AptitudeChannelModsTests : IDisposable
         // the module initializer already set and this test does not need to override).
         var tuningDir = Path.Combine(FindRepoRoot(), "data", "tuning");
         string Read(string name) => File.ReadAllText(Path.Combine(tuningDir, name));
-        FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
-            FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(Read("contracts.v1.json")));
+        FusionRpg.Core.Creatures.Contracts.ContractPolicy.Configure(
+            FusionRpg.Core.Creatures.Contracts.ContractTuningLoader.Parse(Read("contracts.v1.json")));
         FusionRpg.Core.World.Loam.LoamPolicy.Configure(
             FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v4.json")));
         FusionRpg.Core.World.WorldTuningHub.Configure(
             FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v5.json")));
-        FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
-            FusionRpg.Core.Demons.SoulEarnTuningLoader.Parse(Read("souls.v1.json")));
-        FusionRpg.Core.Demons.Patron.PatronPolicy.Configure(
-            FusionRpg.Core.Demons.Patron.PatronTuningLoader.Parse(Read("patron.v1.json")));
-        FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
-            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(Read("fusion.v2.json")));
+        FusionRpg.Core.Creatures.SoulEarnPolicy.Configure(
+            FusionRpg.Core.Creatures.SoulEarnTuningLoader.Parse(Read("souls.v1.json")));
+        FusionRpg.Core.Creatures.Patron.PatronPolicy.Configure(
+            FusionRpg.Core.Creatures.Patron.PatronTuningLoader.Parse(Read("patron.v1.json")));
+        FusionRpg.Core.Creatures.Fusion.StarPolicy.Configure(
+            FusionRpg.Core.Creatures.Fusion.FusionTuningLoader.Parse(Read("fusion.v2.json")));
         FusionRpg.Core.SimDefaults.Configure(
             FusionRpg.Core.SimTuningLoader.Parse(Read("sim.v1.json")));
-        FusionRpg.Core.Demons.SummoningTuningHub.Configure(
-            FusionRpg.Core.Demons.SummoningTuningLoader.Parse(Read("summoning.v1.json")));
+        FusionRpg.Core.Creatures.SummoningTuningHub.Configure(
+            FusionRpg.Core.Creatures.SummoningTuningLoader.Parse(Read("summoning.v1.json")));
         FusionRpg.Core.World.Ai.WorldAiPolicy.Configure(
             FusionRpg.Core.World.Ai.WorldAiTuningLoader.Parse(Read("ai.v2.json")));
         FusionRpg.Data.Policies.SealedCompactionPolicy.Configure(
@@ -138,7 +137,7 @@ public class AptitudeChannelModsTests : IDisposable
         var service = new WebMatchService(_store, hub);
 
         // No roster seeded -- BuildSquad's own documented SIM fallback ("an empty roster still gets a
-        // deterministic synthetic squad") fields this without needing a real summoned demon at all.
+        // deterministic synthetic squad") fields this without needing a real summoned creature at all.
         var (ok, reason, outcome) = await service.RunWebMatchAsync(
             playerId, correlationId: "aptsnap-test-1", waveId: "rift-skirmish", squadInstanceIds: null);
         Assert.True(ok, reason);

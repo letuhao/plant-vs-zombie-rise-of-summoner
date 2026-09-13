@@ -5,7 +5,7 @@
 [seedsmith-content-standard-ideal.md](../seedsmith-content-standard-ideal.md). Gated on nothing —
 first module to build.
 
-The shared engine every domain (`items`, `actions`, `demons`, `dungeon`, `passive-tree`) adopts once,
+The shared engine every domain (`items`, `actions`, `creatures`, `dungeon`, `passive-tree`) adopts once,
 instead of each reinventing its own ledger/metric/backfill shape.
 
 ---
@@ -26,7 +26,7 @@ Give every seedsmith domain the same answer to three questions, using one shared
 directly: a missing-content or stale-content gap is a gate nobody built yet, and building it once
 here is that lesson applied rather than re-learned five times. The audit backing this spec already
 found the five-times version happening: `stale_ids()`-shaped code exists independently in
-demons (×2, both live), dungeon, items, and structures (the latter three dead — zero production
+creatures (×2, both live), dungeon, items, and structures (the latter three dead — zero production
 callers) — proof the ad-hoc-per-domain shape doesn't converge on its own.
 
 ## 2. What already exists, and what this module builds on vs. replaces
@@ -132,7 +132,7 @@ registration call:
 ```python
 @dataclass(frozen=True)
 class CompletenessSpec:
-    domain: str                      # "items", "actions", "demons", "dungeon", "passive-tree"
+    domain: str                      # "items", "actions", "creatures", "dungeon", "passive-tree"
     kinds: frozenset[str]            # which entry kinds this applies to (may be all of a domain)
     field: str                       # which field counts as "missing" when falsy — domain's choice
     is_missing: "Callable[[Mapping], bool] | None" = None   # override the falsy-check if a domain's
@@ -168,7 +168,7 @@ trigger.
 `workflow/validators/language.py`'s `language_consistency` (line 26) only fires when the subject's
 own input `motifs` are CJK (line 32: `if not motifs or not any(_CJK.search(m) for m in motifs):
 return []`). The real, already-found dungeon defect
-(`data/seed/dungeon/events/event.bargain-demon.allpeater-001.json`'s `flavor` field) ran the other
+(`data/seed/dungeon/events/event.bargain-creature.allpeater-001.json`'s `flavor` field) ran the other
 direction: English motifs, a model output that unexpectedly contains CJK fragments anyway. Add the
 reverse check unconditionally — regardless of the subject's own motif language, flag any output
 field whose value mixes `_CJK` and `_LATIN_WORD` matches. The existing CJK-motif direction's own real
@@ -179,7 +179,7 @@ Registered into `content_completeness.py`'s own registry (§5) as a `Content/Lan
 metric (or as a defect the `ContentFieldMissing` predicate itself surfaces — Task 1's own worked
 example against real data decides which shape reads better; not pre-decided here) so every domain
 that adopts `core` gets the fixed, bidirectional check for free, rather than each domain importing
-`language_consistency` piecemeal the way demons/passive-tree do today.
+`language_consistency` piecemeal the way creatures/passive-tree do today.
 
 ## 7. Commands
 

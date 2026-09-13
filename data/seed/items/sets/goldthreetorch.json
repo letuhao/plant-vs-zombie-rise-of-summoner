@@ -25,7 +25,7 @@
       "id": "set.goldthreetorch-001",
       "nameKey": "set.three-line-torch",
       "name": "Three-Line Torch",
-      "themeKey": "demon.goldthreetorch",
+      "themeKey": "creature.goldthreetorch",
       "members": [
         {
           "role": "armament-primary",

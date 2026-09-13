@@ -25,7 +25,7 @@
       "id": "set.silvercorn-001",
       "nameKey": "set.golden-kernel-volley",
       "name": "Golden Kernel Volley",
-      "themeKey": "demon.silvercorn",
+      "themeKey": "creature.silvercorn",
       "members": [
         {
           "role": "armament-primary",

@@ -10,8 +10,8 @@
 
 ## Overview
 
-Ship one `aptitudes-console` (Modes A/B/C) so UniqueActor spends **UniqueDemon**, empire species
-build shares the same console under Pacts, Bound lawn uniques apply UniqueDemon, allocate chrome
+Ship one `aptitudes-console` (Modes A/B/C) so UniqueActor spends **UniqueCreature**, empire species
+build shares the same console under Pacts, Bound lawn uniques apply UniqueCreature, allocate chrome
 (leftover + Confirm/Cancel + auto-assign) is in-band, and aptitude **build presets** land with
 donut chart, dual abs/‰, favour seed, and transactional Activate — without Vision full synergy or
 Hub EffectiveUnique baseline.
@@ -32,9 +32,9 @@ list — the G-locks prevent buried Done gates; they do not replace the map chec
 
 | Id | Decision |
 |---|---|
-| D1 | UniqueDemon free-build; empty legal until spend |
+| D1 | UniqueCreature free-build; empty legal until spend |
 | D2 | Creature → Mode A; commander → Mode C |
-| D3 | Lawn Bound = commander + UniqueDemon |
+| D3 | Lawn Bound = commander + UniqueCreature |
 | E1/S3 | Confirm = draft path; Activate = `POST /api/aptitude-presets/activate` only |
 | E2 | D13 leftover after clamp is legal |
 | E3/S1/S7 | Favour = permille GET seed only; empty → refuse + offer Even |
@@ -61,10 +61,10 @@ preset-api (CRUD+favour+materialize+activate)
 
 ## Delivery phases (vertical)
 
-### Phase 0 — Truth + UniqueDemon write path (Wave 0)
+### Phase 0 — Truth + UniqueCreature write path (Wave 0)
 
 1. **stale-doc-amend** — D5 docs + queue P4 claim.
-2. **unique-allocate** — GET/POST UniqueDemon + FE hooks (D1).
+2. **unique-allocate** — GET/POST UniqueCreature + FE hooks (D1).
 3. **aptitudes-live-bus** — scoped SignalR + FE invalidate + `AptitudesState.species` (S10).
 4. **catalog-icons** + **posture-theme-packs** — parallel content/theme.
 
@@ -91,8 +91,8 @@ preset-api (CRUD+favour+materialize+activate)
 | After | Verify |
 |---|---|
 | Phase 0 | Unique GET/POST curl green; scoped AptitudesUpdated; D5 `rg` clean; icons+packs load |
-| Phase 1 | Bound unique Hot includes UniqueDemon after allocate+reload; leftover+decision in fold fixtures |
-| Phase 2 | Creature posts UniqueDemon; commander posts commander; Mode B respec without ConfirmDialog |
+| Phase 1 | Bound unique Hot includes UniqueCreature after allocate+reload; leftover+decision in fold fixtures |
+| Phase 2 | Creature posts UniqueCreature; commander posts commander; Mode B respec without ConfirmDialog |
 | Phase 3 | Activate txn; favour permille; donut; auto-assign draft-only; map success criteria |
 
 ## Risks

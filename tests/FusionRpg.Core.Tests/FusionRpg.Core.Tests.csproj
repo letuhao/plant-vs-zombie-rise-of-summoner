@@ -22,12 +22,28 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\FusionRpg.Core\FusionRpg.Core.csproj" />
-    <!-- demon-seed module 1 (spec-corpus-dump.md) puts CorpusDumpTests.cs here, and its fixture
+    <!-- creature-seed module 1 (spec-corpus-dump.md) puts CorpusDumpTests.cs here, and its fixture
          is a small in-memory RpgStore rather than the 520MB live database — so this test project
          needs the DAL and the tool's own writer/reader, same shape FusionRpg.Data.Tests already
          has for RpgStore, just scoped to this one module. -->
     <ProjectReference Include="..\..\src\FusionRpg.Data\FusionRpg.Data.csproj" />
-    <ProjectReference Include="..\..\tools\DemonCorpusDump\DemonCorpusDump.csproj" />
+    <ProjectReference Include="..\..\tools\CreatureCorpusDump\CreatureCorpusDump.csproj" />
+    <!-- Cold-process tool fixtures (2026-09-12). Nine test classes shell out to these tools with a
+         no-build Release invocation, but nothing ever built them: the tool bin folders are untracked
+         and the test project did not reference them, so CI (and any clean clone) either ran a stale
+         binary or found none. Two of them embed FusionRpg.Core, so a rename the source already
+         carried (demonType to creatureType) survived in the 9/4 Release output and made the Balance
+         tests throw `missing required key 'demonType'` — a binary-freshness defect, not a test bug.
+         Referencing each tool makes `dotnet test` build it in the same configuration, so the
+         no-build invocation finds a binary that matches the source. This mirrors the apphost
+         convention FusionRpg.AtomImporter.Tests established for the same reason. -->
+    <ProjectReference Include="..\..\tools\DominanceBaseline\DominanceBaseline.csproj" />
+    <ProjectReference Include="..\..\tools\ResidualFitLoop\ResidualFitLoop.csproj" />
+    <ProjectReference Include="..\..\tools\RealDataAggregate\RealDataAggregate.csproj" />
+    <ProjectReference Include="..\..\tools\CombatSim\CombatSim.csproj" />
+    <ProjectReference Include="..\..\tools\CreatureQualityReport\CreatureQualityReport.csproj" />
+    <ProjectReference Include="..\..\tools\ProveAptitude\ProveAptitude.csproj" />
+    <ProjectReference Include="..\..\tools\CreatureSpeciesGen\CreatureSpeciesGen.csproj" />
   </ItemGroup>
   <ItemGroup>
     <!-- These have no Unity/Harmony/BepInEx deps (pure Core types only) — compile for unit tests
@@ -38,6 +54,7 @@
     <Compile Include="..\..\src\FusionRpg.Injector\Stats\InjectorDerivedOverride.cs" Link="Injector\InjectorDerivedOverride.cs" />
     <Compile Include="..\..\src\FusionRpg.Injector\Hud\ActorHudCache.cs" Link="Injector\ActorHudCache.cs" />
     <Compile Include="..\..\src\FusionRpg.Injector\Hud\ActorHudUniqueFlags.cs" Link="Injector\ActorHudUniqueFlags.cs" />
+    <Compile Include="..\FusionRpg.Data.Tests\DataTestStore.cs" Link="TestSupport\DataTestStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\fixtures\effects\**\*" Link="fixtures\effects\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />

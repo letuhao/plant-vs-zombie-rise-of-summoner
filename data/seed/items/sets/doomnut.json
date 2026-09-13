@@ -25,7 +25,7 @@
       "id": "set.doomnut-001",
       "nameKey": "set.nuclear-nut",
       "name": "Nuclear Nut",
-      "themeKey": "demon.doomnut",
+      "themeKey": "creature.doomnut",
       "members": [
         {
           "role": "core-guard",

@@ -3,7 +3,7 @@ using FusionRpg.Core.Actions.Eligibility;
 using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Actions.Unlock;
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Items;
 using FusionRpg.Core.Items.Grants;
@@ -12,6 +12,7 @@ using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -27,7 +28,7 @@ namespace FusionRpg.Server.Tests;
 /// </summary>
 public class RolledItemEquipRuntimeTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly WebMatchService _service;
 
@@ -35,7 +36,7 @@ public class RolledItemEquipRuntimeTests : IDisposable
     {
         UnlockTuningPolicy.Configure(new UnlockTuning(
             P1Milli: 1000, DeltaMilli: 1000, FloorMilli: 1000, HeldCap: 10, RungCap: 10, DiscardTaxCoeffMilli: 100));
-        ActionFamilyMapPolicy.Configure(new Dictionary<string, string>());
+        ActionFamilyMapPolicy.Configure(new Dictionary<string, IReadOnlyList<string>>());
     }
 
     public RolledItemEquipRuntimeTests()
@@ -49,11 +50,11 @@ public class RolledItemEquipRuntimeTests : IDisposable
         var tuningDir = Path.Combine(FindRepoRoot(), "data", "tuning");
         string Read(string name) => File.ReadAllText(Path.Combine(tuningDir, name));
         SummoningTuningHub.Configure(SummoningTuningLoader.Parse(Read("summoning.v1.json")));
-        FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
-            FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(Read("contracts.v1.json")));
+        FusionRpg.Core.Creatures.Contracts.ContractPolicy.Configure(
+            FusionRpg.Core.Creatures.Contracts.ContractTuningLoader.Parse(Read("contracts.v1.json")));
         SoulEarnPolicy.Configure(SoulEarnTuningLoader.Parse(Read("souls.v1.json")));
-        FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
-            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(Read("fusion.v2.json")));
+        FusionRpg.Core.Creatures.Fusion.StarPolicy.Configure(
+            FusionRpg.Core.Creatures.Fusion.FusionTuningLoader.Parse(Read("fusion.v2.json")));
         FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(Read("progression.v1.json")));
         FusionRpg.Core.Battle.BattleTuningHub.Configure(
@@ -65,10 +66,8 @@ public class RolledItemEquipRuntimeTests : IDisposable
         FusionRpg.Core.Stats.Derived.StatsTuningHub.Configure(
             FusionRpg.Core.Stats.Derived.StatsTuningLoader.Parse(Read("stats.v1.json")));
 
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-rolled-equip-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         var services = new ServiceCollection();
         services.AddLogging();
@@ -91,7 +90,7 @@ public class RolledItemEquipRuntimeTests : IDisposable
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     static readonly PowerTuning Tuning = PowerTuning.Build(

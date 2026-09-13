@@ -25,7 +25,7 @@
       "id": "set.scaredynut-001",
       "nameKey": "set.nutcracker-s-defiance",
       "name": "Nutcracker's Defiance",
-      "themeKey": "demon.scaredynut",
+      "themeKey": "creature.scaredynut",
       "members": [
         {
           "role": "armament-primary",

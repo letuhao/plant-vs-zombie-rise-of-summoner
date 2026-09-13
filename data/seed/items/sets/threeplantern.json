@@ -25,7 +25,7 @@
       "id": "set.threeplantern-001",
       "nameKey": "set.triple-line-beam",
       "name": "Triple-Line Beam",
-      "themeKey": "demon.threeplantern",
+      "themeKey": "creature.threeplantern",
       "members": [
         {
           "role": "armament-primary",

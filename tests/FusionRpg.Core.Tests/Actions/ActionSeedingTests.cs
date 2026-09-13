@@ -17,7 +17,7 @@ namespace FusionRpg.Core.Tests.Actions;
 /// determinism/group-exclusion survive being wrapped.
 ///
 /// <para><b>Scope, decided by reading the todo's own acceptance line rather than the full spec's wider
-/// design ambition:</b> per-demon-type category/element weight vectors (§3) and enabler/payoff pairing
+/// design ambition:</b> per-creature-type category/element weight vectors (§3) and enabler/payoff pairing
 /// (§5, T32's own separate item) are NOT built here — T31's acceptance line names determinism, share
 /// rejection, group exclusion, and the area/board gate, and that is what this file proves.</para>
 /// </summary>

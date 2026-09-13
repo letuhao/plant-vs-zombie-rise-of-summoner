@@ -7,22 +7,20 @@ namespace FusionRpg.Data.Tests;
 
 public class UniqueActorStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly long _playerId;
 
     public UniqueActorStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-unique-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _playerId = _store.GetCurrentPlayerId();
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     [Fact]
@@ -675,7 +673,7 @@ public class UniqueActorStoreTests : IDisposable
         });
 
         var fact = _store.ListPvzActivityFacts(_playerId)!.Items.First(x => x.Kind == "ZombieSpawned");
-        Assert.Equal("demon.progression.v1", fact.SourceKind);
+        Assert.Equal("creature.progression.v1", fact.SourceKind);
         Assert.Equal($"unique:{actor.InstanceId}:corr-7", fact.SourceId);
     }
 
@@ -699,7 +697,7 @@ public class UniqueActorStoreTests : IDisposable
         });
 
         var fact = _store.ListPvzActivityFacts(_playerId)!.Items.First(x => x.Kind == "ZombieSpawned");
-        Assert.NotEqual("demon.progression.v1", fact.SourceKind);
+        Assert.NotEqual("creature.progression.v1", fact.SourceKind);
         Assert.Null(_store.GetRpgActor(_playerId, RpgActorKinds.Species, 10003));
     }
 }

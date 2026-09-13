@@ -432,12 +432,18 @@
       "id": "atom.ward-flux",
       "nameKey": "affix.ward-flux",
       "name": "ward-flux",
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
       "kindId": "stat.derived",
       "params": {
         "channel": "status.resist",
         "op": "Replace"
       },
       "roles": [
+        "core-guard",
         "ward-array"
       ],
       "powerBand": "medium",
@@ -451,12 +457,21 @@
       "id": "atom.ward-link",
       "nameKey": "affix.ward-link",
       "name": "ward-link",
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
       "kindId": "stat.derived",
       "params": {
         "channel": "combat.defense.{variant}",
         "op": "Replace"
       },
+      "variants": {
+        "generate": "elements+omni"
+      },
       "roles": [
+        "core-guard",
         "ward-array"
       ],
       "powerBand": "medium",
@@ -470,6 +485,11 @@
       "id": "atom.ward-ward",
       "nameKey": "affix.ward-of-the-unyielding",
       "name": "Ward of the Unyielding",
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
       "kindId": "stat.derived",
       "params": {
         "channel": "status.resist",

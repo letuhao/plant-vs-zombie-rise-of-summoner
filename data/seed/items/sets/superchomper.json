@@ -25,7 +25,7 @@
       "id": "set.superchomper-001",
       "nameKey": "set.tiny-war-god",
       "name": "Tiny War God",
-      "themeKey": "demon.superchomper",
+      "themeKey": "creature.superchomper",
       "members": [
         {
           "role": "armament-primary",

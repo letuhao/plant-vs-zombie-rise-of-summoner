@@ -30,7 +30,7 @@ def test_motif_coverage_accepts_output_using_one_motif():
 
 
 def test_motif_coverage_is_silent_when_the_subject_has_no_motifs():
-    """A blocked demon has nothing to cover — that is an answer, not a defect."""
+    """A blocked creature has nothing to cover — that is an answer, not a defect."""
     assert motif_coverage({"doctrine": "anything"}, {"motifs": []}) == []
 
 
@@ -139,14 +139,14 @@ def test_name_collision_does_not_fire_on_an_empty_draft_name():
 
 
 def test_name_collision_is_registered_as_a_commander_effect_validator():
-    from seedsmith.adapters.demons.commander_effect import VALIDATORS
+    from seedsmith.adapters.creatures.commander_effect import VALIDATORS
 
     assert "name_collision" in [v.__name__ for v in VALIDATORS]
 
 
 def test_every_committed_commander_effect_name_is_distinct():
     """⛔ Corpus-level regression. `SemanticDedup/NearDuplicate` reported 6 GAPs after
-    `subject_name_echo` cut same-as-own-demon names from 83 to 6 — all sibling pairs
+    `subject_name_echo` cut same-as-own-creature names from 83 to 6 — all sibling pairs
     (`doublecherry`/`doubleshooter`, `dollgold`/`dollsilver`, `pot`/`pumpkin`,
     `starfruit`/`starpea`, `jalapeno`/`jalastar`, `chomper`/`nutchomper`). Siblings share motifs, so
     the model converged on one name for both, and no per-draft validator could see it.
@@ -157,7 +157,7 @@ def test_every_committed_commander_effect_name_is_distinct():
     from collections import Counter
     from pathlib import Path
 
-    root = Path(__file__).resolve().parents[3] / "data" / "seed" / "demons"
+    root = Path(__file__).resolve().parents[3] / "data" / "seed" / "creatures"
     entries = json.loads(
         (root / "commander-effect" / "all.json").read_text(encoding="utf-8"))["entries"]
     dupes = {n: c for n, c in Counter(e["name"] for e in entries).items() if c > 1}

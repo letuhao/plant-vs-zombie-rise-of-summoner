@@ -25,7 +25,7 @@
       "id": "set.threecabbage-001",
       "nameKey": "set.triple-row-cabbage-launcher",
       "name": "Triple-Row Cabbage Launcher",
-      "themeKey": "demon.threecabbage",
+      "themeKey": "creature.threecabbage",
       "members": [
         {
           "role": "armament-primary",

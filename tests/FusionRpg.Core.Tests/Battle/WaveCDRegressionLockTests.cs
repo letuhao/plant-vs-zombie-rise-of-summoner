@@ -121,7 +121,7 @@ public class WaveCDRegressionLockTests
             {
                 Assert.NotEmpty(join.TraitIds);
                 Assert.All(join.TraitIds, t => Assert.True(
-                    FusionRpg.Core.Demons.DemonTraitCatalog.IsKnown(t)));
+                    FusionRpg.Core.Creatures.CreatureTraitCatalog.IsKnown(t)));
             }
             if (r.Rewards.WildJoins.Count > 0) return;
         }

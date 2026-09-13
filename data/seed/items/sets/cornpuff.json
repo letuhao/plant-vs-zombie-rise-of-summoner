@@ -23,9 +23,9 @@
   "entries": [
     {
       "id": "set.cornpuff-001",
-      "nameKey": "set.spore-launcher-base",
-      "name": "Spore Launcher Base",
-      "themeKey": "demon.cornpuff",
+      "nameKey": "set.fungal-cannon",
+      "name": "Fungal Cannon",
+      "themeKey": "creature.cornpuff",
       "members": [
         {
           "role": "armament-primary",

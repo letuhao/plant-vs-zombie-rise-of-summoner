@@ -25,7 +25,7 @@
       "id": "set.ultimatestar-001",
       "nameKey": "set.starfruit-emperor-s-decree",
       "name": "Starfruit Emperor's Decree",
-      "themeKey": "demon.ultimatestar",
+      "themeKey": "creature.ultimatestar",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.tower-cherrychomper-001",
       "nameKey": "set.cherry-maw-bombard",
       "name": "Cherry Maw Bombard",
-      "themeKey": "demon.tower_cherrychomper",
+      "themeKey": "creature.tower_cherrychomper",
       "members": [
         {
           "role": "armament-primary",

@@ -82,19 +82,19 @@ describe("ActorListPickerPanel", () => {
     expect(screen.getByTestId("scope-target-empty")).toBeInTheDocument();
   });
 
-  it("emits a uniqueDemon-kind value with the candidate's instanceId", async () => {
+  it("emits a uniqueCreature-kind value with the candidate's instanceId", async () => {
     const onChange = vi.fn();
     const user = userEvent.setup();
     render(
       <ActorListPickerPanel
-        kind="uniqueDemon"
+        kind="uniqueCreature"
         candidates={[readyActor("d1", "Ashkell")]}
         value={null}
         onChange={onChange}
       />
     );
-    await user.click(screen.getByTestId("scope-uniqueDemon-collection-item-d1"));
-    expect(onChange).toHaveBeenCalledWith({ kind: "uniqueDemon", instanceId: "d1" });
+    await user.click(screen.getByTestId("scope-uniqueCreature-collection-item-d1"));
+    expect(onChange).toHaveBeenCalledWith({ kind: "uniqueCreature", instanceId: "d1" });
   });
 
   it("marks the currently selected candidate as selected", () => {

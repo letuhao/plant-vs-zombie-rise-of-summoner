@@ -87,14 +87,23 @@ public class WebMatchInteractiveSweepTests
     public void A_row_with_an_unrecognised_profile_id_is_refused_rather_than_crashing_the_sweep()
     {
         var bad = Unresolved("garbage-profile", profileId: "not-a-real-profile");
-        var good = Unresolved("after-garbage", profileId: null);
+        // A SECOND unrecognised-profile row, created AFTER the first. If the sweep threw out of `bad`
+        // instead of refusing it and continuing, this row would never be reached and would stay
+        // unrefused — so its refusal is what proves the loop continued past the bad row.
+        //
+        // This replaces an earlier claim that a following row was "actually HEALED": that row was
+        // created with `setupJson: "{}"`, and an empty squad can never heal — `ResolveAndIngest`
+        // throws "Squad is empty." and `SweepUnresolved`'s catch logs but marks nothing, so such a row
+        // is neither refused nor healed and could not discriminate a continued loop from an aborted
+        // one (which is why the assertion failed). A second *refusal* proves the same property with a
+        // shape production actually produces. (Production never logs an empty-squad row either:
+        // `BuildSquad` always falls back to a deterministic synthetic squad.)
+        var alsoBad = Unresolved("after-garbage", profileId: "also-not-a-real-profile");
 
-        _matches.SweepUnresolved(); // must not throw and abort before reaching `good`
+        _matches.SweepUnresolved(); // must not throw and abort before reaching the later row
 
         Assert.NotNull(RefusalFor(bad.Corr));
-        Assert.Null(RefusalFor(good.Corr));
-        // Not merely "unrefused" (which a sweep that aborted early would also show) — actually HEALED,
-        // proving the loop really did continue past the bad row rather than throwing out of it.
-        Assert.DoesNotContain(_store.ListUnresolvedWebMatches(500), e => e.Id == good.Id);
+        Assert.NotNull(RefusalFor(alsoBad.Corr));
+        Assert.DoesNotContain(_store.ListUnresolvedWebMatches(500), e => e.Id == alsoBad.Id); // terminal
     }
 }

@@ -25,7 +25,7 @@
       "id": "set.ultimatechomper-001",
       "nameKey": "set.cherry-war-god",
       "name": "Cherry War God",
-      "themeKey": "demon.ultimatechomper",
+      "themeKey": "creature.ultimatechomper",
       "members": [
         {
           "role": "armament-primary",

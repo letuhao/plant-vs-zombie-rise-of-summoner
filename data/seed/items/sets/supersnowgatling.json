@@ -25,7 +25,7 @@
       "id": "set.supersnowgatling-001",
       "nameKey": "set.frost-pea-gatling",
       "name": "Frost Pea Gatling",
-      "themeKey": "demon.supersnowgatling",
+      "themeKey": "creature.supersnowgatling",
       "members": [
         {
           "role": "armament-primary",

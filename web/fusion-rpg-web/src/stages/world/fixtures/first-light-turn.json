@@ -1,13 +1,18 @@
 [
   {
     "turn": 0,
-    "stateHash": "14c4458de618e91a3c8b64bf962b2542a03f5cdd211864b76c9a1ba4d6552a8c",
+    "stateHash": "567e0767cb8eac7e56187eb59ac9e078bbf2363df263f6ccb6286667ba5a7582",
     "phases": [
       "Reveal",
       "Movement",
       "Sieges",
+      "Assaults",
       "Production",
-      "Pressure"
+      "Growth",
+      "Pressure",
+      "Events",
+      "Snapshot",
+      "Intel"
     ],
     "entries": [
       {
@@ -60,12 +65,18 @@
   },
   {
     "turn": 1,
-    "stateHash": "e01d212489c42c750c44ce586a038f465eb9da818fdc03dc33c640ed921a6097",
+    "stateHash": "af2f8a4596c302a4dd7697ad6a9f7ca6e78bfbfdb88dc6fd34eb2c4dae6d7c45",
     "phases": [
       "Reveal",
+      "Movement",
       "Sieges",
+      "Assaults",
       "Production",
-      "Pressure"
+      "Growth",
+      "Pressure",
+      "Events",
+      "Snapshot",
+      "Intel"
     ],
     "entries": [
       {
@@ -111,13 +122,18 @@
   },
   {
     "turn": 2,
-    "stateHash": "f3f5c1fd6f68e1159811161cc7c8f4047e1de801d1fdf961b158f6fd30def32f",
+    "stateHash": "160ab056690af58fe223e582610c5e7c6c276e555a2c0979996b88711c9b3a48",
     "phases": [
       "Reveal",
+      "Movement",
       "Sieges",
+      "Assaults",
       "Production",
+      "Growth",
       "Pressure",
-      "Snapshot"
+      "Events",
+      "Snapshot",
+      "Intel"
     ],
     "entries": [
       {
@@ -177,11 +193,16 @@
   },
   {
     "turn": 3,
-    "stateHash": "34f7790c325ba1f759ac0ef21f26e73bb914f641004f804b53a6a23392b4ae56",
+    "stateHash": "adf7f20e121d4e9d944eb135fea0bcfa71033dbda92e127f27a3931584f1e3ec",
     "phases": [
       "Reveal",
+      "Movement",
+      "Sieges",
+      "Assaults",
       "Production",
+      "Growth",
       "Pressure",
+      "Events",
       "Snapshot",
       "Intel"
     ],
@@ -228,12 +249,17 @@
   },
   {
     "turn": 4,
-    "stateHash": "e0bd4f468e58fd5af81faabddf7e2f6745894a3bd5dffe96405597ba86b5040a",
+    "stateHash": "fff4e89246f8c8d4caf3b317e3f49c8e509c22fcd36416cfbbeb6596296cf590",
     "phases": [
       "Reveal",
       "Movement",
+      "Sieges",
+      "Assaults",
       "Production",
+      "Growth",
       "Pressure",
+      "Events",
+      "Snapshot",
       "Intel"
     ],
     "entries": [
@@ -271,13 +297,6 @@
         "kind": "event",
         "subject": "homeworld",
         "detail": "loam.overflow:50"
-      },
-      {
-        "sectorId": "ash-waste",
-        "phase": "Pressure",
-        "kind": "event",
-        "subject": "e-dave-legion-1",
-        "detail": "legion.burn:30"
       }
     ],
     "commands": [
@@ -293,20 +312,20 @@
   },
   {
     "turn": 5,
-    "stateHash": "666fe0ff798a52783705bdbb7f91e73d173f23ad83340d6d7169bccd8f13f9df",
+    "stateHash": "012d657ebc7fb259a497127672d6393a5528065bdbb9767dc660f610702582c8",
     "phases": [
       "Reveal",
       "Movement",
-      "Production"
+      "Sieges",
+      "Assaults",
+      "Production",
+      "Growth",
+      "Pressure",
+      "Events",
+      "Snapshot",
+      "Intel"
     ],
     "entries": [
-      {
-        "sectorId": "ash-waste",
-        "phase": "Movement",
-        "kind": "battle",
-        "subject": "t6:sector:ash-waste:e-dave-legion-1|e-wild-pack-1",
-        "detail": "sector:ash-waste:e-wild-pack-1"
-      },
       {
         "sectorId": "homeworld",
         "phase": "Production",

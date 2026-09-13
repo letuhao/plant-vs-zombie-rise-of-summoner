@@ -1,14 +1,14 @@
 """seedsmith.metrics.corpus_coverage — CorpusCoverage/DumpCompleteness,
-CorpusCoverage/BasisHistogram (spec-corpus-dump.md, spec-power-parse.md; demon-seed `seed-to-
+CorpusCoverage/BasisHistogram (spec-corpus-dump.md, spec-power-parse.md; creature-seed `seed-to-
 concrete` T1.10).
 
-Both metrics need `ctx.demon_dump` (a `DemonDumpCtx`, T1.10's own loader) rather than
-`ctx.corpus`/`ctx.adapter` — the demon dump is a pre-corpus artifact (JSON captured straight from
+Both metrics need `ctx.creature_dump` (a `CreatureDumpCtx`, T1.10's own loader) rather than
+`ctx.corpus`/`ctx.adapter` — the creature dump is a pre-corpus artifact (JSON captured straight from
 the DAL, not seedsmith content entries), so it gets its own `Ctx` slot rather than being forced
 through the generic `Corpus.load()` shape it was never structured to fit.
 
 **Every target here is declared in tuning, never a literal in this file (P2).** A metric without a
-target is an opinion; `data/tuning/demon-corpus-targets.v1.json` is the balance surface these two
+target is an opinion; `data/tuning/creature-corpus-targets.v1.json` is the balance surface these two
 metrics read from.
 """
 from __future__ import annotations
@@ -22,12 +22,12 @@ TUNING_DIR = Path(__file__).resolve().parents[4] / "data" / "tuning"
 
 
 def _load_targets(version: "int | str" = 1) -> dict:
-    path = TUNING_DIR / f"demon-corpus-targets.v{int(version)}.json"
+    path = TUNING_DIR / f"creature-corpus-targets.v{int(version)}.json"
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 class DumpCompletenessMetric(Metric):
-    """CLOSED — a mismatch is fixed by re-running `DemonCorpusDump`, mechanically verifiable
+    """CLOSED — a mismatch is fixed by re-running `CreatureCorpusDump`, mechanically verifiable
     (spec-corpus-dump.md's own `--check`/`--verify`). Registers as a metric, distinct from
     `dump-preflight`'s check 3: preflight answers "can a run start right now", this answers "is
     the committed dump's own health tracked over time, with a target and a gate".
@@ -37,14 +37,14 @@ class DumpCompletenessMetric(Metric):
     family = "CorpusCoverage"
     loop = Loop.CLOSED
     gates = False   # W1 discipline: every metric starts measure-only; promoted later (spec-metrics.md §4)
-    needs = frozenset({"demon_dump"})
+    needs = frozenset({"creature_dump"})
     covers: "tuple[str, ...]" = ()
 
     def run(self, ctx: Ctx) -> "list[Finding]":
         targets = _load_targets()
         max_mismatches = targets["dumpCompleteness"]["maxCountMismatches"]
 
-        dump = ctx.demon_dump
+        dump = ctx.creature_dump
         manifest = dump.manifest
         by_side = {"plant": 0, "zombie": 0}
         for seed in dump.seeds:
@@ -65,7 +65,7 @@ class DumpCompletenessMetric(Metric):
                 message=f"manifest declares {key}={declared}, dump actually has {actual}",
                 evidence={"declared": declared, "actual": actual, "targetMaxMismatches": max_mismatches},
                 assertion=f"{key} in the manifest equals the actual row count",
-                remedy="re-run DemonCorpusDump and commit the result",
+                remedy="re-run CreatureCorpusDump and commit the result",
             )
             for key, declared, actual in mismatches
         ]
@@ -81,7 +81,7 @@ class BasisHistogramMetric(Metric):
     family = "CorpusCoverage"
     loop = Loop.OPEN
     gates = False
-    needs = frozenset({"demon_dump"})
+    needs = frozenset({"creature_dump"})
     covers: "tuple[str, ...]" = ()
 
     def run(self, ctx: Ctx) -> "list[Finding]":
@@ -89,12 +89,12 @@ class BasisHistogramMetric(Metric):
         min_observed_or_stated_permille = targets["minObservedOrStatedSharePermille"]
         max_blocked_permille = targets["maxBlockedSharePermille"]
 
-        dump = ctx.demon_dump
+        dump = ctx.creature_dump
         total = dump.total
         if total == 0:
             return [Finding(
                 metric=self.id, severity=Severity.NOT_MEASURED, subject="(suite)",
-                message="demon dump has zero species — nothing to classify",
+                message="creature dump has zero species — nothing to classify",
                 evidence={})]
 
         counts = {"observed": 0, "stated": 0, "inferred": 0, "blocked": 0}

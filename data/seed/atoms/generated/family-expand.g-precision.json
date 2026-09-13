@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "kind": "atom",
+  "entries": [
+    {
+      "family": "atom.prec-focus",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Focused Aim T1",
+      "params": {
+        "channel": {
+          "pool": "pool.element-accuracy",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 23,
+          "max": 47,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-precision.json",
+        "generator": "E43",
+        "mechanical": "1",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.prec-focus",
+      "tier": 2,
+      "kind": "stat.derived",
+      "name": "Focused Aim T2",
+      "params": {
+        "channel": {
+          "pool": "pool.element-accuracy",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 41,
+          "max": 81,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-precision.json",
+        "generator": "E43",
+        "mechanical": "1",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.prec-focus",
+      "tier": 3,
+      "kind": "stat.derived",
+      "name": "Focused Aim T3",
+      "params": {
+        "channel": {
+          "pool": "pool.element-accuracy",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 72,
+          "max": 142,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-precision.json",
+        "generator": "E43",
+        "mechanical": "1",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.prec-focus",
+      "tier": 4,
+      "kind": "stat.derived",
+      "name": "Focused Aim T4",
+      "params": {
+        "channel": {
+          "pool": "pool.element-accuracy",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 125,
+          "max": 249,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-precision.json",
+        "generator": "E43",
+        "mechanical": "1",
+        "offensive": "1"
+      }
+    },
+    {
+      "family": "atom.prec-focus",
+      "tier": 5,
+      "kind": "stat.derived",
+      "name": "Focused Aim T5",
+      "params": {
+        "channel": {
+          "pool": "pool.element-accuracy",
+          "count": 1,
+          "allowRepeat": false
+        },
+        "op": "increased",
+        "amount": {
+          "min": 219,
+          "max": 435,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-precision.json",
+        "generator": "E43",
+        "mechanical": "1",
+        "offensive": "1"
+      }
+    }
+  ]
+}

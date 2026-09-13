@@ -40,7 +40,7 @@ reachability from Battle, and roughly thirty cited line numbers across `BattleMo
 | S11 | The stage-3 generator | ⛔ **CONFLICT** | `tools/PassiveTreeGen` (catalog, review, species) vs `tools/TreeBinder` (binder) for the same C# program |
 | S12 | The node's effect field | ⛔ **CONFLICT** | `NodeRecord.affixId` is one string; the plan and the language stage both emit `affixIds[]`, 1..3 |
 | S13 | Validation-gate list | ⛔ **CONFLICT** | `tree-language` owns a 24-gate list; `tree-review` and `species-tree` both cite "the 29 gates" with numbers from research doc 03 that no longer resolve |
-| S14 | Tree category vocabulary | ⛔ **CONFLICT** | 4 values (`aptitude\|element\|status\|demonFamily`) vs 5 (`Primary, Elemental, Status, Family, Species`), with different tokens for the same category |
+| S14 | Tree category vocabulary | ⛔ **CONFLICT** | 4 values (`aptitude\|element\|status\|creatureFamily`) vs 5 (`Primary, Elemental, Status, Family, Species`), with different tokens for the same category |
 | S15 | `PowerLadderKMicro` — who owns it, and how bad is it | ⛔ **CONFLICT** | Three specs name three different owners; two carry the superseded 17% figure; and the real worst case is worse than either (C9) |
 | S16 | Reflect in Battle | ⛔ **CONFLICT** | `tree-binder` prices its reflect example as Battle-executable; `squad-harness` says it is lawn-only. Code says `squad-harness` is right |
 | S17 | The potency ceiling's denominator | ⛔ **CONFLICT** | The plan emits per-node shares in ‰ of *one branch* and the ceiling in ‰ of *the whole tree*; the catalog's load check compares a `kMicro` against "the plan's `nodePotencyCeiling`", which is neither |
@@ -477,7 +477,7 @@ the whole point of that spec's framing.
 ## 11. C11 — the corpus counts (S6, S8)
 
 Five specs count the same corpus and three answers are in circulation. **The verified numbers, counted
-in `data/` this session:** `data/seed/demons/species/_index.json` holds **840** keys; there are **502**
+in `data/` this session:** `data/seed/creatures/species/_index.json` holds **840** keys; there are **502**
 non-`_` species files plus `_index.json` and `_needs-review.json`.
 
 | Quantity | Verified | `tree-review` | `species-tree` | map | `tree-catalog` | `tree-state` | `tree-surface` |
@@ -491,7 +491,7 @@ non-`_` species files plus `_index.json` and `_needs-review.json`.
 
 `tree-review` §1.1 states the correction that the other two missed:
 
-> **FACT, counted 2026-09-05.** `data/seed/demons/species/` holds **840** anchor entries across **502**
+> **FACT, counted 2026-09-05.** `data/seed/creatures/species/` holds **840** anchor entries across **502**
 > non-`_` files … Species tree size is 40, not 29: D30 as amended defers to D10's one-shape rule and
 > D29's 10 tiers × 2 branches.
 
@@ -543,11 +543,11 @@ survives the next time the list changes. Drop "29" from both.
 ## 13. C13, C14 — two vocabulary mismatches
 
 **C13 — the tree category.** `tree-plan`'s per-tree schema: `category | enum(4) | aptitude | element |
-status | demonFamily`. `tree-catalog`'s `TreeRecord`: `category | enum { Primary, Elemental, Status,
+status | creatureFamily`. `tree-catalog`'s `TreeRecord`: `category | enum { Primary, Elemental, Status,
 Family, Species }` — five values, and three of them are different tokens for the plan's four.
 `tree-review` §3.2's stratum axis agrees with the catalog: *"Tree category | 5 (primary / elemental /
 status / family / species)"*. The plan's set is defensible — it emits no species trees, `species-tree`
-does — but `aptitude` vs `primary` and `demonFamily` vs `family` are a straight rename that will
+does — but `aptitude` vs `primary` and `creatureFamily` vs `family` are a straight rename that will
 surface as a failed enum check at import.
 
 **Recommendation.** The catalog's five, with the plan emitting only the first four.

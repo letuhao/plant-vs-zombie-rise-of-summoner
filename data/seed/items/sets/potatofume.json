@@ -25,7 +25,7 @@
       "id": "set.potatofume-001",
       "nameKey": "set.spore-burst-zombie",
       "name": "Spore Burst Zombie",
-      "themeKey": "demon.potatofume",
+      "themeKey": "creature.potatofume",
       "members": [
         {
           "role": "armament-primary",

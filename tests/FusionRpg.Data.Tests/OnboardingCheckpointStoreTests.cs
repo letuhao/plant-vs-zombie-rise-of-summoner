@@ -1,6 +1,6 @@
 using FusionRpg.Data;
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Progression;
 using FusionRpg.Core.Effects.Atoms;
 using Xunit;
@@ -9,20 +9,16 @@ namespace FusionRpg.Data.Tests;
 
 public sealed class OnboardingCheckpointStoreTests : IDisposable
 {
-    readonly string _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-onboarding-" + Guid.NewGuid().ToString("N"));
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public OnboardingCheckpointStoreTests()
     {
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     [Fact]
     public void Player_one_starts_with_an_empty_checkpoint_view()
@@ -113,7 +109,7 @@ public sealed class OnboardingCheckpointStoreTests : IDisposable
     public void Level_three_general_species_checkpoint_uses_validated_source_and_is_idempotent()
     {
         const string matchKey = "onboarding-species";
-        var species = DemonSpeciesCatalog.All.First(x => x.Side == "plant");
+        var species = CreatureSpeciesCatalog.All.First(x => x.Side == "plant");
         var events = new List<EventEnvelope>
         {
             new EventEnvelope
@@ -139,7 +135,7 @@ public sealed class OnboardingCheckpointStoreTests : IDisposable
             Payload = new
             {
                 ptr = "general-plant", type = species.GameTypeId, typeName = species.Name,
-                sourceKind = DemonProgressionSource.ContractKind,
+                sourceKind = CreatureProgressionSource.ContractKind,
                 sourceId = $"general:{species.SpeciesId}"
             }
         });
@@ -181,7 +177,7 @@ public sealed class OnboardingCheckpointStoreTests : IDisposable
         var imported = _store.ImportContent(collected.Content);
         Assert.True(imported.Committed, string.Join("; ", imported.Errors));
 
-        var species = DemonSpeciesCatalog.All.First(x => x.Side == "plant");
+        var species = CreatureSpeciesCatalog.All.First(x => x.Side == "plant");
         var key = "onboarding-level-four";
         var events = new List<EventEnvelope>
         {
@@ -193,7 +189,7 @@ public sealed class OnboardingCheckpointStoreTests : IDisposable
                 T = $"2026-01-03T00:{i + 1:00}:00Z", Payload = new { ptr = $"kill-{i}" } });
         events.Add(new() { Game = RpgConstants.GameId, Kind = "plant.place", MatchKey = key,
             T = "2026-01-03T01:00:00Z", Payload = new { ptr = "general-plant", type = species.GameTypeId,
-                typeName = species.Name, sourceKind = DemonProgressionSource.ContractKind,
+                typeName = species.Name, sourceKind = CreatureProgressionSource.ContractKind,
                 sourceId = $"general:{species.SpeciesId}" } });
         events.Add(new() { Game = RpgConstants.GameId, Kind = "match.result", MatchKey = key,
             T = "2026-01-03T01:01:00Z", Payload = new { result = "victory" } });

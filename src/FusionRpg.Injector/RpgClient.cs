@@ -100,10 +100,10 @@ public sealed class RpgClient
             {
                 CheatCommandRunner.Enqueue(new CommandDto { Name = "commander.snapshot.reload" });
             });
-            // demon-lawn-deploy T2.1: DemonsUpdated previously reached only WebGroup — a new specimen
+            // creature-lawn-deploy T2.1: CreaturesUpdated previously reached only WebGroup — a new specimen
             // (summon/fusion) changes the plant-side deploy roster, so the injector's own session cache
-            // needs to hear it too (DemonEndpoints.cs/FusionEndpoints.cs now also send to InjectorGroup).
-            _hub.On<object>("DemonsUpdated", _ =>
+            // needs to hear it too (CreatureEndpoints.cs/FusionEndpoints.cs now also send to InjectorGroup).
+            _hub.On<object>("CreaturesUpdated", _ =>
             {
                 CheatCommandRunner.Enqueue(new CommandDto { Name = "lawn-deploy.roster.reload" });
             });
@@ -111,11 +111,11 @@ public sealed class RpgClient
             {
                 try { RpgHost.Log.Info("[cheat-cmd] signalr " + (cmd?.Name ?? "?")); } catch { }
                 // Patron designation is state, not a cheat action — cache it here and keep it
-                // out of the cheat runner (spec-patron-demon.md; applies from the NEXT match).
+                // out of the cheat runner (spec-patron-creature.md; applies from the NEXT match).
                 if (string.Equals(cmd?.Name, "patron.aura", StringComparison.OrdinalIgnoreCase))
                 {
                     try { Effects.PatronCommand.Apply(cmd!); } catch (Exception ex) { RpgHost.Log.Warning("patron.aura: " + ex.Message); }
-                    // demon-lawn-deploy T2.1: a patron reassignment changes WHO is excluded from the
+                    // creature-lawn-deploy T2.1: a patron reassignment changes WHO is excluded from the
                     // deploy roster — reuse this already-pushed signal instead of adding a second one.
                     CheatCommandRunner.Enqueue(new CommandDto { Name = "lawn-deploy.roster.reload" });
                     return;
@@ -433,7 +433,7 @@ public sealed class RpgClient
                     {
                         if (!share.Value.TryGetInt64(out var points) || points == 0) continue;
                         speciesAllocation += FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Single(
-                            FusionRpg.Core.Stats.Aptitudes.AllocationScope.DemonType, share.Name, points);
+                            FusionRpg.Core.Stats.Aptitudes.AllocationScope.CreatureType, share.Name, points);
                     }
                     speciesAllocations[speciesEntry.Name] = speciesAllocation;
                 }
@@ -481,7 +481,7 @@ public sealed class RpgClient
         }
     }
 
-    /// <summary>demon-lawn-deploy T2.1: session cache for the plant-side deploy roster at
+    /// <summary>creature-lawn-deploy T2.1: session cache for the plant-side deploy roster at
     /// board.start — same cadence and same "caller resolves, cache stores" split as
     /// <see cref="RefreshCommanderSnapshotCacheAsync"/>. Never called from MatchHost.Apply. A roster
     /// or patron read failure leaves the PREVIOUS cache standing (matching this method's own sibling)
@@ -498,8 +498,8 @@ public sealed class RpgClient
                 : 0L;
             if (playerId <= 0) return;
 
-            var rosterJson = await Http().GetStringAsync(_base + "/api/demons/" + playerId).ConfigureAwait(false);
-            var roster = JsonSerializer.Deserialize<DemonRosterDto>(rosterJson, Json);
+            var rosterJson = await Http().GetStringAsync(_base + "/api/creatures/" + playerId).ConfigureAwait(false);
+            var roster = JsonSerializer.Deserialize<CreatureRosterDto>(rosterJson, Json);
             if (roster == null) return;
 
             string? patronInstanceId = null;
@@ -520,20 +520,20 @@ public sealed class RpgClient
                 return;
             }
 
-            // demon-lawn-deploy live-check (2026-09-07): a HypnoAlly-mode species has no deploy path
+            // creature-lawn-deploy live-check (2026-09-07): a HypnoAlly-mode species has no deploy path
             // yet (T1.4's own refusal, `DeployAsync` returns `deploy.hypno-ally-not-implemented`) —
             // caught live by actually clicking a real fired prompt's own accept button, not guessed.
-            // `DemonSpeciesCatalog` is already `Configure`d on this process at mod load
+            // `CreatureSpeciesCatalog` is already `Configure`d on this process at mod load
             // (`RpgHost.Initialize`), so this is an in-process lookup against the same 829-species
             // roster the frontend's own species index resolves display info from — no new REST call.
             // Unknown-species and not-yet-configured both fail CLOSED (excluded), matching this
             // method's own patron-read-failure branch above: fewer options, never a guess.
             var eligible = roster.Items
                 .Where(it => !string.Equals(it.Actor.InstanceId, patronInstanceId, StringComparison.Ordinal))
-                .Where(it => FusionRpg.Core.Demons.DemonSpeciesCatalog.IsConfigured
-                    && FusionRpg.Core.Demons.DemonSpeciesCatalog.IsKnown(it.Profile.SpeciesId)
-                    && FusionRpg.Core.Demons.DemonSpeciesCatalog.Get(it.Profile.SpeciesId).DeployMode
-                        != FusionRpg.Core.Demons.DemonDeployMode.HypnoAlly)
+                .Where(it => FusionRpg.Core.Creatures.CreatureSpeciesCatalog.IsConfigured
+                    && FusionRpg.Core.Creatures.CreatureSpeciesCatalog.IsKnown(it.Profile.SpeciesId)
+                    && FusionRpg.Core.Creatures.CreatureSpeciesCatalog.Get(it.Profile.SpeciesId).DeployMode
+                        != FusionRpg.Core.Creatures.CreatureDeployMode.HypnoAlly)
                 .Select(it => new FusionRpg.Core.Match.LawnDeployRosterEntry(it.Actor.InstanceId, it.Profile.SpeciesId))
                 .ToList();
             FusionRpg.Core.Match.LawnDeployRosterSessionCache.Apply(eligible);

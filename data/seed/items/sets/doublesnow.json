@@ -25,7 +25,7 @@
       "id": "set.doublesnow-001",
       "nameKey": "set.glacial-volley",
       "name": "Glacial Volley",
-      "themeKey": "demon.doublesnow",
+      "themeKey": "creature.doublesnow",
       "members": [
         {
           "role": "armament-primary",

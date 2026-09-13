@@ -6,6 +6,7 @@ using FusionRpg.Core.Effects;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Data;
 using FusionRpg.Data.Abstractions;
+using FusionRpg.Data.Tests;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
@@ -26,7 +27,7 @@ namespace FusionRpg.Server.Tests;
 /// </summary>
 public class ReforgeWorldEndpointTests : IAsyncLifetime
 {
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
@@ -34,8 +35,8 @@ public class ReforgeWorldEndpointTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         var host = await BuildHostAsync(mapDebug: true);
-        _dir = host.Dir;
-        _store = host.Store;
+        _testStore = host.Store;
+        _store = host.Store.Store;
         _app = host.App;
         _http = host.Http;
     }
@@ -44,7 +45,7 @@ public class ReforgeWorldEndpointTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     /// <summary>One real in-process host, wired exactly like <c>Program.cs</c> — the same builder this
@@ -54,10 +55,8 @@ public class ReforgeWorldEndpointTests : IAsyncLifetime
     /// second gate to test against.</summary>
     static async Task<TestHost> BuildHostAsync(bool mapDebug)
     {
-        var dir = Path.Combine(Path.GetTempPath(), "fusionrpg-reforge-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(dir);
-        var store = new RpgStore(dir);
-        store.Init();
+        var testStore = DataTestStore.Create();
+        var store = testStore.Store;
 
         var port = GetFreeTcpPort();
         var baseUrl = $"http://127.0.0.1:{port}";
@@ -82,19 +81,19 @@ public class ReforgeWorldEndpointTests : IAsyncLifetime
         await app.StartAsync();
 
         var http = new HttpClient { BaseAddress = new Uri(baseUrl), Timeout = TimeSpan.FromSeconds(30) };
-        return new TestHost(app, http, store, dir);
+        return new TestHost(app, http, testStore);
     }
 
     /// <summary>Disposable bundle for a second, independently-gated host — used only by the two tests
     /// that need a host where <c>MapDebug()</c> was never called, alongside the fixture's own host
     /// (<see cref="InitializeAsync"/>) where it always is.</summary>
-    sealed record TestHost(WebApplication App, HttpClient Http, RpgStore Store, string Dir) : IAsyncDisposable
+    sealed record TestHost(WebApplication App, HttpClient Http, DataTestStore Store) : IAsyncDisposable
     {
         public async ValueTask DisposeAsync()
         {
             Http.Dispose();
             await App.StopAsync();
-            try { Directory.Delete(Dir, recursive: true); } catch { /* temp dir */ }
+            Store.Dispose();
         }
     }
 

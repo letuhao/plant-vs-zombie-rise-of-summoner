@@ -9,7 +9,7 @@ namespace FusionRpg.Core.Match.Ai;
 /// whichever <see cref="Battle.IOwnSideOracle"/> the view was built from (production: an ownership
 /// oracle mirroring <see cref="Battle.SpecimenOwnershipOracle"/>'s own "which player deployed it, not
 /// which mechanical side it's on" rule) — never the unit's raw on-board side directly, so a
-/// hypnotized/side-swapped unique demon (`DemonDeployMode.HypnoAlly`, T1.4) keeps resolving to its real
+/// hypnotized/side-swapped unique creature (`CreatureDeployMode.HypnoAlly`, T1.4) keeps resolving to its real
 /// deploying player.
 /// </summary>
 public interface ILawnUnitView
@@ -55,7 +55,7 @@ public sealed record LawnBoardSnapshot(
 /// Builds one <see cref="LawnUnitSnapshot"/> by resolving <paramref name="ptr"/>'s relation through
 /// <paramref name="oracle"/> — the one, enforced seam <see cref="ILawnBoardView"/> consumers use instead
 /// of ever reading a unit's raw on-board side. <see cref="IOwnSideOracle.RelationOf"/> returning
-/// null (no owner registered — a raw vanilla PvZ unit, not a unique demon) resolves to
+/// null (no owner registered — a raw vanilla PvZ unit, not a unique creature) resolves to
 /// <see cref="RelationKind.Enemy"/>: from Zomboss's own reading of the board, an un-owned unit is a
 /// vanilla plant/zombie the game itself spawned, which is exactly as threatening/irrelevant to the
 /// scorer as one that resolved Enemy outright — never silently dropped, never mis-read as Self/Ally.

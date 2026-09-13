@@ -19,7 +19,7 @@ identity only, code resolves every number), but `items generate` has never actua
 (`setgen/answers.py`: *"reads answers a model already authored, from a file... imports nothing from
 pipeline.llm_caller"*). A real live-model transport already exists and is proven elsewhere:
 `pipeline/llm_caller.py:call_model` does a real HTTP POST to a chat-completions endpoint, and sibling
-commands `effects generate`/`demons generate` already expose `--endpoint`/`--model` wired to it. `items
+commands `effects generate`/`creatures generate` already expose `--endpoint`/`--model` wired to it. `items
 generate` doesn't. `cmd_items` (`report/cli.py:365-490`) has no live-endpoint flag at all — `--model` is
 metadata-only, and `--write` without `--answers` refuses outright.
 
@@ -29,7 +29,7 @@ metadata-only, and `--write` without `--answers` refuses outright.
 ## Acceptance criteria
 
 1. `items generate --kind set|charm` gains `--endpoint`/`--model` flags, wired to
-   `pipeline.llm_caller.call_model`, matching the exact pattern `effects generate`/`demons generate`
+   `pipeline.llm_caller.call_model`, matching the exact pattern `effects generate`/`creatures generate`
    already use — no new transport design, a direct port of an existing, working one.
 2. `--write` without `--answers` no longer unconditionally refuses when `--endpoint` is supplied — it
    calls the live endpoint instead of requiring a replay file.
@@ -67,7 +67,7 @@ tools/seedsmith/seedsmith/adapters/items/setgen/run.py     EDIT — accept the l
 ## Code style
 
 Match `effects generate`'s own `--endpoint`/`--model` wiring in `cli.py` line-for-line where reasonable
-— this is the third command adopting the same pattern (after effects, demons), and a fourth generator
+— this is the third command adopting the same pattern (after effects, creatures), and a fourth generator
 later should be able to copy THIS module's diff as its own template.
 
 ## Testing strategy

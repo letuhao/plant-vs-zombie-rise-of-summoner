@@ -67,7 +67,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -104,7 +104,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -142,7 +142,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -180,7 +180,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.immunity",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -218,7 +218,7 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -293,7 +293,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -330,7 +330,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -367,7 +367,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -405,7 +405,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.immunity",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -442,7 +442,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.stoicism",
         "powerBand": "trivial"
       },
       "socketMax": 3,
@@ -473,18 +473,18 @@
     },
     {
       "id": "item.plant-crown-b-013",
-      "nameKey": "base.thickened-bract",
-      "name": "Thickened Bract",
+      "nameKey": "base-type.fibrous-bract",
+      "name": "Fibrous Bract",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.thickened-bract",
+      "iconKey": "icon.base-type.fibrous-bract",
       "flavorKey": "flavor.base.thickened-bract",
       "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the sensitive crown from overhead strikes.",
       "tags": [
@@ -509,18 +509,18 @@
     },
     {
       "id": "item.plant-crown-b-014",
-      "nameKey": "base.braided-thicket",
-      "name": "Braided Thicket",
+      "nameKey": "base-type.woven-briar",
+      "name": "Woven Briar",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.braided-thicket",
+      "iconKey": "icon.base-type.woven-briar",
       "flavorKey": "flavor.base.braided-thicket",
       "flavor": "A dense weave of living vines and supple willow branches, shaped to brace the neck against heavy impact.",
       "tags": [
@@ -545,18 +545,18 @@
     },
     {
       "id": "item.plant-crown-b-015",
-      "nameKey": "base.thickened-bract",
-      "name": "Thickened Bract",
+      "nameKey": "base-type.dense-calyx",
+      "name": "Dense Calyx",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.vitality",
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.thickened-bract",
+      "iconKey": "icon.base-type.dense-calyx",
       "flavorKey": "flavor.base.thickened-bract",
       "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the sensitive crown from overhead strikes.",
       "tags": [
@@ -581,18 +581,18 @@
     },
     {
       "id": "item.plant-crown-b-016",
-      "nameKey": "base.braided-thicket",
-      "name": "Braided Thicket",
+      "nameKey": "base-type.tangled-bramble-wreath",
+      "name": "Tangled Bramble-Wreath",
       "frame": "plant",
       "role": "head-guard",
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.stoicism",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.braided-thicket",
+      "iconKey": "icon.base-type.tangled-bramble-wreath",
       "flavorKey": "flavor.base.braided-thicket",
       "flavor": "A dense weave of living vines and supple stems designed to cushion the skull against heavy impact.",
       "tags": [
@@ -617,18 +617,18 @@
     },
     {
       "id": "item.plant-crown-b-017",
-      "nameKey": "base.braided-thicket",
-      "name": "Braided Thicket",
+      "nameKey": "base-type.twisted-thicket-coil",
+      "name": "Twisted Thicket-Coil",
       "frame": "plant",
       "role": "head-guard",
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.braided-thicket",
+      "iconKey": "icon.base-type.twisted-thicket-coil",
       "flavorKey": "flavor.base.braided-thicket",
       "flavor": "A dense weave of living vines and supple willow branches, designed to absorb the impact of heavy blows.",
       "tags": [
@@ -660,7 +660,7 @@
       "class": "fibre",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -689,18 +689,18 @@
     },
     {
       "id": "item.plant-crown-b-019",
-      "nameKey": "base.thickened-bract",
-      "name": "Thickened Bract",
+      "nameKey": "base-type.coarse-bract",
+      "name": "Coarse Bract",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.vitality",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.thickened-bract",
+      "iconKey": "icon.base-type.coarse-bract",
       "flavorKey": "flavor.base.thickened-bract",
       "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the sensitive crown from overhead strikes.",
       "tags": [
@@ -725,18 +725,18 @@
     },
     {
       "id": "item.plant-crown-b-020",
-      "nameKey": "base.thickened-bract",
-      "name": "Thickened Bract",
+      "nameKey": "base-type.robust-bract",
+      "name": "Robust Bract",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.stalwart",
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.thickened-bract",
+      "iconKey": "icon.base-type.robust-bract",
       "flavorKey": "flavor.base.thickened-bract",
       "flavor": "A dense, overlapping arrangement of toughened leaves designed to shield the sensitive crown from overhead strikes.",
       "tags": [
@@ -768,7 +768,7 @@
       "class": "husk",
       "band": "b",
       "implicit": {
-        "family": "atom.padding",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -833,8 +833,8 @@
     },
     {
       "id": "item.plant-crown-b-023",
-      "nameKey": "base.verdant-diadem",
-      "name": "Verdant Diadem",
+      "nameKey": "base-type.emerald-circlet",
+      "name": "Emerald Circlet",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
@@ -844,7 +844,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.verdant-diadem",
+      "iconKey": "icon.base-type.emerald-circlet",
       "flavorKey": "flavor.base.verdant-diadem",
       "flavor": "A circlet of woven, living vines that pulse with a slow, rhythmic sap. It feels strangely heavy, as if the plant itself is anchoring the wearer to the earth.",
       "tags": [
@@ -869,8 +869,8 @@
     },
     {
       "id": "item.plant-crown-b-024",
-      "nameKey": "base.verdant-diadem",
-      "name": "Verdant Diadem",
+      "nameKey": "base-type.jade-coronet",
+      "name": "Jade Coronet",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
@@ -880,7 +880,7 @@
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.verdant-diadem",
+      "iconKey": "icon.base-type.jade-coronet",
       "flavorKey": "flavor.base.verdant-diadem",
       "flavor": "A circlet of tightly woven living vines that pulse with a slow, rhythmic sap.",
       "tags": [
@@ -905,8 +905,8 @@
     },
     {
       "id": "item.plant-crown-b-025",
-      "nameKey": "base.verdant-diadem",
-      "name": "Verdant Diadem",
+      "nameKey": "base-type.thicketed-circlet",
+      "name": "Thicketed Circlet",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
@@ -916,7 +916,7 @@
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.verdant-diadem",
+      "iconKey": "icon.base-type.thicketed-circlet",
       "flavorKey": "flavor.base.verdant-diadem",
       "flavor": "A circlet of living vines that pulse in rhythm with the wearer's heartbeat. It tightens slightly when the wearer's resolve wavers.",
       "tags": [
@@ -941,8 +941,8 @@
     },
     {
       "id": "item.plant-crown-b-026",
-      "nameKey": "base.verdant-diadem",
-      "name": "Verdant Diadem",
+      "nameKey": "base-type.emerald-thicket-circlet",
+      "name": "Emerald Thicket Circlet",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
@@ -952,7 +952,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.verdant-diadem",
+      "iconKey": "icon.base-type.emerald-thicket-circlet",
       "flavorKey": "flavor.base.verdant-diadem",
       "flavor": "A circlet of tightly woven living vines that pulse with a slow, rhythmic sap.",
       "tags": [
@@ -977,8 +977,8 @@
     },
     {
       "id": "item.plant-crown-b-027",
-      "nameKey": "base.verdant-diadem",
-      "name": "Verdant Diadem",
+      "nameKey": "base-type.bramble-woven-tiara",
+      "name": "Bramble-Woven Tiara",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
@@ -988,7 +988,7 @@
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.verdant-diadem",
+      "iconKey": "icon.base-type.bramble-woven-tiara",
       "flavorKey": "flavor.base.verdant-diadem",
       "flavor": "A woven circlet of living vines that pulses with a slow, rhythmic sap. It serves as a living anchor for the wearer's focus.",
       "tags": [
@@ -1013,8 +1013,8 @@
     },
     {
       "id": "item.plant-crown-b-028",
-      "nameKey": "base.coiled-tendril-coif",
-      "name": "Coiled Tendril-Coif",
+      "nameKey": "base-type.twisted-vine-circlet",
+      "name": "Twisted Vine Circlet",
       "frame": "plant",
       "role": "head-guard",
       "class": "husk",
@@ -1024,7 +1024,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.coiled-tendril-coif",
+      "iconKey": "icon.base-type.twisted-vine-circlet",
       "flavorKey": "flavor.base.coiled-tendril-coif",
       "flavor": "A dense weave of living vines that tightens against the brow to steady the wearer's focus.",
       "tags": [

@@ -22,7 +22,7 @@ public sealed record EventOutcomeRow(
 /// already-parsed tree (<see cref="PredicateNode"/>) — `null` means "always eligible" (the seed
 /// contract's own `none` = always eligible), never a sentinel string. `Theme`/`ClimateAffinity` are
 /// carried but not validated here: theme is a planner-fixed motif subset this module has no catalog
-/// for (matching `demon-seed`'s own still-unaudited motif system), and climate affinity weights a
+/// for (matching `creature-seed`'s own still-unaudited motif system), and climate affinity weights a
 /// draw without ever gating one (seed contract: "not an eligibility rule").
 /// </summary>
 public sealed record EventRow(

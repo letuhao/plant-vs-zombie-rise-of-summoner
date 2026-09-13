@@ -25,7 +25,7 @@
       "id": "set.jalamine-001",
       "nameKey": "set.spore-burst-tuber",
       "name": "Spore-Burst Tuber",
-      "themeKey": "demon.jalamine",
+      "themeKey": "creature.jalamine",
       "members": [
         {
           "role": "armament-primary",

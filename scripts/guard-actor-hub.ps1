@@ -1,4 +1,10 @@
-# Guard: player combat/derived compose must go through ActorHub — sole Hot gate (ADR 2026-09-07).
+# Guard: player combat/derived compose must go through ActorHub — sole Hot gate
+# (ADR 2026-09-07; dual-compose exception overturned 2026-09-12 as architectural debt).
+#
+# Existing BattleStatComposer + listed ChannelMods producers = grandfathered debt until fusion.
+# NEW parallel composers, NEW BattleStatComposer.Compose call sites under src/, and NEW
+# BattleChannelMod producer files fail this guard. Do not copy the battle path.
+#
 # Usage (repo root): .\scripts\guard-actor-hub.ps1
 param(
     [string]$Root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
@@ -52,11 +58,14 @@ foreach ($full in $serverTargets) {
     }
 }
 
-# Ban new private *DerivedComposer* classes outside Core/Stats/Derived and Battle exception
+# Ban new private *Composer* types that touch Derived / AppliedCombat outside allowlist.
+# Allowlist = Hub-path DerivedComposer + grandfathered BattleStatComposer debt + orthogonal Pvz sheet.
+# Other *Composer* names (HUD, corpus, items, power index, …) are fine unless they touch combat derive.
 $allowComposer = @(
     '[\\/]FusionRpg\.Core[\\/]Stats[\\/]Derived[\\/]',
     '[\\/]FusionRpg\.Core[\\/]Battle[\\/]BattleStatComposer\.cs',
     '[\\/]FusionRpg\.Core[\\/]Stats[\\/]PvzStatsSheetComposer\.cs',
+    '[\\/]FusionRpg\.Core[\\/]Stats[\\/]StatComposer\.cs',
     '[\\/]obj[\\/]',
     '[\\/]bin[\\/]'
 )
@@ -71,8 +80,57 @@ if (Test-Path $Src) {
         }
         if ($allowed) { return }
         $code = Get-CodeLines (Get-Content -LiteralPath $full -Raw)
-        if ($code -match 'DerivedModifier|ActorDerivedSnapshot|ContributeDerived') {
-            $failures += "${rel}: private derived composer outside ActorHub / BattleStatComposer allowlist"
+        if ($code -match 'DerivedModifier|ActorDerivedSnapshot|ContributeDerived|AppliedCombat|BattleChannelMod') {
+            $failures += "${rel}: new parallel composer touching Derived/AppliedCombat — ActorHub only (BattleStatComposer is debt, not a template)"
+        }
+    }
+}
+
+# Production BattleStatComposer.Compose call sites under src/ — only BattleEngine (grandfathered debt).
+# Tests/tools may call Compose; new src/ callers fail (do not widen the debt graph).
+$allowBattleComposeCallers = @(
+    '[\\/]FusionRpg\.Core[\\/]Battle[\\/]BattleEngine\.cs$',
+    '[\\/]FusionRpg\.Core[\\/]Battle[\\/]BattleStatComposer\.cs$'
+)
+if (Test-Path $Src) {
+    Get-ChildItem -Path $Src -Recurse -Filter "*.cs" -ErrorAction SilentlyContinue | ForEach-Object {
+        $full = $_.FullName
+        foreach ($pat in $allowBattleComposeCallers) {
+            if ($full -match $pat) { return }
+        }
+        if ($full -match '[\\/](obj|bin)[\\/]') { return }
+        $rel = $full.Substring($Root.Length).TrimStart('\', '/')
+        $code = Get-CodeLines (Get-Content -LiteralPath $full -Raw)
+        if ($code -match 'BattleStatComposer\.Compose\s*\(') {
+            $failures += "${rel}: BattleStatComposer.Compose outside BattleEngine — new debt call sites forbidden (fuse into ActorHub)"
+        }
+    }
+}
+
+# BattleChannelMod construction = private combat fold into battle composer. Grandfathered debt files only.
+$allowChannelModProducers = @(
+    '[\\/]FusionRpg\.Core[\\/]Battle[\\/]EquipAtomSource\.cs$',
+    '[\\/]FusionRpg\.Core[\\/]Battle[\\/]TraitAtomSource\.cs$',
+    '[\\/]FusionRpg\.Core[\\/]Battle[\\/]TreeAtomSource\.cs$',
+    '[\\/]FusionRpg\.Core[\\/]Stats[\\/]Aptitudes[\\/]AptitudeResolver\.cs$',
+    '[\\/]FusionRpg\.Core[\\/]Expeditions[\\/]ExpeditionResolver\.cs$',
+    '[\\/]FusionRpg\.Core[\\/]Items[\\/]Consumables[\\/]DraughtProjection\.cs$',
+    '[\\/]FusionRpg\.Server[\\/]WebMatchService\.cs$',
+    '[\\/]obj[\\/]',
+    '[\\/]bin[\\/]'
+)
+if (Test-Path $Src) {
+    Get-ChildItem -Path $Src -Recurse -Filter "*.cs" -ErrorAction SilentlyContinue | ForEach-Object {
+        $full = $_.FullName
+        $allowed = $false
+        foreach ($pat in $allowChannelModProducers) {
+            if ($full -match $pat) { $allowed = $true; break }
+        }
+        if ($allowed) { return }
+        $rel = $full.Substring($Root.Length).TrimStart('\', '/')
+        $code = Get-CodeLines (Get-Content -LiteralPath $full -Raw)
+        if ($code -match 'new\s+BattleChannelMod\s*\(') {
+            $failures += "${rel}: new BattleChannelMod producer outside debt allowlist — contribute via ActorHub / atoms instead"
         }
     }
 }

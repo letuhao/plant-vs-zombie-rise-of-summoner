@@ -25,7 +25,7 @@
       "id": "set.trainingdummy-001",
       "nameKey": "set.stump-test-rig",
       "name": "Stump Test Rig",
-      "themeKey": "demon.trainingdummy",
+      "themeKey": "creature.trainingdummy",
       "members": [
         {
           "role": "armament-primary",

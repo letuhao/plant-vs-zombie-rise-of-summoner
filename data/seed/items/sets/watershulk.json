@@ -25,7 +25,7 @@
       "id": "set.watershulk-001",
       "nameKey": "set.frostleaf-thorns",
       "name": "Frostleaf Thorns",
-      "themeKey": "demon.watershulk",
+      "themeKey": "creature.watershulk",
       "members": [
         {
           "role": "armament-primary",

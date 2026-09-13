@@ -1,0 +1,14 @@
+---
+description: Agents commit only via MCP repo-git.commit; never raw git commit/push
+alwaysApply: true
+---
+
+# Git — MCP commit only
+
+- **Forbidden:** `git commit`, `git push`, `git merge`/`rebase`/`cherry-pick` that create commits, `clean_commit.py`, `gh pr create`, `gh release create`.
+- **Allowed commit path:** MCP `repo-git.commit` (and optional `repo-git.validate_message`) — commit as part of finishing a task without waiting to be asked.
+- **Commit often:** one logical change per commit, at each verified increment and task boundary — not once at the end of the session. Pass explicit `paths`; leave other streams' dirty files alone. A correction is a new commit, never an amend.
+- **Verify first:** run the subsystem's test/lint/guard, or say in the body that it could not run.
+- **Push:** owner only. Never push from the agent.
+- No `Co-authored-by`, no vendor/AI watermark trailers.
+- See `docs/contributing/agent-git.md`.

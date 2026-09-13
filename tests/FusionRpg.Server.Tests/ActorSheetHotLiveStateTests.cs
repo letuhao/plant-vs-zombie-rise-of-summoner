@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -23,7 +24,7 @@ namespace FusionRpg.Server.Tests;
 /// </summary>
 public class ActorSheetHotLiveStateTests : IAsyncLifetime
 {
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     IActorLiveStateStore _live = null!;
     WebApplication _app = null!;
@@ -33,10 +34,8 @@ public class ActorSheetHotLiveStateTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-hotlive-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _playerId = _store.GetCurrentPlayerId();
         _live = new ActorLiveStateStore();
 
@@ -47,8 +46,8 @@ public class ActorSheetHotLiveStateTests : IAsyncLifetime
         FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(
                 File.ReadAllText(Path.Combine(RepoTuningDir(), "progression.v1.json"))));
-        FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
-            FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(
+        FusionRpg.Core.Creatures.Contracts.ContractPolicy.Configure(
+            FusionRpg.Core.Creatures.Contracts.ContractTuningLoader.Parse(
                 File.ReadAllText(Path.Combine(RepoTuningDir(), "contracts.v1.json"))));
         FusionRpg.Core.Status.StatusPolicy.Configure(
             FusionRpg.Core.Status.StatusTuningLoader.Parse(
@@ -56,7 +55,7 @@ public class ActorSheetHotLiveStateTests : IAsyncLifetime
         FusionRpg.Core.Stats.Derived.StatsTuningHub.Configure(
             FusionRpg.Core.Stats.Derived.StatsTuningLoader.Parse(
                 File.ReadAllText(Path.Combine(RepoTuningDir(), "stats.v1.json"))));
-        FusionRpg.Core.Demons.DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        FusionRpg.Core.Creatures.CreatureSpeciesCatalog.ConfigureFromCompiledDefault();
         FusionRpg.Core.Progression.SpeciesProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.SpeciesProgressionTuningLoader.Parse(
                 File.ReadAllText(Path.Combine(RepoTuningDir(), "species-progression.v1.json"))));
@@ -92,7 +91,7 @@ public class ActorSheetHotLiveStateTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     [Fact]

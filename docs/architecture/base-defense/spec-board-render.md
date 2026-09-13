@@ -58,7 +58,7 @@ lawn paint flip onto `BoardLayers`) are still unfinished. Do not re-clone lawn d
 | `createLawnGame.ts` | `createGame({ scenes, width, height })` | scenes are **injected**, not imported. `createLawnGame` becomes a thin caller |
 | `LawnWorldScene` geometry | `GridSpec` **passed in** | rows/cols/cell size are constructor input, never imported constants |
 | `PtrEntityRegistry` | `EntityRegistry<TKey>` | generic over key type; the lawn keeps ptr keys, the siege uses actor keys |
-| kind → sprite | a **caller-supplied mapping** | the layer knows nothing about demons, plants, zombies or walls |
+| kind → sprite | a **caller-supplied mapping** | the layer knows nothing about creatures, plants, zombies or walls |
 | `PickSystem` | `pickCell(spec, pointer) → GridPos \| null` | pure function of spec and pointer |
 
 **Each extraction lands with the lawn rendering byte-identically.** This is five reversible steps, not

@@ -25,7 +25,7 @@
       "id": "set.cabbagenut-001",
       "nameKey": "set.cabbage-nut-shell",
       "name": "Cabbage Nut Shell",
-      "themeKey": "demon.cabbagenut",
+      "themeKey": "creature.cabbagenut",
       "members": [
         {
           "role": "core-guard",

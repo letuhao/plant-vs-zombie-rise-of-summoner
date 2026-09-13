@@ -25,7 +25,7 @@
       "id": "set.threecorn-001",
       "nameKey": "set.triple-row-kernel",
       "name": "Triple-Row Kernel",
-      "themeKey": "demon.threecorn",
+      "themeKey": "creature.threecorn",
       "members": [
         {
           "role": "armament-primary",

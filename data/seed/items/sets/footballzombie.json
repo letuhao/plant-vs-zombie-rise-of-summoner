@@ -25,7 +25,7 @@
       "id": "set.footballzombie-001",
       "nameKey": "set.corporate-gridiron",
       "name": "Corporate Gridiron",
-      "themeKey": "demon.footballzombie",
+      "themeKey": "creature.footballzombie",
       "members": [
         {
           "role": "armament-primary",

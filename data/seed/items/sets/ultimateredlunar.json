@@ -25,7 +25,7 @@
       "id": "set.ultimateredlunar-001",
       "nameKey": "set.lunar-cabbage-swarm",
       "name": "Lunar Cabbage Swarm",
-      "themeKey": "demon.ultimateredlunar",
+      "themeKey": "creature.ultimateredlunar",
       "members": [
         {
           "role": "armament-primary",

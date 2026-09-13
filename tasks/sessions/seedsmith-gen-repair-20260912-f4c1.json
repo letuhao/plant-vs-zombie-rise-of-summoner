@@ -1,0 +1,26 @@
+{
+  "session": "seedsmith-gen-repair-20260912-f4c1",
+  "program": "item-content",
+  "problem": "Generator-first repair of the item corpus defects: S1 deterministic nameKey + collision reject (basetypegen), S2 per-frame implicit slate (classes.v3.json), S3 re-slate + re-flavour run (428 rows), S4 corpus-wide name repair (848 findings across 8 kind-sets). Plan: tasks/seedsmith-generated-seed-repair-plan.md",
+  "mode": "direct",
+  "branch": "features/derived-stat-extension",
+  "worktree": null,
+  "paths": [
+    "tools/seedsmith/**",
+    "data/seed/items/**",
+    "data/seed/actions/type-weights.json",
+    "docs/architecture/item/**",
+    "tests/FusionRpg.Core.Tests/Items/BaseTypeCorpusTests.cs",
+    "tests/FusionRpg.ItemSeedValidator.Tests/**",
+    "tasks/seedsmith-generated-seed-repair-plan.md",
+    "tasks/seedsmith-generated-seed-repair-todo.md",
+    "tasks/sessions/seedsmith-gen-repair-20260912-f4c1.json"
+  ],
+  "sharedWith": [
+    "data-test-substrate-20260912-9d6a"
+  ],
+  "sharedNote": "Owner decision 2026-09-12: everything-green scope (A+B+C). Owns tools/seedsmith + data/seed/items. Never stage the other session's tests/FusionRpg.Data.Tests/** or src/FusionRpg.Data/** files.",
+  "started": "2026-09-12T17:20:00Z",
+  "status": "merged",
+  "closedNote": "Completed: S1-S6 generator-first repair (name guard, per-frame slate classes.v3.json, 649-row re-slate, 848->0 name collisions, placeholder rows, CI gate). Commits 9d358207 cef4bc38 533749c3 9b4f3033 fae533a5 1a45dbfe 562d0df7 2e1b2f8c."
+}

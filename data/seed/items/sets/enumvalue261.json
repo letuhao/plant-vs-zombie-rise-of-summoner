@@ -25,7 +25,7 @@
       "id": "set.enumvalue261-001",
       "nameKey": "set.the-unnamed-void",
       "name": "The Unnamed Void",
-      "themeKey": "demon.enumvalue261",
+      "themeKey": "creature.enumvalue261",
       "members": [
         {
           "role": "armament-primary",

@@ -23,7 +23,7 @@ public class ILawnBoardViewTests
     public void Build_resolves_relation_from_the_oracle_not_a_raw_side_field()
     {
         // The whole point: nothing in this call ever mentions "which mechanical side this ptr is on" —
-        // only the oracle's own answer decides Relation. A hypnotized/side-swapped unique demon (its
+        // only the oracle's own answer decides Relation. A hypnotized/side-swapped unique creature (its
         // mechanical side flips, its OwnershipOracle answer does not) is exactly this shape.
         var oracle = new FakeOracle(new() { ["ptr-hypno-swapped"] = RelationKind.Ally });
 

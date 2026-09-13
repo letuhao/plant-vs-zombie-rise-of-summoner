@@ -35,7 +35,7 @@ These words get guessed wrong. Read them once before the rest of the page.
 
 Play Zomboss and the map without waiting for automatic hard-counters to your aptitudes.
 
-This page is the intended pressure curve — raise demons → a strategy works → the world counters → rebuild.
+This page is the intended pressure curve — raise creatures → a strategy works → the world counters → rebuild.
 
 ---
 

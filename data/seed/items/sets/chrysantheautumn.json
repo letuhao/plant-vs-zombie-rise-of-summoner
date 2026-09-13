@@ -25,7 +25,7 @@
       "id": "set.chrysantheautumn-001",
       "nameKey": "set.autumnal-bloom",
       "name": "Autumnal Bloom",
-      "themeKey": "demon.chrysantheautumn",
+      "themeKey": "creature.chrysantheautumn",
       "members": [
         {
           "role": "armament-primary",

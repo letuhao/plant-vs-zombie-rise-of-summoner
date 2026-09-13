@@ -33,7 +33,7 @@ import copy
 from typing import Any, Mapping, Sequence
 
 from ....pipeline.model import BLOCKED_FIELD
-from ...demons.anchor.permute import order_for
+from ...creatures.anchor.permute import order_for
 
 __all__ = [
     "SYSTEM_PROMPT", "SIGNATURE_ACTION_SCHEMA", "DIFFERENTIATOR_VALUES", "schema_for_call",
@@ -63,7 +63,7 @@ SYSTEM_PROMPT = (
 # The schema. Every `description` string below is copied byte-for-byte from spec-signature-propose
 # .md SS2's own JSONC block (review F19, 2026-09-03) -- written there specifically so this build
 # would not have to (re-)derive them, each modelled on the hardened `blocked` description at
-# `adapters/demons/anchor/prompts.py:74-82`.
+# `adapters/creatures/anchor/prompts.py:74-82`.
 #
 # `atomFamilies.items.enum`, `motifsExpressed.items.enum` and `differentiator.enum` all ship EMPTY
 # here on purpose: the real enums are filled at call time -- `atomFamilies` from the brief's own
@@ -306,7 +306,7 @@ def build_context(brief: Mapping[str, Any], *, sample_index: int,
     `usage_weights` (roster-balance FC3, 2026-09-06): optional `id -> per-mille weight` mapping,
     identical contract to `general_propose/prompts.py`'s own parameter of the same name.
 
-    `sample_index` is IN this call, never bolted on after (`adapters/demons/anchor/permute.py`'s
+    `sample_index` is IN this call, never bolted on after (`adapters/creatures/anchor/permute.py`'s
     own module docstring) -- and it seeds THREE independent permutations here, one per enum field
     (`"atomFamilies"`, `"motifsExpressed"` and `"differentiator"`), so three votes over three
     identical orders is never possible for any of them."""

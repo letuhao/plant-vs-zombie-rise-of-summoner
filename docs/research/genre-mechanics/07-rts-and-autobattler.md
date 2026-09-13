@@ -338,7 +338,7 @@ converging on the strongest trait — the 6th Brawler you need may already be on
 
 - **8 players**, board limit **7 minions**
   ([hearthstone.wiki.gg Battlegrounds](https://hearthstone.wiki.gg/wiki/Battlegrounds) — second-tier).
-- **10 minion tribes** (Beast, Demon, Dragon, Elemental, Mech, Murloc, Naga, Pirate, Quilboar, Undead)
+- **10 minion tribes** (Beast, Creature, Dragon, Elemental, Mech, Murloc, Naga, Pirate, Quilboar, Undead)
   plus tribeless minions.
 - **A random subset of tribes is present per lobby**, announced at the start. The rule was documented
   as *"with 6 currently active tribes, only 5 of them will be available each game"* when six existed;
@@ -831,7 +831,7 @@ in searching.
 ## Hooks for this project
 
 **Non-normative, un-vetted, and explicitly not a design proposal.** These are observations about where
-this survey touches the shape of a summoner commanding demons on a 5-lane, 9-column lawn. None of it
+this survey touches the shape of a summoner commanding creatures on a 5-lane, 9-column lawn. None of it
 has been checked against the codebase, the design gate, or the existing specs, and none of it is a
 recommendation.
 
@@ -842,7 +842,7 @@ recommendation.
 - **Bonus-with-drawback is the cheapest power-budget device found.** All 54 prestige talents do it, and
   two of them delete the commander's own hero unit. It bounds power without a cap and without a number.
 - **Two group memberships per unit is the measured norm** — not three and not one; 65% of TFT Set 18
-  champions carry exactly two. A demon species with element *and* one other membership sits exactly on
+  champions carry exactly two. A creature species with element *and* one other membership sits exactly on
   that norm.
 - **Step-function payoffs, not slopes.** Between breakpoints a unit adds nothing; at a breakpoint it
   adds everything. Per-member value stays roughly flat (Brawler: 12.5% → 10.0% → 10.8%) — the drama is

@@ -185,7 +185,7 @@ python -m pytest tests -q
 None of the 14 touch any file this task changed. Confirmed by `git status --porcelain` during this
 session: `data/seed/items/drop-tables/d1.json`, `data/seed/dungeon/events/*`,
 `data/seed/dungeon/rooms/*` (11 files), and `tools/seedsmith/seedsmith/adapters/items/*/run.py`
-(4 files), plus new `adapters/demons/completeness.py` / `adapters/dungeon/completeness.py` and their
+(4 files), plus new `adapters/creatures/completeness.py` / `adapters/dungeon/completeness.py` and their
 own new test files, all show as modified/added by concurrent sessions actively building Phases 1/3/4
 of this same program while this session ran — matching the task brief's own warning. One real
 root cause explains 8 of the 14 directly, and a second explains the rest:
@@ -200,10 +200,10 @@ root cause explains 8 of the 14 directly, and a second explains the rest:
   count (`100`, `98`) against a live count that grew to 112 while this session ran, each with its
   own "⛔ CORRECTED <date>" comment showing this is a recurring, expected-to-need-re-measuring
   pattern in this codebase, not a defect this task introduced.
-- **Root cause 2 — a concurrent items/demons/dungeon content wave** landed real new rows mid-session
-  (`git status`: new demon theme sets, new dungeon events/rooms, a new drop-table row): 4 more
+- **Root cause 2 — a concurrent items/creatures/dungeon content wave** landed real new rows mid-session
+  (`git status`: new creature theme sets, new dungeon events/rooms, a new drop-table row): 4 more
   failures each assert a specific historical corpus count/set that moved by a small amount
-  (`test_demon_themes.py` ×2: 38→40 themed entries, one new `themeKey` value; `test_items_adapter.py`:
+  (`test_creature_themes.py` ×2: 38→40 themed entries, one new `themeKey` value; `test_items_adapter.py`:
   1513→1516 entries; `test_sampling_quality.py`: charm total 70→71; `test_distribution_planner.py
   ::DeterminismTests`: the committed `_briefs/round-1.json` is stale relative to a vocabulary that
   changed underneath it — its own test docstring already anticipates this exact failure mode).

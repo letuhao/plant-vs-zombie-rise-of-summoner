@@ -7,7 +7,7 @@
 
 Adopts `content-completeness-core`'s registry and bidirectional language check for the dungeon
 domain, and fixes the one real, already-shipped defect the whole program was partly named after:
-`data/seed/dungeon/events/event.bargain-demon.allpeater-001.json`'s `flavor` field carried
+`data/seed/dungeon/events/event.bargain-creature.allpeater-001.json`'s `flavor` field carried
 untranslated Chinese fragments mid-English sentence ("offensive火力", "permanent 分配").
 
 ---
@@ -15,7 +15,7 @@ untranslated Chinese fragments mid-English sentence ("offensive火力", "permane
 ## 1. Objective
 
 Answer, for the dungeon domain specifically, the same three questions `core`'s spec poses
-generically — and, unlike items/demons/actions/passive-tree, dungeon needed a **second**, deeper
+generically — and, unlike items/creatures/actions/passive-tree, dungeon needed a **second**, deeper
 fix before the first question was even askable: the shared `Corpus` loader cannot see dungeon's own
 real content at all (§2). This spec is "wire up code that already exists and was never connected,
 across two separate layers," not new design — every piece below is either core's own
@@ -40,7 +40,7 @@ than "the plumbing exists but nobody turned the tap":
    staleness-key computation, nothing. This is upstream of `emit.py`'s own gap: even a fully wired
    `write_entry` would have received nothing to stamp.
 3. **There is no committed orchestrator connecting the two at all.** Grepping `report/cli.py`'s own
-   `add_parser` calls (the file's own subcommand registry) finds `demons`, `items`, `effects`,
+   `add_parser` calls (the file's own subcommand registry) finds `creatures`, `items`, `effects`,
    `structures`, `trees`, `numerics` — never `dungeon`. `adapters/dungeon/__init__.py`'s own
    `DungeonAdapter` is registered in `adapters/registry.py` and used by the generic `check`/
    `contract --audit` commands, but nothing calls `pipelines.run_event_draws(...)` and then
@@ -71,7 +71,7 @@ Found while grounding this spec, not assumed: `corpus/model.py`'s `Corpus.load()
 file whose top-level JSON has both a non-empty `kind` string and an `entries` LIST
 (`corpus/model.py:183-186`, `if not kind or not isinstance(raw_entries, list): continue`).
 Dungeon's own `emit.py` docstring states the deliberate, opposite convention: *"One object per
-file... unlike the demons anchor's per-family list."* Every real file under
+file... unlike the creatures anchor's per-family list."* Every real file under
 `data/seed/dungeon/<dir>/*.json` (bar each directory's own `_index.json`) is one bare entry object
 with no `kind`/`entries` wrapper at all.
 
@@ -140,7 +140,7 @@ metric with no per-domain adapter glue, which a dungeon-only key would not be.
 ## 6. The live defect: root cause, fix, and what "regenerated through the pipeline" means here
 
 **Root cause of the defect itself** (distinct from the wiring gap above, which is why it was never
-CAUGHT, not why it happened): `event.bargain-demon.allpeater-001.json` was generated before Task
+CAUGHT, not why it happened): `event.bargain-creature.allpeater-001.json` was generated before Task
 4b's bidirectional `language_consistency` fix existed, through whatever process actually produced
 it (§2.3 — unrecorded). The original, one-directional `language_consistency` (CJK-motif-in only)
 could not have caught this even if dungeon had been wired to it at the time, since this event's
@@ -169,7 +169,7 @@ corpus: `Corpus.load()` sees nothing (the negative case, confirming §3's findin
 corpus` sees all real events including the defect entry, `ensure_completeness_registered` is
 idempotent, `ContentFieldMissing` runs clean against the real event corpus, and — the load-bearing
 regression proof — `ContentLanguageContamination` reports zero findings for
-`event.bargain-demon.allpeater-001` and its `flavor` field is pure ASCII, both AFTER the fix. These
+`event.bargain-creature.allpeater-001` and its `flavor` field is pure ASCII, both AFTER the fix. These
 two tests were run and confirmed FAILING against the real, still-defective file before the fix was
 applied (captured as this task's own before/after evidence, not asserted from memory).
 
@@ -190,7 +190,7 @@ tools/seedsmith/seedsmith/adapters/dungeon/emit.py           (edited) — §5
 tools/seedsmith/seedsmith/report/cli.py                      (edited) — §3, cmd_check's dungeon branch
 tools/seedsmith/tests/test_dungeon_completeness.py           (new)
 tools/seedsmith/tests/test_dungeon_idempotency.py            (edited) — ProvenanceStampingTests
-data/seed/dungeon/events/event.bargain-demon.allpeater-001.json (edited) — §6, the one sanctioned content fix
+data/seed/dungeon/events/event.bargain-creature.allpeater-001.json (edited) — §6, the one sanctioned content fix
 ```
 
 ## 9. Boundaries
@@ -214,6 +214,6 @@ None outstanding for this module's own scope. Two real, named-but-not-fixed gaps
 both explicitly out of this task's scope per §2/§6 above: (1) no dungeon-generation orchestrator
 exists to tie `pipelines.py` to `emit.py` for any FUTURE event, so a fresh, non-repair generation
 pass still has nothing to call `write_corpus` on `_provenance`-stamped; (2) dungeon has no
-`PROMPT_VERSION` constant of its own the way passive-tree/demons do, so a real staleness key for
+`PROMPT_VERSION` constant of its own the way passive-tree/creatures do, so a real staleness key for
 dungeon's own MAIN generation prompt (as opposed to this task's one-off repair prompt) cannot be
 computed today.

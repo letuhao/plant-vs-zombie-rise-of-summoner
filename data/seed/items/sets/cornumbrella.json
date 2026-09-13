@@ -25,7 +25,7 @@
       "id": "set.cornumbrella-001",
       "nameKey": "set.rotting-parasol",
       "name": "Rotting Parasol",
-      "themeKey": "demon.cornumbrella",
+      "themeKey": "creature.cornumbrella",
       "members": [
         {
           "role": "armament-primary",

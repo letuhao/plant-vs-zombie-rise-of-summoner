@@ -5,10 +5,10 @@ using FusionRpg.Core.Battle;
 using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Shield;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Contracts;
-using FusionRpg.Core.Demons.Fusion;
-using FusionRpg.Core.Demons.Patron;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Contracts;
+using FusionRpg.Core.Creatures.Fusion;
+using FusionRpg.Core.Creatures.Patron;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Expeditions;
 using FusionRpg.Core.Match;
@@ -58,19 +58,19 @@ internal static class ContractTuningTestBootstrap
         DerivedStatPolicy.Configure(DefaultDerivedStats);
         // T4.7 step 2 / T4.8 (catalog-runtime) — behaviour-preserving; see the Core.Tests bootstrap's
         // own identical comment.
-        DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        CreatureSpeciesCatalog.ConfigureFromCompiledDefault();
         // T8.4/T8.5 (ds 18, fusion-recipe-runtime) — behaviour-preserving; see the Core.Tests
         // bootstrap's own identical comment. Reading the REAL committed seed here (matching
         // Program.cs's own T8.5 flip) is the WRONG fix, tried and reverted the same session: the
         // real seed's recipes reference the real ~829-species corpus, but this assembly's own
-        // DemonSpeciesCatalog above is the small compiled default (~84 species) — Configure's own
-        // cross-check against DemonSpeciesCatalog correctly refused nearly every real recipe for
+        // CreatureSpeciesCatalog above is the small compiled default (~84 species) — Configure's own
+        // cross-check against CreatureSpeciesCatalog correctly refused nearly every real recipe for
         // referencing a species this roster does not have. BuildDeterministicOnly() against
         // WHATEVER species roster is actually configured is what keeps the two in sync.
         // InternalsVisibleTo for this assembly lives as a C# attribute in
         // FusionRpg.Core/InternalsVisibleTo.Fusion.cs, not in FusionRpg.Core.csproj — the Core/data
         // separation guard substring-scans that one file for this very project's own name.
-        DemonRecipeCatalog.Configure(DemonRecipeCatalog.BuildDeterministicOnly());
+        CreatureRecipeCatalog.Configure(CreatureRecipeCatalog.BuildDeterministicOnly());
         OverlayTuningHub.Configure(DefaultOverlay);
         StatsTuningHub.Configure(DefaultStats);
         ExpeditionTuningHub.Configure(DefaultExpeditions);
@@ -116,29 +116,29 @@ internal static class ContractTuningTestBootstrap
             RankBonusSwornMilli: 15, RankBonusTrustedMilli: 35, RankBonusDevotedMilli: 60),
         Slots: new ContractSlotsTuning(BaseSlots: 12, SlotPriceStep: 300),
         Settlement: new ContractSettlementTuning(MaxSettleDays: 30),
-        PersonalityRates: new Dictionary<DemonPersonality, PersonalityRateTuning>
+        PersonalityRates: new Dictionary<CreaturePersonality, PersonalityRateTuning>
         {
-            [DemonPersonality.Loyal] = new(120, 80, 100),
-            [DemonPersonality.Stoic] = new(90, 60, 100),
-            [DemonPersonality.Proud] = new(100, 100, 130),
-            [DemonPersonality.Calculating] = new(100, 90, 110),
-            [DemonPersonality.Feral] = new(80, 150, 70),
+            [CreaturePersonality.Loyal] = new(120, 80, 100),
+            [CreaturePersonality.Stoic] = new(90, 60, 100),
+            [CreaturePersonality.Proud] = new(100, 100, 130),
+            [CreaturePersonality.Calculating] = new(100, 90, 110),
+            [CreaturePersonality.Feral] = new(80, 150, 70),
         },
         // Full 10-key coverage (seed-to-concrete T4.1) — ContractPolicy.BaseUpkeepPerDay/
         // RitualPrice throw ArgumentOutOfRangeException on a missing key, no fallback.
-        BaseUpkeepPerDay: new Dictionary<DemonRarity, int>
+        BaseUpkeepPerDay: new Dictionary<CreatureRarity, int>
         {
-            [DemonRarity.Chaff] = 2, [DemonRarity.Sprout] = 3, [DemonRarity.Grafted] = 4,
-            [DemonRarity.Cultivated] = 5, [DemonRarity.Fused] = 7, [DemonRarity.Chimeric] = 9,
-            [DemonRarity.Heirloom] = 12, [DemonRarity.Firstseed] = 16, [DemonRarity.Sunwoven] = 25,
-            [DemonRarity.Almanac] = 32,
+            [CreatureRarity.Chaff] = 2, [CreatureRarity.Sprout] = 3, [CreatureRarity.Grafted] = 4,
+            [CreatureRarity.Cultivated] = 5, [CreatureRarity.Fused] = 7, [CreatureRarity.Chimeric] = 9,
+            [CreatureRarity.Heirloom] = 12, [CreatureRarity.Firstseed] = 16, [CreatureRarity.Sunwoven] = 25,
+            [CreatureRarity.Almanac] = 32,
         },
-        RitualPriceSouls: new Dictionary<DemonRarity, long>
+        RitualPriceSouls: new Dictionary<CreatureRarity, long>
         {
-            [DemonRarity.Chaff] = 50, [DemonRarity.Sprout] = 65, [DemonRarity.Grafted] = 80,
-            [DemonRarity.Cultivated] = 100, [DemonRarity.Fused] = 130, [DemonRarity.Chimeric] = 160,
-            [DemonRarity.Heirloom] = 200, [DemonRarity.Firstseed] = 260, [DemonRarity.Sunwoven] = 400,
-            [DemonRarity.Almanac] = 500,
+            [CreatureRarity.Chaff] = 50, [CreatureRarity.Sprout] = 65, [CreatureRarity.Grafted] = 80,
+            [CreatureRarity.Cultivated] = 100, [CreatureRarity.Fused] = 130, [CreatureRarity.Chimeric] = 160,
+            [CreatureRarity.Heirloom] = 200, [CreatureRarity.Firstseed] = 260, [CreatureRarity.Sunwoven] = 400,
+            [CreatureRarity.Almanac] = 500,
         });
 
     public static readonly LoamTuning DefaultLoam = new(
@@ -215,12 +215,12 @@ internal static class ContractTuningTestBootstrap
         MatchEnd: new SoulMatchEndTuning(VictoryDelta: 100, DefeatDelta: 25),
         // Full 10-key coverage (seed-to-concrete T4.1) — SoulEarnPolicy.DiscoveryDelta has
         // no fallback for a missing key.
-        DiscoveryDelta: new Dictionary<DemonRarity, int>
+        DiscoveryDelta: new Dictionary<CreatureRarity, int>
         {
-            [DemonRarity.Chaff] = 25, [DemonRarity.Sprout] = 42, [DemonRarity.Grafted] = 58,
-            [DemonRarity.Cultivated] = 75, [DemonRarity.Fused] = 115, [DemonRarity.Chimeric] = 160,
-            [DemonRarity.Heirloom] = 200, [DemonRarity.Firstseed] = 350, [DemonRarity.Sunwoven] = 500,
-            [DemonRarity.Almanac] = 750,
+            [CreatureRarity.Chaff] = 25, [CreatureRarity.Sprout] = 42, [CreatureRarity.Grafted] = 58,
+            [CreatureRarity.Cultivated] = 75, [CreatureRarity.Fused] = 115, [CreatureRarity.Chimeric] = 160,
+            [CreatureRarity.Heirloom] = 200, [CreatureRarity.Firstseed] = 350, [CreatureRarity.Sunwoven] = 500,
+            [CreatureRarity.Almanac] = 750,
         },
         Codex: new SoulCodexTuning(HalfMilestone: 500, FullMilestone: 1500));
 
@@ -232,13 +232,13 @@ internal static class ContractTuningTestBootstrap
         PerStarMilli: 10,
         PThetaKMilli: 220, // matches the real shipped patron.v1.json (aura-skill T22)
         // Full 10-key coverage (seed-to-concrete T4.1) — PatronPolicy.RarityBaseMilli's
-        // fallback reads [DemonRarity.Almanac], which must itself be present.
-        RarityBaseMilli: new Dictionary<DemonRarity, int>
+        // fallback reads [CreatureRarity.Almanac], which must itself be present.
+        RarityBaseMilli: new Dictionary<CreatureRarity, int>
         {
-            [DemonRarity.Chaff] = 20, [DemonRarity.Sprout] = 24, [DemonRarity.Grafted] = 27,
-            [DemonRarity.Cultivated] = 30, [DemonRarity.Fused] = 34, [DemonRarity.Chimeric] = 38,
-            [DemonRarity.Heirloom] = 45, [DemonRarity.Firstseed] = 50, [DemonRarity.Sunwoven] = 60,
-            [DemonRarity.Almanac] = 70,
+            [CreatureRarity.Chaff] = 20, [CreatureRarity.Sprout] = 24, [CreatureRarity.Grafted] = 27,
+            [CreatureRarity.Cultivated] = 30, [CreatureRarity.Fused] = 34, [CreatureRarity.Chimeric] = 38,
+            [CreatureRarity.Heirloom] = 45, [CreatureRarity.Firstseed] = 50, [CreatureRarity.Sunwoven] = 60,
+            [CreatureRarity.Almanac] = 70,
         });
 
     public static readonly ShieldTuning DefaultShield = new(
@@ -279,48 +279,48 @@ internal static class ContractTuningTestBootstrap
         PerStarPowerMilli: 30,
         PerStarDefenseMilli: 30,
         // Full 10-key coverage (seed-to-concrete T4.1) — StarPolicy.StarCap's own fallback
-        // reads Tuning.StarCap[DemonRarity.Almanac] when a rarity is missing, so Almanac itself
+        // reads Tuning.StarCap[CreatureRarity.Almanac] when a rarity is missing, so Almanac itself
         // must always be present or that fallback throws too (found exactly this way: a post-
         // promotion star-merge test hit Sprout, which fell back to Almanac, which wasn't here).
-        StarCap: new Dictionary<DemonRarity, int>
+        StarCap: new Dictionary<CreatureRarity, int>
         {
-            [DemonRarity.Chaff] = 6, [DemonRarity.Sprout] = 6, [DemonRarity.Grafted] = 6,
-            [DemonRarity.Cultivated] = 8, [DemonRarity.Fused] = 8, [DemonRarity.Chimeric] = 8,
-            [DemonRarity.Heirloom] = 10, [DemonRarity.Firstseed] = 10, [DemonRarity.Sunwoven] = 10,
-            [DemonRarity.Almanac] = 10,
+            [CreatureRarity.Chaff] = 6, [CreatureRarity.Sprout] = 6, [CreatureRarity.Grafted] = 6,
+            [CreatureRarity.Cultivated] = 8, [CreatureRarity.Fused] = 8, [CreatureRarity.Chimeric] = 8,
+            [CreatureRarity.Heirloom] = 10, [CreatureRarity.Firstseed] = 10, [CreatureRarity.Sunwoven] = 10,
+            [CreatureRarity.Almanac] = 10,
         },
         StarMergeCost: new FusionCostTuning(Souls: 50, ShardCount: 1, EssenceCount: 1),
         PromotionCost: new FusionCostTuning(Souls: 200, ShardCount: 3, EssenceCount: 3),
         // Per-rung promotion price (effort-power M5). Mirrors the shipped table so a fixture drift
         // shows up as a test failure rather than as silently different balance.
-        PromotionCostByRarity: new Dictionary<DemonRarity, FusionCostTuning>
+        PromotionCostByRarity: new Dictionary<CreatureRarity, FusionCostTuning>
         {
-            [DemonRarity.Chaff] = new(150, 2, 2), [DemonRarity.Sprout] = new(185, 2, 2),
-            [DemonRarity.Grafted] = new(220, 2, 3), [DemonRarity.Cultivated] = new(320, 3, 4),
-            [DemonRarity.Fused] = new(450, 3, 5), [DemonRarity.Chimeric] = new(620, 4, 6),
-            [DemonRarity.Heirloom] = new(820, 4, 7), [DemonRarity.Firstseed] = new(1000, 5, 8),
-            [DemonRarity.Sunwoven] = new(1000, 5, 8), [DemonRarity.Almanac] = new(1000, 5, 8),
+            [CreatureRarity.Chaff] = new(150, 2, 2), [CreatureRarity.Sprout] = new(185, 2, 2),
+            [CreatureRarity.Grafted] = new(220, 2, 3), [CreatureRarity.Cultivated] = new(320, 3, 4),
+            [CreatureRarity.Fused] = new(450, 3, 5), [CreatureRarity.Chimeric] = new(620, 4, 6),
+            [CreatureRarity.Heirloom] = new(820, 4, 7), [CreatureRarity.Firstseed] = new(1000, 5, 8),
+            [CreatureRarity.Sunwoven] = new(1000, 5, 8), [CreatureRarity.Almanac] = new(1000, 5, 8),
         },
-        RecipeCost: new Dictionary<DemonRarity, RecipeCostTuning>
+        RecipeCost: new Dictionary<CreatureRarity, RecipeCostTuning>
         {
-            [DemonRarity.Cultivated] = new(Souls: 150, ShardRarity: DemonRarity.Chaff, ShardCount: 2, EssenceCount: 2),
-            [DemonRarity.Heirloom] = new(Souls: 400, ShardRarity: DemonRarity.Cultivated, ShardCount: 3, EssenceCount: 4),
-            [DemonRarity.Sunwoven] = new(Souls: 1000, ShardRarity: DemonRarity.Heirloom, ShardCount: 4, EssenceCount: 8),
+            [CreatureRarity.Cultivated] = new(Souls: 150, ShardRarity: CreatureRarity.Chaff, ShardCount: 2, EssenceCount: 2),
+            [CreatureRarity.Heirloom] = new(Souls: 400, ShardRarity: CreatureRarity.Cultivated, ShardCount: 3, EssenceCount: 4),
+            [CreatureRarity.Sunwoven] = new(Souls: 1000, ShardRarity: CreatureRarity.Heirloom, ShardCount: 4, EssenceCount: 8),
         },
-        SlotsByRarity: new Dictionary<DemonRarity, int>
+        SlotsByRarity: new Dictionary<CreatureRarity, int>
         {
-            [DemonRarity.Chaff] = 1, [DemonRarity.Sprout] = 1, [DemonRarity.Grafted] = 1,
-            [DemonRarity.Cultivated] = 2, [DemonRarity.Fused] = 2, [DemonRarity.Chimeric] = 2,
-            [DemonRarity.Heirloom] = 2, [DemonRarity.Firstseed] = 3, [DemonRarity.Sunwoven] = 3,
-            [DemonRarity.Almanac] = 3,
+            [CreatureRarity.Chaff] = 1, [CreatureRarity.Sprout] = 1, [CreatureRarity.Grafted] = 1,
+            [CreatureRarity.Cultivated] = 2, [CreatureRarity.Fused] = 2, [CreatureRarity.Chimeric] = 2,
+            [CreatureRarity.Heirloom] = 2, [CreatureRarity.Firstseed] = 3, [CreatureRarity.Sunwoven] = 3,
+            [CreatureRarity.Almanac] = 3,
         },
         // WAVE F2.3 — mirrors RecipeCost's own (sparse, same rungs) souls values above; a pick's
         // cost is read from its own source rarity, never the fusion output's.
-        InheritCostByRarity: new Dictionary<DemonRarity, long>
+        InheritCostByRarity: new Dictionary<CreatureRarity, long>
         {
-            [DemonRarity.Cultivated] = 150,
-            [DemonRarity.Heirloom] = 400,
-            [DemonRarity.Sunwoven] = 1000,
+            [CreatureRarity.Cultivated] = 150,
+            [CreatureRarity.Heirloom] = 400,
+            [CreatureRarity.Sunwoven] = 1000,
         });
 
     public static readonly DerivedStatTuning DefaultDerivedStats = new(

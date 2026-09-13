@@ -25,7 +25,7 @@
       "id": "set.obsidianjalapeno-001",
       "nameKey": "set.obsidian-chili-spore",
       "name": "Obsidian Chili Spore",
-      "themeKey": "demon.obsidianjalapeno",
+      "themeKey": "creature.obsidianjalapeno",
       "members": [
         {
           "role": "armament-primary",

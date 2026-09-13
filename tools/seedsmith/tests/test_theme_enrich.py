@@ -3,13 +3,13 @@ from pathlib import Path
 
 import pytest
 
-from seedsmith.adapters.demons import theme_enrich
+from seedsmith.adapters.creatures import theme_enrich
 from seedsmith.pipeline.model import audit_schema
 
 
 def _registry(path: Path, *, basis: str = "name") -> None:
     path.write_text(json.dumps({"schemaVersion": 1, "registryVersion": 1, "themes": {
-        "demon.alpha": {
+        "creature.alpha": {
             "speciesId": "alpha", "displayName": "Alpha", "rarity": "common",
             "motifs": ["thorn"], "antiMotifs": ["ice"],
             "expression": {"item": "material", "action": "tempo"},
@@ -56,7 +56,7 @@ def test_acceptance_marks_enriched_and_resume_is_idempotent(tmp_path):
     first = theme_enrich.enrich(registry_path=registry, ledger_path=ledger, caller=caller, write=True)
     assert first["enriched"] == 1
     assert first["complete"] is True
-    row = json.loads(registry.read_text(encoding="utf-8"))["themes"]["demon.alpha"]
+    row = json.loads(registry.read_text(encoding="utf-8"))["themes"]["creature.alpha"]
     assert row["basis"] == "enriched"
     assert row["flavor"].startswith("Thorn-wrapped")
     assert row["flavorProvenance"]["pipeline"] == "theme-enrich"
@@ -77,7 +77,7 @@ def test_blocked_answer_is_terminal_but_does_not_lie_about_basis(tmp_path):
     )
     assert result["blocked"] == 1
     assert result["complete"] is False
-    row = json.loads(registry.read_text(encoding="utf-8"))["themes"]["demon.alpha"]
+    row = json.loads(registry.read_text(encoding="utf-8"))["themes"]["creature.alpha"]
     assert row["basis"] == "name"
 
 
@@ -86,7 +86,7 @@ def test_bound_name_theme_is_refused_before_model_call(tmp_path):
     items = tmp_path / "items"
     items.mkdir()
     _registry(registry)
-    (items / "set.json").write_text('{"kind":"set","entries":[{"themeKey":"demon.alpha"}]}', encoding="utf-8")
+    (items / "set.json").write_text('{"kind":"set","entries":[{"themeKey":"creature.alpha"}]}', encoding="utf-8")
     with pytest.raises(ValueError, match="item-bound"):
         theme_enrich.enrich(registry_path=registry, items_root=items,
                             ledger_path=tmp_path / "ledger.json",

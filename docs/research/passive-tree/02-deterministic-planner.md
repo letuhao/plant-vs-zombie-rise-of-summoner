@@ -21,7 +21,7 @@ from a fact. **RECALL** = general knowledge, not verified in-repo.
 
 | Question | Answer |
 |---|---|
-| **Real roster `n`** | **39 trees are derivable from closed rosters today** — 12 aptitudes + 6 elements + 21 statuses. Demon families add `F`, and **`F` does not exist as a closed roster**: `family` is declared an *open* axis and the shipped corpus carries **699 distinct family tokens over 841 entries**. `n = 39 + F` and the planner cannot read `F` |
+| **Real roster `n`** | **39 trees are derivable from closed rosters today** — 12 aptitudes + 6 elements + 21 statuses. Creature families add `F`, and **`F` does not exist as a closed roster**: `family` is declared an *open* axis and the shipped corpus carries **699 distinct family tokens over 841 entries**. `n = 39 + F` and the planner cannot read `F` |
 | **Real point supply** | **3 aptitude points per `Θ`** (commander scope) and **1 skill point per `Θ`**. At `Θ=100`: 300 aptitude points, 100 skill points |
 | **Recommended topology** | **7 tiers × 2 branches, 14 nodes per branch, 29 nodes per tree** (LE parity) as a **layered DAG**, not a strict tree. Corpus **1,131 nodes at n=39**; **1,682 at n=58** |
 | **Tier count the ladder supports** | **The ladder never runs out** — `Θ` is uncapped by PS-8, and `T_max ≈ √(1.2·Θ)` for an all-in build. What must be chosen is the *authored* depth. `tierCount = T_max(Θ_designTarget, s=1)`; 7 tiers is the depth an all-in build reaches at **`Θ ≈ 39`** |
@@ -35,7 +35,7 @@ from a fact. **RECALL** = general knowledge, not verified in-repo.
 
 1. `DESIGN-GATE.md`'s atom row says *"5 attach points, 12 kinds, **8 triggers**"*. The code says
    **7 / 16 / 13** (`AtomKindRegistry.cs:21`, `:31`, `:36`). Code beats docs.
-2. `D9` says *"each demon family"*. There is no closed family roster; `family` is specified as an
+2. `D9` says *"each creature family"*. There is no closed family roster; `family` is specified as an
    **open** axis (`spec-anchor-contract.md:58`) and the corpus has 699 distinct values.
    **`D9` is not executable as written.**
 3. `D20`'s ladder is **not** flat reward-per-point at tier 1. `W(1)/req(1) = 0.100·b` against an
@@ -46,7 +46,7 @@ from a fact. **RECALL** = general knowledge, not verified in-repo.
 
 ## 1. Roster derivation (D9) — counted, not recalled
 
-`D9`: *"12 primary + all elemental + all status + each demon family"*. The generator must **read**
+`D9`: *"12 primary + all elemental + all status + each creature family"*. The generator must **read**
 the rosters (ideal §8: *"Twelve is a measured outcome, not a decision"*). Counted this session:
 
 | Roster | Count | Source of truth (code) | Checked-in mirror the planner can read |
@@ -54,7 +54,7 @@ the rosters (ideal §8: *"Twelve is a measured outcome, not a decision"*). Count
 | **Aptitudes** | **12** | `src/FusionRpg.Core/Stats/Aptitudes/Aptitude.cs:36` — `Count = PostureCount × PerPosture` = `3 × 4`; the twelve rows are `:40-51` | `data/seed/aptitudes/roster.json` — 12 entries ✅ |
 | **Elements** | **6** | `src/FusionRpg.Core/Combat/Element/ElementTable.cs:125-130` — fire, ice, air, earth, light, dark | `data/seed/elements/roster.json` — 6 entries ✅ |
 | **Statuses** | **21** | `src/FusionRpg.Core/Status/StatusCatalogBootstrap.cs:16-58` — counted: 8 UnityCc + 8 overlay-authored + 5 contagion | ⛔ **none exists.** `find data -iname "*status*"` returns only `data/seed/atoms/fx-status.json` and `data/tuning/status.v1.json` |
-| **Demon families** | ⛔ **not a roster** | see below | — |
+| **Creature families** | ⛔ **not a roster** | see below | — |
 
 **FACT — the aptitude count is computed, not typed.** `AptitudeCatalog.Count` is a product of
 `PostureCount = 3` and `PerPosture = 4` (`Aptitude.cs:30-36`), with the comment saying so: *"a
@@ -63,9 +63,9 @@ forgettable edit."* The planner must read the roster file, never the literal 12 
 exists: `data/tuning/set-charm-gen.v1.json`'s `populations.aptitudeCountNote` refuses to transcribe
 12 for exactly this reason.
 
-### 1.1 ⛔ `D9`'s demon-family clause has no closed roster to read
+### 1.1 ⛔ `D9`'s creature-family clause has no closed roster to read
 
-**FACT.** `data/seed/demons/species/*/*.json` — **503 files, 841 entries**, counted this session.
+**FACT.** `data/seed/creatures/species/*/*.json` — **503 files, 841 entries**, counted this session.
 The `family` field is an **array of free-text strings**:
 
 ```json
@@ -81,7 +81,7 @@ Counted over all 841 entries:
 | Species per first-family (mean) | **1.60** |
 | Largest first-family | `undead`, 63 entries |
 
-**FACT — this is by design, not by drift.** `docs/architecture/demon-seed/spec-anchor-contract.md:58`
+**FACT — this is by design, not by drift.** `docs/architecture/creature-seed/spec-anchor-contract.md:58`
 classifies `family` as **`CLASSIFIED, open` — *"grows organically"*, not enumerable**, and
 `spec-classify-pipelines.md:86` names the rule `family-open`: *"a new `family` value is allowed and
 recorded, never rejected — none, the axis is open by construction."*
@@ -95,8 +95,8 @@ gap is upstream of this program. Two ways out, both owner decisions:
 
 | Option | What it means |
 |---|---|
-| **A — declare a closed family roster** | `data/seed/demons/families/roster.json`, ~15–25 curated ids, each species' free-text `family` mapped onto one. The planner reads the roster; the corpus keeps its open descriptive field |
-| **B — drop family trees; use `DemonType` scope directly** | `AllocationScope.DemonType` already exists (`AptitudeAllocation.cs:8`) and its budget rate ships (`PointBudget.PointsFor`). One tree per *species* is `D23`'s deferred round, so this leaves the demon axis entirely to `D23` |
+| **A — declare a closed family roster** | `data/seed/creatures/families/roster.json`, ~15–25 curated ids, each species' free-text `family` mapped onto one. The planner reads the roster; the corpus keeps its open descriptive field |
+| **B — drop family trees; use `CreatureType` scope directly** | `AllocationScope.CreatureType` already exists (`AptitudeAllocation.cs:8`) and its budget rate ships (`PointBudget.PointsFor`). One tree per *species* is `D23`'s deferred round, so this leaves the creature axis entirely to `D23` |
 
 **Recommendation: A, with `F ≈ 19`**, because it is the figure `spec-roster-metrics.md` already
 argued for and it keeps `D9` intact. Then **`n = 39 + 19 = 58`**.
@@ -120,9 +120,9 @@ Each tree needs a **gate quantity** for `req(t)` to read (ideal §5). Verified a
 | Tree category | Count | Gate quantity | State in code |
 |---|---|---|---|
 | Primary (aptitude) | 12 | Commander-scope aptitude points | ✅ shipped — `PointBudget.PointsFor(AllocationScope.Commander, …)` |
-| Elemental | 6 | `Aspect` scope / `element_mastery` | ⚠️ scope **exists** (`AptitudeAllocation.cs:8`), **source does not**. `PointBudget.cs:14-18`: *"Aspect's own source (`element_mastery`) is owned by the demon program's `aspect-scope` module and does not exist yet"* |
+| Elemental | 6 | `Aspect` scope / `element_mastery` | ⚠️ scope **exists** (`AptitudeAllocation.cs:8`), **source does not**. `PointBudget.cs:14-18`: *"Aspect's own source (`element_mastery`) is owned by the creature program's `aspect-scope` module and does not exist yet"* |
 | Status | 21 | `status_mastery` (D19) | ⛔ **not in the enum.** `AllocationScope` has exactly 4 values |
-| Demon family | F | `DemonType` / almanac XP | ✅ rate shipped; source supplied by caller |
+| Creature family | F | `CreatureType` / almanac XP | ✅ rate shipped; source supplied by caller |
 
 **INFERENCE.** 27 of 39 trees have no live gate source. Per `CLAUDE.md`'s RPG-layer rule this is a
 **wiring gap**, not an architectural wall — the scope enum takes a fifth value and the rate table
@@ -222,7 +222,7 @@ branch"*; this is the concrete proposal against it.
 **FACT.** `data/tuning/aptitudes.v5.json:22-27` — the per-scope table `PointBudget` actually reads:
 
 ```json
-"aptitudePointsPerThetaMilliByScope": { "commander": 3, "demonType": 4, "aspect": 4, "uniqueDemon": 6 }
+"aptitudePointsPerThetaMilliByScope": { "commander": 3, "creatureType": 4, "aspect": 4, "uniqueCreature": 6 }
 ```
 
 **FACT — despite the name, "Milli" does not divide.** `PointBudget.PointsFor` is
@@ -704,9 +704,9 @@ write. `HOLE` = stage 2 must fill; the emit gate refuses a plan with an unfilled
   "aptitudes": ["Might","Fortitude", …],   // 12, read from data/seed/aptitudes/roster.json
   "elements":  ["fire","ice","air","earth","light","dark"],   // 6
   "statuses":  ["butter","freeze", …],     // 21 — NEEDS data/seed/statuses/roster.json (does not exist)
-  "demonFamilies": [ … ],                  // F  — NEEDS a closed roster (§1.1); empty is legal, and
+  "creatureFamilies": [ … ],                  // F  — NEEDS a closed roster (§1.1); empty is legal, and
                                            //      the plan then emits 39 trees and says so
-  "counts": { "aptitudes": 12, "elements": 6, "statuses": 21, "demonFamilies": 0, "trees": 39 }
+  "counts": { "aptitudes": 12, "elements": 6, "statuses": 21, "creatureFamilies": 0, "trees": 39 }
 }
 ```
 
@@ -797,7 +797,7 @@ one-line check against `potency.maxNodeShareMilli` rather than a re-derivation. 
 ```jsonc
 {
   "treeId": "tree.aptitude.might",          // FROZEN — derived from category + roster id
-  "category": "aptitude",                   // FROZEN — aptitude|element|status|demonFamily
+  "category": "aptitude",                   // FROZEN — aptitude|element|status|creatureFamily
   "subject": "Might",                       // FROZEN — the roster entry
   "gateQuantity": "aptitude.Might@Commander",// FROZEN — what req(t) reads (§1.3)
   "archetype": "gated-deep",                // FROZEN — ordinal mod 3
@@ -852,7 +852,7 @@ function of:
 | `data/seed/aptitudes/roster.json` | ✅ |
 | `data/seed/elements/roster.json` | ✅ |
 | `data/seed/statuses/roster.json` **(must be created)** | ✅ |
-| `data/seed/demons/families/roster.json` **(must be created, §1.1)** | ✅ |
+| `data/seed/creatures/families/roster.json` **(must be created, §1.1)** | ✅ |
 | `data/tuning/passive-tree-gen.v{n}.json` | ✅ domain + version + sha256 |
 | `plannerVersion` | ✅ |
 
@@ -943,10 +943,10 @@ built-in default.
 | # | Owed | To whom |
 |---|---|---|
 | 1 | `data/seed/statuses/roster.json` — mirror of the 21 in `StatusCatalogBootstrap` | this repo; the planner cannot reference `FusionRpg.Core` (`tunables-ssot.md` §7.2) |
-| 2 | A **closed** demon-family roster, or `D9` amended to drop family trees | owner (§1.1) |
+| 2 | A **closed** creature-family roster, or `D9` amended to drop family trees | owner (§1.1) |
 | 3 | Two reviewed rows in `ssot-power-scale.md` §10 — `req(t)` as a cost ladder, and the share→`P(Θ)` read | the power SSOT (§3.5) |
 | 4 | `AllocationScope.StatusMastery` — a fifth enum value + a fifth rate-table row | `D19`; class-system |
-| 5 | `Aspect`'s source value (`element_mastery`) | the demon program's `aspect-scope` module (`PointBudget.cs:14-18`) |
+| 5 | `Aspect`'s source value (`element_mastery`) | the creature program's `aspect-scope` module (`PointBudget.cs:14-18`) |
 
 None of 1–5 blocks *writing* the plan. Items 1, 2 and 4 block *emitting* a complete one.
 
@@ -957,7 +957,7 @@ None of 1–5 blocks *writing* the plan. Items 1, 2 and 4 block *emitting* a com
 | # | Written | Code / measurement says | Verdict |
 |---|---|---|---|
 | 1 | `DESIGN-GATE.md` §1 atom row: *"5 attach points, 12 kinds, **8 triggers** (`AtomKindRegistry.TriggerCount`)"* | `AttachPointCount = 7` (`AtomKindRegistry.cs:21`), `KindCount = 16` (`:31`), `TriggerCount = 13` (`:36`) | ⛔ **The gate file is stale on the exact number it says wins over every spec.** It was corrected 7→8 on 2026-09-03 and has drifted again. Code beats docs |
-| 2 | `D9`: *"each demon family"* | `family` is `CLASSIFIED, **open**` (`spec-anchor-contract.md:58`); 699 distinct tokens over 841 entries; `spec-roster-metrics.md:38` expected 19 | ⛔ **`D9` is not executable.** Needs a closed roster or an amendment (§1.1) |
+| 2 | `D9`: *"each creature family"* | `family` is `CLASSIFIED, **open**` (`spec-anchor-contract.md:58`); 699 distinct tokens over 841 entries; `spec-roster-metrics.md:38` expected 19 | ⛔ **`D9` is not executable.** Needs a closed roster or an amendment (§1.1) |
 | 3 | `D20`: *"yields flat reward-per-point at every depth"* | `W/req` is `0.100b` at `t=1` against a `0.200b` asymptote — **tier 1 is half** (§3.4) | ⚠️ Flat from tier 2 on (±11%). The claim overstates tier 1. Owner decides: keep the entry tax, or index `req` on `t(t+1)/2` for exact flatness |
 | 4 | ideal §3.1: *"`Fmax = 1.5` (tunable)"* in the code block | `D5` revises it to 1.15–1.25 | ⚠️ Cosmetic: the §3.1 block was not updated when `D5` was. Worth a one-line fix in the ideal |
 | 5 | ideal §2 `D13`: *"only then does an LLM fill … bonuses"* | `ContentValidation.cs:58-60`: the budget is *"**never** a generation input"* | ✅ **Not a contradiction — a constraint to honour.** The plan hands a *ceiling and a quota*; pools + weights still choose the atoms (§5.4) |
@@ -973,8 +973,8 @@ is respected (`PowerVector` prices are relative and never multiplied by `content
 
 Only questions that a decision — not a measurement — can close.
 
-1. **The demon-family roster (§1.1).** Option A (declare ~19 closed families) or Option B (drop
-   family trees, leave the demon axis to `D23`)? This is the only thing standing between `n = 39` and
+1. **The creature-family roster (§1.1).** Option A (declare ~19 closed families) or Option B (drop
+   family trees, leave the creature axis to `D23`)? This is the only thing standing between `n = 39` and
    `n = 58`.
 2. **`ladder.reqBase` (§3.4).** Keep `10` and accept that tier 1 is a deliberate 2× entry tax, or
    move to `req'(t) = 5·t(t+1)/2` for provably constant reward-per-point? Both are defensible; the
@@ -992,12 +992,12 @@ Only questions that a decision — not a measurement — can close.
 
 ```
 [x] I identified the subsystem(s) this touches — passive trees, class system, power ladder,
-    tunables, effect atoms, demon seeds.
+    tunables, effect atoms, creature seeds.
 [x] I read every doc in the §1 row(s) this session: DESIGN-GATE.md, passive-tree-ideal.md,
     ssot-power-scale.md (§4, §10, §11 head), tunables-ssot.md, class-system-ideal.md (§4.2, §8.1d),
     class-system-map.md (§4b, §5), passive-tree-prior-art-2026-09-04.md,
-    effect-atom/spec-power-vector.md, item/ssot-sets.md §3.5, demon-seed/spec-anchor-contract.md,
-    demon-seed/spec-classify-pipelines.md, demon-seed/spec-roster-metrics.md.
+    effect-atom/spec-power-vector.md, item/ssot-sets.md §3.5, creature-seed/spec-anchor-contract.md,
+    creature-seed/spec-classify-pipelines.md, creature-seed/spec-roster-metrics.md.
 [x] I checked decisions.md is referenced by the ideal's own D-list; this doc proposes no lock
     change. It does report three places where a written claim disagrees with code (§11).
 [x] Every factual claim cites file:line.

@@ -1,15 +1,15 @@
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Combat;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Stats.Derived;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Battle;
 
 /// <summary>
-/// C2d: TraitBattleCatalog — every demon trait has battle semantics. 7 Funnel-routed
+/// C2d: TraitBattleCatalog — every creature trait has battle semantics. 7 Funnel-routed
 /// (stat/HP mutations) + 7 engine-native behaviors (targeting/retreat/report multipliers),
-/// the split locked in demon-standalone-plan.md §Refinement.
+/// the split locked in creature-standalone-plan.md §Refinement.
 /// </summary>
 public class TraitBattleTests
 {
@@ -33,9 +33,9 @@ public class TraitBattleTests
     // ---- the 14-row table ----
 
     [Fact]
-    public void Every_demon_trait_has_exactly_one_battle_def()
+    public void Every_creature_trait_has_exactly_one_battle_def()
     {
-        var traitIds = DemonTraitCatalog.All.Select(t => t.TraitId).OrderBy(x => x, StringComparer.Ordinal).ToList();
+        var traitIds = CreatureTraitCatalog.All.Select(t => t.TraitId).OrderBy(x => x, StringComparer.Ordinal).ToList();
         var battleIds = TraitBattleCatalog.All.Select(t => t.TraitId).OrderBy(x => x, StringComparer.Ordinal).ToList();
         Assert.Equal(traitIds, battleIds);
         Assert.Equal(14, TraitBattleCatalog.All.Count);

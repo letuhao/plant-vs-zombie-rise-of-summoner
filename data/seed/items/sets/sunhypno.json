@@ -25,7 +25,7 @@
       "id": "set.sunhypno-001",
       "nameKey": "set.spore-bound-trampoline",
       "name": "Spore-Bound Trampoline",
-      "themeKey": "demon.sunhypno",
+      "themeKey": "creature.sunhypno",
       "members": [
         {
           "role": "armament-primary",

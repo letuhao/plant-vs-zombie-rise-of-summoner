@@ -46,7 +46,7 @@ public static class PassiveTreeCatalogLoader
         ["primary"] = TreeCategory.Primary,
         ["elemental"] = TreeCategory.Elemental,
         ["status"] = TreeCategory.Status,
-        ["demonFamily"] = TreeCategory.Family,
+        ["creatureFamily"] = TreeCategory.Family,
         ["family"] = TreeCategory.Family,
         ["species"] = TreeCategory.Species,
     };
@@ -286,6 +286,17 @@ public static class PassiveTreeCatalogLoader
             refusals.Add($"node '{nodeId}': unknown op '{opStr}'");
             return null;
         }
+
+        // §6 M3 (task P4.2). Before `More` became a NodeAtomOp member, `Enum.TryParse` above was the
+        // whole enforcement: "more" simply did not parse, so a derived atom could never carry it. The
+        // member now exists because `stat.modify` legitimately supports `more` (AtomKindRegistry.cs:517)
+        // and the two kinds share this enum — so the derived-side refusal must be explicit, or a
+        // `More`-op stat.derived row would load cleanly and then apply nothing forever
+        // (`AtomDerivedSubsystem.TryParseOp` has no "more" arm). Refused here BY NAME, at load, exactly
+        // as the old structural failure did.
+        if (op == NodeAtomOp.More && string.Equals(kindId, "stat.derived", StringComparison.Ordinal))
+            refusals.Add($"node '{nodeId}': channel '{channelId}' op 'more' is not one of " +
+                        "Flat|Increased|Replace|Flag (§6 M3 -- there is no More on the derived side)");
 
         string? trigger = el.TryGetProperty("trigger", out var trigEl) && trigEl.ValueKind != JsonValueKind.Null
             ? trigEl.GetString() : null;

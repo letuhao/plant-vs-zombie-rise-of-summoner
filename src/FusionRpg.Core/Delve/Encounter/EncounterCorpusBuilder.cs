@@ -1,4 +1,4 @@
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
 
@@ -23,7 +23,7 @@ public static class EncounterCorpusBuilder
 {
     public static IReadOnlyList<ConcreteAnchor> Build(
         string speciesDir, AptitudeTuning aptitudeTuning, PowerTuning powerTuning,
-        DemonShapeTuning shapeTuning, DemonThreatTuning threatTuning)
+        CreatureShapeTuning shapeTuning, CreatureThreatTuning threatTuning)
     {
         if (speciesDir is null) throw new ArgumentNullException(nameof(speciesDir));
         if (aptitudeTuning is null) throw new ArgumentNullException(nameof(aptitudeTuning));

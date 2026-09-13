@@ -25,7 +25,7 @@
       "id": "set.helmetplant-001",
       "nameKey": "set.verdant-bark-graft",
       "name": "Verdant Bark Graft",
-      "themeKey": "demon.helmetplant",
+      "themeKey": "creature.helmetplant",
       "members": [
         {
           "role": "armament-primary",

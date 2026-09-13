@@ -25,7 +25,7 @@
       "id": "set.squalourzombie-001",
       "nameKey": "set.song-of-the-grave",
       "name": "Song of the Grave",
-      "themeKey": "demon.squalourzombie",
+      "themeKey": "creature.squalourzombie",
       "members": [
         {
           "role": "armament-primary",

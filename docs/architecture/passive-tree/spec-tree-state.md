@@ -29,19 +29,19 @@ spend, price and power on every read.
 **The catalog side.** D27 ships 12 primary + 6 elemental + 24 status = **42 generic trees** (D51,
 2026-09-06: was 21 status / 39 trees), and D29 fixes each at 10 tiers × 2 branches = **40 nodes** —
 exactly 40, everywhere, species trees included. So one actor faces **1,680** possible owned nodes and
-1,680 possible soul levels, before demon-family or species trees exist
+1,680 possible soul levels, before creature-family or species trees exist
 ([passive-tree-ideal.md:60-61](../passive-tree-ideal.md)).
 
 **The actor side is uncapped, and this is the half that decides the storage shape.** D21 gives *every*
-actor its own tree state — commander and each demon alike. The roster has no ceiling:
+actor its own tree state — commander and each creature alike. The roster has no ceiling:
 
 - `ContractPolicy.Capacity(purchasedSlots) => BaseSlots + Math.Max(0, purchasedSlots)`
   (`ContractPolicy.cs:171`), whose own comment at `:168-170` says the `Math.Min` was removed because
   *"the escalating price… was always the real scarcity control, not this `Math.Min`. A roster of 2,012
   costs 600,300,000 cumulative souls; that is the limit, not a hard-coded 48."*
 - `ContractPolicy.CanBuySlot(purchasedSlots) => true` (`:182`) — *"Always true post-T3.6."*
-- And **unbound** specimens are unlimited: a new demon *"simply arrives unbound when capacity is
-  full"* (`RpgStore.Contracts.cs:80-83`). An unbound demon is still an actor, so it still carries tree
+- And **unbound** specimens are unlimited: a new creature *"simply arrives unbound when capacity is
+  full"* (`RpgStore.Contracts.cs:80-83`). An unbound creature is still an actor, so it still carries tree
   state.
 
 A dense row per actor is therefore `2,012 × 1,680 ≈ 3.4 million` rows for one player, all zero (D51:
@@ -74,8 +74,8 @@ information. A node that is not owned has no row; a node owned but never soul-le
 2. **Sparse by construction.** `SaveAllocation` (`RpgStore.Aptitudes.cs:76`) is a delete-then-insert
    of non-zero rows only — *"no row for an unspent aptitude — nothing to persist"* (`:96`). Copy that
    transaction shape exactly.
-3. **`(scope, scope_key)` is already the D21 key.** The same two columns address a commander, a demon
-   type, an aspect and a unique demon (`AllocationScope` at `AptitudeAllocation.cs:8`;
+3. **`(scope, scope_key)` is already the D21 key.** The same two columns address a commander, a creature
+   type, an aspect and a unique creature (`AllocationScope` at `AptitudeAllocation.cs:8`;
    `ScopeToText` at `RpgStore.Aptitudes.cs:52-60`). *"Every actor carries its own tree state"* needs no
    new addressing scheme.
 
@@ -361,7 +361,7 @@ is a **different question with a different answer**, and the gap between them is
 > `squad-harness` can move it on measurement **without reopening this spec or any other**. That is the
 > whole point of §8: the spec names the key and the unit; the harness settles the value.
 >
-> **What stays open is the other three scope values** (`demonType`, `aspect`, `uniqueDemon`), which
+> **What stays open is the other three scope values** (`creatureType`, `aspect`, `uniqueCreature`), which
 > are unmeasured exactly as the sibling table's own `_weightsWhy` says of its `{3,4,4,6}`.
 
 **And `g ∝ k²` is what carries the archetype defect into the grant.** Width enters *squared*, so the
@@ -451,7 +451,7 @@ Four rules, and `tree-resolve` §5.2 states the same four so neither module can 
    `AptitudeAllocation.cs:19-22` rule again: *"treating 'nothing chosen' as 'chose evenly' would
    silently invent a default nobody set."*
 4. **Membership is: skill points the actor spent directly, and soul levels the actor bought
-   directly.** Item-granted, aptitude-threshold and demon-aspect unlocks are **excluded**, and a named
+   directly.** Item-granted, aptitude-threshold and creature-aspect unlocks are **excluded**, and a named
    test asserts the exclusion is a stated rule rather than an accident.
 
 > **This is deliberately not the same question §2.1 answers, and the two tables must not be read
@@ -467,7 +467,7 @@ through the tree's own rules… no special case to define, enforce or test"* —
 item's points buy" has no per-node answer, and §2.1 refuses to invent one for the price. It follows
 that `selfSpent` is only a *filter* once some source other than the player's own spend can add a
 point, and **no such source ships**: `SkillPointsPerThetaMilli` has zero production consumers (§3),
-and aptitude-threshold and demon-aspect grants of skill points exist in D2's list and nowhere in
+and aptitude-threshold and creature-aspect grants of skill points exist in D2's list and nowhere in
 `src/`. **So today `selfSpent(actor)` is the whole owned set, and rule 4 is a rule with nothing yet
 to exclude.**
 
@@ -491,8 +491,8 @@ later, which already lists `pointEconomy.skillPointsPerThetaMilliByScope.command
 `AptitudePointEconomy.SkillPointsPerThetaMilliByScope` — the exact table this section proposed, its
 own doc comment citing this section by name — and `PointBudget.cs:95` implements `SkillPointsFor
 (AllocationScope, long, AptitudeTuning)`, the exact signature §3's own worked snippet below shows.
-The live tuning file is `aptitudes.v7.json` (D55, 2026-09-06, bumped from `v6` — demonType/aspect/
-uniqueDemon given real rates; see OQ3 below), not the `v5` this section's own line citations still
+The live tuning file is `aptitudes.v7.json` (D55, 2026-09-06, bumped from `v6` — creatureType/aspect/
+uniqueCreature given real rates; see OQ3 below), not the `v5` this section's own line citations still
 name (re-grep the symbol, not the cited line number, if a citation below looks stale). The rest of
 this section is kept as the historical argument for why the fix was necessary — still accurate
 reasoning, just no longer a description of present, unbuilt work.
@@ -501,11 +501,11 @@ reasoning, just no longer a description of present, unbuilt work.
 (`AptitudeTuning.cs:13`), parsed at `:158`, value `1` at `data/tuning/aptitudes.v5.json:17`. Its
 sibling one block over is already a table:
 `AptitudePointEconomy.AptitudePointsPerThetaMilliByScope` (`AptitudeTuning.cs:43-45`,
-`aptitudes.v5.json:23-28`, `{commander 3, demonType 4, aspect 4, uniqueDemon 6}`). Skill points have
+`aptitudes.v5.json:23-28`, `{commander 3, creatureType 4, aspect 4, uniqueCreature 6}`). Skill points have
 no scope table.
 
 **Why that breaks the design outright.** With one scalar, "an actor's skill points" has no per-actor
-definition, and the path of least resistance is that every actor reads `Θ_player`. Fifty demons would
+definition, and the path of least resistance is that every actor reads `Θ_player`. Fifty creatures would
 then each get a full commander budget on its own fresh price ladder: **50 × 31 nodes at `Θ=100` is
 1,550 — most of the 1,680-node generic catalog (D51, 2026-09-06: was 1,560, when this WAS effectively
 the whole catalog), owned across the roster at the calibration point.** D25's bound does not survive
@@ -534,7 +534,7 @@ public static long SkillPointsFor(AllocationScope scope, long sourceValue, Aptit
 
 **Blocked-on, tracked rather than open:** the four scope sources are in different states. Specimen
 level now reads the shared arithmetic curve; species level is an index
-(`PointBudget.DemonTypeSourceFromLevel`, `:40`); `element_mastery` and almanac XP have **zero `src/`
+(`PointBudget.CreatureTypeSourceFromLevel`, `:40`); `element_mastery` and almanac XP have **zero `src/`
 hits**. This module needs whichever scopes actually ship trees, not all four.
 
 **And `element_mastery` now has an owner (D37).** It is one of the two quantities the new wave-0
@@ -581,7 +581,7 @@ value rather than defaulting"* — while moving **where** it throws.
   transaction**. With no partial respec there is no orphaned unlock.
 - **Scoped per actor**, `(scope, scope_key)`. The shipped store is per-key by construction —
   `SaveAllocation(scope, scopeKey, …)` (`RpgStore.Aptitudes.cs:76`) — and a roster-wide reset at a
-  2,000-demon roster would be 2,000 delete-and-reinsert transactions under one lock. Price it per
+  2,000-creature roster would be 2,000 delete-and-reinsert transactions under one lock. Price it per
   actor.
 - **Never refused.** Copy `RespecPolicy`'s own API discipline verbatim (`RespecPolicy.cs:33-35`):
   *"Always available, always priced, never refused — there is no 'cannot respec' return here on
@@ -650,10 +650,10 @@ standalone path where battles *are* the loop.
    battle path does not call it in a loop — the same seam discipline `SpeciesAllocationSeamTests`
    already enforces for `LoadAllocation`.
 
-**One adjacent constraint, recorded so it is not tripped over.** `ListDemonRoster`
-(`RpgStore.Demons.cs:154`) selects every non-retired specimen for a player with no `LIMIT` and no
+**One adjacent constraint, recorded so it is not tripped over.** `ListCreatureRoster`
+(`RpgStore.Creatures.cs:154`) selects every non-retired specimen for a player with no `LIMIT` and no
 cursor. **Tree state must not be joined onto it until it pages** — at a 2,012 roster that response is
-already large, and "compare my demons' builds" is exactly the surface that would join them.
+already large, and "compare my creatures' builds" is exactly the surface that would join them.
 
 ### 7. Numeric types
 
@@ -721,7 +721,7 @@ The struck names are superseded and must not appear in code, config or a sibling
 | `unlockCost.stepPoints` ~~`unlockCost.step`~~ | skill **points** | 2 | same |
 | `soulTrack.thetaPerSoulLevelMilli` ~~`soulThetaWeight` (`Ws`)~~ | `Θ` per soul level, **per-mille** | **unmeasured** | same |
 | `pointEconomy.skillPointsPerThetaMilliByScope.commander` | skill points per `Θ` | **11 — settled (D38).** `10.40` from the corner-share derivation, rounded up; §2.2d carries the working and the 19.2 alternative it is not | `data/tuning/aptitudes.v{n+1}.json` |
-| `pointEconomy.skillPointsPerThetaMilliByScope.{demonType,aspect,uniqueDemon}` | skill points per that scope's own source unit | **{15, 15, 22} — settled (D55, 2026-09-06).** Proportional to the sibling `aptitudePointsPerThetaMilliByScope` {3,4,4,6} ratio against commander=11; OQ3 below carries the derivation | `data/tuning/aptitudes.v7.json` |
+| `pointEconomy.skillPointsPerThetaMilliByScope.{creatureType,aspect,uniqueCreature}` | skill points per that scope's own source unit | **{15, 15, 22} — settled (D55, 2026-09-06).** Proportional to the sibling `aptitudePointsPerThetaMilliByScope` {3,4,4,6} ratio against commander=11; OQ3 below carries the derivation | `data/tuning/aptitudes.v7.json` |
 | `pointEconomy.respecPrice` | **souls** (§5.1 — settled, not unresolved) | 10 today (`aptitudes.v7.json`, unchanged since `v5`) | same |
 
 **Read in place, never copied.** `grant.skillPointsPerTheta` already ships with a live loader
@@ -886,7 +886,7 @@ public static long CostOfNextNode(long nodesOwned, PassiveTreeTuning tuning)
 | `an_invalid_red_node_costs_nothing_to_hold` | D8's trap shape, avoided |
 | `the_count_is_across_all_trees_never_per_tree` | §2.1's last row |
 | `a_missing_scope_rate_is_a_load_rejection_naming_it` | T5, never a default |
-| `every_actor_reads_its_own_scope_budget` | D34 — a demon must not read `Θ_player` |
+| `every_actor_reads_its_own_scope_budget` | D34 — a creature must not read `Θ_player` |
 | `an_unknown_node_id_does_not_throw_on_actor_load` | §4 — the `AptitudeAllocation.cs:39` defect not repeated |
 | `an_unknown_node_id_rejects_the_import_naming_every_offender` | §4's boundary, one report |
 | `a_retired_node_loads_as_invalid_and_grants_nothing` | D11, never silently repaired |
@@ -910,7 +910,7 @@ keep every SQL statement inside `FusionRpg.Data`; keep the `RpgStore` partial-cl
 
 **Ask first:** ~~**republishing `g`**~~ **— closed by D38 (§2.2d): `11`, sized against the measured
 corner build, and a tunable `squad-harness` may move on measurement without reopening a spec**; ~~the
-**other three** values of `skillPointsPerThetaMilliByScope` (`demonType`, `aspect`, `uniqueDemon`)~~
+**other three** values of `skillPointsPerThetaMilliByScope` (`creatureType`, `aspect`, `uniqueCreature`)~~
 **— closed 2026-09-06 by D55: `{15, 15, 22}`, shipped as a flagged guess (§ Open questions #3), and
 `squad-harness` may move any of the three on measurement without reopening this spec, same as
 commander's `11`**; ~~**which resource respec costs**~~ **— closed, it is
@@ -924,7 +924,7 @@ boolean `CanUnlock` that can return false; count souls or invalid nodes toward t
 per tree; throw on an unknown node id during an actor load; add a fifth `AllocationScope` member for
 status mastery — **D35 removed that dependency**, and `AptitudeAllocation.Total()` sums *every* enum
 member into the aptitude share denominator `decisions.md:103` locks, so a new member is a live
-regression, not a slot; join tree state onto the unpaged `ListDemonRoster`; multiply anything by
+regression, not a slot; join tree state onto the unpaged `ListCreatureRoster`; multiply anything by
 `P(Θ)` — that is `tree-resolve`'s and only `tree-resolve`'s.
 
 ## Success criteria
@@ -939,7 +939,7 @@ regression, not a slot; join tree state onto the unpaged `ListDemonRoster`; mult
 - [ ] `skillPointsPerThetaMilliByScope.commander` reproduces from the **corner-share** derivation
       `g = a·corner·step·k²/s` = 10.40, rounded up to the shipped `11` (§2.2d, D38). The share-1.0
       form (19.2) is recorded, not asserted.
-- [ ] Every actor's budget reads its **own** scope rate; a demon reading `Θ_player` fails a test.
+- [ ] Every actor's budget reads its **own** scope rate; a creature reading `Θ_player` fails a test.
 - [ ] One unknown node id fails the import with a report and leaves every actor loadable.
 - [ ] A six-actor squad's tree state loads in **one** query, one lock acquisition, one connection.
 - [ ] `scripts/audit-overflow.py` reports no critical finding; no `float` and no narrowing cast on any
@@ -1002,16 +1002,16 @@ what was decided and why, per this file's own historical-record convention (§3 
    implement it against; it just was never a `firstPoints`/`stepPoints` question.
 3. ~~**The other three values of `skillPointsPerThetaMilliByScope`**~~ — **CLOSED 2026-09-06 by D55:
    proportional to the sibling `{3,4,4,6}` ratio, scaled against the already-settled commander value
-   (`11`).** Per-ratio-unit = `11 / 3 ≈ 3.667`; `demonType = 4 × 3.667 ≈ 14.667 → 15` (rounded up,
+   (`11`).** Per-ratio-unit = `11 / 3 ≈ 3.667`; `creatureType = 4 × 3.667 ≈ 14.667 → 15` (rounded up,
    matching D38's own rounding convention for commander's `10.40 → 11`), `aspect` the same shape as
-   `demonType` (same ratio value, 4) `→ 15`, `uniqueDemon = 6 × 3.667 = 22.0 → 22` (exact, no
+   `creatureType` (same ratio value, 4) `→ 15`, `uniqueCreature = 6 × 3.667 = 22.0 → 22` (exact, no
    rounding needed). **Still explicitly a shipped guess, not a measurement** — the spec's own
    posture holds ("shipping a guess is fine; calling it balance is not"); `squad-harness` may move
    any of the three later without reopening this spec, the same tunable contract commander's `11`
    already has.
 
    ```
-   pointEconomy.skillPointsPerThetaMilliByScope = { commander: 11, demonType: 15, aspect: 15, uniqueDemon: 22 }
+   pointEconomy.skillPointsPerThetaMilliByScope = { commander: 11, creatureType: 15, aspect: 15, uniqueCreature: 22 }
    ```
 
 ## Decisions implemented

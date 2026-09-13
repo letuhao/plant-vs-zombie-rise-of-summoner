@@ -8,8 +8,8 @@ This document does not name a single new resource. It states the tests a resourc
 then shows which open design questions these principles **already answer**, and which are genuinely
 still choices.
 
-**Grounded in what already ships:** [demons/spec-soul-economy.md](demons/spec-soul-economy.md) ·
-`SoulEarnPolicy.cs` · [demon-system-map.md](demon-system-map.md) ·
+**Grounded in what already ships:** [creatures/spec-soul-economy.md](creatures/spec-soul-economy.md) ·
+`SoulEarnPolicy.cs` · [creature-system-map.md](creature-system-map.md) ·
 [world-map-program.md](world-map-program.md) (the determinism lock) ·
 [resource-hub-ssot.md](resource-hub-ssot.md) (a **different** hub — actor pools, not empire stock).
 
@@ -66,7 +66,7 @@ you hold. It converts a stock problem into a flow problem and caps growth withou
 > levels must cost something *every turn*, scaled to how much you hold.
 
 **This repo already does it once:** contract `upkeep` is a daily tribute proportional to bound
-demons. The map should copy that shape, not invent one.
+creatures. The map should copy that shape, not invent one.
 
 **Corollary — the honest version of "difficulty".** Upkeep is also what makes over-expansion punish
 itself, which is the same job `ValueMap`'s overextension penalty does for the AI. The AI and the
@@ -104,7 +104,7 @@ the two goods are one good with two names.
 several costumes, and the extra names cost you a UI row, an `INeedVector` axis, a `ValueMap` weight,
 and a balance surface each.
 
-**Worked example of the test passing:** *"a fire-demon fusion needs `essence.fire` specifically"* is a
+**Worked example of the test passing:** *"a fire-creature fusion needs `essence.fire` specifically"* is a
 true bottleneck — a mountain of `essence.ice` does not help, and that is exactly why element-typed
 sectors are worth fighting over (see P11).
 
@@ -201,13 +201,13 @@ The classical factors of production map onto this game almost exactly:
 | Factor | Here |
 |---|---|
 | **Land** | sectors and their slots — what you hold |
-| **Labour** | demons and bodies — who is standing there |
+| **Labour** | creatures and bodies — who is standing there |
 | **Capital** | buildings — what you have built |
 
 > **Rule P11.** Output should depend on more than one factor. If a building produces the same amount
 > whether or not anyone garrisons the sector, then labour is decoration and the army is pure cost.
 
-This is worth taking seriously because of what it fixes for free: making garrisoned demons an *input*
+This is worth taking seriously because of what it fixes for free: making garrisoned creatures an *input*
 to production gives "presence" ([world-graph-ideal.md](world-graph-ideal.md) §13) an economic job,
 and makes the same bodies simultaneously a P2 upkeep sink and a production input. One mechanism, both
 sides of the ledger, and a real reason to choose between garrisoning and marching.

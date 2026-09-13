@@ -25,7 +25,7 @@
       "id": "set.endoflame-001",
       "nameKey": "set.crimson-lotus-seed",
       "name": "Crimson Lotus Seed",
-      "themeKey": "demon.endoflame",
+      "themeKey": "creature.endoflame",
       "members": [
         {
           "role": "armament-primary",

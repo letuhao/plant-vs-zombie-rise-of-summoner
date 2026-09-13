@@ -18,7 +18,7 @@ public static class Cage
     /// caller's own job (the species catalog, not owned here).</summary>
     public static bool OccupantEligible(bool captureOnly, bool isTopRung) => !captureOnly && !isTopRung;
 
-    /// <summary>"`dispositionBase` shifted one band toward `eager` — a caged demon wants out; a rule,
+    /// <summary>"`dispositionBase` shifted one band toward `eager` — a caged creature wants out; a rule,
     /// not a knob." Reuses <see cref="Disposition.Shift"/> (D4.1) rather than a private clamp — the
     /// cage's own fixed shift has no named source among that function's five (rung/Δ-band/offer/
     /// remembers/stance), so it is carried through the `stanceShift` slot with this comment

@@ -56,9 +56,9 @@ These open over the hall (and over every other stage) and close back to where yo
 |---|---|
 | Creatures, Commanders | Session start |
 | Relics | When you hold your first item |
-| Fusion | Once you have a demon to fuse |
+| Fusion | Once you have a creature to fuse |
 | Pacts | When a contract is first offered |
-| Expeditions | Once you have a bound demon to field |
+| Expeditions | Once you have a bound creature to field |
 | Almanac, Chronicle | After your first run |
 
 Delve travel (**Vision**) unlocks when you have found a domain.

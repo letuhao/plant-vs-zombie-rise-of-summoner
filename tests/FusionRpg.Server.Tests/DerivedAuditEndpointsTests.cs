@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -22,17 +23,15 @@ namespace FusionRpg.Server.Tests;
 /// </summary>
 public class DerivedAuditEndpointsTests : IAsyncLifetime
 {
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
 
     public async Task InitializeAsync()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-derived-audit-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         PowerTuningHub.Configure(
             PowerTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "power-scale.v2.json"))));
@@ -48,7 +47,7 @@ public class DerivedAuditEndpointsTests : IAsyncLifetime
                 File.ReadAllText(Path.Combine(RepoTuningDir(), "status.v1.json"))));
         StatsTuningHub.Configure(
             StatsTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "stats.v1.json"))));
-        FusionRpg.Core.Demons.DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        FusionRpg.Core.Creatures.CreatureSpeciesCatalog.ConfigureFromCompiledDefault();
         FusionRpg.Core.Progression.SpeciesProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.SpeciesProgressionTuningLoader.Parse(
                 File.ReadAllText(Path.Combine(RepoTuningDir(), "species-progression.v1.json"))));
@@ -72,6 +71,9 @@ public class DerivedAuditEndpointsTests : IAsyncLifetime
         builder.Services.AddSingleton<IHotCompactor>(sp => new HotCompactor(sp.GetRequiredService<RpgStore>()));
         builder.Services.AddSingleton<EventIngest>();
         builder.Services.AddSingleton<FusionRpg.Server.DelveBattleSessionManager>();
+        // `/api/actors/{id}/sheet` takes IActorLiveStateStore (CG-A5b live statuses/shields). Production
+        // registers it at Program.cs:345; this test host must too, or route inference fails at start.
+        builder.Services.AddSingleton<IActorLiveStateStore, ActorLiveStateStore>();
         builder.WebHost.UseUrls(baseUrl);
         _app = builder.Build();
         _app.UseDeveloperExceptionPage();
@@ -87,7 +89,7 @@ public class DerivedAuditEndpointsTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     [Fact]
@@ -120,11 +122,12 @@ public class DerivedAuditEndpointsTests : IAsyncLifetime
         Assert.Equal(269, root.GetProperty("registryCount").GetInt32());
         Assert.True(root.GetProperty("presentCount").GetInt32() > 0);
         Assert.True(root.GetProperty("touchedCount").GetInt32() > 0);
-        // The cook expands sparse status.{id} joins that are intentionally session-only. They are
-        // expected to be absent from a cold server sheet; the registry itself must still be complete.
+        // The cook expands sparse status.{id} joins that are intentionally session-only. They may be
+        // absent from a cold server sheet — but the audit's CONTRACT is not "there must be gaps": it is
+        // that whatever IS missing is properly accounted for. A closed gap (empty `missingCook`) is a
+        // pass, so this asserts the classification invariant rather than non-emptiness.
         var missingCook = root.GetProperty("missingCook").EnumerateArray()
             .Select(e => e.GetString()!).ToList();
-        Assert.NotEmpty(missingCook);
         Assert.All(missingCook, id => Assert.True(
             DerivedAuditCoverage.IsStatusSessionChannel(id), "unexpected cold-sheet cook gap: " + id));
         Assert.Equal(0, root.GetProperty("missingRegistry").GetArrayLength());

@@ -26,11 +26,11 @@ These words get guessed wrong. Read them once before the rest of the page.
 
 **Also true:**
 
-- Commander-scope spend is live (Mode C). **UniqueDemon** (UniqueActor sheet) and **species-build**
+- Commander-scope spend is live (Mode C). **UniqueCreature** (UniqueActor sheet) and **species-build**
   (empire generals) player surfaces are specified under
   [aptitude-sheet-map.md](../../architecture/aptitude-sheet-map.md) — not “still ahead” as a product
   excuse.
-- Allocation stacks across commander, species, aspect (blocked), and the unique demon — who you are
+- Allocation stacks across commander, species, aspect (blocked), and the unique creature — who you are
   is the sum.
 
 ---
@@ -66,7 +66,7 @@ These words get guessed wrong. Read them once before the rest of the page.
 
 ## What reaches the field
 
-What you allocate at commander scope reaches every demon you field.
+What you allocate at commander scope reaches every creature you field.
 
 Species and specimen layers can add more lean later (species builds still WIP).
 
@@ -76,7 +76,7 @@ Species and specimen layers can add more lean later (species builds still WIP).
 
 1. Confirm you have aptitude points to spend.
 2. Open builds and put points into two aptitudes that match how you want to play.
-3. Field a demon and treat the change as side-wide commander lean.
+3. Field a creature and treat the change as side-wide commander lean.
 
 > Stop when “no class” sticks. WIP lean: [species builds](species-builds.md).
 

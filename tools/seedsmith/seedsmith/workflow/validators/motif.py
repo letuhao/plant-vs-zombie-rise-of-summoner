@@ -1,4 +1,4 @@
-"""Motif validators — the two that forced a repair in the real 8-demon run."""
+"""Motif validators — the two that forced a repair in the real 8-creature run."""
 from __future__ import annotations
 
 from typing import Any, Mapping

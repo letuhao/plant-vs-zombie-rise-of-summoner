@@ -63,7 +63,7 @@
       "class": "signet",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -129,7 +129,7 @@
       "class": "signet",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -261,7 +261,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -327,7 +327,7 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 1,

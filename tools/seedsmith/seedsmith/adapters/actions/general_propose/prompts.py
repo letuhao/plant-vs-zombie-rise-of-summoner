@@ -23,7 +23,7 @@ import json
 from typing import Any, Mapping, Sequence
 
 from ....pipeline.model import BLOCKED_FIELD
-from ...demons.anchor.permute import order_for
+from ...creatures.anchor.permute import order_for
 from ..vocab import REPO_ROOT
 
 __all__ = [
@@ -54,7 +54,7 @@ SYSTEM_PROMPT = (
 # The schema. Every `description` string below is copied byte-for-byte from spec-general-propose
 # .md SS2's own JSONC block (review F19, 2026-09-03) -- they were written out there specifically
 # so this build would not have to (re-)derive them, and are each modelled on the hardened
-# `blocked` description at `adapters/demons/anchor/prompts.py:74-82`.
+# `blocked` description at `adapters/creatures/anchor/prompts.py:74-82`.
 #
 # `atomFamilies.items.enum` ships EMPTY here on purpose: the real enum is "filled at call time
 # from the brief's own allowedAtomFamilies" (SS2), permuted per (briefId, "atomFamilies",
@@ -233,7 +233,7 @@ def build_context(brief: Mapping[str, Any], *, sample_index: int,
     anything else off `brief`.
 
     `sample_index` is IN this call, never bolted on after -- three votes over three identical
-    orders is one sample with extra steps (`adapters/demons/anchor/permute.py`'s own module
+    orders is one sample with extra steps (`adapters/creatures/anchor/permute.py`'s own module
     docstring).
 
     `family_glossary` (SMOKE BATCH criterion-2 fix, 2026-09-05): an optional `id -> one-line gloss`

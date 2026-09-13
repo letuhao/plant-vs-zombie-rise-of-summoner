@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "air",
+  "eligibility": null,
+  "eventId": "event.encounter-event-creature.allpeater-002",
+  "flavor": "As the combatants clash, the air begins to shimmer with a rhythmic distortion. The very geometry of the chamber seems to undergo a sudden 切换, shifting the battlefield into a mirrored state where every movement feels like a rehearsed dance. A strange 模式 emerges in the way the shadows stretch and retract, pulsing in time with the heartbeat of the room.",
+  "kind": "encounter-event",
+  "name": "The Echoing Resonance",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "staple",
+      "effects": [
+        {
+          "family": "atom.bulwark",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "staple",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "To force a tactical decision regarding the flow of combat through environmental manipulation.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.allpeater"
+}

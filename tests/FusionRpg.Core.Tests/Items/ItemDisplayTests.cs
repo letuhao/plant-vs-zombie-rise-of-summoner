@@ -46,11 +46,14 @@ public class ItemDisplayTests
     [Fact]
     public void Every_shipped_family_has_a_display_template()
     {
-        // 109 -> 112 (2026-09-07): the affix-families-gen trial batch's three new families
-        // (atom.tempo-wildgrowth, atom.elpw-surfeit, atom.shld-absolute) each got a real template
-        // authored the same day this test caught their absence (disptpl.p1-024, p2-036, p2-037).
+        // CONTRACT, not a count. The template corpus is generator-authored one row per shipped family,
+        // so both the row total and the family total move every generation (98 → 107 → 109 → 112 → 125
+        // and climbing), and pinning either is stale by construction. What must hold structurally is the
+        // 1:1 the count was proxying for: every shipped family resolves to exactly one template row, and
+        // no template names a family that is not shipped. A missing template (raw id on a tooltip) or a
+        // stale orphan row is the defect this catches, independent of how many families ship.
         var templates = LoadAllTemplates();
-        Assert.Equal(112, templates.Count);
+        Assert.NotEmpty(templates);
 
         var templated = templates.Select(r => r.RuntimeFamily).ToHashSet(StringComparer.Ordinal);
         var familyDir = Path.Combine(RepoRoot(), "data", "seed", "items", "affix-families");
@@ -62,7 +65,15 @@ public class ItemDisplayTests
 
         Assert.NotEmpty(families);
         Assert.Empty(families.Where(id => !templated.Contains(id)).OrderBy(id => id, StringComparer.Ordinal));
-        Assert.Equal(families.Count, templates.Count);
+
+        // Exactly one row per family — a duplicate template would silently drop one from a lookup.
+        var duplicateFamilyRows = templates.GroupBy(r => r.RuntimeFamily, StringComparer.Ordinal)
+            .Where(g => g.Count() > 1).Select(g => g.Key).OrderBy(s => s, StringComparer.Ordinal).ToList();
+        Assert.Empty(duplicateFamilyRows);
+
+        // And no orphan rows: a template for a family that no longer ships is dead content.
+        var familySet = families.ToHashSet(StringComparer.Ordinal);
+        Assert.Empty(templated.Where(id => !familySet.Contains(id)).OrderBy(id => id, StringComparer.Ordinal));
     }
 
     /// <summary>

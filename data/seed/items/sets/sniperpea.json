@@ -25,7 +25,7 @@
       "id": "set.sniperpea-001",
       "nameKey": "set.undead-marksman",
       "name": "Undead Marksman",
-      "themeKey": "demon.sniperpea",
+      "themeKey": "creature.sniperpea",
       "members": [
         {
           "role": "armament-primary",

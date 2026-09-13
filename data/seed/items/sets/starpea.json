@@ -25,7 +25,7 @@
       "id": "set.starpea-001",
       "nameKey": "set.starlight-vector",
       "name": "Starlight Vector",
-      "themeKey": "demon.starpea",
+      "themeKey": "creature.starpea",
       "members": [
         {
           "role": "armament-primary",

@@ -73,7 +73,7 @@ def load_partition_context(role: str, frame: str, band: str, *,
         raise ValueError(
             f"role {role!r} frame {frame!r} has no legal class-ladder rung — classes.v2.json's "
             f"class ladders name no rung whose roles list includes this role on this frame")
-    implicit_families = tuning.load_legal_implicit_families(role, classes_path)
+    implicit_families = tuning.load_legal_implicit_families(role, frame, classes_path)
 
     directory = base_types_dir or tuning.BASE_TYPES_DIR
     file_path = partitions.file_for(role, frame, band, base_types_dir=directory)

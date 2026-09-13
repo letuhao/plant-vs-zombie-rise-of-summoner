@@ -25,7 +25,7 @@
       "id": "set.superumbrella-001",
       "nameKey": "set.gilded-undead",
       "name": "Gilded Undead",
-      "themeKey": "demon.superumbrella",
+      "themeKey": "creature.superumbrella",
       "members": [
         {
           "role": "armament-primary",

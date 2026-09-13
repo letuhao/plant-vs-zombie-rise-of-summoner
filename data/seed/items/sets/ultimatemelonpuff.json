@@ -25,7 +25,7 @@
       "id": "set.ultimatemelonpuff-001",
       "nameKey": "set.spore-splitter-base",
       "name": "Spore Splitter Base",
-      "themeKey": "demon.ultimatemelonpuff",
+      "themeKey": "creature.ultimatemelonpuff",
       "members": [
         {
           "role": "armament-primary",

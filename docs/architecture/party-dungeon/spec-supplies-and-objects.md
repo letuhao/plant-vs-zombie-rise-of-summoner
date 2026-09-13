@@ -184,7 +184,7 @@ resolves to a call into an owner; none computes a number here:
 Room-kind interactions the resolver also dispatches, without a verb row: **trade** (merchant — `dungeon-loot`
 prices the room's stock at `Θ_room` × `merchant.markupMilli`, `loot-pack` places the purchase, §1
 instantiates), **rest** (`RestResolver.Resolve(members, rung, tuning)` → `RestOutcome`,
-`spec-delve-attrition.md:422`), **cage** (wild-room's captured-demon seam, wave 4 — the `open` verb on a cage
+`spec-delve-attrition.md:422`), **cage** (wild-room's captured-creature seam, wave 4 — the `open` verb on a cage
 object is reserved and refused until that spec lands). Every resolution appends one decision:
 `{kind: "object.{verb}", partyIndex, payload: {sectorId, sourceRef, outcome}}`.
 

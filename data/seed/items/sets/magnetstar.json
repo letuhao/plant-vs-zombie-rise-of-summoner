@@ -25,7 +25,7 @@
       "id": "set.magnetstar-001",
       "nameKey": "set.magnetic-starfruit",
       "name": "Magnetic Starfruit",
-      "themeKey": "demon.magnetstar",
+      "themeKey": "creature.magnetstar",
       "members": [
         {
           "role": "armament-primary",

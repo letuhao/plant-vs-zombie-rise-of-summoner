@@ -1,5 +1,5 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
 using Xunit;
@@ -10,28 +10,26 @@ namespace FusionRpg.Data.Tests;
 /// patron kill-earn hook inside the fact transaction.</summary>
 public class PatronStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public PatronStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-patron-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
-    static readonly DemonSpeciesDef Species = DemonSpeciesCatalog.All
-        .First(s => s.Side == "zombie" && s.Acquisition != DemonAcquisition.CaptureOnly);
+    static readonly CreatureSpeciesDef Species = CreatureSpeciesCatalog.All
+        .First(s => s.Side == "zombie" && s.Acquisition != CreatureAcquisition.CaptureOnly);
 
     string Mint()
     {
-        var (specimen, _) = _store.MintDemon(1, new DemonMintSpec
+        var (specimen, _) = _store.MintCreature(1, new CreatureMintSpec
         {
             SpeciesId = Species.SpeciesId,
             Side = Species.Side,
@@ -107,7 +105,7 @@ public class PatronStoreTests : IDisposable
     public void Fusion_cannot_eat_the_patron_but_the_patron_may_lead()
     {
         _store.AwardSouls(1, 5000, "seed", "patron-fus-bank");
-        _store.AddDemonMaterials(1, new[]
+        _store.AddCreatureMaterials(1, new[]
         {
             ("shard." + Species.BaseRarity.ToId(), 10L),
             ("essence." + Species.ElementPrimary.ToElementId(), 10L)

@@ -1,5 +1,5 @@
 using FusionRpg.Core.Combat;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Injector.Host;
 
@@ -40,14 +40,14 @@ public static class LawnElementResolverHost
             {
                 if (_resolver != null) return _resolver;
 
-                IReadOnlyList<DemonSpeciesDef> species;
-                try { species = DemonSpeciesCatalog.All; }
+                IReadOnlyList<CreatureSpeciesDef> species;
+                try { species = CreatureSpeciesCatalog.All; }
                 catch (InvalidOperationException)
                 {
                     // Configure() has not run yet — a narrow bootstrap window, not a defect. Hand back
                     // a throwaway empty-index resolver (every resolve is a Neutral miss) rather than
                     // caching it, so the NEXT call re-checks once the roster is actually configured.
-                    return new LawnElementResolver(new LawnElementIndex(Array.Empty<DemonSpeciesDef>()));
+                    return new LawnElementResolver(new LawnElementIndex(Array.Empty<CreatureSpeciesDef>()));
                 }
 
                 _resolver = new LawnElementResolver(new LawnElementIndex(species), Report);

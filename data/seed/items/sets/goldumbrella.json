@@ -25,7 +25,7 @@
       "id": "set.goldumbrella-001",
       "nameKey": "set.golden-parasol-swarm",
       "name": "Golden Parasol Swarm",
-      "themeKey": "demon.goldumbrella",
+      "themeKey": "creature.goldumbrella",
       "members": [
         {
           "role": "armament-primary",

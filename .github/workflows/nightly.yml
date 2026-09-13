@@ -1,0 +1,38 @@
+# Nightly `full` profile: runs the whole Data suite UNFILTERED so a disk regression that the fast
+# default profile cannot see is caught within a day, instead of waiting for a release tag.
+# Default profile (`scripts/test-fast.ps1`) excludes DiskSemantics/Heavy; this runs everything.
+# Standard: docs/contributing/testing-standard.md §6.
+name: Nightly full test profile
+
+on:
+  schedule:
+    # 03:17 UTC daily — off the hour so it does not pile onto the many jobs that start at :00.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: nightly-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  full:
+    runs-on: windows-latest
+    # Same hang bound as ci.yml: a real .NET process-redirection deadlock can hang a run with no
+    # diagnostic; fail fast rather than idle toward the platform's 6-hour default.
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Full profile — Data suite, unfiltered
+        shell: pwsh
+        run: |
+          # NO --filter: this is the `full` profile by construction (DiskSemantics + Heavy included).
+          # The nightly's whole job is to prove the file-bound/disk tests still pass and clean up,
+          # so the leak alarm wraps the same unfiltered run.
+          .\scripts\test-substrate-leak-alarm.ps1 -Run { dotnet test tests/FusionRpg.Data.Tests/FusionRpg.Data.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 15min }
+          if ($LASTEXITCODE -ne 0) { throw "nightly full-profile Data suite failed — a disk test broke or leaked" }

@@ -25,7 +25,7 @@
       "id": "set.cactuscaltrop-001",
       "nameKey": "set.cactus-spikes",
       "name": "Cactus Spikes",
-      "themeKey": "demon.cactuscaltrop",
+      "themeKey": "creature.cactuscaltrop",
       "members": [
         {
           "role": "armament-primary",

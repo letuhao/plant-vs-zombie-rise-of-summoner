@@ -58,12 +58,12 @@ after a full reset costs the same 896 skill points it cost the first time. No ex
 and **price is order-independent by construction** — which is what makes derive-on-read safe. §6.
 
 **Per-actor or account-wide? Per-actor, confirming D25 — and it does not defeat the bound, because
-the budget is per-actor too.** A fresh demon does start at price 5, but it also starts at specimen
+the budget is per-actor too.** A fresh creature does start at price 5, but it also starts at specimen
 level 1 with almost no skill points to spend at price 5. Roster breadth already has its own
 escalating price (`ContractPolicy.NextSlotPrice`, `ContractPolicy.cs:176-177`) and §11.1a's own
 verdict that the price *is* the cap. **One wiring requirement:** `skillPointsPerTheta` is a single
 scalar today while aptitude points already ship a four-scope rate table — per-actor pricing needs the
-same table, or every demon reads the commander's `Θ` and the bound really does break. §8.1.
+same table, or every creature reads the commander's `Θ` and the bound really does break. §8.1.
 
 ---
 
@@ -89,7 +89,7 @@ first spender, so D25 owns its calibration.
 
 **FACT.** D29 fixes the shape: *"10 tiers × 2 branches, ~40 nodes per tree… Generic corpus:
 **39 × 40 = 1,560 nodes**"* ([passive-tree-ideal.md:60](../../architecture/passive-tree-ideal.md)).
-The 39 is D27's `12 primary + 6 elemental + 21 status`; demon family and species trees are sequenced
+The 39 is D27's `12 primary + 6 elemental + 21 status`; creature family and species trees are sequenced
 separately.
 
 **INFERENCE.** At the shipped grant and the natural default of one skill point per node, the whole
@@ -623,25 +623,25 @@ breadth for the same budget.
 
 **D25 says per actor. Confirmed — but the charter's worry is the right worry and deserves answering.**
 
-**The worry:** D21 gives every actor its own tree state, so a player with fifty demons gets fifty
-fresh price ladders. Every new demon starts at price 5. Does breadth just move up a level?
+**The worry:** D21 gives every actor its own tree state, so a player with fifty creatures gets fifty
+fresh price ladders. Every new creature starts at price 5. Does breadth just move up a level?
 
-**The answer: no, because the budget is per-actor too.** A fresh demon's skill points come from *its*
+**The answer: no, because the budget is per-actor too.** A fresh creature's skill points come from *its*
 index, not the commander's. `PointBudget.PointsFor(scope, sourceValue, tuning)`
 (`PointBudget.cs:51-58`) already takes the scope's **own** source value and multiplies by that
 scope's own rate; the four sources are `Θ_player` / species level / `element_mastery` / specimen level
-(`aptitudes.v5.json:21`). A demon at specimen level 1 has essentially no skill points to spend at
+(`aptitudes.v5.json:21`). A creature at specimen level 1 has essentially no skill points to spend at
 price 5. **Per-actor pricing against a per-actor budget is not a discount — it is a separate,
 equally-priced ladder that must be paid for separately.**
 
 **And roster breadth is already priced, by shipped code.** `ContractPolicy.NextSlotPrice(n) =
 SlotPriceStep × (n+1)` (`ContractPolicy.cs:176-177`) — the same arithmetic shape, with §11.1a's own
 verdict: *"The hard cap was redundant. Scarcity came from the escalating price, not from the ceiling
-at 48."* A fifty-demon roster costs six figures in souls before a single node is bought. **The two
+at 48."* A fifty-creature roster costs six figures in souls before a single node is bought. **The two
 escalations compose**, and neither needed a cap.
 
-**Why account-wide would be wrong, not merely different.** It would mean building a demon makes your
-commander's next node dearer. That inverts D21's stated purpose (*"each demon is genuinely built, not
+**Why account-wide would be wrong, not merely different.** It would mean building a creature makes your
+commander's next node dearer. That inverts D21's stated purpose (*"each creature is genuinely built, not
 a stat block"*) and re-imports D8's trap at roster scale — a second actor becomes a pure penalty on
 the first.
 
@@ -652,7 +652,7 @@ scalar**, while `AptitudePointEconomy` (`:43-45`) carries `AptitudePointsPerThet
 **four-scope dictionary** (`:199-205`). Skill points have no scope table.
 
 **INFERENCE.** With one scalar, "an actor's skill points" has no per-actor definition. The path of
-least resistance — every actor reads `Θ_player` — would give a fifty-demon roster fifty *full
+least resistance — every actor reads `Θ_player` — would give a fifty-creature roster fifty *full
 commander budgets*, each on its own fresh price ladder, and **that genuinely does defeat the bound**:
 fifty actors × 31 nodes at `Θ=100` is 1,550 nodes, the whole generic catalog owned across the roster
 at the calibration point.
@@ -665,7 +665,7 @@ at the calibration point.
 
 **Blocked-on, tracked rather than open:** the four scope sources are in different states. Specimen
 level now reads the shared arithmetic curve (08's M1 fix, `progression.v1.json:16`); species level is
-an index (`PointBudget.DemonTypeSourceFromLevel`, `:35`); `element_mastery` does not exist
+an index (`PointBudget.CreatureTypeSourceFromLevel`, `:35`); `element_mastery` does not exist
 ([08 §3](08-effort-power-reconciliation.md)). D25 does not need all four — it needs whichever scopes
 ship trees.
 

@@ -35,7 +35,7 @@ class Severity(Enum):
 
 
 VALID_NEEDS = frozenset({
-    "corpus", "adapter", "budget", "numerics", "demon_dump", "demon_anchors", "action_coverage",
+    "corpus", "adapter", "budget", "numerics", "creature_dump", "creature_anchors", "action_coverage",
     "passive_tree_plan",
 })
 
@@ -74,8 +74,8 @@ class Ctx:
     adapter: object                # seedsmith.adapters.SeedAdapter
     budget: object = None
     numerics: object = None
-    demon_dump: object = None      # seedsmith.adapters.demons.dump_ctx.DemonDumpCtx — T1.10
-    demon_anchors: object = None   # list[dict] of classified anchor entries — T2.10
+    creature_dump: object = None      # seedsmith.adapters.creatures.dump_ctx.CreatureDumpCtx — T1.10
+    creature_anchors: object = None   # list[dict] of classified anchor entries — T2.10
     action_coverage: object = None  # seedsmith.adapters.actions.coverage_report.ctx.ActionCoverageCtx — A-S5
     passive_tree_plan: object = None  # PassiveTreePlanCtx (adapters.trees.plan.metrics_ctx) — task C1
 

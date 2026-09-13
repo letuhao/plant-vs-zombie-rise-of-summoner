@@ -105,7 +105,7 @@ export function useAptitudes(playerId: number | null | undefined) {
   });
 }
 
-/** aptitude-sheet Mode A — UniqueDemon by specimen instanceId. Unused by Mode C commander path. */
+/** aptitude-sheet Mode A — UniqueCreature by specimen instanceId. Unused by Mode C commander path. */
 export function useUniqueAptitudes(instanceId: string | null | undefined) {
   const hub = useHubStatus();
   return useQuery({

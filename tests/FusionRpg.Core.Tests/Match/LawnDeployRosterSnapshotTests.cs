@@ -4,7 +4,7 @@ using Xunit;
 namespace FusionRpg.Core.Tests.Match;
 
 /// <summary>
-/// demon-lawn-deploy T2.1 (spec-lawn-deploy-events.md Correction 2) — the Hot/Cold-safe roster
+/// creature-lawn-deploy T2.1 (spec-lawn-deploy-events.md Correction 2) — the Hot/Cold-safe roster
 /// snapshot, tested the same way <c>MatchCommanderSnapshotTests.cs</c> already proves the identical
 /// pattern for the commander snapshot: <see cref="HostApplyWithSnapshot"/> mirrors
 /// <c>MatchHost.Apply</c>'s own board.start/board.end logic directly (the Injector project targets
@@ -62,7 +62,7 @@ public class LawnDeployRosterSnapshotTests
         Assert.False(LawnDeployRosterSessionCache.LastBuildWasCacheMiss);
     }
 
-    /// <summary>A real player with zero eligible demons is NOT a cache miss — the flag distinguishes
+    /// <summary>A real player with zero eligible creatures is NOT a cache miss — the flag distinguishes
     /// "never fetched yet" from "fetched, and it's genuinely empty" (e.g. everything owned is the
     /// active Patron). Mirrors why the analogous commander-snapshot flag exists.</summary>
     [Fact]

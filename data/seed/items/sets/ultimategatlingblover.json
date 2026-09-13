@@ -25,7 +25,7 @@
       "id": "set.ultimategatlingblover-001",
       "nameKey": "set.cherry-sniper",
       "name": "Cherry Sniper",
-      "themeKey": "demon.ultimategatlingblover",
+      "themeKey": "creature.ultimategatlingblover",
       "members": [
         {
           "role": "armament-primary",

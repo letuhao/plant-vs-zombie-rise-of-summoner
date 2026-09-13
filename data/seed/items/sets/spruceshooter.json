@@ -25,7 +25,7 @@
       "id": "set.spruceshooter-001",
       "nameKey": "set.spruce-piercer",
       "name": "Spruce Piercer",
-      "themeKey": "demon.spruceshooter",
+      "themeKey": "creature.spruceshooter",
       "members": [
         {
           "role": "armament-primary",

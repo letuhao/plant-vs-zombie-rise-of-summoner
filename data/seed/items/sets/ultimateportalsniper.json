@@ -25,7 +25,7 @@
       "id": "set.ultimateportalsniper-001",
       "nameKey": "set.temporal-singularity",
       "name": "Temporal Singularity",
-      "themeKey": "demon.ultimateportalsniper",
+      "themeKey": "creature.ultimateportalsniper",
       "members": [
         {
           "role": "armament-primary",

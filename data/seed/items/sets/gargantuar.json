@@ -25,7 +25,7 @@
       "id": "set.gargantuar-001",
       "nameKey": "set.unstoppable-corpse",
       "name": "Unstoppable Corpse",
-      "themeKey": "demon.gargantuar",
+      "themeKey": "creature.gargantuar",
       "members": [
         {
           "role": "armament-primary",

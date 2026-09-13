@@ -8,13 +8,13 @@ using FusionRpg.Data.Seed;
 // themselves (ContentMetrics.FamilyCoverageOf/ContainerFillRatesOf, already built and tested) and
 // never re-implements collecting a seed tree (SeedImportRunner, the same member AtomImporter and the
 // server's own self-healing startup import both call) — this file is argument parsing and a report,
-// matching AtomImporter's/DemonRecipeDistributionIndex's own division of labour exactly.
+// matching AtomImporter's/CreatureRecipeDistributionIndex's own division of labour exactly.
 //
 // Usage: dotnet run --project tools/AffixMetricsGate -- [--seed <dir>] [--gate]
 //        --seed   default: data/seed, found by walking up from the working directory
 //        --tuning default: data/tuning, found the same way
 //        --gate   exit 1 only if a finding's OWN gate is armed in affix-metrics.v{n}.json — the
-//                 same "measure vs. gate" split demons metrics --gate already established
+//                 same "measure vs. gate" split creatures metrics --gate already established
 //
 // Exit codes: 0 clean (or --gate not passed), 1 a gated finding fired, 2 could not start.
 

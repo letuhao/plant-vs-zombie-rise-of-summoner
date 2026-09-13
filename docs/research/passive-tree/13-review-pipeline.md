@@ -47,9 +47,9 @@ visible at all — and it is a failure no per-node review can ever detect.
   is 3–5 working days per full regeneration, and it certifies the one property sampling cannot:
   per-species recognition.
 - The price nobody has written down is **machine** time, not human time:
-  841 × 29 base calls + one voted field × 2 = **73,167 model calls ≈ 50–63 hours** at the demon run's
+  841 × 29 base calls + one voted field × 2 = **73,167 model calls ≈ 50–63 hours** at the creature run's
   own measured rate. Resumable per species, but 2–3 days of wall clock.
-- Budget **two to three** review passes over the catalog's life, not one. The demon corpus needed
+- Budget **two to three** review passes over the catalog's life, not one. The creature corpus needed
   three corpus-wide reprompts (`attackTempo`, `rarity`, `sunwoven`) after its first run completed.
 
 **So: yes, at roughly 20–45 hours of human review per pass and ~60 hours of machine time — but only
@@ -67,7 +67,7 @@ plainly because D24 now makes review a shipping requirement rather than a nicety
 
 ### 1.1 What the machine checked
 
-**FACT.** `tools/DemonQualityReport/Program.cs` (437 lines, read in full this session) is the tool
+**FACT.** `tools/CreatureQualityReport/Program.cs` (437 lines, read in full this session) is the tool
 that certified the corpus. It scans four dimensions:
 
 | § | Dimension | What it reads |
@@ -83,7 +83,7 @@ string comparisons are enum membership and id equality.
 
 ### 1.2 What a human actually looked at
 
-**FACT, counted this session across all 840 indexed entries in `data/seed/demons/species/`:**
+**FACT, counted this session across all 840 indexed entries in `data/seed/creatures/species/`:**
 
 | Signal | Count | Share |
 |---|---|---|
@@ -99,7 +99,7 @@ The three corrected species are `Peashooter`, `SunFlower` and `UltimateHypnoDoom
 not by a review pass. **695 two-to-one splits were resolved by majority vote and no human adjudicated
 one of them.**
 
-Adding up every hand-inspected species named in `tasks/demon-corpus-self-heal-todo.md` — the
+Adding up every hand-inspected species named in `tasks/creature-corpus-self-heal-todo.md` — the
 10-species dedup spot-check (A2), 3 hand-verified merges (Checkpoint B), 8 rarity smoke species (E1),
 8 sunwoven smoke species (G2), 2 model-interrogated (G3), 2 smoke (G4), 10 `fix_unresolved` (F4) —
 gives **roughly 40 species, about 5% of the corpus**, and almost every one was checked for a *single
@@ -107,8 +107,8 @@ field value*, never read as a whole entry.
 
 ### 1.3 The blind spot, found this session
 
-**FACT.** `DemonQualityReport` skips any file whose name begins with `_`
-(`tools/DemonQualityReport/Program.cs:77`). `data/seed/demons/species/zombie/_needs-review.json`
+**FACT.** `CreatureQualityReport` skips any file whose name begins with `_`
+(`tools/CreatureQualityReport/Program.cs:77`). `data/seed/creatures/species/zombie/_needs-review.json`
 begins with `_`. It holds one entry: a **stale 2026-09-02 copy of `SnorkleZombie`**, while
 `_index.json` points at a different, newer copy in `zombie/undead.json` (2026-09-04). The two
 disagree:
@@ -122,7 +122,7 @@ disagree:
 This is **the exact defect class the self-heal plan closed at scale** — 217 stale duplicates fixed in
 Phase A2 — and one instance survives, invisible to the tool that then reported
 *"840 anchor entries on disk, 840 distinct species ids, 840 indexed — clean"*
-(`tasks/demon-corpus-self-heal-todo.md:35-37`).
+(`tasks/creature-corpus-self-heal-todo.md:35-37`).
 
 It also explains the corpus count every passive-tree document repeats. **Counted this session: 840
 entries in 502 species files, plus 1 entry in the `_`-prefixed review bucket = 841 across 503 files.**
@@ -139,12 +139,12 @@ The ideal's §9 count of 841 is right; it is right by including a species the qu
 
 **The 841-species corpus was gated, not reviewed.** The gating was genuinely good — better than most
 generated corpora get, with real balance simulation and a real before/after
-(`tasks/demon-corpus-self-heal-todo.md:239-266`). But every property that needed a human eye was
+(`tasks/creature-corpus-self-heal-todo.md:239-266`). But every property that needed a human eye was
 either machine-proxied (entropy standing in for diversity) or unexamined (prose, coherence,
 sameness). Under D24 that is no longer sufficient, because D24 makes the *catalog* the thing shipped.
 
-**One structural difference makes the tree corpus harder than the demon corpus, and it should be said
-now:** a demon anchor's fields are *classifications of a creature the game already shipped* — a wrong
+**One structural difference makes the tree corpus harder than the creature corpus, and it should be said
+now:** a creature anchor's fields are *classifications of a creature the game already shipped* — a wrong
 one is wrong against an existing referent, and simulation can catch its consequences. A tree node's
 name and flavour are **new authored content with no referent**. Nothing can check them but a person.
 
@@ -169,7 +169,7 @@ stating the sensitivity rather than pretending it is evidence.
 
 The 60–90 s/tree figure is the one that has to be **calibrated on a real 20-tree pilot before the
 full run is authorized**. That is this repo's own established discipline — E1 smoke-tested 8 species
-before spending 2,584 calls (`tasks/demon-corpus-self-heal-todo.md:273-283`) — and the same rule
+before spending 2,584 calls (`tasks/creature-corpus-self-heal-todo.md:273-283`) — and the same rule
 applies to a human throughput claim.
 
 ### 2.2 The arithmetic
@@ -220,7 +220,7 @@ part that gets skipped, so it is named first:
 | **C. Tree census** | 880 trees | *"every tree was looked at by a person"* | that every *node* was read |
 
 **D30's value is per-species recognition** (`03-llm-stage-contract.md:973`: *"it does not need to be
-distinguishable from 903 others; it needs to feel like **that demon**"*). Recognition is a per-species
+distinguishable from 903 others; it needs to feel like **that creature**"*). Recognition is a per-species
 property and does not pool. **No sample of 60 trees certifies 841 identities.** So designs A and B
 are quality-control instruments for the *generator*, and design C is the only one that discharges
 D24 for a species catalog. §8 argues C is affordable; A and B still earn their place, because they
@@ -262,7 +262,7 @@ scale (385 → 264). That asymmetry is itself an argument for the tree as the un
 |---|---|---|
 | Nodes carrying an **exclusion** | ~30‰ cap (`03`'s `exclusionRate` gate) ≈ 780 | D14's whole mechanism. A wrong predicate is a silent no-op the player never sees fire |
 | Nodes the run **escalated** (`FAILED:<reason>` after bounded repair, gate 26) | unknown, expected small | Already known-bad; the machine asked for a person |
-| Nodes with an **unresolved vote** (gate 24's 1-1-1 split) | ≤ 50‰ by gate | The demon run's 695 splits went unadjudicated; do not repeat that |
+| Nodes with an **unresolved vote** (gate 24's 1-1-1 split) | ≤ 50‰ by gate | The creature run's 695 splits went unadjudicated; do not repeat that |
 | Every entry in the **review queue** | should be small | §1.3 — a queue nobody counts is a hiding place |
 
 At 30 s each, ~780 exclusion nodes ≈ **6.5 hours**. Affordable, and it is the highest-value reading
@@ -329,7 +329,7 @@ would otherwise have to judge:
 | **Id grammar, stability, collisions** | 17, 18 | `IdRefused`, and `name_collision` against `takenNames` |
 | **Length, field-echo, subject-name echo, language mixing** | 20, 21 | All measured defects with mechanical signatures — *7 of 8 outputs began `"DOCTRINE: "`*; *87% code-switched* |
 | **Idempotence, determinism, offline** | 27, 29 | Byte-hash comparison |
-| **Balance in real combat** | — | `tools/CombatSim` drives the real resolver; `DemonQualityReport` §4 is the working precedent at 840-entry scale |
+| **Balance in real combat** | — | `tools/CombatSim` drives the real resolver; `CreatureQualityReport` §4 is the working precedent at 840-entry scale |
 
 **So the charter's question — "is balance machine-checkable?" — is answered yes, twice over.** Budget
 and quota conformance are checkable by construction, and *consequential* balance is checkable by
@@ -340,7 +340,7 @@ simulation, which this repo already does over a corpus of this size.
 | Property | What the machine gets | What it misses |
 |---|---|---|
 | **Motif / theme adherence** | Gate 22: token presence, anti-motif tokens | A node that uses every motif word and means none of them |
-| **Diversity** | Normalized Shannon entropy per vocabulary (`DemonQualityReport.cs:400-415`) | Entropy is high when 841 trees use all 12 aptitudes evenly *and are all the same tree wearing 12 hats* |
+| **Diversity** | Normalized Shannon entropy per vocabulary (`CreatureQualityReport.cs:400-415`) | Entropy is high when 841 trees use all 12 aptitudes evenly *and are all the same tree wearing 12 hats* |
 | **Mechanism floor** | Gate 14: is `nodeClass` `mechanism` at deep tiers | Whether the mechanism does anything. `nodeClass` is a **plan-side label** (`03` §2.1 makes it GENERATED), so the gate checks the plan against itself |
 | **Near-duplication** | Gate 19: lexical Jaccard over 5-gram shingles | **Semantic** sameness. `metrics/dedup.py:12-17` states this as a deliberate documented gap — conceptual clustering *"ships only once `axis` is added to the 516 adjective canonical entries"* |
 
@@ -361,7 +361,7 @@ The five irreducibly human properties, and what each costs:
 | **H1** | **Name ↔ effect coherence.** Does "Kindling Wrath" plausibly mean *this* effect? | The machine can prove the name is unique and well-formed. Meaning is not a property of the string | 2, 3 |
 | **H2** | **Flavour quality.** Is the line worth reading? | Ruled OPEN-loop in code | 2 |
 | **H3** | **Is a mechanism node interesting?** | ⭐ **Decomposes, and half of it IS machine-checkable.** *"Does it change anything measurable"* → simulate it in `CombatSim` and read the win-share delta (`passive-tree-ideal.md:485-486`: mechanism nodes ARE measurable). *"Is it legible and worth building toward"* → human | Sim for the first half; tier 1 census on exclusions and tier 2 for the rest |
-| **H4** | **Species recognition.** Does this tree read as *that* demon? | The whole point of D23/D30, and there is no referent to check against but the lore | **Census (§8)** |
+| **H4** | **Species recognition.** Does this tree read as *that* creature? | The whole point of D23/D30, and there is no referent to check against but the lore | **Census (§8)** |
 | **H5** | **Corpus-scale sameness.** Are 841 trees secretly one tree? | Lexical dedup catches copies; the failure here is 841 *different* sentences expressing one idea. `metrics/dedup.py:12-17`'s documented gap | Tier 2, plus the corpus sheet's name-token table (§6.3) |
 
 **H5 is the failure this corpus is most likely to actually have, and it is the one no per-node review
@@ -396,11 +396,11 @@ declared threshold, the prompt is wrong and the batch should have been rejected.
 | **4. Batch reject → REPROMPT** | The tier-2 sample's reject count reaches the acceptance number, **or** any tier-1 census finding is systemic | Stop. Fix the prompt. Redeploy corpus-wide at pipeline scope | the shipped shape: `rerun --pipeline <id> --all`, ~1 call/tree |
 | **5. Owner escalation** | A `nullification` exclusion appears; a decision the plan cannot make; a `legitimateSkew` question | Queue it. Do not resolve it in the run | — |
 
-**Rung 4 is not hypothetical — it is what the demon corpus actually did, three times.** `attackTempo`
+**Rung 4 is not hypothetical — it is what the creature corpus actually did, three times.** `attackTempo`
 entropy 0.00 → prompt fixed → `rerun --pipeline kit-shape --all`. `rarity` 59‰ unresolved → prompt
 fixed using `ssot-rarity.md` §3.3's own rung descriptions → 2,584 calls, ~106 min, unresolved fell to
 17‰. `sunwoven` 0/840 → root-caused by interrogating the model directly → the bar rewritten →
-redeployed to 35 species (`tasks/demon-corpus-self-heal-todo.md:273-370`). **Rung 4 costs about one
+redeployed to 35 species (`tasks/creature-corpus-self-heal-todo.md:273-370`). **Rung 4 costs about one
 call per unit at pipeline scope, which is why it is affordable to be strict.**
 
 ### 5.3 The acceptance numbers
@@ -414,7 +414,7 @@ call per unit at pipeline scope, which is why it is affordable to be strict.**
 | 2 | 10.1% | **Hold.** Draw 30 more trees; 2 in 90 ⇒ ≤ 6.8% |
 | ≥ 3 | 12.4% | **Batch reject (rung 4).** More than one tree in ten is bad; fix the prompt |
 
-⚠️ **These are starting values and must say so**, exactly as `demon-roster-targets.v1.json`'s own
+⚠️ **These are starting values and must say so**, exactly as `creature-roster-targets.v1.json`'s own
 `_note` does, and for the reason `distribution.py:97-98` gives: *"nobody can name a correct Pielou
 value in advance."* Calibrate on the pilot (§2.1). They belong in
 `data/tuning/passive-tree-targets.v1.json` beside `03` §5.3's gates, not in a report — the balance
@@ -430,14 +430,14 @@ a held partition alone denies a pass.** A tree lot is unshippable when any of:
 2. Any `nullification` exclusion exists — it is the only form that names a node, and a generated
    corpus cannot maintain one (`03` §6.3 removes it from the schema entirely).
 3. `PassiveTree/UnresolvedCount` exceeds 50‰ — the one gate `03` §7 promotes to `gates=True`, for
-   `demon_roster.py:357-370`'s stated reason: *"gating the RATE here stops a full run early."*
+   `creature_roster.py:357-370`'s stated reason: *"gating the RATE here stops a full run early."*
 4. Any tier-1 census population is **unread**. A census is not a sample; partial is failure.
 5. The tier-2 acceptance number is reached (§5.3).
 6. `QuotaDrift` exceeds tolerance in either direction.
 7. Any node is unreachable, or any prerequisite is unsatisfiable.
 
 **And one that is specific to D24:** the concrete catalog must regenerate byte-identically from
-unchanged seeds. `tools/DemonSpeciesGen/Program.cs:17`'s `--check` is the shipped pattern —
+unchanged seeds. `tools/CreatureSpeciesGen/Program.cs:17`'s `--check` is the shipped pattern —
 *"compare against what is on disk; write nothing; exit 1 if anything differs."* Without it,
 *"identical for every player"* is a claim about one build machine.
 
@@ -622,7 +622,7 @@ almost nothing.** That is a direct answer to the cost objection D30 was raised a
 | **Human census, 841 tree cards** | **21 h** at 90 s · 14 h at 60 s · **42 h** at 3 min | §2.1's assumption, sensitivity shown |
 | **Tiers 1–3** (exclusion census + 60-tree sample + 200-node sample) | **≈ 10 h** | §3.3 |
 | **Building the review artifact** | ~10–15 h, one time | §6. A report renderer, a fingerprint, a verdict queue. Every input is already committed |
-| **Expected reprompt passes** | **× 2–3** on the human lines | The demon corpus needed three. Each reprompt is ~841 calls at pipeline scope, then a re-review of the affected lot |
+| **Expected reprompt passes** | **× 2–3** on the human lines | The creature corpus needed three. Each reprompt is ~841 calls at pipeline scope, then a re-review of the affected lot |
 
 **Realistic total for the first catalog: ~60–135 hours of human review, front-loaded, plus ~2–3 days
 of resumable machine time.** Steady state after that is `O(diff)` — a magnitude retune costs zero
@@ -639,7 +639,7 @@ exists for and the only one sampling cannot reach.
 card, but as a lattice, not as 20 separate judgements. So the residual claim is: *"every tree was
 judged; individual nodes carry the machine's 29 gates plus a sampled human rate with a ~5% margin."*
 **Say that in the acceptance record. Do not say "the catalog was reviewed" unqualified** — that is
-precisely the overclaim §1 found in the demon baseline.
+precisely the overclaim §1 found in the creature baseline.
 
 ### 8.4 The largest reviewable volume, since the charter asks
 
@@ -647,7 +647,7 @@ precisely the overclaim §1 found in the demon baseline.
 the ceiling is **~1,600 trees per review pass**. D30 asks for 880 (841 species + 39 generic). It
 fits, with room.
 
-The volume that does *not* fit is the one red-team F6 names: if the demon-family axis is resolved as
+The volume that does *not* fit is the one red-team F6 names: if the creature-family axis is resolved as
 **699 family trees**, the roster becomes 1,579 trees and the corpus ~45,800 nodes
 (`06-red-team.md:290-300`). That is at the ceiling on the first pass and over it on every reprompt.
 **The family taxonomy decision, not D30, is what would break this pipeline** — and it is already an
@@ -682,7 +682,7 @@ answerable question is a task — both are above, not here.
    construction (`sampling/__init__.py:9-11`), so inter-reviewer agreement is measurable at no extra
    sampling cost. Whether it is worth a second person's time is not mine to decide.
 4. **What is the acceptable manual-correction rate?** §5.1 makes hand correction legal and stamped.
-   Above some rate it means the prompt is wrong. The demon corpus's rate was 3.6‰ — but that was a
+   Above some rate it means the prompt is wrong. The creature corpus's rate was 3.6‰ — but that was a
    floor set by how little was reviewed, not a ceiling set by quality.
 
 ### Gaps I could not close, stated honestly
@@ -697,7 +697,7 @@ answerable question is a task — both are above, not here.
   no *"this moves goldens"* constraint to test (evidence rule 4).
 - **The design effect in §3.4 is reasoned, not estimated.** The intra-tree correlation of defects
   cannot be known before a corpus exists. The pilot measures it.
-- **I did not verify that `data/generated/demons/`'s file shape is what a tree's concrete stage would
+- **I did not verify that `data/generated/creatures/`'s file shape is what a tree's concrete stage would
   follow** — `03` §9 flagged the same gap and it is still open.
 
 ---
@@ -706,7 +706,7 @@ answerable question is a task — both are above, not here.
 
 ```
 [x] I identified the subsystem(s) this touches - passive trees, seedsmith generation,
-    the demon species corpus, review/metrics.
+    the creature species corpus, review/metrics.
 [x] I read every doc in the DESIGN-GATE §1 row(s) for those subsystems, this session:
     DESIGN-GATE.md, passive-tree-ideal.md (D13/D14/D17/D23/D24/D29/D30/D32, §6, §9, §10, §11),
     research/passive-tree/01 and 03 in full, and the relevant sections of 02, 06, 07.
@@ -715,7 +715,7 @@ answerable question is a task — both are above, not here.
 [x] Every factual claim cites file:line, or says it was counted this session.
 [x] I verified claims against CODE and DATA, not comments - counted 840 entries in 502 files
     plus 1 in the review bucket, counted 3 manualCorrection blocks and 695 split votes, and
-    read all 437 lines of DemonQualityReport rather than trusting its summary.
+    read all 437 lines of CreatureQualityReport rather than trusting its summary.
 [ ] I tested (not assumed) any constraint I am reporting. NOT APPLICABLE and said so in §9:
     no code change is proposed. The one constraint I do report - the `_`-prefix blind spot -
     was verified by reading the skip at Program.cs:77 and confirming the surviving stale
@@ -727,9 +727,9 @@ answerable question is a task — both are above, not here.
 [ ] Corrections are propagated. TWO FINDINGS ARE NOT YET PROPAGATED, deliberately, because
     this note does not edit data/ or other docs:
       - the surviving stale SnorkleZombie duplicate in zombie/_needs-review.json, and the
-        `_`-prefix blind spot in DemonQualityReport/Program.cs:77 that hides it;
+        `_`-prefix blind spot in CreatureQualityReport/Program.cs:77 that hides it;
       - the D29/D30 node-count contradiction (29 vs 40 nodes per species tree).
-    Both are reported here and belong in demon-corpus-self-heal's record and the ideal
+    Both are reported here and belong in creature-corpus-self-heal's record and the ideal
     respectively.
 ```
 
@@ -742,5 +742,5 @@ answerable question is a task — both are above, not here.
 - [03-llm-stage-contract.md](03-llm-stage-contract.md) — the 29 gates, the quota algorithm, §8's species pipeline
 - [06-red-team.md](06-red-team.md) — F6, and the 380-hour figure this note reframes
 - [07-learnability-and-surface.md](07-learnability-and-surface.md) — the volume rule and the magnitude contract the card reuses
-- `tasks/demon-corpus-self-heal-plan.md` / `-todo.md` — the baseline: what a corpus review has actually looked like here
-- `tools/DemonQualityReport/Program.cs` — the four machine dimensions, and the blind spot at `:77`
+- `tasks/creature-corpus-self-heal-plan.md` / `-todo.md` — the baseline: what a corpus review has actually looked like here
+- `tools/CreatureQualityReport/Program.cs` — the four machine dimensions, and the blind spot at `:77`

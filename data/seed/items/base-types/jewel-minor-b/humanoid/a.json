@@ -62,7 +62,7 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -126,7 +126,7 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -254,7 +254,7 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -318,7 +318,7 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.midas",
         "powerBand": "low"
       },
       "socketMax": 0,

@@ -22,7 +22,7 @@
     "amendments": [
       {
         "batch": "materials-gen/shard-rungs-1",
-        "note": "The ten real DemonRarityLadder shard.{rung} rows (material.022-031), authored via materials-gen (tools/seedsmith/seedsmith/adapters/items/materialgen) to close the gap pinned by MaterialCorpusTests.The_shipped_materials_display_corpus_is_measured_not_assumed and test_materials_gen.py's test_the_real_shipped_corpus_is_missing_every_rarity_ladder_shard_rung. No live model call was reachable in this environment -- name/flavor/tags were hand-authored as an honest stand-in, the same precedent gemgen used for g2.json (_meta.model 'gemgen/hand-authored-1'). The four legacy shard.{common,rare,epic,legendary} rows (material.007-010) are untouched by this amendment.",
+        "note": "The ten real CreatureRarityLadder shard.{rung} rows (material.022-031), authored via materials-gen (tools/seedsmith/seedsmith/adapters/items/materialgen) to close the gap pinned by MaterialCorpusTests.The_shipped_materials_display_corpus_is_measured_not_assumed and test_materials_gen.py's test_the_real_shipped_corpus_is_missing_every_rarity_ladder_shard_rung. No live model call was reachable in this environment -- name/flavor/tags were hand-authored as an honest stand-in, the same precedent gemgen used for g2.json (_meta.model 'gemgen/hand-authored-1'). The four legacy shard.{common,rare,epic,legendary} rows (material.007-010) are untouched by this amendment.",
         "promptVersion": "material-gen/1",
         "model": "materialgen/hand-authored-1",
         "authoredUtc": "2026-09-07T00:00:00Z",

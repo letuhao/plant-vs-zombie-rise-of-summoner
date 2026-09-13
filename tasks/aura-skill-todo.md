@@ -820,13 +820,13 @@ battlefield-scoped flags — decision 25 is untouched.
 
 - [x] **T21a: the mechanical own-side oracle** · **M** · DONE 2026-08-30 — gates T12, unblocks it
   - **Split from T21, 2026-08-30**, on the same read that motivated the split: `IOwnSideOracle`'s own
-    doc comment names TWO cases — "specimen ownership when a demon specimen exists, and the mechanical
+    doc comment names TWO cases — "specimen ownership when a creature specimen exists, and the mechanical
     PvZ type otherwise." The mechanical case (plant vs. zombie, mind-control-adjusted) is exactly what
     this program's own two commanders (Dave/plants, Zomboss/zombies) ever need, and it needs **no**
     Cold-plane `player_id` bridge — only `BoardEntitySnap.Side`/`.MindControlled`, both already
     populated in production. Building the mechanical half now, unblocked, is what actually unblocks
     T12 — waiting on the harder specimen-ownership bridge (T21b) would have gated the whole aura
-    program on a demon-program feature this program never needs.
+    program on a creature-program feature this program never needs.
   - Built `MechanicalOwnSideOracle(string mySide, Func<string, BoardEntitySnap?> resolve)` (`Battle/`):
     `RelationOf(ptr)` reads the board, flips the entity's effective side if `MindControlled`, and
     compares to `mySide` — `Ally` if they match, `Enemy` otherwise, `null` for a genuinely untracked
@@ -844,12 +844,12 @@ battlefield-scoped flags — decision 25 is untouched.
   - Files: `Battle/MechanicalOwnSideOracle.cs` (new), `tests/.../Battle/MechanicalOwnSideOracleTests.cs`
     (new, 11 tests).
 
-- [x] **T21b: the specimen-ownership bridge (demon specimens)** · **L, split** · DONE 2026-08-30
-  - The harder half `T21`'s original text named: when a demon SPECIMEN exists, ownership needs a
+- [x] **T21b: the specimen-ownership bridge (creature specimens)** · **L, split** · DONE 2026-08-30
+  - The harder half `T21`'s original text named: when a creature SPECIMEN exists, ownership needs a
     Cold-plane `player_id` read that does not exist anywhere in Core today.
   - **Re-verified 2026-08-30 before building, in response to the Stop hook's challenge that this might
     just be scope-avoidance.** Traced the gap precisely instead of accepting "doesn't exist" at face
-    value: `DemonSpecimenDto.Actor.PlayerId` (`UniqueActorDto.PlayerId`) is real, working, Server-side
+    value: `CreatureSpecimenDto.Actor.PlayerId` (`UniqueActorDto.PlayerId`) is real, working, Server-side
     data — ownership IS knowable Cold-plane-side. `IOwnSideOracle`/`BattlefieldOwnSideReactor` are pure
     Core types (T21a proved a real oracle needs no live game to build/test). The actual, narrower gap:
     nothing bridges Server's `playerId` to a per-`ptr` lookup the oracle's resolver can call — and
@@ -859,10 +859,10 @@ battlefield-scoped flags — decision 25 is untouched.
     predating aura-skill.
   - **Building it was a genuine architecture decision (AGENTS.md: "changes that lock behavior need
     `decisions.md` first") and reached into a different program's territory** (nothing this program
-    ships is a demon specimen) — so it was NOT built unilaterally. Surfaced both tradeoffs to the owner
+    ships is a creature specimen) — so it was NOT built unilaterally. Surfaced both tradeoffs to the owner
     directly via AskUserQuestion; **owner chose "Design and build it now."** Decision recorded as an
     amendment to the existing "Buff/debuff scope (2026-08-29)" row in `decisions.md` (that row already
-    named "own-side resolves through specimen ownership when a demon specimen exists" as a design
+    named "own-side resolves through specimen ownership when a creature specimen exists" as a design
     intent it left unbuilt — this completes it, not a new topic).
   - **Built, symmetric with T21a's own already-accepted bar:**
     - `SpecimenOwnershipOracle` (`Core/Battle/SpecimenOwnershipOracle.cs`, new) — mirrors
@@ -1400,15 +1400,15 @@ battlefield-scoped flags — decision 25 is untouched.
     "run every suite" pass, not a targeted search. Fixed (added `PThetaKMilli: 220` matching the other
     two fixtures); `FusionRpg.E2E.Tests` now **194/194 green** — confirms this task's "no golden moves"
     claim actually holds across all six .NET test projects, not five.
-  - Files: `Core/Demons/Patron/PatronPolicy.cs` (edit — formula + widened `PatronAura`),
-    `Core/Demons/Patron/PatronTuning.cs` (edit — `PThetaKMilli` field + loader),
+  - Files: `Core/Creatures/Patron/PatronPolicy.cs` (edit — formula + widened `PatronAura`),
+    `Core/Creatures/Patron/PatronTuning.cs` (edit — `PThetaKMilli` field + loader),
     `data/tuning/patron.v1.json` (edit — new tunable + `_meta.note`),
     `Injector/Effects/PatronAuraOverlay.cs` (edit — `AddChannel` param widened, unbuildable here, direct
     read only per this session's established precedent), `Injector/Effects/PatronCommand.cs` (edit —
     `GetInt`→`GetLong`), `Server/PatronEndpoints.cs` (edit — real Θ resolution in `Compute`),
     `tests/FusionRpg.Core.Tests/ContractTuningTestBootstrap.cs` (edit — `DefaultPatron` fixture),
     `tests/FusionRpg.Data.Tests/ContractTuningTestBootstrap.cs` (edit — its OWN separate
-    `DefaultPatron` fixture, the build-break fix), `tests/FusionRpg.Core.Tests/Demons/
+    `DefaultPatron` fixture, the build-break fix), `tests/FusionRpg.Core.Tests/Creatures/
     PatronPolicyTests.cs` (heavily edited — 2 tests rewritten, 1 new, **11/11 green**),
     `docs/architecture/power/ssot-power-scale.md` (edit — row 16 + PS-4).
 

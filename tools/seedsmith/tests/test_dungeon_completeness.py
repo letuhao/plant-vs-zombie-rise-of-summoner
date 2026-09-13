@@ -7,7 +7,7 @@ the REAL committed corpus, not a synthetic fixture:
 2. `ensure_completeness_registered` + `Content/FieldMissing`/`Content/LanguageContamination`
    (`metrics/content_completeness.py`) produce real findings against that real corpus, including a
    permanent regression proof that the ALREADY-FIXED live defect
-   (`data/seed/dungeon/events/event.bargain-demon.allpeater-001.json`) stays clean.
+   (`data/seed/dungeon/events/event.bargain-creature.allpeater-001.json`) stays clean.
 
     python -m pytest tools/seedsmith/tests/test_dungeon_completeness.py -v
 """
@@ -34,7 +34,7 @@ from seedsmith.metrics.content_completeness import (  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 LIVE_DUNGEON_ROOT = REPO_ROOT / "data" / "seed" / "dungeon"
-REAL_DEFECT_ENTRY_ID = "event.bargain-demon.allpeater-001"
+REAL_DEFECT_ENTRY_ID = "event.bargain-creature.allpeater-001"
 
 
 @unittest.skipUnless(LIVE_DUNGEON_ROOT.is_dir(), "live dungeon corpus not present in this checkout")
@@ -108,7 +108,7 @@ class RealCorpusFindingsTests(unittest.TestCase):
         self.assertEqual(findings, [], [f.message for f in findings])
 
     def test_the_real_previously_defective_event_is_now_clean(self) -> None:
-        """Regression proof for the fix: `event.bargain-demon.allpeater-001.json`'s own `flavor`
+        """Regression proof for the fix: `event.bargain-creature.allpeater-001.json`'s own `flavor`
         field carried untranslated Chinese fragments ("offensive火力", "permanent 分配") mid-English
         sentence, found live 2026-09-08. After the fix, `Content/LanguageContamination` must report
         zero findings for this specific real entry — not a synthetic stand-in."""

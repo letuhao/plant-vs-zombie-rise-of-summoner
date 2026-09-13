@@ -14,7 +14,7 @@ import {
 } from "@/stages/world/worldSelection";
 import { toGraph, summarizeLoam } from "@/stages/world/worldViewModel";
 import { sectorLabel } from "@/stages/world/labels";
-import { useDemonRoster, usePlayers, useRelics, useRuns, newCorrelationId } from "@/lib/bus";
+import { useCreatureRoster, usePlayers, useRelics, useRuns, newCorrelationId } from "@/lib/bus";
 import { useContracts } from "@/lib/bus/contracts";
 import {
   useWorldHeader,
@@ -78,15 +78,15 @@ export function WorldStage() {
   const runsQuery = useRuns();
   const contractsQuery = useContracts(playerId);
   const relicsQuery = useRelics();
-  const demonRosterQuery = useDemonRoster(playerId);
+  const creatureRosterQuery = useCreatureRoster(playerId);
   const { returnedCount } = useExpeditionReturnWatcher(playerId);
   const railInputs: RailUnlockInputs = {
     currentStageId: "world",
     hasCompletedARun: (runsQuery.data?.length ?? 0) > 0,
-    hasAnyDemon: (demonRosterQuery.data?.items.length ?? 0) > 0,
+    hasAnyCreature: (creatureRosterQuery.data?.items.length ?? 0) > 0,
     hasAnyContract: (contractsQuery.data?.contracts.length ?? 0) > 0,
     hasAnyRelic: (relicsQuery.data?.items.length ?? 0) > 0,
-    hasAnyBoundDemon: contractsQuery.data?.contracts.some((c) => c.bound) ?? false,
+    hasAnyBoundCreature: contractsQuery.data?.contracts.some((c) => c.bound) ?? false,
     returnedExpeditionCount: returnedCount,
     unreadResultCount: 0
   };

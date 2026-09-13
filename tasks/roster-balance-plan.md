@@ -10,11 +10,11 @@ Six earlier spec files (RB1-RB6) are marked superseded in place; kept for the re
 
 ## 1. ⛔ Why this plan is short, and what it replaced
 
-The original plan (2026-09-05) targeted the demon-species roster on the theory that its imbalance
+The original plan (2026-09-05) targeted the creature-species roster on the theory that its imbalance
 caused the measured action-corpus diversity bug (52/98 atom families used). **Tracing the real code
 found that theory wrong**: `signature_propose` — the one stage keyed to a species — reads the
 species anchor only for theming; `allowedAtomFamilies` is the same undifferentiated 98-family pool
-on every scope. Demon-species characteristics never reach it.
+on every scope. Creature-species characteristics never reach it.
 
 Once retargeted at the actual corpus (`data/seed/items/affix-families/*.json`, 98 entries), two facts
 collapsed the six-module plan into two modules:
@@ -70,7 +70,7 @@ measured; every remaining default is reversible or tunable via `data/tuning/acti
 
 ## 5. What this plan will not do
 
-- **Touch the demon-species roster or the affix-family corpus.** Neither needs correction; see map §0.
+- **Touch the creature-species roster or the affix-family corpus.** Neither needs correction; see map §0.
 - **Narrow `allowedAtomFamilies`.** Direction is a bias, checked, never a filter.
 - **Claim to prove the coverage gain without a real run.** Only the weighting *mechanism's*
   correctness is provable for free; whether real model behavior actually diversifies needs a real

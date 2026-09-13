@@ -2,6 +2,7 @@ using FusionRpg.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -14,22 +15,20 @@ namespace FusionRpg.Server.Tests;
 /// here rather than assumed.</summary>
 public class DelveDomainsAndStartEndpointsTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly long _playerId;
 
     public DelveDomainsAndStartEndpointsTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-delve-endpoints-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _playerId = _store.GetCurrentPlayerId();
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     // ---- GET /domains/{playerId} --------------------------------------------------------------------

@@ -14,7 +14,7 @@ word for word:
   `permitted_affixes`/`permitted_properties` as arguments; it does not itself decide what is legal,
   because that decision is `quota.py`/H3's, read once and rendered here, never re-derived.
 
-**Permutation is verified, not trusted.** `order_for` (`demons.anchor.permute`) is reused directly
+**Permutation is verified, not trusted.** `order_for` (`creatures.anchor.permute`) is reused directly
 rather than reimplemented — `verify_permutation` (`actions.validate_heal.derive`) is the gate that
 later re-derives the same order and raises if a rendered brief does not reproduce it; this module's
 job is only to call `order_for` with the right seed, `nodeId|field|sampleIndex` exactly as the
@@ -26,7 +26,7 @@ from dataclasses import dataclass
 from typing import Sequence
 
 from ..plan.archetypes import TIER_COUNT
-from ...demons.anchor.permute import order_for
+from ...creatures.anchor.permute import order_for
 from .vocab import AffixOption
 
 __all__ = [

@@ -1,0 +1,19 @@
+{
+  "session": "commit-tool-hang-fix-20260912-c3d9",
+  "program": "contributing-standards",
+  "problem": "repo-git.commit returns MCP -32001 while validate_message answers instantly: the long-lived MCP stdio server executes stale code after a scripts/commit-tool edit, and git subprocesses have no timeout so a stall hangs the toolcall forever. Add per-call hot-reload of the commit-tool modules and bounded git timeouts so a stall returns a normal error.",
+  "mode": "direct",
+  "branch": "features/derived-stat-extension",
+  "worktree": null,
+  "paths": [
+    "scripts/commit-tool/mcp_server.py",
+    "scripts/commit-tool/clean_commit.py",
+    "scripts/commit-tool/validate.py",
+    "scripts/commit-tool/check_history.py",
+    "scripts/commit-tool/smoke_test.py",
+    "docs/contributing/agent-git.md",
+    "tasks/sessions/commit-tool-hang-fix-20260912-c3d9.json"
+  ],
+  "started": "2026-09-12T10:55:00Z",
+  "status": "merged"
+}

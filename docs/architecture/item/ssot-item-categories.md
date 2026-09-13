@@ -235,7 +235,7 @@ and therefore has to survive a catalog revision without re-rolling).
 | Category | Consumer today | Verdict |
 |---|---|---|
 | `equipment` | `BindGate` + compose → `EntityStatWriter` on the lawn | ships |
-| `material` | **none.** `DemonMaterialCatalog` is documented as *"inventory rows with validated ids"* and *"demon-fusion consumes these later"* (`src/FusionRpg.Core/Demons/DemonMaterialCatalog.cs:7`) | ships as inventory; **I7/I9 must name the consumer** |
+| `material` | **none.** `CreatureMaterialCatalog` is documented as *"inventory rows with validated ids"* and *"creature-fusion consumes these later"* (`src/FusionRpg.Core/Creatures/CreatureMaterialCatalog.cs:7`) | ships as inventory; **I7/I9 must name the consumer** |
 | `currency` | `rpg_soul_ledger` / `rpg_soul_balances` (`src/FusionRpg.Data/Sqlite/RpgStore.cs:440`, `:455`) | ships |
 | `quest` | world / expedition gates | ships |
 | `consumable` | the **action layer**, unbuilt | do not author |
@@ -423,7 +423,7 @@ no bind state, no lock flag — and adding them would make the atom program know
 **Never** duplicate rolled values into this row. The rolls live in `effect_instance_atom` and nowhere else.
 
 **2. `rpg_player_stack`** — one generalised stackable table, the direct generalisation of
-`rpg_demon_materials(player_id, material_id, qty, updated_utc)`
+`rpg_creature_materials(player_id, material_id, qty, updated_utc)`
 (`src/FusionRpg.Data/Sqlite/RpgStore.cs:520`):
 
 ```sql
@@ -432,7 +432,7 @@ rpg_player_stack(player_id, category_id, item_id, qty, charges, updated_utc,
 ```
 
 Serves `material`, `consumable`, `quest`, `insert` (unrolled), `cosmetic`, `blueprint`, `cache`.
-`rpg_demon_materials` migrates into it with `category_id = 'material'`.
+`rpg_creature_materials` migrates into it with `category_id = 'material'`.
 
 **3. The ledger** — currency never enters an inventory table. `rpg_soul_ledger` / `rpg_soul_balances` already
 work this way and are the precedent to copy, not to replace.
@@ -757,7 +757,7 @@ Numbered, each naming the lane. This is where I3's insufficiency shows.
     plate` and `fibre · husk · bark · heartwood`. If I9's taxonomy uses different rungs, crafting a plate helm
     has no plate material and the two ladders silently disagree.
 11. **I13 — build the three stores in §5.6**, and put `base_type_id` on `rpg_item_instance` as a denormalised
-    column so a bag listing does not join `effect_instance`. Also: migrate `rpg_demon_materials` into
+    column so a bag listing does not join `effect_instance`. Also: migrate `rpg_creature_materials` into
     `rpg_player_stack` with `category_id = 'material'` rather than leaving two stack tables.
 12. **I12 — drop must choose base type and rarity as two independent picks** and pass both into instantiation.
     If a drop table names a single fused "item id", band/rarity orthogonality dies and §7.4's overlap floor
@@ -775,7 +775,7 @@ Numbered, each naming the lane. This is where I3's insufficiency shows.
     in §6. Confirm that reusing `effect_container.slot` for a role id is a reviewed reuse and not a schema
     change.
 17. **E12 / combat unification — the schedule for battle reading equipment.** Base damage and base guard are
-    `stat.modify`, ignored by the battle sink today. Until E12 wires `BattleStatComposer`, a fully geared demon
+    `stat.modify`, ignored by the battle sink today. Until E12 wires `BattleStatComposer`, a fully geared creature
     fights identically to a naked one. I need to know whether item content lands before or after that, because
     it decides whether v1 items are a lawn feature or a battle feature.
 18. **The channel-extension spec — `attackInterval`.** `atom.base-cadence` is held on it, and without cadence

@@ -30,7 +30,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -100,7 +100,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -135,7 +135,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -205,7 +205,7 @@
       "class": "leather",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -241,7 +241,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.stoicism",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -276,7 +276,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -311,7 +311,7 @@
       "class": "leather",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -346,7 +346,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.stoicism",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -416,7 +416,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.padding",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -444,18 +444,18 @@
     },
     {
       "id": "item.humanoid-head-b-013",
-      "nameKey": "base.reinforced-visor",
-      "name": "Reinforced Visor",
+      "nameKey": "base-type.tactical-visor",
+      "name": "Tactical Visor",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.reinforced-visor",
+      "iconKey": "icon.base-type.tactical-visor",
       "flavorKey": "flavor.base.reinforced-visor",
       "flavor": "A heavy metal plate designed to shield the eyes and brow from incoming strikes. It provides a wide field of vision while maintaining structural integrity.",
       "tags": [
@@ -480,18 +480,18 @@
     },
     {
       "id": "item.humanoid-head-b-014",
-      "nameKey": "base.reinforced-visor",
-      "name": "Reinforced Visor",
+      "nameKey": "base-type.hardened-sight",
+      "name": "Hardened Sight",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.reinforced-visor",
+      "iconKey": "icon.base-type.hardened-sight",
       "flavorKey": "flavor.base.reinforced-visor",
       "flavor": "A heavy metal plate designed to shield the eyes and brow from incoming strikes. It provides a rigid barrier without obstructing the wearer's field of vision.",
       "tags": [
@@ -516,18 +516,18 @@
     },
     {
       "id": "item.humanoid-head-b-015",
-      "nameKey": "base.reinforced-visor",
-      "name": "Reinforced Visor",
+      "nameKey": "base-type.combat-goggles",
+      "name": "Combat Goggles",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.reinforced-visor",
+      "iconKey": "icon.base-type.combat-goggles",
       "flavorKey": "flavor.base.reinforced-visor",
       "flavor": "A heavy metal plate designed to shield the eyes and brow from incoming strikes. It is built to withstand the brunt of a frontal assault.",
       "tags": [
@@ -552,18 +552,18 @@
     },
     {
       "id": "item.humanoid-head-b-016",
-      "nameKey": "base.reinforced-visor",
-      "name": "Reinforced Visor",
+      "nameKey": "base-type.tactical-goggles",
+      "name": "Tactical Goggles",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.reinforced-visor",
+      "iconKey": "icon.base-type.tactical-goggles",
       "flavorKey": "flavor.base.reinforced-visor",
       "flavor": "A heavy metal plate designed to shield the eyes and brow from incoming strikes. It provides a rigid barrier without obstructing the wearer's vision.",
       "tags": [
@@ -588,18 +588,18 @@
     },
     {
       "id": "item.humanoid-head-b-017",
-      "nameKey": "base.reinforced-visor",
-      "name": "Reinforced Visor",
+      "nameKey": "base-type.plated-sight-guard",
+      "name": "Plated Sight-Guard",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.reinforced-visor",
+      "iconKey": "icon.base-type.plated-sight-guard",
       "flavorKey": "flavor.base.reinforced-visor",
       "flavor": "A heavy metal plate designed to shield the eyes and brow from incoming strikes. It provides a sturdy foundation for any guard's defensive posture.",
       "tags": [
@@ -624,18 +624,18 @@
     },
     {
       "id": "item.humanoid-head-b-018",
-      "nameKey": "base.reinforced-visor",
-      "name": "Reinforced Visor",
+      "nameKey": "base-type.tactical-eyepiece",
+      "name": "Tactical Eyepiece",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.reinforced-visor",
+      "iconKey": "icon.base-type.tactical-eyepiece",
       "flavorKey": "flavor.base.reinforced-visor",
       "flavor": "A heavy metal plate designed to shield the eyes and brow from incoming strikes. It provides a sturdy foundation for a guard's defensive posture.",
       "tags": [
@@ -660,18 +660,18 @@
     },
     {
       "id": "item.humanoid-head-b-019",
-      "nameKey": "base.reinforced-visor",
-      "name": "Reinforced Visor",
+      "nameKey": "base-type.tactical-plasteel-visor",
+      "name": "Tactical Plasteel Visor",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.immunity",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.reinforced-visor",
+      "iconKey": "icon.base-type.tactical-plasteel-visor",
       "flavorKey": "flavor.base.reinforced-visor",
       "flavor": "A heavy metal plate designed to shield the eyes and brow from incoming strikes. It is built to withstand the brunt of a frontal assault.",
       "tags": [
@@ -696,18 +696,18 @@
     },
     {
       "id": "item.humanoid-head-b-020",
-      "nameKey": "base.reinforced-visor",
-      "name": "Reinforced Visor",
+      "nameKey": "base-type.tactical-sight-array",
+      "name": "Tactical Sight Array",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.mending",
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.reinforced-visor",
+      "iconKey": "icon.base-type.tactical-sight-array",
       "flavorKey": "flavor.base.reinforced-visor",
       "flavor": "A heavy metal plate designed to shield the eyes and brow from incoming strikes. It provides a wide field of vision without compromising cranial protection.",
       "tags": [
@@ -739,7 +739,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -768,18 +768,18 @@
     },
     {
       "id": "item.humanoid-head-b-022",
-      "nameKey": "base.laminated-sallet",
-      "name": "Laminated Sallet",
+      "nameKey": "base-type.polished-sallet",
+      "name": "Polished Sallet",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.laminated-sallet",
+      "iconKey": "icon.base-type.polished-sallet",
       "flavorKey": "flavor.base.laminated-sallet",
       "flavor": "A streamlined steel cap designed to deflect downward strikes while maintaining a clear field of vision.",
       "tags": [
@@ -804,18 +804,18 @@
     },
     {
       "id": "item.humanoid-head-b-023",
-      "nameKey": "base.laminated-sallet",
-      "name": "Laminated Sallet",
+      "nameKey": "base-type.gilded-sallet",
+      "name": "Gilded Sallet",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.mending",
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.laminated-sallet",
+      "iconKey": "icon.base-type.gilded-sallet",
       "flavorKey": "flavor.base.laminated-sallet",
       "flavor": "A reinforced steel cap designed to deflect downward strikes while maintaining a clear line of sight for the sentry.",
       "tags": [
@@ -840,18 +840,18 @@
     },
     {
       "id": "item.humanoid-head-b-024",
-      "nameKey": "base.laminated-sallet",
-      "name": "Laminated Sallet",
+      "nameKey": "base-type.polished-steel-sallet",
+      "name": "Polished Steel Sallet",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.immunity",
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.laminated-sallet",
+      "iconKey": "icon.base-type.polished-steel-sallet",
       "flavorKey": "flavor.base.laminated-sallet",
       "flavor": "A streamlined steel cap designed to deflect downward strikes while maintaining a clear field of vision.",
       "tags": [
@@ -876,18 +876,18 @@
     },
     {
       "id": "item.humanoid-head-b-025",
-      "nameKey": "base.laminated-sallet",
-      "name": "Laminated Sallet",
+      "nameKey": "base-type.coated-steel-sallet",
+      "name": "Coated Steel Sallet",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.padding",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.laminated-sallet",
+      "iconKey": "icon.base-type.coated-steel-sallet",
       "flavorKey": "flavor.base.laminated-sallet",
       "flavor": "A sleek, overlapping arrangement of metal plates designed to deflect downward strikes while maintaining clear sightlines.",
       "tags": [
@@ -912,18 +912,18 @@
     },
     {
       "id": "item.humanoid-head-b-026",
-      "nameKey": "base.laminated-sallet",
-      "name": "Laminated Sallet",
+      "nameKey": "base-type.laminated-iron-basin",
+      "name": "Laminated Iron Basin",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.laminated-sallet",
+      "iconKey": "icon.base-type.laminated-iron-basin",
       "flavorKey": "flavor.base.laminated-sallet",
       "flavor": "A streamlined steel cap designed to deflect downward strikes while maintaining a clear field of vision.",
       "tags": [
@@ -948,18 +948,18 @@
     },
     {
       "id": "item.humanoid-head-b-027",
-      "nameKey": "base.laminated-sallet",
-      "name": "Laminated Sallet",
+      "nameKey": "base-type.reinforced-visor-helm",
+      "name": "Reinforced Visor Helm",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.mending",
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.laminated-sallet",
+      "iconKey": "icon.base-type.reinforced-visor-helm",
       "flavorKey": "flavor.base.laminated-sallet",
       "flavor": "A sleek, contoured helm designed to deflect downward strikes away from the neck. Its smooth surface offers little grip for an opponent's blade.",
       "tags": [
@@ -984,18 +984,18 @@
     },
     {
       "id": "item.humanoid-head-b-028",
-      "nameKey": "base.laminated-sallet",
-      "name": "Laminated Sallet",
+      "nameKey": "base-type.laminated-visor-helm",
+      "name": "Laminated Visor Helm",
       "frame": "humanoid",
       "role": "head-guard",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.immunity",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.laminated-sallet",
+      "iconKey": "icon.base-type.laminated-visor-helm",
       "flavorKey": "flavor.base.laminated-sallet",
       "flavor": "A close-fitting steel cap designed to protect the cranium from downward strikes while maintaining a clear field of vision.",
       "tags": [

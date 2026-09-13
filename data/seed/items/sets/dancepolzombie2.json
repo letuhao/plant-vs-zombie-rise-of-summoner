@@ -25,7 +25,7 @@
       "id": "set.dancepolzombie2-001",
       "nameKey": "set.the-performer-s-pole",
       "name": "The Performer's Pole",
-      "themeKey": "demon.dancepolzombie2",
+      "themeKey": "creature.dancepolzombie2",
       "members": [
         {
           "role": "armament-primary",

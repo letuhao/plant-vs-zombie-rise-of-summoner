@@ -25,7 +25,7 @@
       "id": "set.threemine-001",
       "nameKey": "set.three-line-spud",
       "name": "Three-Line Spud",
-      "themeKey": "demon.threemine",
+      "themeKey": "creature.threemine",
       "members": [
         {
           "role": "armament-primary",

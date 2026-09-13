@@ -25,7 +25,7 @@
       "id": "set.portalballoonzombie-001",
       "nameKey": "set.temporal-void-sphere",
       "name": "Temporal Void Sphere",
-      "themeKey": "demon.portalballoonzombie",
+      "themeKey": "creature.portalballoonzombie",
       "members": [
         {
           "role": "armament-primary",

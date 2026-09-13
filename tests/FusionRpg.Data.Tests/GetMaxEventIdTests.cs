@@ -6,15 +6,21 @@ namespace FusionRpg.Data.Tests;
 /// <summary>aura-skill live-lawn-quick-start: `RpgStore.GetMaxEventId` is the in-process tip-of-log
 /// read a debug-orchestration endpoint needs before triggering new events (mirrors what the live-test
 /// scripts approximate externally via a binary search over HTTP paging).</summary>
-public class GetMaxEventIdTests
+public class GetMaxEventIdTests : IDisposable
 {
-    static RpgStore NewStore()
+    readonly List<DataTestStore> _stores = new();
+
+    public void Dispose()
     {
-        var dir = Path.Combine(Path.GetTempPath(), "fusionrpg-maxeventid-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(dir);
-        var store = new RpgStore(dir);
-        store.Init();
-        return store;
+        foreach (var s in _stores)
+            s.Dispose();
+    }
+
+    RpgStore NewStore()
+    {
+        var test = DataTestStore.Create();
+        _stores.Add(test);
+        return test.Store;
     }
 
     [Fact]

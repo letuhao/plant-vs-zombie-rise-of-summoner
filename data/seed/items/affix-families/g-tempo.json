@@ -420,6 +420,10 @@
       "id": "atom.tempo-pulse",
       "nameKey": "affix.tempo-shift",
       "name": "Tempo Shift",
+      "frames": [
+        "plant"
+      ],
+      "side": "plant",
       "kindId": "stat.modify",
       "params": {
         "channel": "produceInterval",

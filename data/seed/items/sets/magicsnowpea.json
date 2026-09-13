@@ -25,7 +25,7 @@
       "id": "set.magicsnowpea-001",
       "nameKey": "set.frost-bean-volley",
       "name": "Frost Bean Volley",
-      "themeKey": "demon.magicsnowpea",
+      "themeKey": "creature.magicsnowpea",
       "members": [
         {
           "role": "armament-primary",

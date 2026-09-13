@@ -25,7 +25,7 @@
       "id": "set.sealantern-001",
       "nameKey": "set.luminous-spore-lantern",
       "name": "Luminous Spore Lantern",
-      "themeKey": "demon.sealantern",
+      "themeKey": "creature.sealantern",
       "members": [
         {
           "role": "armament-primary",

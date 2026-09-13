@@ -25,7 +25,7 @@
       "id": "set.bucketzombie-001",
       "nameKey": "set.iron-casket-husk",
       "name": "Iron-Casket Husk",
-      "themeKey": "demon.bucketzombie",
+      "themeKey": "creature.bucketzombie",
       "members": [
         {
           "role": "armament-primary",

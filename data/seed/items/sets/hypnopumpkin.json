@@ -25,7 +25,7 @@
       "id": "set.hypnopumpkin-001",
       "nameKey": "set.jack-o-lantern-s-hunger",
       "name": "Jack-o'-Lantern's Hunger",
-      "themeKey": "demon.hypnopumpkin",
+      "themeKey": "creature.hypnopumpkin",
       "members": [
         {
           "role": "armament-primary",

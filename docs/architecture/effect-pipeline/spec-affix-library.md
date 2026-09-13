@@ -67,7 +67,7 @@ tests/FusionRpg.Core.Tests/Atoms/AffixLibraryGeneratorTests.cs  new
 ```
 
 **Not a seedsmith module.** This generator runs where the atom catalog already lives — C#, at import
-time or catalog load, the same boundary `species-generator` (demon-seed module 12) draws for the same
+time or catalog load, the same boundary `species-generator` (creature-seed module 12) draws for the same
 reason: it must call the shipped code, not reimplement it, and there is nothing here for a model to
 decide.
 

@@ -5,7 +5,7 @@ namespace FusionRpg.Core.Stats.Aptitudes;
 /// dominant one is the worst case). The relative BUDGET each scope gets is `point-economy`'s call
 /// (P6.1); this type only needs the four buckets to sum into, in the order the decision states them.
 /// Append-only, like every other ordinal roster in this codebase — never reorder.</summary>
-public enum AllocationScope { Commander, DemonType, Aspect, UniqueDemon }
+public enum AllocationScope { Commander, CreatureType, Aspect, UniqueCreature }
 
 /// <summary>
 /// An actor's aptitude allocation — immutable, `long`-valued points per (scope, aptitude id).

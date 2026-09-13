@@ -25,7 +25,7 @@
       "id": "set.portalplant-001",
       "nameKey": "set.fragmented-chrono-flora",
       "name": "Fragmented Chrono-Flora",
-      "themeKey": "demon.portalplant",
+      "themeKey": "creature.portalplant",
       "members": [
         {
           "role": "armament-primary",

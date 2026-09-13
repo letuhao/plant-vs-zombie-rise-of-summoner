@@ -170,7 +170,7 @@ public static class MatchHost
                     }
                     MatchCommanderSnapshotHolder.BeginMatch(snapshot);
                     CheatState.RefreshCommanderAllocationCache();
-                    // demon-lawn-deploy T2.1: same Hot/Cold fix, same board.start moment — a
+                    // creature-lawn-deploy T2.1: same Hot/Cold fix, same board.start moment — a
                     // Cold-plane roster/patron read frozen once, never re-queried mid-match.
                     var lawnRoster = LawnDeployRosterSessionCache.BuildFromSessionCache();
                     if (LawnDeployRosterSessionCache.LastBuildWasCacheMiss)
@@ -178,7 +178,7 @@ public static class MatchHost
                         try { RpgHost.Log.Warning("lawn deploy roster: cache miss — empty roster frozen for this match"); } catch { }
                     }
                     LawnDeployRosterSnapshotHolder.BeginMatch(lawnRoster);
-                    // demon-lawn-deploy T2.4: a fresh per-run "already fired" tracker for the trigger
+                    // creature-lawn-deploy T2.4: a fresh per-run "already fired" tracker for the trigger
                     // evaluator, same board.start moment as everything else above.
                     LawnDeployEventRunStateHolder.BeginMatch();
                     // zomboss-deploy-ai T3.4: same board.start moment, Zomboss's own sibling tracker.
@@ -205,7 +205,7 @@ public static class MatchHost
                     try { _currentWave = Convert.ToInt32(waveObj); } catch { }
                 }
 
-                // demon-lawn-deploy T2.4: checked after every event while a match is actually live —
+                // creature-lawn-deploy T2.4: checked after every event while a match is actually live —
                 // the evaluator's own gates (empty roster, per-run budget, per-case "already fired",
                 // the condition itself) make this cheap and safe to call this often; PlantCount/
                 // ZombieCount only ever change on a spawn/die event, so this is exactly "off
@@ -321,12 +321,12 @@ public static class MatchHost
 
             var tuning = FusionRpg.Core.Match.Ai.ZombossDeployTuningHub.Tuning;
             var candidates = FusionRpg.Core.Match.Ai.ZombossDeployRoster.AvailableSpeciesFor(
-                _currentWave, FusionRpg.Core.Demons.DemonSpeciesCatalog.All, tuning.WaveRarityCeilings);
+                _currentWave, FusionRpg.Core.Creatures.CreatureSpeciesCatalog.All, tuning.WaveRarityCeilings);
 
             var seed = FusionRpg.Core.Battle.SeededRng.DeriveStream(0, matchKey).NextULong();
             var decision = FusionRpg.Core.Match.Ai.ZombossDeployPolicy.Decide(
                 board, candidates,
-                speciesId => FusionRpg.Core.Demons.DemonSpeciesCatalog.Get(speciesId).BaseRarity,
+                speciesId => FusionRpg.Core.Creatures.CreatureSpeciesCatalog.Get(speciesId).BaseRarity,
                 tuning.Scorer, seed, caseId: "zomboss-reinforce");
             if (!decision.Deploys) return;
 

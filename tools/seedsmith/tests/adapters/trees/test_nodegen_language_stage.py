@@ -795,7 +795,7 @@ class SpeciesCategoryTreeResumabilityTests(unittest.TestCase):
         # field" cost table, confirmed live here by inspecting the raw call log): a naive per-CALL
         # counter would hand three DIFFERENT names to the same node's own three votes, which could
         # never resolve. Checked and rejected: keying on the prompt text (permuted per sample,
-        # `demons.anchor.permute.order_for`'s own precedent, so NOT identical within a node) or on
+        # `creatures.anchor.permute.order_for`'s own precedent, so NOT identical within a node) or on
         # the schema (byte-identical within a node, but multiple DIFFERENT nodes sharing a branch
         # can carry the identical permitted-affix schema too, since every node in this tree is
         # forced to the SAME element+status -- schema-keying would wrongly collapse them). The

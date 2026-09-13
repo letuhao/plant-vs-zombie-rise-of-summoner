@@ -25,7 +25,7 @@
       "id": "set.waterfurnace-001",
       "nameKey": "set.aloe-hearth",
       "name": "Aloe Hearth",
-      "themeKey": "demon.waterfurnace",
+      "themeKey": "creature.waterfurnace",
       "members": [
         {
           "role": "armament-primary",

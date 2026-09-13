@@ -25,7 +25,7 @@
       "id": "set.ultimatemelon-001",
       "nameKey": "set.ultimate-garlic-volley",
       "name": "Ultimate Garlic Volley",
-      "themeKey": "demon.ultimatemelon",
+      "themeKey": "creature.ultimatemelon",
       "members": [
         {
           "role": "armament-primary",

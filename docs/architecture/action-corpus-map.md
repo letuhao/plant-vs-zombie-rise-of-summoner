@@ -22,21 +22,26 @@ not part of what was just approved.
 plan → `tasks/action-corpus-plan.md` + `tasks/action-corpus-todo.md`.
 
 **⛔ LIVE ROSTER SOURCE CORRECTION 2026-09-10.** The executable Seedsmith action pipeline reads the
-live JSON roster under `data/seed/demons/species/` and derives family membership from each seed's
-`family` field. The current source contains **904 species**, **227 consolidated family namespaces**,
-and **1,183 family memberships**. The older 84-species / 53-assignment / 19-family figures that
-remain in historical module prose are not valid inputs for the current pipeline; neither the
-runtime SQLite database nor `DemonSpeciesCatalog.Generated.cs` is an action-pipeline source of truth.
-The generated action plan is therefore **5,680 briefs**: 25 general, 1,135 family, and 4,520
-species, with five category slots per subject across `attack`, `defense`, `movement`, `support`, and
-`status`.
+live JSON roster under `data/seed/creatures/species/` and derives family membership from each seed's
+`family` field. The older 84-species / 53-assignment / 19-family figures that remain in historical
+module prose are not valid inputs for the current pipeline; neither the runtime SQLite database nor
+`CreatureSpeciesCatalog.Generated.cs` is an action-pipeline source of truth.
+
+**⛔ ROSTER AND PLAN SIZES ARE READINGS, NOT CONSTANTS (2026-09-11).** The live seed folder is a
+**population**: it grows every time a species ships, so its size and every figure derived from it
+(species count, consolidated family count, family memberships, brief total, per-tier counts) change
+with content. The plan is emitted by the deterministic A-S1 planner over whatever the live roster is
+at run time, with five category slots per subject across `attack`, `defense`, `movement`, `support`,
+and `status`. Do not write a population count into a spec, test, or doc as an acceptance value — see
+[validation-ssot.md](validation-ssot.md). To read the current scale, run the planner and print its
+summary; to assert correctness, assert the **joins and reconciliation**, never the total.
 
 ---
 
 ## 1. What this program is, in one paragraph
 
 **It generates the action seeds a creature can hold**, in three eligibility tiers — general (any
-creature), family (one of the live consolidated demon families), signature (one species) — as **seeds**, never concrete
+creature), family (one of the live consolidated creature families), signature (one species) — as **seeds**, never concrete
 objects. Identity is authored by a model; every magnitude, weight and duration is decided by
 deterministic code and by tables the model never sees. The runtime rolls a seed into a concrete action
 per player (`Instantiator`), which is Law 1 and is already built.
@@ -67,9 +72,10 @@ Restated inline, because a downstream session reads this map and not its links.
 2. **Small-batch proof before any full run.** *"prove LLM pipeline work very well before big batch run…
    i will decide when we fully run."* Every model stage ships `--dry-run` and a small `--count`; **§17's
    call budget is a ceiling, not a plan.**
-3. **The live roster is read from the seed folder.** The current run has 904 species, 227
-   consolidated family namespaces, and 1,183 memberships. These counts are measurements, not hard-coded
-   design points; the generators must re-read the folder on every run.
+3. **The live roster is read from the seed folder.** Its size (species, consolidated families,
+   memberships) is a **reading that grows as content ships** — never a hard-coded design point. The
+   generators re-read the folder on every run; tests assert the *joins* to it, not its size
+   ([validation-ssot.md](validation-ssot.md)).
 4. **C1's family-access widening is gated** (`ideal` §21.3) on three things that do not exist: a per-rung
    `powerBudget` row, a family-aware non-additive price (needs D2), and a budget check with a production
    caller. **Until all three hold, the generator emits structure-gated tiers only.**
@@ -81,7 +87,7 @@ task and test.
 
 | # | Module | Owns | Model? | Depends on |
 |---|---|---|---|---|
-| **A-S0** | `characteristic-pool` | The closed characteristic pool, and the **species role lean** — family-level floor, deterministic derivation to differentiate, model only for the residue (A2 hybrid). Reads the demon seed; **never invents an anchor** | No | — |
+| **A-S0** | `characteristic-pool` | The closed characteristic pool, and the **species role lean** — family-level floor, deterministic derivation to differentiate, model only for the residue (A2 hybrid). Reads the creature seed; **never invents an anchor** | No | — |
 | **A-S1** | `distribution-planner` | **Engine 1.** Category, pairing role, quotas, rung windows, and per-tier atom-family access sets. Owns every count the model is not allowed to choose | No | A-S0 |
 | **A-P1** | `general-propose` | *"A good role-based action any creature could hold."* Role + mechanical slot only — **no anchor at all** | **Yes** | A-S1 |
 | **A-P2** | `family-propose` | *"What expresses THIS family."* Family motifs, anti-motifs, themes | **Yes** | A-S1 |
@@ -125,7 +131,7 @@ between programs.
 |---|---|---|---|
 | **A-M1** | `movement-payload` | The **RPG-layer half** of a movement action — the buff, status or tempo effect. Legal today, works with the game closed. This is what makes a movement action *standalone-first* | — |
 | **A-M2** | `lawn-reposition` | ⛔ **INERT** on landing — decided 2026-09-03 (`spec-lawn-reposition.md` §7 hazard 4): E33 supplies the activation seam and **no lawn-side production producer exists**; `A9 movement-actions` is **not** it (**battle-grid only**, `action-map.md:294`, and itself deferred behind `A10` at `tasks/action-todo.md:1703-1704`). It ships behind its default-off toggle and is reported **inert**, in that word, never *built*. The **lawn enrichment half** — `decisions.md` *"Lawn position write"*, **DRAFTED not built**. ONE guarded entry point (*move actor to cell*) through `EntityApply`, single writer, `guard-single-writer.ps1` extended, record-then-drain. **⚠️ `Hud/` needs an explicit exemption** — the ADR's enumeration originally missed `Hud/ActorHudPool.cs:170,225,243` | **E33** (`OnActivate` on the lawn), A-M1 |
-| **A-T1** | `type-weights` | The per-species generation anchor `spec-action-seeding.md` names and **which does not exist**. A demon type is a weight vector over the five shipped action categories — *"inventing a third vocabulary is the exact defect the atom program exists to stop"* | A-S0 |
+| **A-T1** | `type-weights` | The per-species generation anchor `spec-action-seeding.md` names and **which does not exist**. A creature type is a weight vector over the five shipped action categories — *"inventing a third vocabulary is the exact defect the atom program exists to stop"* | A-S0 |
 | **A-E1** | `eligibility-axis` | ⭐ **The founding gap, and the highest-damage orphan the coverage audit found.** `scope` (`general`/`family`/`species`) + `scopeKey` on the action row, and the candidate-set query `general ∪ family(mine) ∪ species(mine)`. **`ActionRow` has no such field today** — its only `scope` is `ActionScopeRow`'s *effect* scope, an unrelated concept. Without it the corpus is content nothing can read, and `UnlockLadder` stays reachable only from tests | — |
 | **A-G1** | `tier-access-gate` | **Makes decision C1 enableable.** §21.3's gate was named by five specs and owned by none: a per-rung `powerBudgetMilli` (derived from shipped `qPowerMilli` × `poolRolls`, never a new curve), a budget check with a **production caller**, the caps-register entry §5 constraint 2 promised, and `reaction`/`restriction` reporting **`undetectable` rather than `0`**. ⛔ Does **not** enable C1 — assertion 2 stays blocked on effect-atom's D2 | A-S1 |
 | **A-R1** | `resource-ownership` | §30 task 0.4, marked ✅ with its deliverable absent. The 18-row ownership table and the generator that emits 216 edges from it, so *"add a resource id and its edges appear"* becomes true rather than promised. **First emission must reproduce `aptitudes.v5.json` byte-for-byte** | — |
@@ -181,6 +187,22 @@ picker are all inspectable against real data, and the only unknown left is the j
 - **✅ Checkpoint 5 — an innate is picked deterministically.** A-S6 over the smoke batch: same input →
   same pick, ties broken on id, a species with no eligible action gets `null`.
 
+⛔ **Follow-on program (2026-09-12): [`action-distribution-gaps`](../../tasks/action-distribution-gaps-plan.md).**
+A post-Checkpoint-4 audit found the pipeline mechanically sound but unable to reach a clean coverage
+verdict: the design's `S5 → S1` top-up edge (§15's `S5 -->|"round n+1 targets"| S1`, and
+`spec-coverage-report.md` §7's *"A-S1 … reads the report to build round n+1's briefs"*) was **never
+wired**, so `thinCell` can never clear, and `compute_verdict` ignored the framework's `gates=False`
+rule. Two A-S7 defects (`enablerPayoffCoverage`) were fixed 2026-09-12; the loop and the verdict
+semantics are the follow-on program. This does not reopen Checkpoints 0-5; it is what makes
+Checkpoint 4's *"the owner decides whether a full run happens"* reachable at all.
+
+📋 **Full findings + handoff: [audit-2026-09-13-distribution.md](action-corpus/audit-2026-09-13-distribution.md).**
+Durable record of the whole investigation: the three original claims, the four allocation defects
+(category, targetMode, areaShape, frame sequencing), the pairing and granularity defects, the
+verdict/top-up deadlock, the double-count the build-gate caught, current state, and the action plan.
+**Read it before touching the action generator** — the engine is fixed and gated; the remaining work
+is the owner-gated full run and the cleanups in its §10.
+
 ## 7. Cross-program dependencies
 
 | Needs | From | State |
@@ -188,7 +210,7 @@ picker are all inspectable against real data, and the only unknown left is the j
 | `OnActivate` raised on the lawn | **effect-atom E33** | ⛔ **A-M2 is blocked on it** — the only hard cross-program block. **And E33 is not enough:** it ships the seam with no production caller of its own (`spec-activation-edge.md:13-14`), so A-M2 lands **inert** until a lawn-side producer exists — a named, criteria-stated task that blocks no other module (⛔ decided 2026-09-03) |
 | Channel pools (L2) | **effect-atom E30** | A generated action's atoms reference pools |
 | Binding production | **effect-pipeline module 4** `instance-producer` | `effect_binding` has **zero rows**; without it the corpus is authored into a runtime nothing reaches |
-| Species anchors (motifs, family, theme) | **live demon seed folder** | 904 species and 1,183 family memberships; descriptive traits remain seed data |
+| Species anchors (motifs, family, theme) | **live creature seed folder** | one anchor per live species, family membership derived from each seed's `family` field; descriptive traits remain seed data (size is a reading — see validation-ssot.md) |
 | Rung window in the caps register | **A-G1** (was: power) | ✅ **Done 2026-09-04.** `ssot-power-scale.md` §11.2 now carries the `powerBudgetMilli` row §5 constraint 2 promised |
 | Real per-family usage counts | **roster-balance** `usage-stats` (FC1, `docs/research/action-corpus/_usage-*.json`) | A-S7 reads the latest report fresh every round — never a persisted rotation cursor, same "recompute from real data, never a snapshot" discipline `set-charm-gen.v1.json`'s own tuning note already states. Degrades to "every family equally due" when no report exists yet |
 | `restriction` axis detection | **effect-atom** (per-atom payload/target data) | ⛔ **Still absent, and not A-G1's to close alone.** `StructureBudgetGuard.SpentAxes` reads only `rpg_action` + `rpg_action_cost` + `rpg_action_effect_scope` — none carry per-atom payload/target data, so `restriction` (action-ideal.md §8.7: a self-debuff, `status.apply` scoped to `caster`) cannot be detected from here. A-G1 (spec-tier-access-gate.md §3.3, AC8) makes this explicit via `StructureBudgetGuard.UndetectableAxes()` rather than reporting `0` |

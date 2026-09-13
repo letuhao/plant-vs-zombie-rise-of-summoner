@@ -1,7 +1,7 @@
 using FusionRpg.Core.Delve.Domains;
 using FusionRpg.Core.Delve.Encounter;
 using FusionRpg.Core.Delve.Roll;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Dungeon.Tuning;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
@@ -20,14 +20,14 @@ namespace FusionRpg.Core.Tests.Delve.Domains;
 /// </summary>
 public class DomainEncounterCoverageTests
 {
-    static readonly DemonThreatTuning RealThreat = RealAnchorCorpusFixture.ThreatTuning;
+    static readonly CreatureThreatTuning RealThreat = RealAnchorCorpusFixture.ThreatTuning;
     static readonly EncounterTuning RealEncounterTuning = EncounterTuningHub.Tuning;
     static readonly AptitudeTuning RealAptitudes =
         AptitudeTuningLoader.Parse(File.ReadAllText(Path.Combine(DungeonTestFiles.RepoRoot(), "data", "tuning", "aptitudes.v2.json")));
     static readonly PowerTuning RealPower =
         PowerTuningLoader.Parse(File.ReadAllText(Path.Combine(DungeonTestFiles.RepoRoot(), "data", "tuning", "power-scale.v2.json")));
-    static readonly DemonShapeTuning RealShape =
-        DemonShapeTuningLoader.Parse(File.ReadAllText(Path.Combine(DungeonTestFiles.RepoRoot(), "data", "tuning", "demon-shape.v1.json")));
+    static readonly CreatureShapeTuning RealShape =
+        CreatureShapeTuningLoader.Parse(File.ReadAllText(Path.Combine(DungeonTestFiles.RepoRoot(), "data", "tuning", "creature-shape.v1.json")));
     static readonly RaidModeTuning Solo = DungeonTuningHub.Tuning.RaidModes["solo"];
     static readonly DifficultyRungTuning Hard = DungeonTuningHub.Tuning.Rungs["hard"];
 

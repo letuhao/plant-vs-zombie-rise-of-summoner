@@ -86,7 +86,7 @@ audit D1/D2 (separate Core fix unless owner pulls in). Shield **tab** (`shield-s
 | G6 | Volume fixture ~ Guard 7 (current §1 scale + 500 stress) — `derived-volume-guard` |
 | G8–G10 | Theme packs + catalog copy + BE Shared variant |
 
-**Inventory note:** W2/W3/W7/W8 and D13/D14 were audit-internal ids; not separate modules. W2 UniqueDemon →
+**Inventory note:** W2/W3/W7/W8 and D13/D14 were audit-internal ids; not separate modules. W2 UniqueCreature →
 `derived-sheet-projection`; W3 unattributed → `derived-player-copy`; W7 themeRegistry → **D5** /
 `derived-fold-harden`; W8 Pending fields → fold + recipe-wire.
 

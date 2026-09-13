@@ -67,9 +67,9 @@ dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~Element"
 ```
 src/FusionRpg.Data/Sqlite/RpgStore.Elements.cs               (new — 3 tables)
 tools/ElementEnumGen/                                    (new — build-time codegen; a C# enum cannot be
-                                                          generated from rows at load. Precedent: tools/DemonCatalogGen)
+                                                          generated from rows at load. Precedent: tools/CreatureCatalogGen)
 tools/ElementEnumGen/                                    (new — build-time codegen; a C# enum cannot be
-                                                          generated from rows at load. Precedent: tools/DemonCatalogGen)
+                                                          generated from rows at load. Precedent: tools/CreatureCatalogGen)
 src/FusionRpg.Core/Stats/Derived/ActorElementTypes.cs        (enum becomes generated mirror)
 src/FusionRpg.Core/Combat/Element/ElementRingMatrix.cs       (switch → table lookup)
 src/FusionRpg.Core/Combat/Shield/ShieldElementMatrix.cs      (switch → table lookup)

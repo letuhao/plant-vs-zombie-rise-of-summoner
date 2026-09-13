@@ -31,7 +31,7 @@ const PICKER_SURFACES: PickerSurfaceEntry[] = [
   {
     surface: "Fusion (FusionPage — base + sacrifice)",
     hasDiffState: false,
-    reason: "FusionPage shows a cost preview, not a before/after stat comparison against the base demon's current state — no comparison UI has been built for this surface"
+    reason: "FusionPage shows a cost preview, not a before/after stat comparison against the base creature's current state — no comparison UI has been built for this surface"
   },
   {
     surface: "Pacts / contract offers",

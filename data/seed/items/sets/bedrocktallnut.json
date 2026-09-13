@@ -25,7 +25,7 @@
       "id": "set.bedrocktallnut-001",
       "nameKey": "set.absolute-axis-nut",
       "name": "Absolute Axis Nut",
-      "themeKey": "demon.bedrocktallnut",
+      "themeKey": "creature.bedrocktallnut",
       "members": [
         {
           "role": "core-guard",

@@ -25,7 +25,7 @@
       "id": "set.mixanim-001",
       "nameKey": "set.selection-interface",
       "name": "Selection Interface",
-      "themeKey": "demon.mixanim",
+      "themeKey": "creature.mixanim",
       "members": [
         {
           "role": "manipulator",

@@ -25,7 +25,7 @@
       "id": "set.zombieboss2-001",
       "nameKey": "set.doctor-s-trophy-set",
       "name": "Doctor's Trophy Set",
-      "themeKey": "demon.zombieboss2",
+      "themeKey": "creature.zombieboss2",
       "members": [
         {
           "role": "armament-primary",

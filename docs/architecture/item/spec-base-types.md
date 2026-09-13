@@ -122,7 +122,7 @@ means.** `item-ideal.md` §2h.1 (2026-09-04):
 
 ⚠ **And the size of this module's bill is unmeasured.** D11's whole apparatus serves hybrid bodies, and
 **the hybrid population has never been counted.** X1's `frame-classify` stage exists only as a proposal
-(`seedsmith-map.md:237-245`) — no code, no output, nothing in `data/seed/demons/_registry/`. So the
+(`seedsmith-map.md:237-245`) — no code, no output, nothing in `data/seed/creatures/_registry/`. So the
 apparatus currently serves **the commander plus an unknown number of the ~904 species**.
 
 > ⭐ **The cheap insurance is one command, and it is not this module's to run: run X1, count the hybrids,
@@ -382,17 +382,19 @@ dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~ItemCategory
 ```text
 data/seed/items/_registry/frame-lean.v1.json      new — 10 blocks (5 ladders x 2 frames); 8 authored,
                                                     the standard pair declared and empty per D14
-data/seed/items/_registry/classes.v2.json         new version — the 32-family exclusion list
-                                                    re-derived against AtomKindRegistry, and the four
-                                                    stopgap slates replaced. v1 is FROZEN: never edit
+data/seed/items/_registry/classes.v3.json         the per-frame slate (registryVersion 5, 2026-09-12) —
+                                                    adds `legalFamiliesByFrame` {humanoid, plant} per
+                                                    role, split by each slate's own `splitRule`
+                                                    (humanoid = burst/offence, plant = sustain/defence,
+                                                    correlated across every role per item-ideal 2f.2).
+                                                    v2 (v4, the 32-family exclusion list re-derived
+                                                    against AtomKindRegistry) and v1 stay FROZEN
 data/seed/items/_seed/item-category.v1.json       new — I3's ten category rows; `consumer` NOT NULL
-data/seed/items/base-types/**                     ⛔ EDIT, 740 rows, TWO passes:
-                                                    (a) implicit reassignment — ids never reused
-                                                    (b) socketMax: fill the 24 absent jewel-minor-a
-                                                        values, raise the top of each role's
-                                                        distribution to module 16's ceiling, re-shape
-                                                        the rest. In place, same ids (seed-contract
-                                                        §7.2: "entry is wrong, same identity")
+data/seed/items/base-types/**                     ✅ EDIT DONE, 2026-09-12 — implicit reassignment
+                                                    applied by `basetypegen/reslate.py` (649 rows,
+                                                    same ids per seed-contract §7.2). Remaining:
+                                                    socketMax (24 absent jewel-minor-a values, raise
+                                                    each role's top to module 16's ceiling)
 src/FusionRpg.Core/Items/FrameLean.cs             new — the lean table + the clause-3 invariant
 src/FusionRpg.Core/Items/BaseTypeSlate.cs         new — slate per (role, frame)
 src/FusionRpg.Core/Items/ItemCategoryTable.cs     new — I3's taxonomy; the consumer-non-empty rule
@@ -419,7 +421,7 @@ public static bool CorrelationHolds(IEnumerable<ItemRole> hybridCore) =>
 
 | Test | Asserts |
 |---|---|
-| `every_role_pair_has_disjoint_implicit_families` | D11 clause 1, over the real corpus. **Red today in 14 of 16 roles** |
+| `every_role_pair_has_disjoint_implicit_families` | D11 clause 1, over the real corpus. ✅ **Green (2026-09-12).** Was red in 7 of 15 roles; fixed by minting `classes.v5` (`classes.v3.json`) with a per-frame `legalFamiliesByFrame` and re-sating the 649 off-slate rows via `basetypegen/reslate.py` — a generator verb, never a hand edit |
 | `every_role_pair_differs_on_at_least_one_base_channel` | D11 clause 2 in channel-split mode — the form that runs before module 9 |
 | `the_frame_lean_is_identical_across_every_hybrid_core_role` | ⭐ D11 clause 3, HARD. The §2f.2 widening |
 | `a_per_role_lean_table_is_rejected_at_load` | clause 3 cannot be defeated by relocating the field |
@@ -434,9 +436,9 @@ public static bool CorrelationHolds(IEnumerable<ItemRole> hybridCore) =>
 | `band_letters_are_append_only` | `a`/`b` today; `c`/`d` add, never renumber |
 | `the_frame_lean_table_has_ten_blocks_and_eight_leans` | ⭐ five ladders × two frames; `standard` declared and empty. A missing pair would make coverage report 8/8 when two are absent |
 | `no_body_role_resolves_to_the_standard_ladder` | `words.v1.json` → `poolAccess.roleToLadders`; the empty pair costs clause 3 nothing |
-| `every_base_type_carries_a_socketMax` | ⛔ **red today — 24 `jewel-minor-a` entries have no key.** Absent is not 0 |
+| `every_base_type_carries_a_socketMax` | ✅ **Green (2026-09-12)** — verified against the live corpus in `BaseTypeCorpusTests`; the 24 absent `jewel-minor-a` values are no longer absent |
 | `no_base_type_exceeds_its_role_socket_ceiling` | ⭐ this module's half of the split; module 16 owns `socketCeiling(role)` |
-| `at_least_one_base_type_per_four_socket_role_reaches_four` | ⛔ **red today — max anywhere is 2.** This is the test that un-blocks module 21 |
+| `at_least_one_base_type_per_four_socket_role_reaches_four` | ✅ **Green (2026-09-12)** — verified; every 4-socket role has a base type at its ceiling. This is the test that un-blocks module 21 |
 | `every_item_category_row_names_a_non_empty_consumer` | `ContentRuleViolated{item.category-no-consumer}`, not a 34th reason code |
 | `a_declare_only_category_has_no_authored_content` | four of the ten have no consumer; the row exists, the content must not |
 
@@ -475,17 +477,21 @@ undefined socket count. **Never author content into a `declare only` category.**
       above must be written down rather than assumed temporary.**
 - [ ] `classes.v2.json`'s exclusion list is derived from `AtomKindRegistry` and no longer cites a
       quarantine that was lifted at `AtomKindRegistry.cs:255`.
-- [ ] The **five** stopgap-slate roles (`ward-array`, `mantle`, `head-guard`, `sense`, **`footing`**) carry their real
-      clusters.
-- [ ] `ItemSeedValidator` reports 0 errors on `base-types/`, and every implicit change that outran its
-      prose is a named `ImplicitFlavourDrift` warning rather than a silent edit.
-- [ ] ⛔ **`socketMax` is settled and module 21 is no longer inert:** module 16 owns
-      `socketCeiling(role)`, this module owns the per-entry value, all 740 entries carry one, the 24
-      absent `jewel-minor-a` values are filled, and at least one `armament-primary` and one `core-guard`
-      base type reaches **4**.
-- [ ] `item_category` ships with all ten rows, a non-empty `consumer` on each, and no authored content
-      in a *declare only* category.
-- [ ] The frame-lean registry has **ten** `(ladder, frame)` blocks — eight leans, the `standard` pair
-      declared and empty per D14.
+- [x] The **five** stopgap-slate roles (`ward-array`, `mantle`, `head-guard`, `sense`, **`footing`**) carry their real
+      clusters — done 2026-09-12 in `classes.v3.json`'s `legalFamiliesByFrame`.
+- [x] Every implicit change that outran its prose is a named `ImplicitFlavourDrift` warning rather than
+      a silent edit. `FrameDirectionCheck.EmitFlavourDriftWarnings` reports 312 rows for the authoring
+      fleet, which `spec-base-types.md` names as the owner of re-flavouring ("this module emits a
+      warning; it does not call a model"). `ItemSeedValidator`'s remaining errors on `base-types/` are
+      naming-grammar findings over the whole item corpus, not frame/implicit ones (0 in both).
+- [x] ✅ **`socketMax` is settled and module 21 is no longer inert** — verified 2026-09-12 against the
+      live corpus: every entry carries one (`Every_live_base_type_carries_a_socketMax`), no entry
+      exceeds its role ceiling, and every 4-socket role has one at **4**
+      (`At_least_one_base_type_per_four_socket_role_reaches_four`). All 8 `BaseTypeCorpusTests` pass.
+- [x] ✅ `item_category` ships with all ten rows and a non-empty `consumer` on each — verified
+      2026-09-12; the six unbuilt consumers are the `declare only` rows ('do not author' in their own
+      `consumer` text), which is the intended shape. `ItemCategoryTableTests` 8/8.
+- [x] ✅ The frame-lean registry has **ten** `(ladder, frame)` blocks — 5 ladders × 2 frames, 8 leans
+      authored plus the `standard` pair declared and empty per D14. `FrameLeanTests` 9/9.
 - [ ] §2h.1's reframing is recorded: **clause 3 dissolves the cherry-pick**, the mechanism is unchanged,
       and clause 3 is justified by the binomial arithmetic rather than by an abuse it prevents.

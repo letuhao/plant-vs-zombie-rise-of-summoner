@@ -25,7 +25,7 @@
       "id": "set.garlicsplit-001",
       "nameKey": "set.splitting-pod-volley",
       "name": "Splitting Pod Volley",
-      "themeKey": "demon.garlicsplit",
+      "themeKey": "creature.garlicsplit",
       "members": [
         {
           "role": "armament-primary",

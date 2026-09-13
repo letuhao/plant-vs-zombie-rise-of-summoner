@@ -11,7 +11,7 @@ authorized from it.
 > defect claims that had stood unverified since 2026-08-22** (one was real and has since been fixed by
 > another program; two are confirmed and open; one was refuted). **§2c is down to five items, none of
 > which is a decision and none of which blocks authoring.** §2d is what the round did to the
-> program's shape — most importantly, **item content is now a seedsmith pipeline that consumes demon
+> program's shape — most importantly, **item content is now a seedsmith pipeline that consumes creature
 > themes**, the same upstream the action corpus uses.
 >
 > ⚠ **Round 2 changed what is expensive, not what is wanted.** Five platform programs landed under this
@@ -95,7 +95,7 @@ Diablo/PoE inspiration stands. What changed is the substrate, and therefore what
 | **One power ladder — `P(Θ)`** | 2026-08-23/24 | §6, §8, §9: every item magnitude now has a function. §9's *"power is open, drop bands have no number behind them"* is closed |
 | **`stat.derived` un-quarantined** | battle 2026-08-23, **lawn 2026-08-30** | §9's hardest row. *"`+armour` is the hardest common affix to ship"* is **obsolete** |
 | **Affix bundles + prefix/suffix split** | 2026-09-01 | §6.2: the pool's roll unit is a named bundle, not a bare atom |
-| **Ten-rung rarity, adopted repo-wide** | 2026-08-22 → 2026-09-01 | §11's entire Rarity block, and demons stopped being a second ladder |
+| **Ten-rung rarity, adopted repo-wide** | 2026-08-22 → 2026-09-01 | §11's entire Rarity block, and creatures stopped being a second ladder |
 | **Twelve aptitudes shipped** | 2026-08-26 | The lane index's open decision #5 (*"five primary attributes, or none"*) — neither: **twelve** |
 
 ### 2a.2 Built — things this document calls absent that now exist
@@ -105,7 +105,7 @@ Diablo/PoE inspiration stands. What changed is the substrate, and therefore what
 | B1 | **`stat.derived` executes on both real runtimes.** `RuntimeSupportMatrix(Full, Full, None)` — battle via `TraitAtomSource` (E12), lawn via `AtomDerivedSubsystem` at ActorHub order-350 | `AtomKindRegistry.cs:253` · `Stats/Derived/Subsystems/AtomDerivedSubsystem.cs` | **§9's D6 row and G8 row are dead.** First-wave items are no longer restricted to five kinds. `combat.defense.*`, `crit.*`, resistances — all bindable and all executing |
 | B2 | **The affix entity.** `effect_affix(affix_id, affix_class)` + `effect_affix_ref` carrying *either* a concrete `atom_id` *or* a `(slot_name, slot_domain)` slot ref | `RpgStore.Containers.cs:66-84` | *"Master of Fire and Ice"* is expressible today. §6.2's affix model is schema, not proposal |
 | B3 | **`prefix_rolls` / `suffix_rolls`**, replacing one `pool_rolls` | `RpgStore.Containers.cs:28-29` | A mixed bundle consumes **one of each**, never doubling either. Derived from `kind_id`, never authored |
-| B4 ⚠ **the table is EMPTY — §2f.1 F3; ten rungs ship as `DemonRarity`, ordinals 0–9** | **The rarity table with per-class bands** — `rarity(rarity_id, ordinal, prefix_rolls, suffix_rolls, min_tier, max_tier)` | `RpgStore.Containers.cs:54-61` | Ten rungs, ordinals spaced by 10, [ssot-rarity.md §3.3](item/ssot-rarity.md). The tier window is now a **column the resolver reads**, closing §6.2's *"needs a draw-time parameter that does not exist yet"* |
+| B4 ⚠ **the table is EMPTY — §2f.1 F3; ten rungs ship as `CreatureRarity`, ordinals 0–9** | **The rarity table with per-class bands** — `rarity(rarity_id, ordinal, prefix_rolls, suffix_rolls, min_tier, max_tier)` | `RpgStore.Containers.cs:54-61` | Ten rungs, ordinals spaced by 10, [ssot-rarity.md §3.3](item/ssot-rarity.md). The tier window is now a **column the resolver reads**, closing §6.2's *"needs a draw-time parameter that does not exist yet"* |
 | B5 | **The resolver and the producer.** `Resolver.cs`, `InstanceProducer.cs`, `WorldSeed.cs`, `VariantShift.cs`, `ChannelPool.cs`, `AffixLibraryGenerator.cs`, `EligibilityRule.cs` | `src/FusionRpg.Core/Effects/Atoms/` | L2 — *which* derived stat an affix targets — was the missing layer. It exists |
 | B6 ⚠ **half true — §2f.1 F2** | **`ProduceAndBind` is called in production** | `RpgStore.UniqueActors.cs:756` | The *produce* half runs; **`UniqueActor` bindings are write-only** (`RpgHub` pushes only `OwnerKind.Player`). §3's substrate table is now understated, not overstated |
 | B7 | **`OnActivate` trigger exists** — `TriggerCount = 8` | `AtomKindRegistry.cs:22,31` | The lane index's open decision #6 (the `OnUse` request gating consumables) has a legal trigger to name |
@@ -248,7 +248,7 @@ Not corrections — genuinely new questions the platform's arrival creates.
    reach the ceiling?
 3. **Aptitudes and items.** Twelve aptitudes are *sources*; derived channels are what items modify.
    May an item grant aptitude points at all, or only channels? The former is a much stronger lever.
-4. **Commander vs. specimen gear.** `rpg_player_commander` exists and demons exist. Prior art says
+4. **Commander vs. specimen gear.** `rpg_player_commander` exists and creatures exist. Prior art says
    roster gearing is where item systems die. Does gear live on the commander (one paperdoll, always
    relevant) or on specimens (N paperdolls, the Summoners War problem)?
 5. **Does the roster answer come before slot count?** §8 says yes. Prior art agrees emphatically: the
@@ -271,18 +271,18 @@ Two more were closed in passing while this round was assembled:
   binding depends on it."*** → **`OwnerKind.UniqueActor`**, approved 2026-09-02, in `decisions.md`.
 - **d4 §7.3 — *"Which rarity ladder is real?"*** I1 authored **10** rungs, I12 designed drop weights
   against **7**, I6 set enhancement caps against **5**. → **Ten.** It is shipped as the `rarity` table
-  (`RpgStore.Containers.cs:54-61`) and adopted repo-wide including demons. **I12's and I6's per-rung
+  (`RpgStore.Containers.cs:54-61`) and adopted repo-wide including creatures. **I12's and I6's per-rung
   tables are stale and must be re-derived against ten.**
 
 ---
 
 ### D1 — Gear is uncapped. Roster scale is not this program's problem
 
-> *"There are no limit, commander and unique demons can equip items full 15 slots. So i dont worry
+> *"There are no limit, commander and unique creatures can equip items full 15 slots. So i dont worry
 > about game balance, we just focus our item balance, other feature cover it like limit only 5 unique
-> demon can be deploy to the lawn that depend in each feature, we dont care."*
+> creature can be deploy to the lawn that depend in each feature, we dont care."*
 
-The commander and **every** unique demon may wear the full role set. No specimen is excluded and no
+The commander and **every** unique creature may wear the full role set. No specimen is excluded and no
 specimen gets a reduced table.
 
 **The important half is the second sentence.** Roster pressure is real, but it is regulated by the
@@ -326,7 +326,7 @@ a decision and an omission.
 hybrid* and designed for it.
 
 > ⚠ **Amended by D14 the same day: the `standard` slot is out of scope.** The commander is modelled as
-> another unique demon for this program, so it has **15 roles pure / 12 hybrid, with no 16th slot.**
+> another unique creature for this program, so it has **15 roles pure / 12 hybrid, with no 16th slot.**
 > Every budget figure below is unchanged — `standard` was always additive to them.
 
 **And the hybrid price changes shape entirely.** I2 priced it as a flat 10.5% cut. It is now
@@ -610,11 +610,11 @@ deliberately — it is the guarantee that D3's whole mechanism works, and D3 is 
 
 ### D12 — ⭐ Sets and charms are **generated at roster scale**, not hand-authored
 
-> *"each demon specie have 1 set and 1 charm. each primary stat build have 30 set for 10 rarity, 1
+> *"each creature specie have 1 set and 1 charm. each primary stat build have 30 set for 10 rarity, 1
 > offense set and 1 defense set and 1 balance set. they are parameter for LLM resolve, so we have more
 > than 1500+ set and charm."*
 >
-> *"also item generator pipeline will depend on demon specie, same as action generator."*
+> *"also item generator pipeline will depend on creature specie, same as action generator."*
 
 This does not size d4's two UNSIZED entries. **It moves them to a different column.**
 
@@ -623,8 +623,8 @@ This does not size d4's two UNSIZED entries. **It moves them to a different colu
 | Population | Shape | Today | Full roster |
 |---|---|---:|---:|
 | **Build sets** | 12 aptitudes × 3 archetypes (offense · defense · balance) | **36** | 36 |
-| **Species sets** | 1 per demon species | **84** | ~904 |
-| **Species charms** | 1 per demon species | **84** | ~904 |
+| **Species sets** | 1 per creature species | **84** | ~904 |
+| **Species charms** | 1 per creature species | **84** | ~904 |
 | **Total** | | **204** | **~1,844** |
 
 > **Amended by D15 the same day.** The first cut of this table read *"× 10 rarity rungs = 360 build
@@ -643,7 +643,7 @@ Every input already exists as a closed vocabulary:
 |---|---|
 | 12 aptitudes | `Stats/Aptitudes/Aptitude.cs:40-51` — shipped |
 | 10 rarity rungs | the `rarity` table — shipped |
-| demon species + motifs + anti-motifs + themes | `data/seed/demons/_registry/themes.v1.json` — **built** (seedsmith D4) |
+| creature species + motifs + anti-motifs + themes | `data/seed/creatures/_registry/themes.v1.json` — **built** (seedsmith D4) |
 | **3 archetypes** (offense / defense / balance) | ⬅ **the only new authored vocabulary in D12** |
 
 **So d4 §1.1's two UNSIZED rows resolve to roughly three authored rows plus a pipeline**, and the
@@ -652,16 +652,16 @@ owner's, not the lane's.
 
 #### The bridge already exists and is already built
 
-The owner's *"item generator pipeline will depend on demon specie, same as action generator"* is not a
-new dependency to design — it is [`spec-demon-themes.md`](seedsmith/spec-demon-themes.md), seedsmith
+The owner's *"item generator pipeline will depend on creature specie, same as action generator"* is not a
+new dependency to design — it is [`spec-creature-themes.md`](seedsmith/spec-creature-themes.md), seedsmith
 feature 2 module D4, **built 2026-08-31**:
 
-- §2.1 *"Why items are not a demons kind"* — a demon must not become an item kind, because
-  `Corpus.load(root)` is single-root and items live in `data/seed/items/`. **A demon is a *theme*
+- §2.1 *"Why items are not a creatures kind"* — a creature must not become an item kind, because
+  `Corpus.load(root)` is single-root and items live in `data/seed/items/`. **A creature is a *theme*
   instead**, and items reference it.
-- §2.2 *"The bridge is a registry, and it goes one way"* — demons **publish**
-  `data/seed/demons/_registry/themes.v1.json`; items **consume** it as a legal `themeKey` vocabulary.
-  Nothing in the demons corpus reads an item; nothing in the items corpus writes a demon.
+- §2.2 *"The bridge is a registry, and it goes one way"* — creatures **publish**
+  `data/seed/creatures/_registry/themes.v1.json`; items **consume** it as a legal `themeKey` vocabulary.
+  Nothing in the creatures corpus reads an item; nothing in the items corpus writes a creature.
 - **`set` already *requires* `themeKey`** (`adapters/items/kinds.py:63`), and **30 sets and 8 uniques
   already carry a theme** in the live corpus.
 
@@ -700,32 +700,32 @@ Three lanes block on it (`ssot-item-categories` §10.7 — the ≤15% implicit b
 needs it too**. Rather than wait on another program's queue, the item program owns it.
 
 ⚠ **The risk this accepts, named so it can be designed against rather than discovered.** E9 is not an
-item concept — demons, actions and items all produce magnitudes and all need "how strong is this
+item concept — creatures, actions and items all produce magnitudes and all need "how strong is this
 thing?" answered the same way. Building a general system *inside* one consumer is precisely how a
 general system becomes consumer-shaped by accident, and this repo has already ruled on that exact
-pattern once: `provenance-supersede` was moved to seedsmith **core** rather than left in the demons
-feature, because *"burying a general fix inside a demons module is how it becomes demon-shaped by
+pattern once: `provenance-supersede` was moved to seedsmith **core** rather than left in the creatures
+feature, because *"burying a general fix inside a creatures module is how it becomes creature-shaped by
 accident"* (`seedsmith-map.md` §3b).
 
 **So the ruling is *who builds it and when*, not *who it serves*.** The mitigation is one sentence and
 it belongs in the module spec:
 
 > **E9 is authored as a general power model with no item-specific concepts in its interface.** Items
-> are its first consumer, not its subject. A demon or an action must be able to read it without an
+> are its first consumer, not its subject. A creature or an action must be able to read it without an
 > item-shaped adapter.
 
 It also reads `P(Θ)` and adds nothing to the ladder — power is *evaluation* of a thing that exists,
 where `P(Θ)` is *derivation* of a magnitude from a level. Confusing the two would create the private
 curve the power SSOT exists to prevent.
 
-### D14 — The commander is another unique demon. `standard`, artifacts and commander sets are out of scope
+### D14 — The commander is another unique creature. `standard`, artifacts and commander sets are out of scope
 
 > *"i missing for commander sets, this will decide later, not in this scope, commander specific set
 > depend on commander role/class that i don't have idea yet, so commander for now consider as other
-> unique demon, not much different if it don't have passive skill and artifact (specific item for
+> unique creature, not much different if it don't have passive skill and artifact (specific item for
 > commander, we will discuss later in other scope, not this item generator)."*
 
-**For this program, a commander is an actor with the same 15 roles (12 hybrid) as any unique demon.**
+**For this program, a commander is an actor with the same 15 roles (12 hybrid) as any unique creature.**
 No 16th slot, no squad-scoped bindings, no commander-only content.
 
 **Direction acknowledged, scope declined.** Match-scope `standard` atoms are the right shape *when*
@@ -806,7 +806,7 @@ is the difference between a lane that is done and a lane that merely stopped.
 by any given player. **That is fine, and it is a position rather than an oversight.**
 
 **The bar for a species set is recognition, not differentiation.** It does not need to be distinguishable
-from 903 others; it needs to feel like *that demon*. A player who captures a species finds gear waiting
+from 903 others; it needs to feel like *that creature*. A player who captures a species finds gear waiting
 that belongs to it — and that is the whole value, delivered per player rather than per corpus.
 
 **What makes this affordable is D12.** The cost of an unseen species set is generation tokens. There is
@@ -863,7 +863,7 @@ tier path, so the split is clean:
 what a player can own is whatever their `Θ` has earned them. I12's *"75 slots ≈ 10 days"* becomes the
 calibration point at one `Θ`, not a global claim.
 
-### D19 — I11 splits: the equip gate stays, per-species aptitude vectors go to the demon program
+### D19 — I11 splits: the equip gate stays, per-species aptitude vectors go to the creature program
 
 > *"I11 is set/charm atom effect distribution? if true use option 1."*
 
@@ -875,17 +875,17 @@ overtaken.
 **Option 1 is applied anyway, because the correction strengthens it rather than undermining it.** Once
 I11 is understood as the equip gate, the split is obvious rather than merely defensible:
 
-| Stays in I11 | Moves to the demon program |
+| Stays in I11 | Moves to the creature program |
 |---|---|
 | The equip gate: **frame + level**, and any faction clause | **Per-species aptitude vectors** — `84 → ~904` species × 12 aptitudes |
 | Which level `level_req` compares against (specimen or account) | Their growth curves |
 
 **Why the vectors are not item data.** A per-species aptitude vector describes *a species*, exactly as
 its stat block does — it is true whether or not the species ever equips anything. D8 already
-established that **an aptitude is a source, not a registered channel**, and the demon program already
-owns `DemonSpeciesDef`. Keeping species data in the item lane would put one program's content in
-another's document, which is the same boundary error `spec-demon-themes.md` §2.1 refused when it
-declined to make items a demons kind.
+established that **an aptitude is a source, not a registered channel**, and the creature program already
+owns `CreatureSpeciesDef`. Keeping species data in the item lane would put one program's content in
+another's document, which is the same boundary error `spec-creature-themes.md` §2.1 refused when it
+declined to make items a creatures kind.
 
 **This retires I11's stale sizing** (§2c #4): `24 species × 5 attributes` was never going to be right,
 and it now leaves the item program entirely rather than being re-sized here.
@@ -1121,11 +1121,11 @@ aptitudes (`requirements` §10.1–10.3 **entirely**). §2a.5 also *verified* `a
 
 Three structural changes, worth stating separately from the rulings that caused them.
 
-**1. The item generator is now a seedsmith pipeline with a demon dependency.** D12 plus the owner's
-*"item generator pipeline will depend on demon specie, same as action generator"* puts item content on
+**1. The item generator is now a seedsmith pipeline with a creature dependency.** D12 plus the owner's
+*"item generator pipeline will depend on creature specie, same as action generator"* puts item content on
 the same footing as the action corpus: it consumes
-`data/seed/demons/_registry/themes.v1.json`, published one-way by seedsmith's `demon-themes` (built
-2026-08-31). Items reference demons; demons never reference items. **This program therefore has an
+`data/seed/creatures/_registry/themes.v1.json`, published one-way by seedsmith's `creature-themes` (built
+2026-08-31). Items reference creatures; creatures never reference items. **This program therefore has an
 upstream it does not own**, and that upstream is built.
 
 **2. Hand-authoring shrank; generation grew.** d4's cut aimed at ~880 hand-authored cells. D12 removes
@@ -1137,7 +1137,7 @@ purpose.
 **3. The program grew a module and shed a surface.** D13 brings **E9, the power model, in scope** — the
 item program now builds the thing three of its lanes were blocked on. D14 pushes **commander-specific
 gear out** — `standard`, artifacts and commander sets wait on a commander role/class system that does
-not exist, so the commander is modelled as another unique demon. Net: one general system in, one
+not exist, so the commander is modelled as another unique creature. Net: one general system in, one
 speculative surface out.
 
 **4. Loot volume joined the power ladder.** D18 puts drop volume on `Θ` — the same composition every
@@ -1217,10 +1217,10 @@ Six. Each was asserted in §2a or §2b without opening the file, and each change
 |---|---|---|---|
 | **F1** | **W1** — *"a player install never imports content; `ImportContent` has exactly one caller, a dev tool"* | **False. `E46 player-content-boot` is shipped.** `SeedImportRunner.cs:152` calls `ImportContent`, and `FusionRpg.Server/Program.cs:155` invokes it at **every server startup**, self-healing | **W1 is not a wiring gap and gates nothing.** `content-stack` gate G4 is stale for the same reason |
 | **F2** | **B6** — *"the atom runtime is **not inert** any more"* | **Half true.** `ProduceAndBind` does run in production (`RpgStore.UniqueActors.cs:756`) — but `RpgHub.cs:106` pushes only `OwnerKind.Player`, so **`UniqueActor` bindings are write-only**. `decisions.md:106` says exactly this | The produce half is live; the consume half never sees an item binding. **Item module 5 `equip-runtime` is what closes it** |
-| **F3** | **B4** — *"the rarity table, ten rungs, per-class bands"* | **The `rarity` table has zero rows** — `data/seed/rarity/README.md` says so outright. ⚠ **But this correction over-reached, and is itself corrected 2026-09-04:** the item program's `rarity.ordinal` **is 10…100**, declared in the frozen `_registry/core.v1.json` (*"pre-spaced by 10 precisely so a future rung can be inserted at 15 or 85"*), and **D7's "ordinal 100" is written in that space**. `DemonRarity`'s 0–9 is a C# **member index**, not an ordinal — two spaces, not a conflict | Module 7 seeds the table, and must **name both spaces** so the confusion cannot recur |
-| **F4** | *"append-only ordinals spaced by 10 — the house convention (`ElementRow`, `Aptitude`, `rarity`)"* (`spec-affix-power-class.md`) | **No C# roster does this** — `ElementRow` 0–5, `Aptitude` 0–11, `DemonRarity` 0–9. ⚠ Narrowed 2026-09-04: the item **rarity registry** genuinely is spaced by 10 (see F3), so the practice exists — just not for a C# enum, which is what the power class is | Power classes use consecutive ordinals, like every other C# roster |
+| **F3** | **B4** — *"the rarity table, ten rungs, per-class bands"* | **The `rarity` table has zero rows** — `data/seed/rarity/README.md` says so outright. ⚠ **But this correction over-reached, and is itself corrected 2026-09-04:** the item program's `rarity.ordinal` **is 10…100**, declared in the frozen `_registry/core.v1.json` (*"pre-spaced by 10 precisely so a future rung can be inserted at 15 or 85"*), and **D7's "ordinal 100" is written in that space**. `CreatureRarity`'s 0–9 is a C# **member index**, not an ordinal — two spaces, not a conflict | Module 7 seeds the table, and must **name both spaces** so the confusion cannot recur |
+| **F4** | *"append-only ordinals spaced by 10 — the house convention (`ElementRow`, `Aptitude`, `rarity`)"* (`spec-affix-power-class.md`) | **No C# roster does this** — `ElementRow` 0–5, `Aptitude` 0–11, `CreatureRarity` 0–9. ⚠ Narrowed 2026-09-04: the item **rarity registry** genuinely is spaced by 10 (see F3), so the practice exists — just not for a C# enum, which is what the power class is | Power classes use consecutive ordinals, like every other C# roster |
 | **F5** | *"`AtomRow.TagsJson` carries thematic tags (`offensive`, `elemental`)"* | **It carries generator provenance** — `{generatedFrom, generator: "E43"}` (`FamilyExpansion.cs:196-197`). **No `elemental` tag exists anywhere.** The thematic tags live on affix-family seed entries (`offensive` ×41, `defensive` ×40, `utility` ×17) | **Breaks module 8 `eligibility-tags`'s decided derivation.** Fixed by **D28** |
-| **F6** | §4 — *"18 zombie-side and 6 plant-side species"* | **18 zombie, 66 plant, 84 total** (`DemonSpeciesCatalog.Generated.cs`). The four named Fusion hybrids being zombie-side with plant bodies **is** true | §4's frame argument stands; its count did not |
+| **F6** | §4 — *"18 zombie-side and 6 plant-side species"* | **18 zombie, 66 plant, 84 total** (`CreatureSpeciesCatalog.Generated.cs`). The four named Fusion hybrids being zombie-side with plant bodies **is** true | §4's frame argument stands; its count did not |
 
 ⭐ **And one the other direction — a gap that does not exist.** `effect-pipeline-ideal.md` §5.1/§5.2 still
 call **L2 a real gap**. It is **BUILT** as effect-atom **E30** (`ChannelPool.cs`, seed files, validation,
@@ -1370,7 +1370,7 @@ reach level 32, which is **X5**.
 
 **Two of the five questions were malformed, and the owner rejected the premise rather than the option.**
 Both rejections are the same mistake on my part and it is recorded here so it is not repeated:
-**`data/seed/demons/_registry/themes.v1.json` holds 84 species; `data/seed/demons/species/` holds 386**
+**`data/seed/creatures/_registry/themes.v1.json` holds 84 species; `data/seed/creatures/species/` holds 386**
 (292 plant + 94 zombie, counted 2026-09-04). The registry is a **stale snapshot of a generated
 population**, and the population grows every time the generator runs. Any proportion computed over it
 is fiction.
@@ -1387,7 +1387,7 @@ is fiction.
 | **D32** | **A content patch does retune items players already own.** The runtime keeps reading the live catalog | Module 1's R2 fix stays as specced — per-atom compatibility, no freeze of `ValuesJson` at bind. §2g #1 closes as *deliberate*, not *deferred* |
 | **D33** | ⭐ **Both halves.** (a) Charms bind at **actor** scope, not `player:`. (b) **The absence of an atom-level apply scope is an architecture defect**, filed against `buff-debuff-scope` — see §2g.1 below | (a) unblocks module 12 with no cross-program dependency; (b) is a real defect with a real owner, not an item-program workaround |
 | **D35** | ⭐ **Unfreeze and re-derive `classes.v1.json` — `registryVersion 4`.** Lift the 32-family global exclusion whose stated reason (*"quarantined None/None/None (D6); no executor until E12"*) expired when `AtomKindRegistry.cs:255` shipped `Full/Full/None`; refill the **five** stopgap slates from each role's real §2.3 cluster; add the directional-profile field the entry shape lacks. **Author base types after, never before** | **One pass with D30's `core.v1.json` v2** — the regeneration that re-authors the 18 legacy sets is the regeneration that re-slates against the lifted quarantine. ⚠ Five stopgap roles, not four: `footing` was missed by the registry's own `_meta.designNotes` and by §2g's BLOCKING block below |
-| **D34** | **`basis = "name"` is not a constraint to design around — it is missing data, and the pipeline generates data.** The LLM stage writes the name and flavour text, exactly as the demon-species and action generators already do. There is no *"Ask first"* to answer because there is no name-basis theme left once the stage runs | Two follow-ups, both seedsmith's: **(i)** a theme-enrichment stage that raises `basis: name` → `basis: text`; **(ii)** ⛔ **`themes.v1.json` is stale at 84 against 386 shipped species** — a separate defect, and the one that made §2g #9d look like a product question |
+| **D34** | **`basis = "name"` is not a constraint to design around — it is missing data, and the pipeline generates data.** The LLM stage writes the name and flavour text, exactly as the creature-species and action generators already do. There is no *"Ask first"* to answer because there is no name-basis theme left once the stage runs | Two follow-ups, both seedsmith's: **(i)** a theme-enrichment stage that raises `basis: name` → `basis: text`; **(ii)** ⛔ **`themes.v1.json` is stale at 84 against 386 shipped species** — a separate defect, and the one that made §2g #9d look like a product question |
 
 ### 2g.1 ⛔ D33(b) — there is no atom-level apply scope, and that is the defect
 
@@ -1410,7 +1410,7 @@ unconditionally and `IsMatchWide` (`:92`) folds it into match-wide. `Matches` is
 `plant:`/`zombie:` and **not** for `player:`, so a player-scoped buff reaches the zombies. Anything
 routed this way inherits the same hole.
 
-⚠ **`WhoKind` has no `Player` member either** — it is `{ Target, Type, UniqueDemon, Relation }`
+⚠ **`WhoKind` has no `Player` member either** — it is `{ Target, Type, UniqueCreature, Relation }`
 (`WhoSelector.cs:10-16`). So the fix is not *"call `ScopeCompatibility` from `StatApplyScope`"*; the
 target model does not yet express the concept. **That is the buff-debuff-scope program's call**, and
 the item program does not need it resolved: D33(a) binds charms at actor scope, which the atom model
@@ -1432,7 +1432,7 @@ already supports (`stat.derived` / `Relation` / both hosts, `PerEntityGrant`).
 **uniques** (module 17); the 36 build sets get a third append-only **`build.`** theme namespace; the 20
 `standard` orphan entries are **retired, not deleted** (`enabled: false`, id retired forever); the 25
 legacy socket-words are **regenerated**, not retained alongside the 102; D22's affinity bonus keys on
-**each ingredient gem's own element** (no 12→6 mapping invented); and `rpg_demon_materials` →
+**each ingredient gem's own element** (no 12→6 mapping invented); and `rpg_creature_materials` →
 `rpg_materials` proceeds — ⚠ **nine** SQL sites across five files, not the four I9 §6.4 claims.
 
 
@@ -1454,12 +1454,12 @@ legacy socket-words are **regenerated**, not retained alongside the 102; D22's a
 | 8 | ~~**A per-actor Strain/Splice cap**~~ ⚠ **premise was stale — corrected 2026-09-04** | I claimed *"twelve Splices on one actor is legal"* against the **old** `socket_max` table. With D20's 4-ingredient fix and the re-issued 15-role table, **only `armament-primary` and `core-guard` reach 4 sockets — the real ceiling is 2 per actor.** A tunable ships at 3 as a non-binding backstop |
 | 9 | **Price `socket.imbue`** | I9 §7.4's table has nine operations and no row for it. Band-linear, like `bore` |
 | ~~**9b**~~ | ✅ **RESOLVED — D33, both halves.** Original: ⛔ **A `player:`-scoped charm buffs the zombies** | `ssot-charms.md` §3.1 binds resonance at `player:{id}`; `StatApplyScope.cs:81-82` degrades that to match-wide and `:52-53` matches **both sides**. The charm-carry consumer is blocked on an owner decision about scope; module 12's evaluator ships scope-parametric so it is not blocked with it |
-| **9c** | **Two id defects that would ship broken** | `set` *requires* `themeKey` (`kinds.py:62-65`) but the 36 **build** sets belong to no species — they need a third `build.*` population. And `naming.v1.json`'s `set.{themeId}-{seq:03}` over a demon `themeKey` yields `set.demon.allpeater-001` — **two dots, ungrammatical**. Ids must key on `speciesId` (all 84 verified kebab-legal) |
-| ~~**9d**~~ | ✅ **RESOLVED — D34. Wrong question: generate the missing basis.** Original: **31 of 84 published themes are `basis = "name"`** | `spec-demon-themes.md` §7 makes generating from a name-basis theme an **Ask first**. That is **37%** of the species population, not an edge case — module 13 needs a standing answer, not a per-run one |
+| **9c** | **Two id defects that would ship broken** | `set` *requires* `themeKey` (`kinds.py:62-65`) but the 36 **build** sets belong to no species — they need a third `build.*` population. And `naming.v1.json`'s `set.{themeId}-{seq:03}` over a creature `themeKey` yields `set.creature.allpeater-001` — **two dots, ungrammatical**. Ids must key on `speciesId` (all 84 verified kebab-legal) |
+| ~~**9d**~~ | ✅ **RESOLVED — D34. Wrong question: generate the missing basis.** Original: **31 of 84 published themes are `basis = "name"`** | `spec-creature-themes.md` §7 makes generating from a name-basis theme an **Ask first**. That is **37%** of the species population, not an edge case — module 13 needs a standing answer, not a per-run one |
 | 10 | **Two `ssot-rarity` §3.3 rows do not sum to their published band** | `sprout` 1–2 vs halves 0–2; `heirloom` 3–4 vs halves 4–4. Cheap now, a migration after module 7 seeds |
 | **11** | ⭐ **D27 renames every combination container id** | `definitions.md` §1 forces the `container_id` prefix to match the kind, so `gem.combo-pure-fire-3` → **`combo.pure-fire-3`**. Traced 2026-09-04 while speccing module 16 — a consequence of D27 nobody had followed through |
 | **12** | **`pool_rolls` does not exist anywhere in code** | Both `ContainerRow` and `RarityRow` carry `PrefixRolls`/`SuffixRolls`, and `Instantiator.Draw` runs `DrawBudget` **twice**. **I7's whole `T` / `K = pool_rolls − T` algebra is written against a field that is not there** — restated per budget in module 15. ⭐ It also *dissolves* the two-sources-of-truth hazard I7 handed to I1 |
-| **13** | **I9 §6.4 understates the `rpg_demon_materials` rename** | It claims *"four SQL sites — grep-verified, that is the complete list."* There are **nine**, across five files, including `Migrations/ShardRungs.cs`, which post-dates the lane. Still ask-first, still unscheduled |
+| **13** | **I9 §6.4 understates the `rpg_creature_materials` rename** | It claims *"four SQL sites — grep-verified, that is the complete list."* There are **nine**, across five files, including `Migrations/ShardRungs.cs`, which post-dates the lane. Still ask-first, still unscheduled |
 
 ### ✅ ~~BLOCKING~~ — RESOLVED by D35 (2026-09-04); found while speccing module 6
 
@@ -1600,7 +1600,7 @@ proposal — it is shipped code and schema.
 | **Equipping** | `effect_binding` — instance → owner scope, with `slot`, `priority`, bind-time rejection | same |
 | A **rarity ladder** with stable ordinals | the `rarity` table, explicit append-only ordinals | E5 |
 | The **affix library** | ~71 authored families × 5 tiers ≈ 355 atoms, plus ~420 generated element rows | [atom-family-library.md](effect-atom/atom-family-library.md) |
-| A **player-scoped stackable inventory** | `rpg_demon_materials(player_id, material_id, qty)`, seeded by expeditions with `essence.{element}` and `shard.{rarity}` | `RpgStore.cs`, `DemonMaterialCatalog.cs` |
+| A **player-scoped stackable inventory** | `rpg_creature_materials(player_id, material_id, qty)`, seeded by expeditions with `essence.{element}` and `shard.{rarity}` | `RpgStore.cs`, `CreatureMaterialCatalog.cs` |
 
 **The law that comes with it:** *items have no behaviour; actors do*
 ([definitions.md](effect-atom/definitions.md) §0). An item is a **source** that puts atoms on an actor's
@@ -1639,11 +1639,11 @@ it now extends a row that exists rather than inventing one.
 
 ### Faction is not body
 
-`DemonSpeciesDef.Side` is documented as *"linked capture side (plant | zombie) — portrait/body source"*
-(`src/FusionRpg.Core/Demons/DemonSpeciesCatalog.cs:11`) — one field carrying faction **and** body. The
+`CreatureSpeciesDef.Side` is documented as *"linked capture side (plant | zombie) — portrait/body source"*
+(`src/FusionRpg.Core/Creatures/CreatureSpeciesCatalog.cs:11`) — one field carrying faction **and** body. The
 generated roster is 18 zombie-side and ⚠ **66** plant-side species — 84 total (§2f.1 F6 corrected this from "6"), and several zombie-side entries are Fusion
 hybrids: `peashooterzombie`, `ironpeazombie`, `cherrynutzombie`, `bucketnutzombie`
-(`DemonSpeciesCatalog.Generated.cs`). A peashooter-zombie is faction-zombie with a plant body.
+(`CreatureSpeciesCatalog.Generated.cs`). A peashooter-zombie is faction-zombie with a plant body.
 
 **So the item system must not key on `side`.** It keys on an explicit **frame**:
 
@@ -1760,7 +1760,7 @@ The commander is a new actor (§3) and gets the full twelve of their chosen fram
 **One commander-only role — `standard`** (banner, seal, sigil, or root-totem depending on frame) whose
 atoms bind at **`match` scope rather than to the commander's own body**, so commander gear buffs the
 whole squad. That scope already exists and needs no new mechanism, and it gives commander itemisation a
-reason to be different from wearing thirteen copies of a demon's gear.
+reason to be different from wearing thirteen copies of a creature's gear.
 
 Also worth deciding early, because it is a progression lever rather than a content lever: **do slots
 unlock with level?** Starting a commander at six slots and opening the rest over the campaign is a
@@ -1884,7 +1884,7 @@ unique by construction and cannot stack; everything else can, and should live in
 | Category | Rolled? | Stacks? | Storage | Notes |
 |---|---|---|---|---|
 | **Equipment** | yes | never | gear inventory, one row per instance | §5–6 |
-| **Material** | no | yes | **already exists** — `rpg_demon_materials`, generalise it beyond demons | crafting and upgrade inputs; expeditions already seed `essence.*` and `shard.*` |
+| **Material** | no | yes | **already exists** — `rpg_creature_materials`, generalise it beyond creatures | crafting and upgrade inputs; expeditions already seed `essence.*` and `shard.*` |
 | **Consumable** | no | yes, with charges | own store; possibly held in the `girdle-resource` slot | see below |
 | **Quest / key** | no | usually no | own store, undroppable, unsellable | must never compete for gear space |
 | **Currency** | no | yes | ledger, not inventory — souls already work this way | `rpg_soul_balances` / `rpg_soul_ledger` is the precedent |
@@ -1935,12 +1935,12 @@ how much design they cost:
 3. **Sockets and sets** — deferred to §11.
 
 **~~The open economic question~~ ✅ DECIDED — see §2b, D1.** Gear is uncapped: the commander and every
-unique demon may wear the full role set, and **roster pressure is regulated by the features that own it**
+unique creature may wear the full role set, and **roster pressure is regulated by the features that own it**
 (deployment caps, squad size), not by the item system pricing itself defensively. The paragraph below is
 kept as the reasoning that led to the question. Its three named options are all superseded — the answer
 was *"none of these; it is not our problem to solve"*.
 
-items are per-actor, and this game has *rosters*. Twenty demons times
+items are per-actor, and this game has *rosters*. Twenty creatures times
 twelve slots is 240 equipped items before anything sits in a bag. Either gear is scarce and most
 specimens go bare, or gear is plentiful and inventory management becomes the game. Games that solved
 this went one of three ways — shared account-wide stat pools, per-specimen gear that is cheap and
@@ -2059,7 +2059,7 @@ a spec must still be re-verified — §2a.5's are cited, the rest are not.**
 
 ```
 [x] I identified the subsystem(s) this touches — effect-atom (container/instance/binding),
-    unique-actor lifecycle, demon species, standalone economy.
+    unique-actor lifecycle, creature species, standalone economy.
 [x] I read every doc in the §1 row(s) for those subsystems, this session.
 [x] I checked decisions.md for a lock covering this — standalone-first, resource model,
     action model, and the golden-ordering row all bear on it; none forbid this document.
@@ -2132,9 +2132,9 @@ this records what *six weeks of other programs shipping* changed. Full evidence 
 | Drop volume is I12's own calibrated rate | ⚠ **Reframed (D18).** It reads `Θ`, composed as `ssot-power-scale.md` §5 already composes it. Count reads `Θ` linearly; quality keeps reading `P(Θ)`. **No private loot curve** |
 | 144 lane questions are an open queue | ✅ **No (D16).** ~25 answered outright; the rest are decided-unless-disputed, reopened only when one bites |
 | C1–C3 are unverified and one *"would change what a status magnitude means"* | ✅ **Verified (§2e).** C2 was real and **is already fixed** by the power program's audit F4 — nobody told the item lanes. C3 confirmed, C1 reassigned to `E42`, and *"`effect_binding` has zero production consumers"* refuted |
-| A commander is a distinct kind of geared actor (§5.6's `standard`) | ⚠ **Out of scope 2026-09-03 (D14).** The commander is another unique demon here. `standard`, **artifacts** and commander sets are reserved, pending a commander role/class system |
+| A commander is a distinct kind of geared actor (§5.6's `standard`) | ⚠ **Out of scope 2026-09-03 (D14).** The commander is another unique creature here. `standard`, **artifacts** and commander sets are reserved, pending a commander role/class system |
 | Sets and charms are hand-authored, UNSIZED | ⚠ **Reframed 2026-09-03 (D12).** **Generated** — ~528 today, ~2,168 at the full roster, from ~3 authored archetype rows. d4's two biggest unsized entries leave the hand-authored column |
-| Item content is authored | ⚠ **No — it is generated, and it has an upstream.** The item generator consumes seedsmith's demon theme registry, exactly as the action corpus does (§2d) |
+| Item content is authored | ⚠ **No — it is generated, and it has an upstream.** The item generator consumes seedsmith's creature theme registry, exactly as the action corpus does (§2d) |
 | Hybrid is priced by a flat slot cut (I2: 10.5%) | ⚠ **Replaced 2026-09-03 (D3).** **80% floor, earned back to parity by mixing.** I2 §4.2's order-statistics pricing measured sampling; a hybrid *chooses*, so it never applied |
 
 ### The one-line summary

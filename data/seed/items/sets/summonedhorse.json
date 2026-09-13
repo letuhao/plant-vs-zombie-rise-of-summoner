@@ -25,7 +25,7 @@
       "id": "set.summonedhorse-001",
       "nameKey": "set.the-edgar-projection",
       "name": "The Edgar Projection",
-      "themeKey": "demon.summonedhorse",
+      "themeKey": "creature.summonedhorse",
       "members": [
         {
           "role": "armament-primary",

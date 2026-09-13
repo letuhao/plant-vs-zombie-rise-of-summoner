@@ -34,7 +34,7 @@ public class GateCounterAllocationInvarianceTests
             AptitudeAllocation.Single(AllocationScope.Commander, "Might", 30) +
             AptitudeAllocation.Single(AllocationScope.Commander, "Vigor", 10) +
             AptitudeAllocation.Single(AllocationScope.Aspect, "Focus", 5) +
-            AptitudeAllocation.Single(AllocationScope.UniqueDemon, "Onslaught", 70);
+            AptitudeAllocation.Single(AllocationScope.UniqueCreature, "Onslaught", 70);
 
         var grandTotalBefore = allocation.GrandTotal();
         var sharesBefore = allocation.Shares();

@@ -25,7 +25,7 @@
       "id": "set.shulklotus-001",
       "nameKey": "set.steel-leaf-lotus",
       "name": "Steel-Leaf Lotus",
-      "themeKey": "demon.shulklotus",
+      "themeKey": "creature.shulklotus",
       "members": [
         {
           "role": "core-guard",

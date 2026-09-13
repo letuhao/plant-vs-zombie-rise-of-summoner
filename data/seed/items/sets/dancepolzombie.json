@@ -25,7 +25,7 @@
       "id": "set.dancepolzombie-001",
       "nameKey": "set.rhythmic-pole-dancer",
       "name": "Rhythmic Pole Dancer",
-      "themeKey": "demon.dancepolzombie",
+      "themeKey": "creature.dancepolzombie",
       "members": [
         {
           "role": "armament-primary",

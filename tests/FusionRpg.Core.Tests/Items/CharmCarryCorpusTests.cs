@@ -1,5 +1,6 @@
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Items.Thresholds;
+using System.Text.Json;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Items;
@@ -34,18 +35,18 @@ public class CharmCarryCorpusTests
     {
         // Both directions. A domain value nothing uses is a rung the packing decision never sees; a
         // cost outside it is a size the budget cannot price.
+        //
+        // CONTRACT, not counts: the charm population is generated to the roster scale (~904 species,
+        // D12/D17) and grows every generation, so per-cost tallies are stale by construction. What must
+        // hold structurally is (a) every shipped cost is in the closed domain, (b) every domain value
+        // is populated, and (c) the domain is exactly what the corpus uses — no cost outside it, no
+        // domain rung unused. That is the "budget that budgets" claim §3.3 makes.
         var t = Tuning();
         var costs = Charms().Select(c => c.ApCost).ToList();
 
+        Assert.NotEmpty(costs);
         Assert.All(costs, c => Assert.Contains(c, t.ApCostDomain));
         Assert.Equal(t.ApCostDomain.OrderBy(v => v), costs.Distinct().OrderBy(v => v));
-
-        // The measured shape, 2026-09-05: 1x21, 2x21, 3x11, 5x7. 1x21 -> 1x22 (2026-09-07): the new
-        // apCost=1 trial charm.
-        Assert.Equal(22, costs.Count(c => c == 1));
-        Assert.Equal(21, costs.Count(c => c == 2));
-        Assert.Equal(11, costs.Count(c => c == 3));
-        Assert.Equal(7, costs.Count(c => c == 5));
     }
 
     [Fact]
@@ -59,13 +60,18 @@ public class CharmCarryCorpusTests
     }
 
     [Fact]
-    public void Exactly_the_seven_signets_are_unique_carry_so_the_tighter_copy_cap_is_class_shaped()
+    public void Exactly_the_signets_are_unique_carry_so_the_tighter_copy_cap_is_class_shaped()
     {
+        // CONTRACT, not a count: the charm population is generated to roster scale (D12/D17), so the
+        // signet total is stale by construction. The invariant §3.4 actually states is class-shaped:
+        // `unique_carry` is true for exactly the Signet class and false for every other, and the copy
+        // cap follows the class, not a magic number. A non-signet with uniqueCarry (or a signet
+        // without it) is the defect.
         var t = Tuning();
         var charms = Charms();
 
-        Assert.Equal(7, charms.Count(c => c.Class == CharmClass.Signet));
-        Assert.Equal(7, charms.Count(c => c.UniqueCarry));
+        Assert.NotEmpty(charms);
+        Assert.Contains(charms, c => c.Class == CharmClass.Signet);
         Assert.All(charms, c => Assert.Equal(c.Class == CharmClass.Signet, c.UniqueCarry));
 
         Assert.All(charms, c => Assert.Equal(
@@ -100,23 +106,17 @@ public class CharmCarryCorpusTests
     }
 
     [Fact]
-    public void No_axis_can_be_starved_by_the_axis_cap_and_economy_is_the_deepest_pool()
+    public void No_axis_can_be_starved_by_the_axis_cap_and_every_axis_clears_it()
     {
-        // Measured, and it is the one distribution fact worth pinning: economy ships 20 charms and each
-        // of the other four ships 10. Not a defect — §3.5's axes are open categories, not quotas — but
-        // it is a real content asymmetry a balance pass should be able to see move.
-        // survivability 10 -> 11 (2026-09-07): a set-charm-live-endpoint trial batch added one real
-        // survivability charm, `charm.surv-util-021` "Carapace of Patience".
+        // CONTRACT, not counts: the charm population is generated to roster scale (D12/D17) and grows
+        // every generation, so per-axis totals are stale by construction. §3.5's axes are OPEN
+        // categories, not quotas, so the invariant is that every axis supplies enough charms to clear
+        // the per-snapshot axis cap — the cap binds on the PLAYER's packing, never on what the corpus
+        // can supply. An axis at or below the cap is the defect (a lean the player cannot realise).
         var perAxis = Charms().GroupBy(c => c.Axis, StringComparer.Ordinal)
             .ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
 
-        Assert.Equal(20, perAxis["economy"]);
-        Assert.Equal(11, perAxis["survivability"]);
-        foreach (var axis in new[] { "offense", "control", "utility" })
-            Assert.Equal(10, perAxis[axis]);
-
-        // Every axis still clears the cap comfortably, so the cap binds on the PLAYER's packing rather
-        // than on what the corpus can supply.
+        Assert.Equal(5, perAxis.Count); // the five power categories, §3.5
         Assert.All(perAxis.Values, n => Assert.True(n > Tuning().AxisCapPerSnapshot));
     }
 
@@ -211,13 +211,18 @@ public class CharmCarryCorpusTests
     }
 
     [Fact]
-    public void Every_shipped_charm_declares_frame_hint_any_so_section_3_7s_check_is_inert_and_that_is_measured()
+    public void The_resonance_ladder_invariant_holds_regardless_of_frame_hint_distribution()
     {
-        // ⚠ Not a defect and not a rule: an observation about today's corpus, pinned so a later session
-        // does not read "charms are frame-blind in the data" as "the frame_hint check is dead code".
+        // ⚠ The corpus is generated to roster scale and grows every generation, so a count of charms
+        // whose frameHint is `any` is stale by construction — and `frame_hint` is genuinely
+        // per-charm content (the gate's own three-value vocabulary any/humanoid/plant), not a
+        // corpus-wide constant, so pinning "all any" would be wrong even as an observation. What must
+        // hold is the §3.7 envelope: every shipped charm carries a `frameHint` inside that vocabulary,
+        // so the gate's check has a well-formed value to read.
         var json = Directory
             .EnumerateFiles(Path.Combine(CharmCarryTests.RepoRoot(), "data", "seed", "items", "charms"), "*.json")
-            .Where(p => !Path.GetFileName(p).Equals("resonance.json", StringComparison.Ordinal))
+            .Where(p => !Path.GetFileName(p).Equals("resonance.json", StringComparison.Ordinal)
+                     && !Path.GetFileName(p).EndsWith(".ledger.json", StringComparison.Ordinal))
             .Select(p => System.Text.Json.JsonDocument.Parse(File.ReadAllText(p)))
             .ToList();
 
@@ -225,10 +230,14 @@ public class CharmCarryCorpusTests
         foreach (var doc in json)
             using (doc)
                 foreach (var e in doc.RootElement.GetProperty("entries").EnumerateArray())
-                    hints.Add(e.GetProperty("frameHint").GetString()!);
+                {
+                    Assert.True(e.TryGetProperty("frameHint", out var h) && h.ValueKind == JsonValueKind.String,
+                        $"{e.GetProperty("id").GetString()}: charm carries no frameHint string");
+                    hints.Add(h.GetString()!);
+                }
 
-        Assert.Equal(61, hints.Count); // 60 -> 61, 2026-09-07 trial charm
-        Assert.All(hints, h => Assert.Equal("any", h));
+        Assert.NotEmpty(hints);
+        Assert.All(hints, h => Assert.Contains(h, new[] { "any", "humanoid", "plant" }));
     }
 
     [Fact]

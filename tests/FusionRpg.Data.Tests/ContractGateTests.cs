@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Contracts;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
 using Xunit;
@@ -8,12 +8,12 @@ using Xunit;
 namespace FusionRpg.Data.Tests;
 
 /// <summary>
-/// G5: contracts guard every path that FIELDS a demon — and nothing else. Each refusal names its
+/// G5: contracts guard every path that FIELDS a creature — and nothing else. Each refusal names its
 /// condition (`unbound` and `insubordinate` are different problems with different fixes).
 /// </summary>
 public class ContractGateTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     // Midday *today*, not a hard-coded date. `Mint` stamps contract state from the real clock, so a
     // fixed anchor only matches on the day it was written: the day after, every "N days elapsed"
@@ -24,28 +24,26 @@ public class ContractGateTests : IDisposable
 
     public ContractGateTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-contract-gate-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _store.AwardSouls(1, 50_000, "seed", "gate-bank");
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     // DeployMode != HypnoAlly: this file's subject is contract binding/loyalty gating, unrelated to
-    // demon-lawn-deploy T1.4's DeployMode — excluding HypnoAlly keeps the deploy-accepting tests here
+    // creature-lawn-deploy T1.4's DeployMode — excluding HypnoAlly keeps the deploy-accepting tests here
     // from incidentally tripping T1.4's own deploy.hypno-ally-not-implemented refusal.
-    static readonly DemonSpeciesDef Species = DemonSpeciesCatalog.All
-        .First(s => s.Acquisition != DemonAcquisition.CaptureOnly && s.TraitPool.Count > 0
-            && s.DeployMode != DemonDeployMode.HypnoAlly);
+    static readonly CreatureSpeciesDef Species = CreatureSpeciesCatalog.All
+        .First(s => s.Acquisition != CreatureAcquisition.CaptureOnly && s.TraitPool.Count > 0
+            && s.DeployMode != CreatureDeployMode.HypnoAlly);
 
     string Mint()
     {
-        var (specimen, _) = _store.MintDemon(1, new DemonMintSpec
+        var (specimen, _) = _store.MintCreature(1, new CreatureMintSpec
         {
             SpeciesId = Species.SpeciesId,
             Side = Species.Side,
@@ -76,7 +74,7 @@ public class ContractGateTests : IDisposable
     }
 
     [Fact]
-    public void PvZ_deploy_refuses_an_unbound_demon()
+    public void PvZ_deploy_refuses_an_unbound_creature()
     {
         var id = MintUnbound();
         var (ok, reason, _, _) = _store.TryBeginUniqueDeploy(id, "deploy-1");
@@ -86,7 +84,7 @@ public class ContractGateTests : IDisposable
     }
 
     [Fact]
-    public void PvZ_deploy_refuses_an_insubordinate_demon()
+    public void PvZ_deploy_refuses_an_insubordinate_creature()
     {
         var id = MintInsubordinate();
         var (ok, reason, _, _) = _store.TryBeginUniqueDeploy(id, "deploy-2");
@@ -97,14 +95,14 @@ public class ContractGateTests : IDisposable
     [Fact]
     public void PvZ_deploy_of_a_plain_unique_actor_is_untouched()
     {
-        // This path predates demons entirely: an actor with no demon profile has no contract to check.
+        // This path predates creatures entirely: an actor with no creature profile has no contract to check.
         var actor = _store.CreateUniqueActor(1, "plant", 1);
         var (ok, reason, _, _) = _store.TryBeginUniqueDeploy(actor.InstanceId, "deploy-3");
         Assert.True(ok, reason);
     }
 
     [Fact]
-    public void PvZ_deploy_accepts_a_bound_demon()
+    public void PvZ_deploy_accepts_a_bound_creature()
     {
         var id = Mint();
         var (ok, reason, _, _) = _store.TryBeginUniqueDeploy(id, "deploy-4");
@@ -174,7 +172,7 @@ public class ContractGateTests : IDisposable
     }
 
     [Fact]
-    public void Unbound_demons_neither_earn_nor_suffer()
+    public void Unbound_creatures_neither_earn_nor_suffer()
     {
         var id = MintUnbound();
         Assert.Equal(0, _store.ApplyContractResults(1, new[] { id }, won: true, Day0));
@@ -183,7 +181,7 @@ public class ContractGateTests : IDisposable
     }
 
     [Fact]
-    public void Patron_designation_refuses_a_demon_that_cannot_serve()
+    public void Patron_designation_refuses_a_creature_that_cannot_serve()
     {
         var sulking = MintInsubordinate();
         var unbound = MintUnbound();

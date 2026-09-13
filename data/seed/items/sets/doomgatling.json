@@ -25,7 +25,7 @@
       "id": "set.doomgatling-001",
       "nameKey": "set.spore-volley",
       "name": "Spore Volley",
-      "themeKey": "demon.doomgatling",
+      "themeKey": "creature.doomgatling",
       "members": [
         {
           "role": "armament-primary",

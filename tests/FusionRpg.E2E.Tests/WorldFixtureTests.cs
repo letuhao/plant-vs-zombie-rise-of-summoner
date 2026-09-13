@@ -19,9 +19,9 @@ namespace FusionRpg.E2E.Tests;
 [Collection("e2e")]
 public class WorldFixtureTests : IAsyncLifetime
 {
-    const string FixturePath = "web/fusion-rpg-web/src/features/world/fixtures/first-light.json";
-    const string TwoHeartsFixturePath = "web/fusion-rpg-web/src/features/world/fixtures/two-hearths.json";
-    const string BigFixturePath = "web/fusion-rpg-web/src/features/world/fixtures/eighteen-ten.json";
+    const string FixturePath = "web/fusion-rpg-web/src/stages/world/fixtures/first-light.json";
+    const string TwoHeartsFixturePath = "web/fusion-rpg-web/src/stages/world/fixtures/two-hearths.json";
+    const string BigFixturePath = "web/fusion-rpg-web/src/stages/world/fixtures/eighteen-ten.json";
 
     readonly RpgApiFactory _factory;
     readonly HttpClient _http;

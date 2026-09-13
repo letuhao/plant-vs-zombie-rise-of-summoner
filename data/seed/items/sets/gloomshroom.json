@@ -25,7 +25,7 @@
       "id": "set.gloomshroom-001",
       "nameKey": "set.fungal-haze",
       "name": "Fungal Haze",
-      "themeKey": "demon.gloomshroom",
+      "themeKey": "creature.gloomshroom",
       "members": [
         {
           "role": "armament-primary",

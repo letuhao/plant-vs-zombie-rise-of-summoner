@@ -67,7 +67,7 @@ already set:
   "schemaVersion": 1,
   "version": 1,
   "_meta": {
-    "owner": "docs/architecture/demons/spec-demon-contracts.md",
+    "owner": "docs/architecture/creatures/spec-creature-contracts.md",
     "note": "Working values, not a validated balance decision.",
     "rebalance": "Never hand-edit. `python -m tuning set contracts.slotPriceStep=400 --publish`
                   writes v{n+1}; the old version stays for revert."
@@ -151,12 +151,12 @@ files:
 
 | Domain | Literals | File |
 |---|---|---|
-| **contracts** | **47** | `Demons/Contracts/ContractPolicy.cs` |
+| **contracts** | **47** | `Creatures/Contracts/ContractPolicy.cs` |
 | **loam** | 20 | `World/Loam/LoamPolicy.cs` |
-| **souls** | 16 | `Demons/SoulEarnPolicy.cs` |
-| **patron** | 15 | `Demons/Patron/PatronPolicy.cs` |
+| **souls** | 16 | `Creatures/SoulEarnPolicy.cs` |
+| **patron** | 15 | `Creatures/Patron/PatronPolicy.cs` |
 | **vfx** | 11 | `Vfx/VfxRules.cs` |
-| **fusion** | 9 | `Demons/Fusion/StarPolicy.cs` |
+| **fusion** | 9 | `Creatures/Fusion/StarPolicy.cs` |
 | **shield** | 7 | `Combat/Shield/ShieldPolicy.cs` |
 | others | ~14 | overlay, frontier, status, cap, combat |
 

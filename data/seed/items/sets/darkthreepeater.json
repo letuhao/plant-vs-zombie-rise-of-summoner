@@ -25,7 +25,7 @@
       "id": "set.darkthreepeater-001",
       "nameKey": "set.triple-line-scorcher",
       "name": "Triple-Line Scorcher",
-      "themeKey": "demon.darkthreepeater",
+      "themeKey": "creature.darkthreepeater",
       "members": [
         {
           "role": "armament-primary",

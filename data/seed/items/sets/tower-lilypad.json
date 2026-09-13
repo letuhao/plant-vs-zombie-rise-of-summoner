@@ -25,7 +25,7 @@
       "id": "set.tower-lilypad-001",
       "nameKey": "set.lotus-pond-sower",
       "name": "Lotus Pond Sower",
-      "themeKey": "demon.tower_lilypad",
+      "themeKey": "creature.tower_lilypad",
       "members": [
         {
           "role": "armament-primary",

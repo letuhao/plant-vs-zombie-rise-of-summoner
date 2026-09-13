@@ -209,7 +209,7 @@ thing everywhere, inserts stop stacking, and the inventory defence collapses.
 An insert is a `gem.*` container with **`prefix_rolls = 0` AND `suffix_rolls = 0`** — ⚠ not `pool_rolls = 0`;
 that column was replaced (`ContainerRow.cs:119-127`). Five tiers, no rolled values, so every
 `gem.ember-shard.t3` is identical everywhere and an insert in the bag is a **quantity**, not a row per
-copy — the `rpg_demon_materials` shape (`RpgStore.cs:573-579`).
+copy — the `rpg_creature_materials` shape (`RpgStore.cs:573-579`).
 
 Upcycling is **stack arithmetic**: 3 × tier *k* → 1 × tier *k+1*. No instances, no mutation model. It is
 the primary drain on the gem inventory.

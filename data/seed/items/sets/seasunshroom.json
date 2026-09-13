@@ -25,7 +25,7 @@
       "id": "set.seasunshroom-001",
       "nameKey": "set.sunlight-sea-spore",
       "name": "Sunlight Sea Spore",
-      "themeKey": "demon.seasunshroom",
+      "themeKey": "creature.seasunshroom",
       "members": [
         {
           "role": "armament-primary",

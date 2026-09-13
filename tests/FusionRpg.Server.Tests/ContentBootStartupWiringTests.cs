@@ -1,5 +1,6 @@
 using FusionRpg.Data;
 using FusionRpg.Data.Seed;
+using FusionRpg.Data.Tests;
 using Xunit;
 
 namespace FusionRpg.Server.Tests;
@@ -21,17 +22,16 @@ namespace FusionRpg.Server.Tests;
 /// </summary>
 public class ContentBootStartupWiringTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
 
     public ContentBootStartupWiringTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-contentboot-wiring-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
+        _testStore = DataTestStore.Create();
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     static string RepoRoot()
@@ -47,11 +47,8 @@ public class ContentBootStartupWiringTests : IDisposable
 
     /// <summary>The exact block Program.cs runs, reproduced here so a change to either one only needs
     /// to keep matching the other's shape, never a divergent parallel implementation.</summary>
-    static (SeedImportRunResult Boot, RpgStore Store) RunStartupSequence(string dataDir, string searchStartDir)
+    static (SeedImportRunResult Boot, RpgStore Store) RunStartupSequence(RpgStore store, string searchStartDir)
     {
-        var store = new RpgStore(dataDir);
-        store.Init();
-
         var contentBoot = SeedImportRunner.RunSelfHealing(store, searchStartDir);
         store.RecordContentBootOutcome(contentBoot.ContentSource, contentBoot.Detail);
 
@@ -62,7 +59,7 @@ public class ContentBootStartupWiringTests : IDisposable
     [Fact]
     public void A_fresh_scratch_install_imports_the_repos_real_seed_tree_on_first_boot()
     {
-        var (boot, store) = RunStartupSequence(_dir, RepoRoot());
+        var (boot, store) = RunStartupSequence(_testStore.Store, RepoRoot());
 
         Assert.Equal(SeedImportStatus.Imported, boot.Status);
         Assert.Equal("imported", boot.ContentSource);
@@ -79,12 +76,12 @@ public class ContentBootStartupWiringTests : IDisposable
     public void A_second_boot_against_the_same_scratch_db_does_not_reimport()
     {
         var repoRoot = RepoRoot();
-        var (firstBoot, _) = RunStartupSequence(_dir, repoRoot);
+        var (firstBoot, _) = RunStartupSequence(_testStore.Store, repoRoot);
         Assert.Equal(SeedImportStatus.Imported, firstBoot.Status);
 
-        // A new RpgStore instance pointed at the SAME data dir — the shape a real server restart is:
-        // a fresh process, the same sqlite files on disk.
-        var (secondBoot, secondStore) = RunStartupSequence(_dir, repoRoot);
+        // A new RpgStore instance over the SAME storage — the shape a real server restart is:
+        // a fresh process, the same databases.
+        var (secondBoot, secondStore) = RunStartupSequence(_testStore.Reopen(), repoRoot);
 
         Assert.Equal(SeedImportStatus.AlreadyCurrent, secondBoot.Status);
         Assert.Null(secondBoot.Outcome);
@@ -101,7 +98,7 @@ public class ContentBootStartupWiringTests : IDisposable
         Directory.CreateDirectory(isolatedSearchStart);
         try
         {
-            var (boot, store) = RunStartupSequence(_dir, isolatedSearchStart);
+            var (boot, store) = RunStartupSequence(_testStore.Store, isolatedSearchStart);
 
             Assert.Equal(SeedImportStatus.SeedTreeNotFound, boot.Status);
             Assert.Equal(0, store.GetCatalogRevision());
@@ -114,7 +111,7 @@ public class ContentBootStartupWiringTests : IDisposable
         }
         finally
         {
-            try { Directory.Delete(isolatedSearchStart, recursive: true); } catch { /* temp dir */ }
+            Directory.Delete(isolatedSearchStart, recursive: true);
         }
     }
 }

@@ -67,7 +67,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.warded",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -104,7 +104,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.warded",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -141,7 +141,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.warded",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -178,7 +178,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-regen",
+        "family": "atom.shield-toughness",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -215,7 +215,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.shield-toughness",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -291,7 +291,7 @@
       "class": "bark",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.warded",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -328,7 +328,7 @@
       "class": "bark",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.shield-toughness",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -365,7 +365,7 @@
       "class": "bark",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.warded",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -403,7 +403,7 @@
       "class": "heartwood",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-regen",
+        "family": "atom.shield-toughness",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -440,7 +440,7 @@
       "class": "heartwood",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.warded",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -478,7 +478,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-capacity",
+        "family": "atom.warded",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -514,7 +514,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-capacity",
+        "family": "atom.shield-toughness",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -550,7 +550,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-regen",
+        "family": "atom.warded",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -579,18 +579,18 @@
     },
     {
       "id": "item.plant-sheath-a-016",
-      "nameKey": "base.verdant-scabbard",
-      "name": "Verdant Scabbard",
+      "nameKey": "base-type.emerald-scabbard",
+      "name": "Emerald Scabbard",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-capacity",
+        "family": "atom.shield-toughness",
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.verdant-scabbard",
+      "iconKey": "icon.base-type.emerald-scabbard",
       "flavorKey": "flavor.base.verdant-scabbard",
       "flavor": "A tightly woven sleeve of living vines designed to cradle a blade within a protective layer of chlorophyll.",
       "tags": [
@@ -615,18 +615,18 @@
     },
     {
       "id": "item.plant-sheath-a-017",
-      "nameKey": "base.lignified-scabbard",
-      "name": "Lignified Scabbard",
+      "nameKey": "base-type.hardened-scabbard",
+      "name": "Hardened Scabbard",
       "frame": "plant",
       "role": "ward-array",
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-capacity",
+        "family": "atom.warded",
         "powerBand": "trivial"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.lignified-scabbard",
+      "iconKey": "icon.base-type.hardened-scabbard",
       "flavorKey": "flavor.base.lignified-scabbard",
       "flavor": "A rigid, reinforced sleeve of hardened sap and dense cellulose designed to protect a blade's edge from environmental decay.",
       "tags": [
@@ -651,18 +651,18 @@
     },
     {
       "id": "item.plant-sheath-a-018",
-      "nameKey": "base.verdant-scabbard",
-      "name": "Verdant Scabbard",
+      "nameKey": "base-type.jade-scabbard",
+      "name": "Jade Scabbard",
       "frame": "plant",
       "role": "ward-array",
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-regen",
+        "family": "atom.shield-toughness",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.verdant-scabbard",
+      "iconKey": "icon.base-type.jade-scabbard",
       "flavorKey": "flavor.base.verdant-scabbard",
       "flavor": "A tightly woven sleeve of living vines that pulses with a soft, rhythmic light. It holds its contents in a state of constant, revitalizing suspension.",
       "tags": [
@@ -687,18 +687,18 @@
     },
     {
       "id": "item.plant-sheath-a-019",
-      "nameKey": "base.verdant-scabbard",
-      "name": "Verdant Scabbard",
+      "nameKey": "base-type.leafy-scabbard",
+      "name": "Leafy Scabbard",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-regen",
+        "family": "atom.warded",
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.verdant-scabbard",
+      "iconKey": "icon.base-type.leafy-scabbard",
       "flavorKey": "flavor.base.verdant-scabbard",
       "flavor": "A tightly woven sleeve of living vines that pulses with a soft, rhythmic vitality. It holds its contents in a protective, life-sustaining embrace.",
       "tags": [
@@ -723,18 +723,18 @@
     },
     {
       "id": "item.plant-sheath-a-020",
-      "nameKey": "base.verdant-scabbard",
-      "name": "Verdant Scabbard",
+      "nameKey": "base-type.sprout-bound-scabbard",
+      "name": "Sprout-Bound Scabbard",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-regen",
+        "family": "atom.shield-toughness",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.verdant-scabbard",
+      "iconKey": "icon.base-type.sprout-bound-scabbard",
       "flavorKey": "flavor.base.verdant-scabbard",
       "flavor": "A tightly woven sleeve of living vines that pulses with a soft, rhythmic vitality. It holds its contents in a protective, life-sustaining embrace.",
       "tags": [
@@ -766,7 +766,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-capacity",
+        "family": "atom.warded",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -795,18 +795,18 @@
     },
     {
       "id": "item.plant-sheath-a-022",
-      "nameKey": "base.fibrous-sheath",
-      "name": "Fibrous Sheath",
+      "nameKey": "base-type.coarse-husk",
+      "name": "Coarse Husk",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-capacity",
+        "family": "atom.shield-toughness",
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.fibrous-sheath",
+      "iconKey": "icon.base-type.coarse-husk",
       "flavorKey": "flavor.base.fibrous-sheath",
       "flavor": "A tightly woven casing of reinforced cellulose designed to house and protect a sensitive core.",
       "tags": [
@@ -831,18 +831,18 @@
     },
     {
       "id": "item.plant-sheath-a-023",
-      "nameKey": "base.fibrous-sheath",
-      "name": "Fibrous Sheath",
+      "nameKey": "base-type.woven-fiber",
+      "name": "Woven Fiber",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-capacity",
+        "family": "atom.shield-toughness",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.fibrous-sheath",
+      "iconKey": "icon.base-type.woven-fiber",
       "flavorKey": "flavor.base.fibrous-sheath",
       "flavor": "A tightly woven sleeve of reinforced cellulose designed to house a protective core. It provides a stable anchor for the energies it is meant to channel.",
       "tags": [
@@ -867,18 +867,18 @@
     },
     {
       "id": "item.plant-sheath-a-024",
-      "nameKey": "base.fibrous-sheath",
-      "name": "Fibrous Sheath",
+      "nameKey": "base-type.woven-stalk",
+      "name": "Woven Stalk",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-capacity",
+        "family": "atom.warded",
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.fibrous-sheath",
+      "iconKey": "icon.base-type.woven-stalk",
       "flavorKey": "flavor.base.fibrous-sheath",
       "flavor": "A tightly woven sleeve of reinforced cellulose designed to stabilize the energy flow of a planted ward.",
       "tags": [
@@ -903,18 +903,18 @@
     },
     {
       "id": "item.plant-sheath-a-025",
-      "nameKey": "base.fibrous-sheath",
-      "name": "Fibrous Sheath",
+      "nameKey": "base-type.coarse-husk-fragment",
+      "name": "Coarse Husk Fragment",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-capacity",
+        "family": "atom.shield-toughness",
         "powerBand": "trivial"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.fibrous-sheath",
+      "iconKey": "icon.base-type.coarse-husk-fragment",
       "flavorKey": "flavor.base.fibrous-sheath",
       "flavor": "A tightly woven sleeve of reinforced cellulose designed to stabilize and protect the energy core within.",
       "tags": [
@@ -939,18 +939,18 @@
     },
     {
       "id": "item.plant-sheath-a-026",
-      "nameKey": "base.fibrous-sheath",
-      "name": "Fibrous Sheath",
+      "nameKey": "base-type.stranded-husk",
+      "name": "Stranded Husk",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-capacity",
+        "family": "atom.warded",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.fibrous-sheath",
+      "iconKey": "icon.base-type.stranded-husk",
       "flavorKey": "flavor.base.fibrous-sheath",
       "flavor": "A tightly woven sleeve of reinforced cellulose designed to stabilize the energy flow of a planted ward.",
       "tags": [
@@ -975,18 +975,18 @@
     },
     {
       "id": "item.plant-sheath-a-027",
-      "nameKey": "base.fibrous-sheath",
-      "name": "Fibrous Sheath",
+      "nameKey": "base-type.coiled-husk",
+      "name": "Coiled Husk",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-capacity",
+        "family": "atom.shield-toughness",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.fibrous-sheath",
+      "iconKey": "icon.base-type.coiled-husk",
       "flavorKey": "flavor.base.fibrous-sheath",
       "flavor": "A tightly woven sleeve of reinforced cellulose designed to stabilize the energy flow of the weapon it holds. It provides a layered buffer against external kinetic impact.",
       "tags": [
@@ -1011,18 +1011,18 @@
     },
     {
       "id": "item.plant-sheath-a-028",
-      "nameKey": "base.fibrous-sheath",
-      "name": "Fibrous Sheath",
+      "nameKey": "base-type.striated-plant-layer",
+      "name": "Striated Plant Layer",
       "frame": "plant",
       "role": "ward-array",
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.shield-capacity",
+        "family": "atom.warded",
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.fibrous-sheath",
+      "iconKey": "icon.base-type.striated-plant-layer",
       "flavorKey": "flavor.base.fibrous-sheath",
       "flavor": "A tightly woven sleeve of reinforced plant matter designed to house and protect a sensitive warding core.",
       "tags": [

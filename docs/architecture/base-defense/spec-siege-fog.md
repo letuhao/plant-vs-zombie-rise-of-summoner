@@ -76,7 +76,7 @@ divergent visibility computations that could disagree with each other.
 Decision 2 (idea doc) chose "varies by kind" over one flat number, specifically so a `See`-role
 structure's vision is real. Verified against code (§ above): `CombatantKind` has only two values and no
 per-species/per-unit-type catalog was found for animate combatants this pass — inventing one to give
-every demon and legion member its own authored vision range is real, unscoped, separate work this
+every creature and legion member its own authored vision range is real, unscoped, separate work this
 module does not also try to do. **v1 scope, stated rather than silently narrowed:**
 
 - Every `StructureDef` gains `VisionRangeTiles` (`int`, default = `fog.defaultVisionRangeTiles` — no

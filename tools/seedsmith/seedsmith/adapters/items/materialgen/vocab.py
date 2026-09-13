@@ -13,18 +13,18 @@ up as a wrong COUNT here (pinned by `test_materials_gen.py`) rather than silentl
 There is no committed JSON mirror of this vocabulary anywhere in the repo today (checked: no
 `AtomVocabCheck`-named file, no `material`-named registry file exists) — the sole precedent for
 "mirror a closed C# enum into Python with a citation, no re-derivation" is
-`adapters/demons/registries.py`, and this file follows that same discipline.
+`adapters/creatures/registries.py`, and this file follows that same discipline.
 
 Citations, read 2026-09-07 directly from source (never from memory or an earlier session's notes):
 
-    src/FusionRpg.Core/Demons/DemonRarity.cs:16-28        DemonRarity enum — Chaff=0 .. Almanac=9,
+    src/FusionRpg.Core/Creatures/CreatureRarity.cs:16-28        CreatureRarity enum — Chaff=0 .. Almanac=9,
                                                             ordinal IS rank (the enum's own doc comment)
-    src/FusionRpg.Core/Demons/DemonRarity.cs:52-65        DemonRarityIds.ToId() — the literal id
+    src/FusionRpg.Core/Creatures/CreatureRarity.cs:52-65        CreatureRarityIds.ToId() — the literal id
                                                             string for each rung, e.g. Chaff -> "chaff"
-    src/FusionRpg.Core/Demons/DemonRarityLadder.cs:51-52  DemonRarityLadder.All — every rung, ordered
+    src/FusionRpg.Core/Creatures/CreatureRarityLadder.cs:51-52  CreatureRarityLadder.All — every rung, ordered
                                                             by (int)r ascending (this is what
                                                             MaterialCatalog.Build() iterates for shard)
-    src/FusionRpg.Core/Demons/DemonRarity.cs:92-101       LegacyDemonRarityIds.ForwardMap — the four
+    src/FusionRpg.Core/Creatures/CreatureRarity.cs:92-101       LegacyCreatureRarityIds.ForwardMap — the four
                                                             legacy band ids (common/rare/epic/legendary),
                                                             resolvable but never issuable
     src/FusionRpg.Core/Stats/Derived/ActorElementTypes.cs:21-29
@@ -46,8 +46,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-#: DemonRarityLadder.All order — Chaff (weakest) first, Almanac (strongest) last. Ordinal IS rank;
-#: never re-sort this alphabetically or by any other key (DemonRarity.cs's own hard warning).
+#: CreatureRarityLadder.All order — Chaff (weakest) first, Almanac (strongest) last. Ordinal IS rank;
+#: never re-sort this alphabetically or by any other key (CreatureRarity.cs's own hard warning).
 RARITY_RUNGS: "tuple[str, ...]" = (
     "chaff", "sprout", "grafted", "cultivated", "fused",
     "chimeric", "heirloom", "firstseed", "sunwoven", "almanac",
@@ -67,7 +67,7 @@ ELEMENTS: "tuple[str, ...]" = ("fire", "ice", "air", "earth", "light", "dark")
 #: MaterialCatalog.CatalystVerbs.
 CATALYST_VERBS: "tuple[str, ...]" = ("forge", "temper", "flux")
 
-#: LegacyDemonRarityIds.ForwardMap's keys — the four retired shard bands. `IsKnown` (not
+#: LegacyCreatureRarityIds.ForwardMap's keys — the four retired shard bands. `IsKnown` (not
 #: `IsIssuable`) resolves these; a generator must never author NEW content for one.
 LEGACY_SHARD_IDS: "frozenset[str]" = frozenset({"common", "rare", "epic", "legendary"})
 
@@ -153,7 +153,7 @@ def require_issuable(runtime_id: str) -> MaterialId:
     if is_legacy_shard_id(runtime_id):
         raise MaterialVocabularyRejection(
             f"material id {runtime_id!r} is a legacy, retired shard band — resolvable for backward "
-            f"compatibility (LegacyDemonRarityIds.ForwardMap) but deliberately NOT issuable "
+            f"compatibility (LegacyCreatureRarityIds.ForwardMap) but deliberately NOT issuable "
             f"(MaterialCatalog.IsIssuable is false for every legacy id, per its own doc comment); "
             f"materials-gen only authors content for an id the ladder will actually mint, never for "
             f"a retired one.")

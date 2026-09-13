@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using FusionRpg.Core.Battle;
@@ -5,7 +6,7 @@ using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Effects.Atoms.Generation;
 using FusionRpg.Core.Power;
 
-// E43 family-expand generator (spec-family-expand.md §3.1, decided 2026-09-03 — the DemonSpeciesGen
+// E43 family-expand generator (spec-family-expand.md §3.1, decided 2026-09-03 — the CreatureSpeciesGen
 // --check pattern). Reads every authored affix-family definition
 // (data/seed/items/affix-families/*.json) and the tier-bands balance surface
 // (data/seed/items/_tuning/tier-bands.v{n}.json, LATEST version — TierBandsFile.FindLatestPath, fixed
@@ -164,7 +165,7 @@ foreach (var (sourceFile, rows) in bySource)
         return 2;
     }
 
-    wantedFiles[Path.GetFullPath(Path.Combine(outRoot, outName))] = ToSeedFileJson(rows);
+    wantedFiles[Path.GetFullPath(Path.Combine(outRoot, outName))] = FamilyExpansionSeedFile.ToCanonicalJson(rows);
 }
 
 var totalRows = bySource.Values.Sum(r => r.Count);
@@ -184,7 +185,9 @@ if (check)
 
     foreach (var (outPath, json) in wantedFiles)
     {
-        var existing = File.Exists(outPath) ? File.ReadAllText(outPath) : null;
+        var existing = File.Exists(outPath)
+            ? FamilyExpansionSeedFile.Canonicalize(File.ReadAllText(outPath))
+            : null;
         if (existing != json) stale.Add(outPath);
     }
 
@@ -210,9 +213,9 @@ Directory.CreateDirectory(outRoot);
 var written = 0;
 foreach (var (outPath, json) in wantedFiles)
 {
-    if (!File.Exists(outPath) || File.ReadAllText(outPath) != json)
+    if (!File.Exists(outPath) || FamilyExpansionSeedFile.Canonicalize(File.ReadAllText(outPath)) != json)
     {
-        File.WriteAllText(outPath, json);
+        FamilyExpansionSeedFile.WriteCanonical(outPath, json);
         written++;
     }
 }
@@ -227,32 +230,6 @@ foreach (var existingFile in existingGenerated)
 
 Console.WriteLine($"{written} file(s) written, {removed} stale file(s) removed, under {outRoot}");
 return 0;
-
-static string ToSeedFileJson(IReadOnlyList<AtomRow> rows)
-{
-    var entries = new JsonArray();
-    foreach (var row in rows)
-    {
-        entries.Add(new JsonObject
-        {
-            ["family"] = row.FamilyId,
-            ["tier"] = row.Tier,
-            ["kind"] = row.KindId,
-            ["name"] = row.Name,
-            ["params"] = JsonNode.Parse(row.ParamsJson),
-            ["tags"] = JsonNode.Parse(row.TagsJson),
-        });
-    }
-
-    var file = new JsonObject
-    {
-        ["schemaVersion"] = 1,
-        ["kind"] = "atom",
-        ["entries"] = entries,
-    };
-
-    return file.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n";
-}
 
 static string? FindUp(params string[] segments)
 {

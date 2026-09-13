@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+# Strip known watermark trailers before commit-msg validates.
+# Args: $1 = commit message file, $2 = source (message|template|merge|squash|commit)
+MSG_FILE=$1
+if [ -z "$MSG_FILE" ] || [ ! -f "$MSG_FILE" ]; then
+  exit 0
+fi
+
+REPO_ROOT=$(git rev-parse --show-toplevel) || exit 0
+if command -v python >/dev/null 2>&1; then
+  PY=python
+elif command -v python3 >/dev/null 2>&1; then
+  PY=python3
+else
+  exit 0
+fi
+
+"$PY" "$REPO_ROOT/scripts/commit-tool/strip_watermarks.py" "$MSG_FILE" || exit 1
+exit 0

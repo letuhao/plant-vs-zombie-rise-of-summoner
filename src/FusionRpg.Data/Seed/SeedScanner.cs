@@ -35,7 +35,7 @@ public static class SeedScanner
     /// Keeping the distinction here prevents a player's atom import from rejecting an otherwise valid
     /// install merely because another subsystem's content is present.</para>
     ///
-    /// <para><b>`demons/species-effects`</b> (T5.3, spec-species-effects.md §6) added 2026-09-06,
+    /// <para><b>`creatures/species-effects`</b> (T5.3, spec-species-effects.md §6) added 2026-09-06,
     /// the exact same "two halves must name the same folder" discipline `effects/affixes` above
     /// already established — `tools/seedsmith/run_t53_claude_propose.py`'s own `OUTPUT_DIR` writes
     /// here. Unlike the dungeon folders above, this one is NOT a no-op today: a real pilot batch
@@ -44,7 +44,7 @@ public static class SeedScanner
     public static readonly string[] AtomFolders =
         {
             "atoms", "containers", "curves", "rarity", "elements", "channel-policy", "channel-pools",
-            "effects/affixes", "power", "demons/species-effects",
+            "effects/affixes", "power", "creatures/species-effects",
         };
 
     public static readonly string[] DungeonFolders =

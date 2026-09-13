@@ -15,8 +15,8 @@ public enum ActionKind
 }
 
 /// <summary>
-/// The five closed action categories (H.3, spec-action-seeding.md §3) — a demon type's weight vector
-/// (T31) is over these five, plus element/aspect bias, per that spec's own rule: "a demon type is a
+/// The five closed action categories (H.3, spec-action-seeding.md §3) — a creature type's weight vector
+/// (T31) is over these five, plus element/aspect bias, per that spec's own rule: "a creature type is a
 /// weight vector over the five shipped action-categories… inventing a third vocabulary is the exact
 /// defect the atom program exists to stop." Previously only <see cref="DerivedStatChannels"/>' bare
 /// string constants (<see cref="DerivedStatChannels.ActionCategoryAttack"/> etc.) — this enum is typed

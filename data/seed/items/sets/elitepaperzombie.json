@@ -25,7 +25,7 @@
       "id": "set.elitepaperzombie-001",
       "nameKey": "set.scholar-s-wrath",
       "name": "Scholar's Wrath",
-      "themeKey": "demon.elitepaperzombie",
+      "themeKey": "creature.elitepaperzombie",
       "members": [
         {
           "role": "armament-primary",

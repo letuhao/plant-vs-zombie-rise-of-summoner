@@ -25,7 +25,7 @@
       "id": "set.peamine-001",
       "nameKey": "set.sprouting-surge",
       "name": "Sprouting Surge",
-      "themeKey": "demon.peamine",
+      "themeKey": "creature.peamine",
       "members": [
         {
           "role": "armament-primary",

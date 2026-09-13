@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from seedsmith.adapters.dungeon.registries import (  # noqa: E402
     ATOMS_DIR,
     BAND_NAMES,
-    DEMONS_REGISTRY_DIR,
+    CREATURES_REGISTRY_DIR,
     ITEMS_REGISTRY_DIR,
     REGISTRY_DIR,
     load_atom_families,
@@ -44,15 +44,15 @@ from seedsmith.adapters.dungeon.registries import (  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 LIVE_DUNGEON_REGISTRY_ROOT = REPO_ROOT / "data" / "seed" / "dungeon" / "_registry"
-LIVE_DEMONS_REGISTRY_ROOT = REPO_ROOT / "data" / "seed" / "demons" / "_registry"
+LIVE_CREATURES_REGISTRY_ROOT = REPO_ROOT / "data" / "seed" / "creatures" / "_registry"
 
 
 def _raw(name: str) -> dict:
     return json.loads((LIVE_DUNGEON_REGISTRY_ROOT / name).read_text(encoding="utf-8"))
 
 
-def _raw_demons(name: str) -> dict:
-    return json.loads((LIVE_DEMONS_REGISTRY_ROOT / name).read_text(encoding="utf-8"))
+def _raw_creatures(name: str) -> dict:
+    return json.loads((LIVE_CREATURES_REGISTRY_ROOT / name).read_text(encoding="utf-8"))
 
 
 class RegistryDirTests(unittest.TestCase):
@@ -96,7 +96,7 @@ class ObjectiveTemplateTests(unittest.TestCase):
         templates = load_objective_templates()
         self.assertEqual(set(templates), {
             "explore-rooms", "cleanse-fights", "gather-curio-kind", "kill-boss",
-            "extract-with-item-kind", "bring-demon-home-alive", "finish-under-hunger",
+            "extract-with-item-kind", "bring-creature-home-alive", "finish-under-hunger",
             "survive-no-downed", "spend-no-provision",
         })
 
@@ -163,34 +163,36 @@ class BandTests(unittest.TestCase):
 class VersionTests(unittest.TestCase):
     def test_nine_dungeon_files_plus_two_cross_program_theme_files_report_registryVersion_1_at_launch(self) -> None:
         # D1.10's own themes/motifs cross-read (2026-09-07) adds two more tracked versions
-        # (`demons.themes`, `demons.motifs`) alongside the nine dungeon-native files — 9 -> 11,
+        # (`creatures.themes`, `creatures.motifs`) alongside the nine dungeon-native files — 9 -> 11,
         # named here rather than silently bumping the count.
         versions = load_versions()
         self.assertEqual(len(versions), 11)
-        self.assertIn("demons.themes", versions)
-        self.assertIn("demons.motifs", versions)
+        self.assertIn("creatures.themes", versions)
+        self.assertIn("creatures.motifs", versions)
         self.assertTrue(all(v == 1 for v in versions.values()))
 
 
 class ThemeTests(unittest.TestCase):
-    """D1.10 (2026-09-07 correction): `theme` reads the demon-seed program's own already-shipped,
+    """D1.10 (2026-09-07 correction): `theme` reads the creature-seed program's own already-shipped,
     already-reviewed registry as a frozen cross-program input — never a dungeon-authored vocabulary
-    (`spec-dungeon-seed-contract.md:44`: "`themes.v1.json` (84 rows)")."""
+    (`spec-dungeon-seed-contract.md:44`). The roster size is a READING (validation-ssot.md); the
+    test asserts the loaded themes ARE the registry's themes, one entry each."""
 
-    def test_demons_registry_dir_resolves_to_the_real_committed_folder(self) -> None:
-        self.assertEqual(DEMONS_REGISTRY_DIR, LIVE_DEMONS_REGISTRY_ROOT)
-        self.assertTrue(DEMONS_REGISTRY_DIR.is_dir())
+    def test_creatures_registry_dir_resolves_to_the_real_committed_folder(self) -> None:
+        self.assertEqual(CREATURES_REGISTRY_DIR, LIVE_CREATURES_REGISTRY_ROOT)
+        self.assertTrue(CREATURES_REGISTRY_DIR.is_dir())
 
     def test_themes_match_the_complete_published_roster(self) -> None:
         themes = load_themes()
-        self.assertEqual(len(themes), 904)
-        self.assertEqual(set(themes), set(_raw_demons("themes.v1.json")["themes"]))
+        raw = _raw_creatures("themes.v1.json")["themes"]
+        self.assertEqual(set(themes), set(raw))
+        self.assertEqual(len(themes), len(raw), "one loaded theme per registry row, no duplicates")
 
-    def test_every_theme_id_is_demon_prefixed_never_the_legacy_theme_prefix(self) -> None:
-        # THEME_PREFIX in adapters/demons/themes.py is "demon." specifically so it can never
-        # collide with the items corpus's own legacy `theme.*` ids (spec-demon-themes.md §2.2a).
+    def test_every_theme_id_is_creature_prefixed_never_the_legacy_theme_prefix(self) -> None:
+        # THEME_PREFIX in adapters/creatures/themes.py is "creature." specifically so it can never
+        # collide with the items corpus's own legacy `theme.*` ids (spec-creature-themes.md §2.2a).
         for theme_id in load_themes():
-            self.assertTrue(theme_id.startswith("demon."), theme_id)
+            self.assertTrue(theme_id.startswith("creature."), theme_id)
 
     def test_load_theme_ids_is_a_frozenset_of_every_theme_key(self) -> None:
         ids = load_theme_ids()
@@ -198,7 +200,7 @@ class ThemeTests(unittest.TestCase):
         self.assertEqual(ids, frozenset(load_themes()))
 
     def test_a_retired_theme_still_resolves_never_filtered_out(self) -> None:
-        # spec-demon-themes.md §6: "A demon that leaves the roster: its theme is retired, still
+        # spec-creature-themes.md §6: "A creature that leaves the roster: its theme is retired, still
         # resolvable — never deleted." At least the shipped corpus's own retired rows (if any)
         # must still be legal vocabulary members, not silently dropped by this reader.
         themes = load_themes()
@@ -210,7 +212,7 @@ class MotifTests(unittest.TestCase):
     def test_motif_count_matches_the_raw_file(self) -> None:
         motifs = load_motifs()
         self.assertIsInstance(motifs, frozenset)
-        self.assertEqual(motifs, frozenset(_raw_demons("motifs.v1.json")["motifs"]))
+        self.assertEqual(motifs, frozenset(_raw_creatures("motifs.v1.json")["motifs"]))
 
     def test_every_themes_own_motifs_are_members_of_the_flat_union(self) -> None:
         # The flat file is supposed to be exactly the union of every theme's own motifs -- proven
@@ -260,18 +262,29 @@ class AtomFamilyTests(unittest.TestCase):
         self.assertTrue(bound, "fixture assumption: at least one shipped family carries icdKey")
         self.assertEqual(load_grantable_atom_families() & bound, set())
 
-    def test_grantable_matches_the_measured_generic_stat_families(self) -> None:
-        # Named explicitly so a future atom-catalog change that silently narrows or widens this
-        # pool is a loud, reviewed diff here rather than a quiet content-time surprise.
-        self.assertEqual(load_grantable_atom_families(), frozenset({
-            "atom.arm-hardening", "atom.arm-riveting", "atom.arm-welding", "atom.bulwark",
-            "atom.evd-flinch", "atom.evd-harden", "atom.evd-seal", "atom.ferocity",
-            "atom.fortitude", "atom.life-graft", "atom.life-surge", "atom.mending",
-            "atom.might", "atom.resilience", "atom.savagery", "atom.shld-breach",
-            "atom.shld-cycle", "atom.shld-surge", "atom.tempo-haste", "atom.tempo-stampede",
-            "atom.tempo-surge", "atom.tempo-wildgrowth", "atom.tempo-yield", "atom.vitality",
-            "atom.ward-harden", "atom.warding",
-        }))
+    def test_grantable_is_exactly_the_unbound_atom_families(self) -> None:
+        """The CONTRACT, not a snapshot. The atom catalog is a POPULATION that grows as content
+        ships, so the grantable set changes with it; a pinned set here fails the moment an atom
+        family is authored (validation-ssot.md). The rule the loader documents: grantable == every
+        family that never carries an `icdKey`/`when` binding. Asserted independently by a direct scan
+        so a loader that silently starts returning something else is caught."""
+        grantable = load_grantable_atom_families()
+        bound: "set[str]" = set()
+        every: "set[str]" = set()
+        for path in ATOMS_DIR.rglob("*.json"):
+            doc = json.loads(path.read_text(encoding="utf-8"))
+            for entry in doc.get("entries") or ():
+                family = entry.get("family")
+                if isinstance(family, str):
+                    every.add(family)
+                    if "icdKey" in entry:
+                        bound.add(family)
+        self.assertEqual(grantable, every - bound,
+                         "grantable is exactly the families with no icdKey binding")
+        self.assertTrue(grantable.issubset(every))
+        self.assertTrue(bound, "fixture assumption: at least one shipped family carries a binding")
+        self.assertTrue(grantable, "the unbound pool must be non-empty")
+        print(f"grantable atom families: {len(grantable)} of {len(every)}")
 
 
 class PowerBandTests(unittest.TestCase):
@@ -331,10 +344,10 @@ class VocabularyAgreementTests(unittest.TestCase):
         for band_name, row in raw_bands.items():
             self.assertEqual(vocab[band_name], set(row["members"]), f"band '{band_name}' disagrees")
 
-        raw_themes = set(_raw_demons("themes.v1.json")["themes"])
+        raw_themes = set(_raw_creatures("themes.v1.json")["themes"])
         self.assertEqual(vocab["theme"], raw_themes)
 
-        raw_motifs = set(_raw_demons("motifs.v1.json")["motifs"])
+        raw_motifs = set(_raw_creatures("motifs.v1.json")["motifs"])
         self.assertEqual(vocab["motif"], raw_motifs)
 
     def test_every_registry_file_is_read_by_at_least_one_loader(self) -> None:

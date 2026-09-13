@@ -1,5 +1,5 @@
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 
 namespace FusionRpg.Tools.SquadHarness;
 
@@ -31,12 +31,12 @@ public static class WaveOpponent
     /// this mode never lets <c>--theta</c> override the content author's own pinned level.</summary>
     public static WaveOpponentReport Run(IReadOnlyList<RosterEntry> squadRoster, string waveId, ulong runSeed, long trials)
     {
-        // WaveCatalog.Build() reads DemonSpeciesCatalog.All, which throws until configured -- this
+        // WaveCatalog.Build() reads CreatureSpeciesCatalog.All, which throws until configured -- this
         // harness builds its OWN actors in memory and never reaches RpgStore (§13 "Never"), so it uses
         // the same store-free compiled default every non-store host bootstraps from
-        // (DemonSpeciesCatalog.ConfigureFromCompiledDefault's own doc: "every host calls this today").
+        // (CreatureSpeciesCatalog.ConfigureFromCompiledDefault's own doc: "every host calls this today").
         // Idempotent (Configure just replaces static state), so calling it on every invocation is safe.
-        DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        CreatureSpeciesCatalog.ConfigureFromCompiledDefault();
         var wave = WaveCatalog.Get(waveId);
         var theta = wave.ContentIndex;
 

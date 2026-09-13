@@ -23,9 +23,9 @@
   "entries": [
     {
       "id": "set.ulti-cherrygatling-001",
-      "nameKey": "set.the-verdant-cipher",
-      "name": "The Verdant Cipher",
-      "themeKey": "demon.ulti_cherrygatling",
+      "nameKey": "set.emerald-volley",
+      "name": "Emerald Volley",
+      "themeKey": "creature.ulti_cherrygatling",
       "members": [
         {
           "role": "armament-primary",
@@ -77,7 +77,7 @@
           ]
         }
       ],
-      "flavor": "Vines of living data weave through the bark to reveal secrets long buried.",
+      "flavor": "A rapid succession of jade-colored projectiles.",
       "tags": [],
       "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
     }

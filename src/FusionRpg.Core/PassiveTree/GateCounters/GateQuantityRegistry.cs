@@ -2,7 +2,7 @@ namespace FusionRpg.Core.PassiveTree.GateCounters;
 
 /// <summary>
 /// spec-gate-counters.md §12 -- the "aspect-scope collision rule". <c>element_mastery</c> has a named
-/// future owner (the demon program's <c>aspect-scope</c> module) that D37 only deferred, not
+/// future owner (the creature program's <c>aspect-scope</c> module) that D37 only deferred, not
 /// cancelled, so this registry and that module CAN collide one day. The failure
 /// this exists to prevent is silent double-counting, not duplication itself:
 ///

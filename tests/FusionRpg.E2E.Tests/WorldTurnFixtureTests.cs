@@ -31,7 +31,7 @@ namespace FusionRpg.E2E.Tests;
 [Collection("e2e")]
 public class WorldTurnFixtureTests : IAsyncLifetime
 {
-    const string FixturePath = "web/fusion-rpg-web/src/features/world/fixtures/first-light-turn.json";
+    const string FixturePath = "web/fusion-rpg-web/src/stages/world/fixtures/first-light-turn.json";
     const string WorldId = "first-light";
     const int FirstTurn = 0;
     const int LastTurn = 5;

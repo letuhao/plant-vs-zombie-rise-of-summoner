@@ -25,7 +25,7 @@
       "id": "set.apple-001",
       "nameKey": "set.peaceful-apple",
       "name": "Peaceful Apple",
-      "themeKey": "demon.apple",
+      "themeKey": "creature.apple",
       "members": [
         {
           "role": "core-guard",

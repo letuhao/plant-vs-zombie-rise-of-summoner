@@ -172,7 +172,7 @@ export function DelveStage() {
               const queue = useDelveReportQueue.getState();
               queue.push({ kind: "drop", title: "Dev: found a relic" });
               queue.push({ kind: "levelUp", title: "Dev: leveled up" });
-              queue.push({ kind: "join", title: "Dev: a wild demon joined" });
+              queue.push({ kind: "join", title: "Dev: a wild creature joined" });
               queue.push({ kind: "firstClear", title: "Dev: first clear" });
             }}
           >

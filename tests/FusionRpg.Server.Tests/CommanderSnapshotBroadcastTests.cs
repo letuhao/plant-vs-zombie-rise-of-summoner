@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -18,7 +19,7 @@ namespace FusionRpg.Server.Tests;
 /// before the next board.start — same class of bug fixed for AptitudesUpdated 2026-08-30.</summary>
 public class CommanderSnapshotBroadcastTests : IAsyncLifetime
 {
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
@@ -27,10 +28,8 @@ public class CommanderSnapshotBroadcastTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-cmdbroadcast-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _playerId = _store.GetCurrentPlayerId();
 
         var port = GetFreeTcpPort();
@@ -60,7 +59,7 @@ public class CommanderSnapshotBroadcastTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     [Fact]

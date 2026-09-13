@@ -1,7 +1,7 @@
 # Spec: `species-respec`
 
 Module 7 in the [species-build capability map](../species-build-map.md). **Depends on
-`demon-type-allocation` (5).**
+`creature-type-allocation` (5).**
 
 ## Objective
 

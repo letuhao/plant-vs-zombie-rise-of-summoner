@@ -991,7 +991,7 @@ class NearDuplicateMetric(Metric):
 class NameCollisionMetric(Metric):
     """§7 gate 21 — reuses `workflow.validators.field_echo.name_collision` verbatim, never a second
     exact-name-collision implementation. This is the exact shape of the measured historical defect:
-    **83 of 83** generated commander effects were named identically to their own demon, caught only
+    **83 of 83** generated commander effects were named identically to their own creature, caught only
     once a CORPUS-WIDE check compared a draft's name against every OTHER subject's committed name —
     no per-item check could ever have seen it (`field_echo.py:69-94`'s own docstring). This metric
     is the tree-corpus application of that same primitive: a node's name colliding with any OTHER
@@ -1052,7 +1052,7 @@ class NameCollisionMetric(Metric):
 
 class UnresolvedCountMetric(Metric):
     """§7 gate 22 / §7.1 — **the one metric in this family promoted to `gates=True`**, mirroring
-    `demon_roster.py:353-370`'s own `DemonRoster/UnresolvedCount` promotion and its exact reasoning,
+    `creature_roster.py:353-370`'s own `CreatureRoster/UnresolvedCount` promotion and its exact reasoning,
     transferred rather than re-argued: there, an unresolved `aptitudePrimary` was not merely a
     description-quality signal — `SpeciesExpander.Expand` had no edge to derive a magnitude from,
     so an unresolved species was silently generated with ZERO stats. The same shape holds here: an
@@ -1142,7 +1142,7 @@ class UnresolvedCountMetric(Metric):
 
 
 #: Registration order matches §7's own gate order (15-22) — `UnresolvedCount` last, the same
-#: "CLOSED first... gates=True last" reading order `ALL_DEMON_ROSTER_METRICS` already uses.
+#: "CLOSED first... gates=True last" reading order `ALL_CREATURE_ROSTER_METRICS` already uses.
 #: ⚠ Deliberately NOT extended with H5's two new metrics below — this tuple is H4's own eight
 #: (spec-tree-language.md §7 gates 15-22), and `test_passive_tree_metrics.py`'s
 #: `AllPassiveTreeMetricsRegistrationTests` already asserts its exact length against that count
@@ -1280,7 +1280,7 @@ class HiddenFileCountMetric(Metric):
     """Every `_`-prefixed file under a seed root, counted WITHOUT the skip that hides it
     (spec-tree-review.md §7).
 
-    `DemonQualityReport/Program.cs:77` skips `_`-prefixed files — a convention borrowed from
+    `CreatureQualityReport/Program.cs:77` skips `_`-prefixed files — a convention borrowed from
     `AtomImporter` that silently became a hole: one stale `SnorkleZombie` duplicate survived inside
     `zombie/_needs-review.json` while the tool reported "840 indexed — clean." A gate with an
     exclusion rule has a blind spot the size of that rule, so this metric is defined by NOT having

@@ -162,7 +162,7 @@
       "class": "bulb",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.vitality",
         "powerBand": "medium"
       },
       "iconKey": "icon.base.stored-node",
@@ -393,7 +393,7 @@
       "class": "graft",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.vitality",
         "powerBand": "medium"
       },
       "iconKey": "icon.base.taken-rootstock",

@@ -8,11 +8,18 @@
 # this script reproduces byte-identical `arrows`/`dominanceMatrix` content; only `_meta.measuredAt`
 # differs between runs, by design (Guard/prove tests strip it before the determinism comparison).
 param(
-    [string]$Root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+    [string]$Root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path,
+    # Where the three baselines are written. Defaults to the tracked location, but a CALLER may
+    # redirect it — `ClassSystemBaselineRegenTests.RegeneratingTwiceReproducesIdenticalPayloads`
+    # passes a temp dir, because a test that rewrites committed files is a substrate violation and
+    # races any sibling test reading them (found 2026-09-12: the determinism test dirtied
+    # docs/research/class-system on every run, and `..._coverageNamesEveryAxisHonestly` could read
+    # `_baseline-dominance.json` mid-rewrite and flake on a missing `coverage.tuningSync`).
+    [string]$OutDir = ""
 )
 
 $ErrorActionPreference = "Stop"
-$OutDir = Join-Path $Root "docs\research\class-system"
+if (-not $OutDir) { $OutDir = Join-Path $Root "docs\research\class-system" }
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 
 # PSCustomObject + Add-Member rather than `ConvertFrom-Json -AsHashtable`: the -AsHashtable parameter

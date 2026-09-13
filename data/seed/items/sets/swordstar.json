@@ -25,7 +25,7 @@
       "id": "set.swordstar-001",
       "nameKey": "set.peach-sword-spore",
       "name": "Peach Sword Spore",
-      "themeKey": "demon.swordstar",
+      "themeKey": "creature.swordstar",
       "members": [
         {
           "role": "armament-primary",

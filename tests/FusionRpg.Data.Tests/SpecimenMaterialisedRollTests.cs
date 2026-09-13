@@ -7,8 +7,8 @@ using Xunit;
 namespace FusionRpg.Data.Tests;
 
 /// <summary>
-/// WAVE F2.2 (demon-standalone, 2026-09-07, `demon-mechanism-gaps-ideal.md` §3.4): what a sacrificed
-/// specimen actually rolled, for fusion inheritance. `spec-demon-fusion.md`'s own gap, closed here:
+/// WAVE F2.2 (creature-standalone, 2026-09-07, `creature-mechanism-gaps-ideal.md` §3.4): what a sacrificed
+/// specimen actually rolled, for fusion inheritance. `spec-creature-fusion.md`'s own gap, closed here:
 /// <c>RpgStore.GetSpecimenMaterialisedRoll</c> resolves a specimen's own player + species to its real
 /// `player_species`-backed <c>effect_instance</c> row — the SAME roll <see cref="PlayerMaterialiseTests"/>
 /// already proves is durable, read back through the specimen that carries that species, never a second,
@@ -16,20 +16,18 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class SpecimenMaterialisedRollTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public SpecimenMaterialisedRollTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-specimenroll-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     static readonly PowerTuning Tuning = PowerTuning.Build(
@@ -56,7 +54,7 @@ public class SpecimenMaterialisedRollTests : IDisposable
     (long PlayerId, string SpecimenId) MintSpecimen(string speciesId, int typeId)
     {
         var player = _store.CreatePlayer("Owner");
-        var (specimen, _) = _store.MintDemon(player.Id, new DemonMintSpec
+        var (specimen, _) = _store.MintCreature(player.Id, new CreatureMintSpec
         {
             SpeciesId = speciesId, Side = "plant", GameTypeId = typeId, Rarity = "sprout",
             Variant = "normal", ElementPrimary = "earth", TraitIds = new List<string>(), Origin = "test",
@@ -67,7 +65,7 @@ public class SpecimenMaterialisedRollTests : IDisposable
     [Fact]
     public void A_real_specimens_own_instanceId_resolves_to_its_own_real_rolled_atoms()
     {
-        // A real, catalog-known species — MintDemon validates against DemonSpeciesCatalog, unlike
+        // A real, catalog-known species — MintCreature validates against CreatureSpeciesCatalog, unlike
         // SpeciesMaterialiser's own pure path (PlayerMaterialiseTests's synthetic ids don't apply here).
         SeedSpecies("peashooter", 42);
         var (playerId, specimenId) = MintSpecimen("peashooter", 0);
@@ -105,7 +103,7 @@ public class SpecimenMaterialisedRollTests : IDisposable
     }
 
     [Fact]
-    public void A_bare_unique_actor_with_no_demon_profile_returns_null_not_a_crash()
+    public void A_bare_unique_actor_with_no_creature_profile_returns_null_not_a_crash()
     {
         var player = _store.CreatePlayer("Owner");
         var actor = _store.CreateUniqueActor(player.Id, "plant", typeId: 1);

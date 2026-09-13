@@ -32,11 +32,11 @@ thematic. Verified — it survives. After both rules, 84/99 lines are truly them
 
 ---
 
-## S2 — ⛔ `motif-prose-filter` §2.2 "prefer `flavorIntroduce`" makes some demons **worse**
+## S2 — ⛔ `motif-prose-filter` §2.2 "prefer `flavorIntroduce`" makes some creatures **worse**
 
-Simulated the fix end to end. Most demons improve sharply:
+Simulated the fix end to end. Most creatures improve sharply:
 
-| demon | before (committed) | after prose filter |
+| creature | before (committed) | after prose filter |
 |---|---|---|
 | `cherrynut` | `伤害`, `僵尸` ("damage", "zombie") | **`喜爱`, `坚果`, `樱桃`, `爆炸`** ("love", "nut", "cherry", "explosion") |
 | `cactus` | `仙人掌`, `优先` ("cactus", "priority") | **`仙人掌`, `发射`, `尖刺`, `地`, `空`** ("cactus", "fire", "spike", "ground", "air") |
@@ -53,7 +53,7 @@ connectives. The spec proposed the preference without testing what that text act
 ## S3 — ✅ Open question Q1 CLOSED — and its premise was **wrong**
 
 `motif-prose-filter` §9 asked: *"Should a corpus-frequency floor exclude near-universal words like
-`僵尸`?"* **Measured across all 84 demons — frequency is the wrong instrument:**
+`僵尸`?"* **Measured across all 84 creatures — frequency is the wrong instrument:**
 
 | token | document frequency | verdict |
 |---|---|---|
@@ -89,7 +89,7 @@ source-grounded check. Measured on the real shoehorned outputs tier-2 had passed
 | CoVe form | agreed with human judgement |
 |---|---|
 | **Subjective** ("is this meaningful?") | **1/3** — passed *both* shoehorned cases, rationalising them (*"'一类' defines a specific category of behavior"*) |
-| **Source-grounded** ("what does the source say this demon does? is the draft consistent?") | **2/3** — caught **both** shoehorned cases |
+| **Source-grounded** ("what does the source say this creature does? is the draft consistent?") | **2/3** — caught **both** shoehorned cases |
 
 **Any text can be rationalised**, so a subjective verifier defaults to charitable and is worthless.
 A verifier answering a question **from source** has something to be wrong against.
@@ -104,7 +104,7 @@ be answerable from source text alone.
 
 Source-grounded CoVe's one miss was a **false positive**: it rejected the *good* control
 (`wallnut`) because the source said *"nuts have hard shells"* and the verifier objected that the
-source *"does not describe a demon."*
+source *"does not describe a creature."*
 
 A verifier that rejects good content costs real generation budget and can loop. **Fix:** reject only
 on **explicit contradiction**, and route a CoVe rejection to **escalate** (human review) rather than
@@ -128,9 +128,9 @@ something cheaper solves.
 
 ---
 
-## S7 — ✅ Open question Q3 CLOSED by measurement: **one** commander effect per demon
+## S7 — ✅ Open question Q3 CLOSED by measurement: **one** commander effect per creature
 
-`commander-effect` §9 asked whether to generate one or several. Generated **3 for the same demon** at
+`commander-effect` §9 asked whether to generate one or several. Generated **3 for the same creature** at
 temperature 0.9:
 
 ```
@@ -141,7 +141,7 @@ temperature 0.9:
 
 **Two of three produced literally the same name.** Pairwise character-overlap (Jaccard) 0.42 / 0.68 /
 0.45, **mean 0.52**. They are synonyms, not alternatives — exactly audit **A1's thesaurus failure**
-at single-demon scale. **One per demon is correct**, and the question is closed with evidence rather
+at single-creature scale. **One per creature is correct**, and the question is closed with evidence rather
 than deferred.
 
 ---
@@ -150,7 +150,7 @@ than deferred.
 
 `Corpus.add` raises `CorpusLoadError` on a duplicate id **across all kinds** — `entries` is a single
 global dict, only `by_kind` is partitioned. A commander effect keyed `wallnut` would **collide with
-the demon `wallnut`** and fail corpus load.
+the creature `wallnut`** and fail corpus load.
 
 The spec's `"id": "commander-effect.wallnut"` is correct, but by luck of formatting rather than by
 stated rule. **Add an explicit acceptance row**: an unprefixed id must fail corpus load — asserted,
@@ -171,7 +171,7 @@ so the constraint cannot be lost in a later refactor.
 
 ## S10 — ⚠️ `workflow-runtime` §2.2 calls every state field "bounded"; `brief: str` is not
 
-`brief` is a rendered prompt of arbitrary length. It is bounded *in practice* (one demon's data), but
+`brief` is a rendered prompt of arbitrary length. It is bounded *in practice* (one creature's data), but
 the spec states a guarantee it does not enforce. Either state it precisely — *"bounded by
 construction: one subject's brief, never accumulated across steps"* — or assert a length cap. The
 substantive rule (**no `messages` accumulator**) is right and unaffected.
@@ -191,12 +191,12 @@ LangGraph seam rule and the three-way loop bound are sound and, in the probe, ef
 | # | Severity | Lands on | Action |
 |---|---|---|---|
 | S1 | **underspecified** | `motif-prose-filter` §2.1 | Add explicit rules 3 (circled numerals) and 4 (ASCII digits) |
-| S2 | **regression risk** | `motif-prose-filter` §2.2 | Preferring `flavorIntroduce` needs S3's POS filter, or it degrades some demons |
+| S2 | **regression risk** | `motif-prose-filter` §2.2 | Preferring `flavorIntroduce` needs S3's POS filter, or it degrades some creatures |
 | S3 | ✅ **closes Q1** | `motif-prose-filter` §9 | POS filtering, **not** a frequency floor — the question's premise was wrong |
 | S4 | ⛔ **design defect** | `quality-gates` §2.3 | Forbid subjective verification questions explicitly; require source-grounding |
 | S5 | risk | `quality-gates` | Reject only on explicit contradiction; CoVe rejection → escalate, not auto-repair |
 | S6 | **recommendation change** | `quality-gates`, build order | **Specify CoVe, do not build it** until shoehorning is measured to survive `motif-prose-filter` |
-| S7 | ✅ **closes Q3** | `commander-effect` §9 | One per demon — measured synonymy (mean Jaccard 0.52) |
+| S7 | ✅ **closes Q3** | `commander-effect` §9 | One per creature — measured synonymy (mean Jaccard 0.52) |
 | S8 | latent break | `commander-effect` §2.4/§6 | Namespaced id + an assertion that an unprefixed id fails load |
 | S9 | understated | `quality-gates`, `dependency-baseline` | CoVe is 3–4×; suite criterion is "passes", not a fixed number |
 | S10 | imprecise claim | `workflow-runtime` §2.2 | State the bound precisely or enforce it |

@@ -28,12 +28,12 @@ from .characteristic_pool.catalog import (
 from .characteristic_pool.derive import build_species_anchor, derive_all, load_weights, TUNING_PATH
 from .characteristic_pool.pool import build_pool_entries
 
-__all__ = ["run", "regenerate", "ACTIONS_ROOT", "DEMONS_ROOT"]
+__all__ = ["run", "regenerate", "ACTIONS_ROOT", "CREATURES_ROOT"]
 
 REPO_ROOT = Path(__file__).resolve().parents[5]
 ACTIONS_ROOT = REPO_ROOT / "data" / "seed" / "actions"
-DEMONS_ROOT = REPO_ROOT / "data" / "seed" / "demons"
-MOTIF_ASSIGNMENTS_PATH = DEMONS_ROOT / "_generated" / "motif-assignments.json"
+CREATURES_ROOT = REPO_ROOT / "data" / "seed" / "creatures"
+MOTIF_ASSIGNMENTS_PATH = CREATURES_ROOT / "_generated" / "motif-assignments.json"
 
 
 def _canonical_dump(doc: dict) -> str:
@@ -109,7 +109,7 @@ def _characteristic_pool_entries(corpus_hash: str, tuning_version: int) -> dict:
     }
 
 
-def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_ROOT,
+def regenerate(*, actions_root: Path = ACTIONS_ROOT, creatures_root: Path = CREATURES_ROOT,
               catalog_path: Path = CATALOG_PATH, species_root: Path = SPECIES_ROOT,
               family_assignments_path: "Path | None" = None,
               tuning_path: Path = TUNING_PATH, write: bool = True) -> dict:
@@ -120,7 +120,7 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
     weights = load_weights(tuning_path)
 
     motif_assignments = json.loads(
-        (demons_root / "_generated" / "motif-assignments.json").read_text(encoding="utf-8"))
+        (creatures_root / "_generated" / "motif-assignments.json").read_text(encoding="utf-8"))
     using_live_families = family_assignments_path is None
     if using_live_families:
         family_assignments = derive_live_family_assignments(species_root)

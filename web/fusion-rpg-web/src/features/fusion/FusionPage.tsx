@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { usePlayers } from "@/lib/bus";
-import { newCorrelationId, useDemonRoster, useSoulBalance, useSpeciesIndex } from "@/lib/bus/demons";
-import { useDemonMaterials } from "@/lib/bus/expeditions";
+import { newCorrelationId, useCreatureRoster, useSoulBalance, useSpeciesIndex } from "@/lib/bus/creatures";
+import { useCreatureMaterials } from "@/lib/bus/expeditions";
 import {
   useFusionExecute,
   useFusionPreview,
@@ -16,17 +16,17 @@ import { Badge, Banner, Button, EmptyState, Panel, TabList, TypeIcon } from "@/u
 import { costWithPicks, haveNeed, recipeLabel, starPips, togglePick, STAR_CAPS } from "./fusionView";
 
 /**
- * Fusion lab (spec-demon-fusion.md F9): star merges evolve the base, recipes consume all inputs;
+ * Fusion lab (spec-creature-fusion.md F9): star merges evolve the base, recipes consume all inputs;
  * costs preview server-side; undiscovered recipes render as silhouettes.
  */
 export function FusionPage() {
   const players = usePlayers();
   const playerId = players.data?.currentPlayerId ?? 0;
   const speciesById = useSpeciesIndex();
-  const roster = useDemonRoster(playerId);
+  const roster = useCreatureRoster(playerId);
   const patron = usePatron(playerId);
   const souls = useSoulBalance(playerId);
-  const materials = useDemonMaterials(playerId);
+  const materials = useCreatureMaterials(playerId);
   const recipes = useFusionRecipes(playerId);
   const preview = useFusionPreview();
   const execute = useFusionExecute();
@@ -98,7 +98,7 @@ export function FusionPage() {
     }
   }
 
-  function demonButton(s: (typeof items)[number], role: "base" | "sacrifice") {
+  function creatureButton(s: (typeof items)[number], role: "base" | "sacrifice") {
     const id = s.profile.instanceId;
     const species = speciesById.get(s.profile.speciesId);
     const selected = role === "base" ? baseId === id : sacrifices.includes(id);
@@ -125,7 +125,7 @@ export function FusionPage() {
         onClick={() => {
           if (role === "base") {
             setBaseId(selected ? null : id);
-            // A demon promoted to base must leave the sacrifice tray — a stale id would submit
+            // A creature promoted to base must leave the sacrifice tray — a stale id would submit
             // and bounce off the server's sacrifice.is-base refusal (2026-08-21 review).
             setSacrifices((prev) => prev.filter((x) => x !== id));
           } else {
@@ -191,8 +191,8 @@ export function FusionPage() {
       />
 
       {mode !== "recipe" ? (
-        <Panel title="Base demon (survives with its history)">
-          <div className="grid gap-2 sm:grid-cols-2">{items.map((s) => demonButton(s, "base"))}</div>
+        <Panel title="Base creature (survives with its history)">
+          <div className="grid gap-2 sm:grid-cols-2">{items.map((s) => creatureButton(s, "base"))}</div>
         </Panel>
       ) : null}
 
@@ -205,7 +205,7 @@ export function FusionPage() {
           }
         >
           <div className="grid gap-2 sm:grid-cols-2">
-            {items.filter((s) => s.profile.instanceId !== baseId).map((s) => demonButton(s, "sacrifice"))}
+            {items.filter((s) => s.profile.instanceId !== baseId).map((s) => creatureButton(s, "sacrifice"))}
           </div>
         </Panel>
       ) : null}

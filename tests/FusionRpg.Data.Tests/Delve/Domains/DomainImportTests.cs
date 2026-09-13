@@ -16,21 +16,16 @@ namespace FusionRpg.Data.Tests.Delve.Domains;
 /// </summary>
 public class DomainImportTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public DomainImportTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-domain-import-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static DomainRow Domain(string id = "domain.test-001") =>
         new(id, "Test Domain", "A test flavor.", "theme.overgrown", "fire", "shallow", "many",
@@ -227,7 +222,7 @@ public class DomainImportTests : IDisposable
 
     void AssertPool(string domainId, string pool, params (string Key, string RefId)[] expected)
     {
-        using var db = SqliteConnectionFactory.Open(_store.HotPath, readOnly: true);
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "SELECT key, ref_id FROM dungeon_domain_pool WHERE domain_id = $id AND pool = $pool ORDER BY seq;";
         cmd.Parameters.AddWithValue("$id", domainId);

@@ -25,7 +25,7 @@
       "id": "set.garlictorch-001",
       "nameKey": "set.spore-stump-smolder",
       "name": "Spore-Stump Smolder",
-      "themeKey": "demon.garlictorch",
+      "themeKey": "creature.garlictorch",
       "members": [
         {
           "role": "armament-primary",

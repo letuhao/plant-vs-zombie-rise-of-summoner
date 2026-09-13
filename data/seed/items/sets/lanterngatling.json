@@ -25,7 +25,7 @@
       "id": "set.lanterngatling-001",
       "nameKey": "set.luminous-volley",
       "name": "Luminous Volley",
-      "themeKey": "demon.lanterngatling",
+      "themeKey": "creature.lanterngatling",
       "members": [
         {
           "role": "armament-primary",

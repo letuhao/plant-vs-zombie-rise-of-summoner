@@ -25,7 +25,7 @@
       "id": "set.driver-a-001",
       "nameKey": "set.dancing-chariot",
       "name": "Dancing Chariot",
-      "themeKey": "demon.driver_a",
+      "themeKey": "creature.driver_a",
       "members": [
         {
           "role": "armament-primary",

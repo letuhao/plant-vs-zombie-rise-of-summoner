@@ -1,8 +1,8 @@
 """seedsmith.adapters.items.setgen.themes — the theme bridge, one-way.
 
-⛔ **Demons publish; items consume; nothing here writes a demon** (`spec-demon-themes.md` §2.2). This
-module opens `data/seed/demons/_registry/themes.v1.json` for reading and opens nothing under
-`data/seed/demons/` for writing — `nothing_in_the_generator_writes_the_demons_corpus` asserts that
+⛔ **Creatures publish; items consume; nothing here writes a creature** (`spec-creature-themes.md` §2.2). This
+module opens `data/seed/creatures/_registry/themes.v1.json` for reading and opens nothing under
+`data/seed/creatures/` for writing — `nothing_in_the_generator_writes_the_creatures_corpus` asserts that
 structurally rather than by promise.
 
 Three populations of `themeKey`, collision-free by prefix:
@@ -10,7 +10,7 @@ Three populations of `themeKey`, collision-free by prefix:
 | prefix | population | source |
 |---|---|---|
 | `theme.` | 13 legacy, 5 in use | `data/seed/items/_registry/themes.v1.json` (frozen) |
-| `demon.` | one per species | `data/seed/demons/_registry/themes.v1.json` (published) |
+| `creature.` | one per species | `data/seed/creatures/_registry/themes.v1.json` (published) |
 | `build.` | 36, aptitude x archetype | `data/seed/items/_registry/build-themes.v1.json` (new, D-ruled 2026-09-04) |
 
 ⚠ **D34's enrichment precondition remains visible here.** `theme-refresh` now reads the complete
@@ -31,8 +31,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[6]
-DEMON_THEME_REGISTRY = REPO_ROOT / "data" / "seed" / "demons" / "_registry" / "themes.v1.json"
-DEMON_SPECIES_ROOT = REPO_ROOT / "data" / "seed" / "demons" / "species"
+CREATURE_THEME_REGISTRY = REPO_ROOT / "data" / "seed" / "creatures" / "_registry" / "themes.v1.json"
+CREATURE_SPECIES_ROOT = REPO_ROOT / "data" / "seed" / "creatures" / "species"
 BUILD_THEME_REGISTRY = REPO_ROOT / "data" / "seed" / "items" / "_registry" / "build-themes.v1.json"
 LEGACY_THEME_REGISTRY = REPO_ROOT / "data" / "seed" / "items" / "_registry" / "themes.v1.json"
 
@@ -76,7 +76,7 @@ class Theme:
 
 
 def load_species_themes(path: "Path | None" = None) -> "list[Theme]":
-    doc = json.loads((path or DEMON_THEME_REGISTRY).read_text(encoding="utf-8"))
+    doc = json.loads((path or CREATURE_THEME_REGISTRY).read_text(encoding="utf-8"))
     out: "list[Theme]" = []
     for theme_key, row in sorted(doc["themes"].items()):
         out.append(Theme(
@@ -168,7 +168,7 @@ def shipped_species_ids(root: "Path | None" = None) -> "frozenset[str]":
     representative spelling.  The theme coverage gate then turns any index/tree drift into an
     explicit uncovered/orphaned result instead of silently planning a partial population.
     """
-    base = root or DEMON_SPECIES_ROOT
+    base = root or CREATURE_SPECIES_ROOT
     index = base / "_index.json"
     indexed: "frozenset[str]" = frozenset()
     if index.exists():
@@ -195,12 +195,12 @@ def shipped_species_ids(root: "Path | None" = None) -> "frozenset[str]":
 
 
 def _species_ids_from_index(doc) -> "frozenset[str]":
-    """The index shape is the demons feature's, not ours — read defensively rather than assume it,
+    """The index shape is the creatures feature's, not ours — read defensively rather than assume it,
     and fall back to the tree when it is a shape this module does not recognise.
 
     ⛔ **The shape that matters, and the one a filename count gets wrong.** `_index.json` is a flat
     `{speciesId: "plant/family.json"}` map — the *files* under `species/` are FAMILY files holding
-    many species each, so `ls data/seed/demons/species/{plant,zombie} | wc -l` counts families, not
+    many species each, so `ls data/seed/creatures/species/{plant,zombie} | wc -l` counts families, not
     species. Re-measured 2026-09-06: **502 family files, 840 species** (was 496 files on 2026-09-04 —
     the concurrent stream keeps rewriting the tree, and the species count has held across every
     re-measure). Anything comparing the theme registry against the file count is comparing against the
@@ -228,7 +228,7 @@ def _species_ids_from_index(doc) -> "frozenset[str]":
 def species_family_file_count(root: "Path | None" = None) -> int:
     """The count a naive `ls | wc -l` produces — kept as its own function precisely so a test can
     pin that it is NOT the species count, and the two can never be confused again."""
-    base = root or DEMON_SPECIES_ROOT
+    base = root or CREATURE_SPECIES_ROOT
     return sum(1 for p in base.glob("*/*.json") if not p.stem.startswith("_"))
 
 

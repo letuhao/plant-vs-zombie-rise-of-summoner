@@ -191,7 +191,7 @@ def test_transport_stub_raises_if_a_test_calls_a_model():
             f"{src} must never reference the model-calling machinery"
 
 
-# --- audit.py's own five-case coverage, retargeted (structure's own copy of the demon precedent) ---
+# --- audit.py's own five-case coverage, retargeted (structure's own copy of the creature precedent) ---
 
 def test_bare_integer_type_is_rejected():
     schema = {"properties": {"someMagnitude": {"type": "integer"}}}
@@ -228,7 +228,7 @@ def test_deny_listed_field_name_is_rejected_even_with_a_safe_type():
 
 
 def test_no_allowlisted_integer_fields_exist():
-    # Unlike the demon anchor (gameTypeId), structures carry NO numeric identifier at all.
+    # Unlike the creature anchor (gameTypeId), structures carry NO numeric identifier at all.
     assert ALLOWLISTED_INTEGER_FIELDS == frozenset()
     schema = build_structure_anchor_schema()
     for field, prop in schema["properties"].items():

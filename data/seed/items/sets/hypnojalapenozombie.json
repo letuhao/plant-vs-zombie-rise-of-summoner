@@ -25,7 +25,7 @@
       "id": "set.hypnojalapenozombie-001",
       "nameKey": "set.the-perfected-chili",
       "name": "The Perfected Chili",
-      "themeKey": "demon.hypnojalapenozombie",
+      "themeKey": "creature.hypnojalapenozombie",
       "members": [
         {
           "role": "armament-primary",

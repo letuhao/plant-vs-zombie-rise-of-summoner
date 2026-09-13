@@ -25,7 +25,7 @@
       "id": "set.endoflamegirl-001",
       "nameKey": "set.crimson-lotus-volley",
       "name": "Crimson Lotus Volley",
-      "themeKey": "demon.endoflamegirl",
+      "themeKey": "creature.endoflamegirl",
       "members": [
         {
           "role": "armament-primary",

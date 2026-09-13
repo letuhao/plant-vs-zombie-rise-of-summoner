@@ -26,7 +26,7 @@ as `hp: 2400`, and it ships. Over 900 entries, nobody re-derives them.
 
 **So the enforcement is mechanical, never editorial.** A schema that admits a numeric field is rejected
 before a single call is made — `audit_schema` in seedsmith does this today, and
-`demon-seed/spec-anchor-contract.md` §4 extends it to the four shapes that smuggle numbers past a naive
+`creature-seed/spec-anchor-contract.md` §4 extends it to the four shapes that smuggle numbers past a naive
 type check:
 
 1. a `string` field whose `pattern` admits a bare number (`^[0-9]+$`)
@@ -50,7 +50,7 @@ Two distinct biases, and they compound:
 | **Position bias** | the model partly answers *"which position is this?"* rather than *"which value is this?"* |
 | **Label bias** | some tokens are simply likelier than others regardless of the question |
 
-Magnitudes recorded in `demon-seed-ideal.md` §4.7: reordering the options alone swings measured
+Magnitudes recorded in `creature-seed-ideal.md` §4.7: reordering the options alone swings measured
 accuracy on GPT-4-class models by **up to 75 percentage points**, and majority voting across
 permutations recovers **up to 8 points**.
 
@@ -157,7 +157,7 @@ schema guarantee above becomes decorative** with no error anywhere.
 
 **Prove it with one real call at the start of a run**, asking for a small object and checking the reply
 shape. Proving enforcement costs one call; discovering it absent costs the whole run. This is check 6 in
-`demon-seed/spec-dump-preflight.md`, and it is the one that would be skipped.
+`creature-seed/spec-dump-preflight.md`, and it is the one that would be skipped.
 
 ---
 
@@ -240,7 +240,7 @@ entries x pipelines                        = base calls
 entries x voted_fields x (samples - 1)     = vote calls
 ```
 
-Worked, for demon-seed at 904 species, 8 pipelines, 5 voted fields, 3 samples:
+Worked, for creature-seed at 904 species, 8 pipelines, 5 voted fields, 3 samples:
 
 ```text
 904 x 8              =  7,232
@@ -286,4 +286,4 @@ Before any pipeline or contract is built:
 - [../../architecture/seedsmith/spec-pipeline.md](../../architecture/seedsmith/spec-pipeline.md) — guardrails, model selection, cost
 - [../../architecture/seedsmith/spec-workflow-runtime.md](../../architecture/seedsmith/spec-workflow-runtime.md) — resume, fan-out, the retry split
 - [../../architecture/item/seed-contract.md](../../architecture/item/seed-contract.md) — the four ownership levels
-- [../../architecture/demon-seed-ideal.md](../../architecture/demon-seed-ideal.md) §4.7 — the bias research in full
+- [../../architecture/creature-seed-ideal.md](../../architecture/creature-seed-ideal.md) §4.7 — the bias research in full

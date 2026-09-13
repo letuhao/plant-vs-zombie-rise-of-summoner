@@ -239,7 +239,7 @@ public class DomainQuestPreflightBridgeTests
                 [domain.DomainId] = new[]
                 {
                     new QuestRow("q1", "kill-boss", null, null, "modest", "delve", null),
-                    new QuestRow("q2", "bring-demon-home-alive", null, null, "modest", "delve", null),
+                    new QuestRow("q2", "bring-creature-home-alive", null, null, "modest", "delve", null),
                 },
             },
         };

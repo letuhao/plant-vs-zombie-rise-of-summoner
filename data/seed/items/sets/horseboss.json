@@ -25,7 +25,7 @@
       "id": "set.horseboss-001",
       "nameKey": "set.hell-s-grinding-edge",
       "name": "Hell's Grinding Edge",
-      "themeKey": "demon.horseboss",
+      "themeKey": "creature.horseboss",
       "members": [
         {
           "role": "armament-primary",

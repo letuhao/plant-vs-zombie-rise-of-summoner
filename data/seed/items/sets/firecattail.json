@@ -25,7 +25,7 @@
       "id": "set.firecattail-001",
       "nameKey": "set.cinder-tail",
       "name": "Cinder Tail",
-      "themeKey": "demon.firecattail",
+      "themeKey": "creature.firecattail",
       "members": [
         {
           "role": "armament-primary",

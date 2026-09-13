@@ -18,7 +18,7 @@ public static class BattlefieldScopeExecutor
 {
     /// <summary>
     /// Live entity pointers (normalized, `MatchUniqueBindingsFacet.NormalizePtr` shape) a
-    /// target/type/uniqueDemon selector currently reaches. Empty, never throwing, when nothing
+    /// target/type/uniqueCreature selector currently reaches. Empty, never throwing, when nothing
     /// currently qualifies — matching this program's own "false/empty, not throwing" posture for a
     /// scope with no board or no current match.
     /// </summary>
@@ -35,8 +35,8 @@ public static class BattlefieldScopeExecutor
             case WhoKind.Type:
                 return ResolveByType(who.TypeIds, board);
 
-            case WhoKind.UniqueDemon:
-                return ResolveUniqueDemon(who.InstanceId, uniqueBindings);
+            case WhoKind.UniqueCreature:
+                return ResolveUniqueCreature(who.InstanceId, uniqueBindings);
 
             case WhoKind.Relation:
                 throw new InvalidOperationException(
@@ -61,7 +61,7 @@ public static class BattlefieldScopeExecutor
         return matches;
     }
 
-    static IReadOnlyList<string> ResolveUniqueDemon(string? instanceId, MatchUniqueBindingsFacet? uniqueBindings)
+    static IReadOnlyList<string> ResolveUniqueCreature(string? instanceId, MatchUniqueBindingsFacet? uniqueBindings)
     {
         if (string.IsNullOrWhiteSpace(instanceId) || uniqueBindings is null) return Array.Empty<string>();
         if (!uniqueBindings.TryGet(instanceId, out var binding) || binding?.Ptr is null)

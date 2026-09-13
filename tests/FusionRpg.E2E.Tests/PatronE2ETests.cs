@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using Xunit;
 
 namespace FusionRpg.E2E.Tests;
@@ -25,12 +25,12 @@ public class PatronE2ETests : IAsyncLifetime
 
     public Task DisposeAsync() => Task.CompletedTask;
 
-    static readonly string SpeciesId = DemonSpeciesCatalog.All
-        .First(s => s.Acquisition != DemonAcquisition.CaptureOnly).SpeciesId;
+    static readonly string SpeciesId = CreatureSpeciesCatalog.All
+        .First(s => s.Acquisition != CreatureAcquisition.CaptureOnly).SpeciesId;
 
-    async Task<string> MintDemon()
+    async Task<string> MintCreature()
     {
-        var resp = await _http.PostAsJsonAsync($"/api/test/mint-demon?speciesId={SpeciesId}", new { });
+        var resp = await _http.PostAsJsonAsync($"/api/test/mint-creature?speciesId={SpeciesId}", new { });
         resp.EnsureSuccessStatusCode();
         return (await resp.Content.ReadFromJsonAsync<JsonElement>())
             .GetProperty("actor").GetProperty("instanceId").GetString()!;
@@ -39,7 +39,7 @@ public class PatronE2ETests : IAsyncLifetime
     [Fact]
     public async Task Designation_prices_switches_and_serves_the_aura()
     {
-        var first = await MintDemon();
+        var first = await MintCreature();
         var set = await _http.PostAsJsonAsync("/api/patron/set",
             new { instanceId = first, correlationId = "pt-e2e-1" });
         set.EnsureSuccessStatusCode();
@@ -50,7 +50,7 @@ public class PatronE2ETests : IAsyncLifetime
         Assert.True(patron.GetProperty("aura").GetProperty("powerMilli").GetInt32() > 0);
 
         // Broke: switching refuses with 409; first set was free.
-        var second = await MintDemon();
+        var second = await MintCreature();
         var broke = await _http.PostAsJsonAsync("/api/patron/set",
             new { instanceId = second, correlationId = "pt-e2e-2" });
         Assert.Equal(HttpStatusCode.Conflict, broke.StatusCode);
@@ -66,9 +66,9 @@ public class PatronE2ETests : IAsyncLifetime
     [Fact]
     public async Task Match_start_grants_the_aura_marker_in_the_session()
     {
-        var demon = await MintDemon();
+        var creature = await MintCreature();
         (await _http.PostAsJsonAsync("/api/patron/set",
-            new { instanceId = demon, correlationId = "pt-e2e-grant" })).EnsureSuccessStatusCode();
+            new { instanceId = creature, correlationId = "pt-e2e-grant" })).EnsureSuccessStatusCode();
 
         (await _http.PostAsJsonAsync("/api/sim/hello", new { })).EnsureSuccessStatusCode();
         (await _http.PostAsJsonAsync("/api/sim/board/start", new { levelName = "patron-e2e" })).EnsureSuccessStatusCode();
@@ -85,9 +85,9 @@ public class PatronE2ETests : IAsyncLifetime
     [Fact]
     public async Task Patron_kill_earns_pay_the_tenth_kill_bonus_through_ingest()
     {
-        var demon = await MintDemon();
+        var creature = await MintCreature();
         (await _http.PostAsJsonAsync("/api/patron/set",
-            new { instanceId = demon, correlationId = "pt-e2e-earn" })).EnsureSuccessStatusCode();
+            new { instanceId = creature, correlationId = "pt-e2e-earn" })).EnsureSuccessStatusCode();
 
         (await _http.PostAsJsonAsync("/api/sim/hello", new { })).EnsureSuccessStatusCode();
         (await _http.PostAsJsonAsync("/api/sim/board/start", new { levelName = "patron-earn" })).EnsureSuccessStatusCode();

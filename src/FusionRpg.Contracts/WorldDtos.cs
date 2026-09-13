@@ -562,7 +562,7 @@ public sealed class CreateWorldRequest
 }
 
 /// <summary>
-/// `POST /api/world/{worldId}/bind-warden` (world-stage W29): bind a demon contract as a
+/// `POST /api/world/{worldId}/bind-warden` (world-stage W29): bind a creature contract as a
 /// non-releasable warden, then file the ordinary `bind-warden` order in one call.
 /// </summary>
 public sealed class BindWardenRequest

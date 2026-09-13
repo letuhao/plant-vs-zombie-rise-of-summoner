@@ -23,9 +23,9 @@
   "entries": [
     {
       "id": "set.bigsunnut-001",
-      "nameKey": "set.rolling-grave-nut",
-      "name": "Rolling Grave Nut",
-      "themeKey": "demon.bigsunnut",
+      "nameKey": "set.sun-scorched-husk",
+      "name": "Sun-Scorched Husk",
+      "themeKey": "creature.bigsunnut",
       "members": [
         {
           "role": "armament-primary",

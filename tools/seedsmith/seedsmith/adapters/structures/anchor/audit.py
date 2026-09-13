@@ -1,5 +1,5 @@
 """The numeric audit (base-defense `structure-schema`, module 23, spec-structure-schema.md SS4) —
-mechanical, not editorial. A structure's own copy of `adapters/demons/anchor/audit.py`'s five-case
+mechanical, not editorial. A structure's own copy of `adapters/creatures/anchor/audit.py`'s five-case
 numeric-smuggling scan, kept independently testable per that module's own stated reason for NOT
 centralizing this (a per-domain copy, not a shared function): "**this is the module** — enforced by a
 scan rather than by review."
@@ -14,7 +14,7 @@ from ....pipeline.model import NUMERIC_JSON_TYPES
 from .schema import ALLOWLISTED_INTEGER_FIELDS
 
 #: Field names (case-insensitive) that name a magnitude outright — deny-listed regardless of
-#: their declared JSON type, matching the demon precedent's own list plus structure-specific terms.
+#: their declared JSON type, matching the creature precedent's own list plus structure-specific terms.
 MAGNITUDE_DENY_NAMES = frozenset({
     "hp", "atk", "attack", "damage", "defense", "armor", "cost", "weight", "chance", "permille",
     "materialtier", "tier",
@@ -72,7 +72,7 @@ def _field_name_is_magnitude(name: str) -> bool:
 
 
 def numeric_audit(schema: Mapping[str, Any], *, path: str = "$", field_name: "str | None" = None) -> list[NumericDefect]:
-    """Walks `properties`/`items`/`anyOf`/`oneOf`/`allOf` exactly like the demon precedent's own
+    """Walks `properties`/`items`/`anyOf`/`oneOf`/`allOf` exactly like the creature precedent's own
     `numeric_audit`, reporting all five smuggling shapes. `field_name` is the last-seen property
     name, threaded through recursion so the deny-list check (case 5) sees it at any nesting depth.
     """

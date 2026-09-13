@@ -67,7 +67,7 @@ flowchart TB
 
 ---
 
-## 4. Element roster (extended 2026-08-21 — [demons/spec-element-extension.md](demons/spec-element-extension.md))
+## 4. Element roster (extended 2026-08-21 — [creatures/spec-element-extension.md](creatures/spec-element-extension.md))
 
 FusionRpg element ids:
 

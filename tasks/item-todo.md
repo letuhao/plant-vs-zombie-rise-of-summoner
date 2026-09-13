@@ -261,12 +261,12 @@ map*. A decline moves its dependents to Phase 5 with the decline recorded.
 - [ ] Add a staleness check to the pipeline so a snapshot can never drift silently again
 
 **Acceptance:** the registry covers every shipped species; the check fails a deliberate drift.
-~~**Verify:** registry count equals `ls data/seed/demons/species/{plant,zombie} | wc -l` (**386**
+~~**Verify:** registry count equals `ls data/seed/creatures/species/{plant,zombie} | wc -l` (**386**
 today: 292 + 94).~~
 
 ⛔ **Corrected 2026-09-04 while building module 13 (P3.3) — this step is sized against the wrong
 denominator, and the Verify line above would have certified a still-broken registry as complete.**
-The files under `data/seed/demons/species/{plant,zombie}/` are **family** files, each holding many
+The files under `data/seed/creatures/species/{plant,zombie}/` are **family** files, each holding many
 species; `_index.json` is a flat `{speciesId: "plant/family.json"}` map and it is the species list.
 Measured: **840 species across 502 family files** (the file count moves — the concurrent stream is
 rewriting the tree; 495 on 2026-09-04, 503 on 2026-09-05, **502 re-measured 2026-09-06** — while the
@@ -282,7 +282,7 @@ in this block confirmed against current data, none carried forward.
 that only *adds* leaves them behind, so the staleness check has to look both ways.
 
 **Verify:** `python -m pytest tools/seedsmith`; registry count equals
-`len(json.load(open('data/seed/demons/species/_index.json')))`, and module 13's
+`len(json.load(open('data/seed/creatures/species/_index.json')))`, and module 13's
 `the_theme_registry_covers_every_shipped_species` / `the_species_count_is_the_index_not_the_file_count`
 go from asserting the gap exists to asserting it is closed.
 
@@ -316,17 +316,17 @@ generation.
 
 - [ ] LLM stage: each species' body frame — `humanoid` | `plant` | `hybrid` — from name + flavour text,
       carrying `basis`
-- [ ] ⚠ **Frame publishes independently of theme status.** A `basis = blocked` demon still has a body;
-      `spec-demon-themes.md` makes publishing its *theme* a Never, and frame is not a theme
+- [ ] ⚠ **Frame publishes independently of theme status.** A `basis = blocked` creature still has a body;
+      `spec-creature-themes.md` makes publishing its *theme* a Never, and frame is not a theme
 
       ⛔ **The reading of the spec is right and the conclusion still does not reach, found
       2026-09-06 — this bullet cannot be satisfied through the channel both maps chose.**
-      `spec-demon-themes.md` §7's Never list and §2.4 are theme-scoped exactly as claimed
-      (*"A demon whose motifs are `basis = "blocked"` **publishes no theme**"*), and nothing extends
+      `spec-creature-themes.md` §7's Never list and §2.4 are theme-scoped exactly as claimed
+      (*"A creature whose motifs are `basis = "blocked"` **publishes no theme**"*), and nothing extends
       that to another per-species field. But `seedsmith-map.md:252` and `item-map.md:61` both say
       frame is *"published through the theme registry"* — and §2.2 defines that registry as
       `speciesId → { displayName, motifs[], antiMotifs[], expression{}, basis }`, which has **no
-      `frame` key**, for a demon that gets **no row at all**. *"Frame publishes independently of theme
+      `frame` key**, for a creature that gets **no row at all**. *"Frame publishes independently of theme
       status"* and *"frame publishes through the theme registry"* cannot both hold. ⚠ **Live, not
       hypothetical: 15 of 840 anchors sit at `basis: "blocked"` today**, so this bites on the first
       run rather than at some later scale. Neither document resolves the mechanics, and the channel is
@@ -334,15 +334,15 @@ generation.
       `seedsmith-map.md`, "Filed by the item program (2026-09-06)".
 - [ ] ⛔ Runs **after** P0.2, never against the stale snapshot
 
-**Acceptance:** every species carries a frame; `DemonSpeciesDef.Side`'s faction/body conflation is
+**Acceptance:** every species carries a frame; `CreatureSpeciesDef.Side`'s faction/body conflation is
 resolved. Measured 2026-09-06: **0 of 840** anchors carry a `frame` field, and
-`DemonSpeciesCatalog.cs:11-12`'s `Side` still carries the conflation in its own doc comment
+`CreatureSpeciesCatalog.cs:11-12`'s `Side` still carries the conflation in its own doc comment
 (*"Linked capture side ("plant" | "zombie") — portrait/body source"*) with **no `Frame` member on the
 type at all**. Correctly open.
 
 ⚠ **The four worked examples are stale against the corpus this stage would actually run over,
 corrected 2026-09-06.** They were `peashooterzombie`, `ironpeazombie`, `cherrynutzombie`,
-`bucketnutzombie` — exact ids in the compiled 84-species `DemonSpeciesCatalog.Generated.cs`, but the
+`bucketnutzombie` — exact ids in the compiled 84-species `CreatureSpeciesCatalog.Generated.cs`, but the
 acceptance is measured over the **840-anchor** corpus, where three match only case-insensitively
 (`PeaShooterZombie`, `CherryNutZombie`, `BucketNutZombie`) and **`ironpeazombie` has no anchor at
 all** — it is one of the 16 orphan themes P0.2 lists two sections above. A `frame-classify` run can
@@ -628,7 +628,7 @@ not claim that state holds today.
 | Command | Result |
 |---|---|
 | `dotnet test tests\FusionRpg.Core.Tests` | **5315 passed / 14 failed** — exactly the pre-build baseline (§ below); zero new failures |
-| `dotnet test tests\FusionRpg.Data.Tests` | **646 passed / 2 failed** — exactly the pre-build baseline (`DemonSpeciesImportCliTests`, unrelated); +7 new tests, all green |
+| `dotnet test tests\FusionRpg.Data.Tests` | **646 passed / 2 failed** — exactly the pre-build baseline (`CreatureSpeciesImportCliTests`, unrelated); +7 new tests, all green |
 | `dotnet test tests\FusionRpg.Guard.Tests` | **162 / 162**, unchanged |
 | `.\scripts\guard-dal.ps1` | `DAL GUARD OK` |
 | `python scripts\audit-overflow.py` | 0 critical, 44 findings — none in new code |
@@ -727,7 +727,7 @@ understanding down.
 |---|---|
 | `dotnet test tests\FusionRpg.Core.Tests --filter Armoury` | +18 new (`ArmouryQueryTests`, `ArmouryCompareTests`, `ArmouryGuardsTests`), all green |
 | `dotnet test tests\FusionRpg.Core.Tests` (full) | **5334 passed / 14 failed** — exactly the pre-build baseline |
-| `dotnet test tests\FusionRpg.Data.Tests` (full) | **654 passed / 2 failed** — exactly the pre-build baseline (`DemonSpeciesImportCliTests`, unrelated); +8 new tests, all green |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **654 passed / 2 failed** — exactly the pre-build baseline (`CreatureSpeciesImportCliTests`, unrelated); +8 new tests, all green |
 
 **Files:** `src/FusionRpg.Data/Sqlite/RpgStore.Items.cs` (EDIT — stock/rule/event/loadout tables + CRUD +
 `AcquireItem`/`InventoryCeiling`); `src/FusionRpg.Core/Items/{ArmouryQuery.cs, ArmouryCompare.cs,
@@ -773,12 +773,12 @@ the spec asks for two more things of the library itself, and neither existed:
 
 - [x] **`LoadoutReport` (new, Core)** — `Plan(entries, targetSpecimenId, heldBy, force)` returning
       `LoadoutPlan(Entries, Conflicts, Stripped, Refused)`. Pure and DB-free, the same shape as
-      `SalvageGuards`, so there is one place "would this apply take gear off another demon" is
+      `SalvageGuards`, so there is one place "would this apply take gear off another creature" is
       answered. `Refused` is the **default** whenever a conflict exists; `force` flips it and every
       cell the steal would empty comes back in `Stripped` — **never a silent strip**, and a cell
       contested twice is stripped once
 - [x] **`LoadoutConflict` names the cell, not a count** — `(Role, RefKind, RefId, HeldBy)` where
-      `HeldBy` is the `(specimen, role)` pair. *"Why is my other demon naked"* cannot be answered from
+      `HeldBy` is the `(specimen, role)` pair. *"Why is my other creature naked"* cannot be answered from
       a count, which is the spec's own reason for the wording
 - [x] **`RpgStore.GetLoadoutEntriesValidated(loadoutId, playerId)`** — the validate-on-read. **Every
       stored entry comes back; the marker is the output, never a shorter list.** An `"item"` entry
@@ -812,7 +812,7 @@ other side of the line.
 
 ⚠ **A build-lock note, since it shaped how these were run.** A `testhost` (PID 24756) from another
 session sat wedged for 45 minutes — **0.2 s of CPU across a 15-minute sample**, the known
-`DemonSpeciesImportCliTests` hang — holding `tests\FusionRpg.Data.Tests\bin\Debug\net8.0\`. Rather than
+`CreatureSpeciesImportCliTests` hang — holding `tests\FusionRpg.Data.Tests\bin\Debug\net8.0\`. Rather than
 kill another session's process, the Data suites were run through
 `-p:BaseOutputPath=bin-proof\`, **inside the repo** and removed afterwards. ⛔ The first attempt used a
 path under the system temp dir and **all 13 tests failed at module init** —
@@ -852,7 +852,7 @@ override outside the tree turns a green suite red in a way that looks exactly li
 - [ ] ⏸ **Still deferred to X1:** populating the per-actor **species → frame** lookup (a species-keyed
       table, distinct from `item_role_frame`). Everything else in this module needed no X1 wait.
       ✅ **Re-verified still correctly open 2026-09-06** — 0 of 840 anchors carry a `frame` field and
-      `DemonSpeciesDef` has no `Frame` member (P0.4), so there is nothing to populate from
+      `CreatureSpeciesDef` has no `Frame` member (P0.4), so there is nothing to populate from
 - [ ] ⛔ **NEWLY FOUND 2026-09-06 — `SeedRoles` has no production caller, so both tables are empty in
       a real deployed database.** The bullet above says `item_role_frame` is *"schema, and fully
       populated"*; that is true of the code and of the tests, and **false of a shipped install**.
@@ -1380,7 +1380,7 @@ produces, it binds nothing.
 | `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~RelicRowMigration"` | **12 / 12** (new — `RelicRowMigrationTests`) |
 | `dotnet test tests\FusionRpg.Guard.Tests --filter "FullyQualifiedName~LegacyEquipTableRetirement"` | **3 / 3** (new) |
 | `dotnet test tests\FusionRpg.Core.Tests` (full) | **7481 passed / 4 failed** — baseline measured fresh at session start was **7468 / 4**; the same four (`Expeditions.ExpeditionResolverTests`, `ClassSystem.ProveAptitudeJsonEmitTests` ×3), all in the concurrent stream's mid-edit files. **Zero new** |
-| `dotnet test tests\FusionRpg.Data.Tests` (full, `DemonSpeciesImportCliTests` excluded) | **884 passed / 0 failed** — baseline **870 / 0**. **Zero new** |
+| `dotnet test tests\FusionRpg.Data.Tests` (full, `CreatureSpeciesImportCliTests` excluded) | **884 passed / 0 failed** — baseline **870 / 0**. **Zero new** |
 | `dotnet test tests\FusionRpg.Guard.Tests` (full) | **212 passed / 0 failed** — baseline **209 / 0**. **Zero new.** ⚠ A re-run minutes later shows **211 / 1**: `CiWiringGuardTests.Every_test_project_under_tests_appears_somewhere_in_ci_yml` now names `tests/FusionRpg.PassiveTreeRosterGen.Tests`, an **untracked project the passive-tree stream created mid-session** (its `tasks/passive-tree-*.md` and `tests/…/PassiveTree/` are untracked too). Not this change's, and the fix is one `ci.yml` line in that lane |
 | `.\scripts\guard-dal.ps1` / `guard-single-writer` / `guard-funnel-delta` / `guard-secondary-no-unity` | all four **OK** |
 | `dotnet build src\FusionRpg.Server\FusionRpg.Server.csproj` | succeeds — `RelicEndpoints.cs` and the `RelicDto` doc edits do not break boot |
@@ -1393,7 +1393,7 @@ being dismissed: `Expeditions.ExpeditionResolverTests` and `ClassSystem.ProveApt
 (×3) read `docs/research/class-system/_baseline-*.json` and `src/FusionRpg.Core/World/Turn/*`, all
 mid-edit in the concurrent stream and none touched here. ⚠ **A `FusionRpg.Data.Tests` testhost from
 another session sat deadlocked for 20 minutes** (0.12% CPU, on a suite that runs in 3m30s) holding the
-shared build output — the known `DemonSpeciesImportCliTests` CLI-subprocess hang. Killed the wedged
+shared build output — the known `CreatureSpeciesImportCliTests` CLI-subprocess hang. Killed the wedged
 child only, which is what `--blame-hang` does automatically; no source or commit was affected, and
 that run needs re-running.
 
@@ -1675,9 +1675,9 @@ parameter, so no wearer's set silently fails to complete. **Cross-referenced bac
       | Suite | Baseline (before) | After | Verdict |
       |---|---|---|---|
       | `FusionRpg.Server.Tests` (full) | 166 passed / **25 failed** / 191 | 176 passed / **25 failed** / 201 | ✅ **failure set byte-identical** (`diff` of the sorted name lists is empty). +10 passed is exactly the 10 tests added. This is the suite the change actually lives in |
-      | `FusionRpg.Core.Tests` (full) | 11859 passed / **24 failed** / 11883 | 11865 passed / **25 failed** / 11890 | ✅ **zero attributable, structurally — `tests/FusionRpg.Core.Tests` has no `ProjectReference` to `FusionRpg.Server` at all** (Core, Data, DemonCorpusDump only), and every line of this change is inside `src/FusionRpg.Server`. The one new line is `Actions.BasicAttackAdoptionTests.Parity_fixtures_are_captured_before_any_engine_change(name: "stomp", seed: 1001)` — the **battle-tempo stream**, which added 7 tests to this assembly mid-run (total moved 11883→11890) and whose `BasicAttack.cs` / `Battle/Timeline/ActionRunner.cs` sit uncommitted-modified in `git status`. A first after-run also showed `Demons.DemonSpeciesGenExplainTests` red; it **passes alone (2/2)** and is green in the re-run — the demon/seedsmith stream regenerating its corpus on disk, the same flake shape the T6.1 pass recorded |
+      | `FusionRpg.Core.Tests` (full) | 11859 passed / **24 failed** / 11883 | 11865 passed / **25 failed** / 11890 | ✅ **zero attributable, structurally — `tests/FusionRpg.Core.Tests` has no `ProjectReference` to `FusionRpg.Server` at all** (Core, Data, CreatureCorpusDump only), and every line of this change is inside `src/FusionRpg.Server`. The one new line is `Actions.BasicAttackAdoptionTests.Parity_fixtures_are_captured_before_any_engine_change(name: "stomp", seed: 1001)` — the **battle-tempo stream**, which added 7 tests to this assembly mid-run (total moved 11883→11890) and whose `BasicAttack.cs` / `Battle/Timeline/ActionRunner.cs` sit uncommitted-modified in `git status`. A first after-run also showed `Creatures.CreatureSpeciesGenExplainTests` red; it **passes alone (2/2)** and is green in the re-run — the creature/seedsmith stream regenerating its corpus on disk, the same flake shape the T6.1 pass recorded |
       | `FusionRpg.Guard.Tests` (full) | 234 passed / **2 failed** / 236 | 234 passed / **2 failed** / 236 | ✅ **identical set** (`CiWiringGuardTests`, `PlantSideStatusGuardTests`) |
-      | `FusionRpg.Data.Tests` (full) | ⚠ **did not build** | ✅ **1007 passed / 0 failed** | **Improved during the pass, by someone else.** The baseline attempt failed to compile on the party-dungeon/Delve stream's then-UNTRACKED `tests/FusionRpg.Data.Tests/Delve/DelvePackSettlementTests.cs:34-35` (`CS1061` ×2 — `DungeonRegistries.Rooms`/`.Doors`, in `src/FusionRpg.Core/Dungeon/Registry/DungeonRegistries.cs`, did not exist yet). Their fix landed mid-pass and the suite then ran clean. `DemonSpeciesImportCliTests` excluded from both runs as the known pre-existing flaky CLI-subprocess test |
+      | `FusionRpg.Data.Tests` (full) | ⚠ **did not build** | ✅ **1007 passed / 0 failed** | **Improved during the pass, by someone else.** The baseline attempt failed to compile on the party-dungeon/Delve stream's then-UNTRACKED `tests/FusionRpg.Data.Tests/Delve/DelvePackSettlementTests.cs:34-35` (`CS1061` ×2 — `DungeonRegistries.Rooms`/`.Doors`, in `src/FusionRpg.Core/Dungeon/Registry/DungeonRegistries.cs`, did not exist yet). Their fix landed mid-pass and the suite then ran clean. `CreatureSpeciesImportCliTests` excluded from both runs as the known pre-existing flaky CLI-subprocess test |
       | `guard-single-writer` / `guard-secondary-no-unity` / `guard-funnel-delta` / `guard-dal` | — | ✅ **all four OK** | |
 
       **⚠ A third, smaller, pre-existing inconsistency, named for the same reason.**
@@ -1701,10 +1701,10 @@ parameter, so no wearer's set silently fails to complete. **Cross-referenced bac
 
       | Suite | Baseline (before) | After | Verdict |
       |---|---|---|---|
-      | `FusionRpg.Core.Tests` (full) | 8598 passed / **24 failed** | 8764 passed / **25 failed** | **zero attributable.** Failure-set diff is +1 `Demons.DemonQualityReportTests.A_real_run_reports_…` and −1 `Battle.TraitMigrationParityTests.An_unmigrated_trait_still_reads_the_catalog`. The demon one **passes when run alone** — the demon stream is regenerating its corpus on disk right now; the trait one *stopped* failing for the same reason (`data/seed/effects/affixes/all.json` is uncommitted-modified). Neither touches compiled-grant owner keys |
+      | `FusionRpg.Core.Tests` (full) | 8598 passed / **24 failed** | 8764 passed / **25 failed** | **zero attributable.** Failure-set diff is +1 `Creatures.CreatureQualityReportTests.A_real_run_reports_…` and −1 `Battle.TraitMigrationParityTests.An_unmigrated_trait_still_reads_the_catalog`. The creature one **passes when run alone** — the creature stream is regenerating its corpus on disk right now; the trait one *stopped* failing for the same reason (`data/seed/effects/affixes/all.json` is uncommitted-modified). Neither touches compiled-grant owner keys |
       | `FusionRpg.Server.Tests` (full) | 163 passed / **25 failed** | 166 passed / **25 failed** | **failure set byte-identical** — same 25 `World*`/`District*`/`AptitudeChannelMods`/`ContentBoot` names, zero new, zero gone. +3 is exactly the 3 tests added |
       | `FusionRpg.Guard.Tests` (full) | 234 passed / **2 failed** | 234 passed / **2 failed** | **identical set** (`CiWiringGuardTests` missing `PassiveTreeRosterGen.Tests` in `ci.yml`; `PlantSideStatusGuardTests` vs `BattleEffects.cs`, uncommitted in another stream) |
-      | `FusionRpg.Data.Tests` (full) | ⚠ **no baseline obtainable** | 991 passed / **1 failed**, then **aborted** | ⚠ **The one suite this pass could not measure cleanly, and the reason is not this change.** The baseline attempt failed to build three times (MSB3027/MSB3021 — another stream's `dotnet test` on the same project held `bin/Debug/net8.0/FusionRpg.Core.dll`; its vstest.console PID 74948 → testhost PID 57224 sat with frozen CPU for ~25 min. Not killed: not this stream's process). Once the lock cleared, **three separate runs all end the same way — `Test host process crashed`, run aborted.** `--blame` names the crashing test exactly: `Data.Tests.DemonSpeciesImportCliTests.A_stale_committed_file_refuses_the_whole_import_and_writes_nothing` (993rd of 993 in the sequence, the only one not `Completed="True"`) — the **demon/seedsmith stream**, which is regenerating its corpus on disk right now and which independently produced the Core.Tests flake in the row above. The one real failure is `WorldWaveOneAcceptanceTests.The_scenario_hashes_to_its_golden` — **world stream** (`world-map-runtime` files uncommitted-modified). **Reachability checked instead of assumed:** neither `src/FusionRpg.Data` nor `tests/FusionRpg.Data.Tests` references `AtomCompiler`, `UniqueOwnerBinder` or `EffectOwnerKeys.Instance` **anywhere** (whole-project grep, zero hits), and every change here is additive with a null default — so nothing in that suite can observe it |
+      | `FusionRpg.Data.Tests` (full) | ⚠ **no baseline obtainable** | 991 passed / **1 failed**, then **aborted** | ⚠ **The one suite this pass could not measure cleanly, and the reason is not this change.** The baseline attempt failed to build three times (MSB3027/MSB3021 — another stream's `dotnet test` on the same project held `bin/Debug/net8.0/FusionRpg.Core.dll`; its vstest.console PID 74948 → testhost PID 57224 sat with frozen CPU for ~25 min. Not killed: not this stream's process). Once the lock cleared, **three separate runs all end the same way — `Test host process crashed`, run aborted.** `--blame` names the crashing test exactly: `Data.Tests.CreatureSpeciesImportCliTests.A_stale_committed_file_refuses_the_whole_import_and_writes_nothing` (993rd of 993 in the sequence, the only one not `Completed="True"`) — the **creature/seedsmith stream**, which is regenerating its corpus on disk right now and which independently produced the Core.Tests flake in the row above. The one real failure is `WorldWaveOneAcceptanceTests.The_scenario_hashes_to_its_golden` — **world stream** (`world-map-runtime` files uncommitted-modified). **Reachability checked instead of assumed:** neither `src/FusionRpg.Data` nor `tests/FusionRpg.Data.Tests` references `AtomCompiler`, `UniqueOwnerBinder` or `EffectOwnerKeys.Instance` **anywhere** (whole-project grep, zero hits), and every change here is additive with a null default — so nothing in that suite can observe it |
       | `MultiOwnerPushTests` + `CompiledPushTests` (the two suites this change touches) | — | **25 / 25** | the whole point of the pass |
       | `CompiledGrantOwnerScopeTests` | — | **14 / 14** | new |
       | `guard-single-writer` / `guard-secondary-no-unity` / `guard-funnel-delta` / `guard-dal` | — | **all four OK** | |
@@ -1888,7 +1888,7 @@ establishes (any newly-serialized member perturbs `ExpeditionResolverTests.Tier_
 hash unless suppressed) — though the underlying reason differs by field: `Index`'s own comment cites a
 redundant computed alias (`Index => Level`, serialized by default like any get-only property), while
 `SpecimenId`'s own comment gives the field-specific reason (a specimen id is always null in an
-expedition context, since expeditions build actors from wave/species data, never a real owned demon —
+expedition context, since expeditions build actors from wave/species data, never a real owned creature —
 not semantically part of what that hash locks).
 
 **Verification, run and green:**
@@ -2157,7 +2157,7 @@ path that has nothing to do with `UniqueBoundLoadout`/`mods_json` at all.
       mechanism has carried since it was built (T6.1, 2026-09-06):** every `UniqueActor`-scoped grant
       `AtomPushService` has ever sent, at Hello and at every bind/unbind re-push, was refused the same
       way. Several pre-existing tests (`MultiOwnerPushTests`, `UniqueActorAtomRepushTests`,
-      `DemonLawnDeployAtomPushTests`) had explicitly PINNED the `instance:` shape as the correct final
+      `CreatureLawnDeployAtomPushTests`) had explicitly PINNED the `instance:` shape as the correct final
       wire state, with one test's own comment naming the fix as needing "an injector-side BindGrant...
       [that] cannot be proven by anything CI runs" (net6.0/BepInEx interop, no PVZ install in CI) — that
       framing is now shown to be avoidable: the rewrite is exactly as provable **server-side**, using the
@@ -2171,7 +2171,7 @@ path that has nothing to do with `UniqueBoundLoadout`/`mods_json` at all.
       `entity:{ptr}`; specimen with no live ptr → grant dropped, def still travels). All 7 pre-existing
       tests that had PINNED the `instance:` shape as correct were updated to reflect the fixed contract
       (real bound specimens via `TryBeginUniqueDeploy`+`TryAckUniqueSpawn`, not synthetic literal owner
-      keys with no backing row) — `MultiOwnerPushTests` (6), `DemonLawnDeployAtomPushTests` (1),
+      keys with no backing row) — `MultiOwnerPushTests` (6), `CreatureLawnDeployAtomPushTests` (1),
       `UniqueActorAtomRepushTests` (1). **Full regression run after the fix: `FusionRpg.Server.Tests`
       25 failures (down from 27 before this session's changes), ALL in the same pre-existing, unrelated
       set** (`WorldSectorProjectionTests`/`ContentBootStartupWiringTests`/`WorldCalendarProjectionTests`/
@@ -2266,7 +2266,7 @@ one.** Module 14 (`salvage-craft`, P4.1 below) decided its shape: **one integer 
 quantity a salvage of that rung returns before the affix bonus**, read from
 `data/tuning/materials.v1.json`'s `salvageCoefficient.{rung}.substrateBase` and seeded by
 `RpgStore.SeedSalvageYield`. It meets `ssot-rarity.md` §9.8's one constraint on this key — *"must not
-reuse `shard.{DemonRarity}` ids"* — by naming **no shard id at all**: the shard leg of a salvage is R1's
+reuse `shard.{CreatureRarity}` ids"* — by naming **no shard id at all**: the shard leg of a salvage is R1's
 derived rung−1 rule, not a per-rung budget row. `RarityBudgetKeys` flips it to `HasDecidedShape: true`
 and this section's own `RarityBudgetKeysTests` row moved with it (renamed
 `The_ready_keys_are_registered`) rather than being loosened — `socket_min`, `socket_max` and
@@ -2383,14 +2383,14 @@ the owner may revise, exactly as module 10 recorded.
 | `dotnet test tests\FusionRpg.Core.Tests --filter Items.RarityLadderTests\|Items.RarityBudgetKeysTests\|Items.ItemRarityTuningTests` | **31 passed** (new) |
 | `dotnet test tests\FusionRpg.Core.Tests --filter RarityOverlapSimulatorTests` | **9 passed** (new) |
 | `dotnet test tests\FusionRpg.Data.Tests --filter Items.RarityBandsStoreTests` | **14 passed** (new) |
-| `dotnet test tests\FusionRpg.Core.Tests` (full) | **5523 passed / 21 failed** — all 21 in `Demons.*`/`ClassSystem.*`, the concurrent stream's own in-flight work (confirmed by name and by `git status` showing those files mid-edit, none touched by this module); **zero** failures in `Items.*` |
-| `dotnet test tests\FusionRpg.Data.Tests` (full) | **682 passed / 3 failed** — 2 `DemonSpeciesImportCliTests` (same concurrent stream) + 1 pre-existing `AtomStoreTests.An_unknown_trigger_is_rejected` reason-code mismatch, unrelated to rarity/container/items work; **zero** failures in `Items.*` |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **5523 passed / 21 failed** — all 21 in `Creatures.*`/`ClassSystem.*`, the concurrent stream's own in-flight work (confirmed by name and by `git status` showing those files mid-edit, none touched by this module); **zero** failures in `Items.*` |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **682 passed / 3 failed** — 2 `CreatureSpeciesImportCliTests` (same concurrent stream) + 1 pre-existing `AtomStoreTests.An_unknown_trigger_is_rejected` reason-code mismatch, unrelated to rarity/container/items work; **zero** failures in `Items.*` |
 | `dotnet test tests\FusionRpg.Guard.Tests` | **171 / 171**, unchanged |
 
 ⚠ **Baseline note:** the full-suite failure counts have grown since P1.3's snapshot (14→21 Core, 2→3
-Data) purely from the concurrent demon/class-system stream's own in-progress commits landing between
+Data) purely from the concurrent creature/class-system stream's own in-progress commits landing between
 then and now — verified by grepping every failing test name for `rarity`/`container`/`items` (one false
-positive: `SpeciesExpanderTests`'s *demon*-rarity-band test, an unrelated vocabulary collision, not
+positive: `SpeciesExpanderTests`'s *creature*-rarity-band test, an unrelated vocabulary collision, not
 this module). None are this module's regression.
 
 **Files:** `data/seed/rarity/ladder.v1.json` (new — ten rows, E3-corrected halves);
@@ -2516,14 +2516,14 @@ draft this list was written from:**
       `cosmetic` — no consumer ever planned), matching `ssot-item-categories.md`'s own "v1" column
       exactly, not the narrower "four have no consumer today" framing spec-base-types.md's prose uses
       for a different purpose (SC7's shipped-vs-not distinction)
-- [ ] ⏸ **`ImplicitFlavourDrift` warning per re-slated entry — deferred, named, not silently skipped.**
-      359 entries' `implicit.family` changed; a mechanical reassignment can leave an entry's `name`/
-      `flavor` prose describing its OLD family (spec's own anticipated cost: *"an entry keeps its name
-      and prose while its implicit family changes... this module emits a warning; it does not call a
-      model"*). The drift set itself **is captured** (359 entries, `{id, role, frame, from, to, name,
-      flavor}`, scratch JSON from the migration run) but wiring it into `ItemSeedValidator` as a
-      standing warning, and handing the list to the authoring fleet, is not yet done — real remaining
-      work, not scope creep to invent
+- [x] ✅ **`ImplicitFlavourDrift` warning per re-slated entry — wired 2026-09-12.**
+      `FrameDirectionCheck.EmitFlavourDriftWarnings` reports **312 rows** against each family's own
+      display vocabulary (a row whose `flavor` names another family's word while its implicit moved),
+      and `ItemSeedValidator` emits it as a named warning rather than a silent edit. The 649-row
+      re-slate was applied by `basetypegen/reslate.py` (a generator verb — the corpus is seedsmith
+      output, never hand-edited). Handing the list to the authoring fleet for the actual re-flavour
+      remains theirs per `spec-base-types.md`: *"the authoring fleet ... this module emits an
+      `ImplicitFlavourDrift` warning; it does not call a model."*
 - [ ] ⏸ **`ContentValidation.cs:73`'s null-ceiling skip — not this module's to fix.** Named in the old
       todo wording as this module's; re-reading `spec-base-types.md` in fact names **module 9 alone**
       as owner of the `power_ceiling`-gated `corner-matrix` mode (`spec-base-types.md:228`: *"module 9.
@@ -2544,7 +2544,7 @@ draft this list was written from:**
 | Standalone Python cross-check: humanoid ∩ plant implicit families, per role | **0 violations** across all 15 live roles |
 | `python -m pytest` (seedsmith, full suite) | **1498 passed, 1 skipped** — unaffected; seedsmith's `registries.py` reads `classLadders` from `classes.v1.json` only, which v2 never touches (purely additive to `excludedFamilies`/`implicitSlates`) |
 | `dotnet test tests\FusionRpg.Core.Tests` (full) | **5657 passed / 2 failed** — both `ClassSystem.UnitClassContractParityTests` — **world-stage**'s `world-numbers` module landing `loamUnits` mid-flight (W37/W38, same day), not class-system (its own `UnitClass` P1.4 closed 2026-08-26); **zero** in `Items.*` |
-| `dotnet test tests\FusionRpg.Data.Tests` (full) | **682 passed / 3 failed** — same baseline as P2.1's snapshot (2 `DemonSpeciesImportCliTests` + 1 pre-existing `AtomStoreTests` trigger-reason mismatch), unrelated; **zero** in `Items.*` |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **682 passed / 3 failed** — same baseline as P2.1's snapshot (2 `CreatureSpeciesImportCliTests` + 1 pre-existing `AtomStoreTests` trigger-reason mismatch), unrelated; **zero** in `Items.*` |
 | `dotnet test tests\FusionRpg.Guard.Tests` | **170 / 171** — 1 pre-existing `ClassSystemBaselineRegenTests` failure against uncommitted class-system tuning drift (already on file as a known, unrelated issue), not this module's |
 
 **Files:** `data/seed/items/_registry/classes.v2.json` (new — v1 stays frozen);
@@ -2694,7 +2694,7 @@ module 17's.
 | Standalone Python cross-check: relocation rows vs. corpus, orphan count | **619 rows, 0 orphans** — matches the spec's own measurement |
 | `python -m pytest` (seedsmith, full suite) | **1498 passed, 1 skipped** — unaffected (`kinds.py` only allow-lists the `nameWords` field name, never inspects its internal shape) |
 | `dotnet test tests\FusionRpg.Core.Tests` (full) | **5724 passed / 5 failed** — all 5 in `ClassSystem.*`/`Atoms.*`/`ActorHub.*`, the concurrent stream's own in-flight work; **zero** in `Items.*` |
-| `dotnet test tests\FusionRpg.Data.Tests` (full) | **684 passed / 3 failed** — same baseline as P2.1/P2.2's snapshots (2 `DemonSpeciesImportCliTests` + 1 pre-existing `AtomStoreTests` trigger-reason mismatch), unrelated |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **684 passed / 3 failed** — same baseline as P2.1/P2.2's snapshots (2 `CreatureSpeciesImportCliTests` + 1 pre-existing `AtomStoreTests` trigger-reason mismatch), unrelated |
 | `dotnet test tests\FusionRpg.Guard.Tests` | **171 / 171** — the one pre-existing `ClassSystemBaselineRegenTests` failure from P2.2's snapshot is gone (fixed upstream by the concurrent stream since then) |
 
 ⚠ **Two test assumptions were wrong and corrected against real corpus data, not left to pass on a false
@@ -3155,7 +3155,7 @@ actually was: a wiring pass, not a from-scratch build, exactly like modules 6/7/
 |---|---|
 | `dotnet test tests\FusionRpg.Core.Tests --filter Items.ItemDisplayTests` | **30 passed** (new) |
 | `dotnet run --project tools\ItemSeedValidator` | **165 errors, unchanged baseline** — the `stalwart` status flip and the generated `en.json` introduce zero new findings |
-| `dotnet test tests\FusionRpg.Core.Tests` (full) | **5891 passed / 9 failed** — spread across `ClassSystem.*`/`Atoms.*`/`ActorHub.*`/`Demons.*`/`Actions.*`, a new batch from the concurrent stream's own in-progress `match.modify`/wave-control work (confirmed via `git status` showing `BattleModels.cs`/`WaveCatalog.cs` mid-edit, and a transient `WaveCatalog.cs` compile break that resolved itself between two consecutive build attempts); **zero** in `Items.*` |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **5891 passed / 9 failed** — spread across `ClassSystem.*`/`Atoms.*`/`ActorHub.*`/`Creatures.*`/`Actions.*`, a new batch from the concurrent stream's own in-progress `match.modify`/wave-control work (confirmed via `git status` showing `BattleModels.cs`/`WaveCatalog.cs` mid-edit, and a transient `WaveCatalog.cs` compile break that resolved itself between two consecutive build attempts); **zero** in `Items.*` |
 | `dotnet test tests\FusionRpg.Data.Tests` (full) | **684 passed / 3 failed** — identical baseline to every prior module's snapshot |
 | `dotnet test tests\FusionRpg.Guard.Tests` | **169 / 171** — 2 `ClassSystemBaselineRegenTests` failures, same concurrent stream, unrelated |
 | `dotnet build src\FusionRpg.Server\FusionRpg.Server.csproj` | succeeds — the new display-template boot seeding does not break boot |
@@ -3546,8 +3546,8 @@ channel, gated by `IsPooledChannel` through the shipped `ChannelRefJson`);
 | `python scripts\audit-magic-numbers.py --summary` | **M1 = 0**; the 2 `items` M2/M4 rows are module 8's pre-existing `ItemNameComposer.cs:22` / `RoleFamilyTable.cs:27`, **zero** under `Items/Drops/` |
 | `.\scripts\guard-dal.ps1` | **OK** — no SQL outside `FusionRpg.Data` |
 | `.\scripts\guard-single-writer.ps1` | **OK** |
-| `dotnet test tests\FusionRpg.Core.Tests` (full) | **6035 passed / 6 failed** — all 6 in `ClassSystem.UnitClassContractParityTests` (2) and `Demons.SpeciesExpanderTests`/`SpeciesCatalogDiffTests` (4), the concurrent stream's own in-flight work (`git status` shows hundreds of `data/seed/demons/species/**` files mid-add/delete and `classes` registry churn, none touched by this module); **zero** failures in `Items.*` |
-| `dotnet test tests\FusionRpg.Data.Tests` (full) | **704 passed / 3 failed** — the established baseline exactly: 2 `DemonSpeciesImportCliTests` (same concurrent stream) + 1 pre-existing `AtomStoreTests.An_unknown_trigger_is_rejected`; **zero** failures in `Items.*` |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **6035 passed / 6 failed** — all 6 in `ClassSystem.UnitClassContractParityTests` (2) and `Creatures.SpeciesExpanderTests`/`SpeciesCatalogDiffTests` (4), the concurrent stream's own in-flight work (`git status` shows hundreds of `data/seed/creatures/species/**` files mid-add/delete and `classes` registry churn, none touched by this module); **zero** failures in `Items.*` |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **704 passed / 3 failed** — the established baseline exactly: 2 `CreatureSpeciesImportCliTests` (same concurrent stream) + 1 pre-existing `AtomStoreTests.An_unknown_trigger_is_rejected`; **zero** failures in `Items.*` |
 | `dotnet test tests\FusionRpg.Guard.Tests` | **178 / 178** — up from 171 at P2.3's snapshot, all green |
 
 ⚠ **One transient build break, resolved by retry and worth recording as a pattern:**
@@ -3674,7 +3674,7 @@ formula in front of it. X5 (content ladder past level 10) bounds what a band-6 s
 |---|---|
 | `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~WorldSectorLootSource"` | **13 / 13 passed** (new) |
 | `dotnet test tests\FusionRpg.Core.Tests` (full) | ⚠ **The baseline moved twice while this ran** — a concurrent stream is editing battle/delve/class-system code in the same tree, so all three runs are recorded rather than the flattering one. **Baseline 21:41: 4 failed / 7242.** **After the build, 22:15: 7 failed / 7318** — the 3 extra were all `Delve.Difficulty.*` (`RoomThetaComposerTests` ×2, `TailLadderTests` ×1), whose source and tests were written at **22:06 / 22:10**, *after* the baseline. **Final re-run 23:5x: 5 failed / 7336 passed / 7341** — those 3 Delve failures had gone green on their own (that stream finished them), and one different failure appeared: `Battle.BattleGoldenTests.Golden_battles_are_locked`, a moved hash whose cause is `src/FusionRpg.Core/Battle/BattleStatModifierLedger.cs`, **written at 23:47**. The other 4 are the baseline's own. **"Not mine" is proven structurally, not by ownership guess:** `MapLevel` has exactly one caller (`WorldSectorLootSource`), which has none outside its own test, so nothing on the battle or delve path can reach either file; the `PowerIndexComposer` edit is purely additive (`git diff` shows no removed line), leaving `ContentExplain` — the only member `RoomTheta.cs` touches — byte-identical. **Zero failures in `Items.*` or `Power.*` in all three runs** |
-| `dotnet test tests\FusionRpg.Data.Tests` (full) | **858 passed / 1 failed** — the same single pre-existing failure as the fresh baseline (`DemonSpeciesImportCliTests.A_stale_committed_file_refuses_the_whole_import_and_writes_nothing`, the demon stream's, and the reason the suite takes 23 minutes). No Data code was touched |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **858 passed / 1 failed** — the same single pre-existing failure as the fresh baseline (`CreatureSpeciesImportCliTests.A_stale_committed_file_refuses_the_whole_import_and_writes_nothing`, the creature stream's, and the reason the suite takes 23 minutes). No Data code was touched |
 | `dotnet test tests\FusionRpg.Guard.Tests` (full) | **204 / 204**, identical to the fresh baseline. Run twice — once after the code landed and once after the doc edits, because `PowerGuardTests` reads `inventory.json` |
 | `dotnet run --project tools\AtomImporter -- --check --validate` | **exit 0, clean** — 18 files, 66 atoms, 7 containers, 10 rarity bands. It reports *"1 row would change"* against P3.1's *"nothing would change"*; that drift is **not this work's** — `SeedScanner.OwnedFolders` is `atoms, containers, curves, rarity, elements, channel-policy, channel-pools, effects/affixes, power`, and `data/seed/loot/` is not among them, so the only file this task edited under `data/seed/` is invisible to the importer. The changed row tracks the concurrent stream's `data/seed/power/coefficients.v1.json`. Named, not absorbed |
 | `.\scripts\guard-single-writer.ps1` · `guard-secondary-no-unity` · `guard-funnel-delta` · `guard-dal` | **all OK** |
@@ -3784,7 +3784,7 @@ boot, imports the loot corpus after `store.Init()`);
       option B costs one line, exactly as the scope-parametric build predicted
 - [x] ⛔ **`player:` stays refused, in code.** `CharmResonance.RefuseUnsupportedScope` returns
       `ScopeUnsupported` for `player:` and `match:`, and `SetEvaluator.RefuseUnsupportedScope` does the
-      same for a set tier (ssot-sets §4.4 — one demon's gear must not become a team buff). **Re-verified
+      same for a set tier (ssot-sets §4.4 — one creature's gear must not become a team buff). **Re-verified
       against the live file, not the spec's line numbers:** `StatApplyScope.Matches` really does end
       `if (key.StartsWith("player:")) return true; // stub → match-wide apply`, `match` really does
       `return true` before it looks at `side`, and `IsMatchWide` really does report `player:` as
@@ -3894,8 +3894,8 @@ boot, imports the loot corpus after `store.Init()`);
 | `python scripts\audit-overflow.py` | **0 critical**, 55 findings — unchanged from P3.1; **zero** under `Items/Thresholds/` |
 | `python scripts\audit-magic-numbers.py --summary` | **M1 = 0**; the 5 `items` rows are modules 8/10's pre-existing `ItemNameComposer.cs:22`, `RoleFamilyTable.cs:27`, `ArmouryQuery.cs:79`, `RarityPalette.cs:43-44`; **zero** under `Items/Thresholds/` |
 | `.\scripts\guard-dal.ps1` / `guard-single-writer.ps1` / `guard-funnel-delta.ps1` / `guard-secondary-no-unity.ps1` | **all four OK** |
-| `dotnet test tests\FusionRpg.Core.Tests` (full) | **6106 passed / 6 failed** — the same six names as the pre-build baseline measured at the start of this session (`ClassSystem.UnitClassContractParityTests` ×2, `Demons.SpeciesExpanderTests` ×3, `Demons.SpeciesCatalogDiffTests` ×1), the concurrent stream's own in-flight work; **zero** failures in `Items.*` |
-| `dotnet test tests\FusionRpg.Data.Tests` (full) | **712 passed / 3 failed / 715 total** — baseline exactly (707 → 715 is this module's 8), the same three names (`AtomStoreTests.An_unknown_trigger_is_rejected`, 2 × `DemonSpeciesImportCliTests`) |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **6106 passed / 6 failed** — the same six names as the pre-build baseline measured at the start of this session (`ClassSystem.UnitClassContractParityTests` ×2, `Creatures.SpeciesExpanderTests` ×3, `Creatures.SpeciesCatalogDiffTests` ×1), the concurrent stream's own in-flight work; **zero** failures in `Items.*` |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **712 passed / 3 failed / 715 total** — baseline exactly (707 → 715 is this module's 8), the same three names (`AtomStoreTests.An_unknown_trigger_is_rejected`, 2 × `CreatureSpeciesImportCliTests`) |
 | `dotnet test tests\FusionRpg.Guard.Tests` | **184 / 184**, up from 178 at P3.1 |
 | `python -m pytest` (seedsmith, full) | **1505 passed, 1 skipped**, 87 subtests — unaffected (nothing Python-side was touched; the corpus test only *reads* the two constants) |
 
@@ -3978,7 +3978,7 @@ own measured test.
 - [ ] ⏸ **D33(b) — the missing atom-level apply scope — stays filed against `buff-debuff-scope` and
       blocks nothing here.** `ScopeCompatibility` keys on `(AtomKindId, WhereScope, WhoKind, ScopeHost,
       Channel)` and throws on an unlisted combination; `StatApplyScope` is a string grammar with no
-      atom field at all, and `WhoKind` (`Target · Type · UniqueDemon · Relation`) cannot express the
+      atom field at all, and `WhoKind` (`Target · Type · UniqueCreature · Relation`) cannot express the
       concept either. ⚠ Worth stating alongside it: **`unique-actor:` is not in `StatApplyScope`'s
       grammar either** — it falls through to `return false`. That is correct and not a defect: a
       `unique-actor:` binding is *durable* storage, re-keyed to `entity:{ptr}` by
@@ -4091,7 +4091,7 @@ tested against real shipped data.
       `a_sets_total_tier_value_never_exceeds_one_and_a_half_AE_per_member` asserts both the bound and
       the equality; the multiply happens before the divide, once
 - [x] ⭐ **The id defect that would have shipped broken is refused at the minting function.**
-      `emit.set_id("demon.allpeater", 1)` raises `IdRefused` with *"two dots"* in the message;
+      `emit.set_id("creature.allpeater", 1)` raises `IdRefused` with *"two dots"* in the message;
       `emit.set_id("allpeater", 1)` gives `set.allpeater-001` and `tier_container_id(..., 4)` gives
       `set.allpeater-001-04`. The pad is asserted load-bearing by sorting `-02 / -04 / -10`
       (module 12 proved that at the DAL). Minting into the **900-999 correction range** is refused,
@@ -4107,8 +4107,8 @@ tested against real shipped data.
       Wired into `registries.load_theme_keys()` (Python) and `RegistrySet`/`ReferenceCheck` (C#), so
       a build set's `themeKey` resolves on both sides
 - [x] **The theme bridge is one-way and asserted structurally.**
-      `nothing_in_the_generator_writes_the_demons_corpus` scans every module in `setgen/` and
-      `charmgen/` for a write verb on the same line as `demons`, and
+      `nothing_in_the_generator_writes_the_creatures_corpus` scans every module in `setgen/` and
+      `charmgen/` for a write verb on the same line as `creatures`, and
       `nothing_generated_keys_on_theme_rarity` scans for a read of `theme.rarity` (§2.4a — rarity is a
       roster snapshot, not an attribute)
 - [x] ⭐ **`Distribution/CellOccupancy` built and registered — the reskin bar, on the axis that
@@ -4125,7 +4125,7 @@ tested against real shipped data.
       still appear in the report, because a metric that runs and is never read is the same as one
       that never ran
 - [x] ⛔ **`seedsmith items` — the subcommand group the spec's own Commands block called and that did
-      not exist.** `build_parser` registered `check`/`report`/`metrics`/`demons`/`effects` and nothing
+      not exist.** `build_parser` registered `check`/`report`/`metrics`/`creatures`/`effects` and nothing
       else, so every command the spec listed was a documented interface that only worked if you knew
       the private module path. `items generate --kind set|charm --population build|species` now runs,
       prints the plan as JSON, and `--sample-brief` prints a real assembled brief. **`--write` is
@@ -4156,7 +4156,7 @@ tested against real shipped data.
    writing identity — the exact inversion P1 forbids.
 2. ⛔ **The species denominator every D34 number is quoted against counts the wrong thing.** The plan
    and the spec both say *"386 species (292 plant + 94 zombie)"*, derived from
-   `ls data/seed/demons/species/{plant,zombie} | wc -l`. Those are **family files**, each holding many
+   `ls data/seed/creatures/species/{plant,zombie} | wc -l`. Those are **family files**, each holding many
    species. `_index.json` is a flat `{speciesId: "plant/family.json"}` map and it holds **840
    species** across **495 family files** (measured 2026-09-04; the tree is being rewritten by the
    concurrent stream, so both move). So the theme-registry staleness is **84 of 840 — 772 uncovered**,
@@ -4229,16 +4229,16 @@ tested against real shipped data.
 | `python scripts\audit-magic-numbers.py --summary` | **M1 = 0**, 17 total; the 5 `items` rows are modules 8/10's pre-existing ones. Nothing this module added is C# |
 | `.\scripts\guard-dal.ps1` / `guard-single-writer.ps1` / `guard-funnel-delta.ps1` / `guard-secondary-no-unity.ps1` | **all four OK** |
 | `dotnet test tests\FusionRpg.Core.Tests` (full) | **6177 passed / 0 failed** — ⭐ the six-failure baseline measured at the start of this session is **gone**, fixed upstream by the concurrent stream mid-session |
-| `dotnet test tests\FusionRpg.Data.Tests` (full) | **713 passed / 2 failed** — both `DemonSpeciesImportCliTests`, the concurrent demon stream's (48 files under `data/seed/demons/` are mid-edit in `git status`). Down from the 3-failure baseline: `AtomStoreTests.An_unknown_trigger_is_rejected` was also fixed upstream |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **713 passed / 2 failed** — both `CreatureSpeciesImportCliTests`, the concurrent creature stream's (48 files under `data/seed/creatures/` are mid-edit in `git status`). Down from the 3-failure baseline: `AtomStoreTests.An_unknown_trigger_is_rejected` was also fixed upstream |
 | `dotnet test tests\FusionRpg.Guard.Tests` | **197 / 197**, up from 184 at P3.2 |
 
 ⚠ **One Core run aborted with *"Test host process crashed"* mid-suite** (1 failure recorded before the
-abort, `Demons.VariantCountBandTests`). The immediately following clean re-run is 6177/0. Same
+abort, `Creatures.VariantCountBandTests`). The immediately following clean re-run is 6177/0. Same
 intermittent P3.2 recorded for `Data.Tests`, now seen on `Core.Tests` too, and it happens while the
 concurrent stream is rewriting the species tree under both.
 
 ⚠ **One test in another suite had to be updated, and it is this module's change that moved it.**
-`test_demon_themes.py::test_load_theme_keys_returns_the_thirteen_registered_legacy_themes_prefixed`
+`test_creature_themes.py::test_load_theme_keys_returns_the_thirteen_registered_legacy_themes_prefixed`
 pinned the themeKey vocabulary at exactly two populations. Rewritten to assert **13 legacy + 36 build
 = the whole union**, so the original subject (exactly thirteen legacy themes) is still pinned exactly
 rather than loosened to `>= 13`.
@@ -4271,12 +4271,12 @@ rather than loosened to `>= 13`.
       explicit re-run decision."* `emit.set_id` already mints the correct shape and refuses a
       collision with the five pinned partitions, so nothing is blocked by the bump not having
       happened — it is a registry ceremony the owner owns.
-- [ ] ⏸ **`demon.*` themeKeys do not resolve in `ItemSeedValidator`, so a generated species set would
+- [ ] ⏸ **`creature.*` themeKeys do not resolve in `ItemSeedValidator`, so a generated species set would
       report `RegistryValueUnknown` today.** `ReferenceCheck` resolves `themeKey` against
-      `RegistrySet.ThemeIds`, which is now `theme.*` ∪ `build.*` — the demon population lives in
-      `data/seed/demons/_registry/themes.v1.json`, and having the **items** validator read the
-      **demons** registry is a boundary decision, not an edit. Named rather than crossed: the Python
-      adapter already has the seam (`load_vocabularies(demon_theme_keys=…)`); the C# tool does not.
+      `RegistrySet.ThemeIds`, which is now `theme.*` ∪ `build.*` — the creature population lives in
+      `data/seed/creatures/_registry/themes.v1.json`, and having the **items** validator read the
+      **creatures** registry is a boundary decision, not an edit. Named rather than crossed: the Python
+      adapter already has the seam (`load_vocabularies(creature_theme_keys=…)`); the C# tool does not.
       **This blocks persisting species sets, not generating them.**
 - [ ] ⏸ **`Distribution/CellOccupancy` promotion to `gates = True`** — trigger recorded in
       `PROMOTION_TRIGGER` and asserted by a test. It flips with the generation run, not before.
@@ -4596,7 +4596,7 @@ registered); `tools/seedsmith/seedsmith/adapters/items/registries.py` (EDIT — 
 unioned into `load_theme_keys`); `tools/ItemSeedValidator/Registries/RegistrySet.cs` (EDIT — optional
 `build-themes.v1.json`, unioned into `ThemeIds`); `tools/ItemSeedValidator/Checks/ReferenceCheck.cs`
 (EDIT — strip `build.` as well as `theme.`); `tools/seedsmith/tests/test_set_charm_gen.py` (new, 78
-tests); `tools/seedsmith/tests/test_demon_themes.py` (EDIT — the themeKey union is three populations).
+tests); `tools/seedsmith/tests/test_creature_themes.py` (EDIT — the themeKey union is three populations).
 
 **Verify:** `cd tools\seedsmith; python -m pytest tests/test_set_charm_gen.py -q`;
 `python -m seedsmith items generate --kind set --population build --dry-run`;
@@ -4614,7 +4614,7 @@ tests); `tools/seedsmith/tests/test_demon_themes.py` (EDIT — the themeKey unio
 
 ## Phase 4 — economy and depth
 
-### ✅ P4.1 — Module 14 `salvage-craft` — BUILT AND VERIFIED 2026-09-04; **step 5 (`perform`) WIRED and both owned verbs live 2026-09-06** — `upcycle` and `salvage` run through the workbench executor (the `rpg_demon_materials` rename, the ten missing shard display rows, the seven `reroll` corpus recipes and `forge`'s missing base-type container explicitly deferred with owners named)
+### ✅ P4.1 — Module 14 `salvage-craft` — BUILT AND VERIFIED 2026-09-04; **step 5 (`perform`) WIRED and both owned verbs live 2026-09-06** — `upcycle` and `salvage` run through the workbench executor (the `rpg_creature_materials` rename, the ten missing shard display rows, the seven `reroll` corpus recipes and `forge`'s missing base-type container explicitly deferred with owners named)
 
 - [x] ⛔ **The 10× re-key, done — and the field is named so the mistake cannot be made again.**
       `RecipeContext.TargetRungIndex` / `SalvageInput.RungIndex` are the rung **index** 0–9 on
@@ -4626,8 +4626,8 @@ tests); `tools/seedsmith/tests/test_demon_themes.py` (EDIT — the themeKey unio
       confusion its own Platform-correction section warns against; the correction wins, and the
       divergence is recorded in the type's XML doc so a reader of the spec finds it.
 - [x] ⭐ **The 27-id closed vocabulary, five classes, with the shipped sixteen REUSED not re-minted.**
-      `MaterialCatalog` builds `shard.*` ×10 off `DemonRarityLadder.All` and `essence.*` ×6 off
-      `ElementRoster.Concrete` — the same two rosters `DemonMaterialCatalog` reads — and appends the
+      `MaterialCatalog` builds `shard.*` ×10 off `CreatureRarityLadder.All` and `essence.*` ×6 off
+      `ElementRoster.Concrete` — the same two rosters `CreatureMaterialCatalog` reads — and appends the
       eleven this module owns (`substrate.{frame}.{grade}` ×8, `catalyst.{verb}` ×3). **27 and not
       28** because souls carry no id: they are a ledger balance, and the test asserts that too. The
       four legacy shard ids are `IsKnown` **true** / `IsIssuable` **false**, so a saved reference
@@ -4702,7 +4702,7 @@ tests); `tools/seedsmith/tests/test_demon_themes.py` (EDIT — the themeKey unio
       the cap closes (I9 §5.3), and it throws rather than clamping
 - [x] ⭐ **The salvage coefficients are RE-DERIVED to ten rungs by a stated rule, and the derivation
       is re-computed in the test rather than transcribed.** I9's four-row table is keyed on the
-      retired bands. The four anchors are **not chosen** — they are `LegacyDemonRarityIds.ForwardMap`,
+      retired bands. The four anchors are **not chosen** — they are `LegacyCreatureRarityIds.ForwardMap`,
       the shipped one-way band→rung map, so `common`→`chaff`, `rare`→`cultivated`, `epic`→`heirloom`,
       `legendary`→`sunwoven` land value for value (asserted against the live map, not a copy).
       Between anchors: integer linear interpolation with **floor**, never round-half-up, because
@@ -4739,7 +4739,7 @@ tests); `tools/seedsmith/tests/test_demon_themes.py` (EDIT — the themeKey unio
 - [x] ⭐ **`salvage_yield` is UNBLOCKED, registered and seeded — the sixth `rarity_budget` key.**
       `ssot-rarity.md` §5 recorded it as "awaiting I9"; the decided shape is **one integer per rung,
       the substrate quantity a salvage of that rung returns before the affix bonus**. It satisfies
-      §9.8's one constraint — *"must not reuse `shard.{DemonRarity}` ids"* — by naming **no shard id
+      §9.8's one constraint — *"must not reuse `shard.{CreatureRarity}` ids"* — by naming **no shard id
       at all**: the shard leg is R1's derived rung−1 rule, not a per-rung budget row.
       `RpgStore.SeedSalvageYield` seeds all ten from `materials.v1.json` and is wired into
       `Program.cs` at boot, deliberately **separate** from `SeedRarityLadder` so module 7's own
@@ -4797,7 +4797,7 @@ tests); `tools/seedsmith/tests/test_demon_themes.py` (EDIT — the themeKey unio
    It prints `b` `flux` in the **Essence** column and leaves **Catalyst** blank. I9 §7.4, the source,
    has essence `—` and catalyst `b flux`. The source wins; the reason is written into that row's own
    `note` in `materials.v1.json`, where a balance pass reads it.
-   ⚠ **And the spec's `rpg_demon_materials` site count does not match its own table.** It says *"nine
+   ⚠ **And the spec's `rpg_creature_materials` site count does not match its own table.** It says *"nine
    SQL sites across five files"*; the table below it lists **eight** lines in **four** files, and a
    fresh repo-wide grep confirms **eight SQL sites in four files** plus three doc-comment mentions
    (eleven occurrences total). The reset site is `RpgStore.cs:714`, not `:697`. Corrected list below.
@@ -4848,10 +4848,10 @@ introduced a repo-wide `double`→`long` migration plus a `mods-absorption` cuto
 4. **Compare against the numbers in each row below, not against an earlier module's snapshot.**
 
 ⚠ **One shipped guard caught a real defect in this module's first draft, which is the guard working.**
-`SalvagePolicy` computed R1's rung−1 as `DemonRarityLadder.RungsBelow((DemonRarity)item.RungIndex, 1)`,
-and `Guard.Tests DemonRarityLadderGuardTests.No_bare_cast_between_int_and_DemonRarity_outside_the_ladder_helper`
+`SalvagePolicy` computed R1's rung−1 as `CreatureRarityLadder.RungsBelow((CreatureRarity)item.RungIndex, 1)`,
+and `Guard.Tests CreatureRarityLadderGuardTests.No_bare_cast_between_int_and_CreatureRarity_outside_the_ladder_helper`
 went red on it — the bare cast is exactly the form that silently changed meaning the day the enum
-widened from four values to ten. Rewritten as `OneRungBelow(DemonRarityLadder.All[item.RungIndex])`,
+widened from four values to ten. Rewritten as `OneRungBelow(CreatureRarityLadder.All[item.RungIndex])`,
 which indexes the ladder's own ordered list and has no cast at all. Guard back to **198/198**.
 
 ⚠ **Three transient build breaks from the concurrent stream, all resolved by retry and none in a file
@@ -4867,7 +4867,7 @@ loosened — the three keys that *are* still awaiting (`socket_min`, `socket_max
 stay pinned exactly as hard, and `MaterialSpendTests` re-asserts at the DAL that writing one still
 throws.
 
-- [ ] ⏸ **The `rpg_demon_materials` → `rpg_materials` rename is RULED but deliberately NOT in this
+- [ ] ⏸ **The `rpg_creature_materials` → `rpg_materials` rename is RULED but deliberately NOT in this
       module's task list**, exactly as the spec's Success criteria require. This module ships against
       the shipped name. ⛔ **The site list drifted again during this same build — re-measured
       2026-09-05: ELEVEN SQL sites in FIVE files, not the eight-in-four this note claimed on
@@ -4882,7 +4882,7 @@ throws.
       nothing outside it references the table. Recorded for the day the owner says go.
 - [x] ✅ **RESOLVED 2026-09-07** — the shipped materials DISPLAY corpus now carries all 10 real
       `shard.{rung}` ids (`material.022`-`031`: `shard.chaff` through `shard.almanac`, the full
-      `DemonRarityLadder`), authored for real through item-seedgen's `materials-gen` machinery (a hand-
+      `CreatureRarityLadder`), authored for real through item-seedgen's `materials-gen` machinery (a hand-
       authored answer table standing in for a live model call, honestly labeled in `_meta.amendments`,
       matching `sockets-gen`'s own established precedent) rather than a hand-typed JSON edit. The 4
       legacy rows (`shard.common`/`rare`/`epic`/`legendary`) are byte-unchanged — their retirement stays
@@ -4906,7 +4906,7 @@ throws.
       ⭐ **CLOSED 2026-09-07, later, a separate session**: all seven legacy-shard cost lines
       (`recipe.009`/`010`/`011`/`017`/`018`/`025`/`029`) migrated to their mapped new-ladder rung
       via the new `seedsmith.adapters.items.recipegen.migrate_legacy_shards` module, mirroring
-      `LegacyDemonRarityIds.ForwardMap` exactly (common→chaff, rare→cultivated, epic→heirloom,
+      `LegacyCreatureRarityIds.ForwardMap` exactly (common→chaff, rare→cultivated, epic→heirloom,
       legendary→sunwoven). `MaterialCorpusTests.The_shipped_recipe_corpus_loads_and_every_refusal_is_
       named_with_the_module_that_unblocks_it` now asserts zero legacy refusals and 32/32 recipes
       resolvable (up from 25). Recipe amendment recorded in `recipes.json`'s own
@@ -5300,7 +5300,7 @@ stream names (`atom.pool.prefix.{id}`, `atom.pool.suffix.{id}`) are byte-unchang
 |---|---|
 | `dotnet test tests\FusionRpg.Core.Tests --filter` over **every class that touches the changed path** — `Atoms.InstantiatorDrawBudgetTests`, `Items.RerollPolicyTests`, `Atoms.ResolverTests`, `Atoms.InstantiatorTests`, `Atoms.InstanceProducerTests`, `Actions.ActionSeedingTests` | **102 passed / 0 failed.** `InstantiatorDrawBudgetTests` is **13 new facts**; `RerollPolicyTests` went **23 → 27** |
 | `dotnet test tests\FusionRpg.Core.Tests` (full) | **7287 passed / 7 failed**, against a **freshly measured** same-session baseline of **7238 / 4**. ⛔ **Zero in `Items.*` or `Atoms.*`** (grepped, count 0). The baseline four are the class-system / expeditions stream's — three `ProveAptitudeJsonEmitTests` throwing `BattleStatComposer.Configure(...) has not run` (`git status`: `src/FusionRpg.Core/Battle/BattleStatComposer.cs` mid-edit) and `ExpeditionResolverTests.Tier_goldens_are_locked`. The three that appeared **during** this session are `Delve.Difficulty.{RoomThetaComposerTests ×2, TailLadderTests}` — the party-dungeon stream's brand-new tree, **untracked** (`??`) in `git status` under `src/FusionRpg.Core/Delve/` and `tests/FusionRpg.Core.Tests/Delve/`, which is also why the suite total moved 7242 → 7294 mid-session |
-| `dotnet test tests\FusionRpg.Data.Tests` (full) | **858 passed / 1 failed** — **zero in `Items.*`** (grepped, count 0). The one failure is `DemonSpeciesImportCliTests.A_stale_committed_file_refuses_the_whole_import_and_writes_nothing`, which shells out to a CLI and returned **exit −1 instead of 1 after 16 m 44 s** — a killed subprocess, not a wrong answer, under three concurrent test hosts from the other streams. ⛔ **And it is squarely the demon stream's:** the test copies *every* file in `data/generated/demons/*.json` before shelling out, and commit `8a82cf0 "update demon species"` — made **during this session** — rewrote `_species-build-plan.json` by −6126 lines. `tools/DemonSpeciesImport` never references `Instantiator` (grep: source hits 0, only the linked `FusionRpg.Core.dll` matches). ✅ **Settled by re-running that one test alone: it passes in 3 seconds** (1/0). `AffixImportPathTests`, the one Data test that *does* call `Instantiator.Draw` against store-loaded containers, is green |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **858 passed / 1 failed** — **zero in `Items.*`** (grepped, count 0). The one failure is `CreatureSpeciesImportCliTests.A_stale_committed_file_refuses_the_whole_import_and_writes_nothing`, which shells out to a CLI and returned **exit −1 instead of 1 after 16 m 44 s** — a killed subprocess, not a wrong answer, under three concurrent test hosts from the other streams. ⛔ **And it is squarely the creature stream's:** the test copies *every* file in `data/generated/creatures/*.json` before shelling out, and commit `8a82cf0 "update creature species"` — made **during this session** — rewrote `_species-build-plan.json` by −6126 lines. `tools/CreatureSpeciesImport` never references `Instantiator` (grep: source hits 0, only the linked `FusionRpg.Core.dll` matches). ✅ **Settled by re-running that one test alone: it passes in 3 seconds** (1/0). `AffixImportPathTests`, the one Data test that *does* call `Instantiator.Draw` against store-loaded containers, is green |
 | `dotnet test tests\FusionRpg.Guard.Tests` | **204 passed / 0 failed — fully green** (twice) |
 | `.\scripts\guard-single-writer.ps1` · `guard-funnel-delta` · `guard-dal` · `guard-secondary-no-unity` | all four **OK** |
 | `python scripts\audit-overflow.py` | **0 critical** (62 A3/A7 informational findings across the repo, drifting with the other streams) — **zero in `Effects/Atoms/Instantiator.cs` or `Items/Mutation/`** |
@@ -5320,9 +5320,9 @@ session's Data build with `MSB3027`. Re-running with `-p:BaseOutputPath=<scratch
 **invalidates the result** — 77 broad seed/read failures, because `MaterialCorpusTests.RepoRoot()`
 walks up from `AppContext.BaseDirectory` looking for `src/FusionRpg.Injector`, which a scratch output
 directory never reaches. Recorded so the number is not mistaken for a regression. ⚠ Related and also
-not ours: `DemonSpeciesImportCliTests`'s *other* fact still **crashes the test host** when run alone
+not ours: `CreatureSpeciesImportCliTests`'s *other* fact still **crashes the test host** when run alone
 (`"The active test run was aborted. Reason: Test host process crashed"`) — the same Data.Tests
-host-crash P4.2's original evidence block already recorded, in the demon stream's lane.
+host-crash P4.2's original evidence block already recorded, in the creature stream's lane.
 
 **Files (addendum):** `src/FusionRpg.Core/Effects/Atoms/Instantiator.cs` (EDIT — `BudgetDraw`,
 `DrawBudget` public with `count`/`excludeGroups`/`crossBudget`/`excludeAffixIds`, A1 state threaded
@@ -5856,7 +5856,7 @@ against real shipped data.
       than ignored — the grid is closed, so there is no species/build split to make and silently
       accepting the flag would let a caller believe they had selected something
 - [x] **No resume ledger, deliberately.** The spec's own Commands block says 102 is small enough not
-      to need the `demons run` harness; module 13 built one because it faced ~1,800. A ledger here
+      to need the `creatures run` harness; module 13 built one because it faced ~1,800. A ledger here
       would be machinery with no failure to survive, and `plan_run` is byte-identical across runs
       (asserted over the subject dicts, the assembled briefs **and** the summary), which is the
       property that makes re-running safe instead
@@ -6488,7 +6488,7 @@ validators**, not a from-scratch build — checked before assuming, exactly as m
 | `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items."` | **542 passed / 0 failed** — the whole item program, modules 1–16's own suites included, green under this module's two registry edits |
 | `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~Items."` | **103 passed / 0 failed** — the item program's whole DAL half, green under the new `item_unique` schema |
 | `dotnet test tests\FusionRpg.Core.Tests` (full) | **6712 passed / 8 failed** — all 8 in `Actions.ActionsPurityGuardTests`, `Battle.*` (3), `ClassSystem.ProveAptitudeJsonEmitTests` (3) and `Expeditions.ExpeditionResolverTests`, the concurrent stream's own in-flight world/district work; **zero** in `Items.*` |
-| `dotnet test tests\FusionRpg.Data.Tests` (full) | **777 passed / 0 failed**, then the host process **crashed** on `DemonSpeciesImportCliTests.A_stale_committed_file_refuses_the_whole_import_and_writes_nothing` — the demon stream's own CLI-spawning test, reproducible under `--blame-hang`; **zero** failures anywhere, **zero** in `Items.*` |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **777 passed / 0 failed**, then the host process **crashed** on `CreatureSpeciesImportCliTests.A_stale_committed_file_refuses_the_whole_import_and_writes_nothing` — the creature stream's own CLI-spawning test, reproducible under `--blame-hang`; **zero** failures anywhere, **zero** in `Items.*` |
 | `dotnet test tests\FusionRpg.Guard.Tests` (full) | **204 passed / 0 failed** — clean, zero-tolerance held |
 | `dotnet run --project tools\ItemSeedValidator` | **170 errors** (166 before this module). All **4** new findings are `UniqueFrameImpossible` on the three real corpus rows above; no other check moved |
 | `python scripts\audit-magic-numbers.py --summary` | **`M1 = 0`, `M2 = 0`, exit 0**; the `uniques` domain reports **zero** findings |
@@ -6761,7 +6761,7 @@ from-scratch build — checked before assuming, exactly as modules 6/7/8/10/17 w
 | `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Consumable\|FullyQualifiedName~DraughtManifest"` | **78 passed / 0 failed** (new — `ConsumableTests` 39 + `ConsumableCorpusTests` 18 + `DraughtManifestTests` 17, measured per class) |
 | `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~RunDraught"` | **14 passed / 0 failed** (new) |
 | `dotnet test tests\FusionRpg.Core.Tests` (full) | **6792 passed / 9 failed** — **zero** in `Items.*`. All 9 are `Actions.*` (2), `Battle.*` / `Battle.Timeline.*` (3), `ClassSystem.ProveAptitudeJsonEmitTests` (3) and `Expeditions.ExpeditionResolverTests` — the concurrent stream's own in-flight work; `git status` shows `Actions/TimelineDispatch.cs`, `Battle/BattleEngine.cs`, `Battle/BattleModels.cs`, `Battle/BattleRunState.cs` mid-edit and `Battle/Timeline/ReactionLaneTuning.cs` brand new, **none touched by this module** |
-| `dotnet test tests\FusionRpg.Data.Tests` (full, minus the demon CLI test that spawns a process) | ⭐ **793 passed / 0 failed** — fully green |
+| `dotnet test tests\FusionRpg.Data.Tests` (full, minus the creature CLI test that spawns a process) | ⭐ **793 passed / 0 failed** — fully green |
 | `dotnet test tests\FusionRpg.Guard.Tests` (full) | ⭐ **204 passed / 0 failed** — the session-start `ClassSystemBaselineRegenTests` dominance drift cleared by the concurrent stream mid-build |
 | `dotnet run --project tools\ItemSeedValidator` | **170 errors across 120 partitions — identical to module 17's baseline.** Zero new findings; the three `consumables/*` partitions carry only the two pre-existing `MetaRegistryVersion*` notices every partition carries |
 | `python -m pytest tools/seedsmith` | **1608 passed, 1 skipped, 288 subtests** — this module wrote no `tools/seedsmith/**` and no `data/seed/**` file; the only Python it touched is `scripts/audit-magic-numbers.py`'s `EXEMPT_NAMES`, which seedsmith does not import |
@@ -6774,7 +6774,7 @@ from-scratch build — checked before assuming, exactly as modules 6/7/8/10/17 w
 build.** At session start: `Core` **10 failed / 6714 passed** (`Actions.ActionsPurityGuardTests`,
 `Atoms.AtomBenchGuardTests`, `Atoms.PredicateCompilerTests`, `Battle.*` ×3, `ClassSystem.*` ×3,
 `Expeditions.*`), `Guard` **201 passed / 1 failed** (the known dominance-baseline drift), `Data`
-**host-crashed** on `DemonSpeciesImportCliTests` before printing a summary. By the end, `Guard` and
+**host-crashed** on `CreatureSpeciesImportCliTests` before printing a summary. By the end, `Guard` and
 `Data` were fully green and `Core` was 9: the two allocation-budget tests
 (`AtomBenchGuardTests`, `PredicateCompilerTests.Evaluating_allocates_nothing`) had gone green and a
 third of the same kind (`ActionSelectionTests.TryDeclareAllocatesZeroBytesAcrossTwoHundredActors`,
@@ -7051,23 +7051,23 @@ downstream can answer "then spend what?". `CompiledAction.StockDemands` is that 
 | `dotnet test tests\FusionRpg.Core.Tests --filter "~ActionUsability\|~Consumable\|~DraughtManifest"` | ⭐ **113 passed / 0 failed** — measured per class: `ActionUsabilityStockSpendTests` **13** (new), `ActionUsabilityHoldsStockTests` 12 (T10's, untouched and still green), `ConsumableTests` **40** (was 39, +1 from splitting the battle/lawn refusal into an acceptance and a widening proof), `ConsumableCorpusTests` 18, `ConsumableCatalog`/`DraughtManifestTests` the rest |
 | `dotnet test tests\FusionRpg.Data.Tests --filter "~StockSpend\|~RunDraught"` | ⭐ **27 passed / 0 failed** (was 14 — +13 new in `ActionStockSpendStoreTests`, and `RunDraughtStoreTests`' 14 still green **after** `TrySpendDraughts` was refactored onto the shared decrement) |
 | `dotnet test tests\FusionRpg.Core.Tests --filter "~Tests.Items\|~Tests.Actions"` | ⭐ **1270 passed / 0 failed** — the entire surface this work touches, green |
-| `dotnet test tests\FusionRpg.Core.Tests` (full) | **7372 passed / 6 failed** — **zero** in `Items.*` or `Actions.*`. **5 of the 6 are in the pre-edit baseline list**: `ClassSystem.ProveAptitudeJsonEmitTests` ×3 (`BattleStatComposer.Configure` never ran), `Expeditions.ExpeditionResolverTests.Tier_goldens_are_locked`, and `Demons.SpeciesCatalogDiffTests` (a `demonTypeId` shape drift that appeared with commit `8a82cf0 update demon species`). The 6th is `Demons.DemonSpeciesGenExplainTests`, which ⭐ **passes 2/2 in isolation, twice** — it spawns a nested `dotnet build` that loses a lock race on `FusionRpg.Core.sourcelink.json` against its own parent run, so *which* of its two methods reports the loss varies per run. Contention, not a failure |
-| `dotnet test tests\FusionRpg.Data.Tests` (full) | **871 passed / 1 failed** — `DemonSpeciesImportCliTests`, the demon stream's own process-spawning test that module 17 host-crashed on and module 18 excluded; on a later run it hung the host outright for >10 min before printing anything. ⭐ **Minus that one class: 870 passed / 0 failed, fully green.** **Zero** in `Items.*` either way |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **7372 passed / 6 failed** — **zero** in `Items.*` or `Actions.*`. **5 of the 6 are in the pre-edit baseline list**: `ClassSystem.ProveAptitudeJsonEmitTests` ×3 (`BattleStatComposer.Configure` never ran), `Expeditions.ExpeditionResolverTests.Tier_goldens_are_locked`, and `Creatures.SpeciesCatalogDiffTests` (a `creatureTypeId` shape drift that appeared with commit `8a82cf0 update creature species`). The 6th is `Creatures.CreatureSpeciesGenExplainTests`, which ⭐ **passes 2/2 in isolation, twice** — it spawns a nested `dotnet build` that loses a lock race on `FusionRpg.Core.sourcelink.json` against its own parent run, so *which* of its two methods reports the loss varies per run. Contention, not a failure |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **871 passed / 1 failed** — `CreatureSpeciesImportCliTests`, the creature stream's own process-spawning test that module 17 host-crashed on and module 18 excluded; on a later run it hung the host outright for >10 min before printing anything. ⭐ **Minus that one class: 870 passed / 0 failed, fully green.** **Zero** in `Items.*` either way |
 | `dotnet test tests\FusionRpg.Guard.Tests` (full) | ⭐ **208 passed / 0 failed** — fully green |
 | `dotnet build src\FusionRpg.Server\FusionRpg.Server.csproj` | **0 errors** — boot still parses `consumables.v1.json` with the widened `contextsAuthored` |
 | `.\scripts\guard-single-writer.ps1` · `guard-funnel-delta.ps1` · `guard-dal.ps1` · `guard-secondary-no-unity.ps1` | all four **OK**, measured before AND after the edits. The new SQL is inside `FusionRpg.Data`; no combat field write and no HP delta is touched — the spend is an inventory row, not a stat |
 | `python scripts\audit-magic-numbers.py --summary` | **`M1 = 0`, `M2 = 0`, `M4 = 0`, exit 0**; no `consumables` or `actions` domain row |
 | `python scripts\audit-overflow.py` | **0 critical**, 62 findings, **zero** in any file this follow-up wrote or edited |
 
-⚠ **Baseline honesty.** The pre-edit Core run **hung** inside `Demons.DemonSpeciesGenExplainTests` and
+⚠ **Baseline honesty.** The pre-edit Core run **hung** inside `Creatures.CreatureSpeciesGenExplainTests` and
 never printed a summary, so its recorded evidence is its *failure list* (5 names), not a count. That is
 precisely the test that passes in isolation above — the same nested-build lock, hit harder. An earlier
-run this session, before the three demon/doc commits landed, was **7337 passed / 4 failed** with the
-two `Demons.*` rows absent, which is what pins them to `8a82cf0`. Compare against the rows above, not
+run this session, before the three creature/doc commits landed, was **7337 passed / 4 failed** with the
+two `Creatures.*` rows absent, which is what pins them to `8a82cf0`. Compare against the rows above, not
 against module 18's own snapshot.
 
 ⚠ **One transient build break from the concurrent stream, resolved by waiting, in a file this
-follow-up did not touch** — `Demons/Fusion/DemonRecipeCatalog.cs:100` called `TryFindPair` before the
+follow-up did not touch** — `Creatures/Fusion/CreatureRecipeCatalog.cs:100` called `TryFindPair` before the
 method that defines it landed (`CS0103`), which briefly made the whole solution un-buildable. The same
 pattern P3.1, P4.1 and P5.2 all recorded. Every number in the table above was re-measured **after** it
 cleared. Also killed several orphaned `testhost` processes holding `FusionRpg.Core.dll` between runs.
@@ -7349,8 +7349,8 @@ was still worth it, because it found handshake item 8 already closed (G1 below).
 | `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~ItemGrantStore"` | **14 passed / 0 failed** (new) |
 | `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items."` | **666 passed / 0 failed** — the whole item program, modules 1–18's own suites included, green under this module's `ItemPowerReads` edit |
 | `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~Items."` | **131 passed / 0 failed** — the item program's whole DAL half, green under the new `item_granted_action` schema |
-| `dotnet test tests\FusionRpg.Core.Tests` (full) | **6872 passed / 8 failed** — **zero** in `Items.*`. All 8 are `Battle.BattleStatComposerTests`, `Expeditions.ExpeditionResolverTests`, `ClassSystem.ProveAptitudeJsonEmitTests` ×3, `Demons.DemonSpeciesGenExplainTests`, and the two allocation benchmarks `Atoms.ValueSpecTests.Resolving_allocates_nothing` / `Atoms.PredicateCompilerTests.Evaluating_allocates_nothing` — ⭐ **both of which PASS when run in isolation** (2/2), so they are the order-sensitive allocation family module 18 already recorded flapping, not a regression |
-| `dotnet test tests\FusionRpg.Data.Tests` (full) | **816 passed / 2 failed** — both `DemonSpeciesImportCliTests` (the demon stream's own process-spawning tests, which host-crashed at module 17's run and were excluded at module 18's); **zero** in `Items.*` |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **6872 passed / 8 failed** — **zero** in `Items.*`. All 8 are `Battle.BattleStatComposerTests`, `Expeditions.ExpeditionResolverTests`, `ClassSystem.ProveAptitudeJsonEmitTests` ×3, `Creatures.CreatureSpeciesGenExplainTests`, and the two allocation benchmarks `Atoms.ValueSpecTests.Resolving_allocates_nothing` / `Atoms.PredicateCompilerTests.Evaluating_allocates_nothing` — ⭐ **both of which PASS when run in isolation** (2/2), so they are the order-sensitive allocation family module 18 already recorded flapping, not a regression |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **816 passed / 2 failed** — both `CreatureSpeciesImportCliTests` (the creature stream's own process-spawning tests, which host-crashed at module 17's run and were excluded at module 18's); **zero** in `Items.*` |
 | `dotnet test tests\FusionRpg.Guard.Tests` (full) | **203 passed / 1 failed** — `ClassSystemBaselineRegenTests.EveryBaselineParsesAndCarriesMeta`, reading the four `docs/research/class-system/_baseline-*.json` files `git status` shows mid-edit by the concurrent stream |
 | `dotnet run --project tools\ItemSeedValidator` | **170 errors across 120 partitions — identical to modules 17 and 18's baseline.** Zero new findings: this module authors no seed content, which is gate GA2's definition |
 | `python scripts\audit-magic-numbers.py --summary` | **`M1 = 0`, `M2 = 0`, `M4 = 0`, exit 0**; no `grants` domain in the table, and no `Items/Grants/` entry in M3's 13 |
@@ -7362,11 +7362,11 @@ was still worth it, because it found handshake item 8 already closed (G1 below).
 ⚠ **Baseline re-measured fresh at the start of this module, not inherited, and it moved during the
 build.** At session start `Core` was **9 failed / 6801 passed** (`Battle.*` ×2,
 `Expeditions.ExpeditionResolverTests`, `Actions.ActionsPurityGuardTests`,
-`Battle.Timeline.TimelinePurityGuardTests`, `Demons.DemonQualityReportTests`,
+`Battle.Timeline.TimelinePurityGuardTests`, `Creatures.CreatureQualityReportTests`,
 `ClassSystem.ProveAptitudeJsonEmitTests` ×3). By the end **four of those nine had gone green** and
 three different ones had gone red — the two allocation benchmarks above and
-`Demons.DemonSpeciesGenExplainTests`. Every failing name in the final runs was checked against
-`git status`: their sources (`World/`, `Battle/`, `Battle/Ai/`, `ClassSystem` baselines, the demon
+`Creatures.CreatureSpeciesGenExplainTests`. Every failing name in the final runs was checked against
+`git status`: their sources (`World/`, `Battle/`, `Battle/Ai/`, `ClassSystem` baselines, the creature
 species tree) are all mid-edit or brand-new in the concurrent stream and **none is touched by this
 module.**
 
@@ -7788,7 +7788,7 @@ show the attunement half of the affinity rule the spec asks for.
 |---|---|
 | `dotnet test tests\FusionRpg.Core.Tests --filter Items.ItemSurfaceTests` | **32 passed** (new) |
 | `dotnet test tests\FusionRpg.Core.Tests` (full) | **6,951 passed / 7 failed** — `ActorHub.SpecChannelClaimTests`, `Atoms.PredicateCompilerTests.Evaluating_allocates_nothing`, `Battle.BattleStatComposerTests`, 3 × `ClassSystem.ProveAptitudeJsonEmitTests`, `Expeditions.ExpeditionResolverTests.Tier_goldens_are_locked`. **Zero in `Items.*`**, and every one of the seven traces to a file the concurrent stream has mid-edit (`git status`: `Effects/Atoms/PredicateNode.cs`, `Stats/Aptitudes/RespecPolicy.cs`, `Server/ExpeditionEndpoints.cs`, `Data/Sqlite/RpgStore.Aptitudes.cs`) |
-| `dotnet test tests\FusionRpg.Data.Tests` (full) | ✅ **823 passed / 0 failed** — fully green, first time in this build. The three reds every module from P2.1 onward carried (2 × `DemonSpeciesImportCliTests`, 1 × `AtomStoreTests`) have been fixed by the streams that owned them. **This module touched no `src/FusionRpg.Data` file at all** |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | ✅ **823 passed / 0 failed** — fully green, first time in this build. The three reds every module from P2.1 onward carried (2 × `CreatureSpeciesImportCliTests`, 1 × `AtomStoreTests`) have been fixed by the streams that owned them. **This module touched no `src/FusionRpg.Data` file at all** |
 | `dotnet test tests\FusionRpg.Guard.Tests` | **203 passed / 1 failed** — `ClassSystemBaselineRegenTests.RegeneratingTwiceReproducesIdenticalPayloads`, the same concurrent class-system red P2.5 recorded |
 | `.\scripts\guard-dal.ps1` · `guard-single-writer.ps1` · `guard-secondary-no-unity.ps1` · `guard-funnel-delta.ps1` | ✅ **all four OK** — the new server file reads through `RpgStore` and writes no SQL |
 | `dotnet run --project tools\ItemSeedValidator` | **170 errors across 120 partitions — identical to modules 17, 18 and 19's baseline.** Zero new findings: this module authors no seed content |
@@ -8078,8 +8078,8 @@ asks for. ⚠ **Cross-referenced into P5.2 (module 18)** — its own `draughtBin
 |---|---|
 | `dotnet test tests\FusionRpg.Core.Tests --filter CharmCarry` | **48 passed** (new — `CharmCarryTests` 33, `CharmCarryCorpusTests` 15) |
 | `dotnet test tests\FusionRpg.Data.Tests --filter CharmCarry` | **19 passed** (new — `CharmCarryStoreTests`) |
-| `dotnet test tests\FusionRpg.Core.Tests` (full) | **7096 passed / 6 failed / 7102 total.** ⚠ Five are the session baseline's own (`ActorHub.SpecChannelClaimTests`, `Expeditions.ExpeditionResolverTests.Tier_goldens_are_locked`, 3 × `ClassSystem.ProveAptitudeJsonEmitTests`) — all the concurrent class-system / world streams'. The sixth, `Demons.DemonQualityReportTests.A_perfectly_even_split_reports_entropy_1_00`, is **build contention, not a failure**: it shells out to `dotnet run` and got *"Error writing to source link file … used by another process"* while the other stream was rebuilding `FusionRpg.Core`. **Re-run in isolation: 1 passed.** **Zero** failures in `Items.*` |
-| `dotnet test tests\FusionRpg.Data.Tests` (full) | **842 passed / 0 failed / 842 total.** ⭐ Better than the recorded baseline of 3 red — the `AtomStoreTests` and `DemonSpeciesImportCliTests` failures earlier modules carried are gone, and this run did **not** hit the intermittent host crash P3.2 recorded |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **7096 passed / 6 failed / 7102 total.** ⚠ Five are the session baseline's own (`ActorHub.SpecChannelClaimTests`, `Expeditions.ExpeditionResolverTests.Tier_goldens_are_locked`, 3 × `ClassSystem.ProveAptitudeJsonEmitTests`) — all the concurrent class-system / world streams'. The sixth, `Creatures.CreatureQualityReportTests.A_perfectly_even_split_reports_entropy_1_00`, is **build contention, not a failure**: it shells out to `dotnet run` and got *"Error writing to source link file … used by another process"* while the other stream was rebuilding `FusionRpg.Core`. **Re-run in isolation: 1 passed.** **Zero** failures in `Items.*` |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **842 passed / 0 failed / 842 total.** ⭐ Better than the recorded baseline of 3 red — the `AtomStoreTests` and `CreatureSpeciesImportCliTests` failures earlier modules carried are gone, and this run did **not** hit the intermittent host crash P3.2 recorded |
 | `dotnet test tests\FusionRpg.Guard.Tests` | **204 / 204**, up from 184 at P3.2 |
 | `dotnet run --project tools\ItemSeedValidator` | **170 errors across 120 partitions — identical to modules 17, 18, 19 and 20's baseline.** Zero new findings; the four `charms/*` partitions carry only the two pre-existing `MetaRegistryVersion{Mismatch,Behind}` notices every partition carries. This module authors **no** seed content |
 | `python scripts\audit-overflow.py` | **0 critical**, 59 findings — **zero** under `Items/Thresholds/` and zero naming a charm path |
@@ -8344,7 +8344,7 @@ correctly is not the same as its conclusion following, or the cited code still s
 | `socket-imbue` priced here, minted nowhere here | ✅ holds, **and survived module 15** | `MaterialVocabularyTests.cs:143` still asserts `Assert.False(CraftOperations.TryParse("socket-imbue", out _))` — green *after* module 15 minted `MutationOpKind.SocketImbue` (`MutationOp.cs:47`, `:152`). The two vocabularies genuinely stayed separate; this is the claim most likely to have rotted and it did not |
 | No 36th `AtomRejectionReason` | ✅ holds | `AtomRejection.cs` = exactly **35** members (counted); `AtomKindRegistryTests.cs:49` `Assert.Equal(35, reasons.Length)` green **despite that test file being mid-edit by another stream** (`MM` in `git status`) |
 | Corpus: 32 recipes, 32 resolvable, 0 legacy-shard refusals | ✅ holds, **CLOSED 2026-09-07** | `recipes/recipes.json` = **32** (30 hand-authored + `recipe.031`/`032` from the recipegen trial batch); the 7 legacy-shard cost lines (5 `elevate` + 2 `reroll-all`) were migrated to their new-ladder rung by `seedsmith.adapters.items.recipegen.migrate_legacy_shards` — zero refusals, all 32 resolvable |
-| ⏸ `rpg_demon_materials` → `rpg_materials` rename | ⚠ **still open, and the line list drifted a THIRD time** | Fresh grep 2026-09-06: **11 SQL sites in 5 files — the count holds** — but `RpgStore.cs` is now **596** (DDL; P4.1 recorded 575, itself a correction of the spec) and **806** (reset; recorded 754, itself a correction of 714, itself of the spec's 697). The other nine sites are unmoved (`Expeditions.cs` 233/253, `Fusion.cs` 395, `ShardRungs.cs` 48/71/89, `Materials.cs` 153/175/293). Also **one doc mention never counted**: `RpgStore.cs:660`. `RpgStore.cs` is mid-edit by a concurrent stream, so these numbers will drift again — the durable facts are *11 sites, 5 files, all inside `src/FusionRpg.Data/`* |
+| ⏸ `rpg_creature_materials` → `rpg_materials` rename | ⚠ **still open, and the line list drifted a THIRD time** | Fresh grep 2026-09-06: **11 SQL sites in 5 files — the count holds** — but `RpgStore.cs` is now **596** (DDL; P4.1 recorded 575, itself a correction of the spec) and **806** (reset; recorded 754, itself a correction of 714, itself of the spec's 697). The other nine sites are unmoved (`Expeditions.cs` 233/253, `Fusion.cs` 395, `ShardRungs.cs` 48/71/89, `Materials.cs` 153/175/293). Also **one doc mention never counted**: `RpgStore.cs:660`. `RpgStore.cs` is mid-edit by a concurrent stream, so these numbers will drift again — the durable facts are *11 sites, 5 files, all inside `src/FusionRpg.Data/`* |
 | Ten missing shard display rows | ✅ holds, **stale line corrected 2026-09-07** | `materials/materials.json` = **31** rows today, not 21 — all ten `shard.{rung}` ids (`chaff`..`almanac`) ship alongside the four retained legacy display rows (14 shard entries total). This table row had not been refreshed since an earlier fix landed (see this file's own 4906-4907 note, `The_shipped_materials_display_corpus_now_carries_every_issuable_id`) |
 | ⏸ Tier-axis pricing; no `forge-gem`/`imbue` recipe; sixth spend class ask-first | ✅ all still true | No shipped recipe authors a `qty_curve_id`; `MaterialClass` still 5, `CatalystVerbs` still 3 |
 | ⏸ Step 5 `perform` not wired to a production mutation | ⏸→✅ **CLOSED later the same day** | Was true and measured when this pass ran: `TrySpendRecipe` had zero production callers. The executor landed 2026-09-06 — `ItemWorkbench.Upcycle`/`.Enhance`/`.SocketAdd`/`.SocketInsert`/`.SocketImbue` all call it through `RpgStore.TrySpendAndApply`. See P4.1 |
@@ -8659,7 +8659,7 @@ both already record. Not a failure, and no other session's process was killed to
 | ⏸ The generative authoring pass is not run | ✅ still true, untouched | Out of scope for this pass by instruction; nothing here changes it |
 | ⏸ P0.2 / P0.3 gate the species half | ✅ still true | `held 31 (basis=name)`, `complete: false` |
 | ⏸ `naming.v1.json` v3 is an ask-first on a frozen registry | ✅ **exact, all four moving parts** | File is `registryVersion 4, frozen: true`; `NamespaceAllocation.cs:~220` really does `Regex.Matches(note, @"charm\.res-[a-z]+-(\d+)")` and splice the raw digit string — **no `int.Parse` anywhere in the file** — and the note's worked examples are still unpadded (`2`, `3`) |
-| ⏸ `demon.*` themeKeys do not resolve in `ItemSeedValidator` | ✅ still true | `RegistrySet.ThemeIds` is still `theme.*` ∪ `build.*` |
+| ⏸ `creature.*` themeKeys do not resolve in `ItemSeedValidator` | ✅ still true | `RegistrySet.ThemeIds` is still `theme.*` ∪ `build.*` |
 | ⏸ `CellOccupancy` promotion, X4/X7, live transport, `baseType` | ✅ still true | `PROMOTION_TRIGGER` asserted; X4 still specced-and-unbuilt; X7 see finding 2; no `llm_caller` import on the replay path |
 
 ### Checkpoint 3 — the box re-read
@@ -9154,7 +9154,7 @@ entirely, and modules 6/8's eight phantom-implicit-family bullets (a concurrent 
 | `frame-lean.v1.json`: ten `(ladder, frame)` blocks, eight authored, `standard` null | ✅ | 5 ladders × 2 frames = 10 declared, `standard` pair explicitly `null`; every humanoid block `burst`, every plant `sustain`; channels are `maxHp`/`atk`/`combat.dodge.omni`/`combat.crit.damage.omni`/`combat.crit.resist.damage.omni` — no `plating`/`carapace` |
 | Channel-split dominance lint green for all twelve hybrid-core roles | ✅ | `BaseTypeCorpusTests` re-run green this pass |
 | `item_category` ten rows, six `declareOnly` | ✅ | Counted: 10 rows, 6 `declareOnly` |
-| ⏸ `ImplicitFlavourDrift` warning not wired | ✅ **blocker current** | Zero occurrences of `ImplicitFlavourDrift` in any `.cs`; it exists only in `spec-base-types.md` and this file |
+| ✅ `ImplicitFlavourDrift` warning **wired** (2026-09-12) | ✅ **resolved** | `FrameDirectionCheck.EmitFlavourDriftWarnings` reports 312 rows; the re-flavour pass itself stays the authoring fleet's per `spec-base-types.md` |
 | ⏸ `ContentValidation.cs:73`'s null-ceiling skip is module 9's | ✅ **blocker current, and this bullet's line number is the correct one** | `:73` is `if (ceilingFor(container.Rarity!) is not { } ceiling) continue;`. Checkpoint 2, `item-plan.md`'s risk row and `spec-rarity-bands.md:379` all say `:71`, which is now the `foreach` brace |
 
 ### Module 8 `affix-legality` (P2.3) — **two real defects found and fixed**
@@ -9272,8 +9272,8 @@ input" turned out to be a read rather than a choice. The two fixtures are still 
 |---|---|
 | `dotnet test tests\FusionRpg.Core.Tests --filter RarityPowerCeilingTests` | **25 / 25 passed** (new) |
 | `dotnet test tests\FusionRpg.Data.Tests --filter RarityPowerBudgetStoreTests` | **6 / 6 passed** (new) — includes the red-first `Evaluated` 0 → 1 pair |
-| `dotnet test tests\FusionRpg.Core.Tests` (full) | **12,192 passed / 26 failed.** ⛔ None is this pass's: the two new files are *additive* (no existing Core file was edited), no failure names `RarityPowerCeiling`, and the set is live concurrent-stream churn — `ContentValidationTests`/`TraitMigrationParityTests`/`KindValueGuardTests`/`ContentScaleTests` all fail on the same root cause (`data/seed/atoms/vocabulary.json: UnknownKind — kind ''`, a generated vocab file with no `kind` sitting inside a scanned seed folder), plus `ClassSystem.ProveAptitudeJsonEmit` ×3, `Demons.*` ×4, `ExpeditionResolverTests.Tier_goldens_are_locked` and `ItemCardTests`. The `RoleFamilyTableTests` trio that failed in an earlier run of this same session had *stopped* failing by the second run — the corpus is being edited live |
-| `dotnet test tests\FusionRpg.Data.Tests` (full) | ✅ **1,037 / 1,037 passed, 0 failed** — the 3 failures the previous pass recorded (2 `DemonSpeciesImportCliTests`, 1 `AtomStoreTests.An_unknown_trigger_is_rejected`) are gone |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **12,192 passed / 26 failed.** ⛔ None is this pass's: the two new files are *additive* (no existing Core file was edited), no failure names `RarityPowerCeiling`, and the set is live concurrent-stream churn — `ContentValidationTests`/`TraitMigrationParityTests`/`KindValueGuardTests`/`ContentScaleTests` all fail on the same root cause (`data/seed/atoms/vocabulary.json: UnknownKind — kind ''`, a generated vocab file with no `kind` sitting inside a scanned seed folder), plus `ClassSystem.ProveAptitudeJsonEmit` ×3, `Creatures.*` ×4, `ExpeditionResolverTests.Tier_goldens_are_locked` and `ItemCardTests`. The `RoleFamilyTableTests` trio that failed in an earlier run of this same session had *stopped* failing by the second run — the corpus is being edited live |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | ✅ **1,037 / 1,037 passed, 0 failed** — the 3 failures the previous pass recorded (2 `CreatureSpeciesImportCliTests`, 1 `AtomStoreTests.An_unknown_trigger_is_rejected`) are gone |
 | `dotnet build src\FusionRpg.Server` | succeeds — the new boot call compiles |
 | `dotnet run --project tools\ItemSeedValidator` | **178 errors, unchanged** — identical to the previous pass's baseline; no seed content was touched |
 | `guard-single-writer` · `guard-secondary-no-unity` · `guard-funnel-delta` · `guard-dal` | **all four OK** |
@@ -9366,11 +9366,11 @@ world.
 
 | Requirement | Status | Evidence verified fresh |
 |---|---|---|
-| LLM stage emitting `humanoid`/`plant`/`hybrid` | ⏸ **Correctly open** | No frame stage: `anchor/prompts.py` declares 8 stage ids, none frame; no `frame*` module under `adapters/demons/`; `corpus/__init__.py:2` says outright *"no frame … appears anywhere in this package"* |
-| *"every species carries a frame"* | ⏸ Open, **0 of 840** | Counted across all 502 family files: `frame` appears on **zero** anchors. `DemonSpeciesDef` has **no `Frame` member** (`DemonSpeciesCatalog.cs:9-34`) |
-| `Side`'s faction/body conflation | ⏸ Open, and real | `DemonSpeciesCatalog.cs:11-12` — `Side` documented as *"portrait/**body** source"*, one field carrying both meanings, exactly as claimed |
-| *"Frame publishes independently of theme status"* | ⛔ **NEW DEFECT — the citation is right and the conclusion cannot be reached** | `spec-demon-themes.md` §2.4/§7 are theme-scoped exactly as claimed. **But** `seedsmith-map.md:252` and `item-map.md:61` both publish frame *through the theme registry*, whose §2.2 schema has **no `frame` key** and which gives a `basis="blocked"` demon **no row at all**. **15 of 840 anchors are `blocked` today.** Not ours to resolve — **filed** as `seedsmith-map.md`, "Filed by the item program (2026-09-06)"; `item-map.md` §3.1's X1 row now carries the same warning |
-| The four worked examples | ⚠ **Corrected — one cannot exist** | Exact ids in the compiled 84-species `DemonSpeciesCatalog.Generated.cs`, but the acceptance measures the **840-anchor** corpus: three match only case-insensitively (`PeaShooterZombie`, `CherryNutZombie`, `BucketNutZombie`) and **`ironpeazombie` has no anchor at all** — it is one of P0.2's own 16 orphans. A run could never emit a frame for it |
+| LLM stage emitting `humanoid`/`plant`/`hybrid` | ⏸ **Correctly open** | No frame stage: `anchor/prompts.py` declares 8 stage ids, none frame; no `frame*` module under `adapters/creatures/`; `corpus/__init__.py:2` says outright *"no frame … appears anywhere in this package"* |
+| *"every species carries a frame"* | ⏸ Open, **0 of 840** | Counted across all 502 family files: `frame` appears on **zero** anchors. `CreatureSpeciesDef` has **no `Frame` member** (`CreatureSpeciesCatalog.cs:9-34`) |
+| `Side`'s faction/body conflation | ⏸ Open, and real | `CreatureSpeciesCatalog.cs:11-12` — `Side` documented as *"portrait/**body** source"*, one field carrying both meanings, exactly as claimed |
+| *"Frame publishes independently of theme status"* | ⛔ **NEW DEFECT — the citation is right and the conclusion cannot be reached** | `spec-creature-themes.md` §2.4/§7 are theme-scoped exactly as claimed. **But** `seedsmith-map.md:252` and `item-map.md:61` both publish frame *through the theme registry*, whose §2.2 schema has **no `frame` key** and which gives a `basis="blocked"` creature **no row at all**. **15 of 840 anchors are `blocked` today.** Not ours to resolve — **filed** as `seedsmith-map.md`, "Filed by the item program (2026-09-06)"; `item-map.md` §3.1's X1 row now carries the same warning |
+| The four worked examples | ⚠ **Corrected — one cannot exist** | Exact ids in the compiled 84-species `CreatureSpeciesCatalog.Generated.cs`, but the acceptance measures the **840-anchor** corpus: three match only case-insensitively (`PeaShooterZombie`, `CherryNutZombie`, `BucketNutZombie`) and **`ironpeazombie` has no anchor at all** — it is one of P0.2's own 16 orphans. A run could never emit a frame for it |
 | Downstream consumers stay inert | ✅ Confirmed, stronger than claimed | `EquipGate.cs:80-85`'s frame arm is structurally unreachable while `actor.Frame` is null, and **no production code constructs a `SpecimenActor` at all** — every construction site is a test. `LootPipeline.cs:318-326` falls back to a uniform draw |
 | X1's status in the owning program | ⚠ Recorded, unchanged | `seedsmith-map.md` §3c-bis says *"**Proposed, not built**"*; `tasks/seedsmith-todo.md` and `-plan.md` carry **no `frame-classify` task at all**. (Their `:2001` "X1" is an unrelated id collision.) Neither accepted nor declined since 2026-09-03 |
 
@@ -9418,7 +9418,7 @@ world.
 | *"18 findings"* from the gate | ⛔ **Wrong unit — fixed in three files** | Measured live: **30** `Linkage/SetCompletability` findings over **18 distinct** sets (10 sets claim two off-core roles, `set.verdant-graft-005` claims four); exit 1; suite `61 gap, 80 note, 23 not_measured`. 18 is the **set** count. ⭐ Checkpoint 0's own table already said *"30 GAP findings over exactly those 18"* — **this file disagreed with itself for two days.** Corrected here, in `item-plan.md` and in `spec-slot-roles.md:274` |
 | CI line citation | ⚠ **Todo right, plan wrong — plan fixed** | Gate command is `ci.yml:231` (step name `:211`). `item-plan.md`'s `ci.yml:220` is prose inside the step's comment block |
 | *"`item_role_frame` — schema, and **fully populated**"* | ⛔ **NEW — unstated wiring gap** | `SeedRoles` (`RpgStore.Items.cs:187`) really does write 48 rows from the registry with no transcribed literals — **and it has zero production callers.** Not in `Init()`, not in any importer; its only callers are in `SlotRolesTests.cs`. **Both tables are empty in a deployed database.** Inert rather than broken (no production reader either), and deliberately **not wired blind**: `SeedRoles` takes the registry JSON, not a path, so wiring it is a runtime-data-location decision, not a mechanical call. Recorded in P1.3 |
-| X1 species→frame lookup deferral | ✅ Still correctly open | 0 of 840 anchors carry a frame; `DemonSpeciesDef` has no `Frame` member |
+| X1 species→frame lookup deferral | ✅ Still correctly open | 0 of 840 anchors carry a frame; `CreatureSpeciesDef` has no `Frame` member |
 | Spec test coverage | ⚠ Two unaccounted | Of `spec-slot-roles.md:314-331`'s 16, five are absent; three are covered elsewhere or fall under X1, but **`no_affix_family_is_orphaned_by_the_three_drops`** and **`the_generator_never_emits_a_standard_base_type`** are unaccounted — the spec calls the latter *"D14's actual instruction — the half that is true and testable today"* |
 
 ### Module 4 — `equip-assign`
@@ -9458,7 +9458,7 @@ world.
 | `seedsmith check --adapter items --gate` | exit 1, `61 gap, 80 note, 23 not_measured` — the D30-anticipated 30/18, unchanged |
 
 ⚠ **Two environment effects worth recording, neither a regression.** A wedged `testhost` from another
-session (PID 24756 — **0.2 s CPU across a 15-minute sample**, the known `DemonSpeciesImportCliTests`
+session (PID 24756 — **0.2 s CPU across a 15-minute sample**, the known `CreatureSpeciesImportCliTests`
 hang) held the Data test output for 45 minutes, and a separate CS2012 compiler-lock race hit
 Core.Tests. Neither process was killed; the Data suites ran through an **in-repo**
 `-p:BaseOutputPath=bin-proof\` (removed afterwards) and Core was retried. ⛔ The first attempt put that
@@ -9514,7 +9514,7 @@ points at evidence already recorded, above, by name.
 | 2 `armoury` | ✅ built, verified; **the loadout library's missing half built 2026-09-06** (`LoadoutReport`, `GetLoadoutEntriesValidated`, `FindAssignmentHolders`, 15 tests) | P1.2 + Final-proof/Phase 0+1 |
 | 3 `slot-roles` | ✅ built, verified. ⚠ named, not fixed: `SeedRoles` has zero production callers — module 3's own tables are empty in a deployed DB | P1.3 + Final-proof/Phase 0+1 |
 | 4 `equip-assign` | ✅ built, verified; relic-migration mutual-deferral closed 2026-09-06. ⭐ **The equip ENDPOINT landed later the same day (P1.4-E)** — `POST /api/items/equip` + `/unequip` + `GET /api/items/assignments/{specimenId}`, so `SaveAssignment`/`RemoveAssignment` have a production caller and the web armoury tab's `Equip` is real; proven against a published server with the row read back by an independent OS process. ✅ **R1 fixed** — the older relic route silently overwriting a live item assignment (and, found in the same fix, an even worse sibling: `ClearUniqueEquipmentSlot`'s unqualified `DELETE` would have unequipped the item outright). Both now refuse `409 slot.claimed_by_item`, proven live (`PUT`/`DELETE` on a claimed role → 409, row byte-unchanged; a free role still 200). ✅ **2026-09-07 — the "what remains" gap CLOSED**: `RpgStore.MaterializeRolledEquipRuntime` (new) calls `ApplyEquipProjection`/`ApplyEquippedGrants` from `WebMatchService.BuildSquad` — squad build IS this module's own "deploy" moment (`ssot-inventory.md:132` names it as one of exactly two triggers). ⚠ Re-investigated rather than accepted as "the same Injector-side gap Checkpoint 1 names" (that framing conflated two unrelated mechanisms — see Checkpoint 1's own corrected row): this was a plain missing-caller wiring gap, not environment-blocked, and needed no game install. Two more real defects found and fixed in the process: `EquippedActionIdsFor`'s grant-read scope had been moved `Entity`→`UniqueActor` by a same-day concurrent fix (for durable unlock-ladder grants) which would have silently orphaned item-granted-action writes — fixed by merging both scopes; and `ApplyEquippedGrants` alone cannot detect "this item was unequipped since the last call" (it only withdraws sources still present in the CURRENT assignment list) — added the missing diff-against-stored-state withdrawal, proven by a real equip→battle→unequip→battle-again round trip. Red-first per new behavior; full suites after: Data **1119/1** (1 pre-existing `ItemUniqueStoreTests` failure, unrelated), Server **289/25** (all 25 pre-existing, unrelated `World*`/`Aptitude`/`ContentBootStartupWiring`/`DistrictAssault` — a same-day concurrent world-stage stream, confirmed via TRX, zero new) | P1.4 + P1.4-R + P1.4-E + P1.4-G (2026-09-07) |
-| 5 `equip-runtime` | ✅ built, verified; geared-corner-run crash found and fixed 2026-09-06 (a same-day concurrent commit broke it; termination/dominance evidence reproduces exactly after the fix). ✅ **`ApplyEquipProjection` now has a real production caller (2026-09-07, see module 4's own row)** — the module's own payoff (an equipped rolled item's `stat.derived` atoms reach `BattleStatComposer` through the already-shipped `EquipAtomSource` resolver) is proven live end to end. ✅ **Battle-half `stat.modify` equip wiring built and proven 2026-09-07 (P1.5-B)** — `ActionContainerEffectResolverFactory.BuildEquip` + `BattleRunState.BindEquip`, a real `stat.modify` affix atom reaches a real `BattleEngine.Resolve`'s Bag; found and fixed a real defect along the way (`WebMatchService.BuildSquad` never set `BattleActorSetup.SpecimenId`, silently blocking both `stat.derived` AND `stat.modify` equip paths). ✅ **Lawn-half wiring built and proven 2026-09-07 (P1.5-L)** — see this file's own P1.5-L box for the full trace: `ItemEquipService.Equip`/`Unequip` (the real `POST /api/items/equip`/`/unequip` write surface) never called `MaterializeRolledEquipRuntime`, so a Lawn-bound specimen (never sent into a battle) had its equipped rolled items' `effect_binding` rows materialized NEVER, regardless of what the atom push mechanism itself did. Fixed: both endpoints now call `MaterializeRolledEquipRuntime` then re-push via `UniqueActorService.PushAtomUnionAsync` (made public) on every successful equip/unequip. Proven red-first (`RolledItemEquipRuntimeTests`, 4/4). ⚠ **Correction, 2026-09-07 (twice, same day):** first pass concluded the single open item this row named — "Injector-side `BindGrant`, environment-blocked" — was a misattribution, since `BindGrant`'s EXISTING wired caller (`UniqueLoadoutSpec.BindToPtr`) is for an unrelated mechanism (a demon specimen's own bound-loadout stat mods, never item equip). That was half right and half wrong: the EXISTING caller genuinely is unrelated, but the underlying need the original note pointed at was real — just solvable **server-side**, not injector-side. ✅ **Found live, same day, on the actual owner-authorized live-run attempt**: equipping a real item produced no stat change; the injector's own log named the cause verbatim (`"ERR debug.effect.grant: instance: forbidden in Hot; bind to entity:{ptr}"`). Root cause: `AtomPushService.Build` stamps every UniqueActor-scoped grant with a durable `instance:{id}` key and never rewrote it to `entity:{ptr}` — a gap the whole compiled-push mechanism has carried since T6.1 (2026-09-06), affecting every UniqueActor-scoped grant this service has EVER sent, not just equip. **Fixed inside `Build` itself**, using the specimen's own durably-tracked `LastPtr` — no injector build needed after all, closing the "cannot be proven by anything CI runs" framing several pre-existing tests had encoded. 7 pre-existing tests that had pinned the broken `instance:` shape as correct were updated; 2 new tests added (`AtomPushServiceInstanceOwnerRewriteTests`). Redeployed live and re-confirmed: the grant is now accepted, entity-scoped, and fires (`ok:true`, correct target found and reapplied) — a real, dramatic improvement from total refusal. **What remains genuinely, narrowly open**: the final PvZ-visible stat number for the specific test specimen used (a SunFlower) stayed unchanged, most likely because SunFlower has no live-exercised attack stat for a non-attacking support plant, not a further bug — a follow-up with an attacking plant type or the `maxHp` channel is the named next step. Full detail: this file's own P1.5-L box | P1.5 + P1.5-B + P1.5-L + Final-proof/Module 5 + Checkpoint 1 |
+| 5 `equip-runtime` | ✅ built, verified; geared-corner-run crash found and fixed 2026-09-06 (a same-day concurrent commit broke it; termination/dominance evidence reproduces exactly after the fix). ✅ **`ApplyEquipProjection` now has a real production caller (2026-09-07, see module 4's own row)** — the module's own payoff (an equipped rolled item's `stat.derived` atoms reach `BattleStatComposer` through the already-shipped `EquipAtomSource` resolver) is proven live end to end. ✅ **Battle-half `stat.modify` equip wiring built and proven 2026-09-07 (P1.5-B)** — `ActionContainerEffectResolverFactory.BuildEquip` + `BattleRunState.BindEquip`, a real `stat.modify` affix atom reaches a real `BattleEngine.Resolve`'s Bag; found and fixed a real defect along the way (`WebMatchService.BuildSquad` never set `BattleActorSetup.SpecimenId`, silently blocking both `stat.derived` AND `stat.modify` equip paths). ✅ **Lawn-half wiring built and proven 2026-09-07 (P1.5-L)** — see this file's own P1.5-L box for the full trace: `ItemEquipService.Equip`/`Unequip` (the real `POST /api/items/equip`/`/unequip` write surface) never called `MaterializeRolledEquipRuntime`, so a Lawn-bound specimen (never sent into a battle) had its equipped rolled items' `effect_binding` rows materialized NEVER, regardless of what the atom push mechanism itself did. Fixed: both endpoints now call `MaterializeRolledEquipRuntime` then re-push via `UniqueActorService.PushAtomUnionAsync` (made public) on every successful equip/unequip. Proven red-first (`RolledItemEquipRuntimeTests`, 4/4). ⚠ **Correction, 2026-09-07 (twice, same day):** first pass concluded the single open item this row named — "Injector-side `BindGrant`, environment-blocked" — was a misattribution, since `BindGrant`'s EXISTING wired caller (`UniqueLoadoutSpec.BindToPtr`) is for an unrelated mechanism (a creature specimen's own bound-loadout stat mods, never item equip). That was half right and half wrong: the EXISTING caller genuinely is unrelated, but the underlying need the original note pointed at was real — just solvable **server-side**, not injector-side. ✅ **Found live, same day, on the actual owner-authorized live-run attempt**: equipping a real item produced no stat change; the injector's own log named the cause verbatim (`"ERR debug.effect.grant: instance: forbidden in Hot; bind to entity:{ptr}"`). Root cause: `AtomPushService.Build` stamps every UniqueActor-scoped grant with a durable `instance:{id}` key and never rewrote it to `entity:{ptr}` — a gap the whole compiled-push mechanism has carried since T6.1 (2026-09-06), affecting every UniqueActor-scoped grant this service has EVER sent, not just equip. **Fixed inside `Build` itself**, using the specimen's own durably-tracked `LastPtr` — no injector build needed after all, closing the "cannot be proven by anything CI runs" framing several pre-existing tests had encoded. 7 pre-existing tests that had pinned the broken `instance:` shape as correct were updated; 2 new tests added (`AtomPushServiceInstanceOwnerRewriteTests`). Redeployed live and re-confirmed: the grant is now accepted, entity-scoped, and fires (`ok:true`, correct target found and reapplied) — a real, dramatic improvement from total refusal. **What remains genuinely, narrowly open**: the final PvZ-visible stat number for the specific test specimen used (a SunFlower) stayed unchanged, most likely because SunFlower has no live-exercised attack stat for a non-attacking support plant, not a further bug — a follow-up with an attacking plant type or the `maxHp` channel is the named next step. Full detail: this file's own P1.5-L box | P1.5 + P1.5-B + P1.5-L + Final-proof/Module 5 + Checkpoint 1 |
 | 6 `base-types` | ✅ built, verified, re-verified 2026-09-06 | P2.2 + Final-proof/Phase 2 |
 | 7 `rarity-bands` | ✅ built, verified, re-verified 2026-09-06 in full | P2.1 + Final-proof/Phase 2 |
 | 8 `affix-legality` | ✅ built, verified; **a real validation blind spot found and closed 2026-09-06** (`RoleFamilyCheck` never checked corpus→file; today's new `g-punisher.json` families were silently violating D3's role-relocation rule) | P2.3 + Final-proof/Phase 2 |
@@ -9578,7 +9578,7 @@ reproduced directly, that would hit any real deploy running `--validate` today.
 2. Injector-side `BindGrant`'s own live-process verification — needs a real PVZ Fusion game install
    (Checkpoint 1). ⚠ **Corrected 2026-09-07**: this item was previously conflated with module 4/5's
    equip→combat wiring gap (both cited under Checkpoint 1). They are unrelated mechanisms — `BindGrant`
-   is a demon specimen's own bound-loadout stat mods, already wired and live; module 4/5's gap was a
+   is a creature specimen's own bound-loadout stat mods, already wired and live; module 4/5's gap was a
    plain missing-caller wiring defect, now closed (see module 4/5's own rows), needed no game install
    at all. What remains here is narrowly `BindGrant`'s own behavior, unrelated to item equip.
 3. Three cross-program asks (X7 container kinds, D28/E43 family tags, X5 content ladder) — filed
@@ -9751,7 +9751,7 @@ comparison — item vs item — is in scope; player-progress rationing is not.
 ## Test baseline before the item build — measured 2026-09-04, re-measured 2026-09-06 at closure
 
 **Run before a single item line was written, so item breakage stays distinguishable from inherited
-breakage.** ⛔ **All red tests belong to other streams and are theirs to fix** — demon/seedsmith,
+breakage.** ⛔ **All red tests belong to other streams and are theirs to fix** — creature/seedsmith,
 world-stage, class-system, battle-tempo and party-dungeon (`Delve/`) are all actively building in this
 tree across the life of this build. **Do not fix them from the item program**, and do not read them as
 an item regression.
@@ -9761,19 +9761,19 @@ an item regression.
 | `FusionRpg.Guard.Tests` | ✅ **162 / 162** | ✅ **208 / 208** |
 | `tools/seedsmith` (pytest) | ✅ **1489 passed**, 68 subtests | ✅ **1608+ passed** (P3.3/P4.4's own re-measurements) |
 | `FusionRpg.Core.Tests` | ⛔ **14 failed**, 5315 passed | ⛔ **7 failed**, 7371 passed — all `ClassSystem.*`, none in `Items.*` |
-| `FusionRpg.Data.Tests` | ⛔ **2 failed**, 637 passed | ⛔ **1 flaky** (`DemonSpeciesImportCliTests`, a killed CLI subprocess — passes standalone), 870 passed excluding it |
+| `FusionRpg.Data.Tests` | ⛔ **2 failed**, 637 passed | ⛔ **1 flaky** (`CreatureSpeciesImportCliTests`, a killed CLI subprocess — passes standalone), 870 passed excluding it |
 
 ⭐ **The bar moved because the *other* streams kept building for two more days, not because item work
 regressed anything** — every module section above re-measured its own delta against the baseline
 current at build time and found zero attributable failures, and the post-completion rigor pass
 (above) re-confirmed the same at the very end, against the final numbers in this table.
 
-**Cause 1 — 14 tests: the species corpus was regenerated under a new id scheme (demon/seedsmith).**
-Uncommitted under `data/seed/demons/species/`: **186 deletions, 289 additions, 77 modifications**.
+**Cause 1 — 14 tests: the species corpus was regenerated under a new id scheme (creature/seedsmith).**
+Uncommitted under `data/seed/creatures/species/`: **186 deletions, 289 additions, 77 modifications**.
 Tests read hard-coded anchors (`sunflower.json`, `peashooter.json`) that no longer exist.
 ✅ **Verified not data loss** — sunflower's content survives as `solar-pulse-legume.json`; the generator
 moved to descriptive ids. Affected: `SpeciesExpanderTests` (7), `SpeciesCatalogDiffTests` (5),
-`DemonSpeciesImportCliTests` (2).
+`CreatureSpeciesImportCliTests` (2).
 
 **Cause 2 — 2 tests: `loamUnits` is two-thirds built (world-stage).** `UnitClassContractParityTests`
 exists to forbid the TS union and the C# enum drifting apart, and it caught the C# half never landing:
@@ -9801,7 +9801,7 @@ not against zero. ✅ `Guard` and `seedsmith` are clean, so those two *are* zero
 | The 20 `standard` orphan entries | **retire, don't delete** — `enabled: false`, id retired forever | P1.3 |
 | 25 legacy socket-words | **regenerate**, not retain alongside the 102 | P4.4 |
 | D22's affinity bonus | keys on **each ingredient gem's own element** — no 12→6 mapping invented | P4.3 |
-| `rpg_demon_materials` → `rpg_materials` | **proceeds** — ⚠ nine SQL sites across five files | P4.1 |
+| `rpg_creature_materials` → `rpg_materials` | **proceeds** — ⚠ nine SQL sites across five files | P4.1 |
 
 ## Carried, not scheduled
 
@@ -9810,7 +9810,7 @@ not against zero. ✅ `Guard` and `seedsmith` are clean, so those two *are* zero
 - **D8** — a 13th atom kind or `aptitude.*` channel family, and a fifth `AllocationScope`
   (effect-atom + class-system)
 - **D19's other half** — I11 split in two: the **equip gate stays here** (P1.4's `Admits` /
-  `Projectable`), and **per-species aptitude vectors go to the demon program**. Only the gate is
+  `Projectable`), and **per-species aptitude vectors go to the creature program**. Only the gate is
   scheduled above; the vectors are not ours and are not tracked here
 - **D4** — *"v1 content reaches ilvl 32"* is retired as an item decision (§2h.5). D29 made the ladder
   unbounded and tier saturating, so it became a request that *content* exist at level 32 — which is

@@ -1,0 +1,15 @@
+{
+  "_meta": {
+    "assemblyGateRejectCount": 0,
+    "candidateSetHash": "45f5b2dd5bfe10e4874f94328a623bf7069c7bf353edc4d3838cc23fb28c8881",
+    "differentiatorNoneRate": 0.0,
+    "disagreementRate": {},
+    "partition": "rounds",
+    "preflight": "skipped",
+    "restrictionUncheckedCount": 0,
+    "round": 2000
+  },
+  "entries": [],
+  "kind": "action-review",
+  "schemaVersion": 1
+}

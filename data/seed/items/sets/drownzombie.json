@@ -25,7 +25,7 @@
       "id": "set.drownzombie-001",
       "nameKey": "set.trident-athlete",
       "name": "Trident Athlete",
-      "themeKey": "demon.drownzombie",
+      "themeKey": "creature.drownzombie",
       "members": [
         {
           "role": "armament-primary",

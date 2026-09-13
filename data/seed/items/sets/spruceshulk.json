@@ -25,7 +25,7 @@
       "id": "set.spruceshulk-001",
       "nameKey": "set.steel-spruce-volley",
       "name": "Steel-Spruce Volley",
-      "themeKey": "demon.spruceshulk",
+      "themeKey": "creature.spruceshulk",
       "members": [
         {
           "role": "armament-primary",

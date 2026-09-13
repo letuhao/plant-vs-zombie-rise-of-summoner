@@ -25,7 +25,7 @@
       "id": "set.ultimateimpking-001",
       "nameKey": "set.worldly-imp-s-regalia",
       "name": "Worldly Imp's Regalia",
-      "themeKey": "demon.ultimateimpking",
+      "themeKey": "creature.ultimateimpking",
       "members": [
         {
           "role": "armament-primary",

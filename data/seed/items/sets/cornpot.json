@@ -25,7 +25,7 @@
       "id": "set.cornpot-001",
       "nameKey": "set.molten-shell",
       "name": "Molten Shell",
-      "themeKey": "demon.cornpot",
+      "themeKey": "creature.cornpot",
       "members": [
         {
           "role": "armament-primary",

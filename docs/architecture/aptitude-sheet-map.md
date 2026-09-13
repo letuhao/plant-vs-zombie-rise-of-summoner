@@ -13,9 +13,9 @@ allocate-chrome + build presets (ideal **D6–D14** + **E1–E8**).
 **Species write economy (do not fork):** [species-build/spec-allocation-surface.md](species-build/spec-allocation-surface.md) ·
 [species-build/spec-species-respec.md](species-build/spec-species-respec.md)  
 **Species favour plan (read-only seed):** `SpeciesBuildPlanCatalog.SharesFor` ·
-`data/generated/demons/_species-build-plan.json` — **Built**; do not re-author  
+`data/generated/creatures/_species-build-plan.json` — **Built**; do not re-author  
 **Plans (after `/plan`):** `tasks/aptitude-sheet-plan.md` · `tasks/aptitude-sheet-todo.md`  
-**DESIGN-GATE (this session):** Player menus · UI · Class system / aptitudes · Demon progression source ·
+**DESIGN-GATE (this session):** Player menus · UI · Class system / aptitudes · Creature progression source ·
 species-build allocation · ActorHub (consume / existing AptitudeSubsystem — no private fold) ·
 tunables / soft caps (E8)
 
@@ -54,9 +54,9 @@ tunables / soft caps (E8)
 
 Kill three product lies **and** finish allocate chrome + aptitude build presets:
 
-1. UniqueActor Aptitudes edits **UniqueDemon** (not commander-by-default).
+1. UniqueActor Aptitudes edits **UniqueCreature** (not commander-by-default).
 2. Empire species build shares the **same console** (Mode B under Pacts/`AptitudesLayer`).
-3. UniqueDemon spend **applies on lawn** for Bound specimens (Injector wire).
+3. UniqueCreature spend **applies on lawn** for Bound specimens (Injector wire).
 4. Remaining points + Confirm/Cancel **in console** (D6/D7) — not footer-only.
 5. Auto-assign fills **draft** only (D8); Activate is the commit verb from presets (E1).
 6. Own **build-preset** library + nested console + donut + dual abs/‰ + species favour **seed**
@@ -70,12 +70,12 @@ Commander Mode C stays legal on the commander sheet and Pacts — never as Uniqu
 
 | Concern | Owner | Must not |
 |---|---|---|
-| UniqueDemon GET/POST + budget projection | `unique-allocate` | FE invent shares; EffectiveUnique |
+| UniqueCreature GET/POST + budget projection | `unique-allocate` | FE invent shares; EffectiveUnique |
 | Scoped `AptitudesUpdated` payload + FE nested `species` type honesty | `aptitudes-live-bus` | Thin `{ playerId }` only forever; omit commander GET `species` from FE types |
-| Injector Bound UniqueDemon apply | `unique-lawn-wire` | Claim Hub/battle as lawn proof; extend commander GET with `uniques` map |
+| Injector Bound UniqueCreature apply | `unique-lawn-wire` | Claim Hub/battle as lawn proof; extend commander GET with `uniques` map |
 | Species write / price / revert | Existing species-build endpoints | Reopen free `/species/allocate` |
 | Mode B host collapse | `species-host` | Forever-parallel `SpeciesBuildPanel` god UI; ConfirmDialog for Confirm |
-| Role-keyed ActorSheet host | `host-role-gate` | UniqueDemon on commander sheet |
+| Role-keyed ActorSheet host | `host-role-gate` | UniqueCreature on commander sheet |
 | Recipe + fold + leftover/decision/auto bus | `aptitudes-surface-vm` · pieces | God TSX / footer-only leftover |
 | Auto-assign draft rules | `aptitude-auto-assign` | Silent POST; Hub favour fill; FE `SharesFor` |
 | Preset CRUD + active + materialize + **transactional Activate** | `aptitude-preset-api` | FE-localStorage; auto level-up respec; split active-then-allocate client |
@@ -85,7 +85,7 @@ Commander Mode C stays legal on the commander sheet and Pacts — never as Uniqu
 
 **ActorHub:** Aptitude magnitudes continue to **contribute** via existing `AptitudeSubsystem` /
 Hub `aptitudeAllocation` delegate. This program does **not** invent a private fold. Favour seed
-never auto-fills Hub UniqueDemon (**E3**).
+never auto-fills Hub UniqueCreature (**E3**).
 
 **Magnitudes:** aptitude point shares, budgets, abs constraints are **`long`**; overspend **throws /
 409**, never clamps (PS-8). Soft max presets + per-row abs max are **tunable** soft constraints (**E8**),
@@ -97,9 +97,9 @@ not global progression hard ceilings.
 
 | Module id | Responsibility | Depends on | Spec |
 |---|---|---|---|
-| `unique-allocate` | Player GET/POST UniqueDemon by `instanceId`; FE hooks; free-build contract (D1) | store + PointBudget | [aptitude-sheet/spec-unique-allocate.md](aptitude-sheet/spec-unique-allocate.md) |
+| `unique-allocate` | Player GET/POST UniqueCreature by `instanceId`; FE hooks; free-build contract (D1) | store + PointBudget | [aptitude-sheet/spec-unique-allocate.md](aptitude-sheet/spec-unique-allocate.md) |
 | `aptitudes-live-bus` | Shared `AptitudesUpdated` shape (`scope` + key + `playerId`); FE invalidate keys | unique-allocate routes; species/commander broadcasts amended | [aptitude-sheet/spec-aptitudes-live-bus.md](aptitude-sheet/spec-aptitudes-live-bus.md) |
-| `unique-lawn-wire` | Injector cache + resolve UniqueDemon for Bound `instanceId` on reload/bind | unique-allocate · live-bus | [aptitude-sheet/spec-unique-lawn-wire.md](aptitude-sheet/spec-unique-lawn-wire.md) |
+| `unique-lawn-wire` | Injector cache + resolve UniqueCreature for Bound `instanceId` on reload/bind | unique-allocate · live-bus | [aptitude-sheet/spec-unique-lawn-wire.md](aptitude-sheet/spec-unique-lawn-wire.md) |
 | `catalog-icons` | Add `icon` to aptitude-catalog; tile glyph path | catalog SSOT | [aptitude-sheet/spec-catalog-icons.md](aptitude-sheet/spec-catalog-icons.md) |
 | `posture-theme-packs` | Three posture packs + non-null `vfx.select` | theme registry | [aptitude-sheet/spec-posture-theme-packs.md](aptitude-sheet/spec-posture-theme-packs.md) |
 | `aptitude-pieces` | Piece contracts: scope-chip, leftover-gauge, decision-strip, preset-entry, posture-band, tile, inspect, species-build-chrome, layout, **donut chart** | catalog-icons · posture packs · gui-lego chip/inspect | [aptitude-sheet/spec-aptitude-pieces.md](aptitude-sheet/spec-aptitude-pieces.md) |
@@ -161,9 +161,10 @@ Wave 3 — allocate chrome helpers + presets
 
 ## Success criteria (program)
 
-- [ ] UniqueActor Aptitudes spends UniqueDemon; commander sheet spends commander (D2).
-- [ ] UniqueDemon GET returns persisted shares + budget/leftover — no EffectiveUnique (D1).
-- [ ] Bound lawn unique receives UniqueDemon allocation after allocate + reload (D3).
+- [ ] UniqueActor Aptitudes spends UniqueCreature; commander sheet spends commander (D2).
+- [ ] UniqueCreature GET returns persisted shares + budget/leftover — no EffectiveUnique (D1).
+- [ ] Bound lawn unique receives UniqueCreature allocation after allocate + reload (D3) — dual resolve (lawn species vs sheet UniqueCreature) is an ActorHub/FSM defect until this lands; see [combat-power-number-ideal.md](combat-power-number-ideal.md).
+- [ ] Aptitudes scope chrome does not label specimen/species **level** as “power”; player “power” means combat power number (Standing / matrix), not Θ alone and not a single `combat.power.omni` glance ([combat-power-number-ideal.md](combat-power-number-ideal.md) HF-chip / HF-copy).
 - [ ] Species Mode B uses same console under Pacts/`AptitudesLayer`; respec priced; free allocate stays retired (D4).
 - [ ] `AptitudesUpdated` carries scope+key; FE invalidates unique/species/commander queries correctly.
 - [ ] Remaining points visible in console hero; Confirm/Cancel in-band (D6/D7) — not footer-only.
@@ -184,10 +185,11 @@ Wave 3 — allocate chrome helpers + presets
 
 ## DESIGN-GATE checklist
 
-- [x] Read ideal (incl. E1–E8) + UI/menus gate rows + class-system / demon progression / species-build seams.
+- [x] Read ideal (incl. E1–E8) + UI/menus gate rows + class-system / creature progression / species-build seams.
 - [x] Verified against code: `SpeciesBuildPlanCatalog.SharesFor`, `Program.cs` catalog Configure,
       AptitudeEndpoints / species-build / UniqueActorHubCompose / RpgClient lawn resolve (prior + this pass).
 - [x] ActorHub: consume/contribute via existing aptitude path — no private fold; favour ≠ Hub fill.
+- [x] Bound lawn + sheet must share UniqueCreature aptitude input (D3 / unique-lawn-wire); combat power vocabulary locked in [combat-power-number-ideal.md](combat-power-number-ideal.md) (idea phase — code HF-* not authorized from map alone).
 - [x] Tunables/catalog homes named; soft max presets + row abs max in tuning (E8).
 - [x] Caps: overspend throws/409 (PS-8); leftover empty legal; D13 leftover after clamp legal (E2).
 - [ ] Full guard/test sweep — deferred to `/plan` implementation waves.

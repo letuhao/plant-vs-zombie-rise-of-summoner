@@ -25,7 +25,7 @@
       "id": "set.jalastar-001",
       "nameKey": "set.spike-burst-core",
       "name": "Spike-Burst Core",
-      "themeKey": "demon.jalastar",
+      "themeKey": "creature.jalastar",
       "members": [
         {
           "role": "armament-primary",

@@ -1,6 +1,6 @@
 using System.Text.Json;
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons.Patron;
+using FusionRpg.Core.Creatures.Patron;
 
 namespace FusionRpg.Injector.Effects;
 

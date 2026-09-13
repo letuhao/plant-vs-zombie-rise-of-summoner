@@ -3,7 +3,7 @@ using System.Text.Json;
 namespace FusionRpg.Core.Progression;
 
 /// <summary>
-/// `species-build` T1.1 (module 3, `species-xp`) — the tunable surface for a demon SPECIES' own
+/// `species-build` T1.1 (module 3, `species-xp`) — the tunable surface for a creature SPECIES' own
 /// per-player level. The level itself is NOT a parallel type: it reuses <see cref="RpgActorState"/>,
 /// <see cref="RpgXpApply"/> and <see cref="RpgXpCurve"/> exactly as `player`/`plant`/`zombie` do, via
 /// the new <see cref="RpgActorKinds.Species"/> kind (`RpgProgression.cs`) — <see cref="RpgXpCurve.ParamsFor"/>
@@ -15,8 +15,8 @@ namespace FusionRpg.Core.Progression;
 /// engine's own type id and are read by other things today — a species-XP module has no mandate to
 /// migrate them. And a species is reachable from TWO sources (lawn placement, expedition victory),
 /// only one of which has a PvZ type id at all; a join has nothing to join on for the other. So species
-/// gets its own `kind` value in the SAME tables (Option A), keyed on <c>DemonSpeciesDef.DemonTypeId</c>
-/// — already a unique int per species (`DemonSpeciesCatalog.Validate`'s own duplicate-demonTypeId
+/// gets its own `kind` value in the SAME tables (Option A), keyed on <c>CreatureSpeciesDef.CreatureTypeId</c>
+/// — already a unique int per species (`CreatureSpeciesCatalog.Validate`'s own duplicate-creatureTypeId
 /// check) — never a second store forking the ledger/retention/compaction/`LevelChangePipeline` that
 /// already exist for it.</para>
 ///

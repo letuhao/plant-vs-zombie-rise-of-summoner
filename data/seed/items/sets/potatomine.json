@@ -25,7 +25,7 @@
       "id": "set.potatomine-001",
       "nameKey": "set.tuberous-grave-burst",
       "name": "Tuberous Grave-Burst",
-      "themeKey": "demon.potatomine",
+      "themeKey": "creature.potatomine",
       "members": [
         {
           "role": "armament-primary",

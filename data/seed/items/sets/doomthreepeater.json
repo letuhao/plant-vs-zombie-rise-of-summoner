@@ -25,7 +25,7 @@
       "id": "set.doomthreepeater-001",
       "nameKey": "set.triple-line-destroyer",
       "name": "Triple-Line Destroyer",
-      "themeKey": "demon.doomthreepeater",
+      "themeKey": "creature.doomthreepeater",
       "members": [
         {
           "role": "armament-primary",

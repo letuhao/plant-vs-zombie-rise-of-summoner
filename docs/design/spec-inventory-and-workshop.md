@@ -19,7 +19,7 @@
 
 **One player-scoped armoury.** No per-specimen bag, no bank, no stash tabs. A specimen doesn't *hold*
 items; an **assignment** points from `(specimen, role)` at an item in the armoury — *"swap this helm
-onto that demon" is one row update, not a move between two containers.*
+onto that creature" is one row update, not a move between two containers.*
 
 **Storage grade is derived, never authored** — the same discipline `atom_id` uses:
 

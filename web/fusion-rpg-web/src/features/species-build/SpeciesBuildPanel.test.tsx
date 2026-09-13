@@ -52,7 +52,7 @@ vi.mock("@/lib/bus", async (importOriginal) => {
   };
 });
 
-vi.mock("@/lib/bus/demons", () => ({
+vi.mock("@/lib/bus/creatures", () => ({
   newCorrelationId: () => "corr-fixed"
 }));
 
@@ -281,7 +281,7 @@ describe("SpeciesBuildPanel", () => {
     speciesData = freshState({ hasOverride: true });
     render(<SpeciesBuildPanel playerId={1} speciesId="fumeshroom" />);
     const text = document.body.textContent ?? "";
-    for (const forbidden of ["typeId", "scope_key", "AllocationScope", "DemonType"]) {
+    for (const forbidden of ["typeId", "scope_key", "AllocationScope", "CreatureType"]) {
       expect(text).not.toContain(forbidden);
     }
   });

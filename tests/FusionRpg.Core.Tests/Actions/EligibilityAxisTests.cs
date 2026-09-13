@@ -24,11 +24,12 @@ public class EligibilityAxisTests
         ScopeKey = scopeKey,
     };
 
-    static readonly IReadOnlyDictionary<string, string> FamilyOf = new Dictionary<string, string>(StringComparer.Ordinal)
-    {
-        ["cherrybomb"] = "cherry",
-        ["cactus"] = "cactus",
-    };
+    static readonly IReadOnlyDictionary<string, IReadOnlyList<string>> FamilyOf =
+        new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal)
+        {
+            ["cherrybomb"] = new[] { "cherry" },
+            ["cactus"] = new[] { "cactus" },
+        };
 
     /// <summary>Test 3, written first per the spec's own instruction: a species-scoped row with a
     /// null <see cref="ActionRow.ScopeKey"/> must never appear for an actor whose own key is ALSO
@@ -181,11 +182,20 @@ public class EligibilityAxisTests
     // ---- FamilyMap -----------------------------------------------------------------------------
 
     [Fact]
-    public void FamilyMap_parses_a_flat_speciesKey_to_familyId_object()
+    public void FamilyMap_parses_a_speciesKey_to_familyId_list_object()
     {
-        var map = FamilyMap.Parse("""{"cherrybomb":"cherry","cactus":"cactus"}""");
+        var map = FamilyMap.Parse("""{"cherrybomb":["cherry"],"cactus":["cactus"]}""");
         Assert.Equal(2, map.Count);
-        Assert.Equal("cherry", map["cherrybomb"]);
+        Assert.Equal(new[] { "cherry" }, map["cherrybomb"]);
+    }
+
+    /// <summary>⛔ CORRECTED 2026-09-11: the live projection is a RELATION, not a function — a
+    /// multi-element list is legal and reaches every family it names, never just the first.</summary>
+    [Fact]
+    public void FamilyMap_keeps_every_family_in_a_multi_element_list()
+    {
+        var map = FamilyMap.Parse("""{"allpeater":["organism","flora"]}""");
+        Assert.Equal(new[] { "organism", "flora" }, map["allpeater"]);
     }
 
     [Fact]
@@ -195,31 +205,35 @@ public class EligibilityAxisTests
     }
 
     [Fact]
-    public void FamilyMap_refuses_a_non_string_value()
+    public void FamilyMap_refuses_a_scalar_value_not_a_list()
     {
-        Assert.Throws<InvalidOperationException>(() => FamilyMap.Parse("""{"cherrybomb":["cherry"]}"""));
+        Assert.Throws<InvalidOperationException>(() => FamilyMap.Parse("""{"cherrybomb":"cherry"}"""));
     }
 
-    /// <summary>The real committed projection (§3.2, decided 2026-09-03): 53 entries, every key an
-    /// exact lowercase <c>SpeciesId</c> from the 84-row species catalog, every value one of the 19
-    /// families <c>family-assignments.json</c> names — read from disk, not asserted from memory.</summary>
+    /// <summary>The real committed projection (§3.2, decided 2026-09-03; ⛔ re-measured 2026-09-11):
+    /// the file is A-S0's live projection of the creature species corpus (`derive_live_family_assignments`
+    /// over `data/seed/creatures/species/`), NOT the legacy 53-species `_generated/family-assignments.json`.
+    /// Live shape: 904 species over 227 consolidated families, with multi-family membership (a species
+    /// reaching more than one family is the reason the projection is a relation). Every key must be a
+    /// real shipped species — read from disk, not asserted from memory.</summary>
     [Fact]
-    public void The_real_family_map_json_has_53_entries_and_matches_its_source()
+    public void The_real_family_map_json_is_the_live_species_relation()
     {
         var repoRoot = FindRepoRoot();
         var mapPath = Path.Combine(repoRoot, "data", "seed", "actions", "_generated", "family-map.json");
-        var sourcePath = Path.Combine(repoRoot, "data", "seed", "demons", "_generated", "family-assignments.json");
-
         var map = FamilyMap.Parse(File.ReadAllText(mapPath));
-        Assert.Equal(53, map.Count);
 
-        var source = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string[]>>(File.ReadAllText(sourcePath))!;
-        Assert.Equal(source.Count, map.Count);
-        foreach (var (speciesKey, families) in source)
-        {
-            Assert.Single(families); // the relation is a function — the projection refuses otherwise
-            Assert.Equal(families[0], map[speciesKey]);
-        }
+        // Liveness + the relation's defining property.
+        Assert.True(map.Count > 53, $"expected the live roster past the legacy 53 keys; got {map.Count}");
+        Assert.Contains(map.Values, v => v.Count > 1);
+        Assert.All(map.Values, v => Assert.NotEmpty(v));
+
+        // Every key is a shipped species id (the projection cannot invent one).
+        var indexPath = Path.Combine(repoRoot, "data", "seed", "creatures", "species", "_index.json");
+        var species = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(indexPath))!
+            .Keys.Select(k => k.ToLowerInvariant()).ToHashSet(StringComparer.Ordinal);
+        var unknown = map.Keys.Where(k => !species.Contains(k)).ToList();
+        Assert.Empty(unknown);
     }
 
     sealed class AlwaysHitRng : IAtomRandom

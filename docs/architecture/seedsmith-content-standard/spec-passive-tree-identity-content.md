@@ -36,7 +36,7 @@ same shape of content.
 - `generate_codex.py`/`workflow/graphs/species_codex.py`/`species/schemas.py`'s
   `codex_summary_defects` (no digit, no channel-id-shaped token) is the reusable machinery this
   module mirrors: `build_generation_graph` + `make_generate_node`/`make_validate_node`/
-  `make_persist_node`, 3-sample voting via `resolve_vote` (`adapters/demons/anchor/vote.py`).
+  `make_persist_node`, 3-sample voting via `resolve_vote` (`adapters/creatures/anchor/vote.py`).
 
 ## 3. The new schema
 

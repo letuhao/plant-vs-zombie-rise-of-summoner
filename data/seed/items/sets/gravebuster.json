@@ -25,7 +25,7 @@
       "id": "set.gravebuster-001",
       "nameKey": "set.tomb-devourer",
       "name": "Tomb Devourer",
-      "themeKey": "demon.gravebuster",
+      "themeKey": "creature.gravebuster",
       "members": [
         {
           "role": "armament-primary",

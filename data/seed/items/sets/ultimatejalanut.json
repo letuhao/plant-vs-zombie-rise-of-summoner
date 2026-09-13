@@ -25,7 +25,7 @@
       "id": "set.ultimatejalanut-001",
       "nameKey": "set.imperial-fruit-husk",
       "name": "Imperial Fruit Husk",
-      "themeKey": "demon.ultimatejalanut",
+      "themeKey": "creature.ultimatejalanut",
       "members": [
         {
           "role": "armament-primary",
@@ -74,7 +74,7 @@
           ]
         }
       ],
-      "flavor": "A decaying, pulsating core of a demon fruit that forces life to bloom from rot.",
+      "flavor": "A decaying, pulsating core of a creature fruit that forces life to bloom from rot.",
       "tags": [],
       "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
     }

@@ -1,6 +1,6 @@
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Delve.Wild;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Delve.Wild;
@@ -57,7 +57,7 @@ public class AltarPullTests
 
         // A record with a List<string> property compares that property by reference, not content
         // (SummonRollerTests.cs's own established workaround) -- project to a value tuple instead.
-        (string, DemonRarity, string, string) AsTuple(SummonRollResult r) =>
+        (string, CreatureRarity, string, string) AsTuple(SummonRollResult r) =>
             (r.SpeciesId, r.Rarity, r.Variant, string.Join(',', r.TraitIds));
         Assert.Equal(AsTuple(direct[0]), AsTuple(viaAltarPull));
         Assert.Equal(directPity, viaAltarPity);
@@ -72,7 +72,7 @@ public class AltarPullTests
         AltarPull.TryPull(
             SummonBannerCatalog.StandardRift, focusElement: null, pity, Rng(3, "dungeon:altar:test:3"),
             out var result, out _, out _);
-        Assert.True(DemonRarityLadder.AtLeast(result.Rarity, DemonRarity.Heirloom));
+        Assert.True(CreatureRarityLadder.AtLeast(result.Rarity, CreatureRarity.Heirloom));
     }
 
     [Fact]

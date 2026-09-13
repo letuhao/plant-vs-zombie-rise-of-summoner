@@ -386,7 +386,7 @@ export function AptitudePresetConsoleHost({
         mode === "species"
           ? "Species library — Activate charges the respec price shown below"
           : mode === "unique"
-            ? "UniqueDemon library — Apply dirties draft; Activate commits"
+            ? "UniqueCreature library — Apply dirties draft; Activate commits"
             : "Commander library — Apply dirties draft; Activate commits"
       }
       testId="aptitude-preset-panel"

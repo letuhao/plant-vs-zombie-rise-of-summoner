@@ -25,7 +25,7 @@
       "id": "set.blowerpumpkin-001",
       "nameKey": "set.clover-harvest",
       "name": "Clover Harvest",
-      "themeKey": "demon.blowerpumpkin",
+      "themeKey": "creature.blowerpumpkin",
       "members": [
         {
           "role": "armament-primary",

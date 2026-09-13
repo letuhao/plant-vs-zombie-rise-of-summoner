@@ -25,7 +25,7 @@
       "id": "set.hypnopeashooter-001",
       "nameKey": "set.hypnopeashooter-s-shard",
       "name": "Hypnopeashooter's Shard",
-      "themeKey": "demon.hypnopeashooter",
+      "themeKey": "creature.hypnopeashooter",
       "members": [
         {
           "role": "armament-primary",

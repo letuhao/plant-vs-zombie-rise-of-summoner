@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text.Json;
 using FusionRpg.Core.Tests.TestSupport;
 using Xunit;
@@ -96,14 +95,8 @@ public class ProveAptitudeJsonEmitTests : IClassFixture<ProveAptitudeJsonEmitTes
 
         static (int Exit, string Stdout, string Stderr) RunProveAptitude(string repoRoot, string args)
         {
-            var psi = new ProcessStartInfo
-            {
-                FileName = "dotnet",
-                Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "ProveAptitude")}\" --no-restore -- {args}",
-                CreateNoWindow = true,
-                WorkingDirectory = repoRoot
-            };
-            return ExternalProcess.Run(psi, 120_000, "ProveAptitude invocation timed out");
+            // ProjectReference + apphost (see ToolProcess) — no implicit build, no stale output.
+            return ToolProcess.Run(repoRoot, "ProveAptitude", args, 120_000);
         }
 
         public void Dispose()

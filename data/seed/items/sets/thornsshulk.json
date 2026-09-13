@@ -25,7 +25,7 @@
       "id": "set.thornsshulk-001",
       "nameKey": "set.steel-leaf-gale",
       "name": "Steel-Leaf Gale",
-      "themeKey": "demon.thornsshulk",
+      "themeKey": "creature.thornsshulk",
       "members": [
         {
           "role": "armament-primary",

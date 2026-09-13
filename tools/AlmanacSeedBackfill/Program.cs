@@ -1,17 +1,17 @@
 using System.Text.Json;
 using FusionRpg.Data;
 
-// `demon-seed` module 13 (`catalog-runtime`) precondition, found running the real flip 2026-09-05:
+// `creature-seed` module 13 (`catalog-runtime`) precondition, found running the real flip 2026-09-05:
 // species-import's own name resolution (RpgStore.Species.cs's GetAlmanacSeed(side, gameTypeId)) falls
-// back to "Demon {gameTypeId}" for every species on a database whose `almanac_seed` table has never
+// back to "Creature {gameTypeId}" for every species on a database whose `almanac_seed` table has never
 // been populated — which only happens via live, incremental in-game almanac browsing
 // (RebuildAlmanacSeed's own source, type_almanac_dump). The committed corpus dump
-// (data/seed/demons/_dump/almanac/{plant,zombie}.json, corpus-dump/module 1) already carries that same
+// (data/seed/creatures/_dump/almanac/{plant,zombie}.json, corpus-dump/module 1) already carries that same
 // already-parsed shape, captured once elsewhere. This tool loads it directly, once, so a database that
 // has never had a human browse the in-game almanac still gets real names instead of placeholders.
 //
 // Usage: dotnet run --project tools/AlmanacSeedBackfill -- [--dump <dir>] [--db <dir>]
-//        --dump   default: data/seed/demons/_dump, found by walking up from the working directory
+//        --dump   default: data/seed/creatures/_dump, found by walking up from the working directory
 //        --db     default: $FUSIONRPG_DATA, else dist/FusionRpg.Server/data beside the repo root
 //
 // Exit codes: 0 written, 2 could not start.
@@ -29,10 +29,10 @@ string? TakeOption(string flag)
     return value;
 }
 
-var dumpRoot = dumpOverride ?? FindUp("data", "seed", "demons", "_dump");
+var dumpRoot = dumpOverride ?? FindUp("data", "seed", "creatures", "_dump");
 if (dumpRoot is null || !Directory.Exists(dumpRoot))
 {
-    Console.Error.WriteLine("could not locate data/seed/demons/_dump; pass --dump <dir>");
+    Console.Error.WriteLine("could not locate data/seed/creatures/_dump; pass --dump <dir>");
     return 2;
 }
 
@@ -116,10 +116,10 @@ static string? FindUp(params string[] segments)
     return null;
 }
 
-// Mirrors DemonCorpusDump's own DumpAlmanacRow shape exactly (tools/DemonCorpusDump/DumpWriter.cs's
+// Mirrors CreatureCorpusDump's own DumpAlmanacRow shape exactly (tools/CreatureCorpusDump/DumpWriter.cs's
 // AlmanacRowNode) — this file's own JSON is that record's serialized form, captured once and
 // committed. A local record here, not a shared one, since this tool has no other reason to reference
-// DemonCorpusDump's project.
+// CreatureCorpusDump's project.
 sealed record DumpRow(
     string Side, int TypeId, string? TypeName, string? DisplayName, string? FlavorInfo,
     string? FlavorIntroduce, int? SunCost, double? CooldownSec, string? CostStatus,

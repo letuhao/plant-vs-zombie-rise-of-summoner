@@ -9,7 +9,7 @@
 
 ## In one sentence
 
-**Souls** are the currency you earn by playing and spend to call new demons and keep them bound.
+**Souls** are the currency you earn by playing and spend to call new creatures and keep them bound.
 
 ---
 
@@ -19,9 +19,9 @@ These words get guessed wrong. Read them once before the rest of the page.
 
 | Word | What it actually means here |
 |---|---|
-| **Soul** | A **currency number** in your save. Not a demon, not a life bar, not something you lose on death. |
+| **Soul** | A **currency number** in your save. Not a creature, not a life bar, not something you lose on death. |
 | **Spend** | Souls leave your bank the moment you confirm at the [altar](summoning-altar.md). There is no refund. |
-| **Bank** | One shared pool for the whole save. It is not per demon and not per world. |
+| **Bank** | One shared pool for the whole save. It is not per creature and not per world. |
 | **Earn** | Play pays. Waiting does not — there is no idle soul trickle. |
 
 **Also true:**
@@ -45,7 +45,7 @@ You watch it climb while you play and drop when you summon.
 Three things touch the number:
 
 ```text
-  play  ->  souls  ->  altar  ->  demons
+  play  ->  souls  ->  altar  ->  creatures
                        +->  pacts
 ```
 
@@ -86,7 +86,7 @@ The stock strip is always on screen.
 
 ## Common mix-ups
 
-**Do I lose souls when a demon dies?**  
+**Do I lose souls when a creature dies?**  
 No. Souls are a bank, not a health pool.
 
 **Can I buy souls?**  

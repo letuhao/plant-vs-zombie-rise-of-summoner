@@ -17,13 +17,13 @@
   },
   "pointEconomy": {
     "_note": "class-system P6.1, spec-point-economy.md 2.2: 'the single number becomes a table' - four allocation-scope rates, additive to (not a replacement of) grant.aptitudePointsPerTheta above, which nothing in production reads today. A SEPARATE block on purpose, matching spec-point-economy.md 5's own project-structure listing.",
-    "_scopeSourcesWhy": "Each scope's rate multiplies a DIFFERENT source value the caller supplies (spec-point-economy.md 2's table) - commander x Theta_player, demonType x almanac XP, aspect x element_mastery (owned by the demon program's aspect-scope, not built yet), uniqueDemon x specimen level. This module ships the RATE table only, never the sources.",
-    "_weightsWhy": "UNMEASURED - spec-point-economy.md 8 'Ask first: the four tier weights, before residual-fit has measured them. Shipping a guess is fine; calling it balance is not.' Ordered commander smallest, uniqueDemon largest per 2.1's decision (a dominant commander build replicates across the whole roster); demonType and aspect are legally allowed to tie (spec-point-economy.md 7 test 3: 'commander < type <= aspect < unique'). residual-fit (Phase 8) owns the real values.",
+    "_scopeSourcesWhy": "Each scope's rate multiplies a DIFFERENT source value the caller supplies (spec-point-economy.md 2's table) - commander x Theta_player, creatureType x almanac XP, aspect x element_mastery (owned by the creature program's aspect-scope, not built yet), uniqueCreature x specimen level. This module ships the RATE table only, never the sources.",
+    "_weightsWhy": "UNMEASURED - spec-point-economy.md 8 'Ask first: the four tier weights, before residual-fit has measured them. Shipping a guess is fine; calling it balance is not.' Ordered commander smallest, uniqueCreature largest per 2.1's decision (a dominant commander build replicates across the whole roster); creatureType and aspect are legally allowed to tie (spec-point-economy.md 7 test 3: 'commander < type <= aspect < unique'). residual-fit (Phase 8) owns the real values.",
     "aptitudePointsPerThetaMilliByScope": {
       "commander": 3,
-      "demonType": 4,
+      "creatureType": 4,
       "aspect": 4,
-      "uniqueDemon": 6
+      "uniqueCreature": 6
     },
     "_respecWhy": "class-system P6.3, spec-point-economy.md 3/8: UNMEASURED placeholder amount, resource choice (hunger) lives in code (RespecPolicy.cs) as a structural/mechanism decision, not here -- only the AMOUNT is a tunable. 'Ask first' per spec 8; shipped per spec's own 'shipping a guess is fine, calling it balance is not' escape hatch, matching this same block's own tier-weight placeholders above.",
     "respecPrice": 10

@@ -25,7 +25,7 @@
       "id": "set.ultimatedoomscaredy-001",
       "nameKey": "set.ember-bullet-subspecies",
       "name": "Ember Bullet Subspecies",
-      "themeKey": "demon.ultimatedoomscaredy",
+      "themeKey": "creature.ultimatedoomscaredy",
       "members": [
         {
           "role": "armament-primary",

@@ -20,8 +20,8 @@ the bare pair is another stream's and is never a fallback.
 ## What this program is
 
 A **party dungeon crawl** on the RPG layer: the commander provisions a raid of one, two or four
-parties of up to five bound demons, enters a **domain** — a seeded graph of rooms rolled fresh each run
-— and plays room by room through fights, elites, caches, curios, wild demons, shrines, rests, merchants
+parties of up to five bound creatures, enters a **domain** — a seeded graph of rooms rolled fresh each run
+— and plays room by room through fights, elites, caches, curios, wild creatures, shrines, rests, merchants
 and traps to a boss, carrying wounds, hunger and nerve between rooms and an **unbanked haul** in a
 per-party carry grid until extraction. Depth is `DangerBand` inside the one power ladder; difficulty is
 ten named rungs with an open tail; loss is priced by default and permanent on the upper rungs. Every
@@ -55,7 +55,7 @@ by the game runtime, which never calls a model.
 2. Wave 1 ships **both** entrances (decision 2): the Sanctum picker is this program's; the map door is
    an **ask on `world-stage-map.md`** (`world-inspector` action + `world-commands` order) that issues
    the same delve request with a `domainId` — no delve-built map FE, no legion leaves the map (R10).
-3. The threat-band hole (657 of 841 species anchors without `threatBand`) is closed by demon-seed
+3. The threat-band hole (657 of 841 species anchors without `threatBand`) is closed by creature-seed
    module 7's `threat-audit` **before** `encounter-generator` ships. It is an external dependency, not
    this program's work.
 4. The first shipped content is **six `many` domains, one per climate at `shallow`**, from the
@@ -81,14 +81,14 @@ is stale; row 42's "an existing content id" gains "or an encounter anchor id"; `
 §11.1's three caps rows are stale (all three now derive and throw) and §10 row 27's `WebMatchService`
 line is `:396-403`; `structure-seed-ideal.md:73` (seven rows, three kinds); `effect-atom/definitions.md`
 (16 kinds / 13 triggers / eight `OwnerKind`s); `PredicateNode.cs:11` "unbuilt" comment; `information-
-architecture.md` §1 "four stages"; demon-seed documents' "408"; `06-unsourced.md` access blocks
+architecture.md` §1 "four stages"; creature-seed documents' "408"; `06-unsourced.md` access blocks
 (megatenwiki bot gate, diablowiki 403, game8 empty bodies).
 
 ## External dependencies — other programs' modules this program consumes
 
 | Dependency | Owner map / module | What this program needs | Gate |
 |---|---|---|---|
-| `threat-audit` over the 657 anchors without `threatBand` | `demon-seed-map.md` module 7, pipeline 5 | a `threatBand` on every species anchor, so `threatWindow` filters mean something | before `encounter-generator` |
+| `threat-audit` over the 657 anchors without `threatBand` | `creature-seed-map.md` module 7, pipeline 5 | a `threatBand` on every species anchor, so `threatWindow` filters mean something | before `encounter-generator` |
 | `battle-clock-profile` | `base-defense-map.md` | `MaxRounds`/`RoundDurationMs` on the profile; the `delve` profile row lands after it | before `delve-battle-profile` |
 | `siege-ai` (one `IIntentSource` dispatching on `SideOf`) | `base-defense-map.md` | the automated policy that plays un-steered parties (R9) | before raids of 2/4 |
 | `siege-board` + `board-render` (A10) | `base-defense-map.md` | the 2-D board the Delve adopts later; rank collapses into column | none — v1 ships 1-D rank |
@@ -97,7 +97,7 @@ architecture.md` §1 "four stages"; demon-seed documents' "408"; `06-unsourced.m
 | `structure-schema` 18th field `interaction`; `structure-catalog-import` reader | `base-defense-map.md` modules 23–29 | dungeon objects as structures | none — v1 objects are curios in the event deck |
 | `consumable` `ContainerKind` (D27) and the item-cost row on actions (A3) | `item-map.md`, `action-map.md` | supplies usable in a fight; a capture seal consumed | before `supplies-and-objects`, `wild-room` |
 | item module 17 `uniques` amended (generated, rung ≥ 80, X4-gated); `seedsmith-map.md` `unique-pipeline` | `item-map.md` | the uniques pipeline this program's domains bind | before `unique-pipeline` |
-| contracts upkeep and slot/ritual prices on the player's highest cleared content Θ | `demon-system-map.md` `demon-contracts` follow-up | the soul sink that keeps binding past the pin (review S2-8) | ships in this program's **first** wave |
+| contracts upkeep and slot/ritual prices on the player's highest cleared content Θ | `creature-system-map.md` `creature-contracts` follow-up | the soul sink that keeps binding past the pin (review S2-8) | ships in this program's **first** wave |
 | `world-generator` placing `Lair/Tear/Vault/Anomaly` entrances | `world-map-program.md` wave 4 | once-entry domains placed on the map | none — Sanctum picker offers them meanwhile |
 | map-door action in `world-inspector` + `world-commands` | `world-stage-map.md` | the map entrance (decision 2), issuing this program's delve request | wave 1 ask |
 | T10 decision trace, T14 profile row in `battle.v{n}.json` | `battle-timeline-map.md` | the per-battle trace; the `delve` profile as tuning | before `delve-battle-profile` |
@@ -154,10 +154,10 @@ another module's read model.
 
 | Gate | Proves | After |
 |---|---|---|
-| **G0 — prerequisites** | The four `decisions.md` rows are appended; the propagations are made; `threat-audit` is scheduled on the demon-seed budget | before wave 1 build |
+| **G0 — prerequisites** | The four `decisions.md` rows are appended; the propagations are made; `threat-audit` is scheduled on the creature-seed budget | before wave 1 build |
 | **G1 — scoped world** | A delve world row exists beside a map world; `GetActiveWorld` returns the map; `WorldValidation` accepts a rolled graph under the delve profile and still rejects it under the map profile; **all world goldens byte-identical**; `Step` is never called on a delve world (guard test) | wave 1 |
 | **G2 — a room is a fight** | One rolled room resolves through `BattleEngine.Resolve` with the `delve` profile and an automated intent source at `Θ_room + thetaOffset`, byte-identical on replay; **all four battle hashes, the 32-seed sweep and the four expedition tier hashes unchanged** (`WhenWritingDefault` fields proven); a steered fight frozen and resumed from its decision log | wave 2 |
-| **G3 — a delve is a run** | A full solo delve on autopilot: rooms, events, loot into the pack, extraction; souls-per-minute regression (two row-1 rooms then extract loses to a clean run); hunger binds between rests; a downed demon sits out N delves; a permadeath rung Retires a `downedOnce` demon at extraction | wave 3 |
+| **G3 — a delve is a run** | A full solo delve on autopilot: rooms, events, loot into the pack, extraction; souls-per-minute regression (two row-1 rooms then extract loses to a clean run); hunger binds between rests; a downed creature sits out N delves; a permadeath rung Retires a `downedOnce` creature at extraction | wave 3 |
 | **G4 — content** | Six domains from the pipelines pass the schema audit, the budget check and a byte-identical rerun; the encounter cell-coverage metric passes per domain; a 4-party raid resolves with per-party packs, pity and hauls and one boss fight within the fight-length band | wave 4 |
 | **G5 — played** | The stage renders a live delve over SignalR; reward bands hold under a lint over band-3 openers; `vocabularyGuard` rejects every engine word; the Sanctum picker and the map-door request reach the same endpoint | wave 5 |
 

@@ -25,7 +25,7 @@
       "id": "set.superthreegatling-001",
       "nameKey": "set.triple-line-pea-shot",
       "name": "Triple-Line Pea-Shot",
-      "themeKey": "demon.superthreegatling",
+      "themeKey": "creature.superthreegatling",
       "members": [
         {
           "role": "armament-primary",

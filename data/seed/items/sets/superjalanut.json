@@ -25,7 +25,7 @@
       "id": "set.superjalanut-001",
       "nameKey": "set.imperial-fruit-sphere",
       "name": "Imperial Fruit Sphere",
-      "themeKey": "demon.superjalanut",
+      "themeKey": "creature.superjalanut",
       "members": [
         {
           "role": "armament-primary",

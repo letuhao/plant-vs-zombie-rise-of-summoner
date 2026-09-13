@@ -73,7 +73,7 @@ public class ScopeArchitectureTests
             var violations = ScanForBannedReferences(tmp);
             Assert.Contains(violations, v => v.Contains(bannedNamespace, StringComparison.Ordinal));
         }
-        finally { try { Directory.Delete(tmp, true); } catch { /* temp */ } }
+        finally { Directory.Delete(tmp, true); }
     }
 
     [Fact]
@@ -89,6 +89,6 @@ public class ScopeArchitectureTests
 
             Assert.Empty(ScanForBannedReferences(tmp));
         }
-        finally { try { Directory.Delete(tmp, true); } catch { /* temp */ } }
+        finally { Directory.Delete(tmp, true); }
     }
 }

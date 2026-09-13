@@ -1,4 +1,4 @@
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Power;
 

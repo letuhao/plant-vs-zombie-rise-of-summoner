@@ -25,7 +25,7 @@
       "id": "set.catapultzombie-001",
       "nameKey": "set.hoop-ball-zombie",
       "name": "Hoop-Ball Zombie",
-      "themeKey": "demon.catapultzombie",
+      "themeKey": "creature.catapultzombie",
       "members": [
         {
           "role": "armament-primary",

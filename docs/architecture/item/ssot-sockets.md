@@ -18,7 +18,7 @@ An **equip slot** is lane I2's word and never appears here for either concept.
 > | §4.2 | affinity is *always* a soft +1 | **Soft for resonance, HARD for Strains/Splices** — every ingredient must sit in a matching socket (**D22**) |
 > | §4.1, §8.7 | *"low rarities grant zero sockets"* | Still true **at drop**. **Crafting extends sockets at any rarity, and rarity sets the price** (**D23**) — this resolves a blocking contradiction: under D21 a Strain was otherwise unbuildable |
 > | §4.2 | affinity is base-type-declared and unchanging | A **crafted** socket's affinity is **chosen by the crafter**, via a new priced `socket.imbue` operation (**D24**). `attune` was already taken by §4.2's own term |
-> | §10.3 | *"does the commander get more sockets?"* | **Closed by D14** — the commander is another unique demon |
+> | §10.3 | *"does the commander get more sockets?"* | **Closed by D14** — the commander is another unique creature |
 >
 > **New, with no prior text here:** a Strain or Splice requires a **low-rarity, non-set** base
 > (**D21**), which is also D2's verified rule and which closes §8.6's double-dipping structurally.
@@ -223,7 +223,7 @@ failure (§8.4) solvable at all.
 
 Consequences, all good:
 
-- An insert in the bag is a **quantity**, not a row per copy — the same shape as `rpg_demon_materials`
+- An insert in the bag is a **quantity**, not a row per copy — the same shape as `rpg_creature_materials`
   (`src/FusionRpg.Data/Sqlite/RpgStore.cs:520`). I do not propose that table; I13 owns it (§9.9).
 - An insert has **no `roll_seed` that matters**. Instantiating `gem.ember-shard.t3` is deterministic by
   construction, so SC5's reproduction contract holds trivially: there is nothing to reproduce.
@@ -787,7 +787,7 @@ papered over.
 
 ### 8.5 Socketing becomes an inventory chore at roster scale
 
-**The failure this lane cannot fully solve.** Twenty demons × twelve equip slots × up to four sockets is
+**The failure this lane cannot fully solve.** Twenty creatures × twelve equip slots × up to four sockets is
 up to **540 sockets**. Even at a realistic fill rate that is hundreds of socketing decisions, most of
 which are not interesting.
 
@@ -887,7 +887,7 @@ socket is a fascinating decision. Some of them are not, and the design should le
    every amount is illustrative.
 
 9. **I13 — the stackable insert inventory.** `(player_id, gem_container_id, qty)`, the same shape as
-   `rpg_demon_materials` (`src/FusionRpg.Data/Sqlite/RpgStore.cs:520`). I do not propose the table —
+   `rpg_creature_materials` (`src/FusionRpg.Data/Sqlite/RpgStore.cs:520`). I do not propose the table —
    contract cut #10 gives bags and stacking to I13 — but the whole of §4.3 and §8.4 depends on inserts
    being a quantity rather than a row per copy. **If I13 stores inserts as instances, this lane's
    inventory defence collapses.**
@@ -929,12 +929,12 @@ socket is a fascinating decision. Some of them are not, and the design should le
 ## 10. Open questions for the owner
 
 1. **Is the tiered removal rule (§4.7) too harsh at t4–t5?** Destroying a top-tier insert on removal is
-   the genre standard, but this game has a *roster*: a player re-speccing one demon loses gems across
+   the genre standard, but this game has a *roster*: a player re-speccing one creature loses gems across
    twelve items, not one character's ten. A softer alternative is destructive removal only at t5.
 2. **How many words ship in wave 1?** I propose 12. And: are words shared across frames, or does each of
    `humanoid` / `plant` get its own set? Shared is cheaper; per-frame is more flavourful and doubles the
    authoring.
-3. **Does the commander get more sockets than a demon?** The `standard` role (item-ideal §5.6) binds at
+3. **Does the commander get more sockets than a creature?** The `standard` role (item-ideal §5.6) binds at
    `match` scope, so a socketed combination on it would buff the whole squad. That is either the best
    thing in the design or a balance hole, and it depends on decisions §5.6 has not made.
 4. **May a player socket during a run, or only out of combat on unequipped items?** My lean is

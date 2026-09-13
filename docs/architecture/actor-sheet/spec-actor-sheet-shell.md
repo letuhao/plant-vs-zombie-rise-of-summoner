@@ -27,7 +27,7 @@ at this path.
 5. **Tech stack (buy before build):** `lucide-react`, `recharts`, `react-tiny-sparkline`, `motion`,
    and `@xyflow/react` on Paths — [actor-sheet-map.md](../actor-sheet-map.md) Tech stack;
    [tech-stack.md](../../design/tech-stack.md) §3.3. Fat chunk ⇒ split; never ban these libs.
-6. **Commander leftover v1** until UniqueDemon POST — Confirm uses existing allocate API; scope chip
+6. **Commander leftover v1** until UniqueCreature POST — Confirm uses existing allocate API; scope chip
    honest. Leftover footer **only** on Aptitudes (or while aptitude draft is dirty).
 7. **`defaultOpen`** from `actor-sheet.v1.json`; **`versionStamp`** on the fan-in DTO for cache bust.
 8. **Height reclaim (owner, 2026-09-09):** horizontal pill tab row + fat dual identity header are
@@ -223,7 +223,7 @@ No new combat numbers.
 
 - **Always:** Near-fullscreen bound; GG-61 right-panel scroll; catalog-driven tabs/icons; leftover
   footer only on Aptitudes/dirty draft; Esc pops sheet; slim header (no duplicate name hero).
-- **Ask first:** Changing the bound numbers; making *all* PanelShells this large; UniqueDemon
+- **Ask first:** Changing the bound numbers; making *all* PanelShells this large; UniqueCreature
   allocate; a second overlapping presentation library.
 - **Never:** `#/actor/:id`; nested dialog for readings; hand-rolling radials/icons to dodge npm;
   Band B numeric wall; hardcoded eight tab labels in React; horizontal pill tab row on this sheet;

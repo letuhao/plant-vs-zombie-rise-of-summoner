@@ -25,7 +25,7 @@
       "id": "set.solarsunflower-001",
       "nameKey": "set.solar-shell-volley",
       "name": "Solar Shell Volley",
-      "themeKey": "demon.solarsunflower",
+      "themeKey": "creature.solarsunflower",
       "members": [
         {
           "role": "armament-primary",

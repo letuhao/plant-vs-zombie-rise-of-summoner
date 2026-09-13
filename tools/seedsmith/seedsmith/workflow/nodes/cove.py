@@ -6,7 +6,7 @@
     **1/3**. It passed BOTH shoehorned cases, rationalising them (*"'一类' defines a specific
     category of behavior"*). Any text can be rationalised, so a subjective verifier defaults to
     charitable and catches nothing.
-  * SOURCE-GROUNDED form ("what does the source say this demon does? is the draft consistent?") —
+  * SOURCE-GROUNDED form ("what does the source say this creature does? is the draft consistent?") —
     **2/3**. It caught both shoehorned cases. Its one miss was a FALSE POSITIVE on good content.
 
 So CoVe works only source-grounded, and even then it rejects good content sometimes.

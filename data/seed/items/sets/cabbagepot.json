@@ -25,7 +25,7 @@
       "id": "set.cabbagepot-001",
       "nameKey": "set.cabbage-pot-wrap",
       "name": "Cabbage Pot Wrap",
-      "themeKey": "demon.cabbagepot",
+      "themeKey": "creature.cabbagepot",
       "members": [
         {
           "role": "armament-primary",

@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Fusion;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Fusion;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 namespace FusionRpg.Server;
 
 /// <summary>
-/// Fusion lab (spec-demon-fusion.md): preview is a pure read; execute is the one-transaction
+/// Fusion lab (spec-creature-fusion.md): preview is a pure read; execute is the one-transaction
 /// store call with a server-minted seed; the recipe browser projects silhouettes — an
 /// undiscovered recipe's id and output species never reach the wire (the output IS the
 /// discovery), only its rarity band and, once both ingredient species are in the codex, its
@@ -49,11 +49,11 @@ public static class FusionEndpoints
             {
                 try
                 {
-                    await hub.Clients.Group(RpgConstants.WebGroup).SendAsync("DemonsUpdated", new { playerId = pid });
+                    await hub.Clients.Group(RpgConstants.WebGroup).SendAsync("CreaturesUpdated", new { playerId = pid });
                     await hub.Clients.Group(RpgConstants.WebGroup).SendAsync("SoulsUpdated", new { playerId = pid });
-                    // demon-lawn-deploy T2.1: fusion changes roster membership (sacrifices consumed, a
-                    // new specimen created) — see DemonEndpoints.cs's own matching comment.
-                    await hub.Clients.Group(RpgConstants.InjectorGroup).SendAsync("DemonsUpdated", new { playerId = pid });
+                    // creature-lawn-deploy T2.1: fusion changes roster membership (sacrifices consumed, a
+                    // new specimen created) — see CreatureEndpoints.cs's own matching comment.
+                    await hub.Clients.Group(RpgConstants.InjectorGroup).SendAsync("CreaturesUpdated", new { playerId = pid });
                 }
                 catch
                 {
@@ -78,17 +78,17 @@ public static class FusionEndpoints
         {
             if (!store.PlayerExists(playerId)) return Results.NotFound();
             var discovered = new HashSet<string>(store.ListFusionDiscoveries(playerId), StringComparer.Ordinal);
-            var codex = store.ListDemonCodex(playerId).Entries
-                .Where(e => e.State == DemonCodexStates.Discovered)
+            var codex = store.ListCreatureCodex(playerId).Entries
+                .Where(e => e.State == CreatureCodexStates.Discovered)
                 .Select(e => e.SpeciesId)
                 .ToHashSet(StringComparer.Ordinal);
 
-            var items = DemonRecipeCatalog.All
-                .OrderBy(r => DemonSpeciesCatalog.Get(r.OutputSpeciesId).BaseRarity)
+            var items = CreatureRecipeCatalog.All
+                .OrderBy(r => CreatureSpeciesCatalog.Get(r.OutputSpeciesId).BaseRarity)
                 .ThenBy(r => r.RecipeId, StringComparer.Ordinal)
                 .Select((r, slot) =>
                 {
-                    var output = DemonSpeciesCatalog.Get(r.OutputSpeciesId);
+                    var output = CreatureSpeciesCatalog.Get(r.OutputSpeciesId);
                     var cost = FusionCostTable.Recipe(output.BaseRarity);
                     var isDiscovered = discovered.Contains(r.RecipeId);
                     var hintsUnlocked = codex.Contains(r.InputSpeciesIdA) && codex.Contains(r.InputSpeciesIdB);
@@ -119,7 +119,7 @@ public static class FusionEndpoints
 
     static object BuildPreview(RpgStore store, long playerId, FusionHttpRequest body)
     {
-        var roster = store.ListDemonRoster(playerId).Items
+        var roster = store.ListCreatureRoster(playerId).Items
             .ToDictionary(s => s.Profile.InstanceId, StringComparer.Ordinal);
 
         switch (body.Mode)
@@ -129,7 +129,7 @@ public static class FusionEndpoints
             {
                 if (body.BaseInstanceId is null || !roster.TryGetValue(body.BaseInstanceId, out var baseSpec))
                     return new { ok = false, reason = "base.missing" };
-                if (!DemonRarityIds.TryParse(baseSpec.Profile.Rarity, out var rarity))
+                if (!CreatureRarityIds.TryParse(baseSpec.Profile.Rarity, out var rarity))
                     return new { ok = false, reason = "base.rarity" };
                 if (body.Mode == FusionModes.StarMerge)
                 {
@@ -147,7 +147,7 @@ public static class FusionEndpoints
 
                 if (!StarPolicy.CanPromote(rarity, baseSpec.Profile.Star, baseSpec.Profile.Promoted))
                     return new { ok = false, reason = "promotion.not-ready" };
-                var newRarity = DemonRarityLadder.OneRungAbove(rarity);
+                var newRarity = CreatureRarityLadder.OneRungAbove(rarity);
                 return new
                 {
                     ok = true,
@@ -165,10 +165,10 @@ public static class FusionEndpoints
                     return new { ok = false, reason = "sacrifice.invalid" };
                 if (string.Equals(body.Sacrifices[0], body.Sacrifices[1], StringComparison.Ordinal))
                     return new { ok = false, reason = "sacrifice.duplicate" }; // execute would refuse too
-                var recipe = DemonRecipeCatalog.TryMatch(a.Profile.SpeciesId, b.Profile.SpeciesId);
+                var recipe = CreatureRecipeCatalog.TryMatch(a.Profile.SpeciesId, b.Profile.SpeciesId);
                 if (recipe is null)
                     return new { ok = false, reason = "recipe.unknown" };
-                var output = DemonSpeciesCatalog.Get(recipe.OutputSpeciesId);
+                var output = CreatureSpeciesCatalog.Get(recipe.OutputSpeciesId);
                 var isDiscovered = store.ListFusionDiscoveries(playerId)
                     .Contains(recipe.RecipeId, StringComparer.Ordinal);
                 var pickable = a.Profile.TraitIds.Concat(b.Profile.TraitIds)
@@ -186,8 +186,8 @@ public static class FusionEndpoints
                 if (!alreadyOwnsOutput)
                     foreach (var (specimen, specimenId) in new[] { (a, body.Sacrifices[0]), (b, body.Sacrifices[1]) })
                     {
-                        if (!DemonRarityIds.TryParse(specimen.Profile.Rarity, out var sourceRarity)
-                            || !DemonRarityLadder.AtLeast(sourceRarity, DemonRecipeCatalog.OutputEligibilityFloor))
+                        if (!CreatureRarityIds.TryParse(specimen.Profile.Rarity, out var sourceRarity)
+                            || !CreatureRarityLadder.AtLeast(sourceRarity, CreatureRecipeCatalog.OutputEligibilityFloor))
                             continue;
                         var roll = store.GetSpecimenMaterialisedRoll(specimenId);
                         if (roll is null) continue;
@@ -227,7 +227,7 @@ public static class FusionEndpoints
     /// deliberate breadcrumb: without it a player cannot stock the right essence to afford the
     /// experiment, and the discovery loop would be blind trial-and-refusal.
     /// </summary>
-    static object ProjectCost(FusionCost cost, DemonSpeciesDef outputSpecies) =>
+    static object ProjectCost(FusionCost cost, CreatureSpeciesDef outputSpecies) =>
         ProjectCost(cost, outputSpecies.ElementPrimary.ToElementId());
 
     static object ProjectCost(FusionCost cost, string elementId) => new
@@ -272,20 +272,20 @@ public static class FusionEndpoints
         {
             var pid = playerId ?? store.GetCurrentPlayerId();
             if (!store.PlayerExists(pid)) return Results.NotFound();
-            if (!DemonMaterialCatalog.IsKnown(materialId))
+            if (!CreatureMaterialCatalog.IsKnown(materialId))
                 return Results.BadRequest(new { reason = "material.unknown" });
-            store.AddDemonMaterials(pid, new[] { (materialId!, Math.Clamp(qty ?? 1, 1, 10_000)) });
-            return Results.Ok(new { items = store.ListDemonMaterials(pid) });
+            store.AddCreatureMaterials(pid, new[] { (materialId!, Math.Clamp(qty ?? 1, 1, 10_000)) });
+            return Results.Ok(new { items = store.ListCreatureMaterials(pid) });
         });
 
-        test.MapPost("/mint-demon", (RpgStore store, long? playerId, string? speciesId) =>
+        test.MapPost("/mint-creature", (RpgStore store, long? playerId, string? speciesId) =>
         {
             var pid = playerId ?? store.GetCurrentPlayerId();
             if (!store.PlayerExists(pid)) return Results.NotFound();
-            if (!DemonSpeciesCatalog.IsKnown(speciesId))
+            if (!CreatureSpeciesCatalog.IsKnown(speciesId))
                 return Results.BadRequest(new { reason = "species.unknown" });
-            var species = DemonSpeciesCatalog.Get(speciesId!);
-            var (specimen, _) = store.MintDemon(pid, new DemonMintSpec
+            var species = CreatureSpeciesCatalog.Get(speciesId!);
+            var (specimen, _) = store.MintCreature(pid, new CreatureMintSpec
             {
                 SpeciesId = species.SpeciesId,
                 Side = species.Side,

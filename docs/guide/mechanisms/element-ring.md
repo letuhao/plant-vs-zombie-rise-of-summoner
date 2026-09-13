@@ -38,7 +38,7 @@ Six concrete elements, plus omni:
 
 **Fire · ice · air · earth · light · dark**
 
-Matchups are real numbers in combat feedback. Raising a demon’s element at home means something when you field it.
+Matchups are real numbers in combat feedback. Raising a creature’s element at home means something when you field it.
 
 ---
 
@@ -117,7 +117,7 @@ No. The ring is shipped matchups. Named recipes on top of it are Vision — see 
 - Next: [Shields, crit, and resistance](shields-crit-resist.md)
 - [Shields, crit, and resistance](shields-crit-resist.md)
 - [Statuses](statuses.md)
-- [Patron demon](patron.md)
+- [Patron creature](patron.md)
 - [Essence](essence.md)
 - Pillar: [Combat](../combat.md)
 - Fancy skim: [Vision site — Mechanisms](../site/index.html#mechanisms)

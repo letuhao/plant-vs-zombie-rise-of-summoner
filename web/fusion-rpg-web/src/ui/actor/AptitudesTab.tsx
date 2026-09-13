@@ -39,7 +39,7 @@ export type AptitudeDraftState = {
 };
 
 /**
- * Thin host: Mode A UniqueDemon (creature) vs Mode C commander → aptitudes-console RecipeMount.
+ * Thin host: Mode A UniqueCreature (creature) vs Mode C commander → aptitudes-console RecipeMount.
  * Shell footer may mirror Confirm/Cancel; in-console decision strip is the primary (D7/S8).
  */
 export function AptitudesTab({
@@ -103,7 +103,7 @@ export function AptitudesTab({
   if (!data.instanceId) {
     return (
       <div className="mt-4">
-        <EmptyState title="No specimen bound for UniqueDemon aptitudes." testId="aptitudes-no-specimen" />
+        <EmptyState title="No specimen bound for UniqueCreature aptitudes." testId="aptitudes-no-specimen" />
       </div>
     );
   }
@@ -184,7 +184,7 @@ function AptitudesConsoleHost({
       }
       if (!instanceId) {
         emitAptitudeObs("aptitude.confirm.refused", { mode, reason: "no-instance" });
-        throw new Error("UniqueDemon allocate requires instanceId");
+        throw new Error("UniqueCreature allocate requires instanceId");
       }
       emitAptitudeObs("aptitude.confirm", { mode, instanceId });
       await saveUnique.mutateAsync({ instanceId, shares: draft });

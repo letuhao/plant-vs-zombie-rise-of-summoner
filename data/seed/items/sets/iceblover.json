@@ -25,7 +25,7 @@
       "id": "set.iceblover-001",
       "nameKey": "set.frost-clover",
       "name": "Frost Clover",
-      "themeKey": "demon.iceblover",
+      "themeKey": "creature.iceblover",
       "members": [
         {
           "role": "armament-primary",

@@ -14,22 +14,19 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class ContentHashStoreTests : IDisposable
 {
-    readonly List<string> _dirs = new();
+    readonly List<DataTestStore> _stores = new();
 
     public void Dispose()
     {
-        foreach (var d in _dirs)
-            try { Directory.Delete(d, recursive: true); } catch { /* temp dir */ }
+        foreach (var s in _stores)
+            s.Dispose();
     }
 
     RpgStore NewStore()
     {
-        var dir = Path.Combine(Path.GetTempPath(), "fusionrpg-chash-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(dir);
-        _dirs.Add(dir);
-        var store = new RpgStore(dir);
-        store.Init();
-        return store;
+        var test = DataTestStore.Create();
+        _stores.Add(test);
+        return test.Store;
     }
 
     static AtomRow Vitality(int amount = 45, int tier = 1, bool enabled = true) => new()
@@ -85,6 +82,7 @@ public class ContentHashStoreTests : IDisposable
         Assert.Equal(Hash(a), Hash(b));
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void Insert_order_does_not_change_the_hash()
     {
@@ -108,6 +106,7 @@ public class ContentHashStoreTests : IDisposable
         Assert.Equal(Hash(s), Hash(s));
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void An_empty_catalog_is_a_specific_recognisable_hash_not_an_accident()
     {
@@ -211,6 +210,7 @@ public class ContentHashStoreTests : IDisposable
         Assert.Equal(before, Hash(s));
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void One_magnitude_changed_by_one_moves_the_hash()
     {
@@ -237,6 +237,7 @@ public class ContentHashStoreTests : IDisposable
         Assert.NotEqual(before, Hash(s));
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void A_container_edit_moves_the_hash()
     {

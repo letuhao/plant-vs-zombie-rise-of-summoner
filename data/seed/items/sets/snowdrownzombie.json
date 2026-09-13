@@ -25,7 +25,7 @@
       "id": "set.snowdrownzombie-001",
       "nameKey": "set.snow-forker-s-banquet",
       "name": "Snow-Forker's Banquet",
-      "themeKey": "demon.snowdrownzombie",
+      "themeKey": "creature.snowdrownzombie",
       "members": [
         {
           "role": "armament-primary",

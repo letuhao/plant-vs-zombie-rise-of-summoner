@@ -290,7 +290,7 @@ public sealed class EventDeck
 
         // ContainerValidator's own id grammar (`ContainerValidator.cs:27-29`) is
         // `^(item|trait|...)\.[a-z0-9-]+$` -- no second dot, no colon. A real shipped event id carries
-        // dots of its own (`event.bargain-demon.allpeater-001`), so the id built here is NOT the raw
+        // dots of its own (`event.bargain-creature.allpeater-001`), so the id built here is NOT the raw
         // `eventId:ordinal` spec's own pseudocode implies; it is that string with every '.' folded to
         // '-' and the container-kind's own required "item." prefix applied, named as a correction here
         // rather than left to fail the grammar check at every real call.

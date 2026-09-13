@@ -25,7 +25,7 @@
       "id": "set.gatlingpea-001",
       "nameKey": "set.pea-shot-volley",
       "name": "Pea-Shot Volley",
-      "themeKey": "demon.gatlingpea",
+      "themeKey": "creature.gatlingpea",
       "members": [
         {
           "role": "armament-primary",

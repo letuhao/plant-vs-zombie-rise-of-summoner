@@ -25,7 +25,7 @@
       "id": "set.squashpumpkin-001",
       "nameKey": "set.the-cozy-gourd",
       "name": "The Cozy Gourd",
-      "themeKey": "demon.squashpumpkin",
+      "themeKey": "creature.squashpumpkin",
       "members": [
         {
           "role": "armament-primary",

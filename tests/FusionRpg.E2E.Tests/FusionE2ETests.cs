@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Fusion;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Fusion;
 using FusionRpg.Core.Stats.Derived;
 using Xunit;
 
@@ -26,8 +26,8 @@ public class FusionE2ETests : IAsyncLifetime
 
     public Task DisposeAsync() => Task.CompletedTask;
 
-    static readonly DemonRecipeDef Recipe = DemonRecipeCatalog.All
-        .First(r => DemonSpeciesCatalog.Get(r.OutputSpeciesId).BaseRarity == DemonRarity.Cultivated);
+    static readonly CreatureRecipeDef Recipe = CreatureRecipeCatalog.All
+        .First(r => CreatureSpeciesCatalog.Get(r.OutputSpeciesId).BaseRarity == CreatureRarity.Cultivated);
 
     async Task SeedMaterials(params (string Id, long Qty)[] drops)
     {
@@ -36,9 +36,9 @@ public class FusionE2ETests : IAsyncLifetime
                 .EnsureSuccessStatusCode();
     }
 
-    async Task<string> MintDemon(string speciesId)
+    async Task<string> MintCreature(string speciesId)
     {
-        var resp = await _http.PostAsJsonAsync($"/api/test/mint-demon?speciesId={speciesId}", new { });
+        var resp = await _http.PostAsJsonAsync($"/api/test/mint-creature?speciesId={speciesId}", new { });
         resp.EnsureSuccessStatusCode();
         return (await resp.Content.ReadFromJsonAsync<JsonElement>())
             .GetProperty("actor").GetProperty("instanceId").GetString()!;
@@ -47,11 +47,11 @@ public class FusionE2ETests : IAsyncLifetime
     [Fact]
     public async Task Star_merge_previews_and_executes()
     {
-        var species = DemonSpeciesCatalog.All.First(s =>
-            s.BaseRarity == DemonRarity.Chaff && s.Acquisition != DemonAcquisition.CaptureOnly);
+        var species = CreatureSpeciesCatalog.All.First(s =>
+            s.BaseRarity == CreatureRarity.Chaff && s.Acquisition != CreatureAcquisition.CaptureOnly);
         await SeedMaterials(("shard.chaff", 5), ("essence." + species.ElementPrimary.ToElementId(), 5));
-        var baseId = await MintDemon(species.SpeciesId);
-        var fuel = new[] { await MintDemon(species.SpeciesId), await MintDemon(species.SpeciesId) };
+        var baseId = await MintCreature(species.SpeciesId);
+        var fuel = new[] { await MintCreature(species.SpeciesId), await MintCreature(species.SpeciesId) };
 
         var preview = await _http.PostAsJsonAsync("/api/fusion/preview", new
         {
@@ -90,7 +90,7 @@ public class FusionE2ETests : IAsyncLifetime
     [Fact]
     public async Task Recipes_stay_silhouetted_until_discovered()
     {
-        var output = DemonSpeciesCatalog.Get(Recipe.OutputSpeciesId);
+        var output = CreatureSpeciesCatalog.Get(Recipe.OutputSpeciesId);
         var cost = FusionCostTable.Recipe(output.BaseRarity);
         await SeedMaterials(
             ("shard." + cost.ShardRarity.ToId(), 10),
@@ -105,9 +105,9 @@ public class FusionE2ETests : IAsyncLifetime
             Assert.False(item.TryGetProperty("resultSpeciesId", out _), "the output IS the discovery");
         });
 
-        var a = await MintDemon(Recipe.InputSpeciesIdA);
-        var b = await MintDemon(Recipe.InputSpeciesIdB);
-        var pickable = DemonSpeciesCatalog.Get(Recipe.InputSpeciesIdA).TraitPool[0];
+        var a = await MintCreature(Recipe.InputSpeciesIdA);
+        var b = await MintCreature(Recipe.InputSpeciesIdB);
+        var pickable = CreatureSpeciesCatalog.Get(Recipe.InputSpeciesIdA).TraitPool[0];
 
         var exec = await _http.PostAsJsonAsync("/api/fusion/execute", new
         {
@@ -152,7 +152,7 @@ public class FusionE2ETests : IAsyncLifetime
     public void Loyalty_mods_are_zero_at_bound_and_climb_with_rank()
     {
         Assert.Empty(FusionRpg.Server.WebMatchService.LoyaltyChannelMods(
-            FusionRpg.Core.Demons.Contracts.ContractPolicy.BindLoyalty, 5));
+            FusionRpg.Core.Creatures.Contracts.ContractPolicy.BindLoyalty, 5));
 
         var sworn = FusionRpg.Server.WebMatchService.LoyaltyChannelMods(450, 5);
         var devoted = FusionRpg.Server.WebMatchService.LoyaltyChannelMods(900, 5);
@@ -201,13 +201,13 @@ public class FusionE2ETests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Starred_demon_carries_its_mods_into_a_real_match()
+    public async Task Starred_creature_carries_its_mods_into_a_real_match()
     {
-        var species = DemonSpeciesCatalog.All.First(s =>
-            s.BaseRarity == DemonRarity.Chaff && s.Acquisition != DemonAcquisition.CaptureOnly);
+        var species = CreatureSpeciesCatalog.All.First(s =>
+            s.BaseRarity == CreatureRarity.Chaff && s.Acquisition != CreatureAcquisition.CaptureOnly);
         await SeedMaterials(("shard.chaff", 5), ("essence." + species.ElementPrimary.ToElementId(), 5));
-        var baseId = await MintDemon(species.SpeciesId);
-        var fuel = new[] { await MintDemon(species.SpeciesId), await MintDemon(species.SpeciesId) };
+        var baseId = await MintCreature(species.SpeciesId);
+        var fuel = new[] { await MintCreature(species.SpeciesId), await MintCreature(species.SpeciesId) };
         (await _http.PostAsJsonAsync("/api/fusion/execute", new
         {
             mode = "star-merge",
@@ -216,7 +216,7 @@ public class FusionE2ETests : IAsyncLifetime
             correlationId = "fus-e2e-starmatch"
         })).EnsureSuccessStatusCode();
 
-        // The starred demon fights a real web match; its logged setup carries the star mods.
+        // The starred creature fights a real web match; its logged setup carries the star mods.
         var match = await _http.PostAsJsonAsync("/api/test/web-match", new
         {
             correlationId = "fus-e2e-starmatch-battle",
@@ -240,17 +240,25 @@ public class FusionE2ETests : IAsyncLifetime
         foreach (var element in new[] { "fire", "ice", "air", "earth", "light", "dark" })
             await SeedMaterials(("essence." + element, 200));
 
-        var legendary = DemonRecipeCatalog.All.First(r =>
-            DemonSpeciesCatalog.Get(r.OutputSpeciesId).BaseRarity == DemonRarity.Sunwoven);
+        var legendary = CreatureRecipeCatalog.All.First(r =>
+            CreatureSpeciesCatalog.Get(r.OutputSpeciesId).BaseRarity == CreatureRarity.Sunwoven);
         var corr = 0;
 
         async Task<(string Id, string Trait)> Craft(string speciesId)
         {
-            var species = DemonSpeciesCatalog.Get(speciesId);
-            if (species.BaseRarity == DemonRarity.Chaff)
-                return (await MintDemon(speciesId), species.TraitPool[0]);
+            var species = CreatureSpeciesCatalog.Get(speciesId);
+            // Base case: a species the recipe graph does not produce. That is exactly "below the
+            // output-eligibility floor" (`CreatureRecipeCatalog.OutputEligibilityFloor` = Cultivated),
+            // so Chaff is NOT the only leaf — Grafted/Sprout species are leaves too and are minted
+            // directly, the same way a Chaff is. The old `== Chaff` test assumed every non-Chaff input
+            // had a recipe; 30 Grafted-rarity inputs are referenced by recipes without having one of
+            // their own (spec-fusion-recipe-generator.md: an input comes from the nearest populated
+            // rung BELOW its output, which need not be Chaff), so the old predicate fell through to
+            // `.First()` and threw "Sequence contains no matching element".
+            var recipe = CreatureRecipeCatalog.All.FirstOrDefault(r => r.OutputSpeciesId == speciesId);
+            if (recipe is null)
+                return (await MintCreature(speciesId), species.TraitPool[0]);
 
-            var recipe = DemonRecipeCatalog.All.First(r => r.OutputSpeciesId == speciesId);
             var a = await Craft(recipe.InputSpeciesIdA);
             var b = await Craft(recipe.InputSpeciesIdB);
             var exec = await _http.PostAsJsonAsync("/api/fusion/execute", new
@@ -267,7 +275,7 @@ public class FusionE2ETests : IAsyncLifetime
         }
 
         var crown = await Craft(legendary.OutputSpeciesId);
-        var roster = await _http.GetFromJsonAsync<JsonElement>("/api/demons/1");
+        var roster = await _http.GetFromJsonAsync<JsonElement>("/api/creatures/1");
         var born = roster.GetProperty("items").EnumerateArray()
             .Single(i => i.GetProperty("actor").GetProperty("instanceId").GetString() == crown.Id);
         Assert.Equal("sunwoven", born.GetProperty("profile").GetProperty("rarity").GetString());

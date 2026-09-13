@@ -25,7 +25,7 @@
       "id": "set.waterjackboxjumpzombie-001",
       "nameKey": "set.jester-s-nitro",
       "name": "Jester's Nitro",
-      "themeKey": "demon.waterjackboxjumpzombie",
+      "themeKey": "creature.waterjackboxjumpzombie",
       "members": [
         {
           "role": "armament-primary",

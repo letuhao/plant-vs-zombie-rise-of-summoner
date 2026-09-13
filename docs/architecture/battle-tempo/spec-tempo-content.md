@@ -5,7 +5,7 @@ Module `tempo-content` in the [battle-tempo map](../battle-tempo-map.md). A **pa
 
 **Read before editing:** [battle-turn-ideal.md](../battle-turn-ideal.md) §4 and §10a ·
 [resource-hub-ssot.md](../resource-hub-ssot.md) · [tunables-ssot.md](../tunables-ssot.md) ·
-[demon-seed-map.md](../demon-seed-map.md).
+[creature-seed-map.md](../creature-seed-map.md).
 
 ---
 
@@ -19,35 +19,35 @@ every comparison ties, and ordering falls through to the initiative jitter it al
 
 ### 1.1 ⭐ The species half is already authored — it is not new content
 
-The obvious plan was "add a speed field to the demon corpus". **That work is already done under another
+The obvious plan was "add a speed field to the creature corpus". **That work is already done under another
 name.**
 
 | Fact | Evidence |
 |---|---|
 | Every species has an attack tempo | `attackTempo` on all 831 anchors — a closed five-value vocabulary (`ponderous`, `slow`, `steady`, `quick`, `flurry`) |
-| It is already a **number**, not a label | `demon-shape.v1.json` → `attackTempoIntervalMs`: ponderous **3000**, slow **2400**, steady **1500**, quick **900**, flurry **500** — a **6× spread** |
+| It is already a **number**, not a label | `creature-shape.v1.json` → `attackTempoIntervalMs`: ponderous **3000**, slow **2400**, steady **1500**, quick **900**, flurry **500** — a **6× spread** |
 | It is already **computed and persisted** | `ConcreteSpecies.AttackIntervalMs` (a `long`), stored and round-tripped by `RpgStore.Species.cs` |
 | ⛔ **Battle ignores it entirely** | The only consumers of `AttackIntervalMs` are the store's own persist / read / compare. No battle path reads it. |
 
 So the species half of this module is **a projection, not an authoring pass**: `turn.speed` derives
 from an interval the corpus already carries. **No corpus change, no classifier run, no new column** —
 which also removes the cross-program dependency the map originally flagged, and with it the risk of
-authoring against ids the demon stream is still reconciling.
+authoring against ids the creature stream is still reconciling.
 
 ### ⛔ D12 — "battle ignores it entirely" was true, but not for the reason this section assumed
 
 **Build-time finding, 2026-09-05.** The table above is accurate about `ConcreteSpecies` — battle never
 read it — but that framing hid a second gap the review round never caught: `WaveCatalog.Enemies`
-builds every `BattleActorSetup` from **`DemonSpeciesDef`**, the Core-side, DB-free compiled roster, not
-`ConcreteSpecies`. `DemonSpeciesDef` never carried an interval field **at all** — so "no battle path
+builds every `BattleActorSetup` from **`CreatureSpeciesDef`**, the Core-side, DB-free compiled roster, not
+`ConcreteSpecies`. `CreatureSpeciesDef` never carried an interval field **at all** — so "no battle path
 reads it" was not a missing *read*, it was a missing *value to read*, one layer further back than this
 section assumed.
 
-The gap turned out to be exactly one line: `RpgStore.BuildDemonSpeciesSnapshot()` already reads a
-`ConcreteSpecies` row (`AttackIntervalMs` included) to build each `DemonSpeciesDef`, and simply never
+The gap turned out to be exactly one line: `RpgStore.BuildCreatureSpeciesSnapshot()` already reads a
+`ConcreteSpecies` row (`AttackIntervalMs` included) to build each `CreatureSpeciesDef`, and simply never
 copied that one field across. **This does not change §1.1's conclusion — no corpus change, no
-classifier run — it changes what "the wiring" means:** `DemonSpeciesDef.AttackIntervalMs` (new field,
-default `0`, additive) → `BuildDemonSpeciesSnapshot` copies it → `WaveCatalog.Enemies` carries it onto
+classifier run — it changes what "the wiring" means:** `CreatureSpeciesDef.AttackIntervalMs` (new field,
+default `0`, additive) → `BuildCreatureSpeciesSnapshot` copies it → `WaveCatalog.Enemies` carries it onto
 a new `BattleActorSetup.AttackIntervalMs` → `BattleStatComposer.Compose` projects it.
 
 ⚠️ **This is a second, more specific golden-movement cost, not a new one.** `BattleActorSetup` is what
@@ -145,8 +145,8 @@ data/tuning/battle.v{n}.json                           referenceIntervalMs (publ
 tests/FusionRpg.Core.Tests/Battle/SpeciesTempoTests.cs NEW
 
 # D12's own additions -- the wiring gap the spec's §1.1 did not anticipate:
-src/FusionRpg.Core/Demons/DemonSpeciesCatalog.cs       DemonSpeciesDef.AttackIntervalMs, NEW field
-src/FusionRpg.Data/Sqlite/RpgStore.Species.cs          BuildDemonSpeciesSnapshot copies it across
+src/FusionRpg.Core/Creatures/CreatureSpeciesCatalog.cs       CreatureSpeciesDef.AttackIntervalMs, NEW field
+src/FusionRpg.Data/Sqlite/RpgStore.Species.cs          BuildCreatureSpeciesSnapshot copies it across
 src/FusionRpg.Core/Battle/BattleModels.cs              BattleActorSetup.AttackIntervalMs, NEW field
 src/FusionRpg.Core/Battle/WaveCatalog.cs               Enemies() carries species.AttackIntervalMs onto the setup
 ```
@@ -179,7 +179,7 @@ public static long SpeedFor(long attackIntervalMs, long referenceIntervalMs, lon
 ## 6. Testing strategy
 
 1. **The five shipped tempos project to five distinct speeds**, ordered — `ponderous < slow < steady <
-   quick < flurry`. Read from the **real** `demon-shape.v1.json`, not a fixture.
+   quick < flurry`. Read from the **real** `creature-shape.v1.json`, not a fixture.
 2. ⭐ **A faster species acts first on the production path** — the assertion `B39` could only make with
    a synthetic channel mod. Proven **by contrast in both directions** (swap which species is fast), so
    an initiative roll cannot pass it by luck.
@@ -196,7 +196,7 @@ public static long SpeedFor(long attackIntervalMs, long referenceIntervalMs, lon
   read `TurnDefaultSpeed` from `derived-stats`, never re-declare it.
 - **Ask first:** changing the reference tempo away from `steady`; giving traits a haste mod large enough
   to invert the species ordering.
-- **Never:** add a per-tempo speed table (a second curve); write a speed number into the demon corpus;
+- **Never:** add a per-tempo speed table (a second curve); write a speed number into the creature corpus;
   re-point `swift`; hand-edit a published tuning file.
 
 ---

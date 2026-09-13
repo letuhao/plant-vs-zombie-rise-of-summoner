@@ -22,7 +22,7 @@ Pending when incomplete.
 | DTO | `ActorSheetChannelDto` | Widen fields below |
 | Compose | `UniqueActorHubCompose.ProjectSheet` | Fill metadata from registry + snapshot |
 | FE | `aura.ts` / sheet types | Mirror wire; no invent |
-| Lean | `GET /derived` | Pending if baseline merge omitted (UniqueDemon) |
+| Lean | `GET /derived` | Pending if baseline merge omitted (UniqueCreature) |
 
 ## DTO fields (`ActorSheetChannelDto`)
 
@@ -43,7 +43,7 @@ Pending when incomplete.
 
 Shield HP magnitudes elsewhere stay **`long`** — not this DTO.
 
-## UniqueDemon / lean path
+## UniqueCreature / lean path
 
 If baseline merge is omitted on `/derived`, FE must show **Pending** — never invent values.
 Close [spec-derived-tab](../actor-sheet/spec-derived-tab.md) open question via this signal.
@@ -76,7 +76,7 @@ Close [spec-derived-tab](../actor-sheet/spec-derived-tab.md) open question via t
 - [ ] Sheet JSON includes `unitClass`, `cap`, `defaultValue`, `renderState` for cook-joined channels.
 - [ ] Omni resist: `cap` null; category resist: cap from policy/tuning.
 - [ ] FE can delete `KNOWN_CAPS` / stub regex after consumers migrate.
-- [ ] UniqueDemon lean path: Pending when baseline omitted — test documented.
+- [ ] UniqueCreature lean path: Pending when baseline omitted — test documented.
 - [ ] DTO comments note **D6** double exempt; shield `long` elsewhere.
 
 ## Commands

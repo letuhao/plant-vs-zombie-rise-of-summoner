@@ -1,5 +1,5 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Stats.Aptitudes;
 using Microsoft.Data.Sqlite;
 
@@ -384,7 +384,7 @@ public sealed partial class RpgStore
                         tx.Rollback();
                         return FailActivate("presets.scopeKey.missing", shares, leftover);
                     }
-                    SaveAllocationUnlocked(db, tx, AllocationScope.UniqueDemon, scopeKey, allocation);
+                    SaveAllocationUnlocked(db, tx, AllocationScope.UniqueCreature, scopeKey, allocation);
                     tx.Commit();
                     return new AptitudePresetActivateOutcome(
                         true, "", shares, leftover, false, 0, 0, null);
@@ -401,7 +401,7 @@ public sealed partial class RpgStore
                         tx.Rollback();
                         return FailActivate("correlation.missing", shares, leftover);
                     }
-                    if (!DemonSpeciesCatalog.IsKnown(scopeKey))
+                    if (!CreatureSpeciesCatalog.IsKnown(scopeKey))
                     {
                         tx.Rollback();
                         return FailActivate("species.unknown", shares, leftover);

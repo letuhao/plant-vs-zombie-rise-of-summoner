@@ -66,7 +66,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -174,7 +174,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.fortitude",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -283,7 +283,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -391,7 +391,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.stalwart",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
       "socketMax": 1,

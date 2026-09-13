@@ -25,7 +25,7 @@
       "id": "set.cherryshooter-001",
       "nameKey": "set.crimson-burst-cannon",
       "name": "Crimson Burst Cannon",
-      "themeKey": "demon.cherryshooter",
+      "themeKey": "creature.cherryshooter",
       "members": [
         {
           "role": "armament-primary",

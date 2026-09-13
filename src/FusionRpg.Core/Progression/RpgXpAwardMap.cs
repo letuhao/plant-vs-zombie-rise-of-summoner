@@ -1,5 +1,5 @@
 using FusionRpg.Core.Activity;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 
 namespace FusionRpg.Core.Progression;
 
@@ -83,7 +83,7 @@ public static class RpgXpAwardMap
     /// game mode produced it.
     ///
     /// <para>Best-effort, never a hard requirement: most progression tests never configure
-    /// <see cref="DemonSpeciesCatalog"/> or <see cref="SpeciesProgressionTuningHub"/>, and awarding the
+    /// <see cref="CreatureSpeciesCatalog"/> or <see cref="SpeciesProgressionTuningHub"/>, and awarding the
     /// existing type/player XP above must keep working identically without either configured. A
     /// species award additionally requires a typed <c>EmpireGeneral</c> provenance claim; the legacy
     /// <paramref name="payloadJson"/> argument remains for call-site compatibility but is not a
@@ -97,17 +97,17 @@ public static class RpgXpAwardMap
         // injector's opaque `source` token are deliberately ignored.
         if (!IsEmpireGeneralSource(sourceKind, sourceId, side, gameTypeId))
             return new[] { typeAward };
-        if (gameTypeId is not { } tid || !DemonSpeciesCatalog.IsConfigured || !SpeciesProgressionTuningHub.IsConfigured)
+        if (gameTypeId is not { } tid || !CreatureSpeciesCatalog.IsConfigured || !SpeciesProgressionTuningHub.IsConfigured)
             return new[] { typeAward };
 
-        var index = new LawnElementIndex(DemonSpeciesCatalog.All);
+        var index = new LawnElementIndex(CreatureSpeciesCatalog.All);
         if (!index.TryGet(side, tid, out var species))
             return new[] { typeAward };
 
         return new[]
         {
             typeAward,
-            new Award(RpgActorKinds.Species, species.DemonTypeId,
+            new Award(RpgActorKinds.Species, species.CreatureTypeId,
                 SpeciesProgressionTuningHub.Tuning.PlacementAward, typeAward.Reason,
                 ScopeKey: species.SpeciesId)
         };
@@ -115,15 +115,15 @@ public static class RpgXpAwardMap
 
     static bool IsEmpireGeneralSource(string? sourceKind, string? sourceId, string side, int? gameTypeId)
     {
-        if (!string.Equals(sourceKind, DemonProgressionSource.EmpireGeneralKind, StringComparison.Ordinal)
+        if (!string.Equals(sourceKind, CreatureProgressionSource.EmpireGeneralKind, StringComparison.Ordinal)
             || string.IsNullOrWhiteSpace(sourceId)
             || gameTypeId is not { } tid
-            || !DemonSpeciesCatalog.IsConfigured) return false;
+            || !CreatureSpeciesCatalog.IsConfigured) return false;
         try
         {
-            if (DemonProgressionSource.Parse(sourceKind!, sourceId!)
-                is not DemonProgressionSource.EmpireGeneralSource general) return false;
-            return new LawnElementIndex(DemonSpeciesCatalog.All).TryGet(side, tid, out var species)
+            if (CreatureProgressionSource.Parse(sourceKind!, sourceId!)
+                is not CreatureProgressionSource.EmpireGeneralSource general) return false;
+            return new LawnElementIndex(CreatureSpeciesCatalog.All).TryGet(side, tid, out var species)
                 && string.Equals(species.SpeciesId, general.SpeciesId, StringComparison.Ordinal);
         }
         catch (InvalidOperationException) { return false; }

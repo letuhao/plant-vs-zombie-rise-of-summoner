@@ -4,7 +4,7 @@
 **Status:** Draft — pending owner review.
 
 **Depends on:** `scope-model` · **Blocks:** nothing (own-side completeness soft-depends on
-`membership-events`, but target/type/unique-demon ship without it)
+`membership-events`, but target/type/unique-creature ship without it)
 
 ---
 
@@ -54,10 +54,10 @@ effect that needs a scope rather than a single target, on either host.
 
 **Success is measurable:** a scope targeting "own side" grants to every currently-qualifying entity and
 nothing else, **on the SIM host** (measured directly); a scope requiring the side-wide-constant shape
-(G8, live-only) reads as one value, not N grants; a unique-demon scope resolves through the specimen's
+(G8, live-only) reads as one value, not N grants; a unique-creature scope resolves through the specimen's
 real binding; nothing in this module moves an existing golden; **and, separately, a LIVE gate** (owner
-checklist, matching `patron-demon`'s own precedent) proves a live-PvZ grant is visible and correct in a
-real match — SIM-passing is not proof for the live host, the same way it wasn't for patron-demon.
+checklist, matching `patron-creature`'s own precedent) proves a live-PvZ grant is visible and correct in a
+real match — SIM-passing is not proof for the live host, the same way it wasn't for patron-creature.
 
 ## Design
 
@@ -67,7 +67,7 @@ real match — SIM-passing is not proof for the live host, the same way it wasn'
 |---|---|---|
 | target | one `EffectGrant`, `owner_kind = entity` | `EffectBag.Grant` directly |
 | type | filter by `TypeIds` at grant time, one grant per currently-matching entity | `ActionTargetFilters.TypeIds`'s existing filter logic |
-| unique demon | resolve `instanceId → ptr` via `TryGet`, `entity:{ptr}` owner_key | `MatchUniqueBindingsFacet` (`Match/UniqueBindings.cs`) unchanged |
+| unique creature | resolve `instanceId → ptr` via `TryGet`, `entity:{ptr}` owner_key | `MatchUniqueBindingsFacet` (`Match/UniqueBindings.cs`) unchanged |
 | own/enemy side | **event-driven**: grant per qualifying entity on a `membership-events` spawn/hypnotize-on transition; `EffectBag.WithdrawForOwner("entity", ptr)` on clear/hypnotize-off | `EffectBag.Grant`/`WithdrawForOwner` (verified to exist, §Assumptions) |
 
 Every grant this module issues carries a shared `PluginId` per aura source, so a whole source's grants
@@ -93,7 +93,7 @@ The injector's own overlay/Funnel path already reads grants from the same shared
 (`owner_kind = match`) — proven by `patron.aura`, which is exactly this shape today: *"a match-owner
 effect grant... enters through the Secondary plugin Grant path → Funnel... the overlay combat calculator
 reads the deltas through the existing derived-channel compose"*
-([spec-patron-demon.md](../demons/spec-patron-demon.md)). **This module does not build a second reader
+([spec-patron-creature.md](../creatures/spec-patron-creature.md)). **This module does not build a second reader
 for live PvZ.** Its job on this host is narrower: issue grants shaped so that already-working path reads
 them correctly, and — for any kind that path does **not** already support at `Full` (`scope-model`'s
 table says which) — reject rather than silently issue an inert grant.
@@ -117,7 +117,7 @@ $env:FUSIONRPG_GAME_DIR = "<game dir>"; .\scripts\deploy-play.ps1 -NoServer   # 
 Three guards named deliberately: this module grants through `EffectBag` (funnel-delta's territory), sits
 adjacent to combat-relevant reads (single-writer's territory), and its live-PvZ half must add no Unity
 read of its own (secondary-no-unity) — even though the reader itself is unchanged, existing code. The
-LIVE gate command matches `patron-demon`'s own precedent exactly: SIM passing is not proof for this host.
+LIVE gate command matches `patron-creature`'s own precedent exactly: SIM passing is not proof for this host.
 
 ## Project structure
 
@@ -134,24 +134,24 @@ new capability into the shipped kernel.
 ## Code style
 
 Reuse existing types directly rather than re-wrapping them — `ActionTargetFilters` for type filtering,
-`MatchUniqueBindingsFacet` for demon resolution, `EffectGrantDto` for the grant shape. This module's own
+`MatchUniqueBindingsFacet` for creature resolution, `EffectGrantDto` for the grant shape. This module's own
 code is the **glue**, not a parallel implementation of anything that already exists.
 
 ## Testing strategy
 
-- **Per-WHO resolution**, against a real multi-entity board: target/type/unique-demon each proven to
+- **Per-WHO resolution**, against a real multi-entity board: target/type/unique-creature each proven to
   reach exactly the entities they should and no others.
 - **The G8 case**, using the real shipped kind it applies to: proven to read as one side-wide value, not
   granted per entity — the direct execution-side test for `scope-model`'s own Assumption 2.
-- **Membership reaction**: a demon spawning mid-match gains the grant; one dying/clearing loses it — built
+- **Membership reaction**: a creature spawning mid-match gains the grant; one dying/clearing loses it — built
   against a **test double for `membership-events`' transition shape** if that module hasn't landed yet by
   build time, matching this program's own established precedent (`StubIntentSource` built against a seam
   before its real caller existed).
 - **Golden-neutrality**: full suite + all 8 golden fixtures unmoved — nothing currently authored calls
   this module, so this is a direct, measured proof, not an assumption.
-- **LIVE gate (owner checklist, `patron-demon`-style — required before this module is "done" on the
+- **LIVE gate (owner checklist, `patron-creature`-style — required before this module is "done" on the
   live-PvZ host, not just on SIM):** deploy → grant an own-side scope in a real match → (1) the debug
-  effects view shows one grant per qualifying entity, named correctly, (2) a demon spawning mid-match
+  effects view shows one grant per qualifying entity, named correctly, (2) a creature spawning mid-match
   gains it without a restart, (3) one leaving loses it, (4) the G8-shaped kind is confirmed **not**
   delivered as a grant at all (still reads through the unchanged side-wide path), (5) perf probe shows no
   new hot-path cost.

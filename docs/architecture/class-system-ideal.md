@@ -73,7 +73,7 @@ what a spec author reads.
 
 | # | Decision | Consequence |
 |---|---|---|
-| **1** | **Allocation is scoped four ways: commander → demon type → type variant → unique demon.** An actor's allocation is the SUM of four | §7c. **All four map onto shipped concepts** (§7c.5). `aspect` = the actor's element typing — `ActorElementTypes` + `BattleStatComposer`'s affinity divisors are its precedent. **The work it creates is a migration, not a design**: `ElementPrimary`/`ElementSecondary` and `TraitPool` sit on `DemonSpeciesDef` today and move down a tier |
+| **1** | **Allocation is scoped four ways: commander → creature type → type variant → unique creature.** An actor's allocation is the SUM of four | §7c. **All four map onto shipped concepts** (§7c.5). `aspect` = the actor's element typing — `ActorElementTypes` + `BattleStatComposer`'s affinity divisors are its precedent. **The work it creates is a migration, not a design**: `ElementPrimary`/`ElementSecondary` and `TraitPool` sit on `CreatureSpeciesDef` today and move down a tier |
 | **2** | **Register `poise`** — `decisions.md` **Resource model** amendment, five → six | Unblocks §5.1 (guard costs something), §5b.3 (its cost shape), §8.9 (BASTION's missing offence). §5b.3's recommendation stands: a flat commit cost **plus** an absorb drain |
 | **3** | **Status apply shape: `sigmoid` + a positive `applyOffsetK`** — keep the curve soft, move the neutral point off 50% | Chosen over `linearFromZero` so no amount of resistance confers immunity (rule 5). **It needs a second number** — see §0.0.1b |
 | **4** | **Keep 12 aptitudes**, and strengthen `Focus` rather than cut it | §8.1a answers what `Focus` feeds and why it measures dead; §8.1b found the reason is not `Focus` |
@@ -166,7 +166,7 @@ Per §0.2, a gap a later layer can fill is a design opportunity; a gap no layer 
 | `cc` turn-loss is modelled crudely, not through readiness | `battle-timeline` owns the readiness model | No |
 | ~~Does `Focus` need a mechanism?~~ | **DECIDED: keep 12, and DELEGATE the fix to the action layer** (§8.1c) — flattening it into damage would trade a gameplay mechanism for a measurable number. §8.1a: two of its three dead levers are dead because the HARNESS lacks cooldowns and cost reduction | No |
 | ~~The 4th tier is undefined~~ | **DECIDED: it is `aspect` — the element typing** (§7c.4–7c.6). Carries element + derived trait bias + starting skills; strengths/weaknesses are the shipped element ring | No |
-| **NEW — move element off the species** | `variant-scope` module. `DemonSpeciesDef.ElementPrimary/Secondary` + `TraitPool` currently sit on the SPECIES, so one species is one element today. Moving them down is a schema + generator change | No — but it is the largest single piece of work §7c creates |
+| **NEW — move element off the species** | `variant-scope` module. `CreatureSpeciesDef.ElementPrimary/Secondary` + `TraitPool` currently sit on the SPECIES, so one species is one element today. Moving them down is a schema + generator change | No — but it is the largest single piece of work §7c creates |
 | **NEW — every measurement neutralised elements** (§7c.7) | `residual-fit`, and it should be its FIRST step, not its last | No — but §8.8a's dominance severity is an upper bound until it is redone |
 | **NEW — `stamina` is free** (§8.1b): `strike` regen 3,784 > cost 1,544, so it never runs dry | `residual-fit` — an action cost only matters if it exceeds the regen of its pool. **It is the top reservation for 9 of 12 aptitudes (§8.1d)** — one number, more effect than any per-aptitude tuning | No |
 | The two acceptance criteria are **coupled** and must be solved jointly | `residual-fit` (§5d.4b) | No |
@@ -1628,7 +1628,7 @@ build pays"**, and it is a curve rather than a fee. That puts real weight on one
 **Owner decision, 2026-08-26.** The question *"who holds an allocation?"* was never asked in this
 document, and the answer is not one of the obvious three:
 
-> **commander → demon type → **aspect** → unique demon.**
+> **commander → creature type → **aspect** → unique creature.**
 
 **An actor's allocation is the SUM of four allocations**, one per scope. That is not a new mechanism —
 it is the same tiered-additive shape the game already uses everywhere: `status.power.omni + .{category}
@@ -1643,15 +1643,15 @@ collapse these"*, and §7 already splits type from specimen:
 | Scope | Shipped key | Where it lives today |
 |---|---|---|
 | **commander** | `player_id` (`kind=player`) | `rpg_actor_progression`; it is what `Θ_actor`'s `daveLevel` term already reads |
-| **demon type** | `(player_id, kind, type_id)` | §7's *"Type almanac — all Peashooters share one plant actor XP"* |
+| **creature type** | `(player_id, kind, type_id)` | §7's *"Type almanac — all Peashooters share one plant actor XP"* |
 | **aspect** (was “variant”) | `ActorElementTypes` + `BattleStatComposer` affinity | §7c.5 — it has MORE shipped support than any other tier; §7c.1 said “nothing” and that was wrong |
-| **unique demon** | `instance_id` (+ `player_id`) | §7's *"Unique specimen — one named Peashooter with gear/level across runs"*, `instance:{guid}` owner key |
+| **unique creature** | `instance_id` (+ `player_id`) | §7's *"Unique specimen — one named Peashooter with gear/level across runs"*, `instance:{guid}` owner key |
 
 **Three of four are shipped concepts with their own progression rows.** The design does not need new
 identity plumbing; it needs a point budget per tier.
 
 **The variant tier is the gap.** There is no `variant` between type and instance. Candidates already in
-the demon program — `rarity`, `star` (`Demons/Fusion/StarPolicy.cs`), `personality` — but **nothing
+the creature program — `rarity`, `star` (`Creatures/Fusion/StarPolicy.cs`), `personality` — but **nothing
 declares which one is the allocation scope**, and it must be one thing rather than three. That is the
 one genuinely new concept this decision introduces, and it belongs in the spec's Phase 0.
 
@@ -1662,19 +1662,19 @@ rather than arbitrary:
 
 | Tier | Points scale with | What it expresses |
 |---|---|---|
-| commander | `Θ_player` — daveLevel, realms, runs | **who you are.** Shared by every demon you field |
+| commander | `Θ_player` — daveLevel, realms, runs | **who you are.** Shared by every creature you field |
 | type | type almanac XP | **what a species is.** Shared by every specimen of it |
 | variant | (undecided — rarity/star) | **which strain** |
 | unique | specimen level (`instance_id`) | **this one, that you invested in** |
 
 > **DECIDED 2026-08-26: the commander tier is the SMALLEST and the unique tier the LARGEST.**
 >
-> The commander tier applies to *every* demon you field, so a dominant commander allocation is the
+> The commander tier applies to *every* creature you field, so a dominant commander allocation is the
 > worst possible version of §8.8a's finding — one wrong build, replicated across your whole roster.
 > The unique tier applies to one specimen, so a strong unique allocation is *specialisation*, which is
 > what makes a team diverse.
 >
-> **Per-demon allocation is also what most blunts the dominance problem** (§0.2.1): when you field a
+> **Per-creature allocation is also what most blunts the dominance problem** (§0.2.1): when you field a
 > mix, "one corner beats all eleven" stops being the whole game, because the question becomes which
 > *team* to bring rather than which build to play. That is the summoner fantasy doing balance work.
 
@@ -1685,7 +1685,7 @@ rather than arbitrary:
 | §7a.2 (3 aptitude points per `Θ`) | **Per tier now, not per actor.** Four grants, four sources. The single number becomes a table |
 | §7b (free build) | Unchanged in principle — every tier is still free within itself. But "a build" now means a *stack* of four |
 | §8.8a (dominance) | Still measured per-actor and still valid; its *severity* drops, because a player fields several actors rather than one |
-| §6 (Zomboss patterns) | **Newly symmetric.** A pattern is an allocation at the type/variant tier, which is exactly what an authored enemy is — and the player's demons now work the same way |
+| §6 (Zomboss patterns) | **Newly symmetric.** A pattern is an allocation at the type/variant tier, which is exactly what an authored enemy is — and the player's creatures now work the same way |
 | `residual-fit` | Must fit **four** budgets, not one. Larger job, and the tier weights are its first output |
 
 ### 7c.4 The fourth tier is `aspect` — element, and what element implies
@@ -1701,7 +1701,7 @@ one a character.
 **But derive it, never author it.** That is the whole discipline, and the repo already has the machinery:
 
 ```csharp
-DemonSpeciesGenerator:  TraitPool = TraitsFor(rarity, typeId)      // today
+CreatureSpeciesGenerator:  TraitPool = TraitsFor(rarity, typeId)      // today
                         TraitPool = TraitsFor(rarity, typeId, element)   // one more argument
 ```
 
@@ -1723,13 +1723,13 @@ weakness ARE its element's.**
 | An actor's element identity | **`ActorElementTypes`** — `Primary` + `Secondary`, validated (secondary requires a primary; the two must differ) |
 | Element routing a share of stats onto its own channels | **`BattleStatComposer`** — *"element affinity fills the actor's own element channels"*, `PrimaryAffinityDivisor` +25%, `SecondaryAffinityDivisor` +12.5% |
 | Strength / weakness | the element ring + `ShieldElementMatrix` |
-| Trait pools, generated per species | `DemonSpeciesGenerator.TraitsFor(rarity, typeId)` |
+| Trait pools, generated per species | `CreatureSpeciesGenerator.TraitsFor(rarity, typeId)` |
 
 **`BattleStatComposer`'s affinity is this tier's shipped precedent, with a fixed share instead of a
 budget.** The aspect tier is the same idea made allocatable: instead of a divisor handing you +25% on
 your own element, you *spend points* there.
 
-> **The one real migration.** `DemonSpeciesDef` carries `ElementPrimary` / `ElementSecondary`
+> **The one real migration.** `CreatureSpeciesDef` carries `ElementPrimary` / `ElementSecondary`
 > **on the species**, so today one species **is** one element — a fire Peashooter and an ice Peashooter
 > would be two species, not two aspects of one. Making element an aspect means moving those two fields
 > (and probably `TraitPool`) **down** a tier. That is a schema and generator change, not a rename, and
@@ -1738,7 +1738,7 @@ your own element, you *spend points* there.
 ### 7c.6 The name — `aspect`
 
 `race` is taken (`StatClass.Race`). `variant` is taken and means something else entirely —
-`DemonSpeciesCatalog.KnownVariants` is a shipped closed list of `normal · ancient · mutated · corrupted
+`CreatureSpeciesCatalog.KnownVariants` is a shipped closed list of `normal · ancient · mutated · corrupted
 · blessed · cursed · shiny`, i.e. **cosmetic-rarity finishes**. Adopting it would create exactly the
 collision `race` was avoided for.
 
@@ -1747,7 +1747,7 @@ tier carries traits and starting skills, and `affinity` names a divisor share.
 
 **`aspect`** — free everywhere in `src/`, reads correctly for what it is (*"the fire aspect of
 Peashooter"*), implies more than a damage type, and carries no biological framing, which matters
-because zombies and demons take element typings too.
+because zombies and creatures take element typings too.
 
 ### 7c.7 ⚠️ Every dominance measurement neutralised elements
 

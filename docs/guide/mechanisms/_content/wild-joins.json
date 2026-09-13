@@ -5,10 +5,10 @@
   "kicker": "Roster and summoning · idle expeditions",
   "pillar": {"text": "Expeditions", "href": "expeditions.md"},
   "loopLine": "Summon and fusion · Idle expeditions",
-  "hook": "**Wild joins** are demons that enter the roster from expedition outcomes — intake that is not the altar.",
+  "hook": "**Wild joins** are creatures that enter the roster from expedition outcomes — intake that is not the altar.",
   "blindSpots": [
     {"term": "Wild join", "meaning": "A specimen that arrives from an expedition result, not from a soul pull."},
-    {"term": "Intake", "meaning": "Any path that adds a demon. Altar, wild join, and (later) capture are different intakes."},
+    {"term": "Intake", "meaning": "Any path that adds a creature. Altar, wild join, and (later) capture are different intakes."},
     {"term": "Expedition", "meaning": "Idle squad mission — dispatch, wait, collect. Detail: [expeditions](expeditions)."},
     {"term": "Altar", "meaning": "Soul gacha pulls. Wild joins prove gacha is not the only path."}
   ],
@@ -38,21 +38,21 @@
     {
       "title": "Why it exists",
       "paras": [
-        "If only the altar grew the roster, idle play would never surprise you with a demon.",
+        "If only the altar grew the roster, idle play would never surprise you with a creature.",
         "Wild joins keep expeditions on the summon-and-fusion spine."
       ]
     }
   ],
   "doTitle": "What you do (first time)",
   "doSteps": [
-    "Unlock Expeditions (bound demon available).",
+    "Unlock Expeditions (bound creature available).",
     "Send a squad and collect a return.",
     "If no wild join this time, still read the report — joins are an outcome, not a guarantee every run."
   ],
   "doNote": "Stop when altar ≠ only intake. WIP hunt path: [capture](capture).",
   "mixUps": [
     {"q": "Did I get charged souls for a wild join?", "a": "No. That is the point of a non-altar intake."},
-    {"q": "Is every expedition return a new demon?", "a": "No. Materials and souls are common; wild joins are one possible outcome."},
+    {"q": "Is every expedition return a new creature?", "a": "No. Materials and souls are common; wild joins are one possible outcome."},
     {"q": "Is this capture?", "a": "No. Capture is WIP pressure-and-catch in a run."},
     {"q": "Can a wild join fuse later?", "a": "Yes. It is a normal specimen once it lands."}
   ],

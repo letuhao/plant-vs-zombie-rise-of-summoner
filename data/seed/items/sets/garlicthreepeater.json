@@ -25,7 +25,7 @@
       "id": "set.garlicthreepeater-001",
       "nameKey": "set.triple-line-venom",
       "name": "Triple-Line Venom",
-      "themeKey": "demon.garlicthreepeater",
+      "themeKey": "creature.garlicthreepeater",
       "members": [
         {
           "role": "armament-primary",

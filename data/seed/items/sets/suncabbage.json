@@ -25,7 +25,7 @@
       "id": "set.suncabbage-001",
       "nameKey": "set.solar-cabbage-launcher",
       "name": "Solar Cabbage Launcher",
-      "themeKey": "demon.suncabbage",
+      "themeKey": "creature.suncabbage",
       "members": [
         {
           "role": "armament-primary",

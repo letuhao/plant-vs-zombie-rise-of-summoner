@@ -30,7 +30,7 @@
 | Thing | Owner |
 |---|---|
 | Equip roles and their unlock predicate | Item module 3 (`slot-roles`) |
-| Actor frame, species, family, and unique-demon classification | Demon / Seedsmith frame-classify work |
+| Actor frame, species, family, and unique-creature classification | Creature / Seedsmith frame-classify work |
 | The ten-rung rarity ladder | Item module 7 (`rarity-bands`) |
 | Rolled affixes and their tier bands | Item module 8 (`affix-legality`) |
 | The twelve primary stats (aptitudes) | Class system |
@@ -80,8 +80,8 @@ that same contract:
 SetIdentityRequirement {
   setClass: general | family | unique-species
   requiredFamilyId?: declared family id
-  requiredSpeciesId?: declared demon species id
-  requiresUniqueDemon: bool
+  requiredSpeciesId?: declared creature species id
+  requiresUniqueCreature: bool
   hybridEligibility: allowed | forbidden
 }
 ```
@@ -90,10 +90,10 @@ SetIdentityRequirement {
 |---|---|
 | `general` | No family or species requirement; hybrid eligibility follows the ordinary frame/role rules. |
 | `family` | The wearer must have the exact declared `requiredFamilyId`. It may be a hybrid only when its ordinary frame and role checks pass. |
-| `unique-species` | The wearer must be a unique demon of the exact declared `requiredSpeciesId`, and its frame must not be `hybrid`. Both ten-role and fifteen-role unique templates use this same restriction. |
+| `unique-species` | The wearer must be a unique creature of the exact declared `requiredSpeciesId`, and its frame must not be `hybrid`. Both ten-role and fifteen-role unique templates use this same restriction. |
 
 The actor facts come from the authoritative unique-actor/species projection:
-`speciesId`, `familyId`, whether the actor is a unique demon, and `frame`. No
+`speciesId`, `familyId`, whether the actor is a unique creature, and `frame`. No
 rule may infer a family from a display name, species-id prefix, faction, side,
 or an LLM classification. A missing required identity fact fails closed.
 
@@ -105,7 +105,7 @@ role unlock -> frame -> faction -> set identity -> specimen level
 ```
 
 The implementation extends the typed gate vocabulary with `FamilyMismatch`,
-`SpeciesMismatch`, `UniqueDemonRequired`, and `HybridSetForbidden`. It also
+`SpeciesMismatch`, `UniqueCreatureRequired`, and `HybridSetForbidden`. It also
 extends the gate's specimen input with the four authoritative identity facts
 above. These are an approved future contract, not claims about the current
 `EquipGate` implementation.
@@ -215,9 +215,9 @@ reason beyond the approved identity reasons, or a new container kind / column.
   vocabulary.
 - `src/FusionRpg.Core/Items/EquipProjector.cs` — projection retains lapsed
   assignments and reports shortfalls.
-- `docs/architecture/demon-system-map.md` — unique demons are individual
-  `UniqueActor` specimens; general demons are species-only and cannot satisfy
-  a unique-demon item restriction.
+- `docs/architecture/creature-system-map.md` — unique creatures are individual
+  `UniqueActor` specimens; general creatures are species-only and cannot satisfy
+  a unique-creature item restriction.
 - `src/FusionRpg.Core/Stats/Aptitudes/Aptitude.cs` — the twelve-aptitude catalog.
 - `docs/architecture/class-system/spec-primary-stats.md` §2–§3 — primary-stat
   terminology and aptitude-source rule.

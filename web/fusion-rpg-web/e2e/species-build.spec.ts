@@ -24,7 +24,7 @@ const players = {
   currentPlayerId: 1
 };
 
-const boundDemon = {
+const boundCreature = {
   instanceId: "d1",
   bound: true,
   deployable: true,
@@ -59,17 +59,17 @@ async function mockSanctumWithSpeciesBuild(page: Page) {
   );
   await page.route("**/api/contracts/**", (route) =>
     fulfillJson(route, {
-      contracts: [boundDemon],
+      contracts: [boundCreature],
       capacity: { used: 1, total: 4, purchasedSlots: 0, nextSlotPrice: 500, canBuy: true, maxSlots: 8 },
       dailyTribute: 5,
       deployFloor: 200,
       loyaltyMax: 1000
     })
   );
-  await page.route("**/api/demons/catalog", (route) => fulfillJson(route, { species: [] }));
-  await page.route("**/api/demons/*/codex", (route) => fulfillJson(route, { entries: [] }));
-  await page.route("**/api/demons/*/summon-state", (route) => fulfillJson(route, { pity: 0 }));
-  await page.route("**/api/demons/*", (route) =>
+  await page.route("**/api/creatures/catalog", (route) => fulfillJson(route, { species: [] }));
+  await page.route("**/api/creatures/*/codex", (route) => fulfillJson(route, { entries: [] }));
+  await page.route("**/api/creatures/*/summon-state", (route) => fulfillJson(route, { pity: 0 }));
+  await page.route("**/api/creatures/*", (route) =>
     fulfillJson(route, {
       playerId: 1,
       items: [

@@ -253,7 +253,7 @@ def add_rung_power_budget(doc, reference_power):
 
 
 def add_inherit_cost_table(doc):
-    """demon-standalone WAVE F2.3 (2026-09-07): add `inheritCostByRarity` — a fusion pick's cost is
+    """creature-standalone WAVE F2.3 (2026-09-07): add `inheritCostByRarity` — a fusion pick's cost is
     read from the PICK'S OWN source rarity, not the fusion output's, so it needs its own table rather
     than reusing `recipeCost` (which is keyed by output rarity). Reuses `recipeCost`'s own `souls`
     escalation verbatim (the todo's own "same 150->1000-souls shape... already uses" instruction) --
@@ -280,7 +280,7 @@ def add_inherit_cost_table(doc):
 
     meta = doc.setdefault("_meta", {})
     meta["inheritCostByRarityDerivation"] = (
-        "WAVE F2.3 (demon-standalone, 2026-09-07): a flat {rarity: souls} map, one entry per "
+        "WAVE F2.3 (creature-standalone, 2026-09-07): a flat {rarity: souls} map, one entry per "
         "recipeCost rung, copied verbatim from recipeCost[rarity].souls at the time this table was "
         "added. Looked up by the INHERITED PICK's own source species' rarity (F2.2/F2.4), never the "
         "fusion output's own rarity -- a different lookup key from recipeCost, hence its own table "

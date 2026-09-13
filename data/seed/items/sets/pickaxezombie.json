@@ -23,9 +23,9 @@
   "entries": [
     {
       "id": "set.pickaxezombie-001",
-      "nameKey": "set.the-unreachable-pyramid",
-      "name": "The Unreachable Pyramid",
-      "themeKey": "demon.pickaxezombie",
+      "nameKey": "set.relic-of-the-sunken-tomb",
+      "name": "Relic of the Sunken Tomb",
+      "themeKey": "creature.pickaxezombie",
       "members": [
         {
           "role": "armament-primary",

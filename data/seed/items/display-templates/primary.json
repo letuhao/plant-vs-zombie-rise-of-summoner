@@ -260,6 +260,36 @@
       "groupId": "g.tempo",
       "status": "live",
       "tags": []
+    },
+    {
+      "id": "disptpl.p1-025",
+      "nameKey": "disptpl.affix.arm-plate",
+      "name": "{value}% more armor plating",
+      "runtimeFamily": "atom.arm-plate",
+      "plantOverrideKey": null,
+      "groupId": "g.armour",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-026",
+      "nameKey": "disptpl.affix.arm-op",
+      "name": "{value}% more carapace",
+      "runtimeFamily": "atom.arm-op",
+      "plantOverrideKey": null,
+      "groupId": "g.armour",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-027",
+      "nameKey": "disptpl.affix.tempo-pulse",
+      "name": "{value}% more sun production interval",
+      "runtimeFamily": "atom.tempo-pulse",
+      "plantOverrideKey": null,
+      "groupId": "g.tempo",
+      "status": "live",
+      "tags": []
     }
   ]
 }

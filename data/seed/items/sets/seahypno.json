@@ -25,7 +25,7 @@
       "id": "set.seahypno-001",
       "nameKey": "set.jellyfish-lifeline",
       "name": "Jellyfish Lifeline",
-      "themeKey": "demon.seahypno",
+      "themeKey": "creature.seahypno",
       "members": [
         {
           "role": "armament-primary",

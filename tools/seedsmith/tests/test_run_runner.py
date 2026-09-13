@@ -1,4 +1,4 @@
-"""Tests for the `run-control` execution driver (spec-run-control.md, demon-seed module 9).
+"""Tests for the `run-control` execution driver (spec-run-control.md, creature-seed module 9).
 
 Uses `test_run_orchestrator.py`'s own `always_valid_call` stub — the REAL LangGraph pipeline
 graphs run end to end, only the network call is replaced, so these tests exercise the actual
@@ -15,17 +15,17 @@ import pytest
 
 pytest.importorskip("langgraph.graph")
 
-from seedsmith.adapters.demons.anchor.prompts import PIPELINES  # noqa: E402
-from seedsmith.adapters.demons.preflight import PREFLIGHT_RECORD_NAME, _compute_content_hash  # noqa: E402
-from seedsmith.adapters.demons.run import runner  # noqa: E402
-from seedsmith.adapters.demons.run.record import RunRecord, write_record  # noqa: E402
+from seedsmith.adapters.creatures.anchor.prompts import PIPELINES  # noqa: E402
+from seedsmith.adapters.creatures.preflight import PREFLIGHT_RECORD_NAME, _compute_content_hash  # noqa: E402
+from seedsmith.adapters.creatures.run import runner  # noqa: E402
+from seedsmith.adapters.creatures.run.record import RunRecord, write_record  # noqa: E402
 from test_run_orchestrator import always_valid_call  # noqa: E402
 
 # Every SPECIES row below has statsObserved=True -> basis="observed" -> threat-audit is NOT one of
 # the voted pipelines (Q26: only inferred/blocked genuinely choose a rung — observed/stated AUDIT
 # a deterministic computed one). So 5 of the 8 pipelines vote (3 samples each) and 3 don't (1 each):
 # 5*3 + 3*1 = 18, never a flat `len(PIPELINES)` (spec-option-permutation.md §6's own budget).
-# `attackTempo` (kit-shape) joined the voted 5 on 2026-09-04 (demon-corpus-self-heal C1) — was 16
+# `attackTempo` (kit-shape) joined the voted 5 on 2026-09-04 (creature-corpus-self-heal C1) — was 16
 # (4*3 + 4*1) before kit-shape was wired into voting/permutation at all.
 CALLS_PER_OBSERVED_SPECIES = 18
 
@@ -215,7 +215,7 @@ def test_overwrite_all_requires_the_correct_token(tmp_path):
         runner.overwrite_all("wrong-token", paths=paths, call=always_valid_call)
 
     dump_hash = _compute_content_hash(paths.dump_dir)
-    from seedsmith.adapters.demons.run.record import overwrite_all_token
+    from seedsmith.adapters.creatures.run.record import overwrite_all_token
     token = overwrite_all_token(dump_hash)
     record = runner.overwrite_all(token, paths=paths, call=always_valid_call)
     assert record.state == "completed"
@@ -237,7 +237,7 @@ def test_rerun_reclassifies_even_an_already_emitted_species(tmp_path):
     assert calls["n"] == CALLS_PER_OBSERVED_SPECIES  # re-classified despite already being emitted
 
 
-# ---- pipeline-scoped rerun (2026-09-04, demon-corpus-self-heal B1) -----------------------------
+# ---- pipeline-scoped rerun (2026-09-04, creature-corpus-self-heal B1) -----------------------------
 #
 # Redeploying a fixed prompt used to mean either living with the stale field forever or paying for
 # a full 8-pipeline reclassification of species that already have 7 perfectly good judgments.
@@ -340,7 +340,7 @@ def test_status_reports_state_and_progress(tmp_path):
 # ---- family-file bucketing (2026-09-02) ------------------------------------------------------
 #
 # Real bug found on T2.11's own 20-species run: `_family_for` only ever consulted
-# `family-assignments.json` (built for the unrelated fusion-product `demon` corpus) and ignored
+# `family-assignments.json` (built for the unrelated fusion-product `creature` corpus) and ignored
 # the anchor's own just-classified `family` field entirely — every base species not coincidentally
 # sharing an id with that other corpus landed in the generic "unclassified" bucket despite the
 # `identity` pipeline (spec-classify-pipelines.md pipeline 8) already having proposed a real family
@@ -374,9 +374,9 @@ def test_slugify_family_matches_the_repos_own_kebab_case_grammar():
     assert runner._slugify_family("  already-kebab  ") == "already-kebab"
 
 
-# ---- stale-duplicate write bug (2026-09-04, demon-corpus-self-heal A1) --------------------------
+# ---- stale-duplicate write bug (2026-09-04, creature-corpus-self-heal A1) --------------------------
 #
-# Real bug found via DemonQualityReport at corpus scale: a reclassification that changes a
+# Real bug found via CreatureQualityReport at corpus scale: a reclassification that changes a
 # species' own `family` moves its entry to a NEW bucket file but never removed it from the OLD
 # one — 217 of 833 real species had a stale copy left behind. `_write_species_entry` now scans
 # every OTHER file already loaded into `existing_by_file` and removes this species from it too.
@@ -706,13 +706,13 @@ def test_resume_with_more_workers_than_the_original_start_only_finishes_what_rem
     assert resumed.calls_made == len(species) * CALLS_PER_OBSERVED_SPECIES
 
 
-# ---- fix_unresolved (2026-09-04, demon-corpus-self-heal F1; extended Phase H, 2026-09-07) ------
+# ---- fix_unresolved (2026-09-04, creature-corpus-self-heal F1; extended Phase H, 2026-09-07) ------
 #
-# The deliberate fix step, run ON DEMAND after reading DemonQualityReport's own unresolved-rate
+# The deliberate fix step, run ON DEMAND after reading CreatureQualityReport's own unresolved-rate
 # finding, never automatically during classification. threatBand has a real, already-sanctioned
-# deterministic default (demon-threat.v1.json's own inferredDefaultRung). rarity, added on
+# deterministic default (creature-threat.v1.json's own inferredDefaultRung). rarity, added on
 # explicit owner direction (Phase H), falls back to threatBand via a rank-preserving
-# correspondence (demon-rarity-power-fallback.v1.json) — rarity is this game's own invented
+# correspondence (creature-rarity-power-fallback.v1.json) — rarity is this game's own invented
 # mechanism, not an almanac/PvZ property, so a vote that never converges gets a deterministic
 # engine instead of staying unresolved forever.
 

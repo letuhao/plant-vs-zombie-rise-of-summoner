@@ -25,7 +25,7 @@
       "id": "set.cattailgirl-001",
       "nameKey": "set.zombie-bullet-volley",
       "name": "Zombie Bullet Volley",
-      "themeKey": "demon.cattailgirl",
+      "themeKey": "creature.cattailgirl",
       "members": [
         {
           "role": "armament-primary",

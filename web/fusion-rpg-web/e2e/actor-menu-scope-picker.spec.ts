@@ -74,14 +74,14 @@ test.describe("Actor menu scope picker (fe-essentials T6)", () => {
     await expect.poll(() => consoleLogs.some((l) => l.includes("list selection"))).toBe(true);
   });
 
-  test("UniqueDemon mode lists the same roster candidates via the shared list panel", async ({ page }) => {
+  test("UniqueCreature mode lists the same roster candidates via the shared list panel", async ({ page }) => {
     await mockShell(page);
     await page.goto("/#/actor-menu-scope-picker-demo?mock=1");
 
-    await page.getByTestId("scope-mode-unique-demon").click();
-    await expect(page.getByTestId("scope-uniqueDemon-list")).toBeVisible();
+    await page.getByTestId("scope-mode-unique-creature").click();
+    await expect(page.getByTestId("scope-uniqueCreature-list")).toBeVisible();
     await page.getByTestId("actor-row").click();
-    await expect(page.getByTestId("scope-picker-demo-value")).toContainText('"kind": "uniqueDemon"');
+    await expect(page.getByTestId("scope-picker-demo-value")).toContainText('"kind": "uniqueCreature"');
   });
 
   test("Type mode lists real types from the catalog and multi-selects", async ({ page }) => {

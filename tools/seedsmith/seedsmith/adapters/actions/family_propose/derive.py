@@ -1,6 +1,6 @@
 """seedsmith.adapters.actions.family_propose.derive --- A-P2's own candidate assembly: per-sample
 bounded self-heal (F9's adapted contract) and majority-vote resolution over `atomFamilies` ONLY
-(spec-family-propose.md SS2 "Which fields are voted"). Reuses `demons.anchor.vote.resolve_vote`
+(spec-family-propose.md SS2 "Which fields are voted"). Reuses `creatures.anchor.vote.resolve_vote`
 and `pipeline.llm_caller.call_with_self_heal` directly, never reimplemented (this whole program's
 own reuse discipline) -- exactly as `general_propose/derive.py` does.
 
@@ -27,7 +27,8 @@ from typing import Any, Callable, Mapping, Sequence
 
 from ....pipeline.llm_caller import LlmCallerConfig, call_with_self_heal
 from ....pipeline.model import BLOCKED_FIELD
-from ...demons.anchor.vote import SetVoteResult, resolve_set_vote
+from ...creatures.anchor.vote import SetVoteResult, resolve_set_vote
+from ..coverage_assignment.derive import splice_payoff_enablers
 from .prompts import (
     SYSTEM_PROMPT,
     atom_families_are_allowed,
@@ -173,7 +174,8 @@ class Candidate:
 
 
 def finalize_candidate(brief: Mapping[str, Any], drafts: Sequence[Mapping[str, Any]], *,
-                       candidate_id: str, provenance: "Mapping[str, Any] | None" = None) -> Candidate:
+                       candidate_id: str, provenance: "Mapping[str, Any] | None" = None,
+                       pairing_table: "Mapping[str, Sequence[str]] | None" = None) -> Candidate:
     """Pure -- zero model calls, so this is what `--dry-run` and the recorded-transcript replay
     test both exercise. Takes exactly `SAMPLE_COUNT` already-produced draft dicts (live-called-
     and-healed, or a recorded transcript replayed verbatim) and resolves ONE candidate:
@@ -224,6 +226,10 @@ def finalize_candidate(brief: Mapping[str, Any], drafts: Sequence[Mapping[str, A
     # own required family, ONLY on an accepted candidate -- deterministic, zero extra model calls,
     # omitted `requiredFamilies` is byte-identical to before this existed.
     atom_families = sorted(set(vote.values) | set(brief.get("requiredFamilies") or ()))
+    if pairing_table:
+        atom_families = splice_payoff_enablers(
+            atom_families, pairing_table=pairing_table,
+            allowed_atom_families=brief.get("pool", {}).get("allowedAtomFamilies", ()))
     entry = entry_for({**primary, "atomFamilies": atom_families}, candidate_id=candidate_id,
                       brief_id=brief_id, provenance=prov)
     return Candidate(brief_id=brief_id, outcome="accepted", entry=entry, vote=vote, provenance=prov)
@@ -257,7 +263,8 @@ def propose_family_action(brief: Mapping[str, Any], *, candidate_id: str,
 
     prov = dict(provenance or {})
     prov["healNotes"] = heal_notes
-    return finalize_candidate(brief, drafts, candidate_id=candidate_id, provenance=prov)
+    return finalize_candidate(brief, drafts, candidate_id=candidate_id, provenance=prov,
+                              pairing_table=pairing_table)
 
 
 def candidate_row(candidate: Candidate, *, pipeline_id: str = "A-P2", scope: str = "family") -> "dict[str, Any]":

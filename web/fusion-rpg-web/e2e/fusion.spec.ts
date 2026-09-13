@@ -20,7 +20,7 @@ async function fulfillJson(route: Route, body: unknown, status = 200) {
   await route.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
 }
 
-async function mockSanctum(page: Page, opts?: { demons?: unknown[] }) {
+async function mockSanctum(page: Page, opts?: { creatures?: unknown[] }) {
   await page.route("**/hub/rpg**", (route) => route.abort());
   await page.route("**/health", (route) => fulfillJson(route, health));
   await page.route("**/api/players", (route) => fulfillJson(route, players));
@@ -41,10 +41,10 @@ async function mockSanctum(page: Page, opts?: { demons?: unknown[] }) {
       loyaltyMax: 0
     })
   );
-  await page.route("**/api/demons/catalog", (route) => fulfillJson(route, { species: [] }));
-  await page.route("**/api/demons/*/codex", (route) => fulfillJson(route, { entries: [] }));
-  await page.route("**/api/demons/*/summon-state", (route) => fulfillJson(route, { pity: 0 }));
-  await page.route("**/api/demons/*", (route) => fulfillJson(route, { playerId: 1, items: opts?.demons ?? [] }));
+  await page.route("**/api/creatures/catalog", (route) => fulfillJson(route, { species: [] }));
+  await page.route("**/api/creatures/*/codex", (route) => fulfillJson(route, { entries: [] }));
+  await page.route("**/api/creatures/*/summon-state", (route) => fulfillJson(route, { pity: 0 }));
+  await page.route("**/api/creatures/*", (route) => fulfillJson(route, { playerId: 1, items: opts?.creatures ?? [] }));
   await page.route("**/api/patron/**", (route) => fulfillJson(route, { patron: null }));
   await page.route("**/api/expeditions/*/materials", (route) => fulfillJson(route, { items: [] }));
   await page.route("**/api/expeditions/*", (route) => fulfillJson(route, { items: [] }));
@@ -52,16 +52,16 @@ async function mockSanctum(page: Page, opts?: { demons?: unknown[] }) {
 }
 
 test.describe("Fusion layer (T15)", () => {
-  test("locked with no demons", async ({ page }) => {
+  test("locked with no creatures", async ({ page }) => {
     await mockSanctum(page);
     await page.goto("/#/sanctum");
     await expect(page.getByTestId("sanctum-hud")).toBeVisible();
     await expect(page.getByTestId("rail-fusion")).toBeDisabled();
   });
 
-  test("F opens it once a demon exists, Esc closes it without unmounting the Sanctum", async ({ page }) => {
+  test("F opens it once a creature exists, Esc closes it without unmounting the Sanctum", async ({ page }) => {
     await mockSanctum(page, {
-      demons: [
+      creatures: [
         {
           profile: { instanceId: "d1", speciesId: "sp-imp", rarity: "common", star: 0, promoted: false, traitIds: [], locked: false },
           actor: { level: 3 }

@@ -25,7 +25,7 @@
       "id": "set.threekelp-001",
       "nameKey": "set.triple-line-grass-shooter",
       "name": "Triple-Line Grass Shooter",
-      "themeKey": "demon.threekelp",
+      "themeKey": "creature.threekelp",
       "members": [
         {
           "role": "armament-primary",

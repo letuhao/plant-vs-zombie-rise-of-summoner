@@ -1,7 +1,7 @@
 # Game-design research — unit design, counter systems, roster scale
 
-**Captured 2026-09-01** for the `demon-seed` idea phase
-([demon-seed-ideal.md](../../architecture/demon-seed-ideal.md) §4 is the distilled version; these
+**Captured 2026-09-01** for the `creature-seed` idea phase
+([creature-seed-ideal.md](../../architecture/creature-seed-ideal.md) §4 is the distilled version; these
 files are the raw material behind it).
 
 **Read this before commissioning any research on unit design, elemental typing, counter matrices,
@@ -72,7 +72,7 @@ Numbers marked **(computed)** in the files are tallies over primary data, not qu
 
 ## Two things this research is *not*
 
-**It is not a spec.** Nothing here says what this game should do. `demon-seed-ideal.md` §4 draws the
+**It is not a spec.** Nothing here says what this game should do. `creature-seed-ideal.md` §4 draws the
 conclusions; these files hold the evidence.
 
 **It is not complete on designer intent.** The single most consistent negative finding across every

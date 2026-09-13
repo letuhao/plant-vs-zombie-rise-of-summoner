@@ -53,7 +53,7 @@ Status badges match the [feature catalog](../README.md#feature-catalog): **Shipp
 | Pacts and loyalty | Shipped | [Guide](../site/mechanisms/pacts-loyalty.html) · [pacts-loyalty](pacts-loyalty.md) |
 | Tribute on pacts | Shipped | [Guide](../site/mechanisms/tribute.html) · [tribute](tribute.md) |
 | Specimen fusion | Shipped | [Guide](../site/mechanisms/specimen-fusion.html) · [specimen-fusion](specimen-fusion.md) |
-| Patron demon | WIP | [Guide](../site/mechanisms/patron.html) · [patron](patron.md) |
+| Patron creature | WIP | [Guide](../site/mechanisms/patron.html) · [patron](patron.md) |
 | In-run capture | WIP | [Guide](../site/mechanisms/capture.html) · [capture](capture.md) |
 | Wild joins | Shipped | [Guide](../site/mechanisms/wild-joins.html) · [wild-joins](wild-joins.md) |
 
@@ -90,7 +90,7 @@ Status badges match the [feature catalog](../README.md#feature-catalog): **Shipp
 |---|---|---|
 | Lawn match (first core) | Shipped | [Guide](../site/mechanisms/lawn-match.html) · [lawn-match](lawn-match.md) |
 | Live mirror and unit HUD | Shipped | [Guide](../site/mechanisms/lawn-mirror-hud.html) · [lawn-mirror-hud](lawn-mirror-hud.md) |
-| Bound demon deploy | Shipped | [Guide](../site/mechanisms/lawn-deploy.html) · [lawn-deploy](lawn-deploy.md) |
+| Bound creature deploy | Shipped | [Guide](../site/mechanisms/lawn-deploy.html) · [lawn-deploy](lawn-deploy.md) |
 | Lawn blessing | WIP | [Guide](../site/mechanisms/lawn-blessing.html) · [lawn-blessing](lawn-blessing.md) |
 | Lawn trophies | WIP | [Guide](../site/mechanisms/lawn-trophies.html) · [lawn-trophies](lawn-trophies.md) |
 | In-game open control room | WIP | [Guide](../site/mechanisms/in-game-open.html) · [in-game-open](in-game-open.md) |

@@ -72,7 +72,7 @@ public class WebGameGuardE2ETests : IAsyncLifetime
 
     /// <summary>
     /// C4c: the same wipe scenario through the REAL service path — a WebMatchService battle
-    /// (real demons, real ingest) during a live PvZ match leaves the grant session, the open
+    /// (real creatures, real ingest) during a live PvZ match leaves the grant session, the open
     /// PvZ run, and the specimen actors untouched.
     /// </summary>
     [Fact]
@@ -89,14 +89,14 @@ public class WebGameGuardE2ETests : IAsyncLifetime
         })).EnsureSuccessStatusCode();
         Assert.Equal(1, await SessionGrantCount());
 
-        // Real demons on the roster (seed → ×10 pull), snapshot their actor state.
+        // Real creatures on the roster (seed → ×10 pull), snapshot their actor state.
         (await _http.PostAsJsonAsync("/api/test/seed-souls-demo?amount=2000", new { })).EnsureSuccessStatusCode();
-        (await _http.PostAsJsonAsync("/api/demons/summon", new
+        (await _http.PostAsJsonAsync("/api/creatures/summon", new
         {
             count = 10,
             correlationId = "guard-svc-pull"
         })).EnsureSuccessStatusCode();
-        var rosterBefore = await _http.GetFromJsonAsync<JsonElement>("/api/demons/1");
+        var rosterBefore = await _http.GetFromJsonAsync<JsonElement>("/api/creatures/1");
         var actorsBefore = rosterBefore.GetProperty("items").EnumerateArray()
             .Select(i => i.GetProperty("actor"))
             .ToDictionary(
@@ -120,7 +120,7 @@ public class WebGameGuardE2ETests : IAsyncLifetime
         Assert.True(pvzRun.GetProperty("endedUtc").ValueKind == JsonValueKind.Null,
             "the web match must not close the live PvZ run");
 
-        var rosterAfter = await _http.GetFromJsonAsync<JsonElement>("/api/demons/1");
+        var rosterAfter = await _http.GetFromJsonAsync<JsonElement>("/api/creatures/1");
         foreach (var item in rosterAfter.GetProperty("items").EnumerateArray())
         {
             var actor = item.GetProperty("actor");

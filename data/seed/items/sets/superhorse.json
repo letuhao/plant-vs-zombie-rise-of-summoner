@@ -25,7 +25,7 @@
       "id": "set.superhorse-001",
       "nameKey": "set.global-blitz-vanguard",
       "name": "Global Blitz Vanguard",
-      "themeKey": "demon.superhorse",
+      "themeKey": "creature.superhorse",
       "members": [
         {
           "role": "armament-primary",

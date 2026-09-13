@@ -1,5 +1,5 @@
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Power;
 
 namespace FusionRpg.Core.Delve.Loot;

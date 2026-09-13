@@ -1,6 +1,7 @@
 using FusionRpg.Contracts;
 using FusionRpg.Data;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -21,21 +22,19 @@ namespace FusionRpg.Server.Tests;
 /// </summary>
 public class StaleBoardStartTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public StaleBoardStartTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-staleboard-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
         // RpgStore is not IDisposable; the temp dir is the only thing to clean up.
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir, best effort */ }
+        _testStore.Dispose();
     }
 
     long Insert(string kind) => _store.InsertEvent(new EventEnvelope

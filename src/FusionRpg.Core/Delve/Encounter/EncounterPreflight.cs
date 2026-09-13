@@ -11,7 +11,7 @@ namespace FusionRpg.Core.Delve.Encounter;
 /// </summary>
 public sealed record EncounterDomain(string DomainId, ElementTypeId? Climate, IReadOnlyList<EncounterAnchor> Encounters);
 
-/// <summary>How many real, banded corpus anchors fall at each of `demon-threat.v1.json`'s ten
+/// <summary>How many real, banded corpus anchors fall at each of `creature-threat.v1.json`'s ten
 /// rungs — "exactly what `threat-audit` changes" (spec §8).</summary>
 public sealed record RungHistogramRow(int Rung, int Count);
 

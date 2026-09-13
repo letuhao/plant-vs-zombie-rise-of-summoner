@@ -226,7 +226,7 @@ class SemanticDedup(Metric):
         # similarity (~0.5-0.6, sentences sharing a topic rather than near-identical short
         # strings), 8-band/4-row LSH has real recall loss: it missed the real corpus's clearest
         # pair (Jaccard 0.56) entirely on a live run. A kind with a prose dedup field is bounded in
-        # the low thousands at worst (commander-effect's ceiling is ~900 demons), where O(n^2)
+        # the low thousands at worst (commander-effect's ceiling is ~900 creatures), where O(n^2)
         # exact-shingle comparison is cheap and has no recall problem to trade away.
         prose_shingle_sets = {(p.entry_id, p.field): shingles(p.text) for p in prosed}
         prose_by_key = {(p.entry_id, p.field): p for p in prosed}

@@ -25,7 +25,7 @@
       "id": "set.passionfruit-001",
       "nameKey": "set.spore-seed-launcher",
       "name": "Spore-Seed Launcher",
-      "themeKey": "demon.passionfruit",
+      "themeKey": "creature.passionfruit",
       "members": [
         {
           "role": "armament-primary",
