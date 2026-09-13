@@ -121,17 +121,47 @@ and an agent cannot drift. `deploy-play.ps1` calls it. CI keeps calling `dotnet 
 **no** filter, so CI is `full` by construction and can never accidentally inherit the dev default.
 A negative filter includes uncategorized tests, so only the *excluded* tests need a trait.
 
-### The guards run on `full` only
+### The guards run on `full` only — except the static gate, which runs on `default` too
 
-**`guard-test-substrate.ps1` (the static gate) and `test-substrate-leak-alarm.ps1` (the runtime
-alarm) run against the `full` profile, never the default.** The default profile *intentionally*
-writes the file-bound directories — those are the `DiskSemantics` tests — so a disk-leak alarm run
-around it would either false-positive every time or need an ever-growing allowlist. The static gate
-reads source and is profile-independent, but it is paired with the alarm for the same "one run, both
-halves" reason. **Do not "optimize" either guard onto the fast profile.**
+**The runtime leak alarm (`test-substrate-leak-alarm.ps1`) runs against the `full` profile only.** The
+default profile *intentionally* writes the file-bound directories — those are the `DiskSemantics` tests —
+so a disk-leak alarm run around it would either false-positive every time or need an ever-growing
+allowlist. **Do not "optimize" the alarm onto the fast profile.**
 
-`full` is the only profile that catches a disk regression — hence the nightly workflow: it reruns
-everything unfiltered within a day, instead of waiting for a release tag.
+**The static gate (`guard-test-substrate.ps1`) also runs in the default profile** — added 2026-09-13.
+It reads *source*, so it is profile-independent and cannot false-positive on those intentional writes: it
+refuses a test that **swears** a temp delete or builds a store from a temp path. `scripts/test-fast.ps1`
+calls it first and exits non-zero on failure ("DEFAULT PROFILE REFUSED"), which makes the dev loop
+**self-guarding** — a leaking test cannot be added and then run unnoticed. Verified by planting a
+leaking probe: `test-fast.ps1` refused with the file named, then the probe was removed.
+
+`full` is the only profile that catches a disk regression at *runtime* — hence the nightly workflow: it
+reruns everything unfiltered within a day, instead of waiting for a release tag.
+
+### Wall-clock is its own axis — see the burden audit
+
+The profiles above reduce what runs by *category*. **Test wall-clock is a separate axis, and the
+obvious reading of it is wrong.** [test-burden-audit.md](test-burden-audit.md) (measured 2026-09-13)
+records the two facts that matter before anyone tunes a "slow" test:
+
+1. **Per-test durations in a full-suite TRX are not cost.** Under parallelism they absorb contention —
+   the top 25 Data.Tests classes showed **53×–230× inflation** (median ~160×). Re-measure a suspect
+   test **in isolation** before concluding anything.
+2. **Data.Tests is fastest at ~2 threads, not 32** — 87s vs 367s wall, a **4.2×** difference. A pure-CPU
+   control on the same machine scaled 6.58× at 8 threads, so this is a property of the store path, not
+   of a busy box.
+
+**That second fact has a cause, and the cause changes the fix.**
+[test-architecture-audit.md](test-architecture-audit.md) proves it is a **process-global mutex inside
+SQLite's in-memory VFS** (`SQLITE_MUTEX_STATIC_VFS1`, taken on every in-memory database open —
+`src/memdb.c`), so in-memory databases cannot parallelize *within a process* at all, while **file**
+databases scaled 3.25× on the same machine. The correct lever is therefore a **process** boundary, not a
+thread cap: two concurrent `dotnet test` processes measured **23.9s vs 47.4s sequential**. Read that
+document before touching parallelism — a thread cap treats the symptom and permanently forfeits cores.
+
+That document also lists the hypotheses **already ruled out with numbers** (`ClearAllPools`,
+shared-cache mode, GC, batch shape, raw DDL, machine load), so they are not re-tested, and the two real
+defects it found (`EnsureColumn`'s swallowed `ALTER TABLE`; the `--no-build` stale-assembly trap).
 
 ---
 
@@ -182,10 +212,20 @@ own: `CreatureSpeciesImportCliTests` (another session's cold-process test) and
 reads `FUSIONRPG_DATA` from disk. Its dispose is leak-proof (clears pools, does not swallow), but it
 cannot be memory without changing production `Program.cs`, which this program does not touch.
 
+**Measured 2026-09-13: it is not worth excluding from the default profile.** It is an
+`ICollectionFixture` (`FoundationE2ETests.cs:308`), so one shared dir serves the whole `e2e` collection
+and is deleted cleanly — a full default-profile E2E run (**221 tests**) left **0 MB and 0 directories**.
+Tagging it `DiskSemantics` would be a **no-op anyway** (xUnit traits do not inherit from a collection
+fixture; the 39 consumer classes would each need the attribute), and excluding all 39 would drop 221
+real tests to save nothing. The right call is to leave it running and let the **leak alarm** prove
+cleanup, which it does (`-IsolateTemp` → 0 survivors).
+
 ### Group 3 — class-C, not a store test (`tests/FusionRpg.Server.Tests`)
 
 `BaseTypeSocketMaxCorpusTests.cs : swallowed-delete` — no `new RpgStore(`; it writes a real nested
-JSON fixture tree for `BaseTypeSocketMaxCorpus.Load(root)`. A fixture-leak fix, not a store migration.
+JSON fixture tree for `BaseTypeSocketMaxCorpus.Load(root)`, so the fixture **is** the subject. Fixed
+2026-09-13: it is now `[Trait("Category", "DiskSemantics")]` and its cleanup **throws** instead of
+swallowing (R3). It writes no SQLite, which is why the gate's `temp-store` rule never applied to it.
 
 ### Group 4 — outside this program's boundary
 

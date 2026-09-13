@@ -27,8 +27,19 @@
     "docs/architecture/actor-hub-and-combat-power-solid-fixing-*.md",
     "tasks/actor-hub-and-combat-power-solid-fixing-*.md",
     "tasks/evidence-fragments/**",
-    "tasks/sessions/solid-run-20260912-eb53.json"
+    "tasks/sessions/solid-run-20260912-eb53.json",
+    "docs/architecture/live-probe-map.md",
+    "docs/architecture/live-probe-ideal.md",
+    "docs/architecture/live-probe/**",
+    "docs/contributing/live-probe-standard.md",
+    "docs/DESIGN-GATE.md",
+    "tasks/live-probe-plan.md",
+    "tasks/live-probe-todo.md",
+    "tasks/party-dungeon-todo.md",
+    "scripts/guard-debug-scope.ps1",
+    "tools/ProveLiveProbe/**"
   ],
   "started": "2026-09-12T14:38:04Z",
-  "status": "active"
+  "status": "active",
+  "scopeAmended": "2026-09-13T00:00:00Z — added the live-probe sub-program's own paths (born from this session's own T12/T14 live-probe incident, spec'd and planned as its own program under the same worktree/session rather than opening a second one). docs/DESIGN-GATE.md and tasks/party-dungeon-todo.md are narrow, single-purpose additions (one topic-index row + failure-log entry; one cross-link note) -- not a claim on those programs' own scope."
 }

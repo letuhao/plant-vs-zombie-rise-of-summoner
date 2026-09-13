@@ -68,12 +68,22 @@ test-category filter that CI can override cleanly per invocation. A category fil
 `dotnet test` command line, which is also what makes the four profiles visible and greppable. We keep
 `test.runsettings` exactly as it is.
 
-### 4. The guards stay on `full`
+### 4. The guards: the alarm stays on `full`, the static gate also runs on `default`
 
-`guard-test-substrate.ps1` (static) and the `disk-write-probe` runtime alarm (T19b) must run against
-the **full** profile — the default profile *intentionally* writes the file-bound dirs, so an alarm run
-on the default profile would either false-positive or need an ever-growing allowlist. Stated in the
-spec so no future session "optimizes" the guards onto the fast profile.
+**The `disk-write-probe` runtime alarm (T19b) must run against the `full` profile only** — the default
+profile *intentionally* writes the file-bound dirs, so an alarm run on the default profile would either
+false-positive or need an ever-growing allowlist. Stated so no future session "optimizes" the alarm onto
+the fast profile.
+
+**The static gate (`guard-test-substrate.ps1`) is different and was added to the default profile
+2026-09-13.** It reads *source*, not the filesystem, so it is profile-independent
+and cannot false-positive on those intentional writes; it refuses a test that **swears** a temp delete
+or builds a store from a temp path. `scripts/test-fast.ps1` runs it first and exits non-zero on failure,
+so the dev loop is **self-guarding**: a leaking test cannot be added and then run unnoticed. Verified by
+planting a leaking probe — `test-fast.ps1` refused it by name.
+
+This closes the one gap the profiles left: previously the default profile relied entirely on tests being
+correctly migrated/tagged, with no independent check of that assumption.
 
 ### 5. What this deliberately does not do
 
@@ -82,6 +92,16 @@ spec so no future session "optimizes" the guards onto the fast profile.
   in *every* profile).
 - Does not change `src/`, `trait`s on production code, or `test.runsettings`.
 - Does not make the default profile the only gate — CI/nightly/release all run `full`.
+
+**Does not own test wall-clock — that is a separate axis, measured separately.** Profiles reduce *what
+runs* by category; they say nothing about how fast the remainder runs. The 2026-09-13 burden audit
+([`docs/contributing/test-burden-audit.md`](../../contributing/test-burden-audit.md)) found two facts a
+reader of this spec needs and would otherwise re-derive the hard way: per-test durations in a full-suite
+TRX are **contention wall-clock, not cost** (53×–230× inflation in Data.Tests), and **Data.Tests is 4.2×
+faster at ~2 threads than at the default 32**. The follow-ups that came out of it — capping Data.Tests
+parallelism, fixing `EnsureColumn`'s swallowed `ALTER TABLE`, and investigating the unexplained ~46ms in
+`EnsureHotSchema` — are tracked as BU1–BU4 in `tasks/data-test-substrate-todo.md` Phase 8, not here,
+because they change `src`/CI rather than the profile contract.
 
 ## Commands
 
@@ -147,7 +167,7 @@ public void A_seed_tree_on_disk_imports_end_to_end() { … }
    migration (T18b–T18f) has retired the 102 files that are neither tagged nor migrated.
 2. `full` (CI/`release.yml`/nightly) runs everything; CI is unfiltered (asserted by a T28 step).
 3. The two categories exist and are documented in `testing-standard.md` with the profile table.
-4. The guards run only on `full`.
+4. The runtime alarm runs only on `full`; the static gate also runs in the default profile (`test-fast.ps1` runs it first).
 5. No test is deleted, and every tagged file's assertion count is unchanged.
 6. A nightly workflow exists so a disk regression is caught within a day.
 

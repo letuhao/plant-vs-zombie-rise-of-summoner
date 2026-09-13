@@ -323,7 +323,30 @@ Phase 6  mechanism carriage                        R5             ← deep tiers
 Phase 7  resolve proof (lawn + battle parity)      acceptance
 Phase 8  regenerate the corpus + re-audit          R6
 Phase 9  balance measurement (squad-harness S4)    the actual balance goal
+Phase 10 effect-pipeline L0 (modules 11/12)        R-2, NEW 2026-09-13 — parallel-safe, not blocking
+Phase 11 ActorHub primary producer                 R-1 primary half, NEW 2026-09-13 — ⛔ GATED
+Phase 12 the real join (Resolver + InstanceProducer) R-1.1, R-3.1-3.3, NEW 2026-09-13 — plan-audit find
 ```
+
+**Phase 12 added 2026-09-13 by a plan-coverage audit** — R-1.1 and R-3.1–3.3 were both in the report
+and the approved capability map, and both were dropped when Phases 10/11 were written. It is the SOLID
+remediation for Phase 4's bespoke `AffixComposer` patch (the hard rule requires one be named and
+sequenced, not left implicit) and it also supersedes Phase 4's "refuse by name" pool disposition —
+`spec-channel-pool.md` §4 already assigns the roll to module 2, so delegating to it is what makes pool
+resolution real instead of permanent. Sequenced after Phase 4 (it replaces what Phase 4 patches) and
+before Phase 8's final regeneration (P8.2 re-runs the census after this phase too, not only Phase 6).
+
+**Phases 10 and 11 added 2026-09-13**, after the owner answered the two blockers this plan's §6
+originally left open (both kinds for the kind fork; publish anchors now for the balance decision) and
+asked that `effect-pipeline` modules 11/12 be specced inside this program. Phase 10 runs in parallel
+with anything above it — it improves *which* affixes get picked, not whether a node binds and reads,
+so nothing else depends on it finishing first. **Phase 11 is a genuine pre-work gate, not a
+checkpoint:** `solid-run-20260912-eb53` (`actor-hub-and-combat-power-solid-fixing`) is fusing
+`ActorHub`/`BattleStatComposer` on the exact subsystem-registration surface Phase 11 needs, right now.
+Named resolver: owner, merging that worktree (read 2026-09-13: "program complete, owner sign-off
+pending," close). Default if this plan reaches Phase 11 unmerged: **skip it — Phases 0–10 already
+deliver full playability through the derived route — and carry it as a tracked follow-up**, per
+`planning-and-task-breakdown`'s gates-vs-checkpoints rule.
 
 **Phase 5 moved to after Phase 2–3, reversing the 2026-09-11 order.** Aligning `vocab.py` first would
 have been a repair in appearance only: it removes the *symptom* (1,356 refusals) by making the
@@ -357,6 +380,9 @@ done when its gate passes on real data.
 | **G9 — corpus regenerated** | `data/generated/passive-tree/*.json` is byte-reproducible from `--check`; `check --family PassiveTree` runs with real wired data, not `NOT_MEASURED` |
 | **G10 — bind rate by class** | Magnitude **and** mechanism node classes both bind at a high rate; the mechanism class is no longer the worst; no tree binds **0%** |
 | **G11 — balance measured** | `squad-harness` S4 re-run against the real direct-channel model; `F ∈ [1, Fmax]`; no tree is OP; the `ExclusionRate`/`NearDuplicate` GAP findings from the parent plan are either closed or explicitly deferred with a named owner |
+| **G12 — L0 lands** (Phase 10, NEW) | Every affix carries a closed power class + `basis`; `channelWeights[powerClass][channel]` covers the six named channels; tree-language's candidate list is L0-composed; a fixed-seed replay before/after L0 is byte-identical (no RNG consumed) |
+| **G13 — primary route reaches Hub** (Phase 11, NEW, gated) | A new `IActorStatSubsystem` contributes `stat.modify` tree atoms into `ActorHub`; `guard-actor-hub.ps1` passes (no second composer); one owned primary-kind node changes a real number in lawn **and** battle, through Hub, not a bolt-on |
+| **G14 — one resolver, tree is a dispositioned path** (Phase 12, NEW, plan-audit find) | `effect-pipeline-map.md` §1 names the tree as path 5; `AffixComposer.Resolve`'s parallel copy is deleted or delegates to `Resolver`; a node yields a real `InstanceRow`+`BindingRow`; pool-shaped channels resolve through `ChannelPool` instead of a permanent refusal |
 
 **G10 is the distribution-specific gate this program adds.** A repair that raises the aggregate bind
 rate while leaving mechanism nodes at 2.1% and tiers 8–10 empty has not fixed the tree — it has fixed
@@ -379,25 +405,38 @@ the metric.
 
 ## 6. Ask-first items (owner decisions this plan cannot make alone)
 
-1. **Publish new channel curves (R10).** 20 families need a curve for `combat.accuracy.*`,
-   `combat.dodge.*`, `combat.crit.*`, `combat.shield.*`, `arm1Max`, `arm2Max`, `attackInterval`,
-   `produceInterval`, `status.power`, `status.resist`. Adding a curve is a power-ladder change owned
-   by the power program, published as a **new version** (`power-scale.v3.json`), never an in-place
-   edit of v2. This is the single largest unblock in the program.
-2. **`Replace`/`Flag` tier semantics (R8).** A structural op carries no magnitude — either bind it as
-   a mechanism with no amount, or exclude those 19 families from the tree vocabulary. `bands.v1.json`
-   is frozen and says "out of scope", so this is a decision, not a derivation.
-3. **Which kind does a tree node target?** The owner already answered *both, unified*: the repo has
-   one battle engine, so a tree contributes through both the `stat.derived` fan-in and the
-   `stat.modify` producer path, and the lawn and battle read modes are not split. **R4's fix is
-   therefore: emit both kinds correctly and prove both reach the shared engine** — not "pick one".
-4. **Add `More` to `NodeAtomOp`, or keep excluding `more`-op families?** R2. The owner's "everything,
-   unified" direction favors adding `More` (it is legal for `stat.modify` and priced at 550‰), threaded
-   through the resolve path. Confirm before widening the shipped enum.
-5. **Mechanism-carriage shape (R7/R5)** — does a mechanism node carry its atom with `kMicro = 0` and a
-   real `kindId`, or a new field? Needed once R7 makes mechanism atoms exist.
-6. **The cross-program `tier-bands`/`power-scale` ownership** — publishing versions is the power
-   program's call; this program requests them and consumes them, never edits them unilaterally.
+1. ✅ **ANSWERED 2026-09-13 — publish new channel curves (R10).** 20 families need a curve for
+   `combat.accuracy.*`, `combat.dodge.*`, `combat.crit.*`, `combat.shield.*`, `arm1Max`, `arm2Max`,
+   `attackInterval`, `produceInterval`, `status.power`, `status.resist`, **plus a `status.apply`
+   chance/duration anchor** (new, folded into this same decision — Decision B, "publish anchors now").
+   Both are a power-ladder change owned by the power program, published as **new versions**
+   (`power-scale.v3.json`; a new anchor file, `bands.v1.json` stays frozen), never an in-place edit.
+   Still the single largest piece of real work in the program — the decision unblocks it, it does not
+   do it.
+2. **`Replace`/`Flag` tier semantics (R8).** Still open. A structural op carries no magnitude —
+   either bind it as a mechanism with no amount, or exclude those 19 families from the tree
+   vocabulary. `bands.v1.json` is frozen and says "out of scope", so this is a decision, not a
+   derivation.
+3. ✅ **ANSWERED 2026-09-13 — which kind does a tree node target, and by what mechanism?** Both
+   kinds, confirmed. The *mechanism* (left open by the 2026-09-12 direction) is now specific: the
+   `stat.derived` half is the existing `AtomDerivedSubsystem` fan-in (already wired, lawn + battle,
+   B6/D6/D7); the `stat.modify` half is a **new `IActorStatSubsystem` on `ActorHub`** — the owner's
+   own correction, *"it is actor hub, not battle engine"* — not the `FA1`/`BattleStatModifierLedger`
+   shape this row originally proposed. See Phase 11. **Gated** on `solid-run-20260912-eb53`
+   (`actor-hub-and-combat-power-solid-fixing`) merging first — that session is fusing the exact
+   `ActorHub` subsystem-registration surface this needs, right now.
+4. ✅ **DONE — `More` added to `NodeAtomOp` (R2).** Commit `38286a0d`. Priced at 550‰, threaded
+   through load + bind, M3 stays a loud named refusal on the derived side.
+5. **Mechanism-carriage shape (R7/R5)** — still open. Does a mechanism node carry its atom with
+   `kMicro = 0` and a real `kindId`, or a new field? Needed once R7 makes mechanism atoms exist.
+6. **The cross-program `tier-bands`/`power-scale` ownership** — unchanged: publishing versions is the
+   power program's call; this program requests them and consumes them, never edits them unilaterally.
+7. ✅ **ANSWERED 2026-09-13 — include `effect-pipeline` modules 11/12 (L0) in this program's scope?**
+   Yes. Specced under `docs/architecture/effect-pipeline/` (that program's own convention, not this
+   one's), built as Phase 10, parallel-safe and non-blocking for playability.
+8. **NEW — the `decisions.md` row for the ActorHub primary producer (Phase 11, P11.0).** Not answerable
+   yet — write it against the *merged* `solid-run` subsystem contract, not the pre-merge one. Owned by
+   whoever resumes Phase 11 after that merge lands.
 
 ---
 
