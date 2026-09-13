@@ -18,7 +18,6 @@ describe("DeveloperTree (T12)", () => {
         "atom-preview",
         "cheats",
         "icon-dump",
-        "log",
         "phaser-scene-poc",
         "pvz-activity",
         "runs",

@@ -41,7 +41,6 @@ const DEV_ROUTE_REDIRECTS: Record<string, string> = {
   "almanac-dump": "almanac-dump",
   cheats: "cheats",
   sim: "sim",
-  log: "log",
   runs: "runs",
   "phaser-scene-poc": "phaser-scene-poc"
 };

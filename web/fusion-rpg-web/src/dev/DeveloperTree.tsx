@@ -17,7 +17,6 @@ const AlmanacDumpPage = lazy(() =>
 );
 const CheatsPage = lazy(() => import("@/features/cheats/CheatsPage").then((m) => ({ default: m.CheatsPage })));
 const SimPage = lazy(() => import("@/features/sim/SimPage").then((m) => ({ default: m.SimPage })));
-const LogPage = lazy(() => import("@/features/log/LogPage").then((m) => ({ default: m.LogPage })));
 const MetricsPage = lazy(() => import("@/features/metrics/MetricsPage").then((m) => ({ default: m.MetricsPage })));
 const PhaserSceneSwitchPocPage = lazy(() =>
   import("./PhaserSceneSwitchPocPage").then((m) => ({ default: m.PhaserSceneSwitchPocPage }))
@@ -39,7 +38,9 @@ export const DEV_SURFACES = [
   { id: "atom-preview", label: "ItemPreview", Component: AtomPreviewPage },
   { id: "cheats", label: "Cheats", Component: CheatsPage },
   { id: "sim", label: "Sim", Component: SimPage },
-  { id: "log", label: "Log", Component: LogPage },
+  // "log" removed: its own `@/features/log/LogPage` was never built (no such module anywhere in
+  // the tree) — a scaffolded entry pointing at nothing, found while unrelated FE work needed a
+  // clean production build.
   { id: "runs", label: "Runs", Component: MetricsPage },
   { id: "phaser-scene-poc", label: "ScenePOC", Component: PhaserSceneSwitchPocPage }
 ] as const;
