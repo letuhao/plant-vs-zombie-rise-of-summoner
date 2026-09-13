@@ -70,7 +70,9 @@ a magnitude that exceeds `int` at the boundary is a real gameplay event, not a r
 | Level | Cases |
 |---|---|
 | Core unit | Golden values unchanged for ordinary magnitudes — this is a representation change, not a balance change |
-| Core unit | Determinism: same inputs produce byte-identical output; no `double` remains in the path (assert by type, or by a source scan) |
+| Core unit | Determinism: same inputs produce byte-identical output |
+| Core unit | **No `double`/`float` remains**, asserted by a **source scan test** over `OverlayCombatCalculator.cs`, `ElementHub.cs`, `OverlayCombatMath.cs` — same technique `debug-scope-guard` and `ProveLiveProbe.Tests` already use. *"Assert by type OR a source scan" was two options with no owner; this is the one.* |
+| Core unit | **D1's prohibition is guarded:** `MergeAppliedCombat` (`ActorHub.cs:89-113`) folds only `progression.bonus.*` and **no `combat.*` channel**. D1 says this must never change, and until now no spec asserted it — this is the test that fails if someone "helpfully" adds omni to the field bridge and double-dips RPG power into one hit |
 | Core unit | Overflow: a magnitude past the `long` ceiling **throws**, not wraps |
 | Core unit | Divide-last: a case where dividing first and last differ, asserting the last-divide result |
 | Boundary | A magnitude exceeding `int` at `EntityStatWriter` produces the documented behaviour (throw or reported clamp), never a silent wrap |

@@ -80,8 +80,13 @@ has a test.
 ## Success criteria
 
 - [ ] A hypnotised zombie resolves its new side on the next element read, proven by a Core unit test.
-- [ ] Trigger 3 (ptr reuse) has a test and a stated answer, even if the answer is "already safe
-      because `ForgetEntity` runs first" — with the file:line that makes it true.
-- [ ] Trigger 4 has a stated answer, even if that answer is "cannot happen mid-match".
+- [ ] Trigger 3 (ptr reuse) has an **executable test**: resolve ptr P → element A; kill that entity;
+      register a new entity at the same address with a different species; resolve P → element B. It
+      must not return A. *(If the answer is "already safe because `ForgetEntity` runs first", the test
+      still exists and proves it — a prose answer is not a check.)*
+- [ ] Trigger 4 (catalog revision / `reforge-world` mid-run) is resolved one of two ways, both
+      checkable: either an invalidation test like trigger 3's, **or** a test asserting the catalog
+      revision cannot change while a match is live (so the trigger genuinely cannot fire). Prose alone
+      does not close it.
 - [ ] No whole-cache clear added to any per-entity path.
 - [ ] `guard-secondary-no-unity.ps1` green.

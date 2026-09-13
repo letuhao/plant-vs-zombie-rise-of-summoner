@@ -534,7 +534,7 @@ Per `live-probe-standard.md`, and shaped by the traps this feature specifically 
 
 ## Open questions
 
-None outstanding. D1–D7 cover the design decisions; everything else in this doc is a wire or a build
+None outstanding. D1–D9 cover the design decisions; everything else in this doc is a wire or a build
 whose shape is specified above.
 
 ---

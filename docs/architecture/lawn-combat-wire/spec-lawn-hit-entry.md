@@ -102,7 +102,7 @@ described**, and `event-pipeline-v2-ssot.md` should be amended to match.
 |---|---|---|
 | Target dies before the deferred delta lands | No liveness check. `InjectorEffectActionSink.cs:176-209` can find a dying-but-not-destroyed object; `EntityStatWriter.cs:176-227` guards only `== null`, and `next <= 0` calls `ForceKill*` (`:263-287`) → a **second `Die()`** | A death-resolution guard: an already-dead-or-dying target absorbs no further delta. Prior art is a death phase with an "already marked dead" flag, not per-hit death checks |
 | Re-entrant drain vs ptr reuse | `FlushForPtr` is a no-op inside a nested drain (`EventDrain.cs:277`), so records can drain **after** grants withdraw — and FA10 kills inside a drain are exactly what this feature makes common | Records for a ptr must drain before `ForgetEntity` withdraws its grants, nested or not. Existing ordering: `GameHooks.cs:664/676`, `:1154/1156` |
-| Lawnmower / instant kill | A 1,000,000-damage event was observed live | A rider must not scale off an instakill-shaped event |
+| Lawnmower / instant kill | A 1,000,000-damage event was observed live | A rider must not scale off it. **"Instakill-shaped" needs a definition, not a vibe** — the spec must pick one and name it: a `DamageType` from the engine's own enum (`Squash`, `MaxDamage`, `Crash`, `RealDamage` are the candidates — `DamageType` has 19 members), or the `mower.*` event kinds, or a magnitude threshold. **Prefer the engine's own `DamageType`** over a threshold: a threshold is a magic number that a balance pass will eventually cross legitimately |
 | Attacker dies mid-flight | `bullet.from` is null | No RPG contribution; never a stub attacker (`lawn-hit-attribution`) |
 
 ## Code style
@@ -150,7 +150,10 @@ Re-entry depth stays 0: an overlay apply must not emit a `combat.hit` that neste
 - [ ] One swing = one action trigger, N victims, proven by test **and** live.
 - [ ] No effect-bearing hit is dropped under budget exhaustion.
 - [ ] No double-kill; no delta applied to a recycled pointer.
-- [ ] A general creature (no `UniqueActor`) works identically to a Bound specimen.
+- [ ] A general creature (no `UniqueActor`) takes the **same code path** as a Bound specimen — it
+      produces a packet, resolves an element, and receives a rider. *(Not "identically": their damage
+      numbers will legitimately differ, so "identically" had no operational meaning. The checkable
+      claim is that no branch excludes a creature for lacking a binding.)*
 - [ ] **A fresh perf baseline is recorded with the trigger-mask on.** The existing "300z at 4.44%
       frame share" was measured with it **off** (`event-pipeline-v2-ssot.md` §3.1, `:80`) and does not
       apply — binding an `OnDamageDealt` grant to every lawn actor pins that bit on permanently.
