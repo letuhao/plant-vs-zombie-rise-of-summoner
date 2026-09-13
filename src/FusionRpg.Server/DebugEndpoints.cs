@@ -353,29 +353,27 @@ public static class DebugEndpoints
                     waitedMs = sw.ElapsedMilliseconds
                 });
 
-            // Observability gap found live 2026-09-14: after a real defeat (match.result payload
-            // result:"defeat", GameHooks.cs's BoardStatistics.GameOver hook), spawn commands still
-            // queue but land against a board that had to be reset first -- debug.reset-board
-            // (DeleteAllPlants+DeleteAllZombies) is proven live to restore real spawn capability
-            // (plant.spawn/debug.spawn.plant fired for real immediately after). Self-heal the same way
-            // quick-start already self-enables the two toggles above, rather than silently letting a
-            // caller spawn into a dead board. This does NOT dismiss the game's own visual "重新开始"
-            // (restart) overlay -- no sanctioned debug command exists for that yet, so a real player
-            // or operator still needs to click through it or return to the main menu; named honestly
-            // here rather than assumed fixed.
+            // Real bug found live 2026-09-14: after a real defeat (match.result payload
+            // result:"defeat", GameHooks.cs's BoardStatistics.GameOver hook), the old plan here was
+            // debug.reset-board (DeleteAllPlants+DeleteAllZombies) -- proven live to restore
+            // API-level spawn capability, but the operator confirmed the game's own visual "重新开始"
+            // (restart) overlay stayed up regardless: reset-board clears entities on the SAME dead
+            // board, it never leaves it. The actual fix, proven live the same session: force a fresh
+            // debug.enter-level (force:true bypasses EnterLevel's "board already live" guard
+            // entirely, DebugActions.cs's EnterLevel) over the dead board -- this really does clear
+            // the overlay and lands back on the real seed-picker screen, which the existing
+            // mid-entry-probe/skip-setup pipeline below already knows how to dismiss. So on a detected
+            // defeat this now skips the mid-entry probe (we KNOW the old board is dead, not a fresh
+            // seed-picker) and forces straight into the enter-level branch instead.
             // Same staleness guard as /lawn/state: a match.result from a dead, previous game process
-            // must never trigger a reset against the current one.
-            var defeatReset = false;
+            // must never trigger this against the current one.
             var latestHelloForDefeat = FindLatestKind(store, "injector.hello");
             var latestResult = FindLatestKind(store, "match.result");
             if (latestResult is not null && latestHelloForDefeat is not null && latestResult.Id < latestHelloForDefeat.Id)
                 latestResult = null;
-            if (latestResult is not null && string.Equals(PayloadString(latestResult.Payload, "result"), "defeat", StringComparison.OrdinalIgnoreCase))
-            {
-                await Send(hub, inbox, "debug.reset-board", new { });
-                await Task.Delay(500);
-                defeatReset = true;
-            }
+            var defeatDetected = latestResult is not null
+                && string.Equals(PayloadString(latestResult.Payload, "result"), "defeat", StringComparison.OrdinalIgnoreCase);
+            var defeatReset = defeatDetected; // reported field name kept; meaning is now "forced a fresh entry", not "called reset-board"
 
             // Some game profiles never emit board.start for a board that already exists behind the
             // seed-picker screen -- confirmed live 2026-09-14 on pvzrh-3.9: several full match cycles
@@ -390,26 +388,31 @@ public static class DebugEndpoints
             // enter-level. Success (`board:true`) proves a real Board already exists -- either
             // mid-seed-picker or already in a running match -- and lets quick-start skip straight to
             // wave-freeze/scenario instead of re-attempting an entry that will only time out.
+            // Skipped entirely when defeatDetected: a defeated board is known-dead, not mid-entry, and
+            // probing it would just waste a round trip before the forced re-entry below regardless.
             var alreadyMidEntry = false;
-            store.MergeCheatField("DEBUG-SETUP-SKIP", true, null);
-            await Send(hub, inbox, "cheat.toggle", new { id = "DEBUG-SETUP-SKIP", enabled = true });
-            var probeBeforeSkip = store.GetMaxEventId();
-            await Send(hub, inbox, "debug.skip-setup", new { method = "quick" });
-            var probeSkipAck = await PollForKind(store, probeBeforeSkip, "debug.setup.skip", TimeSpan.FromSeconds(Math.Min(timeoutSec, 8)));
-            var setupSkipOk = probeSkipAck is not null && PayloadBool(probeSkipAck.Payload, "ok");
-            if (setupSkipOk) alreadyMidEntry = true;
+            if (!defeatDetected)
+            {
+                store.MergeCheatField("DEBUG-SETUP-SKIP", true, null);
+                await Send(hub, inbox, "cheat.toggle", new { id = "DEBUG-SETUP-SKIP", enabled = true });
+                var probeBeforeSkip = store.GetMaxEventId();
+                await Send(hub, inbox, "debug.skip-setup", new { method = "quick" });
+                var probeSkipAck = await PollForKind(store, probeBeforeSkip, "debug.setup.skip", TimeSpan.FromSeconds(Math.Min(timeoutSec, 8)));
+                if (probeSkipAck is not null && PayloadBool(probeSkipAck.Payload, "ok")) alreadyMidEntry = true;
+            }
+            var setupSkipOk = false;
 
             var entered = false;
-            var boardStart = alreadyMidEntry ? null : FindLatestLiveBoardStart(store);
+            var boardStart = (alreadyMidEntry || defeatDetected) ? null : FindLatestLiveBoardStart(store);
             string? enteredLevelType = null;
 
-            if (boardStart is null && !alreadyMidEntry)
+            if ((boardStart is null && !alreadyMidEntry) || defeatDetected)
             {
                 store.MergeCheatField("DEBUG-LEVEL-ENTRY", true, null);
                 await Send(hub, inbox, "cheat.toggle", new { id = "DEBUG-LEVEL-ENTRY", enabled = true });
 
                 var beforeEnter = store.GetMaxEventId();
-                await Send(hub, inbox, "debug.enter-level", new { levelType = 0, levelNumber, id = 0, name = "" });
+                await Send(hub, inbox, "debug.enter-level", new { levelType = 0, levelNumber, id = 0, name = "", force = defeatDetected });
 
                 var ackTimeoutSec = Math.Min(timeoutSec, 20);
                 var enterAck = await PollForKind(store, beforeEnter, "debug.level.enter", TimeSpan.FromSeconds(ackTimeoutSec));

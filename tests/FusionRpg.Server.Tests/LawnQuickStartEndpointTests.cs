@@ -106,13 +106,17 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Post_latestMatchResultIsDefeat_selfHealsWithResetBoard_beforeEnterLevel()
+    public async Task Post_latestMatchResultIsDefeat_forcesFreshEntry_neverProbesOrResetsTheDeadBoard()
     {
         // Real gap found live 2026-09-14: after a genuine defeat (match.result payload result:
-        // "defeat"), spawn commands still queued but landed against a dead board until
-        // debug.reset-board ran -- proven live (plant.spawn/debug.spawn.plant fired for real right
-        // after a manual reset-board call). quick-start must self-heal this the same way it already
-        // self-enables its two toggles, rather than silently leaving a caller to spawn into nothing.
+        // "defeat"), debug.reset-board restored API-level spawn capability but the operator
+        // confirmed the game's own visual defeat overlay stayed up -- reset-board clears entities on
+        // the SAME dead board, it never leaves it. The proven live fix: force a fresh
+        // debug.enter-level (force:true bypasses EnterLevel's "board already live" guard) over the
+        // dead board, which really does clear the overlay and lands on the real seed-picker screen --
+        // which the existing pipeline already knows how to dismiss. A detected defeat must skip the
+        // mid-entry probe entirely (the old board is known-dead, not a fresh seed-picker) and go
+        // straight to a FORCED enter-level, never debug.reset-board.
         _store.Heartbeat(RpgConstants.SourceInjector);
         _store.InsertEvent(new EventEnvelope
         {
@@ -120,19 +124,21 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
             Kind = "match.result",
             Payload = JsonSerializer.SerializeToElement(new { result = "defeat", activeMatchMs = 57311 })
         });
-        SeedLiveBoardStart();
         var inbox = _app.Services.GetRequiredService<InjectorCommandInbox>();
 
         var resp = await _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { scenario = "lab-overlay", timeoutSec = 1 });
-        Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode); // honest timeout -- no real game answering
+        Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode); // honest timeout -- no real game answering enter-level
         var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
-        Assert.True(((JsonElement)body!["defeatReset"]).GetBoolean());
+        Assert.Contains("debug.level.enter did not ack", body!["error"].ToString());
+        Assert.True(((JsonElement)body["defeatReset"]).GetBoolean());
 
-        var sent = inbox.Drain(int.MaxValue).Select(c => c.Name).ToList();
-        var resetIdx = sent.FindIndex(n => n == "debug.reset-board");
-        var skipProbeIdx = sent.FindIndex(n => n == "debug.skip-setup");
-        Assert.True(resetIdx >= 0, "expected debug.reset-board to be sent after a detected defeat");
-        Assert.True(resetIdx < skipProbeIdx, "the board must be reset before the mid-entry probe runs");
+        var sent = inbox.Drain(int.MaxValue).ToList();
+        Assert.DoesNotContain(sent, c => c.Name == "debug.reset-board");
+        Assert.DoesNotContain(sent, c => c.Name == "debug.skip-setup"); // the mid-entry probe must be skipped
+        var enterCmd = sent.SingleOrDefault(c => c.Name == "debug.enter-level");
+        Assert.NotNull(enterCmd);
+        var payloadJson = JsonSerializer.Serialize(enterCmd!.Payload);
+        Assert.Contains("\"force\":true", payloadJson);
     }
 
     [Fact]
