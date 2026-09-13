@@ -61,13 +61,13 @@
 
 ## Phase 1 — Lawn + presentation contracts (Wave 1)
 
-- [ ] **AS-1.1** Injector Bound UniqueCreature apply — `unique-lawn-wire`
+- [x] **AS-1.1** Injector Bound UniqueCreature apply — `unique-lawn-wire`
   - Accept: Bound Hot resolve = commander + UniqueCreature(instanceId); generals stay commander+species; fetch via **unique GET only** (S4); empty unique legal
   - Accept (G6): Bound unique sharing a species id with a general still resolves `commander+UniqueCreature`, never empire species shares
-  - Verify: Injector/Core unit; live probe after allocate+AptitudesUpdated; `.\scripts\guard-secondary-no-unity.ps1`
-  - Files: `RpgClient.cs`, `CheatState.cs`, Hot resolve path
+  - Verify: Core unit green (`SpeciesAllocationSourceTests` — 4 new Bound-priority cases, 11/11 total). Injector/live probe **not run in this session** — `FusionRpg.Injector` needs a game-dir interop build this sandbox has no `FUSIONRPG_GAME_DIR`/MelonLoader install for; `.\scripts\guard-secondary-no-unity.ps1` not run for the same reason. Owner: build + deploy-play + live Bound-allocate probe still owed before calling the Injector half proven, not just written.
+  - Files: `SpeciesAllocationSource.cs` (Core: optional Bound-priority branch, backward-compatible — sole production caller is `CheatState.cs`), `RpgClient.cs` (new `RefreshUniqueAptitudesAsync`: enumerates Bound instanceIds off `MatchHost.Runtime.ToSnapshot().Bindings`, one `GET /api/aptitudes/unique/{instanceId}` per id, wholesale-replaces the cache; wired at StartAsync/Reconnected/`aptitudes.allocation.reload`), `CheatState.cs` (`_uniqueAllocations` cache + `ApplyUniqueAllocations` + `ResolveBoundInstanceId` via the SAME `MatchHost` ptr→binding index `UniqueBoundLoadout` already uses), `CheatCommandRunner.cs` (reload wiring)
   - Deps: AS-0.2, AS-0.3
-  - **Cross-linked (2026-09-13):** `actor-hub-and-combat-power-solid-fixing`'s T12 (`lawn-aptitude-parity`) and T19 bullet 3 (`prove-hub-combat`) are both honestly blocked waiting on this exact task — that program's own spec locks "defer implementation ownership" to this one, so it refuses to build across the boundary rather than duplicating this work. When AS-1.1 lands, revisit both.
+  - **Cross-linked (2026-09-13):** built to unblock `actor-hub-and-combat-power-solid-fixing`'s T12 (`lawn-aptitude-parity`) and T19 bullet 3 (`prove-hub-combat`), per owner instruction not to leave a real cross-program block deferred. Both revisited same session — see their own entries for what's now closed vs. what still needs the live probe.
   - Scope: M
 
 - [x] **AS-1.2** Piece HTML drafts — `aptitude-pieces` (drafts)
@@ -95,7 +95,7 @@
 
 ### Checkpoint 1
 
-- [ ] Bound unique lawn reflects UniqueCreature after allocate+reload
+- [ ] Bound unique lawn reflects UniqueCreature after allocate+reload — code written and Core-unit-proven (AS-1.1, 2026-09-13); live probe (deploy-play → Bound → allocate → observe) still owed before ticking this box
 - [x] Fold fixtures show leftover + decision in-band
 - [x] Piece landmark tests green; HTML drafts present
 - [x] Review Phase 1 before hosts
@@ -175,9 +175,9 @@
 
 ### Checkpoint 3 — program Done
 
-- [x] Map success criteria checklist all met (or explicitly deferred items only A6/E6 keep-aligned) — FE A/B/C + presets proven; AS-1.1 Bound UniqueCreature lawn wire remains injector
+- [x] Map success criteria checklist all met (or explicitly deferred items only A6/E6 keep-aligned) — FE A/B/C + presets proven; AS-1.1 Injector wire written 2026-09-13, live probe still owed (see AS-1.1)
 - [x] Guards: DAL green (this stream); secondary-no-unity N/A for FE-only
-- [ ] Live: Bound unique after Activate/allocate shows UniqueCreature
+- [ ] Live: Bound unique after Activate/allocate shows UniqueCreature — blocked on the AS-1.1 live probe, not on missing code
 - [ ] Menu queue P4 Aptitudes evidence noted on map/queue
 
 ---

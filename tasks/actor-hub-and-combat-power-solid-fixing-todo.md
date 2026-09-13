@@ -304,21 +304,34 @@
 **Spec:** `lawn-aptitude-parity` (+ `aptitude-sheet` `unique-lawn-wire`)  
 **Description:** Ensure Bound Hot = `commander + UniqueCreature(instanceId)`; empire = species. Implementation in unique-lawn-wire; tick this program’s Done gate + HF-lawn.
 
-**Status: BLOCKED — honest gap, not forced.** `spec-lawn-aptitude-parity.md` locks "Always: Defer implementation ownership to `unique-lawn-wire`" — this task cannot build that work itself. `aptitude-sheet` program's AS-1.1 (`unique-lawn-wire`) is unchecked with zero implementation (no `GET /api/aptitudes/unique/{instanceId}` caller in the Injector, no Bound/instanceId branch in `SpeciesAllocationSource.Resolve`). Per this task's own dependency clause ("Done, **or open criteria listed**"), the open criteria are listed below rather than closed. See evidence 12.1-12.7.
+**Status (2026-09-13): unique-lawn-wire (AS-1.1) implemented — live parity prove still owed, not forced.**
+Owner instruction: a cross-program block is never left deferred without at least building the
+dependency (or scoping an idea pass first if the dependency genuinely needed one — it didn't here,
+`spec-unique-lawn-wire.md` already had a concrete design). `aptitude-sheet` AS-1.1 is now built:
+`SpeciesAllocationSource.Resolve` (Core) takes an optional Bound-priority branch — a Bound ctx
+resolves `commander + UniqueCreature(instanceId)` and returns before the species lookup ever runs,
+never merged with it, which is what keeps a Bound unique sharing a species id with a general from
+inheriting empire shares. `RpgClient.RefreshUniqueAptitudesAsync` (Injector) fetches
+`GET /api/aptitudes/unique/{instanceId}` per currently-Bound id (enumerated off
+`MatchHost.Runtime.ToSnapshot().Bindings`) and wholesale-replaces `CheatState`'s cache, wired at the
+same cadence as the commander/species caches. Core-proven: `SpeciesAllocationSourceTests`, 11/11
+including 4 new Bound-priority cases. **Not proven:** this sandbox has no `FUSIONRPG_GAME_DIR` /
+MelonLoader install, so the Injector half is un-buildable here — owner still owes a real build +
+`deploy-play` + live Bound-allocate probe before the parity prove below can close.
 
 **Acceptance criteria:**
-- [ ] After unique allocate + AptitudesUpdated, Bound unique Hot includes UniqueCreature shares. — blocked on `unique-lawn-wire` AS-1.1
-- [ ] Fetch path is unique GET only (S4). — blocked on `unique-lawn-wire` AS-1.1
-- [ ] General lawn creatures unchanged (species path). — blocked on `unique-lawn-wire` AS-1.1
-- [ ] Regression: unique with same species id as a general does not inherit empire allocation. — blocked on `unique-lawn-wire` AS-1.1
-- [ ] Parity prove: Bound lawn aptitude input matches Server UniqueCreature compose. — blocked on `unique-lawn-wire` AS-1.1
-- [ ] HF-lawn ticked on ideal / maps. — cannot honestly tick while the above are open
-- [ ] aptitude-sheet `unique-lawn-wire` Done (or listed open criteria closed) before closing this task. — open criteria listed (evidence 12.7)
+- [x] After unique allocate + AptitudesUpdated, Bound unique Hot includes UniqueCreature shares. — implemented + Core-unit-proven; live confirmation owed
+- [x] Fetch path is unique GET only (S4). — `RefreshUniqueAptitudesAsync` is the only new fetch, per-instanceId GET, no `uniques` map added to the commander payload
+- [x] General lawn creatures unchanged (species path). — Bound branch returns before the species lookup runs; a non-Bound ctx takes the untouched original path (`Not_Bound_falls_through_to_the_species_path_even_when_the_hook_is_wired`)
+- [x] Regression: unique with same species id as a general does not inherit empire allocation. — `Bound_unique_sharing_a_species_id_with_a_general_never_inherits_empire_shares`, proven
+- [ ] Parity prove: Bound lawn aptitude input matches Server UniqueCreature compose. — still needs the live probe (owner step)
+- [ ] HF-lawn ticked on ideal / maps. — held until the live parity prove above closes
+- [x] aptitude-sheet `unique-lawn-wire` Done (or listed open criteria closed) before closing this task. — AS-1.1 code landed; its own live-probe line is the same open item as this task's parity prove
 
 **Verification:**
-- [ ] Core filter `SpeciesAllocation|UniqueCreature|Bound` — nothing new to run; no production code changed for this task
-- [ ] `.\scripts\guard-secondary-no-unity.ps1` — N/A, no code changed
-- [ ] Live Bound unique allocate probe (optional owner step) — not attempted (owner-optional, and the underlying feature does not exist yet)
+- [x] Core filter `SpeciesAllocation|UniqueCreature|Bound` — `SpeciesAllocationSourceTests` 11/11 (`dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~SpeciesAllocation|UniqueCreature|Bound"`)
+- [ ] `.\scripts\guard-secondary-no-unity.ps1` — not run in this session (no interop build available); Injector files touched (`RpgClient.cs`, `CheatState.cs`, `CheatCommandRunner.cs`) add no Unity types, HTTP, or new I/O beyond the established `GetStringAsync`/`JsonDocument` pattern already used by the identical commander/species fetch this mirrors
+- [ ] Live Bound unique allocate probe (owner step) — owed: deploy-play → Bound unique → allocate → observe lawn stats match Server Hub
 
 **Dependencies:** T6; aptitude-sheet `unique-lawn-wire` Done (or open criteria listed)  
 **Files likely touched:** Injector `CheatState` / bindings, aptitude-sheet wire, Done docs  
@@ -479,7 +492,7 @@
 - [ ] Script exists and documented (`prove-hub-combat.ps1` or extend `prove-aptitude.ps1`).
 - [x] Post-fuse battle Hub channel totals ≡ sheet Hub for same UniqueActor inputs (equip/tree; aptitude parity already proven separately by `prove-aptitude.ps1`, not duplicated here — see evidence 19.2).
 - [x] Standing rises when a membership combat channel rises via Hub writers — not when only Θ rises.
-- [ ] Bound lawn aptitude input matches Server UniqueCreature compose. — honestly blocked, same finding as T12 (AS-1.1 unbuilt); nothing to compare against yet
+- [ ] Bound lawn aptitude input matches Server UniqueCreature compose. — same open item as T12: AS-1.1 is now built and Core-proven (2026-09-13); this bullet needs the live probe, not new code
 - [x] Ideal handoff prove path checked / runbook linked.
 
 **Verification:**

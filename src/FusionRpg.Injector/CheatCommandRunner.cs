@@ -71,6 +71,10 @@ public static class CheatCommandRunner
             if (RpgHost.Client != null)
             {
                 _ = RpgHost.Client.RefreshCommanderAllocationAsync();
+                // unique-lawn-wire (AS-1.1): a Bound specimen's own AptitudesUpdated broadcast (scope
+                // "unique") rides the SAME command as commander/species -- one reload signal, three
+                // caches, never a fourth SignalR event.
+                _ = RpgHost.Client.RefreshUniqueAptitudesAsync();
                 _ = RpgHost.Client.RefreshCommanderSnapshotCacheAsync();
             }
             return;

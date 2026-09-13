@@ -9,9 +9,9 @@ namespace FusionRpg.Core.Tests.Stats.Aptitudes;
 /// `SpecimenOwnershipOracle`'s established shape) — no `LawnElementIndex`, no running game.</summary>
 public class SpeciesAllocationSourceTests
 {
-    static StatContext Ctx(StatSide side, int typeId, long? playerId = 1) => new()
+    static StatContext Ctx(StatSide side, int typeId, long? playerId = 1, string? entityKey = null) => new()
     {
-        Side = side, TypeId = typeId, EntityKey = $"{side}:{typeId}", PlayerId = playerId
+        Side = side, TypeId = typeId, EntityKey = entityKey ?? $"{side}:{typeId}", PlayerId = playerId
     };
 
     [Fact]
@@ -137,5 +137,75 @@ public class SpeciesAllocationSourceTests
         var source = new SpeciesAllocationSource(Lookup, Species, Commander, _ => { });
 
         Assert.Throws<ArgumentNullException>(() => source.Resolve(null!));
+    }
+
+    // ---- unique-lawn-wire (aptitude-sheet AS-1.1) ------------------------------------------
+
+    [Fact]
+    public void Bound_entity_resolves_commander_plus_unique_never_the_species_lookup()
+    {
+        var source = new SpeciesAllocationSource(
+            resolveSpeciesId: (side, typeId) => throw new InvalidOperationException("must not be called for a Bound ctx"),
+            resolveSpeciesAllocation: _ => throw new InvalidOperationException("must not be called for a Bound ctx"),
+            resolveCommanderAllocation: _ => AptitudeAllocation.Single(AllocationScope.Commander, "Might", 20),
+            reportUnconfigured: _ => Assert.Fail("must not report for a Bound ctx"),
+            resolveBoundInstanceId: entityKey => entityKey == "PTR1" ? "unique-1" : null,
+            resolveUniqueAllocation: id => id == "unique-1"
+                ? AptitudeAllocation.Single(AllocationScope.UniqueCreature, "Vigor", 45)
+                : AptitudeAllocation.Empty);
+
+        var result = source.Resolve(Ctx(StatSide.Plant, 7, entityKey: "PTR1"));
+
+        Assert.Equal(20, result.PointsAt(AllocationScope.Commander, "Might"));
+        Assert.Equal(45, result.PointsAt(AllocationScope.UniqueCreature, "Vigor"));
+    }
+
+    [Fact]
+    public void Bound_unique_sharing_a_species_id_with_a_general_never_inherits_empire_shares()
+    {
+        // G6 regression (spec-unique-lawn-wire.md): same (Side, TypeId) as a real general, but this
+        // ctx's EntityKey IS Bound -- the species branch must never run, so it can never contribute.
+        var source = new SpeciesAllocationSource(
+            resolveSpeciesId: (side, typeId) => SpeciesLookupResult.Hit("fumeshroom"),
+            resolveSpeciesAllocation: id => AptitudeAllocation.Single(AllocationScope.CreatureType, "Vigor", 999),
+            resolveCommanderAllocation: _ => AptitudeAllocation.Empty,
+            reportUnconfigured: _ => Assert.Fail("must not report for a Bound ctx"),
+            resolveBoundInstanceId: entityKey => entityKey == "PTR1" ? "unique-1" : null,
+            resolveUniqueAllocation: _ => AptitudeAllocation.Single(AllocationScope.UniqueCreature, "Vigor", 10));
+
+        var bound = source.Resolve(Ctx(StatSide.Plant, 7, entityKey: "PTR1"));
+        var general = source.Resolve(Ctx(StatSide.Plant, 7, entityKey: "PTR2"));
+
+        Assert.Equal(10, bound.PointsAt(AllocationScope.UniqueCreature, "Vigor"));
+        Assert.Equal(0, bound.PointsAt(AllocationScope.CreatureType, "Vigor"));
+        Assert.Equal(999, general.PointsAt(AllocationScope.CreatureType, "Vigor"));
+        Assert.Equal(0, general.PointsAt(AllocationScope.UniqueCreature, "Vigor"));
+    }
+
+    [Fact]
+    public void Not_Bound_falls_through_to_the_species_path_even_when_the_hook_is_wired()
+    {
+        var source = new SpeciesAllocationSource(
+            resolveSpeciesId: (side, typeId) => SpeciesLookupResult.Hit("wallnut"),
+            resolveSpeciesAllocation: _ => AptitudeAllocation.Single(AllocationScope.CreatureType, "Fortitude", 30),
+            resolveCommanderAllocation: _ => AptitudeAllocation.Empty,
+            reportUnconfigured: _ => Assert.Fail("index resolves a hit, should not report"),
+            resolveBoundInstanceId: _ => null, // no Bound match for this entity
+            resolveUniqueAllocation: _ => throw new InvalidOperationException("must not be called when not Bound"));
+
+        var result = source.Resolve(Ctx(StatSide.Plant, 7));
+
+        Assert.Equal(30, result.PointsAt(AllocationScope.CreatureType, "Fortitude"));
+    }
+
+    [Fact]
+    public void Constructor_requires_resolveUniqueAllocation_when_resolveBoundInstanceId_is_supplied()
+    {
+        AptitudeAllocation Commander(long? _) => AptitudeAllocation.Empty;
+        AptitudeAllocation Species(string _) => AptitudeAllocation.Empty;
+        SpeciesLookupResult Lookup(StatSide _, int __) => SpeciesLookupResult.NoSpecies;
+
+        Assert.Throws<ArgumentNullException>(() => new SpeciesAllocationSource(
+            Lookup, Species, Commander, _ => { }, resolveBoundInstanceId: _ => null));
     }
 }
