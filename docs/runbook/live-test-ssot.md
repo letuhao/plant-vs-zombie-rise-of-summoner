@@ -87,7 +87,20 @@ PowerShell ever sees them — a real, repeated time-sink in the session that wro
 anything beyond a one-line command, write the script to a `.ps1` file first and invoke it with
 `powershell -File <path>` instead of inlining it.
 
-Always finish either procedure with a state check, never assume a clean slate:
+**Never trust a background task runner's own "still running" status as proof a deploy has not
+finished.** Real incident (2026-09-14): `deploy-play.ps1` had already launched a healthy, connected
+game over four minutes before the task runner still reported the job "running" — the game was ready
+long before the tool said so. Poll the real, observable state instead of the tool's status:
+
+```powershell
+.\scripts\wait-for-deploy.ps1                # polls /health + the game process with a bounded
+                                              # timeout (default 300s); exits 0 the moment both are
+                                              # real, exits 1 on genuine timeout -- never blocks forever
+.\scripts\wait-for-deploy.ps1 -NoGame        # Procedure A (server-only) -- don't wait on a game process
+```
+
+Always finish either procedure with this poll, then a state check — never assume a clean slate from
+either the deploy tool's status or the mere fact that a redeploy was started:
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:5088/api/debug/lawn/state
