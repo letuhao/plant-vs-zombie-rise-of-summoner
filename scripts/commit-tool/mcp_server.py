@@ -84,10 +84,15 @@ def main() -> None:
         paths: list[str] | None = None,
         all: bool = False,
         amend: bool = False,
+        worktree: str | None = None,
     ) -> str:
         """Create a git commit with allowlisted author after policy validation.
 
         Push is not available — owner pushes manually. Only call when the user asked to commit.
+
+        `worktree` targets a linked worktree (e.g. `.kilo/worktrees/<id>`, absolute or
+        relative to the main checkout) so the commit lands on that worktree's branch.
+        Omit it to commit the main checkout.
         """
         _reload_tool_modules()
         if not (message or "").strip():
@@ -98,6 +103,7 @@ def main() -> None:
             all_tracked=bool(all),
             amend=bool(amend),
             allow_empty=False,
+            worktree=worktree,
         )
         if not result.ok:
             return _tool_result({"ok": False, "errors": result.errors})

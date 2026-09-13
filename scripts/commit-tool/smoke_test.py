@@ -121,6 +121,23 @@ def main() -> int:
     expect(server_src.count("_reload_tool_modules()") >= 3,
            "both tools must call _reload_tool_modules (definition + 2 calls)")
 
+    # Worktree commit target: a relative path anchors to the main checkout, not the server cwd,
+    # and repo_root(cwd=...) resolves that checkout's own toplevel (linked worktree support).
+    import clean_commit as cc2  # noqa: E402
+
+    main_root = cc2.main_repo_root()
+    rel = cc2.resolve_worktree_path(".kilo/worktrees/example-id")
+    expect(str(rel).replace("\\", "/").endswith("/.kilo/worktrees/example-id"),
+           f"relative worktree must anchor to the main checkout: {rel}")
+    expect(cc2.repo_root() == main_root.resolve(), "default repo_root is the main checkout")
+    wt = TOOL_DIR.parent.parent / ".kilo" / "worktrees" / "solid-run-20260912-eb53"
+    if wt.is_dir():
+        resolved = cc2.repo_root(wt)
+        expect(resolved == wt.resolve(),
+               f"worktree target must resolve its own toplevel, got {resolved}")
+        expect(str(cc2.resolve_worktree_path(str(wt))) == str(wt), "absolute worktree passthrough")
+    expect("worktree" in server_src, "MCP commit tool must expose the worktree parameter")
+
     data = json.loads((TOOL_DIR / "policy.json").read_text(encoding="utf-8"))
     expect(data.get("schemaVersion") == 1, "schemaVersion")
 

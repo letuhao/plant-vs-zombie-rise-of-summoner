@@ -133,3 +133,14 @@ Eleven modules, five phases.
 
 Ten modules named, one real 11th-corpus question flagged rather than resolved unilaterally. Module
 specs at `docs/architecture/item-seedgen/spec-<module-id>.md`.
+
+---
+
+## Filed by the `species-gear-chain` initiative (2026-09-13)
+
+Asks raised by [species-gear-chain-map.md](species-gear-chain-map.md) and its module specs. **Nothing here is built or approved** — each is an ask-first boundary this program owns, filed so it is visible to the owner rather than living only in the requesting map.
+
+| # | Ask | Requesting module | Evidence |
+|---|---|---|---|
+| 1 | ⛔ **Replace three `27` pins with a reconciliation canary** — `len(ISSUABLE) == len(MaterialCatalog.All)` | ``species-materials`` | `materialgen/vocab.py:120` and `:124` are **module-level `assert`s that hard-crash on import**; `tests/test_recipes_gen.py:193` is a red test. Widening the material vocabulary **breaks the build, not a test** |
+| 2 | ⚠ **`materialgen` structurally refuses the ask today** — its own header says it authors *"`name` / `flavor` / `tags` for a material id — **never a new material id**"* | ``species-materials`` | `materialgen/__init__.py:1-10`. Ownership is **this program's** (module 3 `materials-gen`), not seedsmith's |

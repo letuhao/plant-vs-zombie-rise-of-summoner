@@ -138,3 +138,13 @@ Personality-driven in-run AI (Unity-owned), faction kingdoms/diplomacy, creature
 | `CreatureMintSpec.Level` | `creature-core` | `party-dungeon/spec-wild-room.md` §4 | additive `long? Level` on the spec; `RpgStore.Creatures.cs:53` writes `$level = spec.Level ?? 1` — null is today's line for every caller | a recruit or capture mints at level 1 instead of `Θ_room + thetaOffset` |
 | `SummonRoller.Roll` optional `poolFilter` | `creature-summoning` | wild-room §6 | a trailing `Func<CreatureSpeciesDef, bool>? poolFilter = null` on `Roll` (`SummonRoller.cs:61`); null = today's pool; `altar.poolFromDomain` stays `false` until it exists | the altar pulls from the whole summonable catalog |
 | A personality mint override | `creature-contracts` | wild-room §2 (**ask first**) | the talk's `PersonalityFor("dungeon:wild:{r}:{c}")` recorded on the mint instead of `PersonalityFor(instanceId)` over a fresh `Guid` (`RpgStore.Creatures.cs:45`) | v1 accepts the mismatch |
+
+---
+
+## Filed by the `species-gear-chain` initiative (2026-09-13)
+
+Asks raised by [species-gear-chain-map.md](species-gear-chain-map.md) and its module specs. **Nothing here is built or approved** — each is an ask-first boundary this program owns, filed so it is visible to the owner rather than living only in the requesting map.
+
+| # | Ask | Requesting module | Evidence |
+|---|---|---|---|
+| 1 | ⭐ **A third creature category** in the Vocabulary section: a **neutral unit that never becomes a legion troop** | ``wild-species-spawn`` | Today a creature is a **general creature** (engine-spawned, troop-stack shaped, recruitable) or a **unique creature** (a `UniqueActor` specimen). The owner introduced **demon** and **void beast**, which are neither. Named only — no design |

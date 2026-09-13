@@ -149,3 +149,15 @@ uses the prefixed convention from [AGENTS.md](../../AGENTS.md):
 | Module specs | `docs/architecture/power/spec-<module-id>.md` |
 | Plan | `tasks/power-plan.md` |
 | Task list | `tasks/power-todo.md` |
+
+---
+
+## Filed by the `species-gear-chain` initiative (2026-09-13)
+
+Asks raised by [species-gear-chain-map.md](species-gear-chain-map.md) and its module specs. **Nothing here is built or approved** — each is an ask-first boundary this program owns, filed so it is visible to the owner rather than living only in the requesting map.
+
+| # | Ask | Requesting module | Evidence |
+|---|---|---|---|
+| 1 | ⭐ **Three `ssot-power-scale.md` §10 rows for rung-keyed cost ladders** — `promoteCostSoulsMilli`, `upgradeCostSoulsMilli`, `speciesCostMultiplierMilli`. §10 is a closed inventory: *"a power-shaped number that is not in this table does not have permission to exist"* | ``rarity-promotion`, `item-upgrade-tree`, `species-cost-shaping`` | Rows 6/26/27/31/33 are precedent; row 18 shows an authored per-rung table still earns one. **File once for all three** |
+| 2 | A **§11 caps-register row** for `craft_potential` as a **soft** cap, with stage 2 (durability decay) named as its continuation path | ``craft-risk-ladder`` | PS-8: a cap on a magnitude is a progression ceiling until a verdict says otherwise |
+| 3 | ⭐ **The T-5 split.** A tier reaches an **actor magnitude** only as an additive per-rung `thetaOffset` (T-5a); a tier **may** key an **economy cost** coefficient (T-5b), each owing its own §10 row | ``tier-propagation-contract`` | ⚠ The single-clause version is **false of shipped code** — `materials.v1.json` prices six verbs on `rung` as a coefficient |

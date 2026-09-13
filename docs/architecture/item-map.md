@@ -311,3 +311,21 @@ four rows here; each is this program's file to change, consumed there.
 | Module 19 `ItemGrantValidator` admits unique container ids | `Items/Grants/ItemGrantValidator.cs` | `item_granted_action.container_id` may be a unique's `item.<slug>` beside a base type's — one validator arm — `spec-unique-pipeline.md` §3 | a unique cannot grant an action |
 | Lock check on `rpg_delve_pack_lock` | salvage, transfer, assign and bulk paths in `RpgStore.Items.cs` / `ItemSurfaceEndpoints.cs` | refuse an instance carried in a live delve (`pack.carried`); the armoury listing hides or badges it — `party-dungeon/spec-loot-pack.md` §4 | a carried item can be salvaged at home mid-delve |
 | Item-side derived price (`seed-contract.md` §2.1: price DERIVED, none built) | item program | class × grade × `contentScale(Θ)`; the Delve contributes only `merchant.markupMilli` | the delve merchant refuses (`delve.price-undesigned`) and opens as a sell-nothing rest |
+
+---
+
+## Filed by the `species-gear-chain` initiative (2026-09-13)
+
+Asks raised by [species-gear-chain-map.md](species-gear-chain-map.md) and its module specs. **Nothing here is built or approved** — each is an ask-first boundary this program owns, filed so it is visible to the owner rather than living only in the requesting map.
+
+| # | Ask | Requesting module | Evidence |
+|---|---|---|---|
+| 1 | An **eleventh `op_kind`** (`MutationOpKind`, closed at ten, *"adding a member is ask-first"*) for **promotion** | ``rarity-promotion`` | `MutationOp.cs:13-48`. ⚠ **Queued behind `Repair`**, which `deployment-hierarchy-map.md` filed first |
+| 2 | A **twelfth `op_kind`** for **item→item upgrade** | ``item-upgrade-tree`` | Same enum; third in the queue |
+| 3 | An **eleventh `CraftOperation`** — a **separate** closed enum whose own doc says *"adding a verb here is **code**, because a verb needs an executor and an owning module"* | ``item-upgrade-tree`` | `CostClassMatrix.cs:11-44`. Not covered by the `op_kind` ask |
+| 4 | ⛔ **Superseding `spec-enhance-reroll.md` §4's Safe/Risk bands** (+1..+8 at 1000‰, +9..+14 at 950‰→600‰) with one graduated potential→durability ladder | ``craft-risk-ladder`` | Reopens written design inside module 15. One risk vocabulary, not two |
+| 5 | ⛔ **A sixth `MaterialClass`** (provenance) — ask-first against `ssot-materials-crafting.md` §3.1 | ``species-materials`` | `MaterialCatalog.cs:6-9` states the test: *"which of these five questions is unanswerable for my spend?"* ⭐ **The slot is CONTESTED** — `deployment-hierarchy-map.md:89` filed for a new material class first |
+| 6 | **Naming the §3.4 role-axis reversal.** §3.4 refuses a **role** axis (*"Twelve roles × anything is the scavenger hunt"*); a species axis at 904 is two orders of magnitude past it | ``species-materials`` | `ssot-materials-crafting.md:160`. The reversal is argued in the spec; it needs this program's review |
+| 7 | **Per-verb cost-class widening.** `Forge` admits `Substrate` **only**, so D2's flagship *"1 generic + 3 species commons + 1 rare gate"* recipe shape cannot be priced even if every trophy id existed | ``species-materials`` | `CostClassMatrix.Allows` — independent of the sixth-class ask |
+| 8 | ⚠ **A drift fix, found while verifying:** `ssot-enhancement.md` §5.3's reserved `op_kind` table lists nine values and **omits `socket-imbue`**, which the enum already mints | ``enhance-track-wiring`, `craft-executor-completion`` | `MutationOp.cs:42-47` vs §5.3. Reconcile with the next amendment rather than separately |
+| 9 | ⚠ **Stale comment:** `ItemWorkbench.cs:189-193` says forge *"cannot run: its recipes name `item.*` containers and no module has authored an `effect_container` for a base type."* `EquipmentContainerBuild.From` now builds one on the fly | ``craft-executor-completion`` | `EquipmentContainerBuild.cs:47`, `LootMintAt.cs:76-88`. **Forge is a wiring gap today, not a content gap** |

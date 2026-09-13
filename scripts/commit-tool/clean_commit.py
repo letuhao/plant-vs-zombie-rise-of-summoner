@@ -62,7 +62,35 @@ class CommitResult:
     stderr: str = ""
 
 
-def repo_root() -> Path:
+def main_repo_root() -> Path:
+    """The repo checkout this tool lives in (the main worktree, not a linked one)."""
+    return TOOL_DIR.parent.parent
+
+
+def resolve_worktree_path(value: str | Path) -> Path:
+    """Absolute path for a commit target worktree.
+
+    A relative value is anchored to the main checkout (where scripts/commit-tool lives),
+    not to the server process cwd, so `worktree=".kilo/worktrees/<id>"` is stable no matter
+    where the MCP server was started.
+    """
+    path = Path(value)
+    if not path.is_absolute():
+        path = main_repo_root() / path
+    return path
+
+
+def repo_root(cwd: str | Path | None = None) -> Path:
+    """`git rev-parse --show-toplevel` for cwd (default: this tool's checkout).
+
+    `cwd` is how a linked worktree commits its own branch: git resolves the worktree root
+    and the shared `.git/config` still supplies `core.hooksPath`. When `cwd` is passed it is
+    an *explicit* target and must resolve in its own checkout — the main-checkout fallback
+    below is only for the implicit case (an MCP server started outside the repo). Falling
+    back for an explicit target would silently commit the wrong branch.
+    """
+    start = Path(cwd).resolve() if cwd else TOOL_DIR
+    explicit = cwd is not None
     try:
         out = subprocess.check_output(
             ["git", "rev-parse", "--show-toplevel"],
@@ -73,11 +101,13 @@ def repo_root() -> Path:
             # call until the client times out with -32001. Git never needs our stdin.
             stdin=subprocess.DEVNULL,
             creationflags=NO_WINDOW,
-            cwd=str(TOOL_DIR),
+            cwd=str(start),
             timeout=GIT_TIMEOUT_SECONDS,
         )
         return Path(out.strip())
     except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+        if explicit:
+            raise
         # MCP servers often start with cwd outside the repo — fall back from tool path.
         candidate = TOOL_DIR.parent.parent
         if (candidate / ".git").exists() or (candidate / ".githooks").exists():
@@ -161,10 +191,18 @@ def perform_commit(
     amend: bool = False,
     allow_empty: bool = False,
     policy_path: Path | None = None,
+    worktree: str | Path | None = None,
 ) -> CommitResult:
-    """Validate + commit with allowlisted identity. Never passes --no-verify."""
+    """Validate + commit with allowlisted identity. Never passes --no-verify.
+
+    `worktree` targets a linked worktree (any git worktree checkout, including
+    `.kilo/worktrees/<id>`): git resolves that checkout's toplevel and commits its current
+    branch. The linked worktree shares `.git/config`, so `core.hooksPath=.githooks` still
+    runs this repo's commit-msg policy hook. Omit it to commit the main checkout.
+    """
     try:
-        root = repo_root()
+        start = resolve_worktree_path(worktree) if worktree else None
+        root = repo_root(start)
     except (subprocess.CalledProcessError, FileNotFoundError) as exc:
         return CommitResult(ok=False, errors=[f"not a git repo / git missing: {exc}"])
 
@@ -282,6 +320,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--all", "-a", action="store_true", help="git commit -a")
     parser.add_argument("--amend", action="store_true", help="Amend HEAD")
     parser.add_argument("--allow-empty", action="store_true")
+    parser.add_argument(
+        "--worktree",
+        help="Commit a linked worktree (path absolute or relative to the main checkout)",
+    )
     parser.add_argument("paths", nargs="*", help="Optional paths to git add before commit")
     args = parser.parse_args(argv)
 
@@ -296,10 +338,11 @@ def main(argv: list[str] | None = None) -> int:
     result = perform_commit(
         message,
         paths=list(args.paths) if args.paths else None,
-        all_tracked=args.all,
-        amend=args.amend,
-        allow_empty=args.allow_empty,
+        all_tracked=bool(args.all),
+        amend=bool(args.amend),
+        allow_empty=bool(args.allow_empty),
         policy_path=args.policy,
+        worktree=args.worktree,
     )
     if not result.ok:
         print("clean-commit: rejected:", file=sys.stderr)

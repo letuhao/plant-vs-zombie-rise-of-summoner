@@ -60,6 +60,10 @@ if (collisionGroups)
     // Group every player-facing name by the validator's own normalized key. A group of 2+ is one
     // collision; the winner is the lexically first id, and every other row must be renamed.
     var groups = new Dictionary<string, List<object>>(StringComparer.Ordinal);
+    // nameKey collisions are a SEPARATE axis: the six `set.item` placeholder rows have DIFFERENT
+    // Chinese names (so no name collision) yet share one key, which the name-based grouping cannot
+    // see. Emitting them makes that defect reachable by the same repair.
+    var byNameKey = new Dictionary<string, List<object>>(StringComparer.Ordinal);
     foreach (var file in files)
     {
         if (file.Root is null) continue;
@@ -72,15 +76,25 @@ if (collisionGroups)
         {
             var name = entry.AsString("name");
             if (string.IsNullOrWhiteSpace(name)) continue;
-            var key = normalizer.Normalize(name).Key;
-            if (key.Length == 0) continue;
-            if (!groups.TryGetValue(key, out var list))
-                groups[key] = list = new List<object>();
-            list.Add(new
+            var descriptor = new
             {
                 id = entry.Id, name, kind = file.Kind, file = file.RelativePath,
                 nameKey = entry.NameKey, partition = file.Directory,
-            });
+            };
+            var key = normalizer.Normalize(name).Key;
+            if (key.Length > 0)
+            {
+                if (!groups.TryGetValue(key, out var list))
+                    groups[key] = list = new List<object>();
+                list.Add(descriptor);
+            }
+            var nameKey = entry.NameKey;
+            if (!string.IsNullOrWhiteSpace(nameKey))
+            {
+                if (!byNameKey.TryGetValue(nameKey, out var keyList))
+                    byNameKey[nameKey] = keyList = new List<object>();
+                keyList.Add(descriptor);
+            }
         }
     }
 
@@ -89,10 +103,21 @@ if (collisionGroups)
         .OrderBy(g => g.Key, StringComparer.Ordinal)
         .Select(g => new
         {
+            reason = "name",
             key = g.Key,
             members = g.Value.OrderBy(m => (string)m.GetType().GetProperty("id")!.GetValue(m)!,
                                              StringComparer.Ordinal).ToList(),
         })
+        .Concat(byNameKey
+            .Where(k => k.Value.Count > 1)
+            .OrderBy(k => k.Key, StringComparer.Ordinal)
+            .Select(k => new
+            {
+                reason = "nameKey",
+                key = k.Key,
+                members = k.Value.OrderBy(m => (string)m.GetType().GetProperty("id")!.GetValue(m)!,
+                                                StringComparer.Ordinal).ToList(),
+            }))
         .ToList();
 
     Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(
