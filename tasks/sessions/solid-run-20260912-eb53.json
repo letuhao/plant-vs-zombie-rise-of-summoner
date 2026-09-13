@@ -39,10 +39,12 @@
     "scripts/guard-debug-scope.ps1",
     "tools/ProveLiveProbe/**",
     "docs/architecture/aptitude-sheet/spec-unique-lawn-wire.md",
-    "tasks/aptitude-sheet-todo.md"
+    "tasks/aptitude-sheet-todo.md",
+    "docs/architecture/lawn-combat-wire-ideal.md"
   ],
   "started": "2026-09-12T14:38:04Z",
   "status": "active",
+  "scopeAmended3": "2026-09-13T19:10:00Z — added docs/architecture/lawn-combat-wire-ideal.md. Owner ran /idea after this session's live probe showed RPG combat channels (combat.power.omni etc) never reach a vanilla lawn hit. Idea-phase deliverable only: one new ideal doc, no spec, no plan, no code. Names the lawn hit wire as its own future program.",
   "scopeAmended2": "2026-09-13T11:35:00Z — added two aptitude-sheet paths (spec-unique-lawn-wire.md, aptitude-sheet-todo.md). Reason: this session's own T12 live probe found a real defect whose root cause is a cadence gap in THAT module's spec (it named 3 refresh triggers; its own map row said 'on reload/bind'). Owner directed the fix. Narrow, single-purpose edits: the cadence section + success criteria on that one spec, and one new task (AS-1.1b) plus a result note on AS-1.1 in that todo -- NOT a claim on aptitude-sheet's wider scope. No code in that program touched by this session.",
   "scopeAmended": "2026-09-13T00:00:00Z — added the live-probe sub-program's own paths (born from this session's own T12/T14 live-probe incident, spec'd and planned as its own program under the same worktree/session rather than opening a second one). docs/DESIGN-GATE.md and tasks/party-dungeon-todo.md are narrow, single-purpose additions (one topic-index row + failure-log entry; one cross-link note) -- not a claim on those programs' own scope."
 }
