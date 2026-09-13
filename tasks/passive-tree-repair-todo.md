@@ -274,10 +274,46 @@ loader/pricing/source-shape tests and a stale doc comment, all fixed). Verified:
 full Core.Tests green (`13369/13369` as read at the gate — a reading, and it moves as other streams add
 tests), `op 'more'` 80 → 0 with 0 unhandled exceptions, 6 guards green.
 
-### P4.3: Make binder and resolver agree on kind, for both kinds (R4) — ⛔ DEFERRED (architecture fork; needs an owner decision)
+### P4.3a: Census counts READABLE atoms, not priced ones — DONE `4e21bc2f`
 
-**Measured 2026-09-13 during `/build full` — this is the defect that makes the tree unplayable, and it
-is an ARCHITECTURE fork, not a bug fix:**
+**Found while investigating P4.3, and it is the program's own instrument lying.** The P0.1 census's
+"inert" metric counted atoms the binder *priced*, but the resolver reads only `stat.derived` — so 243
+bound nodes reported healthy while contributing nothing. By the repair skill's own §0.1 definition
+("bound nodes carrying zero READABLE atoms"), the real number is **266/266 unreadable, readable 0.0%
+of bound**. Fixed: `bound_with_readable_atoms`, `bound_atoms_by_kind`, `unreadable_share_permille`,
+a named `DEFECT` line when no readable kind binds, and a test asserting `READABLE_KIND_ID` against the
+resolver source so the census cannot drift from the thing it measures. 37 census tests, 545 tree tests.
+
+### P4.3: Make binder and resolver agree on kind, for both kinds (R4) — ⛔ DEFERRED (architecture fork)
+
+**Owner direction is on record** (Bundle C; plan §6 A1: *"both, unified — one battle engine, the lawn
+and battle read modes are not split"*). **What is NOT specified is the mechanism, and the two specs
+give opposite answers:**
+
+- `spec-tree-resolve.md` §2.1: a tree node carries **`stat.derived`**; the plan's own quota axis agrees
+  (`channelFamily` is drawn from the derived-stat catalog — `progression.bonus.atk`, `combat.power.omni`,
+  per `spec-tree-plan.md:739`).
+- The committed corpus is **100% `stat.modify`**: 22 of 30 generated families are `stat.modify`, the
+  binder prices primary channels for them, and a fresh bind produces `stat.modify/atk: 261`,
+  `stat.modify/defense: 76`, `stat.derived: 0`. `Resolve/TreeAtomSource.BoundAtomsFor` skips every one.
+
+**Both routes to "both kinds" leave this task's scope:**
+- **Derived half** needs the language stage to draw from the quota cell's *derived* `channelFamily`
+  rather than a branch tag (R1/P5) **and** the 8 `stat.derived` families' pool channels resolved
+  (P3.3) — P4.1 chose `refuse` for pools, so they cannot bind yet.
+- **Primary half** needs a NEW producer path (compile the node's `stat.modify` atoms to grants the way
+  `ActionContainerEffectResolverFactory.BuildEquip` does for equipment, then deliver via FA1
+  `ModifyStat`/`BattleStatModifierLedger`). That locks behavior, so AGENTS.md requires a
+  `decisions.md` row first — an architecture change, not a task-sized fix. The shipped
+  `progression.bonus.atk → atk` bridge (`ActorHub.MergeAppliedCombat`, `EntityApply.cs:404`) may
+  make the derived route sufficient, which is the first thing to check — but deciding that is not a
+  build-run's call when two frozen specs disagree.
+
+**This is a §4 stop: "the spec is genuinely silent on a product decision."** Unblocking order:
+P2.1's anchor → P3 → P5 → then P4.3 becomes implementable as the derived route, or the owner locks the
+primary-producer route in `decisions.md` and it becomes its own program.
+
+**Measured detail (2026-09-13, live bind):**
 
 ```
 fresh bind (tools/TreeBinder --out):  bound=407  onlyModify=243  onlyDerived=0  empty=164
@@ -286,50 +322,9 @@ bound atoms by kind/channel:          stat.modify/atk: 261   stat.modify/defense
 resolve path (Resolve/TreeAtomSource.BoundAtomsFor):  `if (atom.KindId != "stat.derived") continue;`
 ```
 
-So **100% of the 407 bound tree atoms are dropped by the resolver.** The 266-node census "bound" figure
-overstated health twice over: 164 nodes carry no atom at all, and the remaining 243 carry only
-`stat.modify` atoms that the resolve path filters out. Live bind rate 24.2% is really **0% readable**.
-
-**The two specs disagree, and the disagreement is the fork:**
-
-- `spec-tree-resolve.md` §2.1 is explicit that a tree node carries **`stat.derived`**: *"`stat.derived`
-  is the kind whose entire purpose is direct derived-channel mods … Its runtime matrix is already
-  `RuntimeSupportMatrix(Full, Full, None)`"*, fanned in via `AtomDerivedSubsystem` as
-  `BoundDerivedAtom`s. The plan's own quota vocabulary agrees: `channelFamily` is drawn from the
-  **derived**-stat catalog (`progression.bonus.atk`, `combat.power.omni`, … — `spec-tree-plan.md:739`).
-- `spec-tree-binder.md` §4.1 lists primary channels (`hp` `maxHp` `atk` `defense` `arm*`) as legal
-  binder targets, and the binder prices `stat.modify` for them (`TreeBinderRun.BindNode`), which is
-  what the corpus actually contains.
-
-**Why this cannot be resolved by narrowing either side.** The language stage picked `stat.modify`
-affixes (22 of the 30 generated families are `stat.modify`; 8 are `stat.derived`) even though the
-plan's quota cell names a DERIVED `channelFamily`. That is R1's root cause seen from the kind side:
-`vocab.permitted_for_branch` keys on branch tags only, so the `channelFamily` axis never constrains
-which affix — or which kind — a node may draw. Aligning `TreeAtomSource` to read `stat.modify` would
-contradict §2.1 and the quota axis; aligning the binder to emit `stat.derived` requires the language
-stage to draw derived-channel affixes, which requires P5 (vocabulary) and the 8 derived families only.
-
-**The two honest end-states (owner decision — plan §6 A1):**
-- **(A) Per `spec-tree-resolve` §2.1:** tree nodes carry `stat.derived` on derived channels only.
-  Requires P5's vocabulary fix (draw from the quota cell's `channelFamily`, not the branch tag) plus
-  the 8 `stat.derived` families (R10 curving). Smallest architectural change; matches the frozen
-  plan's quota axis; but the tree cannot grant primary `atk`/`maxHp` directly.
-- **(B) Owner's "both, unified":** add a PRIMARY producer path for trees — compile the node's
-  `stat.modify` atoms into grants the way `ActionContainerEffectResolverFactory.BuildEquip` already
-  does for equipment (FA1 `ModifyStat` → `EntityStatWriter` lawn / `BattleStatModifierLedger` battle),
-  *and* keep the derived fan-in. This is the union and reaches both modes through the one shared
-  engine, but it is a new producer and an architecture change that `decisions.md` must lock first.
-
-**Both options require a `decisions.md` row** (architecture that locks behavior needs it first), and
-option B additionally touches the effect/atom compile layer. That is a §4 stop: *"the spec is genuinely
-silent on a product decision"* — the two specs give opposite answers, and choosing is not this run's.
-
-**Also found here, and it is the program's own instrument lying:** the P0.1 census's "inert" metric
-counts atoms the binder *priced* (`node.atoms` non-empty), but the resolver reads only `stat.derived`.
-By the repair skill's own §0.1 definition — *"bound nodes carrying zero READABLE atoms"* — the real
-inert count today is **407/407**, not 164. The census must count readable atoms, not priced ones, or it
-cannot measure the thing it was built for. Small, testable, and in-scope; the correct next increment
-once the P4.3 fork is decided (it is the metric P4.3's own gate reads).
+100% of bound tree atoms are dropped by the resolver. The committed census reads 266 bound (lower
+than the live 407 because the committed corpus is older than the current generator), of which
+`readable=0.0%` — the number P4.3a's fix made visible.
 
 ### P4.3 (original task text, retained for reference): Make binder and resolver agree on kind, for both kinds (R4)
 **Spec:** `spec-tree-binder.md` §4.1; `spec-tree-resolve.md` §2.1, §12 test 15. **Owner answered:
