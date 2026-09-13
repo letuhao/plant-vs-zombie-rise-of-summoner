@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "kind": "action-seed",
+  "_meta": {
+    "owner": "docs/architecture/lawn-combat-wire-map.md (basic-attack-grant)",
+    "authored": "HAND-AUTHORED, not generator output. Deliberately carries no `_provenance` block: every entry in `committed-round-*.json` has one (`model`/`pipeline`/`promptVersion`), which marks those files as seedsmith OUTPUT that must never be hand-edited. This file is the opposite kind -- a small, reviewed, authored row, in the same sanctioned class as `data/tuning/**` and `**/_registry/**`. A generator must never write here, and a regeneration run must never overwrite it.",
+    "why": "`act.attack` is the engine's 'always legal' fallback basic attack, and today it exists ONLY as a hardcoded C# row (`BattleRunState.cs:64-81`) whose `Costs` is a literal `Array.Empty<CompiledActionCost>()`. That puts a balance number in code and leaves the action uncostable. Authoring it here makes the fallback data -- so its cost, rung band and atom family become reviewable config rather than a C# literal, per tunables-ssot.md.",
+    "scope": "The SHARED fallback only. Per-species basics (`SpeciesBasicsRow(SpeciesKey, AttackActionId, GuardActionId, MoveActionId, InnateActionId)`) are a separate, unbuilt capability owned by the action program -- nothing populates that table today and the corpus composer cannot emit `Kind = Basic` (`ActionCorpusComposer.cs:144` hardcodes `ActionKind.Skill`). Element already varies per actor without per-species rows, because element rides `attacker.AttackComponents`, not the action row (action-ideal.md:158-160).",
+    "triad": "Only the ATTACK basic is authored here. action-ideal.md D1 names three basics (attack, guard, move); guard is a STANCE (D3) and move is movement -- neither is needed for the lawn elemental-damage wire, and authoring them unused would be content nobody reads."
+  },
+  "entries": [
+    {
+      "id": "act.attack",
+      "name": "Basic Attack",
+      "description": "The plain swing, bite, or shot every creature always has. It carries whatever element the creature itself is made of.",
+      "descriptionKey": "action.basic.attack.desc",
+      "category": "attack",
+      "kindHint": "basic",
+      "scope": "general",
+      "scopeKey": null,
+      "relation": "enemy",
+      "targetMode": "single",
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.fx-overlay-damage"
+      ],
+      "rungBand": [
+        1,
+        1
+      ],
+      "pairedPayoffFamily": null,
+      "pairingRole": "none"
+    }
+  ]
+}
