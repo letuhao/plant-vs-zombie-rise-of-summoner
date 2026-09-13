@@ -214,6 +214,25 @@ public static class DebugEndpoints
                     waitedMs = sw.ElapsedMilliseconds
                 });
 
+            // Observability gap found live 2026-09-14: after a real defeat (match.result payload
+            // result:"defeat", GameHooks.cs's BoardStatistics.GameOver hook), spawn commands still
+            // queue but land against a board that had to be reset first -- debug.reset-board
+            // (DeleteAllPlants+DeleteAllZombies) is proven live to restore real spawn capability
+            // (plant.spawn/debug.spawn.plant fired for real immediately after). Self-heal the same way
+            // quick-start already self-enables the two toggles above, rather than silently letting a
+            // caller spawn into a dead board. This does NOT dismiss the game's own visual "重新开始"
+            // (restart) overlay -- no sanctioned debug command exists for that yet, so a real player
+            // or operator still needs to click through it or return to the main menu; named honestly
+            // here rather than assumed fixed.
+            var defeatReset = false;
+            var latestResult = FindLatestKind(store, "match.result");
+            if (latestResult is not null && string.Equals(PayloadString(latestResult.Payload, "result"), "defeat", StringComparison.OrdinalIgnoreCase))
+            {
+                await Send(hub, inbox, "debug.reset-board", new { });
+                await Task.Delay(500);
+                defeatReset = true;
+            }
+
             // Some game profiles never emit board.start for a board that already exists behind the
             // seed-picker screen -- confirmed live 2026-09-14 on pvzrh-3.9: several full match cycles
             // (board.end fired repeatedly), zero board.start events, ever. So a board sitting on the
@@ -251,7 +270,7 @@ public static class DebugEndpoints
                 var ackTimeoutSec = Math.Min(timeoutSec, 20);
                 var enterAck = await PollForKind(store, beforeEnter, "debug.level.enter", TimeSpan.FromSeconds(ackTimeoutSec));
                 if (enterAck is null)
-                    return Results.Conflict(new { ok = false, error = $"debug.level.enter did not ack within {ackTimeoutSec}s", waitedMs = sw.ElapsedMilliseconds });
+                    return Results.Conflict(new { ok = false, error = $"debug.level.enter did not ack within {ackTimeoutSec}s", waitedMs = sw.ElapsedMilliseconds, defeatReset });
 
                 var ackOk = PayloadBool(enterAck.Payload, "ok");
                 if (!ackOk)
@@ -336,7 +355,7 @@ public static class DebugEndpoints
 
             var runDone = await PollForKind(store, beforeScenario, "debug.run-steps.done", TimeSpan.FromSeconds(timeoutSec));
             if (runDone is null)
-                return Results.Conflict(new { ok = false, error = $"scenario '{scenarioId}' steps did not complete within {timeoutSec}s", waitedMs = sw.ElapsedMilliseconds });
+                return Results.Conflict(new { ok = false, error = $"scenario '{scenarioId}' steps did not complete within {timeoutSec}s", waitedMs = sw.ElapsedMilliseconds, defeatReset });
 
             EventEnvelope? snapshot = null;
             var beforeSnapshot = store.GetMaxEventId();
@@ -372,6 +391,7 @@ public static class DebugEndpoints
                 targetPtr,
                 plantPtr,
                 setupSkip = setupSkipOk,
+                defeatReset,
                 elapsedMs = sw.ElapsedMilliseconds,
                 note = snapshot is null ? "no board snapshot arrived — targetPtr/plantPtr unavailable" : null
             });

@@ -106,6 +106,58 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Post_latestMatchResultIsDefeat_selfHealsWithResetBoard_beforeEnterLevel()
+    {
+        // Real gap found live 2026-09-14: after a genuine defeat (match.result payload result:
+        // "defeat"), spawn commands still queued but landed against a dead board until
+        // debug.reset-board ran -- proven live (plant.spawn/debug.spawn.plant fired for real right
+        // after a manual reset-board call). quick-start must self-heal this the same way it already
+        // self-enables its two toggles, rather than silently leaving a caller to spawn into nothing.
+        _store.Heartbeat(RpgConstants.SourceInjector);
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "match.result",
+            Payload = JsonSerializer.SerializeToElement(new { result = "defeat", activeMatchMs = 57311 })
+        });
+        SeedLiveBoardStart();
+        var inbox = _app.Services.GetRequiredService<InjectorCommandInbox>();
+
+        var resp = await _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { scenario = "lab-overlay", timeoutSec = 1 });
+        Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode); // honest timeout -- no real game answering
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.True(((JsonElement)body!["defeatReset"]).GetBoolean());
+
+        var sent = inbox.Drain(int.MaxValue).Select(c => c.Name).ToList();
+        var resetIdx = sent.FindIndex(n => n == "debug.reset-board");
+        var skipProbeIdx = sent.FindIndex(n => n == "debug.skip-setup");
+        Assert.True(resetIdx >= 0, "expected debug.reset-board to be sent after a detected defeat");
+        Assert.True(resetIdx < skipProbeIdx, "the board must be reset before the mid-entry probe runs");
+    }
+
+    [Fact]
+    public async Task Post_latestMatchResultIsWin_doesNotResetBoard()
+    {
+        _store.Heartbeat(RpgConstants.SourceInjector);
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "match.result",
+            Payload = JsonSerializer.SerializeToElement(new { result = "victory" })
+        });
+        SeedLiveBoardStart();
+        var inbox = _app.Services.GetRequiredService<InjectorCommandInbox>();
+
+        var resp = await _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { scenario = "lab-overlay", timeoutSec = 1 });
+        Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode);
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.False(((JsonElement)body!["defeatReset"]).GetBoolean());
+
+        var sent = inbox.Drain(int.MaxValue).Select(c => c.Name).ToList();
+        Assert.DoesNotContain("debug.reset-board", sent);
+    }
+
+    [Fact]
     public async Task Post_injectorNotConnected_refusesBeforeTouchingAnything()
     {
         var resp = await _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { });
