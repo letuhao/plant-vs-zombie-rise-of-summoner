@@ -1,6 +1,8 @@
 # Live probe (RPG Server Debug) — the ideal
 
-**Status:** idea phase, 2026-09-13. Not a spec. No build authorized.
+**Status:** idea phase, 2026-09-13, adversarially audited same day (3 parallel reviews: citation
+fact-check, live-engine-proof-gap check, design-decision steelman — all findings folded in below,
+not left as a separate report). Not a spec. No build authorized.
 
 ## Which loop this extends
 
@@ -43,16 +45,22 @@ have also been broken by the same class of defect had it too gone through the fa
 | Step | Endpoint | Evidence |
 |---|---|---|
 | Summon (gacha) | `POST /api/creatures/summon` | `CreatureEndpoints.cs:83` → `RpgStore.ExecuteSummon` (`RpgStore.Summons.cs:28`) spends souls, rolls via `SummonRoller.Roll`, mints via `MintCreatureUnlocked` (`RpgStore.Creatures.cs:29`, a real `INSERT INTO rpg_unique_actors`). `SummonRequest` (`CreatureEndpoints.cs:280`) is `PlayerId, BannerId, Count, CorrelationId` — identity/selection only, no stats fields exist to fabricate |
-| Fusion | `POST /api/fusion/execute` | `FusionEndpoints.cs:30` → `RpgStore.ExecuteFusion`; Recipe mode mints via the SAME `MintCreatureUnlocked` (`RpgStore.Fusion.cs:298`), StarMerge updates the existing row (`RpgStore.Fusion.cs:126`). `FusionHttpRequest` (`FusionEndpoints.cs:249`) is likewise selection-only |
+| Fusion | `POST /api/fusion/execute` | `FusionEndpoints.cs:30` → `RpgStore.ExecuteFusion`; Recipe mode mints via the SAME `MintCreatureUnlocked` (`RpgStore.Fusion.cs:298`), StarMerge updates the existing row in place (`RpgStore.Fusion.cs:109-139`, the `UPDATE rpg_creature_profiles SET star = …` itself at line ~132). `FusionHttpRequest` (`FusionEndpoints.cs:249`) is likewise selection-only |
 | Delve altar pull | `PullAtAltar` → `CloseDelve(Extracted)` | `RpgStore.Delve.cs:1418`, `:950` — mint uses server-rolled `entry.Rarity`/`Variant`/`TraitIds` from the haul, not caller input |
 | Identity-only debug shortcut | `POST /api/debug/spawn-unique-actor` | `CreatureEndpoints.cs:187`, `SpawnUniqueActorRequest` (`:294`) is `PlayerId, Side, GameTypeId` only — despite the `/api/debug/` prefix this is a **legitimate** RPG Server Debug shortcut (skips the RNG/soul cost of a real summon, produces an identical row through `store.CreateUniqueActor`), not a fabrication vector. Correctly shaped already |
-| Level / XP | `POST /api/unique/actors/{id}/xp` | `UniqueActorEndpoints.cs:113` → `ua.AwardXp` → `RpgStore.AwardUniqueActorXp` (`RpgStore.UniqueActors.cs:1808`). Only checks `delta > 0`, not its source — see Wiring gap below |
+| Level / XP | `POST /api/unique/actors/{id}/xp` | `UniqueActorEndpoints.cs:113` → `ua.AwardXp` → `RpgStore.AwardUniqueActorXp` (`RpgStore.UniqueActors.cs:1808`). Only checks `delta > 0`, not its source — see Real gap below |
 | Aptitude allocation | `POST /api/aptitudes/unique/allocate` | `AptitudeEndpoints.cs:64` — real, budget-checked, persisted. **Already proven correct** by the 2026-09-13 T12 probe (30 pts → `Might`, `bonusAtk=1060`, `appliedAtk=1080`, matched live) |
-| Equip | `PUT /api/unique/actors/{id}/equipment/{slot}`, `POST /api/items/equip` | `RpgStore.UniqueActors.cs:1408` and `ItemEquipEndpoints.cs:104` both hard-require a real, owned, catalog-known item — no fabrication possible. Equip write triggers the real `mods_json` rebuild: `RebuildUniqueModsFromEquipmentUnlocked` (`RpgStore.UniqueActors.cs:1774`) |
+| Equip | `POST /api/items/equip`, `PUT /api/unique/actors/{id}/equipment/{slot}` | **Not symmetric — corrected after audit.** `POST /api/items/equip` (`ItemEquipEndpoints.cs:104-117`) hard-checks the item is real, stored, owned by this player, and `Disposition == "owned"` — genuine fabrication-proof. `PUT /api/unique/actors/{id}/equipment/{slot}` (`RpgStore.UniqueActors.cs:1408`) checks only `UniqueEquipmentCatalog.IsKnownItem`/`SlotMatchesItem` — a **fixed, explicitly-documented stub allowlist** (`UniqueEquipmentCatalog.cs:37-38`: "item-id allowlist only, not combat SSOT"), with **no per-player ownership check**. Not a fabrication risk in practice (magnitudes come from fixed seeded containers, not caller input) but a live probe should prefer the `/api/items/equip` path where the item in question is a real rolled instance, and name the PUT route's stub nature rather than call it equally "hard-validated." Both trigger the same real `mods_json` rebuild: `RebuildUniqueModsFromEquipmentUnlocked` (`RpgStore.UniqueActors.cs:1774`) |
 | Deploy | `POST /api/unique/actors/{id}/deploy` | `UniqueActorEndpoints.cs:43` → `UniqueActorService.DeployAsync` — real, persisted, real board placement. **Its own `loadoutJson` parameter is the defect seam** — see below |
 
 **This chain is ~90% already built and real.** The idea that a live probe *has to* fabricate an actor
 is false — it was a shortcut taken under time pressure, not a missing capability.
+
+**Second stub found by the same audit, same shape as `loadoutJson`:** `UniqueEquipmentCatalog` is
+itself documented as a stub, not combat SSOT (`UniqueEquipmentCatalog.cs:37-38`). Two independent
+"this is a placeholder, not the real gear system" seams sit on the equip/deploy path — worth the
+`bound-loadout-hub`/equip-program owners knowing they're the same class of debt, not raised further
+here.
 
 ### Wiring gap — `DeployAsync`'s `loadoutJson` overrides real equipment state
 
@@ -89,6 +97,28 @@ not fabricating a fake mechanism (there is no other mechanism to bypass yet) —
 only entry point that exists, which is legitimate, but it proves "does XP → level compute correctly,"
 never "does a real match reward XP" (that second claim has no code to test yet — a real gap, not
 this program's to close).
+
+### Real gap — no server-side compose read-back exists for a UniqueActor's derived combat stats
+
+Verified independently by two audit passes: `GET /api/unique/actors/{id}` returns `UniqueActorDto`
+(`UniqueActorDtos.cs:15-30` — instanceId, playerId, side, typeId, phase, level, xp, matchKey, lastPtr,
+correlationId, revision, timestamps) and `GET /api/unique/actors/{id}/equipment` returns
+`UniqueEquipmentListDto` (`:71-77` — slot/itemId list and the raw `modsJson` string). **Neither field
+set includes a composed atk/maxHp/derived-combat value; neither handler calls anything resembling
+`ActorHub.Resolve`.** The only endpoint in this whole area that computes anything derived is
+`AptitudeEndpoints.ProjectUniqueState`, and even that returns budget/spent/shares, not atk/maxHp.
+
+This means the two GETs, by themselves, can only ever prove **inputs were persisted correctly**
+(level, xp, equipment assignment, raw `mods_json`) — never that a bonus actually reached
+`AppliedCombat` the way `ActorHub.MergeAppliedCombat` composes it. For a combat-stat feature like
+`bound-loadout-hub`, the composed value is **only observable at all** through the Injector's own
+live `CheatState.ActorHub` instance — there is no Server-side equivalent to check instead. This is
+not a gap this program should close (building a Server-side ActorHub-equivalent compose-and-expose
+endpoint would be significant new work, is arguably a duplicate compose per `DESIGN-GATE.md` §2.15's
+"ActorHub sole Hot compose" invariant, and is out of scope for a testing-tooling idea) — it is a
+structural fact "The shape" below must design around: **the live-engine half of a T12/T14-style
+probe is not an optional nice-to-have on top of the Server reads — for a combat-stat claim
+specifically, it is currently the only place the composed value can be observed.**
 
 ### Real gap, found as a byproduct, unrelated to this program
 
@@ -133,23 +163,59 @@ No PvZ-genre or RPG-genre prior art applies here — this is not a player-facing
 
 ## The shape
 
-Two decisions, not two open questions — the engineering answer is clear enough to state as a
-recommendation, per this skill's own "a recommendation nobody disputes is a decision" rule:
+Two decisions, strengthened by an adversarial audit pass (2026-09-13, same session) that steelmanned
+the opposing choice against this repo's actual conventions rather than generic practice — both
+decisions survived, but neither survived unchanged:
 
-1. **Do not split `DebugEndpoints.cs` into two files yet.** It already contains two correctly-shaped
-   examples in one file under one route group; splitting is a real refactor with no behavior change
-   and no urgency — revisit only if the file's growth or reviewer confusion makes the mixing itself a
-   problem. Cheaper first step: a one-line `// Game Injector Debug` / `// RPG Server Debug` banner
-   comment above each route grouping, so the distinction is visible without a file move.
-2. **The live-probe "recipe" is a documented sequence of the real endpoints above, not a new
-   orchestration endpoint.** The chain is already five real HTTP calls (summon-or-`spawn-unique-actor`
-   → aptitude allocate → equip → deploy-with-empty-`loadoutJson` → read back via `GET /api/unique/
-   actors/{id}` and `GET /api/unique/actors/{id}/equipment`) — thin enough that a new server-side
-   "prove" endpoint would just be one more thing that could itself drift from the real pipeline it's
-   supposed to prove. Matches this repo's own `prove-hub-combat.ps1`/`prove-aptitude.ps1` precedent: an
-   **operator script**, not a server capability, chains the real calls and asserts the read-back
-   matches. Building that script (or extending an existing prove script) is implementation work for
-   `/spec`, not this doc.
+1. **Do not split `DebugEndpoints.cs` into two files yet — but name the guard that replaces "revisit
+   if it becomes a problem."** The original soft trigger ("revisit if growth/confusion makes the
+   mixing a problem") was itself a defect by this repo's own `planning-and-task-breakdown` rule that a
+   gate needs a named resolver, not a vibe. The audit found the fix does not require a file split at
+   all: every existing `DebugEndpoints.cs` route already has a **mechanically greppable** signature —
+   an RPG-Server-Debug-shaped handler calls `store.*`/`ua.*` (a real domain/persistence method)
+   directly in its body, while a Game-Injector-Debug relay is uniformly a `MapPost(g, path,
+   "debug.xyz")` wrapper that only forwards a command string. **`scripts/guard-debug-scope.ps1`** (not
+   yet built — named here as the concrete follow-up, matching this repo's `guard-*.ps1` convention for
+   every other boundary rule, e.g. `guard-single-writer.ps1`, `guard-actor-hub.ps1`, none of which are
+   comment-enforced) can assert this shape today, from the handler bodies, with zero refactor
+   prerequisite. A banner comment (`// Game Injector Debug` / `// RPG Server Debug` above each
+   grouping) is still worth adding for human readability, but it is not what makes the rule
+   enforceable — the guard is. File split stays deferred; the guard does not.
+2. **The live-probe "recipe" is an operator script, not a new server endpoint — but this is net-new
+   engineering, not a citation of existing precedent.** The audit read `prove-hub-combat.ps1` and
+   `tools/ProveHubCombat/Program.cs` directly: it drives `RpgStore.InMemory()` **in-process**, with
+   **zero `HttpClient` usage** anywhere in the file — it proves an offline/in-memory invariant, not a
+   live server + live game over real HTTP. Citing it as "this repo's own precedent" for a live,
+   multi-step, real-HTTP-plus-async-SignalR-ack probe overstated the support that citation carries;
+   corrected here. The decision itself still holds, for a sharper reason than "matches precedent": a
+   new server-side "prove" endpoint would be a second orchestrator of the same real calls the web FE
+   already makes, in its own sequence, that must independently stay in sync with the FE forever — the
+   same shape `DESIGN-GATE.md` §2.15 (SOLID) already bans for a combat compose ("a second `*Composer*`
+   or private fold... never a template"), applied here to orchestration instead of composition. An
+   operator script that calls the SAME real HTTP endpoints the FE calls, in the SAME sequence, has no
+   independent logic to drift — only real work correctly reused. Building it means real
+   `Invoke-RestMethod` calls plus the same async ack/poll pattern `DebugEndpoints.cs` already uses
+   server-side for injector round trips (`PollForKind`, e.g. lines 85/373/382) — genuinely new
+   scripting work, not "extend an existing prove script."
+
+   **The recipe's own missing step, found by the same audit:** as drafted, the chain stopped at
+   the two Server GETs — which, per the real gap above, can only prove **persisted inputs**, never
+   that the composed value reached `AppliedCombat`. The corrected six-step recipe:
+
+   1. Summon (or `POST /api/debug/spawn-unique-actor` for the identity-only shortcut)
+   2. `POST /api/aptitudes/unique/allocate`
+   3. `POST /api/items/equip` (prefer this over the PUT stub route — see the Equip row above)
+   4. `POST /api/unique/actors/{id}/deploy` — **`loadoutJson` omitted/empty, always**
+   5. Read back persisted state: `GET /api/unique/actors/{id}` + `.../equipment` — proves inputs
+      were persisted correctly. **This is not yet a live proof.**
+   6. **Separately, labeled as the distinct live-engine claim** (`live-probe-standard.md` §1's "may
+      NOT prove" row): call `debug.board-stats` for the deployed specimen's ptr
+      (`CheatCommandRunner.cs:325` → `DebugRuntime.BoardEntityStats()`, `DebugRuntime.cs:183-213`,
+      relayed at `DebugEndpoints.cs:314` — reads the actual live Unity fields: `attackDamage`,
+      `thePlantHealth`, `thePlantMaxHealth`, the exact fields the 2026-09-13 incident compared) and
+      assert they match step 5's persisted values. **A probe that stops at step 5 and calls that
+      "proven" repeats this program's own founding mistake, just shifted from over-trusting an
+      Injector read to over-trusting a Server read.**
 
 ## Tunables
 
@@ -159,8 +225,17 @@ would touch.
 ## What this deliberately does not decide
 
 - Does not redesign or split `DebugEndpoints.cs` (§ above already recommends against it for now).
+- Does not build `guard-debug-scope.ps1` — named as the concrete follow-up mechanism, not built here;
+  writing and wiring it into `deploy-play.ps1`/CI is implementation work for `/spec`.
+- Does not build the six-step operator script itself — the recipe and its evidence are specified
+  above; the script is implementation work for `/spec`.
 - Does not fix `DeployAsync`'s `loadoutJson` override, or decide whether that parameter should
   eventually be removed — named as a known, already-documented stub, not re-opened here.
+- Does not fix the `UniqueEquipmentCatalog` stub-allowlist gap on the PUT equipment route — named
+  alongside `loadoutJson` as the same class of debt, not re-opened here.
+- Does not build a Server-side compose-and-expose endpoint for a UniqueActor's derived combat stats —
+  considered and rejected above as a likely duplicate-compose (`DESIGN-GATE.md` §2.15); the Injector's
+  `debug.board-stats` remains the only place this claim is observable, by design, not by gap.
 - Does not fix the `/talk`/`/cage` `CreatureMintSpec` trust gap — a real production-validation
   finding, out of scope for a live-probe-tooling idea.
 - Does not redo the T12/T14 Actor Hub live proof itself — that is downstream execution work once a
