@@ -21,6 +21,51 @@ and be correct on both read modes; "battle-only first pass" is not an option.
 `python scripts/audit-magic-numbers.py` 0 M1/M2 attributable to the task. For `tools/seedsmith` work,
 add `python -m pytest tools/seedsmith/tests/adapters/trees`.
 
+---
+
+## ▶ RESUME HERE (state at 2026-09-13, `/build full` run)
+
+**Committed and gated:** P0.1, P0.1b, P0.2, P0.3, P1.1, P1.2, P1.3, P4.1, P4.2, P4.3a.
+Commits: `d352a027` `52ad4948` `bbe47eb1` `c82d6f5a` `c3ef3d9a` `bd5b651b` `38286a0d` `4e21bc2f`
+(`ab1a1b56` cleanup) `1d76131f`.
+
+**Measured gain from Phase 4:** `op 'more'` refusals 80 → 0; the binder no longer crashes; live bind
+rate 15.8% → 24.2%. **But `readable = 0.0% of bound`** — every bound atom is `stat.modify` and the
+resolver reads only `stat.derived`, so the tree still contributes nothing in play. That is P4.3.
+
+**The run stopped on two §4 blockers, both genuine (not tooling failures):**
+
+1. **P2.1 — the mechanism-kind magnitude anchors are authored nowhere.** `bands.v1.json`'s
+   `statusMagnitudeAndDuration` group has ratios (chance 1.75‰, duration 1.4‰) but no `formula` and no
+   `sharePermilleOwnership`; its own worked example says *"illustrative, inherited, not balanced"*;
+   `spec-numerics.md:210-212` says those shares are *"specced when their families are resolved"*; and
+   `tier-bands.v5.json` has **no** per-family chance/duration surface. No non-magnitude family carries
+   an explicit `amount` either (checked: 51 families, 0 with `amount`). The registry's own rule is
+   *"reject at import, not guess one"*, so inventing the anchor IS the defect. **Needs:** the owner (or
+   the power program) to publish the anchors — a `power-scale.v3` curve for the magnitude kinds (R10)
+   **and** a chance/duration anchor for `status.apply`. Nothing downstream of P2.1 is reachable until
+   this exists.
+
+2. **P4.3 — the two frozen specs disagree on the kind a tree node carries.**
+   `spec-tree-resolve.md` §2.1 + the plan's `channelFamily` quota axis say **`stat.derived`**; the
+   binder and the whole committed corpus are **`stat.modify`** (261 atk + 76 defense, 0 derived), and
+   `Resolve/TreeAtomSource` skips every one. The owner's *direction* is on record ("both, unified"),
+   but the **mechanism** is not: the derived route needs P5 + P3 (both blocked by #1), and the primary
+   route needs a new producer path that locks behavior and therefore a `decisions.md` row first.
+
+**Concrete ask for the owner (smallest unblocking set):**
+- publish the missing balance anchors (chance/duration for `status.apply`; curves for the 20
+  curve-less channels) so Phase 2–3 can run; **or** say "exclude the mechanism kinds from the tree
+  vocabulary for now" and the plan re-scopes to magnitude-only.
+- decide P4.3's route: **(A)** derived-only per `spec-tree-resolve` §2.1 (once P2/P3/P5 land), or
+  **(B)** lock a primary producer path in `decisions.md` (the equipment/`BuildEquip` shape).
+
+**First thing to re-check on resume:** the shipped `progression.bonus.atk → atk` bridge
+(`ActorHub.MergeAppliedCombat`, `EntityApply.cs:404`) — if a derived-channel atom on
+`progression.bonus.atk` reaches a live `atk`, option A is sufficient and option B is unnecessary.
+
+---
+
 **Standing rule:** a task that edits generated seed/generated JSON **without** a `src/` or
 `tools/seedsmith` code change is not a repair. If the only change is data, it is class D/E and must
 cite the code evidence that the pipeline is already correct.
