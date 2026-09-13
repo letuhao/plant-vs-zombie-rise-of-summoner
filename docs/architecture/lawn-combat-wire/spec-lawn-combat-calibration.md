@@ -19,26 +19,53 @@ balance pass can redo it rather than reverse-engineer it.
 does **not** run win-rate sweeps or tune for feel. It answers the narrower question *"what number is
 defensible on day one, and why"*, so the feature is playable and its numbers are traceable.
 
-### One of these is a hard blocker, not a deferral
+### ⚠ Correction — the first draft of this spec was wrong about its own headline
 
-```json
-// data/tuning/action-shares.v1.json — keyed by ATOM FAMILY
-{ "atom.strike": 1000, "atom.fireball": 1000, "atom.poison-rider": 300 }
+**It claimed `sharePermille` was a hard blocker that would throw on first use. It is not.**
+
+`ActionShareTable` has **zero callers** in `src/` — only its own definition file
+(`Actions/Seeding/ActionShareTable.cs`). It belongs to the **seeding** path, whose entry point
+`ActionSeeder.Generate` also has zero production callers (`ItemGrantedActionRow.cs:111-119` asserts
+`ActionCorpusProducerLanded = false`). Neither `BasicAttack.cs` nor `BattleRunState.cs` mentions
+`sharePermille` at all.
+
+**The basic attack's base damage does not come from a share.** It comes from the attacker's own atk:
+
+```csharp
+BaseOverlayDamage = attacker.LiveAtk(state.Ledger)                         // BasicAttack.cs:369
+public long LiveAtk(…) => ledger.Recompose(Setup.Key, "atk", Setup.Atk);   // BattleEngine.cs:101
 ```
 
-`atom.fx-overlay-damage` — the family the authored basic attack uses — **is absent**, and
-`ActionShareTable` *"rejects rather than defaults"* (`ActionShareTable.cs:13`, per
-`spec-action-seeding.md` §2/§7). **The feature throws on first use without this row.** It is not a
-balance nicety.
+So `anchor(Θ) = sharePermille × P(Θ)/1000` is **not** the formula in play, and the
+`atom.poison-rider = 300` precedent is irrelevant to this module. That error came from inferring a
+call path from a component's existence instead of verifying it — the same mistake that produced the
+first `lawn-action-bridge` draft, made twice in one hour.
 
-## The four numbers
+## The numbers — two, plus one genuinely open question
 
 | # | Number | Home | Status |
 |---|---|---|---|
-| 1 | `sharePermille` for `atom.fx-overlay-damage` | `data/tuning/action-shares.v1.json` | **missing — runtime rejection** |
-| 2 | `stamina` cost per swing for `act.attack` | Kind-aware cost template (`basic-attack-seed`) | missing |
-| 3 | Lawn `stamina` regen rate (per-mille/tick) | `data/tuning/battle-resources.v1.json` | missing; blocked until `resource-subtick` makes it expressible |
-| 4 | Lawn `resource.max.stamina` | derived, `poolShareMilli` | **already derivable** — `BaseHp(Θ) × poolShareMilli/1000`; only the seeding is missing (`basic-attack-cost` wire 2) |
+| 1 | `stamina` cost per swing for `act.attack` | Kind-aware cost template (`basic-attack-seed`) | **missing — real** |
+| 2 | Lawn `stamina` regen rate (per-mille/tick) | `data/tuning/battle-resources.v1.json` | **missing — real**; blocked until `resource-subtick` makes it expressible |
+| 3 | Lawn `resource.max.stamina` | derived | **already derivable** — `BaseHp(Θ) × poolShareMilli/1000`; only the seeding is missing (`basic-attack-cost` wire 2) |
+
+### The open question this module must resolve first
+
+**What amount does `atom.fx-overlay-damage` actually resolve to on the lawn?**
+
+The lawn path is `EffectBag.cs:509` → `DamagePacketBuilder.FromOverlay` → `amount = amountOverride ??
+ResolveAmount(overlay, ev)` (`DamagePacketBuilder.cs:17-28`). Our atom
+(`data/seed/atoms/fx-core.json:33`) authors `params: { channel: "hp" }` and **no amount**. There is an
+"event-linked magnitude" marker in that path (P0.2, `spec-value-spec-and-curve.md`). So either:
+
+| | Consequence for this module |
+|---|---|
+| **(a)** the atom needs an **authored amount** | That number is a third thing to calibrate, and it is an independent magnitude |
+| **(b)** it resolves the **event-linked** magnitude — the vanilla hit's own damage | **There is no new magnitude to author at all.** The rider becomes a transform of the vanilla number via power/defense and the element ring, and calibration reduces to cost + regen |
+
+**Resolve this by reading `ResolveAmount` before authoring anything.** (b) is the shape the feature
+was described as having — an elemental *delta* on top of a vanilla hit — but that is a reason to check,
+not a reason to assume. This spec has already been wrong once by assuming.
 
 ## Shipped anchors — derive from these, do not invent
 
@@ -124,8 +151,11 @@ Every authored value carries, in `_meta`: the anchor it derived from, the arithm
 
 ## Success criteria
 
-- [ ] `atom.fx-overlay-damage` has an authored `sharePermille`; `ActionShareTable` no longer rejects.
-- [ ] The chosen share's arithmetic and resulting TTK-versus-vanilla are recorded in `_meta`.
+- [ ] **`ResolveAmount`'s behaviour for `atom.fx-overlay-damage` is read and recorded** — (a) authored
+      amount or (b) event-linked. Everything else in this module depends on which.
+- [ ] If (a): the authored amount's arithmetic and resulting TTK-versus-vanilla are recorded in
+      `_meta`. If (b): **no magnitude is authored**, and that is stated explicitly so nobody adds one
+      "for completeness".
 - [ ] `stamina` cost and lawn regen are authored, and satisfy `cost ≤ regenPerSecond × 1.5 s` at the
       pin.
 - [ ] Exhaustion is reachable under burst fire — live-proof 4's falsifier can actually run.

@@ -160,7 +160,7 @@ pass — but derived and traceable rather than invented.
 | 9 | Escape-hatch criterion let the program be "done" with four creature types RPG-inert | Closed in `spec-lawn-hit-attribution.md` |
 | 10 | Hypno re-bake seam: the resolver cache is fixed but a **baked** `elementPayload` stays stale | Added to `spec-basic-attack-grant.md` |
 | 11 | `lawn-action-bridge`'s premise was factually wrong — injector already references Core; a compiled row cannot be transported; `ActionTimingPolicy` **throws** unconfigured; both named guards were vacuous | Spec rewritten; scope shrank from "build a transport" to "extract a factory + configure a policy" |
-| 12 | `sharePermille` for `atom.fx-overlay-damage` is **absent** from `action-shares.v1.json` and `ActionShareTable` rejects rather than defaults — the feature **throws on first use** | New module `lawn-combat-calibration` |
+| 12 | ~~`sharePermille` missing ⇒ throws on first use~~ — **retracted, that claim was false.** `ActionShareTable` has zero callers; base damage is `attacker.LiveAtk`, not a share. New module `lawn-combat-calibration` still stands, but for **two** numbers (cost, regen) plus one open question — what amount `atom.fx-overlay-damage` resolves to | `lawn-combat-calibration`, corrected |
 
 ---
 
