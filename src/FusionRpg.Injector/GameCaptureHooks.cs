@@ -280,6 +280,18 @@ public static class GameCaptureHooks
         }
     }
 
+    /// <summary>
+    /// ⛔ Deliberately does NOT invalidate <c>LawnElementResolverHost</c>, and that is checked by
+    /// <c>LawnElementResolverTests</c>, not left to memory. That cache stores the actor's OBJECT KIND,
+    /// which mind control does not change: <c>InjectorEntityRegistry.CollectSnaps</c> writes
+    /// <c>Side = "zombie"</c> as a literal for every Zombie and carries control state in the separate
+    /// <c>BoardEntitySnap.MindControlled</c> flag, which <c>MechanicalOwnSideOracle</c> is the SSOT for
+    /// folding into an allegiance. A charmed zombie is still a Zombie with a zombie type id, so its
+    /// species row is still the zombie one — re-resolving here would return the identical value at the
+    /// cost of a board scan, and flipping the stored side to "plant" would make the
+    /// <c>(side, gameTypeId)</c> species lookup miss (degrading a charmed zombie to Neutral element)
+    /// and break <c>GateCounterHost</c>, which requires spawn kind by spec-gate-counters.md §2.1.
+    /// </summary>
     [HarmonyPatch(typeof(Zombie), nameof(Zombie.SetMindControl))]
     public static class ZombieMindControl
     {

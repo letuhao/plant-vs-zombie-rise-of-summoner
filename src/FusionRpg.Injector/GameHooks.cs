@@ -1286,6 +1286,11 @@ public static class GameHooks
         Applied.Remove(ptr);
         EntityStatWriter.Forget(ptr);
         CheatState.Stats.ForgetEntity(ptr.ToString("X"));
+        // IL2CPP can hand this exact address to a NEW entity later in the same match, and the element
+        // cache is keyed by ptr and cleared only on a match change — so without this the next creature
+        // at this address would inherit the dead one's species element
+        // (LawnElementResolver's trigger set, item 3).
+        try { Effects.LawnElementResolverHost.Invalidate(ptr.ToString("X")); } catch { }
         try { Hud.ActorHudCache.Remove(ptr.ToString("X")); } catch { }
         try { Hud.ActorHudPool.ReleaseOwner(ptr.ToString("X")); } catch { }
     }
