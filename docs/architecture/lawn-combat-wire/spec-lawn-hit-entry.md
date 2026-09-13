@@ -63,11 +63,17 @@ GameHooks.cs:750       ...else if (EventDrainHost.Enabled)   // AFTER a debug/te
 **Owner decision, 2026-09-13: one attack is one action trigger; triggering it multiple times is a
 defect.** A piercing pea hitting five zombies is one swing.
 
-- Dedupe the **action trigger** on the swing id (`bullet.Pointer`, supplied by
-  `lawn-hit-attribution`). The cost is paid once per swing.
+- Dedupe the **action trigger** on the swing id supplied by `lawn-hit-attribution` — `bullet.Pointer`
+  for projectiles, `(attackerPtr, frame)` for melee. The cost is paid once per swing.
 - Still resolve the **elemental rider per victim** — each victim has its own defence and its own
   element matchup, so one shared number would be wrong.
-- Melee needs no dedupe: one bite is one victim already.
+- **Melee needs dedupe too — corrected 2026-09-13.** The host game has multi-target melee:
+  `QingZombie.AttackPlants()`, `EternalZombie_a.AttackPlants()` (both plural, verified in
+  `Assembly-CSharp.dll`), plus plant-side `Shulkflower.AttackEffect(List<…>)` and
+  `WaterShulk.AttackEffect(List<…>)`. An earlier draft's "one bite = one victim" was wrong. Whether
+  the existing `Zombie.AttackPlant` patch even observes these is a build-time verification item owned
+  by `lawn-hit-attribution` — if it does not, those attacks are invisible to the RPG layer and that is
+  a tracked capture gap, not a silent zero.
 
 This is also the shipped slice's only rate control, because the proc coefficient is deferred to the
 balance program. Without it, pierce/AoE multiplies value on an axis nothing prices.

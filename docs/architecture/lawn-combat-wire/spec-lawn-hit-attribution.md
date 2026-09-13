@@ -66,11 +66,35 @@ both identities on the record:
 | Field | Was | Becomes | Why |
 |---|---|---|---|
 | attacker | `bullet.Pointer` | `bullet.from.Pointer`, or `from_zombie.Pointer` when `shootByZombie` | ActorHub resolve + `entity:{ptr}` grant matching |
-| **swing id** | — | `bullet.Pointer` | Dedupes the action trigger — `lawn-hit-entry` fires once per swing |
+| **swing id** (projectile) | — | `bullet.Pointer` | Dedupes the action trigger — `lawn-hit-entry` fires once per swing |
+| **swing id** (melee) | — | `(attackerPtr, frame)` | Same, for multi-target bites |
 | target | victim ptr | unchanged | Each victim keeps its own defence/element matchup |
 
-**Melee needs no swing id** — `TryRecordMeleeDealt` already records the true `attackerPtr`, and one
-bite is one victim. Melee is correct today; do not change its attacker.
+**Melee attribution is already correct** — `TryRecordMeleeDealt` records the true `attackerPtr`. Do not
+change it.
+
+**But melee DOES need a swing id — corrected 2026-09-13.** An earlier draft of this spec claimed "one
+bite = one victim". That is false: the host game has multi-target melee, verified by reading
+`Assembly-CSharp.dll` metadata —
+
+| Method | Shape |
+|---|---|
+| `Zombie.AttackPlant(Plant)` | single target — the only thing the injector hooks (`GameHooks.cs:1026`) |
+| `QingZombie.AttackPlants()` | **plural**, no args |
+| `EternalZombie_a.AttackPlants()` | **plural**, no args |
+| `Shulkflower.AttackEffect(List<…>)` | plant-side, takes a collection |
+| `WaterShulk.AttackEffect(List<…>)` | plant-side, takes a collection |
+
+`grep` for any of these four types in `src/FusionRpg.Injector/` returns **zero hits** — the injector
+does not know they exist. And `AttackPlants()` is a *separate method*, not an override of
+`AttackPlant(Plant)`, so the existing Harmony patch catches it **only if** it loops into
+`AttackPlant(plant)` per victim. That is unresolved from metadata alone (no IL bodies) and is a
+**build-time verification item**, not an assumption.
+
+**Melee swing id = `(attackerPtr, frame)`.** One attacker's bites within one frame are one swing.
+This is correct whichever way the loop question resolves, and it reuses machinery that already exists:
+`_meleePairsByTarget` / `_meleePairsFrame` (`EventDrainHost.cs:26-27,85-90`) already scopes melee
+bookkeeping per frame and clears on frame advance. Do not invent a second frame-scoped structure.
 
 ## Code style
 
@@ -109,5 +133,11 @@ Read the field once per record and pass it down; do not re-read IL2CPP fields pe
       — **not** the `{Hp=100,MaxHp=100,Atk=10}` stub.
 - [ ] An `entity:{ptr}` grant bound to the firing plant matches on a projectile hit (the precondition
       `basic-attack-grant` depends on).
-- [ ] Melee attribution unchanged.
+- [ ] Melee **attribution** unchanged; melee **gains** a `(attackerPtr, frame)` swing id.
 - [ ] A null shooter produces no RPG contribution and no exception.
+- [ ] **Multi-target melee resolved, not assumed.** Spawn a `QingZombie` / `EternalZombie_a` against
+      several plants and record which of these is true: (a) the existing `Zombie.AttackPlant` patch
+      fires once per victim — the swing id handles it; or (b) it does not fire at all — those attacks
+      are currently invisible to the RPG layer and that is a named capture gap to track, since
+      `Plant.TakeDamage` is deliberately not used for melee `combat.hit` to avoid double-counting
+      (`GameHooks.cs:982`). Record the answer in this spec rather than leaving it open.
