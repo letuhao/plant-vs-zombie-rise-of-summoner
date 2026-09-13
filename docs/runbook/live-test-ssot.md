@@ -100,10 +100,18 @@ Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/spawn-zombie `
 ```
 
 **Do not proceed to the test proper until every spawned actor's identity and location are confirmed**
-— never assume a spawn call succeeded silently:
+— never assume a spawn call succeeded silently. **`board-stats` is `POST`-only and does not return
+the stats in its HTTP body** — like every other `debug.*` relay, it queues a command and answers
+`{ "ok": true, "queued": N }`; the real data arrives as a `debug.board-stats` **event** (verified
+live 2026-09-14 — a `GET` to this path falls through to the web UI's SPA route and returns
+`index.html`, not stats):
 
 ```powershell
-Invoke-RestMethod http://127.0.0.1:5088/api/debug/board-stats
+$tip = (Invoke-RestMethod "http://127.0.0.1:5088/api/events?afterId=0&limit=1").items[-1].id
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/board-stats
+Start-Sleep -Milliseconds 500
+$page = Invoke-RestMethod "http://127.0.0.1:5088/api/events?afterId=$tip&limit=50"
+($page.items | Where-Object kind -eq 'debug.board-stats')[-1].payload
 # plants[]/zombies[] each carry: ptr, typeId, col, row, attack/attackDamage, hp, maxHp
 ```
 
@@ -120,7 +128,32 @@ below — or, for `lawn-combat-wire` specifically, read the `lawn-combat-observe
 always-on, non-perturbing instrument; see `tools/LawnCombatObserver`), never console prose and never
 a worker's summary.
 
-### Step 6 — Tear down before the next test instance
+### Step 6 — A cycling or defeated board is not a mystery: it is now a metric
+
+Two real, live-observed board states that used to produce a confusing silent timeout with no clue to
+the real cause — both now self-report instead of requiring a manual event-log diff:
+
+- **Cycling board** (a "quick" setup-skip with no real plants placed loses every wave in seconds, and
+  the game auto-retries in a tight loop). `/lawn/quick-start` counts `board.end` events in the last
+  10s and refuses immediately (`recentBoardEnds`, `waitedMs`) instead of polling `debug.enter-level`
+  into a timeout that can never resolve while the board keeps churning.
+- **Defeated board** (`match.result` payload `result:"defeat"` — `GameHooks.cs`'s
+  `BoardStatistics.GameOver` hook). Spawn commands still *queue* successfully but land against a dead
+  board. `/lawn/quick-start` now checks the latest `match.result` and proactively runs
+  `debug.reset-board` when it says defeat, reporting `defeatReset: true`. **Proven live 2026-09-14**:
+  after a real defeat, a manual `debug.reset-board` + `spawn-plant` produced a real
+  `plant.spawn`/`debug.spawn.plant` event immediately after.
+- **What this does NOT fix**: the game's own visual "重新开始" (restart) / defeat overlay stays on
+  screen — `reset-board` restores API-level spawn capability, but there is no sanctioned debug command
+  today to dismiss that overlay (confirmed by inspection: no restart/replay/back-to-menu case exists
+  in `CheatCommandRunner.cs`). A real player or operator still needs to click through it or return to
+  the main menu for a visually clean board. Do not report a defeat-recovered board as "clean" — it is
+  API-usable, not player-presentable.
+
+Both checks run automatically inside `/lawn/quick-start` (`DebugEndpoints.cs`) — driving the API by
+hand still needs its own `board.end`/`match.result` check before trusting a poll to resolve.
+
+### Step 7 — Tear down before the next test instance
 
 End the debug session, then return to Step 1 for the next instance — never layer a new test onto a
 board a previous instance already mutated:
