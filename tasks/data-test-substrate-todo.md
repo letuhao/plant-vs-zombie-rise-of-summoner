@@ -202,7 +202,13 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - Verified empirically by a probe (fails before, builds after), not assumed.
   - Fix: a `<Compile Include="..\FusionRpg.Data.Tests\DataTestStore.cs" Link="TestSupport\DataTestStore.cs" />` source link in the Server csproj — the repo's **existing** cross-test-project seam (`FusionRpg.Core.Tests.csproj` already links Injector sources this way). No new project, no new dependency. E2E needs the same link at T18e.
   - Files: `tests/FusionRpg.Server.Tests/FusionRpg.Server.Tests.csproj`. Scope: XS.
-- [ ] **Task T18d: Server.Tests (54 A-tier)** — each boots a `WebApplication`/store directly; migrate construction + teardown in 7 sub-batches of ~8 — Deps: T10. Scope: M ×7 (never one XL task).
+- [x] **Task T18d: Server.Tests (54 store files)** ✅ 2026-09-12
+  - Migrated all 54 Server store tests to `DataTestStore.Create()` / helper dispose. 14 use `SqliteConnectionFactory.Open(_store.HotPath)` for their raw reads; `ContentBootStartupWiringTests` uses `Reopen()` and its static helper now takes an `RpgStore` instead of building one; `ZombossAdaptiveSeamTests`' per-iteration sweep store is now an independent `DataTestStore.Create()` **and is disposed each iteration** (it previously leaked one store per loop); `ReforgeWorldEndpointTests`' multi-host bundle runs entirely in memory.
+  - **`BaseTypeSocketMaxCorpusTests` is deliberately NOT migrated** — it is class C (no `new RpgStore(`; it writes a real fixture tree for `BaseTypeSocketMaxCorpus.Load`), so it keeps its baseline line and needs a separate fixture-leak ruling.
+  - Verified: gate PASS — 54 files with **zero assertion/method drift**, focused + full Server **404/404 twice**, `guard-dal` + `guard-test-substrate` green, baseline **96→42**, leak alarm 0 survivors.
+  - **The gate found a real false positive in the T19b alarm**, fixed here: on a shared machine a *concurrent* process creates/removes its own `fusionrpg-*` dirs inside the alarm's window (measured: 108 "survivors" that all belonged to a concurrent Data.Tests run). Added `-IsolateTemp`, which gives the wrapped run its own private temp root; verified it still **detects** a planted leak (exit 1, naming the dir) and passes clean (exit 0).
+  - Files: 54 under `tests/FusionRpg.Server.Tests/`, `scripts/test-substrate-baseline.txt`, `scripts/test-substrate-leak-alarm.ps1`. Scope: M ×7.
+  - Deps: T10, seam fix.
 - [ ] **Task T18e: E2E (4 A-tier) + Core.Tests (4 store sites)** — Deps: T10. Scope: S.
 - [ ] **Task T18f: the 5 file-bound classes to `CreateFileBacked()`** (`LegacyMonoMigratorTests`, `RpgStoreDalSmokeTests`, `RpgStoreSmokeTests`, `ColdArchiveCompactionTests`, `StoragePurgeTests`) — fix the leak **without** changing their file/WAL assertions — Deps: T10. Scope: M.
 

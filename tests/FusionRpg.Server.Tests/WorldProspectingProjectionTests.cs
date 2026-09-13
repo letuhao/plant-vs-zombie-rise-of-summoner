@@ -4,10 +4,11 @@ using FusionRpg.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
+using FusionRpg.Data.Sqlite;
 
 namespace FusionRpg.Server.Tests;
 
@@ -18,7 +19,7 @@ namespace FusionRpg.Server.Tests;
 /// </summary>
 public class WorldProspectingProjectionTests : IAsyncLifetime
 {
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
@@ -28,10 +29,8 @@ public class WorldProspectingProjectionTests : IAsyncLifetime
     {
         ConfigureWorldTuningOnce();
 
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-w16-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         var port = GetFreeTcpPort();
         var baseUrl = $"http://127.0.0.1:{port}";
@@ -62,14 +61,12 @@ public class WorldProspectingProjectionTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        SqliteConnection.ClearAllPools();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     void SetStance(string entityId, string stance)
     {
-        using var db = new SqliteConnection($"Data Source={_store.HotPath}");
-        db.Open();
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "UPDATE rpg_world_entities SET stance = $s WHERE world_id = $w AND entity_id = $e;";
         cmd.Parameters.AddWithValue("$s", stance);

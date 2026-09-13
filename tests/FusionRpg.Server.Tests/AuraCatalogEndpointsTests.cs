@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -16,17 +17,15 @@ namespace FusionRpg.Server.Tests;
 /// each aura's real upkeep cost, read live from `RpgStore.ListCosts` (never fabricated).</summary>
 public class AuraCatalogEndpointsTests : IAsyncLifetime
 {
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
 
     public async Task InitializeAsync()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-auracatalog-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         var port = GetFreeTcpPort();
         var baseUrl = $"http://127.0.0.1:{port}";
@@ -46,7 +45,7 @@ public class AuraCatalogEndpointsTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     [Fact]

@@ -9,10 +9,19 @@
 # Snapshot is a SET DIFF, never a count: a pre-existing dir is not read as a new leak, and an equal
 # count does not pass while the membership differs. Assert the relationship (delta = 0), never a
 # pinned total. Standard: docs/contributing/testing-standard.md; validation-ssot.md.
+#
+# SHARED-MACHINE FALSE POSITIVE (fixed 2026-09-12): on the OS temp root, a *concurrent* process on the
+# same box (another agent, another worktree's test run) creates and removes its own `fusionrpg-*` dirs
+# inside this alarm's before/after window, so they appear as "leaked" even though the wrapped run was
+# innocent. Measured: a Server run of 26 tests reported ~108 survivors that all belonged to a
+# concurrent Data.Tests run. Pass `-IsolateTemp` to give the wrapped run its own private temp root
+# (TEMP/TMP redirected), which removes the cross-talk entirely; the alarm defaults to it OFF so the
+# behavior is explicit and a CI (single-runner, ephemeral disk) invocation is unaffected.
 param(
     [string]$Root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path,
     [string]$TempRoot = [System.IO.Path]::GetTempPath(),
-    [scriptblock]$Run
+    [scriptblock]$Run,
+    [switch]$IsolateTemp
 )
 
 $ErrorActionPreference = "Stop"
@@ -20,6 +29,20 @@ $TestsDir = Join-Path $Root "tests"
 
 if (-not (Test-Path -LiteralPath $TestsDir)) {
     throw "tests/ missing: $TestsDir"
+}
+
+# Own the wrapped run's temp root when asked, so no other process can pollute the snapshot.
+$ownedTemp = $null
+$savedTemp = $null
+$savedTmp = $null
+if ($IsolateTemp) {
+    $ownedTemp = Join-Path ([System.IO.Path]::GetTempPath()) ("test-substrate-alarm-" + [Guid]::NewGuid().ToString("N"))
+    New-Item -ItemType Directory -Path $ownedTemp -Force | Out-Null
+    $savedTemp = $env:TEMP
+    $savedTmp = $env:TMP
+    $env:TEMP = $ownedTemp
+    $env:TMP = $ownedTemp
+    $TempRoot = $ownedTemp
 }
 
 # The test temp root: directories whose name starts with fusionrpg- (the store/helper prefix).
@@ -66,6 +89,17 @@ if ($Run) {
 
 $afterDirs = Get-TempDirSnapshot
 $afterSqlite = Get-SqliteSnapshot
+
+# Restore the ambient temp env and remove this alarm's private root once it is empty (a survivor in
+# it is a leak and is reported above, so only delete the root itself when nothing is left).
+if ($IsolateTemp) {
+    $env:TEMP = $savedTemp
+    $env:TMP = $savedTmp
+    if ($null -ne $ownedTemp -and (Test-Path -LiteralPath $ownedTemp)) {
+        $left = Get-ChildItem -LiteralPath $ownedTemp -Force -ErrorAction SilentlyContinue
+        if (-not $left) { Remove-Item -LiteralPath $ownedTemp -Recurse -Force -ErrorAction SilentlyContinue }
+    }
+}
 
 $leakedDirs = Get-NewMembers -Before $beforeDirs -After $afterDirs
 $newSqlite = Get-NewMembers -Before $beforeSqlite -After $afterSqlite

@@ -3,6 +3,7 @@ using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -14,20 +15,18 @@ namespace FusionRpg.Server.Tests;
 /// wire is load-bearing, not dead code that happens to compile).</summary>
 public class AptitudeChannelModsTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public AptitudeChannelModsTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-aptchanmods-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     [Fact]

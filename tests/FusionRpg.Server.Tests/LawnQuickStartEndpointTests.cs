@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -22,17 +23,15 @@ namespace FusionRpg.Server.Tests;
 /// code paths that terminate at "sent a command, waiting for a real game to answer").</summary>
 public class LawnQuickStartEndpointTests : IAsyncLifetime
 {
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
 
     public async Task InitializeAsync()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-lawnquickstart-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         var port = GetFreeTcpPort();
         var baseUrl = $"http://127.0.0.1:{port}";
@@ -59,7 +58,7 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     void SeedLiveBoardStart(string levelType = "Adventure")

@@ -12,6 +12,7 @@ using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -27,7 +28,7 @@ namespace FusionRpg.Server.Tests;
 /// </summary>
 public class RolledItemEquipRuntimeTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly WebMatchService _service;
 
@@ -65,10 +66,8 @@ public class RolledItemEquipRuntimeTests : IDisposable
         FusionRpg.Core.Stats.Derived.StatsTuningHub.Configure(
             FusionRpg.Core.Stats.Derived.StatsTuningLoader.Parse(Read("stats.v1.json")));
 
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-rolled-equip-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         var services = new ServiceCollection();
         services.AddLogging();
@@ -91,7 +90,7 @@ public class RolledItemEquipRuntimeTests : IDisposable
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     static readonly PowerTuning Tuning = PowerTuning.Build(
