@@ -31,10 +31,28 @@ running them.
 |---|---|
 | Only `src/FusionRpg.Server/**` (or something it alone depends on) changed | **A — server-only restart.** Never touches the game/injector. |
 | `src/FusionRpg.Injector*/**`, `src/FusionRpg.Core/**`, or `src/FusionRpg.Contracts/**` changed | **B — full clean redeploy.** A server-only restart leaves a stale injector DLL running. |
-| `GET /api/debug/lawn/state` reports `Cycling`, `Defeated`, or `Victorious` and you are **not** going through `/lawn/quick-start` (which self-heals these) | Call `POST /api/debug/reset-board` directly; if it recurs, treat it as **B**. |
-| `GET /health` shows `injectorConnected: false`, or `/lawn/state` reports `Unknown` and you don't know why | **B.** Don't guess — a fresh process removes the ambiguity. |
-| The game window visibly shows a stuck screen (seed-picker, defeat/victory overlay) that a debug call didn't resolve | **B.** There is no sanctioned dismiss command for those overlays (see [lawn-run-state-machine.md](../architecture/live-probe/lawn-run-state-machine.md) §3) — closing and relaunching is the only known full reset. |
+| `GET /api/debug/lawn/state` reports `Cycling`, `Defeated`, or `Victorious` and you are **not** going through `/lawn/quick-start` (which self-heals these) | Call `POST /api/debug/reset-board` directly; if it recurs, treat it as **C**. |
+| The game window visibly shows a stuck screen (seed-picker, defeat/victory overlay) and no injector/Core/Contracts source changed | **C — game-only restart (`scripts/restart-game.ps1`).** Fastest reliable fix — see below. `debug.ui-nav` (`back-to-menu` then `enter-main-menu`) can get you back to the real main menu without a restart, but whether the *next* `enter-level` after that is a genuinely fresh scene is unverified and deliberately deferred (see [lawn-run-state-machine.md](../architecture/live-probe/lawn-run-state-machine.md) §1 "Defeat/victory overlay dismissed by the player") — don't spend time chasing it live; restart instead. |
+| `GET /health` shows `injectorConnected: false`, or `/lawn/state` reports `Unknown` and you don't know why | **C** if only the game process is suspect; **B** if injector/Core/Contracts source also changed. Don't guess — a fresh process/deploy removes the ambiguity either way. |
 | You genuinely don't know what changed, or it's the first action of a new session | **B.** When in doubt, redeploy — it is always safe. |
+
+#### Procedure C — game-only restart (easiest, no rebuild)
+
+Use when the game itself is stuck (defeat/seed-picker overlay, unresponsive) but the injector/server
+binaries are already correct — no source changed since the last deploy. Closes and relaunches
+`PlantsVsZombiesRH.exe` only; does not touch the server or rebuild anything.
+
+```powershell
+.\scripts\restart-game.ps1
+# Closes the game if running, relaunches it, polls /health until injectorConnected=true AND the
+# heartbeat is newer than the pre-restart snapshot (proves the NEW process connected, not the old
+# one still shutting down). Bounded timeout (default 120s), exits 1 with a clear message if it
+# never resolves -- never blocks forever.
+```
+
+This is the recommended default recovery for a stuck live-probe board — cheaper than Procedure B
+(no rebuild) and more reliable than chasing `debug.ui-nav` in place, because a brand-new process
+cannot carry over a stale `Board`/`InitBoard` reference the way an in-place menu navigation might.
 
 #### Procedure A — server-only restart
 
@@ -210,17 +228,27 @@ the real cause — both now self-report instead of requiring a manual event-log 
   10s and refuses immediately (`recentBoardEnds`, `waitedMs`) instead of polling `debug.enter-level`
   into a timeout that can never resolve while the board keeps churning.
 - **Defeated board** (`match.result` payload `result:"defeat"` — `GameHooks.cs`'s
-  `BoardStatistics.GameOver` hook). Spawn commands still *queue* successfully but land against a dead
-  board. `/lawn/quick-start` now checks the latest `match.result` and proactively runs
-  `debug.reset-board` when it says defeat, reporting `defeatReset: true`. **Proven live 2026-09-14**:
-  after a real defeat, a manual `debug.reset-board` + `spawn-plant` produced a real
-  `plant.spawn`/`debug.spawn.plant` event immediately after.
-- **What this does NOT fix**: the game's own visual "重新开始" (restart) / defeat overlay stays on
-  screen — `reset-board` restores API-level spawn capability, but there is no sanctioned debug command
-  today to dismiss that overlay (confirmed by inspection: no restart/replay/back-to-menu case exists
-  in `CheatCommandRunner.cs`). A real player or operator still needs to click through it or return to
-  the main menu for a visually clean board. Do not report a defeat-recovered board as "clean" — it is
-  API-usable, not player-presentable.
+  `BoardStatistics.GameOver` hook, cross-checked against the latest `board.economy` so a genuine
+  post-defeat recovery is never mistaken for a stale reading — see
+  `BoardEconomyAfterDefeat_reportsInMatch_defeatIsStale`). `/lawn/quick-start` now sends
+  `debug.ui-nav {action:"back-to-menu"}` and waits for its ack, then a normal (non-forced)
+  `debug.enter-level`, reporting `defeatReset: true`. **Superseded finding, 2026-09-14**: the earlier
+  plan here was `debug.reset-board` (restores API-level spawn capability but never touches the visual
+  overlay), then forcing `debug.enter-level(force:true)` straight over the dead board (proven live to
+  clear the overlay once, but proven live twice more afterward to simply never ack — consistent with
+  the known forced-entry engine-stability hazard). The current fix calls the real
+  `UIMgr.BackToMenu()` first so the board is actually torn down before a normal re-entry, instead of
+  forcing entry over a live one.
+- **What this still does NOT fully prove**: `debug.ui-nav`'s `back-to-menu` was proven live to leave
+  a defeated board, but landed on the *previous* menu layer (e.g. Challenge Mode select), not the true
+  main menu — this game's menu stack is not flat. A confirmed working sequence for THIS profile is
+  `back-to-menu` then `enter-main-menu` (two calls), verified against the operator's own screen.
+  Whether the following `enter-level` then opens a genuinely fresh scene (vs. reusing stale
+  `Board`/`InitBoard` references — `hasBoard`/`hasInitBoard` are confirmed to stay `true` through this
+  whole sequence, see [lawn-run-state-machine.md](../architecture/live-probe/lawn-run-state-machine.md))
+  is unverified and was deliberately deferred. **When a clean, provably-fresh board matters more than
+  speed, use `scripts/restart-game.ps1` (Step 1 Procedure C) instead** — do not report an in-place
+  `ui-nav` recovery as "a fresh run" without independently confirming it on the actual screen.
 
 Both checks run automatically inside `/lawn/quick-start` (`DebugEndpoints.cs`) — driving the API by
 hand still needs its own `board.end`/`match.result` check before trusting a poll to resolve.
@@ -276,7 +304,9 @@ $env:FUSIONRPG_ML_GAMEDIR = "H:\Games\PVZ-Fusion-3.9_MelonLoader"
 # or: python -m live_test deploy --launch
 ```
 
-From assistant sessions: start server with `Start-Process dist\FusionRpg.Server\FusionRpg.Server.exe` (tool-tree `deploy-play` can kill the server).
+From assistant sessions: start server with `Start-Process dist\FusionRpg.Server\FusionRpg.Server.exe` (tool-tree `deploy-play` can kill the server). Launching it directly this way needs `-WorkingDirectory dist\FusionRpg.Server` (or `Set-Location` there first) — the app's `ContentRoot` is the exe's own directory, and starting it from the repo root instead throws `NotSupportedException: The content root changed` (real incident 2026-09-14).
+
+If the game/board state is stuck (defeat overlay, unresponsive) and no injector/server source changed, prefer `.\scripts\restart-game.ps1` over redeploying — see §0 Step 1 Procedure C.
 
 ## 2. Command / event model
 
@@ -359,6 +389,8 @@ Base: `/api/debug`. Success event kinds usually mirror the command name (`debug.
 | GET | `/events` | Filter events (`afterId`, `kinds`, `scenarioId`, `limit`) |
 | GET | `/scenarios` | List named scenario ids |
 | POST | `/scenario/{id}` | Expand → `debug.run-steps` |
+| POST | `/game-state` | Active "what is current game state, right now" probe — reads `Board.Instance`/`InitBoard.Instance`/`GameAPP.theBoardType`/real `FindObjectsOfType<Plant/Zombie>` counts directly, synchronous, no event-log history involved. Prefer this over `/lawn/state` when the injector is connected; `/lawn/state` is the fallback when it is not. **Known blind spot**: `hasBoard`/`hasInitBoard` do not clear after returning to the main menu (see `lawn-run-state-machine.md`) — use `theBoardType`/`sceneType`/`liveState` instead when checking "did we actually leave the board." |
+| POST | `/ui-nav` | Calls one real `UIMgr` static navigation method, chosen by `{"action": "..."}`. Actions: `back-to-menu`, `enter-main-menu`, `back-to-game`, `enter-pause-menu`, `enter-lose-menu`, `enter-challenge-menu`, `enter-classic-travel`, `enter-travel-adv`, `enter-travel-game`, `enter-travel-challenge`, `enter-treasure-menu`, `enter-tower-menu`, `enter-iz-menu`, `enter-survival-e-menu`, `menu-normal-settings`, `enter-help-menu`, `enter-other-menu`, `enter-option-menu`, `enter-explore-menu`, `enter-almanac`, `enter-garden`, `enter-zuma`. This game's menu stack is not flat — `back-to-menu` alone can land on a previous menu layer, not the true main menu; `back-to-menu` then `enter-main-menu` (two calls) is the sequence proven live to reach it. |
 
 ### Board / spawn / economy
 

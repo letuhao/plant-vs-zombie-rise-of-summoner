@@ -1455,6 +1455,67 @@ public static class DebugActions
         }
     }
 
+    /// <summary>Calls one real <c>UIMgr</c> static navigation entry point, chosen by name. Real
+    /// problem this replaces (2026-09-14): forcing <c>debug.enter-level(force:true)</c> straight over
+    /// a defeated-but-still-alive <c>Board</c> never acked, live, twice (automated and manual) --
+    /// consistent with the already-known hazard that repeated/rapid forced entry can destabilize the
+    /// engine (see force-debug-enter-level memory). The fix attempt was <c>UIMgr.BackToMenu()</c>
+    /// (already Harmony-hooked, emits <c>menu.enter</c>) -- proven live to leave the dead board, but it
+    /// landed on the game's PREVIOUS menu layer (Challenge Mode select), not the true main menu: this
+    /// game's menu stack is not flat, so one guessed method is not enough. Exposing every real
+    /// <c>UIMgr</c> static navigation method by name here lets a caller find the actual working
+    /// sequence live instead of hard-coding a single guess that only holds for one menu depth.
+    /// Never fabricates -- every action below is the literal real static method call.</summary>
+    public static void UiNav(JsonElement p)
+    {
+        var action = Str(p, "action") ?? "";
+        var dump = new Dictionary<string, object> { ["action"] = action };
+        try
+        {
+            switch (action)
+            {
+                case "back-to-menu": UIMgr.BackToMenu(); break;
+                case "enter-main-menu": UIMgr.EnterMainMenu(); break;
+                case "back-to-game": UIMgr.BackToGame(); break;
+                case "enter-pause-menu": UIMgr.EnterPauseMenu(); break;
+                case "enter-lose-menu": UIMgr.EnterLoseMenu(Str(p, "reason") ?? ""); break;
+                case "enter-challenge-menu": UIMgr.EnterChallengeMenu(); break;
+                case "enter-classic-travel": UIMgr.EnterClassicTravel(); break;
+                case "enter-travel-adv": UIMgr.EnterTravelAdv(); break;
+                case "enter-travel-game": UIMgr.EnterTravelGame(); break;
+                case "enter-travel-challenge": UIMgr.EnterTravelChallenge(); break;
+                case "enter-treasure-menu": UIMgr.EnterTreasureMenu(); break;
+                case "enter-tower-menu": UIMgr.EnterTowerMenu(); break;
+                case "enter-iz-menu": UIMgr.EnterIZMenu(); break;
+                case "enter-survival-e-menu": UIMgr.EnterSurvivalEMenu(); break;
+                case "menu-normal-settings": UIMgr.MenuNormalSettings(); break;
+                case "enter-help-menu": UIMgr.EnterHelpMenu(); break;
+                case "enter-other-menu": UIMgr.EnterOtherMenu(); break;
+                case "enter-option-menu": UIMgr.EnterOptionMenu(); break;
+                case "enter-explore-menu": UIMgr.EnterExploreMenu(); break;
+                case "enter-almanac": UIMgr.EnterAlmanac(); break;
+                case "enter-garden": UIMgr.EnterGarden(); break;
+                case "enter-zuma": UIMgr.EnterZuma(); break;
+                default:
+                    dump["ok"] = false;
+                    dump["error"] = $"unknown action '{action}'";
+                    DebugRuntime.Emit("debug.ui-nav", dump);
+                    CheatState.Error("debug.ui-nav: unknown action " + action);
+                    return;
+            }
+            dump["ok"] = true;
+            DebugRuntime.Emit("debug.ui-nav", dump);
+            CheatState.Note("debug.ui-nav: " + action);
+        }
+        catch (Exception ex)
+        {
+            dump["ok"] = false;
+            dump["error"] = ex.Message;
+            DebugRuntime.Emit("debug.ui-nav", dump);
+            CheatState.Error("debug.ui-nav: " + ex.Message);
+        }
+    }
+
     static LevelType ParseLevelType(JsonElement p)
     {
         if (p.TryGetProperty("levelType", out var el))

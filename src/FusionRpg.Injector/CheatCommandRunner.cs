@@ -325,6 +325,9 @@ public static class CheatCommandRunner
             case "debug.game-state":
                 DebugActions.GameState();
                 break;
+            case "debug.ui-nav":
+                DebugActions.UiNav(p);
+                break;
             case "debug.board-stats":
             {
                 var payload = DebugRuntime.BoardEntityStats();

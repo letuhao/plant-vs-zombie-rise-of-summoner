@@ -162,6 +162,33 @@ public static class DebugEndpoints
             return Results.Ok(new { ok = true, live = ack.Payload });
         });
 
+        // Game Injector Debug
+        // Calls one real UIMgr static navigation method, chosen by name (see DebugActions.UiNav for
+        // the full action list -- back-to-menu, enter-main-menu, back-to-game, etc.). Added
+        // 2026-09-14 after debug.enter-level(force:true) never acked live against a defeated-but-
+        // still-alive Board. The first fix attempt (a single hard-coded BackToMenu call) proved live
+        // that this game's menu stack is not flat -- BackToMenu landed on the previous menu layer
+        // (Challenge Mode select), not the true main menu -- so the real fix is exposing every real
+        // navigation entry point and finding the working sequence live, not guessing one.
+        g.MapPost("/ui-nav", async (JsonElement body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            if (!store.InjectorConnected)
+                return Results.Conflict(new { ok = false, error = "injector not connected — start the game with the FusionRpg injector loaded" });
+
+            var action = PayloadString(body, "action");
+            if (string.IsNullOrWhiteSpace(action))
+                return Results.BadRequest(new { ok = false, error = "action is required" });
+
+            const int timeoutSec = 10; // structural acknowledgement wait, not a balance value
+            var before = store.GetMaxEventId();
+            await Send(hub, inbox, "debug.ui-nav", new { action });
+            var ack = await PollForKind(store, before, "debug.ui-nav", TimeSpan.FromSeconds(timeoutSec));
+            if (ack is null)
+                return Results.Conflict(new { ok = false, error = $"debug.ui-nav did not ack within {timeoutSec}s" });
+
+            return Results.Ok(new { ok = true, result = ack.Payload });
+        });
+
         // RPG Server Debug
         // (in-memory catalog read only, no injector relay and no RpgStore read)
         g.MapGet("/scenarios", () => Results.Ok(new { items = DebugScenarios.AllIds }));
@@ -358,21 +385,33 @@ public static class DebugEndpoints
             // debug.reset-board (DeleteAllPlants+DeleteAllZombies) -- proven live to restore
             // API-level spawn capability, but the operator confirmed the game's own visual "重新开始"
             // (restart) overlay stayed up regardless: reset-board clears entities on the SAME dead
-            // board, it never leaves it. The actual fix, proven live the same session: force a fresh
-            // debug.enter-level (force:true bypasses EnterLevel's "board already live" guard
-            // entirely, DebugActions.cs's EnterLevel) over the dead board -- this really does clear
-            // the overlay and lands back on the real seed-picker screen, which the existing
-            // mid-entry-probe/skip-setup pipeline below already knows how to dismiss. So on a detected
-            // defeat this now skips the mid-entry probe (we KNOW the old board is dead, not a fresh
-            // seed-picker) and forces straight into the enter-level branch instead.
-            // Same staleness guard as /lawn/state: a match.result from a dead, previous game process
-            // must never trigger this against the current one.
-            var latestHelloForDefeat = FindLatestKind(store, "injector.hello");
+            // board, it never leaves it. So on a detected defeat this now skips the mid-entry probe
+            // (we KNOW the old board is dead, not a fresh seed-picker) and forces straight into the
+            // enter-level branch instead.
+            //
+            // Real bug found live 2026-09-14 (third one, same afternoon): forcing debug.enter-level
+            // (force:true bypasses EnterLevel's "board already live" guard entirely) STRAIGHT over the
+            // dead board never acked, twice (once via this endpoint, once via a direct manual retry) --
+            // consistent with the already-documented hazard that forced entry against a live board can
+            // destabilize the engine. The fix is not to force through a live board at all: call the
+            // real UIMgr.BackToMenu() first (DebugActions.ExitToMenu, the same static entry point the
+            // game's own pause/lose menu buttons call, already Harmony-hooked to emit menu.enter) so the
+            // board is actually torn down, THEN a normal (non-forced) enter-level lands cleanly on the
+            // seed-picker exactly like a first launch.
+            // Real bug found live 2026-09-14 (second one, same afternoon): using injector.hello to
+            // guard this was WRONG for an active recovery decision -- restarting the SERVER (not the
+            // game) mints a fresh hello for the SAME still-running game, which discarded a genuinely
+            // current defeat as if it belonged to a dead process, and quick-start then treated the
+            // dead board as live instead of recovering it. The right question is not "did the process
+            // restart" but "is this defeat still the most recent word on the board" -- the same
+            // newest-signal-wins rule /lawn/state's classifier already gets right (see
+            // BoardEconomyAfterDefeat_reportsInMatch_defeatIsStale). Only board.economy proves the
+            // board moved on since; nothing did here, so the defeat stands.
             var latestResult = FindLatestKind(store, "match.result");
-            if (latestResult is not null && latestHelloForDefeat is not null && latestResult.Id < latestHelloForDefeat.Id)
-                latestResult = null;
+            var latestEconomyForDefeat = FindLatestKind(store, "board.economy");
             var defeatDetected = latestResult is not null
-                && string.Equals(PayloadString(latestResult.Payload, "result"), "defeat", StringComparison.OrdinalIgnoreCase);
+                && string.Equals(PayloadString(latestResult.Payload, "result"), "defeat", StringComparison.OrdinalIgnoreCase)
+                && (latestEconomyForDefeat is null || latestResult.Id > latestEconomyForDefeat.Id);
             var defeatReset = defeatDetected; // reported field name kept; meaning is now "forced a fresh entry", not "called reset-board"
 
             // Some game profiles never emit board.start for a board that already exists behind the
@@ -411,8 +450,20 @@ public static class DebugEndpoints
                 store.MergeCheatField("DEBUG-LEVEL-ENTRY", true, null);
                 await Send(hub, inbox, "cheat.toggle", new { id = "DEBUG-LEVEL-ENTRY", enabled = true });
 
+                if (defeatDetected)
+                {
+                    var beforeExit = store.GetMaxEventId();
+                    await Send(hub, inbox, "debug.ui-nav", new { action = "back-to-menu" });
+                    var exitAckTimeoutSec = Math.Min(timeoutSec, 10);
+                    var exitAck = await PollForKind(store, beforeExit, "debug.ui-nav", TimeSpan.FromSeconds(exitAckTimeoutSec));
+                    if (exitAck is null)
+                        return Results.Conflict(new { ok = false, error = $"debug.ui-nav (back-to-menu) did not ack within {exitAckTimeoutSec}s", waitedMs = sw.ElapsedMilliseconds, defeatReset });
+                    if (!PayloadBool(exitAck.Payload, "ok"))
+                        return Results.Conflict(new { ok = false, error = PayloadString(exitAck.Payload, "error") ?? "debug.ui-nav (back-to-menu) rejected", defeatReset });
+                }
+
                 var beforeEnter = store.GetMaxEventId();
-                await Send(hub, inbox, "debug.enter-level", new { levelType = 0, levelNumber, id = 0, name = "", force = defeatDetected });
+                await Send(hub, inbox, "debug.enter-level", new { levelType = 0, levelNumber, id = 0, name = "" });
 
                 var ackTimeoutSec = Math.Min(timeoutSec, 20);
                 var enterAck = await PollForKind(store, beforeEnter, "debug.level.enter", TimeSpan.FromSeconds(ackTimeoutSec));

@@ -106,17 +106,18 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Post_latestMatchResultIsDefeat_forcesFreshEntry_neverProbesOrResetsTheDeadBoard()
+    public async Task Post_latestMatchResultIsDefeat_exitsToMenuBeforeEnterLevel_neverProbesOrResetsTheDeadBoard()
     {
         // Real gap found live 2026-09-14: after a genuine defeat (match.result payload result:
         // "defeat"), debug.reset-board restored API-level spawn capability but the operator
         // confirmed the game's own visual defeat overlay stayed up -- reset-board clears entities on
-        // the SAME dead board, it never leaves it. The proven live fix: force a fresh
-        // debug.enter-level (force:true bypasses EnterLevel's "board already live" guard) over the
-        // dead board, which really does clear the overlay and lands on the real seed-picker screen --
-        // which the existing pipeline already knows how to dismiss. A detected defeat must skip the
-        // mid-entry probe entirely (the old board is known-dead, not a fresh seed-picker) and go
-        // straight to a FORCED enter-level, never debug.reset-board.
+        // the SAME dead board, it never leaves it. First fix (force:true on debug.enter-level over
+        // the live board) worked once live, then proven live TWICE more to simply never ack --
+        // consistent with the known forced-entry engine-stability hazard. Current fix: call the real
+        // UIMgr.BackToMenu() (debug.ui-nav, action:"back-to-menu") first so the board is actually torn
+        // down, then a normal (non-forced) enter-level. A detected defeat must skip the mid-entry
+        // probe entirely (the old board is known-dead, not a fresh seed-picker) and go straight to
+        // ui-nav, never debug.reset-board.
         _store.Heartbeat(RpgConstants.SourceInjector);
         _store.InsertEvent(new EventEnvelope
         {
@@ -127,18 +128,57 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
         var inbox = _app.Services.GetRequiredService<InjectorCommandInbox>();
 
         var resp = await _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { scenario = "lab-overlay", timeoutSec = 1 });
-        Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode); // honest timeout -- no real game answering enter-level
+        Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode); // honest timeout -- no real game answering ui-nav
         var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
-        Assert.Contains("debug.level.enter did not ack", body!["error"].ToString());
+        Assert.Contains("debug.ui-nav", body!["error"].ToString());
+        Assert.Contains("did not ack", body["error"].ToString());
         Assert.True(((JsonElement)body["defeatReset"]).GetBoolean());
 
         var sent = inbox.Drain(int.MaxValue).ToList();
         Assert.DoesNotContain(sent, c => c.Name == "debug.reset-board");
         Assert.DoesNotContain(sent, c => c.Name == "debug.skip-setup"); // the mid-entry probe must be skipped
-        var enterCmd = sent.SingleOrDefault(c => c.Name == "debug.enter-level");
-        Assert.NotNull(enterCmd);
-        var payloadJson = JsonSerializer.Serialize(enterCmd!.Payload);
-        Assert.Contains("\"force\":true", payloadJson);
+        var navCmd = sent.SingleOrDefault(c => c.Name == "debug.ui-nav");
+        Assert.NotNull(navCmd);
+        Assert.Contains("\"action\":\"back-to-menu\"", JsonSerializer.Serialize(navCmd!.Payload));
+        // ui-nav never acked in this test (no real injector), so enter-level must never be reached.
+        Assert.DoesNotContain(sent, c => c.Name == "debug.enter-level");
+    }
+
+    [Fact]
+    public async Task Post_defeatFollowedByServerRestartHello_stillExitsToMenu_notDiscardedAsStale()
+    {
+        // Real bug found live 2026-09-14, same afternoon as the fix above: this used to invalidate
+        // match.result against the newest injector.hello, matching FindLatestLiveBoardStart's own
+        // guard for board.start. That guard is right for board.start (a KILLED game process leaving a
+        // stale row forever); it was wrong here -- restarting the SERVER (not the game) mints a fresh
+        // hello for the SAME still-running, still-defeated game, and the old logic discarded a
+        // genuinely current defeat as if it belonged to a dead process. quick-start then treated the
+        // dead board as live instead of recovering it. Fixed: only a NEWER board.economy proves the
+        // board moved on since the defeat; a hello alone does not.
+        _store.Heartbeat(RpgConstants.SourceInjector);
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "match.result",
+            Payload = JsonSerializer.SerializeToElement(new { result = "defeat" })
+        });
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "injector.hello",
+            Payload = JsonSerializer.SerializeToElement(new { game = "pvzrh-3.9", version = "1.0.0" })
+        });
+        var inbox = _app.Services.GetRequiredService<InjectorCommandInbox>();
+
+        var resp = await _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { scenario = "lab-overlay", timeoutSec = 1 });
+        Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode);
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.True(((JsonElement)body!["defeatReset"]).GetBoolean(), "a hello with no newer board.economy must not discard a real defeat");
+
+        var sent = inbox.Drain(int.MaxValue).ToList();
+        var navCmd = sent.SingleOrDefault(c => c.Name == "debug.ui-nav");
+        Assert.NotNull(navCmd);
+        Assert.Contains("\"action\":\"back-to-menu\"", JsonSerializer.Serialize(navCmd!.Payload));
     }
 
     [Fact]
