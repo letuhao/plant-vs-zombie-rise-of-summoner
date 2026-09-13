@@ -11,11 +11,19 @@
 
 ## Rules
 
-1. **Agents must not** run `git commit`, `git push`, `git merge` / `rebase` / `cherry-pick` (commit-creating), or `python scripts/commit-tool/clean_commit.py`.
-2. **Agents may commit** via MCP server **`repo-git`** tool **`commit`**, as part of finishing a task
+1. **Agents must not** run `git commit`, `git push`, `git rebase` / `cherry-pick` (commit-creating), or `python scripts/commit-tool/clean_commit.py`.
+2. **Agents may run `git merge`** (owner decision, 2026-09-13), with no `-C`/`--git-dir` override —
+   i.e. only against the agent's own current worktree. Unlike the operations in rule 1, a merge
+   never rewrites existing history: it can only ever advance the CURRENT branch by folding in a
+   sibling branch's already-committed, already-reviewed work, and the branch merged *from* is never
+   touched. A clean merge auto-commits with git's own boilerplate message (nothing free-form to
+   watermark-check); a conflicted merge stops with **no commit at all** — finishing it still needs a
+   real `git commit` / `git merge --continue`, which stays forbidden under rule 1, so a conflict
+   hands back to the owner rather than an agent resolving and silently completing it.
+3. **Agents may commit** via MCP server **`repo-git`** tool **`commit`**, as part of finishing a task
    without waiting to be asked. No other commit path.
-3. **Push is owner-only.** No MCP push tool; shell gates deny `git push` and `gh pr create` / `gh release create`.
-4. No `Co-authored-by` / vendor watermark trailers. Author must match `scripts/commit-tool/policy.json`.
+4. **Push is owner-only.** No MCP push tool; shell gates deny `git push` and `gh pr create` / `gh release create`.
+5. No `Co-authored-by` / vendor watermark trailers. Author must match `scripts/commit-tool/policy.json`.
 
 ## When and what to commit
 
