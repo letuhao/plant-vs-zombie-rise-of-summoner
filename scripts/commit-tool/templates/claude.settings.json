@@ -3,7 +3,6 @@
     "deny": [
       "Bash(git commit*)",
       "Bash(git push*)",
-      "Bash(git merge*)",
       "Bash(git rebase*)",
       "Bash(git cherry-pick*)",
       "Bash(gh pr create*)",
