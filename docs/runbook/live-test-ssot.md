@@ -19,25 +19,81 @@ polling the resulting event, not by the `{ "ok": true, "queued": 1 }` envelope.
 ### Step 1 — Redeploy before every new test instance
 
 A stale injector build or a stale running game/server from a prior session is not a valid starting
-state — never reuse one across test instances. Kill it and redeploy clean:
+state — never reuse one across test instances, and **never treat "the game is already running" as a
+reason to skip redeploying or as a blocker to work around** — closing and relaunching it is always a
+valid, cheap, reversible action. This subsection is the full decision tree; it exists because a
+2026-09-14 session repeatedly got stuck re-deriving these exact steps under pressure instead of just
+running them.
+
+#### Decision tree — which procedure do you need?
+
+| Situation | Procedure |
+|---|---|
+| Only `src/FusionRpg.Server/**` (or something it alone depends on) changed | **A — server-only restart.** Never touches the game/injector. |
+| `src/FusionRpg.Injector*/**`, `src/FusionRpg.Core/**`, or `src/FusionRpg.Contracts/**` changed | **B — full clean redeploy.** A server-only restart leaves a stale injector DLL running. |
+| `GET /api/debug/lawn/state` reports `Cycling`, `Defeated`, or `Victorious` and you are **not** going through `/lawn/quick-start` (which self-heals these) | Call `POST /api/debug/reset-board` directly; if it recurs, treat it as **B**. |
+| `GET /health` shows `injectorConnected: false`, or `/lawn/state` reports `Unknown` and you don't know why | **B.** Don't guess — a fresh process removes the ambiguity. |
+| The game window visibly shows a stuck screen (seed-picker, defeat/victory overlay) that a debug call didn't resolve | **B.** There is no sanctioned dismiss command for those overlays (see [lawn-run-state-machine.md](../architecture/live-probe/lawn-run-state-machine.md) §3) — closing and relaunching is the only known full reset. |
+| You genuinely don't know what changed, or it's the first action of a new session | **B.** When in doubt, redeploy — it is always safe. |
+
+#### Procedure A — server-only restart
+
+Use only when injector/Core/Contracts source is unchanged since the last deploy. Never launches or
+touches the game process.
 
 ```powershell
-# Server: survives tool-tree cleanup (an assistant tool call's own process does not)
-Start-Process dist\FusionRpg.Server\FusionRpg.Server.exe
-# Injector only — never let deploy-play also restart a server from an assistant session
-.\scripts\deploy-play.ps1 -NoServer
-# Confirm before touching anything else
+Get-NetTCPConnection -LocalPort 5088 -ErrorAction SilentlyContinue |
+    Where-Object { $_.State -eq 'Listen' } |
+    ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
+Start-Sleep -Seconds 2
+dotnet publish src\FusionRpg.Server\FusionRpg.Server.csproj -c Release -o dist\FusionRpg.Server --nologo -v q
+Start-Process -FilePath dist\FusionRpg.Server\FusionRpg.Server.exe -WorkingDirectory dist\FusionRpg.Server
+Start-Sleep -Seconds 3
 Invoke-RestMethod http://127.0.0.1:5088/health
-# Expect: ok=true, injectorConnected=true, simEnabled=false
-Invoke-RestMethod http://127.0.0.1:5088/api/debug/lawn/state
-# Read state/asOf/sinceMs before assuming a clean slate -- a prior instance's board can still be
-# Cycling/Defeated/InMatch. See Step 6 and live-probe-standard.md §6.
+# Expect: ok=true, injectorConnected=true (the still-running game re-Hellos to the fresh server)
 ```
 
-If a game process from an earlier test instance is still running, treat it as **the wrong frame**:
-close it and start over from a fresh `deploy-play.ps1` deploy, rather than attaching a new test run
-to old process state (a stale `G-TIMEFREEZE`/`G-TIMESCALE`/cheat-toggle carryover from a previous
-session's run is a real, observed failure mode — see the 2026-09-13/14 incident in Step 2).
+#### Procedure B — full clean redeploy
+
+Closes the game, rebuilds the injector (freshness-checked against source), and launches a brand-new
+game process. This is the only way to guarantee no stale process/state carries over.
+
+```powershell
+Stop-Process -Name PlantsVsZombiesRH -Force -ErrorAction SilentlyContinue
+Start-Sleep -Seconds 2
+.\scripts\deploy-play.ps1                    # full test-fast.ps1 gate -- the default, required
+                                              # before calling any build "verified" or before a
+                                              # live proof; add -QuickTest ONLY for a fast local
+                                              # iteration loop (see deploy-play.ps1's own header
+                                              # and local-dev.md §6 for what -QuickTest skips and
+                                              # does NOT prove)
+Invoke-RestMethod http://127.0.0.1:5088/health
+Invoke-RestMethod http://127.0.0.1:5088/api/debug/lawn/state
+```
+
+**If `deploy-play.ps1` fails on a guard** (single-writer, DAL, secondary-no-unity, funnel-delta,
+actor-hub, debug-scope, overflow, **magic-numbers**, power, stat-pairs, class-system, or the default
+test profile) — read the guard's own printed finding and fix the real cause; never bypass a guard to
+get past it. Real incident (2026-09-14): a new `const int ...Threshold` failed
+`guard-magic-numbers.ps1` (HIGH: "const with balance vocabulary — belongs in config") because its name
+matched a balance-word pattern even though it was a diagnostic count, not a tunable — fixed by renaming
+past the trigger word and adding the comment T2 requires, not by suppressing the guard. See
+[tunables-ssot.md](../architecture/tunables-ssot.md) and `scripts/audit-magic-numbers.py`'s own
+`BALANCE_WORD`/`STRUCTURAL_WORD` patterns before renaming anything that gets flagged.
+
+**A note on running PowerShell from a non-interactive shell tool:** a `powershell -Command "..."`
+string built by another tool (e.g. a bash wrapper) can mangle `$_`, backticks, and backslashes before
+PowerShell ever sees them — a real, repeated time-sink in the session that wrote this section. For
+anything beyond a one-line command, write the script to a `.ps1` file first and invoke it with
+`powershell -File <path>` instead of inlining it.
+
+Always finish either procedure with a state check, never assume a clean slate:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:5088/api/debug/lawn/state
+# Read state/asOf/sinceMs -- a prior instance's board can still be Cycling/Defeated/Victorious/
+# InMatch. See Step 6 and live-probe-standard.md §6.
+```
 
 ### Step 2 — Enter the level, then close the seed-picker screen (mandatory UI gate)
 
