@@ -509,7 +509,13 @@ public static class EffectRuntime
             ElementHub.Default,
             bag.CombatRng,
             (breakdown, packet, targetPtr) =>
-                InjectorCombatBridge.EmitOverlayBreakdown(breakdown, packet, targetPtr));
+            {
+                InjectorCombatBridge.EmitOverlayBreakdown(breakdown, packet, targetPtr);
+                // lawn-combat-observer (Task 0, lawn-combat-wire): unconditional RPG-delta capture,
+                // additive alongside EmitOverlayBreakdown (which stays session-gated) — never a
+                // replacement for it, never a new gate on it.
+                LawnCombatObserverBridge.RecordRpgDelta(breakdown, packet, targetPtr);
+            });
         bag.CombatMath = new ConditionalOverlayCombatMath(overlay)
         {
             IsEnabled = () => OverlayCombatFeature.Enabled
