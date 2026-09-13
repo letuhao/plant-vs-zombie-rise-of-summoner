@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -115,6 +116,36 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode);
         var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
         Assert.Contains("did not complete within 1s", body!["error"].ToString());
+    }
+
+    [Fact]
+    public async Task Post_boardAlreadyLive_sendsSetupSkip_beforeWaveFreezeAndScenario()
+    {
+        // Real bug found live 2026-09-13: EnterGame opens the level, but the vanilla "Choose Your
+        // Plants" seed-picker screen stays up until debug.skip-setup dismisses it — with it open,
+        // waves never start and plants/zombies never act. quick-start must self-enable the
+        // DEBUG-SETUP-SKIP gate and send debug.skip-setup before any wave/scenario work, the same way
+        // it already self-enables DEBUG-LEVEL-ENTRY for entering the level in the first place.
+        _store.Heartbeat(RpgConstants.SourceInjector);
+        SeedLiveBoardStart();
+        var inbox = _app.Services.GetRequiredService<InjectorCommandInbox>();
+
+        var resp = await _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { scenario = "lab-overlay", timeoutSec = 1 });
+        Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode); // honest timeout -- no real game answering
+
+        var sent = inbox.Drain(int.MaxValue).Select(c => c.Name).ToList();
+        var toggleIdx = sent.FindIndex(n => n == "cheat.toggle");
+        var skipIdx = sent.FindIndex(n => n == "debug.skip-setup");
+        var freezeIdx = sent.FindIndex(n => n == "debug.wave-freeze");
+        var runStepsIdx = sent.FindIndex(n => n == "debug.run-steps");
+
+        Assert.True(toggleIdx >= 0, "expected a cheat.toggle command (DEBUG-SETUP-SKIP) to be sent");
+        Assert.True(skipIdx >= 0, "expected debug.skip-setup to be sent");
+        Assert.True(freezeIdx >= 0, "expected debug.wave-freeze to be sent");
+        Assert.True(runStepsIdx >= 0, "expected debug.run-steps to be sent");
+        Assert.True(toggleIdx < skipIdx, "the DEBUG-SETUP-SKIP toggle must be enabled before debug.skip-setup is sent");
+        Assert.True(skipIdx < freezeIdx, "the seed-picker screen must be dismissed before waves are frozen");
+        Assert.True(freezeIdx < runStepsIdx, "waves must be frozen before scenario steps run");
     }
 
     [Fact]

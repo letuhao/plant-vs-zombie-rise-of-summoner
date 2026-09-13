@@ -256,6 +256,22 @@ public static class DebugEndpoints
             if (BadLevelTypes.Contains(levelType))
                 return Results.Conflict(new { ok = false, error = $"refusing lab on levelType={levelType} — open Adventure/Challenge day lawn, not Explore/Travel" });
 
+            // EnterGame opens the level, but the real lawn (waves moving, plants/zombies acting) stays
+            // behind the vanilla "Choose Your Plants" seed-picker screen (InitBoard/InGameUI) until that
+            // screen is dismissed. debug.skip-setup (InitBoard.QuickInGame) is the sanctioned dismissal —
+            // call it before any wave/scenario work so a fresh board is never left sitting on that
+            // screen. Unlike /setup/skip (a standalone probe that expects the operator to have already
+            // opted in), quick-start is itself a one-call dev/live-probe orchestrator and already
+            // self-enables DEBUG-LEVEL-ENTRY above on the same basis, so it self-enables this gate too.
+            // Non-fatal: a board reused from a previous quick-start call is already past this screen and
+            // reports ok=false here, which is expected, not an error.
+            store.MergeCheatField("DEBUG-SETUP-SKIP", true, null);
+            await Send(hub, inbox, "cheat.toggle", new { id = "DEBUG-SETUP-SKIP", enabled = true });
+            var beforeSkip = store.GetMaxEventId();
+            await Send(hub, inbox, "debug.skip-setup", new { method = "quick" });
+            var skipAck = await PollForKind(store, beforeSkip, "debug.setup.skip", TimeSpan.FromSeconds(Math.Min(timeoutSec, 10)));
+            var setupSkipOk = skipAck is not null && PayloadBool(skipAck.Payload, "ok");
+
             await Send(hub, inbox, "debug.wave-freeze", new { enabled = true });
 
             var scenarioCorrelation = Guid.NewGuid().ToString("N")[..12];
@@ -311,6 +327,7 @@ public static class DebugEndpoints
                 scenario = scenarioId,
                 targetPtr,
                 plantPtr,
+                setupSkip = setupSkipOk,
                 note = snapshot is null ? "no board snapshot arrived — targetPtr/plantPtr unavailable" : null
             });
         });
