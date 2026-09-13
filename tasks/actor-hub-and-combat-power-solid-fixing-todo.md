@@ -304,7 +304,13 @@
 **Spec:** `lawn-aptitude-parity` (+ `aptitude-sheet` `unique-lawn-wire`)  
 **Description:** Ensure Bound Hot = `commander + UniqueCreature(instanceId)`; empire = species. Implementation in unique-lawn-wire; tick this program’s Done gate + HF-lawn.
 
-**Status (2026-09-13): unique-lawn-wire (AS-1.1) implemented — live parity prove still owed, not forced.**
+**Status (2026-09-13, amended after the live probe actually ran): unique-lawn-wire (AS-1.1)
+implemented; ActorHub parity PROVEN live; blocked on a transport-cadence fix (AS-1.1b), not on
+anything in this program.** The live probe this task owed was run against a real game+server and the
+Hub compose chain passed for real (numbers in the acceptance criteria below). It also exposed an
+order-dependence in `aptitude-sheet`'s fetch cadence that keeps this Done gate open — allocating
+before deploying loses the allocation. That fix is `aptitude-sheet` AS-1.1b; this program owns no
+code change for it.
 Owner instruction: a cross-program block is never left deferred without at least building the
 dependency (or scoping an idea pass first if the dependency genuinely needed one — it didn't here,
 `spec-unique-lawn-wire.md` already had a concrete design). `aptitude-sheet` AS-1.1 is now built:
@@ -324,14 +330,40 @@ MelonLoader install, so the Injector half is un-buildable here — owner still o
 - [x] Fetch path is unique GET only (S4). — `RefreshUniqueAptitudesAsync` is the only new fetch, per-instanceId GET, no `uniques` map added to the commander payload
 - [x] General lawn creatures unchanged (species path). — Bound branch returns before the species lookup runs; a non-Bound ctx takes the untouched original path (`Not_Bound_falls_through_to_the_species_path_even_when_the_hook_is_wired`)
 - [x] Regression: unique with same species id as a general does not inherit empire allocation. — `Bound_unique_sharing_a_species_id_with_a_general_never_inherits_empire_shares`, proven
-- [ ] Parity prove: Bound lawn aptitude input matches Server UniqueCreature compose. — still needs the live probe (owner step)
+- [ ] Parity prove: Bound lawn aptitude input matches Server UniqueCreature compose. — **live probe RUN
+      2026-09-13, split result.** The ActorHub compose chain is **PROVEN CORRECT end to end on a real
+      board**: a real specimen (minted via the real `MintCreature` path, levelled via the real
+      `POST /api/unique/actors/{id}/xp`, allocated via the real `POST /api/aptitudes/unique/allocate`,
+      deployed via the real `POST /api/unique/actors/{id}/deploy` to `phase: ActiveBound` with a real
+      Unity ptr) resolved `bonusAtk 222` / `bonusMaxHp 1110` with contribs
+      `aptitude.Might:Flat:222` and `aptitude.Vigor:Flat:666;aptitude.Fortitude:Flat:444`, composing
+      `primaryAtk 20 + 222 = appliedAtk 242` and `primaryMaxHp 300 + 1110 = appliedMaxHp 1410`, and
+      `debug.board-stats` read the live Unity entity back as `attack 223 hp 1410 maxHp 1410`. Not a
+      fabricated actor at any step. **But it is order-dependent** — see the blocker below
 - [ ] HF-lawn ticked on ideal / maps. — held until the live parity prove above closes
 - [x] aptitude-sheet `unique-lawn-wire` Done (or listed open criteria closed) before closing this task. — AS-1.1 code landed; its own live-probe line is the same open item as this task's parity prove
 
 **Verification:**
 - [x] Core filter `SpeciesAllocation|UniqueCreature|Bound` — `SpeciesAllocationSourceTests` 11/11 (`dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~SpeciesAllocation|UniqueCreature|Bound"`)
 - [x] `.\scripts\guard-secondary-no-unity.ps1` — stale note, fixed 2026-09-13: this guard is a text scan, needs no Injector build; actually run same session, OK
-- [ ] Live Bound unique allocate probe (owner step) — owed: deploy-play → Bound unique → allocate → observe lawn stats match Server Hub
+- [x] Live Bound unique allocate probe — **RUN 2026-09-13** against a real MelonLoader game + live
+      server (`/health` `injectorConnected: true`, real board via `POST /api/debug/lawn/quick-start`).
+      Evidence above. Method followed `live-probe-standard.md`: real endpoints only, live-engine
+      read-back separate from the persisted read-back, no fabricated actor or loadout
+- [ ] **BLOCKER found by that probe — cross-program, tracked as `aptitude-sheet` AS-1.1b.** The probe
+      run in the `allocate → deploy` order produces `bonusAtk 0` / empty contribs: an allocation made
+      while the specimen is still in `Roster` phase never loads, because
+      `RpgClient.RefreshUniqueAptitudesAsync` only refreshes at StartAsync / Reconnected /
+      `AptitudesUpdated`, and its key set is *currently Bound* instanceIds — nothing refreshes on the
+      bind edge. **This is a transport cadence gap, NOT an ActorHub defect** (same specimen, same Hub,
+      resolved correctly the instant the cache entry existed). Spec defect at root:
+      `spec-unique-lawn-wire.md` named 3 triggers while `aptitude-sheet-map.md` said "on reload/bind";
+      spec amended + `DESIGN-GATE.md` §2.16 added 2026-09-13. **T12's Done gate stays open until
+      AS-1.1b lands**, since parity must hold in both orders
+- [ ] Note for whoever runs this next: `lab-overlay` quick-start sets `A-P-ATK% = 0`
+      (`DebugCombatActions.SilenceVanilla`), which floors `primaryAtk` to 1 via `StatComposer.cs:91`.
+      That is **by design, not a defect** — it cost time to rule out here. `POST /api/debug/reset-mods`
+      restores `primaryAtk 20`
 
 **Dependencies:** T6; aptitude-sheet `unique-lawn-wire` Done (or open criteria listed)  
 **Files likely touched:** Injector `CheatState` / bindings, aptitude-sheet wire, Done docs  

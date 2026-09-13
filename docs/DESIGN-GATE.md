@@ -122,6 +122,28 @@ explicitly, and expect a decision) or your own misunderstanding (far more likely
     first (or the work waits). Grandfathered debt may remain until a named fix program lands — it is
     never a template. First recorded SOLID ADR defect: ActorHub vs `BattleStatComposer`
     (`decisions.md` ActorHub sole Hot overturn; [combat-power-number-ideal.md](architecture/combat-power-number-ideal.md)).
+16. **An edge-refreshed cache must enumerate its FULL trigger set — including the state-entry edge —
+    and test every one.** Any cache the injector hydrates from the server on discrete events (not a
+    per-frame poll) must, in its spec, list every trigger that can invalidate it, and each trigger
+    needs its own test. **The trigger that gets forgotten is the one where the cache's KEY SET moves,
+    not its values**: a cache keyed by "currently Bound specimens" is stale the instant a specimen
+    binds, even though no allocation changed. Copying a trigger set from a sibling cache is the
+    specific trap — a *global* cache (commander allocation) is complete with "refresh on change",
+    while a *per-entity* cache with the same shape is not.
+
+    **Corollary for acceptance criteria: a criterion that encodes an ordering only tests that
+    ordering.** "After allocate + `AptitudesUpdated`, the Bound unique includes its shares" silently
+    assumes the specimen was already Bound; the reverse order (allocate, then bind) is a different
+    execution and needs its own criterion. Where order can vary in real play, say **order-independent**
+    and test both directions.
+
+    Three shipped instances, all the same shape — cache populated on trigger X, state changed on
+    trigger Y: commander reallocation reaching only entities spawned after it
+    (`CheatState.cs:98-102`, owner-caught live 2026-08-30); a SignalR reconnect re-joining the group
+    without re-syncing caches (`RpgClient.cs:143-147`); and `unique-lawn-wire`'s missing bind edge
+    (2026-09-13, §4). Prior art for doing it right:
+    [architecture/species-build/spec-allocation-transport.md](architecture/species-build/spec-allocation-transport.md)
+    enumerates four refresh paths and makes a stale cache after any of them a **failure**.
 
 ---
 
@@ -169,6 +191,7 @@ argument for the gate — keep it factual and keep it growing.
 | 2026-08-24 | *"`DerivedStatRegistryTests.cs:22` asserts a literal 84; replace it with the formula"* | The test **already computes** `families.Count × (roster.Count + 1)`; the literal on the line above is a deliberate canary asserting what the formula currently equals. A sibling test is named `The_channel_count_is_the_formula_not_the_literal_eighty_four`. The spec would have had someone rewrite tests that were already correct | Reading the whole test body, not the cited line. **Evidence rule 3 applies to code, not just prose** |
 | 2026-09-12 | Dual compose (ActorHub vs `BattleStatComposer`) locked as intentional ADR exception | SOLID/DRY fork of the same actor combat numbers treated as “by design” because an ADR / class-system decision said so | §2.15 SOLID — PO/ADR confirmation does not bless a SOLID defect; overturn + fuse (FUSE-battle-hub owed) |
 | 2026-09-11 | Correcting the stale `84` roster by replacing it with `904` — then propagating `904`/`227`/`1,183` into specs and tests | The roster is a **population that grows per shipped species**, not a constant. Both `84` and `904` are readings; a pinned literal is stale-by-design and turns every successful seed extension into a red suite | Evidence rule 7 + [architecture/validation-ssot.md](architecture/validation-ssot.md). The same class as the 2026-08-24 literal-84 incident below, from the other direction |
+| 2026-09-13 | `unique-lawn-wire` (AS-1.1) shipped with aptitude allocations that silently never reached a Bound lawn specimen — read on the live board as "ActorHub is broken / does nothing" | **Not** an ActorHub defect: the compose chain was provably correct (the same specimen resolved `bonusAtk 1330` the moment its cache entry existed). The cache is keyed by Bound `instanceId`, so its **key set moves when a specimen binds** — but its trigger set was copied from the commander cache (session start / reconnect / `AptitudesUpdated`), which is global and whose key set never moves. Allocating *before* deploying therefore loaded nothing, forever. The spec named only those three triggers; `aptitude-sheet-map.md` said "on reload/**bind**" and the bind half was lost in map→spec. **Third instance of this exact class** (see `CheatState.cs:98-102`, `RpgClient.cs:143-147`) | The new §2 invariant below: enumerate an edge-refreshed cache's FULL trigger set including the state-entry edge, and test each one. Also: an acceptance criterion that names an *ordering* ("allocate + AptitudesUpdated") tests only that ordering — the reverse order was never specified or tested |
 | 2026-09-13 | A live probe for `bound-loadout-hub` (T14) "confirmed" a stat-buff feature by binding a debug loadout JSON straight into the Injector and reading the result back from the same injector's own telemetry | Both the fabricated precondition (no real `UniqueActor`/deployment behind it) and the read-back (injector-only, not the RPG server's persisted/derived state) were in the same untrustworthy scope. The sibling T12 probe happened to use a real Server endpoint (`POST /api/aptitudes/unique/allocate`) and real Injector telemetry for two *different* claims, which is why it caught the T14 defect (Hub-bonus grants never reaching Unity) instead of also hiding it | [contributing/live-probe-standard.md](contributing/live-probe-standard.md) — Game Injector Debug vs RPG Server Debug, named explicitly, before treating any debug response as proof |
 
 ---
@@ -195,6 +218,12 @@ Paste and complete before presenting any design work.
     text, or a per-cycle outcome. Population scale is a reading; guardrails assert the contract and
     closed enums only (validation-ssot.md). A pinned literal has a named closed vocabulary and a
     stated reason.
+[ ] If this introduces or touches an event-refreshed cache (§2.16): I listed EVERY trigger that
+    invalidates it, including the edge where its KEY SET changes (an entity entering the state the
+    cache is keyed by), and each trigger has a test. I did not copy a trigger set from a cache
+    with different key-set behaviour.
+[ ] No acceptance criterion silently fixes an ordering that can vary in real play. Where both
+    orders are reachable, the criterion says order-independent and both are tested.
 [ ] If this feature produces or consumes an actor combat/derived magnitude: it either
     contributes via ActorHub (`IActorStatSubsystem` / registered atom reader) with a
     non-empty ContributionSourceIds grammar id, or it consumes Hub output only —
