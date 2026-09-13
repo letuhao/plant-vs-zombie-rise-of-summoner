@@ -120,15 +120,20 @@ structural fact "The shape" below must design around: **the live-engine half of 
 probe is not an optional nice-to-have on top of the Server reads — for a combat-stat claim
 specifically, it is currently the only place the composed value can be observed.**
 
-### Real gap, found as a byproduct, unrelated to this program
+### Not a real gap this program found — already a named, owned, larger gap in `party-dungeon`
 
-`POST /api/delve/rooms/{id}/talk` and `/cage` (`DelveWildEndpoints.cs:62-65`, real, non-debug,
-production endpoints) accept a caller-supplied `CreatureMintSpec{Rarity, Variant, TraitIds}`
-(`DelveWildJoinRequest.Spec`, `CreatureDtos.cs:58-68`) with only catalog-known-id validation in
-`MintCreatureUnlocked` — no independent server-side re-roll or bound check against what the delve
-room's own resolved encounter should produce. This is a genuine trust gap in **production** code (a
-player-reachable endpoint trusting a client-supplied rarity), not a debug-scope question at all. Named
-here because it surfaced during this survey; **not this idea's to fix** — see Open questions.
+`POST /api/delve/rooms/{id}/talk` and `/cage` (`DelveWildEndpoints.cs:62-65`) accept a caller-supplied
+`CreatureMintSpec{Rarity, Variant, TraitIds}` with only catalog-known-id validation. **Corrected after
+reading `tasks/party-dungeon-todo.md`'s D4.8 entry directly (2026-09-13):** this is not a fresh finding
+— it is the exact same gap that task's own "Still not built, named precisely" note already identifies
+(2026-09-07): `TalkTree`'s multi-verb `Step`-style orchestrator does not exist anywhere, so `talk`/
+`cage` are deliberately scoped to COMMITTING an already-resolved outcome only, not resolving one from a
+bare verb. `docs/architecture/party-dungeon/spec-wild-room.md` is a **fully owner-approved, unbuilt**
+spec for exactly this orchestrator (§2's whole verb/eligibility/outcome-draw table). Fixing this
+properly means building that already-spec'd `party-dungeon` module — real, large, and already owned;
+forking it into `live-probe` would duplicate ownership of an approved module. Handed off, not built or
+re-specified here — see the capability map's own note and `tasks/party-dungeon-todo.md` D4.8's
+cross-link.
 
 ### Structural observation — `DebugEndpoints.cs` already mixes both scopes correctly in two spots
 
@@ -236,18 +241,19 @@ would touch.
 - Does not build a Server-side compose-and-expose endpoint for a UniqueActor's derived combat stats —
   considered and rejected above as a likely duplicate-compose (`DESIGN-GATE.md` §2.15); the Injector's
   `debug.board-stats` remains the only place this claim is observable, by design, not by gap.
-- Does not fix the `/talk`/`/cage` `CreatureMintSpec` trust gap — a real production-validation
-  finding, out of scope for a live-probe-tooling idea.
-- Does not redo the T12/T14 Actor Hub live proof itself — that is downstream execution work once a
-  probe script exists, for the `actor-hub-and-combat-power-solid-fixing` program (or a successor) to
-  run, not something this idea phase produces.
+- Does not build the `/talk`/`/cage` `CreatureMintSpec` fix — it is `party-dungeon`'s own `wild-room`
+  module (§ above), already approved and unbuilt; cross-linked into `tasks/party-dungeon-todo.md`
+  D4.8, not forked into this program.
+- **Does** redo the T12/T14 Actor Hub live proof, using `live-probe-tool` — see the capability map's
+  `actor-hub-live-proof` module.
 
-## Open questions
+## Open questions (both resolved 2026-09-13)
 
-1. **The `/talk`/`/cage` `CreatureMintSpec` trust gap** (real production endpoint, caller-supplied
-   rarity/variant/traits, weak validation) — fix now as a small separate task, or file it and let the
-   delve/wild-join program pick it up on its own schedule? This is unrelated to live-probe tooling and
-   was found only as a byproduct of this survey.
-2. **Redo the T12/T14 Actor Hub proof now**, using the real chain this doc names (once a probe script
-   exists per "The shape" §2), or treat that as separate follow-up work for
-   `actor-hub-and-combat-power-solid-fixing` to schedule on its own?
+1. ~~The `/talk`/`/cage` `CreatureMintSpec` trust gap~~ — **resolved: hand off, not build here.** It
+   turned out to already be `party-dungeon`'s own named, approved, unbuilt `wild-room` module, not a
+   fresh finding. Cross-linked into `tasks/party-dungeon-todo.md` D4.8 rather than specced or built
+   under `live-probe`.
+2. ~~Redo the T12/T14 Actor Hub proof now?~~ — **resolved: yes, in this program.** `actor-hub-live-
+   proof` is a module in `live-probe-map.md`, depending on `live-probe-tool`.
+
+No open questions remain blocking `/spec`.
