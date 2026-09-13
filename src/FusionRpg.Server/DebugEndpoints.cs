@@ -183,6 +183,83 @@ public static class DebugEndpoints
             }
         });
 
+        // RPG Server Debug
+        // Read-only, no injector relay, no side effects.
+        // Answers exactly the question a live-probe session must never guess or eyeball: what state
+        // is the lawn actually in, and since when. Built 2026-09-14 after a real incident: an agent
+        // read a `/lawn/quick-start` { ok: true } response with real ptrs and declared the board
+        // recovered, while the operator was looking at a still-showing defeat screen. Both were
+        // "right" about different layers -- the simulation had moved on, the screen had not -- and
+        // there was no single query that could have said so instead of one side privately eyeballing
+        // the game and the other reading an HTTP body. This endpoint is that query.
+        g.MapGet("/lawn/state", (RpgStore store) =>
+        {
+            var now = DateTime.UtcNow;
+            DateTime? ParseT(EventEnvelope? e) =>
+                e is not null && DateTime.TryParse(e.T, null, System.Globalization.DateTimeStyles.RoundtripKind, out var t) ? t : null;
+
+            const int cyclingWindowSec = 10;
+            const int CyclingBoardEndThreshold = 3;
+            var recentBoardEnds = CountRecentEventsOfKind(store, "board.end", TimeSpan.FromSeconds(cyclingWindowSec));
+
+            var latestMatchResult = FindLatestKind(store, "match.result");
+            var latestBoardEconomy = FindLatestKind(store, "board.economy");
+            var resultTime = ParseT(latestMatchResult);
+            var economyTime = ParseT(latestBoardEconomy);
+            var resultValue = latestMatchResult is not null ? PayloadString(latestMatchResult.Payload, "result") : null;
+
+            string state;
+            EventEnvelope? decidingEvent;
+            if (recentBoardEnds >= CyclingBoardEndThreshold)
+            {
+                state = "Cycling";
+                decidingEvent = latestBoardEconomy;
+            }
+            else if (resultTime is not null && (economyTime is null || resultTime > economyTime))
+            {
+                // The newest board-lifecycle signal is a terminal result with nothing newer proving a
+                // fresh board exists since -- the board is in whatever post-match state the game left
+                // it in (debug.reset-board can restore API-level spawning, never the game's own visual
+                // overlay -- see the note below).
+                state = string.Equals(resultValue, "defeat", StringComparison.OrdinalIgnoreCase) ? "Defeated" : "MatchEnded";
+                decidingEvent = latestMatchResult;
+            }
+            else if (economyTime is not null && now - economyTime < TimeSpan.FromSeconds(30))
+            {
+                state = "InMatch";
+                decidingEvent = latestBoardEconomy;
+            }
+            else
+            {
+                // No recent board.economy and no terminal result: could be the main menu, or the
+                // vanilla seed-picker screen (Board not yet constructed -- PollBoard's own null-check
+                // means NOTHING passively telemetered fires while it is up, confirmed live 2026-09-14
+                // across a whole session with zero board.start events). This state is genuinely
+                // ambiguous from passive telemetry alone; say so rather than guess.
+                state = "Unknown";
+                decidingEvent = latestBoardEconomy ?? latestMatchResult;
+            }
+
+            var decidingTime = ParseT(decidingEvent);
+            return Results.Ok(new
+            {
+                state,
+                asOf = decidingEvent?.T,
+                sinceMs = decidingTime is { } dt ? (long?)(now - dt).TotalMilliseconds : null,
+                recentBoardEnds,
+                latestMatchResult = resultValue,
+                injectorConnected = store.InjectorConnected,
+                note = "API/simulation state only. Does NOT confirm what is rendered on screen -- a " +
+                    "defeat/victory overlay can persist after debug.reset-board clears entities, and " +
+                    "state=\"Unknown\" cannot distinguish the main menu from the seed-picker screen " +
+                    "(no passive event fires for either; only an active POST /api/debug/setup/skip " +
+                    "probe can tell them apart, and it has a side effect). When the question is what a " +
+                    "human sees, ask the human -- this answers what the simulation has recorded, never " +
+                    "a substitute for looking at the actual game."
+            });
+        });
+
+        // Game Injector Debug
         g.MapPost("/lawn/quick-start", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox, EffectGrantSession grants) =>
         {
             var b = BodyOrEmpty(body);
