@@ -21,6 +21,82 @@ It is **vacuous today** for four separate reasons, and all four must land togeth
 Success: a lawn actor pays `stamina` per swing, regenerates it over time, and contributes no elemental
 delta while empty.
 
+## Cost-delivery shape (decided — `lawn-combat-wire-todo.md` Task 2)
+
+`spec-lawn-action-bridge.md` ("Cost is a different problem") names three candidate shapes for getting
+an authored cost onto the lawn. **Chosen: construct `CompiledActionCost` locally in Core, reading the
+already-shipped cost-template tuning file** — a corrected, smaller version of that spec's first
+candidate.
+
+| # | Candidate (as named in `spec-lawn-action-bridge.md`) | Verdict |
+|---|---|---|
+| 1 | Ship `authored-basics.json` beside the tuning files and read the cost locally | **Chosen, corrected** — see below |
+| 2 | Deliver the cost through an existing cold-edge cache (the aptitude-cache shape) | Rejected — reintroduces the §2.16 trigger-set apparatus that spec's own adversarial rewrite tore out for the row itself; a cost row needs none of it |
+| 3 | Accept an uncosted lawn basic attack for the first increment | Rejected as the todo's own default *only* because a clearly-better option exists; would contradict D2 from day one |
+
+### Correction to candidate 1, found on inspection
+
+`data/seed/actions/authored-basics.json` carries `act.attack`'s **identity** (name, category,
+`kindHint`, `atomFamilies`, `rungBand`) but **no cost fields at all** — read directly, confirmed. The
+cost is composed at import time from `data/tuning/action-corpus-cost-templates.v1.json`
+(`categories.attack.{resourceId, baseAmountAtRung1, timing}`) by `ActionCorpusComposer.Compose`
+(`ActionCorpusComposer.cs:165-168`):
+
+```csharp
+var costs = new[] { new ActionCostRow(brief.Id, costTemplateRow.ResourceId,
+    ValueSpec.Of(costTemplateRow.BaseAmountAtRung1), costTemplateRow.Timing) };
+```
+
+So there is nothing to "ship beside the tuning files" — **the cost template is already there.** All
+three injector host `.csproj`s already copy `data\tuning\**\*.json` verbatim
+(`FusionRpg.Injector.MelonLoader.39.csproj:51-54` and its BepInEx/MelonLoader siblings), and
+`action-corpus-cost-templates.v{n}.json` lives under `data/tuning/`, so it already reaches the plugin
+folder with zero build changes.
+
+### Why this beats candidates 2 and 3
+
+- **No compilation problem exists for a cost row.** `spec-lawn-action-bridge.md`'s rewrite killed the
+  first draft's cold-edge/DTO/trigger-set machinery because `CompiledAction.Condition` is an
+  `ICompiledPredicate` — a behavioural object that cannot cross a wire. A cost has no such shape:
+  `CompiledActionCost(string ResourceId, ValueSpec ScaledAmount, ActionCostTiming When)`
+  (`CompiledAction.cs:8`) is three data fields, and `ValueSpec` (`ValueSpec.cs`) is itself
+  Min/Max/enum data with no interned or behavioural members. Candidate 2's cache/trigger-set apparatus
+  solves a problem a cost row does not have.
+- **There is already a shipped precedent for exactly this shape.** `ConcreteSpeciesSeedReader` reads
+  `data/generated/creatures/*.json` directly, Core-only, no SQL, via `RpgHost.Initialize` — "the same
+  way `data/tuning/` already reaches this same folder" (`FusionRpg.Injector.MelonLoader.39.csproj:55-59`,
+  its own comment). Reading `action-corpus-cost-templates.v{n}.json` the same way is the established
+  pattern, not a new one.
+- **It keeps D2 intact.** Candidate 3 (uncosted) is the todo's own named fallback *only if no
+  clearly-better option turns up* — one did, so it is not taken. The basic attack costs a resource
+  from the first increment, per D2 (`lawn-combat-wire-ideal.md:425`: *"Follow the existing resource
+  design ... no resource, no trigger"*).
+- **No new machinery, no new project reference.** `ActionCorpusComposer` already lives in
+  `FusionRpg.Core.Actions.Corpus` (`ActionCorpusComposer.cs:30`), which the injector already
+  references — `spec-lawn-action-bridge.md`'s own correction established "there is no reference to
+  add." The cost-row construction quoted above is a pure function of `costTemplateRow`, reusable (or
+  trivially mirrored) injector-side without a second implementation of the arithmetic.
+
+### Consequence for this task (T12, `basic-attack-cost`)
+
+Wire 1 ("A `stamina` cost row for `act.attack`") is built as: **construct `CompiledActionCost` locally
+in Core**, at the same place `lawn-action-bridge`'s `BasicAttackCompiled` factory builds the rest of
+the row, by reading `action-corpus-cost-templates.v{n}.json` (already on disk in the plugin folder —
+no new copy rule needed) and applying the kind-aware `Basic → stamina` rule `basic-attack-seed`/D5
+establish. **Not**:
+
+- SQLite-delivered cost (`RpgStore.Actions.cs:453 ListCosts`) — the injector has no `FusionRpg.Data`
+  reference and no Server round trip on the construction path, per `lawn-action-bridge`'s own
+  boundary.
+- A hardcoded C# fallback number — that reintroduces the exact defect this program exists to remove
+  (a balance number in code, per `tunables-ssot.md`).
+- Uncosted — this task charges a real `stamina` amount from the first increment; D2 is honoured, not
+  deferred.
+
+The remaining wires (pool-max seeding, regen as a kernel kind, the `CostLedger` seam/assembly) are
+unaffected by this decision — it only answers **where the raw cost value comes from**, not how the
+ledger is assembled around it.
+
 ## Tech stack
 
 `FusionRpg.Core` (cost ledger, pools, regen) + `FusionRpg.Injector` (the lawn's cost gate, the regen
@@ -55,7 +131,7 @@ undeployed.
 
 | # | Wire | Inert line today |
 |---|---|---|
-| 1 | **A `stamina` cost row for `act.attack`** | `BattleRunState.cs:81` `Costs: Array.Empty<CompiledActionCost>()`. Delivered as data by `basic-attack-seed`; this module consumes it |
+| 1 | **A `stamina` cost row for `act.attack`** | `BattleRunState.cs:81` `Costs: Array.Empty<CompiledActionCost>()`. Delivered as data by `basic-attack-seed`; this module consumes it — delivery shape decided above (Task 2) |
 | 2 | **Seed `resource.max.*` on the lawn Hub** | `ActorHub.cs:147` `seedResourceBaseline = false`; sole `true` caller is `UniqueActorHubCompose.cs:75` (Server). The injector's Hub (`CheatState.cs:49`) never opts in, so **max is 0 for every lawn actor** |
 | 3 | **Regen as a third kernel kind** | `KernelDriveHost.cs:69-70` has `KindDotPulse` and `KindShieldUpkeep`; regen is not among them |
 | 4 | **The lawn's missing `CostLedger` call** | `grep CostLedger src/FusionRpg.Injector` → **zero hits**. The lawn has pools but no gate |
