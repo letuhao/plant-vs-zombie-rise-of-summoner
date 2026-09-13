@@ -18,7 +18,6 @@ tests/FusionRpg.Core.Tests/Scope/ScopeArchitectureTests.cs : swallowed-delete
 tests/FusionRpg.Core.Tests/Scope/ScopePurityGuardTests.cs : swallowed-delete
 tests/FusionRpg.Data.Tests/ColdArchiveCompactionTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/CreatureSpeciesImportCliTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/Delve/Domains/DomainRealPipelineTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/LegacyMonoMigratorTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/RpgStoreDalSmokeTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/RpgStoreSmokeTests.cs : swallowed-delete, temp-store

@@ -25,7 +25,7 @@ namespace FusionRpg.Data.Tests.Delve;
 /// creature-minting fixture (<see cref="MintBoundCreature"/>) that effect needs.</para></summary>
 public class DelveAttritionSettlementTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly RoomTypeCatalog _rooms;
     readonly DoorTypeCatalog _doors;
@@ -34,10 +34,8 @@ public class DelveAttritionSettlementTests : IDisposable
 
     public DelveAttritionSettlementTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-delve-attrition-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _store.AwardSouls(1, 1_000_000, "seed", "attrition-bank");
 
         var repoRoot = FindRepoRoot();
@@ -47,10 +45,7 @@ public class DelveAttritionSettlementTests : IDisposable
         _tuning = DungeonTuningLoader.Parse(File.ReadAllText(Path.Combine(repoRoot, "data", "tuning", "dungeon.v3.json")), registries);
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static string FindRepoRoot()
     {

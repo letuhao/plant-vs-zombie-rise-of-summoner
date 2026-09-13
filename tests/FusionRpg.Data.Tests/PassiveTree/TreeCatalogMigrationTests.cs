@@ -1,5 +1,6 @@
 using FusionRpg.Core.PassiveTree.State;
 using FusionRpg.Data;
+using FusionRpg.Data.Sqlite;
 using Microsoft.Data.Sqlite;
 using Xunit;
 
@@ -10,21 +11,16 @@ namespace FusionRpg.Data.Tests.PassiveTree;
 /// home in `TreeCatalogImportTests.cs` (task C4) and is untouched here.</summary>
 public class TreeCatalogMigrationTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public TreeCatalogMigrationTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-treemigration-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static PassiveTreeTuning Tuning() => new(
         SchemaVersion: 1, Version: 1,
@@ -103,8 +99,7 @@ public class TreeCatalogMigrationTests : IDisposable
 
     (bool Enabled, int? RetiredAtRevision, int BudgetShareMilli)? ReadCatalogNode(string nodeId)
     {
-        using var c = new SqliteConnection($"Data Source={_store.HotPath}");
-        c.Open();
+        using var c = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = c.CreateCommand();
         cmd.CommandText = "SELECT enabled, retired_at_revision, budget_share_milli FROM rpg_tree_catalog_node WHERE node_id = $id;";
         cmd.Parameters.AddWithValue("$id", nodeId);
@@ -115,8 +110,7 @@ public class TreeCatalogMigrationTests : IDisposable
 
     long ReadAtomKMicro(string nodeId)
     {
-        using var c = new SqliteConnection($"Data Source={_store.HotPath}");
-        c.Open();
+        using var c = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = c.CreateCommand();
         cmd.CommandText = "SELECT k_micro FROM rpg_tree_catalog_atom WHERE node_id = $id;";
         cmd.Parameters.AddWithValue("$id", nodeId);

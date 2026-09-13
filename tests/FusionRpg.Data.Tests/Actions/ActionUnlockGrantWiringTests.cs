@@ -20,7 +20,7 @@ namespace FusionRpg.Data.Tests.Actions;
 /// </summary>
 public class ActionUnlockGrantWiringTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     static ActionUnlockGrantWiringTests()
@@ -36,16 +36,11 @@ public class ActionUnlockGrantWiringTests : IDisposable
 
     public ActionUnlockGrantWiringTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-action-unlock-wiring-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     void SeedAction(string actionId)
     {

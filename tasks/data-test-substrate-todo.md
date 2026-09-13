@@ -190,7 +190,18 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - Verified: gate PASS — 23 files, zero assertions/methods/seeds dropped, focused Items **238/238**, full Data **1288/1288**, `guard-dal` + `guard-test-substrate` green, no probe/temp residue. Baseline **132→117** (132 − 21 migrated Items lines + 6 newly-detected real violations; `ItemWorkbench`'s line also widened from `temp-store` to `swallowed-delete, temp-store`).
   - Files: `tests/FusionRpg.Data.Tests/Items/**` (23), `scripts/guard-test-substrate.ps1`, `scripts/test-substrate-baseline.txt`. Scope: M ×3.
   - Deps: T10.
-- [ ] **Task T18c: Delve/** (13) + Actions/** (5) + remaining PassiveTree/** (2) → 3 sub-batches of ~7 — **read-only: `DomainImportTests`, `DomainProgressStoreTests`** — Deps: T10. Scope: M ×3.
+- [x] **Task T18c: Delve/ + Actions/ + PassiveTree/** (21 files) ✅ 2026-09-12
+  - Migrated the 20 fenced files, plus **`Delve/Domains/DomainRealPipelineTests.cs`** — a genuine un-migrated store test the **broken scanner had made invisible** (never baselined), found because the fixed gate now reports it.
+  - Specials: `DomainImportTests`/`DomainProgressStoreTests` read-only opens → plain; `TreeCatalogMigrationTests`' two raw `Data Source=` helpers → `SqliteConnectionFactory.Open(_store.HotPath)`; `WebMatchDecisionsTests`' legacy-schema test → `CreateWithPreInitHot` (memory); `ActionUnlockGrantWiringTests`' ctor no longer writes disk.
+  - Verified: build clean; focused Delve/Actions/PassiveTree **255/255**; per-file `Assert.`/method counts identical HEAD→work across all 21; zero leftovers.
+  - Files: 21 under Delve/Actions/PassiveTree + `scripts/test-substrate-baseline.txt`. Scope: M ×3.
+  - Deps: T10.
+
+- [x] **Seam fix (uncovered by the T18d worker, 2026-09-12): `DataTestStore` was unreachable from Server/E2E tests** ✅
+  - **A real gap in this program's own spec:** `spec-test-store-helper.md` assumed the helper was "reachable by the other test projects that construct the store", but no task provisioned that seam. `DataTestStore` lives only in `tests/FusionRpg.Data.Tests`, and the Server/E2E csprojs have no reference to it — so every Server test would fail `CS0103: The name 'DataTestStore' does not exist`.
+  - Verified empirically by a probe (fails before, builds after), not assumed.
+  - Fix: a `<Compile Include="..\FusionRpg.Data.Tests\DataTestStore.cs" Link="TestSupport\DataTestStore.cs" />` source link in the Server csproj — the repo's **existing** cross-test-project seam (`FusionRpg.Core.Tests.csproj` already links Injector sources this way). No new project, no new dependency. E2E needs the same link at T18e.
+  - Files: `tests/FusionRpg.Server.Tests/FusionRpg.Server.Tests.csproj`. Scope: XS.
 - [ ] **Task T18d: Server.Tests (54 A-tier)** — each boots a `WebApplication`/store directly; migrate construction + teardown in 7 sub-batches of ~8 — Deps: T10. Scope: M ×7 (never one XL task).
 - [ ] **Task T18e: E2E (4 A-tier) + Core.Tests (4 store sites)** — Deps: T10. Scope: S.
 - [ ] **Task T18f: the 5 file-bound classes to `CreateFileBacked()`** (`LegacyMonoMigratorTests`, `RpgStoreDalSmokeTests`, `RpgStoreSmokeTests`, `ColdArchiveCompactionTests`, `StoragePurgeTests`) — fix the leak **without** changing their file/WAL assertions — Deps: T10. Scope: M.

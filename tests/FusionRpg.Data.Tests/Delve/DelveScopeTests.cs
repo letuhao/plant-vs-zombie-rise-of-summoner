@@ -12,17 +12,15 @@ namespace FusionRpg.Data.Tests.Delve;
 /// goldens do not move; no path can Step a delve.</summary>
 public class DelveScopeTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly RoomTypeCatalog _rooms;
     readonly DoorTypeCatalog _doors;
 
     public DelveScopeTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-delve-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         var registryDir = FindRepoRoot();
         var registries = DungeonRegistryLoader.LoadAll(Path.Combine(registryDir, "data", "seed", "dungeon", "_registry"));
@@ -30,10 +28,7 @@ public class DelveScopeTests : IDisposable
         _doors = new DoorTypeCatalog(registries.DoorKinds);
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static string FindRepoRoot()
     {

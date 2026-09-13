@@ -9,21 +9,16 @@ namespace FusionRpg.Data.Tests.PassiveTree;
 /// classification against the real C4 catalog tables.</summary>
 public class TreeStateReconcilerStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public TreeStateReconcilerStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-treereconcile-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static PassiveTreeTuning Tuning() => new(
         SchemaVersion: 1, Version: 1,
