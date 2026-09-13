@@ -1367,6 +1367,58 @@ public static class DebugActions
         }
     }
 
+    /// <summary>Answers "where is current game state, right now" by reading the game's own live
+    /// objects directly -- never reconstructed from event history. Real problem this replaces
+    /// (2026-09-14): every prior attempt at this question read the event log for the most recent
+    /// board.economy/match.result/etc., which is fragile by construction (a long enough session, a
+    /// clamped query window, or a signal that simply never fires for a given transition all produce a
+    /// wrong answer with no way to tell it apart from a right one). <c>Board.Instance</c> and
+    /// <c>InitBoard.Instance</c> are the same live accessors <c>CheatActions.cs</c>/
+    /// <c>DebugActions.cs</c> already read everywhere else in this file -- this command exists only to
+    /// surface them as one direct, synchronous answer instead of requiring a caller to infer the same
+    /// thing from a trickle of past events.
+    ///
+    /// <c>hasInitBoard</c> is a best-effort signal, not a certainty: whether <c>InitBoard.Instance</c>
+    /// stays non-null after returning to the main menu (i.e. whether it is a persistent singleton) is
+    /// unverified in this repo's own source as of this writing -- treat <c>liveState</c>'s
+    /// "AtMainMenuOrNoBoard" vs the seed-picker distinction as a hypothesis to confirm live, not a
+    /// proven fact, until someone checks it against a real main-menu vs seed-picker screen.</summary>
+    public static void GameState()
+    {
+        var dump = new Dictionary<string, object>();
+        try
+        {
+            var board = GameHooks.Board ?? Board.Instance;
+            var init = InitBoard.Instance;
+            dump["hasBoard"] = board != null;
+            dump["hasInitBoard"] = init != null;
+            try { dump["theBoardType"] = (int)GameAPP.theBoardType; dump["theBoardTypeName"] = GameAPP.theBoardType.ToString(); } catch { }
+            try { dump["theBoardLevel"] = GameAPP.theBoardLevel; } catch { }
+            if (board != null)
+            {
+                try { dump["sceneType"] = (int)board.sceneType; } catch { }
+            }
+
+            var matchSnap = Match.MatchHost.Runtime.ToSnapshot();
+            dump["matchPhase"] = matchSnap.Phase.ToString();
+            dump["plantCount"] = matchSnap.PlantCount;
+            dump["zombieCount"] = matchSnap.ZombieCount;
+
+            dump["liveState"] = board != null
+                ? (string.Equals(matchSnap.Phase.ToString(), "Paused", StringComparison.Ordinal) ? "Paused" : "InMatch")
+                : (init != null ? "SeedPickerOrPersistentInitBoard" : "AtMainMenuOrNoBoard");
+            dump["ok"] = true;
+            DebugRuntime.Emit("debug.game-state", dump);
+        }
+        catch (Exception ex)
+        {
+            dump["ok"] = false;
+            dump["error"] = ex.Message;
+            DebugRuntime.Emit("debug.game-state", dump);
+            CheatState.Error("debug.game-state: " + ex.Message);
+        }
+    }
+
     static LevelType ParseLevelType(JsonElement p)
     {
         if (p.TryGetProperty("levelType", out var el))

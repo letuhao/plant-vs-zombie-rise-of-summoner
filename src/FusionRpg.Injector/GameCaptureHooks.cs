@@ -772,30 +772,51 @@ public static class GameCaptureHooks
     }
 
     // W3-A: UIMgr.EnterPauseMenu / BackToGame (Assembly-CSharp) — NotifyPaused, not Core Apply kinds.
+    // Real gap found live 2026-09-14 (lawn-run-state-machine.md §1/§3): these four hooks already
+    // existed but emitted no event at all -- NotifyPaused only flips an in-process MatchPhase never
+    // surfaced through /api/debug/events, so a paused match read identically to a running one, and
+    // returning to the main menu was invisible to every live-probe state check. Wiring real emits
+    // into the already-hooked methods below (no new Harmony patch needed) closes both gaps.
     [HarmonyPatch(typeof(UIMgr), nameof(UIMgr.EnterPauseMenu))]
     public static class EnterPauseMenuHook
     {
-        public static void Postfix() => Match.MatchHost.NotifyPaused(true);
+        public static void Postfix()
+        {
+            Match.MatchHost.NotifyPaused(true);
+            Emit("match.pause", new Dictionary<string, object>());
+        }
     }
 
     [HarmonyPatch(typeof(UIMgr), nameof(UIMgr.BackToGame))]
     public static class BackToGameHook
     {
-        public static void Postfix() => Match.MatchHost.NotifyPaused(false);
+        public static void Postfix()
+        {
+            Match.MatchHost.NotifyPaused(false);
+            Emit("match.resume", new Dictionary<string, object>());
+        }
     }
 
     // Escape / in-game pause path may call PauseGame without going through UIMgr first.
     [HarmonyPatch(typeof(InGameUI), nameof(InGameUI.PauseGame))]
     public static class InGamePauseGameHook
     {
-        public static void Postfix() => Match.MatchHost.NotifyPaused(true);
+        public static void Postfix()
+        {
+            Match.MatchHost.NotifyPaused(true);
+            Emit("match.pause", new Dictionary<string, object>());
+        }
     }
 
     // Leaving to menu while Paused: clear overlay pause (Idle/board.end still via Die).
     [HarmonyPatch(typeof(UIMgr), nameof(UIMgr.BackToMenu))]
     public static class BackToMenuClearPauseHook
     {
-        public static void Postfix() => Match.MatchHost.NotifyPaused(false);
+        public static void Postfix()
+        {
+            Match.MatchHost.NotifyPaused(false);
+            Emit("menu.enter", new Dictionary<string, object>());
+        }
     }
 
     [HarmonyPatch(typeof(ItemManager), nameof(ItemManager.SetBucket))]

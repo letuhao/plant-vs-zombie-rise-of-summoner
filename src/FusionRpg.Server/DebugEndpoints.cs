@@ -139,6 +139,29 @@ public static class DebugEndpoints
             return Results.Ok(new { ok = true, method, acknowledgement = ack.Payload });
         });
 
+        // Game Injector Debug
+        // The unified "what is current game state, right now" probe (2026-09-14). Unlike
+        // /lawn/state (RpgServerDebug, reconstructs a best guess from the event log -- fragile by
+        // construction, see lawn-run-state-machine.md), this ACTIVELY asks the game to read its own
+        // live objects (Board.Instance / InitBoard.Instance / GameAPP.theBoardType / the injector's own
+        // MatchPhase FSM) and reports exactly what it found, synchronously, no history involved. Use
+        // this when the injector is connected and you need ground truth; fall back to /lawn/state when
+        // it is not (or when you need "since when" duration context this probe does not carry).
+        g.MapPost("/game-state", async (RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            if (!store.InjectorConnected)
+                return Results.Conflict(new { ok = false, error = "injector not connected — start the game with the FusionRpg injector loaded" });
+
+            const int timeoutSec = 10; // structural acknowledgement wait, not a balance value
+            var before = store.GetMaxEventId();
+            await Send(hub, inbox, "debug.game-state", new { });
+            var ack = await PollForKind(store, before, "debug.game-state", TimeSpan.FromSeconds(timeoutSec));
+            if (ack is null)
+                return Results.Conflict(new { ok = false, error = $"debug.game-state did not ack within {timeoutSec}s" });
+
+            return Results.Ok(new { ok = true, live = ack.Payload });
+        });
+
         // RPG Server Debug
         // (in-memory catalog read only, no injector relay and no RpgStore read)
         g.MapGet("/scenarios", () => Results.Ok(new { items = DebugScenarios.AllIds }));

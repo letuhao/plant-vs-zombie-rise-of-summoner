@@ -322,6 +322,9 @@ public static class CheatCommandRunner
             case "debug.snapshot":
                 DebugRuntime.Emit("debug.snapshot", DebugRuntime.Snapshot());
                 break;
+            case "debug.game-state":
+                DebugActions.GameState();
+                break;
             case "debug.board-stats":
             {
                 var payload = DebugRuntime.BoardEntityStats();
