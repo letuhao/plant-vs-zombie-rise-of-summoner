@@ -28,7 +28,7 @@
     "tasks/sessions/data-test-substrate-*.json"
   ],
   "started": "2026-09-12T11:06:58Z",
-  "status": "active",
+  "status": "merged",
   "sharedWith": [
     "session-boundary-standard-20260912-a3f2"
   ],
