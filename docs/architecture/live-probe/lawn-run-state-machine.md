@@ -1,7 +1,18 @@
 # Lawn run state machine
 
-**Status:** binding reference for `GET /api/debug/lawn/state` and `POST /api/debug/lawn/quick-start`.
-Referenced from [live-probe-standard.md](../../contributing/live-probe-standard.md) §6.
+**Status:** binding reference for `GET /api/debug/lawn/state`, `POST /api/debug/lawn/quick-start`, and
+`POST /api/debug/game-state`. Referenced from
+[live-probe-standard.md](../../contributing/live-probe-standard.md) §6.
+
+**Two answers to "what state is the lawn in," not one.** `/lawn/state` (this doc's original subject)
+reconstructs a best guess from the event log — useful when the injector is disconnected, or when you
+need "since when" duration context, but fragile by construction: this session hit a clamped query
+window, a signal that never fires for a given transition, AND a stale cross-process read, all as real
+live bugs in the same afternoon. `POST /api/debug/game-state` (added 2026-09-14) is the direct
+alternative: it asks the game to read its own live objects — `Board.Instance`, `InitBoard.Instance`,
+`GameAPP.theBoardType`, and the injector's own `MatchPhase` FSM — and reports exactly what it finds,
+synchronously, no history involved. **Prefer `game-state` for "is it safe to proceed right now";
+use `lawn/state` for "how long has it been this way" or when the injector is disconnected.**
 
 **Why this exists.** 2026-09-14: a session spent hours reactively patching `/lawn/quick-start` for
 one symptom at a time (seed-picker screen, `board.start` never firing, cycling matches, defeat state)
@@ -37,11 +48,11 @@ the IL2CPP assembly, this document says so rather than guessing.
 
 | Transition | Why it's invisible |
 |---|---|
-| Seed-picker screen appears | No dedicated event. `card.bank` bursts are the closest available proxy, unused today. |
-| Seed-picker dismissed → real match confirmed running | Neither `debug.setup.skip`'s ack nor `board.start` reliably proves this; only a `board.economy` tick (which needs a sun/money/points change to fire at all) does. |
-| Return to main menu | `UIMgr.BackToMenu` is hooked (`GameCaptureHooks.cs:794-799`) but emits nothing — only clears an internal pause flag. No `menu.*` event kind exists anywhere. |
-| Defeat/victory overlay dismissed by the player | `match.lose`/`match.win`/`match.result` fire when the game decides the outcome; nothing fires when the player clicks past the resulting overlay. `debug.reset-board` can clear entities at the simulation level and never touches this overlay. |
-| Pause / resume | `UIMgr.EnterPauseMenu`/`BackToGame`/`InGameUI.PauseGame` only flip an in-process `MatchPhase` (`MatchRuntime.NotifyPaused`) that is never itself emitted as an event. A paused match reads identically to a running one from outside the injector. |
+| Seed-picker screen appears | No dedicated event. `card.bank` bursts are the closest available proxy, unused today. **`POST /api/debug/game-state`'s `hasInitBoard` is a live, active alternative** — unverified whether it stays true after leaving to the main menu (see §1 note). |
+| Seed-picker dismissed → real match confirmed running | Neither `debug.setup.skip`'s ack nor `board.start` reliably proves this; only a `board.economy` tick (which needs a sun/money/points change to fire at all) does. `game-state`'s `hasBoard` is the direct alternative — true the instant `Board.Instance` exists, no tick required. |
+| Return to main menu | ~~`UIMgr.BackToMenu` is hooked but emits nothing~~ **Fixed 2026-09-14**: now emits `menu.enter` (`GameCaptureHooks.cs`'s `BackToMenuClearPauseHook`). |
+| Defeat/victory overlay dismissed by the player | `match.lose`/`match.win`/`match.result` fire when the game decides the outcome; nothing fires when the player clicks past the resulting overlay. `debug.reset-board` can clear entities at the simulation level and never touches this overlay. **Still a real gap** — `game-state`'s live read doesn't see the overlay either, only the simulation. |
+| Pause / resume | ~~Only flips an in-process `MatchPhase`, never emitted~~ **Fixed 2026-09-14, two ways**: `EnterPauseMenu`/`BackToGame`/`InGameUI.PauseGame` now emit `match.pause`/`match.resume`; and `game-state`'s `matchPhase` field reads the live FSM value (`Paused`) directly, on demand, no event needed. |
 
 ## 2. The state machine (the outputs)
 
