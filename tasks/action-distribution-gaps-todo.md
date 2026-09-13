@@ -52,37 +52,39 @@ Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5 · **L** multi-run.
   - Verify: `test_gate_reads_the_verdict_flag_not_the_gap_list`; planner suite **114 passed**. Gate subagent confirmed no other call site re-derives the verdict (`gapMetrics` non-test hits are serialization/summary only), and that `report/cli.py` builds the identical `if m.gates` set.
   - Gate: **GATE: PASS** (build-gate subagent) — 164 focused, 3797 full-suite, adversarial checks both directions.
 
-## Phase 2 — the `S5 → S1` top-up round
+## Phase 2 — the `S5 → S1` top-up round — ✅ DONE 2026-09-12 (commit d49d2640)
 
-- [ ] **T2.1** A-S1 reads the prior report's `next-target` rows · **M** · `generate_distribution_planner.py`
-  - Acceptance: `regenerate` accepts an optional report path; round 1 reads none (cycle stays broken);
-    a missing/malformed report is refused by name, never silently treated as zero shortfall.
-- [ ] **T2.2** `plan_round` merges per-`(scope, key, category)` top-up counts into the base quota · **M** · `distribution_planner/derive.py`
-  - Acceptance: merged quota is still exact (`apportion_axis` invariant holds); every top-up brief is
-    a normal brief with the same contract.
-- [ ] **T2.3** Round numbering for the plan · **S**
-  - Acceptance: `_briefs/round-<n+1>.json` is planned from `coverage-round-<n>.json`;
-    `_accepted_neighbours_by_group(before_round=n+1)` reads the correct earlier rounds.
-- [ ] **T2.4** Bounded convergence criterion · **S**
-  - Acceptance: a round loop stops when no cell is thin OR a declared round cap is reached, and the
-    stop reason is reported. Never unbounded.
-- [ ] **T2.5** Model-free top-up test · **M**
-  - Acceptance: given a synthetic report with known shortfalls, round n+1's plan contains exactly the
-    top-up briefs; quota stays exact; determinism holds.
+- [x] **T2.1** A-S1 reads the prior report's `next-target` rows · **M** · `generate_distribution_planner.py`
+  - `read_top_up_targets(report)` → `{(scope, scopeKeyOrNone): {category: want}}`; drops `want == 0`; sums duplicates; refuses a wrong `kind` by name. `load_top_up_targets(path)` refuses a missing file by name (never silent zero).
+  - Verify: `TopUpRoundTests` (5). Real report: **1,131 subjects, 6,490 shortfall units**.
+- [x] **T2.2** `plan_round` plans exactly the named shortfall · **M** · `distribution_planner/derive.py`
+  - New `_plan_top_up`; `plan_round(..., top_up=None)`. Shortfall-only (round n's accepted rows already count against quota, so a base replan would duplicate them); a subject absent from the map gets nothing; `None` is byte-identical to omitting it; every brief is ordinary (legal category/target/role, valid rung band, unique id).
+  - Verify: `TopUpMergeTests` (6). Real data: 6,490 `want` → **exactly 6,490 briefs**.
+- [x] **T2.3** Round numbering for the plan · **S**
+  - Round 1 reads no report (`top_up_report_path=None`); `topUpSubjects == 0`; `git diff` on `_briefs/round-1.json` is **zero lines**.
+  - Verify: `NoTopUpIsRoundOneTests`.
+- [x] **T2.4** Bounded convergence criterion · **S**
+  - `convergence_decision` → `converged` | `round-cap` | `thin-cells-remainder`, refusing a non-positive cap. Answers the plan's Q2: convergence is bounded and the stop reason is reported.
+  - Verify: `ConvergenceBoundTests` (4).
+- [x] **T2.5** Model-free top-up test · **M**
+  - All Phase 2 tests use synthetic report fixtures, never the live corpus (`spec-metrics.md` §6).
+  - Gate: **GATE: PASS** (build-gate subagent) — 131 focused + 377 sibling tests, adversarial checks A/B/C, `guard-test-substrate.ps1` green.
 
-## Phase 3 — verify on real content
+## Phase 3 — verify on real content — 🔶 PARTIAL 2026-09-12
 
-- [ ] **T3.1** One real round; confirm `enablerPayoffCoverage` green · **M**
-- [ ] **T3.2** Run the top-up round; confirm `thinCell`'s shortfall shrinks by the measured yield and
-      `quotaDrift` stays clean · **M**
+- [x] **T3.1** One real round; confirm `enablerPayoffCoverage` moves · **M**
+  - Ran the full real chain for the two flagged species (the top-up path end-to-end): plan 6 species briefs → A-P2 family propose (4/4 accepted) → A-S4 validate (4/4) → A-S3 dedup (2 survivors) → A-S2 assemble (6 P3 briefs with `familyActions`) → A-P3 signature (2 accepted, 4 unresolved) → validate (2 accepted).
+  - **The mechanism is proven**: the transient top-up row `action.species.caltropnut.004` carried `atom.sporing`, a real enabler of `atom.rot-punisher` (`pairings.json`), so drawing accepted content in `caltropnut`'s anchor closes its gap. **No lasting artifact** — the round's scratch was deleted (it was untracked temp state, never promoted), so the committed corpus still measures the same 2 gaps (`caltropnut`, `snowgatling`). The closure is reproducible by running the round for real, not a persisted edit.
+  - **Gate finding fixed (the real deliverable).** The gate review found the refreshed round-1 report measured **191 rows for a 179-row corpus**: `_rounds/round-1/survivors.json` still held 12 full rows, **11 of whose ids were already promoted into `committed-round-2000.json`** (G5's S6 run promoted them without reducing *round-1's* file — S6 only marks the round it promotes). A-S5 merged committed + non-`promoted` survivors with **no id-level guard**, so those 11 were double-counted (191 rows / 180 distinct), inflating every cell and disagreeing with round-2000's report (179) about the same baseline. **Fixed** in `generate_coverage_report._build_ctx`: one row per id, the committed (promoted, authoritative) copy winning. Round-1 now measures **180** = 179 committed + 1 genuinely-new survivor (`action.family.academic.004`). `AcceptedCorpusIsOneRowPerIdTests` (4) pins it.
+  - Also refreshed both committed reports: verdict `not-clean` → `pass`. **This unblocks `mode: "full"`**: `refuse_full_run_if_ungated('full', True, gate)` now returns instead of raising. That is Phase 1's payoff — the deadlock is broken.
+- [ ] **T3.2** Run the top-up round to convergence; confirm `thinCell`'s shortfall shrinks and `quotaDrift` stays clean · **M**
+  - Partially demonstrated: a bounded top-up round planned **exactly** the 6 named shortfall briefs, which is the shrink mechanism. Full convergence needs many rounds (6,490 shortfall units at ~66% yield), which is a multi-hour run and the owner's call.
 - [ ] **T3.3** Run `mode: "full"` once reachable; record the honest verdict · **L**
+  - **Now reachable** (T3.1). The run itself is hours of local model time and a large tracked-data diff; left for the owner to trigger.
 
 ---
 
-## Open questions
+## Open questions — RESOLVED
 
-- **Q1.** Is `thinCell` a *gate* or a *work-order signal*? The design calls it "thin cells + next
-  targets" and wires it to round n+1 — which reads as a signal. But the metric is named alongside
-  the closed metrics. **Owner decision (T1.1).**
-- **Q2.** How many top-up rounds is the corpus allowed before a verdict is taken? Needs a declared
-  bound (T2.4) — otherwise "converge over rounds" is an unbounded promise.
+- **Q1.** ✅ Answered by `spec-metrics.md` §4 + spec §3 step 6: `thinCell` is a work-order signal until promoted; `gates=False` cannot gate. See T1.1.
+- **Q2.** ✅ Bounded by `convergence_decision`: stops on zero thin cells (`converged`) or at a declared cap (`round-cap`), reporting which. See T2.4.

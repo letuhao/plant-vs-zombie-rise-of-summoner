@@ -119,6 +119,35 @@ def _build_ctx(*, actions_root: Path, creatures_root: Path, catalog_path: Path,
         accepted_rows.extend(
             e for e in (survivors_doc.get("entries") or []) if not e.get("promoted"))
 
+    # ⛔ ONE ROW PER ID — the 2026-09-12 gate finding (T3.1). The filter above trusts this round's
+    # `survivors.json` to have been reduced to `promoted` markers once its content moved into a
+    # `committed-round-<n>.json`. That is true only if S6 promoted THIS round. When a LATER round's
+    # S6 run promotes a row that also still sits in an EARLIER round's un-marked survivors file, the
+    # committed copy and the stale round copy are both admitted, with different payloads: measured,
+    # `_rounds/round-1/survivors.json` held 12 rows, 11 of them already committed in
+    # `committed-round-2000.json`, so this report measured 191 rows for a 179-row corpus and the two
+    # reports disagreed about the same baseline.
+    #
+    # The invariant the pipeline claims is "one id exists in exactly one place" (`innate_picker`).
+    # A producer-side violation is not the consumer's to police, but the consumer is where it does
+    # damage, and a duplicate row double-counts every cell, `thinCell` and `speciesCoverage` alike.
+    # So: keep the FIRST occurrence per id. `load_committed` is read first and already guarantees
+    # committed ids are unique, so the committed (promoted, authoritative) copy wins and a stale
+    # round copy is dropped. Deterministic: iteration order is committed-then-survivors, sorted by
+    # file and entry order, so "first" is stable.
+    deduped: "list[dict]" = []
+    seen_ids: "set[str]" = set()
+    for row in accepted_rows:
+        row_id = row.get("id")
+        if row_id is None:
+            deduped.append(row)                     # an id-less row is not this guard's business
+            continue
+        if row_id in seen_ids:
+            continue
+        seen_ids.add(row_id)
+        deduped.append(row)
+    accepted_rows = deduped
+
     review_rows: "tuple[dict, ...]" = ()
     review_path = round_dir / "review-queue.json"
     if review_path.is_file():

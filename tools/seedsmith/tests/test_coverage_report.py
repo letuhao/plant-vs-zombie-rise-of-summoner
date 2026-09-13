@@ -33,6 +33,7 @@ from seedsmith.adapters.actions.coverage_report.ctx import (  # noqa: E402
 )
 from seedsmith.adapters.actions.distribution_planner.derive import WeightsRow  # noqa: E402
 from seedsmith.adapters.actions.load import load_committed  # noqa: E402
+from seedsmith.adapters.actions.distribution_planner.tuning import RUN_TUNING_PATH  # noqa: E402
 from seedsmith.adapters.actions.vocab import load_family_ids  # noqa: E402
 from seedsmith.metrics.action_coverage import (  # noqa: E402
     ALL_ACTION_COVERAGE_CLOSED_METRICS, ALL_ACTION_COVERAGE_OPEN_METRICS,
@@ -45,6 +46,8 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 FAMILY_IDS = load_family_ids()                                    # the real 98, read fresh
 FAM_A, FAM_B = sorted(FAMILY_IDS)[:2]
 PAIRINGS_PATH = REPO_ROOT / "data" / "seed" / "actions" / "pairings.json"
+REAL_ACTIONS_ROOT = REPO_ROOT / "data" / "seed" / "actions"
+REAL_PLAN_PATH = REAL_ACTIONS_ROOT / "_briefs" / "round-1.json"
 
 
 # ---------------------------------------------------------------------------------------------
@@ -88,6 +91,40 @@ def _simple_ctx(accepted_rows, *, quota_by_scope_category=None, subject_category
         roster=roster or RosterCounts(2, 1, 2),
         review_rows=tuple(review_rows), round_no=round_no, mode=mode,
     )
+
+
+def _build_ctx_with_survivors(*, committed, survivors, round_no=1, tmpdir=None):
+    """Build a real `ActionCoverageCtx` from an isolated on-disk tree, so the accepted-corpus merge
+    (committed + a round's survivors) is exercised exactly as production builds it — never by
+    re-implementing the merge in the test. Everything except the two row sets is copied from the
+    live tree, so the quota recompute and vocabulary stay real."""
+    import shutil
+    root = Path(tmpdir) / "actions"
+    (root / "_rounds" / f"round-{round_no}").mkdir(parents=True, exist_ok=True)
+    real = REAL_ACTIONS_ROOT
+    for name in ("type-weights.json", "pairings.json"):
+        shutil.copy(real / name, root / name)
+    (root / f"committed-round-{round_no}.json").write_text(
+        json.dumps({"schemaVersion": 1, "kind": "action-seed",
+                    "_meta": {"partition": f"round-{round_no}", "round": round_no},
+                    "entries": list(committed)}), encoding="utf-8")
+    (root / "_rounds" / f"round-{round_no}" / "survivors.json").write_text(
+        json.dumps({"schemaVersion": 1, "kind": "action-seed",
+                    "_meta": {"partition": "rounds", "round": round_no},
+                    "entries": list(survivors)}), encoding="utf-8")
+    return gen_mod._build_ctx(
+        actions_root=root, creatures_root=real.parent / "creatures",
+        catalog_path=real.parent / "creatures" / "species",
+        type_weights_path=root / "type-weights.json", run_tuning_path=RUN_TUNING_PATH,
+        family_assignments_path=None, pairings_path=root / "pairings.json", round_no=round_no)
+
+
+class _TempTreeMixin:
+    """A per-test tempdir for the tree-building helpers, torn down automatically."""
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.tmpdir = Path(self._tmp.name)
 
 
 def _closed_registry() -> MetricRegistry:
@@ -156,6 +193,67 @@ class OpenMetricGatesTests(unittest.TestCase):
 # ---------------------------------------------------------------------------------------------
 # Planted violation — unevaluated pass (a genuinely missing input -> NOT_MEASURED, never a pass).
 # ---------------------------------------------------------------------------------------------
+
+class AcceptedCorpusIsOneRowPerIdTests(_TempTreeMixin, unittest.TestCase):
+    """⛔ The 2026-09-12 gate finding (T3.1). The accepted corpus is built as committed rows PLUS a
+    round's non-`promoted` survivors. That filter relies on S6 having MARKED every promoted survivor
+    in that round's own file — but a survivor file can be stale (the id was promoted by a LATER
+    round's S6 run, and this round's file was never reduced to markers). Measured: `round-1/
+    survivors.json` held 11 ids already present in `committed-round-2000.json`, with DIFFERENT
+    payloads, so the report measured 191 rows for a 179-row corpus and the two reports disagreed
+    about the same baseline.
+
+    The invariant the whole pipeline claims is "one id exists in exactly one place". The consumer is
+    where a violation does damage, so A-S5 enforces it here: **one row per id, the committed copy
+    winning** (it is the promoted, authoritative version; `load_committed` already guarantees committed
+    ids are unique). A stale round row is dropped, never merged and never allowed to shadow committed
+    content."""
+
+    def test_a_round_row_duplicating_a_committed_id_is_dropped(self) -> None:
+        ctx = _build_ctx_with_survivors(
+            tmpdir=self.tmpdir,
+            committed=[_row("action.x.001", "species", "x")],
+            survivors=[_row("action.x.001", "species", "x"), _row("action.x.002", "species", "x")])
+        ids = [r["id"] for r in ctx.accepted_rows]
+        self.assertEqual(sorted(ids), ["action.x.001", "action.x.002"],
+                         "the duplicate id appears once")
+
+    def test_the_committed_copy_wins_a_content_conflict(self) -> None:
+        committed_row = dict(_row("action.x.001", "species", "x"), name="committed-wins")
+        stale_row = dict(_row("action.x.001", "species", "x"), name="stale-loses")
+        ctx = _build_ctx_with_survivors(tmpdir=self.tmpdir, committed=[committed_row],
+                                        survivors=[stale_row])
+        self.assertEqual(len(ctx.accepted_rows), 1)
+        self.assertEqual(ctx.accepted_rows[0]["name"], "committed-wins")
+
+    def test_distinct_round_rows_are_kept(self) -> None:
+        ctx = _build_ctx_with_survivors(
+            tmpdir=self.tmpdir,
+            committed=[_row("action.a.001", "species", "a")],
+            survivors=[_row("action.b.001", "species", "b")])
+        self.assertEqual(len(ctx.accepted_rows), 2)
+
+    def test_the_real_reports_measure_the_real_committed_corpus(self) -> None:
+        """The end-to-end contract on the live tree: a real round's report cannot measure more rows
+        than exist once committed plus that round's genuinely-new survivors, and no id repeats."""
+        if not REAL_PLAN_PATH.is_file():
+            self.skipTest("action corpus not present in this checkout")
+        real_root = REAL_ACTIONS_ROOT
+        committed = load_committed(real_root).corpus.by_kind("action-seed")
+        for round_no in (1, 2000):
+            if not (real_root / "_rounds" / f"round-{round_no}" / "survivors.json").is_file():
+                continue
+            ctx = gen_mod._build_ctx(
+                actions_root=real_root, creatures_root=real_root.parent / "creatures",
+                catalog_path=real_root.parent / "creatures" / "species",
+                type_weights_path=real_root / "type-weights.json",
+                run_tuning_path=RUN_TUNING_PATH, family_assignments_path=None,
+                pairings_path=real_root / "pairings.json", round_no=round_no)
+            ids = [r["id"] for r in ctx.accepted_rows]
+            self.assertEqual(len(ids), len(set(ids)),
+                             f"round-{round_no} measured a duplicate id")
+            self.assertGreaterEqual(len(ids), len(committed))
+
 
 class VerdictHonoursGatesTests(unittest.TestCase):
     """T1.2 (2026-09-12, spec §3 step 6 + `spec-metrics.md` §4): a metric that has NOT been promoted
