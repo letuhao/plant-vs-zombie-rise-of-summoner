@@ -134,7 +134,7 @@
 - [x] Delve/siege/web paths that inherit BattleEngine follow Hub.
 - [x] Baseline combat flats / tempo / resources contribute via Hub baseline subsystem(s); seed parity with old `BattleStatComposer` seeds documented.
 - [x] Pre-delete parity matrix: old Compose vs Hub Resolve channel-for-channel on fixtures (green before T6 delete).
-- [ ] `AptitudeResolver.ResolveForBattle` retired or reduced to Hub-only path when fuse lands. (→ T6 with the composer delete.)
+- [x] `AptitudeResolver.ResolveForBattle` retired or reduced to Hub-only path when fuse lands. — stale checkbox, fixed 2026-09-13: confirmed deleted by T6 (`ChannelModsHubParityTests.cs`'s own "ResolveForBattle is deleted" comment), just never ticked here
 
 **Verification:**
 - [x] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Battle"`
@@ -330,7 +330,7 @@ MelonLoader install, so the Injector half is un-buildable here — owner still o
 
 **Verification:**
 - [x] Core filter `SpeciesAllocation|UniqueCreature|Bound` — `SpeciesAllocationSourceTests` 11/11 (`dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~SpeciesAllocation|UniqueCreature|Bound"`)
-- [ ] `.\scripts\guard-secondary-no-unity.ps1` — not run in this session (no interop build available); Injector files touched (`RpgClient.cs`, `CheatState.cs`, `CheatCommandRunner.cs`) add no Unity types, HTTP, or new I/O beyond the established `GetStringAsync`/`JsonDocument` pattern already used by the identical commander/species fetch this mirrors
+- [x] `.\scripts\guard-secondary-no-unity.ps1` — stale note, fixed 2026-09-13: this guard is a text scan, needs no Injector build; actually run same session, OK
 - [ ] Live Bound unique allocate probe (owner step) — owed: deploy-play → Bound unique → allocate → observe lawn stats match Server Hub
 
 **Dependencies:** T6; aptitude-sheet `unique-lawn-wire` Done (or open criteria listed)  
@@ -498,7 +498,7 @@ unset = Add) toward the target — `TryGuardMutation` structurally refuses `mode
 **Description:** Operator script: Hub battle ≡ sheet; Standing membership; Bound lawn UniqueCreature — no BattleStatComposer SSOT.
 
 **Acceptance criteria:**
-- [ ] Script exists and documented (`prove-hub-combat.ps1` or extend `prove-aptitude.ps1`).
+- [x] Script exists and documented (`prove-hub-combat.ps1` or extend `prove-aptitude.ps1`). — stale checkbox, fixed 2026-09-13: both `scripts/prove-hub-combat.ps1` and `tools/ProveHubCombat` exist, confirmed on disk
 - [x] Post-fuse battle Hub channel totals ≡ sheet Hub for same UniqueActor inputs (equip/tree; aptitude parity already proven separately by `prove-aptitude.ps1`, not duplicated here — see evidence 19.2).
 - [x] Standing rises when a membership combat channel rises via Hub writers — not when only Θ rises.
 - [ ] Bound lawn aptitude input matches Server UniqueCreature compose. — same open item as T12: AS-1.1 is now built and Core-proven (2026-09-13); this bullet needs the live probe, not new code
