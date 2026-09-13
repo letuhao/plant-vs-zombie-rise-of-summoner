@@ -45,7 +45,13 @@
     "docs/architecture/lawn-combat-wire/**",
     "docs/research/pvz-engine-surface/**",
     "tasks/lawn-combat-wire-plan.md",
-    "tasks/lawn-combat-wire-todo.md"
+    "tasks/lawn-combat-wire-todo.md",
+    "tools/tuning/**",
+    "tools/seedsmith/seedsmith/adapters/actions/vocab.py",
+    "docs/architecture/event-pipeline-v2-ssot.md",
+    "src/FusionRpg.Injector.MelonLoader.39/**",
+    "src/FusionRpg.Injector.BepInEx/**",
+    "tools/LawnCombatObserver/**"
   ],
   "started": "2026-09-12T14:38:04Z",
   "status": "active",
@@ -54,5 +60,6 @@
   "scopeAmended": "2026-09-13T00:00:00Z — added the live-probe sub-program's own paths (born from this session's own T12/T14 live-probe incident, spec'd and planned as its own program under the same worktree/session rather than opening a second one). docs/DESIGN-GATE.md and tasks/party-dungeon-todo.md are narrow, single-purpose additions (one topic-index row + failure-log entry; one cross-link note) -- not a claim on those programs' own scope.",
   "scopeAmended4": "2026-09-13T20:35:00Z - added lawn-combat-wire capability map + module spec dir. /spec phase for the program born from this session's own lawn-combat finding. data/seed/actions/authored-basics.json is already covered by the existing data/seed/** entry.",
   "scopeAmended5": "2026-09-13T21:20:00Z - added docs/research/pvz-engine-surface/**. Tracking doc for a FUTURE injector-extension program: the PvZ Fusion engine's own effect/damage/hook surface, read from the shipped assembly with Mono.Cecil. Research only, no proposals.",
-  "scopeAmended6": "2026-09-13T21:58:00Z - added tasks/lawn-combat-wire-{plan,todo}.md. /plan phase for the lawn-combat-wire program: 13 tasks over 4 phases covering all 11 module specs."
+  "scopeAmended6": "2026-09-13T21:58:00Z - added tasks/lawn-combat-wire-{plan,todo}.md. /plan phase for the lawn-combat-wire program: 13 tasks over 4 phases covering all 11 module specs.",
+  "scopeAmended7": "2026-09-13T22:30:00Z - BUILD scope for lawn-combat-wire, owner-authorized ('we will build all'). 15 tasks across Core/Injector/data/tuning/tools. Adds tools/tuning (publish.py needs an add-key mode), the seedsmith actions vocab mirror, event-pipeline-v2-ssot.md (T9b amends it), the injector host csprojs, a new observer tool, and Injector.Tests. This program was born from this session's own live finding and the owner chose to build it here rather than open a second session."
 }
