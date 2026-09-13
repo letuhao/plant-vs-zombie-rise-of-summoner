@@ -86,10 +86,32 @@ bite = one victim". That is false: the host game has multi-target melee, verifie
 | `WaterShulk.AttackEffect(List<…>)` | plant-side, takes a collection |
 
 `grep` for any of these four types in `src/FusionRpg.Injector/` returns **zero hits** — the injector
-does not know they exist. And `AttackPlants()` is a *separate method*, not an override of
-`AttackPlant(Plant)`, so the existing Harmony patch catches it **only if** it loops into
-`AttackPlant(plant)` per victim. That is unresolved from metadata alone (no IL bodies) and is a
-**build-time verification item**, not an assumption.
+does not know they exist.
+
+### Resolved 2026-09-13: the capture gap is real, and exactly four methods
+
+Enumerated from `Assembly-CSharp.dll` metadata:
+
+```
+Zombie.AttackPlant(Plant)          virtual=True  newslot=True    <- base; the ONLY method hooked
+QingZombie.AttackPlant(Plant)      virtual=True  newslot=False   <- a genuine OVERRIDE
+QingZombie.AttackPlants()          virtual=False                 <- multi-target
+EternalZombie_a.AttackPlants()     virtual=False                 <- multi-target
+```
+
+Harmony patches a *specific* method, and an override has its own body, so the existing patch on
+`Zombie.AttackPlant` captures **none** of the other three. Add the two plant-side collection attacks
+(`Shulkflower.AttackEffect(List<…>)`, `WaterShulk.AttackEffect(List<…>)`) and the uncaptured set is
+**four methods across four types**, out of 88 `Zombie` subclasses.
+
+`GameHooks.cs:1023`'s own comment says *"≈1 override"* — **that count is correct**; there is exactly
+one. The comment is accurate, the *coverage* is not.
+
+**IL bodies cannot answer behaviour questions here, and that is worth knowing before anyone tries.**
+The `Il2CppAssemblies` are Il2CppInterop **proxies**: every method body is a thunk
+(`il2cpp_runtime_invoke`) into native `GameAssembly.dll`. Signatures, fields and virtual/override flags
+are real and queryable — which is how `Bullet.from` and this table were resolved — but *what a method
+does* is not in managed IL. Behaviour questions need the live game.
 
 **Melee swing id = `(attackerPtr, frame)`.** One attacker's bites within one frame are one swing.
 This is correct whichever way the loop question resolves, and it reuses machinery that already exists:
@@ -135,9 +157,12 @@ Read the field once per record and pass it down; do not re-read IL2CPP fields pe
       `basic-attack-grant` depends on).
 - [ ] Melee **attribution** unchanged; melee **gains** a `(attackerPtr, frame)` swing id.
 - [ ] A null shooter produces no RPG contribution and no exception.
-- [ ] **Multi-target melee resolved, not assumed.** Spawn a `QingZombie` / `EternalZombie_a` against
-      several plants and record which of these is true: (a) the existing `Zombie.AttackPlant` patch
-      fires once per victim — the swing id handles it; or (b) it does not fire at all — those attacks
-      are currently invisible to the RPG layer and that is a named capture gap to track, since
-      `Plant.TakeDamage` is deliberately not used for melee `combat.hit` to avoid double-counting
-      (`GameHooks.cs:982`). Record the answer in this spec rather than leaving it open.
+- [ ] **The four uncaptured attack methods are hooked, or the gap is explicitly accepted and tracked.**
+      `QingZombie.AttackPlant(Plant)` (override), `QingZombie.AttackPlants()`,
+      `EternalZombie_a.AttackPlants()`, and the plant-side `Shulkflower.AttackEffect(List<…>)` /
+      `WaterShulk.AttackEffect(List<…>)`. Four extra Harmony patches is mechanical work; leaving them
+      unhooked means those creatures deal **no** elemental damage, which is a real gameplay hole, not a
+      rounding error. `Plant.TakeDamage` cannot be the backstop — melee `combat.hit` deliberately
+      avoids it to prevent double-counting (`GameHooks.cs:982`).
+- [ ] Whichever is chosen, the multi-target ones still resolve **one swing id per attack**, so a
+      3-cell smash is one action trigger and three damage applications.
