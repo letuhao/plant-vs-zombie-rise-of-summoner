@@ -160,19 +160,21 @@ hand still needs its own `board.end`/`match.result` check before trusting a poll
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:5088/api/debug/lawn/state
-# { state: "InMatch"|"Defeated"|"MatchEnded"|"Cycling"|"Unknown", asOf, sinceMs, recentBoardEnds,
-#   latestMatchResult, note }
+# { state: "Cycling"|"Defeated"|"Victorious"|"InMatch"|"LevelEntryPending"|"Unknown",
+#   asOf, sinceMs, recentBoardEnds, latestMatchResult, note }
 ```
 
 Call this **before** reporting any live-probe outcome, not just before a spawn/scenario call. It is
-read-only (no injector relay, no side effects) — safe to call as often as needed. See
+read-only (no injector relay, no side effects) — safe to call as often as needed. Full state machine —
+every signal behind these six states, its reliability, and every known blind spot:
+[lawn-run-state-machine.md](../architecture/live-probe/lawn-run-state-machine.md). See
 [live-probe-standard.md](../contributing/live-probe-standard.md) §6 for the full rule and the incident
 that produced it: an `{ ok: true }` response and an operator's own eyes disagreed, and there was no
-single query either side could check instead. `state: "Unknown"` cannot tell the main menu apart from
-the seed-picker screen (no passive telemetry fires while `Board` is null), and no state read can see
-what is actually rendered — a defeat overlay can outlive `debug.reset-board` clearing the entities
-behind it. When the question is what a human sees on screen, ask the human; this answers what the
-simulation recorded.
+single query either side could check instead. `state: "Unknown"` cannot tell the main menu, the
+seed-picker screen, or a paused match apart (no passive telemetry fires for any of them), and no state
+read can see what is actually rendered — a defeat overlay can outlive `debug.reset-board` clearing the
+entities behind it. When the question is what a human sees on screen, ask the human; this answers what
+the simulation recorded.
 
 ### Step 7 — Tear down before the next test instance
 

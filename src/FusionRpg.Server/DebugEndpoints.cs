@@ -192,6 +192,11 @@ public static class DebugEndpoints
         // "right" about different layers -- the simulation had moved on, the screen had not -- and
         // there was no single query that could have said so instead of one side privately eyeballing
         // the game and the other reading an HTTP body. This endpoint is that query.
+        // Full model: docs/architecture/live-probe/lawn-run-state-machine.md. Six states by strict
+        // precedence (Cycling > Defeated/Victorious > InMatch > LevelEntryPending > Unknown), built
+        // from every real lifecycle signal the injector emits -- not the three ad hoc ones the first
+        // version of this endpoint shipped with, which is what produced a confusing "Unknown" read
+        // against a genuinely defeated board on 2026-09-14. Read that doc before changing this.
         g.MapGet("/lawn/state", (RpgStore store) =>
         {
             var now = DateTime.UtcNow;
@@ -203,10 +208,29 @@ public static class DebugEndpoints
             var recentBoardEnds = CountRecentEventsOfKind(store, "board.end", TimeSpan.FromSeconds(cyclingWindowSec));
 
             var latestMatchResult = FindLatestKind(store, "match.result");
+            var latestMatchLose = FindLatestKind(store, "match.lose");
+            var latestMatchWin = FindLatestKind(store, "match.win");
             var latestBoardEconomy = FindLatestKind(store, "board.economy");
+            var latestCatalogZombies = FindLatestKind(store, "catalog.zombies");
+
             var resultTime = ParseT(latestMatchResult);
+            var loseTime = ParseT(latestMatchLose);
+            var winTime = ParseT(latestMatchWin);
             var economyTime = ParseT(latestBoardEconomy);
+            var catalogTime = ParseT(latestCatalogZombies);
             var resultValue = latestMatchResult is not null ? PayloadString(latestMatchResult.Payload, "result") : null;
+            var resultIsDefeat = string.Equals(resultValue, "defeat", StringComparison.OrdinalIgnoreCase);
+
+            // match.result's own result string is cross-checked against the two unambiguous pulse
+            // events (match.lose/match.win carry no data but cannot be misread) -- whichever real
+            // signal is most recent decides, never "does a terminal event exist anywhere in history".
+            var terminalCandidates = new List<(DateTime Time, EventEnvelope Ev, string State)>();
+            if (resultTime is { } rt) terminalCandidates.Add((rt, latestMatchResult!, resultIsDefeat ? "Defeated" : "Victorious"));
+            if (loseTime is { } lt) terminalCandidates.Add((lt, latestMatchLose!, "Defeated"));
+            if (winTime is { } wt) terminalCandidates.Add((wt, latestMatchWin!, "Victorious"));
+            var terminal = terminalCandidates.Count > 0
+                ? terminalCandidates.OrderByDescending(c => c.Time).First()
+                : ((DateTime Time, EventEnvelope Ev, string State)?)null;
 
             string state;
             EventEnvelope? decidingEvent;
@@ -215,29 +239,37 @@ public static class DebugEndpoints
                 state = "Cycling";
                 decidingEvent = latestBoardEconomy;
             }
-            else if (resultTime is not null && (economyTime is null || resultTime > economyTime))
+            else if (terminal is { } t && (economyTime is null || t.Time > economyTime))
             {
                 // The newest board-lifecycle signal is a terminal result with nothing newer proving a
                 // fresh board exists since -- the board is in whatever post-match state the game left
                 // it in (debug.reset-board can restore API-level spawning, never the game's own visual
                 // overlay -- see the note below).
-                state = string.Equals(resultValue, "defeat", StringComparison.OrdinalIgnoreCase) ? "Defeated" : "MatchEnded";
-                decidingEvent = latestMatchResult;
+                state = t.State;
+                decidingEvent = t.Ev;
             }
             else if (economyTime is not null && now - economyTime < TimeSpan.FromSeconds(30))
             {
                 state = "InMatch";
                 decidingEvent = latestBoardEconomy;
             }
+            else if (catalogTime is not null
+                && (economyTime is null || catalogTime > economyTime)
+                && (terminal is null || catalogTime > terminal.Value.Time))
+            {
+                // catalog.zombies fires while the level's zombie list is being initialized, BEFORE
+                // Board.Awake -- the earliest real signal a level entry has begun, likely (not
+                // certain -- see the doc) the seed-picker screen. Medium confidence, named as such.
+                state = "LevelEntryPending";
+                decidingEvent = latestCatalogZombies;
+            }
             else
             {
-                // No recent board.economy and no terminal result: could be the main menu, or the
-                // vanilla seed-picker screen (Board not yet constructed -- PollBoard's own null-check
-                // means NOTHING passively telemetered fires while it is up, confirmed live 2026-09-14
-                // across a whole session with zero board.start events). This state is genuinely
-                // ambiguous from passive telemetry alone; say so rather than guess.
+                // No recent signal of any kind: could be the main menu, the seed-picker screen, a
+                // paused match, or a frozen/crashed injector -- all identical from here. This state is
+                // genuinely ambiguous from passive telemetry alone; say so rather than guess.
                 state = "Unknown";
-                decidingEvent = latestBoardEconomy ?? latestMatchResult;
+                decidingEvent = latestBoardEconomy ?? latestCatalogZombies ?? latestMatchResult;
             }
 
             var decidingTime = ParseT(decidingEvent);
@@ -251,11 +283,12 @@ public static class DebugEndpoints
                 injectorConnected = store.InjectorConnected,
                 note = "API/simulation state only. Does NOT confirm what is rendered on screen -- a " +
                     "defeat/victory overlay can persist after debug.reset-board clears entities, and " +
-                    "state=\"Unknown\" cannot distinguish the main menu from the seed-picker screen " +
-                    "(no passive event fires for either; only an active POST /api/debug/setup/skip " +
-                    "probe can tell them apart, and it has a side effect). When the question is what a " +
-                    "human sees, ask the human -- this answers what the simulation has recorded, never " +
-                    "a substitute for looking at the actual game."
+                    "state=\"Unknown\" cannot distinguish the main menu, the seed-picker screen, or a " +
+                    "paused match (no passive event fires for any of them; only an active POST " +
+                    "/api/debug/setup/skip probe can partially disambiguate, and it has a side effect). " +
+                    "When the question is what a human sees, ask the human -- this answers what the " +
+                    "simulation has recorded, never a substitute for looking at the actual game. Full " +
+                    "model: docs/architecture/live-probe/lawn-run-state-machine.md."
             });
         });
 

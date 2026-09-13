@@ -125,20 +125,27 @@ other reading an HTTP body. That gap, not either individual reading, was the def
 
 **The rule: before reporting a live probe's outcome, query the lawn's actual state — never infer it
 from one response, and never require a human to describe it by eye.** `GET /api/debug/lawn/state`
-(`DebugEndpoints.cs`) exists for exactly this: it classifies the board (`InMatch` / `Defeated` /
-`MatchEnded` / `Cycling` / `Unknown`) from the same event-log signals other debug tooling already
-emits, and reports which event decided it (`asOf`) and how long ago (`sinceMs`) — a "where and when"
-answer traceable to a real timestamp, never a guess.
+(`DebugEndpoints.cs`) exists for exactly this: it classifies the board into one of six states
+(`Cycling` / `Defeated` / `Victorious` / `InMatch` / `LevelEntryPending` / `Unknown`, in that
+precedence) from the **full inventory** of lifecycle signals the injector emits, and reports which
+event decided it (`asOf`) and how long ago (`sinceMs`) — a "where and when" answer traceable to a real
+timestamp, never a guess. The full state machine — every signal, its reliability, and every known
+blind spot — is [lawn-run-state-machine.md](../architecture/live-probe/lawn-run-state-machine.md).
+**Read that document, not just this summary, before changing the classifier or adding a new state.**
+It exists because a first version of this endpoint was built from three signals chosen ad hoc under
+time pressure and produced a confusing, stale-looking answer against a genuinely defeated board — the
+fix was not a fourth patch, it was reading the whole hook surface once and mapping it properly.
 
 **What it cannot do — say so, do not paper over it.** `state: "Unknown"` cannot distinguish the main
-menu from the vanilla seed-picker screen: nothing passively telemetered fires while `Board` is null
-(confirmed live — zero `board.start` events across a whole multi-hour session). And no passive state
-query can see what is actually *rendered*: `debug.reset-board` restores API-level spawn capability
-after a defeat, but the game's own defeat/victory overlay has no sanctioned dismiss command today, so
-the simulation and the screen can genuinely disagree for a while. When the question is what a player
-or operator sees, the answer is "ask them" — a state query is not a substitute for eyes on the actual
-game, it is a substitute for guessing when nobody's eyes are on it, or when two parties each have a
-different half of the picture and neither one's half is labeled as partial.
+menu, the vanilla seed-picker screen, or a paused match: nothing passively telemetered fires for any
+of them (confirmed live — zero `board.start` events across a whole multi-hour session while `Board`
+stays null, and pause/resume hooks exist but emit no event at all). And no passive state query can see
+what is actually *rendered*: `debug.reset-board` restores API-level spawn capability after a defeat,
+but the game's own defeat/victory overlay has no sanctioned dismiss command today, so the simulation
+and the screen can genuinely disagree for a while. When the question is what a player or operator
+sees, the answer is "ask them" — a state query is not a substitute for eyes on the actual game, it is a
+substitute for guessing when nobody's eyes are on it, or when two parties each have a different half of
+the picture and neither one's half is labeled as partial.
 
 **Every ad-hoc fix to a stuck live run is a debt until it is a tool.** Diagnosing the seed-picker
 screen, the `board.start`-never-fires profile quirk, the cycling-board loop, and the defeat state all

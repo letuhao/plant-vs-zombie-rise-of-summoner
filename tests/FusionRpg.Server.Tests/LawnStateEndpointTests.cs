@@ -111,6 +111,69 @@ public class LawnStateEndpointTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task MatchLoseWithNoMatchResult_reportsDefeated()
+    {
+        // match.lose (GameLose.HandleGameLose) carries no data but is an unambiguous pulse -- it must
+        // decide Defeated on its own, not require match.result's result string to also be present.
+        Insert("match.lose", new { });
+        var resp = await _http.GetAsync("/api/debug/lawn/state");
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.Equal("Defeated", body!["state"].ToString());
+    }
+
+    [Fact]
+    public async Task MatchWinWithNoMatchResult_reportsVictorious()
+    {
+        Insert("match.win", new { });
+        var resp = await _http.GetAsync("/api/debug/lawn/state");
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.Equal("Victorious", body!["state"].ToString());
+    }
+
+    [Fact]
+    public async Task MatchResultNonDefeat_reportsVictorious()
+    {
+        Insert("match.result", new { result = "victory" });
+        var resp = await _http.GetAsync("/api/debug/lawn/state");
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.Equal("Victorious", body!["state"].ToString());
+    }
+
+    [Fact]
+    public async Task NewerMatchWinOverridesOlderMatchResultDefeat_reportsVictorious()
+    {
+        // Whichever real terminal signal is most recent decides -- cross-checking match.result
+        // against the unambiguous pulses, not trusting one source exclusively.
+        Insert("match.result", new { result = "defeat" }, DateTime.UtcNow.AddSeconds(-5));
+        Insert("match.win", new { });
+        var resp = await _http.GetAsync("/api/debug/lawn/state");
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.Equal("Victorious", body!["state"].ToString());
+    }
+
+    [Fact]
+    public async Task CatalogZombiesWithNoEconomy_reportsLevelEntryPending()
+    {
+        // catalog.zombies (InitZombieList.InitZombie) fires before Board.Awake -- the earliest real
+        // signal a level entry has begun, likely the seed-picker screen (medium confidence, not
+        // certain -- see lawn-run-state-machine.md).
+        Insert("catalog.zombies", new { levelType = "Advanture", levelNumber = 1 });
+        var resp = await _http.GetAsync("/api/debug/lawn/state");
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.Equal("LevelEntryPending", body!["state"].ToString());
+    }
+
+    [Fact]
+    public async Task EconomyNewerThanCatalogZombies_reportsInMatch_notLevelEntryPending()
+    {
+        Insert("catalog.zombies", new { levelType = "Advanture", levelNumber = 1 }, DateTime.UtcNow.AddSeconds(-5));
+        Insert("board.economy", new { sun = 100 });
+        var resp = await _http.GetAsync("/api/debug/lawn/state");
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.Equal("InMatch", body!["state"].ToString());
+    }
+
+    [Fact]
     public async Task ThreeRecentBoardEnds_reportsCycling()
     {
         for (var i = 0; i < 3; i++) Insert("board.end", new { });
