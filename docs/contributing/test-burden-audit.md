@@ -153,11 +153,11 @@ the change, because the test project references the edited project. It made a co
 
 | Action | Basis | Confidence |
 |---|---|---|
-| **Cap Data.Tests at `MaxParallelThreads=2`** | Measured optimum 87s vs 367s at 32 — a **4.2× CI win**, one setting, reversible | **High** — monotonic curve, reproduced |
+| **⚠ SUPERSEDED by [test-architecture-audit.md](test-architecture-audit.md).** Capping at `MaxParallelThreads=2` (87s vs 367s at 32) treats the symptom: the cause is a **process-global mutex in SQLite's in-memory VFS**, so the correct lever is a **process** boundary — 2 concurrent processes measured **23.9s vs 47.4s sequential (2×)**, cores used. The cap would permanently limit the suite to ~2 cores | **High** — the defect is proven from SQLite's `memdb.c` source |
 | **Fix `EnsureColumn`** to a `PRAGMA table_info` check | 9.7× on the call; removes a banned swallow | **High** — measured both ways |
-| **Re-measure on an idle machine** before further tuning | Every number is from an 82%-CPU box with 4 worktrees | **High** — obvious caveat |
+| **Re-measure on an idle machine** before further tuning | The first burden numbers were from an 82%-CPU box; the architecture audit re-ran clean and its conclusions hold | **Done** — see the architecture audit §0 |
 | **Leave Core/Server serialization alone** | `[assembly: CollectionBehavior(DisableTestParallelization = true)]` at `Core.Tests/AssemblyInfo.cs:6` and `Server.Tests/AssemblyParallelism.cs:38` is deliberate (static-hub safety) and already efficient: Core 13,369 tests mean **4.6ms** | **High** |
-| **Investigate the 46ms gap** | Unproven; needs probes §3 lists | — |
+| **Investigate the 46ms gap** | Partly explained by the architecture audit (the memdb mutex is on the open path, and `Init` opens 3 connections); the remaining per-store breakdown is still unproven | — |
 
 ---
 

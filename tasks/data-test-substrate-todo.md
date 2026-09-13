@@ -376,17 +376,26 @@ and it exists so this is not re-derived.
   Files: `src/FusionRpg.Data/Sqlite/RpgStore.cs` (+ tests). Scope: S.
   - ⚠️ **Boundary:** `src/FusionRpg.Data/**` is inside this session's record; `solid-run-20260912-eb53`
     also claims it, so coordinate (its commits are elsewhere in the file, but confirm before editing).
-- [ ] **BU2 — cap Data.Tests parallelism at 2 threads (4.2x CI win).**
-  Description: measured monotonic curve — 1t 112.6s, **2t 87.0s (optimum)**, 4t 126.4s, 8t 222.1s,
-  16t 303.9s, 32t 367.1s. A pure-CPU control on the same box scaled 6.58x at 8t, so this is the store
-  path, not a busy machine. Apply via `test.runsettings` or the CI invocation (`xUnit.MaxParallelThreads`),
-  and record why in the standard so nobody "restores" the default.
-  Acceptance: Data.Tests wall drops from ~6 min to ~1.5 min in a `full` run; result count unchanged.
-  Verify: two timed full runs, same pass count (currently 1288).
-  Files: `test.runsettings` or `.github/workflows/ci.yml` + `docs/contributing/testing-standard.md`.
-  Scope: XS.
+- [ ] **BU2 — shard Data.Tests across PROCESSES (NOT a thread cap).**
+  Description: the original finding was a monotonic thread curve (1t 112.6s, 2t 87.0s, 4t 126.4s,
+  8t 222.1s, 32t 367.1s), which suggested capping at 2 threads. The **architecture audit**
+  (`docs/contributing/test-architecture-audit.md`) proved that is a workaround: the cause is a
+  **process-global mutex inside SQLite's in-memory VFS** (`SQLITE_MUTEX_STATIC_VFS1`, taken on every
+  in-memory database open — `src/memdb.c`), so intra-process threads serialise by construction, while
+  **file** databases scaled 3.25x on the same machine. The correct lever is a **process boundary**:
+  two concurrent `dotnet test` processes measured **23.9s vs 47.4s sequential (2x)**, both green.
+  Work: shard Data.Tests by class into N process groups, run them concurrently (CI already invokes
+  `dotnet test` per project), and keep intra-process `MaxParallelThreads` LOW (~2) because those
+  threads still share the one mutex.
+  Acceptance: Data.Tests wall drops substantially with N cores actually used; pass count unchanged
+  (currently 1288); no thread cap is the *sole* mechanism.
+  Verify: timed runs of the sharded invocation vs the single-process one, same pass counts.
+  Files: `.github/workflows/ci.yml` (+ a sharding manifest, or `scripts/test-shard.ps1`) +
+  `docs/contributing/testing-standard.md`. Scope: M.
   - ⚠️ **`test.runsettings` / `Directory.Build.props` belong to the merged `test-hang-guard` session** —
     the CI invocation is the safer home.
+  - **Not yet measured:** the best shard count for this machine (2 halves proved the principle; 4/8
+    were not tried), and whether the sharding should be by class, by folder, or by trait.
 - [ ] **BU3 — investigate the 46ms `EnsureHotSchema` gap (unproven, do not guess).**
   Description: extracted SQL runs in ~2.7ms and the 40 sub-methods total 8.66ms, yet `EnsureHotSchema`
   measures **58ms**; re-`Init` on the same store is 2.2ms, so it is first-time population work. The

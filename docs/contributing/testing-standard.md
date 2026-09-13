@@ -146,6 +146,14 @@ records the two facts that matter before anyone tunes a "slow" test:
    control on the same machine scaled 6.58× at 8 threads, so this is a property of the store path, not
    of a busy box.
 
+**That second fact has a cause, and the cause changes the fix.**
+[test-architecture-audit.md](test-architecture-audit.md) proves it is a **process-global mutex inside
+SQLite's in-memory VFS** (`SQLITE_MUTEX_STATIC_VFS1`, taken on every in-memory database open —
+`src/memdb.c`), so in-memory databases cannot parallelize *within a process* at all, while **file**
+databases scaled 3.25× on the same machine. The correct lever is therefore a **process** boundary, not a
+thread cap: two concurrent `dotnet test` processes measured **23.9s vs 47.4s sequential**. Read that
+document before touching parallelism — a thread cap treats the symptom and permanently forfeits cores.
+
 That document also lists the hypotheses **already ruled out with numbers** (`ClearAllPools`,
 shared-cache mode, GC, batch shape, raw DDL, machine load), so they are not re-tested, and the two real
 defects it found (`EnsureColumn`'s swallowed `ALTER TABLE`; the `--no-build` stale-assembly trap).
