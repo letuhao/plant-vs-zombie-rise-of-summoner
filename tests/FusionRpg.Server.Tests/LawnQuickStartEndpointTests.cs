@@ -73,6 +73,39 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Post_boardCyclingRapidly_refusesFastWithMetric_neverPollsIntoTheTimeout()
+    {
+        // Observability gap found live 2026-09-14: a board stuck in a rapid match-end/retry loop (a
+        // "quick" setup-skip with no real plants placed loses every wave instantly) produced a
+        // confusing, silent "debug.level.enter did not ack" timeout with nothing pointing at the real
+        // cause -- diagnosing it required manually diffing thousands of raw events. quick-start must
+        // detect this directly, fail fast, and report the real cause plus how long it actually waited.
+        _store.Heartbeat(RpgConstants.SourceInjector);
+        for (var i = 0; i < 4; i++)
+        {
+            _store.InsertEvent(new EventEnvelope
+            {
+                T = DateTime.UtcNow.ToString("o"),
+                Kind = "board.end",
+                Payload = JsonSerializer.SerializeToElement(new { })
+            });
+        }
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var resp = await _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { timeoutSec = 30 });
+        sw.Stop();
+
+        Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode);
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.Contains("cycling", body!["error"].ToString());
+        Assert.True(((JsonElement)body["recentBoardEnds"]).GetInt32() >= 3);
+        Assert.True(body.ContainsKey("waitedMs"), "expected a waitedMs metric on the refusal");
+        // The whole point: this must be a fast, immediate refusal, never a poll into the 30s timeout.
+        Assert.True(sw.ElapsedMilliseconds < 5000,
+            $"expected an immediate refusal, took {sw.ElapsedMilliseconds}ms — cycling detection did not short-circuit the poll");
+    }
+
+    [Fact]
     public async Task Post_injectorNotConnected_refusesBeforeTouchingAnything()
     {
         var resp = await _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { });

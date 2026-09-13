@@ -189,9 +189,30 @@ public static class DebugEndpoints
             var levelNumber = IntProp(b, "levelNumber", 1);
             var scenarioId = StrProp(b, "scenario") ?? "lab-overlay";
             var timeoutSec = IntProp(b, "timeoutSec", 45);
+            var sw = System.Diagnostics.Stopwatch.StartNew();
 
             if (!store.InjectorConnected)
                 return Results.Conflict(new { ok = false, error = "injector not connected — start the game with the FusionRpg injector loaded" });
+
+            // Observability gap found live 2026-09-14: a board stuck in a rapid match-end/retry loop
+            // (e.g. a "quick" setup-skip with no real plants placed, so every wave is lost instantly)
+            // produces a confusing "debug.level.enter did not ack" timeout with nothing in the response
+            // pointing at the real cause -- diagnosing it required manually diffing thousands of raw
+            // events by hand. Detect the loop directly and fail fast and loud instead of polling into
+            // it blind. Threshold is a structural safety check, not a balance value: real gameplay does
+            // not lose 3 matches in 10 seconds.
+            const int CyclingBoardEndThreshold = 3;
+            var cyclingWindowSec = 10;
+            var recentBoardEnds = CountRecentEventsOfKind(store, "board.end", TimeSpan.FromSeconds(cyclingWindowSec));
+            if (recentBoardEnds >= CyclingBoardEndThreshold)
+                return Results.Conflict(new
+                {
+                    ok = false,
+                    error = $"board is cycling ({recentBoardEnds} board.end events in the last {cyclingWindowSec}s) — " +
+                        "the match is likely repeatedly ending with no real plants placed; check the game or place real plants before retrying",
+                    recentBoardEnds,
+                    waitedMs = sw.ElapsedMilliseconds
+                });
 
             // Some game profiles never emit board.start for a board that already exists behind the
             // seed-picker screen -- confirmed live 2026-09-14 on pvzrh-3.9: several full match cycles
@@ -230,7 +251,7 @@ public static class DebugEndpoints
                 var ackTimeoutSec = Math.Min(timeoutSec, 20);
                 var enterAck = await PollForKind(store, beforeEnter, "debug.level.enter", TimeSpan.FromSeconds(ackTimeoutSec));
                 if (enterAck is null)
-                    return Results.Conflict(new { ok = false, error = $"debug.level.enter did not ack within {ackTimeoutSec}s" });
+                    return Results.Conflict(new { ok = false, error = $"debug.level.enter did not ack within {ackTimeoutSec}s", waitedMs = sw.ElapsedMilliseconds });
 
                 var ackOk = PayloadBool(enterAck.Payload, "ok");
                 if (!ackOk)
@@ -315,7 +336,7 @@ public static class DebugEndpoints
 
             var runDone = await PollForKind(store, beforeScenario, "debug.run-steps.done", TimeSpan.FromSeconds(timeoutSec));
             if (runDone is null)
-                return Results.Conflict(new { ok = false, error = $"scenario '{scenarioId}' steps did not complete within {timeoutSec}s" });
+                return Results.Conflict(new { ok = false, error = $"scenario '{scenarioId}' steps did not complete within {timeoutSec}s", waitedMs = sw.ElapsedMilliseconds });
 
             EventEnvelope? snapshot = null;
             var beforeSnapshot = store.GetMaxEventId();
@@ -351,6 +372,7 @@ public static class DebugEndpoints
                 targetPtr,
                 plantPtr,
                 setupSkip = setupSkipOk,
+                elapsedMs = sw.ElapsedMilliseconds,
                 note = snapshot is null ? "no board snapshot arrived — targetPtr/plantPtr unavailable" : null
             });
         });
@@ -752,6 +774,28 @@ public static class DebugEndpoints
         if (lastHello is not null && latestStart.Id < lastHello.Id) return null;
 
         return latestStart;
+    }
+
+    /// <summary>Counts events of `kind` timestamped within the last `window` — the observability check
+    /// that catches a rapidly cycling board (match ending and retrying every second or two, e.g. from
+    /// a "quick" setup-skip with no real plants placed) before quick-start polls into a confusing
+    /// timeout against it. Same bounded-scan shape as <see cref="FindLatestLiveBoardStart"/>; `T` is
+    /// the ISO round-trip string every event is stamped with (`DateTime.UtcNow.ToString("o")`).</summary>
+    static int CountRecentEventsOfKind(RpgStore store, string kind, TimeSpan window)
+    {
+        var max = store.GetMaxEventId();
+        if (max <= 0) return 0;
+        const int windowCapacity = 500;
+        var after = Math.Max(0, max - windowCapacity);
+        var cutoff = DateTime.UtcNow - window;
+        var count = 0;
+        foreach (var e in store.ListEvents(windowCapacity, after))
+        {
+            if (!string.Equals(e.Kind, kind, StringComparison.OrdinalIgnoreCase)) continue;
+            if (DateTime.TryParse(e.T, null, System.Globalization.DateTimeStyles.RoundtripKind, out var t) && t >= cutoff)
+                count++;
+        }
+        return count;
     }
 
     static EventEnvelope? FindKindAfter(RpgStore store, long afterId, string kind)
