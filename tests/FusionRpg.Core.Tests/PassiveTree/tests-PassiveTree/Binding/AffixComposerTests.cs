@@ -189,4 +189,67 @@ public class AffixComposerTests
         Assert.Equal("atk", atom.ChannelId);
         Assert.Equal("flat", atom.Op);
     }
+
+    /// <summary>P4.1 (tasks/passive-tree-repair-plan.md, R3). The crash: `ParseAtom` read
+    /// `params.channel` with `JsonElement.GetString()`, which throws `InvalidOperationException` on a
+    /// JSON object — and E30's pool-reference form (`{"pool":"...","count":1}`) IS an object. That
+    /// exception is not a `BindRefusal`, so `BindTree`'s catch did not see it and the whole binder run
+    /// died (reproduced 2026-09-13: exit -532462766 on the first pool-shaped family). Eight generated
+    /// `stat.derived` families carry this shape and the language stage picked them 461 times.
+    /// <para>A pool reference is not a concrete channel, so this binder cannot price it: the roll
+    /// belongs to effect-pipeline module 2 and a pool's price is a weighted MEAN over members, never
+    /// one member. The refusal must therefore be a NAMED `BindRefusal`, never a crash and never a
+    /// silently chosen member.</para></summary>
+    [Fact]
+    public void A_pool_shaped_channel_is_refused_by_name_never_crashing()
+    {
+        var affix = new AffixRow("affix.synthetic-pool", null,
+            new[] { new AffixRefRow(0, "atom.synthetic-pool") });
+        var poolAtom = new AtomRow
+        {
+            AtomId = "atom.synthetic-pool",
+            KindId = "stat.derived",
+            FamilyId = "atom.synthetic-pool",
+            Tier = 1,
+            Name = "synthetic pool",
+            ParamsJson = """{"channel":{"pool":"pool.element-defense","count":1,"allowRepeat":false},"op":"flat","amount":{"min":1,"max":1}}""",
+            WhenJson = "{}",
+        };
+        var affixes = new System.Collections.Generic.Dictionary<string, AffixRow> { [affix.AffixId] = affix };
+        var atoms = new System.Collections.Generic.Dictionary<string, AtomRow> { [poolAtom.AtomId] = poolAtom };
+
+        var ex = Assert.Throws<BindRefusal>(() => AffixComposer.Resolve(new[] { affix.AffixId }, affixes, atoms));
+        Assert.Contains("pool.element-defense", ex.Message);
+        Assert.Contains("pool", ex.Message, System.StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>The other half of P4.1: a malformed `channel` value (neither a string nor a valid pool
+    /// object) is also a named refusal, not a raw `JsonException`/`InvalidOperationException` escaping
+    /// as an unhandled crash.</summary>
+    [Fact]
+    public void A_malformed_channel_value_is_refused_by_name_never_crashing()
+    {
+        var affix = new AffixRow("affix.synthetic-bad-channel", null,
+            new[] { new AffixRefRow(0, "atom.synthetic-bad-channel") });
+        var badAtom = new AtomRow
+        {
+            AtomId = "atom.synthetic-bad-channel",
+            KindId = "stat.modify",
+            FamilyId = "atom.synthetic-bad-channel",
+            Tier = 1,
+            Name = "synthetic bad channel",
+            ParamsJson = """{"channel":{"count":1},"op":"flat","amount":{"min":1,"max":1}}""",
+            WhenJson = "{}",
+        };
+        var affixes = new System.Collections.Generic.Dictionary<string, AffixRow> { [affix.AffixId] = affix };
+        var atoms = new System.Collections.Generic.Dictionary<string, AtomRow> { [badAtom.AtomId] = badAtom };
+
+        var ex = Assert.Throws<BindRefusal>(() => AffixComposer.Resolve(new[] { affix.AffixId }, affixes, atoms));
+        // Discriminating, not just "names channel": the pool shape must be refused for BEING a pool
+        // (no 'pool' id, so ChannelRefJson fails the pool-object rule), and must name the atom so the
+        // author can find it. Asserting the word "channel" alone would pass on any channel error.
+        Assert.Contains(badAtom.AtomId, ex.Message);
+        Assert.Contains("channel", ex.Message, System.StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("pool", ex.Message, System.StringComparison.OrdinalIgnoreCase);
+    }
 }

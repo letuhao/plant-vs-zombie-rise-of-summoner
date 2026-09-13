@@ -127,7 +127,33 @@ guard that prevents a stale vintage from being reported as healthy.
 
 ## Phase 2 — expander: non-magnitude kinds (R7, R8)
 
-### P2.1: Teach `FamilyExpansion` the mechanism-kind formulas
+### P2.1: Teach `FamilyExpansion` the mechanism-kind formulas — ⛔ DEFERRED (needs an owner balance decision)
+
+**Verified 2026-09-13 during `/build full`. This is a data gap, not a code gap — do not implement by
+inventing a number.** The formulas' *shape* is locked, but their *anchors* are authored nowhere:
+
+- `bands.v1.json` → `powerBand.channelFamilyGroups.statusMagnitudeAndDuration` has **no `formula` and
+  no `sharePermilleOwnership`** key. It gives `twoLadderRule` (chance 1.75‰, duration 1.4‰ *mandatory*),
+  a `memberFamilies` list, and a `workedExample` whose own `status` field reads
+  **`"illustrative, inherited, not balanced"`**. There is no `m1` anchor for chance or duration.
+- `docs/architecture/seedsmith/spec-numerics.md:210-212` states the other three groups (incl.
+  `statusMagnitudeAndDuration`) **"have locked formulas and need their own shares… specced when their
+  families are resolved."** The shares do not exist.
+- `data/seed/items/_tuning/tier-bands.v5.json` has **no per-family chance/duration override surface**
+  (keys are only `baseSharePermille`, `channelWeightPermille`, `opWeightPermille`), and
+  `bands.v1.json`'s own `note` says a rider's family-specific chance ladder is *"recorded in the
+  family's own tier-bands input, never this registry's default."*
+- `sharePermilleOwnership` states the binding rule: *"A generator with no authored share for a channel
+  must reject at import, not guess one."* The existing tool already follows it — `Program.cs:130-138`
+  returns `null` for a channel with no `BattleRuleset` curve and refuses honestly.
+
+**The owner decision (plan §6 A1/A5):** author the missing anchors as a new published balance surface
+— a `power-scale.v3.json` curve for the magnitude kinds (already R10/P3.1) **and** a chance/duration
+anchor for `status.apply` (new; not currently in any plan item). Until it exists, the honest behavior
+is the status quo: refuse by name. **Deferred as a §4 "spec genuinely silent on a product decision"
+stop; P4.1 was taken instead (eligible, independent, and on the critical path).**
+
+### P2.1 (original task text, retained for reference): Teach `FamilyExpansion` the mechanism-kind formulas
 **Spec:** `bands.v1.json` `statusMagnitudeAndDuration` + `familiesOutOfFourWaySplit`;
 `spec-family-expand.md`; `spec-mechanism-wiring.md`. **Ask first** (owner confirms the formula
 reading). **Description:** `TryReferenceBaseM1` (`FamilyExpansion.cs:253-284`) refuses everything whose
@@ -218,10 +244,16 @@ registered channel families** — verify which is true before adding a pool.
 unhandled exception, killing the run. A pool must resolve to a concrete channel deterministically
 (§3.2's roll rules) or refuse as a named `BindRefusal`.
 **Acceptance:**
-- [ ] `tools/TreeBinder --check` completes on all 42 trees without an unhandled exception
-- [ ] A pool-shaped channel is resolved with the §3.2 rule named, or refused as a `BindRefusal`
-- [ ] A test proves both paths; `--check` no longer crashes
-**Depends on:** P0.2. **Scope:** M.
+- [x] `tools/TreeBinder --check` completes on all 42 trees without an unhandled exception
+- [x] A pool-shaped channel is resolved with the §3.2 rule named, or refused as a `BindRefusal`
+- [x] A test proves both paths; `--check` no longer crashes
+**Depends on:** P0.2. **Scope:** M. **Done:** gate PASS 2026-09-13. Chosen disposition: **refuse by
+name**, not resolve — `spec-channel-pool.md` §4 makes the roll effect-pipeline module 2's, and §3.4
+prices a pool as `count × weighted_mean(member)`, so a bake-time pick would store a number the roll can
+contradict. Verified: `--check` exits 1 (stale corpus, separate task) with **0 unhandled exceptions**
+and 289 pool channels named; AffixComposerTests 10/10; PassiveTree 405/405; 4 guards green. Gate noted
+the malformed-channel assertion was only weakly discriminating (word "channel") and the boxes were
+unticked at gate time — both fixed in this commit.
 
 ### P4.2: Add `More` to the tree op vocabulary (R2)
 **Spec:** `spec-tree-catalog.md` §2.3; `AtomKindRegistry.cs:517`. **Ask first — owner leans yes.**
