@@ -35,11 +35,14 @@ makes cold. Before either command below:
    (an agent-launched server dies when a synchronous tool call's process tree is reaped — this has
    caused real, misread "mid-run crash" incidents before). Never `deploy-play.ps1` with a server
    restart from an agent shell.
-2. **Confirm the server is actually up** — `GET /health` (or equivalent) before proceeding.
+2. **Confirm the server is up AND the game is connected in one call** — `GET /health`
+   (`Program.cs:858` → `RpgStore.ToHealth`) returns `{ Ok, InjectorConnected, CurrentPlayerId, ... }`
+   directly (`RpgStore.cs:1041`) — no separate injector-check call needed. Do not proceed until
+   `InjectorConnected: true`.
 3. **Cold-start the lawn** per the `live-lawn-quick-start` skill — enter a real level, confirm a live
-   board exists. `store.InjectorConnected` gates several routes (`DebugEndpoints.cs:180`,
-   `/lawn/quick-start`) and returns 409 without a connected game; `debug.board-stats` (step 6) returns
-   nothing useful without a live board either.
+   board exists. `store.InjectorConnected` also gates several routes (`DebugEndpoints.cs:180`,
+   `/lawn/quick-start`, 409 without it); `debug.board-stats` (step 6) returns nothing useful without a
+   live board either.
 4. **Only then** run the commands below, from the owner's own terminal, or a background agent that
    itself followed steps 1-3 correctly (never a plain synchronous `Bash` call expecting the server
    it just started in the same call to still be alive).
