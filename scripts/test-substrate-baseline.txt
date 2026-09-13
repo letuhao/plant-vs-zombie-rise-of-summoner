@@ -5,12 +5,9 @@
 tests/FusionRpg.AtomImporter.Tests/RealColdProcessTests.cs : swallowed-delete
 tests/FusionRpg.AtomImporter.Tests/SeedScannerTests.cs : swallowed-delete
 tests/FusionRpg.AtomImporter.Tests/ValidateGateCiTests.cs : swallowed-delete
-tests/FusionRpg.Data.Tests/ColdArchiveCompactionTests.cs : swallowed-delete, temp-store
 tests/FusionRpg.Data.Tests/CreatureSpeciesImportCliTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/LegacyMonoMigratorTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/RpgStoreDalSmokeTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/RpgStoreSmokeTests.cs : swallowed-delete, temp-store
-tests/FusionRpg.Data.Tests/StoragePurgeTests.cs : swallowed-delete, temp-store
+tests/FusionRpg.Data.Tests/LegacyMonoMigratorTests.cs : temp-store
+tests/FusionRpg.Data.Tests/RpgStoreSmokeTests.cs : temp-store
 tests/FusionRpg.E2E.Tests/RpgApiFactory.cs : temp-store
 tests/FusionRpg.Guard.Tests/ActorHubGuardTests.cs : swallowed-delete
 tests/FusionRpg.Guard.Tests/ClassSystemGuardTests.cs : swallowed-delete

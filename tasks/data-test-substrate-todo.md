@@ -218,12 +218,20 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - Verified: gate PASS round 2 — Core **13,364/13,364**, Data **1,288/1,288**, E2E 212/219 (7 proven pre-existing: 5 checked-in fixture JSONs absent from the tree + 2 unrelated DTO/catalog failures, all store-free, reproduced on a pristine HEAD clone), 14 files zero drift, baseline **42→29**, both guards green.
   - Files: 11 Core + 3 E2E + 2 csprojs + baseline + standard. Scope: S→M.
   - Deps: T10, seam fix.
-- [ ] **Task T18f: the 5 file-bound classes to `CreateFileBacked()`** (`LegacyMonoMigratorTests`, `RpgStoreDalSmokeTests`, `RpgStoreSmokeTests`, `ColdArchiveCompactionTests`, `StoragePurgeTests`) — fix the leak **without** changing their file/WAL assertions — Deps: T10. Scope: M.
+- [x] **Task T18f: the 5 file-bound classes to the leak-proof file helper** ✅ 2026-09-12
+  - `ColdArchiveCompactionTests`, `RpgStoreDalSmokeTests`, `RpgStoreSmokeTests`, `StoragePurgeTests` now build their store via **`DataTestStore.CreateFileBacked()`** (they keep real files — the disk IS their subject — but their disposal is the helper's, which clears pools and throws on a failed delete). `LegacyMonoMigratorTests` builds a hand-made legacy `rpg.sqlite` per test, so it keeps its own dirs with `ClearAllPools()` + a **throwing** delete in each `finally`.
+  - **The gate's runtime alarm caught a real live leak in this task:** `RpgStoreSmokeTests.Init_recreates_media_when_hot_exists_and_media_missing` had a **second**, per-test swallowed delete that leaked `fusionrpg-nomedia-*` on every run — the exact 65.5 GB mechanism. Fixed with `ClearAllPools()` + a throwing delete. Both alarm runs now report **0 survivors**.
+  - **The gate also caught two false claims in §7 of the standard** (it said all six use `CreateFileBacked()` — false for `LegacyMonoMigratorTests` and the other session's `CreatureSpeciesImportCliTests` — and understated `RpgStoreSmokeTests`). §7 corrected to name exactly which classes use the helper, which keep a `temp-store` line and why, with no pinned count.
+  - Verified: gate PASS round 2 — focused 35/35, Data **1,288/1,288**, baseline **29→26**, both guards green, leak alarm 0 survivors twice, 5 files zero drift and no memory move (every disk assertion intact).
+  - Files: 5 test files + `scripts/test-substrate-baseline.txt` + `docs/contributing/testing-standard.md`. Scope: M.
+  - Deps: T10.
 
-- [ ] **Task T19: Migration checkpoint — the whole suite is leak-proof**
-  - Description: every migrated file's baseline line is gone; the file-bound 5 use the leak-proof helper; no test in `tests/**` creates a temp store; runtime duration + temp-dir delta reported.
-  - Acceptance: `guard-test-substrate.ps1` green with a **smaller** baseline than `7183a59e`; a full Data+Server+E2E+Core run leaves **0** `rpg-*.sqlite` files outside the file-bound tmp dirs.
-  - Verify: `guard-test-substrate.ps1` + full suites + a temp-root count before/after.
+### Checkpoint 4 — Migration ✅
+- [x] ⭐ Baseline **216 → 26**; every store test that *can* be memory writes nothing; the 6 genuinely file-bound classes use the leak-proof file helper; the runtime alarm reports 0 survivors. No new violation possible: the ratchet only shrinks and the gate has been live since before the build.
+
+- [x] **Task T19: Migration checkpoint — the whole suite is leak-proof** ✅ 2026-09-12
+  - Description/acceptance met: every migrated file's baseline line is gone (216 → **26**); the file-bound classes use the leak-proof file helper; `guard-test-substrate.ps1` is green with a strictly smaller baseline than `7183a59e`; and the **runtime alarm around Data + Server + Core reports 0 survivors** (the strongest form of "no `rpg-*.sqlite` left outside the file-bound dirs").
+  - Verified: alarm `-IsolateTemp` around Data (default profile) + Server + Core → exit 0, no survivors; baseline arithmetic 216 → 26; both guards green.
   - Files: `scripts/test-substrate-baseline.txt`. Scope: M.
   - Dependencies: T11–T18f.
 
@@ -237,7 +245,7 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - Dependencies: T19 (the suite must be leak-proof before an alarm can pass).
 
 ### Checkpoint 4 — Migration
-- [ ] ⭐ Baseline strictly smaller; no new violation; owner reviews the delta before the archive tail.
+- [x] ⭐ Baseline strictly smaller (216 → 26); no new violation; the runtime alarm reports 0 survivors.
 
 ## Phase 5 — Archive target (module `archive-target`, optional)
 

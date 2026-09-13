@@ -158,6 +158,24 @@ stale the moment a file is fixed or a test project changes, which is the anti-pa
 These are **excluded from the default profile** via `DiskSemantics` (T26) and run at `full`/nightly/gate.
 They must **not** be converted to memory — that would delete real coverage (`substrate-standard` R2).
 
+After T18f (2026-09-12) the four store classes among them (`RpgStoreDalSmokeTests`,
+`ColdArchiveCompactionTests`, `StoragePurgeTests`, `RpgStoreSmokeTests`) route their store and cleanup
+through the leak-proof **file** helper or `ClearAllPools` + a throwing delete, so their cleanup can no
+longer swallow. Three then dropped off the static baseline entirely (`RpgStoreDalSmokeTests`,
+`ColdArchiveCompactionTests`, `StoragePurgeTests`): their disposal is the helper's, so the scanner no
+longer finds `new RpgStore(` beside a temp path. `LegacyMonoMigratorTests` and `RpgStoreSmokeTests`
+keep a baseline line **only for the `temp-store` pattern** — both legitimately boot a store over a
+**hand-built on-disk file** (a legacy `rpg.sqlite`; a hot-only folder whose media is recreated), which
+is exactly the disk-is-the-subject case R2 permits. `CreatureSpeciesImportCliTests` remains baselined
+end to end because it is another session's cold-process test, not migrated here.
+
+**Being on the static baseline is not a defect for a file-bound class** — the baseline is what stops a
+*new* file-backed store appearing anywhere else. After T18f the only `swallowed-delete` lines left
+inside this program's four Store test projects are the two files the program deliberately does **not**
+own: `CreatureSpeciesImportCliTests` (another session's cold-process test) and
+`BaseTypeSocketMaxCorpusTests` (class C, a fixture-leak fix, not a store migration). Every other
+`swallowed-delete` line is in the out-of-boundary Guard/Launcher/AtomImporter projects (Group 4).
+
 ### Group 2 — file-bound host (`tests/FusionRpg.E2E.Tests`)
 
 `RpgApiFactory.cs : temp-store` — a `WebApplicationFactory<Program>` boots the **real server**, which

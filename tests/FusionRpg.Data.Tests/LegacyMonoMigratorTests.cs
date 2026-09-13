@@ -40,7 +40,7 @@ public class LegacyMonoMigratorTests
         }
         finally
         {
-            try { Directory.Delete(dir, true); } catch { /* temp */ }
+            SqliteConnection.ClearAllPools(); Directory.Delete(dir, recursive: true);
         }
     }
 
@@ -57,7 +57,7 @@ public class LegacyMonoMigratorTests
         }
         finally
         {
-            try { Directory.Delete(dir, true); } catch { /* temp */ }
+            SqliteConnection.ClearAllPools(); Directory.Delete(dir, recursive: true);
         }
     }
 
@@ -81,7 +81,7 @@ public class LegacyMonoMigratorTests
         }
         finally
         {
-            try { Directory.Delete(dir, true); } catch { /* temp */ }
+            SqliteConnection.ClearAllPools(); Directory.Delete(dir, recursive: true);
         }
     }
 
@@ -111,7 +111,7 @@ public class LegacyMonoMigratorTests
         }
         finally
         {
-            try { Directory.Delete(dir, true); } catch { /* temp */ }
+            SqliteConnection.ClearAllPools(); Directory.Delete(dir, recursive: true);
         }
     }
 
