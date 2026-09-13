@@ -12,6 +12,8 @@
     "tests/FusionRpg.E2E.Tests/**",
     "tests/FusionRpg.Core.Tests/**",
     "tests/FusionRpg.Guard.Tests/**",
+    "web/fusion-rpg-web/src/stages/world/fixtures/**",
+    "web/fusion-rpg-web/e2e/fixtures/**",
     "scripts/data-test-*.ps1",
     "scripts/guard-test-substrate.ps1",
     "scripts/test-substrate-baseline.txt",

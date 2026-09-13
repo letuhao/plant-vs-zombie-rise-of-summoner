@@ -247,10 +247,18 @@ public class FusionE2ETests : IAsyncLifetime
         async Task<(string Id, string Trait)> Craft(string speciesId)
         {
             var species = CreatureSpeciesCatalog.Get(speciesId);
-            if (species.BaseRarity == CreatureRarity.Chaff)
+            // Base case: a species the recipe graph does not produce. That is exactly "below the
+            // output-eligibility floor" (`CreatureRecipeCatalog.OutputEligibilityFloor` = Cultivated),
+            // so Chaff is NOT the only leaf — Grafted/Sprout species are leaves too and are minted
+            // directly, the same way a Chaff is. The old `== Chaff` test assumed every non-Chaff input
+            // had a recipe; 30 Grafted-rarity inputs are referenced by recipes without having one of
+            // their own (spec-fusion-recipe-generator.md: an input comes from the nearest populated
+            // rung BELOW its output, which need not be Chaff), so the old predicate fell through to
+            // `.First()` and threw "Sequence contains no matching element".
+            var recipe = CreatureRecipeCatalog.All.FirstOrDefault(r => r.OutputSpeciesId == speciesId);
+            if (recipe is null)
                 return (await MintCreature(speciesId), species.TraitPool[0]);
 
-            var recipe = CreatureRecipeCatalog.All.First(r => r.OutputSpeciesId == speciesId);
             var a = await Craft(recipe.InputSpeciesIdA);
             var b = await Craft(recipe.InputSpeciesIdB);
             var exec = await _http.PostAsJsonAsync("/api/fusion/execute", new
