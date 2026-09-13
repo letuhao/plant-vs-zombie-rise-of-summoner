@@ -149,6 +149,47 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Post_noBoardStartRecorded_butSetupSkipProbeSucceeds_neverAttemptsEnterLevel()
+    {
+        // Real bug found live 2026-09-14: some game profiles never emit board.start for a board that
+        // already exists behind the seed-picker screen (confirmed on pvzrh-3.9 -- several full match
+        // cycles, zero board.start events, ever), so FindLatestLiveBoardStart sees "no board" even
+        // though a real one is sitting there mid-entry. quick-start used to always attempt
+        // debug.enter-level in that case, which times out because EnterGame is undefined when called
+        // a second time on an already-mid-entry level. The fix: probe with debug.skip-setup FIRST --
+        // a success proves a real Board already exists, so enter-level must never be attempted.
+        _store.Heartbeat(RpgConstants.SourceInjector);
+        var inbox = _app.Services.GetRequiredService<InjectorCommandInbox>();
+
+        var request = _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { scenario = "lab-overlay", timeoutSec = 2 });
+
+        // Wait for the probe's debug.skip-setup to be enqueued, then answer it ok:true -- simulating
+        // a real injector that is already sitting on the seed-picker (Board exists, not yet entered
+        // through a fresh EnterGame call this request).
+        List<CommandDto> queued = new();
+        for (var i = 0; i < 80 && !queued.Any(c => c.Name == "debug.skip-setup"); i++)
+        {
+            await Task.Delay(25);
+            queued.AddRange(inbox.Drain(int.MaxValue));
+        }
+        Assert.Contains(queued, c => c.Name == "debug.skip-setup");
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "debug.setup.skip",
+            Payload = JsonSerializer.SerializeToElement(new { ok = true, method = "quick", board = true, ui = true })
+        });
+
+        var resp = await request;
+        Assert.Equal(HttpStatusCode.Conflict, resp.StatusCode); // honest scenario timeout -- no real game answering run-steps
+
+        var sentAfter = queued.Concat(inbox.Drain(int.MaxValue)).Select(c => c.Name).ToList();
+        Assert.DoesNotContain("debug.enter-level", sentAfter);
+        Assert.Contains("debug.wave-freeze", sentAfter);
+        Assert.Contains("debug.run-steps", sentAfter);
+    }
+
+    [Fact]
     public async Task Post_noBoardLive_attemptsEnterLevel_andTimesOutHonestlyWhenNothingAcks()
     {
         _store.Heartbeat(RpgConstants.SourceInjector);

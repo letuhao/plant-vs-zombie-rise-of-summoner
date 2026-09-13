@@ -193,11 +193,33 @@ public static class DebugEndpoints
             if (!store.InjectorConnected)
                 return Results.Conflict(new { ok = false, error = "injector not connected — start the game with the FusionRpg injector loaded" });
 
+            // Some game profiles never emit board.start for a board that already exists behind the
+            // seed-picker screen -- confirmed live 2026-09-14 on pvzrh-3.9: several full match cycles
+            // (board.end fired repeatedly), zero board.start events, ever. So a board sitting on the
+            // seed-picker (Board not yet constructed) is invisible to FindLatestLiveBoardStart, and
+            // debug.enter-level's own live-board guard (which checks the Board reference) never
+            // triggers either -- calling EnterGame a second time on an already-mid-entry level is
+            // undefined by the vanilla game and was observed to time out with NO debug.level.enter
+            // event at all, not even a rejection. Probe for this state directly instead of guessing:
+            // debug.skip-setup is spec-sanctioned to call repeatedly (spec-setup-skip.md: "no
+            // automatic double-call fallback... repeated calls are allowed"), so try it before
+            // enter-level. Success (`board:true`) proves a real Board already exists -- either
+            // mid-seed-picker or already in a running match -- and lets quick-start skip straight to
+            // wave-freeze/scenario instead of re-attempting an entry that will only time out.
+            var alreadyMidEntry = false;
+            store.MergeCheatField("DEBUG-SETUP-SKIP", true, null);
+            await Send(hub, inbox, "cheat.toggle", new { id = "DEBUG-SETUP-SKIP", enabled = true });
+            var probeBeforeSkip = store.GetMaxEventId();
+            await Send(hub, inbox, "debug.skip-setup", new { method = "quick" });
+            var probeSkipAck = await PollForKind(store, probeBeforeSkip, "debug.setup.skip", TimeSpan.FromSeconds(Math.Min(timeoutSec, 8)));
+            var setupSkipOk = probeSkipAck is not null && PayloadBool(probeSkipAck.Payload, "ok");
+            if (setupSkipOk) alreadyMidEntry = true;
+
             var entered = false;
-            var boardStart = FindLatestLiveBoardStart(store);
+            var boardStart = alreadyMidEntry ? null : FindLatestLiveBoardStart(store);
             string? enteredLevelType = null;
 
-            if (boardStart is null)
+            if (boardStart is null && !alreadyMidEntry)
             {
                 store.MergeCheatField("DEBUG-LEVEL-ENTRY", true, null);
                 await Send(hub, inbox, "cheat.toggle", new { id = "DEBUG-LEVEL-ENTRY", enabled = true });
@@ -250,27 +272,28 @@ public static class DebugEndpoints
                     return Results.Conflict(new { ok = false, error = "enter-level reported board already live, but no level metadata was found" });
             }
 
-            var levelType = boardStart is null
-                ? enteredLevelType ?? ""
-                : PayloadString(boardStart.Payload, "levelType") ?? "";
-            if (BadLevelTypes.Contains(levelType))
+            // alreadyMidEntry has no board.start / enter-level ack to read a levelType from (see the
+            // probe comment above) -- the successful skip-setup probe is itself the live-board proof
+            // in that case, so the Explore/Travel/IZ refusal below is skipped rather than guessed at.
+            var levelType = alreadyMidEntry
+                ? ""
+                : (boardStart is null ? enteredLevelType ?? "" : PayloadString(boardStart.Payload, "levelType") ?? "");
+            if (!alreadyMidEntry && BadLevelTypes.Contains(levelType))
                 return Results.Conflict(new { ok = false, error = $"refusing lab on levelType={levelType} — open Adventure/Challenge day lawn, not Explore/Travel" });
 
             // EnterGame opens the level, but the real lawn (waves moving, plants/zombies acting) stays
             // behind the vanilla "Choose Your Plants" seed-picker screen (InitBoard/InGameUI) until that
             // screen is dismissed. debug.skip-setup (InitBoard.QuickInGame) is the sanctioned dismissal —
             // call it before any wave/scenario work so a fresh board is never left sitting on that
-            // screen. Unlike /setup/skip (a standalone probe that expects the operator to have already
-            // opted in), quick-start is itself a one-call dev/live-probe orchestrator and already
-            // self-enables DEBUG-LEVEL-ENTRY above on the same basis, so it self-enables this gate too.
-            // Non-fatal: a board reused from a previous quick-start call is already past this screen and
-            // reports ok=false here, which is expected, not an error.
-            store.MergeCheatField("DEBUG-SETUP-SKIP", true, null);
-            await Send(hub, inbox, "cheat.toggle", new { id = "DEBUG-SETUP-SKIP", enabled = true });
-            var beforeSkip = store.GetMaxEventId();
-            await Send(hub, inbox, "debug.skip-setup", new { method = "quick" });
-            var skipAck = await PollForKind(store, beforeSkip, "debug.setup.skip", TimeSpan.FromSeconds(Math.Min(timeoutSec, 10)));
-            var setupSkipOk = skipAck is not null && PayloadBool(skipAck.Payload, "ok");
+            // screen. The proactive probe above already did this when alreadyMidEntry is true; only
+            // call it again for a level we just entered ourselves in this same request.
+            if (!alreadyMidEntry)
+            {
+                var beforeSkip = store.GetMaxEventId();
+                await Send(hub, inbox, "debug.skip-setup", new { method = "quick" });
+                var skipAck = await PollForKind(store, beforeSkip, "debug.setup.skip", TimeSpan.FromSeconds(Math.Min(timeoutSec, 10)));
+                setupSkipOk = skipAck is not null && PayloadBool(skipAck.Payload, "ok");
+            }
 
             await Send(hub, inbox, "debug.wave-freeze", new { enabled = true });
 
