@@ -20,6 +20,7 @@
     "tasks/sessions/goal-23failures-20260913.json"
   ],
   "started": "2026-09-13T00:00:00Z",
-  "status": "active",
+  "status": "merged",
+  "closed": "2026-09-13 — all 5 commits landed (4 worktree + 1 main); default profile 23 -> 0 verified before committing.",
   "scopeNote": "Owner-invoked via /goal to execute tasks/worktree-23-failures-plan.md. Edits land in the solid-run worktree on its own branch; solid-run-20260912-eb53 owns overlapping paths (tests/**) and remains active — changes are test-harness/golden only, no src/ product edits planned except none. Git hands-off: no commits by this session; owner commits via repo-git.commit with explicit paths."
 }
