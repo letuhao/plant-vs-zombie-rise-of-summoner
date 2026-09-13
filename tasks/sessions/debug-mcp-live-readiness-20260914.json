@@ -1,0 +1,18 @@
+{
+  "session": "debug-mcp-live-readiness-20260914",
+  "program": "debug-mcp",
+  "problem": "Extend the existing debug_preflight MCP tool with a read-only, scope-honest live readiness observation composed from the existing health, session, snapshot, and event routes. It must distinguish server reachability, injector heartbeat, and fresh board observation without deploying, restarting, launching, or adding a second debug implementation.",
+  "mode": "direct",
+  "branch": "features/derived-stat-extension",
+  "worktree": null,
+  "paths": [
+    "tools/debug-mcp/**",
+    ".kilo/kilo.json",
+    ".cursor/mcp.json",
+    ".mcp.json",
+    "tasks/sessions/debug-mcp-live-readiness-20260914.json"
+  ],
+  "started": "2026-09-14T00:00:00Z",
+  "status": "active",
+  "scopeNote": "No active session owns tools/debug-mcp/**. Local-only MCP registration surfaces were added 2026-09-14 at owner request and are never committed. The global boundary checker has pre-existing unrelated drift: two active sessions overlap on AGENTS.md and Guard.Tests, and one old worktree is unclaimed. No architecture/spec/task document is edited because debug-mcp-idea-20260913 remains active on those paths."
+}

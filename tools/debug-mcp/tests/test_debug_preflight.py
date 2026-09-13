@@ -64,3 +64,55 @@ def test_server_registers_debug_preflight():
     from server import mcp
     tools = asyncio.run(mcp.list_tools())
     assert "debug_preflight" in [t.name for t in tools]
+
+
+def test_live_state_separates_injector_connection_from_idle_board():
+    snapshots = []
+
+    def request(method, path, params=None):
+        if path == "/health":
+            return {"status": 200, "body": {"ok": True, "injectorConnected": True,
+                                              "lastHeartbeatUtc": "2026-09-14T00:00:00+00:00",
+                                              "source": "injector", "simEnabled": False}}
+        if path == "/api/debug/session":
+            return {"status": 200, "body": {"sessionActive": False}}
+        if path == "/api/debug/snapshot":
+            snapshots.append(True)
+            return {"status": 200, "body": {"ok": True}}
+        if not snapshots and params["afterId"] < 9:
+            return {"status": 200, "body": {"items": [{"id": 9}]}}
+        if snapshots and params["afterId"] == 9:
+            return {"status": 200, "body": {"items": [{"id": 10, "kind": "debug.snapshot",
+                "matchKey": None, "payload": {"match": {"phase": "Idle"}}}]}}
+        return {"status": 200, "body": {"items": []}}
+
+    out = preflight.live_state(request=request, process_probe=lambda: True)
+    assert snapshots == [True]
+    assert out["injector"]["connected"] is True
+    assert out["board"]["observed"] is True
+    assert out["board"]["state"] == "idle"
+    assert out["ready"] is False
+    assert "injector liveness alone" in out["fix"]
+
+
+def test_live_state_requires_a_fresh_snapshot_for_ready():
+    def request(method, path, params=None):
+        if path == "/health":
+            return {"status": 200, "body": {"ok": True, "injectorConnected": True}}
+        if path in ("/api/debug/session", "/api/debug/snapshot"):
+            return {"status": 200, "body": {"ok": True}}
+        return {"status": 200, "body": {"items": []}}
+
+    now = iter((0, 6))
+    out = preflight.live_state(request=request, process_probe=lambda: True,
+                               monotonic=lambda: next(now), sleep=lambda _: None)
+    assert out["injector"]["connected"] is True
+    assert out["board"]["observed"] is False
+    assert out["ready"] is False
+    assert "did not emit debug.snapshot" in out["fix"]
+
+
+def test_board_state_only_calls_non_idle_observation_live():
+    assert preflight._board_state({"payload": {"match": {"phase": "Idle"}}})[0] == "idle"
+    assert preflight._board_state({"payload": {"match": {"phase": "Loading"}}})[0] == "loading"
+    assert preflight._board_state({"payload": {"match": {"phase": "InMatch"}}})[0] == "active"

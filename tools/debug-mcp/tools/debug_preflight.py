@@ -4,14 +4,22 @@ Read-only: inspects the tree, env, and :5088; changes nothing (no timestamps
 in output, so two idle runs are identical). Every check reports PASS/FAIL +
 evidence + the fix command. Root and env inject for hermetic tests.
 """
+import csv
+import datetime as dt
+import io
 import os
 import socket
+import subprocess
+import time
 from pathlib import Path
 
+import httpx
 import registry
 
 _PORT = 5088
+_BASE_URL = "http://127.0.0.1:5088"
 _GAME_VARS = ("FUSIONRPG_ML_GAMEDIR", "FUSIONRPG_GAME_DIR")
+_SNAPSHOT_TIMEOUT_SECONDS = 5  # Readiness observation must never become a long-running probe.
 
 
 def _fail(check, evidence, fix):
@@ -144,7 +152,162 @@ def _mcp_deps(root, env):
     return _pass("mcp-deps", f"fastmcp {version}")
 
 
-def audit(root=None, env=None):
+def _runtime_request(method, path, params=None):
+    """Read one existing local route; callers may inject this in tests."""
+    response = httpx.request(method, _BASE_URL + path, params=params, timeout=2)
+    try:
+        body = response.json()
+    except ValueError:
+        body = {"raw": response.text[:4000]}
+    return {"status": response.status_code, "body": body}
+
+
+def _game_process_running():
+    """Local process fact only; it does not claim that the injector loaded."""
+    try:
+        completed = subprocess.run(
+            ["tasklist", "/FI", "IMAGENAME eq PlantsVsZombiesRH.exe", "/FO", "CSV", "/NH"],
+            capture_output=True, text=True, timeout=2, check=False)
+        rows = list(csv.reader(io.StringIO(completed.stdout)))
+        return any(row and row[0].lower() == "plantsvszombiesrh.exe" for row in rows)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+
+
+def _event_max_id(request):
+    """Find the event watermark through the existing cursor route, without SQL."""
+    first = request("GET", "/api/debug/events", {"afterId": 0, "limit": 1})
+    if first["status"] >= 400 or not first["body"].get("items"):
+        return 0
+
+    def has_after(event_id):
+        result = request("GET", "/api/debug/events", {"afterId": event_id, "limit": 1})
+        return result["status"] < 400 and bool(result["body"].get("items"))
+
+    low, high = 0, 1
+    for _ in range(63):
+        if not has_after(high):
+            break
+        low, high = high, high * 2
+    else:
+        return None
+    while high - low > 1:
+        middle = low + (high - low) // 2
+        if has_after(middle):
+            low = middle
+        else:
+            high = middle
+    return high
+
+
+def _heartbeat_age_ms(value, now=None):
+    if not isinstance(value, str):
+        return None
+    try:
+        parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+        parsed = parsed if parsed.tzinfo else parsed.replace(tzinfo=dt.timezone.utc)
+        current = now or dt.datetime.now(dt.timezone.utc)
+        return max(0, round((current - parsed.astimezone(dt.timezone.utc)).total_seconds() * 1000))
+    except ValueError:
+        return None
+
+
+def _board_state(snapshot):
+    payload = snapshot.get("payload", {}) if isinstance(snapshot, dict) else {}
+    match = payload.get("match", {}) if isinstance(payload, dict) else {}
+    phase = match.get("phase", payload.get("matchPhase")) if isinstance(match, dict) else None
+    normalized = str(phase or "unknown").lower()
+    if normalized in ("idle", "", "unknown"):
+        return "idle", phase
+    if "load" in normalized or "enter" in normalized:
+        return "loading", phase
+    return "active", phase
+
+
+def live_state(request=None, process_probe=None, sleep=None, monotonic=None):
+    """Compose health + session + fresh snapshot into an honest live verdict.
+
+    Health proves server/injector liveness. A snapshot emitted after a saved
+    watermark proves a current injector observation. Neither fact is silently
+    upgraded into the other.
+    """
+    request = request or _runtime_request
+    process_probe = process_probe or _game_process_running
+    sleep = sleep or time.sleep
+    monotonic = monotonic or time.monotonic
+    game_running = process_probe()
+    try:
+        health_result = request("GET", "/health")
+    except (httpx.HTTPError, OSError) as exc:
+        return {
+            "ready": False,
+            "server": {"reachable": False, "error": str(exc)},
+            "gameProcess": {"running": game_running},
+            "injector": {"connected": False},
+            "board": {"observed": False, "state": "unknown"},
+            "session": None,
+            "scope": ["local-machine", "rpg-server-debug", "game-injector-debug"],
+            "fix": "Start-Process dist\\FusionRpg.Server\\FusionRpg.Server.exe",
+        }
+
+    health = health_result.get("body", {})
+    healthy = health_result.get("status", 500) < 400 and bool(health.get("ok"))
+    connected = healthy and bool(health.get("injectorConnected"))
+    result = {
+        "ready": False,
+        "server": {"reachable": health_result.get("status", 500) < 400, "healthy": healthy},
+        "gameProcess": {"running": game_running},
+        "injector": {"connected": connected, "heartbeatAgeMs": _heartbeat_age_ms(health.get("lastHeartbeatUtc")),
+                     "source": health.get("source"), "simEnabled": health.get("simEnabled")},
+        "board": {"observed": False, "state": "unknown", "phase": None},
+        "session": None,
+        "scope": ["local-machine", "rpg-server-debug", "game-injector-debug"],
+        "fix": None,
+    }
+    if not healthy:
+        result["fix"] = "Inspect http://127.0.0.1:5088/health, then start the published server if it is down"
+        return result
+    if not connected:
+        result["fix"] = ".\\scripts\\deploy-play.ps1 -NoServer -NoRebuildUi"
+        return result
+
+    session = request("GET", "/api/debug/session")
+    result["session"] = session.get("body") if session.get("status", 500) < 400 else None
+    before = _event_max_id(request)
+    if before is None:
+        result["fix"] = "Event watermark could not be bounded; inspect /api/debug/events before a live probe"
+        return result
+    snapshot_request = request("GET", "/api/debug/snapshot")
+    if snapshot_request.get("status", 500) >= 400:
+        result["fix"] = "Snapshot command was refused; verify injector connection and debug route availability"
+        return result
+
+    deadline = monotonic() + _SNAPSHOT_TIMEOUT_SECONDS
+    snapshot = None
+    while monotonic() < deadline:
+        events = request("GET", "/api/debug/events", {"afterId": before, "limit": 500})
+        for event in events.get("body", {}).get("items", []):
+            if event.get("kind") == "debug.snapshot":
+                snapshot = event
+        if snapshot is not None:
+            break
+        sleep(0.25)
+    if snapshot is None:
+        result["fix"] = "Injector is connected but did not emit debug.snapshot within 5s; inspect the game loading state or injector logs"
+        return result
+
+    state, phase = _board_state(snapshot)
+    result["board"] = {"observed": True, "state": state, "phase": phase,
+                       "eventId": snapshot.get("id"), "matchKey": snapshot.get("matchKey")}
+    result["ready"] = state == "active"
+    if state == "idle":
+        result["fix"] = "Open a lawn or use debug_lawn_setup only when you own the board; injector liveness alone is not a live probe"
+    elif state == "loading":
+        result["fix"] = "Wait for the game to finish loading, then run debug_preflight again"
+    return result
+
+
+def audit(root=None, env=None, include_live=False, request=None, process_probe=None):
     """Run every check. Pure read: safe to run twice, output identical."""
     env = dict(os.environ) if env is None else dict(env)
     if root is None:
@@ -162,4 +325,7 @@ def audit(root=None, env=None):
         _node_modules(root, env),
         _mcp_deps(root, env),
     ]
-    return {"checks": checks, "scope": "local-machine"}
+    result = {"checks": checks, "scope": "local-machine"}
+    if include_live:
+        result["live"] = live_state(request=request, process_probe=process_probe)
+    return result

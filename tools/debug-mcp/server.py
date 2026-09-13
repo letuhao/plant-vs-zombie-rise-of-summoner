@@ -56,10 +56,10 @@ def debug_verify(feature: str, subject: str) -> dict:
     return debug_verify_impl(feature, subject)
 
 
-@mcp.tool(description="Audit setup readiness: game dir, interop, ports, DLLs, data, FE, deps.")
+@mcp.tool(description="Audit deploy readiness and live state: server, injector, fresh board observation, artifacts.")
 def debug_preflight() -> dict:
-    """Scope: local-machine. Read-only; every check carries evidence + fix."""
-    return debug_preflight_impl()
+    """Read-only. Separates deploy readiness from server/injector/board liveness."""
+    return debug_preflight_impl(include_live=True)
 
 
 @mcp.tool(description="Set up a live lab board: enter level, freeze waves, poll target ptrs.")
@@ -91,4 +91,3 @@ def main(argv=None):
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-
