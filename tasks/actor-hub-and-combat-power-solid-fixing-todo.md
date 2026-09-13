@@ -549,13 +549,13 @@
 **Description:** Remove or rewire Level-as-Θ battle/delve aliases (`ActorThetaSeam` / composer leftovers); final sweep that no stub equip remains player-usable.
 
 **Acceptance criteria:**
-- [ ] No production Level-as-Θ alias on battle/delve aptitude paths (`ActorThetaSeam` / composer leftovers) — wire real Θ or delete the lie.
-- [ ] Stub equip not player-usable SSOT (align T4).
-- [ ] Comments point real Θ / Hub only.
+- [x] No production Level-as-Θ alias on battle/delve aptitude paths — **honest negative, not forced** (see evidence map 22.1): `ActorThetaSeam`'s Level fallback and `BattleModels.cs`'s `ThetaActor` field are already honestly documented, locked to `delve-battle-profile` (a different program, own D2.8-D2.14) as the owner of wiring it — independently re-confirmed via a DIFFERENT session's own 2026-09-07 finding in `party-dungeon-todo.md`, not assumed. No production caller reads either as a live alias today.
+- [x] Stub equip not player-usable SSOT (align T4) — re-confirmed clean, T4's own finding unchanged.
+- [x] Comments point real Θ / Hub only — re-confirmed, nothing stale.
 
 **Verification:**
-- [ ] `rg -n "ActorThetaSeam|theta \\?\\? specimenLevel|Level as Θ" src` triage clean
-- [ ] Stub equip rg clean for production
+- [x] `rg -n "ActorThetaSeam|theta \\?\\? specimenLevel|Level as Θ" src` — 2 hits, both already-honest doc comments, zero production aliasing
+- [x] Stub equip rg clean for production — confirmed
 
 **Dependencies:** T17, T4, T20  
 **Files likely touched:** Delve/battle Θ seams, equip catalog leftovers  
@@ -569,12 +569,12 @@
 **Description:** Ensure map / ideal / DESIGN-GATE pointer name tracked program; no Hub world assault Done claim.
 
 **Acceptance criteria:**
-- [ ] Map Out of scope / Tracked names `world-actor-combat`.
-- [ ] Ideal / Wave 5 Done checkboxes honest.
-- [ ] No module under this program claims world combat engine Done.
+- [x] Map Out of scope / Tracked names `world-actor-combat` — already correct, re-confirmed.
+- [x] Ideal / Wave 5 Done checkboxes honest — found and fixed real staleness (ideal.md's B4/wiring-gap/Θ-alias rows still read the pre-T21-amendment literal wording; map.md's "Done when" checklist had 5 stale unticked boxes for already-done earlier-wave work).
+- [x] No module under this program claims world combat engine Done — re-confirmed, zero affirmative claims.
 
 **Verification:**
-- [ ] Re-read map + ideal + this todo Done section
+- [x] Re-read map + ideal + this todo Done section — done; see evidence map T23 rows for the specific corrections
 
 **Dependencies:** T20–T21  
 **Files likely touched:** map, ideal, optional DESIGN-GATE one-liner  

@@ -67,6 +67,7 @@
   - Verify: Injector/Core unit; live probe after allocate+AptitudesUpdated; `.\scripts\guard-secondary-no-unity.ps1`
   - Files: `RpgClient.cs`, `CheatState.cs`, Hot resolve path
   - Deps: AS-0.2, AS-0.3
+  - **Cross-linked (2026-09-13):** `actor-hub-and-combat-power-solid-fixing`'s T12 (`lawn-aptitude-parity`) and T19 bullet 3 (`prove-hub-combat`) are both honestly blocked waiting on this exact task — that program's own spec locks "defer implementation ownership" to this one, so it refuses to build across the boundary rather than duplicating this work. When AS-1.1 lands, revisit both.
   - Scope: M
 
 - [x] **AS-1.2** Piece HTML drafts — `aptitude-pieces` (drafts)

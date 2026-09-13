@@ -54,8 +54,8 @@ From `the-loops.md` / `the-game.md`: Rise of Summoner is **RPG + empire building
 |---|---|---|
 | ~~Injector PassiveTree never configured~~ | `TreeBoundAtoms.cs` doc comment, `TreeBoundAtomsCache.cs` | **CLOSED** (T13, 2026-09-13) — not by configuring `PassiveTreeTuningHub` in the Injector process (still Server-only, correctly), but by a thin HTTP fetch+cache (`GET /api/passive-tree/bound-atoms/{playerId}`) mirroring the aptitude cache's own shape |
 | TurnEngine / DistrictAssault → PlaceholderBattleResolver | `TurnEngine.cs:139` · `DistrictAssaultResolver` early returns | **W5+ delete stub**; world combat → **new program** (not this map’s Hub-fed assault) |
-| Intel `Strength(entity)` via placeholder | `IntelRecorder.cs:146` | **B4 drop** with stub delete; real weight → `world-actor-combat` |
-| Battle / Delve Θ aliased to Level | `BattleStatComposer` · `ActorThetaSeam` | **W5+ fold** (`unique-theta-wire` / related) — wire real Θ or delete alias fiction |
+| Intel `Strength(entity)` via placeholder | `IntelRecorder.cs:146` | **CLOSED, amended** (T21, 2026-09-13) — formula relocated to `Intel.ForceStrength.Of`, not dropped/zeroed; the deleted class's own reference is gone, but the numbers survive to keep the real `ai-commander` AI and web UI intact. See B4's amendment note above; honest weight from a real world-actor truth stays `world-actor-combat`'s |
+| Battle / Delve Θ aliased to Level | `ActorThetaSeam` (`BattleStatComposer` itself deleted, T6 battle-hub-fuse) | **Honest negative, T22, 2026-09-13** — already-documented, locked to `delve-battle-profile` (a different program, own D2.8-D2.14; `BattleModels.cs:185-193`'s own comment states the field exists, shape-only, and wiring it is that program's job); independently re-confirmed via a prior session's identical finding in `tasks/party-dungeon-todo.md:3055-3058`. Not this program's to build across |
 | EquipAtomSource.None / StubPowerIndexProvider Θ=0 | defaults | Host inject real; no silent “zero is fine” as feature |
 
 ### Real gap
@@ -98,8 +98,8 @@ From `the-loops.md` / `the-game.md`: Rise of Summoner is **RPG + empire building
 | Stub equip catalog | **Delete** Items / EffectIds that are non-usable; player path must not offer dead gear |
 | `PlaceholderBattleResolver` + tuning surface that only serves it | **Delete**; call sites fail loud or feature-gate **off** (no silent Hp×Level win) |
 | World assault / district combat engine | **Out of scope** — track **`world-actor-combat`** |
-| Delve / battle Level-as-Θ alias | **Fold into W5+** — wire real Θ or remove the alias path that lies |
-| Intel Strength (depends on placeholder) | **B4 drop** — presence-only until `world-actor-combat` |
+| Delve / battle Level-as-Θ alias | **Honest negative (T22)** — locked to `delve-battle-profile`'s own task list, not this program's; already honestly documented, no production caller reads it as a live alias |
+| Intel Strength (depends on placeholder) | **Relocated, not dropped** (T21 amendment) — see B4 above; honest weight from real world-actor truth stays `world-actor-combat`'s |
 
 ### Tracked out
 
@@ -119,7 +119,7 @@ From `the-loops.md` / `the-game.md`: Rise of Summoner is **RPG + empire building
 | Number | Owner |
 |---|---|
 | `PlaceholderBattleTuning` | **Deleted** with resolver |
-| Strength bands | Idle until `world-actor-combat` invents honest weight (B4 dropped stub Strength) |
+| Strength bands | Still live (T21 relocated, not dropped, the number they read — see B4 amendment); a genuinely honest weight from real world-actor truth is `world-actor-combat`'s to invent |
 | Equip rolled magnitudes | Item / atom pipeline only after stubs gone |
 
 ---
@@ -131,7 +131,7 @@ From `the-loops.md` / `the-game.md`: Rise of Summoner is **RPG + empire building
 | **B1** | Delete stubs in Wave 5+; must implement SOLID to cover. If no idea yet → stop and run a **new idea enrich**. |
 | **B2** | World assaults need a real combat engine — **huge program**. Defer + track new program. **Delete** stub code; do not keep unfinished combat. |
 | **B3** | **Delete** stub equipment; do not ship features players cannot use. |
-| **B4** | **Drop** intel force Strength / bands that depend on placeholder weight. Presence-only (or feature off) until a **world actor / combat state** program exists. Not a hotfix. |
+| **B4** | **Drop** intel force Strength / bands that depend on placeholder weight. Presence-only (or feature off) until a **world actor / combat state** program exists. Not a hotfix. **AMENDED at T21 execution, 2026-09-13** (HISTORICAL note, not a rewrite of the 2026-09-12 clearance above): the literal "presence-only" reading was found to silently break a real, shipped, production-wired consumer this clearance did not anticipate — the `ai-commander` AI (`ThreatMap`/`FrontierRulesPolicy`'s `Defend`/`Garrison`/`Expand` rules) and a live web UI readout (`WorldEndpoints.cs`'s `BandCeiling`/`BandName`), both reading the exact same `RememberedForce.Strength`/`BandIndex` numbers B4 named. Presented to the owner directly at T21 (not decided unilaterally); owner chose to relocate the Hp×Level formula out of the deleted `PlaceholderBattleResolver` into Intel's own ownership (`FactionIntel.cs`'s new `ForceStrength.Of`), keeping the numbers byte-identical, over zeroing them. `PlaceholderBattleResolver.Strength` is still gone (T20); only the formula's OWNERSHIP moved, never called to decide a battle — see `tasks/actor-hub-and-combat-power-solid-fixing-evidence-map.md` T21.2 for the full investigation. |
 | **O1** | No new stubs. Big unfinished feature → delete stub, track new program. |
 | **O2** | **Fold** Delve/Level-as-Θ into Wave 5+. |
 | **O3** | Clarified: two ideal docs stay linked (product combat-power vs this stub hygiene). Not a merge. |
