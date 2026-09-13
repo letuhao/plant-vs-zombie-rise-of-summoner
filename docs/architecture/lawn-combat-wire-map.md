@@ -23,6 +23,7 @@ adversarial audit of the specs themselves** — see "Audit corrections" at the b
 | **`lawn-action-bridge`** | **[audit] Added — was the single most likely day-one stop.** `grep FusionRpg.Core.Actions src/FusionRpg.Injector` → **0 files**: the injector has no reference to the action stack at all. This module owns the assembly reference, the delivery path that gets a compiled `act.attack` row (with its cost) into the injector **without a Server round-trip on the hit path**, and the `guard-secondary-no-unity` check that lands with it. Both `basic-attack-grant` and `basic-attack-cost` assumed this existed. | `basic-attack-seed` |
 | `basic-attack-grant` | Bind `ActionKind.Basic` to every lawn actor at spawn so `HasOnDamageDealtGrant()` is true; carry a real `elementPayload` from the owner's species element, sourced at bind from `LawnElementResolverHost`. | `lawn-hit-attribution`, `element-cache-invalidate`, `lawn-action-bridge`, **`lawn-hit-entry`** |
 | `basic-attack-cost` | Make `act.attack`'s cost **authored data** rather than a hardcoded empty array; seed `resource.max.*` on the lawn Hub; add regen as a third kernel kind; add the lawn's missing `CostLedger` call. | `resource-subtick`, `basic-attack-grant` |
+| **`lawn-combat-calibration`** | **[audit] Added — one of its numbers is a hard blocker, not a balance nicety.** `action-shares.v1.json` is keyed by atom family and does **not** contain `atom.fx-overlay-damage`, while `ActionShareTable` *"rejects rather than defaults"* — so the feature **throws on first use**. Owns all four numbers (share, cost, regen, pool max), each **derived from a named shipped anchor** with the arithmetic recorded. Calibration, not balance. | `basic-attack-seed`, `resource-subtick` |
 | `lawn-combat-live-proof` | Re-measure the perf baseline with the damage trigger-mask **on**, then run the falsifier probe outside a debug session. Produces no source. | all of the above |
 
 **Build order**
@@ -39,8 +40,14 @@ basic-attack-seed ────────┘
         │        │
         │        └─► basic-attack-grant   ── strictly AFTER lawn-hit-entry
         │                    │
-        │                    └─► basic-attack-cost ──► lawn-combat-live-proof
+        │                    └─► basic-attack-cost ──┐
+        │                                            ├─► lawn-combat-live-proof
+        lawn-combat-calibration ────────────────────┘
 ```
+
+`lawn-combat-calibration` depends on `basic-attack-seed` + `resource-subtick` and gates the live
+proof: proofs 2 (element differential) and 4 (exhaustion/recovery) are **unrunnable** until the
+numbers exist.
 
 ### ⚠ Ordering is a safety constraint, not a preference — [audit]
 
@@ -127,9 +134,14 @@ magnitude at all**:
 than today's bug.** So regen is a **fifth** all-or-nothing wire, not an optional follow-up; the "four
 wires" framing in `basic-attack-cost` is wrong.
 
-**Resolution:** ship documented placeholders, per this repo's own posture (*"shipping a guess is fine,
-calling it balance is not"*), owned by `basic-attack-cost`, marked `UNMEASURED` in tuning, with the
-real pass left to the balance program. A placeholder is a decision; silence is a blocker.
+**Resolution — superseded 2026-09-13: these now have their own module, `lawn-combat-calibration`.**
+Leaving them as "placeholders somebody authors eventually" was wrong on two counts. First, one of them
+is a **hard blocker**: `atom.fx-overlay-damage` has no row in `action-shares.v1.json` and
+`ActionShareTable` rejects rather than defaults, so the feature throws on first use. Second, a number
+with no derivation is un-arguable — the module requires each value to trace to a named shipped anchor
+(`atom.poison-rider = 300` as the rider precedent, the `atk(Θ=20) = 92` pin, the measured vanilla pea
+at 20 damage / 1.5 s) with the arithmetic recorded in `_meta`. Still `UNMEASURED`, still not a balance
+pass — but derived and traceable rather than invented.
 
 ---
 
