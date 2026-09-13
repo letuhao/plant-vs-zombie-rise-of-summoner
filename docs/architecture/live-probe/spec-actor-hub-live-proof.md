@@ -21,18 +21,39 @@ either tick with that evidence or stay open with a named, concrete reason.
 ## Tech stack
 
 No new code — this module is an **operation**, not a build: run `live-probe-tool` against a real
-deployed game + server, twice (once per claim), and write down what it says.
+deployed game + server, twice (once per claim), and write down what it says. **Both runs must use
+`-Mode B`** — T12/T14 are combat-stat claims about the live Unity entity, which only Mode B checks;
+Mode A alone would repeat this program's own founding mistake by proving persisted state only.
+
+## Prerequisites (missing from an earlier draft — added after audit)
+
+This module can only run with a real game and server up. It is **not** a synchronous call an agent
+makes cold. Before either command below:
+
+1. **Build + deploy the Injector, start the server correctly** — per `CLAUDE.md`'s "Live deploy" /
+   "Server lifetime" section: `Start-Process dist\FusionRpg.Server\FusionRpg.Server.exe` directly
+   (an agent-launched server dies when a synchronous tool call's process tree is reaped — this has
+   caused real, misread "mid-run crash" incidents before). Never `deploy-play.ps1` with a server
+   restart from an agent shell.
+2. **Confirm the server is actually up** — `GET /health` (or equivalent) before proceeding.
+3. **Cold-start the lawn** per the `live-lawn-quick-start` skill — enter a real level, confirm a live
+   board exists. `store.InjectorConnected` gates several routes (`DebugEndpoints.cs:180`,
+   `/lawn/quick-start`) and returns 409 without a connected game; `debug.board-stats` (step 6) returns
+   nothing useful without a live board either.
+4. **Only then** run the commands below, from the owner's own terminal, or a background agent that
+   itself followed steps 1-3 correctly (never a plain synchronous `Bash` call expecting the server
+   it just started in the same call to still be alive).
 
 ## Commands
 
 ```powershell
-# T12 — aptitude parity
-.\scripts\prove-live-probe.ps1 -PlayerId 1 -Side plant -TypeId <peashooter-id> `
+# T12 — aptitude parity (Bound Peashooter)
+.\scripts\prove-live-probe.ps1 -Mode B -PlayerId 1 -Side plant -BannerId <banner-id> `
     -AptitudeId Might -AptitudePoints 30
 
-# T14 — loadout via Hub (equip a real item first, per live-probe-tool's own recipe)
-.\scripts\prove-live-probe.ps1 -PlayerId 1 -Side plant -TypeId <wallnut-id> `
-    -ItemInstanceId <owned-item-id>
+# T14 — loadout via Hub (Bound WallNut; equip a real, owned item first, per live-probe-tool's recipe)
+.\scripts\prove-live-probe.ps1 -Mode B -PlayerId 1 -Side plant -BannerId <banner-id> `
+    -Role <slot> -ItemInstanceId <owned-item-id>
 ```
 
 ## Project structure
@@ -67,6 +88,11 @@ its T12/T14 entries from 2026-09-13 for the shape: what was run, what the number
   inline.
 - **Never:** declare T12/T14 "done" on a persisted-state pass alone if the live-engine half fails or
   wasn't run — matches `live-probe-standard.md` §6's own definition of done.
+- **Never:** start the Server via a synchronous agent tool call for this module (see Prerequisites) —
+  use `Start-Process` and confirm `/health` first, from the owner's own terminal or a correctly
+  detached background agent.
+- **Never:** run `-Mode A` and report it as covering T12/T14 — these two tasks are combat-stat claims
+  about the live entity; only `-Mode B` checks that.
 
 ## Success criteria
 

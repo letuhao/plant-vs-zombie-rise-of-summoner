@@ -9,20 +9,43 @@
 ## Objective
 
 A mechanical guard that distinguishes **Game Injector Debug** routes (`DebugEndpoints.cs` handlers
-that only relay a `"debug.xyz"` command string to the Injector) from **RPG Server Debug** routes
-(handlers that call `store.*`/`ua.*`/a service method directly — real domain/persistence logic) —
-by handler-body shape, with **no file split and no route-prefix change**. Prevents a repeat of the
-2026-09-13 incident class at the *source* level: a future route that looks RPG-Server-Debug-shaped in
-a comment but is actually a bare relay (or vice versa) fails CI instead of misleading the next
-session that reads it.
+whose correctness depends on relaying a command to the Injector) from **RPG Server Debug** routes
+(handlers whose correctness depends only on real, persisted domain logic, with no injector relay at
+all) — by handler-body shape, with **no file split and no route-prefix change**. Prevents a repeat of
+the 2026-09-13 incident class at the *source* level: a future route that looks RPG-Server-Debug-shaped
+in a comment but actually depends on the live game (or vice versa) fails CI instead of misleading the
+next session that cites it as evidence.
 
 Who reads this: any agent or human about to write a new `/api/debug/*` route, or cite an existing one
 as evidence in a live probe.
 
-Success: the guard runs green today against the current `DebugEndpoints.cs` (which already contains
-both shapes correctly, per the ideal doc's own survey), and turns red the moment a new route mixes
-the two shapes inside one handler (calls both `store.*` AND relays a `"debug.xyz"` command in the
-same body) without an explicit, named exemption.
+**The classification rule, corrected after an audit found the original binary rule wrong against the
+real file:** the first draft ("RPG-Server-Debug if it calls `store.*`; Game-Injector-Debug if it ONLY
+relays; both in one body = violation") does not survive contact with the real
+`DebugEndpoints.cs` — the audit found several routes (`/lawn/quick-start`, `/scenario/{id}`,
+`/effect/grant`, `/effect/withdraw`, `/effect/clear`, `/effects/reload`, the shared
+`AcceptDebugSpawnExtra` helper used by `/spawn-extra` and `/fire-spawn-extra`) that genuinely call
+both a real method (`store.MergeCheatField`, `store.RecordExtraSpawnIntent`, `EffectGrantSession`
+mutations) **and** relay a command in the same handler — none of these are defects, they are
+legitimate orchestration (e.g. entering a level *requires* telling the Injector to do it). The
+relayed command string also isn't always literally `"debug.xyz"` — `"cheat.toggle"`,
+`"effects.reload"`, and `"pvz.spawn.extra"` all appear too.
+
+**The rule that actually holds:** *any relay to the Injector, anywhere in the handler body, makes the
+route Game-Injector-Debug-shaped* — full stop, regardless of what other bookkeeping (session-state
+flags, an in-memory `EffectGrantSession` mutation, a real `RpgStore` write alongside it) the same
+handler also does. The true dividing question `live-probe-standard.md` §1 asks is *"does this route's
+correctness depend on the live game responding,"* not *"does this handler call exactly one kind of
+thing."* A route is **only** RPG-Server-Debug-shaped when it contains **no** injector relay call at
+all (`reforge-world`, `derived-audit-actor` — the two clean examples the ideal doc already found).
+Under this corrected rule, every route in the current file classifies cleanly with **zero new
+exemptions** — the mixed routes above are all Game-Injector-Debug-shaped (they relay), not
+violations.
+
+Success: the guard runs green today against the current `DebugEndpoints.cs` under this corrected
+rule, and turns red only for a genuinely new shape: a route that calls a real persisted-write method
+**and legitimately should not** also depend on the live game, but does, or is miscategorized by a
+stale banner comment.
 
 ## Tech stack
 
@@ -49,27 +72,40 @@ dotnet test tests/FusionRpg.Guard.Tests --filter "FullyQualifiedName~DebugScope"
 
 ## Code style
 
-Mirror `guard-single-writer.ps1`'s own shape exactly: a `param($Root = ...)` root resolve, an
-`$ErrorActionPreference = "Stop"`, a per-route scan, a `$failures` accumulator, and a final
-`if ($failures.Count -gt 0) { ...; exit 1 }` / else `"... GUARD OK"` line. Detection logic per route
-handler body (a `g.MapPost("/path", ...)` or `g.MapGet("/path", ...)` lambda):
+**Corrected precedent:** mirror `guard-test-substrate.ps1`'s `Find-SwallowedDelete` shape, not
+`guard-single-writer.ps1`'s flat whole-file regex — the audit found a flat regex cannot isolate one
+handler's true extent (a route's body can span many lines with validation logic before ever reaching
+its relay or store call). `guard-test-substrate.ps1:99-132` already does brace-depth matching (a
+`Strip-Comments` pass, then a char-by-char `$depth` counter that finds where a block actually ends)
+— reuse that technique here rather than reinventing it.
+
+Two route shapes to recognize, not one flat lambda pattern:
 
 ```powershell
-# A route is Game-Injector-Debug-shaped if its ONLY effect is relaying a command string:
-#   await Send(hub, inbox, "debug.xyz", ...)  — and it calls no store.*/ua.* domain method.
-# A route is RPG-Server-Debug-shaped if it calls a real domain/persistence method
-#   (store.*, ua.*, a *Service.* method) directly in its own body.
-# A route calling BOTH shapes in the same handler body is a VIOLATION unless the route name
-# appears in an explicit $exempt allowlist with a one-line reason (same convention as
-# guard-single-writer.ps1's own $allowed list).
+# Shape A — the shared helper, single-line, no braces to match at all:
+#   MapPost(g, "/path", "cmd.name");
+# Every call matching this IS Game-Injector-Debug-shaped by construction (verified once against
+# the helper's own definition at the bottom of the file) — no body scan needed.
+
+# Shape B — an inline lambda:
+#   g.MapPost("/path", async (...) => { ...body... });
+# Brace-match from the opening `{` to its matching `}` (Find-SwallowedDelete's own technique) to
+# get the body text, then classify:
+#   - body contains ANY `Send(hub, inbox, "<anything>", ...)` call, regardless of the string's own
+#     prefix (not just "debug.*" — "cheat.toggle"/"effects.reload"/"pvz.spawn.extra" all count) ->
+#     Game-Injector-Debug-shaped, regardless of what else the body does.
+#   - body contains NO Send(...) call, and calls a real persisted method (store.*, ua.*, a
+#     *Service.* method) -> RPG-Server-Debug-shaped.
+#   - neither (e.g. a route that only reads a static in-memory catalog) -> flagged for manual
+#     review, not auto-classified either way.
 ```
 
 ## Testing strategy
 
 | Level | Cases |
 |---|---|
-| Guard unit test | A fixture route body with only a `Send(hub, inbox, "debug.xyz", ...)` call → passes as Game Injector Debug. A fixture body with only `store.Foo(...)` → passes as RPG Server Debug. A fixture body with both → fails unless allowlisted |
-| Live | Run the guard against the real, current `DebugEndpoints.cs` — must pass green with zero exemptions needed (the file's existing routes are already correctly single-shaped, per the ideal doc's survey) |
+| Guard unit test | A fixture body with only a `Send(hub, inbox, "cmd", ...)` call → Game Injector Debug. A fixture body with only `store.Foo(...)`, no relay → RPG Server Debug. A fixture body with BOTH a `store.Foo(...)` call and a `Send(...)` call → still Game Injector Debug (the corrected "any relay wins" rule) — this is the actual regression case the original wrong rule would have flagged, so it must be asserted explicitly. A `MapPost(g, "/x", "cmd")` shared-helper call → Game Injector Debug without a body scan |
+| Live | Run the guard against the real, current `DebugEndpoints.cs` — must pass green with **zero exemptions**, including the mixed-shape routes the audit found (`/lawn/quick-start`, `/scenario/{id}`, `/effect/grant`, `/effect/withdraw`, `/effect/clear`, `/effects/reload`, `AcceptDebugSpawnExtra`'s two callers) — under the corrected rule these are simply Game-Injector-Debug-shaped, not violations |
 | Regression | Guard script itself has a small `tests/FusionRpg.Guard.Tests` case so a future edit to the guard's own regex is caught by CI, not discovered live |
 
 ## Boundaries

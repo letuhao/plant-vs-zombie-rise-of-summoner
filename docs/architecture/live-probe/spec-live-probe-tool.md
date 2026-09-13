@@ -22,20 +22,51 @@ the Injector's own telemetry.
 Who reads this: any agent asked to prove a Bound-`UniqueActor`/combat-stat feature works live (the
 exact class of claim T12/T14 needed and got wrong the fast way).
 
-## The six steps (from the ideal doc, restated)
+## Two modes, not one — corrected after an audit found the acquisition step has a real fork
 
-1. **Acquire** — `POST /api/creatures/summon` (real gacha) or `POST /api/debug/spawn-unique-actor`
-   (identity-only shortcut: `PlayerId, Side, GameTypeId` — legitimate, no stats to fabricate).
-2. **Allocate** — `POST /api/aptitudes/unique/allocate` for the new `instanceId`.
-3. **Equip** — `POST /api/items/equip` (prefer over the `PUT .../equipment/{slot}` stub-allowlist
-   route — see the ideal doc's Equip row).
-4. **Deploy** — `POST /api/unique/actors/{id}/deploy` — **`loadoutJson` omitted, always.**
+**Mode A (persisted-state only, steps 1-5): Server up, Injector/game NOT required.** None of
+`/api/debug/spawn-unique-actor`, `/api/aptitudes/unique/allocate`, `/api/items/equip`, or
+`/api/unique/actors/{id}/deploy` carry an `InjectorConnected` gate — confirmed by reading each
+handler. This mode proves persisted domain logic only, and can run against a bare Server with no
+game.
+
+**Mode B (full proof, all 6 steps): Injector connected + a live match/board already running.**
+**Critical correction, found by audit:** the identity-only debug shortcut
+(`POST /api/debug/spawn-unique-actor`) mints a **synthetic ptr** (`"DEBUG" + Guid`, per its own code
+comment: proves hybrid-typing "without a real Unity-spawned entity") that **never exists on any live
+board**. Step 6 reads a live entity by ptr — if acquisition used the debug shortcut, step 6 has
+nothing real to read and will time out or return empty, not "fail honestly," just uninformatively
+empty. **Mode B's step 1 MUST use the real acquisition path** (`POST /api/creatures/summon`, or an
+equivalent that results in a genuinely Unity-spawned entity) — the debug shortcut is Mode-A-only.
+
+1. **Acquire.**
+   - Mode A: `POST /api/debug/spawn-unique-actor` (`PlayerId, Side, GameTypeId`) — fine, no live
+     board needed.
+   - Mode B: `POST /api/creatures/summon` (`PlayerId, BannerId, Count, CorrelationId` — note:
+     `BannerId`, not a type id; the roll picks the species) — the only acquisition path that reaches
+     an actual Unity entity on a live board.
+2. **Allocate** — `POST /api/aptitudes/unique/allocate`, body `{ InstanceId, Shares }` where
+   `Shares` is a `Dictionary<string, long>` — the tool translates `-AptitudeId X -AptitudePoints N`
+   into `Shares = { [X]: N }` before POSTing; it is not a flat `{AptitudeId, Points}` body.
+3. **Equip** — `POST /api/items/equip`, body `{ PlayerId?, SpecimenId, InstanceId, Role }`
+   (`ItemEquipEndpoints.cs:293`) — **`SpecimenId` (the target UniqueActor's `instanceId` from step
+   1) and `Role` (the equip slot) are BOTH required**, not just the item's own `InstanceId`; the
+   handler 400s without them. Prefer this endpoint over the `PUT .../equipment/{slot}` stub-allowlist
+   route (see the ideal doc's Equip row).
+4. **Deploy** — `POST /api/unique/actors/{id}/deploy`, body `{ PlayerId?, CorrelationId, Col, Row,
+   MatchKey, LoadoutJson }` — **`LoadoutJson` omitted/empty, always.** **Precondition the Server does
+   NOT enforce:** `MatchKey` is stored unvalidated (`TryBeginUniqueDeploy`, `RpgStore.UniqueActors.cs:
+   139`) — the call succeeds (`Queued=true`) even with no real match running. Mode B still requires
+   one anyway, because step 6 needs a live board to read from; the Server's own success response is
+   not evidence that one exists.
 5. **Persisted-state read-back** — `GET /api/unique/actors/{id}` + `.../equipment`. Proves inputs
-   were persisted correctly. **Not yet a live proof.**
-6. **Live-engine read, kept explicitly separate** — `debug.board-stats` for the deployed ptr
-   (`CheatCommandRunner.cs:325` → `DebugRuntime.BoardEntityStats()`, relayed at
-   `DebugEndpoints.cs:314`), asserted against step 5's persisted values. Labeled in the tool's own
-   output as the distinct "does the live game reflect it" claim, never merged into step 5's verdict.
+   were persisted correctly. **Not a live proof; this is where Mode A stops.**
+6. **Live-engine read, Mode B only, kept explicitly separate** — `debug.board-stats` for the deployed
+   ptr (`CheatCommandRunner.cs:325` → `DebugRuntime.BoardEntityStats()`, relayed at
+   `DebugEndpoints.cs:314`, confirmed to return a structured per-entity list with real `ptr`/`attack`/
+   `hp`/`maxHp` fields — not a raw dump), asserted against step 5's persisted values. Labeled in the
+   tool's own output as the distinct "does the live game reflect it" claim, never merged into step
+   5's verdict.
 
 ## Tech stack
 
@@ -53,8 +84,13 @@ exact class of claim T12/T14 needed and got wrong the fast way).
 ## Commands
 
 ```powershell
-.\scripts\prove-live-probe.ps1 -PlayerId 1 -Side plant -TypeId <peashooter-id> `
-    -AptitudeId Might -AptitudePoints 30 -ItemInstanceId <owned-item-id> -TimeoutSec 30
+# Mode A — persisted-state only, Server up, no game/Injector needed
+.\scripts\prove-live-probe.ps1 -Mode A -PlayerId 1 -Side plant -TypeId <peashooter-id> `
+    -AptitudeId Might -AptitudePoints 30 -Role <slot> -ItemInstanceId <owned-item-id>
+
+# Mode B — full proof, real summon + live match/board + Injector connected required
+.\scripts\prove-live-probe.ps1 -Mode B -PlayerId 1 -Side plant -BannerId <banner-id> `
+    -AptitudeId Might -AptitudePoints 30 -Role <slot> -ItemInstanceId <owned-item-id> -TimeoutSec 30
 # exits 0 on full pass, non-zero + a labeled failure line naming which of the 2 halves (persisted vs live) failed
 ```
 
@@ -89,7 +125,8 @@ Never a single merged `bool Passed` across both halves without saying which one 
 | Level | Cases |
 |---|---|
 | Unit (Core/Data, offline) | Request/response DTO (de)serialization only — no live server needed for this slice |
-| Live (owner or agent, real game+server up) | Full 6-step run against a real deployed specimen; assert both halves pass; assert the tool correctly FAILS and names the right half when `loadoutJson` is deliberately populated in a throwaway test invocation (proves the tool itself would have caught the 2026-09-13 incident) |
+| Live, Mode A (Server up, no game needed) | Steps 1-5 against a real running Server, debug-shortcut acquisition; asserts persisted state only |
+| Live, Mode B (owner or agent, real game+server up, per `actor-hub-live-proof`'s own Prerequisites) | Full 6-step run via real summon; assert both halves pass; assert the tool correctly FAILS and names the right half when `loadoutJson` is deliberately populated in a throwaway test invocation (proves the tool itself would have caught the 2026-09-13 incident) |
 | Guard | None new — this tool is itself a verification instrument, not a source-shape guard (see `debug-scope-guard`) |
 
 ## Boundaries
@@ -109,13 +146,15 @@ Never a single merged `bool Passed` across both halves without saying which one 
 
 ## Success criteria
 
-- [ ] `tools/ProveLiveProbe` builds and runs against a live Server + live game.
-- [ ] Exits 0 only when both halves (persisted + live-engine) match; exits non-zero with a labeled
-      failure otherwise.
+- [ ] `tools/ProveLiveProbe` builds; `-Mode A` runs against a bare running Server with no game/
+      Injector connected and reports the persisted-state half only.
+- [ ] `-Mode B` requires real summon acquisition (refuses `-Mode B` combined with the debug shortcut,
+      since that combination can never produce a real live-board ptr) and exits 0 only when both
+      halves (persisted + live-engine) match; exits non-zero with a labeled failure otherwise.
 - [ ] Never populates `loadoutJson`; refuses/warns if a caller tries to pass one through.
-- [ ] Proven to catch the 2026-09-13 incident shape: run against a specimen with a deliberately
-      broken Hub-bonus grant (or the pre-fix `bound-loadout-hub` state via git if still reachable) and
-      confirm it reports a live-engine-half FAIL rather than a pass.
+- [ ] Proven to catch the 2026-09-13 incident shape: run `-Mode B` against a specimen with a
+      deliberately broken Hub-bonus grant (or the pre-fix `bound-loadout-hub` state via git if still
+      reachable) and confirm it reports a live-engine-half FAIL rather than a pass.
 
 ## Open questions
 
