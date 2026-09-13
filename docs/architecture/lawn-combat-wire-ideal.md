@@ -417,14 +417,31 @@ and one contradiction.
 | **Cadence mismatch.** `action-ideal.md:223`: *"An action cost is authored against the pool's **REGEN**, never against its MAX."* Battle costs are per-*round*; a lawn Peashooter fires roughly every 1.4 s of wall-clock. A round is not a second, so no battle-authored cost transfers to the lawn unmapped | — |
 | Stamina regen coefficient is sized against the wrong opponent — named defect, owned by `residual-fit`, not this program | `tools/CombatSim/tuning/aptitudes.v1.json` `recovery.scaleMilli: 374`; diagnosis `action-ideal.md:184-201` |
 
-### The contradiction to resolve
+### The apparent contradiction — resolved, there was never one (2026-09-13)
 
-| Source | Says |
-|---|---|
-| `action-ideal.md:63` — D22, owner, 2026-08-27 | the basic attack costs **`stamina`** |
-| `data/tuning/action-corpus-cost-templates.v1.json:12` | attack → **`qi` 20** `onCommit`, self-labelled *"UNMEASURED placeholders"* |
+It looked like D22 (`stamina`) and the corpus template (`qi 20`) disagreed. They do not: **they are
+indexed by different things.**
 
-Open question 1 below.
+| | Indexed by | Applies to | Resource |
+|---|---|---|---|
+| `action-ideal.md:63` D22 | `ActionKind.Basic` | `act.attack`, the intrinsic fallback | **`stamina`** |
+| `action-corpus-cost-templates.v1.json` | `ActionCategory` (all five) | **corpus-composed rows only** — `ActionCorpusComposer.cs:165-168` | **`qi`** |
+
+`act.attack` is never corpus-composed — it is constructed directly at `BattleRunState.cs:80`, so the
+template has never applied to it. The collision was purely lexical: "attack" is both a Category and
+the Basic action's id. The template's own `_meta.derivation` even reasons about *"the default/
+basic-attack-shaped path"* while actually keying on Category, which is where the confusion came from.
+
+**Owner's reconciliation rule (2026-09-13), now binding for this program:** *the basic attack uses
+`stamina`; if something costs `qi`, it is by definition **not** a basic attack — it is a species/
+family **signature** action.*
+
+That rule needs no new vocabulary. A species/family signature action is **`ActionKind.Innate`**
+(`action-ideal.md:40` D1 — "innate (1, free, per creature type)"), where "free" means free of
+*loadout capacity* (D2: *"Basic actions cost no loadout capacity — they are intrinsic"*), **not**
+free of resource cost. So an Innate costing `qi` is consistent with both documents.
+
+Remaining work is therefore a wire, not a decision: author a `stamina` cost row for `act.attack`.
 
 ---
 
@@ -441,41 +458,52 @@ silently drop.
 | **Proc coefficient** (fire-rate value scaling, D3/RoR2 prior art) | Real anti-exploit, but it prices value — that is the balance program's axis, not a wiring gap | balance program |
 | Plant-side lawn status | Lawn status executor iterates zombies only (`action-corpus-ideal.md:1379`) — a named, ownerless capability gap | status resolver |
 | Per-actor defense on incoming vanilla hits | `GameHooks.cs:702` synthetic `"dmg"` key, one cached number per side | whichever program owns that fix |
+| **Resource exhaustion as a real status/debuff** | Owner, 2026-09-13 (D6): an exhausted actor showing decayed stats belongs to a proper exhaustion feature using the existing buff/debuff/status architecture — not an ad-hoc stat decay here, which would overlap and confuse the status system | status resolver |
 
 ---
 
-## Open questions — owner decisions only
+## Decisions, round 2 (owner, 2026-09-13)
 
-**1. `stamina` or `qi` for the basic attack's cost?**
-D22 (`action-ideal.md:63`, owner 2026-08-27) says **stamina**. The shipped corpus template says
-**`qi` 20** (`action-corpus-cost-templates.v1.json:12`), self-labelled "UNMEASURED placeholders". One
-of the two is wrong and the spec cannot author a cost row until this is settled. A one-word answer.
+**D5 — `stamina` for the basic attack; `qi` marks a signature action.**
+See "The apparent contradiction — resolved" above. *The basic attack uses `stamina`; anything costing
+`qi` is not a basic attack, it is a species/family signature action* — which is `ActionKind.Innate`,
+already in the sealed three-kind vocabulary. No widening, no new concept.
 
-**2. On the lawn, "no resource, no trigger" cannot stop the shot. What should it stop instead?**
-This is the load-bearing question and it has no precedent in battle. In battle, refusing to *declare*
-an action means the actor does not act. **On the lawn we do not own the sim loop**: PvZ fires the pea
-on its own cadence, and we are forbidden from modifying vanilla projectile behaviour
-(`combat-damage-ssot.md:608-612`). So an exhausted plant still shoots — we cannot suppress it.
+**D6 — Exhaustion suppresses the rider only.**
+On the lawn we do not own the sim loop: PvZ fires the pea on its own cadence, and we are forbidden
+from modifying vanilla projectile behaviour (`combat-damage-ssot.md:608-612`). So "no resource, no
+trigger" **cannot stop the shot**. Out of `stamina` ⇒ the pea still flies and deals its
+vanilla/`attackDamage` number, and **no elemental delta is added**. The actor simply waits for regen
+and triggers again.
 
-Which means "no resource" can only suppress **the RPG's own contribution**. Candidates:
+*Semantics diverge per mode by necessity, and the spec must say so plainly:* in battle, no resource
+means the action is never declared; on the lawn, it means the RPG contributes nothing to a shot that
+happens anyway. Both are the same rule — "the RPG gates only the RPG's own contribution" — applied to
+two different levels of control over the clock.
 
-- **(a) No rider.** Out of resource ⇒ the pea still flies and deals its vanilla/`attackDamage` number,
-  but no elemental delta is added. The plant visibly "runs out of magic" while still plinking.
-  Smallest, honest, and needs nothing we do not already have.
-- **(b) No rider *and* the stat bleed decays.** Also stop refreshing `progression.bonus.atk`, so the
-  plant drifts back toward vanilla. More dramatic, but it fights the "reflection with delay" model and
-  would look like a bug on a busy board.
-- **(c) Cost is not per-shot at all** — charge on bind/deploy, or per wave, so the pool gates
-  *presence* rather than *each swing*. Sidesteps the cadence problem entirely (question 3).
+**Explicitly rejected: decaying the stat bleed on exhaustion.** Owner, 2026-09-13: that belongs to a
+**resource-exhaustion feature with real statuses/debuffs**, since the architecture already supports
+adding buffs/debuffs/statuses. Doing it ad-hoc here would overlap and confuse the status system.
+Tracked below.
 
-**3. What is the lawn's cost cadence?**
-`action-ideal.md:223`: *"An action cost is authored against the pool's **REGEN**, never against its
-MAX."* Battle authors per **round**; a Peashooter fires about every **1.4 s** of wall-clock. A round
-is not a second, so no battle-authored number transfers unmapped. Either the spec defines a
-round↔second mapping for the lawn, or lawn costs are authored independently. This also decides
-whether the regen reader must land in the same slice (it must, if cost is per-shot — otherwise every
-plant dries up permanently, since `BaseResourceRegen` returns 0 and nothing reads the aptitude-funded
-`resource.regen.*` channels).
+**D7 — Regen rides the existing 100 ms kernel. Do not count frames, do not add a clock.**
+The lawn's own clock is per-frame — `InjectorLoop.Tick(unscaledDeltaTime)`, called from
+`MonoBehaviour.Update` / `MelonMod.OnUpdate` (`InjectorLoop.cs:9,37,224`). But a periodic scheduler
+already exists and is the right host: `KernelDriveHost`, `UpkeepPeriodTicks = 100` (ms), documented
+*"It stays 100 ms deliberately"* (`KernelDriveHost.cs:61,65`), today driving `KindDotPulse` and
+`KindShieldUpkeep` (`:69-70,201-202`). **Resource regen becomes a third kind on that queue.**
+
+Why not "every 60 frames": 60 frames is not one second unless the machine holds 60 fps — on a 30 fps
+machine regen would run at half rate, making game behaviour depend on hardware speed. The kernel is
+carry-corrected against real time and deliberately re-arms off the event's own `DueTick`, never off
+"now", *"so a stuttering frame would permanently slow DoT cadence instead of merely delaying it"*
+(`KernelDriveHost.cs:186-192`). Riding it inherits that correctness for free and honours the
+"don't invent a clock" principle.
+
+**Consequence for the cost cadence question:** with regen on a 100 ms real-time grid, a lawn cost is
+authored against **regen per second**, per `action-ideal.md:223` (*"authored against the pool's REGEN,
+never against its MAX"*). No round↔second fiction is needed. The three wires — cost row, regen
+reader, lawn `CostLedger` call — must still land in the same slice, or plants dry up permanently.
 
 ---
 
@@ -510,7 +538,7 @@ citing this gate should cite the schema default, not the env var.
 
 ## Next step
 
-`/spec` — a capability map plus module specs — once the three open questions are answered.
+**All open questions are answered (D1–D7). This doc is ready for `/spec`.**
 
 The natural module split this doc now suggests, all of it wiring:
 
@@ -518,7 +546,7 @@ The natural module split this doc now suggests, all of it wiring:
 |---|---|
 | **lawn-hit-entry** | The `HasOnDamageDealtGrant()` guard → drain → packet, keyed on the **board fold** (not the FSM) |
 | **basic-attack-grant** | Bind `ActionKind.Basic` per lawn actor at spawn so the predicate above is true; element rides the existing `elementPayload` bake |
-| **basic-attack-cost** | The empty `Costs` array (`BattleRunState.cs:80`) + the missing regen reader + the lawn's absent `CostLedger` call — these three must land together or plants dry up permanently |
+| **basic-attack-cost** | A `stamina` cost row for `act.attack` (D5) + a regen reader + the lawn's absent `CostLedger` call + regen as a third kind on the 100 ms kernel (D7) — **these must land together**, or plants dry up permanently |
 | **corpus-unblock** | `ActionCorpusComposer.cs:143` (forces `Skill`), `Program.cs:402` (24 of 179 load), `UpsertSpeciesBasics` callers |
 
 Rate limiting is **not** a module here — proc coefficient went to the balance program (D4), and ICD
