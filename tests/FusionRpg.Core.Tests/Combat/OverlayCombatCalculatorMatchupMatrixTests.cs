@@ -8,7 +8,7 @@ namespace FusionRpg.Core.Tests.Combat;
 /// <summary>All 16 single-type attacker×defender cells → MatchupBonus + FinalSignedDelta.</summary>
 public class OverlayCombatCalculatorMatchupMatrixTests
 {
-    const double Base = 100;
+    const long Base = 100;
 
     static OverlayCombatRequest Request(ElementTypeId attacker, ElementTypeId defender) =>
         new()

@@ -8,7 +8,7 @@ namespace FusionRpg.Core.Tests.Combat;
 /// <summary>U4 — per-profile min-chip floor (owner decision 6).</summary>
 public class MinChipFloorTests
 {
-    static OverlayCombatRequest TankMatchup(CombatProfile profile, double baseDamage = 100,
+    static OverlayCombatRequest TankMatchup(CombatProfile profile, long baseDamage = 100,
         bool? forceHit = true, bool? forceCrit = false)
     {
         var composer = new DerivedComposer();
