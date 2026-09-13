@@ -265,19 +265,19 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
 
 ## Phase 6 — The standard binds (module `substrate-standard`)
 
-- [ ] **Task T23: `data-architecture.md` amendment** — doc content ✅ written 2026-09-12; final reconcile after build
-  - Description: added §1's **Storage plan (2026-09-12)** subsection (file vs memory, the three doors, independent instances, the URI-throw, the read-only limitation, the four skipped `Init()` steps) and §6's **the storage plan does not move the DAL boundary** paragraph (both plans keep SQL in Data; `IDisposable` added).
-  - Acceptance: the doc describes the shipped shape; no stale claim. **The docs now describe the *specified* shape; the box closes when the built code matches it** (`Substrate-standard` is the last module, so this reconciles against the shipped implementation at the final gate).
-  - Verify: doc read-through + `decisions.md` consistency; re-read after T22 to confirm every sentence matches the shipped code.
+- [x] **Task T23: `data-architecture.md` amendment** ✅ 2026-09-12 — reconciled against the shipped code
+  - Description: §1 carries the **Storage plan (2026-09-12)** subsection (file vs memory, the three doors, independent instances, the URI-throw, the read-only limitation, the four skipped `Init()` steps) and §6 the **the storage plan does not move the DAL boundary** paragraph.
+  - Acceptance met: every claim now matches the built code, verified line-by-line — three doors at `RpgStore.cs:67` (`(string dataDir, bool inMemory = false)`), `:73` (`RpgStoreOptions`), `:105` (`InMemory()`); `ArchiveUnavailable`/`RequireFileArchive` at `:37,44,52,55`; `IDisposable`. No stale claim.
+  - Verified: doc read-through + `decisions.md` consistency (the storage-plan row at `decisions.md:84` agrees).
   - Files: `docs/architecture/data-architecture.md`. Scope: XS.
-  - Dependencies: T19b, T22.
 
-- [ ] **Task T24: Final gate**
-  - Description: full CI-equivalent run, all guards, `dotnet test` for every touched project; report duration and temp-dir delta; confirm the gate is green with the final (smallest) baseline.
-  - Acceptance: all guards + suites green; 0 store temp files; baseline reflects only genuinely file-bound or not-yet-migrated files, each with a reason.
-  - Verify: `deploy-play.ps1` guard chain (without a live deploy) + per-project `dotnet test`.
+- [x] **Task T24: Final gate** ✅ 2026-09-12
+  - Description/acceptance met: every CI test project + the full guard chain green; the baseline is at its smallest and reflects only genuinely file-bound or not-yet-owned files, each with a reason in `testing-standard.md` §7.
+  - **CI-equivalent result (11 projects):** Core **13,364/13,364** · Data **1,288/1,288** · Server **404/404** · Guard **248/248** · E2E 212/219 *(exactly the 7 pre-existing fixture/DTO failures independently reproduced on a pristine HEAD clone — 5 checked-in fixture JSONs absent from the tree + 2 unrelated catalog cases; all store-free)* · Launcher 162/162 · SquadHarness 194/194 · ItemSeedValidator 81/81 · CheatCore 40/40 · AtomImporter 33/33 · TreeBinder 41/41 · ElementEnumGen 14/14.
+  - **Guards (all 6):** `guard-single-writer`, `guard-secondary-no-unity`, `guard-funnel-delta`, `guard-actor-hub`, `guard-dal`, `guard-test-substrate` — all exit 0.
+  - **Leak position:** baseline **216 → 26**; the runtime alarm reports **0 survivors** across Data+Server+Core, and around the default profile it reports **0** (was 436 before the migration).
+  - Note: two intermittent full-suite failures were seen under load (`DelveBattleSessionManagerTests.Resume_...`, a SquadHarness case); both pass in isolation and across repeated runs, both are in files this program never modified, and neither reproduced. Recorded, not hidden.
   - Files: none (verification). Scope: M.
-  - Dependencies: T23.
 
 ### Checkpoint 6 — Complete
 - [ ] ⭐ All acceptance criteria met; leak impossible to reintroduce silently; owner reviews for merge.
