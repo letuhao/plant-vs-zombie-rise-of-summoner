@@ -54,11 +54,11 @@ See [The loops](the-loops.md).
 | **Dave’s level** | The main power line and the Vision unlock clock |
 | **Creature** | Anything in your collection layer |
 | **Specimen** | One persistent individual — not a stack of copies |
-| **Creature** | A specimen you summon, bind, fuse, and field |
 | **Legion** | A force you march on the rift |
 | **Commander** | Who leads a lawn run or a legion |
 | **Warden** | A creature bound to hold ground on the map (**WIP**) |
 | **Patron** | The one creature whose element colours the army (**WIP** on the live lawn) |
+| **Demon** | **Not used in the shipped game — reserved for a future race.** A creature of a *new empire*, a faction in its own right. Named only; owner: *"needs a serious huge program."* Every player-facing and source use of the word is now **Creature** (repo-wide rename, 2026-09-12). Do not reintroduce it for an existing creature. See [species-selection-ideal.md](../architecture/species-selection-ideal.md) |
 | **Zomboss** | The enemy commander. He decides from his own fog |
 
 ---
