@@ -36,7 +36,7 @@ from seedsmith.adapters.actions.load import load_committed  # noqa: E402
 from seedsmith.adapters.actions.vocab import load_family_ids  # noqa: E402
 from seedsmith.metrics.action_coverage import (  # noqa: E402
     ALL_ACTION_COVERAGE_CLOSED_METRICS, ALL_ACTION_COVERAGE_OPEN_METRICS,
-    EnablerPayoffCoverageMetric, PairingReachMetric,
+    EnablerPayoffCoverageMetric, PairingReachMetric, ThinCellMetric,
 )
 from seedsmith.metrics.model import Ctx, Finding, Loop, Metric, Severity  # noqa: E402
 from seedsmith.metrics.registry import MetricRegistry, run_all  # noqa: E402
@@ -156,6 +156,53 @@ class OpenMetricGatesTests(unittest.TestCase):
 # ---------------------------------------------------------------------------------------------
 # Planted violation — unevaluated pass (a genuinely missing input -> NOT_MEASURED, never a pass).
 # ---------------------------------------------------------------------------------------------
+
+class VerdictHonoursGatesTests(unittest.TestCase):
+    """T1.2 (2026-09-12, spec §3 step 6 + `spec-metrics.md` §4): a metric that has NOT been promoted
+    (`gates=False`) reports its GAPs but cannot make the verdict `not-clean`. Promotion is the
+    deliberate act that earns the right to gate, and every action-corpus metric ships unpromoted —
+    so before this, every GAP blocked the verdict and the full-run gate was unreachable by
+    construction. `NOT_MEASURED` stays blocking in every case: an absent check is never a pass."""
+
+    def _verdict(self, findings, *, mode="full", gating=()):
+        ids = [m.id for m in ALL_ACTION_COVERAGE_CLOSED_METRICS]
+        return cr.compute_verdict(findings, ids, mode, gating_metric_ids=gating)
+
+    def test_a_non_gating_gap_does_not_flip_the_verdict(self) -> None:
+        findings = [Finding(metric=ThinCellMetric.id, severity=Severity.GAP, subject="cell.x",
+                            message="short")]
+        verdict = self._verdict(findings, mode="full", gating=())
+        self.assertEqual(verdict.verdict, "pass",
+                         "thinCell is not promoted; its GAP is a reading, not a gate")
+        self.assertIn(ThinCellMetric.id, verdict.gap_metrics,
+                      "the GAP is still reported — it just does not gate")
+
+    def test_a_gating_gap_flips_the_verdict(self) -> None:
+        findings = [Finding(metric=ThinCellMetric.id, severity=Severity.GAP, subject="cell.x",
+                            message="short")]
+        verdict = self._verdict(findings, mode="full", gating=(ThinCellMetric.id,))
+        self.assertEqual(verdict.verdict, "not-clean")
+        self.assertIn(ThinCellMetric.id, verdict.gap_metrics)
+
+    def test_not_measured_blocks_even_when_not_gating(self) -> None:
+        findings = [Finding(metric=PairingReachMetric.id, severity=Severity.NOT_MEASURED,
+                            subject="(suite)", message="missing pairings")]
+        verdict = self._verdict(findings, mode="full", gating=())
+        self.assertNotEqual(verdict.verdict, "pass")
+        self.assertNotEqual(verdict.verdict, "smoke-clean")
+
+    def test_the_verdict_reports_which_metrics_are_gating(self) -> None:
+        """The report must say WHICH metrics can gate, so a reader can tell a real gate from a
+        reading without opening the registry."""
+        verdict = self._verdict([], mode="full", gating=(ThinCellMetric.id,))
+        self.assertEqual(verdict.gating_metrics, (ThinCellMetric.id,))
+
+    def test_shipped_registry_ships_no_gating_action_metrics(self) -> None:
+        """Calibration order (`spec-metrics.md` §4): measure, look, set, gate. Nothing here has been
+        promoted, so with real findings the run verdict is not blocked by an unpromoted metric."""
+        self.assertTrue(all(not m.gates for m in ALL_ACTION_COVERAGE_CLOSED_METRICS),
+                        "no action-corpus metric is promoted yet")
+
 
 class UnevaluatedPassTests(unittest.TestCase):
     def test_missing_pairings_json_yields_not_measured_and_a_non_pass_verdict(self) -> None:
@@ -617,7 +664,7 @@ class RealNonzeroAcceptedReportTests(unittest.TestCase):
     `SyntheticContentTests`/`OfflineGuaranteeTests` elsewhere in this file exercise it directly --
     this class only ever asserted it against the REAL checkout, which has permanently moved on."""
 
-    def test_a_real_run_reports_the_real_accepted_corpus_and_an_explicit_non_pass_verdict(self) -> None:
+    def test_a_real_run_reports_the_real_accepted_corpus_with_gaps_visible_but_not_gating(self) -> None:
         summary = gen_mod.regenerate(write=False)
         # The accepted corpus is a POPULATION (it grows every round and every promotion), so its
         # size is a reading, never a literal (validation-ssot.md). Assert the CONTRACT instead:
@@ -628,7 +675,13 @@ class RealNonzeroAcceptedReportTests(unittest.TestCase):
         committed_rows = committed.corpus.by_kind("action-seed")
         self.assertGreater(len(committed_rows), 0)
         self.assertGreaterEqual(summary["acceptedCorpusSize"], len(committed_rows))
-        self.assertNotEqual(summary["verdict"], "pass")
+        # ⛔ UPDATED 2026-09-12 (T1.2): the run verdict is `pass` now that `gates` decides it — no
+        # action-corpus metric is promoted, so a GAP is a reading and a next-round work order, not a
+        # gate (spec-metrics.md §4; spec §3 step 6). The thin corpus is still VISIBLE: `gapMetrics`
+        # is non-empty and every gap is named. "Non-pass" was the old (pre-fix) semantics.
+        self.assertEqual(summary["verdict"], "pass")
+        self.assertNotEqual(summary["gapMetrics"], [],
+                            "the thin corpus is still reported, it just does not gate")
         # 3 scopes x 5 categories = 15 (scope, category, rungBand) groups; 45 is the exploded
         # per-pairingRole cell ROW count in the written report's `entries` (cell_entries below).
         self.assertEqual(summary["cellCount"], 15)

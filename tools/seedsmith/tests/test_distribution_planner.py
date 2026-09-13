@@ -958,6 +958,34 @@ class FullRunRefusalTests(unittest.TestCase):
             }}), encoding="utf-8")
             self.assertTrue(gen_mod.is_passing_quality_gate(path))
 
+    def test_gate_reads_the_verdict_flag_not_the_gap_list(self) -> None:
+        """T1.3 (2026-09-12): the gate must defer to A-S5's own `gates`-aware verdict rather than
+        re-deriving a second, divergent rule from `gapMetrics`. A `pass` verdict whose `gapMetrics`
+        is non-empty is a legitimate report — the GAPs are unpromoted readings (spec-metrics §4) —
+        and the gate must accept it. Before this, the gate re-imposed `gapMetrics == []`, which is
+        the very definition A-S5 had to stop using, so the two disagreed: A-S5 said `pass`, the gate
+        said no. The verdict is the single source of truth; the gate never re-interprets it.
+
+        `NOT_MEASURED` stays blocking: a pass verdict can never contain one (A-S5 refuses to emit
+        `pass` in that case), and the gate keeps its own belt-and-braces check against a hand-written
+        report that claims `pass` while listing an unevaluated metric."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "coverage-round-1.json"
+            path.write_text(json.dumps({"kind": "action-coverage", "_meta": {
+                "round": 1, "verdict": {"verdict": "pass", "notMeasuredMetrics": [],
+                                          "gapMetrics": ["action.corpus.thinCell"]},
+            }}), encoding="utf-8")
+            self.assertTrue(gen_mod.is_passing_quality_gate(path),
+                            "a pass with unpromoted GAPs is a valid gate — the GAPs do not gate")
+
+            path.write_text(json.dumps({"kind": "action-coverage", "_meta": {
+                "round": 1, "verdict": {"verdict": "pass",
+                                          "notMeasuredMetrics": ["action.corpus.pairingReach"],
+                                          "gapMetrics": []},
+            }}), encoding="utf-8")
+            self.assertFalse(gen_mod.is_passing_quality_gate(path),
+                             "a pass cannot list an unevaluated metric")
+
     def test_gate_rejects_wrong_kind_or_round(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "coverage-round-1.json"

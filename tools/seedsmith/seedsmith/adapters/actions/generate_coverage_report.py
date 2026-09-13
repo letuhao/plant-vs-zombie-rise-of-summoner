@@ -172,7 +172,13 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, creatures_root: Path = CREA
     entries.sort(key=lambda e: e["id"])
 
     closed_ids = [m.id for m in ALL_ACTION_COVERAGE_CLOSED_METRICS]
-    verdict = cr.compute_verdict(closed_findings, closed_ids, cov.mode)
+    # The SAME `gates` set `report/cli.py --gate` builds, read from the live registry rather than
+    # duplicated: a metric earns the right to gate by flipping `gates` (spec-metrics.md §4), and that
+    # one flag decides both this verdict and the general reporter's exit code — so they cannot
+    # disagree. T1.2/T1.3 (2026-09-12).
+    gating_ids = [m.id for m in registry.all() if m.gates]
+    verdict = cr.compute_verdict(closed_findings, closed_ids, cov.mode,
+                                 gating_metric_ids=gating_ids)
 
     doc = cr.build_envelope(entries, meta={
         "partition": f"round-{round_no}",

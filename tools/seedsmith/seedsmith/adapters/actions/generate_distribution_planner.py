@@ -101,9 +101,16 @@ def is_passing_quality_gate(path: Path, *, round_no: int = 1) -> bool:
         return False
     # A clean smoke report is also a passing quality gate. A full report uses `pass`; a smoke
     # report uses `smoke-clean` because A-S5 deliberately never labels a partial run `pass`.
+    #
+    # ⛔ CORRECTED 2026-09-12 (T1.3). This gate must DEFER to A-S5's own verdict, not re-derive a
+    # second rule. It used to also require `gapMetrics == []`, which is exactly the definition A-S5
+    # had to abandon: `gates=False` metrics report GAPs without gating (spec-metrics.md §4), so
+    # A-S5 emits `pass` with a non-empty `gapMetrics`, and the two disagreed — A-S5 said pass, the
+    # gate said no. The verdict string is now the single source of truth. `NOT_MEASURED` stays
+    # blocking as belt-and-braces: A-S5 never emits `pass` with an unevaluated metric, and a
+    # hand-written report claiming `pass` while listing one is refused here.
     return (verdict.get("verdict") in {"pass", "smoke-clean"} and
-            verdict.get("notMeasuredMetrics") == [] and
-            verdict.get("gapMetrics") == [])
+            verdict.get("notMeasuredMetrics") == [])
 
 
 def _family_members(family_assignments: dict) -> "dict[str, list[str]]":
