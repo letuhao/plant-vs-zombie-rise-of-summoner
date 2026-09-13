@@ -3,7 +3,7 @@
 **Plan:** [actor-hub-and-combat-power-solid-fixing-plan.md](actor-hub-and-combat-power-solid-fixing-plan.md)  
 **Map:** [docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md](../docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md)  
 **Runbook / evidence:** [runbook](actor-hub-and-combat-power-solid-fixing-runbook.md) · [evidence map](actor-hub-and-combat-power-solid-fixing-evidence-map.md) · command `/solid-run`  
-**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 + Wave 2 complete (T1-T11 done). Wave 3: T12 BLOCKED (honest gap — depends on `aptitude-sheet` program's unbuilt `unique-lawn-wire`, out of this program's own implementation scope per its own spec's locked boundary); T13 done; T14 deferred (depends on T12). Wave 4 in progress: T15-T18 done (T17 closed as honest negative — no real per-instance Θ exists; one real dead-fallback bug fixed); T19 next.
+**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 + Wave 2 complete (T1-T11 done). Wave 3: T12 BLOCKED (honest gap — depends on `aptitude-sheet` program's unbuilt `unique-lawn-wire`, out of this program's own implementation scope per its own spec's locked boundary); T13 done; T14 deferred (depends on T12). Wave 4 complete (T15-T19 done; T17/T19-bullet-3 honest negatives, not forced). Wave 5 (T20-T23, stub hygiene) next.
 
 ---
 
@@ -477,14 +477,14 @@
 
 **Acceptance criteria:**
 - [ ] Script exists and documented (`prove-hub-combat.ps1` or extend `prove-aptitude.ps1`).
-- [ ] Post-fuse battle Hub channel totals ≡ sheet Hub for same UniqueActor inputs (equip/aptitude/tree).
-- [ ] Standing rises when a membership combat channel rises via Hub writers — not when only Θ rises.
-- [ ] Bound lawn aptitude input matches Server UniqueCreature compose.
-- [ ] Ideal handoff prove path checked / runbook linked.
+- [x] Post-fuse battle Hub channel totals ≡ sheet Hub for same UniqueActor inputs (equip/tree; aptitude parity already proven separately by `prove-aptitude.ps1`, not duplicated here — see evidence 19.2).
+- [x] Standing rises when a membership combat channel rises via Hub writers — not when only Θ rises.
+- [ ] Bound lawn aptitude input matches Server UniqueCreature compose. — honestly blocked, same finding as T12 (AS-1.1 unbuilt); nothing to compare against yet
+- [x] Ideal handoff prove path checked / runbook linked.
 
 **Verification:**
-- [ ] `.\scripts\prove-hub-combat.ps1` (or documented successor) green
-- [ ] Core filter `ProveHub|StandingParity|BoundLawn` if tests added
+- [x] `.\scripts\prove-hub-combat.ps1` (or documented successor) green — exit 0, both bullets pass
+- [x] Core filter `ProveHub|StandingParity|BoundLawn` — N/A, this task shipped an operator script (`tools/ProveHubCombat`), not new xUnit tests, matching the spec's own "Tool" testing-strategy row
 
 **Dependencies:** T7, T9, T12, T14 (Waves 1–3 Done gates)  
 **Files likely touched:** `tools/ProveAptitude`, new/extended script, tests, runbook / ideal handoff prove path  
@@ -494,7 +494,7 @@
 
 ## Checkpoint: Wave 4 complete
 
-- [ ] Sim / coeffs / Θ / docs / prove green
+- [x] Sim / coeffs / Θ / docs / prove green
 - [ ] Owner review before stub hygiene
 
 ---
