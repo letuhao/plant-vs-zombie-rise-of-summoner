@@ -904,7 +904,7 @@ public static class DebugEndpoints
         // file's own comments already state.
         const int windowCapacity = 2000;
         var after = Math.Max(0, max - windowCapacity);
-        var items = store.ListEvents(windowCapacity, after);
+        var items = store.ListEventsForServerScan(windowCapacity, after);
         var starts = items.Where(e => e.Kind == "board.start").ToList();
         if (starts.Count == 0) return null;
         var latestStart = starts[^1];
@@ -939,11 +939,11 @@ public static class DebugEndpoints
     {
         var max = store.GetMaxEventId();
         if (max <= 0) return 0;
-        const int windowCapacity = 500;
+        const int windowCapacity = 2000;
         var after = Math.Max(0, max - windowCapacity);
         var cutoff = DateTime.UtcNow - window;
         var count = 0;
-        foreach (var e in store.ListEvents(windowCapacity, after))
+        foreach (var e in store.ListEventsForServerScan(windowCapacity, after))
         {
             if (!string.Equals(e.Kind, kind, StringComparison.OrdinalIgnoreCase)) continue;
             if (DateTime.TryParse(e.T, null, System.Globalization.DateTimeStyles.RoundtripKind, out var t) && t >= cutoff)
@@ -963,7 +963,7 @@ public static class DebugEndpoints
         var max = store.GetMaxEventId();
         if (max <= 0) return null;
         const int windowCapacity = 2000;
-        return store.ListEvents(windowCapacity, Math.Max(0, max - windowCapacity))
+        return store.ListEventsForServerScan(windowCapacity, Math.Max(0, max - windowCapacity))
             .LastOrDefault(e => string.Equals(e.Kind, kind, StringComparison.OrdinalIgnoreCase));
     }
 

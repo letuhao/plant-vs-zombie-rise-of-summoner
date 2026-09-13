@@ -202,6 +202,26 @@ public class LawnStateEndpointTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task InjectorHelloFoundAcrossMoreThan500IntermediateEvents_stillDiscardsStaleDefeat()
+    {
+        // Real bug found live 2026-09-14, one layer deeper than the staleness check itself:
+        // RpgStore.ListEvents hardcodes Math.Clamp(limit, 1, 500) in its SQL regardless of what a
+        // caller asks for -- so FindLatestKind's own claimed 2000-row window silently was only ever
+        // 500 rows, and on a long-running server (500+ events between an old match.result and the
+        // injector.hello that should invalidate it) the hello fell outside the window, so the stale
+        // defeat was never discarded. This reproduces exactly that shape: >500 filler events between
+        // the stale defeat and the fresh hello.
+        Insert("match.result", new { result = "defeat" }, DateTime.UtcNow.AddMinutes(-10));
+        for (var i = 0; i < 600; i++) Insert("cheat.apply", new { note = $"filler {i}" });
+        Insert("injector.hello", new { game = "pvzrh-3.9", version = "1.0.0" });
+
+        var resp = await _http.GetAsync("/api/debug/lawn/state");
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        Assert.NotEqual("Defeated", body!["state"].ToString());
+        Assert.Equal("Unknown", body["state"].ToString());
+    }
+
+    [Fact]
     public async Task ThreeRecentBoardEnds_reportsCycling()
     {
         for (var i = 0; i < 3; i++) Insert("board.end", new { });
