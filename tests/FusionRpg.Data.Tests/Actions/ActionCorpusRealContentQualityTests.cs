@@ -54,14 +54,24 @@ public class ActionCorpusRealContentQualityTests : IDisposable
 
     static string RepoPath(params string[] parts) => Path.Combine(new[] { RepoRoot() }.Concat(parts).ToArray());
 
-    static ActionCorpusCostTemplate CostTemplate() => new(new Dictionary<ActionCategory, ActionCorpusCostTemplateRow>
-    {
-        [ActionCategory.Attack] = new("qi", 20, ActionCostTiming.OnCommit),
-        [ActionCategory.Defense] = new("qi", 30, ActionCostTiming.OnCommit),
-        [ActionCategory.Support] = new("qi", 40, ActionCostTiming.OnCommit),
-        [ActionCategory.Movement] = new("qi", 15, ActionCostTiming.OnCommit),
-        [ActionCategory.Status] = new("qi", 35, ActionCostTiming.OnCommit),
-    });
+    static ActionCorpusCostTemplate CostTemplate() => new(
+        new Dictionary<ActionCategory, ActionCorpusCostTemplateRow>
+        {
+            [ActionCategory.Attack] = new("qi", 20, ActionCostTiming.OnCommit),
+            [ActionCategory.Defense] = new("qi", 30, ActionCostTiming.OnCommit),
+            [ActionCategory.Support] = new("qi", 40, ActionCostTiming.OnCommit),
+            [ActionCategory.Movement] = new("qi", 15, ActionCostTiming.OnCommit),
+            [ActionCategory.Status] = new("qi", 35, ActionCostTiming.OnCommit),
+        },
+        // T7 (basic-attack-seed): one of the 24 real briefs this file imports
+        // (`action.species.cabbagepult.002`) already authors `"kindHint": "innate"` — Kind-aware rows
+        // are required here too, mirroring the real shipped action-corpus-cost-templates.v1.json's own
+        // "kinds" block, or that one brief's compose now rejects for lacking a `kinds.innate` row.
+        new Dictionary<ActionKind, ActionCorpusCostTemplateRow>
+        {
+            [ActionKind.Basic] = new("stamina", 20, ActionCostTiming.OnCommit),
+            [ActionKind.Innate] = new("qi", 25, ActionCostTiming.OnCommit),
+        });
 
     static IReadOnlyList<ActionCorpusBrief> RealBriefs()
     {

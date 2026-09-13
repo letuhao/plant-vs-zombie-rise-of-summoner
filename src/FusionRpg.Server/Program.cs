@@ -399,7 +399,11 @@ if (Environment.GetEnvironmentVariable("FUSIONRPG_ACTION_CORPUS_IMPORT") != "0")
     {
         var actionCostTemplate = FusionRpg.Core.Actions.Corpus.ActionCorpusCostTemplateLoader.Parse(File.ReadAllText(actionCorpusTemplatePath));
         var actionBriefs = new List<FusionRpg.Core.Actions.Corpus.ActionCorpusBrief>();
-        foreach (var briefFile in new[] { "committed-round-1.json", "committed-round-2.json" })
+        // `authored-basics.json` (T7, basic-attack-seed): the hand-authored `act.attack` fallback,
+        // never generator output (spec-basic-attack-seed.md) -- loaded alongside the two generated
+        // committed rounds so the shared basic attack becomes a real seed-imported row instead of only
+        // existing as BattleRunState.cs's hardcoded CompiledAction.
+        foreach (var briefFile in new[] { "committed-round-1.json", "committed-round-2.json", "authored-basics.json" })
         {
             var briefPath = Path.Combine(AppContext.BaseDirectory, "data", "seed", "actions", briefFile);
             if (File.Exists(briefPath))

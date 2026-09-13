@@ -12,11 +12,14 @@ public sealed class ActionCorpusBriefRejection : Exception
 /// §7.2: no file I/O here — `FusionRpg.Server`'s startup step reads the file, this parses the
 /// string). Reads only the fields the corpus brief actually needs — the original six plus
 /// `descriptionKey` (item-content `granted-action-text`, T14)
-/// (`AuthoredEligibilityResolvesTests.cs`'s own established field-reading precedent); every OTHER
-/// authored field (`areaShape`, `kindHint`, `motifsUsed`, `pairedPayoffFamily`, `pairingRole`) is
-/// content-authoring metadata this module does not consume, so an unknown-key check would reject
-/// real shipped content — deliberately not applied here (unlike `ActionTargetSpecJson`'s own closed
-/// key set, which parses caller-authored predicate JSON, not a corpus brief).
+/// (`AuthoredEligibilityResolvesTests.cs`'s own established field-reading precedent) and, since
+/// `basic-attack-seed` (T7), `kindHint` — real, already-shipped content
+/// (`data/seed/actions/committed-round-*.json` briefs carry `"kindHint": "innate"`) that this parser
+/// used to discard silently; that was the defect (spec-basic-attack-seed.md). Every OTHER authored
+/// field (`areaShape`, `motifsUsed`, `pairedPayoffFamily`, `pairingRole`) is still content-authoring
+/// metadata this module does not consume, so an unknown-key check would reject real shipped content —
+/// deliberately not applied here (unlike `ActionTargetSpecJson`'s own closed key set, which parses
+/// caller-authored predicate JSON, not a corpus brief).
 /// </summary>
 public static class ActionCorpusBriefJson
 {
@@ -60,9 +63,24 @@ public static class ActionCorpusBriefJson
                     throw new ActionCorpusBriefRejection($"brief '{id}': missing or non-array atomFamilies");
                 var families = famEl.EnumerateArray().Select(f => f.GetString() ?? "").ToArray();
 
+                // T7 (basic-attack-seed): `kindHint` is optional -- an absent (or JSON null) property
+                // means "no hint", and the composer defaults that to ActionKind.Skill for back-compat.
+                // A PRESENT value that is not one of the three closed strings is a REJECTION naming
+                // this brief's own id, never a silent default and never coerced to Skill -- the same
+                // "reject, never default" discipline every other closed vocabulary in this file uses.
+                ActionKind? kindHint = null;
+                if (e.TryGetProperty("kindHint", out var khEl)
+                    && khEl.ValueKind != JsonValueKind.Null && khEl.ValueKind != JsonValueKind.Undefined)
+                {
+                    if (khEl.ValueKind != JsonValueKind.String || !ActionKinds.TryParse(khEl.GetString(), out var parsedKind))
+                        throw new ActionCorpusBriefRejection(
+                            $"brief '{id}': unknown kindHint '{(khEl.ValueKind == JsonValueKind.String ? khEl.GetString() : khEl.ToString())}' — must be 'basic', 'innate' or 'skill'");
+                    kindHint = parsedKind;
+                }
+
                 briefs.Add(new ActionCorpusBrief(
                     id, name, category, scope, scopeKey, rungFloor, rungCeiling, families,
-                    targetMode, relation, descriptionKey));
+                    targetMode, relation, descriptionKey, kindHint));
             }
             return briefs;
         }
