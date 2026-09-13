@@ -139,12 +139,12 @@ multiplying (`:252`), exits on an **unchecked** `(long)Math.Round` (`:297`), and
 the tuning file itself names as the fix.
 
 **Acceptance:**
-- [ ] Per-mille accumulation with a carried `long` remainder; divide by 1000 exactly once.
-- [ ] **No drift** over ≥10,000 ticks: accrued == `floor(rate × ticks / 1000)`.
-- [ ] A capped pool discards overflow **and** the carry.
-- [ ] Integer-only; no `double`/`float`.
-- [ ] `BaseResourceRegen` still returns 0 — this makes rates *expressible*, it does not author them.
-- [ ] **Battle byte-identical** while regen rows remain absent.
+- [x] Per-mille accumulation with a carried `long` remainder; divide by 1000 exactly once.
+- [x] **No drift** over ≥10,000 ticks: accrued == `floor(rate × ticks / 1000)`.
+- [x] A capped pool discards overflow **and** the carry.
+- [x] Integer-only; no `double`/`float`.
+- [x] `BaseResourceRegen` still returns 0 — this makes rates *expressible*, it does not author them.
+- [x] **Battle byte-identical** while regen rows remain absent.
 
 **Verify:** `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~Resource"`;
 `dotnet test tests/FusionRpg.Core.Tests --filter "Category=BalanceGuard"`

@@ -6,7 +6,7 @@ namespace FusionRpg.Core.Actions.Cost;
 /// All six resource pools for one actor (spec-action-costs.md §1 — <c>hp</c>, <c>stamina</c>,
 /// <c>hunger</c>, <c>spirit</c>, <c>qi</c>, <c>poise</c>). Indexed by
 /// <see cref="DerivedStatChannels.ResourceIds"/>' fixed order — array-backed, no dictionary
-/// allocation on <see cref="Resolve"/>. <c>max</c>/<c>ratePerTick</c> are read fresh from the actor's
+/// allocation on <see cref="Resolve"/>. <c>max</c>/<c>ratePerMilleTick</c> are read fresh from the actor's
 /// derived snapshot on every call rather than cached, since a buff or exhaustion debuff can move
 /// either between reads (spec §10: exhaustion "re-evaluates on read, not only on write").
 /// </summary>
@@ -51,7 +51,7 @@ public sealed class ActorResourcePools
     public long Resolve(string resourceId, long nowTick, ActorDerivedSnapshot derived)
     {
         var idx = IndexOf(resourceId);
-        return _states[idx].Resolve(nowTick, ResourceChannelReader.RegenPerTick(derived, resourceId), ResourceChannelReader.Max(derived, resourceId));
+        return _states[idx].Resolve(nowTick, ResourceChannelReader.RegenPerMilleTick(derived, resourceId), ResourceChannelReader.Max(derived, resourceId));
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ public sealed class ActorResourcePools
 
         var idx = IndexOf(resourceId);
         var max = ResourceChannelReader.Max(derived, resourceId);
-        var rate = ResourceChannelReader.RegenPerTick(derived, resourceId);
+        var rate = ResourceChannelReader.RegenPerMilleTick(derived, resourceId);
         var current = _states[idx].Resolve(nowTick, rate, max);
 
         if (current < amount) return false;
@@ -94,12 +94,14 @@ public sealed class ActorResourcePools
     {
         var idx = IndexOf(resourceId);
         var max = ResourceChannelReader.Max(derived, resourceId);
-        var rate = ResourceChannelReader.RegenPerTick(derived, resourceId);
+        var rate = ResourceChannelReader.RegenPerMilleTick(derived, resourceId);
         var settled = _states[idx].Settle(nowTick, rate, max);
 
         var next = settled.Stored + amount;
-        if (next < 0) next = 0;
-        else if (next > max) next = max;
+        // Hitting a rail discards the sub-unit carry too (S10.1): a pool clamped full must not bank
+        // a windfall it hands back the instant something spends from it.
+        if (next < 0) { _states[idx] = settled with { Stored = 0, Carry = 0 }; return 0; }
+        if (next > max) { _states[idx] = settled with { Stored = max, Carry = 0 }; return max; }
 
         _states[idx] = settled with { Stored = next };
         return next;
@@ -115,7 +117,7 @@ public sealed class ActorResourcePools
         var result = new Dictionary<string, long>(Ids.Count, StringComparer.Ordinal);
         for (var i = 0; i < Ids.Count; i++)
         {
-            var settled = _states[i].Settle(nowTick, ResourceChannelReader.RegenPerTick(derived, Ids[i]), ResourceChannelReader.Max(derived, Ids[i]));
+            var settled = _states[i].Settle(nowTick, ResourceChannelReader.RegenPerMilleTick(derived, Ids[i]), ResourceChannelReader.Max(derived, Ids[i]));
             _states[i] = settled;
             result[Ids[i]] = settled.Stored;
         }
