@@ -273,6 +273,10 @@ deliberately (*"adjacent windows OVERLAP by design… so socket count never beco
 1. A drawn `Material` entry credits the shelf, proven end to end.
 2. A creature kill resolves to a loot source and draws from its own table.
 3. The shard a creature yields follows **its rung**, not `isBoss`.
+3a. ⭐ An `Equipment`-kind entry in a creature-authored table mints a real, saved equipment instance
+    through the existing `LootMintAt.cs:77-87` arm, with `thetaContent` derived from the killed
+    species' own rung — the same input E3a establishes for the shard. No new equipment-roll mechanism
+    is built; this criterion proves the existing arm is reachable from a creature source.
 4. ⭐ Expedition manifests remain byte-identical for a given seed — plan-time determinism intact.
 5. The shipped drop-rate floor is consumed; no second floor exists.
 6. No new material id; the 27-id vocabulary is untouched.
@@ -287,9 +291,16 @@ deliberately (*"adjacent windows OVERLAP by design… so socket count never beco
 
 1. ⭐ **Plan-time or collect-time for E3a?** **Recommendation: plan-time, from the planned wave.** It
    preserves the manifest contract exactly, and the planned species are known where the mint happens.
-2. **Does a creature drop equipment, or only materials, in v1?** **Recommendation: materials only.**
-   Equipment drops open rarity, affix and set-roll questions that belong to the item program, and the
-   spine only needs materials to close.
+2. ⭐ **DECIDED 2026-09-13 (owner) — equipment drops too, in v1**, overriding this spec's own
+   recommendation of materials-only. **This does not open a new rarity/affix-roll design:**
+   `DropEntryKind.Equipment` is already a **built** arm — `LootMintAt.cs:77-87` already mints a real
+   equipment instance via `EquipmentContainerBuild.From` + `Instantiator.TryInstantiate`, driven by
+   `grant.RollSeed` and a `thetaContent` input, and other drop sources already use it. **The only new
+   design surface is what `thetaContent` a creature-authored `Equipment` entry rolls at** — resolved
+   the same way E3a resolves the shard: **the killed species' own rung**, at plan time, from the
+   planned wave (Open question 1's answer applies identically here — one `theta` input, two entry
+   kinds). No new rarity/affix mechanism, no set-roll design; this module supplies the input, the
+   existing arm does the rest.
 3. **One table per species, per rung, or per species-kind?** **Recommendation: per rung, with a
    per-species override slot left empty.** 904 authored tables is the MH sprawl failure; a rung table
    plus a thin override is the bounded shape, and it is the same 1–2-per-species discipline

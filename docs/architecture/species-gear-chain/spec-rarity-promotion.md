@@ -287,10 +287,9 @@ destroys the overlap."* A promoted item is **not** a scaled item.
    `tier-propagation-contract` will not add it (§ Design 3). **Recommendation: this module builds it**
    — ~20 lines mirroring the creature ladder, and promotion is its only caller today. The alternative,
    widening `tier-propagation-contract`'s scope, couples a correctness fix to a refactor.
-2. **Does the species cost multiplier apply to `elevate`?** `species-cost-shaping` defers this to
-   here. **Recommendation: yes** — promotion is exactly the top-of-tree step MH gates on a species
-   part. But it should be balanced **with** the promotion cost curve in one review, not stacked
-   unexamined.
+2. ⭐ **DECIDED 2026-09-13 (owner): yes.** Promotion is exactly the top-of-tree step MH gates on a
+   species part. Balanced **with** the promotion cost curve in this module's own review (T26), not
+   stacked unexamined.
 3. **Does promotion consume more crafting potential than a temper?** **Recommendation: yes, keyed per
    `CraftOperation` id** so the dial exists without a code change — a rung climb is a bigger event
    than a value reroll, and the ladder already supports differentiating.

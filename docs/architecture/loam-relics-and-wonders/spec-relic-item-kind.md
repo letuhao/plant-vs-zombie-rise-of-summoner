@@ -358,6 +358,12 @@ weight-based draw already treats an unreachable/disabled entry as `weight = 0` (
 deleted, `DropTableModel.cs:191-201`), the same overflow-safe, no-silent-clamp discipline every
 other drop-table entry uses.
 
+**Named, not designed (ideal doc Open question #9):** relics mint from up to seven confirmed loops
+with no named sink beyond `wonder-build-flow`'s own construction spend — a future balance-pass risk
+if mint volume outpaces Wonder-building demand (a growing, un-spendable relic pile). The ideal doc
+itself calls this non-blocking; repeated here so the spec layer a balance pass would actually read
+carries the same flag, not only the idea doc.
+
 ## Numeric types
 
 `Weight`, `MinCount`/`MaxCount` on `DropTableEntryRow` are `int`, matching every existing entry

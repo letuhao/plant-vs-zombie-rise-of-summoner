@@ -2,6 +2,8 @@
 
 **Initiative:** `species-gear-chain` ([map](../species-gear-chain-map.md)) · **Module:** `wild-species-spawn`
 **Owning programs:** `loam` (the spawner) + `world-map-runtime` (the sector context)
+**Depends on:** `species-magnitude-synth` — ⭐ **added 2026-09-13 (owner decision, Open question 2
+below)**: wild members take their species' own derived `P(Θ)`, not the flat `UnmadeMemberHp`
 **Status:** spec, 2026-09-13. Awaiting owner approval. No build authorized.
 **Source ideal:** [species-selection-ideal.md](../species-selection-ideal.md) § The shape 3, § Wild map admission
 
@@ -288,10 +290,10 @@ already expressible.**
 1. **Does the map spawn table share the wave slot table, or is it its own?** **Recommendation: its
    own**, keyed on sector and climate. A sector's residents and a wave's roster answer different
    questions, and the admission rules already differ.
-2. **Do wild members keep the flat `UnmadeMemberHp`, or take their species' own `P(Θ)`?** The flat
-   value is a *placeholder for one species*; with 900 it becomes a lie. **Recommendation: species
-   magnitudes via the existing path**, which makes this module depend on `species-magnitude-synth`
-   for the *interesting* version while the literal fix stays independent. An owner call on sequencing.
+2. ⭐ **DECIDED 2026-09-13 (owner): species `P(Θ)` via `species-magnitude-synth`**, not the flat
+   `UnmadeMemberHp`. The flat value is a placeholder for one species and becomes a lie at 900 — see
+   the header's new `Depends on` line. Members' magnitudes compose through the existing container
+   path this initiative already builds; no second stat mechanism.
 3. **Does `RaiseResolver.SpeciesFor` get fixed here or filed separately?** It is the same defect
    (deterministic first-by-ordinal, ~6 species reachable) in the recruit path rather than the wild
    path. **Recommendation: file it as its own small task** — it changes what a player's *own* legions

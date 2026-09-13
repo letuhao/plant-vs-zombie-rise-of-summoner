@@ -63,7 +63,8 @@ directories instead of a shared one, that is a one-line change to this map and t
 | `species-materials` | D2: the general / species-unique material layers (**family layer withdrawn**); widen the closed 27-id vocabulary as a reviewed change; `CostClassMatrix.Allows` admits a sixth class; new `data/tuning/creature-yield.v1.json` | `species-cost-shaping`, `creature-drop-tables` | `item` + `creature-seed` | craft slice 3, tier E3b |
 | `craft-risk-ladder` | Crafting potential as a new per-instance column, **derived with an explicit authored override** (never a sentinel); exhaustion becomes a new durability decay source; enhancement's Safe/Risk bands fold in — one risk vocabulary | — (but carries two **cross-program asks**, below) | `item` module 15 + `deployment-hierarchy` module 7 | gear §Failure shape |
 | `rarity-promotion` | E6: one reviewed `op_kind` amendment, one `MutationOpKind` member, one executor + POST on the five-verb `ItemWorkbench` pattern, and the `promoted_from_ordinal` mark on the card | `craft-risk-ladder`, `tier-propagation-contract` | `item` | gear §The shape 1 |
-| `item-upgrade-tree` | E5: an item-typed cost line, a consume-and-replace `output_kind`, a successor edge on the **armour** class ladder; no reroll; affix-pool legality + the implicit swap presented before consuming; ⛔ **blocked on `requirement-profiles` (item module 23), UNBUILT** | `rarity-promotion`, `craft-risk-ladder` | `item` | gear §The shape 2 |
+| `item-upgrade-tree` | E5: an item-typed cost line, a consume-and-replace `output_kind`, a successor edge on the **armour** class ladder plus an authored `successorOf` field for weapon/offhand/jewel (content not authored here); no reroll; affix-pool legality + the implicit swap presented before consuming | `rarity-promotion`, `craft-risk-ladder`, ⭐ `requirement-profiles-pullforward` | `item` | gear §The shape 2 |
+| ⭐ `requirement-profiles-pullforward` | ⛔ **Un-blocks `item-upgrade-tree`, owner-approved 2026-09-13** — the same pull-forward shape as `durability-slice`. `item` module 23 (`requirement-profiles`) already has a **complete, approved spec** (`docs/architecture/item/spec-requirement-profiles.md`) — a pure deterministic resolver + trial evaluator + one tuning file, no schema/persistence change in v1. Built here exactly to that spec, filed back into `item-map.md` | — | `item` module 23 | (new, not from an ideal) |
 | ⭐ `gem-tier` | ⛔ **A WIRING gap, not a content gap — the ideal's own fix was illegal.** A gem's tier is already derived in production (`GemContainerBuild.cs:49` → `UniqueBudget.TierOfPowerBand`); the socket path just **hardcodes `1`** at three sites. Authoring a tier on a gem entry is an explicit **OwnershipViolation** (`entry-shapes.md:81`), so the ideal's *"gem tier ids in tuning"* row cannot ship. Also wires the unread `upcycleInputPerOutput` ladder | — | `item` module 16 | tier §Wiring gap |
 | ⭐ `socket-combat-wiring` | Make a socketed insert actually reach combat. **Today sockets reach no combat at all** — every production reader is card/surface/workbench; nothing in `Battle/`, equip runtime or the injector reads a socket. Must contribute via **ActorHub**, never a second composer | `gem-tier` | `item` module 16 | tier §Wiring gap |
 | ⭐ `enhance-track-wiring` | Make the authored per-item `enhanceTrack` milestone atoms append at the right enhance levels. **All 1,178 base types carry one; `grep enhanceTrack src/` returns zero hits**, and `ItemWorkbench` passes `Array.Empty<AtomAppend>()` | — | `item` module 15 | tier §Wiring gap |
@@ -102,15 +103,21 @@ Layer 3
 Layer 4
   species-materials           ← species-cost-shaping, creature-drop-tables
 
-OUTSIDE the layered graph — blocked on external UNBUILT work, not on layer position
-  craft-risk-ladder 2–4       ← deployment-hierarchy module 7 (durability)      UNBUILT
-  rarity-promotion            ← craft-risk-ladder + item-side rung arithmetic   (now its own deliverable)
-  item-upgrade-tree           ← rarity-promotion, craft-risk-ladder,
-                                item module 23 requirement-profiles             UNBUILT
+OUTSIDE the layered graph, previously — now RESOLVED:
+  craft-risk-ladder 2–4       ← deployment-hierarchy module 7 (durability)      pulled forward, DONE
+  item-upgrade-tree           ← item module 23 requirement-profiles            pulled forward, DONE
+
+  rarity-promotion            ← craft-risk-ladder + item-side rung arithmetic   (its own deliverable)
+  item-upgrade-tree           ← rarity-promotion, craft-risk-ladder, requirement-profiles-pullforward
+  requirement-profiles-pullforward  ← nothing — Layer 0, parallel-safe like durability-slice
 
   craft-executor-completion  ⚠ NOT dependent on rarity-promotion — moved into Layer 0 by the
                               module's own spec correction (needs zero enum members; expect it to
                               land first). See the module table row above.
+
+**⭐ Owner-approved 2026-09-13: `item-upgrade-tree` is no longer deferred.** Both of this initiative's
+external blockers were resolved the same way — pulling a small, already-designed slice of the
+blocking program forward rather than waiting on its own schedule. **The deferred list is now empty.**
 ```
 
 ¹ moves to Layer 2 behind `species-magnitude-synth` if its Open question 2 resolves to species

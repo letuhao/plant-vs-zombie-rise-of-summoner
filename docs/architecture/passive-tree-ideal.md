@@ -1,6 +1,6 @@
 # Passive skill trees — the ideal
 
-**Status:** idea phase, opened 2026-09-04. **Not a spec. No build authorized.** 36 owner decisions, 16 research documents (`../research/passive-tree/`), four measured results. §11 and §12 record the enrichment and strengthening rounds; **§11.4 is the live open list**. **Idea phase CLOSED 2026-09-05**; `/spec` opened the same day. D33 is no longer a gate — the squad harness is the first module built, and the numbers it settles are tunables (§14), not spec preconditions.
+**Status:** idea phase, opened 2026-09-04. **Not a spec. No build authorized.** 36 owner decisions, 16 research documents (`../research/passive-tree/`), four measured results. §11 and §12 record the enrichment and strengthening rounds; **§11.4 is the live open list**. **Idea phase CLOSED 2026-09-05**; `/spec` opened the same day. D33 is no longer a gate — the squad harness is the first module built, and the numbers it settles are tunables (§14), not spec preconditions. **§17 (2026-09-13) folds in the `passive-tree-repair` program's live measurement: the shipped corpus binds and resolves at 0% readable — a wiring/real-gap defect §12.3/§13.2 already predicted in outline but never measured.**
 conversation that [class-system-map.md](class-system-map.md) §5 reserved by name: *"there are many sub
 features for class system, includes passive skills, will be added later"* (owner, 2026-08-26).
 
@@ -615,7 +615,8 @@ Both share one shape, and it is worth naming because it will recur:
 2. **Three `ssot-power-scale.md` §10 rows** (`req(t)`, `W(T)`, soul→`Ws`), against a program with zero
    open tasks. D36 adds a fourth.
 3. **ep-11 / ep-12** (`affix-power-class`, `affix-channel-weights`) — specced 2026-09-03, in no task
-   list, and the only named call site for the `AffixTags` code that already shipped.
+   list, and the only named call site for the `AffixTags` code that already shipped. **Still true
+   2026-09-13** — see §17, which also measures what shipping without them costs in the live corpus.
 
 ### 12.4 Build order
 
@@ -673,7 +674,7 @@ Each row names the **specific inert line**. None of these is a wall.
 | `stat.derived` is unscored in Sim, so the sweep cannot see the node class §3.5 prescribes | `AtomKindRegistry.cs:534` — `RuntimeState.None` | M |
 | Battle's derived recompose runs once, at construction | `BattleRunState.RecomposeDerived` — **cite by SYMBOL, not line**: another program moved it `:313 → :323` during this session | S |
 | `AffixTags` has no production call site | `EligibilityRule.cs:30-95`, callers = its own tests | S |
-| `Instantiator` / `TryInstantiate` built but unreached | awaiting `effect-pipeline` module 4 | — |
+| `Instantiator` / `TryInstantiate` built but unreached | **Updated 2026-09-13:** module 4 now has real production callers (`RpgStore.AtomInstances.cs:351`, `RpgStore.Fusion.cs:325`) — true in general, **still false for the tree specifically**: nothing under `tools/TreeBinder`/`PassiveTree/**` calls `Resolver`/`ChannelPool`/`Instantiator`. See §17.2 | — |
 | `PowerLadderKMilli` is **per-mille**, so a tier-1 node rounds with 17% error — larger than one tier step | `ValueSpec.cs:92` | 3 lines |
 | **Two** of four `AllocationScope`s unreached — **corrected 2026-09-05**, this row previously said three | `CreatureType` is wired END TO END: `SpeciesAllocation.cs:35,62` is a real producer, plus the tuning row and the store round-trip. `Aspect` and `UniqueCreature` have only the tuning row (`AptitudeTuning.cs:203-204`) and the scope-key round-trip (`RpgStore.Aptitudes.cs:57-58,66-67`) — no producer, no save, no load | S |
 | ~~`RespecPolicy.PriceOf` returns Hunger against D18's souls, zero callers~~ — **BOTH WRONG, corrected 2026-09-05.** It returns `RespecResource.Soul` (`RespecPolicy.cs:46`; `:15` records Hunger as the PRIOR value) and it has **two** production callers (`RpgStore.SpeciesRespec.cs:154`, `SpeciesBuildEndpoints.cs:90`). D18 and the shipped code AGREE | — |
@@ -786,3 +787,104 @@ not an open question** — leaving them listed is how a settled thing gets re-li
 4. **`legitimateSkew`'s contents** — D32 fixed the *shape* (near-uniform plus a named theme
    allowance); the per-aptitude and per-element numbers need the target-distribution file, which is
    authored against the corpus rather than argued in advance.
+
+---
+
+## 17. Repair round, 2026-09-13 — the tree's own atom layer never reaches the resolver
+
+**Extends the same loop as the rest of this document** — *A. Level up and power* (`the-loops.md`:
+"Aptitude points go where you want... Later: trees and commander presence" — status **Vision**).
+**RPG-layer check:** every item in this round is `FusionRpg.Core`/`seedsmith` work — atom kinds,
+channel resolution, an LLM classification stage, a deterministic weight table. None of it reads or
+writes a Unity field, so the RPG-layer rule (`CLAUDE.md`: *"an RPG feature is built in the RPG layer,
+never by changing what PvZ is"*) and standalone-first both hold without further discussion.
+
+Separately from the 2026-09-05 rounds above, a `passive-tree-repair` program (2026-09-07 → 2026-09-13)
+tried to make the shipped, committed corpus (§10/D24's own "concrete value before the game run")
+actually bind and resolve. It measured what §12.3 and §13.2 had already predicted in outline —
+*"ep-11/ep-12... in no task list"*, *"Instantiator built but unreached"* — but never quantified. This
+round folds the measurement in and does not reopen any locked decision D1–D46.
+
+### 17.1 Measured live, this session (`TreeBinder` + census; supersedes any older reading)
+
+```
+Global (42 generic trees, 1,680 planned nodes):  bound 407 / refused 1,273  (24.2%)
+  bound atom kinds:            stat.modify 337   ·   stat.derived 0
+  bound nodes with NO atom:    164 / 407
+  readable (kind the resolver actually reads):    0.0% of bound
+  mechanism vs magnitude bind rate:  2.1%  vs  29.5%  — tiers 8-10 are 100% mechanism, so the
+  deep-tier payoff §3.5 already made load-bearing ("a focus build can only be rescued with
+  MECHANISM") is exactly what the pipeline currently deletes
+
+Might tree specifically (fresh TreeBinder run, this session):
+  bound 24/40 (60%)  —  Off 17/20 (85%)   ·   Def 7/20 (35%)
+  ALL 7 "pool-shaped channel, can't price at bake time" refusals land on Def
+  content-missing (upstream FamilyExpansion refusal) splits 3 Off / 6 Def
+  Topology is untouched: 20/20 nodes, 1000‰/1000‰ budget, width 2×10 both branches — C1/G9 still
+  hold exactly. The asymmetry is in OUTCOME, not in the generated plan.
+```
+
+### 17.2 Root cause, in this document's own three buckets
+
+| Bucket | Item | Evidence |
+|---|---|---|
+| **Wiring gap** | Binder emits `stat.modify`; the resolver (`PassiveTree/Resolve/TreeAtomSource.cs:68`) reads only `stat.derived` | Both halves exist and are each individually correct — they disagree on which kind carries a tree contribution. `spec-tree-resolve.md` §2.1 and the plan's `channelFamily` quota axis say `stat.derived`; the shipped binder and corpus are 100% `stat.modify` |
+| **Wiring gap** | Pool-shaped channels (e.g. `pool.element-shield-regen`) refuse at bind — `ChannelPool` (E30) exists and has other callers, the tree-binder's `AffixComposer` just never calls it | Confirms §13.2's `PassiveTree/**` line: nothing there calls `Resolver`/`ChannelPool`/`Instantiator`. Every pool refusal this session landed on Might's Def branch — every defensive-flavored channel the tree drew happens to be pool-shaped |
+| **Real gap** | `effect-pipeline` modules **11 `affix-power-class`** / **12 `affix-channel-weights`** — specced 2026-09-03, still zero lines in `src/` as of 2026-09-13 | `data/seed/channel-policy/defaults.json` is still a 2-entry stub against a spec naming six channels. §12.3 named this unowned eight days ago; it stayed unowned across two separate programs |
+| **Real gap** | `FamilyExpansion` implements only the magnitude formula; every mechanism kind is refused at the upstream seed layer (94/125 families) | Not a tree-layer bug — the tree cannot pick from atoms that were never generated for it to pick |
+| **Real gap** | Balance anchors for 20 curve-less channels, plus a `status.apply` chance/duration anchor | `bands.v1.json` carries ratios but no base and is self-labelled *"illustrative, inherited, not balanced"*; the registry's own rule is *"reject at import, not guess one"* — inventing the anchor is the defect this program exists to avoid |
+
+`effect-pipeline-map.md` §1 dispositions four effect paths (atom layer, `mods_json`, patron plugin,
+aura catalog) with the invariant *"an actor never receives the same source through two paths."* The
+passive tree is a **fifth, undispositioned path** — R-3.1's fix is to disposition it, not to invent a
+sixth mechanism.
+
+### 17.3 Genre check — deliberately short, and the absence is itself the finding
+
+Searched for how Path of Exile / Last Epoch handle a passive node whose value resolves against a pool
+rather than a fixed channel. **Nothing found**, and that is confirmation, not a gap in the search:
+both games' passive trees are **fully static and hand-authored at every level — no per-node roll of
+any kind exists in either game's passive layer.** That matches this document's own D24 exactly
+(*"the tree catalog is STATIC, SHARED and IDENTICAL for every player... a rolled catalog would make
+build knowledge worthless"*). So R-1.3's fix — resolve a pool-shaped channel **once, at bake time**,
+the same output for every player — is not a pattern borrowed from the genre; it is D24 applied to a
+channel type this program had not exercised until now. No source is claimed for this paragraph beyond
+that absence.
+
+Sources checked (general passive-tree references, none of which discuss roll-time-vs-static
+internals): [Passive Skill Tree — Path of Exile](https://www.pathofexile.com/passive-skill-tree) ·
+[Passives — Last Epoch Wiki](https://lastepoch.fandom.com/wiki/Passives).
+
+### 17.4 Two owner decisions this round adds — scoping, not design
+
+Neither is new mechanic design; both gate which of §17.2's rows get built next.
+
+- **Decision A — kind fork.** Recommend **derived-only**: the lawn+battle consumption path
+  (`PassiveTree/Resolve/TreeAtomSource.cs` → the lawn's `AtomDerivedSubsystem` fan-in, and
+  `Battle/TreeAtomSource.cs` → `BattleStatComposer`) is **already built and tested** for
+  `stat.derived` (task B6/D6/D7) — so aligning the binder to that kind is the smaller change, needs no
+  new producer, and needs no `decisions.md` row. The alternative (both kinds) would add a
+  primary-producer path with no evidence yet that it is needed.
+- **Decision B — balance anchors for mechanism kinds.** Either the power program publishes a new
+  `power-scale.v{next}` curve for the 20 curve-less channels plus a `status.apply` chance/duration
+  anchor (unlocks tiers 8-10, currently 100% mechanism at a 2.1% bind rate), or the tree is explicitly
+  re-scoped to magnitude-only for now and mechanism content ships as its own later program. Either is
+  legitimate; inventing an anchor to unblock tiers 8-10 is not.
+
+### 17.5 New tunable this round names
+
+| Number | Unit | Home | Status |
+|---|---|---|---|
+| `channelWeights[powerClass][channel]` | weight | `data/tuning/channel-policy.v{n}.json` (module 12) | **Not yet authored.** `defaults.json` is a 2-entry stub against a spec naming six channels (`drop`/`boss`/`set`/`socket`/`unique`/`craft`) |
+
+### 17.6 Relation to §11.4 / §12.3's open lists
+
+§11.4 said only two things blocked *specification*, and that was true — the generation spec shipped
+and D1–D46 stand. Neither of those rounds ran a live bind, so neither could have measured the
+*resolution* seam this round covers. Decisions A/B above are **additive** to §11.4's open list, not a
+reopening of anything already decided.
+
+**Companion artifacts:** [`../../tasks/passive-tree-repair-plan.md`](../../tasks/passive-tree-repair-plan.md) ·
+[`../../tasks/passive-tree-repair-todo.md`](../../tasks/passive-tree-repair-todo.md) ·
+[`../../tasks/passive-tree-repair-report.md`](../../tasks/passive-tree-repair-report.md) (full R1–R10
+cause chain, R-1/R-2/R-3 requirements, evidence index).

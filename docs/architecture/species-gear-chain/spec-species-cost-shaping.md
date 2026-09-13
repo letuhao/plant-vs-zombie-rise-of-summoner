@@ -241,6 +241,6 @@ is introduced.**
 2. **Is the multiplier per-rung or a single factor applied above the gate?** **Recommendation:
    per-rung.** A flat factor makes the gate a cliff; a per-rung table lets the cost climb with the
    species, which is the MH shape being copied.
-3. **Does the species cost apply to `elevate`?** It is the promotion verb and `rarity-promotion` owns
-   it. **Recommendation: yes, but decided in that module's review**, so the promotion cost curve and
-   the species multiplier are balanced together rather than stacking unexamined.
+3. ⭐ **DECIDED 2026-09-13 (owner): yes — the species cost applies to `elevate`.** Balanced together
+   with the promotion cost curve in `rarity-promotion`'s own review (T32/T26 in the plan), not stacked
+   unexamined.

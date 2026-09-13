@@ -97,3 +97,6 @@ how Warden bindings clear); the multi-empire program; sector-to-sector trade rou
 
 The consent/offer flow for a genuine future cross-faction trade (scoped-inventory Open question #6b) —
 explicitly not buildable until a real second empire/`player_id` exists, tracked but not a module here.
+Which loop/milestone unlocks sector and legion cargo (Open question #4) — direction set, specifics
+pending; tracked one level up in `empire-development-map.md`'s own "unlock-gate question" section, not
+repeated here to avoid two sources of truth for the same open decision.

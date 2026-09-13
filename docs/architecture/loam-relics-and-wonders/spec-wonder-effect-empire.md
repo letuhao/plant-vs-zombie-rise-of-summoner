@@ -18,6 +18,18 @@ precedent: [scoped-inventory-hierarchy/spec-legion-cargo.md](../scoped-inventory
 additive discipline for structure yields (adopted as the working design, reviewable at build time —
 a structural constant, not a tunable number)."*
 
+**Amended same day (2026-09-13), before build starts — §Design 6 added.** An adversarial
+economy-lens audit of this spec found a real, non-blocking risk: `ScopeModifierMilli` only ever
+grows (§Design 3's SUM has no negative term anywhere in this module), so a heavily-Wondered empire
+could drive every one of its sectors' `LoamUpkeep`-vs-`LoamProduction` ratio toward pure surplus —
+loam-decay pressure trending to near-zero empire-wide — with **zero** added cost anywhere in the
+economy. Put to the owner, who chose explicitly: *"Add an upkeep term now."* §Design 6 designs that
+term as a real extension of this module's own scope (it reuses `LoamUpkeep`, a file this module
+already reasons about via `LoamPhases.Pressure`'s call graph, §What already exists), not a deferral
+to a future balance pass, and not a change to `wonder-structure.md` (module 2) — reasoned out in full
+in §Design 6, which also amends §Design 3's own code sample to share one scan function between the
+benefit and the cost side rather than duplicating the traversal.
+
 ## Objective
 
 Wire a built `Empire`-scope Wonder's `WonderEffectDef` (Kind = `LoamGenerationRate`, shipped by
@@ -32,7 +44,12 @@ Success looks like: a faction with two built `Empire`-scope Wonders authoring `v
 Production phase; every one of that faction's sectors' loam yield is multiplied by that value before
 the existing capacity/overflow logic runs; saving and reloading the world (or a normal turn-commit
 diff) preserves that number exactly, where today it silently resets to `1000`; a faction with no
-`Empire`-scope Wonder is byte-identical to today, on every existing golden.
+`Empire`-scope Wonder is byte-identical to today, on every existing golden. **Also (§Design 6):**
+each of those two built Wonders' own hosting sector pays a real, nonzero upkeep term every Pressure
+phase, proportional to its own `ValueMilli`, drawn from that sector's own territory-component pool
+through the exact mechanism every other `LoamUpkeep` term already uses — so the empire-wide boost
+`ScopeModifierMilli` grants is never free, closing the audit's "production keeps climbing with zero
+added cost" finding before this module's first line of code ships.
 
 ## Locked anchors
 
@@ -57,6 +74,13 @@ diff) preserves that number exactly, where today it silently resets to `1000`; a
   to fix.** Widening it to `long` is a `WorldState.cs`/`WorldCanonical.cs`/SQL-column-type change with
   its own golden-moving blast radius — out of scope. This module mitigates with `checked` arithmetic
   so an overflow throws rather than silently wraps (§Numeric types).
+- **Empire-scope Wonder upkeep is a fifth `LoamUpkeep` additive term, charged to the Wonder's own
+  hosting sector — never a new payment path** (§Design 6, the owner's "add an upkeep term now"
+  decision). It is drawn every Pressure phase from that sector's own territory-component pool through
+  `TerritoryComponents.For`/`DrawProportionally`, the identical mechanism Base/Garrison/Development/
+  Danger already use (`LoamPhases.cs:138-145`). No new faction-wide pool, no new fade rule, no new
+  SQL, no new field on `WonderEffectDef`/`StructureDef` — computable entirely from data
+  `wonder-structure` already ships plus one new `LoamPolicy` rate constant.
 
 ## What already exists
 
@@ -88,6 +112,7 @@ diff) preserves that number exactly, where today it silently resets to `1000`; a
 | No function anywhere computes "the sum of every built `Empire`-scope Wonder's `LoamGenerationRate` `ValueMilli` for one faction" | §Design 1, 3 — `WonderEmpireEffects.ComputeScopeModifierMilli`, this module's own centerpiece |
 | The `scope_modifier_milli` SQL column and its INSERT/SELECT/diff wiring | §Design 5 |
 | **Found this session, not previously named by the ideal doc or `wonder-structure`:** three real, non-`Production` call sites of `LoamProduction.For` (`LoamForecast.ProjectedStock`, `LoamBalance.PerSector`, `WorldEndpoints.cs:631`) would silently under-report for any faction with a built `Empire`-scope Wonder unless each resolves and passes the stored modifier too | §Design 4 |
+| **Owner-directed addition (2026-09-13), not a gap the map/ideal doc named:** an Empire-scope Wonder's benefit has no offsetting cost anywhere in the economy — an adversarial audit's finding, resolved by explicit owner decision ("add an upkeep term now") rather than deferred | §Design 6 |
 
 ## Design
 
@@ -206,12 +231,43 @@ WonderEffectKind.LoamGenerationRate` (`Scope` is already guaranteed `== WonderSc
 `StructureCatalog.Validate` — this function trusts that invariant rather than re-checking it, the
 same way nothing in `LoamProduction.cs` re-validates `YieldMultiplierMilli`'s own non-negativity):
 
-```
-long sum = 0;
-foreach (matching effect)
-    sum = checked(sum + effect.ValueMilli);
+**Amended by §Design 6, same session, before this module is built — not a later change.** The
+per-sector half of this scan (which slots on ONE sector host an active Empire-scope
+`LoamGenerationRate` effect, and what those effects sum to) is exactly the number §Design 6's own
+upkeep term also needs, so it is factored into its own function rather than inlined twice — one scan
+shape, two callers, matching this module's own "one rule, so \[two consumers\] cannot silently
+disagree" discipline already used for `LoamForecast`/`LoamBalance` (§Design 4):
 
-return checked((int)(1000 + sum));
+```
+public static long EmpireLoamGenerationValueMilliFor(WorldSector sector)
+{
+    long sum = 0;
+    foreach (var slot in sector.Slots)
+    {
+        if (slot.StructureId is not { } id) continue;
+        if (slot.ConstructionTurnsRemaining is > 0) continue;
+        if (!StructureCatalog.IsKnown(id)) continue;
+
+        var structure = StructureCatalog.Get(id);
+        if (structure.WonderScope != WonderScope.Empire) continue;
+
+        foreach (var effect in structure.WonderEffects)
+            if (effect.Kind == WonderEffectKind.LoamGenerationRate)
+                sum = checked(sum + effect.ValueMilli);
+    }
+    return sum;
+}
+
+public static int ComputeScopeModifierMilli(IReadOnlyList<WorldSector> sectors, string factionId)
+{
+    long sum = 0;
+    foreach (var sector in sectors)
+    {
+        if (!string.Equals(sector.OwnerFactionId, factionId, StringComparison.Ordinal)) continue;
+        sum = checked(sum + EmpireLoamGenerationValueMilliFor(sector));
+    }
+    return checked((int)(1000 + sum));
+}
 ```
 
 A faction with no built `Empire`-scope Wonder gets `sum == 0` and the function returns exactly
@@ -277,6 +333,193 @@ not previously named by either the ideal doc or `wonder-structure`'s citations (
 All three edits stay inside `FusionRpg.Data` — `guard-dal.ps1` scope, satisfying the SQL-only-in-Data
 hard rule. No schema change touches any table this module does not already name.
 
+### 6. Wonder upkeep — the offsetting term
+
+**Why this is here, and why now.** §Design 3's SUM only ever adds — nothing in this module (or in
+`wonder-structure`) subtracts from `ScopeModifierMilli`, so a faction that builds enough Empire-scope
+Wonders keeps multiplying every sector's loam yield with no matching rise in cost anywhere in the
+economy. An adversarial economy-lens audit of this spec found that real, non-blocking risk this
+session; the owner, asked directly, chose **"Add an upkeep term now"** — a real design landed before
+build starts, not a deferral. The four questions below are answered from the real, already-shipped
+`LoamUpkeep`/`LoamPhases.Pressure` code (re-read in full this session, §What already exists is
+`wonder-effect-empire`'s own module, not borrowed from a sibling), not invented fresh.
+
+**Where the cost lands — per-sector, matching the existing shape, not a new per-faction pool.**
+`LoamUpkeep` already has exactly one shape for "what does holding ground cost": four additive terms
+(`Base`, `Garrison`, `Development`, `Danger`) computed **per sector** (`LoamUpkeep.BreakdownFor`,
+`LoamUpkeep.cs:44-68`), summed **per territory component** and drawn from that component's own
+pooled `LoamStock` proportionally, with any shortfall fading the single weakest member
+(`LoamPhases.Pressure`, `LoamPhases.cs:114-186`, specifically the per-component loop at `:138-145`
+and `DrawProportionally` at `:315-330`). `ScopeModifierMilli`'s own *benefit* is faction-wide (every
+sector multiplied, regardless of which territory component it sits in — §Design 1), but a Wonder
+itself is a physical `StructureDef` occupying one `WorldSlot` in one `WorldSector` — the object with a
+"where" is the structure, not the faction. Charging the upkeep to **that Wonder's own hosting
+sector**, as a fifth `LoamUpkeepBreakdown` term, reuses the existing per-sector-computed/
+per-component-drawn/per-component-faded mechanism exactly as it stands — no new pool, no new draw
+rule, no new fade rule, zero new SQL. The alternative — a true faction-wide upkeep pool, drawn once
+across every sector a faction owns regardless of territory component — does not exist anywhere in
+this codebase and cannot be built by extension: `Pressure` never pools loam *across* territory
+components (`TerritoryComponents.For` is the connectivity boundary `DrawProportionally` respects), so
+a faction-wide pool would be a **third** payment pattern beside "per-sector-component" (Loam) and
+"per-legion" (`LegionSupply`) — exactly the "don't invent a third pattern if the existing one fits"
+the task warns against. Per-sector is not a compromise; it is the only shape that costs zero new
+mechanism.
+
+This does mean the sector that happens to host a faction's Empire-scope Wonder pays more than an
+otherwise-identical sector elsewhere in the same empire — a real, intended asymmetry, not an
+oversight. It is also the forcing function the audit's risk needed: `LoamPhases.Pressure`'s own
+lost-sector branch (`LoamPhases.cs:190-211`, specifically `:202-204`) already unconditionally clears
+every slot's `StructureId` — including a Wonder's — when its sector is lost. A faction that lets the
+Wonder's own hosting sector or component starve loses the Wonder outright, and `ScopeModifierMilli`
+recomputes back down the very next Production phase (§Design 3's own recompute-fresh design, no
+change needed). Reusing the per-sector mechanism does not just avoid new code — it is what makes the
+Wonder's upkeep a genuine, felt risk rather than an abstract ledger entry.
+
+**Proportional to `ValueMilli`, not a flat per-Wonder cost.** A flat cost (the same number whether a
+Wonder authors `valueMilli: 50` or `valueMilli: 500`) does not scale with the size of the risk it
+offsets — the audit's finding was specifically that a *bigger* boost costs *nothing more*, and a flat
+fee leaves that exact shape unchanged, just shifted by a constant. Charging `ValueMilli × a tunable
+rate` means a Wonder that grants a larger empire-wide multiplier costs proportionally more to
+maintain — the offset scales with the very risk it exists to offset, by construction, not by tuning
+luck.
+
+**Where the rate lives — `LoamPolicy`/`data/tuning/loam.v{n}.json`, not `WonderPolicy`/
+`data/tuning/loam-relics-wonders.v1.json`, and why.** `LoamPolicy.cs` (read in full this session) is
+already the single, shared, multi-module-contributed home for every other rate constant `LoamUpkeep`'s
+own formula reads — `BaseUpkeepPerSector`, `GarrisonUpkeepPerMember`, `DevelopmentUpkeepPerLevel`,
+`DangerUpkeepPerBand` (`LoamPolicy.cs:36-45`), each backed by `data/tuning/loam.v{n}.json`'s own
+`upkeep` block and each added by a *different* module over time (the file's own `// ---- <module> ----`
+section comments name `loam-structures`, `loam-texture`, `sector-development` as later contributors to
+the same static holder, `LoamPolicy.cs:111,138,149`) — this is the established, proven pattern for "a
+later module adds one more rate constant to an existing upkeep formula," not a pattern this spec would
+be inventing. The Wonder-upkeep rate is the fifth peer of an existing family (Base/Garrison/
+Development/Danger/**Wonder**), computed and consumed entirely inside files this module (`wonder-
+effect-empire`) already edits (`LoamUpkeep.cs`, `LoamPolicy.cs`) — needing **zero** change to
+`wonder-structure.md`, `WonderPolicy.cs`, `WonderTuning.cs`, or `data/tuning/loam-relics-wonders.v1.json`
+(module 2's own file, scoped to `UniqueExistenceCap.{Sector,Empire}` only, an unrelated concern —
+"how many Wonders may exist," not "what a built one costs to maintain"). This is the concrete,
+evidence-based resolution of the task's own EITHER/OR: reuse what already exists, no upstream spec
+touched — confirmed by opening `wonder-structure.md` fresh this session and finding nothing in it
+this addition needs to change (§Interface exposed to dependents already lists exactly what module 3
+reads from module 2; this addition reads none of it more than §Design 3 already did).
+
+**No new field on `WonderEffectDef`/`StructureDef`.** The upkeep is computed entirely from
+`WonderEffectDef.ValueMilli` — a field `wonder-structure` already ships — and one new `LoamPolicy`
+rate constant. This directly satisfies the task's own preferred shape (§Design questions 3-4):
+zero change to the closed vocabulary, zero change to `StructureCorpus`'s wire format, zero new
+`Validate` rule, zero new seed-content authoring burden on the 25 shipped rows or any future Wonder
+row.
+
+**The formula and the hook point, by file:line.** `LoamUpkeepBreakdown` (`LoamUpkeep.cs:11-25`) gains
+a fifth additive field:
+
+```
+public readonly record struct LoamUpkeepBreakdown(
+    long Base, long Garrison, long Development, long Danger, long WonderUpkeep,
+    int IntensityMilli, int HandicapMilli, int SeasonMilli)
+{
+    public long Sum => Base + Garrison + Development + Danger + WonderUpkeep;
+    public long Total => checked(Sum * IntensityMilli * HandicapMilli * SeasonMilli / 1_000_000_000);
+}
+```
+
+`LoamUpkeep.BreakdownFor(WorldState world, WorldSector sector)` (`LoamUpkeep.cs:44-68`) — the truth
+side, already reading `sector` directly — computes the new term and passes it into the existing pure
+`Breakdown(...)` builder:
+
+```
+var wonderUpkeep = checked(
+    WonderEmpireEffects.EmpireLoamGenerationValueMilliFor(sector) * LoamPolicy.EmpireWonderUpkeepRateMilli
+) / 1000;
+
+return Breakdown(garrisonMembers, sector.DevelopmentLevel, sector.DangerBand,
+    sector.FractureIntensityMilli, handicapMilli, seasonMilli, wonderUpkeep);
+```
+
+`Breakdown(...)`'s own signature (`LoamUpkeep.cs:82`) gains one trailing, **defaulted** parameter —
+`long wonderUpkeep = 0` — so every existing call site keeps compiling unchanged: the six-argument
+belief-side overload `LoamUpkeep.For(int, int, int, int, int, int)` (`LoamUpkeep.cs:78-79`), whose
+**only** real caller is `FrontierRulesPolicy.cs:192` (grep-confirmed this session, matching the exact
+single-caller shape `LoamProduction.For`'s own belief overload already has at `FrontierRulesPolicy.cs:188`),
+passes nothing new and gets `wonderUpkeep: 0` — deliberately. `LoamProduction`'s own belief/truth split
+already established the precedent that belief-side estimates stay coarse (module 3's own §Design 0/
+citation: the belief overload "already ignores `YieldMultiplierMilli`/`FlatYieldPerTurn`/
+`DevelopmentYield` entirely"); a Wonder's upkeep is the same kind of fine-grained, structure-sourced
+detail the belief side has never tracked, for either module. Widening it now would be new scope this
+task did not ask for, on a code path with a different owner concern (AI decision-making, not the
+audited economy risk). **No call site anywhere — `LoamPhases.cs:140`, `LoamForecast.cs:74`,
+`LoamBalance.cs:13`, `WorldEndpoints.cs:632`, or any existing test — needs a signature change**;
+all four truth-side consumers call `LoamUpkeep.For(world, sector)`/`BreakdownFor(world, sector)` with
+their existing two arguments and receive the new term automatically, the identical "one number, many
+readers, cannot silently disagree" property §Design 4 already relies on.
+
+**When: every Pressure phase, from the same already-decremented, already-active sector list
+Production wrote.** `LoamPhases.Pressure` (`LoamPhases.cs:114`) reads `world.Sectors` — the exact
+`WorldState` `TurnEngine.Step` already threaded through `Production` earlier the same turn
+(decisions.md's own locked phase order: `... → Production → Growth → Pressure → ...`). A Wonder whose
+`ConstructionTurnsRemaining` reaches zero this exact Production pass is therefore **already active**
+for both halves the same turn — this same pass's `ScopeModifierMilli` contribution (§Design 1's own
+same-pass-activation finding) **and** this same pass's `WonderUpkeep` charge — no asymmetry between
+when a Wonder starts paying and when it starts earning. Symmetrically, `Pressure`'s own lost-sector
+branch clears `StructureId` unconditionally (`LoamPhases.cs:202-204`), so a lost Wonder stops both
+contributing and costing on the very next Production/Pressure cycle, with no explicit "remove upkeep"
+step anywhere — the identical recompute-fresh discipline §Design 1 already argues for the benefit
+side, now proven to hold for the cost side too, for free.
+
+**Inherited, not solved: a shortfall's fade does not necessarily land on the Wonder's own sector.**
+`LoamForecast.Weakest`'s existing selection rule (unchanged by this addition) picks the single weakest
+contributor in a shortfalling territory component — which may or may not be the specific sector whose
+new Wonder upkeep pushed the component into shortfall. This is not a new asymmetry this addition
+introduces; it is the same property Base/Garrison/Development/Danger upkeep already has today (a
+component's shortfall has never been attributed back to whichever sector raised it most). Named here
+so a future reader does not mistake it for an oversight in this design.
+
+**Sector-scope Wonders and `World`/`Multiverse` scope stay out of this term's scope, on purpose.** A
+`Sector`-scope Wonder's benefit is already bounded to the one sector it occupies (§Design 0) — the
+audit's risk (an ever-growing, unbounded-reach benefit with no matching cost) does not arise there by
+construction, so extending this upkeep term to `Sector` scope would be manufactured symmetry, not a
+real gap. `World`/`Multiverse` scope are still named-but-refused by `StructureCatalog.Validate`
+(module 2, unchanged) — not reachable by any live code path, so this term has nothing to compute for
+either; whichever future module registers them inherits this same design question, named here rather
+than silently assumed solved.
+
+**Numeric overflow, reasoned explicitly, not asserted.** `EmpireLoamGenerationValueMilliFor`'s running
+sum is `long`, `checked`, mirroring `ComputeScopeModifierMilli`'s own sum exactly (both walk the same
+kind of bounded, slot-count-limited list — §Numeric types' existing "structurally bounded, not
+progression-bounded" argument applies unchanged to a per-sector subset of the same scan). The upkeep
+multiply — `EmpireLoamGenerationValueMilliFor(sector) * LoamPolicy.EmpireWonderUpkeepRateMilli` — is a
+`long * long` product (both operands already `long`, so "widen before multiplying" is satisfied
+without a cast), wrapped in `checked`, divided by `1000` exactly **once**, immediately, before the
+result is ever added into `Sum`. This is a *second*, independent per-mille-to-whole-unit conversion
+from `LoamUpkeepBreakdown.Total`'s own existing one (`Sum * IntensityMilli * HandicapMilli *
+SeasonMilli / 1_000_000_000`, `LoamUpkeep.cs:24`) — not a violation of "divide by 1000 last, exactly
+once," because the two divisions close two *different* multiplications: `ValueMilli × RateMilli`
+converts a Wonder's own per-mille magnitude into a whole loam-unit-per-turn cost (exactly the same
+shape `LoamProduction.For`'s own `total * scopeModifierMilli / 1000` step already uses, §Design 2 of
+this same module), and only *after* that whole-unit `WonderUpkeep` becomes an ordinary `Sum` term
+(indistinguishable from `Base`) does `Total`'s own, separate three-factor product apply its own single
+division. Each multiplication divides exactly once, at its own end — the rule is about not
+re-dividing the *same* quantity repeatedly down a chain, not about capping a whole formula to one
+division total, and this design does not do that either way.
+
+**Answering the task's Q6 directly:** the implementation computes `Σ(ValueMilli) × rate / 1000` — sum
+first, across every matching effect on the sector (and, via `ComputeScopeModifierMilli`, across every
+sector a faction owns), multiply and divide exactly once at the end — never
+`Σ(ValueMilli × rate / 1000)` (dividing per-term before summing). For a sector that hosts more than
+one Empire-scope `LoamGenerationRate` effect (multiple Wonder slots), these two orderings are not
+merely stylistically different — per-term division can floor-truncate each addend before the sum,
+losing up to `999` milli-units per term, where summing first loses at most `999` once, total. This is
+the identical reasoning `LoamUpkeepBreakdown.Total`'s own existing test
+(`The_formula_divides_only_once_not_once_per_multiplier`, `LoamUpkeepTests.cs:48-60`) already proves
+for the season/intensity/handicap product — this addition follows the same discipline, not a new one.
+
+**Tunable value.** `EmpireWonderUpkeepRateMilli` is a provisional placeholder like every other
+constant in `LoamPolicy` — this spec picks `50` (five percent: a Wonder authoring `valueMilli: 200`
+costs `10` loam/turn, on par with `BaseUpkeepPerSector`'s own `10`) as a starting point that is
+clearly nonzero and clearly proportionate to the size of an ordinary sector's own upkeep, not a final
+balance number — L9-style harness tuning against real play, not this spec, owns the real value, per
+`LoamPolicy.cs`'s own header comment.
+
 ## Numeric types
 
 - `WonderEffectDef.ValueMilli` — `long`, already declared by `wonder-structure` (module 2), unchanged
@@ -316,6 +559,20 @@ hard rule. No schema change touches any table this module does not already name.
   re-reading `wonder-structure`'s own "Numeric types" section, which states the same for `ValueMilli`
   generally, and by this module introducing no new formula that reads a level or `Θ` anywhere. One
   power ladder, satisfied by construction, not by exemption.
+- **§Design 6's own numbers, per CLAUDE.md's overflow table:** `LoamPolicy.EmpireWonderUpkeepRateMilli`
+  is `long`, not `int` — it is not a bounded 0..1000 ratio the way `BesiegedRationMilli` is (that field
+  is validated to a literal 0..1000 draw-rate range by `LoamTuningLoader.Parse`, `LoamTuning.cs:101-105`,
+  because it is explicitly "this per-mille of normal"); a Wonder-upkeep rate has no such natural
+  ceiling — a balance pass may legitimately want Wonder upkeep to scale *faster* than the benefit it
+  funds, and AGENTS.md's "no hard progression ceilings" rule means this spec must not assume it stays
+  near identity the way `WellYieldMultiplierMilli`/`HatcheryYieldMultiplierMilli` (both `int`, both
+  genuinely bounded-near-1000 multipliers-toward-identity) can. `EmpireLoamGenerationValueMilliFor`'s
+  running sum is `long`, `checked`, structurally bounded by the same finite-slot-count argument
+  `ComputeScopeModifierMilli`'s own sum already uses (§Numeric types, above) — a per-sector subset of
+  an already-bounded scan is bounded at least as tightly. The `ValueMilli × RateMilli` product is
+  `long * long`, `checked`, divided by `1000` exactly once before joining `Sum` (§Design 6's own
+  "numeric overflow, reasoned explicitly" paragraph has the full reasoning, including why this is a
+  second, independent division from `Total`'s own, not a violation of "divide once").
 
 ## Tunables
 
@@ -323,10 +580,13 @@ hard rule. No schema change touches any table this module does not already name.
 |---|---|---|
 | Empire-scope combination rule (SUM) | Not a tunable — a structural constant (decisions.md, quoted above) | **Re-confirmed fresh against the map's own Tunables table row 4**, which already states this correctly: *"a structural constant, commented as such — the combination function, not a tunable number."* This module ships no new `data/tuning/*.json` file or row. |
 | `WonderEffectDef.ValueMilli` per row | `data/seed/structures/**` (module 2's own seed content, unchanged by this module) | This module reads the field; it does not author it or change its home. |
+| `LoamUpkeepTuning.EmpireWonderUpkeepRateMilli` (§Design 6) | `data/tuning/loam.v{n}.json`'s existing `upkeep` block — a new key, sibling to `baseUpkeepPerSector`/`garrisonUpkeepPerMember`/`developmentUpkeepPerLevel`/`dangerUpkeepPerBand`. Published via `python tools/tuning/publish.py loam upkeep.empireWonderUpkeepRateMilli=<value>`, landing in `loam.v5.json` | **Not** `data/tuning/loam-relics-wonders.v1.json` (module 2's own new file, scoped to `UniqueExistenceCap.{Sector,Empire}` only — an unrelated "how many may exist" concern). `LoamPolicy`/`LoamTuning`/`loam.v{n}.json` already own every other rate constant `LoamUpkeep`'s own formula reads; the fifth additive term's rate belongs beside its four siblings, in files this module already edits — zero change to `wonder-structure.md`, `WonderPolicy.cs`, or `WonderTuning.cs`. |
 
-No tunable is introduced by this module. This is a deliberate, verified finding, not an omission —
-every number this module's own code touches is either a structural constant (SUM) or content already
-owned by module 2.
+**Amended (§Design 6, same session, before build starts):** this module *does* introduce one tunable
+— `EmpireWonderUpkeepRateMilli`, the owner's explicit "add an upkeep term now" decision. The line
+above ("no tunable is introduced by this module") described this spec before that decision was made;
+every other number this module's own code touches remains either a structural constant (SUM) or
+content already owned by module 2, unchanged by this amendment.
 
 ## Commands
 
@@ -335,7 +595,9 @@ dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~WonderEmpire
 dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~LoamPhasesTests"     # Production byte-identity when no Wonder exists
 dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~LoamProductionTests" # the new multiply step, in isolation
 dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~WorldGraph"          # ScopeModifierMilli round-trips save/load and turn-commit diff
+dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~LoamUpkeepTests"     # the new WonderUpkeep term (§Design 6)
 .\scripts\guard-dal.ps1        # every new SQL string stays inside FusionRpg.Data
+python tools\tuning\publish.py loam upkeep.empireWonderUpkeepRateMilli=<value>           # writes loam.v{n+1}.json (§Design 6)
 ```
 
 ## Structure
@@ -361,7 +623,23 @@ src/FusionRpg.Data/Sqlite/RpgStore.World.cs            MODIFIED — EnsureColumn
                                                         SELECT both gain the column (§Design 5)
 src/FusionRpg.Data/Sqlite/RpgStore.WorldGraphDiff.cs   MODIFIED — DiffFactions' INSERT OR REPLACE gains
                                                         the column (§Design 5)
-tests/FusionRpg.Core.Tests/World/Loam/WonderEffectEmpireTests.cs   NEW
+src/FusionRpg.Core/World/Loam/LoamUpkeep.cs            MODIFIED (§Design 6) — LoamUpkeepBreakdown
+                                                        gains WonderUpkeep; BreakdownFor computes it via
+                                                        WonderEmpireEffects.EmpireLoamGenerationValueMilliFor;
+                                                        Breakdown(...) gains a defaulted trailing
+                                                        parameter, zero existing call site changes
+src/FusionRpg.Core/World/Loam/LoamPolicy.cs            MODIFIED (§Design 6) — EmpireWonderUpkeepRateMilli
+                                                        accessor, beside its four upkeep-term siblings
+src/FusionRpg.Core/World/Loam/LoamTuning.cs            MODIFIED (§Design 6) — LoamUpkeepTuning gains
+                                                        EmpireWonderUpkeepRateMilli; LoamTuningLoader
+                                                        parses upkeep.empireWonderUpkeepRateMilli
+data/tuning/loam.v5.json                               NEW (§Design 6) — published via
+                                                        tools/tuning/publish.py, not hand-edited
+tests/FusionRpg.Core.Tests/World/Loam/WonderEffectEmpireTests.cs   NEW — gains
+                                                        EmpireLoamGenerationValueMilliFor coverage (§Design 6)
+tests/FusionRpg.Core.Tests/World/Loam/LoamUpkeepTests.cs           MODIFIED (§Design 6) — WonderUpkeep
+                                                        term coverage; existing cases assert Sum/Total
+                                                        byte-identity with WonderUpkeep == 0
 tests/FusionRpg.Data.Tests/World/WorldGraphScopeModifierTests.cs   NEW — the actual persistence-gap
                                                         regression test (save/load AND turn-commit diff)
 UNTOUCHED: TurnEngine.cs (no signature change needed anywhere, §Design 1); StructureCatalog.cs,
@@ -383,6 +661,15 @@ var scopeModifierByFaction = world.Factions.ToDictionary(
     f => f.FactionId,
     f => WonderEmpireEffects.ComputeScopeModifierMilli(decrementedSectors, f.FactionId),
     StringComparer.Ordinal);
+```
+
+```csharp
+// LoamUpkeep.BreakdownFor, the §Design 6 addition: one more additive term, computed from the same
+// per-sector scan ComputeScopeModifierMilli already shares, converted to whole loam units with the
+// same single-divide-at-the-end discipline LoamProduction.For's own multiply step already uses.
+var wonderUpkeep = checked(
+    WonderEmpireEffects.EmpireLoamGenerationValueMilliFor(sector) * LoamPolicy.EmpireWonderUpkeepRateMilli
+) / 1000;
 ```
 
 ## Testing strategy
@@ -408,23 +695,58 @@ var scopeModifierByFaction = world.Factions.ToDictionary(
 - **Three secondary call sites agree with the engine.** `LoamForecast.ProjectedStock`,
   `LoamBalance.PerSector`, and the debug endpoint all report the same yield for a sector as
   `LoamPhases.Production` would compute for it this turn, given the same `WorldState`.
+- **§Design 6 — Zero-Wonder byte-identity.** Every existing `LoamUpkeep`/`LoamPhases.Pressure` golden
+  that authors no Empire-scope Wonder produces an identical `LoamUpkeepBreakdown.Total` before and
+  after this addition — `EmpireLoamGenerationValueMilliFor` returns `0` for every sector, so
+  `WonderUpkeep == 0` and `Sum` is unchanged.
+- **§Design 6 — A built, active Empire-scope Wonder's own hosting sector pays a nonzero term.**
+  `LoamUpkeep.BreakdownFor` for that sector returns `WonderUpkeep == ValueMilli * EmpireWonderUpkeepRateMilli / 1000`,
+  proportional to the Wonder's own magnitude, never a flat constant regardless of `ValueMilli`.
+- **§Design 6 — Same-pass activation parity.** A Wonder whose `ConstructionTurnsRemaining` reaches
+  zero this exact Production pass already contributes both its `ScopeModifierMilli` share and its
+  `WonderUpkeep` charge this same Pressure phase — not the phase after, for either side.
+- **§Design 6 — Sum-then-divide, not divide-then-sum.** Two Empire-scope `LoamGenerationRate` effects
+  on the same sector (two Wonder-bearing slots) produce the same `WonderUpkeep` as one effect
+  authoring their combined `ValueMilli` — proving `Σ(ValueMilli) × rate / 1000`, not
+  `Σ(ValueMilli × rate / 1000)`, with a deliberately non-round `ValueMilli`/rate pair chosen so the
+  two orderings would disagree if the wrong one were implemented (mirroring
+  `LoamUpkeepTests.The_formula_divides_only_once_not_once_per_multiplier`'s own proof shape).
+- **§Design 6 — Lost sector drops both sides with no residue.** A faction that loses the sector
+  holding its only Empire-scope Wonder sees `ScopeModifierMilli` return to `1000` **and**
+  `WonderUpkeep` return to `0` the very next Production/Pressure cycle, with no leftover contribution
+  and no explicit "remove" step in either direction.
+- **§Design 6 — `checked` overflow proof.** A synthetic `ValueMilli`/`EmpireWonderUpkeepRateMilli`
+  pair large enough to overflow `long` throws `OverflowException` at the multiply, never wraps.
+- **§Design 6 — The belief-side overload is unaffected.** `LoamUpkeep.For(int, int, int, int, int, int)`
+  (and its only real caller, `FrontierRulesPolicy.cs:192`) returns the identical value before and after
+  this addition — proving the defaulted trailing parameter changed no existing behaviour.
 
 ## Boundaries
 
 - **Always:** compute `ScopeModifierMilli` fresh every Production phase from the live, post-decrement
   sector list; apply the resolved modifier as the last step of `LoamProduction.For`, after every
   existing sum; `checked` arithmetic on every step of the sum and the final narrowing cast; every SQL
-  change stays inside `FusionRpg.Data`.
+  change stays inside `FusionRpg.Data`. **§Design 6:** charge an Empire-scope Wonder's upkeep to its
+  own hosting sector, as a fifth `LoamUpkeepBreakdown` term, drawn from that sector's own
+  territory-component pool exactly like Base/Garrison/Development/Danger already are; recompute it
+  fresh every Pressure phase from the same post-decrement sector list Production already wrote;
+  `checked` arithmetic on the multiply, one division by `1000`.
 - **Ask first:** widening `WorldFaction.ScopeModifierMilli` from `int` to `long` (a golden-moving,
   cross-file structural change named but deliberately deferred here, §Numeric types); reusing this
   module's own per-faction Wonder scan as the existence-cap query `wonder-build-flow` (module 4) will
   need for `Unique`-rarity enforcement — plausible reuse, not designed or locked here, since module 4
-  needs every scope/rarity combination, not only `Empire`/`LoamGenerationRate`.
+  needs every scope/rarity combination, not only `Empire`/`LoamGenerationRate`. **§Design 6:**
+  extending an upkeep term to `Sector`-scope Wonders, or to `World`/`Multiverse` once either is
+  registered — named as a real, deferred question (§Design 6's own "stays out of scope, on purpose"
+  paragraph), not designed or assumed here.
 - **Never:** an incremental, event-driven running total for `ScopeModifierMilli` (rejected, §Design
   1); a second, competing writer of `ScopeModifierMilli` inside this module beyond the one Production-
   phase recompute; a live SQL read from inside `LoamPhases.Production` or any other turn-phase
   function; a private per-sector or per-faction fold of anything ActorHub-shaped (this module never
-  touches actor combat state at all — see Design-gate checklist).
+  touches actor combat state at all — see Design-gate checklist). **§Design 6:** a second, faction-wide
+  upkeep pool or draw rule beside `TerritoryComponents`'/`DrawProportionally`'s existing one; a new
+  field on `WonderEffectDef`/`StructureDef`; a rate constant homed anywhere but `LoamPolicy`/
+  `data/tuning/loam.v{n}.json`.
 
 ## Success criteria
 
@@ -438,7 +760,13 @@ var scopeModifierByFaction = world.Factions.ToDictionary(
    (`LoamForecast.ProjectedStock`, `LoamBalance.PerSector`, `WorldEndpoints.cs:631`) resolve and pass
    the stored modifier, never re-scanning. 5. Every existing Loam/world-graph golden that authors no
    `Empire`-scope Wonder is byte-identical. 6. `guard-dal.ps1` green. 7. No `TurnEngine.cs` signature
-   change anywhere.
+   change anywhere. **8. (§Design 6)** A built, active Empire-scope Wonder's own hosting sector's
+   `LoamUpkeepBreakdown` carries a nonzero `WonderUpkeep` term, `checked((ValueMilli * rate) / 1000)`,
+   drawn every Pressure phase through the existing per-component mechanism — no new pool, no new SQL,
+   no new `WonderEffectDef`/`StructureDef` field. **9.** Losing the Wonder's hosting sector zeroes both
+   `ScopeModifierMilli`'s contribution and `WonderUpkeep` the next Production/Pressure cycle, with no
+   explicit removal step. **10.** `LoamUpkeep.For(int, int, int, int, int, int)` and its sole caller
+   (`FrontierRulesPolicy.cs:192`) are behaviourally unchanged.
 
 ## Interface exposed to dependents
 
@@ -452,6 +780,8 @@ rather than left as an empty section:
 |---|---|
 | `WorldFaction.ScopeModifierMilli` (now real, persisted, recomputed every turn) | Any future consumer of the buff-debuff-scope T12 storage this module is the first real reader/writer of — e.g. a future non-Wonder empire-wide effect. **Not designed here**: if a second, non-Wonder writer of this same field is ever built, it must design its own combination rule against this module's own SUM rather than silently overwriting it (named as a real, inherited concern in §Numeric types and Boundaries, not solved) |
 | `WonderEmpireEffects.ComputeScopeModifierMilli`'s internal "built `Empire`-scope structures owned by faction X" scan shape | Plausible, non-binding reuse for `wonder-build-flow`'s own `Unique`-rarity existence-cap enforcement (module 4) — that module needs every scope/rarity combination, not only `Empire`/`LoamGenerationRate`, so this is not exposed as a locked API, only named so module 4 does not reinvent the traversal pattern from nothing |
+| `WonderEmpireEffects.EmpireLoamGenerationValueMilliFor(WorldSector)` (§Design 6) | Shared, this session, between `ComputeScopeModifierMilli` (benefit) and `LoamUpkeep.BreakdownFor` (cost) — the one place "how much Empire-scope `LoamGenerationRate` `ValueMilli` does this one sector host" is computed. Any future per-sector Wonder-effect consumer should call this rather than re-walking `sector.Slots` |
+| `LoamPolicy.EmpireWonderUpkeepRateMilli` (§Design 6) | Not designed for reuse beyond `LoamUpkeep.BreakdownFor` — named here only so a future module extending upkeep to a different scope/kind knows a Wonder-upkeep rate constant already exists in `LoamPolicy` and does not add a second one beside it |
 
 ## What this module does not touch
 
@@ -476,6 +806,14 @@ rather than left as an empty section:
   kinds that would ever touch ActorHub, and both are refused today).
 - **The 25 pre-Wonder shipped structure rows** — every one of them authors no `WonderScope`, so
   `ComputeScopeModifierMilli` never matches them and their yield is multiplied by the identity `1000`.
+- **§Design 6 does not touch:** `Sector`-scope Wonder upkeep (deliberately out of scope, reasoned in
+  §Design 6 — a `Sector`-scope Wonder's benefit is already bounded to one sector, so the audit's
+  unbounded-reach risk does not apply); `World`/`Multiverse`-scope upkeep (unreachable — `Validate`
+  still refuses both scopes, module 2, unchanged); `LoamForecast.Weakest`'s fade-target selection rule
+  (unchanged — a shortfall caused in part by Wonder upkeep still fades whichever sector that rule
+  already picks, not necessarily the Wonder's own sector, named as inherited in §Design 6); any change
+  to `WonderEffectDef`, `StructureDef`, `StructureCorpus`, or `StructureCatalog.Validate` (module 2,
+  untouched by this addition — confirmed no change to `wonder-structure.md` is needed, §Design 6).
 
 ## Design-gate checklist
 
@@ -487,8 +825,13 @@ rather than left as an empty section:
     (full row, quoted verbatim above) and "World turn phase order" row (full, quoted); DESIGN-GATE.md
     §1 rows: Economy/currencies/yields, World map, Data/SQL/schema, Any tunable number, Any cap or
     ceiling, Any numeric magnitude, Stats (to confirm ActorHub is out of scope);
-    spec-wonder-structure.md (full, the direct dependency); scoped-inventory-hierarchy/spec-legion-cargo.md
-    (full, house style template).
+    spec-wonder-structure.md (full, the direct dependency — re-read fresh again for §Design 6, not
+    trusted from this same file's own earlier citation); scoped-inventory-hierarchy/spec-legion-cargo.md
+    (full, house style template). **§Design 6 addition:** LoamUpkeep.cs (full file), LoamPhases.cs
+    (full file, re-read), LoamProduction.cs (full file, re-read), LoamPolicy.cs (full file), LoamTuning.cs
+    (full file, including LoamTuningLoader.Parse's strict-parse/no-TryGetProperty shape and the
+    `besiegedRationMilli` 0..1000 validation precedent); data/tuning/loam.v4.json (full);
+    tests/FusionRpg.Core.Tests/World/Loam/LoamUpkeepTests.cs (full file).
 [x] Code cited by file:line, opened fresh this session (not trusted from any sibling doc's own
     citation without re-opening): TurnEngine.cs (:264-276); LoamPhases.cs (full file); LoamProduction.cs
     (full file); LoamForecast.cs (full file); LoamBalance.cs (full file); WorldState.cs (:60-146,
@@ -496,27 +839,54 @@ rather than left as an empty section:
     :133-152, :260-284, :455-480); RpgStore.WorldGraphDiff.cs (:97-117); WorldEndpoints.cs (:615-644);
     FrontierRulesPolicy.cs (:188, grep-confirmed as the belief-side overload's only caller); grep of
     every `LoamProduction.For` call site in `src/` (10 hits, 4 real call sites, 6 comments/citations).
+    **§Design 6:** LoamUpkeep.cs (:1-91, full file, `LoamUpkeepBreakdown`/`BreakdownFor`/`Breakdown`/
+    the belief overload); LoamPhases.cs (:114-186, `Pressure`, the per-component draw at :138-145, the
+    lost-sector clear at :190-211); LoamPolicy.cs (:1-45, `BaseUpkeepPerSector`/`GarrisonUpkeepPerMember`/
+    `DevelopmentUpkeepPerLevel`/`DangerUpkeepPerBand`, and :111,138,149 for the multi-module `// ---- ----`
+    section precedent); LoamTuning.cs (:5-7 `LoamUpkeepTuning`, :78-109 `Parse`'s `upkeep`/`legionSupply`
+    blocks, :100-105 the `besiegedRationMilli` bounded-ratio validation contrasted against this addition's
+    deliberately-unbounded rate); grep of every `LoamUpkeep.For`/`BreakdownFor`/`Breakdown` call site in
+    `src/` (6 hits, all named above, zero missed).
 [x] Drift reported: the ideal doc and `wonder-structure` both name only `LoamPhases.cs:30` as
     `LoamProduction.For`'s call site when discussing this exact gap; grepping the real call graph this
     session found three more real call sites (`LoamForecast.cs:55`, `LoamBalance.cs:13`,
     `WorldEndpoints.cs:631`) that would silently under-report without the same fix — reported as a
     genuinely new finding, not previously named, and designed for (§Design 4), not silently left.
+    **§Design 6:** no drift found against `wonder-structure.md` — the addition needed zero change to
+    it, confirmed by re-reading it fresh rather than assuming the earlier read still held.
 [x] No §2 invariant contradicted: SQL confined to `FusionRpg.Data` (guard-dal.ps1 covers the three
     modified files); no cap on a magnitude presented as a progression ceiling (SUM is unbounded by
     construction, matching `Common` rarity's own "no existence cap" design; the `int` narrowing is an
     inherited-debt overflow guard, not a progression ceiling); no `f(Θ)` introduced anywhere; no second
     ActorHub composer (this module never touches actor combat state); no second ownership root (this
     module owns no item/relic state); the balance surface introduces no new magic number (§Tunables:
-    zero new tunables, SUM is a structural constant per decisions.md).
+    the one new tunable — `EmpireWonderUpkeepRateMilli` — is homed in `data/tuning/loam.v{n}.json`,
+    never a bare literal in `LoamPolicy.cs`/`LoamUpkeep.cs`; SUM is a structural constant per
+    decisions.md). **§Design 6:** the upkeep rate is a configurable balance dial, never a hard-coded
+    progression ceiling — a balance pass can raise or lower it freely via `publish.py`, and nothing in
+    this design clamps a magnitude silently.
 [x] Numeric overflow reasoned explicitly, not asserted safe by estimate: `checked` arithmetic on every
     addition and the final narrowing cast; the structural (not progression) bound on Wonder count
     argued from slot-count finiteness, not from an assumed small number; the pre-existing `int` typing
     on `ScopeModifierMilli` named as inherited debt with a stated future fix, not silently worked
-    around.
+    around. **§Design 6:** the new multiply (`ValueMilli * EmpireWonderUpkeepRateMilli`) is `long * long`,
+    `checked`, divided by `1000` exactly once before joining `Sum`; explicitly reasoned as a second,
+    independent division from `LoamUpkeepBreakdown.Total`'s own pre-existing one, not a violation of
+    "divide by 1000 last, exactly once" (§Design 6's own "numeric overflow" paragraph); the rate's
+    `long` (not `int`) typing is reasoned against the codebase's own bounded-ratio precedent
+    (`BesiegedRationMilli`), not copied by default.
 [ ] The exact reuse (or non-reuse) of this module's own Wonder-scan shape for `wonder-build-flow`'s
     `Unique`-rarity existence-cap check (module 4) was not designed this session — correctly deferred,
     named only as a plausible non-binding option (§Interface exposed to dependents).
 [ ] A second, non-Wonder future writer of `WorldFaction.ScopeModifierMilli` and its combination rule
     against this module's own SUM was not designed this session — correctly deferred, named as a real,
     inherited concern (§Interface exposed to dependents, §Boundaries), not solved or dismissed.
+[ ] §Design 6: extending an upkeep term to `Sector`-scope Wonders or to `World`/`Multiverse` scope
+    (once either is registered) was not designed this session — correctly deferred, reasoned as
+    out-of-scope-by-construction for `Sector` and unreachable for `World`/`Multiverse` today, not
+    silently assumed solved (§Design 6's own "stays out of scope, on purpose" paragraph, §Boundaries).
+[ ] §Design 6: the real balance value of `EmpireWonderUpkeepRateMilli` was not chosen this session —
+    `50` is a stated, reasoned provisional placeholder (§Design 6's own "Tunable value" paragraph),
+    matching every other constant in `LoamPolicy.cs`; an L9-style harness pass against real play owns
+    the final number, not this spec.
 ```

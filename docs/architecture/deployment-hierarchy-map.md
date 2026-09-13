@@ -175,3 +175,34 @@ Asks raised by [species-gear-chain-map.md](species-gear-chain-map.md) and its mo
 | 2 | **Potential exhaustion as a new decay source**, beside battle wear | ``craft-risk-ladder`` | D1 holds unamended — decay drives to zero; only a **repair attempt** may destroy |
 | 3 | ⛔ **An amendment to module 7's own Never list.** `spec-item-durability-repair.md:408` forbids *"per-item authored durability (max is DERIVED, **never authored, matching every sibling DERIVED field**)"* — but the owner decided potential is *derived **with an authored per-base-type override*** | ``craft-risk-ladder`` | Decision at `gear-climb-ideal.md:350-352`; ⚠ the same doc calls it open at `:273`. **Never reconciled with `:408`** |
 | 4 | **Schema ownership of `data/tuning/deployment-hierarchy.v1.json`** — the file does not exist, and `craft-risk-ladder` is Layer 0 so it always creates it | ``craft-risk-ladder`` | Two independently written parsers over one file with a **throw-on-missing-section** posture (T5). Agree the section layout before either builds |
+
+### ⛔ Pull-forward, not just an ask (owner-approved 2026-09-13, `/plan` audit)
+
+`species-gear-chain`'s `craft-risk-ladder` could not ship Stage 1 alone without violating
+`AGENTS.md`'s no-hard-progression-ceiling rule (crafting potential would exhaust with no consequence
+and no recovery path — a hard stop on a `long` magnitude). The owner chose to **pull forward a
+minimal slice of this module** rather than defer the whole risk ladder or invent a parallel
+mechanism, built via `species-gear-chain`'s `durability-slice` tasks (T11, T23 in
+`tasks/species-gear-chain-todo.md`), landing in that initiative's Phase 1/Phase 2.
+
+**Built there, exactly to this spec's own §1/§2/§5(workbench-tier only)/§6 — not a parallel
+invention:**
+- `durability_max`/`durability_current` columns on `effect_instance` (§1)
+- `DurabilityTable.Build` derivation over `class`/`rarity`/`tags` (§2)
+- The at-zero enforcement filter in `MaterializeRolledEquipRuntime` (§6)
+- Workbench-only repair — `RepairPolicy.Resolve`, the `Repair` `op_kind`/`CraftOperation` members
+  (fulfilling ask #1 in the table above, in the enum's ordinal already reserved for it), the
+  destruction-on-repair-attempt chance, the shard-leg-at-high-rungs cost shape (§5)
+
+**Deliberately NOT built by that pull-forward — still this module's own future work:**
+- **Field touch-up (D4)** — needs `party-dungeon`'s `PackGrid`, itself unbuilt. The
+  `ICarriedSupplyCheck` interface this spec already defines is the seam; `species-gear-chain` does
+  not implement a caller for it.
+- **Death-drop extra decay** — needs `corpse-cache`, itself unbuilt.
+- **Commander-pouch parity (D6)** — a separate scope, not touched.
+
+**Consequence for this map's own future plan:** when `deployment-hierarchy` gets its own `/plan`
+pass, do not re-build §1/§2/§5(workbench)/§6 — check `species-gear-chain-todo.md` T11/T23 first and
+extend from there. Asks #1–4 above are **resolved by this pull-forward**, not merely filed; #3's
+Never-list reconciliation is done as part of T10's explicit pre-step, and #4's schema agreement is
+done as part of T10/T11 landing together in the same sub-checkpoint.

@@ -2,8 +2,12 @@
 
 **Initiative:** `species-gear-chain` ([map](../species-gear-chain-map.md)) · **Module:** `item-upgrade-tree`
 **Owning program:** `item`
-**Depends on:** `rarity-promotion`, `craft-risk-ladder`
-**⛔ Blocked on external unbuilt work:** `item` module 23 `requirement-profiles` — **approved 2026-09-09, NOT BUILT** (`grep -rn "RequirementProfile" src/` returns **zero hits**)
+**Depends on:** `rarity-promotion`, `craft-risk-ladder`, `requirement-profiles-pullforward`
+**⭐ UN-BLOCKED 2026-09-13 (owner):** `item` module 23 `requirement-profiles` had zero implementation
+(`grep -rn "RequirementProfile" src/` → 0 hits) but a **complete, approved spec**
+(`docs/architecture/item/spec-requirement-profiles.md`). Rather than wait on the `item` program's own
+schedule, a minimal pull-forward of that spec is built inside this initiative — the same shape as
+`craft-risk-ladder`'s durability pull-forward. See `requirement-profiles-pullforward`'s tasks.
 **Status:** spec, 2026-09-13. Awaiting owner approval. No build authorized.
 **Source ideal:** [gear-climb-ideal.md](../gear-climb-ideal.md) § The shape 2 (E5)
 
@@ -107,7 +111,7 @@ change**. ⚠ **Corrected:** an earlier draft cited `v4Note` as the additivity p
 - Every class ladder entry carries `id`, `frame`, **`rung`**, `nameKey`, `identity`, `roles`, `tags`.
 - `ItemWorkbench`'s six-verb pattern, the mutation ledger, and the recipe corpus (67 recipes,
   `outputKind` / `outputQty` / `costLines` / `soulsCostBand`).
-- ~~`requirement-profiles` (item module 23) exists~~ ⛔ **STRUCK — it does not.** `grep -rn "RequirementProfile" src/` returns **zero hits**; there is no `requirement-profiles` tuning file. What exists is `docs/architecture/item/spec-requirement-profiles.md` and `item-map.md`'s module 23 row, *"approved 2026-09-09"*, **build order 23 -> 24 -> 25, none built**. The only shipped requirement surface is presentation-only (`Items/Display/ItemCard.cs:452-481`). **A doc saying "approved" is not evidence something is built** — moved to Real gap.
+- ~~`requirement-profiles` (item module 23) exists~~ ⛔ **STRUCK — it did not.** `grep -rn "RequirementProfile" src/` returned **zero hits** as of the /spec audit. What existed was a **complete, approved spec** (`docs/architecture/item/spec-requirement-profiles.md`, Design-gate record already ticked) with no code. **A doc saying "approved" is not evidence something is built.** ⭐ **Resolved 2026-09-13:** rather than wait, the owner approved pulling that already-designed module forward — see `requirement-profiles-pullforward`'s own tasks, built exactly to that spec. This module's dependency on it is now a normal task dependency, not an external blocker.
 
 ### Real gap
 
@@ -122,15 +126,25 @@ change**. ⚠ **Corrected:** an earlier draft cited `v4Note` as the additivity p
 
 ## Design
 
-### 1. Ship armour first, and say so
+### 1. Two successor sources, one executor — armour has content today, the rest do not
 
-**Scope v1 to the armour ladder** (both frames: `cloth→leather→scale→plate`,
+**Scope v1 to the armour ladder for content** (both frames: `cloth→leather→scale→plate`,
 `fibre→husk→bark→heartwood`). It is the only ladder whose ordering is a progression, and it covers
 **nine of the fifteen roles**.
 
-Weapons, offhands and jewels need a **successor field that is not the class ladder** — see Open
-question 1. Shipping armour proves the whole mechanism (cost line, output kind, affix carry,
-requirement check) against a spine that is genuinely correct.
+⭐ **DECIDED 2026-09-13 (owner):** weapons, offhands and jewels get a **new authored `successorOf`
+field per base type**, not a derivation from any class ladder — the class ladder there is a **style**
+axis (`blade→blunt→launcher` is melee→ranged, not power; the offhand's is "does it guard, or does it
+not"), so deriving from it would silently turn an upgrade into a different *kind* of item. This is
+the only shape that expresses *"a better blade"* without also expressing *"a blade becomes a
+launcher."*
+
+**The executor reads whichever source the base type declares — armour reads the class ladder's
+`rung`, everything else reads `successorOf` — one lookup function, two inputs, never two executors.**
+No `successorOf` value is authored by this module for the ~800 non-armour base types; that is a
+separate content-authoring pass, named here so it is not discovered mid-build. Shipping armour proves
+the whole mechanism (cost line, output kind, affix carry, requirement check) against a spine that
+already has content; `successorOf` proves the mechanism generalises, with zero rows authored yet.
 
 ### 2. ⛔ Do not reroll on upgrade
 
@@ -224,7 +238,8 @@ if (!RequirementProfile.Met(owner, successor))
 | Number | Meaning | Owner |
 |---|---|---|
 | `upgradeCostSoulsMilli` per class rung | E5's price, same shape as `elevate` | `data/tuning/materials.v1.json` `operations`, new verb |
-| Class-ladder successor edges | Which chassis upgrades into which | `data/seed/items/_registry/classes.v{n}.json` — ⚠ **authored content, not a formula**, and a reviewed additive registry change |
+| Class-ladder successor edges (armour only) | Which chassis upgrades into which | `data/seed/items/_registry/classes.v{n}.json` — ⚠ **authored content, not a formula**, and a reviewed additive registry change |
+| `successorOf` per base type (weapon/offhand/jewel) | Which specific chassis a given one upgrades into — **content, not a formula, and not authored by this module** | New field on the base-type registry — a reviewed additive schema change; **zero rows authored here**, a separate content pass |
 
 ⚠ **`upgradeCostSoulsMilli` prices on a rung, so it is a cost ladder and owes a
 `ssot-power-scale.md` §10 row** — the same ask `rarity-promotion` files.
@@ -312,7 +327,9 @@ against the old one must be **withdrawn**. The withdraw-on-absence machinery alr
 2. Every affix carries across identically.
 3. A requirement the owner cannot meet **refuses, and consumes nothing** — proven byte-identically.
 4. The card presents the result as a chassis carrying its own identity, not as the named successor.
-5. ⭐ Weapon, offhand and standard ladders are **explicitly refused** with a message naming the reason.
+5. ⭐ A weapon/offhand/jewel base type upgrades if it carries an authored `successorOf`, and
+   **refuses by name** if it does not — never derived from the class ladder. Standard (commander gear)
+   stays explicitly refused; it is not a progression ladder at all.
 6. Hub bindings against the consumed instance are withdrawn via the existing machinery.
 7. The registry change is purely additive; `minCompatibleVersion` semantics hold; `ItemSeedValidator`
    green.
@@ -321,11 +338,10 @@ against the old one must be **withdrawn**. The withdraw-on-absence machinery alr
 
 ## Open questions
 
-1. ⭐ **What is the successor spine for weapons, offhands and jewels?** The class ladder is a style
-   axis there, not a progression. **Recommendation: a separate, explicit `successorOf` field on the
-   base type**, authored per chassis, rather than derived from any ladder — it is the only shape that
-   expresses "a better blade" without expressing "a blade becomes a launcher." That is its own
-   content pass and should not block armour.
+1. *(Not a question — moved to Design §1.)* **DECIDED 2026-09-13 (owner): a separate, explicit
+   `successorOf` field on the base type**, authored per chassis, never derived from any ladder.
+   Authoring actual `successorOf` values for the ~800 non-armour base types is its own content pass
+   and does not block armour or the executor mechanism itself.
 2. **Does the upgraded item keep its `promoted_from_ordinal`?** It is a different base type but the
    same player's item. **Recommendation: keep it** — the mark answers *"was this natural?"* about the
    rarity, which the upgrade does not change.

@@ -324,8 +324,32 @@ Asks raised by [species-gear-chain-map.md](species-gear-chain-map.md) and its mo
 | 2 | A **twelfth `op_kind`** for **item→item upgrade** | ``item-upgrade-tree`` | Same enum; third in the queue |
 | 3 | An **eleventh `CraftOperation`** — a **separate** closed enum whose own doc says *"adding a verb here is **code**, because a verb needs an executor and an owning module"* | ``item-upgrade-tree`` | `CostClassMatrix.cs:11-44`. Not covered by the `op_kind` ask |
 | 4 | ⛔ **Superseding `spec-enhance-reroll.md` §4's Safe/Risk bands** (+1..+8 at 1000‰, +9..+14 at 950‰→600‰) with one graduated potential→durability ladder | ``craft-risk-ladder`` | Reopens written design inside module 15. One risk vocabulary, not two |
-| 5 | ⛔ **A sixth `MaterialClass`** (provenance) — ask-first against `ssot-materials-crafting.md` §3.1 | ``species-materials`` | `MaterialCatalog.cs:6-9` states the test: *"which of these five questions is unanswerable for my spend?"* ⭐ **The slot is CONTESTED** — `deployment-hierarchy-map.md:89` filed for a new material class first |
+| 5 | ⛔ **A sixth `MaterialClass`** (provenance) — ask-first against `ssot-materials-crafting.md` §3.1 | ``species-materials`` | `MaterialCatalog.cs:6-9` states the test: *"which of these five questions is unanswerable for my spend?"* ⚠ **Correction 2026-09-13:** an earlier version of this row called the slot "contested" with `deployment-hierarchy-map.md:89` — that was a misreading; that ask reuses the existing `Shard` class at high rungs and proposes no new class. No collision; ordinary single-owner ask |
 | 6 | **Naming the §3.4 role-axis reversal.** §3.4 refuses a **role** axis (*"Twelve roles × anything is the scavenger hunt"*); a species axis at 904 is two orders of magnitude past it | ``species-materials`` | `ssot-materials-crafting.md:160`. The reversal is argued in the spec; it needs this program's review |
 | 7 | **Per-verb cost-class widening.** `Forge` admits `Substrate` **only**, so D2's flagship *"1 generic + 3 species commons + 1 rare gate"* recipe shape cannot be priced even if every trophy id existed | ``species-materials`` | `CostClassMatrix.Allows` — independent of the sixth-class ask |
 | 8 | ⚠ **A drift fix, found while verifying:** `ssot-enhancement.md` §5.3's reserved `op_kind` table lists nine values and **omits `socket-imbue`**, which the enum already mints | ``enhance-track-wiring`, `craft-executor-completion`` | `MutationOp.cs:42-47` vs §5.3. Reconcile with the next amendment rather than separately |
 | 9 | ⚠ **Stale comment:** `ItemWorkbench.cs:189-193` says forge *"cannot run: its recipes name `item.*` containers and no module has authored an `effect_container` for a base type."* `EquipmentContainerBuild.From` now builds one on the fly | ``craft-executor-completion`` | `EquipmentContainerBuild.cs:47`, `LootMintAt.cs:76-88`. **Forge is a wiring gap today, not a content gap** |
+
+### ⛔ Pull-forward, not just an ask (owner-approved 2026-09-13)
+
+`item-upgrade-tree` was blocked on **module 23 `requirement-profiles`** — a complete, approved spec
+(`docs/architecture/item/spec-requirement-profiles.md`) with zero implementation
+(`grep -rn "RequirementProfile" src/` → 0 hits). Rather than wait on this program's own build order
+(`23 → 24 → 25`), the owner approved building module 23's **core** inside `species-gear-chain`
+(`requirement-profiles-pullforward`'s tasks, `tasks/species-gear-chain-todo.md`) — the same shape as
+the durability pull-forward filed with `deployment-hierarchy-map.md`.
+
+**Built there, to this spec exactly — no schema/persistence change, matching the spec's own v1
+scope:** `RequirementProfile` + `RequirementProfileResolver`, `RequirementTrialEvaluator`,
+`RequirementProfileTuning` + `data/tuning/equipment-requirements.v1.json`, and the Seedsmith
+build-favor-label validation. **Not touched:** module 24 (activation) and module 25 (set
+reconciliation) — this program's own future work, unaffected.
+
+**Consequence for this map's own future plan:** when `item` gets its own `/plan` pass for modules
+24/25, module 23's core already exists — check `species-gear-chain-todo.md`'s
+`requirement-profiles-pullforward` tasks before re-building any of it.
+
+**Also filed:** `item-upgrade-tree` authors a new `successorOf` field per base type for
+weapon/offhand/jewel upgrades (armour already has the class ladder). **No `successorOf` values are
+authored by `species-gear-chain`** — that is a separate content pass, owed to whichever program picks
+it up.

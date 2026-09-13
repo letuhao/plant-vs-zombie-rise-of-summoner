@@ -28,20 +28,13 @@ public class WebMatchContentHashSweepTests
     }
 
     /// <summary>An unresolved log row: logged, never ingested — the crash window the sweep heals.</summary>
-    (long Id, string Corr) Unresolved(string tag, string? contentStamp)
-    {
-        var corr = "chash-" + tag + "-" + Guid.NewGuid().ToString("N")[..8];
-        var (created, entry) = _store.AppendWebMatchLog(
-            playerId: 1, correlationId: corr, matchKey: "match-" + corr,
-            setupJson: "{}", seed: 7,
-            engineVersion: FusionRpg.Core.Battle.BattleRuleset.EngineVersion,
-            rulesetVersion: FusionRpg.Core.Battle.BattleRuleset.RulesetVersion,
-            rngAlgoVersion: FusionRpg.Core.Battle.SeededRng.RngAlgoVersion,
-            environmentStamp: FusionRpg.Core.Battle.BattleEnvironment.Stamp,
-            contentHash: contentStamp);
-        Assert.True(created);
-        return (entry.Id, corr);
-    }
+    /// <remarks>
+    /// Carries a <b>resolvable</b> setup (B40.6). These tests' subject is the content-hash verdict, so
+    /// the row must resolve; an empty <c>{}</c> setup could never heal and the old "not refused"
+    /// assertion silently passed on a row the sweep had actually failed to resolve.
+    /// </remarks>
+    (long Id, string Corr) Unresolved(string tag, string? contentStamp) =>
+        SweepSetupFixture.AppendUnresolved(_store, _matches, "chash-", tag, contentStamp);
 
     string? RefusalFor(string corr) => _store.TryGetWebMatchLog(1, corr)?.SweepRefused;
 
@@ -83,7 +76,10 @@ public class WebMatchContentHashSweepTests
 
         _matches.SweepUnresolved();
 
+        // Not merely "unrefused": the row must actually HEAL (leave the unresolved window), which is
+        // what distinguishes a registry tolerance from a row the sweep failed to resolve at all.
         Assert.Null(RefusalFor(row.Corr));
+        Assert.DoesNotContain(_store.ListUnresolvedWebMatches(500), e => e.Id == row.Id);
     }
 
     [Fact]
@@ -96,6 +92,7 @@ public class WebMatchContentHashSweepTests
         _matches.SweepUnresolved();
 
         Assert.Null(RefusalFor(row.Corr));
+        Assert.DoesNotContain(_store.ListUnresolvedWebMatches(500), e => e.Id == row.Id);
     }
 
     [Fact]
@@ -106,5 +103,6 @@ public class WebMatchContentHashSweepTests
         _matches.SweepUnresolved();
 
         Assert.Null(RefusalFor(row.Corr));
+        Assert.DoesNotContain(_store.ListUnresolvedWebMatches(500), e => e.Id == row.Id);
     }
 }

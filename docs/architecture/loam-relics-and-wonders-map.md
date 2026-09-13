@@ -96,10 +96,9 @@ multi-empire program; `World`/`Multiverse` scope (reserved vocabulary only).
 Exact relic drop table/row/rate (module 1's own spec-time call); **resolved 2026-09-13** — whether
 `wonder-structure` needs a new `StructureKind` value or an orthogonal tag: neither, an orthogonal
 *field* on the existing record (`spec-wonder-structure.md` §Design 1, mirroring `Obstacle`'s own
-precedent). **New, genuinely open (strengthen-pass finding, 2026-09-13):** does `relic-item-kind`'s
-own unilateral addition of 3 new item-program closed-vocabulary members need that program's own
-sign-off first (see External dependencies row above); a heavily-Wondered empire can drive decay
-pressure to near-zero across its whole territory since no Wonder carries an offsetting upkeep cost —
-not a mechanical cheat (nothing short-circuits, every number still flows through the real
-generator→storage→decay loop), but worth a balance-pass look before Empire-scope Wonders ship in
-volume.
+precedent). **Resolved by owner, 2026-09-13:** `relic-item-kind`'s unilateral addition of 3 new item-program
+closed-vocabulary members needs no separate sign-off — sufficient as designed, matching the
+`Gem`/`Charm`/`Combo`/`Consumable` precedent. **Resolved by owner, 2026-09-13:** a heavily-Wondered
+empire driving decay pressure to near-zero across its whole territory (no Wonder carried an
+offsetting upkeep cost) — owner chose to add an upkeep term now, in `wonder-effect-empire`'s own
+spec, rather than defer to a future balance pass. See that spec's own Design section for the term.

@@ -451,9 +451,9 @@ assert it** ([validation-ssot.md](../validation-ssot.md) §4).
    Changing one to match the other now would be a balance decision wearing a consistency argument's
    clothes. It is a one-line tuning bump later. *(Irreversible? No.)*
 
-4. **Does `forge-gem` upcycle within a family only (3× `atom.might` t2 → 1× `atom.might` t3), or may it
-   consume any three same-tier gems?**
-   **Recommendation: same-family only.** Cross-family conversion makes every gem fungible, which
+4. ⭐ **DECIDED 2026-09-13 (owner): same-family only.** `forge-gem` upcycles within a family
+   (3× `atom.might` t2 → 1× `atom.might` t3); it may **not** consume any three same-tier gems
+   regardless of family. Cross-family conversion makes every gem fungible, which
    deletes the collection pressure the socket system runs on and makes `atom.elemental-power` (the one
    family with **7** shipped entries, versus 1 for each of the other 97) a laundering route into any
    other family. Same-family also needs no new tuning row — the family is already on the seed entry.
