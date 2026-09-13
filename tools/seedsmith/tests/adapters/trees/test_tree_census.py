@@ -53,9 +53,69 @@ def _generated(bound: "list[tuple[str, list[dict]]]", refused: "list[tuple[str, 
     }
 
 
-def _atom(channel: str = "atk") -> dict:
-    return {"kindId": "stat.modify", "attachPoint": "Stat", "channelId": channel,
+def _atom(channel: str = "atk", kind: str = "stat.modify") -> dict:
+    return {"kindId": kind, "attachPoint": "Stat", "channelId": channel,
             "op": "Flat", "kMicro": 608, "unitClass": "GameUnits", "scaleAxis": "PTheta"}
+
+
+class ReadableVsPricedTests(unittest.TestCase):
+    """R4 / P4.3. A bound node can be fully PRICED and completely UNREAD: the resolver reads only
+    `stat.derived`, so a `stat.modify` atom contributes zero. Counting priced atoms reported 243
+    healthy nodes on 2026-09-13 where the truth was 0. These tests pin the distinction.
+    """
+
+    def test_a_priced_but_unreadable_atom_counts_as_priced_and_not_readable(self) -> None:
+        plan = _plan("t", [("skill.t-t1-n0", "magnitude", 1)])
+        gen = _generated([("skill.t-t1-n0", [_atom("atk", "stat.modify")])], [])
+        row = census_mod.census_tree("t", plan, _seed([]), gen)
+        self.assertEqual(row.bound_with_priced_atoms, 1)
+        self.assertEqual(row.priced_atom_count, 1)
+        self.assertEqual(row.bound_with_readable_atoms, 0)
+        self.assertEqual(row.readable_atom_count, 0)
+        self.assertEqual(row.unreadable_share_permille, 1000)
+
+    def test_a_derived_atom_is_both_priced_and_readable(self) -> None:
+        plan = _plan("t", [("skill.t-t1-n0", "magnitude", 1)])
+        gen = _generated([("skill.t-t1-n0", [_atom("combat.power.fire", "stat.derived")])], [])
+        row = census_mod.census_tree("t", plan, _seed([]), gen)
+        self.assertEqual(row.bound_with_readable_atoms, 1)
+        self.assertEqual(row.readable_atom_count, 1)
+        self.assertEqual(row.unreadable_share_permille, 0)
+
+    def test_a_node_with_both_kinds_is_readable_and_counted_by_kind(self) -> None:
+        plan = _plan("t", [("skill.t-t1-n0", "magnitude", 1)])
+        gen = _generated([("skill.t-t1-n0", [_atom("atk", "stat.modify"),
+                                             _atom("combat.power.fire", "stat.derived")])], [])
+        row = census_mod.census_tree("t", plan, _seed([]), gen)
+        self.assertEqual(row.bound_with_readable_atoms, 1)
+        self.assertEqual(row.bound_atoms_by_kind, {"stat.derived": 1, "stat.modify": 1})
+
+    def test_the_readable_kind_matches_the_resolver_source(self) -> None:
+        # The census's copy of the resolver's predicate must not drift from the resolver itself.
+        # `BoundAtomsFor` skips anything whose KindId != the readable kind, so the literal it compares
+        # against is the contract this constant mirrors.
+        root = census_mod.REPO_ROOT
+        source = (root / "src" / "FusionRpg.Core" / "PassiveTree" / "Resolve" / "TreeAtomSource.cs")
+        self.assertTrue(source.is_file(), f"resolver source not found: {source}")
+        text = source.read_text(encoding="utf-8")
+        self.assertIn(f'"{census_mod.READABLE_KIND_ID}"', text,
+                      "the resolver no longer mentions the census's READABLE_KIND_ID — update both together")
+
+    def test_corpus_reports_bound_atoms_by_kind(self) -> None:
+        plan = _plan("a", [("skill.a-t1-n0", "magnitude", 1)])
+        rows = (
+            census_mod.census_tree(
+                "a", plan, _seed([]),
+                _generated([("skill.a-t1-n0", [_atom("atk", "stat.modify")])], [])),
+        )
+        result = census_mod.DistributionCensus(trees=rows, by_reason={}, by_reason_class={})
+        self.assertEqual(result.totals()["readableAtoms"], 0)
+        self.assertEqual(result.totals()["unreadableBoundNodes"], 1)
+        self.assertEqual(result.bound_atoms_by_kind(), {"stat.modify": 1})
+
+
+if __name__ == "__main__":
+    unittest.main()
 
 
 class ClassSplitTests(unittest.TestCase):
