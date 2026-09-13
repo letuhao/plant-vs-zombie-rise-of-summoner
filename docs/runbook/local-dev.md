@@ -102,7 +102,14 @@ startup than the older BepInEx install), building into that game's `Mods\` folde
 
 The web UI build runs by default (2026-08-30 — it used to be opt-in via `-RebuildUi` and got forgotten,
 leaving a stale FE served for a whole session). Flags: `-LoaderHost` (`MelonLoader`/`BepInEx`), `-NoGame`,
-`-NoServer`, `-NoRebuildUi` (skip the web UI build), `-RestartServer`.
+`-NoServer`, `-NoRebuildUi` (skip the web UI build), `-RestartServer`, `-QuickTest`.
+
+**`-QuickTest` (2026-09-14).** The slowest step by far is the default test profile (`test-fast.ps1`,
+13k+ tests) — a real cost when a redeploy follows a small, already-hand-verified edit. `-QuickTest`
+skips only that step; every boundary guard still runs, and a loud warning prints every time it's used.
+**Never the default, never proof of anything** — re-run without it (or the targeted `dotnet test`
+filters for what you actually touched) before calling a build verified, before a live proof, and
+before commit/merge. It exists to shorten the local iteration loop, not to replace the gate.
 
 **FE always lands in `dist` (2026-09-09):** Vite writes `src/FusionRpg.Server/wwwroot`; the published
 server serves `dist/FusionRpg.Server/wwwroot` (`ContentRoot` = exe dir). If `:5088` is already up,
