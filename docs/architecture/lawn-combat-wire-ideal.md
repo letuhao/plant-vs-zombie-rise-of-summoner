@@ -112,7 +112,7 @@ Every one of these is an inert line, not a wall.
 | 155 of 179 shipped action briefs never load — hardcoded two-file array | `Program.cs:402` |
 | `UpsertSpeciesBasics` / `GetSpeciesBasics` have zero production callers | `RpgStore.Actions.cs:650,673` |
 | The action stack is unreachable from the lawn — `grep FusionRpg.Core.Actions src/FusionRpg.Injector` → **0 files** | — |
-| `combat.power.omni` (and all `combat.*`) structurally excluded from the field bridge — `MergeAppliedCombat` folds only `progression.bonus.*` | `ActorHub.cs:89-113` |
+| ~~`combat.power.omni` excluded from the field bridge~~ — **reclassified: correct by design, NOT a gap.** `MergeAppliedCombat` folding only `progression.bonus.*` is what keeps the two halves separate (D1). Folding `combat.*` here would double-dip RPG power into one hit via two routes | `ActorHub.cs:89-113` — keep as is |
 | Per-actor defense never reaches its own incoming hit — the damage scalar resolves ActorHub with a literal `"dmg"` key and a `{Hp=1,MaxHp=1,Atk=1}` baseline, caching one number per side | `GameHooks.cs:691-710`, inert line `:702` |
 | `type-weights.json` exists and is populated (1,131 entries) but has **zero `src/**` readers** — Python-only | `data/seed/actions/type-weights.json` |
 | A13's runtime roll `ActionSeeder.Generate` is implemented but has **zero production callers** — the code asserts this about itself: `ActionCorpusProducerLanded = false` ("No production path exists"), enforced by a test | `Actions/Seeding/ActionSeeder.cs:30,32`; flag at `Items/Grants/ItemGrantedActionRow.cs:111-119` |
@@ -331,39 +331,151 @@ it should say so in a comment.
 
 ## What this deliberately does not decide
 
-- Whether plant-side status ever works (a named, ownerless capability gap — `action-corpus-ideal.md:1379`).
-- Whether `combat.power.omni` should also join the *vanilla field* bridge via `MergeAppliedCombat`.
-  Probably not — that would double-count once the overlay path lights up — but it is not this doc's
-  call.
-- Per-actor defense on incoming vanilla hits (`GameHooks.cs:702`). Named here, owned by whichever
-  program fixes the `"dmg"` synthetic key.
-- The action corpus content itself (179 briefs, 24 loading).
+- The action corpus content itself (179 briefs, 24 loading) — the *loader* is in scope, the *content*
+  is not.
 - Any FE/HUD surface for elemental damage numbers.
+- Any rebalancing (D1 — separate program).
+- Everything in "Deferred, tracked" above.
+
+Settled since the first draft, and no longer open: whether `combat.*` should join `MergeAppliedCombat`
+(**no** — D1), and whether moving battle goldens is acceptable (**not applicable** — D3).
+
+---
+
+## Decisions (owner, 2026-09-13)
+
+**D1 — Both systems run together. The RPG keeps its own damage calculation.**
+Not "additive vs absorb" as originally framed: the two halves are *already* separate features and
+both are intended. `aura-skill-ideal.md:625-632` states it as a table — **commander stat bleed**
+(`progression.bonus.*` → `ActorHub` → `EntityStatWriter` → vanilla plant/zombie stats, reach
+"maxHp, atk, arm") versus **aura/overlay** (`combat.*` → RPG damage/shield resolution). So writing
+`attackDamage` is *designed behaviour*, not a leak — corrected here because a reasonable reading of
+"we don't touch PvZ stats" suggests otherwise, and the live writer really does set `attackDamage`,
+`thePlantAttackInterval`, `theShieldHealth`, `theLevel` and eight more fields
+(`EntityStatWriter.cs:47-81`, E16/E38).
+
+**The one thing that would create a real double-dip is folding `combat.*` into `AppliedCombat`.**
+`ActorHub.cs:89-113` folds only `progression.bonus.*` and must keep doing so. That exclusion is
+**correct by design**, not a gap — an earlier draft of this doc mis-filed it as a wiring gap.
+
+**Balance is a separate program.** This program wires gaps only. No rebalancing of vanilla numbers,
+no retuning of the element ring, here.
+
+**D2 — Follow the existing resource design. No new resource invention.**
+The basic attack consumes a resource; no resource, no trigger. Verified: the rule is genuinely
+implemented at *declare* time, which is the right place (§ Resource findings). What is missing is the
+cost row and the regen reader — both wiring.
+
+**D3 — Byte-identical determinism does not apply to the lawn.**
+It applies to the modes we own the clock for: siege, world-map assault, delve. **The lawn is a
+reflection built from event capture, with a delay of one or more steps — not an instant apply**,
+because we do not own PvZ's sim loop. This is exactly record-then-drain and G5's *"worst case
+degrades to delayed effects, never to frame drops"*. So the A5 "byte-identical" constraint is a
+battle-mode property and never transferred to the lawn; the goldens question in an earlier draft of
+this doc was malformed. The correct audit question is *does the spec follow the principles* — and the
+finding of this doc is that the principles are sound and the wiring simply never happened.
+
+**D4 — No ICD, no elemental reactions, no status resolver in this program.**
+ICD belongs to status application, and the elemental system is deliberately half-built: it has
+bonus/reduce damage only (a simple Pokémon-shaped ring), with no reactions and no status resolver.
+Building those is a serious individual feature. **Deferred and tracked — see "Deferred, tracked"
+below.** Consequence for this program: the basic attack deals elemental *damage*, and applies no
+elemental *status*.
+
+---
+
+## Resource cost and regeneration — verified 2026-09-13
+
+The owner's recollection was checked against code. Design and machinery confirmed; two wires missing
+and one contradiction.
+
+### Built
+
+| Thing | Evidence |
+|---|---|
+| Cost model | `ActionCostRow(ActionId, ResourceId, AmountSpec, When, AllowLethal)` — `Actions/ActionRow.cs:141` |
+| `CostLedger` — pre-gate `Check` (deterministic, no roll) and validate-all-then-consume-all `TryPay`; hp floors at 1 unless `AllowLethal` | `Actions/Cost/CostLedger.cs:85-100`, `:106-138`, `:145` |
+| All six pools, array-backed over `DerivedStatChannels.ResourceIds` | `Actions/Cost/ActorResourcePools.cs:13,64,93,113` |
+| **"No resource, no trigger" is real, and gates at _declare_ not commit** — an unaffordable action is never declared, so no attack happens | `UsabilityEvaluator.cs:66` → `CostLedger.Check` → `UsabilityReason.CannotAfford` (`CostLedger.cs:96`); real ledger passed at `BasicAttack.cs:163-166` |
+| Lawn resource pools exist, keyed by combat ptr, with lifecycle cleanup | `Combat/LawnActorResourcePools.cs:26`; registered `Injector/Effects/InjectorEntityRegistry.cs:51`, cleaned `:127,:138` |
+| Real cost rows do exist in production — siege constructions spend `qi`/`stamina`/`hunger` | `Battle/Siege/ConstructionActions.cs:120-122` |
+
+### Wiring gap
+
+| Gap | Inert line |
+|---|---|
+| **The basic attack costs nothing.** One empty array, so `CostLedger.Check` early-returns `Usable` and the gate passes vacuously for every shipped action | `Battle/BattleRunState.cs:80` — `Costs: Array.Empty<CompiledActionCost>()`; early-out at `CostLedger.cs:69-70` |
+| **No regen reader.** `resource.regen.*` channels are registered and aptitudes can fund them, but nothing consumes them for `stamina`/`qi`/`spirit`/`hunger` | `Stats/Derived/DerivedStatRegistry.cs:239` records this in its own note |
+| **The lawn has no cost gate at all.** `grep CostLedger src/FusionRpg.Injector` → zero hits. Lawn pools are written only by the `resource.delta` atom sink | only caller `InjectorEffectActionSink.cs:254` |
+| Item-stock precondition (`ActionStockCommit` / `StockDemand`) is a separate, also-inert path — not resource cost, do not conflate | `Actions/Cost/StockLedger.cs:119` early-out; zero authored `holdsStock` |
+
+### Real gap
+
+| Gap | Detail |
+|---|---|
+| **Combat regeneration is deliberately zero.** `BattleRuleset.BaseResourceRegen(theta, resourceId) => 0`, rationale at `:395-411`: rounding to whole ticks makes the smallest non-zero rate ~300 poise/round against a 100 spend. `resource-hub-ssot.md:284` — pools *"persist across a run and refill **at rest**"*, and a battle is not a rest | `Battle/BattleModels.cs:412` |
+| **Cadence mismatch.** `action-ideal.md:223`: *"An action cost is authored against the pool's **REGEN**, never against its MAX."* Battle costs are per-*round*; a lawn Peashooter fires roughly every 1.4 s of wall-clock. A round is not a second, so no battle-authored cost transfers to the lawn unmapped | — |
+| Stamina regen coefficient is sized against the wrong opponent — named defect, owned by `residual-fit`, not this program | `tools/CombatSim/tuning/aptitudes.v1.json` `recovery.scaleMilli: 374`; diagnosis `action-ideal.md:184-201` |
+
+### The contradiction to resolve
+
+| Source | Says |
+|---|---|
+| `action-ideal.md:63` — D22, owner, 2026-08-27 | the basic attack costs **`stamina`** |
+| `data/tuning/action-corpus-cost-templates.v1.json:12` | attack → **`qi` 20** `onCommit`, self-labelled *"UNMEASURED placeholders"* |
+
+Open question 1 below.
+
+---
+
+## Deferred, tracked (not this program)
+
+Named here so they cannot become invisible, per D4 and the owner's instruction to track rather than
+silently drop.
+
+| Deferred | Why | Depends on |
+|---|---|---|
+| **Elemental reactions** (wet+lightning-shaped combos) | The element system is bonus/reduce only today. Reactions are a large individual feature | A status resolver |
+| **Elemental status application + status resolver** | Needs the action system completely wired first | action system |
+| **ICD / element-application rate limiting** | Only meaningful once statuses apply; pointless while elements are damage-only | the two above |
+| **Proc coefficient** (fire-rate value scaling, D3/RoR2 prior art) | Real anti-exploit, but it prices value — that is the balance program's axis, not a wiring gap | balance program |
+| Plant-side lawn status | Lawn status executor iterates zombies only (`action-corpus-ideal.md:1379`) — a named, ownerless capability gap | status resolver |
+| Per-actor defense on incoming vanilla hits | `GameHooks.cs:702` synthetic `"dmg"` key, one cached number per side | whichever program owns that fix |
 
 ---
 
 ## Open questions — owner decisions only
 
-**1. Additive rider, or does the RPG absorb the vanilla share?**
-Today an overlay packet is *additive beside* vanilla damage, and `decisions.md:34` locks *"Vanilla
-peas/bites stay `TakeDamage` + Prefix DEF."* Your spec says the engine returns *"elemental **delta**
-damage"* — which is the additive shape and needs no lock change. If instead the intent is that the
-RPG eventually **owns** the whole number (vanilla becomes a floor or is silenced), that is a real
-gap, needs new machinery, and **overturns a standing lock**. Additive is recommended as the first
-increment; it is strictly smaller and reversible.
+**1. `stamina` or `qi` for the basic attack's cost?**
+D22 (`action-ideal.md:63`, owner 2026-08-27) says **stamina**. The shipped corpus template says
+**`qi` 20** (`action-corpus-cost-templates.v1.json:12`), self-labelled "UNMEASURED placeholders". One
+of the two is wrong and the spec cannot author a cost row until this is settled. A one-word answer.
 
-**2. Does a lawn basic attack cost `stamina`?**
-`action-ideal.md:63` D22 (owner, 2026-08-27): *"**The basic attack costs `stamina`**."* A
-continuously-firing lawn plant paying stamina per pea is a very different economy from a turn-based
-battle. Either the lawn basic attack is exempt (and D22 gains a scope clause), or stamina regen on
-the lawn must be tuned to make it a non-event. This must be decided before a spec, because it changes
-whether a resource pool is on the hot path at all.
+**2. On the lawn, "no resource, no trigger" cannot stop the shot. What should it stop instead?**
+This is the load-bearing question and it has no precedent in battle. In battle, refusing to *declare*
+an action means the actor does not act. **On the lawn we do not own the sim loop**: PvZ fires the pea
+on its own cadence, and we are forbidden from modifying vanilla projectile behaviour
+(`combat-damage-ssot.md:608-612`). So an exhausted plant still shoots — we cannot suppress it.
 
-**3. Is moving goldens acceptable here?**
-`action-map.md:8` records that A5's basic-attack adoption was deliberately *"an **inert,
-byte-identical** proof… explicitly never routing runtime combat through it ('If a player could tell
-the difference, this module failed')"*. Wiring it to the lawn **will** change combat outcomes. That is
-the intent — but it should be an explicit, reviewed decision rather than a surprise in a diff.
+Which means "no resource" can only suppress **the RPG's own contribution**. Candidates:
+
+- **(a) No rider.** Out of resource ⇒ the pea still flies and deals its vanilla/`attackDamage` number,
+  but no elemental delta is added. The plant visibly "runs out of magic" while still plinking.
+  Smallest, honest, and needs nothing we do not already have.
+- **(b) No rider *and* the stat bleed decays.** Also stop refreshing `progression.bonus.atk`, so the
+  plant drifts back toward vanilla. More dramatic, but it fights the "reflection with delay" model and
+  would look like a bug on a busy board.
+- **(c) Cost is not per-shot at all** — charge on bind/deploy, or per wave, so the pool gates
+  *presence* rather than *each swing*. Sidesteps the cadence problem entirely (question 3).
+
+**3. What is the lawn's cost cadence?**
+`action-ideal.md:223`: *"An action cost is authored against the pool's **REGEN**, never against its
+MAX."* Battle authors per **round**; a Peashooter fires about every **1.4 s** of wall-clock. A round
+is not a second, so no battle-authored number transfers unmapped. Either the spec defines a
+round↔second mapping for the lawn, or lawn costs are authored independently. This also decides
+whether the regen reader must land in the same slice (it must, if cost is per-shot — otherwise every
+plant dries up permanently, since `BaseResourceRegen` returns 0 and nothing reads the aptitude-funded
+`resource.regen.*` channels).
 
 ---
 
@@ -398,8 +510,18 @@ citing this gate should cite the schema default, not the env var.
 
 ## Next step
 
-`/spec` — a capability map plus module specs — once the three open questions are answered. The
-natural module split this doc suggests: **basic-attack-grant** (make the predicate true, bind at
-spawn), **lawn-hit-entry** (drain → packet, keyed on the board fold), **rate-limit** (proc
-coefficient), and **corpus-unblock** (the four inert action lines). Not written here; the ideal doc is
-where this phase stops.
+`/spec` — a capability map plus module specs — once the three open questions are answered.
+
+The natural module split this doc now suggests, all of it wiring:
+
+| Module | Wires |
+|---|---|
+| **lawn-hit-entry** | The `HasOnDamageDealtGrant()` guard → drain → packet, keyed on the **board fold** (not the FSM) |
+| **basic-attack-grant** | Bind `ActionKind.Basic` per lawn actor at spawn so the predicate above is true; element rides the existing `elementPayload` bake |
+| **basic-attack-cost** | The empty `Costs` array (`BattleRunState.cs:80`) + the missing regen reader + the lawn's absent `CostLedger` call — these three must land together or plants dry up permanently |
+| **corpus-unblock** | `ActionCorpusComposer.cs:143` (forces `Skill`), `Program.cs:402` (24 of 179 load), `UpsertSpeciesBasics` callers |
+
+Rate limiting is **not** a module here — proc coefficient went to the balance program (D4), and ICD
+went to the deferred status feature.
+
+Not written here; the ideal doc is where this phase stops.
