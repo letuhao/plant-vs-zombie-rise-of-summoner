@@ -59,10 +59,10 @@ def _tool_result(payload: dict[str, Any]) -> str:
 
 def main() -> None:
     try:
-        from mcp.server.fastmcp import FastMCP
+        from fastmcp import FastMCP
     except ImportError as exc:
         print(
-            "mcp package missing; run: pip install -r scripts/commit-tool/requirements.txt",
+            "fastmcp package missing; run: pip install -r scripts/commit-tool/requirements.txt",
             file=sys.stderr,
         )
         raise SystemExit(2) from exc

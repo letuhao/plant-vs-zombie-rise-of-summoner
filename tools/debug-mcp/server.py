@@ -17,6 +17,8 @@ from tools.debug_actor import snapshot as debug_actor_impl
 from tools.debug_verify import verify as debug_verify_impl
 from tools.debug_preflight import audit as debug_preflight_impl
 from tools.debug_lawn_setup import setup as debug_lawn_setup_impl
+from tools.debug_ui_nav import nav as debug_ui_nav_impl, ACTIONS as _UI_NAV_ACTIONS
+from tools.debug_restart_game import restart as debug_restart_game_impl
 
 mcp = FastMCP("debug-mcp")
 
@@ -67,6 +69,29 @@ def debug_lawn_setup(scenario: str = "lab-overlay", level: int = 1,
                      timeout: int = 60) -> dict:
     """Scope: game-injector-debug orchestration. Setup only, never a proof."""
     return debug_lawn_setup_impl(scenario, level, timeout)
+
+
+@mcp.tool(description=(
+    "Call one real UIMgr navigation method (back-to-menu, enter-main-menu, back-to-game, etc.) "
+    "to leave a stuck/defeated board. Known working recovery sequence: back-to-menu THEN "
+    "enter-main-menu (two calls) -- one call alone can land on the previous menu layer, not the "
+    "true main menu. Actions: " + ", ".join(_UI_NAV_ACTIONS)
+))
+def debug_ui_nav(action: str, reason: Optional[str] = None) -> dict:
+    """Scope: game-injector-debug. Real UIMgr call, never fabricated; refuses an unknown action
+    locally before any round trip."""
+    return debug_ui_nav_impl(action, reason=reason)
+
+
+@mcp.tool(description=(
+    "DISRUPTIVE: close and relaunch the game process, poll for a fresh injector connection. "
+    "The easiest, most reliable fix for a stuck/defeated board -- prefer this over chasing "
+    "debug_ui_nav in place when a provably clean board matters more than speed. Ends whatever "
+    "the operator was looking at."
+))
+def debug_restart_game(timeout_sec: int = 120) -> dict:
+    """Scope: local-machine. Adapter over scripts/restart-game.ps1 -- not reimplemented here."""
+    return debug_restart_game_impl(timeout_sec)
 
 
 def resolve_transport(argv=None):

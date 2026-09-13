@@ -19,6 +19,30 @@ import registry
 _PORT = 5088
 _BASE_URL = "http://127.0.0.1:5088"
 _GAME_VARS = ("FUSIONRPG_ML_GAMEDIR", "FUSIONRPG_GAME_DIR")
+# Real false-FAIL found live 2026-09-14: this check required one of _GAME_VARS
+# unconditionally, so a machine using CLAUDE.md's documented zero-config MelonLoader default
+# (deploy-play.ps1's own fallback path, needing neither env var) reported game-dir/interop-refs/
+# dll-freshness as FAIL with no actual problem to fix. The fallback path is machine-local
+# (AGENTS.md/CLAUDE.md: never hardcode/commit an `H:\Games\...`-shaped path), so it is read from
+# a repo-root `.env` (gitignored, same as CLAUDE.md/AGENTS.md themselves) instead of a literal
+# default in this file -- absent on a machine with no `.env`, this check just falls through to
+# the existing "no game dir" FAIL, same as before this fix.
+
+
+def _dotenv_value(root, key):
+    """Plain KEY=VALUE reader for repo-root `.env` -- no new pip dependency for one optional
+    machine-local default. Not a general .env parser: no quoting/interpolation/export support."""
+    env_file = Path(root) / ".env"
+    if not env_file.is_file():
+        return None
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        name, _, value = line.partition("=")
+        if name.strip() == key:
+            return value.strip().strip('"').strip("'")
+    return None
 _SNAPSHOT_TIMEOUT_SECONDS = 5  # Readiness observation must never become a long-running probe.
 
 
@@ -40,9 +64,15 @@ def _game_dir(root, env):
                 return str(candidate), _pass("game-dir", f"{var}={candidate}")
             return None, _fail("game-dir", f"{var}={candidate} (no game exe)",
                                f"point {var} at the MelonLoader/BepInEx pack")
+    dotenv_default = _dotenv_value(root, "FUSIONRPG_ML_GAMEDIR_DEFAULT")
+    if dotenv_default:
+        default = Path(dotenv_default)
+        if default.is_dir() and (default / "PlantsVsZombiesRH.exe").is_file():
+            return str(default), _pass(
+                "game-dir", f"no env var set, using .env FUSIONRPG_ML_GAMEDIR_DEFAULT={default}")
     return None, _fail(
-        "game-dir", "no game dir (%s)" % ", ".join(_GAME_VARS),
-        "$env:FUSIONRPG_GAME_DIR = \"<game folder>\" (MelonLoader pack default)")
+        "game-dir", "no env var (%s) and no usable .env FUSIONRPG_ML_GAMEDIR_DEFAULT" % ", ".join(_GAME_VARS),
+        "$env:FUSIONRPG_GAME_DIR = \"<game folder>\", or set FUSIONRPG_ML_GAMEDIR_DEFAULT in a repo-root .env")
 
 
 def _interop_refs(root, env, game_dir):
@@ -50,6 +80,13 @@ def _interop_refs(root, env, game_dir):
         return _fail("interop-refs", "no game dir (see game-dir check)",
                      "fix game-dir first")
     game = Path(game_dir)
+    # MelonLoader host (this machine's documented default, see game-dir above) ships its own
+    # interop assemblies under MelonLoader/Il2CppAssemblies -- it has no BepInEx/ tree at all, so
+    # checking for BepInEx/core+interop unconditionally false-FAILed a correctly-set-up MelonLoader
+    # install (found live 2026-09-14, same session as the game-dir false-FAIL above).
+    melon_interop = game / "MelonLoader" / "Il2CppAssemblies"
+    if melon_interop.is_dir() and any(melon_interop.glob("*.dll")):
+        return _pass("interop-refs", f"MelonLoader host: {melon_interop}")
     for sub in ("BepInEx/core", "BepInEx/interop"):
         if not (game / sub).is_dir():
             artifacts = Path(root) / "artifacts" / "bepinex-refs"

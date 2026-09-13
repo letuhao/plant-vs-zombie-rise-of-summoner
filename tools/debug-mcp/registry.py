@@ -28,6 +28,7 @@ _RELAY_RE = re.compile(r"Send\s*\(\s*(hub|inbox)\b")
 _STORE_RE = re.compile(r"\b(store|grants|ua|ingest)\s*\.")
 
 _allowlist_cache = None
+_allowlist_cache_key = None
 
 
 def check_mapped(tools):
@@ -68,8 +69,30 @@ def _classify(span):
     return None
 
 
+def _endpoints_files(root):
+    base = find_repo_root(root) / "src" / "FusionRpg.Server"
+    return sorted(base.glob("*Endpoints.cs"))
+
+
+def _cache_key(paths):
+    """(path, mtime) per *Endpoints.cs file -- changes the instant any one is edited."""
+    return tuple((str(p), p.stat().st_mtime) for p in paths)
+
+
 def load_allowlist(root=None):
-    """Map route path -> scope (or None when unclassifiable). Cached.
+    """Map route path -> scope (or None when unclassifiable).
+
+    Cached, but the cache is invalidated the moment any *Endpoints.cs file's
+    mtime changes -- a plain "cache forever" cache was proven live 2026-09-14
+    to hide newly-added routes (/game-state, /ui-nav) for the lifetime of this
+    long-running stdio process: routes added mid-session to DebugEndpoints.cs
+    stayed invisible to debug_call ("route not in debug allowlist") until the
+    whole MCP server process was restarted, even though debug_preflight and
+    every other tool kept working against the live server the whole time.
+    Re-reading on every call would be wrong for a different reason (a partial
+    edit mid-save could parse as unbalanced parens); mtime comparison is the
+    same cheap freshness check `commit-tool`'s `_reload_tool_modules` already
+    uses for exactly this class of "stale in-process state" problem.
 
     DebugEndpoints.cs contributes MapPost + MapGet (the debug surface,
     including writes). Every other *Endpoints.cs contributes MapGet only:
@@ -77,12 +100,13 @@ def load_allowlist(root=None):
     stay on the debug surface. Keys are full paths; /api/debug routes are
     additionally keyed relative for backward compatibility.
     """
-    global _allowlist_cache
-    if _allowlist_cache is not None:
+    global _allowlist_cache, _allowlist_cache_key
+    paths = _endpoints_files(root)
+    key = _cache_key(paths)
+    if _allowlist_cache is not None and _allowlist_cache_key == key:
         return _allowlist_cache
-    base = find_repo_root(root) / "src" / "FusionRpg.Server"
     routes = {}
-    for path in sorted(base.glob("*Endpoints.cs")):
+    for path in paths:
         text = path.read_text(encoding="utf-8-sig")
         debug_file = path.name == "DebugEndpoints.cs"
         group_match = _GROUP_RE.search(text)
@@ -96,6 +120,7 @@ def load_allowlist(root=None):
             if debug_file and group == "/api/debug":
                 routes[route] = scope
     _allowlist_cache = routes
+    _allowlist_cache_key = key
     return routes
 
 

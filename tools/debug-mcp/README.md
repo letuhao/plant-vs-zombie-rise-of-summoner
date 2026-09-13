@@ -1,7 +1,7 @@
 # Debug MCP — owner walkthrough
 
 Thin adapter MCP over the repo's real debug surface (spec:
-`docs/architecture/debug-mcp/spec-debug-mcp.md`). Seven tools, stdio default,
+`docs/architecture/debug-mcp/spec-debug-mcp.md`). Nine tools, stdio default,
 local HTTP behind a flag. No domain logic lives here.
 
 ## Install
@@ -25,7 +25,7 @@ python tools/debug-mcp/server.py --transport http --port 8899
 
 Localhost bind only; any other `--host` is refused before serving.
 
-## Inspector walkthrough (do all 7, in order)
+## Inspector walkthrough (do all 9, in order)
 
 ```powershell
 npx @modelcontextprotocol/inspector python tools/debug-mcp/server.py
@@ -47,6 +47,18 @@ npx @modelcontextprotocol/inspector python tools/debug-mcp/server.py
 7. `debug_lawn_setup` — `{}` **only with a live game you own the board of**:
    enters level 1, freezes waves, runs lab-overlay, returns ptrs. It touches
    the live lawn — never run it against someone else's prove session.
+8. `debug_ui_nav` — `{"action":"back-to-menu"}` then `{"action":"enter-main-menu"}`
+   to leave a stuck/defeated board and reach the real main menu (one call
+   alone can land on the previous menu layer instead — this game's menu stack
+   is not flat). Requires `/ui-nav` to exist in the checkout this server runs
+   against (`src/FusionRpg.Server/DebugEndpoints.cs`) — added 2026-09-14,
+   check it landed before relying on this tool.
+9. `debug_restart_game` — **DISRUPTIVE**: `{}` closes and relaunches the game
+   process, polling for a fresh injector connection. Ends whatever the
+   operator was looking at; prefer it over chasing `debug_ui_nav` in place
+   when a provably clean board matters more than speed. Adapter over
+   `scripts/restart-game.ps1` — refuses cleanly if that script is missing
+   from the checkout this server runs against.
 
 ## Scope labels (every response carries one)
 
@@ -66,3 +78,5 @@ npx @modelcontextprotocol/inspector python tools/debug-mcp/server.py
 | `debug_lawn_setup` 409 injector-not-connected | Launch the game with the injector loaded, then retry |
 | `debug_preflight.live.ready` is false but injector is connected | Follow its `fix`: wait for loading, or open a lawn/use `debug_lawn_setup` only on a board you own |
 | Live tests skip | Start the SIM server first; unit tests never need it |
+| `debug_call`/`debug_ui_nav` says "route not in debug allowlist" for a route you know exists | The allowlist is generated from `DebugEndpoints.cs` in whatever checkout this server's cwd resolves to — a route added in a worktree is invisible here until it's merged/present in this checkout. Confirmed real 2026-09-14: `/ui-nav`/`/game-state` existed only in a worktree branch while this server ran against main. Check `git branch --show-current` in the server's own working directory. |
+| A route you just added to `DebugEndpoints.cs` still isn't found | The allowlist cache is keyed by every `*Endpoints.cs` file's mtime and reloads automatically on the next call within the same checkout — no server restart needed for that case (fixed 2026-09-14; previously required a restart). |

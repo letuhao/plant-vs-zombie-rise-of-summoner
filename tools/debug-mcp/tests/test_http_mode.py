@@ -33,6 +33,6 @@ def test_readme_walks_every_registered_tool():
     readme = (Path(__file__).resolve().parent.parent / "README.md").read_text()
     tools = asyncio.run(server.mcp.list_tools())
     names = [t.name for t in tools]
-    assert len(names) == 7
+    assert len(names) == 9
     missing = [n for n in names if n not in readme]
     assert missing == [], f"README missing tools: {missing}"

@@ -16,6 +16,9 @@ _FIXES = (
      "launch the game with the FusionRpg injector loaded, then retry"),
     ("did not ack",
      "return to the main menu and re-run (snapshot poll missed the ack)"),
+    ("board is cycling",
+     "the board is losing every wave in a tight loop (no real plants placed) -- place real "
+     "plants before retrying, or use scripts/restart-game.ps1 for a clean board"),
 )
 
 
