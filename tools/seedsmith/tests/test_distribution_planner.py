@@ -1117,6 +1117,195 @@ class QuotaExactnessTests(unittest.TestCase):
                            "the scope allocation must differentiate subjects")
 
 
+class TopUpRoundTests(unittest.TestCase):
+    """T2.1/T2.2/T2.3/T2.4 (2026-09-12) — the `S5 → S1` top-up round the design specifies
+    (`action-corpus-ideal.md` §15 `S5 -->|"round n+1 targets"| S1`; `spec-coverage-report.md` §7
+    "Depended on by: A-S1, which reads the report to build round n+1's briefs") but which was never
+    wired. One round can never fill its own quota (measured ~66% yield), so `thinCell` was
+    permanently short and the full-run gate unreachable.
+
+    These tests use SYNTHETIC report targets, never the live corpus, so they keep testing after the
+    corpus is repaired (`spec-metrics.md` §6)."""
+
+    @staticmethod
+    def _report(entries: "list[dict]") -> dict:
+        return {"schemaVersion": 1, "kind": "action-coverage",
+                "_meta": {"round": 1, "mode": "smoke"}, "entries": entries}
+
+    def test_reads_next_target_rows_by_scope_key_and_category(self) -> None:
+        """T2.1 — the reader returns `{(scope, scopeKey): {category: want}}`, ignoring non-target
+        entries, so the planner can ask "how many more of what does this subject need?"."""
+        report = self._report([
+            {"kindOfEntry": "next-target", "scope": "species", "scopeKey": "alpha",
+             "category": "attack", "want": 2},
+            {"kindOfEntry": "next-target", "scope": "species", "scopeKey": "alpha",
+             "category": "defense", "want": 1},
+            {"kindOfEntry": "next-target", "scope": "family", "scopeKey": "fam1",
+             "category": "support", "want": 3},
+            {"kindOfEntry": "next-target", "scope": "general", "scopeKey": None,
+             "category": "attack", "want": 5},
+            {"kindOfEntry": "cell", "scope": "species", "category": "attack", "count": 0},
+        ])
+        got = gen_mod.read_top_up_targets(report)
+        self.assertEqual(got[("species", "alpha")], {"attack": 2, "defense": 1})
+        self.assertEqual(got[("family", "fam1")], {"support": 3})
+        self.assertEqual(got[("general", None)], {"attack": 5})
+
+    def test_a_zero_want_target_is_dropped(self) -> None:
+        """A `want` of 0 is not a deficiency; carrying it would emit a zero-count subject and
+        perturb the allocation for no reason."""
+        report = self._report([
+            {"kindOfEntry": "next-target", "scope": "species", "scopeKey": "alpha",
+             "category": "attack", "want": 0},
+        ])
+        self.assertEqual(gen_mod.read_top_up_targets(report), {})
+
+    def test_duplicate_targets_for_one_subject_category_sum(self) -> None:
+        """Two rows naming the same `(scope, scopeKey, category)` — never written by A-S5, but a
+        hand-merged or concatenated report must not silently lose one."""
+        report = self._report([
+            {"kindOfEntry": "next-target", "scope": "species", "scopeKey": "a",
+             "category": "attack", "want": 2},
+            {"kindOfEntry": "next-target", "scope": "species", "scopeKey": "a",
+             "category": "attack", "want": 3},
+        ])
+        self.assertEqual(gen_mod.read_top_up_targets(report)[("species", "a")]["attack"], 5)
+
+    def test_wrong_kind_is_refused_by_name(self) -> None:
+        """A report of the wrong kind is a caller error, not an empty shortfall — silently reading
+        zero would plan a duplicate round 1 and look like success."""
+        with self.assertRaises(ValueError) as ctx:
+            gen_mod.read_top_up_targets({"kind": "action-brief", "entries": []})
+        self.assertIn("action-coverage", str(ctx.exception))
+
+    def test_missing_file_is_refused_by_name(self) -> None:
+        """T2.1 acceptance: 'a missing/malformed report is refused by name, never silently treated
+        as zero shortfall'. The loader takes a PATH (the planner's real input)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            missing = Path(tmp) / "coverage-round-99.json"
+            with self.assertRaises(FileNotFoundError):
+                gen_mod.load_top_up_targets(missing)
+
+
+class NoTopUpIsRoundOneTests(unittest.TestCase):
+    """T2.3 — round 1 reads no report (the cycle stays broken by construction), so round 1's plan is
+    byte-identical to what it was before the top-up path existed."""
+
+    def test_round_one_without_a_report_is_unchanged(self) -> None:
+        """Passing no report must reproduce the current round-1 plan exactly: the top-up path is
+        additive and inert when no report is supplied."""
+        if not OUTPUT_PATH.is_file():
+            self.skipTest("round-1.json not yet generated in this checkout")
+        shipped = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as tmp:
+            actions_root = Path(tmp) / "actions"
+            gate_path = Path(tmp) / "coverage-round-1.json"
+            _write_passing_gate(gate_path)
+            with patch.object(gen_mod, "SMOKE_GATE_EVIDENCE_PATH", gate_path):
+                summary = gen_mod.regenerate(actions_root=actions_root, full_flag=True, write=True)
+            fresh = json.loads((actions_root / "_briefs" / "round-1.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(fresh["entries"]), len(shipped["entries"]),
+                         "no report -> no top-up -> identical brief count")
+        self.assertEqual(summary["topUpSubjects"], 0)
+
+
+class TopUpMergeTests(unittest.TestCase):
+    """T2.2 — a top-up round plans EXACTLY the shortfall, never a fresh full base. Round n's accepted
+    rows already persist in the committed corpus and already count against the quota, so re-planning
+    the base would generate duplicates of rows that were accepted; the `want` field is precisely the
+    shortfall. A subject with no target needs nothing and gets no briefs."""
+
+    @staticmethod
+    def _kwargs(**over):
+        species_anchor = {
+            "a": dp.SpeciesAnchorRow("a", "fam", "fire", "chaff", "creature.a", ("m1", "m2"), ()),
+            "b": dp.SpeciesAnchorRow("b", "fam", "fire", "chaff", "creature.b", ("m1", "m2"), ()),
+        }
+        kwargs = dict(
+            species_ids=["a", "b"], family_members={"fam": ["a", "b"]}, species_anchor=species_anchor,
+            weights_by_key={("species", "a"): _weights(), ("species", "b"): _weights(),
+                            ("family", "fam"): _weights()},
+            rung_table=dp.load_rung_table(REPO_ROOT / "data" / "tuning" / "action-rungs.v1.json"),
+            family_ids=FAMILY_IDS, pairing_table={}, general_count=2, per_species_count=1,
+            per_family_count=1, multiplicative_pairs=(("atom.keen-edge", "atom.cruelty"),),
+            family_motif_max=6, corpus_hash="fixed", tuning_version=1,
+        )
+        kwargs.update(over)
+        return kwargs
+
+    def test_a_short_subject_gets_exactly_its_shortfall_and_nothing_else(self) -> None:
+        base = dp.plan_round(**self._kwargs())
+        topped = dp.plan_round(**self._kwargs(
+            top_up={("species", "a"): {"attack": 3}, ("species", "b"): {"defense": 1}}))
+        a_top = [b for b in topped if b["scope"] == "species" and b["scopeKey"] == "a"]
+        b_top = [b for b in topped if b["scope"] == "species" and b["scopeKey"] == "b"]
+        self.assertEqual(len(a_top), 3, "subject a plans exactly its 3 shortfall briefs")
+        self.assertEqual(len(b_top), 1, "subject b plans exactly its 1 shortfall brief")
+        self.assertGreater(len(base), 0, "sanity: the base round is non-empty")
+
+    def test_the_planned_briefs_are_the_requested_categories(self) -> None:
+        topped = dp.plan_round(**self._kwargs(
+            top_up={("species", "a"): {"attack": 3, "defense": 1}}))
+        a_rows = [b for b in topped if b["scope"] == "species" and b["scopeKey"] == "a"]
+        by_cat = {}
+        for b in a_rows:
+            by_cat[b["slot"]["category"]] = by_cat.get(b["slot"]["category"], 0) + 1
+        self.assertEqual(by_cat, {"attack": 3, "defense": 1},
+                         "the category counts are exactly what the report asked for")
+
+    def test_a_subject_with_no_target_gets_no_briefs(self) -> None:
+        topped = dp.plan_round(**self._kwargs(top_up={("species", "a"): {"attack": 2}}))
+        b_rows = [b for b in topped if b["scope"] == "species" and b["scopeKey"] == "b"]
+        self.assertEqual(b_rows, [], "a covered subject needs nothing from a top-up round")
+
+    def test_no_top_up_is_byte_identical_to_no_parameter(self) -> None:
+        self.assertEqual(dp.plan_round(**self._kwargs()),
+                         dp.plan_round(**self._kwargs(top_up=None)))
+
+    def test_an_empty_top_up_plans_nothing(self) -> None:
+        self.assertEqual(dp.plan_round(**self._kwargs(top_up={})), [])
+
+    def test_a_top_up_round_is_still_deterministic(self) -> None:
+        kw = self._kwargs(top_up={("species", "a"): {"attack": 2}, ("family", "fam"): {"status": 1}})
+        self.assertEqual(dp.plan_round(**kw), dp.plan_round(**kw))
+
+    def test_a_top_up_round_carries_the_normal_brief_contract(self) -> None:
+        """Every top-up brief is an ordinary brief: unique id, a legal category/target/role, a rung
+        band, and the same required keys — so nothing downstream needs a special case."""
+        topped = dp.plan_round(**self._kwargs(top_up={("species", "a"): {"attack": 2}}))
+        base = dp.plan_round(**self._kwargs())
+        for b in topped:
+            self.assertEqual(set(b.keys()), set(base[0].keys()))
+            self.assertIn(b["slot"]["category"], CATEGORIES)
+            self.assertIn(b["slot"]["targetMode"], TARGET_MODES)
+            dp.validate_rung_band(b["scope"], b["slot"]["rungBand"])
+        ids = [b["briefId"] for b in topped]
+        self.assertEqual(len(ids), len(set(ids)), "briefIds are unique within the round")
+
+
+class ConvergenceBoundTests(unittest.TestCase):
+    """T2.4 — a round loop must be bounded and report WHY it stopped, never run unbounded."""
+
+    def test_stops_when_no_cell_is_thin(self) -> None:
+        decision = gen_mod.convergence_decision(thin_cell_count=0, rounds_done=1, max_rounds=10)
+        self.assertEqual(decision["stop"], True)
+        self.assertEqual(decision["reason"], "converged")
+
+    def test_stops_at_the_declared_round_cap(self) -> None:
+        decision = gen_mod.convergence_decision(thin_cell_count=5, rounds_done=10, max_rounds=10)
+        self.assertEqual(decision["stop"], True)
+        self.assertEqual(decision["reason"], "round-cap")
+
+    def test_continues_while_thin_and_under_the_cap(self) -> None:
+        decision = gen_mod.convergence_decision(thin_cell_count=5, rounds_done=2, max_rounds=10)
+        self.assertEqual(decision["stop"], False)
+        self.assertEqual(decision["reason"], "thin-cells-remain")
+
+    def test_a_non_positive_cap_is_refused(self) -> None:
+        with self.assertRaises(ValueError):
+            gen_mod.convergence_decision(thin_cell_count=1, rounds_done=0, max_rounds=0)
+
+
 class DeterminismTests(unittest.TestCase):
     """Spec §5 'Determinism', acceptance #9."""
 

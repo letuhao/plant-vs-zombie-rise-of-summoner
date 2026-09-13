@@ -37,6 +37,7 @@ import hashlib
 import json
 import re
 from pathlib import Path
+from typing import Any, Mapping
 
 from .characteristic_pool.catalog import (
     CATALOG_PATH, derive_live_family_assignments, load_catalog,
@@ -46,7 +47,8 @@ from .distribution_planner.tuning import (
     DEDUP_TUNING_PATH, RUN_TUNING_PATH, load_dedup_k, load_run_tuning,
 )
 from .dedup_select.derive import parse_candidate
-from .vocab import load_family_ids
+from .characteristic_pool.derive import CATEGORIES
+from .vocab import SCOPES, load_family_ids
 
 __all__ = ["run", "regenerate", "is_passing_quality_gate", "ACTIONS_ROOT", "CREATURES_ROOT"]
 
@@ -192,11 +194,86 @@ def _corpus_hash(role_lean_corpus_hash: str, type_weights_lean_hash: str, run_tu
     return hashlib.sha256(blob).hexdigest()
 
 
+def read_top_up_targets(report: "Mapping[str, Any]") -> "dict[tuple[str, str | None], dict[str, int]]":
+    """**T2.1 — A-S1 reads round n's report to build round n+1's briefs.** Returns
+    `{(scope, scopeKeyOrNone): {category: want}}` from the report's `next-target` rows
+    (`coverage_report.derive.next_round_targets`, spec-coverage-report.md §3 step 5).
+
+    This is the `S5 → S1` edge the design specifies (`action-corpus-ideal.md` §15
+    `S5 -->|"round n+1 targets"| S1`; `spec-coverage-report.md` §7 *"Depended on by: A-S1, which
+    reads the report to build round n+1's briefs"*) and which was never wired — so `thinCell` could
+    never clear and the full-run gate was unreachable by construction.
+
+    Rules, each chosen so a caller error cannot masquerade as a healthy empty shortfall:
+    - A wrong `kind` raises, naming the kind. Reading zero from an `action-brief` (say) would plan a
+      duplicate round 1 and look like success.
+    - A `want` of 0 is dropped: zero is not a deficiency, and carrying it would emit a zero-count
+      subject for no reason.
+    - Duplicate rows for one `(scope, scopeKey, category)` SUM. A-S5 never writes duplicates, but a
+      concatenated or hand-merged report must not silently lose one.
+    - Rows whose `scope` is not a known scope are refused, not skipped: an unrecognised scope means
+      the report is not the shape this planner consumes.
+    """
+    kind = report.get("kind")
+    if kind != "action-coverage":
+        raise ValueError(
+            f"top-up report must be an 'action-coverage' envelope (A-S5's own output) — got "
+            f"kind={kind!r}")
+    out: "dict[tuple[str, str | None], dict[str, int]]" = {}
+    for row in report.get("entries") or ():
+        if not isinstance(row, dict) or row.get("kindOfEntry") != "next-target":
+            continue
+        scope = row.get("scope")
+        if scope not in SCOPES:
+            raise ValueError(f"top-up target names an unknown scope {scope!r}")
+        want = row.get("want")
+        if not isinstance(want, int) or isinstance(want, bool) or want < 0:
+            raise ValueError(f"top-up target {row.get('id')!r} has a non-positive-integer want "
+                             f"{want!r}")
+        if want == 0:
+            continue
+        category = row.get("category")
+        if category not in CATEGORIES:
+            raise ValueError(f"top-up target names an unknown category {category!r}")
+        by_cat = out.setdefault((scope, row.get("scopeKey")), {})
+        by_cat[category] = by_cat.get(category, 0) + want
+    return out
+
+
+def load_top_up_targets(path: Path) -> "dict[tuple[str, str | None], dict[str, int]]":
+    """T2.1's file reader. Refuses a missing file by name (`FileNotFoundError`) rather than treating
+    it as zero shortfall — the acceptance criterion the plan states explicitly, because silently
+    planning a duplicate round 1 is the failure mode a lenient default would hide."""
+    if not path.is_file():
+        raise FileNotFoundError(f"top-up report not found: {path}")
+    return read_top_up_targets(json.loads(path.read_text(encoding="utf-8")))
+
+
+def convergence_decision(*, thin_cell_count: int, rounds_done: int, max_rounds: int) -> dict:
+    """**T2.4 — the bounded convergence criterion.** A round loop stops when no cell is thin OR the
+    declared cap is reached, and it REPORTS which, so `"converge over rounds"` is never an unbounded
+    promise (the plan's open question Q2). Returning the reason rather than a bare bool is the point:
+    a cap stop means the corpus is still incomplete and that must be visible, not indistinguishable
+    from convergence."""
+    if max_rounds <= 0:
+        raise ValueError("max_rounds must be positive — an unbounded round loop is not a criterion")
+    if thin_cell_count < 0:
+        raise ValueError("thin_cell_count must be non-negative")
+    if thin_cell_count == 0:
+        return {"stop": True, "reason": "converged", "roundsDone": rounds_done}
+    if rounds_done >= max_rounds:
+        return {"stop": True, "reason": "round-cap", "roundsDone": rounds_done,
+                "thinCellsRemaining": thin_cell_count}
+    return {"stop": False, "reason": "thin-cells-remain", "roundsDone": rounds_done,
+            "thinCellsRemaining": thin_cell_count}
+
+
 def regenerate(*, actions_root: Path = ACTIONS_ROOT, creatures_root: Path = CREATURES_ROOT,
               catalog_path: Path = CATALOG_PATH, role_lean_path: Path = ROLE_LEAN_PATH,
               family_assignments_path: "Path | None" = None, type_weights_path: "Path | None" = None,
               rungs_path: Path = RUNGS_PATH, run_tuning_path: Path = RUN_TUNING_PATH,
               dedup_tuning_path: Path = DEDUP_TUNING_PATH, pairings_path: "Path | None" = None,
+              top_up_report_path: "Path | None" = None,
               full_flag: bool = False, write: bool = True, round_no: int = 1) -> dict:
     """Pure computation + (optionally) one file write. Returns a summary dict for the caller to
     report -- never prints itself, so a test can call this without capturing stdout."""
@@ -253,6 +330,12 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, creatures_root: Path = CREA
 
     accepted_neighbours = _accepted_neighbours_by_group(actions_root, before_round=round_no)
 
+    # T2.1/T2.3 — round n+1 reads round n's report; round 1 passes no path and therefore plans the
+    # full quota exactly as before (the cycle stays broken by construction, spec §7). Absent path ->
+    # no top-up; a path that is given but missing/malformed is refused by the loader, never treated
+    # as zero shortfall.
+    top_up = load_top_up_targets(top_up_report_path) if top_up_report_path is not None else None
+
     briefs = dp.plan_round(
         species_ids=species_ids, family_members=family_members, species_anchor=species_anchor,
         weights_by_key=weights_by_key, rung_table=rung_table, family_ids=family_ids,
@@ -262,6 +345,7 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, creatures_root: Path = CREA
         family_motif_max=run_tuning.family_motif_max, corpus_hash=corpus_hash,
         tuning_version=run_tuning.version, round_no=round_no, prompt_version=1,
         accepted_neighbours_by_group=accepted_neighbours, avoid_neighbour_k=dedup_k,
+        top_up=top_up,
     )
     briefs.sort(key=lambda b: b["briefId"])
     for b in briefs:
@@ -298,6 +382,7 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, creatures_root: Path = CREA
         "familySubjects": len(family_members),
         "familyAssignedSpeciesCount": sum(len(v) for v in family_members.values()),
         "dedupK": dedup_k, "dedupKSource": dedup_k_source,
+        "topUpSubjects": len(top_up) if top_up else 0,
         "corpusHash": corpus_hash, "tuningVersion": run_tuning.version, "mode": run_tuning.mode,
         "written": bool(write),
     }

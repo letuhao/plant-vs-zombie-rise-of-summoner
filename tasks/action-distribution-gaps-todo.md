@@ -39,17 +39,18 @@ Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5 · **L** multi-run.
   - Root cause: `assertEqual(summary["acceptedCorpusSize"], 138)` pinned a population; the S6 run legitimately moved it to 191.
   - Acceptance: asserts the corpus reconciles to committed + survivors, never a literal (validation-ssot.md).
 
-## Phase 1 — gate semantics (owner decision)
+## Phase 1 — gate semantics — ✅ DONE 2026-09-12 (commit bdd91b68)
 
-- [ ] **T1.1** Decide and record what `thinCell` means · **S** · `spec-coverage-report.md` (owner)
-  - Options: **A** honour `gates=False`; **B** redefine the threshold as a fill ratio; **C** keep
-    gating and converge over rounds. Recommended: **A + C**.
-- [ ] **T1.2** Implement the chosen `compute_verdict` policy · **S** · `coverage_report/derive.py`
-  - Acceptance: `gates=False` metrics inform but cannot make a verdict `not-clean` (Option A), or the
-    chosen threshold is exact (Option B). A test pins the policy.
-- [ ] **T1.3** Reconcile with the general reporter's `gates` use · **XS** · `report/cli.py`, A-S5
-  - Acceptance: there is one definition of "a passing report"; A-S5's verdict and
-    `report/cli.py --gate` cannot disagree.
+- [x] **T1.1** Decide and record what `thinCell` means · **S** · `spec-coverage-report.md`
+  - **DECIDED: Option A.** Spec-answerable, not an open product call — `spec-metrics.md` §4 (*"New metric → `gates=False`, runs, reports. **Then** a threshold goes into `budget` and `gates` flips"*) and spec §3 step 6 (*"`pass` requires every **gating** CLOSED metric green"*) already fix it; `compute_verdict` had diverged from its own spec.
+  - Recorded in spec §3 step 6 (the decision + why it was blocking) and §4 (the converse rule).
+- [x] **T1.2** Implement the chosen `compute_verdict` policy · **S** · `coverage_report/derive.py`
+  - `compute_verdict(..., gating_metric_ids=)` blocks on `NOT_MEASURED` (any CLOSED metric) and on a `GAP` from a **gating** metric; an unpromoted `GAP` stays in `gapMetrics` and does not block. `Verdict.gating_metrics` added and serialized as `gatingMetrics`; the caller passes `{m.id for m in registry.all() if m.gates}`.
+  - Verify: `VerdictHonoursGatesTests` (5). Focused: **50 passed** in `test_coverage_report.py`.
+- [x] **T1.3** Reconcile with the general reporter's `gates` use · **XS**
+  - `is_passing_quality_gate` no longer requires `gapMetrics == []` — it defers to A-S5's verdict string, which was the definition A-S5 had to abandon. `NOT_MEASURED` stays blocking as belt-and-braces.
+  - Verify: `test_gate_reads_the_verdict_flag_not_the_gap_list`; planner suite **114 passed**. Gate subagent confirmed no other call site re-derives the verdict (`gapMetrics` non-test hits are serialization/summary only), and that `report/cli.py` builds the identical `if m.gates` set.
+  - Gate: **GATE: PASS** (build-gate subagent) — 164 focused, 3797 full-suite, adversarial checks both directions.
 
 ## Phase 2 — the `S5 → S1` top-up round
 
