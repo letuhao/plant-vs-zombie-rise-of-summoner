@@ -10,7 +10,7 @@ import os
 import subprocess
 import sys
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 TOOL_DIR = Path(__file__).resolve().parent
@@ -55,6 +55,20 @@ def _timed_out(args: list[str], timeout: float) -> subprocess.CompletedProcess[s
 class CommitResult:
     ok: bool
     errors: list[str]
+    hash: str | None = None
+    subject: str | None = None
+    author: str | None = None
+    stdout: str = ""
+    stderr: str = ""
+
+
+@dataclass
+class MergeResult:
+    ok: bool
+    errors: list[str]
+    fast_forward: bool = False
+    already_up_to_date: bool = False
+    conflicts: list[str] = field(default_factory=list)
     hash: str | None = None
     subject: str | None = None
     author: str | None = None
@@ -306,6 +320,119 @@ def perform_commit(
             os.unlink(msg_path)
         except OSError:
             pass
+
+
+def perform_merge(
+    branch: str,
+    *,
+    worktree: str | Path | None = None,
+    ff_only: bool = False,
+    policy_path: Path | None = None,
+) -> MergeResult:
+    """Merge `branch` into the current branch of `worktree` (default: main checkout).
+
+    `git merge` never rewrites existing history: it can only advance the current branch
+    by folding in a sibling branch's already-committed work, and `branch` itself is never
+    touched (owner decision, 2026-09-13 — see block_git_write.py). No strategy/`-X` options
+    are exposed and `--no-verify` is never passed, keeping the surface as narrow as `commit`.
+
+    Refuses outright (no git state changed) if:
+    - the target checkout has ANY uncommitted changes (tracked or untracked) — a merge must
+      never land on top of someone else's in-progress edits, agent or human;
+    - `branch` does not resolve to a real ref in this checkout;
+    - HEAD is detached.
+
+    On conflict: leaves the conflicted merge exactly as git left it (no auto-`--abort`) and
+    reports the conflicted paths — finishing it needs a real `git commit` / `merge --continue`,
+    which stays blocked for agent shells, so this is always a hand-back to the owner.
+    """
+    try:
+        start = resolve_worktree_path(worktree) if worktree else None
+        root = repo_root(start)
+    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+        return MergeResult(ok=False, errors=[f"not a git repo / git missing: {exc}"])
+
+    os.chdir(root)
+    policy = load_policy(policy_path or DEFAULT_POLICY)
+
+    hook_errors = assert_hooks_path()
+    if hook_errors:
+        return MergeResult(ok=False, errors=hook_errors)
+
+    branch_name = (branch or "").strip()
+    if not branch_name:
+        return MergeResult(ok=False, errors=["branch is required"])
+
+    head = run_git(["symbolic-ref", "-q", "--short", "HEAD"])
+    if head.returncode != 0 or not (head.stdout or "").strip():
+        return MergeResult(ok=False, errors=["HEAD is detached; check out a branch first"])
+    current_branch = head.stdout.strip()
+
+    verify = run_git(["rev-parse", "--verify", "--quiet", branch_name + "^{commit}"])
+    if verify.returncode != 0:
+        return MergeResult(ok=False, errors=[f"unknown branch/ref: {branch_name!r}"])
+
+    dirty = run_git(["status", "--porcelain"])
+    if dirty.returncode != 0:
+        return MergeResult(ok=False, errors=[(dirty.stderr or "git status failed").strip()])
+    if (dirty.stdout or "").strip():
+        return MergeResult(
+            ok=False,
+            errors=[
+                f"{current_branch} has uncommitted changes; merge refuses to run "
+                "against a dirty tree (commit, or set the changes aside, first)"
+            ],
+        )
+
+    before = run_git(["rev-parse", "HEAD"])
+    before_sha = (before.stdout or "").strip()
+
+    name, email = resolve_author(policy)
+    env = build_commit_env(name, email)
+
+    merge_args = ["merge", branch_name, "--no-edit"]
+    if ff_only:
+        merge_args.append("--ff-only")
+    cp = run_git(merge_args, env=env)
+
+    if cp.returncode != 0:
+        conflict = run_git(["diff", "--name-only", "--diff-filter=U"])
+        conflicts = [ln for ln in (conflict.stdout or "").splitlines() if ln.strip()]
+        return MergeResult(
+            ok=False,
+            errors=[(cp.stderr or cp.stdout or "git merge failed").strip()],
+            conflicts=conflicts,
+            stdout=cp.stdout or "",
+            stderr=cp.stderr or "",
+        )
+
+    output = cp.stdout or ""
+    already_up_to_date = "Already up to date" in output
+    after = run_git(["rev-parse", "HEAD"])
+    after_sha = (after.stdout or "").strip()
+    fast_forward = (not already_up_to_date) and ("Fast-forward" in output)
+
+    commit_hash = subject = author = None
+    if not already_up_to_date and after_sha != before_sha:
+        show = run_git(["log", "-1", "--format=%H%n%s%n%an <%ae>"])
+        if show.returncode == 0:
+            lines = show.stdout.splitlines()
+            if len(lines) >= 3:
+                commit_hash, subject, author = lines[0], lines[1], lines[2]
+            elif lines:
+                commit_hash = lines[0]
+
+    return MergeResult(
+        ok=True,
+        errors=[],
+        fast_forward=fast_forward,
+        already_up_to_date=already_up_to_date,
+        hash=commit_hash,
+        subject=subject,
+        author=author,
+        stdout=output,
+        stderr=cp.stderr or "",
+    )
 
 
 def main(argv: list[str] | None = None) -> int:

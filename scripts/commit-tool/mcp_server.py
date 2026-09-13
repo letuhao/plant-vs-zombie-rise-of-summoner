@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""MCP server: repo-git — validated commits only (no push).
+"""MCP server: repo-git — validated commits and merges only (no push).
 
 Tools:
-  commit(message, paths?, all?, amend?)
+  commit(message, paths?, all?, amend?, worktree?)
+  merge(branch, worktree?, ff_only?)
   validate_message(message)
 
 Run: python scripts/commit-tool/mcp_server.py
@@ -110,6 +111,47 @@ def main() -> None:
         return _tool_result(
             {
                 "ok": True,
+                "hash": result.hash,
+                "subject": result.subject,
+                "author": result.author,
+            }
+        )
+
+    @mcp.tool(name="merge")
+    def merge_tool(
+        branch: str,
+        worktree: str | None = None,
+        ff_only: bool = False,
+    ) -> str:
+        """Merge `branch` into the current branch of a checkout (default: main checkout).
+
+        `git merge` never rewrites history — it only advances the current branch by
+        folding in a sibling branch's already-committed work; `branch` itself is never
+        touched. Refuses outright if the target checkout has any uncommitted changes
+        (never lands on top of someone else's in-progress edits), if `branch` doesn't
+        resolve, or if HEAD is detached. On conflict, the merge is left exactly as git
+        left it (no auto-abort) and the conflicted paths are reported — finishing it
+        needs a real `git commit`/`merge --continue` from the owner's own terminal.
+
+        `worktree` targets a linked worktree (e.g. `.kilo/worktrees/<id>`, absolute or
+        relative to the main checkout), same as `commit`. `ff_only` requires a
+        fast-forward and fails rather than creating a merge commit.
+        """
+        _reload_tool_modules()
+        result = clean_commit.perform_merge(
+            branch,
+            worktree=worktree,
+            ff_only=bool(ff_only),
+        )
+        if not result.ok:
+            return _tool_result(
+                {"ok": False, "errors": result.errors, "conflicts": result.conflicts}
+            )
+        return _tool_result(
+            {
+                "ok": True,
+                "fast_forward": result.fast_forward,
+                "already_up_to_date": result.already_up_to_date,
                 "hash": result.hash,
                 "subject": result.subject,
                 "author": result.author,
