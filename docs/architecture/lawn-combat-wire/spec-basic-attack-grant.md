@@ -81,6 +81,22 @@ which is the whole point.
 - Binding N actors in one tick must not issue N separate pushes — coalesce, or bind from the existing
   spawn fold pass.
 
+## The hypno re-bake seam — [audit], and neither module owned it
+
+`elementPayload` is baked **at bind/compile time** from the owner's species element
+(`AtomCompiler.cs:237-243`). `element-cache-invalidate` fixes the **resolver cache**, so after a hypno
+a fresh *resolve* returns the new side — but this grant's **already-baked payload is still the old
+element**. Neither spec covered it, and hypno is the exact trigger that module exists for.
+
+**Required: a side change re-bakes (or re-binds) the actor's basic-attack grant**, not just
+invalidates the resolver. Test it explicitly — a hypnotised zombie must deal damage with its *new*
+element.
+
+**Where the element comes from at bind time** must also be stated, because a general creature has no
+`UniqueActor` to read from: `LawnElementResolverHost.Resolve(ptr)`
+(`Injector/Effects/LawnElementResolverHost.cs:27-32`) → `(Side, GameTypeId)` → species → element. That
+is the same path `InjectorCombatBridge` uses, and it must not become a second lookup.
+
 ## Code style
 
 Reuse the Funnel grant path every other grant already uses. A Secondary plugin never calls

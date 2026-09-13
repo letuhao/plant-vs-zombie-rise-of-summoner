@@ -140,7 +140,13 @@ Re-entry depth stays 0: an overlay apply must not emit a `combat.hit` that neste
 
 ## Success criteria
 
-- [ ] A vanilla pea produces an elemental RPG delta on a live board, proven outside a debug session.
+- [ ] ~~A vanilla pea produces an elemental RPG delta on a live board~~ — **[audit] moved to
+      `lawn-combat-live-proof`.** This module cannot meet that criterion: it needs a bound
+      `OnDamageDealt` grant, which `basic-attack-grant` supplies and which ships *after* this module
+      by the map's safety ordering. What this module proves on its own is the **rules**: dedupe,
+      never-drop, liveness, ordering — testable against a synthetic grant.
+- [ ] **A fresh perf baseline** also moves to `lawn-combat-live-proof`, for the same reason: the
+      trigger-mask bit is only pinned once the grant exists.
 - [ ] One swing = one action trigger, N victims, proven by test **and** live.
 - [ ] No effect-bearing hit is dropped under budget exhaustion.
 - [ ] No double-kill; no delta applied to a recycled pointer.

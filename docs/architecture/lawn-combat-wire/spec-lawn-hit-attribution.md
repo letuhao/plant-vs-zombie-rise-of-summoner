@@ -151,13 +151,23 @@ Read the field once per record and pass it down; do not re-read IL2CPP fields pe
 
 - [ ] A projectile hit records the firing creature's ptr as attacker, proven live.
 - [ ] The same hit records the bullet ptr as swing id, and N victims of one bullet share it.
-- [ ] `InjectorCombatBridge.ResolveActor` returns a real ActorHub-composed snapshot for that attacker
-      — **not** the `{Hp=100,MaxHp=100,Atk=10}` stub.
+- [ ] **The attacker's own power reaches the packet.** Stated as a differential, because the obvious
+      phrasing is defeatable: "`ResolveActor` returns a real snapshot, not the `{Hp=100,MaxHp=100,
+      Atk=10}` stub" **passes even when broken** — that stub is the fallback for *any* key with no
+      registered baseline (`InjectorCombatBridge.cs:57-59`), the call returns `hub.Resolve(ctx)`
+      either way, and a general PvZ zombie may legitimately have no Hub baseline. So assert instead:
+      **two shooters of different composed power produce different `combat.power.*` on the packet**,
+      with the weaker one's number matching its own Hub snapshot.
 - [ ] An `entity:{ptr}` grant bound to the firing plant matches on a projectile hit (the precondition
       `basic-attack-grant` depends on).
 - [ ] Melee **attribution** unchanged; melee **gains** a `(attackerPtr, frame)` swing id.
 - [ ] A null shooter produces no RPG contribution and no exception.
-- [ ] **The four uncaptured attack methods are hooked, or the gap is explicitly accepted and tracked.**
+- [ ] **The four uncaptured attack methods are hooked.** *(The earlier "…or the gap is explicitly
+      accepted and tracked" wording was an escape hatch — both branches passed, so the program could
+      be declared done with `QingZombie`, `EternalZombie_a`, `Shulkflower` and `WaterShulk` dealing
+      zero elemental damage forever while every other criterion stayed green. Accepting the gap is
+      still a legitimate owner decision, but it is a **scope change to be asked for**, not a way to
+      satisfy this criterion.)*
       `QingZombie.AttackPlant(Plant)` (override), `QingZombie.AttackPlants()`,
       `EternalZombie_a.AttackPlants()`, and the plant-side `Shulkflower.AttackEffect(List<…>)` /
       `WaterShulk.AttackEffect(List<…>)`. Four extra Harmony patches is mechanical work; leaving them

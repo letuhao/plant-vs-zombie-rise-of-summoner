@@ -52,12 +52,39 @@ Each is a pair: a positive and its falsifier. A passing run with no negative cas
 | # | Claim | Positive | Falsifier |
 |---|---|---|---|
 | 1 | Attribution | The recorded attacker is the firing plant's ptr | It is **not** the bullet's ptr, and the resolved attacker is not the `{Hp=100,MaxHp=100,Atk=10}` stub |
-| 2 | Element rides the actor | A Fire actor and an Ice actor deal **different** damage to the same target | Same species, same element ⇒ same damage |
+| 2 | Element rides the actor | **See "Proof 2, designed properly" below** — the naive version is defeatable both ways | — |
 | 3 | One swing, one trigger | A piercing shot hitting N zombies fires **one** action trigger | N victims still each take damage |
-| 4 | Cost gates the rider | An exhausted actor's shot lands for its vanilla number with **no** elemental delta | After regen, the same actor's shot carries the delta again |
+| 4 | Cost gates the rider | An exhausted actor's shot lands for its vanilla number with **no** elemental delta | After regen, **the same actor instance** (same ptr, never a respawn) carries the delta again — `LawnActorResourcePools` creates pools **full at spawn** (`:38,50`), so a respawn trivially "passes" without regen ever running |
 | 5 | Stat bleed independent | While exhausted, `attackDamage`/`maxHp` remain Hub-composed | Only the rider disappears, never the bleed |
 | 6 | General creatures covered | A plain PvZ-spawned zombie (no `UniqueActor`) gets an elemental rider | Identical treatment to a Bound specimen |
 | 7 | No double-kill | A target killed by a deferred delta dies once | `plant.die`/`zombie.die` emitted once per death |
+
+## Proof 2, designed properly — [audit]
+
+The obvious version ("a Fire actor and an Ice actor deal different damage") **fails as a proof in both
+directions**, so it is specified concretely instead.
+
+- **Vacuous pass (the dangerous one).** Two *different* plants differ in vanilla damage and in
+  Hub-composed power anyway, so they deal different numbers with the element multiplier at exactly
+  **1.0 for both**. The proof "passes" having demonstrated nothing about elements.
+- **Vacuous fail.** `ElementHub.ResolveComponentBonus` (`ElementHub.cs:14`) returns `0.0` immediately
+  when `defenderTypes.IsNeutral`, and `RelationShare` (`ElementRingMatrix.cs:34-40`) returns `0.0` for
+  **both `Neutral` and `Same`**. Pick a defender whose species element resolves Neutral — or whose
+  `LawnElementIndex` lookup simply misses — and Fire and Ice deal *identical* damage **with the whole
+  program working correctly**. The run reads as a program failure; the cause is content.
+
+**Required design:**
+
+1. **One species, two element assignments** — so vanilla damage and Hub-composed power are held
+   constant and element is the only variable.
+2. **A defender proven non-Neutral**, and proven **Strong** to one element and **Weak** to the other —
+   read the defender's resolved element first and confirm against `ElementRingMatrix`, do not assume.
+3. **Compute the expected delta before the run**, from `matchupShareK` in
+   `data/tuning/stats.v1.json:10` (today `0.25`, giving STR ×1.25 / WEK ×0.75). Assert the observed
+   ratio against that number.
+4. **Falsifier:** the same species against a **Neutral** defender must produce *equal* damage for both
+   elements. If that also differs, the difference is coming from somewhere other than the element
+   ring, and proof 2 has not proven what it claims.
 
 ## Perf — a precondition, not a footnote
 
@@ -69,6 +96,12 @@ resolves per bullet hit.
 
 Re-measure per `runbook/perf-probe-plan.md`, with the mask on, before this program is called done.
 Record the new baseline in `docs/research/perf/`.
+
+**[audit] A budget and a stop rule, because "record a baseline" is satisfied by recording a
+regression.** Proposed ceiling: **≤ 6% frame share at 300 zombies** (the pre-existing figure is 4.44%
+with the mask off). On breach the feature ships **behind the kill switch, defaulted off** — it does not
+ship green with a known regression. Revisit the number once the first real measurement exists; a
+provisional ceiling that forces a decision beats no ceiling at all.
 
 ## Commands
 

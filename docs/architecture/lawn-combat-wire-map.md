@@ -1,7 +1,12 @@
 # Capability map: `lawn-combat-wire`
 
-**Ideal:** [lawn-combat-wire-ideal.md](lawn-combat-wire-ideal.md) (idea phase, audited, D1–D7 settled)
-**Status:** capability map — **awaiting owner approval before any module spec is written**
+**Ideal:** [lawn-combat-wire-ideal.md](lawn-combat-wire-ideal.md) (idea phase, audited, **D1–D9** settled)
+**Status:** boundary approved 2026-09-13; all module specs written; **revised after a two-pass
+adversarial audit of the specs themselves** — see "Audit corrections" at the bottom.
+
+> **D8 and D9 are load-bearing and were added after the first map draft.** D8: one attack is one
+> action trigger (drives the swing id). D9: an effect-bearing lawn hit is carried and coalesced, never
+> dropped. A builder reading only this map previously never learned of them.
 
 ---
 
@@ -15,7 +20,8 @@
 | `lawn-hit-attribution` | Record the firing actor (`Bullet.from` / `from_zombie`, or melee `attackerPtr`) instead of `bullet.Pointer`. Unblocks the Hub resolve **and** `entity:{ptr}` grant matching in one change. | — |
 | `lawn-hit-entry` | The vanilla hit → drain → `DamagePacket` path, keyed on the **MatchRuntime board fold** (not the FSM). Owns the four gates, liveness/death ordering, ptr-reuse, drop policy, and multi-hit/piercing semantics. | `lawn-hit-attribution`, `combat-numerics` |
 | `basic-attack-seed` | Load the shared fallback basic attack from **authored seed data** instead of the hardcoded C# row. Seed authored: `data/seed/actions/authored-basics.json` (`act.attack`, atom family `atom.fx-overlay-damage`). Needs: the `Program.cs` loader to include it, `ActionCorpusBriefJson` to read `kindHint`, `ActionCorpusComposer` to honour it instead of hardcoding `Skill`, and Kind-aware cost resolution (Basic → `stamina`, not the category template's `qi`). | — |
-| `basic-attack-grant` | Bind `ActionKind.Basic` to every lawn actor at spawn so `HasOnDamageDealtGrant()` is true; carry a real `elementPayload` from the owner's species element. | `lawn-hit-attribution`, `element-cache-invalidate`, `basic-attack-seed` |
+| **`lawn-action-bridge`** | **[audit] Added — was the single most likely day-one stop.** `grep FusionRpg.Core.Actions src/FusionRpg.Injector` → **0 files**: the injector has no reference to the action stack at all. This module owns the assembly reference, the delivery path that gets a compiled `act.attack` row (with its cost) into the injector **without a Server round-trip on the hit path**, and the `guard-secondary-no-unity` check that lands with it. Both `basic-attack-grant` and `basic-attack-cost` assumed this existed. | `basic-attack-seed` |
+| `basic-attack-grant` | Bind `ActionKind.Basic` to every lawn actor at spawn so `HasOnDamageDealtGrant()` is true; carry a real `elementPayload` from the owner's species element, sourced at bind from `LawnElementResolverHost`. | `lawn-hit-attribution`, `element-cache-invalidate`, `lawn-action-bridge`, **`lawn-hit-entry`** |
 | `basic-attack-cost` | Make `act.attack`'s cost **authored data** rather than a hardcoded empty array; seed `resource.max.*` on the lawn Hub; add regen as a third kernel kind; add the lawn's missing `CostLedger` call. | `resource-subtick`, `basic-attack-grant` |
 | `lawn-combat-live-proof` | Re-measure the perf baseline with the damage trigger-mask **on**, then run the falsifier probe outside a debug session. Produces no source. | all of the above |
 
@@ -28,10 +34,24 @@ resource-subtick ─────────┤   (five independent, parallelisa
 lawn-hit-attribution ─────┤
 basic-attack-seed ────────┘
         │
-        ├─► lawn-hit-entry ──────┐
-        └─► basic-attack-grant ──┤
-                                 └─► basic-attack-cost ──► lawn-combat-live-proof
+        ├─► lawn-hit-entry        (safety rules land FIRST — see hazard below)
+        ├─► lawn-action-bridge
+        │        │
+        │        └─► basic-attack-grant   ── strictly AFTER lawn-hit-entry
+        │                    │
+        │                    └─► basic-attack-cost ──► lawn-combat-live-proof
 ```
+
+### ⚠ Ordering is a safety constraint, not a preference — [audit]
+
+**`basic-attack-grant` must not ship before `lawn-hit-entry`.** The first draft of this map showed
+them as siblings. Binding the grant flips `HasOnDamageDealtGrant()` true for **every** actor, which
+opens `EventDrainHost.cs:48/72` for every bullet and melee hit — with none of `lawn-hit-entry`'s
+liveness guard, never-drop rule, swing dedupe or instakill guard in place. That means per-victim
+triggering (violating D8), the `next <= 0` → `ForceKill*` double-`Die()` path live
+(`EntityStatWriter.cs:263-287`), and a rider on the lawnmower's 1,000,000-damage event.
+
+**A half-deployed program is worse than an undeployed one here.** Treat this edge as a gate.
 
 ---
 
@@ -67,6 +87,68 @@ basic-attack-seed ────────┘
 | Elemental reactions, status application, ICD | D4 — elements stay bonus/reduce only here | deferred, tracked in the ideal |
 | Per-actor defense on incoming vanilla hits (`GameHooks.cs:700,703`) | Pre-existing defect, unrelated to the rider path | that program |
 | Battle's `recovery.scaleMilli` sizing | `resource-subtick` makes regen *expressible*; choosing its value is a balance pass | `residual-fit` |
+
+## Program-wide constraints — [audit] none of these were stated, all are required
+
+### A kill switch, named
+
+No spec proposed one, and the existing switches are **not** substitutes:
+
+| Switch | What it actually does | Why it is not enough |
+|---|---|---|
+| `OVERLAY-COMBAT` (default **on**) | Gates `OverlayCombatMath` only | With it **off** but the grant bound, hits are still recorded, still drained, **still cost stamina**, and the delta is dropped at `Finalize` — **actors pay for nothing**. Strictly worse than undeployed |
+| `FUSIONRPG_EVENT_V2=0` | Disables the whole v2 drain | Sledgehammer; takes out unrelated machinery |
+
+**Required: a feature-specific switch** (e.g. `FUSIONRPG_LAWN_BASIC_ATTACK`) that disables **binding
+the grant and charging the cost together**, so the off state is exactly today's behaviour. Owned by
+`basic-attack-grant`, honoured by `basic-attack-cost`.
+
+### A perf budget with a stop rule
+
+"Record a fresh baseline" is satisfied by *recording a regression*. The program needs a number and an
+action on breach, not just a measurement. The only figure in scope is the existing **4.44% frame share
+at 300 zombies** — measured with the damage trigger-mask **off**, which this program pins permanently
+**on**. The spec phase must set a ceiling (a starting proposal: **≤ 6% at 300z**, revisited once the
+first real measurement exists) and name what happens if it breaches: the feature ships behind the kill
+switch defaulted off, rather than shipping green.
+
+### Three numbers nobody owns
+
+Every spec correctly refuses to invent balance values, and the result is that **the feature has no
+magnitude at all**:
+
+| Number | Status |
+|---|---|
+| Basic-attack `sharePermille` — sets `anchor(Θ) = sharePermille × P(Θ)/1000`, i.e. **how much damage the feature does** | unowned |
+| The `stamina` cost per swing | `basic-attack-cost` says "ask first" |
+| The regen rate | `resource-subtick` says "leave `BaseResourceRegen` at 0"; `basic-attack-cost` says "ask first" |
+
+**With cost non-zero and regen zero, every lawn actor swings once and is permanently inert — worse
+than today's bug.** So regen is a **fifth** all-or-nothing wire, not an optional follow-up; the "four
+wires" framing in `basic-attack-cost` is wrong.
+
+**Resolution:** ship documented placeholders, per this repo's own posture (*"shipping a guess is fine,
+calling it balance is not"*), owned by `basic-attack-cost`, marked `UNMEASURED` in tuning, with the
+real pass left to the balance program. A placeholder is a decision; silence is a blocker.
+
+---
+
+## Audit corrections (2026-09-13, two-pass adversarial review of the specs)
+
+| # | Finding | Fix |
+|---|---|---|
+| 1 | The injector has **zero** references to `FusionRpg.Core.Actions`; two specs assumed reachability | New module `lawn-action-bridge` |
+| 2 | `basic-attack-grant` shown as a sibling of `lawn-hit-entry` — half-deploy is worse than no deploy | Hard ordering constraint above |
+| 3 | No kill switch; `OVERLAY-COMBAT` off + grant bound = pay-for-nothing | Named above |
+| 4 | Perf criterion satisfiable by recording a regression | Budget + stop rule above |
+| 5 | `sharePermille`, cost and regen all unowned; regen is a fifth all-or-nothing wire | Placeholders, owned above |
+| 6 | Map said "D1–D7"; D8/D9 exist and are load-bearing | Header fixed |
+| 7 | Live-proof's Fire-vs-Ice proof is defeatable both ways | Rewritten in `spec-lawn-combat-live-proof.md` |
+| 8 | "not the `{Hp=100…}` stub" is satisfiable *by* a stub | Rewritten in `spec-lawn-hit-attribution.md` |
+| 9 | Escape-hatch criterion let the program be "done" with four creature types RPG-inert | Closed in `spec-lawn-hit-attribution.md` |
+| 10 | Hypno re-bake seam: the resolver cache is fixed but a **baked** `elementPayload` stays stale | Added to `spec-basic-attack-grant.md` |
+
+---
 
 ## Resolved during review
 

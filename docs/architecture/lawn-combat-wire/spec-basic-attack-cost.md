@@ -1,7 +1,11 @@
 # Spec: `basic-attack-cost`
 
 **Program:** `lawn-combat-wire` · **Map:** [../lawn-combat-wire-map.md](../lawn-combat-wire-map.md)
-**Depends on:** `resource-subtick`, `basic-attack-grant`
+**Depends on:** `resource-subtick`, `basic-attack-grant`, `lawn-action-bridge`, `lawn-hit-entry`
+
+> `lawn-hit-entry` is a real dependency, not a courtesy: cost is charged **once per swing**, and the
+> swing-id dedupe lives there. `lawn-action-bridge` supplies the `CostLedger` the injector currently
+> cannot reach at all.
 
 ---
 
@@ -29,7 +33,25 @@ dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~CostLedger|A
 dotnet test tests/FusionRpg.Core.Tests --filter "Category=BalanceGuard"
 ```
 
-## The four wires — any three without the fourth ships the feature silently inert
+## Five wires — [audit] the "four wires" framing was wrong
+
+There is a **fifth**, and it is the one that turns the feature from inert into *actively worse than
+today*: **an authored regen rate**. `resource-subtick` correctly refuses to author values
+(*"leave `BaseResourceRegen` returning 0"*) and this spec's Boundaries said *"ask first"*. Both
+refusing means the shipped state is **cost > 0, regen = 0** — every lawn actor swings once and is
+permanently inert.
+
+**Resolution: this module owns a documented placeholder**, per the repo's own posture (*"shipping a
+guess is fine, calling it balance is not"*), marked `UNMEASURED` in tuning, with the real pass left to
+the balance program. The same applies to the `stamina` cost itself and to the rider's
+`sharePermille` — a placeholder is a decision; silence is a blocker.
+
+**Also required: the feature kill switch** (see the map's program-wide constraints). Disabling it must
+stop **binding the grant and charging the cost together** — with `OVERLAY-COMBAT` off but the grant
+bound, actors pay stamina and the delta is dropped at `Finalize`: paying for nothing, worse than
+undeployed.
+
+## The wires — any one missing ships the feature silently inert
 
 | # | Wire | Inert line today |
 |---|---|---|
@@ -120,3 +142,12 @@ declare-time gate. Author the basic attack's cost as `onCommit` unless that is d
 - [ ] Lawn pool lifecycle is stated in the spec and matches the code, or `resource-hub-ssot.md` is
       amended.
 - [ ] No second cost gate exists; `guard-actor-hub` green.
+- [ ] **Where `CostLedger.Check` is called on the lawn is specified**, and its position relative to the
+      swing-id dedupe is stated — there is no lawn "declare" step for `UsabilityEvaluator.cs:66` to sit
+      in, so the seam must be designed, not inherited.
+- [ ] **Zombies get pools too.** `LawnActorResourcePools` is ptr-keyed with side unstated, while the
+      grant binds to "plant and zombie" — confirm a zombie can hold and spend `stamina`, or state that
+      zombies are exempt and why.
+- [ ] Placeholder values for cost, regen and `sharePermille` are authored and marked `UNMEASURED`.
+- [ ] The kill switch disables grant-binding and cost-charging together; with it off, behaviour is
+      byte-identical to today.
