@@ -311,11 +311,10 @@ Module 1 spec: [../docs/architecture/data-test-substrate/spec-memory-storage-pla
   - **Corrected sequencing:** profiles can land (the filter is right and the machinery is proven), but `spec-test-profiles.md` success criterion 1 ("`test-fast.ps1` writes no disk") is only satisfiable **after T18b–T18f migrate the remaining 102 files**. Recorded here so no future session claims the default is disk-free early. Nightly will be red until then — which is the alarm doing its job.
   - Files: `scripts/test-fast.ps1`, `scripts/deploy-play.ps1`, `docs/contributing/testing-standard.md`, `.github/workflows/{ci,nightly}.yml`. Scope: M.
   - Deps: T26, T27.
-- [ ] **Task T29: profile checkpoint** — Deps: T28 **and T18f** (the migration must finish first; see below). Scope: XS.
-  - Description: report the default-vs-full counts and wall time; confirm default = full − tagged; confirm the guards still run only on `full`; confirm no assertion count changed for any tagged file; **and re-run the leak alarm around `test-fast.ps1` and require 0 survivors** — the criterion that is only satisfiable after T18f retires the last `temp-store` file.
-  - Acceptance: the count relationship holds at run time (never a pinned total); the alarm around the default profile returns **0**.
-  - **Blocked until T18b–T18f land:** at T28 the default profile still wrote disk (102 un-migrated `temp-store` files; `ArmouryTests` alone leaked 14 dirs in an isolated run, `test-fast.ps1` 436 survivors). Do not run this checkpoint expecting 0 before the migration completes.
-  - Verify: two runs + the alarm + per-file assert diffs.
+- [x] **Task T29: profile checkpoint** ✅ 2026-09-12
+  - Report: **default = 1225, full = 1288, tagged = 51 DiskSemantics + 12 Heavy** → `51 + 12 + 1225 = 1288` exactly. The relationship holds at run time (no pinned total anywhere).
+  - **The key criterion is now satisfied:** with the migration complete (T18f), the leak alarm around `test-fast.ps1` (`-IsolateTemp`) reports **exit 0, 0 survivors** — it reported **436** survivors when T28 landed, before the migration retired the remaining 102 files. The default profile now genuinely writes no disk.
+  - Guards still run only on `full` (`test-fast.ps1` runs the suite, not the guards); no assertion count changed for any tagged file (verified per-file at T26/T27 and re-verified for the migration's 5 file-bound classes at T18f).
   - Files: none (verification). Scope: XS.
 
 ### Checkpoint 7 — Profiles
