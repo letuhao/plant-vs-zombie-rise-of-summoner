@@ -456,6 +456,21 @@ the status system.
 
 **D7 — Regen rides the existing 100 ms kernel, and the sub-tick unit gets built.** See §4.6.
 
+**D8 — One attack is one action trigger.** Owner, 2026-09-13: *"a attack is 1 action trigger, if we
+trigger it multiple times that is defect."* A piercing pea hitting five zombies is **one swing** — one
+action trigger, one cost payment — while the elemental rider still resolves **per victim**, because
+each victim has its own defence and element matchup. This requires the hit record to carry **two**
+identities: the shooter's ptr (attacker) and the bullet's ptr (swing id). Melee needs no swing id.
+Specced in `lawn-hit-attribution` (record shape) and `lawn-hit-entry` (dedupe).
+
+**D9 — An effect-bearing lawn hit is carried and coalesced, never dropped.** Corrected after owner
+review: `combat.hit` is droppable today *because it has no consumer* — §4c's droppable kinds are
+explicitly ones with *"no consumer anywhere"*. **This feature changes that class.** Once a record
+carries an elemental delta, dropping it is dropping gameplay, not telemetry, and that collides with
+G5's own promise (*"degrades to delayed effects, never to frame drops"* `:35`) versus §3.3's *"drop
+droppable kinds with a counter"* (`:61-62`). Resolved in favour of G5. The architecture does not
+currently describe this case — `event-pipeline-v2-ssot.md` is amended by `lawn-hit-entry`.
+
 ---
 
 ## Tunables
