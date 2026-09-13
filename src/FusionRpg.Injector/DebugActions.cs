@@ -1378,11 +1378,12 @@ public static class DebugActions
     /// surface them as one direct, synchronous answer instead of requiring a caller to infer the same
     /// thing from a trickle of past events.
     ///
-    /// <c>hasInitBoard</c> is a best-effort signal, not a certainty: whether <c>InitBoard.Instance</c>
-    /// stays non-null after returning to the main menu (i.e. whether it is a persistent singleton) is
-    /// unverified in this repo's own source as of this writing -- treat <c>liveState</c>'s
-    /// "AtMainMenuOrNoBoard" vs the seed-picker distinction as a hypothesis to confirm live, not a
-    /// proven fact, until someone checks it against a real main-menu vs seed-picker screen.</summary>
+    /// <c>hasInitBoard</c> is a best-effort signal, not a certainty. Live-verified 2026-09-14:
+    /// <c>InitBoard.Instance</c> stays non-null once ANY level has been entered this session --
+    /// a real probe mid-match returned <c>hasBoard:true, hasInitBoard:true</c> together -- so it
+    /// does NOT distinguish "on the seed-picker" from "in a match" after the first entry. Whether
+    /// it clears after backing out to the main menu is still unverified; treat that specific
+    /// question as open until checked against a real return-to-menu.</summary>
     public static void GameState()
     {
         var dump = new Dictionary<string, object>();
