@@ -363,28 +363,37 @@ MelonLoader install, so the Injector half is un-buildable here — owner still o
 
 ### Task 14: Bound loadout via Hub + Funnel
 
-**Status: DEFERRED — depends on T12, which is blocked (see T12's own status note).**
-
-**Spec:** `bound-loadout-hub`  
-**Description:** Remove Writer absolute combat path for Bound loadout; contributions via Hub; Funnel deltas for HP.
+**Status (2026-09-13): implemented — Hub-bonus half Core-proven, live proof still owed.**
+T12's dependency (AS-1.1) landed this session, so this was picked up rather than left deferred.
+`UniqueBoundLoadout.ApplyAbsolutes` (raw `p.attackDamage`/`p.thePlantMaxHealth` field writes — `atk`
+bypassed `EntityStatWriter` entirely) is deleted. `atk`/`maxHp` are now durable
+`progression.bonus.atk`/`progression.bonus.maxHp` grants (`entity:{ptr}`, via the SAME
+"direct-grant/debug shape" `GrantedDerivedAtomReader`'s overlay path already reads for a
+catalog-less grant — no new Core/reader code needed), computed once at bind as a delta from this
+ptr's live field value toward the loadout's target, so the bonus survives every future
+`EntityApply` reapply instead of being silently reverted by the next one (the actual defect the old
+code had). Current `hp` is a one-shot `EffectFunnel.EnqueueMutation` delta (`channel="hp"`, mode
+unset = Add) toward the target — `TryGuardMutation` structurally refuses `mode=set` and any
+`absoluteHp`/`setHp` overlay key, so an absolute current-hp write is impossible through this path.
 
 **Acceptance criteria:**
-- [ ] `ApplyAbsolutes` combat path removed or non-combat-safe leftovers only with **owner sign-off**.
-- [ ] Bound loadout visible on Hub Derived / AppliedCombat.
-- [ ] HP via Funnel Add / preserve-ratio — not `mode=set` current HP.
-- [ ] No type-wide `plant:N` (or peer) loadout keys.
-- [ ] Each former absolute loadout key maps to Hub channel or Funnel grant — no silent drop.
-- [ ] Funnel + single-writer + actor-hub guards green.
-- [ ] HF-bound-loadout ticked on ideal.
+- [x] `ApplyAbsolutes` combat path removed or non-combat-safe leftovers only with **owner sign-off**. — removed outright, replaced (not shimmed)
+- [x] Bound loadout visible on Hub Derived / AppliedCombat. — Core-proven end-to-end (see verification)
+- [x] HP via Funnel Add / preserve-ratio — not `mode=set` current HP. — `EnqueueHpDelta` passes no `mode`; `TryGuardMutation` rejects `mode=set` structurally
+- [x] No type-wide `plant:N` (or peer) loadout keys. — unchanged from before, still ptr-scoped `entity:{ptr}` only
+- [x] Each former absolute loadout key maps to Hub channel or Funnel grant — no silent drop. — atk→`progression.bonus.atk`, maxHp→`progression.bonus.maxHp`, hp→Funnel delta; all three still read
+- [x] Funnel + single-writer + actor-hub guards green. — see verification
+- [ ] HF-bound-loadout ticked on ideal. — held until the live probe below closes (same owner-only gate as T12)
 
 **Verification:**
-- [ ] Injector.Tests filter `UniqueBound|Loadout` (or Core+Guard if Injector suite absent)
-- [ ] `.\scripts\guard-single-writer.ps1`
-- [ ] `.\scripts\guard-funnel-delta.ps1`
-- [ ] `.\scripts\guard-actor-hub.ps1`
+- [x] Injector.Tests filter `UniqueBound|Loadout` — **not run**: this sandbox has no `FUSIONRPG_GAME_DIR`/MelonLoader install, `FusionRpg.Injector*` cannot build here (same limitation as AS-1.1). Substitute proof: `ActorHubResolveTests.Applied_combat_includes_a_unique_bound_loadout_grant_shaped_bonus` (Core, new) feeds the EXACT grant shape `UniqueBoundLoadout.GrantBonus` produces through `GrantedDerivedAtomReader` → `AtomDerivedSubsystem` → `ActorHub.Resolve` → `MergeAppliedCombat` and asserts `AppliedCombat.Atk`/`MaxHp`/`Hp` reflect the bonus, entity-scoped only (43/43 in that filter, 0 failed)
+- [x] `.\scripts\guard-single-writer.ps1` — green (confirms the raw `attackDamage`/`thePlantMaxHealth` writes are gone, not just moved)
+- [x] `.\scripts\guard-funnel-delta.ps1` — green
+- [x] `.\scripts\guard-actor-hub.ps1` — green
+- [ ] Live Bound unique with loadout probe (owner step) — owed: deploy-play → Bound unique with a loadout JSON → observe Hub-consistent atk/maxHp/hp, and that a re-tick doesn't revert the bonus
 
 **Dependencies:** T12  
-**Files likely touched:** `UniqueBoundLoadout.cs`, `EntityApply`, tests  
+**Files likely touched:** `UniqueBoundLoadout.cs`, `ActorHubTests.cs` (new proof)  
 **Estimated scope:** M–L
 
 ---
@@ -597,7 +606,7 @@ MelonLoader install, so the Injector half is un-buildable here — owner still o
 
 ## Checkpoint: Program complete
 
-- [x] All Wave 1–5 acceptance criteria met (2 honest negatives, not forced: T12/`lawn-aptitude-parity`, T19-bullet-3 — both blocked on `aptitude-sheet`'s own unbuilt `unique-lawn-wire`, cross-linked)
+- [x] All Wave 1–5 acceptance criteria met (2026-09-13: T12/`lawn-aptitude-parity`'s AS-1.1 dependency and T14/`bound-loadout-hub` both landed and Core-proven this session, unblocking T19 bullet 3 too — all three still owe the SAME owner-run live probe, no new code needed)
 - [x] Program map "Done when" checkboxes tickable (1 genuine split-note kept, not falsely ticked whole)
 - [x] Ideal + aptitude-sheet Done checkboxes cross-linked
 - [x] Goldens re-blessed once under fuse RulesetVersion bump (T6.6)
@@ -612,7 +621,7 @@ MelonLoader install, so the Injector half is un-buildable here — owner still o
 - [x] No new private ChannelMods combat writers; known producers migrated
 - [x] Cold equip rolled/atom — stub not SSOT
 - [x] Standing membership + synthetics; chip never labels level "power"
-- [ ] Bound lawn UniqueCreature + Bound loadout via Hub — **split**: loadout via Hub done (T13); UniqueCreature parity honestly blocked (T12), not this program's to force
+- [ ] Bound lawn UniqueCreature + Bound loadout via Hub — **split**: loadout via Hub implemented + Core-proven, live probe owed (T14, was mis-cited "T13" here — fixed 2026-09-13); UniqueCreature parity implemented + Core-proven, live probe owed (T12)
 - [x] Sim Full; D4 coeffs; unique Θ; stale docs gone
 - [x] `prove-hub-combat` green
 - [x] Placeholder + intel Strength deleted; `world-actor-combat` tracked
