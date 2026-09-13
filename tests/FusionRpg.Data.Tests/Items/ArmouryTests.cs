@@ -127,7 +127,10 @@ public class ArmouryTests : IDisposable
                 IgnoreInaccessible = true,
                 AttributesToSkip = FileAttributes.Hidden | FileAttributes.System,
             })
-            .Where(IsScannedSourcePath)
+            // Judge the path RELATIVE to the resolved root: from the main checkout this still
+            // excludes nested worktrees (.kilo/worktrees/...) below the root, while from inside
+            // a worktree the tree's own src/ files are no longer rejected for living under .kilo.
+            .Where(f => IsScannedSourcePath(Path.GetRelativePath(dir, f)))
             .ToList();
         Assert.True(matches.Count == 1, $"expected exactly one {fileName}, found {matches.Count}");
         return matches[0];
