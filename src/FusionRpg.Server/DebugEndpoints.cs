@@ -203,9 +203,7 @@ public static class DebugEndpoints
             DateTime? ParseT(EventEnvelope? e) =>
                 e is not null && DateTime.TryParse(e.T, null, System.Globalization.DateTimeStyles.RoundtripKind, out var t) ? t : null;
 
-            const int cyclingWindowSec = 10;
-            const int CyclingBoardEndThreshold = 3;
-            var recentBoardEnds = CountRecentEventsOfKind(store, "board.end", TimeSpan.FromSeconds(cyclingWindowSec));
+            var recentBoardEnds = CountRecentEventsOfKind(store, "board.end", TimeSpan.FromSeconds(CyclingWindowSec));
 
             var latestMatchResult = FindLatestKind(store, "match.result");
             var latestMatchLose = FindLatestKind(store, "match.lose");
@@ -234,7 +232,7 @@ public static class DebugEndpoints
 
             string state;
             EventEnvelope? decidingEvent;
-            if (recentBoardEnds >= CyclingBoardEndThreshold)
+            if (recentBoardEnds >= CyclingBoardEndMinCount)
             {
                 state = "Cycling";
                 decidingEvent = latestBoardEconomy;
@@ -311,14 +309,12 @@ public static class DebugEndpoints
             // events by hand. Detect the loop directly and fail fast and loud instead of polling into
             // it blind. Threshold is a structural safety check, not a balance value: real gameplay does
             // not lose 3 matches in 10 seconds.
-            const int CyclingBoardEndThreshold = 3;
-            var cyclingWindowSec = 10;
-            var recentBoardEnds = CountRecentEventsOfKind(store, "board.end", TimeSpan.FromSeconds(cyclingWindowSec));
-            if (recentBoardEnds >= CyclingBoardEndThreshold)
+            var recentBoardEnds = CountRecentEventsOfKind(store, "board.end", TimeSpan.FromSeconds(CyclingWindowSec));
+            if (recentBoardEnds >= CyclingBoardEndMinCount)
                 return Results.Conflict(new
                 {
                     ok = false,
-                    error = $"board is cycling ({recentBoardEnds} board.end events in the last {cyclingWindowSec}s) — " +
+                    error = $"board is cycling ({recentBoardEnds} board.end events in the last {CyclingWindowSec}s) — " +
                         "the match is likely repeatedly ending with no real plants placed; check the game or place real plants before retrying",
                     recentBoardEnds,
                     waitedMs = sw.ElapsedMilliseconds
@@ -843,6 +839,11 @@ public static class DebugEndpoints
     {
         "Explore", "TravelAdvanture", "Travel", "IZ"
     };
+
+    // Structural safety check, not a balance value: real gameplay does not lose 3 matches in 10
+    // seconds. Shared by /lawn/state and /lawn/quick-start so the two never drift apart.
+    const int CyclingBoardEndMinCount = 3;
+    const int CyclingWindowSec = 10;
 
     static int IntProp(JsonElement obj, string name, int fallback) =>
         obj.ValueKind == JsonValueKind.Object && obj.TryGetProperty(name, out var el) && el.TryGetInt32(out var v)
