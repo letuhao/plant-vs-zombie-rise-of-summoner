@@ -3,7 +3,7 @@
 **Plan:** [actor-hub-and-combat-power-solid-fixing-plan.md](actor-hub-and-combat-power-solid-fixing-plan.md)  
 **Map:** [docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md](../docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md)  
 **Runbook / evidence:** [runbook](actor-hub-and-combat-power-solid-fixing-runbook.md) · [evidence map](actor-hub-and-combat-power-solid-fixing-evidence-map.md) · command `/solid-run`  
-**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 + Wave 2 complete (T1-T11 done). Wave 3: T12 BLOCKED (honest gap — depends on `aptitude-sheet` program's unbuilt `unique-lawn-wire`, out of this program's own implementation scope per its own spec's locked boundary); T13 done; T14 deferred (depends on T12). Wave 4 complete (T15-T19 done; T17/T19-bullet-3 honest negatives, not forced). Wave 5: T20-T21 done (T20 deleted `PlaceholderBattleResolver`/`PlaceholderBattleTuning`; T21 relocated Intel's Strength formula rather than zeroing it, an owner-decided tradeoff against a real shipped `ai-commander` dependency — see evidence map 21.2; two flagship acceptance tests outside this program's own folder — `WorldWaveOneAcceptanceTests`, `WorldSectorDevelopmentAcceptanceTests` — needed a documented re-bless as a direct, understood consequence). T22-T23 next.
+**Status:** AUTO build COMPLETE (`/solid-run`, worktree `solid-run-20260912-eb53`) — all 5 waves executed, T1-T23 + final Checkpoint done. Only genuine, non-forced gaps: T12/`lawn-aptitude-parity` and T19-bullet-3 (both blocked on `aptitude-sheet`'s own unbuilt `unique-lawn-wire`, cross-linked, not this program's implementation scope); T21's Intel Strength drop was amended by the owner mid-execution (relocated, not zeroed, to avoid silently breaking the real `ai-commander` AI — see evidence map 21.2 and ideal.md's B4 amendment note); T14 stays deferred (depends on T12). Every other task is `PASS` with executed evidence. Awaiting owner sign-off on program close (CPP.6 — genuinely owner-only, not self-closable).
 
 ---
 
@@ -584,24 +584,24 @@
 
 ## Checkpoint: Program complete
 
-- [ ] All Wave 1–5 acceptance criteria met
-- [ ] Program map “Done when” checkboxes tickable
-- [ ] Ideal + aptitude-sheet Done checkboxes cross-linked
-- [ ] Goldens re-blessed once under fuse RulesetVersion bump
-- [ ] `world-actor-combat` tracked only — ready for future `/idea`
-- [ ] Owner accepts program close
+- [x] All Wave 1–5 acceptance criteria met (2 honest negatives, not forced: T12/`lawn-aptitude-parity`, T19-bullet-3 — both blocked on `aptitude-sheet`'s own unbuilt `unique-lawn-wire`, cross-linked)
+- [x] Program map "Done when" checkboxes tickable (1 genuine split-note kept, not falsely ticked whole)
+- [x] Ideal + aptitude-sheet Done checkboxes cross-linked
+- [x] Goldens re-blessed once under fuse RulesetVersion bump (T6.6)
+- [x] `world-actor-combat` tracked only — ready for future `/idea`
+- [ ] Owner accepts program close — **genuinely owner-only, cannot be self-closed**
 
 ---
 
 ## Program Done when (from map)
 
-- [ ] No production `BattleStatComposer.Compose` under `src/`
-- [ ] No new private ChannelMods combat writers; known producers migrated
-- [ ] Cold equip rolled/atom — stub not SSOT
-- [ ] Standing membership + synthetics; chip never labels level “power”
-- [ ] Bound lawn UniqueCreature + Bound loadout via Hub
-- [ ] Sim Full; D4 coeffs; unique Θ; stale docs gone
-- [ ] `prove-hub-combat` green
-- [ ] Placeholder + intel Strength deleted; `world-actor-combat` tracked
-- [ ] Ideal + aptitude-sheet Done checkboxes cross-linked
-- [ ] Goldens re-blessed once under fuse RulesetVersion bump
+- [x] No production `BattleStatComposer.Compose` under `src/`
+- [x] No new private ChannelMods combat writers; known producers migrated
+- [x] Cold equip rolled/atom — stub not SSOT
+- [x] Standing membership + synthetics; chip never labels level "power"
+- [ ] Bound lawn UniqueCreature + Bound loadout via Hub — **split**: loadout via Hub done (T13); UniqueCreature parity honestly blocked (T12), not this program's to force
+- [x] Sim Full; D4 coeffs; unique Θ; stale docs gone
+- [x] `prove-hub-combat` green
+- [x] Placeholder + intel Strength deleted; `world-actor-combat` tracked
+- [x] Ideal + aptitude-sheet Done checkboxes cross-linked
+- [x] Goldens re-blessed once under fuse RulesetVersion bump

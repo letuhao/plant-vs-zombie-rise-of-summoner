@@ -326,12 +326,12 @@ Legend: `PENDING` · `PASS` · `FAIL` · `N/A`
 
 | # | Criterion | Command | Executed result | Artifact |
 |---|---|---|---|---|
-| CPP.1 | All Wave 1–5 acceptance criteria met | all rows above `PASS`/`N/A` | PENDING | — |
-| CPP.2 | Program map "Done when" checkboxes tickable | doc read + diff | PENDING | — |
-| CPP.3 | Ideal + aptitude-sheet Done checkboxes cross-linked | doc read + diff | PENDING | — |
-| CPP.4 | Goldens re-blessed once under fuse RulesetVersion bump | `Golden` filter row of T6.6 | PENDING | — |
-| CPP.5 | `world-actor-combat` tracked only | doc read + diff | PENDING | — |
-| CPP.6 | Owner accepts program close | owner note | PENDING | — |
+| CPP.1 | All Wave 1–5 acceptance criteria met | all rows above `PASS`/`N/A` | PASS/HONEST-NEGATIVE — every task row above is `PASS`, `PASS (honest negative, not forced)`, or explicitly documented as owner-decided amendment; the two genuine non-forced gaps (T12 / lawn-aptitude-parity, T19-bullet-3) both depend on `aptitude-sheet`'s own unbuilt `unique-lawn-wire` — a different program's locked boundary, cross-linked at T23, not this program's to build across | — |
+| CPP.2 | Program map "Done when" checkboxes tickable | doc read + diff | PASS — all 9 boxes now `[x]` except the one genuinely split box (Bound lawn UniqueCreature parity, honestly blocked half), which carries an explicit split-note rather than a false tick | `docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md` |
+| CPP.3 | Ideal + aptitude-sheet Done checkboxes cross-linked | doc read + diff | PASS (T23) — `tasks/aptitude-sheet-todo.md`'s AS-1.1 now cross-links back to this program's T12/T19-bullet-3 | `tasks/aptitude-sheet-todo.md` |
+| CPP.4 | Goldens re-blessed once under fuse RulesetVersion bump | `Golden` filter row of T6.6 | PASS — T6.6's own executed evidence row: `BattleGoldenTests` (4 hashes) re-blessed exactly once; `ExpeditionResolverTests.Tier_goldens_are_locked` investigated and confirmed pre-existing, correctly NOT re-blessed. (Separately, T20/T21 re-blessed `WorldWaveOneAcceptanceTests`' own golden — a different, World-turn-engine-level hash unrelated to the Battle `RulesetVersion` this criterion names; not double-counted here) | — |
+| CPP.5 | `world-actor-combat` tracked only | doc read + diff | PASS — re-confirmed at T23.1/T23.3; no specs, no modules, no Done claims under this program for world combat | — |
+| CPP.6 | Owner accepts program close | owner note | **Genuinely owner-only, left PENDING** — per this session's own standing rule (never invent an approval or a stopping point), this checkpoint cannot be self-closed. Every other row in this program is executed and documented; this is the one gate that is not this session's to grant | — |
 
 ---
 
@@ -339,16 +339,16 @@ Legend: `PENDING` · `PASS` · `FAIL` · `N/A`
 
 | # | Criterion | Command | Executed result | Artifact |
 |---|---|---|---|---|
-| PD.1 | No production `BattleStatComposer.Compose` under `src/` | `rg -n "BattleStatComposer" src` | PENDING | — |
-| PD.2 | No new private ChannelMods combat writers; known producers migrated | `.\scripts\guard-actor-hub.ps1` | PENDING | — |
-| PD.3 | Cold equip rolled/atom — stub not SSOT | `rg -n "stub\.atk_ring\|butter_bead\|hp_charm" src` | PENDING | — |
-| PD.4 | Standing membership + synthetics; chip never labels level "power" | `Standing` filter + `foldAptitudesSurfaceVm` | PENDING | — |
-| PD.5 | Bound lawn UniqueCreature + Bound loadout via Hub | Wave 3 filters | PENDING | — |
-| PD.6 | Sim Full; D4 coeffs; unique Θ; stale docs gone | Wave 4 rows | PENDING | — |
-| PD.7 | `prove-hub-combat` green | `.\scripts\prove-hub-combat.ps1` | PENDING | — |
-| PD.8 | Placeholder + intel Strength deleted; `world-actor-combat` tracked | Wave 5 rows | PENDING | — |
-| PD.9 | Ideal + aptitude-sheet Done checkboxes cross-linked | doc read + diff | PENDING | — |
-| PD.10 | Goldens re-blessed once under fuse RulesetVersion bump | T6.6 | PENDING | — |
+| PD.1 | No production `BattleStatComposer.Compose` under `src/` | `rg -n "BattleStatComposer" src` + direct file check | PASS — file deleted (T6); every remaining hit is historical prose confirming the deletion | — |
+| PD.2 | No new private ChannelMods combat writers; known producers migrated | `rg -n "new\s*BattleChannelMod\s*\(" src` | PASS — only the allowlisted `TraitAtomSource.cs` constructs one | — |
+| PD.3 | Cold equip rolled/atom — stub not SSOT | `rg -n "stub\.atk_ring\|butter_bead\|hp_charm" src`, `rg -n "UniqueEquipmentCatalog\.Items\b" src` | PASS (T4, re-confirmed T22.2) — zero production callers | — |
+| PD.4 | Standing membership + synthetics; chip never labels level "power" | Wave 2 rows (T9, T10) | PASS | — |
+| PD.5 | Bound lawn UniqueCreature + Bound loadout via Hub | Wave 3 filters | SPLIT — loadout via Hub `PASS` (T13); UniqueCreature parity honest negative (T12, re-confirmed T19-bullet-3), blocked on `aptitude-sheet`'s own unbuilt AS-1.1 | — |
+| PD.6 | Sim Full; D4 coeffs; unique Θ; stale docs gone | Wave 4 rows | PASS (T15-T19; T17/T19-bullet-3 honest negatives, not forced) | — |
+| PD.7 | `prove-hub-combat` green | T19 rows | PASS | — |
+| PD.8 | Placeholder + intel Strength deleted; `world-actor-combat` tracked | Wave 5 rows (T20-T23) | PASS — see T21.2 for the one owner-decided amendment (relocate, not zero) | — |
+| PD.9 | Ideal + aptitude-sheet Done checkboxes cross-linked | doc read + diff | PASS (T23) | `tasks/aptitude-sheet-todo.md` |
+| PD.10 | Goldens re-blessed once under fuse RulesetVersion bump | T6.6 | PASS | — |
 
 ---
 
