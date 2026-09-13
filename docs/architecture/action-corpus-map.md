@@ -196,6 +196,13 @@ rule. Two A-S7 defects (`enablerPayoffCoverage`) were fixed 2026-09-12; the loop
 semantics are the follow-on program. This does not reopen Checkpoints 0-5; it is what makes
 Checkpoint 4's *"the owner decides whether a full run happens"* reachable at all.
 
+📋 **Full findings + handoff: [audit-2026-09-13-distribution.md](action-corpus/audit-2026-09-13-distribution.md).**
+Durable record of the whole investigation: the three original claims, the four allocation defects
+(category, targetMode, areaShape, frame sequencing), the pairing and granularity defects, the
+verdict/top-up deadlock, the double-count the build-gate caught, current state, and the action plan.
+**Read it before touching the action generator** — the engine is fixed and gated; the remaining work
+is the owner-gated full run and the cleanups in its §10.
+
 ## 7. Cross-program dependencies
 
 | Needs | From | State |
