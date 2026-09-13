@@ -41,31 +41,62 @@ So `anchor(Θ) = sharePermille × P(Θ)/1000` is **not** the formula in play, an
 call path from a component's existence instead of verifying it — the same mistake that produced the
 first `lawn-action-bridge` draft, made twice in one hour.
 
-## The numbers — two, plus one genuinely open question
+## The numbers — three, now that the open question below is resolved
 
 | # | Number | Home | Status |
 |---|---|---|---|
 | 1 | `stamina` cost per swing for `act.attack` | Kind-aware cost template (`basic-attack-seed`) | **missing — real** |
 | 2 | Lawn `stamina` regen rate (per-mille/tick) | `data/tuning/battle-resources.v1.json` | **missing — real**; blocked until `resource-subtick` makes it expressible |
 | 3 | Lawn `resource.max.stamina` | derived | **already derivable** — `BaseHp(Θ) × poolShareMilli/1000`; only the seeding is missing (`basic-attack-cost` wire 2) |
+| 4 | `atom.fx-overlay-damage` amount | `data/seed/atoms/fx-core.json:33` (or the grant's overlay, or an `eventField` marker — the module's choice) | **missing — real, confirmed 2026-09-13** (see resolved question below): the atom resolves to a hardcoded `0` today, an independent magnitude to author |
 
-### The open question this module must resolve first
+### RESOLVED (2026-09-13): (a) — the atom needs an authored amount. Today it resolves to a hardcoded zero.
 
-**What amount does `atom.fx-overlay-damage` actually resolve to on the lawn?**
+**Correction to this spec's own prior citation:** the line range `DamagePacketBuilder.cs:17-28` (quoted
+below, and in `tasks/lawn-combat-wire-todo.md` Task 1) is **stale** — that range is `FromOverlay`'s
+signature and packet construction. The method that actually decides the amount, `ResolveAmount`, is at
+`DamagePacketBuilder.cs:63-83` in this checkout. Cite the method, not a drifted line number.
 
-The lawn path is `EffectBag.cs:509` → `DamagePacketBuilder.FromOverlay` → `amount = amountOverride ??
-ResolveAmount(overlay, ev)` (`DamagePacketBuilder.cs:17-28`). Our atom
-(`data/seed/atoms/fx-core.json:33`) authors `params: { channel: "hp" }` and **no amount**. There is an
-"event-linked magnitude" marker in that path (P0.2, `spec-value-spec-and-curve.md`). So either:
+**The trace, file:line by file:line:**
 
-| | Consequence for this module |
-|---|---|
-| **(a)** the atom needs an **authored amount** | That number is a third thing to calibrate, and it is an independent magnitude |
-| **(b)** it resolves the **event-linked** magnitude — the vanilla hit's own damage | **There is no new magnitude to author at all.** The rider becomes a transform of the vanilla number via power/defense and the element ring, and calibration reduces to cost + regen |
+1. `EffectBag.cs:507-514` — for the `ApplyResourceDelta` action, `FireGrant` calls
+   `DamagePacketBuilder.FromOverlay(merged, ev, ...)` with **no `amountOverride`** (the parameter is
+   left at its `null` default), so the amount is decided entirely by `ResolveAmount`.
+2. `merged` comes from `EffectOverlayMerge.TryMerge` (`EffectProcAndOwner.cs:322-323, 331-344`): it
+   copies `actionParams` (the atom's compiled row) into `merged`, then folds in `grant.Overlay` **only
+   for keys `grant.Overlay` already contains**. It never invents an `"amount"` key.
+3. The atom's actually-shipped compiled row — `EffectAtomCatalog.Generated.cs:205-222`
+   (`EffectId = "fx.overlay_damage"`, `Action = "ApplyResourceDelta"`) — has
+   `Params = { ["channel"] = "hp" }`. **No `amount` key, at the compiled/runtime level, not just the
+   seed source** (`data/seed/atoms/fx-core.json:33-40` matches it exactly).
+4. `basic-attack-grant`'s standing bind (`spec-basic-attack-grant.md`) never sets `grant.Overlay["amount"]`
+   either — that spec's own "what the grant carries" section only bakes `elementPayload` and the
+   `entity:{ptr}` owner key. The grant is bound **once at spawn** and never re-created per swing, so
+   there is no per-hit call site that could inject a fresh `amount` into it even if one wanted to.
+5. So `merged` reaching `ResolveAmount` (`DamagePacketBuilder.cs:63-83`) never contains an `"amount"` key
+   at all. `ResolveAmount`'s first branch (`:65-80`, the P0.2 event-linked marker) is gated on
+   `overlay.TryGetValue("amount", ...)` succeeding — it does not — so it is skipped entirely. Execution
+   falls to the final line, `DamagePacketBuilder.cs:82`:
+   `return (long)JsonOverlay.GetDouble(overlay, "amount");` — and `JsonOverlay.GetDouble`
+   (`EffectModels.cs:234-238`) returns its `fallback` parameter (default `0`) when the key is absent.
+6. Back in `EffectBag.cs:518-521`, the only re-read of `merged["amount"]` is itself gated on
+   `merged.ContainsKey("amount")` — also false here — so nothing overwrites the zero.
 
-**Resolve this by reading `ResolveAmount` before authoring anything.** (b) is the shape the feature
-was described as having — an elemental *delta* on top of a vanilla hit — but that is a reason to check,
-not a reason to assume. This spec has already been wrong once by assuming.
+**Verdict: as authored and as compiled today, `atom.fx-overlay-damage` resolves to a literal, hardcoded
+`0` on every hit through the `basic-attack-grant` path.** It does **not** read the vanilla/RPG hit's own
+damage automatically. This is answer **(a)** — a real, confirmed gap, not (b).
+
+**One nuance worth recording so the next session doesn't reinvent it:** the mechanism that
+answer (b) describes — reading the firing event's own `Damage` field — already exists and is exactly
+built for this shape (`ValueSpec.EventField`/`P0.2`, `docs/architecture/effect-atom/spec-value-spec-and-curve.md`
+"Event-linked magnitudes", **not** under `lawn-combat-wire/` — that doc-path citation in the todo/map
+was also wrong). It is just not invoked by this atom: the seed row authors no
+`"amount": {"eventField": "damage", "multiplierMilli": ...}` marker. Whoever authors the missing amount
+for `basic-attack-calibration` has two legitimate shapes to choose between — a flat authored number
+(closer to the `atom.poison-rider = 300` precedent already used elsewhere in this file) or wiring the
+existing `eventField` marker so the rider scales off the vanilla hit's own damage — and that choice is
+this module's to make, not something this task decides. What this task closes is only the factual
+question of what happens **today**, unauthored: zero, always.
 
 ## Shipped anchors — derive from these, do not invent
 
@@ -151,11 +182,15 @@ Every authored value carries, in `_meta`: the anchor it derived from, the arithm
 
 ## Success criteria
 
-- [ ] **`ResolveAmount`'s behaviour for `atom.fx-overlay-damage` is read and recorded** — (a) authored
-      amount or (b) event-linked. Everything else in this module depends on which.
-- [ ] If (a): the authored amount's arithmetic and resulting TTK-versus-vanilla are recorded in
-      `_meta`. If (b): **no magnitude is authored**, and that is stated explicitly so nobody adds one
-      "for completeness".
+- [x] **`ResolveAmount`'s behaviour for `atom.fx-overlay-damage` is read and recorded** — **(a)**,
+      resolved 2026-09-13: as authored and as compiled, the atom resolves to a hardcoded `0` on every
+      hit (no `amount` key anywhere in its compiled row or its standing grant's overlay reaches
+      `ResolveAmount`); it does not read the vanilla hit's own damage. See "RESOLVED" above for the
+      full trace. Everything else in this module depends on this, and it is now a fourth number (#4
+      above) to calibrate, not a reduction to cost + regen.
+- [ ] The authored amount's arithmetic and resulting TTK-versus-vanilla are recorded in `_meta`
+      (the module still must pick a shape — flat authored number, or the existing `eventField`
+      marker — before this can close).
 - [ ] `stamina` cost and lawn regen are authored, and satisfy `cost ≤ regenPerSecond × 1.5 s` at the
       pin.
 - [ ] Exhaustion is reachable under burst fire — live-proof 4's falsifier can actually run.
