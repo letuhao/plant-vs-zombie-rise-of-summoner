@@ -217,9 +217,10 @@ public class BattleSeamWideningTests
     {
         // spec-siege-seam.md's rule 7: "combat never writes world state" -- the budget crosses in,
         // the spend crosses back, only the world debits. Source scan over the resolver namespace's
-        // own files: PlaceholderBattleResolver.cs and BattleApplication.cs must never assign to
-        // WorldSector.LoamStock or WorldEntity.CarriedLoam.
-        foreach (var file in new[] { "PlaceholderBattleResolver.cs", "BattleApplication.cs", "BattleReporting.cs" })
+        // own files: DistrictAssaultResolver.cs (actor-hub-and-combat-power-solid-fixing T20: the
+        // real resolver, replacing the deleted PlaceholderBattleResolver.cs) and BattleApplication.cs
+        // must never assign to WorldSector.LoamStock or WorldEntity.CarriedLoam.
+        foreach (var file in new[] { "DistrictAssaultResolver.cs", "BattleApplication.cs", "BattleReporting.cs" })
         {
             var text = File.ReadAllText(FindSource(file));
             Assert.DoesNotContain("LoamStock =", text, StringComparison.Ordinal);

@@ -14,10 +14,14 @@ namespace FusionRpg.Core.World.Turn;
 /// implementation for <see cref="BattleKinds.District"/> — the world/battle join. Builds a real board
 /// from <see cref="DistrictLayout"/>, places combatants (and any structures standing on the district's
 /// slots) on it, runs a real <see cref="BattleEngine.Resolve"/>, evaluates <see cref="SiegeObjective"/>,
-/// and translates the result back into a <see cref="BattleOutcome"/>. Delegates every non-district kind,
-/// and every district request with no board projected, straight to
-/// <see cref="PlaceholderBattleResolver"/> — the early return IS the feature-absence guarantee,
-/// provable by construction rather than by a golden diff.
+/// and translates the result back into a <see cref="BattleOutcome"/>. Every non-district kind, and
+/// every district request this resolver cannot really simulate (no board projected, no living
+/// attacker, or a board too small for the forces on it), returns the same refused/no-op
+/// <see cref="BattleOutcome"/> shape (<c>BattleId</c> only — no winner, no sides) rather than
+/// inventing a weight-comparison result — `actor-hub-and-combat-power-solid-fixing`'s
+/// `placeholder-battle-hub` (T20): there is no real engine for those kinds yet, so there is no
+/// winner, not a fake one. The early return IS the feature-absence guarantee, provable by
+/// construction rather than by a golden diff.
 ///
 /// <para><b>No raw `IIntentSource` instance is ever constructed here — but a real, scored AI IS wired,
 /// via a different seam (2026-09-07, siege-ai, owner-authorized).</b> `BattleEngine.Resolve`'s
@@ -53,12 +57,14 @@ public sealed class DistrictAssaultResolver : IBattleResolver
 
     public BattleOutcome Resolve(BattleRequest request, IReadOnlyList<WorldEntity> combatants, ulong seed)
     {
+        // No real engine resolves a non-district kind, and a district request with no board is not
+        // simulable — refuse cleanly (no winner, no sides) rather than invent one. See T20 above.
         if (request.Kind != BattleKinds.District || request.Board is null)
-            return PlaceholderBattleResolver.Instance.Resolve(request, combatants, seed);
+            return new BattleOutcome { BattleId = request.BattleId };
 
         var attacker = combatants.FirstOrDefault(e => string.Equals(e.EntityId, request.AttackerEntityId, StringComparison.Ordinal));
         if (attacker is null)
-            return PlaceholderBattleResolver.Instance.Resolve(request, combatants, seed);
+            return new BattleOutcome { BattleId = request.BattleId };
 
         var defender = request.DefenderEntityId is { } defenderId
             ? combatants.FirstOrDefault(e => string.Equals(e.EntityId, defenderId, StringComparison.Ordinal))
@@ -108,7 +114,7 @@ public sealed class DistrictAssaultResolver : IBattleResolver
         var attackerKeys = new List<string>();
         var attackerSetups = BuildAnimateSetups(attacker, AttackerSide, attackerKeys);
         if (attackerSetups.Count == 0)
-            return PlaceholderBattleResolver.Instance.Resolve(request, combatants, seed);
+            return new BattleOutcome { BattleId = request.BattleId };
 
         var defenderKeys = new List<string>();
         var defenderSetups = defender is null ? new List<BattleActorSetup>() : BuildAnimateSetups(defender, DefenderSide, defenderKeys);
@@ -125,10 +131,10 @@ public sealed class DistrictAssaultResolver : IBattleResolver
         var approachCells = OpenCellsInZone(spec, boardState, DistrictZone.Approach, board.AttackerEdge, wardExtraDepth);
         var coreCells = OpenCellsInZone(spec, boardState, DistrictZone.Core, board.AttackerEdge, wardExtraDepth);
 
-        // A board too small for the forces standing on it falls back rather than throwing mid-turn --
-        // the placeholder's own crude weight comparison is a better answer than an aborted turn.
+        // A board too small for the forces standing on it refuses cleanly rather than throwing
+        // mid-turn or inventing a weight-comparison winner for a fight that was never simulated.
         if (attackerKeys.Count > approachCells.Count || defenderKeys.Count > coreCells.Count)
-            return PlaceholderBattleResolver.Instance.Resolve(request, combatants, seed);
+            return new BattleOutcome { BattleId = request.BattleId };
 
         Placement.PlaceActors(boardState, attackerKeys, approachCells);
         if (defenderKeys.Count > 0) Placement.PlaceActors(boardState, defenderKeys, coreCells);
@@ -323,8 +329,8 @@ public sealed class DistrictAssaultResolver : IBattleResolver
 
     /// <summary>
     /// One `BattleActorSetup` per LIVING member (`Math.Max(0, member.Hp - member.Wounds) > 0` — the
-    /// same effective-HP formula <see cref="PlaceholderBattleResolver.Strength"/> already establishes
-    /// for this program), reusing the real, shipped, Core-only pattern
+    /// same effective-HP reading <see cref="Intel.ForceStrength.Of"/> uses for fog-of-war, unrelated
+    /// use of the same simple test), reusing the real, shipped, Core-only pattern
     /// <see cref="Battle.WaveCatalog"/> already uses for AI-side content: species-derived
     /// Element/Traits/AttackInterval, magnitudes from <see cref="BattleRuleset.BaseHp"/>/
     /// <see cref="BattleRuleset.BaseAtk"/>/<see cref="BattleRuleset.BaseDefense"/>. Appends each built
@@ -419,8 +425,8 @@ public sealed class DistrictAssaultResolver : IBattleResolver
     }
 
     /// <summary>Translates this side's battle result back into world state — the same
-    /// entering-effective-hp / new-total-wounds composition <see cref="PlaceholderBattleResolver.Wounded"/>
-    /// already establishes: a member entered with `member.Hp - member.Wounds` effective HP; the battle
+    /// entering-effective-hp / new-total-wounds composition the deleted wave-1 `PlaceholderBattleResolver`
+    /// once established: a member entered with `member.Hp - member.Wounds` effective HP; the battle
     /// leaves it with `HpRemaining` of THAT; the new total wounds relative to the member's own full
     /// `Hp` is `member.Hp - HpRemaining`.</summary>
     static BattleSideOutcome BuildSideOutcome(

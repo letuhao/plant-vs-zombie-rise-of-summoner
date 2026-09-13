@@ -6,9 +6,6 @@ public sealed record WorldSizeNodeRange(int Min, int Max);
 
 public sealed record StrengthBandTuning(long Floor, long Ceiling, long Midpoint);
 
-public sealed record PlaceholderBattleTuning(
-    int DefenderBonusMilli, int WipeoutRatioMilli, int RoutWoundMilli, int GuardWoundMilli);
-
 public sealed record WorldCalendarTuning(
     int DaysPerWeek, int WeeksPerMonth,
     int SpecialWeekChanceMilli, int SpecialMonthChanceMilli, int PlagueChanceMilli);
@@ -62,7 +59,6 @@ public sealed record WorldTuning(
     IReadOnlyDictionary<string, int> LaneCostMultiplierMilli,
     IReadOnlyDictionary<string, WorldSizeNodeRange> WorldSizeNodes,
     IReadOnlyList<StrengthBandTuning> StrengthBands,
-    PlaceholderBattleTuning PlaceholderBattle,
     WorldCalendarTuning Calendar,
     MovementTuning Movement,
     WorldGrowthTuning Growth,
@@ -118,13 +114,6 @@ public static class WorldTuningLoader
                 i++;
             }
 
-            var pb = Obj(root, "placeholderBattle", "$");
-            var placeholderBattle = new PlaceholderBattleTuning(
-                DefenderBonusMilli: Int(pb, "defenderBonusMilli", "placeholderBattle"),
-                WipeoutRatioMilli: Int(pb, "wipeoutRatioMilli", "placeholderBattle"),
-                RoutWoundMilli: Int(pb, "routWoundMilli", "placeholderBattle"),
-                GuardWoundMilli: Int(pb, "guardWoundMilli", "placeholderBattle"));
-
             var cal = Obj(root, "calendar", "$");
             var calendar = new WorldCalendarTuning(
                 DaysPerWeek: Int(cal, "daysPerWeek", "calendar"),
@@ -173,7 +162,7 @@ public static class WorldTuningLoader
                 MovementMilli: movementMilli);
 
             return new WorldTuning(
-                schemaVersion, version, lanes, sizes, bands, placeholderBattle, calendar, movement,
+                schemaVersion, version, lanes, sizes, bands, calendar, movement,
                 growth, seasons);
         }
     }
@@ -228,10 +217,9 @@ public static class WorldTuningLoader
 
 /// <summary>
 /// Single configuration point for every world catalog/policy this tuning file feeds — mirrors
-/// <c>ContractPolicy.Configure</c> / <c>LoamPolicy.Configure</c>, but one call covers five files
+/// <c>ContractPolicy.Configure</c> / <c>LoamPolicy.Configure</c>, but one call covers several files
 /// (<see cref="LaneTypeCatalog"/>, <see cref="WorldSizeCatalog"/>, <see cref="Intel.StrengthBandCatalog"/>,
-/// <see cref="Turn.PlaceholderBattleResolver"/>, <see cref="Turn.TurnCalendar"/>) since they all read
-/// one <c>world.v{n}.json</c>.
+/// <see cref="Turn.TurnCalendar"/>) since they all read one <c>world.v{n}.json</c>.
 /// </summary>
 public static class WorldTuningHub
 {

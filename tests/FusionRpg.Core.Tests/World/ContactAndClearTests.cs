@@ -11,6 +11,80 @@ namespace FusionRpg.Core.Tests.World;
 /// </summary>
 public class ContactAndClearTests
 {
+    /// <summary>The attacker always routs, the defender always wins, nobody dies — used only where a
+    /// test needs a routed precondition. `actor-hub-and-combat-power-solid-fixing` T20 turned every
+    /// non-district contact fight into an honest no-op (no engine resolves one, so no winner is
+    /// invented), so a real fight in this file can no longer manufacture a rout on its own; the
+    /// mechanic under test here is the turn-cost/fall-back bookkeeping, not combat, matching the same
+    /// explicit-resolver pattern <see cref="RoutFallBackTests"/>/<see cref="RoutLifecycleTests"/>
+    /// already use.</summary>
+    sealed class AttackerAlwaysRouts : IBattleResolver
+    {
+        public BattleOutcome Resolve(BattleRequest request, IReadOnlyList<WorldEntity> combatants, ulong seed)
+        {
+            var attacker = combatants.Single(e => e.EntityId == request.AttackerEntityId);
+            var defender = combatants.Single(e => e.EntityId == request.DefenderEntityId);
+
+            return new BattleOutcome
+            {
+                BattleId = request.BattleId,
+                WinnerEntityId = defender.EntityId,
+                Sides = new[]
+                {
+                    new BattleSideOutcome { EntityId = defender.EntityId, Survivors = defender.Members },
+                    new BattleSideOutcome { EntityId = attacker.EntityId, Survivors = attacker.Members, Routed = true }
+                }
+            };
+        }
+    }
+
+    /// <summary>Routs a fresh attacker, then wipes it on the very next call — a winner pressing its
+    /// advantage on ground it already holds, the same shape <see cref="AttackerAlwaysRouts"/> cannot
+    /// produce (it always routs, never finishes). Tracks its own call count rather than reading
+    /// `attacker.Routed`: `TurnEngine.Step` clears a routed entity's flag at the *top* of the next
+    /// turn as part of the "rout costs exactly one turn" bookkeeping, before any battle resolves, so
+    /// the flag this resolver would see is always false regardless of what happened last turn.</summary>
+    sealed class RoutsThenFinishes : IBattleResolver
+    {
+        bool _hasFoughtBefore;
+
+        public BattleOutcome Resolve(BattleRequest request, IReadOnlyList<WorldEntity> combatants, ulong seed)
+        {
+            var attacker = combatants.Single(e => e.EntityId == request.AttackerEntityId);
+            var defender = combatants.Single(e => e.EntityId == request.DefenderEntityId);
+
+            var attackerSide = _hasFoughtBefore
+                ? new BattleSideOutcome { EntityId = attacker.EntityId, Survivors = Array.Empty<WorldEntityMember>(), Destroyed = true }
+                : new BattleSideOutcome { EntityId = attacker.EntityId, Survivors = attacker.Members, Routed = true };
+            _hasFoughtBefore = true;
+
+            return new BattleOutcome
+            {
+                BattleId = request.BattleId,
+                WinnerEntityId = defender.EntityId,
+                Sides = new[] { new BattleSideOutcome { EntityId = defender.EntityId, Survivors = defender.Members }, attackerSide }
+            };
+        }
+    }
+
+    /// <summary>Guard-kind contact resolves as a clean win — T20 made `BattleKinds.Guard` one of
+    /// `DistrictAssaultResolver`'s refused non-district kinds too, so clearing a slot no longer
+    /// happens on its own; this stands in to prove `Clear` still targets only the named slot.</summary>
+    sealed class GuardAlwaysClears : IBattleResolver
+    {
+        public BattleOutcome Resolve(BattleRequest request, IReadOnlyList<WorldEntity> combatants, ulong seed)
+        {
+            var attacker = combatants.Single(e => e.EntityId == request.AttackerEntityId);
+            return new BattleOutcome
+            {
+                BattleId = request.BattleId,
+                WinnerEntityId = attacker.EntityId,
+                GuardCleared = true,
+                Sides = new[] { new BattleSideOutcome { EntityId = attacker.EntityId, Survivors = attacker.Members } }
+            };
+        }
+    }
+
     static WorldState World() => WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 1);
 
     static WorldCommand Move(string commander, string entityId, params string[] lanePath) => new()
@@ -67,13 +141,12 @@ public class ContactAndClearTests
     [Fact]
     public void Entering_a_hostile_held_sector_halts_the_march()
     {
-        // Same order, but now a wild warband stands in ember-hollow — strong enough (entrenched, per
-        // `A_routed_force_loses_the_next_turns_orders_and_then_recovers`'s own fixture) to also rout
-        // Dave in the Sector-kind contact fight this same arrival triggers. Zone-of-control still
-        // halted the march exactly at ember-hollow rather than letting it continue onto
-        // `l-ember-ash` — the "zoc" report line is written from the halt itself, before any battle
-        // resolves — but the fall-back that rout then applies is a later, separate effect
-        // (world-map, 2026-09-05) and is what the final position below now reflects.
+        // Same order, but now a wild warband stands in ember-hollow. Zone-of-control halts the march
+        // exactly at ember-hollow rather than letting it continue onto `l-ember-ash` — the "zoc"
+        // report line is written from the halt itself, before any battle resolves. T20 turned the
+        // ensuing Sector-kind contact fight into an honest no-op (no engine resolves one), so unlike
+        // before this fix, nothing decides it: the legion is left standing in ember-hollow, neither
+        // routed nor victorious, rather than a Hp×Level comparison inventing a winner.
         var world = Place(World(), "e-wild-pack-1", "ember-hollow", movement: 0);
 
         var result = TurnEngine.Step(world,
@@ -83,8 +156,8 @@ public class ContactAndClearTests
 
         var legion = Find(result.World, "e-dave-legion-1");
         Assert.NotNull(legion);
-        Assert.True(legion!.Routed);
-        Assert.Equal("homeworld", legion.AtSectorId);
+        Assert.False(legion!.Routed);
+        Assert.Equal("ember-hollow", legion.AtSectorId);
         Assert.Null(legion.OnLaneId);
     }
 
@@ -170,11 +243,12 @@ public class ContactAndClearTests
     [Fact]
     public void A_routed_force_loses_the_next_turns_orders_and_then_recovers()
     {
-        // The wild pack (2 x 140 HP at level 2), entrenched, outweighs the starting legion, which
-        // routs and falls back to homeworld — the lane it marched in on (world-map, 2026-09-05).
+        // T20: Sector-kind contact is now a no-op, so an explicit resolver manufactures the routed
+        // precondition — the mechanic under test is the turn-cost bookkeeping, not combat.
+        var resolver = new AttackerAlwaysRouts();
         var world = Place(World(), "e-wild-pack-1", "ember-hollow", movement: 0);
         var first = TurnEngine.Step(world,
-            new[] { Move("dave", "e-dave-legion-1", "l-home-ember") }, seed: 1);
+            new[] { Move("dave", "e-dave-legion-1", "l-home-ember") }, seed: 1, resolver);
 
         var beaten = Find(first.World, "e-dave-legion-1");
         Assert.NotNull(beaten);
@@ -209,16 +283,18 @@ public class ContactAndClearTests
     [Fact]
     public void A_routed_force_the_winner_stands_over_is_finished_off()
     {
-        // Both forces already stand in ash-waste before the turn starts and neither files an order —
-        // no lane was ever touched, so `BattleApplication.FallBack` finds nothing to reverse.
+        // T20: an explicit resolver stands in for combat (see AttackerAlwaysRouts's own remark) —
+        // both forces already stand in ash-waste before the turn starts and neither files an order,
+        // so `BattleApplication.FallBack` finds nothing to reverse either way.
+        var resolver = new RoutsThenFinishes();
         var world = Place(World(), "e-dave-legion-1", "ash-waste");
-        var first = TurnEngine.Step(world, Array.Empty<WorldCommand>(), seed: 1);
+        var first = TurnEngine.Step(world, Array.Empty<WorldCommand>(), seed: 1, resolver);
         var routed = Find(first.World, "e-dave-legion-1");
         Assert.NotNull(routed);
         Assert.True(routed!.Routed);
         Assert.Equal("ash-waste", routed.AtSectorId);
 
-        var second = TurnEngine.Step(first.World, Array.Empty<WorldCommand>(), seed: 1);
+        var second = TurnEngine.Step(first.World, Array.Empty<WorldCommand>(), seed: 1, resolver);
         Assert.Null(Find(second.World, "e-dave-legion-1"));
     }
 
@@ -229,7 +305,8 @@ public class ContactAndClearTests
     {
         var world = Place(World(), "e-dave-legion-1", "ember-hollow");
 
-        var result = TurnEngine.Step(world, new[] { Clear("dave", "e-dave-legion-1", "ember-hollow", 2) }, seed: 1);
+        var result = TurnEngine.Step(world, new[] { Clear("dave", "e-dave-legion-1", "ember-hollow", 2) },
+            seed: 1, new GuardAlwaysClears());
 
         var ember = result.World.Sectors.Single(s => s.SectorId == "ember-hollow");
         Assert.Equal(GuardState.Cleared, ember.Slots[2].GuardState);

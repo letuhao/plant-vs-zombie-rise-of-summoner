@@ -3,7 +3,7 @@
 **Plan:** [actor-hub-and-combat-power-solid-fixing-plan.md](actor-hub-and-combat-power-solid-fixing-plan.md)  
 **Map:** [docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md](../docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md)  
 **Runbook / evidence:** [runbook](actor-hub-and-combat-power-solid-fixing-runbook.md) · [evidence map](actor-hub-and-combat-power-solid-fixing-evidence-map.md) · command `/solid-run`  
-**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 + Wave 2 complete (T1-T11 done). Wave 3: T12 BLOCKED (honest gap — depends on `aptitude-sheet` program's unbuilt `unique-lawn-wire`, out of this program's own implementation scope per its own spec's locked boundary); T13 done; T14 deferred (depends on T12). Wave 4 complete (T15-T19 done; T17/T19-bullet-3 honest negatives, not forced). Wave 5 (T20-T23, stub hygiene) next.
+**Status:** AUTO build in progress (`/solid-run`, worktree `solid-run-20260912-eb53`) — Wave 1 + Wave 2 complete (T1-T11 done). Wave 3: T12 BLOCKED (honest gap — depends on `aptitude-sheet` program's unbuilt `unique-lawn-wire`, out of this program's own implementation scope per its own spec's locked boundary); T13 done; T14 deferred (depends on T12). Wave 4 complete (T15-T19 done; T17/T19-bullet-3 honest negatives, not forced). Wave 5: T20-T21 done (T20 deleted `PlaceholderBattleResolver`/`PlaceholderBattleTuning`; T21 relocated Intel's Strength formula rather than zeroing it, an owner-decided tradeoff against a real shipped `ai-commander` dependency — see evidence map 21.2; two flagship acceptance tests outside this program's own folder — `WorldWaveOneAcceptanceTests`, `WorldSectorDevelopmentAcceptanceTests` — needed a documented re-bless as a direct, understood consequence). T22-T23 next.
 
 ---
 
@@ -507,15 +507,15 @@
 **Description:** Remove resolver and PlaceholderBattleTuning; TurnEngine / DistrictAssault fail loud or combat kinds off — no silent Hp×Level wins.
 
 **Acceptance criteria:**
-- [ ] `PlaceholderBattleResolver` removed from production paths.
-- [ ] `PlaceholderBattleTuning` deleted or unread.
-- [ ] No silent Hp×Level combat outcomes.
-- [ ] World tests re-blessed for feature-off / fail-loud.
+- [x] `PlaceholderBattleResolver` removed from production paths.
+- [x] `PlaceholderBattleTuning` deleted or unread.
+- [x] No silent Hp×Level combat outcomes.
+- [x] World tests re-blessed for feature-off / fail-loud.
 
 **Verification:**
-- [ ] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~PlaceholderBattle|DistrictAssault|TurnEngine|World"`
-- [ ] `rg -n "PlaceholderBattleResolver" src` — gone or test-only
-- [ ] `.\scripts\guard-actor-hub.ps1`
+- [x] `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~PlaceholderBattle|DistrictAssault|TurnEngine|World"` — 1067/1067; full Core/Data/E2E suites at exactly their pre-existing, unrelated failure baselines (37/1/7)
+- [x] `rg -n "PlaceholderBattleResolver" src` — gone (file deleted); 5 historical-prose-only hits remain
+- [x] `.\scripts\guard-actor-hub.ps1` — manually re-derived (sandbox blocks direct powershell invocation from this worktree-isolated session): underlying `audit-magic-numbers.py`/`audit-overflow.py` both exit 0; guard's own file targets untouched by this task's diff
 
 **Dependencies:** T19 (map) / T6 minimum  
 **Files likely touched:** `PlaceholderBattleResolver.cs`, `WorldTuning`, `TurnEngine`, `DistrictAssaultResolver`, tests  
@@ -529,13 +529,13 @@
 **Description:** Remove Intel Strength/bands derived from placeholder formula; presence-only (id/owner/kind) OK.
 
 **Acceptance criteria:**
-- [ ] `IntelRecorder` / `IntelSeed` do not call deleted Strength.
-- [ ] Bands not fed by Hp×Level fiction.
-- [ ] Intel tests updated.
+- [x] `IntelRecorder` / `IntelSeed` do not call deleted Strength.
+- [x] Bands not fed by Hp×Level fiction — **owner-decided partial-literal compliance, documented, not silently claimed full** (see evidence map 21.2): the formula's ownership moved to Intel's own `ForceStrength.Of`, never the deleted class; the real, shipped `ai-commander` AI (`ThreatMap`/`FrontierRulesPolicy`) and a live web UI readout depend on the exact same numbers, and zeroing them (the literal reading) would have silently broken both with no test coverage catching the UI half — owner chose to relocate over zero-out when presented with the tradeoff.
+- [x] Intel tests updated — none needed rewriting; the relocation is numerically identical.
 
 **Verification:**
-- [ ] Core filter `Intel`
-- [ ] `rg -n "PlaceholderBattleResolver\\.Strength" src` — none
+- [x] Core filter `Intel` — green, part of the 1067/1067 World run
+- [x] `rg -n "PlaceholderBattleResolver\\.Strength" src` — none
 
 **Dependencies:** T20  
 **Files likely touched:** `IntelRecorder.cs`, `IntelSeed.cs`, FactionIntel consumers, tests  
