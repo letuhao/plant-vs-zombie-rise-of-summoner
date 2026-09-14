@@ -426,7 +426,7 @@ unset = Add) toward the target — `TryGuardMutation` structurally refuses `mode
 - [x] `.\scripts\guard-single-writer.ps1` — green (confirms the raw `attackDamage`/`thePlantMaxHealth` writes are gone, not just moved)
 - [x] `.\scripts\guard-funnel-delta.ps1` — green
 - [x] `.\scripts\guard-actor-hub.ps1` — green
-- [ ] Live Bound unique with loadout probe (owner step) — owed: deploy-play → Bound unique with a loadout JSON → observe Hub-consistent atk/maxHp/hp, and that a re-tick doesn't revert the bonus
+- [ ] Live Bound unique with loadout probe (owner step) — owed: deploy-play → Bound unique with a loadout JSON → observe Hub-consistent atk/maxHp/hp, and that a re-tick doesn't revert the bonus. **Live-probe attempted 2026-09-15** via `tools/ProveLiveProbe -Mode B` (`live-probe-todo.md` Task 11, real MelonLoader game + server this session): blocked by a real, non-fabricated economy constraint, not a code or tool defect — player 1's real soul balance (42) is below every summon banner's real cost (100/120 per `data/tuning/summoning.v1.json`), and every faster path was checked and correctly refuses: `/api/test/seed-souls-demo` is unreachable (405) in this build, `/api/sim/*` structurally refuses via `SimService.Guard()` while a real injector is connected (409 "live injector connected"), and real kill-earn needs a `(playerId, runId)` a `lab-overlay` debug scenario never creates. Not worked around by design — see `live-probe-todo.md` Task 11 for the full finding. Still owed: a real Adventure-mode soul-earning session (or an owner-run session with an already-stocked player) before this specific live-engine half can be observed.
 
 **Dependencies:** T12  
 **Files likely touched:** `UniqueBoundLoadout.cs`, `ActorHubTests.cs` (new proof)  

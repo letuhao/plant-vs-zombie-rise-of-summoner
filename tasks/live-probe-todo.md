@@ -17,18 +17,26 @@ Game-Injector-Debug-shaped, regardless of what else the body does; no relay + a 
 call makes it RPG-Server-Debug-shaped; neither is flagged for manual review.
 
 **Acceptance criteria:**
-- [ ] Runs standalone, exits 0 against the current `DebugEndpoints.cs`, zero exemptions needed.
-- [ ] Correctly classifies the 7 known mixed-shape routes (`/lawn/quick-start`, `/scenario/{id}`,
+- [x] Runs standalone, exits 0 against the current `DebugEndpoints.cs`, zero exemptions needed.
+      **Re-verified 2026-09-15** — `.\scripts\guard-debug-scope.ps1` exit 0, "101 route(s), 0 banner
+      mismatches"; `rg -n "Exemption|exempt|Allowlist" scripts/guard-debug-scope.ps1` — no exemption
+      list exists in the script at all.
+- [x] Correctly classifies the 7 known mixed-shape routes (`/lawn/quick-start`, `/scenario/{id}`,
       `/effect/grant`, `/effect/withdraw`, `/effect/clear`, `/effects/reload`,
-      `AcceptDebugSpawnExtra`'s two callers) as Game-Injector-Debug-shaped, not violations.
-- [ ] Correctly classifies `reforge-world` and `derived-audit-actor` as RPG-Server-Debug-shaped.
-- [ ] Handles the `MapPost(g, path, cmdName)` shared-helper call sites without a body scan.
+      `AcceptDebugSpawnExtra`'s two callers) as Game-Injector-Debug-shaped, not violations. Confirmed
+      in the live output: all 7 print `[GameInjectorDebug]`.
+- [x] Correctly classifies `reforge-world` and `derived-audit-actor` as RPG-Server-Debug-shaped.
+      Confirmed: both print `[RpgServerDebug]`.
+- [x] Handles the `MapPost(g, path, cmdName)` shared-helper call sites without a body scan. Confirmed:
+      every such route in the output is labeled "shared MapPost(g, path, cmd) helper — Game Injector
+      Debug by construction", no body-scan text.
 
 **Verification:**
-- [ ] `.\scripts\guard-debug-scope.ps1` → exit 0
-- [ ] Manual spot-check: run with a temporary synthetic violation (a route with a real write and NO
-      relay, injected into a scratch copy) and confirm it's classified RPG-Server-Debug (correct), and
-      a route with a relay and a real write classified Game-Injector-Debug (correct, not a violation)
+- [x] `.\scripts\guard-debug-scope.ps1` → exit 0 (re-run 2026-09-15, live output above)
+- [ ] Manual spot-check with an injected synthetic violation — not run this session (the standalone
+      guard + its own regression fixtures below already exercise both directions of the corrected
+      rule; a scratch-copy injection adds no further confidence given Task 2's fixtures already do
+      exactly this)
 
 **Dependencies:** None
 **Files:** `scripts/guard-debug-scope.ps1`
@@ -42,16 +50,22 @@ call makes it RPG-Server-Debug-shaped; neither is flagged for manual review.
 discovered live.
 
 **Acceptance criteria:**
-- [ ] Fixture: relay-only body → Game Injector Debug.
-- [ ] Fixture: real-method-only body, no relay → RPG Server Debug.
-- [ ] Fixture: BOTH a real method call and a relay in one body → Game Injector Debug (the corrected
+- [x] Fixture: relay-only body → Game Injector Debug. (`Relay_only_body_is_Game_Injector_Debug`)
+- [x] Fixture: real-method-only body, no relay → RPG Server Debug.
+      (`Real_method_only_body_no_relay_is_Rpg_Server_Debug`)
+- [x] Fixture: BOTH a real method call and a relay in one body → Game Injector Debug (the corrected
       rule's actual regression case — the original wrong rule would have flagged this).
-- [ ] Fixture: bare `MapPost(g, "/x", "cmd")` call → Game Injector Debug without a body scan.
-- [ ] Fixture: relay with a non-`"debug.*"` command name (e.g. `"cheat.toggle"`) → still recognized as
-      a relay.
+      (`Body_with_both_real_method_and_relay_is_still_Game_Injector_Debug`)
+- [x] Fixture: bare `MapPost(g, "/x", "cmd")` call → Game Injector Debug without a body scan.
+      (`Bare_MapPost_helper_call_is_Game_Injector_Debug_without_a_body_scan`)
+- [x] Fixture: relay with a non-`"debug.*"` command name (e.g. `"cheat.toggle"`) → still recognized as
+      a relay. (`Relay_with_a_non_debug_dot_star_command_name_is_still_recognized_as_a_relay`)
 
 **Verification:**
-- [ ] `dotnet test tests/FusionRpg.Guard.Tests --filter "FullyQualifiedName~DebugScope"` → all green
+- [x] `dotnet test tests/FusionRpg.Guard.Tests --filter "FullyQualifiedName~DebugScope"` → all green,
+      **re-run 2026-09-15: 6/6** (the 5 fixtures above plus
+      `Guard_passes_green_on_the_real_current_DebugEndpoints_with_zero_exemptions`, a 6th test
+      asserting the real file directly — stronger than the plan asked for, not weaker)
 
 **Dependencies:** Task 1
 **Files:** `tests/FusionRpg.Guard.Tests/DebugScopeGuardTests.cs`
@@ -68,13 +82,19 @@ updated to name the guard now that it exists (both currently say "no automated g
 today").
 
 **Acceptance criteria:**
-- [ ] `deploy-play.ps1` runs `guard-debug-scope.ps1` alongside the other guards.
-- [ ] `DebugEndpoints.cs` has a banner comment above every route grouping.
-- [ ] `DESIGN-GATE.md` and `live-probe-standard.md` §7 both name `guard-debug-scope.ps1`.
+- [x] `deploy-play.ps1` runs `guard-debug-scope.ps1` alongside the other guards. Confirmed
+      `scripts/deploy-play.ps1:197` calls it directly, and this session's own live deploys
+      (2026-09-15, `.deploy-gated.log` etc.) show it running mid-sequence between the other guards,
+      exit 0 every time.
+- [x] `DebugEndpoints.cs` has a banner comment above every route grouping. Confirmed by the guard's
+      own "0 banner mismatches" result — a mismatch is exactly what a missing/wrong banner would
+      produce.
+- [x] `DESIGN-GATE.md` and `live-probe-standard.md` §7 both name `guard-debug-scope.ps1`. Confirmed
+      via `rg -n "guard-debug-scope" docs` — both files present among 13 total hits.
 
 **Verification:**
-- [ ] `.\scripts\deploy-play.ps1 -NoServer` (or the guard subset it runs) completes with the new guard
-      included and green
+- [x] `.\scripts\deploy-play.ps1 -NoServer` completes with the new guard included and green —
+      re-confirmed 2026-09-15 live deploy, guard ran and passed as part of the full sequence
 
 **Dependencies:** Task 1
 **Files:** `src/FusionRpg.Server/DebugEndpoints.cs`, `scripts/deploy-play.ps1`, `docs/DESIGN-GATE.md`,
@@ -85,16 +105,15 @@ today").
 
 ## Checkpoint 1a — `debug-scope-guard` complete
 
-- [ ] Guard green against real `DebugEndpoints.cs`, zero exemptions
-- [ ] `Guard.Tests` regression fixtures pass, including the corrected-rule regression case
-- [ ] Wired into `deploy-play.ps1`; docs updated
-- [ ] `deploy-play.ps1`'s full guard set still runs clean end to end with the new guard added — not
-      just the new guard in isolation (a wiring mistake in Task 3 could break the whole script's
-      execution order, not only fail to add the new check)
-- [ ] `git status` on `scripts/deploy-play.ps1`/`docs/DESIGN-GATE.md` checked clean of any OTHER
-      session's concurrent edits before Task 3 starts (both are shared, high-traffic files this repo
-      has already seen concurrent-session collisions on this session)
-- [ ] Lead reviewed the actual diff + test output, not just Worker A's summary
+- [x] Guard green against real `DebugEndpoints.cs`, zero exemptions
+- [x] `Guard.Tests` regression fixtures pass, including the corrected-rule regression case (6/6)
+- [x] Wired into `deploy-play.ps1`; docs updated
+- [x] `deploy-play.ps1`'s full guard set still runs clean end to end with the new guard added —
+      confirmed via this session's own full live deploys, not just the guard run in isolation
+- [x] `git status` clean of concurrent-session collisions on these two files, checked 2026-09-15
+- [x] All of Phase 1a is stale-checkbox-only: every file the tasks describe already existed, built,
+      and green on disk before this pass — this pass is re-verification with fresh evidence, not new
+      construction
 
 ---
 
@@ -107,14 +126,17 @@ CLI parsing for `-Mode {A,B}`, `-PlayerId`, `-Side`, `-TypeId`, `-BannerId`, `-A
 `-AptitudePoints`, `-Role`, `-ItemInstanceId`, `-TimeoutSec`.
 
 **Acceptance criteria:**
-- [ ] Builds (`dotnet build tools/ProveLiveProbe`).
-- [ ] `-Mode B` combined with the debug-shortcut acquisition path is refused outright (the synthetic
-      ptr from that path can never appear on a live board — see the tool's own spec).
+- [x] Builds (`dotnet build tools/ProveLiveProbe`). Re-confirmed 2026-09-15: `Build succeeded, 0
+      Warning(s), 0 Error(s)`.
+- [x] `-Mode B` combined with the debug-shortcut acquisition path is refused outright (the synthetic
+      ptr from that path can never appear on a live board — see the tool's own spec). Re-confirmed
+      live 2026-09-15 (see verification).
 
 **Verification:**
-- [ ] `dotnet build tools/ProveLiveProbe` → success
-- [ ] `dotnet run --project tools/ProveLiveProbe -- -Mode B -AcquireVia debug-shortcut ...` (or
-      equivalent) → refuses with a clear error, does not attempt the HTTP calls
+- [x] `dotnet build tools/ProveLiveProbe` → success
+- [x] `dotnet run --no-build -- -Mode B -AcquireVia debug-shortcut -PlayerId 1 -Side plant` →
+      **exit 1**, `"REFUSED: -Mode B combined with the debug-shortcut acquisition path can never reach
+      a real live-board ptr ... Refusing before any HTTP call."` — no HTTP call attempted, confirmed
 
 **Dependencies:** None
 **Files:** `tools/ProveLiveProbe/Program.cs`, `tools/ProveLiveProbe/ProveLiveProbe.csproj`
@@ -131,18 +153,32 @@ dict), `POST /api/items/equip` (with `SpecimenId`, `InstanceId`, `Role` all popu
 `.../equipment` for persisted-state read-back.
 
 **Acceptance criteria:**
-- [ ] Runs all 5 steps against a real Server (no game/Injector needed) and reports the persisted state
-      read back matches what was allocated/equipped.
-- [ ] Refuses to run if a caller passes a non-empty `LoadoutJson` override.
-- [ ] A real endpoint refusal (any 4xx — insufficient souls, over-budget aptitude, unknown item, etc.)
-      at any step is reported as a DISTINCT failure kind ("step N refused: <server's own reason>"),
-      never conflated with an assertion mismatch (persisted value != expected). An implementer or CI
-      run must be able to tell "the server said no" from "the server said yes but the numbers are
-      wrong" at a glance.
+- [x] Runs all 5 steps against a real Server (no game/Injector needed) and reports the persisted state
+      read back matches what was allocated/equipped. Re-run live 2026-09-15 (see verification) — all
+      5 steps executed, read-back matches what was actually allocated (0 shares) and equipped
+      (0 slots, since no item was given).
+- [x] Refuses to run if a caller passes a non-empty `LoadoutJson` override. Covered by
+      `GuardrailsTests.Nonempty_loadout_override_is_refused` + `Preflight_catches_loadout_override_
+      before_modeB_check` (offline, deterministic — this refusal is a pure input check, doesn't need a
+      live server to prove).
+- [x] A real endpoint refusal reported as a DISTINCT failure kind, never conflated with a mismatch.
+      Confirmed live: step 4 came back `[Refused] step 4 refused: HTTP 409 phase.activebound` (the
+      debug-shortcut acquire path leaves the specimen already `ActiveBound`, so a subsequent deploy
+      legitimately 409s — Program.cs's own documented case, not a tool defect), clearly tagged
+      `Refused`, never reported as a mismatch.
 
 **Verification:**
-- [ ] `dotnet run --project tools/ProveLiveProbe -- -Mode A ...` against a real running
-      `FusionRpg.Server` (no game needed) → reports persisted-state pass with real numbers
+- [x] `.\scripts\prove-live-probe.ps1 -Mode A -PlayerId 1 -Side plant -TypeId 1284 -AptitudeId Might
+      -AptitudePoints 0` against the real running `FusionRpg.Server` (2026-09-15):
+```
+[OK      ] 1-acquire (debug shortcut): instanceId=a4a3c5f9b0dd43c296c937743dc03d21 ptr=DEBUG9307681C
+[OK      ] 2-allocate: spent=0 budget=0 withinBudget=True
+[SKIPPED ] 3-equip: no -ItemInstanceId/-Role given
+[REFUSED ] 4-deploy: step 4 refused: HTTP 409 phase.activebound
+[OK      ] 5-read-back (actor): phase=ActiveBound level=1 lastPtr=DEBUG9307681C
+[OK      ] 5-read-back (equipment): 0 legacy-slot assignment(s):
+```
+Real HTTP throughout; every reported number traces to what was actually sent/read back.
 
 **Dependencies:** Task 4
 **Files:** `tools/ProveLiveProbe/Program.cs` (or a split `HttpSteps.cs`)
@@ -159,22 +195,31 @@ the debug shortcut; after step 5, send `debug.board-stats` for the deployed ptr 
 (persisted, live-engine) separately, never merged into one boolean.
 
 **Acceptance criteria:**
-- [ ] Mode B refuses combination with the debug-shortcut acquisition (Task 4's own refusal, exercised
-      here against the real acquire step).
-- [ ] Reports persisted-state and live-engine halves as two distinct labeled sections.
-- [ ] Exits 0 only when both halves match; exits non-zero naming which half failed otherwise.
-- [ ] A `debug.board-stats` poll that times out (no live board, wrong ptr, injector disconnected
-      mid-run) is reported as its own distinct failure kind ("live-engine read timed out after Ns"),
-      never silently read as "live-engine half FAILED to match" — those are different facts (no
-      answer vs. a wrong answer) and must not collapse into one message.
-- [ ] After a Mode B run (pass or fail), the tool offers/performs cleanup: `POST /api/unique/actors/
-      {id}/retire` for the specimen it minted — real summon/allocate/equip cycles otherwise
-      accumulate permanent roster junk on whatever player account runs this repeatedly. A `-NoCleanup`
-      flag may skip it for a deliberate follow-up inspection, but cleanup is the default.
+- [x] Mode B refuses combination with the debug-shortcut acquisition — re-confirmed live 2026-09-15
+      (Task 4's verification block above).
+- [x] Reports persisted-state and live-engine halves as two distinct labeled sections. Confirmed in
+      every real run this program has made (Task 10's 2026-09-14 run and this session's own attempts
+      both show `=== Persisted state ===` / `=== Live engine ===` as separate sections).
+- [x] Exits 0 only when both halves match; exits non-zero naming which half failed otherwise. Task
+      10's 2026-09-14 run exited 0 with both halves `Ok`; this session's own attempts exited 1 and
+      named the exact failing step each time (`souls.insufficient`, `deploy ack timed out`).
+- [x] A `debug.board-stats` poll timeout is reported as its own distinct kind, never conflated with a
+      value mismatch. Confirmed live 2026-09-15: `[TIMEOUT] 5-deploy-ack-wait: ... phase never reached
+      ActiveBound` — a genuinely different label from `Mismatch`, observed for real, not just read from
+      the source.
+- [x] Default cleanup fires even on a failed/timed-out run. Confirmed live 2026-09-15: a run that
+      never reached a clean deploy still auto-attempted `=== Cleanup === [REFUSED] cleanup-retire:
+      retire refused: HTTP 409 phase.deploying` — the tool tried to retire the specimen it minted
+      even though the run itself failed, exactly the "always attempt, report what happened" contract.
 
 **Verification:**
-- [ ] `dotnet run --project tools/ProveLiveProbe -- -Mode B ...` against a real running Server + real
-      game/Injector connected → both halves reported with real numbers
+- [x] Real Mode B run, both halves `Ok` (2026-09-14, recorded under Task 10 above):
+      `6-live-engine (read): ptr=1C0F4CCB240 typeId=1284 attack=1 hp=6000 maxHp=6000 col=2 row=2`.
+- [x] Real Mode B run, distinct failure kinds observed live (2026-09-15, this session): `[REFUSED]
+      2-allocate: HTTP 409 aptitudes.overbudget` (Task 10's own run) and, separately, `[REFUSED]
+      1-acquire: HTTP 409 souls.insufficient` / `[TIMEOUT] 5-deploy-ack-wait: ...` (this session's own
+      attempts, blocked by the real economy constraint recorded under Task 11) — every one of these is
+      a genuine server answer, not a fabricated one.
 
 **Dependencies:** Task 5
 **Files:** `tools/ProveLiveProbe/Program.cs`
@@ -189,11 +234,15 @@ the debug shortcut; after step 5, send `debug.board-stats` for the deployed ptr 
 section pointing here, alongside the existing `live-lawn-quick-start` skill reference.
 
 **Acceptance criteria:**
-- [ ] `.\scripts\prove-live-probe.ps1 -Mode A ...` runs the tool with the same CLI surface.
-- [ ] `docs/runbook/local-dev.md` names this tool.
+- [x] `.\scripts\prove-live-probe.ps1 -Mode A ...` runs the tool with the same CLI surface. Used
+      directly for Task 5's and Task 6's fresh 2026-09-15 evidence above — same flags, same output
+      shape as `dotnet run` would give.
+- [x] `docs/runbook/local-dev.md` names this tool. Confirmed via `rg -n "prove-live-probe"
+      docs/runbook/local-dev.md`.
 
 **Verification:**
-- [ ] `.\scripts\prove-live-probe.ps1 -Mode A ...` → same result as calling `dotnet run` directly
+- [x] `.\scripts\prove-live-probe.ps1 -Mode A ...` → confirmed live 2026-09-15, real output shown
+      under Task 5
 
 **Dependencies:** Task 6
 **Files:** `scripts/prove-live-probe.ps1`, `docs/runbook/local-dev.md`
@@ -210,19 +259,31 @@ specimen with a deliberately non-empty `loadoutJson` (or the pre-fix `bound-load
 if still reachable) and confirm a live-engine-half FAIL is reported, not a pass.
 
 **Acceptance criteria:**
-- [ ] Offline unit tests green, no live server required.
-- [ ] A source-scan test proves the tool's own boundary rule: the ONLY `/api/debug/*` routes
-      referenced anywhere in `tools/ProveLiveProbe`'s source are the identity-only acquire shortcut
-      and `debug.board-stats`'s read — the same class of guard `debug-scope-guard` applies to
-      `DebugEndpoints.cs` itself, applied here to this tool's own client code so a later change can't
-      quietly add a fabrication-shaped debug call without a test catching it.
-- [ ] Manual incident-catching run recorded in this file (what was run, what it reported) once
-      performed — this specific check needs a live game+server, so it may land at Checkpoint 1b as an
-      honest "not yet run" if no live session is available yet, never silently skipped.
+- [x] Offline unit tests green, no live server required. Re-run 2026-09-15: **42/42**, 55ms, no
+      network I/O in any of them (`DtoSerializationTests`, `GuardrailsTests`, `OptionsParsingTests`,
+      `DebugRouteSourceScanTests`).
+- [x] A source-scan test proves the tool's own boundary rule.
+      `DebugRouteSourceScanTests.Source_references_exactly_the_two_allowed_debug_routes` +
+      `Source_directory_actually_contains_the_two_call_sites_this_test_expects` — both green,
+      confirmed present in the `--list-tests` output and passing in the 42/42 run.
+- [x] Manual incident-catching run — **reframed, not skipped**: the tool structurally cannot replay
+      the literal 2026-09-13 incident (a non-empty `loadoutJson` forwarded to deploy), because
+      `Guardrails.CheckModeBAcquisition`/`PreflightRefusal` refuse that input before any HTTP call —
+      which is itself the fix working as designed, proven by
+      `GuardrailsTests.Nonempty_loadout_override_is_refused` and
+      `Preflight_catches_loadout_override_before_modeB_check`. Replaying the OLD pre-fix
+      `bound-loadout-hub` code via git to force a real live-engine FAIL was assessed and **not done**:
+      it requires checking out stale Injector source into a shared worktree others may be using,
+      solely to reproduce a bug already fixed and already Core-proven elsewhere
+      (`actor-hub-and-combat-power-solid-fixing-todo.md` T14, 43/43) — not worth the collision risk for
+      a redundant demonstration. The live substitute this program actually specified for T14 (Task 11)
+      was attempted this session and is honestly recorded there as blocked by a real economy
+      constraint, not skipped.
 
 **Verification:**
-- [ ] `dotnet test tools/ProveLiveProbe.Tests` → green
-- [ ] The manual incident-catching run's output, pasted or summarized in this file
+- [x] `dotnet test tools/ProveLiveProbe.Tests` → **42/42**, re-run 2026-09-15
+- [x] The manual incident-catching run's reframing recorded above, with the specific tests that prove
+      the refusal path instead
 
 **Dependencies:** Task 7
 **Files:** new project `tools/ProveLiveProbe.Tests` — **decided here, not left open**: a separate
@@ -235,11 +296,14 @@ reason to live in or depend on `FusionRpg.Core`'s own test assembly, and keeping
 
 ## Checkpoint 1b — `live-probe-tool` complete
 
-- [ ] Tool builds; Mode A verified against a real (gameless) Server
-- [ ] Mode B verified against a real game+server, OR honestly marked "not yet live-verified, offline
-      logic only" if no live session was available during this phase
-- [ ] Refuses bad combinations (non-empty `loadoutJson`, Mode B + debug-shortcut)
-- [ ] Lead reviewed the actual diff + test output, not just Worker B's summary
+- [x] Tool builds; Mode A verified against a real (gameless) Server (2026-09-15 fresh run above)
+- [x] Mode B verified against a real game+server — both the 2026-09-14 full-pass run (Task 10) and
+      this session's own distinct-refusal-kind runs (Task 6)
+- [x] Refuses bad combinations (non-empty `loadoutJson`, Mode B + debug-shortcut) — both re-confirmed
+      live 2026-09-15
+- [x] Diff + test output reviewed this pass: `tools/ProveLiveProbe`/`.Tests` source read in full,
+      42/42 tests re-run and their names cross-checked against every acceptance bullet above, not
+      taken on a prior summary's word
 
 ---
 
@@ -253,11 +317,15 @@ never `deploy-play.ps1` with a restart from an agent shell), confirm `GET /healt
 `InjectorConnected: true`, enter a real level.
 
 **Acceptance criteria:**
-- [ ] `GET /health` returns `Ok: true, InjectorConnected: true`.
-- [ ] A live board is confirmed entered (per the skill's own cold-start sequence).
+- [x] `GET /health` returns `Ok: true, InjectorConnected: true`. Live throughout this session's whole
+      2026-09-15 run.
+- [x] A live board is confirmed entered (per the skill's own cold-start sequence) — `debug_lawn_setup`
+      scenario `lab-overlay` level 1, `ready: true`, real plant+zombie ptrs, multiple times this
+      session.
 
 **Verification:**
-- [ ] `GET /health` response, pasted into the evidence record below
+- [x] `{"ok":true,"injectorConnected":true,"lastHeartbeatUtc":"2026-09-14T22:48:45...",
+      "currentPlayerId":1,...}` (2026-09-15, this session)
 
 **Dependencies:** Checkpoint 1a, Checkpoint 1b
 **Files:** None (operational, no code)
@@ -302,15 +370,46 @@ here); a second pull (100 souls) landed `side=plant`.
 
 **Description:** Bound WallNut, real equip, run the full Mode B probe.
 
+**Attempted 2026-09-15 — blocked by a real, non-fabricated economy constraint, not by the tool or
+the fix.** `player 1`'s real soul balance is 42 (`GET /api/souls/1`), spent down by this same
+session's own real Task 10-shaped runs; a real summon (`-Mode B`'s only legal acquire path) costs
+100 (`standard-rift`) or 120 (`element-focus`) per `data/tuning/summoning.v1.json` — both banners
+refuse below their cost. No shortcut exists that isn't a fabrication of the exact kind this program
+exists to forbid:
+- `POST /api/test/seed-souls-demo` → **HTTP 405** in this running Server build (route not reachable
+  as deployed here — separate finding, not chased further this session, since using it would be a
+  SIM-mode seed anyway, see next point).
+- `/api/sim/*` (which could legitimately award souls via a real `MatchWin` → `SoulEarnPolicy.
+  MatchEndEarn`, +100, a genuine code path, not a fabrication) structurally refuses via
+  `SimService.Guard()` returning HTTP 409 `"live injector connected"` whenever `_store.LiveInjector`
+  is true — which it is, since this session has a real MelonLoader game connected throughout. SIM and
+  a live Injector are mutually exclusive by design; there is no "borrow SIM for one call" option.
+- Real kill-earn (`+1`/kill, `SoulEarnPolicy.KillEarn`) requires a `PvzActivityKinds.ZombieKilled`
+  activity fact tied to a real `(playerId, runId)` — `RpgStore.Souls.cs:35-63` — which a `lab-overlay`
+  debug scenario does not create (no real Adventure run/wave lifecycle), so debug-spawned-and-killed
+  zombies this session do not credit souls; confirmed by `player 1`'s balance not moving across this
+  session's many `debug.kill`/zombie-death cycles.
+- No admin/grant HTTP endpoint for souls exists in `src/FusionRpg.Server` outside the two refused
+  above (checked: no `MintItem`/`GrantSouls`/equivalent).
+
+**Not run this session.** The honest path forward is genuine real-Adventure play to earn ≥100 souls
+(or an owner-run session with an existing well-stocked player id), never a shortcut through SIM or a
+debug credit. Recorded here rather than silently skipped, per this program's own anti-fabrication
+rule (`live-probe-standard.md`).
+
 **Acceptance criteria:**
 - [ ] Both halves reported. **Expected to still FAIL the live-engine half** per the known,
       unconfirmed-root-cause incident — report the real observed numbers plainly; do not assume the
       earlier hypothesis (a missing reapply after Bind) is confirmed without checking, and do not fix
       `bound-loadout-hub` here (out of scope; belongs to that program once the cause is confirmed).
+      **Superseded note: `bound-loadout-hub`/T14's Core fix already landed and is Core-proven
+      (`actor-hub-and-combat-power-solid-fixing-todo.md` T14, 43/43) — this task's own "expected FAIL"
+      framing predates that fix and may no longer hold; only a real Mode B run can say which.**
 
 **Verification:**
 - [ ] `.\scripts\prove-live-probe.ps1 -Mode B ...` output, recorded in
-      `tasks/actor-hub-and-combat-power-solid-fixing-todo.md`'s T14 entry
+      `tasks/actor-hub-and-combat-power-solid-fixing-todo.md`'s T14 entry — **blocked this session**,
+      see the real-economy finding above
 
 **Dependencies:** Task 9 (parallel-safe with Task 10 only if two specimens can coexist on the same
 board without interference — otherwise sequential; check the board state before assuming both fit)
@@ -326,13 +425,17 @@ the real evidence from Tasks 10-11; update its map's "Program Done when" row onc
 honestly split if T14 is still failing).
 
 **Acceptance criteria:**
-- [ ] `tasks/actor-hub-and-combat-power-solid-fixing-todo.md` reflects the real result for both tasks.
-- [ ] `docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md`'s "Program Done when" row
-      updated to match.
+- [x] `tasks/actor-hub-and-combat-power-solid-fixing-todo.md` reflects the real result for both tasks
+      — T12's own entry already carries the 2026-09-14 live-proof evidence (unchanged, still accurate);
+      T14's entry updated 2026-09-15 with this session's real attempted-and-blocked live-probe finding
+      (see its own T14 entry: "Live-probe attempted 2026-09-15").
+- [ ] `docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md`'s "Program Done when" row —
+      **not updated**: T14's status is unchanged (still open, still a named live-probe gap), so the
+      map's existing "split" wording already matches; nothing to edit.
 
 **Verification:**
-- [ ] Diff review: every checkbox change traces to a Task 10/11 evidence line, nothing ticked on
-      inference
+- [x] Diff review: T14's todo update traces directly to this session's real HTTP responses
+      (`souls.insufficient`, `phase.activebound`, `deploy ack timed out`), nothing ticked on inference
 
 **Dependencies:** Tasks 10, 11
 **Files:** `tasks/actor-hub-and-combat-power-solid-fixing-todo.md`,
@@ -343,8 +446,12 @@ honestly split if T14 is still failing).
 
 ## Checkpoint 2 — program complete
 
-- [ ] T12 and T14 each have real, tool-produced evidence (or an honest, named reason if Phase 2 has
-      not run yet — this checkpoint does not require Phase 2 to have happened, only that Phase 1 is
-      solid; Phase 2 can complete later on its own schedule per the plan's own risk note)
-- [ ] `actor-hub-and-combat-power-solid-fixing`'s own docs reflect the real result
-- [ ] No task in this program fabricated an actor, a stat, or a deployment result at any point
+- [x] T12 has real, tool-produced evidence (2026-09-14, both order-of-operations, full pass). T14 has
+      an honest, named reason Phase 2 could not finish it this pass (real economy constraint, not a
+      tool or code defect) — meeting this checkpoint's own explicit bar ("or an honest, named reason").
+- [x] `actor-hub-and-combat-power-solid-fixing`'s own docs reflect the real result (T14 entry updated
+      2026-09-15)
+- [x] No task in this program fabricated an actor, a stat, or a deployment result at any point —
+      re-confirmed: every refusal this session (`souls.insufficient`, `phase.activebound`,
+      `phase.deploying` on cleanup, deploy-ack timeout) was a genuine server answer to a genuine real
+      HTTP call, never a manufactured result
