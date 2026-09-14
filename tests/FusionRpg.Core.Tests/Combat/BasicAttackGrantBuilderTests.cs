@@ -136,14 +136,14 @@ public class BasicAttackGrantBuilderTests
         var resolver = new LawnElementResolver(index);
 
         // Before hypno: a real zombie, resolved once (matches production — resolved lazily, cached).
-        var (sideBefore, elementsBefore) = resolver.Resolve("m1", "1A2B", () => ("zombie", 20));
+        var (sideBefore, elementsBefore) = resolver.Resolve("m1", "1A2B", () => ("zombie", 20, true));
         var beforeGrant = BasicAttackGrantBuilder.Build("1A2B", elementsBefore.Primary, elementsBefore.Secondary);
 
         // "Hypno" happens: per Trigger2 (LawnElementResolverTests), this NEVER invalidates the
         // resolver's cache and NEVER changes the (side, typeId) a real board lookup would answer for
         // this ptr — mind control is a separate flag the board-fact lookup this cache/grant relies on
         // never reads. So the SAME lookup, called again, must still answer the SAME facts.
-        var (sideAfter, elementsAfter) = resolver.Resolve("m1", "1A2B", () => ("zombie", 20));
+        var (sideAfter, elementsAfter) = resolver.Resolve("m1", "1A2B", () => ("zombie", 20, true));
         var afterGrant = BasicAttackGrantBuilder.Build("1A2B", elementsAfter.Primary, elementsAfter.Secondary);
 
         Assert.Equal(sideBefore, sideAfter);

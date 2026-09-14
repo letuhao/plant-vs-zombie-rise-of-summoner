@@ -26,8 +26,7 @@ public static class LawnElementResolverHost
     ///
     /// <para><b>2026-09-14 fix (lawn-combat-wire T10/T12 live-inert investigation, second defect):</b>
     /// <paramref name="key"/>'s board facts are resolved via <see cref="BoardFactsFor"/> FIRST, and a
-    /// <c>typeId == 0</c> ("board does not know this ptr" — see <see cref="LawnBasicAttackGrantBinder"/>'s
-    /// own doc on the sentinel) now returns immediately WITHOUT ever calling into the inner
+    /// genuine board miss now returns immediately WITHOUT ever calling into the inner
     /// <see cref="LawnElementResolver"/>. Before this fix, the inner call ran unconditionally and its own
     /// per-ptr cache has no notion of "try again later" — a ptr looked up even ONE FRAME before
     /// <c>InjectorEntityRegistry.Add</c> registers it (a real, reproducible race for any caller that
@@ -37,18 +36,32 @@ public static class LawnElementResolverHost
     /// that ptr's key, keyed by ptr only (not by whether the lookup actually resolved a real species) —
     /// so a caller that retried the SAME ptr on a later frame, once the board genuinely knew about it,
     /// still read back the stale Neutral answer for the rest of the match. This was the mechanism behind
-    /// `LawnBasicAttackGrantBinder.Bind`'s `typeId == 0` early return being effectively permanent even
-    /// when the caller re-resolves: <see cref="LawnBasicAttackGrantBinder"/> now retries a fresh ptr
-    /// across a few frames, and that retry only works because a genuine "not on the board yet" miss no
-    /// longer poisons this cache.</para>
+    /// `LawnBasicAttackGrantBinder.Bind`'s early return being effectively permanent even when the caller
+    /// re-resolves: <see cref="LawnBasicAttackGrantBinder"/> now retries a fresh ptr across a few frames,
+    /// and that retry only works because a genuine "not on the board yet" miss no longer poisons this
+    /// cache.</para>
+    ///
+    /// <para><b>2026-09-14, corrected same day (third defect, root cause of the live-inert symptom
+    /// surviving the first two fixes):</b> the original version of this method used
+    /// <c>typeId == 0</c> itself as the "board does not know this ptr" signal. That is wrong for this
+    /// game build: <c>data/generated/creatures/Peashooter.json</c> and <c>NormalZombie.json</c> are both
+    /// <c>"gameTypeId": 0</c> — real, ordinary, commonly-spawned creatures, not a "no entity" sentinel —
+    /// confirmed live via `debug.spawn.plant`/`debug.spawn.zombie` events (`type:0,
+    /// typeName:"Peashooter"` / `typeName:"NormalZombie"`). Every Peashooter and every NormalZombie was
+    /// therefore treated as permanently unresolved by this method (not a one-frame race — an
+    /// unconditional miss), which degraded both <see cref="LawnBasicAttackGrantBinder"/>'s grant AND
+    /// <c>InjectorCombatBridge</c>/<c>InjectorStatusBridge</c>'s elemental combat math to Neutral for the
+    /// two most common default test subjects in the whole program. <see cref="BoardFactsFor"/> now
+    /// returns an explicit <c>Found</c> flag, decoupled from the numeric typeId, and that flag — not
+    /// <c>typeId == 0</c> — is what gates the early return and the inner resolver's cache.</para>
     /// </summary>
-    public static (string Side, int TypeId, ActorElementTypes Elements) Resolve(string key)
+    public static (string Side, int TypeId, ActorElementTypes Elements, bool Found) Resolve(string key)
     {
-        var (side, typeId) = BoardFactsFor(key);
-        if (typeId == 0)
-            return (side, 0, ActorElementTypes.Neutral);
-        var (resolvedSide, elements) = Resolver.Resolve(GameHooks.MatchKey, key, () => (side, typeId));
-        return (resolvedSide, typeId, elements);
+        var (side, typeId, found) = BoardFactsFor(key);
+        if (!found)
+            return (side, typeId, ActorElementTypes.Neutral, false);
+        var (resolvedSide, elements) = Resolver.Resolve(GameHooks.MatchKey, key, () => (side, typeId, found));
+        return (resolvedSide, typeId, elements, true);
     }
 
     /// <summary>
@@ -95,26 +108,33 @@ public static class LawnElementResolverHost
     /// The board scan both bridges used to run independently, moved here once. Mirrors the pre-E27
     /// logic verbatim, including the `CheatState.SelectedPtr` prove-pack fallback for an entity the
     /// board snapshot has not registered yet.
+    ///
+    /// <para><b>Found is a real flag, never inferred from typeId == 0.</b> Species index 0 (Peashooter,
+    /// NormalZombie — see this class's <see cref="Resolve"/> doc) is a real creature on this board, so
+    /// <c>typeId</c> alone cannot tell "matched a real entity whose type happens to be 0" apart from
+    /// "never matched anything". <c>Found</c> is set true only inside the loop, on an actual ptr match.</para>
     /// </summary>
-    static (string Side, int TypeId) BoardFactsFor(string key)
+    static (string Side, int TypeId, bool Found) BoardFactsFor(string key)
     {
         var board = InjectorBoardSnapshot.Capture();
         var side = "plant";
         var typeId = 0;
+        var found = false;
         foreach (var e in board.Entities)
         {
             if (!CombatPtr.EqualsPtr(e.Ptr, key)) continue;
             side = e.Side ?? "plant";
             typeId = e.TypeId;
+            found = true;
             break;
         }
 
-        if (typeId == 0
+        if (!found
             && CheatState.SelectedPtr != IntPtr.Zero
             && CombatPtr.EqualsPtr(CheatState.SelectedPtr.ToString("X"), key)
             && !string.IsNullOrWhiteSpace(CheatState.SelectedSide))
             side = CheatState.SelectedSide;
 
-        return (side, typeId);
+        return (side, typeId, found);
     }
 }

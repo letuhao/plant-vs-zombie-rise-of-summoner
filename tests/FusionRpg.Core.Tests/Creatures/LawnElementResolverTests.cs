@@ -82,12 +82,32 @@ public class LawnElementResolverTests
         var index = new LawnElementIndex(new[] { Species("s1", "plant", 10, ElementTypeId.Fire) });
         var resolver = new LawnElementResolver(index);
 
-        var (side, elements) = resolver.Resolve("m1", "0xA", () => ("plant", 10));
+        var (side, elements) = resolver.Resolve("m1", "0xA", () => ("plant", 10, true));
 
         Assert.Equal("plant", side);
         Assert.Equal(ElementTypeId.Fire, elements.Primary);
         Assert.Null(elements.Secondary);
         Assert.False(elements.IsNeutral);
+    }
+
+    [Fact]
+    public void A_species_at_gameTypeId_zero_resolves_normally_typeId_zero_is_not_a_sentinel()
+    {
+        // Real live incident (2026-09-14): data/generated/creatures/Peashooter.json and
+        // NormalZombie.json are both "gameTypeId": 0 -- real, ordinary, commonly-spawned creatures, not
+        // this codebase's "no entity" sentinel. A resolver that treated typeId == 0 as "board miss"
+        // (the original, wrong shape of the 2026-09-14 fix) would degrade every Peashooter and every
+        // NormalZombie to Neutral forever, board-registered or not. Found is what must gate this, never
+        // the numeric typeId -- this is the regression test for that exact confusion.
+        var index = new LawnElementIndex(new[] { Species("Peashooter", "plant", 0, ElementTypeId.Earth) });
+        var resolver = new LawnElementResolver(index);
+
+        var (side, elements) = resolver.Resolve("m1", "0xA", () => ("plant", 0, true));
+
+        Assert.Equal("plant", side);
+        Assert.Equal(ElementTypeId.Earth, elements.Primary);
+        Assert.False(elements.IsNeutral);
+        Assert.Equal(1, resolver.CachedPtrCount); // a real species-0 resolve caches normally
     }
 
     [Fact]
@@ -102,7 +122,7 @@ public class LawnElementResolverTests
         });
         var resolver = new LawnElementResolver(index);
 
-        var (_, elements) = resolver.Resolve("m1", "0xA", () => ("plant", 10));
+        var (_, elements) = resolver.Resolve("m1", "0xA", () => ("plant", 10, true));
 
         Assert.Equal(ElementTypeId.Fire, elements.Primary);
         Assert.Null(elements.Secondary);
@@ -117,7 +137,7 @@ public class LawnElementResolverTests
         });
         var resolver = new LawnElementResolver(index);
 
-        var (_, elements) = resolver.Resolve("m1", "0xA", () => ("plant", 10));
+        var (_, elements) = resolver.Resolve("m1", "0xA", () => ("plant", 10, true));
 
         Assert.Equal(ElementTypeId.Fire, elements.Primary);
         Assert.Equal(ElementTypeId.Ice, elements.Secondary);
@@ -131,7 +151,7 @@ public class LawnElementResolverTests
         var index = new LawnElementIndex(Array.Empty<CreatureSpeciesDef>());
         var resolver = new LawnElementResolver(index);
 
-        var (_, elements) = resolver.Resolve("m1", "0xA", () => ("plant", 404));
+        var (_, elements) = resolver.Resolve("m1", "0xA", () => ("plant", 404, true));
 
         Assert.True(elements.IsNeutral);
     }
@@ -143,9 +163,9 @@ public class LawnElementResolverTests
         var index = new LawnElementIndex(Array.Empty<CreatureSpeciesDef>());
         var resolver = new LawnElementResolver(index, reports.Add);
 
-        resolver.Resolve("m1", "0xA", () => ("plant", 404));
-        resolver.Resolve("m1", "0xB", () => ("plant", 404)); // different actor, same typeId
-        resolver.Resolve("m1", "0xC", () => ("plant", 405)); // a different miss
+        resolver.Resolve("m1", "0xA", () => ("plant", 404, true));
+        resolver.Resolve("m1", "0xB", () => ("plant", 404, true)); // different actor, same typeId
+        resolver.Resolve("m1", "0xC", () => ("plant", 405, true)); // a different miss
 
         Assert.Equal(2, reports.Count);
     }
@@ -161,7 +181,7 @@ public class LawnElementResolverTests
         var reports = new List<string>();
         var resolver = new LawnElementResolver(index, reports.Add);
 
-        var (_, elements) = resolver.Resolve("m1", "0xA", () => ("plant", 10));
+        var (_, elements) = resolver.Resolve("m1", "0xA", () => ("plant", 10, true));
 
         Assert.True(elements.IsNeutral);
         Assert.Single(reports);
@@ -177,7 +197,7 @@ public class LawnElementResolverTests
         var resolver = new LawnElementResolver(index);
         var lookups = 0;
 
-        (string, int) BoardLookup() { lookups++; return ("plant", 10); }
+        (string, int, bool) BoardLookup() { lookups++; return ("plant", 10, true); }
 
         resolver.Resolve("m1", "0xA", BoardLookup);
         resolver.Resolve("m1", "0xA", BoardLookup);
@@ -198,8 +218,8 @@ public class LawnElementResolverTests
         });
         var resolver = new LawnElementResolver(index);
 
-        resolver.Resolve("m1", "0xA", () => ("plant", 10));
-        resolver.Resolve("m1", "0xB", () => ("zombie", 20));
+        resolver.Resolve("m1", "0xA", () => ("plant", 10, true));
+        resolver.Resolve("m1", "0xB", () => ("zombie", 20, true));
 
         Assert.Equal(2, resolver.BoardLookupCount);
     }
@@ -214,11 +234,11 @@ public class LawnElementResolverTests
         });
         var resolver = new LawnElementResolver(index);
 
-        var first = resolver.Resolve("m1", "0xA", () => ("plant", 10));
+        var first = resolver.Resolve("m1", "0xA", () => ("plant", 10, true));
         Assert.Equal(ElementTypeId.Fire, first.Elements.Primary);
 
         // Same pointer, a new match, a different entity behind it — must NOT reuse m1's cached fire.
-        var second = resolver.Resolve("m2", "0xA", () => ("zombie", 20));
+        var second = resolver.Resolve("m2", "0xA", () => ("zombie", 20, true));
 
         Assert.Equal(ElementTypeId.Ice, second.Elements.Primary);
         Assert.Equal(2, resolver.BoardLookupCount);
@@ -233,8 +253,8 @@ public class LawnElementResolverTests
         var index = new LawnElementIndex(Array.Empty<CreatureSpeciesDef>());
         var resolver = new LawnElementResolver(index, reports.Add);
 
-        resolver.Resolve("m1", "0xA", () => ("plant", 404));
-        resolver.Resolve("m2", "0xA", () => ("plant", 404));
+        resolver.Resolve("m1", "0xA", () => ("plant", 404, true));
+        resolver.Resolve("m2", "0xA", () => ("plant", 404, true));
 
         Assert.Equal(2, reports.Count);
     }
@@ -250,37 +270,44 @@ public class LawnElementResolverTests
     //   2 hypno / charm         cannot fire — `side` is object kind, not allegiance
     //   3 death + ptr reuse     fires — per-ptr Invalidate, wired at GameHooks.ForgetEntity
     //   4 catalog revision      cannot fire — the roster is configured once per host at startup
-    //   5 board-miss (typeId 0) fires — the ptr's own board-registration racing this resolve must never
+    //   5 board-miss (Found)    fires — the ptr's own board-registration racing this resolve must never
     //                            latch a Neutral answer (see Trigger5 tests below)
 
     // ---- trigger 5: the board not knowing this ptr YET (added 2026-09-14) ----------------------------
     //
     // lawn-combat-wire T10/T12 live-inert investigation, second defect: a `LawnBasicAttackGrantBinder`
     // grant, bound once at spawn, resolves the actor's element via THIS resolver keyed on
-    // `boardLookup() -> typeId`. Confirmed live (POST /api/debug/effect/list against a real running
+    // `boardLookup() -> Found`. Confirmed live (POST /api/debug/effect/list against a real running
     // game): roughly half of otherwise-identical `debug.spawn-plant`/`debug.spawn-zombie` calls lost a
     // real, reproducible race — the grant-bind drain ran before `InjectorEntityRegistry.Add` had
-    // registered the freshly-spawned entity, so `boardLookup()` answered `("plant", 0)` (this codebase's
-    // "no entity here" sentinel). Before this fix, that miss was cached exactly like any other miss —
-    // permanently, for the ptr — so `LawnBasicAttackGrantBinder`'s own requeue-and-retry (added the same
-    // day, once the entity WAS registered a frame or two later) still read back the stale Neutral answer
-    // forever, because a cache hit never calls `boardLookup` again. The fix: `typeId == 0` is answered
-    // directly and never written into `_cache`.
+    // registered the freshly-spawned entity, so `boardLookup()` answered `Found = false`. Before this
+    // fix, that miss was cached exactly like any other miss — permanently, for the ptr — so
+    // `LawnBasicAttackGrantBinder`'s own requeue-and-retry (added the same day, once the entity WAS
+    // registered a frame or two later) still read back the stale Neutral answer forever, because a
+    // cache hit never calls `boardLookup` again. The fix: `Found == false` is answered directly and
+    // never written into `_cache`.
+    //
+    // 2026-09-14, corrected same day: the original shape of this fix used `typeId == 0` as the miss
+    // signal instead of a real `Found` flag — wrong for this game build, where species index 0
+    // (Peashooter, NormalZombie) is a real creature, not a sentinel (see
+    // `A_species_at_gameTypeId_zero_resolves_normally...`, above, and `LawnElementResolverHost`'s own
+    // doc). The tests below now drive `Found` directly and use a nonzero typeId so a regression back to
+    // the `typeId == 0` shape would not accidentally pass them.
 
     [Fact]
-    public void Trigger5_a_typeId_zero_board_miss_is_never_cached_so_a_later_real_resolve_still_finds_the_species()
+    public void Trigger5_a_board_miss_is_never_cached_so_a_later_real_resolve_still_finds_the_species()
     {
         var index = new LawnElementIndex(new[] { Species("s1", "plant", 10, ElementTypeId.Fire) });
         var resolver = new LawnElementResolver(index);
 
         // First call: the board does not know this ptr yet (registry hasn't caught up with the spawn).
-        var early = resolver.Resolve("m1", "1A2B", () => ("plant", 0));
+        var early = resolver.Resolve("m1", "1A2B", () => ("plant", 10, false));
         Assert.True(early.Elements.IsNeutral);
 
         // Second call, SAME ptr, SAME match: the entity is registered now. Without the fix this would
         // still read back the cached Neutral from the first call and never invoke boardLookup again —
         // exactly the live defect (grants:0 forever after a lost race, confirmed via a real running game).
-        var later = resolver.Resolve("m1", "1A2B", () => ("plant", 10));
+        var later = resolver.Resolve("m1", "1A2B", () => ("plant", 10, true));
 
         Assert.Equal(ElementTypeId.Fire, later.Elements.Primary);
         Assert.False(later.Elements.IsNeutral);
@@ -288,12 +315,12 @@ public class LawnElementResolverTests
     }
 
     [Fact]
-    public void Trigger5_a_typeId_zero_board_miss_does_not_count_as_a_cached_ptr()
+    public void Trigger5_a_board_miss_does_not_count_as_a_cached_ptr()
     {
         var index = new LawnElementIndex(new[] { Species("s1", "plant", 10) });
         var resolver = new LawnElementResolver(index);
 
-        resolver.Resolve("m1", "1A2B", () => ("plant", 0));
+        resolver.Resolve("m1", "1A2B", () => ("plant", 10, false));
 
         // Nothing was ever cached for this ptr -- CachedPtrCount only counts entries a later resolve
         // could read back stale, and a board-miss must never be one of them.
@@ -301,17 +328,18 @@ public class LawnElementResolverTests
     }
 
     [Fact]
-    public void Trigger5_a_genuine_content_gap_typeId_nonzero_no_species_still_caches_as_before()
+    public void Trigger5_a_genuine_content_gap_found_true_no_species_still_caches_as_before()
     {
-        // The negative control: this fix narrows the no-cache rule to typeId == 0 specifically. A real
-        // entity whose type the species catalog simply does not cover (typeId != 0) is a DIFFERENT,
-        // pre-existing case (`No_species_for_the_pair_resolves_Neutral_not_a_throw`, above) and must keep
-        // caching + reporting exactly as before -- this fix must not accidentally widen into "never cache
-        // any Neutral", which would silently reintroduce the per-hit board-scan cost E27 removed.
+        // The negative control: this fix narrows the no-cache rule to Found == false specifically. A
+        // real entity whose type the species catalog simply does not cover (Found == true) is a
+        // DIFFERENT, pre-existing case (`No_species_for_the_pair_resolves_Neutral_not_a_throw`, above)
+        // and must keep caching + reporting exactly as before -- this fix must not accidentally widen
+        // into "never cache any Neutral", which would silently reintroduce the per-hit board-scan cost
+        // E27 removed.
         var index = new LawnElementIndex(Array.Empty<CreatureSpeciesDef>());
         var resolver = new LawnElementResolver(index);
 
-        resolver.Resolve("m1", "1A2B", () => ("plant", 404)); // a real entity, just not in the catalog
+        resolver.Resolve("m1", "1A2B", () => ("plant", 404, true)); // a real entity, just not in the catalog
 
         Assert.Equal(1, resolver.CachedPtrCount);
         resolver.Resolve("m1", "1A2B", () => throw new InvalidOperationException("must still be cached"));
@@ -333,13 +361,13 @@ public class LawnElementResolverTests
         });
         var resolver = new LawnElementResolver(index);
 
-        var before = resolver.Resolve("m1", "1A2B", () => ("plant", 10));
+        var before = resolver.Resolve("m1", "1A2B", () => ("plant", 10, true));
         Assert.Equal(ElementTypeId.Fire, before.Elements.Primary);
         Assert.Equal("plant", before.Side);
 
         Assert.True(resolver.Invalidate("1A2B"));
 
-        var after = resolver.Resolve("m1", "1A2B", () => ("zombie", 20));
+        var after = resolver.Resolve("m1", "1A2B", () => ("zombie", 20, true));
 
         Assert.NotEqual(ElementTypeId.Fire, after.Elements.Primary);
         Assert.Equal(ElementTypeId.Ice, after.Elements.Primary);
@@ -359,8 +387,8 @@ public class LawnElementResolverTests
         });
         var resolver = new LawnElementResolver(index);
 
-        resolver.Resolve("m1", "1A2B", () => ("plant", 10));
-        var stale = resolver.Resolve("m1", "1A2B", () => ("zombie", 20)); // no Invalidate
+        resolver.Resolve("m1", "1A2B", () => ("plant", 10, true));
+        var stale = resolver.Resolve("m1", "1A2B", () => ("zombie", 20, true)); // no Invalidate
 
         Assert.Equal(ElementTypeId.Fire, stale.Elements.Primary);
         Assert.Equal(1, resolver.BoardLookupCount);
@@ -380,9 +408,9 @@ public class LawnElementResolverTests
         });
         var resolver = new LawnElementResolver(index);
 
-        resolver.Resolve("m1", "A", () => ("plant", 10));
-        resolver.Resolve("m1", "B", () => ("zombie", 20));
-        resolver.Resolve("m1", "C", () => ("plant", 30));
+        resolver.Resolve("m1", "A", () => ("plant", 10, true));
+        resolver.Resolve("m1", "B", () => ("zombie", 20, true));
+        resolver.Resolve("m1", "C", () => ("plant", 30, true));
         Assert.Equal(3, resolver.CachedPtrCount);
         Assert.Equal(3, resolver.BoardLookupCount);
 
@@ -393,7 +421,7 @@ public class LawnElementResolverTests
         // A and C still hit; only B pays a second board lookup.
         resolver.Resolve("m1", "A", () => throw new InvalidOperationException("A must still be cached"));
         resolver.Resolve("m1", "C", () => throw new InvalidOperationException("C must still be cached"));
-        resolver.Resolve("m1", "B", () => ("zombie", 20));
+        resolver.Resolve("m1", "B", () => ("zombie", 20, true));
 
         Assert.Equal(4, resolver.BoardLookupCount);
     }
@@ -408,7 +436,7 @@ public class LawnElementResolverTests
         // touched, so "not cached" is the normal case rather than an error.
         var index = new LawnElementIndex(new[] { Species("s1", "plant", 10) });
         var resolver = new LawnElementResolver(index);
-        resolver.Resolve("m1", "A", () => ("plant", 10));
+        resolver.Resolve("m1", "A", () => ("plant", 10, true));
 
         Assert.False(resolver.Invalidate(ptr));
         Assert.Equal(1, resolver.CachedPtrCount);
@@ -428,7 +456,7 @@ public class LawnElementResolverTests
         });
         var resolver = new LawnElementResolver(index);
 
-        resolver.Resolve("m1", "0x1A2B", () => ("plant", 10));
+        resolver.Resolve("m1", "0x1A2B", () => ("plant", 10, true));
         var sameEntity = resolver.Resolve("m1", "1a2b", () => throw new InvalidOperationException(
             "0x1A2B and 1a2b are the same entity and must share one cache entry"));
         Assert.Equal(ElementTypeId.Fire, sameEntity.Elements.Primary);
@@ -437,7 +465,7 @@ public class LawnElementResolverTests
         // GameHooks.ForgetEntity invalidates with ptr.ToString("X") — upper, unprefixed.
         Assert.True(resolver.Invalidate("1A2B"));
 
-        var reused = resolver.Resolve("m1", "0x1A2B", () => ("zombie", 20));
+        var reused = resolver.Resolve("m1", "0x1A2B", () => ("zombie", 20, true));
         Assert.Equal(ElementTypeId.Ice, reused.Elements.Primary);
     }
 

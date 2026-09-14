@@ -45,21 +45,27 @@ namespace FusionRpg.Core.Creatures;
 /// </para>
 ///
 /// <para><b>A fifth case, added 2026-09-14 (lawn-combat-wire T10/T12 live-inert investigation): the
-/// board not knowing this ptr YET.</b> <paramref name="boardLookup"/> answers <c>typeId == 0</c> (this
-/// codebase's own "no entity at this ptr" sentinel — <c>CreateZombieHooks.cs</c>:
-/// <c>theZombieType == ZombieType.Nothing</c>) for two DIFFERENT reasons a caller cannot tell apart from
-/// the return value alone: the ptr genuinely has nothing on the board (death, or a bad ptr), OR the
-/// entity is real but its OWN board-registration hook has not run yet this frame — a real,
-/// reproducible race for any caller that resolves a freshly-spawned ptr from OUTSIDE that entity's own
-/// spawn hook (confirmed live: <c>LawnBasicAttackGrantBinder</c>, queued from `MatchHost.Apply`'s
-/// `plant.spawn`/`zombie.spawn` handling, not from the spawn hook itself). Before this fix, EITHER
-/// reason got the SAME treatment: <c>ElementsFor</c> ran, returned <see cref="ActorElementTypes.Neutral"/>
-/// (no species found for typeId 0), and <c>_cache[key]</c> latched that Neutral answer for the ptr for
-/// the rest of the match — so a caller that retried the SAME ptr once the board genuinely knew about it
-/// still read back the stale Neutral answer forever, because a cache lookup never re-invokes
-/// <paramref name="boardLookup"/> at all. A `typeId == 0` result is therefore never cached: it is
-/// returned directly, so every call with nothing on the board costs one (cheap, frame-cached at the
-/// caller) board lookup rather than corrupting the entry a LATER, real resolve needs.</para>
+/// board not knowing this ptr YET.</b> <paramref name="boardLookup"/> now answers an explicit
+/// <c>Found</c> flag instead of overloading <c>typeId == 0</c> as a "no entity" sentinel.
+/// <b>2026-09-14, corrected same day (live-inert root cause, third defect):</b> the original version of
+/// this fix used <c>typeId == 0</c> itself as the "board does not know this ptr" signal, on the documented
+/// belief that <c>0</c> is this codebase's universal "no entity" sentinel (mirroring
+/// <c>ZombieType.Nothing</c>). That belief is false for THIS game build: live evidence
+/// (<c>data/generated/creatures/Peashooter.json</c> and <c>NormalZombie.json</c>, both
+/// <c>"gameTypeId": 0</c>; confirmed via `debug.spawn.plant`/`debug.spawn.zombie` events showing
+/// <c>type:0, typeName:"Peashooter"</c> / <c>typeName:"NormalZombie"</c> — the two most common default
+/// test subjects) proves species index <c>0</c> is a real, ordinary creature on both sides, not a sentinel.
+/// The old <c>typeId == 0</c> check therefore treated EVERY Peashooter and EVERY NormalZombie as
+/// permanently unresolved — never a one-frame race, an unconditional miss — which is why
+/// <c>LawnBasicAttackGrantBinder</c>'s own retry-and-requeue fix (same investigation, earlier the same
+/// day) never closed the live symptom: retrying a board-fact lookup that is wrong by construction just
+/// repeats the same wrong answer. It also silently degraded <c>InjectorCombatBridge</c>/
+/// <c>InjectorStatusBridge</c>'s elemental combat math to Neutral for both species, a wider blast radius
+/// than the grant binder alone. The fix is a real found/not-found signal, decoupled from the numeric
+/// typeId: a board miss (<c>Found == false</c>) is answered directly and never cached, for the same
+/// reason as before — a caller that retries the SAME ptr once the board genuinely knows about it must
+/// not read back a stale cached Neutral, because a cache hit never re-invokes
+/// <paramref name="boardLookup"/> at all.</para>
 /// </summary>
 public sealed class LawnElementResolver
 {
@@ -90,7 +96,7 @@ public sealed class LawnElementResolver
     public int CachedPtrCount => _cache.Count;
 
     public (string Side, ActorElementTypes Elements) Resolve(
-        string? matchKey, string ptrKey, Func<(string Side, int TypeId)> boardLookup)
+        string? matchKey, string ptrKey, Func<(string Side, int TypeId, bool Found)> boardLookup)
     {
         if (string.IsNullOrEmpty(ptrKey)) throw new ArgumentException("ptrKey is required.", nameof(ptrKey));
         if (boardLookup is null) throw new ArgumentNullException(nameof(boardLookup));
@@ -114,12 +120,13 @@ public sealed class LawnElementResolver
         if (_cache.TryGetValue(key, out var hit)) return hit;
 
         BoardLookupCount++;
-        var (side, typeId) = boardLookup();
-        // 2026-09-14 fix (this class's own doc, "a fifth case"): typeId 0 means the board does not (yet,
-        // or any longer) know this ptr -- never cache that, or a caller that resolves too early (before
-        // the entity's own board-registration hook has run) permanently poisons this ptr's entry with
-        // Neutral, even once a later call would have found the real species.
-        if (typeId == 0) return (side, ActorElementTypes.Neutral);
+        var (side, typeId, found) = boardLookup();
+        // 2026-09-14 fix (this class's own doc, "a fifth case"): a board miss (Found == false) is never
+        // cached -- a caller that resolves too early (before the entity's own board-registration hook has
+        // run) must not permanently poison this ptr's entry with Neutral, even once a later call would
+        // have found the real species. Found is a real flag now, never inferred from typeId == 0 -- see
+        // the class doc's "corrected same day" note for why that inference was wrong.
+        if (!found) return (side, ActorElementTypes.Neutral);
         var elements = ElementsFor(side, typeId);
 
         var result = (side, elements);
