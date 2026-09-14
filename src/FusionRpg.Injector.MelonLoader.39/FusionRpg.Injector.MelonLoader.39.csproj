@@ -128,6 +128,10 @@
       <HintPath>$(MlGameDir)\MelonLoader\Il2CppAssemblies\UnityEngine.ParticleSystemModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.ScreenCaptureModule">
+      <HintPath>$(MlGameDir)\MelonLoader\Il2CppAssemblies\UnityEngine.ScreenCaptureModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
   <!--
     The WebView2 package ships WPF/WinForms wrappers, XML docs and arm64/x86 natives. We use only

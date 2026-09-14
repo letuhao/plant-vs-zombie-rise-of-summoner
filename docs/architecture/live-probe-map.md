@@ -10,11 +10,13 @@
 | `debug-scope-guard` | `scripts/guard-debug-scope.ps1` — mechanically detects Game-Injector-Debug vs RPG-Server-Debug handler shape from handler bodies (no file split); scope-banner comments in `DebugEndpoints.cs` | — |
 | `live-probe-tool` | The 6-step operator tool: summon/`spawn-unique-actor` → aptitude allocate → equip → deploy (`loadoutJson` always empty) → persisted-state read-back → separate live-engine read (`debug.board-stats`), asserting both halves match | — |
 | `actor-hub-live-proof` | Run the real T12/T14 proof end-to-end using `live-probe-tool`; tick the remaining live-probe checkboxes in `actor-hub-and-combat-power-solid-fixing-todo.md` | `live-probe-tool` |
+| `lawn-screenshot` | On-demand Unity frame capture (`debug.screenshot`) + server store/serve + minimal control-room viewer, so live probes stop depending on eyeballing the game (ideal addendum + spec on this branch; plan/tasks `tasks/live-probe-screenshot-*`) | — |
 
-**Build order:** `debug-scope-guard`, `live-probe-tool` in parallel → `actor-hub-live-proof`.
+**Build order:** `debug-scope-guard`, `live-probe-tool` in parallel → `actor-hub-live-proof`; `lawn-screenshot` independent (own worktree/branch, no shared files with the first three).
 
 **Module specs:** `docs/architecture/live-probe/spec-debug-scope-guard.md` ·
-`spec-live-probe-tool.md` · `spec-actor-hub-live-proof.md`.
+`spec-live-probe-tool.md` · `spec-actor-hub-live-proof.md` · `spec-lawn-screenshot.md`
+(idea addendum: `ideal-lawn-screenshot.md`).
 
 **Dropped, not a module here — handed off instead (2026-09-13):** the `/talk`/`/cage`
 `CreatureMintSpec` trust surface turned out to be `party-dungeon`'s own `wild-room` module (D4.8's

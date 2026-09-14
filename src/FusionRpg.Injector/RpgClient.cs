@@ -321,6 +321,35 @@ public sealed class RpgClient
         }
     }
 
+    /// <summary>Fire-and-forget lawn screenshot upload (binary PNG, not the event queue).</summary>
+    public void EnqueueScreenshot(byte[] png, string tag)
+    {
+        if (png == null || png.Length == 0) return;
+        _ = UploadScreenshotAsync(png, ScreenshotCapture.SanitizeTag(tag));
+    }
+
+    async Task UploadScreenshotAsync(byte[] png, string tag)
+    {
+        try
+        {
+            using var content = new ByteArrayContent(png);
+            content.Headers.ContentType =
+                new System.Net.Http.Headers.MediaTypeHeaderValue("image/png");
+            var resp = await Http().PostAsync(
+                $"{_base}/api/debug/screenshot/upload?tag={Uri.EscapeDataString(tag)}", content)
+                .ConfigureAwait(false);
+            if (!resp.IsSuccessStatusCode)
+                RpgHost.Log.Warning($"[screenshot] upload {tag} -> {(int)resp.StatusCode}");
+            else
+                RpgHost.Log.Info($"[screenshot] uploaded {tag} {png.Length}B");
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+            try { RpgHost.Log.Warning("[screenshot] upload failed: " + ex.Message); } catch { }
+        }
+    }
+
     public void Enqueue(string kind, object? payload, string? matchKey = null)
     {
         var n = Volatile.Read(ref _queued);

@@ -25,7 +25,7 @@ python tools/debug-mcp/server.py --transport http --port 8899
 
 Localhost bind only; any other `--host` is refused before serving.
 
-## Inspector walkthrough (do all 10, in order)
+## Inspector walkthrough (do all 11, in order)
 
 ```powershell
 npx @modelcontextprotocol/inspector python tools/debug-mcp/server.py
@@ -67,6 +67,12 @@ npx @modelcontextprotocol/inspector python tools/debug-mcp/server.py
     flags a `gameStateCrossCheck`/corrected `fix` on disagreement. Same
     checkout caveat as `debug_ui_nav` — requires `/game-state` to exist in
     `DebugEndpoints.cs` in this server's checkout.
+11. `debug_screenshot` — `{"tag":"probe"}` captures the live Unity frame and
+    returns it as base64 PNG (Playwright `browser_screenshot` analogue) plus
+    an optional `save_to` path. Shows what the engine renders — proves nothing
+    about the server. Same checkout caveat as `debug_ui_nav` — requires the
+    `/screenshot` routes to exist in `DebugEndpoints.cs` in this server's
+    checkout (live-probe `lawn-screenshot` module).
 
 ## Scope labels (every response carries one)
 
