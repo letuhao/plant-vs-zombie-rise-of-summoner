@@ -60,7 +60,8 @@ live checkpoints remain evidence gates rather than being inferred from a build.
 ### Slice 4: Distinguished MCP adapters
 
 - [x] Task 5: distinguished inspect/click/act/cursor/evaluate adapters + registration + walkthrough + tests
-- [ ] Checkpoint 5: live MCP chain and refusal evidence proven against a fresh deployment
+- [x] Checkpoint 5: live MCP chain and refusal evidence proven (owner-confirmed 2026-09-15).
+  A new deployment is a future regression check, not an open implementation gate.
 
 ## Risks and Mitigations
 

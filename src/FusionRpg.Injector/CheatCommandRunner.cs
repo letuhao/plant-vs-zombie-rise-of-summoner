@@ -325,6 +325,39 @@ public static class CheatCommandRunner
             case "debug.screenshot":
                 ScreenshotCapture.TryArm(p);
                 break;
+            case "debug.inspect":
+                ControlInspect.Run(p);
+                break;
+            case "debug.census":
+                ControlInspect.RunCensus();
+                break;
+            case "debug.scan":
+                ControlInspect.RunScan(p);
+                break;
+            case "debug.dump-all":
+                ControlInspect.RunDumpAll(p);
+                break;
+            case "debug.evaluate-search":
+                ControlInspect.RunEvaluateSearch(p);
+                break;
+            case "debug.evaluate-methods":
+                ControlInspect.RunEvaluateMethods(p);
+                break;
+            case "debug.evaluate-call":
+                ControlInspect.RunEvaluateCall(p);
+                break;
+            case "debug.evaluate-text":
+                ControlInspect.RunEvaluateText(p);
+                break;
+            case "debug.click":
+                ControlClick.Run(p);
+                break;
+            case "debug.act":
+                ControlAct.Run(p);
+                break;
+            case "debug.cursor":
+                ControlCursor.Run(p);
+                break;
             case "debug.game-state":
                 DebugActions.GameState();
                 break;

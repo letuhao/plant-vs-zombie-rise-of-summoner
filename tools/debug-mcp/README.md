@@ -1,7 +1,7 @@
 # Debug MCP — owner walkthrough
 
 Thin adapter MCP over the repo's real debug surface (spec:
-`docs/architecture/debug-mcp/spec-debug-mcp.md`). Ten tools, stdio default,
+`docs/architecture/debug-mcp/spec-debug-mcp.md`). Nineteen tools, stdio default,
 local HTTP behind a flag. No domain logic lives here.
 
 ## Install
@@ -25,7 +25,7 @@ python tools/debug-mcp/server.py --transport http --port 8899
 
 Localhost bind only; any other `--host` is refused before serving.
 
-## Inspector walkthrough (do all 11, in order)
+## Inspector walkthrough (do all 19, in order)
 
 ```powershell
 npx @modelcontextprotocol/inspector python tools/debug-mcp/server.py
@@ -73,6 +73,25 @@ npx @modelcontextprotocol/inspector python tools/debug-mcp/server.py
     about the server. Same checkout caveat as `debug_ui_nav` — requires the
     `/screenshot` routes to exist in `DebugEndpoints.cs` in this server's
     checkout (live-probe `lawn-screenshot` module).
+12. `debug_inspect` — `{"scope":"menu"}` returns the budgeted control tree with
+    snapshot-scoped refs. Same checkout caveat — requires `/inspect`.
+13. `debug_click` — `{"snapshotId":"snap1","ref":"c0"}` acts on a ref; stale refs
+    refuse with the fresh-snapshot instruction. Same checkout caveat — `/click`.
+14. `debug_act` — `{"verb":"shovel","col":2,"row":2}` runs a lawn verb with a
+    named receipt. Same checkout caveat — `/act`.
+15. `debug_cursor` — **DISRUPTIVE**: `{"x":100,"y":100,"click":false,
+    "confirmed":true}` moves the real mouse. Opt-in, foreground-checked,
+    throttled. Same checkout caveat — `/cursor`.
+16. `debug_evaluate_search` — `{"nameContains":"Almanac"}` finds controls with
+    ptrs. Same checkout caveat — `/evaluate-search`.
+17. `debug_evaluate_methods` — `{"ptr":"..."}` lists method tables. Same checkout
+    caveat — `/evaluate-methods`.
+18. `debug_evaluate_call` — `{"ptr":"...","method":"OnMouseUp"}` invokes one
+    method, reporting `via`. Same checkout caveat — `/evaluate-call`.
+19. `debug_evaluate_text` — `{"text":"确定"}` finds visible text and resolves the
+    clickable behind it (no OCR). Same checkout caveat — `/evaluate-text`.
+    Items 12–19 are the game-control program: one distinguished tool per verb,
+    adapter-only, scope-stamped.
 
 ## Scope labels (every response carries one)
 

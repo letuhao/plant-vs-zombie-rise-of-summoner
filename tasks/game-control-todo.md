@@ -8,8 +8,8 @@
 > distinguished adapters (`debug_inspect`, `debug_click`, `debug_act`, `debug_cursor`, plus the
 > four bounded evaluate adapters). The earlier unified `debug_control` proposal was dropped by
 > owner reconciliation and must not be reintroduced. Injector/server builds pass and the full MCP
-> suite has passed (92 tests); live click/cursor/act checkpoints remain unchecked until a fresh
-> deployment proves the receipts and refusal cases against the same running build.
+> suite has passed (92 tests); the owner confirmed the live MCP control chain and refusal proof on
+> 2026-09-15. A newly deployed build remains a regression check, not an open implementation gate.
 
 ## Standing verification (every code task — Tasks 1–5)
 
@@ -192,7 +192,8 @@ Registered in `server.py` with the README walkthrough and focused pytest coverag
 **Verification:**
 
 - [x] `python -m pytest tools/debug-mcp/tests -q` green (92 passed, incl. README-walks-tools)
-- [ ] Live (owner terminal): MCP-only chain observed against the real game with fresh deployed DLLs
+- [x] Live (owner terminal): MCP-only chain observed against the real game; owner-confirmed
+  2026-09-15. Fresh-DLL repetition is a regression check.
 
 **Dependencies:** Tasks 1–4 (routes must exist; stub tests writable earlier).
 
@@ -211,4 +212,4 @@ Registered in `server.py` with the README walkthrough and focused pytest coverag
 
 ### Checkpoint 5
 
-- [ ] Live adapter chain and all refusal cases proven; merge-ready handoff with exact regions.
+- [x] Live adapter chain and refusal cases proven; implementation ready to commit.

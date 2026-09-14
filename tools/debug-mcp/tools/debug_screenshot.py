@@ -81,16 +81,22 @@ def screenshot(tag="probe", timeout=30, save_to=None, transport=None,
         body = trigger["body"] if isinstance(trigger["body"], dict) else {}
         error = body.get("error", "screenshot trigger refused")
         return _not_ready(error, _match_fix(error))
+    # Anchor the poll past everything already stored: the table is append-only and
+    # forward-paged, so kinds-without-afterId only ever sees the oldest window.
+    try:
+        after_id = trigger["body"].get("afterId", 0)
+    except Exception:
+        after_id = 0
 
     deadline = time.monotonic() + timeout
     ready = None
     while time.monotonic() < deadline:
         try:
-            # Newest-first tail: /events reads forward from afterId, so its kinds
-            # filter only sees the oldest window on a long-lived server.
-            page = route_call("GET", "/events/tail",
+            # kinds filtering runs inside the SQL query (ListEventsByKinds), so this
+            # sees fresh rows on long-lived servers.
+            page = route_call("GET", "/events",
                               params={"kinds": "debug.screenshot.ready",
-                                      "limit": 20},
+                                      "limit": 20, "afterId": after_id},
                               transport=transport, timeout=_FETCH_TIMEOUT)
         except (httpx.ConnectError, ConnectionError, TimeoutError,
                 httpx.TimeoutException):
@@ -100,6 +106,11 @@ def screenshot(tag="probe", timeout=30, save_to=None, transport=None,
         for envelope in items:
             payload = envelope.get("payload", {}) \
                 if isinstance(envelope, dict) else {}
+            try:
+                if isinstance(envelope.get("id"), int):
+                    after_id = max(after_id, envelope["id"])
+            except Exception:
+                pass
             if payload.get("tag") == tag and payload.get("validPng"):
                 ready = payload
                 break
@@ -145,6 +156,10 @@ def screenshot(tag="probe", timeout=30, save_to=None, transport=None,
         except OSError as ex:
             return _not_ready(f"could not write {save_to}: {ex}",
                               "pick a writable path")
+    # A caller that passed save_to already has the PNG on disk -- inlining base64
+    # too blows the tool-result token budget for nothing (the whole point of
+    # save_to). Only inline when there is no file to read back instead.
+    inline = None if saved is not None else base64.b64encode(png).decode("ascii")
     return {
         "ok": True,
         "tag": tag,
@@ -153,7 +168,7 @@ def screenshot(tag="probe", timeout=30, save_to=None, transport=None,
         "bytes": len(png),
         "takenAtUtc": taken_at,
         "primitive": ready.get("primitive"),
-        "pngBase64": base64.b64encode(png).decode("ascii"),
+        "pngBase64": inline,
         "path": saved,
         "scope": "game-injector-debug",
     }

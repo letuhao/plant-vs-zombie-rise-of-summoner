@@ -91,28 +91,8 @@ public static class DebugEndpoints
             });
         });
 
-        // RPG Server Debug
-        // (newest-first read of the persisted event log for "what just happened" polling.
-        // The sibling /events reads forward from afterId, so its kinds filter only ever
-        // sees the oldest window — a fresh kind on a long-lived server never matches.
-        // This scans one bounded trailing window (last 5000 rows) instead; older history
-        // still pages via /events. Consumers (screenshot poll) keep their own
-        // game-injector-debug scope label on what the rows prove.)
-        g.MapGet("/events/tail", (RpgStore store, string? kinds, int limit = 20) =>
-        {
-            limit = Math.Clamp(limit, 1, 100);
-            HashSet<string>? set = null;
-            if (!string.IsNullOrWhiteSpace(kinds))
-                set = new HashSet<string>(kinds.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
-                    StringComparer.OrdinalIgnoreCase);
-            var floor = Math.Max(0, store.GetMaxEventId() - 5000);
-            var items = store.ListEventsForServerScan(5000, floor);
-            var matches = items.Where(e => set == null || set.Contains(e.Kind)).ToList();
-            return Results.Ok(new { items = matches.TakeLast(limit).ToList() });
-        });
-
         // Game Injector Debug
-        g.MapPost("/screenshot", async (JsonElement? body, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        g.MapPost("/screenshot", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {
             var b = BodyOrEmpty(body);
             var tag = SanitizeScreenshotTag(StrProp(b, "tag"));
@@ -121,7 +101,267 @@ public static class DebugEndpoints
             {
                 ok = true,
                 tag,
+                afterId = store.GetMaxEventId(),
                 note = "injector emits debug.screenshot.ready (with stored fileName); poll GET /api/debug/events?kinds=debug.screenshot.ready then GET /api/debug/screenshot/latest"
+            });
+        });
+
+        // Game Injector Debug
+        g.MapPost("/census", async (IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            await Send(hub, inbox, "debug.census", new { });
+            return Results.Ok(new
+            {
+                ok = true,
+                note = "injector emits debug.census (counts + samples per roster type); poll GET /api/debug/events?kinds=debug.census"
+            });
+        });
+
+        // Game Injector Debug
+        g.MapPost("/scan", async (JsonElement? body, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            var b = BodyOrEmpty(body);
+            await Send(hub, inbox, "debug.scan", new
+            {
+                type = StrProp(b, "type") ?? "",
+                limit = IntProp(b, "limit", 200),
+                cursor = StrProp(b, "cursor")
+            });
+            return Results.Ok(new
+            {
+                ok = true,
+                note = "injector emits debug.scan (full dump of one roster type, capped); poll GET /api/debug/events?kinds=debug.scan"
+            });
+        });
+
+        // Game Injector Debug
+        g.MapPost("/evaluate-search", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            var b = BodyOrEmpty(body);
+            await Send(hub, inbox, "debug.evaluate-search", new
+            {
+                nameContains = StrProp(b, "nameContains") ?? "",
+                type = StrProp(b, "type") ?? "",
+                pathContains = StrProp(b, "pathContains") ?? "",
+                limit = IntProp(b, "limit", 50),
+                tag = StrProp(b, "tag") ?? ""
+            });
+            return Results.Ok(new
+            {
+                ok = true,
+                afterId = store.GetMaxEventId(),
+                note = "injector emits debug.evaluate.result (read-only matches with ptrs); poll GET /api/debug/events?kinds=debug.evaluate.result"
+            });
+        });
+
+        // Game Injector Debug
+        g.MapPost("/evaluate-methods", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            var b = BodyOrEmpty(body);
+            await Send(hub, inbox, "debug.evaluate-methods", new { ptr = StrProp(b, "ptr") ?? "", tag = StrProp(b, "tag") ?? "" });
+            return Results.Ok(new
+            {
+                ok = true,
+                afterId = store.GetMaxEventId(),
+                note = "injector emits debug.evaluate.methods (read-only method tables); poll GET /api/debug/events?kinds=debug.evaluate.methods"
+            });
+        });
+
+        // Game Injector Debug
+        g.MapPost("/evaluate-call", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            var b = BodyOrEmpty(body);
+            await Send(hub, inbox, "debug.evaluate-call", new
+            {
+                ptr = StrProp(b, "ptr") ?? "",
+                type = StrProp(b, "type") ?? "",
+                method = StrProp(b, "method") ?? "",
+                args = b.TryGetProperty("args", out var ae) && ae.ValueKind == JsonValueKind.Array
+                    ? ae : (JsonElement?)null,
+                tag = StrProp(b, "tag") ?? ""
+            });
+            return Results.Ok(new
+            {
+                ok = true,
+                afterId = store.GetMaxEventId(),
+                note = "injector invokes one public instance method on the resolved component; poll GET /api/debug/events?kinds=debug.evaluate.called"
+            });
+        });
+
+        // Game Injector Debug
+        g.MapPost("/evaluate-text", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            var b = BodyOrEmpty(body);
+            await Send(hub, inbox, "debug.evaluate-text", new
+            {
+                text = StrProp(b, "text") ?? "",
+                limit = IntProp(b, "limit", 50),
+                tag = StrProp(b, "tag") ?? ""
+            });
+            return Results.Ok(new
+            {
+                ok = true,
+                afterId = store.GetMaxEventId(),
+                note = "injector matches engine text content and resolves clickables; poll GET /api/debug/events?kinds=debug.evaluate.text"
+            });
+        });
+
+        // Game Injector Debug
+        // (DISRUPTIVE surface: moves the operator's real cursor. Banner names it. The
+        // opt-in lives per command — no persistent armed state anywhere.)
+        g.MapPost("/cursor", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            var b = BodyOrEmpty(body);
+            await Send(hub, inbox, "debug.cursor", new
+            {
+                x = IntProp(b, "x", -1),
+                y = IntProp(b, "y", -1),
+                click = !(b.TryGetProperty("click", out var cl) && cl.ValueKind == JsonValueKind.False),
+                confirmedLiveCursor = b.TryGetProperty("confirmedLiveCursor", out var cf) && cf.ValueKind == JsonValueKind.True,
+                tag = StrProp(b, "tag") ?? ""
+            });
+            return Results.Ok(new
+            {
+                ok = true,
+                afterId = store.GetMaxEventId(),
+                note = "injector moves/clicks the real cursor on opt-in, foreground-checked, throttled; poll GET /api/debug/events?kinds=debug.cursor.done"
+            });
+        });
+
+        // Game Injector Debug
+        g.MapPost("/act", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            var b = BodyOrEmpty(body);
+            await Send(hub, inbox, "debug.act", new
+            {
+                verb = StrProp(b, "verb") ?? "",
+                typeId = IntProp(b, "typeId", -1),
+                col = IntProp(b, "col", -1),
+                row = IntProp(b, "row", -1),
+                tag = StrProp(b, "tag") ?? ""
+            });
+            return Results.Ok(new
+            {
+                ok = true,
+                afterId = store.GetMaxEventId(),
+                note = "injector runs the verb and emits debug.act.done with the expected telemetry kind; poll GET /api/debug/events?kinds=debug.act.done"
+            });
+        });
+
+        // Game Injector Debug
+        g.MapPost("/click", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            var b = BodyOrEmpty(body);
+            await Send(hub, inbox, "debug.click", new
+            {
+                snapshotId = StrProp(b, "snapshotId") ?? "",
+                @ref = StrProp(b, "ref") ?? "",
+                tag = StrProp(b, "tag") ?? ""
+            });
+            return Results.Ok(new
+            {
+                ok = true,
+                afterId = store.GetMaxEventId(),
+                note = "injector re-verifies the ref and invokes; poll GET /api/debug/events?kinds=debug.click.done"
+            });
+        });
+
+        // Game Injector Debug
+        g.MapPost("/dump-all", async (JsonElement? body, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            var b = BodyOrEmpty(body);
+            await Send(hub, inbox, "debug.dump-all", new { tag = StrProp(b, "tag") ?? "probe" });
+            return Results.Ok(new
+            {
+                ok = true,
+                note = "injector enumerates EVERY GameObject to a side-store JSON file; poll GET /api/debug/events?kinds=debug.dump.done then GET /api/debug/dump/latest"
+            });
+        });
+
+        // Game Injector Debug
+        // (raw-dump upload half: JSON side-store write, no relay in body, no domain write —
+        // guard lists it as ManualReview by design, same as the screenshot upload.)
+        g.MapPost("/dump/upload", async (JsonElement? body) =>
+        {
+            var b = BodyOrEmpty(body);
+            var tag = SanitizeScreenshotTag(StrProp(b, "tag"));
+            var json = StrProp(b, "json") ?? "";
+            // Structural (not tunable): rejects garbage before buffering. Not the balance surface.
+            const int dumpMaxChars = 32 * 1024 * 1024;
+            if (json.Length == 0 || json.Length > dumpMaxChars)
+                return Results.BadRequest(new { ok = false, error = "empty or over size cap" });
+            var dir = DumpStoreDir();
+            Directory.CreateDirectory(dir);
+            var fileName = $"{DateTime.UtcNow:yyyyMMdd-HHmmssfff}-{tag}.json";
+            await File.WriteAllTextAsync(Path.Combine(dir, fileName), json);
+            var info = new { fileName, tag, chars = json.Length, takenAtUtc = DateTime.UtcNow.ToString("o") };
+            await File.WriteAllTextAsync(Path.Combine(dir, "latest.json"), JsonSerializer.Serialize(info));
+            PruneDumps(dir);
+            return Results.Ok(new { ok = true, fileName, tag, chars = json.Length });
+        });
+
+        // Game Injector Debug
+        // (reads of the raw-dump side store. Same ManualReview note as above.)
+        g.MapGet("/dump/latest", () =>
+        {
+            var dir = DumpStoreDir();
+            var latestPath = Path.Combine(dir, "latest.json");
+            if (!File.Exists(latestPath))
+                return Results.NotFound(new { ok = false, error = "no dump stored yet" });
+            try
+            {
+                using var doc = JsonDocument.Parse(File.ReadAllText(latestPath));
+                if (!doc.RootElement.TryGetProperty("fileName", out var f) ||
+                    f.ValueKind != JsonValueKind.String)
+                    return Results.NotFound(new { ok = false, error = "latest pointer is corrupt" });
+                var path = Path.Combine(dir, f.GetString()!);
+                if (!path.StartsWith(dir, StringComparison.OrdinalIgnoreCase) || !File.Exists(path))
+                    return Results.NotFound(new { ok = false, error = "latest file is missing" });
+                return Results.File(File.ReadAllBytes(path), "application/json");
+            }
+            catch
+            {
+                return Results.NotFound(new { ok = false, error = "latest pointer is unreadable" });
+            }
+        });
+
+        // Game Injector Debug
+        // (metadata read for the file above. Same ManualReview note as above.)
+        g.MapGet("/dump/info", () =>
+        {
+            var latestPath = Path.Combine(DumpStoreDir(), "latest.json");
+            if (!File.Exists(latestPath))
+                return Results.NotFound(new { ok = false, error = "no dump stored yet" });
+            try
+            {
+                using var doc = JsonDocument.Parse(File.ReadAllText(latestPath));
+                return Results.Ok(doc.RootElement.Clone());
+            }
+            catch
+            {
+                return Results.BadRequest(new { ok = false, error = "latest pointer is unreadable" });
+            }
+        });
+
+        // Game Injector Debug
+        g.MapPost("/inspect", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            var b = BodyOrEmpty(body);
+            var scope = (StrProp(b, "scope") ?? "all").Trim().ToLowerInvariant();
+            if (scope is not ("menu" or "lawn" or "all")) scope = "all";
+            await Send(hub, inbox, "debug.inspect", new
+            {
+                scope,
+                limit = IntProp(b, "limit", 50),
+                cursor = StrProp(b, "cursor"),
+                tag = StrProp(b, "tag")
+            });
+            return Results.Ok(new
+            {
+                ok = true,
+                scope,
+                afterId = store.GetMaxEventId(),
+                note = "injector emits debug.inspect (snapshot id = event id); poll GET /api/debug/events?kinds=debug.inspect"
             });
         });
 
@@ -1101,6 +1341,29 @@ public static class DebugEndpoints
 
     static string ScreenshotStoreDir() =>
         Path.Combine(AppContext.BaseDirectory, "artifacts", "lawn-screenshots");
+
+    static string DumpStoreDir() =>
+        Path.Combine(AppContext.BaseDirectory, "artifacts", "lawn-dumps");
+
+    // Structural (not tunable): disk bound for dev dumps. Not the balance surface.
+    const int DumpRetainCount = 10;
+
+    static void PruneDumps(string dir)
+    {
+        try
+        {
+            var files = new DirectoryInfo(dir).GetFiles("*.json")
+                .Where(f => !string.Equals(f.Name, "latest.json", StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(f => f.Name)
+                .Skip(DumpRetainCount)
+                .ToList();
+            foreach (var f in files)
+            {
+                try { f.Delete(); } catch { /* best-effort prune */ }
+            }
+        }
+        catch { /* best-effort prune */ }
+    }
 
     static void PruneScreenshots(string dir)
     {

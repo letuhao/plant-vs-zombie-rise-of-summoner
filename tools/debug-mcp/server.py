@@ -21,6 +21,14 @@ from tools.debug_ui_nav import nav as debug_ui_nav_impl, ACTIONS as _UI_NAV_ACTI
 from tools.debug_restart_game import restart as debug_restart_game_impl
 from tools.debug_game_state import state as debug_game_state_impl
 from tools.debug_screenshot import screenshot as debug_screenshot_impl
+from tools.debug_inspect import inspect as debug_inspect_impl
+from tools.debug_click import click as debug_click_impl
+from tools.debug_act import act as debug_act_impl
+from tools.debug_cursor import cursor as debug_cursor_impl
+from tools.debug_evaluate_search import search as debug_evaluate_search_impl
+from tools.debug_evaluate_methods import methods as debug_evaluate_methods_impl
+from tools.debug_evaluate_call import call as debug_evaluate_call_impl
+from tools.debug_evaluate_text import text as debug_evaluate_text_impl
 
 mcp = FastMCP("debug-mcp")
 
@@ -119,6 +127,91 @@ def debug_screenshot(tag: str = "probe", timeout: int = 30,
                      save_to: Optional[str] = None) -> dict:
     """Scope: game-injector-debug. Adapter over the screenshot endpoints only."""
     return debug_screenshot_impl(tag=tag, timeout=timeout, save_to=save_to)
+
+
+@mcp.tool(description=(
+    "Inspect the live game screen as a budgeted control tree (Playwright "
+    "browser_snapshot analogue): menus as named controls, lawn as "
+    "cells/cards/entities. Only interactables get refs; over-budget output "
+    "truncates with a marker and a cursor."
+))
+def debug_inspect(scope: str = "all", limit: int = 50,
+                  cursor: Optional[str] = None) -> dict:
+    """Scope: game-injector-debug. Adapter over POST /api/debug/inspect."""
+    return debug_inspect_impl(scope=scope, limit=limit, cursor=cursor)
+
+
+@mcp.tool(description=(
+    "Click a control ref from the current inspect snapshot (Playwright "
+    "browser_click analogue). Refs die with their snapshot; stale refs are "
+    "refused, never retried blind."
+))
+def debug_click(snapshotId: str, ref: str) -> dict:
+    """Scope: game-injector-debug. Adapter over POST /api/debug/click."""
+    return debug_click_impl(snapshotId, ref)
+
+
+@mcp.tool(description=(
+    "Run one lawn verb with a named receipt: place (card to cell), shovel, "
+    "hammer. Verbs compose click primitives; failures name the broken link."
+))
+def debug_act(verb: str, typeId: Optional[int] = None,
+              col: Optional[int] = None, row: Optional[int] = None) -> dict:
+    """Scope: game-injector-debug. Adapter over POST /api/debug/act."""
+    params: dict[str, Any] = {}
+    if typeId is not None:
+        params["typeId"] = typeId
+    if col is not None:
+        params["col"] = col
+    if row is not None:
+        params["row"] = row
+    return debug_act_impl(verb, **params)
+
+
+@mcp.tool(description=(
+    "DISRUPTIVE: move the REAL OS cursor, optionally click. Per-call opt-in "
+    "(`confirmed=True`), game-foreground check, throttled, clamped to the game "
+    "window. Ends whatever the operator was pointing at."
+))
+def debug_cursor(x: int, y: int, click: bool = False,
+                 confirmed: bool = False) -> dict:
+    """Scope: game-injector-debug. Adapter over POST /api/debug/cursor."""
+    return debug_cursor_impl(x, y, click=click, confirmed=confirmed)
+
+
+@mcp.tool(description="Find controls by name/type/path (locator building block).")
+def debug_evaluate_search(nameContains: str = "", type: str = "",
+                          pathContains: str = "", limit: int = 50) -> dict:
+    """Scope: game-injector-debug. Read-only; matches carry ptrs."""
+    return debug_evaluate_search_impl(
+        nameContains=nameContains, type=type, pathContains=pathContains,
+        limit=limit)
+
+
+@mcp.tool(description="List public instance methods of a resolved object.")
+def debug_evaluate_methods(ptr: str) -> dict:
+    """Scope: game-injector-debug. Read-only discovery for evaluate-call."""
+    return debug_evaluate_methods_impl(ptr)
+
+
+@mcp.tool(description=(
+    "Invoke one public instance method on a resolved component "
+    "(Playwright browser_evaluate analogue, bounded: live ptr + allowlisted "
+    "shape + JSON primitives only)."
+))
+def debug_evaluate_call(ptr: str, method: str, type: str = "",
+                        args: Optional[list] = None) -> dict:
+    """Scope: game-injector-debug. Reports what ran, via which path."""
+    return debug_evaluate_call_impl(ptr, method, type=type, args=args)
+
+
+@mcp.tool(description=(
+    "Find visible text and resolve the clickable behind it (no OCR — engine "
+    "text content read directly). Bare paint returns the nearby tree instead."
+))
+def debug_evaluate_text(text: str, limit: int = 50) -> dict:
+    """Scope: game-injector-debug. Read-only search with clickable resolution."""
+    return debug_evaluate_text_impl(text, limit=limit)
 
 
 def resolve_transport(argv=None):

@@ -350,6 +350,33 @@ public sealed class RpgClient
         }
     }
 
+    /// <summary>Fire-and-forget raw scene dump upload (JSON, not the event queue).</summary>
+    public void EnqueueDump(string json, string tag)
+    {
+        if (string.IsNullOrEmpty(json)) return;
+        _ = UploadDumpAsync(json, ScreenshotCapture.SanitizeTag(tag));
+    }
+
+    async Task UploadDumpAsync(string json, string tag)
+    {
+        try
+        {
+            var payload = JsonSerializer.Serialize(new { tag, json }, Json);
+            using var content = new StringContent(payload, Encoding.UTF8, "application/json");
+            var resp = await Http().PostAsync(
+                $"{_base}/api/debug/dump/upload", content).ConfigureAwait(false);
+            if (!resp.IsSuccessStatusCode)
+                RpgHost.Log.Warning($"[dump] upload {tag} -> {(int)resp.StatusCode}");
+            else
+                RpgHost.Log.Info($"[dump] uploaded {tag} {json.Length} chars");
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+            try { RpgHost.Log.Warning("[dump] upload failed: " + ex.Message); } catch { }
+        }
+    }
+
     public void Enqueue(string kind, object? payload, string? matchKey = null)
     {
         var n = Volatile.Read(ref _queued);

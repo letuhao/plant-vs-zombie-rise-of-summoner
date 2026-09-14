@@ -24,7 +24,7 @@ def _trigger_ok(method, url, body, params=None):
 
 
 def _tail_ready(method, url, body, params=None):
-    assert url.endswith("/api/debug/events/tail")
+    assert url.endswith("/api/debug/events")
     assert params["kinds"] == "debug.screenshot.ready"
     return {"status": 200, "body": {"items": [
         {"id": 99, "kind": "debug.screenshot.ready", "payload": dict(_READY)}]}}
@@ -39,7 +39,9 @@ def _fetch_png(url, timeout):
     return _PNG
 
 
-def test_happy_path_returns_image_envelope(tmp_path):
+def test_happy_path_with_save_to_omits_inline_base64(tmp_path):
+    # save_to already puts the PNG on disk -- inlining base64 too blows the
+    # tool-result token budget for nothing, so the envelope must not carry it.
     target = tmp_path / "frame.png"
     out = shot.screenshot(transport=_mux_ok(),
                           fetch=_fetch_png, sleep=lambda s: None,
@@ -49,10 +51,18 @@ def test_happy_path_returns_image_envelope(tmp_path):
     assert (out["width"], out["height"]) == (960, 538)
     assert out["bytes"] == len(_PNG)
     assert out["primitive"] == "screen-readback"
-    assert base64.b64decode(out["pngBase64"]) == _PNG
+    assert out["pngBase64"] is None
     assert out["path"] == str(target)
     assert target.read_bytes() == _PNG
     assert out["scope"] == "game-injector-debug"
+
+
+def test_happy_path_without_save_to_inlines_base64():
+    out = shot.screenshot(transport=_mux_ok(),
+                          fetch=_fetch_png, sleep=lambda s: None)
+    assert out["ok"] is True
+    assert base64.b64decode(out["pngBase64"]) == _PNG
+    assert out["path"] is None
 
 
 def _mux_ok():
