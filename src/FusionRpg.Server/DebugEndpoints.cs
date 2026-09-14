@@ -92,6 +92,119 @@ public static class DebugEndpoints
         });
 
         // RPG Server Debug
+        // (newest-first read of the persisted event log for "what just happened" polling.
+        // The sibling /events reads forward from afterId, so its kinds filter only ever
+        // sees the oldest window — a fresh kind on a long-lived server never matches.
+        // This scans one bounded trailing window (last 5000 rows) instead; older history
+        // still pages via /events. Consumers (screenshot poll) keep their own
+        // game-injector-debug scope label on what the rows prove.)
+        g.MapGet("/events/tail", (RpgStore store, string? kinds, int limit = 20) =>
+        {
+            limit = Math.Clamp(limit, 1, 100);
+            HashSet<string>? set = null;
+            if (!string.IsNullOrWhiteSpace(kinds))
+                set = new HashSet<string>(kinds.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
+                    StringComparer.OrdinalIgnoreCase);
+            var floor = Math.Max(0, store.GetMaxEventId() - 5000);
+            var items = store.ListEventsForServerScan(5000, floor);
+            var matches = items.Where(e => set == null || set.Contains(e.Kind)).ToList();
+            return Results.Ok(new { items = matches.TakeLast(limit).ToList() });
+        });
+
+        // Game Injector Debug
+        g.MapPost("/screenshot", async (JsonElement? body, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            var b = BodyOrEmpty(body);
+            var tag = SanitizeScreenshotTag(StrProp(b, "tag"));
+            await Send(hub, inbox, "debug.screenshot", new { tag });
+            return Results.Ok(new
+            {
+                ok = true,
+                tag,
+                note = "injector emits debug.screenshot.ready (with stored fileName); poll GET /api/debug/events?kinds=debug.screenshot.ready then GET /api/debug/screenshot/latest"
+            });
+        });
+
+        // Game Injector Debug
+        // (upload half of the screenshot pair: no Send() relay call in this body and no
+        // RpgStore/domain write — it stores an opaque engine artifact — so the scope guard
+        // lists it as ManualReview by design. The scope is declared here for human readers:
+        // this proves only live-engine state, never server correctness.)
+        g.MapPost("/screenshot/upload", async (HttpRequest request, string? tag) =>
+        {
+            var body = request.Body;
+            if (request.ContentType == null ||
+                !request.ContentType.StartsWith("image/png", StringComparison.OrdinalIgnoreCase))
+                return Results.BadRequest(new { ok = false, error = "expected Content-Type: image/png" });
+            byte[] png;
+            using (var ms = new MemoryStream())
+            {
+                await body.CopyToAsync(ms);
+                png = ms.ToArray();
+            }
+            if (png.Length is 0 or > ScreenshotMaxBytes || !HasPngSignature(png))
+                return Results.BadRequest(new { ok = false, error = "not a PNG or over size cap" });
+            var cleanTag = SanitizeScreenshotTag(tag);
+            var dir = ScreenshotStoreDir();
+            Directory.CreateDirectory(dir);
+            var fileName = $"{DateTime.UtcNow:yyyyMMdd-HHmmssfff}-{cleanTag}.png";
+            await File.WriteAllBytesAsync(Path.Combine(dir, fileName), png);
+            var info = new
+            {
+                fileName,
+                tag = cleanTag,
+                bytes = png.Length,
+                takenAtUtc = DateTime.UtcNow.ToString("o")
+            };
+            await File.WriteAllTextAsync(Path.Combine(dir, "latest.json"), JsonSerializer.Serialize(info));
+            PruneScreenshots(dir);
+            return Results.Ok(new { ok = true, fileName, tag = cleanTag, bytes = png.Length });
+        });
+
+        // Game Injector Debug
+        // (read half: serves the opaque engine artifact above. Same ManualReview note as PUT.)
+        g.MapGet("/screenshot/latest", () =>
+        {
+            var dir = ScreenshotStoreDir();
+            var latestPath = Path.Combine(dir, "latest.json");
+            if (!File.Exists(latestPath))
+                return Results.NotFound(new { ok = false, error = "no screenshot stored yet" });
+            try
+            {
+                using var doc = JsonDocument.Parse(File.ReadAllText(latestPath));
+                if (!doc.RootElement.TryGetProperty("fileName", out var f) ||
+                    f.ValueKind != JsonValueKind.String)
+                    return Results.NotFound(new { ok = false, error = "latest pointer is corrupt" });
+                var path = Path.Combine(dir, f.GetString()!);
+                if (!path.StartsWith(dir, StringComparison.OrdinalIgnoreCase) || !File.Exists(path))
+                    return Results.NotFound(new { ok = false, error = "latest file is missing" });
+                return Results.File(File.ReadAllBytes(path), "image/png");
+            }
+            catch
+            {
+                return Results.NotFound(new { ok = false, error = "latest pointer is unreadable" });
+            }
+        });
+
+        // Game Injector Debug
+        // (metadata read for the file above. Same ManualReview note as PUT.)
+        g.MapGet("/screenshot/info", () =>
+        {
+            var latestPath = Path.Combine(ScreenshotStoreDir(), "latest.json");
+            if (!File.Exists(latestPath))
+                return Results.NotFound(new { ok = false, error = "no screenshot stored yet" });
+            try
+            {
+                using var doc = JsonDocument.Parse(File.ReadAllText(latestPath));
+                return Results.Ok(doc.RootElement.Clone());
+            }
+            catch
+            {
+                return Results.BadRequest(new { ok = false, error = "latest pointer is unreadable" });
+            }
+        });
+
+        // RPG Server Debug
         g.MapGet("/events", (RpgStore store, int limit = 200, long afterId = 0, string? kinds = null, string? scenarioId = null) =>
         {
             var items = store.ListEvents(Math.Clamp(limit, 1, 500), afterId);
@@ -944,6 +1057,55 @@ public static class DebugEndpoints
     static string? StrProp(JsonElement obj, string name) =>
         obj.ValueKind == JsonValueKind.Object && obj.TryGetProperty(name, out var el) && el.ValueKind == JsonValueKind.String
             ? el.GetString() : null;
+
+    // ---- lawn-screenshot side store (dev artifacts, never RpgStore, never committed) ----
+
+    // Structural (not tunable): rejects garbage/accidental multi-GB posts before buffering.
+    const int ScreenshotMaxBytes = 8 * 1024 * 1024;
+
+    // Structural (not tunable): disk bound for dev screenshots.
+    const int ScreenshotRetainCount = 20;
+
+    static readonly byte[] PngSignature = { 137, 80, 78, 71, 13, 10, 26, 10 };
+
+    static bool HasPngSignature(byte[] png)
+    {
+        if (png.Length < PngSignature.Length) return false;
+        for (var i = 0; i < PngSignature.Length; i++)
+            if (png[i] != PngSignature[i]) return false;
+        return true;
+    }
+
+    static string SanitizeScreenshotTag(string? tag)
+    {
+        if (string.IsNullOrWhiteSpace(tag)) return "probe";
+        var sb = new System.Text.StringBuilder(32);
+        foreach (var c in tag.Trim())
+        {
+            if (sb.Length >= 32) break;
+            sb.Append(char.IsLetterOrDigit(c) || c is '_' or '-' ? c : '_');
+        }
+        return sb.Length == 0 ? "probe" : sb.ToString();
+    }
+
+    static string ScreenshotStoreDir() =>
+        Path.Combine(AppContext.BaseDirectory, "artifacts", "lawn-screenshots");
+
+    static void PruneScreenshots(string dir)
+    {
+        try
+        {
+            var files = new DirectoryInfo(dir).GetFiles("*.png")
+                .OrderByDescending(f => f.Name)
+                .Skip(ScreenshotRetainCount)
+                .ToList();
+            foreach (var f in files)
+            {
+                try { f.Delete(); } catch { /* best-effort prune */ }
+            }
+        }
+        catch { /* best-effort prune */ }
+    }
 
     static bool PayloadBool(object? payload, string name) =>
         payload is JsonElement el && el.ValueKind == JsonValueKind.Object
