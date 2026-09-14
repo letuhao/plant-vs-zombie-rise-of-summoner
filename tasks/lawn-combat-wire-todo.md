@@ -670,19 +670,23 @@ fixed here, both named precisely:**
    fixing it needs its own read/build/test cycle. Left named here so proof 4/5 is not silently
    abandoned: this is the actual reason the buffed plant died to two ordinary zombie bites instead of
    surviving to exhaustion.
-2. **A severe, reproducible per-frame stall (`loopMs` ~580-620ms, up from a healthy ~7-17ms baseline)
-   was observed for several minutes straight this session**, persisting across `session/end`,
-   across deleting the only plant on the board, and across board-state changes generally — ruling out
-   both "legacy debug-session overhead" (this session's own earlier, resolved finding) and "a huge-HP
-   entity is expensive to render/update" as the cause. `fps` stayed a steady 60 throughout (the
-   render thread itself was never blocked), so whatever is slow is time spent inside the mod's own
-   per-tick handler, off the frame-critical path — consistent with, but not confirmed as, a growing
-   backlog from this session's own unusually high rate of back-to-back `debug_call`/`debug_inspect`
-   invocations rather than a production defect. **Not root-caused this session** — flagged here
-   because it is exactly the kind of finding the T13 perf-ceiling proof (≤6% frame share at 300z)
-   needs to rule out before that proof can be trusted; whoever attempts perf ceiling next should
-   restart the game process first and watch `loopMs` from a clean baseline before attributing any
-   number to the feature under test.
+2. **A severe per-frame stall (`loopMs` ~580-620ms, up from a healthy ~7-17ms baseline) was observed
+   for several minutes straight this session**, persisting across `session/end`, across deleting the
+   only plant on the board, and across board-state changes generally — ruling out both "legacy
+   debug-session overhead" (this session's own earlier, separately-resolved finding) and "a huge-HP
+   entity is expensive to render/update" as the cause. `fps` stayed a steady 60 throughout (the render
+   thread itself was never blocked), so the cost was inside the mod's own per-tick handler, off the
+   frame-critical path. **Resolved by itself, confirmed, not just assumed**: after a ~30-minute idle
+   gap with no further debug calls (an unrelated `debug_restart_game` MCP call sat waiting the whole
+   time), `loopMs` was back to `7.26-7.86ms` — a clean recovery with no restart, no code change, and
+   no session/end in between the stall and the recovery. This matches a transient backlog from this
+   session's own unusually high rate of back-to-back `debug_call`/`debug_inspect` invocations (each
+   queued and drained a few per frame), not a persistent production defect — but this is inferred from
+   the recovery pattern, not measured directly (no per-command queue-depth metric exists to confirm
+   it), so it is named as the likely explanation, not a proven one. Flagged for whoever runs the T13
+   perf-ceiling proof (≤6% frame share at 300z) next: space out debug calls during that measurement,
+   or don't drive combat via rapid debug commands at all, so a transient backlog like this one can
+   never be mistaken for the feature's own frame cost.
 
 ---
 
