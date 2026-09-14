@@ -169,10 +169,15 @@ public static class EventDrainHost
         // silently reintroduce the stub-resolve bug this module removes. No RPG contribution; the
         // caller still treats this as "was a bullet" (wasBullet stays true above) so the vanilla
         // taken-side record stays suppressed, matching existing bullet policy.
-        if (shooterPtr == IntPtr.Zero) return false;
+        if (shooterPtr == IntPtr.Zero)
+        {
+            if (CheatState.EmitProof && CheatState.On("SYS-EMIT-PROOF"))
+                CheatState.Note($"fsm-trace EventDrainHost.TryRecordDealtFromBullet DROPPED bulletPtr={bullet.Pointer:X} shooterPtr=0 (no shooter resolved)");
+            return false;
+        }
 
         var d = Drain;
-        return d.Record(new GameEventRec(
+        var recorded = d.Record(new GameEventRec(
             GameEventKind.CombatHit, SafeFrame(), d.NextSeq(),
             actorPtr: shooterPtr, targetPtr: targetPtr,
             typeId: shooterTypeId, targetTypeId: targetTypeId, side: targetSide,
@@ -180,6 +185,9 @@ public static class EventDrainHost
             chainDepth: d.RecordDepth, sourceGrantIdx: -1,
             matchKeyIdx: d.InternMatchKey(GameHooks.MatchKey), pairId: 0,
             swingPtr: bullet.Pointer, instakillShaped: instakillShaped));
+        if (CheatState.EmitProof && CheatState.On("SYS-EMIT-PROOF"))
+            CheatState.Note($"fsm-trace EventDrainHost.TryRecordDealtFromBullet recorded={recorded} shooterPtr={shooterPtr:X} targetPtr={targetPtr:X} damage={damage}");
+        return recorded;
     }
 
     /// <summary>Melee dealt (zombie bite, or a plant-side area melee like Shulkflower's

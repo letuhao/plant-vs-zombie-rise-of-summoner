@@ -877,6 +877,8 @@ public static class GameHooks
     {
         public static void Prefix(Zombie __instance, ref int theDamage, IDamageMaker damageFrom, DamageType theDamageType, PlantType reportType, bool fix)
         {
+            if (CheatState.EmitProof && CheatState.On("SYS-EMIT-PROOF"))
+                CheatState.Note($"fsm-trace ZombieTakeDamage.Prefix RAW theDamage={theDamage} zombiePtr={__instance?.Pointer:X} zGod={CheatState.On("Z-GOD")}");
             BeginDamageSource(__instance?.Pointer ?? IntPtr.Zero, damageFrom);
             using var _perf = PerfProbe.Measure(PerfSection.TakeDamagePrefix);
             if (CheatState.On("Z-GOD")) { theDamage = 0; return; }
@@ -1353,6 +1355,8 @@ public static class GameHooks
                     catch { }
                 }
                 Effects.EventDrainHost.CacheBulletShooter(__instance.Pointer, shooterPtr, shooterTypeId);
+                if (CheatState.EmitProof && CheatState.On("SYS-EMIT-PROOF"))
+                    CheatState.Note($"fsm-trace BulletInit.Postfix bulletPtr={__instance.Pointer:X} shooterPtr={shooterPtr:X} shooterTypeId={shooterTypeId}");
             }
             catch { }
             // Highest-rate kind (~per pea). Emit only when something consumes it: an OnSpawn

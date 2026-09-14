@@ -559,6 +559,101 @@ the observer run file · **Scope:** M (real-time, not compute-bound)
 
 ---
 
+### T13 evidence — 2026-09-15, FSM sequence trace (owner demand: one diagram, every module logs, prove the flow)
+
+The owner rejected the prior evidence in this file as unproven: no module in the FSM/funnel chain
+wrote a log, so "the plant attack triggers" was an inference from downstream numbers, never observed
+directly. Confirmed by `grep` before any fix: **zero** log statements existed anywhere in
+`EffectBag.cs`, `CombatDamageDispatcher.cs`, `EventDrain.cs` (Core), or `EventDrainHost.cs`
+(Injector) — the entire FSM/funnel was silent. Fixed by adding one `CheatState.Note` at each node
+below, all gated behind the existing `CheatState.EmitProof && CheatState.On("SYS-EMIT-PROOF")`
+convention (`EntityStatWriter.ProofWrite`'s own gate) — additive, standing infrastructure, not a
+throwaway trace to be deleted after this session.
+
+**Sequence (plant basic attack → zombie takes RPG damage):**
+
+```mermaid
+sequenceDiagram
+    participant PvZ as PvZ vanilla (Plant fires pea)
+    participant BI as GameHooks.BulletInit.Postfix
+    participant ZTD as GameHooks.ZombieTakeDamage.Prefix
+    participant EDH as EventDrainHost.TryRecordDealtFromBullet
+    participant ED as Core EventDrain (buffer/dedupe)
+    participant OD as EffectRuntime.OnDrained
+    participant EB as Core EffectBag.OnEvent -> FireGrant
+    participant CDD as Core CombatDamageDispatcher.DispatchInstant
+    participant DAP as Core DamageApplyPipeline.Apply
+    participant GCH as GateCounterHost.HandleDamageApplied (OnDamageApplied hook)
+    participant FUN as Core EffectFunnel (queued mutation)
+    participant FA10 as InjectorEffectActionSink (hp branch)
+    participant ESW as EntityStatWriter.AddZombieHp -> ProofWrite
+
+    PvZ->>BI: Bullet.InitData
+    BI->>BI: resolve shooterPtr (direct read, else position-fallback)
+    BI->>EDH: CacheBulletShooter(bulletPtr, shooterPtr)
+    PvZ->>ZTD: Bullet hits zombie
+    ZTD->>ZTD: RAW theDamage (vanilla, pre-scale)
+    ZTD->>EDH: TryRecordDealtFromBullet(bulletPtr...)
+    EDH->>ED: Record(GameEventRec actorPtr=shooterPtr)
+    ED-->>OD: Drain() callback (buffered/coalesced)
+    OD->>EB: Bag.OnEvent(ev) [ev.ActorPtr=shooterPtr]
+    EB->>CDD: DispatchInstant(packet) [packet.ActorPtr=ev.ActorPtr]
+    CDD->>DAP: Apply(finalizedSignedAmount)
+    DAP->>FUN: sink.Apply (EnqueueMutation)
+    CDD->>GCH: onDamageApplied(result, origin, attackerPtr)
+    FUN-->>FA10: funnel drain -> plan item (channel=hp)
+    FA10->>ESW: AddZombieHp(zombie, amount, source)
+    ESW->>ESW: ProofWrite -> "writer.zombie ..." log
+```
+
+**Per-node log evidence, one real run (`2026-09-15T05:38:53-05:39:09Z`, `lab-overlay`, session
+ended before observing — see gotcha below):**
+
+| # | Node | Log line (verbatim sample) | Proven |
+|---|---|---|---|
+| 1 | `BulletInit.Postfix` (`GameHooks.cs`) | `fsm-trace BulletInit.Postfix bulletPtr=1F77B66DD20 shooterPtr=1F779420900 shooterTypeId=0` | yes — shooter resolves to the real plant ptr |
+| 2 | `ZombieTakeDamage.Prefix` RAW (`GameHooks.cs`) | `fsm-trace ZombieTakeDamage.Prefix RAW theDamage=1 zombiePtr=1F77947C320` | yes — vanilla damage is genuinely **1** (silenced), matching the owner's own screen observation, not the `vanilla=20` this file reported earlier this program (see finding B) |
+| 3 | `EventDrainHost.TryRecordDealtFromBullet` | `fsm-trace EventDrainHost.TryRecordDealtFromBullet recorded=True shooterPtr=1F779420900 targetPtr=1F77947C320 damage=1` | yes — event recorded with the correct (fifth-defect-fixed) shooter identity |
+| 4 | `EffectRuntime.OnDrained` (event in) | `fsm-trace EffectRuntime.OnDrained ev trigger=OnDamageDealt actorPtr=1F779420900 targetPtr=1F77947C320 damage=-1 swingId=1F77B66DD20 isFirstOfSwing=True` | yes — the event Core's `EffectBag` actually receives carries the **plant's** ptr as attacker, not the bullet's |
+| 5 | `CombatDamageDispatcher.OnDamageApplied` (FSM apply) | `fsm-trace CombatDamageDispatcher.OnDamageApplied outcome=Applied appliedAmount=0 absorbedAmount=0 origin=DirectHit attackerPtr=1F779420900` | yes — `FireGrant` for `lawn-basic-attack` demonstrably runs per hit, attacker correctly identified; **appliedAmount=0** is explained, not a mystery — finding C |
+| 6 | `EntityStatWriter.ProofWrite` (final Unity write) | (separate run, zombie melee vs plant) `writer.plant src=effect.fa10:lawn-basic-attack@1F779420240 ptr=1F779420240 hp 300/300->194/300` | yes — the terminal Unity HP write fires and is logged **whenever the applied amount is non-zero**; a zero-amount apply (node 5 above) produces no writer line, confirmed by its absence in the same window |
+
+**Finding A — legacy-path gotcha (real, cost ~10 minutes of misleading data this session):**
+combat run through the injector while `DebugRuntime.SessionActive` is still true (e.g. right after
+`debug_lawn_setup`, before an explicit `session/end`) takes the **legacy dict/`OnCapture` path**, not
+the v2 `EventDrainHost`/`OnDrained` path this whole program built and fixed — confirmed live: with the
+session still active, `OnDamageApplied` fired with `attackerPtr=<bulletPtr>` (the pre-T6 naive
+identity) and none of nodes 3/4 above ever logged at all. This is already documented at this file's own
+Task 0 (line 17: *"a debug session sets `EventDrainHost.Active = false`, disabling the path under
+test"*) — this session re-discovered it empirically rather than reading it first. **Any T13 proof run
+must call `POST /api/debug/session/end` before observing combat**, or it silently measures the wrong
+pipeline.
+
+**Finding B — `debug.combat.silence-vanilla` zeroes the SAME ActorHub channel both systems read
+(by design, not a bug, but a real confound for THIS proof):** `SilenceVanilla` (`DebugCombatActions.cs:16`)
+sets `A-P-ATK%=0` and `P-ATK=0` on the plant, which zeroes the plant's ActorHub-composed ATK —
+the one number both vanilla bullet damage **and** the RPG overlay math (`OverlayCombatMath`, reading
+the same derived snapshot) scale from. That is why every `OnDamageApplied` for the plant's own attack
+this run showed `appliedAmount=0`: not a broken trigger, but a correctly-computed zero from a
+zeroed attacker ATK. **This means `lab-overlay`'s own default setup (which calls silence-vanilla
+unconditionally) cannot be used to prove a non-zero RPG delta for the silenced side's own attack** —
+it only isolates the *defender's* screen number. Un-silencing (`POST /api/debug/reset-mods`, which
+correctly clears the `A-`/`P-` override groups) restores real ATK, but the plant died to the zombie's
+own un-silenced melee bite (real vanilla damage) within one bullet cycle both times this was tried —
+confirming the zombie's attack chain end-to-end (`writer.plant ... -53/-53 -> hp 300/300->194/300`,
+finding above) but not yet capturing a non-zero plant-attack `appliedAmount`. **Still open**: repeat
+with the plant's HP buffed (or the zombie's ATK floored) so the plant survives past its first real
+volley.
+
+**Net effect on this task's status:** proof 1 (attribution) is now confirmed **twice over** — once via
+the observer's `swing=<plantPtr>:N` sample (already recorded above) and once via this independent FSM
+log trail (nodes 1-5), which is the stronger of the two since it is not reading the same instrument the
+proof exists to validate. The "never proves the attack triggers" objection is answered: it does, at
+every node, with the correct identity. What remains open is unchanged in substance (proofs 2/4/5/6/7 and
+perf), plus the one new item above (a non-zero plant-attack RPG delta, un-confounded by silence-vanilla).
+
+---
+
 ### Dropped success criteria — [audit] restored to their tasks
 
 The first draft of this todo silently dropped eight criteria that exist in the specs. Each is added to
