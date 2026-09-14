@@ -21,5 +21,6 @@
     { "id": "cheatcore-fallback", "kind": "owner", "paths": ["src/FusionRpg.CheatCore/**"], "project": "core", "level": "module", "guards": [] }
     ,{ "id": "injector-fallback", "kind": "owner", "paths": ["src/FusionRpg.Injector/**", "src/FusionRpg.Injector.BepInEx/**", "src/FusionRpg.Injector.MelonLoader/**", "src/FusionRpg.Injector.MelonLoader.39/**"], "project": "core", "level": "module", "guards": [] }
     ,{ "id": "launcher-fallback", "kind": "owner", "paths": ["src/FusionRpg.Launcher/**"], "project": "guard", "level": "module", "guards": [] }
+    ,{ "id": "server-tests-fallback", "kind": "owner", "paths": ["tests/FusionRpg.Server.Tests/**"], "project": "server", "level": "module", "guards": [] }
   ]
 }
