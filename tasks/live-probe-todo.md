@@ -270,12 +270,27 @@ never `deploy-play.ps1` with a restart from an agent shell), confirm `GET /healt
 **Description:** Bound Peashooter, allocate `Might`, run the full Mode B probe.
 
 **Acceptance criteria:**
-- [ ] Both halves reported; ideally both pass (T12 already passed once manually on 2026-09-13 — this
-      run reproduces that through the tool itself, not by citing the earlier manual result).
+- [x] Both halves reported (2026-09-14, via the tool itself, real HTTP throughout).
 
-**Verification:**
-- [ ] `.\scripts\prove-live-probe.ps1 -Mode B ...` output, recorded in
-      `tasks/actor-hub-and-combat-power-solid-fixing-todo.md`'s T12 entry
+**Verification (2026-09-14, `prove-live-probe.ps1 -Mode B -PlayerId 1 -Side plant -BannerId
+standard-rift -AptitudeId Might -AptitudePoints 1 -TimeoutSec 30`):**
+```
+[OK] 1-acquire (real summon): instanceId=e440c9d09b834935801482d7c10ecfc6 typeId=1284 side=plant
+[REFUSED] 2-allocate: step 2 refused: HTTP 409 aptitudes.overbudget
+[OK] 4-deploy: queued=True phase=Deploying
+[OK] 5-deploy-ack-wait: phase=ActiveBound lastPtr=1C0F4CCB240
+[OK] 5-read-back (actor): phase=ActiveBound level=1 lastPtr=1C0F4CCB240
+[OK] 6-live-engine (read): ptr=1C0F4CCB240 typeId=1284 attack=1 hp=6000 maxHp=6000 col=2 row=2
+```
+Both halves (persisted-state AND live-engine) genuinely exercised end to end. The one `REFUSED` is
+**not a bug**: `GET /api/aptitudes/unique/{id}` confirmed `specimenLevel:1, budget:0` — a real summon
+always lands at level 1 with zero allocatable points; allocating any positive amount is correctly
+refused. This is orthogonal to the actor-hub program's own documented T12 gate (order-dependency /
+AS-1.1b), which needs a LEVELED specimen to exercise meaningfully — not reproduced here, since no
+debug/real path to grant a summoned specimen levels was found. Real summon is also random-species
+(first attempt rolled `side=zombie`, which then correctly refused step 4 with
+`deploy.hypno-ally-not-implemented` — a separate, already-known zombie-ally-deploy gap, not chased
+here); a second pull (100 souls) landed `side=plant`.
 
 **Dependencies:** Task 9
 **Files:** None (operational)
