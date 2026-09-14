@@ -27,9 +27,9 @@ public static class EffectAtomCatalog
                     Action = "BoardAction",
                     Params = new()
                     {
-                        ["col"] = 4.0,
+                        ["col"] = 4,
                         ["op"] = "cherry",
-                        ["row"] = 2.0,
+                        ["row"] = 2,
                     },
                 },
             },
@@ -160,9 +160,9 @@ public static class EffectAtomCatalog
                     Action = "SpawnGridItem",
                     Params = new()
                     {
-                        ["col"] = 3.0,
-                        ["gridItemType"] = 7.0,
-                        ["row"] = 2.0,
+                        ["col"] = 3,
+                        ["gridItemType"] = 7,
+                        ["row"] = 2,
                     },
                 },
                 new()
@@ -171,9 +171,9 @@ public static class EffectAtomCatalog
                     Action = "ClearGridItem",
                     Params = new()
                     {
-                        ["col"] = 3.0,
-                        ["gridItemType"] = 7.0,
-                        ["row"] = 2.0,
+                        ["col"] = 3,
+                        ["gridItemType"] = 7,
+                        ["row"] = 2,
                     },
                 },
             },
@@ -216,6 +216,7 @@ public static class EffectAtomCatalog
                     Action = "ApplyResourceDelta",
                     Params = new()
                     {
+                        ["amount"] = new Dictionary<string, object?> { ["eventField"] = "damage", ["multiplierMilli"] = 1000 },
                         ["channel"] = "hp",
                     },
                 },
@@ -281,9 +282,9 @@ public static class EffectAtomCatalog
                     Action = "SetBoxType",
                     Params = new()
                     {
-                        ["boxType"] = 2.0,
-                        ["col"] = 3.0,
-                        ["row"] = 2.0,
+                        ["boxType"] = 2,
+                        ["col"] = 3,
+                        ["row"] = 2,
                     },
                 },
             },
@@ -346,10 +347,10 @@ public static class EffectAtomCatalog
                     Action = "SpawnEntity",
                     Params = new()
                     {
-                        ["col"] = 3.0,
+                        ["col"] = 3,
                         ["kind"] = "plant",
-                        ["row"] = 2.0,
-                        ["typeId"] = 0.0,
+                        ["row"] = 2,
+                        ["typeId"] = 0,
                     },
                 },
                 new()
@@ -359,8 +360,8 @@ public static class EffectAtomCatalog
                     Params = new()
                     {
                         ["kind"] = "bullet",
-                        ["row"] = 2.0,
-                        ["typeId"] = 0.0,
+                        ["row"] = 2,
+                        ["typeId"] = 0,
                         ["x"] = 400,
                     },
                 },
@@ -385,7 +386,7 @@ public static class EffectAtomCatalog
                         ["hp"] = 100,
                         ["kind"] = "zombie",
                         ["maxHp"] = 100,
-                        ["typeId"] = 0.0,
+                        ["typeId"] = 0,
                     },
                 },
             },
