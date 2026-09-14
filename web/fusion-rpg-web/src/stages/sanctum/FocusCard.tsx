@@ -27,6 +27,7 @@ export type OverdueContract = {
 export function FocusCard({
   actorCount,
   firstActor,
+  showFirstUserGuide = false,
   overdueContract,
   returnedExpeditionCount,
   onOpenCreatures,
@@ -35,6 +36,7 @@ export function FocusCard({
 }: {
   actorCount: number;
   firstActor: ActorRungState | null;
+  showFirstUserGuide?: boolean;
   overdueContract?: OverdueContract;
   returnedExpeditionCount?: number;
   onOpenCreatures: () => void;
@@ -46,6 +48,13 @@ export function FocusCard({
       <div className="rounded-md border border-panel bg-panel p-4" data-testid="focus-card-first-run">
         <p className="text-xs font-bold uppercase tracking-wide text-muted">First lawn run</p>
         <p className="mt-1 font-display text-lg text-text">Win a run to meet Crazy Dave</p>
+        {showFirstUserGuide ? (
+          <div className="mt-3 rounded-sm border border-lawn-hot bg-soil-raised p-3" data-testid="first-user-guide">
+            <p className="text-xs font-bold uppercase tracking-wide text-ok">Your first job</p>
+            <p className="mt-1 text-sm text-text">Defend the lawn. A settled victory earns Souls and opens Dave’s commander sheet.</p>
+            <p className="mt-1 text-xs text-muted">The wider Rift story will meet you when you are ready.</p>
+          </div>
+        ) : null}
         <p className="mt-1 text-sm text-muted">Your first victory unlocks the commander and starts the saved progression path.</p>
         <Button size="sm" className="mt-3" data-testid="focus-card-cta" onClick={onOpenCreatures}>View creatures</Button>
       </div>

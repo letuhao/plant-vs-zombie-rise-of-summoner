@@ -9,6 +9,7 @@ export type DialogShellProps = {
   title: string;
   subtitle?: string;
   footer?: ReactNode;
+  onEscapeKeyDown?: () => void;
   children: ReactNode;
   testId?: string;
 };
@@ -24,6 +25,7 @@ export function DialogShell({
   title,
   subtitle,
   footer,
+  onEscapeKeyDown,
   children,
   testId = "dialog-shell"
 }: DialogShellProps) {
@@ -60,6 +62,7 @@ export function DialogShell({
             // See PanelShell — the global keymap (T3) is the single owner of
             // Esc; Radix's own built-in handling is suppressed so it can't race it.
             event.preventDefault();
+            onEscapeKeyDown?.();
           }}
           className={cn(
             "band-dialog fixed left-1/2 top-1/2 flex w-[min(440px,92vw)] -translate-x-1/2 -translate-y-1/2",

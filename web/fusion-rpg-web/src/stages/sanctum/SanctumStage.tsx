@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { useCreatureRoster, usePlayers, useRelics, useRuns, useSoulBalance, useSpeciesIndex, useUniqueActors } from "@/lib/bus";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useCreatureRoster, useOnboarding, usePlayers, useRelics, useRuns, useSoulBalance, useSpeciesIndex, useUniqueActors } from "@/lib/bus";
 import { useContracts } from "@/lib/bus/contracts";
 import { conditionOf } from "@/features/creatures/contractView";
 import { displayName } from "@/features/creatures/rosterSplit";
@@ -18,6 +18,7 @@ import { FocusCard } from "./FocusCard";
 import { SanctumHome } from "./SanctumHome";
 import { SanctumHud } from "./SanctumHud";
 import { OnboardingReveal } from "./OnboardingReveal";
+import { RiftPrologueDialog } from "@/features/onboarding/RiftPrologueDialog";
 
 // GG-38's `layer-collection` / `layer-world` / `layer-reference` chunks (tech-stack.md §6): each
 // layer's real weight (a wrapped page, in most cases) loads once it's opened for the first time,
@@ -68,6 +69,7 @@ function useKeybindingsVersion(): number {
  */
 export function SanctumStage() {
   useStageMountGuard("sanctum");
+  const navigate = useNavigate();
   const players = usePlayers();
   const playerId = players.data?.currentPlayerId ?? 1;
 
@@ -75,10 +77,16 @@ export function SanctumStage() {
   const runsQuery = useRuns();
   const contractsQuery = useContracts(playerId);
   const soulsQuery = useSoulBalance(playerId);
+  const onboardingQuery = useOnboarding(playerId);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const openLayer = searchParams.get("panel") as Exclude<RailEntry["id"], "sanctum"> | null;
   const selectedId = searchParams.get("sel");
+  const riftStory = onboardingQuery.data?.stories.find((story) => story.storyId === "rift-prologue" && story.version === 1);
+  const [riftOpen, setRiftOpen] = useState(false);
+  useEffect(() => {
+    if (openLayer === null && riftStory?.eligible) setRiftOpen(true);
+  }, [openLayer, riftStory?.eligible]);
 
   // A layer mounts (and its chunk fetches) the first time it's opened — via a click or a cold
   // deep-link — and then stays mounted across a later close, matching every layer's existing
@@ -228,6 +236,7 @@ export function SanctumStage() {
           <FocusCard
             actorCount={actors.length}
             firstActor={firstActorState}
+            showFirstUserGuide={riftStory?.state === "acknowledged"}
             overdueContract={overdueContract}
             returnedExpeditionCount={returnedCount}
             onOpenCreatures={() => openLayerById("creatures")}
@@ -247,6 +256,13 @@ export function SanctumStage() {
           ) : null}
         </div>
       </div>
+
+      <RiftPrologueDialog
+        open={riftOpen}
+        playerId={playerId}
+        onClose={() => setRiftOpen(false)}
+        onContinueToLawn={() => navigate("/lawn")}
+      />
 
       {mountedLayers.has("creatures") ? (
         <Suspense fallback={<ChunkFallback testId="chunk-fallback-creatures" />}>

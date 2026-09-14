@@ -169,3 +169,5 @@ plant-vs-zombie-rise-of-summoner.code-workspace
 .opencode/
 tools/sprite-debug/assets/*.png
 tools/sprite-debug/assets/*/*.png
+web/fusion-rpg-web/package-lock.json
+.artifacts/

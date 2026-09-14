@@ -16,6 +16,10 @@ You need a legal install of **Plants vs. Zombies: Fusion** (a fan-made Plants vs
 
 You are **Crazy Dave**. Your capital is his **homeworld** — the one timeline still yours. Creatures are what the Fracture made of your lawn’s plants and zombies. Penny is how legions reach the other eras at all.
 
+On a fresh Sanctum entry, a short optional [Rift prologue](../ideas/onboarding-gnome-teaser.md) frames
+the fiction before the first lawn. It is a presentation-only warning: it does not create a save slot,
+grant a reward, or replace the lawn-first progression sequence.
+
 Everything you own lives at home: roster, reserve, altar, fusion lab, almanac, stored haul. That is why defending the homeworld is the spine, not one more objective.
 
 ---

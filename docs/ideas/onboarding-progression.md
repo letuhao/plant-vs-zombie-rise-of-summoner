@@ -4,6 +4,11 @@
 [spec-first-session-progression.md](../architecture/standalone/spec-first-session-progression.md).
 This brief is not implementation authorisation by itself.
 
+**Current boundary:** the implemented `rift-prologue` story is a separate Sanctum-owned presentation
+ledger. It precedes the first lawn when eligible, and its completed/skipped acknowledgement never
+adds a checkpoint or reward. The three checkpoint sequence below remains the authoritative first-win,
+level-3, and level-4 progression contract.
+
 ## Audit verdict
 
 The three-beat order is coherent and should stay. The idea was not yet live-testable, however:

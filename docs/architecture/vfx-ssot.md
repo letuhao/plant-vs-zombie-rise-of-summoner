@@ -108,6 +108,24 @@ Status cues are added by **criterion, not list**: a status gets `status.{id}.app
 
 **Phase 4 complete (vfx-v2, 2026-08-21):** all 21 catalog statuses had prove coverage, so the full roster is seeded (`VfxSeedCatalog.StatusFx` — one statusId→RGB row each). The producer is `StatusRuntime.OnApplied` (fires on definitive apply only, spread hops included; resists and StatusICD emit nothing), wired to `VfxDirector.Sink` in `EffectRuntime.Ensure`. Adding a status VFX is now one `StatusFx` row.
 
+### 4.3 Rift prologue cues (presentation-only extension)
+
+The onboarding Rift prologue uses the same catalog/director path. These cues are semantic scene beats,
+not gameplay events, and never write profile, run, HP, or checkpoint state:
+
+| Cue | Visual grammar | Anchor | Degraded fallback |
+|---|---|---|---|
+| `rift.portal.open` | radial violet tear with a bright rim and depth flash | scene/world | static portal art |
+| `rift.portal.surge` | directional lime corruption push, distinct from the radial open | scene/world | static portal art with surge line |
+| `rift.quarantine.seal` | directional cyan lock geometry and hard-edged seal | scene/world | static quarantine seal |
+| `rift.quarantine.fade` | rising violet residue settling into a still horizon | scene/world | final still/seal |
+
+The normal queue cap, per-cue rate limits, resource-failure skip reasons, and match-end clear apply
+unchanged. If the injector, shader, or pooled particle resource is unavailable, the director emits
+`debug.fx.skipped` and the web dialog remains usable with static base art. Reduced-motion mode keeps
+the semantic base art and seal treatment without animated particle emission. The dialog requests only
+these cue ids through the presentation seam; it does not construct Unity primitives.
+
 ---
 
 ## 5. Contracts

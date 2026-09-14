@@ -28,8 +28,8 @@ public class VfxRulesAndCatalogTests
         Assert.True(catalog.TryGet(VfxCueIds.CombatHit, out var hit));
         Assert.True(catalog.TryGet(VfxCueIds.CombatHeal, out var heal));
         Assert.True(catalog.TryGet(VfxCueIds.DebugProbe, out var probe));
-        // 3 combat/debug cues + shield.broken + 21 status.{id}.apply cues (SPEC W5 + shield T14)
-        Assert.Equal(25, catalog.Ids.Count);
+        // 3 combat/debug cues + shield.broken + 4 Rift cues + 21 status.{id}.apply cues.
+        Assert.Equal(29, catalog.Ids.Count);
 
         // combat.hit = floater + burst + impact flash; heal = floater + rising motes; probe = fixed-color burst.
         Assert.Equal(3, hit.Primitives.Count);
@@ -47,6 +47,26 @@ public class VfxRulesAndCatalogTests
         Assert.Single(probe.Primitives);
         Assert.Equal(VfxColorSourceKind.Fixed, probe.Primitives[0].Color);
         Assert.Equal(VfxSeedCatalog.ProbeOrange, probe.Primitives[0].FixedRgb);
+    }
+
+    [Fact]
+    public void Rift_recipes_keep_portal_and_quarantine_visual_grammar_distinct()
+    {
+        var catalog = new VfxCatalog();
+        catalog.ReplaceAll(VfxSeedCatalog.CreateAll());
+
+        Assert.True(catalog.TryGet(VfxCueIds.RiftPortalOpen, out var open));
+        Assert.True(catalog.TryGet(VfxCueIds.RiftPortalSurge, out var surge));
+        Assert.True(catalog.TryGet(VfxCueIds.RiftQuarantineSeal, out var seal));
+        Assert.True(catalog.TryGet(VfxCueIds.RiftQuarantineFade, out var fade));
+        Assert.Equal(VfxBurstShape.Radial, open.Primitives.Single(p => p.Kind == VfxPrimitiveKind.Burst).Shape);
+        Assert.Equal(VfxBurstShape.Directional, surge.Primitives.Single(p => p.Kind == VfxPrimitiveKind.Burst).Shape);
+        Assert.Equal(VfxBurstShape.Directional, seal.Primitives.Single(p => p.Kind == VfxPrimitiveKind.Burst).Shape);
+        Assert.Equal(VfxBurstShape.Rising, fade.Primitives.Single(p => p.Kind == VfxPrimitiveKind.Burst).Shape);
+        Assert.NotEqual(open.Primitives.Single(p => p.Kind == VfxPrimitiveKind.Burst).FixedRgb,
+            surge.Primitives.Single(p => p.Kind == VfxPrimitiveKind.Burst).FixedRgb);
+        Assert.NotEqual(surge.Primitives.Single(p => p.Kind == VfxPrimitiveKind.Burst).FixedRgb,
+            seal.Primitives.Single(p => p.Kind == VfxPrimitiveKind.Burst).FixedRgb);
     }
 
     [Fact]
