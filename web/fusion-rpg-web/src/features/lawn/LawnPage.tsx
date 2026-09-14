@@ -38,6 +38,7 @@ import {
   TypeIcon
 } from "@/ui";
 import { LawnGameHost } from "./LawnGameHost";
+import { LawnScreenshotPanel } from "./LawnScreenshotPanel";
 import { ActorHudInspector } from "./ActorHudInspector";
 import { LawnOccupantList } from "./LawnOccupantList";
 import { LawnStatsModal } from "./LawnStatsModal";
@@ -668,6 +669,7 @@ export function LawnPage() {
           { label: "Mode", value: interaction.mode }
         ]}
       />
+      <LawnScreenshotPanel />
 
       {(interaction.mode === "TileSelected" ||
         interaction.mode === "SpawnTargeting") &&
