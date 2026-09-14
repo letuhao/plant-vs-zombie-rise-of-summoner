@@ -330,17 +330,21 @@ MelonLoader install, so the Injector half is un-buildable here — owner still o
 - [x] Fetch path is unique GET only (S4). — `RefreshUniqueAptitudesAsync` is the only new fetch, per-instanceId GET, no `uniques` map added to the commander payload
 - [x] General lawn creatures unchanged (species path). — Bound branch returns before the species lookup runs; a non-Bound ctx takes the untouched original path (`Not_Bound_falls_through_to_the_species_path_even_when_the_hook_is_wired`)
 - [x] Regression: unique with same species id as a general does not inherit empire allocation. — `Bound_unique_sharing_a_species_id_with_a_general_never_inherits_empire_shares`, proven
-- [ ] Parity prove: Bound lawn aptitude input matches Server UniqueCreature compose. — **live probe RUN
-      2026-09-13, split result.** The ActorHub compose chain is **PROVEN CORRECT end to end on a real
-      board**: a real specimen (minted via the real `MintCreature` path, levelled via the real
+- [x] Parity prove: Bound lawn aptitude input matches Server UniqueCreature compose. — **both orders
+      now proven live, closing this criterion for real.** `deploy → allocate` (2026-09-13): a real
+      specimen (minted via the real `MintCreature` path, levelled via the real
       `POST /api/unique/actors/{id}/xp`, allocated via the real `POST /api/aptitudes/unique/allocate`,
       deployed via the real `POST /api/unique/actors/{id}/deploy` to `phase: ActiveBound` with a real
       Unity ptr) resolved `bonusAtk 222` / `bonusMaxHp 1110` with contribs
       `aptitude.Might:Flat:222` and `aptitude.Vigor:Flat:666;aptitude.Fortitude:Flat:444`, composing
       `primaryAtk 20 + 222 = appliedAtk 242` and `primaryMaxHp 300 + 1110 = appliedMaxHp 1410`, and
-      `debug.board-stats` read the live Unity entity back as `attack 223 hp 1410 maxHp 1410`. Not a
-      fabricated actor at any step. **But it is order-dependent** — see the blocker below
-- [ ] HF-lawn ticked on ideal / maps. — held until the live parity prove above closes
+      `debug.board-stats` read the live Unity entity back as `attack 223 hp 1410 maxHp 1410`.
+      `allocate → deploy` (2026-09-14, after AS-1.1b landed): a real level-148 Roster specimen
+      (`5dd73a05c09a4bc6afcebbf1acd5e847`) allocated `Might 141` via `POST /api/aptitudes/unique/allocate`
+      WHILE still `Roster`, then deployed via `POST /api/unique/actors/{id}/deploy` — `debug.board-stats`
+      read the live Unity entity (ptr `2887A74BB40`) back as `attack 2721 attackDamage 2721` (vanilla
+      baseline `attack 1`). Not a fabricated actor at any step, either run.
+- [x] HF-lawn ticked on ideal / maps. — unblocked, both orders proven live
 - [x] aptitude-sheet `unique-lawn-wire` Done (or listed open criteria closed) before closing this task. — AS-1.1 code landed; its own live-probe line is the same open item as this task's parity prove
 
 **Verification:**
