@@ -136,9 +136,14 @@ public static class ScreenshotRunner
         var h = Math.Max(1, Mathf.FloorToInt(src.height * scale));
         var rt = RenderTexture.GetTemporary(w, h, 0, RenderTextureFormat.Default, RenderTextureReadWrite.sRGB);
         var prev = RenderTexture.active;
+        var prevSrgbWrite = GL.sRGBWrite;
         Texture2D? small = null;
         try
         {
+            // Graphics.Blit does not guarantee the sRGB write state. In a Linear project,
+            // leaving it disabled stores linear values in the sRGB target and makes midtones
+            // appear too dark in the emitted PNG. Match Unity's active color space explicitly.
+            GL.sRGBWrite = QualitySettings.activeColorSpace == ColorSpace.Linear;
             Graphics.Blit(src, rt);
             RenderTexture.active = rt;
             small = new Texture2D(w, h, TextureFormat.RGBA32, false);
@@ -150,6 +155,7 @@ public static class ScreenshotRunner
         }
         finally
         {
+            GL.sRGBWrite = prevSrgbWrite;
             RenderTexture.active = prev;
             RenderTexture.ReleaseTemporary(rt);
             if (small != null) UObject.Destroy(small);
@@ -178,9 +184,11 @@ public static class ScreenshotRunner
         var rt = RenderTexture.GetTemporary(w, h, 0, RenderTextureFormat.Default, RenderTextureReadWrite.sRGB);
         var prevTarget = cam.targetTexture;
         var prevActive = RenderTexture.active;
+        var prevSrgbWrite = GL.sRGBWrite;
         Texture2D? tex = null;
         try
         {
+            GL.sRGBWrite = QualitySettings.activeColorSpace == ColorSpace.Linear;
             cam.targetTexture = rt;
             cam.Render();
             RenderTexture.active = rt;
@@ -199,6 +207,7 @@ public static class ScreenshotRunner
         finally
         {
             try { cam.targetTexture = prevTarget; } catch { }
+            GL.sRGBWrite = prevSrgbWrite;
             RenderTexture.active = prevActive;
             RenderTexture.ReleaseTemporary(rt);
             if (tex != null) UObject.Destroy(tex);

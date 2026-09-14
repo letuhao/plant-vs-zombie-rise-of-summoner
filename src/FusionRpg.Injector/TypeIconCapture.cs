@@ -167,10 +167,12 @@ public static class TypeIconCapture
 
         var rt = RenderTexture.GetTemporary(src.width, src.height, 0, RenderTextureFormat.Default, RenderTextureReadWrite.sRGB);
         var prev = RenderTexture.active;
+        var prevSrgbWrite = GL.sRGBWrite;
         Texture2D? full = null;
         Texture2D? crop = null;
         try
         {
+            GL.sRGBWrite = QualitySettings.activeColorSpace == ColorSpace.Linear;
             Graphics.Blit(src, rt);
             RenderTexture.active = rt;
             full = new Texture2D(src.width, src.height, TextureFormat.RGBA32, false);
@@ -191,6 +193,7 @@ public static class TypeIconCapture
         }
         finally
         {
+            GL.sRGBWrite = prevSrgbWrite;
             RenderTexture.active = prev;
             RenderTexture.ReleaseTemporary(rt);
             if (full != null) Object.Destroy(full);
