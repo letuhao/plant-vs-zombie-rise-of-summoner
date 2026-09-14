@@ -244,12 +244,78 @@ public class LawnElementResolverTests
     // This cache is populated on one trigger (a resolve) and describes state that changes on others.
     // §2.16 requires the enumeration of EVERY edge that can change what a ptr resolves to, with a test
     // per edge — the enumeration is the deliverable, not just whichever edge prompted the work. There
-    // are four candidates; two fire and two provably cannot, and each of the four is checked below.
+    // are now five candidates; three fire (one added 2026-09-14) and two provably cannot, checked below.
     //
     //   1 match change          fires — wholesale clear (A_match_key_change_clears_the_cache..., above)
     //   2 hypno / charm         cannot fire — `side` is object kind, not allegiance
     //   3 death + ptr reuse     fires — per-ptr Invalidate, wired at GameHooks.ForgetEntity
     //   4 catalog revision      cannot fire — the roster is configured once per host at startup
+    //   5 board-miss (typeId 0) fires — the ptr's own board-registration racing this resolve must never
+    //                            latch a Neutral answer (see Trigger5 tests below)
+
+    // ---- trigger 5: the board not knowing this ptr YET (added 2026-09-14) ----------------------------
+    //
+    // lawn-combat-wire T10/T12 live-inert investigation, second defect: a `LawnBasicAttackGrantBinder`
+    // grant, bound once at spawn, resolves the actor's element via THIS resolver keyed on
+    // `boardLookup() -> typeId`. Confirmed live (POST /api/debug/effect/list against a real running
+    // game): roughly half of otherwise-identical `debug.spawn-plant`/`debug.spawn-zombie` calls lost a
+    // real, reproducible race — the grant-bind drain ran before `InjectorEntityRegistry.Add` had
+    // registered the freshly-spawned entity, so `boardLookup()` answered `("plant", 0)` (this codebase's
+    // "no entity here" sentinel). Before this fix, that miss was cached exactly like any other miss —
+    // permanently, for the ptr — so `LawnBasicAttackGrantBinder`'s own requeue-and-retry (added the same
+    // day, once the entity WAS registered a frame or two later) still read back the stale Neutral answer
+    // forever, because a cache hit never calls `boardLookup` again. The fix: `typeId == 0` is answered
+    // directly and never written into `_cache`.
+
+    [Fact]
+    public void Trigger5_a_typeId_zero_board_miss_is_never_cached_so_a_later_real_resolve_still_finds_the_species()
+    {
+        var index = new LawnElementIndex(new[] { Species("s1", "plant", 10, ElementTypeId.Fire) });
+        var resolver = new LawnElementResolver(index);
+
+        // First call: the board does not know this ptr yet (registry hasn't caught up with the spawn).
+        var early = resolver.Resolve("m1", "1A2B", () => ("plant", 0));
+        Assert.True(early.Elements.IsNeutral);
+
+        // Second call, SAME ptr, SAME match: the entity is registered now. Without the fix this would
+        // still read back the cached Neutral from the first call and never invoke boardLookup again —
+        // exactly the live defect (grants:0 forever after a lost race, confirmed via a real running game).
+        var later = resolver.Resolve("m1", "1A2B", () => ("plant", 10));
+
+        Assert.Equal(ElementTypeId.Fire, later.Elements.Primary);
+        Assert.False(later.Elements.IsNeutral);
+        Assert.Equal(2, resolver.BoardLookupCount); // both calls actually asked the board — no cache hit
+    }
+
+    [Fact]
+    public void Trigger5_a_typeId_zero_board_miss_does_not_count_as_a_cached_ptr()
+    {
+        var index = new LawnElementIndex(new[] { Species("s1", "plant", 10) });
+        var resolver = new LawnElementResolver(index);
+
+        resolver.Resolve("m1", "1A2B", () => ("plant", 0));
+
+        // Nothing was ever cached for this ptr -- CachedPtrCount only counts entries a later resolve
+        // could read back stale, and a board-miss must never be one of them.
+        Assert.Equal(0, resolver.CachedPtrCount);
+    }
+
+    [Fact]
+    public void Trigger5_a_genuine_content_gap_typeId_nonzero_no_species_still_caches_as_before()
+    {
+        // The negative control: this fix narrows the no-cache rule to typeId == 0 specifically. A real
+        // entity whose type the species catalog simply does not cover (typeId != 0) is a DIFFERENT,
+        // pre-existing case (`No_species_for_the_pair_resolves_Neutral_not_a_throw`, above) and must keep
+        // caching + reporting exactly as before -- this fix must not accidentally widen into "never cache
+        // any Neutral", which would silently reintroduce the per-hit board-scan cost E27 removed.
+        var index = new LawnElementIndex(Array.Empty<CreatureSpeciesDef>());
+        var resolver = new LawnElementResolver(index);
+
+        resolver.Resolve("m1", "1A2B", () => ("plant", 404)); // a real entity, just not in the catalog
+
+        Assert.Equal(1, resolver.CachedPtrCount);
+        resolver.Resolve("m1", "1A2B", () => throw new InvalidOperationException("must still be cached"));
+    }
 
     // ---- trigger 3: death + IL2CPP pointer reuse ------------------------------------------------------
 

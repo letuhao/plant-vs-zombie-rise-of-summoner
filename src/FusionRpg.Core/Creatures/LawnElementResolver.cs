@@ -43,6 +43,23 @@ namespace FusionRpg.Core.Creatures;
 /// <c>Configure</c>.</item>
 /// </list>
 /// </para>
+///
+/// <para><b>A fifth case, added 2026-09-14 (lawn-combat-wire T10/T12 live-inert investigation): the
+/// board not knowing this ptr YET.</b> <paramref name="boardLookup"/> answers <c>typeId == 0</c> (this
+/// codebase's own "no entity at this ptr" sentinel — <c>CreateZombieHooks.cs</c>:
+/// <c>theZombieType == ZombieType.Nothing</c>) for two DIFFERENT reasons a caller cannot tell apart from
+/// the return value alone: the ptr genuinely has nothing on the board (death, or a bad ptr), OR the
+/// entity is real but its OWN board-registration hook has not run yet this frame — a real,
+/// reproducible race for any caller that resolves a freshly-spawned ptr from OUTSIDE that entity's own
+/// spawn hook (confirmed live: <c>LawnBasicAttackGrantBinder</c>, queued from `MatchHost.Apply`'s
+/// `plant.spawn`/`zombie.spawn` handling, not from the spawn hook itself). Before this fix, EITHER
+/// reason got the SAME treatment: <c>ElementsFor</c> ran, returned <see cref="ActorElementTypes.Neutral"/>
+/// (no species found for typeId 0), and <c>_cache[key]</c> latched that Neutral answer for the ptr for
+/// the rest of the match — so a caller that retried the SAME ptr once the board genuinely knew about it
+/// still read back the stale Neutral answer forever, because a cache lookup never re-invokes
+/// <paramref name="boardLookup"/> at all. A `typeId == 0` result is therefore never cached: it is
+/// returned directly, so every call with nothing on the board costs one (cheap, frame-cached at the
+/// caller) board lookup rather than corrupting the entry a LATER, real resolve needs.</para>
 /// </summary>
 public sealed class LawnElementResolver
 {
@@ -98,6 +115,11 @@ public sealed class LawnElementResolver
 
         BoardLookupCount++;
         var (side, typeId) = boardLookup();
+        // 2026-09-14 fix (this class's own doc, "a fifth case"): typeId 0 means the board does not (yet,
+        // or any longer) know this ptr -- never cache that, or a caller that resolves too early (before
+        // the entity's own board-registration hook has run) permanently poisons this ptr's entry with
+        // Neutral, even once a later call would have found the real species.
+        if (typeId == 0) return (side, ActorElementTypes.Neutral);
         var elements = ElementsFor(side, typeId);
 
         var result = (side, elements);

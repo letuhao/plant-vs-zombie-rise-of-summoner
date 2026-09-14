@@ -23,10 +23,30 @@ public static class LawnElementResolverHost
     /// `(side, elementTypes)` for a lawn actor, cached per actor per match. Never throws — a species
     /// the index cannot find, or the catalog not yet configured, resolves <see cref="ActorElementTypes.Neutral"/>
     /// and is reported once (spec §2.4 step 5).
+    ///
+    /// <para><b>2026-09-14 fix (lawn-combat-wire T10/T12 live-inert investigation, second defect):</b>
+    /// <paramref name="key"/>'s board facts are resolved via <see cref="BoardFactsFor"/> FIRST, and a
+    /// <c>typeId == 0</c> ("board does not know this ptr" — see <see cref="LawnBasicAttackGrantBinder"/>'s
+    /// own doc on the sentinel) now returns immediately WITHOUT ever calling into the inner
+    /// <see cref="LawnElementResolver"/>. Before this fix, the inner call ran unconditionally and its own
+    /// per-ptr cache has no notion of "try again later" — a ptr looked up even ONE FRAME before
+    /// <c>InjectorEntityRegistry.Add</c> registers it (a real, reproducible race for any caller that
+    /// applies stats/emits a spawn event outside the entity's own `Start`/`InitHealth` Harmony postfix,
+    /// confirmed live via `debug.spawn-plant`/`debug.spawn-zombie`: roughly half of otherwise-identical
+    /// spawns lost this race) got PERMANENTLY cached as <c>(side, ActorElementTypes.Neutral)</c> under
+    /// that ptr's key, keyed by ptr only (not by whether the lookup actually resolved a real species) —
+    /// so a caller that retried the SAME ptr on a later frame, once the board genuinely knew about it,
+    /// still read back the stale Neutral answer for the rest of the match. This was the mechanism behind
+    /// `LawnBasicAttackGrantBinder.Bind`'s `typeId == 0` early return being effectively permanent even
+    /// when the caller re-resolves: <see cref="LawnBasicAttackGrantBinder"/> now retries a fresh ptr
+    /// across a few frames, and that retry only works because a genuine "not on the board yet" miss no
+    /// longer poisons this cache.</para>
     /// </summary>
     public static (string Side, int TypeId, ActorElementTypes Elements) Resolve(string key)
     {
         var (side, typeId) = BoardFactsFor(key);
+        if (typeId == 0)
+            return (side, 0, ActorElementTypes.Neutral);
         var (resolvedSide, elements) = Resolver.Resolve(GameHooks.MatchKey, key, () => (side, typeId));
         return (resolvedSide, typeId, elements);
     }
