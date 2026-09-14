@@ -159,3 +159,4 @@ test-results/
 test-results/
 web/fusion-rpg-web/tmp/
 web/fusion-rpg-web/package-lock.json
+.artifacts/
