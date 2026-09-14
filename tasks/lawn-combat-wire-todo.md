@@ -296,6 +296,41 @@ true. The atom already exists purpose-built: `atom.fx-overlay-damage`, `kind: re
 `guard-funnel-delta`, `guard-actor-hub`
 **Dependencies:** **T9**, T6, T3, T8 · **Files:** `MatchHost.cs`, `EffectRuntime.cs` · **Scope:** M
 
+**2026-09-14 live-inert investigation (T10/T12 built and committed; observer kept reading
+`actionTriggers=0, staminaSpent=0, exhaustionEvents=0, rpgDeltaMergedHits=0` on every live retest).
+Three real defects found and fixed, in order:**
+1. Module-boundary defect — `LawnBasicAttackFeature.Enabled` borrowed `CheatState`'s debug-registry
+   schema fallback as its only production default. Fixed: own `DefaultOn = true` const, `CheatState`
+   only consulted when explicitly user-set (`0110d5ad`).
+2. Grant-bind/registry-registration race — a debug-spawned ptr resolved before
+   `InjectorEntityRegistry.Add` ran for it, and the old resolver cache latched that miss as a
+   permanent Neutral. Fixed: requeue-and-retry (`MaxRetryFrames`) + the resolver no longer caches a
+   genuine board-miss (`d465f93b`).
+3. **Root cause, found after 1 and 2 still didn't close the symptom:** `typeId == 0` was used
+   throughout `LawnElementResolverHost`/`LawnElementResolver`/`LawnBasicAttackGrantBinder` as the "no
+   entity here" sentinel — but `data/generated/creatures/Peashooter.json` and `NormalZombie.json`
+   (the two most common default test subjects) are both `gameTypeId: 0`, a real species, not a
+   sentinel. Every Peashooter/NormalZombie was permanently treated as unresolved. Fixed: a real
+   `Found` bool, decoupled from the numeric typeId (`0896aa7c`).
+
+**Live-verified after fix 3:** fresh Peashooter vs NormalZombie via `LawnCombatObserver` now shows
+`rpgObserved=true` and `rpgDeltaMergedHits` matching `totalHits` — the elemental combat math
+(`InjectorCombatBridge`/`OverlayCombatMath`) is alive for these species for the first time this
+investigation.
+
+**Still open, NOT yet explained:** `actionTriggers`/`staminaSpent`/`exhaustionEvents` (T12's own
+counters, recorded only by `LawnBasicAttackCostCharger.ShouldApplyRider`) stayed at 0 in every retest
+after fix 3 too. Diagnostic tracing (temporary, reverted — never committed) showed **zero vanilla
+combat.hit events occurring at all** in the later live attempts: a zombie walked straight through the
+plant's column without colliding, both left `living:true`, unharmed — a live-environment/scenario
+reproduction problem (repeated `debug.spawn-*`/`debug.lawn/quick-start` calls against one long-running
+game/server session), not yet distinguished from a genuine T12 gating bug. `Bag.HasAnyGrant()` and
+`ShouldApplyRider`'s own gate read correctly by code inspection (global grant existence check, not
+per-owner) and are not obviously at fault. **Next step should be a Core/Injector-level deterministic
+test of `ShouldApplyRider`/`EffectRuntime.OnDrained`'s gating (per this program's own "test the RPG
+server, not the live PvZ engine" standard) instead of chasing this live flakiness further** — a fresh
+game+server restart before the next live attempt is also worth trying first.
+
 ---
 
 ### Task 11: `lawn-combat-calibration` — **and the tooling to author it**
