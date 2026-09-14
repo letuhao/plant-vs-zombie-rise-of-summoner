@@ -652,6 +652,38 @@ proof exists to validate. The "never proves the attack triggers" objection is an
 every node, with the correct identity. What remains open is unchanged in substance (proofs 2/4/5/6/7 and
 perf), plus the one new item above (a non-zero plant-attack RPG delta, un-confounded by silence-vanilla).
 
+**Two more real findings, from a proof-4/5 (exhaustion/regen) attempt this same session — neither
+fixed here, both named precisely:**
+
+1. **`debug.spawn-plant`'s absolute `hp`/`maxHp` override does not survive the very next automatic
+   scale-push.** Attempted to buff a fresh plant to `500000/500000` HP (so it would survive long
+   enough to exhaust and regen its stamina pool) via `POST /api/debug/spawn-plant
+   {"maxHp":500000,"hp":500000}`. Log proof: `writer.plant src=debug.spawn ptr=1EF7E418D80 hp
+   300/300->500000/500000` immediately followed, one line later, by `writer.plant
+   src=cheat.pushScales ptr=1EF7E418D80 hp 500000/500000->300/300` — a routine, automatic
+   `PushScalesNow()` (fired by an unrelated cheat-state change, not something this session
+   deliberately triggered) silently reverted the debug-spawn override back to the type's own default
+   baseline. This is a real gap in the debug-spawn tool, not in `lawn-combat-wire`'s own production
+   code: an absolute spawn-time override needs to persist across a reapply the same way
+   `UniqueBoundLoadout`'s Hub-bonus grants now do (T14, `actor-hub-and-combat-power-solid-fixing`),
+   not as a one-shot field poke. **Not fixed this session** — out of this task's own file list, and
+   fixing it needs its own read/build/test cycle. Left named here so proof 4/5 is not silently
+   abandoned: this is the actual reason the buffed plant died to two ordinary zombie bites instead of
+   surviving to exhaustion.
+2. **A severe, reproducible per-frame stall (`loopMs` ~580-620ms, up from a healthy ~7-17ms baseline)
+   was observed for several minutes straight this session**, persisting across `session/end`,
+   across deleting the only plant on the board, and across board-state changes generally — ruling out
+   both "legacy debug-session overhead" (this session's own earlier, resolved finding) and "a huge-HP
+   entity is expensive to render/update" as the cause. `fps` stayed a steady 60 throughout (the
+   render thread itself was never blocked), so whatever is slow is time spent inside the mod's own
+   per-tick handler, off the frame-critical path — consistent with, but not confirmed as, a growing
+   backlog from this session's own unusually high rate of back-to-back `debug_call`/`debug_inspect`
+   invocations rather than a production defect. **Not root-caused this session** — flagged here
+   because it is exactly the kind of finding the T13 perf-ceiling proof (≤6% frame share at 300z)
+   needs to rule out before that proof can be trusted; whoever attempts perf ceiling next should
+   restart the game process first and watch `loopMs` from a clean baseline before attributing any
+   number to the feature under test.
+
 ---
 
 ### Dropped success criteria — [audit] restored to their tasks
