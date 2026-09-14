@@ -103,9 +103,15 @@ public static class CheatSchema
         // effect-runtime/_prove-overlay-combat.json); promoted per spec-overlay-combat-enable.md
         // §7's own "only after the proof" rule.
         T("OVERLAY-COMBAT", true);
-        // lawn-combat-wire T10/T12's shared kill switch (lawn-combat-wire-plan.md): default ON, same
-        // reasoning as OVERLAY-COMBAT above — the risk it exists for is a measured perf breach, not
-        // an a-priori doubt. FUSIONRPG_LAWN_BASIC_ATTACK=0 forces it off regardless of this default.
+        // lawn-combat-wire T10/T12's shared kill switch (lawn-combat-wire-plan.md): registered here so
+        // a debug/QA session can still EXPLICITLY override it via /api/cheats/toggle. 2026-09-14
+        // correction: LawnBasicAttackFeature.Enabled (FusionRpg.Injector.Effects) no longer reads this
+        // entry's ToggleDefault as its production default — that flag now owns a real `DefaultOn`
+        // const of its own and treats this schema row as an optional override signal only (see that
+        // class's doc comment for why: this registry's job is session cheat/debug state, not a durable
+        // feature-flag contract). The `true` below stays accurate for THIS registry's own display/
+        // migration semantics (what an unset toggle here should read as if something else ever asks),
+        // it is simply no longer load-bearing for the lawn combat feature's default.
         T("LAWN-BASIC-ATTACK", true);
 
         Cfg("D-DMG-%", 1, "slider");

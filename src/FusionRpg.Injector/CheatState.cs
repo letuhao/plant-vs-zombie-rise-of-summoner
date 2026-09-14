@@ -384,8 +384,10 @@ public static class CheatState
             // effect-runtime/_prove-overlay-combat.json); promoted per spec-overlay-combat-enable.md
             // §7's own "only after the proof" rule.
             Get("OVERLAY-COMBAT").Enabled = true;
-            // lawn-combat-wire T10/T12's shared kill switch — default ON, same reasoning as
-            // OVERLAY-COMBAT immediately above.
+            // lawn-combat-wire T10/T12's shared kill switch — kept registered here as an EXPLICIT
+            // debug/QA override surface only. 2026-09-14 correction: LawnBasicAttackFeature.Enabled no
+            // longer trusts this class's own IsSet=false schema-fallback as its production default (see
+            // that class's doc comment) — this Enabled=true seed is display/back-compat only.
             Get("LAWN-BASIC-ATTACK").Enabled = true;
             // Schema defaults are not user-set; Effective* applies display defaults when IsSet=false.
         }
