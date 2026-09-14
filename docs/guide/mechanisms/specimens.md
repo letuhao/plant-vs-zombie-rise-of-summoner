@@ -9,7 +9,7 @@
 
 ## In one sentence
 
-Every demon is a **specimen** — its own level, gear, and history — not a stack of identical copies.
+Every creature is a **specimen** — its own level, gear, and history — not a stack of identical copies.
 
 ---
 
@@ -19,8 +19,8 @@ These words get guessed wrong. Read them once before the rest of the page.
 
 | Word | What it actually means here |
 |---|---|
-| **Specimen** | One individual demon in your roster. Two Peashooter-line demons are still two specimens. |
-| **Creature / demon** | Player words for the same roster beings. You collect creatures; the ones you summon and bind are demons. |
+| **Specimen** | One individual creature in your roster. Two Peashooter-line creatures are still two specimens. |
+| **Creature / creature** | Player words for the same roster beings. You collect creatures; the ones you summon and bind are creatures. |
 | **Duplicate** | Another specimen of a species you already have — fuel for fusion, not trash to delete on sight. |
 | **Persistent** | They stay in your save across sessions and bank across worlds with who you are. |
 
@@ -44,7 +44,7 @@ Duplicates are not dust — they feed star merges, recipes, and trait inheritanc
 | Piece | What it does |
 |---|---|
 | **Inspect** | Open Creatures and read who you have. |
-| **Bind** | Put demons on pacts so they will deploy — see [pacts and loyalty](pacts-loyalty.md). |
+| **Bind** | Put creatures on pacts so they will deploy — see [pacts and loyalty](pacts-loyalty.md). |
 | **Field** | Bound specimens deploy to lawn; spare ones can go on expeditions. |
 | **Fuse** | Spend duplicates and [essence](essence.md) in the Fusion lab. |
 

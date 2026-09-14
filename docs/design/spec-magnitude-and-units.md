@@ -50,6 +50,12 @@ var powerAdjusted = request.BaseOverlayDamage + weightedDelta;                 /
 order-of-magnitude cousin. The sigmoid appears only at `:91`, `:95` and `:99`, on accuracy/dodge,
 crit rate/resist, and crit damage.
 
+> **Glance vs combat power number (2026-09-12).** `combat.power.*` on this path is **one attack
+> family** (game units into overlay damage). It is **not** the player’s aggregate **combat power
+> number** (E9 `actorPower` / sheet Standing over combat-affecting derived). High dodge can raise
+> combat power while omni attack stays low. Do not render specimen level or Θ as that number.
+> Ideal: [combat-power-number-ideal.md](../architecture/combat-power-number-ideal.md).
+
 > **A code comment currently says the opposite.**
 > [ValueSpec.cs:24-26](../../src/FusionRpg.Core/Effects/Atoms/ValueSpec.cs) reads: *"`+10 fire power` is
 > ten resolver points on a sigmoid scale where CritRateScale is 100.0, so ten points is 0.1 sigmoid
@@ -232,7 +238,7 @@ nothing and hides nothing — the raw magnitude is still on the face of the card
 
 **R1 — per-mille never reaches the player.** Content is integer ‰
 ([definitions.md §2](../architecture/effect-atom/definitions.md)). Adopt the **shipped** helper rather
-than writing a second one — [patronView.ts:23](../../web/fusion-rpg-web/src/features/demons/patronView.ts):
+than writing a second one — [patronView.ts:23](../../web/fusion-rpg-web/src/features/creatures/patronView.ts):
 divide by 10, one decimal, trim a trailing `.0`. It moves into the shared display module and
 `patronView` calls it instead of owning it.
 

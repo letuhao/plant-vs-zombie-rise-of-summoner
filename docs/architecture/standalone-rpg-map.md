@@ -1,12 +1,12 @@
 # Capability map: Standalone-first RPG architecture
 
-Program goal: **invert the architecture's center of gravity** — the RPG (demons, souls, progression, battles) becomes a complete game playable in the web FE with the PvZ game closed; PvZ play becomes an optional *extension* mode. Status: **wave 1 + expeditions SHIPPED 2026-08-21; first-session progression implemented 2026-09-08** — charter, pipeline adaptations, match-source-core (BattleEngine + WebMatchService, goldens locked), expeditions (dispatch→collect playable in the web FE), and the server-owned first-session checkpoint/item queue are implemented; real deploy acceptance remains content-environment gated. Module specs live in [demons/](demons/) (existing program) and [standalone/](standalone/) (this program).
+Program goal: **invert the architecture's center of gravity** — the RPG (creatures, souls, progression, battles) becomes a complete game playable in the web FE with the PvZ game closed; PvZ play becomes an optional *extension* mode. Status: **wave 1 + expeditions SHIPPED 2026-08-21; first-session progression implemented 2026-09-08** — charter, pipeline adaptations, match-source-core (BattleEngine + WebMatchService, goldens locked), expeditions (dispatch→collect playable in the web FE), and the server-owned first-session checkpoint/item queue are implemented; real deploy acceptance remains content-environment gated. Module specs live in [creatures/](creatures/) (existing program) and [standalone/](standalone/) (this program).
 
 > **Product-vision reconcile (2026-09-05).** *"Web core / PvZ extension"* in this map means **capability and CI** — gameless-first, one economy, four enrich roles — not the player pitch. Genre and named loops live in [../guide/the-game.md](../guide/the-game.md) + [../guide/the-loops.md](../guide/the-loops.md). The lawn is a first-class place loop and the intended first session; that does not authorize a permanent Fusion gate. See `decisions.md` Standalone-first (qualified) and Product vision rows.
 
 ## Why this is an inversion, not a rewrite
 
-The stack was built game-agnostic from day one: server and web already speak only `game` + `kind` + JSON; `FusionRpg.Core` (StatSystem, ActorHub, StatusRuntime, ElementHub, OverlayCombatMath, EffectBag, MatchRuntime) is Unity-free; `SimEngine` + `FUSIONRPG_SIM=1` already drive the full pipeline without the game; the demon V1 slice is entirely Cold-plane. What changes: a **playable gameplay source** joins the injector as a peer producer of matches and facts, and the docs/decisions flip which mode is "core".
+The stack was built game-agnostic from day one: server and web already speak only `game` + `kind` + JSON; `FusionRpg.Core` (StatSystem, ActorHub, StatusRuntime, ElementHub, OverlayCombatMath, EffectBag, MatchRuntime) is Unity-free; `SimEngine` + `FUSIONRPG_SIM=1` already drive the full pipeline without the game; the creature V1 slice is entirely Cold-plane. What changes: a **playable gameplay source** joins the injector as a peer producer of matches and facts, and the docs/decisions flip which mode is "core".
 
 ## Resolved decisions (2026-08-21)
 
@@ -16,14 +16,14 @@ The stack was built game-agnostic from day one: server and web already speak onl
    - **One-axis rule:** each role owns exactly one axis — capture = collection *breadth*, booster = earn *tempo*, shared battles = roster *expression*, trophies = *prestige*. PvZ must never be the best source of something web mode also provides.
    - **Exclusive capture:** ≤15% of the species catalog, zero legendaries; codex completion milestones claimable at 90% so web-only players get every milestone; world-events later rotates a slow web path to each exclusive (exclusive *method*, not permanent lock).
    - **Booster = Blessing, not multiplier:** a real PvZ run charges +50% Soul earn for the next 3 web expeditions (max 1 charge banked) — PvZ play makes web play better instead of competing with it; PvZ-sourced income intended ≤40% of total.
-   - **Shared battles:** ≤2 demon deploys per PvZ run, small additive grants via the existing bounded effect path; specimens on a web expedition are soft-locked from PvZ deploy (Cold-plane flag, not the UniqueActor FSM) and vice versa — no double-dipping.
+   - **Shared battles:** ≤2 creature deploys per PvZ run, small additive grants via the existing bounded effect path; specimens on a web expedition are soft-locked from PvZ deploy (Cold-plane flag, not the UniqueActor FSM) and vice versa — no double-dipping.
    - **Trophies:** cosmetic, one-time grants only — never stats, never repeatable faucets.
 
 **Expedition design anchors** (prior-art research + owner decisions 2026-08-21; the expeditions spec elaborates): duration tiers 30 min / 4 h / 8 h / 20 h (20 h so daily schedule drift never punishes); parallelism gated by expedition slots (2 → 5 via progression), **no stamina system** — with no monetization a stamina gate has no honest job; recall allowed anytime with rewards pro-rated to completed ticks; outcome sealed at dispatch by recorded seed, revealed at collection; nothing expires if uncollected.
 
-- **Content shape (locked): chain + events** — each tier resolves a battle chain (30 min = 1 battle … 20 h = 4 + a boss wave using a hypno-ally species as enemy) interleaved with seed-rolled non-combat event ticks (found souls, met a wild demon, took an injury). Ticks = the recall pro-rating boundary.
-- **Rewards (locked): all channels** — Souls + player XP (via the normal pipeline), **specimen XP** per battle won (existing unique-actor XP path), a small seed-rolled **wild-join chance** (a defeated wave demon joins the roster, origin `expedition` — the non-gacha acquisition path that honors vision rule #2 before PvZ capture ships), and **fusion material stubs** (per-player material inventory, unusable until demon-fusion lands — deliberately pre-seeding that economy).
-- **Post-expeditions order (locked): demon-fusion next** (duplicate pressure is already real; fusion is the promised Reserve sink), then contracts, then PvZ capture.
+- **Content shape (locked): chain + events** — each tier resolves a battle chain (30 min = 1 battle … 20 h = 4 + a boss wave using a hypno-ally species as enemy) interleaved with seed-rolled non-combat event ticks (found souls, met a wild creature, took an injury). Ticks = the recall pro-rating boundary.
+- **Rewards (locked): all channels** — Souls + player XP (via the normal pipeline), **specimen XP** per battle won (existing unique-actor XP path), a small seed-rolled **wild-join chance** (a defeated wave creature joins the roster, origin `expedition` — the non-gacha acquisition path that honors vision rule #2 before PvZ capture ships), and **fusion material stubs** (per-player material inventory, unusable until creature-fusion lands — deliberately pre-seeding that economy).
+- **Post-expeditions order (locked): creature-fusion next** (duplicate pressure is already real; fusion is the promised Reserve sink), then contracts, then PvZ capture.
 
 ## Modules
 
@@ -31,12 +31,12 @@ The stack was built game-agnostic from day one: server and web already speak onl
 |---|---|---|---|
 | `standalone-charter` | The inversion SSOT: mode taxonomy, gameless-first rule, `game` profile for web mode, decisions.md amendment | — | **1** |
 | `match-source-core` | Promote server-side match production to a first-class source: `BattleEngine` in Core (pure, seeded) resolving squad-vs-wave combat via ActorHub/Status/Element/CombatMath/EffectBag; canonical events through the normal ingest (runs, facts, XP, Souls) | standalone-charter | **1** |
-| `expeditions` | Playable loop #1: squad select → timed expedition → server auto-resolve → rewards + encounter discoveries; FE screens | match-source-core, demon-core, soul-economy | **2** |
+| `expeditions` | Playable loop #1: squad select → timed expedition → server auto-resolve → rewards + encounter discoveries; FE screens | match-source-core, creature-core, soul-economy | **2** |
 | `web-battles` | Playable loop #2: interactive turn-based battles (server-resolved turns, same BattleEngine); FE battle UI | expeditions | **3** |
-| `first-session-progression` | One server-owned first-session reveal sequence: first victory → Dave sheet, level-3 general species progression, level-4 commander equipment | `match-source-core`, `demon-progression-source`, `species-xp`, `commander-sheet-role`, item ownership/equip | **3** |
-| `game-bridge` | PvZ-as-extension policy: earn multipliers by source, exclusive-capture species flags, shared-deploy continuity, trophies | standalone-charter (+ demon-capture later) | **3** |
+| `first-session-progression` | One server-owned first-session reveal sequence: first victory → Dave sheet, level-3 general species progression, level-4 commander equipment | `match-source-core`, `creature-progression-source`, `species-xp`, `commander-sheet-role`, item ownership/equip | **3** |
+| `game-bridge` | PvZ-as-extension policy: earn multipliers by source, exclusive-capture species flags, shared-deploy continuity, trophies | standalone-charter (+ creature-capture later) | **3** |
 
-**Combined roadmap with the [demon program](demon-system-map.md):** `standalone-charter` + `element-extension` (parallel) → `demon-core` → `soul-economy` + `match-source-core` (parallel) → `demon-summoning` → `expeditions` (**the moment the RPG is a standalone playable game**) → `web-battles` / `demon-contracts` / `demon-capture` (PvZ) → `demon-fusion` → `game-bridge` polish → `world-events`.
+**Combined roadmap with the [creature program](creature-system-map.md):** `standalone-charter` + `element-extension` (parallel) → `creature-core` → `soul-economy` + `match-source-core` (parallel) → `creature-summoning` → `expeditions` (**the moment the RPG is a standalone playable game**) → `web-battles` / `creature-contracts` / `creature-capture` (PvZ) → `creature-fusion` → `game-bridge` polish → `world-events`.
 
 ## Invariants this program adds
 

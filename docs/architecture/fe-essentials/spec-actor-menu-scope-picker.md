@@ -10,7 +10,7 @@
 ## Objective
 
 One reusable component that lets a caller pick **who** a standing effect reaches — the FE-side
-counterpart to the buff-debuff-scope program's `WhoSelector` (`Target` / `Type` / `UniqueDemon` /
+counterpart to the buff-debuff-scope program's `WhoSelector` (`Target` / `Type` / `UniqueCreature` /
 `Relation`, all four modes per owner decision). Built now, ahead of the commander/aura-skill feature
 that will eventually consume it — matches this program's own precedent of building the scope primitive
 before the feature that uses it.
@@ -37,7 +37,7 @@ error/ready — GG-17, the same rule `ActorRungState` already enforces for every
 type ScopePickerValue =
   | { kind: "target"; targetPtr: string }
   | { kind: "type"; typeIds: number[] }
-  | { kind: "uniqueDemon"; instanceId: string }
+  | { kind: "uniqueCreature"; instanceId: string }
   | { kind: "relation"; relation: "ally" | "enemy" };
 
 function ActorMenuScopePicker(props: {
@@ -46,7 +46,7 @@ function ActorMenuScopePicker(props: {
   // Each mode's own data source — the picker renders states from these, never fetches itself
   // (matches the Actor ladder's own "components bind to a shape, never fetch" rule).
   targetCandidates: ActorRungState[];   // for "target" mode's list
-  uniqueDemonCandidates: ActorRungState[]; // for "uniqueDemon" mode's list (same shape, different source)
+  uniqueCreatureCandidates: ActorRungState[]; // for "uniqueCreature" mode's list (same shape, different source)
   typeOptions: { typeId: number; label: string }[]; // for "type" mode's multi-select
 }): JSX.Element;
 ```
@@ -56,7 +56,7 @@ function ActorMenuScopePicker(props: {
 | Mode | UI | Reuses |
 |---|---|---|
 | `target` | A searchable list of `ActorRow`s, single-select | `ui/actor/ActorRow` directly — its own doc comment already names "deploy pickers" as an intended use |
-| `uniqueDemon` | Same list pattern as `target`, different candidate source (durable specimens, not live board ptrs) | `ActorRow` again — same component, different data feed, matching this program's own "bind to a shape" rule so the picker doesn't need two list implementations |
+| `uniqueCreature` | Same list pattern as `target`, different candidate source (durable specimens, not live board ptrs) | `ActorRow` again — same component, different data feed, matching this program's own "bind to a shape" rule so the picker doesn't need two list implementations |
 | `type` | A simple multi-select over species/type names — **no existing component covers this** (confirmed: this session's FE audit found zero `TypeToken`/`TypeChip` anywhere) | New, small: a checkbox list using existing `Checkbox`/`Row` primitives — not a new entity ladder, just a plain multi-select |
 | `relation` | Two radio options, Ally/Enemy — trivial, no actor data needed at all | Existing form primitives only |
 
@@ -100,10 +100,10 @@ CSS files.
   shape that mode's own type declares — no cross-mode field leakage.
 - **Mode switch clears stale value**: switching from `type` (with 2 type ids selected) to `relation`
   and back to `type` does not silently resurrect the old selection as the new one's default.
-- **Four states per data-driven mode**: `target`/`uniqueDemon`/`type` each render loading/empty/error/
+- **Four states per data-driven mode**: `target`/`uniqueCreature`/`type` each render loading/empty/error/
   ready correctly (GG-17) — reuses `RungStateFallback` for the two actor-row modes; `type` needs its
   own small equivalent for an empty/error type-option list.
-- **Reuses `ActorRow`, not a parallel implementation**: a test asserting `target` and `uniqueDemon`
+- **Reuses `ActorRow`, not a parallel implementation**: a test asserting `target` and `uniqueCreature`
   modes both render via the real `ActorRow` component (not a lookalike), so the two list UIs cannot
   visually drift apart the way `docs/design/README.md`'s own "one entity, one ladder, no forks" rule
   is meant to prevent.
@@ -120,6 +120,6 @@ CSS files.
 ## Success criteria
 
 1. All four modes implemented, each producing the exact `WhoSelector`-matching shape.
-2. `target`/`uniqueDemon` both reuse the real `ActorRow`, proven by test, not just by convention.
+2. `target`/`uniqueCreature` both reuse the real `ActorRow`, proven by test, not just by convention.
 3. Mode switching never carries a stale cross-mode value.
 4. A demo page exists, matching `ActorLadderDemoPage.tsx`'s own precedent for shipping ahead of a consumer.

@@ -25,7 +25,7 @@
       "id": "set.sunnutzombie-001",
       "nameKey": "set.sun-drenched-nut-shell",
       "name": "Sun-Drenched Nut Shell",
-      "themeKey": "demon.sunnutzombie",
+      "themeKey": "creature.sunnutzombie",
       "members": [
         {
           "role": "armament-primary",

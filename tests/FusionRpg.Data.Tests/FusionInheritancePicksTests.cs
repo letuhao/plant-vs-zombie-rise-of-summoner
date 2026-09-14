@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Fusion;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Fusion;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Derived;
@@ -10,13 +10,13 @@ using Xunit;
 namespace FusionRpg.Data.Tests;
 
 /// <summary>
-/// WAVE F2.4 (demon-standalone, 2026-09-07, `demon-mechanism-gaps-ideal.md` §3.4): `ExecuteFusion`
+/// WAVE F2.4 (creature-standalone, 2026-09-07, `creature-mechanism-gaps-ideal.md` §3.4): `ExecuteFusion`
 /// accepts, validates, and prices player-selected inheritance picks — the closing seam over F2.1
 /// (`InstanceProducer.Compose` forced picks), F2.2 (`GetSpecimenMaterialisedRoll`), and F2.3
 /// (`FusionCostTable.InheritPick`).
 ///
 /// <para>Recipe fixture deliberately selects one whose OWN INPUTS are already at or above
-/// <c>DemonRecipeCatalog.OutputEligibilityFloor</c> (Cultivated) — unlike the sibling
+/// <c>CreatureRecipeCatalog.OutputEligibilityFloor</c> (Cultivated) — unlike the sibling
 /// <c>FusionStoreTests.Recipe</c> (a Cultivated-output recipe, whose own inputs sit one rung BELOW
 /// that floor per <c>InputPoolBelow</c>). <c>InheritCostByRarity</c> only covers Cultivated-and-above,
 /// so a Cultivated-output recipe's inputs are never pick-eligible; this fixture picks a recipe one or
@@ -24,36 +24,34 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class FusionInheritancePicksTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public FusionInheritancePicksTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-inherit-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     static readonly PowerTuning MaterialiseTuning = PowerTuning.Build(
         1, 1, 80_000, 0, 20, 680, 1000, 25000, 250, 1000, 5000, 5000, 25000);
     const int PinTheta = 20;
 
-    static readonly DemonRecipeDef Recipe = DemonRecipeCatalog.All
+    static readonly CreatureRecipeDef Recipe = CreatureRecipeCatalog.All
         .First(r =>
-            DemonRarityLadder.AtLeast(DemonSpeciesCatalog.Get(r.InputSpeciesIdA).BaseRarity, DemonRecipeCatalog.OutputEligibilityFloor)
-            && DemonRarityLadder.AtLeast(DemonSpeciesCatalog.Get(r.InputSpeciesIdB).BaseRarity, DemonRecipeCatalog.OutputEligibilityFloor));
-    static readonly DemonSpeciesDef Output = DemonSpeciesCatalog.Get(Recipe.OutputSpeciesId);
+            CreatureRarityLadder.AtLeast(CreatureSpeciesCatalog.Get(r.InputSpeciesIdA).BaseRarity, CreatureRecipeCatalog.OutputEligibilityFloor)
+            && CreatureRarityLadder.AtLeast(CreatureSpeciesCatalog.Get(r.InputSpeciesIdB).BaseRarity, CreatureRecipeCatalog.OutputEligibilityFloor));
+    static readonly CreatureSpeciesDef Output = CreatureSpeciesCatalog.Get(Recipe.OutputSpeciesId);
 
     string Mint(string speciesId)
     {
-        var species = DemonSpeciesCatalog.Get(speciesId);
-        var (specimen, _) = _store.MintDemon(1, new DemonMintSpec
+        var species = CreatureSpeciesCatalog.Get(speciesId);
+        var (specimen, _) = _store.MintCreature(1, new CreatureMintSpec
         {
             SpeciesId = species.SpeciesId,
             Side = species.Side,
@@ -100,7 +98,7 @@ public class FusionInheritancePicksTests : IDisposable
     {
         var cost = FusionCostTable.Recipe(Output.BaseRarity);
         _store.AwardSouls(1, souls, "seed", "inherit-bank-" + Guid.NewGuid().ToString("N"));
-        _store.AddDemonMaterials(1, new[]
+        _store.AddCreatureMaterials(1, new[]
         {
             ("shard." + cost.ShardRarity.ToId(), (long)cost.ShardCount * 5),
             ("essence." + Output.ElementPrimary.ToElementId(), (long)cost.EssenceCount * 5),
@@ -118,7 +116,7 @@ public class FusionInheritancePicksTests : IDisposable
         var b = Mint(Recipe.InputSpeciesIdB);
         var materialise = _store.MaterialisePlayerSpecies(1, PinTheta, MaterialiseTuning);
         Assert.True(materialise.IsOk, materialise.Rejection.ToString());
-        var pick = _store.GetDemonProfile(a)!.TraitIds[0];
+        var pick = _store.GetCreatureProfile(a)!.TraitIds[0];
         return (a, b, atomId, pick);
     }
 
@@ -180,7 +178,7 @@ public class FusionInheritancePicksTests : IDisposable
         // cost is added on top.
         var baseCost = FusionCostTable.Recipe(Output.BaseRarity);
         _store.AwardSouls(1, baseCost.Souls, "seed", "inherit-tight");
-        _store.AddDemonMaterials(1, new[]
+        _store.AddCreatureMaterials(1, new[]
         {
             ("shard." + baseCost.ShardRarity.ToId(), (long)baseCost.ShardCount * 5),
             ("essence." + Output.ElementPrimary.ToElementId(), (long)baseCost.EssenceCount * 5),

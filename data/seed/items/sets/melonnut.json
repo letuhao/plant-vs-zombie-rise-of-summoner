@@ -25,7 +25,7 @@
       "id": "set.melonnut-001",
       "nameKey": "set.rind-of-retribution",
       "name": "Rind of Retribution",
-      "themeKey": "demon.melonnut",
+      "themeKey": "creature.melonnut",
       "members": [
         {
           "role": "core-guard",

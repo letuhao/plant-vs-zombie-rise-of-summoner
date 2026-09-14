@@ -1,0 +1,14 @@
+{
+  "session": "sprite-debug-tool-20260914",
+  "program": "sprite-review-tool",
+  "problem": "Add a standalone repo-local HTML bench for storing and reviewing generated zombie animation sprite sheets.",
+  "mode": "direct",
+  "branch": "features/derived-stat-extension",
+  "worktree": null,
+  "paths": [
+    "tools/sprite-debug/**",
+    "tasks/sessions/sprite-debug-tool-20260914.json"
+  ],
+  "started": "2026-09-14T00:00:00Z",
+  "status": "active"
+}

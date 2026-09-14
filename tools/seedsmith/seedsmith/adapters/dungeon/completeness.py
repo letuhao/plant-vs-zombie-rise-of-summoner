@@ -7,7 +7,7 @@ Two real, separate gaps this module closes — both confirmed by reading the cod
    recognises a file whose TOP-LEVEL JSON has both a `kind` string and an `entries` LIST
    (`corpus/model.py:183-186`: `if not kind or not isinstance(raw_entries, list): continue`).
    Dungeon's own `emit.py` docstring states the deliberate opposite convention: "One object per
-   file... unlike the demons anchor's per-family list" (`emit.py:1-5`) — every real file under
+   file... unlike the creatures anchor's per-family list" (`emit.py:1-5`) — every real file under
    `data/seed/dungeon/<dir>/*.json` (bar each directory's own `_index.json`) IS one bare entry
    object, no `kind`/`entries` wrapper. So `Corpus.load()` silently skips every dungeon file today:
    registering a `CompletenessSpec` for dungeon alone would be reachable in the registry and inert
@@ -20,7 +20,7 @@ Two real, separate gaps this module closes — both confirmed by reading the cod
    `pipelines.py`'s `run_event_draws` (and every sibling `run_*_draws`) returns a raw model-parsed
    `dict` with no `_provenance` and no caller anywhere in this repo passes that dict to
    `emit.write_entry`/`write_corpus` — confirmed by grep: `report/cli.py`'s own subcommands name
-   demons/items/effects/structures/trees/numerics, never `dungeon`. `DungeonProvenance`/`stale_ids`
+   creatures/items/effects/structures/trees/numerics, never `dungeon`. `DungeonProvenance`/`stale_ids`
    (`provenance.py`) being dead code (only a test importer) is one symptom of this deeper gap, not
    the whole of it: there is no "dungeon generate"/"dungeon commit" step in this codebase for
    provenance to ride along with in the first place. This module cannot invent that missing

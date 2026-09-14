@@ -1,10 +1,10 @@
-"""Tests for seedsmith.adapters.demons.motifs (spec-motif-derive.md, wave D2)."""
+"""Tests for seedsmith.adapters.creatures.motifs (spec-motif-derive.md, wave D2)."""
 from __future__ import annotations
 
 import dataclasses
 
-from seedsmith.adapters.demons.motifs import (
-    DemonMotifInput,
+from seedsmith.adapters.creatures.motifs import (
+    CreatureMotifInput,
     DerivedMotifs,
     FamilyMembership,
     classify_line,
@@ -18,9 +18,9 @@ def FM(family_id: str, basis: str = "text") -> FamilyMembership:
     return FamilyMembership(family_id=family_id, basis=basis)
 
 
-def D(species_id: str, name: str = "Demon", flavor_text: "str | None" = None,
-      families: tuple = ()) -> DemonMotifInput:
-    return DemonMotifInput(species_id=species_id, name=name, flavor_text=flavor_text, families=families)
+def D(species_id: str, name: str = "Creature", flavor_text: "str | None" = None,
+      families: tuple = ()) -> CreatureMotifInput:
+    return CreatureMotifInput(species_id=species_id, name=name, flavor_text=flavor_text, families=families)
 
 
 # ---- Real defect, real model, 2026-08-31: whole Chinese clauses were not word tokens -----------
@@ -65,26 +65,26 @@ def test_own_motifs_blocked_when_neither_text_nor_usable_name():
 
 
 def test_same_corpus_derived_twice_is_byte_identical():
-    demons = [
+    creatures = [
         D("a", flavor_text="Ancient nut defender.", families=(FM("nut"),)),
         D("b", flavor_text="Younger nut sentry.", families=(FM("nut"),)),
         D("c", flavor_text="Lone wanderer with no kin."),
     ]
-    first = derive_motifs(demons)
-    second = derive_motifs(list(reversed(demons)))
+    first = derive_motifs(creatures)
+    second = derive_motifs(list(reversed(creatures)))
     assert first == second
 
 
 # ---- Inheritance ----------------------------------------------------------------------------
 
 
-def test_demon_in_two_families_inherits_from_both():
-    demons = [
+def test_creature_in_two_families_inherits_from_both():
+    creatures = [
         D("host", families=(FM("nut"), FM("shell"))),
         D("nut-a", flavor_text="Nut power surges within.", families=(FM("nut"),)),
         D("shell-a", flavor_text="Shell armor gleams brightly.", families=(FM("shell"),)),
     ]
-    result = derive_motifs(demons)
+    result = derive_motifs(creatures)
     host = result["host"]
     nut_pool_tokens = set(own_motifs(flavor_text="Nut power surges within.", name="x")[0])
     shell_pool_tokens = set(own_motifs(flavor_text="Shell armor gleams brightly.", name="x")[0])
@@ -92,30 +92,30 @@ def test_demon_in_two_families_inherits_from_both():
     assert set(host.motifs) & shell_pool_tokens
 
 
-def test_demon_in_no_family_with_text_derives_from_own_text_basis_text():
-    demons = [D("solo", flavor_text="A powerful lone wanderer.")]
-    result = derive_motifs(demons)
+def test_creature_in_no_family_with_text_derives_from_own_text_basis_text():
+    creatures = [D("solo", flavor_text="A powerful lone wanderer.")]
+    result = derive_motifs(creatures)
     assert result["solo"].motifs
     assert result["solo"].basis == "text"
 
 
-def test_demon_in_no_family_no_text_is_blocked_with_no_motifs():
-    demons = [D("solo", name="", flavor_text=None)]
-    result = derive_motifs(demons)
+def test_creature_in_no_family_no_text_is_blocked_with_no_motifs():
+    creatures = [D("solo", name="", flavor_text=None)]
+    result = derive_motifs(creatures)
     assert result["solo"].motifs == []
     assert result["solo"].basis == "blocked"
     assert result["solo"].tautological is False
 
 
 def test_family_with_basis_name_propagates_basis_name_not_text():
-    # This demon's OWN candidate for "nut" was extracted from its NAME pattern (basis="name"),
+    # This creature's OWN candidate for "nut" was extracted from its NAME pattern (basis="name"),
     # even though the family pool itself may contain text-derived tokens from other members —
-    # basis tracks how THIS demon came to belong, not what the pool happens to contain.
-    demons = [
+    # basis tracks how THIS creature came to belong, not what the pool happens to contain.
+    creatures = [
         D("d0", name="Wallnut Sentinel", families=(FM("nut", basis="name"),)),
         D("d1", flavor_text="Rich nut lore text here.", families=(FM("nut", basis="text"),)),
     ]
-    result = derive_motifs(demons)
+    result = derive_motifs(creatures)
     assert result["d0"].basis == "name"
 
 
@@ -123,22 +123,22 @@ def test_family_with_basis_name_propagates_basis_name_not_text():
 
 
 def test_motif_count_is_between_three_and_five_wherever_any_motif_exists():
-    demons = [
+    creatures = [
         D("d0", flavor_text="Ancient towering nut colossus guards the perimeter fiercely today.",
           families=(FM("nut"),)),
     ]
-    result = derive_motifs(demons)
+    result = derive_motifs(creatures)
     assert 1 <= len(result["d0"].motifs) <= 5  # small fixture; upper bound is the real invariant
 
 
 def test_ordering_is_family_first_and_stable_across_runs():
-    demons = [
+    creatures = [
         D("host", families=(FM("alpha"), FM("beta"))),
         D("a-member", flavor_text="Alpha token appears here.", families=(FM("alpha"),)),
         D("b-member", flavor_text="Beta token appears here.", families=(FM("beta"),)),
     ]
-    first = derive_motifs(demons)["host"].motifs
-    second = derive_motifs(list(reversed(demons)))["host"].motifs
+    first = derive_motifs(creatures)["host"].motifs
+    second = derive_motifs(list(reversed(creatures)))["host"].motifs
     assert first == second
 
 
@@ -146,22 +146,22 @@ def test_ordering_is_family_first_and_stable_across_runs():
 
 
 def test_anti_motifs_drawn_from_the_nearest_contrasting_family_and_nonempty():
-    demons = [
+    creatures = [
         D("host", families=(FM("nut"),)),
         D("nut-a", flavor_text="Nut shell fortress strength.", families=(FM("nut"),)),
         D("fire-a", flavor_text="Blazing inferno flame chaos.", families=(FM("fire"),)),
     ]
-    result = derive_motifs(demons)
+    result = derive_motifs(creatures)
     assert result["host"].anti_motifs, "at least one other family exists globally, so contrast is possible"
     assert not (set(result["host"].anti_motifs) & set(result["host"].motifs))
 
 
 def test_anti_motifs_empty_when_no_other_family_exists_anywhere():
-    demons = [
+    creatures = [
         D("host", families=(FM("nut"),)),
         D("nut-a", flavor_text="Nut shell fortress.", families=(FM("nut"),)),
     ]
-    result = derive_motifs(demons)
+    result = derive_motifs(creatures)
     assert result["host"].anti_motifs == []
 
 
@@ -169,23 +169,23 @@ def test_anti_motifs_empty_when_no_other_family_exists_anywhere():
 
 
 def test_a2_tautology_flagged_when_own_and_every_family_are_basis_name():
-    demons = [D("d0", name="Nut Guardian", families=(FM("nut", basis="name"),))]
-    result = derive_motifs(demons)
+    creatures = [D("d0", name="Nut Guardian", families=(FM("nut", basis="name"),))]
+    result = derive_motifs(creatures)
     assert result["d0"].tautological is True
 
 
 def test_not_tautological_when_any_contributing_basis_is_text():
-    demons = [
-        D("d0", flavor_text="Real lore text about this demon appears here.",
+    creatures = [
+        D("d0", flavor_text="Real lore text about this creature appears here.",
           families=(FM("nut", basis="name"),)),
     ]
-    result = derive_motifs(demons)
+    result = derive_motifs(creatures)
     assert result["d0"].tautological is False
 
 
 def test_not_tautological_with_no_family_at_all():
-    demons = [D("d0", name="Solo Wanderer")]
-    result = derive_motifs(demons)
+    creatures = [D("d0", name="Solo Wanderer")]
+    result = derive_motifs(creatures)
     assert result["d0"].tautological is False
 
 
@@ -270,11 +270,11 @@ def test_pos_filter_keeps_real_content_words():
 # ---- Committed-artifact consistency (added 2026-09-01, same class as the theme staleness) --------
 
 
-def _demon_artifacts():
+def _creature_artifacts():
     import json
     from pathlib import Path
 
-    root = Path(__file__).resolve().parents[3] / "data" / "seed" / "demons"
+    root = Path(__file__).resolve().parents[3] / "data" / "seed" / "creatures"
     return (
         json.loads((root / "_generated" / "motif-assignments.json").read_text(encoding="utf-8")),
         json.loads((root / "_registry" / "motifs.v1.json").read_text(encoding="utf-8"))["motifs"],
@@ -283,11 +283,11 @@ def _demon_artifacts():
 
 def test_the_motif_registry_is_exactly_the_distinct_motifs_in_use():
     """`motifs.v1.json` is a DERIVED vocabulary — `generate_motifs` builds it by walking each
-    demon's `.motifs`. Nothing recomputed it would notice if the two drifted, which is exactly how
-    `themes.v1.json` came to carry pre-G1 motifs for all 84 demons while passing every gate.
+    creature's `.motifs`. Nothing recomputed it would notice if the two drifted, which is exactly how
+    `themes.v1.json` came to carry pre-G1 motifs for all 84 creatures while passing every gate.
 
-    Deliberately motifs-only: `antiMotifs` are per-demon negatives, never vocabulary."""
-    assignments, registry = _demon_artifacts()
+    Deliberately motifs-only: `antiMotifs` are per-creature negatives, never vocabulary."""
+    assignments, registry = _creature_artifacts()
     used = set()
     for rec in assignments.values():
         used |= set(rec.get("motifs") or [])
@@ -295,14 +295,14 @@ def test_the_motif_registry_is_exactly_the_distinct_motifs_in_use():
     assert set(registry) == used, (
         f"registry has {len(set(registry) - used)} unused and misses "
         f"{len(used - set(registry))} in-use motifs — re-run "
-        f"`python -m seedsmith.adapters.demons.generate_motifs`")
+        f"`python -m seedsmith.adapters.creatures.generate_motifs`")
     assert len(registry) == len(set(registry)), "the registry contains duplicates"
 
 
 def test_anti_motifs_are_deliberately_absent_from_the_registry():
     """Pins the intent, so a later 'fix' that unions anti-motifs in is a failing test rather than a
     silent widening of the legal vocabulary."""
-    assignments, registry = _demon_artifacts()
+    assignments, registry = _creature_artifacts()
     anti = set()
     for rec in assignments.values():
         anti |= set(rec.get("antiMotifs") or [])
@@ -320,13 +320,13 @@ def test_narrative_connectives_tagged_l_are_dropped():
     they survived the G1.2 filter and became motifs. `motif_coverage` then REQUIRES a motif to
     appear in the generated text — so a junk motif became *mandatory junk in committed content*:
     `normalzombie` shipped named 「随处可见的消耗」 and `flagzombie`'s doctrine forced in
-    「毋庸置疑的指令」. Seven demons, every one passing every gate.
+    「毋庸置疑的指令」. Seven creatures, every one passing every gate.
 
     The single-word regression set (`为什么`/r, `不过`/c) could never have caught this — those are
     tagged as function words, these are tagged as content."""
     import jieba.posseg as pseg
 
-    from seedsmith.adapters.demons.motifs import _CONTENT_POS
+    from seedsmith.adapters.creatures.motifs import _CONTENT_POS
 
     for phrase in ("从那之后", "发现自己", "一段时间", "随处可见", "毋庸置疑",
                    "更进一步", "并不知道", "很难说", "不多见"):
@@ -338,22 +338,22 @@ def test_narrative_connectives_tagged_l_are_dropped():
 
 def test_idioms_and_abbreviations_are_still_kept():
     """The other direction — dropping `l` must not take `i` (成语) or `j` with it. `人心惶惶`
-    ('panic-stricken') is exactly the evocative vocabulary a demon theme wants."""
-    from seedsmith.adapters.demons.motifs import _CONTENT_POS
+    ('panic-stricken') is exactly the evocative vocabulary a creature theme wants."""
+    from seedsmith.adapters.creatures.motifs import _CONTENT_POS
 
     assert "i" in _CONTENT_POS and "j" in _CONTENT_POS
     assert "l" not in _CONTENT_POS, "`l` admits narrative connectives — see the test above"
 
 
-def test_no_non_blocked_demon_was_left_without_motifs_by_the_filter():
-    """Tightening a filter can silently starve a demon into `basis='name'`. The complete almanac
+def test_no_non_blocked_creature_was_left_without_motifs_by_the_filter():
+    """Tightening a filter can silently starve a creature into `basis='name'`. The complete almanac
     refresh currently yields 857 text-basis and 47 name-basis rows."""
     import collections
 
-    assignments, _ = _demon_artifacts()
+    assignments, _ = _creature_artifacts()
     starved = [k for k, v in assignments.items()
                if not v.get("motifs") and v.get("basis") != "blocked"]
-    assert starved == [], f"the POS filter starved {len(starved)} demons: {starved[:5]}"
+    assert starved == [], f"the POS filter starved {len(starved)} creatures: {starved[:5]}"
     by_basis = collections.Counter(v["basis"] for v in assignments.values())
     assert by_basis["text"] + by_basis["name"] == len(assignments), (
         f"unexpected basis values in complete roster: {dict(by_basis)}")
@@ -367,8 +367,8 @@ def test_no_non_blocked_demon_was_left_without_motifs_by_the_filter():
 # principles while writing this note, NOT by a failing test ... a real limitation of this module's
 # current coverage, not silently smoothed over."
 #
-# These two tests close it. The original defect: `basis` excluded a demon's OWN contribution
-# whenever the demon had ANY family — so a demon whose own name-derived token genuinely survived
+# These two tests close it. The original defect: `basis` excluded a creature's OWN contribution
+# whenever the creature had ANY family — so a creature whose own name-derived token genuinely survived
 # into `motifs` reported `basis="text"` (inherited from the family) and hid the fact that part of
 # its emitted vocabulary traces back to a bare string. `tautological` could not catch this: it
 # requires EVERY family to be name-based, and here the family is text-based.
@@ -389,7 +389,7 @@ def test_an_own_name_token_that_survives_the_trim_weakens_the_basis():
     assert "ironhide" in solo.motifs, (
         f"premise moved: the own name-token was expected to survive the trim, got {solo.motifs}")
     assert solo.basis == "name", (
-        "the demon's own name-derived token is in the emitted motifs, so the combined basis must "
+        "the creature's own name-derived token is in the emitted motifs, so the combined basis must "
         f"be 'name'; got {solo.basis!r} — this is the exact defect D2.3 flagged as untested")
 
 

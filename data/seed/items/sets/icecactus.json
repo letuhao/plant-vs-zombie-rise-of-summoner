@@ -25,7 +25,7 @@
       "id": "set.icecactus-001",
       "nameKey": "set.frost-spike-unit",
       "name": "Frost-Spike Unit",
-      "themeKey": "demon.icecactus",
+      "themeKey": "creature.icecactus",
       "members": [
         {
           "role": "armament-primary",

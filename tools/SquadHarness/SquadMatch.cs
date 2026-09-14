@@ -68,15 +68,14 @@ public static class SquadMatch
         return stalemateMilli > StalemateFlagMilli;
     }
 
-    /// <summary>Builds one <see cref="BattleActorSetup"/> from an allocation, through
-    /// <see cref="AptitudeResolver.ResolveForBattle"/> -- the trial-path twin §11 names, never
-    /// <c>TerminationGuard</c>'s closed-form <c>ToActor</c> (the closed-form/duel-only helper). Elements
-    /// stay null (neutral) throughout -- spec §3.</summary>
+    /// <summary>Builds one <see cref="BattleActorSetup"/> from an allocation, carried as a Hub input
+    /// (battle-hub-fuse T6: <c>AptitudeResolver.ResolveForBattle</c> is deleted -- the allocation reaches
+    /// battle as <see cref="BattleHubInputs.Aptitude"/>, resolved through the same
+    /// <see cref="AptitudeResolver.Resolve"/> the overlay seam uses) -- the trial-path twin §11 names,
+    /// never <c>TerminationGuard</c>'s closed-form <c>ToActor</c> (the closed-form/duel-only helper).
+    /// Elements stay null (neutral) throughout -- spec §3.</summary>
     public static BattleActorSetup ToActorSetup(string key, string side, AptitudeAllocation allocation, int theta)
     {
-        var ladder = new PowerLadder(PowerTuningHub.Tuning);
-        var registry = DerivedStatRegistry.CreateDefault();
-        var mods = AptitudeResolver.ResolveForBattle(allocation, AptitudeTuningHub.Tuning, ladder, theta, registry);
         return new BattleActorSetup
         {
             Key = key,
@@ -86,7 +85,7 @@ public static class SquadMatch
             MaxHp = BattleRuleset.BaseHp(theta),
             Atk = BattleRuleset.BaseAtk(theta),
             Defense = BattleRuleset.BaseDefense(theta),
-            ChannelMods = mods,
+            HubInputs = new BattleHubInputs { Aptitude = allocation },
         };
     }
 

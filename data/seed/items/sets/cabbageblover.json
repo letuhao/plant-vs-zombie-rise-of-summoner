@@ -25,7 +25,7 @@
       "id": "set.cabbageblover-001",
       "nameKey": "set.cabbage-float",
       "name": "Cabbage Float",
-      "themeKey": "demon.cabbageblover",
+      "themeKey": "creature.cabbageblover",
       "members": [
         {
           "role": "armament-primary",

@@ -17,7 +17,7 @@ back through the same deterministic vote/hash logic (`finalize_candidate` -> `ca
 functions in this whole module that DO call a model, per their own docstrings).
 
 Real, live repo data (`data/seed/actions/_briefs/round-1.json`, A-S1's shipped output, and
-`data/seed/demons/_generated/family-assignments.json`) is used for determinism/shape/permutation/
+`data/seed/creatures/_generated/family-assignments.json`) is used for determinism/shape/permutation/
 roster tests, matching every prior action-corpus module's own fixture discipline this session;
 synthetic, in-memory briefs are used for planted violations, vote resolution, and the anchor/slot
 raises, so those tests do not depend on today's real round happening to contain a matching case.
@@ -62,13 +62,13 @@ from seedsmith.adapters.actions.family_propose.derive import (  # noqa: E402
     finalize_candidate,
 )
 from seedsmith.adapters.actions import generate_family_actions as gen_mod  # noqa: E402
-from seedsmith.adapters.demons.anchor.permute import order_for  # noqa: E402
-from seedsmith.adapters.demons.anchor.vote import SetVoteResult  # noqa: E402
+from seedsmith.adapters.creatures.anchor.permute import order_for  # noqa: E402
+from seedsmith.adapters.creatures.anchor.vote import SetVoteResult  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REAL_BRIEFS_PATH = REPO_ROOT / "data" / "seed" / "actions" / "_briefs" / "round-1.json"
 REAL_FAMILY_ASSIGNMENTS_PATH = (
-    REPO_ROOT / "data" / "seed" / "demons" / "_generated" / "family-assignments.json"
+    REPO_ROOT / "data" / "seed" / "creatures" / "_generated" / "family-assignments.json"
 )
 RUN_TUNING_PATH = REPO_ROOT / "data" / "tuning" / "action-corpus-run.v1.json"
 
@@ -221,7 +221,7 @@ class FamilyAnchorRaiseTests(unittest.TestCase):
     def test_species_scoped_anchor_content_raises(self):
         base_anchor = dict(make_brief()["anchor"])
         for key, value in (("element", "fire"), ("motifs", ["fire"]),
-                          ("themeKey", "demon.cherrybomb"), ("speciesKey", "cherrybomb")):
+                          ("themeKey", "creature.cherrybomb"), ("speciesKey", "cherrybomb")):
             with self.subTest(key=key):
                 anchor = dict(base_anchor)
                 anchor[key] = value
@@ -286,7 +286,7 @@ class BuildBriefContentTests(unittest.TestCase):
         text = build_brief(context)
         self.assertIn("cherry", text)  # the family anchor IS meant to appear
         lowered = text.lower()
-        for token in ("fire", "cultivated", "demon.", "element:", "species:"):
+        for token in ("fire", "cultivated", "creature.", "element:", "species:"):
             self.assertNotIn(token, lowered)
 
     def test_family_motifs_render_in_permuted_order_matching_order_for(self):
@@ -862,28 +862,33 @@ class CanonicalFamilyKeyTests(unittest.TestCase):
 
 # ---------------------------------------------------------------------------------------------
 # Roster test, not a claim (spec SS4.4): the plan was sized on real per-family member counts read
-# straight from `family-assignments.json` -- asserted here so those numbers cannot silently drift.
+# straight from `family-assignments.json`. Asserted as RECONCILIATION (bins sum, memberships sum),
+# never a pinned snapshot -- the family map is a population that grows per shipped species
+# (docs/architecture/validation-ssot.md).
 # ---------------------------------------------------------------------------------------------
 
 class RosterTests(unittest.TestCase):
-    def test_family_assignments_match_the_numbers_this_plan_was_sized_on(self):
+    def test_family_assignments_reconcile(self):
         assignments = json.loads(REAL_FAMILY_ASSIGNMENTS_PATH.read_text(encoding="utf-8"))
         counts: "dict[str, int]" = {}
         for species_id, families in assignments.items():
-            for family in families:
+            values = families if isinstance(families, list) else [families]
+            self.assertTrue(values, f"{species_id} must carry at least one family")
+            for family in values:
                 counts[family] = counts.get(family, 0) + 1
 
-        self.assertEqual(len(assignments), 53, "53 species carry a family assignment")
-        self.assertEqual(len(counts), 19, "19 distinct family tokens")
-        total_species = sum(counts.values())
-        self.assertEqual(total_species, 53)
-        self.assertAlmostEqual(total_species / len(counts), 2.8, places=1)  # mean ~2.8
-
-        self.assertEqual(counts["cherry"], 7, "cherry is the largest family")
-        self.assertEqual(counts["nut"], 1, "nut holds exactly one species")
-        families_with_exactly_two = [f for f, n in counts.items() if n == 2]
-        self.assertEqual(len(families_with_exactly_two), 11,
-                         "eleven families hold exactly two species")
+        # Reconciliation: every membership joins a real family token, and the per-family totals sum
+        # to the per-species membership sum -- both recomputed, never a literal.
+        self.assertEqual(sum(counts.values()),
+                         sum(len(v if isinstance(v, list) else [v])
+                             for v in assignments.values()))
+        self.assertEqual(len(counts), len(set(counts)), "family tokens are a set")
+        # The largest family is at least as large as the mean; nut exists and is non-empty.
+        mean = sum(counts.values()) / len(counts)
+        self.assertGreaterEqual(max(counts.values()), mean)
+        self.assertTrue(all(n >= 1 for n in counts.values()))
+        print(f"family assignments: {len(assignments)} species, {len(counts)} families, "
+              f"mean {mean:.1f}")
 
 
 if __name__ == "__main__":

@@ -25,7 +25,7 @@
       "id": "set.drownpultzombie-001",
       "nameKey": "set.the-verdict-s-trident",
       "name": "The Verdict's Trident",
-      "themeKey": "demon.drownpultzombie",
+      "themeKey": "creature.drownpultzombie",
       "members": [
         {
           "role": "armament-primary",

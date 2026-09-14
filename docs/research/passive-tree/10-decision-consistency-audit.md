@@ -24,7 +24,7 @@ carries `D29MaxTier` (`:312-317`), which was **not** in the build that produced
 
 | # | Sev | What breaks | Evidence | Fix |
 |---|---|---|---|---|
-| A1 | **Critical** | **D30 defeats D24's own reason to exist.** D24 is a learnability decision; D30 makes the catalog scale with the roster, so a 30-demon player must learn 2,430 nodes and a 100-demon player 4,460 — against PoE's ~1,300, which doc 07 already called too many | `ideal:58` vs `:64,412-425`; `07:132,137-142,177-190` | Adopt `06:315`'s shared pool + small unique cap, or state that D24's learnability criterion applies to generic trees only |
+| A1 | **Critical** | **D30 defeats D24's own reason to exist.** D24 is a learnability decision; D30 makes the catalog scale with the roster, so a 30-creature player must learn 2,430 nodes and a 100-creature player 4,460 — against PoE's ~1,300, which doc 07 already called too many | `ideal:58` vs `:64,412-425`; `07:132,137-142,177-190` | Adopt `06:315`'s shared pool + small unique cap, or state that D24's learnability criterion applies to generic trees only |
 | A2 | **Critical** | **D25 is a cap by the caps register's own definition and has no §11 row.** *"A flat rate facing a scaling cost"* is named a cap in `ssot-power-scale.md:783`; §11.7 is exactly that shape. D25 asserts PS-8 compliance instead of registering a verdict | `ideal:61`; `ssot-power-scale.md:778-787`; §11.10 is the right section | Add a §11.10 row with a verdict, and a §10 cost-ladder row beside the two doc 02 already owes |
 | A3 | **High** | **D25 has never been modelled, and it is the one thing that actually unsupports doc 09.** Every published sweep sets `W = b·T(T+1)/2` — you own *every* node up to your tier. Under D25 you own `O(√Θ)` of them | `Program.cs:262,373`; `ideal:61` | Add a `--d25` term before any further win-share argument; D28's adoption rests on the un-modelled numbers |
 | A4 | **High** | **D25 repeats the exact defect D26 was adopted to fix.** It claims *"same arithmetic-cost shape the soul track already uses, so it adds no new ladder"* — matching the shape while mismatching the index is doc 08's whole thesis, and the one shipped count-escalating cost that *was* audited (`StarPolicy`) graded **DECAYING**, *"the same index mismatch as D20"* | `ideal:61`; `08:§1 row 9`; `StarPolicy.cs:76-82` | State D25's reward index and pair it, the way D26 paired `req` to `W` |
@@ -37,7 +37,7 @@ carries `D29MaxTier` (`:312-317`), which was **not** in the build that produced
 | A11 | **Medium** | **D32's named allowance is far below the measured skew, so D32 is a re-assignment mandate.** Earth is 2.7× uniform, not 1.5×; the aptitude axis gets no allowance at all and needs ~500 species moved | `ideal:60` vs `:370,384` | Say the quota is a *re-assignment*, and name the thematic cost |
 | A12 | **Medium** | **D25 × D11 reopens the trap D11's amendment closed.** Gear-granted points advance the escalation counter, so an off-build drop permanently raises the price of every later on-build node | `ideal:40,43,61` | Rule whether gear-fed spends advance the counter |
 | A13 | **Medium** | **D25 makes `H` order-dependent** — the thing D18 was adopted to dissolve. Total cost stays order-free; the *per-tree points share* does not | `ideal:40,50,61` | Read `H` on node budget or node count, never on points paid |
-| A14 | **Medium** | **D25 is per actor and D21 gives every actor its own tree state**, so the breadth bound does not reach the roster. Each new demon restarts the ladder at `c0` | `ideal:53,61` | Say whether legion-scale breadth is deliberately unpriced |
+| A14 | **Medium** | **D25 is per actor and D21 gives every actor its own tree state**, so the breadth bound does not reach the roster. Each new creature restarts the ladder at `c0` | `ideal:53,61` | Say whether legion-scale breadth is deliberately unpriced |
 | A15 | **Low** | **D29's `Θ≈170` uses a different sizing rule from doc 02's own.** `02:§3.3` fixes `tierCount = T_max(Θ, s=1)`, which gives `Θ ≈ 92`; D29 computes at `s = 0.542` | `ideal:57`; `02:§3.3`; `Program.cs:79-80,86` | State which convention the tunable `_note` records |
 | A16 | **Low** | **D25's own `Θ≈1,450` is stale** — it quotes a 1,450-node catalog that D29 replaced the same day | `ideal:61` vs `:57` | One-word fix |
 | A17 | **Low** | **D17 says 165:1; §9 measures 332:2 = 166:1** | `ideal:49` vs `:384` | One-character fix |
@@ -203,7 +203,7 @@ no spec, no sweep, no tunable and no register row.
 The brief asked me to find one or say there is none. **There are two, both arithmetic in count-owned,
 both per actor.**
 
-**FACT.** `src/FusionRpg.Core/Demons/Contracts/ContractPolicy.cs:176-177`:
+**FACT.** `src/FusionRpg.Core/Creatures/Contracts/ContractPolicy.cs:176-177`:
 
 ```csharp
 public static long NextSlotPrice(int purchasedSlots, int thetaContent, PowerTuning tuning) =>
@@ -221,7 +221,7 @@ is the register entry for that reasoning. **This is strong support for D25's sha
 model for what D25 is missing: `NextSlotPrice` is wrapped in `SoulSinkPolicy.Price` so it tracks its
 faucet, and it has a register row.
 
-**FACT.** `src/FusionRpg.Core/Demons/Fusion/StarPolicy.cs:76-82` — `SacrificesForStar(n) = n + 1`,
+**FACT.** `src/FusionRpg.Core/Creatures/Fusion/StarPolicy.cs:76-82` — `SacrificesForStar(n) = n + 1`,
 cumulative `n(n+3)/2`. Same shape again.
 
 ### 3.2 The precedent that was audited failed the test D26 just introduced
@@ -342,8 +342,8 @@ never on points paid. That is also the reading that survives D11.
 ### 3.8 D25 × D21 — the bound stops at one actor
 
 D25 is *"arithmetic, per actor"*. D21 (`ideal:53`) gives **every** actor its own tree state. So a
-player's total build breadth across a 100-demon roster is bounded only by `ContractPolicy.NextSlotPrice`,
-not by D25 — each new demon restarts the escalation at `c0`. Whether that is deliberate (a roster *is*
+player's total build breadth across a 100-creature roster is bounded only by `ContractPolicy.NextSlotPrice`,
+not by D25 — each new creature restarts the escalation at `c0`. Whether that is deliberate (a roster *is*
 supposed to be broad) or an oversight is an owner call, but it should be stated, because D25's own
 justification is *"the whole catalog unlocked at Θ≈1,450 and the tree stopped being a choice"* — and
 at roster scale it still is.
@@ -387,7 +387,7 @@ else has this"* payoff D23 is buying.
 D24 exists for **learnability** (`ideal:64`, owner: *"user cannot build because they need to
 relearn"*). Doc 07's whole surface analysis rests on one sentence (`07:177-178`):
 
-> *"D21 gives the commander and every demon its own tree state. **The catalog is shared** (ideal §7,
+> *"D21 gives the commander and every creature its own tree state. **The catalog is shared** (ideal §7,
 > owner decision 1: 'the catalog is shared; only allocation is per-actor')."*
 
 and closes with (`07:190`):
@@ -401,8 +401,8 @@ the roster. Computed:
 | Roster | Generic nodes (D29) | Species nodes (D30) | **Nodes the player must learn** |
 |---|---:|---:|---:|
 | commander only | 1,560 | 0 | 1,560 |
-| + 30 demons | 1,560 | 870 | **2,430** |
-| + 100 demons | 1,560 | 2,900 | **4,460** |
+| + 30 creatures | 1,560 | 870 | **2,430** |
+| + 100 creatures | 1,560 | 2,900 | **4,460** |
 
 Doc 07 already flagged 1,450 as the problem (`07:137-142`):
 
@@ -410,7 +410,7 @@ Doc 07 already flagged 1,450 as the problem (`07:137-142`):
 > PoE's is *one* tree… Ours is fifty disjoint pictures with no shared geography. Fifty small maps are
 > harder to learn than one big one."*
 
-D30 takes that from 1,450 disjoint nodes to 2,430–4,460, and every new demon adds 29 more that no
+D30 takes that from 1,450 disjoint nodes to 2,430–4,460, and every new creature adds 29 more that no
 guide, no comparison and no shared vocabulary covers — because by D23's definition they are *"nodes no
 other tree has."* D24's own image (`ideal:425`) is:
 
@@ -471,7 +471,7 @@ Swept across `src/`, `tools/`, `tests/`, `web/`, `data/`, `scripts/`.
 
 | Consumer | Behaviour at 6 | Verdict |
 |---|---|---|
-| `AptitudeAllocation.cs:8` — `enum AllocationScope { Commander, DemonType, Aspect, UniqueDemon }` | implicit ordinals 0–3, no `[Flags]`, no zero-sentinel; doc comment `:3-7` says *"Append-only… never reorder"* | appending is sanctioned |
+| `AptitudeAllocation.cs:8` — `enum AllocationScope { Commander, CreatureType, Aspect, UniqueCreature }` | implicit ordinals 0–3, no `[Flags]`, no zero-sentinel; doc comment `:3-7` says *"Append-only… never reorder"* | appending is sanctioned |
 | **`AptitudeAllocation.cs:103`** — `static readonly AllocationScope[] AllScopes = Enum.GetValues<AllocationScope>();` driving `Total` (`:54`), `GrandTotal` (`:62-63`), `Share` (`:83-84`) | **self-sizing, so it silently sums a sixth scope into the aptitude share denominator** | ⛔ **live balance change, unnamed by D31** — see §5.3 |
 | `AptitudeTuning.cs:199-205` — rate dict built from **four hardcoded** JSON keys, no `Enum.GetValues` loop | a sixth scope has no rate row | ⛔ see §5.4 |
 | `PointBudget.cs:57` — `tuning.PointEconomy.AptitudePointsPerThetaMilliByScope[scope]` | throws bare **`KeyNotFoundException`**, not the loader's named `AptitudeTuningRejection` | ⛔ violates `tunables-ssot.md:91` T5 |
@@ -479,7 +479,7 @@ Swept across `src/`, `tools/`, `tests/`, `web/`, `data/`, `scripts/`.
 | `RpgStore.Aptitudes.cs:36-47` — schema `scope TEXT NOT NULL` | **stores the string name, never the ordinal** | ✅ see §5.5 |
 | `AptitudeAllocation.cs:30,32,34,44,94` — `Dictionary<(AllocationScope, string), long>` | enum used as a composite dict key, default comparer, no ordinal arithmetic | ✅ safe |
 | `AllocationStoreTests.cs:107-112` — round-trip test over a **hardcoded 4-element array**, not `Enum.GetValues` | a sixth member is silently never round-trip tested | ⚠️ blind spot |
-| `SpeciesAllocationSeamTests.cs:31,36,53` — a **literal source-text scan** for `"LoadAllocation(AllocationScope.DemonType"` across `src/**/*.cs` | sensitive to spelling, not meaning | ⚠️ will need touching |
+| `SpeciesAllocationSeamTests.cs:31,36,53` — a **literal source-text scan** for `"LoadAllocation(AllocationScope.CreatureType"` across `src/**/*.cs` | sensitive to spelling, not meaning | ⚠️ will need touching |
 | Literal `AllocationScope.<Member>` call sites — `SpeciesAllocation.cs:35,62`, `ZombossCommanderAllocation.cs:49-50`, `ZombossPattern.cs:27,37`, `AptitudeEndpoints.cs` (12 sites), `AuraDerivedEndpoints.cs:59`, `WebMatchService.cs:304,389,492`, `RpgClient.cs:373`, `tools/{DominanceBaseline,ResidualFitLoop,ProveAptitude,HybridViability}` | unaffected | ✅ |
 | `src/FusionRpg.Contracts` | **zero references** | ✅ no wire surface |
 | `web/fusion-rpg-web` | **zero references** — no TypeScript mirror; `types.ts:449-457`'s `AptitudesState` carries no scope field at all | ✅ |
@@ -491,8 +491,8 @@ Swept across `src/`, `tools/`, `tests/`, `web/`, `data/`, `scripts/`.
 **FACT.** `AptitudeAllocation.cs:103` reads the enum with `Enum.GetValues`, and `Total` / `GrandTotal`
 / `Share` iterate it. **FACT.** `decisions.md:103` locks the semantics:
 
-> *"An actor's allocation is the **sum of four scopes** (commander → demon type → aspect → unique
-> demon)… `share` is taken **on the sum**, never per scope."*
+> *"An actor's allocation is the **sum of four scopes** (commander → creature type → aspect → unique
+> creature)… `share` is taken **on the sum**, never per scope."*
 
 **INFERENCE.** If a `status_mastery` scope ever holds points that `Single` accepts — which is exactly
 what D31's *"second, separate change"* would enable — those points enter `GrandTotal` and shrink every
@@ -606,7 +606,7 @@ list to close and the most expensive to discover after 25,900 nodes are authored
 
 ### 7.1 The arithmetic
 
-**Roster.** D27 (`ideal:63`) ships *"12 primary + 6 elemental + 21 status + demon family + species."*
+**Roster.** D27 (`ideal:63`) ships *"12 primary + 6 elemental + 21 status + creature family + species."*
 Closed rosters give `n = 39`; `F` (families) is undecided — `02:§1.2` gives `F ≈ 19` as the
 recommendation, `525` as the literal reading, `0` as today's value.
 
@@ -626,7 +626,7 @@ before the planner can refuse anything.
 | **Total if D10 is honoured for species** | 36,860 | 35,960 |
 
 **Two errors in one figure.** `39 × 40 = 1,560` (a) drops the shared root and (b) sets `F = 0`,
-excluding the demon-family trees D27 explicitly ships. §11.3's *"≈25,900"* inherits both.
+excluding the creature-family trees D27 explicitly ships. §11.3's *"≈25,900"* inherits both.
 
 ### 7.2 Stale volume figures, listed so the propagation is one pass
 
@@ -662,7 +662,7 @@ seed's triple, against a corpus measured at 166:1.
 
 **D17 does not do that.** `ideal:49`, read in full:
 
-> *"Demon species trees lock a build-favour triple… **Extending that favour into the seeds** is a
+> *"Creature species trees lock a build-favour triple… **Extending that favour into the seeds** is a
 > **deterministic planner → agent-inspects-seed → validated-against-target** pipeline, never an LLM
 > free choice."*
 
@@ -747,7 +747,7 @@ Named because a short list of real findings is only credible next to what surviv
 
 ```
 [x] I identified the subsystem(s): passive trees, class system, power ladder / caps register,
-    tunables, effect atoms, demon seeds, item program.
+    tunables, effect atoms, creature seeds, item program.
 [x] I read every doc in the §1 row(s) this session: DESIGN-GATE.md (in full), decisions.md
     (rows 94/97/103/107/108), passive-tree-ideal.md (in full), research/passive-tree/02 (in full),
     06 (§1, §7, §8), 07 (§1.2-§1.4), 08 (§1, §2 M1-M2), 09 (in full),

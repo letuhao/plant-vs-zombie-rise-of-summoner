@@ -29,7 +29,7 @@ usually missed.**
 
 Layer 2 is the whole answer to the owner's real question. **An unrestricted enum of twelve aptitudes
 is exactly what produced Onslaught 39.5% against Ferocity 0.2%** (§9 of the ideal, re-verified: 841
-entries in 503 files, counted this session — `data/seed/demons/species/`, 504 files including
+entries in 503 files, counted this session — `data/seed/creatures/species/`, 504 files including
 `_index.json`). Shrinking or reordering that enum does not fix it. **Removing the wrong options from
 the call does.**
 
@@ -63,7 +63,7 @@ files under `tools/seedsmith/tests/` — 273 first-party Python files, excluding
 | Path | Role |
 |---|---|
 | `tools/seedsmith/seedsmith/__main__.py:10-13` | 13-line shim — `from .report.cli import main` |
-| `tools/seedsmith/seedsmith/report/cli.py` | the entire CLI: `check`, `report`, `metrics`, `demons`, `items generate`, `effects generate` |
+| `tools/seedsmith/seedsmith/report/cli.py` | the entire CLI: `check`, `report`, `metrics`, `creatures`, `items generate`, `effects generate` |
 | `tools/seedsmith/seedsmith/corpus/` | load a seed folder into a typed graph |
 | `tools/seedsmith/seedsmith/budget/` | declarative targets — `derive.py`, `model.py` |
 | `tools/seedsmith/seedsmith/metrics/` | 20 metric modules; the check catalogue |
@@ -77,7 +77,7 @@ files under `tools/seedsmith/tests/` — 273 first-party Python files, excluding
 | `tools/seedsmith/seedsmith/pipeline/provenance.py` | `Provenance`, `ProvenanceLedger`, `should_generate` |
 | `tools/seedsmith/seedsmith/workflow/` | typed state, graph nodes, SQLite checkpoint, `runner.py`'s retry split |
 | `tools/seedsmith/seedsmith/workflow/validators/` | the tier-2 deterministic validator battery |
-| `tools/seedsmith/seedsmith/adapters/demons/` | the 8-pipeline anchor classifier |
+| `tools/seedsmith/seedsmith/adapters/creatures/` | the 8-pipeline anchor classifier |
 | `tools/seedsmith/seedsmith/adapters/actions/` | 12 stages incl. `distribution_planner`, `validate_heal` |
 | `tools/seedsmith/seedsmith/adapters/items/setgen/` · `charmgen/` | the newest precedent (2026-09-04) |
 | `tools/seedsmith/seedsmith/adapters/effects/affix/` | affix authoring — the model picks a bundle |
@@ -114,26 +114,26 @@ forgets."* **Adopt this verbatim for the tree stage.**
 
 ### 1.4 ⭐ The distribution gate the tree stage should copy exactly
 
-**FACT.** `tools/seedsmith/seedsmith/metrics/demon_roster.py` + `data/tuning/demon-roster-targets.v1.json`
+**FACT.** `tools/seedsmith/seedsmith/metrics/creature_roster.py` + `data/tuning/creature-roster-targets.v1.json`
 is a working instance of *"target distribution declared as data, compared against the emitted corpus,
-fails loudly on drift."* Its own docstring (`demon_roster.py:7-8`) states both principles it obeys:
+fails loudly on drift."* Its own docstring (`creature_roster.py:7-8`) states both principles it obeys:
 *"Every target here is declared in tuning (P2)"* and *"Every metric here is CLOSED-loop (P3)."*
 
-The loader is three lines (`demon_roster.py:26-28`); the target file is 26 lines of integer per-mille
-thresholds (`data/tuning/demon-roster-targets.v1.json:1-26`). Eight metrics compare the emitted anchor
+The loader is three lines (`creature_roster.py:26-28`); the target file is 26 lines of integer per-mille
+thresholds (`data/tuning/creature-roster-targets.v1.json:1-26`). Eight metrics compare the emitted anchor
 corpus against it — `GridFill` (252 element-pair × aptitude cells), `SingleElementShare`,
 `AptitudeDistribution`, `ThreatBandOccupancy`, `RarityMonotonicity`, `FamilySizeSpread`,
 `PostureBalance`, `UnresolvedCount`. Every finding carries `evidence` and a machine-readable `remedy`
-naming the pipeline that could close it (e.g. `demon_roster.py:97`).
+naming the pipeline that could close it (e.g. `creature_roster.py:97`).
 
-**`DemonRoster/UnresolvedCount` (`demon_roster.py:370`) is the only metric in the repo promoted to
+**`CreatureRoster/UnresolvedCount` (`creature_roster.py:370`) is the only metric in the repo promoted to
 `gates = True`**, and its justification (`:358-365`) is the template for promoting a tree gate: an
 unresolved field silently produced zero-stat species, so *"Gating the RATE here stops a full run
 early — before spending thousands of model calls."*
 
 Three sibling instances of the same shape: `metrics/pipeline_health.py` +
-`data/tuning/demon-pipeline-health-targets.v1.json`; `metrics/corpus_coverage.py` +
-`data/tuning/demon-corpus-targets.v1.json`; and — for **quotas** rather than shares — the symmetric
+`data/tuning/creature-pipeline-health-targets.v1.json`; `metrics/corpus_coverage.py` +
+`data/tuning/creature-corpus-targets.v1.json`; and — for **quotas** rather than shares — the symmetric
 `quota_drift_findings` at `adapters/actions/coverage_report/derive.py:257-282`, which catches
 **overshoot** as well as undershoot and **re-derives the quota independently rather than trusting the
 stored brief** (`derive.py:70-98`).
@@ -141,7 +141,7 @@ stored brief** (`derive.py:70-98`).
 ### 1.5 The shipped artifact shape
 
 **FACT.** `data/seed/` holds 17 domain folders. A seed entry is a JSON array of objects, each carrying
-a `_provenance` block. The real example — `data/seed/demons/species/plant/sunflower-kin.json` — carries
+a `_provenance` block. The real example — `data/seed/creatures/species/plant/sunflower-kin.json` — carries
 per-pipeline `attempts` and `promptVersions`, a `dumpHash`, `emittedUtc`, per-field `confidence`
 (`high`/`split`), `minorityValues`, and a `manualCorrection` block with `from`/`to`/`by`/`why`. Every
 content field is an enum id, a string list, or prose. **There is not one number in the entry** apart
@@ -288,7 +288,7 @@ and the document is named as stale.
 | 9d | `ActionTargetMode` | `Actions/ActionTargetSpec.cs:14` | **6** | 6 | ✅ |
 | 9e | `ActionAreaShape` | `Actions/ActionTargetSpec.cs:42` | **4** | 4 | ✅ |
 | 10a | Item **rarity ladder** | `Items/RarityLadder.cs:16` | **10** | 10 | ✅ |
-| 10b | `DemonRarity` | `Demons/DemonRarity.cs:16` | **10** | 10 | ✅ |
+| 10b | `CreatureRarity` | `Creatures/CreatureRarity.cs:16` | **10** | 10 | ✅ |
 | 11 | `AllocationScope` | `Stats/Aptitudes/AptitudeAllocation.cs:8` | **4** | 4 | ✅ (D19 asks for a 5th) |
 | 12 | `StatClass` | `Stats/Derived/StatClass.cs:7` | **4** | 4 | ✅ |
 | 13 | `UnitClass` | `Stats/Derived/StatClass.cs:29` | **13** | its own doc `:26-28` says ten | ⛔ stale |
@@ -525,7 +525,7 @@ would make `F` depend on which other trees you took, which §3.2 was written to 
 
 ### 5.1 The measurement this exists to answer
 
-**FACT, re-verified this session.** `data/seed/demons/species/` holds 503 species files (504 including
+**FACT, re-verified this session.** `data/seed/creatures/species/` holds 503 species files (504 including
 `_index.json`) carrying **841 entries** — matching §9's own count exactly. Its measured skew:
 Onslaught 332 (39.5%) against Ferocity 2 (0.2%), a **166× ratio**, with uniform at 8.3%. `earth` 379
 (45.1%) against `air` 56 (6.7%), with uniform at 16.7%. Force outnumbers Finesse 2.9:1.
@@ -570,7 +570,7 @@ mode, and area shape conditioned on the target-mode allocation.
 
 ```text
 INPUT   trees[]           from D9's roster, itself derived from the aptitude / element /
-                          status / demon-family rosters — never hardcoded (§8's rule)
+                          status / creature-family rosters — never hardcoded (§8's rule)
         nodesPerTree      from the tree's shape archetype (D15)
         targets           data/tuning/passive-tree-targets.v1.json   ← declared, not implied
 
@@ -615,7 +615,7 @@ once by draw — and the residual free trees inherit the deficit.
 
 ### 5.3 The target-distribution data file
 
-Shape, following `data/tuning/demon-roster-targets.v1.json` and `data/tuning/set-charm-gen.v1.json`
+Shape, following `data/tuning/creature-roster-targets.v1.json` and `data/tuning/set-charm-gen.v1.json`
 (integer per-mille throughout, `_note` recording provenance and honesty about what is fitted):
 
 ```jsonc
@@ -666,7 +666,7 @@ rate** — 18 pairs of 1,025, every one a deliberate designed twin
 `cellOccupancy.medianMax` 2 is the band every well-regarded roster in that same measurement sits in
 (Summoners War 1.02, HSR 1.7-1.8, Arknights 1.97; Fire Emblem Heroes, the worst documented, is 15.3 with
 a max of 129). **Neither is invented here.** The rest are starting values and must say so, exactly as
-`demon-roster-targets.v1.json`'s own `_note` does.
+`creature-roster-targets.v1.json`'s own `_note` does.
 
 ⚠️ **`legitimateSkew` is the owner decision the ideal's §7 item 2 already owes**, and putting it in the
 target file is the cheapest place to spend it. The ideal's own corollary says why: *"a species' thematic
@@ -675,7 +675,7 @@ are earthy) becomes mechanical skew (everyone plays earth)."*
 
 ### 5.4 The check gate
 
-Copy `metrics/demon_roster.py` module-for-module. Seven metrics, `PassiveTree/*`:
+Copy `metrics/creature_roster.py` module-for-module. Seven metrics, `PassiveTree/*`:
 
 | Metric | Compares | Fails when |
 |---|---|---|
@@ -685,7 +685,7 @@ Copy `metrics/demon_roster.py` module-for-module. Seven metrics, `PassiveTree/*`
 | `PassiveTree/ExclusionRate` | exclusion count / node count, and the form split | rate > 30‰, or **any** `nullification` |
 | `PassiveTree/ExclusionResolvable` | every predicate key against the plan's property registry | an unresolvable key, or an `EligibilityResolver.Validate` `UnsatisfiablePool` |
 | `PassiveTree/TreeEqualValue` | per-tree summed potency bands vs the plan's budget | a tree outside its budget — D15's *"equal expected value"* made machine-checkable |
-| `PassiveTree/UnresolvedCount` | per-voted-field `unresolved` rate | rate > 50‰ — ⭐ **promote this one to `gates=True`**, for the same reason `demon_roster.py:358-365` gives: it stops a full run early, before thousands of calls are spent |
+| `PassiveTree/UnresolvedCount` | per-voted-field `unresolved` rate | rate > 50‰ — ⭐ **promote this one to `gates=True`**, for the same reason `creature_roster.py:358-365` gives: it stops a full run early, before thousands of calls are spent |
 
 Every finding carries `evidence` and a machine-readable `remedy`. Absence reports `NOT_MEASURED`, never
 a pass — `metrics/registry.py:45-52`: *"an absent check is never indistinguishable from a healthy pass."*
@@ -720,7 +720,7 @@ vote calls            1,450 x 1 voted field x (3 - 1)           =  2,900
                                                                    4,350 calls
 ```
 
-At the demon run's measured rate (16,272 calls ≈ 14 h on the local model) that is **≈ 3.7 h**. Affordable,
+At the creature run's measured rate (16,272 calls ≈ 14 h on the local model) that is **≈ 3.7 h**. Affordable,
 and about a quarter of a run this repo has already done twice.
 
 **Vote exactly one field, and name it.** `affixIds` — because being wrong there is expensive to fix later
@@ -873,7 +873,7 @@ run inherits that dependency.
 ### 6.5 Where the frozen output lives
 
 **Confirmed: the language stage's output is committed, and in three places, matching
-[demon-seed-map.md](../../architecture/demon-seed-map.md) §1's chain exactly.**
+[creature-seed-map.md](../../architecture/creature-seed-map.md) §1's chain exactly.**
 
 ```text
 data/seed/passive-tree/plan/<treeId>.json      THE PLAN — model-free. Shape, tier ladder,
@@ -890,17 +890,17 @@ data/generated/passive-tree/<treeId>.json      CONCRETE — every magnitude, che
                                                diffable, reviewable. THIS is what ships.
 ```
 
-**The static/shared constraint changes one thing and only one.** [demon-seed-map.md](../../architecture/demon-seed-map.md)
+**The static/shared constraint changes one thing and only one.** [creature-seed-map.md](../../architecture/creature-seed-map.md)
 §3a's two-layer answer is *"shared definitions, per-player materialisation — only **effects** roll."*
 A tree node has no roll, so **there is no `player-materialise` stage for trees.** `data/generated/` is
 the end of the chain, and the same bytes reach every player.
 
 ✅ **`data/generated/` exists, and the map that says otherwise is stale.**
-[demon-seed-map.md](../../architecture/demon-seed-map.md) §1 (written 2026-09-01) states:
+[creature-seed-map.md](../../architecture/creature-seed-map.md) §1 (written 2026-09-01) states:
 *"Honest scope statement: `data/generated/` does not exist … verified, the directory is absent."*
-**Counted this session: `data/generated/demons/` holds 830 committed JSON files.** So the middle stage
-of the seed → concrete chain has since been built for demons, and the tree stage is following a path
-that exists rather than one that is planned. That correction belongs back in `demon-seed-map.md` §1.
+**Counted this session: `data/generated/creatures/` holds 830 committed JSON files.** So the middle stage
+of the seed → concrete chain has since been built for creatures, and the tree stage is following a path
+that exists rather than one that is planned. That correction belongs back in `creature-seed-map.md` §1.
 
 ⚠️ **What that does not tell you** is whether the *tree*'s own concrete generator is anything more than
 `numerics.resolve` in a loop. **INFERENCE:** for a static shared catalog it is exactly that — the plan
@@ -932,7 +932,7 @@ Ordered by when they fire. **Every row names a shipped mechanism or says it is n
 | 15 | **Exclusion properties resolvable** | every predicate key against the plan's property registry, then `EligibilityResolver.Validate` (`EligibilityRule.cs:74-95`) | an unknown key; a rule selecting zero eligible affixes for a non-zero budget | `UnsatisfiablePool`, *"rejected at load, never discovered as a silent under-fill"* |
 | 16 | **Exclusion form / rate** | `PassiveTree/ExclusionRate` (new) | rate > 30‰; **any** `nullification`; any predicate naming a node id | rate and the offending ids |
 | 17 | **Id stability and grammar** | `emit.set_id` / `IdRefused` (`setgen/emit.py:33-63`), `_assert_container_grammar` (`:101-107`) | a themeKey substituted for an id (two dots); a non-kebab id; a legacy-partition collision; a seq outside 1..899 (900-999 reserved for hand corrections) | `IdRefused` with the rule in the message — **refused, never sanitised** |
-| 18 | **No duplicate ids or names** | `name_collision` (`validators/field_echo.py:69-94`) against `context["takenNames"]`; `dedup.dedup_report` exact-match (`setgen/dedup.py:66-96`) | a name already used | ⭐ measured: **83 of 83** commander effects were named identically to their demon, and it was caught by a corpus metric, not a per-item check (`field_echo.py:52-56`) |
+| 18 | **No duplicate ids or names** | `name_collision` (`validators/field_echo.py:69-94`) against `context["takenNames"]`; `dedup.dedup_report` exact-match (`setgen/dedup.py:66-96`) | a name already used | ⭐ measured: **83 of 83** commander effects were named identically to their creature, and it was caught by a corpus metric, not a per-item check (`field_echo.py:52-56`) |
 | 19 | **Near-duplicate rate** | `setgen/dedup.py`'s **local exact** Jaccard, deliberately not the shared MinHash | rate > 5‰ | ⚠ the shared MinHash over-reports 7× on real pairs (0.120 true vs 0.844 estimated, `dedup.py:6-16`) — *"gating on a signal that over-reports by 7× would fail every run for the wrong reason"* |
 | 20 | **Text style** | `field_echo` (`:15-34`), `subject_name_echo` (`:48-66`), `language_consistency` (`language.py:26-44`), `non_empty` (`:37-45`) | a value opening with its own field name (**measured: 7 of 8 outputs began `"DOCTRINE: "`**); a name equal to the subject's; CJK + Latin prose mixed in one value (**measured: 87% code-switched, and the prompt caused it**) | named per field |
 | 21 | **Text length** | `maxLength: 140` on `flavor` | over-long flavour | schema-level, unsampleable |
@@ -951,7 +951,7 @@ are **OPEN-loop** — detectable, not machine-verifiable — so they produce a r
 *"An open-loop metric that contributes to a pass verdict is a lie with a checkmark on it."*
 
 **Promote exactly one gate to start:** `PassiveTree/UnresolvedCount`. Everything else runs and reports.
-That is the shipped posture — `cli.py:12-14` and `demon_roster.py:370` — and the reason is that a gate
+That is the shipped posture — `cli.py:12-14` and `creature_roster.py:370` — and the reason is that a gate
 promoted before a real run has been measured against a threshold nobody can name in advance
 (`distribution.py:97-98`: *"nobody can name a correct Pielou value in advance"*).
 
@@ -959,7 +959,7 @@ promoted before a real run has been measured against a threshold nobody can name
 
 ## 8. The species-tree pipeline (D23) — why it is separate, and how it stays affordable
 
-D23 makes a demon species tree's reward **a unique tree — nodes no other tree has, with its own
+D23 makes a creature species tree's reward **a unique tree — nodes no other tree has, with its own
 generation pipeline.** D17 locks each species to a build-favour triple (primary tree + element +
 status). The scale is 841 species (verified §5.1).
 
@@ -970,7 +970,7 @@ status). The scale is 841 species (verified §5.1).
 | **Population** | ~50 trees | **841 species** |
 | **Input** | the tree's own roster row — an aptitude, an element, a status | the **species anchor**, which is 18 fields of already-classified judgement plus the almanac lore |
 | **Quota axes** | 6 (nodeClass, trigger, element, status, channelFamily, exclusionForm) | the same **plus the D17 favour triple**, which is the axis with the measured 166× problem |
-| **Distinctness bar** | *differentiation* — 50 trees must be tellable apart | ⭐ **recognition, not differentiation.** [spec-set-charm-gen.md](../../architecture/item/spec-set-charm-gen.md) D17: *"It does not need to be distinguishable from 903 others; it needs to feel like **that demon**"* |
+| **Distinctness bar** | *differentiation* — 50 trees must be tellable apart | ⭐ **recognition, not differentiation.** [spec-set-charm-gen.md](../../architecture/item/spec-set-charm-gen.md) D17: *"It does not need to be distinguishable from 903 others; it needs to feel like **that creature**"* |
 | **Uniqueness** | nodes drawn from a shared affix library | nodes **no other tree has** — so the pool must be per-species, not shared |
 
 ### 8.2 What makes it affordable at 841
@@ -997,7 +997,7 @@ are the species' favoured-tree nodes re-keyed, the call count is:
                                                 5,046 calls   (~4.3 h, local)
 ```
 
-versus 841 × 29 = **24,389** for a fully bespoke tree — larger than the whole demon classification run.
+versus 841 × 29 = **24,389** for a fully bespoke tree — larger than the whole creature classification run.
 **The 4-vs-29 decision is the single biggest cost lever in this program, and it is an owner decision,
 not a technical one.**
 
@@ -1019,14 +1019,14 @@ stage can pick is already inside the quota. It is also cheaper than free choice:
 narrow set is the task shape enum classification is *most* reliable at, and the `unresolved` rate
 becomes a direct measurement of how well the target fits the corpus.
 
-⚠️ **The theme registry it would read is stale by 4.5×.** `data/seed/demons/_registry/themes.v1.json`
+⚠️ **The theme registry it would read is stale by 4.5×.** `data/seed/creatures/_registry/themes.v1.json`
 ships 84 themes against 841 shipped species entries — filed as a seedsmith defect
 ([seedsmith-map.md](../../architecture/seedsmith-map.md) §3c-ter), with `theme-refresh` and
 `theme-enrich` named as the fix and **unbuilt**. A species tree program inherits that dependency and
 should say so at task start rather than discovering it mid-run.
 
 ⚠️ **`AllocationScope` has four members** (`AptitudeAllocation.cs:8`) and D19 asks for a fifth
-(`status_mastery`). `UniqueDemon` is the scope a species tree gates on and it ships today; the status
+(`status_mastery`). `UniqueCreature` is the scope a species tree gates on and it ships today; the status
 trees are the category with no gate quantity, which the ideal's §5 already flags.
 
 ---
@@ -1057,7 +1057,7 @@ answerable question is a task — both are recorded above rather than here.
   one. Until it lands, §4.4's worked example cannot be authored — its `conversionState` key resolves to
   nothing. This is a hard prerequisite and I have not costed it beyond "one registry, one stamping pass,
   one validator change."
-- **I did not open any of the 830 files in `data/generated/demons/`** (§6.5) — I counted them and
+- **I did not open any of the 830 files in `data/generated/creatures/`** (§6.5) — I counted them and
   confirmed the directory is real, but I did not verify that their *shape* is what a tree's concrete
   stage would follow. Someone specifying that stage should read one before assuming it.
 - **I did not run the test suites.** Nothing here proposes a code change, so there was no constraint of
@@ -1073,7 +1073,7 @@ answerable question is a task — both are recorded above rather than here.
 [x] I identified the subsystem(s) this touches — atom layer, seedsmith generation, passive trees.
 [x] I read every doc in the §1 row(s) for those subsystems, this session:
     DESIGN-GATE.md, passive-tree-ideal.md, atom-catalog-ssot.md, spec-action-seeding.md,
-    demon-seed-map.md, seedsmith-map.md, item/seed-contract.md, spec-set-charm-gen.md,
+    creature-seed-map.md, seedsmith-map.md, item/seed-contract.md, spec-set-charm-gen.md,
     effect-pipeline-ideal.md §5-§6, spec-eligibility-tags.md, ai-native-generation/README.md,
     passive-tree-prior-art-2026-09-04.md.
 [x] I checked decisions.md for a lock covering this — via DESIGN-GATE §1's atom row, which is

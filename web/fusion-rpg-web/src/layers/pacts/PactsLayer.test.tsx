@@ -16,7 +16,7 @@ function ControlledPactsLayer() {
 }
 
 const mockUsePlayers = vi.fn();
-const mockUseDemonRoster = vi.fn();
+const mockUseCreatureRoster = vi.fn();
 const mockUseSpeciesIndex = vi.fn();
 const mockUseContracts = vi.fn();
 const mockUsePatron = vi.fn();
@@ -27,7 +27,7 @@ const mockBuySlotMutateAsync = vi.fn();
 
 vi.mock("@/lib/bus", () => ({
   usePlayers: () => mockUsePlayers(),
-  useDemonRoster: () => mockUseDemonRoster(),
+  useCreatureRoster: () => mockUseCreatureRoster(),
   useSpeciesIndex: () => mockUseSpeciesIndex(),
   // AptitudesLayer (opened by this layer's own "View build" button) mounts AptitudesPage/
   // SpeciesBuildPanel, both of which read from this same module -- stubbed here so opening the
@@ -56,7 +56,7 @@ vi.mock("@/lib/bus", () => ({
   useRespecSpecies: () => ({ mutateAsync: vi.fn(), isPending: false })
 }));
 
-vi.mock("@/lib/bus/demons", () => ({
+vi.mock("@/lib/bus/creatures", () => ({
   newCorrelationId: () => "corr-1"
 }));
 
@@ -81,7 +81,7 @@ vi.mock("react-router-dom", async (importOriginal) => {
   return { ...actual, useNavigate: () => mockNavigate };
 });
 
-const contentDemon = {
+const contentCreature = {
   instanceId: "d1",
   bound: true,
   deployable: true,
@@ -91,7 +91,7 @@ const contentDemon = {
   upkeepPerDay: 5
 };
 
-const overdueDemon = {
+const overdueCreature = {
   instanceId: "d2",
   bound: true,
   deployable: false,
@@ -121,11 +121,11 @@ const speciesIndex = new Map([
 
 function setup(opts?: { contracts?: unknown[]; patronInstanceId?: string | null }) {
   mockUsePlayers.mockReturnValue({ data: { currentPlayerId: 1 } });
-  mockUseDemonRoster.mockReturnValue({ data: roster });
+  mockUseCreatureRoster.mockReturnValue({ data: roster });
   mockUseSpeciesIndex.mockReturnValue(speciesIndex);
   mockUseContracts.mockReturnValue({
     data: {
-      contracts: opts?.contracts ?? [contentDemon, overdueDemon],
+      contracts: opts?.contracts ?? [contentCreature, overdueCreature],
       capacity: { used: 2, total: 4, purchasedSlots: 0, nextSlotPrice: 500, canBuy: true, maxSlots: 8 },
       dailyTribute: 13,
       deployFloor: 200,
@@ -141,7 +141,7 @@ describe("PactsLayer (T17)", () => {
   it("shows a loading state while queries are in flight, distinct from empty (GG-17)", () => {
     mockUsePlayers.mockReturnValue({ data: { currentPlayerId: 1 } });
     mockUseSpeciesIndex.mockReturnValue(speciesIndex);
-    mockUseDemonRoster.mockReturnValue({ isLoading: true, data: undefined });
+    mockUseCreatureRoster.mockReturnValue({ isLoading: true, data: undefined });
     mockUseContracts.mockReturnValue({ isLoading: true, data: undefined });
     mockUsePatron.mockReturnValue({ data: { patron: null, switchCostSouls: 100 } });
     renderWithProviders(<PactsLayer open onOpenChange={() => {}} />);
@@ -154,7 +154,7 @@ describe("PactsLayer (T17)", () => {
     const refetchRoster = vi.fn();
     mockUsePlayers.mockReturnValue({ data: { currentPlayerId: 1 } });
     mockUseSpeciesIndex.mockReturnValue(speciesIndex);
-    mockUseDemonRoster.mockReturnValue({ data: roster, refetch: refetchRoster });
+    mockUseCreatureRoster.mockReturnValue({ data: roster, refetch: refetchRoster });
     mockUseContracts.mockReturnValue({ isError: true, data: undefined, refetch: refetchContracts });
     mockUsePatron.mockReturnValue({ data: { patron: null, switchCostSouls: 100 } });
     const user = userEvent.setup();
@@ -172,19 +172,19 @@ describe("PactsLayer (T17)", () => {
     expect(screen.getByText("No pacts yet")).toBeInTheDocument();
   });
 
-  // G4 (species-build-todo.md): the empty-state hint already named "the Demons roster" — the
+  // G4 (species-build-todo.md): the empty-state hint already named "the Creatures roster" — the
   // only place a first contract can be bound — but nothing made it reachable. This asserts the
   // action is a real, working link there, not just more specific copy.
-  it("G4: the empty state's action navigates to the Demons roster, where a contract is actually bound", async () => {
+  it("G4: the empty state's action navigates to the Creatures roster, where a contract is actually bound", async () => {
     setup({ contracts: [] });
     const user = userEvent.setup();
     renderWithProviders(<PactsLayer open onOpenChange={() => {}} />);
 
-    const openDemons = screen.getByTestId("pacts-empty-open-demons");
-    expect(openDemons).toBeInTheDocument();
+    const openCreatures = screen.getByTestId("pacts-empty-open-creatures");
+    expect(openCreatures).toBeInTheDocument();
 
-    await user.click(openDemons);
-    expect(mockNavigate).toHaveBeenCalledWith("/demons");
+    await user.click(openCreatures);
+    expect(mockNavigate).toHaveBeenCalledWith("/creatures");
   });
 
   it("a content pact offers Release, an overdue pact disables Renegotiate with its reason inline and offers Ritual instead", () => {

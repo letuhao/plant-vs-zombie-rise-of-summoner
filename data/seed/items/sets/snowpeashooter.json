@@ -25,7 +25,7 @@
       "id": "set.snowpeashooter-001",
       "nameKey": "set.frostbite-spire",
       "name": "Frostbite Spire",
-      "themeKey": "demon.snowpeashooter",
+      "themeKey": "creature.snowpeashooter",
       "members": [
         {
           "role": "armament-primary",

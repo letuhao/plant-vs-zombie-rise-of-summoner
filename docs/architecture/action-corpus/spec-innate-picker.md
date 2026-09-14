@@ -38,7 +38,7 @@ ranking to apply.
 | An innate is **never bound** — putting one in the equipped set is a category error, not a wasted slot | `LoadoutSet.cs:74` (`IntrinsicNotEquippable`) |
 | The scarce thing it bypasses is **5 slots** | `LoadoutSet.cs:40` |
 | The five categories in declared order — the tie order for the lean | `ActionEnums.cs:119-123` |
-| Six elements, with `ElementPrimary`/`ElementSecondary` per species for all 904 live records | `ActorElementTypes.cs:3-11`; `data/seed/demons/species/**/*.json` |
+| Six elements, with `ElementPrimary`/`ElementSecondary` per species for all 904 live records | `ActorElementTypes.cs:3-11`; `data/seed/creatures/species/**/*.json` |
 | Rung table with `cap: 10` | `data/tuning/action-rungs.v1.json` |
 
 **One overclaim corrected, because the conclusion must not rest on it.** An earlier argument filed
@@ -54,7 +54,7 @@ There is no picker and no per-species innate content — 84 picks, which is what
 ## 2. Inputs and outputs
 
 **Reads:** the accepted corpus (A-S3 survivors plus everything already accepted) ·
-`role-lean.json` (A-S0) · `DemonSpeciesCatalog.Generated.cs` for element ·
+`role-lean.json` (A-S0) · `CreatureSpeciesCatalog.Generated.cs` for element ·
 `data/tuning/action-innate-picker.v1.json` (**new** — the five term multipliers, per-mille).
 
 **Writes** `data/seed/actions/species-innate.json`, `kind: "action-innate"`, in the A-C1 envelope:
@@ -131,7 +131,7 @@ score  = Σ_t ( (long)base_t * (term_t + offset_t) * w_t ) / 1000     # ONE divi
 
 ### 3.4 The pick
 
-1. Enumerate species in catalog order (`DemonSpeciesCatalog.Generated.cs`), lowercased key.
+1. Enumerate species in catalog order (`CreatureSpeciesCatalog.Generated.cs`), lowercased key.
 2. Collect the eligible set, sorted byte-wise on `actionId` — a total order, so the result cannot depend
    on enumeration order.
 3. Score each, take the maximum; **ties break on the `actionId` ordinal**, ascending.

@@ -15,22 +15,19 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class ActionCatalogStoreTests : IDisposable
 {
-    readonly List<string> _dirs = new();
+    readonly List<DataTestStore> _stores = new();
 
     public void Dispose()
     {
-        foreach (var d in _dirs)
-            try { Directory.Delete(d, recursive: true); } catch { /* temp dir */ }
+        foreach (var s in _stores)
+            s.Dispose();
     }
 
     RpgStore NewStore()
     {
-        var dir = Path.Combine(Path.GetTempPath(), "fusionrpg-action-chash-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(dir);
-        _dirs.Add(dir);
-        var store = new RpgStore(dir);
-        store.Init();
-        return store;
+        var test = DataTestStore.Create();
+        _stores.Add(test);
+        return test.Store;
     }
 
     static AtomRow Vitality(int amount = 45, int tier = 1) => new()

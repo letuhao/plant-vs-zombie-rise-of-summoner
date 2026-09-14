@@ -91,7 +91,7 @@ class RealDomainContentTests(unittest.TestCase):
             self.assertIn(entry["bossSpeciesRef"], candidates, entry_id)
 
     def test_retinueFamily_is_a_real_registered_family(self) -> None:
-        real_families = reg.load_demon_families()
+        real_families = reg.load_creature_families()
         for entry_id, entry in _shipped_entries().items():
             self.assertIn(entry["retinueFamily"], real_families, entry_id)
 

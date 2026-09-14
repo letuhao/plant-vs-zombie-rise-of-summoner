@@ -57,8 +57,8 @@ being optimised away.
 **Side must stay in the key.** `LawnElementIndex.cs:11-13` records that `polevaulterzombie` and
 `wallnut` are both `GameTypeId 3`; a bare type id collides across sides.
 
-⚠️ **The key is *compatible* with `demon-type-allocation`'s needs, not identical to any existing one.**
-An earlier draft claimed it was "exactly the key `demon-type-allocation` will need". `LawnElementIndex`
+⚠️ **The key is *compatible* with `creature-type-allocation`'s needs, not identical to any existing one.**
+An earlier draft claimed it was "exactly the key `creature-type-allocation` will need". `LawnElementIndex`
 is keyed `(string Side, int GameTypeId)` (`LawnElementIndex.cs`), while `StatContext.Side` is a
 `StatSide` — so module 6 needs a small, explicit translation between the two, and this spec does not
 get to promise it away.

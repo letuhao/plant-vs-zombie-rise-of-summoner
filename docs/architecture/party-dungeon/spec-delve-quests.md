@@ -27,7 +27,7 @@ and template; every battle, expedition, world and item golden is byte-identical.
 
 - **Ideal §11.3 (`:1095-1114`):** *"no quest system exists, whole"*; the anchor is `objectiveTemplate` *"(VALIDATED,
   closed: `explore-rooms · cleanse-fights · gather-curio-kind · kill-boss · extract-with-item-kind ·
-  bring-demon-home-alive · finish-under-hunger · survive-no-downed · spend-no-provision`) · `targetRef` (a **kind**,
+  bring-creature-home-alive · finish-under-hunger · survive-no-downed · spend-no-provision`) · `targetRef` (a **kind**,
   never a number, or `none`) … · `rewardBand` (a tier window resolved through `LootPipeline` with a `dungeon-quest`
   source kind — never a gold number) · `scope` (`delve · domain · roster`)"*; *"evaluation is pure and idempotent on
   `(playerId, questId, delveId)` under the expedition exactly-once envelope"*; *"Doran and Parberry's structural
@@ -61,12 +61,12 @@ and `sinkAvoidance`, exposed by `ObjectiveTemplateCatalog`; this module adds no 
 | `gather-curio-kind` | `curio-kind` (an event `kind`) | ‰ of rooms whose event has that kind | `events[]` with `choice ≠ leave`, `outcomeOrdinal ≠ nothing` (`spec-event-deck.md:199`) | no | no |
 | `kill-boss` | `boss` | — | `boss` room `cleared`; the `role: boss` actor `Survived == false` (`BattleModels.cs:342-345`) | yes | no |
 | `extract-with-item-kind` | `item-kind` (a role) | — (≥ 1) | a pack at extraction holds that role (`spec-loot-pack.md:75`) | no | no |
-| `bring-demon-home-alive` | `none` | — | no member `downed` at extraction (`spec-delve-attrition.md:81`) | no | no |
+| `bring-creature-home-alive` | `none` | — | no member `downed` at extraction (`spec-delve-attrition.md:81`) | no | no |
 | `finish-under-hunger` | `none` | — | no member carries a hunger exhaustion status at extraction (`:79`) | no | **yes** |
 | `survive-no-downed` | `none` | — | no member `downedOnce` (`:81`) | no | **yes** |
 | `spend-no-provision` | `none` | — | no `pack.drop{by: use}` in `decisions_json` (`spec-loot-pack.md:79`) | no | **yes** |
 
-Two readings fixed here and named as this spec's: `bring-demon-home-alive` is *standing at extraction*,
+Two readings fixed here and named as this spec's: `bring-creature-home-alive` is *standing at extraction*,
 `survive-no-downed` is *never downed* — strictly harder, hence sink-avoidance. `extract-with-item-kind` takes no count:
 `quests.countBand.*Milli` is *‰ of rooms* (registries `:136`); an item count is a new unit — ask first. **Counts are
 `int`s derived at entry from the rolled graph**: `need = max(1, ceil(rooms_of_kind × milli / 1000))` over
@@ -277,7 +277,7 @@ public static QuestVerdict Evaluate(QuestRow q, DelveReport r)
         "gather-curio-kind"      => Count(r.Events.Count(e => e.Kind == q.TargetRef && e.Choice != "leave" && e.Outcome != "nothing"), need),
         "kill-boss"              => Flag(r.Kills.Any(k => k.Role == "boss")),
         "extract-with-item-kind" => Flag(r.Haul.Any(h => h.Role == q.TargetRef)),
-        "bring-demon-home-alive" => Flag(r.Members.All(m => !m.Downed)),
+        "bring-creature-home-alive" => Flag(r.Members.All(m => !m.Downed)),
         "finish-under-hunger"    => Flag(r.Members.All(m => !m.Statuses.Contains(ResourceStatusIds.HungerExhausted))),
         "survive-no-downed"      => Flag(r.Members.All(m => !m.DownedOnce)),
         "spend-no-provision"     => Flag(!r.Decisions.Any(d => d.Kind == "pack.drop" && d.By == "use")),

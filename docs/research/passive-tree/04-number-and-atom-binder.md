@@ -159,7 +159,7 @@ module 4 wires the call"*.
 (`src/FusionRpg.Core/Effects/Atoms/InstanceProducer.cs:28`) is the module-4 payoff, and it has two
 real production callers outside its own tests:
 
-- `src/FusionRpg.Core/Demons/Materialise/SpeciesMaterialiser.cs:55`
+- `src/FusionRpg.Core/Creatures/Materialise/SpeciesMaterialiser.cs:55`
 - `src/FusionRpg.Data/Sqlite/RpgStore.AtomInstances.cs:341` (`ProduceAndBind`, which wraps the
   composed `InstanceRow` in a `BindingRow` and persists both)
 

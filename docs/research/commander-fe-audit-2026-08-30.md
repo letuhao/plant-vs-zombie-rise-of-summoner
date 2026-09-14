@@ -150,7 +150,7 @@ No commander list step; no default commander. Pre-run squad excluded (game-gui T
 | Default equipped aura loadout (Dave)? | **No** — `GET /api/loadout/{playerId}` returns null until POST |
 | Default enabled aura on match start? | **No** — `AuraRuntime` starts empty; nothing auto-enables |
 | Default aptitude allocation? | **Empty** until player allocates |
-| Auto-equip on deploy? | **Demons only** (`AutoEquip`); not Dave/commander |
+| Auto-equip on deploy? | **Creatures only** (`AutoEquip`); not Dave/commander |
 | Default on world map idle? | **Yes** — `stand-fast` (`src/FusionRpg.Core/World/Turn/WorldCommand.cs`) |
 | Aura reaches live lawn today? | **Partial** — aptitudes wired (T5); aura enable is server-RAM only, **no injector consumer** (`spec-aura-delivery-path.md` R4 gap) |
 

@@ -18,7 +18,7 @@
 3. **`ItemRole` stays on the item program** — this module only exposes role ids + display words the
    sheet lists; it does not own `core.v1.json` budget weights.
 4. **Commander leftover v1** — Confirm uses existing commander allocate API on every sheet; honest
-   scope chip. UniqueDemon allocate POST is later. Plate 13 is the visual SSOT for chrome.
+   scope chip. UniqueCreature allocate POST is later. Plate 13 is the visual SSOT for chrome.
 5. **No hot-reload** — restart after `publish.py`.
 6. **Eight closed tab kinds** — T5 rejects a ninth `kind` without a React renderer.
 7. **`kitRoles` shape** — `{ roleId, labels: { humanoid, plant } }` (not flat humanoid/plant keys).

@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from seedsmith.adapters.demons.anchor.vote import SetVoteResult, VoteResult  # noqa: E402
+from seedsmith.adapters.creatures.anchor.vote import SetVoteResult, VoteResult  # noqa: E402
 from seedsmith.adapters.structures.generate_anchor import (  # noqa: E402
     SAMPLE_COUNT,
     field_options_for,
@@ -55,7 +55,7 @@ def test_permutation_seeding_gives_each_sample_its_own_order():
     # votes one sample with extra steps. Reuses `order_for` (already tested on its own), so this
     # test only proves `sample_field` actually threads sample_index through to it.
     opts = field_options_for("role", PLAN).options
-    from seedsmith.adapters.demons.anchor.permute import order_for
+    from seedsmith.adapters.creatures.anchor.permute import order_for
     orders = [order_for("test-structure", "role", i, opts) for i in range(SAMPLE_COUNT)]
     assert len(set(tuple(o) for o in orders)) > 1, "all three sample orders were identical"
 

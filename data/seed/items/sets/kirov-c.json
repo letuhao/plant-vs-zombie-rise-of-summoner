@@ -25,7 +25,7 @@
       "id": "set.kirov-c-001",
       "nameKey": "set.grand-information-bomber",
       "name": "Grand Information Bomber",
-      "themeKey": "demon.kirov_c",
+      "themeKey": "creature.kirov_c",
       "members": [
         {
           "role": "armament-primary",

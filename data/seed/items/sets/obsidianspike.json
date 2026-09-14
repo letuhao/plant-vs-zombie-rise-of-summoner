@@ -25,7 +25,7 @@
       "id": "set.obsidianspike-001",
       "nameKey": "set.black-steel-spikes",
       "name": "Black Steel Spikes",
-      "themeKey": "demon.obsidianspike",
+      "themeKey": "creature.obsidianspike",
       "members": [
         {
           "role": "armament-primary",

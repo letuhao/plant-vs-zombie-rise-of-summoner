@@ -18,20 +18,18 @@ public class ActionStockSpendStoreTests : IDisposable
 {
     const string Player = "player-1";
 
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ActionStockSpendStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-stockspend-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     static StockDemand[] One(string id, long qty = 1) => new[] { new StockDemand(id, qty) };
@@ -73,6 +71,7 @@ public class ActionStockSpendStoreTests : IDisposable
         Assert.Equal(0, _store.StockQty(Player, "consumable.k1-001")); // never negative
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void A_stack_the_player_has_never_held_refuses_rather_than_creating_a_row()
     {
@@ -82,6 +81,7 @@ public class ActionStockSpendStoreTests : IDisposable
         Assert.Equal(0, _store.StockQty(Player, "consumable.k9-999"));
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void A_partial_stack_refuses_whole_rather_than_taking_what_is_there()
     {

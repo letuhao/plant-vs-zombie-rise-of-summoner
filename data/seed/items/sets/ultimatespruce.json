@@ -25,7 +25,7 @@
       "id": "set.ultimatespruce-001",
       "nameKey": "set.evergreen-frost",
       "name": "Evergreen Frost",
-      "themeKey": "demon.ultimatespruce",
+      "themeKey": "creature.ultimatespruce",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.jackson-c-001",
       "nameKey": "set.golden-spotlight-conductor",
       "name": "Golden Spotlight Conductor",
-      "themeKey": "demon.jackson_c",
+      "themeKey": "creature.jackson_c",
       "members": [
         {
           "role": "armament-primary",

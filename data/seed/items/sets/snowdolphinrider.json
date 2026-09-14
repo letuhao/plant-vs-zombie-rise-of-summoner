@@ -25,7 +25,7 @@
       "id": "set.snowdolphinrider-001",
       "nameKey": "set.the-doctor-s-advance",
       "name": "The Doctor's Advance",
-      "themeKey": "demon.snowdolphinrider",
+      "themeKey": "creature.snowdolphinrider",
       "members": [
         {
           "role": "armament-primary",

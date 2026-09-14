@@ -52,8 +52,12 @@ public class NoCatchInLiveBattleCallStackTests
     {
         "Battle/BattleEngine.cs",
         "Battle/BattleRunState.cs",
-        "Battle/BattleStatComposer.cs",
+        "Battle/BattleHubCompose.cs",
         "Battle/BattleModels.cs",
+        "Stats/Derived/Subsystems/BattleBaselineSubsystem.cs",
+        "Stats/Derived/Subsystems/BattleAffinitySubsystem.cs",
+        "Stats/Derived/Subsystems/BattleTraitSubsystem.cs",
+        "Stats/Derived/Subsystems/BattleTempoSubsystem.cs",
         "Battle/Timeline/ActionRunner.cs",
         "Battle/Timeline/ActorTurnMachine.cs",
         "Battle/Timeline/TurnEconomy.cs",

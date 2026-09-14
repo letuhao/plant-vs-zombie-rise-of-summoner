@@ -3,14 +3,14 @@
 ⚠ **What this module does and does not do.** It assembles the whole run *deterministically*: which
 themes are in, which are held and why, the brief for each, the id each entry will take, and the
 ledger that makes an interrupted run resumable. The **model call itself is not made here** — the
-graph that makes it is the same `workflow` package `effects generate` and `demons generate` use, and
+graph that makes it is the same `workflow` package `effects generate` and `creatures generate` use, and
 this module hands it a subject list. A `--dry-run` therefore exercises everything except the call,
 which is what makes the run inspectable before a token is spent.
 
 ⛔ **Resume is not optional at ~1,800 entries.** The ledger is a single JSON file keyed by subject
 id, written after each subject completes. `plan_run` reads it and returns only the subjects not
 already done — so re-running is idempotent and an interrupt costs the work in flight, not the run.
-The demon harness's own resume path holds a real atomic file lock; this ledger reuses that
+The creature harness's own resume path holds a real atomic file lock; this ledger reuses that
 discipline by writing through a temporary file and replacing, so a killed process cannot leave a
 half-written ledger behind.
 """
@@ -93,8 +93,8 @@ def _least_represented_charm_class(tuning: SetCharmGenTuning,
 def _set_entry_on_disk(entry_id: str, *, sets_dir: "Path | None" = None) -> bool:
     """True when the production (or test) sets corpus already carries this id.
 
-    Ledger subject keys can drift when a theme/species id is renamed (e.g. demon.caltrop →
-    demon.caltropnut) while the partition file still holds the minted set id. Re-planning that
+    Ledger subject keys can drift when a theme/species id is renamed (e.g. creature.caltrop →
+    creature.caltropnut) while the partition file still holds the minted set id. Re-planning that
     theme then regenerates a different row for the same id and `_merged_partition_rows` raises.
     Corpus presence wins — same discipline materialgen uses for hand-authored rows without a
     ledger record.

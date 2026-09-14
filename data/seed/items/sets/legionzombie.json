@@ -25,7 +25,7 @@
       "id": "set.legionzombie-001",
       "nameKey": "set.alpha-vanguard",
       "name": "Alpha Vanguard",
-      "themeKey": "demon.legionzombie",
+      "themeKey": "creature.legionzombie",
       "members": [
         {
           "role": "armament-primary",

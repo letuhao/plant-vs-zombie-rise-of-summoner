@@ -19,7 +19,7 @@ describe("useDelveReportQueue (D5.9, spec-delve-stage.md §7 band-4 row + §12 r
 
   it("Reports_land_at_band_4_and_wait_behind_the_summary — held: a report does NOT land in the toast stack until release", () => {
     useDelveReportQueue.getState().hold();
-    useDelveReportQueue.getState().push({ kind: "join", title: "A wild demon joined" });
+    useDelveReportQueue.getState().push({ kind: "join", title: "A wild creature joined" });
 
     // Still waiting — nothing on band 4 yet, and the queue itself carries it instead.
     expect(useToastStack.getState().toasts).toEqual([]);
@@ -28,7 +28,7 @@ describe("useDelveReportQueue (D5.9, spec-delve-stage.md §7 band-4 row + §12 r
     useDelveReportQueue.getState().release();
 
     expect(useToastStack.getState().toasts).toHaveLength(1);
-    expect(useToastStack.getState().toasts[0]).toMatchObject({ title: "A wild demon joined" });
+    expect(useToastStack.getState().toasts[0]).toMatchObject({ title: "A wild creature joined" });
     expect(useDelveReportQueue.getState().pending).toEqual([]);
     expect(useDelveReportQueue.getState().held).toBe(false);
   });
@@ -86,7 +86,7 @@ describe("useDelveReportQueue (D5.9, spec-delve-stage.md §7 band-4 row + §12 r
     vi.useFakeTimers();
     try {
       useDelveReportQueue.getState().hold();
-      useDelveReportQueue.getState().push({ kind: "join", title: "A wild demon joined" });
+      useDelveReportQueue.getState().push({ kind: "join", title: "A wild creature joined" });
       useDelveReportQueue.getState().release();
       expect(useToastStack.getState().toasts).toHaveLength(1);
 

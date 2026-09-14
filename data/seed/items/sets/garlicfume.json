@@ -25,7 +25,7 @@
       "id": "set.garlicfume-001",
       "nameKey": "set.spore-cloud",
       "name": "Spore Cloud",
-      "themeKey": "demon.garlicfume",
+      "themeKey": "creature.garlicfume",
       "members": [
         {
           "role": "armament-primary",

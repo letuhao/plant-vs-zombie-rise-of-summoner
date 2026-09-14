@@ -26,7 +26,7 @@ namespace FusionRpg.Server;
 /// (spec-tree-surface.md §3: "never enters a browse"), a different task (I5) with a different key
 /// shape (per-creature, not per-player). Loading all 840 species trees (33,600 nodes) into one
 /// player-level response would also be exactly the un-windowed volume defect §3's own callout warns
-/// against for `DemonsPage.tsx`. `Commander` scope only, matching `AptitudeEndpoints`'s own stated
+/// against for `CreaturesPage.tsx`. `Commander` scope only, matching `AptitudeEndpoints`'s own stated
 /// scope decision for the same reason: the other three scopes need a specimen picker this surface
 /// does not have yet.</para>
 ///
@@ -57,7 +57,7 @@ public static class PassiveTreeEndpoints
     // (12 Primary paths, Commander scope). NOT the only shape with a real producer any more --
     // element_mastery/status_applied have had one since G6 (2026-09-06) -- this pattern was simply
     // never extended to them, tracked as J1's own acceptance bullet (see the class doc comment above).
-    // A well-formed "aptitude.X@DemonType" also resolves Unproduced here, deliberately: the other
+    // A well-formed "aptitude.X@CreatureType" also resolves Unproduced here, deliberately: the other
     // three scopes need a specimen picker this surface does not have yet.
     static readonly Regex AptitudeGatePattern = new(@"^aptitude\.(?<id>[A-Za-z]+)@Commander$", RegexOptions.Compiled);
 
@@ -139,6 +139,26 @@ public static class PassiveTreeEndpoints
             }
 
             return Results.Ok(ProjectState(store, powerIndex, playerId, ownedOverride: body.Nodes, aptitudeDeltaById: aptitudeDeltaById));
+        });
+
+        // lawn-tree-hydrate (T13) -- the Injector has no SQL store, so it cannot call
+        // TreeBoundAtoms.ForPlayer itself; this is the one HTTP round trip that lets it fan the SAME
+        // commander-scope shared-tree atoms the Server sheet already resolves into its own Hot
+        // ActorHub, mirroring RpgClient.RefreshCommanderAllocationAsync's own shape (GET at session
+        // start + on a SignalR reload broadcast, never a per-frame poll).
+        g.MapGet("/bound-atoms/{playerId:long}", (long playerId, RpgStore store, IPowerIndexProvider powerIndex) =>
+        {
+            if (!store.PlayerExists(playerId)) return Results.NotFound();
+            var atoms = FusionRpg.Server.TreeBoundAtoms.ForPlayer(store, powerIndex, playerId)
+                .Select(a => new BoundDerivedAtomDto
+                {
+                    Channel = a.Channel,
+                    Op = a.Op.ToString(),
+                    Amount = a.Amount,
+                    SourceId = a.SourceId
+                })
+                .ToList();
+            return Results.Ok(atoms);
         });
     }
 

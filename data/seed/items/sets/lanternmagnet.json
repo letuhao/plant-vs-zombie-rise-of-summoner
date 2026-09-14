@@ -25,7 +25,7 @@
       "id": "set.lanternmagnet-001",
       "nameKey": "set.magnetic-luster",
       "name": "Magnetic Luster",
-      "themeKey": "demon.lanternmagnet",
+      "themeKey": "creature.lanternmagnet",
       "members": [
         {
           "role": "armament-primary",

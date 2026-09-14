@@ -1,0 +1,22 @@
+{
+  "_meta": {
+    "candidateSetHash": "0922ad0396e8948961584eee48f11f2beeedf0d31bda972fadaf00f11194660f",
+    "corpusHash": "7c7d3fbd5bf40590cb8f6008f040276d4833ad2466bdf6b84ecda584c7e4eb18",
+    "partition": "rounds",
+    "round": 1000,
+    "semanticEnabled": true,
+    "similarityFunctionId": "token-overlap-jaccard-milli",
+    "similarityFunctionVersion": 1,
+    "tuningVersion": 1
+  },
+  "entries": [
+    {
+      "candidateA": "action.species.acientsunnut.001",
+      "candidateB": "action.species.acientsunnut.004",
+      "id": "review.round-1000.0001",
+      "similarityMilli": 1000
+    }
+  ],
+  "kind": "action-review",
+  "schemaVersion": 1
+}

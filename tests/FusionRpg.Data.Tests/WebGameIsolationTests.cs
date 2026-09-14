@@ -11,21 +11,16 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class WebGameIsolationTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public WebGameIsolationTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-webiso-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     EventEnvelope Ev(string game, string kind, string matchKey, object payload) => new()
     {
@@ -37,6 +32,9 @@ public class WebGameIsolationTests : IDisposable
     };
 
     void PlayMatch(string game, string matchKey, int kills, string result, string ptrPrefix)
+        => PlayMatch(_store, game, matchKey, kills, result, ptrPrefix);
+
+    void PlayMatch(RpgStore store, string game, string matchKey, int kills, string result, string ptrPrefix)
     {
         var events = new List<EventEnvelope> { Ev(game, "board.start", matchKey, new { levelName = "iso" }) };
         for (var i = 0; i < kills; i++)
@@ -47,7 +45,7 @@ public class WebGameIsolationTests : IDisposable
 
         events.Add(Ev(game, "match.result", matchKey, new { result }));
         events.Add(Ev(game, "board.end", matchKey, new { levelName = "iso" }));
-        _store.InsertEvents(events);
+        store.InsertEvents(events);
     }
 
     [Fact]
@@ -102,14 +100,20 @@ public class WebGameIsolationTests : IDisposable
     [Fact]
     public void Closed_web_runs_are_exempt_from_capture_archiving()
     {
+        // This case's subject is the filesystem archive: it calls CompactAfterRunClosed (an archive
+        // entry point that throws on a memory store) and asserts NO capture files appear. So it uses
+        // the leak-proof file-backed helper while the rest of the class stays in memory.
+        using var file = DataTestStore.CreateFileBacked();
+        var store = file.Store;
+
         // Well past KeepLastN=50 in web runs alone — none may archive, and no files may appear.
         for (var i = 0; i < 55; i++)
-            PlayMatch(RpgConstants.GameIdWebRpg, Guid.NewGuid().ToString("N"), 1, "victory", $"w{i}-");
-        _store.CompactAfterRunClosed(null);
+            PlayMatch(store, RpgConstants.GameIdWebRpg, Guid.NewGuid().ToString("N"), 1, "victory", $"w{i}-");
+        store.CompactAfterRunClosed(null);
 
-        var runs = _store.ListRuns();
+        var runs = store.ListRuns();
         Assert.DoesNotContain(runs, r => r.Game == RpgConstants.GameIdWebRpg && !string.IsNullOrEmpty(r.ArchiveUri));
-        var archiveDir = Path.Combine(_dir, "archive");
+        var archiveDir = Path.Combine(file.DataDir!, "archive");
         var captureFiles = Directory.Exists(archiveDir)
             ? Directory.GetFiles(archiveDir, "capture-run-*.sqlite")
             : Array.Empty<string>();

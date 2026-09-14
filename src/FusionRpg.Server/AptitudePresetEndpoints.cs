@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Progression;
 using FusionRpg.Core.Stats;
@@ -287,8 +287,8 @@ public static class AptitudePresetEndpoints
     static AllocationScope? ScopeToAllocation(string scope) => scope switch
     {
         "commander" => AllocationScope.Commander,
-        "unique" => AllocationScope.UniqueDemon,
-        "species" => AllocationScope.DemonType,
+        "unique" => AllocationScope.UniqueCreature,
+        "species" => AllocationScope.CreatureType,
         _ => null
     };
 
@@ -310,18 +310,18 @@ public static class AptitudePresetEndpoints
                 var actor = store.GetUniqueActor(scopeKey);
                 if (actor is null) return (false, "unique.notFound", 0, 0);
                 if (actor.PlayerId != playerId) return (false, "presets.owner.mismatch", 0, 0);
-                var source = PointBudget.UniqueDemonSourceFromLevel(actor.Level);
-                var budget = PointBudget.PointsFor(AllocationScope.UniqueDemon, source, AptitudeTuningHub.Tuning);
+                var source = PointBudget.UniqueCreatureSourceFromLevel(actor.Level);
+                var budget = PointBudget.PointsFor(AllocationScope.UniqueCreature, source, AptitudeTuningHub.Tuning);
                 return (true, "", budget, source);
             }
             case "species":
             {
-                if (string.IsNullOrWhiteSpace(scopeKey) || !DemonSpeciesCatalog.IsKnown(scopeKey))
+                if (string.IsNullOrWhiteSpace(scopeKey) || !CreatureSpeciesCatalog.IsKnown(scopeKey))
                     return (false, "species.unknown", 0, 0);
-                var demonTypeId = DemonSpeciesCatalog.Get(scopeKey).DemonTypeId;
-                var level = store.GetRpgActor(playerId, RpgActorKinds.Species, demonTypeId)?.Level ?? 1;
-                var source = PointBudget.DemonTypeSourceFromLevel(level);
-                var budget = PointBudget.PointsFor(AllocationScope.DemonType, source, AptitudeTuningHub.Tuning);
+                var creatureTypeId = CreatureSpeciesCatalog.Get(scopeKey).CreatureTypeId;
+                var level = store.GetRpgActor(playerId, RpgActorKinds.Species, creatureTypeId)?.Level ?? 1;
+                var source = PointBudget.CreatureTypeSourceFromLevel(level);
+                var budget = PointBudget.PointsFor(AllocationScope.CreatureType, source, AptitudeTuningHub.Tuning);
                 return (true, "", budget, source);
             }
             default:

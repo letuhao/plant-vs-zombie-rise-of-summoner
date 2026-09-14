@@ -25,7 +25,7 @@
       "id": "set.ultimatespring-001",
       "nameKey": "set.inferno-spore-volley",
       "name": "Inferno Spore Volley",
-      "themeKey": "demon.ultimatespring",
+      "themeKey": "creature.ultimatespring",
       "members": [
         {
           "role": "armament-primary",

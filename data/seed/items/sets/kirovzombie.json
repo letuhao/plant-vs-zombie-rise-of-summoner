@@ -25,7 +25,7 @@
       "id": "set.kirovzombie-001",
       "nameKey": "set.edgar-s-masterpiece",
       "name": "Edgar's Masterpiece",
-      "themeKey": "demon.kirovzombie",
+      "themeKey": "creature.kirovzombie",
       "members": [
         {
           "role": "armament-primary",

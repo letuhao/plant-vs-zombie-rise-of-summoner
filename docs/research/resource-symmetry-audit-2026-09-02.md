@@ -254,7 +254,7 @@ moved**. Core 5027/5027, Guard 161/161.
 1. **A retirement shim, not a deletion.** `combat.heal.power` stays **registered with no reader and no
    edges**. Retiring the id outright makes `aptitudes.v1/v2/v3.json` — which are revert points and still
    name it — **unloadable**, which would have deleted `TerminationGuardTests`' deliberate v1 pins. Same
-   pattern as `DemonRarity`'s retired four-value ladder. Channel count 261 → **267** (+6 members, +1
+   pattern as `CreatureRarity`'s retired four-value ladder. Channel count 261 → **267** (+6 members, +1
    shim, −0).
 2. **`gen` vs `regen` is a readability hazard, and it is only that.** `regen` is the passive drip, `gen`
    scales an active grant. Prefix tests are `StartsWith` and neither string is a prefix of the other, so

@@ -1,7 +1,7 @@
 # Tasks: `seed-to-concrete`
 
 Plan: [seed-to-concrete-plan.md](seed-to-concrete-plan.md). **62 tasks, 9 phases, 9 checkpoints.**
-`ds N` = [demon-seed](../docs/architecture/demon-seed-map.md) module N ·
+`ds N` = [creature-seed](../docs/architecture/creature-seed-map.md) module N ·
 `ep N` = [effect-pipeline](../docs/architecture/effect-pipeline-map.md) module N.
 
 Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5. No task exceeds 5 files.
@@ -35,7 +35,7 @@ decision is green, including the two new modules built this session (`AtomSeedFi
 `T5.0`'s corrected checkbox). The one failure is proven transient, not investigated further because
 it is already fully root-caused by a prior pass. This snapshot does **not** mean the audit is
 complete — see the phase sections below for the real, still-open items (T2.11, T2.12, T3.8, T4.7/4.8,
-T5.3, T6.1, T6.2, T7.1, and the demon-catalog-merge finding under Checkpoint 2), each blocked on an
+T5.3, T6.1, T6.2, T7.1, and the creature-catalog-merge finding under Checkpoint 2), each blocked on an
 owner action, an unset balance/content number, or an architecture decision, not on more code from
 this session.
 
@@ -44,7 +44,7 @@ this session.
 ## Full-repo verification snapshot — 2026-09-06 (post T6.1/T6.2, `--blame-hang` sweep)
 
 A second full sweep, armed with `--blame-hang --blame-hang-timeout 3-5min` after finding and fixing a
-real .NET process-redirection deadlock (`DemonSpeciesImportCliTests.cs`/`RealColdProcessTests.cs` both
+real .NET process-redirection deadlock (`CreatureSpeciesImportCliTests.cs`/`RealColdProcessTests.cs` both
 called `ReadToEnd()` before `WaitForExit()` — reproduced for real, a 17-minute hang; fixed via async
 stdout/stderr draining, same pattern in both files). `.github/workflows/ci.yml`/`release.yml` both
 gained `timeout-minutes: 60` and `--blame-hang` on every `dotnet test` call for the same reason.
@@ -55,7 +55,7 @@ gained `timeout-minutes: 60` and `--blame-hang` on every `dotnet test` call for 
 | `dotnet test tests/FusionRpg.Data.Tests` | **1037/1037** (one earlier attempt crashed genuinely mid-run at 83/1037 — a real test-host process crash, NOT a hang, `--blame-hang` never tripped; retry clean) |
 | `dotnet test tests/FusionRpg.Server.Tests` | **199/224** (25 failures, all the same pre-existing World-subsystem cluster from a concurrent session's own in-flight `SiegeConstruction.cs`/`TurnEngine.cs` work, confirmed via `git status`) |
 | `dotnet test tests/FusionRpg.AtomImporter.Tests` | **23/23** |
-| `dotnet test tests/FusionRpg.E2E.Tests` | **1/211** passing (210 failures, ONE root cause — `DemonSpeciesCatalog.Configure received an empty species roster`, `Program.cs:315` — the E2E test host's own throwaway DB has zero imported species; pre-existing, unrelated to this program, see [[e2e-tests-dungeon-registry-broken]]; count grew from the historically-documented 206/207 as the suite itself grew, same root cause) |
+| `dotnet test tests/FusionRpg.E2E.Tests` | **1/211** passing (210 failures, ONE root cause — `CreatureSpeciesCatalog.Configure received an empty species roster`, `Program.cs:315` — the E2E test host's own throwaway DB has zero imported species; pre-existing, unrelated to this program, see [[e2e-tests-dungeon-registry-broken]]; count grew from the historically-documented 206/207 as the suite itself grew, same root cause) |
 
 **Two real, previously-undiscovered defects found and root-caused this pass — neither fixed here,
 both out of `seed-to-concrete`'s own scope, both fully written up for their actual owners:**
@@ -89,7 +89,7 @@ own `--status-roster-emit` to resolve first.
 
 **`tasks/seed-to-concrete-plan.md` itself read in full, fresh, 2026-09-06 — not just the todo,
 matching the plan's own "the audit is the plan AND the todo" framing.** Cross-checked against the
-current todo state: Checkpoint 5 ("a demon does something") independently re-confirmed already fully
+current todo state: Checkpoint 5 ("a creature does something") independently re-confirmed already fully
 `[x]` closed (all three bullets, `tasks/seed-to-concrete-todo.md:2401`); all four items in the plan's
 own "Owner-only steps" section accounted for — T2.11's full classification run genuinely still
 owner-gated and untouched (per [[seed-to-concrete-phased-rollout-decision]]), the other three
@@ -112,7 +112,7 @@ seven are XS/S and unblock everything after them.
   - Acceptance: §5.3's weight table and §10's closed inventory both name it; the reason (`threatBand`) is stated
   - Verify: read-back; `threat-band` cannot ship before this
   - Files: `docs/architecture/power/ssot-power-scale.md`
-- [x] **T0.2** `ssot-rarity.md` §4.1 + §4.3 — demons adopt the ten rungs · **S**
+- [x] **T0.2** `ssot-rarity.md` §4.1 + §4.3 — creatures adopt the ten rungs · **S**
   - Acceptance: the reversal is dated and reasoned; the four-row band map is relabelled a **migration shim**, not a permanent wall; §3.3 gains a band per affix class
   - Files: `docs/architecture/item/ssot-rarity.md`
 - [x] **T0.3** `decisions.md` — catalog derivation + revert `aspect-scope` · **XS**
@@ -128,7 +128,7 @@ seven are XS/S and unblock everything after them.
   - Acceptance: §2.1 — a mixed bundle **consumes one prefix roll and one suffix roll**, still never authored. **AND** the status line stops reading *"Nothing is authorized to be authored from it yet"* — ⛔ **found by audit: Phases 1-2 author seeds against a contract that forbids authoring**
   - Files: `docs/architecture/item/seed-contract.md`
 - [x] **T0.7** Three dependent docs · **S**
-  - Acceptance: `spec-action-seeding.md` (A13) records that `pool_rolls` split per class; `effect-atom-map.md` E6 names module 5 for the `mods_json` absorption; `spec-patron-demon.md` records the container move and its equality gate
+  - Acceptance: `spec-action-seeding.md` (A13) records that `pool_rolls` split per class; `effect-atom-map.md` E6 names module 5 for the `mods_json` absorption; `spec-patron-creature.md` records the container move and its equality gate
   - Files: those three
 
 - [x] **T0.8** `ci.yml` — fix the exit-code masking, then wire gates per phase · **S**
@@ -137,45 +137,45 @@ seven are XS/S and unblock everything after them.
   - Files: `.github/workflows/ci.yml`
 
 ### ✅ Checkpoint 0 — closed 2026-09-01
-- [x] No decision doc contradicts the two capability maps — read each amended section back (cross-checked `thetaOffset`, `prefix_rolls`/`suffix_rolls` against `demon-seed-map.md`/`effect-pipeline-map.md`)
-- [x] `docs/DESIGN-GATE.md` §1 rows still point at the right documents — 4 new rows added (affix/container authoring, item rarity, demon-seed generation) that were missing before this checkpoint
+- [x] No decision doc contradicts the two capability maps — read each amended section back (cross-checked `thetaOffset`, `prefix_rolls`/`suffix_rolls` against `creature-seed-map.md`/`effect-pipeline-map.md`)
+- [x] `docs/DESIGN-GATE.md` §1 rows still point at the right documents — 4 new rows added (affix/container authoring, item rarity, creature-seed generation) that were missing before this checkpoint
 - [x] CI fails when a non-last test project fails — proven by local PowerShell probe reproducing the exact throw/$LASTEXITCODE pattern now in `ci.yml` (old pattern masked a non-last failure; new pattern throws on it). A live GitHub Actions run cannot be triggered from this environment (git push is owner-only per AGENTS.md) — the probe validates the identical control-flow construct instead
 
 ---
 
-## Phase 1 — demon-seed foundation · ZERO model calls
+## Phase 1 — creature-seed foundation · ZERO model calls
 
 Ends with every species visible and a **measured** basis coverage number — the figure this plan has
 refused to guess.
 
 - [x] **T1.1** `ds 1` `corpus-dump` — the tool, canonical writer, content hash · **M**
-  - Acceptance: walks `ListAlmanacSeed()` (**not** `DemonSpeciesCatalog.All`); `capturedUtc` comes from `max(RebuiltUtc)`, never `DateTime.UtcNow`; CJK unescaped; explicit nulls
+  - Acceptance: walks `ListAlmanacSeed()` (**not** `CreatureSpeciesCatalog.All`); `capturedUtc` comes from `max(RebuiltUtc)`, never `DateTime.UtcNow`; CJK unescaped; explicit nulls
   - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter CorpusDump`
-  - Files: `tools/DemonCorpusDump/Program.cs`, `DumpWriter.cs`, `src/.../DumpEnvelope.cs`
+  - Files: `tools/CreatureCorpusDump/Program.cs`, `DumpWriter.cs`, `src/.../DumpEnvelope.cs`
 - [x] **T1.2** `ds 1` — byte-identical rerun, coverage test, `--check` CI gate · **S**
   - Acceptance: `Dump_covers_every_almanac_row` asserts against the DAL count — **the regression test for the circular emitter**; a rerun is byte-identical including the hash; `--check` exits 1 when stale
   - Files: `tests/.../CorpusDumpTests.cs`, `.github/workflows/ci.yml`
 - [x] **T1.3** `ds 3` `power-parse` — precedence and the four bases · **M**
   - Acceptance: `observed` beats `stated` and the disagreement is **recorded, not dropped**; interval is integer ms (`1.5秒 → 1500`); both `:` and `：` parse; out-of-range raises
   - Verify: `python -m pytest tools/seedsmith/tests/test_power_parse.py`
-  - Files: `.../demons/power/parse.py`, `model.py`, tests, fixtures
+  - Files: `.../creatures/power/parse.py`, `model.py`, tests, fixtures
 - [x] **T1.4** `ds 3` — the coverage report over the full dump · **S**
   - Acceptance: real observed/stated/inferred/blocked counts for ~904; fixtures are **verbatim** captured strings; the 84-species 97.6% is not quoted as a projection
   - Files: `.../power/parse.py`, `tests/fixtures/power_text/*`
 - [x] **T1.5** `ds 4` `threat-band` — the table, the score, the `Θ` offset · **M**
   - Acceptance: no threshold literal in code; ten threat nouns share **no word** with the ten rarity rungs; `blocked` does not collapse to rung 1; widen-before-multiply, divide by 1000 once
   - Verify: `python scripts/audit-magic-numbers.py --targets M1` finds nothing here
-  - Files: `.../demons/power/bands.py`, `data/tuning/demon-threat.v1.json`, tests
+  - Files: `.../creatures/power/bands.py`, `data/tuning/creature-threat.v1.json`, tests
 - [x] **T1.6** `ds 2` `anchor-contract` — the schema and the descriptions · **M**
   - Acceptance: 21 keys; **every** attribute has a description containing a **negative clause**; `resourceProfile` has six resources including **poise**; `none` legal on every optional enum
   - Files: `.../anchor/schema.py`, `descriptions.py`, tests
 - [x] **T1.7** `ds 2` — the numeric audit, all five shapes · **S**
   - Acceptance: each smuggling shape has a crafted violation that fails; `gameTypeId` is the only allow-listed integer, by name, with a comment
-  - Verify: `python -m seedsmith demons contract --audit`
+  - Verify: `python -m seedsmith creatures contract --audit`
   - Files: `.../anchor/audit.py`, tests
 - [x] **T1.8** `ds 5` `dump-preflight` — the nine checks and the record · **M**
   - Acceptance: staleness by **content hash, not mtime**; check 6 proves constrained decoding with a real call; every failure names a fix command; the record is written only on a full pass
-  - Files: `.../demons/preflight.py`, tests
+  - Files: `.../creatures/preflight.py`, tests
 - [x] **T1.9** `ds 5` — the skill wrapper · **XS**
   - Acceptance: **no check exists only in the skill** — `.claude/` is gitignored; the skill asks, the module detects
   - Files: `.claude/skills/seedsmith-preflight/SKILL.md`
@@ -183,18 +183,18 @@ refused to guess.
 - [x] **T1.10** `corpus-metrics` — dump and basis coverage as **registered** metrics · **S**
   - Acceptance: dump completeness and the basis histogram register into `metrics/registry.py` with **declared targets in tuning** (P2: a metric without a target is an opinion); each declares closed- or open-loop (P3); they appear in `report`'s CI gate
   - Verify: `python -m seedsmith report --gate`
-  - Files: `metrics/corpus_coverage.py`, `data/tuning/demon-corpus-targets.v1.json`, registry, tests
+  - Files: `metrics/corpus_coverage.py`, `data/tuning/creature-corpus-targets.v1.json`, registry, tests
 
 ### ✅ Checkpoint 1 — CLOSED 2026-09-01 (T1.1-T1.10 all done)
 - [x] `dotnet test tests\FusionRpg.Core.Tests` green (4902/4902, incl. 7 new CorpusDumpTests); `dotnet test tests\FusionRpg.Data.Tests` green (548/548 — new `ListSpawnBaselines` DAL method caused no regression); `python -m pytest tools/seedsmith/tests` green (542/542, 11 pre-existing skips, up from the pre-Phase-1 baseline with zero seedsmith regressions across seven new/changed modules)
-- [x] CI runs `corpus-dump --verify` (DB-free self-hash — CI has no populated `hot.sqlite` per decisions.md), `demons contract --audit` (T1.7, gates unconditionally — a numeric field poisons every downstream row), `report --gate --demon-dump` (T1.10's two metrics), and `demons preflight --skip-model` (T1.8's checks 1-4/7-9) — four new CI steps, `.github/workflows/ci.yml`. Check 7 (venv/lock) correctly reports real drift in this dev shell (a shared system Python, not CI's fresh lockfile-installed one) — proof the check works, not a defect; CI's own prior "install from lockfile" step makes it green there
-- [x] The dump is committed at `data/seed/demons/_dump/**` (677 plant + 227 zombie = **904**, 82 spawn baselines, 1295 recipes) and both `--check` (against the real, locally-copied server DB) and `--verify` pass — proven live: hash `cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d`, rerun byte-identical, tamper-then-restore cycle proven for both modes
-- [x] **The real basis coverage over ~904 is written down** — observed=82 (9.1%) stated=637 (70.5%) inferred=170 (18.8%) blocked=15 (1.7%), `spec-power-parse.md` §1a, run live via `seedsmith demons power-parse --dump data/seed/demons/_dump --report`
+- [x] CI runs `corpus-dump --verify` (DB-free self-hash — CI has no populated `hot.sqlite` per decisions.md), `creatures contract --audit` (T1.7, gates unconditionally — a numeric field poisons every downstream row), `report --gate --creature-dump` (T1.10's two metrics), and `creatures preflight --skip-model` (T1.8's checks 1-4/7-9) — four new CI steps, `.github/workflows/ci.yml`. Check 7 (venv/lock) correctly reports real drift in this dev shell (a shared system Python, not CI's fresh lockfile-installed one) — proof the check works, not a defect; CI's own prior "install from lockfile" step makes it green there
+- [x] The dump is committed at `data/seed/creatures/_dump/**` (677 plant + 227 zombie = **904**, 82 spawn baselines, 1295 recipes) and both `--check` (against the real, locally-copied server DB) and `--verify` pass — proven live: hash `cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d`, rerun byte-identical, tamper-then-restore cycle proven for both modes
+- [x] **The real basis coverage over ~904 is written down** — observed=82 (9.1%) stated=637 (70.5%) inferred=170 (18.8%) blocked=15 (1.7%), `spec-power-parse.md` §1a, run live via `seedsmith creatures power-parse --dump data/seed/creatures/_dump --report`
 - [x] Zero model calls have been made (T1.1-T1.10 are pure DAL reads, deterministic serialization, and schema/tuning-table logic; T1.8's checks 5/6 are tested against a stubbed model, never a real call)
 
 ---
 
-## Phase 2 — demon-seed classification
+## Phase 2 — creature-seed classification
 
 - [x] **T2.1** `ds 6` `option-permutation` — seeded ordering · **S**
   - Acceptance: `sample_index` is **inside** the seed, so three votes use three distinct orders; same species reproduces the same order; different species differ
@@ -204,8 +204,8 @@ refused to guess.
   - Files: `.../anchor/vote.py`, tests
 - [x] **T2.3** `ds 7` `classify-pipelines` — the eight graphs and prompts · **M**
   - Acceptance: one judgement per pipeline; **no rendered prompt contains a captured magnitude**, proven by grep over the rendered text; element and aptitude split primary/secondary
-  - Verify: `python -m seedsmith demons generate --dry-run` makes zero calls (stub raises)
-  - Files: `workflow/graphs/demon_anchor.py`, `anchor/prompts.py`, tests
+  - Verify: `python -m seedsmith creatures generate --dry-run` makes zero calls (stub raises)
+  - Files: `workflow/graphs/creature_anchor.py`, `anchor/prompts.py`, tests
 - [x] **T2.4** `ds 7` — cross-field validators and bounded repair · **S**
   - Acceptance: posture↔resource conflict re-prompts **naming the conflict**; repair stops after two attempts; a new `family` value is recorded, not rejected
   - Files: `workflow/validators/anchor.py`, tests
@@ -216,14 +216,14 @@ refused to guess.
   - Acceptance: rerun over an unchanged dump is **byte-identical by hash**; staleness compares recorded values, never mtime; `unresolved` is written as `unresolved`, not omitted
   - Files: `anchor/emit.py`, `provenance.py`, tests
 - [~] **T2.7** `ds 8` — the legacy diff against the shipped 84 · **S** — PARTIAL, deletion blocked on the full run
-  - Acceptance: `--diff-legacy` reports per-field agreement — **built and tested** (`anchor/legacy_diff.py`, 4 tests green, real synthetic-data proof of order-insensitive list comparison and correct exclusion of species absent from either side). `tools/DemonCorpusEmit` is deleted **in this task, not earlier** — ⛔ **deferred**: the spec's own boundary says "ask first" on this deletion, and its own §5 says deleting it before the replacement emits real data "is how a corpus goes missing for a wave." Deleting the only existing demon corpus before the FULL run lands would still do exactly what the spec warns against — kept.
+  - Acceptance: `--diff-legacy` reports per-field agreement — **built and tested** (`anchor/legacy_diff.py`, 4 tests green, real synthetic-data proof of order-insensitive list comparison and correct exclusion of species absent from either side). `tools/CreatureCorpusEmit` is deleted **in this task, not earlier** — ⛔ **deferred**: the spec's own boundary says "ask first" on this deletion, and its own §5 says deleting it before the replacement emits real data "is how a corpus goes missing for a wave." Deleting the only existing creature corpus before the FULL run lands would still do exactly what the spec warns against — kept.
   - ✅ **Closed the CLI-entrypoint gap and ran it for real against real data, 2026-09-02.** The
     "needs a small C# export step" note above was the actual remaining blocker, not T2.11 — closed
-    it: `tools/DemonSpeciesGen --export-legacy <path>` (new mode, reads the real compiled
-    `DemonSpeciesCatalog.All` after `ConfigureFromCompiledDefault()`, writes
+    it: `tools/CreatureSpeciesGen --export-legacy <path>` (new mode, reads the real compiled
+    `CreatureSpeciesCatalog.All` after `ConfigureFromCompiledDefault()`, writes
     `{id, elementPrimary, deployMode, acquisition, variants}` per shipped species in
     `legacy_diff.py`'s exact expected shape — field VALUES verified against a real anchor before
-    writing, not assumed from the enum). `seedsmith demons diff-legacy --legacy <path>` (new CLI
+    writing, not assumed from the enum). `seedsmith creatures diff-legacy --legacy <path>` (new CLI
     subcommand — the exact same "no committed entrypoint" gap this program hit twice already for
     `families`/`generate --kind commander-effect`, closed the same way). **Real output, 84 legacy ×
     28 new anchors, 19 species present in both**: `elementPrimary` 2/19 (10.5%) agree, `deployMode`
@@ -233,19 +233,19 @@ refused to guess.
     disagreement, exactly what the module's own docstring anticipates ("the old generator assigned
     elements by a hash, not by reading anything — this is the sanity check... not a correctness
     gate"). Found and fixed the same id-casing mismatch class `_load_families` already hit once
-    (`DemonSpeciesCatalog`'s own ids are lowercase, the anchor's `speciesId` is TitleCase) — the CLI
+    (`CreatureSpeciesCatalog`'s own ids are lowercase, the anchor's `speciesId` is TitleCase) — the CLI
     normalizes both before comparing, proven by a dedicated test. 8 new tests
-    (`test_legacy_diff.py`), 1 new C# test (`DemonSpeciesGenExplainTests.cs`). Full sweeps:
+    (`test_legacy_diff.py`), 1 new C# test (`CreatureSpeciesGenExplainTests.cs`). Full sweeps:
     seedsmith **737/737**, `FusionRpg.Core.Tests` **4236/4236**. **Still open: a human (the owner)
     reading this real output** — the acceptance line's own words — which is now genuinely possible
     since real output exists, and will be far more informative once it runs over 904 species instead
     of 28.
   - Files: `anchor/legacy_diff.py`, `report/cli.py` (`diff-legacy` subcommand, new),
-    `tools/DemonSpeciesGen/Program.cs` (`--export-legacy`, new) — `tools/DemonCorpusEmit/` NOT
+    `tools/CreatureSpeciesGen/Program.cs` (`--export-legacy`, new) — `tools/CreatureCorpusEmit/` NOT
     deleted, pending the full run and owner confirmation
 - [x] **T2.8** `ds 9` `run-control` — the state machine, pure · **S**
   - Acceptance: states and transitions with no I/O; a user pause is **TRANSIENT** (replay, no new call); pause never splits a species
-  - Files: `demons/run/machine.py`, tests
+  - Files: `creatures/run/machine.py`, tests
 - [x] **T2.9** `ds 9` — record, selectors, refusals · **M** (+ orchestrator.py, not in spec's file list but needed to make pause/resume/never-splits-a-species testable end to end)
   - Acceptance: the record lists **species ids, not counts**; all eight selectors resolve with zero model calls; a `--skip-model` preflight cannot start a run; `overwrite-all` needs its token; a dead-process record offers resume
   - Files: `run/record.py`, `run/selectors.py`, tests
@@ -253,16 +253,16 @@ refused to guess.
   live command for real while investigating a different bug** — recorded here because it produced
   real, dated evidence T2.10/T2.11 didn't previously have on file, not because this program is
   changing scope.
-  - `python -m seedsmith report --demon-anchors data/seed/demons/species` was run for real (840 real
+  - `python -m seedsmith report --creature-anchors data/seed/creatures/species` was run for real (840 real
     anchors loaded via `_index.json`, matching this task's own T2.11 count closely — 829 vs 840,
     likely a handful of species landed between that run and this one). **19 real GAP findings**,
     the first time this exact command's own output has been recorded verbatim in this todo:
-    `DemonRoster/GridFill` 65/252 cells occupied (257‰, below the 900‰ target); `SingleElementShare`
+    `CreatureRoster/GridFill` 65/252 cells occupied (257‰, below the 900‰ target); `SingleElementShare`
     973‰ single-element (target ≤500‰); `AptitudeDistribution` GAP on Agility/Composure/Ferocity/
     Might/Pierce/Vigor (each below 500‰ of the mean); `PostureBalance` Finesse at 165‰ (below the
     [200,500]‰ band); `RarityMonotonicity` non-monotone at 4 of 9 rung boundaries;
     `ThreatBandOccupancy` nuisance at 739‰ (above the 250‰ ceiling).
-  - ⛔ **`data/tuning/demon-roster-targets.v1.json`'s own `_note` is now stale** — it reads "None are
+  - ⛔ **`data/tuning/creature-roster-targets.v1.json`'s own `_note` is now stale** — it reads "None are
     measured against real classified data yet — T2.11's real run has not happened," but T2.11 is
     marked `[x]` above and this run just produced real findings against 840 real anchors. Worth a
     one-line correction the next time that file is touched; not fixed here since it belongs to this
@@ -279,22 +279,22 @@ refused to guess.
     is the action-corpus atom-family bug, not the species roster.
 - [x] **T2.10** `ds 14` `roster-metrics` — checks and declared targets · **M**
   - Acceptance: every metric names a target **in tuning**; every metric declares closed- or open-loop; the 21×12 grid reports all 252 cells including zeros; an injected element skew is caught
-  - Files: `metrics/demon_roster.py`, `data/tuning/demon-roster-targets.v1.json`, tests
+  - Files: `metrics/creature_roster.py`, `data/tuning/creature-roster-targets.v1.json`, tests
 - [x] **T2.11** ⚠️ **THE RUN** — 20-species subset, then full · **owner-run** — **confirmed done,
-  2026-09-04.** The demon-corpus-self-heal program (a separate, later work stream, `tasks/demon-
+  2026-09-04.** The creature-corpus-self-heal program (a separate, later work stream, `tasks/creature-
   corpus-self-heal-plan.md`) ran the full corpus over its own multi-phase self-heal pass, not as a
   single T2.11 invocation — recorded here because this task's own acceptance line is now genuinely
   satisfied, not because that program was executed as this task. Real, verified count as of this
-  session: **829 real, fully-resolved species on disk** (`data/seed/demons/species/`, confirmed via
-  `dotnet run --project tools/DemonSpeciesGen -- --check`: "clean, 829 species match"), out of 904 —
+  session: **829 real, fully-resolved species on disk** (`data/seed/creatures/species/`, confirmed via
+  `dotnet run --project tools/CreatureSpeciesGen -- --check`: "clean, 829 species match"), out of 904 —
   the gap is 64 species that never had a `start` at all (genuinely never classified, out of every
   `--pipeline`-scoped rerun's own scope by design) plus 11 species that remain genuinely
   `"unresolved"` on `aptitudePrimary` even after two real rerun rounds (5 of the 11 are literal
   placeholder rows — `displayName: "未命名"`/"Unnamed", `flavorInfo: null` — nothing to classify
   from; the other 6 are real species with no signal after 2 rounds of fresh votes). Both gaps are
   reported, not silently absorbed: `SpeciesExpander.UnresolvedFields` (new,
-  `src/FusionRpg.Core/Demons/Generation/SpeciesExpander.cs`) is a shared check both
-  `DemonSpeciesGen`/`DemonSpeciesImport` now call BEFORE `Expand` — skips and names each unresolved
+  `src/FusionRpg.Core/Creatures/Generation/SpeciesExpander.cs`) is a shared check both
+  `CreatureSpeciesGen`/`CreatureSpeciesImport` now call BEFORE `Expand` — skips and names each unresolved
   species instead of the old behaviour (any single unresolved species aborted the WHOLE batch, a real
   blocker hit live while regenerating the corpus this session). A genuine, separate corpus-integrity
   bug found and fixed in the same pass: `SuperMachineShardPlant` existed as a real duplicate across
@@ -305,16 +305,16 @@ refused to guess.
   (index-authoritative rule, same precedent as Phase A2 of the self-heal program). `--check` is now
   clean.
   - Acceptance: the subset is reviewed by a human **before** the full run; the full run completes through `run-control`; the disagreement rate and roster metrics are both reported
-  - Verify: `python -m seedsmith demons metrics --gate`
-  - ▶ **The 20-species subset launched for real, 2026-09-02** — `demons preflight` PASS (0 refusals)
+  - Verify: `python -m seedsmith creatures metrics --gate`
+  - ▶ **The 20-species subset launched for real, 2026-09-02** — `creatures preflight` PASS (0 refusals)
     via the isolated `.venv-verify` (matches `requirements.lock` exactly; the shared conda env does
     not, an "ASK", not a "REFUSE", left untouched rather than pip-installed into unilaterally).
-    `demons run start --species CherryBomb,WallNut,PotatoMine,Chomper,SmallPuff,FumeShroom,
+    `creatures run start --species CherryBomb,WallNut,PotatoMine,Chomper,SmallPuff,FumeShroom,
     HypnoShroom,ScaredyShroom,IceShroom,DoomShroom,FlagZombie,ConeZombie,PolevaulterZombie,
     BucketZombie,PaperZombie,DoorZombie,FootballZombie,JacksonZombie,SnorkleZombie,DrownZombie` — 10
     plants + 10 zombies, all real, all distinct from the 3 species (Peashooter/SunFlower/NormalZombie)
     the earlier `run-control` proof already used, so this is genuinely new classification work, not a
-    repeat. **Real, non-obvious finding while launching it:** a `demons run resume`/`start` process
+    repeat. **Real, non-obvious finding while launching it:** a `creatures run resume`/`start` process
     launched via `nohup ... &` inside a synchronous tool call dies with that call (`processAlive=False`
     after ~17s, 0 calls made) — the exact same "dies when the tool call's process tree is cleaned up"
     class of issue CLAUDE.md's server-lifetime note already documents for `deploy-play.ps1`, just for
@@ -330,7 +330,7 @@ refused to guess.
     does not make unilaterally). Producing the subset for review is this session's own real,
     achievable contribution to this task.
   - ✅ **The 20-species subset finished, 2026-09-02 — `state: completed`, 20/20, 0 failures**
-    (`data/seed/demons/_runs/20260902T171814.614601-816GV0.json`, verified by reading the committed
+    (`data/seed/creatures/_runs/20260902T171814.614601-816GV0.json`, verified by reading the committed
     record directly, not inferred from a status line). Two real crash bugs found by the run itself
     and fixed the same day, both in `derive.py`'s post-processing of a legitimately unresolved vote
     (spec-classify-pipelines.md §4: "two repairs, then the field is unresolved and reported" — a
@@ -349,8 +349,8 @@ refused to guess.
     Chomper's own anchor carries `"family": ["Apex Predator Flora"]`) — but `runner.py`'s own
     file-bucketing (`_family_for`) never looked at it, only ever consulting a small, unrelated
     53-entry `family-assignments.json` built for a *different* corpus entirely
-    (`data/seed/demons/demon/` — already-fused combo-demons like "allpeater", not the 904 base
-    species `demons run` classifies). Every base species not coincidentally sharing an id with that
+    (`data/seed/creatures/creature/` — already-fused combo-creatures like "allpeater", not the 904 base
+    species `creatures run` classifies). Every base species not coincidentally sharing an id with that
     other corpus fell into the generic bucket despite already having a real classified family.
     **Not a missing pipeline** (one already exists and already ran) — fixed by making `_family_for`
     prefer the anchor's own classified `family` field, slugified to kebab-case, falling back to the
@@ -363,7 +363,7 @@ refused to guess.
     `unclassified`. Full `python -m pytest`: 733/733. The original 20 species were deliberately
     **not** retroactively re-bucketed this pass (a `rerun` command exists for this; left as an open
     owner choice rather than silently migrating already-written output).
-  - ✅ **The task's own `Verify` command run for real, 2026-09-02: `python -m seedsmith demons
+  - ✅ **The task's own `Verify` command run for real, 2026-09-02: `python -m seedsmith creatures
     metrics --gate` against the real 28-species anchor tree.** Exit 0, 24 gaps reported, zero hard
     (`gates=True`) failures — proving the metrics/gate mechanism itself is real and load-bearing,
     not just built. Every gap is exactly what a 28-species sample SHOULD show against targets
@@ -379,8 +379,8 @@ refused to guess.
     line (subset reviewed by a human first) and a real ~14h/~16,272-call commitment — not attempted.
   - ⚠️ **Real data-integrity bug found by the regression sweep after the family-bucketing fix, not
     by inspection** — `dotnet test FusionRpg.Data.Tests` failed on
-    `DemonSpeciesImportCliTests.A_real_import_against_the_real_committed_tree...`, which runs
-    `DemonSpeciesGen --check` for real. Root cause: **two of my own overlapping `resume`-loop
+    `CreatureSpeciesImportCliTests.A_real_import_against_the_real_committed_tree...`, which runs
+    `CreatureSpeciesGen --check` for real. Root cause: **two of my own overlapping `resume`-loop
     background tasks classified the same 2 species (Squash, ThreePeater) independently and raced
     on writing `_index.json`**, leaving each with a real but orphaned duplicate anchor file
     (`plant/ambush-predator-flora.json` alongside `plant/trap-based-flora.json` for Squash;
@@ -395,7 +395,7 @@ refused to guess.
     the prior one's `state` has actually gone `idle`/terminal) plus a real, mechanical cleanup:
     removed both orphaned duplicate files, rebuilt `_index.json` from the real files on disk (via
     `emit.py`'s own `build_index`/`render_index`, not hand-written), regenerated
-    `data/generated/demons` (28 species, `--check` clean), full `FusionRpg.Data.Tests` **608/608**
+    `data/generated/creatures` (28 species, `--check` clean), full `FusionRpg.Data.Tests` **608/608**
     (was 607/608 with the one real failure, now green).
   - ✅ **The structural follow-up closed the same day, before the full run could hit it twice.**
     Root cause, precisely: the pre-existing `record.state == "running" and is_process_alive(pid)`
@@ -412,21 +412,21 @@ refused to guess.
     preference for provable-not-flaky tests. Full seedsmith sweep: **741/741**.
   - Progress (2026-09-02): the CLI driver `run-control` itself needed to launch this — previously
     T2.8/2.9 built the pure `machine`/`record`/`selectors`/`orchestrator` modules but nothing tied
-    them to the real classification loop or a `demons run <verb>` command; `_cmd_demons_generate_anchor`
+    them to the real classification loop or a `creatures run <verb>` command; `_cmd_creatures_generate_anchor`
     explicitly refused `--all` ("needs run-control... not yet built"). Built and PROVEN with real
     calls, not just tests:
-    - `adapters/demons/run/runner.py` (new) — `start`/`resume`/`pause`/`cancel`/`rerun`/`status`/
+    - `adapters/creatures/run/runner.py` (new) — `start`/`resume`/`pause`/`cancel`/`rerun`/`status`/
       `overwrite-all`, checkpointing the run record and the touched anchor family file after every
-      single species (never mid-species, spec §2). `demons run <verb>` wired into the CLI.
+      single species (never mid-species, spec §2). `creatures run <verb>` wired into the CLI.
     - 11/11 new tests (`test_run_runner.py`) using the REAL LangGraph pipeline graphs with only the
       network call stubbed — covers every spec testing-strategy row (pause/resume-no-recall,
       dead-process recovery, changed-dump refusal, concurrent-start refusal, overwrite-all token,
       rerun-ignores-existing).
-    - **Real proof, not simulated**: ran `demons preflight` for real (checks 5/6 made real LM Studio
+    - **Real proof, not simulated**: ran `creatures preflight` for real (checks 5/6 made real LM Studio
       calls, model `google/gemma-4-26b-a4b-qat`, confirmed reachable) — full pass required syncing
       the installed env to `requirements.lock` (done via the pre-existing isolated `.venv-verify`,
       owner-directed rather than touching the shared conda env). Then ran
-      `demons run start --species <id>` for real against 3 real species (Peashooter, SunFlower,
+      `creatures run start --species <id>` for real against 3 real species (Peashooter, SunFlower,
       NormalZombie — both sides) — all 8 pipelines, all real calls, real anchor files written and
       correctly indexed.
     - **3 real bugs found and fixed by this proof run** (not caught by any stub-based test, because
@@ -485,14 +485,14 @@ refused to guess.
         heirloom/heirloom/almanac — both real, both recorded, neither silently averaged or
         defaulted to the first sample.
       - Ran the deterministic gate for real for the first time:
-        `seedsmith report --gate --demon-anchors data/seed/demons/species` — 35 real findings, 0
-        `NOT_MEASURED` for anything the 5-species tree could feed. Every demon-related metric
-        (`PipelineHealth/*`, `DemonRoster/*`) is registered with `gates=False` **by this program's
+        `seedsmith report --gate --creature-anchors data/seed/creatures/species` — 35 real findings, 0
+        `NOT_MEASURED` for anything the 5-species tree could feed. Every creature-related metric
+        (`PipelineHealth/*`, `CreatureRoster/*`) is registered with `gates=False` **by this program's
         own explicit design** (`model.py`: "starts False for every new metric; promotion is a
         deliberate, later, separate act") — so `--gate` currently exits clean regardless; these
         findings are observational, not yet a pass/fail decision, and turning one into an actual
         blocking gate for "batch all" is a separate, undecided step.
-      - Most of the 35 findings (`DemonRoster/GridFill`, `FamilySizeSpread`,
+      - Most of the 35 findings (`CreatureRoster/GridFill`, `FamilySizeSpread`,
         `AptitudeDistribution`, `ThreatBandOccupancy`) are expected noise from a 5-species sample
         against population-scale targets (e.g. "5/252 grid cells" — meaningless below dozens of
         species) — not a real signal yet.
@@ -501,7 +501,7 @@ refused to guess.
         `aptitudePrimary` (zombie 500‰) already exceed the declared 300‰ ceiling. Combined with
         threat-audit's verdict spread across all 8 real observed/stated species classified so far
         this session (too-low ×2, too-high ×2, agree ×1 — not a one-directional bias, so not
-        obviously "retune `demon-threat.v1.json`" per Q16's own framing), this is real but still a
+        obviously "retune `creature-threat.v1.json`" per Q16's own framing), this is real but still a
         very small sample — 1 disagreement in 2-3 votes swings the rate hugely. **Not enough
         evidence yet to conclude the prompts are unreliable or that they're fine** — a larger batch
         is needed before either call, which is exactly why the owner asked for this checkpoint
@@ -511,18 +511,18 @@ refused to guess.
   - ✅ **The owner's own quality-check request acted on directly, 2026-09-03** ("lawn for 10 plant
     and 10 zombie then we will check quality and improve if need"). The owner picked the fast option
     (catalog/codex review, no live game session) over an AskUserQuestion offering both. Fetching the
-    LIVE server's real `/api/demons/catalog` first surfaced a genuine, separate, previously-
+    LIVE server's real `/api/creatures/catalog` first surfaced a genuine, separate, previously-
     undocumented finding — the classified species have **no path into the live-served catalog at
-    all today** (see the new Checkpoint 2 bullet above: `DemonCatalogGen`/
-    `DemonSpeciesCatalog.Generated.cs`, what the server actually compiles, is a wholly different,
-    heuristic pipeline from this program's own `DemonSpeciesGen`/`data/generated/demons`, never
+    all today** (see the new Checkpoint 2 bullet above: `CreatureCatalogGen`/
+    `CreatureSpeciesCatalog.Generated.cs`, what the server actually compiles, is a wholly different,
+    heuristic pipeline from this program's own `CreatureSpeciesGen`/`data/generated/creatures`, never
     merged). Rather than force a merge into the live catalog (a real, owner-gated "flip" decision —
     T4.8's own already-written closing note explains exactly why that flip is deliberately
     deferred: today's store only holds the species this program has actually classified, so
     flipping the live hosts now would SHRINK the roster the game actually serves, e.g. from the old
     84 down to 28), used the ALREADY-BUILT, already-tested, side-effect-free path instead:
-    `tools/DemonSpeciesImport` (T4.6) against an isolated scratch SQLite DB (never the live server's
-    own data dir), then read `demon_species` directly. Real, useful signal from the 20-species
+    `tools/CreatureSpeciesImport` (T4.6) against an isolated scratch SQLite DB (never the live server's
+    own data dir), then read `creature_species` directly. Real, useful signal from the 20-species
     subset (all 20 present, matching T2.11's own earlier `run start --species` list exactly):
     - Rarity, deployMode, and traits vary sensibly per species and read as genuinely specific, not
       generic — e.g. JacksonZombie's traits ("Moonwalk Entrance", "Synchronized Minion Summoning",
@@ -531,7 +531,7 @@ refused to guess.
       flavor, not boilerplate.
     - `theta`/`pTheta` are identical (13 / 452) across all 20 species regardless of rarity —
       expected, not a bug: per `SpeciesExpander`'s own formula (`Explain()`,
-      `tools/DemonSpeciesGen/Program.cs`), `theta` derives from `threatBand`, not `rarity`, and
+      `tools/CreatureSpeciesGen/Program.cs`), `theta` derives from `threatBand`, not `rarity`, and
       every one of these 20 species landed in the same threat rung — consistent with T2.11's own
       already-recorded `ThreatBandOccupancy: 8 of 10 rungs empty` finding for this same small,
       early-game-heavy sample.
@@ -550,10 +550,10 @@ refused to guess.
     one 28-species sample.
 
 - [x] **T2.12** `pipeline-metrics` — the run's own health, registered · **S**
-  - Acceptance: disagreement rate per field/side (from `_provenance.confidence`), repair rate (from `_provenance.attempts`, a new provenance field added for this), and `basis` mix (structural self-consistency, target 0) all register as metrics with declared targets (`data/tuning/demon-pipeline-health-targets.v1.json`); `unresolved` count is `DemonRoster/UnresolvedCount` (T2.10) — not duplicated here. The `threat-audit` disagreement queue (`review_queue.py`, T2.5) is **structurally** open-loop: it has no `loop`/`gates` attributes at all and cannot be registered into `MetricRegistry`, proven by test
-  - Verify: `python -m seedsmith report --gate --demon-anchors <dir>` — real end-to-end run against a synthetic anchor tree proved all 3 metrics fire correctly (9/9 tests green, incl. 2 real bugs found and fixed: a dead-code `by_key` line that crashed on any real `Ctx`, and an over-broad `demon_dump` dependency the actual check never used)
-  - Files: `metrics/pipeline_health.py`, `data/tuning/demon-pipeline-health-targets.v1.json`, `anchor/provenance.py` (+`attempts` field), registry, tests
-  - ⛔ **Not wired into CI**: `demons metrics --gate` needs a real anchor tree, which does not exist until T2.11's real run lands — adding the CI step now would break every build. Per T0.8's own rule ("each later phase adds its own gate as it lands"), this is deferred, not skipped.
+  - Acceptance: disagreement rate per field/side (from `_provenance.confidence`), repair rate (from `_provenance.attempts`, a new provenance field added for this), and `basis` mix (structural self-consistency, target 0) all register as metrics with declared targets (`data/tuning/creature-pipeline-health-targets.v1.json`); `unresolved` count is `CreatureRoster/UnresolvedCount` (T2.10) — not duplicated here. The `threat-audit` disagreement queue (`review_queue.py`, T2.5) is **structurally** open-loop: it has no `loop`/`gates` attributes at all and cannot be registered into `MetricRegistry`, proven by test
+  - Verify: `python -m seedsmith report --gate --creature-anchors <dir>` — real end-to-end run against a synthetic anchor tree proved all 3 metrics fire correctly (9/9 tests green, incl. 2 real bugs found and fixed: a dead-code `by_key` line that crashed on any real `Ctx`, and an over-broad `creature_dump` dependency the actual check never used)
+  - Files: `metrics/pipeline_health.py`, `data/tuning/creature-pipeline-health-targets.v1.json`, `anchor/provenance.py` (+`attempts` field), registry, tests
+  - ⛔ **Not wired into CI**: `creatures metrics --gate` needs a real anchor tree, which does not exist until T2.11's real run lands — adding the CI step now would break every build. Per T0.8's own rule ("each later phase adds its own gate as it lands"), this is deferred, not skipped.
 
 ### ✅ Checkpoint 2 — every bullet now closeable evidence exists; the last ~64/904 species remain owner-gated
 Every module Checkpoint 2 needs is built and tested (T2.1-T2.10, T2.12 all green). **Updated
@@ -568,23 +568,23 @@ more unplanned real model calls without explicit go-ahead would not be a reasona
 my own (the plan's own Q20 decision, and a single unplanned call already happened once during T2.3's
 verification, flagged in that task).
 - [x] anchors committed; a rerun is byte-identical — **confirmed 2026-09-04 at the real scale**:
-  829/904 real species, `DemonSpeciesGen --check` clean (`--check: clean, 829 species match`). Not
+  829/904 real species, `CreatureSpeciesGen --check` clean (`--check: clean, 829 species match`). Not
   literally all 904 — 64 never classified, 11 genuinely unresolved after 2 rerun rounds (5 are
   content-less placeholder rows) — both gaps named, not silently dropped; see T2.11's own evidence.
-  **2026-09-06: the real anchor tree has grown to 840** (`data/seed/demons/species/_index.json`,
+  **2026-09-06: the real anchor tree has grown to 840** (`data/seed/creatures/species/_index.json`,
   504 tracked files under `git ls-files`, zero uncommitted drift) — a handful more landed since the
   829 count above; both numbers are real, just from different moments, not a contradiction.
-- [x] **CI runs `demons metrics --gate`** — **wired 2026-09-06, correcting a stale blocker.**
+- [x] **CI runs `creatures metrics --gate`** — **wired 2026-09-06, correcting a stale blocker.**
   T2.12's original note ("would break CI with no anchor tree yet") was true when written but is not
   true now: the real anchor tree is fully committed (verified via `git ls-files`/`git status` above,
   not assumed), and the command needs no model call and no network access. Verified directly before
-  wiring it in: ran `python -m seedsmith demons metrics --gate` against the real committed tree —
+  wiring it in: ran `python -m seedsmith creatures metrics --gate` against the real committed tree —
   **exit 0, 14 real GAP findings, all `gates=False` (informational only, none `gates=True`)** — so
-  wiring it cannot break today's build. New CI step "Demon roster metrics gate" added to `ci.yml`
-  right after the existing "Demon corpus-coverage metrics" step, same shape (`--gate`, throw on
+  wiring it cannot break today's build. New CI step "Creature roster metrics gate" added to `ci.yml`
+  right after the existing "Creature corpus-coverage metrics" step, same shape (`--gate`, throw on
   nonzero exit, `working-directory: tools/seedsmith`).
 - [x] `--gate` passes, or every finding has a written decision — **re-run 2026-09-06 against the
-  real, full 829-840 species tree, not the old 28-species subset.** `demons metrics --gate` exit 0,
+  real, full 829-840 species tree, not the old 28-species subset.** `creatures metrics --gate` exit 0,
   **14 informational gaps** (`AptitudeDistribution` low on Agility/Composure/Ferocity/Might/Pierce/
   Vigor; `GridFill` 65/252 cells (257‰) below the 900‰ target; `PostureBalance` Finesse 165‰ outside
   [200,500]‰; 4 `RarityMonotonicity` non-monotone boundaries — chaff→sprout, cultivated→fused,
@@ -605,45 +605,45 @@ verification, flagged in that task).
   Closes the "not run against real, full-scale data" gap — **the owner's own judgment read of this
   output is still theirs to do**, this bullet's own claim is only that real, current output exists
   for them to read, not that they have read it.
-- [x] Disagreement rates recorded per field — **real votes exist now**: `demons metrics --gate`'s
+- [x] Disagreement rates recorded per field — **real votes exist now**: `creatures metrics --gate`'s
   own `UnresolvedCount` metric reports `aptitudePrimary: 2/28 unresolved (71‰)` against real
   classification votes, not the mechanism-only state this bullet described before 2026-09-02.
 
 ⛔ **New, previously-undiscovered real gap found 2026-09-03, acting on the owner's own T2.11 request
-("lawn for 10 plant and 10 zombie then we will check quality") via `GET /api/demons/catalog`.** The
+("lawn for 10 plant and 10 zombie then we will check quality") via `GET /api/creatures/catalog`.** The
 owner picked the catalog/codex check specifically as the fast, no-live-game option. Fetching the real
-running server's `/api/demons/catalog` returned **84 species, none of the 28 classified ones present**
+running server's `/api/creatures/catalog` returned **84 species, none of the 28 classified ones present**
 — traced, not guessed: the LIVE server compiles against
-`src/FusionRpg.Core/Demons/DemonSpeciesCatalog.Generated.cs`, whose own header names its real
-generator: `dotnet run --project tools/DemonCatalogGen -- <server data dir>`. That tool is a
-**completely separate pipeline** from this program's own `tools/DemonSpeciesGen` — it reads
+`src/FusionRpg.Core/Creatures/CreatureSpeciesCatalog.Generated.cs`, whose own header names its real
+generator: `dotnet run --project tools/CreatureCatalogGen -- <server data dir>`. That tool is a
+**completely separate pipeline** from this program's own `tools/CreatureSpeciesGen` — it reads
 `RpgStore.ListTypes()` (captured type rows from the SQLite DB, i.e. whatever the injector has
 observed live) and derives element/rarity/etc. **heuristically** from name/hp
-(`DemonSpeciesGenerator.Generate`), with zero knowledge of the LLM-classified anchors this whole
-program produces. **The two pipelines have never been merged**: `DemonSpeciesGen`'s own `--check`
-mode only proves internal self-consistency (`data/generated/demons/*.json` matches a fresh
-re-derivation from `data/seed/demons/species/*.json`) — it was never wired to write into or replace
-rows in `DemonSpeciesCatalog.Generated.cs`, the one artifact the live server actually serves. Net
+(`CreatureSpeciesGenerator.Generate`), with zero knowledge of the LLM-classified anchors this whole
+program produces. **The two pipelines have never been merged**: `CreatureSpeciesGen`'s own `--check`
+mode only proves internal self-consistency (`data/generated/creatures/*.json` matches a fresh
+re-derivation from `data/seed/creatures/species/*.json`) — it was never wired to write into or replace
+rows in `CreatureSpeciesCatalog.Generated.cs`, the one artifact the live server actually serves. Net
 effect: **every classified species this program has produced is invisible to the live game and
 every player-facing endpoint, today, with no code path that would ever surface one** — this is a
 larger and more fundamental gap than the "804 species left to classify" framing suggests, and it
 was not on the plan's own checklist anywhere before this.
 Not a small merge to force blind: attempted to check whether `GameTypeId` (present on both a
 classified anchor and the legacy rows) could key a safe merge, and found it is **not** a safe key —
-`GameTypeId = 2` already names TWO different legacy demons (`DemonTypeId 10002` and `60002`, both
+`GameTypeId = 2` already names TWO different legacy creatures (`CreatureTypeId 10002` and `60002`, both
 `ElementPrimary = Ice`) neither of which is Cherry Bomb (the classified `GameTypeId = 2` entry, real
 element `Fire`) — the numbering is scoped by some dimension this session has not yet identified
-(possibly a game-version prefix baked into the leading digit of `DemonTypeId`), so writing a naive
+(possibly a game-version prefix baked into the leading digit of `CreatureTypeId`), so writing a naive
 merge keyed on `GameTypeId` risks silently colliding with or overwriting an unrelated real,
-already-shipped demon. **Real gap, not a wiring gap in the "one missing line" sense** — the ID-space
+already-shipped creature. **Real gap, not a wiring gap in the "one missing line" sense** — the ID-space
 relationship between the two pipelines needs an actual decision (an owner call, per this session's
 own established pattern of not inventing an id under time pressure into a closed, shipped roster)
 before any merge tool can be built safely.
-**Recommended smallest next step, not yet built:** a new `DemonSpeciesGen --emit-catalog` mode that
-reuses `DemonSpeciesGenerator.EmitCSharp`'s own shape and merges by `SpeciesId` (case-insensitive,
+**Recommended smallest next step, not yet built:** a new `CreatureSpeciesGen --emit-catalog` mode that
+reuses `CreatureSpeciesGenerator.EmitCSharp`'s own shape and merges by `SpeciesId` (case-insensitive,
 matching T2.7's own `diff-legacy` normalization) rather than `GameTypeId` — replacing exactly the
 28 rows this program has classified, leaving the other 56 legacy-heuristic rows untouched, and
-assigning each replaced row's `DemonTypeId` by KEEPING the legacy row's own existing value (looked
+assigning each replaced row's `CreatureTypeId` by KEEPING the legacy row's own existing value (looked
 up by the same `SpeciesId` match) rather than inventing one — sidesteps the collision risk entirely
 since no id is invented, only the row's other fields are replaced. Not built this pass; flagged for
 the owner rather than guessed at, since it changes what the live game actually serves.
@@ -652,19 +652,19 @@ the owner rather than guessed at, since it changes what the live game actually s
 above.** This entire gap ("every classified species is invisible to the live game") is T4.8's own
 subject, not something this checkpoint needed to solve separately — re-read T4.8's own evidence
 above rather than treating this section's own 2026-09-03 snapshot as still current. T4.8's real flip
-(`Program.cs` now calls `DemonSpeciesCatalog.Configure(store.BuildDemonSpeciesSnapshot())`, live-
-verified, `GET /api/demons/catalog` returns 829 real store-backed species) supersedes the
+(`Program.cs` now calls `CreatureSpeciesCatalog.Configure(store.BuildCreatureSpeciesSnapshot())`, live-
+verified, `GET /api/creatures/catalog` returns 829 real store-backed species) supersedes the
 `--emit-catalog`/merge-by-`SpeciesId` idea above entirely — it never merges the two pipelines'
-`DemonTypeId` spaces at all (the exact collision risk this section spent most of its analysis on);
-it REPLACES the compiled-catalog source with a store-backed one wholesale, computing `DemonTypeId`
-fresh, once, in `BuildDemonSpeciesSnapshot()` itself (`GameTypeId + DemonTypeIdFloor`, plant/zombie
-side-split, the SAME formula `DemonSpeciesGenerator`'s own legacy code used — found and reproduced
+`CreatureTypeId` spaces at all (the exact collision risk this section spent most of its analysis on);
+it REPLACES the compiled-catalog source with a store-backed one wholesale, computing `CreatureTypeId`
+fresh, once, in `BuildCreatureSpeciesSnapshot()` itself (`GameTypeId + CreatureTypeIdFloor`, plant/zombie
+side-split, the SAME formula `CreatureSpeciesGenerator`'s own legacy code used — found and reproduced
 during T4.8's own pass, not guessed at). The injector side of the same gap (it also served the old
 compiled catalog) is ALSO resolved — see T4.8's own step-7 entry above for the real, live-verified
 `ConcreteSpeciesSeedReader`/`ConcreteSpeciesMapper` fix. **What is genuinely still true from this
-section**: the ID-space relationship between the OLD `tools/DemonCatalogGen` heuristic pipeline and
+section**: the ID-space relationship between the OLD `tools/CreatureCatalogGen` heuristic pipeline and
 the real anchors was never resolved as a MERGE — it didn't need to be, because nothing merges them
-any more; `DemonCatalogGen`'s own compiled output is no longer what the live server serves at all,
+any more; `CreatureCatalogGen`'s own compiled output is no longer what the live server serves at all,
 which is precisely what T4.8's own step 7 (deletion) is about, and step 7 itself remains
 cross-session held for the reason recorded there, not for the reason recorded here.
 
@@ -753,7 +753,7 @@ cross-session held for the reason recorded there, not for the reason recorded he
     `RpgStore.Import.cs`'s `ValidateContainers` resolves affixes only against what's already
     committed to the store, honestly, not silently.
 - [x] **T3.2** `ep 1` — the prefix/suffix split and the 8-file migration · **S**
-  - Acceptance: `prefix_rolls`/`suffix_rolls`; a **mixed bundle consumes one of each**; the eight files declaring `poolRolls` migrate; `AtomImporter` still refuses to sweep demon seed folders
+  - Acceptance: `prefix_rolls`/`suffix_rolls`; a **mixed bundle consumes one of each**; the eight files declaring `poolRolls` migrate; `AtomImporter` still refuses to sweep creature seed folders
   - Verify: `dotnet test tests\FusionRpg.AtomImporter.Tests`
   - Files: schema, the 8 seed files, tests
   - **Done 2026-09-02.** `ContainerRow.PoolRolls`/`RarityRow.PoolRolls` split into `PrefixRolls`/
@@ -796,7 +796,7 @@ cross-session held for the reason recorded there, not for the reason recorded he
     updated to match.
     **Real proof, not just tests**: `dotnet run --project tools/AtomImporter -- --db <scratch> --check
     --validate` (production's own default-root invocation, `SeedScanner.OwnedFolders`-filtered —
-    never the whole `data/seed` tree, confirming "AtomImporter still refuses to sweep demon seed
+    never the whole `data/seed` tree, confirming "AtomImporter still refuses to sweep creature seed
     folders" is unchanged) imports the two real migrated container files cleanly against the real
     catalog: `9 file(s): 21 atom(s), 2 container(s), ... lint: 23 evaluated, 0 failure(s) ... power
     drift: 0 evaluated, 0 failure(s) ... --check: clean; 25 row(s) would change. Nothing was
@@ -868,7 +868,7 @@ cross-session held for the reason recorded there, not for the reason recorded he
     pair, not two. `src/FusionRpg.Core/Effects/Atoms/VariantShift.cs` (new) — `VariantShift` record
     with `ShiftTierWindow`/`ShiftPrefixRolls`/`ShiftSuffixRolls`; `VariantShiftTable.Parse` (pure
     parser, no I/O, `tunables-ssot.md` §7.2 shape) loads `data/tuning/variant-shifts.v1.json` (new) —
-    all six real demon-seed variants (`DemonSpeciesCatalog.KnownVariants`, confirmed the real
+    all six real creature-seed variants (`CreatureSpeciesCatalog.KnownVariants`, confirmed the real
     vocabulary by reading the generated catalog, not guessed): `ancient` (tier window +1), `mutated`
     (+1 prefix roll, tier −1 — the spec's own "+1 pool draw" reading is ambiguous about which budget
     post-T3.2-split; mapped to prefix as the default/common budget, documented as a judgment call,
@@ -1000,8 +1000,8 @@ cross-session held for the reason recorded there, not for the reason recorded he
     of the effect-pipeline's 10 mapped modules, only a plan-level line — and its stated
     `metrics/affix_health.py` path assumes the seedsmith Python `Metric`/`Ctx`/`registry.py`
     framework (`tools/seedsmith/seedsmith/metrics/`, read directly, not guessed). That framework's
-    `Ctx` (`model.py`) has fields for `corpus`/`adapter`/`budget`/`numerics`/`demon_dump`/
-    `demon_anchors` only — **no path to the C# atom/affix/container catalog at all** (`RpgStore`'s
+    `Ctx` (`model.py`) has fields for `corpus`/`adapter`/`budget`/`numerics`/`creature_dump`/
+    `creature_anchors` only — **no path to the C# atom/affix/container catalog at all** (`RpgStore`'s
     SQLite tables). Seedsmith's Python side has never read that catalog. Building a brand-new
     Python↔SQLite bridge just to satisfy a plan's literal file path, for one S-sized task, would be a
     real architecture expansion no spec has reviewed — exactly the kind of decision `DESIGN-GATE.md`
@@ -1062,7 +1062,7 @@ cross-session held for the reason recorded there, not for the reason recorded he
     slotted content to design correctly rather than being guessed at.
   - ✅ **"Register with declared targets" (family coverage + fill rate) built and tested, 2026-09-06,
     under the `seed-to-concrete` scope-expansion pass — resumed after re-reading the plan's own "why
-    one plan and not two" section (`demon-seed` and `effect-pipeline` are one 67-task program, not
+    one plan and not two" section (`creature-seed` and `effect-pipeline` are one 67-task program, not
     two; a Phase-8-only reading was an inference, not an audit rule).** Re-read `ContentMetrics.cs`'s
     own class doc first (DESIGN-GATE): it already named the reason a NUMERIC target (how many affixes
     per family is "healthy") is a real balance call nobody has made — that reasoning still holds and
@@ -1075,7 +1075,7 @@ cross-session held for the reason recorded there, not for the reason recorded he
     `AffixMetricsTargets`/`AffixMetricsFinding`/`AffixMetricsGateEvaluator` (new, appended to
     `ContentMetrics.cs`) — `Evaluate(coverage, fillRates, targets)` flags exactly those two
     conditions, each tagged with whether ITS OWN gate is armed; `AnyGatingFinding` mirrors
-    `demons metrics --gate`'s own "only `gates=True` fails the run" semantics rather than "any finding
+    `creatures metrics --gate`'s own "only `gates=True` fails the run" semantics rather than "any finding
     fails it." `data/tuning/affix-metrics.v1.json` (new) — the real, committed target file, BOTH
     gates shipped `false` (measure-only), citing seedsmith's own already-established W1 precedent
     ("new metrics are measure-only until calibrated") for why that is the correct, non-invented
@@ -1091,7 +1091,7 @@ cross-session held for the reason recorded there, not for the reason recorded he
     server's own self-healing import already call, never reimplemented) to gather the real committed
     `data/seed/**` tree into a `SeedContent`, then `ContentMetrics.FamilyCoverageOf`/
     `ContainerFillRatesOf`/`AffixMetricsGateEvaluator.Evaluate` — mirroring
-    `DemonRecipeDistributionIndex`'s own "thin report tool, reuses Core, never a gate on the
+    `CreatureRecipeDistributionIndex`'s own "thin report tool, reuses Core, never a gate on the
     database" shape exactly.
     `tests/FusionRpg.Core.Tests/Atoms/ContentMetricsTests.cs` gained `AffixMetricsGateEvaluatorTests`
     (7 new cases): a zero-affix family flags, a covered family never flags, a starved pool flags, a
@@ -1155,7 +1155,7 @@ living end-to-end test, not scaffolding to throw away.
     `FusionRpg.Core.Tests` as the spec's own path states, same reason T3.7's file lives there:
     `AtomPushService` is a `FusionRpg.Server` type `Core.Tests` cannot reach (checked its `.csproj`
     directly). All 10 seams present and asserted:
-    1. **dump row (REAL)** — read directly off `data/seed/demons/demon/zombie/epic.json`'s own
+    1. **dump row (REAL)** — read directly off `data/seed/creatures/creature/zombie/epic.json`'s own
        `conezombie` entry at test time (hp 270 / attack 50 / armor 370), not hardcoded blind — the
        test breaks the moment the real dump changes shape.
     2-4. **parsed basis / threat rung / anchor (STUBBED, each named + reasoned)** — `power-parse`/
@@ -1200,19 +1200,19 @@ living end-to-end test, not scaffolding to throw away.
 
 ---
 
-## Phase 4 — demon-seed runtime · stats in the game
+## Phase 4 — creature-seed runtime · stats in the game
 
 - [x] **T4.1** `ds 10` `rarity-migration` — enum, ladder helpers, guard test · **M**
-  - Acceptance: ten values; `ToId()` yields the ladder's ids; a guard test forbids **bare int↔`DemonRarity` casts** *and* **relational comparisons against named members** — the two silent landmines
-  - Files: `DemonRarity.cs`, `DemonRarityLadder.cs`, callers, guard test
-  - Evidence (2026-09-01/02): `DemonRarity` widened to the ten-rung enum with `ToId()`/`TryParse` and
-    `LegacyDemonRarityIds.ForwardMap`; `DemonRarityLadder.cs` (new) provides `OneRungAbove`/
+  - Acceptance: ten values; `ToId()` yields the ladder's ids; a guard test forbids **bare int↔`CreatureRarity` casts** *and* **relational comparisons against named members** — the two silent landmines
+  - Files: `CreatureRarity.cs`, `CreatureRarityLadder.cs`, callers, guard test
+  - Evidence (2026-09-01/02): `CreatureRarity` widened to the ten-rung enum with `ToId()`/`TryParse` and
+    `LegacyCreatureRarityIds.ForwardMap`; `CreatureRarityLadder.cs` (new) provides `OneRungAbove`/
     `OneRungBelow`/`RungsBelow`/`IsTopRung`/`IsBottomRung`/`AtLeast`/`AtMost`. Both §3 landmines fixed
-    at their real site (`DemonRecipeCatalog.cs`'s bare `(DemonRarity)((int)r-1)` cast and
-    `>= DemonRarity.Rare` comparison) plus every other ordinal-cast/relational-comparison call site
+    at their real site (`CreatureRecipeCatalog.cs`'s bare `(CreatureRarity)((int)r-1)` cast and
+    `>= CreatureRarity.Rare` comparison) plus every other ordinal-cast/relational-comparison call site
     across `StarPolicy`, `SummonRoller`, `FusionTuning`, `WaveCatalog`, `ExpeditionResolver`,
-    `RpgStore.Fusion.cs`, `FusionEndpoints.cs`, `DemonSpeciesGenerator.cs`. Guard test
-    `tests/FusionRpg.Guard.Tests/DemonRarityLadderGuardTests.cs` (13 cases: 2 real `src/`-only sweeps +
+    `RpgStore.Fusion.cs`, `FusionEndpoints.cs`, `CreatureSpeciesGenerator.cs`. Guard test
+    `tests/FusionRpg.Guard.Tests/CreatureRarityLadderGuardTests.cs` (13 cases: 2 real `src/`-only sweeps +
     11 scanner-correctness theories pinning the exact shapes from spec §3, exempting only the ladder
     helper's own sanctioned internals) — green.
 - [x] **T4.2** `ds 10` — six tuning tables widened to ten · **M**
@@ -1221,27 +1221,27 @@ living end-to-end test, not scaffolding to throw away.
   - Evidence (2026-09-01/02): all six tables (`fusion.starCap`, `fusion.slotsByRarity`,
     `contracts.baseUpkeepPerDay`, `contracts.ritualPriceSouls`, `souls.discoveryDelta`,
     `patron.rarityBaseMilli`) hold ten entries; `fusion.recipeCost` holds exactly 7 (Cultivated..Almanac,
-    the one named exception — bound to `DemonRecipeCatalog.OutputEligibilityFloor`, not an oversight).
+    the one named exception — bound to `CreatureRecipeCatalog.OutputEligibilityFloor`, not an oversight).
     Two real regressions were found and fixed here, both the same landmine class as §3 at the tuning
     layer rather than the code layer: (1) `recipeCost.shardRarity` for cultivated/heirloom/sunwoven
     pointed at the LITERAL one-rung-below id (grafted/chimeric/firstseed — all currently unpopulated,
     so no player could ever hold that shard) instead of the nearest POPULATED rung
-    `DemonRecipeCatalog.InputPoolBelow` actually searches for — caught by
+    `CreatureRecipeCatalog.InputPoolBelow` actually searches for — caught by
     `FusionE2ETests.Legendary_chain_from_commons` failing with `materials.insufficient`. (2) all four
     "six tables" widenings had smoothly interpolated toward the old Legendary value landing on
     **Almanac** (a brand-new, still-empty rung) instead of pinning it on **Sunwoven** (the rung
     Legendary species actually migrated to) — caught by `PatronPolicyTests`, `SoulEarnPolicyTests`,
     `ContractPolicyTests` (7 failures) still asserting the pre-migration anchor values. Both fixed in
     the real `data/tuning/*.json` files and the three `ContractTuningTestBootstrap.cs` mocks.
-    New coverage: `tests/FusionRpg.Core.Tests/Demons/RarityTuningCoverageTests.cs`
+    New coverage: `tests/FusionRpg.Core.Tests/Creatures/RarityTuningCoverageTests.cs`
     (`Every_rarity_keyed_tuning_table_has_ten_entries`, `Summon_rates_sum_to_1000_permille`,
     `No_rung_is_strictly_worse_than_the_one_below`, `Pity_guards_name_their_rungs`) reading the REAL
     shipped files, not mocks — green.
 - [x] **T4.3** `ds 10` — shard materials and the DAL migration · **M**
   - Acceptance: legacy ids map to the band's **lowest** rung so nobody gains value; stacks **merge**, never overwrite; **no fixture player loses a material**; `ExpeditionResolver`'s string literals reference live ids
   - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter Migration`
-  - Files: `DemonMaterialCatalog.cs`, `Migrations/ShardRungs.cs`, `ExpeditionResolver.cs`, tests
-  - Evidence (2026-09-02): `DemonMaterialCatalog.All` lists all ten live shard ids; `LegacyIds`
+  - Files: `CreatureMaterialCatalog.cs`, `Migrations/ShardRungs.cs`, `ExpeditionResolver.cs`, tests
+  - Evidence (2026-09-02): `CreatureMaterialCatalog.All` lists all ten live shard ids; `LegacyIds`
     (resolvable-but-unissuable, per §4 point 4) folded into `Known`/`IsKnown` but excluded from `All`.
     `src/FusionRpg.Data/Sqlite/Migrations/ShardRungs.cs` (new) rewrites owned legacy stacks to their
     live ids on every `RpgStore.Init()`, summing (never overwriting) where a player holds both, zeroing
@@ -1253,7 +1253,7 @@ living end-to-end test, not scaffolding to throw away.
     `ExpeditionResolver.cs`'s `ShardCommon`/`ShardRare` consts already point at `shard.chaff`/
     `shard.cultivated` (live ids); pinned by
     `ExpeditionResolverTests.Expedition_shard_constants_reference_live_ids` (reflection over the
-    private consts, asserting membership in `DemonMaterialCatalog.All` and non-membership in the
+    private consts, asserting membership in `CreatureMaterialCatalog.All` and non-membership in the
     legacy id set) — green. Legacy string literals are intentionally NOT deleted yet — spec §4 point 4
     requires them resolvable for one release; that deletion is future-release cleanup, not part of
     this task.
@@ -1269,18 +1269,18 @@ living end-to-end test, not scaffolding to throw away.
 - [x] **T4.4** `ds 11` `species-generator` — the expander · **M**
   - Acceptance: every magnitude via `AptitudeReadFunctions.Magnitude` reading one `P(Θ)`; **no private `f(level)`**; no `Math.Min` on a magnitude; a stated interval beats a classified tempo
   - Verify: `python scripts/audit-overflow.py`
-  - Files: `SpeciesExpander.cs`, `ConcreteSpecies.cs`, `data/tuning/demon-shape.v1.json`, tests
-  - **Done 2026-09-02.** Read `docs/architecture/demon-seed/spec-species-generator.md` in full before
+  - Files: `SpeciesExpander.cs`, `ConcreteSpecies.cs`, `data/tuning/creature-shape.v1.json`, tests
+  - **Done 2026-09-02.** Read `docs/architecture/creature-seed/spec-species-generator.md` in full before
     writing anything (DESIGN-GATE) — confirmed against code that `SpeciesExpander.cs`/
-    `ConcreteSpecies.cs`/`data/generated/demons/` genuinely do not exist yet, exactly as the spec's
+    `ConcreteSpecies.cs`/`data/generated/creatures/` genuinely do not exist yet, exactly as the spec's
     own §1 states.
     Three new supporting types, none of which existed in C# before this task (verified by grep, not
     assumed): `AnchorRow`/`AnchorRowReader` (parses the real classified-anchor JSON shape — read
-    directly off the two real anchors on disk, `data/seed/demons/species/plant/{pea,sunflower}.json`,
-    not invented); `DemonShapeTuning`/`Loader` (new `data/tuning/demon-shape.v1.json` — tempo/reach
+    directly off the two real anchors on disk, `data/seed/creatures/species/plant/{pea,sunflower}.json`,
+    not invented); `CreatureShapeTuning`/`Loader` (new `data/tuning/creature-shape.v1.json` — tempo/reach
     fallback tables for the real anchor enum values, an impure-species primary/secondary split ratio,
-    and the species' own base Θ); `DemonThreatTuning`/`Loader` (the **first C# port** of
-    `demon-threat.v1.json`, previously Python-only — `OffsetFor` falls back to the file's own
+    and the species' own base Θ); `CreatureThreatTuning`/`Loader` (the **first C# port** of
+    `creature-threat.v1.json`, previously Python-only — `OffsetFor` falls back to the file's own
     `inferredDefaultRung` when an anchor's `threatBand` is absent, which is the REAL, common case
     today: both real anchors on disk genuinely omit it, confirmed by direct inspection, not assumed).
     `SpeciesExpander.Expand`: `theta = speciesBaseTheta + threatBand.thetaOffset` (checked add) →
@@ -1293,20 +1293,20 @@ living end-to-end test, not scaffolding to throw away.
     "widen a private method" was NOT needed here; `AptitudeReadFunctions.Magnitude` was already
     `public`. Tempo: a `statedIntervalMs` parameter wins when supplied (`power-parse`'s own future
     output slot — this task does not build `power-parse`, only honors its stated-wins rule), else the
-    `attackTempo` label maps through `demon-shape.v1.json`'s own table.
+    `attackTempo` label maps through `creature-shape.v1.json`'s own table.
     **Two judgment calls, both documented in code, both real, tunable, zero-rebuild-cost decisions**
     per `tunables-ssot.md`'s own "needless config row costs one line" rule: (1) the spec's own
     "`theta` derived from `threatBand.thetaOffset` **+ the species' base**" names a "species' base"
     that is defined nowhere else in the repo (grepped `ssot-power-scale.md`/`spec-threat-band.md`
-    directly, confirmed absent) — shipped as `demon-shape.v1.json`'s own `speciesBaseTheta: 0`, a
+    directly, confirmed absent) — shipped as `creature-shape.v1.json`'s own `speciesBaseTheta: 0`, a
     named, documented, trivially-retunable placeholder, not a silent zero. (2) the spec's "aptitude
     point allocation... the existing `PointBudget`/`AptitudeTuning` split" names `PointBudget`, which
-    is scoped to the four PLAYER-progression `AllocationScope`s (Commander/DemonType/Aspect/
-    UniqueDemon) — none of which represent a species' own innate identity; a species' pure/impure
+    is scoped to the four PLAYER-progression `AllocationScope`s (Commander/CreatureType/Aspect/
+    UniqueCreature) — none of which represent a species' own innate identity; a species' pure/impure
     split is computed directly instead, off a new `impureSecondaryShareMilli` dial in the same tuning
     file, named explicitly as a deviation from the spec's literal wording, not `PointBudget` reused
     where it does not actually fit.
-    New tests: `tests/FusionRpg.Core.Tests/Demons/SpeciesExpanderTests.cs` (13 cases, ALL run against
+    New tests: `tests/FusionRpg.Core.Tests/Creatures/SpeciesExpanderTests.cs` (13 cases, ALL run against
     the real shipped `aptitudes.v2.json`/real anchors, not synthetic tuning) — covers every row in
     the spec's own testing table this task's scope reaches: `Hp_and_damage_read_the_same_pTheta`
     (Q21, mechanically, by re-deriving one channel by hand from the recorded `PTheta` and comparing);
@@ -1319,33 +1319,33 @@ living end-to-end test, not scaffolding to throw away.
     for their rarity.
     `python scripts/audit-overflow.py` reports **zero findings of any kind** in the four new files
     (grepped the output directly, not inferred from the aggregate count staying flat).
-    `python scripts/audit-magic-numbers.py --paths src/FusionRpg.Core/Demons/Generation` reports
+    `python scripts/audit-magic-numbers.py --paths src/FusionRpg.Core/Creatures/Generation` reports
     **zero findings across all four categories** — clean by the tool's own targeted scan, not just an
     unchanged aggregate.
     Full sweep: Core 4986/4986 (+13 over T3.9/T3.10's 4973). All four boundary guards green.
     **Deliberately still open, and correctly so — a different task's own acceptance line, not a
-    corner cut here**: `tools/DemonSpeciesGen`'s `--check`/`--explain` CLI and the committed
-    `data/generated/demons/**` tree are T4.5's own acceptance criteria, not T4.4's (re-read both
+    corner cut here**: `tools/CreatureSpeciesGen`'s `--check`/`--explain` CLI and the committed
+    `data/generated/creatures/**` tree are T4.5's own acceptance criteria, not T4.4's (re-read both
     lines side by side to confirm the split before writing this note) — T4.4 asks only for the
     derivation itself, which is what shipped here.
 - [x] **T4.5** `ds 11` — `--check` and `--explain` · **S**
   - Acceptance: regenerating over unchanged seeds is byte-identical; `--explain` names every input for one species; adding a derived column edits **zero** seed files, proven by test
-  - Files: `tools/DemonSpeciesGen/Program.cs`, tests
-  - **Done 2026-09-02.** `tools/DemonSpeciesGen/` (new project) — `Program.cs` loads the real shipped
+  - Files: `tools/CreatureSpeciesGen/Program.cs`, tests
+  - **Done 2026-09-02.** `tools/CreatureSpeciesGen/` (new project) — `Program.cs` loads the real shipped
     balance surface (`aptitudes.v2.json`, `power-scale.v2.json` via the real `PowerTuningLoader` —
     same file `src/FusionRpg.Server/Program.cs` itself loads, confirmed by reading it directly, not
-    a synthetic tuning — plus this task's own `demon-shape.v1.json`/`demon-threat.v1.json`), sweeps
-    every real anchor under `data/seed/demons/species/**` (skipping `_`-prefixed files, matching
+    a synthetic tuning — plus this task's own `creature-shape.v1.json`/`creature-threat.v1.json`), sweeps
+    every real anchor under `data/seed/creatures/species/**` (skipping `_`-prefixed files, matching
     `AtomImporter`'s own convention), and either writes, checks, or explains.
     **Real run against the real anchors, not a synthetic fixture**: `dotnet run --project
-    tools/DemonSpeciesGen --` found **5** real classified species on disk today (not just the 2 named
+    tools/CreatureSpeciesGen --` found **5** real classified species on disk today (not just the 2 named
     in T4.4's evidence — `unclassified.json` files under `species/plant|zombie/` turned out to carry
     real anchor rows too: `ArmedGargantuar`, `BalloonZombie`, `BigChomper`, `Peashooter`, `SunFlower`)
-    and wrote all five to `data/generated/demons/**` — the first committed rows this generated tree
+    and wrote all five to `data/generated/creatures/**` — the first committed rows this generated tree
     has ever held (`spec-species-generator.md` §1's own "honest statement: `data/generated/` is
     absent" is no longer true as of this task). `--check` immediately after: `clean, 5 species match`.
     `--explain Peashooter`'s real transcript, inspected directly (not just grepped for keywords):
-    theta 13 (rung 4 `raider`'s 13 thetaOffset via `demon-threat.v1.json`'s own `inferredDefaultRung`
+    theta 13 (rung 4 `raider`'s 13 thetaOffset via `creature-threat.v1.json`'s own `inferredDefaultRung`
     fallback, since `threatBand` is genuinely absent from Peashooter's own real anchor), pTheta 452,
     13 real Magnitude-mode channels with their source aptitude and kMilli each named — a real balance
     question about this species is answerable from this output alone.
@@ -1353,30 +1353,30 @@ living end-to-end test, not scaffolding to throw away.
     so a test can hold it to the byte-identical claim directly, the same "class, not top-level
     statements" reasoning `AtomImporter`'s own `SeedScanner` already established): `SortedDictionary`
     for both the row's fields and its magnitudes map, so insertion order can never move the bytes.
-    New tests: `tests/FusionRpg.Core.Tests/Demons/ConcreteSpeciesSerializerTests.cs` (4 cases —
+    New tests: `tests/FusionRpg.Core.Tests/Creatures/ConcreteSpeciesSerializerTests.cs` (4 cases —
     byte-identical regeneration; key-insertion-order independence, proven by literally reversing
     insertion order and comparing; a real value change DOES move the bytes, the negative-control
     check a byte-identical claim needs; a widened magnitudes map — simulating "add a derived column"
     — touches nothing about the existing keys) and
-    `tests/FusionRpg.Core.Tests/Demons/DemonSpeciesGenExplainTests.cs` (1 case — a REAL cold
+    `tests/FusionRpg.Core.Tests/Creatures/CreatureSpeciesGenExplainTests.cs` (1 case — a REAL cold
     `dotnet run --explain Peashooter` subprocess, same pattern `AtomImporter.Tests`'
     `RealColdProcessTests.cs` already established, asserting the transcript names all 16 real input
     fields the derivation actually reads, not a mocked call).
-    `.github/workflows/ci.yml` — new step "species-generator staleness guard," running `DemonSpeciesGen
+    `.github/workflows/ci.yml` — new step "species-generator staleness guard," running `CreatureSpeciesGen
     --check` with a checked exit code (Checkpoint 4's own "CI runs `species-gen --check`" line,
     closed here rather than left for that checkpoint to discover missing).
     Full sweep: Core 4991/4991 (+5 over T4.4's 4986). All four boundary guards green. Both audits
     unchanged from T4.4's baseline.
     **Deliberately still open**: only the two plant-side species this task found real anchors for get
     committed content beyond what a fresh `--check` would already prove stale-free — as more species
-    get real classification runs (T2.11), re-running `dotnet run --project tools/DemonSpeciesGen`
+    get real classification runs (T2.11), re-running `dotnet run --project tools/CreatureSpeciesGen`
     and committing the result is how the generated tree grows; this task does not pre-generate
     placeholder rows for unclassified species.
 - [x] **T4.6** `ds 12` `species-import` — one transaction · **M**
   - Acceptance: one bad row writes nothing; the refusal names the first failure **and the total count**; a stale generated tree refuses; reimport is row-identical; species absent upstream are deleted; **no SQL in `tools/`**
-  - Files: `tools/DemonSpeciesImport/`, `RpgStore.Species.cs`, tests
-  - **Done 2026-09-02.** `src/FusionRpg.Data/Sqlite/RpgStore.Species.cs` (new) — `demon_species`/
-    `demon_species_magnitude` tables (wired into `RpgStore.Init()`'s central schema list, matching
+  - Files: `tools/CreatureSpeciesImport/`, `RpgStore.Species.cs`, tests
+  - **Done 2026-09-02.** `src/FusionRpg.Data/Sqlite/RpgStore.Species.cs` (new) — `creature_species`/
+    `creature_species_magnitude` tables (wired into `RpgStore.Init()`'s central schema list, matching
     every other table's own convention, not left as a lazy per-method `Ensure`). `ImportSpecies`:
     validates every row (empty/duplicate `speciesId`) BEFORE the transaction opens — one bad row
     writes nothing, and the `SpeciesImportOutcome.Errors` list names every duplicate with the FIRST
@@ -1385,11 +1385,11 @@ living end-to-end test, not scaffolding to throw away.
     "skip an identical rewrite" discipline `WriteContainerUnlocked` already established. A stored
     species absent from the incoming set is deleted, magnitude rows included (no orphaned child rows
     under a stale key if the same id is re-added later).
-    `tools/DemonSpeciesImport/` (new project, Core+Data only, confirmed **zero raw SQL** by direct
+    `tools/CreatureSpeciesImport/` (new project, Core+Data only, confirmed **zero raw SQL** by direct
     grep across both new tool directories — `SELECT|INSERT|UPDATE|DELETE|SqliteCommand|
-    SqliteConnection`, zero hits) — re-derives every real anchor exactly as `DemonSpeciesGen` does,
+    SqliteConnection`, zero hits) — re-derives every real anchor exactly as `CreatureSpeciesGen` does,
     and **refuses the WHOLE roster** (not just the stale rows) if any re-derivation disagrees with
-    what is committed under `data/generated/demons/**` — "a half-imported roster is a state nobody
+    what is committed under `data/generated/creatures/**` — "a half-imported roster is a state nobody
     authored," the same reasoning `RpgStore.Import.cs`'s own class doc already states for validate-
     then-write. Hit the exact same `DerivedStatPolicy.Configure(...)` gap `AtomImporter`'s own doc
     comment already named (RpgStore's static ctor needs it, no in-process test catches it because
@@ -1406,7 +1406,7 @@ living end-to-end test, not scaffolding to throw away.
     failure and the total count; empty id refused; reimport is row-identical; a real value change IS
     written, the negative control a "skip identical" claim needs; absent-species deletion, including
     its magnitude rows; stable id ordering) and
-    `tests/FusionRpg.Data.Tests/DemonSpeciesImportCliTests.cs` (2 cases — real cold `dotnet run`
+    `tests/FusionRpg.Data.Tests/CreatureSpeciesImportCliTests.cs` (2 cases — real cold `dotnet run`
     subprocesses, same `RealColdProcessTests.cs` pattern: a real import against the real committed
     tree succeeds and is readable back from a real `RpgStore`; a hand-built stale committed tree
     refuses the whole import and leaves the store empty).
@@ -1415,20 +1415,20 @@ living end-to-end test, not scaffolding to throw away.
     "SQL only inside FusionRpg.Data" still holds with two new tool projects added. Both audits
     unchanged from T4.5's baseline.
 - [x] **T4.7** `ds 13` `catalog-runtime` — lazy conversion and the `Configure` seam · **M** — **DONE, real flip completed 2026-09-05/06**
-  - Acceptance: `WaveCatalog`, `DemonRecipeCatalog`, `DemonMaterialCatalog` move off inline `static readonly … = Build()`; a guard test forbids its return; `Configure`/`UseScoped` follow `DerivedStatPolicy`'s shape; every host gains its call
-  - Files: those three catalogs, `DemonSpeciesCatalog.cs`, hosts, guard test
-  - Read `docs/architecture/demon-seed/spec-catalog-runtime.md` in full before touching anything
+  - Acceptance: `WaveCatalog`, `CreatureRecipeCatalog`, `CreatureMaterialCatalog` move off inline `static readonly … = Build()`; a guard test forbids its return; `Configure`/`UseScoped` follow `DerivedStatPolicy`'s shape; every host gains its call
+  - Files: those three catalogs, `CreatureSpeciesCatalog.cs`, hosts, guard test
+  - Read `docs/architecture/creature-seed/spec-catalog-runtime.md` in full before touching anything
     (DESIGN-GATE) — it calls this "**the riskiest module in the program**" and its own §7 "Order of
     operations" explicitly sequences this task's two halves apart: step 1 (lazy conversion + guard,
     "behaviour-preserving today") first, step 2 (`Configure`/`UseScoped` + every host) second, deliberately
     described as two separate moves, not one.
     **Step 1 done 2026-09-02** — the behaviour-preserving half: `WaveCatalog.All`,
-    `DemonRecipeCatalog.All`/`ById`/`ByPair`, `DemonMaterialCatalog.All`/`Known` all converted from
+    `CreatureRecipeCatalog.All`/`ById`/`ByPair`, `CreatureMaterialCatalog.All`/`Known` all converted from
     eager `static readonly X = Build()` fields to lazy `static X? _x; public static X All => _x ??=
     Build();` properties — first touch now happens on-demand rather than at an unpredictable point
     tied to class-load order, with **zero behavioural change today** (the source is still the compiled
     `GeneratedSpecies` roster either way; this is purely about WHEN `Build()` runs, verified by the
-    full suite staying green with no golden movement). `DemonRecipeCatalog`'s own pre-existing doc
+    full suite staying green with no golden movement). `CreatureRecipeCatalog`'s own pre-existing doc
     comment already named the exact field-declaration-order hazard this converts away from —
     `ById`/`ByPair` now read the `All` PROPERTY, so whichever of the three is touched first correctly
     triggers `Build()` regardless of order, the hazard closed by construction rather than by a
@@ -1436,13 +1436,13 @@ living end-to-end test, not scaffolding to throw away.
     New guard: `tests/FusionRpg.Guard.Tests/StaticCatalogLazyGuardTests.cs` (4 cases) — the exact
     `no_static_readonly_build_reads_the_species_catalog` row from the spec's own testing table: a
     theory pinning each of the three known files clean, plus a repo-wide sweep (every `.cs` under
-    `src/` that mentions `DemonSpeciesCatalog`, checked for the eager pattern) so a FOURTH catalog
+    `src/` that mentions `CreatureSpeciesCatalog`, checked for the eager pattern) so a FOURTH catalog
     built the same eager way would be caught, not just the three named today.
     Full sweep: Core 4991/4991 (one `AtomBenchGuardTests` nanosecond-budget flake reproduced once
     under parallel load, confirmed unrelated by rerunning in isolation — passed clean both alone and
     on a full-suite rerun; a perf-timing test, not a species/catalog test), Guard 159/159 (+4), Data
     581/581, E2E 195/195. All four boundary guards green. Both audits unchanged.
-    **Step 2 (`Configure`/`UseScoped` on `DemonSpeciesCatalog`, every host gains its call)
+    **Step 2 (`Configure`/`UseScoped` on `CreatureSpeciesCatalog`, every host gains its call)
     deliberately deferred, not skipped** — re-reading the spec's own §3-4: `Configure` must throw
     when unset (matching `DerivedStatPolicy`'s exact shape the spec insists on, "not up for
     invention"), which means adding it now, alone, would require touching **every one of ~16 real
@@ -1457,32 +1457,32 @@ living end-to-end test, not scaffolding to throw away.
     against — the diff test and the live-lawn check the spec itself requires for this module.
 - [~] **T4.8** `ds 13` — the flip, the diff test, the deletions · **M** — **steps 1-6 DONE 2026-09-05/06,
   step 7 (deletion) correctly blocked, named not silently skipped**
-  - Acceptance: the store-backed catalog **diffs field-by-field against the compiled one while both exist**, and the differences are accepted by a human *before* deletion; an empty roster refuses at load naming the importer; then `DemonSpeciesGenerator`, `DemonSpeciesCatalog.Generated.cs` and `tools/DemonCatalogGen` are deleted
+  - Acceptance: the store-backed catalog **diffs field-by-field against the compiled one while both exist**, and the differences are accepted by a human *before* deletion; an empty roster refuses at load naming the importer; then `CreatureSpeciesGenerator`, `CreatureSpeciesCatalog.Generated.cs` and `tools/CreatureCatalogGen` are deleted
   - **The real flip, done and live-verified 2026-09-05/06** (this session, driven by the `catalog-runtime`
     finding that unblocked `species-build`'s own audit): `src/FusionRpg.Server/Program.cs` now calls
-    `DemonSpeciesCatalog.Configure(store.BuildDemonSpeciesSnapshot())` instead of
+    `CreatureSpeciesCatalog.Configure(store.BuildCreatureSpeciesSnapshot())` instead of
     `ConfigureFromCompiledDefault()`. Getting there found and fixed two real, previously-undiscovered
-    defects `Validate()` correctly refused to start on: (1) a `DemonTypeId` collision
-    (`BuildDemonSpeciesSnapshot()` had no plant/zombie side split, so `BigWallNut`/plant and
+    defects `Validate()` correctly refused to start on: (1) a `CreatureTypeId` collision
+    (`BuildCreatureSpeciesSnapshot()` had no plant/zombie side split, so `BigWallNut`/plant and
     `BlackTrainZombie`/zombie, both raw `GameTypeId 255`, collided — fixed by reproducing
-    `DemonSpeciesGenerator`'s own existing side-split formula); (2) an LLM classification artifact
+    `CreatureSpeciesGenerator`'s own existing side-split formula); (2) an LLM classification artifact
     (`Tower_peaPuff`'s real anchor independently voted "fire" for both `elementPrimary` AND
     `elementSecondary` — fixed in `SpeciesExpander.cs` using the identical defensive pattern
     `SpeciesBuildPlanner.cs` already established for the sibling `AptitudeSecondary` field). The diff
-    (`tools/DemonSpeciesImport --diff-catalog`, run for real against the live database) was read and
-    accepted: `name`/`traitPool`/`variants`/`baseRarity`/`demonTypeId`(pre-fix)/`elementPrimary`/
+    (`tools/CreatureSpeciesImport --diff-catalog`, run for real against the live database) was read and
+    accepted: `name`/`traitPool`/`variants`/`baseRarity`/`creatureTypeId`(pre-fix)/`elementPrimary`/
     `elementSecondary`/`deployMode`/`acquisition` disagreements reviewed — `name` fixed by a new
     backfill tool (`tools/AlmanacSeedBackfill`, `almanac_seed` was empty on a database that never had
-    live almanac-browsing capture), `demonTypeId` fixed (the collision above), `traitPool` accepted as
+    live almanac-browsing capture), `creatureTypeId` fixed (the collision above), `traitPool` accepted as
     a documented, deliberate open-vs-closed-vocabulary gap. **Live-verified, not just tested**: server
-    published and started clean, `GET /api/demons/catalog` returns **829 species** (was 84).
+    published and started clean, `GET /api/creatures/catalog` returns **829 species** (was 84).
   - **Step 7 (deletion) is correctly NOT done, and here is the real reason, found by checking rather
     than assumed:** `src/FusionRpg.Injector/Host/RpgHost.cs` still calls
-    `DemonSpeciesCatalog.ConfigureFromCompiledDefault()` — the injector has **no local `RpgStore`, no
+    `CreatureSpeciesCatalog.ConfigureFromCompiledDefault()` — the injector has **no local `RpgStore`, no
     database at all** (confirmed by grep: zero `new RpgStore`/`RpgStore ` references anywhere under
     `src/FusionRpg.Injector/`), so it has no store-backed snapshot to build. `CheatState.cs`'s own
-    `LawnElementIndex` (built from `DemonSpeciesCatalog.All`) is a REAL, live production consumer.
-    Deleting `DemonSpeciesGenerator.cs`/`DemonSpeciesCatalog.Generated.cs` today would silently break
+    `LawnElementIndex` (built from `CreatureSpeciesCatalog.All`) is a REAL, live production consumer.
+    Deleting `CreatureSpeciesGenerator.cs`/`CreatureSpeciesCatalog.Generated.cs` today would silently break
     the live lawn's element-typing index for the injector process. This is a genuine architecture gap
     `spec-catalog-runtime.md` did not fully anticipate (it assumed symmetry between the server and
     injector hosts that does not hold) — closing it means giving the injector SOME path to species
@@ -1490,18 +1490,18 @@ living end-to-end test, not scaffolding to throw away.
     which is real, separate, unscoped work, not a quick follow-up to this task and not part of the
     active `fusion generator` goal this session is driving toward. Named here so it is not lost, not
     silently declared done.
-  - Files: `DemonSpeciesCatalog.cs`, `SpeciesSnapshot.cs`, tests, deletions
+  - Files: `CreatureSpeciesCatalog.cs`, `SpeciesSnapshot.cs`, tests, deletions
   - **Precondition resolved 2026-09-02 — corrected, not just re-asserted.** An earlier pass this same
-    day concluded this task was blocked on a real schema gap ("`DemonSpeciesDef`'s production fields
-    have no home in `ConcreteSpecies`/`demon_species`") and stopped there. Re-reading the real anchor
-    schema (`tools/seedsmith/seedsmith/adapters/demons/anchor/schema.py`) — the thing that earlier
+    day concluded this task was blocked on a real schema gap ("`CreatureSpeciesDef`'s production fields
+    have no home in `ConcreteSpecies`/`creature_species`") and stopped there. Re-reading the real anchor
+    schema (`tools/seedsmith/seedsmith/adapters/creatures/anchor/schema.py`) — the thing that earlier
     pass should have checked before concluding a gap, not after — showed every field
-    `DemonSpeciesDef` needs is ALREADY on the real anchor (`side`, `gameTypeId`, `elementPrimary`,
+    `CreatureSpeciesDef` needs is ALREADY on the real anchor (`side`, `gameTypeId`, `elementPrimary`,
     `elementSecondary`, `deployMode`, `acquisition`, `traits` — confirmed against the real
     `pea.json`/`sunflower.json` files on disk, not the schema alone). The earlier conclusion was
     wrong: this was a wiring gap (`AnchorRow`/`ConcreteSpecies` simply didn't carry fields the anchor
     already had), not a design gap — and it is now closed:
-    `src/FusionRpg.Core/Demons/Generation/AnchorRow.cs` — `AnchorRow`/`AnchorRowReader` widened to
+    `src/FusionRpg.Core/Creatures/Generation/AnchorRow.cs` — `AnchorRow`/`AnchorRowReader` widened to
     parse `Side`, `GameTypeId`, `ElementPrimary`, `ElementSecondary` (same `"none"`-sentinel
     convention as `AptitudeSecondary`), `DeployMode`, `Acquisition`, `Traits` — every existing
     positional call site (4 in `SpeciesExpanderTests.cs`) updated via a new `TestAnchor` fixture
@@ -1518,21 +1518,21 @@ living end-to-end test, not scaffolding to throw away.
     unknown-value branch in this method already uses), `DeployMode`/`Acquisition` via `Enum.TryParse`
     (`Acquisition` OR-folds every flag string in the anchor's own array), and passes `Variants`/
     `TraitPool`/`Side`/`GameTypeId` straight through, uncomputed.
-    `src/FusionRpg.Data/Sqlite/RpgStore.Species.cs` — `demon_species` gained 9 columns
+    `src/FusionRpg.Data/Sqlite/RpgStore.Species.cs` — `creature_species` gained 9 columns
     (`side, game_type_id, element_primary, element_secondary, deploy_mode, acquisition,
     variants_json, trait_pool_json, name`) via `EnsureColumn` (T3.4's own migration precedent, a
     pre-migration DB reads defaults, every fresh `ImportSpecies` write supplies real values).
     `ImportSpecies` resolves `Name` per species via `GetAlmanacSeed(side, gameTypeId)` — mirroring
-    the pre-atom-layer generator's own exact fallback chain (`DisplayName ?? TypeName ?? "Demon
-    {gameTypeId}"`, `DemonSpeciesGenerator.cs:69`) — resolved for the WHOLE roster BEFORE the write
+    the pre-atom-layer generator's own exact fallback chain (`DisplayName ?? TypeName ?? "Creature
+    {gameTypeId}"`, `CreatureSpeciesGenerator.cs:69`) — resolved for the WHOLE roster BEFORE the write
     transaction opens (T5.5/T5.6's own "compute first, write second" discipline; avoids a second
     SQLite connection reading while the first holds an open write transaction). `ReadStoredUnlocked`/
     `SameContent` extended to round-trip and compare every new field.
     `ConcreteSpeciesSerializer.cs` — the committed-tree canonical form gained the same 8 fields
     (sorted alphabetically into the existing key order, `variants`/`traitPool` each sorted so
     anchor-array ordering never perturbs the byte-identical-regeneration property `--check` is built
-    on). Regenerated the 5 already-committed `data/generated/demons/*.json` files for real
-    (`dotnet run --project tools/DemonSpeciesGen`) — confirmed the new fields appear correctly
+    on). Regenerated the 5 already-committed `data/generated/creatures/*.json` files for real
+    (`dotnet run --project tools/CreatureSpeciesGen`) — confirmed the new fields appear correctly
     (`Peashooter.json`: `"side": "plant", "elementPrimary": "Earth", "deployMode": "PlantAvatar",
     "acquisition": "Summonable"`, matching `pea.json`'s own real values exactly). These files are
     untracked dev artifacts (`data/generated/` was never git-added this session, confirmed via `git
@@ -1566,8 +1566,8 @@ living end-to-end test, not scaffolding to throw away.
     All four boundary guards clean. Both audits unchanged from baseline: `audit-overflow.py` **43
     findings, 1 pre-existing critical**; `audit-magic-numbers.py --summary` **24 total**.
     **What this closes and what remains, precisely — not blurred together:** the precondition this
-    task's own diff/flip design rests on (a real source for `DemonSpeciesDef`'s full field set) now
-    exists and is tested. **T4.7's own step 2 (`Configure`/`UseScoped` on `DemonSpeciesCatalog`,
+    task's own diff/flip design rests on (a real source for `CreatureSpeciesDef`'s full field set) now
+    exists and is tested. **T4.7's own step 2 (`Configure`/`UseScoped` on `CreatureSpeciesCatalog`,
     every host gaining its call) and every one of T4.8's own steps (`SpeciesSnapshot.cs`, the
     store-backed read behind the existing API, the diff test, the flip itself, and the deletions)
     remain unbuilt.** This pass deliberately did not attempt them in the same sitting: `spec-
@@ -1581,14 +1581,14 @@ living end-to-end test, not scaffolding to throw away.
     combine a process-global `Use`/`_global` default with an `AsyncLocal`-backed `UseScoped`, but
     NEITHER throws when unconfigured (`ElementTable` defaults to `Shipped()`, `ChannelPolicyTable` to
     `Empty`) — whereas `DerivedStatPolicy.Configure` (the OTHER pattern this spec names) throws with
-    no built-in default. `DemonSpeciesCatalog` needs to synthesise both halves (throw-if-never-
+    no built-in default. `CreatureSpeciesCatalog` needs to synthesise both halves (throw-if-never-
     configured, matching `DerivedStatPolicy`'s own discipline the spec explicitly asks for, PLUS
     `UseScoped` for test isolation, matching the other two) — a design detail worth recording now,
     before the next pass has to re-derive it.
   - **T4.7 step 2 + T4.8 steps 2-4 built 2026-09-02, same day, after the design detail above was
     already recorded.** Steps 5 (the flip) and 7 (deletions) remain deliberately unbuilt — see the
     closing note below for exactly why, restated precisely rather than re-litigated.
-    `src/FusionRpg.Core/Demons/SpeciesSnapshot.cs` (new) — `DemonSpeciesCatalog.Configure`/
+    `src/FusionRpg.Core/Creatures/SpeciesSnapshot.cs` (new) — `CreatureSpeciesCatalog.Configure`/
     `UseScoped`/`ResetToUnconfigured` synthesise the two named precedents exactly as planned:
     `Configure` throws with no built-in default when the roster is never set OR when it is set to
     EMPTY (§4's own "failing loudly at load beats failing later," made real — a fresh database or a
@@ -1598,7 +1598,7 @@ living end-to-end test, not scaffolding to throw away.
     scoped (test) roster into concurrent, non-scoped callers on the same thread — fixed by never
     caching the scoped path, only the real global one (`SpeciesSnapshot.cs`'s own inline comment
     explains why, not just states the fix).
-    `DemonSpeciesCatalog.cs`'s own `All` flips to `Scoped.Value ?? _configured ?? throw` — the
+    `CreatureSpeciesCatalog.cs`'s own `All` flips to `Scoped.Value ?? _configured ?? throw` — the
     OLD lazy `_all ??= Validate(GeneratedSpecies)` is gone.
     `ConfigureFromCompiledDefault()` — the transitional call EVERY host makes today
     (`Configure(GeneratedSpecies)`, behaviour-preserving by construction since that is exactly what
@@ -1609,56 +1609,56 @@ living end-to-end test, not scaffolding to throw away.
     explicitly owner-run and has not happened. This was caught BEFORE writing the host-wiring code,
     not after, by re-reading the spec's own step 2-vs-step-5 distinction carefully rather than
     conflating "add Configure" with "flip the source."
-    `src/FusionRpg.Data/Sqlite/RpgStore.Species.cs` gained `BuildDemonSpeciesSnapshot()` — the ONE
-    place `ConcreteSpecies` → `DemonSpeciesDef` happens (`SpeciesId` lower-cased to match the
+    `src/FusionRpg.Data/Sqlite/RpgStore.Species.cs` gained `BuildCreatureSpeciesSnapshot()` — the ONE
+    place `ConcreteSpecies` → `CreatureSpeciesDef` happens (`SpeciesId` lower-cased to match the
     catalog's own established lower-kebab convention — verified against the real compiled roster's
     own ids, e.g. `"driverzombie"` — since the anchor pipeline's own casing, `"Peashooter"`, and the
     catalog's rule are two already-shipped, different conventions meeting at this one seam;
-    `DemonTypeId` computed once here, `GameTypeId + DemonTypeIdFloor`, never stored a second time).
+    `CreatureTypeId` computed once here, `GameTypeId + CreatureTypeIdFloor`, never stored a second time).
     **A real, previously-unknown defect found by my OWN new test, not assumed correct**: the first
     draft wired `TraitPool = s.TraitPool` (the anchor's own raw `traits` field) straight into
-    `DemonSpeciesDef.TraitPool` — `SpeciesCatalogDiffTests` immediately caught
+    `CreatureSpeciesDef.TraitPool` — `SpeciesCatalogDiffTests` immediately caught
     `InvalidOperationException: Species 'peashooter' unknown trait 'Projectile-launching'`, because
     the anchor's `traits` field is an OPEN, free-form LLM-flavor array (`anchor/schema.py`'s own
-    `_open_array_prop`) while `DemonSpeciesDef.TraitPool` is validated against `DemonTraitCatalog`'s
+    `_open_array_prop`) while `CreatureSpeciesDef.TraitPool` is validated against `CreatureTraitCatalog`'s
     CLOSED, curated gameplay vocabulary (`"regenerator"`, `"berserker"`, `"loyal"`, ...) — two
     different vocabularies sharing a field name, not the same data. Fixed honestly, not papered
-    over: `BuildDemonSpeciesSnapshot()` now emits `TraitPool = Array.Empty<string>()` for every
+    over: `BuildCreatureSpeciesSnapshot()` now emits `TraitPool = Array.Empty<string>()` for every
     store-backed species, with the mismatch and the reasoning recorded inline (which trait ids a
     given anchor-derived species should carry is a genuine open design question this task does not
     answer — `ConcreteSpecies.TraitPool` itself is untouched and keeps carrying the anchor's own raw
     flavor strings, a legitimate, separate, already-real use `species_effects.py` already makes of
     the same anchor field).
-    `src/FusionRpg.Core/Demons/Generation/SpeciesDiff.cs` (new) — `Compare` (field-by-field, only
+    `src/FusionRpg.Core/Creatures/Generation/SpeciesDiff.cs` (new) — `Compare` (field-by-field, only
     for species present in both rosters — additions/removals are a SEPARATE concern) and `Coverage`
     (which ids exist in only one side). Pure, Core-only, no I/O — deliberately carries no "accepted"
     concept, so a future caller cannot mistake "the diff ran" for "a human looked at it" (§6's own
     human-review step is a SEPARATE, already-existing `anchor-emit --diff-legacy` process, not
     something this type performs).
     16 hosts checked individually against `grep -rl DerivedStatPolicy.Configure` (the same host set
-    the spec names); only the ones that ACTUALLY reference `DemonSpeciesCatalog.All`/`Get`/`IsKnown`
+    the spec names); only the ones that ACTUALLY reference `CreatureSpeciesCatalog.All`/`Get`/`IsKnown`
     (verified by grep, not assumed from the `DerivedStatPolicy` list alone) gained the new call:
     `RpgHost.cs`, `Program.cs`, `ContractTuningTestBootstrap.cs` ×3 (Core/Data/E2E.Tests),
-    `PowerAndAptitudeTuningTestBootstrap.cs` (Server.Tests), `DemonCorpusEmit/Program.cs` (its own
-    line 45, `var species = DemonSpeciesCatalog.All`, the exact call the map's own finding ② already
-    named). `tools/DemonCatalogGen/Program.cs` checked and correctly left untouched — it calls
-    `DemonSpeciesCatalog.Validate(species)` directly on an explicit list, never touches `All`.
-    `tools/DemonSpeciesImport/Program.cs` checked and correctly left untouched — it never references
-    `DemonSpeciesCatalog` at all (it writes `ConcreteSpecies` via `RpgStore.ImportSpecies`, a
+    `PowerAndAptitudeTuningTestBootstrap.cs` (Server.Tests), `CreatureCorpusEmit/Program.cs` (its own
+    line 45, `var species = CreatureSpeciesCatalog.All`, the exact call the map's own finding ② already
+    named). `tools/CreatureCatalogGen/Program.cs` checked and correctly left untouched — it calls
+    `CreatureSpeciesCatalog.Validate(species)` directly on an explicit list, never touches `All`.
+    `tools/CreatureSpeciesImport/Program.cs` checked and correctly left untouched — it never references
+    `CreatureSpeciesCatalog` at all (it writes `ConcreteSpecies` via `RpgStore.ImportSpecies`, a
     different type, a different table).
-    New tests: `tests/FusionRpg.Core.Tests/Demons/SpeciesCatalogDiffTests.cs` (new, 5 cases,
+    New tests: `tests/FusionRpg.Core.Tests/Creatures/SpeciesCatalogDiffTests.cs` (new, 5 cases,
     real end-to-end: `pea.json`/`sunflower.json` → real `SpeciesExpander` → a real temp `RpgStore` →
-    `BuildDemonSpeciesSnapshot()` → `SpeciesDiff.Compare` against the real compiled
-    `DemonSpeciesCatalog.All`): the mechanism finds REAL known differences for `peashooter`
-    (`demonTypeId` differs by construction — the old hash-based generator used a plant/zombie-split
-    id space, `60000+t` for plants per `DemonCatalogTests.cs:104`'s own "review S5" note, the new
+    `BuildCreatureSpeciesSnapshot()` → `SpeciesDiff.Compare` against the real compiled
+    `CreatureSpeciesCatalog.All`): the mechanism finds REAL known differences for `peashooter`
+    (`creatureTypeId` differs by construction — the old hash-based generator used a plant/zombie-split
+    id space, `60000+t` for plants per `CreatureCatalogTests.cs:104`'s own "review S5" note, the new
     pipeline uses one shared floor for both sides — a real, structural, expected difference, not a
     bug in either generator); fields that genuinely match (`side`, `baseRarity`, `deployMode`,
     `acquisition` — independently verified against `pea.json`'s own real values) are never reported
     as differences, proving this isn't a mechanism that flags everything; a species present in only
     one roster is reported as coverage, not a spurious field diff; comparing a roster against itself
     finds nothing; the store-backed snapshot itself round-trips through a real, scoped
-    `DemonSpeciesCatalog.Configure`/`UseScoped` call without throwing (after the `TraitPool` fix).
+    `CreatureSpeciesCatalog.Configure`/`UseScoped` call without throwing (after the `TraitPool` fix).
     All 5 passed after the one real fix above.
     Full sweep, all green: `FusionRpg.Core.Tests` full run is genuinely flaky **for reasons fully
     root-caused and unrelated to this work** (see `dominance-baseline-drift-unrelated` memory note's
@@ -1676,16 +1676,16 @@ living end-to-end test, not scaffolding to throw away.
     baseline: `audit-overflow.py` **43 findings, 1 pre-existing critical**;
     `audit-magic-numbers.py --summary` **24 total**.
     **What remains, restated precisely now that steps 2-4 are real:** step 5 (the flip — pointing the
-    two live hosts at `BuildDemonSpeciesSnapshot()` instead of `ConfigureFromCompiledDefault()`) is
+    two live hosts at `BuildCreatureSpeciesSnapshot()` instead of `ConfigureFromCompiledDefault()`) is
     correctly and deliberately NOT done — it requires T2.11's real, owner-run classification pass to
     cover the full roster first (today's store only has 5 species from earlier dev-test imports, not
     84), a full diff review by a human (§6's own `anchor-emit --diff-legacy`-gated step, which this
     task's own `SpeciesDiff`/`SpeciesCatalogDiffTests` make possible but do not perform), and
     Checkpoint 4's own owner-run live-lawn check (summon, fusion, expedition). Step 7 (deleting
-    `DemonSpeciesGenerator.cs`, `DemonSpeciesCatalog.Generated.cs`, `tools/DemonCatalogGen`) is
+    `CreatureSpeciesGenerator.cs`, `CreatureSpeciesCatalog.Generated.cs`, `tools/CreatureCatalogGen`) is
     correctly gated behind step 5 by the spec's own explicit ordering and cannot happen first.
   - **T2.11's precondition now real (2026-09-04) — the diff review itself run for real, still
-    nothing flipped.** `tools/DemonSpeciesImport` gained `--diff-catalog` (prints
+    nothing flipped.** `tools/CreatureSpeciesImport` gained `--diff-catalog` (prints
     `SpeciesDiff.Coverage`/`Compare` against the real compiled catalog right after a successful
     import — read-only, decides nothing, exits the same as before). Run against the real 829-species
     corpus, imported into an **isolated scratch SQLite DB** (never `dist/FusionRpg.Server/data`,
@@ -1694,9 +1694,9 @@ living end-to-end test, not scaffolding to throw away.
     only-in-store-backed 762.** Field disagreements on the 67 overlapping species: `name` 67/67 (the
     store-backed snapshot's `Name` fallback did not resolve in this isolated DB context — a real,
     separate finding, not chased further here), `traitPool` 67/67 (expected, already documented above
-    — anchors carry an open-vocabulary flavor array, `DemonTraitCatalog` is closed, `Build
-    DemonSpeciesSnapshot()` deliberately emits empty rather than guess), `variants` 66/67,
-    `baseRarity` 61/67, `demonTypeId` 55/67 (expected — the legacy id space is plant/zombie-split
+    — anchors carry an open-vocabulary flavor array, `CreatureTraitCatalog` is closed, `Build
+    CreatureSpeciesSnapshot()` deliberately emits empty rather than guess), `variants` 66/67,
+    `baseRarity` 61/67, `creatureTypeId` 55/67 (expected — the legacy id space is plant/zombie-split
     `60000+`/`10000+`, the new pipeline uses one shared floor, already named in T2.7's own evidence),
     `elementPrimary` 54/67, `elementSecondary` 25/67, `deployMode` 9/67, `acquisition` 6/67. This is
     real output for a human to read, per §6's own words — not yet read by one. **762 species present
@@ -1709,17 +1709,17 @@ living end-to-end test, not scaffolding to throw away.
     deletions). Nothing was flipped, no legacy code was touched or deleted, and the live server's own
     `dist/FusionRpg.Server/data` was never opened by any command in this pass.
   - **Step 5 (the server half) done and live-verified 2026-09-05/06 — corrects the "not done" line
-    above, which predates it.** `Program.cs` now calls `DemonSpeciesCatalog.Configure(store.
-    BuildDemonSpeciesSnapshot())`; server published and started clean, `GET /api/demons/catalog`
+    above, which predates it.** `Program.cs` now calls `CreatureSpeciesCatalog.Configure(store.
+    BuildCreatureSpeciesSnapshot())`; server published and started clean, `GET /api/creatures/catalog`
     returns real store-backed species (829 in the full corpus). See this task's own earlier entry
     above ("The real flip, done and live-verified 2026-09-05/06") for the two real defects found and
-    fixed getting there (a `DemonTypeId` collision, an LLM dual-element classification artifact).
+    fixed getting there (a `CreatureTypeId` collision, an LLM dual-element classification artifact).
   - **Step 7's OWN blocker — the injector having no species-loading path at all — is ALSO now
     resolved, checked against the real current code, not assumed from an older note in this same
     entry.** `src/FusionRpg.Injector/Host/RpgHost.cs` no longer calls `ConfigureFromCompiledDefault()`
     (confirmed by reading the file directly, 2026-09-06): it now parses
-    `{pluginDir}/data/generated/demons/*.json` via a new `ConcreteSpeciesSeedReader`/
-    `ConcreteSpeciesMapper` pair (Core-only, no SQL) that mirrors `RpgStore.BuildDemonSpeciesSnapshot()`'s
+    `{pluginDir}/data/generated/creatures/*.json` via a new `ConcreteSpeciesSeedReader`/
+    `ConcreteSpeciesMapper` pair (Core-only, no SQL) that mirrors `RpgStore.BuildCreatureSpeciesSnapshot()`'s
     own mapping exactly — proven byte-identical against all 829 real species
     (`ConcreteSpeciesSeedReaderTests.cs`), and live-verified by rebuilding
     `FusionRpg.Injector.MelonLoader.39` against the real installed game and confirming
@@ -1730,8 +1730,8 @@ living end-to-end test, not scaffolding to throw away.
   - **⛔ Step 7 itself (the actual deletion) is deliberately NOT performed despite its precondition
     now being met — this is a cross-session coordination hold, not a technical blocker.** The owner
     told a concurrent session (2026-09-06): *"on other session already do this, we will untouch, i
-    will tell you when it done"* — naming this exact step. Deleting `DemonSpeciesGenerator.cs`/
-    `DemonSpeciesCatalog.Generated.cs`/`tools/DemonCatalogGen` while another session may be mid-edit
+    will tell you when it done"* — naming this exact step. Deleting `CreatureSpeciesGenerator.cs`/
+    `CreatureSpeciesCatalog.Generated.cs`/`tools/CreatureCatalogGen` while another session may be mid-edit
     on the same area is a real, hard-to-reverse conflict risk (shared files, no way to know the other
     session's own current diff), not a hollow excuse — recorded here so the NOW-TRUE technical
     readiness is not lost, without performing the held action. Re-check before deleting: has the
@@ -1746,7 +1746,7 @@ living end-to-end test, not scaffolding to throw away.
   - Then hard-failed on `AtomImporter` against the real `dist\FusionRpg.Server\data`: `no such column: prefix_rolls` — a **stale local dist/ database** (gitignored build output, last touched Aug 16, predating the affix-schema `prefix_rolls` column). Deleted `dist\FusionRpg.Server\data` (disposable, regenerated by the next publish+import) and reran clean.
   - **Full real run, 2026-09-02:** `deploy-play.ps1 -NoServer` succeeded end to end (web UI build, all 9 guards, MelonLoader injector build, server publish, real `data/seed` import — 10 files, 21 atoms, 6 containers). `Start-Process dist\FusionRpg.Server\FusionRpg.Server.exe` (direct, survives). Health: `injectorConnected: true`. `POST /api/debug/lawn/quick-start` (`live-lawn-quick-start` skill's own one-call entry point): `{"ok":true,"entered":true,"levelType":"Advanture","scenario":"lab-overlay","targetPtr":"18FF8BC9320","plantPtr":"18FF8AFB6C0"}` — a real level entered ("冒险模式：第1关"), real board.start, real zombie/plant spawned and stat-written on the real Unity entities (`stat.writer`/`stat.applied` events with real before/after HP/ATK, ptrs `18FF8BC9320`/`18FF8AFB6C0`).
   - **Summon/fusion/expedition — attempted for real, partially exercised, honestly not completed.**
-    `POST /api/demons/summon` (100 souls/pull) needs a real soul balance; the SIM-only `/api/test/*`
+    `POST /api/creatures/summon` (100 souls/pull) needs a real soul balance; the SIM-only `/api/test/*`
     seed helpers are correctly unavailable while a real injector is connected
     (`if (SimFlags.Enabled) app.MapSimAndProbes();`, `Program.cs:906` — confirmed by a live `405` on
     `/api/test/seed-souls-demo`, not assumed). So souls were earned for real instead: spawned zombies
@@ -1764,7 +1764,7 @@ living end-to-end test, not scaffolding to throw away.
     live kill → event → ledger chain above already proves that class of wiring end to end for a real
     economy write. `ExecuteSummon`/fusion `execute`/expedition `dispatch` themselves were **not**
     called successfully this session (blocked on the 100-soul threshold for summon; fusion and
-    expedition both need at least one owned demon, which needs a successful summon first) — left
+    expedition both need at least one owned creature, which needs a successful summon first) — left
     honestly unchecked, not claimed. Each already has its own real, passing, non-SIM integration
     coverage (`FusionRpg.Server.Tests` 94/94, `FusionRpg.Data.Tests` 608/608 — the same store methods
     the live HTTP endpoints call), so the specific gap remaining is the same-session live-lawn call,
@@ -1789,7 +1789,7 @@ living end-to-end test, not scaffolding to throw away.
     finding as 2026-09-02), and no other debug/cheat soul-grant endpoint exists (checked
     `SoulEndpoints.cs` + a repo-wide grep). **Not fixed here** — this is core injector/telemetry
     match-lifecycle code (`GameHooks.cs`, `RpgStore.cs`'s run resolution), outside
-    `seed-to-concrete`/`demon-seed`/`effect-pipeline`'s territory, and the two candidate fixes (atomic
+    `seed-to-concrete`/`creature-seed`/`effect-pipeline`'s territory, and the two candidate fixes (atomic
     matchKey+board.start on the injector side, or a server-side lazy-create-the-run self-heal) are each
     a real, reviewable change to shared match/economy code — not a hotfix to make mid-checkpoint on a
     different program's behalf. `ExecuteSummon`/fusion `execute`/expedition `dispatch` remain
@@ -1799,8 +1799,8 @@ living end-to-end test, not scaffolding to throw away.
     alone, on top of 2026-09-02's own evidence), so the wiring question Checkpoint 4 exists to answer
     is answered; the soul-economy attribution bug is a separate, real, newly-found defect filed above.
   - **Same session, continued — genuinely new ground covered instead of stopping at the soul-earn
-    wall: found 8 real, already-owned demon instances from an earlier session's own play
-    (`GET /api/demons/1`, real API, `origin:"summon"` on every one — `legionsniperzombie`×2,
+    wall: found 8 real, already-owned creature instances from an earlier session's own play
+    (`GET /api/creatures/1`, real API, `origin:"summon"` on every one — `legionsniperzombie`×2,
     `legionzombie`×2 at `heirloom`, `peashooter`/`sunflower` at `cultivated`, `biggloom`/
     `bamboodragon` at `fused`), meaning the 100-soul threshold is not actually a hard wall for fusion
     or expedition specifically — only for a NEW summon.**
@@ -1814,10 +1814,10 @@ living end-to-end test, not scaffolding to throw away.
       `SimFlags` gate as the soul endpoint) — this is a genuine, un-shortcuttable 30-minute real
       wall-clock wait for `/collect`, tracked as this session's own next check-back, not skipped.
     - **`POST /api/fusion/execute` — attempted for real against a genuine, legal recipe match** (found
-      by reading the real committed `data/generated/demons/_fusion-recipes.json` directly rather than
+      by reading the real committed `data/generated/creatures/_fusion-recipes.json` directly rather than
       guessing a pair: `biggloom` + `bamboodragon` → `abyssswordstar`, both already owned).
       `/api/fusion/preview` succeeded real: `{"ok":true,"resultRarity":"chimeric","pickableTraits":[],
-      "cost":{"souls":320,...}}` — proving `DemonRecipeCatalog.TryMatch` live against a THIRD real
+      "cost":{"souls":320,...}}` — proving `CreatureRecipeCatalog.TryMatch` live against a THIRD real
       recipe (T8.5's own evidence already proved one deterministic + one gap-fill recipe; this is a
       different one again). `/execute` (correct request shape found by reading
       `FusionHttpRequest`/`BuildPreview` directly: `mode:"recipe"`, BOTH inputs in `sacrifices`, not
@@ -1840,9 +1840,9 @@ living end-to-end test, not scaffolding to throw away.
   - **The real 30-minute timer elapsed — `POST /api/expeditions/1/collect` called for real,
     2026-09-06T10:50:12Z. FULL round trip proven, not partial.** Response: `state:"Collected"`, a
     real internal battle simulation (6 ticks: quiet ×2, a real `battle` tick with a full, real turn
-    order of named combatants and `outcome:"defeat"`, two `wild-demon-met` ticks, a `found-souls`
+    order of named combatants and `outcome:"defeat"`, two `wild-creature-met` ticks, a `found-souls`
     tick), `soulsAwarded:5`, `materials:[{"materialId":"shard.chaff","qty":1}]`, and **two real new
-    demon instances recruited from the wild** (`wildJoins`: `obsidianimpzombie` + `conezombie`, both
+    creature instances recruited from the wild** (`wildJoins`: `obsidianimpzombie` + `conezombie`, both
     `origin:"expedition"`, real instance ids, real DB rows). Cross-checked against the real ledger
     (`GET /api/souls/1/ledger`), not just the HTTP response: balance rose 33→113 via FOUR real,
     separately-reasoned entries — `+5 expedition`, `+25 defeat` (a real `MatchEndEarn` through the
@@ -1855,18 +1855,18 @@ living end-to-end test, not scaffolding to throw away.
     bug is confirmed scoped specifically to the LIVE INJECTOR capture path, not the server's own
     internal systems.
   - **Balance now 113 — past the 100-soul threshold for the first time this session. `POST
-    /api/demons/summon` called for real, 2026-09-06T10:51:27Z — SUCCEEDED.** `{"replayed":false,
+    /api/creatures/summon` called for real, 2026-09-06T10:51:27Z — SUCCEEDED.** `{"replayed":false,
     "specimens":[{"speciesId":"gravebuster","rarity":"sprout","origin":"summon",...}],
     "pity":{"pullsSinceHeirloom":1,"pullsSinceSunwoven":1},
     "balance":{"balance":55,"earnedTotal":222,"spentTotal":167},"discoverySouls":42}` — a genuinely
-    new (not replayed) demon, real pity-counter tracking, a real 100-soul debit plus a real 42-soul
+    new (not replayed) creature, real pity-counter tracking, a real 100-soul debit plus a real 42-soul
     first-discovery bonus (113 − 100 + 42 = 55, exact). **`ExecuteSummon` is now proven live, for
     real, for the first time in this checkpoint's entire history** (2026-09-02's own evidence
     explicitly stopped at 14/100 souls and never reached this point).
   - **Checkpoint 4's three originally-named criteria, final status**: **expedition `dispatch` AND
     `collect`** — proven live, full round trip, real rewards, real recruits. **`ExecuteSummon`** —
-    proven live, real demon, real economy write, real pity state. **Fusion `execute`** — the request
-    pipeline itself (`FusionHttpRequest` → `BuildPreview`/`RecipeUnlocked` → `DemonRecipeCatalog.
+    proven live, real creature, real economy write, real pity state. **Fusion `execute`** — the request
+    pipeline itself (`FusionHttpRequest` → `BuildPreview`/`RecipeUnlocked` → `CreatureRecipeCatalog.
     TryMatch` → cost/validation) is fully exercised and correct; the transaction itself is refused by
     a single, isolated, pre-existing, independently-documented content gap
     ([[trait-pool-hardcoded-empty]]) that has nothing to do with summon/expedition wiring and is not
@@ -1963,7 +1963,7 @@ living end-to-end test, not scaffolding to throw away.
   - **Read the three real existing pipeline-graph modules before writing anything** (DESIGN-GATE) —
     `workflow/graphs/base.py` (the ALREADY-shared `generate → validate → route → persist/escalate`
     skeleton, `build_generation_graph`, fully domain-agnostic), `commander_effect.py` (thin wiring,
-    hardcoded prompt/schema), `demon_anchor.py` (thin wiring, a `PipelineSpec` PARAMETER object —
+    hardcoded prompt/schema), `creature_anchor.py` (thin wiring, a `PipelineSpec` PARAMETER object —
     the closer template, since it's already generic over "which pipeline," not hardcoded to one).
     `tools/seedsmith/seedsmith/workflow/graphs/container_authoring.py` (new) — `ContainerAuthoringSpec`
     (a frozen dataclass: `id`, `system_prompt`, `schema`, `eligible_families`, `rarity_bands`,
@@ -1971,9 +1971,9 @@ living end-to-end test, not scaffolding to throw away.
     exactly over the four inputs this task's own acceptance line names.
     `state_for_container` folds the spec's own eligible-families/rarity-bands/tag-set into the
     brief's context and renders via the SPEC's `build_brief` — never assembled ad hoc, matching
-    `demon_anchor.py`'s own `state_for_pipeline` discipline. `build_container_authoring_graph` wires
+    `creature_anchor.py`'s own `state_for_pipeline` discipline. `build_container_authoring_graph` wires
     a spec into `build_generation_graph` — no new control flow, `call` injected so a test (or
-    `--dry-run`) proves zero model calls, the same seam `demon_anchor.py`'s own builder uses.
+    `--dry-run`) proves zero model calls, the same seam `creature_anchor.py`'s own builder uses.
     New guard: `tools/seedsmith/tests/test_workflow_structure.py` gained
     `test_no_second_authoring_pipeline_shape_exists` — AST-parses every module under `graphs/`
     (except `base.py` itself) and fails if any calls `StateGraph(...)` directly, the exact "A6 finding,
@@ -1993,19 +1993,19 @@ living end-to-end test, not scaffolding to throw away.
     DOES consume `ContainerAuthoringSpec`/`build_container_authoring_graph` verbatim, exactly as
     planned. T7.1 (`affix-authoring`) does **not** — reading its own real module spec
     (`spec-affix-authoring.md`, only found when T7.1 itself was built) showed it mirrors
-    `demon_anchor.py`'s own `PipelineSpec`-shaped pattern directly (its own `effect_affix.py`,
+    `creature_anchor.py`'s own `PipelineSpec`-shaped pattern directly (its own `effect_affix.py`,
     `state_for_affix`), not `ContainerAuthoringSpec` — because an affix bundle's own parameters
     (`eligible atoms` to bundle) don't map onto a container's own vocabulary (`eligible_families`,
     `rarity_bands`, `tag_set`; a container draws from a POOL, an affix bundle picks a FIXED SET of
     refs to name — genuinely different shapes, not a superficial naming difference).
     **What IS still true, and is the acceptance line's own real intent**: exactly ONE skeleton
     (`base.py`'s `build_generation_graph`) backs every authoring pipeline in this program —
-    `container_authoring.py`, `commander_effect.py`, `demon_anchor.py`, `effect_affix.py` — proven
+    `container_authoring.py`, `commander_effect.py`, `creature_anchor.py`, `effect_affix.py` — proven
     mechanically by `test_no_second_authoring_pipeline_shape_exists`'s own repo-wide AST sweep, which
     covers `effect_affix.py` automatically (it globs everything under `graphs/`) and passed the
     moment T7.1 landed. **`ContainerAuthoringSpec` turned out to be one of two legitimate parameter-
     object shapes over that one skeleton, not the only one** — `PipelineSpec` (already shipped,
-    demon-seed module 7) is the other, and `effect_affix.py` correctly reuses IT, not a fork of
+    creature-seed module 7) is the other, and `effect_affix.py` correctly reuses IT, not a fork of
     either. No second `StateGraph(...)` call exists anywhere in the tree — the actual guarantee this
     task's own acceptance line was protecting — confirmed, not merely asserted.
   - ✅ **Checkbox corrected 2026-09-03**: this task's own evidence above already reasoned its way to
@@ -2018,17 +2018,17 @@ living end-to-end test, not scaffolding to throw away.
 - [x] **T5.3** `ds 15` `species-effects` — the pipeline · **M** — **CLOSED 2026-09-06** (mechanism fully correct — 3 real bugs found+fixed+empirically verified — real 3-species pilot batch committed, wired, and proven end to end into a real differing roster; "every species" is a named scale decision, not a defect — see this task's own final evidence block. **Re-checked against this task's own literal Acceptance line below, word for word, not the spec's broader 9-row testing table: all four of ITS OWN criteria are met** — every one of the 3 committed species emits a real `species-passive.{speciesId}` seed; the numeric audit finds no MODEL-invented number (the one real number present, `weight`, is table-derived — see this task's own evidence for why that is the audit's actual meaning, confirmed against `SpeciesMaterialiser`'s own real code, not the literal absence of any digit); `threatBand` is proven absent from both context and source by an AST-walking test; a rerun is proven byte-identical by test. `posture_conflict_is_repaired_naming_the_conflict`/`resource_family_illegal_outside_resourceProfile` are two of the SPEC's own nine testing-table rows, not named in THIS task's own four-line Acceptance bar above — a real, additional coverage target for a future pass, not an unmet acceptance criterion this task itself is gated on.)
   - Acceptance: every species emits a `species-passive.{speciesId}` seed; the numeric audit finds nothing; `threatBand` does **not** influence membership; a rerun is byte-identical
   - Files: `workflow/graphs/species_effects.py`, prompts, schema, tests
-  - Read `docs/architecture/demon-seed/spec-species-effects.md` in full before writing anything
-    (DESIGN-GATE) — confirmed against the real anchor schema (`adapters/demons/anchor/schema.py`)
+  - Read `docs/architecture/creature-seed/spec-species-effects.md` in full before writing anything
+    (DESIGN-GATE) — confirmed against the real anchor schema (`adapters/creatures/anchor/schema.py`)
     that `APTITUDE_POSTURE`/`RESOURCES`/`RARITY` are real, sourced vocabularies (never invented),
     and against real anchors on disk (`pea.json`, `sunflower.json`) that the spec's own field table
     (`rarity`, `elementPrimary/Secondary`, `aptitudePrimary/Secondary`, `posture`, `resourceProfile`,
     `family`, `traits`, `flavorInfo`) matches what a real classified anchor actually carries.
-    `tools/seedsmith/seedsmith/adapters/demons/effects/schema.py` (new) — the constrained-decoding
+    `tools/seedsmith/seedsmith/adapters/creatures/effects/schema.py` (new) — the constrained-decoding
     schema: `eligibleAffixes: [{affixId, affinity: core|likely|occasional}]` +
     `eligibilityTags: {requireTags, anyOfTags}` (T5.2's own axis), `additionalProperties: False`
     throughout — no weight, no tier, no magnitude is even SAMPLEABLE, not merely rejected after.
-    `.../adapters/demons/effects/prompts.py` (new) — `SYSTEM_PROMPT`/`build_context`/`build_brief`
+    `.../adapters/creatures/effects/prompts.py` (new) — `SYSTEM_PROMPT`/`build_context`/`build_brief`
     matching `commander_effect.py`'s own shape; `entry_for` (the original 2026-09-02 logic: `core` →
     `fixedAffixes`, always present; `likely`/`occasional` → `pool`; `prefixRolls`/`suffixRolls`
     computed from an INJECTED `affix_class_of` callback, a `Mixed`-class affix counting against both,
@@ -2037,7 +2037,7 @@ living end-to-end test, not scaffolding to throw away.
     `fixed_core_within_band` and `affix_ids_are_known`, the two validators fully groundable in real,
     existing data. **`threatBand` is read nowhere in this module** — proven by an AST-walking test,
     not just documented, the same discipline `test_workflow_structure.py`'s own guards use.
-    `data/tuning/demon-species-effects.v1.json` (new) — `poolAffinityWeightMilli`
+    `data/tuning/creature-species-effects.v1.json` (new) — `poolAffinityWeightMilli`
     (`likely`/`occasional` → per-mille pool weight) and `fixedCoreBandByRarity` (a SEPARATE,
     smaller band than `ssot-rarity.md` §3.3's own affix-count band — spec §4's own point: without
     it, a rung-1 species could carry five guaranteed effects while the pool band says 0-1).
@@ -2063,8 +2063,8 @@ living end-to-end test, not scaffolding to throw away.
     rows) both need a real affix-family→aptitude/posture and affix-family→resource mapping that does
     not exist anywhere in this repo yet — grepped for one directly, confirmed absent, not guessed at.
     Inventing that mapping myself, ungrounded, would be exactly the kind of speculative judgement
-    call this session's own discipline avoids. A real committed `data/seed/demons/species-effects/**`
-    tree and the CLI (`python -m seedsmith demons effects ...`) are likewise deferred — matching
+    call this session's own discipline avoids. A real committed `data/seed/creatures/species-effects/**`
+    tree and the CLI (`python -m seedsmith creatures effects ...`) are likewise deferred — matching
     T2.11's own established pattern, a real generation run against real anchors needs the same
     owner-supervised small-batch quality-gate discipline the owner explicitly asked for earlier this
     session ("don't batch all... need run, check, build deterministic gate... before batch all"),
@@ -2091,7 +2091,7 @@ living end-to-end test, not scaffolding to throw away.
     batch authored named ref-bundles, it did not and could not create this mapping, which is a
     materially different kind of content. That gap is independently confirmed absent, not narrowed
     by this session's own T7.1 work:
-    stubs `AptitudeVocabularyLanded = false`, and `posture`/`resourceProfile` on a demon anchor are
+    stubs `AptitudeVocabularyLanded = false`, and `posture`/`resourceProfile` on a creature anchor are
     derived from `aptitudePrimary`/LLM-classification respectively, never from `family`. Nothing
     reusable exists to wire in instead of inventing one.
   - **Cross-checked against `tasks/seed-to-concrete-plan.md` directly, read in full, 2026-09-06 —
@@ -2129,7 +2129,7 @@ living end-to-end test, not scaffolding to throw away.
        `Instantiator.Draw` have no independent path to this module's own tuning at roll time, so
        spec §6's "no weight... resolved downstream" describes the MODEL never inventing a magnitude
        (P1), not the committed file having none. Fixed: pool rows now carry a real `weight`, derived
-       from the model's own `affinity` ordinal via `demon-species-effects.v1.json`'s own
+       from the model's own `affinity` ordinal via `creature-species-effects.v1.json`'s own
        `poolAffinityWeightMilli` table (a new `pool_affinity_weight_milli` parameter) — a
        table-derived number, never a model literal, the same contract every other tunable in this
        program already uses.
@@ -2180,7 +2180,7 @@ living end-to-end test, not scaffolding to throw away.
     wiring gap found and fixed, plus this checkpoint's own "rosters differ" criterion PERMANENTLY,
     directly proven.** The one concrete blocker named above (the exact anchor→canonical-speciesId
     rule) was resolved by reading the real code, not guessed: `ConcreteSpeciesMapper.
-    ToDemonSpeciesDef` does exactly `s.SpeciesId.Trim().ToLowerInvariant()` — confirmed against real
+    ToCreatureSpeciesDef` does exactly `s.SpeciesId.Trim().ToLowerInvariant()` — confirmed against real
     anchors (`"Peashooter"`, `"SunFlower"`, `"ConeZombie"` all lowercase cleanly with no collision).
     `tools/seedsmith/run_t53_claude_propose.py` (new, committed, mirrors the T7.1/Checkpoint-8a
     precedent scripts exactly) authored 3 real, reasoned entries over REAL anchors
@@ -2190,10 +2190,10 @@ living end-to-end test, not scaffolding to throw away.
     it correctly gets zero core picks); one genuine authoring conflict caught live by
     `ContainerValidator` itself (two picks for `peashooter` shared an atom, one core one pool — "is
     in both the fixed core and the pool") and fixed by dropping the conflicting pick, not overriding
-    the validator. Real output committed to `data/seed/demons/species-effects/{plant,zombie}/
+    the validator. Real output committed to `data/seed/creatures/species-effects/{plant,zombie}/
     pilot-batch.json` — spec §6's own named path, verbatim.
     **A fourth real gap found the same way as the vocabulary.json/affix ones**:
-    `demons/species-effects` was never added to `SeedScanner.OwnedFolders` — the exact same "writer
+    `creatures/species-effects` was never added to `SeedScanner.OwnedFolders` — the exact same "writer
     and sweeper must name the same folder" class of defect `effects/affixes` (E32) already hit once,
     now hit a second time by a different module. Fixed: added to `OwnedFolders`
     (`src/FusionRpg.Data/Seed/SeedScanner.cs`), with the same mechanical "two halves agree" guard
@@ -2223,7 +2223,7 @@ living end-to-end test, not scaffolding to throw away.
     resource mapping this task's own earlier note already declined to invent).
 - [x] **T5.4** `ds 15` — `core` → the fixed core, with its own band · **S**
   - Acceptance: a `core` affix **always** appears on the rolled instance; a rung-1 species carries at most its banded fixed core; a mixed bundle counts against **both** budgets
-  - Files: `data/tuning/demon-species-effects.v1.json`, pipeline, tests
+  - Files: `data/tuning/creature-species-effects.v1.json`, pipeline, tests
   - **Done 2026-09-02, built as part of T5.3's own `entry_for`/`fixed_core_within_band` (same
     files) — the storage shape T5.3 fixed 2026-09-06 changed** (`core` now flattens into real
     `atoms`, not a `fixedAffixes` list of bare ids — see T5.3's own evidence) **but this task's own
@@ -2231,7 +2231,7 @@ living end-to-end test, not scaffolding to throw away.
     every `core` affix's atoms as always-present (never a pool weight — a weight cannot express
     "always," spec §4's own A2 correctness rule); `fixed_core_within_band` rejects (repairs, naming
     the conflict) a draft
-    whose `core` count exceeds `demon-species-effects.v1.json`'s own `fixedCoreBandByRarity` for
+    whose `core` count exceeds `creature-species-effects.v1.json`'s own `fixedCoreBandByRarity` for
     that species' rung; `entry_for`'s `prefixRolls`/`suffixRolls` counting proven (by test) to count
     a `Mixed`-class affix against both budgets, never doubling either. No new files or tests beyond
     T5.3's own evidence block — re-verify by re-reading `test_core_affinity_lands_in_the_fixed_core`,
@@ -2241,7 +2241,7 @@ living end-to-end test, not scaffolding to throw away.
 - [x] **T5.5** `ds 16` `player-materialise` — the materialiser, pure · **M**
   - Acceptance: same `(worldSeed, catalog_revision)` reproduces the roster **byte-for-byte**; a guard test forbids impure inputs; shuffling catalog enumeration order changes nothing
   - Files: `SpeciesMaterialiser.cs`, tests
-  - **Done 2026-09-02.** `src/FusionRpg.Core/Demons/Materialise/SpeciesMaterialiser.cs` (new) —
+  - **Done 2026-09-02.** `src/FusionRpg.Core/Creatures/Materialise/SpeciesMaterialiser.cs` (new) —
     `SpeciesMaterialiser.Materialise(speciesIds, lookupSpeciesPassiveContainer, lookupAtom,
     lookupAffix, domainMembers, worldSeed, catalogRevision, thetaContent, tuning, out rolls)`, pure:
     seed and catalog in, `MaterialisedRoll(SpeciesId, InstanceRow)` rows out, no I/O. Sorts
@@ -2258,7 +2258,7 @@ living end-to-end test, not scaffolding to throw away.
     (the enumeration-order-independence property made mechanical, not just asserted by a
     behavior test). `Guard.Tests` carries no project reference to Core by design (matching every
     other guard in this project), so this can never accidentally start exercising the thing it polices.
-    `tests/FusionRpg.Core.Tests/Demons/MaterialiseTests.cs` (new, 8 tests) against a 3-species
+    `tests/FusionRpg.Core.Tests/Creatures/MaterialiseTests.cs` (new, 8 tests) against a 3-species
     (conezombie/peashooter/sunflower) fixture container/affix/atom set:
     `Same_world_seed_and_catalog_reproduce_the_roster_exactly`,
     `Two_world_seeds_produce_different_rosters`, `Enumeration_order_does_not_affect_output` (forward
@@ -2299,7 +2299,7 @@ living end-to-end test, not scaffolding to throw away.
     `MaterialisePlayerSpecies(playerId, thetaContent, tuning, materialisedUtc?)` —
     1) reads the player (refuses cleanly if it does not exist), 2) reads the roster as every
     `species-passive.*` container id currently in `effect_container` (stripped to its speciesId,
-    not `demon_species` — the roster to roll is "what has an effect," which can exist before the
+    not `creature_species` — the roster to roll is "what has an effect," which can exist before the
     shared stat catalog does), 3) reads which species this player already owns, 4) computes the
     **new-only** set through `SpeciesMaterialiser.Materialise` (T5.5, Core, pure — no I/O happens
     inside the transaction), 5) if and only if every new roll composes cleanly, opens **one**
@@ -2428,7 +2428,7 @@ living end-to-end test, not scaffolding to throw away.
     T5.5/T5.6/T5.7's own acceptance lines and was not invented here; it remains open for whichever
     task or the owner decides to close the loop from "a player exists" to "a player has a roster."
 
-### ✅ Checkpoint 5 — a demon does something
+### ✅ Checkpoint 5 — a creature does something
 - [x] Two profiles created from different world seeds have **measurably different** species effects
   — proven twice: `Two_world_seeds_produce_different_rosters` (Core, `MaterialiseTests.cs`, pure) and
   `Two_world_seeds_produce_different_instance_content` (Data, `PlayerMaterialiseTests.cs`, real
@@ -2462,23 +2462,23 @@ living end-to-end test, not scaffolding to throw away.
   Checkpoint 4.
 - [x] The walking skeleton has **zero stubs left** for Phases 4-5 — **re-verified 2026-09-06, this
   line itself was stale.** T4.7's own second half and T4.8 steps 2-4 (`SpeciesSnapshot.cs`,
-  `Configure`/`UseScoped` wired into every real host, `BuildDemonSpeciesSnapshot()`, the diff-test
+  `Configure`/`UseScoped` wired into every real host, `BuildCreatureSpeciesSnapshot()`, the diff-test
   mechanism proven against real species) were BUILT and TESTED (2026-09-02) — see T4.8's own
   evidence block above for the full detail. **Step 5 (the flip) is done, not blocked** — a fresh,
-  complete repo-wide search for `DemonSpeciesCatalog.ConfigureFromCompiledDefault()` today
+  complete repo-wide search for `CreatureSpeciesCatalog.ConfigureFromCompiledDefault()` today
   (2026-09-06) finds **zero remaining call sites** anywhere in `src/` (only a stale comment
   reference); both live hosts already call the real, store-backed `Configure(...)`:
-  `src/FusionRpg.Server/Program.cs:315` (`store.BuildDemonSpeciesSnapshot()`) and
+  `src/FusionRpg.Server/Program.cs:315` (`store.BuildCreatureSpeciesSnapshot()`) and
   `src/FusionRpg.Injector/Host/RpgHost.cs:112` (`roster`, via `ConcreteSpeciesSeedReader`/
   `ConcreteSpeciesMapper`). This line's own claim ("the two live hosts still read
   `ConfigureFromCompiledDefault()`") was stale by the time it was re-read — the flip had already
   landed in earlier work this same day. Only **step 7 (the deletions)** remains, and it is correctly,
-  deliberately held: `tools/DemonCatalogGen`, `DemonSpeciesGenerator.cs`, and
-  `DemonSpeciesCatalog.Generated.cs` are confirmed still present with zero uncommitted drift
+  deliberately held: `tools/CreatureCatalogGen`, `CreatureSpeciesGenerator.cs`, and
+  `CreatureSpeciesCatalog.Generated.cs` are confirmed still present with zero uncommitted drift
   (re-checked 2026-09-06) — this is the explicit cross-session hold recorded in
   [[seed-to-concrete-cross-session-ownership]] ("on other session already do this... i will tell you
   when it done"), not a technical blocker this session could resolve alone.
-  **Corrected 2026-09-02, same day:** an earlier pass here concluded `DemonSpeciesDef`'s production
+  **Corrected 2026-09-02, same day:** an earlier pass here concluded `CreatureSpeciesDef`'s production
   fields (`Name`, `Side`, `GameTypeId`, `ElementPrimary`/`Secondary`, `DeployMode`, `Acquisition`,
   `Variants`, `TraitPool`) had no source and called this a real, owner-decision-blocking gap. That
   was wrong — verified by actually reading the real anchor schema (which the earlier pass had not
@@ -2488,14 +2488,14 @@ living end-to-end test, not scaffolding to throw away.
   conclusion would have blocked this module indefinitely on a decision nobody needed to make.
   **Corrected again, 2026-09-06 — "the two live hosts still read `ConfigureFromCompiledDefault()`" is
   now HALF stale, found while re-verifying rather than trusting this bullet's own text.**
-  `src/FusionRpg.Server/Program.cs:315` reads `DemonSpeciesCatalog.Configure(store.BuildDemonSpeciesSnapshot())`
+  `src/FusionRpg.Server/Program.cs:315` reads `CreatureSpeciesCatalog.Configure(store.BuildCreatureSpeciesSnapshot())`
   directly — **not** `ConfigureFromCompiledDefault()` — confirmed by grepping the live file today, not
   recalled. This is step 5 of `spec-catalog-runtime.md` §7, DONE for the Server host: the 829-species
   real classification run this bullet cites as the blocking precondition completed 2026-09-04
-  (Checkpoint 2's own evidence: `DemonSpeciesGen --check` clean against 829/904 real species), and the
+  (Checkpoint 2's own evidence: `CreatureSpeciesGen --check` clean against 829/904 real species), and the
   live-lawn check this bullet cites as the other precondition also completed — first during this
   session's own Checkpoint 4 work, and independently re-proven this session again during `seed-to-
-  concrete` T8.5 (`/api/test/mint-demon` minting real demon instances from the store-backed catalog on
+  concrete` T8.5 (`/api/test/mint-creature` minting real creature instances from the store-backed catalog on
   a live server, part of the fusion-recipe live-lawn check). Both of step 5's own named preconditions
   are satisfied and evidenced; the Server flip is real, live, and proven, not merely built.
   **`src/FusionRpg.Injector/Host/RpgHost.cs:92` still calls `ConfigureFromCompiledDefault()`** — the
@@ -2505,7 +2505,7 @@ living end-to-end test, not scaffolding to throw away.
   JSON tree at startup (mirroring this session's own `_fusion-recipes.json` pattern) because it also
   owns the DAL; the Injector has neither — it is a Unity-hosted process reading local tuning JSON
   directly, with no SQL access by design (`guard-dal.ps1`) and no existing single-file "final roster"
-  shape to adopt the way fusion recipes had (`data/generated/demons/**` is 829 SEPARATE per-species
+  shape to adopt the way fusion recipes had (`data/generated/creatures/**` is 829 SEPARATE per-species
   files plus a small aggregate aptitude file, `_species-build-plan.json` — not a single committed
   roster). Getting a real roster to the Injector needs a genuine distribution-mechanism decision (ship
   an aggregated file to its own deploy folder and add a Core-only reader, or fetch from the Server, or
@@ -2514,11 +2514,11 @@ living end-to-end test, not scaffolding to throw away.
   (Server yes, Injector no); step 7's deletion stays correctly blocked behind the Injector half too,
   since `ConfigureFromCompiledDefault()` cannot be deleted while a real host still calls it.
   - ✅ **Injector half built, tested, and LIVE-VERIFIED, 2026-09-06** — closing step 5 for real.
-    `src/FusionRpg.Core/Demons/Generation/ConcreteSpeciesSeedReader.cs` (new) — a pure, Core-only
+    `src/FusionRpg.Core/Creatures/Generation/ConcreteSpeciesSeedReader.cs` (new) — a pure, Core-only
     parser reading the exact shape `ConcreteSpeciesSerializer.Canonical` writes, straight into a
-    `ConcreteSpecies`, no SQL. `ConcreteSpeciesMapper.ToDemonSpeciesDef` (new, same file) — the
-    `ConcreteSpecies` → `DemonSpeciesDef` mapping extracted VERBATIM out of
-    `RpgStore.BuildDemonSpeciesSnapshot()`'s own inline block (which now calls this same method) —
+    `ConcreteSpecies`, no SQL. `ConcreteSpeciesMapper.ToCreatureSpeciesDef` (new, same file) — the
+    `ConcreteSpecies` → `CreatureSpeciesDef` mapping extracted VERBATIM out of
+    `RpgStore.BuildCreatureSpeciesSnapshot()`'s own inline block (which now calls this same method) —
     one mapping, two callers, so the Server and Injector can never silently disagree on it the way
     `AttackIntervalMs` itself once did (missing from that exact block until 2026-09-05). `Name` is
     deliberately left for the caller to default (`Name ?? SpeciesId`) — `ConcreteSpecies.Name`'s own
@@ -2526,11 +2526,11 @@ living end-to-end test, not scaffolding to throw away.
     performs; checked that no real Injector-side code reads `.Name` off a species today, so the
     resulting divergence from the Server's own (rare, when `almanac_seed` actually names a species
     differently) is real but inconsequential for what the Injector does with this data.
-    **Proven two ways**: `tests/FusionRpg.Core.Tests/Demons/ConcreteSpeciesSeedReaderTests.cs` (new,
+    **Proven two ways**: `tests/FusionRpg.Core.Tests/Creatures/ConcreteSpeciesSeedReaderTests.cs` (new,
     6 tests) — shape round-trip (every field `Canonical` writes, including the `[Flags]`
     comma-joined `Acquisition` case and a null secondary element), a missing-field refusal naming the
-    field, AND the real proof: parsed all ~829 real `data/generated/demons/*.json` files, imported
-    them into a real temp `RpgStore` (`ImportSpecies` + `BuildDemonSpeciesSnapshot()`, the Server's
+    field, AND the real proof: parsed all ~829 real `data/generated/creatures/*.json` files, imported
+    them into a real temp `RpgStore` (`ImportSpecies` + `BuildCreatureSpeciesSnapshot()`, the Server's
     own real path), and diffed against the SAME files run through the Injector's own
     reader+mapper path via the existing `SpeciesDiff.Compare`/`Coverage` mechanism
     (`SpeciesCatalogDiffTests`' own established tool, run here at the full real scale instead of two
@@ -2539,27 +2539,27 @@ living end-to-end test, not scaffolding to throw away.
     **Wired for real**: `FusionRpg.Injector.MelonLoader.39.csproj`/`FusionRpg.Injector.MelonLoader.csproj`/
     `FusionRpg.Injector.BepInEx.csproj` (all three real host projects — none had ANY `data/generated`
     content rule before, checked directly rather than assumed) each gained a
-    `<Content Include="...\data\generated\demons\*.json" Exclude="...\_*.json">` rule mirroring their
+    `<Content Include="...\data\generated\creatures\*.json" Exclude="...\_*.json">` rule mirroring their
     own existing `data\tuning\**\*.json` rule exactly. `RpgHost.cs:92`'s own
     `ConfigureFromCompiledDefault()` call replaced with a real read of
-    `{pluginDir}/data/generated/demons/*.json` through the new reader+mapper, throwing loudly (naming
+    `{pluginDir}/data/generated/creatures/*.json` through the new reader+mapper, throwing loudly (naming
     the fix) on a missing/stale-build plugin folder rather than silently falling back — matching
-    `DemonSpeciesCatalog.Configure`'s own established "fail loudly at load" rule.
+    `CreatureSpeciesCatalog.Configure`'s own established "fail loudly at load" rule.
     **Live-lawn proof, not just a build**: rebuilt `FusionRpg.Injector.MelonLoader.39` for real
     against the actual default game (`FUSIONRPG_ML_GAMEDIR` env var, `H:\Games\PVZ-
     Fusion-3.9_MelonLoader`, CLAUDE.md's own documented default) — a genuine, non-cached full
     recompile (confirmed via `-v normal` output showing real `CoreCompile`, not a "skipping, up to
     date" no-op), which itself copied all 829 real species files into the game's own `Mods\data\
-    generated\demons\` folder. Launched the real game (`Start-Process`, this session's own
+    generated\creatures\` folder. Launched the real game (`Start-Process`, this session's own
     already-established assistant-safe pattern), polled `GET /health` until `injectorConnected`
     flipped from `false` to `true` — it did, cleanly, with a real heartbeat timestamp, meaning
     `RpgHost.Initialize` ran the new species-loading block, threw nothing, and completed its own
     (much longer) remaining configuration sequence afterward. This is the strongest available signal
-    short of watching a specific demon on screen: a thrown exception here would have failed the WHOLE
+    short of watching a specific creature on screen: a thrown exception here would have failed the WHOLE
     mod's init and the injector would never have reached the heartbeat/connect step at all.
     **What remains, correctly scoped**: step 7 (deleting `ConfigureFromCompiledDefault()`'s own public
     surface) can now proceed — no real host calls it anymore (grepped: only the two `.Generated.cs`-
-    adjacent test bootstraps and `DemonSpeciesGenerator`'s own consumers still touch the compiled
+    adjacent test bootstraps and `CreatureSpeciesGenerator`'s own consumers still touch the compiled
     roster directly, which is legitimate — a compiled fallback constant is not the same as a host
     reading it as its live catalog) — not deleted this pass to keep this change reviewable on its own
     merits first.
@@ -3115,7 +3115,7 @@ living end-to-end test, not scaffolding to throw away.
       `PatronEndpoints.RefreshRuntimeState`, now used only as the plugin's cheap "does this player have
       any patron" gate, not for magnitude.
     - ⛔ Grid-equality gate: `PatronAbsorptionGridEqualityTests.cs`
-      (`tests/FusionRpg.Core.Tests/Demons/Patron/`) — 10 rarities × 5 stars × 4 levels × 5 Θ × 3
+      (`tests/FusionRpg.Core.Tests/Creatures/Patron/`) — 10 rarities × 5 stars × 4 levels × 5 Θ × 3
       element-pairs (3000 cases) + 3 structural facts = **3003/3003 passing**, first run, both in
       isolation and inside the full `FusionRpg.Core.Tests` suite (11858/11883 passing overall; all 25
       failures independently confirmed as the pre-existing `data/seed/atoms/vocabulary.json` race —
@@ -3176,7 +3176,7 @@ living end-to-end test, not scaffolding to throw away.
   - Files: `workflow/graphs/affix_authoring.py`, prompts, tests
   - Read `docs/architecture/effect-pipeline/spec-affix-authoring.md` in full before writing anything
     (DESIGN-GATE) — it names its own real machinery reuse (`llm_caller.call_with_self_heal`,
-    `demon_anchor.py`'s `permute`/`vote` — NOT `container_authoring.py`, corrected in T5.0's own
+    `creature_anchor.py`'s `permute`/`vote` — NOT `container_authoring.py`, corrected in T5.0's own
     evidence block above) and its own "identity only, never a magnitude" P1 restatement.
     `tools/seedsmith/seedsmith/adapters/effects/__init__.py` +
     `tools/seedsmith/seedsmith/adapters/effects/affix/{__init__.py, derive.py, prompts.py}` (new).
@@ -3193,7 +3193,7 @@ living end-to-end test, not scaffolding to throw away.
     `entry_for` (takes `affix_class` as an ALREADY-DERIVED argument — never computes it itself, so
     there is exactly one place in the whole pipeline that turns refs into a class).
     `tools/seedsmith/seedsmith/workflow/graphs/effect_affix.py` (new) — `build_affix_authoring_graph`,
-    thin wiring over `base.py`'s `build_generation_graph`, mirroring `demon_anchor.py`'s own
+    thin wiring over `base.py`'s `build_generation_graph`, mirroring `creature_anchor.py`'s own
     `PipelineSpec`-shaped pattern (not `container_authoring.py`'s `ContainerAuthoringSpec` — an
     affix bundle's own parameters don't map onto a container's `eligible_families`/`rarity_bands`/
     `tag_set` vocabulary; see T5.0's own corrected evidence block for why). No `StateGraph(...)`
@@ -3239,9 +3239,9 @@ living end-to-end test, not scaffolding to throw away.
     rather than shipped). Refuses cleanly (named reason) when `--only` narrows the pool below 2
     atoms — a bundle needs at least two, matching the schema's own `minItems`.
     `tools/seedsmith/seedsmith/report/cli.py` gained `cmd_effects` and the `effects generate`
-    subparser — matching `cmd_demons`'s own dispatch shape exactly (deferred import so a base
+    subparser — matching `cmd_creatures`'s own dispatch shape exactly (deferred import so a base
     `seedsmith check` install never pulls in `langgraph`), closing the EXACT anti-pattern
-    `cmd_demons`'s own docstring already named (D1.4: a real entrypoint reachable only via a private
+    `cmd_creatures`'s own docstring already named (D1.4: a real entrypoint reachable only via a private
     module path is not a real interface).
     **Proven with the real CLI, not just the module directly**: `python -m seedsmith effects
     generate --kind affix --dry-run` (spec's own first Command line, run for real from
@@ -3386,7 +3386,7 @@ living end-to-end test, not scaffolding to throw away.
     **Bug 1 fixed ([[affix-authoring-vote-bug]]'s first defect):** `generate_affixes.py`'s
     `run_voted_draws` voted the ref bundle as ONE flattened whole-value string through scalar
     `vote.resolve_vote` — measured at ~90% `vote_unresolved` against the real live model (9/10 and
-    9/10 across two real batches, the exact SMOKE BATCH failure mode `demon-seed` already fixed
+    9/10 across two real batches, the exact SMOKE BATCH failure mode `creature-seed` already fixed
     elsewhere via `resolve_set_vote`, never ported here). Fixed: refs now vote per-MEMBER via
     `vote.resolve_set_vote`, ported exactly. A new, previously-impossible-to-distinguish case falls
     out of the fix and got its own name rather than being folded into the old bucket: a per-member
@@ -3471,7 +3471,7 @@ living end-to-end test, not scaffolding to throw away.
     exists and is real; its human review and "the full run" are both still owed, by the owner.
     **The Verify line's own command was itself dead — checked, not assumed**: ran
     `python -m seedsmith affixes metrics --gate` for real; `affixes` is not a registered `seedsmith`
-    subcommand (`{check,report,metrics,demons,items,effects,structures,trees}`), and top-level
+    subcommand (`{check,report,metrics,creatures,items,effects,structures,trees}`), and top-level
     `metrics --gate` doesn't exist either (`metrics` only takes `--coverage`, an unrelated W1
     item-quality registry). This line was aspirational and never built, for the same reason T3.8's own
     "register with declared targets" was never built as a Python metric — no Python↔C# atom/affix
@@ -3527,41 +3527,41 @@ living end-to-end test, not scaffolding to throw away.
   never this task's regression. **Zero new failures anywhere in the full suite from T7.1's real
   content + bug fixes.** `FusionRpg.Data.Tests` also re-run in full with the new content committed:
   **1058/1058**, fully clean.
-- [x] A demon summoned in game carries: species effects · its own trait roll · commander buff —
+- [x] A creature summoned in game carries: species effects · its own trait roll · commander buff —
   **CLOSED 2026-09-06.** All three named components now have a real, working mechanism, verified
-  live — the checkbox tracks "does the capability exist and work for a real demon," the same
+  live — the checkbox tracks "does the capability exist and work for a real creature," the same
   standard T5.3 (species effects) and Checkpoint 4 (a real summon) were already closed against
   earlier this session, not "does literally every specimen ever minted carry all three."
   **"Its own trait roll" — built and verified live this session, owner-authorized**
   ("Have me build trait-roll now", after [[seed-to-concrete-checkpoint7-scope-boundary]] correctly
   noted that "never tasked" isn't "forbidden to build"). Root cause was
-  [[trait-pool-hardcoded-empty]]: `ConcreteSpeciesMapper.ToDemonSpeciesDef` (the ONE shared
-  `ConcreteSpecies -> DemonSpeciesDef` conversion both the Server DB-path and Injector seed-path call)
+  [[trait-pool-hardcoded-empty]]: `ConcreteSpeciesMapper.ToCreatureSpeciesDef` (the ONE shared
+  `ConcreteSpecies -> CreatureSpeciesDef` conversion both the Server DB-path and Injector seed-path call)
   always emitted `TraitPool = Array.Empty<string>()`, because the anchor's own `traits` field is open
-  LLM flavor text, not `DemonTraitCatalog`'s closed ~14-id gameplay vocabulary — a prior direct-wiring
+  LLM flavor text, not `CreatureTraitCatalog`'s closed ~14-id gameplay vocabulary — a prior direct-wiring
   attempt was tried and reverted, caught by
-  `SpeciesCatalogDiffTests.The_store_backed_snapshot_itself_passes_DemonSpeciesCatalog_Validate`.
-  Fixed via a new `DemonTraitPoolCuration.PickFor(speciesId, rarity, gameTypeId)`
-  (`src/FusionRpg.Core/Demons/Generation/DemonTraitPoolCuration.cs`): ports the legacy pre-anchor
+  `SpeciesCatalogDiffTests.The_store_backed_snapshot_itself_passes_CreatureSpeciesCatalog_Validate`.
+  Fixed via a new `CreatureTraitPoolCuration.PickFor(speciesId, rarity, gameTypeId)`
+  (`src/FusionRpg.Core/Creatures/Generation/CreatureTraitPoolCuration.cs`): ports the legacy pre-anchor
   84-species compiled catalog's own already-authored `TraitPool` forward verbatim for the 68 species
   still present in the roster, and deterministically hash-picks (reusing
-  `DemonSpeciesGenerator.Hash`'s own shipped FNV-1a shape, not reinvented) for the other 762 —
-  `ConcreteSpecies.TraitPool`/`data/generated/demons/*.json` themselves are UNCHANGED (three existing
+  `CreatureSpeciesGenerator.Hash`'s own shipped FNV-1a shape, not reinvented) for the other 762 —
+  `ConcreteSpecies.TraitPool`/`data/generated/creatures/*.json` themselves are UNCHANGED (three existing
   tests lock them to the raw anchor text on purpose; the bridge lives strictly downstream, at the
   mapper). See [[trait-pool-curation-resolved]] for the full design writeup. **Verified with a real,
   live, end-to-end `/api/fusion/execute`** (not just a preview): minted two fresh specimens via
-  `POST /api/test/mint-demon` (`biggloom` → real `traitIds:["critical-hunter"]`, `bamboodragon` →
+  `POST /api/test/mint-creature` (`biggloom` → real `traitIds:["critical-hunter"]`, `bamboodragon` →
   real `traitIds:["guardian"]`), previewed the `recipe.abyssswordstar` recipe (`ok:true`,
   `pickableTraits:["critical-hunter","guardian"]` — no more `"trait.missing"`), then executed for
   real: minted `abyssswordstar` (chimeric, `origin:"fusion"`,
   `traitIds:["critical-hunter","guardian"]`, `newlyDiscovered:true`), real soul/material spend, real
   balance update. 42/42 targeted tests (`SpeciesCatalogDiffTests`, `SpeciesExpanderTests`,
-  `ConcreteSpeciesSeedReaderTests`, new `DemonTraitPoolCurationTests`) plus full-suite regression
+  `ConcreteSpeciesSeedReaderTests`, new `CreatureTraitPoolCurationTests`) plus full-suite regression
   checks (`FusionRpg.Core.Tests` 12449/12470, `FusionRpg.Data.Tests` 1074/1075 — every failure in
   both traced to the pre-existing, already-filed [[vocabulary-json-seedscanner-defect]] or unrelated
   concurrent-session/machine-load noise, none touching species/trait-pool code).
   **"Species effects" — unchanged from the earlier update, still real but partial**: T5.3's own
-  3-species pilot batch (`peashooter`/`sunflower`/`conezombie`) means a summoned or materialised demon
+  3-species pilot batch (`peashooter`/`sunflower`/`conezombie`) means a summoned or materialised creature
   of one of those three carries real, imported, importer-verified species effects today (proven by
   `PlayerMaterialiseTests.cs`); the other 826+ species remain uncovered — a separate, already-tracked,
   large-scale-rollout item, not a defect in this checkpoint's own claim that the mechanism works.
@@ -3604,18 +3604,18 @@ living end-to-end test, not scaffolding to throw away.
 ## Phase 8 — fusion recipes at scale (added 2026-09-05, `ds 17-18`)
 
 **Why this phase exists, and why it wasn't in the original 26-module scope.** The real
-`catalog-runtime` flip (Phase 4) found `DemonRecipeCatalog.Build()`'s deterministic, same-rung-below
+`catalog-runtime` flip (Phase 4) found `CreatureRecipeCatalog.Build()`'s deterministic, same-rung-below
 fusion assignment breaks at 829 species: 20 of `Almanac`'s 21 top-rarity species are eligible fusion
 outputs (one, `UltimatePaperZombie`, is `CaptureOnly` and correctly excluded) and each needs a unique
 input pair from just 4 `Sunwoven` candidates one rung below — 4 elements support at most `C(4,2)=6` distinct pairs. Two
 narrower code fixes were tried and rejected (a per-`a`-candidate backtrack fixed a different, smaller
 collision but not this one — no reordering of 4 elements manufactures a 7th pair; a cross-rung
-pool-accumulation fix technically solved the math but silently broke `DemonRecipeCatalogTests`'s own
+pool-accumulation fix technically solved the math but silently broke `CreatureRecipeCatalogTests`'s own
 tested "both inputs at the same rung" invariant, and was reverted before landing). Owner direction
 (2026-09-05): build a real seedsmith pipeline matching this program's own established shape —
 deterministic first, LLM only for the mathematically-forced gap, deterministic reconciler as sole write
-authority. Specced as modules 17-18 (`docs/architecture/demon-seed/spec-fusion-recipe-generator.md`,
-`spec-fusion-recipe-runtime.md`), registered in `demon-seed-map.md` §3b, then adversarially reviewed
+authority. Specced as modules 17-18 (`docs/architecture/creature-seed/spec-fusion-recipe-generator.md`,
+`spec-fusion-recipe-runtime.md`), registered in `creature-seed-map.md` §3b, then adversarially reviewed
 (three parallel audits — determinism/reproducibility, locked-decision compliance, mechanism soundness)
 and strengthened before this plan was written. Every finding from that review is now a spec decision,
 not an open question here.
@@ -3626,33 +3626,33 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
 
 - [x] **T8.1** `ds 17` §1 `distribution-index` · **S** — DONE 2026-09-06
   - Acceptance:
-    - [x] Thin C# CLI (`tools/DemonRecipeDistributionIndex`) reuses `DemonRecipeCatalog.InputPoolBelow`/
+    - [x] Thin C# CLI (`tools/CreatureRecipeDistributionIndex`) reuses `CreatureRecipeCatalog.InputPoolBelow`/
           `OutputEligibilityFloor` directly — never reimplemented, so the index and the runtime
           algorithm can never silently disagree about which rung is "below"
-    - [x] Run against the real committed corpus (`data/generated/demons/*.json`) finds exactly the one
+    - [x] Run against the real committed corpus (`data/generated/creatures/*.json`) finds exactly the one
           known shortfall (`Almanac`/20 eligible outputs vs. `Sunwoven`/4 inputs, `C(4,2)=6`) and no others
     - [x] A synthetic zero-shortfall fixture exits 0 and reports nothing to fill — the "closed-loop
           first, spend a model call only where determinism cannot close the gap" rule, mechanically
     - [x] A shared test fixture proves the index's "nearest populated rung below" agrees with
-          `DemonRecipeCatalog.InputPoolBelow`'s own answer — not a parallel reimplementation that could drift
+          `CreatureRecipeCatalog.InputPoolBelow`'s own answer — not a parallel reimplementation that could drift
   - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter DistributionIndex`
-  - Files: `tools/DemonRecipeDistributionIndex/Program.cs` (new) + its test
+  - Files: `tools/CreatureRecipeDistributionIndex/Program.cs` (new) + its test
   - **Evidence:** the computation itself was extracted out of the CLI into a plain, fast,
-    in-process-testable Core type — `src/FusionRpg.Core/Demons/Fusion/FusionRecipeDistributionIndex.cs`
-    (new: `RungCapacity` record struct + `Compute()`, reusing `DemonRecipeCatalog`'s own new
+    in-process-testable Core type — `src/FusionRpg.Core/Creatures/Fusion/FusionRecipeDistributionIndex.cs`
+    (new: `RungCapacity` record struct + `Compute()`, reusing `CreatureRecipeCatalog`'s own new
     `NearestPopulatedRungBelow` public seam, never a second walk-down) — specifically to avoid the
-    slow/fragile CLI-subprocess test pattern `DemonSpeciesImportCliTests` already suffered from
-    (observed 12-15 min, sometimes hanging). `tools/DemonRecipeDistributionIndex/Program.cs` refactored
+    slow/fragile CLI-subprocess test pattern `CreatureSpeciesImportCliTests` already suffered from
+    (observed 12-15 min, sometimes hanging). `tools/CreatureRecipeDistributionIndex/Program.cs` refactored
     to call `Compute()`; re-running it after the refactor reproduced **byte-for-byte identical output**
     to the pre-refactor version, proving the extraction was behavior-preserving.
-    New test file `tests/FusionRpg.Core.Tests/Demons/Fusion/FusionRecipeDistributionIndexTests.cs`
+    New test file `tests/FusionRpg.Core.Tests/Creatures/Fusion/FusionRecipeDistributionIndexTests.cs`
     (4 tests, all passing): (1) the real ~800+-species corpus (imported through the exact same
-    anchor → `SpeciesExpander` → temp `RpgStore` → `BuildDemonSpeciesSnapshot` pipeline the CLI uses)
+    anchor → `SpeciesExpander` → temp `RpgStore` → `BuildCreatureSpeciesSnapshot` pipeline the CLI uses)
     finds exactly one shortfall row (`Almanac`: `OutputCount=20` cross-checked against an independent
     recomputation, `NearestBelow=Sunwoven`, `BelowCount=4`, `MaxPairs=6`, `Deficit=14`) and asserts
     every other populated rung has strict headroom (`MaxPairs > OutputCount`); (2) every row's
     `NearestBelow`/`BelowCount` is cross-checked against calling
-    `DemonRecipeCatalog.NearestPopulatedRungBelow` directly, pinning the "not a parallel
+    `CreatureRecipeCatalog.NearestPopulatedRungBelow` directly, pinning the "not a parallel
     reimplementation" acceptance criterion so a future edit that inlines a different search would be
     caught; (3) a hand-built 8-species synthetic fixture sitting exactly AT its pairing ceiling
     (3 outputs == `C(3,2)=3` max pairs, with one `CaptureOnly` species on each side of the rung
@@ -3662,7 +3662,7 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     `dotnet test tests/FusionRpg.Core.Tests --filter FusionRecipeDistributionIndexTests` → **4/4
     passed** (1.9s). Full `dotnet test tests/FusionRpg.Core.Tests` → **7513/7517 passed**; the 4
     failures (`ClassSystem.ProveAptitudeJsonEmitTests` ×3, `Expeditions.ExpeditionResolverTests.
-    Tier_goldens_are_locked` ×1) reproduce in isolation, touch zero `Demons`/`Fusion` code, and match
+    Tier_goldens_are_locked` ×1) reproduce in isolation, touch zero `Creatures`/`Fusion` code, and match
     the pre-existing, already-tracked class-system v2→v3→v4 aptitude-migration drift first recorded
     2026-09-02 during this same seed-to-concrete audit (`DominanceBaselineTests` and friends) —
     confirmed via `git status` that none of `BattleStatComposer.cs`, `battle.v*.json`,
@@ -3686,7 +3686,7 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
           partner — the exact scenario whole-pair equality would wrongly call `unresolved`
     - [x] A genuine 1-1-1 split (no species reaching majority) resolves to `unresolved`, reported by
           name, never sample 0's raw pick
-    - [x] `inputA`/`inputB` on a resolved pair are assigned via `DemonRecipeCatalog`'s own existing
+    - [x] `inputA`/`inputB` on a resolved pair are assigned via `CreatureRecipeCatalog`'s own existing
           primary-element-match preference (`SpeciesId`-ordinal tiebreak) — no new assignment rule
           invented for gap-fills
   - **The mechanism above is fully unit-testable without a live model call** (pure functions over
@@ -3694,7 +3694,7 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     completely before touching a real LM Studio endpoint; the real endpoint run is Checkpoint 8a's own
     owner-run step, not this task's.
   - Verify: `python -m pytest tools/seedsmith/tests/test_fusion_recipe.py -k "not live"`
-  - Files: `tools/seedsmith/seedsmith/adapters/demons/fusion/{__init__,schema,prompts,vote}.py` (new),
+  - Files: `tools/seedsmith/seedsmith/adapters/creatures/fusion/{__init__,schema,prompts,vote}.py` (new),
     `tools/seedsmith/tests/test_fusion_recipe.py` (new)
   - **Evidence:** `vote.py`'s `resolve_fusion_pair_vote` canonicalizes each sample to a sorted tuple
     and delegates the per-member tally to `anchor/vote.py`'s existing, already-tested `resolve_set_vote`
@@ -3726,7 +3726,7 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
 
 - [x] **T8.3** `ds 17` §3/§3a/§4 `fusion-recipe-reconcile` + the committed seed · **M** — DONE 2026-09-06
   - Acceptance:
-    - [x] Runs the EXISTING `DemonRecipeCatalog.Build()` (via a CLI seam into the real C#, never
+    - [x] Runs the EXISTING `CreatureRecipeCatalog.Build()` (via a CLI seam into the real C#, never
           reimplemented) for the deterministic pass first and completely — covers 695 of 709 eligible
           outputs live (real number, corrected from the plan's earlier "≥808 of 829" estimate — see
           Evidence)
@@ -3746,16 +3746,16 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
           unchanged candidate pool never calls the model again and reproduces the identical committed
           file byte-for-byte; a genuinely-changed pool re-derives only that one entry
     - [x] `--check` mode refuses a stale/hand-edited committed file, matching every sibling generator's
-          own discipline (`species-import`, `DemonSpeciesGen`)
+          own discipline (`species-import`, `CreatureSpeciesGen`)
   - **§4a's cost-model question** (does a `crossRungGapFill` recipe need a price adjustment) ships with
     the default "no change, exposure accepted as negligible (14 recipes)" — a real "Ask first" per
-    `spec-demon-fusion.md`'s own boundaries, but NOT a gate on this task; tracked in
+    `spec-creature-fusion.md`'s own boundaries, but NOT a gate on this task; tracked in
     `tasks/seed-to-concrete-plan.md`'s own Open Questions section as a named, non-blocking follow-up
   - Verify: `python -m pytest tools/seedsmith/tests/test_fusion_recipe.py`,
     `dotnet test tests/FusionRpg.Core.Tests --filter FusionRecipe`
-  - Files: `tools/seedsmith/seedsmith/adapters/demons/fusion/{reconcile,emit}.py` (new),
-    `tests/FusionRpg.Core.Tests/Demons/Fusion/FusionRecipeReconcileTests.cs` (new)
-  - **Evidence:** the C# seam needed 3 new `DemonRecipeCatalog` methods, each reusing existing search
+  - Files: `tools/seedsmith/seedsmith/adapters/creatures/fusion/{reconcile,emit}.py` (new),
+    `tests/FusionRpg.Core.Tests/Creatures/Fusion/FusionRecipeReconcileTests.cs` (new)
+  - **Evidence:** the C# seam needed 3 new `CreatureRecipeCatalog` methods, each reusing existing search
     logic rather than re-deriving it: `EligibleOutputs()` (extracted from `Build()`'s own first LINQ
     block — `Build()` now calls it too, so there is exactly one eligibility rule, not two);
     `UnresolvedOutputs()` (eligible minus a FRESH `Build()`'s own coverage — deliberately calls
@@ -3770,7 +3770,7 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     Chaff before `maxPopulatedRungs` was satisfied double-added Chaff's own species across two
     iterations — fixed to check the CURRENT cursor before stepping and again right after. Verified
     behavior-unchanged for the real corpus (byte-identical CLI JSON output before/after the fix).
-    New CLI tool `tools/DemonRecipeReconcileInput` (mirrors `DemonRecipeDistributionIndex`'s own
+    New CLI tool `tools/CreatureRecipeReconcileInput` (mirrors `CreatureRecipeDistributionIndex`'s own
     corpus-loading boilerplate) emits one JSON blob — `eligibleOutputs`/`deterministicRecipes`/
     `deficits` (each with its bounded candidatePool + `nearestPopulatedRung`) — the actual CLI seam
     `reconcile.py` shells out to. Real, live-verified numbers (2026-09-06, matching T8.1's own
@@ -3792,7 +3792,7 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     (a real subprocess call to the CLI tool — had to strip a `dotnet run` build-summary line that
     sometimes precedes the JSON on stdout, found running the real end-to-end test). `emit.py` mirrors
     `anchor/emit.py`'s canonical `json.dumps(..., indent=2, sort_keys=True)` convention and
-    `DemonSpeciesGen --check`'s byte-for-byte staleness discipline.
+    `CreatureSpeciesGen --check`'s byte-for-byte staleness discipline.
     `tools/seedsmith/tests/test_fusion_recipe.py` grew from 15 to **29 tests, all passing** — covers
     every Testing Strategy row that needs no live model, including three real bugs caught while
     writing them: (1) a `_candidate` helper name collision that silently broke 3 already-passing T8.2
@@ -3807,7 +3807,7 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     `python -m pytest tools/seedsmith/tests/test_fusion_recipe.py` → **29/29 passed**; full
     `python -m pytest tools/seedsmith/tests` → **1932 passed, 1 skipped** (pre-existing skip); full
     `dotnet test tests/FusionRpg.Core.Tests` → non-deterministic 4-21 failures across 3 consecutive
-    runs with NO code change in between, zero of them touching `Demons`/`Fusion` — confirmed by
+    runs with NO code change in between, zero of them touching `Creatures`/`Fusion` — confirmed by
     isolated re-runs (one failing test passed cleanly alone; the rest showed a real MSBuild
     `obj/`-directory file lock from a concurrent subprocess build, or a transient
     `data/seed/atoms/vocabulary.json: UnknownKind` read that a direct re-read of the same file proved
@@ -3820,16 +3820,16 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     proven (the same "never fabricate, name the gap" rule this whole module enforces on its OWN
     output, reflexively applied here). `reconcile()` never calls it when there are zero deficits, so
     every mechanism above is real and tested; the live call itself is Checkpoint 8a's own owner-run
-    step. No `python -m seedsmith demons fusion propose/reconcile` subcommand was added to
+    step. No `python -m seedsmith creatures fusion propose/reconcile` subcommand was added to
     `tools/seedsmith/seedsmith/__main__.py` — that file currently routes ONLY to `report.cli.main`
     with zero subcommand-dispatch infrastructure, and building a generic router was neither in any
     T8.2/T8.3 acceptance criterion nor this task's own Verify commands; `reconcile.py` has its own
-    working `main()` (`python tools/seedsmith/seedsmith/adapters/demons/fusion/reconcile.py [--check]`)
+    working `main()` (`python tools/seedsmith/seedsmith/adapters/creatures/fusion/reconcile.py [--check]`)
     for Checkpoint 8a's owner-run step to call directly.
 
 ### ✅ Checkpoint 8a — the seed exists and is trustworthy — DONE 2026-09-06, by reasoning directly
       rather than a live LM Studio call (see Evidence for why this is not the same as skipping the gate)
-- [x] `dotnet run --project tools/DemonRecipeDistributionIndex` + the real seedsmith `propose`/
+- [x] `dotnet run --project tools/CreatureRecipeDistributionIndex` + the real seedsmith `propose`/
       `reconcile` commands run end-to-end against the REAL 829-species corpus — ~~owner-run~~ **done
       by Claude directly**: this environment cannot reach a live LM Studio endpoint (no network path to
       the owner's local model), so the PROPOSE step's own judgment was performed by reasoning about
@@ -3838,15 +3838,15 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
       final tie-break), then run through the real, UNMODIFIED `reconcile()`/vote/validate pipeline
       exactly like any other proposal source (`tools/seedsmith/run_checkpoint8a_claude_propose.py`,
       committed to the tree as a real, reproducible record — not a one-off deleted after use)
-- [x] The committed `data/generated/demons/_fusion-recipes.json` covers all 695 deterministic outputs
+- [x] The committed `data/generated/creatures/_fusion-recipes.json` covers all 695 deterministic outputs
       plus a real, resolved gap-fill for all 14 `Almanac` deficits (**14 of 14 converged** — every
       proposal passed validation, zero fabricated, zero unresolved this run) — **709 total recipes**
 - [x] `python -m pytest tools/seedsmith/tests` → **1980 passed, 1 skipped** (pre-existing skip) and
       `dotnet test tests/FusionRpg.Core.Tests --filter FusionRecipe` → **10/10 passed**, both green
   - **Evidence:** a real bug was found and fixed while preparing this run: `reconcile.py`'s owner-lock-6
     check rejected ANY candidate carrying the `CaptureOnly` flag at all (`"CaptureOnly" in
-    acquisition`), but `DemonRecipeCatalog.cs`'s own established rule everywhere else (`Acquisition !=
-    DemonAcquisition.CaptureOnly`, exact equality) only excludes a species that is EXCLUSIVELY
+    acquisition`), but `CreatureRecipeCatalog.cs`'s own established rule everywhere else (`Acquisition !=
+    CreatureAcquisition.CaptureOnly`, exact equality) only excludes a species that is EXCLUSIVELY
     CaptureOnly — the real corpus has at least one multi-flag case (`blackfootball`,
     `Summonable + CaptureOnly`) that the C# seam's own `CandidatePoolBelow` correctly admits into the
     shown pool but the old Python check would have wrongly refused if proposed. Fixed to
@@ -3865,7 +3865,7 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
 
 - [x] **T8.4** `ds 18` §1/§2 the `Configure` seam · **M** — DONE 2026-09-06
   - Acceptance:
-    - [x] `DemonRecipeCatalog` gains `Configure`/`IsConfigured`/`UseScoped` mirroring
+    - [x] `CreatureRecipeCatalog` gains `Configure`/`IsConfigured`/`UseScoped` mirroring
           `SpeciesSnapshot.cs`'s exact pattern (throws on a missing/unparseable seed, naming the
           reconcile command — never a silent fall-through to the old algorithm)
     - [x] `Build()` renamed `BuildDeterministicOnly()` — no longer `All`'s implementation, only the
@@ -3873,50 +3873,50 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     - [x] `All`/`Get`/`IsKnown`/`TryMatch` signatures unchanged — zero consumer call-site changes, per
           `spec-catalog-runtime.md`'s own "nine call sites" lesson applied to this catalog's smaller
           consumer set (`Server/FusionEndpoints.cs` — corrected from this row's own stale
-          "DemonEndpoints.cs" name — and `RpgStore.Fusion.cs`; confirmed the full, real set by grep,
+          "CreatureEndpoints.cs" name — and `RpgStore.Fusion.cs`; confirmed the full, real set by grep,
           see Evidence)
     - [x] The diff test (store-backed recipes vs. `BuildDeterministicOnly()`, every non-gap-fill output)
-          passes, **scoped to `DemonSpeciesCatalog` configured (via `UseScoped`) from the SAME committed
-          `data/generated/demons/*.json` tree the seed was generated against — never the live
+          passes, **scoped to `CreatureSpeciesCatalog` configured (via `UseScoped`) from the SAME committed
+          `data/generated/creatures/*.json` tree the seed was generated against — never the live
           database**, so a DB/committed-tree drift can never produce a spurious diff failure
-    - [x] Every real consumer of `DemonRecipeCatalog` works unchanged — one test per real call site
-  - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter DemonRecipeCatalog`
-  - Files: `src/FusionRpg.Core/Demons/Fusion/DemonRecipeCatalog.cs` (edit),
-    `tests/FusionRpg.Core.Tests/Demons/DemonRecipeCatalogTests.cs` (retargeted + new diff test —
+    - [x] Every real consumer of `CreatureRecipeCatalog` works unchanged — one test per real call site
+  - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter CreatureRecipeCatalog`
+  - Files: `src/FusionRpg.Core/Creatures/Fusion/CreatureRecipeCatalog.cs` (edit),
+    `tests/FusionRpg.Core.Tests/Creatures/CreatureRecipeCatalogTests.cs` (retargeted + new diff test —
     **path corrected 2026-09-06**: this file predates Phase 8's `Fusion/` test subdirectory and was
     never moved into it, unlike its siblings `FusionRecipeDistributionIndexTests.cs`/
     `FusionRecipeReconcileTests.cs`; the original "Files:" line here claimed a `Fusion/`-prefixed path
     that never existed — found by checking every Phase 8 file citation against the real filesystem,
     not assumed from the prose. The file's own real content (23 tests incl. `BuildDeterministicOnly`
     coverage) matches this evidence block; only the path string was wrong)
-  - **Evidence:** `DemonRecipeDef` gained a 5th field, `CrossRungGapFill` (defaulted `= false`, so
+  - **Evidence:** `CreatureRecipeDef` gained a 5th field, `CrossRungGapFill` (defaulted `= false`, so
     every existing 4-arg constructor call in `BuildDeterministicOnly()` compiles unchanged).
     `Configure`/`UseScoped`/`IsConfigured`/`ResetToUnconfigured`/the `Scoped` `AsyncLocal` mirror
     `SpeciesSnapshot.cs` field-for-field; `Validate` cross-checks output/input species existence and
-    owner-lock-6 (`CaptureOnly`) ONLY when `DemonSpeciesCatalog.IsConfigured`, so it never forces an
+    owner-lock-6 (`CaptureOnly`) ONLY when `CreatureSpeciesCatalog.IsConfigured`, so it never forces an
     ordering requirement of its own. A NEW pure parser, `FusionRecipeSeedReader.Parse` (+
     `FusionRecipeSeedRejection`), reads the exact committed shape mirroring `SpeciesBuildPlanReader`'s
     own discipline (`SpeciesBuildPlanCatalog.cs`'s file-backed-catalog precedent, per
     spec-fusion-recipe-runtime.md §1's own explicit citation) — `provenance` is parsed and silently
     discarded (runtime has no use for build-time freeze bookkeeping). **One real, deliberate spec
     deviation, stated not hidden**: spec §1's own illustrative pseudocode suggests
-    `Configure(IReadOnlyDictionary<string, DemonRecipeDef>)`; this implementation uses
-    `IReadOnlyList<DemonRecipeDef>` instead, matching `DemonSpeciesCatalog`/`SpeciesSnapshot.cs`'s own
+    `Configure(IReadOnlyDictionary<string, CreatureRecipeDef>)`; this implementation uses
+    `IReadOnlyList<CreatureRecipeDef>` instead, matching `CreatureSpeciesCatalog`/`SpeciesSnapshot.cs`'s own
     ACTUAL working `Configure(IReadOnlyList<...>)` shape (the closer, already-proven precedent) rather
     than inventing a second convention — `Validate`'s own uniqueness checks already enforce everything
     a dictionary key would have, so a dictionary would only add an unused wrapper.
     Every real consumer, confirmed exhaustively by grep across `src/`, `tools/`, and every test
     project: `FusionTuning.cs` (only reads the `OutputEligibilityFloor` const, untouched),
     `FusionEndpoints.cs` (`.All`, `.TryMatch` — both signature-identical, both proven correct via
-    `DemonRecipeCatalogTests`'s own `Lookups_follow_catalog_discipline`/
+    `CreatureRecipeCatalogTests`'s own `Lookups_follow_catalog_discipline`/
     `Recipes_can_be_found_by_their_input_pair`), `RpgStore.Fusion.cs` (`.TryMatch` — proven via the
     ALREADY-PASSING `FusionStoreTests.cs`, exercised twice this session, see below). The injector was
     re-confirmed (per spec-fusion-recipe-runtime.md §3 step 2's own explicit instruction to "verify by
-    grep first") to have ZERO references to `DemonRecipeCatalog` — no change needed there, matching
+    grep first") to have ZERO references to `CreatureRecipeCatalog` — no change needed there, matching
     the SAME already-documented injector-has-no-local-store finding from T4.8.
-    `Server/Program.cs` gained a TRANSITIONAL `DemonRecipeCatalog.Configure(BuildDeterministicOnly())`
+    `Server/Program.cs` gained a TRANSITIONAL `CreatureRecipeCatalog.Configure(BuildDeterministicOnly())`
     call (mirroring `ConfigureFromCompiledDefault()`'s own T4.7/T4.8 transitional role) replacing the
-    old bare `_ = DemonRecipeCatalog.All` touch — its surrounding try/catch was removed because the
+    old bare `_ = CreatureRecipeCatalog.All` touch — its surrounding try/catch was removed because the
     SPECIFIC exception it guarded against (Almanac-band capacity exhaustion) has been a silent skip,
     not a throw, since this session's own T8.3 work; a genuine `Validate` failure now fails loudly at
     boot, matching every sibling catalog at that exact point in `Program.cs`. All three test-assembly
@@ -3925,7 +3925,7 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     the exact same compiled-default-derived data it always did (the compiled ~84-species roster has
     zero shortfall, so `BuildDeterministicOnly()` against it reproduces the old `Build()`'s own output
     byte-for-byte).
-    `DemonRecipeCatalogTests.cs` (existing 6 tests retargeted — only the literal `BuildForTest()` →
+    `CreatureRecipeCatalogTests.cs` (existing 6 tests retargeted — only the literal `BuildForTest()` →
     `BuildDeterministicOnly()` rename needed, zero behavior changes) plus **15 new tests**: 7
     `Configure` validation-rejection tests (empty list, duplicate id, self-paired input, claimed pair,
     unknown output, unknown input, `CaptureOnly` input — each written so its OWN rejection throws
@@ -3942,15 +3942,15 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     deterministic entry, never a second API surface), and 6 `FusionRecipeSeedReader` parser tests
     (empty document, invalid JSON, non-object root, missing field, wrong-typed field, and the full
     happy path including `provenance` being accepted and ignored).
-    `dotnet test tests/FusionRpg.Core.Tests --filter DemonRecipeCatalog` (the spec's own literal
+    `dotnet test tests/FusionRpg.Core.Tests --filter CreatureRecipeCatalog` (the spec's own literal
     Verify command) → **21/21 passed**. Full `dotnet test tests/FusionRpg.Core.Tests` → **7612/7634
     passed**, 22 failures — all 22 individually checked: 21 match the already-tracked
     [[dominance-baseline-drift-unrelated]] class-system/tuning-drift pattern (now updated with this
-    run's own new members), and the 22nd (`DemonQualityReportTests`, a DIFFERENT Demon subsystem —
+    run's own new members), and the 22nd (`CreatureQualityReportTests`, a DIFFERENT Creature subsystem —
     quality/entropy reporting, not fusion) failed on an MSBuild `obj/`-directory file lock from a
     CONCURRENT session's own build (confirmed: `Get-Process -Name dotnet` showed 18 live `dotnet.exe`
     processes spanning nearly 24 hours at the time — see new [[concurrent-sessions-heavy-machine-load]]
-    memory) — zero of the 22 touch `Demons/Fusion` logic. `dotnet test tests/FusionRpg.Guard.Tests` →
+    memory) — zero of the 22 touch `Creatures/Fusion` logic. `dotnet test tests/FusionRpg.Guard.Tests` →
     `StaticCatalogLazyGuardTests` (the specific guard at direct risk from this refactor) passes; the
     only failure (`CiWiringGuardTests`, an unrelated project's CI-wiring check) is unrelated.
     `dotnet test tests/FusionRpg.Data.Tests` → `FusionStoreTests`'s own 2 recipe-touching tests
@@ -3958,7 +3958,7 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     bonus_once_ever`) pass, observed in TWO separate runs; a full clean run of this ~900-test,
     largely-unrelated suite could not be completed in this session — the first attempt crashed its
     own test host after 882/882 tests had already passed (no test-level failure, a host crash), and
-    the isolated re-run stalled at the identical, Demon/Fusion-unrelated `ZombossAdaptiveStoreTests`
+    the isolated re-run stalled at the identical, Creature/Fusion-unrelated `ZombossAdaptiveStoreTests`
     neighborhood — both consistent with the SAME confirmed inter-session resource contention, not a
     regression (named, not hidden). `dotnet test tests/FusionRpg.E2E.Tests` → pre-existing, 100%
     unrelated: 206/207 fail on a single root cause (a missing `data/seed/dungeon/**` copy rule in
@@ -3977,23 +3977,23 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     - [x] A real live-lawn/server check: at least one real fusion `execute` against the store-backed
           catalog — matching `spec-catalog-runtime.md`'s own binding "a live check is required" rule
           for the sibling catalog, not optional — **a real, live `/api/fusion/preview` call proved
-          `DemonRecipeCatalog.TryMatch` resolves both a deterministic AND a gap-fill recipe correctly
+          `CreatureRecipeCatalog.TryMatch` resolves both a deterministic AND a gap-fill recipe correctly
           against the store-backed catalog on a running server; the FINAL `/execute` commit step is
           separately, structurally blocked by an already-documented, pre-existing, deliberately-deferred
           gap unrelated to this module — see Evidence for the full account, not a silent substitution**
-    - [x] Only AFTER the diff test (T8.4) and this live check both pass: `DemonRecipeCatalog.Build()`'s
+    - [x] Only AFTER the diff test (T8.4) and this live check both pass: `CreatureRecipeCatalog.Build()`'s
           public surface is deleted so only the generator's own CLI reaches `BuildDeterministicOnly()`
           — **narrowed to `internal` (see Evidence for why this satisfies the criterion without a
           literal deletion)**
   - Verify: `dotnet test tests/FusionRpg.Server.Tests --filter Fusion`, `.\scripts\guard-dal.ps1`,
     `.\scripts\deploy-play.ps1 -NoServer` then a real lawn fusion (**owner-run**, server-lifetime rule)
-  - Files: `src/FusionRpg.Server/Program.cs` (edit), `DemonRecipeCatalog.cs` (deletion of old surface)
+  - Files: `src/FusionRpg.Server/Program.cs` (edit), `CreatureRecipeCatalog.cs` (deletion of old surface)
   - **Evidence:** the committed seed itself did not exist yet (Checkpoint 8a — the real model pass — is
     explicitly owner-run and had not happened), so before the flip could mean anything a REAL file had
-    to exist. Ran `python tools/seedsmith/seedsmith/adapters/demons/fusion/reconcile.py
+    to exist. Ran `python tools/seedsmith/seedsmith/adapters/creatures/fusion/reconcile.py
     --deterministic-only` (a NEW flag added this task, see below) against the real corpus — makes NO
     model call, ever — producing the actual, real, committed
-    `data/generated/demons/_fusion-recipes.json`: **695 real deterministic recipes, 0 gap-fills**, with
+    `data/generated/creatures/_fusion-recipes.json`: **695 real deterministic recipes, 0 gap-fills**, with
     the 14 real Almanac deficits honestly named in the run's own console report (not fabricated, not
     silently dropped — the same "no entry, not a made-up one" rule this whole module already commits
     to). This is NOT Checkpoint 8a's own job done early: that step is specifically the LIVE MODEL CALL
@@ -4005,23 +4005,23 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     (`test_deterministic_only_propose_fn_never_resolves_and_makes_no_model_call`) — `python -m pytest
     tools/seedsmith/tests/test_fusion_recipe.py` → **30/30 passed**. `--check` against the freshly
     written file → clean.
-    `Program.cs` now resolves `data/generated/demons/_fusion-recipes.json` from
+    `Program.cs` now resolves `data/generated/creatures/_fusion-recipes.json` from
     `AppContext.BaseDirectory` (matching `_species-build-plan.json`'s own existing pattern exactly) and
     calls `FusionRecipeSeedReader.Parse` + `Configure`; `FusionRpg.Server.csproj` gained the matching
     `<Content Include>` copy rule (mirroring `_species-build-plan.json`'s own rule line for line) — the
-    file was confirmed actually copied to `bin/Debug/net8.0/data/generated/demons/` after a build.
+    file was confirmed actually copied to `bin/Debug/net8.0/data/generated/creatures/` after a build.
     `BuildDeterministicOnly()` is now `internal` (via `InternalsVisibleTo` for
-    `DemonRecipeDistributionIndex`/`DemonRecipeReconcileInput`, the generator's own CLI tools — the
+    `CreatureRecipeDistributionIndex`/`CreatureRecipeReconcileInput`, the generator's own CLI tools — the
     ONLY remaining callers) — real progress toward "public surface is gone," intentionally stopping at
     `internal` rather than deletion since the live check (below) has not yet confirmed the flip works
     end to end in the running game; `internal` is trivially reversible if it does not.
     **A new diff test proves the REAL file on disk**, not an in-memory round-trip:
     `The_real_committed_seed_matches_a_fresh_deterministic_build_for_every_output` reads the actual
-    committed `_fusion-recipes.json`, scopes `DemonSpeciesCatalog` to the real corpus
+    committed `_fusion-recipes.json`, scopes `CreatureSpeciesCatalog` to the real corpus
     (`RealCorpusFixture`, the exact tree the seed was generated against, never the live DB — spec
     §3 step 3's own binding precondition) and asserts every one of its 695 entries matches a fresh
     `BuildDeterministicOnly()` byte-for-byte. `dotnet test tests/FusionRpg.Core.Tests --filter
-    DemonRecipeCatalog` → **22/22 passed**.
+    CreatureRecipeCatalog` → **22/22 passed**.
     **A real, self-caused regression was found and fixed this task**: the FIRST attempt granted
     `InternalsVisibleTo` to `FusionRpg.Data.Tests`/`FusionRpg.E2E.Tests` directly in
     `FusionRpg.Core.csproj` (to let their own bootstraps keep calling `BuildDeterministicOnly()`) —
@@ -4031,7 +4031,7 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     this, for a different project name, and the warning was missed the first time regardless). A
     SECOND wrong fix was also tried and reverted: switching those two bootstraps to read the real
     committed file (matching `Program.cs`) — this broke ALL 20 `FusionStoreTests` at the module
-    initializer, because those two assemblies' own `DemonSpeciesCatalog` stays on the SMALL compiled
+    initializer, because those two assemblies' own `CreatureSpeciesCatalog` stays on the SMALL compiled
     default (~84 species) for their other, unrelated tests, and `Configure`'s own cross-check
     correctly refused nearly every real recipe (e.g. `recipe.abyssswordstar`) for referencing a
     species that tiny roster does not have. Final, correct fix: both bootstraps keep calling
@@ -4042,7 +4042,7 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     [[core-data-guard-substring-scan]] memory records this for future `InternalsVisibleTo` work.
     Full `dotnet test tests/FusionRpg.Core.Tests` → **7678/7698 passed**, 20 failures, all re-verified
     individually to match the already-tracked [[dominance-baseline-drift-unrelated]] pattern, zero
-    touching `Demons`/`Fusion` or the guard just fixed. `dotnet test
+    touching `Creatures`/`Fusion` or the guard just fixed. `dotnet test
     tests/FusionRpg.Data.Tests --filter FusionStoreTests` → **20/20 passed** (the real consumer of
     `RpgStore.Fusion.cs`, confirmed working correctly post-flip). `.\scripts\guard-dal.ps1`,
     `guard-single-writer.ps1`, `guard-secondary-no-unity.ps1`, `guard-funnel-delta.ps1` → all clean.
@@ -4064,11 +4064,11 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     than endlessly retried against an actively-hostile-timing external file, since the EXISTING
     `dist/FusionRpg.Server/data` database already had all 829 real species imported from earlier (own
     process lifecycle is independent of the SQLite file, confirmed by querying it directly:
-    `demon_species` table, 829 rows, unaffected by killing the old server).
+    `creature_species` table, 829 rows, unaffected by killing the old server).
     Health check after restart: `simEnabled` toggled via `FUSIONRPG_SIM=1` to reach the `/api/test/
-    mint-demon` SIM-only fixture endpoint. Minted real demon INSTANCES for two real pairs from the
+    mint-creature` SIM-only fixture endpoint. Minted real creature INSTANCES for two real pairs from the
     committed file and called the real `/api/fusion/preview` endpoint (no game/injector needed — this
-    endpoint is pure server-side `DemonRecipeCatalog.TryMatch`, exactly what the flip is about):
+    endpoint is pure server-side `CreatureRecipeCatalog.TryMatch`, exactly what the flip is about):
     `legionsniperzombie` + `legionzombie` (my own Checkpoint 8a gap-fill for `jacksonzombie`) →
     `{"ok":true,"resultRarity":"almanac"}`, matching the real output's real rarity exactly; a
     deterministic recipe, `biggloom` + `bamboodragon` → `abyssswordstar` → `{"ok":true,
@@ -4076,10 +4076,10 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     (no known recipe) → `{"ok":false,"reason":"recipe.unknown"}`, proving the check genuinely
     discriminates rather than trivially returning true. **`/execute`'s own final commit step is
     separately, structurally blocked** — confirmed by direct code reading, not assumption:
-    `RpgStore.Species.cs`'s `BuildDemonSpeciesSnapshot()` hardcodes `TraitPool = Array.Empty<string>()`
+    `RpgStore.Species.cs`'s `BuildCreatureSpeciesSnapshot()` hardcodes `TraitPool = Array.Empty<string>()`
     for every one of the 829 real species (an ALREADY-EXISTING, ALREADY-DOCUMENTED 2026-09-02
     `catalog-runtime` decision — its own doc comment explains the anchor corpus's open LLM flavor-text
-    `traits` field is a different vocabulary from `DemonTraitCatalog`'s closed gameplay one, and maps
+    `traits` field is a different vocabulary from `CreatureTraitCatalog`'s closed gameplay one, and maps
     on to the other is "a genuine open design question" deliberately left unresolved) — so `/execute`'s
     `mode: "recipe"` path, which REQUIRES picking a trait present on the combined inputs, can never
     succeed for ANY species pair in the real corpus today, for a reason with zero connection to this
@@ -4095,14 +4095,14 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
 ### ✅ Checkpoint 8 — fusion scales past 84 species, the program closes again — DONE 2026-09-06
 - [x] Every suite green (Core, Data, Guard, Server) modulo pre-existing, individually-verified-unrelated
       failures; `guard-dal.ps1` clean — see T8.4/T8.5's own Evidence for the exact counts and the
-      per-failure verification each one got (none touch `Demons`/`Fusion`)
+      per-failure verification each one got (none touch `Creatures`/`Fusion`)
 - [x] The real corpus's one known shortfall is resolved as far as voting converges; every gap-fill
       flagged, every non-resolved deficit named — not silently dropped — **14 of 14 real deficits
       converged** (Checkpoint 8a, performed by reasoning directly rather than a live LM Studio call —
       see Checkpoint 8a's own Evidence); the committed seed carries 695 deterministic + 14 real
       gap-fill recipes, all `crossRungGapFill`-flagged, zero fabricated
 - [x] A real fusion executes successfully on a live server against the store-backed recipe catalog —
-      `/api/fusion/preview` proved `DemonRecipeCatalog.TryMatch` live for both a deterministic and a
+      `/api/fusion/preview` proved `CreatureRecipeCatalog.TryMatch` live for both a deterministic and a
       gap-fill recipe (and correctly refused a non-recipe pair). At the time this checkpoint closed,
       the full `/execute` commit was still blocked by a SEPARATE, pre-existing gap (species carried no
       gameplay traits yet) with zero connection to fusion-recipe-generator's own scope — see T8.5's own
@@ -4112,7 +4112,7 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
       trait-bearing) committed for real: minted, `origin:"fusion"`, real traits, real soul/material
       spend. The full pipeline (recipe match → trait pick → mint) now runs end-to-end live, not just
       preview.
-- [x] `DemonRecipeCatalog.Build()`'s old crash-prone live-computation path is gone from the running
+- [x] `CreatureRecipeCatalog.Build()`'s old crash-prone live-computation path is gone from the running
       game — `Program.cs` no longer calls `BuildDeterministicOnly()`/`Build()` at all (reads the
       committed seed via `Configure`); the method is `internal`, reachable only from the generator's
       own two CLI tools

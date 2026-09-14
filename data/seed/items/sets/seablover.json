@@ -25,7 +25,7 @@
       "id": "set.seablover-001",
       "nameKey": "set.undulating-corpse-spore",
       "name": "Undulating Corpse Spore",
-      "themeKey": "demon.seablover",
+      "themeKey": "creature.seablover",
       "members": [
         {
           "role": "armament-primary",

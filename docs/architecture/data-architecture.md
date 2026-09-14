@@ -15,6 +15,37 @@ Data dir: `{ServerExeDir}/data/` (override: env `FUSIONRPG_DATA`, tests only).
 
 Connection policy (`SqliteConnectionFactory`): WAL, `busy_timeout=5000`, `synchronous=NORMAL`, shared cache; all `RpgStore` writes serialized behind one process-wide gate.
 
+**Storage plan (2026-09-12).** `RpgStore` can be constructed against either of two substrates:
+
+| Plan | Substrate | Who uses it |
+|---|---|---|
+| **file** (default, production) | `rpg-hot.sqlite` + `rpg-media.sqlite` + `archive/*` as above | `Program.cs` (`{ServerExeDir}/data`, `FUSIONRPG_DATA`), tools |
+| **memory** (test-first) | two uniquely-named shared-memory DBs (`file:rpg-hot-{guid}?mode=memory&cache=shared` and the media twin), each held open by one **keeper** connection for the store's lifetime | `tests/**` via the `DataTestStore` helper |
+
+Three public doors reach the same plan (`RpgStore(string dataDir, bool inMemory = false)`, the public
+`RpgStoreOptions` record, and `RpgStore.InMemory()`). Each store is an **independent instance** — there
+is no singleton and no process-wide shared DB, so tests scale to the machine's cores.
+
+Two constraints worth recording, both verified:
+
+- **A `file:`/`mode=memory` URI with `inMemory = false` throws.** The production constructor does
+  `Path.GetFullPath` + `Path.Combine`, which would rewrite a URI into a filesystem path and re-create a
+  file — so the plan rejects it rather than corrupting it.
+- **A shared-cache memory DB cannot be opened read-only** (`SqliteConnectionFactory.Open(…,
+  readOnly: true)` fails). Store tests read the memory DB through a plain open; the only remaining
+  read-only opens read real archive files. On a memory store, archive entry points **throw**
+  (`StorePlanException`). Archive is **file-only by decision**: the `archive-target` module that would
+  have made the archive memory-capable was **cut by the owner on 2026-09-13** (its benefit no longer
+  justified refactoring production archive code — see
+  [data-test-substrate-map.md](data-test-substrate-map.md) module 5). The two archive test classes stay
+  file-bound and `DiskSemantics`-tagged, and are leak-proof through the file helper.
+
+The memory plan skips the four file-only `Init()` steps (`CreateDirectory(_dataDir)` /
+`CreateDirectory(ArchiveDir)` / `LegacyMonoMigrator.TryMigrate` / `HealOrphanMediaTables`) and nothing
+else, so a memory store is **schema-identical** to a file store. Production behavior is unchanged.
+Spec: [data-test-substrate/spec-memory-storage-plan.md](data-test-substrate/spec-memory-storage-plan.md);
+standard: [../contributing/testing-standard.md](../contributing/testing-standard.md).
+
 ```mermaid
 flowchart LR
   Inj["Injector events"] -->|REST/SignalR| Ingest["Server EventIngest — Channel + writer thread"]
@@ -123,6 +154,8 @@ append (hot, mid-run: append only)
 **All SQL lives in `FusionRpg.Data`.** The Server references it but contains zero SQL; the Injector and Core never touch a database. Enforced by `scripts/guard-dal.ps1` (scans all of `src/` outside Data for Sqlite/raw-SQL patterns; empty allowlist) — run by CI, `tests/FusionRpg.Guard.Tests`, and `deploy-play.ps1`.
 
 `RpgStore` is one sealed partial class, partitioned by domain: core/ingest (`RpgStore.cs`), `Progression`, `UniqueActors`, `Compaction`, `Storage`, `Icons`, `Almanac`; thin adapters expose `IColdArchiveWriter` / `IColdArchiveCatalog` / `IHotCompactor`.
+
+**The storage plan does not move the DAL boundary.** Both plans keep all SQL inside `FusionRpg.Data` — the memory branch is one URI test in `SqliteConnectionFactory`, not a second data path — so `guard-dal.ps1` passes unchanged. `FusionRpg.Data` also implements `IDisposable`: the file plan's `Dispose` is a no-op, and the memory plan's releases its keeper connections.
 
 ## 7. Versioning & revisions
 

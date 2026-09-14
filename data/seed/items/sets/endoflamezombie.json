@@ -23,9 +23,9 @@
   "entries": [
     {
       "id": "set.endoflamezombie-001",
-      "nameKey": "set.crimson-lotus-betrayal",
-      "name": "Crimson Lotus Betrayal",
-      "themeKey": "demon.endoflamezombie",
+      "nameKey": "set.scarlet-petal-treachery",
+      "name": "Scarlet Petal Treachery",
+      "themeKey": "creature.endoflamezombie",
       "members": [
         {
           "role": "armament-primary",

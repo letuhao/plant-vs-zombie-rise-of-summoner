@@ -1,7 +1,7 @@
 namespace FusionRpg.Core.World;
 
 /// <summary>
-/// T13 (buff-debuff-scope-todo.md Phase 4). Own-side and unique-demon resolution for the world-map
+/// T13 (buff-debuff-scope-todo.md Phase 4). Own-side and unique-creature resolution for the world-map
 /// WHERE. No delivery mechanism here — that is T12's `ScopeModifierMilli` field plus whichever future
 /// content-specific consumer reads it (resolved during audit: `UpkeepHandicapMilli` itself has no
 /// single compute path, so this module does not need one either).
@@ -16,7 +16,7 @@ public static class WorldMapScopeExecutor
         string.Equals(entity.OwnerFactionId, casterFactionId, StringComparison.Ordinal);
 
     /// <summary>
-    /// Unique-demon resolution: walk `Entities[].Members[]` for a matching `InstanceId` — the
+    /// Unique-creature resolution: walk `Entities[].Members[]` for a matching `InstanceId` — the
     /// world-map equivalent of `MatchUniqueBindingsFacet.TryGet` (battlefield). Null when the
     /// specimen has no legion presence on this world right now.
     /// </summary>

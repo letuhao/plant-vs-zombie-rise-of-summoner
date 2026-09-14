@@ -72,6 +72,25 @@ So the rule: **an interactive match whose trace is incomplete is marked refused 
 never re-resolved.** Re-resolving it would substitute AI decisions for a player's and silently
 overwrite a real result, which is the precise hole this module exists to close.
 
+**Amended 2026-09-13 (B40.1): the rule covers a resolve failure, not only an incomplete trace.** When
+`ResolveAndIngest` throws because the row's own persisted setup is unusable — `BattleEngine.Resolve`'s
+`ArgumentException` guards (empty squad, empty wave, bad/duplicate actor key) or `WaveCatalog.ProfileFor`'s
+`W ≤ 0` — the failure is **deterministic**: the same `setup_json` + seed throws identically on every boot,
+so the row can never heal. `SweepUnresolved` therefore **refuses it terminally**, exactly as it does an
+incomplete trace, rather than logging and leaving it unresolved. That matters beyond tidiness: unmarked
+rows are re-listed every boot, and the unresolved query is `ORDER BY id ASC LIMIT n`, so enough of them
+crowd every newer row out of the window — crash recovery dies silently while still reporting a clean
+sweep. This is reachable **across a deploy**, not within one build: `setup_json` is authored by the
+previous build while `WaveCatalog` is code-authored (not covered by the content hash) and
+`ValidateActorKey`'s rules can tighten.
+
+The refusal is deliberately scoped to **deterministic, data-owned** failures only. A **transient**
+failure (`SqliteException` from the ingest transaction, a busy/locked database, a process-global tuning
+precondition) leaves the row unresolved so the next boot retries it; marking those refused would bury
+recoverable work. `InvalidOperationException` is treated as transient on purpose even where it is
+row-determined (the engine's runaway-loop guard names an *engine* defect, not unusable data), so it stays
+a loud recurring log rather than a terminal mark.
+
 ### 5. Expeditions are barred from interactive profiles by assertion
 
 Not by convention. An expedition resolves server-side with nobody watching, so an interactive profile

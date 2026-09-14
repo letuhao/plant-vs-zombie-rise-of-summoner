@@ -549,7 +549,7 @@ overload to preserve since `Resolve` already carries two optional trailing param
       wearing a row's clothes. **Exactness is now a declared field on each row.** Verified by direct
       token scan and by the guard itself.
     - **Suite:** Forecast + ModeProfile filters **50/50**. Full Core **3 failed / 5613 passed** — every
-      failure inherited from the demon/world-stage streams (which fixed 11 of their 14 while this ran),
+      failure inherited from the creature/world-stage streams (which fixed 11 of their 14 while this ran),
       **zero beyond baseline**. `M1 = 0`; overflow A1/A2 clean; four boundary guards green.
 
 - [x] **B20: T6 interactive turns** — **DONE 2026-09-04** *(spec first; shipped with B21)*
@@ -700,11 +700,11 @@ overload to preserve since `Resolve` already carries two optional trailing param
       untested forever (the same reason `TimelineDrive` and `EntityWriteGate` live in Core). It holds
       no Unity type, and the kernel purity scan covers it: **53/53** with the guard included.
     - **Suite:** full Core **3 failed / 5796 passed** — the world-stage `loamUnits` pair and the known
-      `DemonQualityReport` parallel-load flake. Goldens **40/40**; `M1 = 0`; overflow A1/A2 clean; four
+      `CreatureQualityReport` parallel-load flake. Goldens **40/40**; `M1 = 0`; overflow A1/A2 clean; four
       guards green.
     - ⚠️ **The stale-tool-binary finding bit a second time and is worth carrying forward.** Before
-      rebuilding `tools/`, this run showed **9** failures; six were `ProveAptitude`/`DemonQualityReport`/
-      `DemonSpeciesGenExplain` tests shelling out to binaries stale against the current Core. Rebuilding
+      rebuilding `tools/`, this run showed **9** failures; six were `ProveAptitude`/`CreatureQualityReport`/
+      `CreatureSpeciesGenExplain` tests shelling out to binaries stale against the current Core. Rebuilding
       the eleven tools returned the suite to 3. **Any Core change invalidates every tool binary that
       references it, and tests that invoke tools with `--no-build` will report false regressions until
       they are rebuilt.**
@@ -1011,7 +1011,7 @@ Spec: [spec-timeline-tunables.md](../docs/architecture/battle/spec-timeline-tuna
 > **Core 14 failed / 5382 passed · Data 2 failed / 669 passed · Guard 165/165 green.**
 > This matches the audit's stated 14/2 contract exactly. Attribution corrected: the 14 Core reds are
 > `SpeciesExpanderTests` (7), `SpeciesCatalogDiffTests` (5) and `UnitClassContractParityTests` (2);
-> Data's 2 are `DemonSpeciesImportCliTests`. The item-todo note had the last two suites swapped.
+> Data's 2 are `CreatureSpeciesImportCliTests`. The item-todo note had the last two suites swapped.
 >
 > ⛔ **A defect was found and fixed before the baseline could be trusted.** The first full run reported
 > **16** red, including `ExpeditionResolverTests.Tier_goldens_are_locked` — an expedition golden, which
@@ -1036,7 +1036,7 @@ Spec: [spec-timeline-tunables.md](../docs/architecture/battle/spec-timeline-tuna
 > that touched no production code. **The item stream did not move the expedition goldens.** Byte-identical by acceptance: this phase
 relocates values between code and config without changing one, so **a moved golden is a defect in the
 ⚠️ **Baseline superseded 2026-09-04 — re-measure, never assume.** The 14/2 figure below was true when
-this phase started and is not now: the demon and world-stage streams fixed most of theirs mid-run, so
+this phase started and is not now: the creature and world-stage streams fixed most of theirs mid-run, so
 the tree stands at **2 red Core / 3 red Data**, Guard **171/171**. And **any Core change invalidates
 every `tools/` binary that references it** — six tests that shell out with `--no-build` reported false
 regressions until the eleven tools were rebuilt. Rebuild tools, then measure, then compare.
@@ -1139,12 +1139,12 @@ inherited from other streams — compare against those, not zero.**
       `audit-magic-numbers.py` **M1 = 0, M2 = 0, M4 = 0**.
     - ⚠️ **Two more allocation-test flakes observed and quantified, not silenced.**
       `Atoms.PredicateCompilerTests.Evaluating_allocates_nothing` and
-      `Demons.DemonQualityReportTests.A_perfectly_even_split_reports_entropy_1_00` each failed once in
+      `Creatures.CreatureQualityReportTests.A_perfectly_even_split_reports_entropy_1_00` each failed once in
       a full run and passed alone; **four consecutive full runs then came back at exactly 14 with
       nothing beyond baseline**. Same family as B28's `ValueSpecTests` finding — they assert
       `GC.GetAllocatedBytesForCurrentThread()`, which is thread-local, so no parallel test can move it;
       the mechanism is tiered re-JIT inside the measured loop, and adding tests raises the odds by
-      raising load. Recorded for the atom/demon programs. **The bar stays 14, re-verified by
+      raising load. Recorded for the atom/creature programs. **The bar stays 14, re-verified by
       repetition rather than by one lucky run.**
 
 - [x] **B30: the retained constants say why they are not tunable** — **DONE 2026-09-04**
@@ -1505,7 +1505,7 @@ Phase 7 for the published defaults. **B31–B35 are independent of Phase 6; only
       `~WaveCatalog`, `~ModeProfile` with the flip live.
     - ⚠️ **The "14/2" baseline in this line is stale and should not be used again** — see the note at
       the head of this file. Measured this run: **10 Core reds**, all attributable to other streams
-      (demons 4, atoms 3, class-system 2, actor-hub 1) and all red before this work; Guard **170/171**,
+      (creatures 4, atoms 3, class-system 2, actor-hub 1) and all red before this work; Guard **170/171**,
       its one red the known class-system dominance drift.
     - ⛔ **A final full-suite pass could not be completed**: `src/FusionRpg.Core/World/Turn/TurnEngine.cs`
       is being edited concurrently by the world-stage stream (file changed twice while these runs were
@@ -1720,3 +1720,116 @@ Phase 7 for the published defaults. **B31–B35 are independent of Phase 6; only
     `RulesetVersion` stays **4**. **Every moved golden was predicted in advance — because none moved,
     and exactly the one predicted tripwire tripped.**
   - ✅ Commit drafts handed over per task group; **no git writes** (the repo's hard rule).
+
+---
+
+## Phase 9 — sweep refusal defect (B40) — found 2026-09-13
+
+**A real source defect in B21's own acceptance, found by investigation rather than by a red test** — the
+B21 clause "the boot sweep refuses and marks `Abandoned` … never heals it" was only half-built. Interactive
+rows with an incomplete trace are refused; a row whose **resolve throws** is neither refused nor healed,
+so it is re-listed every boot forever.
+
+**Verdict: SOURCE bug, not a stale test** (case by case below). Evidence:
+- Spec authority: [`spec-interactive-turns.md`](../docs/architecture/battle/spec-interactive-turns.md) §4
+  *"The sweep must refuse, not heal"* — *"A refusal is TERMINAL, not a skip: the row is marked so it leaves
+  the unresolved [set]"*; testing strategy §2 *"refuses and marks … never heals it. Assert the row leaves
+  the unresolved set"*. The spec is **silent** on non-interactive resolve failures, so nothing licenses the
+  current do-nothing catch.
+- The code's own comment (`WebMatchService.cs:244-247`) names this exact hazard for refusals: *"Left
+  unmarked, refused rows are re-listed every boot … crash recovery dies silently while still reporting a
+  clean sweep."*
+- Chronology: the swallow landed **2026-08-21** (`4f147a11`); the tests were written **2026-09-06**
+  (`50fcdf87`) — the tests encode the spec's intent, not the code's behaviour.
+- Reachable in production across a deploy: `setup_json` is authored by the previous build, `WaveCatalog`
+  is code-authored and **not** covered by the content hash, and `ValidateActorKey`'s rules can tighten.
+
+### The defect
+
+`src/FusionRpg.Server/WebMatchService.cs` — `SweepUnresolved`'s catch (lines 321-324) logs and **marks
+nothing**, conflating two different failure kinds:
+
+| Throw source | Type | Deterministic across boots? | Correct handling |
+|---|---|---|---|
+| `BattleEngine.Resolve` (empty squad/wave, bad actor key) | `ArgumentException` | **Yes** — same persisted `setup_json` + seed | **mark refused, terminal** |
+| `WaveCatalog.Get` (unknown wave) | `ArgumentException` | **Yes** | **mark refused, terminal** |
+| `InsertWebMatchEvents` (disk/lock/rollback rethrow `:186`) | `SqliteException` | No — transient | leave unresolved, retry next boot |
+
+### Cases
+
+- [x] **B40.1 — fix the source: split the catch.** ✅ 2026-09-13 `catch (ArgumentException ex)` marks the row refused
+  (`MarkWebMatchSweepRefused`) with a reason naming the failure; a following `catch (Exception ex)` keeps
+  today's log-only retry for transient errors. Acceptance: a row whose setup can never resolve leaves the
+  unresolved window and is not re-resolved on a second sweep; a transient failure still does not.
+  Verify: new focused tests + `WebMatch*Sweep*` + full E2E. Files: `src/FusionRpg.Server/WebMatchService.cs`
+  (the only `src` change). Scope: S.
+  - ⚠️ **Boundary:** `src/FusionRpg.Server/**` is claimed by the active `solid-run-20260912-eb53` session.
+    Coordinate before editing, or take the work in that session's own todo.
+- [x] **B40.2 — `WebMatchInteractiveSweepTests.A_row_with_an_unrecognised_profile_id…`** ✅ 2026-09-13 — already
+  rewritten (2026-09-13, commit `4aa5714f`) to prove "the loop continued" with a **second refusal**
+  instead of a heal it could not produce. Re-verify after B40.1: the row must now be **refused** where the
+  old assertion expected `Assert.Null(RefusalFor(good))` on an unhealable `{}` row. **Stale input, correct
+  intent.**
+- [x] **B40.3 — `WebMatchInteractiveSweepTests.A_row_with_no_profile_id_and_an_unresolvable_wave…`** ✅ 2026-09-13 —
+  its `{}` row asserts `Assert.Null(RefusalFor(row.Corr))` (line 83). After B40.1 an empty-squad row is
+  **refused**, so this assertion becomes stale. Give it a resolvable setup (known wave + real squad) so it
+  exercises its stated subject — "an unresolvable *wave* is not interactive, not refused" — rather than
+  accidentally depending on an empty squad. **Stale input, correct intent.**
+- [x] **B40.4 — `WebMatchContentHashSweepTests` ×3** ✅ 2026-09-13 — `A_registry_version_change_is_not_a_refusal` (:86),
+  `An_unstamped_row_is_not_refused` (:98), `A_row_stamped_with_the_current_content_is_not_refused` (:108)
+  each assert `Assert.Null(RefusalFor(...))` on a `{}` row. Their **subject is the content hash**, not
+  resolve failure; the empty setup is fixture convenience. Give each a resolvable setup so the resolve
+  succeeds and the assertion tests the content verdict alone. **Stale input, correct intent.**
+- [x] **B40.5 — re-check `A_match_logged_against_different_content_is_refused_terminally`** (:56) ✅ 2026-09-13 — it
+  asserts `DoesNotContain` on a `{}` row. The content-hash refusal fires *before* resolve, so it should be
+  unaffected; confirm rather than assume, and make its setup resolvable too if the refusal path ever
+  reaches resolve.
+- [x] **B40.6 — add ONE shared valid-setup builder** ✅ 2026-09-13 — for the two sweep classes. Both build rows inline
+  with `setupJson: "{}"`; after B40.3/B40.4 they need a valid setup (a known `WaveCatalog` wave + a
+  minimal real squad), so the shape lives in one place and a future test cannot silently reintroduce an
+  unhealable row. Verify: no test in either class constructs `setupJson: "{}"` for a row it expects to
+  resolve.
+
+### Acceptance for the phase
+- The sweep marks a deterministically-unresolvable row refused and terminal; a transient failure still
+  retries. Verified by contrast in both directions, not by one green run.
+- Every test in the two sweep classes uses a setup consistent with what it asserts.
+- Full E2E green (currently 219/219) and Server green; no golden moved.
+- **`spec-interactive-turns.md` §4 gains one sentence** naming the non-interactive resolve-failure case
+  explicitly, so the rule is complete rather than inferred.
+
+### ✅ Outcome — B40 DONE 2026-09-13
+
+- **B40.1 (source).** `SweepUnresolved` now has two catches: `catch (ArgumentException ex)` marks the
+  row **refused and terminal** (`MarkWebMatchSweepRefused`, reason `"unresolvable setup: <msg>"`), and
+  `catch (Exception ex)` keeps the log-and-retry for transient failures. The type is deliberately
+  narrow, and the audit during implementation **corrected the todo's own first proposal**
+  (`catch (ArgumentException)` was too broad a rule in spirit): `InvalidOperationException` is left
+  transient on purpose because it covers both a row-specific runaway loop *and* process-global tuning
+  preconditions, and the sweep hashes content **once** for the whole loop — so refusing broadly could
+  have marked every row terminal for a server misconfiguration. The runaway-loop guard's trade-off is
+  documented in the code as a deliberate choice.
+- **B40.3/B40.4 (tests).** All four stale `{}`-input assertions now use a **resolvable** setup from the
+  shared builder. The three content-hash tests and the unresolvable-wave test additionally assert the
+  row **leaves the unresolved window** — the property the old weak `Assert.Null(RefusalFor(...))` could
+  never observe, which is exactly why the defect shipped green.
+- **B40.5.** Confirmed **no change needed**: the content refusal fires at `:296` before the `try` at
+  `:305`, proven by line order and by the captured refusal log. Recorded rather than assumed.
+- **B40.6.** `tests/FusionRpg.E2E.Tests/SweepSetupFixture.cs` builds the setup from the **real**
+  producers (`WebMatchService.BuildSquad` — whose empty-roster synthetic fallback is the production
+  path — and `WaveCatalog`), so the shape cannot drift from what production writes.
+- **Two B40.1 proof tests added** (both non-vacuous): a deterministic failure is refused terminally and
+  is not re-listed on a second sweep; the contrast case proves a resolvable row heals, so the refusal
+  is not blanket. Verified by **temporarily reverting the fix and watching the new test FAIL**, then
+  restoring it.
+- **Spec amended:** `spec-interactive-turns.md` §4 now states the resolve-failure case explicitly,
+  including the deterministic-vs-transient split and the deploy-time reachability.
+- **Verified:** E2E **221/221** (was 219, plus 2 new), Server **404/404**, `guard-dal` +
+  `guard-test-substrate` green. No golden moved.
+- ⚠️ **Boundary:** `src/FusionRpg.Server/WebMatchService.cs` was edited under this session's record with
+  the owner's authorization. The active `solid-run-20260912-eb53` session also claims
+  `src/FusionRpg.Server/**` but had **not** touched this file; its branch's version of the region is
+  byte-identical, and its two commits there change only lines 449-572 (`ApplyZombossPattern`/reveal),
+  so the edit is conflict-free at merge.
+
+### Acceptance for the phase

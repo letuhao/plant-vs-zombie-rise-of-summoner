@@ -1,5 +1,5 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.PassiveTree.State;
 using FusionRpg.Core.Stats.Aptitudes;
 using Microsoft.Data.Sqlite;

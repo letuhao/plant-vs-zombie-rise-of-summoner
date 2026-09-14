@@ -7,7 +7,7 @@ import {
   subscribeLastHit,
   subscribeLog,
   useCommanders,
-  useDemonRoster,
+  useCreatureRoster,
   useDeployUniqueActor,
   useLawnDebugPost,
   usePlayers,
@@ -38,6 +38,7 @@ import {
   TypeIcon
 } from "@/ui";
 import { LawnGameHost } from "./LawnGameHost";
+import { LawnScreenshotPanel } from "./LawnScreenshotPanel";
 import { ActorHudInspector } from "./ActorHudInspector";
 import { LawnOccupantList } from "./LawnOccupantList";
 import { LawnStatsModal } from "./LawnStatsModal";
@@ -438,7 +439,7 @@ export function LawnPage() {
     setInteraction(idleInteraction());
   };
 
-  // demon-lawn-deploy T2.4 — a server-fired "reinforcements available" trigger (lawn-deploy-events'
+  // creature-lawn-deploy T2.4 — a server-fired "reinforcements available" trigger (lawn-deploy-events'
   // own evaluator), distinct from T22's own player-INITIATED deploy above: no cell-targeting, the
   // server picks the spawn side/typeId from the specimen's own species (lawn-deploy-core). Stage
   // chrome, same "no scrim, inline banner" convention as the T22 banner — this is a live-match
@@ -452,7 +453,7 @@ export function LawnPage() {
   }, [model.matchKey]);
   const showLawnDeployPrompt =
     !!pendingLawnDeploy && pendingLawnDeploy.caseId !== respondedLawnDeployCaseId;
-  const lawnDeployRosterQ = useDemonRoster(playerId);
+  const lawnDeployRosterQ = useCreatureRoster(playerId);
   const speciesIndex = useSpeciesIndex();
   const lawnDeployMutation = useDeployUniqueActor();
   const lawnDeployEligible = useMemo(() => {
@@ -668,6 +669,7 @@ export function LawnPage() {
           { label: "Mode", value: interaction.mode }
         ]}
       />
+      <LawnScreenshotPanel />
 
       {(interaction.mode === "TileSelected" ||
         interaction.mode === "SpawnTargeting") &&

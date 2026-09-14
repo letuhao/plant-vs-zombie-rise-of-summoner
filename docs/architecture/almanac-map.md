@@ -1,7 +1,7 @@
 # Capability map: Almanac (BE seed data)
 
 Turns the game's own almanac + live capture into a trustworthy, reusable, BE-only content source —
-the generator the Demon program's species catalog already commits to using
+the generator the Creature program's species catalog already commits to using
 ([decisions.md:90](decisions.md) — *"species catalog generated deterministically from captured game
 data (types/almanac/icons/spawn_stats), output checked in"*). No FE in this round; the owner has a
 separate FE refactor task planned.
@@ -41,7 +41,7 @@ test dependencies:
   before that, `spawn_stats` covers ~10% of plants and ~8% of zombies, so "not observed" is the
   overwhelming default rather than the edge case the flag is meant to represent. This is a
   data-quality dependency: the rebuild works and tests pass either way, but the *output* is only
-  useful for downstream consumers (e.g. the Demon species catalog) after coverage exists.
+  useful for downstream consumers (e.g. the Creature species catalog) after coverage exists.
 - **`almanac-recipes-fix` is independent** of everything else here. Recipes never enter the seed
   contract (owner call: keep `/api/recipes` a separate lookup), so nothing downstream blocks on it.
   It rides along because it surfaced in the same investigation and is cheap to close.

@@ -25,7 +25,7 @@
       "id": "set.doomfume-001",
       "nameKey": "set.spore-burst",
       "name": "Spore Burst",
-      "themeKey": "demon.doomfume",
+      "themeKey": "creature.doomfume",
       "members": [
         {
           "role": "armament-primary",

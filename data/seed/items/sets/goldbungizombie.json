@@ -25,7 +25,7 @@
       "id": "set.goldbungizombie-001",
       "nameKey": "set.gluttonous-bungee",
       "name": "Gluttonous Bungee",
-      "themeKey": "demon.goldbungizombie",
+      "themeKey": "creature.goldbungizombie",
       "members": [
         {
           "role": "armament-primary",

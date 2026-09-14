@@ -1,0 +1,225 @@
+{
+  "_meta": {
+    "candidateSetHash": "c5b63fc51cb9d244ec8ff9afb1a2419934dfdacf3cd0d5fe4431f0c81209f473",
+    "corpusHash": "a428db55391f9c46c10393317d61ad2c54e8431679efc520468d80e7ab1db25a",
+    "partition": "rounds",
+    "round": 2000,
+    "tuningVersion": 1
+  },
+  "entries": [
+    {
+      "id": "action.family.academic.001",
+      "promoted": true
+    },
+    {
+      "id": "action.family.academic.002",
+      "promoted": true
+    },
+    {
+      "id": "action.family.academic.003",
+      "promoted": true
+    },
+    {
+      "id": "action.family.afflicted.001",
+      "promoted": true
+    },
+    {
+      "id": "action.family.afflicted.002",
+      "promoted": true
+    },
+    {
+      "id": "action.family.afflicted.004",
+      "promoted": true
+    },
+    {
+      "id": "action.family.afflicted.005",
+      "promoted": true
+    },
+    {
+      "id": "action.family.alchemical.002",
+      "promoted": true
+    },
+    {
+      "id": "action.family.alchemical.003",
+      "promoted": true
+    },
+    {
+      "id": "action.family.alchemical.004",
+      "promoted": true
+    },
+    {
+      "id": "action.family.allium.001",
+      "promoted": true
+    },
+    {
+      "id": "action.family.allium.002",
+      "promoted": true
+    },
+    {
+      "id": "action.family.allium.003",
+      "promoted": true
+    },
+    {
+      "id": "action.family.allium.004",
+      "promoted": true
+    },
+    {
+      "id": "action.family.allium.005",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0019",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0020",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0021",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0023",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0024",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0025",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0026",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0027",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0028",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0029",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0030",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0031",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0032",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0033",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0034",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0035",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0036",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0037",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0038",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0039",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0040",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0041",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0042",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0043",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0046",
+      "promoted": true
+    },
+    {
+      "id": "action.general.0051",
+      "promoted": true
+    },
+    {
+      "id": "action.species.abyssswordstar.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.abyssswordstar.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.abyssswordstar.003",
+      "promoted": true
+    },
+    {
+      "id": "action.species.abyssswordstar.004",
+      "promoted": true
+    },
+    {
+      "id": "action.species.acientsunnut.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.acientsunnut.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.acientsunnut.003",
+      "promoted": true
+    },
+    {
+      "id": "action.species.acientsunnut.004",
+      "promoted": true
+    },
+    {
+      "id": "action.species.allpeater.004",
+      "promoted": true
+    },
+    {
+      "id": "action.species.apple.001",
+      "promoted": true
+    },
+    {
+      "id": "action.species.apple.002",
+      "promoted": true
+    },
+    {
+      "id": "action.species.apple.003",
+      "promoted": true
+    }
+  ],
+  "kind": "action-seed",
+  "schemaVersion": 1
+}

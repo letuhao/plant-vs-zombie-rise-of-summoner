@@ -25,7 +25,7 @@
       "id": "set.supermachineshardplant-001",
       "nameKey": "set.nut-shell-fusion",
       "name": "Nut-Shell Fusion",
-      "themeKey": "demon.supermachineshardplant",
+      "themeKey": "creature.supermachineshardplant",
       "members": [
         {
           "role": "armament-primary",

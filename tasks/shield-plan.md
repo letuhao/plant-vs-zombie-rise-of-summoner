@@ -13,7 +13,7 @@ Add the shield resource above the Funnel: four `combat.shield.*` derived familie
 - All shield math is permille `long` with the locked clamp `[0.10×, 3×] × input` and `hitCount × breakerDelta`; `ShieldElementMatrix` returns unit relations, K applied once.
 - Events go on the string envelope stream (not the v2 ring); `ShieldRuntime` aggregates `shield.absorbed` per `(owner, shieldId)` per flush window.
 - Standalone absorption is **out of scope** — blocked on Battle-C2; this stream keeps the runtime engine-agnostic and adds the `BattleActorSetup` seam only.
-- `trait.guardian` template wiring stays with the demon stream; this stream ships the aura mechanism (OnTimer + Area targeting).
+- `trait.guardian` template wiring stays with the creature stream; this stream ships the aura mechanism (OnTimer + Area targeting).
 
 ## Dependency graph
 
@@ -62,7 +62,7 @@ Build order follows the graph; T1–T4 are parallel-safe foundations, T10/T13/T1
 
 ## Out of scope (spec-locked)
 
-Vanilla damage absorption (never); standalone absorb E2E (Battle-C2); `trait.guardian` template wiring (demon stream); VFX cue art/tuning (VFX stream); radius shape / ally-relative targeting (ask-first `TargetResolver` extension); reflection/immunity types, percent pen, `bypassShield`, `OnShieldBroken` procs (ask-first).
+Vanilla damage absorption (never); standalone absorb E2E (Battle-C2); `trait.guardian` template wiring (creature stream); VFX cue art/tuning (VFX stream); radius shape / ally-relative targeting (ask-first `TargetResolver` extension); reflection/immunity types, percent pen, `bypassShield`, `OnShieldBroken` procs (ask-first).
 
 ## Open items
 

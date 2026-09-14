@@ -25,7 +25,7 @@
       "id": "set.jalatorch-001",
       "nameKey": "set.blazing-stump",
       "name": "Blazing Stump",
-      "themeKey": "demon.jalatorch",
+      "themeKey": "creature.jalatorch",
       "members": [
         {
           "role": "armament-primary",

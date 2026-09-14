@@ -25,7 +25,7 @@
       "id": "set.nutpumpkin-001",
       "nameKey": "set.gilded-nut-husk",
       "name": "Gilded Nut Husk",
-      "themeKey": "demon.nutpumpkin",
+      "themeKey": "creature.nutpumpkin",
       "members": [
         {
           "role": "core-guard",

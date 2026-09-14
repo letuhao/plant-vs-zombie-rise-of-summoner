@@ -25,7 +25,7 @@
       "id": "set.ultimateendoflamezombie-001",
       "nameKey": "set.crimson-lotus-jungle",
       "name": "Crimson Lotus Jungle",
-      "themeKey": "demon.ultimateendoflamezombie",
+      "themeKey": "creature.ultimateendoflamezombie",
       "members": [
         {
           "role": "armament-primary",

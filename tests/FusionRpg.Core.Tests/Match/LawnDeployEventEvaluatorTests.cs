@@ -4,7 +4,7 @@ using Xunit;
 namespace FusionRpg.Core.Tests.Match;
 
 /// <summary>
-/// demon-lawn-deploy T2.2/T2.3 — one fact per named case × {fires, does-not-fire-below-threshold,
+/// creature-lawn-deploy T2.2/T2.3 — one fact per named case × {fires, does-not-fire-below-threshold,
 /// does-not-fire-if-already-used-this-run}, per spec-lawn-deploy-events.md's own testing strategy
 /// (mirroring spec-ai-commander.md's own per-rule fire/no-fire matrix), plus an explicit determinism
 /// assertion. `FireChanceMilli: 1000`/`0` in test-local tuning removes the RNG as a variable for the
@@ -92,7 +92,7 @@ public class LawnDeployEventEvaluatorTests
     // ---- cross-cutting gates: eligibility, per-run budget, ordering ---------------------------------
 
     [Fact]
-    public void Never_fires_with_no_eligible_demon_regardless_of_board_state()
+    public void Never_fires_with_no_eligible_creature_regardless_of_board_state()
     {
         var tuning = Tuning(1, new LawnDeployEventCaseTuning("zombie-swarm", 1, null, 1000));
         var result = LawnDeployEventEvaluator.Evaluate(

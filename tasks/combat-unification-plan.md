@@ -65,7 +65,7 @@ E1 riders → E3 hybrid          Phase 5 (independent of each other; neither bum
       │
 S1 neutral invariant → S2 cooldown read → S3 effectiveness read → S4 receipt   Phase 6 (species-skills)
                                                                         │
-                                                          S5 species eligibility (⏸ waits on demon corpus)
+                                                          S5 species eligibility (⏸ waits on creature corpus)
 ```
 
 ## Risks and mitigations
@@ -100,12 +100,12 @@ where no actor carries a non-neutral `skill.*` value is **byte-identical**. Same
 zero-rider invariant. `RulesetVersion` stays 4; no golden is re-blessed.
 
 **Split by dependency, not by convenience:** the two reads depend on nothing and start immediately;
-the species→action eligibility *content* waits on `demon-corpus-self-heal`'s four open items, because
+the species→action eligibility *content* waits on `creature-corpus-self-heal`'s four open items, because
 the species ids are mid-regeneration and authoring against them means authoring twice.
 
 ## Phase 7 — hybrid typing goes live (added 2026-09-07)
 
-Owner decision (`docs/architecture/demon-mechanism-gaps-ideal.md` §2.6): Wave E3's mechanism was
+Owner decision (`docs/architecture/creature-mechanism-gaps-ideal.md` §2.6): Wave E3's mechanism was
 always going to sit inert until an owner-gated balance value moved; that moved. **"We only have one
 battle engine — do not make duplicated code"** is the load-bearing instruction for this phase: lawn
 parity is built by wiring the lawn's own attack construction to call the *same* `HybridPayload.Build`
@@ -117,7 +117,7 @@ the investigation gate for F3 (which may touch the closed atom vocabulary and ne
 |---|---|---|
 | F1 | Raise `hybrid.secondaryWeightMilli` 0 → 250‰ (reusing `MatchupShareK`'s own precedent number); re-run and check the predicted expedition-golden delta before re-blessing | `--filter "Hybrid\|Expedition"` |
 | F2 (non-blocking) | Seedsmith authoring pass to grow real `ElementSecondary` coverage past today's 21/841 | content only, no code verify |
-| F3 | Investigate whether any existing value-spec lets a grant reference its own firing attacker dynamically; reuse it for element if found, stop and escalate for review if not; wire lawn attacks to `HybridPayload.Build`; prove live on a real lawn demon | new unit tests + a real live-lawn check |
+| F3 | Investigate whether any existing value-spec lets a grant reference its own firing attacker dynamically; reuse it for element if found, stop and escalate for review if not; wire lawn attacks to `HybridPayload.Build`; prove live on a real lawn creature | new unit tests + a real live-lawn check |
 
 Risk carried forward explicitly, not hidden in the todo alone: F3's size is genuinely unknown until
 its own investigation step runs — it may be a small wiring addition or may require a reviewed,
@@ -130,5 +130,5 @@ rather than decide that unilaterally.
 - E1 and E3 get their own detailed todos at wave start (progressive elaboration) — the todo lists
   wave-level acceptance only. Phase 6 is elaborated in full because it is the one unblocking another
   program (`class-system`'s readiness gate).
-- **S5 has no date, only a condition**: `demon-corpus-self-heal` closing C2/C3/D1. Nothing else in
+- **S5 has no date, only a condition**: `creature-corpus-self-heal` closing C2/C3/D1. Nothing else in
   this program waits on it.

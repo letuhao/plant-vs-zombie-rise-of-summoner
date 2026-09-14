@@ -135,6 +135,35 @@ public class FamilyExpansionTests
         }
     }
 
+    /// <summary>P1.1 (tasks/passive-tree-repair-plan.md): the id-only comparison above could not see a
+    /// renamed family (same ids, new `name`) or a newline difference, and both really shipped — three
+    /// committed files drifted from their sources for a full commit cycle. This pins the CONTRACT that
+    /// would have caught it: each committed file's canonical text must equal the generator's canonical
+    /// text (one shared serializer, <see cref="FamilyExpansionSeedFile"/>).
+    /// <para>Comparison is made in canonical form, never against raw working-tree bytes: a checkout
+    /// with <c>core.autocrlf=true</c> legitimately materialises CRLF, so asserting "no CRLF on disk"
+    /// would test the environment rather than the content.</para>
+    /// </summary>
+    [Fact]
+    public void Committed_generated_files_match_the_generator_byte_for_byte()
+    {
+        var (families, tierBands) = LoadReal();
+        var generatedDir = Path.Combine(FindDataDir(), "seed", "atoms", "generated");
+        var result = FamilyExpansion.Expand(families, tierBands, FlatReferenceBase);
+
+        foreach (var group in result.Rows.GroupBy(r => families.First(f => f.Id == r.FamilyId).SourceFile))
+        {
+            var stem = Path.GetFileNameWithoutExtension(group.Key);
+            var outPath = Path.Combine(generatedDir, $"family-expand.{stem}.json");
+            Assert.True(File.Exists(outPath), $"expected committed output {outPath}");
+
+            var committed = FamilyExpansionSeedFile.Canonicalize(File.ReadAllText(outPath));
+            var fresh = FamilyExpansionSeedFile.ToCanonicalJson(group.ToList());
+
+            Assert.Equal(fresh, committed);
+        }
+    }
+
     [Fact]
     public void A_manufactured_drift_is_detectable_by_the_same_comparison_the_check_mode_uses()
     {

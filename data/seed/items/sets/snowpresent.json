@@ -25,7 +25,7 @@
       "id": "set.snowpresent-001",
       "nameKey": "set.seasonal-gift-box",
       "name": "Seasonal Gift Box",
-      "themeKey": "demon.snowpresent",
+      "themeKey": "creature.snowpresent",
       "members": [
         {
           "role": "armament-primary",

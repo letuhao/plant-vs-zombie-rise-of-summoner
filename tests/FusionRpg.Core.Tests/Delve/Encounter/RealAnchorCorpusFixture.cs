@@ -1,5 +1,5 @@
 using FusionRpg.Core.Delve.Encounter;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
 using Xunit;
@@ -10,8 +10,8 @@ namespace FusionRpg.Core.Tests.Delve.Encounter;
 /// The real anchor corpus, joined into <see cref="ConcreteAnchor"/> rows through the exact production
 /// pipeline (anchor -&gt; `SpeciesExpander` -&gt; `ConcreteAnchor.From`), built ONCE for every
 /// `Delve.Encounter` test that needs it. Deliberately does NOT reuse
-/// `Demons.Fusion.RealCorpusFixture` — that one round-trips through a temp `RpgStore` and returns
-/// `DemonSpeciesDef`, which carries neither `ThreatBand`, `AptitudePrimary`, `Reach` nor
+/// `Creatures.Fusion.RealCorpusFixture` — that one round-trips through a temp `RpgStore` and returns
+/// `CreatureSpeciesDef`, which carries neither `ThreatBand`, `AptitudePrimary`, `Reach` nor
 /// `TargetPreference` (verified 2026-09-06) — exactly the fields this module's own join exists to
 /// recover, so building from the plain `AnchorRow`/`ConcreteSpecies` pair directly is both simpler and
 /// the only shape that actually has what `SlotFilter.Candidates` needs.
@@ -33,11 +33,11 @@ internal static class RealAnchorCorpusFixture
         File.ReadAllText(Path.Combine(new[] { RepoRoot() }.Concat(relative).ToArray()));
 
     static readonly AptitudeTuning RealAptitudes = AptitudeTuningLoader.Parse(ReadTuning("data", "tuning", "aptitudes.v2.json"));
-    static readonly DemonShapeTuning RealShape = DemonShapeTuningLoader.Parse(ReadTuning("data", "tuning", "demon-shape.v1.json"));
-    static readonly DemonThreatTuning RealThreat = DemonThreatTuningLoader.Parse(ReadTuning("data", "tuning", "demon-threat.v1.json"));
+    static readonly CreatureShapeTuning RealShape = CreatureShapeTuningLoader.Parse(ReadTuning("data", "tuning", "creature-shape.v1.json"));
+    static readonly CreatureThreatTuning RealThreat = CreatureThreatTuningLoader.Parse(ReadTuning("data", "tuning", "creature-threat.v1.json"));
     static readonly PowerTuning RealPower = PowerTuningLoader.Parse(ReadTuning("data", "tuning", "power-scale.v2.json"));
 
-    public static DemonThreatTuning ThreatTuning => RealThreat;
+    public static CreatureThreatTuning ThreatTuning => RealThreat;
 
     /// <summary>Ordinal `SpeciesId` order (spec-encounter-generator.md §9 — "no dictionary enumeration
     /// reaches an output"), matching `WaveCatalog.cs`'s own `OrderBy(..., Ordinal)` convention.
@@ -48,7 +48,7 @@ internal static class RealAnchorCorpusFixture
 
     static IReadOnlyList<ConcreteAnchor> Build()
     {
-        var seedRoot = Path.Combine(RepoRoot(), "data", "seed", "demons", "species");
+        var seedRoot = Path.Combine(RepoRoot(), "data", "seed", "creatures", "species");
         var anchors = new List<AnchorRow>();
         foreach (var file in Directory.GetFiles(seedRoot, "*.json", SearchOption.AllDirectories).OrderBy(f => f, StringComparer.Ordinal))
         {

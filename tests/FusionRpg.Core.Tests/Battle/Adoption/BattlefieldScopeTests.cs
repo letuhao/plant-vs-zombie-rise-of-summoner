@@ -7,7 +7,7 @@ using Xunit;
 namespace FusionRpg.Core.Tests.Battle.Adoption;
 
 /// <summary>
-/// T7 (buff-debuff-scope-todo.md Phase 3) — the shared front end. Target/type/uniqueDemon must each
+/// T7 (buff-debuff-scope-todo.md Phase 3) — the shared front end. Target/type/uniqueCreature must each
 /// reach exactly the entities they should on a real multi-entity board, and no others.
 /// </summary>
 public class BattlefieldScopeTests
@@ -62,26 +62,26 @@ public class BattlefieldScopeTests
     }
 
     [Fact]
-    public void A_unique_demon_selector_resolves_through_the_real_binding_facet()
+    public void A_unique_creature_selector_resolves_through_the_real_binding_facet()
     {
         var facet = new MatchUniqueBindingsFacet();
-        facet.TryBeginPending("inst-demon-1", "corr-1", "zombie", typeId: 5);
+        facet.TryBeginPending("inst-creature-1", "corr-1", "zombie", typeId: 5);
         facet.TryBindOnSpawn("corr-1", null, "0xEEE", out _);
 
-        var who = new WhoSelector { Kind = WhoKind.UniqueDemon, InstanceId = "inst-demon-1" };
+        var who = new WhoSelector { Kind = WhoKind.UniqueCreature, InstanceId = "inst-creature-1" };
         var ptrs = BattlefieldScopeExecutor.ResolvePtrs(who, Board, facet);
 
         Assert.Equal(new[] { "EEE" }, ptrs);
     }
 
     [Fact]
-    public void A_unique_demon_selector_for_a_still_pending_never_bound_specimen_resolves_empty()
+    public void A_unique_creature_selector_for_a_still_pending_never_bound_specimen_resolves_empty()
     {
         var facet = new MatchUniqueBindingsFacet();
-        facet.TryBeginPending("inst-demon-2", "corr-2", "plant", typeId: 5);
+        facet.TryBeginPending("inst-creature-2", "corr-2", "plant", typeId: 5);
         // Never bound to a live ptr.
 
-        var who = new WhoSelector { Kind = WhoKind.UniqueDemon, InstanceId = "inst-demon-2" };
+        var who = new WhoSelector { Kind = WhoKind.UniqueCreature, InstanceId = "inst-creature-2" };
         Assert.Empty(BattlefieldScopeExecutor.ResolvePtrs(who, Board, facet));
     }
 

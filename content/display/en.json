@@ -865,5 +865,44 @@
   },
   "flavor.unique.gilded-porcelain-70-012": {
     "template": "Jagged vines wrap around the core to strike at anything that dares approach. The sap pulses with a violent hunger for life."
+  },
+  "disptpl.affix.arm-plate": {
+    "template": "{value}% more armor plating"
+  },
+  "disptpl.affix.arm-op": {
+    "template": "{value}% more carapace"
+  },
+  "disptpl.affix.tempo-pulse": {
+    "template": "{value}% more sun production interval"
+  },
+  "disptpl.affix.elpw-surge": {
+    "template": "{element} power overflow becomes {value}, overriding weaker sources"
+  },
+  "disptpl.affix.evd-evd": {
+    "template": "cannot be hit by {element} attacks"
+  },
+  "disptpl.affix.evd-shift": {
+    "template": "{value} reduced {element} critical damage taken"
+  },
+  "disptpl.affix.prec-focus": {
+    "template": "{value} increased {element} accuracy"
+  },
+  "disptpl.affix.prec-sync": {
+    "template": "always critically strikes with {element} attacks"
+  },
+  "disptpl.affix.shld-toughness": {
+    "template": "{element} shields cannot be broken by critical hits"
+  },
+  "disptpl.affix.shld-toughness-mod": {
+    "template": "sets {element} shield toughness to {value}, ignoring other modifiers"
+  },
+  "disptpl.affix.ward-flux": {
+    "template": "sets status resistance to {value}, overriding weaker sources"
+  },
+  "disptpl.affix.ward-link": {
+    "template": "{element} defense becomes {value}, overriding weaker sources"
+  },
+  "disptpl.affix.ward-ward": {
+    "template": "{value} increased status resistance"
   }
 }

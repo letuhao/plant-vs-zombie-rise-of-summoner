@@ -484,8 +484,8 @@ disposable carrier, and the decision disappears.
 ### 7.5 The cost curve, in I9's vocabulary
 
 Today's shipped material vocabulary is `essence.{element}` (6 concrete elements) and `shard.{rarity}`
-(common/rare/epic/legendary) in `rpg_demon_materials(player_id, material_id, qty)`
-(`src/FusionRpg.Core/Demons/DemonMaterialCatalog.cs:15-20`,
+(common/rare/epic/legendary) in `rpg_creature_materials(player_id, material_id, qty)`
+(`src/FusionRpg.Core/Creatures/CreatureMaterialCatalog.cs:15-20`,
 `src/FusionRpg.Data/Sqlite/RpgStore.cs:520`), plus the soul ledger
 (`rpg_soul_balances` / `rpg_soul_ledger`, `src/FusionRpg.Data/Sqlite/RpgStore.cs:440`). Costs are
 expressed in those three today and move to whatever I9 lands.
@@ -543,7 +543,7 @@ Success chance before pity, from `item_enhance_rules`:
 success.** At the worst level (200‰) success is guaranteed by the **11th** attempt, and the expected
 number of attempts is **3.1**. The in-tree precedent is already shipped, already persisted and already
 visible in the UI — `SummonRoller`'s pity counters
-(`src/FusionRpg.Core/Demons/SummonRoller.cs:6`).
+(`src/FusionRpg.Core/Creatures/SummonRoller.cs:6`).
 
 **Protection.** One item, `ward.enhance` (I9). Consuming one converts a `fail-level-lost` into a
 `fail-nothing` for that attempt. It does **not** raise the success chance. Protection that improves odds
@@ -784,7 +784,7 @@ stalls. Transfer (§7.4) is the release valve; the 70% ratio is the price of the
 5. **Does enhancement apply to charms (I10) and socket inserts (I4), or only to equipment?** I scoped it
    to equipment. Extending it is cheap mechanically and expensive in balance.
 6. **Roster scale** — [item-ideal.md](../item-ideal.md) §8's unanswered question decides whether the safe
-   band must be *free* rather than merely cheap. If twenty demons × twelve slots each want `+8`, "5% of
+   band must be *free* rather than merely cheap. If twenty creatures × twelve slots each want `+8`, "5% of
    the ladder" is still 240 × 52 shards.
 7. **Should players be able to un-enhance?** I shipped administrative `restore` only, and no player-facing
    undo, on the grounds that a reversible decision is not a decision and there is nothing to protect the

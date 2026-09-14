@@ -25,7 +25,7 @@
       "id": "set.submarinezombie-001",
       "nameKey": "set.submarine-dream",
       "name": "Submarine Dream",
-      "themeKey": "demon.submarinezombie",
+      "themeKey": "creature.submarinezombie",
       "members": [
         {
           "role": "armament-primary",

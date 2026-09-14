@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getJson, sendJson } from "./rest";
 
-// ---- DTOs (spec-demon-contracts.md wire shapes) ----
+// ---- DTOs (spec-creature-contracts.md wire shapes) ----
 
 export type ContractRowDto = {
   instanceId: string;
@@ -51,7 +51,7 @@ function useContractMutation<TReq>(path: string) {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["contracts"] });
       void qc.invalidateQueries({ queryKey: ["souls"] });
-      void qc.invalidateQueries({ queryKey: ["demons"] });
+      void qc.invalidateQueries({ queryKey: ["creatures"] });
     }
   });
 }

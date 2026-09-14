@@ -509,15 +509,18 @@ public class EffectOfflineKitTests
     /// `stat.derived` still at <see cref="RuntimeState.None"/> — asserted first, so this test failed
     /// loudly (not silently passed for the wrong reason) the day E5 flipped it without updating this
     /// assertion, which is exactly what happened: E5 (2026-09-06) moved the cell to
-    /// <see cref="RuntimeState.Partial"/>, and this guard is updated in the same change, not left
-    /// stale. <c>AddContribution</c> never asks <see cref="BindGate"/> anything, which is exactly what
-    /// makes the fold and the registry cell independent — this test still runs unmodified in
-    /// substance, it just no longer needs Sim's cell to sit at `None` to prove that independence.</para>
+    /// <see cref="RuntimeState.Partial"/>, then sim-hub-parity (T15, 2026-09-13) moved it again to
+    /// <see cref="RuntimeState.Full"/> once the fold became op-aware, and this guard is updated in the
+    /// same change both times, not left stale. <c>AddContribution</c> never asks
+    /// <see cref="BindGate"/> anything, which is exactly what makes the fold and the registry cell
+    /// independent — this test still runs unmodified in substance (Flat sums the same way under either
+    /// state), it just no longer needs Sim's cell to sit at `None` or `Partial` to prove that
+    /// independence.</para>
     /// </summary>
     [Fact]
     public void Sim_folds_bound_derived_contributions_onto_the_pinned_snapshot()
     {
-        Assert.Equal(RuntimeState.Partial,
+        Assert.Equal(RuntimeState.Full,
             AtomKindRegistry.Get("stat.derived")!.SupportIn(RuntimeId.Sim));
 
         var flat = new BoundDerivedAtom(
@@ -551,14 +554,16 @@ public class EffectOfflineKitTests
     /// are that call site: both run the row through the REAL <see cref="BindGate"/>, and both are
     /// exercised here.
     ///
-    /// <para><b>E5 (§11 A5):</b> now that the Sim cell for `stat.derived` is
-    /// <see cref="RuntimeState.Partial"/> (not <see cref="RuntimeState.None"/> — see
-    /// <see cref="The_four_derived_ops_decide_Full_versus_Partial"/> for why it landed there and not
-    /// `Full`), the same row is genuinely ACCEPTED here — <see cref="BindGate.Check"/> only rejects
-    /// <see cref="RuntimeState.None"/> and a non-planner host on <see cref="RuntimeState.PlanOnly"/>;
-    /// `Partial` binds like `Full` does. This test used to assert the opposite (`RuntimeUnsupported`)
-    /// before E5 flipped the cell — updated here, not left to rot, per this test's own original doc
-    /// comment ("that is E5's cell to flip, not this test's to fake past").</para>
+    /// <para><b>E5 (§11 A5):</b> once the Sim cell for `stat.derived` moved off
+    /// <see cref="RuntimeState.None"/> — first to <see cref="RuntimeState.Partial"/> (E5,
+    /// 2026-09-06; see <see cref="The_four_derived_ops_decide_Full_versus_Partial"/> for why it
+    /// landed there and not `Full` at the time), later to <see cref="RuntimeState.Full"/>
+    /// (sim-hub-parity, T15, 2026-09-13) — the same row is genuinely ACCEPTED here:
+    /// <see cref="BindGate.Check"/> only rejects <see cref="RuntimeState.None"/> and a non-planner
+    /// host on <see cref="RuntimeState.PlanOnly"/>; `Partial` and `Full` both bind. This test used to
+    /// assert the opposite (`RuntimeUnsupported`) before E5 first flipped the cell — updated here, not
+    /// left to rot, per this test's own original doc comment ("that is E5's cell to flip, not this
+    /// test's to fake past").</para>
     /// </summary>
     [Fact]
     public void A_stat_derived_bind_in_Sim_is_accepted()
@@ -582,32 +587,34 @@ public class EffectOfflineKitTests
     }
 
     /// <summary>
-    /// E5, spec-mechanism-wiring.md §4.3 step 4 / §11 A6: whether the Sim cell reads `Full` or
-    /// `Partial` is decided FROM the built fold, never asserted up front (decisions.md, "Derived-write
-    /// lawn executor", owner decision 2). <see cref="ActorDerivedLookup.Resolve"/>'s fold folds bound
-    /// `stat.derived` contributions onto the pinned base via
-    /// <see cref="ActorDerivedSnapshot.OverlayAdd"/> -- a PLAIN SUM that reads only
-    /// <see cref="BoundDerivedAtom.Amount"/>, never <see cref="BoundDerivedAtom.Op"/> (and
-    /// <see cref="BoundDerivedAtom"/> carries no `Priority` field at all, so it could not implement
-    /// `Replace`'s priority-ordering even if the fold tried to read `Op`). This test proves, against
-    /// the REAL <see cref="DerivedComposer"/> every other runtime composes through, which of the four
-    /// <see cref="DerivedModifierOp"/> values that plain sum happens to reproduce and which it does not.
+    /// E5 (spec-mechanism-wiring.md §4.3 step 4) proved this fold against the real
+    /// <see cref="DerivedComposer"/> and found it honoured only Flat/Increased -- <see cref="ActorDerivedLookup.Resolve"/>
+    /// folded bound `stat.derived` contributions onto the pinned base via a PLAIN SUM
+    /// (<see cref="ActorDerivedSnapshot.OverlayAdd"/>) that read only <see cref="BoundDerivedAtom.Amount"/>,
+    /// never <see cref="BoundDerivedAtom.Op"/>. sim-hub-parity (T15, 2026-09-13) fixed it: `Resolve` now
+    /// calls <see cref="DerivedComposer.ComposeChannelWithBaseline"/> per channel -- the SAME op-aware
+    /// fold every other runtime's composer uses, with the pinned snapshot value standing in for
+    /// <see cref="DerivedStatDef.DefaultValue"/>. This test proves, against the REAL
+    /// <see cref="DerivedComposer"/> every other runtime composes through, that all four
+    /// <see cref="DerivedModifierOp"/> values now match.
     ///
     /// <para><b>Flat</b> (a <c>FlatSum</c> channel) and <b>Increased</b> (a <c>SumIncreased</c>
-    /// channel) are BOTH implemented by <c>DerivedComposer.ComposeChannel</c> as
-    /// <c>default + Σ(matching-op values)</c> -- exactly what a plain sum against the pinned base
-    /// already computes. The fold's answer matches the composer's exactly for both: HONOURED.</para>
+    /// channel) were already sums, so the fix changes nothing about them: HONOURED before and after.</para>
     ///
     /// <para><b>Replace</b> (a <c>FlatReplace</c> channel) and <b>Flag</b> (a <c>MaxPriorityFlag</c>
     /// channel) are NOT sums in the real composer -- <c>ComposeFlatReplace</c> returns the
     /// highest-priority `Replace` value OUTRIGHT, discarding the baseline and every other
-    /// contribution; <c>ComposeMaxFlag</c> returns the MAX of the flag-ish contributions. A plain-sum
-    /// fold instead adds every contribution on top of the base, so it diverges from the composer's
-    /// real answer for both: NOT HONOURED. A bound `stat.derived` atom using `Replace` or `Flag` in
-    /// Sim therefore composes as if it had used `Flat` instead -- silently, not rejected.</para>
+    /// contribution; <c>ComposeMaxFlag</c> returns the MAX of the flag-ish contributions.
+    /// <c>ComposeChannelWithBaseline</c> reuses those SAME private helpers, so both now match: HONOURED.
+    /// The Replace scenario below deliberately never sets an explicit <c>Priority</c> on either side --
+    /// <see cref="BoundDerivedAtom"/> carries no `Priority` field at all (a genuine, pre-existing
+    /// structural gap this task does not close), so a Sim-sourced <see cref="DerivedModifier"/> always
+    /// defaults to `Priority: 0`, exactly like every other real producer converting FROM a
+    /// `BoundDerivedAtom` already does (<c>AtomDerivedSubsystem</c>'s own conversion never sets one
+    /// either) -- a tied multi-Replace breaks by `SourceId`, identically on both sides.</para>
     ///
-    /// <para>Two of four honoured is the empirical basis for <see cref="RuntimeState.Partial"/>, not
-    /// <see cref="RuntimeState.Full"/> -- <c>AtomKindRegistry</c>'s own comment on the `stat.derived`
+    /// <para>Four of four honoured is the empirical basis for <see cref="RuntimeState.Full"/>, not
+    /// <see cref="RuntimeState.Partial"/> -- <c>AtomKindRegistry</c>'s own comment on the `stat.derived`
     /// Sim cell says so, citing this test.</para>
     /// </summary>
     [Fact]
@@ -650,14 +657,19 @@ public class EffectOfflineKitTests
         Assert.Equal(10, incReal);
         Assert.Equal(incReal, incFold); // HONOURED
 
-        // ---- Replace: progression.power is a FlatReplace channel, default 1.0. ----
+        // ---- Replace: progression.power is a FlatReplace channel, default 1.0. Neither side sets an
+        // explicit Priority: BoundDerivedAtom carries no such field (a real, pre-existing structural
+        // gap this task does not close), so a Sim-sourced DerivedModifier always defaults to
+        // Priority: 0, matching what every OTHER real producer converting from a BoundDerivedAtom
+        // already gets. A tie therefore breaks by SourceId on both sides. ----
         const string replaceChannel = DerivedStatChannels.ProgressionPower;
         var replaceReal = composer.Compose(new[]
         {
-            new DerivedModifier(replaceChannel, DerivedModifierOp.Replace, 5, Priority: 1),
-            new DerivedModifier(replaceChannel, DerivedModifierOp.Replace, 50, Priority: 2)
+            new DerivedModifier(replaceChannel, DerivedModifierOp.Replace, 5, SourceId: "t1"),
+            new DerivedModifier(replaceChannel, DerivedModifierOp.Replace, 50, SourceId: "t2")
         }).Get(replaceChannel);
-        Assert.Equal(50, replaceReal); // highest priority wins outright; baseline (1.0) discarded
+        Assert.Equal(5, replaceReal); // tied priority (both 0) breaks by SourceId ascending -- "t1"
+                                       // wins outright; baseline (1.0) discarded either way
 
         lookup.Pin("0xReplace", ActorDerivedSnapshot.FromValues(new[]
         {
@@ -669,8 +681,7 @@ public class EffectOfflineKitTests
             new BoundDerivedAtom(replaceChannel, DerivedModifierOp.Replace, 50, "t2"));
         var replaceFold = lookup.Resolve("0xReplace", attackerLess: false).Get(replaceChannel);
 
-        Assert.NotEqual(replaceReal, replaceFold); // NOT HONOURED
-        Assert.Equal(1.0 + 5 + 50, replaceFold); // the fold sums instead of overriding
+        Assert.Equal(replaceReal, replaceFold); // sim-hub-parity (T15): now HONOURED
 
         // ---- Flag: status.immune.poison is a MaxPriorityFlag channel, default 0. ----
         var flagChannel = DerivedStatChannels.StatusImmune("poison");
@@ -689,7 +700,6 @@ public class EffectOfflineKitTests
         lookup.AddContribution("0xFlag", new BoundDerivedAtom(flagChannel, DerivedModifierOp.Flag, 1, "t2"));
         var flagFold = lookup.Resolve("0xFlag", attackerLess: false).Get(flagChannel);
 
-        Assert.NotEqual(flagReal, flagFold); // NOT HONOURED
-        Assert.Equal(2, flagFold); // the fold sums instead of taking the max
+        Assert.Equal(flagReal, flagFold); // sim-hub-parity (T15): now HONOURED
     }
 }

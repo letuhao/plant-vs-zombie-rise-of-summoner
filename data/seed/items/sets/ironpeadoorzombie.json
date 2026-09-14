@@ -25,7 +25,7 @@
       "id": "set.ironpeadoorzombie-001",
       "nameKey": "set.stainless-shell",
       "name": "Stainless Shell",
-      "themeKey": "demon.ironpeadoorzombie",
+      "themeKey": "creature.ironpeadoorzombie",
       "members": [
         {
           "role": "armament-primary",

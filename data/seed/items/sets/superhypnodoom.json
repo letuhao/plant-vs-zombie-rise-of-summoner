@@ -25,7 +25,7 @@
       "id": "set.superhypnodoom-001",
       "nameKey": "set.the-final-spore",
       "name": "The Final Spore",
-      "themeKey": "demon.superhypnodoom",
+      "themeKey": "creature.superhypnodoom",
       "members": [
         {
           "role": "armament-primary",

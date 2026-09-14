@@ -25,7 +25,7 @@
       "id": "set.ultimatemagnet-001",
       "nameKey": "set.magnetic-spore-king",
       "name": "Magnetic Spore King",
-      "themeKey": "demon.ultimatemagnet",
+      "themeKey": "creature.ultimatemagnet",
       "members": [
         {
           "role": "armament-primary",

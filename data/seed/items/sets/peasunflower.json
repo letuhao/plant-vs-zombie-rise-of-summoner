@@ -25,7 +25,7 @@
       "id": "set.peasunflower-001",
       "nameKey": "set.solar-volley",
       "name": "Solar Volley",
-      "themeKey": "demon.peasunflower",
+      "themeKey": "creature.peasunflower",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.cattaillour-001",
       "nameKey": "set.the-swarm-s-softness",
       "name": "The Swarm's Softness",
-      "themeKey": "demon.cattaillour",
+      "themeKey": "creature.cattaillour",
       "members": [
         {
           "role": "armament-primary",

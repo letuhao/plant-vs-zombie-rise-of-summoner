@@ -205,7 +205,7 @@ quote was stale before it was read; so was every figure that replaced it. Across
 a constant, and it moved four times while other streams worked.** Never carry it forward.
 
 **The final reading for this run, every figure from an executed command:** Core **6 failed / 5 915
-passed** (demons 4, class-system 2) · Data **3 failed / 684 passed** (atom 1, demon-import 2) · Guard
+passed** (creatures 4, class-system 2) · Data **3 failed / 684 passed** (atom 1, creature-import 2) · Guard
 **170/171** (the known class-system dominance drift) · the battle-scope filter **403/403** ·
 four boundary guards green · overflow **A1=0, A2=0, 0 critical** · magic numbers **M1 = 1**, in the
 atom stream's untracked `BulletModifyMath.cs`. **Zero failures anywhere in battle or timeline**, and

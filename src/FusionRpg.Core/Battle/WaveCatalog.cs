@@ -1,5 +1,5 @@
 using System.Text.Json;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 
 namespace FusionRpg.Core.Battle;
 
@@ -32,13 +32,13 @@ namespace FusionRpg.Core.Battle;
 public sealed record WaveDef(string WaveId, string Name, int ContentIndex, IReadOnlyList<BattleActorSetup> Enemies, string? Profile = null, int? W = null);
 
 /// <summary>
-/// Code-authored wave roster built over the generated demon species catalog — enemies are wild
-/// demons wearing the same species the player collects. Deterministic: same catalog ⇒ same waves.
+/// Code-authored wave roster built over the generated creature species catalog — enemies are wild
+/// creatures wearing the same species the player collects. Deterministic: same catalog ⇒ same waves.
 /// </summary>
 public static class WaveCatalog
 {
     // Lazy, not `static readonly ... = Build()` (T4.7, catalog-runtime §3a): first touch must happen
-    // after DemonSpeciesCatalog.Configure runs, not at an unpredictable point tied to class-load
+    // after CreatureSpeciesCatalog.Configure runs, not at an unpredictable point tied to class-load
     // order. Behaviour-preserving today — the source is still the compiled roster either way.
     //
     // base-defense siege-waves §3.5 (task 12.4, 2026-09-06): production now calls Configure with the
@@ -54,7 +54,7 @@ public static class WaveCatalog
 
     /// <summary>Overrides the roster with a data-sourced one (normally `WaveCatalogLoader.Parse`'s
     /// result). Throws on an empty snapshot — a wave-less roster is a load error, not a valid content
-    /// state, matching `DemonSpeciesCatalog.Configure`'s own precedent for the same failure shape.</summary>
+    /// state, matching `CreatureSpeciesCatalog.Configure`'s own precedent for the same failure shape.</summary>
     public static void Configure(IReadOnlyList<WaveDef> snapshot)
     {
         if (snapshot is null || snapshot.Count == 0)
@@ -65,7 +65,7 @@ public static class WaveCatalog
     }
 
     /// <summary>Test-only escape hatch back to the compiled roster — mirrors
-    /// `DemonSpeciesCatalog.ConfigureFromCompiledDefault`'s own name and role.</summary>
+    /// `CreatureSpeciesCatalog.ConfigureFromCompiledDefault`'s own name and role.</summary>
     public static void ConfigureFromCompiledDefault() => _all = Build();
 
     public static WaveDef Get(string waveId) =>
@@ -124,10 +124,10 @@ public static class WaveCatalog
         // catalog only populates these four rungs today, so the wave rosters are unchanged.
         // Widening these four bands to cover the six new intermediate rungs is a wave-content
         // authoring decision, out of scope for this migration.
-        var commons = Band(DemonRarity.Chaff);
-        var rares = Band(DemonRarity.Cultivated);
-        var epics = Band(DemonRarity.Heirloom);
-        var legendaries = Band(DemonRarity.Sunwoven);
+        var commons = Band(CreatureRarity.Chaff);
+        var rares = Band(CreatureRarity.Cultivated);
+        var epics = Band(CreatureRarity.Heirloom);
+        var legendaries = Band(CreatureRarity.Sunwoven);
 
         return new[]
         {
@@ -150,11 +150,11 @@ public static class WaveCatalog
 
     /// <summary>Widened from `private` for `WaveCatalogLoader`'s own use (siege-waves 12.4) — the
     /// data-sourced roster picks by the SAME ordered rarity band, never a second selection rule.</summary>
-    internal static List<DemonSpeciesDef> Band(DemonRarity rarity) =>
-        DemonSpeciesCatalog.All.Where(s => s.BaseRarity == rarity).OrderBy(s => s.SpeciesId, StringComparer.Ordinal).ToList();
+    internal static List<CreatureSpeciesDef> Band(CreatureRarity rarity) =>
+        CreatureSpeciesCatalog.All.Where(s => s.BaseRarity == rarity).OrderBy(s => s.SpeciesId, StringComparer.Ordinal).ToList();
 
     /// <summary>Widened from `private` for `WaveCatalogLoader`'s own use (siege-waves 12.4).</summary>
-    internal static IReadOnlyList<BattleActorSetup> Enemies(int theta, params (List<DemonSpeciesDef> Pool, int Count)[] picks)
+    internal static IReadOnlyList<BattleActorSetup> Enemies(int theta, params (List<CreatureSpeciesDef> Pool, int Count)[] picks)
     {
         var list = new List<BattleActorSetup>();
         var n = 0;
@@ -168,7 +168,7 @@ public static class WaveCatalog
                     Key = $"wave:{n++}",
                     Side = "wave",
                     SpeciesId = species.SpeciesId,
-                    TypeId = species.DemonTypeId,
+                    TypeId = species.CreatureTypeId,
                     Level = theta,
                     ElementPrimary = species.ElementPrimary,
                     ElementSecondary = species.ElementSecondary,
@@ -229,11 +229,11 @@ public static class WaveCatalogLoader
                 if (!w.TryGetProperty("picks", out var picksEl) || picksEl.ValueKind != JsonValueKind.Array || picksEl.GetArrayLength() == 0)
                     throw new WaveCatalogRejection($"wave '{waveId}': missing or empty 'picks' array");
 
-                var picks = new List<(List<DemonSpeciesDef> Pool, int Count)>();
+                var picks = new List<(List<CreatureSpeciesDef> Pool, int Count)>();
                 foreach (var p in picksEl.EnumerateArray())
                 {
                     var rarityText = RequireString(p, "rarity", waveId);
-                    if (!DemonRarityIds.TryParse(rarityText, out var rarity))
+                    if (!CreatureRarityIds.TryParse(rarityText, out var rarity))
                         throw new WaveCatalogRejection($"wave '{waveId}': unknown rarity '{rarityText}'");
                     var count = RequireInt(p, "count", waveId);
                     if (count <= 0)

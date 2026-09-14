@@ -25,7 +25,7 @@
       "id": "set.peablover-001",
       "nameKey": "set.synchronized-pea-volley",
       "name": "Synchronized Pea Volley",
-      "themeKey": "demon.peablover",
+      "themeKey": "creature.peablover",
       "members": [
         {
           "role": "armament-primary",

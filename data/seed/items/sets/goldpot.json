@@ -25,7 +25,7 @@
       "id": "set.goldpot-001",
       "nameKey": "set.golden-bloom-vessel",
       "name": "Golden Bloom Vessel",
-      "themeKey": "demon.goldpot",
+      "themeKey": "creature.goldpot",
       "members": [
         {
           "role": "armament-primary",

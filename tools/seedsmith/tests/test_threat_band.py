@@ -1,4 +1,4 @@
-"""Tests for seedsmith.adapters.demons.power.bands (spec-threat-band.md, demon-seed module 4)."""
+"""Tests for seedsmith.adapters.creatures.power.bands (spec-threat-band.md, creature-seed module 4)."""
 from __future__ import annotations
 
 import ast
@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from seedsmith.adapters.demons.power.bands import (
+from seedsmith.adapters.creatures.power.bands import (
     ThreatTuning,
     UnoccupiedRung,
     classify,
@@ -14,9 +14,9 @@ from seedsmith.adapters.demons.power.bands import (
     rung_for_score,
     score,
 )
-from seedsmith.adapters.demons.power.model import PowerSeed
+from seedsmith.adapters.creatures.power.model import PowerSeed
 
-BANDS_SRC = Path(__file__).parents[1] / "seedsmith" / "adapters" / "demons" / "power" / "bands.py"
+BANDS_SRC = Path(__file__).parents[1] / "seedsmith" / "adapters" / "creatures" / "power" / "bands.py"
 
 # ssot-rarity.md §3.3's ten `rarity_id` values — the ladder threat-band's own vocabulary must
 # never rhyme with (Q11).
@@ -142,7 +142,7 @@ def test_histogram_reports_empty_rungs(tuning: ThreatTuning):
 
 
 def test_tuning_loads_from_real_committed_file():
-    # No fixture stand-in — this is the actual data/tuning/demon-threat.v1.json this module ships.
+    # No fixture stand-in — this is the actual data/tuning/creature-threat.v1.json this module ships.
     t = ThreatTuning.load(1)
     assert t.version == 1
     assert len(t.thresholds) == 10

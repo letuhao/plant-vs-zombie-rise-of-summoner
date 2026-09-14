@@ -25,7 +25,7 @@
       "id": "set.seanut-001",
       "nameKey": "set.the-spore-husk",
       "name": "The Spore Husk",
-      "themeKey": "demon.seanut",
+      "themeKey": "creature.seanut",
       "members": [
         {
           "role": "armament-primary",

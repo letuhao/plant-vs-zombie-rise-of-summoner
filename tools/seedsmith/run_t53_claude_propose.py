@@ -4,12 +4,12 @@ LM Studio model (which this environment cannot reach) — same substitution patt
 
 A small, deliberate batch (3 species) over REAL committed anchors and the REAL 10-affix catalog,
 picked for thematic coherence against each species' own real aptitude/posture/element/traits (read
-from `data/seed/demons/species/**/*.json`, not guessed) and each affix's own real effect. Submitted
+from `data/seed/creatures/species/**/*.json`, not guessed) and each affix's own real effect. Submitted
 as 3 unanimous "samples" per species through the REAL, unmodified `entry_for`/`fixed_core_within_band`
 — an honest single judgment call, not a fabricated stochastic spread (same framing the two precedents
 above already use).
 
-**Deliberately conservative, not exhaustive**: every pick respects `demon-species-effects.v1.json`'s
+**Deliberately conservative, not exhaustive**: every pick respects `creature-species-effects.v1.json`'s
 own `fixedCoreBandByRarity` for that species' real rarity (`conezombie` is `chaff` — band {0,0} — so
 it gets ZERO core picks, pool only) and avoids the two still-unbuilt validator paths this run cannot
 exercise correctly (posture/resource conflict-repair) by simply not authoring a pick that would
@@ -24,7 +24,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from seedsmith.adapters.demons.effects.prompts import (
+from seedsmith.adapters.creatures.effects.prompts import (
     build_context,
     entry_for,
     fixed_core_within_band,
@@ -32,9 +32,9 @@ from seedsmith.adapters.demons.effects.prompts import (
 from seedsmith.workflow.graphs.species_effects import load_shape_tuning
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SPECIES_ROOT = REPO_ROOT / "data" / "seed" / "demons" / "species"
+SPECIES_ROOT = REPO_ROOT / "data" / "seed" / "creatures" / "species"
 AFFIX_FILE = REPO_ROOT / "data" / "seed" / "effects" / "affixes" / "all.json"
-OUTPUT_DIR = REPO_ROOT / "data" / "seed" / "demons" / "species-effects"
+OUTPUT_DIR = REPO_ROOT / "data" / "seed" / "creatures" / "species-effects"
 
 
 def load_real_affixes() -> "tuple[dict, dict]":

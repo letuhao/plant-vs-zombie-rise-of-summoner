@@ -25,7 +25,7 @@
       "id": "set.sunstar-001",
       "nameKey": "set.solar-starburst",
       "name": "Solar Starburst",
-      "themeKey": "demon.sunstar",
+      "themeKey": "creature.sunstar",
       "members": [
         {
           "role": "armament-primary",

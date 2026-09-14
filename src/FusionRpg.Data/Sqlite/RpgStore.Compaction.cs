@@ -10,6 +10,7 @@ public sealed partial class RpgStore
     /// <summary>Cold-move closed-run capture to <c>archive/</c>; refuse open runs.</summary>
     public string? PromoteClosedRunCapture(long runId)
     {
+        RequireFileArchive();
         lock (_gate)
             return PromoteClosedRunCaptureCore(runId);
     }
@@ -41,6 +42,7 @@ public sealed partial class RpgStore
 
     public void CompactAfterRunClosed(long? closedRunId)
     {
+        RequireFileArchive();
         lock (_gate)
         {
             EnforceKeepLastNCore();
@@ -54,6 +56,7 @@ public sealed partial class RpgStore
     /// already covers trim, so balances never change; the overflow lands in a segment archive.</summary>
     public void TrimSoulLedgerTails(int? retainOverride = null)
     {
+        RequireFileArchive();
         lock (_gate)
         {
             TrimSoulTailsCore(retainOverride);

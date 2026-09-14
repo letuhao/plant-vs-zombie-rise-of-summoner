@@ -15,7 +15,7 @@ public static class LawnDeployRosterSessionCache
     /// <summary>True when the last <see cref="BuildFromSessionCache"/> returned <see cref="LawnDeployRosterSnapshot.Empty"/>
     /// because <see cref="Apply"/> has never landed yet (the injector's own <c>StartAsync</c> refresh
     /// chain had not reached the roster call by <c>board.start</c>) — distinct from a real player
-    /// genuinely owning zero eligible demons, which also returns an empty list but leaves this false.
+    /// genuinely owning zero eligible creatures, which also returns an empty list but leaves this false.
     /// Mirrors <see cref="Commanders.MatchCommanderSessionCache.LastBuildUsedFallback"/>'s own role.</summary>
     public static bool LastBuildWasCacheMiss { get; private set; }
 

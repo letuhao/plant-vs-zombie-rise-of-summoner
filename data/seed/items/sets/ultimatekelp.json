@@ -25,7 +25,7 @@
       "id": "set.ultimatekelp-001",
       "nameKey": "set.vessel-of-gluttonous-veins",
       "name": "Vessel of Gluttonous Veins",
-      "themeKey": "demon.ultimatekelp",
+      "themeKey": "creature.ultimatekelp",
       "members": [
         {
           "role": "armament-primary",

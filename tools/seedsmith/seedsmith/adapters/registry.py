@@ -5,14 +5,14 @@ from __future__ import annotations
 
 from ._stub import StubAdapter
 from .actions import ActionsAdapter
-from .demons import DemonsAdapter
+from .creatures import CreaturesAdapter
 from .dungeon import DungeonAdapter
 from .items import ItemsAdapter
 
 ADAPTERS: "dict[str, type]" = {
     "stub": StubAdapter,
     "items": ItemsAdapter,
-    "demons": DemonsAdapter,
+    "creatures": CreaturesAdapter,
     "actions": ActionsAdapter,
     "dungeon": DungeonAdapter,
 }

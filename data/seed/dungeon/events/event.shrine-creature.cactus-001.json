@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.shrine-creature.cactus-001",
+  "flavor": "A towering, calcified 仙人掌 stands in the center of a stone dais, its spines vibrating with a low, rhythmic hum. From its crown, a beam of concentrated light begins to 发射 toward the cavern ceiling, illuminating the dust motes like drifting diamonds.",
+  "kind": "shrine",
+  "name": "The Needle's Zenith",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "A ritual site focused on the redirection of energy through sharp, static conduits.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.cactus"
+}

@@ -355,6 +355,106 @@
       "groupId": "g.shield-stat",
       "status": "live",
       "tags": []
+    },
+    {
+      "id": "disptpl.p2-038",
+      "nameKey": "disptpl.affix.elpw-surge",
+      "name": "{element} power overflow becomes {value}, overriding weaker sources",
+      "runtimeFamily": "atom.elpw-surge",
+      "plantOverrideKey": null,
+      "groupId": "g.elem-power",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-039",
+      "nameKey": "disptpl.affix.evd-evd",
+      "name": "cannot be hit by {element} attacks",
+      "runtimeFamily": "atom.evd-evd",
+      "plantOverrideKey": null,
+      "groupId": "g.evade",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-040",
+      "nameKey": "disptpl.affix.evd-shift",
+      "name": "{value} reduced {element} critical damage taken",
+      "runtimeFamily": "atom.evd-shift",
+      "plantOverrideKey": null,
+      "groupId": "g.evade",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-041",
+      "nameKey": "disptpl.affix.prec-focus",
+      "name": "{value} increased {element} accuracy",
+      "runtimeFamily": "atom.prec-focus",
+      "plantOverrideKey": null,
+      "groupId": "g.precision",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-042",
+      "nameKey": "disptpl.affix.prec-sync",
+      "name": "always critically strikes with {element} attacks",
+      "runtimeFamily": "atom.prec-sync",
+      "plantOverrideKey": null,
+      "groupId": "g.precision",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-043",
+      "nameKey": "disptpl.affix.shld-toughness",
+      "name": "{element} shields cannot be broken by critical hits",
+      "runtimeFamily": "atom.shld-toughness",
+      "plantOverrideKey": null,
+      "groupId": "g.shield-stat",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-044",
+      "nameKey": "disptpl.affix.shld-toughness-mod",
+      "name": "sets {element} shield toughness to {value}, ignoring other modifiers",
+      "runtimeFamily": "atom.shld-toughness-mod",
+      "plantOverrideKey": null,
+      "groupId": "g.shield-stat",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-045",
+      "nameKey": "disptpl.affix.ward-flux",
+      "name": "sets status resistance to {value}, overriding weaker sources",
+      "runtimeFamily": "atom.ward-flux",
+      "plantOverrideKey": null,
+      "groupId": "g.ward",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-046",
+      "nameKey": "disptpl.affix.ward-link",
+      "name": "{element} defense becomes {value}, overriding weaker sources",
+      "runtimeFamily": "atom.ward-link",
+      "plantOverrideKey": null,
+      "groupId": "g.ward",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-047",
+      "nameKey": "disptpl.affix.ward-ward",
+      "name": "{value} increased status resistance",
+      "runtimeFamily": "atom.ward-ward",
+      "plantOverrideKey": null,
+      "groupId": "g.ward",
+      "status": "live",
+      "tags": []
     }
   ]
 }

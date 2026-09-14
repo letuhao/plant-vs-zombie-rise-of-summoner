@@ -25,7 +25,7 @@
       "id": "set.ultimatedolphin-001",
       "nameKey": "set.whale-rider-s-echo",
       "name": "Whale-Rider's Echo",
-      "themeKey": "demon.ultimatedolphin",
+      "themeKey": "creature.ultimatedolphin",
       "members": [
         {
           "role": "armament-primary",

@@ -176,7 +176,7 @@ public class ReachMapTests
     }
 
     /// <summary>A species whose primary element is Fire, so a banner can match a Fire climate.</summary>
-    static readonly string FireSpecies = FusionRpg.Core.Demons.DemonSpeciesCatalog.All
+    static readonly string FireSpecies = FusionRpg.Core.Creatures.CreatureSpeciesCatalog.All
         .First(s => s.ElementPrimary == ElementTypeId.Fire).SpeciesId;
 
     // ---- fog ------------------------------------------------------------------------------------

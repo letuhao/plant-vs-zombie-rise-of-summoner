@@ -10,7 +10,7 @@ document says so and stops.
 | | Doc 07 assumed | Now decided |
 |---|---|---|
 | Tree shape | 7 tiers, ~29 nodes | **D29** — 10 tiers × 2 branches, ~40 nodes |
-| Roster | ~50 trees, demon *families* | **D27/D29** — 39 closed (12 aptitudes + 6 elements + 21 statuses); families are a build-order task |
+| Roster | ~50 trees, creature *families* | **D27/D29** — 39 closed (12 aptitudes + 6 elements + 21 statuses); families are a build-order task |
 | Species trees | deferred | **D30** — every one of 841 species gets its own 29-node tree |
 | Breadth | unbounded, flagged as an open question | **D25** — unlock cost rises with the nodes you already own |
 | Tier gate | local to one tree | **D28** — satisfied by your largest same-stance tree |
@@ -35,7 +35,7 @@ Doc 07 made twelve load-bearing calls. **Nine hold, two need amending, one is wr
 | 4 | L4 — plan a build without spending | **Holds and gets more important** — D25 makes a wrong order expensive |
 | 5 | L5 — a dead node says so | **Holds** |
 | 6 | L6 — you can see the rule you are scored on | **Holds, and now covers two rules**, not one. Focus was the only hidden coefficient in doc 07. D28 adds a second, and it is harder to see |
-| 7 | L7 — what you learned on the commander is true on the demons | **Amended.** True for the 39 shared paths. **False for a species tree**, which is unique by construction (D23/D30) |
+| 7 | L7 — what you learned on the commander is true on the creatures | **Amended.** True for the 39 shared paths. **False for a species tree**, which is unique by construction (D23/D30) |
 | 8 | The four-level IA (Yours → All paths → one tree → one node) | **Holds for the shared corpus. Breaks if species trees are put in level 1** — see §3 |
 | 9 | "The tree, not the node, is the unit of browsing" | **Holds, and is now the whole answer.** 39 tree cards is still the window tier |
 | 10 | "One tree's ~29 nodes is render-all under the shipped volume rule" | **Wrong.** `RENDER_ALL_MAX = 24` (`web/fusion-rpg-web/src/layers/creatures/CreaturesLayer.tsx:21`, FACT) — 29 was already over it and 40 is further over. The error is applying the wrong rule: a fixed lattice is **one entity's own content**, which is GG-61's subject, not GG-50's. §2.3 |
@@ -49,15 +49,15 @@ Two changes to doc 07's four levels, and nothing else.
 ```text
 Actor sheet (band 2, already exists) → Passives tab
 ├── Level 0  Yours            paths this actor has invested in · Focus · dead-trait count · unspent
-├── Level 0b Bloodline        THIS demon's own path — pinned, never in a browse   ← new
+├── Level 0b Bloodline        THIS creature's own path — pinned, never in a browse   ← new
 ├── Level 1  All paths        the 39 shared paths, ordered, searchable            ← 39, not 50
 ├── Level 2  One path         2 branches × 10 tiers, ~40 traits, one fixed lattice
 └── Level 3  One trait        value · what it costs next · depth · exclusion print · where it goes
 ```
 
-1. **A species tree is level 0b, not level 1.** It is pinned to the demon that has it and never
+1. **A species tree is level 0b, not level 1.** It is pinned to the creature that has it and never
    enters the browse. 841 unique trees create **zero** browse pressure, because a player never picks
-   one — you get the one your demon is. §3.
+   one — you get the one your creature is. §3.
 2. **Level 2 is a GG-61 surface, not a GG-50 one.** A 40-cell lattice is bounded by construction and
    scrolls inside `PanelShell`'s own bound (`max-h-[min(720px,82vh)]`,
    `web/fusion-rpg-web/src/shell/PanelShell.tsx:86`, FACT). §2.3.
@@ -72,7 +72,7 @@ Depth from a stage is unchanged: sheet (1) → path (2) → trait (3). GG-10's b
 |---|---:|---:|
 | Whole corpus (39 × 40 + 841 × 29) | 25,949 | 100% |
 | **The shared corpus — the only part a build guide can be written about** | **1,560** | **6.0%** |
-| A 30-demon player's whole reachable reading surface (1,560 + 30 × 29) | 2,430 | 9.4% |
+| A 30-creature player's whole reachable reading surface (1,560 + 30 × 29) | 2,430 | 9.4% |
 | Traits *open* to a one-aptitude build at Θ=100, across the twelve primary paths (computed, §7) | 176 | 0.68% |
 | Traits that build actually **owns** at Θ=100 under D25 (computed, §5.1) | 13–36 | **0.05–0.14%** |
 
@@ -84,8 +84,8 @@ hundred and seventy-six that are open, inside four paths out of thirty-nine."*
 
 Two consequences follow, and both are design work rather than opinions:
 
-- **The 24,389 species nodes are not a learning surface at all.** They are per-demon content, read
-  once when a demon is bound, never compared across. Treating them as catalog is the mistake that
+- **The 24,389 species nodes are not a learning surface at all.** They are per-creature content, read
+  once when a creature is bound, never compared across. Treating them as catalog is the mistake that
   would make this unlearnable.
 - **The remaining 1,560 must be exhaustively legible**, because it is the whole shared vocabulary of
   the game and it is what every build guide, screenshot and shared plan refers to.
@@ -107,10 +107,10 @@ and one live defect was found in a surface this design will sit next to (§3.4).
 | Elements | 6 | 40 | 240 |
 | Statuses | 21 | 40 | 840 |
 | **Shared subtotal** | **39** | | **1,560** |
-| Demon species | 841 | 29 | 24,389 |
+| Creature species | 841 | 29 | 24,389 |
 | **Total** | **880** | | **25,949** |
 
-FACT: 841 species across 503 files, counted this session over `data/seed/demons/species/*/*.json`.
+FACT: 841 species across 503 files, counted this session over `data/seed/creatures/species/*/*.json`.
 FACT: 12 aptitudes at `src/FusionRpg.Core/Stats/Aptitudes/Aptitude.cs:38-51`; 6 concrete elements;
 21 statuses per `status-ssot.md`. Matches D27's roster and D29's own `39 × 40 = 1,560`.
 
@@ -154,7 +154,7 @@ rule with the same property and a worse failure mode — `F` only changes how bi
 D28 changes **whether a node exists for you at all**. A wrong number is an argument; a node that is
 open for no visible reason is a bug report. §6 is the design.
 
-**L7 splits.** *"What I learned on my commander is still true on my demons"* is true for the 39
+**L7 splits.** *"What I learned on my commander is still true on my creatures"* is true for the 39
 shared paths — the catalog is shared, only allocation is per-actor (D21). It is **false by
 construction** for a species tree, because D23's whole reward is *"nodes no other tree has."* The
 promise the player should be given instead is two sentences, not one:
@@ -210,7 +210,7 @@ Holds, and D25 completes it. See §5.
 
 ### 3.1 The question, stated precisely
 
-A player who owns 30 demons holds **30 unique trees plus the 39 shared ones**. Doc 07 never faced
+A player who owns 30 creatures holds **30 unique trees plus the 39 shared ones**. Doc 07 never faced
 this because D23 deferred species trees and D30 had not happened.
 
 ### 3.2 What already exists — checked before proposing
@@ -219,8 +219,8 @@ this because D23 deferred species trees and D30 had not happened.
 |---|---|---|
 | Actor sheet, six tabs incl. `passives` | `web/fusion-rpg-web/src/ui/actor/ActorPanel.tsx:19-26` | Band-2 panel, per-actor, opens over any stage. FACT |
 | Passives tab, four locked slots | `web/fusion-rpg-web/src/ui/actor/PassivesTab.tsx:5-20` | Placeholder, reason stated. FACT |
-| **Demon Codex** — every species, `seen`/`discovered`, silhouette when neither | `web/fusion-rpg-web/src/features/demons/DemonsPage.tsx:365-390`, `lib/bus/demons.ts:50-51,117-121` | **A shipped species reference with a discovery state.** FACT |
-| Pacts layer — bound demons, loyalty, tribute | `web/fusion-rpg-web/src/layers/pacts/PactsLayer.tsx:47-60` | Contracts, not content. FACT |
+| **Creature Codex** — every species, `seen`/`discovered`, silhouette when neither | `web/fusion-rpg-web/src/features/creatures/CreaturesPage.tsx:365-390`, `lib/bus/creatures.ts:50-51,117-121` | **A shipped species reference with a discovery state.** FACT |
+| Pacts layer — bound creatures, loyalty, tribute | `web/fusion-rpg-web/src/layers/pacts/PactsLayer.tsx:47-60` | Contracts, not content. FACT |
 | Almanac layer — Creatures + Recipes tabs | `web/fusion-rpg-web/src/layers/almanac/AlmanacLayer.tsx:6-9` | Its own comment says the fuller per-species book *"has no real backing yet."* FACT |
 
 So the repo already has a species-shaped reference surface with an unlock state, and it is **not**
@@ -228,10 +228,10 @@ the Almanac — it is the Codex.
 
 ### 3.3 The answer
 
-**A species tree is the demon's own content, reached two ways, and it is never in a browse.**
+**A species tree is the creature's own content, reached two ways, and it is never in a browse.**
 
-1. **To spend:** the demon's actor sheet → Passives tab → its bloodline pinned above the shared
-   paths (level 0b). One extra card on a surface the player already opens for that demon. Zero new
+1. **To spend:** the creature's actor sheet → Passives tab → its bloodline pinned above the shared
+   paths (level 0b). One extra card on a surface the player already opens for that creature. Zero new
    navigation, same as doc 07's argument for the shared trees.
 2. **To read:** the Codex entry for that species, read-only — the same relationship doc 07 gave the
    Almanac for shared paths, and GG-9 permits exactly it (*other surfaces link into the canonical
@@ -241,7 +241,7 @@ the Almanac — it is the Codex.
 **Why this is not a dodge — three reasons, in order of strength.**
 
 **A species tree is not a choice, so it needs no chooser.** Every other browse in the game exists
-because the player picks from it. A player cannot pick a bloodline: it is a property of the demon
+because the player picks from it. A player cannot pick a bloodline: it is a property of the creature
 they bound. There is no build-planning reason to put 841 of them side by side, because no decision
 is taken by comparing them. (INFERENCE, but a strong one: D23's own framing is *"you give up build
 freedom and receive something unobtainable elsewhere."*)
@@ -251,7 +251,7 @@ freedom and receive something unobtainable elsewhere."*)
 shape GG-25 rejects.
 
 **The one real cross-species question is a collection question, not a build question.** *"Which
-demon should I bind next?"* is answered by the Codex, at the resolution the Codex already works at —
+creature should I bind next?"* is answered by the Codex, at the resolution the Codex already works at —
 a rarity badge, an element, a favour triple (D17), and one line naming what the bloodline is *for*.
 Not by 29 node descriptions × 841. That line is content the D30 pipeline must emit **per species, as
 a summary** — one sentence per tree, 841 sentences, reviewable in an afternoon. That is a real, cheap
@@ -259,7 +259,7 @@ addition to the generator's contract and it is worth booking now (§10.3).
 
 ### 3.4 One live defect found next door
 
-`DemonsPage.tsx:367-388` maps the **entire** species catalog into a grid with no volume strategy —
+`CreaturesPage.tsx:367-388` maps the **entire** species catalog into a grid with no volume strategy —
 `(catalog.data?.species ?? []).map(...)`. FACT. At 841 species that is 841 DOM subtrees on one tab,
 against a rule whose search-first threshold is 240. It is a GG-50 violation today, independent of
 passive trees, and it is the surface a bloodline reference would be added to. Worth fixing before
@@ -353,8 +353,8 @@ discovered by a player who expected a flat rate.
 
 **This is not a new player concept.** `ContractPolicy.NextSlotPrice(purchasedSlots, …)` is an
 arithmetic price in the count you already own — `SoulSinkPolicy.Price(SlotPriceStep × (purchased+1), …)`
-(`src/FusionRpg.Core/Demons/Contracts/ContractPolicy.cs:176-177`, FACT) — and the FE already renders
-it in player words: `· next 900 Souls` (`web/fusion-rpg-web/src/features/demons/contractView.ts:50-54`,
+(`src/FusionRpg.Core/Creatures/Contracts/ContractPolicy.cs:176-177`, FACT) — and the FE already renders
+it in player words: `· next 900 Souls` (`web/fusion-rpg-web/src/features/creatures/contractView.ts:50-54`,
 FACT). Souls are rendered today as composed sentences, not through `formatMagnitude`, so **no new
 unit class is needed.** (Checked: the `UnitClass` union at
 `web/fusion-rpg-web/src/contract/types.ts:33-56` holds thirteen, and none of them has to grow.)
@@ -382,7 +382,7 @@ Doc 07's Plan object is the right container; D25 gives it the field it was missi
 > *Every trait you own makes the next one cost more.*
 
 - **Total** is the whole plan from *this actor's* current state, so the same plan applied to a fresh
-  demon and to a deep commander prices differently — which is correct and must be visible, since
+  creature and to a deep commander prices differently — which is correct and must be visible, since
   D21 makes plan-to-many-actors the normal case.
 - **Next** is what lets the player start without arithmetic.
 - **The rule sentence appears once**, at the top of the tab, first time only (GG-45).
@@ -547,7 +547,7 @@ Three shipped presentations, and they say different things (all FACT):
 | Presentation | Where | What it communicates |
 |---|---|---|
 | **A condition** — *"Unlocks when you hold your first item"* | `web/fusion-rpg-web/src/shell/railState.ts:52-60` | This exists and you cannot have it yet. **No distance.** Reads as a wall |
-| **A silhouette** — `???`, grayscale icon | `web/fusion-rpg-web/src/features/demons/DemonsPage.tsx:371-379` | This exists, is countable, and its identity is the reward. A collection hook |
+| **A silhouette** — `???`, grayscale icon | `web/fusion-rpg-web/src/features/creatures/CreaturesPage.tsx:371-379` | This exists, is countable, and its identity is the reward. A collection hook |
 | **A distance** — a filled bar against a target | `StatBar`, used at `web/fusion-rpg-web/src/ui/actor/ProgressionTab.tsx:34` | You are *here*, the thing is *there*, and the gap is a number |
 
 **Recommendation: deep tiers get a distance, and never a silhouette.**
@@ -601,9 +601,9 @@ small fraction, and the fractions are not close to each other.**
 ```text
 Whole corpus                                        25,949   100%
   shared, guide-able, the thing to learn             1,560     6.0%
-  species bloodlines, one per demon                 24,389    94.0%
+  species bloodlines, one per creature                 24,389    94.0%
 
-A player who owns 30 demons
+A player who owns 30 creatures
   shared corpus (learn once, forever)                1,560     6.0%
   their 30 bloodlines (read once each, on binding)     870     3.4%
   ─ reachable reading surface                        2,430     9.4%
@@ -617,7 +617,7 @@ That player's commander at Θ=100, all-in on one aptitude
 **The three sentences that matter:**
 
 1. **The learning target is 1,560, not 25,949.** Everything a player can plan with, share, or read a
-   guide about is in the shared corpus. The other 94% is content they receive one demon at a time.
+   guide about is in the shared corpus. The other 94% is content they receive one creature at a time.
 2. **Even 1,560 is met 176 traits at a time.** A player at Θ=100 has four paths open past tier 2. The
    surface's entire job at level 0 and level 1 is getting them to those four.
 3. **Ownership is a rounding error, and D25 makes it one deliberately.** Thirteen to thirty-six
@@ -641,7 +641,7 @@ GG-25 rejects it by name. Everything else in this document is downstream of not 
    is a `data/tuning/` number, not a decision that blocks a spec — but the surface's *"you can afford
    about N more"* readout is only honest once it exists.
 3. **A one-line summary per species tree** (§3.3). 841 sentences the generator must emit so the Codex
-   can answer *"which demon should I bind?"* without 29 node descriptions each. Cheap if booked into
+   can answer *"which creature should I bind?"* without 29 node descriptions each. Cheap if booked into
    the D30 pipeline now, expensive as a second pass over 841 artifacts.
 4. **Naming.** This document kept doc 07's *paths* / *traits* / *Focus* / *Plan* and adds
    **bloodline** for a species tree and **stance** for a posture. Both are owner calls; both need
@@ -655,7 +655,7 @@ respec stays a full reset (D18); the tab is the actor sheet's, not a new route (
 
 | File | What is wrong |
 |---|---|
-| `web/fusion-rpg-web/src/features/demons/DemonsPage.tsx:367-388` | The Codex grid maps the entire species catalog with no volume strategy. 841 entries against a 240 search-first threshold — a live GG-50 violation, unrelated to passive trees |
+| `web/fusion-rpg-web/src/features/creatures/CreaturesPage.tsx:367-388` | The Codex grid maps the entire species catalog with no volume strategy. 841 entries against a 240 search-first threshold — a live GG-50 violation, unrelated to passive trees |
 | `docs/research/passive-tree/07-learnability-and-surface.md` §4.2/§4.3 | *"One tree's 29 nodes is render-all"* — `RENDER_ALL_MAX` is 24, and a lattice is a GG-61 surface, not a GG-50 one. §2.3 |
 | `web/fusion-rpg-web/src/ui/actor/PassivesTab.tsx:12` | Still says *"this game doesn't have PoE's content scale to justify one"*. Doc 07 already flagged it; the gap is now 20× rather than 1.1× |
 
@@ -665,7 +665,7 @@ respec stays a full reset (D18); the tab is the actor sheet's, not a new route (
 
 ```
 [x] I identified the subsystem(s) this touches - passive trees, player UI,
-    derived stats / units, demon species content, standalone web.
+    derived stats / units, creature species content, standalone web.
 [x] I read every doc in the §1 row(s) for those subsystems, this session:
     DESIGN-GATE.md (whole), architecture/game-gui-principles.md (all 61 rules,
     §16-§21), design/information-architecture.md (whole), architecture/
@@ -677,7 +677,7 @@ respec stays a full reset (D18); the tab is the actor sheet's, not a new route (
 [x] Every factual claim cites file:line.
 [x] I verified claims against CODE, not comments - and corrected one of doc 07's
     own claims (RENDER_ALL_MAX = 24 makes a 29- or 40-cell lattice not
-    "render-all"), found one live volume defect (DemonsPage.tsx:367), and read
+    "render-all"), found one live volume defect (CreaturesPage.tsx:367), and read
     the largest-mate rule out of tools/HybridViability rather than the prose.
 [x] I read the surrounding section of every rule I quoted - GG-61's own "This is
     not GG-50" paragraph and GG-44's menu-entry scope are both load-bearing here.

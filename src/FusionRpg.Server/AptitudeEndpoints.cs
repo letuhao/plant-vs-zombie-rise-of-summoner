@@ -1,5 +1,5 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Progression;
 using FusionRpg.Core.Stats;
@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.SignalR;
 namespace FusionRpg.Server;
 
 /// <summary>
-/// Player aptitude allocate surfaces: commander (Mode C), species GET, UniqueDemon GET/POST (Mode A —
+/// Player aptitude allocate surfaces: commander (Mode C), species GET, UniqueCreature GET/POST (Mode A —
 /// aptitude-sheet <c>unique-allocate</c>). Commander-only scope decision in historical class-system docs is
 /// superseded for UniqueActor sheets; this file owns all three HTTP surfaces.
 /// </summary>
@@ -74,19 +74,19 @@ public static class AptitudeEndpoints
             try
             {
                 allocation = body.Shares.Aggregate(AptitudeAllocation.Empty,
-                    (acc, kv) => acc + AptitudeAllocation.Single(AllocationScope.UniqueDemon, kv.Key, kv.Value));
+                    (acc, kv) => acc + AptitudeAllocation.Single(AllocationScope.UniqueCreature, kv.Key, kv.Value));
             }
             catch (ArgumentException ex)
             {
                 return Results.BadRequest(new { reason = "aptitudes.unknownid", detail = ex.Message });
             }
 
-            var source = PointBudget.UniqueDemonSourceFromLevel(actor.Level);
-            var check = PointBudget.CheckScope(AllocationScope.UniqueDemon, allocation, source, AptitudeTuningHub.Tuning);
+            var source = PointBudget.UniqueCreatureSourceFromLevel(actor.Level);
+            var check = PointBudget.CheckScope(AllocationScope.UniqueCreature, allocation, source, AptitudeTuningHub.Tuning);
             if (!check.WithinBudget)
                 return Results.Conflict(new { reason = "aptitudes.overbudget", spent = check.Spent, budget = check.Budget });
 
-            store.SaveAllocation(AllocationScope.UniqueDemon, actor.InstanceId, allocation);
+            store.SaveAllocation(AllocationScope.UniqueCreature, actor.InstanceId, allocation);
 
             _ = BroadcastBestEffort(hub, new AptitudesUpdatedDto(actor.PlayerId, "unique", actor.InstanceId, null));
             return Results.Ok(ProjectUniqueState(store, powerIndex, actor));
@@ -96,7 +96,7 @@ public static class AptitudeEndpoints
         g.MapGet("/species/{playerId:long}/{speciesId}", (long playerId, string speciesId, RpgStore store) =>
         {
             if (!store.PlayerExists(playerId)) return Results.NotFound();
-            if (!DemonSpeciesCatalog.IsKnown(speciesId))
+            if (!CreatureSpeciesCatalog.IsKnown(speciesId))
                 return Results.BadRequest(new { reason = "species.unknown" });
             return Results.Ok(ProjectSpeciesState(store, playerId, speciesId));
         });
@@ -124,9 +124,9 @@ public static class AptitudeEndpoints
 
     static object ProjectUniqueState(RpgStore store, IPowerIndexProvider powerIndex, UniqueActorDto actor)
     {
-        var allocation = store.LoadAllocation(AllocationScope.UniqueDemon, actor.InstanceId);
-        var source = PointBudget.UniqueDemonSourceFromLevel(actor.Level);
-        var check = PointBudget.CheckScope(AllocationScope.UniqueDemon, allocation, source, AptitudeTuningHub.Tuning);
+        var allocation = store.LoadAllocation(AllocationScope.UniqueCreature, actor.InstanceId);
+        var source = PointBudget.UniqueCreatureSourceFromLevel(actor.Level);
+        var check = PointBudget.CheckScope(AllocationScope.UniqueCreature, allocation, source, AptitudeTuningHub.Tuning);
         var leftover = check.Budget - check.Spent;
         if (leftover < 0) leftover = 0;
 
@@ -140,7 +140,7 @@ public static class AptitudeEndpoints
             leftover,
             withinBudget = check.WithinBudget,
             shares = AptitudeCatalog.All.ToDictionary(
-                a => a.Id, a => allocation.PointsAt(AllocationScope.UniqueDemon, a.Id), StringComparer.Ordinal)
+                a => a.Id, a => allocation.PointsAt(AllocationScope.UniqueCreature, a.Id), StringComparer.Ordinal)
         };
     }
 
@@ -155,7 +155,7 @@ public static class AptitudeEndpoints
         {
             var effective = store.EffectiveSpeciesAllocation(playerId, speciesId, AptitudeTuningHub.Tuning);
             species[speciesId] = AptitudeCatalog.All.ToDictionary(
-                a => a.Id, a => effective.PointsAt(AllocationScope.DemonType, a.Id), StringComparer.Ordinal);
+                a => a.Id, a => effective.PointsAt(AllocationScope.CreatureType, a.Id), StringComparer.Ordinal);
         }
 
         return new
@@ -171,11 +171,11 @@ public static class AptitudeEndpoints
 
     static object ProjectSpeciesState(RpgStore store, long playerId, string speciesId)
     {
-        var demonTypeId = DemonSpeciesCatalog.Get(speciesId).DemonTypeId;
-        var level = store.GetRpgActor(playerId, RpgActorKinds.Species, demonTypeId)?.Level ?? 1;
+        var creatureTypeId = CreatureSpeciesCatalog.Get(speciesId).CreatureTypeId;
+        var level = store.GetRpgActor(playerId, RpgActorKinds.Species, creatureTypeId)?.Level ?? 1;
         var allocation = store.EffectiveSpeciesAllocation(playerId, speciesId, AptitudeTuningHub.Tuning);
-        var source = PointBudget.DemonTypeSourceFromLevel(level);
-        var check = PointBudget.CheckScope(AllocationScope.DemonType, allocation, source, AptitudeTuningHub.Tuning);
+        var source = PointBudget.CreatureTypeSourceFromLevel(level);
+        var check = PointBudget.CheckScope(AllocationScope.CreatureType, allocation, source, AptitudeTuningHub.Tuning);
 
         var baseline = store.SpeciesBaselineAllocation(playerId, speciesId, AptitudeTuningHub.Tuning);
         return new
@@ -187,9 +187,9 @@ public static class AptitudeEndpoints
             withinBudget = check.WithinBudget,
             hasOverride = store.HasSpeciesOverride(playerId, speciesId),
             shares = AptitudeCatalog.All.ToDictionary(
-                a => a.Id, a => allocation.PointsAt(AllocationScope.DemonType, a.Id), StringComparer.Ordinal),
+                a => a.Id, a => allocation.PointsAt(AllocationScope.CreatureType, a.Id), StringComparer.Ordinal),
             baseline = AptitudeCatalog.All.ToDictionary(
-                a => a.Id, a => baseline.PointsAt(AllocationScope.DemonType, a.Id), StringComparer.Ordinal)
+                a => a.Id, a => baseline.PointsAt(AllocationScope.CreatureType, a.Id), StringComparer.Ordinal)
         };
     }
 

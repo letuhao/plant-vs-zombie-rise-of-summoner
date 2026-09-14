@@ -55,4 +55,17 @@ public sealed class LawnActorResourcePools
     public void Clear() => _pools.Clear();
 
     public int Count => _pools.Count;
+
+    /// <summary>
+    /// `lawn-combat-wire` T12b (spec-basic-attack-cost.md, wire 3: "regen as a third kernel kind"): a
+    /// snapshot of every currently-tracked ptr, for a periodic caller (`KernelDriveHost`'s own 100ms
+    /// grid) that wants to settle/observe every live actor's pools without needing a second registry
+    /// of "which ptrs exist" — this one already is that registry. Returns a defensive copy (an array,
+    /// not the live dictionary's own enumerator) so a caller may safely remove a ptr mid-iteration
+    /// (e.g. a settle that discovers a stale entry) without an `InvalidOperationException`.
+    /// </summary>
+    public IReadOnlyList<KeyValuePair<string, ActorResourcePools>> Snapshot() =>
+        _pools.Count == 0
+            ? Array.Empty<KeyValuePair<string, ActorResourcePools>>()
+            : new List<KeyValuePair<string, ActorResourcePools>>(_pools);
 }

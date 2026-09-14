@@ -66,7 +66,7 @@ nothing sets it in v1. Recorded now because the alternative is discovering it af
 
 > ⚠ **Corrected 2026-09-03.** An earlier draft claimed *"spaced by 10 — the house convention
 > (`ElementRow`, `Aptitude`, `rarity`)"*. **No roster does this**: `ElementRow` is 0–5, `Aptitude` 0–11,
-> `DemonRarity` 0–9, and the `rarity` table has no rows at all. The precedent was invented. Spacing may
+> `CreatureRarity` 0–9, and the `rarity` table has no rows at all. The precedent was invented. Spacing may
 > still be worth arguing on its own merits; it cannot be argued from precedent.
 
 | Ordinal | `power_class` | What it means | Rough share of the library |

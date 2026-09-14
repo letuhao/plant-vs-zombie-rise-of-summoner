@@ -92,7 +92,7 @@ describe("layoutGrid stackDrawPlan", () => {
       col: 1,
       chips: [],
       selected: false,
-      instanceId: "demon-1",
+      instanceId: "creature-1",
       go: go as never
     });
 

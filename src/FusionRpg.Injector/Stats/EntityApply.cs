@@ -291,10 +291,10 @@ public static class EntityApply
         if (!string.Equals(source, "start", StringComparison.Ordinal)
             && !string.Equals(source, "initHealth", StringComparison.Ordinal))
             return;
-        if (!FusionRpg.Core.Demons.DemonSpeciesCatalog.IsConfigured) return;
-        var index = new FusionRpg.Core.Demons.LawnElementIndex(FusionRpg.Core.Demons.DemonSpeciesCatalog.All);
+        if (!FusionRpg.Core.Creatures.CreatureSpeciesCatalog.IsConfigured) return;
+        var index = new FusionRpg.Core.Creatures.LawnElementIndex(FusionRpg.Core.Creatures.CreatureSpeciesCatalog.All);
         if (!index.TryGet(side, typeId, out var species)) return;
-        payload["sourceKind"] = FusionRpg.Core.Demons.DemonProgressionSource.EmpireGeneralKind;
+        payload["sourceKind"] = FusionRpg.Core.Creatures.CreatureProgressionSource.EmpireGeneralKind;
         payload["sourceId"] = "general:" + species.SpeciesId;
     }
 

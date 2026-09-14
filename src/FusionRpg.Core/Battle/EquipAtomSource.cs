@@ -62,39 +62,12 @@ public sealed class EquipAtomSource
     }
 
     /// <summary>
-    /// This specimen's equipped `stat.derived` channel mods. Only `stat.derived` contributes — the
-    /// one kind whose consumer battle has, exactly as <see cref="TraitAtomSource"/> already restricts
-    /// itself.
-    ///
-    /// <para><b>The op is deliberately not read here, and that is a named gap, not an oversight.</b>
-    /// <c>BattleStatComposer</c> folds every equip mod additively
-    /// (<c>snap.Set(ch, snap.Get(ch) + mod.Amount)</c>), so an equipped atom declaring
-    /// <c>op: "increased"</c> or <c>op: "replace"</c> applies as if it were <c>flat</c> on the battle
-    /// side. No shipped content trips it — the only concrete `stat.derived` atom in the corpus today
-    /// is `atom.critical-hunter` at <c>op: "flat"</c> — but it is a real divergence from the derived
-    /// contract, and <see cref="DerivedAtomsFor"/> (the primary/derived side, below) honours the op
-    /// rather than reproducing this. Widening battle to match would move battle numbers, which is a
-    /// battle-program change, not this seam's to make.</para>
-    /// </summary>
-    public IReadOnlyList<BattleChannelMod> ModsFor(string specimenId)
-    {
-        var mods = new List<BattleChannelMod>();
-        foreach (var parsed in EquippedDerived(specimenId))
-            mods.Add(new BattleChannelMod(parsed.Channel, parsed.Amount));
-        return mods;
-    }
-
-    /// <summary>
-    /// The same equipped atoms, projected for the <b>primary/derived</b> pipeline
-    /// (<see cref="ActorHub"/> / <see cref="AtomDerivedSubsystem"/>) instead of the battle one.
-    ///
-    /// <para><b>Why a second projection and not a second pipeline.</b> `class-system-map.md` §2a.0
-    /// decided 2026-08-26 that *the composers stay separate* — the battle seam is `ChannelMods`, and
-    /// `BattleStatComposer` runs no subsystems. That decision is about not fusing the two composers;
-    /// it says nothing against each side reading the SAME equipped atoms through its own seam, which
-    /// is exactly what this is. The parse is shared with <see cref="ModsFor"/> (one
-    /// <see cref="EquippedDerived"/> walk), so the two sides can never drift on which atoms count,
-    /// which channel they name, or what magnitude they carry.</para>
+    /// This specimen's equipped <c>stat.derived</c> atoms, projected for <see cref="ActorHub"/> /
+    /// <see cref="AtomDerivedSubsystem"/> — the ONE consumer now that battle-hub-fuse (T6) deleted
+    /// <c>BattleStatComposer</c> and battle-ops-parity (T7) deleted the battle-only <c>ModsFor</c>
+    /// ignore-op fold this doc comment used to also describe. Battle reads this exact method too now
+    /// (via <see cref="BattleHubInputs.BoundAtoms"/>), so there is only one projection to drift from,
+    /// not two to keep in sync.
     ///
     /// <para><b>The op IS honoured here</b>, through <see cref="AtomDerivedSubsystem.TryParseOp"/> —
     /// the shipped parser whose own contract is that an unknown or `more` op is a content error to
@@ -114,7 +87,7 @@ public sealed class EquipAtomSource
     }
 
     /// <summary>
-    /// The ONE parse of a specimen's equipped `stat.derived` atoms, shared by both projections above.
+    /// The ONE parse of a specimen's equipped `stat.derived` atoms, feeding <see cref="DerivedAtomsFor"/>.
     ///
     /// <para><b><c>amount</c> is read as <c>long</c>, not <c>int</c>.</b> The first cut of this class
     /// used <c>TryGetInt32</c>, which does not throw on a larger magnitude — it returns false, so the

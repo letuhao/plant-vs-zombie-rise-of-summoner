@@ -28,27 +28,27 @@ public class SummonE2ETests : IAsyncLifetime
     public async Task Ten_pull_updates_roster_codex_balance_and_pity_and_is_replay_safe()
     {
         var corr = Guid.NewGuid().ToString("N");
-        var pull = await _http.PostAsJsonAsync("/api/demons/summon",
+        var pull = await _http.PostAsJsonAsync("/api/creatures/summon",
             new { bannerId = "standard-rift", count = 10, correlationId = corr });
         pull.EnsureSuccessStatusCode();
         var outcome = await pull.Content.ReadFromJsonAsync<JsonElement>();
         Assert.False(outcome.GetProperty("replayed").GetBoolean());
         Assert.Equal(10, outcome.GetProperty("specimens").EnumerateArray().Count());
 
-        var roster = await _http.GetFromJsonAsync<JsonElement>("/api/demons/1");
+        var roster = await _http.GetFromJsonAsync<JsonElement>("/api/creatures/1");
         Assert.Equal(10, roster.GetProperty("items").EnumerateArray().Count());
 
-        var codex = await _http.GetFromJsonAsync<JsonElement>("/api/demons/1/codex");
+        var codex = await _http.GetFromJsonAsync<JsonElement>("/api/creatures/1/codex");
         Assert.True(codex.GetProperty("entries").EnumerateArray().Any());
 
-        var state = await _http.GetFromJsonAsync<JsonElement>("/api/demons/1/summon-state");
+        var state = await _http.GetFromJsonAsync<JsonElement>("/api/creatures/1/summon-state");
         var balance = state.GetProperty("balance").GetProperty("balance").GetInt64();
         var discovery = outcome.GetProperty("discoverySouls").GetInt64();
         Assert.Equal(5000 - 900 + discovery, balance);
         Assert.Equal(25, state.GetProperty("pity").GetProperty("heirloomGuaranteeAt").GetInt32());
 
         // Replay: identical instance ids, no further spend.
-        var replay = await _http.PostAsJsonAsync("/api/demons/summon",
+        var replay = await _http.PostAsJsonAsync("/api/creatures/summon",
             new { bannerId = "standard-rift", count = 10, correlationId = corr });
         replay.EnsureSuccessStatusCode();
         var replayed = await replay.Content.ReadFromJsonAsync<JsonElement>();
@@ -65,9 +65,9 @@ public class SummonE2ETests : IAsyncLifetime
     {
         // Drain via pulls until a ×10 can't be afforded, then assert the conflict shape.
         for (var i = 0; i < 5; i++)
-            await _http.PostAsJsonAsync("/api/demons/summon",
+            await _http.PostAsJsonAsync("/api/creatures/summon",
                 new { bannerId = "standard-rift", count = 10, correlationId = Guid.NewGuid().ToString("N") });
-        var broke = await _http.PostAsJsonAsync("/api/demons/summon",
+        var broke = await _http.PostAsJsonAsync("/api/creatures/summon",
             new { bannerId = "standard-rift", count = 10, correlationId = Guid.NewGuid().ToString("N") });
         if (broke.StatusCode == HttpStatusCode.OK) return; // discovery rewards kept it solvent — acceptable
         Assert.Equal(HttpStatusCode.Conflict, broke.StatusCode);
@@ -79,16 +79,16 @@ public class SummonE2ETests : IAsyncLifetime
     public async Task Oversized_inputs_are_rejected_with_400()
     {
         var longCorr = new string('x', 65);
-        var pull = await _http.PostAsJsonAsync("/api/demons/summon",
+        var pull = await _http.PostAsJsonAsync("/api/creatures/summon",
             new { bannerId = "standard-rift", count = 1, correlationId = longCorr });
         Assert.Equal(HttpStatusCode.BadRequest, pull.StatusCode);
 
-        var ok = await _http.PostAsJsonAsync("/api/demons/summon",
+        var ok = await _http.PostAsJsonAsync("/api/creatures/summon",
             new { bannerId = "standard-rift", count = 1, correlationId = Guid.NewGuid().ToString("N") });
         ok.EnsureSuccessStatusCode();
         var outcome = await ok.Content.ReadFromJsonAsync<JsonElement>();
         var id = outcome.GetProperty("specimens")[0].GetProperty("profile").GetProperty("instanceId").GetString();
-        var longNick = await _http.PostAsJsonAsync($"/api/demons/specimen/{id}/nickname",
+        var longNick = await _http.PostAsJsonAsync($"/api/creatures/specimen/{id}/nickname",
             new { nickname = new string('n', 33) });
         Assert.Equal(HttpStatusCode.BadRequest, longNick.StatusCode);
     }
@@ -96,18 +96,18 @@ public class SummonE2ETests : IAsyncLifetime
     [Fact]
     public async Task Nickname_and_lock_work_on_a_summoned_specimen()
     {
-        var pull = await _http.PostAsJsonAsync("/api/demons/summon",
+        var pull = await _http.PostAsJsonAsync("/api/creatures/summon",
             new { bannerId = "standard-rift", count = 1, correlationId = Guid.NewGuid().ToString("N") });
         pull.EnsureSuccessStatusCode();
         var outcome = await pull.Content.ReadFromJsonAsync<JsonElement>();
         var id = outcome.GetProperty("specimens")[0].GetProperty("profile").GetProperty("instanceId").GetString();
 
-        var nick = await _http.PostAsJsonAsync($"/api/demons/specimen/{id}/nickname", new { nickname = "Ragnar" });
+        var nick = await _http.PostAsJsonAsync($"/api/creatures/specimen/{id}/nickname", new { nickname = "Ragnar" });
         nick.EnsureSuccessStatusCode();
-        var locked = await _http.PostAsJsonAsync($"/api/demons/specimen/{id}/lock", new { locked = true });
+        var locked = await _http.PostAsJsonAsync($"/api/creatures/specimen/{id}/lock", new { locked = true });
         locked.EnsureSuccessStatusCode();
 
-        var roster = await _http.GetFromJsonAsync<JsonElement>("/api/demons/1");
+        var roster = await _http.GetFromJsonAsync<JsonElement>("/api/creatures/1");
         var item = roster.GetProperty("items").EnumerateArray()
             .Single(x => x.GetProperty("profile").GetProperty("instanceId").GetString() == id);
         Assert.Equal("Ragnar", item.GetProperty("profile").GetProperty("nickname").GetString());

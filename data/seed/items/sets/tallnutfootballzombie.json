@@ -25,7 +25,7 @@
       "id": "set.tallnutfootballzombie-001",
       "nameKey": "set.nutty-gridiron",
       "name": "Nutty Gridiron",
-      "themeKey": "demon.tallnutfootballzombie",
+      "themeKey": "creature.tallnutfootballzombie",
       "members": [
         {
           "role": "core-guard",

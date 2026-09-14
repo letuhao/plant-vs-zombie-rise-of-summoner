@@ -21,7 +21,7 @@ public class SpeciesMaterialiserPurityGuardTests
     [Fact]
     public void The_materialiser_reads_no_clock_and_no_unseeded_random()
     {
-        var text = ReadCore("Demons", "Materialise", "SpeciesMaterialiser.cs");
+        var text = ReadCore("Creatures", "Materialise", "SpeciesMaterialiser.cs");
 
         foreach (var forbidden in ForbiddenPatterns)
             Assert.DoesNotContain(forbidden, text, StringComparison.Ordinal);
@@ -30,7 +30,7 @@ public class SpeciesMaterialiserPurityGuardTests
     [Fact]
     public void The_materialiser_sorts_its_own_iteration_rather_than_trusting_caller_order()
     {
-        var text = ReadCore("Demons", "Materialise", "SpeciesMaterialiser.cs");
+        var text = ReadCore("Creatures", "Materialise", "SpeciesMaterialiser.cs");
 
         // Q5/§4's own "no dictionary or hash-set iteration order" property, made mechanical: the
         // roster loop must call an explicit ordering operator, not iterate the caller's own list.

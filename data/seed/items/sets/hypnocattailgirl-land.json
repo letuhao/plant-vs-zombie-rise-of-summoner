@@ -25,7 +25,7 @@
       "id": "set.hypnocattailgirl-land-001",
       "nameKey": "set.chromatic-pulse",
       "name": "Chromatic Pulse",
-      "themeKey": "demon.hypnocattailgirl_land",
+      "themeKey": "creature.hypnocattailgirl_land",
       "members": [
         {
           "role": "armament-primary",

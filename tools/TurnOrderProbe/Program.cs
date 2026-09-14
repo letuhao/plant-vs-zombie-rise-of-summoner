@@ -3,9 +3,9 @@
 
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Battle.Timeline;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 
-DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+CreatureSpeciesCatalog.ConfigureFromCompiledDefault();
 
 var failures = 0;
 void Check(string name, bool condition)
@@ -41,8 +41,8 @@ BattleSetup Setup() => new()
         entries.Count == 3 && entries[0].Round == 1 && entries[1].Round == 1 && entries[2].Round == 2);
 }
 {
-    var realSpeciesId = DemonSpeciesCatalog.All[0].SpeciesId;
-    var realName = DemonSpeciesCatalog.All[0].Name;
+    var realSpeciesId = CreatureSpeciesCatalog.All[0].SpeciesId;
+    var realName = CreatureSpeciesCatalog.All[0].Name;
     var setup = new BattleSetup
     {
         WaveId = "probe",

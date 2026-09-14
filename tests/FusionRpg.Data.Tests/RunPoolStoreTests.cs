@@ -13,21 +13,16 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class RunPoolStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public RunPoolStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-runpools-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static Dictionary<string, long> AllSix(long value) =>
         DerivedStatChannels.ResourceIds.ToDictionary(id => id, _ => value);
@@ -47,10 +42,9 @@ public class RunPoolStoreTests : IDisposable
 
         _store.SaveRunPools("run-1", "wave:0", values);
 
-        // A fresh RpgStore over the SAME data directory -- proves this is real persistence, not an
-        // in-memory cache the same instance happens to still hold.
-        var reopened = new RpgStore(_dir);
-        reopened.Init();
+        // A fresh store over the SAME storage -- proves this is real persistence, not an in-memory
+        // cache the same instance happens to still hold.
+        var reopened = _testStore.Reopen();
         var loaded = reopened.LoadRunPools("run-1", "wave:0");
 
         Assert.NotNull(loaded);

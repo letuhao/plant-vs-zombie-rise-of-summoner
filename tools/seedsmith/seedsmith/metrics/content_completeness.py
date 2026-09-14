@@ -114,7 +114,7 @@ class ContentLanguageContamination(Metric):
     """Task 4b: registers the fixed, bidirectional `language_consistency` check
     (`workflow/validators/language.py`) into `core`'s own registry, so every domain that adopts
     `content-completeness-core` gets it for free rather than importing `language_consistency`
-    piecemeal the way demons/passive-tree do today. Runs the check against every registered
+    piecemeal the way creatures/passive-tree do today. Runs the check against every registered
     spec's own `field` (the same text this module already treats as this domain's player-facing
     content) — a domain does not register separately for this; it comes with `CompletenessSpec`."""
 

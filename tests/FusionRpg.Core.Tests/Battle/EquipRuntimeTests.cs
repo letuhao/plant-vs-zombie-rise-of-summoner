@@ -1,6 +1,7 @@
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Stats.Derived.Subsystems;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Battle;
@@ -10,15 +11,23 @@ namespace FusionRpg.Core.Tests.Battle;
 /// on one actor is observable in battle. Mirrors <see cref="TraitAtomSource"/>'s own migration tests
 /// exactly, because it is the same producer shape.
 /// </summary>
-public class EquipRuntimeTests : IDisposable
+public class EquipRuntimeTests
 {
-    // No BattleStatComposer.Configure(...) needed: these fixtures never set ElementPrimary/Secondary,
-    // so AddAffinity (the only reader of Tuning) never runs.
-    public void Dispose()
+    // battle-hub-fuse T6: equipment reaches battle as Hub inputs (bound atoms resolved through the
+    // same FromResolver projection production uses), never a composer static. No shared state, so
+    // no Dispose reset is needed.
+    //
+    // battle-ops-parity T7: resolved by SpecimenId, never Key -- production (EquippedBoundAtoms,
+    // WebMatchService) always resolves a specimen's equip atoms by its SpecimenId (the durable
+    // assignment scope), and every fixture below sets a distinct Key ("squad:0") while varying
+    // SpecimenId, so keying off Key here would resolve every actor's atoms identically regardless of
+    // which specimen it actually is -- found and fixed live in this session: the earlier `setup.Key`
+    // read a constant across every fixture and silently produced zero atoms.
+    static BattleActorSetup WithBoundAtoms(BattleActorSetup setup, EquipAtomSource source) => setup with
     {
-        BattleStatComposer.ResetEquipment();
-        BattleStatComposer.ResetTraits();
-    }
+        HubInputs = (setup.HubInputs ?? new BattleHubInputs())
+            with { BoundAtoms = setup.SpecimenId is { } specimenId ? source.DerivedAtomsFor(specimenId) : Array.Empty<BoundDerivedAtom>() }
+    };
 
     static BattleActorSetup Actor(string? specimenId, int level = 5) => new()
     {
@@ -37,11 +46,11 @@ public class EquipRuntimeTests : IDisposable
     [Fact]
     public void An_equipped_item_changes_a_battle_number()
     {
-        BattleStatComposer.UseEquipment(EquipAtomSource.FromResolver(specimenId =>
-            specimenId == "s42" ? new[] { DerivedAtom(DerivedStatChannels.CombatPowerFire, 30) } : Array.Empty<AtomRow>()));
+        var source = EquipAtomSource.FromResolver(specimenId =>
+            specimenId == "s42" ? new[] { DerivedAtom(DerivedStatChannels.CombatPowerFire, 30) } : Array.Empty<AtomRow>());
 
-        var geared = BattleStatComposer.Compose(Actor(specimenId: "s42"));
-        var bare = BattleStatComposer.Compose(Actor(specimenId: "s42", level: 5) with { SpecimenId = null });
+        var geared = BattleHubCompose.Compose(WithBoundAtoms(Actor(specimenId: "s42"), source));
+        var bare = BattleHubCompose.Compose(Actor(specimenId: "s42", level: 5) with { SpecimenId = null });
 
         Assert.Equal(bare.Get(DerivedStatChannels.CombatPowerFire) + 30,
             geared.Get(DerivedStatChannels.CombatPowerFire));
@@ -50,14 +59,12 @@ public class EquipRuntimeTests : IDisposable
     [Fact]
     public void Unequipping_removes_the_contribution()
     {
-        var equipped = true;
-        BattleStatComposer.UseEquipment(EquipAtomSource.FromResolver(_ =>
-            equipped ? new[] { DerivedAtom(DerivedStatChannels.CombatPowerFire, 30) } : Array.Empty<AtomRow>()));
+        var source = EquipAtomSource.FromResolver(_ =>
+            new[] { DerivedAtom(DerivedStatChannels.CombatPowerFire, 30) });
+        var empty = EquipAtomSource.FromResolver(_ => Array.Empty<AtomRow>());
 
-        var before = BattleStatComposer.Compose(Actor(specimenId: "s42"));
-
-        equipped = false; // the projection is rebuilt, not patched -- simulated here as "resolves empty now"
-        var after = BattleStatComposer.Compose(Actor(specimenId: "s42"));
+        var before = BattleHubCompose.Compose(WithBoundAtoms(Actor(specimenId: "s42"), source));
+        var after = BattleHubCompose.Compose(WithBoundAtoms(Actor(specimenId: "s42"), empty));
 
         Assert.Equal(30, before.Get(DerivedStatChannels.CombatPowerFire) - after.Get(DerivedStatChannels.CombatPowerFire));
     }
@@ -65,7 +72,7 @@ public class EquipRuntimeTests : IDisposable
     [Fact]
     public void Equipment_and_trait_mods_compose_without_double_counting()
     {
-        BattleStatComposer.UseTraits(TraitAtomSource.FromContainers(
+        var traits = TraitAtomSource.FromContainers(
             new[]
             {
                 new ContainerRow
@@ -74,18 +81,18 @@ public class EquipRuntimeTests : IDisposable
                     Atoms = new[] { new ContainerAtomRow(1, "atom.trait-test.t1") },
                 },
             },
-            atomId => atomId == "atom.trait-test.t1" ? DerivedAtomNamed("atom.trait-test", DerivedStatChannels.CombatPowerFire, 10) : null));
-
-        BattleStatComposer.UseEquipment(EquipAtomSource.FromResolver(_ =>
-            new[] { DerivedAtom(DerivedStatChannels.CombatPowerFire, 30) }));
+            atomId => atomId == "atom.trait-test.t1" ? DerivedAtomNamed("atom.trait-test", DerivedStatChannels.CombatPowerFire, 10) : null);
+        var equip = EquipAtomSource.FromResolver(_ =>
+            new[] { DerivedAtom(DerivedStatChannels.CombatPowerFire, 30) });
 
         var setup = Actor(specimenId: "s42") with { TraitIds = new[] { "test-trait" } };
-        var composed = BattleStatComposer.Compose(setup);
+        var composed = BattleHubCompose.Compose(WithBoundAtoms(setup, equip), traits);
 
-        var bareline = BattleStatComposer.Compose(Actor(specimenId: null));
+        var bareline = BattleHubCompose.Compose(Actor(specimenId: null));
 
         // Both contributions landed, exactly once each -- 10 (trait) + 30 (equipment), not 40 twice
-        // and not one silently overwriting the other (both write the SAME channel via snap.Set(get()+amount)).
+        // and not one silently overwriting the other. The trait source rides explicitly (no shared
+        // static); equipment rides the setup's Hub inputs, exactly like production.
         Assert.Equal(bareline.Get(DerivedStatChannels.CombatPowerFire) + 40,
             composed.Get(DerivedStatChannels.CombatPowerFire));
     }
@@ -118,14 +125,14 @@ public class EquipRuntimeTests : IDisposable
     [Fact]
     public void A_ValueSpec_amount_is_skipped_not_crashed_on_in_battle()
     {
-        BattleStatComposer.UseEquipment(EquipAtomSource.FromResolver(_ => new[]
+        var equip = EquipAtomSource.FromResolver(_ => new[]
         {
             ValueSpecAtom(DerivedStatChannels.CombatPowerFire),
             DerivedAtom(DerivedStatChannels.CombatPowerFire, 30),
-        }));
+        });
 
-        var composed = BattleStatComposer.Compose(Actor(specimenId: "s42"));
-        var bare = BattleStatComposer.Compose(Actor(specimenId: null) with { SpecimenId = null });
+        var composed = BattleHubCompose.Compose(WithBoundAtoms(Actor(specimenId: "s42"), equip));
+        var bare = BattleHubCompose.Compose(Actor(specimenId: null) with { SpecimenId = null });
 
         // The unresolvable row is skipped and the walk CONTINUES -- the readable atom beside it still
         // lands. A thrown row would take the whole squad build with it.
@@ -152,11 +159,10 @@ public class EquipRuntimeTests : IDisposable
     [Fact]
     public void No_specimen_id_means_no_equipment_contribution()
     {
-        BattleStatComposer.UseEquipment(EquipAtomSource.FromResolver(_ =>
-            new[] { DerivedAtom(DerivedStatChannels.CombatPowerFire, 999) }));
-
-        var withoutSpecimen = BattleStatComposer.Compose(Actor(specimenId: null));
-        var baseline = BattleStatComposer.Compose(Actor(specimenId: null) with { SpecimenId = null });
+        // No Hub inputs, no contribution — the bound-atom projection only runs for setups that
+        // carry it, exactly like the old SpecimenId-gated read.
+        var withoutSpecimen = BattleHubCompose.Compose(Actor(specimenId: null));
+        var baseline = BattleHubCompose.Compose(Actor(specimenId: null) with { SpecimenId = null });
 
         Assert.Equal(baseline.Get(DerivedStatChannels.CombatPowerFire), withoutSpecimen.Get(DerivedStatChannels.CombatPowerFire));
     }
@@ -165,15 +171,18 @@ public class EquipRuntimeTests : IDisposable
     public void Sim_runtime_opens_partially_and_the_spec_says_why()
     {
         // mechanism-wiring E5 (2026-09-06): SimEffectHost gained a real consumer -- ActorDerivedLookup's
-        // contribution fold, reached via SimEffectHost/FoundationHarness.ContributeDerived. `Partial`,
-        // not `Full`: the fold is a plain sum (ActorDerivedSnapshot.OverlayAdd) that honours
-        // Flat/Increased and not Replace/Flag (EffectOfflineKitTests.
-        // The_four_derived_ops_decide_Full_versus_Partial). `tools/CombatSim` (which drives
-        // FoundationHarness, not this class) can therefore simulate an item's Flat/Increased channels
-        // today; a Replace/Flag-authored item still composes wrong there until the fold routes through
-        // the real DerivedComposer. Renamed from "..._stays_None_...", which is no longer true.
+        // contribution fold, reached via SimEffectHost/FoundationHarness.ContributeDerived. Opened
+        // `Partial`, not `Full`, at first: the fold was a plain sum (ActorDerivedSnapshot.OverlayAdd)
+        // that honoured Flat/Increased and not Replace/Flag (EffectOfflineKitTests.
+        // The_four_derived_ops_decide_Full_versus_Partial). sim-hub-parity (T15, 2026-09-13) closed that
+        // gap: the fold now routes through DerivedComposer.ComposeChannelWithBaseline, the SAME op-aware
+        // fold every other runtime uses, so `tools/CombatSim` (which drives FoundationHarness, not this
+        // class) can now simulate ANY op an item authors, not just Flat/Increased. Method name kept
+        // (renamed from "..._stays_None_..." once already; this is its second history note, not a
+        // second rename) to avoid drifting two out-of-program doc references
+        // (item-todo.md, spec-equip-runtime.md) that cite it by name.
         var kind = AtomKindRegistry.Get("stat.derived")!;
-        Assert.Equal(RuntimeState.Partial, kind.SupportIn(RuntimeId.Sim));
+        Assert.Equal(RuntimeState.Full, kind.SupportIn(RuntimeId.Sim));
         Assert.Equal(RuntimeState.Full, kind.SupportIn(RuntimeId.Battle));
         Assert.Equal(RuntimeState.Full, kind.SupportIn(RuntimeId.Lawn));
     }

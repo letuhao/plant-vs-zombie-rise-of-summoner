@@ -25,7 +25,7 @@
       "id": "set.firecaltrop-001",
       "nameKey": "set.flame-light-spikes",
       "name": "Flame-Light Spikes",
-      "themeKey": "demon.firecaltrop",
+      "themeKey": "creature.firecaltrop",
       "members": [
         {
           "role": "armament-primary",

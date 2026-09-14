@@ -67,7 +67,7 @@ Fire essence will not stand in for ice — see [essence](essence.md).
 
 ## What you do (first time)
 
-1. Unlock Fusion (you need a demon you can actually fuse).
+1. Unlock Fusion (you need a creature you can actually fuse).
 2. Open `F` and pick a cheap experiment you can afford.
 3. Watch discovery or power change, then check the specimen on Creatures.
 
@@ -93,7 +93,7 @@ It may be locked or away (for example on an expedition).
 
 ## Related
 
-- Next: [Patron demon](patron.md)
+- Next: [Patron creature](patron.md)
 - [Essence](essence.md)
 - [Persistent specimens](specimens.md)
 - [Summoning altar](summoning-altar.md)

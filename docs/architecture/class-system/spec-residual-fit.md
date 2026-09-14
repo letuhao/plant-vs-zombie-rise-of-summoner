@@ -39,7 +39,7 @@ because an uncontrolled element matchup was silently adding ±25% to two of thre
 was correct at the time**, and it means:
 
 > Every result in the design record, including the dominant corner, was measured on a **1-D slice** of
-> what [spec-aspect-scope.md](../demons/spec-aspect-scope.md) makes a **2-D matchup space**.
+> what [spec-aspect-scope.md](../creatures/spec-aspect-scope.md) makes a **2-D matchup space**.
 
 With `aspect` as a tier, a team is chosen on **posture × element**, and a single dominant posture is
 much less decisive — you would still be picking aspects against the ring.

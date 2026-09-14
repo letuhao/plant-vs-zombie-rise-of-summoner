@@ -25,7 +25,7 @@
       "id": "set.cherrychomper-001",
       "nameKey": "set.cherry-maw-bomb",
       "name": "Cherry Maw Bomb",
-      "themeKey": "demon.cherrychomper",
+      "themeKey": "creature.cherrychomper",
       "members": [
         {
           "role": "armament-primary",

@@ -198,7 +198,7 @@ filled from `s.Actor.Level` at `WebMatchService.cs:407`; `BaseHp/BaseAtk/BaseDef
 `BattleModels.cs:218-221`) read the same `Level`. `difficulty-ladder` §7 leaves the seam to this module. Two
 readings:
 
-- **(a) Pass composed `Θ_actor` as `Level`.** No new field; but `BaseHp(Θ_actor)` moves too — a demon's hp
+- **(a) Pass composed `Θ_actor` as `Level`.** No new field; but `BaseHp(Θ_actor)` moves too — a creature's hp
   ladder would jump with Dave level and runs, which is `power-index` hydration's decision
   (`spec-power-index.md` §2.5), and `Level` is the serialised name every tier hash locks (`:15-22`).
 - **(b) Add `int? ThetaActor`** (`WhenWritingDefault`, §5 table). **Recommended.** `BattleStatComposer.cs:108`

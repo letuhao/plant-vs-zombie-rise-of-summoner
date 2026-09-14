@@ -1,0 +1,37 @@
+{
+  "chainRef": "event.story-creature.ashthreepeater-001",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.story-creature.allpeater-001",
+  "flavor": "A creature of shifting, iridescent smoke coalesces in the center of the chamber. It does not possess a fixed shape, instead cycling through various geometric patterns of light. It offers to adjust the very logic of your presence here, suggesting a sudden 切换 in the laws of physics, provided you pay the toll of your own essence.",
+  "kind": "story",
+  "name": "The Broker of Modalities",
+  "outcomes": [
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.resilience",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "A narrative encounter presenting a high-stakes choice between immediate power and permanent character cost.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.allpeater"
+}

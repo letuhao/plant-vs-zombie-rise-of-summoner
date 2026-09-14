@@ -9,7 +9,7 @@
   "blindSpots": [
     {"term": "Lawn", "meaning": "The live PvZ board match on your machine, watched and fed by Rise of Summoner — not the rift map and not a web-only puzzle."},
     {"term": "First core", "meaning": "What you play first and what feeds almost every spine loop. It is not the win condition and not optional flavour."},
-    {"term": "Replace the game", "meaning": "What Rise of Summoner does **not** do. It observes, records, and can deploy demons back — it does not rewrite the binary."},
+    {"term": "Replace the game", "meaning": "What Rise of Summoner does **not** do. It observes, records, and can deploy creatures back — it does not rewrite the binary."},
     {"term": "Lawn-only forever", "meaning": "Unlocked web features stay playable with the lawn game closed once opened. Nothing essential stays lawn-only forever."},
     {"term": "Same save", "meaning": "Progress lands in your Rise of Summoner save. The lawn game’s own saves stay that game’s."}
   ],
@@ -22,7 +22,7 @@
       "title": "What it is",
       "paras": [
         "Legal Plants vs. Zombies: Fusion on your machine, with the control room watching.",
-        "You play the board. Rise of Summoner records what happened and can send roster demons back into the fight."
+        "You play the board. Rise of Summoner records what happened and can send roster creatures back into the fight."
       ],
       "note": "Point the launcher at a legal install. Uninstalling the plugin is deleting a folder."
     },
@@ -33,12 +33,12 @@
         {"name": "Souls", "body": "Kills and victories feed the soul ledger."},
         {"name": "Almanac and types", "body": "Plants and zombies you meet feed type progression and the almanac."},
         {"name": "Specimen levels", "body": "Specimens gain levels from work they actually did."},
-        {"name": "Deployed demons", "body": "Bound demons you field fight with the traits and element you gave them."}
+        {"name": "Deployed creatures", "body": "Bound creatures you field fight with the traits and element you gave them."}
       ],
       "diagram": [
         "  legal match  ->  play board  ->  souls / XP / almanac / levels",
         "                      |",
-        "                      +->  deploy roster demons (when bound)"
+        "                      +->  deploy roster creatures (when bound)"
       ]
     },
     {
@@ -62,7 +62,7 @@
     "Open Lawn in the control room and confirm the live mirror is moving.",
     "Finish a wave and look for souls / almanac / specimen progress in your save."
   ],
-  "doNote": "Read the board under pressure: [live mirror and unit HUD](lawn-mirror-hud). Field roster demons: [bound demon deploy](lawn-deploy).",
+  "doNote": "Read the board under pressure: [live mirror and unit HUD](lawn-mirror-hud). Field roster creatures: [bound creature deploy](lawn-deploy).",
   "mixUps": [
     {"q": "Is the lawn the whole game?", "a": "No. It is the first core loop. Expeditions, map, and later places matter too."},
     {"q": "Do I lose RPG progress if I close the lawn game?", "a": "Unlocked web features stay playable with the lawn game closed. RPG data lives beside the server."},

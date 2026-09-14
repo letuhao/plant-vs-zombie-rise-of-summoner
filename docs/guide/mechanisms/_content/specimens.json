@@ -5,10 +5,10 @@
   "kicker": "Roster and summoning · summon and fusion",
   "pillar": {"text": "Creatures", "href": "creatures.md"},
   "loopLine": "Summon and fusion",
-  "hook": "Every demon is a **specimen** — its own level, gear, and history — not a stack of identical copies.",
+  "hook": "Every creature is a **specimen** — its own level, gear, and history — not a stack of identical copies.",
   "blindSpots": [
-    {"term": "Specimen", "meaning": "One individual demon in your roster. Two Peashooter-line demons are still two specimens."},
-    {"term": "Creature / demon", "meaning": "Player words for the same roster beings. You collect creatures; the ones you summon and bind are demons."},
+    {"term": "Specimen", "meaning": "One individual creature in your roster. Two Peashooter-line creatures are still two specimens."},
+    {"term": "Creature / creature", "meaning": "Player words for the same roster beings. You collect creatures; the ones you summon and bind are creatures."},
     {"term": "Duplicate", "meaning": "Another specimen of a species you already have — fuel for fusion, not trash to delete on sight."},
     {"term": "Persistent", "meaning": "They stay in your save across sessions and bank across worlds with who you are."}
   ],
@@ -28,7 +28,7 @@
       "title": "How you use the roster",
       "cards": [
         {"name": "Inspect", "body": "Open Creatures and read who you have."},
-        {"name": "Bind", "body": "Put demons on pacts so they will deploy — see [pacts and loyalty](pacts-loyalty)."},
+        {"name": "Bind", "body": "Put creatures on pacts so they will deploy — see [pacts and loyalty](pacts-loyalty)."},
         {"name": "Field", "body": "Bound specimens deploy to lawn; spare ones can go on expeditions."},
         {"name": "Fuse", "body": "Spend duplicates and [essence](essence) in the Fusion lab."}
       ]
@@ -63,7 +63,7 @@
   "next": ["summoning-altar"],
   "related": ["summoning-altar", "pacts-loyalty", "specimen-fusion", "wild-joins", "souls"],
   "sources": [
-    "docs/guide/creatures.md §Demons are individuals",
+    "docs/guide/creatures.md §Creatures are individuals",
     "docs/guide/creatures.md §Creature sheet",
     "docs/guide/mechanisms/specimens.md (prior stub)"
   ]

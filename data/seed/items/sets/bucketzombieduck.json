@@ -25,7 +25,7 @@
       "id": "set.bucketzombieduck-001",
       "nameKey": "set.the-unwilling-float",
       "name": "The Unwilling Float",
-      "themeKey": "demon.bucketzombieduck",
+      "themeKey": "creature.bucketzombieduck",
       "members": [
         {
           "role": "armament-primary",

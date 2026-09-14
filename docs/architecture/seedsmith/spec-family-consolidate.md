@@ -3,7 +3,7 @@
 Module `family-consolidate` in the [seedsmith map](../seedsmith-map.md) §3b. Wave **D2**.
 Depends on `family-extract`.
 
-Ideal: [seedsmith-demons-ideal.md](../seedsmith-demons-ideal.md); `A#` = its §6 audit.
+Ideal: [seedsmith-creatures-ideal.md](../seedsmith-creatures-ideal.md); `A#` = its §6 audit.
 
 **Status: APPROVED by the owner 2026-08-31. Authorized to build.**
 
@@ -20,7 +20,7 @@ This is where the taxonomy is actually decided, and audit A6 is the reason it is
 > doing it fresh each run returns a different taxonomy each run — breaking determinism, this repo's
 > stated product, in the one artifact everything else inherits from.
 
-**Done means:** an append-only `families.v1.json` exists, every demon maps to zero or more family
+**Done means:** an append-only `families.v1.json` exists, every creature maps to zero or more family
 ids, and running consolidation again over the same candidates reproduces it exactly.
 
 ---
@@ -65,7 +65,7 @@ Mechanical merging will not catch everything — `shambler` and `lurcher` are th
 reader and share no token. A model call is permitted for the residue, on one condition:
 
 **Its output is committed and re-run only deliberately**, exactly as
-`DemonSpeciesCatalog.Generated.cs` already is — *"Do not hand-edit — rebalance via the generator, then
+`CreatureSpeciesCatalog.Generated.cs` already is — *"Do not hand-edit — rebalance via the generator, then
 re-emit."*
 
 So the pipeline is: mechanical merge → residue → optional one-off model pass → **commit the result**.
@@ -78,22 +78,22 @@ uses in three places.
 `families.v1.json` is **append-only**: a family id, once published, never changes meaning, never gets
 renamed, and never moves position.
 
-This is not caution. Family ids become the **partition key** (`demon-metrics`) and a **motif
+This is not caution. Family ids become the **partition key** (`creature-metrics`) and a **motif
 inheritance channel** (`motif-derive`), and generated content is content-addressed against them.
 Renaming a family after content exists silently re-parents everything derived from it, and no test
-would notice — the content is still there, still valid, and now describing a different demon.
+would notice — the content is still there, still valid, and now describing a different creature.
 
 Superseding an id (splitting a family, retiring one) is therefore a **versioned change** —
 `families.v2.json` with a documented migration — not an edit.
 
 ### 2.4 Multi-membership
 
-A demon belongs to zero, one or several families (owner, 2026-08-31). Consolidation therefore emits
+A creature belongs to zero, one or several families (owner, 2026-08-31). Consolidation therefore emits
 `speciesId -> [familyId]`, and two consequences must not be lost:
 
 - **Partition counts no longer sum to the roster size.** Any metric assuming they do is wrong (A5),
-  which is why `demon-metrics` carries a per-demon coverage check as well as a per-family one.
-- **A demon with zero families is legal**, not an error — it is a `blocked` extraction faithfully
+  which is why `creature-metrics` carries a per-creature coverage check as well as a per-family one.
+- **A creature with zero families is legal**, not an error — it is a `blocked` extraction faithfully
   carried through. It shows up as work remaining (Q6b), not as a validation failure.
 
 ### 2.5 What consolidation must not do
@@ -119,12 +119,12 @@ python -m pytest -q
 ## 4. Project structure
 
 ```
-tools/seedsmith/seedsmith/adapters/demons/family/
+tools/seedsmith/seedsmith/adapters/creatures/family/
     consolidate.py   → normalize, head-noun merge, synonym merge, id assignment
     synonyms.json    → human-edited, algorithm-read
 tools/seedsmith/tests/test_family_consolidate.py
-data/seed/demons/_registry/families.v1.json          → the vocabulary, committed, append-only
-data/seed/demons/_generated/family-assignments.json  → speciesId -> [familyId], committed
+data/seed/creatures/_registry/families.v1.json          → the vocabulary, committed, append-only
+data/seed/creatures/_generated/family-assignments.json  → speciesId -> [familyId], committed
 ```
 
 ---
@@ -146,10 +146,10 @@ points at one rule rather than at "the merge". No I/O below the top-level entry 
 | `shell` with an **empty** synonym map | **not** merged — proves the map is load-bearing rather than decorative |
 | Two candidates differing **only** in `nativeLabel` | **one** family — native text never affects merging (§2.0) |
 | A merged family | carries the `nativeLabel`s of its contributing candidates, for display and `lore-enrich` |
-| A demon with `basis = "blocked"` | **zero** families, and this is not an error |
-| A demon with candidates from two heads | **both** families — multi-membership works |
+| A creature with `basis = "blocked"` | **zero** families, and this is not an error |
+| A creature with candidates from two heads | **both** families — multi-membership works |
 | A family id present in `families.v1.json` | never renamed or re-positioned by a later run over new candidates |
-| Adding a new demon and re-running | existing ids unchanged; new family appended at the end |
+| Adding a new creature and re-running | existing ids unchanged; new family appended at the end |
 | A family with no supporting candidate | rejected — consolidation cannot invent (§2.5) |
 | Vocabulary | inlinable into a brief; no citation-shaped text |
 
@@ -172,7 +172,7 @@ add once content has been generated against the ids.
 ## 8. Success criteria
 
 1. Byte-identical output across runs, proven by test.
-2. Append-only holds when new demons are added — existing ids untouched.
+2. Append-only holds when new creatures are added — existing ids untouched.
 3. Multi-membership and zero-membership both work and are both legal.
 4. The synonym map is proven load-bearing by its empty-map contrast test.
 5. Consolidation cannot invent a family.
@@ -187,7 +187,7 @@ add once content has been generated against the ids.
 1. ~~Label language (audit S7's blocker).~~ **RESOLVED by the owner — see §2.0.** Merging reads the
    English `label`; `nativeLabel` rides along and never merges.
 2. ~~Is the synonym map per-feature or shared?~~ **DECIDED: per-feature**
-   (`adapters/demons/family/synonyms.json`, as §4 already lays out). A shared map would couple the
-   demon and item corpora through a file neither owns, so an edit made for one silently re-merges the
+   (`adapters/creatures/family/synonyms.json`, as §4 already lays out). A shared map would couple the
+   creature and item corpora through a file neither owns, so an edit made for one silently re-merges the
    other's families — and the append-only rule (§2.3) means that damage is not reversible by editing
    the map back. If items later want one, they get their own.

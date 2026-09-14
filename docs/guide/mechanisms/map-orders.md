@@ -20,7 +20,7 @@ These words get guessed wrong. Read them once before the rest of the page.
 | Word | What it actually means here |
 |---|---|
 | **WIP** | Not finished. Basic march and claim ship; this richer toolkit is still hardening. |
-| **Warden** | A demon bound to hold ground on the map — not a lawn-only role. |
+| **Warden** | A creature bound to hold ground on the map — not a lawn-only role. |
 | **Cede** | Give up a sector on purpose — a deliberate retreat, not only a Fracture loss. |
 | **Lens** | A way to recolour how the map reads (supply, fog, and more) — not a combat element. |
 
@@ -42,7 +42,7 @@ Orders and tools the adventure graph wants:
 
 | Piece | What it does |
 |---|---|
-| **Wardens** | Bind demons to hold ground. |
+| **Wardens** | Bind creatures to hold ground. |
 | **Cede** | Give up a sector on purpose. |
 | **Dowse** | A stance for reading the ground. |
 | **Lenses / outliner** | Switch map reads; list legions and holdings without hunting the canvas. |
@@ -87,7 +87,7 @@ When tools ship, they hang on the same adventure surface.
 Cede is WIP. You can still lose ground to neglect / Fracture.
 
 **Are wardens the same as commanders?**  
-No. Wardens bind demons to hold ground; commanders lead runs or legions.
+No. Wardens bind creatures to hold ground; commanders lead runs or legions.
 
 **Is the outliner required to play?**  
 No. It is a WIP convenience over the canvas.

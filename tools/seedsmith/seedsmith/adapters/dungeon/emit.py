@@ -1,5 +1,5 @@
 """Canonical dungeon anchor serialisation and emission (D1.11, spec-dungeon-seed-contract.md §6).
-**One object per file** — unlike the demons anchor's per-family list — so `data/seed/dungeon/
+**One object per file** — unlike the creatures anchor's per-family list — so `data/seed/dungeon/
 <directory>/<id>.json` holds exactly one entry, plus one `_index.json` per directory
 (`id -> filename`) for O(1) lookup without a full-tree load.
 
@@ -23,7 +23,7 @@ from typing import Any, Mapping, Sequence
 
 def render_entry(entry: Mapping[str, Any]) -> bytes:
     """Sorted keys, two-space indent, `\\n` line ending, CJK unescaped, explicit nulls — the
-    demons/anchor/emit.py `render_family_file` rules, applied per single object here."""
+    creatures/anchor/emit.py `render_family_file` rules, applied per single object here."""
     text = json.dumps(dict(entry), indent=2, sort_keys=True, ensure_ascii=False)
     return (text + "\n").encode("utf-8")
 

@@ -1,9 +1,9 @@
-"""Tests for seedsmith.adapters.demons.anchor.{permute,vote} (spec-option-permutation.md,
-demon-seed module 6)."""
+"""Tests for seedsmith.adapters.creatures.anchor.{permute,vote} (spec-option-permutation.md,
+creature-seed module 6)."""
 from __future__ import annotations
 
-from seedsmith.adapters.demons.anchor.permute import order_for
-from seedsmith.adapters.demons.anchor.vote import (
+from seedsmith.adapters.creatures.anchor.permute import order_for
+from seedsmith.adapters.creatures.anchor.vote import (
     VOTED_FIELDS,
     SetVoteResult,
     VoteRecord,
@@ -76,7 +76,7 @@ def test_resolve_vote_requires_exactly_three():
 
 
 def test_vote_set_is_exactly_the_six_named_fields():
-    # attackTempo joined 2026-09-04 (demon-corpus-self-heal C1, owner-approved) — kit-shape was the
+    # attackTempo joined 2026-09-04 (creature-corpus-self-heal C1, owner-approved) — kit-shape was the
     # one pipeline never wired into voting, and the real corpus audit found exactly the collapse
     # that predicts (attackTempo entropy 0.00 across 833 real species).
     assert VOTED_FIELDS == frozenset({

@@ -2,14 +2,35 @@ using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.PassiveTree.Catalog;
 
-/// <summary>The four ops a node atom may carry (spec-tree-catalog.md §2.3) — matches
-/// `AtomRowValidator.DerivedOps` exactly; there is no dedicated shared enum in the atom layer
-/// (ops are validated there as raw strings against `StatOps`/`DerivedOps`), so this is the
-/// catalog's own typed view over the same four values.</summary>
+/// <summary>The ops a node atom may carry. The enum is the UNION of the two kind-specific op sets the
+/// atom layer validates as raw strings (`AtomRowValidator.StatOps` / `DerivedOps`) — it is not itself
+/// a per-kind allowance, and it must not be used as one:
+///
+/// <list type="bullet">
+/// <item><c>stat.modify</c> (primary) — <c>Flat | Increased | More</c> (`AtomKindRegistry.cs:517`).</item>
+/// <item><c>stat.derived</c> — <c>Flat | Increased | Replace | Flag</c>. There is **no `More`** on the
+/// derived side (§6 M3): `AtomDerivedSubsystem.TryParseOp` has no `<c>more</c>` arm, so a `More`-op
+/// derived atom would compose to nothing. M3 is enforced by a NAMED refusal at both the catalog loader
+/// and `TreeBinderRun.ParseOp` — never by the absence of this member.</item>
+/// </list>
+///
+/// <para><b>Why `More` exists here at all (P4.2, R2).</b> The two kinds share this one enum, so a
+/// member absent for the derived side was also absent for the primary side — and the language stage
+/// picked `more`-op primary affixes (e.g. `atom.savagery`, `atom.arm-hardening`) on real tree nodes,
+/// every one of which was refused. The member was added and the derived-side refusal moved from a
+/// structural property to an explicit kind-aware check, so it stays loud instead of decaying into the
+/// silent drop `TreeAtomSource.BoundAtomsFor` performs when `TryParseOp` fails. The exact node and
+/// family counts are a READING of the corpus at the revision the fix landed, not a constant to quote —
+/// re-run `tools/TreeBinder --check` for the current numbers.</para>
+/// </summary>
 public enum NodeAtomOp
 {
     Flat,
     Increased,
+
+    /// <summary>`stat.modify` only (FA1's third op). Refused on `stat.derived` by name (§6 M3).</summary>
+    More,
+
     Replace,
     Flag,
 }

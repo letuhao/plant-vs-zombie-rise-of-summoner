@@ -3,11 +3,11 @@
 ⚠ **What this module does and does not do.** It assembles the whole run *deterministically*: the
 grid cells, the id each entry will take, the brief for each, and the reports the run is judged
 against. The **model call itself is not made here** — the graph that makes it is the same `workflow`
-package `effects generate` and `demons generate` use. A `--dry-run` therefore exercises everything
+package `effects generate` and `creatures generate` use. A `--dry-run` therefore exercises everything
 except the call, which is what makes the run inspectable before a token is spent.
 
 ⚠ **No resume ledger, deliberately.** `spec-strain-splice-gen.md`'s own Commands block says 102
-entries is small enough not to need the `demons run` resume harness, and module 13 built one because
+entries is small enough not to need the `creatures run` resume harness, and module 13 built one because
 it faced ~1,800. A ledger here would be machinery with no failure to survive; re-running the whole
 grid is cheap, and `plan_run` is byte-identical across runs, which is the property that makes
 re-running safe.

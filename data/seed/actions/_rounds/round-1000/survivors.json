@@ -1,0 +1,533 @@
+{
+  "_meta": {
+    "candidateSetHash": "0922ad0396e8948961584eee48f11f2beeedf0d31bda972fadaf00f11194660f",
+    "corpusHash": "7c7d3fbd5bf40590cb8f6008f040276d4833ad2466bdf6b84ecda584c7e4eb18",
+    "partition": "rounds",
+    "round": 1000,
+    "tuningVersion": 1
+  },
+  "entries": [
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.rot-punisher"
+      ],
+      "category": "support",
+      "id": "action.family.academic.002",
+      "motifsUsed": [
+        "花园里",
+        "樱桃派",
+        "保证",
+        "僵尸",
+        "东西"
+      ],
+      "name": "The Academic's Guarantee",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "payoff",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "academic",
+      "targetMode": "multi"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.rotting",
+        "atom.venomous"
+      ],
+      "category": "movement",
+      "id": "action.family.academic.003",
+      "motifsUsed": [
+        "保证",
+        "东西",
+        "樱桃派",
+        "花园里",
+        "僵尸"
+      ],
+      "name": "Garden Rot",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "academic",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.econ-toll",
+        "atom.gardener"
+      ],
+      "category": "status",
+      "id": "action.family.academic.004",
+      "motifsUsed": [
+        "樱桃派",
+        "东西",
+        "保证",
+        "僵尸",
+        "花园里"
+      ],
+      "name": "Garden's Guarantee",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "academic",
+      "targetMode": "all"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cherry-bloom",
+        "atom.chill-punisher"
+      ],
+      "category": "attack",
+      "id": "action.family.afflicted.001",
+      "motifsUsed": [
+        "樱桃",
+        "僵尸",
+        "一般"
+      ],
+      "name": "Frostbite Reckoning",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "payoff",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "afflicted",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.freezing"
+      ],
+      "category": "defense",
+      "id": "action.family.afflicted.002",
+      "motifsUsed": [
+        "僵尸",
+        "一般"
+      ],
+      "name": "Frostbound Husk",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "afflicted",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cherry-bloom",
+        "atom.rotting",
+        "atom.venomous"
+      ],
+      "category": "movement",
+      "id": "action.family.afflicted.004",
+      "motifsUsed": [
+        "僵尸",
+        "樱桃",
+        "一般"
+      ],
+      "name": "Rotting Bloom",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "afflicted",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cherry-bloom",
+        "atom.elemental-power"
+      ],
+      "category": "status",
+      "id": "action.family.afflicted.005",
+      "motifsUsed": [
+        "僵尸",
+        "一般",
+        "樱桃"
+      ],
+      "name": "Cherry Rot",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "afflicted",
+      "targetMode": "all"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.freezing"
+      ],
+      "category": "defense",
+      "id": "action.family.alchemical.002",
+      "motifsUsed": [
+        "严寒",
+        "金质",
+        "带来",
+        "冰菇",
+        "稳定"
+      ],
+      "name": "Glacial Gilded Bloom",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "alchemical",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.venomous"
+      ],
+      "category": "movement",
+      "id": "action.family.alchemical.003",
+      "motifsUsed": [
+        "冰菇",
+        "金质",
+        "严寒",
+        "带来",
+        "稳定"
+      ],
+      "name": "Glacial Anchoring",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "alchemical",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.tempo-surge",
+        "atom.venomous"
+      ],
+      "category": "movement",
+      "id": "action.family.allium.002",
+      "motifsUsed": [
+        "金质",
+        "僵尸",
+        "大蒜",
+        "咬",
+        "换行"
+      ],
+      "name": "Pungent Advance",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "allium",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.affliction",
+        "atom.prec-fixation",
+        "atom.rotting"
+      ],
+      "category": "status",
+      "id": "action.family.allium.003",
+      "motifsUsed": [
+        "大蒜",
+        "僵尸",
+        "咬",
+        "金质",
+        "换行"
+      ],
+      "name": "Pungent Aftermath",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "allium",
+      "targetMode": "all"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.fortitude",
+        "atom.savagery"
+      ],
+      "category": "attack",
+      "id": "action.general.0021",
+      "name": "Vanguard's Resolve",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-hardening",
+        "atom.elpw-surge"
+      ],
+      "category": "attack",
+      "id": "action.species.abyssswordstar.001",
+      "motifsUsed": [
+        "从天而降"
+      ],
+      "name": "Sky-Sunderer's Descent",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "abyssswordstar",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.deathblast",
+        "atom.elpw-surge"
+      ],
+      "category": "movement",
+      "id": "action.species.abyssswordstar.002",
+      "motifsUsed": [
+        "从天而降"
+      ],
+      "name": "Sky-Piercing Descent",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "abyssswordstar",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.retribution"
+      ],
+      "category": "attack",
+      "id": "action.species.acientsunnut.001",
+      "motifsUsed": [
+        "消耗",
+        "来回"
+      ],
+      "name": "Solar Flare Reciprocity",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "acientsunnut",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.econ-toll",
+        "atom.mending"
+      ],
+      "category": "support",
+      "id": "action.species.acientsunnut.002",
+      "motifsUsed": [
+        "消耗",
+        "来回"
+      ],
+      "name": "Solar Reciprocity",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "acientsunnut",
+      "targetMode": "multi"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elemental-power",
+        "atom.evd-shift"
+      ],
+      "category": "movement",
+      "id": "action.species.acientsunnut.003",
+      "motifsUsed": [
+        "来回"
+      ],
+      "name": "Solar Flare Leap",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "acientsunnut",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evd-evd",
+        "atom.retribution"
+      ],
+      "category": "status",
+      "id": "action.species.acientsunnut.004",
+      "motifsUsed": [
+        "消耗",
+        "受伤",
+        "来回"
+      ],
+      "name": "Solar Flare Reciprocity",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "acientsunnut",
+      "targetMode": "all"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.bonding",
+        "atom.evd-shift"
+      ],
+      "category": "movement",
+      "id": "action.species.allpeater.005",
+      "motifsUsed": [
+        "切换"
+      ],
+      "name": "Atmospheric Displacement",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "allpeater",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-focus",
+        "atom.warding"
+      ],
+      "category": "support",
+      "id": "action.species.apple.001",
+      "motifsUsed": [
+        "苹",
+        "护",
+        "安"
+      ],
+      "name": "苹",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "apple",
+      "targetMode": "multi"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evd-husk",
+        "atom.evd-shift"
+      ],
+      "category": "movement",
+      "id": "action.species.apple.002",
+      "motifsUsed": [
+        "苹"
+      ],
+      "name": "Luminous Translocation",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "apple",
+      "targetMode": "rolledTarget"
+    }
+  ],
+  "kind": "action-seed",
+  "schemaVersion": 1
+}

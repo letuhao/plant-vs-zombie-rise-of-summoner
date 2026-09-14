@@ -25,7 +25,7 @@
       "id": "set.goldzombie-001",
       "nameKey": "set.edgar-s-souvenir",
       "name": "Edgar's Souvenir",
-      "themeKey": "demon.goldzombie",
+      "themeKey": "creature.goldzombie",
       "members": [
         {
           "role": "armament-primary",
@@ -80,7 +80,7 @@
           ]
         }
       ],
-      "flavor": "A popular golden monument crafted to introduce the glory of the demon species.",
+      "flavor": "A popular golden monument crafted to introduce the glory of the creature species.",
       "tags": [],
       "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
     }

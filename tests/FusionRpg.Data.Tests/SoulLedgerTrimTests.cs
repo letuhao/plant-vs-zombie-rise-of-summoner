@@ -7,24 +7,24 @@ namespace FusionRpg.Data.Tests;
 /// D5: soul-ledger tail-trim + archive (the P4 deferral — expedition volume makes it real).
 /// XP-ledger pattern: only rows already folded into the watermarked balance trim, so the
 /// balance is byte-identical before and after (spec-soul-economy success criterion 4).
+///
+/// <para>This class's subject IS the filesystem archive: <c>TrimSoulLedgerTails</c> is an archive
+/// entry point that throws on a memory store (module <c>memory-storage-plan</c> §5), so the class uses
+/// the leak-proof file-backed helper rather than the memory one. It joins the Tier-3 file-bound set
+/// until module <c>archive-target</c> makes the archive target memory-capable.</para>
 /// </summary>
 public class SoulLedgerTrimTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public SoulLedgerTrimTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-soultrim-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.CreateFileBacked();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     void Seed(int n)
     {
@@ -49,13 +49,13 @@ public class SoulLedgerTrimTests : IDisposable
         // Newest 10 remain; the archived overflow is on disk and cataloged.
         var ledger = _store.ListSoulLedger(1, 100);
         Assert.Equal(10, ledger.Items.Count);
-        var archives = Directory.GetFiles(Path.Combine(_dir, "archive"), "souls-a1-*.sqlite");
+        var archives = Directory.GetFiles(Path.Combine(_testStore.DataDir!, "archive"), "souls-a1-*.sqlite");
         Assert.Single(archives);
 
         // Second trim is a no-op.
         _store.TrimSoulLedgerTails(retainOverride: 10);
         Assert.Equal(10, _store.ListSoulLedger(1, 100).Items.Count);
-        Assert.Single(Directory.GetFiles(Path.Combine(_dir, "archive"), "souls-a1-*.sqlite"));
+        Assert.Single(Directory.GetFiles(Path.Combine(_testStore.DataDir!, "archive"), "souls-a1-*.sqlite"));
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class SoulLedgerTrimTests : IDisposable
         Seed(5);
         _store.TrimSoulLedgerTails(retainOverride: 10);
         Assert.Equal(5, _store.ListSoulLedger(1, 100).Items.Count);
-        var archiveDir = Path.Combine(_dir, "archive");
+        var archiveDir = Path.Combine(_testStore.DataDir!, "archive");
         Assert.True(!Directory.Exists(archiveDir)
                     || Directory.GetFiles(archiveDir, "souls-*.sqlite").Length == 0);
     }

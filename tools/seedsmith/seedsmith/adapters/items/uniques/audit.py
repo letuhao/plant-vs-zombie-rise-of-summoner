@@ -25,7 +25,7 @@ from typing import Any, Iterable, Mapping
 from ....pipeline.model import NUMERIC_JSON_TYPES
 
 #: Field names (case-insensitive, exact) that name a magnitude outright regardless of declared
-#: type -- the demons/anchor/audit.py precedent, duplicated here rather than imported (that
+#: type -- the creatures/anchor/audit.py precedent, duplicated here rather than imported (that
 #: module's allow-list is a hardcoded relative import of its OWN sibling schema.py; dungeon's own
 #: copy duplicates for the identical reason). No field in this schema is numeric today -- this
 #: check exists to catch one that is added carelessly later, the same preventative posture
@@ -92,7 +92,7 @@ def _field_name_is_set_stem(name: str) -> bool:
 
 def numeric_audit(schema: Mapping[str, Any], *, path: str = "$", field_name: "str | None" = None) -> "list[AuditDefect]":
     """Walks `properties`/`items`/`anyOf`/`oneOf`/`allOf`, reporting every smuggling shape
-    (dungeon/demons/structures adapters' own shared precedent, duplicated per that convention)
+    (dungeon/creatures/structures adapters' own shared precedent, duplicated per that convention)
     plus this kind's own set-stem check."""
     defects: "list[AuditDefect]" = []
 

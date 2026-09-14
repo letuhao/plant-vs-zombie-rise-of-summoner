@@ -25,7 +25,7 @@
       "id": "set.sandjackson-001",
       "nameKey": "set.beach-dance-king",
       "name": "Beach Dance King",
-      "themeKey": "demon.sandjackson",
+      "themeKey": "creature.sandjackson",
       "members": [
         {
           "role": "armament-primary",

@@ -1,4 +1,4 @@
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 
 namespace FusionRpg.Core.Items.Materials;
 
@@ -72,10 +72,10 @@ public static class SalvagePolicy
         // below it and its shardBack is 0, which MaterialTuning refuses to let a balance pass change.
         if (item.RungIndex > 0 && coefficient.ShardBack > 0)
         {
-            // Indexed off the ladder's own ordered list, never `(DemonRarity)index` — a bare cast is
+            // Indexed off the ladder's own ordered list, never `(CreatureRarity)index` — a bare cast is
             // what silently changed meaning the day the enum widened from four values to ten, and
-            // DemonRarityLadderGuardTests forbids the form outside the helper.
-            var below = DemonRarityLadder.OneRungBelow(DemonRarityLadder.All[item.RungIndex]);
+            // CreatureRarityLadderGuardTests forbids the form outside the helper.
+            var below = CreatureRarityLadder.OneRungBelow(CreatureRarityLadder.All[item.RungIndex]);
             lines.Add(new MaterialCostLine(MaterialClass.Shard, MaterialCatalog.ShardId(below), coefficient.ShardBack));
         }
 

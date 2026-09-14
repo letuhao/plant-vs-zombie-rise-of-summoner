@@ -25,7 +25,7 @@
       "id": "set.ultimatesungatlingpuff-001",
       "nameKey": "set.radiant-spore-cone",
       "name": "Radiant Spore Cone",
-      "themeKey": "demon.ultimatesungatlingpuff",
+      "themeKey": "creature.ultimatesungatlingpuff",
       "members": [
         {
           "role": "armament-primary",

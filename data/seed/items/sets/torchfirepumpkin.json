@@ -25,7 +25,7 @@
       "id": "set.torchfirepumpkin-001",
       "nameKey": "set.flame-glow-harvest",
       "name": "Flame-Glow Harvest",
-      "themeKey": "demon.torchfirepumpkin",
+      "themeKey": "creature.torchfirepumpkin",
       "members": [
         {
           "role": "armament-primary",

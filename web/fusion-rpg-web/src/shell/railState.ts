@@ -43,19 +43,19 @@ export type RailEntry = {
 export type RailUnlockInputs = {
   currentStageId: StageId;
   hasCompletedARun: boolean;
-  /** T15: fusion is real demon fusion (spec-demon-fusion.md), not creature fusion — star merge
-   * and promotion both need at least one demon in the roster (recipe fusion needs two, but the
+  /** T15: fusion is real creature fusion (spec-creature-fusion.md), not creature fusion — star merge
+   * and promotion both need at least one creature in the roster (recipe fusion needs two, but the
    * lab itself is reachable with one so a player can see what it needs). */
-  hasAnyDemon: boolean;
+  hasAnyCreature: boolean;
   hasAnyContract: boolean;
   /** T14: the relic catalog is real but has no acquisition system yet, so every player holds
    * it in full — this is always true today, but still threaded through real query data rather
    * than hardcoded, so it stays correct once holding a relic becomes an earned event. */
   hasAnyRelic: boolean;
-  /** T17: expeditions field demons, not creatures — real requirement is a bound demon (World's
+  /** T17: expeditions field creatures, not creatures — real requirement is a bound creature (World's
    * "held sector" never applied; the previous condition was wrong-domain, not just hard to
    * live-demo, and has been replaced). */
-  hasAnyBoundDemon: boolean;
+  hasAnyBoundCreature: boolean;
   /** T17: dispatched expeditions whose due time has passed but aren't collected yet — GG-53's
    * rail badge. */
   returnedExpeditionCount: number;
@@ -66,9 +66,9 @@ const UNLOCK_LADDER: Record<RailLayerId, { label: string; key: string; reason: s
   creatures: { label: "Creatures", key: "C", reason: "Unlocks at session start" },
   commanders: { label: "Commanders", key: "K", reason: "Unlocks at session start" },
   relics: { label: "Relics", key: "R", reason: "Unlocks when you hold your first item" },
-  fusion: { label: "Fusion", key: "F", reason: "Unlocks once you have a demon to fuse" },
+  fusion: { label: "Fusion", key: "F", reason: "Unlocks once you have a creature to fuse" },
   pacts: { label: "Pacts", key: "P", reason: "Unlocks when a contract is first offered" },
-  expeditions: { label: "Expeditions", key: "E", reason: "Unlocks once you have a bound demon to field" },
+  expeditions: { label: "Expeditions", key: "E", reason: "Unlocks once you have a bound creature to field" },
   almanac: { label: "Almanac", key: "A", reason: "Unlocks after your first run" },
   chronicle: { label: "Chronicle", key: "H", reason: "Unlocks after your first run" }
 };
@@ -81,11 +81,11 @@ function isUnlocked(id: RailLayerId, inputs: RailUnlockInputs): boolean {
     case "relics":
       return inputs.hasAnyRelic;
     case "fusion":
-      return inputs.hasAnyDemon;
+      return inputs.hasAnyCreature;
     case "pacts":
       return inputs.hasAnyContract;
     case "expeditions":
-      return inputs.hasAnyBoundDemon;
+      return inputs.hasAnyBoundCreature;
     case "almanac":
     case "chronicle":
       return inputs.hasCompletedARun;

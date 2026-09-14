@@ -23,7 +23,7 @@ is the scarcity the whole design leans on:
 | | Count | Chosen? |
 |---|---|---|
 | **Basic** — attack · guard · move | 3 | no — intrinsic, always present |
-| **Innate** | 1 | no — the demon type's, always present |
+| **Innate** | 1 | no — the creature type's, always present |
 | **Earned skill** | **5** | **yes — this module** |
 
 `rpg_actor_loadout(owner_kind, owner_key, ordinal, action_id)`, reusing `A1`'s seven owner scopes rather
@@ -49,7 +49,7 @@ truncation silently picks a winner and the player never learns which.
 **Owner, 2026-08-27:** *"new loadout + random equipment prefer stronger action, so that can help Zomboss.
 We will extend the auto mechanism in the future — use power scale for now."*
 
-**Every actor needs a loadout, and only one of them has a player.** Zomboss patterns, generated demons,
+**Every actor needs a loadout, and only one of them has a player.** Zomboss patterns, generated creatures,
 wild encounters and any actor an AI drives must arrive equipped — so auto-equip is not a convenience, it is
 what stops non-player actors from fighting with three basics.
 

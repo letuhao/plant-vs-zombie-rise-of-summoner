@@ -16,7 +16,7 @@ rather than assumed, and **it is satisfied — there is no gate to wait on:**
 | G0 clause | State | Evidence |
 |---|---|---|
 | Four `decisions.md` rows (P1–P4) appended | **Done** | `decisions.md` carries *Game GUI — sixth stage `delve`*, *World store — delve worlds*, *Status SSOT + Resource model — nerve*, *Action model — extended action slots*, all dated 2026-09-05 |
-| Propagations made | **Done** | Landed across waves 1–5 verification passes: `item-map` §9, `seedsmith-map`, `action-map` §13, `effect-atom-map` §19, `status-ssot` §9, `unique-actor-runtime` §11.1, `demon-system-map`, `world-stage-map`, `world-map-program`, `standalone-rpg-map`, `information-architecture` §2.4a/§4/§5, `game-gui-map` |
+| Propagations made | **Done** | Landed across waves 1–5 verification passes: `item-map` §9, `seedsmith-map`, `action-map` §13, `effect-atom-map` §19, `status-ssot` §9, `unique-actor-runtime` §11.1, `creature-system-map`, `world-stage-map`, `world-map-program`, `standalone-rpg-map`, `information-architecture` §2.4a/§4/§5, `game-gui-map` |
 | `threat-audit` scheduled | **Not done, and not blocking** — see §5 | Measured today: **841 species anchors, 184 carry a `threatBand`, 657 do not** |
 
 Two external dependencies the map listed as gating are **already built**, so two modules that looked
@@ -123,8 +123,8 @@ Parallel: `event-deck` (D3.1–D3.9) and `dungeon-loot` (D3.10–D3.17) share no
 
 > **CHECKPOINT G3 — a delve is a run.** A full solo delve on autopilot: rooms, events, loot into the
 > pack, extraction. The souls-per-minute regression holds (two row-1 rooms then extract loses to a clean
-> run); hunger binds between rests; a downed demon sits out N **delves**; a permadeath rung Retires a
-> `downedOnce` demon at extraction.
+> run); hunger binds between rests; a downed creature sits out N **delves**; a permadeath rung Retires a
+> `downedOnce` creature at extraction.
 
 ### Phase 4 — content (modules 13–16, wave 4) · 31 tasks
 
@@ -179,14 +179,14 @@ Each ships behind a default the owning spec already wrote, so the program never 
 
 | Dependency | Owner | Default until it lands | Affects |
 |---|---|---|---|
-| **Contracts upkeep and slot/ritual prices on cleared-content Θ** | `demon-system-map` — `demon-contracts` follow-up | **The map schedules this in *this program's first wave*** (`party-dungeon-map.md:99`) because it is the sink that keeps binding costly past the pin (review S2-8). `ContractPolicy.BaseUpkeepPerDay(rarity)` is a flat `int` while every other contract price is Θ-scaled. `spec-dungeon-loot.md:196-198` files it and explicitly builds nothing. Tracked as **F10**; until it lands the Delve's faucet outruns that one sink | none blocked — F10 |
-| `threat-audit` (657 anchors) | `demon-seed-map` module 7 | Refuse a null `threatBand`; first-ship domains draw from the 184 that have one | D2.1–D2.4 coverage |
+| **Contracts upkeep and slot/ritual prices on cleared-content Θ** | `creature-system-map` — `creature-contracts` follow-up | **The map schedules this in *this program's first wave*** (`party-dungeon-map.md:99`) because it is the sink that keeps binding costly past the pin (review S2-8). `ContractPolicy.BaseUpkeepPerDay(rarity)` is a flat `int` while every other contract price is Θ-scaled. `spec-dungeon-loot.md:196-198` files it and explicitly builds nothing. Tracked as **F10**; until it lands the Delve's faucet outruns that one sink | none blocked — F10 |
+| `threat-audit` (657 anchors) | `creature-seed-map` module 7 | Refuse a null `threatBand`; first-ship domains draw from the 184 that have one | D2.1–D2.4 coverage |
 | `consumable` `ContainerKind` (D27) | `item-map` | Supplies instantiate as items; the `battle` use context is refused | D3.24–D3.26 |
 | Item-cost row on actions (A3) | `action-map` | `act.capture` refuses `capture.not-landed`; rest and curio uses are unaffected | D3.24, D4.6 |
 | `structure-schema` 18th field `interaction` | `base-defense-map` 23–29 | v1 objects are curios in the event deck, exactly as specced | D3.27–D3.30 |
 | `siege-board` / `board-render` (A10) | `base-defense-map` | v1 ships 1-D rank on `SideIndex`; the 2-D board is adopted later | D2.3, D5.4 |
 | `world-generator` entrance placement | `world-map-program` wave 4 | The Sanctum picker offers found domains; no map placement needed | D4.20 |
-| `DemonMintSpec.Level`, `SummonRoller` `poolFilter`, a personality mint override | `demon-system-map` | Mint at level 1 (today's line); the altar pulls the whole summonable catalog; `altar.poolFromDomain` stays `false` | D4.5, D4.7 |
+| `CreatureMintSpec.Level`, `SummonRoller` `poolFilter`, a personality mint override | `creature-system-map` | Mint at level 1 (today's line); the altar pulls the whole summonable catalog; `altar.poolFromDomain` stays `false` | D4.5, D4.7 |
 
 ---
 

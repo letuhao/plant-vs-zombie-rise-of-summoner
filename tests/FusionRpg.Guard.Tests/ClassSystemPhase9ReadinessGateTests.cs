@@ -127,11 +127,7 @@ public class ClassSystemPhase9ReadinessGateTests
             UseShellExecute = false,
             CreateNoWindow = true
         };
-        using var p = Process.Start(psi)!;
-        var stdout = p.StandardOutput.ReadToEnd();
-        var stderr = p.StandardError.ReadToEnd();
-        Assert.True(p.WaitForExit(60_000), "gate script timed out");
-        return (p.ExitCode, stdout, stderr);
+        return ExternalProcess.Run(psi, 60_000, "gate script timed out");
     }
 
     static void Cleanup(string fixturePath)

@@ -239,18 +239,64 @@ public class ChannelLegalityTests
 
     // ---- 6. M3 — there is no `More` on the derived side ------------------------------------
 
+    /// <summary>Superseded 2026-09-13 (task P4.2, R2). This test used to assert `NodeAtomOp` had **no**
+    /// `More` member, so a more-op atom was "structurally unrepresentable". That worked only because
+    /// the tree vocabulary could never name `More` — but `stat.modify` legitimately supports it
+    /// (`AtomKindRegistry.cs:517`, `AtomRowValidator.StatOps`), and the SAME enum serves both kinds.
+    /// The absence therefore refused 80 real nodes' `more` ops (measured 2026-09-13) at
+    /// `TreeBinderRun.ParseOp`. P4.2 adds the member and moves M3 from a structural property to a
+    /// NAMED, KIND-AWARE refusal — which this test now proves is still enforced, at load and at bind,
+    /// so the loud refusal cannot decay into the silent drop `TreeAtomSource` would otherwise perform.
+    /// </summary>
     [Fact]
-    public void NodeAtomOp_has_no_More_member_so_a_more_op_atom_is_structurally_unrepresentable()
+    public void More_exists_in_the_vocabulary_and_is_refused_on_the_derived_side_by_name()
     {
-        // §6 M3: "Derived ops are Flat|Increased|Replace|Flag; there is no More on the derived side.
-        // A More-op derived atom is refused at load, and the binder refuses it earlier, with the rule
-        // named." NodeAtomOp itself has no More member, so `Enum.TryParse<NodeAtomOp>("more", ...)`
-        // fails at PassiveTreeCatalogLoader.LoadAtom before a NodeAtom bearing "more" can ever exist
-        // -- the refusal is structural, not a runtime branch this class duplicates.
-        Assert.DoesNotContain(Enum.GetNames<NodeAtomOp>(), name => name.Equals("More", StringComparison.OrdinalIgnoreCase));
-        Assert.False(Enum.TryParse<NodeAtomOp>("more", ignoreCase: true, out _));
+        // The member exists now ...
+        Assert.Contains(Enum.GetNames<NodeAtomOp>(), name => name.Equals("More", StringComparison.OrdinalIgnoreCase));
+        Assert.True(Enum.TryParse<NodeAtomOp>("more", ignoreCase: true, out var more));
+        Assert.Equal(NodeAtomOp.More, more);
+
+        // ... and M3 is still loud: a stat.derived atom bearing it is a named BindRefusal, never a
+        // silent skip. (The catalog loader's OWN M3 arm is proven separately in
+        // PassiveTreeCatalogLoaderTests.Derived_atom_with_a_more_op_is_refused_by_name_at_load; this
+        // proves the BIND-time arm, which is what a tree run actually goes through.)
+        var derivedMore = new NodeAtom("stat.derived", AttachPoint.Stat, "combat.power.fire",
+            NodeAtomOp.More, null, null, 100, ScaleAxis.PTheta, UnitClass.GameUnits);
+        var ex = Assert.Throws<BindRefusal>(() => ChannelLegality.CheckBind(derivedMore));
+        Assert.Contains("more", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("derived", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("M3", ex.Message);
 
         Assert.Equal("M3", ChannelLegality.NoMoreOnDerivedRuleName);
+    }
+
+    /// <summary>P4.2's core hazard, proven directly: the whole point of the explicit M3 check is that a
+    /// derived `More` must NOT reach the resolve path, where `TreeAtomSource.BoundAtomsFor` would skip
+    /// it silently (`AtomDerivedSubsystem.TryParseOp` has no "more" arm). This proves the refusal fires
+    /// for EVERY kind spelling that could carry it, so no path lets it through to a silent drop.</summary>
+    [Fact]
+    public void A_derived_More_is_refused_but_a_primary_More_is_not_the_exact_P4_2_distinction()
+    {
+        Assert.Throws<BindRefusal>(() => ChannelLegality.CheckBind(
+            new NodeAtom("stat.derived", AttachPoint.Stat, "combat.power.fire",
+                NodeAtomOp.More, null, null, 100, ScaleAxis.PTheta, UnitClass.GameUnits)));
+
+        // The same op on the kind that owns it is accepted -- both halves matter: refusing both would
+        // not fix the 80-node defect, and accepting both would create the silent no-op.
+        ChannelLegality.CheckBind(
+            new NodeAtom("stat.modify", AttachPoint.Stat, "atk",
+                NodeAtomOp.More, null, null, 100, ScaleAxis.PTheta, UnitClass.GameUnits));
+    }
+
+    [Fact]
+    public void More_is_legal_on_a_primary_stat_modify_channel()
+    {
+        // The other half: `more` is a real op for stat.modify (FA1's own vocabulary), so a
+        // stat.modify atom must NOT be refused for it. This is the exact case the 80 measured
+        // refusals were.
+        var primaryMore = new NodeAtom("stat.modify", AttachPoint.Stat, "atk",
+            NodeAtomOp.More, null, null, 100, ScaleAxis.PTheta, UnitClass.GameUnits);
+        ChannelLegality.CheckBind(primaryMore); // must not throw
     }
 
     // ---- 7. channelAnchorMilli follows a moved pin, with no source edit --------------------

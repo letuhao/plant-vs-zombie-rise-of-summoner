@@ -25,7 +25,7 @@
       "id": "set.ultimatehorse-001",
       "nameKey": "set.nine-palace-general",
       "name": "Nine Palace General",
-      "themeKey": "demon.ultimatehorse",
+      "themeKey": "creature.ultimatehorse",
       "members": [
         {
           "role": "armament-primary",

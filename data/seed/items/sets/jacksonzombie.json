@@ -25,7 +25,7 @@
       "id": "set.jacksonzombie-001",
       "nameKey": "set.moonwalk-legend",
       "name": "Moonwalk Legend",
-      "themeKey": "demon.jacksonzombie",
+      "themeKey": "creature.jacksonzombie",
       "members": [
         {
           "role": "armament-primary",

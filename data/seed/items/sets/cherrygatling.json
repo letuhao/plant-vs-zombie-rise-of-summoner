@@ -25,7 +25,7 @@
       "id": "set.cherrygatling-001",
       "nameKey": "set.cherrygatling-core",
       "name": "Cherrygatling Core",
-      "themeKey": "demon.cherrygatling",
+      "themeKey": "creature.cherrygatling",
       "members": [
         {
           "role": "armament-primary",

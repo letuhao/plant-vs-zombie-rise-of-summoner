@@ -120,7 +120,7 @@ public class MovementMathTests
     }
 
     static string SpeciesOf(ElementTypeId element) =>
-        FusionRpg.Core.Demons.DemonSpeciesCatalog.All.First(s => s.ElementPrimary == element).SpeciesId;
+        FusionRpg.Core.Creatures.CreatureSpeciesCatalog.All.First(s => s.ElementPrimary == element).SpeciesId;
 
     // ---- crossing ----
 

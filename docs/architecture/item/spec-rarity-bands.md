@@ -52,13 +52,13 @@ than left to context.
 | Space | Values | Where |
 |---|---|---|
 | **Registry / DB ordinal** | **10, 20, … 100**, spaced by 10 | `data/seed/items/_registry/core.v1.json` → `rarity.ladder[].ordinal`, `frozen: true`, append-only *"pre-spaced by 10 precisely so a future rung can be inserted"* |
-| **C# enum member index** | **0 … 9**, consecutive | `src/FusionRpg.Core/Demons/DemonRarity.cs:16-28`; `DemonRarityLadder.RungCount = 10` |
+| **C# enum member index** | **0 … 9**, consecutive | `src/FusionRpg.Core/Creatures/CreatureRarity.cs:16-28`; `CreatureRarityLadder.RungCount = 10` |
 
 **`rarity.ordinal` is the registry space, 10 … 100.** The enum member index is **not** an ordinal and
 must never be written to that column. The enum already carries the warning in its own doc comment —
 *"a bare `(int)r-1` meant 'one rung of four' before and 'one rung of ten' after, with no compiler
-error either way"* (`DemonRarity.cs:10-15`) — and `DemonRarityLadder` exists so intent survives a width
-change (`src/FusionRpg.Core/Demons/DemonRarityLadder.cs:10-53`).
+error either way"* (`CreatureRarity.cs:10-15`) — and `CreatureRarityLadder` exists so intent survives a width
+change (`src/FusionRpg.Core/Creatures/CreatureRarityLadder.cs:10-53`).
 
 ⚠ **item-ideal §2f.1 F4's correction is about the *power-class* enum, not about `rarity.ordinal`.**
 F4 is right that no C# roster spaces its members by 10; it does not repeal the frozen registry's
@@ -66,7 +66,7 @@ spacing, and D7's *"promotion reaches ordinal 100"* is written in the registry s
 statements are consistent once the spaces are named. **Naming them is this module's job.**
 
 The join key between the two is the **string id**, and it already resolves both ways
-(`DemonRarityIds.ToId` / `.TryParse`, `DemonRarity.cs:52,67`).
+(`CreatureRarityIds.ToId` / `.TryParse`, `CreatureRarity.cs:52,67`).
 
 ### ⚠ Two §3.3 rows do not sum to their published band — fix before seeding
 
@@ -367,7 +367,7 @@ mechanical instead of aspirational.
 | `socket_min` / `socket_max` | 16 | ⛔ awaiting I4. ⚠ §4.4 requires it to declare whether the count is **rolled** — a rolled count is a fourth variance and moves every number in §3.5 |
 | `set_eligible` | — | ⛔ **DROPPED — not seeded.** D15 makes it vacuous (a set has no rarity and completes from pieces of any rung) and **`spec-set-charm-gen.md` never mentions it**, so under SC7 a seeded row would reject. Resolved here rather than deferred to module 13 again — see below |
 | `reroll_cost_mult` | 15 | ⛔ awaiting I7 — must scale with **affix count**, not rung alone (§9.7) |
-| `salvage_yield` | 14 | ⛔ awaiting I9 — must **not** reuse `shard.{DemonRarity}` ids (`DemonMaterialCatalog.cs`); §9.8 suggests `dust.{rarity_id}` |
+| `salvage_yield` | 14 | ⛔ awaiting I9 — must **not** reuse `shard.{CreatureRarity}` ids (`CreatureMaterialCatalog.cs`); §9.8 suggests `dust.{rarity_id}` |
 | `charm_potency` | — | ⛔ **NOT REGISTERED.** I10 defines it and **`spec-set-charm-gen.md` never mentions it**; SC7 forbids registering a key ahead of its consumer. Module 13 requests it when it needs it — see below |
 | — | 11 (`level_req`) | **negative registration: rarity is not an equip gate** |
 
@@ -502,10 +502,10 @@ src/FusionRpg.Core/Effects/Atoms/AtomSeedFile.cs  EDIT — read the two _max fie
 
 ```csharp
 // Two ordinal spaces exist for one ladder and they are 10x apart. `rarity.ordinal` is the REGISTRY
-// space (10..100, frozen in core.v1.json, pre-spaced so a rung can be inserted); DemonRarity's member
+// space (10..100, frozen in core.v1.json, pre-spaced so a rung can be inserted); CreatureRarity's member
 // index is 0..9 and is NOT an ordinal. The string id is the join. Writing (int)rarity here would put
 // `almanac` at ordinal 9, below `chaff` at 10, and every sort in the game would invert.
-public static int OrdinalOf(DemonRarity rarity) => Ladder[rarity.ToId()].Ordinal;   // never (int)rarity
+public static int OrdinalOf(CreatureRarity rarity) => Ladder[rarity.ToId()].Ordinal;   // never (int)rarity
 ```
 
 ## Testing strategy

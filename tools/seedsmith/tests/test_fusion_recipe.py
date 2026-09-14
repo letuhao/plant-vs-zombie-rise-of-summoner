@@ -1,11 +1,11 @@
-"""demon-seed module 17 `fusion-recipe-generator` (spec-fusion-recipe-generator.md):
+"""creature-seed module 17 `fusion-recipe-generator` (spec-fusion-recipe-generator.md):
 - T8.2 §2 `fusion-recipe-propose` — the propose MECHANISM only: canonicalization, per-member
   voting, A/B assignment, and the bounded prompt/schema shape. Pure functions over synthetic
   fixtures, no live model call.
 - T8.3 §3/§3a/§4 `fusion-recipe-reconcile` — the deterministic reconciler's own validation,
   freeze-on-commit, and `crossRungGapFill` logic, exercised via synthetic seam fixtures (a fake
   `propose_fn` stands in for a live model — matching `anchor/vote.py`'s own test shape) PLUS one
-  real end-to-end case that shells out to the actual `tools/DemonRecipeReconcileInput` CLI against
+  real end-to-end case that shells out to the actual `tools/CreatureRecipeReconcileInput` CLI against
   the real corpus (no model needed, since the real corpus's deterministic pass alone is what is
   being proven there).
 
@@ -18,15 +18,15 @@ import subprocess
 
 import pytest
 
-from seedsmith.adapters.demons.fusion import emit, reconcile
-from seedsmith.adapters.demons.fusion.prompts import (
+from seedsmith.adapters.creatures.fusion import emit, reconcile
+from seedsmith.adapters.creatures.fusion.prompts import (
     MAX_RUNG_DISTANCE,
     DeficitOutput,
     FusionCandidate,
     build_fusion_proposal_brief,
 )
-from seedsmith.adapters.demons.fusion.schema import build_fusion_proposal_schema
-from seedsmith.adapters.demons.fusion.vote import assign_input_a_b, resolve_fusion_pair_vote
+from seedsmith.adapters.creatures.fusion.schema import build_fusion_proposal_schema
+from seedsmith.adapters.creatures.fusion.vote import assign_input_a_b, resolve_fusion_pair_vote
 
 
 # --- vote.py: canonicalization + per-member majority --------------------------------------------
@@ -249,8 +249,8 @@ def test_a_capture_only_proposed_input_is_refused_not_silently_dropped():
 
 
 def test_a_candidate_with_summonable_and_captureonly_both_set_is_a_legal_input():
-    # Real corpus case (e.g. "blackfootball"): DemonRecipeCatalog.cs's own established rule
-    # everywhere (`Acquisition != DemonAcquisition.CaptureOnly`, exact equality) admits a
+    # Real corpus case (e.g. "blackfootball"): CreatureRecipeCatalog.cs's own established rule
+    # everywhere (`Acquisition != CreatureAcquisition.CaptureOnly`, exact equality) admits a
     # multi-flag Summonable+CaptureOnly species into the candidate pool, since it is not
     # EXCLUSIVELY capture-only — a player can still summon it. Owner lock 6 must match that same
     # rule, not reject on "CaptureOnly present at all".
@@ -385,36 +385,33 @@ def test_a_clean_rewrite_of_identical_content_writes_nothing(tmp_path):
 
 
 def test_real_corpus_end_to_end():
-    """Shells out to the REAL `tools/DemonRecipeReconcileInput` CLI (no model needed — this proves
-    the seam integration and the reconciler's own bookkeeping against the actual corpus). Numbers
-    updated 2026-09-07 (T2.11's own full classification run completed: 840 -> 903 generatable
-    species). Almanac itself grew 21 -> 22 eligible outputs while Sunwoven (the one rung below) stayed
-    at its own real ceiling of 4 (C(4,2)=6 pairs either way), so the deficit widened 14 -> 16 by
-    exactly that growth. Every existing Almanac deficit's own candidate pool also grew (more
-    Sunwoven/Firstseed/Heirloom species now populate the nearest-2-3-rungs-below window), which
-    correctly invalidated all 14 previously-resolved gap-fills via the reconciler's own §3a
-    freeze-on-commit (their `corpusContentHash` no longer matches a changed pool) — closing the gap
-    for real needs a fresh live-model vote (Checkpoint 8a), not attempted here or by this test.
-    Updated again same day: DoubleCherry's own `attackTempo` closed via an owner-directed manual pick
-    (never a model call), 903 -> 904 species, 774 -> 775 eligible outputs, 758 -> 759 deterministic
-    (Almanac's own 16 deficits unaffected — DoubleCherry is Fused, not Almanac)
-    (775 eligible, 759 deterministic, 16 deficits — was 774/758/16, before that 713/699/14)."""
+    """Shells out to the REAL `tools/CreatureRecipeReconcileInput` CLI (no model needed — this proves
+    the seam integration and the reconciler's own bookkeeping against the actual corpus). The seam's
+    output counts move whenever species ship (the corpus is a population — validation-ssot.md), so
+    this asserts the reconciler's CONTRACT rather than the 2026-09-07 snapshot: every deterministic
+    recipe survives reconcile untouched, every named deficit stays unresolved through a always-fail
+    propose_fn, and no gap-fill is fabricated.
+    History (a reading, not a pin): 840 -> 903 species, then 904; 774/758/16 -> 775/759/16."""
     try:
         seam = reconcile.run_seam_cli()
     except (RuntimeError, FileNotFoundError, OSError) as e:
         pytest.skip(f"real C# seam not runnable in this environment: {e}")
 
-    assert len(seam["eligibleOutputs"]) == 775
-    assert len(seam["deterministicRecipes"]) == 759
-    assert len(seam["deficits"]) == 16
+    eligible = len(seam["eligibleOutputs"])
+    deterministic = len(seam["deterministicRecipes"])
+    deficits = len(seam["deficits"])
+    assert deterministic + deficits == eligible, (
+        "every eligible output is either covered by a deterministic recipe or is a named deficit")
+    assert deterministic > 0 and deficits > 0, "real corpus must exercise both branches"
 
-    # A propose_fn that always fails to resolve — proves the real seam's 16 deficits pass all the
-    # way through reconcile() as named, unresolved outputs, and every deterministic recipe survives
-    # untouched, with zero gap-fills fabricated.
-    outcome = reconcile.reconcile(seam, _fixed_sample_fn(*([(None, None, None)] * 16)))
-    assert len(outcome.recipes) == 759
-    assert len(outcome.unresolved) == 16
+    # A propose_fn that always fails to resolve — proves the real deficits pass all the way through
+    # reconcile() as named, unresolved outputs, and every deterministic recipe survives untouched,
+    # with zero gap-fills fabricated.
+    outcome = reconcile.reconcile(seam, _fixed_sample_fn(*([(None, None, None)] * deficits)))
+    assert len(outcome.recipes) == deterministic
+    assert len(outcome.unresolved) == deficits
     assert all(r["crossRungGapFill"] is False for r in outcome.recipes.values())
+    print(f"fusion seam: {eligible} eligible = {deterministic} deterministic + {deficits} deficits")
 
 
 def test_deterministic_only_propose_fn_never_resolves_and_makes_no_model_call():

@@ -25,7 +25,7 @@
       "id": "set.jackboxdoom-001",
       "nameKey": "set.the-decaying-effigy",
       "name": "The Decaying Effigy",
-      "themeKey": "demon.jackboxdoom",
+      "themeKey": "creature.jackboxdoom",
       "members": [
         {
           "role": "armament-primary",

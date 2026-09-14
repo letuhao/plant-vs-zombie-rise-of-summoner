@@ -137,10 +137,33 @@ public static class MatchHost
 
                 _runtime.Apply(kind, payload);
 
+                // lawn-combat-wire T10 (spec-basic-attack-grant.md): "bind on the spawn edge... keyed
+                // on the board fold" — right after the board-fold Apply above, for every plant/zombie
+                // spawn, general creature included (no branch here excludes one for lacking a
+                // binding). Recorded, not bound synchronously: LawnBasicAttackGrantBinder.Tick drains
+                // once per frame so a mass-spawn wave pays for one board resolve, not N.
+                if (string.Equals(kind, "plant.spawn", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(kind, "zombie.spawn", StringComparison.OrdinalIgnoreCase))
+                {
+                    var spawnPtr = payload != null && payload.TryGetValue("ptr", out var ptrObj)
+                        ? ptrObj?.ToString()
+                        : null;
+                    TryEffect("LawnBasicAttackGrantQueue",
+                        () => Effects.LawnBasicAttackGrantBinder.QueueSpawn(spawnPtr));
+                }
+
                 var bound = _runtime.ConsumeLastBound();
                 if (bound != null)
                 {
                     try { UniqueBoundLoadout.TryApply(bound); } catch { }
+                    // aptitude-sheet AS-1.1b (unique-lawn-wire fix, DESIGN-GATE.md §2.16 3rd instance):
+                    // the bind edge is the one cadence trigger AS-1.1's original 3-trigger set missed --
+                    // it is the edge where RefreshUniqueAptitudesAsync's own Bound-instanceId KEY SET
+                    // moves. Without this, `allocate -> deploy` (allocate before this specimen was ever
+                    // Bound) leaves the cache never keyed for it, so its shares never load -- confirmed
+                    // live 2026-09-13. Fire-and-forget, off the hot path (async HTTP); TriggerBoundAptitudeRefresh
+                    // coalesces concurrent binds into at most one extra round trip rather than one per bind.
+                    try { RpgHost.Client?.TriggerBoundAptitudeRefresh(); } catch { }
                 }
 
                 if (isEnd)
@@ -170,7 +193,7 @@ public static class MatchHost
                     }
                     MatchCommanderSnapshotHolder.BeginMatch(snapshot);
                     CheatState.RefreshCommanderAllocationCache();
-                    // demon-lawn-deploy T2.1: same Hot/Cold fix, same board.start moment — a
+                    // creature-lawn-deploy T2.1: same Hot/Cold fix, same board.start moment — a
                     // Cold-plane roster/patron read frozen once, never re-queried mid-match.
                     var lawnRoster = LawnDeployRosterSessionCache.BuildFromSessionCache();
                     if (LawnDeployRosterSessionCache.LastBuildWasCacheMiss)
@@ -178,7 +201,7 @@ public static class MatchHost
                         try { RpgHost.Log.Warning("lawn deploy roster: cache miss — empty roster frozen for this match"); } catch { }
                     }
                     LawnDeployRosterSnapshotHolder.BeginMatch(lawnRoster);
-                    // demon-lawn-deploy T2.4: a fresh per-run "already fired" tracker for the trigger
+                    // creature-lawn-deploy T2.4: a fresh per-run "already fired" tracker for the trigger
                     // evaluator, same board.start moment as everything else above.
                     LawnDeployEventRunStateHolder.BeginMatch();
                     // zomboss-deploy-ai T3.4: same board.start moment, Zomboss's own sibling tracker.
@@ -205,7 +228,7 @@ public static class MatchHost
                     try { _currentWave = Convert.ToInt32(waveObj); } catch { }
                 }
 
-                // demon-lawn-deploy T2.4: checked after every event while a match is actually live —
+                // creature-lawn-deploy T2.4: checked after every event while a match is actually live —
                 // the evaluator's own gates (empty roster, per-run budget, per-case "already fired",
                 // the condition itself) make this cheap and safe to call this often; PlantCount/
                 // ZombieCount only ever change on a spawn/die event, so this is exactly "off
@@ -321,12 +344,12 @@ public static class MatchHost
 
             var tuning = FusionRpg.Core.Match.Ai.ZombossDeployTuningHub.Tuning;
             var candidates = FusionRpg.Core.Match.Ai.ZombossDeployRoster.AvailableSpeciesFor(
-                _currentWave, FusionRpg.Core.Demons.DemonSpeciesCatalog.All, tuning.WaveRarityCeilings);
+                _currentWave, FusionRpg.Core.Creatures.CreatureSpeciesCatalog.All, tuning.WaveRarityCeilings);
 
             var seed = FusionRpg.Core.Battle.SeededRng.DeriveStream(0, matchKey).NextULong();
             var decision = FusionRpg.Core.Match.Ai.ZombossDeployPolicy.Decide(
                 board, candidates,
-                speciesId => FusionRpg.Core.Demons.DemonSpeciesCatalog.Get(speciesId).BaseRarity,
+                speciesId => FusionRpg.Core.Creatures.CreatureSpeciesCatalog.Get(speciesId).BaseRarity,
                 tuning.Scorer, seed, caseId: "zomboss-reinforce");
             if (!decision.Deploys) return;
 

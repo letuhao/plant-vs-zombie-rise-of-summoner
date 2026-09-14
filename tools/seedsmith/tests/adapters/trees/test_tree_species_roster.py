@@ -161,7 +161,7 @@ class MissingIndexTests(unittest.TestCase):
 
 
 class RealCorpusTests(unittest.TestCase):
-    """Against the actual committed `data/seed/demons/species/` root -- not a synthetic stand-in.
+    """Against the actual committed `data/seed/creatures/species/` root -- not a synthetic stand-in.
 
     **Resolved 2026-09-07** (this file's own docstring anticipated exactly this update): the
     `zombie/_needs-review.json` parked duplicate this test used to name was a single-entry,

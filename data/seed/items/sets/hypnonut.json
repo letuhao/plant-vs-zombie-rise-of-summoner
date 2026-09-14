@@ -25,7 +25,7 @@
       "id": "set.hypnonut-001",
       "nameKey": "set.the-biting-nut",
       "name": "The Biting Nut",
-      "themeKey": "demon.hypnonut",
+      "themeKey": "creature.hypnonut",
       "members": [
         {
           "role": "armament-primary",

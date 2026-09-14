@@ -25,7 +25,7 @@
       "id": "set.firesniper-001",
       "nameKey": "set.cinder-sniper",
       "name": "Cinder Sniper",
-      "themeKey": "demon.firesniper",
+      "themeKey": "creature.firesniper",
       "members": [
         {
           "role": "armament-primary",

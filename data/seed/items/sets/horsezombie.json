@@ -25,7 +25,7 @@
       "id": "set.horsezombie-001",
       "nameKey": "set.cavalry-of-the-grave",
       "name": "Cavalry of the Grave",
-      "themeKey": "demon.horsezombie",
+      "themeKey": "creature.horsezombie",
       "members": [
         {
           "role": "armament-primary",

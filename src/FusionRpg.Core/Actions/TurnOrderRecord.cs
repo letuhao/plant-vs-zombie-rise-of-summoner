@@ -1,4 +1,4 @@
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 
 namespace FusionRpg.Core.Battle.Timeline;
 
@@ -28,7 +28,7 @@ public static class TurnOrderRecord
     /// Extracts the acting order from a resolved trace: one entry per `Ready -> Committed`
     /// transition (that IS the turn order — §2.1's own finding), in the order they occurred,
     /// resolved from `actorKey` to a display name via <paramref name="setup"/>. An actor whose
-    /// species is unknown to <see cref="DemonSpeciesCatalog"/> (a synthetic/golden fixture, never
+    /// species is unknown to <see cref="CreatureSpeciesCatalog"/> (a synthetic/golden fixture, never
     /// real content) falls back to its raw species id rather than throwing — a rendering nicety for
     /// test data, never a real production path, since real content's species ids are always known.
     /// </summary>
@@ -39,8 +39,8 @@ public static class TurnOrderRecord
 
         var nameByKey = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var actor in setup.Squad.Concat(setup.Wave))
-            nameByKey[actor.Key] = DemonSpeciesCatalog.IsKnown(actor.SpeciesId)
-                ? DemonSpeciesCatalog.Get(actor.SpeciesId).Name
+            nameByKey[actor.Key] = CreatureSpeciesCatalog.IsKnown(actor.SpeciesId)
+                ? CreatureSpeciesCatalog.Get(actor.SpeciesId).Name
                 : actor.SpeciesId; // fallback for synthetic/golden fixtures only -- never real content
 
         var entries = new List<TurnOrderEntry>();

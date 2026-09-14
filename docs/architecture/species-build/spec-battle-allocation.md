@@ -1,7 +1,7 @@
 # Spec: `battle-allocation`
 
 Module 10 in the [species-build capability map](../species-build-map.md). **Depends on
-`demon-type-allocation` (5).**
+`creature-type-allocation` (5).**
 
 **⛔ Added 2026-09-05 by the spec-coverage audit. Its absence was a real hole, not a refinement.**
 
@@ -46,7 +46,7 @@ No plumbing is needed to find it. `BuildSquad` already resolves the species per 
 the setup:
 
 ```csharp
-var species = DemonSpeciesCatalog.Get(s.Profile.SpeciesId);
+var species = CreatureSpeciesCatalog.Get(s.Profile.SpeciesId);
 ...
 SpeciesId = species.SpeciesId,
 ```
@@ -162,12 +162,12 @@ what this needs.
 ## ⛔ The golden constraint this module makes load-bearing
 
 An unrecorded actor's progression defaults to **`Level = 1`** (`RpgStore.Progression.cs:280`). Under
-`demon-type-allocation`'s compose-at-read baseline, a level-1 species would therefore carry a *non-empty*
+`creature-type-allocation`'s compose-at-read baseline, a level-1 species would therefore carry a *non-empty*
 allocation everywhere — including in every battle golden fixture, whose actors would silently gain a
 build they never had.
 
 **Therefore the species budget must be zero at level 1**, which `budget-source` (module 2) owns:
-`PointsFor(DemonType, level)` reads `(level − 1) × rate`, not `level × rate`.
+`PointsFor(CreatureType, level)` reads `(level − 1) × rate`, not `level × rate`.
 
 That is not a workaround for the goldens. **It is what the owner actually described** — *"they will earn
 bonus when specie level up"* — a species that has never levelled has earned nothing. The golden safety
@@ -178,7 +178,7 @@ falls out of stating the rule correctly.
 - **Always:** merge scopes into one allocation before resolving; keep the species read per actor; keep
   the seam a `ChannelMods` adaptation, never an engine or composer change.
 - **Ask first:** changing `AptitudeChannelMods`'s public signature in a way other than adding the
-  species (it is exercised by shipped tests); reading any scope beyond Commander and DemonType (Aspect
+  species (it is exercised by shipped tests); reading any scope beyond Commander and CreatureType (Aspect
   is not authorized to build).
 - **Never:** resolve per scope and concatenate; introduce a second `Θ`; let a battle read a species
   allocation belonging to another player.

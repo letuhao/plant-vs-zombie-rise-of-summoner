@@ -27,7 +27,7 @@ def _pick_lines(picks: "tuple[str, ...]") -> str:
 def build_consumable_brief(theme: str, *, motifs: "tuple[str, ...]" = ()) -> str:
     """One consumable, one theme. `theme` is free text describing the item's flavor identity (a
     material, a creature, an aptitude) — this module has no theme registry of its own; the caller
-    supplies one (a demon species name, a build archetype, a recipe line), same as `setgen` takes
+    supplies one (a creature species name, a build archetype, a recipe line), same as `setgen` takes
     its `Theme` from a loaded registry the brief itself does not own."""
     families = schema.load_atom_family_names()
     motif_line = f"\nMotifs to express: {', '.join(motifs)}." if motifs else ""

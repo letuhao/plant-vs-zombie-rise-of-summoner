@@ -40,9 +40,9 @@ four bands, and they are the four ids already shipped."* **Verified false as of 
 
 | Lane claim | Verified |
 |---|---|
-| four shard ids ship | **Ten.** `DemonMaterialCatalog.Build()` iterates `DemonRarityLadder.All` (`src/FusionRpg.Core/Demons/DemonMaterialCatalog.cs:19-27`), and `DemonRarityLadder.RungCount = 10` (`src/FusionRpg.Core/Demons/DemonRarityLadder.cs:11`, `:51`) |
-| the four band ids are `common/rare/epic/legendary` | Those are the **legacy** ids — resolvable by `IsKnown`, never minted (`DemonMaterialCatalog.cs:30-38`), migrated forward by `Migrations/ShardRungs.cs` |
-| I1 must add a `material_band` column to `rarity` | The `rarity` table is `rarity_id · ordinal · prefix_rolls · suffix_rolls · min_tier · max_tier` (`src/FusionRpg.Data/Sqlite/RpgStore.Containers.cs:54-61`). No band column, and **the table has zero rows** — the live ten rungs are the C# enum `DemonRarity` (`src/FusionRpg.Core/Demons/DemonRarity.cs:18-27`), which is what `DemonMaterialCatalog` reads |
+| four shard ids ship | **Ten.** `CreatureMaterialCatalog.Build()` iterates `CreatureRarityLadder.All` (`src/FusionRpg.Core/Creatures/CreatureMaterialCatalog.cs:19-27`), and `CreatureRarityLadder.RungCount = 10` (`src/FusionRpg.Core/Creatures/CreatureRarityLadder.cs:11`, `:51`) |
+| the four band ids are `common/rare/epic/legendary` | Those are the **legacy** ids — resolvable by `IsKnown`, never minted (`CreatureMaterialCatalog.cs:30-38`), migrated forward by `Migrations/ShardRungs.cs` |
+| I1 must add a `material_band` column to `rarity` | The `rarity` table is `rarity_id · ordinal · prefix_rolls · suffix_rolls · min_tier · max_tier` (`src/FusionRpg.Data/Sqlite/RpgStore.Containers.cs:54-61`). No band column, and **the table has zero rows** — the live ten rungs are the C# enum `CreatureRarity` (`src/FusionRpg.Core/Creatures/CreatureRarity.cs:18-27`), which is what `CreatureMaterialCatalog` reads |
 
 > **Decision: the four-band request is withdrawn. Shards stay per-rung at ten, and `material_band`
 > is not asked for.** Collapsing ten shipped, migrated ids back into four is a schema migration bought
@@ -51,15 +51,15 @@ four bands, and they are the four ids already shipped."* **Verified false as of 
 > id, determined by the thing you are working on.
 
 Consequence: I9's *"single hardest dependency in this lane"* no longer exists. Module 7 `rarity-bands`
-seeds the `rarity` table's rows; this module reads `DemonRarityLadder` for material ids and the seeded
-`rarity.ordinal` for curve input. **⛔ **CORRECTED 2026-09-04 — costs key on the RUNG INDEX 0–9, which is *not* `rarity.ordinal`.** `rarity.ordinal` is **10…100** (`_registry/core.v1.json`), and `spec-rarity-bands.md:307` makes writing an enum member index into it a **Never**. Reading `rarity.ordinal` into `b` would make every cost row and every salvage coefficient wrong by **10×**. The field is `TargetRungIndex`, derived via `DemonRarityLadder`, band-linear becomes rung-linear.**
+seeds the `rarity` table's rows; this module reads `CreatureRarityLadder` for material ids and the seeded
+`rarity.ordinal` for curve input. **⛔ **CORRECTED 2026-09-04 — costs key on the RUNG INDEX 0–9, which is *not* `rarity.ordinal`.** `rarity.ordinal` is **10…100** (`_registry/core.v1.json`), and `spec-rarity-bands.md:307` makes writing an enum member index into it a **Never**. Reading `rarity.ordinal` into `b` would make every cost row and every salvage coefficient wrong by **10×**. The field is `TargetRungIndex`, derived via `CreatureRarityLadder`, band-linear becomes rung-linear.**
 
 ### The five spends — the artefact modules 15 and 16 cite
 
 | # | Class | Id shape | Count | The question it answers | Storage |
 |---|---|---|---|---|---|
 | 1 | **Souls** | *(ledger balance)* | — | *May I act at all?* — the flat fee | `rpg_soul_ledger` / `rpg_soul_balances` |
-| 2 | **Substrate** | `substrate.{frame}.{grade}` | 8 | *What is it made of?* — frame-locked, graded by item level | `rpg_demon_materials` |
+| 2 | **Substrate** | `substrate.{frame}.{grade}` | 8 | *What is it made of?* — frame-locked, graded by item level | `rpg_creature_materials` |
 | 3 | **Shard** | `shard.{rung}` | **10** | *How good may it be?* — the rarity ceiling | same, **already shipped** |
 | 4 | **Essence** | `essence.{element}` | 6 | *What flavour?* — element direction, no magnitude | same, **already shipped** |
 | 5 | **Catalyst** | `catalyst.{verb}` | 3 | *What am I doing to it?* — make / improve / re-randomise | same |
@@ -188,7 +188,7 @@ Every property is inherited from a shipped path, and each citation is verified:
 | Replay returns the original outcome; a reused correlation with **different** arguments is refused, not replayed | `TrySpendSouls` (`src/FusionRpg.Data/Sqlite/RpgStore.Souls.cs:189-213`) — returns `"replay"` on a match, `"correlation.mismatch"` on a differing amount |
 | Refusals write nothing, so a retried refusal re-evaluates | same, `RpgStore.Souls.cs:186-187` (the doc comment states the contract the code keeps) |
 | Material legs use a conditional decrement; a zero row count fails the whole transaction | `RpgStore.Fusion.cs:394-400` — `UPDATE … SET qty = qty - $q WHERE … AND qty >= $q` |
-| An unknown material id **throws** at the write boundary rather than silently no-op | `RpgStore.Fusion.cs:391-392` — `DemonMaterialCatalog.IsKnown` guard |
+| An unknown material id **throws** at the write boundary rather than silently no-op | `RpgStore.Fusion.cs:391-392` — `CreatureMaterialCatalog.IsKnown` guard |
 | The souls leg throws on a dedupe collision outside its own log | `RpgStore.Fusion.cs:380-382` |
 
 **Fixed class order matters** (step 4): a partial failure always fails at the same point, so two logs of
@@ -208,7 +208,7 @@ one refusal are byte-comparable.
 `material_recipe_cost` rows and **no code**. Adding an *operation verb* is **code**, because a verb needs
 an executor and a module that owns it.
 
-### ⚠ `rpg_demon_materials` → `rpg_materials` is **ask-first and not scheduled**
+### ⚠ `rpg_creature_materials` → `rpg_materials` is **ask-first and not scheduled**
 
 I9 §10.7 flags it as *"a shipped-schema migration that wants the owner's word."* It is not in this
 module's task list, and this module ships against the shipped name.
@@ -225,7 +225,7 @@ complete list."* Verified today: **nine**, in five files.
 
 Also note the DDL is at `RpgStore.cs:573-579`, **not** `:520-526` as I9 cites.
 
-✅ **The rename is RULED (confirmed 2026-09-04):** `rpg_demon_materials` → `rpg_materials` proceeds.
+✅ **The rename is RULED (confirmed 2026-09-04):** `rpg_creature_materials` → `rpg_materials` proceeds.
 ⚠ **Nine** SQL sites across five files — the table above — not the four I9 §6.4 calls *"the complete
 list"*. `Migrations/ShardRungs.cs` post-dates the lane, which is how the count drifted.
 
@@ -251,10 +251,10 @@ python scripts\audit-overflow.py                     # long on every magnitude
 ## Project structure
 
 ```text
-src/FusionRpg.Core/Demons/DemonMaterialCatalog.cs      SHIPPED - widen All(), do not rewrite.
+src/FusionRpg.Core/Creatures/CreatureMaterialCatalog.cs      SHIPPED - widen All(), do not rewrite.
                                                         Ten shard ids already correct
 src/FusionRpg.Core/Items/MaterialCatalog.cs            new - the 27-id closed vocabulary + IsKnown,
-                                                        wrapping DemonMaterialCatalog for the shipped 16
+                                                        wrapping CreatureMaterialCatalog for the shipped 16
 src/FusionRpg.Core/Items/MaterialRecipeCatalog.cs      new - load, validate at startup, Resolve(...)
 src/FusionRpg.Core/Items/SalvagePolicy.cs              new - pure Yield(), integer-only
 src/FusionRpg.Core/Items/CostClassMatrix.cs            new - operation -> spendable classes
@@ -304,7 +304,7 @@ static long Scale(long qty, int multiplierMilli) =>
 | `a_reused_correlation_with_different_arguments_is_refused` | `correlation.mismatch`, not a silent replay |
 | `a_forced_mid_sequence_failure_leaves_zero_rows_across_all_three_stores` | materials, souls ledger, spend log — the `ExecuteFusion` forced-failure shape |
 | `spend_order_is_souls_shard_substrate_essence_catalyst` | fixed order, so two refusal logs are byte-comparable |
-| `an_unknown_material_id_throws_at_the_write_boundary` | `DemonMaterialCatalog.IsKnown`, `RpgStore.Fusion.cs:391` |
+| `an_unknown_material_id_throws_at_the_write_boundary` | `CreatureMaterialCatalog.IsKnown`, `RpgStore.Fusion.cs:391` |
 | `two_builds_of_the_recipe_catalog_are_byte_identical` | the fusion-catalog golden precedent |
 | `a_quantity_curve_can_never_resolve_a_cost_to_zero` | ceiling, always |
 | `every_material_quantity_is_long_and_overflow_throws` | no `int` magnitude on the cost path |
@@ -316,7 +316,7 @@ inline; spend in fixed class order inside one transaction; return the recorded o
 correlation; write nothing on a refusal; keep every quantity in `data/tuning/materials.v1.json`.
 
 **Ask first:** a **sixth spend class** — a lane wanting one must say which of the five questions is
-unanswerable; ✅ ~~the `rpg_demon_materials` → `rpg_materials` rename~~ — **confirmed 2026-09-04 and
+unanswerable; ✅ ~~the `rpg_creature_materials` → `rpg_materials` rename~~ — **confirmed 2026-09-04 and
 scheduled** (⚠ nine SQL sites across five files); a fourth catalyst; adding an `operation` verb (it needs an executor and an owning module).
 
 **Never:** a cost term that reads the player's `Θ`, level, power index, item count, or any wall-clock or
@@ -339,5 +339,5 @@ that namespace (`ssot-enhancement.md` §5.3). Never let salvage return `catalyst
 - [ ] Every quantity lives in `data/tuning/materials.v1.json`; `audit-magic-numbers.py` reports no M1
       target in `MaterialRecipeCatalog`, `SalvagePolicy` or `CostClassMatrix`.
 - [ ] Every magnitude on the cost path is `long`, widened before multiplying, divided by 1000 once.
-- [ ] The `rpg_demon_materials` rename is **not** in the task list, and the nine SQL sites are recorded
+- [ ] The `rpg_creature_materials` rename is **not** in the task list, and the nine SQL sites are recorded
       for the day the owner says go.

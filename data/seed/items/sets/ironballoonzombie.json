@@ -25,7 +25,7 @@
       "id": "set.ironballoonzombie-001",
       "nameKey": "set.nutty-propeller-shell",
       "name": "Nutty Propeller Shell",
-      "themeKey": "demon.ironballoonzombie",
+      "themeKey": "creature.ironballoonzombie",
       "members": [
         {
           "role": "armament-primary",

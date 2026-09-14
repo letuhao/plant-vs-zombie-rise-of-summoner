@@ -489,7 +489,7 @@ class RepetitionLoopDetectorTests(unittest.TestCase):
 
     def test_legitimate_non_repeating_text_is_not_a_false_positive(self) -> None:
         text = ("The frost-bound sentinel guards the eastern vault, its runes flickering with "
-                "each passing hour as the demon host gathers beyond the tree line.")
+                "each passing hour as the creature host gathers beyond the tree line.")
         self.assertFalse(_has_repetition_loop(text))
 
     def test_text_shorter_than_the_smallest_detection_window_is_not_a_false_positive(self) -> None:

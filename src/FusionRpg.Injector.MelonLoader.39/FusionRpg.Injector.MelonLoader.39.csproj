@@ -57,8 +57,17 @@
          the same way data/tuning/ already reaches this same folder. Excludes the two underscore-
          prefixed aggregate files (_species-build-plan.json, _fusion-recipes.json) — neither is a
          per-species ConcreteSpecies row the reader can parse. -->
-    <Content Include="..\..\data\generated\demons\*.json" Exclude="..\..\data\generated\demons\_*.json">
-      <Link>data\generated\demons\%(Filename)%(Extension)</Link>
+    <Content Include="..\..\data\generated\creatures\*.json" Exclude="..\..\data\generated\creatures\_*.json">
+      <Link>data\generated\creatures\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <!-- Same menu overlay asset as the 3.8 MelonLoader twin. -->
+    <Content Include="..\..\web\fusion-rpg-web\public\assets\onboarding\rift-portal-pvz-style.png">
+      <Link>assets\onboarding\rift-portal-pvz-style.png</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\web\fusion-rpg-web\public\assets\onboarding\rift-icon-pvz-style-64.png">
+      <Link>assets\onboarding\rift-icon-pvz-style-64.png</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -126,6 +135,10 @@
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule">
       <HintPath>$(MlGameDir)\MelonLoader\Il2CppAssemblies\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ScreenCaptureModule">
+      <HintPath>$(MlGameDir)\MelonLoader\Il2CppAssemblies\UnityEngine.ScreenCaptureModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>

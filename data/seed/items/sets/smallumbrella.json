@@ -25,7 +25,7 @@
       "id": "set.smallumbrella-001",
       "nameKey": "set.spore-umbrella",
       "name": "Spore Umbrella",
-      "themeKey": "demon.smallumbrella",
+      "themeKey": "creature.smallumbrella",
       "members": [
         {
           "role": "armament-primary",

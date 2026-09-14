@@ -3992,6 +3992,24 @@
     },
     {
       "droppedRole": "ward-array",
+      "familyId": "atom.arm-op",
+      "hostRole": "core-guard",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "ward-array",
+      "familyId": "atom.evd-evd",
+      "hostRole": "core-guard",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "ward-array",
+      "familyId": "atom.evd-shift",
+      "hostRole": "core-guard",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "ward-array",
       "familyId": "atom.shield-capacity",
       "hostRole": "armament-secondary",
       "maxTier": 3
@@ -4048,6 +4066,30 @@
       "droppedRole": "ward-array",
       "familyId": "atom.shld-cycle",
       "hostRole": "jewel-major",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "ward-array",
+      "familyId": "atom.shld-toughness",
+      "hostRole": "core-guard",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "ward-array",
+      "familyId": "atom.ward-flux",
+      "hostRole": "core-guard",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "ward-array",
+      "familyId": "atom.ward-link",
+      "hostRole": "core-guard",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "ward-array",
+      "familyId": "atom.ward-ward",
+      "hostRole": "core-guard",
       "maxTier": 3
     }
   ]

@@ -38,8 +38,8 @@ Sizes use the repo's own S/M/L task convention.
 | **B6** | Migration: one retired node id makes an actor unloadable | `class-system` + `FusionRpg.Data` | BUILT, throws per row | **S** | **HARD** from the first catalog regeneration |
 | **B7** | Battle fires no `OnDamageTaken` / `OnSpawn` / `OnDeath` | `battle-timeline` / `action` | ⚠️ **`OnDamageDealt` and `OnActivate` ARE fired.** The other three are absent | **M** | **HARD** for reflect / on-kill nodes; satisfied for on-hit |
 | **B8** | Three `ssot-power-scale.md` §10 rows: `req(t)`, `W(T)`, `Ws` | `power` | ⛔ **ABSENT — and the power program is closed** (`tasks/power-todo.md` has zero open tasks) | **S** | **HARD** — no permission to exist without them |
-| **B9** | **D9/D27** — a closed demon-family roster | `seedsmith` / `demon-seed` | Tools **BUILT** (D2.1/D2.2, 2026-08-31); the corpus is still open at **699 tokens** | **M** | **HARD** for family trees only |
-| **B10** | `element_mastery` and almanac XP have zero `src/` hits | demon program (`aspect-scope`) / almanac | ⛔ **ABSENT** | **M** each | **HARD** for elemental and family tree gates |
+| **B9** | **D9/D27** — a closed creature-family roster | `seedsmith` / `creature-seed` | Tools **BUILT** (D2.1/D2.2, 2026-08-31); the corpus is still open at **699 tokens** | **M** | **HARD** for family trees only |
+| **B10** | `element_mastery` and almanac XP have zero `src/` hits | creature program (`aspect-scope`) / almanac | ⛔ **ABSENT** | **M** each | **HARD** for elemental and family tree gates |
 | **B11** | `RespecPolicy` has zero production callers | `class-system` | BUILT, inert | **S** | **Soft** — parallel |
 | **B12** | `affix-power-class` / `affix-channel-weights` (ep-11/12) | `effect-pipeline` | Specced, unbuilt, **and in no task list** | **M** | **Soft** — but it is B1's only named call site |
 
@@ -69,15 +69,15 @@ WAVE 1  — the twelve primary trees (the only category whose gate quantity ship
   B4d  flip the overlay resolver on by default, or ship the lawn degraded      [injector, S]
 
 WAVE 2  — the six elemental trees
-  B10a element_mastery — the Aspect scope's source value                       [demon program, M]
+  B10a element_mastery — the Aspect scope's source value                       [creature program, M]
 
 WAVE 3  — the 21 status trees
   B3   AllocationScope slot 5, then slot 6                                     [UNOWNED, S + M]
   B3b  let a scope name something that is not one of the twelve aptitudes      [class-system, S]
 
-WAVE 4  — the demon-family trees
+WAVE 4  — the creature-family trees
   B9   consolidate 699 family tokens into a closed roster                      [seedsmith, M]
-  B10b almanac XP — the DemonType scope's source value                         [demon program, M]
+  B10b almanac XP — the CreatureType scope's source value                         [creature program, M]
 
 WAVE 5  — the species trees (D30, ~24,000 nodes) and conversion nodes
   B2   a 17th atom kind that writes an element payload                         [effect-atom, M]
@@ -205,7 +205,7 @@ This is the most important finding in the document.
 `src/FusionRpg.Core/Stats/Aptitudes/AptitudeAllocation.cs:8`:
 
 ```csharp
-public enum AllocationScope { Commander, DemonType, Aspect, UniqueDemon }
+public enum AllocationScope { Commander, CreatureType, Aspect, UniqueCreature }
 ```
 
 **FACT.** `passive-tree-ideal.md:59` (D31) says slot 6 comes *"after the item program takes 5"*, citing
@@ -484,29 +484,29 @@ Nothing in the passive-tree program may be specced before these rows are reviewe
 
 ### 10.2 B9 — the family roster: the tools shipped, the corpus did not
 
-**FACT, counted this session.** Parsing all 503 files under `data/seed/demons/species/*/*.json`:
+**FACT, counted this session.** Parsing all 503 files under `data/seed/creatures/species/*/*.json`:
 **841 entries, 699 distinct `family` tokens.** Top values: `undead` 64, `artillery-flora` 17,
 `fungal-artillery` 16, `explosive-flora` 14, `unclassified` 13. `spec-roster-metrics.md:38` expected 19.
 
 **FACT, and this is the part the red team missed.** A **closed 19-family roster already exists** —
-`data/seed/demons/_generated/family-assignments.json`, 53 species keys, 19 distinct families: `base`,
+`data/seed/creatures/_generated/family-assignments.json`, 53 species keys, 19 distinct families: `base`,
 `bucket`, `cactus`, `cherry`, `chomper`, `corn`, `dolls`, `double`, `fire`, `fruit`, `garlic`, `hypno`,
 `ice`, `light`, `line`, `nut`, `pea`, `sun`, `sunflower`. It is the projection `decisions.md`'s
 action-eligibility row already depends on, through `data/seed/actions/_generated/family-map.json`.
 
 So there are **two family vocabularies**: an open one over the whole 841-entry corpus, and a closed one
-over the 53-species subset the shipped 84-row `DemonSpeciesCatalog.Generated.cs` covers.
+over the 53-species subset the shipped 84-row `CreatureSpeciesCatalog.Generated.cs` covers.
 
 **FACT.** `family` is **open by contract**, not by accident —
-`docs/architecture/demon-seed/spec-anchor-contract.md:58` marks it *CLASSIFIED, open — grows organically*.
+`docs/architecture/creature-seed/spec-anchor-contract.md:58` marks it *CLASSIFIED, open — grows organically*.
 
 **FACT.** The consolidation machinery is **BUILT**: `tasks/seedsmith-todo.md:1249` (`D2.1
 family-extract`, **M**) and `:1291` (`D2.2 family-consolidate`, **M**), both `[x] BUILT + VERIFIED
 2026-08-31`.
 
 **Verdict: a run-and-decide gap, not absent work.** What is missing is (a) a decision to close the axis,
-or to derive a closed roster beside it — which amends `spec-anchor-contract.md:58` and is `demon-seed`'s
-call — and (b) one consolidation run over all 841 entries. **Owner: `seedsmith` / `demon-seed`. Size: M.
+or to derive a closed roster beside it — which amends `spec-anchor-contract.md:58` and is `creature-seed`'s
+call — and (b) one consolidation run over all 841 entries. **Owner: `seedsmith` / `creature-seed`. Size: M.
 HARD for family trees only**, which blocks no other category — exactly why D27 (*"the roster ships
 whole… curation is a build-order task"*) is safe.
 
@@ -517,14 +517,14 @@ comments** (`AptitudeTuning.cs:20`; `PointBudget.cs:13,15,22`). `grep -rni "alma
 --include=*.cs src/` returns **nothing**.
 
 **FACT.** `PointBudget.cs:13-15` names the owner in writing: *"Aspect's own source (`element_mastery`) is
-owned by the demon program's `aspect-scope` module and does not exist yet."*
+owned by the creature program's `aspect-scope` module and does not exist yet."*
 
-**INFERENCE.** `passive-tree-ideal.md:285` maps Aspect → elemental trees and DemonType → family trees, so
+**INFERENCE.** `passive-tree-ideal.md:285` maps Aspect → elemental trees and CreatureType → family trees, so
 **both non-primary generic categories gate on a quantity with no producer.** The Commander scope
-(`Θ_player`) and the UniqueDemon scope (specimen level) do ship, so the twelve primary trees and the
+(`Θ_player`) and the UniqueCreature scope (specimen level) do ship, so the twelve primary trees and the
 species trees have real gates today.
 
-**Owner: the demon program (`aspect-scope`) for `element_mastery`; the almanac for almanac XP. Size: M
+**Owner: the creature program (`aspect-scope`) for `element_mastery`; the almanac for almanac XP. Size: M
 each. HARD for waves 2 and 4.**
 
 > **And the deeper problem the red team's F5 raises is real:** one `req(t)` ladder facing four quantities

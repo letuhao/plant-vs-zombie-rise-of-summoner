@@ -12,7 +12,7 @@ public class OverlayCombatCalculatorTests
     static OverlayCombatRequest MatchupRequest(
         ElementTypeId attackerElement,
         ActorElementTypes defenderTypes,
-        double baseDamage = 100)
+        long baseDamage = 100)
     {
         return new OverlayCombatRequest
         {

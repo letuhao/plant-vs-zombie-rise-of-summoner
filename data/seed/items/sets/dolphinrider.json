@@ -25,7 +25,7 @@
       "id": "set.dolphinrider-001",
       "nameKey": "set.aquarium-keeper-s-interest",
       "name": "Aquarium Keeper's Interest",
-      "themeKey": "demon.dolphinrider",
+      "themeKey": "creature.dolphinrider",
       "members": [
         {
           "role": "armament-primary",

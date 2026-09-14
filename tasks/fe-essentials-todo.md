@@ -71,7 +71,7 @@ Not in the original 7-task plan. The owner directed a layout refactor mid-sessio
 is outdated, new FE layout don't have it"), pointing back at `01-shell-home.html`. Reading the **whole**
 plate (not just §D, already read for T1) plus `00-foundation.html` F.2 resolved what "outdated sidebar"
 meant: **not** the icon Rail (already the plate's own intended design, already shipped as T25) — the
-flat **`AuditNav`** component (`src/app/AppShell.tsx`, "AUDIT: Lawn/World/Roster/Demons/Storage"),
+flat **`AuditNav`** component (`src/app/AppShell.tsx`, "AUDIT: Lawn/World/Roster/Creatures/Storage"),
 explicitly named in `00-foundation.html:2003-2005` as the thing GG-40 replaces: *"The current sidebar
 has nineteen flat entries under a heading reading `AUDIT`... The rail carries player layers only."*
 Its own doc comment showed a multi-step shrink already in progress (T12/T15/T17/T19) — this closes it.
@@ -84,9 +84,9 @@ own visual pass found — removing it fixed both concerns in one change.
 - [x] Verified before removing, not after: `SanctumHome.tsx` already has real "Travel to the map"
   (`/world`) and "Defend the lawn" (`/lawn`) buttons (plate 01 §C's own authored content) — two of
   AuditNav's five links were already fully redundant. `/roster` already redirects into the rail's own
-  Creatures entry (also redundant). `/demons` and `/storage` lose their only nav entry but keep their
-  real routes (URL-reachable) — `/demons` deliberately left this way, matching this program's own
-  Assumption 2 (DemonsPage is a real, larger legacy candidate, explicitly out of scope here).
+  Creatures entry (also redundant). `/creatures` and `/storage` lose their only nav entry but keep their
+  real routes (URL-reachable) — `/creatures` deliberately left this way, matching this program's own
+  Assumption 2 (CreaturesPage is a real, larger legacy candidate, explicitly out of scope here).
   `/storage` similarly retained by URL only — no rail-layer redesign invented for it (would be new,
   unrequested scope).
   - Files: `src/app/AppShell.tsx` (edit), `src/app/AuditNav.tsx` (deleted).
@@ -198,7 +198,7 @@ Files: `src/app/TitleScreen.tsx`, `SaveSelect.tsx` (new); `src/app/AppShell.tsx`
   - Verify: `npm run test -- ActorMenuScopePicker` — green.
   - Files: `ui/scope/ActorMenuScopePicker.tsx`, `ActorMenuScopePicker.test.tsx` (new).
 
-- [x] **T3: `ActorListPickerPanel` — shared Target/UniqueDemon mode** · **M**
+- [x] **T3: `ActorListPickerPanel` — shared Target/UniqueCreature mode** · **M**
   - `ui/scope/ActorListPickerPanel.tsx` — one implementation for both modes, differing only in
     `kind`/`candidates`/the extracted id field (`targetPtr` vs `instanceId`, both sourced from
     `ActorView.instanceId` — confirmed via `contract/types.ts` that no separate live-battle-ptr field
@@ -212,7 +212,7 @@ Files: `src/app/TitleScreen.tsx`, `SaveSelect.tsx` (new); `src/app/AppShell.tsx`
     `ActorMenuScopePicker.tsx` (edit).
 
 ### ✅ Checkpoint 2 (mid-module) — **closed**
-- [x] Container + three of four modes (Relation, Target, UniqueDemon) working end-to-end in isolation,
+- [x] Container + three of four modes (Relation, Target, UniqueCreature) working end-to-end in isolation,
   proven by test.
 
 - [x] **T4: `TypeMultiSelect` — new primitive for Type mode** · **S/M**
@@ -232,7 +232,7 @@ Files: `src/app/TitleScreen.tsx`, `SaveSelect.tsx` (new); `src/app/AppShell.tsx`
 
 - [x] **T6: demo page + route** · **S**
   - `ui/scope/ActorMenuScopePickerDemoPage.tsx` — `ActorLadderDemoPage.tsx`'s exact shape (`?mock=1`,
-    `Page` wrapper); target/uniqueDemon candidates both from `useUniqueActors` (noted honestly in a
+    `Page` wrapper); target/uniqueCreature candidates both from `useUniqueActors` (noted honestly in a
     comment as a demo simplification — a real consumer would likely feed two different sources); type
     options from the real `useTypes()`/`/api/types` catalog, not invented data.
   - `routes.tsx` — new lazy route `actor-menu-scope-picker-demo`, matching `actor-ladder-demo` exactly.
@@ -271,11 +271,11 @@ Files: `src/app/TitleScreen.tsx`, `SaveSelect.tsx` (new); `src/app/AppShell.tsx`
     that these strings must NOT appear.
   - No competing who-picker existed before `actor-menu-scope-picker` and none appeared during
     development — confirmed true by construction (net-new code, no prior art to conflict with).
-  - `DemonsPage.tsx` / `/demons`: confirmed via `git status`/`git diff --stat` that **zero** files under
-    `src/features/demons/` were touched this program, and `routes.tsx`'s diff is additive-only (+11/-0)
-    — the `/demons` route entry itself is untouched. Explicitly named here as deliberately out of scope,
+  - `CreaturesPage.tsx` / `/creatures`: confirmed via `git status`/`git diff --stat` that **zero** files under
+    `src/features/creatures/` were touched this program, and `routes.tsx`'s diff is additive-only (+11/-0)
+    — the `/creatures` route entry itself is untouched. Explicitly named here as deliberately out of scope,
     not silently skipped.
-  - Acceptance (all met): grep evidence recorded above (zero matches); DemonsPage named explicitly.
+  - Acceptance (all met): grep evidence recorded above (zero matches); CreaturesPage named explicitly.
   - Verify: grep commands above; `npm run test` full suite (674/674) and `npx playwright test`
     (168/169, the one failure pre-existing and unrelated, confirmed via diff scope) as the closing sweep.
   - Files: none needed — nothing to fix.

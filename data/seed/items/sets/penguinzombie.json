@@ -25,7 +25,7 @@
       "id": "set.penguinzombie-001",
       "nameKey": "set.doctor-s-frozen-specimen",
       "name": "Doctor's Frozen Specimen",
-      "themeKey": "demon.penguinzombie",
+      "themeKey": "creature.penguinzombie",
       "members": [
         {
           "role": "armament-primary",

@@ -7,14 +7,14 @@ from __future__ import annotations
 
 import pytest
 
-from seedsmith.adapters.demons.effects.prompts import (
+from seedsmith.adapters.creatures.effects.prompts import (
     build_brief,
     build_context,
     entry_for,
     fixed_core_within_band,
     affix_ids_are_known,
 )
-from seedsmith.adapters.demons.effects.schema import SPECIES_EFFECTS_SCHEMA
+from seedsmith.adapters.creatures.effects.schema import SPECIES_EFFECTS_SCHEMA
 from seedsmith.workflow.graphs.species_effects import (
     build_species_effects_graph,
     load_shape_tuning,
@@ -75,7 +75,7 @@ def test_threatBand_string_appears_nowhere_in_the_module_reading_anchors():
     import ast
     import inspect
 
-    from seedsmith.adapters.demons.effects import prompts as prompts_module
+    from seedsmith.adapters.creatures.effects import prompts as prompts_module
 
     tree = ast.parse(inspect.getsource(prompts_module))
 

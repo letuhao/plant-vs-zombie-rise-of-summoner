@@ -25,7 +25,7 @@
       "id": "set.magnetfume-001",
       "nameKey": "set.magnetic-spore-cloud",
       "name": "Magnetic Spore Cloud",
-      "themeKey": "demon.magnetfume",
+      "themeKey": "creature.magnetfume",
       "members": [
         {
           "role": "armament-primary",

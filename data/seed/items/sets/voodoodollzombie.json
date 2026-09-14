@@ -25,7 +25,7 @@
       "id": "set.voodoodollzombie-001",
       "nameKey": "set.the-effigy-weave",
       "name": "The Effigy Weave",
-      "themeKey": "demon.voodoodollzombie",
+      "themeKey": "creature.voodoodollzombie",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.umbrellapot-001",
       "nameKey": "set.umbrella-parasol",
       "name": "Umbrella Parasol",
-      "themeKey": "demon.umbrellapot",
+      "themeKey": "creature.umbrellapot",
       "members": [
         {
           "role": "armament-primary",

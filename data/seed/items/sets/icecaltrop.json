@@ -25,7 +25,7 @@
       "id": "set.icecaltrop-001",
       "nameKey": "set.rime-shard-spikes",
       "name": "Rime Shard Spikes",
-      "themeKey": "demon.icecaltrop",
+      "themeKey": "creature.icecaltrop",
       "members": [
         {
           "role": "armament-primary",

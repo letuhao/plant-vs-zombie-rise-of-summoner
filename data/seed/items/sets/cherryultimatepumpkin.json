@@ -25,7 +25,7 @@
       "id": "set.cherryultimatepumpkin-001",
       "nameKey": "set.magnetic-zombie-swarm",
       "name": "Magnetic Zombie Swarm",
-      "themeKey": "demon.cherryultimatepumpkin",
+      "themeKey": "creature.cherryultimatepumpkin",
       "members": [
         {
           "role": "armament-primary",

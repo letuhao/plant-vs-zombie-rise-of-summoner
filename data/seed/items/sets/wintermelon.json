@@ -25,7 +25,7 @@
       "id": "set.wintermelon-001",
       "nameKey": "set.frozen-melon",
       "name": "Frozen Melon",
-      "themeKey": "demon.wintermelon",
+      "themeKey": "creature.wintermelon",
       "members": [
         {
           "role": "armament-primary",

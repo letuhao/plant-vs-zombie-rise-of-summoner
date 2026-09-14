@@ -89,7 +89,7 @@ Wells, waystations, granaries, deep roots, soul conduits — buildings with cost
 
 Orders and tools beyond basic march and claim:
 
-- **Wardens** — bind demons to hold ground
+- **Wardens** — bind creatures to hold ground
 - **Cede** — give up a sector on purpose
 - **Dowse** — a stance for reading the ground
 - **Lenses** — switch how the map reads (supply, fog, and more)

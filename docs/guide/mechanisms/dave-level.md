@@ -76,8 +76,8 @@ You keep who you are across worlds — see [New world](new-world-prestige.md).
 **Why didn’t Dave 10 open Relics?**  
 Dave chapters are Vision. Relics open on the live item beat.
 
-**Is Dave’s level the same as a demon’s level?**  
-No. Demons have specimen XP; Dave is the summoner line.
+**Is Dave’s level the same as a creature’s level?**  
+No. Creatures have specimen XP; Dave is the summoner line.
 
 ---
 

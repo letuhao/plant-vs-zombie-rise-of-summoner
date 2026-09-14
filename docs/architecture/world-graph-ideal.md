@@ -21,7 +21,7 @@ Canon we lean on, not invent: Zomboss's time machine **malfunctioned and scatter
 
 **Our branch:** where a shard landed, plant and zombie *fused*. That is what the Fusion mod is, told as lore.
 
-**You are Dave.** The demons are what the fracture made of his lawn's plants and his lawn's zombies; **the capital is his homeworld**, the one timeline still his; Penny is how legions reach the other eras at all. Everything the player owns — roster, reserve, altar, fusion lab, atlas, stored haul — lives at home, which is what makes defending it the spine rather than one more objective.
+**You are Dave.** The creatures are what the fracture made of his lawn's plants and his lawn's zombies; **the capital is his homeworld**, the one timeline still his; Penny is how legions reach the other eras at all. Everything the player owns — roster, reserve, altar, fusion lab, atlas, stored haul — lives at home, which is what makes defending it the spine rather than one more objective.
 
 **Win condition:** find Zomboss's fortress sector and take it. **Lose condition:** the homeworld falls.
 
@@ -182,7 +182,7 @@ Two separate domains, two separate streams, two separate vocabularies:
 | | **Strategy clock** (this design) | **Combat clock** (other stream) |
 |---|---|---|
 | Unit | **turn** — a day on the map | **round** — a beat inside one battle |
-| Who acts | commanders: the player, Zomboss, neutrals | actors: individual demons and structures |
+| Who acts | commanders: the player, Zomboss, neutrals | actors: individual creatures and structures |
 | Question it answers | who moves where, what gets built, what is claimed | who hits whom, in what order, for how much |
 | Barrier | every commander commits (§3.2) | its own, owned by that stream |
 | Owner | this document | the combat/actor stream |
@@ -260,14 +260,14 @@ Switching modes *mid-campaign* is a balance problem, not a technical one — sta
 
 | Turn | What you do |
 |---|---|
-| **1** | Dave's homeworld, front lawn only. Penny has one lane open. Your first legion — three demons — marches into the **unknown** sector beyond it |
+| **1** | Dave's homeworld, front lawn only. Penny has one lane open. Your first legion — three creatures — marches into the **unknown** sector beyond it |
 | **2** | Arrival reveals the sector board: four slots — an ice essence deposit under a light guard, a lair, a ruin, one buildable wildland. The guard is a short chain of fights; you play the first one yourself |
 | **3** | Guard cleared, sector contested. You order an **outpost** on the wildland. It will take two turns |
-| **5** | Outpost stands, the sector is yours. You order an **essence extractor** on the deposit — ice essence, the exact material the fusion lab at home demands for ice demons |
+| **5** | Outpost stands, the sector is yours. You order an **essence extractor** on the deposit — ice essence, the exact material the fusion lab at home demands for ice creatures |
 | **6** | You clear the **lair** and claim it. It will release recruits at the start of every week |
 | **7** | Week boundary: the lair's first pulse arrives. Enough bodies for a second legion — one to hold, one to push |
 | **8** | Your watchpost catches a warband that a rift tear two lanes away has been feeding: *"Five, fire-typed, arrives turn 11."* You have three turns |
-| **9–10** | Prepare: a wall in lane two, an ice tower where the fire wave will funnel, garrison demons in the slots behind. The second legion is recalled to stand in the line |
+| **9–10** | Prepare: a wall in lane two, an ice tower where the fire wave will funnel, garrison creatures in the slots behind. The second legion is recalled to stand in the line |
 | **11** | It arrives. You play the defense yourself — or let the layout resolve it |
 | **12** | Held. Now push: the rich sector next door has a shard vein, and a heavier guard |
 
@@ -417,11 +417,11 @@ An allied enclave shares intel across its lanes, opens trade at better rates, an
 
 ## 9. Legions and war
 
-> **Legions take. Garrisons hold.** Demons parked in a sector defend it and suppress pressure; only a legion breaks guards, claims, delves, assaults, and builds.
+> **Legions take. Garrisons hold.** Creatures parked in a sector defend it and suppress pressure; only a legion breaks guards, claims, delves, assaults, and builds.
 
 | Property | Meaning |
 |---|---|
-| **Capacity** | how many demons it fields; grows with legion tier |
+| **Capacity** | how many creatures it fields; grows with legion tier |
 | **Commander** | a designated specimen — **recruited heroes fill this slot later** |
 | **Banner element** | from its members' mix; drives ley-lane cost and climate synergy (§11) |
 | **Movement** | points per turn, spent on lane cost; corridors and matching ley lanes are cheaper; enemy zone of control stops a march dead |
@@ -435,7 +435,7 @@ An allied enclave shares intel across its lanes, opens trade at better rates, an
 
 **Guards scale to reward:** every claimable thing is guarded in proportion to what it is worth. Difficulty is legible before you commit, progression self-paces without level gates, and the generator can place value freely because value carries its own defense.
 
-**Three jobs for a demon:** legion (marching and fighting), garrison (standing on a defense board), work crew (extraction, construction, refining). Everything you own is working, holding, or fighting — and moving one out of a job costs something elsewhere.
+**Three jobs for a creature:** legion (marching and fighting), garrison (standing on a defense board), work crew (extraction, construction, refining). Everything you own is working, holding, or fighting — and moving one out of a job costs something elsewhere.
 
 **Expansion has a price:** no hard cap, a curve. Every sector held beyond capacity raises instability everywhere — faster pressure, hungrier garrisons, quicker drift. Hold four sectors well, or seven badly?
 
@@ -486,7 +486,7 @@ My read is **occupied**: it makes the homeworld what every other system is prote
 The elements already ship, so putting them at sector scale is nearly free depth.
 
 - **Every sector has an element climate.** Its deposits produce that essence, its lairs recruit that element's species, and fights inside it apply the climate through the existing ring and the light/dark pair.
-- **Holding ice ground is how you fuse ice demons** — fusion already demands element-matched essences, so the map becomes the supply chain of a system that exists today.
+- **Holding ice ground is how you fuse ice creatures** — fusion already demands element-matched essences, so the map becomes the supply chain of a system that exists today.
 - **Ley lanes** reward banner-matched legions with speed.
 - **A base can be attuned** to an element, projecting that aura over its sector and onto its board totem — the patron aura math applied to ground.
 
@@ -564,7 +564,7 @@ Turns make this section short, which is the point.
 
 **Two drivers, one engine.** Delves, defenses, and rival legions all run the same resolver; who decides is a parameter — **autopilot policy** (today's expedition, generalized) or **player**. Same seed, same rewards, with a decision premium for playing it yourself.
 
-**Economy.** Souls buy roster power; **shards buy position** (stabilize, build, raise capacity); essences and materials feed fusion and construction; **presence** — demons in jobs — is a sink made of bodies with upkeep; unbanked haul is what you can lose. Depletion caps farming without a cooldown, nothing expires unclaimed, and there is no stamina.
+**Economy.** Souls buy roster power; **shards buy position** (stabilize, build, raise capacity); essences and materials feed fusion and construction; **presence** — creatures in jobs — is a sink made of bodies with upkeep; unbanked haul is what you can lose. Depletion caps farming without a cooldown, nothing expires unclaimed, and there is no stamina.
 
 **Real PvZ.** A live run *is* a base defense: when an incursion reaches one of your sectors you can answer it in the actual game — that lawn is that base's board, that wave is that warband, and winning pushes the front line back. One axis, breadth and access, never power.
 
@@ -580,7 +580,7 @@ Turns make this section short, which is the point.
 4. **How strong is the rival summoner** — a racer for shards, or an enemy that takes sectors and holds your old lawn?
 5. **Does recruitment threaten the gacha?** Territory supplies numbers, summoning supplies rarity — where is the line?
 6. **How many clusters and sectors at launch?** Three clusters, ~20 sectors is my instinct.
-7. **Do demons remember?** Frost-scars, a warlord that remembers losing, a garrison that survived a siege.
+7. **Do creatures remember?** Frost-scars, a warlord that remembers losing, a garrison that survived a siege.
 8. **How stale can intel get before it lies?** Drama at a week, frustration at a month.
 
 ---

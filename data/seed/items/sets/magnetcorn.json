@@ -25,7 +25,7 @@
       "id": "set.magnetcorn-001",
       "nameKey": "set.magnetic-corn-pitcher",
       "name": "Magnetic Corn Pitcher",
-      "themeKey": "demon.magnetcorn",
+      "themeKey": "creature.magnetcorn",
       "members": [
         {
           "role": "armament-primary",

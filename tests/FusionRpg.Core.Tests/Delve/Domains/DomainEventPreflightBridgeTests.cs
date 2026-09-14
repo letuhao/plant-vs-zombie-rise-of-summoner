@@ -98,7 +98,7 @@ public class DomainEventPreflightBridgeTests
     /// SHIP`'s own comment: the deferred question is about a FUTURE multi-chapter arc, not about
     /// shipping more standalone beats in the ALREADY-ESTABLISHED shape the first 2 story events
     /// already used. Generated 2 more standalone `story` events via the real pipeline
-    /// (`run_event_draws`, real local-model call — `event.story-demon.cactus-001` /
+    /// (`run_event_draws`, real local-model call — `event.story-creature.cactus-001` /
     /// `dolldiamond-001`, chained the same planner-assigned way `EventCatalog.Load`'s
     /// `ChainRefRequiredForStory` rule requires), reaching 4 distinct themes, and widened all 12 real
     /// `wild` rooms' own `eventPool` to the full 4-event set (the identical widen-by-union pattern

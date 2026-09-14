@@ -19,7 +19,7 @@ Every shipped monster-fusion system answers one question — *given inputs, what
 answers split cleanly into **computed rules** and **authored lookup tables**, with the successful games
 running both at once. Shin Megami Tensei is the reference implementation and it is a rule engine with a
 hand-authored escape hatch: an N×N race chart picks the output *family*, an arithmetic rule
-(`result level ≥ (levelA + levelB)/2 + 1`, then take the lowest demon of that family at or above it)
+(`result level ≥ (levelA + levelB)/2 + 1`, then take the lowest creature of that family at or above it)
 picks the output *individual*, and ~30–70 hand-written "special recipes" per game cover the cases the
 rule cannot reach — and the whole thing only works because **(race, level) is a primary key over the
 entire roster with zero collisions in all five games measured (computed)**. Minion power derivation is
@@ -38,7 +38,7 @@ punishing" and that the reason it exists at all is that more units make heroes m
 
 ---
 
-## 1. Shin Megami Tensei / Persona demon fusion — the reference implementation
+## 1. Shin Megami Tensei / Persona creature fusion — the reference implementation
 
 ### 1.1 Sources, and why these are trustworthy
 
@@ -90,19 +90,19 @@ Journey, and hardcoded as `const lvlModifier = 1` in the Persona same-arcana pat
 ([`per-nonelem-fusions.ts`](https://github.com/aqiu384/megaten-fusion-tool/blob/master/src/app/compendium/fusions/per-nonelem-fusions.ts)).
 So the rule in plain terms:
 
-> **The result is the lowest-level demon of the result race whose level is at least
+> **The result is the lowest-level creature of the result race whose level is at least
 > `(levelA + levelB) / 2 + 1`.**
 
 This is the "average plus one" rule, and the "+1" is doing something specific: it guarantees the child
 is strictly *above* the parents' average, so a fusion chain always climbs. The rounding is not a
-rounding at all — it is a **ceiling to the next demon that exists in that race**. Fuse a level-12 Pixie
-with a level-9 Apsaras, target `10.5 + 1 = 11.5`, and if the Holy race has no demon at 12 you get the
+rounding at all — it is a **ceiling to the next creature that exists in that race**. Fuse a level-12 Pixie
+with a level-9 Apsaras, target `10.5 + 1 = 11.5`, and if the Holy race has no creature at 12 you get the
 level-13 Shiisaa
 ([Game8, Nocturne fusion chart guide](https://game8.co/games/Shin-Megami-Tensei-III-Nocturne/archives/332176)).
 
-**Step 3 — the whole thing only works because of a primary key.** Tallied over the shipped demon tables:
+**Step 3 — the whole thing only works because of a primary key.** Tallied over the shipped creature tables:
 
-| Game | Demons | Races | Median demons per race | Max | Distinct `(race, level)` cells | **Collisions** |
+| Game | Creatures | Races | Median creatures per race | Max | Distinct `(race, level)` cells | **Collisions** |
 |---|---:|---:|---:|---:|---:|---:|
 | SMT III: Nocturne | 195 | 35 | 6 | 10 | 195 | **0** |
 | SMT IV | 426 | 48 | 9 | 19 | 426 | **0** |
@@ -110,9 +110,9 @@ level-13 Shiisaa
 | Persona 4 | 187 | 22 | 9 | 11 | 187 | **0** |
 | Persona 5 | 210 | 21 | 9 | 16 | 210 | **0** |
 
-*(computed from `demon-data.json` per game)*
+*(computed from `creature-data.json` per game)*
 
-**No two obtainable demons in any of these games share a race and a level.** `(race, level)` addresses
+**No two obtainable creatures in any of these games share a race and a level.** `(race, level)` addresses
 exactly one creature, always. The fusion rule is a *lookup by computed key* into a table the designers
 guaranteed is unique. Remove that guarantee and the "+1 then take the lowest at or above" step becomes
 ambiguous and the algorithm stops being a function.
@@ -123,8 +123,8 @@ for Summoners War, where `family_id × element` is filled 821/870 with median ex
 
 ### 1.3 Element / Mitama fusion — a rank shift, not a level shift
 
-Fusing a normal demon with an "element" demon (Erthys, Aeros, Aquans, Flaemis in Nocturne; the eight
-Treasure Demons in Persona 5) does not change race. It moves the demon **one slot up or down in that
+Fusing a normal creature with an "element" creature (Erthys, Aeros, Aquans, Flaemis in Nocturne; the eight
+Treasure Creatures in Persona 5) does not change race. It moves the creature **one slot up or down in that
 race's level-ordered list**. From
 [`smt3/data/element-chart.json`](https://github.com/aqiu384/megaten-fusion-tool/blob/master/src/app/smt3/data/element-chart.json)
 the table is `race × element → ±1`, 21 races × 4 elements in Nocturne, values only ever `+1` or `−1`.
@@ -138,7 +138,7 @@ an out-of-family result. It is the cheapest "nudge" operator in the whole system
 
 ### 1.4 Special fusion — the authored escape hatch
 
-Some demons cannot be produced by the rule at all and have a hand-written ingredient list. Ingredient
+Some creatures cannot be produced by the rule at all and have a hand-written ingredient list. Ingredient
 counts, tallied from `special-recipes.json`:
 
 | Game | Special recipes | 2 ingredients | 3 | 4 | 5 | 6 | 10+ | Unbuildable (0) |
@@ -148,7 +148,7 @@ counts, tallied from `special-recipes.json`:
 | SMT V | 46 | 6 | **31** | 9 | — | — | — | — |
 | Persona 3 Reload | 22 | 2 | 7 | 5 | 3 | 5 | — | — |
 | Persona 4 | 17 | 3 | 1 | 4 | 4 | 4 | 1 (12) | — |
-| Persona 5 | 29 | 3 | 8 | 4 | 3 | 3 | — | 8 (Treasure Demons) |
+| Persona 5 | 29 | 3 | 8 | 4 | 3 | 3 | — | 8 (Treasure Creatures) |
 
 *(computed)*
 
@@ -193,13 +193,13 @@ Persona 5 Royal raising 8 → 10 is the only slot-count change in the series' mo
 enhanced re-release. **INFERENCE:** slot count is the single most load-bearing number in the whole
 system, because it sets how many decisions a fusion is, and they moved it exactly once.
 
-**Gate 3 — what a given demon is *allowed* to inherit.** Each demon carries an affinity bitmask over
-skill families. Nocturne uses a **9-character `o`/`x` string** per demon over 9 inherit categories;
+**Gate 3 — what a given creature is *allowed* to inherit.** Each creature carries an affinity bitmask over
+skill families. Nocturne uses a **9-character `o`/`x` string** per creature over 9 inherit categories;
 tallying the whole roster, the distribution of allowed categories is
-`0:2, 1:8, 2:17, 3:36, 4:49, 5:63, 6:19, 7:1` with **median 4 of 9 (computed)** — so the average demon
+`0:2, 1:8, 2:17, 3:36, 4:49, 5:63, 6:19, 7:1` with **median 4 of 9 (computed)** — so the average creature
 is barred from more than half the skill vocabulary.
 
-Persona 5 replaces the per-demon mask with a **shared 14 × 12 grid**: 14 "inheritance types" a Persona
+Persona 5 replaces the per-creature mask with a **shared 14 × 12 grid**: 14 "inheritance types" a Persona
 can have, against 12 skill element families, `o` = allowed. From
 [`p5/data/inheritance-types.json`](https://github.com/aqiu384/megaten-fusion-tool/blob/master/src/app/p5/data/inheritance-types.json):
 
@@ -217,8 +217,8 @@ can have, against 12 skill element families, `o` = allowed. From
 own element — which is the whole joke: a fire Persona cannot inherit fire skills, so you must fuse
 *across* elements to build a coverage kit. Phys at 4/12 and None at 0/12 are the two hard walls.
 
-**INFERENCE — the design shape.** Nocturne pays `O(demons)` for its mask; Persona 5 pays
-`O(types × families)` for a shared grid and then one enum per demon. The shared grid is dramatically
+**INFERENCE — the design shape.** Nocturne pays `O(creatures)` for its mask; Persona 5 pays
+`O(types × families)` for a shared grid and then one enum per creature. The shared grid is dramatically
 cheaper to maintain and to explain, and it is what a later game in the same studio chose.
 
 ### 1.6 Fusion accidents
@@ -233,8 +233,8 @@ Sources disagree and I am reporting the disagreement rather than picking.
 | SMT V: Vengeance | Full moon only; otherwise **impossible** | "Mutative Element" miracle stacked with full moon reported at **~40–50%+** | [TheGamer](https://www.thegamer.com/shin-megami-tensei-5-vengeance-fusion-accidents-explained-guide/), [Nintendo Everything](https://nintendoeverything.com/how-to-trigger-fusion-accidents-in-shin-megami-tensei-v-vengeance/) |
 
 Structural facts that are not in dispute: **special fusions and Fiend fusions are immune to accidents**;
-in SMT V: Vengeance **3 of the 40 new demons are obtainable only through an accident**
-([Game8](https://game8.co/games/Shin-Megami-Tensei-V/archives/350405) — accident-exclusive demon
+in SMT V: Vengeance **3 of the 40 new creatures are obtainable only through an accident**
+([Game8](https://game8.co/games/Shin-Megami-Tensei-V/archives/350405) — accident-exclusive creature
 list). In Nocturne the accident result is drawn from a **cursed chart** shipped as its own data file
 (`smt3/data/cursed-chart.json`), i.e. accidents are a *second* authored race table, not noise.
 
@@ -246,21 +246,21 @@ miracle) it stops being an accident and becomes a mode you toggle.
 
 ### 1.7 The Compendium — re-summon what you registered
 
-The Compendium registers a demon's level, stats, skills and affinities at the moment you register it,
-and lets you buy that exact snapshot back for money. Registration is the reason fusing a demon is not a
+The Compendium registers a creature's level, stats, skills and affinities at the moment you register it,
+and lets you buy that exact snapshot back for money. Registration is the reason fusing a creature is not a
 loss: the parent is consumed, the record is not.
 
 Cost is a function of level and stats. In the Nocturne calculator the price is reconstructed as
 `100 × floor((sum of stats)² / 20) / 2`
 ([`smt3/compendium.module.ts`](https://github.com/aqiu384/megaten-fusion-tool/blob/master/src/app/smt3/compendium.module.ts)) —
-**quadratic in the stat sum**. SMT IV and SMT V ship an explicit `price` per demon; fitting those:
+**quadratic in the stat sum**. SMT IV and SMT V ship an explicit `price` per creature; fitting those:
 
 | Game | Median price at level ~10 | ~30 | ~50 | ~70 | ~90 | Implied exponent on level |
 |---|---:|---:|---:|---:|---:|---:|
 | SMT IV | 1,240 | 4,716 | 10,701 | 15,879 | 26,970 | **≈ 1.40** |
 | SMT V | 1,389 | 7,082 | 16,652 | 31,367 | **80,058** | **≈ 1.84** |
 
-*(computed from `demon-data.json`; exponent from the level-10 → level-90 ratio)*
+*(computed from `creature-data.json`; exponent from the level-10 → level-90 ratio)*
 
 **The re-summon sink is superlinear and close to quadratic, and SMT V made it steeper than SMT IV.**
 That is the same shape this project's own power ladder uses.
@@ -275,18 +275,18 @@ Recruitment is a conversation, not a capture. Reported mechanics
 ([Game8 Nocturne](https://game8.co/games/Shin-Megami-Tensei-III-Nocturne/archives/332036),
 [Game8 SMT V](https://game8.co/games/Shin-Megami-Tensei-V/archives/348793)):
 
-- The demon demands **items, money, or HP/MP** and the exchange is not a guaranteed purchase — paying
+- The creature demands **items, money, or HP/MP** and the exchange is not a guaranteed purchase — paying
   can still fail and refusing can still succeed.
-- **Moon phase changes demon mood** — some are agreeable at full moon, some are worse.
-- Hard preconditions: **a free party slot** and **no demon of the same species already in the party**.
-- The money a demon offers correlates with its level and the protagonist's **Luck**.
+- **Moon phase changes creature mood** — some are agreeable at full moon, some are worse.
+- Hard preconditions: **a free party slot** and **no creature of the same species already in the party**.
+- The money a creature offers correlates with its level and the protagonist's **Luck**.
 
 I could not find a datamined success-probability formula for any modern entry (see
 *What I could not find*).
 
 Two structural rules that matter more than the odds:
 
-1. **A demon cannot exceed the protagonist's level.** This is the series' hard ceiling on the whole
+1. **A creature cannot exceed the protagonist's level.** This is the series' hard ceiling on the whole
    loop, and it is what makes the protagonist's own level the gate on the roster rather than the
    grind.
 2. **Persona locks 21 top-tier Personas behind maxed social relationships.** From
@@ -480,9 +480,9 @@ This is the load-bearing table. **"Rule"** means the output is computed from the
 
 | System | Fusion INPUT | What determines the OUTPUT identity | What determines OUTPUT numbers | Rule / Table | Inputs consumed? | Result is |
 |---|---|---|---|---|---|---|
-| **SMT / Persona normal fusion** | 2 demons | **Table** (race × race chart, 22–47 races, 77–98% filled) | **Rule**: lowest demon of result race with `level ≥ (lA+lB)/2 + 1` | **Hybrid** | Both | Permanent, new creature |
-| **SMT element fusion** | 1 demon + 1 element demon | Same race, always | **Rule**: ±1 **rank** in the race's level-ordered list (table of ±1 per race×element) | Hybrid | Both | Permanent |
-| **SMT special fusion** | 2–6 named demons (median 3 in SMT IV/V) | **Table only** — hand-written recipe | Fixed — the named demon | **Table** | All | Permanent |
+| **SMT / Persona normal fusion** | 2 creatures | **Table** (race × race chart, 22–47 races, 77–98% filled) | **Rule**: lowest creature of result race with `level ≥ (lA+lB)/2 + 1` | **Hybrid** | Both | Permanent, new creature |
+| **SMT element fusion** | 1 creature + 1 element creature | Same race, always | **Rule**: ±1 **rank** in the race's level-ordered list (table of ±1 per race×element) | Hybrid | Both | Permanent |
+| **SMT special fusion** | 2–6 named creatures (median 3 in SMT IV/V) | **Table only** — hand-written recipe | Fixed — the named creature | **Table** | All | Permanent |
 | **SMT fusion accident** | Any fusion, on the right moon phase | **Table** (a second, "cursed" race chart) | Fixed | Table | Both | Permanent, unpredictable |
 | **Pokémon breeding** | 2 compatible parents | **Table** (egg group + mother's species → base-form species) | **Rule**: 3 (or 5 w/ Destiny Knot) of 6 IVs copied from a randomly chosen parent per stat; rest rolled 0–31; nature from Everstone | **Hybrid** | Neither — parents survive | New level-5 creature |
 | **Monster Rancher CD** | A music CD's TOC (5 integers) | **Table** first (hard-coded special list), else **rule**: `LN-PMin − (LT-PMin % 16)` → 1 of 28 breeds | **Rule**: two 60-row offset tables summed onto breed base; 7 modifiers each, −10..+20 | **Hybrid, table wins** | N/A | New creature |
@@ -808,22 +808,22 @@ tax on inattention, and the tax fell on exactly the situation where a player is 
 (the pet died, the fight is still going, and you cannot feed in combat). It survived seven years and
 was removed in two stages: the punitive half first, the entire thing three years later.
 
-### 6.2 Warlock demon control — friction removed one patch at a time
+### 6.2 Warlock creature control — friction removed one patch at a time
 
-Subjugate Demon (formerly Enslave Demon), from
+Subjugate Creature (formerly Enslave Creature), from
 [Warcraft Wiki](https://warcraft.wiki.gg/wiki/Enslave_Demon):
 
-- Takes a demon **up to (player level + 1)** for **10 minutes**.
+- Takes a creature **up to (player level + 1)** for **10 minutes**.
 - Releasing it flips it hostile: *"subjugating generates a large amount of aggro towards the caster —
   upon release it will likely attack its previous controller."*
 - The agency features were removed progressively:
   - **1.1.0 (2004-11):** *added* an increasing break-free chance for repeat casts on the same target.
-  - **3.1.0 (2009-04):** *"There is no longer a penalty for repeatedly enslaving the same Demon."*
-  - **7.0.3 (2016-07):** *"No longer reduces the enslaved demon's haste."*
+  - **3.1.0 (2009-04):** *"There is no longer a penalty for repeatedly enslaving the same Creature."*
+  - **7.0.3 (2016-07):** *"No longer reduces the enslaved creature's haste."*
   - **2.2.0 (2007-09):** PvP duration cut from 10 minutes to **10 seconds**.
 
 **Twelve years of patches, every one of them subtracting agency.** The remaining agency is entirely
-positional: the demon is temporary, level-capped, and hostile the moment you let go.
+positional: the creature is temporary, level-capped, and hostile the moment you let go.
 
 ### 6.3 Pokémon obedience — a hard gate on borrowed creatures, with the exact formula
 
@@ -880,7 +880,7 @@ as a system players engage with.
 - **Persona 5's 21 Confidant-gated Personas** (§1.8) do the same thing at the acquisition step: a
   relationship rank is the key, and the creature behaves identically once you have it.
 - **SMT negotiation** (§1.8) is the only one in the family where the creature can refuse in the moment,
-  and even there the demon's demands are transactional (items, money, HP) rather than persistent.
+  and even there the creature's demands are transactional (items, money, HP) rather than persistent.
 
 ### 6.6 The Nemesis System — agency as the *enemy's* property, and it is patented
 
@@ -1068,7 +1068,7 @@ file.
    (a moddable named stat) is sourced; the *numbers* live in the skill gem data, not `Minions.lua`, and
    I did not retrieve them.
 5. **A datamined SMT negotiation success formula for any modern entry.** Guides describe the inputs
-   (Luck, moon phase, demon mood, alignment, level difference) but no source gave a probability
+   (Luck, moon phase, creature mood, alignment, level difference) but no source gave a probability
    expression. Guide prose only.
 6. **The Persona 5 skill-inheritance threshold table has an off-by-one I could not resolve.** The
    published table reads "13–23 → 4" and "23–31 → 5"; 23 appears in both bands. Not resolvable against
@@ -1099,7 +1099,7 @@ file.
 touches systems this repo already has. Nothing here has been checked against the code, the design gate,
 or `decisions.md`, and none of it is a recommendation.
 
-- **The `(race, level)` primary key.** SMT's fusion rule is only a function because no two demons share
+- **The `(race, level)` primary key.** SMT's fusion rule is only a function because no two creatures share
   a race and a level — five games, zero collisions. Any generated roster that wants a computed fusion
   rule inherits that constraint, and a *generator* can violate it silently in a way a hand-authored
   roster cannot.

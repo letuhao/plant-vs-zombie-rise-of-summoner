@@ -32,7 +32,7 @@ ITEM_ROLES: "tuple[str, ...]" = (
 #: count-less), so it is its own named list here too, matching the C# side exactly rather than
 #: re-deriving a rule that does not actually hold.
 COUNT_LESS_TEMPLATES: "frozenset[str]" = frozenset({
-    "kill-boss", "extract-with-item-kind", "bring-demon-home-alive",
+    "kill-boss", "extract-with-item-kind", "bring-creature-home-alive",
     "finish-under-hunger", "survive-no-downed", "spend-no-provision",
 })
 
@@ -130,7 +130,7 @@ QUEST_SYSTEM_PROMPT = (
 #: `spec-delve-quests.md:79-82`'s own real, mechanical definition of scope -- WHICH FACT SOURCE the
 #: quest's completion predicate reads, never a difficulty or a narrative register on its own. Real
 #: finding, 2026-09-07: a first live batch measured a HIGH `name_collision` rate specifically
-#: between different scopes of the SAME template (`bring-demon-home-alive` at `delve` vs `domain`
+#: between different scopes of the SAME template (`bring-creature-home-alive` at `delve` vs `domain`
 #: vs `roster` produced the identical name twice) -- the brief gave the model no reason to write a
 #: different name for the "same ask evaluated differently" shape scope actually is. This hint
 #: grounds a real, accurate distinction (never an invented one) so `name`/`flavor` can legitimately
@@ -138,7 +138,7 @@ QUEST_SYSTEM_PROMPT = (
 _SCOPE_HINT = {
     "delve": "Judged by what happens during this one descent alone -- an immediate task for this run.",
     "domain": "Judged across every attempt the player has made at this same domain -- a standing task tied to the place, not one run.",
-    "roster": "Judged by what becomes of the party's own demons at extraction -- a task about who comes home, not where.",
+    "roster": "Judged by what becomes of the party's own creatures at extraction -- a task about who comes home, not where.",
 }
 
 
@@ -339,7 +339,7 @@ _EVENT_KIND_HINT = {
     "shrine": "a place of ritual the party can spend something at, or walk past",
     "trap": "a hazard sprung by moving through it, not a choice offered",
     "bargain": "an explicit offer with a stated cost and a stated gain, agreed to or refused",
-    "story": "a wild demon the party may talk to, offer to, or leave -- a single, self-contained beat, not part of a longer chain",
+    "story": "a wild creature the party may talk to, offer to, or leave -- a single, self-contained beat, not part of a longer chain",
 }
 
 
@@ -622,7 +622,7 @@ ROOM_SYSTEM_PROMPT = (
 _ROOM_KIND_HINT = {
     "fight": "a straightforward fight room", "elite": "a tougher, smaller fight room",
     "cache": "a reward room with no fight", "curio": "a room built around one curio event",
-    "wild": "a room where a wild demon may be talked to, bought from, prayed to, or caged",
+    "wild": "a room where a wild creature may be talked to, bought from, prayed to, or caged",
     "shrine": "a room built around one shrine event", "rest": "a room to recover between fights",
     "merchant": "a room to trade with a merchant", "trap": "a room built around one trap event",
     "unknown": "a room whose true nature is hidden until entered", "boss": "the domain's own boss room",

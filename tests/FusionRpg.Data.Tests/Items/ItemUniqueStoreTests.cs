@@ -11,20 +11,18 @@ namespace FusionRpg.Data.Tests.Items;
 /// </summary>
 public class ItemUniqueStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ItemUniqueStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-uniques-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     static string RepoRoot()
@@ -170,8 +168,13 @@ public class ItemUniqueStoreTests : IDisposable
 
         _store.SeedUniqueEligible(Tuning());
 
+        // CONTRACT, not a hardcoded ordinal: the eligibility floor is a tunable
+        // (`uniques.v1.json.rungFloorOrdinal`) and D4.23 moved it 30 → 80. Asserting against the
+        // TUNING's own floor rather than a literal keeps this true when a balance pass moves the rung
+        // — the old `ordinal >= 30` was stale the moment the floor moved.
+        var floor = Tuning().RungFloorOrdinal;
         foreach (var (id, ordinal) in ladder)
-            Assert.Equal(ordinal >= 30 ? 1 : 0,
+            Assert.Equal(ordinal >= floor ? 1 : 0,
                 _store.GetRarityBudget(id, UniqueLimits.EligibilityBudgetKey));
     }
 

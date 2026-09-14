@@ -26,7 +26,7 @@ public class TraitMigrationParityTests
     {
         Key = "squad:0",
         Side = "squad",
-        SpeciesId = "demon.test",
+        SpeciesId = "creature.test",
         Level = 5,
         MaxHp = 500,
         Atk = 40,
@@ -97,8 +97,8 @@ public class TraitMigrationParityTests
         // changes. The prediction the spec asked for is now a measurement.
         var actor = Actor(Trait);
 
-        var viaOldCatalog = BattleStatComposer.Compose(actor, PreMigration());
-        var viaAtoms = BattleStatComposer.Compose(actor, MigratedFromSeed());
+        var viaOldCatalog = BattleHubCompose.Compose(actor, PreMigration());
+        var viaAtoms = BattleHubCompose.Compose(actor, MigratedFromSeed());
 
         AssertSameSnapshot(viaOldCatalog, viaAtoms);
     }
@@ -119,7 +119,7 @@ public class TraitMigrationParityTests
         // The migration is only real if the old home is empty. If both still supplied it, the trait
         // would be double-counted the moment anything read them together.
         Assert.Empty(TraitBattleCatalog.Get(Trait).ChannelMods);
-        Assert.Equal(new[] { PreMigrationMod }, BattleStatComposer.Traits.ModsFor(Trait));
+        Assert.Equal(new[] { PreMigrationMod }, BattleHubCompose.Traits.ModsFor(Trait));
     }
 
     [Fact]
@@ -146,8 +146,8 @@ public class TraitMigrationParityTests
     public void A_trait_with_the_migrated_one_reads_higher_crit_than_one_without()
     {
         // Proves the migrated path does something, so parity is not two zeros agreeing.
-        var withTrait = BattleStatComposer.Compose(Actor(Trait), MigratedFromSeed());
-        var without = BattleStatComposer.Compose(Actor(), MigratedFromSeed());
+        var withTrait = BattleHubCompose.Compose(Actor(Trait), MigratedFromSeed());
+        var without = BattleHubCompose.Compose(Actor(), MigratedFromSeed());
 
         Assert.Equal(
             without.Get(DerivedStatChannels.CombatCritRateOmni) + 150,
@@ -179,8 +179,8 @@ public class TraitMigrationParityTests
         var actor = Actor("regenerator", "soul-eater", "guardian", "swift");
 
         AssertSameSnapshot(
-            BattleStatComposer.Compose(actor, TraitAtomSource.CatalogOnly),
-            BattleStatComposer.Compose(actor, MigratedFromSeed()));
+            BattleHubCompose.Compose(actor, TraitAtomSource.CatalogOnly),
+            BattleHubCompose.Compose(actor, MigratedFromSeed()));
     }
 
     // ---- the kind that had to re-open --------------------------------------------------------------
@@ -196,19 +196,21 @@ public class TraitMigrationParityTests
     }
 
     [Fact]
-    public void Stat_derived_opens_partially_in_sim_where_the_fold_is_incomplete()
+    public void Stat_derived_opens_fully_in_sim_now_that_the_fold_is_op_aware()
     {
         // The rule is unchanged: a runtime opens only where a consumer exists. LAWN opened 2026-08-30
         // (decisions.md "Derived-write lawn executor") on the strength of its OWN consumer --
         // `AtomDerivedSubsystem` on the injector's ActorHub -- never on the strength of battle's. SIM
-        // opened 2026-09-06 (mechanism-wiring E5) to Partial, not Full, once ActorDerivedLookup's
-        // contribution fold gave it a real consumer that honours Flat/Increased and not Replace/Flag
-        // (EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial). Renamed from
-        // "..._stays_closed_where_it_still_has_no_consumer", which is no longer true.
+        // opened 2026-09-06 (mechanism-wiring E5) to Partial once ActorDerivedLookup's contribution fold
+        // gave it a real consumer that honoured Flat/Increased and not Replace/Flag
+        // (EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial), then sim-hub-parity
+        // (T15, 2026-09-13) closed the gap to Full via DerivedComposer.ComposeChannelWithBaseline.
+        // Renamed from "..._stays_closed_where_it_still_has_no_consumer", then from
+        // "..._opens_partially_in_sim_where_the_fold_is_incomplete", neither of which stayed true.
         var kind = AtomKindRegistry.Get("stat.derived")!;
 
         Assert.Equal(RuntimeState.Full, kind.SupportIn(RuntimeId.Lawn));
-        Assert.Equal(RuntimeState.Partial, kind.SupportIn(RuntimeId.Sim));
+        Assert.Equal(RuntimeState.Full, kind.SupportIn(RuntimeId.Sim));
     }
 
     [Fact]

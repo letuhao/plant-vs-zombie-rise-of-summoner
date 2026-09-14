@@ -25,7 +25,7 @@
       "id": "set.ultimatehugenut-001",
       "nameKey": "set.obsidian-bastion",
       "name": "Obsidian Bastion",
-      "themeKey": "demon.ultimatehugenut",
+      "themeKey": "creature.ultimatehugenut",
       "members": [
         {
           "role": "core-guard",

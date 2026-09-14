@@ -25,7 +25,7 @@
       "id": "set.normalzombie-001",
       "nameKey": "set.the-unworthy-name",
       "name": "The Unworthy Name",
-      "themeKey": "demon.normalzombie",
+      "themeKey": "creature.normalzombie",
       "members": [
         {
           "role": "armament-primary",

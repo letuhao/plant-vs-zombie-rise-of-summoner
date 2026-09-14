@@ -25,7 +25,7 @@
       "id": "set.whitefootball-001",
       "nameKey": "set.uncolored-gridiron",
       "name": "Uncolored Gridiron",
-      "themeKey": "demon.whitefootball",
+      "themeKey": "creature.whitefootball",
       "members": [
         {
           "role": "armament-primary",

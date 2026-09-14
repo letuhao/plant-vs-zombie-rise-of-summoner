@@ -25,7 +25,7 @@
       "id": "set.goldcorn-001",
       "nameKey": "set.golden-kernel-launcher",
       "name": "Golden Kernel Launcher",
-      "themeKey": "demon.goldcorn",
+      "themeKey": "creature.goldcorn",
       "members": [
         {
           "role": "armament-primary",

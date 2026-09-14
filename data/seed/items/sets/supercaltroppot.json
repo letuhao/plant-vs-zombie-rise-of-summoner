@@ -25,7 +25,7 @@
       "id": "set.supercaltroppot-001",
       "nameKey": "set.oily-basin-subspecies",
       "name": "Oily Basin Subspecies",
-      "themeKey": "demon.supercaltroppot",
+      "themeKey": "creature.supercaltroppot",
       "members": [
         {
           "role": "armament-primary",

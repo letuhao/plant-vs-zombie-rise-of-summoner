@@ -25,7 +25,7 @@
       "id": "set.ultimatecactus-001",
       "nameKey": "set.cactus-glacial-surge",
       "name": "Cactus Glacial Surge",
-      "themeKey": "demon.ultimatecactus",
+      "themeKey": "creature.ultimatecactus",
       "members": [
         {
           "role": "armament-primary",

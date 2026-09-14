@@ -49,7 +49,7 @@
   ],
   "doTitle": "What you do (first time)",
   "doSteps": [
-    "Unlock Fusion (you need a demon you can actually fuse).",
+    "Unlock Fusion (you need a creature you can actually fuse).",
     "Open `F` and pick a cheap experiment you can afford.",
     "Watch discovery or power change, then check the specimen on Creatures."
   ],
@@ -64,7 +64,7 @@
   "related": ["essence", "specimens", "summoning-altar", "element-ring"],
   "sources": [
     "docs/guide/creatures.md §Fuse",
-    "docs/architecture/demons/spec-demon-fusion.md",
+    "docs/architecture/creatures/spec-creature-fusion.md",
     "web/fusion-rpg-web/src/features/fusion/fusionView.ts",
     "docs/guide/mechanisms/specimen-fusion.md (prior stub)"
   ]

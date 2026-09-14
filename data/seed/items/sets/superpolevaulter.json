@@ -25,7 +25,7 @@
       "id": "set.superpolevaulter-001",
       "nameKey": "set.champion-s-pole-vaulting-zombie",
       "name": "Champion's Pole-Vaulting Zombie",
-      "themeKey": "demon.superpolevaulter",
+      "themeKey": "creature.superpolevaulter",
       "members": [
         {
           "role": "armament-primary",

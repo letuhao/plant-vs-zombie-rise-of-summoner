@@ -25,7 +25,7 @@
       "id": "set.doompeashooter-001",
       "nameKey": "set.item",
       "name": "毁灭豌豆之友",
-      "themeKey": "demon.doompeashooter",
+      "themeKey": "creature.doompeashooter",
       "members": [
         {
           "role": "armament-primary",

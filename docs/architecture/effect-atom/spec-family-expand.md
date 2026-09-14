@@ -61,7 +61,7 @@ corpus one directory outside the importer's view.
 the item program. **Both are satisfied by a third shape that neither section considered, and it is the
 one the repo already uses for exactly this problem:**
 
-**E43 is a generator with a `--check` mode, on the `DemonSpeciesGen` pattern.** It **reads** the 98
+**E43 is a generator with a `--check` mode, on the `CreatureSpeciesGen` pattern.** It **reads** the 98
 definitions as a tool input, and **writes** atom seed files into `data/seed/atoms/generated/` — a
 directory already inside `OwnedFolders`' `atoms` root (`SeedScanner.cs:14-15`), so the importer sweeps
 the **output** and never parses a family file.
@@ -76,7 +76,7 @@ the **output** and never parses a family file.
   would still require `AtomSeedFile` to learn a kind it has no reason to know.
 - **§4's *"no second family namespace"* holds by construction.** The generator reads the one namespace;
   it never copies it.
-- **The precedent is shipped and already gated in CI:** `DemonSpeciesGen --check` regenerates the
+- **The precedent is shipped and already gated in CI:** `CreatureSpeciesGen --check` regenerates the
   committed tree and fails on any difference (`ci.yml:43-51`), which is verbatim §5 test 2.
 
 **Acceptance 1 is rewritten accordingly** — the criterion is that the **generated rows** are swept and

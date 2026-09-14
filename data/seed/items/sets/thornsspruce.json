@@ -25,7 +25,7 @@
       "id": "set.thornsspruce-001",
       "nameKey": "set.spruce-snowball",
       "name": "Spruce Snowball",
-      "themeKey": "demon.thornsspruce",
+      "themeKey": "creature.thornsspruce",
       "members": [
         {
           "role": "armament-primary",

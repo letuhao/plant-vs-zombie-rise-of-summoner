@@ -25,7 +25,7 @@
       "id": "set.tower-bigsunshroom-001",
       "nameKey": "set.solar-spore-accumulator",
       "name": "Solar Spore Accumulator",
-      "themeKey": "demon.tower_bigsunshroom",
+      "themeKey": "creature.tower_bigsunshroom",
       "members": [
         {
           "role": "armament-primary",

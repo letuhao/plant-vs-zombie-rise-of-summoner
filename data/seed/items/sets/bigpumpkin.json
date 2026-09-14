@@ -25,7 +25,7 @@
       "id": "set.bigpumpkin-001",
       "nameKey": "set.pumpkin-guard",
       "name": "Pumpkin Guard",
-      "themeKey": "demon.bigpumpkin",
+      "themeKey": "creature.bigpumpkin",
       "members": [
         {
           "role": "core-guard",

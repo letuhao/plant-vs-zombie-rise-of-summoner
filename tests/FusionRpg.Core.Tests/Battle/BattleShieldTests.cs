@@ -175,8 +175,8 @@ public class BattleShieldTests
     public void Report_carries_ruleset_v3_and_platform_stamp()
     {
         var report = Run(Actor("squad:0", "squad"), Actor("wave:0", "wave"));
-        // T4.2 (power-dial, 2026-08-24): RulesetVersion 2 -> 3.
-        Assert.Equal(4, report.RulesetVersion);
+        // battle-hub-fuse (2026-09-13): RulesetVersion 4 -> 5.
+        Assert.Equal(5, report.RulesetVersion);
         Assert.Equal(BattleEnvironment.Stamp, report.EnvironmentStamp);
         Assert.False(string.IsNullOrWhiteSpace(report.EnvironmentStamp));
     }

@@ -1,0 +1,265 @@
+{
+  "_meta": {
+    "candidateSetHash": "0922ad0396e8948961584eee48f11f2beeedf0d31bda972fadaf00f11194660f",
+    "corpusHash": "7c7d3fbd5bf40590cb8f6008f040276d4833ad2466bdf6b84ecda584c7e4eb18",
+    "partition": "rounds",
+    "round": 1000,
+    "tuningVersion": 1
+  },
+  "entries": [
+    {
+      "candidateId": "action.family.academic.001",
+      "collidedWith": "action.general.0018",
+      "id": "reject.round-1000.0001",
+      "reason": "identical fingerprint",
+      "tier": 1
+    },
+    {
+      "candidateId": "action.family.afflicted.003",
+      "collidedWith": "action.family.academic.002",
+      "id": "reject.round-1000.0002",
+      "reason": "identical fingerprint",
+      "tier": 1
+    },
+    {
+      "candidateId": "action.family.alchemical.001",
+      "collidedWith": "action.general.0018",
+      "id": "reject.round-1000.0003",
+      "reason": "identical fingerprint",
+      "tier": 1
+    },
+    {
+      "candidateId": "action.family.allium.001",
+      "collidedWith": "action.family.academic.002",
+      "id": "reject.round-1000.0004",
+      "reason": "identical fingerprint",
+      "tier": 1
+    },
+    {
+      "candidateId": "action.general.0019",
+      "collidedWith": "action.general.0018",
+      "id": "reject.round-1000.0005",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0020",
+      "collidedWith": "action.general.0007",
+      "id": "reject.round-1000.0006",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0022",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0007",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0023",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0008",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0024",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0009",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0025",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0010",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0026",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0011",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0027",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0012",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0028",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0013",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0029",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0014",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0030",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0015",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0031",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0016",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0032",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0017",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0033",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0018",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0034",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0019",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0035",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0020",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0036",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0021",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0037",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0022",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0038",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0023",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0039",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0024",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0040",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0025",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0041",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0026",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0042",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0027",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0043",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0028",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0044",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0029",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0045",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0030",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0046",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0031",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0047",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0032",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0048",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0033",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.general.0049",
+      "collidedWith": "action.general.0021",
+      "id": "reject.round-1000.0034",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.species.allpeater.003",
+      "collidedWith": "action.species.allpeater.001",
+      "id": "reject.round-1000.0035",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    },
+    {
+      "candidateId": "action.species.allpeater.004",
+      "collidedWith": "action.species.allpeater.002",
+      "id": "reject.round-1000.0036",
+      "reason": "near-duplicate -- exactly one field apart within the same anchor",
+      "tier": 2
+    }
+  ],
+  "kind": "action-reject",
+  "schemaVersion": 1
+}

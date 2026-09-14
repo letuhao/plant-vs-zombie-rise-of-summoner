@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { adaptCombinations, adaptWorkbenchOutcome } from "@/contract/adapt";
 import type { CombinationView, SocketCellView } from "@/contract/types";
-import { newCorrelationId } from "@/lib/bus/demons";
+import { newCorrelationId } from "@/lib/bus/creatures";
 import { useHeldInserts, useItemCombinations, useSocketAdd, useSocketInsert } from "@/lib/bus/items";
 import { cn } from "@/lib/cn";
 import { DialogShell } from "@/shell/DialogShell";

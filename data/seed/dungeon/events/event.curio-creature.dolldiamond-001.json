@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.curio-creature.dolldiamond-001",
+  "flavor": "Resting upon a pedestal of obsidian, a small figure 像是 a child is carved from a single, massive diamond. Its surface catches the torchlight, casting fractured patterns of light across the chamber walls. The craftsmanship is so precise it feels less like a carving and more like a moment frozen in stone.",
+  "kind": "curio",
+  "name": "The Vitreous Effigy",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.resilience",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party discovers a high-value relic that offers a tempting but dangerous magical shortcut.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.dolldiamond"
+}

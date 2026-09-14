@@ -18,18 +18,18 @@ RECALL = general knowledge, unverified in-repo — a lead, not a citation.
 
 **The constraint and the principle do not conflict.** The seed-to-concrete law is a law about *where
 magnitudes come from*, not a law that every generator must roll per player. The repo already ships the
-exact split the owner is asking for, in the demon program, and it is written down in three places as
+exact split the owner is asking for, in the creature program, and it is written down in three places as
 **two layers**: shared deterministic stats, per-player rolled effects.
 
 | Layer | For the passive tree | When it is decided | Same for every player? | Precedent in repo |
 |---|---|---|---|---|
-| **(a) Baked at BUILD time, shipped as data** | tree roster · tree shape · node ids · node links · tier gates (`req(t)`, D20) · which atoms each node grants · each node's authored magnitude and its soul-scaling curve · exclusion properties (D14) | dev machine, before packaging | **YES — identical for all** | `data/generated/demons/**.json`, 830 files, committed (counted 2026-09-05) |
+| **(a) Baked at BUILD time, shipped as data** | tree roster · tree shape · node ids · node links · tier gates (`req(t)`, D20) · which atoms each node grants · each node's authored magnitude and its soul-scaling curve · exclusion properties (D14) | dev machine, before packaging | **YES — identical for all** | `data/generated/creatures/**.json`, 830 files, committed (counted 2026-09-05) |
 | **(b) Per-ACTOR state** | which nodes are allocated · soul level per node · earned/spent skill points · gear-granted points (D11) | player's machine, as they play | no — this is the build | `rpg_aptitude_allocation` (scope, scope_key, aptitude_id, points) |
 | **(c) Rolled per player at runtime** | **nothing** | — | — | — |
 
 **(c) should be empty, and stays empty.** Argued in §4. Per-player variance is not removed from the
 game by this; it already has three homes that are not the tree — rolled item affixes, the
-`species-passive` container that rolls per player (`demon-seed` module 16), and D11's gear-granted
+`species-passive` container that rolls per player (`creature-seed` module 16), and D11's gear-granted
 points, which change *what you can afford* without changing *what the tree is*.
 
 **The one-line version:** the passive tree is a **catalog**, and catalogs are content. Content is
@@ -70,29 +70,29 @@ FACT — `tasks/seed-to-concrete-plan.md:40-41`, under *Architecture decisions (
 
 > **Two layers.** Species *stats* are deterministic and shared; only *effects* roll.
 
-FACT — `DESIGN-GATE.md:45`, the *Demon species generation* row:
+FACT — `DESIGN-GATE.md:45`, the *Creature species generation* row:
 
 > Species *stats* are deterministic and shared; only *effects* roll, per player, at runtime.
 
-FACT — `docs/architecture/demon-seed/spec-species-generator.md:163-166`, the module's own Boundaries
+FACT — `docs/architecture/creature-seed/spec-species-generator.md:163-166`, the module's own Boundaries
 block:
 
 > **Scope note (2026-09-01).** This module produces the **shared** layer only — stats, which are
 > deterministic and identical for every player. The per-player *effect* roll is `player-materialise`
 > (module 16) … **Only effects roll; stats never do.**
 
-FACT — `demon-seed-map.md:180-183`, recording that the per-player decision was checked against modules
+FACT — `creature-seed-map.md:180-183`, recording that the per-player decision was checked against modules
 11–13 and did *not* invalidate them:
 
 > the owner's **two-layer** answer — shared definitions, per-player materialisation — keeps species
 > *stats* deterministic and global … **Only effects roll.**
 
-FACT — the shared layer is not a plan, it is on disk. `data/generated/demons/` holds **830** committed
-files (counted 2026-09-05). One row, `data/generated/demons/Bamboo.json`, carries `theta: 13`,
+FACT — the shared layer is not a plan, it is on disk. `data/generated/creatures/` holds **830** committed
+files (counted 2026-09-05). One row, `data/generated/creatures/Bamboo.json`, carries `theta: 13`,
 `pTheta: 452`, and ten `resource.*` magnitudes — real numbers, checked in, identical for every player.
-`demon-seed-map.md:41` labels that stage **`CONCRETE — checked in, diffable, reviewable`**.
+`creature-seed-map.md:41` labels that stage **`CONCRETE — checked in, diffable, reviewable`**.
 
-⚠️ **Two documents are stale on this and will mislead a later session.** `demon-seed-map.md:47` and
+⚠️ **Two documents are stale on this and will mislead a later session.** `creature-seed-map.md:47` and
 `spec-species-generator.md:24` both say *"`data/generated/` does not exist"* / *"is absent from the
 repo"*. It exists, with 830 files. Verified by listing, not inferred.
 
@@ -158,7 +158,7 @@ decision this document may make.
 
 Everything that a build guide would need to quote:
 
-- the tree roster (D9: 12 primary + all elemental + all status + each demon family, `n ≈ 40–60`)
+- the tree roster (D9: 12 primary + all elemental + all status + each creature family, `n ≈ 40–60`)
 - per tree: the 2 branches × tiers shape (D10), and its shape archetype (D15)
 - per node: id, tier, branch, prerequisite links, the atoms it grants, each atom's authored magnitude,
   the curve its soul track reads, its exclusion properties (D14), and whether it is a **mechanism** or
@@ -188,7 +188,7 @@ Three properties of it transfer to the tree directly, and each is already argued
    zero never becomes a row. D21's "sparse storage is a hard requirement" (~1,450 possible per-skill
    soul levels per actor) has a working precedent, not just a preference.
 3. **The `(scope, scope_key)` key is already the D21 key.** The same two columns address a commander,
-   a demon type, an aspect and a unique demon (`RpgStore.Aptitudes.cs:23-31`). "Every actor carries its
+   a creature type, an aspect and a unique creature (`RpgStore.Aptitudes.cs:23-31`). "Every actor carries its
    own tree state" needs no new addressing scheme.
 
 FACT — this store is no longer callerless. `SaveAllocation` / `LoadAllocation` have **6** production
@@ -199,7 +199,7 @@ FACT — the spender for skill points still does not exist. `SkillPointsPerTheta
 three times in the tree: declared at `AptitudeTuning.cs:13`, parsed at `AptitudeTuning.cs:156`,
 asserted once in `AptitudeTuningTests.cs:90`. Zero production consumers. D2's claim holds as written.
 
-### 4.3 (c) — why nothing rolls, including for a demon species tree
+### 4.3 (c) — why nothing rolls, including for a creature species tree
 
 Four arguments, strongest first.
 
@@ -216,12 +216,12 @@ rolled mechanism at depth is a lottery ticket, not a build.
 
 **3. Per-player variance already has three homes, and none of them is the tree.** Rolled item affixes
 (`item` containers roll the pool — `spec-container-schema.md:50`); the per-player species passive roll
-(`demon-seed` module 16, `demon-seed-map.md:177-178`); and D11's gear-granted points, which vary what
+(`creature-seed` module 16, `creature-seed-map.md:177-178`); and D11's gear-granted points, which vary what
 you can afford without varying what the tree is. Adding a fourth would buy variance the game already
 has, at the cost of the one property this layer needs.
 
 **4. The species tree (D17/D23) is static too, and the precedent is exact.** A species tree is derived
-from a species anchor, and species anchors are **shared seed** — `data/seed/demons/species/**.json`,
+from a species anchor, and species anchors are **shared seed** — `data/seed/creatures/species/**.json`,
 841 entries across 503 files (the ideal's §9 count). The layer above them, the concrete stat block, is
 already *"deterministic and identical for every player"* (`spec-species-generator.md:163-165`). A tree
 derived from that anchor inherits the same standing by construction. Its uniqueness (D23) is
@@ -243,9 +243,9 @@ Q7). Not rolling the tree is a **design choice made against an available mechani
 
 ## 5. What artifact ships the catalog, and where it lives
 
-### 5.1 The two-directory shape, copied from the demon program
+### 5.1 The two-directory shape, copied from the creature program
 
-FACT — `demon-seed-map.md:33-44` and `item/seed-contract.md:32` both use the same chain, and
+FACT — `creature-seed-map.md:33-44` and `item/seed-contract.md:32` both use the same chain, and
 `spec-species-generator.md:28-30` says explicitly that its shape is *"a **precedent**, not just a
 feature. The shape chosen here is the shape the item and action programs will follow."*
 
@@ -275,7 +275,7 @@ decision does not survive a port"*; and the runtime is C#. **Seedsmith stops at 
 
 ### 5.3 The gate that makes "identical for every player" true rather than hoped
 
-FACT — `tools/DemonSpeciesGen/Program.cs:17`:
+FACT — `tools/CreatureSpeciesGen/Program.cs:17`:
 
 > `--check    compare against what is on disk; write nothing; exit 1 if anything differs`
 
@@ -416,7 +416,7 @@ each node's key once and records it in the seed; regeneration reads the allocate
 recomputing a position. That is the difference between a stable id and an ordinal wearing a slug's
 clothes.
 
-**Test to write with the generator, mirroring the demon precedent's own list
+**Test to write with the generator, mirroring the creature precedent's own list
 (`spec-species-generator.md:143-151`):**
 
 - `regenerating_unchanged_seeds_is_byte_identical` — the `--check` gate
@@ -431,7 +431,7 @@ clothes.
 **Risk 1 — the catalog is large enough that "generated once, shipped" is the only affordable shape,
 and nobody has costed it.** D9's roster (`n ≈ 40–60`) at Last Epoch's ~29 nodes per tree is ~1,450
 nodes (the ideal's own §7 figure), and D23 adds *per-species* unique nodes against a corpus of 841
-entries in 503 files. FACT for scale comparison: `data/generated/demons/` is 830 files today and is
+entries in 503 files. FACT for scale comparison: `data/generated/creatures/` is 830 files today and is
 committed without apparent trouble. INFERENCE: a per-species tree corpus is roughly the same order,
 plus the generic trees. That is fine as data, but it is a real review-surface question the plan owes an
 answer to, and it is the one place the "bake it" answer costs something.
@@ -443,7 +443,7 @@ player's save is an unloadable actor rather than a red node. R5 has to name *whe
 happens or it becomes an outage.
 
 **Risk 3 — two authoritative documents currently state the opposite of the on-disk truth about
-`data/generated/`.** `demon-seed-map.md:47` and `spec-species-generator.md:24` both say it does not
+`data/generated/`.** `creature-seed-map.md:47` and `spec-species-generator.md:24` both say it does not
 exist; it holds 830 files. A session reading the map to decide "does the shared-deterministic layer
 exist" gets the wrong answer from the index. Cheap to fix, expensive to hit.
 
@@ -458,7 +458,7 @@ exist" gets the wrong answer from the index. Cheap to fix, expensive to hit.
 2. **Does the species tree (D23) ship as catalog data, or as a derivation run at import?** Both satisfy
    §1's freeze line. Shipping it as data makes the corpus reviewable and diffable at 841-entry scale;
    deriving it at import keeps the repo smaller but moves the review surface into a generator. The
-   demon program chose *ship the data* (`demon-seed-map.md:41`), and consistency argues for the same
+   creature program chose *ship the data* (`creature-seed-map.md:41`), and consistency argues for the same
    choice — but the size is the owner's call, not this document's.
 
 3. **Is a free full respec on catalog change acceptable as the whole migration story (R4)?** It is
@@ -479,10 +479,10 @@ exist" gets the wrong answer from the index. Cheap to fix, expensive to hit.
 [x] I read every doc in the §1 row(s) for those subsystems, this session:
     DESIGN-GATE.md; effect-pipeline-ideal.md §5 + §0/§1/§3.5/§7; effect-atom/definitions.md
     §4a/§5/§6; effect-atom/spec-container-schema.md; effect-atom/spec-content-hash.md;
-    demon-seed-map.md; demon-seed/spec-species-generator.md; item/seed-contract.md;
+    creature-seed-map.md; creature-seed/spec-species-generator.md; item/seed-contract.md;
     tunables-ssot.md; tasks/seed-to-concrete-plan.md; passive-tree-ideal.md;
     research/passive-tree-prior-art-2026-09-04.md.
-[x] I checked decisions.md for a lock covering this — the Demon program row (line 97) and the
+[x] I checked decisions.md for a lock covering this — the Creature program row (line 97) and the
     Class system row (line 103) are the two that touch it; neither is contradicted.
 [x] Every factual claim cites file:line.
 [x] I verified claims against CODE, not comments — container kinds, RollPolicy, CurveInput,
@@ -494,7 +494,7 @@ exist" gets the wrong answer from the index. Cheap to fix, expensive to hit.
     Nothing here proposes a code change, and no claim in this document rests on a test result;
     every count was taken by listing or grepping the tree directly and is dated 2026-09-05.
 [x] Nothing contradicts a §2 invariant.
-[ ] Corrections are propagated. NOT DONE, and two are owed: demon-seed-map.md:47 and
+[ ] Corrections are propagated. NOT DONE, and two are owed: creature-seed-map.md:47 and
     spec-species-generator.md:24 both assert `data/generated/` is absent. It exists with 830
     files. This is research, not an edit pass — the fix belongs to whoever owns those docs.
 ```

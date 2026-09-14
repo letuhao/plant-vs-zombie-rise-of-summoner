@@ -25,7 +25,7 @@
       "id": "set.lanternfume-001",
       "nameKey": "set.luminous-spore-array",
       "name": "Luminous Spore Array",
-      "themeKey": "demon.lanternfume",
+      "themeKey": "creature.lanternfume",
       "members": [
         {
           "role": "armament-primary",

@@ -42,12 +42,12 @@
 ### 2.1 The problem that defines this lane, and its answer
 
 OD2 gives every pure frame **~15 equip slots**. The roster is not small: contract binding slots start at
-**12 and buy up to a hard maximum of 48** (`docs/architecture/demons/spec-demon-contracts.md:54`). At the
+**12 and buy up to a hard maximum of 48** (`docs/architecture/creatures/spec-creature-contracts.md:54`). At the
 ceiling that is **48 × 15 = 720 equipped items** before one spare sits anywhere. Twenty specimens is 300.
 
 There are only two honest ways out, and both of the obvious ones are wrong:
 
-- Make gear scarce, and 42 of your 48 demons stand bare. The roster becomes decorative — you own 48 and
+- Make gear scarce, and 42 of your 48 creatures stand bare. The roster becomes decorative — you own 48 and
   play 5. That kills the thing the owner actually asked for, which is *commanding a roster*.
 - Make gear plentiful, and you are hand-placing 720 rolled items across 48 dossiers in a browser. That is
   a spreadsheet with a fantasy skin, and it is the single most reliable way to make 15 slots a chore.
@@ -106,8 +106,8 @@ warehouse. A specimen does not "hold" items; an **assignment** points from a `(s
 item in the armoury.
 
 This matters more than it sounds. Per-specimen bags force a move operation between two containers, and
-move operations are where inventory games grow tetris. With one armoury, "swap this helm onto that demon"
-is a single row update, and "which of my 48 demons could use this?" is one query rather than 48.
+move operations are where inventory games grow tetris. With one armoury, "swap this helm onto that creature"
+is a single row update, and "which of my 48 creatures could use this?" is one query rather than 48.
 
 ### 2.4 Equipped is an assignment; a binding is its runtime shadow
 
@@ -117,7 +117,7 @@ right and the missing half is load-bearing.
 [definitions.md](../effect-atom/definitions.md) §6 is explicit: **`entity:` bindings are session-scoped
 and never durable** — a pointer can be recycled, and a durable row aimed at a recycled address silently
 retargets. The 7 owner scopes are `match` · `plant:N` · `zombie:N` · `entity:` · `player:` · `sector:` ·
-`slot:`. **None of them is a durable specimen.** A demon is a `rpg_unique_actors.instance_id` GUID; the
+`slot:`. **None of them is a durable specimen.** A creature is a `rpg_unique_actors.instance_id` GUID; the
 shipped code already knows this and works around it — `UniqueOwnerBinder` translates `instance:{guid}` →
 `entity:{ptr}` at bind time, and unique-actor-runtime §3 states the rule outright: *"Durable `instance:`
 must not appear in hot Resolve."*
@@ -126,7 +126,7 @@ So there are **two acts, not one**:
 
 | Act | Durable? | Owner | Lives in |
 |---|---|---|---|
-| **Assign** — this demon wears this item | yes, forever | I13 | `rpg_item_assignment` |
+| **Assign** — this creature wears this item | yes, forever | I13 | `rpg_item_assignment` |
 | **Bind** — this item's atoms are on this actor's effect list right now | no, session-scoped | E6 | `effect_binding` |
 
 The assignment is the **only** durable writer of equip state. Bindings are **derived**: at deploy (or at
@@ -174,7 +174,7 @@ Six decisions, each with the alternatives that were actually plausible.
 |---|---|
 | **A — Per-actor rolled gear, plentiful** | The ARPG default. 720 rolled rows to place by hand. Inventory management becomes the game; the browser FE becomes a spreadsheet. |
 | **B — Account-wide stat pools** | Equip once, everyone benefits (the gacha "resonance"/collection-power line — recalled, unverified). Kills the per-specimen fantasy outright and makes I2's 15 slots decorative. |
-| **C — Small deployable squad; only 5 actors ever need gear** | Honest and cheap, but it means 43 of 48 contract slots exist to be looked at. Buying a slot for 300 × k Souls to own a demon that can never be equipped is a bad purchase. |
+| **C — Small deployable squad; only 5 actors ever need gear** | Honest and cheap, but it means 43 of 48 contract slots exist to be looked at. Buying a slot for 300 × k Souls to own a creature that can never be equipped is a bad purchase. |
 | **D — Two storage grades: stock counters + rolled rows** | Everyone is kitted; only the interesting half needs attention. Costs a derived discriminator and a promotion rule. |
 
 **Recommendation: D.** It is the only one that keeps all three of "everybody is geared", "15 slots is
@@ -230,7 +230,7 @@ SC9 forbids depending on E9's power model, and `power_json` is nullable.
 
 **Recommendation: player-level library.** Apply **refuses by default** when an entry's item is held
 elsewhere (`LoadoutConflict`, listing exactly which cells hold what); `force = true` steals and **reports
-what it stripped**. Never silently strip — the "why is my other demon naked" bug is one silent strip away.
+what it stripped**. Never silently strip — the "why is my other creature naked" bug is one silent strip away.
 
 ### 3.6 Salvage safety
 
@@ -257,7 +257,7 @@ partial `RpgStore.Items.cs`, matching the existing domain partitioning.
 |---|---|---|---|
 | `rpg_item` | one row per rolled instance | rolled / unique / socketed / enhanced equipment and charms | **new** |
 | `rpg_item_stock` | counter | unrolled equipment, unrolled consumables, uncut inserts | **new** |
-| `rpg_demon_materials` | counter | materials, essences, shards | **exists**, `RpgStore.cs:520` — reuse, widen the id vocabulary (I9) |
+| `rpg_creature_materials` | counter | materials, essences, shards | **exists**, `RpgStore.cs:520` — reuse, widen the id vocabulary (I9) |
 | `rpg_soul_balances` / `rpg_soul_ledger` | ledger | currency | **exists**, `RpgStore.cs:455` — reuse, never inventory |
 | `rpg_item_assignment` | one row per filled cell | what is worn / carried | **new** — replaces `rpg_unique_equipment` |
 | `rpg_item_loadout` / `rpg_item_loadout_entry` | preset | named gear sets | **new** |
@@ -328,7 +328,7 @@ cells from becoming 720 instance rows.
 
 PK `(player_id, owner_kind, owner_key, role)` — **one item per cell, by the primary key**, so double-equip
 is impossible rather than merely checked. Partial unique index on `ref_id WHERE ref_kind = 'rolled'` — a
-rolled item is in at most one cell, also by constraint. Stock has no such index: five demons may all wear
+rolled item is in at most one cell, also by constraint. Stock has no such index: five creatures may all wear
 `item.iron-plate-helm`, and the counter is what limits it.
 
 `owner_kind = 'player'` is how I10's **charm pouch** lives here: the pouch is a set of assignment rows
@@ -377,7 +377,7 @@ path — named, per SC7.
 | `effect_instance` / `effect_instance_atom` | a rolled item **is** the instance; `rpg_item` hangs off it |
 | `effect_binding` | the **runtime shadow** of an assignment, built at deploy, withdrawn at recover |
 | `rarity` table + ordinals | sort, salvage-by-rarity, the auto-salvage floor — all key on the **ordinal**, never the label |
-| `rpg_demon_materials` | salvage yield lands here; no second material store |
+| `rpg_creature_materials` | salvage yield lands here; no second material store |
 | `rpg_soul_*` | currency stays a ledger |
 
 | Genuinely new | Why it could not be reused |
@@ -592,8 +592,8 @@ Numbers are illustrative, not balanced. Units are stated because SC4 requires it
 
 ### 7.1 Kitting the twenty-first specimen
 
-The player has bought 9 contract slots beyond the base 12 (`spec-demon-contracts.md:54` — the k-th costs
-300 × k Souls) and owns 21 bound demons. #21 is a plant-frame Sunflower, phase `Roster`, wearing nothing.
+The player has bought 9 contract slots beyond the base 12 (`spec-creature-contracts.md:54` — the k-th costs
+300 × k Souls) and owns 21 bound creatures. #21 is a plant-frame Sunflower, phase `Roster`, wearing nothing.
 
 `POST /api/items/issue-kit` → 15 roles resolved, 15 stock counters decremented, 15 assignment rows
 written, one transaction.
@@ -629,7 +629,7 @@ but it rolled **940‰** of its band on `atom.elemental-power.fire.t3` and it is
 the player owns. G-D caught it. Under a lock-only design it would be gone, because the player had never
 opened it — it was still `seen = 0`.
 
-Commit salvages 271 and credits 542 `shard.magic` into `rpg_demon_materials`.
+Commit salvages 271 and credits 542 `shard.magic` into `rpg_creature_materials`.
 
 ### 7.3 A content patch disables an atom
 
@@ -671,11 +671,11 @@ Unsentimental, and each names what in this design prevents it.
 | 2 | **The stash becomes a museum nobody sorts** | Every ARPG with a big enough stash | Not fully solved — converted from a *storage* problem to an *attention* problem, which is the honest framing. The counters are the inbox (`seen`), the gap board (tells you where acting pays), auto-salvage rules, and a tidy advisory that never refuses. |
 | 3 | **Bulk salvage destroys something precious** | Destiny 2's "dismantled a god roll" is the canonical case (recalled, unverified); Diablo 3 fixed most of it with lock + never-salvage-equipped | Four standing guards, a preview that names every exclusion, an undo window, and the rule that unseen items are excluded from bulk by default. G-D is the load-bearing one: lock only protects what you already looked at. |
 | 4 | **Comparison UI cannot answer the only question players ask** | Any game that shows a raw stat block and calls it a tooltip | Delta table + dominance verdict + roll quality ‰, and a hard refusal to synthesize a scalar before E9 exists. A wrong number that looks authoritative is worse than no number. |
-| 5 | **Per-actor gear makes the twenty-first specimen unaffordable** | Gacha rosters where only the meta five are geared | §7.1 — one click, 15 counter decrements, zero rows. Contract slots stay worth buying because the demon you buy can actually be fielded. |
+| 5 | **Per-actor gear makes the twenty-first specimen unaffordable** | Gacha rosters where only the meta five are geared | §7.1 — one click, 15 counter decrements, zero rows. Contract slots stay worth buying because the creature you buy can actually be fielded. |
 | 6 | **Loadout rot** — presets silently referencing destroyed items | Common in games where presets are id lists | Loadout membership implies lock (G-C), and entries are validated on read with a `missing` marker rather than dropped. |
 | 7 | **The gap board becomes a to-do list of 720 chores** | The failure mode a "helpful" completion screen creates | It defaults to showing only cells where an unassigned **strict** improvement exists — usually a handful — and collapses "issue stock" into one action per specimen. |
 | 8 | **Bag pressure sold back as a feature** | Diablo 3 stash tabs (recalled, unverified) | There is nothing to sell, and no capacity to sell it against. The pressure is deliberately never built. |
-| 9 | **Silent strip** — applying a loadout quietly undresses another demon | Any "equip best" button | Apply refuses by default with `LoadoutConflict` naming the conflicts; `force` steals and **reports every cell it emptied**. |
+| 9 | **Silent strip** — applying a loadout quietly undresses another creature | Any "equip best" button | Apply refuses by default with `LoadoutConflict` naming the conflicts; `force` steals and **reports every cell it emptied**. |
 | 10 | **A patch bricks a save** — a disabled atom refuses a deploy | The exact shape of an atom-layer regression | Best-effort binding projection with a reported skip (§5.6). One dead trinket costs one role, never the deploy. |
 
 ---
@@ -713,7 +713,7 @@ Numbered, each naming the lane. This is where the insufficiency shows.
    one, and (b) a flag or a derivable answer to *"has this instance been mutated"*, because that is what
    permanently blocks re-stacking.
 
-7. **I9 — the material id namespace and the yield vocabulary.** I am reusing `rpg_demon_materials`
+7. **I9 — the material id namespace and the yield vocabulary.** I am reusing `rpg_creature_materials`
    (`RpgStore.cs:520`) rather than creating a second material store, so I9 must widen that id namespace
    beyond `essence.*` / `shard.*` rather than starting fresh. Also: when the power model lands, it becomes
    a **fourth column** in the comparison payload and the replacement for G-D's crude ranking — not a
@@ -770,7 +770,7 @@ Numbered, each naming the lane. This is where the insufficiency shows.
 
 4. **Does the commander share the armoury?** I assumed yes — one player, one armoury, and the commander is
    just another owner in the assignment table. If commander gear should be a separate pool (so a
-   commander item can never be "wasted" on a demon), that is a different design.
+   commander item can never be "wasted" on a creature), that is a different design.
 
 5. **Retire while geared: auto-release, or refuse?** I chose auto-release with a reported count. Refusing
    ("unequip first") is more explicit and less magical, at the cost of an extra step on a routine action.

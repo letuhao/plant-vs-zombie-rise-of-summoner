@@ -30,9 +30,9 @@ public class WaveCDRegressionLockTests
     public void Duplicate_trait_ids_apply_stat_mods_once()
     {
         // A doubled trait id (bad upstream data) must not double the crit-rate mod.
-        var doubled = BattleStatComposer.Compose(
+        var doubled = BattleHubCompose.Compose(
             Actor("squad:0", "squad", traits: new[] { "critical-hunter", "critical-hunter" }));
-        var single = BattleStatComposer.Compose(
+        var single = BattleHubCompose.Compose(
             Actor("squad:0", "squad", traits: new[] { "critical-hunter" }));
         Assert.Equal(
             CombatDerivedReader.CritRate(single, ElementTypeId.Fire),
@@ -121,7 +121,7 @@ public class WaveCDRegressionLockTests
             {
                 Assert.NotEmpty(join.TraitIds);
                 Assert.All(join.TraitIds, t => Assert.True(
-                    FusionRpg.Core.Demons.DemonTraitCatalog.IsKnown(t)));
+                    FusionRpg.Core.Creatures.CreatureTraitCatalog.IsKnown(t)));
             }
             if (r.Rewards.WildJoins.Count > 0) return;
         }

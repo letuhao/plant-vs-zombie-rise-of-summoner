@@ -25,7 +25,7 @@
       "id": "set.icebean-001",
       "nameKey": "set.frostseed-spore-launcher",
       "name": "Frostseed Spore-Launcher",
-      "themeKey": "demon.icebean",
+      "themeKey": "creature.icebean",
       "members": [
         {
           "role": "armament-primary",

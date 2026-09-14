@@ -31,12 +31,6 @@
     { "floor": 4000,  "ceiling": 9999,  "midpoint": 7000 },
     { "floor": 10000, "ceiling": 20000, "midpoint": 20000 }
   ],
-  "placeholderBattle": {
-    "defenderBonusMilli": 1250,
-    "wipeoutRatioMilli": 250,
-    "routWoundMilli": 750,
-    "guardWoundMilli": 100
-  },
   "calendar": {
     "daysPerWeek": 7,
     "weeksPerMonth": 4,

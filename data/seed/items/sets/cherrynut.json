@@ -25,7 +25,7 @@
       "id": "set.cherrynut-001",
       "nameKey": "set.crimson-obsession",
       "name": "Crimson Obsession",
-      "themeKey": "demon.cherrynut",
+      "themeKey": "creature.cherrynut",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.spreadfume-001",
       "nameKey": "set.spore-pile",
       "name": "Spore Pile",
-      "themeKey": "demon.spreadfume",
+      "themeKey": "creature.spreadfume",
       "members": [
         {
           "role": "armament-primary",

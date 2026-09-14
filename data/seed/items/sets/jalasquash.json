@@ -25,7 +25,7 @@
       "id": "set.jalasquash-001",
       "nameKey": "set.explosive-gourd",
       "name": "Explosive Gourd",
-      "themeKey": "demon.jalasquash",
+      "themeKey": "creature.jalasquash",
       "members": [
         {
           "role": "armament-primary",

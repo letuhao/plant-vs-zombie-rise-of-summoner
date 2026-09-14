@@ -1,8 +1,8 @@
 using System.IO;
 using FusionRpg.Core.Delve.Loot;
 using FusionRpg.Core.Delve.Wild;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Contracts;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Tests.Dungeon;
@@ -86,23 +86,23 @@ public class OfferPricingTests
     [Fact]
     public void Contract_matches_RitualPrice_scaled_by_loyalty_over_loyaltyMax_exactly()
     {
-        var basePrice = ContractPolicy.RitualPrice(DemonRarity.Cultivated, Pin, Tuning);
+        var basePrice = ContractPolicy.RitualPrice(CreatureRarity.Cultivated, Pin, Tuning);
         var expected = basePrice * 300 / 1000;
-        Assert.Equal(expected, OfferPricing.Contract(DemonRarity.Cultivated, Pin, loyalty: 300, loyaltyMax: 1000, Tuning));
+        Assert.Equal(expected, OfferPricing.Contract(CreatureRarity.Cultivated, Pin, loyalty: 300, loyaltyMax: 1000, Tuning));
     }
 
     [Fact]
     public void Contract_at_full_loyalty_equals_the_unscaled_ritual_price()
     {
-        var basePrice = ContractPolicy.RitualPrice(DemonRarity.Heirloom, Pin, Tuning);
-        Assert.Equal(basePrice, OfferPricing.Contract(DemonRarity.Heirloom, Pin, loyalty: 1000, loyaltyMax: 1000, Tuning));
+        var basePrice = ContractPolicy.RitualPrice(CreatureRarity.Heirloom, Pin, Tuning);
+        Assert.Equal(basePrice, OfferPricing.Contract(CreatureRarity.Heirloom, Pin, loyalty: 1000, loyaltyMax: 1000, Tuning));
     }
 
     [Fact]
     public void Contract_genuinely_reads_rarity_not_a_hardcoded_one()
     {
-        var chaff = OfferPricing.Contract(DemonRarity.Chaff, Pin, 1000, 1000, Tuning);
-        var almanac = OfferPricing.Contract(DemonRarity.Almanac, Pin, 1000, 1000, Tuning);
+        var chaff = OfferPricing.Contract(CreatureRarity.Chaff, Pin, 1000, 1000, Tuning);
+        var almanac = OfferPricing.Contract(CreatureRarity.Almanac, Pin, 1000, 1000, Tuning);
         Assert.NotEqual(chaff, almanac);
         Assert.True(almanac > chaff); // Almanac's own RitualPriceSouls (500) is above Chaff's (50)
     }
@@ -110,7 +110,7 @@ public class OfferPricingTests
     [Fact]
     public void Contract_refuses_a_non_positive_loyaltyMax()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => OfferPricing.Contract(DemonRarity.Chaff, Pin, 300, 0, Tuning));
+        Assert.Throws<ArgumentOutOfRangeException>(() => OfferPricing.Contract(CreatureRarity.Chaff, Pin, 300, 0, Tuning));
     }
 
     [Fact]

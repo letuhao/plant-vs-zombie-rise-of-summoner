@@ -33,7 +33,7 @@ describe("bloodlineDiscoveryOf", () => {
 });
 
 describe("isBloodlineKnown", () => {
-  it("discovered and seen both count as known (DemonsPage.tsx's own reading)", () => {
+  it("discovered and seen both count as known (CreaturesPage.tsx's own reading)", () => {
     expect(isBloodlineKnown("discovered")).toBe(true);
     expect(isBloodlineKnown("seen")).toBe(true);
   });

@@ -25,7 +25,7 @@
       "id": "set.seafume-001",
       "nameKey": "set.great-spore-terror",
       "name": "Great Spore Terror",
-      "themeKey": "demon.seafume",
+      "themeKey": "creature.seafume",
       "members": [
         {
           "role": "armament-primary",

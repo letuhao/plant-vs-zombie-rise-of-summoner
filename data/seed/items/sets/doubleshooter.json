@@ -25,7 +25,7 @@
       "id": "set.doubleshooter-001",
       "nameKey": "set.obsidian-volley",
       "name": "Obsidian Volley",
-      "themeKey": "demon.doubleshooter",
+      "themeKey": "creature.doubleshooter",
       "members": [
         {
           "role": "armament-primary",

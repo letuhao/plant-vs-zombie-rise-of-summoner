@@ -25,7 +25,7 @@
       "id": "set.obsidiantallnutzombie-001",
       "nameKey": "set.obsidian-shell",
       "name": "Obsidian Shell",
-      "themeKey": "demon.obsidiantallnutzombie",
+      "themeKey": "creature.obsidiantallnutzombie",
       "members": [
         {
           "role": "core-guard",

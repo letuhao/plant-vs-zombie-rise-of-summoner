@@ -25,7 +25,7 @@
       "id": "set.magnetcactus-001",
       "nameKey": "set.magnetic-cactus",
       "name": "Magnetic Cactus",
-      "themeKey": "demon.magnetcactus",
+      "themeKey": "creature.magnetcactus",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.supersnowmonsterzombie-001",
       "nameKey": "set.beast-king-s-leap",
       "name": "Beast King's Leap",
-      "themeKey": "demon.supersnowmonsterzombie",
+      "themeKey": "creature.supersnowmonsterzombie",
       "members": [
         {
           "role": "footing",

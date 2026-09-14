@@ -84,7 +84,7 @@ stacks; `entity.stats` fold carries aggregate `rpgShieldHp`/`rpgShieldMax`; the 
 **Why it feels like waste:**
 
 1. **Single-purpose pool** — shield-only; duplicate anchor logic (`worldYOffset` vs UnitFrame lift).
-2. **Low information density** — 10% stepped fill + three stack pips; no boss/demon/level/commander read.
+2. **Low information density** — 10% stepped fill + three stack pips; no boss/creature/level/commander read.
 3. **Perf coupling** — `VfxDirector.Tick` stays hot whenever any shield exists, even with F9 off.
 4. **No web/Phaser parity** — fold keys exist; Phaser never draws RPG shield; status chips cover 9/13+ custom ids.
 
@@ -129,7 +129,7 @@ almanac. Detail, scenarios, and accessibility checks:
 | Player question | Ideal slot | Today |
 |-----------------|------------|-------|
 | Boss or elite? | Tier frame + level band | No frame on unit |
-| My demon / bound specimen? | Role badge | Inspector only when selected |
+| My creature / bound specimen? | Role badge | Inspector only when selected |
 | Why isn't damage landing? | Shield element segments | Fill only; no element on bar |
 | What's afflicting this unit? | Status strip icons | VFX motion; text chips in Inspector |
 | Which unit is the threat? | Identity row (type icon) | Inspector / HP bar only on canvas |
@@ -139,7 +139,7 @@ almanac. Detail, scenarios, and accessibility checks:
 
 1. **Horde** — overflow `+N`; never shrink below readable token size.
 2. **Elite + dual status** — icons for meaning; VFX for motion — no duplicate fact.
-3. **Bound demon** — role pip visible without opening Inspector.
+3. **Bound creature** — role pip visible without opening Inspector.
 4. **Phaser spectator** — same `Occupant.hud` semantics as Unity world HUD.
 
 ---
@@ -175,13 +175,13 @@ UnitFrame Body + worldYOffset (default -0.35)
   local Y ≈ 0     — Resource row: shield track + element segments + stack pips
                     | HP sliver (optional) | meter ticks
   local Y > 0     — Status strip: 2-letter tokens | CC accent | +N overflow
-  local Y higher  — Identity: tier letter | role pip | level digits | unique/demon pip
+  local Y higher  — Identity: tier letter | role pip | level digits | unique/creature pip
 ```
 
 **Slot rules:**
 
 - Each slot type maps to **one** semantic dimension (documented in plate §B legend).
-- **Priority when crowded:** CC > commander-mark > unique/demon > shield > top statuses > level.
+- **Priority when crowded:** CC > commander-mark > unique/creature > shield > top statuses > level.
 - **Overflow:** collapse to `+N` pip — never shrink text to illegibility.
 - **Tunables:** slot caps, bar W/H, `worldYOffset`, row offsets, stack pips in `data/tuning/actor-hud.v*.json`
   (bar geometry SSOT — not orphaned `vfx.v3` `render.shieldBar`). **Glyphs, initials, and status/resource
@@ -217,8 +217,8 @@ ActorSheet.
 
 | Slot | Player read | Data signal | Source today | Lawn wired? |
 |------|-------------|-------------|--------------|-------------|
-| **Tier frame** | Normal / elite / boss / unique threat | Rarity, expedition tier, unique flag | Demon rarity; `flags.unique`; boss TBD | Partial (`unique` on web) |
-| **Role icon** | Commander-led, demon specimen, vanilla | `instanceId` binding, demon profile | `debug.snapshot` bindings; roster API | Partial |
+| **Tier frame** | Normal / elite / boss / unique threat | Rarity, expedition tier, unique flag | Creature rarity; `flags.unique`; boss TBD | Partial (`unique` on web) |
+| **Role icon** | Commander-led, creature specimen, vanilla | `instanceId` binding, creature profile | `debug.snapshot` bindings; roster API | Partial |
 | **Level badge** | Power band at a glance | Θ band from `progression.power` | `DerivedStatChannels`; `EntityApply` | Resolved, not displayed |
 | **Unique pip** | This unit is special | PvZ unique plant; bound specimen | `plant.unique`; bindings | Web fold partial |
 
@@ -278,7 +278,7 @@ hud: {
     tier?: "normal" | "elite" | "boss" | "unique";
     role?: "specimen" | "commander-mark" | "vanilla";
     levelBand?: number;       // display band, not raw Θ
-    flags: string[];          // e.g. "unique", "demon"
+    flags: string[];          // e.g. "unique", "creature"
   };
   resources: {
     shield?: {
@@ -319,7 +319,7 @@ Full SSOT table, Hot pipeline, duplicate retirement, and feature gate:
 | Status instances | `StatusRuntime` | VFX + 9 web chips | Status strip |
 | Specimen binding | `MatchUniqueBindingsFacet` | Web `instanceId` when bound | Identity row |
 | PvZ unique plant | `plant.unique` event | Web `flags.unique` | Identity pip |
-| Demon profile | Server roster / `DemonDtos` | ActorPanel only | Identity (when bound) |
+| Creature profile | Server roster / `CreatureDtos` | ActorPanel only | Identity (when bound) |
 | Progression power | `progression.power` channel (pinned @ EntityApply) | Nowhere on lawn | Level badge band |
 | Commander leader | `MatchCommanderSnapshot` | Match HUD chip only | Not per-unit (Band A) |
 | Boss flag | Expedition/battle | **Inert on lawn** | Tier frame TBD |

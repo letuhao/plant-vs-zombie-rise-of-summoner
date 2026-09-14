@@ -6,8 +6,9 @@ using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.Battle.Timeline;
-using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Creatures.Contracts;
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Stats.Derived.Subsystems;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
 
@@ -317,8 +318,41 @@ public sealed class WebMatchService
                 ResolveAndIngest(entry.PlayerId, entry.MatchKey, setup, entry.Seed);
                 healed++;
             }
+            catch (ArgumentException ex)
+            {
+                // A DETERMINISTIC resolve failure — the persisted setup_json + seed produce the same
+                // exception on every boot, so this row can never heal. Refusing it is the rule
+                // spec-interactive-turns.md §4 states for the trace case ("The sweep must refuse, not
+                // heal"), applied here to the resolve case it left implicit, and it is the hazard this
+                // method's own comment above already names: an unmarked row is re-listed every boot,
+                // and enough of them crowd every newer row out of the `ORDER BY id ASC LIMIT` window.
+                //
+                // The exception TYPE is deliberately narrow. `ArgumentException` here is exactly what
+                // "the data itself is unusable" means in the resolver: empty squad / empty wave / bad
+                // or duplicate actor key (BattleEngine.ValidateActorKey + Resolve's own guards), and
+                // `W <= 0` from WaveCatalog.ProfileFor. It is NOT a proxy for "any failure" —
+                // `InvalidOperationException` is deliberately left to the transient branch below,
+                // because it covers BOTH a row-specific runaway loop AND process-global
+                // preconditions ("ActionTimingPolicy.Configure(...) has not run"); refusing on it
+                // would mark every row terminal for what is a server misconfiguration.
+                var why = "unresolvable setup: " + ex.Message;
+                Console.Error.WriteLine($"[web-match] sweep refused {entry.MatchKey}: {why}");
+                _store.MarkWebMatchSweepRefused(entry.Id, why);
+            }
             catch (Exception ex)
             {
+                // Transient (SqliteException from InsertWebMatchEvents' rolled-back transaction, a
+                // busy/locked database, a global tuning precondition): leave the row UNRESOLVED so the
+                // next boot retries it. Marking it refused would bury recoverable work permanently.
+                //
+                // DELIBERATE TRADE-OFF for BattleEngine's own runaway-loop guard, which throws
+                // InvalidOperationException ("a runaway event loop, not a long battle") and IS
+                // deterministic for a given setup+seed. It is left here on purpose rather than
+                // refused: its message names an ENGINE defect, not unusable data, so the correct
+                // signal is a loud recurring log that a human reads, not a terminal mark that would
+                // bury every affected row the first time an engine change causes one. If that guard
+                // ever proves reachable in a shipped build, it wants its own decision — not this
+                // catch's default.
                 Console.Error.WriteLine($"[web-match] sweep failed for {entry.MatchKey}: {ex.Message}");
             }
         }
@@ -379,7 +413,7 @@ public sealed class WebMatchService
         foreach (var instanceId in setup.Squad.Select(a => a.SpecimenId).Where(id => !string.IsNullOrEmpty(id)).Distinct(StringComparer.Ordinal))
         {
             uniqueShares[instanceId!] = _store.LoadAllocation(
-                FusionRpg.Core.Stats.Aptitudes.AllocationScope.UniqueDemon, instanceId!).Shares();
+                FusionRpg.Core.Stats.Aptitudes.AllocationScope.UniqueCreature, instanceId!).Shares();
         }
         events.Add(new EventEnvelope
         {
@@ -446,24 +480,28 @@ public sealed class WebMatchService
     /// </summary>
     public BattleSetup ApplyZombossPattern(long playerId, BattleSetup baseSetup, long theta, ulong seed)
     {
+        // DEBT — channelmods-hub: one-release BattleChannelMod concat over the pattern allocation;
+        // the Hub twin is AptitudeResolver.Resolve over the same ZombossCommanderAllocation.
+        // Delete in battle-hub-fuse (T6).
         var tuning = FusionRpg.Core.Battle.Ai.ZombossAdaptiveTuningHub.Tuning;
         var level = WaveCatalog.Get(baseSetup.WaveId).ContentIndex;
         var selection = _store.SelectZombossPattern(playerId, level, seed, tuning);
 
         var zomboss = new FusionRpg.Core.Battle.Ai.ZombossCommanderAllocation(selection.PatternId);
         zomboss.Refresh(FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, theta, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning);
-        var mods = FusionRpg.Core.Stats.Aptitudes.AptitudeResolver.ResolveForBattle(
-            zomboss.Resolve(new FusionRpg.Core.Stats.StatContext()),
-            FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning,
-            new FusionRpg.Core.Power.PowerLadder(FusionRpg.Core.Power.PowerTuningHub.Tuning),
-            level,
-            FusionRpg.Core.Stats.Derived.DerivedStatRegistry.CreateDefault());
+        // battle-hub-fuse T5: the pattern reaches wave actors as Hub inputs (resolved through the
+        // Hub aptitude twin at the actors' own content level, exactly the ladder input the old
+        // concat used), not pre-folded ChannelMods.
+        var patternAllocation = zomboss.Resolve(new FusionRpg.Core.Stats.StatContext());
 
         return baseSetup with
         {
             ZombossPatternId = selection.PatternId,
             ZombossEncounterIndex = selection.EncounterIndex,
-            Wave = baseSetup.Wave.Select(a => a with { ChannelMods = a.ChannelMods.Concat(mods).ToList() }).ToList(),
+            Wave = baseSetup.Wave.Select(a => a with
+            {
+                HubInputs = (a.HubInputs ?? new BattleHubInputs()) with { Aptitude = patternAllocation }
+            }).ToList(),
         };
     }
 
@@ -480,7 +518,7 @@ public sealed class WebMatchService
             && squadInstanceIds.Distinct(StringComparer.Ordinal).Count() != squadInstanceIds.Count)
             return (false, "squad.duplicate", null, none);
 
-        // Contracts gate fielding (spec-demon-contracts.md). Settling first is what keeps an
+        // Contracts gate fielding (spec-creature-contracts.md). Settling first is what keeps an
         // un-migrated player from being refused everything; on any day already settled it is a
         // single read, so this is not a billing loop on the battle path.
         _store.SettleContracts(playerId);
@@ -489,11 +527,11 @@ public sealed class WebMatchService
         bool Bound(string id) => contracts.TryGetValue(id, out var c) && c.Bound;
         bool Deployable(string id) => contracts.TryGetValue(id, out var c) && c.Deployable;
 
-        var roster = _store.ListDemonRoster(playerId).Items;
-        List<DemonSpecimenDto> picked;
+        var roster = _store.ListCreatureRoster(playerId).Items;
+        List<CreatureSpecimenDto> picked;
         if (squadInstanceIds is { Count: > 0 })
         {
-            picked = new List<DemonSpecimenDto>();
+            picked = new List<CreatureSpecimenDto>();
             foreach (var id in squadInstanceIds)
             {
                 var specimen = roster.FirstOrDefault(s =>
@@ -528,7 +566,7 @@ public sealed class WebMatchService
         for (var i = 0; i < picked.Count; i++)
         {
             var s = picked[i];
-            var species = FusionRpg.Core.Demons.DemonSpeciesCatalog.Get(s.Profile.SpeciesId);
+            var species = FusionRpg.Core.Creatures.CreatureSpeciesCatalog.Get(s.Profile.SpeciesId);
             var level = (int)Math.Max(1, s.Actor.Level);
 
             // item module 4/5's own "deploy" moment (RpgStore.MaterializeRolledEquipRuntime's own doc) —
@@ -548,7 +586,7 @@ public sealed class WebMatchService
                 // wiring was built. A real, previously-unnoticed structural gap, not a hypothetical one.
                 SpecimenId = s.Profile.InstanceId,
                 SpeciesId = species.SpeciesId,
-                TypeId = species.DemonTypeId,
+                TypeId = species.CreatureTypeId,
                 Level = level,
                 ElementPrimary = species.ElementPrimary,
                 ElementSecondary = species.ElementSecondary,
@@ -556,116 +594,24 @@ public sealed class WebMatchService
                 MaxHp = BattleRuleset.BaseHp(level),
                 Atk = BattleRuleset.BaseAtk(level),
                 Defense = BattleRuleset.BaseDefense(level),
-                ChannelMods = StarChannelMods(s.Profile.Star, level)
-                    .Concat(LoyaltyChannelMods(
-                        contracts.TryGetValue(s.Profile.InstanceId, out var c) ? c.Loyalty : 0, level))
-                    .Concat(UniqueDemonAptitudeChannelMods(level, playerId, _store, s.Profile.InstanceId, commanderAllocation))
-                    .ToList(),
+                // battle-hub-fuse T5: producers reach battle as Hub inputs (resolved through the
+                // Hub twins), not pre-folded ChannelMods. The DEBT-tagged ChannelMods adapters stay
+                // for tests until T6 deletes them with the composer.
+                HubInputs = new BattleHubInputs
+                {
+                    Aptitude = commanderAllocation + _store.LoadAllocation(
+                        FusionRpg.Core.Stats.Aptitudes.AllocationScope.UniqueCreature, s.Profile.InstanceId),
+                    BoundAtoms = EquippedBoundAtoms.DerivedFromStore(_store, s.Profile.InstanceId),
+                    StarLoyalty = new FusionRpg.Core.Stats.Derived.Subsystems.StarLoyaltyContribution(
+                        s.Profile.Star,
+                        contracts.TryGetValue(s.Profile.InstanceId, out var c) ? c.Loyalty : 0,
+                        level),
+                },
                 EquippedActionIds = EquippedActionIdsFor(s.Profile.InstanceId, _store),
             });
         }
 
         return (true, "", squad, picked.Select(p => p.Profile.InstanceId).ToList());
-    }
-
-    /// <summary>
-    /// Star ranks reach battles ONLY here — flat per-mille shares of the level stats on the omni
-    /// channels (spec-demon-fusion.md F8). The engine and its goldens never change; stars are
-    /// ordinary ChannelMods in the setup. Floored at `star` so low-level stars still register.
-    /// </summary>
-    public static IReadOnlyList<BattleChannelMod> StarChannelMods(int star, int level)
-    {
-        if (star <= 0) return Array.Empty<BattleChannelMod>();
-        // The per-mille bonus is now a CURVE indexed on the triangular sacrifice cost, not `star`
-        // times a flat rate (StarPolicy.StarPowerMilli) -- so `star` must not be multiplied in again.
-        var power = Math.Max(star,
-            BattleRuleset.BaseAtk(level) * FusionRpg.Core.Demons.Fusion.StarPolicy.StarPowerMilli(star) / 1000);
-        var defense = Math.Max(star,
-            BattleRuleset.BaseDefense(level) * FusionRpg.Core.Demons.Fusion.StarPolicy.StarDefenseMilli(star) / 1000);
-        return new[]
-        {
-            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatPowerOmni, power),
-            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatDefenseOmni, defense)
-        };
-    }
-
-    /// <summary>
-    /// Loyalty reaches battles the same way stars do — flat per-mille shares of the level stats on
-    /// the omni channels, never an engine change (spec-demon-contracts.md G7). The Bound band pays
-    /// +0‰ by design, so a fresh contract cannot move a single golden hash.
-    /// </summary>
-    public static IReadOnlyList<BattleChannelMod> LoyaltyChannelMods(int loyalty, int level)
-    {
-        var rank = ContractPolicy.RankFor(loyalty);
-        var milli = ContractPolicy.RankBonusMilli(rank);
-        if (milli <= 0) return Array.Empty<BattleChannelMod>();
-        // Floored at the rank step (Sworn 1 / Trusted 2 / Devoted 3) exactly like stars: at low
-        // levels a per-mille share truncates to nothing, and every rank would look identical.
-        var floor = (int)rank - 1;
-        var power = Math.Max(floor, BattleRuleset.BaseAtk(level) * milli / 1000);
-        var defense = Math.Max(floor, BattleRuleset.BaseDefense(level) * milli / 1000);
-        return new[]
-        {
-            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatPowerOmni, power),
-            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatDefenseOmni, defense)
-        };
-    }
-
-    /// <summary>
-    /// class-system-todo.md P2.5/P9.1 — aptitudes reach battle the same way stars/loyalty do: ordinary
-    /// ChannelMods in the setup, adapted at this one seam, never an engine or composer change
-    /// (spec-aptitude-resolve.md §2a — "this module emits one thing and it is adapted at two seams").
-    /// **Reads the real commander-scope allocation now** (spec-aptitude-allocation-surface.md, 2026-08-27)
-    /// — `point-economy`'s `AllocationStore` is the real per-actor source; a player who has never
-    /// allocated still resolves against `AptitudeAllocation.Empty` (`LoadAllocation`'s own contract on
-    /// an unset key), so this stays exactly as inert as before for every squad it already served.
-    ///
-    /// <para><b>species-build `battle-allocation` (module 10).</b> <paramref name="speciesId"/> and
-    /// <paramref name="commanderAllocation"/> are both optional and trailing — every existing call site
-    /// (4 in `AptitudeChannelModsTests`) keeps compiling and behaving identically, resolving Commander
-    /// alone. When a species is supplied, its EFFECTIVE DemonType allocation
-    /// (`RpgStore.EffectiveSpeciesAllocation`) is merged with the commander allocation into ONE
-    /// `AptitudeAllocation` via `operator+` and resolved with a SINGLE `ResolveForBattle` call — never
-    /// resolved per scope and concatenated (`AptitudeAllocation.cs`'s own "scopes sum before share,
-    /// never the reverse": two per-scope resolves, later combined, is a different and wrong number).
-    /// <paramref name="commanderAllocation"/> lets `BuildSquad` load the commander row ONCE per squad
-    /// (it is the same for every actor) rather than once per actor — the species read alone stays
-    /// per-actor, since two squad members can be different species.</para>
-    /// </summary>
-    public static IReadOnlyList<BattleChannelMod> AptitudeChannelMods(
-        int level, long playerId, RpgStore store,
-        string? speciesId = null,
-        FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation? commanderAllocation = null)
-    {
-        var commander = commanderAllocation ?? store.LoadAllocation(
-            FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId));
-        var species = string.IsNullOrEmpty(speciesId)
-            ? FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty
-            : store.EffectiveSpeciesAllocation(playerId, speciesId, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning);
-        var merged = commander + species;
-        var ladder = new FusionRpg.Core.Power.PowerLadder(FusionRpg.Core.Power.PowerTuningHub.Tuning);
-        return FusionRpg.Core.Stats.Aptitudes.AptitudeResolver.ResolveForBattle(
-            merged, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning, ladder, level,
-            FusionRpg.Core.Stats.Derived.DerivedStatRegistry.CreateDefault());
-    }
-
-    /// <summary>Dedicated unique-demon battle input. A specimen receives the commander layer plus
-    /// its own persisted UniqueDemon allocation; the empire species fallback is intentionally not
-    /// consulted for this source.</summary>
-    public static IReadOnlyList<BattleChannelMod> UniqueDemonAptitudeChannelMods(
-        int level, long playerId, RpgStore store, string instanceId,
-        FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation? commanderAllocation = null)
-    {
-        if (string.IsNullOrWhiteSpace(instanceId))
-            throw new ArgumentException("instanceId must not be empty", nameof(instanceId));
-        var commander = commanderAllocation ?? store.LoadAllocation(
-            FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId));
-        var unique = store.LoadAllocation(
-            FusionRpg.Core.Stats.Aptitudes.AllocationScope.UniqueDemon, instanceId.Trim());
-        var ladder = new FusionRpg.Core.Power.PowerLadder(FusionRpg.Core.Power.PowerTuningHub.Tuning);
-        return FusionRpg.Core.Stats.Aptitudes.AptitudeResolver.ResolveForBattle(
-            commander + unique, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning, ladder, level,
-            FusionRpg.Core.Stats.Derived.DerivedStatRegistry.CreateDefault());
     }
 
     /// <summary>
@@ -676,7 +622,7 @@ public sealed class WebMatchService
     /// contract `RpgStore.GetLoadoutOrAutoEquip`'s own doc comment states).
     ///
     /// <para>Loadout stays keyed on <see cref="OwnerKind.Entity"/> + the specimen's own instance id,
-    /// matching `LoadoutStoreTests.cs`'s own convention for "one demon's loadout, independent of who
+    /// matching `LoadoutStoreTests.cs`'s own convention for "one creature's loadout, independent of who
     /// currently owns it" — unchanged, since a loadout PREFERENCE is not permanent progress: losing one
     /// on a session boundary degrades gracefully to auto-equip, never to nothing.</para>
     ///

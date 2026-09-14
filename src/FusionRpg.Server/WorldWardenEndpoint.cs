@@ -11,7 +11,7 @@ namespace FusionRpg.Server;
 /// which references both `FusionRpg.Core` and `FusionRpg.Data`.
 ///
 /// Two steps, and there is no rollback between them:
-///   1. `store.BindAsWarden(playerId, instanceId)` — the demon-contract side: capacity, the soul fee,
+///   1. `store.BindAsWarden(playerId, instanceId)` — the creature-contract side: capacity, the soul fee,
 ///      and the non-releasable flag are all shipped and read as-is (`RpgStore.Contracts.cs:310-323`).
 ///   2. `store.SubmitWorldCommands(worldId, [bind-warden])` — the ordinary world command path.
 ///

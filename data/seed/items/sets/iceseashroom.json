@@ -23,9 +23,9 @@
   "entries": [
     {
       "id": "set.iceseashroom-001",
-      "nameKey": "set.frost-spore-swell",
-      "name": "Frost-Spore Swell",
-      "themeKey": "demon.iceseashroom",
+      "nameKey": "set.glacial-mycelium",
+      "name": "Glacial Mycelium",
+      "themeKey": "creature.iceseashroom",
       "members": [
         {
           "role": "armament-primary",

@@ -30,7 +30,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -67,7 +67,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -105,7 +105,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -142,7 +142,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -180,7 +180,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -217,7 +217,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -254,7 +254,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -292,7 +292,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -329,7 +329,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "trivial"
       },
       "socketMax": 3,
@@ -366,7 +366,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -404,7 +404,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -441,7 +441,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -472,18 +472,18 @@
     },
     {
       "id": "item.humanoid-shoulders-b-013",
-      "nameKey": "base.reinforced-pauldron",
-      "name": "Reinforced Pauldron",
+      "nameKey": "base-type.iron-studded-spaulder",
+      "name": "Iron-Studded Spaulder",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.reinforced-pauldron",
+      "iconKey": "icon.base-type.iron-studded-spaulder",
       "flavorKey": "flavor.base.reinforced-pauldron",
       "flavor": "A heavy, layered plating designed to deflect kinetic impact away from the neck and collarbone.",
       "tags": [
@@ -508,18 +508,18 @@
     },
     {
       "id": "item.humanoid-shoulders-b-014",
-      "nameKey": "base.reinforced-pauldron",
-      "name": "Reinforced Pauldron",
+      "nameKey": "base-type.heavy-plated-spaulder",
+      "name": "Heavy Plated Spaulder",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.reinforced-pauldron",
+      "iconKey": "icon.base-type.heavy-plated-spaulder",
       "flavorKey": "flavor.base.reinforced-pauldron",
       "flavor": "A heavy, layered plate designed to deflect incoming kinetic energy away from the neck and collarbone.",
       "tags": [
@@ -544,18 +544,18 @@
     },
     {
       "id": "item.humanoid-shoulders-b-015",
-      "nameKey": "base.reinforced-pauldron",
-      "name": "Reinforced Pauldron",
+      "nameKey": "base-type.bulwark-shoulder-guard",
+      "name": "Bulwark Shoulder Guard",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-capacity",
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.reinforced-pauldron",
+      "iconKey": "icon.base-type.bulwark-shoulder-guard",
       "flavorKey": "flavor.base.reinforced-pauldron",
       "flavor": "A heavy, layered plating designed to deflect kinetic impact away from the neck and collarbone. It provides a stable foundation for mounting defensive apparatus.",
       "tags": [
@@ -580,18 +580,18 @@
     },
     {
       "id": "item.humanoid-shoulders-b-016",
-      "nameKey": "base.reinforced-pauldron",
-      "name": "Reinforced Pauldron",
+      "nameKey": "base-type.plated-shoulder-guard",
+      "name": "Plated Shoulder Guard",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-regen",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.reinforced-pauldron",
+      "iconKey": "icon.base-type.plated-shoulder-guard",
       "flavorKey": "flavor.base.reinforced-pauldron",
       "flavor": "A heavy, layered plating designed to deflect kinetic impact away from the neck and collarbone. It serves as a stable mounting point for defensive energy emitters.",
       "tags": [
@@ -616,18 +616,18 @@
     },
     {
       "id": "item.humanoid-shoulders-b-017",
-      "nameKey": "base.reinforced-pauldron",
-      "name": "Reinforced Pauldron",
+      "nameKey": "base-type.heavy-mantle",
+      "name": "Heavy Mantle",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-capacity",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.reinforced-pauldron",
+      "iconKey": "icon.base-type.heavy-mantle",
       "flavorKey": "flavor.base.reinforced-pauldron",
       "flavor": "A heavy, layered plating designed to deflect kinetic impact away from the neck and collarbone.",
       "tags": [
@@ -652,18 +652,18 @@
     },
     {
       "id": "item.humanoid-shoulders-b-018",
-      "nameKey": "base.reinforced-pauldron",
-      "name": "Reinforced Pauldron",
+      "nameKey": "base-type.bulwark-mantle",
+      "name": "Bulwark Mantle",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.reinforced-pauldron",
+      "iconKey": "icon.base-type.bulwark-mantle",
       "flavorKey": "flavor.base.reinforced-pauldron",
       "flavor": "A heavy, layered plating designed to deflect kinetic impact away from the neck and collarbone. Its wide surface area provides a stable mounting point for defensive energy emitters.",
       "tags": [
@@ -688,18 +688,18 @@
     },
     {
       "id": "item.humanoid-shoulders-b-019",
-      "nameKey": "base.reinforced-pauldron",
-      "name": "Reinforced Pauldron",
+      "nameKey": "base-type.heavy-shoulder-guard",
+      "name": "Heavy Shoulder Guard",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.mending",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.reinforced-pauldron",
+      "iconKey": "icon.base-type.heavy-shoulder-guard",
       "flavorKey": "flavor.base.reinforced-pauldron",
       "flavor": "A heavy, layered plate designed to deflect kinetic impact away from the neck and collarbone.",
       "tags": [
@@ -724,18 +724,18 @@
     },
     {
       "id": "item.humanoid-shoulders-b-020",
-      "nameKey": "base.reinforced-pauldron",
-      "name": "Reinforced Pauldron",
+      "nameKey": "base-type.bulwark-pauldron",
+      "name": "Bulwark Pauldron",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-capacity",
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.reinforced-pauldron",
+      "iconKey": "icon.base-type.bulwark-pauldron",
       "flavorKey": "flavor.base.reinforced-pauldron",
       "flavor": "A heavy, layered plating designed to deflect kinetic impact away from the neck and collarbone. It provides a stable mounting point for defensive energy emitters.",
       "tags": [
@@ -803,7 +803,7 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -832,8 +832,8 @@
     },
     {
       "id": "item.humanoid-shoulders-b-023",
-      "nameKey": "base.padded-mantle",
-      "name": "Padded Mantle",
+      "nameKey": "base-type.reinforced-pauldrons",
+      "name": "Reinforced Pauldrons",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "cloth",
@@ -843,7 +843,7 @@
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.padded-mantle",
+      "iconKey": "icon.base-type.reinforced-pauldrons",
       "flavorKey": "flavor.base.padded-mantle",
       "flavor": "A thick layer of quilted fabric designed to absorb kinetic impact and stabilize the wearer's posture.",
       "tags": [
@@ -867,8 +867,8 @@
     },
     {
       "id": "item.humanoid-shoulders-b-024",
-      "nameKey": "base.padded-mantle",
-      "name": "Padded Mantle",
+      "nameKey": "base-type.heavy-guard-shoulders",
+      "name": "Heavy Guard Shoulders",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "cloth",
@@ -878,7 +878,7 @@
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.padded-mantle",
+      "iconKey": "icon.base-type.heavy-guard-shoulders",
       "flavorKey": "flavor.base.padded-mantle",
       "flavor": "A thick layer of quilted fabric designed to absorb kinetic impact and stabilize the wearer's posture.",
       "tags": [
@@ -903,18 +903,18 @@
     },
     {
       "id": "item.humanoid-shoulders-b-025",
-      "nameKey": "base.laminated-mantlet",
-      "name": "Laminated Mantlet",
+      "nameKey": "base-type.reinforced-mantlet",
+      "name": "Reinforced Mantlet",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-toughness",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.laminated-mantlet",
+      "iconKey": "icon.base-type.reinforced-mantlet",
       "flavorKey": "flavor.base.laminated-mantlet",
       "flavor": "A series of layered plates designed to deflect incoming kinetic energy away from the neck and collarbone.",
       "tags": [
@@ -939,8 +939,8 @@
     },
     {
       "id": "item.humanoid-shoulders-b-026",
-      "nameKey": "base.padded-mantle",
-      "name": "Padded Mantle",
+      "nameKey": "base-type.heavy-guardlets",
+      "name": "Heavy Guardlets",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "cloth",
@@ -950,7 +950,7 @@
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.padded-mantle",
+      "iconKey": "icon.base-type.heavy-guardlets",
       "flavorKey": "flavor.base.padded-mantle",
       "flavor": "A thick layer of quilted fabric designed to absorb kinetic impact and stabilize the wearer's posture.",
       "tags": [
@@ -975,8 +975,8 @@
     },
     {
       "id": "item.humanoid-shoulders-b-027",
-      "nameKey": "base.padded-mantle",
-      "name": "Padded Mantle",
+      "nameKey": "base-type.layered-guard",
+      "name": "Layered Guard",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "cloth",
@@ -986,7 +986,7 @@
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.padded-mantle",
+      "iconKey": "icon.base-type.layered-guard",
       "flavorKey": "flavor.base.padded-mantle",
       "flavor": "A thick layer of quilted fabric designed to absorb kinetic impact and stabilize the wearer's posture.",
       "tags": [
@@ -1011,8 +1011,8 @@
     },
     {
       "id": "item.humanoid-shoulders-b-028",
-      "nameKey": "base.padded-mantle",
-      "name": "Padded Mantle",
+      "nameKey": "base-type.heavy-guarded-shoulders",
+      "name": "Heavy Guarded Shoulders",
       "frame": "humanoid",
       "role": "ward-array",
       "class": "cloth",
@@ -1022,7 +1022,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.padded-mantle",
+      "iconKey": "icon.base-type.heavy-guarded-shoulders",
       "flavorKey": "flavor.base.padded-mantle",
       "flavor": "A thick layer of quilted fabric designed to absorb kinetic impact and stabilize the wearer's posture.",
       "tags": [

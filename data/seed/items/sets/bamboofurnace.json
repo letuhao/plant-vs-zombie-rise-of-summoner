@@ -25,7 +25,7 @@
       "id": "set.bamboofurnace-001",
       "nameKey": "set.bamboo-ember-kiln",
       "name": "Bamboo Ember Kiln",
-      "themeKey": "demon.bamboofurnace",
+      "themeKey": "creature.bamboofurnace",
       "members": [
         {
           "role": "armament-primary",

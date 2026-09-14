@@ -25,7 +25,7 @@
       "id": "set.machinenut-001",
       "nameKey": "set.thermal-nut",
       "name": "Thermal Nut",
-      "themeKey": "demon.machinenut",
+      "themeKey": "creature.machinenut",
       "members": [
         {
           "role": "armament-primary",

@@ -42,7 +42,7 @@ The frame change to *"no campaign, endless RPG"* (ideal §12.1) has a consequenc
 
 > **Any permanent solution to a recurring cost is eventually free.**
 
-Wardens are the clearest case. Bind one demon, and that sector never fades again — *forever*. With an
+Wardens are the clearest case. Bind one creature, and that sector never fades again — *forever*. With an
 endless summon faucet, a player eventually wardens everything and the loam constraint evaporates. The
 same defect sits in **deep root** (a permanent upkeep reduction, so buy it everywhere) and in
 **scorched root** (a one-shot with no replacement cost).
@@ -54,7 +54,7 @@ This is not a reason to cut them. It is a test every mechanic in the set now has
 
 > ✅ **CLOSED 2026-08-23.** Bounded worlds dissolved most of it — deep root, scorched root, granaries
 > and waystations are world-scoped and die with the map, so "permanent" means "for this world".
-> Wardens keep their cure: binding one permanently consumes a `demon-contracts` binding slot, already
+> Wardens keep their cure: binding one permanently consumes a `creature-contracts` binding slot, already
 > Soul-priced and scarce. See `empire-economy-ssot.md` §7.
 
 ### A2 · **High** — if you can never hold the whole map, what does "completing" one mean?

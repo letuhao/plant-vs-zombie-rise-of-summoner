@@ -25,7 +25,7 @@
       "id": "set.imitater-001",
       "nameKey": "set.mimicry-deck",
       "name": "Mimicry Deck",
-      "themeKey": "demon.imitater",
+      "themeKey": "creature.imitater",
       "members": [
         {
           "role": "armament-primary",

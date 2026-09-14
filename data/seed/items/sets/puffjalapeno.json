@@ -25,7 +25,7 @@
       "id": "set.puffjalapeno-001",
       "nameKey": "set.spicy-spore-burst",
       "name": "Spicy Spore Burst",
-      "themeKey": "demon.puffjalapeno",
+      "themeKey": "creature.puffjalapeno",
       "members": [
         {
           "role": "armament-primary",

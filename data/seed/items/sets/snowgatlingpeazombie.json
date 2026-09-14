@@ -25,7 +25,7 @@
       "id": "set.snowgatlingpeazombie-001",
       "nameKey": "set.sub-zero-volley",
       "name": "Sub-Zero Volley",
-      "themeKey": "demon.snowgatlingpeazombie",
+      "themeKey": "creature.snowgatlingpeazombie",
       "members": [
         {
           "role": "armament-primary",

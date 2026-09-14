@@ -25,7 +25,7 @@
       "id": "set.portalpea-001",
       "nameKey": "set.chronos-pea",
       "name": "Chronos Pea",
-      "themeKey": "demon.portalpea",
+      "themeKey": "creature.portalpea",
       "members": [
         {
           "role": "armament-primary",

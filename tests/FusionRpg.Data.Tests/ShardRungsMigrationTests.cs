@@ -12,60 +12,58 @@ namespace FusionRpg.Data.Tests;
 ///
 /// <see cref="RpgStore.Init"/> runs the migration on every boot (idempotent — see
 /// <see cref="ShardRungs.Migrate"/>'s own doc comment), so these tests seed a legacy stack directly
-/// through the real public write path (<see cref="RpgStore.AddDemonMaterials"/>, which already accepts
-/// legacy ids per <c>DemonMaterialCatalog.IsKnown</c>) and then re-run <c>Init()</c> on the same store
+/// through the real public write path (<see cref="RpgStore.AddCreatureMaterials"/>, which already accepts
+/// legacy ids per <c>CreatureMaterialCatalog.IsKnown</c>) and then re-run <c>Init()</c> on the same store
 /// to trigger the migration exactly the way a real boot would.
 /// </summary>
 public class ShardRungsMigrationTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ShardRungsMigrationTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-shardrungs-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     [Fact]
     public void Legacy_shard_id_resolves_after_migration()
     {
-        // "resolvable but unissuable" (spec §4 point 4) — DemonMaterialCatalog.IsKnown must keep
+        // "resolvable but unissuable" (spec §4 point 4) — CreatureMaterialCatalog.IsKnown must keep
         // accepting the legacy id even after every owned stack has been rewritten, so a stale
         // client's reference to it does not hard-fail.
-        Assert.True(FusionRpg.Core.Demons.DemonMaterialCatalog.IsKnown("shard.common"));
-        Assert.True(FusionRpg.Core.Demons.DemonMaterialCatalog.IsKnown("shard.rare"));
-        Assert.True(FusionRpg.Core.Demons.DemonMaterialCatalog.IsKnown("shard.epic"));
-        Assert.True(FusionRpg.Core.Demons.DemonMaterialCatalog.IsKnown("shard.legendary"));
+        Assert.True(FusionRpg.Core.Creatures.CreatureMaterialCatalog.IsKnown("shard.common"));
+        Assert.True(FusionRpg.Core.Creatures.CreatureMaterialCatalog.IsKnown("shard.rare"));
+        Assert.True(FusionRpg.Core.Creatures.CreatureMaterialCatalog.IsKnown("shard.epic"));
+        Assert.True(FusionRpg.Core.Creatures.CreatureMaterialCatalog.IsKnown("shard.legendary"));
         // ...but never issuable going forward.
-        Assert.DoesNotContain("shard.common", FusionRpg.Core.Demons.DemonMaterialCatalog.All);
+        Assert.DoesNotContain("shard.common", FusionRpg.Core.Creatures.CreatureMaterialCatalog.All);
     }
 
     [Fact]
     public void Migration_never_reduces_a_player_material_count()
     {
         const long playerId = 1;
-        _store.AddDemonMaterials(playerId, new[] { ("shard.common", 7L) });
-        _store.AddDemonMaterials(playerId, new[] { ("shard.rare", 3L) });
-        _store.AddDemonMaterials(playerId, new[] { ("shard.epic", 5L) });
-        _store.AddDemonMaterials(playerId, new[] { ("shard.legendary", 2L) });
-        _store.AddDemonMaterials(playerId, new[] { ("essence.fire", 4L) });
+        _store.AddCreatureMaterials(playerId, new[] { ("shard.common", 7L) });
+        _store.AddCreatureMaterials(playerId, new[] { ("shard.rare", 3L) });
+        _store.AddCreatureMaterials(playerId, new[] { ("shard.epic", 5L) });
+        _store.AddCreatureMaterials(playerId, new[] { ("shard.legendary", 2L) });
+        _store.AddCreatureMaterials(playerId, new[] { ("essence.fire", 4L) });
 
-        var before = _store.ListDemonMaterials(playerId).Sum(m => m.Qty);
+        var before = _store.ListCreatureMaterials(playerId).Sum(m => m.Qty);
 
         // Re-running Init() on the SAME data dir is exactly what a real boot after the migration
         // ships does — the legacy rows above were seeded before this call, matching a save from
         // before the rename.
         _store.Init();
 
-        var after = _store.ListDemonMaterials(playerId).ToList();
+        var after = _store.ListCreatureMaterials(playerId).ToList();
         Assert.True(after.Sum(m => m.Qty) >= before,
             $"material count dropped across migration: before={before}, after={after.Sum(m => m.Qty)}");
 
@@ -85,29 +83,29 @@ public class ShardRungsMigrationTests : IDisposable
         const long playerId = 2;
         // The player already holds the LIVE id (post-migration mint or drop) AND the legacy id
         // (a pre-migration save) at once — the both-held case the spec names explicitly.
-        _store.AddDemonMaterials(playerId, new[] { ("shard.cultivated", 10L) });
-        _store.AddDemonMaterials(playerId, new[] { ("shard.rare", 6L) });
+        _store.AddCreatureMaterials(playerId, new[] { ("shard.cultivated", 10L) });
+        _store.AddCreatureMaterials(playerId, new[] { ("shard.rare", 6L) });
 
         _store.Init();
 
-        var cultivated = _store.ListDemonMaterials(playerId).Single(m => m.MaterialId == "shard.cultivated");
+        var cultivated = _store.ListCreatureMaterials(playerId).Single(m => m.MaterialId == "shard.cultivated");
         Assert.Equal(16, cultivated.Qty); // summed, not overwritten by either side
-        Assert.DoesNotContain(_store.ListDemonMaterials(playerId), m => m.MaterialId == "shard.rare");
+        Assert.DoesNotContain(_store.ListCreatureMaterials(playerId), m => m.MaterialId == "shard.rare");
     }
 
     [Fact]
     public void Migration_is_idempotent_a_second_run_touches_nothing()
     {
         const long playerId = 3;
-        _store.AddDemonMaterials(playerId, new[] { ("shard.common", 9L) });
+        _store.AddCreatureMaterials(playerId, new[] { ("shard.common", 9L) });
         _store.Init(); // first migration: shard.common -> shard.chaff
 
-        var afterFirst = _store.ListDemonMaterials(playerId).Sum(m => m.Qty);
+        var afterFirst = _store.ListCreatureMaterials(playerId).Sum(m => m.Qty);
         _store.Init(); // second run: no legacy rows remain, must be a no-op
-        var afterSecond = _store.ListDemonMaterials(playerId).Sum(m => m.Qty);
+        var afterSecond = _store.ListCreatureMaterials(playerId).Sum(m => m.Qty);
 
         Assert.Equal(afterFirst, afterSecond);
-        Assert.Equal(9, _store.ListDemonMaterials(playerId).Single(m => m.MaterialId == "shard.chaff").Qty);
+        Assert.Equal(9, _store.ListCreatureMaterials(playerId).Single(m => m.MaterialId == "shard.chaff").Qty);
     }
 
     [Fact]
@@ -116,8 +114,8 @@ public class ShardRungsMigrationTests : IDisposable
         Assert.Equal(4, ShardRungs.LegacyToLiveShardId.Count);
         foreach (var (legacy, live) in ShardRungs.LegacyToLiveShardId)
         {
-            Assert.True(FusionRpg.Core.Demons.DemonMaterialCatalog.IsKnown(legacy));
-            Assert.Contains(live, FusionRpg.Core.Demons.DemonMaterialCatalog.All);
+            Assert.True(FusionRpg.Core.Creatures.CreatureMaterialCatalog.IsKnown(legacy));
+            Assert.Contains(live, FusionRpg.Core.Creatures.CreatureMaterialCatalog.All);
         }
         Assert.Equal("shard.chaff", ShardRungs.LegacyToLiveShardId["shard.common"]);
         Assert.Equal("shard.cultivated", ShardRungs.LegacyToLiveShardId["shard.rare"]);

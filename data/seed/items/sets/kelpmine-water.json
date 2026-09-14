@@ -25,7 +25,7 @@
       "id": "set.kelpmine-water-001",
       "nameKey": "set.entangling-water-mine",
       "name": "Entangling Water-Mine",
-      "themeKey": "demon.kelpmine_water",
+      "themeKey": "creature.kelpmine_water",
       "members": [
         {
           "role": "armament-primary",

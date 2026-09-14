@@ -59,8 +59,8 @@ I12 §8 states its target as *"**20–30 equipment items per day**"* and its cal
 *"75 slots ≈ 10 days"* (`ssot-generation.md` §8), with a `40/day` tripwire.
 
 **There is no day-based progression axis in this game.** Verified by search across Core: the only
-per-day concepts are the demon-contract timers —
-`Demons/Contracts/ContractPolicy.cs:88` (`DecayPerDay`), `:124` (`BaseUpkeepPerDay`), `:133`
+per-day concepts are the creature-contract timers —
+`Creatures/Contracts/ContractPolicy.cs:88` (`DecayPerDay`), `:124` (`BaseUpkeepPerDay`), `:133`
 (`UpkeepPerDay`), and `ContractTuning.cs:11` (`DailyGainCap`). The one other candidate is gone:
 `RpgStore.Souls.cs:67` records *"T3.6 deleted `VictoryFullPerDay`, audit F11."* Θ itself has no time
 term — it counts levels, realms and runs (`PowerIndexComposer.cs:58-60`).
@@ -286,7 +286,7 @@ migration.**
 `an_insert_or_charm_entry_is_refused_by_name_until_x7_lands`.
 
 Step 11 is one transaction because the summoning flow already paid for that lesson —
-`spec-demon-summoning.md`'s two-transaction bug — *with one extra hazard: nothing is spent, so a partial
+`spec-creature-summoning.md`'s two-transaction bug — *with one extra hazard: nothing is spent, so a partial
 commit mints free items rather than losing paid ones.*
 
 ### X4 — this module supplies the `drop` and `boss` channels

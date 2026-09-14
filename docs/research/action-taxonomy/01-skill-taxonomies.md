@@ -575,13 +575,13 @@ project has, so the numbers matter more here than anywhere else.
 
 **FACT (computed)** over the shipped compendium data in
 <https://github.com/aqiu384/megaten-fusion-tool> (`src/app/smt5/data/`, `src/app/p5/data/`), which
-mirrors the games' own skill and demon tables.
+mirrors the games' own skill and creature tables.
 
 ### Shin Megami Tensei V: Vengeance
 
 | | |
 |---|---|
-| Demons | **306** (242 base + 97 Vengeance-added, union of both tables) |
+| Creatures | **306** (242 base + 97 Vengeance-added, union of both tables) |
 | Skills | **763** (444 base + 352 Vengeance, union) |
 | Distinct skill element codes | **14** |
 
@@ -619,8 +619,8 @@ The config splits them:
 
 **What the element code buys — and this is the whole answer for a monster game:**
 
-1. **It is the resistance-table column set.** A demon's `resists` string is indexed by `resistElems` in
-   exactly that order. SMT V demons carry a 7-character string; Persona 5 demons a 10-character one.
+1. **It is the resistance-table column set.** A creature's `resists` string is indexed by `resistElems` in
+   exactly that order. SMT V creatures carry a 7-character string; Persona 5 creatures a 10-character one.
    The skill's category and the target's defence grid are **the same enum**. There is no mapping layer.
 2. **It gates fusion inheritance.** Persona 5 ships a 14 × 12 bitmask: each Persona has one of 14
    *inheritance types* (`phys, fire, ice, elec, wind, psy, nuke, bless, curse, ailment, healing,
@@ -630,7 +630,7 @@ The config splits them:
 3. **It drives the Press Turn / One More economy** — hitting a weakness grants an extra action, and
    weakness is read off the resistance grid, which is indexed by the element code.
 
-**What breaks if the code is wrong:** the demon resists the wrong thing, the Press Turn economy breaks
+**What breaks if the code is wrong:** the creature resists the wrong thing, the Press Turn economy breaks
 in both directions, and fusion produces a Persona that cannot learn the skills it is supposed to. This
 is the highest-stakes categorisation in the whole sample.
 
@@ -641,7 +641,7 @@ rosters of 306 and 232. That is the direct comparator for a 5-value `ActionCateg
 the same number.
 
 **And crucially, both games hold the vocabulary constant while the roster grows.** SMT V: Vengeance
-added 97 demons and 352 skill rows to the base game and added **zero** new element codes.
+added 97 creatures and 352 skill rows to the base game and added **zero** new element codes.
 
 ---
 
@@ -779,7 +779,7 @@ buckets a player will hold in their head."
 | Path of Exile | Display tags 51 → 54 keys between the archived and current data snapshots; 2 real new player-facing tags (`Retaliation`, `Pact`) | **Near-flat growth** | RePoE (computed) |
 | World of Warcraft | 7 schools unchanged since 2004; multi-schools added as **bit combinations**, not new values. Meanwhile `AuraType` reached **665** and `SpellEffects` **360** | **Top stable, bottom explodes** | TrinityCore headers |
 | World of Warcraft | "As of Battle for Azeroth, a significant number of abilities which previously were not on the global cooldown have been added to it" | **Reclassification, not growth** | [warcraft.wiki.gg](https://warcraft.wiki.gg/wiki/Global_cooldown) |
-| Shin Megami Tensei V → Vengeance | +97 demons, +352 skill rows, **+0 element codes** | **Flat** | fusion-tool data (computed) |
+| Shin Megami Tensei V → Vengeance | +97 creatures, +352 skill rows, **+0 element codes** | **Flat** | fusion-tool data (computed) |
 | Diablo IV | Primary tags grew as classes shipped — Spiritborn's `Skill_Primary_Spirit` / `_Combat` and Druid's two Destruction tiers | **Grows with classes, not with skills** | d4data (computed) |
 | Persona 5 → Royal | +1 skill class (`tra`, traits); resistance columns unchanged at 10 | **+1 in a decade** | fusion-tool data (computed) |
 
@@ -847,7 +847,7 @@ two largest rosters carry 8 and 0.
 
 **On roster size as an argument.** It is not one. Category count is uncorrelated with roster size
 across the whole sample: 1,025 species / 3 categories, 3,207 creatures / 8, 374 operators / 3, 306
-demons / 7 (element-inclusive), 232 personas / 5. The variable that moves is the **second vocabulary**,
+creatures / 7 (element-inclusive), 232 personas / 5. The variable that moves is the **second vocabulary**,
 not the first.
 
 **On the second vocabulary.** This is where every game in the sample absorbs growth, and it is where

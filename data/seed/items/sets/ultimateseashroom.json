@@ -25,7 +25,7 @@
       "id": "set.ultimateseashroom-001",
       "nameKey": "set.mycelial-overlord",
       "name": "Mycelial Overlord",
-      "themeKey": "demon.ultimateseashroom",
+      "themeKey": "creature.ultimateseashroom",
       "members": [
         {
           "role": "armament-primary",

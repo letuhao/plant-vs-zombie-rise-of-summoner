@@ -25,7 +25,7 @@
       "id": "set.cherrypot-001",
       "nameKey": "set.cherry-blossom-marksman",
       "name": "Cherry Blossom Marksman",
-      "themeKey": "demon.cherrypot",
+      "themeKey": "creature.cherrypot",
       "members": [
         {
           "role": "armament-primary",

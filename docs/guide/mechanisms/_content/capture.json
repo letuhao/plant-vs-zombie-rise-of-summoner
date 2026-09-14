@@ -5,11 +5,11 @@
   "kicker": "Roster and summoning · lawn / hunt",
   "pillar": {"text": "Creatures", "href": "creatures.md"},
   "loopLine": "Farm / hunt / defend · Lawn",
-  "hook": "**WIP:** weaken a wild demon in a run and attempt to **catch** it — a hunt intake beside the altar and wild joins.",
+  "hook": "**WIP:** weaken a wild creature in a run and attempt to **catch** it — a hunt intake beside the altar and wild joins.",
   "blindSpots": [
     {"term": "WIP", "meaning": "Not finished. You should not expect a reliable capture button on every lawn yet."},
     {"term": "Capture", "meaning": "Pressure a target in play, then attempt to add it as a specimen — not an altar pull."},
-    {"term": "Wild", "meaning": "A demon you meet in a run that is not already on your roster."},
+    {"term": "Wild", "meaning": "A creature you meet in a run that is not already on your roster."},
     {"term": "Lawn-only finds", "meaning": "Design allows a small slice of species as lawn finds (never legendaries forever gated that way), with web paths so web-only play can still finish milestones."}
   ],
   "alsoTrue": [

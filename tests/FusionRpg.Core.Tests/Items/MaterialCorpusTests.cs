@@ -1,5 +1,5 @@
 using System.Text.Json;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Items;
 using FusionRpg.Core.Items.Materials;
 using Xunit;
@@ -71,10 +71,13 @@ public class MaterialCorpusTests
     [Fact]
     public void A_tuning_that_breaks_D24_is_refused_at_load_not_at_the_first_crafted_socket()
     {
-        var broken = TuningJson().Replace(
+        // Normalize first: the tuning file is LF in the blob but checks out as CRLF
+        // when core.autocrlf=true, which would make the "\n"-literal surgery below a no-op.
+        var tuning = TuningJson().Replace("\r\n", "\n");
+        var broken = tuning.Replace(
             "\"imbue\": {\n      \"owner\": \"sockets (16)\",\n      \"souls\": { \"coefficient\": 50, \"variable\": \"rung\" }",
             "\"imbue\": {\n      \"owner\": \"sockets (16)\",\n      \"souls\": { \"coefficient\": 51, \"variable\": \"rung\" }");
-        Assert.NotEqual(TuningJson(), broken); // the substitution really landed
+        Assert.NotEqual(tuning, broken); // the substitution really landed
         var ex = Assert.Throws<MaterialTuningRejection>(() => MaterialTuning.Parse(broken));
         Assert.Contains("D24", ex.Message);
     }
@@ -142,7 +145,7 @@ public class MaterialCorpusTests
     [Fact]
     public void The_salvage_coefficients_reproduce_I9s_four_anchors_on_the_shipped_band_to_rung_map()
     {
-        // The four anchors are not chosen — they are LegacyDemonRarityIds.ForwardMap, the SHIPPED
+        // The four anchors are not chosen — they are LegacyCreatureRarityIds.ForwardMap, the SHIPPED
         // one-way band->rung map. I9 §5.1's four-row table lands on those four rungs value for value.
         var t = Tuning();
         var i9 = new Dictionary<string, (long Substrate, long Essence, long Shard)>(StringComparer.Ordinal)
@@ -155,7 +158,7 @@ public class MaterialCorpusTests
 
         foreach (var (legacyId, expected) in i9)
         {
-            Assert.True(LegacyDemonRarityIds.ForwardMap.TryGetValue(legacyId, out var rung), legacyId);
+            Assert.True(LegacyCreatureRarityIds.ForwardMap.TryGetValue(legacyId, out var rung), legacyId);
             var row = t.Salvage[rung.ToId()];
             Assert.Equal(expected.Substrate, row.SubstrateBase);
             Assert.Equal(expected.Essence, row.EssenceCap);
@@ -326,7 +329,7 @@ public class MaterialCorpusTests
         // `seedsmith.adapters.items.recipegen.migrate_legacy_shards`, run against the real corpus:
         // the seven cost lines naming a RETIRED band shard id (five `elevate` rows plus the two
         // `reroll-all` rows this test's own history already explains, 017/018) were rewritten to
-        // their mapped new-ladder rung, mirroring `LegacyDemonRarityIds.ForwardMap` exactly —
+        // their mapped new-ladder rung, mirroring `LegacyCreatureRarityIds.ForwardMap` exactly —
         // common->chaff, rare->cultivated, epic->heirloom, legendary->sunwoven (each legacy band's
         // LOWEST rung, so no player gains value on migration). See `recipes.json`'s own
         // `_meta.amendments` entry `recipegen/legacy-shard-migration-1`. NOT ONE recipe is refused
@@ -455,7 +458,7 @@ public class MaterialCorpusTests
         // ⭐ Defect 3 CLOSED 2026-09-07 by `materials-gen` (item module 3,
         // tools/seedsmith/seedsmith/adapters/items/materialgen): data/seed/items/materials/materials.json
         // grew from 21 to 31 display rows — the ten real `shard.{rung}` ids (material.022-031,
-        // `_meta.amendments[0]`) that DemonRarityLadder actually mints. The four legacy
+        // `_meta.amendments[0]`) that CreatureRarityLadder actually mints. The four legacy
         // `shard.{common,rare,epic,legendary}` rows (material.007-010) are untouched: they still
         // resolve (IsKnown) but stay deliberately non-issuable, exactly as before. Recorded in
         // tasks/item-todo.md P4.1; measured here so it cannot quietly change size again.

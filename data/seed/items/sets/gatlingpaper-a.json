@@ -25,7 +25,7 @@
       "id": "set.gatlingpaper-a-001",
       "nameKey": "set.midnight-scholar-s-volley",
       "name": "Midnight Scholar's Volley",
-      "themeKey": "demon.gatlingpaper_a",
+      "themeKey": "creature.gatlingpaper_a",
       "members": [
         {
           "role": "armament-primary",

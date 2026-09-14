@@ -25,7 +25,7 @@
       "id": "set.armoredimpzombie-001",
       "nameKey": "set.scrap-built-husk",
       "name": "Scrap-Built Husk",
-      "themeKey": "demon.armoredimpzombie",
+      "themeKey": "creature.armoredimpzombie",
       "members": [
         {
           "role": "armament-primary",

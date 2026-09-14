@@ -5,10 +5,11 @@ using FusionRpg.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
+using FusionRpg.Data.Sqlite;
 
 namespace FusionRpg.Server.Tests;
 
@@ -18,7 +19,7 @@ namespace FusionRpg.Server.Tests;
 /// </summary>
 public class WorldCalendarProjectionTests : IAsyncLifetime
 {
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
@@ -29,10 +30,8 @@ public class WorldCalendarProjectionTests : IAsyncLifetime
     {
         ConfigureWorldTuningOnce();
 
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-w15-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         var port = GetFreeTcpPort();
         var baseUrl = $"http://127.0.0.1:{port}";
@@ -63,14 +62,12 @@ public class WorldCalendarProjectionTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        SqliteConnection.ClearAllPools();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     void SetCurrentTurn(int turn)
     {
-        using var db = new SqliteConnection($"Data Source={_store.HotPath}");
-        db.Open();
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "UPDATE rpg_worlds SET current_turn = $t WHERE world_id = $w;";
         cmd.Parameters.AddWithValue("$t", turn);

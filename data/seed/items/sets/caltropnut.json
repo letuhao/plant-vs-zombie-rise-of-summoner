@@ -25,7 +25,7 @@
       "id": "set.caltropnut-001",
       "nameKey": "set.spiked-nut-carapace",
       "name": "Spiked Nut Carapace",
-      "themeKey": "demon.caltropnut",
+      "themeKey": "creature.caltropnut",
       "members": [
         {
           "role": "core-guard",

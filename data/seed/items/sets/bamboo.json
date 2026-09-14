@@ -25,7 +25,7 @@
       "id": "set.bamboo-001",
       "nameKey": "set.stagnant-barrier",
       "name": "Stagnant Barrier",
-      "themeKey": "demon.bamboo",
+      "themeKey": "creature.bamboo",
       "members": [
         {
           "role": "core-guard",

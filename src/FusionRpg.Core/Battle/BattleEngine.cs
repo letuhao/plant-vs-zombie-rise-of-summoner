@@ -35,7 +35,11 @@ public static partial class BattleEngine
             // to the old `Hp = setup.MaxHp` for all of them. "One hp seat": this IS the actor's HP,
             // never a second value a resource pool could drift out of sync with.
             Hp = setup.CurrentHp ?? setup.MaxHp;
-            Derived = BattleStatComposer.Compose(setup);
+            // battle-hub-fuse T5: ActorHub is the sole compose gate — BattleHubCompose builds the
+            // Hub from setup fields + builder-attached HubInputs and returns the snapshot. The old
+            // BattleStatComposer.Compose path is retired (deleted in T6); pre-delete parity is pinned
+            // by BattleHubComposeParityTests.
+            Derived = BattleHubCompose.Compose(setup);
             // aura-skill T4: a defensive copy, frozen the instant Derived is born — the one stable
             // baseline BattleDerivedModifierLedger.Recompose adds dynamic contributions on top of.
             // `Derived` itself is mutable (Set, used today by the A18e defense live-read path) so it

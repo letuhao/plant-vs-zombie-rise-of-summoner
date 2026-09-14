@@ -25,7 +25,7 @@
       "id": "set.dolphinpaper-001",
       "nameKey": "set.dolphin-s-medical-tide",
       "name": "Dolphin's Medical Tide",
-      "themeKey": "demon.dolphinpaper",
+      "themeKey": "creature.dolphinpaper",
       "members": [
         {
           "role": "armament-primary",

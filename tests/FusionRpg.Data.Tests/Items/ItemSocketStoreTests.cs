@@ -10,22 +10,21 @@ namespace FusionRpg.Data.Tests.Items;
 /// spec-sockets.md §5.2 / D2 §6 — <c>item_socket</c> is the SSOT, and the recipe tables are a
 /// multiset (D41). Against a real SQLite store, not a mock.
 /// </summary>
+[Trait("VerificationId", "data.item-socket")]
 public class ItemSocketStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ItemSocketStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-sockets-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     /// <summary>

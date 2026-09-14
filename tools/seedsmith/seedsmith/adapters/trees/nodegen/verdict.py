@@ -116,12 +116,12 @@ def missing_thresholds_report(targets: PassiveTreeTargets) -> "list[str]":
 # What §7.1 actually promotes to "exactly one" is a DIFFERENT thing with a similar name: of every
 # metric REGISTERED under one family in `metrics.registry.MetricRegistry` (`metrics/registry.py`),
 # exactly one may carry `gates=True` — "every other gate starts False and is promoted... as a
-# deliberate, later, separate act." `DemonRoster/UnresolvedCount` is the one place this already
-# holds in the shipped registry today (`metrics/demon_roster.py:369`); `PassiveTree/UnresolvedCount`
+# deliberate, later, separate act." `CreatureRoster/UnresolvedCount` is the one place this already
+# holds in the shipped registry today (`metrics/creature_roster.py:369`); `PassiveTree/UnresolvedCount`
 # is the metric H4 (not yet built) promotes the same way — this module cannot make that literally
 # true in the registry ahead of H4 without doing H4's own job, so what it ships instead is the
 # INVARIANT itself, enforced against whatever registry a caller hands it, proven here against
-# today's real `DemonRoster` (already exactly one) and against a synthetic fixture standing in for
+# today's real `CreatureRoster` (already exactly one) and against a synthetic fixture standing in for
 # PassiveTree's own end state (`test_nodegen_verdict.py`'s own test for this function).
 # ---------------------------------------------------------------------------------------------
 

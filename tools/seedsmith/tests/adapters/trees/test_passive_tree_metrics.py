@@ -928,7 +928,7 @@ class HiddenFileCountMetricTests(unittest.TestCase):
 
     def test_a_canary_parked_entry_in_an_underscore_file_is_found(self) -> None:
         """The todo's own named proof: a fixture root with one `_`-prefixed file is found — this
-        metric does NOT skip `_`-prefixed entries the way `DemonQualityReport` does."""
+        metric does NOT skip `_`-prefixed entries the way `CreatureQualityReport` does."""
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / "zombie").mkdir()

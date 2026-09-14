@@ -13,7 +13,7 @@
 
 1. Fielding uses existing `enterSpawnTargeting` + ghost on cell. This module is **honest chrome**,
    not a new sim.
-2. Rows are **unique demons** legal to deploy this match — not expedition-locked, not already Bound.
+2. Rows are **unique creatures** legal to deploy this match — not expedition-locked, not already Bound.
 3. **Forbidden:** numeric `typeId` field on the player tray; side toggle plant/zombie (specimen has
    a side); debug general inject on the player tray (GG-40 — stays developer tree).
 4. Ack immediately on confirm (GG-15); occupant appears on observe fold; reject → toast + ghost clear

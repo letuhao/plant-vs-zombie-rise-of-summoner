@@ -1181,7 +1181,7 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
   - Dependencies: L40.
 
 - [x] **L42: Wardens** ✅ 2026-08-23 — `BindAsWarden` (`RpgStore.Contracts.cs`) mirrors `BindContract`'s
-  capacity check and upkeep fee exactly, adding one new `warden` column (`rpg_demon_contracts`,
+  capacity check and upkeep fee exactly, adding one new `warden` column (`rpg_creature_contracts`,
   `EnsureColumn`) flagged permanent; `ReleaseContract` now refuses any warden-flagged row
   unconditionally (`contract.warden-permanent`), checked before every other release blocker.
   `LoamForecast.Weakest` excludes warded sectors from fade candidacy entirely (not merely
@@ -1469,13 +1469,13 @@ real chain; L44, L45, L46, L50 have no technical dependency on one another).
   - Description: a "Bind Warden" button in the Sector inspector (next to Sustain/Build), enabled when
     the player owns the sector and it has no `wardenBindingId`. Opens a band-3 confirm dialog (GG-22 —
     destructive/irreversible actions confirm and name exactly what is lost) listing the player's
-    eligible demons (bound, not already a warden — reusing `useContracts`'s existing data,
-    `contracts.ts:38`), stating plainly *"binds {demon} to {sector} permanently — it can never be
+    eligible creatures (bound, not already a warden — reusing `useContracts`'s existing data,
+    `contracts.ts:38`), stating plainly *"binds {creature} to {sector} permanently — it can never be
     released, fielded, or fused again."* **Owner decision**: if the player's Souls balance is below
     the bind fee, the dialog shows a second, explicit low-balance confirmation step before the action
     fires — not merely a disabled button. `useBindAsWarden()` mirrors `useBindContract()`'s shape
     (`contracts.ts:59-61`) exactly.
-  - Acceptance: the dialog names the exact demon and sector before firing; the low-Souls case shows
+  - Acceptance: the dialog names the exact creature and sector before firing; the low-Souls case shows
     its own second confirmation step, asserted as a distinct test from the ordinary-affordability path;
     a successful bind updates both the contracts view and the world view (`onSuccess` invalidates both
     query keys, mirroring `useContractMutation`'s existing invalidation list at `contracts.ts:51-55`
@@ -1529,7 +1529,7 @@ Suggested commit message:
 >
 > Closes out loam-texture (L38-L43) and Checkpoint 10, the program's post-gate slice. The Unmade
 > spawn onto neglected, barren, Lost ground once a map has a Wild faction (two-hearths now does).
-> Wardens let a bound demon permanently exempt one sector from FadePolicy, at the cost of a
+> Wardens let a bound creature permanently exempt one sector from FadePolicy, at the cost of a
 > non-releasable contract slot; LoamForecast/LoamPhases exclude warded sectors from fade candidacy
 > and a fully-warded, unpayable component now reports its shortfall instead of crashing. Prospecting
 > adds a dowser stance that reveals loam-source ground beyond ordinary scouting, as a pure intel

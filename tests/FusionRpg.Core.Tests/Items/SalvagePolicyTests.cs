@@ -104,7 +104,7 @@ public class SalvagePolicyTests
     {
         // I9 §7.5 example 2: a level-60 EPIC humanoid chest, 5 drawn affixes of which 3 carry a
         // concrete element (2 fire, 1 dark), enhancement +7. `epic` maps to `heirloom` (rung 6)
-        // through the shipped LegacyDemonRarityIds.ForwardMap, so the re-derived ten-rung table must
+        // through the shipped LegacyCreatureRarityIds.ForwardMap, so the re-derived ten-rung table must
         // reproduce the example's arithmetic line for line.
         var lines = SalvagePolicy.Yield(
             Item(6, level: 60, frame: "humanoid", affixes: 5,

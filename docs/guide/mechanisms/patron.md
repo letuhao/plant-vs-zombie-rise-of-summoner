@@ -1,4 +1,4 @@
-﻿# Patron demon
+﻿# Patron creature
 
 **Status:** WIP  
 **Loop:** Summon and fusion — see [The loops](../the-loops.md)  
@@ -9,7 +9,7 @@
 
 ## In one sentence
 
-**WIP:** name one demon your **patron** so its element colours the army — switching costs souls.
+**WIP:** name one creature your **patron** so its element colours the army — switching costs souls.
 
 ---
 
@@ -33,7 +33,7 @@ These words get guessed wrong. Read them once before the rest of the page.
 
 ## What it will be
 
-Pick one demon from the roster as patron.
+Pick one creature from the roster as patron.
 
 Its element becomes the army’s tint; changing that choice costs souls.
 

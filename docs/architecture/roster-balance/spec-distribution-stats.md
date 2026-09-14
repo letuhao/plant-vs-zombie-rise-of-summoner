@@ -1,7 +1,7 @@
-> ⛔ **SUPERSEDED 2026-09-06.** This module (RB1) targeted the demon-species roster on a
+> ⛔ **SUPERSEDED 2026-09-06.** This module (RB1) targeted the creature-species roster on a
 > causal theory that did not survive tracing the real code: species characteristics never
 > reach the action-corpus's atom-family pool (see `roster-balance-map.md` §0 for the full
-> correction). The real bug lives in the 98 atom/affix families' USAGE, not in demon
+> correction). The real bug lives in the 98 atom/affix families' USAGE, not in creature
 > species data, which measures healthy on its own axes. **This module was never built.**
 > Superseded by `spec-usage-stats.md` (FC1) and `spec-usage-direction.md` (FC3). Kept
 > for the record — the reasoning inside is not wrong on its own terms, it was aimed at the
@@ -33,7 +33,7 @@ species count, family count, axis list or cell count is a defect in this module,
 
 ### What it reads
 
-`data/seed/demons/species/**/*.json` (excluding `_index.json`), each file a JSON array of species
+`data/seed/creatures/species/**/*.json` (excluding `_index.json`), each file a JSON array of species
 rows. The nine characteristic axes present today are discovered, not declared:
 
 `aptitudePrimary` · `aptitudeSecondary` · `posture` · `elementPrimary` · `elementSecondary` ·
@@ -76,11 +76,11 @@ the tunable that names it.
 It **detects and names**, never edits:
 
 - **Illegitimate axis values.** `posture: "unresolved"` on 12 rows today. `unresolved` is a vote
-  outcome, not a characteristic; its producer is `demon-seed`'s classification pipeline, which owns
+  outcome, not a characteristic; its producer is `creature-seed`'s classification pipeline, which owns
   the fix. Reported as a distinct defect class, never silently folded into the counts.
 - **Degenerate axes.** `elementSecondary` is 97.4% `none` (evenness 0.105) — an axis carrying almost
   no information. Whether that means "under-authored" or "should not be an axis" is a design call for
-  `demon-seed`; this module states the number and stops.
+  `creature-seed`; this module states the number and stops.
 
 ## Commands
 
@@ -137,7 +137,7 @@ key; report illegitimate values as a distinct class.
 **Ask first:** adding an axis to the *default* coverage grid — that changes what "balanced" costs and
 belongs in RB2's tunable, not here.
 
-**Never:** write to `data/seed/demons/species/**`; hard-code a species, family, axis or cell count;
+**Never:** write to `data/seed/creatures/species/**`; hard-code a species, family, axis or cell count;
 call a model; silently drop an illegitimate value (it must be reported, and it must not pollute the
 real counts).
 

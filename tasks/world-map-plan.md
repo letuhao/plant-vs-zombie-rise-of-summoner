@@ -102,7 +102,7 @@ High-risk work is deliberately early: determinism and the turn transaction land 
 1. **Guard wave ids: validated or opaque in wave 1?** Opaque strings are cheaper now and let the combat stream define the catalog; validation is a one-line change when it does.
 2. **Report hot-tail depth** (proposed 50) — a guess until a real campaign measures replay cost.
 3. **Homeworld loss consequences** (ideal §10.5) — the menu now includes **partial capture** across the homeworld's four sites and **a per-world difficulty setting**; still the owner's tone call, still not blocking this wave.
-4. **The commander slot before heroes exist** — candidate: reuse the shipped **patron** demon rather than inventing a second concept. Ideal-level, not wave-1.
+4. **The commander slot before heroes exist** — candidate: reuse the shipped **patron** creature rather than inventing a second concept. Ideal-level, not wave-1.
 
 
 ---

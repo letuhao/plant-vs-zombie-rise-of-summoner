@@ -25,7 +25,7 @@
       "id": "set.kelpmine-land-001",
       "nameKey": "set.tangled-mine",
       "name": "Tangled Mine",
-      "themeKey": "demon.kelpmine_land",
+      "themeKey": "creature.kelpmine_land",
       "members": [
         {
           "role": "core-guard",

@@ -25,7 +25,7 @@
       "id": "set.redzombieloonnut-001",
       "nameKey": "set.the-heavy-roll",
       "name": "The Heavy Roll",
-      "themeKey": "demon.redzombieloonnut",
+      "themeKey": "creature.redzombieloonnut",
       "members": [
         {
           "role": "armament-primary",

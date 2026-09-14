@@ -55,7 +55,7 @@ It is the ledger of your summoner story — not a wiki of species art.
 |---|---|
 | Summoner | Your account level and XP |
 | Plant / zombie types | Per-type levels from play |
-| Specimens | Individual demons from work they did — lawn, expedition, battle |
+| Specimens | Individual creatures from work they did — lawn, expedition, battle |
 
 ---
 

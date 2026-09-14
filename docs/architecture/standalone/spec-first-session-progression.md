@@ -1,7 +1,7 @@
 # Spec: first-session progression reveals
 
 **Module id:** `first-session-progression` · **Program:** [../standalone-rpg-map.md](../standalone-rpg-map.md)  
-**Depends on:** `match-source-core`, `demon-progression-source`, `species-xp`, `commander-sheet-role`, item ownership/equip  
+**Depends on:** `match-source-core`, `creature-progression-source`, `species-xp`, `commander-sheet-role`, item ownership/equip  
 **Status:** implemented in code; simulator acceptance is green and live deploy smoke is operational
 
 ## Purpose
@@ -9,7 +9,7 @@
 Teach the first three durable facts without creating a second progression system:
 
 1. a resolved lawn victory pays Souls and reveals Crazy Dave's commander sheet;
-2. after player level 3, a qualifying general demon run shows empire species XP and automatic primary-stat allocation;
+2. after player level 3, a qualifying general creature run shows empire species XP and automatic primary-stat allocation;
 3. after player level 4, Dave receives one real basic equipment reward.
 
 The feature is one authored sequence over the existing lawn-first loop. It does not add a summon,
@@ -83,9 +83,9 @@ checkpoint or item. A UI `claim` mutation only changes `claimed_utc` after verif
 ## Source and progression boundaries
 
 The level-3 encounter is valid only when the activity fact carries a parseable
-`demon.progression.v1:general:<speciesId>` claim. The source grammar and fail-closed rules are
-defined in [spec-progression-source-contract.md](../demons/spec-progression-source-contract.md).
-The species row is the per-player/per-species empire fallback, not an individual demon unlock.
+`creature.progression.v1:general:<speciesId>` claim. The source grammar and fail-closed rules are
+defined in [spec-progression-source-contract.md](../creatures/spec-progression-source-contract.md).
+The species row is the per-player/per-species empire fallback, not an individual creature unlock.
 
 - General spawn → `EmpireGeneral`; receives the empire species progression.
 - Unique specimen spawn → `UniqueSpecimen`; receives specimen progression only.
@@ -174,14 +174,14 @@ and level-3 checkpoints without depending on a PVZ window; the focused Data harn
 item transaction and replay. A real victory window remains optional smoke coverage rather than a release
 gate.
 The 2026-09-09 live probe also observed ordinary zombie spawns carrying the typed
-`demon.progression.v1` / `general:normalzombie` source claim, followed by the scenario completion and
+`creature.progression.v1` / `general:normalzombie` source claim, followed by the scenario completion and
 board snapshot events.
 Existing BattleEngine death attribution is orthogonal: it supports
 unique specimen lawn XP and must not be used as a substitute for general-source onboarding evidence.
 
 ## Design-gate checklist
 
-- [x] Subsystems identified: player bootstrap, activity/progression, demon source selection, commander
+- [x] Subsystems identified: player bootstrap, activity/progression, creature source selection, commander
       sheet/item ownership, and stage UI.
 - [x] Required architecture, product-guide, and UI documents were read this session; decisions were
       checked before writing this spec.

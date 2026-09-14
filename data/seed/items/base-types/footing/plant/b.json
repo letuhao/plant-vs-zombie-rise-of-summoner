@@ -67,7 +67,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -141,7 +141,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -215,7 +215,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -289,7 +289,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -363,7 +363,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -437,7 +437,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.vitality",
         "powerBand": "medium"
       },
       "socketMax": 2,

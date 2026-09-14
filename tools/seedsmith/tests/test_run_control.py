@@ -1,4 +1,4 @@
-"""Tests for `run-control` (spec-run-control.md, demon-seed module 9)."""
+"""Tests for `run-control` (spec-run-control.md, creature-seed module 9)."""
 from __future__ import annotations
 
 import json
@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from seedsmith.adapters.demons.run.machine import IllegalTransition, can, is_terminal, transition
-from seedsmith.adapters.demons.run.record import (
+from seedsmith.adapters.creatures.run.machine import IllegalTransition, can, is_terminal, transition
+from seedsmith.adapters.creatures.run.record import (
     RunRecord,
     can_overwrite_all,
     can_resume,
@@ -19,7 +19,7 @@ from seedsmith.adapters.demons.run.record import (
     read_record,
     write_record,
 )
-from seedsmith.adapters.demons.run.selectors import UnknownSelectorKind, resolve_selector
+from seedsmith.adapters.creatures.run.selectors import UnknownSelectorKind, resolve_selector
 
 DUMP_SPECIES = [
     {"speciesId": "peashooter", "side": "plant"},

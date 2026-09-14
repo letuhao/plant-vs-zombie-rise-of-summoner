@@ -33,7 +33,7 @@ These words get guessed wrong. Read them once before the rest of the page.
 
 ## What it is
 
-A pact is not free forever. Tribute is the recurring cost of keeping that demon under contract.
+A pact is not free forever. Tribute is the recurring cost of keeping that creature under contract.
 
 When tribute is overdue, renegotiation waits until you pay what you owe.
 
@@ -42,7 +42,7 @@ When tribute is overdue, renegotiation waits until you pay what you owe.
 ## How you use it
 
 1. Open Pacts and read each contract’s tribute ask.
-2. Pay when due if you still need that demon in the field.
+2. Pay when due if you still need that creature in the field.
 3. If you are overdue, clear the debt before you expect friendly renegotiation.
 
 ---
@@ -57,7 +57,7 @@ It is not essence — fusion materials are a different stock.
 
 ## What you do (first time)
 
-1. With a demon on a pact, open Pacts (`P`).
+1. With a creature on a pact, open Pacts (`P`).
 2. Find the tribute line and the due state.
 3. Pay once when asked and confirm the overdue warning clears.
 
@@ -73,7 +73,7 @@ Do not. Overdue tribute is its own problem — leverage stays until paid.
 **Does tribute spend essence?**  
 No. Plan around souls (and whatever the pact UI shows).
 
-**If I release the demon, do I still owe?**  
+**If I release the creature, do I still owe?**  
 Leaving a contract is a pact decision — clear dues the UI still shows before you assume you are free.
 
 **Is this a real-money shop?**  

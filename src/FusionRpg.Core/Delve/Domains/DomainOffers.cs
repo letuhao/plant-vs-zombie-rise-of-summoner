@@ -22,7 +22,7 @@ public sealed record DomainProgressFact(string DomainId, IReadOnlyList<DomainCle
 /// parameters `RungOffer.For` itself already demands, none of which a domain-progress projection can
 /// fabricate. <see cref="RungLabelFor"/> and <see cref="BossDisplayNameFor"/> have no source anywhere
 /// in the codebase today (confirmed: `DifficultyRungDef` carries only `RungId`/`Ordinal`, no display
-/// name; no almanac keyed by a demon species id exists, only PVZ's own `(side, type_id)`-keyed
+/// name; no almanac keyed by a creature species id exists, only PVZ's own `(side, type_id)`-keyed
 /// `type_almanac`). <see cref="ProvisionableFor"/> is `delve-stage`'s own not-yet-specified pricing
 /// (spec-delve-stage.md §18 ask 6, filed 2026-09-05 against this DTO after the original spec, Phase 5
 /// entirely unbuilt).

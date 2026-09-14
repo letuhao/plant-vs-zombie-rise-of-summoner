@@ -25,7 +25,7 @@
       "id": "set.bamboodragon-001",
       "nameKey": "set.bamboo-hellfire-husk",
       "name": "Bamboo Hellfire Husk",
-      "themeKey": "demon.bamboodragon",
+      "themeKey": "creature.bamboodragon",
       "members": [
         {
           "role": "armament-primary",

@@ -88,9 +88,10 @@ public class AffixFiltersTests
         // `AffixFilters.RuntimeAllows` is "anything but None" (AffixFilters.cs), and the Sim cell moved
         // to `RuntimeState.Partial` once ActorDerivedLookup's contribution fold gave it a real (if
         // partial -- Flat/Increased only, see EffectOfflineKitTests.
-        // The_four_derived_ops_decide_Full_versus_Partial) consumer. So this is now legal content, not
-        // a refusal -- an affix author may name `stat.derived` for a Sim target, and it will compose
-        // correctly as long as it sticks to Flat/Increased.
+        // The_four_derived_ops_decide_Full_versus_Partial) consumer, then to `RuntimeState.Full`
+        // (sim-hub-parity, T15, 2026-09-13) once the fold became op-aware. So this is now legal
+        // content, not a refusal -- an affix author may name `stat.derived` for a Sim target and every
+        // op composes correctly, not just Flat/Increased.
         Assert.True(AffixFilters.RuntimeAllows("stat.derived", RuntimeId.Sim));
     }
 

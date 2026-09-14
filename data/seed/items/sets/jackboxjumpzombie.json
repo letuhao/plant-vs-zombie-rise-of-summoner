@@ -25,7 +25,7 @@
       "id": "set.jackboxjumpzombie-001",
       "nameKey": "set.the-jester-s-jest",
       "name": "The Jester's Jest",
-      "themeKey": "demon.jackboxjumpzombie",
+      "themeKey": "creature.jackboxjumpzombie",
       "members": [
         {
           "role": "armament-primary",

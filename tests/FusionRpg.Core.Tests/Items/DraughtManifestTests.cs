@@ -1,5 +1,6 @@
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Expeditions;
 using FusionRpg.Core.Items.Consumables;
 using FusionRpg.Core.Stats.Derived;
 using Xunit;
@@ -199,83 +200,68 @@ public class DraughtManifestTests
         Assert.Equal(1, cat.Count);
     }
 
-    // ---- the projection ---------------------------------------------------------------------------------
-
-    static BattleActorSetup Member(string key) => new()
-    {
-        Key = key, Side = "squad", SpeciesId = "demon.test", Level = 10, MaxHp = 1000, Atk = 100,
-    };
+    // ---- the projection (Hub twin; the BattleChannelMod append is deleted in T6) --------
 
     [Fact]
     public void A_draught_is_ApplyInjuries_with_the_opposite_sign_and_reaches_every_squad_member()
     {
-        var squad = new[] { Member("squad:0"), Member("squad:1"), Member("squad:2") };
-        var after = DraughtProjection.Apply(squad, new[]
+        // battle-hub-fuse T6: the BattleChannelMod append is deleted; the twin carries the same
+        // manifest 1:1 (per-member fan-out lives in DraughtSubsystem, pinned by
+        // ChannelModsHubParityTests). Same assertions, new road.
+        var twin = DraughtProjection.ToDerivedModifiers(new[]
         {
             new DraughtMod("consumable.k2-004", DerivedStatChannels.CombatPowerOmni, 120L),
         });
 
-        Assert.Equal(3, after.Count);
-        foreach (var m in after)
-        {
-            var mod = Assert.Single(m.ChannelMods);
-            Assert.Equal(DerivedStatChannels.CombatPowerOmni, mod.ChannelId);
-            Assert.Equal(120L, mod.Amount);
-        }
-
-        // pure: the inputs are untouched, exactly as ApplyInjuries behaves
-        Assert.All(squad, m => Assert.Empty(m.ChannelMods));
+        var mod = Assert.Single(twin);
+        Assert.Equal(DerivedStatChannels.CombatPowerOmni, mod.ChannelId);
+        Assert.Equal(120L, checked((long)mod.Value));
+        Assert.Equal(DerivedModifierOp.Flat, mod.Op);
     }
 
     [Fact]
     public void The_projection_appends_rather_than_replacing_so_injuries_and_draughts_coexist()
     {
-        var injured = Member("squad:0") with
-        {
-            ChannelMods = new[] { new BattleChannelMod(DerivedStatChannels.CombatPowerOmni, -25L) },
-        };
-
-        var after = DraughtProjection.Apply(new[] { injured }, new[]
+        var draughts = DraughtProjection.ToDerivedModifiers(new[]
         {
             new DraughtMod("consumable.k2-001", DerivedStatChannels.CombatPowerOmni, 120L),
         });
+        var injuries = ExpeditionResolver.InjuryDerivedModifiers("squad:0", 1, atk: 100);
 
-        Assert.Equal(new[] { -25L, 120L }, after[0].ChannelMods.Select(m => m.Amount).ToArray());
+        // Both halves emit omni mods that sum — neither replaces the other.
+        Assert.Equal(new[] { 120L, -25L },
+            draughts.Concat(injuries).Select(m => checked((long)m.Value)).ToArray());
     }
 
     [Fact]
-    public void An_empty_manifest_returns_the_squad_unchanged_by_reference()
+    public void An_empty_manifest_returns_no_contributions()
     {
-        var squad = new[] { Member("squad:0") };
-        Assert.Same(squad, DraughtProjection.Apply(squad, Array.Empty<DraughtMod>()));
+        Assert.Empty(DraughtProjection.ToDerivedModifiers(Array.Empty<DraughtMod>()));
     }
 
     [Fact]
     public void A_non_positive_draught_throws_rather_than_being_clamped_to_nothing()
     {
-        var squad = new[] { Member("squad:0") };
         foreach (var amount in new[] { 0L, -50L })
-            Assert.Throws<ArgumentOutOfRangeException>(() => DraughtProjection.Apply(
-                squad, new[] { new DraughtMod("consumable.k2-001", DerivedStatChannels.CombatPowerOmni, amount) }));
+            Assert.Throws<ArgumentOutOfRangeException>(() => DraughtProjection.ToDerivedModifiers(
+                new[] { new DraughtMod("consumable.k2-001", DerivedStatChannels.CombatPowerOmni, amount) }));
     }
 
     [Fact]
     public void The_projection_carries_a_long_past_the_int_ceiling_without_narrowing()
     {
-        var squad = new[] { Member("squad:0") };
         const long huge = 3_000_000_000L;   // past int.MaxValue
-        var after = DraughtProjection.Apply(squad, new[]
+        var twin = DraughtProjection.ToDerivedModifiers(new[]
         {
             new DraughtMod("consumable.k2-001", DerivedStatChannels.CombatPowerOmni, huge),
         });
-        Assert.Equal(huge, after[0].ChannelMods[0].Amount);
+        Assert.Equal(huge, checked((long)Assert.Single(twin).Value));
     }
 
     [Fact]
     public void A_draught_naming_no_channel_is_refused()
     {
-        var squad = new[] { Member("squad:0") };
-        Assert.Throws<ArgumentException>(() => DraughtProjection.Apply(
-            squad, new[] { new DraughtMod("consumable.k2-001", "", 10L) }));
+        Assert.Throws<ArgumentException>(() => DraughtProjection.ToDerivedModifiers(
+            new[] { new DraughtMod("consumable.k2-001", "", 10L) }));
     }
 }

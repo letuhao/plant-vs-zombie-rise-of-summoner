@@ -25,7 +25,7 @@
       "id": "set.peapuff-001",
       "nameKey": "set.peashooter-spore",
       "name": "Peashooter Spore",
-      "themeKey": "demon.peapuff",
+      "themeKey": "creature.peapuff",
       "members": [
         {
           "role": "armament-primary",

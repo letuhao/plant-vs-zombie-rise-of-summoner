@@ -25,7 +25,7 @@
       "id": "set.thronsaloes-001",
       "nameKey": "set.snow-thorn-volley",
       "name": "Snow-Thorn Volley",
-      "themeKey": "demon.thronsaloes",
+      "themeKey": "creature.thronsaloes",
       "members": [
         {
           "role": "armament-primary",

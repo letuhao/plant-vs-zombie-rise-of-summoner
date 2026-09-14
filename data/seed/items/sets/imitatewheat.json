@@ -25,7 +25,7 @@
       "id": "set.imitatewheat-001",
       "nameKey": "set.mimicry-s-pulse",
       "name": "Mimicry's Pulse",
-      "themeKey": "demon.imitatewheat",
+      "themeKey": "creature.imitatewheat",
       "members": [
         {
           "role": "armament-primary",

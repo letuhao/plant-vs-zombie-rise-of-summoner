@@ -12,7 +12,7 @@ namespace FusionRpg.Core.Tests.Actions;
 /// <para><c>EligibilityAxisTests</c> already proves the <b>mechanism</b> thoroughly, but every one of
 /// its scope cases is a synthetic row. Nothing read the <b>shipped, committed</b> content, so a
 /// `family`/`species` row whose `scopeKey` had gone stale — the exact risk S5 was parked on while the
-/// demon corpus was being re-classified — would have resolved to nothing, silently, and no test would
+/// creature corpus was being re-classified — would have resolved to nothing, silently, and no test would
 /// have said a word.</para>
 ///
 /// <para>This file closes S5's two acceptance clauses against the real files:
@@ -55,9 +55,26 @@ public class AuthoredEligibilityResolvesTests
         return rows;
     }
 
-    static IReadOnlyDictionary<string, string> RealFamilyMap() =>
+    static IReadOnlyDictionary<string, IReadOnlyList<string>> RealFamilyMap() =>
         FamilyMap.Parse(File.ReadAllText(Path.Combine(
             RepoRoot(), "data", "seed", "actions", "_generated", "family-map.json")));
+
+    /// <summary>The family ids a `family`-scoped row may name: the live map's values UNION the
+    /// `families.v1.json` compatibility registry, matching `vocab.py:load_family_map_keys` exactly.
+    /// The registry keeps previously committed rows loadable while the live roster's family vocabulary
+    /// evolves — a scoped row naming a registry family is shipped and intentional, not dangling.</summary>
+    static HashSet<string> LoadableFamilyIds()
+    {
+        var families = RealFamilyMap().Values.SelectMany(v => v).ToList();
+        var registryPath = Path.Combine(RepoRoot(), "data", "seed", "creatures", "_registry", "families.v1.json");
+        if (File.Exists(registryPath))
+        {
+            using var doc = JsonDocument.Parse(File.ReadAllText(registryPath));
+            if (doc.RootElement.TryGetProperty("families", out var reg) && reg.ValueKind == JsonValueKind.Object)
+                foreach (var p in reg.EnumerateObject()) families.Add(p.Name);
+        }
+        return families.ToHashSet(StringComparer.Ordinal);
+    }
 
     static ActionRow Row(Authored a) => new()
     {
@@ -75,7 +92,7 @@ public class AuthoredEligibilityResolvesTests
     /// ⭐ **S5 clause 1 — every authored scope key names something that exists.**
     ///
     /// <para>A `family` row's key must be a family the map actually assigns, and a `species` row's key
-    /// must be a species the demon catalog actually ships. A dangling key is not a crash: the row
+    /// must be a species the creature catalog actually ships. A dangling key is not a crash: the row
     /// simply never joins any candidate set, so the action is authored, shipped, and unreachable.
     /// That is the failure this asserts against, and it is invisible without a check like this.</para>
     /// </summary>
@@ -83,9 +100,9 @@ public class AuthoredEligibilityResolvesTests
     public void Every_authored_scope_key_resolves_against_the_shipped_content()
     {
         var rows = AuthoredRows();
-        var families = RealFamilyMap().Values.ToHashSet(StringComparer.Ordinal);
+        var families = LoadableFamilyIds();
 
-        var indexPath = Path.Combine(RepoRoot(), "data", "seed", "demons", "species", "_index.json");
+        var indexPath = Path.Combine(RepoRoot(), "data", "seed", "creatures", "species", "_index.json");
         var species = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(indexPath))!
             .Keys.Select(k => k.ToLowerInvariant())
             .ToHashSet(StringComparer.Ordinal);
@@ -106,7 +123,7 @@ public class AuthoredEligibilityResolvesTests
                 case "species":
                     speciesRows++;
                     if (r.ScopeKey is null || !species.Contains(r.ScopeKey))
-                        dangling.Add($"{r.Id}: species '{r.ScopeKey}' is not in the demon catalog");
+                        dangling.Add($"{r.Id}: species '{r.ScopeKey}' is not in the creature catalog");
                     break;
             }
         }
@@ -153,11 +170,11 @@ public class AuthoredEligibilityResolvesTests
                                   .Select(r => r.ScopeKey!)
                                   .ToHashSet(StringComparer.Ordinal);
 
-        var pair = map.FirstOrDefault(kv => authoredFamilies.Contains(kv.Value));
+        var pair = map.FirstOrDefault(kv => kv.Value.Any(authoredFamilies.Contains));
         Assert.False(pair.Key is null,
             "no mapped species belongs to any family that has an authored action — family scope is shipped but unreachable");
 
         var candidates = ActionEligibility.Candidates(all, pair.Key, map);
-        Assert.Contains(candidates, c => c.Scope == EligibilityScope.Family && c.ScopeKey == pair.Value);
+        Assert.Contains(candidates, c => c.Scope == EligibilityScope.Family && authoredFamilies.Contains(c.ScopeKey!));
     }
 }

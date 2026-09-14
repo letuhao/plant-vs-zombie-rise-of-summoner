@@ -25,7 +25,7 @@
       "id": "set.icepeach-001",
       "nameKey": "set.frostbloom-linkage",
       "name": "Frostbloom Linkage",
-      "themeKey": "demon.icepeach",
+      "themeKey": "creature.icepeach",
       "members": [
         {
           "role": "armament-primary",

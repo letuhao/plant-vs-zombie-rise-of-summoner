@@ -25,7 +25,7 @@
       "id": "set.supercherryshooterzombie-001",
       "nameKey": "set.cherry-shooter-s-aim",
       "name": "Cherry Shooter's Aim",
-      "themeKey": "demon.supercherryshooterzombie",
+      "themeKey": "creature.supercherryshooterzombie",
       "members": [
         {
           "role": "armament-primary",

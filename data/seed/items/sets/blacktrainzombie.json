@@ -25,7 +25,7 @@
       "id": "set.blacktrainzombie-001",
       "nameKey": "set.frozen-zombie-carriage",
       "name": "Frozen Zombie Carriage",
-      "themeKey": "demon.blacktrainzombie",
+      "themeKey": "creature.blacktrainzombie",
       "members": [
         {
           "role": "armament-primary",

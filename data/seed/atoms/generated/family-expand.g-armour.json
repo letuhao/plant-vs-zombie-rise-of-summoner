@@ -103,6 +103,216 @@
       }
     },
     {
+      "family": "atom.arm-op",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Offhand Reinforcement T1",
+      "params": {
+        "channel": "arm2Max",
+        "op": "more",
+        "amount": {
+          "min": 23,
+          "max": 45,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "sturdy": "1",
+        "metal": "1"
+      }
+    },
+    {
+      "family": "atom.arm-op",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Offhand Reinforcement T2",
+      "params": {
+        "channel": "arm2Max",
+        "op": "more",
+        "amount": {
+          "min": 40,
+          "max": 80,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "sturdy": "1",
+        "metal": "1"
+      }
+    },
+    {
+      "family": "atom.arm-op",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Offhand Reinforcement T3",
+      "params": {
+        "channel": "arm2Max",
+        "op": "more",
+        "amount": {
+          "min": 70,
+          "max": 140,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "sturdy": "1",
+        "metal": "1"
+      }
+    },
+    {
+      "family": "atom.arm-op",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Offhand Reinforcement T4",
+      "params": {
+        "channel": "arm2Max",
+        "op": "more",
+        "amount": {
+          "min": 123,
+          "max": 245,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "sturdy": "1",
+        "metal": "1"
+      }
+    },
+    {
+      "family": "atom.arm-op",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Offhand Reinforcement T5",
+      "params": {
+        "channel": "arm2Max",
+        "op": "more",
+        "amount": {
+          "min": 216,
+          "max": 428,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "sturdy": "1",
+        "metal": "1"
+      }
+    },
+    {
+      "family": "atom.arm-plate",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Plate Reinforcement T1",
+      "params": {
+        "channel": "arm1Max",
+        "op": "more",
+        "amount": {
+          "min": 23,
+          "max": 45,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "metal": "1",
+        "sturdy": "1"
+      }
+    },
+    {
+      "family": "atom.arm-plate",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Plate Reinforcement T2",
+      "params": {
+        "channel": "arm1Max",
+        "op": "more",
+        "amount": {
+          "min": 40,
+          "max": 80,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "metal": "1",
+        "sturdy": "1"
+      }
+    },
+    {
+      "family": "atom.arm-plate",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Plate Reinforcement T3",
+      "params": {
+        "channel": "arm1Max",
+        "op": "more",
+        "amount": {
+          "min": 70,
+          "max": 140,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "metal": "1",
+        "sturdy": "1"
+      }
+    },
+    {
+      "family": "atom.arm-plate",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Plate Reinforcement T4",
+      "params": {
+        "channel": "arm1Max",
+        "op": "more",
+        "amount": {
+          "min": 123,
+          "max": 245,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "metal": "1",
+        "sturdy": "1"
+      }
+    },
+    {
+      "family": "atom.arm-plate",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Plate Reinforcement T5",
+      "params": {
+        "channel": "arm1Max",
+        "op": "more",
+        "amount": {
+          "min": 216,
+          "max": 428,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43",
+        "metal": "1",
+        "sturdy": "1"
+      }
+    },
+    {
       "family": "atom.arm-riveting",
       "tier": 1,
       "kind": "stat.modify",

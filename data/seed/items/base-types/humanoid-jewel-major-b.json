@@ -65,7 +65,7 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -136,7 +136,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -242,7 +242,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -446,18 +446,18 @@
     },
     {
       "id": "item.humanoid-neck-b-013",
-      "nameKey": "base.gilded-gorget",
-      "name": "Gilded Gorget",
+      "nameKey": "base-type.gilded-gorget-plate",
+      "name": "Gilded Gorget Plate",
       "frame": "humanoid",
       "role": "jewel-major",
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.gilded-gorget",
+      "iconKey": "icon.base-type.gilded-gorget-plate",
       "flavorKey": "flavor.base.gilded-gorget",
       "flavor": "A rigid, polished collar designed to protect the throat while signaling high status. Its surface is often etched with the lineage of its wearer.",
       "tags": [
@@ -482,18 +482,18 @@
     },
     {
       "id": "item.humanoid-neck-b-014",
-      "nameKey": "base.gilded-gorget",
-      "name": "Gilded Gorget",
+      "nameKey": "base-type.aureate-neck-guard",
+      "name": "Aureate Neck Guard",
       "frame": "humanoid",
       "role": "jewel-major",
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.midas",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.gilded-gorget",
+      "iconKey": "icon.base-type.aureate-neck-guard",
       "flavorKey": "flavor.base.gilded-gorget",
       "flavor": "A rigid, polished collar designed to protect the throat while signaling high status. Its surface is often etched with the lineage of its wearer.",
       "tags": [
@@ -518,18 +518,18 @@
     },
     {
       "id": "item.humanoid-neck-b-015",
-      "nameKey": "base.gilded-gorget",
-      "name": "Gilded Gorget",
+      "nameKey": "base-type.sun-kissed-gorget",
+      "name": "Sun-Kissed Gorget",
       "frame": "humanoid",
       "role": "jewel-major",
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.gilded-gorget",
+      "iconKey": "icon.base-type.sun-kissed-gorget",
       "flavorKey": "flavor.base.gilded-gorget",
       "flavor": "A rigid, polished collar designed to protect the throat while projecting an aura of unyielding authority.",
       "tags": [
@@ -554,18 +554,18 @@
     },
     {
       "id": "item.humanoid-neck-b-016",
-      "nameKey": "base.gilded-gorget",
-      "name": "Gilded Gorget",
+      "nameKey": "base-type.lustrous-neck-guard",
+      "name": "Lustrous Neck-Guard",
       "frame": "humanoid",
       "role": "jewel-major",
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.gilded-gorget",
+      "iconKey": "icon.base-type.lustrous-neck-guard",
       "flavorKey": "flavor.base.gilded-gorget",
       "flavor": "A rigid, polished collar designed to protect the throat while signaling high status. Its heavy construction makes it difficult to remove once fastened.",
       "tags": [
@@ -590,18 +590,18 @@
     },
     {
       "id": "item.humanoid-neck-b-017",
-      "nameKey": "base.gilded-gorget",
-      "name": "Gilded Gorget",
+      "nameKey": "base-type.gilded-neck-guard",
+      "name": "Gilded Neck-Guard",
       "frame": "humanoid",
       "role": "jewel-major",
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.midas",
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.gilded-gorget",
+      "iconKey": "icon.base-type.gilded-neck-guard",
       "flavorKey": "flavor.base.gilded-gorget",
       "flavor": "A rigid, polished collar designed to protect the throat while signaling high status. Its surface is smooth, catching the light with every movement of the wearer.",
       "tags": [
@@ -626,18 +626,18 @@
     },
     {
       "id": "item.humanoid-neck-b-018",
-      "nameKey": "base.gilded-gorget",
-      "name": "Gilded Gorget",
+      "nameKey": "base-type.gilded-neckpiece",
+      "name": "Gilded Neckpiece",
       "frame": "humanoid",
       "role": "jewel-major",
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.midas",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.gilded-gorget",
+      "iconKey": "icon.base-type.gilded-neckpiece",
       "flavorKey": "flavor.base.gilded-gorget",
       "flavor": "A rigid, polished collar designed to protect the throat while signaling high status. Its weight is felt more as a symbol of authority than a burden of defense.",
       "tags": [
@@ -662,18 +662,18 @@
     },
     {
       "id": "item.humanoid-neck-b-019",
-      "nameKey": "base.gilded-gorget",
-      "name": "Gilded Gorget",
+      "nameKey": "base-type.auric-neck-guard",
+      "name": "Auric Neck-Guard",
       "frame": "humanoid",
       "role": "jewel-major",
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.gilded-gorget",
+      "iconKey": "icon.base-type.auric-neck-guard",
       "flavorKey": "flavor.base.gilded-gorget",
       "flavor": "A rigid, polished collar designed to protect the throat while signaling high status. Its surface is smooth, catching the light with every movement of the wearer.",
       "tags": [
@@ -698,8 +698,8 @@
     },
     {
       "id": "item.humanoid-neck-b-020",
-      "nameKey": "base.gilded-gorget",
-      "name": "Gilded Gorget",
+      "nameKey": "base-type.brass-gorget",
+      "name": "Brass Gorget",
       "frame": "humanoid",
       "role": "jewel-major",
       "class": "torc",
@@ -709,7 +709,7 @@
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.gilded-gorget",
+      "iconKey": "icon.base-type.brass-gorget",
       "flavorKey": "flavor.base.gilded-gorget",
       "flavor": "A rigid, polished band of precious metal designed to protect the throat while signaling high status.",
       "tags": [
@@ -741,7 +741,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -769,18 +769,18 @@
     },
     {
       "id": "item.humanoid-neck-b-022",
-      "nameKey": "base.polished-torc",
-      "name": "Polished Torc",
+      "nameKey": "base-type.ornate-torque",
+      "name": "Ornate Torque",
       "frame": "humanoid",
       "role": "jewel-major",
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.midas",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.polished-torc",
+      "iconKey": "icon.base-type.ornate-torque",
       "flavorKey": "flavor.base.polished-torc",
       "flavor": "A rigid, seamless band of heavy metal designed to rest firmly against the throat. Its weight serves as a constant reminder of the wearer's station.",
       "tags": [
@@ -805,18 +805,18 @@
     },
     {
       "id": "item.humanoid-neck-b-023",
-      "nameKey": "base.polished-torc",
-      "name": "Polished Torc",
+      "nameKey": "base-type.gilded-torque",
+      "name": "Gilded Torque",
       "frame": "humanoid",
       "role": "jewel-major",
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.polished-torc",
+      "iconKey": "icon.base-type.gilded-torque",
       "flavorKey": "flavor.base.polished-torc",
       "flavor": "A rigid, seamless band of precious metal designed to rest heavily against the throat. It serves as a permanent mark of status and unyielding presence.",
       "tags": [
@@ -847,7 +847,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -876,18 +876,18 @@
     },
     {
       "id": "item.humanoid-neck-b-025",
-      "nameKey": "base.etched-gorget",
-      "name": "Etched Gorget",
+      "nameKey": "base-type.carved-gorget",
+      "name": "Carved Gorget",
       "frame": "humanoid",
       "role": "jewel-major",
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.etched-gorget",
+      "iconKey": "icon.base-type.carved-gorget",
       "flavorKey": "flavor.base.etched-gorget",
       "flavor": "A rigid, polished plate designed to protect the throat and serve as a canvas for ceremonial engravings.",
       "tags": [
@@ -912,18 +912,18 @@
     },
     {
       "id": "item.humanoid-neck-b-026",
-      "nameKey": "base.etched-torque",
-      "name": "Etched Torque",
+      "nameKey": "base-type.carved-choker",
+      "name": "Carved Choker",
       "frame": "humanoid",
       "role": "jewel-major",
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.etched-torque",
+      "iconKey": "icon.base-type.carved-choker",
       "flavorKey": "flavor.base.etched-torque",
       "flavor": "A rigid band of polished metal designed to sit high against the throat, serving as a focal point for concentrated essence.",
       "tags": [
@@ -947,18 +947,18 @@
     },
     {
       "id": "item.humanoid-neck-b-027",
-      "nameKey": "base.polished-torc",
-      "name": "Polished Torc",
+      "nameKey": "base-type.ornate-collar",
+      "name": "Ornate Collar",
       "frame": "humanoid",
       "role": "jewel-major",
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.midas",
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.polished-torc",
+      "iconKey": "icon.base-type.ornate-collar",
       "flavorKey": "flavor.base.polished-torc",
       "flavor": "A rigid, seamless band of precious metal designed to rest heavily against the throat. It serves as a permanent mark of status and unyielding presence.",
       "tags": [
@@ -983,18 +983,18 @@
     },
     {
       "id": "item.humanoid-neck-b-028",
-      "nameKey": "base.etched-gorget",
-      "name": "Etched Gorget",
+      "nameKey": "base-type.inscribed-gorget",
+      "name": "Inscribed Gorget",
       "frame": "humanoid",
       "role": "jewel-major",
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.etched-gorget",
+      "iconKey": "icon.base-type.inscribed-gorget",
       "flavorKey": "flavor.base.etched-gorget",
       "flavor": "A rigid, protective band designed to shield the throat and collarbone from sudden strikes.",
       "tags": [

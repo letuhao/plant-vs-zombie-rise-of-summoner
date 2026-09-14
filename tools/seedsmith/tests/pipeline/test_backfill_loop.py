@@ -98,14 +98,23 @@ class StalenessIsReportedNeverAutoTriggeredTests(unittest.TestCase):
 
     def test_a_real_stale_node_is_reported_by_the_metric_but_never_auto_planned(self) -> None:
         doc = json.loads(FEROCITY_SEED.read_text(encoding="utf-8"))
-        recorded_prompt_version = doc["_provenance"]["promptVersion"]
-        self.assertEqual(recorded_prompt_version, "tree-language/1")
-        self.assertNotEqual(recorded_prompt_version, PROMPT_VERSION)
+        prov = doc["_provenance"]
+        recorded_prompt_version = prov["promptVersion"]
+
+        # ⛔ CORRECTED 2026-09-11: `build_seed_document` now derives the document stamp from the
+        # records and emits `"mixed"` (with a per-node `promptVersionByNode` split) when a tree holds
+        # more than one vintage. The test's real claim is that the committed record is NOT current;
+        # it no longer has to be a specific older literal.
+        if recorded_prompt_version == "mixed":
+            self.assertTrue(any(v != PROMPT_VERSION
+                                for v in prov.get("promptVersionByNode", {}).values()))
+        else:
+            self.assertNotEqual(recorded_prompt_version, PROMPT_VERSION)
 
         current_key = staleness_key(brief_hash="x", prompt_version=PROMPT_VERSION,
-                                    schema_version="1", model_id=doc["_provenance"]["model"])
+                                    schema_version="1", model_id=prov["model"])
         recorded_key = staleness_key(brief_hash="x", prompt_version=recorded_prompt_version,
-                                     schema_version="1", model_id=doc["_provenance"]["model"])
+                                     schema_version="1", model_id=prov["model"])
 
         corpus = Corpus()
         corpus.add(Entry(id="ferocity", kind="tree", partition="passive-tree",

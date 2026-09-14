@@ -25,7 +25,7 @@
       "id": "set.chickenimp-001",
       "nameKey": "set.plume-of-the-predator",
       "name": "Plume of the Predator",
-      "themeKey": "demon.chickenimp",
+      "themeKey": "creature.chickenimp",
       "members": [
         {
           "role": "armament-primary",

@@ -38,7 +38,7 @@ Plan: [lawn-interactive-plan.md](lawn-interactive-plan.md) · Map:
 - [x] T9 commander-action-bar UI (nine locked-visible empty-corpus slots)
 - [ ] Checkpoint E — combat book full arm→Intent (deferred until action corpus; chrome + Esc cancel armed only)
 - [x] T10 CreaturesLayer → ActorCollection
-- [x] T11 scope picker → ActorCollection (`targetPtr` explicit; UniqueDemon keeps `instanceId`)
+- [x] T11 scope picker → ActorCollection (`targetPtr` explicit; UniqueCreature keeps `instanceId`)
 - [x] T12 actor-hud click → dock
 - [x] T13 focus / safe-area / reduced-motion (§10) — `.safe-area-*` in tokens; dock focuses first collection item
 - [x] Checkpoint F — program acceptance (`e2e/lawn-interactive.spec.ts` + multi-viewport) for chrome paths proven above

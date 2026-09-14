@@ -25,7 +25,7 @@
       "id": "set.solarlily-001",
       "nameKey": "set.solar-lotus-traveler",
       "name": "Solar Lotus Traveler",
-      "themeKey": "demon.solarlily",
+      "themeKey": "creature.solarlily",
       "members": [
         {
           "role": "armament-primary",

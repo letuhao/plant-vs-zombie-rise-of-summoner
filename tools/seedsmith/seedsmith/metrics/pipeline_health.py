@@ -1,4 +1,4 @@
-"""seedsmith.metrics.pipeline_health — the classification RUN's own health (demon-seed module 7,
+"""seedsmith.metrics.pipeline_health — the classification RUN's own health (creature-seed module 7,
 `seed-to-concrete` T2.12). Distinct from `roster-metrics` (T2.10, which measures the RESULTING
 distribution): this measures how the PIPELINES themselves behaved — how often they disagreed with
 themselves, how often they needed a repair, whether the echoed `basis` still matches what
@@ -21,15 +21,15 @@ TUNING_DIR = Path(__file__).resolve().parents[4] / "data" / "tuning"
 
 
 def _load_targets(version: "int | str" = 1) -> dict:
-    path = TUNING_DIR / f"demon-pipeline-health-targets.v{int(version)}.json"
+    path = TUNING_DIR / f"creature-pipeline-health-targets.v{int(version)}.json"
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _anchors_or_not_measured(metric_id: str, ctx: Ctx) -> "list[Mapping[str, Any]] | Finding":
-    anchors = ctx.demon_anchors
+    anchors = ctx.creature_anchors
     if not anchors:
         return Finding(metric=metric_id, severity=Severity.NOT_MEASURED, subject="(suite)",
-                       message="no demon anchors supplied — nothing to measure", evidence={})
+                       message="no creature anchors supplied — nothing to measure", evidence={})
     return anchors
 
 
@@ -43,7 +43,7 @@ class DisagreementRateMetric(Metric):
     family = "PipelineHealth"
     loop = Loop.CLOSED
     gates = False
-    needs = frozenset({"demon_anchors"})
+    needs = frozenset({"creature_anchors"})
     covers: "tuple[str, ...]" = ()
 
     def run(self, ctx: Ctx) -> "list[Finding]":
@@ -87,7 +87,7 @@ class RepairRateMetric(Metric):
     family = "PipelineHealth"
     loop = Loop.CLOSED
     gates = False
-    needs = frozenset({"demon_anchors"})
+    needs = frozenset({"creature_anchors"})
     covers: "tuple[str, ...]" = ()
 
     def run(self, ctx: Ctx) -> "list[Finding]":
@@ -137,7 +137,7 @@ class BasisMixMetric(Metric):
     family = "PipelineHealth"
     loop = Loop.CLOSED
     gates = False
-    needs = frozenset({"demon_anchors"})
+    needs = frozenset({"creature_anchors"})
     covers: "tuple[str, ...]" = ()
 
     def run(self, ctx: Ctx) -> "list[Finding]":

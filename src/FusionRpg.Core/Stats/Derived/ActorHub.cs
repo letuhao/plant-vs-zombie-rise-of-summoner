@@ -144,13 +144,20 @@ public static class ActorHubBootstrap
         Func<StatContext, Aptitudes.AptitudeAllocation>? aptitudeAllocation = null,
         Func<StatContext, IReadOnlyList<Subsystems.BoundDerivedAtom>>? boundDerivedAtoms = null,
         Func<StatContext, IReadOnlyList<Subsystems.StatusDerivedMod>>? statusDerivedMods = null,
-        bool seedResourceBaseline = false)
+        bool seedResourceBaseline = false,
+        Func<StatContext, Subsystems.StarLoyaltyContribution>? starLoyalty = null,
+        Func<StatContext, IReadOnlyList<Items.Consumables.DraughtMod>>? draughts = null,
+        Func<StatContext, IReadOnlyDictionary<string, int>>? expeditionInjuries = null)
     {
         var sys = stats ?? StatSystemBootstrap.CreateDefault();
         var hub = new ActorHub(sys);
         if (seedResourceBaseline)
             hub.Register(new Subsystems.ResourceBaselineSubsystem(powerIndex));
         hub.Register(new Subsystems.RpgProgressionSubsystem(powerIndex));
+        // channelmods-hub: same per-context delegate seam as aptitude/bound atoms. Opt-in, so bare
+        // CreateDefault callers are unaffected; a contributor returning IsEmpty contributes nothing.
+        if (starLoyalty is not null)
+            hub.Register(new Subsystems.StarLoyaltySubsystem(starLoyalty));
         if (aptitudeTuning is not null)
         {
             hub.Register(new Subsystems.AptitudeSubsystem(
@@ -165,6 +172,12 @@ public static class ActorHubBootstrap
         // before this arm existed, so the hundreds of tests calling CreateDefault() bare are unaffected.
         if (statusDerivedMods is not null)
             hub.Register(new Subsystems.StatusDerivedSubsystem(statusDerivedMods));
+        // channelmods-hub T2: same opt-in seam for draughts and expedition injuries. Omitting them
+        // registers nothing, so every existing caller is unaffected; production wiring lands at fuse.
+        if (draughts is not null)
+            hub.Register(new Subsystems.DraughtSubsystem(draughts));
+        if (expeditionInjuries is not null)
+            hub.Register(new Subsystems.ExpeditionInjurySubsystem(expeditionInjuries));
         return hub;
     }
 }

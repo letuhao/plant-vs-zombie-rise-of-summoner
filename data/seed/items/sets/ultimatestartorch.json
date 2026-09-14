@@ -25,7 +25,7 @@
       "id": "set.ultimatestartorch-001",
       "nameKey": "set.spike-bullet-subspecies",
       "name": "Spike-Bullet Subspecies",
-      "themeKey": "demon.ultimatestartorch",
+      "themeKey": "creature.ultimatestartorch",
       "members": [
         {
           "role": "armament-primary",

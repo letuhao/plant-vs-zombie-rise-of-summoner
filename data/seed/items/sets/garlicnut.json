@@ -25,7 +25,7 @@
       "id": "set.garlicnut-001",
       "nameKey": "set.nutty-garlic-entry",
       "name": "Nutty Garlic Entry",
-      "themeKey": "demon.garlicnut",
+      "themeKey": "creature.garlicnut",
       "members": [
         {
           "role": "armament-primary",

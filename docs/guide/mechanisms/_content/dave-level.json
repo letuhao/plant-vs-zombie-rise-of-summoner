@@ -51,7 +51,7 @@
     {"q": "Is there a max Dave level?", "a": "No designed cap. Endless grind is the rule."},
     {"q": "Does a new world reset Dave?", "a": "You keep who you are across worlds — see [New world](new-world-prestige)."},
     {"q": "Why didn’t Dave 10 open Relics?", "a": "Dave chapters are Vision. Relics open on the live item beat."},
-    {"q": "Is Dave’s level the same as a demon’s level?", "a": "No. Demons have specimen XP; Dave is the summoner line."}
+    {"q": "Is Dave’s level the same as a creature’s level?", "a": "No. Creatures have specimen XP; Dave is the summoner line."}
   ],
   "next": ["type-specimen-xp"],
   "related": ["aptitudes", "type-specimen-xp", "unlock-chapters"],

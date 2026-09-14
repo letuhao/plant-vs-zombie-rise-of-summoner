@@ -126,7 +126,7 @@ matches the plan's own impact-first sequencing, not a hard requirement.
       **Built — two of the five needed a real name on the wire, three did not.**
       1. **Equip target** (`RelicsLayer.tsx`) — a unique actor carries `side` + `typeId` and *no name*
          (`adaptActor` marks `displayName` pending; no route serves one), so the name comes from
-         `DemonSpeciesCatalog` via the already-shared `useSpeciesIndex`, keyed `(side, gameTypeId)`.
+         `CreatureSpeciesCatalog` via the already-shared `useSpeciesIndex`, keyed `(side, gameTypeId)`.
          The panel **subtitle** was fixed with it — it printed `#${instanceId.slice(0,6)}`, and a
          shortened id is still an id.
       2. **Delta labels** (`CompareView.tsx`) — new `channelLabel` in `adapt.ts`. ⚠ A **placement,

@@ -25,7 +25,7 @@
       "id": "set.doomplantern-001",
       "nameKey": "set.embers-of-the-halo",
       "name": "Embers of the Halo",
-      "themeKey": "demon.doomplantern",
+      "themeKey": "creature.doomplantern",
       "members": [
         {
           "role": "armament-primary",

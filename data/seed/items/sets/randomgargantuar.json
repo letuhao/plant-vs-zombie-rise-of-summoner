@@ -25,7 +25,7 @@
       "id": "set.randomgargantuar-001",
       "nameKey": "set.blind-box-giant",
       "name": "Blind Box Giant",
-      "themeKey": "demon.randomgargantuar",
+      "themeKey": "creature.randomgargantuar",
       "members": [
         {
           "role": "armament-primary",

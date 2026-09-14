@@ -25,7 +25,7 @@
       "id": "set.supercherrygatling-001",
       "nameKey": "set.cherry-burst-marksman",
       "name": "Cherry Burst Marksman",
-      "themeKey": "demon.supercherrygatling",
+      "themeKey": "creature.supercherrygatling",
       "members": [
         {
           "role": "armament-primary",

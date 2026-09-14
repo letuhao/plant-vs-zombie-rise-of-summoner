@@ -25,7 +25,7 @@
       "id": "set.peapot-001",
       "nameKey": "set.the-artillery-pot",
       "name": "The Artillery Pot",
-      "themeKey": "demon.peapot",
+      "themeKey": "creature.peapot",
       "members": [
         {
           "role": "armament-primary",

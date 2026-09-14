@@ -1,14 +1,14 @@
-"""Tests for seedsmith.metrics.demon_roster (spec-roster-metrics.md, demon-seed module 14,
+"""Tests for seedsmith.metrics.creature_roster (spec-roster-metrics.md, creature-seed module 14,
 `seed-to-concrete` T2.10). Fixtures are synthetic rosters with a deliberately injected defect —
 the only way to prove a metric would notice (spec's own testing-strategy rule).
 """
 from __future__ import annotations
 
-from seedsmith.adapters.demons.anchor.schema import APTITUDES, ELEMENTS, RARITY, THREAT_BAND
+from seedsmith.adapters.creatures.anchor.schema import APTITUDES, ELEMENTS, RARITY, THREAT_BAND
 from seedsmith.corpus import Corpus
-from seedsmith.metrics.demon_roster import (
+from seedsmith.metrics.creature_roster import (
     ALL_ELEMENT_PAIRS,
-    ALL_DEMON_ROSTER_METRICS,
+    ALL_CREATURE_ROSTER_METRICS,
     AptitudeDistributionMetric,
     FamilySizeSpreadMetric,
     GridFillMetric,
@@ -32,7 +32,7 @@ def anchor(species_id, *, element="fire", element2="none", aptitude="Might",
 
 
 def ctx_with(anchors) -> Ctx:
-    return Ctx(corpus=Corpus(), adapter=None, demon_anchors=anchors)
+    return Ctx(corpus=Corpus(), adapter=None, creature_anchors=anchors)
 
 
 # --- grid fill ------------------------------------------------------------------------------
@@ -174,7 +174,7 @@ def test_every_metric_has_a_declared_target_in_tuning():
     import json
     from pathlib import Path
     targets = json.loads(
-        (Path(__file__).parents[1] / ".." / ".." / "data" / "tuning" / "demon-roster-targets.v1.json")
+        (Path(__file__).parents[1] / ".." / ".." / "data" / "tuning" / "creature-roster-targets.v1.json")
         .resolve().read_text(encoding="utf-8"))
     expected_keys = {"gridFill", "singleElementShare", "aptitudeDistribution", "threatBandOccupancy",
                      "familySizeSpread", "postureBalance", "unresolvedCount"}
@@ -182,7 +182,7 @@ def test_every_metric_has_a_declared_target_in_tuning():
 
 
 def test_open_loop_metric_never_contributes_to_pass():
-    # Every DemonRoster metric declares CLOSED (spec §4's own table) — this is the mechanical
+    # Every CreatureRoster metric declares CLOSED (spec §4's own table) — this is the mechanical
     # proof the registry itself enforces (Loop.OPEN + gates=True raises at registration).
     #
     # UnresolvedCountMetric was promoted to gates=True 2026-09-03 — a real, deliberate promotion
@@ -190,9 +190,9 @@ def test_open_loop_metric_never_contributes_to_pass():
     # deliberate, later, separate act"), not an accident this test should mask. Found by audit: an
     # unresolved aptitudePrimary silently produced a zero-stat species (SpeciesExpander had no edge
     # to derive a magnitude from) — gating the aggregate rate stops a full run early rather than
-    # discovering it species-by-species after the fact. Every other DemonRoster metric is still
+    # discovering it species-by-species after the fact. Every other CreatureRoster metric is still
     # measure-only.
-    for cls in ALL_DEMON_ROSTER_METRICS:
+    for cls in ALL_CREATURE_ROSTER_METRICS:
         assert cls.loop is Loop.CLOSED
         expected_gates = cls is UnresolvedCountMetric
         assert cls.gates is expected_gates, f"{cls.__name__}.gates should be {expected_gates}"

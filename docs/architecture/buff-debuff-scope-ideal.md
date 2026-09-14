@@ -4,7 +4,7 @@
 problem and a proposed direction so the next step (a Phase 0 capability map, if the owner confirms the
 shape) starts from grounded material instead of a blank page. Matches this repo's own ideal → map →
 spec sequence ([action-ideal.md](action-ideal.md), [class-system-ideal.md](class-system-ideal.md),
-[demon-system-map.md](demon-system-map.md) all preceded their specs the same way).
+[creature-system-map.md](creature-system-map.md) all preceded their specs the same way).
 
 **Deliberately narrow.** The owner's own sequencing: build the scope primitive first; the aura skill
 content and the commander concept itself (Zomboss, Crazy Dave, "join battle directly") are a **separate,
@@ -18,7 +18,7 @@ not a commander-specific mechanism.
 
 A general answer to: **given a buff or debuff effect, which entities does it actually reach?**
 
-Not scoped to commanders. The owner's own framing: *"this apply for multiple gameplay"* — patron-demon's
+Not scoped to commanders. The owner's own framing: *"this apply for multiple gameplay"* — patron-creature's
 aura, a future world-buff, an item aura, a status that spreads to allies, are all instances of the same
 question, and today each would have to work it out from scratch.
 
@@ -52,7 +52,7 @@ for where a grant is anchored:
 
 This is an **anchor/ownership** scope — where a grant's row lives and what it's keyed on — not a
 population query. But `match` is already exactly "battlefield-wide," and `patron.aura`
-([demons/spec-patron-demon.md](demons/spec-patron-demon.md)) is already described as *"a match-owner
+([creatures/spec-patron-creature.md](creatures/spec-patron-creature.md)) is already described as *"a match-owner
 effect grant"* — so **the battlefield case (PvZ lawn, and by the same shape expeditions/web-RPG
 battles) is not new work.** It already has a working, shipped precedent.
 
@@ -83,20 +83,20 @@ someone died, someone spawned, someone got mind-controlled), not once.
 
 [Match/UniqueBindings.cs](../../src/FusionRpg.Core/Match/UniqueBindings.cs) already resolves both
 directions: `TryGet(instanceId) → Ptr` and `TryGetByPtr(ptr) → instanceId`, tracked through
-`PendingSpawn → Bound → Cleared`. This is precisely the "unique demon" scope's resolution step — a
-commander's aura naming a durable demon specimen resolves to a live `entity:{ptr}` through this facet,
+`PendingSpawn → Bound → Cleared`. This is precisely the "unique creature" scope's resolution step — a
+commander's aura naming a durable creature specimen resolves to a live `entity:{ptr}` through this facet,
 **with no new binding table needed.**
 
 **One real wrinkle, found reading this file, not assumed:** `UniqueBinding.Side` is hard-normalized to
 `"plant"` or `"zombie"` only (`NormalizeSide`, line 217-221) — there is no third value. A hypno-zombie
-demon binds with `Side = "zombie"` because that's what it deploys as in Unity. **So "my own side" cannot
+creature binds with `Side = "zombie"` because that's what it deploys as in Unity. **So "my own side" cannot
 be read off this field alone.**
 
 **Resolved 2026-08-29 (owner) — and the real rule is sharper than a plant/zombie split.** There are two
 distinct kinds of hypno-zombie on the board, not one:
 
-1. **A player-deployed demon in hypno-zombie form** (a specimen the player captured/summoned — see
-   `demon-system-map.md`'s *"designated boss-class species deploy as hypno-zombie allies"*).
+1. **A player-deployed creature in hypno-zombie form** (a specimen the player captured/summoned — see
+   `creature-system-map.md`'s *"designated boss-class species deploy as hypno-zombie allies"*).
 2. **An ordinary vanilla zombie temporarily mind-controlled by a plant hit** (PvZ's own classic
    Hypnotize mechanic) — mechanically fighting for the player, but **still Zomboss's for buff-scope
    purposes.** The owner's own words: *"zomboss's hypno zombie still consider as his side and earn
@@ -105,7 +105,7 @@ distinct kinds of hypno-zombie on the board, not one:
 So the deciding signal is **ownership identity, not current combat allegiance.** A status effect (charm/
 mind-control — a well-established pattern, not unique to this game: see Sources) can flip who a unit
 *fights for* without changing who it *belongs to* for scope purposes. Case 1 has a durable specimen
-record with a real `player_id` (confirmed: `RpgStore.Demons.cs` / `RpgStore.UniqueActors.cs`) — case 2
+record with a real `player_id` (confirmed: `RpgStore.Creatures.cs` / `RpgStore.UniqueActors.cs`) — case 2
 has no specimen at all, just a plain zombie-type entity with a temporary status flag. **"Own side" for a
 buff/debuff scope resolves through specimen ownership when a specimen exists, and falls through to the
 mechanical PvZ type only when it doesn't** — never the other way around. See §4 for the FSM work this
@@ -126,7 +126,7 @@ already anticipated something in this shape. A commander aura is a strong candid
 [world/spec-ai-commander.md](world/spec-ai-commander.md) §ThreatMap: *"a pure faction-id comparison, so
 it is belief-safe."* This is the world map's own answer to "own side vs. enemy," structurally unrelated
 to `ActionRelation` — different data (`WorldState`/`IWorldView`, factions and legions, not
-`BattleEffectHost`/`ActorState`). The demon map's own words about a parallel case are worth repeating
+`BattleEffectHost`/`ActorState`). The creature map's own words about a parallel case are worth repeating
 here: *"Two different catalogs, deliberately... Collapsing them would make [X] and [Y] the same axis."*
 **A unified scope system should let battlefield and world-map both express "own side," without merging
 their two relation mechanisms into one.** They answer the same question over structurally different
@@ -141,7 +141,7 @@ Following this codebase's own established pattern (`ActionTargetSpec` already se
 
 | WHERE value | What it resolves against | New work? |
 |---|---|---|
-| `battlefield` | **Corrected during audit, 2026-08-29 — not one host.** `owner_kind = match` and the `EffectBag`/Funnel grant mechanism are shared, and *that* part needs no new work, proven by patron-demon. But "PvZ lawn" and "expeditions/web-RPG" are not the same **reader**: `BattleEngine`/`BattleEffectHost` (this session's A17/A18 work) is the SIM/expedition kernel and never runs for live PvZ; live PvZ's own damage path is Unity-side and the RPG's write side deliberately never touches it (`EntityStatWriter.cs`: *"Never TakeDamage"*). So the SIM reader is real new work (`battlefield-scope`'s own spec); the live-PvZ reader is not — the injector's existing overlay/Funnel path already does it, proven by patron.aura. See `buff-debuff-scope/spec-battlefield-scope.md` for the full split |
+| `battlefield` | **Corrected during audit, 2026-08-29 — not one host.** `owner_kind = match` and the `EffectBag`/Funnel grant mechanism are shared, and *that* part needs no new work, proven by patron-creature. But "PvZ lawn" and "expeditions/web-RPG" are not the same **reader**: `BattleEngine`/`BattleEffectHost` (this session's A17/A18 work) is the SIM/expedition kernel and never runs for live PvZ; live PvZ's own damage path is Unity-side and the RPG's write side deliberately never touches it (`EntityStatWriter.cs`: *"Never TakeDamage"*). So the SIM reader is real new work (`battlefield-scope`'s own spec); the live-PvZ reader is not — the injector's existing overlay/Funnel path already does it, proven by patron.aura. See `buff-debuff-scope/spec-battlefield-scope.md` for the full split |
 | `world map` | A `WorldState` faction/legion/sector row, over many turns | **Real, new — and explicitly in scope for v1 (owner, 2026-08-29: "build both now, full parity").** No `BattleEffectHost` exists here at all — this is closer to a `WorldCanonical` state field than an `EffectGrant`, so it needs its own delivery mechanism, not a variant of the battlefield one. **Confirmed during audit:** `TurnEngine.Step` is a pure pipeline of `with`-expression rewrites (`WorldCanonical.cs`/`TurnEngine.cs` read directly) — a world-map buff is one more such rewrite, not a new mutation mechanism. **Building this crosses the World Map row's own standing caution — [DESIGN-GATE.md](../DESIGN-GATE.md) §1: "Specs pending owner review — no build authorized." That caution is explicitly lifted here, by the owner, for this scope only** — the same shape this repo already used for `P0.2`–`P0.5` in the action program (`tasks/action-todo.md`: "unblocked by building it across the program boundary under explicit owner authorization"). Worth a `decisions.md` line when this reaches a real spec, so the authorization is traceable later, not just in this conversation |
 
 Naming the asymmetry explicitly because it's easy to miss: "battlefield" and "world map" *sound* like two
@@ -155,14 +155,14 @@ scratch, under the authorization above.
 |---|---|---|
 | a specific target | `entity:` owner_kind directly | None |
 | a type | `ActionTargetFilters.TypeIds` | None |
-| a unique demon | `MatchUniqueBindingsFacet` (§2.3) | None for plant-side; resolved for hypno-zombie-demons via specimen ownership (§2.3) |
+| a unique creature | `MatchUniqueBindingsFacet` (§2.3) | None for plant-side; resolved for hypno-zombie-creatures via specimen ownership (§2.3) |
 | own side / enemy side | `ActionRelation.Ally/Enemy/Any`, **resolved through specimen ownership when a specimen exists, mechanical PvZ type otherwise** (§2.3) | Real: not a population re-query — see §4's resolved delivery model |
 
 ## 4. Resolved decisions (owner, 2026-08-29)
 
 ### 4.1 Own-side resolution — ownership identity, via FSM events, not a per-read population scan
 
-Settled in §2.3: a hypno-zombie demon resolves "mine" through specimen ownership; an ordinary
+Settled in §2.3: a hypno-zombie creature resolves "mine" through specimen ownership; an ordinary
 hypnotized zombie stays Zomboss's regardless of who it currently fights for.
 
 **Delivery mechanism (this question and the old §4.4 below converge on one answer):** researched

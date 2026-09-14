@@ -25,7 +25,7 @@
       "id": "set.ultimatecabbage-001",
       "nameKey": "set.solar-cabbage-core",
       "name": "Solar Cabbage Core",
-      "themeKey": "demon.ultimatecabbage",
+      "themeKey": "creature.ultimatecabbage",
       "members": [
         {
           "role": "armament-primary",

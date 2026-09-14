@@ -16,12 +16,12 @@ function ControlledFusionLayer() {
 }
 
 /**
- * T15 — the real, already-shipped Demon fusion lab, now reached as a band-2 layer instead of a
- * standalone route. `FusionPage`'s own hooks (demons/expeditions/fusion/patron modules) are left
+ * T15 — the real, already-shipped Creature fusion lab, now reached as a band-2 layer instead of a
+ * standalone route. `FusionPage`'s own hooks (creatures/expeditions/fusion/patron modules) are left
  * unmocked here, matching T12's `DeveloperTree.test.tsx` precedent: with no live server they
  * resolve into their own loading/error states harmlessly in jsdom rather than crashing — this is
  * a smoke test of the shell around the page, not a re-test of the page's own already-covered
- * behavior (`fusionView.test.ts`, the Core/Data/E2E suites named in spec-demon-fusion.md).
+ * behavior (`fusionView.test.ts`, the Core/Data/E2E suites named in spec-creature-fusion.md).
  */
 describe("FusionLayer (T15)", () => {
   it("renders the real fusion lab inside the shared band-2 shell", () => {

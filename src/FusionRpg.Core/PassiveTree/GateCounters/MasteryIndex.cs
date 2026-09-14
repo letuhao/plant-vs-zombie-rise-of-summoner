@@ -17,7 +17,7 @@ namespace FusionRpg.Core.PassiveTree.GateCounters;
 ///
 /// <para><b>This repo has already paid for getting it wrong once.</b> <c>PointBudget.cs:20-26</c>: an
 /// accumulation passed where an index was expected inverted the locked scope ordering by 176× at
-/// ordinary play levels. <see cref="Index"/> is this module's <c>DemonTypeSourceFromLevel</c>.</para>
+/// ordinary play levels. <see cref="Index"/> is this module's <c>CreatureTypeSourceFromLevel</c>.</para>
 ///
 /// <para><b>Naming note.</b> Spec-gate-counters.md §9's code sample names the tuning parameter type
 /// <c>GateCounterTuning</c>; task G2 shipped the same record as <see cref="GateCountersTuning"/> (plural
@@ -102,7 +102,7 @@ public static class MasteryIndex
     }
 
     /// <summary>Aptitude-point-EQUIVALENTS — the only unit `tree-resolve` ever sees (spec §5.2).
-    /// <c>index − 1</c>, never <c>index</c>, mirroring <c>PointBudget.DemonTypeSourceFromLevel</c>
+    /// <c>index − 1</c>, never <c>index</c>, mirroring <c>PointBudget.CreatureTypeSourceFromLevel</c>
     /// (<c>:40</c>) and for a sharper version of its reason: index 1 is what every existing save
     /// carries on day one, and a non-zero value there would open tier 1 on all 27 trees for free.
     /// Both operands are already `long`, so the multiply is widened before it happens rather than

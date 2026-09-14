@@ -1,6 +1,27 @@
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.World.Turn;
 
 namespace FusionRpg.Core.World.Intel;
+
+/// <summary>
+/// Effective weight for fog-of-war reporting only: health still in the fight, scaled by experience.
+/// Relocated here from the deleted `PlaceholderBattleResolver` (`actor-hub-and-combat-power-solid-fixing`,
+/// T21) — that class used the identical formula to invent battle winners, which this program's own
+/// "no invented winners" rule forbids; Intel's own use is different in kind, not degree: a
+/// <see cref="RememberedForce"/> was always an estimate a fogged observer forms, never a claim about
+/// who would win a fight, so the same crude weight is honest here in a way it never was as a combat
+/// resolver. Never call this to decide a battle.
+/// </summary>
+public static class ForceStrength
+{
+    public static long Of(WorldEntity entity)
+    {
+        long total = 0;
+        foreach (var m in entity.Members)
+            total += Math.Max(0, m.Hp - m.Wounds) * (long)Math.Max(1, m.Level);
+        return total;
+    }
+}
 
 /// <summary>
 /// A force as somebody else remembers it. Exact if they stood on the ground with it; a

@@ -25,7 +25,7 @@
       "id": "set.icepot-001",
       "nameKey": "set.frozen-bloom-vessel",
       "name": "Frozen Bloom Vessel",
-      "themeKey": "demon.icepot",
+      "themeKey": "creature.icepot",
       "members": [
         {
           "role": "core-guard",

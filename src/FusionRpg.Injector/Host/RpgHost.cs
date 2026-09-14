@@ -55,8 +55,8 @@ public static class RpgHost
         // tunables-ssot.md §7.2: the injector loads data/tuning/ and injects it; Core never reads a
         // file. Copied next to the built plugin DLL by the host .csproj (BepInEx / MelonLoader).
         var tuningDir = System.IO.Path.Combine(_pluginDir, "data", "tuning");
-        FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
-            FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(
+        FusionRpg.Core.Creatures.Contracts.ContractPolicy.Configure(
+            FusionRpg.Core.Creatures.Contracts.ContractTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "contracts.v1.json"))));
         FusionRpg.Core.World.Loam.LoamPolicy.Configure(
             FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(
@@ -65,11 +65,11 @@ public static class RpgHost
             System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "world.v5.json")));
         FusionRpg.Core.World.WorldTuningHub.Configure(worldTuning);
         FusionRpg.Core.World.Growth.RecruitPolicy.Configure(worldTuning.Growth);
-        FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
-            FusionRpg.Core.Demons.SoulEarnTuningLoader.Parse(
+        FusionRpg.Core.Creatures.SoulEarnPolicy.Configure(
+            FusionRpg.Core.Creatures.SoulEarnTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "souls.v1.json"))));
-        FusionRpg.Core.Demons.Patron.PatronPolicy.Configure(
-            FusionRpg.Core.Demons.Patron.PatronTuningLoader.Parse(
+        FusionRpg.Core.Creatures.Patron.PatronPolicy.Configure(
+            FusionRpg.Core.Creatures.Patron.PatronTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "patron.v1.json"))));
         FusionRpg.Core.Combat.Shield.ShieldPolicy.Configure(
             FusionRpg.Core.Combat.Shield.ShieldTuningLoader.Parse(
@@ -77,8 +77,8 @@ public static class RpgHost
         FusionRpg.Core.Combat.CombatPolicy.Configure(
             FusionRpg.Core.Combat.CombatTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "combat.v1.json"))));
-        FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
-            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(
+        FusionRpg.Core.Creatures.Fusion.StarPolicy.Configure(
+            FusionRpg.Core.Creatures.Fusion.FusionTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "fusion.v2.json"))));
         FusionRpg.Core.Status.StatusPolicy.Configure(
             FusionRpg.Core.Status.StatusTuningLoader.Parse(
@@ -102,27 +102,27 @@ public static class RpgHost
         // catalog-runtime's Injector-side flip (seed-to-concrete, 2026-09-06): both of step 5's own
         // preconditions are now satisfied and evidenced — the 829-species real classification run
         // (T2.11, 2026-09-04) and the live-lawn/diff-test proof (Checkpoint 4; re-proven this session
-        // via T8.5's mint-demon check) — so this host reads the same real committed tree the Server
+        // via T8.5's mint-creature check) — so this host reads the same real committed tree the Server
         // already flipped to, via the Core-only path that never needs SQL: every
-        // data/generated/demons/<SpeciesId>.json this project's own .csproj now copies alongside the
+        // data/generated/creatures/<SpeciesId>.json this project's own .csproj now copies alongside the
         // built mod, parsed by ConcreteSpeciesSeedReader and mapped by ConcreteSpeciesMapper — the
-        // SAME mapper RpgStore.BuildDemonSpeciesSnapshot() calls, proven field-for-field identical
+        // SAME mapper RpgStore.BuildCreatureSpeciesSnapshot() calls, proven field-for-field identical
         // against the real 829-species tree (ConcreteSpeciesSeedReaderTests). Throws loudly on a
         // missing/empty tree rather than silently falling back to the compiled default, matching
-        // DemonSpeciesCatalog.Configure's own established "fail loudly at load, name the fix" rule.
+        // CreatureSpeciesCatalog.Configure's own established "fail loudly at load, name the fix" rule.
         {
-            var speciesDir = System.IO.Path.Combine(_pluginDir, "data", "generated", "demons");
+            var speciesDir = System.IO.Path.Combine(_pluginDir, "data", "generated", "creatures");
             if (!System.IO.Directory.Exists(speciesDir))
                 throw new InvalidOperationException(
                     $"Species seed tree not found at '{speciesDir}'. Rebuild this project — its own " +
-                    ".csproj now copies data/generated/demons/*.json alongside the mod — or point " +
+                    ".csproj now copies data/generated/creatures/*.json alongside the mod — or point " +
                     "FUSIONRPG at a plugin folder that has been rebuilt since 2026-09-06.");
             var roster = System.IO.Directory.EnumerateFiles(speciesDir, "*.json")
                 .Where(p => !System.IO.Path.GetFileName(p).StartsWith('_'))
-                .Select(FusionRpg.Core.Demons.Generation.ConcreteSpeciesSeedReader.ParseFile)
-                .Select(FusionRpg.Core.Demons.Generation.ConcreteSpeciesMapper.ToDemonSpeciesDef)
+                .Select(FusionRpg.Core.Creatures.Generation.ConcreteSpeciesSeedReader.ParseFile)
+                .Select(FusionRpg.Core.Creatures.Generation.ConcreteSpeciesMapper.ToCreatureSpeciesDef)
                 .ToList();
-            FusionRpg.Core.Demons.DemonSpeciesCatalog.Configure(roster);
+            FusionRpg.Core.Creatures.CreatureSpeciesCatalog.Configure(roster);
         }
         FusionRpg.Core.Overlay.OverlayTuningHub.Configure(
             FusionRpg.Core.Overlay.OverlayTuningLoader.Parse(
@@ -165,7 +165,7 @@ public static class RpgHost
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "power-scale.v2.json"))));
         FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(
             FusionRpg.Core.Stats.Aptitudes.AptitudeTuningLoader.Parse(
-                // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. Phase 0 six-resource coverage (2026-09-02): v2 -> v3, then v3 -> v4 (0.8: combat.heal.power generalised to resource.restore.{resource}) -- 32 edges added so every (family x resource) cell is fed, closing P7.2's poise gap. v2 stays on disk -- reverting is pointing this back at aptitudes.v2.json. passive-tree C6 (2026-09-06): v5 -> v6, pointEconomy gains skillPointsPerThetaMilliByScope (D34). D55 (2026-09-06): v6 -> v7, demonType/aspect/uniqueDemon given real rates {15,15,22} -- v6 stays on disk.
+                // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. Phase 0 six-resource coverage (2026-09-02): v2 -> v3, then v3 -> v4 (0.8: combat.heal.power generalised to resource.restore.{resource}) -- 32 edges added so every (family x resource) cell is fed, closing P7.2's poise gap. v2 stays on disk -- reverting is pointing this back at aptitudes.v2.json. passive-tree C6 (2026-09-06): v5 -> v6, pointEconomy gains skillPointsPerThetaMilliByScope (D34). D55 (2026-09-06): v6 -> v7, creatureType/aspect/uniqueCreature given real rates {15,15,22} -- v6 stays on disk.
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "aptitudes.v8.json"))));
         FusionRpg.Core.Hud.ActorHudTuningHub.Configure(
             FusionRpg.Core.Hud.ActorHudTuningLoader.Parse(
@@ -176,6 +176,39 @@ public static class RpgHost
         FusionRpg.Core.Match.Ai.ZombossDeployTuningHub.Configure(
             FusionRpg.Core.Match.Ai.ZombossDeployTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "zomboss-deploy-ai.v1.json"))));
+        // lawn-combat-wire T8 (spec-lawn-action-bridge.md): without this, the first lawn touch of the
+        // hand-built basic-attack row throws -- ActionTimingDerivation.DeriveBasicAttack (called from
+        // BasicAttackFactory.Create) reads ActionTimingPolicy.Tuning, which throws
+        // InvalidOperationException until Configure has run. Server/Program.cs already does this for
+        // the Battle system; this is the injector's own copy, from the same shipped tuning file
+        // (already copied verbatim by every host .csproj's own `data\tuning\**\*.json` content rule --
+        // no build change needed). Ordered here, before RpgHost.Initialize returns and therefore before
+        // any lawn actor can be granted a basic attack -- never raced against host startup.
+        FusionRpg.Core.Actions.ActionTimingPolicy.Configure(
+            FusionRpg.Core.Actions.ActionTimingTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "action-timing.v1.json"))));
+        // lawn-combat-wire T12a (spec-basic-attack-cost.md wire 2): without this, ResourceBaselineSubsystem
+        // (now registered on CheatState.ActorHub) reads BattleRuleset.ResourceTuning before Configure has
+        // ever run, throwing on the injector's very first resource-max resolve. Same file, same call
+        // Server/Program.cs already makes for the identical reason -- one shared tuning read, no second
+        // copy of the arithmetic. v2 (not v1): the real, non-zero stamina regen share T11 authored.
+        FusionRpg.Core.Battle.BattleRuleset.ConfigureResources(
+            FusionRpg.Core.Battle.BattleResourceTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "battle-resources.v2.json"))));
+        // lawn-combat-wire T12 (spec-basic-attack-cost.md), sixth defect (2026-09-14): the same
+        // "Server/Program.cs already does this, this is the injector's own copy" gap as the two
+        // Configure calls above, just missed at the time -- Program.cs's own RungPolicy.Configure
+        // call carries a comment ("actions are battle-mode and the injector never sees one, so the
+        // rung ladder has no reason to load there") that was true until this lawn-combat-wire T12
+        // module gave LawnBasicAttackCostGate/CostLedger a real injector-side RungPolicy.Table read
+        // (rung 1 is RungPolicy's own shipped inert row, CostMulti=1000). Unconfigured, every
+        // TryChargeForSwing call threw "RungPolicy.Configure(...) has not run", caught by
+        // LawnBasicAttackCostCharger.ShouldApplyRider's own try/catch and failed closed -- silently
+        // zeroing actionTriggers/staminaSpent forever, confirmed live: real combat, a real bound
+        // grant, drainTickTotalMs > 0, yet actionTriggers stayed 0 until this fix.
+        FusionRpg.Core.Actions.Rungs.RungPolicy.Configure(
+            FusionRpg.Core.Actions.Rungs.RungTableLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "action-rungs.v1.json"))));
 
         IsInitialized = true;
     }

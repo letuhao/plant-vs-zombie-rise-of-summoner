@@ -3,7 +3,7 @@
 lines in the real recipes corpus name a legacy, retired shard band id, refused at real C# import time
 (`MaterialCatalog.IsLegacyShardId` / `MaterialUnissuableRule`).
 
-Mapping mirrors `LegacyDemonRarityIds.ForwardMap` (`src/FusionRpg.Core/Demons/DemonRarity.cs:94-99`),
+Mapping mirrors `LegacyCreatureRarityIds.ForwardMap` (`src/FusionRpg.Core/Creatures/CreatureRarity.cs:94-99`),
 verified live in this session: common->chaff, rare->cultivated, epic->heirloom, legendary->sunwoven.
 """
 from __future__ import annotations
@@ -38,7 +38,7 @@ def _entry(entry_id, *materials):
 # ---------------------------------------------------------------------------------------------
 
 
-def test_forward_map_matches_LegacyDemonRarityIds_exactly():
+def test_forward_map_matches_LegacyCreatureRarityIds_exactly():
     assert mod.LEGACY_SHARD_FORWARD_MAP == {
         "common": "chaff", "rare": "cultivated", "epic": "heirloom", "legendary": "sunwoven",
     }

@@ -25,7 +25,7 @@
       "id": "set.elephantzombie-a-001",
       "nameKey": "set.the-undead-itinerary",
       "name": "The Undead Itinerary",
-      "themeKey": "demon.elephantzombie_a",
+      "themeKey": "creature.elephantzombie_a",
       "members": [
         {
           "role": "armament-primary",

@@ -7,7 +7,7 @@ function baseProps(overrides?: Partial<Parameters<typeof BindWardenDialog>[0]>) 
   return {
     open: true,
     onOpenChange: vi.fn(),
-    demonName: "Ashkell",
+    creatureName: "Ashkell",
     sectorName: "Frost Mire",
     slotsUsedAfterBind: 7,
     slotsCapacity: 8,
@@ -34,7 +34,7 @@ describe("BindWardenDialog (world-stage W102/W103, spec-world-confirms.md §2, �
   it("the permanence copy is exact — GG-22's own required sentences", () => {
     render(<BindWardenDialog {...baseProps()} />);
     expect(screen.getByTestId("warden-permanence")).toHaveTextContent("can never be released");
-    expect(screen.getByTestId("warden-keep-ground")).toHaveTextContent("You do not keep the demon.");
+    expect(screen.getByTestId("warden-keep-ground")).toHaveTextContent("You do not keep the creature.");
   });
 
   it('the word "Ward" appears nowhere in this dialog', () => {

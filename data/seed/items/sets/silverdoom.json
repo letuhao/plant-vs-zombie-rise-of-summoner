@@ -25,7 +25,7 @@
       "id": "set.silverdoom-001",
       "nameKey": "set.silver-ruin-spore",
       "name": "Silver Ruin Spore",
-      "themeKey": "demon.silverdoom",
+      "themeKey": "creature.silverdoom",
       "members": [
         {
           "role": "armament-primary",

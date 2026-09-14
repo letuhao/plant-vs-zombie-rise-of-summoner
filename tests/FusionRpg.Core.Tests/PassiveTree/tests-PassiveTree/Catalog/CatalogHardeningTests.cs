@@ -21,7 +21,7 @@ namespace FusionRpg.Core.Tests.PassiveTree.Catalog;
 ///      tested by `PassiveTreeCatalogLoaderTests.A_category_token_outside_the_five_value_map_is_refused_naming_it`.
 ///      Cross-checked against `tools/seedsmith/seedsmith/adapters/trees/plan/emit.py:41,154` — the
 ///      plan emits the canonical five tokens directly (`"primary" | "elemental" | "status" | "family"
-///      | "species"`), not the `aptitude`/`demonFamily` renames the spec's prose describes; the map
+///      | "species"`), not the `aptitude`/`creatureFamily` renames the spec's prose describes; the map
 ///      already carries both spellings defensively, so there is no live gap to close.
 ///   3a. exclusionForm/excludeProps disagreement in both directions, and IdMismatch kept as authored
 ///      (never rewritten): both already refuse and both already have named tests in

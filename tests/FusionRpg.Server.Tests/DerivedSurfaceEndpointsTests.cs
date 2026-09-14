@@ -53,12 +53,24 @@ public sealed class DerivedSurfaceEndpointsTests : IAsyncLifetime
         Assert.Equal(new[] { "elements", "status", "resources", "other" }, body.Tabs.Select(t => t.Id));
         Assert.Contains(body.Tabs.Single(t => t.Id == "elements").Variants, v => v.Id == "omni" && v.PresentationOnly);
         var statusTab = body.Tabs.Single(t => t.Id == "status");
-        Assert.Equal(25, statusTab.Variants.Count);
+        // D1 (spec-derived-cook-ia.md): the Status rail is Omni + `statusCategoryVariants`
+        // (omni/dot/cc/contagion), NOT the per-status-id chips this test used to expect (25). The
+        // catalog's own `statusCategoryVariants` is the source, so assert against it rather than a
+        // literal — a category added to the catalog moves the rail by construction.
+        var expectedStatusIds = new[] { "omni" }
+            .Concat(ReadTuningDerivedStatusCategories())
+            .ToArray();
+        Assert.Equal(expectedStatusIds, statusTab.Variants.Select(v => v.Id).ToArray());
         Assert.Equal("omni", statusTab.Variants[0].Id);
-        Assert.Contains(statusTab.Variants, v => v.Id == "butter");
-        Assert.Contains(statusTab.Variants, v => v.Id == "nerve.afflicted");
-        Assert.Empty(body.Tabs.Single(t => t.Id == "other").Variants);
-        Assert.Equal(5, body.Tabs.Single(t => t.Id == "other").ActionCategoryVariants!.Count);
+        Assert.True(statusTab.Variants[0].PresentationOnly);
+        // D3 (spec-derived-cook-ia.md): OTHER Shared is a first-class BE-emitted variant, so the
+        // `other` tab is never empty — asserting `Empty` predated D3 and was masked by a host-start
+        // error. The contract is that `shared` is present and the action-category rail is populated
+        // from the catalog (asserted against the catalog, not a literal).
+        var other = body.Tabs.Single(t => t.Id == "other");
+        Assert.Equal(new[] { "shared" }, other.Variants.Select(v => v.Id).ToArray());
+        Assert.NotNull(other.ActionCategoryVariants);
+        Assert.NotEmpty(other.ActionCategoryVariants!);
     }
 
     [Fact]
@@ -104,6 +116,19 @@ public sealed class DerivedSurfaceEndpointsTests : IAsyncLifetime
         var path = Path.Combine(FindRepoRoot(), "data", "tuning", fileName);
         Assert.True(File.Exists(path), "missing " + path);
         return File.ReadAllText(path);
+    }
+
+    /// <summary>The Status rail's category ids from the catalog's own `statusCategoryVariants`,
+    /// excluding Omni (which the rail carries first). Read from the shipped tuning so the assertion
+    /// tracks a catalog edit rather than pinning a literal.</summary>
+    static IReadOnlyList<string> ReadTuningDerivedStatusCategories()
+    {
+        using var doc = System.Text.Json.JsonDocument.Parse(
+            ReadTuning("derived-stat-catalog.v2.json"));
+        return doc.RootElement.GetProperty("statusCategoryVariants").EnumerateArray()
+            .Select(v => v.GetProperty("id").GetString()!)
+            .Where(id => id != "omni")
+            .ToList();
     }
 
     static string FindRepoRoot()

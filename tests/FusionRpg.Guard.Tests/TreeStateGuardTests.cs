@@ -131,13 +131,13 @@ public class TreeStateGuardTests
     }
 
     [Fact]
-    public void ListDemonRoster_does_not_join_tree_state()
+    public void ListCreatureRoster_does_not_join_tree_state()
     {
         // The unpaged roster query must never grow an implicit join onto rpg_tree_node_state -- that
         // would turn a roster listing into an O(actors x owned nodes) query with no pagination to
         // bound it.
         var repoRoot = FindRepoRoot();
-        var path = Path.Combine(repoRoot, "src", "FusionRpg.Data", "Sqlite", "RpgStore.Demons.cs");
+        var path = Path.Combine(repoRoot, "src", "FusionRpg.Data", "Sqlite", "RpgStore.Creatures.cs");
         Assert.True(File.Exists(path), "missing " + path);
         var text = File.ReadAllText(path);
         Assert.DoesNotContain("rpg_tree_node_state", text, StringComparison.Ordinal);

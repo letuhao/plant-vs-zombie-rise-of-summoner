@@ -1,5 +1,5 @@
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Stats.Derived;
 
@@ -18,7 +18,7 @@ public enum TargetPreference { Frontline, Backline, Swarm, Elite, Structure, Ind
 /// fields, keyed by <see cref="SpeciesId"/> (spec-encounter-generator.md §1 Inputs — "the species
 /// corpus as `ConcreteSpecies` rows... joined to their anchor ordinals"). The join is real, not spec
 /// drift to paper over: neither <see cref="ConcreteSpecies"/> nor the live, post-catalog-runtime-flip
-/// <see cref="DemonSpeciesDef"/> carries <c>ThreatBand</c>, <c>AptitudePrimary</c>, <c>Reach</c> or
+/// <see cref="CreatureSpeciesDef"/> carries <c>ThreatBand</c>, <c>AptitudePrimary</c>, <c>Reach</c> or
 /// <c>TargetPreference</c> (confirmed by reading both 2026-09-06) — every one of those is consumed
 /// into a numeric/derived field and discarded during species generation, so a filter over ordinals
 /// has nowhere else to read them from.</summary>
@@ -31,7 +31,7 @@ public sealed record ConcreteAnchor
     public string? ThreatBand { get; init; }
 
     /// <summary>Null iff <see cref="ThreatBand"/> is null — resolved once, at join time, from
-    /// `demon-threat.v1.json`'s own rung table, never re-derived per filter call.</summary>
+    /// `creature-threat.v1.json`'s own rung table, never re-derived per filter call.</summary>
     public int? ThreatRung { get; init; }
 
     public string AptitudePrimary { get; init; } = "";
@@ -42,18 +42,18 @@ public sealed record ConcreteAnchor
     public IReadOnlyList<string> TraitPool { get; init; } = Array.Empty<string>();
     public long AttackIntervalMs { get; init; }
 
-    /// <summary>The anchor's own captured PvZ type id — <see cref="DemonTypeId"/> is computed from
+    /// <summary>The anchor's own captured PvZ type id — <see cref="CreatureTypeId"/> is computed from
     /// this, never stored twice (<see cref="ConcreteSpecies"/>'s own established discipline).</summary>
     public int GameTypeId { get; init; }
 
-    public int DemonTypeId => DemonSpeciesCatalog.DemonTypeIdFloor + GameTypeId;
+    public int CreatureTypeId => CreatureSpeciesCatalog.CreatureTypeIdFloor + GameTypeId;
 
     /// <summary>Joins one already-expanded species back to its own source anchor. Throws
     /// <see cref="InvalidOperationException"/> (never <see cref="EncounterRefusal"/> — that type
     /// names a SLOT's filter tuple, and there is no slot in scope during a corpus join) for a
     /// mismatched pairing or an unrecognised ordinal string — the same "not a known X" convention
     /// <see cref="SpeciesExpander"/> already uses for every other anchor enum field.</summary>
-    public static ConcreteAnchor From(AnchorRow anchor, ConcreteSpecies species, DemonThreatTuning threatTuning)
+    public static ConcreteAnchor From(AnchorRow anchor, ConcreteSpecies species, CreatureThreatTuning threatTuning)
     {
         if (anchor is null) throw new ArgumentNullException(nameof(anchor));
         if (species is null) throw new ArgumentNullException(nameof(species));
@@ -78,12 +78,12 @@ public sealed record ConcreteAnchor
         };
     }
 
-    static int RungFor(string speciesId, string threatBand, DemonThreatTuning tuning)
+    static int RungFor(string speciesId, string threatBand, CreatureThreatTuning tuning)
     {
         foreach (var t in tuning.Thresholds)
             if (string.Equals(t.Id, threatBand, StringComparison.Ordinal)) return t.Rung;
         throw new InvalidOperationException(
-            $"'{speciesId}': threatBand '{threatBand}' has no rung in demon-threat.v1.json");
+            $"'{speciesId}': threatBand '{threatBand}' has no rung in creature-threat.v1.json");
     }
 
     static EncounterReach ParseReach(string speciesId, string reach) =>
@@ -104,7 +104,7 @@ public sealed record ConcreteAnchor
 public sealed record EncounterSlot(
     Posture Posture, EncounterReach? Reach, TargetPreference? TargetPreference, string CountBand);
 
-/// <summary>The anchor's threat rung must fall in `[FloorRung, CeilRung]` — `demon-threat.v1.json`'s
+/// <summary>The anchor's threat rung must fall in `[FloorRung, CeilRung]` — `creature-threat.v1.json`'s
 /// rungs 1-10 (spec-encounter-generator.md §2 step 2).</summary>
 public sealed record ThreatWindow(int FloorRung, int CeilRung)
 {
@@ -147,7 +147,7 @@ public static class SlotFilter
             if (slot.Reach is { } wantReach && a.Reach != wantReach) continue;
             if (slot.TargetPreference is { } wantTp && a.TargetPreference != wantTp) continue;
             if (!spreadSet.Contains(a.ElementPrimary)) continue;
-            // HypnoAlly species (DemonDeployMode) are candidates like any other — no special case here.
+            // HypnoAlly species (CreatureDeployMode) are candidates like any other — no special case here.
             list.Add(a);
         }
 

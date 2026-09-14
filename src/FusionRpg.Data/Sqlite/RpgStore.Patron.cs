@@ -1,5 +1,5 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons.Patron;
+using FusionRpg.Core.Creatures.Patron;
 using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.Data;
@@ -9,7 +9,7 @@ public sealed record PatronRow(long PlayerId, string InstanceId, string SetUtc, 
 public sealed partial class RpgStore
 {
     /// <summary>
-    /// Patron designation (spec-patron-demon.md): first set free, every change spends
+    /// Patron designation (spec-patron-creature.md): first set free, every change spends
     /// PatronPolicy.SwitchCostSouls — one transaction, refusals write nothing. Re-designating
     /// the CURRENT patron is a natural free replay; a correlation reused for a different target
     /// is a mismatch (the soul-ledger dedupe is the switch's replay anchor).
@@ -29,12 +29,12 @@ public sealed partial class RpgStore
             var now = DateTime.UtcNow.ToString("o");
 
             var actor = ReadUniqueActorUnlocked(db, id);
-            var profile = actor == null ? null : ReadDemonProfileUnlocked(db, id);
+            var profile = actor == null ? null : ReadCreatureProfileUnlocked(db, id);
             if (actor is null || actor.PlayerId != playerId || profile is null
                 || string.Equals(actor.Phase, UniqueActorPhases.Retired, StringComparison.Ordinal))
                 return (false, "specimen.missing", null);
 
-            // A patron speaks for the summoner: it must be a demon that actually serves.
+            // A patron speaks for the summoner: it must be a creature that actually serves.
             var contract = ContractViewUnlocked(db, playerId, id);
             if (!contract.Bound) return (false, "patron.unbound", null);
             if (!contract.Deployable) return (false, "patron.insubordinate", null);
@@ -52,7 +52,7 @@ public sealed partial class RpgStore
                 if (balance.Balance < PatronPolicy.SwitchCostSouls)
                     return (false, "souls.insufficient", null);
                 if (!AppendSoulLedgerUnlocked(db, playerId, 0, -PatronPolicy.SwitchCostSouls,
-                        Core.Demons.SoulEarnPolicy.Reasons.Patron, "spend", corr, corr, now))
+                        Core.Creatures.SoulEarnPolicy.Reasons.Patron, "spend", corr, corr, now))
                     return (false, "correlation.mismatch", null); // corr already bought a different switch
             }
 

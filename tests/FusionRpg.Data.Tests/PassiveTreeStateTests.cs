@@ -8,20 +8,18 @@ namespace FusionRpg.Data.Tests;
 /// §6).</summary>
 public class PassiveTreeStateTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public PassiveTreeStateTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-treestate-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     [Fact]
@@ -68,11 +66,11 @@ public class PassiveTreeStateTests : IDisposable
     {
         _store.SaveTreeNodeState(AllocationScope.Commander, "player:1",
             new Dictionary<string, long> { ["a"] = 1 });
-        _store.SaveTreeNodeState(AllocationScope.UniqueDemon, "instance:abc",
+        _store.SaveTreeNodeState(AllocationScope.UniqueCreature, "instance:abc",
             new Dictionary<string, long> { ["b"] = 2 });
 
         var commander = _store.LoadTreeState(AllocationScope.Commander, "player:1");
-        var unique = _store.LoadTreeState(AllocationScope.UniqueDemon, "instance:abc");
+        var unique = _store.LoadTreeState(AllocationScope.UniqueCreature, "instance:abc");
 
         Assert.True(commander.ContainsKey("a"));
         Assert.False(commander.ContainsKey("b"));
@@ -107,11 +105,11 @@ public class PassiveTreeStateTests : IDisposable
         var keys = new (AllocationScope, string)[]
         {
             (AllocationScope.Commander, "player:1"),
-            (AllocationScope.UniqueDemon, "instance:1"),
-            (AllocationScope.UniqueDemon, "instance:2"),
-            (AllocationScope.UniqueDemon, "instance:3"),
-            (AllocationScope.UniqueDemon, "instance:4"),
-            (AllocationScope.UniqueDemon, "instance:5"),
+            (AllocationScope.UniqueCreature, "instance:1"),
+            (AllocationScope.UniqueCreature, "instance:2"),
+            (AllocationScope.UniqueCreature, "instance:3"),
+            (AllocationScope.UniqueCreature, "instance:4"),
+            (AllocationScope.UniqueCreature, "instance:5"),
         };
         foreach (var (scope, key) in keys)
             _store.SaveTreeNodeState(scope, key, new Dictionary<string, long> { [$"node-{key}"] = 1 });
@@ -137,19 +135,19 @@ public class PassiveTreeStateTests : IDisposable
     [Fact]
     public void LoadTreeStateBatch_does_not_cross_contaminate_similarly_named_keys()
     {
-        _store.SaveTreeNodeState(AllocationScope.UniqueDemon, "instance:1",
+        _store.SaveTreeNodeState(AllocationScope.UniqueCreature, "instance:1",
             new Dictionary<string, long> { ["a"] = 1 });
-        _store.SaveTreeNodeState(AllocationScope.UniqueDemon, "instance:2",
+        _store.SaveTreeNodeState(AllocationScope.UniqueCreature, "instance:2",
             new Dictionary<string, long> { ["a"] = 2 });
 
         var batch = _store.LoadTreeStateBatch(new (AllocationScope, string)[]
         {
-            (AllocationScope.UniqueDemon, "instance:1"),
-            (AllocationScope.UniqueDemon, "instance:2"),
+            (AllocationScope.UniqueCreature, "instance:1"),
+            (AllocationScope.UniqueCreature, "instance:2"),
         });
 
-        Assert.Equal(1L, batch[(AllocationScope.UniqueDemon, "instance:1")]["a"]);
-        Assert.Equal(2L, batch[(AllocationScope.UniqueDemon, "instance:2")]["a"]);
+        Assert.Equal(1L, batch[(AllocationScope.UniqueCreature, "instance:1")]["a"]);
+        Assert.Equal(2L, batch[(AllocationScope.UniqueCreature, "instance:2")]["a"]);
     }
 
     [Fact]
@@ -168,8 +166,8 @@ public class PassiveTreeStateTests : IDisposable
         var keys = new (AllocationScope, string)[2000];
         for (var i = 0; i < 2000; i++)
         {
-            keys[i] = (AllocationScope.UniqueDemon, $"instance:{i}");
-            _store.SaveTreeNodeState(AllocationScope.UniqueDemon, $"instance:{i}",
+            keys[i] = (AllocationScope.UniqueCreature, $"instance:{i}");
+            _store.SaveTreeNodeState(AllocationScope.UniqueCreature, $"instance:{i}",
                 new Dictionary<string, long> { [$"node-{i}"] = i });
         }
 
@@ -177,6 +175,6 @@ public class PassiveTreeStateTests : IDisposable
 
         Assert.Equal(2000, batch.Count);
         for (var i = 0; i < 2000; i += 137) // sampled, not exhaustive
-            Assert.Equal(i, batch[(AllocationScope.UniqueDemon, $"instance:{i}")][$"node-{i}"]);
+            Assert.Equal(i, batch[(AllocationScope.UniqueCreature, $"instance:{i}")][$"node-{i}"]);
     }
 }

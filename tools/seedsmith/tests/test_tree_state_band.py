@@ -39,7 +39,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]  # tools/seedsmith/tests -> repo
 # spec-tree-state.md §3/§8) — a different program's file, so there is no shared Python loader for it
 # yet. Read directly, same `_require`-by-hand discipline as `plan_tuning.py`'s own loader: a missing
 # key fails loudly rather than substituting a default (tunables-ssot T5). v6 -> v7 (D55, 2026-09-06)
-# only touched demonType/aspect/uniqueDemon; commander (read below) is untouched.
+# only touched creatureType/aspect/uniqueCreature; commander (read below) is untouched.
 APTITUDES_TUNING_PATH = REPO_ROOT / "data" / "tuning" / "aptitudes.v7.json"
 
 

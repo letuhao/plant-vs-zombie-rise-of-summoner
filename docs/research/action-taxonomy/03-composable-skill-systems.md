@@ -1344,7 +1344,7 @@ runs 1 (*"Will definitely see again"*) to 10 (*"this would require a major mirac
 **FACT ([hearthstone.wiki.gg](https://hearthstone.wiki.gg/wiki/Keyword) — **second-tier**).** Roughly
 **32 evergreen keywords** usable in any set (Battlecry, Deathrattle, Discover, Divine Shield, Lifesteal,
 Rush, Taunt, …) plus **six evergreen class keywords locked to one class each** (Choose One → Druid,
-Combo → Rogue, Outcast → Demon Hunter, Overheal → Priest, Overload → Shaman), plus roughly **40 set
+Combo → Rogue, Outcast → Creature Hunter, Overheal → Priest, Overload → Shaman), plus roughly **40 set
 keywords** confined to one expansion (Corrupt, Dredge, Echo, Excavate, Magnetic, Spellburst, Titan…).
 Same evergreen/deciduous split as MTG, with the class lock adding a faction gate.
 
@@ -1778,18 +1778,18 @@ effect shares one envelope, the syndrome generator only ever rolls a **5-tuple**
 probability, target selector, timing)* — and **any effect composes with any other for free**. The space
 is enormous and nothing malformed comes out, because malformedness is not representable.
 
-**The legality rules, from the Demon generation documentation — the most explicit statement in DF's
+**The legality rules, from the Creature generation documentation — the most explicit statement in DF's
 docs:**
 
-> *"the game begins by generating a table of demon subtypes (flying spirit, unique, humanoid beast,
+> *"the game begins by generating a table of creature subtypes (flying spirit, unique, humanoid beast,
 > beast, and 'whatever') and their difficulties. **The subtype determines which random creature profiles
-> are available**, with humanoid demons requiring a **humanoidable shape** … and **flying spirits being
+> are available**, with humanoid creatures requiring a **humanoidable shape** … and **flying spirits being
 > made of an intangible material** like snow or flame."*
 
-> *"A demon receives spheres, one chosen from the list of evil spheres … and one to two additional
+> *"A creature receives spheres, one chosen from the list of evil spheres … and one to two additional
 > **non-good spheres that don't conflict**."*
 
-> *"**Unless their creature profile already possesses a special attack**, demons receive a strong attack
+> *"**Unless their creature profile already possesses a special attack**, creatures receive a strong attack
 > tweak such as a poisonous sting, toxic breath, or fire breath."*
 
 Three distinct devices: a **subtype tag gates the shape and material pools**; sphere selection has an
@@ -1818,10 +1818,10 @@ and it <mannerism>. Its <colour> <tissue> <appearance modifier>. Beware its <spe
 final clause is the player-facing threat summary, generated straight from the attack slot, so the one
 mechanically decisive fact is always the last thing you read.**
 
-**The naming scheme is gated by the same property that gated generation:** *"a **base noun** (demon,
+**The naming scheme is gated by the same property that gated generation:** *"a **base noun** (creature,
 devil, etc) and an **adjective derived from their features**, like their colour, material, or species
-profile. **Corporeal** demons will be named either demon, devil, fiend, brute, or monster. **Intangible**
-demons instead pick from spirit, ghost, banshee, haunt, phantom, specter, or wraith."* A snow-bodied
+profile. **Corporeal** creatures will be named either creature, devil, fiend, brute, or monster. **Intangible**
+creatures instead pick from spirit, ghost, banshee, haunt, phantom, specter, or wraith."* A snow-bodied
 creature can be a wraith but never a brute. Sprites follow: *"randomly generated creatures with random
 colors that **resemble the generated appearance they've been given**."*
 

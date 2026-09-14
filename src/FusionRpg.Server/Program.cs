@@ -27,8 +27,8 @@ builder.Services.AddSignalR().AddJsonProtocol();
 // tunables-ssot.md §7.2: hosts load and inject; Core stays file-I/O-free. Migrated domains are
 // copied next to the exe by FusionRpg.Server.csproj (M.1 contracts, M.2 loam).
 var tuningDir = Path.Combine(AppContext.BaseDirectory, "data", "tuning");
-FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
-    FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(
+FusionRpg.Core.Creatures.Contracts.ContractPolicy.Configure(
+    FusionRpg.Core.Creatures.Contracts.ContractTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "contracts.v1.json"))));
 FusionRpg.Core.World.Loam.LoamPolicy.Configure(
     FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(
@@ -37,11 +37,11 @@ var worldTuning = FusionRpg.Core.World.WorldTuningLoader.Parse(
     File.ReadAllText(Path.Combine(tuningDir, "world.v5.json")));
 FusionRpg.Core.World.WorldTuningHub.Configure(worldTuning);
 FusionRpg.Core.World.Growth.RecruitPolicy.Configure(worldTuning.Growth);
-FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
-    FusionRpg.Core.Demons.SoulEarnTuningLoader.Parse(
+FusionRpg.Core.Creatures.SoulEarnPolicy.Configure(
+    FusionRpg.Core.Creatures.SoulEarnTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "souls.v1.json"))));
-FusionRpg.Core.Demons.Patron.PatronPolicy.Configure(
-    FusionRpg.Core.Demons.Patron.PatronTuningLoader.Parse(
+FusionRpg.Core.Creatures.Patron.PatronPolicy.Configure(
+    FusionRpg.Core.Creatures.Patron.PatronTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "patron.v1.json"))));
 FusionRpg.Core.Match.LawnDeployEventsTuningHub.Configure(
     FusionRpg.Core.Match.LawnDeployEventsTuningLoader.Parse(
@@ -55,8 +55,8 @@ FusionRpg.Core.Combat.Shield.ShieldPolicy.Configure(
 FusionRpg.Core.Combat.CombatPolicy.Configure(
     FusionRpg.Core.Combat.CombatTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "combat.v1.json"))));
-FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
-    FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(
+FusionRpg.Core.Creatures.Fusion.StarPolicy.Configure(
+    FusionRpg.Core.Creatures.Fusion.FusionTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "fusion.v2.json"))));
 FusionRpg.Core.Status.StatusPolicy.Configure(
     FusionRpg.Core.Status.StatusTuningLoader.Parse(
@@ -130,18 +130,18 @@ FusionRpg.Core.Progression.SpeciesProgressionTuningHub.Configure(
     FusionRpg.Core.Progression.SpeciesProgressionTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "species-progression.v1.json"))));
 // species-build T1.5: server-only, mirroring SpeciesProgressionTuningHub's own shape — the generation
-// tool (tools/DemonBuildPlanGen) reads this file directly and never goes through this hub.
-FusionRpg.Core.Demons.Generation.SpeciesBuildTuningHub.Configure(
-    FusionRpg.Core.Demons.Generation.SpeciesBuildTuningLoader.Parse(
+// tool (tools/CreatureBuildPlanGen) reads this file directly and never goes through this hub.
+FusionRpg.Core.Creatures.Generation.SpeciesBuildTuningHub.Configure(
+    FusionRpg.Core.Creatures.Generation.SpeciesBuildTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "species-build.v1.json"))));
-// species-build T2.1: the committed, generated plan (tools/DemonBuildPlanGen owns writing it) —
-// `SpeciesBuildPlanCatalog` is `demon-type-allocation`'s runtime reader for it. `tuningDir`'s parent is
-// ".../data", so "generated/demons" (not "data/generated/demons") — same relative shape Program.cs
+// species-build T2.1: the committed, generated plan (tools/CreatureBuildPlanGen owns writing it) —
+// `SpeciesBuildPlanCatalog` is `creature-type-allocation`'s runtime reader for it. `tuningDir`'s parent is
+// ".../data", so "generated/creatures" (not "data/generated/creatures") — same relative shape Program.cs
 // already uses for the generated-tree convention.
-FusionRpg.Core.Demons.Generation.SpeciesBuildPlanCatalog.Configure(
-    FusionRpg.Core.Demons.Generation.SpeciesBuildPlanReader.Parse(
+FusionRpg.Core.Creatures.Generation.SpeciesBuildPlanCatalog.Configure(
+    FusionRpg.Core.Creatures.Generation.SpeciesBuildPlanReader.Parse(
         File.ReadAllText(Path.Combine(
-            Directory.GetParent(tuningDir)!.FullName, "generated", "demons", "_species-build-plan.json"))));
+            Directory.GetParent(tuningDir)!.FullName, "generated", "creatures", "_species-build-plan.json"))));
 // species-build T4.4: ⛔ server-only — the Zomboss exists on battle and expedition surfaces, never the
 // lawn, so wiring this into the injector would be dead weight.
 FusionRpg.Core.Battle.Ai.ZombossAdaptiveTuningHub.Configure(
@@ -169,9 +169,15 @@ FusionRpg.Core.Battle.BattleTuningHub.Configure(
 // declined every time. Its own file rather than a battle.v{n}.json section because publish.py's
 // `set` path refuses to invent keys, and the file forbids hand-editing
 // (spec-battle-resources.md §2.2a).
+// v1 -> v2 (lawn-combat-wire T11, spec-lawn-combat-calibration.md, 2026-09-14): adds
+// `regenPerSecondShareMilli` — stamina now regenerates (the other four ids stay explicit 0s),
+// published via `tools/tuning/publish.py battle-resources --add-regen-block`, no hand-edit. v1
+// stays on disk for revert; every other reader of this file (tests, tools) still pins v1 directly
+// and gets the old byte-identical zero-regen behaviour, since BattleResourceTuningLoader.Parse
+// treats a missing regen block as an implicit all-zero share.
 FusionRpg.Core.Battle.BattleRuleset.ConfigureResources(
     FusionRpg.Core.Battle.BattleResourceTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "battle-resources.v1.json"))));
+        File.ReadAllText(Path.Combine(tuningDir, "battle-resources.v2.json"))));
 FusionRpg.Core.Battle.Board.SiegeTuningPolicy.Configure(
     FusionRpg.Core.Battle.Board.SiegeTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "siege.v1.json"))));
@@ -187,8 +193,8 @@ FusionRpg.Core.Battle.Board.BattleBoardTuningPolicy.Configure(
 FusionRpg.Core.World.StructureCatalog.Configure(
     FusionRpg.Core.World.StructureSeed.StructureCorpus.Load(
         Path.Combine(AppContext.BaseDirectory, "data", "seed", "structures")));
-FusionRpg.Core.Demons.SummoningTuningHub.Configure(
-    FusionRpg.Core.Demons.SummoningTuningLoader.Parse(
+FusionRpg.Core.Creatures.SummoningTuningHub.Configure(
+    FusionRpg.Core.Creatures.SummoningTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "summoning.v1.json"))));
 FusionRpg.Core.Aura.AuraTuningHub.Configure(
     FusionRpg.Core.Aura.AuraTuningLoader.Parse(
@@ -207,7 +213,7 @@ FusionRpg.Core.Power.PowerTuningHub.Configure(
         File.ReadAllText(Path.Combine(tuningDir, "power-scale.v2.json"))));
 FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(
     FusionRpg.Core.Stats.Aptitudes.AptitudeTuningLoader.Parse(
-        // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. Phase 0 six-resource coverage (2026-09-02): v2 -> v3, then v3 -> v4 (0.8: combat.heal.power generalised to resource.restore.{resource}) -- 32 edges added so every (family x resource) cell is fed, closing P7.2's poise gap. v2 stays on disk -- reverting is pointing this back at aptitudes.v2.json. passive-tree C6 (2026-09-06): v5 -> v6, pointEconomy gains skillPointsPerThetaMilliByScope (D34) -- v5 stays on disk. passive-tree D55 (2026-09-06): v6 -> v7, published via tools/tuning/publish.py -- demonType/aspect/uniqueDemon skillPointsPerThetaMilliByScope moved from the borrowed-placeholder {4,4,6} to the {3,4,4,6}-ratio-derived {15,15,22} against the already-settled commander=11 (spec-tree-state.md open question 3) -- v6 stays on disk.
+        // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. Phase 0 six-resource coverage (2026-09-02): v2 -> v3, then v3 -> v4 (0.8: combat.heal.power generalised to resource.restore.{resource}) -- 32 edges added so every (family x resource) cell is fed, closing P7.2's poise gap. v2 stays on disk -- reverting is pointing this back at aptitudes.v2.json. passive-tree C6 (2026-09-06): v5 -> v6, pointEconomy gains skillPointsPerThetaMilliByScope (D34) -- v5 stays on disk. passive-tree D55 (2026-09-06): v6 -> v7, published via tools/tuning/publish.py -- creatureType/aspect/uniqueCreature skillPointsPerThetaMilliByScope moved from the borrowed-placeholder {4,4,6} to the {3,4,4,6}-ratio-derived {15,15,22} against the already-settled commander=11 (spec-tree-state.md open question 3) -- v6 stays on disk.
         File.ReadAllText(Path.Combine(tuningDir, "aptitudes.v8.json"))));
 // aptitude-sheet AS-3.1: soft max presets (E8) — separate file so aptitudes.v{n} is not republished for a library-size knob.
 FusionRpg.Core.Stats.Aptitudes.AptitudePresetTuningHub.Configure(
@@ -360,14 +366,14 @@ if (SimFlags.Enabled)
 var app = builder.Build();
 var store = app.Services.GetRequiredService<RpgStore>();
 store.Init();
-// catalog-runtime (demon-seed module 13, spec-catalog-runtime.md §7 step 5) — THE FLIP, 2026-09-05:
-// species now load from the store `species-import` writes (data/generated/demons/**.json, imported
-// via `tools/DemonSpeciesImport`), not the compiled `DemonSpeciesCatalog.Generated.cs` snapshot.
+// catalog-runtime (creature-seed module 13, spec-catalog-runtime.md §7 step 5) — THE FLIP, 2026-09-05:
+// species now load from the store `species-import` writes (data/generated/creatures/**.json, imported
+// via `tools/CreatureSpeciesImport`), not the compiled `CreatureSpeciesCatalog.Generated.cs` snapshot.
 // Owner decision (2026-09-05): the classification/generation pipeline is real and current
 // (829 species, up from 84); further review happens against the real, running roster, not by
 // withholding it. Loaded once here, immutable for the process lifetime (§3a — no live reload; an
 // import needs a server restart, already how this repo deploys).
-FusionRpg.Core.Demons.DemonSpeciesCatalog.Configure(store.BuildDemonSpeciesSnapshot());
+FusionRpg.Core.Creatures.CreatureSpeciesCatalog.Configure(store.BuildCreatureSpeciesSnapshot());
 store.SeedRarityLadder(itemRarityTuning);
 // item-ideal.md, salvage-craft (module 14): `salvage_yield`, the sixth `rarity_budget` key, whose
 // shape ssot-rarity.md §5 recorded as "awaiting I9" until this module decided it. Seeded here rather
@@ -394,12 +400,19 @@ store.SeedUniqueEligible(uniqueTuning);
 // live game/injector path -- this runs once, here, before the server accepts any connection.
 if (Environment.GetEnvironmentVariable("FUSIONRPG_ACTION_CORPUS_IMPORT") != "0")
 {
-    var actionCorpusTemplatePath = Path.Combine(AppContext.BaseDirectory, "data", "tuning", "action-corpus-cost-templates.v1.json");
+    // v1 -> v2 (lawn-combat-wire T11, spec-lawn-combat-calibration.md, 2026-09-14): kinds.basic
+    // baseAmountAtRung1 derived from the pool/regen envelope (20 -> 25), published via
+    // tools/tuning/publish.py, no hand-edit. v1 stays on disk for revert.
+    var actionCorpusTemplatePath = Path.Combine(AppContext.BaseDirectory, "data", "tuning", "action-corpus-cost-templates.v2.json");
     if (File.Exists(actionCorpusTemplatePath))
     {
         var actionCostTemplate = FusionRpg.Core.Actions.Corpus.ActionCorpusCostTemplateLoader.Parse(File.ReadAllText(actionCorpusTemplatePath));
         var actionBriefs = new List<FusionRpg.Core.Actions.Corpus.ActionCorpusBrief>();
-        foreach (var briefFile in new[] { "committed-round-1.json", "committed-round-2.json" })
+        // `authored-basics.json` (T7, basic-attack-seed): the hand-authored `act.attack` fallback,
+        // never generator output (spec-basic-attack-seed.md) -- loaded alongside the two generated
+        // committed rounds so the shared basic attack becomes a real seed-imported row instead of only
+        // existing as BattleRunState.cs's hardcoded CompiledAction.
+        foreach (var briefFile in new[] { "committed-round-1.json", "committed-round-2.json", "authored-basics.json" })
         {
             var briefPath = Path.Combine(AppContext.BaseDirectory, "data", "seed", "actions", briefFile);
             if (File.Exists(briefPath))
@@ -699,14 +712,14 @@ store.LoadContentIntoRuntime();
         $"[items] {rarityBudget.Render("rarity power budget")} "
         + $"— {ceilings.PricedRungs} rung(s) priced, pinAE {ceilings.RenderPinAe()}");
 }
-// Fail fast on demon content errors: the catalogs are lazy, and a bad species surfacing on the
+// Fail fast on creature content errors: the catalogs are lazy, and a bad species surfacing on the
 // first request would permanently poison WaveCatalog's static initializer (review I6).
-_ = FusionRpg.Core.Demons.DemonSpeciesCatalog.All;
+_ = FusionRpg.Core.Creatures.CreatureSpeciesCatalog.All;
 // base-defense siege-waves §3.5 (task 12.4, 2026-09-06): wave composition moved out of a hand-written
 // WaveCatalog.cs array into data/tuning/waves.v1.json — species selection by rarity band still
 // happens in Core (WaveCatalog.Band/Enemies, reused verbatim by the loader), only WHICH waves exist
-// and their picks are now data. Must run after DemonSpeciesCatalog.Configure above: Band() reads
-// DemonSpeciesCatalog.All. Same Loader.Parse(File.ReadAllText(...)) -> Configure(...) shape as every
+// and their picks are now data. Must run after CreatureSpeciesCatalog.Configure above: Band() reads
+// CreatureSpeciesCatalog.All. Same Loader.Parse(File.ReadAllText(...)) -> Configure(...) shape as every
 // other data/tuning/*.json load in this file.
 FusionRpg.Core.Battle.WaveCatalog.Configure(
     FusionRpg.Core.Battle.WaveCatalogLoader.Parse(
@@ -721,14 +734,14 @@ FusionRpg.Core.Battle.WaveCatalog.Configure(
 // the old live algorithm, matching spec-catalog-runtime.md's own binding rule for the sibling
 // catalog.
 {
-    var fusionRecipesPath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "demons", "_fusion-recipes.json");
+    var fusionRecipesPath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "creatures", "_fusion-recipes.json");
     if (!File.Exists(fusionRecipesPath))
         throw new InvalidOperationException(
             $"Fusion recipe seed not found at '{fusionRecipesPath}'. Run 'python tools/seedsmith/seedsmith/" +
-            "adapters/demons/fusion/reconcile.py' (add --deterministic-only for a model-free pass) against " +
+            "adapters/creatures/fusion/reconcile.py' (add --deterministic-only for a model-free pass) against " +
             "the data directory this host points at.");
-    var fusionRecipes = FusionRpg.Core.Demons.Fusion.FusionRecipeSeedReader.Parse(File.ReadAllText(fusionRecipesPath));
-    FusionRpg.Core.Demons.Fusion.DemonRecipeCatalog.Configure(fusionRecipes);
+    var fusionRecipes = FusionRpg.Core.Creatures.Fusion.FusionRecipeSeedReader.Parse(File.ReadAllText(fusionRecipesPath));
+    FusionRpg.Core.Creatures.Fusion.CreatureRecipeCatalog.Configure(fusionRecipes);
 }
 // Boot sweep: web matches logged but never ingested (crash window) re-resolve deterministically.
 var sweptMatches = app.Services.GetRequiredService<WebMatchService>().SweepUnresolved();
@@ -748,12 +761,11 @@ if (clearedBindings > 0)
 var orphanInstances = app.Services.GetRequiredService<RpgStore>().CountOrphanInstances();
 if (orphanInstances > 0)
     Console.WriteLine($"[atoms] {orphanInstances} orphan instance(s) remain after the boot sweep");
-// `equip-atom-source-not-wired` (action-plan.md §5) + GG-49 equip SourceId (2026-09-08):
-// BattleStatComposer and UniqueActorHubCompose share EquippedBoundAtoms so battle ModsFor and
-// sheet DerivedAtomsFor mint equip:{role}:{itemRef}, never bare atom ids / equip:unknown.
-var equipStore = app.Services.GetRequiredService<RpgStore>();
-FusionRpg.Core.Battle.BattleStatComposer.UseEquipment(
-    EquippedBoundAtoms.SourceFromStore(equipStore));
+// battle-hub-fuse T6: the old global BattleStatComposer.UseEquipment(EquippedBoundAtoms
+// .SourceFromStore(...)) resolver is deleted with the composer -- it fed nothing once BattleEngine
+// moved to BattleHubCompose in T5 (BattleHubCompose reads per-actor setup.HubInputs.BoundAtoms, not
+// a global default). Wiring a real per-actor EquippedBoundAtoms source into battle setups' HubInputs
+// is T7's named scope ("Battle equip path Hub op-aware only"), not re-created here.
 app.UseCors();
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -761,7 +773,7 @@ app.UseStaticFiles();
 app.MapStorageEndpoints();
 app.MapUniqueActors();
 app.MapRelics();
-app.MapDemons();
+app.MapCreatures();
 app.MapZombossDeploy();
 app.MapSouls();
 app.MapExpeditions();

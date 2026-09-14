@@ -48,7 +48,7 @@ reading both the current component and the plate directly this session, not inhe
 | Module id | Responsibility | Depends on |
 |---|---|---|
 | `onboarding-first-run` | Build plate 01 §D's actual naming-ritual content — the sunflower reveal, editable name field, "Bind" action — in place of the current "Open Creatures" CTA redirect, for the zero-creature `FocusCard` branch specifically. The other three branches (tribute/expedition/run-prompt) are real and out of scope here | — |
-| `actor-menu-scope-picker` | A **new** composition, not a new plate section — assembles the existing, already production-proven Actor ladder (`ui/actor/{ActorToken,ActorChip,ActorRow,ActorCard,ActorPanel}`) into one reusable menu that emits a `WhoSelector`-shaped value (buff-debuff-scope program: `Target` / `Type` / `UniqueDemon` / `Relation`, all four modes per owner decision). FE-only for now — no backend wiring, since the commander/aura-skill feature that would consume this is still explicitly deferred | — (independent; can build in parallel) |
+| `actor-menu-scope-picker` | A **new** composition, not a new plate section — assembles the existing, already production-proven Actor ladder (`ui/actor/{ActorToken,ActorChip,ActorRow,ActorCard,ActorPanel}`) into one reusable menu that emits a `WhoSelector`-shaped value (buff-debuff-scope program: `Target` / `Type` / `UniqueCreature` / `Relation`, all four modes per owner decision). FE-only for now — no backend wiring, since the commander/aura-skill feature that would consume this is still explicitly deferred | — (independent; can build in parallel) |
 | `hide-legacy-entry` | Mechanical: hide whichever existing UI currently occupies the first-run / actor-selection space, in favor of the two new pieces above. Narrow scope, owner-confirmed (see Resolved below) | `onboarding-first-run`, `actor-menu-scope-picker` (hide only once the replacement exists) |
 
 ## Build order
@@ -84,10 +84,10 @@ legacy surface exists to remove) found:
 - **Actor-selection has no existing competitor to hide.** `actor-menu-scope-picker` is net-new — no
   screen currently renders a "pick who a buff/debuff reaches" menu, because the commander/aura-skill
   feature that would need one doesn't exist yet. There is nothing occupying that space today.
-- **A real, larger legacy candidate exists but is out of this module's stated scope.** [`DemonsPage.tsx`](../../web/fusion-rpg-web/src/features/demons/DemonsPage.tsx)
-  (own doc comment: *"Demon Domain V1... Summon panel... Active/Reserve roster, Codex"*) is a full
+- **A real, larger legacy candidate exists but is out of this module's stated scope.** [`CreaturesPage.tsx`](../../web/fusion-rpg-web/src/features/creatures/CreaturesPage.tsx)
+  (own doc comment: *"Creature Domain V1... Summon panel... Active/Reserve roster, Codex"*) is a full
   top-level page still directly routed (`routes.tsx:81-88`, not redirected into Sanctum like almost
-  every other legacy route) with its own working nickname mechanism (`useSetDemonNickname`) —
+  every other legacy route) with its own working nickname mechanism (`useSetCreatureNickname`) —
   materially more capable than Creatures' `adaptActor` (`displayName` hardcoded `"Pending"`, per
   `spec-onboarding-first-run.md`'s own finding). It plausibly duplicates roster/actor-selection
   territory, but hiding a full summon/pity/roster/codex feature is a materially bigger action than
@@ -97,4 +97,4 @@ legacy surface exists to remove) found:
 
 **`hide-legacy-entry` closes as a verification module**: confirm both replacements shipped cleanly and
 left no dangling old code, rather than a module with its own removal work. See the spec for the
-DemonsPage question, surfaced for owner review rather than resolved silently.
+CreaturesPage question, surfaced for owner review rather than resolved silently.

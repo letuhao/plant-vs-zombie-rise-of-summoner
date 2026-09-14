@@ -13,7 +13,7 @@ Player words only. If a term is not here, it does not belong on a player surface
 | **Level up and power** | Dave’s level, specimen XP, aptitudes — endless, no cap |
 | **Summon and fusion** | Altar, pacts, fusion, wild joins, capture |
 | **Item collection** | Find, vault, equip, craft relics |
-| **Idle expeditions** | Dispatch spare demons; wait; collect — core forever |
+| **Idle expeditions** | Dispatch spare creatures; wait; collect — core forever |
 | **Farm / hunt / defend** | Yield and materials; prey and capture; Seat and homeworld |
 | **World-map adventure** | Where you go — fog, march, claim |
 | **World-stage empire** | Where you stand to run the empire |
@@ -54,11 +54,11 @@ See [The loops](the-loops.md).
 | **Dave’s level** | The main power line and the Vision unlock clock |
 | **Creature** | Anything in your collection layer |
 | **Specimen** | One persistent individual — not a stack of copies |
-| **Demon** | A specimen you summon, bind, fuse, and field |
 | **Legion** | A force you march on the rift |
 | **Commander** | Who leads a lawn run or a legion |
-| **Warden** | A demon bound to hold ground on the map (**WIP**) |
-| **Patron** | The one demon whose element colours the army (**WIP** on the live lawn) |
+| **Warden** | A creature bound to hold ground on the map (**WIP**) |
+| **Patron** | The one creature whose element colours the army (**WIP** on the live lawn) |
+| **Demon** | **Not used in the shipped game — reserved for a future race.** A creature of a *new empire*, a faction in its own right. Named only; owner: *"needs a serious huge program."* Every player-facing and source use of the word is now **Creature** (repo-wide rename, 2026-09-12). Do not reintroduce it for an existing creature. See [species-selection-ideal.md](../architecture/species-selection-ideal.md) |
 | **Zomboss** | The enemy commander. He decides from his own fog |
 
 ---
@@ -67,11 +67,11 @@ See [The loops](the-loops.md).
 
 | Term | Meaning |
 |---|---|
-| **Summon** | Spend souls at the altar for a new demon |
-| **Bind / pact** | Assign a demon to a contract slot and keep loyalty |
+| **Summon** | Spend souls at the altar for a new creature |
+| **Bind / pact** | Assign a creature to a contract slot and keep loyalty |
 | **Tribute** | Keep a pact paid; overdue tribute is leverage |
 | **Fuse** | Merge specimens — stars, recipes, inheritance |
-| **Deploy** | Send a bound demon into a lawn run or a fight |
+| **Deploy** | Send a bound creature into a lawn run or a fight |
 | **Dispatch** | Send a squad on an expedition |
 | **Recall** | Pull an expedition home early for pro-rated rewards |
 | **Collect** | Claim expedition (or other) rewards when ready |

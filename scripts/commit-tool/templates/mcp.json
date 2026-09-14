@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "repo-git": {
+      "command": "python",
+      "args": ["scripts/commit-tool/mcp_server.py"]
+    }
+  }
+}

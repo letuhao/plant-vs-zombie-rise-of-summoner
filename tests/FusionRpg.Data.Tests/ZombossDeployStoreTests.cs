@@ -4,28 +4,26 @@ using Xunit;
 namespace FusionRpg.Data.Tests;
 
 /// <summary>zomboss-deploy-ai T3.4 — the store-side half of the deploy wiring: a dedicated, idempotent
-/// Zomboss player row, and minting a fresh specimen under it via the real `MintDemon` primitive.</summary>
+/// Zomboss player row, and minting a fresh specimen under it via the real `MintCreature` primitive.</summary>
 public class ZombossDeployStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ZombossDeployStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-zomboss-deploy-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
-    static readonly FusionRpg.Core.Demons.DemonSpeciesDef CatalogSpecies =
-        FusionRpg.Core.Demons.DemonSpeciesCatalog.All.First(s =>
-            s.DeployMode != FusionRpg.Core.Demons.DemonDeployMode.HypnoAlly);
+    static readonly FusionRpg.Core.Creatures.CreatureSpeciesDef CatalogSpecies =
+        FusionRpg.Core.Creatures.CreatureSpeciesCatalog.All.First(s =>
+            s.DeployMode != FusionRpg.Core.Creatures.CreatureDeployMode.HypnoAlly);
 
     [Fact]
     public void EnsureZombossPlayer_creates_a_player_row_named_Zomboss()
@@ -70,8 +68,8 @@ public class ZombossDeployStoreTests : IDisposable
     [Fact]
     public void MintForZomboss_is_deterministic_same_seed_same_traits()
     {
-        var traitSpecies = FusionRpg.Core.Demons.DemonSpeciesCatalog.All.First(s =>
-            s.DeployMode != FusionRpg.Core.Demons.DemonDeployMode.HypnoAlly && s.TraitPool.Count > 0);
+        var traitSpecies = FusionRpg.Core.Creatures.CreatureSpeciesCatalog.All.First(s =>
+            s.DeployMode != FusionRpg.Core.Creatures.CreatureDeployMode.HypnoAlly && s.TraitPool.Count > 0);
 
         var first = _store.MintForZomboss(traitSpecies.SpeciesId, seed: 999);
         var second = _store.MintForZomboss(traitSpecies.SpeciesId, seed: 999);

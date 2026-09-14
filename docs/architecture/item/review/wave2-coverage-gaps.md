@@ -39,7 +39,7 @@ whether the two frames get *comparable numbers of items* within those eight role
 | `manipulator` | hands | leaves | 10 | 8 | 1.25 : 1 |
 | **Total** | | | **59** | **85** | **1 : 1.44** |
 
-A humanoid demon has 59 unique options across the whole roster against a plant demon's 85 — a 44%
+A humanoid creature has 59 unique options across the whole roster against a plant creature's 85 — a 44%
 gap — and in the weapon slot specifically (`armament-primary`), the plant frame has 2.6× the unique
 choices a humanoid has.
 

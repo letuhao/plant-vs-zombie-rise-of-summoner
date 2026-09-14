@@ -34,11 +34,11 @@
       },
       {
         "batch": "recipegen/legacy-shard-migration-1",
-        "note": "Seven pre-existing cost lines named a retired legacy shard band id (shard.common/rare/epic/legendary), refused at real C# import time (MaterialCatalog.IsLegacyShardId / MaterialUnissuableRule via MaterialRecipeCatalog.Load -- these recipes could never be paid). Migrated via seedsmith.adapters.items.recipegen.migrate_legacy_shards, mirroring LegacyDemonRarityIds.ForwardMap exactly (each legacy band maps to its lowest new-ladder rung, spec-rarity-migration.md sec4 point 4): common->chaff, rare->cultivated, epic->heirloom, legendary->sunwoven. No live model call -- a mechanical id rewrite, no prompt involved, same 'hand-authored, no model' precedent recipegen's own trial-1 amendment used for its hand-authored name/flavor.",
+        "note": "Seven pre-existing cost lines named a retired legacy shard band id (shard.common/rare/epic/legendary), refused at real C# import time (MaterialCatalog.IsLegacyShardId / MaterialUnissuableRule via MaterialRecipeCatalog.Load -- these recipes could never be paid). Migrated via seedsmith.adapters.items.recipegen.migrate_legacy_shards, mirroring LegacyCreatureRarityIds.ForwardMap exactly (each legacy band maps to its lowest new-ladder rung, spec-rarity-migration.md sec4 point 4): common->chaff, rare->cultivated, epic->heirloom, legendary->sunwoven. No live model call -- a mechanical id rewrite, no prompt involved, same 'hand-authored, no model' precedent recipegen's own trial-1 amendment used for its hand-authored name/flavor.",
         "promptVersion": "n/a-mechanical-migration",
         "model": "recipegen/legacy-shard-migration-1",
         "authoredUtc": "2026-09-07T16:15:29Z",
-        "sourceRef": "docs/architecture/demon-seed/spec-rarity-migration.md#4",
+        "sourceRef": "docs/architecture/creature-seed/spec-rarity-migration.md#4",
         "entries": [
           "recipe.009",
           "recipe.010",
@@ -54,7 +54,7 @@
   "entries": [
     {
       "id": "recipe.001",
-      "nameKey": "recipe.forge-humanoid-cloth",
+      "nameKey": "recipe.recipe.001",
       "name": "Forge: Cloth Armor",
       "operation": "forge",
       "outputKind": "container",
@@ -78,7 +78,7 @@
     },
     {
       "id": "recipe.002",
-      "nameKey": "recipe.forge-humanoid-leather",
+      "nameKey": "recipe.recipe.002",
       "name": "Forge: Leather Gear",
       "operation": "forge",
       "outputKind": "container",
@@ -102,7 +102,7 @@
     },
     {
       "id": "recipe.003",
-      "nameKey": "recipe.forge-plant-stalk",
+      "nameKey": "recipe.recipe.003",
       "name": "Forge: Stalk Bloom",
       "operation": "forge",
       "outputKind": "container",
@@ -126,7 +126,7 @@
     },
     {
       "id": "recipe.004",
-      "nameKey": "recipe.forge-plant-heartwood",
+      "nameKey": "recipe.recipe.004",
       "name": "Forge: Heartwood Branch",
       "operation": "forge",
       "outputKind": "container",
@@ -150,7 +150,7 @@
     },
     {
       "id": "recipe.005",
-      "nameKey": "recipe.upcycle-humanoid-crude",
+      "nameKey": "recipe.recipe.005",
       "name": "Upcycle: Refine Metal Scraps",
       "operation": "upcycle",
       "outputKind": "material",
@@ -167,7 +167,7 @@
     },
     {
       "id": "recipe.006",
-      "nameKey": "recipe.upcycle-humanoid-sound",
+      "nameKey": "recipe.recipe.006",
       "name": "Upcycle: Polish Metal",
       "operation": "upcycle",
       "outputKind": "material",
@@ -184,7 +184,7 @@
     },
     {
       "id": "recipe.007",
-      "nameKey": "recipe.upcycle-plant-crude",
+      "nameKey": "recipe.recipe.007",
       "name": "Upcycle: Cure Fibers",
       "operation": "upcycle",
       "outputKind": "material",
@@ -201,7 +201,7 @@
     },
     {
       "id": "recipe.008",
-      "nameKey": "recipe.upcycle-plant-sound",
+      "nameKey": "recipe.recipe.008",
       "name": "Upcycle: Strengthen Grain",
       "operation": "upcycle",
       "outputKind": "material",
@@ -218,7 +218,7 @@
     },
     {
       "id": "recipe.009",
-      "nameKey": "recipe.elevate-to-rare",
+      "nameKey": "recipe.recipe.009",
       "name": "Elevate: Forge Rarity",
       "operation": "elevate",
       "outputKind": "mutation",
@@ -243,7 +243,7 @@
     },
     {
       "id": "recipe.010",
-      "nameKey": "recipe.elevate-to-epic",
+      "nameKey": "recipe.recipe.010",
       "name": "Elevate: Apex Rarity",
       "operation": "elevate",
       "outputKind": "mutation",
@@ -268,7 +268,7 @@
     },
     {
       "id": "recipe.011",
-      "nameKey": "recipe.elevate-to-legendary",
+      "nameKey": "recipe.recipe.011",
       "name": "Elevate: Legendary Crown",
       "operation": "elevate",
       "outputKind": "mutation",
@@ -293,7 +293,7 @@
     },
     {
       "id": "recipe.012",
-      "nameKey": "recipe.temper-enhance-1",
+      "nameKey": "recipe.recipe.012",
       "name": "Temper: First Enhancement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -314,7 +314,7 @@
     },
     {
       "id": "recipe.013",
-      "nameKey": "recipe.temper-enhance-mid",
+      "nameKey": "recipe.recipe.013",
       "name": "Temper: Deeper Enhancement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -335,7 +335,7 @@
     },
     {
       "id": "recipe.014",
-      "nameKey": "recipe.temper-enhance-high",
+      "nameKey": "recipe.recipe.014",
       "name": "Temper: Ultimate Enhancement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -356,7 +356,7 @@
     },
     {
       "id": "recipe.015",
-      "nameKey": "recipe.reroll-single-common",
+      "nameKey": "recipe.recipe.015",
       "name": "Reroll: Reshape Common",
       "operation": "reroll-one",
       "outputKind": "mutation",
@@ -373,7 +373,7 @@
     },
     {
       "id": "recipe.016",
-      "nameKey": "recipe.reroll-single-elemental",
+      "nameKey": "recipe.recipe.016",
       "name": "Reroll: Reweave Element",
       "operation": "reroll-one",
       "outputKind": "mutation",
@@ -394,7 +394,7 @@
     },
     {
       "id": "recipe.017",
-      "nameKey": "recipe.reroll-all-rare",
+      "nameKey": "recipe.recipe.017",
       "name": "Reroll: Rework Rare",
       "operation": "reroll-all",
       "outputKind": "mutation",
@@ -415,7 +415,7 @@
     },
     {
       "id": "recipe.018",
-      "nameKey": "recipe.reroll-all-epic",
+      "nameKey": "recipe.recipe.018",
       "name": "Reroll: Remake Epic",
       "operation": "reroll-all",
       "outputKind": "mutation",
@@ -436,7 +436,7 @@
     },
     {
       "id": "recipe.019",
-      "nameKey": "recipe.bore-socket-humanoid",
+      "nameKey": "recipe.recipe.019",
       "name": "Bore: Open Metal",
       "operation": "bore",
       "outputKind": "mutation",
@@ -457,7 +457,7 @@
     },
     {
       "id": "recipe.020",
-      "nameKey": "recipe.bore-socket-plant",
+      "nameKey": "recipe.recipe.020",
       "name": "Bore: Split Fiber",
       "operation": "bore",
       "outputKind": "mutation",
@@ -478,7 +478,7 @@
     },
     {
       "id": "recipe.021",
-      "nameKey": "recipe.bore-socket-fine",
+      "nameKey": "recipe.recipe.021",
       "name": "Bore: Carve Deep",
       "operation": "bore",
       "outputKind": "mutation",
@@ -499,7 +499,7 @@
     },
     {
       "id": "recipe.022",
-      "nameKey": "recipe.socket-insert",
+      "nameKey": "recipe.recipe.022",
       "name": "Socket: Gem Setting",
       "operation": "socket",
       "outputKind": "mutation",
@@ -511,7 +511,7 @@
     },
     {
       "id": "recipe.023",
-      "nameKey": "recipe.forge-humanoid-plate",
+      "nameKey": "recipe.recipe.023",
       "name": "Forge: Plated Guard",
       "operation": "forge",
       "outputKind": "container",
@@ -535,7 +535,7 @@
     },
     {
       "id": "recipe.024",
-      "nameKey": "recipe.forge-plant-root",
+      "nameKey": "recipe.recipe.024",
       "name": "Forge: Root Cluster",
       "operation": "forge",
       "outputKind": "container",
@@ -559,7 +559,7 @@
     },
     {
       "id": "recipe.025",
-      "nameKey": "recipe.elevate-to-legendary-plus",
+      "nameKey": "recipe.recipe.025",
       "name": "Elevate: Apex Legacy",
       "operation": "elevate",
       "outputKind": "mutation",
@@ -584,7 +584,7 @@
     },
     {
       "id": "recipe.026",
-      "nameKey": "recipe.reroll-essence-fire",
+      "nameKey": "recipe.recipe.026",
       "name": "Reroll: Fiery Essence",
       "operation": "reroll-one",
       "outputKind": "mutation",
@@ -605,7 +605,7 @@
     },
     {
       "id": "recipe.027",
-      "nameKey": "recipe.reroll-essence-dark",
+      "nameKey": "recipe.recipe.027",
       "name": "Reroll: Shadow Weave",
       "operation": "reroll-one",
       "outputKind": "mutation",
@@ -626,7 +626,7 @@
     },
     {
       "id": "recipe.028",
-      "nameKey": "recipe.reroll-essence-air",
+      "nameKey": "recipe.recipe.028",
       "name": "Reroll: Windward Turn",
       "operation": "reroll-one",
       "outputKind": "mutation",
@@ -647,7 +647,7 @@
     },
     {
       "id": "recipe.029",
-      "nameKey": "recipe.elevate-rare-to-epic",
+      "nameKey": "recipe.recipe.029",
       "name": "Elevate: Escalate Rarity",
       "operation": "elevate",
       "outputKind": "mutation",
@@ -672,7 +672,7 @@
     },
     {
       "id": "recipe.030",
-      "nameKey": "recipe.temper-enhance-extreme",
+      "nameKey": "recipe.recipe.030",
       "name": "Temper: Peak Enhancement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -693,7 +693,7 @@
     },
     {
       "id": "recipe.031",
-      "nameKey": "recipe.forge-cloth-hood",
+      "nameKey": "recipe.recipe.031",
       "name": "Forge: Cloth Hood",
       "operation": "forge",
       "outputKind": "container",
@@ -718,7 +718,7 @@
     },
     {
       "id": "recipe.032",
-      "nameKey": "recipe.elevate-take-root",
+      "nameKey": "recipe.recipe.032",
       "name": "Elevate: Take Root",
       "operation": "elevate",
       "outputKind": "mutation",
@@ -744,7 +744,7 @@
     },
     {
       "id": "recipe.033",
-      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "nameKey": "recipe.recipe.033",
       "name": "Temper: Sunwoven Reinforcement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -766,7 +766,7 @@
     },
     {
       "id": "recipe.034",
-      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "nameKey": "recipe.recipe.034",
       "name": "Temper: Sunwoven Reinforcement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -788,7 +788,7 @@
     },
     {
       "id": "recipe.035",
-      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "nameKey": "recipe.recipe.035",
       "name": "Temper: Sunwoven Reinforcement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -810,7 +810,7 @@
     },
     {
       "id": "recipe.036",
-      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "nameKey": "recipe.recipe.036",
       "name": "Temper: Sunwoven Reinforcement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -832,7 +832,7 @@
     },
     {
       "id": "recipe.037",
-      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "nameKey": "recipe.recipe.037",
       "name": "Temper: Sunwoven Reinforcement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -854,7 +854,7 @@
     },
     {
       "id": "recipe.038",
-      "nameKey": "recipe.temper-sunwoven-weave",
+      "nameKey": "recipe.recipe.038",
       "name": "Temper: Sunwoven Weave",
       "operation": "temper",
       "outputKind": "mutation",
@@ -876,7 +876,7 @@
     },
     {
       "id": "recipe.039",
-      "nameKey": "recipe.temper-sunwoven-weave",
+      "nameKey": "recipe.recipe.039",
       "name": "Temper: Sunwoven Weave",
       "operation": "temper",
       "outputKind": "mutation",
@@ -898,7 +898,7 @@
     },
     {
       "id": "recipe.040",
-      "nameKey": "recipe.temper-sunwoven-weave",
+      "nameKey": "recipe.recipe.040",
       "name": "Temper: Sunwoven Weave",
       "operation": "temper",
       "outputKind": "mutation",
@@ -920,7 +920,7 @@
     },
     {
       "id": "recipe.041",
-      "nameKey": "recipe.temper-sunwoven-weave",
+      "nameKey": "recipe.recipe.041",
       "name": "Temper: Sunwoven Weave",
       "operation": "temper",
       "outputKind": "mutation",
@@ -942,7 +942,7 @@
     },
     {
       "id": "recipe.042",
-      "nameKey": "recipe.temper-sunwoven-weave",
+      "nameKey": "recipe.recipe.042",
       "name": "Temper: Sunwoven Weave",
       "operation": "temper",
       "outputKind": "mutation",
@@ -964,7 +964,7 @@
     },
     {
       "id": "recipe.043",
-      "nameKey": "recipe.temper-sunwoven-edge",
+      "nameKey": "recipe.recipe.043",
       "name": "Temper: Sunwoven Edge",
       "operation": "temper",
       "outputKind": "mutation",
@@ -986,7 +986,7 @@
     },
     {
       "id": "recipe.044",
-      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "nameKey": "recipe.recipe.044",
       "name": "Temper: Sunwoven Reinforcement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1008,7 +1008,7 @@
     },
     {
       "id": "recipe.045",
-      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "nameKey": "recipe.recipe.045",
       "name": "Temper: Sunwoven Reinforcement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1030,7 +1030,7 @@
     },
     {
       "id": "recipe.046",
-      "nameKey": "recipe.temper-sunwoven-weave",
+      "nameKey": "recipe.recipe.046",
       "name": "Temper: Sunwoven Weave",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1052,7 +1052,7 @@
     },
     {
       "id": "recipe.047",
-      "nameKey": "recipe.temper-sunwoven-weave",
+      "nameKey": "recipe.recipe.047",
       "name": "Temper: Sunwoven Weave",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1073,7 +1073,7 @@
     },
     {
       "id": "recipe.048",
-      "nameKey": "recipe.temper-sunwoven-weave",
+      "nameKey": "recipe.recipe.048",
       "name": "Temper: Sunwoven Weave",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1095,7 +1095,7 @@
     },
     {
       "id": "recipe.049",
-      "nameKey": "recipe.temper-sunwoven-weave",
+      "nameKey": "recipe.recipe.049",
       "name": "Temper: Sunwoven Weave",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1117,7 +1117,7 @@
     },
     {
       "id": "recipe.050",
-      "nameKey": "recipe.temper-sunwoven-weave",
+      "nameKey": "recipe.recipe.050",
       "name": "Temper: Sunwoven Weave",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1139,7 +1139,7 @@
     },
     {
       "id": "recipe.051",
-      "nameKey": "recipe.elevate-sunwoven-core",
+      "nameKey": "recipe.recipe.051",
       "name": "Elevate: Sunwoven Core",
       "operation": "elevate",
       "outputKind": "mutation",
@@ -1161,7 +1161,7 @@
     },
     {
       "id": "recipe.052",
-      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "nameKey": "recipe.recipe.052",
       "name": "Temper: Sunwoven Reinforcement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1183,7 +1183,7 @@
     },
     {
       "id": "recipe.053",
-      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "nameKey": "recipe.recipe.053",
       "name": "Temper: Sunwoven Reinforcement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1205,7 +1205,7 @@
     },
     {
       "id": "recipe.054",
-      "nameKey": "recipe.temper-sunwoven-edge",
+      "nameKey": "recipe.recipe.054",
       "name": "Temper: Sunwoven Edge",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1227,7 +1227,7 @@
     },
     {
       "id": "recipe.055",
-      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "nameKey": "recipe.recipe.055",
       "name": "Temper: Sunwoven Reinforcement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1249,7 +1249,7 @@
     },
     {
       "id": "recipe.056",
-      "nameKey": "recipe.elevate-sunwoven-core",
+      "nameKey": "recipe.recipe.056",
       "name": "Elevate: Sunwoven Core",
       "operation": "elevate",
       "outputKind": "mutation",
@@ -1271,7 +1271,7 @@
     },
     {
       "id": "recipe.057",
-      "nameKey": "recipe.elevate-verdant-bloom",
+      "nameKey": "recipe.recipe.057",
       "name": "Elevate: Verdant Bloom",
       "operation": "elevate",
       "outputKind": "mutation",
@@ -1293,7 +1293,7 @@
     },
     {
       "id": "recipe.058",
-      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "nameKey": "recipe.recipe.058",
       "name": "Temper: Sunwoven Reinforcement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1315,7 +1315,7 @@
     },
     {
       "id": "recipe.059",
-      "nameKey": "recipe.temper-sunwoven-weave",
+      "nameKey": "recipe.recipe.059",
       "name": "Temper: Sunwoven Weave",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1337,7 +1337,7 @@
     },
     {
       "id": "recipe.060",
-      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "nameKey": "recipe.recipe.060",
       "name": "Temper: Sunwoven Reinforcement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1358,7 +1358,7 @@
     },
     {
       "id": "recipe.061",
-      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "nameKey": "recipe.recipe.061",
       "name": "Temper: Sunwoven Reinforcement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1380,7 +1380,7 @@
     },
     {
       "id": "recipe.062",
-      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "nameKey": "recipe.recipe.062",
       "name": "Temper: Sunwoven Reinforcement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1402,7 +1402,7 @@
     },
     {
       "id": "recipe.063",
-      "nameKey": "recipe.elevate-sunwoven-core",
+      "nameKey": "recipe.recipe.063",
       "name": "Elevate: Sunwoven Core",
       "operation": "elevate",
       "outputKind": "mutation",
@@ -1424,7 +1424,7 @@
     },
     {
       "id": "recipe.064",
-      "nameKey": "recipe.temper-sunwoven-weave",
+      "nameKey": "recipe.recipe.064",
       "name": "Temper: Sunwoven Weave",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1446,7 +1446,7 @@
     },
     {
       "id": "recipe.065",
-      "nameKey": "recipe.temper-sunwoven-weave",
+      "nameKey": "recipe.recipe.065",
       "name": "Temper: Sunwoven Weave",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1468,7 +1468,7 @@
     },
     {
       "id": "recipe.066",
-      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "nameKey": "recipe.recipe.066",
       "name": "Temper: Sunwoven Reinforcement",
       "operation": "temper",
       "outputKind": "mutation",
@@ -1490,7 +1490,7 @@
     },
     {
       "id": "recipe.067",
-      "nameKey": "recipe.temper-sunwoven-reinforcement",
+      "nameKey": "recipe.recipe.067",
       "name": "Temper: Sunwoven Reinforcement",
       "operation": "temper",
       "outputKind": "mutation",

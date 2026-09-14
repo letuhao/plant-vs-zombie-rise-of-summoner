@@ -25,7 +25,7 @@
       "id": "set.starfume-001",
       "nameKey": "set.starfruit-spore-burst",
       "name": "Starfruit Spore-Burst",
-      "themeKey": "demon.starfume",
+      "themeKey": "creature.starfume",
       "members": [
         {
           "role": "armament-primary",

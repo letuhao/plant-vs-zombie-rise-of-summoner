@@ -25,7 +25,7 @@
       "id": "set.diamondrandomzombie-001",
       "nameKey": "set.diamond-blind-box",
       "name": "Diamond Blind Box",
-      "themeKey": "demon.diamondrandomzombie",
+      "themeKey": "creature.diamondrandomzombie",
       "members": [
         {
           "role": "armament-primary",

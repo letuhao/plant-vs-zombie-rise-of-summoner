@@ -1,5 +1,5 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Match.Ai;
 using Xunit;
 
@@ -20,16 +20,16 @@ public class ZombossDeployAiTests
     static readonly ZombossScorerTuning AlwaysFires = new(FireChanceMilli: 1000, MinEnemyUnitsToConsiderDeploy: 3, MaxConcurrentOwnUnits: 2);
     static readonly ZombossScorerTuning NeverFires = AlwaysFires with { FireChanceMilli = 0 };
 
-    static DemonRarity RarityOf(string speciesId) => speciesId switch
+    static CreatureRarity RarityOf(string speciesId) => speciesId switch
     {
-        "low" => DemonRarity.Chaff,
-        "mid" => DemonRarity.Cultivated,
-        "high" => DemonRarity.Almanac,
+        "low" => CreatureRarity.Chaff,
+        "mid" => CreatureRarity.Cultivated,
+        "high" => CreatureRarity.Almanac,
         _ => throw new ArgumentOutOfRangeException(nameof(speciesId)),
     };
 
     [Fact]
-    public void No_eligible_demon_declines_regardless_of_board_state_or_roll()
+    public void No_eligible_creature_declines_regardless_of_board_state_or_roll()
     {
         var decision = ZombossDeployPolicy.Decide(
             Board(ownUnits: 0, enemyUnits: 10), Array.Empty<string>(), RarityOf, AlwaysFires, matchSeed: 1, caseId: "case-a");
@@ -61,7 +61,7 @@ public class ZombossDeployAiTests
     [Fact]
     public void Ties_break_by_SpeciesId_ordinal_deterministically()
     {
-        static DemonRarity SameRarity(string _) => DemonRarity.Cultivated;
+        static CreatureRarity SameRarity(string _) => CreatureRarity.Cultivated;
 
         var decision = ZombossDeployPolicy.Decide(
             Board(ownUnits: 0, enemyUnits: 10), new[] { "zzz", "aaa", "mmm" }, SameRarity, AlwaysFires, matchSeed: 1, caseId: "case-a");

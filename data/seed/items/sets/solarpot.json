@@ -25,7 +25,7 @@
       "id": "set.solarpot-001",
       "nameKey": "set.solar-bloom-pot",
       "name": "Solar Bloom Pot",
-      "themeKey": "demon.solarpot",
+      "themeKey": "creature.solarpot",
       "members": [
         {
           "role": "armament-primary",

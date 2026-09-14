@@ -25,7 +25,7 @@
       "id": "set.levatationzombie-001",
       "nameKey": "set.ufo-snowdrift",
       "name": "UFO Snowdrift",
-      "themeKey": "demon.levatationzombie",
+      "themeKey": "creature.levatationzombie",
       "members": [
         {
           "role": "armament-primary",

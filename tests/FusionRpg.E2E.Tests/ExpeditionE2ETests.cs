@@ -28,12 +28,12 @@ public class ExpeditionE2ETests : IAsyncLifetime
     async Task<List<string>> SummonSquad(int take)
     {
         (await _http.PostAsJsonAsync("/api/test/seed-souls-demo?amount=2000", new { })).EnsureSuccessStatusCode();
-        (await _http.PostAsJsonAsync("/api/demons/summon", new
+        (await _http.PostAsJsonAsync("/api/creatures/summon", new
         {
             count = 10,
             correlationId = "exp-e2e-pull-" + Guid.NewGuid().ToString("N")
         })).EnsureSuccessStatusCode();
-        var roster = await _http.GetFromJsonAsync<JsonElement>("/api/demons/1");
+        var roster = await _http.GetFromJsonAsync<JsonElement>("/api/creatures/1");
         return roster.GetProperty("items").EnumerateArray()
             .Select(i => i.GetProperty("actor").GetProperty("instanceId").GetString()!)
             .Take(take).ToList();
@@ -114,13 +114,13 @@ public class ExpeditionE2ETests : IAsyncLifetime
         (await _http.PostAsJsonAsync($"/api/expeditions/{expeditionId}/collect", new { })).EnsureSuccessStatusCode();
 
         var balanceAfterFirst = await Balance();
-        var rosterAfterFirst = (await _http.GetFromJsonAsync<JsonElement>("/api/demons/1"))
+        var rosterAfterFirst = (await _http.GetFromJsonAsync<JsonElement>("/api/creatures/1"))
             .GetProperty("items").EnumerateArray().Count();
 
         var second = await _http.PostAsJsonAsync($"/api/expeditions/{expeditionId}/collect", new { });
         Assert.False(second.IsSuccessStatusCode, "a second collect must refuse");
         Assert.Equal(balanceAfterFirst, await Balance());
-        Assert.Equal(rosterAfterFirst, (await _http.GetFromJsonAsync<JsonElement>("/api/demons/1"))
+        Assert.Equal(rosterAfterFirst, (await _http.GetFromJsonAsync<JsonElement>("/api/creatures/1"))
             .GetProperty("items").EnumerateArray().Count());
     }
 

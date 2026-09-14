@@ -53,6 +53,11 @@ class DryRunTests(unittest.TestCase):
 
 class RealRunTests(unittest.TestCase):
     def test_real_run_preserves_every_existing_brief_field_byte_identical(self) -> None:
+        """A-S7 is ADDITIVE: re-running it changes `requiredFamilies` (and nothing else) on every
+        brief. `requiredFamilies` is stripped from BOTH sides — comparing the freshly assigned value
+        against a previously assigned one would assert "the assignment never changes", which is not
+        the contract and is false the moment the payoff-exclusion rule (G1, 2026-09-12) or the usage
+        report moves. The contract is: every OTHER field survives untouched."""
         if not REAL_PLAN_PATH.is_file():
             self.skipTest("round-1.json not yet generated in this checkout")
         original = json.loads(REAL_PLAN_PATH.read_text(encoding="utf-8"))
@@ -69,8 +74,10 @@ class RealRunTests(unittest.TestCase):
         for original_entry in original_entries:
             updated_entry = by_id[original_entry["briefId"]]
             self.assertIn("requiredFamilies", updated_entry)
-            without_new_field = {k: v for k, v in updated_entry.items() if k != "requiredFamilies"}
-            self.assertEqual(without_new_field, original_entry)
+            without_new = {k: v for k, v in updated_entry.items() if k != "requiredFamilies"}
+            original_without = {k: v for k, v in original_entry.items() if k != "requiredFamilies"}
+            self.assertEqual(without_new, original_without,
+                             f"{original_entry['briefId']}: a field other than requiredFamilies moved")
 
     def test_omitted_usage_report_dir_falls_back_to_the_real_default(self) -> None:
         if not REAL_PLAN_PATH.is_file():

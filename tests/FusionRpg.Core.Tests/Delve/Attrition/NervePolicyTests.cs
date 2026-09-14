@@ -105,10 +105,10 @@ public class NervePolicyTests
         var policy = new NervePolicy(CatalogWithNerve(), Stages, Mods());
         var runtime = MakeRuntime(CatalogWithNerve());
 
-        var applied = policy.Sync(runtime, "demon:1", stage: -1, DateTimeOffset.UnixEpoch);
+        var applied = policy.Sync(runtime, "creature:1", stage: -1, DateTimeOffset.UnixEpoch);
 
         Assert.False(applied);
-        Assert.Empty(runtime.ForHost("demon:1"));
+        Assert.Empty(runtime.ForHost("creature:1"));
     }
 
     // ---- Sync: first entry into a stage ----
@@ -120,10 +120,10 @@ public class NervePolicyTests
         var policy = new NervePolicy(catalog, Stages, Mods());
         var runtime = MakeRuntime(catalog);
 
-        var applied = policy.Sync(runtime, "demon:1", stage: 0, DateTimeOffset.UnixEpoch);
+        var applied = policy.Sync(runtime, "creature:1", stage: 0, DateTimeOffset.UnixEpoch);
 
         Assert.True(applied);
-        var live = Assert.Single(runtime.ForHost("demon:1"));
+        var live = Assert.Single(runtime.ForHost("creature:1"));
         Assert.Equal("nerve.unsettled", live.StatusId);
     }
 
@@ -135,11 +135,11 @@ public class NervePolicyTests
         var runtime = MakeRuntime(catalog);
         var now = DateTimeOffset.UnixEpoch;
 
-        Assert.True(policy.Sync(runtime, "demon:1", 1, now));
-        var again = policy.Sync(runtime, "demon:1", 1, now.AddSeconds(1));
+        Assert.True(policy.Sync(runtime, "creature:1", 1, now));
+        var again = policy.Sync(runtime, "creature:1", 1, now.AddSeconds(1));
 
         Assert.False(again);
-        Assert.Single(runtime.ForHost("demon:1")); // still exactly one instance, not a second stack
+        Assert.Single(runtime.ForHost("creature:1")); // still exactly one instance, not a second stack
     }
 
     // ---- Sync: stage change replaces the live instance, never coexists ----
@@ -152,11 +152,11 @@ public class NervePolicyTests
         var runtime = MakeRuntime(catalog);
         var now = DateTimeOffset.UnixEpoch;
 
-        policy.Sync(runtime, "demon:1", 0, now); // unsettled
-        var changed = policy.Sync(runtime, "demon:1", 2, now.AddSeconds(1)); // straight to afflicted
+        policy.Sync(runtime, "creature:1", 0, now); // unsettled
+        var changed = policy.Sync(runtime, "creature:1", 2, now.AddSeconds(1)); // straight to afflicted
 
         Assert.True(changed);
-        var live = Assert.Single(runtime.ForHost("demon:1")); // never two nerve.* instances live together
+        var live = Assert.Single(runtime.ForHost("creature:1")); // never two nerve.* instances live together
         Assert.Equal("nerve.afflicted", live.StatusId);
     }
 
@@ -168,10 +168,10 @@ public class NervePolicyTests
         var runtime = MakeRuntime(catalog);
         var now = DateTimeOffset.UnixEpoch;
 
-        policy.Sync(runtime, "demon:1", 2, now);
-        policy.Sync(runtime, "demon:1", 0, now.AddSeconds(1));
+        policy.Sync(runtime, "creature:1", 2, now);
+        policy.Sync(runtime, "creature:1", 0, now.AddSeconds(1));
 
-        var live = Assert.Single(runtime.ForHost("demon:1"));
+        var live = Assert.Single(runtime.ForHost("creature:1"));
         Assert.Equal("nerve.unsettled", live.StatusId);
     }
 
@@ -185,11 +185,11 @@ public class NervePolicyTests
         var runtime = MakeRuntime(catalog);
         var now = DateTimeOffset.UnixEpoch;
 
-        policy.Sync(runtime, "demon:1", 1, now);
-        var withdrew = policy.Sync(runtime, "demon:1", -1, now.AddSeconds(1));
+        policy.Sync(runtime, "creature:1", 1, now);
+        var withdrew = policy.Sync(runtime, "creature:1", -1, now.AddSeconds(1));
 
         Assert.False(withdrew); // a withdraw is not counted as an apply -- matches ExhaustionPolicy.Sync
-        Assert.Empty(runtime.ForHost("demon:1"));
+        Assert.Empty(runtime.ForHost("creature:1"));
     }
 
     // ---- Sync: carries the authored StatMods verbatim, never a hardcoded channel ----
@@ -202,9 +202,9 @@ public class NervePolicyTests
         var policy = new NervePolicy(catalog, Stages, Mods(("shaken", mod)));
         var runtime = MakeRuntime(catalog);
 
-        policy.Sync(runtime, "demon:1", 1, DateTimeOffset.UnixEpoch);
+        policy.Sync(runtime, "creature:1", 1, DateTimeOffset.UnixEpoch);
 
-        var live = Assert.Single(runtime.ForHost("demon:1"));
+        var live = Assert.Single(runtime.ForHost("creature:1"));
         Assert.Equal(new[] { mod }, live.StatMods);
     }
 
@@ -214,7 +214,7 @@ public class NervePolicyTests
     public void Sync_null_runtime_throws()
     {
         var policy = new NervePolicy(CatalogWithNerve(), Stages, Mods());
-        Assert.Throws<ArgumentNullException>(() => policy.Sync(null!, "demon:1", 0, DateTimeOffset.UnixEpoch));
+        Assert.Throws<ArgumentNullException>(() => policy.Sync(null!, "creature:1", 0, DateTimeOffset.UnixEpoch));
     }
 
     [Theory]
@@ -225,24 +225,24 @@ public class NervePolicyTests
         var policy = new NervePolicy(CatalogWithNerve(), Stages, Mods());
         var runtime = MakeRuntime(CatalogWithNerve());
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => policy.Sync(runtime, "demon:1", badStage, DateTimeOffset.UnixEpoch));
+        Assert.Throws<ArgumentOutOfRangeException>(() => policy.Sync(runtime, "creature:1", badStage, DateTimeOffset.UnixEpoch));
     }
 
-    // ---- multiple demons are independent ----
+    // ---- multiple creatures are independent ----
 
     [Fact]
-    public void Different_demons_nerve_independently()
+    public void Different_creatures_nerve_independently()
     {
         var catalog = CatalogWithNerve();
         var policy = new NervePolicy(catalog, Stages, Mods());
         var runtime = MakeRuntime(catalog);
         var now = DateTimeOffset.UnixEpoch;
 
-        policy.Sync(runtime, "demon:1", 2, now);
-        policy.Sync(runtime, "demon:2", 0, now);
+        policy.Sync(runtime, "creature:1", 2, now);
+        policy.Sync(runtime, "creature:2", 0, now);
 
-        Assert.Equal("nerve.afflicted", Assert.Single(runtime.ForHost("demon:1")).StatusId);
-        Assert.Equal("nerve.unsettled", Assert.Single(runtime.ForHost("demon:2")).StatusId);
+        Assert.Equal("nerve.afflicted", Assert.Single(runtime.ForHost("creature:1")).StatusId);
+        Assert.Equal("nerve.unsettled", Assert.Single(runtime.ForHost("creature:2")).StatusId);
     }
 }
 
@@ -368,8 +368,8 @@ public class NerveContainerTests
         })
         {
             var stage = NerveLadder.StageFor(stacks, spiritResolved, thresholds);
-            policy.Sync(runtime, "demon:real", stage, now);
-            var live = runtime.ForHost("demon:real");
+            policy.Sync(runtime, "creature:real", stage, now);
+            var live = runtime.ForHost("creature:real");
 
             if (expectedId is null)
                 Assert.Empty(live);

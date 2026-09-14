@@ -41,7 +41,9 @@ from dataclasses import dataclass
 from typing import Mapping, Sequence
 
 from ..characteristic_pool.derive import CATEGORIES
-from ..distribution_planner.derive import GENERAL_WEIGHTS, RUN_WINDOW, largest_remainder_count
+from ..distribution_planner.derive import (
+    GENERAL_WEIGHTS, RUN_WINDOW, apportion_categories, largest_remainder_count,
+)
 from ..vocab import PAIRING_ROLES, SCOPES, STATUSES
 from ....metrics.model import Finding, Severity
 from .ctx import ActionCoverageCtx, RosterCounts
@@ -51,12 +53,12 @@ __all__ = [
     "CellGroup", "partition_accepted", "build_cell_groups", "cell_entries",
     "cell_occupancy_findings", "thin_cell_findings", "quota_drift_findings",
     "enabler_payoff_coverage_findings", "pairing_reach_findings", "atom_family_namespace_findings",
-    "species_collision_findings", "singleton_share_findings", "structure_enforceability_findings",
+    "species_collision_findings", "species_coverage_findings", "singleton_share_findings",
+    "structure_enforceability_findings",
     "roster_reconciliation_findings", "flavour_quality_findings", "semantic_neighbour_findings",
     "next_round_targets", "Verdict", "compute_verdict", "corpus_hash", "build_envelope",
     "canonical_dump",
-    "TOLERANCE_UNITS", "SIGNATURE_ACTIONS_PER_SPECIES", "RESEARCH_BAND_UNITS",
-    "RESEARCH_BAND_ROSTER",
+    "TOLERANCE_UNITS", "RESEARCH_BAND_UNITS", "RESEARCH_BAND_ROSTER",
 ]
 
 _GENERAL_SUBJECT_KEY = "general"          # the general scope's one pseudo-subject
@@ -75,25 +77,30 @@ def recompute_subject_category_counts(
     """Returns `{(scope, subjectKey): {category: count}}` — `subjectKey` is the literal
     `'general'` for the single general pseudo-subject (never `None`: a dict key needs to be
     hashable and comparable alongside real species/family ids, and `'general'` can never collide
-    with a real one). Re-derives EXACTLY the way `distribution_planner.derive.plan_subject` does:
-    largest remainder over each subject's own `categoryMilli` row and its own per-round count —
-    never trusting a stored brief's own counts."""
+    with a real one). Re-derives EXACTLY the way `distribution_planner.derive.plan_round` does:
+    the SCOPE-level two-level allocation (`apportion_categories`), never trusting a stored brief's
+    own counts. The general scope has one subject, so its own per-subject split IS the scope
+    allocation and `largest_remainder_count` is correct there."""
     out: "dict[tuple[str, str], dict[str, int]]" = {}
     if general_count:
         out[("general", _GENERAL_SUBJECT_KEY)] = largest_remainder_count(
             GENERAL_WEIGHTS.category_milli, CATEGORIES, general_count)
-    for species_id in species_ids:
-        weights = weights_by_key.get(("species", species_id))
-        if weights is None or per_species_count == 0:
-            continue
-        out[("species", species_id)] = largest_remainder_count(
-            weights.category_milli, CATEGORIES, per_species_count)
-    for family_id in sorted(family_members):
-        weights = weights_by_key.get(("family", family_id))
-        if weights is None or per_family_count == 0:
-            continue
-        out[("family", family_id)] = largest_remainder_count(
-            weights.category_milli, CATEGORIES, per_family_count)
+
+    species_subjects = [
+        (species_id, weights_by_key[("species", species_id)].category_milli)
+        for species_id in species_ids
+        if weights_by_key.get(("species", species_id)) is not None and per_species_count
+    ]
+    for species_id, counts in apportion_categories(species_subjects, per_species_count).items():
+        out[("species", species_id)] = counts
+
+    family_subjects = [
+        (family_id, weights_by_key[("family", family_id)].category_milli)
+        for family_id in sorted(family_members)
+        if weights_by_key.get(("family", family_id)) is not None and per_family_count
+    ]
+    for family_id, counts in apportion_categories(family_subjects, per_family_count).items():
+        out[("family", family_id)] = counts
     return out
 
 
@@ -222,7 +229,7 @@ def cell_entries(groups: "Sequence[CellGroup]", *, round_no: int) -> "list[dict]
 
 
 # ---------------------------------------------------------------------------------------------
-# §3 step 3 — the ten CLOSED metrics. Every function returns `Finding`s directly (never raises);
+# §3 step 3 — the eleven CLOSED metrics. Every function returns `Finding`s directly (never raises);
 # `metrics/action_coverage.py`'s `Metric.run` methods are thin one-line wrappers over these.
 # ---------------------------------------------------------------------------------------------
 
@@ -434,6 +441,55 @@ def species_collision_findings(metric_id: str, cov: ActionCoverageCtx) -> "list[
     return findings
 
 
+def species_coverage_findings(metric_id: str, cov: ActionCoverageCtx) -> "list[Finding]":
+    """**The per-species coverage gate — the granularity the scope-aggregate cells cannot see (G3).**
+
+    ⛔ **The defect this closes, measured 2026-09-12.** `cellOccupancy`/`thinCell` gate on
+    `cell.<scope>.<category>.<band>`, which at species scope is ONE aggregate over all 904 species:
+    `cell.species.attack.1-10` had quota 976 (= 904 x 5 x 21.6%). That number can be satisfied by
+    spreading 976 attack rows over ~100 species (9-10 each) while **804 species hold no attack
+    action** — and the cell would read perfect. Measured at the time: **828 of 904 species had zero
+    accepted actions, and no metric reported it.** A scope-aggregate cell is structurally blind to
+    per-subject distribution; this metric is the per-subject view the design needs and the
+    `next-target` derivation (`next_round_targets`, which already names individual species) already
+    assumed.
+
+    **What it asserts (the CONTRACT, not a population count).** Every live species id that the ctx
+    knows about must have at least one accepted row. The roster is a POPULATION
+    ([validation-ssot.md](../../../../../docs/architecture/validation-ssot.md)): the metric never
+    compares a *count* to a literal; it compares the *set of species with zero rows* to the empty
+    set. Adding a species makes the requirement grow, which is correct — the new species is simply
+    another subject that must be covered.
+
+    **One Finding per uncovered species**, naming that species, so the same rows feed the top-up
+    loop as explicit work orders. Severity GAP: an uncovered species is a real hole, not a note.
+
+    **Which species ids count as required.** `cov.family_ids` carries the authored atom-family
+    namespace, not species ids, so the required roster is derived from `subject_category_counts`:
+    every `("species", speciesId)` key the quota was recomputed for IS a planned species subject
+    (`recompute_subject_category_counts` builds exactly the catalog ids). That keeps this metric's
+    universe identical to the planner's, with no second roster read and no way for the two to
+    disagree."""
+    required = {key for (scope, key) in cov.subject_category_counts if scope == "species"}
+    covered = {row["scopeKey"] for row in cov.accepted_rows
+               if row.get("scope") == "species" and row.get("scopeKey")}
+    uncovered = sorted(required - covered)
+    return [
+        Finding(
+            metric=metric_id, severity=Severity.GAP, subject=species_id,
+            message=f"species {species_id!r}: no accepted action — {len(covered)} of "
+                    f"{len(required)} species have at least one; the scope-aggregate cells "
+                    f"(cellOccupancy/thinCell) cannot see a missing species",
+            evidence={"speciesKey": species_id, "coveredSpecies": len(covered),
+                      "requiredSpecies": len(required)},
+            assertion=f"{species_id!r} has >= 1 accepted action row",
+            remedy="next-round target for this species, or raise perSpeciesCount / generalCount "
+                   "so its planned briefs are drawn and accepted",
+        )
+        for species_id in uncovered
+    ]
+
+
 def singleton_share_findings(metric_id: str, cov: ActionCoverageCtx) -> "list[Finding]":
     """Median rows per occupied mechanical cell (the `(scope, category, rungBand, pairingRole)`
     literal partition, spec §3 step 1) and the singleton share, against the research target of
@@ -502,14 +558,24 @@ def structure_enforceability_findings(metric_id: str, cov: ActionCoverageCtx) ->
 # The research band is historical context. The live roster and the per-species count are read from
 # the seed tree and `action-corpus-run.v1.json`; neither may be rejected because it differs from the
 # old projection used by the original spec.
-SIGNATURE_ACTIONS_PER_SPECIES = 3
 RESEARCH_BAND_UNITS = (1500, 3500)
 RESEARCH_BAND_ROSTER = 904
 
 def roster_reconciliation_findings(
     metric_id: str, roster: RosterCounts, accepted_corpus_size: int,
-    signature_actions_per_species: int = SIGNATURE_ACTIONS_PER_SPECIES,
+    signature_actions_per_species: int,
 ) -> "list[Finding]":
+    """⛔ **`signature_actions_per_species` is REQUIRED, with no default (2026-09-12, G4).** It used
+    to default to a module constant `SIGNATURE_ACTIONS_PER_SPECIES = 3`, which restated the SEALED
+    ideal's *"3 signature actions per species"* (B1) as though it were the shipped value. The shipped
+    `action-corpus-run.v1.json` sets `perSpeciesCount: 5`, so the default was wrong, and it was dead
+    — the one caller (`metrics/action_coverage.py`) always passes `cov.per_species_count`. A wrong
+    default that happens never to be reached is worse than no default: it is a second, contradictory
+    source of truth that the next reader trusts. Making the parameter required means the tuning file
+    is the only place this number lives, and a future caller cannot silently get `3`.
+
+    `signatureTierEstimate` is therefore always `roster.species_count x` the LIVE tuning count, so
+    the reconciliation message reports the corpus this run is actually sized for."""
     if signature_actions_per_species < 0:
         raise ValueError("signature_actions_per_species must be non-negative")
     signature_tier_estimate = roster.species_count * signature_actions_per_species
@@ -633,6 +699,7 @@ class Verdict:
     evaluated_metrics: "tuple[str, ...]"
     not_measured_metrics: "tuple[str, ...]"
     gap_metrics: "tuple[str, ...]"
+    gating_metrics: "tuple[str, ...]" = ()
 
     def to_dict(self) -> dict:
         return {
@@ -640,11 +707,32 @@ class Verdict:
             "evaluatedMetrics": list(self.evaluated_metrics),
             "notMeasuredMetrics": list(self.not_measured_metrics),
             "gapMetrics": list(self.gap_metrics),
+            "gatingMetrics": list(self.gating_metrics),
         }
 
 
 def compute_verdict(closed_findings: "Sequence[Finding]", closed_metric_ids: "Sequence[str]",
-                    mode: str) -> Verdict:
+                    mode: str, gating_metric_ids: "Sequence[str]" = (),
+                    ) -> Verdict:
+    """**The verdict, gated on `gates` — not on the mere existence of a GAP (T1.2, 2026-09-12).**
+
+    `spec-metrics.md` §4 fixes the calibration order: *"New metric → `gates=False`, runs, reports.
+    Then a threshold goes into `budget` and `gates` flips."* So a GAP from an UNPROMOTED metric is a
+    reading plus a next-round work order, never a gate — and `spec-coverage-report.md` §3 step 6 says
+    `pass` requires every **gating** CLOSED metric green. This function previously ignored the flag
+    and treated any GAP as `not-clean`, which (with all eleven action metrics shipping unpromoted)
+    made every verdict non-clean and the full-run gate unreachable by construction.
+
+    **What blocks, precisely:**
+    - `NOT_MEASURED` on **any** CLOSED metric → never clean, gating or not. An absent check must stay
+      distinguishable from a pass (`spec §4`), and it is not a threshold question.
+    - `GAP` on a metric in `gating_metric_ids` → not clean.
+    - `GAP` on any other metric → reported in `gap_metrics`, does not block. `gating_metric_ids` is
+      the caller's `{m.id for m in registry.all() if m.gates}` — the same set `report/cli.py` builds
+      for `--gate`, so A-S5's verdict and the general reporter cannot disagree about what gates.
+
+    The full GAP list is ALWAYS returned and always written to the report; promotion changes only
+    whether a GAP flips the verdict, never whether it is visible."""
     by_metric: "dict[str, list[Finding]]" = {mid: [] for mid in closed_metric_ids}
     for f in closed_findings:
         by_metric.setdefault(f.metric, []).append(f)
@@ -655,9 +743,11 @@ def compute_verdict(closed_findings: "Sequence[Finding]", closed_metric_ids: "Se
     gap = tuple(sorted(
         mid for mid, fs in by_metric.items()
         if any(f.severity is Severity.GAP for f in fs)))
+    gating = tuple(sorted(set(gating_metric_ids)))
     evaluated = tuple(sorted(by_metric))
 
-    clean = not not_measured and not gap
+    gating_gap = tuple(sorted(set(gap) & set(gating)))
+    clean = not not_measured and not gating_gap
     if clean and mode == "full":
         verdict = "pass"
     elif clean:
@@ -666,7 +756,8 @@ def compute_verdict(closed_findings: "Sequence[Finding]", closed_metric_ids: "Se
         verdict = "not-clean"
 
     return Verdict(verdict=verdict, evaluated_metrics=evaluated,
-                   not_measured_metrics=not_measured, gap_metrics=gap)
+                   not_measured_metrics=not_measured, gap_metrics=gap,
+                   gating_metrics=gating)
 
 
 # ---------------------------------------------------------------------------------------------

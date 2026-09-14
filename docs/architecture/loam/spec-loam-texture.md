@@ -16,8 +16,8 @@ cleared.
 Six mechanics, each *derived* rather than bolted on (every one names what shipped code it reuses,
 per the ideal's own discipline in §9): the **granary** (storage, a real planning horizon), **fade
 contagion** (a lost sector makes its neighbours fade faster), the **Unmade** (faded ground births
-hostile wildlife, for free, off an existing faction kind), **wardens** (permanently bind a demon to
-stop one sector fading, at the cost of a `demon-contracts` binding slot forever), **prospecting** (a
+hostile wildlife, for free, off an existing faction kind), **wardens** (permanently bind a creature to
+stop one sector fading, at the cost of a `creature-contracts` binding slot forever), **prospecting** (a
 stance that finds hidden rootbeds), and **Fracture surges** (the calendar's already-rolling `Plague`
 finally does something).
 
@@ -89,7 +89,7 @@ naming it *"the wild's permanent policy... a hazard on the map, not a third empi
   (place a `Wild`-owned `WorldEntity` at a `Lost` sector after N neglected turns) needs no new state
   beyond a per-sector neglect counter.
 
-### Wardens — extends `demon-contracts`' shipped binding machinery, does not replace it
+### Wardens — extends `creature-contracts`' shipped binding machinery, does not replace it
 
 Verified: `ContractPolicy.Capacity()`/`CanBuySlot()` (`ContractPolicy.cs:79-81,163-168`) and
 `RpgStore.BindContract`/`ReleaseContract` (`RpgStore.Contracts.cs:231-269,277`) are real, shipped,
@@ -103,8 +103,8 @@ check, a different, permanent kind of bind**:
 - **New**: `WorldSector.WardenBindingId` (`string?`) — a sector with one set is exempt from
   `LoamPhases.Pressure`'s fade calculation entirely (its `StabilityMilli` neither rises nor falls while
   the binding holds), the literal shape of *"the sector stops fading."*
-- **Cure already in place, per A1's own closure**: the demon consumed is gone from the roster
-  permanently, via a mechanism (`demon-contracts` binding slots, already Soul-priced and scarce) that
+- **Cure already in place, per A1's own closure**: the creature consumed is gone from the roster
+  permanently, via a mechanism (`creature-contracts` binding slots, already Soul-priced and scarce) that
   existed before this module and needed no new economy invented for it.
 - **What warding does *not* exempt, resolved**: a warded sector's own upkeep is still summed into its
   component's total and still drawn from the pooled stock — warding stops the *fade*, not the *cost*.
@@ -119,7 +119,7 @@ check, a different, permanent kind of bind**:
   left implicit the way the audit found it.
 - **Warding vs. capture, resolved**: warding exempts `FadePolicy` only — a warded sector can still be
   taken militarily via ordinary combat/siege (or as a `loam-ai` `Sever` target, since severance is a
-  combat outcome, not an economic one). **Capture releases the binding**: the warden's demon is not
+  combat outcome, not an economic one). **Capture releases the binding**: the warden's creature is not
   transferred to the new owner and is not returned to the original faction's roster — the binding ends,
   the specimen is gone, matching the same "permanent, no refund" shape this program has already used
   for a structure lost mid-construction (`spec-loam-structures.md`). A warded sector is still only as
@@ -163,7 +163,7 @@ Per §9.2/§9.4's own "high value, not core" and "rejected" lists, kept out on p
 - **Deep tap, scorched root, reavers** — genuine mechanics, lower priority than the four core ones;
   `DepletionMilli` is reserved for deep tap but not wired by this spec.
 - **Loam market, loam as a battle resource, loam grades/tiers, the Fracture as a commanding AI faction,
-  per-demon loam upkeep, randomised yields** — explicitly rejected in the design source (§9.4), each
+  per-creature loam upkeep, randomised yields** — explicitly rejected in the design source (§9.4), each
   with its own stated reason; not re-argued here.
 
 ## Commands
@@ -228,7 +228,7 @@ formulas.
 ## Boundaries
 
 - **Always:** every new constant harness-tuned, not guessed; `PressureMilli`/`DepletionMilli` used for
-  exactly the purpose their own doc comments already anticipated; wardens extend `demon-contracts`,
+  exactly the purpose their own doc comments already anticipated; wardens extend `creature-contracts`,
   never a parallel binding system.
 - **Ask first:** wiring the Unmade onto any map other than by adding an explicit `Wild` faction row —
   no implicit "everyone gets wildlife" default.
@@ -256,7 +256,7 @@ formulas.
 - **The Unmade need `two-hearths` to gain an explicit `Wild` faction row** — confirmed as a real,
   narrow gap (the map has none today), scoped as part of this module's own change rather than a
   separately-tracked follow-up.
-- **Wardens extend, not replace, `demon-contracts`' binding capacity and loyalty machinery** — the only
+- **Wardens extend, not replace, `creature-contracts`' binding capacity and loyalty machinery** — the only
   new rule is that a warden bind is permanent and never releasable.
 - **Prospecting lives in the intel/belief layer, not under `World/Loam`** — keeps the loam calculators
   pure and unwired from AI/fog concerns, the same boundary held since wave 1.

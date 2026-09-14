@@ -5,9 +5,9 @@
   "kicker": "Power and builds · level up and power",
   "pillar": {"text": "Almanac", "href": "almanac.md"},
   "loopLine": "Level up and power",
-  "hook": "Plants, zombies, and demons grow from **work they actually did** — type lines and individual specimens, not only Dave’s level.",
+  "hook": "Plants, zombies, and creatures grow from **work they actually did** — type lines and individual specimens, not only Dave’s level.",
   "blindSpots": [
-    {"term": "Specimen XP", "meaning": "Progress on one demon instance — that Peashooter-line specimen you fielded."},
+    {"term": "Specimen XP", "meaning": "Progress on one creature instance — that Peashooter-line specimen you fielded."},
     {"term": "Type XP", "meaning": "Progress on a species / type line you have used and met — feeds how deep that line feels over time."},
     {"term": "Almanac", "meaning": "Dossiers for what you have met. Meeting types deepens reference — see [almanac](almanac)."},
     {"term": "Chronicle", "meaning": "Your run and progression history — a place XP and levels show up."}
@@ -42,14 +42,14 @@
   ],
   "doTitle": "What you do (first time)",
   "doSteps": [
-    "Field a bound demon on a lawn or expedition.",
+    "Field a bound creature on a lawn or expedition.",
     "Afterward, open Creatures and notice that specimen’s progress.",
     "Open Almanac or Chronicle and see type / history catch up."
   ],
   "doNote": "Stop when Dave ≠ specimen XP is clear. Spend power: [aptitudes](aptitudes).",
   "mixUps": [
     {"q": "Does only Dave’s level matter?", "a": "No. Specimens and types grow from work they did."},
-    {"q": "If I never field a demon, does it level?", "a": "Progress comes from work done — idle shelf pets stay behind."},
+    {"q": "If I never field a creature, does it level?", "a": "Progress comes from work done — idle shelf pets stay behind."},
     {"q": "Is type XP the same as fusion rarity?", "a": "No. Rarity and fusion are other systems; this is growth from play."},
     {"q": "Where do I read it?", "a": "Roster sheets, Chronicle, and Almanac dossiers."}
   ],

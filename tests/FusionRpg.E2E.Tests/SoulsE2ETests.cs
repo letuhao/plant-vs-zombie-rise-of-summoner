@@ -76,7 +76,7 @@ public class SoulsE2ETests : IAsyncLifetime
                 type = 0,
                 typeName = "NormalZombie",
                 source = "initHealth",
-                sourceKind = "demon.progression.v1",
+                sourceKind = "creature.progression.v1",
                 sourceId = "general:normalzombie"
             })).EnsureSuccessStatusCode();
             (await _http.PostAsJsonAsync("/api/sim/zombie/die", new { ptr })).EnsureSuccessStatusCode();

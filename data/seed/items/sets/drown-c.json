@@ -25,7 +25,7 @@
       "id": "set.drown-c-001",
       "nameKey": "set.trident-of-the-tilted-breach",
       "name": "Trident of the Tilted Breach",
-      "themeKey": "demon.drown_c",
+      "themeKey": "creature.drown_c",
       "members": [
         {
           "role": "armament-primary",

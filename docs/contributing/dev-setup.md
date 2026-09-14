@@ -19,6 +19,17 @@ cd plant-vs-zombie-rise-of-summoner
 dotnet build
 ```
 
+## Line endings
+
+`.gitattributes` checks out text as LF (`* text=auto eol=lf`). Golden
+fixtures/tuning/seed are LF in the blob and several tests compare bytes exactly,
+so a CRLF working tree fails them for no reason. After changing line-ending
+settings on an existing checkout, re-normalize once:
+
+```powershell
+git add --renormalize .
+```
+
 ## Tests (same commands CI runs)
 
 ```powershell
@@ -28,6 +39,15 @@ dotnet test tests/FusionRpg.CheatCore.Tests -c Release
 dotnet test tests/FusionRpg.Guard.Tests -c Release
 dotnet test tests/FusionRpg.Launcher.Tests -c Release
 ```
+
+**Before concluding a test is slow, read [test-burden-audit.md](test-burden-audit.md).** Two facts it
+records will otherwise cost you the same investigation: per-test durations in a full-suite TRX are
+**contention wall-clock, not cost** (53×–230× inflation), and **Data.Tests is 4.2× faster at ~2 threads
+than at the default 32** on a 32-core box. It also lists the hypotheses already ruled out with numbers,
+so they are not re-tested.
+
+For the routine loop use `.\scripts\test-fast.ps1` (the `default` profile — see
+[testing-standard.md](testing-standard.md) §6), which excludes the disk-writing and long tests.
 
 ## Injector refs (no hardcoded game path)
 

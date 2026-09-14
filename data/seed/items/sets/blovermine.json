@@ -25,7 +25,7 @@
       "id": "set.blovermine-001",
       "nameKey": "set.tuberous-blast",
       "name": "Tuberous Blast",
-      "themeKey": "demon.blovermine",
+      "themeKey": "creature.blovermine",
       "members": [
         {
           "role": "armament-primary",

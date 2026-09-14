@@ -25,7 +25,7 @@
       "id": "set.icelotus-001",
       "nameKey": "set.frost-lotus-bloom",
       "name": "Frost Lotus Bloom",
-      "themeKey": "demon.icelotus",
+      "themeKey": "creature.icelotus",
       "members": [
         {
           "role": "armament-primary",

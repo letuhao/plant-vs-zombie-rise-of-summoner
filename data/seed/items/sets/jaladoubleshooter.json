@@ -25,7 +25,7 @@
       "id": "set.jaladoubleshooter-001",
       "nameKey": "set.dual-pea-shot",
       "name": "Dual Pea-Shot",
-      "themeKey": "demon.jaladoubleshooter",
+      "themeKey": "creature.jaladoubleshooter",
       "members": [
         {
           "role": "armament-primary",

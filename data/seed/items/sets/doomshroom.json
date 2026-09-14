@@ -25,7 +25,7 @@
       "id": "set.doomshroom-001",
       "nameKey": "set.void-pit-spore",
       "name": "Void-Pit Spore",
-      "themeKey": "demon.doomshroom",
+      "themeKey": "creature.doomshroom",
       "members": [
         {
           "role": "armament-primary",

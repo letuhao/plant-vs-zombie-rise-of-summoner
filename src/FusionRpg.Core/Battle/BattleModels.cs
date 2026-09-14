@@ -3,13 +3,13 @@ using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Battle;
 
-/// <summary>One combatant entering a battle — a demon specimen snapshot or a wave enemy.</summary>
+/// <summary>One combatant entering a battle — a creature specimen snapshot or a wave enemy.</summary>
 public sealed record BattleActorSetup
 {
     public string Key { get; init; } = "";                 // stable within the battle (e.g. "squad:0", "wave:3")
     public string Side { get; init; } = "";                // "squad" | "wave"
     public string SpeciesId { get; init; } = "";
-    public int TypeId { get; init; }                        // demon type id (disjoint space) for event emission
+    public int TypeId { get; init; }                        // creature type id (disjoint space) for event emission
     public int Level { get; init; } = 1;
 
     /// <summary>Alias for <see cref="Level"/> — the actor's Θ (content-authoring, T2.3,
@@ -30,11 +30,11 @@ public sealed record BattleActorSetup
     /// <summary>The `rpg_unique_actor` this setup represents — its own stable `instance_id` string,
     /// matching `OwnerScope.UniqueActor`'s key exactly (never a numeric id) — for module 5's equipment
     /// lookup (`EquipAtomSource.ModsFor`). Null for a setup with no durable specimen behind it (a wave
-    /// demon, an expedition roster entry, a test fixture); equipment resolves to nothing.
+    /// creature, an expedition roster entry, a test fixture); equipment resolves to nothing.
     /// <see cref="JsonIgnoreAttribute"/> for the identical reason <see cref="Index"/> already carries
     /// one: expedition tier resolution serializes this record as part of its own golden hash, and a
     /// specimen id — always null there, since expeditions build setups from wave/species data, never a
-    /// real owned demon — is not semantically part of what that hash locks. Found the same way
+    /// real owned creature — is not semantically part of what that hash locks. Found the same way
     /// <see cref="Index"/>'s comment describes: a first draft without this moved
     /// `ExpeditionResolverTests.Tier_goldens_are_locked`'s hash.</summary>
     [JsonIgnore]
@@ -62,6 +62,16 @@ public sealed record BattleActorSetup
 
     /// <summary>Additive derived-channel adjustments (tests, traits, one-offs). Equipment enters via <see cref="EquipAtomSource"/> when <c>SpecimenId</c> is set — do not also mirror equip here. Integer amounts only.</summary>
     public IReadOnlyList<BattleChannelMod> ChannelMods { get; init; } = Array.Empty<BattleChannelMod>();
+
+    /// <summary>
+    /// battle-hub-fuse T5 — Hub inputs the builders resolved for this actor (aptitude allocation,
+    /// bound atoms, star/loyalty, draughts, injuries). <c>BattleHubCompose</c> reads these instead
+    /// of pre-folded <c>ChannelMods</c>; null (the default) means baseline + affinity + traits +
+    /// tempo only. <c>WhenWritingDefault</c> keeps every existing golden byte-identical: expedition
+    /// tier resolution serializes this record before any builder attaches inputs.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public BattleHubInputs? HubInputs { get; init; }
 
     /// <summary>Statuses applied attacker-less at battle start (test seams now, trait/attack riders later).</summary>
     public IReadOnlyList<BattleStatusSpec> InitialStatuses { get; init; } = Array.Empty<BattleStatusSpec>();
@@ -221,7 +231,7 @@ public sealed record PhaseGrant(long HpThresholdMilli, string ContainerInstanceI
 /// </summary>
 public enum CombatantKind
 {
-    /// <summary>A demon, a legion member, anything that takes turns. Index 0, so the default is
+    /// <summary>A creature, a legion member, anything that takes turns. Index 0, so the default is
     /// today's behaviour for every existing caller.</summary>
     Animate,
 
@@ -263,8 +273,15 @@ public static class BattleRuleset
     /// rate does, and PS-3 still does not apply to these hashes. Adopted because the subtractive
     /// shape floors damage at zero once defense outruns offense -- total immunity, the same defect
     /// removed from ampFactor in the same session, measured at 17.1% of LANDED hits dealing
-    /// nothing. Divisive approaches zero asymptotically and never reaches it.</summary>
-    public const int RulesetVersion = 4;
+    /// nothing. Divisive approaches zero asymptotically and never reaches it.
+    /// v5 (battle-hub-fuse, 2026-09-13): BattleStatComposer is deleted; BattleEngine composes through
+    /// BattleHubCompose (ActorHub) exclusively. T5's own pre-delete parity matrix proved Hub ==
+    /// composer channel-for-channel (exact on battle channels, narrowing-bounded on funded aptitude
+    /// channels, three adopted op-divergences on status.resist.{dot,cc,contagion} capped at 0.95 vs
+    /// the old uncapped raw sums) -- this bump is the single, approved (Ask-first table) marker for
+    /// that engine-shape change, not a magnitude retune. Any golden whose hash embeds RulesetVersion
+    /// moves by construction and is re-blessed once alongside this bump, never per-golden thereafter.</summary>
+    public const int RulesetVersion = 5;
 
     static BattleTuning? _tuning;
 
@@ -380,19 +397,46 @@ public static class BattleRuleset
     /// `battle-tempo` `battle-resources` — in-battle regen, which is <b>0 for every resource</b>, and
     /// that is a design position rather than an unset placeholder (spec §2.5).
     ///
-    /// <para>Two independent reasons. (1) <see cref="Stats.Derived.ResourceChannelReader.RegenPerTick"/>
-    /// rounds the channel to a whole <c>long</c>, and a round runs several hundred ticks
-    /// (`action-timing.v1.json`: the basic attack alone is 150 wind-up + 50 recovery), so the smallest
-    /// expressible non-zero rate accrues ~300 poise per round against `reaction-lane.v1.json`'s spend
-    /// of 100 — three counters a round, which erases the scarcity the pool exists to create. There is
-    /// no representable value between "nothing" and that. (2) `resource-hub-ssot.md` §11: pools
-    /// "persist across a run and refill <b>at rest</b>" — a battle is not a rest, and a pool that
-    /// refills mid-battle is the per-encounter model the hub explicitly rejects.</para>
+    /// <para>Two independent reasons were originally given. (1) — <b>resolved by S10.1, 2026-09-13</b>
+    /// — the reader used to round the channel to a whole <c>long</c>, so the smallest expressible
+    /// non-zero rate was 1/tick, and a round runs several hundred ticks (`action-timing.v1.json`: the
+    /// basic attack alone is 150 wind-up + 50 recovery), accruing ~300 poise against
+    /// `reaction-lane.v1.json`'s spend of 100 — three counters a round, with nothing representable
+    /// between that and "nothing". <see cref="Stats.Derived.ResourceChannelReader.RegenPerMilleTick"/>
+    /// now reads the rate in per-mille per tick and <see cref="Actions.Cost.ResourcePoolState"/>
+    /// carries the remainder, so 999 rates exist inside that former gap and a rate is no longer
+    /// forced to be coarse. (2) still stands, and is now the whole of the reason: `resource-hub-ssot.md`
+    /// §11 — pools "persist across a run and refill <b>at rest</b>", a battle is not a rest, and a pool
+    /// that refills mid-battle is the per-encounter model the hub explicitly rejects.</para>
     ///
-    /// <para>A method rather than an inlined literal so the reasoning has somewhere to live and a
-    /// future sub-tick unit (spec §10.1) has one place to change.</para>
+    /// <para><b>T11 (lawn-combat-wire, spec-lawn-combat-calibration.md, 2026-09-14) authors the first
+    /// non-zero row.</b> `stamina` now regenerates — the other four ids stay exactly 0, by the
+    /// surviving reason above (poise) or because nothing spends them yet (hunger/spirit/qi). The rate
+    /// is expressed as <see cref="BattleResourceTuning.RegenShareOf"/> — a per-mille SHARE of the
+    /// resource's OWN pool max, regenerated per second — so it projects through <see cref="BaseHp"/>
+    /// the same way <see cref="BaseResourceMax"/> already does, rather than forking a second,
+    /// theta-independent curve. `hp` carries no share row at all (mirrors <see cref="BaseResourceMax"/>'s
+    /// own hp special-case) and always returns 0 here.</para>
+    ///
+    /// <para>Returns UNITS PER TICK (the channel's own meaning, <see cref="ResourceChannelReader"/>),
+    /// as a <c>double</c> — the whole point of `resource-subtick` (S10.1) was making a SUB-tick rate
+    /// expressible, so this can no longer be a <c>long</c>: <c>regenPerSecond / TicksPerSecond</c>,
+    /// dividing once, at the end, from long arithmetic into the one double this method returns.</para>
     /// </summary>
-    public static long BaseResourceRegen(int theta, string resourceId) => 0;
+    public static double BaseResourceRegen(int theta, string resourceId)
+    {
+        if (resourceId == "hp") return 0;
+
+        var poolMax = checked(BaseHp(theta) * ResourceTuning.ShareOf(resourceId)) / 1000;
+        var regenPerSecond = checked(poolMax * ResourceTuning.RegenShareOf(resourceId)) / 1000;
+        return regenPerSecond / (double)TicksPerSecond;
+    }
+
+    /// <summary>The kernel's own tick period is 100 ms (`KernelDriveHost`, `EffectRuntime`'s shield
+    /// upkeep grid — both cite "the period stays 100 ms" as a substitution, not a redesign). Structural,
+    /// not a tunable: it is the sub-tick unit's own denominator, not a balance number a pass would
+    /// change — changing it would mean re-deriving every per-mille-per-tick rate in this file.</summary>
+    const int TicksPerSecond = 10;
 
     // The v1 per-mille Hit*/Crit* constants are retired (combat-unification ban test);
     // the SSOT resolver's sigmoid + CombatProbabilityPolicy own hit/crit math now.

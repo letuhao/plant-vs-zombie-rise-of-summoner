@@ -58,7 +58,7 @@ program existed to close.
   regeneration on its own.
 - **A general, bidirectional language-contamination check**, generalizing (and fixing) the real,
   already-proven `language_consistency` validator (`workflow/validators/language.py:26`, wired
-  into demons + passive-tree today) — its own current logic only catches CJK-motif-in, mixed-output
+  into creatures + passive-tree today) — its own current logic only catches CJK-motif-in, mixed-output
   cases; the real dungeon defect ran the other direction and would not be caught by wiring the
   existing validator in unchanged.
 
@@ -112,7 +112,7 @@ Tasks 5-6. Depends on Phase 0.
 
 Tasks 7-8. Depends on Phase 0. Runs in parallel with Phase 1/3/4/5.
 
-### Phase 3 — `content-completeness-demons`
+### Phase 3 — `content-completeness-creatures`
 
 Tasks 9-10. Depends on Phase 0. Runs in parallel with Phase 1/2/4/5.
 

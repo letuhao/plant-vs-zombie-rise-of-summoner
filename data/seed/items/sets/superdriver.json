@@ -25,7 +25,7 @@
       "id": "set.superdriver-001",
       "nameKey": "set.sled-racer-s-engine",
       "name": "Sled Racer's Engine",
-      "themeKey": "demon.superdriver",
+      "themeKey": "creature.superdriver",
       "members": [
         {
           "role": "armament-primary",

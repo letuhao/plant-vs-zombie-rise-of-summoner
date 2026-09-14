@@ -100,12 +100,12 @@ public class BattlefieldOwnSideReactorTests
     [Fact]
     public void MindControlToggled_into_own_side_grants_and_back_out_withdraws()
     {
-        // The exact hypno-zombie-demon case the ideal document's own §4.1 finding is about.
+        // The exact hypno-zombie-creature case the ideal document's own §4.1 finding is about.
         var bag = NewBag();
         var oracle = new FakeOracle();
         var reactor = NewReactor(bag, oracle, RelationKind.Ally, "aura:t8");
 
-        oracle.Set("EEE", RelationKind.Ally); // now considered ours (a player-owned demon, hypnotized on)
+        oracle.Set("EEE", RelationKind.Ally); // now considered ours (a player-owned creature, hypnotized on)
         reactor.OnMembershipChanged(new ScopeMembershipEvent("EEE", ScopeMembershipTransition.MindControlToggled, MindControlledNow: true));
         Assert.True(HasGrant(bag, "EEE"));
 

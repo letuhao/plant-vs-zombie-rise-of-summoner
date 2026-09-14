@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Text.Json;
 using FusionRpg.CheatCore;
 using FusionRpg.Contracts;
@@ -7,6 +8,7 @@ using FusionRpg.Core.Stats.Derived;
 
 using FusionRpg.Injector.Host;
 using FusionRpg.Injector.Lawn;
+using FusionRpg.Injector.Match;
 using FusionRpg.Injector.Stats;
 
 namespace FusionRpg.Injector;
@@ -56,12 +58,27 @@ public static class CheatState
         // D6's "binds accepted, nothing applied" state.
         // Fully qualified on purpose: a bare `Stats.` here is ambiguous with this class's own
         // `Stats` StatSystem property.
-        boundDerivedAtoms: FusionRpg.Injector.Stats.GrantedDerivedAtoms.For,
+        //
+        // lawn-tree-hydrate (T13): merges in the cached commander-scope shared-tree atoms alongside
+        // the live-grant reader above — two independent Hub combat writers, one delegate, neither
+        // shadowing the other (a node granting the same channel as a live grant folds via the SAME
+        // DerivedComposer both already feed, never a second private sum).
+        boundDerivedAtoms: ctx =>
+            FusionRpg.Injector.Stats.GrantedDerivedAtoms.For(ctx)
+                .Concat(FusionRpg.Injector.Stats.TreeBoundAtomsCache.For(ctx))
+                .ToList(),
         // mechanism-wiring G1's injector half (spec-mechanism-wiring.md §4.1): registers the fourth
         // IActorStatSubsystem so a status's own `stat.<combat.*|status.*>.<op>` writes reach the
         // composed value instead of landing in the primary bag no subsystem reads. Additive next to
         // boundDerivedAtoms above — same opt-in shape, same fully-qualified-on-purpose reason.
-        statusDerivedMods: FusionRpg.Injector.Stats.StatusDerivedMods.For);
+        statusDerivedMods: FusionRpg.Injector.Stats.StatusDerivedMods.For,
+        // lawn-combat-wire T12a (spec-basic-attack-cost.md wire 2): the injector's Hub never opted
+        // into ResourceBaselineSubsystem before this line, so `resource.max.*`/`resource.regen.*`
+        // resolved to 0 for every lawn actor -- indistinguishable from this whole feature's own bug.
+        // Sole prior `true` caller was UniqueActorHubCompose.cs (Server's cold /sheet compose); this
+        // is the injector's own opt-in, from the SAME already-shipped ResourceBaselineSubsystem/
+        // BattleRuleset.BaseResourceMax/BaseResourceRegen -- never a second seed mechanism.
+        seedResourceBaseline: true);
 
     /// <summary>aura-skill T5 (W1): cached commander-scope allocation — <see cref="ActorHub"/>'s
     /// hot-path <c>aptitudeAllocation</c> delegate reads only this cache, never the server
@@ -115,24 +132,24 @@ public static class CheatState
     static IReadOnlyDictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation> _speciesAllocations =
         new Dictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation>(StringComparer.Ordinal);
 
-    /// <summary>`(Side, GameTypeId) → speciesId`, lazily built from <c>DemonSpeciesCatalog.All</c> and
+    /// <summary>`(Side, GameTypeId) → speciesId`, lazily built from <c>CreatureSpeciesCatalog.All</c> and
     /// cached for the process lifetime (`catalog-runtime`'s own "loaded once, immutable" rule — the
     /// SAME precedent <c>LawnElementResolverHost</c> already established for the element-resolve case).
-    /// <see cref="FusionRpg.Core.Demons.DemonSpeciesCatalog.IsConfigured"/> is checked FIRST, non-
+    /// <see cref="FusionRpg.Core.Creatures.CreatureSpeciesCatalog.IsConfigured"/> is checked FIRST, non-
     /// throwing, so an un-configured catalog is a distinguishable <see cref="FusionRpg.Core.Stats.Aptitudes.SpeciesLookupResult.NotConfigured"/>
     /// answer rather than an exception or a silent empty-index miss (the exact bootstrap-window hazard
     /// spec-allocation-transport.md calls out by name).</summary>
     static readonly object SpeciesIndexGate = new();
-    static FusionRpg.Core.Demons.LawnElementIndex? _speciesIndex;
+    static FusionRpg.Core.Creatures.LawnElementIndex? _speciesIndex;
 
     static FusionRpg.Core.Stats.Aptitudes.SpeciesLookupResult ResolveSpeciesLookup(StatSide side, int typeId)
     {
-        if (!FusionRpg.Core.Demons.DemonSpeciesCatalog.IsConfigured)
+        if (!FusionRpg.Core.Creatures.CreatureSpeciesCatalog.IsConfigured)
             return FusionRpg.Core.Stats.Aptitudes.SpeciesLookupResult.NotConfigured;
 
-        FusionRpg.Core.Demons.LawnElementIndex index;
+        FusionRpg.Core.Creatures.LawnElementIndex index;
         lock (SpeciesIndexGate)
-            index = _speciesIndex ??= new FusionRpg.Core.Demons.LawnElementIndex(FusionRpg.Core.Demons.DemonSpeciesCatalog.All);
+            index = _speciesIndex ??= new FusionRpg.Core.Creatures.LawnElementIndex(FusionRpg.Core.Creatures.CreatureSpeciesCatalog.All);
 
         var sideText = side == StatSide.Zombie ? "zombie" : "plant";
         return index.TryGet(sideText, typeId, out var species)
@@ -159,7 +176,10 @@ public static class CheatState
         resolveSpeciesAllocation: speciesId => _speciesAllocations.TryGetValue(speciesId, out var a)
             ? a : FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty,
         resolveCommanderAllocation: _ => CommanderAllocation.Resolve(DummyStatContextForCommanderRead),
-        reportUnconfigured: msg => RpgHost.Log.Warning(msg));
+        reportUnconfigured: msg => RpgHost.Log.Warning(msg),
+        resolveBoundInstanceId: ResolveBoundInstanceId,
+        resolveUniqueAllocation: instanceId => _uniqueAllocations.TryGetValue(instanceId, out var u)
+            ? u : FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty);
 
     /// <summary>Called from the transport (`RpgClient.RefreshCommanderAllocationAsync`, extended to
     /// parse the SAME response's new `species` map alongside `shares` — one fetch, both caches, never
@@ -171,6 +191,42 @@ public static class CheatState
         IReadOnlyDictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation> bySpeciesId)
     {
         _speciesAllocations = bySpeciesId ?? throw new ArgumentNullException(nameof(bySpeciesId));
+        Stats.Invalidate();
+    }
+
+    // ---- aptitude-sheet `unique-lawn-wire` (AS-1.1) --------------------------------------------
+
+    /// <summary>Cache `instanceId → effective UniqueCreature allocation`, populated by
+    /// <see cref="ApplyUniqueAllocations"/> from <c>RpgClient</c>'s per-Bound-id
+    /// <c>GET /api/aptitudes/unique/{instanceId}</c> fetch. Mirrors <see cref="_speciesAllocations"/>'s
+    /// own shape exactly — wholesale replace, no incremental merge.</summary>
+    static IReadOnlyDictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation> _uniqueAllocations =
+        new Dictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation>(StringComparer.Ordinal);
+
+    /// <summary>`EntityKey` (the live ptr hex `RpgClient`/`EntityApply` already build every
+    /// `StatContext` with) → the UniqueCreature `instanceId` it is Bound to, or null when this entity
+    /// is not a Bound specimen. Reads the SAME `MatchHost.Runtime` ptr→binding index
+    /// <see cref="FusionRpg.Injector.Match.UniqueBoundLoadout"/> already uses for the absolute-write
+    /// side of a Bound specimen (W5-C) — one ptr index, two consumers, never a second lookup this
+    /// class builds on its own. `Phase != Bound` (PendingSpawn / Cleared) resolves to null, same
+    /// guard <c>UniqueBoundLoadout.TryApply</c> applies for the identical reason: a binding row can
+    /// briefly exist before/after the specimen is actually the live entity behind this ptr.</summary>
+    static string? ResolveBoundInstanceId(string entityKey)
+    {
+        if (string.IsNullOrWhiteSpace(entityKey)) return null;
+        if (!MatchHost.Runtime.TryGetBindingByPtr(entityKey, out var binding) || binding is null)
+            return null;
+        return binding.Phase == FusionRpg.Core.Match.UniqueBindingPhase.Bound ? binding.InstanceId : null;
+    }
+
+    /// <summary>Called from the transport (`RpgClient`'s per-Bound-id unique fetch) after a successful
+    /// round of fetches. Replaces the whole cache — an instanceId no longer Bound this round (the
+    /// specimen was released / died) simply stops being fetched and ages out on the next full replace,
+    /// matching <see cref="ApplySpeciesAllocations"/>'s own contract.</summary>
+    public static void ApplyUniqueAllocations(
+        IReadOnlyDictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation> byInstanceId)
+    {
+        _uniqueAllocations = byInstanceId ?? throw new ArgumentNullException(nameof(byInstanceId));
         Stats.Invalidate();
     }
     static FusionRpg.Core.Power.IPowerIndexProvider? _powerIndex;
@@ -296,7 +352,7 @@ public static class CheatState
                          "H-ANYWHERE", "H-NOCD-CARD", "H-NOCD-GLOVE", "H-NOCD-HAMMER", "H-NOCD-WHEEL", "H-MOWER-INF",
                          "SYS-EMIT-PROOF", "SYS-DAMAGE-FX", "SYS-ELEMENT-FX",
                          "SYS-LIMHEALTH-GATE", "SYS-LIMHEALTH-OBSERVE",
-                         "OVERLAY-COMBAT", "DEBUG-LEVEL-ENTRY"
+                         "OVERLAY-COMBAT", "DEBUG-LEVEL-ENTRY", "LAWN-BASIC-ATTACK"
                      })
                 T(id);
 
@@ -328,6 +384,11 @@ public static class CheatState
             // effect-runtime/_prove-overlay-combat.json); promoted per spec-overlay-combat-enable.md
             // §7's own "only after the proof" rule.
             Get("OVERLAY-COMBAT").Enabled = true;
+            // lawn-combat-wire T10/T12's shared kill switch — kept registered here as an EXPLICIT
+            // debug/QA override surface only. 2026-09-14 correction: LawnBasicAttackFeature.Enabled no
+            // longer trusts this class's own IsSet=false schema-fallback as its production default (see
+            // that class's doc comment) — this Enabled=true seed is display/back-compat only.
+            Get("LAWN-BASIC-ATTACK").Enabled = true;
             // Schema defaults are not user-set; Effective* applies display defaults when IsSet=false.
         }
         SyncLocalStatsFromEntries();

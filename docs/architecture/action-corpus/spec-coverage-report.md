@@ -35,7 +35,7 @@ claimed — no round declares success against a metric it did not evaluate.
 | **`gates` starts `False` for every new metric**; promotion is a deliberate, later, separate act | `metrics/model.py:85` and its comment at `:8-9` |
 | A metric whose `needs` are unmet reports `NOT_MEASURED`, never a pass — silence and success stay distinguishable | `metrics/model.py:10-11`, `Severity.NOT_MEASURED` at `:34` |
 | An existing coverage/dedup/distribution metric family to model on | `metrics/coverage.py`, `metrics/dedup.py`, `metrics/distribution.py`, `metrics/corpus_coverage.py` |
-| The runner and its `--gate` / `--json` surface | `report/cli.py:154` (`cmd_report`), flags at `:778-780` and `:793-795` ⛔ **corrected 2026-09-03: `:728-741` is `_cmd_demons_diff_legacy`, not the runner** |
+| The runner and its `--gate` / `--json` surface | `report/cli.py:154` (`cmd_report`), flags at `:778-780` and `:793-795` ⛔ **corrected 2026-09-03: `:728-741` is `_cmd_creatures_diff_legacy`, not the runner** |
 | The in-game closed-loop pairing assertion this report mirrors | `EnablerPayoffCoverage.cs:21-34` |
 | The rung table the rung-band axis is indexed against | `data/tuning/action-rungs.v1.json` |
 
@@ -132,9 +132,31 @@ That fixes both metrics above, and it makes one of them worse before it makes it
    `next-target` entry per subject that is short, ordered by `(shortfall desc, subjectKey ordinal)`.
    Round n+1's briefs are then a pure function of round n's report, so each round is individually
    replayable and the sequence is auditable.
-6. **Emit the verdict.** `pass` requires *every gating CLOSED metric* green **and** an explicit list of
-   which metrics were evaluated. An unevaluated metric is named in the report as unevaluated; it never
-   silently counts as green.
+6. **Emit the verdict.** `pass` requires *every **gating** CLOSED metric* green **and** an explicit
+   list of which metrics were evaluated. An unevaluated metric is named in the report as unevaluated;
+   it never silently counts as green.
+
+   ⛔ **DECIDED 2026-09-12 (T1.1) — `gates` is the gate flag, and `gates=False` metrics cannot make a
+   verdict `not-clean`.** This is not a new rule; it is the one `spec-metrics.md` §4 already states
+   (*"New metric → `gates=False`, runs, reports. **Then** a threshold goes into `budget` and `gates`
+   flips"*) and the one the general reporter already implements in four places
+   (`report/cli.py`'s `gating_ids = {m.id for m in registry.all() if m.gates}`). The A-S5
+   implementation had diverged: `compute_verdict` treated **any** `GAP` finding as `not-clean`,
+   ignoring `gates` entirely.
+
+   **Why it had to be fixed rather than worked around.** All **eleven** action-corpus CLOSED metrics
+   ship `gates=False` — none has earned a threshold yet, correctly, because calibration is
+   *measure, look, set, gate*. So under the old behaviour every GAP blocked the verdict even though no
+   metric had been promoted, which made the full-run gate **unreachable by construction**:
+   `mode: "full"` needs a passing verdict → the verdict needs `thinCell` green → `thinCell` needs a
+   filled corpus → a filled corpus needs `mode: "full"`.
+
+   **What the verdict now reports.** A `GAP` on a non-gating metric is still a `GAP`: it is listed in
+   the report, it names its subject, and it feeds the next-round targets (§3 step 5). It simply does
+   not, on its own, flip the run verdict — exactly the calibration order. `NOT_MEASURED` stays
+   blocking in every mode: an absent check must never be indistinguishable from a pass. When the
+   owner promotes a metric (a threshold in `budget`, `gates` flipped to `True`) its GAPs begin
+   blocking, and the report's `gatingMetrics` list says which those are.
 7. **Canonical write** — sorted keys, fixed indent, `\n`, explicit nulls.
 
 ## 4. What it must NOT do
@@ -142,13 +164,18 @@ That fixes both metrics above, and it makes one of them worse before it makes it
 - **Never let an open-loop metric contribute to a pass.** `flavourQuality` and `semanticNeighbour`
   produce review queues and nothing else.
 - **Never register a new metric with `gates=True`.** Promotion is a separate, later, deliberate act
-  (`metrics/model.py:8-9`, `:85`).
+  (`metrics/model.py:8-9`, `:85`). The mirror image binds too, as of the 2026-09-12 T1.1 decision:
+  **never let a `gates=False` metric's GAP decide the verdict.** A `GAP` that is not promoted is a
+  reading and a work order, not a gate.
 - **Never report a pass for a metric it did not run.** `NOT_MEASURED` is a distinct severity and must
   stay visible in the output.
 - **Never quote the 1,500-3,500 band against the shipped roster without re-deriving it.** That band was
   derived for ~900 units; at 84 species and 3 signature actions each the signature tier is **252**, and
   the whole corpus is roughly **850** — below the band rather than inside it. The derivation is correct
   in method and was applied to the wrong roster, and repeating that here would re-ship the same error.
+  ⛔ **RE-MEASURED 2026-09-11:** the live roster is **904 species / 227 families**, and the shipped
+  round-1 plan is **6,655 briefs** (1,000 general / 1,135 family / 4,520 species), so the 84-species
+  arithmetic above is a historical note, not the current target.
 - **Never schedule past the smoke batch.** The report is the evidence for the owner's decision; it does
   not make the decision and it does not plan the full run.
 - Never call a model. Not to summarise, not to judge prose, not to "explain" a thin cell.

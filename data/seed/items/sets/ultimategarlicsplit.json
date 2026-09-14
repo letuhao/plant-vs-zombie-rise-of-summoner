@@ -25,7 +25,7 @@
       "id": "set.ultimategarlicsplit-001",
       "nameKey": "set.shadow-bolt-subspecies",
       "name": "Shadow-Bolt Subspecies",
-      "themeKey": "demon.ultimategarlicsplit",
+      "themeKey": "creature.ultimategarlicsplit",
       "members": [
         {
           "role": "armament-primary",

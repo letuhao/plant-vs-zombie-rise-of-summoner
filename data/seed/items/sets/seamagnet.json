@@ -25,7 +25,7 @@
       "id": "set.seamagnet-001",
       "nameKey": "set.magnetic-siphon",
       "name": "Magnetic Siphon",
-      "themeKey": "demon.seamagnet",
+      "themeKey": "creature.seamagnet",
       "members": [
         {
           "role": "armament-primary",

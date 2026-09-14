@@ -47,8 +47,8 @@ NUMERIC_JSON_TYPES = frozenset({"number", "integer"})
 # Three extensions added for `validate-heal` (A-S4, spec-validate-heal.md SS2 Stage 0) and kept
 # HERE rather than in an action-corpus-local copy, so every seedsmith pipeline inherits them the
 # moment it constructs a `Pipeline` (guardrail #6's own audit-at-construction-time discipline).
-# `adapters/demons/anchor/audit.py`'s `numeric_audit` already proved this exact shape of check for
-# the demon-seed program (same three smuggling cases, plus a couple of demon-specific deny names)
+# `adapters/creatures/anchor/audit.py`'s `numeric_audit` already proved this exact shape of check for
+# the creature-seed program (same three smuggling cases, plus a couple of creature-specific deny names)
 # -- it stays exactly as-is (a separate, already-tested module with its own callers) rather than
 # being refactored into this one; the implementation below mirrors its `_DIGIT_PROBES` /
 # `fullmatch` technique deliberately, because it is a more correct test for "does this pattern
@@ -58,7 +58,7 @@ NUMERIC_JSON_TYPES = frozenset({"number", "integer"})
 #: Property names that name a magnitude outright, regardless of declared JSON type -- a value
 #: smuggled through a "closed" string enum or a narrowly-worded pattern is still a magnitude a
 #: model invented. This is the floor every seedsmith schema shares; a program with its own wider
-#: vocabulary (demons' `MAGNITUDE_DENY_NAMES` in `adapters/demons/anchor/audit.py`) keeps that
+#: vocabulary (creatures' `MAGNITUDE_DENY_NAMES` in `adapters/creatures/anchor/audit.py`) keeps that
 #: list local rather than widening this one for everybody.
 MAGNITUDE_DENY_NAMES = frozenset({
     "hp", "atk", "damage", "cost", "chance", "duration", "weight", "rung", "tier",
@@ -134,7 +134,7 @@ def audit_schema(schema: Mapping[str, Any], *, path: str = "$", field_name: "str
     `name_allowlist` is the escape hatch the spec requires for the name check ONLY: a property that
     is genuinely an identifier (never entering arithmetic) is exempted BY NAME, per call, with the
     CALLER's own comment saying why — never a blanket exemption baked in here. `field_name` is the
-    last-seen property name, threaded through recursion (mirrors `adapters/demons/anchor/audit.py`'s
+    last-seen property name, threaded through recursion (mirrors `adapters/creatures/anchor/audit.py`'s
     `numeric_audit`) so the name-based checks see it at any nesting depth, including inside an
     array's `items`.
     """

@@ -25,7 +25,7 @@
       "id": "set.driver-c-001",
       "nameKey": "set.great-dreadnought-engine",
       "name": "Great Dreadnought Engine",
-      "themeKey": "demon.driver_c",
+      "themeKey": "creature.driver_c",
       "members": [
         {
           "role": "armament-primary",

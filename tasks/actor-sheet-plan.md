@@ -60,7 +60,7 @@ T16 HUD resolve from status-catalog
 
 ## 3. Out of scope
 
-Trail specs · Promote · UniqueDemon allocate POST · action corpus · Phaser Path VFX · Band B enlarge ·
+Trail specs · Promote · UniqueCreature allocate POST · action corpus · Phaser Path VFX · Band B enlarge ·
 **lawn-interactive** (own map).
 
 ## 4. Risks
@@ -73,7 +73,7 @@ Trail specs · Promote · UniqueDemon allocate POST · action corpus · Phaser P
 
 ## 5. Non-blocking follow-ups
 
-Commander HUD chip → sheet · UniqueDemon allocate · lawn-interactive plan:
+Commander HUD chip → sheet · UniqueCreature allocate · lawn-interactive plan:
 [lawn-interactive-plan.md](lawn-interactive-plan.md) (separate program; not this checklist).
 
 ## 6. Verification (when unlocked)

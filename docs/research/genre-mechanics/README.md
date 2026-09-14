@@ -24,7 +24,7 @@ reachable — not from wiki prose. Where only a wiki was available it is labelle
 | `dannyguy253/PvZHeroes-Database` (503 cards from `card_data_173`) | The full PvZ Heroes stat/cost/keyword table | [04](04-pvz-franchise-siblings.md) |
 | `Btd6ModHelper/btd6-game-data` (live BTD6 model export) | Paragon degree data, bloon model fields, freeplay scaling | [05](05-tower-defense-genre.md) |
 | `Kengxxiao/ArknightsGameData_YoStar` | 374 Operators, 1,552 enemy records, shipped level files | [05](05-tower-defense-genre.md) |
-| `megaten-fusion-tool` (fusion code + per-game datamined JSON) | The SMT fusion algorithm and demon tables | [06](06-summoner-minion-fusion-rpg.md) |
+| `megaten-fusion-tool` (fusion code + per-game datamined JSON) | The SMT fusion algorithm and creature tables | [06](06-summoner-minion-fusion-rpg.md) |
 | Path of Building `Minions.lua` / `Misc.lua` (generated from GGG data) | Minion life and damage curves | [06](06-summoner-minion-fusion-rpg.md) |
 | `pret/pokeemerald` disassembly | Obedience formula, IV inheritance | [06](06-summoner-minion-fusion-rpg.md) |
 | Riot's own TFT export (`communitydragon`, 24 MB) | Trait tables, breakpoints, magnitudes | [07](07-rts-and-autobattler.md) |
@@ -73,7 +73,7 @@ Numbers marked **(computed)** are tallies over primary data, not quotes.
    [04](04-pvz-franchise-siblings.md) §2
 4. **Fusion at scale is a table that picks the family and a rule that picks the individual** — and
    authored recipes always beat computed ones in precedence. SMT's algorithm only works because
-   `(race, level)` is a primary key: **zero collisions across all five games' demon tables (computed).**
+   `(race, level)` is a primary key: **zero collisions across all five games' creature tables (computed).**
    [06](06-summoner-minion-fusion-rpg.md) §1, §3
 5. **Enemy durability outgrows enemy lethality in every endless game examined.** Diablo III Greater
    Rifts diverge by a factor of **5.15 million** over 149 tiers; Path of Exile's `×352` damage growth

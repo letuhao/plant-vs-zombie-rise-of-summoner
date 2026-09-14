@@ -25,7 +25,7 @@
       "id": "set.tallfirenutzombie-001",
       "nameKey": "set.frozen-nut-brood",
       "name": "Frozen Nut Brood",
-      "themeKey": "demon.tallfirenutzombie",
+      "themeKey": "creature.tallfirenutzombie",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.threepot-001",
       "nameKey": "set.the-sentry-s-vessel",
       "name": "The Sentry's Vessel",
-      "themeKey": "demon.threepot",
+      "themeKey": "creature.threepot",
       "members": [
         {
           "role": "footing",

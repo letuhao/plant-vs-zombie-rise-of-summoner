@@ -88,7 +88,7 @@ class GateEvidenceTests(unittest.TestCase):
     def test_the_real_evidence_file_has_all_four_kinds(self) -> None:
         evidence = gates.load_gate_evidence(real_seed_root())
         self.assertEqual(set(evidence.keys()),
-                         {"aptitudePoints", "elementMastery", "statusApplied", "demonTypeLevel"})
+                         {"aptitudePoints", "elementMastery", "statusApplied", "creatureTypeLevel"})
 
     def test_all_four_gate_index_kinds_are_carrier(self) -> None:
         # 2026-09-06: elementMastery/statusApplied flipped pending -> carrier for real -- their
@@ -99,7 +99,7 @@ class GateEvidenceTests(unittest.TestCase):
         # ladder names the exact rung this crosses).
         evidence = gates.load_gate_evidence(real_seed_root())
         self.assertEqual(evidence["aptitudePoints"].gate_state, "carrier")
-        self.assertEqual(evidence["demonTypeLevel"].gate_state, "carrier")
+        self.assertEqual(evidence["creatureTypeLevel"].gate_state, "carrier")
         self.assertEqual(evidence["elementMastery"].gate_state, "carrier")
         self.assertEqual(evidence["statusApplied"].gate_state, "carrier")
 

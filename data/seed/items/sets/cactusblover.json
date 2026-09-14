@@ -25,7 +25,7 @@
       "id": "set.cactusblover-001",
       "nameKey": "set.emerald-shard-vortex",
       "name": "Emerald Shard Vortex",
-      "themeKey": "demon.cactusblover",
+      "themeKey": "creature.cactusblover",
       "members": [
         {
           "role": "armament-primary",

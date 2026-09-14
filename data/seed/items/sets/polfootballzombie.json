@@ -25,7 +25,7 @@
       "id": "set.polfootballzombie-001",
       "nameKey": "set.the-scrum-s-desire",
       "name": "The Scrum's Desire",
-      "themeKey": "demon.polfootballzombie",
+      "themeKey": "creature.polfootballzombie",
       "members": [
         {
           "role": "armament-primary",

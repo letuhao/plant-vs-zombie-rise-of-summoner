@@ -25,7 +25,7 @@
       "id": "set.flagzombie-001",
       "nameKey": "set.banner-of-the-great-undead",
       "name": "Banner of the Great Undead",
-      "themeKey": "demon.flagzombie",
+      "themeKey": "creature.flagzombie",
       "members": [
         {
           "role": "armament-primary",

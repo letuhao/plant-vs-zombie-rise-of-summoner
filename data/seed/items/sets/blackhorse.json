@@ -25,7 +25,7 @@
       "id": "set.blackhorse-001",
       "nameKey": "set.black-olive-charge",
       "name": "Black Olive Charge",
-      "themeKey": "demon.blackhorse",
+      "themeKey": "creature.blackhorse",
       "members": [
         {
           "role": "armament-primary",

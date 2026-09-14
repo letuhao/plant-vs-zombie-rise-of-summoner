@@ -39,10 +39,18 @@ def _canonical_dump(doc: dict) -> str:
 
 
 def regenerate(*, plan_path: Path, usage_reports_dir: Path = USAGE_REPORTS_DIR,
-              plan_out_path: "Path | None" = None, write: bool = True) -> dict:
+              plan_out_path: "Path | None" = None, pairings_path: "Path | None" = None,
+              write: bool = True) -> dict:
     """Pure-ish computation (`write=False` writes nothing) plus, on a real run, one file write.
     Returns a summary dict; never prints itself, matching every sibling `regenerate`'s own "a test
-    can call this without capturing stdout" convention."""
+    can call this without capturing stdout" convention.
+
+    Reads `pairings.json` to learn which families are **payoff keys**, and passes them to
+    `assign_required_families` so the non-pairing round-robin never requires a payoff without its
+    enabler (see that function's own 2026-09-12 note: 74 live anchors were otherwise guaranteed
+    `enablerPayoffCoverage` gaps). A missing/blank `pairings.json` degrades to an empty payoff set --
+    the pre-fix behaviour exactly -- rather than refusing, matching how `coverage_report` treats the
+    same absent input."""
     doc = json.loads(plan_path.read_text(encoding="utf-8"))
     if doc.get("kind") != "action-brief":
         raise ValueError(
@@ -52,7 +60,14 @@ def regenerate(*, plan_path: Path, usage_reports_dir: Path = USAGE_REPORTS_DIR,
     entries = doc.get("entries") or []
     usage_counts = load_current_usage(usage_reports_dir)
     family_ids = load_family_ids()
-    assignments = assign_required_families(entries, usage_counts=usage_counts, family_ids=family_ids)
+    pairings_file = pairings_path or (ACTIONS_ROOT / "pairings.json")
+    payoff_families: "list[str]" = []
+    if pairings_file.is_file():
+        table = json.loads(pairings_file.read_text(encoding="utf-8"))
+        payoff_families = sorted(table)
+    assignments = assign_required_families(entries, usage_counts=usage_counts,
+                                           family_ids=family_ids,
+                                           payoff_families=payoff_families)
 
     for entry in entries:
         brief_id = entry.get("briefId") or entry.get("id")

@@ -10,7 +10,7 @@
     data/seed/actions/type-weights.json                  A-T1 — categoryMilli, for quota recompute
     data/tuning/action-corpus-run.v1.json                round counts (generalCount/perFamilyCount/
                                                           perSpeciesCount) and mode
-    data/seed/demons/species/**/*.json                      live species/family membership
+    data/seed/creatures/species/**/*.json                      live species/family membership
     data/seed/items/affix-families/*.json                the 98-family namespace
     data/seed/actions/pairings.json                      read-only; today's 5 out-of-namespace ids
 
@@ -49,11 +49,11 @@ from ...metrics.action_coverage import (
     ALL_ACTION_COVERAGE_CLOSED_METRICS, ALL_ACTION_COVERAGE_OPEN_METRICS,
 )
 
-__all__ = ["run", "regenerate", "ACTIONS_ROOT", "DEMONS_ROOT"]
+__all__ = ["run", "regenerate", "ACTIONS_ROOT", "CREATURES_ROOT"]
 
 REPO_ROOT = Path(__file__).resolve().parents[5]
 ACTIONS_ROOT = REPO_ROOT / "data" / "seed" / "actions"
-DEMONS_ROOT = REPO_ROOT / "data" / "seed" / "demons"
+CREATURES_ROOT = REPO_ROOT / "data" / "seed" / "creatures"
 TYPE_WEIGHTS_PATH = ACTIONS_ROOT / "type-weights.json"
 PAIRINGS_PATH = ACTIONS_ROOT / "pairings.json"
 
@@ -68,7 +68,7 @@ def _family_members(family_assignments: dict) -> "dict[str, list[str]]":
     return {fam: sorted(v) for fam, v in members.items()}
 
 
-def _build_ctx(*, actions_root: Path, demons_root: Path, catalog_path: Path,
+def _build_ctx(*, actions_root: Path, creatures_root: Path, catalog_path: Path,
               type_weights_path: Path, run_tuning_path: Path,
               family_assignments_path: "Path | None", pairings_path: Path,
               round_no: int) -> ActionCoverageCtx:
@@ -77,7 +77,7 @@ def _build_ctx(*, actions_root: Path, demons_root: Path, catalog_path: Path,
 
     using_live_families = family_assignments_path is None
     if using_live_families:
-        live_species_root = catalog_path if catalog_path.is_dir() else demons_root / "species"
+        live_species_root = catalog_path if catalog_path.is_dir() else creatures_root / "species"
         family_assignments = derive_live_family_assignments(live_species_root)
     else:
         family_assignments = json.loads(family_assignments_path.read_text(encoding="utf-8"))
@@ -119,6 +119,35 @@ def _build_ctx(*, actions_root: Path, demons_root: Path, catalog_path: Path,
         accepted_rows.extend(
             e for e in (survivors_doc.get("entries") or []) if not e.get("promoted"))
 
+    # ⛔ ONE ROW PER ID — the 2026-09-12 gate finding (T3.1). The filter above trusts this round's
+    # `survivors.json` to have been reduced to `promoted` markers once its content moved into a
+    # `committed-round-<n>.json`. That is true only if S6 promoted THIS round. When a LATER round's
+    # S6 run promotes a row that also still sits in an EARLIER round's un-marked survivors file, the
+    # committed copy and the stale round copy are both admitted, with different payloads: measured,
+    # `_rounds/round-1/survivors.json` held 12 rows, 11 of them already committed in
+    # `committed-round-2000.json`, so this report measured 191 rows for a 179-row corpus and the two
+    # reports disagreed about the same baseline.
+    #
+    # The invariant the pipeline claims is "one id exists in exactly one place" (`innate_picker`).
+    # A producer-side violation is not the consumer's to police, but the consumer is where it does
+    # damage, and a duplicate row double-counts every cell, `thinCell` and `speciesCoverage` alike.
+    # So: keep the FIRST occurrence per id. `load_committed` is read first and already guarantees
+    # committed ids are unique, so the committed (promoted, authoritative) copy wins and a stale
+    # round copy is dropped. Deterministic: iteration order is committed-then-survivors, sorted by
+    # file and entry order, so "first" is stable.
+    deduped: "list[dict]" = []
+    seen_ids: "set[str]" = set()
+    for row in accepted_rows:
+        row_id = row.get("id")
+        if row_id is None:
+            deduped.append(row)                     # an id-less row is not this guard's business
+            continue
+        if row_id in seen_ids:
+            continue
+        seen_ids.add(row_id)
+        deduped.append(row)
+    accepted_rows = deduped
+
     review_rows: "tuple[dict, ...]" = ()
     review_path = round_dir / "review-queue.json"
     if review_path.is_file():
@@ -137,7 +166,7 @@ def _build_ctx(*, actions_root: Path, demons_root: Path, catalog_path: Path,
     )
 
 
-def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_ROOT,
+def regenerate(*, actions_root: Path = ACTIONS_ROOT, creatures_root: Path = CREATURES_ROOT,
               catalog_path: Path = CATALOG_PATH, type_weights_path: "Path | None" = None,
               run_tuning_path: Path = RUN_TUNING_PATH, family_assignments_path: "Path | None" = None,
               pairings_path: "Path | None" = None, round_no: int = 1, write: bool = True) -> dict:
@@ -147,7 +176,7 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
     pairings_path = pairings_path or PAIRINGS_PATH
 
     cov = _build_ctx(
-        actions_root=actions_root, demons_root=demons_root, catalog_path=catalog_path,
+        actions_root=actions_root, creatures_root=creatures_root, catalog_path=catalog_path,
         type_weights_path=type_weights_path, run_tuning_path=run_tuning_path,
         family_assignments_path=family_assignments_path, pairings_path=pairings_path,
         round_no=round_no,
@@ -172,7 +201,13 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
     entries.sort(key=lambda e: e["id"])
 
     closed_ids = [m.id for m in ALL_ACTION_COVERAGE_CLOSED_METRICS]
-    verdict = cr.compute_verdict(closed_findings, closed_ids, cov.mode)
+    # The SAME `gates` set `report/cli.py --gate` builds, read from the live registry rather than
+    # duplicated: a metric earns the right to gate by flipping `gates` (spec-metrics.md §4), and that
+    # one flag decides both this verdict and the general reporter's exit code — so they cannot
+    # disagree. T1.2/T1.3 (2026-09-12).
+    gating_ids = [m.id for m in registry.all() if m.gates]
+    verdict = cr.compute_verdict(closed_findings, closed_ids, cov.mode,
+                                 gating_metric_ids=gating_ids)
 
     doc = cr.build_envelope(entries, meta={
         "partition": f"round-{round_no}",

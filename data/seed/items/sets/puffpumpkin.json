@@ -25,7 +25,7 @@
       "id": "set.puffpumpkin-001",
       "nameKey": "set.spore-guard-cluster",
       "name": "Spore-Guard Cluster",
-      "themeKey": "demon.puffpumpkin",
+      "themeKey": "creature.puffpumpkin",
       "members": [
         {
           "role": "core-guard",

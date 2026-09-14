@@ -8,7 +8,7 @@ namespace FusionRpg.Core.Battle;
 /// <summary>
 /// Answers "whose side is this ptr on right now" for a <see cref="BattlefieldOwnSideReactor"/>.
 /// A deliberate seam (matching this program's own `IContainerEffectResolver` precedent): the real
-/// answer needs specimen ownership when a demon specimen exists, and the mechanical PvZ type
+/// answer needs specimen ownership when a creature specimen exists, and the mechanical PvZ type
 /// otherwise (buff-debuff-scope-ideal.md §2.3/§4.1) — the specimen-ownership half needs a Cold-plane
 /// `player_id` bridge that does not exist yet (confirmed: no such read path in Core today). Building
 /// against this interface now, rather than half-implementing that bridge, matches

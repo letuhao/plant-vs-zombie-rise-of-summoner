@@ -25,7 +25,7 @@
       "id": "set.fireseashroom-001",
       "nameKey": "set.flickering-spore-torch",
       "name": "Flickering Spore Torch",
-      "themeKey": "demon.fireseashroom",
+      "themeKey": "creature.fireseashroom",
       "members": [
         {
           "role": "armament-primary",

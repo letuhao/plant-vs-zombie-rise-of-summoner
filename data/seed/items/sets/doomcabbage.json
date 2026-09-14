@@ -25,7 +25,7 @@
       "id": "set.doomcabbage-001",
       "nameKey": "set.cabbage-ember-launcher",
       "name": "Cabbage Ember Launcher",
-      "themeKey": "demon.doomcabbage",
+      "themeKey": "creature.doomcabbage",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.thornsbamboo-001",
       "nameKey": "set.spiked-winter-obstacle",
       "name": "Spiked Winter Obstacle",
-      "themeKey": "demon.thornsbamboo",
+      "themeKey": "creature.thornsbamboo",
       "members": [
         {
           "role": "armament-primary",

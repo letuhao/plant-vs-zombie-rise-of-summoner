@@ -45,7 +45,7 @@ async function mockShell(page: Page) {
       loyaltyMax: 0
     })
   );
-  await page.route("**/api/demons/catalog", (route) => fulfillJson(route, { species: [] }));
+  await page.route("**/api/creatures/catalog", (route) => fulfillJson(route, { species: [] }));
   await page.route("**/api/expeditions/*", (route) =>
     fulfillJson(route, { serverUtc: new Date().toISOString(), tiers: [], items: [] })
   );

@@ -3,10 +3,10 @@
   "dispositionBase": "hostile",
   "encounterRef": "encounter.pack-mono-001",
   "eventPool": [
-    "event.story-demon.allpeater-001",
-    "event.story-demon.ashthreepeater-001",
-    "event.story-demon.cactus-001",
-    "event.story-demon.dolldiamond-001"
+    "event.story-creature.allpeater-001",
+    "event.story-creature.ashthreepeater-001",
+    "event.story-creature.cactus-001",
+    "event.story-creature.dolldiamond-001"
   ],
   "flavor": "Sunlight pours through high, crystalline panes, illuminating a swirling vortex of golden feathers and humming, radiant energy. Within the brilliance, a massive, multi-winged entity sits perched upon a pillar of solid light, its eyes glowing like miniature stars as it watches the shadows dance.",
   "hazardBand": "light",

@@ -1,4 +1,4 @@
-"""seedsmith.workflow.graphs.species_effects — T5.3 (`species-effects`, demon-seed module 15).
+"""seedsmith.workflow.graphs.species_effects — T5.3 (`species-effects`, creature-seed module 15).
 Thin wiring only, the first REAL consumer of `container_authoring.py`'s shared shape (T5.0) —
 matching `commander_effect.py`'s own code style, per this module's own spec.
 """
@@ -8,14 +8,14 @@ import json
 from pathlib import Path
 from typing import Any, Callable
 
-from ...adapters.demons.effects.prompts import (
+from ...adapters.creatures.effects.prompts import (
     SYSTEM_PROMPT,
     affix_ids_are_known,
     build_brief,
     build_context,
     fixed_core_within_band,
 )
-from ...adapters.demons.effects.schema import SPECIES_EFFECTS_SCHEMA
+from ...adapters.creatures.effects.schema import SPECIES_EFFECTS_SCHEMA
 from ...pipeline.llm_caller import DEFAULT_CONFIG, LlmCallerConfig
 from .container_authoring import ContainerAuthoringSpec, build_container_authoring_graph, state_for_container
 
@@ -25,7 +25,7 @@ TUNING_DIR = Path(__file__).resolve().parents[5] / "data" / "tuning"
 
 
 def load_shape_tuning(version: "int | str" = 1) -> dict:
-    path = TUNING_DIR / f"demon-species-effects.v{int(version)}.json"
+    path = TUNING_DIR / f"creature-species-effects.v{int(version)}.json"
     return json.loads(path.read_text(encoding="utf-8"))
 
 

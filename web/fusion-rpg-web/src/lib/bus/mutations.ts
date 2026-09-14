@@ -258,7 +258,7 @@ export function useSaveAptitudes() {
   });
 }
 
-/** aptitude-sheet Mode A — POST UniqueDemon allocate. Not used by Mode C commander path. */
+/** aptitude-sheet Mode A — POST UniqueCreature allocate. Not used by Mode C commander path. */
 export function useSaveUniqueAptitudes() {
   const qc = useQueryClient();
   return useMutation({

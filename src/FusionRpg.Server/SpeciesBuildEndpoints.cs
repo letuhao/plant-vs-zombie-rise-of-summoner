@@ -1,5 +1,5 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Progression;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Data;
@@ -17,8 +17,8 @@ namespace FusionRpg.Server;
 /// is an ADDITIONAL friction, never a replacement for the anti-cheat budget cap.
 ///
 /// <para>The sibling bypass this module's own T4.3 evidence once named — <c>AptitudeEndpoints.cs</c>'s
-/// <c>POST /api/aptitudes/species/allocate</c> (module 5, `demon-type-allocation`), which wrote a
-/// DemonType override directly via <c>store.SaveAllocation</c> with zero pricing awareness — was
+/// <c>POST /api/aptitudes/species/allocate</c> (module 5, `creature-type-allocation`), which wrote a
+/// CreatureType override directly via <c>store.SaveAllocation</c> with zero pricing awareness — was
 /// RETIRED (owner decision, 2026-09-05: "retire it now"), not just documented. This endpoint is now the
 /// only write path for a species aptitude override; that route's GET twin still serves reads.</para>
 /// </summary>
@@ -32,7 +32,7 @@ public static class SpeciesBuildEndpoints
         {
             var pid = body.PlayerId ?? store.GetCurrentPlayerId();
             if (!store.PlayerExists(pid)) return Results.NotFound();
-            if (string.IsNullOrWhiteSpace(body.SpeciesId) || !DemonSpeciesCatalog.IsKnown(body.SpeciesId))
+            if (string.IsNullOrWhiteSpace(body.SpeciesId) || !CreatureSpeciesCatalog.IsKnown(body.SpeciesId))
                 return Results.BadRequest(new { reason = "species.unknown" });
             if (body.Shares is null) return Results.BadRequest(new { reason = "shares.missing" });
             if (string.IsNullOrWhiteSpace(body.CorrelationId))
@@ -42,17 +42,17 @@ public static class SpeciesBuildEndpoints
             try
             {
                 newOverride = body.Shares.Aggregate(AptitudeAllocation.Empty,
-                    (acc, kv) => acc + AptitudeAllocation.Single(AllocationScope.DemonType, kv.Key, kv.Value));
+                    (acc, kv) => acc + AptitudeAllocation.Single(AllocationScope.CreatureType, kv.Key, kv.Value));
             }
             catch (ArgumentException ex)
             {
                 return Results.BadRequest(new { reason = "aptitudes.unknownid", detail = ex.Message });
             }
 
-            var demonTypeId = DemonSpeciesCatalog.Get(body.SpeciesId).DemonTypeId;
-            var level = store.GetRpgActor(pid, RpgActorKinds.Species, demonTypeId)?.Level ?? 1;
-            var source = PointBudget.DemonTypeSourceFromLevel(level);
-            var check = PointBudget.CheckScope(AllocationScope.DemonType, newOverride, source, AptitudeTuningHub.Tuning);
+            var creatureTypeId = CreatureSpeciesCatalog.Get(body.SpeciesId).CreatureTypeId;
+            var level = store.GetRpgActor(pid, RpgActorKinds.Species, creatureTypeId)?.Level ?? 1;
+            var source = PointBudget.CreatureTypeSourceFromLevel(level);
+            var check = PointBudget.CheckScope(AllocationScope.CreatureType, newOverride, source, AptitudeTuningHub.Tuning);
             if (!check.WithinBudget)
                 return Results.Conflict(new { reason = "aptitudes.overbudget", spent = check.Spent, budget = check.Budget });
 
@@ -71,7 +71,7 @@ public static class SpeciesBuildEndpoints
                 soulBalance = outcome.Balance.Balance,
                 replay = outcome.Reason == "replay",
                 shares = AptitudeCatalog.All.ToDictionary(
-                    a => a.Id, a => newOverride.PointsAt(AllocationScope.DemonType, a.Id), StringComparer.Ordinal)
+                    a => a.Id, a => newOverride.PointsAt(AllocationScope.CreatureType, a.Id), StringComparer.Ordinal)
             });
         });
 
@@ -81,11 +81,11 @@ public static class SpeciesBuildEndpoints
         g.MapGet("/respec-price/{playerId:long}/{speciesId}", (long playerId, string speciesId, RpgStore store) =>
         {
             if (!store.PlayerExists(playerId)) return Results.NotFound();
-            if (!DemonSpeciesCatalog.IsKnown(speciesId))
+            if (!CreatureSpeciesCatalog.IsKnown(speciesId))
                 return Results.BadRequest(new { reason = "species.unknown" });
 
             var count = store.GetSpeciesRespecCount(playerId, speciesId);
-            var price = RespecPolicy.PriceOf(FusionRpg.Core.Demons.Generation.SpeciesBuildTuningHub.Tuning, count);
+            var price = RespecPolicy.PriceOf(FusionRpg.Core.Creatures.Generation.SpeciesBuildTuningHub.Tuning, count);
             return Results.Ok(new
             {
                 speciesId,

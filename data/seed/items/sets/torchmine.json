@@ -25,7 +25,7 @@
       "id": "set.torchmine-001",
       "nameKey": "set.sprouting-torch-potato",
       "name": "Sprouting Torch Potato",
-      "themeKey": "demon.torchmine",
+      "themeKey": "creature.torchmine",
       "members": [
         {
           "role": "armament-primary",

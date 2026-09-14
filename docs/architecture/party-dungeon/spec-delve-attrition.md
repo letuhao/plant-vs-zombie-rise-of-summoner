@@ -15,7 +15,7 @@ and `dungeon-registries` (`attrition.*`, `risk.*`, `rest.*`, `bands.hazardBand.*
 
 ## Objective
 
-Everything a demon carries between rooms, and what happens when it runs out. A room fight today starts
+Everything a creature carries between rooms, and what happens when it runs out. A room fight today starts
 every actor at `Hp = setup.MaxHp` (`BattleEngine.cs:29`) with no pools (`ActorState`, `:23-82`);
 `resource-hub-ssot.md` §11 says pools *"persist across a run and refill at rest"* and no run has needed
 that until this one. This module constructs the six pools per party member from persisted state, hands
@@ -25,24 +25,24 @@ refill; wires the timeline FSM's `Downed` into a delve fight; and settles the co
 `downedOnce`, Retired on a permadeath rung, Recovering **in delves** below it, the priced ritual, the
 wipe, loyalty — at **one assessment point: extraction**.
 
-Success looks like: a solo delve enters row 3 with hunger at 61 % and two `nerve.unsettled` demons,
-rests on row `N−1`, extracts, and comes home with hunger at 74 % (not refilled), one demon `Recovering`
+Success looks like: a solo delve enters row 3 with hunger at 61 % and two `nerve.unsettled` creatures,
+rests on row `N−1`, extracts, and comes home with hunger at 74 % (not refilled), one creature `Recovering`
 for two delves, loyalty applied once — and every battle golden byte-identical, because nothing here runs
 unless the profile row says so.
 
 ## Locked anchors
 
 - **Decision 1 (ideal §8 box, `party-dungeon-ideal.md:690-697`):** *"priced time plus souls by default,
-  AND permadeath on rungs `very-hard` and above, per domain, tunable … A downed demon on a permadeath rung
+  AND permadeath on rungs `very-hard` and above, per domain, tunable … A downed creature on a permadeath rung
   is `Retired` at extraction; below it, it is `Recovering` for a tunable count of **delves**
   (`risk.downedRecoveryDelves`) … with the `−10` loss and the soul ritual as the priced escape."*
 - **Decision 4 (`:700-706`):** *"`spirit` is the nerve meter, realised as a stackable, staged status …
   spirit drain applies stacks of a `nerve` status whose stages are the Darkest Dungeon affliction ladder
   (unsettled → shaken → afflicted, names tunable), each stage a container of atoms."*
-- **R3 (`:1750`), verbatim:** *"`downedOnce`: on a permadeath rung a demon downed at any point is
+- **R3 (`:1750`), verbatim:** *"`downedOnce`: on a permadeath rung a creature downed at any point is
   `Retired` at extraction even if revived — the revive lets it finish the run, not escape the rule. A wipe
   Retires the whole party and drops the haul; the named mitigation is cheap replacement at the pull price."*
-- **R6 (`:1753`), verbatim:** *"Virtual time only — a downed demon sits out a tunable number of delves
+- **R6 (`:1753`), verbatim:** *"Virtual time only — a downed creature sits out a tunable number of delves
   (`risk.downedRecoveryDelves`). The real-time clock is removed. Owner: 'this game is not a paywall game;
   we don't limit players by a stamina system like some cheap mobile game.'"*
 - **`decisions.md:115` (P3), quoted:** *"**`spirit` pays for nerve.** Spirit drain from horror curios,
@@ -67,10 +67,10 @@ unless the profile row says so.
 
 ## Design
 
-### 1. Party state — the per-demon record
+### 1. Party state — the per-creature record
 
 `rpg_delves.parties_json` is one element per `PartyIndex` (`spec-delve-scope.md:72`); each gains
-`members[]`, one record per demon, read and written only through `RpgStore.Delve.cs`:
+`members[]`, one record per creature, read and written only through `RpgStore.Delve.cs`:
 
 | Field | Type | Written by | Read by |
 |---|---|---|---|
@@ -80,7 +80,7 @@ unless the profile row says so.
 | `nerveStacks` | `int` | §4 events, rest | §4 stage resolver |
 | `downed` · `downedOnce` | bool · bool (set once, never cleared in-run) | §6 | room entry · §7 |
 
-Two durable per-demon rows live **outside** the delve because they outlive it — and neither has a
+Two durable per-creature rows live **outside** the delve because they outlive it — and neither has a
 `*_utc` column, because recovery is counted, never timed (§7):
 
 ```sql
@@ -159,7 +159,7 @@ between rests**: provisioning decides how many rests you can skip, not whether h
 is the closest shipped shape and still carries no count. So:
 
 - **The counter lives in party state** (`nerveStacks`) and the status is its **projection**: at most one
-  live `nerve.*` instance per demon; the count is never a status field.
+  live `nerve.*` instance per creature; the count is never a status field.
 - **Resolver** (pure): `NerveLadder.StageFor(stacks, spiritResolved, thresholds)` — the highest stage
   whose threshold `≤ stacks`, **or the top stage when `ExhaustionPolicy.IsExhausted(spirit)`**. Spirit is
   the pool the stacks read; exhausted spirit is `afflicted` whatever the count.
@@ -241,10 +241,10 @@ At `CloseDelve(Extracted)`, one transaction, per member with `downedOnce`:
   `ActiveBound → Roster` in one step and *"`Recovering` is not an observable intermediate row"*
   (`unique-actor-runtime.md:121`); for a delve wound it becomes **durable**. Delve dispatch refuses it (the
   expedition soft-lock, `spec-expeditions.md:47`); `TryRetireUniqueActor` already refuses it (`:200-202`),
-  so a wounded demon cannot be released until recovered — kept, named in Ask-first.
+  so a wounded creature cannot be released until recovered — kept, named in Ask-first.
 - **Recovery is virtual time (R6).** The counter decrements **inside the same `CloseDelve` transaction**
   of every later delve the player closes (Extracted **or** Wiped), for every recovery row of that player; 0
-  flips the demon to `Roster` in the same write. **No `DateTime`, no `ElapsedDays`
+  flips the creature to `Roster` in the same write. **No `DateTime`, no `ElapsedDays`
   (`ContractPolicy.cs:187-191` is contracts' own wall-clock seam, never called here), no due stamp.** The
   audit's §5 #6(a) "settle on read through `ElapsedDays`" is the option the owner **refused** (`:286`, R6).
 - **The ritual — the priced escape.** `POST …/recovery-ritual` spends `SoulSinkPolicy.Price(
@@ -270,7 +270,7 @@ whole, not per battle"*). Per-room credit would be S1-1 in a different currency.
 the party cleared at least half the rooms on its route) **and** the member is not `afflicted` at
 extraction. Everyone else — wipe, shallow bail, top nerve stage — takes `ApplyLoss` (`ContractPolicy.cs:154`,
 `lossPenalty 10`, `contracts.v1.json:17`). Ideal §4.6's *"spirit at zero at extraction = a second −10"* is
-folded into this single call, so no demon is touched twice. `WinGain 15` (`:16`) rides `ApplyGain`'s daily
+folded into this single call, so no creature is touched twice. `WinGain 15` (`:16`) rides `ApplyGain`'s daily
 window (`ContractPolicy.cs:143-150`); that `day` (`RpgStore.Contracts.cs:464`) is contracts' own clock.
 
 ### 10. Determinism
@@ -341,7 +341,7 @@ Pure resolvers with tick and tuning as parameters; ledgers over the shipped pool
 type; rejections name the key; the `ExhaustionPolicy` voice.
 
 ```csharp
-/// <summary>One demon between rooms. `Pools` carries all six — `hp` included — so the battle's Hp and the
+/// <summary>One creature between rooms. `Pools` carries all six — `hp` included — so the battle's Hp and the
 /// pool have one owner. `NerveStacks` is the counter StatusRuntime has no field for (P3).</summary>
 public sealed record DelveMemberState(
     string InstanceId,
@@ -393,9 +393,9 @@ public static class NerveLadder
 - **Always:** pools through `ActorResourcePools` (`FromStored` in, `SettleAll` out); exhaustion through
   `ExhaustionPolicy.Sync` over the whole `ResourceIds` loop; nerve through `StatusRuntime` with the counter
   in party state; every delve-only engine behaviour behind a profile **field**; settlement in one `CloseDelve`
-  transaction; loyalty once per demon per delve; `long` and `checked` for every amount.
+  transaction; loyalty once per creature per delve; `long` and `checked` for every amount.
 - **Ask first:** persisting more than `hunger` across delves; a fourth nerve stage; letting
-  `TryRetireUniqueActor` release a `Recovering` demon; loyalty for a partial clear below half the route; a
+  `TryRetireUniqueActor` release a `Recovering` creature; loyalty for a partial clear below half the route; a
   revive that clears `downedOnce` (that re-opens R3).
 - **Never:** a wall clock, `ElapsedDays`, a due stamp or a scheduler for recovery; a hand-listed resource
   subset in code; a `nerve` pool or a seventh `ResourceIds` entry (spirit is the pool); per-room loyalty; `hp`
@@ -405,9 +405,9 @@ public static class NerveLadder
 
 ## Success criteria (G3, `party-dungeon-map.md:159`)
 
-1. *"hunger binds between rests"* — the two-delve and rest-only-refill tests hold. 2. *"a downed demon sits
+1. *"hunger binds between rests"* — the two-delve and rest-only-refill tests hold. 2. *"a downed creature sits
 out N delves"* — the counter test holds with no timestamp anywhere. 3. *"a permadeath rung Retires a
-`downedOnce` demon at extraction"* — including revived-then-extracted. 4. Battle goldens, the 32-seed sweep
+`downedOnce` creature at extraction"* — including revived-then-extracted. 4. Battle goldens, the 32-seed sweep
 and the expedition tier hashes byte-identical. 5. `guard-dal`, `guard-funnel-delta`, the no-clock guard and
 `audit-magic-numbers --domain dungeon` green. 6. The `unique-actor-runtime.md` row is appended and
 `status-ssot.md` §9 reads 24 ids.
@@ -422,12 +422,12 @@ and the expedition tier hashes byte-identical. 5. `guard-dal`, `guard-funnel-del
 | `RestResolver.Resolve(members, rung, tuning)` → `RestOutcome { Healed, Relieved, Ambushed? }` | `event-deck` (draws the ambush row when the seam says so) |
 | `ExtractionSettlement.Decide(raid, rung, gate)` → per member `Retire | Recover(n) | Roster` + `won` | `RpgStore.Delve.CloseDelve` (the only writer), `delve-stage` (band-3 summary's wipe/permadeath notice) |
 | `RecoveryLedger` — recovery rows; ritual price at `theta_run` | `dungeon-loot` (a `SoulSinkPolicy` sink), the Sanctum roster (a `Recovering` badge with delves left) |
-| **`unique-actor-runtime.md` row owed** (drafted; that program appends it): *"party-dungeon `delve-attrition` (2026-09-05): `Retired` gains a second producer — extraction from a delve on a permadeath rung (`PermadeathGate.Applies`) retires a `downedOnce` demon; `Recovering` becomes a **durable** row for a delve wound, counted down in delves at `CloseDelve` (never timed), left by the counter reaching 0 or the recovery ritual. The W4 one-write note stands for lawn deaths. Spec: `party-dungeon/spec-delve-attrition.md` §7."* | — |
+| **`unique-actor-runtime.md` row owed** (drafted; that program appends it): *"party-dungeon `delve-attrition` (2026-09-05): `Retired` gains a second producer — extraction from a delve on a permadeath rung (`PermadeathGate.Applies`) retires a `downedOnce` creature; `Recovering` becomes a **durable** row for a delve wound, counted down in delves at `CloseDelve` (never timed), left by the counter reaching 0 or the recovery ritual. The W4 one-write note stands for lawn deaths. Spec: `party-dungeon/spec-delve-attrition.md` §7."* | — |
 
 ## Design-gate checklist
 
 ```
-[x] Subsystems: resources/actor pools, status effects, battle/turns, unique-actor lifecycle, demon contracts,
+[x] Subsystems: resources/actor pools, status effects, battle/turns, unique-actor lifecycle, creature contracts,
     tunables, DAL boundary, party dungeon.
 [x] Read this session: party-dungeon-map.md (row 8, P3, G3); decisions.md:42, :113-116; the five approved
     wave-1 specs; ideal §2.3-2.4, §4.5, §4.6, §8 box, §11.5, §11.10; audit §1(f), S1-1, S1-9, S2-4, S2-6/7/8,
@@ -447,7 +447,7 @@ and the expedition tier hashes byte-identical. 5. `guard-dal`, `guard-funnel-del
     battle suite is the proof and the first build task. "CostLedger has zero production constructors" is
     the ideal's claim (:183), not re-grepped here.
 [x] No §2 invariant contradicted. One reading added and named: spirit-zero at extraction counts as the
-    member's loss inside the single loyalty call (§9), so no demon is touched twice.
+    member's loss inside the single loyalty call (§9), so no creature is touched twice.
 [x] Corrections propagated 2026-09-05 (verification pass): the ideal's :173 row corrected; CarryInPools and
     DownedOnDeplete are rows in spec-delve-battle-profile.md §5/§1; the unique-actor-runtime.md §11 row and
     the status-ssot.md §9 note are appended; the new tuning keys are rows in spec-dungeon-registries.md.

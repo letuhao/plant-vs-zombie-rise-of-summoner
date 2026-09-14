@@ -25,7 +25,7 @@
       "id": "set.tower-scaredyfume-001",
       "nameKey": "set.spore-cloud-spout",
       "name": "Spore Cloud Spout",
-      "themeKey": "demon.tower_scaredyfume",
+      "themeKey": "creature.tower_scaredyfume",
       "members": [
         {
           "role": "armament-primary",

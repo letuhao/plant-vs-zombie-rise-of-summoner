@@ -8,6 +8,14 @@ Owner writes the `decisions.md` row at commit time. Known ceiling under sustaine
 war (owner-buffed 600z+): drain throughput — v4 targets filed in 00-baseline.md §v4; these are
 tuning within this contract, not changes to it.
 
+**Amended 2026-09-14 (`lawn-hit-entry`/T9b, D9):** §3.3 and §4c.2 below described `combat.hit` as
+droppable under ring/budget exhaustion *because it had no consumer*. `lawn-combat-wire` gives it
+one (a live `OnDamageDealt`/`OnDamageTaken` grant), which moves it into the never-drop class —
+§3.3's own overflow policy and §4c.3's list are updated in place below to say so, rather than
+left to silently contradict what actually ships. See
+[`lawn-combat-wire/spec-lawn-hit-entry.md`](lawn-combat-wire/spec-lawn-hit-entry.md) "Deferred
+damage must not be dropped" for the full reasoning.
+
 ## 1. Why v1 cannot ship
 
 v1 runs the full pipeline synchronously inside every Harmony hook on the game's main thread:
@@ -57,9 +65,26 @@ at all.
 
 ### 3.3 Drain (once per frame, budgeted)
 
-- Runs from `InjectorLoop.Tick`, FIFO, under a time budget (default ~1.5 ms, configurable).
+- Runs from `InjectorLoop.Tick`, FIFO, under a time budget of **10% of the measured frame time,
+  clamped to [0.2 ms, 2 ms]** — `Math.Clamp(frameSec * 0.10, 0.0002, 0.002)`
+  (`EventDrainHost.cs:145-157`). Session mode drains unbudgeted and uncoalesced.
+  **This budget is a structural per-frame cap, not a tunable** — it is derived from the frame the
+  drain is running inside, so it is exempt from the balance-surface rule (`tunables-ssot.md`) and
+  from the no-hard-caps rule (`ssot-power-scale.md` §11, per-frame caps clause): changing it changes
+  whether the drain fits in a frame, never how the game feels. It is therefore **hardcoded and not
+  configurable**. *(Corrected 2026-09-13: this line read "default ~1.5 ms, configurable", which was
+  never what shipped.)*
 - Budget exhausted → remaining records carry to next frame (bounded backlog; overflow policy:
   coalesce harder, then drop droppable kinds with a counter, never drop death/board lifecycle).
+  **Amended (T9b, D9):** the RING's own fixed-capacity overflow no longer drops either — every
+  record that reaches `EventDrain.Record` already passed a live-grant gate at the caller
+  (`EventDrainHost.TryRecordDealtFromBullet`/`TryRecordTaken`/`TryRecordMeleeDealt` all refuse to
+  record without a matching `OnDamageDealt`/`OnDamageTaken` grant first), so ring-full now diverts
+  the incoming record straight to the carry tier instead of dropping it (`GameEventRing.Dropped`
+  keeps counting the event as a backlog-pressure signal — still real telemetry, just no longer
+  "lost"). A kind with genuinely no consumer (§4c.2 below) is filtered out before it ever reaches
+  the ring at all, by the same live-grant gate, so it never needs this protection in the first
+  place.
 - Dict payloads are built **only here**, and only for consumers that need them (transport batch,
   debug session). MatchHost/effects consume the typed record directly where possible.
 - Events generated *during* draining (chains, counter bursts) append to the buffer and respect
@@ -242,6 +267,10 @@ never IL2CPP object references.
 2. `plant.damage`/`zombie.damage` — no server projection, web-stripped. Emit when LogDamage ∥
    session ∥ **an OnDamageTaken grant is live** (the last clause fixes a latent bug: with
    telemetry now default-off, melee OnDamageTaken effects would silently never fire).
+   **Amended (T9b):** the moment an `OnDamageTaken`/`OnDamageDealt` grant IS live, this record
+   is no longer in the "safe to drop" class at all — it moves to §4c.3's never-drop set below
+   for the lifetime of that grant. "Safe to stop emitting" only ever meant *while no consumer
+   wants it*; that is exactly what the live-grant gate already decides at the record call site.
 3. `bullet.place`, `item.drop`, `pet.xp` — no consumer anywhere; session-gate.
 4. All `debug.*` outside sessions.
 
@@ -250,6 +279,19 @@ never IL2CPP object references.
 `board.start`, `board.end`, `match.result`, `plant.spawn`, `zombie.spawn`, `plant.die`,
 `zombie.die`, `plant.place`, `mower.place/start/die`, `pvz.spawn.extra.ack` — XP ledger and
 membership are per-instance, per-ptr.
+
+**Extended (2026-09-14, `lawn-hit-entry`/T9b, D9):** an effect-bearing `combat.hit` /
+`plant.damage` / `zombie.damage` — one with a live `OnDamageDealt`/`OnDamageTaken` grant attached
+— joins this **never-drop** class for as long as that grant is live, on the same rationale as the
+lifecycle kinds above ("per-instance… integrity" — here, "the gameplay delta this record carries
+is real and must land, not just be logged"). Unlike the lifecycle kinds it may still be
+**coalesced** (summed amount, accumulated `HitCount` — `EventDrain`'s existing merge rules,
+unchanged) and it may still be **reordered relative to unrelated ptrs** under budget carry; the
+one guarantee added is that it is never *lost* — ring overflow diverts it to the carry tier
+instead of dropping it (§3.3 above), and a per-death flush budget only ever *shortens how promptly*
+a dying entity's own remaining records land, via `DroppedByDeathBudget`, which is a distinct,
+documented, counted exception for the one ptr that is provably no longer able to act on the
+result — never a general drop of gameplay.
 
 ## 4d. Status
 

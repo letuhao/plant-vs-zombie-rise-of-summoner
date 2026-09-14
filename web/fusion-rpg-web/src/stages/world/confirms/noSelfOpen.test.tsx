@@ -83,7 +83,7 @@ describe("No confirms dialog opens itself (world-stage W105)", () => {
           open={false}
           onOpenChange={() => {}}
           onConfirm={() => {}}
-          demonName="Ashkell"
+          creatureName="Ashkell"
           sectorName="Frost Mire"
           slotsUsedAfterBind={1}
           slotsCapacity={8}

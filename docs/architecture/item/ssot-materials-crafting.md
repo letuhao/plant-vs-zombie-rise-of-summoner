@@ -34,7 +34,7 @@
 | The affix pool and tier bands | **I8** — salvage *reads* affix count and element |
 | Drop tables and the loot pipeline | **I12** — I say what drops; they own how |
 | Storage UI, bag layout, have/need display | **I13** — §8 is a recommendation to them, not a decision |
-| Soul earn policy, ledger, watermarks | **shipped and locked** ([spec-soul-economy.md](../demons/spec-soul-economy.md)) — I extend, never redesign |
+| Soul earn policy, ledger, watermarks | **shipped and locked** ([spec-soul-economy.md](../creatures/spec-soul-economy.md)) — I extend, never redesign |
 
 **Tuning boundary.** Other lanes may tune the *quantities* in §7.4 for their own operation. They may not
 introduce a class, split one, or spend a class §3.2 forbids their operation. That is enforced, not asked
@@ -63,8 +63,8 @@ produces it. That legibility is the whole point of the vocabulary; the closed se
 **Souls already exist and already work.** `rpg_soul_ledger` + `rpg_soul_balances`, append-only with a
 watermarked projection, `TrySpendSouls(playerId, amount, reason, correlationId)` atomic under the store
 gate, correlation-idempotent, no negative balances ever
-([spec-soul-economy.md](../demons/spec-soul-economy.md)). I add a spend reason and nothing else. The
-materials half already exists too: `rpg_demon_materials(player_id, material_id, qty, updated_utc)` with PK
+([spec-soul-economy.md](../creatures/spec-soul-economy.md)). I add a spend reason and nothing else. The
+materials half already exists too: `rpg_creature_materials(player_id, material_id, qty, updated_utc)` with PK
 `(player_id, material_id)` (`src/FusionRpg.Data/Sqlite/RpgStore.cs:520-526`), seeded by expeditions
 (`RpgStore.Expeditions.cs:232`) and spent by fusion (`RpgStore.Fusion.cs:393-397`). Twenty-one material ids
 is a *widening of that catalog*, not a new subsystem.
@@ -103,9 +103,9 @@ substrate.plant.crude      substrate.plant.sound      substrate.plant.fine      
 catalyst.forge   catalyst.temper   catalyst.flux
 ```
 
-The first ten already exist. `DemonMaterialCatalog.Build()` generates `essence.{element}` over
+The first ten already exist. `CreatureMaterialCatalog.Build()` generates `essence.{element}` over
 `ElementRoster.Concrete` — **six elements, `omni` deliberately absent** — and `shard.{rarity}` over the
-four `DemonRarity` values (`src/FusionRpg.Core/Demons/DemonMaterialCatalog.cs:13-21`). I am **appending
+four `CreatureRarity` values (`src/FusionRpg.Core/Creatures/CreatureMaterialCatalog.cs:13-21`). I am **appending
 eleven ids and renaming nothing.** Fusion's shipped cost table keeps working byte-identically.
 
 ### 3.2 The three catalysts, and why exactly three
@@ -219,7 +219,7 @@ coin currency exists anywhere in `FusionRpg.Core`; souls are the only currency a
 
 The argument, in one step: a sell price makes items mint currency. Souls already occupy the universal-fee
 role and their earn policy is carefully capped — 50 counted kills per match, victory decay after three
-wins per UTC day ([spec-soul-economy.md](../demons/spec-soul-economy.md)). If gear could be sold for souls,
+wins per UTC day ([spec-soul-economy.md](../creatures/spec-soul-economy.md)). If gear could be sold for souls,
 **gear farming would out-earn playing**, and every one of those caps would be routed around by an item
 system that was never balanced against them. Introducing a second currency (gold) instead just moves the
 inflation into a closed loop whose only source and only sink are items.
@@ -361,21 +361,21 @@ I6 keeps that in its own coefficient table; see §9.4.
 
 ### 6.4 Storage recommendation to I13
 
-`rpg_demon_materials` has **no demon-shaped column** — it is `(player_id, material_id, qty, updated_utc)`
-with PK `(player_id, material_id)` (`RpgStore.cs:520-526`). The name is the only thing demon-specific about
+`rpg_creature_materials` has **no creature-shaped column** — it is `(player_id, material_id, qty, updated_utc)`
+with PK `(player_id, material_id)` (`RpgStore.cs:520-526`). The name is the only thing creature-specific about
 it.
 
 | Option | Verdict |
 |---|---|
 | **A — parallel `rpg_item_materials` table** | **Rejected.** Two tables holding the same shape means two spend paths, two idempotency stories, and the inevitable day a recipe needs a shard from one and an essence from the other |
-| **B — keep the name, widen the catalog** | Zero migration, permanently misleading name, and every future reader has to be told that `rpg_demon_materials` is not about demons |
-| **C — rename in place** ✅ | `ALTER TABLE rpg_demon_materials RENAME TO rpg_materials`, then repoint **four** SQL sites: `RpgStore.Expeditions.cs:232`, `RpgStore.Expeditions.cs:252`, `RpgStore.Fusion.cs:395`, and the reset path at `RpgStore.cs:612`. Grep-verified — that is the complete list |
+| **B — keep the name, widen the catalog** | Zero migration, permanently misleading name, and every future reader has to be told that `rpg_creature_materials` is not about creatures |
+| **C — rename in place** ✅ | `ALTER TABLE rpg_creature_materials RENAME TO rpg_materials`, then repoint **four** SQL sites: `RpgStore.Expeditions.cs:232`, `RpgStore.Expeditions.cs:252`, `RpgStore.Fusion.cs:395`, and the reset path at `RpgStore.cs:612`. Grep-verified — that is the complete list |
 
 **Recommend C**, with two additions:
 
 - `CHECK (qty >= 0)`. The shipped spend is already safe (`WHERE qty >= $q`, `Fusion.cs:394-397`), but the
   check is free defence in depth and makes a hand-edited database fail loudly.
-- `DemonMaterialCatalog` → `MaterialCatalog`, same `IsKnown` gate, same throw-on-unknown at the write
+- `CreatureMaterialCatalog` → `MaterialCatalog`, same `IsKnown` gate, same throw-on-unknown at the write
   boundary (`Fusion.cs:390-391`). Keep the old type as a one-line alias if anything outside these files
   references it.
 
@@ -392,7 +392,7 @@ collect is already state-and-correlation idempotent, so a re-collect adds no mat
 ### 6.5 The spend transaction
 
 `TrySpendRecipe(playerId, recipeId, context, correlationId)` — one gate-serialised store transaction,
-copying `ExecuteFusion`'s discipline exactly ([spec-demon-fusion.md](../demons/spec-demon-fusion.md)).
+copying `ExecuteFusion`'s discipline exactly ([spec-creature-fusion.md](../creatures/spec-creature-fusion.md)).
 
 ```
 1. replay check   — rpg_material_spend_log, UNIQUE(player_id, correlation_id)
@@ -471,7 +471,7 @@ error would duplicate a surface that is already better.
 
 | Check | When |
 |---|---|
-| Every `material_id` and template resolves against `MaterialCatalog` | catalog load, fail fast — the `DemonRecipeCatalog` discipline |
+| Every `material_id` and template resolves against `MaterialCatalog` | catalog load, fail fast — the `CreatureRecipeCatalog` discipline |
 | Every `output_ref` container exists and is `enabled` | catalog load |
 | `operation` ↔ allowed cost classes | catalog load (`CostClassForbidden`) |
 | Every rarity rung has a `material_band` | catalog load, cross-checked against I1's table |
@@ -541,7 +541,7 @@ Notes that are rules, not commentary:
 - **Socketing an insert costs 10 souls and nothing else.** Moving a gem you already own between sockets must
   never be a material decision, or players stop experimenting and the socket system dies quietly.
 - **Essence is spent only when the operation names an element.** There is no `essence.omni` — `omni` is a
-  channel slot, not a material (`DemonMaterialCatalog.cs:16-17` builds over `ElementRoster.Concrete`,
+  channel slot, not a material (`CreatureMaterialCatalog.cs:16-17` builds over `ElementRoster.Concrete`,
   six ids). A non-elemental reroll spends no essence.
 - **Upcycle is capped at `g ≤ 2`** (`crude → sound → fine`). `prime` has **no** upcycle path. Without that
   cap, volume-farming low-level content would manufacture top-grade substrate and break the grade lock
@@ -688,7 +688,7 @@ content release, not a hotfix. Named here so nobody discovers it during a balanc
 2. **I1 — confirm the four bands are enough.** If the ladder tops out above `legendary`, I need a fifth band
    id, which is a shipped-material addition and a content-hash schema bump. Better to know now.
 3. **I3 — base types must declare `frame` and a substrate `grade`.** Forge recipes should be *generated*
-   from the base-type catalog (the `DemonRecipeCatalog` pattern: code-derived, validated at startup), not
+   from the base-type catalog (the `CreatureRecipeCatalog` pattern: code-derived, validated at startup), not
    hand-authored one per base. That is only possible if the base type carries both fields.
 4. **I6 — two things.** (a) Confirm **rarity elevation is your operation**, since §4.1 routes all rarity
    gain through you. (b) `enhancement_level` must be readable off a frozen instance, because §5.1 reads it.
@@ -707,7 +707,7 @@ content release, not a hotfix. Named here so nobody discovers it during a balanc
 8. **I12 — materials drop through your pipeline.** I say *what* drops and at which band (§7.3); you own the
    weighted table, the seed, and the event. Two constraints from here: no material id may be source-tagged,
    and `catalyst.forge` / `catalyst.flux` must be weighted to hard content only.
-9. **I13 — storage.** §6.4 recommends renaming `rpg_demon_materials` to `rpg_materials` (four SQL sites),
+9. **I13 — storage.** §6.4 recommends renaming `rpg_creature_materials` to `rpg_materials` (four SQL sites),
    adding `CHECK (qty >= 0)`, and giving materials a shelf rather than bag slots. The have/need cost panel is
    yours to build; `#/fusion` is the shipped model.
 10. **I5 — can set pieces be salvaged, and can a set base be forged?** My position: **forged bases are never
@@ -745,9 +745,9 @@ content release, not a hotfix. Named here so nobody discovers it during a balanc
    Paying only souls is simpler and completely removes the "is the injector the best farm?" question.
 6. **Bad-luck protection on catalysts?** The summon pity counters are the in-tree precedent. A player who
    goes four sessions without a `catalyst.flux` has a bad time that no other part of this design produces.
-7. **The `rpg_demon_materials` rename** (§6.4) touches a shipped table and four shipped SQL sites. Cheap and
+7. **The `rpg_creature_materials` rename** (§6.4) touches a shipped table and four shipped SQL sites. Cheap and
    grep-verified, but it is a shipped-schema migration and wants the owner's word before anyone runs it.
-8. **Roster-scale.** [item-ideal.md](../item-ideal.md) §8 flags that twenty demons × twelve slots is 240
+8. **Roster-scale.** [item-ideal.md](../item-ideal.md) §8 flags that twenty creatures × twelve slots is 240
    equipped items, and says the answer must land before slot counts freeze. It also decides this lane's
    volumes: if every specimen is geared, salvage input is enormous and §7.4's quantities are an order of
    magnitude out. **The cost table cannot be tuned until that is answered** — it is currently priced for a
@@ -761,14 +761,14 @@ Required by [DESIGN-GATE.md](../../DESIGN-GATE.md) §5. Not one of the contract'
 
 ```
 [x] I identified the subsystem(s) this touches — effect-atom (container/pool/curve/content-hash),
-    soul economy, demon fusion, expeditions, world model slot types, item lanes I1/I3/I4/I6/I7/I8/I12/I13.
+    soul economy, creature fusion, expeditions, world model slot types, item lanes I1/I3/I4/I6/I7/I8/I12/I13.
 [x] I read every required-reading doc named in the contract §5 and my lane brief, this session.
 [x] I checked decisions.md's standalone-first and one-economy locks — neither forbids this design;
     §7.3's PvZ rule and §4.3's no-vendor pick are written to satisfy both.
 [x] Every factual claim about the repo cites file:line or a doc.
-[x] I verified against CODE, not comments — rpg_demon_materials DDL (RpgStore.cs:520-526), the four
+[x] I verified against CODE, not comments — rpg_creature_materials DDL (RpgStore.cs:520-526), the four
     call sites, the conditional-UPDATE spend (Fusion.cs:393-397), the essence string concat
-    (Fusion.cs:378-381), the six-element roster (DemonMaterialCatalog.cs:16-17, ActorElementTypes.cs:21-29),
+    (Fusion.cs:378-381), the six-element roster (CreatureMaterialCatalog.cs:16-17, ActorElementTypes.cs:21-29),
     and the absence of any gold/coin currency in Core.
 [x] I read the surrounding section of every rule I quoted.
 [ ] I tested (not assumed) any constraint I am reporting. **Gap: no suite was run for this document.**

@@ -25,7 +25,7 @@
       "id": "set.wallnut-001",
       "nameKey": "set.iron-rind-nut",
       "name": "Iron-Rind Nut",
-      "themeKey": "demon.wallnut",
+      "themeKey": "creature.wallnut",
       "members": [
         {
           "role": "core-guard",

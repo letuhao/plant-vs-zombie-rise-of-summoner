@@ -25,7 +25,7 @@
       "id": "set.ultimatecannon-001",
       "nameKey": "set.ultimate-silent-cannon",
       "name": "Ultimate Silent Cannon",
-      "themeKey": "demon.ultimatecannon",
+      "themeKey": "creature.ultimatecannon",
       "members": [
         {
           "role": "armament-primary",

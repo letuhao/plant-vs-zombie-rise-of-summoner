@@ -24,7 +24,7 @@ schema, with nothing downstream that turns the string into behaviour.
 | Finding class | Verdict | Detail |
 |---|---|---|
 | **D1–D36 implemented by requirement text** | **31 of 36 clean** · 2 superseded correctly (D19, D31) · **3 with real holes** (D2, D11/D12, D35) | §3 |
-| **Decisions silently dropped** | **3** — D2's aptitude-threshold and demon-aspect sources; D35's gate quantity | §2.2, §2.3 |
+| **Decisions silently dropped** | **3** — D2's aptitude-threshold and creature-aspect sources; D35's gate quantity | §2.2, §2.3 |
 | **§13.2 wiring gaps owned** | 8 of 10 owned · 2 named as another program's (`AffixTags` call site, Battle's trigger set) | §4.1 |
 | **§13.3 real gaps owned** | 4 of 6 owned or honestly declared · **1 orphan named by nobody** (layer denial / bypass) · 1 declared orphan (the 17th atom kind) | §4.2 |
 | **§14 tunables named with unit and file** | 12 of 12 named · **2 carry conflicting names, units or files across specs** (`tierLadder.k`, `Ws`) | §5 |
@@ -93,7 +93,7 @@ categories unresolvable:
 | aptitude | 12 | `aptitude.<Id>@Commander` | shipped |
 | element | 6 | `element_mastery.<id>@Aspect` | *"scope exists; source does not"* |
 | status | 21 | `status_applied.<id>` (D35) | *"zero `src/` hits"* |
-| demonFamily | 0 | `species_level@DemonType` | rate shipped, roster absent |
+| creatureFamily | 0 | `species_level@CreatureType` | rate shipped, roster absent |
 
 **FACT, grepped this session.** `status_applied` and `StatusApplied` return **zero** hits across `src/`.
 `status_applied.<id>` appears exactly once in the whole spec set — `spec-tree-plan.md:506` — as a string
@@ -124,13 +124,13 @@ nothing replaced it. **The decision's table row is honoured; the decision's purp
 - `passive-tree-map.md` — a blocked-on row naming `element_mastery`'s producer, which belongs to the
   aspect/element program, not to this one.
 - `spec-tree-plan.md` — emit status and element trees behind the same `_pending` declaration it already
-  uses for `demonFamilies`, so a category with no gate is visible in the plan rather than discovered at
+  uses for `creatureFamilies`, so a category with no gate is visible in the plan rather than discovered at
   resolve time. Authoring 1,080 nodes for a gate that does not exist is the expensive half of this gap,
   and `_pending` is the cheap fix.
 
 ### 2.3 ⛔ S1 — D2 is one-quarter implemented, and D11's carrier does not exist
 
-**D2:** *"All four acquisition sources: skill points · aptitude thresholds · items/affixes · demon
+**D2:** *"All four acquisition sources: skill points · aptitude thresholds · items/affixes · creature
 aspect."*
 
 | Source | Requirement anywhere? |
@@ -138,7 +138,7 @@ aspect."*
 | Skill points | ✅ `spec-tree-state.md` §3 — `skillPointsPerThetaMilliByScope`, the D34 table |
 | Items / affixes | ⚠️ **rule stated in four specs, mechanism specified in none** |
 | Aptitude thresholds | ⛔ **nothing.** Named once, as a term with no definition (`spec-tree-resolve.md:242`) |
-| Demon aspect | ⛔ **nothing.** Same line, same status |
+| Creature aspect | ⛔ **nothing.** Same line, same status |
 
 **FACT, grepped this session.** `skillPoint` / `SkillPoint` appears in exactly **two** places in all of
 `src/`: `AptitudeTuning.cs:13` (the record field) and `:158` (the parse). There is no channel, no
@@ -202,7 +202,7 @@ means no spec carries it and no spec says it was left out.
 
 | # | Verdict | Where, or why not |
 |---|---|---|
-| D1 | **Implemented as a constraint** | `spec-tree-plan.md:976` — *"honoured by omission: the roster has no class category"*, and §1's roster is aptitude/element/status/demonFamily. See §10 |
+| D1 | **Implemented as a constraint** | `spec-tree-plan.md:976` — *"honoured by omission: the roster has no class category"*, and §1's roster is aptitude/element/status/creatureFamily. See §10 |
 | D2 | ⛔ **Partial — two sources dropped** | §2.3 |
 | D3 | Implemented | `tree-binder` §5, `tree-state` §7, `tree-resolve` §6.2, `tree-surface` §4 |
 | D4 | Implemented | `spec-tree-resolve.md` §5.1, with the `F ≤ Fmax` proof and test 6 |
@@ -228,7 +228,7 @@ means no spec carries it and no spec says it was left out.
 | D24 | Implemented | `tree-catalog` §1's freeze line, `tree-plan` §Reproducibility, `tree-language` §6.4, `tree-review` §1–2, `tree-binder` §1 |
 | D25 | Implemented, two consequences stranded | `spec-tree-state.md` §2. See §7 findings 1 and 2 |
 | D26 | Implemented, currency disputed | `tree-plan` §2 (flatness computed at every tier), `tree-resolve` §3.1 and test 1. §2.1 |
-| D27 | Implemented as declared-partial | 39 of 58 trees; `demonFamilies: []` plus a `_pending` entry, *"never silence"* (`spec-tree-plan.md:721`). D27 itself makes curation a build-order task |
+| D27 | Implemented as declared-partial | 39 of 58 trees; `creatureFamilies: []` plus a `_pending` entry, *"never silence"* (`spec-tree-plan.md:721`). D27 itself makes curation a build-order task |
 | D28 | Implemented | `spec-tree-resolve.md` §4 with the measured `Θ ≲ 300` bound recorded; `spec-tree-surface.md` §7's five parts |
 | D29 | Implemented, with the G9 correction | `spec-tree-plan.md` §1 — rootless, 40 exactly, even by construction |
 | D30 | Implemented | `spec-species-tree.md` — 840 × 40, costed at 105,840 calls and ≈33 human hours per pass |
@@ -418,9 +418,9 @@ the ideal's §13.3 row while you are there.
 
 ### 4. ⚠️ D25 is per-actor only, and it has no caps-register row (doc 10, A14 and A2)
 
-**A14.** D25 bounds one actor's breadth. D21 gives every actor its own tree state, so a 2,000-demon roster
+**A14.** D25 bounds one actor's breadth. D21 gives every actor its own tree state, so a 2,000-creature roster
 restarts the escalation at `first` two thousand times. `spec-tree-state.md` §3 partially closes this by
-making the *budget* per-scope — a demon must not read `Θ_player` — which is the right fix for the budget
+making the *budget* per-scope — a creature must not read `Θ_player` — which is the right fix for the budget
 half. But the spec never states whether legion-scale breadth is deliberately unpriced. D25's own
 justification is *"the whole catalog unlocked and the tree stopped being a choice"*, and at roster scale
 it still is.
@@ -461,7 +461,7 @@ That is the honest handling.
 
 | # | Assumption | Held? |
 |---|---|---|
-| 1 | The generator is a `tools/` program; nothing in `src/` generates a node | ✅ **with a note.** Entry points are `tools/` in all four generation specs. `tree-binder` and `tree-catalog` put the *logic* in `src/FusionRpg.Core/PassiveTree/{Binding,Catalog}/` so it is unit-testable — the `DemonSpeciesGen` shape, and defensible. But see §2.4c: the tool has two names |
+| 1 | The generator is a `tools/` program; nothing in `src/` generates a node | ✅ **with a note.** Entry points are `tools/` in all four generation specs. `tree-binder` and `tree-catalog` put the *logic* in `src/FusionRpg.Core/PassiveTree/{Binding,Catalog}/` so it is unit-testable — the `CreatureSpeciesGen` shape, and defensible. But see §2.4c: the tool has two names |
 | 2 | `tree-resolve` extends the shipped resolver rather than forking it | ✅ `spec-tree-resolve.md` §2.1 — a fan-in on the existing `boundDerivedAtoms` delegate, plus a third `BattleChannelMod` source. No new subsystem, no new order band |
 | 3 | Web is primary; the injector enriches, never gates | ✅ `spec-tree-surface.md` §10; `spec-mechanism-wiring.md`'s Never list refuses to gate on the default-off overlay |
 | 4 | Species trees reuse the generic node record | ✅ `spec-species-tree.md` §1 names it; `spec-tree-catalog.md` §5 carries it |
@@ -479,7 +479,7 @@ passive-tree module implements — a constraint, not a requirement."* True but i
 `spec-tree-plan.md:976` gives the better answer: *"honoured by omission — the roster has no class
 category."* D1 is a **negative** decision, and a negative decision is implemented by a structure that
 cannot express the thing it forbids. `tree-plan` §1's roster is four categories — aptitude, element,
-status, demonFamily — and none is a class. Nothing anywhere in the eleven specs introduces a player
+status, creatureFamily — and none is a class. Nothing anywhere in the eleven specs introduces a player
 class, a class container, or a build archetype the player selects. **D1 is honoured.**
 
 **One cheap improvement.** It is honoured and unpinned: no test asserts it. `tree-plan` already greps its
@@ -492,7 +492,7 @@ of merely true. Add it to `spec-tree-plan.md` §Testing strategy.
 D2 is not under-covered because one module carries it. It is under-covered because **that module
 implements one of the four sources.** See §2.3. Skill points are specified end to end. Items and affixes
 have a rule in four specs and a carrier in none — `skillPoints` appears twice in all of `src/`, both in
-`AptitudeTuning.cs`. Aptitude thresholds and demon aspect appear once in the whole spec set, at
+`AptitudeTuning.cs`. Aptitude thresholds and creature aspect appear once in the whole spec set, at
 `spec-tree-resolve.md:242`, quoted from the red team as terms whose meaning is undefined.
 
 This is the highest-value single finding in the audit, because D2 is what gives the program its spender.

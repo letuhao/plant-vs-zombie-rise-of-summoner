@@ -1,7 +1,7 @@
 # Spec: `aptitude-allocation-surface` — the first player-reachable way to spend aptitude points
 
-> **Partially superseded (2026-09-10).** Commander GET/POST remains Mode C. UniqueDemon + species
-> player surfaces + lawn UniqueDemon wire are owned by [aptitude-sheet-map.md](../aptitude-sheet-map.md).
+> **Partially superseded (2026-09-10).** Commander GET/POST remains Mode C. UniqueCreature + species
+> player surfaces + lawn UniqueCreature wire are owned by [aptitude-sheet-map.md](../aptitude-sheet-map.md).
 > ~~“specimen picker missing / commander only forever”~~ is **historical** — ActorSheet is the
 > specimen picker (`?sel=` = `instanceId`). Do **not** treat §1 “commander scope only” as current
 > product law for UniqueActor Aptitudes.
@@ -22,8 +22,8 @@ audit that found `point-economy`'s own persistence (P6.1-P6.4) has zero producti
 `WebMatchService.AptitudeChannelMods` hardcodes `AptitudeAllocation.Empty`. This module shipped the
 first player-reachable slice: **commander scope** (Mode C), reachable from already-shipped flows.
 
-~~**Why commander scope only, not all four:**~~ **Superseded by aptitude-sheet.** UniqueDemon and
-DemonType player allocate are Done gates under [aptitude-sheet-map.md](../aptitude-sheet-map.md)
+~~**Why commander scope only, not all four:**~~ **Superseded by aptitude-sheet.** UniqueCreature and
+CreatureType player allocate are Done gates under [aptitude-sheet-map.md](../aptitude-sheet-map.md)
 (ActorSheet is the specimen picker). Aspect remains externally blocked. Historical rationale for
 shipping commander first (widest impact, simplest key) remains valid as *delivery order*, not as a
 permanent UniqueActor product limit.
@@ -129,5 +129,5 @@ SQL inside `FusionRpg.Data` (already true — this module only calls existing `R
 `IPowerIndexProvider`); build a squad-picker or a new battle-trigger (Expeditions already is one).
 
 **Ask first** — pricing respec for real (needs a resource-spend seam this module doesn't otherwise
-need); `DemonType`/`UniqueDemon`/`Aspect` scope UI (a specimen-selection design fork nothing has decided
+need); `CreatureType`/`UniqueCreature`/`Aspect` scope UI (a specimen-selection design fork nothing has decided
 yet).

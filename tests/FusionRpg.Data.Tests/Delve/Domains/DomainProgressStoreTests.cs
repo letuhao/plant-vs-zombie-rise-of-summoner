@@ -11,28 +11,23 @@ namespace FusionRpg.Data.Tests.Delve.Domains;
 /// unreachable in production, reachable and asserted here because nothing calls these yet).</summary>
 public class DomainProgressStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public DomainProgressStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-domain-progress-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     // ---- the three tables land -------------------------------------------------------------------
 
     [Fact]
     public void Init_creates_all_three_domain_tables()
     {
-        using var db = SqliteConnectionFactory.Open(_store.HotPath, readOnly: true);
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('dungeon_domain', 'dungeon_domain_pool', 'rpg_domain_progress');";
         using var r = cmd.ExecuteReader();

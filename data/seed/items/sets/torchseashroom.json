@@ -25,7 +25,7 @@
       "id": "set.torchseashroom-001",
       "nameKey": "set.ignited-spore-volley",
       "name": "Ignited Spore Volley",
-      "themeKey": "demon.torchseashroom",
+      "themeKey": "creature.torchseashroom",
       "members": [
         {
           "role": "armament-primary",

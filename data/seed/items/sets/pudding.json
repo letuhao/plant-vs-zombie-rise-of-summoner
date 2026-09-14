@@ -25,7 +25,7 @@
       "id": "set.pudding-001",
       "nameKey": "set.succulent-paw",
       "name": "Succulent Paw",
-      "themeKey": "demon.pudding",
+      "themeKey": "creature.pudding",
       "members": [
         {
           "role": "armament-primary",

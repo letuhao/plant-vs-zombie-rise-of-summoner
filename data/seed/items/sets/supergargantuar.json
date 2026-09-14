@@ -25,7 +25,7 @@
       "id": "set.supergargantuar-001",
       "nameKey": "set.unarmored-giant",
       "name": "Unarmored Giant",
-      "themeKey": "demon.supergargantuar",
+      "themeKey": "creature.supergargantuar",
       "members": [
         {
           "role": "armament-primary",

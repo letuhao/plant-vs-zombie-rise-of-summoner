@@ -25,7 +25,7 @@
       "id": "set.doublepuff-001",
       "nameKey": "set.twin-spore-launcher",
       "name": "Twin Spore Launcher",
-      "themeKey": "demon.doublepuff",
+      "themeKey": "creature.doublepuff",
       "members": [
         {
           "role": "armament-primary",

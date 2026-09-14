@@ -59,6 +59,21 @@ public static class InjectorEntityRegistry
             var typeId = -1;
             try { typeId = (int)p.thePlantType; } catch { }
             if (typeId >= 0) QueueInnateShield("plant", typeId, p.Pointer);
+            // lawn-combat-wire T10, 2026-09-14 (4th defect in the live-inert investigation): a Unity
+            // object Start() only ever fires ONCE per lifetime -- a REUSED/pooled Plant (confirmed
+            // live: this game's own "frozen wave" lab-overlay replacement spawn reactivates one rather
+            // than instantiating fresh) never re-runs PlantStart's Harmony postfix, so it never reaches
+            // GameHooks.Emit("plant.spawn") and LawnBasicAttackGrantBinder.QueueSpawn was NEVER called
+            // for it -- confirmed by trace: the replacement plant that landed every observed vanilla
+            // hit for the rest of that match never appears in the grant binder's log at all, while the
+            // ORIGINAL plant (a genuine Start()) did. This class's own doc already names Resync's full
+            // rescan as the fallback for "units the [Start/InitHealth] hooks never saw" -- but nothing
+            // downstream of THAT edge ever queued a grant. Queuing here, at the one place every entry
+            // path (Start hook AND Resync) already funnels through, closes it. Safe to call on every
+            // Add, including a resync repeat of an already-granted actor: QueueSpawn's own drain
+            // (LawnBasicAttackGrantBinder.Bind) upserts by a ptr-scoped GrantId, so a repeat is a
+            // harmless no-op re-grant, never a duplicate.
+            LawnBasicAttackGrantBinder.QueueSpawn(p.Pointer.ToString("X"));
         }
         catch { }
     }
@@ -77,6 +92,9 @@ public static class InjectorEntityRegistry
                 TypeId = typeId
             };
             QueueInnateShield("zombie", typeId, z.Pointer);
+            // Same reasoning and same fix as Add(Plant?) above -- a reused/pooled Zombie never re-runs
+            // ZombieStart/InitHealth's own Emit("zombie.spawn"), so it never reached QueueSpawn either.
+            LawnBasicAttackGrantBinder.QueueSpawn(z.Pointer.ToString("X"));
         }
         catch { }
     }

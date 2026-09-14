@@ -6,7 +6,7 @@
 ## Phase 1 — Wave 1 (truth on the wire)
 
 - [x] **DC-1** Widen `ActorSheetChannelDto` + FE twin + ProjectSheet fill (`derived-sheet-projection`)
-  - Accept: `unitClass`, `defaultValue`, `cap`, `renderState`; D6 double exempt comment; UniqueDemon lean → Pending
+  - Accept: `unitClass`, `defaultValue`, `cap`, `renderState`; D6 double exempt comment; UniqueCreature lean → Pending
   - Verify: Server.Tests + curl sheet channel sample
 - [x] **DC-2** Cook IA: Status variants Omni+L2b; dense families `expand: status-category`; BE OTHER Shared (**D1**/D3)
   - Accept: `status.resist.dot` joins; Shared in cook JSON; no FE invent required

@@ -10,9 +10,9 @@ deliberately:
   everything spec calls a MEASURED fact — join counts, weight-file shape, real output shape.
 - **Synthetic, in-memory fixtures** (`_species`, `_weights` helpers below) for everything that
   needs to be independent of a moving target — determinism, tie-break, planted violations,
-  overflow. This split exists because `data/seed/demons/species/` (the anchor tree) is, AS
+  overflow. This split exists because `data/seed/creatures/species/` (the anchor tree) is, AS
   MEASURED DURING THIS MODULE'S OWN BUILD, under active concurrent modification from an unrelated
-  demon-classification pass (`git status` showed it `M`odified-but-uncommitted, plus dozens of new
+  creature-classification pass (`git status` showed it `M`odified-but-uncommitted, plus dozens of new
   untracked anchor files, and three separate measurements inside this same build session returned
   three different anchor-tree sizes: 68, then 87, then 87 rows again). A hard-coded literal
   against that specific tree would be a false-positive tripwire, not a true content-change signal
@@ -21,6 +21,7 @@ deliberately:
 from __future__ import annotations
 
 import json
+import re
 import sys
 import tempfile
 import unittest
@@ -31,12 +32,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from seedsmith.adapters.actions.characteristic_pool import anchors as anchors_mod  # noqa: E402
 from seedsmith.adapters.actions.characteristic_pool import catalog as catalog_mod  # noqa: E402
 from seedsmith.adapters.actions.characteristic_pool import derive as derive_mod  # noqa: E402
+from seedsmith.adapters.actions.characteristic_pool import ladders as ladders_mod  # noqa: E402
 from seedsmith.adapters.actions.characteristic_pool import pool as pool_mod  # noqa: E402
 from seedsmith.adapters.actions.characteristic_pool.anchors import AnchorRow, AnchorTree  # noqa: E402
 from seedsmith.adapters.actions.characteristic_pool.catalog import (  # noqa: E402
     LEGACY_CATALOG_PATH, RARITY_LADDER, SpeciesRow, TRAIT_POOL,
     derive_live_family_assignments, load_catalog,
 )
+from seedsmith.adapters.actions.characteristic_pool.curation import curated_traits  # noqa: E402
 from seedsmith.adapters.actions.characteristic_pool.derive import (  # noqa: E402
     CATEGORIES, RoleLeanWeights, SpeciesAnchor, build_species_anchor, compute_scores, derive_all,
     family_floor_order, load_weights, rank_categories,
@@ -46,14 +49,27 @@ from seedsmith.adapters.actions.load import load_committed  # noqa: E402
 from seedsmith.corpus import Corpus  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEMONS_ROOT = REPO_ROOT / "data" / "seed" / "demons"
+CREATURES_ROOT = REPO_ROOT / "data" / "seed" / "creatures"
 ACTIONS_ROOT = REPO_ROOT / "data" / "seed" / "actions"
 TUNING_PATH = REPO_ROOT / "data" / "tuning" / "action-role-lean.v1.json"
 
 
+def _count_species_records(species_root: Path) -> int:
+    """The live roster SIZE, recomputed from disk — the reading a contract test compares against,
+    never a literal. See `docs/architecture/validation-ssot.md`."""
+    total = 0
+    for path in sorted(species_root.rglob("*.json")):
+        if path.name == "_index.json":
+            continue
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        rows = payload if isinstance(payload, list) else [payload]
+        total += sum(1 for row in rows if isinstance(row, dict) and row.get("speciesId"))
+    return total
+
+
 # ---------------------------------------------------------------------------------------------
 # Synthetic fixtures — independent of any live file, so determinism/tie/overflow tests never
-# depend on what the demon-classification pass happens to have written today.
+# depend on what the creature-classification pass happens to have written today.
 # ---------------------------------------------------------------------------------------------
 
 def _flat_weights(*, milli: int = 1000, secondary_scale: int = 500, version: int = 1) -> RoleLeanWeights:
@@ -80,22 +96,29 @@ def _anchor(species: SpeciesRow, *, family=None, motifs=(), anti_motifs=(),
            anchor: "AnchorRow | None" = None) -> SpeciesAnchor:
     return SpeciesAnchor(
         species=species, family=family, motifs=tuple(motifs), anti_motifs=tuple(anti_motifs),
-        theme_key=f"demon.{species.species_id}", anchor=anchor,
+        theme_key=f"creature.{species.species_id}", anchor=anchor,
     )
 
 
 class CatalogParserTests(unittest.TestCase):
     """Sanity checks for the live seed loader and its explicit legacy compatibility parser."""
+    def test_live_seed_species_covers_every_record_on_disk(self) -> None:
+        """The CONTRACT, not a count: the catalog is exactly the seed records on disk, one row each
+        and no duplicates. A new species shipping is the normal case and must not fail this — see
+        `docs/architecture/validation-ssot.md` (a population's size is a reading, never a literal)."""
+        on_disk = _count_species_records(catalog_mod.CATALOG_PATH)
+        catalog = load_catalog()
+        self.assertEqual(len(catalog), on_disk)
+        self.assertEqual(len({row.species_id for row in catalog}), on_disk,
+                         "every seed record must load as a distinct species id")
 
-    def test_live_seed_species(self) -> None:
-        self.assertEqual(len(load_catalog()), 904)
-
-    def test_default_catalog_is_the_live_seed_folder(self) -> None:
+    def test_default_catalog_is_the_live_seed_folder_not_the_legacy_projection(self) -> None:
         live_ids = {row.species_id for row in load_catalog()}
         legacy_ids = {row.species_id for row in load_catalog(LEGACY_CATALOG_PATH)}
+        self.assertTrue(live_ids > legacy_ids,
+                        "the live seed roster must strictly contain the frozen legacy projection")
         self.assertIn("abyssswordstar", live_ids)
         self.assertNotIn("abyssswordstar", legacy_ids)
-        self.assertGreater(len(live_ids - legacy_ids), 800)
 
     def test_trait_counts_match_spec_step_4(self) -> None:
         # spec §3 step 4's own measured counts, re-derived here from the live file rather than
@@ -119,24 +142,42 @@ class CatalogParserTests(unittest.TestCase):
 
 
 class JoinCountTests(unittest.TestCase):
-    """The action source boundary must cover every live species and family membership."""
+    """The action source boundary must cover every live species and family membership — asserted as
+    JOIN relationships, never as roster literals (validation-ssot.md §2: a population's size is a
+    reading). The old version pinned 904/227/1,183; the corpus grows per shipped species and would
+    fail this suite for succeeding at its job."""
 
-    def test_catalog_and_motif_and_family_counts(self) -> None:
+    def test_motif_and_family_keys_join_the_catalog_exactly(self) -> None:
         catalog = load_catalog()
-        self.assertEqual(len(catalog), 904)
         catalog_ids = {r.species_id for r in catalog}
+        print(f"live species roster: {len(catalog_ids)}")
 
-        motif = json.loads((DEMONS_ROOT / "_generated" / "motif-assignments.json")
-                           .read_text(encoding="utf-8"))
-        self.assertEqual(len(motif), 904)
-        self.assertEqual(set(motif) - catalog_ids, set(), "every motif key must join the catalog")
+        motif = json.loads((CREATURES_ROOT / "_generated" / "motif-assignments.json")
+                          .read_text(encoding="utf-8"))
+        self.assertEqual(set(motif), catalog_ids,
+                         "every species has motifs and every motif key is a real species")
 
         family = derive_live_family_assignments()
-        self.assertEqual(len(family), 904)
+        self.assertEqual(set(family), catalog_ids,
+                         "every species carries a family assignment and no key is stray")
+
+    def test_family_memberships_cover_every_species_and_ids_are_unique(self) -> None:
+        catalog_ids = {r.species_id for r in load_catalog()}
+        family = derive_live_family_assignments()
         family_ids: "set[str]" = set()
-        for v in family.values():
-            family_ids.update(v)
-        self.assertEqual(len(family_ids), 227)
+        assigned = 0
+        for species_id, value in family.items():
+            values = [value] if isinstance(value, str) else value
+            self.assertTrue(values, f"{species_id} must carry at least one family")
+            assigned += len(values)
+            family_ids.update(values)
+        self.assertEqual(len(family_ids), len(set(family_ids)), "family ids are a set, not a bag")
+        # The reconciliation the count used to stand in for: every membership joins a real species,
+        # and the total is the sum of the per-species lists, not a pinned 1,183.
+        self.assertEqual(assigned, sum(len(v if isinstance(v, list) else [v])
+                                       for v in family.values()))
+        self.assertTrue(catalog_ids == set(family), "species and family-assignment keys coincide")
+        print(f"families: {len(family_ids)} over {assigned} memberships")
 
 
 class AnchorTreeJoinTests(unittest.TestCase):
@@ -316,7 +357,7 @@ class FamilyFloorAndF12Tests(unittest.TestCase):
         defined purely by family-assignments.json — stable per JoinCountTests)."""
         catalog = load_catalog()
         weights = load_weights()
-        motif = json.loads((DEMONS_ROOT / "_generated" / "motif-assignments.json")
+        motif = json.loads((CREATURES_ROOT / "_generated" / "motif-assignments.json")
                            .read_text(encoding="utf-8"))
         family = derive_live_family_assignments()
         anchor_tree = anchors_mod.load_anchor_tree()
@@ -373,7 +414,7 @@ class AttackTempoExclusionTests(unittest.TestCase):
         was `"steady"` — a single distinct value cannot discriminate between species even if it
         WERE scored, which was the reason re-adding it was provably inert.
 
-        **That premise is no longer true as of 2026-09-04** (demon-corpus-self-heal C1/C2, a
+        **That premise is no longer true as of 2026-09-04** (creature-corpus-self-heal C1/C2, a
         SEPARATE, approved program): `kit-shape` — the pipeline that decides `attackTempo` — had
         never been wired into `option-permutation`'s voting/permutation at all, unlike every other
         classified field, and a real 833-species audit found it had collapsed to `"steady"` 100%
@@ -388,7 +429,7 @@ class AttackTempoExclusionTests(unittest.TestCase):
         assertion or a silent deletion, so the real question — should `attackTempo` score now that
         it discriminates? — stays visible to whoever owns this module next."""
         self.skipTest(
-            "premise invalidated 2026-09-04 by demon-corpus-self-heal C1/C2: attackTempo is no "
+            "premise invalidated 2026-09-04 by creature-corpus-self-heal C1/C2: attackTempo is no "
             "longer constant in the live tree (kit-shape was fixed and redeployed) — whether "
             "compute_scores should now read it is a real, undecided design question for this "
             "module, not something to silently assert either way here")
@@ -437,9 +478,9 @@ class OfflineGuaranteeTests(unittest.TestCase):
     def test_regenerate_runs_with_no_network(self) -> None:
         # No mocking needed to prove this — the function simply never imports anything that
         # could reach a network. A stub transport that raises would be redundant scaffolding for
-        # a module with zero call sites to stub.
+        # a module with no call sites to stub.
         summary = gen_mod.regenerate(write=False)
-        self.assertEqual(summary["species"], 904)
+        self.assertEqual(summary["species"], _count_species_records(catalog_mod.CATALOG_PATH))
 
 
 class ResidueReportedTests(unittest.TestCase):
@@ -453,7 +494,10 @@ class ResidueReportedTests(unittest.TestCase):
         self.assertIn("residue", summary)
         for key in ("familyAssigned", "familyLess", "residueCount", "residueSpecies"):
             self.assertIn(key, summary["residue"])
-        self.assertEqual(summary["residue"]["familyAssigned"], 904)
+        # Every live species is family-assigned today (no `derived-nofloor` rows); recomputed from
+        # the roster rather than pinned.
+        self.assertEqual(summary["residue"]["familyAssigned"],
+                         _count_species_records(catalog_mod.CATALOG_PATH))
         self.assertEqual(summary["residue"]["familyLess"], 0)
 
     def test_every_written_entry_carries_its_own_separation(self) -> None:
@@ -472,9 +516,9 @@ class DeterminismTests(unittest.TestCase):
     def _frozen_inputs(self):
         catalog = load_catalog()
         weights = load_weights()
-        motif = json.loads((DEMONS_ROOT / "_generated" / "motif-assignments.json")
+        motif = json.loads((CREATURES_ROOT / "_generated" / "motif-assignments.json")
                            .read_text(encoding="utf-8"))
-        family = json.loads((DEMONS_ROOT / "_generated" / "family-assignments.json")
+        family = json.loads((CREATURES_ROOT / "_generated" / "family-assignments.json")
                             .read_text(encoding="utf-8"))
         # Freeze the anchor tree ONCE so both runs in a test see identical input, independent of
         # whatever the concurrent classification pass does between the two calls.
@@ -501,11 +545,11 @@ class DeterminismTests(unittest.TestCase):
         them (the risk `AnchorTreeJoinTests`'s docstring documents)."""
         with tempfile.TemporaryDirectory(prefix="a-s0-determinism-") as tmp:
             tmp_path = Path(tmp)
-            demons_root = tmp_path / "demons"
-            (demons_root / "_generated").mkdir(parents=True)
+            creatures_root = tmp_path / "creatures"
+            (creatures_root / "_generated").mkdir(parents=True)
             for name in ("motif-assignments.json", "family-assignments.json"):
-                (demons_root / "_generated" / name).write_text(
-                    (DEMONS_ROOT / "_generated" / name).read_text(encoding="utf-8"),
+                (creatures_root / "_generated" / name).write_text(
+                    (CREATURES_ROOT / "_generated" / name).read_text(encoding="utf-8"),
                     encoding="utf-8")
             species_root = tmp_path / "species"
             species_root.mkdir()
@@ -515,14 +559,14 @@ class DeterminismTests(unittest.TestCase):
             actions_root_2 = tmp_path / "actions2"
 
             summary1 = gen_mod.regenerate(
-                actions_root=actions_root_1, demons_root=demons_root,
+                actions_root=actions_root_1, creatures_root=creatures_root,
                 species_root=species_root,
-                family_assignments_path=demons_root / "_generated" / "family-assignments.json",
+                family_assignments_path=creatures_root / "_generated" / "family-assignments.json",
                 write=True)
             summary2 = gen_mod.regenerate(
-                actions_root=actions_root_2, demons_root=demons_root,
+                actions_root=actions_root_2, creatures_root=creatures_root,
                 species_root=species_root,
-                family_assignments_path=demons_root / "_generated" / "family-assignments.json",
+                family_assignments_path=creatures_root / "_generated" / "family-assignments.json",
                 write=True)
 
             for name in ("role-lean.json", "characteristic-pool.json"):
@@ -563,8 +607,14 @@ class RoleLeanShapeTests(unittest.TestCase):
         if self.doc is None:
             self.skipTest("role-lean.json not yet generated in this checkout")
 
-    def test_exactly_904_entries(self) -> None:
-        self.assertEqual(len(self.doc["entries"]), 904)
+    def test_one_entry_per_live_species(self) -> None:
+        """A JOIN to the roster, not a count: role-lean covers exactly the catalog, one row each."""
+        self.assertEqual(len(self.doc["entries"]),
+                         len({e["speciesKey"] for e in self.doc["entries"]}),
+                         "one role-lean entry per species, no duplicates")
+        self.assertEqual({e["speciesKey"] for e in self.doc["entries"]},
+                         {r.species_id for r in load_catalog()},
+                         "role-lean speciesKeys are exactly the catalog ids")
 
     def test_lean_order_is_a_permutation_of_the_five_categories(self) -> None:
         for entry in self.doc["entries"]:
@@ -625,8 +675,84 @@ class CorpusLoadRoundTripTests(unittest.TestCase):
         if not (ACTIONS_ROOT / "_generated" / "role-lean.json").is_file():
             self.skipTest("outputs not yet generated in this checkout")
         result = load_committed(ACTIONS_ROOT)
-        self.assertEqual(len(result.corpus.by_kind("action-role-lean")), 904)
+        self.assertEqual(len(result.corpus.by_kind("action-role-lean")),
+                         _count_species_records(catalog_mod.CATALOG_PATH))
+        # 6 is a CLOSED vocabulary (spec §2's groups A-F) a human changes — pinning it is correct.
         self.assertEqual(len(result.corpus.by_kind("action-characteristic-pool")), 6)
+
+
+class CurationParityTests(unittest.TestCase):
+    """Guards the transcription `curation.py` performs of the C# SSOT `CreatureTraitPoolCuration`.
+
+    The 2026-09-11 review's finding: `curated_traits` re-implements
+    `CreatureTraitPoolCuration.PickFor` constant-for-constant (sub-pools, FNV salts, the Heirloom
+    threshold, the Almanac top rung) with nothing binding the two. No committed artifact carries the
+    curated closed pool (`data/generated/creatures/*.json` holds the OPEN flavor text), so a value
+    oracle does not exist. These tests instead parse the C# source that owns each fact and assert the
+    Python side agrees — so editing the C# arrays, salts, or ladder fails here rather than silently
+    changing the trait pool the game grants while the corpus keeps scoring the old bridge.
+    """
+
+    CS_ROOT = REPO_ROOT / "src" / "FusionRpg.Core" / "Creatures"
+
+    @staticmethod
+    def _cs(path: Path) -> str:
+        if not path.is_file():
+            raise unittest.SkipTest(f"C# source not present: {path}")
+        return path.read_text(encoding="utf-8")
+
+    def test_combat_and_personality_pools_match_the_csharp_arrays(self) -> None:
+        text = self._cs(self.CS_ROOT / "Generation" / "CreatureTraitPoolCuration.cs")
+        combat = re.search(r"Combat\s*=\s*\{([^}]*)\}", text)
+        personality = re.search(r"Personality\s*=\s*\{([^}]*)\}", text)
+        self.assertIsNotNone(combat, "Combat array not found in CreatureTraitPoolCuration.cs")
+        self.assertIsNotNone(personality, "Personality array not found")
+        cs_combat = tuple(re.findall(r'"([a-z-]+)"', combat.group(1)))
+        cs_personality = tuple(re.findall(r'"([a-z-]+)"', personality.group(1)))
+        self.assertEqual(ladders_mod.COMBAT_TRAITS, cs_combat)
+        self.assertEqual(ladders_mod.PERSONALITY_TRAITS, cs_personality)
+
+    def test_rarity_ladder_matches_the_csharp_enum_declaration_order(self) -> None:
+        text = self._cs(self.CS_ROOT / "CreatureRarity.cs")
+        enum_block = re.search(r"enum CreatureRarity\s*\{(?P<body>[^}]*)\}", text)
+        self.assertIsNotNone(enum_block, "CreatureRarity enum not found")
+        members = re.findall(r"\b([A-Z][A-Za-z0-9]*)\b", enum_block.group("body"))
+        cs_ladder = tuple(m.lower() for m in members)
+        self.assertEqual(ladders_mod.RARITY_LADDER, cs_ladder,
+                         "the shared rarity ladder must match CreatureRarity's declaration order — "
+                         "a widened enum here silently shifts the Heirloom/essence threshold")
+
+    def test_trait_pool_matches_the_csharp_catalog_ids(self) -> None:
+        text = self._cs(self.CS_ROOT / "CreatureTraitCatalog.cs")
+        ids = tuple(re.findall(r'new\("([a-z-]+)"', text))
+        self.assertEqual(ladders_mod.TRAIT_POOL, ids)
+
+    def test_fnv_salts_match_the_csharp_call_sites(self) -> None:
+        text = self._cs(self.CS_ROOT / "Generation" / "CreatureTraitPoolCuration.cs")
+        cs_salts = tuple(re.findall(r'Hash\(gameTypeId,\s*"([a-z0-9-]+)"\)', text))
+        self.assertEqual(cs_salts, ("curate-t1", "curate-t2", "curate-t3", "curate-essence"))
+
+    def test_essence_and_top_rung_thresholds_match_the_ladder(self) -> None:
+        text = self._cs(self.CS_ROOT / "Generation" / "CreatureTraitPoolCuration.cs")
+        self.assertIn("AtLeast(rarity, CreatureRarity.Heirloom)", text)
+        self.assertIn("IsTopRung(rarity)", text)
+        # The C# `AtLeast(..., Heirloom)` is ordinal >= the Heirloom index; `IsTopRung` is the last
+        # ladder rung. Both are derived in `curation.py` from the shared ladder, not re-typed.
+        self.assertEqual(ladders_mod.RARITY_ORDINAL["heirloom"],
+                         ladders_mod.RARITY_LADDER.index("heirloom"))
+        top = ladders_mod.RARITY_LADDER[-1]
+        self.assertEqual(top, "almanac")
+        # Almanac (top) must be >= Heirloom, or the top-rung essence branch would never fire.
+        self.assertGreaterEqual(ladders_mod.RARITY_ORDINAL[top],
+                                ladders_mod.RARITY_ORDINAL["heirloom"])
+
+    def test_curated_traits_is_deterministic_and_in_the_closed_pool(self) -> None:
+        for sid, rarity, gid in (("x", "chaff", 7), ("y", "heirloom", 7), ("z", "almanac", 7)):
+            first = curated_traits(sid, rarity, gid)
+            self.assertEqual(first, curated_traits(sid, rarity, gid))
+            self.assertTrue(set(first) <= set(TRAIT_POOL), first)
+            if rarity == "almanac":
+                self.assertIn("immortal", first)
 
 
 if __name__ == "__main__":

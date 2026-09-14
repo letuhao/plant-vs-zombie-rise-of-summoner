@@ -25,7 +25,7 @@
       "id": "set.hypnojalapenopickaxezombie-001",
       "nameKey": "set.spicy-ambush-set",
       "name": "Spicy Ambush Set",
-      "themeKey": "demon.hypnojalapenopickaxezombie",
+      "themeKey": "creature.hypnojalapenopickaxezombie",
       "members": [
         {
           "role": "armament-primary",

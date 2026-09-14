@@ -1,9 +1,9 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { useDemonRoster, usePlayers, useRelics, useRuns, useSoulBalance, useSpeciesIndex, useUniqueActors } from "@/lib/bus";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useCreatureRoster, useOnboarding, usePlayers, useRelics, useRuns, useSoulBalance, useSpeciesIndex, useUniqueActors } from "@/lib/bus";
 import { useContracts } from "@/lib/bus/contracts";
-import { conditionOf } from "@/features/demons/contractView";
-import { displayName } from "@/features/demons/rosterSplit";
+import { conditionOf } from "@/features/creatures/contractView";
+import { displayName } from "@/features/creatures/rosterSplit";
 import { adaptActor, PLAYER_PENDING } from "@/contract/adapt";
 import { pendingWithReason } from "@/contract/pending";
 import { registerGlobalVerb } from "@/shell/keymap";
@@ -18,6 +18,7 @@ import { FocusCard } from "./FocusCard";
 import { SanctumHome } from "./SanctumHome";
 import { SanctumHud } from "./SanctumHud";
 import { OnboardingReveal } from "./OnboardingReveal";
+import { RiftPrologueDialog } from "@/features/onboarding/RiftPrologueDialog";
 
 // GG-38's `layer-collection` / `layer-world` / `layer-reference` chunks (tech-stack.md §6): each
 // layer's real weight (a wrapped page, in most cases) loads once it's opened for the first time,
@@ -68,6 +69,7 @@ function useKeybindingsVersion(): number {
  */
 export function SanctumStage() {
   useStageMountGuard("sanctum");
+  const navigate = useNavigate();
   const players = usePlayers();
   const playerId = players.data?.currentPlayerId ?? 1;
 
@@ -75,10 +77,16 @@ export function SanctumStage() {
   const runsQuery = useRuns();
   const contractsQuery = useContracts(playerId);
   const soulsQuery = useSoulBalance(playerId);
+  const onboardingQuery = useOnboarding(playerId);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const openLayer = searchParams.get("panel") as Exclude<RailEntry["id"], "sanctum"> | null;
   const selectedId = searchParams.get("sel");
+  const riftStory = onboardingQuery.data?.stories.find((story) => story.storyId === "rift-prologue" && story.version === 1);
+  const [riftOpen, setRiftOpen] = useState(false);
+  useEffect(() => {
+    if (openLayer === null && riftStory?.eligible) setRiftOpen(true);
+  }, [openLayer, riftStory?.eligible]);
 
   // A layer mounts (and its chunk fetches) the first time it's opened — via a click or a cold
   // deep-link — and then stays mounted across a later close, matching every layer's existing
@@ -163,13 +171,13 @@ export function SanctumStage() {
 
   const actors = actorsQuery.data?.items ?? [];
   const relicsQuery = useRelics();
-  const demonRosterQuery = useDemonRoster(playerId);
+  const creatureRosterQuery = useCreatureRoster(playerId);
   const speciesById = useSpeciesIndex();
   const { returnedCount } = useExpeditionReturnWatcher(playerId);
 
   // T26's priority banner needs the same "which pact is overdue, and what's its real name"
   // resolution `PactsLayer.tsx` already does — reused here rather than re-derived differently.
-  const bySpecimenId = new Map((demonRosterQuery.data?.items ?? []).map((s) => [s.profile.instanceId, s]));
+  const bySpecimenId = new Map((creatureRosterQuery.data?.items ?? []).map((s) => [s.profile.instanceId, s]));
   const overdueContractRow = (contractsQuery.data?.contracts ?? []).find((c) => conditionOf(c) === "insubordinate");
   const overdueContract = overdueContractRow
     ? (() => {
@@ -184,10 +192,10 @@ export function SanctumStage() {
   const railInputs: RailUnlockInputs = {
     currentStageId: "sanctum",
     hasCompletedARun: (runsQuery.data?.length ?? 0) > 0,
-    hasAnyDemon: (demonRosterQuery.data?.items.length ?? 0) > 0,
+    hasAnyCreature: (creatureRosterQuery.data?.items.length ?? 0) > 0,
     hasAnyContract: (contractsQuery.data?.contracts.length ?? 0) > 0,
     hasAnyRelic: (relicsQuery.data?.items.length ?? 0) > 0,
-    hasAnyBoundDemon: (contractsQuery.data?.contracts.some((c) => c.bound) ?? false),
+    hasAnyBoundCreature: (contractsQuery.data?.contracts.some((c) => c.bound) ?? false),
     returnedExpeditionCount: returnedCount,
     unreadResultCount: 0 // no "unread results" concept exists server-side yet
   };
@@ -228,6 +236,7 @@ export function SanctumStage() {
           <FocusCard
             actorCount={actors.length}
             firstActor={firstActorState}
+            showFirstUserGuide={riftStory?.state === "acknowledged"}
             overdueContract={overdueContract}
             returnedExpeditionCount={returnedCount}
             onOpenCreatures={() => openLayerById("creatures")}
@@ -247,6 +256,13 @@ export function SanctumStage() {
           ) : null}
         </div>
       </div>
+
+      <RiftPrologueDialog
+        open={riftOpen}
+        playerId={playerId}
+        onClose={() => setRiftOpen(false)}
+        onContinueToLawn={() => navigate("/lawn")}
+      />
 
       {mountedLayers.has("creatures") ? (
         <Suspense fallback={<ChunkFallback testId="chunk-fallback-creatures" />}>

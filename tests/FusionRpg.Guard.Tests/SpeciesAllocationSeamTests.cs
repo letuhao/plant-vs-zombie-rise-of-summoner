@@ -3,7 +3,7 @@ using Xunit;
 namespace FusionRpg.Guard.Tests;
 
 /// <summary>
-/// `species-build` T2.3 (module 5, `demon-type-allocation`) — spec-demon-type-allocation.md's own
+/// `species-build` T2.3 (module 5, `creature-type-allocation`) — spec-creature-type-allocation.md's own
 /// named risk: "composition lives behind a single named entry point that returns the effective
 /// allocation, and `LoadAllocation` is not called directly by any consumer of species allocation." A
 /// caller that reads `LoadAllocation` directly and forgets to compose the baseline gets a silently
@@ -13,7 +13,7 @@ namespace FusionRpg.Guard.Tests;
 public class SpeciesAllocationSeamTests
 {
     [Fact]
-    public void No_file_other_than_RpgStoreAptitudes_calls_LoadAllocation_with_the_DemonType_scope()
+    public void No_file_other_than_RpgStoreAptitudes_calls_LoadAllocation_with_the_CreatureType_scope()
     {
         var repoRoot = FindRepoRoot();
         var srcRoot = Path.Combine(repoRoot, "src");
@@ -24,16 +24,16 @@ public class SpeciesAllocationSeamTests
             if (file.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal)) continue;
             if (file.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal)) continue;
             // RpgStore.Aptitudes.cs IS the one named entry point (EffectiveSpeciesAllocation) — it is
-            // allowed, and required, to call LoadAllocation(DemonType, ...) internally.
+            // allowed, and required, to call LoadAllocation(CreatureType, ...) internally.
             if (Path.GetFileName(file) == "RpgStore.Aptitudes.cs") continue;
 
             var text = File.ReadAllText(file);
-            if (text.Contains("LoadAllocation(AllocationScope.DemonType", StringComparison.Ordinal))
+            if (text.Contains("LoadAllocation(AllocationScope.CreatureType", StringComparison.Ordinal))
                 violations.Add(file);
         }
 
         Assert.True(violations.Count == 0,
-            "LoadAllocation(AllocationScope.DemonType, ...) called directly outside " +
+            "LoadAllocation(AllocationScope.CreatureType, ...) called directly outside " +
             "RpgStore.Aptitudes.cs -- route species allocation reads through " +
             "RpgStore.EffectiveSpeciesAllocation instead. Offending file(s): " +
             string.Join(", ", violations));
@@ -50,7 +50,7 @@ public class SpeciesAllocationSeamTests
         Assert.True(File.Exists(path), "missing " + path);
         var text = File.ReadAllText(path);
         Assert.Contains("EffectiveSpeciesAllocation", text, StringComparison.Ordinal);
-        Assert.DoesNotContain("LoadAllocation(AllocationScope.DemonType", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("LoadAllocation(AllocationScope.CreatureType", text, StringComparison.Ordinal);
     }
 
     static string FindRepoRoot()

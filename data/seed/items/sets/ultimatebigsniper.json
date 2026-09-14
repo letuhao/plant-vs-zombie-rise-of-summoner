@@ -25,7 +25,7 @@
       "id": "set.ultimatebigsniper-001",
       "nameKey": "set.relentless-laser-battery",
       "name": "Relentless Laser Battery",
-      "themeKey": "demon.ultimatebigsniper",
+      "themeKey": "creature.ultimatebigsniper",
       "members": [
         {
           "role": "armament-primary",

@@ -19,7 +19,7 @@ layers**:
 | **Workflow definition** | *Inside ONE generation: what steps, what state, when to branch/retry/resume?* | **Nothing. Does not exist.** |
 
 Today layer 2 is a hand-rolled serial `for` loop in
-[`family/extract.py`](../../tools/seedsmith/seedsmith/adapters/demons/family/extract.py). Repeating
+[`family/extract.py`](../../tools/seedsmith/seedsmith/adapters/creatures/family/extract.py). Repeating
 that across five workflows is the real problem. **Scale, measured:** 65 modules · 6,449 source lines
 · 5,515 test lines · 11 packages.
 
@@ -100,7 +100,7 @@ Real motif-constrained output from C2:
 ```json
 {"name": "坚果", "doctrine": "Creates an impenetrable 外壳 to provide 保护 for the rest of the squad through its 坚硬 defense."}
 ```
-The validator *forced* the demon's own motifs (`保护`/`坚硬`/`外壳`). Attempt 1 didn't use them, was
+The validator *forced* the creature's own motifs (`保护`/`坚硬`/`外壳`). Attempt 1 didn't use them, was
 rejected **mechanically**, attempt 2 complied.
 
 ### Alternatives at this layer
@@ -187,7 +187,7 @@ workflow/
 ([review/audit-agent-runtime-proposal.md](seedsmith/review/audit-agent-runtime-proposal.md) R1)
 measured the actual corpus: the flavour text is **not thin, it is diluted**.
 
-| `flavorInfo` across all 84 demons | chars | share |
+| `flavorInfo` across all 84 creatures | chars | share |
 |---|---|---|
 | stat / mechanic lines (`韧性：270+2200（一类）`, `伤害：20/1.5秒`, `融合配方：…`) | 4,276 | **70%** |
 | prose | 1,815 | 29% |
@@ -202,10 +202,10 @@ work a script can do is a slow, expensive, non-reproducible script."*
 | id | Workflow | Model? | Status |
 |---|---|---|---|
 | **W-0** | **restrict motif derivation to prose** — drop `label：value` lines and `特点`/`特性`/`弱点`/`融合配方` blocks; prefer `flavorIntroduce` (pure lore, present for **18/84**) | **No** | ⭐ **Build first.** Deterministic, free, testable |
-| **W-B** | `commander-effect` per demon | Yes | Second — measured 8/8 first-attempt (§R2) |
-| **W-D** | item/action content themed to a demon | Yes | Third |
+| **W-B** | `commander-effect` per creature | Yes | Second — measured 8/8 first-attempt (§R2) |
+| **W-D** | item/action content themed to a creature | Yes | Third |
 | **W-E** | `lore-enrich` | Yes | **Re-evaluate after W-0** — its value likely shrinks a lot. ⛔ **Blocked on R4**: needs `basis="enriched"` first (see §7a) |
-| **W-A** | `aspect` per demon | Yes | ⛔ blocked: `aspect-scope` approved but unbuilt |
+| **W-A** | `aspect` per creature | Yes | ⛔ blocked: `aspect-scope` approved but unbuilt |
 | **W-C** | `environment` | **No** | ❌ deterministic mapping — same rule as W-0 |
 
 ### 7a. ⛔ W-E prerequisite — `basis` corruption (audit R4)
@@ -277,14 +277,14 @@ regression question. Adding a tracing service before there is traffic to trace i
 - **Phase 3.5 — re-evaluate W-E.** Only if W-0's motifs are still insufficient, and only after
   `basis="enriched"` (§7a) exists.
 - **Phase 4 — close the measurement loop.** Merge generated content onto corpus entries so
-  `Coverage/DemonUncovered` falls from 84 and `Distribution/MotifSharing` can finally measure.
-- **W-A** unblocks when the demon program builds `aspect-scope`.
+  `Coverage/CreatureUncovered` falls from 84 and `Distribution/MotifSharing` can finally measure.
+- **W-A** unblocks when the creature program builds `aspect-scope`.
 
 ---
 
 ## 10. Cost
 
-Local ⇒ cost is wall-clock. Measured: **84 demons / 11 batches / 104s** single-shot. Per-item graphs
+Local ⇒ cost is wall-clock. Measured: **84 creatures / 11 batches / 104s** single-shot. Per-item graphs
 with repair + CoVe run **~3–5× calls/item**; 252 items (84 × 3 kinds) ≈ **30–90 min**. This is why
 checkpoint/resume is a **requirement** (§2.2), not a nicety — a crash at minute 50 must not restart
 from zero.
@@ -313,7 +313,7 @@ Audit: [review/audit-agent-runtime-proposal.md](seedsmith/review/audit-agent-run
 > *"seedsmith is a tool outside the game, it is dev tool not ship in release"* — owner
 
 **The owner's reasoning is stronger than the audit's**, and it is the one to record. The audit argued
-the precedent narrowly ([`spec-demon-corpus-emit.md:28-30`](seedsmith/spec-demon-corpus-emit.md),
+the precedent narrowly ([`spec-creature-corpus-emit.md:28-30`](seedsmith/spec-creature-corpus-emit.md),
 *"a second SQL dialect for **the same tables**"*). The correct, more general reason:
 
 **`guard-dal.ps1` and the "SQL only in `FusionRpg.Data`" invariant exist to protect the *shipped
@@ -326,7 +326,7 @@ intended.
 **Scope of this decision, stated so it cannot creep:** it authorises `sqlite3` for **LangGraph
 checkpoint state inside `tools/seedsmith/` only**. It does **not** authorise Python reading the
 game's SQLite (`types`, `almanac_seed`, `recipes`) — that remains C#-through-the-DAL, exactly as
-`demon-corpus-emit` established, and for exactly the reason that spec gives.
+`creature-corpus-emit` established, and for exactly the reason that spec gives.
 
 **Consequence:** `langgraph-checkpoint-sqlite` is a pinned Phase 0 dependency; crash-resume (§10's
 30–90 minute runs) is preserved; `MemorySaver` and the custom JSON checkpointer are not needed.

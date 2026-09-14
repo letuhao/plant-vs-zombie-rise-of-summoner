@@ -5,7 +5,7 @@ namespace FusionRpg.Core.Tests.Atoms;
 
 /// <summary>
 /// T5.1 (`world-seed`, `spec-world-seed.md`): the one derivation contract every per-player roll in
-/// this program (and `demon-seed`'s `player-materialise`) must go through.
+/// this program (and `creature-seed`'s `player-materialise`) must go through.
 /// </summary>
 public class WorldSeedTests
 {

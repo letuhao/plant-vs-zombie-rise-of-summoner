@@ -25,7 +25,7 @@
       "id": "set.portalmelon-001",
       "nameKey": "set.spacetime-melon-launcher",
       "name": "Spacetime Melon Launcher",
-      "themeKey": "demon.portalmelon",
+      "themeKey": "creature.portalmelon",
       "members": [
         {
           "role": "armament-primary",

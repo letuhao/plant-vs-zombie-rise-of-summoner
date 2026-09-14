@@ -14,7 +14,7 @@ Read this session, in full: [reconciliation-plan.md](reconciliation-plan.md),
 
 Code opened: `CurveTable.cs`, `ContainerRow.cs`, `AtomCompiler.cs`, `AtomRowValidator.cs`,
 `Instantiator.cs`, `BindGate.cs`, `ContentHashRegistry.cs`, `RpgStore.Containers.cs`,
-`RpgStore.AtomInstances.cs`, `DemonMaterialCatalog.cs`, `DemonRarity.cs`, `RpgStore.Fusion.cs`,
+`RpgStore.AtomInstances.cs`, `CreatureMaterialCatalog.cs`, `CreatureRarity.cs`, `RpgStore.Fusion.cs`,
 `ExpeditionResolver.cs`, `FusionEndpoints.cs`, `web/fusion-rpg-web/src/features/fusion/fusionView.ts`.
 
 **Two suites were run for this document**, so the design gate's evidence box is ticked rather than
@@ -36,7 +36,7 @@ not a repair.
 
 | Q | Question | Ruling in one line |
 |---|---|---|
-| **Q1** | Shard per rung (10 ids) or per band (4 ids)? And rebase the cost tables. | **Per band, four ids, the shipped strings — but the strings stop being derived from `DemonRarity`.** |
+| **Q1** | Shard per rung (10 ids) or per band (4 ids)? And rebase the cost tables. | **Per band, four ids, the shipped strings — but the strings stop being derived from `CreatureRarity`.** |
 | **Q2** | `ContainerRow.PoolRolls` vs `RarityRow.PoolRolls` — which is authoritative? | **Neither is the post-op authority.** The container wins the *draw*; the rarity row is an *authoring bound*; the invariant reads the **instance**. |
 | **Q3** | `CurveInput.Rarity` exists; E5's Boundaries forbid rarity changing a magnitude. | **Both are right about different consumers, and the code is a third thing: live and wrong.** |
 
@@ -65,7 +65,7 @@ point of this section.
 originates in [ssot-materials-crafting.md](ssot-materials-crafting.md):136 and is restated as I9's
 hardest dependency at :684-687. What I1 wrote instead is the opposite instruction:
 
-> "**I9 — a salvage material namespace that does not overload `shard.{DemonRarity}`.** … Item salvage
+> "**I9 — a salvage material namespace that does not overload `shard.{CreatureRarity}`.** … Item salvage
 > keyed on a ten-rung ladder needs its own ids — this lane suggests `dust.{item_rarity_id}` — and
 > reusing `shard.*` would silently fuse two ladders that §4.3 keeps apart."
 > — `ssot-rarity.md:696-700`, and the same instruction as a registry constraint at `:340`
@@ -82,13 +82,13 @@ dropped by expeditions, and rendered as literal UI labels**:
 
 | Site | What it does | Evidence |
 |---|---|---|
-| Mint | `DemonMaterialCatalog.Build()` loops the four `DemonRarity` values and emits `$"shard.{rarity.ToId()}"` | `src/FusionRpg.Core/Demons/DemonMaterialCatalog.cs:18-19` |
-| Gate | `DemonMaterialCatalog.IsKnown` is the validity check every material write passes | `DemonMaterialCatalog.cs:23-25`; enforced at `RpgStore.Expeditions.cs:209` per `ssot-generation.md:604` |
+| Mint | `CreatureMaterialCatalog.Build()` loops the four `CreatureRarity` values and emits `$"shard.{rarity.ToId()}"` | `src/FusionRpg.Core/Creatures/CreatureMaterialCatalog.cs:18-19` |
+| Gate | `CreatureMaterialCatalog.IsKnown` is the validity check every material write passes | `CreatureMaterialCatalog.cs:23-25`; enforced at `RpgStore.Expeditions.cs:209` per `ssot-generation.md:604` |
 | Spend | fusion builds the cost line `("shard." + cost.ShardRarity.ToId(), cost.ShardCount)` | `src/FusionRpg.Data/Sqlite/RpgStore.Fusion.cs:374` |
 | Contract | the REST cost DTO carries `shardMaterialId = "shard." + cost.ShardRarity.ToId()` | `src/FusionRpg.Server/FusionEndpoints.cs:202` |
 | Faucet | expedition rewards hold `shard.common` / `shard.rare` as string constants | `src/FusionRpg.Core/Expeditions/ExpeditionResolver.cs:165-166` |
 | UI | the have/need panel prints the id **as the label** — `label: cost.shardMaterialId` | `web/fusion-rpg-web/src/features/fusion/fusionView.ts:24-27` |
-| Player data | `rpg_demon_materials` PK is `(player_id, material_id)`, so a rename is a **row migration on live balances**, not a code edit | `src/FusionRpg.Data/Sqlite/RpgStore.cs:520-526` |
+| Player data | `rpg_creature_materials` PK is `(player_id, material_id)`, so a rename is a **row migration on live balances**, not a code edit | `src/FusionRpg.Data/Sqlite/RpgStore.cs:520-526` |
 
 Six production sites plus a data migration. Renaming is **not** free, and I9's claim at
 `ssot-materials-crafting.md:106-109` — *"I am appending eleven ids and renaming nothing"* — is
@@ -99,21 +99,21 @@ verified correct and is worth protecting.
 > **R1. A shard exists per BAND. Four ids. `shard.common` · `shard.rare` · `shard.epic` ·
 > `shard.legendary`, byte-identical to what ships today.**
 >
-> **R2. The four strings stop being derived from `DemonRarity`.** A new four-value
+> **R2. The four strings stop being derived from `CreatureRarity`.** A new four-value
 > `MaterialBand { Common, Rare, Epic, Legendary }` enum in `FusionRpg.Core` becomes the id source;
-> `DemonRarity` gains a 1:1 `ToMaterialBand()` map and stops being the keyspace owner. Same four
+> `CreatureRarity` gains a 1:1 `ToMaterialBand()` map and stops being the keyspace owner. Same four
 > strings, same output bytes, no migration, one new file and one edited line
-> (`DemonMaterialCatalog.cs:18`).
+> (`CreatureMaterialCatalog.cs:18`).
 >
 > **R3. `rarity` gains a non-nullable `material_band` column**, values 1–4, populated from I1's own
-> `DemonRarity → ordinal band` map, which it already published at `ssot-rarity.md:298-303`. Band is
+> `CreatureRarity → ordinal band` map, which it already published at `ssot-rarity.md:298-303`. Band is
 > **stored, never inferred from an ordinal range** — I9 is right at `:137-138` that inferred
 > boundaries drift the moment a rung is inserted.
 >
 > **R4. `dust.{item_rarity_id}` is rejected.** I1 §9.8 is withdrawn.
 
 R2 is the whole answer to the contradiction. I1's objection at `:696-700` is not about the *strings* —
-it is about a ten-rung item ladder being keyed off a four-value **demon enum**, which would fuse two
+it is about a ten-rung item ladder being keyed off a four-value **creature enum**, which would fuse two
 ladders §4.3 deliberately keeps apart. R2 removes the coupling without touching a single id, a single
 row, or a single HTTP field. I9 keeps everything it asked for; I1 gets the separation it asked for.
 
@@ -489,8 +489,8 @@ Every edit this decision forces. Section-level, so nobody has to re-derive the l
 |---|---|
 | §3.3 ladder table (`:115-126`) | add a `material_band` column, values from R3's table |
 | §3.6 (`:195`) | widen the `CurveInput.Rarity` ban from `item` containers to the whole magnitude path (R14) |
-| §4.3 (`:295-306`) | the `DemonRarity → ordinal band` map is promoted from prose to the `material_band` column; note the map is now read in the **rung → band** direction by I9 |
-| §4.4 registry (`:326-342`) | `salvage_yield` row (`:340`) drops *"must not reuse `shard.{DemonRarity}`"* — R2 removes the coupling. Add `material_band` to the *columns on the rarity row* block. `enhance_cap` (`:335`) gets I6's rebased ten-rung values (Q1.4b) |
+| §4.3 (`:295-306`) | the `CreatureRarity → ordinal band` map is promoted from prose to the `material_band` column; note the map is now read in the **rung → band** direction by I9 |
+| §4.4 registry (`:326-342`) | `salvage_yield` row (`:340`) drops *"must not reuse `shard.{CreatureRarity}`"* — R2 removes the coupling. Add `material_band` to the *columns on the rarity row* block. `enhance_cap` (`:335`) gets I6's rebased ten-rung values (Q1.4b) |
 | §5.1 / §5.3 (`:387-413`) | `material_band` joins N2 as a new non-nullable column; `pool_rolls` reinterpretation at `:402` is confirmed as **floor** (R9) |
 | §6.1 (`:445`) | widen the `BadCurve` row per R14 |
 | §6.3 (`:469-481`) | rename/widen `Rarity_curve_input_is_rejected_on_item_containers`; add `Container_pool_rolls_outside_its_rung_band_is_rejected` |
@@ -501,7 +501,7 @@ Every edit this decision forces. Section-level, so nobody has to re-derive the l
 
 | § | Edit |
 |---|---|
-| §3.1 (`:88-104`) | shard row: the id source is `MaterialBand`, not `DemonRarity` (R2). Id strings unchanged |
+| §3.1 (`:88-104`) | shard row: the id source is `MaterialBand`, not `CreatureRarity` (R2). Id strings unchanged |
 | §3.3 (`:125-143`) | the band request is **granted**; add the concrete rung → band map from R3 |
 | §6.2 (`:336`) | `qty_curve_id` restriction upheld and promoted: it is now the *definition* of the legal rarity-curve consumer set (R13) |
 | §7.4 (`:522-548`) | demoted to a fallback. Delete the `elevate` · `temper` · `reroll` rows — superseded by I6 and I7 (R6). Keep `forge` · `upcycle` · `gem` · `bore` · `socket` |
@@ -572,7 +572,7 @@ That is the line I1's own §4.4 already draws between *"columns on the rarity ro
 |---|---|---|---|
 | `rarity.material_band INTEGER NOT NULL` | **Additive DDL** — the table holds zero production rows (`ssot-rarity.md:66-67`) so NOT NULL costs no backfill. But it **must** be hashed, so it is a `ContentHashRegistry` V2 and a `CurrentSchemaVersion` bump | E5 (*"ask first: adding a column"*, `spec-container-schema.md:143`) | **Ask-first** |
 | `rarity.pool_rolls_max INTEGER` nullable | Additive, same hash consequence | E5 | Ask-first (already I1's §10.1) |
-| `MaterialBand` enum + `DemonRarity.ToMaterialBand()` | **Pure code, no schema, no data, byte-identical ids** | none — new Core type | **Safe. Do it** |
+| `MaterialBand` enum + `CreatureRarity.ToMaterialBand()` | **Pure code, no schema, no data, byte-identical ids** | none — new Core type | **Safe. Do it** |
 | `item_enhance_cost` keyed on `band` | New table, never shipped | I6's own | Safe |
 | `item_generation.envelope_rolls` | New table, never shipped | I12's own | Safe |
 | `rarity_budget` table | New table | E5 + content hash registry | Ask-first (already I1's §10.1) |
@@ -595,9 +595,9 @@ since it re-prices every recipe.
 
 | Rejected | Argued by | Why it lost |
 |---|---|---|
-| **One shard per rung — ten ids** | the implicit reading of `shard.{rarity}` in `ssot-enhancement.md:475` and `ssot-reroll.md:308-310` | Six production sites bind the four shipped ids, including a REST field and a UI label that prints the id verbatim (`fusionView.ts:24-27`), and `rpg_demon_materials` is PK'd on `material_id` so re-keying migrates live player balances. Against that: zero mechanical gain — the rung already reaches the price through `enhance_cap` and through curve points at ordinals |
+| **One shard per rung — ten ids** | the implicit reading of `shard.{rarity}` in `ssot-enhancement.md:475` and `ssot-reroll.md:308-310` | Six production sites bind the four shipped ids, including a REST field and a UI label that prints the id verbatim (`fusionView.ts:24-27`), and `rpg_creature_materials` is PK'd on `material_id` so re-keying migrates live player balances. Against that: zero mechanical gain — the rung already reaches the price through `enhance_cap` and through curve points at ordinals |
 | **`dust.{item_rarity_id}` — a parallel ten-id salvage namespace** | `ssot-rarity.md:696-700` | It solves a coupling problem that R2 solves in one file with no new ids. It would also make a fifth material class in a vocabulary that argued itself down to four (`ssot-materials-crafting.md:165-172`, §8.1) |
-| **Growing `DemonRarity` to ten values** | considered and rejected by I1 at `ssot-rarity.md:252`; re-checked here | Confirmed: it would move summon rates (`SummonRoller.cs:22-30`), pity thresholds, fusion trait slots, soul earn, and the shard ids — five consumers for zero item-side gain |
+| **Growing `CreatureRarity` to ten values** | considered and rejected by I1 at `ssot-rarity.md:252`; re-checked here | Confirmed: it would move summon rates (`SummonRoller.cs:22-30`), pity thresholds, fusion trait slots, soul earn, and the shard ids — five consumers for zero item-side gain |
 | **Inferring `material_band` from an ordinal range** | the cheap alternative to a column | I9 is right at `:137-138`: an inferred boundary drifts the instant a rung is inserted at ordinal 85, and it re-prices every recipe silently. Store the mapping |
 | **`rarity.pool_rolls` as the band ceiling** | `ssot-generation.md:373,401` | Cannot encode `chaff`'s `0` without a `max(1, …)` special case; cannot encode a fixed band at all; hard-codes width 2 into arithmetic and is right today only by coincidence |
 | **Deriving the mint affix count as `count(instance_atom) − count(container.Atoms)`** | the no-column option | The container's fixed core is mutable content, so one authoring edit retroactively breaks the reroll invariant on every existing item — the failure I6 §8.7 already forbids |
@@ -649,9 +649,9 @@ Stated rather than decided, because each needs an input this debate does not hav
    Checkpoint-B-published contract — ask-first under `spec-container-schema.md:143`. The bump also has
    to be sequenced against E18 and E9, which already claim versions 2 and 3.
 
-2. **Is `MaterialBand` worth a new Core type, or should `DemonRarity` simply be renamed?** R2 adds an
-   enum and a 1:1 map so the item ladder is not keyed off a demon enum. The cheaper alternative is to
-   rename `DemonRarity` to `MaterialBand` in place — fewer types, but it makes a demon-summon concept
+2. **Is `MaterialBand` worth a new Core type, or should `CreatureRarity` simply be renamed?** R2 adds an
+   enum and a 1:1 map so the item ladder is not keyed off a creature enum. The cheaper alternative is to
+   rename `CreatureRarity` to `MaterialBand` in place — fewer types, but it makes a creature-summon concept
    carry an item-economy name, and it touches `SummonRoller`, `FusionRoller`, `SoulEarnPolicy` and the
    contracts DTO. My pick is the new type; the rename is defensible and cheaper.
 
@@ -678,7 +678,7 @@ Stated rather than decided, because each needs an input this debate does not hav
 
 ```
 [x] I identified the subsystems this touches — effect-atom (curve, container, rarity, content hash),
-    demon fusion, expeditions, soul economy, the web fusion panel, item lanes I1/I6/I7/I9/I12.
+    creature fusion, expeditions, soul economy, the web fusion panel, item lanes I1/I6/I7/I9/I12.
 [x] I read every document named in the brief, in full, this session — including both sides of the
     Q3 contradiction (definitions §2 AND §4, and the container spec's Boundaries AND its A1 contract).
 [x] I verified against CODE, not comments or docs: the six shard consumption sites, the zero-reader

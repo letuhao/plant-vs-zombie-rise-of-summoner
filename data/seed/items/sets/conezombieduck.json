@@ -25,7 +25,7 @@
       "id": "set.conezombieduck-001",
       "nameKey": "set.unwilling-stationery-zombie",
       "name": "Unwilling Stationery Zombie",
-      "themeKey": "demon.conezombieduck",
+      "themeKey": "creature.conezombieduck",
       "members": [
         {
           "role": "armament-primary",

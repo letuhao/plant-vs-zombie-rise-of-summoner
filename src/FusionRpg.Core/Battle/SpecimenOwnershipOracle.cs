@@ -5,7 +5,7 @@ namespace FusionRpg.Core.Battle;
 /// <summary>
 /// aura-skill T21b: the real, production `IOwnSideOracle` for the SPECIMEN case —
 /// `BattlefieldOwnSideReactor`'s own doc comment names this as the harder half `MechanicalOwnSideOracle`
-/// (T21a) deliberately left unanswered: when a demon SPECIMEN is on the lawn, ownership is "which
+/// (T21a) deliberately left unanswered: when a creature SPECIMEN is on the lawn, ownership is "which
 /// player deployed it," not "which mechanical side is it on."
 ///
 /// <para><b>The Cold-plane bridge this needs is real now, not invented here.</b>

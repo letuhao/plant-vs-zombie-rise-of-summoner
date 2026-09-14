@@ -25,7 +25,7 @@
       "id": "set.doompaper-001",
       "nameKey": "set.physics-of-decay",
       "name": "Physics of Decay",
-      "themeKey": "demon.doompaper",
+      "themeKey": "creature.doompaper",
       "members": [
         {
           "role": "armament-primary",

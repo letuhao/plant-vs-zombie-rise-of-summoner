@@ -35,7 +35,7 @@ path and its importer) are outside that scope and outside every other task.
 |---|---|---|---|
 | C1 | §1 freeze line: layer (c) is empty; a `skill` container uses the fixed core alone, so `prefix_rolls = suffix_rolls = 0` and the draw never runs | PARTIAL | A2 builds the record; nothing asserts the no-roll property, which is what D24 rests on |
 | C2 | §2.1 `TreeRecord` shape; `gateQuantity` is stored even when its counter does not exist yet (D37) and the tree is never disabled for it | PARTIAL | A2 covers records generally — and its second acceptance bullet **contradicts this** (§6) |
-| C3 | §2.1 / R7 five-value `category` enum; the importer maps the plan's `aptitude`/`demonFamily` tokens and refuses any token outside the map, naming it | MISSING | No task. Spec test `a_plan_category_token_outside_the_five_is_refused_naming_it` |
+| C3 | §2.1 / R7 five-value `category` enum; the importer maps the plan's `aptitude`/`creatureFamily` tokens and refuses any token outside the map, naming it | MISSING | No task. Spec test `a_plan_category_token_outside_the_five_is_refused_naming_it` |
 | C4 | §2.2 `NodeRecord` shape — `nodeClass`, `affixIds[]` 1..3, `budgetShareMilli` carried verbatim (R4/R5) | PARTIAL | A2 names `affixIds` 1..3 only; `nodeClass` and `budgetShareMilli` unnamed, though A4 reads the latter |
 | C5 | §2.2 / D40 `exclusionForm` enum, and the refusal when form and `excludeProps` disagree | PARTIAL | Named in A2's Description, absent from its acceptance criteria |
 | C6 | §2.3 `NodeAtom` shape — `kMicro` `long`, `unitClass` stored, 11 authorable triggers, `whenJson` | PARTIAL | A2 covers `kMicro is long`; the rest unnamed |
@@ -79,19 +79,19 @@ delivering criteria.
 | S7 | §2.2d `the_skill_wallet_clears_the_tier_it_just_opened_for_every_shipped_archetype`; `g` reproduces from the corner-share derivation | MISSING | No task. §2.2d's own note: the existing derivation "had no test at all" |
 | S8 | §2.3 the soft-bound proof: no `Math.Min` on the price, no narrowing cast on the budget, no `CanUnlock` that can return false — each a named test, plus the PS-8 exemption comment | MISSING | No task. The standing verification runs audits, not these greps |
 | S9 | §2.4 the `selfSpent` projection (D8/D39): `(n_i, s_i)` per tree, four membership rules, three named tests | MISSING | **No task.** A6 says `H` reads the final allocation; nothing supplies the projection it reads |
-| S10 | §3 `pointEconomy.skillPointsPerThetaMilliByScope` + `PointBudget.SkillPointsFor`; a missing rate is a load rejection naming it; every actor reads its own scope | MISSING | No task. Without it fifty demons each read `Θ_player` — §3's stated failure |
+| S10 | §3 `pointEconomy.skillPointsPerThetaMilliByScope` + `PointBudget.SkillPointsFor`; a missing rate is a load rejection naming it; every actor reads its own scope | MISSING | No task. Without it fifty creatures each read `Θ_player` — §3's stated failure |
 | S11 | §4 `LoadTreeState` never throws on an unknown id; the three-way live/retired/unknown reconciler | PARTIAL | A2 covers the import boundary; `TreeStateReconciler` is unbuilt |
 | S12 | §4 an unknown id rejects the **import**, naming every offender | COVERED | A2 |
 | S13 | §5 respec: full reset, one transaction, per `(scope, scope_key)`, never refused, priced in souls off its own counter | MISSING | No task. A5's "respec round-trip costs identically" tests the cost lemma, not the respec operation |
 | S14 | §6 `LoadTreeStateBatch` — one query, one lock, one connection for a six-actor squad | COVERED | A5 |
 | S15 | §6 the single-key loader exists for the editing surface only; a seam test proves the battle path never loops it | PARTIAL | A5 covers the batch half; the seam test is unnamed |
-| S16 | §6 tree state is not joined onto the unpaged `ListDemonRoster` | MISSING | No task states the boundary |
+| S16 | §6 tree state is not joined onto the unpaged `ListCreatureRoster` | MISSING | No task states the boundary |
 | S17 | §7 `long` on both sides, `checked` products, `GetInt64` never `GetInt32` | PARTIAL | Inside A5's build; asserted only by the standing verification |
 | S18 | §8 the tunable table: `unlockCost.firstPoints`/`stepPoints`, `soulTrack.thetaPerSoulLevelMilli`, the scope table in `aptitudes.v{n+1}.json`; T5 rejection; `1000 ⇒ Ws = 1` pinned | MISSING | Same missing file as C22 |
 | S19 | §9.1 `ssot-power-scale.md` §10.2 **row 29** for D25's cost ladder, plus the `inventory.json` mirror row | MISSING | No task. Verified: §10.2's highest row is 28 today, and `inventory.json` has 27 rows, none passive-tree |
 | S20 | §9.2 the **§11.10** caps-register row for the unlock price | MISSING | No task |
 | S21 | Success: 2,000 actors × 40 nodes stores 80,000 rows, not 3.1 million, proven by a row count | MISSING | No task |
-| S22 | Success: `every_actor_reads_its_own_scope_budget` — a demon reading `Θ_player` fails | MISSING | Follows S10 |
+| S22 | Success: `every_actor_reads_its_own_scope_budget` — a creature reading `Θ_player` fails | MISSING | Follows S10 |
 
 ---
 
@@ -238,13 +238,13 @@ and watches the anchor follow.
 **Spec:** `spec-tree-state.md` §3, §8 (D34). **Rank 4.**
 **Description:** The scope table on `pointEconomy`, mirroring `AptitudePointsPerThetaMilliByScope` one
 line above it, and `PointBudget.SkillPointsFor` as the sibling of `PointsFor`. Without it every actor's
-budget reads `Θ_player` and fifty demons own the generic catalog at the calibration point.
+budget reads `Θ_player` and fifty creatures own the generic catalog at the calibration point.
 **Acceptance:**
 - [ ] `pointEconomy.skillPointsPerThetaMilliByScope` ships in `aptitudes.v{n+1}.json` with
       `commander = 11`; the other three carry a stated guess, labelled unmeasured
 - [ ] `SkillPointsFor` is the same shape as `PointsFor`: `checked`, `long`, no cap, negative source rejected
 - [ ] A missing rate is a load rejection naming it
-- [ ] `every_actor_reads_its_own_scope_budget` — a demon reading `Θ_player` fails
+- [ ] `every_actor_reads_its_own_scope_budget` — a creature reading `Θ_player` fails
 **Verification:** the four scopes resolve to four budgets from one actor set.
 **Depends on:** A7. **Scope:** S–M. **Files:** `src/FusionRpg.Core/Stats/Aptitudes/PointBudget.cs`,
 `data/tuning/aptitudes.v{n+1}.json`.
@@ -257,7 +257,7 @@ count and self-spent soul levels. Four rules, stated identically in both specs s
 - [ ] The projection is the **final allocation**, not points paid and not a purchase order
 - [ ] A node counts once, at 1 — never weighted by what it cost
 - [ ] A tree with no self-bought node is **absent** from the vector, never present at zero
-- [ ] The exclusion of item-granted, aptitude-threshold and demon-aspect unlocks is a **stated rule**
+- [ ] The exclusion of item-granted, aptitude-threshold and creature-aspect unlocks is a **stated rule**
       with its own test, so widening it later moves a golden instead of starting an investigation
 **Verification:** the same node set built two ways yields one identical vector; the store-side half of
 `tree-resolve` test 6c.
@@ -399,7 +399,7 @@ caps-register row for the unlock price, and the `inventory.json` mirror rows in 
 | **A2** | Delete the `kMicro`-over-the-ceiling and unknown-`gateQuantity` criteria (§5). Add: `scaleAxis` stored and validated against `UnitClass` (a sigmoid channel never carries `PTheta`); `exclusionForm`/`excludeProps` agreement; `IdMismatch` kept as authored; the five-value `category` enum and the plan's token map (R7); reflection proving every stored magnitude field is `long` and no resolved magnitude is stored |
 | **A3** | Add: widening `AtomCompiler`'s **result** from `int` to `long` (`spec-tree-binder.md` §5.3 / §7, `spec-tree-state.md` §7) — it moves the first refusal from `Θ` 103,557 to ≈214,748,300 and costs one cast |
 | **A4** | Fix bullet 2 per §5. Add: the R4 source-shape test (no `tierWeight`, `weightTotal` or `w[t]` in `CoefficientBinder`); an excluded node — nullification included — binds normally with the same `kMicro`; a refused conversion slot's unspent budget is **reported**, and the run's verdict is `FAIL`; `--explain` prints the whole chain. Give the task a Files line (`AffixComposer.cs`, `CoefficientBinder.cs`, `BoundNode.cs`, `tools/TreeBinder/`) |
-| **A5** | Fix bullet 1 to "only non-zero **entries** persist; a node owned at `soul_level = 0` keeps its row". Add: §2.1's five ownership rows as commented `const`s plus the item-swap invariant; the three PS-8 grep tests (no `Math.Min` on the price, no narrowing cast on the budget, no `CanUnlock` returning false); the batch seam test; the 2,000-actor row-count proof; do not join tree state onto the unpaged `ListDemonRoster` |
+| **A5** | Fix bullet 1 to "only non-zero **entries** persist; a node owned at `soul_level = 0` keeps its row". Add: §2.1's five ownership rows as commented `const`s plus the item-swap invariant; the three PS-8 grep tests (no `Math.Min` on the price, no narrowing cast on the budget, no `CanUnlock` returning false); the batch seam test; the 2,000-actor row-count proof; do not join tree state onto the unpaged `ListCreatureRoster` |
 | **A6** | Add: `Tier_gate_reads_the_catalog_depth_not_a_literal`; the `w` blend of `H_nodes`/`H_souls` with empty denominators reading zero; PS-3 line by line (contest channels read `Θ_node` linearly); `F` multiplies only tree-derived contributions; `Fmax = 1000‰` removes `F` byte-identically; memoise by reference and re-resolve on a changed state reference |
 | **B4** | State that a reflect node contributes **exactly zero** through the battle/sim path — `TryReflect` has one caller, `CombatDamageDispatcher.DispatchInstant`, and nothing in `src/FusionRpg.Core/Battle/` calls it. A sweep reporting reflect as weak is reporting a missing reader, not a balance finding (`spec-tree-binder.md` §6 M2) |
 | **D4** | Add the catalog's own `--check` staleness gate to CI, distinct from the plan's byte-identity check |

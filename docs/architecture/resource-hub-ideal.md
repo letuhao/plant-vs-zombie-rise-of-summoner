@@ -48,7 +48,7 @@ Verified 2026-08-22 in `src/`:
 | HP | The only battle pool; `EntityStatWriter` / FA10 / Funnel | Per actor |
 | Shields | `ShieldRuntime`, element-typed, 4 derived families | Per actor |
 | Sun | `SimEngine` / `SimModels` — **lawn sim only, never reaches an RPG battle** | Per **match** |
-| Souls | `SoulEarnPolicy`, `RpgStore.Souls.cs`, expeditions, demon binding + daily tribute | Per **player**, persistent |
+| Souls | `SoulEarnPolicy`, `RpgStore.Souls.cs`, expeditions, creature binding + daily tribute | Per **player**, persistent |
 | Stamina, spirit, hunger, rot | Do not exist | — |
 | Derived stat channels | 84 combat (asserted at exactly 84 by test) + status + progression | — |
 
@@ -93,7 +93,7 @@ One word — "resource" — currently covers both, and the moment a shared code 
 
 ### 5.3 `soul` — resolved by the owner, 2026-08-22
 
-**Settled: `soul` is the summoner mechanism's currency and nothing else.** It stays player-scoped and persistent (`rpg_soul_balances`, `rpg_soul_ledger`, `SoulEarnPolicy`, demon binding, daily tribute, expeditions — all shipped). `spirit` takes the per-actor essence slot, so the word is never overloaded.
+**Settled: `soul` is the summoner mechanism's currency and nothing else.** It stays player-scoped and persistent (`rpg_soul_balances`, `rpg_soul_ledger`, `SoulEarnPolicy`, creature binding, daily tribute, expeditions — all shipped). `spirit` takes the per-actor essence slot, so the word is never overloaded.
 
 The flow described below still works and is worth keeping as *lore*: an actor's spirit, extinguished, is what the summoner harvests as soul. It is a conversion between two named resources at two scopes, not one resource wearing two hats — which is the version that survives contact with code.
 
@@ -101,7 +101,7 @@ The flow described below still works and is worth keeping as *lore*: an actor's 
 
 ### The original problem
 
-It already means the **player's persistent currency** (`SoulEarnPolicy`, expeditions, demon binding, daily tribute — all shipped). The proposal adds **per-actor identity**. The action map already flagged the first collision; this makes three readings of one word.
+It already means the **player's persistent currency** (`SoulEarnPolicy`, expeditions, creature binding, daily tribute — all shipped). The proposal adds **per-actor identity**. The action map already flagged the first collision; this makes three readings of one word.
 
 **Amendment, and this one is a synthesis rather than a rename:** the player is a **summoner who harvests souls from the fallen**. So an actor's soul and the player's soul bank are *the same substance at two scopes*, connected by a flow: an actor dies, its soul enters the player's bank. That is lore-coherent, it is what the game already does mechanically, and it means `soul` is one resource with a `scope` field rather than two resources sharing a name.
 
@@ -189,9 +189,9 @@ Two mitigations make this affordable, and both are already the plan:
 |---|---|---|---|
 | `hp` | actor | `pvz.*` write channel in PvZ mode (Unity is SSOT); overlay-owned in web mode | `StatChannels`, FA10, `EntityStatWriter` |
 | **shields** — 7 element-typed pools per actor | actor | `rpg.*` | `ShieldRuntime`; 4 derived families (`capacity` / `toughness` / `pen` / `regen`) × omni + 6 elements |
-| `soul` | **player**, persistent | `rpg.*` | `rpg_soul_balances` + `rpg_soul_ledger`, `AwardSouls` / `TrySpendSouls` with an overflow ceiling; `SoulEarnPolicy`, demon binding, daily tribute, expeditions |
+| `soul` | **player**, persistent | `rpg.*` | `rpg_soul_balances` + `rpg_soul_ledger`, `AwardSouls` / `TrySpendSouls` with an overflow ceiling; `SoulEarnPolicy`, creature binding, daily tribute, expeditions |
 | `xp` | actor, persistent | `rpg.*` | `rpg_xp_ledger` + `rpg_actor_progression` |
-| demon materials | player, persistent | `rpg.*` | `rpg_demon_materials` — fusion inputs |
+| creature materials | player, persistent | `rpg.*` | `rpg_creature_materials` — fusion inputs |
 | lawn `sun` | match | **`pvz.*` — not ours** | `SimModels.Sun`; the sunflower→bank→plant economy, untouched by this hub |
 
 **Shields are already a resource and nobody has been calling them one.** They have capacity, regen, depletion, and per-element pools. The registry either adopts them or explicitly excludes them, and silently doing neither is how a second resource system gets born.
@@ -300,9 +300,9 @@ Rest as a place rather than a duration is what makes attrition legible: the play
 
 Four consequences the spec must carry:
 
-1. **Pool state needs somewhere to live between encounters.** Today nothing stores a demon's stamina between fights. This is a per-member row on the run, not a per-battle value.
+1. **Pool state needs somewhere to live between encounters.** Today nothing stores a creature's stamina between fights. This is a per-member row on the run, not a per-battle value.
 2. **`ExpeditionResolver` must thread pool state through its encounters.** It resolves several battles back to back with no player; if pools do not carry, expeditions silently ignore the entire resource system.
-3. **`hp` follows the same rule, and this is a real gameplay change.** A demon that ends a battle at 10 HP starts the next one at 10. That is the intended attrition, but it changes expedition outcomes and therefore every balance number derived from them.
+3. **`hp` follows the same rule, and this is a real gameplay change.** A creature that ends a battle at 10 HP starts the next one at 10. That is the intended attrition, but it changes expedition outcomes and therefore every balance number derived from them.
 4. **A run must always be able to end.** If a world-map player can wander indefinitely without reaching a friendly sector, exhausted pools become a soft-lock. Either rest sites are guaranteed reachable, or there is a fallback — retreat, or a slow out-of-combat trickle that is not a rest.
 
 ## 10.6 What `now` means across a save, a load, and a battle boundary

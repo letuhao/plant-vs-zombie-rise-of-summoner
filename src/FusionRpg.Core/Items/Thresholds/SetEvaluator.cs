@@ -82,7 +82,7 @@ public static class SetEvaluator
     /// <summary>
     /// ssot-sets.md §4.4: a set tier binds to exactly the owner scope its member pieces are bound to,
     /// and <b>never to <c>match</c></b> — the wearer wears the set, the squad does not. Binding a tier
-    /// match-wide would silently turn one demon's gear into a team buff, and it would make I5 §3.5's
+    /// match-wide would silently turn one creature's gear into a team buff, and it would make I5 §3.5's
     /// piece budget unenforceable, because the denominator (one actor's slots) would stop being the
     /// thing being paid for.
     /// </summary>
@@ -90,7 +90,7 @@ public static class SetEvaluator
     {
         OwnerKind.UniqueActor => AtomRejection.Ok,
         OwnerKind.Match => AtomRejection.Fail(AtomRejectionReason.ScopeUnsupported,
-            "a set tier may not bind at match scope — one demon's gear must not become a team buff " +
+            "a set tier may not bind at match scope — one creature's gear must not become a team buff " +
             "(ssot-sets.md §4.4)"),
         OwnerKind.Player => AtomRejection.Fail(AtomRejectionReason.ScopeUnsupported,
             "a set tier may not bind at player: scope — StatApplyScope reports player: as match-wide, " +

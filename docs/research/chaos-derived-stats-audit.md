@@ -145,7 +145,7 @@ STR/VIT/DEX/INT/SPI. Two primary-stat systems coexist in that repo and were neve
 | `talent_foundation` | `learning_speed` |
 | `bloodline` | `racial_bonus` |
 
-Carries `RaceTinhBase` per race (human / dragon / **demon** bases already authored) and
+Carries `RaceTinhBase` per race (human / dragon / **creature** bases already authored) and
 `BreakthroughBonus` per realm. **If we ever adopt primary stats, pick one of these two sets — not both.**
 
 ---

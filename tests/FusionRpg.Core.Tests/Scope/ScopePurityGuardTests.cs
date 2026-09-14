@@ -113,6 +113,6 @@ public class ScopePurityGuardTests
 
     static void Cleanup(string dir)
     {
-        try { Directory.Delete(dir, true); } catch { /* temp */ }
+        Directory.Delete(dir, true);
     }
 }

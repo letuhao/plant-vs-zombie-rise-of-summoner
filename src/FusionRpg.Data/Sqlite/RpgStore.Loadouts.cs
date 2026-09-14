@@ -108,7 +108,7 @@ public sealed partial class RpgStore
     /// <summary>
     /// T22 (spec-loadout.md §3): the actor's real loadout if one was ever set, otherwise auto-equip
     /// from <paramref name="heldSkillCandidates"/> — "every actor with no loadout row auto-equips,"
-    /// so a Zomboss pattern or a generated demon never fights with three basics just because nobody
+    /// so a Zomboss pattern or a generated creature never fights with three basics just because nobody
     /// chose for it. Never persists the auto-equip result: it is recomputed from whatever is
     /// currently held every time this is called, so a later real unlock or discard is reflected
     /// immediately with no stale cached loadout to invalidate.

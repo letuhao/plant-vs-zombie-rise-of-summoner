@@ -25,7 +25,7 @@
       "id": "set.supernutshooter-001",
       "nameKey": "set.nutty-gatling",
       "name": "Nutty Gatling",
-      "themeKey": "demon.supernutshooter",
+      "themeKey": "creature.supernutshooter",
       "members": [
         {
           "role": "armament-primary",

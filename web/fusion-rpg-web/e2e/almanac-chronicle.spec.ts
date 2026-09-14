@@ -41,7 +41,7 @@ async function mockSanctum(page: Page, opts?: { runs?: unknown[] }) {
       loyaltyMax: 0
     })
   );
-  await page.route("**/api/demons/**", (route) => fulfillJson(route, { playerId: 1, items: [] }));
+  await page.route("**/api/creatures/**", (route) => fulfillJson(route, { playerId: 1, items: [] }));
   await page.route("**/api/types", (route) => fulfillJson(route, { items: [{ side: "plant", type: 0, typeName: "Peashooter", seenCount: 1, killedCount: 0 }] }));
   await page.route("**/api/recipes", (route) => fulfillJson(route, { items: [] }));
 }

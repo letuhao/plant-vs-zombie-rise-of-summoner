@@ -10,7 +10,7 @@
 
 Expeditions are the **idle RPG** loop — Monster Hunter–style dispatch that stays forever. Playable with the lawn game closed. Sibling of the Delve, not a prototype to replace.
 
-Pick demons who are not on a live task. Dispatch them. Wait. Collect.
+Pick creatures who are not on a live task. Dispatch them. Wait. Collect.
 
 Durations are built for real schedules:
 
@@ -39,7 +39,7 @@ Each tier resolves a **battle chain** interleaved with event ticks:
 
 - Quiet stretches
 - Found souls
-- Meeting a wild demon
+- Meeting a wild creature
 - Injuries
 
 Outcome is sealed at dispatch by a recorded seed and revealed at collection.
@@ -51,8 +51,8 @@ Outcome is sealed at dispatch by a recorded seed and revealed at collection.
 ## What you bring home
 
 - **Souls** and summoner XP (power loop)
-- **Specimen XP** for demons who fought
-- A chance a defeated wave demon **joins** the roster (summon loop — a non-gacha path)
+- **Specimen XP** for creatures who fought
+- A chance a defeated wave creature **joins** the roster (summon loop — a non-gacha path)
 - Fusion **materials** (essence) for later merges and for empire buildings that ask for them
 
 Materials feed **actors and empire** — never loam. Loam never banks.
@@ -71,6 +71,6 @@ Delves and sieges are separate stages — see [Delves and sieges](delves-and-sie
 
 ## In this build
 
-Dispatch → wait → collect is live. Wild joins, materials, recall, and the four duration tiers are part of the loop. The Expeditions layer opens from the Sanctum rail (`E`) once you have a **bound demon** to field. Quest- and event-starting ticks stay **Vision**.
+Dispatch → wait → collect is live. Wild joins, materials, recall, and the four duration tiers are part of the loop. The Expeditions layer opens from the Sanctum rail (`E`) once you have a **bound creature** to field. Quest- and event-starting ticks stay **Vision**.
 
 Next: [The rift](the-rift.md) · [Creatures](creatures.md) · [The loops](the-loops.md).

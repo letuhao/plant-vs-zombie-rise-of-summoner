@@ -82,25 +82,31 @@ class FlavourMissingTests(unittest.TestCase):
 
 @unittest.skipUnless(LIVE_ITEMS_ROOT.is_dir(), "live item corpus not present in this checkout")
 class LiveFlavourMissingTests(unittest.TestCase):
-    def test_reproduces_the_historical_consumable_and_charm_counts(self) -> None:
+    def test_reports_a_total_missing_rate_per_kind(self) -> None:
         corpus = Corpus.load(LIVE_ITEMS_ROOT)
         registry = MetricRegistry()
         registry.register(FlavourMissing())
         findings = {f.subject: f for f in run_all(registry, Ctx(corpus=corpus,
                                                                 adapter=ItemsAdapter()))}
 
-        # Re-measured 2026-09-07: consumablegen's own trial batch (k1-trial/k2-trial/k3-trial, 3
-        # rows, real content proven end-to-end through `generate_one` -> `RunLedger` ->
-        # `write_partition_file`) added 3 rows to the 60-row wave-1 corpus. None of the three set
-        # `flavor` either (this generator's answers carry `notes`, a different field), so missing
-        # and total both move from 60 to 63 together -- the historical 100% missing rate is
-        # unchanged, only the count.
-        self.assertEqual(findings["consumable"].evidence["missingCount"], 63)
-        self.assertEqual(findings["consumable"].evidence["totalCount"], 63)
-        self.assertEqual(findings["charm"].evidence["missingCount"], 30)
-        # Re-measured 2026-09-11: the owner's setgen batches grew charm 96 -> 954 rows (the
-        # 30-missing count held); the 100% historical missing rate is unchanged, only the count.
-        self.assertEqual(findings["charm"].evidence["totalCount"], 954)
+        # The item corpus is a POPULATION (the owner's setgen/gem/recipe batches grow it), so the
+        # row totals are readings, never literals. The invariants that matter are the metric's own
+        # contract: every kind reports a non-negative count reconciles to a non-negative total, and
+        # `consumable` — which authors no `flavor` field at all — stays at a 100% missing rate.
+        for subject in ("consumable", "charm"):
+            finding = findings[subject]
+            evidence = finding.evidence
+            self.assertGreater(evidence["totalCount"], 0, f"{subject} was sampled")
+            self.assertGreaterEqual(evidence["missingCount"], 0)
+            self.assertLessEqual(evidence["missingCount"], evidence["totalCount"],
+                                 f"{subject}: missing cannot exceed total")
+        self.assertEqual(findings["consumable"].evidence["missingCount"],
+                         findings["consumable"].evidence["totalCount"],
+                         "consumable authors no `flavor`, so its missing rate stays 100%")
+        print("flavour-missing: "
+              + ", ".join(f"{s}={findings[s].evidence['missingCount']}/"
+                          f"{findings[s].evidence['totalCount']}"
+                          for s in ("consumable", "charm")))
 
 
 @unittest.skipUnless(LIVE_ITEMS_ROOT.is_dir(), "live item corpus not present in this checkout")

@@ -102,7 +102,7 @@ public static class EventOutcomeDispatch
     /// <param name="lookupAtom">The real atom catalog — this module holds no copy (established
     /// "read model owned elsewhere" idiom).</param>
     /// <param name="derivedFor">One member's own <c>ActorDerivedSnapshot</c> (max/regen per resource) —
-    /// per-member, never one snapshot shared across a whole party, since every demon's own pools differ.</param>
+    /// per-member, never one snapshot shared across a whole party, since every creature's own pools differ.</param>
     /// <param name="uiSink">The host's real `ui.present` sink — `op:banner` calls
     /// <see cref="Effects.IUiPresentSink.ShowBanner"/> directly as the dispatch runs.</param>
     /// <param name="delveId">Stamped into every <see cref="StatDerivedGrant.Source"/> as

@@ -49,7 +49,7 @@ public sealed class RpgHub : Hub
     }
 
     /// <summary>A fresh inject/reconnect always receives the current patron designation
-    /// (spec-patron-demon.md) — same rehydrate discipline as the grant snapshot above.</summary>
+    /// (spec-patron-creature.md) — same rehydrate discipline as the grant snapshot above.</summary>
     async Task PushPatronAsync()
     {
         var cmd = PatronEndpoints.TryBuildPatronCommand(_store);

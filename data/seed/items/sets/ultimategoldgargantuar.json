@@ -25,7 +25,7 @@
       "id": "set.ultimategoldgargantuar-001",
       "nameKey": "set.edgar-s-golden-legion",
       "name": "Edgar's Golden Legion",
-      "themeKey": "demon.ultimategoldgargantuar",
+      "themeKey": "creature.ultimategoldgargantuar",
       "members": [
         {
           "role": "armament-primary",

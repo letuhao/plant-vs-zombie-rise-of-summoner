@@ -290,9 +290,9 @@ Pools **persist across a run and refill at rest.** They are not per-encounter.
 | | Why |
 |---|---|
 | **Shields** | Excluded by decision. Nothing pays a shield to act — they are a damage-layer absorption pool, not an action cost. `ShieldRuntime` keeps them, with its own 4 derived families × omni + 6 elements |
-| **`soul`** | **Player-scoped currency**, not an actor pool. `rpg_soul_balances` / `rpg_soul_ledger`, `SoulEarnPolicy`, demon binding, daily tribute, expeditions — all shipped. An actor's extinguished `spirit` is what the summoner harvests *as* soul: a conversion between two named resources at two scopes, not one resource wearing two hats |
+| **`soul`** | **Player-scoped currency**, not an actor pool. `rpg_soul_balances` / `rpg_soul_ledger`, `SoulEarnPolicy`, creature binding, daily tribute, expeditions — all shipped. An actor's extinguished `spirit` is what the summoner harvests *as* soul: a conversion between two named resources at two scopes, not one resource wearing two hats |
 | **`xp`** | Actor-scoped and persistent, but progression, not a spendable pool — `rpg_xp_ledger`, `rpg_actor_progression` |
-| **Demon materials** | Player-scoped fusion inputs — `rpg_demon_materials` |
+| **Creature materials** | Player-scoped fusion inputs — `rpg_creature_materials` |
 | **Lawn sun** | `pvz.*`, match-scoped. §4 |
 
 ---

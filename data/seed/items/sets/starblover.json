@@ -25,7 +25,7 @@
       "id": "set.starblover-001",
       "nameKey": "set.star-spinning-starfruit",
       "name": "Star-Spinning Starfruit",
-      "themeKey": "demon.starblover",
+      "themeKey": "creature.starblover",
       "members": [
         {
           "role": "armament-primary",

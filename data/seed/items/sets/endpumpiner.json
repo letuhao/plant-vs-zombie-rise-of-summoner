@@ -25,7 +25,7 @@
       "id": "set.endpumpiner-001",
       "nameKey": "set.end-void-crate",
       "name": "End Void Crate",
-      "themeKey": "demon.endpumpiner",
+      "themeKey": "creature.endpumpiner",
       "members": [
         {
           "role": "core-guard",

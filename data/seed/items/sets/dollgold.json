@@ -25,7 +25,7 @@
       "id": "set.dollgold-001",
       "nameKey": "set.golden-matryoshka",
       "name": "Golden Matryoshka",
-      "themeKey": "demon.dollgold",
+      "themeKey": "creature.dollgold",
       "members": [
         {
           "role": "armament-primary",

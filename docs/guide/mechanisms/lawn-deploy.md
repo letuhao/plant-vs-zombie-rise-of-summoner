@@ -1,4 +1,4 @@
-﻿# Bound demon deploy
+﻿# Bound creature deploy
 
 **Status:** Shipped  
 **Loop:** Lawn — first core · Summon and fusion — see [The loops](../the-loops.md)  
@@ -9,7 +9,7 @@
 
 ## In one sentence
 
-**Deploy** bound roster demons into a lawn run — usually as plant-side avatars, sometimes as designated hypno-zombie allies.
+**Deploy** bound roster creatures into a lawn run — usually as plant-side avatars, sometimes as designated hypno-zombie allies.
 
 ---
 
@@ -20,10 +20,10 @@ These words get guessed wrong. Read them once before the rest of the page.
 | Word | What it actually means here |
 |---|---|
 | **Deploy** | Send a bound specimen onto the live lawn board for this match — not an altar pull and not an expedition dispatch. |
-| **Plant-side avatar** | Most demons appear as empowered plant-side uniques carrying that specimen’s traits and element. |
+| **Plant-side avatar** | Most creatures appear as empowered plant-side uniques carrying that specimen’s traits and element. |
 | **Hypno-zombie ally** | Designated boss-class species can deploy as hypno-zombie allies instead of plant avatars. |
 | **Soft-lock** | A specimen already out on an expedition cannot lawn-deploy (and the reverse). No double-dipping. |
-| **Bound** | Pacts keep demons on your roster ready to field — see [pacts and loyalty](pacts-loyalty.md). |
+| **Bound** | Pacts keep creatures on your roster ready to field — see [pacts and loyalty](pacts-loyalty.md). |
 
 **Also true:**
 
@@ -34,7 +34,7 @@ These words get guessed wrong. Read them once before the rest of the page.
 
 ## What it is
 
-Your raised demons come back onto the board as deployable presence.
+Your raised creatures come back onto the board as deployable presence.
 
 Most arrive as plant-side avatars. A smaller set of boss-class designations can arrive as hypno-zombie allies.
 
@@ -51,13 +51,13 @@ Bind first, then field when free:
 
 | Piece | What it does |
 |---|---|
-| **Bind** | Keep demons on pacts so they are roster-ready. |
+| **Bind** | Keep creatures on pacts so they are roster-ready. |
 | **Check locks** | Expedition soft-locks block lawn deploy until the idle job is clear. |
 | **Deploy** | During a match, send an eligible specimen onto the lawn. |
 
 | Form | Who |
 |---|---|
-| Plant-side avatar | Most demons |
+| Plant-side avatar | Most creatures |
 | Hypno-zombie ally | Designated boss-class species |
 
 ---
@@ -66,7 +66,7 @@ Bind first, then field when free:
 
 ### During a match
 
-1. Bind demons on pacts in the control room.
+1. Bind creatures on pacts in the control room.
 2. Start a lawn match and open Lawn.
 3. Deploy specimens that are not locked on an expedition.
 
@@ -86,19 +86,19 @@ Bind first, then field when free:
 
 ## Common mix-ups
 
-**Why can’t I deploy this demon?**  
+**Why can’t I deploy this creature?**  
 Often soft-locked on an expedition — or not bound. Check both.
 
 **Is deploy the same as summoning at the altar?**  
 No. Altar creates/binds. Deploy fields someone you already have into a match.
 
-**Do all demons become plants?**  
+**Do all creatures become plants?**  
 Most do as plant-side avatars. Designated boss-class species can be hypno-zombie allies.
 
 **Can one specimen be on lawn and expedition at once?**  
 No. Soft-lock prevents double-dipping.
 
-**Do deployed demons ignore elements?**  
+**Do deployed creatures ignore elements?**  
 No. They carry the traits and element you gave them.
 
 ---

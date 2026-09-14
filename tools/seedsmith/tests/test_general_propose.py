@@ -61,8 +61,8 @@ from seedsmith.adapters.actions.general_propose.derive import (  # noqa: E402
     finalize_candidate,
 )
 from seedsmith.adapters.actions import generate_general_actions as gen_mod  # noqa: E402
-from seedsmith.adapters.demons.anchor.permute import order_for  # noqa: E402
-from seedsmith.adapters.demons.anchor.vote import SetVoteResult  # noqa: E402
+from seedsmith.adapters.creatures.anchor.permute import order_for  # noqa: E402
+from seedsmith.adapters.creatures.anchor.vote import SetVoteResult  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REAL_BRIEFS_PATH = REPO_ROOT / "data" / "seed" / "actions" / "_briefs" / "round-1.json"
@@ -180,7 +180,7 @@ class NoAnchorRaiseTests(unittest.TestCase):
 
     def test_real_anchor_content_raises(self):
         for key, value in (("family", "cherry"), ("element", "fire"), ("rarity", "cultivated"),
-                          ("themeKey", "demon.cherrybomb"), ("motifs", ["fire"]),
+                          ("themeKey", "creature.cherrybomb"), ("motifs", ["fire"]),
                           ("antiMotifs", ["water"])):
             with self.subTest(key=key):
                 anchor = {"family": None, "element": None, "rarity": None, "themeKey": None,
@@ -220,7 +220,7 @@ class BuildBriefContentTests(unittest.TestCase):
     def test_no_anchor_derived_token(self):
         context = build_context(make_brief(), sample_index=0)
         text = build_brief(context).lower()
-        for token in ("cherry", "fire", "cultivated", "demon.", "family:", "element:", "species:"):
+        for token in ("cherry", "fire", "cultivated", "creature.", "family:", "element:", "species:"):
             self.assertNotIn(token, text)
 
     def test_payoff_role_inlines_the_payoff_family_and_its_enablers(self):

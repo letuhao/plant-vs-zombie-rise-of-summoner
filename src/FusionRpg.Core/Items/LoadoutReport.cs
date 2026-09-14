@@ -24,7 +24,7 @@ public sealed record LoadoutEntryStatus(string Role, string RefKind, string RefI
 
 /// <summary>One entry that cannot be applied because a specific copy is already worn somewhere else.
 /// <c>HeldBy</c> names the exact cell rather than reporting a count — <i>"listing exactly which cells
-/// hold what"</i> is the spec's wording, and a bare count is what makes <i>"why is my other demon
+/// hold what"</i> is the spec's wording, and a bare count is what makes <i>"why is my other creature
 /// naked"</i> unanswerable.</summary>
 public sealed record LoadoutConflict(string Role, string RefKind, string RefId, LoadoutCell HeldBy);
 
@@ -51,7 +51,7 @@ public sealed record LoadoutPlan(
 ///
 /// <para><b>Pure and DB-free</b>, the same shape as <see cref="SalvageGuards"/> — the caller assembles
 /// the facts, so this stays unit-testable without a database and there is exactly one place the
-/// question "would this apply take something off another demon" is answered.</para>
+/// question "would this apply take something off another creature" is answered.</para>
 /// </summary>
 public static class LoadoutReport
 {

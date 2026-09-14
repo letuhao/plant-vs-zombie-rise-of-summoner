@@ -211,7 +211,7 @@ public static class DelveEndpoints
         StalenessFor: _ => throw new NotImplementedException("DomainStaleness needs validated_json parsed from a real dungeon_domain row -- none exists yet (D4.16)."),
         ComposeRungs: (_, _) => throw new NotImplementedException("RungOffer.For needs PowerTuning/DungeonTuning/DomainThetaInputs/ParentWorldTerms -- ParentWorldTerms has never been built from live state anywhere (D4.21's own finding)."),
         RungLabelFor: _ => throw new NotImplementedException("No rung display-name registry exists anywhere in this codebase (D4.19's own finding)."),
-        BossDisplayNameFor: _ => throw new NotImplementedException("No almanac keyed by a demon species id exists -- only PVZ's own (side, type_id) shape (D4.19's own finding)."),
+        BossDisplayNameFor: _ => throw new NotImplementedException("No almanac keyed by a creature species id exists -- only PVZ's own (side, type_id) shape (D4.19's own finding)."),
         // Real, 2026-09-07: LayoutTemplateCatalog now exists (data/seed/dungeon/layouts/*.json,
         // six entries) -- an unknown layoutId returns empty (RaidModesFor's own documented
         // behavior), never throws, matching every caller's own "not offered" handling.

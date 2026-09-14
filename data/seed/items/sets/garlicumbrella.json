@@ -25,7 +25,7 @@
       "id": "set.garlicumbrella-001",
       "nameKey": "set.umbrella-of-the-undead",
       "name": "Umbrella of the Undead",
-      "themeKey": "demon.garlicumbrella",
+      "themeKey": "creature.garlicumbrella",
       "members": [
         {
           "role": "armament-primary",

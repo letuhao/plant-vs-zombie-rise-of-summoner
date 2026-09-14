@@ -280,7 +280,7 @@ Ids are stable. `Deps` are task ids. Sizes: XS 1 file · S 1–2 · M 3–5 · L
     re-declared. The divisor floor is **structural, PS-8 exempt, and says so in a comment** —
     `EffectiveRate` divides by speed and throws on `<= 0`.
   - **Verify:** the five shipped tempos give five ordered distinct speeds, read from the **real**
-    `demon-shape.v1.json` · zero/negative interval yields the default and never throws ·
+    `creature-shape.v1.json` · zero/negative interval yields the default and never throws ·
     `audit-magic-numbers.py --summary` (`M1 = 0` — `referenceIntervalMs` read from tuning, not inlined)
   - **Files:** `Battle/SpeciesTempoProjection.cs`, tuning, test
   - **Evidence (2026-09-05):** `SpeciesTempoProjection.SpeedFor` written exactly to the formula, with
@@ -289,10 +289,10 @@ Ids are stable. `Deps` are task ids. Sizes: XS 1 file · S 1–2 · M 3–5 · L
     findings, all 7 categories clean** — but `audit-magic-numbers.py --summary` surfaced a pre-existing,
     unrelated `mutation` domain M1=1 finding (`Items/Mutation/RerollPolicy.cs:47`) belonging to neither
     this task nor any file this session touched — confirmed by file path, left untouched, not this
-    task's to fix. **No new M1 anywhere `battle`/`demons` appear in the summary** — `referenceIntervalMs`
+    task's to fix. **No new M1 anywhere `battle`/`creatures` appear in the summary** — `referenceIntervalMs`
     reads from `Tuning.SpeciesTempoReferenceIntervalMs`, never a literal.
     ⭐ **Probed against real compiled code and real production data**
-    (`tools/TempoProbe`, `data/tuning/demon-shape.v1.json`'s actual values, `derived-stats.v2.json`'s
+    (`tools/TempoProbe`, `data/tuning/creature-shape.v1.json`'s actual values, `derived-stats.v2.json`'s
     real `TurnDefaultSpeed = 100`): the five tempos project to **ponderous 50 · slow 62 · steady 100 ·
     quick 166 · flurry 300** — the exact numbers `spec-tempo-content.md §2.1` predicted, now measured
     rather than estimated. Floor, overflow (near-`long.MaxValue` interval), and both argument-validation
@@ -310,15 +310,15 @@ Ids are stable. `Deps` are task ids. Sizes: XS 1 file · S 1–2 · M 3–5 · L
   - **Evidence (2026-09-05):** ⛔ **A real wiring gap found, not assumed from the spec's own claim.**
     `spec-tempo-content.md §1.1` asserted the species half was "already authored... no battle path reads
     it" — true only of `ConcreteSpecies.AttackIntervalMs` (the Data-layer generation record). The
-    **battle-facing** roster, `DemonSpeciesDef` (Core, no DB access), never carried the field at all,
+    **battle-facing** roster, `CreatureSpeciesDef` (Core, no DB access), never carried the field at all,
     and `WaveCatalog.Enemies` never populated it on `BattleActorSetup` — so there was no path from
     species data to the composer regardless of this task. Traced to one line:
-    `RpgStore.BuildDemonSpeciesSnapshot()` reads `ConcreteSpecies` (which does carry
-    `AttackIntervalMs`) but never copied it into the `DemonSpeciesDef` it builds. **Fixed as a genuinely
+    `RpgStore.BuildCreatureSpeciesSnapshot()` reads `ConcreteSpecies` (which does carry
+    `AttackIntervalMs`) but never copied it into the `CreatureSpeciesDef` it builds. **Fixed as a genuinely
     small, additive projection** (matching TC1's own "no corpus change, no classifier run" promise —
-    the promise was right about the corpus, wrong about the wiring): `DemonSpeciesDef.AttackIntervalMs`
+    the promise was right about the corpus, wrong about the wiring): `CreatureSpeciesDef.AttackIntervalMs`
     (new field, default `0`, every existing literal unaffected) →
-    `BuildDemonSpeciesSnapshot` copies it → `WaveCatalog.Enemies` carries it onto a new
+    `BuildCreatureSpeciesSnapshot` copies it → `WaveCatalog.Enemies` carries it onto a new
     `BattleActorSetup.AttackIntervalMs` field → `BattleStatComposer.Compose` projects it into
     `turn.speed` via `SpeciesTempoProjection`. ⚠️ **This is a MORE SPECIFIC instance of D5's already-
     accepted golden-movement cost**: `BattleActorSetup` is what `ExpeditionResolverTests.Tier_goldens_
@@ -596,7 +596,7 @@ Ids are stable. `Deps` are task ids. Sizes: XS 1 file · S 1–2 · M 3–5 · L
     correctly, honestly refuses every counter attempt today — traced with a temporary diagnostic print,
     confirmed `poiseBefore=0` on every single reaction across an entire battle, then removed the print.
     **The wiring is not broken; the derived-stat input it depends on does not exist yet.** Deciding how
-    much poise a demon should have (by level? a flat amount? a trait?) is a real balance/design
+    much poise a creature should have (by level? a flat amount? a trait?) is a real balance/design
     question, correctly out of `RL2`'s own "intent, cost, and payoff" scope — not decided or guessed
     here.
   - **Verify, all executed:** `tools/TimelineDispatchProbe/` extended to 17/17 PASS, including:
@@ -1353,7 +1353,7 @@ change has now landed without its tier goldens being re-blessed.
     waved through as "external."** This is "blocked on conditions outside this program's authority to
     fix," the same honest, evidenced distinction this checkpoint's own sibling lines (B, D) already
     draw — not "still blocked" and not "assumed external." `Guard.Tests` (204/204) and `Data.Tests`
-    (800/803 — the 3 failures are `DemonSpeciesImportCliTests`, a DAL/CLI-import concern, not
+    (800/803 — the 3 failures are `CreatureSpeciesImportCliTests`, a DAL/CLI-import concern, not
     battle-tempo's) were also run this session, for the first time, with the same result: no
     `battle-tempo`-owned failure in either suite. Also hit, and waited out rather than touched, several
     more transient compile errors from other streams mid-investigation (`BoardSnapshotAdapter.cs`/
@@ -1419,14 +1419,14 @@ change has now landed without its tier goldens being re-blessed.
     that first. Resolved and built: `Battle/Timeline/TurnOrderRecord.cs` —
     `FromTrace(BattleTrace, BattleSetup) -> IReadOnlyList<TurnOrderEntry>` — filters to `Ready ->
     Committed` transitions only (§2.1's own finding: that IS the turn order), resolves each `actorKey`
-    against `setup.Squad`/`Wave` to `DemonSpeciesCatalog.Get(...).Name`, and falls back to the raw
+    against `setup.Squad`/`Wave` to `CreatureSpeciesCatalog.Get(...).Name`, and falls back to the raw
     species id (never the actorKey) for a synthetic/golden fixture with no real catalog entry.
     7 tests written (`tests/.../Battle/Timeline/TurnOrderRecordTests.cs`): only `Ready->Committed`
     counts; order is preserved across rounds; a real species resolves to its real name and provably
     not the actorKey; an unknown species falls back to its id, not to a crash; an empty trace projects
     nothing; null trace/setup throws.
     ⭐ **Probed against real compiled code and the real compiled species roster**
-    (`tools/TurnOrderProbe`, `DemonSpeciesCatalog.ConfigureFromCompiledDefault()`): 6/6 pass, including
+    (`tools/TurnOrderProbe`, `CreatureSpeciesCatalog.ConfigureFromCompiledDefault()`): 6/6 pass, including
     resolving a REAL species id to its real (non-English) display name and confirming it is not the
     actorKey. ⭐ **Falsifier executed:** the `Ready->Committed` filter was removed (every transition
     accepted), rebuilt, re-probed — exactly the filtering-dependent assertion reddened, the other 5
@@ -1497,7 +1497,7 @@ change has now landed without its tier goldens being re-blessed.
     pass, 9/9, unaffected by the DTO extension.
     `audit-overflow.py --paths src/FusionRpg.Server`: 0 findings. `audit-magic-numbers.py --summary`:
     0 for every file this session touched — a `fusion`-domain M2/M4 finding appeared in
-    `Demons/Fusion/StarPolicy.cs`, a file never touched this session or referenced by anything in
+    `Creatures/Fusion/StarPolicy.cs`, a file never touched this session or referenced by anything in
     `battle-tempo`, confirming a concurrent, unrelated stream (the same transient-collision pattern
     `CombinationEvaluator.cs` produced earlier this session) — not investigated further, not this
     program's to fix.
@@ -1558,7 +1558,7 @@ change has now landed without its tier goldens being re-blessed.
   its own error message names to a specific other, uncommitted, concurrent stream — not asserted from
   the error text alone (see Checkpoint E for the per-failure evidence, including the one case where an
   earlier pass here mis-attributed a 4th, genuinely in-scope failure as "external" before re-verifying
-  and fixing it). `Guard.Tests`: 204/204. `Data.Tests`: 800/803 (3 failures, `DemonSpeciesImport
+  and fixing it). `Guard.Tests`: 204/204. `Data.Tests`: 800/803 (3 failures, `CreatureSpeciesImport
   CliTests`, a DAL/CLI-import concern unrelated to battle). `web` (`npm run test`, re-run this session
   to confirm rather than assumed): **1291/1292** — the one failure, `disabledReasonGuard.test.ts`'s
   repo-wide accessible-disabled-control scan, flags `Commanders`-layer components

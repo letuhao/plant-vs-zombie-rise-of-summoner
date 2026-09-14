@@ -1,5 +1,5 @@
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Expeditions;
@@ -10,7 +10,7 @@ public static class ExpeditionTickKinds
     public const string BossBattle = "boss-battle";
     public const string Quiet = "quiet";
     public const string FoundSouls = "found-souls";
-    public const string WildDemonMet = "wild-demon-met";
+    public const string WildCreatureMet = "wild-creature-met";
     public const string Injury = "injury";
 }
 
@@ -46,7 +46,7 @@ public sealed record ExpeditionResolution(
 /// </summary>
 public static class ExpeditionResolver
 {
-    // Event roll CEILINGS (‰, cumulative): quiet <400, found-souls <750, wild-demon-met <900,
+    // Event roll CEILINGS (‰, cumulative): quiet <400, found-souls <750, wild-creature-met <900,
     // injury ≥900 — i.e. band widths 400/350/150/100. Edit widths by moving every later ceiling.
     // Loaded (tunables-ssot.md T1) — see ExpeditionTuningHub. −25% Atk per injury, on the omni
     // power channel, is InjuryPowerDivisor's shape (divide by 4).
@@ -130,14 +130,14 @@ public static class ExpeditionResolver
                 }
                 else
                 {
-                    // The demon slips away but sheds a trace of its element.
+                    // The creature slips away but sheds a trace of its element.
                     var essence = "essence." + species.ElementPrimary.ToElementId();
                     materials.TryGetValue(essence, out var have);
                     materials[essence] = have + 1;
                 }
 
                 ticks.Add(new ExpeditionTickOutcome(
-                    t, ExpeditionTickKinds.WildDemonMet, -1, 0, species.SpeciesId, joins,
+                    t, ExpeditionTickKinds.WildCreatureMet, -1, 0, species.SpeciesId, joins,
                     joins ? variant : null, null));
             }
             else
@@ -166,7 +166,7 @@ public static class ExpeditionResolver
 
     const string BossWaveId = "rift-tyrant";
     // Renamed to the ten-rung ladder's own ids (seed-to-concrete T4.1) — these are REWARD
-    // ISSUANCE (a shard actually minted into a player's inventory), unlike DemonMaterialCatalog's
+    // ISSUANCE (a shard actually minted into a player's inventory), unlike CreatureMaterialCatalog's
     // LegacyIds, which exist only to keep old references resolvable. New drops always use the
     // current ladder's ids, never a legacy one.
     const string ShardCommon = "shard.chaff";
@@ -224,37 +224,59 @@ public static class ExpeditionResolver
     /// band. Renamed to the ten-rung ladder (seed-to-concrete T4.1) via the SAME band each old
     /// value migrated to (ssot-rarity.md §4.3) — behaviour-preserving: today's 84-species catalog
     /// only populates these four rungs.</summary>
-    static DemonSpeciesDef RollWildSpecies(SeededRng rng)
+    static CreatureSpeciesDef RollWildSpecies(SeededRng rng)
     {
         var rarityRoll = rng.NextPerMille();
-        var rarity = rarityRoll < 840 ? DemonRarity.Chaff
-            : rarityRoll < 990 ? DemonRarity.Cultivated
-            : DemonRarity.Heirloom;
+        var rarity = rarityRoll < 840 ? CreatureRarity.Chaff
+            : rarityRoll < 990 ? CreatureRarity.Cultivated
+            : CreatureRarity.Heirloom;
         var band = WildBand(rarity);
-        if (band.Count == 0) band = WildBand(DemonRarity.Chaff);
+        if (band.Count == 0) band = WildBand(CreatureRarity.Chaff);
         return band[rng.NextInt(band.Count)];
     }
 
-    static List<DemonSpeciesDef> WildBand(DemonRarity rarity) =>
-        DemonSpeciesCatalog.All
-            .Where(s => s.Acquisition != DemonAcquisition.CaptureOnly
+    static List<CreatureSpeciesDef> WildBand(CreatureRarity rarity) =>
+        CreatureSpeciesCatalog.All
+            .Where(s => s.Acquisition != CreatureAcquisition.CaptureOnly
                         && s.BaseRarity == rarity
-                        && s.BaseRarity != DemonRarity.Sunwoven)
+                        && s.BaseRarity != CreatureRarity.Sunwoven)
             .OrderBy(s => s.SpeciesId, StringComparer.Ordinal)
             .ToList();
 
+    /// <summary>
+    /// channelmods-hub T2 — the Hub twin of <see cref="ApplyInjuries"/>: one victim's injury count
+    /// as attributed <c>Flat</c> derived contributions on <c>combat.power.omni</c> (source
+    /// <c>grant:injury:{actorKey}</c> through <see cref="ContributionSourceIds.Grant"/> — GG-49 has
+    /// no injury family, and the plan's Ask-first default reuses families already in use).
+    /// <see cref="Derived.Subsystems.ExpeditionInjurySubsystem"/> contributes these on the Hub path;
+    /// battles keep consuming <see cref="ApplyInjuries"/> until battle-hub-fuse.
+    /// Re-home only: the per-injury magnitude below is byte-for-byte <see cref="ApplyInjuries"/>'s.
+    /// </summary>
+    public static IReadOnlyList<DerivedModifier> InjuryDerivedModifiers(string actorKey, int count, long atk)
+    {
+        if (count <= 0) return Array.Empty<DerivedModifier>();
+        var source = ContributionSourceIds.Grant($"injury:{actorKey}");
+        return Enumerable.Range(0, count).Select(_ => new DerivedModifier(
+            DerivedStatChannels.CombatPowerOmni, DerivedModifierOp.Flat,
+            -Math.Max(1, atk / InjuryPowerDivisor), SourceId: source)).ToList();
+    }
+
+    // battle-hub-fuse T5: injuries reach battle as Hub inputs (resolved through the
+    // ExpeditionInjurySubsystem twin), not pre-folded ChannelMods. The map is snapshotted — the
+    // plan keeps accumulating later ticks into `injuries`, and this battle must keep its own view.
+    // (The old BattleChannelMod append is retired with the composer in T6.)
     static IReadOnlyList<BattleActorSetup> ApplyInjuries(
         IReadOnlyList<BattleActorSetup> squad, Dictionary<string, int> injuries)
     {
         if (injuries.Count == 0) return squad;
+        var snapshot = new Dictionary<string, int>(injuries, StringComparer.Ordinal);
         return squad.Select(s =>
         {
-            if (!injuries.TryGetValue(s.Key, out var count) || count == 0) return s;
-            var mods = s.ChannelMods.ToList();
-            for (var i = 0; i < count; i++)
-                mods.Add(new BattleChannelMod(
-                    DerivedStatChannels.CombatPowerOmni, -Math.Max(1, s.Atk / InjuryPowerDivisor)));
-            return s with { ChannelMods = mods };
+            if (!snapshot.TryGetValue(s.Key, out var count) || count == 0) return s;
+            return s with
+            {
+                HubInputs = (s.HubInputs ?? new BattleHubInputs()) with { Injuries = snapshot }
+            };
         }).ToList();
     }
 }

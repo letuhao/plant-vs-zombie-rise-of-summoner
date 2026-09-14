@@ -11,8 +11,8 @@ itself**, so the gate the module is named for is reachable only from a hand-run 
 
 ## 1. The defect
 
-Verified 2026-09-03. `.github/workflows/ci.yml`'s only tool invocations are `DemonSpeciesGen --check`,
-`DemonCorpusDump --verify` and `ItemSeedValidator`. It runs **`FusionRpg.AtomImporter.Tests`**
+Verified 2026-09-03. `.github/workflows/ci.yml`'s only tool invocations are `CreatureSpeciesGen --check`,
+`CreatureCorpusDump --verify` and `ItemSeedValidator`. It runs **`FusionRpg.AtomImporter.Tests`**
 (`ci.yml:97`) — the tool's *tests* — and never the tool.
 
 **So `ContentValidation.Lint` and `.Drift` run over the real shipped corpus in nobody's pipeline.**

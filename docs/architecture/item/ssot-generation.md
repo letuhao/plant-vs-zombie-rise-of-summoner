@@ -8,7 +8,7 @@ Read this session, in the order the contract names them: [item-ideal.md](../item
 §2/§4/§5/§6/§10, [spec-container-schema.md](../effect-atom/spec-container-schema.md),
 [spec-instance-and-binding.md](../effect-atom/spec-instance-and-binding.md),
 [spec-expeditions.md](../standalone/spec-expeditions.md),
-[spec-demon-summoning.md](../demons/spec-demon-summoning.md),
+[spec-creature-summoning.md](../creatures/spec-creature-summoning.md),
 [spec-standalone-charter.md](../standalone/spec-standalone-charter.md). Code claims below cite
 `file:line` and were read, not recalled.
 
@@ -105,7 +105,7 @@ only safe position.
 **Why the whole thing is one transaction** (11): the summoning spec fixed exactly this bug — *"the old
 two-transaction flow had a third post-crash state where Souls were spent but nothing was recorded, and
 replay would re-roll a fresh seed"*
-([spec-demon-summoning.md](../demons/spec-demon-summoning.md) §Pull flow). Loot has the same shape
+([spec-creature-summoning.md](../creatures/spec-creature-summoning.md) §Pull flow). Loot has the same shape
 with one extra hazard: nothing is *spent*, so a partial commit mints free items rather than losing
 paid ones.
 
@@ -234,7 +234,7 @@ named in §10.2.
 **Reuse:** per-player counters, advanced inside the mint transaction, reset only on a hit of that
 tier, and **visible in the UI**. Summoning's argument transfers verbatim — *"a no-money game has no
 reason for opacity; visible counters turn dead pulls into progress"*
-([spec-demon-summoning.md](../demons/spec-demon-summoning.md) §Banner catalog). Storage mirrors
+([spec-creature-summoning.md](../creatures/spec-creature-summoning.md) §Banner catalog). Storage mirrors
 `rpg_summon_pity` (`src/FusionRpg.Data/Sqlite/RpgStore.cs:473-478`).
 
 **Diverge:** summoning counts **pulls**, because a pull is a discrete, player-initiated, paid action.
@@ -631,7 +631,7 @@ a second table beside this one, and it is I13's. Deliberately not claimed.
 | `rarity(rarity_id, ordinal, pool_rolls, min_tier, max_tier)` | `RpgStore.Containers.cs:52` | **I become its first production consumer** (§3.2) |
 | `effect_instance.roll_seed`, `.catalog_revision`, `.origin` | `RpgStore.AtomInstances.cs:56` | origin `Drop`; the two revisions make replay meaningful |
 | `Instantiator.TryInstantiate` | `Instantiator.cs:68` | the one mint path for equipment, inserts, and charms alike |
-| `rpg_demon_materials(player_id, material_id, qty)` | `RpgStore.cs:515` | material entries add atomically; ids validated by `DemonMaterialCatalog.IsKnown` (`RpgStore.Expeditions.cs:209`) |
+| `rpg_creature_materials(player_id, material_id, qty)` | `RpgStore.cs:515` | material entries add atomically; ids validated by `CreatureMaterialCatalog.IsKnown` (`RpgStore.Expeditions.cs:209`) |
 | `AwardSouls(playerId, delta, reason, dedupeKey)` | `RpgStore.Souls.cs:160` | currency entries, `reason = 'loot'` |
 | `SeededRng.DeriveStream` | `SeededRng.cs:26` | every stream in §4.3 |
 | `AtomRandom.NextInclusive` / `NextPerMille` | `AtomRandom.cs:52,63` | every draw; integer-only, unbiased |
@@ -643,7 +643,7 @@ The substantive half of §3.6. Selection is shared; only resolution differs.
 | `entry_kind` | `ref_id` resolves to | Quantity | Sink | Stacks | Idempotency | Unknown ref |
 |---|---|---|---|---|---|---|
 | `equipment` | a **base-type set** id (I3) | always 1 | `effect_instance` + `item_generation` | never — rolled values make it unique by construction (item-ideal §7) | the instance is unique | `UnknownBaseTypeSet` |
-| `material` | a material id (`essence.*`, `shard.*` today) | `min..max` on `item.qty.{i}` | `rpg_demon_materials`, atomic `qty +=` | yes | the drop-log row; the add is inside the same transaction | existing catalog refusal |
+| `material` | a material id (`essence.*`, `shard.*` today) | `min..max` on `item.qty.{i}` | `rpg_creature_materials`, atomic `qty +=` | yes | the drop-log row; the add is inside the same transaction | existing catalog refusal |
 | `currency` | a currency id (`souls` is the only one today) | `min..max` | `rpg_soul_ledger` via `AwardSouls(..., 'loot', correlationId)` | ledger, not inventory | the ledger's own `UNIQUE(player_id, reason, dedupe_key)` | `UnknownCurrency` |
 | `insert` | a `gem.*` container id (I4) | 1 | an `effect_instance` of `container_kind='gem'`, unsocketed | stacks until socketed — I4/I13's call | the instance | `UnknownContainer` (exists) |
 | `charm` | a `charm.*` container id (I10) | 1 | an `effect_instance` of `container_kind='charm'` | never — charms roll | the instance | `UnknownContainer` (exists) |
@@ -689,7 +689,7 @@ codes, and adding one is a reviewed change.
 | `loot_source.table_id` names no table | import | `UnknownDropTable` **(new)** |
 | `entry_kind='table'` and `ref_id` names no table | import | `UnknownDropTable` **(new)** |
 | `entry_kind='equipment'` and `ref_id` names no base-type set | import | `UnknownBaseTypeSet` **(new)** |
-| `entry_kind='material'` and the id fails `DemonMaterialCatalog.IsKnown` | import | existing catalog refusal (`RpgStore.Expeditions.cs:209`) |
+| `entry_kind='material'` and the id fails `CreatureMaterialCatalog.IsKnown` | import | existing catalog refusal (`RpgStore.Expeditions.cs:209`) |
 | `entry_kind='currency'` and `ref_id` names no currency | import | `UnknownCurrency` **(new)** |
 | `entry_kind='insert'` / `'charm'` and `ref_id` names no container | import | `UnknownContainer` (exists) |
 | nested `table` chain deeper than 3 | import | `DropTableDepthExceeded` **(new)** |
@@ -866,7 +866,7 @@ button, which I13 owns. **The tripwire, stated so it is falsifiable:** if measur
 exceeds **40 equipment items per player per day**, a filter is required before the next content wave
 ships. That is a number to instrument, not a hope — and `item_drop_log` is where it is measured.
 
-**The roster problem, honestly.** OD2 puts ~15 slots on a frame. Twenty demons × 15 slots is 300
+**The roster problem, honestly.** OD2 puts ~15 slots on a frame. Twenty creatures × 15 slots is 300
 equipped items before anything sits in a bag, and at 6–9 keepers per day that is a month and a half to
 gear one roster — which is item-ideal §8's open economic question arriving with a bill attached.
 **These numbers are calibrated for a deployable squad of five gearing at a time (75 slots ≈ 10 days).**
@@ -926,9 +926,9 @@ before anything here is built.
 6. **I11 — confirmation that a droppable item may be unequippable.** The pipeline deliberately does
    not consult the equip gate (§4.5). If I11 believes drops must always be equippable, that is a real
    disagreement and it changes smart loot.
-7. **I9 — the generalised material id space.** `DemonMaterialCatalog` is demon-scoped
-   (`essence.{element}`, `shard.{rarity}` — `src/FusionRpg.Core/Demons/DemonMaterialCatalog.cs:15-20`)
-   and `rpg_demon_materials` is named for demons. My `material` entries point at ids and reject unknown
+7. **I9 — the generalised material id space.** `CreatureMaterialCatalog` is creature-scoped
+   (`essence.{element}`, `shard.{rarity}` — `src/FusionRpg.Core/Creatures/CreatureMaterialCatalog.cs:15-20`)
+   and `rpg_creature_materials` is named for creatures. My `material` entries point at ids and reject unknown
    ones through that catalog today; tell me the new id space and whether the table is renamed.
 8. **I6 — where the mutation chain attaches.** SC5 requires an item's state to be derivable from its
    origin seed plus an ordered list of recorded operations. My `item_drop_log` + `item_generation` are
@@ -994,7 +994,7 @@ before anything here is built.
 [x] I verified claims against CODE, not comments — ContainerValidator's tier-window rejection,
     Instantiator.Draw's group rule and stream names, AtomStreams' three constants,
     SeededRng.DeriveStream, the rarity table's absent production consumer, the correlation-id
-    UNIQUE keys, DemonMaterialCatalog, WaveCatalog's levels, and AwardSouls were all opened.
+    UNIQUE keys, CreatureMaterialCatalog, WaveCatalog's levels, and AwardSouls were all opened.
 [x] I read the surrounding section of every rule I quoted.
 [ ] I tested (not assumed) any constraint I am reporting. **Gap: no suite was run.** The one
     claim that needs executing is §3.2's "adding an optional DrawEnvelope moves no golden" —

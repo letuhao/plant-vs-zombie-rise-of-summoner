@@ -25,7 +25,7 @@
       "id": "set.snowzombie-001",
       "nameKey": "set.the-glacial-deli",
       "name": "The Glacial Deli",
-      "themeKey": "demon.snowzombie",
+      "themeKey": "creature.snowzombie",
       "members": [
         {
           "role": "armament-primary",

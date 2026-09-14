@@ -67,6 +67,7 @@ public sealed partial class RpgStore
 
     public StoragePurgeResultDto DeleteArchives(IReadOnlyList<string> uris)
     {
+        RequireFileArchive();
         var result = new StoragePurgeResultDto();
         if (uris.Count == 0)
             return result;
@@ -141,6 +142,7 @@ public sealed partial class RpgStore
 
     public StoragePurgeResultDto PurgeClosedRunCapture(IReadOnlyList<long> runIds)
     {
+        RequireFileArchive();
         var result = new StoragePurgeResultDto();
         if (runIds.Count == 0)
             return result;
@@ -180,6 +182,7 @@ public sealed partial class RpgStore
 
     public StoragePurgeResultDto DeleteClosedRuns(IReadOnlyList<long> runIds)
     {
+        RequireFileArchive();
         var result = new StoragePurgeResultDto();
         if (runIds.Count == 0)
             return result;

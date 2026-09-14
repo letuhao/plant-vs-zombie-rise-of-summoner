@@ -1,7 +1,7 @@
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Battle.Ai;
 using FusionRpg.Core.Delve.Encounter;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Dungeon.Tuning;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
@@ -39,26 +39,34 @@ public class BossBuildTests
     static readonly AptitudeTuning AptitudeTuning =
         AptitudeTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "aptitudes.v2.json")));
     static readonly PowerTuning PowerTuning = PowerTuningHub.Tuning; // PowerTuningHub IS configured whole-assembly (ContractTuningTestBootstrap's own [ModuleInitializer])
-    static readonly DemonThreatTuning ThreatTuning = RealAnchorCorpusFixture.ThreatTuning;
+    static readonly CreatureThreatTuning ThreatTuning = RealAnchorCorpusFixture.ThreatTuning;
     static readonly EncounterTuning Tuning = EncounterTuningHub.Tuning;
     static readonly RaidModeTuning Solo = DungeonTuningHub.Tuning.RaidModes["solo"];
     static readonly RaidModeTuning Quad = DungeonTuningHub.Tuning.RaidModes["quad"];
     static readonly DifficultyRungTuning Hard = DungeonTuningHub.Tuning.Rungs["hard"];
 
-    // ---- ResolveKit ----
+    // ---- ResolveKitAllocation + Resolve (battle-hub-fuse T6: the BattleChannelMod ResolveKit
+    // producer is deleted; the kit reaches battle as this allocation through the Hub twin) ----
+
+    static IReadOnlyList<DerivedModifier> ResolveKitMods(string patternId, int thetaBoss) =>
+        AptitudeResolver.Resolve(
+            BossBuild.ResolveKitAllocation(patternId, thetaBoss, AptitudeTuning),
+            AptitudeTuning,
+            new PowerLadder(PowerTuning),
+            thetaBoss,
+            DerivedStatRegistry.CreateDefault());
 
     [Fact]
     public void ResolveKit_returns_a_nonempty_ChannelMods_list_for_a_real_pattern()
     {
-        var mods = BossBuild.ResolveKit("force-pure", thetaBoss: 127, AptitudeTuning, PowerTuning);
-        Assert.NotEmpty(mods);
+        Assert.NotEmpty(ResolveKitMods("force-pure", thetaBoss: 127));
     }
 
     [Fact]
     public void ResolveKit_is_deterministic_same_inputs_same_ChannelMods()
     {
-        var a = BossBuild.ResolveKit("bastion-pure", 100, AptitudeTuning, PowerTuning);
-        var b = BossBuild.ResolveKit("bastion-pure", 100, AptitudeTuning, PowerTuning);
+        var a = ResolveKitMods("bastion-pure", 100);
+        var b = ResolveKitMods("bastion-pure", 100);
         Assert.Equal(a, b);
     }
 
@@ -67,36 +75,30 @@ public class BossBuildTests
     {
         // Not asserting exact magnitudes (that's AptitudeResolver's own test surface) -- just that
         // BossBuild actually threads theta through rather than ignoring it.
-        var low = BossBuild.ResolveKit("finesse-pure", 50, AptitudeTuning, PowerTuning);
-        var high = BossBuild.ResolveKit("finesse-pure", 500, AptitudeTuning, PowerTuning);
+        var low = ResolveKitMods("finesse-pure", 50);
+        var high = ResolveKitMods("finesse-pure", 500);
         Assert.NotEqual(low, high);
     }
 
     [Fact]
     public void ResolveKit_rejects_an_unknown_pattern_id()
     {
-        Assert.Throws<ArgumentException>(() => BossBuild.ResolveKit("not-a-real-pattern", 100, AptitudeTuning, PowerTuning));
+        Assert.Throws<ArgumentException>(() => BossBuild.ResolveKitAllocation("not-a-real-pattern", 100, AptitudeTuning));
     }
 
-    [Fact]
-    public void ResolveKit_null_arguments_throw()
-    {
-        Assert.Throws<ArgumentException>(() => BossBuild.ResolveKit("", 100, AptitudeTuning, PowerTuning));
-        Assert.Throws<ArgumentNullException>(() => BossBuild.ResolveKit("force-pure", 100, null!, PowerTuning));
-        Assert.Throws<ArgumentNullException>(() => BossBuild.ResolveKit("force-pure", 100, AptitudeTuning, null!));
-    }
+    // battle-hub-fuse T6 deleted BossBuild.ResolveKit itself (proven zero production callers) along
+    // with its own null-argument guards -- ResolveKitAllocation's guards are covered above
+    // (ResolveKit_rejects_an_unknown_pattern_id already calls it, not the deleted method).
 
     // ---- ApplyKit ----
 
     [Fact]
-    public void ApplyKit_sets_ChannelMods_and_a_single_equipped_action_touching_nothing_else()
+    public void ApplyKit_sets_a_single_equipped_action_touching_nothing_else()
     {
         var boss = new BattleActorSetup { Key = "wave:0", Side = "wave", SpeciesId = "x", Level = 127, MaxHp = 5000 };
-        var mods = BossBuild.ResolveKit("force-pure", 127, AptitudeTuning, PowerTuning);
 
-        var kitted = BossBuild.ApplyKit(boss, mods, "act.boss-signature");
+        var kitted = BossBuild.ApplyKit(boss, "act.boss-signature");
 
-        Assert.Equal(mods, kitted.ChannelMods);
         Assert.Equal(new[] { "act.boss-signature" }, kitted.EquippedActionIds);
         // "touching nothing else" -- checked field by field, not via record equality: BattleActorSetup
         // carries array/list-typed properties, and record-generated equality falls back to REFERENCE
@@ -112,10 +114,8 @@ public class BossBuildTests
     public void ApplyKit_rejects_empty_arguments()
     {
         var boss = new BattleActorSetup { Key = "wave:0" };
-        var mods = BossBuild.ResolveKit("force-pure", 100, AptitudeTuning, PowerTuning);
-        Assert.Throws<ArgumentNullException>(() => BossBuild.ApplyKit(null!, mods, "a"));
-        Assert.Throws<ArgumentNullException>(() => BossBuild.ApplyKit(boss, null!, "a"));
-        Assert.Throws<ArgumentException>(() => BossBuild.ApplyKit(boss, mods, ""));
+        Assert.Throws<ArgumentNullException>(() => BossBuild.ApplyKit(null!, "a"));
+        Assert.Throws<ArgumentException>(() => BossBuild.ApplyKit(boss, ""));
     }
 
     // ---- PhaseThresholdsMilli ----
@@ -236,7 +236,9 @@ public class BossBuildTests
 
         var boss = half.Enemies[0];
         Assert.Equal("boss-x", boss.SpeciesId);
-        Assert.NotEmpty(boss.ChannelMods);
+        // battle-hub-fuse T6: the kit's allocation reaches battle as a Hub input, not ChannelMods.
+        Assert.NotNull(boss.HubInputs?.Aptitude);
+        Assert.NotEqual(FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty, boss.HubInputs!.Aptitude);
         Assert.Equal(new[] { "act.boss-signature" }, boss.EquippedActionIds);
         Assert.Equal(Tuning.FormationBossRankSpan, boss.RankSpan);
     }
@@ -303,7 +305,11 @@ public class BossBuildTests
         var boss = half.Enemies[0];
         Assert.Equal("boss-x", boss.SpeciesId);
         Assert.Equal(127, boss.Level); // 100 + tyrant's +27, unaffected by climate
-        Assert.NotEmpty(boss.ChannelMods);
+        // battle-hub-fuse T6: the kit's allocation reaches battle as a Hub input, not pre-folded
+        // ChannelMods (ApplyKit no longer sets ChannelMods at all -- see the plain-boss test above,
+        // still Empty by construction either way).
+        Assert.NotNull(boss.HubInputs?.Aptitude);
+        Assert.NotEqual(FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty, boss.HubInputs!.Aptitude);
         Assert.Equal(new[] { "act.boss-signature" }, boss.EquippedActionIds);
         Assert.True(half.Enemies.Count >= 3); // boss + retinue, under every climate tested
     }

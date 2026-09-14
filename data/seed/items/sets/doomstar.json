@@ -25,7 +25,7 @@
       "id": "set.doomstar-001",
       "nameKey": "set.meteorite-impact",
       "name": "Meteorite Impact",
-      "themeKey": "demon.doomstar",
+      "themeKey": "creature.doomstar",
       "members": [
         {
           "role": "armament-primary",

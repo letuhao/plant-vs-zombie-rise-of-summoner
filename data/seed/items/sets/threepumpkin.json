@@ -25,7 +25,7 @@
       "id": "set.threepumpkin-001",
       "nameKey": "set.three-line-rot",
       "name": "Three-Line Rot",
-      "themeKey": "demon.threepumpkin",
+      "themeKey": "creature.threepumpkin",
       "members": [
         {
           "role": "armament-primary",

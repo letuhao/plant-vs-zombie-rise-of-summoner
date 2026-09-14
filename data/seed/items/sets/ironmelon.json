@@ -25,7 +25,7 @@
       "id": "set.ironmelon-001",
       "nameKey": "set.ironmelon-tomb-smasher",
       "name": "Ironmelon Tomb-Smasher",
-      "themeKey": "demon.ironmelon",
+      "themeKey": "creature.ironmelon",
       "members": [
         {
           "role": "armament-primary",

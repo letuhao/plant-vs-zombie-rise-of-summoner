@@ -1,6 +1,6 @@
 using System.Text.Json;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Stats.Derived;
 using Microsoft.Data.Sqlite;
 
@@ -21,15 +21,15 @@ public sealed record SpeciesImportOutcome(
 }
 
 /// <summary>
-/// `species-import` (T4.6, `spec-species-generator.md`'s downstream consumer, demon-seed module 13) —
-/// `data/generated/demons/**` -> the `demon_species`/`demon_species_magnitude` tables, one transaction.
+/// `species-import` (T4.6, `spec-species-generator.md`'s downstream consumer, creature-seed module 13) —
+/// `data/generated/creatures/**` -> the `creature_species`/`creature_species_magnitude` tables, one transaction.
 /// </summary>
 public sealed partial class RpgStore
 {
     void EnsureSpeciesSchemaUnlocked(SqliteConnection db)
     {
         Exec(db, """
-            CREATE TABLE IF NOT EXISTS demon_species (
+            CREATE TABLE IF NOT EXISTS creature_species (
               species_id TEXT NOT NULL PRIMARY KEY,
               rarity TEXT NOT NULL,
               theta INTEGER NOT NULL,
@@ -41,7 +41,7 @@ public sealed partial class RpgStore
               revision INTEGER NOT NULL DEFAULT 0
             );
 
-            CREATE TABLE IF NOT EXISTS demon_species_magnitude (
+            CREATE TABLE IF NOT EXISTS creature_species_magnitude (
               species_id TEXT NOT NULL,
               channel TEXT NOT NULL,
               value INTEGER NOT NULL,
@@ -50,19 +50,19 @@ public sealed partial class RpgStore
             """);
 
         // catalog-runtime pass-through columns (T4.8's own real precondition, resolved 2026-09-02) —
-        // a database created before this migration has demon_species without them, so the addition
+        // a database created before this migration has creature_species without them, so the addition
         // is explicit, matching effect_instance's own theta_content/content_scale_milli precedent
         // (T3.4). Defaults only ever apply to pre-migration rows read back after this point; a fresh
         // ImportSpecies call always supplies real values.
-        EnsureColumn(db, "demon_species", "side", "TEXT NOT NULL DEFAULT ''");
-        EnsureColumn(db, "demon_species", "game_type_id", "INTEGER NOT NULL DEFAULT 0");
-        EnsureColumn(db, "demon_species", "element_primary", "TEXT NOT NULL DEFAULT ''");
-        EnsureColumn(db, "demon_species", "element_secondary", "TEXT");
-        EnsureColumn(db, "demon_species", "deploy_mode", "TEXT NOT NULL DEFAULT ''");
-        EnsureColumn(db, "demon_species", "acquisition", "INTEGER NOT NULL DEFAULT 0");
-        EnsureColumn(db, "demon_species", "variants_json", "TEXT NOT NULL DEFAULT '[]'");
-        EnsureColumn(db, "demon_species", "trait_pool_json", "TEXT NOT NULL DEFAULT '[]'");
-        EnsureColumn(db, "demon_species", "name", "TEXT");
+        EnsureColumn(db, "creature_species", "side", "TEXT NOT NULL DEFAULT ''");
+        EnsureColumn(db, "creature_species", "game_type_id", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(db, "creature_species", "element_primary", "TEXT NOT NULL DEFAULT ''");
+        EnsureColumn(db, "creature_species", "element_secondary", "TEXT");
+        EnsureColumn(db, "creature_species", "deploy_mode", "TEXT NOT NULL DEFAULT ''");
+        EnsureColumn(db, "creature_species", "acquisition", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(db, "creature_species", "variants_json", "TEXT NOT NULL DEFAULT '[]'");
+        EnsureColumn(db, "creature_species", "trait_pool_json", "TEXT NOT NULL DEFAULT '[]'");
+        EnsureColumn(db, "creature_species", "name", "TEXT");
     }
 
     /// <summary>
@@ -99,7 +99,7 @@ public sealed partial class RpgStore
             var almanac = GetAlmanacSeed(s.Side, s.GameTypeId);
             names[s.SpeciesId] = !string.IsNullOrWhiteSpace(almanac?.DisplayName) ? almanac.DisplayName
                 : !string.IsNullOrWhiteSpace(almanac?.TypeName) ? almanac.TypeName
-                : $"Demon {s.GameTypeId}";
+                : $"Creature {s.GameTypeId}";
         }
 
         lock (_gate)
@@ -121,7 +121,7 @@ public sealed partial class RpgStore
                 }
 
                 ExecIn(db, tx, """
-                    INSERT INTO demon_species
+                    INSERT INTO creature_species
                       (species_id, rarity, theta, p_theta, attack_interval_ms, attack_interval_source,
                        range_cells, variant_count, revision, side, game_type_id, element_primary,
                        element_secondary, deploy_mode, acquisition, variants_json, trait_pool_json, name)
@@ -138,7 +138,7 @@ public sealed partial class RpgStore
                       deploy_mode = excluded.deploy_mode, acquisition = excluded.acquisition,
                       variants_json = excluded.variants_json, trait_pool_json = excluded.trait_pool_json,
                       name = excluded.name,
-                      revision = demon_species.revision + 1;
+                      revision = creature_species.revision + 1;
                     """,
                     ("$id", s.SpeciesId), ("$rarity", s.Rarity.ToString()), ("$theta", s.Theta),
                     ("$pTheta", s.PTheta), ("$intervalMs", s.AttackIntervalMs),
@@ -152,10 +152,10 @@ public sealed partial class RpgStore
                     ("$traitPoolJson", JsonSerializer.Serialize(s.TraitPool)),
                     ("$name", (object?)names[s.SpeciesId] ?? DBNull.Value));
 
-                ExecIn(db, tx, "DELETE FROM demon_species_magnitude WHERE species_id = $id;", ("$id", s.SpeciesId));
+                ExecIn(db, tx, "DELETE FROM creature_species_magnitude WHERE species_id = $id;", ("$id", s.SpeciesId));
                 foreach (var (channel, value) in s.Magnitudes)
                     ExecIn(db, tx,
-                        "INSERT INTO demon_species_magnitude (species_id, channel, value) VALUES ($id, $ch, $v);",
+                        "INSERT INTO creature_species_magnitude (species_id, channel, value) VALUES ($id, $ch, $v);",
                         ("$id", s.SpeciesId), ("$ch", channel), ("$v", value));
 
                 written++;
@@ -165,14 +165,14 @@ public sealed partial class RpgStore
             using (var cmd = db.CreateCommand())
             {
                 cmd.Transaction = tx;
-                cmd.CommandText = "SELECT species_id FROM demon_species;";
+                cmd.CommandText = "SELECT species_id FROM creature_species;";
                 using var r = cmd.ExecuteReader();
                 var storedIds = new List<string>();
                 while (r.Read()) storedIds.Add(r.GetString(0));
                 foreach (var staleId in storedIds.Where(id => !seenIds.Contains(id)))
                 {
-                    ExecIn(db, tx, "DELETE FROM demon_species WHERE species_id = $id;", ("$id", staleId));
-                    ExecIn(db, tx, "DELETE FROM demon_species_magnitude WHERE species_id = $id;", ("$id", staleId));
+                    ExecIn(db, tx, "DELETE FROM creature_species WHERE species_id = $id;", ("$id", staleId));
+                    ExecIn(db, tx, "DELETE FROM creature_species_magnitude WHERE species_id = $id;", ("$id", staleId));
                     deleted++;
                 }
             }
@@ -184,16 +184,16 @@ public sealed partial class RpgStore
 
     /// <summary>
     /// `catalog-runtime`'s own snapshot source (T4.8, `spec-catalog-runtime.md` §3) — every stored
-    /// species, converted to the shape `DemonSpeciesCatalog.Configure` needs. The ONE place
-    /// `ConcreteSpecies` -> `DemonSpeciesDef` happens, so a host never hand-rolls the conversion.
+    /// species, converted to the shape `CreatureSpeciesCatalog.Configure` needs. The ONE place
+    /// `ConcreteSpecies` -> `CreatureSpeciesDef` happens, so a host never hand-rolls the conversion.
     ///
     /// <para><c>SpeciesId</c> is lower-cased here — the anchor pipeline's own casing (`"Peashooter"`)
-    /// and `DemonSpeciesCatalog.Validate`'s established lower-kebab rule (matching the compiled
+    /// and `CreatureSpeciesCatalog.Validate`'s established lower-kebab rule (matching the compiled
     /// catalog's own real ids, e.g. `"driverzombie"`) are two different, already-shipped
     /// conventions; this is the one seam where the anchor pipeline's casing meets the catalog's own
     /// rule, so every other layer keeps reading/writing the anchor's own real casing unchanged.</para>
     ///
-    /// <para><c>DemonTypeId</c> is computed here, once — <c>GameTypeId + DemonSpeciesCatalog.DemonTypeIdFloor</c>
+    /// <para><c>CreatureTypeId</c> is computed here, once — <c>GameTypeId + CreatureSpeciesCatalog.CreatureTypeIdFloor</c>
     /// — never stored a second time (`ConcreteSpecies` deliberately does not carry it, its own doc
     /// comment already says why).</para>
     ///
@@ -201,36 +201,36 @@ public sealed partial class RpgStore
     /// 2026-09-02, not assumed: the anchor's own `traits` field is an OPEN, free-form array
     /// (`anchor/schema.py`'s own `_open_array_prop`, unvalidated LLM flavor text — `pea.json`'s own
     /// real values are `"Projectile-launching"`, `"Defensive"`, `"Rapid-fire"`), while
-    /// `DemonSpeciesDef.TraitPool` is validated against `DemonTraitCatalog`'s CLOSED, curated
+    /// `CreatureSpeciesDef.TraitPool` is validated against `CreatureTraitCatalog`'s CLOSED, curated
     /// gameplay vocabulary (`"regenerator"`, `"berserker"`, `"loyal"`, ...) — two different
     /// vocabularies that happen to share a field name. Wiring one straight into the other (an
     /// `s.TraitPool` passthrough) was tried once and caught by
-    /// `SpeciesCatalogDiffTests.The_store_backed_snapshot_itself_passes_DemonSpeciesCatalog_Validate`,
+    /// `SpeciesCatalogDiffTests.The_store_backed_snapshot_itself_passes_CreatureSpeciesCatalog_Validate`,
     /// which threw exactly the mismatch this comment describes. <c>ConcreteSpecies.TraitPool</c> keeps
     /// carrying the anchor's own raw flavor strings unchanged (a legitimate, separate use —
     /// `species_effects.py` reads the anchor's own `traits` field as LLM brief context) — the bridge
     /// into the gameplay-validated vocabulary instead lives in
-    /// <see cref="Core.Demons.Generation.DemonTraitPoolCuration"/> (2026-09-06, trait-roll), called
-    /// from <see cref="Core.Demons.Generation.ConcreteSpeciesMapper.ToDemonSpeciesDef"/> below — by
+    /// <see cref="Core.Creatures.Generation.CreatureTraitPoolCuration"/> (2026-09-06, trait-roll), called
+    /// from <see cref="Core.Creatures.Generation.ConcreteSpeciesMapper.ToCreatureSpeciesDef"/> below — by
     /// species id (porting the legacy compiled catalog's own already-authored pick forward) or by a
     /// deterministic rarity/gameTypeId-seeded fallback, never by reinterpreting the flavor text
     /// itself.</para>
     /// </summary>
-    public IReadOnlyList<Core.Demons.DemonSpeciesDef> BuildDemonSpeciesSnapshot()
+    public IReadOnlyList<Core.Creatures.CreatureSpeciesDef> BuildCreatureSpeciesSnapshot()
     {
         var ids = ListSpeciesIds();
-        var snapshot = new List<Core.Demons.DemonSpeciesDef>(ids.Count);
+        var snapshot = new List<Core.Creatures.CreatureSpeciesDef>(ids.Count);
         foreach (var id in ids)
         {
             var s = GetSpecies(id);
             if (s is null) continue; // deleted between the two reads — a fresh Configure call retries
 
             // T6.1-adjacent (2026-09-06, catalog-runtime's Injector flip): this mapping now lives in
-            // Core.Demons.Generation.ConcreteSpeciesMapper, shared with the Injector's own
+            // Core.Creatures.Generation.ConcreteSpeciesMapper, shared with the Injector's own
             // ConcreteSpeciesSeedReader-sourced path, so the two hosts compute the identical roster
             // from the identical shape rather than risking a second copy silently drifting the way
             // AttackIntervalMs itself once did (missing from this exact block until 2026-09-05).
-            snapshot.Add(Core.Demons.Generation.ConcreteSpeciesMapper.ToDemonSpeciesDef(s));
+            snapshot.Add(Core.Creatures.Generation.ConcreteSpeciesMapper.ToCreatureSpeciesDef(s));
         }
         return snapshot;
     }
@@ -250,7 +250,7 @@ public sealed partial class RpgStore
         {
             using var db = OpenUnlocked();
             using var cmd = db.CreateCommand();
-            cmd.CommandText = "SELECT species_id FROM demon_species ORDER BY species_id;";
+            cmd.CommandText = "SELECT species_id FROM creature_species ORDER BY species_id;";
             using var r = cmd.ExecuteReader();
             var ids = new List<string>();
             while (r.Read()) ids.Add(r.GetString(0));
@@ -268,13 +268,13 @@ public sealed partial class RpgStore
                 SELECT species_id, rarity, theta, p_theta, attack_interval_ms, attack_interval_source,
                        range_cells, variant_count, side, game_type_id, element_primary, element_secondary,
                        deploy_mode, acquisition, variants_json, trait_pool_json, name
-                FROM demon_species WHERE species_id = $id;
+                FROM creature_species WHERE species_id = $id;
                 """;
             cmd.Parameters.AddWithValue("$id", speciesId);
             using var r = cmd.ExecuteReader();
             if (!r.Read()) return null;
 
-            if (!DemonRarityIds.TryParse(r.GetString(1), out var rarity))
+            if (!CreatureRarityIds.TryParse(r.GetString(1), out var rarity))
                 throw new InvalidOperationException($"stored species '{speciesId}' has an unparseable rarity '{r.GetString(1)}'");
             if (!Enum.TryParse<ElementTypeId>(r.GetString(10), out var elementPrimary))
                 throw new InvalidOperationException($"stored species '{speciesId}' has an unparseable elementPrimary '{r.GetString(10)}'");
@@ -285,7 +285,7 @@ public sealed partial class RpgStore
                     throw new InvalidOperationException($"stored species '{speciesId}' has an unparseable elementSecondary '{r.GetString(11)}'");
                 elementSecondary = parsedSec;
             }
-            if (!Enum.TryParse<DemonDeployMode>(r.GetString(12), out var deployMode))
+            if (!Enum.TryParse<CreatureDeployMode>(r.GetString(12), out var deployMode))
                 throw new InvalidOperationException($"stored species '{speciesId}' has an unparseable deployMode '{r.GetString(12)}'");
 
             head = new ConcreteSpecies
@@ -295,7 +295,7 @@ public sealed partial class RpgStore
                 RangeCells = r.GetInt64(6), VariantCount = r.GetInt32(7),
                 Side = r.GetString(8), GameTypeId = r.GetInt32(9),
                 ElementPrimary = elementPrimary, ElementSecondary = elementSecondary,
-                DeployMode = deployMode, Acquisition = (DemonAcquisition)r.GetInt32(13),
+                DeployMode = deployMode, Acquisition = (CreatureAcquisition)r.GetInt32(13),
                 Variants = JsonSerializer.Deserialize<string[]>(r.GetString(14)) ?? Array.Empty<string>(),
                 TraitPool = JsonSerializer.Deserialize<string[]>(r.GetString(15)) ?? Array.Empty<string>(),
                 Name = r.IsDBNull(16) ? null : r.GetString(16),
@@ -306,7 +306,7 @@ public sealed partial class RpgStore
         using (var cmd = db.CreateCommand())
         {
             if (tx is not null) cmd.Transaction = tx;
-            cmd.CommandText = "SELECT channel, value FROM demon_species_magnitude WHERE species_id = $id;";
+            cmd.CommandText = "SELECT channel, value FROM creature_species_magnitude WHERE species_id = $id;";
             cmd.Parameters.AddWithValue("$id", speciesId);
             using var r = cmd.ExecuteReader();
             while (r.Read()) magnitudes[r.GetString(0)] = r.GetInt64(1);

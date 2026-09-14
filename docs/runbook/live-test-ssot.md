@@ -4,6 +4,286 @@
 
 Related: [debug-pipeline.md](debug-pipeline.md) (API recipes), [level-entry.md](../research/level-entry.md) (enter-level gate), [debug-live-checklist.md](debug-live-checklist.md) / [melon-live-checklist.md](melon-live-checklist.md) (host checklists), [live-test-maintain.md](../contributing/live-test-maintain.md) (enrich/maintain rule). Code route map: [`DebugEndpoints.cs`](../../src/FusionRpg.Server/DebugEndpoints.cs). Protocol table: [rest.md](../protocol/rest.md).
 
+## 0. Golden path — one full Live Probe run, start to finish
+
+**Read this section before running or scripting a Live Probe.** It is the mandatory sequence, in
+order. Each numbered step names the exact API/command, why it exists, and the failure it prevents.
+Sections 1–8 below are reference detail for the pieces this sequence calls; this section is the
+procedure itself.
+
+**Governing rule (unchanged by this section):** a debug call may trigger a real operation but must
+never fabricate its result — see [live-probe-standard.md](../contributing/live-probe-standard.md).
+Nothing here licenses treating a queued HTTP response as proof; every step below is proven by
+polling the resulting event, not by the `{ "ok": true, "queued": 1 }` envelope.
+
+### Step 1 — Redeploy before every new test instance
+
+A stale injector build or a stale running game/server from a prior session is not a valid starting
+state — never reuse one across test instances, and **never treat "the game is already running" as a
+reason to skip redeploying or as a blocker to work around** — closing and relaunching it is always a
+valid, cheap, reversible action. This subsection is the full decision tree; it exists because a
+2026-09-14 session repeatedly got stuck re-deriving these exact steps under pressure instead of just
+running them.
+
+#### Decision tree — which procedure do you need?
+
+| Situation | Procedure |
+|---|---|
+| Only `src/FusionRpg.Server/**` (or something it alone depends on) changed | **A — server-only restart.** Never touches the game/injector. |
+| `src/FusionRpg.Injector*/**`, `src/FusionRpg.Core/**`, or `src/FusionRpg.Contracts/**` changed | **B — full clean redeploy.** A server-only restart leaves a stale injector DLL running. |
+| `GET /api/debug/lawn/state` reports `Cycling`, `Defeated`, or `Victorious` and you are **not** going through `/lawn/quick-start` (which self-heals these) | Call `POST /api/debug/reset-board` directly; if it recurs, treat it as **C**. |
+| The game window visibly shows a stuck screen (seed-picker, defeat/victory overlay) and no injector/Core/Contracts source changed | **C — game-only restart (`scripts/restart-game.ps1`).** Fastest reliable fix — see below. `debug.ui-nav` (`back-to-menu` then `enter-main-menu`) can get you back to the real main menu without a restart, but whether the *next* `enter-level` after that is a genuinely fresh scene is unverified and deliberately deferred (see [lawn-run-state-machine.md](../architecture/live-probe/lawn-run-state-machine.md) §1 "Defeat/victory overlay dismissed by the player") — don't spend time chasing it live; restart instead. |
+| `GET /health` shows `injectorConnected: false`, or `/lawn/state` reports `Unknown` and you don't know why | **C** if only the game process is suspect; **B** if injector/Core/Contracts source also changed. Don't guess — a fresh process/deploy removes the ambiguity either way. |
+| You genuinely don't know what changed, or it's the first action of a new session | **B.** When in doubt, redeploy — it is always safe. |
+
+#### Procedure C — game-only restart (easiest, no rebuild)
+
+Use when the game itself is stuck (defeat/seed-picker overlay, unresponsive) but the injector/server
+binaries are already correct — no source changed since the last deploy. Closes and relaunches
+`PlantsVsZombiesRH.exe` only; does not touch the server or rebuild anything.
+
+```powershell
+.\scripts\restart-game.ps1
+# Closes the game if running, relaunches it, polls /health until injectorConnected=true AND the
+# heartbeat is newer than the pre-restart snapshot (proves the NEW process connected, not the old
+# one still shutting down). Bounded timeout (default 120s), exits 1 with a clear message if it
+# never resolves -- never blocks forever.
+```
+
+This is the recommended default recovery for a stuck live-probe board — cheaper than Procedure B
+(no rebuild) and more reliable than chasing `debug.ui-nav` in place, because a brand-new process
+cannot carry over a stale `Board`/`InitBoard` reference the way an in-place menu navigation might.
+
+#### Procedure A — server-only restart
+
+Use only when injector/Core/Contracts source is unchanged since the last deploy. Never launches or
+touches the game process.
+
+```powershell
+Get-NetTCPConnection -LocalPort 5088 -ErrorAction SilentlyContinue |
+    Where-Object { $_.State -eq 'Listen' } |
+    ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
+Start-Sleep -Seconds 2
+dotnet publish src\FusionRpg.Server\FusionRpg.Server.csproj -c Release -o dist\FusionRpg.Server --nologo -v q
+Start-Process -FilePath dist\FusionRpg.Server\FusionRpg.Server.exe -WorkingDirectory dist\FusionRpg.Server
+Start-Sleep -Seconds 3
+Invoke-RestMethod http://127.0.0.1:5088/health
+# Expect: ok=true, injectorConnected=true (the still-running game re-Hellos to the fresh server)
+```
+
+#### Procedure B — full clean redeploy
+
+Closes the game, rebuilds the injector (freshness-checked against source), and launches a brand-new
+game process. This is the only way to guarantee no stale process/state carries over.
+
+```powershell
+Stop-Process -Name PlantsVsZombiesRH -Force -ErrorAction SilentlyContinue
+Start-Sleep -Seconds 2
+.\scripts\deploy-play.ps1                    # full test-fast.ps1 gate -- the default, required
+                                              # before calling any build "verified" or before a
+                                              # live proof; add -QuickTest ONLY for a fast local
+                                              # iteration loop (see deploy-play.ps1's own header
+                                              # and local-dev.md §6 for what -QuickTest skips and
+                                              # does NOT prove)
+Invoke-RestMethod http://127.0.0.1:5088/health
+Invoke-RestMethod http://127.0.0.1:5088/api/debug/lawn/state
+```
+
+**If `deploy-play.ps1` fails on a guard** (single-writer, DAL, secondary-no-unity, funnel-delta,
+actor-hub, debug-scope, overflow, **magic-numbers**, power, stat-pairs, class-system, or the default
+test profile) — read the guard's own printed finding and fix the real cause; never bypass a guard to
+get past it. Real incident (2026-09-14): a new `const int ...Threshold` failed
+`guard-magic-numbers.ps1` (HIGH: "const with balance vocabulary — belongs in config") because its name
+matched a balance-word pattern even though it was a diagnostic count, not a tunable — fixed by renaming
+past the trigger word and adding the comment T2 requires, not by suppressing the guard. See
+[tunables-ssot.md](../architecture/tunables-ssot.md) and `scripts/audit-magic-numbers.py`'s own
+`BALANCE_WORD`/`STRUCTURAL_WORD` patterns before renaming anything that gets flagged.
+
+**A note on running PowerShell from a non-interactive shell tool:** a `powershell -Command "..."`
+string built by another tool (e.g. a bash wrapper) can mangle `$_`, backticks, and backslashes before
+PowerShell ever sees them — a real, repeated time-sink in the session that wrote this section. For
+anything beyond a one-line command, write the script to a `.ps1` file first and invoke it with
+`powershell -File <path>` instead of inlining it.
+
+**Never trust a background task runner's own "still running" status as proof a deploy has not
+finished.** Real incident (2026-09-14): `deploy-play.ps1` had already launched a healthy, connected
+game over four minutes before the task runner still reported the job "running" — the game was ready
+long before the tool said so. Poll the real, observable state instead of the tool's status:
+
+```powershell
+.\scripts\wait-for-deploy.ps1                # polls /health + the game process with a bounded
+                                              # timeout (default 300s); exits 0 the moment both are
+                                              # real, exits 1 on genuine timeout -- never blocks forever
+.\scripts\wait-for-deploy.ps1 -NoGame        # Procedure A (server-only) -- don't wait on a game process
+```
+
+Always finish either procedure with this poll, then a state check — never assume a clean slate from
+either the deploy tool's status or the mere fact that a redeploy was started:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:5088/api/debug/lawn/state
+# Read state/asOf/sinceMs -- a prior instance's board can still be Cycling/Defeated/Victorious/
+# InMatch. See Step 6 and live-probe-standard.md §6.
+```
+
+### Step 2 — Enter the level, then close the seed-picker screen (mandatory UI gate)
+
+`UIMgr.EnterGame` (`POST /api/debug/enter-level`) opens the level, but the vanilla **"Choose Your
+Plants"** seed-picker screen (the panel with the "一起摇滚吧!" / "Let's Rock!" button) stays on
+screen afterward. **While it is open, the match has not started: waves do not spawn, and plants and
+zombies do not act.** This is not cosmetic — it is a hard precondition, and skipping it silently
+produces a "board" that will never generate a single real hit.
+
+Close it with `debug.skip-setup` (`InitBoard.QuickInGame()`), gated behind `DEBUG-SETUP-SKIP`:
+
+```powershell
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/cheats/toggle `
+  -ContentType application/json -Body '{"id":"DEBUG-SETUP-SKIP","enabled":true}'
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/setup/skip `
+  -ContentType application/json -Body '{"method":"quick","timeoutSec":15}'
+# Success: debug.setup.skip { ok: true, board: true, ui: true }
+```
+
+**As of 2026-09-14, `POST /api/debug/lawn/quick-start` does this step for you automatically** — it
+self-enables `DEBUG-SETUP-SKIP` and calls `debug.skip-setup` right after entering the level, before
+freezing waves or running any scenario (`DebugEndpoints.cs`, `/lawn/quick-start` handler). Prefer
+quick-start for a new test instance; call `/setup/skip` directly only when driving `/enter-level`
+by hand or reusing an already-open board outside quick-start.
+
+*Incident this step exists because of (2026-09-13/14):* a live run of `lawn-combat-observer` (T0)
+could not capture a single real vanilla hit against a freshly entered board. The operator's own
+screenshot showed the seed-picker screen still open — `/lawn/quick-start` had entered the level but
+never dismissed it, so the "run" had never actually started. The fix landed in `/lawn/quick-start`
+itself (commit `8224dae4`); this doc section and the standalone `/setup/skip` path remain for any
+flow that does not go through quick-start.
+
+### Step 3 — Freeze waves immediately, before any scenario or spawn work
+
+Vanilla zombie waves must never be allowed to spawn during a controlled test — freeze them the
+moment the run starts, before doing anything else on the board:
+
+```powershell
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/wave-freeze `
+  -ContentType application/json -Body '{"enabled":true}'
+# Assert: debug.wave.freeze { enabled: true }
+```
+
+`/lawn/quick-start` already sequences this immediately after Step 2 and before expanding any
+scenario. If driving the API by hand, do not reorder this after a spawn or scenario call — an
+un-frozen wave can spawn and attack concurrently with a controlled test actor, corrupting attribution.
+
+### Step 4 — Spawn test actors into specific lanes, then verify before executing
+
+Set the target cell before each spawn (`debug.spawn-cell` caches `col`/`row` for the *next* spawn
+call only — set it again before every subsequent spawn into a different lane):
+
+```powershell
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/spawn-cell `
+  -ContentType application/json -Body '{"col":1,"row":2}'
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/spawn-plant `
+  -ContentType application/json -Body '{"type":0}'   # Peashooter at col 1 / row 2
+
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/spawn-cell `
+  -ContentType application/json -Body '{"col":8,"row":2}'
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/spawn-zombie `
+  -ContentType application/json -Body '{"type":0,"mindControl":false}'   # BasicZ at col 8 / row 2
+```
+
+**Do not proceed to the test proper until every spawned actor's identity and location are confirmed**
+— never assume a spawn call succeeded silently. **`board-stats` is `POST`-only and does not return
+the stats in its HTTP body** — like every other `debug.*` relay, it queues a command and answers
+`{ "ok": true, "queued": N }`; the real data arrives as a `debug.board-stats` **event** (verified
+live 2026-09-14 — a `GET` to this path falls through to the web UI's SPA route and returns
+`index.html`, not stats):
+
+```powershell
+$tip = (Invoke-RestMethod "http://127.0.0.1:5088/api/events?afterId=0&limit=1").items[-1].id
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/board-stats
+Start-Sleep -Milliseconds 500
+$page = Invoke-RestMethod "http://127.0.0.1:5088/api/events?afterId=$tip&limit=50"
+($page.items | Where-Object kind -eq 'debug.board-stats')[-1].payload
+# plants[]/zombies[] each carry: ptr, typeId, col, row, attack/attackDamage, hp, maxHp
+```
+
+Cross-check every entry against the intended lane and type before executing the test. A spawn that
+landed in the wrong lane, at the wrong type, or not at all (empty `plants`/`zombies` array) is a
+setup failure, not a test result — stop and re-spawn rather than running the test against an
+unverified board.
+
+### Step 5 — Run the test, then read results only from the real event/telemetry path
+
+Never read a "did it work" verdict from an HTTP response body alone. Poll `GET /api/events` (or the
+narrower `GET /api/debug/events`) after recording the pre-test max event id, per §2's cursor pattern
+below — or, for `lawn-combat-wire` specifically, read the `lawn-combat-observer` run file (an
+always-on, non-perturbing instrument; see `tools/LawnCombatObserver`), never console prose and never
+a worker's summary.
+
+### Step 6 — A cycling or defeated board is not a mystery: it is now a metric
+
+Two real, live-observed board states that used to produce a confusing silent timeout with no clue to
+the real cause — both now self-report instead of requiring a manual event-log diff:
+
+- **Cycling board** (a "quick" setup-skip with no real plants placed loses every wave in seconds, and
+  the game auto-retries in a tight loop). `/lawn/quick-start` counts `board.end` events in the last
+  10s and refuses immediately (`recentBoardEnds`, `waitedMs`) instead of polling `debug.enter-level`
+  into a timeout that can never resolve while the board keeps churning.
+- **Defeated board** (`match.result` payload `result:"defeat"` — `GameHooks.cs`'s
+  `BoardStatistics.GameOver` hook, cross-checked against the latest `board.economy` so a genuine
+  post-defeat recovery is never mistaken for a stale reading — see
+  `BoardEconomyAfterDefeat_reportsInMatch_defeatIsStale`). `/lawn/quick-start` now sends
+  `debug.ui-nav {action:"back-to-menu"}` and waits for its ack, then a normal (non-forced)
+  `debug.enter-level`, reporting `defeatReset: true`. **Superseded finding, 2026-09-14**: the earlier
+  plan here was `debug.reset-board` (restores API-level spawn capability but never touches the visual
+  overlay), then forcing `debug.enter-level(force:true)` straight over the dead board (proven live to
+  clear the overlay once, but proven live twice more afterward to simply never ack — consistent with
+  the known forced-entry engine-stability hazard). The current fix calls the real
+  `UIMgr.BackToMenu()` first so the board is actually torn down before a normal re-entry, instead of
+  forcing entry over a live one.
+- **What this still does NOT fully prove**: `debug.ui-nav`'s `back-to-menu` was proven live to leave
+  a defeated board, but landed on the *previous* menu layer (e.g. Challenge Mode select), not the true
+  main menu — this game's menu stack is not flat. A confirmed working sequence for THIS profile is
+  `back-to-menu` then `enter-main-menu` (two calls), verified against the operator's own screen.
+  Whether the following `enter-level` then opens a genuinely fresh scene (vs. reusing stale
+  `Board`/`InitBoard` references — `hasBoard`/`hasInitBoard` are confirmed to stay `true` through this
+  whole sequence, see [lawn-run-state-machine.md](../architecture/live-probe/lawn-run-state-machine.md))
+  is unverified and was deliberately deferred. **When a clean, provably-fresh board matters more than
+  speed, use `scripts/restart-game.ps1` (Step 1 Procedure C) instead** — do not report an in-place
+  `ui-nav` recovery as "a fresh run" without independently confirming it on the actual screen.
+
+Both checks run automatically inside `/lawn/quick-start` (`DebugEndpoints.cs`) — driving the API by
+hand still needs its own `board.end`/`match.result` check before trusting a poll to resolve.
+
+**Query it directly instead of re-deriving it by hand:**
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:5088/api/debug/lawn/state
+# { state: "Cycling"|"Defeated"|"Victorious"|"InMatch"|"LevelEntryPending"|"Unknown",
+#   asOf, sinceMs, recentBoardEnds, latestMatchResult, note }
+```
+
+Call this **before** reporting any live-probe outcome, not just before a spawn/scenario call. It is
+read-only (no injector relay, no side effects) — safe to call as often as needed. Full state machine —
+every signal behind these six states, its reliability, and every known blind spot:
+[lawn-run-state-machine.md](../architecture/live-probe/lawn-run-state-machine.md). See
+[live-probe-standard.md](../contributing/live-probe-standard.md) §6 for the full rule and the incident
+that produced it: an `{ ok: true }` response and an operator's own eyes disagreed, and there was no
+single query either side could check instead. `state: "Unknown"` cannot tell the main menu, the
+seed-picker screen, or a paused match apart (no passive telemetry fires for any of them), and no state
+read can see what is actually rendered — a defeat overlay can outlive `debug.reset-board` clearing the
+entities behind it. When the question is what a human sees on screen, ask the human; this answers what
+the simulation recorded.
+
+### Step 7 — Tear down before the next test instance
+
+End the debug session, then return to Step 1 for the next instance — never layer a new test onto a
+board a previous instance already mutated:
+
+```powershell
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/session/end
+```
+
+---
+
 ## 1. Preflight
 
 | Check | Expect |
@@ -24,7 +304,9 @@ $env:FUSIONRPG_ML_GAMEDIR = "H:\Games\PVZ-Fusion-3.9_MelonLoader"
 # or: python -m live_test deploy --launch
 ```
 
-From assistant sessions: start server with `Start-Process dist\FusionRpg.Server\FusionRpg.Server.exe` (tool-tree `deploy-play` can kill the server).
+From assistant sessions: start server with `Start-Process dist\FusionRpg.Server\FusionRpg.Server.exe` (tool-tree `deploy-play` can kill the server). Launching it directly this way needs `-WorkingDirectory dist\FusionRpg.Server` (or `Set-Location` there first) — the app's `ContentRoot` is the exe's own directory, and starting it from the repo root instead throws `NotSupportedException: The content root changed` (real incident 2026-09-14).
+
+If the game/board state is stuck (defeat overlay, unresponsive) and no injector/server source changed, prefer `.\scripts\restart-game.ps1` over redeploying — see §0 Step 1 Procedure C.
 
 ## 2. Command / event model
 
@@ -49,7 +331,8 @@ Trap: `afterId=0` + `kinds=` returns the **oldest** matching page — use tip cu
 | Path | What it does | Use when |
 |---|---|---|
 | **Manual** | Operator: main menu → Adventure → day; leave lawn running | **Default reliable** |
-| `POST /api/debug/enter-level` | Gated `UIMgr.EnterGame` | Gate on: cheat `DEBUG-LEVEL-ENTRY` or env `FUSIONRPG_LEVEL_ENTRY=1`. Assert `debug.level.enter ok=true` then `board.start` — HTTP queued ≠ entered |
+| `POST /api/debug/lawn/quick-start` | One-call orchestrator: enter-level → **skip-setup (2026-09-14+)** → wave-freeze → scenario expand → board-snapshot poll | **Preferred for a new test instance** — see §0's golden path |
+| `POST /api/debug/enter-level` | Gated `UIMgr.EnterGame` | Gate on: cheat `DEBUG-LEVEL-ENTRY` or env `FUSIONRPG_LEVEL_ENTRY=1`. Assert `debug.level.enter ok=true` then `board.start` — HTTP queued ≠ entered. Leaves the seed-picker screen open — follow with setup-skip (below) before anything else |
 | `POST /api/debug/scenario/{id}` | Expands named steps on **current** board | Mid-match lab only — does **not** open a level |
 | `POST /api/debug/wave-freeze` | `{ "enabled": true }` | Almost every lab starts here |
 
@@ -58,6 +341,12 @@ Named labs (see `DebugScenarios`): `lab-overlay`, `lab-empty`, `lab-shield-bar`.
 Refuse lab when latest live `board.start` has `levelType` in `Explore`, `Travel*`, `IZ`.
 
 ### Setup panel skip
+
+**As of 2026-09-14, `/lawn/quick-start` performs this step automatically** (self-enables
+`DEBUG-SETUP-SKIP` and calls `debug.skip-setup` right after entering the level, before wave-freeze —
+see §0 Step 2 and `DebugEndpoints.cs`). The manual sequence below is still the correct path when
+driving `/enter-level` directly instead of through quick-start, or when reusing an already-open
+board through the standalone `/setup/skip` probe.
 
 The setup panel can be completed through the host game's own IL2CPP handler. The injector command
 is gated so ordinary player runs do not invoke it. Set the gate before launching the game, then use
@@ -100,6 +389,8 @@ Base: `/api/debug`. Success event kinds usually mirror the command name (`debug.
 | GET | `/events` | Filter events (`afterId`, `kinds`, `scenarioId`, `limit`) |
 | GET | `/scenarios` | List named scenario ids |
 | POST | `/scenario/{id}` | Expand → `debug.run-steps` |
+| POST | `/game-state` | Active "what is current game state, right now" probe — reads `Board.Instance`/`InitBoard.Instance`/`GameAPP.theBoardType`/real `FindObjectsOfType<Plant/Zombie>` counts directly, synchronous, no event-log history involved. Prefer this over `/lawn/state` when the injector is connected; `/lawn/state` is the fallback when it is not. **Known blind spot**: `hasBoard`/`hasInitBoard` do not clear after returning to the main menu (see `lawn-run-state-machine.md`) — use `theBoardType`/`sceneType`/`liveState` instead when checking "did we actually leave the board." |
+| POST | `/ui-nav` | Calls one real `UIMgr` static navigation method, chosen by `{"action": "..."}`. Actions: `back-to-menu`, `enter-main-menu`, `back-to-game`, `enter-pause-menu`, `enter-lose-menu`, `enter-challenge-menu`, `enter-classic-travel`, `enter-travel-adv`, `enter-travel-game`, `enter-travel-challenge`, `enter-treasure-menu`, `enter-tower-menu`, `enter-iz-menu`, `enter-survival-e-menu`, `menu-normal-settings`, `enter-help-menu`, `enter-other-menu`, `enter-option-menu`, `enter-explore-menu`, `enter-almanac`, `enter-garden`, `enter-zuma`. This game's menu stack is not flat — `back-to-menu` alone can land on a previous menu layer, not the true main menu; `back-to-menu` then `enter-main-menu` (two calls) is the sequence proven live to reach it. |
 
 ### Board / spawn / economy
 

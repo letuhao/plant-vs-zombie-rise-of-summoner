@@ -25,7 +25,7 @@
       "id": "set.tower-gravebuster-001",
       "nameKey": "set.grave-eater-s-harvest",
       "name": "Grave-Eater's Harvest",
-      "themeKey": "demon.tower_gravebuster",
+      "themeKey": "creature.tower_gravebuster",
       "members": [
         {
           "role": "armament-primary",

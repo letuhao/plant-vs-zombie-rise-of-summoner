@@ -29,5 +29,5 @@ public static class DungeonTestFiles
     public static string EncountersDir() => Path.Combine(RepoRoot(), "data", "seed", "dungeon", "encounters");
     public static string RoomsDir() => Path.Combine(RepoRoot(), "data", "seed", "dungeon", "rooms");
     public static string DomainsDir() => Path.Combine(RepoRoot(), "data", "seed", "dungeon", "domains");
-    public static string SpeciesDir() => Path.Combine(RepoRoot(), "data", "seed", "demons", "species");
+    public static string SpeciesDir() => Path.Combine(RepoRoot(), "data", "seed", "creatures", "species");
 }

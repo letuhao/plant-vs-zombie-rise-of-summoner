@@ -25,7 +25,7 @@
       "id": "set.ultimatejalapuff-001",
       "nameKey": "set.obsidian-spore-guard",
       "name": "Obsidian Spore Guard",
-      "themeKey": "demon.ultimatejalapuff",
+      "themeKey": "creature.ultimatejalapuff",
       "members": [
         {
           "role": "core-guard",

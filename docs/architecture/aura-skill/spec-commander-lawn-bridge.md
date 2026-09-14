@@ -187,7 +187,7 @@ widen before multiplying; divide by 1000 last.
 | 8 | Guards | `guard-single-writer`, `guard-secondary-no-unity` green |
 
 **Live verification is required and cannot be automated** — a human must watch real plants/zombies
-change. Matches the `patron-demon` and `buff-debuff-scope` T11 precedent: an owner-run checklist item.
+change. Matches the `patron-creature` and `buff-debuff-scope` T11 precedent: an owner-run checklist item.
 
 ---
 

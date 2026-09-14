@@ -25,7 +25,7 @@
       "id": "set.nutblover-001",
       "nameKey": "set.floating-nut-amulet",
       "name": "Floating Nut Amulet",
-      "themeKey": "demon.nutblover",
+      "themeKey": "creature.nutblover",
       "members": [
         {
           "role": "core-guard",

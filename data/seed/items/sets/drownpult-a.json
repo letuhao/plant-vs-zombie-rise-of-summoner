@@ -25,7 +25,7 @@
       "id": "set.drownpult-a-001",
       "nameKey": "set.rocketed-trident",
       "name": "Rocketed Trident",
-      "themeKey": "demon.drownpult_a",
+      "themeKey": "creature.drownpult_a",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.sunblover-001",
       "nameKey": "set.sunlight-clover",
       "name": "Sunlight Clover",
-      "themeKey": "demon.sunblover",
+      "themeKey": "creature.sunblover",
       "members": [
         {
           "role": "armament-primary",

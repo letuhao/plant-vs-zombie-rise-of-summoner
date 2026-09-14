@@ -1,0 +1,37 @@
+{
+  "chainRef": "event.story-creature.ashthreepeater-002",
+  "climateAffinity": "fire",
+  "eligibility": null,
+  "eventId": "event.story-creature.ashthreepeater-001",
+  "flavor": "A creature of shifting soot and embers sits perched atop a pile of charred bones. Its form is a jagged silhouette of a 射手, clutching a longbow carved from blackened obsidian. The air around it ripples with a heat so intense it feels like a physical weight, and the ground beneath its feet is nothing but a circle of 烧焦 earth. It watches the party with eyes like dying coals, waiting to see if you are prey or something more interesting.",
+  "kind": "story",
+  "name": "The Scorched Marksman",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.resilience",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "A high-stakes social encounter with a powerful entity that tests the party's willingness to sacrifice resources for sudden power.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.ashthreepeater"
+}

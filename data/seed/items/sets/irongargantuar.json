@@ -25,7 +25,7 @@
       "id": "set.irongargantuar-001",
       "nameKey": "set.the-idle-automaton",
       "name": "The Idle Automaton",
-      "themeKey": "demon.irongargantuar",
+      "themeKey": "creature.irongargantuar",
       "members": [
         {
           "role": "armament-primary",

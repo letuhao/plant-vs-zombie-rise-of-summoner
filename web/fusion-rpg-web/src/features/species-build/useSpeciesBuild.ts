@@ -1,4 +1,4 @@
-import { newCorrelationId } from "@/lib/bus/demons";
+import { newCorrelationId } from "@/lib/bus/creatures";
 import { useRespecSpecies, useSpeciesAptitudes, useSpeciesRespecPrice } from "@/lib/bus";
 
 /**

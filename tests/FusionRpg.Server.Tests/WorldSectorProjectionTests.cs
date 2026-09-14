@@ -5,10 +5,11 @@ using FusionRpg.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
+using FusionRpg.Data.Sqlite;
 
 namespace FusionRpg.Server.Tests;
 
@@ -29,7 +30,7 @@ namespace FusionRpg.Server.Tests;
 /// </summary>
 public class WorldSectorProjectionTests : IAsyncLifetime
 {
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
@@ -39,10 +40,8 @@ public class WorldSectorProjectionTests : IAsyncLifetime
     {
         ConfigureWorldTuningOnce();
 
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-w6-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         var port = GetFreeTcpPort();
         var baseUrl = $"http://127.0.0.1:{port}";
@@ -73,8 +72,7 @@ public class WorldSectorProjectionTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        SqliteConnection.ClearAllPools();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     /// <summary>
@@ -84,8 +82,7 @@ public class WorldSectorProjectionTests : IAsyncLifetime
     /// </summary>
     void SeedSectorColumns(string sectorId, int pressureMilli, string wardenBindingId, int neglectedTurns)
     {
-        using var db = new SqliteConnection($"Data Source={_store.HotPath}");
-        db.Open();
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
             UPDATE rpg_world_sectors
@@ -105,8 +102,7 @@ public class WorldSectorProjectionTests : IAsyncLifetime
     /// for the growth/project columns nothing in Core drives to a non-default value yet either.</summary>
     void SeedGrowthColumns(string sectorId, long recruitStock, string projectId, int projectTurnsRemaining)
     {
-        using var db = new SqliteConnection($"Data Source={_store.HotPath}");
-        db.Open();
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
             UPDATE rpg_world_sectors

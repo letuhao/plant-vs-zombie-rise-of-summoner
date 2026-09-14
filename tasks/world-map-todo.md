@@ -376,7 +376,7 @@ Settled during the spec audit, so nobody re-litigates it here: the AI runs **out
 
 ## Phase 8 — the turn can end (no intelligence anywhere)
 
-- [x] **Task W25: `expectedTurn` — a commit means one specific turn** *(done 2026-08-22 — 9 tests. The check is refused in **both** directions and placed after `commander.unknown`, so a stranger cannot learn which turn is open. The world is now loaded **inside** `_gate` — the pre-lock read could be resolved out from under the call. Caught in passing: four demon-contract test files anchored `Day0` to a hard-coded 2026-08-21 while `Mint` stamps state from the real clock, so every "N days elapsed" assertion drifted by one per day. Not this stream's code; re-anchored to today because it fails a little worse every morning.)*
+- [x] **Task W25: `expectedTurn` — a commit means one specific turn** *(done 2026-08-22 — 9 tests. The check is refused in **both** directions and placed after `commander.unknown`, so a stranger cannot learn which turn is open. The world is now loaded **inside** `_gate` — the pre-lock read could be resolved out from under the call. Caught in passing: four creature-contract test files anchored `Day0` to a hard-coded 2026-08-21 while `Mint` stamps state from the real clock, so every "N days elapsed" assertion drifted by one per day. Not this stream's code; re-anchored to today because it fails a little worse every morning.)*
   - Description: `CommitWorldTurn(worldId, commanderId, int expectedTurn)` — required, no default — re-reading the world's turn **inside `_gate`** and refusing a mismatch as `turn.stale`. `CommitWorldTurnRequest` gains `Turn`; the endpoint 400s without it; `WorldPage` sends the turn it rendered. Ships and is verified **before any AI exists**, because it is the guard rail everything after it leans on.
   - Acceptance: committing the open turn behaves exactly as today; committing a resolved turn is refused `turn.stale` and changes nothing; a commit that lands while another is resolving refuses rather than filing into a closed turn; the endpoint rejects a body with no turn; the FE's End Turn round-trips.
   - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter FullyQualifiedName~WorldTurn`; `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`; `npm run test` in `web/fusion-rpg-web`.
@@ -409,7 +409,7 @@ Settled during the spec audit, so nobody re-litigates it here: the AI runs **out
 - [x] End Turn advances the world from the browser with no manual commits; pressing it twice is refused `turn.stale` instead of burning a turn.
 - [x] The policy-swap replay test passes: a stored log reproduces its hashes through the pure engine with no policy involved at all.
 - [x] **No golden moved.** Both 20-turn scenarios still hash to their goldens — because an explicit commit speaks for a faction and suppresses the fill, which is the escape hatch a scripted scenario needs.
-- [x] Two bugs found that were nobody's task: a **retried commit could burn a turn** the moment the AI made the barrier reachable, and four demon-contract test files were anchored to a hard-coded date that drifts by one day every morning.
+- [x] Two bugs found that were nobody's task: a **retried commit could burn a turn** the moment the AI made the barrier reachable, and four creature-contract test files were anchored to a hard-coded date that drifts by one day every morning.
 - [x] Collision, not ours: `FusionRpg.Core` (net6.0 / **C# 10**) briefly stopped compiling when a concurrent stream wrote C# 12 primary constructors into `Effects/Atoms/`. They rewrote them. Worth remembering — **nothing in this module may use C# 11 or 12 syntax**.
 
 ## Phase 9 — the tables (pure over belief, nothing wired, all parallel-safe)
@@ -676,7 +676,7 @@ bit-identical. Two golden re-blesses total, both budgeted here rather than disco
     work, `Items/*.cs` and `Battle/Timeline/*.cs`, causing several transient build-race failures that
     cleared on retry and are called out here so they are not mistaken for this task's own defect).
     `dotnet test tests\FusionRpg.E2E.Tests` → **202/202 passed**; `dotnet test
-    tests\FusionRpg.Data.Tests` → 682/685 (3 pre-existing, unrelated: demon species import + atom
+    tests\FusionRpg.Data.Tests` → 682/685 (3 pre-existing, unrelated: creature species import + atom
     trigger tests); `dotnet test tests\FusionRpg.Guard.Tests` → 170/171 (1 pre-existing, unrelated: a
     CI-wiring guard flagging an unrelated new test project). `dotnet build src/FusionRpg.Server` →
     green. **Not verified**: `FusionRpg.Injector.BepInEx` (needs a real BepInEx game install via
@@ -941,7 +941,7 @@ bit-identical. Two golden re-blesses total, both budgeted here rather than disco
     World-namespace slice this task actually touches, verified in isolation since the whole-assembly
     run hit a real but unrelated test-host crash from a separate concurrent uncommitted stream on
     this branch mid-session; re-run clean afterward at 5891/5900, 9 pre-existing Atoms/ClassSystem/
-    Demons/ActorHub failures, none touching World). `dotnet test tests\FusionRpg.Data.Tests --filter
+    Creatures/ActorHub failures, none touching World). `dotnet test tests\FusionRpg.Data.Tests --filter
     FullyQualifiedName~WorldWaveOneAcceptanceTests` → **6/6 passed — confirming the acceptance's own
     "bit-identical at identity" claim directly: the 20-turn scenario's golden did NOT need a second
     re-bless**, because it never crosses a season boundary (20 turns, well inside season 0's 84-day
@@ -984,7 +984,7 @@ bit-identical. Two golden re-blesses total, both budgeted here rather than disco
     as a live non-identity run, without the parallelism risk. `dotnet test tests\FusionRpg.Core.Tests
     --filter FullyQualifiedName~LoamUpkeepSeasonCallSiteTests` → **2/2 passed**. Full `dotnet test
     tests\FusionRpg.Core.Tests` → 5903/5913 (10 pre-existing, unrelated failures — ActorHub/
-    ClassSystem/Atoms/Battle.Timeline/Demons, a separate concurrent uncommitted stream on this
+    ClassSystem/Atoms/Battle.Timeline/Creatures, a separate concurrent uncommitted stream on this
     branch, confirmed by name, none touching World/Loam/Ai). `dotnet test tests\FusionRpg.E2E.Tests
     --filter FullyQualifiedName~World` → **47/47 passed** (the task's own stated Verify command,
     exactly as written, no regression from W46's own fixture re-bless).
@@ -1073,15 +1073,15 @@ bit-identical. Two golden re-blesses total, both budgeted here rather than disco
     exact wrong-collection-empty message, restored the fix) before being left green — not merely
     asserted to catch the bug.
     **Species selection reuses an existing mechanism, not a new one, exactly as the acceptance
-    requires**, found by research rather than invented: `DemonSpeciesCatalog.ElementPrimary`
-    (`Demons/DemonSpeciesCatalog.cs`) already exists per species, and `BannerElement.Of`
+    requires**, found by research rather than invented: `CreatureSpeciesCatalog.ElementPrimary`
+    (`Creatures/CreatureSpeciesCatalog.cs`) already exists per species, and `BannerElement.Of`
     (`Movement/LaneCost.cs:66-90`, already shipped, already a production dependency of `World` on
-    `Demons`) already reads it the other way (species → element) to compute a legion's banner. This
+    `Creatures`) already reads it the other way (species → element) to compute a legion's banner. This
     task's `SpeciesFor(climate)` is the mirror query: the zombie-side species whose `ElementPrimary`
     matches the sector's `Climate`, picked deterministically by lowest `SpeciesId` ordinal (no RNG,
     matching "a pure constructor" literally) — a sector with no climate (only the homeworld) falls
     back to `ElementTypeId.Dark`, an arbitrary but documented placeholder exactly like every other
-    provisional number this module ships. Confirmed `DemonSpeciesCatalog` is already globally
+    provisional number this module ships. Confirmed `CreatureSpeciesCatalog` is already globally
     configured for every test in `Core.Tests`/`Data.Tests`/`E2E.Tests` via each assembly's own
     `ContractTuningTestBootstrap`'s `[ModuleInitializer]`, so no new test-only wiring was needed.
     **One genuine schema addition, decided deliberately rather than avoided for convenience:** a
@@ -1123,11 +1123,11 @@ bit-identical. Two golden re-blesses total, both budgeted here rather than disco
     passed** (the new coverage, in isolation); `--filter FullyQualifiedName~World` → **828/828
     passed** (up from W50's 807, +21 across the new files and the admission additions); full
     `dotnet test tests\FusionRpg.Core.Tests` → **6036/6042 passed** (6 pre-existing, unrelated —
-    `Demons.SpeciesExpanderTests`×2, `SpeciesCatalogDiffTests`, confirmed by name and by
+    `Creatures.SpeciesExpanderTests`×2, `SpeciesCatalogDiffTests`, confirmed by name and by
     `git status` showing an actively running, concurrent, uncommitted seedsmith species-regeneration
-    process mutating `data/seed/demons/species/*` on disk mid-session, not this task's own defect).
+    process mutating `data/seed/creatures/species/*` on disk mid-session, not this task's own defect).
     `dotnet test tests\FusionRpg.Data.Tests` → **704/707 passed** (3 pre-existing, unrelated —
-    `DemonSpeciesImportCliTests`×2, same concurrent species-regeneration cause; `AtomStoreTests` — a
+    `CreatureSpeciesImportCliTests`×2, same concurrent species-regeneration cause; `AtomStoreTests` — a
     separate, unrelated stream); the task's own stated golden/round-trip filter
     (`FullyQualifiedName~WorldWaveOneAcceptanceTests|FullyQualifiedName~WorldCommandRoundTripPropertyTests`)
     → **8/8 passed**, confirming both **no golden moved** and that `raise` round-trips with its
@@ -1238,12 +1238,12 @@ bit-identical. Two golden re-blesses total, both budgeted here rather than disco
     hydration paths). Full `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~World` →
     **852/852 passed** (up from W51's 828, +24 across the new files and the admission/round-trip
     additions). Full `dotnet test tests\FusionRpg.Core.Tests` → **6173/6174 passed** (1 pre-existing,
-    unrelated — `Demons.VariantCountBandTests`, confirmed against `git status`'s own actively-running,
+    unrelated — `Creatures.VariantCountBandTests`, confirmed against `git status`'s own actively-running,
     concurrent, uncommitted seedsmith species-regeneration process on this branch, the identical cause
     W51's own Done note already names; one run also hit a transient test-host crash unrelated to any
     file this task touched, cleared on immediate retry with no edit). `dotnet test
     tests\FusionRpg.Data.Tests` → **713/715 passed** (2 pre-existing, unrelated —
-    `DemonSpeciesImportCliTests`×2, same concurrent seedsmith cause). `dotnet test
+    `CreatureSpeciesImportCliTests`×2, same concurrent seedsmith cause). `dotnet test
     tests\FusionRpg.Guard.Tests` → **198/198 passed** (`WorldDeterminismGuardTests` picked up
     `Growth/DevelopResolver.cs` and `ProjectCatalog.cs` automatically, per its own scan-`src/`-directly
     design). `dotnet test tests\FusionRpg.E2E.Tests` → **202/202 passed**, unchanged. `dotnet build
@@ -1461,7 +1461,7 @@ bit-identical. Two golden re-blesses total, both budgeted here rather than disco
     tests\FusionRpg.Core.Tests --filter FullyQualifiedName~World` → **877/877 passed** (up from W55's
     865, +12 across the new `LoamStructuresTests.cs` cases). Full `dotnet test
     tests\FusionRpg.Core.Tests` → **6304/6304 passed** — genuinely clean, no pre-existing failure
-    remaining at all (the `ClassSystem`/`Demons`/`Atoms` failures earlier tasks' own Done notes
+    remaining at all (the `ClassSystem`/`Creatures`/`Atoms` failures earlier tasks' own Done notes
     recorded as a standing, separate, concurrent stream's own defects have since cleared on their own,
     confirming those really were transient and not this phase's). `dotnet build
     src\FusionRpg.Core`/`src\FusionRpg.Data` → both green. `python scripts\audit-overflow.py` →

@@ -1,7 +1,7 @@
 import { ActorCollection, type ActorCollectionItem, type ActorRungState } from "@/ui/actor";
 import type { ScopePickerValue, ScopeTargetCandidate } from "./ActorMenuScopePicker";
 
-type ListKind = "target" | "uniqueDemon";
+type ListKind = "target" | "uniqueCreature";
 
 function idOf(value: ScopePickerValue | null, kind: ListKind): string | null {
   if (!value || value.kind !== kind) return null;
@@ -22,7 +22,7 @@ function uniqueItems(candidates: ActorRungState[]): ActorCollectionItem[] {
       };
     }
     return {
-      key: `pending-uniqueDemon-${index}`,
+      key: `pending-uniqueCreature-${index}`,
       rungState: state,
       lockedReason: "Not ready"
     };
@@ -56,10 +56,10 @@ function targetItems(candidates: ScopeTargetCandidate[]): ActorCollectionItem[] 
 }
 
 /**
- * Target / UniqueDemon list body for ActorMenuScopePicker.
+ * Target / UniqueCreature list body for ActorMenuScopePicker.
  * Uses shared ActorCollection (lawn-interactive T11) — never a private ActorRow fork.
  *
- * WhoSelector shapes stay distinct: target → targetPtr, uniqueDemon → instanceId.
+ * WhoSelector shapes stay distinct: target → targetPtr, uniqueCreature → instanceId.
  * Never pass instanceId as targetPtr.
  */
 export function ActorListPickerPanel({
@@ -70,7 +70,7 @@ export function ActorListPickerPanel({
   onChange
 }: {
   kind: ListKind;
-  /** UniqueDemon candidates (instanceId identity). */
+  /** UniqueCreature candidates (instanceId identity). */
   candidates?: ActorRungState[];
   /** Target candidates — each ready row must carry an explicit targetPtr. */
   targetCandidates?: ScopeTargetCandidate[];
@@ -99,7 +99,7 @@ export function ActorListPickerPanel({
           }
           const ready = (candidates ?? []).find((c) => c.kind === "ready" && c.data.instanceId === key);
           if (!ready || ready.kind !== "ready") return;
-          onChange({ kind: "uniqueDemon", instanceId: ready.data.instanceId });
+          onChange({ kind: "uniqueCreature", instanceId: ready.data.instanceId });
         }}
         empty={
           <p className="text-sm italic text-muted" data-testid={`scope-${kind}-empty`}>

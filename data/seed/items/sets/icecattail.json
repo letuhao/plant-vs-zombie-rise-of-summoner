@@ -25,7 +25,7 @@
       "id": "set.icecattail-001",
       "nameKey": "set.frozen-tail",
       "name": "Frozen Tail",
-      "themeKey": "demon.icecattail",
+      "themeKey": "creature.icecattail",
       "members": [
         {
           "role": "armament-primary",

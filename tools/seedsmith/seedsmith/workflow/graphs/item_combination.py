@@ -13,7 +13,7 @@ not wired, and `--write` says so instead of writing nothing"*) — this file is 
 
 Mirrors `item_set.py`'s shape deliberately: `call` is injected, so the same graph drives a replayed
 answer file today (`combogen/authored.py`) and a live endpoint later without a rewrite — the same
-seam `demon_anchor.py` / `effect_affix.py` / `item_set.py` already rely on for their own tests.
+seam `creature_anchor.py` / `effect_affix.py` / `item_set.py` already rely on for their own tests.
 
 ⚠ **Only three validators, not five.** `combination_schema()` is a closed enum with no numeric
 field and no distributable magnitude to price (`schema.py`'s own P1 note) — there is no

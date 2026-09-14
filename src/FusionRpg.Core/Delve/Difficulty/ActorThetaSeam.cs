@@ -17,7 +17,7 @@ namespace FusionRpg.Core.Delve.Difficulty;
 /// changes — nothing here invents a second curve.
 ///
 /// <b>Fallback until the seam lands:</b> the gap between `Θ_content` and the specimen's `Θ_actor`
-/// closes only through specimen levels — 35 specimen levels per demon per +35 `Θ`
+/// closes only through specimen levels — 35 specimen levels per creature per +35 `Θ`
 /// (`ssot-power-scale.md` §10 row 27's cost ladder) — never a `bandDelta` tied to `Θ_actor` (Last
 /// Epoch corruption, ideal §11.2); `RungValidator`'s actor-axis name ban is the enforcement.
 /// </summary>

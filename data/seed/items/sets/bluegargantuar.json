@@ -25,7 +25,7 @@
       "id": "set.bluegargantuar-001",
       "nameKey": "set.elite-parade",
       "name": "Elite Parade",
-      "themeKey": "demon.bluegargantuar",
+      "themeKey": "creature.bluegargantuar",
       "members": [
         {
           "role": "armament-primary",

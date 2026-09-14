@@ -25,7 +25,7 @@
       "id": "set.ifvpumpkin-001",
       "nameKey": "set.multi-functional-pumpkin",
       "name": "Multi-Functional Pumpkin",
-      "themeKey": "demon.ifvpumpkin",
+      "themeKey": "creature.ifvpumpkin",
       "members": [
         {
           "role": "armament-primary",

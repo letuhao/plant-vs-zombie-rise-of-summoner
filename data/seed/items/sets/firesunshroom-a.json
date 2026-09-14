@@ -25,7 +25,7 @@
       "id": "set.firesunshroom-a-001",
       "nameKey": "set.luminous-symbiosis",
       "name": "Luminous Symbiosis",
-      "themeKey": "demon.firesunshroom_a",
+      "themeKey": "creature.firesunshroom_a",
       "members": [
         {
           "role": "armament-primary",

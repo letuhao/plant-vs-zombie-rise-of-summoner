@@ -677,7 +677,7 @@ external blockers — see each item's own evidence below. No external blocker re
     just reads `a.Setup.EquippedActionIds` straight through. `WebMatchService.BuildSquad` gained
     `EquippedActionIdsFor(instanceId, store)`: builds `new OwnerScope(OwnerKind.Entity, instanceId)`
     (matching `LoadoutStoreTests.cs`'s own convention — keyed on the SPECIMEN, never the player, since
-    two demons one player owns can carry different loadouts), maps `store.ListGrants(scope)` through
+    two creatures one player owns can carry different loadouts), maps `store.ListGrants(scope)` through
     `store.GetAction(...)` filtered to `ActionKind.Skill` into `AutoEquipCandidate`s, and calls the
     already-built `store.GetLoadoutOrAutoEquip(scope, candidates)` (T21/T22's own real loadout/auto-
     equip resolution — a real loadout row wins, else it auto-equips live from whatever the specimen
@@ -1124,7 +1124,7 @@ external blockers — see each item's own evidence below. No external blocker re
     via `Instantiator.Draw` → roll a target shape via `WeightedChoice`, with `Area` excluded from the
     candidate pool whenever no board exists → compose the name via `ActionNameTemplates`).
   - **Scope, decided by reading the todo's own acceptance line rather than the full spec's wider
-    ambition**: per-demon-type category/element weight vectors (§3, `data/seed/actions/type-
+    ambition**: per-creature-type category/element weight vectors (§3, `data/seed/actions/type-
     weights.json`) and enabler/payoff pairing (§5) are **not** built here — the todo's acceptance line
     names determinism, share rejection, group exclusion, and the area/board gate, and T32 owns
     enabler/payoff coverage as its own separate item. Documented rather than silently dropped.
@@ -2194,7 +2194,7 @@ Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5 · **L** 5-8 (broken down further
     than duplicated. Named A17-A23 sweep + `RungSemanticsTests` + `AuraUpkeepDriverTests`: 113/113
     green. Full `Core.Tests` run: 26 failures, verified via `git status` (not assumed) to trace
     entirely to a different, unrelated, uncommitted stream (Atoms/Patron/Delve/ClassSystem —
-    `DemonSpeciesCatalog.Generated.cs`, `ConstructionActions.cs` (new/untracked), `Compilability.cs`,
+    `CreatureSpeciesCatalog.Generated.cs`, `ConstructionActions.cs` (new/untracked), `Compilability.cs`,
     etc. — none overlapping `CostLedger.cs`/`BattleRunState.cs`/`BattleEngine.cs`), matching and
     extending the SAME drift this session already recorded once today (memory:
     `concurrent-session-atoms-patron-drift-2026-09-06.md`, updated with the current, larger file
@@ -2482,13 +2482,13 @@ Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5 · **L** 5-8 (broken down further
     rather than a shared SQL transaction, since `AwardUniqueActorXpUnlocked`'s own `UPDATE` was
     already a single auto-committing statement with no `BeginTransaction` to share. (2) The catalog
     and family-map delegates the spec's own §4 draft implied would be threaded as NEW parameters are
-    instead two new process-wide static policies mirroring `RungPolicy`/`DemonSpeciesCatalog` exactly
+    instead two new process-wide static policies mirroring `RungPolicy`/`CreatureSpeciesCatalog` exactly
     — `ActionFamilyMapPolicy` (Core) and `UnlockTuningPolicy` (Core) — both **defaulting to
     "byte-identical unless configured"** (empty map / null tuning, skip-the-roll) rather than
     `RungPolicy`'s own "throw if unconfigured": this is the FIRST real production caller of the
     unlock ladder, so throwing would break every unrelated XP-award test across every project that
     never configures it. `RpgStore.TryRollActionUnlocks` (new, private): resolves the specimen's
-    species key from `DemonSpeciesCatalog.All` defensively (try/catch on "not configured" — no
+    species key from `CreatureSpeciesCatalog.All` defensively (try/catch on "not configured" — no
     `IsConfigured` flag exists, and a specimen with no resolvable species is a real, legal case per
     `ActionEligibility`'s own null contract, not a reason to fail the roll), derives a per-specimen
     seed via a local FNV-1a64 (a specimen has no separate "world seed" field; its own stable
@@ -2504,7 +2504,7 @@ Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5 · **L** 5-8 (broken down further
     one of 3 rolls to succeed deterministically; fixed to `DeltaMilli: 1000` (no decay). Acknowledged,
     accepted trade-off: `ActionFamilyMapPolicy`/`UnlockTuningPolicy` are configured once, statically,
     by the new test file — the same "process-wide static, configured once, never reset between tests"
-    convention `RungPolicy`/`DemonSpeciesCatalog`/every `*Hub` in this codebase already uses, with the
+    convention `RungPolicy`/`CreatureSpeciesCatalog`/every `*Hub` in this codebase already uses, with the
     same narrow theoretical cross-test-class parallelization exposure those already carry.
     `ActionUnlockGrantWiringTests.cs` (Data.Tests, 3 tests): a level gain with no imported actions
     still awards XP correctly (no-op is legal); a real level gain grants a real imported action,
@@ -2905,17 +2905,17 @@ tested, and verified for real, not re-deferred.
       (`--filter "FullyQualifiedName~Battle.Siege"`, 180/180) — a flaky, order-dependent full-suite
       artifact, not a regression; it does not reference anything A25 touches.
     - `Data.Tests`: **1115/1118 green, 3 failures.** 1 is the same pre-existing `ItemUniqueStoreTests`
-      defect. The other 2 (`DemonLawnDeployMagnitudeTests.Redeploying_with_the_same_species_writes_no_new_binding`,
+      defect. The other 2 (`CreatureLawnDeployMagnitudeTests.Redeploying_with_the_same_species_writes_no_new_binding`,
       `.A_specimens_species_magnitude_binds_on_first_deploy`) reproduce in isolation too, but
-      `git status` shows `DemonLawnDeployMagnitudeTests.cs` itself as `??` (untracked, never
+      `git status` shows `CreatureLawnDeployMagnitudeTests.cs` itself as `??` (untracked, never
       committed) — a DIFFERENT concurrent session's own brand-new, in-progress test file, whose own
       `SeedMagnitudeContainer` helper authors an invalid `family_id`
-      (`atom.species-magnitude.test-magnitude-demon`, two dots, not kebab-case) — a bug in that
+      (`atom.species-magnitude.test-magnitude-creature`, two dots, not kebab-case) — a bug in that
       session's own fixture, confirmed by direct evidence, not merely by name-matching a theme.
     - `Server.Tests`: **285/311 green, 26 failures.** 25 match Checkpoint L's own already-traced set
       (2 pre-existing, 23 from the siege-ai session's own untracked work). The 1 new name
-      (`DemonLawnDeployAtomPushTests.A_demon_specimens_reconciled_trait_binding_reaches_the_real_atom_push_payload`)
-      is confirmed via `git status` (`??`, untracked) as the SAME demon-lawn-deploy concurrent
+      (`CreatureLawnDeployAtomPushTests.A_creature_specimens_reconciled_trait_binding_reaches_the_real_atom_push_payload`)
+      is confirmed via `git status` (`??`, untracked) as the SAME creature-lawn-deploy concurrent
       session's own in-progress work, now touching a second test project.
   - Command list: `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~ActionContainerEffectResolverFactoryTests"` (7/7),
     `dotnet test tests\FusionRpg.Server.Tests --filter "FullyQualifiedName~BuildSquadEquippedActionsTests"` (6/6),
@@ -2988,6 +2988,238 @@ tested, and verified for real, not re-deferred.
   Server boot: `EquippedBoundAtoms.SourceFromStore` → `FromEquippedResolver` (`equip:{role}:{itemRef}`).
   Legacy `FromResolver` remains for tests/tools only. Content gap: catalog mostly `stat.modify`.
   Full historical trace of the first wire: `action-plan.md` §5.
+
+---
+
+## Phase 14 — A26–A32, closing the gap to playable (added 2026-09-13)
+
+Plan: [action-plan.md](action-plan.md) (new §, this reopening). Map: `action-map.md` §17. Specs:
+`docs/architecture/action/spec-{unlock-tuning-activation,specimen-loadout-endpoints,
+unlock-discard-endpoint,action-corpus-import-completion,actions-tab-fe-wiring,
+action-choice-rung-tiebreak,action-choice-condition-awareness}.md`. No hard gates in this phase — see
+`action-plan.md`'s "Gates vs. checkpoints" table.
+
+### A26 — unlock-tuning-activation
+
+- [ ] **T62: wire `UnlockTuningPolicy.Configure` into `Program.cs`** · **XS**
+  - One call, same block/shape as its ~18 sibling `*Policy.Configure(*TuningLoader.Parse(...))` calls,
+    reading `data/tuning/action-unlock.v1.json`.
+  - Acceptance: `UnlockTuningPolicy.Tuning` is non-null after the real host boots; a missing/corrupt
+    tuning file throws at startup, matching every sibling call's existing behavior.
+  - Verify: `dotnet build src\FusionRpg.Server`
+  - Files: `src/FusionRpg.Server/Program.cs`
+
+- [ ] **T63: real-host proof that a level-up grants a real action** · **S**
+  - Boot via `RpgApiFactory : WebApplicationFactory<Program>` (confirmed to share the real bootstrap,
+    not a hand-rolled test host). Level a real specimen through the real award path with a
+    guaranteed-hit RNG; assert a real `rpg_action_grant` row appears.
+  - Acceptance: the test fails on the pre-T62 code (proving it actually exercises the gap) and passes
+    after. **Recommended execution order**: write this test first (red against pre-T62 code), then land
+    T62, confirm green — proves the test, not just the fix.
+  - Verify: `dotnet test tests\FusionRpg.Server.Tests --filter "FullyQualifiedName~UnlockTuningActivation"`
+  - Files: `tests/FusionRpg.Server.Tests/Actions/UnlockTuningActivationTests.cs`
+  - Dependencies: T62
+  - **Audit note (test-substrate, verified not a gap)**: `RpgApiFactory` already disposes its real temp
+    SQLite dir with no swallowed catch (`RpgApiFactory.cs:75-88`, cites "testing-standard R3" in its own
+    comment) — the disk-backed host here is the sanctioned exception (disk is genuinely the thing under
+    test: proving the real bootstrap ran), not a violation of this repo's test-substrate rule.
+
+### ✅ Checkpoint M — the ladder is live
+- [ ] `UnlockTuningPolicy.Tuning` non-null post-boot · a real level-up produces a real grant · full
+  `Core.Tests`/`Data.Tests`/`Server.Tests` green, zero regressions · `.\scripts\guard-test-substrate.ps1`
+  green (new tests touch a real store)
+
+---
+
+### A27 — specimen-loadout-endpoints
+
+- [ ] **T64: `GET/POST /api/actors/{instanceId}/loadout`** · **M**
+  - `isHeld` merges `ListGrants(OwnerKind.UniqueActor, instanceId)` (durable) **and**
+    `ListGrants(OwnerKind.Entity, instanceId)` (item-granted), filtered to `Kind: ActionKind.Skill`.
+    `SetLoadout`/`GetLoadout` use `OwnerKind.Entity` (the slot assignment itself — session-scoped,
+    matching `WebMatchService.cs:702-705`'s existing convention). Existence check (404) before
+    constructing any scope.
+  - **⚠️ Audit finding: must actually be registered.** `LoadoutEndpoints.MapLoadout()` is a static
+    extension method, but it does nothing until `Program.cs:782` calls `app.MapLoadout()`. This module's
+    own `SpecimenLoadoutEndpoints.MapSpecimenLoadout()` needs the identical real call added to
+    `Program.cs` — the exact "correct code, zero production callers" shape A26 itself was built to close.
+    Do not let this endpoint ship compiled-but-unreachable.
+  - Acceptance (per spec's testing table): `GET` matches `GetLoadoutOrAutoEquip`'s own output; an
+    action held only under `UniqueActor` is accepted; one held only under `Entity` is accepted; a
+    withdrawn grant is **not** treated as held; 6th-slot/category-error rejections match T21's existing
+    rules; unknown `instanceId` → 404; **a real HTTP round-trip against the booted host resolves the
+    route** (via `RpgApiFactory`), not just a unit test calling the handler delegate directly.
+  - Verify: `dotnet test tests\FusionRpg.Server.Tests --filter "FullyQualifiedName~SpecimenLoadout"` ·
+    `.\scripts\guard-dal.ps1` (new code sits in `FusionRpg.Server`, must not smuggle raw SQL there)
+  - Files: `src/FusionRpg.Server/SpecimenLoadoutEndpoints.cs`, **`src/FusionRpg.Server/Program.cs`**
+    (the `app.MapSpecimenLoadout()` call),
+    `tests/FusionRpg.Server.Tests/Actions/SpecimenLoadoutEndpointsTests.cs`
+  - Dependencies: T62 (A26)
+
+### A29 — action-corpus-import-completion (parallel-safe with A27/A31)
+
+- [ ] **T65: schema-compat check, `committed-round-909/2000.json` against `ActionCorpusImporter`** · **XS**
+  - Run the real importer against the two newer files in isolation; read the result.
+  - Acceptance: a written finding — clean import (proceed to T66 as a one-line change) or a named schema
+    gap (proceed to T66 with importer changes in scope).
+  - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~ActionCorpusImporter"`
+    (temporarily pointed at the two files, or a new throwaway case)
+  - Files: none changed yet — a scratch/diagnostic run
+
+- [ ] **T66: extend `Program.cs`'s import list to all four files + cross-file id-collision guard** · **S**
+  - Add the reject-loudly guard first (same id, different payload across files → throw naming the id
+    and both source files — the proven historical defect shape, `audit-2026-09-13-distribution.md` §7),
+    **then** extend the literal file list.
+  - Acceptance: real `rpg_action` count matches the corpus's own reconciled total, read not asserted; a
+    planted same-id-different-payload fixture across two files rejects loudly; re-import stays
+    idempotent.
+  - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~ActionCorpusImporter"`
+  - Files: `src/FusionRpg.Server/Program.cs`, `src/FusionRpg.Data/Sqlite/ActionCorpusImporter.cs` (only
+    if T65 found a schema gap), `tests/FusionRpg.Data.Tests/Actions/ActionCorpusImporterTests.cs`
+  - Dependencies: T65. **Rebase on T62** (same file, `Program.cs`, different lines — avoid a trivial
+    merge conflict, not a real dependency).
+
+### A31 — action-choice-rung-tiebreak (parallel-safe with A27/A29)
+
+- [ ] **T67: `ActionTagPreference.Compare` tiebreak → `Rung` descending, then `action_id`** · **XS**
+  - `(tagRank, -Rung, action_id)`, `RankOf`/tag order unchanged.
+  - Acceptance: rung-9 beats rung-1 of the same tag regardless of id; untagged-vs-untagged also orders
+    by rung now (not just `action_id`, correcting the doc comment's old description); same-rung falls
+    back to `action_id`; `SiegeAiIntentSource` (shares the same `Compare`) exhibits the fix too, tested
+    explicitly, not assumed; full suite + all 8 goldens zero-mover, proven.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~ActionTagPreference"`
+    + `--filter "FullyQualifiedName~BasicAttackAdoption"` (goldens)
+  - Files: `src/FusionRpg.Core/Actions/ActionTagPreference.cs`,
+    `tests/FusionRpg.Core.Tests/Actions/ActionTagPreferenceTests.cs` (**new file — confirmed no
+    pre-existing test asserts the old alphabetical tiebreak, searched, zero hits — so this task cannot
+    silently break a legacy fixed-expectation test**)
+  - Dependencies: none (independent of A26)
+
+### ✅ Checkpoint N — a player can see, equip, and the ordering is meaningful
+- [ ] T64, T66, T67 all green · full suite + goldens re-run clean across all three together (not just
+  each in isolation) · corpus row count matches the reconciled total · `.\scripts\guard-dal.ps1` and
+  `.\scripts\guard-test-substrate.ps1` green
+
+---
+
+### A28 — unlock-discard-endpoint
+
+- [ ] **T68: `POST /api/actors/{instanceId}/unlock/discard`** · **M**
+  - `OwnerKind.UniqueActor` scope (the durable grant/earn-history scope — **not** `Entity`, the
+    opposite of T64's loadout-slot scope). Real soul spend via `RpgStore.Souls.TrySpendSouls`. Θ source:
+    search for an existing per-actor `P(Θ)` reader first; if none found within this task, use the same
+    inert-seam-with-documented-default shape `CostLedger`/T17 already established and flag the real
+    wiring as a named follow-up — **do not block this task on finding one**, per the plan's own
+    gates-vs-checkpoints resolution.
+  - Acceptance: successful discard frees the slot, spends the exact quoted soul price, `EarnCount`
+    provably unchanged; insufficient soul → typed refusal, no state change; discard-not-held → typed
+    refusal; a fresh specimen with no unlock-state row refuses `NotHeld` cleanly (no exception); a
+    retried/double-submitted discard is idempotent (second call refuses, no double charge); response
+    echoes the post-spend `SoulBalanceDto`.
+  - **Same registration finding as T64 applies here**: add the real `app.MapUnlockDiscard()` call to
+    `Program.cs` — do not ship a compiled-but-unreachable endpoint.
+  - Verify: `dotnet test tests\FusionRpg.Server.Tests --filter "FullyQualifiedName~UnlockDiscard"` ·
+    `.\scripts\guard-dal.ps1`
+  - Files: `src/FusionRpg.Server/UnlockDiscardEndpoints.cs`, **`src/FusionRpg.Server/Program.cs`** (the
+    `app.MapUnlockDiscard()` call), `tests/FusionRpg.Server.Tests/Actions/UnlockDiscardEndpointTests.cs`
+  - Dependencies: T62 (A26), T64 (A27, same endpoint family/review batch)
+
+### ✅ Checkpoint O — a player can see, equip, and discard, over real HTTP
+- [ ] T68 green · Θ-source resolution recorded (either a real reader found and used, or the documented
+  seam-with-default shipped and a follow-up filed) · full suite green · `.\scripts\guard-dal.ps1` and
+  `.\scripts\guard-test-substrate.ps1` green · a real HTTP client can reach both T64's and T68's routes
+  against a booted host (not just their unit tests)
+
+---
+
+### A30 — actions-tab-fe-wiring
+
+- [ ] **T69: `lib/bus/action.ts` — loadout + discard hooks, mirroring `lib/bus/aura.ts`** · **S**
+  - `useActionLoadout(instanceId)`, `useSetLoadout(instanceId)`, `useDiscardUnlock(instanceId)`. No new
+    catalog endpoint — A27's `GET` response IS the catalog.
+  - Acceptance: hook shapes match the aura module's existing conventions (loading/error/mutate).
+  - Verify: `npm test -- action.ts` (web/fusion-rpg-web)
+  - Files: `web/fusion-rpg-web/src/lib/bus/action.ts` (new)
+  - Dependencies: T64, T68 (A27, A28 must exist to call)
+
+- [ ] **T70: `ActionsTab.tsx` real wiring, `PLACEHOLDER_ACTIONS` removed** · **M**
+  - Real grid replacing the placeholder block; a 4th state for "equipped, on cooldown" (do not force-fit
+    `AuraSlot`'s 3-state model); a confirm interaction before a discard mutation fires (priced,
+    ratchet-never-rewinds — not a free toggle like an aura).
+  - Acceptance: grid renders real held/equipped state per specimen; equip/unequip/discard round-trip
+    through T69's hooks; discard requires confirm; cooldown renders as its own state, not conflated with
+    locked/active; `grep PLACEHOLDER_ACTIONS` returns nothing.
+  - **Audit addition**: any new user-facing string (locked reason, discard confirm copy, cooldown label)
+    goes through `npm run extract` (lingui) — commit `src/i18n/locales` if it changes, per this repo's
+    own web convention. Also run `npm run check:bundle` — new hooks/components must not pull the
+    entry-chunk budget over its line (Phaser/recharts already excluded; this module adds neither, but
+    the budget check is the actual proof, not an assumption).
+  - Verify: `npm test -- ActionsTab && npm run build && npm run check:bundle && npm run extract`
+    (web/fusion-rpg-web)
+  - Files: `web/fusion-rpg-web/src/ui/actor/ActionsTab.tsx`,
+    `web/fusion-rpg-web/src/ui/actor/ActionsTab.test.tsx`, `web/fusion-rpg-web/src/i18n/locales/*` (if
+    `extract` changes them)
+  - Dependencies: T69
+
+### ✅ Checkpoint P — the FE shows real state
+- [ ] T69, T70 green · `npm run build` clean · `npm run check:bundle` clean · `PLACEHOLDER_ACTIONS` gone
+
+---
+
+### A32 — action-choice-condition-awareness
+
+- [ ] **T71: `IBattleView.HasLiveConditionalPayoff` + shared `ActionChoice` lookahead helper** · **M**
+  - New boolean read (container-level `when.predicate` truth via the existing `PredicateCompiler`/
+    `FactReader`, distinct from the action's own usability condition). New shared helper (e.g.
+    `ActionChoice.PickFromTiedRun`) implementing the bounded lookahead **inside** the decision loop —
+    never folded into the static `ActionTagPreference.Compare` (that function has no live target
+    context; see the spec's own architectural correction).
+  - Acceptance: scans only a contiguous `(tagRank, Rung)`-tied run, bounded by run size; never called
+    for a run of size 1 or for non-tied candidates (cost-discipline test, call-counting fixture).
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~ActionChoiceConditionAwareness"`
+  - Files: `src/FusionRpg.Core/Battle/Timeline/IBattleView.cs`,
+    `src/FusionRpg.Core/Actions/ActionChoice.cs` (new)
+  - Dependencies: T67 (A31 — the tied runs this scans only exist meaningfully once rung orders them)
+
+- [ ] **T72: wire the shared helper into both `StubIntentSource` and `SiegeAiIntentSource`** · **S**
+  - Both call sites use the one helper from T71 — never two separate implementations of the lookahead.
+  - Acceptance: a live-Chill-conditional fixture picks the conditional action through **both**
+    `StubIntentSource` and `SiegeAiIntentSource`, proven by the same test run against both, not one.
+  - Verify: same filter as T71, extended
+  - Files: `src/FusionRpg.Core/Actions/StubIntentSource.cs`,
+    `src/FusionRpg.Core/Battle/Siege/SiegeAiIntentSource.cs`
+  - Dependencies: T71
+
+### ✅ Checkpoint Q — a build changes the outcome, everywhere it's chosen
+- [ ] T71, T72 green · both intent sources proven, not just one · full suite + all 8 goldens zero-mover
+
+---
+
+- [ ] **T73: propagate closure into `action-map.md` §17 and both ideal docs** · **XS**
+  - Per this repo's own evidence rule ("when you correct something, propagate it — a fix that lands in
+    prose but not in the map/task list has not landed"): flip §17's Checkpoints M-Q to ✅ with a dated
+    evidence line each (matching the style every prior A17-A25 checkpoint already uses), and update
+    `action-playability-ideal.md`'s gap table (#1-#5, #8) and `action-choice-ideal.md`'s "wiring gap"
+    section to record that each is now closed, rather than leaving them describing the pre-fix state.
+  - Acceptance: re-grep both ideal docs and §17 after — no remaining sentence claims a gap that this
+    phase closed.
+  - Verify: manual re-read, not a command
+  - Files: `docs/architecture/action-map.md`, `docs/architecture/action-playability-ideal.md`,
+    `docs/architecture/action-choice-ideal.md`
+  - Dependencies: T62-T72 all closed
+
+## Phase 14 — final acceptance
+
+- [ ] A real specimen can level up (T62-T63), hold a real second action, be seen and re-equipped over
+  HTTP (T64), discarded from (T68), rendered in the FE (T70), and have its choice among held actions
+  actually reflect rung and live conditions (T67, T71-T72) — the full loop this reopening exists to
+  close.
+- [ ] Full `Core.Tests`/`Data.Tests`/`Server.Tests`/`Guard.Tests` + all 8 goldens green, once, with every
+  Phase 14 task landed together.
+- [ ] All six boundary guards green: `guard-single-writer.ps1`, `guard-secondary-no-unity.ps1`,
+  `guard-funnel-delta.ps1`, `guard-actor-hub.ps1`, `guard-dal.ps1`, `guard-test-substrate.ps1` (or
+  `deploy-play.ps1`, which runs all of them).
+- [ ] T73 done — docs match shipped state.
 
 ---
 

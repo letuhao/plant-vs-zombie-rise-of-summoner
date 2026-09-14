@@ -11,7 +11,14 @@ namespace FusionRpg.Guard.Tests;
 /// each file parses and carries `_meta.measuredAt` + `_meta.conditions`, and regenerating twice
 /// reproduces byte-identical PAYLOAD content (the `_meta.measuredAt` timestamp is the one field
 /// allowed to differ between runs — everything else must not).
+///
+/// <para><b>One collection.</b> <see cref="RegeneratingTwiceReproducesIdenticalPayloads"/> runs the
+/// real regen script while the other two tests read the same files. Under xUnit's default parallel
+/// collections the reader could observe a half-written `_baseline-dominance.json` and flake on a
+/// missing `coverage.tuningSync` (seen 2026-09-12). The regen now writes to a temp dir so the
+/// tracked baselines are never touched, and the collection keeps the two from interleaving at all.</para>
 /// </summary>
+[Collection("class-system-baselines")]
 public class ClassSystemBaselineRegenTests
 {
     static readonly string[] BaselineFiles =
@@ -26,10 +33,14 @@ public class ClassSystemBaselineRegenTests
         // Self-contained rather than relying on a sibling test (or a prior CI step) having already
         // regenerated the live files — a fresh checkout with the baselines not yet committed must not
         // spuriously fail this test just because of run order.
-        var setup = RunRegen(repoRoot);
+        //
+        // Regenerated into a TEMP dir, never docs/research/class-system: a test that rewrites
+        // committed files is a substrate violation, and it is what raced the sibling reads below.
+        using var scratch = new TempDirectory();
+        var dir = scratch.Path;
+        var setup = RunRegen(repoRoot, dir);
         Assert.True(setup.Exit == 0, $"regen failed: {setup.Stdout}\n{setup.Stderr}");
 
-        var dir = Path.Combine(repoRoot, "docs", "research", "class-system");
         foreach (var name in BaselineFiles)
         {
             var path = Path.Combine(dir, name);
@@ -100,19 +111,52 @@ public class ClassSystemBaselineRegenTests
     public void RegeneratingTwiceReproducesIdenticalPayloads()
     {
         var repoRoot = FindRepoRoot();
-        var liveDir = Path.Combine(repoRoot, "docs", "research", "class-system");
 
-        var runA = RunRegen(repoRoot);
-        var snapshotA = BaselineFiles.ToDictionary(n => n, n => StripMeta(File.ReadAllText(Path.Combine(liveDir, n))));
+        // Write to a TEMP dir, never the tracked baselines. The regen script defaults to
+        // docs/research/class-system, so running this test used to leave three committed files
+        // dirty every time (a test-substrate violation) AND race the sibling test below, which
+        // reads _baseline-dominance.json — the reader could catch it mid-rewrite and flake on a
+        // missing coverage.tuningSync. `-OutDir` redirects the script; the [Collection] attribute
+        // on this class keeps the two tests from running concurrently regardless.
+        using var scratch = new TempDirectory();
+        var outDir = scratch.Path;
 
-        var runB = RunRegen(repoRoot);
-        var snapshotB = BaselineFiles.ToDictionary(n => n, n => StripMeta(File.ReadAllText(Path.Combine(liveDir, n))));
+        var runA = RunRegen(repoRoot, outDir);
+        var snapshotA = BaselineFiles.ToDictionary(n => n, n => StripMeta(File.ReadAllText(Path.Combine(outDir, n))));
+
+        var runB = RunRegen(repoRoot, outDir);
+        var snapshotB = BaselineFiles.ToDictionary(n => n, n => StripMeta(File.ReadAllText(Path.Combine(outDir, n))));
 
         Assert.True(runA.Exit == 0, $"first regen failed: {runA.Stdout}\n{runA.Stderr}");
         Assert.True(runB.Exit == 0, $"second regen failed: {runB.Stdout}\n{runB.Stderr}");
 
         foreach (var name in BaselineFiles)
             Assert.Equal(snapshotA[name], snapshotB[name]);
+    }
+
+    /// <summary>A temp directory that deletes itself, with a failed delete a FAILURE, never a
+    /// swallowed catch (docs/contributing/testing-standard.md; the 65.5 GB temp-dir leak).</summary>
+    sealed class TempDirectory : IDisposable
+    {
+        public string Path { get; } = System.IO.Path.Combine(
+            System.IO.Path.GetTempPath(), "kilo-class-system-regen-" + Guid.NewGuid().ToString("N"));
+
+        public TempDirectory() => Directory.CreateDirectory(Path);
+
+        public void Dispose()
+        {
+            if (!Directory.Exists(Path)) return;
+            try
+            {
+                Directory.Delete(Path, recursive: true);
+            }
+            catch (IOException ex)
+            {
+                throw new InvalidOperationException(
+                    $"failed to delete the regen scratch dir {Path} — a swallowed delete leaks temp " +
+                    "storage (testing-standard.md); investigate rather than ignoring", ex);
+            }
+        }
     }
 
     /// <summary>Removes `_meta.measuredAt` (the one field the regen script intentionally re-stamps
@@ -125,24 +169,20 @@ public class ClassSystemBaselineRegenTests
         return node.ToJsonString(new JsonSerializerOptions { WriteIndented = false });
     }
 
-    static (int Exit, string Stdout, string Stderr) RunRegen(string repoRoot)
+    static (int Exit, string Stdout, string Stderr) RunRegen(string repoRoot, string outDir)
     {
         var script = Path.Combine(repoRoot, "scripts", "regen-class-system-baselines.ps1");
         var psi = new ProcessStartInfo
         {
             FileName = "powershell",
-            Arguments = $"-NoProfile -ExecutionPolicy Bypass -File \"{script}\" -Root \"{repoRoot}\"",
+            Arguments = $"-NoProfile -ExecutionPolicy Bypass -File \"{script}\" -Root \"{repoRoot}\" -OutDir \"{outDir}\"",
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
             CreateNoWindow = true,
             WorkingDirectory = repoRoot
         };
-        using var p = Process.Start(psi)!;
-        var stdout = p.StandardOutput.ReadToEnd();
-        var stderr = p.StandardError.ReadToEnd();
-        Assert.True(p.WaitForExit(180_000), "regen script timed out");
-        return (p.ExitCode, stdout, stderr);
+        return ExternalProcess.Run(psi, 180_000, "regen script timed out");
     }
 
     static string FindRepoRoot()

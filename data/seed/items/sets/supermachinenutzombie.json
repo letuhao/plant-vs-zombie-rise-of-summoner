@@ -25,7 +25,7 @@
       "id": "set.supermachinenutzombie-001",
       "nameKey": "set.corporate-strike-set",
       "name": "Corporate Strike Set",
-      "themeKey": "demon.supermachinenutzombie",
+      "themeKey": "creature.supermachinenutzombie",
       "members": [
         {
           "role": "armament-primary",

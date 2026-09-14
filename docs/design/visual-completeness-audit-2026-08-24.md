@@ -139,7 +139,7 @@ This is the pattern that explains most of the individual gaps above and below it
 once, structurally, rather than four times:
 
 - **Fusion** — plate 02 §C draws *creature* fusion (two creatures in, one out). The built Fusion is
-  the real, already-shipped **demon** fusion lab — a different domain entirely, per T15's own owner
+  the real, already-shipped **creature** fusion lab — a different domain entirely, per T15's own owner
   decision. The plate section is simply not applicable to what ships; not a gap, a resolved mismatch.
 - **Expeditions** (plate 03 §C) — the plate's rich card list (icon, status pill, results row with
   item/XP/souls chips, progress bar, roster chips, an "Empty berth · Dispatch" card) is not what
@@ -192,7 +192,7 @@ Moderate, not major — the information content is real and present, only the la
 | 5c | Pacts layout density (stack vs. card pair, no portraits) | 03 §D | Minor | Real component, layout differs |
 | 5d | Rail orientation (horizontal strip vs. vertical dock) | 01, 02, 04 | **Major**, cross-cutting | Affects every stage/layer simultaneously |
 | — | Relics numeric deltas / layout | 02 §B | Known/reasoned | Already documented (T14) |
-| — | Fusion domain | 02 §C | Resolved, N/A | Owner redirected to demon fusion (T15) |
+| — | Fusion domain | 02 §C | Resolved, N/A | Owner redirected to creature fusion (T15) |
 | — | Deploy targeting | 07 §B | Matches | Already live-verified (T22) |
 
 **Rail orientation (5d) is called out separately** because it is not one surface's gap — `Rail.tsx` is

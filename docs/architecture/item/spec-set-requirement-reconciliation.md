@@ -28,7 +28,7 @@ SetIdentityRequirement {
   setId, setClass,
   requiredFamilyId?: string,
   requiredSpeciesId?: string,
-  requiresUniqueDemon: bool,
+  requiresUniqueCreature: bool,
   hybridEligibility: allowed | forbidden
 }
 ```
@@ -41,12 +41,12 @@ name, id prefix, faction, or current player state participates.
 |---|---|---|
 | `general` | no identity selector; `hybridEligibility = allowed` | ordinary role/frame/faction/level gate only |
 | `family` | one declared `requiredFamilyId`; `hybridEligibility = allowed` | exact actor family is required, then ordinary gate rules apply |
-| `unique-species` | one declared `requiredSpeciesId`; `requiresUniqueDemon = true`; `hybridEligibility = forbidden` | exact unique-demon species is required and a hybrid is refused before the member can be assigned |
+| `unique-species` | one declared `requiredSpeciesId`; `requiresUniqueCreature = true`; `hybridEligibility = forbidden` | exact unique-creature species is required and a hybrid is refused before the member can be assigned |
 
 `family` and `unique-species` are not fallback filters. Missing actor identity,
 an unknown catalog selector, or a class/selectors mismatch blocks the set plan.
 The future `EquipGate` maps failures to the typed I11 reasons
-`FamilyMismatch`, `SpeciesMismatch`, `UniqueDemonRequired`, and
+`FamilyMismatch`, `SpeciesMismatch`, `UniqueCreatureRequired`, and
 `HybridSetForbidden`.
 
 All members of one set read the same identity requirement. A base type may not
@@ -132,7 +132,7 @@ Before a set seed is accepted it must prove:
 
 1. The static identity requirement matches the set class: general has none,
    family has exactly one known family, and unique-species has exactly one known
-   unique-demon species plus `hybridEligibility = forbidden`.
+   unique-creature species plus `hybridEligibility = forbidden`.
 2. Every declared member role has exactly one frozen profile and inherits the
    same set identity requirement.
 3. No restrictive member is shared by a set with a different identity
@@ -201,7 +201,7 @@ Candidate roles and ids are ordinally sorted. Costs and fixed floors are
 |---|---|
 | frozen replay | same set input yields byte-identical envelope and members |
 | family assignment | a matching family is admitted; another family gets `FamilyMismatch` |
-| unique-demon assignment | only the exact unique demon species is admitted; a general demon gets `UniqueDemonRequired` and another species gets `SpeciesMismatch` |
+| unique-creature assignment | only the exact unique creature species is admitted; a general creature gets `UniqueCreatureRequired` and another species gets `SpeciesMismatch` |
 | hybrid unique refusal | a hybrid receives `HybridSetForbidden` for both ten-role and fifteen-role unique templates |
 | restrictive member overlap | conflicting family/species memberships block before any member seed writes |
 | no conflicting targets | every non-empty member profile uses the envelope aptitude/resource |
@@ -236,7 +236,7 @@ runtime; or create another set-effect delivery path.
 - [ ] Every accepted generated set has one frozen, witnessed requirement
       envelope that can activate its complete intended loadout.
 - [ ] Every family and unique-species set has one frozen, witnessed static
-      identity contract; a hybrid can never assign a unique-demon set member.
+      identity contract; a hybrid can never assign a unique-creature set member.
 - [ ] A player can equip all legal set pieces while trials remain unmet.
 - [ ] Set progress remains role-deduped and visibly complete before activation.
 - [ ] No full set grants effects until its one envelope is satisfied.

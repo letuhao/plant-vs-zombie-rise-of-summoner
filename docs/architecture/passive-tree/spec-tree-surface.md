@@ -29,7 +29,7 @@ plannable and spendable — on a surface the player already opens, in words a pl
 |---|---:|---:|
 | Whole corpus (42 × 40 shared + 840 species × 40) | **35,280** | 100% |
 | **The shared corpus — the only part a build guide can be written about** | **1,680** | **4.8%** |
-| A 30-demon player's whole reachable reading surface | **2,880** | 8.2% |
+| A 30-creature player's whole reachable reading surface | **2,880** | 8.2% |
 | Traits *open* to a one-aptitude build at Θ=100 across the twelve primary paths | 176 | 0.50% |
 | Traits that build actually **owns** at Θ=100 under D25 | 13–36 | **0.04–0.10%** |
 
@@ -181,11 +181,11 @@ criterion, not a nicety, and it needs a GG-61 volume fixture at the 720px floor.
 1. **To spend:** that creature's actor sheet → Passives tab → its bloodline pinned above the shared
    paths. One extra card on a surface the player already opens for that creature. Zero new
    navigation.
-2. **To read:** the Demon Codex entry for that species, read-only. GG-9 permits exactly this — other
+2. **To read:** the Creature Codex entry for that species, read-only. GG-9 permits exactly this — other
    surfaces *link into* the canonical one rather than re-implementing it.
 
 **The Codex already ships the states this needs**, verified at
-`web/fusion-rpg-web/src/features/demons/DemonsPage.tsx:365-390`: a `discovered`/`seen` map, a name or
+`web/fusion-rpg-web/src/features/creatures/CreaturesPage.tsx:365-390`: a `discovered`/`seen` map, a name or
 `???`, and a grayscale silhouette (`opacity-30 grayscale`) for anything neither. A discovered species
 shows its bloodline; an undiscovered one keeps the silhouette it already has.
 
@@ -212,7 +212,7 @@ are the D30 pipeline's to emit.
 That is not a weakening. It is the collection hook D23 was decided for, stated honestly.
 
 > ⛔ **A live GG-50 defect sits on the surface this would hang off.**
-> `DemonsPage.tsx:367-388` maps the **entire** species catalog into a grid with no volume strategy —
+> `CreaturesPage.tsx:367-388` maps the **entire** species catalog into a grid with no volume strategy —
 > `(catalog.data?.species ?? []).map(...)`. At 840 species that is 840 DOM subtrees against a
 > search-first threshold of 240. It is a violation today, independent of passive trees. **It is fixed
 > before a bloodline reference is added to it** — §12 lists it as ask-first, because it is another
@@ -592,7 +592,7 @@ The repo ships three presentations of out-of-reach content, and they say differe
 | Presentation | Where | Communicates |
 |---|---|---|
 | A **condition** — *"Unlocks when you hold your first item"* | `shell/railState.ts:52-60` | It exists, you cannot have it. **No distance.** Reads as a wall |
-| A **silhouette** — `???`, grayscale | `features/demons/DemonsPage.tsx:371-379` | It exists, is countable, and its identity is the reward |
+| A **silhouette** — `???`, grayscale | `features/creatures/CreaturesPage.tsx:371-379` | It exists, is countable, and its identity is the reward |
 | A **distance** — a filled bar against a target | `StatBar`, used at `ui/actor/ProgressionTab.tsx:34` | You are *here*, it is *there*, and the gap is a number |
 
 **Deep tiers get a distance, and never a silhouette.**
@@ -926,7 +926,7 @@ leak, because every trait is a channel underneath.
 
 - **Naming.** This spec uses *paths* / *traits* / *Focus* / *Plan* / *bloodline* / *stance*. A name is
   content and the owner's call, and one is needed before any player text is written.
-- **Fixing `DemonsPage.tsx:367-388`'s volume defect** — another program's file, and it must be fixed
+- **Fixing `CreaturesPage.tsx:367-388`'s volume defect** — another program's file, and it must be fixed
   before a bloodline reference hangs off it (§3).
 - **Auto-drafting a species-derived starter plan** when a creature is bound. Friendly and free, but it
   puts a build in front of a player who did not ask for one.
@@ -1038,7 +1038,7 @@ whenever the property exists; the surface does not depend on it existing.
 
 ```
 [x] I identified the subsystem(s) this touches — passive trees, player UI,
-    derived stats and units, demon species content, standalone web.
+    derived stats and units, creature species content, standalone web.
 [x] I read every doc in DESIGN-GATE §1's "Anything a player sees" row this
     session: architecture/game-gui-principles.md (GG-1, 8, 9, 10, 15, 16, 17,
     22-27, 33, 38, 39, 44-51, 53, 61 and §20.1's decisions),
@@ -1084,7 +1084,7 @@ whenever the property exists; the surface does not depend on it existing.
     (D37) and nullification (D40) -- and one moved to "booked" because `species-tree` 6 owns it.
     Naming and plan comparison are still open.
 [~] Corrections propagated. PARTIAL: §2.1 and §3 name two files that need fixing
-    (PassivesTab.tsx:12's comment, DemonsPage.tsx:367-388's volume defect); this
+    (PassivesTab.tsx:12's comment, CreaturesPage.tsx:367-388's volume defect); this
     is a spec and does not edit them. Both are booked — one as this module's own
     work, one as ask-first because it is another program's file.
 ```

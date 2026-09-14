@@ -25,7 +25,7 @@
       "id": "set.fumepumpkin-001",
       "nameKey": "set.spore-pumpkin-volley",
       "name": "Spore-Pumpkin Volley",
-      "themeKey": "demon.fumepumpkin",
+      "themeKey": "creature.fumepumpkin",
       "members": [
         {
           "role": "armament-primary",

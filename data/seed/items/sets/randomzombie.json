@@ -25,7 +25,7 @@
       "id": "set.randomzombie-001",
       "nameKey": "set.the-unopened-box",
       "name": "The Unopened Box",
-      "themeKey": "demon.randomzombie",
+      "themeKey": "creature.randomzombie",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.pinkonion-001",
       "nameKey": "set.rabbit-s-verdant-call",
       "name": "Rabbit's Verdant Call",
-      "themeKey": "demon.pinkonion",
+      "themeKey": "creature.pinkonion",
       "members": [
         {
           "role": "armament-primary",

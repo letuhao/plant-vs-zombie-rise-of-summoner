@@ -25,7 +25,7 @@
       "id": "set.goldsunflower-001",
       "nameKey": "set.solar-harvest",
       "name": "Solar Harvest",
-      "themeKey": "demon.goldsunflower",
+      "themeKey": "creature.goldsunflower",
       "members": [
         {
           "role": "armament-primary",

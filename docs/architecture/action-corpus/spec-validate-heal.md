@@ -50,7 +50,7 @@ A-S3's. The map should be corrected to say so; until it is, this paragraph is th
 | `PipelineResult` separating `blocked` (declined, reportable) from `escalated` (retries exhausted, a real problem) | `pipeline/model.py:102-123` |
 | `call_with_self_heal(items, system, build_user, verify_fn, ..., max_heal, build_heal_user, default_for)` — hard failures re-prompt **naming the defect per key**, soft failures are reported and never auto-retried | `pipeline/llm_caller.py:207-236` |
 | Heal budget is configurable; **default 3** | `pipeline/llm_caller.py:45,236` |
-| Vote resolution: 3-0 `high`, 2-1 `split` + minority, 1-1-1 `unresolved` with `value is None` | `adapters/demons/anchor/vote.py:16-40` |
+| Vote resolution: 3-0 `high`, 2-1 `split` + minority, 1-1-1 `unresolved` with `value is None` | `adapters/creatures/anchor/vote.py:16-40` |
 | Disagreement rate per field, reported as a deliverable | `anchor/vote.py:43-67`; `metrics/pipeline_health.py:37-39` |
 | TRANSIENT vs QUALITY split, stated in the runner's own docstring; `resume()` replays from checkpoint with `None` input | `workflow/runner.py:11-13,46-51` |
 | Offline guarantee as a test, not a claim | `tools/seedsmith/tests/test_classify_pipelines.py:36 (NOT test_offline_guarantee.py — that file PERMITS 127.*/localhost/::1/0.0.0.0, which is exactly where the model runs: llm_caller.py:40 endpoint http://localhost:1234):1-8` |

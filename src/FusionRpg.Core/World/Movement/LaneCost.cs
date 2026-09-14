@@ -1,4 +1,4 @@
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.World.Intel;
 
@@ -68,8 +68,8 @@ public static class BannerElement
         var counts = new Dictionary<ElementTypeId, int>();
         foreach (var member in entity.Members)
         {
-            if (!DemonSpeciesCatalog.IsKnown(member.SpeciesId)) continue;
-            var element = DemonSpeciesCatalog.Get(member.SpeciesId).ElementPrimary;
+            if (!CreatureSpeciesCatalog.IsKnown(member.SpeciesId)) continue;
+            var element = CreatureSpeciesCatalog.Get(member.SpeciesId).ElementPrimary;
             counts[element] = counts.TryGetValue(element, out var n) ? n + 1 : 1;
         }
 

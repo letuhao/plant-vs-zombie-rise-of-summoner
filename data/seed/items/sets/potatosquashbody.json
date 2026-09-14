@@ -25,7 +25,7 @@
       "id": "set.potatosquashbody-001",
       "nameKey": "set.the-flattened-tuber",
       "name": "The Flattened Tuber",
-      "themeKey": "demon.potatosquashbody",
+      "themeKey": "creature.potatosquashbody",
       "members": [
         {
           "role": "armament-primary",

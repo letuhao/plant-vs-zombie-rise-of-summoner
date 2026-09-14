@@ -16,10 +16,10 @@ public readonly record struct TreeSelfSpent(long NodeCount, long SoulLevels);
 /// pure COUNT over rows, order-free for the same reason the store's own read is: the row set is a
 /// property of the build, not of the route to it.</para>
 ///
-/// <para><b>Rule 4 (item-granted / aptitude-threshold / demon-aspect exclusion) has nothing to
+/// <para><b>Rule 4 (item-granted / aptitude-threshold / creature-aspect exclusion) has nothing to
 /// exclude today</b> — stated exactly, not glossed over (spec-tree-state.md §2.4's own note): no
 /// source other than the player's own spend can add a tree node right now
-/// (`SkillPointsPerThetaMilli` has zero production consumers, and aptitude-threshold/demon-aspect
+/// (`SkillPointsPerThetaMilli` has zero production consumers, and aptitude-threshold/creature-aspect
 /// skill-point grants exist in D2's list and nowhere in `src/`). So `RpgStore`'s owned-node dictionary
 /// IS already the self-spent set by construction, and this module's whole obligation under D39's
 /// parking is to say so in one place rather than let `H` silently assume it forever. The day a

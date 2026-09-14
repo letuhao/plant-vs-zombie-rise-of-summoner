@@ -25,7 +25,7 @@
       "id": "set.goldgarlic-001",
       "nameKey": "set.golden-garlic-bite",
       "name": "Golden Garlic Bite",
-      "themeKey": "demon.goldgarlic",
+      "themeKey": "creature.goldgarlic",
       "members": [
         {
           "role": "armament-primary",

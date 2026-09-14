@@ -1,4 +1,4 @@
-"""Tests for seedsmith.adapters.demons.preflight (spec-dump-preflight.md, demon-seed module 5)."""
+"""Tests for seedsmith.adapters.creatures.preflight (spec-dump-preflight.md, creature-seed module 5)."""
 from __future__ import annotations
 
 import json
@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from seedsmith.adapters.demons.preflight import (
+from seedsmith.adapters.creatures.preflight import (
     DEFAULT_DUMP_DIR,
     PreflightReport,
     check_1_dump_exists,
@@ -91,7 +91,7 @@ def test_truncated_dump_refuses_never_asks(tmp_path: Path):
 
 def test_hash_matches_the_real_committed_dump():
     # No fixture — this module's hash algorithm must agree byte-for-byte with the C#
-    # DumpWriter.ComputeContentHash that actually wrote data/seed/demons/_dump.
+    # DumpWriter.ComputeContentHash that actually wrote data/seed/creatures/_dump.
     result = check_2_dump_is_current(DEFAULT_DUMP_DIR)
     assert result.ok is True, result
 
@@ -224,7 +224,7 @@ def test_skip_model_record_is_rejected_by_run_control():
 
 def test_every_check_is_reachable_from_the_committed_module():
     # No check exists only in the gitignored skill — all nine are plain functions in this file.
-    import seedsmith.adapters.demons.preflight as mod
+    import seedsmith.adapters.creatures.preflight as mod
     for i in (1, 2, 3, 4, 5, 7, 8, 9):
         assert any(f"check_{i}" in name for name in dir(mod)), f"check {i} not found in preflight.py"
     assert "check_5_and_6_model" in dir(mod)  # check 6 is folded into the same function as 5

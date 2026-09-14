@@ -25,7 +25,7 @@
       "id": "set.bucketpaper-001",
       "nameKey": "set.iron-barrel-reader",
       "name": "Iron Barrel Reader",
-      "themeKey": "demon.bucketpaper",
+      "themeKey": "creature.bucketpaper",
       "members": [
         {
           "role": "core-guard",

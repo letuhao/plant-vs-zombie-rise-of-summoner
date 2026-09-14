@@ -55,7 +55,9 @@ export function PathLattice({
   /** The actor's OWN current power index (`AptitudesState.theta`), real per-actor data that changes
    * as the actor's build changes -- rendered on a locked tier's distance line as "your power is N
    * today," never the raw `Θ` glyph (`vocabularyGuard.ts`'s own BANNED_SYMBOLS: "a name on screen,
-   * never this letter" -- `ProgressionTab.tsx`/`AptitudesPage.tsx` both already say "power {theta}").
+   * never this letter" -- a deliberate, distance-line-only choice; `chip-honesty` (T10) since fixed
+   * the aptitude scope chip's own copy off "power {theta}" onto "Lv"/"Ladder", so this file's
+   * wording is this surface's own decision, not shared with those anymore).
    *
    * DISCLOSED SIMPLIFICATION: `spec-tree-surface.md` §9's own worked example ("about Θ 139 at your
    * current shape") reads as a PROJECTED power index -- the level the actor would need to reach this

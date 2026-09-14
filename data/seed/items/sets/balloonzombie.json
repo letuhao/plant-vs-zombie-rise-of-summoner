@@ -25,7 +25,7 @@
       "id": "set.balloonzombie-001",
       "nameKey": "set.kirov-s-tethered-husk",
       "name": "Kirov's Tethered Husk",
-      "themeKey": "demon.balloonzombie",
+      "themeKey": "creature.balloonzombie",
       "members": [
         {
           "role": "armament-primary",

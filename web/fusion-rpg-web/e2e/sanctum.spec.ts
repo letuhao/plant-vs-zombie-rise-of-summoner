@@ -141,10 +141,10 @@ test.describe("Sanctum home (T26)", () => {
         loyaltyMax: 1000
       })
     );
-    await page.route("**/api/demons/catalog", (route) => fulfillJson(route, { species: [] }));
-    await page.route("**/api/demons/*/codex", (route) => fulfillJson(route, { entries: [] }));
-    await page.route("**/api/demons/*/summon-state", (route) => fulfillJson(route, { pity: 0 }));
-    await page.route("**/api/demons/*", (route) =>
+    await page.route("**/api/creatures/catalog", (route) => fulfillJson(route, { species: [] }));
+    await page.route("**/api/creatures/*/codex", (route) => fulfillJson(route, { entries: [] }));
+    await page.route("**/api/creatures/*/summon-state", (route) => fulfillJson(route, { pity: 0 }));
+    await page.route("**/api/creatures/*", (route) =>
       fulfillJson(route, {
         playerId: 1,
         items: [{ profile: { instanceId: "d1", speciesId: "sp-imp", rarity: "epic", star: 1, elementPrimary: "fire", nickname: null }, actor: { level: 5 } }]
@@ -171,7 +171,7 @@ test.describe("Sanctum home (T26)", () => {
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
   });
 
-  // fe-essentials: AuditNav (the flat "AUDIT: Lawn/World/Roster/Demons/Storage" leftover sidebar,
+  // fe-essentials: AuditNav (the flat "AUDIT: Lawn/World/Roster/Creatures/Storage" leftover sidebar,
   // AppShell.tsx) is gone entirely — the plate's own design (00-foundation.html F.2, GG-40) never
   // had it, and its fixed 176px column was the direct cause of the mobile-viewport clipping this
   // program's visual pass found. Real replacements exist for two of its five links: SanctumHome's

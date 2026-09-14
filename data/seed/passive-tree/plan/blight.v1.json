@@ -925,11 +925,11 @@
     ],
     "counts": {
       "aptitudes": 12,
-      "demonFamilies": 19,
+      "creatureFamilies": 19,
       "elements": 6,
       "statuses": 24
     },
-    "demonFamilies": [
+    "creatureFamilies": [
       "base",
       "bucket",
       "cactus",

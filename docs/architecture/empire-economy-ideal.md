@@ -21,23 +21,23 @@ first, or every building is a guess.
 **Read with:** [economy-principles.md](economy-principles.md) (**the foundation — read first**) ·
 [world-graph-ideal.md](world-graph-ideal.md) §7 and §13 (what the map wants) ·
 [world-map-program.md](world-map-program.md) (what the map already is) ·
-[demons/spec-soul-economy.md](demons/spec-soul-economy.md) (the one ledger that already works) ·
+[creatures/spec-soul-economy.md](creatures/spec-soul-economy.md) (the one ledger that already works) ·
 [resource-hub-ssot.md](resource-hub-ssot.md) (**a different thing with the same name — see §2**).
 
 ---
 
 ## 1. What already exists, and it is more than it looks
 
-The empire has a wallet today. It was built for the demon game and nobody has called it an economy,
+The empire has a wallet today. It was built for the creature game and nobody has called it an economy,
 but it is one, and the map should bank into it rather than beside it.
 
 | What | Where | Shape |
 |---|---|---|
 | **Souls** | `rpg_soul_ledger` + `rpg_soul_balances` | Append-only ledger, watermarked balance projection, dedupe key per row, atomic `TrySpendSouls`, cold-archive + trim. This is the good one — copy its pattern, do not invent a second one |
-| **Essences** | `rpg_demon_materials(player_id, material_id, qty)` — `RpgStore.cs:520` | `essence.fire` … `essence.dark`, six concrete elements from `ElementRoster.Concrete` (`ActorElementTypes.cs:21`) |
-| **Rarity shards** | same table | `shard.common` · `shard.rare` · `shard.epic` · `shard.legendary` (`DemonMaterialCatalog.cs`) |
+| **Essences** | `rpg_creature_materials(player_id, material_id, qty)` — `RpgStore.cs:520` | `essence.fire` … `essence.dark`, six concrete elements from `ElementRoster.Concrete` (`ActorElementTypes.cs:21`) |
+| **Rarity shards** | same table | `shard.common` · `shard.rare` · `shard.epic` · `shard.legendary` (`CreatureMaterialCatalog.cs`) |
 
-Both material families are built by `DemonMaterialCatalog.Build()` and validated on every write
+Both material families are built by `CreatureMaterialCatalog.Build()` and validated on every write
 (`RpgStore.Expeditions.cs:209`, `RpgStore.Fusion.cs:391`). **The vocabulary is already closed and
 already enforced** — which is exactly the property we want, and also the reason a new resource
 cannot simply be typed into a string somewhere.
@@ -102,7 +102,7 @@ and feeding them was the whole reason the ideal wanted an essence extractor (§7
 ```
   ┌─ Tier 1 ── STOCK ───────────────┐        ┌─ Tier 2 ── TREASURY ─────────┐
   │ lives in WorldState             │        │ rpg_soul_ledger              │
-  │ per sector, unbanked            │  ship  │ rpg_demon_materials          │
+  │ per sector, unbanked            │  ship  │ rpg_creature_materials          │
   │ hashed by StateHasher           │ ─────▶ │ player-scope, ledgered       │
   │ replayed from the command log   │  home  │ spends on summon / fusion    │
   │ can be raided, cut off, lost    │        │ safe                         │
@@ -157,7 +157,7 @@ we have a build queue to feel it against — not before.
 
 **Recruits are not a stock.** A lair produces *bodies*, and a body becomes a `WorldEntityMember`
 inside a legion. Counting them as a currency would make them fungible, and the whole point of a
-demon is that it is not.
+creature is that it is not.
 
 ---
 
@@ -167,7 +167,7 @@ A **soul conduit** building is exactly right as a design: the summon feature nee
 player can *build* rather than only *earn*, and a mine is the readable version of that.
 
 It is also the one thing in this document that contradicts something already written down.
-[demons/spec-soul-economy.md](demons/spec-soul-economy.md), Boundaries:
+[creatures/spec-soul-economy.md](creatures/spec-soul-economy.md), Boundaries:
 
 > **Never:** … earning from anything but recorded Activity facts …
 
@@ -254,7 +254,7 @@ swallowed"*, and `WorldState.cs:95` as *"the homeworld, which the fracture never
 fiction already says the fracture swallows things and home is the exception. Nothing has ever made
 that true.
 
-**Name the force "the Fracture", not "chaos".** `chaos-marked` is already a shipped demon trait with
+**Name the force "the Fracture", not "chaos".** `chaos-marked` is already a shipped creature trait with
 essence-proc mechanics (`TraitBattleCatalog.cs:86`); a world-level force with the same word would
 collide in every search and every doc. "Fracture" is already the established vocabulary, in code.
 
@@ -465,7 +465,7 @@ carries loam out. One mechanism, two directions, and a supply line that is genui
 ### 8.6 Modifiers — where the interesting numbers live
 
 - **A garrison slows the fade.** Bodies standing on ground help hold it real. This is principle P11's
-  opportunity taken: labour becomes a *production input*, not only a cost, and the same demons are
+  opportunity taken: labour becomes a *production input*, not only a cost, and the same creatures are
   simultaneously an upkeep sink and an anchor. It also gives `hold` stance a third job.
 - **Sector type scales cost.** Storm and no-base ground costs more — the fracture is stronger there.
   A nexus costs more because it is a big junction.
@@ -668,13 +668,13 @@ A sector adjacent to faded ground fades faster.
 
 #### Wardens — spend a creature to hold a place
 
-**Bind a demon permanently to a sector. It becomes part of the ground. The sector stops fading.**
-You never get that demon back.
+**Bind a creature permanently to a sector. It becomes part of the ground. The sector stops fading.**
+You never get that creature back.
 
-- **Why it is derived:** loam is *"the ground remembers how to be ground"*. A demon that stays long
+- **Why it is derived:** loam is *"the ground remembers how to be ground"*. A creature that stays long
   enough becomes something the ground remembers. It is the same mechanic as a well, paid for with a
   life instead of geology.
-- **What it reuses:** `demon-contracts` shipped 2026-08-21 with **binding slots and loyalty** — the
+- **What it reuses:** `creature-contracts` shipped 2026-08-21 with **binding slots and loyalty** — the
   binding machinery exists. This is a new binding *target*, not a new system.
 - **The decision it creates:** the best one in the design. A roster sink that is **not** summoning,
   priced in something you cannot buy back, and aimed at a *territory* problem. Giving up a specific
@@ -752,7 +752,7 @@ Saying no is most of a design budget.
 | **Loam as a battle resource** | Scope collision with `resource-hub-ssot.md`'s five actor pools (§2.1). Loam is empire-scope. Two scopes, one word, is the mistake that document exists to prevent |
 | **Loam grades or tiers (raw / refined / pure)** | Violates **P7**. It is three UI rows and three balance surfaces to express one number, and no cost would be a `min(x, y)` bottleneck (**P4**) |
 | **The Fracture as a commanding faction with its own AI** | A third brain triples the AI balance surface to produce what a spread pass over `PressureMilli` produces for free. The Fracture is a **field**, not a commander. The Unmade it leaves behind are `Wild`, and `Wild` already stands fast |
-| **Loam upkeep on individual demons** | Upkeep belongs to *holdings*, not bodies — `demon-contracts` already charges a daily soul tribute per bound demon, and a second per-creature upkeep in a different currency is bookkeeping the player cannot hold in their head |
+| **Loam upkeep on individual creatures** | Upkeep belongs to *holdings*, not bodies — `creature-contracts` already charges a daily soul tribute per bound creature, and a second per-creature upkeep in a different currency is bookkeeping the player cannot hold in their head |
 | **Randomised loam yields per turn** | Determinism survives it (seeded), but planning does not. Anchoring is a *planning* mechanic; noise on the input makes the plan a guess. Variance belongs in the calendar's surges, where it is announced in advance |
 
 ### 9.5 Where the multiplication happens
@@ -839,8 +839,8 @@ Two alternatives, and both are worse for reasons worth recording:
 | Mostly bearers, lightly armed | A deep expedition — long leash, cannot win a fight, needs to avoid one |
 | All teeth, few bearers | A strike force — hits hard, short leash, must succeed quickly or come home |
 
-**And it gives junk demons a job.** Commons and duplicates that are not worth fusing become the
-logistics corps. [demon-system-map.md](demon-system-map.md) already names *"duplicate pressure"* as
+**And it gives junk creatures a job.** Commons and duplicates that are not worth fusing become the
+logistics corps. [creature-system-map.md](creature-system-map.md) already names *"duplicate pressure"* as
 the live problem that made fusion the next sink; bearers are a second outlet for it, and one that
 does not consume the specimen.
 
@@ -959,14 +959,14 @@ slipping, not read about it having slipped.
 #### G8 · Does loam ever bank into the player's treasury?
 
 **No — loam is Tier 1 only.** It is spent where it is, on the map, and never enters
-`rpg_demon_materials` or any player-scope wallet. §3's two-tier ship-it-home seam applies to
+`rpg_creature_materials` or any player-scope wallet. §3's two-tier ship-it-home seam applies to
 **essence and souls**; loam never crosses it. That is a simplification worth having explicitly:
 one fewer thing on the home screen, and one fewer conversion to police under **P5**.
 
 #### G9 · Does a warden still cost daily soul tribute?
 
-No. Binding a demon as a warden **consumes the specimen and frees its binding slot**, ending its
-`demon-contracts` daily tribute. So a warden is a permanent cost to the *roster* and a permanent
+No. Binding a creature as a warden **consumes the specimen and frees its binding slot**, ending its
+`creature-contracts` daily tribute. So a warden is a permanent cost to the *roster* and a permanent
 **relief** to the *soul economy* — two economies touching in one decision, which is exactly the sort
 of thing that makes a choice memorable rather than arithmetic.
 

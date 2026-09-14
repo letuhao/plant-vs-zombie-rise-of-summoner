@@ -66,12 +66,12 @@ public class ZombossPatternTests
         var tuning = ShippedTuning();
         var pattern = ZombossPatterns.Resolve("force-defence-bastion-breaks-guard");
 
-        var smallBudget = PointBudget.PointsFor(AllocationScope.DemonType, sourceValue: 10, tuning);
-        var largeBudget = PointBudget.PointsFor(AllocationScope.DemonType, sourceValue: 5000, tuning);
+        var smallBudget = PointBudget.PointsFor(AllocationScope.CreatureType, sourceValue: 10, tuning);
+        var largeBudget = PointBudget.PointsFor(AllocationScope.CreatureType, sourceValue: 5000, tuning);
         Assert.True(largeBudget > smallBudget * 100, "expected the Theta=5000 budget to be dramatically larger, or this test proves nothing");
 
-        var small = pattern.ToAllocation(AllocationScope.DemonType, smallBudget);
-        var large = pattern.ToAllocation(AllocationScope.DemonType, largeBudget);
+        var small = pattern.ToAllocation(AllocationScope.CreatureType, smallBudget);
+        var large = pattern.ToAllocation(AllocationScope.CreatureType, largeBudget);
 
         foreach (var aptitudeId in pattern.SharePermille.Keys)
         {
@@ -90,11 +90,11 @@ public class ZombossPatternTests
         // spec §2 point 4, the anti-cheat: "a pattern is an allocation from the SAME finite pool the
         // player draws on." Every pattern, at a real budget, must spend AT MOST that budget -- never more.
         var tuning = ShippedTuning();
-        var budget = PointBudget.PointsFor(AllocationScope.DemonType, sourceValue: 100, tuning);
+        var budget = PointBudget.PointsFor(AllocationScope.CreatureType, sourceValue: 100, tuning);
 
         foreach (var id in ZombossPatterns.All)
         {
-            var allocation = ZombossPatterns.Resolve(id).ToAllocation(AllocationScope.DemonType, budget);
+            var allocation = ZombossPatterns.Resolve(id).ToAllocation(AllocationScope.CreatureType, budget);
             Assert.True(allocation.GrandTotal() <= budget,
                 $"{id}: spent {allocation.GrandTotal()} against a budget of {budget}");
         }

@@ -11,6 +11,11 @@ public static class ContributionSourceIds
     /// <summary>UniqueActor Hub base resource.max/regen seed (Condition /sheet pools).</summary>
     public const string ResourceBaseline = "rpg.resource.base";
 
+    /// <summary>Battle baseline seeds (defense/accuracy/dodge/crit/affinity/tempo) re-homed from
+    /// BattleStatComposer — same dotted-const shape as <see cref="ResourceBaseline"/>, not a new
+    /// grammar family. Follow-up: confirm the fiction label for sheet surfaces.</summary>
+    public const string BattleBaseline = "rpg.battle.base";
+
     public static string Equip(string role, string itemRefId)
     {
         var r = string.IsNullOrWhiteSpace(role) ? "unknown" : role.Trim();

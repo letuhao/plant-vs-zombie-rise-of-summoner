@@ -25,7 +25,7 @@
       "id": "set.cherrythreepeater-001",
       "nameKey": "set.three-line-marksman",
       "name": "Three-Line Marksman",
-      "themeKey": "demon.cherrythreepeater",
+      "themeKey": "creature.cherrythreepeater",
       "members": [
         {
           "role": "armament-primary",

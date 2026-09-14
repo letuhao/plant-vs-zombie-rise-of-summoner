@@ -21,7 +21,7 @@ type ActorDtoShape = Parameters<typeof adaptActor>[0];
  * (buff-debuff-scope-ideal.md §5), so this page exists to prove the component works end to end ahead
  * of that feature, the same way the Actor ladder shipped ahead of Creatures/Sanctum.
  *
- * UniqueDemon candidates come from the roster (instanceId). Target candidates must carry an
+ * UniqueCreature candidates come from the roster (instanceId). Target candidates must carry an
  * explicit board/world targetPtr — demo uses a synthetic ptr, never the specimen instanceId.
  */
 export function ActorMenuScopePickerDemoPage() {
@@ -82,7 +82,7 @@ export function ActorMenuScopePickerDemoPage() {
           value={value}
           onChange={setValue}
           targetCandidates={targetCandidates}
-          uniqueDemonCandidates={uniqueCandidates}
+          uniqueCreatureCandidates={uniqueCandidates}
           typeOptions={typeOptions}
         />
         <div>

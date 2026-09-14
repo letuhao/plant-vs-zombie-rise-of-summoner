@@ -42,8 +42,8 @@ These are real effects with no definition anywhere — the number *is* the desig
 
 | # | Site | The magnitude | Evidence | On adoption |
 |---|---|---|---|---|
-| B1 | Patron aura | `clamp(rarityBase + 10×star + level, 0, 150)` ‰; primary element full power, half defence | `Core/Demons/Patron/PatronPolicy.cs:33` | The aura grant already exists as a marker with no overlay. Magnitudes become atom values on a container |
-| B2 | Star merge | `PerStarPowerMilli = 30`, `PerStarDefenseMilli = 30` | `Core/Demons/Fusion/StarPolicy.cs:10` | A per-star container of two stat atoms, or stays a progression curve — a fusion-spec call |
+| B1 | Patron aura | `clamp(rarityBase + 10×star + level, 0, 150)` ‰; primary element full power, half defence | `Core/Creatures/Patron/PatronPolicy.cs:33` | The aura grant already exists as a marker with no overlay. Magnitudes become atom values on a container |
+| B2 | Star merge | `PerStarPowerMilli = 30`, `PerStarDefenseMilli = 30` | `Core/Creatures/Fusion/StarPolicy.cs:10` | A per-star container of two stat atoms, or stays a progression curve — a fusion-spec call |
 | B3 | Expedition injury | writes `combat.power.omni −max(1, Atk/4)` straight onto the actor setup | `Core/Expeditions/ExpeditionResolver.cs:56,246` | Clearest case of an effect with no def. Becomes a temporary bound container — and gains a power price for free |
 | B4 | Lane cost | per-lane-type `CostMultiplierMilli`, `LeyDiscountMilli = 800` | `Core/World/LaneTypeCatalog.cs`, `World/Movement/LaneCost.cs:62` | **Adjacent, probably not an atom** — terrain economics, not an actor effect. Listed so the world stream can decide, not because we claim it |
 
@@ -108,7 +108,7 @@ Status values: `not started` · `contract accepted` · `in migration` · `adopte
 | A4 | Items | items (none yet) | not started | an item spec existing at all |
 | A5 | VFX cue mirror | vfx | not started | atom ids being stable |
 | A6 | Innate shields | shield | not started | item containers |
-| B1 | Patron aura | demons | not started | atom schema |
+| B1 | Patron aura | creatures | not started | atom schema |
 | B2 | Star merge | fusion | not started | product call: container or curve |
 | B3 | Expedition injury | standalone | not started | atom schema |
 | B4 | Lane cost | world | **out of scope unless the world stream says otherwise** | — |

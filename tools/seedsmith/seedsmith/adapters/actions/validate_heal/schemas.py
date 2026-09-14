@@ -205,7 +205,7 @@ SCHEMAS_BY_PIPELINE: "dict[str, dict[str, Any]]" = {
 #: constraint 3): `atomFamilies` for A-P1/A-P2; `atomFamilies` + `differentiator` for A-P3. Adding a
 #: field here is an "ask first" boundary (moves the call budget by a third of the run) --- pinned as
 #: a literal mapping so a sixth field needs a deliberate code change, matching
-#: `adapters/demons/anchor/vote.py`'s own `VOTED_FIELDS` frozenset discipline.
+#: `adapters/creatures/anchor/vote.py`'s own `VOTED_FIELDS` frozenset discipline.
 VOTED_FIELDS_BY_PIPELINE: "dict[str, tuple[str, ...]]" = {
     "A-P1": ("atomFamilies",), "A-P2": ("atomFamilies",), "A-P3": ("atomFamilies", "differentiator"),
 }

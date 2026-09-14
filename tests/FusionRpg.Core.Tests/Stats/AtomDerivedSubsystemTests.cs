@@ -149,18 +149,21 @@ public class AtomDerivedSubsystemTests
         Assert.False(AtomDerivedSubsystem.TryParseOp(op, out _));
     }
 
-    [Fact] // A8 — the lawn opened; E5 (2026-09-06) opened sim too, but only PARTIALLY
-    public void Lawn_is_now_supported_battle_stays_supported_and_sim_opens_partially()
+    [Fact] // A8 — the lawn opened; E5 (2026-09-06) opened sim too, then T15 finished it
+    public void Lawn_battle_and_sim_are_all_fully_supported()
     {
-        // Sim's fold (ActorDerivedLookup, reached by SimEffectHost/FoundationHarness) is a plain sum
-        // that honours Flat/Increased and not Replace/Flag -- proven empirically by
-        // EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial -- so the cell reads
-        // Partial, not Full. Renamed from "..._and_sim_stays_refused", which is no longer true.
+        // Sim's fold (ActorDerivedLookup, reached by SimEffectHost/FoundationHarness) was a plain sum
+        // that honoured Flat/Increased and not Replace/Flag -- proven empirically by
+        // EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial -- so the cell read
+        // Partial, not Full, from E5 (2026-09-06) until sim-hub-parity (T15, 2026-09-13) routed the
+        // fold through DerivedComposer.ComposeChannelWithBaseline. Renamed from
+        // "..._and_sim_stays_refused", then from "..._and_sim_opens_partially", neither of which
+        // stayed true.
         var kind = AtomKindRegistry.Get("stat.derived");
         Assert.NotNull(kind);
         Assert.Equal(RuntimeState.Full, kind!.Support.Lawn);
         Assert.Equal(RuntimeState.Full, kind.Support.Battle);
-        Assert.Equal(RuntimeState.Partial, kind.Support.Sim);
+        Assert.Equal(RuntimeState.Full, kind.Support.Sim);
     }
 
     [Fact] // A8 — and the scope table agrees with the kind matrix on both hosts

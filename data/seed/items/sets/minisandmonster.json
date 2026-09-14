@@ -25,7 +25,7 @@
       "id": "set.minisandmonster-001",
       "nameKey": "set.sandstorm-wanderer",
       "name": "Sandstorm Wanderer",
-      "themeKey": "demon.minisandmonster",
+      "themeKey": "creature.minisandmonster",
       "members": [
         {
           "role": "armament-primary",

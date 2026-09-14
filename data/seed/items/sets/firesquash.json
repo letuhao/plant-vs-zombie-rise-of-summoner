@@ -25,7 +25,7 @@
       "id": "set.firesquash-001",
       "nameKey": "set.gourd-of-converging-embers",
       "name": "Gourd of Converging Embers",
-      "themeKey": "demon.firesquash",
+      "themeKey": "creature.firesquash",
       "members": [
         {
           "role": "core-guard",

@@ -175,7 +175,7 @@ zero misses).
 
 `dotnet test tests/FusionRpg.Core.Tests` (filtered to Power/CostFunction/ContentValidation/
 PowerInteraction/ActorPowerTests/RungPowerBudgetTests): **260/260 passing**. Full suite: **6558/6572
-passing** — the 14 remaining failures are pre-existing and unrelated (Battle/Demons.StarPolicy/
+passing** — the 14 remaining failures are pre-existing and unrelated (Battle/Creatures.StarPolicy/
 Expeditions/ClassSystem.ProveAptitude, all failing on an unconfigured `BattleStatComposer`/tuning
 bootstrap gap from other uncommitted work this session, none touching Power/Atoms/
 ContentValidation). One genuinely related, pre-existing stale assertion was found and fixed:

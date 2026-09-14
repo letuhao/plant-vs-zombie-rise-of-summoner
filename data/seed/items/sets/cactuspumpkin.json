@@ -25,7 +25,7 @@
       "id": "set.cactuspumpkin-001",
       "nameKey": "set.spiny-gourd",
       "name": "Spiny Gourd",
-      "themeKey": "demon.cactuspumpkin",
+      "themeKey": "creature.cactuspumpkin",
       "members": [
         {
           "role": "armament-primary",

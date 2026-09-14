@@ -37,20 +37,18 @@ namespace FusionRpg.Data.Tests.Items;
 /// </summary>
 public class ItemCardStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ItemCardStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-itemcard-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     // ---- the real corpus ------------------------------------------------------------------------------
@@ -508,10 +506,6 @@ public class ItemCardStoreTests : IDisposable
     public void An_item_under_the_rare_threshold_is_named_by_the_affix_grammar()
     {
         var f = SeedWorld();
-        var instance = _store.GetInstance(f.InstanceId)!;
-        var container = _store.GetContainer(f.ContainerId)!;
-        var drawnFamily = _store.GetAtom(
-            instance.Atoms.First(a => container.Atoms.All(c => c.Seq != a.Seq)).AtomId)!.FamilyId;
 
         // Raise the threshold above this item's affix count so the grammar path runs against a real,
         // already-minted instance rather than needing a second fixture.
@@ -519,9 +513,20 @@ public class ItemCardStoreTests : IDisposable
         ItemsTuningHub.Configure(previous with { RareNameThreshold = 99 });
         try
         {
+            // The item rolls three prefixes, and `BestWord` picks the highest-tier one — NOT
+            // necessarily the family `drawnFamily` names. Stubbing only one family made this test
+            // depend on which affix won the roll, so it broke whenever the generated pool changed.
+            // The contract under test is the grammar itself (word + authored base name), so the stub
+            // supplies a Probe word for EVERY family the corpus asks about.
+            var probe = new AffixNameSlot(AffixClass.Prefix, new[]
+            {
+                new AffixNameRow("A", null, "Probe-A", null),
+                new AffixNameRow("B", null, "Probe-B", null),
+                new AffixNameRow("C", null, "Probe-C", null),
+            });
             var corpus = Corpus() with
             {
-                LookupNameWords = NameWordsFor(drawnFamily, "atom.not-drawn"),
+                LookupNameWords = _ => probe,
                 RareNameDraw = _ => ("never", "used"),
             };
 
@@ -857,23 +862,14 @@ public class ItemCardStoreTests : IDisposable
     [Fact]
     public void The_card_renders_from_item_display_template_rows_and_refuses_without_them()
     {
-        var freshDir = Path.Combine(Path.GetTempPath(), "fusionrpg-itemcard-nodisplay-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(freshDir);
-        try
-        {
-            var f = SeedWorld();
-            Assert.NotEmpty(_store.ListDisplayTemplates());
+        var f = SeedWorld();
+        Assert.NotEmpty(_store.ListDisplayTemplates());
 
-            // Same store, same item, but ask for a family the table does not have: the lookup the DAL
-            // handed over returns null and the renderer refuses rather than printing a raw id.
-            var input = _store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f))!;
-            Assert.Null(input.LookupTemplate("atom.not-a-family"));
-            Assert.NotNull(input.LookupTemplate(
-                f.Atoms.First(a => _store.GetDisplayTemplate(a.FamilyId) is not null).FamilyId));
-        }
-        finally
-        {
-            try { Directory.Delete(freshDir, recursive: true); } catch { /* temp dir */ }
-        }
+        // Same store, same item, but ask for a family the table does not have: the lookup the DAL
+        // handed over returns null and the renderer refuses rather than printing a raw id.
+        var input = _store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f))!;
+        Assert.Null(input.LookupTemplate("atom.not-a-family"));
+        Assert.NotNull(input.LookupTemplate(
+            f.Atoms.First(a => _store.GetDisplayTemplate(a.FamilyId) is not null).FamilyId));
     }
 }

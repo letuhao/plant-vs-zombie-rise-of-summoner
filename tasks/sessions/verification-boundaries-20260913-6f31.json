@@ -1,0 +1,32 @@
+{
+  "session": "verification-boundaries-20260913-6f31",
+  "program": "verification-boundaries",
+  "problem": "Build a path-owned verification-boundary system so agents select the smallest correct local test and guard set without running an unfiltered full suite for a narrow change.",
+  "mode": "direct",
+  "branch": "features/derived-stat-extension",
+  "worktree": null,
+  "paths": [
+    "docs/architecture/verification-boundaries-map.md",
+    "docs/architecture/verification-boundaries/**",
+    "scripts/verification-boundary-inventory.ps1",
+    "scripts/verification-boundaries.v1.json",
+    "scripts/verify-change.ps1",
+    "scripts/guard-verification-boundaries.ps1",
+    "scripts/lib/VerificationBoundaries.ps1",
+    "scripts/test-fast.ps1",
+    "scripts/deploy-play.ps1",
+    "tests/FusionRpg.Guard.Tests/VerificationBoundary*.cs",
+    ".github/workflows/ci.yml",
+    "docs/contributing/testing-standard.md",
+    "docs/contributing/dev-setup.md",
+    "AGENTS.md",
+    "tasks/verification-boundaries-plan.md",
+    "tasks/verification-boundaries-todo.md",
+    "tasks/sessions/verification-boundaries-20260913-6f31.json"
+  ],
+  "started": "2026-09-13T20:10:37Z",
+  "status": "active",
+  "sharedWith": ["solid-run-20260912-eb53"],
+  "sharedNote": "The solid-run worktree claims broad Guard.Tests/deploy/dev-setup paths but its current diff changes DebugScopeGuardTests and unrelated deploy/dev-setup regions. This session owns new VerificationBoundary* test files and the verification-path workflow regions only; compare concrete regions before either session changes a shared file.",
+  "scopeNote": "The session-boundary checker reports a pre-existing unclaimed worktree-agent-a4497053e6313d493. It does not overlap this session's paths."
+}

@@ -154,7 +154,7 @@ async function mockPresetApis(page: import("@playwright/test").Page) {
 }
 
 test.describe("Aptitude preset console (AS-3.4/3.5)", () => {
-  test("open → save → activate commits UniqueDemon via activate API only", async ({ page }) => {
+  test("open → save → activate commits UniqueCreature via activate API only", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await mockShell(page);
     await mockPresetApis(page);

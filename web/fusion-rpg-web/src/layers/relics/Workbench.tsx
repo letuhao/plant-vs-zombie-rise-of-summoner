@@ -2,7 +2,7 @@ import { useState } from "react";
 import { adaptWorkbenchOutcome, idWords } from "@/contract/adapt";
 import type { WorkbenchOutcomeView } from "@/contract/types";
 import { formatMagnitude } from "@/i18n/magnitude";
-import { newCorrelationId } from "@/lib/bus/demons";
+import { newCorrelationId } from "@/lib/bus/creatures";
 import {
   useEnhanceItem,
   useSalvageItem,

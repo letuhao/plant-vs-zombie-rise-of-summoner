@@ -24,7 +24,7 @@
         "sha256": "07fa43c7ece05ef367396813e47d0813843988ff74eb58122f3c48990936a9a6"
       },
       {
-        "path": "data/seed/demons/_registry/families.v1.json",
+        "path": "data/seed/creatures/_registry/families.v1.json",
         "sha256": "4a4ccf60746f6c129506be03981549686882523921852707c0d6bd7b1d08e755"
       },
       {
@@ -535,12 +535,12 @@
     ],
     "counts": {
       "aptitudes": 12,
-      "demonFamilies": 19,
+      "creatureFamilies": 19,
       "elements": 6,
       "statuses": 24,
       "trees": 42
     },
-    "demonFamilies": [
+    "creatureFamilies": [
       "base",
       "bucket",
       "cactus",

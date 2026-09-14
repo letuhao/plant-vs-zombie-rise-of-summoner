@@ -1,5 +1,5 @@
 """The dungeon schema audit (D1.7, spec-dungeon-seed-contract.md §2). Reuses the four smuggling
-shapes `adapters/demons/anchor/audit.py`'s `numeric_audit` already checks (a bare numeric type, a
+shapes `adapters/creatures/anchor/audit.py`'s `numeric_audit` already checks (a bare numeric type, a
 pattern admitting a bare digit string, an all-numeric-string enum, a deny-listed field name) —
 duplicated here rather than imported, because that function's allow-list is a hard-coded relative
 import of its OWN sibling `schema.py`; this module needs the SAME shape against the dungeon
@@ -17,7 +17,7 @@ from ...pipeline.model import NUMERIC_JSON_TYPES
 from .schema import ALLOWLISTED_INTEGER_FIELDS, PLANNED_FIELDS_BY_KIND, SCHEMA_BUILDERS, build_schema
 
 #: Field names (case-insensitive, exact) that name a magnitude outright regardless of declared
-#: type — the demons/anchor/audit.py precedent, mirrored so a magnitude smuggled as a "closed"
+#: type — the creatures/anchor/audit.py precedent, mirrored so a magnitude smuggled as a "closed"
 #: string enum of digits cannot pass either.
 MAGNITUDE_DENY_NAMES = frozenset({
     "hp", "atk", "attack", "damage", "defense", "armor", "cost", "weight", "chance", "permille",
@@ -88,7 +88,7 @@ def _field_name_is_magnitude(name: str) -> bool:
 
 def numeric_audit(schema: Mapping[str, Any], *, path: str = "$", field_name: "str | None" = None) -> "list[AuditDefect]":
     """Walks `properties`/`items`/`anyOf`/`oneOf`/`allOf`, reporting all smuggling shapes: the four
-    base cases (demons/anchor/audit.py precedent) plus the dungeon-specific stem check and
+    base cases (creatures/anchor/audit.py precedent) plus the dungeon-specific stem check and
     spelled-number check."""
     defects: "list[AuditDefect]" = []
     allowlisted = field_name in ALLOWLISTED_INTEGER_FIELDS

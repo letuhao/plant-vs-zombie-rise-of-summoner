@@ -25,7 +25,7 @@
       "id": "set.silvermelon-001",
       "nameKey": "set.silver-melon-launcher",
       "name": "Silver Melon Launcher",
-      "themeKey": "demon.silvermelon",
+      "themeKey": "creature.silvermelon",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.eternalzombie-c-001",
       "nameKey": "set.the-uprising-banner",
       "name": "The Uprising Banner",
-      "themeKey": "demon.eternalzombie_c",
+      "themeKey": "creature.eternalzombie_c",
       "members": [
         {
           "role": "armament-primary",

@@ -1,6 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Data;
@@ -39,12 +39,12 @@ public sealed partial class RpgStore
     /// a specimen born this way is distinguishable in its own history from a player summon/fusion/quest
     /// mint without needing a separate table.
     /// </summary>
-    public DemonSpecimenDto MintForZomboss(string speciesId, ulong seed)
+    public CreatureSpecimenDto MintForZomboss(string speciesId, ulong seed)
     {
         var zomboss = EnsureZombossPlayer();
-        var species = Core.Demons.DemonSpeciesCatalog.Get(speciesId);
+        var species = Core.Creatures.CreatureSpeciesCatalog.Get(speciesId);
         var traits = SummonRoller.RollTraits(species, species.BaseRarity, SeededRng.DeriveStream(seed, "zomboss-deploy-ai:mint"));
-        var (specimen, _) = MintDemon(zomboss.Id, new DemonMintSpec
+        var (specimen, _) = MintCreature(zomboss.Id, new CreatureMintSpec
         {
             SpeciesId = species.SpeciesId,
             Side = species.Side,

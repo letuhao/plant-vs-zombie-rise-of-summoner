@@ -25,7 +25,7 @@
       "id": "set.jalapenozombie-001",
       "nameKey": "set.pepper-zombie-volley",
       "name": "Pepper Zombie Volley",
-      "themeKey": "demon.jalapenozombie",
+      "themeKey": "creature.jalapenozombie",
       "members": [
         {
           "role": "armament-primary",

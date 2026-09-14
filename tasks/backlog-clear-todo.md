@@ -381,7 +381,7 @@ U14 signed off 2026-08-31, so the waves are all that remain.
     not as a `const`.
   - **⛔ It moves goldens, and the size is measured rather than guessed: 4 of 24 shipped species
     carry a secondary element** (Light, Ice, Fire, Dark — counted in
-    `DemonSpeciesCatalog.Generated.cs`). Every battle involving one currently attacks as pure
+    `CreatureSpeciesCatalog.Generated.cs`). Every battle involving one currently attacks as pure
     primary and would afterwards attack split. That is a `RulesetVersion` bump plus a
     predicted-delta writeup, on the same discipline the Battle time model row already records.
   - **The zero-content invariant to assert** (Wave R's own shape, applied here): an actor with **no**

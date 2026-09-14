@@ -12,7 +12,7 @@ One capability, one spec. Module id: `shield-system`. §10 records the one hard 
 
 1. **RPG-combat-only, locked permanently.** Shields absorb RPG damage only. Vanilla PVZ damage (bites, pea hits, Unity `TakeDamage`) is never absorbed — a shielded plant can still die to in-game damage, by design. We extend our combat, we do not change the PVZ game. No vanilla-refund variant, ever.
 2. **Regen = constant trickle.** No after-hit delay in v1 (future grant field, ask-first).
-3. **Guardian aura targeting is in this spec's scope** — with the honest scope split the audit forced: this spec ships multi-target area grants and the cadence path; the `trait.guardian` → grant-template wiring stays with the demon deploy-facing module where demon V1 explicitly deferred it (§2.6).
+3. **Guardian aura targeting is in this spec's scope** — with the honest scope split the audit forced: this spec ships multi-target area grants and the cadence path; the `trait.guardian` → grant-template wiring stays with the creature deploy-facing module where creature V1 explicitly deferred it (§2.6).
 4. **Innate shields allowed** — content rows auto-grant at actor registration (barrier rule in §2.6).
 5. **Channels live under `combat.shield.*`** in the combat family catalog; catalog grows 56 → 84. Verified safe: nothing parses channel segments, and `combat.crit.resist.damage.*` is existing 4-segment precedent.
 6. **Shields get their own matchup matrix** (`ShieldElementMatrix`), seeded from the ring relations but independently editable.
@@ -23,7 +23,7 @@ One capability, one spec. Module id: `shield-system`. §10 records the one hard 
 
 ## 1. Objective
 
-Give the RPG a second defensive resource next to HP: an element-typed, depletable **shield pool** absorbed above the Funnel HP write, plus four derived-stat families that scale it. Shields are what a summoner *grants* — guardian demons shield areas, skills shield plants, elite zombies arrive innately shielded — while HP stays the vanilla-owned life bar.
+Give the RPG a second defensive resource next to HP: an element-typed, depletable **shield pool** absorbed above the Funnel HP write, plus four derived-stat families that scale it. Shields are what a summoner *grants* — guardian creatures shield areas, skills shield plants, elite zombies arrive innately shielded — while HP stays the vanilla-owned life bar.
 
 Success looks like: a granted or innate shield absorbs overlay damage deterministically, breaks with an event and a VFX cue, responds to the four stat families — with byte-identical combat output when no shield is present, zero change to vanilla damage always, and the same `ShieldMath` numbers available to the standalone engine the day Battle-C2 routes its damage through the shared pipeline (§10).
 
@@ -148,10 +148,10 @@ Note per-layer `breakerDelta` charges flat pen fresh at every layer — bounded 
 
 **Aura targeting (in scope — owner decision 3, audit-corrected vocabulary and scope split).**
 
-- *Cadence:* auras ride the **existing `OnTimer` effect trigger** — an aura is an effect grant whose timer fires the `shield.grant` action on its period. No new "trait pulse" mechanism (none exists; the audit confirmed trait→grant wiring was explicitly deferred out of demon V1).
+- *Cadence:* auras ride the **existing `OnTimer` effect trigger** — an aura is an effect grant whose timer fires the `shield.grant` action on its period. No new "trait pulse" mechanism (none exists; the audit confirmed trait→grant wiring was explicitly deferred out of creature V1).
 - *Targeting:* `shield.grant` accepts the **actual** `TargetResolver` vocabulary — `Actor` (self), `Area` with shapes `Row` (lane), `Square`/`Rectangle`, plus the existing pool filters (`side`, `row`/`col`, `excludeMindControlled`). There is no radius shape and no ally-relative side filter today; v1 auras use `Square` areas and an explicit absolute `side` from the grant content. Adding a true radius shape or a `side: "same"` relative token is a `TargetResolver` (shared combat file) extension — **ask first**.
 - *Application:* one `ShieldRuntime.Apply` per resolved target, `refillOnMerge = false`, idempotent via §2.5. Aura work runs on grant cadence, never per hit.
-- *Scope split:* this spec ships and tests the full aura path (OnTimer grant → area resolve → multi-apply). Wiring `trait.guardian`'s grant template to demon deploys stays with the demon stream, which owns trait→grant templates.
+- *Scope split:* this spec ships and tests the full aura path (OnTimer grant → area resolve → multi-apply). Wiring `trait.guardian`'s grant template to creature deploys stays with the creature stream, which owns trait→grant templates.
 
 **Events (audit-corrected: string envelope stream, not the hot ring).** `shield.granted`, `shield.absorbed`, `shield.broken`, `shield.expired` are **observability events on the string event stream** — shields are Core runtime state like statuses, and putting them in the v2 ring would cost 4 enum slots, `ToDto` arms in a fail-open switch, and a contradiction with `IsCoalescible`'s `SourceGrantIdx < 0` rule. Instead:
 
@@ -238,7 +238,7 @@ Shield-as-actor with subsystem registration; ImmunityShield / ReflectionShield /
 ## 10. Dependencies and sequencing
 
 - **Standalone absorption is blocked on Battle-C2** (match-source-core: battle-local `EffectFunnel` + shared combat channels; today `BattleEngine` mutates HP directly and never touches the dispatcher). This spec keeps `ShieldRuntime`/`ShieldMath` engine-agnostic and Battle-C2 inherits shields by routing through the shared dispatcher — but "same numbers in both modes" is a claim C2 completes, not this spec. §11 splits the criteria accordingly.
-- **`trait.guardian` template wiring** belongs to the demon deploy-facing module (deferred there by demon V1); this spec delivers the aura mechanism it will call.
+- **`trait.guardian` template wiring** belongs to the creature deploy-facing module (deferred there by creature V1); this spec delivers the aura mechanism it will call.
 - **VFX cue art** for `shield.broken` lands via the VFX stream; this spec registers the cue id and emit point.
 
 ## 11. Success criteria

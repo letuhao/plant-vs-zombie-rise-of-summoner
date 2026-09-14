@@ -15,12 +15,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from seedsmith.adapters.actions.coverage_assignment.derive import (  # noqa: E402
     MissingForcedEnablerError, assign_required_families, load_current_usage,
-    sort_population_by_usage, usage_counts_from_report,
+    sort_population_by_usage, splice_payoff_enablers, usage_counts_from_report,
 )
 from seedsmith.adapters.actions.vocab import load_family_ids  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 USAGE_REPORTS_DIR = REPO_ROOT / "docs" / "research" / "action-corpus"
+ACTIONS_ROOT = REPO_ROOT / "data" / "seed" / "actions"
+PLAN_PATH = ACTIONS_ROOT / "_briefs" / "round-1.json"
+PAIRINGS_PATH = ACTIONS_ROOT / "pairings.json"
 FAMILY_IDS = load_family_ids()
 
 
@@ -174,6 +177,100 @@ class RealDataProofTests(unittest.TestCase):
         missing = never_used - assigned
         self.assertEqual(missing, set(),
                          f"real never-used families never assigned within one full pass: {missing}")
+
+
+class PayoffExclusionTests(unittest.TestCase):
+    """G1 (2026-09-12): the non-pairing round-robin must never require a payoff key, because only a
+    `role: payoff` brief carries a matching enabler and species-scope briefs are never pairing briefs.
+    Measured before the fix: 74 live anchors required `atom.rot-punisher` with no possible enabler."""
+
+    PAYOFFS = ("atom.rot-punisher", "atom.chill-punisher")
+
+    def test_round_robin_never_assigns_a_payoff_key(self) -> None:
+        population = [f for f in FAMILY_IDS if f not in self.PAYOFFS]
+        entries = [_brief(f"b{i}", role="none") for i in range(len(FAMILY_IDS) * 2)]
+        out = assign_required_families(entries, usage_counts={}, family_ids=FAMILY_IDS,
+                                      payoff_families=self.PAYOFFS)
+        assigned = {v[0] for v in out.values() if v}
+        self.assertEqual(assigned & set(self.PAYOFFS), set(),
+                         "a payoff key reached a role:none brief")
+        self.assertEqual(assigned, set(population))
+
+    def test_a_pairing_brief_still_names_its_payoff_key(self) -> None:
+        entry = {"briefId": "b0", "pairing": {"role": "payoff",
+                                              "pairedPayoffFamily": "atom.rot-punisher"}}
+        out = assign_required_families([entry], usage_counts={}, family_ids=FAMILY_IDS,
+                                       payoff_families=self.PAYOFFS)
+        self.assertEqual(out["b0"], ["atom.rot-punisher"])
+
+    def test_default_payoff_set_is_backward_compatible(self) -> None:
+        entries = [_brief(f"b{i}", role="none") for i in range(len(FAMILY_IDS))]
+        with_default = assign_required_families(entries, usage_counts={}, family_ids=FAMILY_IDS)
+        population = sort_population_by_usage(FAMILY_IDS, {})
+        self.assertEqual(with_default["b0"], [population[0]])
+
+
+class RealPlanPayoffTests(unittest.TestCase):
+    """G1 against the REAL committed plan: no `role: none` brief requires a payoff key, and both
+    payoff keys stay covered through their own pairing briefs (the fix loses no coverage)."""
+
+    def test_no_real_none_brief_requires_a_payoff_key(self) -> None:
+        if not PLAN_PATH.is_file() or not PAIRINGS_PATH.is_file():
+            self.skipTest("real plan/pairings not present in this checkout")
+        plan = json.loads(PLAN_PATH.read_text(encoding="utf-8"))
+        pairings = json.loads(PAIRINGS_PATH.read_text(encoding="utf-8"))
+        payoffs = set(pairings)
+        offenders = [e["briefId"] for e in plan["entries"]
+                     if (e.get("pairing") or {}).get("role") == "none"
+                     and set(e.get("requiredFamilies") or ()) & payoffs]
+        self.assertEqual(offenders, [], f"{len(offenders)} role:none briefs require a payoff key")
+
+    def test_real_payoff_keys_stay_covered_by_pairing_briefs(self) -> None:
+        if not PLAN_PATH.is_file() or not PAIRINGS_PATH.is_file():
+            self.skipTest("real plan/pairings not present in this checkout")
+        plan = json.loads(PLAN_PATH.read_text(encoding="utf-8"))
+        pairings = json.loads(PAIRINGS_PATH.read_text(encoding="utf-8"))
+        covered = {e["pairing"]["pairedPayoffFamily"] for e in plan["entries"]
+                   if (e.get("pairing") or {}).get("role") == "payoff"}
+        self.assertEqual(covered, set(pairings),
+                         "every payoff key must be required by a real pairing brief")
+
+
+class SplicePayoffEnablersTests(unittest.TestCase):
+    """G2 (2026-09-12): a model-picked payoff key gains its enabler deterministically, so an accepted
+    species row can never carry a payoff with no same-anchor enabler."""
+
+    TABLE = {"atom.rot-punisher": ["atom.venomous", "atom.withering", "atom.bloodletting"]}
+
+    def test_payoff_pick_gains_its_first_allowed_enabler(self) -> None:
+        out = splice_payoff_enablers(
+            ["atom.rot-punisher", "atom.might"], pairing_table=self.TABLE,
+            allowed_atom_families=["atom.might", "atom.withering", "atom.venomous"])
+        self.assertIn("atom.venomous", out)
+        self.assertEqual(out, sorted(out))
+
+    def test_existing_enabler_is_not_duplicated(self) -> None:
+        out = splice_payoff_enablers(
+            ["atom.rot-punisher", "atom.withering"], pairing_table=self.TABLE,
+            allowed_atom_families=["atom.withering"])
+        self.assertEqual(out, ["atom.rot-punisher", "atom.withering"])
+
+    def test_no_allowed_enabler_adds_nothing(self) -> None:
+        out = splice_payoff_enablers(
+            ["atom.rot-punisher"], pairing_table=self.TABLE,
+            allowed_atom_families=["atom.might"])
+        self.assertEqual(out, ["atom.rot-punisher"])
+
+    def test_non_payoff_input_is_unchanged(self) -> None:
+        out = splice_payoff_enablers(["atom.might", "atom.swift"], pairing_table=self.TABLE,
+                                     allowed_atom_families=["atom.might", "atom.swift"])
+        self.assertEqual(out, ["atom.might", "atom.swift"])
+
+    def test_deterministic(self) -> None:
+        args = (["atom.rot-punisher"],)
+        kwargs = dict(pairing_table=self.TABLE, allowed_atom_families=["atom.withering"])
+        self.assertEqual(splice_payoff_enablers(*args, **kwargs),
+                         splice_payoff_enablers(*args, **kwargs))
 
 
 if __name__ == "__main__":

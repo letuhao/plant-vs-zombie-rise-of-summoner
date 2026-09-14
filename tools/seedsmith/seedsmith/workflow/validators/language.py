@@ -14,7 +14,7 @@ CHEAPER instrument, not a model-based one: this is mechanically checkable, so it
 
 ⛔ **The second, opposite defect this now also exists for (found 2026-09-08, `seedsmith-content-
 standard` audit).** A committed dungeon event
-(`data/seed/dungeon/events/event.bargain-demon.allpeater-001.json`) has real, shipped English
+(`data/seed/dungeon/events/event.bargain-creature.allpeater-001.json`) has real, shipped English
 motifs, yet its own `flavor` field contains stray Chinese fragments mid-English-sentence — the
 ORIGINAL check's own guard clause (`if not motifs or not any(_CJK.search(m) for m in motifs):
 return []`) cannot see this, because it only ever fires when the subject's own INPUT motifs are
@@ -44,7 +44,7 @@ def language_consistency(draft: "Mapping[str, Any]", context: "Mapping[str, Any]
     output (the original 2026-09-01 incident, `commander_effect.py`) and English motifs, CJK-
     contaminated output (the 2026-09-08 dungeon defect, above). `context["motifs"]` is read only to
     phrase the message; an ALL-LATIN corpus with no contamination is still unaffected, so this
-    stays a general validator, not a demons- or CJK-specific one."""
+    stays a general validator, not a creatures- or CJK-specific one."""
     motifs = [m for m in (context.get("motifs") or []) if m]
     motif_language = "Chinese" if any(_CJK.search(m) for m in motifs) else "the subject's language"
 

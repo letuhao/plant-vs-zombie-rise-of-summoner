@@ -143,7 +143,7 @@ public static class IntelRecorder
 
             if (!standing && !arriving) continue;
 
-            var strength = Turn.PlaceholderBattleResolver.Strength(entity);
+            var strength = ForceStrength.Of(entity);
 
             forces.Add(new RememberedForce
             {

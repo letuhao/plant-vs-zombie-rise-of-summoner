@@ -1,5 +1,5 @@
 using System.Text;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Items.Materials;
 using Microsoft.Data.Sqlite;
 
@@ -18,8 +18,8 @@ public sealed partial class RpgStore
     // ---- materials + recipes (module 14, salvage-craft) ---------------------------------------------
 
     /// <summary>
-    /// ⚠ Ships against the SHIPPED table name <c>rpg_demon_materials</c>. The
-    /// <c>rpg_demon_materials → rpg_materials</c> rename is RULED but deliberately NOT in this
+    /// ⚠ Ships against the SHIPPED table name <c>rpg_creature_materials</c>. The
+    /// <c>rpg_creature_materials → rpg_materials</c> rename is RULED but deliberately NOT in this
     /// module's task list (`spec-salvage-craft.md` §"ask-first and not scheduled"); the SQL sites it
     /// touches are recorded in tasks/item-todo.md P4.1 for the day the owner says go.
     /// </summary>
@@ -153,7 +153,7 @@ public sealed partial class RpgStore
         {
             using var db = OpenUnlocked();
             using var cmd = db.CreateCommand();
-            cmd.CommandText = "SELECT qty FROM rpg_demon_materials WHERE player_id = $p AND material_id = $m;";
+            cmd.CommandText = "SELECT qty FROM rpg_creature_materials WHERE player_id = $p AND material_id = $m;";
             cmd.Parameters.AddWithValue("$p", playerId);
             cmd.Parameters.AddWithValue("$m", materialId);
             return cmd.ExecuteScalar() is long q ? q : 0L;
@@ -184,11 +184,11 @@ public sealed partial class RpgStore
     {
         foreach (var (materialId, qty) in grants)
         {
-            if (!MaterialCatalog.IsKnown(materialId) && !DemonMaterialCatalog.IsKnown(materialId))
+            if (!MaterialCatalog.IsKnown(materialId) && !CreatureMaterialCatalog.IsKnown(materialId))
                 throw new ArgumentException($"Unknown material id '{materialId}'.");
             using var cmd = db.CreateCommand();
             cmd.CommandText = """
-                INSERT INTO rpg_demon_materials(player_id, material_id, qty, updated_utc)
+                INSERT INTO rpg_creature_materials(player_id, material_id, qty, updated_utc)
                 VALUES ($p, $m, $q, $t)
                 ON CONFLICT(player_id, material_id) DO UPDATE SET qty = qty + $q, updated_utc = $t;
                 """;
@@ -303,7 +303,7 @@ public sealed partial class RpgStore
 
                 using var cmd = db.CreateCommand();
                 cmd.CommandText = """
-                    UPDATE rpg_demon_materials SET qty = qty - $q, updated_utc = $t
+                    UPDATE rpg_creature_materials SET qty = qty - $q, updated_utc = $t
                     WHERE player_id = $p AND material_id = $m AND qty >= $q;
                     """;
                 cmd.Parameters.AddWithValue("$q", line.Qty);

@@ -25,7 +25,7 @@
       "id": "set.randompluszombie-001",
       "nameKey": "set.golden-blind-box",
       "name": "Golden Blind Box",
-      "themeKey": "demon.randompluszombie",
+      "themeKey": "creature.randompluszombie",
       "members": [
         {
           "role": "armament-primary",

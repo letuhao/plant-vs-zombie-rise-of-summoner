@@ -25,7 +25,7 @@
       "id": "set.spreadscaredyshroom-001",
       "nameKey": "set.spore-swarm-formation",
       "name": "Spore Swarm Formation",
-      "themeKey": "demon.spreadscaredyshroom",
+      "themeKey": "creature.spreadscaredyshroom",
       "members": [
         {
           "role": "armament-primary",

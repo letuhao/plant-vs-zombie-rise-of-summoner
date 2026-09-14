@@ -1,7 +1,7 @@
 using System.Text.Json;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Stats.Derived;
 using Microsoft.Data.Sqlite;
 
@@ -14,13 +14,13 @@ public sealed partial class RpgStore
 
     public sealed record SummonOutcome(
         bool Replayed,
-        List<DemonSpecimenDto> Specimens,
+        List<CreatureSpecimenDto> Specimens,
         PityState Pity,
         SoulBalanceDto Balance,
         long DiscoverySouls);
 
     /// <summary>
-    /// The summon pull — ONE gate-serialized transaction (spec-demon-summoning.md, hardened):
+    /// The summon pull — ONE gate-serialized transaction (spec-creature-summoning.md, hardened):
     /// replay-check → spend → rolls (seeded, pity-aware) → mints → codex + discovery awards →
     /// pity update → log. Atomic or nothing; per-player correlation; replay validates the
     /// stored request and returns the stored results without spending.
@@ -67,10 +67,10 @@ public sealed partial class RpgStore
                     r.Close();
                     tx.Commit();
                     var stored = storedIds
-                        .Select(id => new DemonSpecimenDto
+                        .Select(id => new CreatureSpecimenDto
                         {
                             Actor = ReadUniqueActorUnlocked(db, id)!,
-                            Profile = ReadDemonProfileUnlocked(db, id)!
+                            Profile = ReadCreatureProfileUnlocked(db, id)!
                         })
                         .Where(s => s.Actor != null && s.Profile != null)
                         .ToList();
@@ -85,7 +85,7 @@ public sealed partial class RpgStore
             {
                 tx.Rollback();
                 return (false, "souls.insufficient", new SummonOutcome(
-                    false, new List<DemonSpecimenDto>(), ReadPityUnlocked(db, playerId), balance, 0));
+                    false, new List<CreatureSpecimenDto>(), ReadPityUnlocked(db, playerId), balance, 0));
             }
 
             if (!AppendSoulLedgerUnlocked(db, playerId, 0, -cost, SoulEarnPolicy.Reasons.Summon, "spend", corr, corr, now))
@@ -95,13 +95,13 @@ public sealed partial class RpgStore
             var rng = SeededRng.DeriveStream(rngSeed, "gacha");
             var (rolls, newPity) = SummonRoller.Roll(banner, focus, count, pity, rng);
 
-            var specimens = new List<DemonSpecimenDto>(rolls.Count);
+            var specimens = new List<CreatureSpecimenDto>(rolls.Count);
             long discoverySouls = 0;
             var first = true;
             foreach (var roll in rolls)
             {
-                var species = DemonSpeciesCatalog.Get(roll.SpeciesId);
-                var specimen = MintDemonUnlocked(db, playerId, new DemonMintSpec
+                var species = CreatureSpeciesCatalog.Get(roll.SpeciesId);
+                var specimen = MintCreatureUnlocked(db, playerId, new CreatureMintSpec
                 {
                     SpeciesId = species.SpeciesId,
                     Side = species.Side,
@@ -133,7 +133,7 @@ public sealed partial class RpgStore
 
             // Codex milestone faucet (spec-soul-economy): half at ≥50 % discovered, full at ≥90 %
             // (the guardrail lets web-only players claim it once capture-exclusives exist).
-            var totalSpecies = DemonSpeciesCatalog.All.Count;
+            var totalSpecies = CreatureSpeciesCatalog.All.Count;
             if (totalSpecies > 0)
             {
                 var discovered = CountDiscoveredUnlocked(db, playerId);
@@ -185,7 +185,7 @@ public sealed partial class RpgStore
     long CountDiscoveredUnlocked(SqliteConnection db, long playerId)
     {
         using var cmd = db.CreateCommand();
-        cmd.CommandText = "SELECT COUNT(*) FROM rpg_demon_codex WHERE player_id=$p AND state='discovered';";
+        cmd.CommandText = "SELECT COUNT(*) FROM rpg_creature_codex WHERE player_id=$p AND state='discovered';";
         cmd.Parameters.AddWithValue("$p", playerId);
         return (long)(cmd.ExecuteScalar() ?? 0L);
     }

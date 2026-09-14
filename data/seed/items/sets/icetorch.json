@@ -25,7 +25,7 @@
       "id": "set.icetorch-001",
       "nameKey": "set.glacial-stump-volley",
       "name": "Glacial Stump Volley",
-      "themeKey": "demon.icetorch",
+      "themeKey": "creature.icetorch",
       "members": [
         {
           "role": "armament-primary",

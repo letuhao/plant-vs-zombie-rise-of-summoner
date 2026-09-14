@@ -25,7 +25,7 @@
       "id": "set.garlicrepeater-001",
       "nameKey": "set.garlic-pea-launcher",
       "name": "Garlic Pea Launcher",
-      "themeKey": "demon.garlicrepeater",
+      "themeKey": "creature.garlicrepeater",
       "members": [
         {
           "role": "armament-primary",

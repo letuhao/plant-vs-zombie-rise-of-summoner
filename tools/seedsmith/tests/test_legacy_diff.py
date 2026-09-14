@@ -1,10 +1,10 @@
-"""Tests for seedsmith.adapters.demons.anchor.legacy_diff (spec-anchor-emit.md §6, T2.7)."""
+"""Tests for seedsmith.adapters.creatures.anchor.legacy_diff (spec-anchor-emit.md §6, T2.7)."""
 from __future__ import annotations
 
 import json
 
-from seedsmith.adapters.demons.anchor.legacy_diff import diff_legacy, format_report
-from seedsmith.report.cli import build_parser, cmd_demons
+from seedsmith.adapters.creatures.anchor.legacy_diff import diff_legacy, format_report
+from seedsmith.report.cli import build_parser, cmd_creatures
 
 
 def test_legacy_diff_reports_per_field_agreement():
@@ -39,7 +39,7 @@ def test_species_absent_from_legacy_are_excluded_not_counted_as_disagreement():
 
 
 def test_only_the_named_fields_are_compared():
-    from seedsmith.adapters.demons.anchor.legacy_diff import COMPARED_FIELDS
+    from seedsmith.adapters.creatures.anchor.legacy_diff import COMPARED_FIELDS
     assert set(COMPARED_FIELDS) == {"elementPrimary", "deployMode", "acquisition", "variants"}
     assert "attackTempo" not in COMPARED_FIELDS  # no old counterpart to compare against
 
@@ -53,11 +53,11 @@ def test_format_report_reads_as_a_percentage():
     assert "100.0%" in text
 
 
-# ---- `seedsmith demons diff-legacy` -- the real CLI entrypoint (T2.7, closed 2026-09-02) --------
+# ---- `seedsmith creatures diff-legacy` -- the real CLI entrypoint (T2.7, closed 2026-09-02) --------
 #
 # `legacy_diff.py`'s own docstring named the gap: "a small future export step (or a one-off read)
 # produces those [legacy dicts]... this module only computes and reports." Closed by
-# `DemonSpeciesGen --export-legacy` (C#, reads the real compiled catalog) feeding this CLI command,
+# `CreatureSpeciesGen --export-legacy` (C#, reads the real compiled catalog) feeding this CLI command,
 # which never reads C# source itself, matching the module's own stated boundary.
 
 
@@ -77,7 +77,7 @@ def _anchor_tree(tmp_path, side="plant"):
 
 
 def _legacy_file(tmp_path):
-    # Lowercase ids, matching DemonSpeciesCatalog's own real casing convention -- proves the CLI
+    # Lowercase ids, matching CreatureSpeciesCatalog's own real casing convention -- proves the CLI
     # normalizes case itself rather than requiring the caller to pre-lowercase.
     path = tmp_path / "legacy.json"
     path.write_text(json.dumps([
@@ -89,12 +89,12 @@ def _legacy_file(tmp_path):
     return path
 
 
-def test_cli_parses_demons_diff_legacy():
+def test_cli_parses_creatures_diff_legacy():
     parser = build_parser()
     args = parser.parse_args(
-        ["demons", "diff-legacy", "--legacy", "some/path.json", "--anchors", "some/anchors"])
-    assert args.func is cmd_demons
-    assert args.demon_command == "diff-legacy"
+        ["creatures", "diff-legacy", "--legacy", "some/path.json", "--anchors", "some/anchors"])
+    assert args.func is cmd_creatures
+    assert args.creature_command == "diff-legacy"
     assert args.legacy == "some/path.json"
     assert args.anchors == "some/anchors"
 
@@ -105,7 +105,7 @@ def test_diff_legacy_end_to_end_through_the_real_cli_normalizes_case_and_reports
 
     parser = build_parser()
     args = parser.parse_args([
-        "demons", "diff-legacy", "--legacy", str(legacy_path), "--anchors", str(anchors_root)])
+        "creatures", "diff-legacy", "--legacy", str(legacy_path), "--anchors", str(anchors_root)])
     exit_code = args.func(args)
 
     assert exit_code == 0
@@ -121,13 +121,13 @@ def test_diff_legacy_end_to_end_through_the_real_cli_normalizes_case_and_reports
 
 def test_diff_legacy_without_legacy_flag_refuses_naming_the_fix():
     parser = build_parser()
-    args = parser.parse_args(["demons", "diff-legacy"])
+    args = parser.parse_args(["creatures", "diff-legacy"])
     exit_code = args.func(args)
     assert exit_code == 2  # EXIT_CANNOT_RUN
 
 
 def test_diff_legacy_with_a_missing_legacy_file_refuses():
     parser = build_parser()
-    args = parser.parse_args(["demons", "diff-legacy", "--legacy", "/nowhere/at/all.json"])
+    args = parser.parse_args(["creatures", "diff-legacy", "--legacy", "/nowhere/at/all.json"])
     exit_code = args.func(args)
     assert exit_code == 2

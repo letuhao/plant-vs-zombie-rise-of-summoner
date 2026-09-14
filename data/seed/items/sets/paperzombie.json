@@ -25,7 +25,7 @@
       "id": "set.paperzombie-001",
       "nameKey": "set.the-unfinished-column",
       "name": "The Unfinished Column",
-      "themeKey": "demon.paperzombie",
+      "themeKey": "creature.paperzombie",
       "members": [
         {
           "role": "armament-primary",

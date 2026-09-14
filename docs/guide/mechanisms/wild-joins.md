@@ -9,7 +9,7 @@
 
 ## In one sentence
 
-**Wild joins** are demons that enter the roster from expedition outcomes — intake that is not the altar.
+**Wild joins** are creatures that enter the roster from expedition outcomes — intake that is not the altar.
 
 ---
 
@@ -20,7 +20,7 @@ These words get guessed wrong. Read them once before the rest of the page.
 | Word | What it actually means here |
 |---|---|
 | **Wild join** | A specimen that arrives from an expedition result, not from a soul pull. |
-| **Intake** | Any path that adds a demon. Altar, wild join, and (later) capture are different intakes. |
+| **Intake** | Any path that adds a creature. Altar, wild join, and (later) capture are different intakes. |
 | **Expedition** | Idle squad mission — dispatch, wait, collect. Detail: [expeditions](expeditions.md). |
 | **Altar** | Soul gacha pulls. Wild joins prove gacha is not the only path. |
 
@@ -53,7 +53,7 @@ A wild join is a full specimen appearing in Creatures when the outcome says so.
 
 ## Why it exists
 
-If only the altar grew the roster, idle play would never surprise you with a demon.
+If only the altar grew the roster, idle play would never surprise you with a creature.
 
 Wild joins keep expeditions on the summon-and-fusion spine.
 
@@ -61,7 +61,7 @@ Wild joins keep expeditions on the summon-and-fusion spine.
 
 ## What you do (first time)
 
-1. Unlock Expeditions (bound demon available).
+1. Unlock Expeditions (bound creature available).
 2. Send a squad and collect a return.
 3. If no wild join this time, still read the report — joins are an outcome, not a guarantee every run.
 
@@ -74,7 +74,7 @@ Wild joins keep expeditions on the summon-and-fusion spine.
 **Did I get charged souls for a wild join?**  
 No. That is the point of a non-altar intake.
 
-**Is every expedition return a new demon?**  
+**Is every expedition return a new creature?**  
 No. Materials and souls are common; wild joins are one possible outcome.
 
 **Is this capture?**  

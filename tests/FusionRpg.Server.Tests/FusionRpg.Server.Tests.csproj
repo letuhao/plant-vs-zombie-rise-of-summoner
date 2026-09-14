@@ -24,4 +24,10 @@
     <ProjectReference Include="..\..\src\FusionRpg.Server\FusionRpg.Server.csproj" />
     <ProjectReference Include="..\..\src\FusionRpg.Contracts\FusionRpg.Contracts.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- The shared store test helper. It lives in FusionRpg.Data.Tests; linking the source is the
+         repo's existing cross-test-project seam (see FusionRpg.Core.Tests.csproj's Injector links),
+         and it is what lets a Server test build its store in memory instead of on disk. -->
+    <Compile Include="..\FusionRpg.Data.Tests\DataTestStore.cs" Link="TestSupport\DataTestStore.cs" />
+  </ItemGroup>
 </Project>

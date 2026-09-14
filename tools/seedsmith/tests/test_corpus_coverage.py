@@ -1,11 +1,11 @@
 """Tests for seedsmith.metrics.corpus_coverage (spec-corpus-dump.md/spec-power-parse.md,
-demon-seed `seed-to-concrete` T1.10)."""
+creature-seed `seed-to-concrete` T1.10)."""
 from __future__ import annotations
 
 import json
 from pathlib import Path
 
-from seedsmith.adapters.demons.dump_ctx import load_demon_dump_ctx
+from seedsmith.adapters.creatures.dump_ctx import load_creature_dump_ctx
 from seedsmith.corpus import Corpus
 from seedsmith.metrics.corpus_coverage import BasisHistogramMetric, DumpCompletenessMetric
 from seedsmith.metrics.model import Ctx, Loop, Severity
@@ -34,9 +34,9 @@ def row(side: str, type_id: int, *, hp=None, attack=None, flavor=None, observed=
 
 
 def ctx_with_dump(dump_dir: Path) -> Ctx:
-    demon_dump = load_demon_dump_ctx(dump_dir)
-    assert demon_dump is not None
-    return Ctx(corpus=Corpus(), adapter=None, demon_dump=demon_dump)
+    creature_dump = load_creature_dump_ctx(dump_dir)
+    assert creature_dump is not None
+    return Ctx(corpus=Corpus(), adapter=None, creature_dump=creature_dump)
 
 
 # --- DumpCompletenessMetric ------------------------------------------------------------------
@@ -46,7 +46,7 @@ def test_dump_completeness_metric_is_closed_and_named_correctly():
     m = DumpCompletenessMetric()
     assert m.id == "CorpusCoverage/DumpCompleteness"
     assert m.loop is Loop.CLOSED
-    assert m.needs == frozenset({"demon_dump"})
+    assert m.needs == frozenset({"creature_dump"})
 
 
 def test_matching_counts_produce_no_findings(tmp_path: Path):
@@ -104,10 +104,10 @@ def test_low_observed_or_stated_share_is_a_gap(tmp_path: Path):
 
 
 def test_real_committed_dump_meets_both_targets():
-    # No fixture — the real, live data/seed/demons/_dump this program committed (T1.1/T1.2).
-    from seedsmith.adapters.demons.preflight import DEFAULT_DUMP_DIR
-    demon_dump = load_demon_dump_ctx(DEFAULT_DUMP_DIR)
-    assert demon_dump is not None
-    ctx = Ctx(corpus=Corpus(), adapter=None, demon_dump=demon_dump)
+    # No fixture — the real, live data/seed/creatures/_dump this program committed (T1.1/T1.2).
+    from seedsmith.adapters.creatures.preflight import DEFAULT_DUMP_DIR
+    creature_dump = load_creature_dump_ctx(DEFAULT_DUMP_DIR)
+    assert creature_dump is not None
+    ctx = Ctx(corpus=Corpus(), adapter=None, creature_dump=creature_dump)
     assert DumpCompletenessMetric().run(ctx) == []
     assert BasisHistogramMetric().run(ctx) == []

@@ -25,7 +25,7 @@
       "id": "set.sunsquash-001",
       "nameKey": "set.sunburst-squash",
       "name": "Sunburst Squash",
-      "themeKey": "demon.sunsquash",
+      "themeKey": "creature.sunsquash",
       "members": [
         {
           "role": "armament-primary",

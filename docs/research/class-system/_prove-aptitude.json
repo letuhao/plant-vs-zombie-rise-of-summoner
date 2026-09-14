@@ -3,13 +3,208 @@
   "Source": "Might",
   "Points": 100,
   "PerChannel": {
+    "combat.accuracy.omni": {
+      "Overlay": 140,
+      "Battle": 26360
+    },
+    "combat.crit.damage.omni": {
+      "Overlay": 140,
+      "Battle": 140
+    },
+    "combat.crit.rate.omni": {
+      "Overlay": 140,
+      "Battle": 10140
+    },
     "combat.power.omni": {
       "Overlay": 497376,
       "Battle": 497376
+    },
+    "progression.bonus.atk": {
+      "Overlay": 2260800,
+      "Battle": 2260800
+    },
+    "resource.max.hp": {
+      "Overlay": 3165120,
+      "Battle": 3165121
+    },
+    "resource.max.hunger": {
+      "Overlay": 2034720,
+      "Battle": 2147760
+    },
+    "resource.max.qi": {
+      "Overlay": 1356480,
+      "Battle": 1469520
+    },
+    "resource.max.spirit": {
+      "Overlay": 678240,
+      "Battle": 791280
+    },
+    "resource.max.stamina": {
+      "Overlay": 4069440,
+      "Battle": 4182480
+    },
+    "resource.regen.hp": {
+      "Overlay": 25321,
+      "Battle": 25321
+    },
+    "resource.regen.hunger": {
+      "Overlay": 25321,
+      "Battle": 25321
+    },
+    "resource.regen.qi": {
+      "Overlay": 33912,
+      "Battle": 33912
+    },
+    "resource.regen.spirit": {
+      "Overlay": 16956,
+      "Battle": 16956
+    },
+    "resource.regen.stamina": {
+      "Overlay": 76189,
+      "Battle": 76189
+    },
+    "skill.effectiveness.attack": {
+      "Overlay": 80,
+      "Battle": 80
+    },
+    "status.duration.cc": {
+      "Overlay": 40,
+      "Battle": 40
+    },
+    "status.duration.contagion": {
+      "Overlay": 40,
+      "Battle": 40
+    },
+    "status.duration.dot": {
+      "Overlay": 40,
+      "Battle": 40
+    },
+    "status.duration.omni": {
+      "Overlay": 20,
+      "Battle": 20
+    },
+    "status.durationReduction.cc": {
+      "Overlay": 40,
+      "Battle": 40
+    },
+    "status.durationReduction.contagion": {
+      "Overlay": 40,
+      "Battle": 40
+    },
+    "status.durationReduction.dot": {
+      "Overlay": 40,
+      "Battle": 40
+    },
+    "status.durationReduction.omni": {
+      "Overlay": 20,
+      "Battle": 20
+    },
+    "status.intensity.cc": {
+      "Overlay": 100,
+      "Battle": 100
+    },
+    "status.intensity.contagion": {
+      "Overlay": 40,
+      "Battle": 40
+    },
+    "status.intensity.dot": {
+      "Overlay": 120,
+      "Battle": 120
+    },
+    "status.intensity.omni": {
+      "Overlay": 36.6,
+      "Battle": 36.6
+    },
+    "status.intensityReduction.cc": {
+      "Overlay": 40,
+      "Battle": 40
+    },
+    "status.intensityReduction.contagion": {
+      "Overlay": 40,
+      "Battle": 40
+    },
+    "status.intensityReduction.dot": {
+      "Overlay": 40,
+      "Battle": 40
+    },
+    "status.intensityReduction.omni": {
+      "Overlay": 20,
+      "Battle": 20
+    },
+    "status.power.cc": {
+      "Overlay": 30,
+      "Battle": 30
+    },
+    "status.power.contagion": {
+      "Overlay": 30,
+      "Battle": 30
+    },
+    "status.power.dot": {
+      "Overlay": 60,
+      "Battle": 60
+    },
+    "status.power.omni": {
+      "Overlay": 20,
+      "Battle": 20
+    },
+    "status.resist.cc": {
+      "Overlay": 0.95,
+      "Battle": 0.95
+    },
+    "status.resist.contagion": {
+      "Overlay": 0.95,
+      "Battle": 0.95
+    },
+    "status.resist.dot": {
+      "Overlay": 0.95,
+      "Battle": 0.95
+    },
+    "status.resist.omni": {
+      "Overlay": 20,
+      "Battle": 20
     }
   },
   "Deltas": {
-    "combat.power.omni": 0
+    "combat.accuracy.omni": -26220,
+    "combat.crit.damage.omni": 0,
+    "combat.crit.rate.omni": -10000,
+    "combat.power.omni": 0,
+    "progression.bonus.atk": 0,
+    "resource.max.hp": -1,
+    "resource.max.hunger": -113040,
+    "resource.max.qi": -113040,
+    "resource.max.spirit": -113040,
+    "resource.max.stamina": -113040,
+    "resource.regen.hp": 0,
+    "resource.regen.hunger": 0,
+    "resource.regen.qi": 0,
+    "resource.regen.spirit": 0,
+    "resource.regen.stamina": 0,
+    "skill.effectiveness.attack": 0,
+    "status.duration.cc": 0,
+    "status.duration.contagion": 0,
+    "status.duration.dot": 0,
+    "status.duration.omni": 0,
+    "status.durationReduction.cc": 0,
+    "status.durationReduction.contagion": 0,
+    "status.durationReduction.dot": 0,
+    "status.durationReduction.omni": 0,
+    "status.intensity.cc": 0,
+    "status.intensity.contagion": 0,
+    "status.intensity.dot": 0,
+    "status.intensity.omni": 0,
+    "status.intensityReduction.cc": 0,
+    "status.intensityReduction.contagion": 0,
+    "status.intensityReduction.dot": 0,
+    "status.intensityReduction.omni": 0,
+    "status.power.cc": 0,
+    "status.power.contagion": 0,
+    "status.power.dot": 0,
+    "status.power.omni": 0,
+    "status.resist.cc": 0,
+    "status.resist.contagion": 0,
+    "status.resist.dot": 0,
+    "status.resist.omni": 0
   },
-  "Pass": true
+  "Pass": false
 }

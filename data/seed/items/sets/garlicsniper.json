@@ -25,7 +25,7 @@
       "id": "set.garlicsniper-001",
       "nameKey": "set.viral-spore-sniper",
       "name": "Viral Spore Sniper",
-      "themeKey": "demon.garlicsniper",
+      "themeKey": "creature.garlicsniper",
       "members": [
         {
           "role": "armament-primary",

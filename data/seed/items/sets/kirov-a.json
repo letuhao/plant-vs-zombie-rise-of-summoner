@@ -25,7 +25,7 @@
       "id": "set.kirov-a-001",
       "nameKey": "set.kirov-s-greeting",
       "name": "Kirov's Greeting",
-      "themeKey": "demon.kirov_a",
+      "themeKey": "creature.kirov_a",
       "members": [
         {
           "role": "armament-primary",

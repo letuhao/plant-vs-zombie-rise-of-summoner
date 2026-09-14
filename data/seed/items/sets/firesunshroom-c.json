@@ -25,7 +25,7 @@
       "id": "set.firesunshroom-c-001",
       "nameKey": "set.firefly-spore-symbiosis",
       "name": "Firefly Spore Symbiosis",
-      "themeKey": "demon.firesunshroom_c",
+      "themeKey": "creature.firesunshroom_c",
       "members": [
         {
           "role": "armament-primary",

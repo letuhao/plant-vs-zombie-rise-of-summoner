@@ -1,0 +1,296 @@
+{
+  "done": {
+    "creature.cactus": {
+      "basis": "enriched",
+      "entryId": "creature.cactus",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.cactusblover": {
+      "basis": "enriched",
+      "entryId": "creature.cactusblover",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.cherrybomb": {
+      "basis": "enriched",
+      "entryId": "creature.cherrybomb",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.cherrygatling": {
+      "basis": "enriched",
+      "entryId": "creature.cherrygatling",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.cherrynut": {
+      "basis": "enriched",
+      "entryId": "creature.cherrynut",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.cherrynutzombie": {
+      "basis": "enriched",
+      "entryId": "creature.cherrynutzombie",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.cherrypaperzombie": {
+      "basis": "enriched",
+      "entryId": "creature.cherrypaperzombie",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.cherryshooter": {
+      "basis": "enriched",
+      "entryId": "creature.cherryshooter",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.cherrysplit": {
+      "basis": "enriched",
+      "entryId": "creature.cherrysplit",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.cornpult": {
+      "basis": "enriched",
+      "entryId": "creature.cornpult",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.doublecherry": {
+      "basis": "enriched",
+      "entryId": "creature.doublecherry",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.doubleshooter": {
+      "basis": "enriched",
+      "entryId": "creature.doubleshooter",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.doublesnow": {
+      "basis": "enriched",
+      "entryId": "creature.doublesnow",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.enumvalue261": {
+      "basis": "enriched",
+      "entryId": "creature.enumvalue261",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.enumvalue262": {
+      "basis": "enriched",
+      "entryId": "creature.enumvalue262",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.enumvalue263": {
+      "basis": "enriched",
+      "entryId": "creature.enumvalue263",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.enumvalue264": {
+      "basis": "enriched",
+      "entryId": "creature.enumvalue264",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.enumvalue265": {
+      "basis": "enriched",
+      "entryId": "creature.enumvalue265",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.enumvalue266": {
+      "basis": "enriched",
+      "entryId": "creature.enumvalue266",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.enumvalue267": {
+      "basis": "enriched",
+      "entryId": "creature.enumvalue267",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.enumvalue268": {
+      "basis": "enriched",
+      "entryId": "creature.enumvalue268",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.extract_single": {
+      "basis": "enriched",
+      "entryId": "creature.extract_single",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.extract_ten": {
+      "basis": "enriched",
+      "entryId": "creature.extract_ten",
+      "model": "google/gemma-4-26b-a4b-qat",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.hypnojalapeno": {
+      "basis": "enriched",
+      "entryId": "creature.hypnojalapeno",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.hypnopeashooter": {
+      "basis": "enriched",
+      "entryId": "creature.hypnopeashooter",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.hypnoshroom": {
+      "basis": "enriched",
+      "entryId": "creature.hypnoshroom",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.icecaltrop": {
+      "basis": "enriched",
+      "entryId": "creature.icecaltrop",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.iceshroom": {
+      "basis": "enriched",
+      "entryId": "creature.iceshroom",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.jalacaltrop": {
+      "basis": "enriched",
+      "entryId": "creature.jalacaltrop",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.jalagatling": {
+      "basis": "enriched",
+      "entryId": "creature.jalagatling",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.magnetbox": {
+      "basis": "enriched",
+      "entryId": "creature.magnetbox",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.magnetinterface": {
+      "basis": "enriched",
+      "entryId": "creature.magnetinterface",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.nutchomper": {
+      "basis": "enriched",
+      "entryId": "creature.nutchomper",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.peachomper": {
+      "basis": "enriched",
+      "entryId": "creature.peachomper",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.peanut": {
+      "basis": "enriched",
+      "entryId": "creature.peanut",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.peashooter": {
+      "basis": "enriched",
+      "entryId": "creature.peashooter",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.peashooterzombie": {
+      "basis": "enriched",
+      "entryId": "creature.peashooterzombie",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.peasquash": {
+      "basis": "enriched",
+      "entryId": "creature.peasquash",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.pit": {
+      "basis": "enriched",
+      "entryId": "creature.pit",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.refrash": {
+      "basis": "enriched",
+      "entryId": "creature.refrash",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.seacactus": {
+      "basis": "enriched",
+      "entryId": "creature.seacactus",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.snowsplit": {
+      "basis": "enriched",
+      "entryId": "creature.snowsplit",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.splitpea": {
+      "basis": "enriched",
+      "entryId": "creature.splitpea",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.starfruit": {
+      "basis": "enriched",
+      "entryId": "creature.starfruit",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.starpea": {
+      "basis": "enriched",
+      "entryId": "creature.starpea",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.sunflower": {
+      "basis": "enriched",
+      "entryId": "creature.sunflower",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    },
+    "creature.voodoodollzombie": {
+      "basis": "enriched",
+      "entryId": "creature.voodoodollzombie",
+      "outcome": "persisted",
+      "promptVersion": "theme-enrich/1"
+    }
+  },
+  "schemaVersion": 1
+}

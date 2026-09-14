@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.curio-creature.cactus-001",
+  "flavor": "A solitary, thick-skinned 仙人掌 sits atop a stone pedestal. Its needles vibrate with a low hum, and every few seconds, a needle is violently 发射 into the dark void beyond the pedestal's edge.",
+  "kind": "curio",
+  "name": "The Spiked Projectile",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party discovers a strange, kinetic oddity that reacts to physical contact.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.cactus"
+}

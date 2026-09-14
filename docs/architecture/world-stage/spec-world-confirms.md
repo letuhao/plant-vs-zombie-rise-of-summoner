@@ -69,7 +69,7 @@ if (row.Warden) return (false, "contract.warden-permanent", null);
 
 So the confirm states the loss in full, in player words, with no hedging: **Ashkell will never leave
 your roster, never take another contract, and can never be released — not for souls, not by retiring
-it, not ever.** *You keep the ground. You do not keep the demon.*
+it, not ever.** *You keep the ground. You do not keep the creature.*
 
 **What it costs, read from `BindAsWarden` (`RpgStore.Contracts.cs:283-326`) rather than from the
 plate:**
@@ -113,7 +113,7 @@ would then be worthless on the one occasion it mattered.
 
 The threshold is `balance < fee + upkeepPerDay` — computed from the same values the engine charges,
 never a magic number, and read from the balance the client already has
-(`/api/souls/{playerId}`, `lib/bus/demons.ts:135-136`).
+(`/api/souls/{playerId}`, `lib/bus/creatures.ts:135-136`).
 
 Typing `bind` is recall, and GG-24 forbids recall in the general case (*"the player chooses from what
 is shown"*). This is the deliberate exception and the reason is stated on the dialog: the friction
@@ -251,7 +251,7 @@ Vitest, colocated. Five levels, and two of them exist because the failure would 
    present by accessible text. A confirm that lost a row still renders and still works; only a test
    notices.
 2. **The permanence copy is exact** — the bind dialog contains the words *"can never be released"* and
-   *"You do not keep the demon."* This is a copy test on purpose: it is the sentence GG-22 requires and
+   *"You do not keep the creature."* This is a copy test on purpose: it is the sentence GG-22 requires and
    it is the one a later refactor would soften.
 3. **Step 2 is conditional, both ways** — with a comfortable balance the dialog completes in one step;
    with `balance < fee + upkeepPerDay` step 2 appears and **the confirm button stays disabled until

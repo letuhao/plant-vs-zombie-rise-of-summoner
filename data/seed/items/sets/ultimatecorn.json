@@ -25,7 +25,7 @@
       "id": "set.ultimatecorn-001",
       "nameKey": "set.ultimate-spacetime-corn",
       "name": "Ultimate Spacetime Corn",
-      "themeKey": "demon.ultimatecorn",
+      "themeKey": "creature.ultimatecorn",
       "members": [
         {
           "role": "armament-primary",

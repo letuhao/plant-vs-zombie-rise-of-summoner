@@ -1,0 +1,1302 @@
+{
+  "_meta": {
+    "assemblyGateRejectCount": 0,
+    "candidateSetHash": "f607a658cccfc92e296f73682ae2478fd596b5a424aaaceeaedb7183ce50a440",
+    "differentiatorNoneRate": 0.0,
+    "disagreementRate": {},
+    "partition": "rounds",
+    "preflight": "skipped",
+    "restrictionUncheckedCount": 0,
+    "round": 1000
+  },
+  "entries": [
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.bloodletting",
+        "atom.rot-punisher",
+        "atom.sporing",
+        "atom.venomous",
+        "atom.withering"
+      ],
+      "category": "attack",
+      "id": "action.general.0019",
+      "name": "Corrosive Sporecloud",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "payoff",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.marking",
+        "atom.rotting",
+        "atom.venomous"
+      ],
+      "category": "attack",
+      "id": "action.general.0020",
+      "name": "Blighted Mark",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "enabler",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.fortitude",
+        "atom.savagery"
+      ],
+      "category": "attack",
+      "id": "action.general.0021",
+      "name": "Vanguard's Resolve",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.fortitude",
+        "atom.might",
+        "atom.tempo-haste"
+      ],
+      "category": "attack",
+      "id": "action.general.0022",
+      "name": "Sudden Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.hit-followthrough",
+        "atom.mesmerizing"
+      ],
+      "category": "attack",
+      "id": "action.general.0023",
+      "name": "Vanguard's Resolve",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.ferocity",
+        "atom.might",
+        "atom.quickening"
+      ],
+      "category": "attack",
+      "id": "action.general.0024",
+      "name": "Vanguard's Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.might",
+        "atom.quickening",
+        "atom.venomous"
+      ],
+      "category": "attack",
+      "id": "action.general.0025",
+      "name": "Sudden Onslaught",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.might",
+        "atom.tempo-surge"
+      ],
+      "category": "attack",
+      "id": "action.general.0026",
+      "name": "Sudden Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-salvo",
+        "atom.might"
+      ],
+      "category": "attack",
+      "id": "action.general.0027",
+      "name": "Sudden Onslaught",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.hit-followthrough",
+        "atom.mending"
+      ],
+      "category": "attack",
+      "id": "action.general.0028",
+      "name": "Sudden Onslaught",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.might",
+        "atom.swiftness",
+        "atom.tempo-haste"
+      ],
+      "category": "attack",
+      "id": "action.general.0029",
+      "name": "Vanguard's Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-hardening",
+        "atom.might"
+      ],
+      "category": "attack",
+      "id": "action.general.0030",
+      "name": "Sudden Onslaught",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.freezing",
+        "atom.might"
+      ],
+      "category": "attack",
+      "id": "action.general.0031",
+      "name": "Sudden Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.might",
+        "atom.tempo-haste",
+        "atom.volley"
+      ],
+      "category": "attack",
+      "id": "action.general.0032",
+      "name": "Vanguard's Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.might",
+        "atom.sust-husk"
+      ],
+      "category": "attack",
+      "id": "action.general.0033",
+      "name": "Vanguard's Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.might",
+        "atom.retribution",
+        "atom.tempo-haste",
+        "atom.tempo-surge"
+      ],
+      "category": "attack",
+      "id": "action.general.0034",
+      "name": "Sudden Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-overflow",
+        "atom.might"
+      ],
+      "category": "attack",
+      "id": "action.general.0035",
+      "name": "Sudden Onslaught",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.econ-toll",
+        "atom.might"
+      ],
+      "category": "attack",
+      "id": "action.general.0036",
+      "name": "Vanguard's Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.might",
+        "atom.prec-fixation",
+        "atom.tempo-haste"
+      ],
+      "category": "attack",
+      "id": "action.general.0037",
+      "name": "Vanguard's Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.prec-truesight",
+        "atom.volley"
+      ],
+      "category": "attack",
+      "id": "action.general.0038",
+      "name": "Sudden Spore",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.might",
+        "atom.ward-harden"
+      ],
+      "category": "attack",
+      "id": "action.general.0039",
+      "name": "Vanguard's Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.econ-endure",
+        "atom.ferocity"
+      ],
+      "category": "attack",
+      "id": "action.general.0040",
+      "name": "Sudden Onslaught",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.econ-muster",
+        "atom.might"
+      ],
+      "category": "attack",
+      "id": "action.general.0041",
+      "name": "Vigilant Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elemental-defense",
+        "atom.ferocity"
+      ],
+      "category": "attack",
+      "id": "action.general.0042",
+      "name": "Sudden Onslaught",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-focus",
+        "atom.retribution"
+      ],
+      "category": "attack",
+      "id": "action.general.0043",
+      "name": "Sudden Onslaught",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evd-husk",
+        "atom.might",
+        "atom.tempo-surge"
+      ],
+      "category": "attack",
+      "id": "action.general.0044",
+      "name": "Vanguard's Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.ferocity",
+        "atom.hit-followthrough",
+        "atom.might"
+      ],
+      "category": "attack",
+      "id": "action.general.0045",
+      "name": "Vanguard's Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.firelining",
+        "atom.might"
+      ],
+      "category": "attack",
+      "id": "action.general.0046",
+      "name": "Vanguard's Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.flourishing",
+        "atom.might",
+        "atom.tempo-surge"
+      ],
+      "category": "attack",
+      "id": "action.general.0047",
+      "name": "Vanguard's Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.gravedigging",
+        "atom.might"
+      ],
+      "category": "attack",
+      "id": "action.general.0048",
+      "name": "Sudden Onslaught",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.gravemaking",
+        "atom.might"
+      ],
+      "category": "attack",
+      "id": "action.general.0049",
+      "name": "Sudden Onslaught",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chill-punisher",
+        "atom.freezing"
+      ],
+      "category": "attack",
+      "id": "action.family.academic.001",
+      "motifsUsed": [
+        "花园里",
+        "樱桃派",
+        "僵尸",
+        "保证",
+        "东西"
+      ],
+      "name": "The Gardener's Guarantee",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "payoff",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "academic",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.rot-punisher"
+      ],
+      "category": "support",
+      "id": "action.family.academic.002",
+      "motifsUsed": [
+        "花园里",
+        "樱桃派",
+        "保证",
+        "僵尸",
+        "东西"
+      ],
+      "name": "The Academic's Guarantee",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "payoff",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "academic",
+      "targetMode": "multi"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.rotting",
+        "atom.venomous"
+      ],
+      "category": "movement",
+      "id": "action.family.academic.003",
+      "motifsUsed": [
+        "保证",
+        "东西",
+        "樱桃派",
+        "花园里",
+        "僵尸"
+      ],
+      "name": "Garden Rot",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "academic",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.econ-toll",
+        "atom.gardener"
+      ],
+      "category": "status",
+      "id": "action.family.academic.004",
+      "motifsUsed": [
+        "樱桃派",
+        "东西",
+        "保证",
+        "僵尸",
+        "花园里"
+      ],
+      "name": "Garden's Guarantee",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "academic",
+      "targetMode": "all"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cherry-bloom",
+        "atom.chill-punisher"
+      ],
+      "category": "attack",
+      "id": "action.family.afflicted.001",
+      "motifsUsed": [
+        "樱桃",
+        "僵尸",
+        "一般"
+      ],
+      "name": "Frostbite Reckoning",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "payoff",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "afflicted",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.freezing"
+      ],
+      "category": "defense",
+      "id": "action.family.afflicted.002",
+      "motifsUsed": [
+        "僵尸",
+        "一般"
+      ],
+      "name": "Frostbound Husk",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "afflicted",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.rot-punisher"
+      ],
+      "category": "support",
+      "id": "action.family.afflicted.003",
+      "motifsUsed": [
+        "一般",
+        "僵尸",
+        "樱桃"
+      ],
+      "name": "Blighted Bloom",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "payoff",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "afflicted",
+      "targetMode": "multi"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cherry-bloom",
+        "atom.rotting",
+        "atom.venomous"
+      ],
+      "category": "movement",
+      "id": "action.family.afflicted.004",
+      "motifsUsed": [
+        "僵尸",
+        "樱桃",
+        "一般"
+      ],
+      "name": "Rotting Bloom",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "afflicted",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cherry-bloom",
+        "atom.elemental-power"
+      ],
+      "category": "status",
+      "id": "action.family.afflicted.005",
+      "motifsUsed": [
+        "僵尸",
+        "一般",
+        "樱桃"
+      ],
+      "name": "Cherry Rot",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "afflicted",
+      "targetMode": "all"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chill-punisher",
+        "atom.freezing"
+      ],
+      "category": "attack",
+      "id": "action.family.alchemical.001",
+      "motifsUsed": [
+        "严寒",
+        "稳定",
+        "带来",
+        "金质",
+        "冰菇"
+      ],
+      "name": "Glacial Transmutation",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "payoff",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "alchemical",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.freezing"
+      ],
+      "category": "defense",
+      "id": "action.family.alchemical.002",
+      "motifsUsed": [
+        "严寒",
+        "金质",
+        "带来",
+        "冰菇",
+        "稳定"
+      ],
+      "name": "Glacial Gilded Bloom",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "alchemical",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.venomous"
+      ],
+      "category": "movement",
+      "id": "action.family.alchemical.003",
+      "motifsUsed": [
+        "冰菇",
+        "金质",
+        "严寒",
+        "带来",
+        "稳定"
+      ],
+      "name": "Glacial Anchoring",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "alchemical",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.rot-punisher"
+      ],
+      "category": "support",
+      "id": "action.family.allium.001",
+      "motifsUsed": [
+        "换行",
+        "咬",
+        "大蒜",
+        "金质",
+        "僵尸"
+      ],
+      "name": "Pungent Burst",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "payoff",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "allium",
+      "targetMode": "multi"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.tempo-surge",
+        "atom.venomous"
+      ],
+      "category": "movement",
+      "id": "action.family.allium.002",
+      "motifsUsed": [
+        "金质",
+        "僵尸",
+        "大蒜",
+        "咬",
+        "换行"
+      ],
+      "name": "Pungent Advance",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "allium",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.affliction",
+        "atom.prec-fixation",
+        "atom.rotting"
+      ],
+      "category": "status",
+      "id": "action.family.allium.003",
+      "motifsUsed": [
+        "大蒜",
+        "僵尸",
+        "咬",
+        "金质",
+        "换行"
+      ],
+      "name": "Pungent Aftermath",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "allium",
+      "targetMode": "all"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-hardening",
+        "atom.elpw-surge"
+      ],
+      "category": "attack",
+      "id": "action.species.abyssswordstar.001",
+      "motifsUsed": [
+        "从天而降"
+      ],
+      "name": "Sky-Sunderer's Descent",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "abyssswordstar",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.deathblast",
+        "atom.elpw-surge"
+      ],
+      "category": "movement",
+      "id": "action.species.abyssswordstar.002",
+      "motifsUsed": [
+        "从天而降"
+      ],
+      "name": "Sky-Piercing Descent",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "abyssswordstar",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.retribution"
+      ],
+      "category": "attack",
+      "id": "action.species.acientsunnut.001",
+      "motifsUsed": [
+        "消耗",
+        "来回"
+      ],
+      "name": "Solar Flare Reciprocity",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "acientsunnut",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.econ-toll",
+        "atom.mending"
+      ],
+      "category": "support",
+      "id": "action.species.acientsunnut.002",
+      "motifsUsed": [
+        "消耗",
+        "来回"
+      ],
+      "name": "Solar Reciprocity",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "acientsunnut",
+      "targetMode": "multi"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elemental-power",
+        "atom.evd-shift"
+      ],
+      "category": "movement",
+      "id": "action.species.acientsunnut.003",
+      "motifsUsed": [
+        "来回"
+      ],
+      "name": "Solar Flare Leap",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "acientsunnut",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evd-evd",
+        "atom.retribution"
+      ],
+      "category": "status",
+      "id": "action.species.acientsunnut.004",
+      "motifsUsed": [
+        "消耗",
+        "受伤",
+        "来回"
+      ],
+      "name": "Solar Flare Reciprocity",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "acientsunnut",
+      "targetMode": "all"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.prec-fixation"
+      ],
+      "category": "attack",
+      "id": "action.species.allpeater.003",
+      "motifsUsed": [
+        "火力"
+      ],
+      "name": "allpeater",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "allpeater",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.prec-truesight",
+        "atom.shld-cycle"
+      ],
+      "category": "defense",
+      "id": "action.species.allpeater.004",
+      "motifsUsed": [
+        "分配"
+      ],
+      "name": "Atmospheric Buffer",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "allpeater",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.bonding",
+        "atom.evd-shift"
+      ],
+      "category": "movement",
+      "id": "action.species.allpeater.005",
+      "motifsUsed": [
+        "切换"
+      ],
+      "name": "Atmospheric Displacement",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "allpeater",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-focus",
+        "atom.warding"
+      ],
+      "category": "support",
+      "id": "action.species.apple.001",
+      "motifsUsed": [
+        "苹",
+        "护",
+        "安"
+      ],
+      "name": "苹",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "apple",
+      "targetMode": "multi"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evd-husk",
+        "atom.evd-shift"
+      ],
+      "category": "movement",
+      "id": "action.species.apple.002",
+      "motifsUsed": [
+        "苹"
+      ],
+      "name": "Luminous Translocation",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "apple",
+      "targetMode": "rolledTarget"
+    }
+  ],
+  "kind": "action-seed",
+  "schemaVersion": 1
+}

@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "corpusHash": "6cea77948aafbdb6ccce71e87691e42b79b33e3e0c5ffcaf25185da213eeeaef",
+    "corpusHash": "25758e3100b6625c33f6835a420ef44adb5e0ebc5282e7d1d080507826705c18",
     "partition": "characteristic-pool",
     "tuningVersion": 1
   },
@@ -57,7 +57,7 @@
       "group": "B",
       "id": "pool.b-identity-context",
       "name": "Identity context",
-      "sourceVocabulary": "catalog + motif-assignments.json + family-assignments.json + themes.v1.json; 6 elements ActorElementTypes.cs:3-11; 10 rarity rungs DemonRarity.cs:16-27",
+      "sourceVocabulary": "catalog + motif-assignments.json + family-assignments.json + themes.v1.json; 6 elements ActorElementTypes.cs:3-11; 10 rarity rungs CreatureRarity.cs:16-27",
       "whoPicks": "read from the seed"
     },
     {

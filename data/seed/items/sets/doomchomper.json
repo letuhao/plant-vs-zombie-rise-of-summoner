@@ -25,7 +25,7 @@
       "id": "set.doomchomper-001",
       "nameKey": "set.devouring-maw",
       "name": "Devouring Maw",
-      "themeKey": "demon.doomchomper",
+      "themeKey": "creature.doomchomper",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.doomzombie-001",
       "nameKey": "set.fungal-forging-husk",
       "name": "Fungal Forging Husk",
-      "themeKey": "demon.doomzombie",
+      "themeKey": "creature.doomzombie",
       "members": [
         {
           "role": "armament-primary",

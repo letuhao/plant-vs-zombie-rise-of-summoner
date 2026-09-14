@@ -25,7 +25,7 @@
       "id": "set.thornslotus-001",
       "nameKey": "set.frost-lotus-thorns",
       "name": "Frost Lotus Thorns",
-      "themeKey": "demon.thornslotus",
+      "themeKey": "creature.thornslotus",
       "members": [
         {
           "role": "armament-primary",

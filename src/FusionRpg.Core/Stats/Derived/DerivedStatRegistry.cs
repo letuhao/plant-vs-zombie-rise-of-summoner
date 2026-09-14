@@ -214,7 +214,7 @@ public sealed class DerivedStatRegistry
         // disk as revert points and still carry edges naming it, and `TerminationGuardTests` deliberately
         // pins v1 to prove historical facts about it. An unregistered channel is a hard load rejection,
         // so retiring the id outright would make every archived config unloadable and delete those
-        // regression checks. Migration-shim only, exactly like `DemonRarity`'s retired four-value ladder:
+        // regression checks. Migration-shim only, exactly like `CreatureRarity`'s retired four-value ladder:
         // **nothing reads it** (OverlayCombatMath moved to resource.restore.hp) and **no new edge may name
         // it** -- the live config v4 has none, and AptitudeTuningTests' coverage test is over
         // `resource.restore`, not this.

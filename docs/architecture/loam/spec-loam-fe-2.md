@@ -55,7 +55,7 @@ construction from an active one, cannot see a sector is warded, and cannot **do*
 only from a raw API call.
 
 **Success looks like:** a player can open `#/world`, select their legion, Sustain a starving sector,
-queue a Build order for a well, watch its construction countdown tick down turn by turn, bind a demon
+queue a Build order for a well, watch its construction countdown tick down turn by turn, bind a creature
 as a warden on threatened ground (with a clear, confirmed, "this is permanent" warning), see their
 dowser's revealed sectors highlighted on the map, and read what happened in the turn-playback rail in
 plain English — all without touching curl or a test harness.
@@ -143,14 +143,14 @@ notice mechanism (`WorldPage.tsx:145-154`).
 
 The bigger gap: no `WorldCommandKinds.Ward` exists, no endpoint calls `RpgStore.BindAsWarden`, and
 nothing connects the two even if both existed. Two systems meet here — a **permanent, Data-layer**
-demon-contract action (already shipped: `RpgStore.BindAsWarden`) and a **World-layer** effect
+creature-contract action (already shipped: `RpgStore.BindAsWarden`) and a **World-layer** effect
 (`WorldSector.WardenBindingId`, already shipped, exempts fade). Core must not call `RpgStore` (DAL
 boundary, `data-architecture.md` — SQL only inside `FusionRpg.Data`), so the two cannot be one
 resolver. The design:
 
 **New Core plumbing** (mirrors `Sustain`/`Build` exactly):
 - `WorldCommandKinds.Ward` + `WorldCommand.WardenBindingId` (`string?`) — the caller-supplied opaque id
-  (in practice, the demon's `instanceId`; Core never validates it against a real contract — that
+  (in practice, the creature's `instanceId`; Core never validates it against a real contract — that
   validation already happened one layer down, same as `Build`'s `StructureId` is caller-supplied and
   Core only checks it against the known-structure catalog, not against whether the player can afford
   it).
@@ -173,8 +173,8 @@ resolver. The design:
 **New Web UI**: a "Bind Warden" button in the Sector inspector (next to Sustain/Build), enabled when
 the player owns the sector and it has no `wardenBindingId`. Per **GG-22** (destructive/irreversible
 actions confirm and name exactly what is lost) this opens a **band-3 confirm dialog** — not a silent
-button click — listing the player's eligible demons (bound, not already a warden — reusing
-`useContracts`'s existing data, `contracts.ts:38`) and stating plainly: *"binds {demon} to {sector}
+button click — listing the player's eligible creatures (bound, not already a warden — reusing
+`useContracts`'s existing data, `contracts.ts:38`) and stating plainly: *"binds {creature} to {sector}
 permanently — it can never be released, fielded, or fused again."* A `useBindAsWarden()` hook mirrors
 `useBindContract()`'s shape (`contracts.ts:59-61`) exactly.
 
@@ -210,7 +210,7 @@ missing it:
 - **No new top-level route, no new panel type.** Every control above lives in the existing
   `Panel title="Sector"` band-2 layer or a band-3 confirm dialog — GG-1.
 - **Whose warden a sector belongs to is not exposed to other factions.** `wardenBindingId`'s *presence*
-  is scouted-visible (§1); the demon identity behind it stays owner-only — showing it would leak
+  is scouted-visible (§1); the creature identity behind it stays owner-only — showing it would leak
   roster information across the fog boundary this program has held since wave 1.
 
 ## Commands
@@ -269,7 +269,7 @@ and the raw engine string does not.
 - **Always:** owner-only/scouted-only gating asserted as a property on every new field; disabled
   (never hidden) controls with a stated reason; player vocabulary on every rendered surface and every
   playback line; GG-22 confirmation before Ward.
-- **Ask first:** exposing which specific demon backs a `wardenBindingId` to non-owners (currently
+- **Ask first:** exposing which specific creature backs a `wardenBindingId` to non-owners (currently
   designed as never — see What stays cut); any rollback mechanism for the Ward endpoint's two-step
   failure case (currently designed as accepted risk, not rollback).
 - **Never:** a new top-level route or panel type; deriving loam numbers in TypeScript (the server
@@ -280,7 +280,7 @@ and the raw engine string does not.
 1. `carriedLoam`, member `role`, `constructionTurnsRemaining`, `wardenBindingId`, and `neglectedTurns`
    are on the wire, fog-gated, and rendered in the Sector inspector.
 2. A player can Sustain, Build, and Bind a Warden entirely from `#/world`, with no raw API call.
-3. A Ward action shows a confirm dialog naming the exact demon and sector before it fires.
+3. A Ward action shows a confirm dialog naming the exact creature and sector before it fires.
 4. The turn-playback rail never prints a raw engine detail string for any loam/legion/Unmade event —
    every one translates to player words.
 5. A dowser's revealed sectors render with their own distinct treatment, never confused with

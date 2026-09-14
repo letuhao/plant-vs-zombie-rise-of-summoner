@@ -25,7 +25,7 @@
       "id": "set.firegloom-001",
       "nameKey": "set.crimson-spore-vent",
       "name": "Crimson Spore Vent",
-      "themeKey": "demon.firegloom",
+      "themeKey": "creature.firegloom",
       "members": [
         {
           "role": "armament-primary",

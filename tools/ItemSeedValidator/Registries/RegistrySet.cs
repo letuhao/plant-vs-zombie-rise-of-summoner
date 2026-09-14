@@ -186,9 +186,10 @@ public sealed class RegistrySet
             Themes = Read("themes.v1.json"),
             // item-ideal.md, base-types (module 6, D35): v2 re-derives the 32-family global
             // exclusion list against AtomKindRegistry.cs, lifting 15 stale D6-quarantine entries.
-            // v1 stays on disk (frozen, never edited); v2 is purely additive (minCompatibleVersion
-            // 1), so nothing legal under v1 becomes illegal here.
-            Classes = Read("classes.v2.json"),
+            // v1 and v2 stay on disk (frozen, never edited); v3 is additive on top of v2 — it adds
+            // `legalFamiliesByFrame` per role (D11 clause 1, 2026-09-12) and leaves the role-wide
+            // `legalFamilies` as the union, so nothing legal under v2 becomes illegal here.
+            Classes = Read("classes.v3.json"),
             Naming = Read("naming.v1.json"),
             BuildThemes = ReadOptional("build-themes.v1.json"),
             Words = ReadOptional("words.v1.json"),

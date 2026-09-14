@@ -246,7 +246,7 @@ apply scope … every effect must apply through atom effect runtime."* Verified:
 
 **`player:` is the symptom.** An effect delivered through `StatApplyScope` never consults the atom
 scope model, because the type has no field in which the atom could appear. ⚠ `WhoKind` cannot express
-the concept either — `{ Target, Type, UniqueDemon, Relation }` (`WhoSelector.cs:10-16`).
+the concept either — `{ Target, Type, UniqueCreature, Relation }` (`WhoSelector.cs:10-16`).
 
 **Filed against `buff-debuff-scope`** ([buff-debuff-scope-map.md](../buff-debuff-scope-map.md), *Filed
 defect*), where the model that must grow the concept lives. **This module does not wait on it** — (a)
@@ -470,7 +470,7 @@ the frozen `core.v1.json` (**module 3 issues the v2 bump — this module consume
 its stated price. **Never pin the recovery curve only at its endpoints** — a step function at
 `minorityMilli 40` passes an endpoint-only suite and reduces D3 to the price of one cheap role. Never
 give the evaluator a cap on how many sets a wearer may be partially in. Never bind a set tier at `match` scope (`ScopeUnsupported`, ssot-sets §4.4) — one
-demon's gear must not become a team buff. Never let a breakpoint be a hard progression ceiling; the top
+creature's gear must not become a team buff. Never let a breakpoint be a hard progression ceiling; the top
 breakpoint is a content limit, and the *count* it reads is unbounded. Never write a `player:`-scoped
 combat atom while `StatApplyScope.cs:81-82` returns match-wide — it buffs the zombies.
 

@@ -126,8 +126,8 @@ of sampling, can catch:
   `spec-pipeline.md`'s guardrails or `spec-metrics.md`'s families routes that signal anywhere.
 - **Cross-feature interaction.** Every metric in `spec-metrics.md` is `(corpus, budget, numerics,
   adapter) → list[Finding]` for **one** adapter (§6, "Metrics are pure"). Once a second feature
-  (world map, demons) exists, nothing in the module list checks whether the *combination* is
-  balanced — e.g., item power curves making world-map combat trivial, or demon-contract yields
+  (world map, creatures) exists, nothing in the module list checks whether the *combination* is
+  balanced — e.g., item power curves making world-map combat trivial, or creature-contract yields
   interacting with item drop rates in a way neither feature's own budget can see. This is not an
   oversight inside any one spec; it is structurally excluded by every metric's signature, and the
   map's boundaries section (§5) doesn't mention it as an explicit non-goal either — it is simply
@@ -297,7 +297,7 @@ absence should be closed before W3 ships anything to review.
 Map decision 3 and `spec-foundation.md` §2 are honest about scope: the stub "exists only in the
 test suite... roughly 5% the cost of a real second feature," proving only that the core doesn't
 reach into item concepts *by name*. Two concrete things the stub cannot exercise, and that a real
-second feature (world map or demons, per the standing programs) will hit:
+second feature (world map or creatures, per the standing programs) will hit:
 
 - **`legal_combinations()` returns a pairwise boolean legality function** (`spec-foundation.md` §2).
   That is exactly right for items, where illegality is a flat pair like `ward-array × hybrid`. World

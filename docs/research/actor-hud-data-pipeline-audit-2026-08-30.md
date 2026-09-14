@@ -69,9 +69,9 @@ a live match.
 | `identity.role` | `MatchUniqueBindingsFacet` | Hot RAM | `TryGetByPtr(normalizedPtr)` | yes | wired API exists | Inspector guessing binding |
 | `identity.levelBand` | `ActorDerivedSnapshot` pin | Hot pin | `InjectorDerivedOverride.TryGet` → `progression.power` → `PowerBandDisplay` | yes | **wired** at EntityApply (slice 1, 2026-08-30) | `theLevel`, raw Θ on lawn |
 | `identity.tier` unique | BoardProjection / spawn observe | Hot events | `flags.unique` on occupant fold path | yes | partial | — |
-| `identity.tier` elite | Demon/rarity derived | Hot | TBD — **omit v1** if no signal | — | inert | — |
+| `identity.tier` elite | Creature/rarity derived | Hot | TBD — **omit v1** if no signal | — | inert | — |
 | `identity.tier` boss | Expedition spawn | Cold+Hot | **omit v1** | — | inert | — |
-| `identity.flags` | Binding + unique + demon profile | Hot + observe | Composed in builder from above | yes | partial | — |
+| `identity.flags` | Binding + unique + creature profile | Hot + observe | Composed in builder from above | yes | partial | — |
 | `resources.shield` | `ShieldRuntime` | Hot RAM | `EffectRuntime.Bag.ShieldGate.Runtime` totals/stacks | yes | **wired** (slice 2) | `rpgShieldHp`/`Max`, `ShieldBarPool` |
 | `statuses[]` | `StatusRuntime` | Hot RAM | Instance list by owner ptr (combat owner key) | yes | **wired** (slice 2) | `statusChips` text fold |
 | `overflow.statusCount` | `ActorHudLayout` | Core pure | Full status list − visible cap | yes | **wired** (slice 2) | — |
@@ -208,7 +208,7 @@ compliance where applicable.
 | Derived pin not at EntityApply | **Wiring gap** — P1.5 |
 | `statusChips` partial (9/13 ids) | Wiring gap — extend fold |
 | Boss tier signal on lawn | Real gap — expedition program |
-| Elite from demon profile | Wiring gap when profile path exists |
+| Elite from creature profile | Wiring gap when profile path exists |
 
 ---
 

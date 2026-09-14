@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using FusionRpg.Core.Actions;
 using FusionRpg.Core.Actions.Corpus;
 using FusionRpg.Core.Actions.Rungs;
@@ -15,22 +16,17 @@ namespace FusionRpg.Data.Tests.Actions;
 /// </summary>
 public class ActionCorpusImporterTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public ActionCorpusImporterTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-action-corpus-import-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         SeedAtoms();
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     void SeedAtoms()
     {
@@ -51,14 +47,22 @@ public class ActionCorpusImporterTests : IDisposable
         }
     }
 
-    static ActionCorpusCostTemplate CostTemplate() => new(new Dictionary<ActionCategory, ActionCorpusCostTemplateRow>
-    {
-        [ActionCategory.Attack] = new("qi", 20, ActionCostTiming.OnCommit),
-        [ActionCategory.Defense] = new("qi", 30, ActionCostTiming.OnCommit),
-        [ActionCategory.Support] = new("qi", 40, ActionCostTiming.OnCommit),
-        [ActionCategory.Movement] = new("qi", 15, ActionCostTiming.OnCommit),
-        [ActionCategory.Status] = new("qi", 35, ActionCostTiming.OnCommit),
-    });
+    static ActionCorpusCostTemplate CostTemplate() => new(
+        new Dictionary<ActionCategory, ActionCorpusCostTemplateRow>
+        {
+            [ActionCategory.Attack] = new("qi", 20, ActionCostTiming.OnCommit),
+            [ActionCategory.Defense] = new("qi", 30, ActionCostTiming.OnCommit),
+            [ActionCategory.Support] = new("qi", 40, ActionCostTiming.OnCommit),
+            [ActionCategory.Movement] = new("qi", 15, ActionCostTiming.OnCommit),
+            [ActionCategory.Status] = new("qi", 35, ActionCostTiming.OnCommit),
+        },
+        // T7 (basic-attack-seed): Kind-aware rows, mirroring the real shipped
+        // action-corpus-cost-templates.v1.json's own "kinds" block.
+        new Dictionary<ActionKind, ActionCorpusCostTemplateRow>
+        {
+            [ActionKind.Basic] = new("stamina", 20, ActionCostTiming.OnCommit),
+            [ActionKind.Innate] = new("qi", 25, ActionCostTiming.OnCommit),
+        });
 
     static ActionCorpusBrief Brief(string id = "action.import.test.001") => new(
         Id: id, Name: "Import Test Volley", Category: "attack", Scope: "general", ScopeKey: null,
@@ -114,5 +118,111 @@ public class ActionCorpusImporterTests : IDisposable
         Assert.Equal(1, result.RejectedCount);
         Assert.NotNull(_store.GetAction("action.import.good.001"));
         Assert.Null(_store.GetAction("action.import.bad.001"));
+    }
+
+    // ---- T7 (basic-attack-seed): the real authored-basics.json + the real committed corpus ----
+
+    static string RepoRoot([CallerFilePath] string here = "")
+    {
+        var testsDir = Path.GetDirectoryName(here)!;                       // tests/.../Actions
+        return Path.GetFullPath(Path.Combine(testsDir, "..", "..", "..")); // repo root
+    }
+
+    static string RepoPath(params string[] parts) => Path.Combine(new[] { RepoRoot() }.Concat(parts).ToArray());
+
+    /// <summary>The real shipped tuning file, not the inline mirror above — proves the actual bytes on
+    /// disk (with the "kinds" block this task added) parse and resolve correctly.</summary>
+    static ActionCorpusCostTemplate RealCostTemplate() =>
+        ActionCorpusCostTemplateLoader.Parse(File.ReadAllText(RepoPath("data", "tuning", "action-corpus-cost-templates.v1.json")));
+
+    void SeedRealAtomFile(string relativePath)
+    {
+        var path = RepoPath(relativePath.Split('/'));
+        var collect = AtomSeedFile.Collect(new[] { (path, File.ReadAllText(path)) });
+        Assert.True(collect.IsOk, string.Join("; ", collect.Errors));
+        var result = _store.UpsertAtoms(collect.Content.Atoms);
+        Assert.Empty(result.Rejected);
+    }
+
+    /// <summary>Data test (spec-basic-attack-seed.md's own testing-strategy table): importing
+    /// `authored-basics.json` yields exactly one row, id `act.attack`, `Kind = Basic`, with a `stamina`
+    /// cost row attached — against the REAL seed file, the REAL atom (`atom.fx-overlay-damage`,
+    /// `data/seed/atoms/fx-core.json`) and the REAL tuning file, not hand-built fixtures.</summary>
+    [Fact]
+    public void ImportingTheRealAuthoredBasicsFileYieldsActAttackAsBasicWithAStaminaCost()
+    {
+        SeedRealAtomFile("data/seed/atoms/fx-core.json");
+        var briefs = ActionCorpusBriefJson.Parse(File.ReadAllText(RepoPath("data", "seed", "actions", "authored-basics.json")));
+        Assert.Single(briefs);
+        Assert.Equal("act.attack", briefs[0].Id);
+        Assert.Equal(ActionKind.Basic, briefs[0].KindHint);
+
+        var result = ActionCorpusImporter.Import(_store, briefs, RealCostTemplate(), RungPolicy.Table);
+
+        Assert.Equal(1, result.ImportedCount);
+        Assert.Equal(0, result.RejectedCount);
+
+        var row = _store.GetAction("act.attack");
+        Assert.NotNull(row);
+        Assert.Equal(ActionKind.Basic, row!.Kind);
+
+        var costs = _store.ListCosts("act.attack");
+        Assert.Single(costs);
+        Assert.Equal("stamina", costs[0].ResourceId);
+    }
+
+    /// <summary>
+    /// The task's own "most important regression check", run for real against the real shipped
+    /// `committed-round-{1,2}.json` (24 briefs) and the real tuning file — mirroring
+    /// `ActionCorpusRealContentQualityTests`'s established atom fixture (only `atom.fortitude` and
+    /// `atom.vitality` resolve, so exactly 3 of 24 briefs import; unchanged by this task, since kindHint
+    /// honoring never touches atom-family resolution).
+    ///
+    /// <para><b>Premise found wrong while verifying this, reported rather than hidden:</b> the todo's
+    /// own acceptance bar reads "ALL 179 existing action briefs import completely UNCHANGED — no Kind
+    /// drift, no cost drift for any of them." That is false for one of the three briefs that actually
+    /// import today: `action.species.cabbagepult.002` already authors `"kindHint": "innate"` in the
+    /// real shipped file (measured directly, not assumed) — before this task every brief hardcoded to
+    /// `Kind = Skill` regardless of `kindHint`; after this task, honoring `kindHint` (which is the
+    /// task's own primary acceptance criterion) necessarily flips this ONE already-imported brief's
+    /// `Kind` from `Skill` to `Innate`, and its cost from the `defense` category row (`qi` 30) to the
+    /// `kinds.innate` row (`qi` 25). This is the correct, intended effect of finally consuming a field
+    /// the parser used to discard (spec-basic-attack-seed.md: "That is the defect; the field is not
+    /// new") — not a regression introduced by this change. The other two composing briefs
+    /// (`action.general.0003`, `action.species.cabbagepult.001`) carry no `kindHint` and are provably
+    /// unaffected, asserted below.</para>
+    /// </summary>
+    [Fact]
+    public void TheRealShippedCorpusHasExactlyOneDocumentedKindChangeAndNoOthers()
+    {
+        SeedRealAtomFile("data/seed/atoms/generated/family-expand.g-life.json");
+        var briefs = new List<ActionCorpusBrief>();
+        foreach (var f in new[] { "committed-round-1.json", "committed-round-2.json" })
+            briefs.AddRange(ActionCorpusBriefJson.Parse(File.ReadAllText(RepoPath("data", "seed", "actions", f))));
+        Assert.Equal(24, briefs.Count); // liveness -- the real files still have 24 rows between them
+
+        var result = ActionCorpusImporter.Import(_store, briefs, RealCostTemplate(), RungPolicy.Table);
+
+        // Atom-family resolution is untouched by this task -- same 3-imported/21-rejected split as
+        // ActionCorpusRealContentQualityTests already established before this task existed.
+        Assert.Equal(3, result.ImportedCount);
+        Assert.Equal(21, result.RejectedCount);
+
+        // Unaffected: no kindHint authored on either -> Skill, category-driven cost, same as always.
+        var general0003 = _store.GetAction("action.general.0003")!;
+        Assert.Equal(ActionKind.Skill, general0003.Kind);
+        Assert.Equal("qi", _store.ListCosts("action.general.0003").Single().ResourceId);
+
+        var cabbagepult1 = _store.GetAction("action.species.cabbagepult.001")!;
+        Assert.Equal(ActionKind.Skill, cabbagepult1.Kind);
+        Assert.Equal("qi", _store.ListCosts("action.species.cabbagepult.001").Single().ResourceId);
+
+        // The one documented, intended change: kindHint="innate" was always in this file; only now is
+        // it honored.
+        var cabbagepult2 = _store.GetAction("action.species.cabbagepult.002")!;
+        Assert.Equal(ActionKind.Innate, cabbagepult2.Kind);
+        var cabbagepult2Cost = _store.ListCosts("action.species.cabbagepult.002").Single();
+        Assert.Equal("qi", cabbagepult2Cost.ResourceId);
+        Assert.Equal(ValueSpec.Of(25), cabbagepult2Cost.AmountSpec); // kinds.innate, not defense-category's 30
     }
 }

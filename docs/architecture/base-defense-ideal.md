@@ -131,7 +131,7 @@ buildings and obstacles exist to serve it. See §5.13.
 29. **The force-size numbers stay tunable**, not fixed as bands in §0. The playability audit's objection
     is accepted as a **recorded risk**, not overruled: board dimensions, decisions per engagement and
     viewport fit cannot be settled until the field cap exists, so the first balance pass owns them.
-30. **`structure-seed` is its own program**, mirroring `demon-seed` beside `demon-system`. Ideal:
+30. **`structure-seed` is its own program**, mirroring `creature-seed` beside `creature-system`. Ideal:
     [structure-seed-ideal.md](structure-seed-ideal.md).
 
 **Round 8 — after the spec completeness audit (2026-09-04).** See
@@ -203,16 +203,16 @@ buildings and obstacles exist to serve it. See §5.13.
 
 **Round 10 — the last three, and two of them change scope (2026-09-04).**
 
-43. **PvZ's static plants STAY demons.** Wall-nut, Tall-nut, Pumpkin, Spikeweed and Lily Pad are not
+43. **PvZ's static plants STAY creatures.** Wall-nut, Tall-nut, Pumpkin, Spikeweed and Lily Pad are not
     reclassified. This confirms what `structure-seed-ideal.md` §3 already argued from the owner's own
-    earlier words (*"cannot use soul to summon a wall, that confuse with wallnut demon family"*):
+    earlier words (*"cannot use soul to summon a wall, that confuse with wallnut creature family"*):
     reclassifying them *"would take content out of the summon roster."*
 
-    > ⚠️ **The question's own framing was wrong and the correction matters.** It offered "stay demons"
+    > ⚠️ **The question's own framing was wrong and the correction matters.** It offered "stay creatures"
     > as implying a **datamine-classify** pipeline. §3 says the opposite, explicitly: *"the PvZ corpus
     > is **not** available for reuse here … **So the source material is the design research, not a
     > datamine**"* — §5.18's four obstacle kinds plus §5.21's ten economic roles, **~25–30 seed concepts
-    > authored by hand first and generated second.** Staying demons means an **INVENTION** pipeline,
+    > authored by hand first and generated second.** Staying creatures means an **INVENTION** pipeline,
     > which has a different failure surface (mode collapse and generic flavour, neither caught by
     > majority vote). The decision stands; the reasoning attached to it does not.
 
@@ -569,11 +569,11 @@ starting legion is three members, Zomboss's two, the wild pack two
 | **Expedition squad slots — 2 / 3 / 4 / 5 by tier** | `data/tuning/expeditions.v1.json` `tiers.*.squadSlots`, loaded through `ExpeditionTuning.cs:51`, enforced at `ExpeditionResolver.cs:66` (`"Squad exceeds tier slots."`) | ✅ **The pattern to copy.** A slot count that scales with content tier and lives entirely in data |
 | **Web battle squad — 6** | `WebMatchService.cs:238` — `const int maxSquad = 6;`, refusing with `"squad.toolarge"` at `:240` | ❌ **A magic number on the balance surface**, in the one production battle path. It is exactly the number a balance pass would change, and it is a `const`. Fixing it belongs to whoever next touches that file |
 
-**One modelling fact that decides how "slots" can work here:** `WorldEntityMember` is **one demon,
+**One modelling fact that decides how "slots" can work here:** `WorldEntityMember` is **one creature,
 not a stack** — it carries `InstanceId` (a roster specimen), `Level`, `Hp`, `Wounds`
 (`WorldState.cs:212-220`). HOMM3's seven slots hold *stacks* of one creature type each (up to 9,999).
 Ours cannot: a stack has no single `InstanceId`, no single level, and no place to put gear. So in this
-codebase **a slot is one specimen**, and "max demon types per legion" and "max legion size" are the
+codebase **a slot is one specimen**, and "max creature types per legion" and "max legion size" are the
 same number unless stacks are introduced — which would be a change to the unique-actor grain, not a
 tuning value.
 
@@ -1129,7 +1129,7 @@ forced-to-attack, break-the-round, keeps-battle-alive. One change, not three.
 Decision 15 — a building acts **through its occupant** — is load-bearing architecture, not flavour:
 
 - **Buildings never enter the initiative order.** §3.4's gap shrinks from *"an actor that acts but is
-  not a demon"* to *"a destructible board object."* The kind flag is still needed so `AnyActive`
+  not a creature"* to *"a destructible board object."* The kind flag is still needed so `AnyActive`
   (`BattleEngine.cs:405-406`) does not count a wall as a living side — but the hard half is skipped.
 - **Structures carry traits and actions as _data_; the occupant is the executor.** That reconciles
   "buildings have traits and actions" with "buildings receive no buffs": nothing is ever granted *to*
@@ -1244,7 +1244,7 @@ tiring. Also useful: *"exhaustion is re-evaluated on read, not only on write"* �
 #### Scope: no fifth `WhoKind`, not yet
 
 Decision 11 says structures receive nothing. The instinct is a fifth `WhoKind` — the vocabulary is
-`{ Target, Type, UniqueDemon, Relation }`, closed, *"adding a fifth is a reviewed change"*. **Two
+`{ Target, Type, UniqueCreature, Relation }`, closed, *"adding a fifth is a reviewed change"*. **Two
 reasons not to, today:**
 
 1. **It points the wrong way.** A fifth kind names a population you *can* reach. Exclusion is wanted,
@@ -1312,8 +1312,8 @@ waystations are world-scoped and die with the map"*).
 Two world-scoped materials keep loam's scope discipline intact: both die with the map, and
 `min(loam, material)` is a bottleneck between two stocks at the same scope.
 
-**And the thematic argument stands on its own:** souls summon **demons**, and Wall-nut *is* a demon. If
-souls also bought walls, "wall" would have two acquisition paths and decision 11's demon/structure
+**And the thematic argument stands on its own:** souls summon **creatures**, and Wall-nut *is* a creature. If
+souls also bought walls, "wall" would have two acquisition paths and decision 11's creature/structure
 split would blur at the economy layer.
 
 #### Satisfying P4 for the *second* material — the part that needs care
@@ -1335,7 +1335,7 @@ harder guard, in maps that already ship. `world-graph-ideal.md`'s own rule — *
 reward"* — is doing the work for free.
 
 **Naming.** `empire-economy-ssot.md` §1 chose "loam" because it *"collides with nothing"*. Same test
-run 2026-09-04: **`metal` collides in 49 files** (five demon species — `ferro-flora`,
+run 2026-09-04: **`metal` collides in 49 files** (five creature species — `ferro-flora`,
 `magneto-flora`, `magneto-fungi`, `armored-legume`, `explosive-fungi`), **`stone` in 29** (including
 Tailwind's `stone-` palette in the shipped FE CSS). Clean: `timber`, `granite`, `masonry`,
 `ironwork`, `rubble`. **`ironwork` is chosen** for the worked material; the bulk material's name is
@@ -1450,7 +1450,7 @@ sizes the game at 6–10 legions with no mechanism behind the number. A two-knee
 theirs.** That is right, and it removes more of the table above than it keeps. Two structural reasons,
 and they disqualify whole rows rather than trimming them:
 
-1. **RTS units are fungible and disposable. Ours are persistent individuals.** A demon has an
+1. **RTS units are fungible and disposable. Ours are persistent individuals.** A creature has an
    `instanceId`, a level, XP, gear, traits, contracts, six resource pools and a rolled atom loadout.
    You do not queue five more of it.
 2. **There is no *worker* loop on the board** — no fungible harvester unit, so drop-off points,
@@ -1463,7 +1463,7 @@ and they disqualify whole rows rather than trimming them:
 
 | RTS role | Verdict | Why |
 |---|---|---|
-| **Production** (Barracks / Factory / Starport) | ❌ **Redundant** | Exists because units are fungible. Demons are summoned at player scope through souls and contracts, and they persist. A barracks producing disposable troops would contradict the roster, contract and unique-actor design at once |
+| **Production** (Barracks / Factory / Starport) | ❌ **Redundant** | Exists because units are fungible. Creatures are summoned at player scope through souls and contracts, and they persist. A barracks producing disposable troops would contradict the roster, contract and unique-actor design at once |
 | **Upgrade** (Blacksmith, +1 attack to all footmen) | ❌ **Redundant *and* harmful** | Exists because RTS units have no individual progression. Ours have levels, gear, traits, atoms and a rung ladder. A flat army-wide bonus is a **second progression curve**, which §2 rule 4 forbids outright |
 | **Seat / tier** (Town Hall → Keep → Castle) | ❌ **Already ours** | `DevelopmentLevel` is exactly this, and §5.10 already reads it |
 | **Supply / upkeep** (Farm, food cap, the two-knee tax) | ❌ **Already shipped** | `LoamUpkeep` already taxes headcount per sector — `Garrison: garrisonMembers × GarrisonUpkeepPerMember` (`LoamUpkeep.cs:71`), summed over every entity standing there (`:50-52`). We do not need to import WC3's idea; we have it, and it is *per-sector* rather than global, which is better for a territorial game |
@@ -1535,7 +1535,7 @@ It is also nearly built: the seam is `intentSource` (§3.3), three missing argum
 1. **The quality ceiling becomes the battle AI's, permanently.** Age of Wonders states the quiet part:
    *"Auto combat employs the same AI for controlling player units as it does enemy units."* Players
    beat that AI, so delegating is a guaranteed downgrade — and with persistent, levelled, geared,
-   contract-bound demons, *"losing a unit equals having a worse team"* compounds.
+   contract-bound creatures, *"losing a unit equals having a worse team"* compounds.
    ⛔ **This is the sharp tension with the requirement that playing be "meaningfully better, never
    mandatory": with one kernel both are set by the same dial.** Too far and auto is unusable
    (mandatory play); not far enough and playing is pointless — **fheroes2's maintainers hit the second
@@ -1800,7 +1800,7 @@ stays exactly as decisive at Θ=200 as at Θ=1.** That is precisely what §2 rul
    (capped) for cavalry on the same hex**; Fire Emblem fliers get Fort/Gate/Throne and nothing else.
    The alternative is Advance Wars' documented outcome — its own wiki says heavy terrain is *"always
    preferred"*, because the bonus is universal and free. **Our lever is better than a unit-class
-   enum**: demons have elements, traits and aptitudes, so cover magnitude can key on those.
+   enum**: creatures have elements, traits and aptitudes, so cover magnitude can key on those.
 4. **If cover decays, decay it with the occupant's condition, not with turns.** Advance Wars scales
    terrain defense by **current HP** — a 5 HP unit in 2-star woods gets 10%, not 20% — so a fortress
    stops being one exactly when it is most needed. **We have a better hook and it needs no new
@@ -2306,7 +2306,7 @@ one. There are four, they cost different things, and **the difference is what ma
 |---|---|---|---|---|
 | **1** | **Built** | world materials — `rubble` / `ironwork` (+ loam) | accumulates over map turns | The **defender**, at home and in supply |
 | **2** | **Assembled from a consumable** | the **item** | **immediate** | The **attacker** — a prefabricated work, carried in and deployed |
-| **3** | **Summoned by a demon action** | **`qi`** | the action | Any actor with the right action |
+| **3** | **Summoned by a creature action** | **`qi`** | the action | Any actor with the right action |
 | **4** | **Laboured** — digging a moat, throwing up a berm | **`stamina` / `hunger`** | the action | Any actor. **No materials at all** |
 
 #### This is what answers the audit's sharpest economic finding

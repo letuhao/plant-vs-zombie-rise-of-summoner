@@ -26,7 +26,7 @@ Reference material, open over any stage:
 
 Discovery states matter. An empty slot is something you have not met yet — not a broken link.
 
-Codex milestones for demons reward exploration. Web-only players can still claim completion milestones without every exclusive lawn capture.
+Codex milestones for creatures reward exploration. Web-only players can still claim completion milestones without every exclusive lawn capture.
 
 ---
 
@@ -49,7 +49,7 @@ Progress **survives the run**. Nothing you earn disappears with the level. There
 |---|---|
 | Summoner | Your account level and XP |
 | Plant / zombie types | Per-type levels from play |
-| Specimens | Individual demons from work they did — lawn, expedition, battle |
+| Specimens | Individual creatures from work they did — lawn, expedition, battle |
 
 Souls are separate from XP: souls buy summons and rituals; XP grows power curves and unlocks.
 

@@ -25,7 +25,7 @@
       "id": "set.ashthreepeater-001",
       "nameKey": "set.cinder-line-marksman",
       "name": "Cinder-Line Marksman",
-      "themeKey": "demon.ashthreepeater",
+      "themeKey": "creature.ashthreepeater",
       "members": [
         {
           "role": "armament-primary",

@@ -291,7 +291,7 @@ export function toLiveMap(
     }
     return map;
   }
-  // Lean /derived without sheet projection — no invent of cap/renderState (UniqueDemon Pending honesty).
+  // Lean /derived without sheet projection — no invent of cap/renderState (UniqueCreature Pending honesty).
   for (const ch of lean ?? []) {
     map.set(ch.channelId, {
       channelId: ch.channelId,

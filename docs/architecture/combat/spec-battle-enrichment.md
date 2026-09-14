@@ -39,7 +39,7 @@ Make battles richer on top of the now-central combat system: attacks that apply 
 
 - `SkillDef`: id, cooldown (rounds), action kind + params, targeting policy. Action kinds reuse the effect vocabulary semantics: damage (through the resolver + pipeline), heal (pipeline, positive), `GrantShield` (ShieldRuntime — **durations in ms**, host-converted), `ApplyStatus` (StatusRuntime). No bespoke skill math. Crit-damage-flavored skill content is costed against the resolver's **(1.0, 2.0)** crit-multiplier bound — the retired ×3.0 ceiling is unreachable.
 - Selection: deterministic policy per actor (skill off cooldown → use, else basic attack); `skills` RNG stream for any chance-based policy. Initiative unchanged.
-- `SkillCatalog` code-first like the trait catalog; species → skill mapping via demon catalog metadata (coordinated with the demon stream's species SSOT).
+- `SkillCatalog` code-first like the trait catalog; species → skill mapping via creature catalog metadata (coordinated with the creature stream's species SSOT).
 - Report: skill-use events (`skill.used`) in the battle vocabulary.
 
 ## Wave H — hybrid payloads

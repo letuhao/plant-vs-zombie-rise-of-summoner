@@ -9,7 +9,7 @@
 
 ## Objective
 
-Wire ActorSheet Aptitudes so **creature → Mode A (UniqueDemon)** and **commander → Mode C**, using
+Wire ActorSheet Aptitudes so **creature → Mode A (UniqueCreature)** and **commander → Mode C**, using
 thin `RecipeMount` over `aptitudes-surface-vm`. Stop using commander allocate as UniqueActor default.
 Honor **E1:** Confirm commits draft; Activate calls transactional preset activate API without Confirm.
 
@@ -59,7 +59,7 @@ Draft key: Mode A by `instanceId`; Mode C by `playerId`. Dirty footer only for a
 `aptitude.reset` / revert.
 
 **Favour (E3/S1):** New preset / Auto-assign may seed from favour GET permille when `speciesId`
-known — never auto-fills UniqueDemon on sheet open.
+known — never auto-fills UniqueCreature on sheet open.
 
 ---
 
@@ -72,7 +72,7 @@ Host owns: query selection, mutate on **confirm** or **preset.activate → activ
 
 ## Testing strategy
 
-- Role gate unit/UI tests: commander chip ≠ UniqueDemon; creature confirm hits unique mutation mock.
+- Role gate unit/UI tests: commander chip ≠ UniqueCreature; creature confirm hits unique mutation mock.
 - Refuse confirm without instanceId in Mode A.
 - Activate path calls activate API **without** requiring prior Confirm; does not split set-active + allocate.
 - Apply-to-draft leaves dirty draft; Confirm then posts.
@@ -83,7 +83,7 @@ Host owns: query selection, mutate on **confirm** or **preset.activate → activ
 ## Boundaries
 
 - **Always:** D2 role gate; leftover+decision in console; E1 verb split; transactional Activate (S3).
-- **Never:** DemonType write from ActorSheet; UniqueDemon on commander sheet; Hub favour baseline;
+- **Never:** CreatureType write from ActorSheet; UniqueCreature on commander sheet; Hub favour baseline;
   client split Activate.
 
 ---

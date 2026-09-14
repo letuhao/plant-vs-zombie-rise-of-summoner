@@ -261,6 +261,17 @@ function buildMeter(
   };
 }
 
+/**
+ * copy-surfaces (T11) — the only sanctioned "combat power" number: Offense + Survivability +
+ * Control from Standing. Utility/Economy are real axes (kept on the five-axis vector below for
+ * inspect) but never folded into this label — and neither is Θ/level (`chip-honesty`, T10's own
+ * surface) nor a single `combat.power.omni` glance (that channel is one Offense contributor among
+ * many, not the product's own "combat power" number).
+ */
+export function sumCombatPowerLabel(standing: ActorStandingDto): number {
+  return standing.offense + standing.survivability + standing.control;
+}
+
 function buildStanding(sheet: ActorSheetDto | null | undefined): PiecePayload {
   const standing = sheet?.standing ?? null;
   if (standing == null) {
@@ -270,6 +281,7 @@ function buildStanding(sheet: ActorSheetDto | null | undefined): PiecePayload {
       phase: "ready",
       gridArea: "stand",
       title: STANDING_TITLE,
+      combatPowerText: null,
       radar: {
         piece: "standing-radar",
         instanceId: "condition:standing:radar",
@@ -306,6 +318,7 @@ function buildStanding(sheet: ActorSheetDto | null | undefined): PiecePayload {
     phase: "ready",
     gridArea: "stand",
     title: STANDING_TITLE,
+    combatPowerText: sumCombatPowerLabel(standing).toLocaleString(),
     radar: {
       piece: "standing-radar",
       instanceId: "condition:standing:radar",

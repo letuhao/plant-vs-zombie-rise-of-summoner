@@ -25,7 +25,7 @@
       "id": "set.ultimatecornfume-001",
       "nameKey": "set.volcanic-spore-command",
       "name": "Volcanic Spore Command",
-      "themeKey": "demon.ultimatecornfume",
+      "themeKey": "creature.ultimatecornfume",
       "members": [
         {
           "role": "armament-primary",

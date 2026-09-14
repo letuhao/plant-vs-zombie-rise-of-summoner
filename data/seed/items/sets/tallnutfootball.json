@@ -25,7 +25,7 @@
       "id": "set.tallnutfootball-001",
       "nameKey": "set.steel-nut-bastion",
       "name": "Steel Nut Bastion",
-      "themeKey": "demon.tallnutfootball",
+      "themeKey": "creature.tallnutfootball",
       "members": [
         {
           "role": "core-guard",

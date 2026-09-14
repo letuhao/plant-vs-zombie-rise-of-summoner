@@ -97,16 +97,16 @@ public class QuestProgressTests
         Assert.False(QuestProgress.Evaluate(Row("q1", "extract-with-item-kind", "armor"), 0, report, HungerExhausted).Done);
     }
 
-    // ---- bring-demon-home-alive ----
+    // ---- bring-creature-home-alive ----
 
     [Fact]
-    public void Bring_demon_home_alive_requires_every_member_standing_at_extraction()
+    public void Bring_creature_home_alive_requires_every_member_standing_at_extraction()
     {
         var allAlive = EmptyReport() with { Members = new[] { Member(downed: false), Member(downed: false) } };
         var oneDowned = EmptyReport() with { Members = new[] { Member(downed: false), Member(downed: true) } };
 
-        Assert.True(QuestProgress.Evaluate(Row("q1", "bring-demon-home-alive"), 0, allAlive, HungerExhausted).Done);
-        Assert.False(QuestProgress.Evaluate(Row("q1", "bring-demon-home-alive"), 0, oneDowned, HungerExhausted).Done);
+        Assert.True(QuestProgress.Evaluate(Row("q1", "bring-creature-home-alive"), 0, allAlive, HungerExhausted).Done);
+        Assert.False(QuestProgress.Evaluate(Row("q1", "bring-creature-home-alive"), 0, oneDowned, HungerExhausted).Done);
     }
 
     // ---- finish-under-hunger ----
@@ -129,7 +129,7 @@ public class QuestProgressTests
         // Revived-then-standing still fails: DownedOnce, not Downed, is what this template reads.
         var revived = EmptyReport() with { Members = new[] { Member(downed: false, downedOnce: true) } };
         Assert.False(QuestProgress.Evaluate(Row("q1", "survive-no-downed"), 0, revived, HungerExhausted).Done);
-        Assert.True(QuestProgress.Evaluate(Row("q1", "bring-demon-home-alive"), 0, revived, HungerExhausted).Done);
+        Assert.True(QuestProgress.Evaluate(Row("q1", "bring-creature-home-alive"), 0, revived, HungerExhausted).Done);
     }
 
     // ---- spend-no-provision ----
@@ -194,5 +194,5 @@ public class QuestProgressTests
     }
 
     static DelveReportMember Member(bool downed = false, bool downedOnce = false, IReadOnlyList<string>? statuses = null) =>
-        new(0, "demon.instance-1", downed, downedOnce, statuses ?? Array.Empty<string>());
+        new(0, "creature.instance-1", downed, downedOnce, statuses ?? Array.Empty<string>());
 }

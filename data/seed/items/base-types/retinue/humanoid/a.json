@@ -34,7 +34,7 @@
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.shrill-whistle",
+      "iconKey": "icon.base.slight-whistle",
       "flavorKey": "flavor.base.shrill-whistle",
       "flavor": "One sharp note calls a friend to the board.",
       "tags": [
@@ -136,7 +136,7 @@
       "class": "torc",
       "band": "a",
       "implicit": {
-        "family": "atom.gravemaking",
+        "family": "atom.cherry-bloom",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -210,7 +210,7 @@
         "powerBand": "low"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.slight-chime",
+      "iconKey": "icon.base.minute-chime",
       "flavorKey": "flavor.base.slight-chime",
       "flavor": "A delicate call that darkens the board.",
       "tags": [
@@ -276,7 +276,7 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.gravemaking",
+        "family": "atom.cherry-bloom",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -312,7 +312,7 @@
       "class": "torc",
       "band": "a",
       "implicit": {
-        "family": "atom.gravemaking",
+        "family": "atom.firelining",
         "powerBand": "low"
       },
       "socketMax": 1,

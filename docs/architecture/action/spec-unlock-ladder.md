@@ -9,7 +9,7 @@ Depends on **A12** (the rung table). Blocks **A15** (the grant seam reads the as
 
 **How an actor comes to hold an action, and what it costs to change its mind.**
 
-A demon type levels; each level rolls for an unlock; unlocks arrive stronger as you go; you may hold only
+A creature type levels; each level rolls for an unlock; unlocks arrive stronger as you go; you may hold only
 so many, so accepting one more means giving one up. That decision — **keep or discard** — is the module.
 
 ## Design

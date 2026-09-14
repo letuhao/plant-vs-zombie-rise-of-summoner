@@ -6,12 +6,22 @@
   },
   "entries": [
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:07:09.619172+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "09a6bc91e57263900690d8dd5f0898f0d6454ded7bec4e0763ef552d5ab38bc3"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.chilling",
         "atom.freezing"
       ],
       "category": "status",
+      "description": "Vines rapidly crystallize into jagged frost, locking the target in a frozen, leafy tomb.",
       "descriptionKey": "action.family.base.002.desc",
       "id": "action.family.base.002",
       "motifsUsed": [
@@ -31,12 +41,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:13.412865+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "5cf58481c8518b41658d765b88bc8de22e9a3064e5216d4a0106eb360e4883ec"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.chill-punisher",
         "atom.freezing"
       ],
       "category": "attack",
+      "description": "A sudden, crystalline glaze creeps over the skin, turning movement into a brittle struggle.",
       "descriptionKey": "action.general.0018.desc",
       "id": "action.general.0018",
       "name": "Frostbite",
@@ -52,6 +72,15 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:04.826562+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "dc47a8ca94230cd78cdc1a9adba814d647e4eae79d89d767eac541bef881f068"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.chilling",
@@ -59,6 +88,7 @@
         "atom.prec-focus"
       ],
       "category": "attack",
+      "description": "A sudden, crystalline glaze creeps over the leaves, turning everything brittle and pale.",
       "descriptionKey": "action.general.0007.desc",
       "id": "action.general.0007",
       "name": "Frostbite",
@@ -74,12 +104,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:07.711684+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "ef505cd699b2d244e0cf5ca8c88fe9abc5dcbf8f7ca60779fb55da61c65724ab"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.blighting",
         "atom.chilling"
       ],
       "category": "status",
+      "description": "A creeping, frost-rimed decay seeps through the air, turning vitality into brittle, grey ash.",
       "descriptionKey": "action.general.0015.desc",
       "id": "action.general.0015",
       "name": "Blight",
@@ -95,6 +135,15 @@
       "targetMode": "all"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:10.538991+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "ec436c4d2f7364a72feec6ccf91f49b9f418bda6ad3bd274ed1121b99a107de2"
+      },
       "areaShape": "column",
       "atomFamilies": [
         "atom.affliction",
@@ -102,6 +151,7 @@
         "atom.rotting"
       ],
       "category": "status",
+      "description": "A creeping, sickly discoloration spreads across the ground, leaving nothing but withered husks in its wake.",
       "descriptionKey": "action.general.0017.desc",
       "id": "action.general.0017",
       "name": "Blight",
@@ -117,12 +167,22 @@
       "targetMode": "area"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:16.510689+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "90285e62125bccb9613218fd03f6862b4ae4f4bd4677dd4dbeb77a135f856858"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elemental-defense",
         "atom.sust-husk"
       ],
       "category": "defense",
+      "description": "A swirling vortex of hot ash and embers forms a protective shroud around the plant.",
       "descriptionKey": "action.species.allpeater.002.desc",
       "id": "action.species.allpeater.002",
       "motifsUsed": [
@@ -141,12 +201,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:19.372424+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "293b704e8b074b49ca41c655ab7ec894971da5101a69ba20049673c85a485eeb"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-override",
         "atom.elpw-surfeit"
       ],
       "category": "status",
+      "description": "The ashthreepeater's embers collapse inward, swirling into a hungry, light-consuming speck that leaves only gray soot in its wake.",
       "descriptionKey": "action.species.ashthreepeater.001.desc",
       "id": "action.species.ashthreepeater.001",
       "kindHint": "innate",
@@ -168,12 +238,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:22.206809+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "bcfe8d6322e9bf8537adebd2ec51e20b69c95b747300c785cb7ac5385f3ae152"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.prec-focus",
         "atom.volley"
       ],
       "category": "attack",
+      "description": "A rapid-fire barrage of needles arcs through the air in a whistling cloud.",
       "descriptionKey": "action.species.cactus.001.desc",
       "id": "action.species.cactus.001",
       "motifsUsed": [
@@ -192,12 +272,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:25.297152+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "9c39f1e8c5a6b16a820ff7f52b723120fdc4062a8b8c79ac98130e389cce854a"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.deathblast",
         "atom.prec-sync"
       ],
       "category": "attack",
+      "description": "A sudden, rhythmic shuddering of needles precedes a violent, explosive burst of green energy.",
       "descriptionKey": "action.species.cactusblover.002.desc",
       "id": "action.species.cactusblover.002",
       "motifsUsed": [
@@ -216,12 +306,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:28.066559+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "9dc3d232292a4bd06eceacc81c327e27f1b2e34ac39767e8c53c736c55c0a353"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.life-graft",
         "atom.regeneration"
       ],
       "category": "support",
+      "description": "A cluster of jagged, thorny vines erupts from the soil to snag passing feet.",
       "descriptionKey": "action.species.caltrop.001.desc",
       "id": "action.species.caltrop.001",
       "kindHint": "innate",
@@ -241,12 +341,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:30.849706+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "b69f6bd79062b6541dac4e4425f9fe2878c1f7047016c7ce35985ae25688a5b2"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.resilience",
         "atom.retribution"
       ],
       "category": "attack",
+      "description": "A sudden, violent eruption of jagged thorns that catches the intruder mid-stride.",
       "descriptionKey": "action.species.caltropnut.001.desc",
       "id": "action.species.caltropnut.001",
       "kindHint": "innate",
@@ -268,12 +378,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:33.826783+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "4eee5e31898b700c5898961be57d1677c2c06f448d3ea2ad4dac554ba9f4fead"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.retribution",
         "atom.rot-punisher"
       ],
       "category": "defense",
+      "description": "A sudden, violent shudder sends a spray of jagged, piercing spikes outward in every direction.",
       "descriptionKey": "action.species.caltropnut.002.desc",
       "id": "action.species.caltropnut.002",
       "motifsUsed": [
@@ -293,12 +413,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:36.680707+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "806dfdad5f533d2a63ae9aef4687ceee53fe7cf58fc31a871c81ad8f9d537c37"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.deathblast",
         "atom.rotting"
       ],
       "category": "attack",
+      "description": "A sudden, icy explosion shatters the surrounding air into a cloud of frozen, jagged shards.",
       "descriptionKey": "action.species.cherrybomb.001.desc",
       "id": "action.species.cherrybomb.001",
       "kindHint": "innate",
@@ -319,12 +449,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:39.605951+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "f697e8aec17957ab629b370b78f13c59d4eab1bb7ed8be1f8199259116603c4c"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.deathblast",
         "atom.shield-capacity"
       ],
       "category": "defense",
+      "description": "A sudden, crimson eruption that leaves nothing behind but a scorched crater and a lingering scent of gunpowder.",
       "descriptionKey": "action.species.cherrybomb.002.desc",
       "id": "action.species.cherrybomb.002",
       "motifsUsed": [
@@ -344,12 +484,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:42.503600+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "95f57dc4c421dab6517ce4a6a3f1e1d1750000929b220c13d39e27cc700f0ebc"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.shield-pen",
         "atom.volley"
       ],
       "category": "attack",
+      "description": "A rapid-fire barrage of explosive pits erupts from the stem, shredding through defenses in a chaotic spray.",
       "descriptionKey": "action.species.cherrygatling.001.desc",
       "id": "action.species.cherrygatling.001",
       "kindHint": "innate",
@@ -370,12 +520,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:45.465912+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "33b066da6fa3efd1aa8c8681937971be45b5e66282ae5921c7de89696f7da940"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.cherry-bloom",
         "atom.shield-toughness"
       ],
       "category": "attack",
+      "description": "A dense, petal-strengthened rind hardens around the core, absorbing the brunt of the impact.",
       "descriptionKey": "action.species.cherrynut.001.desc",
       "id": "action.species.cherrynut.001",
       "kindHint": "innate",
@@ -396,12 +556,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:48.473300+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "c91e117ef4e3b4ae3419d75030d32c29d7cb885a5ef01ff4d0104b771f80d24e"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.hit-mend",
         "atom.shld-absolute"
       ],
       "category": "defense",
+      "description": "A sudden, searing layer of hardened ash knits over the shell, turning every impact into a shower of sparks.",
       "descriptionKey": "action.species.cherrynut.002.desc",
       "id": "action.species.cherrynut.002",
       "motifsUsed": [
@@ -421,12 +591,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:51.241267+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "17dc68f5b24cd8c0af0cb65cfb3b1ed6b4df18b25b87474066dedec5ceae2011"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.cherry-bloom",
         "atom.shld-toughness"
       ],
       "category": "attack",
+      "description": "A sudden, violent eruption of heat shatters the cherry's shell, sending glowing embers flying in every direction.",
       "descriptionKey": "action.species.cherrynutzombie.001.desc",
       "id": "action.species.cherrynutzombie.001",
       "kindHint": "innate",
@@ -448,12 +628,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:54.208847+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "ddb4b49a2f33b8283010b8f5281c17dc97bf8014b3af0939f60cb5712e6ea7ef"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.shld-toughness-mod",
         "atom.sust-husk"
       ],
       "category": "defense",
+      "description": "A sudden, hardened shell erupts around the cherry, absorbing the impact with a dull, stony thud.",
       "descriptionKey": "action.species.cherrynutzombie.002.desc",
       "id": "action.species.cherrynutzombie.002",
       "motifsUsed": [
@@ -473,12 +663,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:08:57.184437+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "f2dac3a30461e17ae4dda954edc8fd4b5e4cb68fb245ff39b84542c22168fa5a"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.cherry-bloom",
         "atom.sparking"
       ],
       "category": "attack",
+      "description": "A sudden, fragrant burst of crimson petals erupts from the zombie, accompanied by a sharp, crackling discharge of static energy.",
       "descriptionKey": "action.species.cherrypaperzombie.001.desc",
       "id": "action.species.cherrypaperzombie.001",
       "kindHint": "innate",
@@ -500,12 +700,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:00.103337+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "b1b8ec6df3faef9bc668ee58ce18430a78e6d3edd40f21e9e12095411b9044d9"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.stalwart",
         "atom.sust-husk"
       ],
       "category": "defense",
+      "description": "A sudden, frantic rustling of paper layers as the zombie stiffens into a rigid, unyielding barricade.",
       "descriptionKey": "action.species.cherrypaperzombie.002.desc",
       "id": "action.species.cherrypaperzombie.002",
       "motifsUsed": [
@@ -526,12 +736,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:03.034996+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "0695afefd2d140281fc3b21051085ce2fb02e92de7b02ecfe39660398943be11"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-surge",
         "atom.stoicism"
       ],
       "category": "support",
+      "description": "A sudden, blinding flare of crimson light radiates from the core, steadying the nerves of every nearby comrade.",
       "descriptionKey": "action.species.cherryshooter.001.desc",
       "id": "action.species.cherryshooter.001",
       "motifsUsed": [
@@ -550,12 +770,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:05.830848+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "032d97844ee2d3213734b5861201dc8a6b415377ff0c0390c102772ce382c1ee"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-surge",
         "atom.sust-freshgraft"
       ],
       "category": "movement",
+      "description": "A sudden, blinding flash of chlorophyll-fueled energy propels the cherry forward in a streak of light.",
       "descriptionKey": "action.species.cherryshooter.002.desc",
       "id": "action.species.cherryshooter.002",
       "motifsUsed": [
@@ -575,12 +805,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:08.704076+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "de416e6324562e1940b4853bb0cfd4b419d18a425ef25b186ae4d30f7ddad6ec"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.deathblast",
         "atom.tempo-pulse"
       ],
       "category": "attack",
+      "description": "A sudden, rhythmic detonation ripples outward as the pair bursts into a synchronized wave of red fury.",
       "descriptionKey": "action.species.cherrysplit.001.desc",
       "id": "action.species.cherrysplit.001",
       "kindHint": "innate",
@@ -602,12 +842,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:12.129476+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "e97e056944680273c3f10bc78e3e3fc179740923c8aa0a554e41fffbb728d6ee"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.freezing",
         "atom.tempo-wildgrowth"
       ],
       "category": "attack",
+      "description": "A sudden, rapid surge of icy vines erupts from the soil, encasing the target in a jagged layer of rime.",
       "descriptionKey": "action.species.cherrythreepeater.001.desc",
       "id": "action.species.cherrythreepeater.001",
       "kindHint": "innate",
@@ -628,12 +878,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:15.082076+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "5db429786cc353f14baeb6d57b25122fb5200ef3f947d2256df7323dc235e967"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-surge",
         "atom.ward-brace"
       ],
       "category": "attack",
+      "description": "A rhythmic, neon-pulsing glow radiates from the jaws as they snap shut with overwhelming force.",
       "descriptionKey": "action.species.chomper.001.desc",
       "id": "action.species.chomper.001",
       "kindHint": "innate",
@@ -654,12 +914,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:17.821063+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "a8b4103ea11d926560927dae13650e07f66ff9fe29ca4609b0a3f1a463ab35b8"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.chilling",
         "atom.ward-link"
       ],
       "category": "status",
+      "description": "A frost-rimed cone encases the zombie, locking its movements in a brittle, crystalline shell.",
       "descriptionKey": "action.species.conezombie.001.desc",
       "id": "action.species.conezombie.001",
       "kindHint": "innate",
@@ -680,12 +950,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:20.558867+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "35cd2d016e12248e7ae77d94480bc9b6d3cda0c1c4b90b2b2f15635e21584adc"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.death-salvo",
         "atom.ward-ward"
       ],
       "category": "attack",
+      "description": "A frantic, rhythmic popping of kernels creates a relentless barrage of golden projectiles.",
       "descriptionKey": "action.species.cornpot.001.desc",
       "id": "action.species.cornpot.001",
       "kindHint": "innate",
@@ -706,12 +986,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:23.249195+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "839c93657a544752a058131b5e8c181af20164b2fcdab381ed4282a580b718b8"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.arm-welding",
         "atom.volley"
       ],
       "category": "attack",
+      "description": "A rapid-fire barrage of charred kernels streaks through the air like heavy, soot-stained hail.",
       "descriptionKey": "action.species.cornpult.001.desc",
       "id": "action.species.cornpult.001",
       "motifsUsed": [
@@ -731,12 +1021,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:25.946670+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "73c174568790206c33282e52b9b6e8c8781fcf4444ad595142a353fc48c68f85"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.cleansing",
         "atom.sust-husk"
       ],
       "category": "defense",
+      "description": "A rhythmic pulse of dark energy ripples through the stalk, hardening its essence into a resilient, shadowy shell.",
       "descriptionKey": "action.species.dancepolzombie.001.desc",
       "id": "action.species.dancepolzombie.001",
       "motifsUsed": [
@@ -756,12 +1056,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:28.631169+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "248f2ee865da96de9022cc54a211a9023a509c6f61c7c9062ff035da53918171"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.death-glean",
         "atom.tempo-pulse"
       ],
       "category": "status",
+      "description": "The undead begins to sway rhythmically, its limbs twitching to an invisible, driving beat.",
       "descriptionKey": "action.species.dancepolzombie.002.desc",
       "id": "action.species.dancepolzombie.002",
       "kindHint": "innate",
@@ -785,12 +1095,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:31.554455+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "7fa852a5d98dcff770146518f2e80fb6b3dba9281165d170df9b6a495156cbbe"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.chilling",
         "atom.econ-bounty"
       ],
       "category": "status",
+      "description": "A crystalline frost locks the Dark Threepeater in a shimmering, motionless tomb.",
       "descriptionKey": "action.species.darkthreepeater.001.desc",
       "id": "action.species.darkthreepeater.001",
       "kindHint": "innate",
@@ -810,12 +1130,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:34.433287+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "177ddd6376eea41bde14cf85ea2eea9071cbd4189a1c3a291b1be2c0b7fef910"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.econ-graze",
         "atom.ward-flux"
       ],
       "category": "defense",
+      "description": "A shimmering, crystalline aura pulses from the core, casting a brilliant light that stabilizes the surrounding space.",
       "descriptionKey": "action.species.dolldiamond.001.desc",
       "id": "action.species.dolldiamond.001",
       "kindHint": "innate",
@@ -837,12 +1167,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:37.478433+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "9664822c7a007bb5a65f4416fde6421b370f1970536d90fbe36ff49ff8dab7b6"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-overflow",
         "atom.entangling"
       ],
       "category": "attack",
+      "description": "Golden vines erupt from the soil, binding the intruder in a shimmering, restrictive embrace.",
       "descriptionKey": "action.species.dollgold.001.desc",
       "id": "action.species.dollgold.001",
       "kindHint": "innate",
@@ -863,12 +1203,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:40.449230+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "56a492637f791f2c0b35879deab5771ce82f9b5c900907401fd179c5f9acb85c"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.evasion",
         "atom.sust-husk"
       ],
       "category": "defense",
+      "description": "A series of nested, golden petals rapidly unfold and collapse, absorbing the impact of every strike.",
       "descriptionKey": "action.species.dollgold.002.desc",
       "id": "action.species.dollgold.002",
       "motifsUsed": [
@@ -887,12 +1237,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:43.388446+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "79686dde90c9e9cb64cc76abb455f125b652d5ef96b01ea90690948c6be4d506"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.evd-flinch",
         "atom.sust-husk"
       ],
       "category": "defense",
+      "description": "A shimmering, woven lattice of silvered fibers tightens around the doll, hardening its form into a resilient shell.",
       "descriptionKey": "action.species.dollsilver.001.desc",
       "id": "action.species.dollsilver.001",
       "kindHint": "innate",
@@ -912,12 +1272,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:46.355495+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "a7af8dd4769954e34ce79f521e298cb8b34d32f3b2aa3d41f480d02aafca8b51"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-overflow",
         "atom.evd-scar"
       ],
       "category": "attack",
+      "description": "A violent, jagged eruption of needles tears through the soil, shredding everything in its immediate vicinity.",
       "descriptionKey": "action.species.doomcactus.001.desc",
       "id": "action.species.doomcactus.001",
       "kindHint": "innate",
@@ -941,12 +1311,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:49.252925+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "2af7c4dc589388d0d382115d94f76a0ae7a0971333b2b34b8766e9bf419e335c"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-surge",
         "atom.evd-seal"
       ],
       "category": "movement",
+      "description": "A shimmering haze of glowing dust lifts the cactus from the soil, carrying it gracefully upon a localized updraft.",
       "descriptionKey": "action.species.doomcactus.002.desc",
       "id": "action.species.doomcactus.002",
       "motifsUsed": [
@@ -968,12 +1348,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:52.402731+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "07b3dac318c449a64b3482cc67fc82d5e4b4af5ac1c9e2e0803da153d4d7ed8f"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.arm-plate",
         "atom.gardener"
       ],
       "category": "defense",
+      "description": "A thick layer of reinforced petals wraps around the stem, bracing for impact.",
       "descriptionKey": "action.species.doublecherry.001.desc",
       "id": "action.species.doublecherry.001",
       "motifsUsed": [
@@ -993,12 +1383,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:55.304531+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "5e305f64017e1f056957921edc5847b56e4d4b3208848e8dbb20c0ffaf5697df"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-surge",
         "atom.hit-mend"
       ],
       "category": "attack",
+      "description": "A sudden, searing heat ripples through the frost, turning the icy surface into a cloud of scalding steam.",
       "descriptionKey": "action.species.doublesnow.001.desc",
       "id": "action.species.doublesnow.001",
       "kindHint": "innate",
@@ -1019,12 +1419,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:09:58.088157+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "684cb8fb9f76fb1915a8e46284afe6b9389e0d655f33f491a15d5c88896a69ba"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.arm-hardening",
         "atom.padding"
       ],
       "category": "defense",
+      "description": "A thick layer of reinforced padding wraps around the zombie, turning a simple steering wheel into a heavy, blunt-force shield.",
       "descriptionKey": "action.species.driverzombie.001.desc",
       "id": "action.species.driverzombie.001",
       "kindHint": "innate",
@@ -1048,12 +1458,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:01.160933+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "faa1e4aaebc31b3132566f28db5273b09cc2057d6a154bd7bed299a189166d66"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-overflow",
         "atom.shld-breach"
       ],
       "category": "attack",
+      "description": "A sudden, violent rupture of energy erupts from within, shredding the zombie's form from the inside out.",
       "descriptionKey": "action.species.flagzombie.001.desc",
       "id": "action.species.flagzombie.001",
       "kindHint": "innate",
@@ -1075,12 +1495,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:04.187663+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "b97a188e7ef2cf346e82f5be5904bfa3f1e6eaec6cc8352a2c02b32d5f792e04"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-surge",
         "atom.shld-cycle"
       ],
       "category": "status",
+      "description": "A frantic, rhythmic waving of a red banner that seems to pulse with a frantic, hypnotic energy.",
       "descriptionKey": "action.species.flagzombie.002.desc",
       "id": "action.species.flagzombie.002",
       "motifsUsed": [
@@ -1103,12 +1533,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:07.106325+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "57c54a5e74dfd21164c573d091c489e798ad7d44f87897b6f966deb4d8dbd32a"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.cherry-bloom",
         "atom.sporing"
       ],
       "category": "attack",
+      "description": "A sudden, fiery burst erupts from the cap, scattering glowing embers into the air.",
       "descriptionKey": "action.species.fumeshroom.001.desc",
       "id": "action.species.fumeshroom.001",
       "kindHint": "innate",
@@ -1130,12 +1570,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:09.886866+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "bd2d87d6ea3ddb49fe2e047316d7315768b259fe189c2dbaa31f3f65c44a96cf"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.evd-brace",
         "atom.searing-strike"
       ],
       "category": "attack",
+      "description": "A pungent, blistering heat radiates from the cloves, forcing any approaching threat to recoil in discomfort.",
       "descriptionKey": "action.species.garlic.001.desc",
       "id": "action.species.garlic.001",
       "kindHint": "innate",
@@ -1156,12 +1606,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:12.736882+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "53bfe299fda54eb959d05b2bf441e6a39ca6396fc98370dad9125ea9d498cd52"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.immunity",
         "atom.venomous"
       ],
       "category": "attack",
+      "description": "A sickly, neon-green bile surges through the plant's veins, turning its very essence into a lethal contagion.",
       "descriptionKey": "action.species.garlicpea.001.desc",
       "id": "action.species.garlicpea.001",
       "kindHint": "innate",
@@ -1182,12 +1642,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:15.532367+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "972e7781f1f81228c0a557cd529421904200a0a8419e3a8ab59bc0eb088a1209"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.affliction",
         "atom.life-graft"
       ],
       "category": "support",
+      "description": "A pulsing, emerald vine weaves through a comrade, infusing their stem with a pungent, revitalizing essence.",
       "descriptionKey": "action.species.garlicpea.002.desc",
       "id": "action.species.garlicpea.002",
       "motifsUsed": [
@@ -1207,12 +1677,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:18.329123+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "49747f7f3c7f6de9f089e17916fd39913a80733c8247b37b04f5e8267f5ed1fb"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.affliction",
         "atom.sunbloom"
       ],
       "category": "attack",
+      "description": "A sickly, neon-green glow pulses beneath the skin as the plant's own essence turns against it.",
       "descriptionKey": "action.species.garlicthreepeater.001.desc",
       "id": "action.species.garlicthreepeater.001",
       "motifsUsed": [
@@ -1232,12 +1712,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:21.275511+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "fe0e47992f2092544504635e67526b97bb3f5b4796032bb810d1d4f0c84cac1d"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.venomous",
         "atom.warding"
       ],
       "category": "defense",
+      "description": "A bitter, sickly green glow pulses beneath the skin, turning the garlic's scent into a lethal deterrent.",
       "descriptionKey": "action.species.garlicthreepeater.002.desc",
       "id": "action.species.garlicthreepeater.002",
       "motifsUsed": [
@@ -1258,6 +1748,15 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:24.097282+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "c8b8f060ca853b51971b2aaa1a1c7f9eb1d3eb848c14d86eac07435ee2151c31"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.chilling",
@@ -1265,6 +1764,7 @@
         "atom.volley"
       ],
       "category": "attack",
+      "description": "A rapid-fire barrage of frost-rimed pellets descends in a frantic, freezing blur.",
       "descriptionKey": "action.species.gatlingpea.001.desc",
       "id": "action.species.gatlingpea.001",
       "kindHint": "innate",
@@ -1285,12 +1785,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:26.904206+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "3c1b62871b7274b3ba910f06e3b46d83419cec66753a2ecd4dd4852bf93c2147"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.flash-freeze",
         "atom.searing-strike"
       ],
       "category": "defense",
+      "description": "A rapid-fire barrage of frost-rimed, molten projectiles tears through the air in a relentless, steaming stream.",
       "descriptionKey": "action.species.gatlingpea.002.desc",
       "id": "action.species.gatlingpea.002",
       "motifsUsed": [
@@ -1310,12 +1820,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:29.720425+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "891d408777be85ec8bb63eac66466898c1e9d255be6d11af252831236ec68a7e"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.mesmerizing",
         "atom.shld-surge"
       ],
       "category": "attack",
+      "description": "A rhythmic, glowing pulse radiates from the petals, luring the unwary into a trance-like stupor.",
       "descriptionKey": "action.species.hypnochomper.001.desc",
       "id": "action.species.hypnochomper.001",
       "kindHint": "innate",
@@ -1335,12 +1855,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:32.567869+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "6ea2fcf2c31aba22ac4cdaa96512c5527e25d503bff4f8abde9ca8fddd655693"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.mesmerizing",
         "atom.summoner"
       ],
       "category": "movement",
+      "description": "A trail of swirling, hypnotic embers marks the path where the spores once drifted.",
       "descriptionKey": "action.species.hypnochomper.002.desc",
       "id": "action.species.hypnochomper.002",
       "motifsUsed": [
@@ -1359,12 +1889,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:35.534524+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "dfb203f1f232d0305c84fdf498e7de979e9058906026e509725fe2c98c88f185"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.arm-riveting",
         "atom.mesmerizing"
       ],
       "category": "attack",
+      "description": "A rhythmic, pulsing heat radiates from the pepper, casting swirling patterns of crimson light into the eyes of those nearby.",
       "descriptionKey": "action.species.hypnojalapeno.001.desc",
       "id": "action.species.hypnojalapeno.001",
       "kindHint": "innate",
@@ -1384,12 +1924,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:38.499910+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "03a2e1a9c1209ace6cdc26e269e4436288084ee0567a16d3b83c0d139cfafbac"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.plating",
         "atom.sust-husk"
       ],
       "category": "defense",
+      "description": "A sudden, spicy burst of heat radiates from the husk, leaving the attacker dazed and swaying in a trance.",
       "descriptionKey": "action.species.hypnojalapeno.002.desc",
       "id": "action.species.hypnojalapeno.002",
       "motifsUsed": [
@@ -1409,12 +1959,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:41.467823+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "1fd05e5415dceeaae75217dc3e45495b3a1fd3da8851061af35a4afae2284ec8"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.mesmerizing",
         "atom.tempo-surge"
       ],
       "category": "attack",
+      "description": "A rhythmic, swirling pulse of color emanates from the petals, lulling the mind into a trance.",
       "descriptionKey": "action.species.hypnopeashooter.001.desc",
       "id": "action.species.hypnopeashooter.001",
       "kindHint": "innate",
@@ -1434,12 +1994,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:44.201805+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "126240e3d472477eae4717dd9d1e743dcfbd100d85f4e792e93c9bd61137856d"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.sust-husk",
         "atom.vitality"
       ],
       "category": "defense",
+      "description": "A rhythmic, pulsing glow emanates from its petals, lulling the intruder into a deep, dreamless slumber.",
       "descriptionKey": "action.species.hypnopeashooter.002.desc",
       "id": "action.species.hypnopeashooter.002",
       "motifsUsed": [
@@ -1458,6 +2028,15 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:46.974300+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "074f0b74b3f1e1f025c2429eda9529770f5ac6ff6cc7fbed69c4009603277657"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.evd-shift",
@@ -1465,6 +2044,7 @@
         "atom.sust-husk"
       ],
       "category": "defense",
+      "description": "The mushroom's spores pulse with a sickly, erratic light as its physical form begins to fray and reform.",
       "descriptionKey": "action.species.hypnoshroom.001.desc",
       "id": "action.species.hypnoshroom.001",
       "motifsUsed": [
@@ -1484,12 +2064,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:50.075033+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "40786acc72ebec2b4d7cc75428787274063f8861fc4d466d4e81e8ff0b7f34c2"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.mesmerizing",
         "atom.shld-breach"
       ],
       "category": "attack",
+      "description": "A jagged shard of dark glass erupts from the frost, shattering the defenses of any who approach.",
       "descriptionKey": "action.species.icecaltrop.001.desc",
       "id": "action.species.icecaltrop.001",
       "kindHint": "innate",
@@ -1510,12 +2100,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:53.140698+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "c2e9ca1c29b0dbc015b234f15667e5db772c982c1c3b96bdcd24c1a38a6700d8"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.chilling",
         "atom.withering"
       ],
       "category": "defense",
+      "description": "A sudden, numbing frost creeps across the soil, locking everything in a brittle, crystalline shroud.",
       "descriptionKey": "action.species.iceshroom.001.desc",
       "id": "action.species.iceshroom.001",
       "kindHint": "innate",
@@ -1535,6 +2135,15 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:56.090516+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "b24ccee95ae1da7e2a784a71674f5815d5015c6c20a8b7802603fdcc550d3837"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.chilling",
@@ -1542,6 +2151,7 @@
         "atom.prec-verdict"
       ],
       "category": "attack",
+      "description": "A spectral frost creeps across the iron plating, freezing the zombie's very essence into a brittle, crystalline tomb.",
       "descriptionKey": "action.species.ironpeazombie.001.desc",
       "id": "action.species.ironpeazombie.001",
       "kindHint": "innate",
@@ -1562,12 +2172,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:10:58.988473+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "bb6a63b70a9b27b177383c1ce3ade65a29a6dbadc19f54ba9854f7482555fda0"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-pierce",
         "atom.prec-verdict"
       ],
       "category": "status",
+      "description": "A chilling, spectral card descends, freezing the iron-clad zombie mid-stride in a layer of jagged ice.",
       "descriptionKey": "action.species.ironpeazombie.002.desc",
       "id": "action.species.ironpeazombie.002",
       "motifsUsed": [
@@ -1588,12 +2208,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:01.690319+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "4f0f45729fa7b7e8b02e1b40e98eca009e517596e4a3975659f8309e4f3a8c4c"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.prec-focus",
         "atom.terraforming"
       ],
       "category": "attack",
+      "description": "The ground erupts in a jagged, splintering surge of sharpened earth.",
       "descriptionKey": "action.species.jalacaltrop.001.desc",
       "id": "action.species.jalacaltrop.001",
       "kindHint": "innate",
@@ -1614,12 +2244,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:04.857964+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "9f14ec26d18ebabcd3e7bf2539ce79c2018109a60d37baeee8a0e38bf4f64fc7"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.flash-freeze",
         "atom.sust-callus"
       ],
       "category": "defense",
+      "description": "A sudden, frost-rimed layer of hardened bark erupts from the surface, bristling with jagged, icy spikes.",
       "descriptionKey": "action.species.jalacaltrop.002.desc",
       "id": "action.species.jalacaltrop.002",
       "motifsUsed": [
@@ -1639,6 +2279,15 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:07.771928+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "d18b05196aacd7cf525169bc33dfefd75816f0120984811d7d574561b55445ba"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.chilling",
@@ -1646,6 +2295,7 @@
         "atom.shld-breach"
       ],
       "category": "attack",
+      "description": "A sudden, frost-rimed crack ripples through the Jalagatling's form, draining its vitality to fortify its icy shell.",
       "descriptionKey": "action.species.jalagatling.001.desc",
       "id": "action.species.jalagatling.001",
       "kindHint": "innate",
@@ -1665,12 +2315,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:10.681075+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "dfeec0863c3f870439443e6dfe797fa6e2ed622cbc409d9a8928c7be6f7013c8"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.retribution",
         "atom.savagery"
       ],
       "category": "defense",
+      "description": "A sudden, searing eruption of spicy heat radiates outward from the pepper's core.",
       "descriptionKey": "action.species.jalapeashooter.001.desc",
       "id": "action.species.jalapeashooter.001",
       "kindHint": "innate",
@@ -1690,12 +2350,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:13.688995+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "4462e9d74025292e8f0cbcb94969008b427595141733b6b8f3e2453d402bdac6"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-override",
         "atom.elpw-surge"
       ],
       "category": "attack",
+      "description": "A sudden, violent eruption of heat sends jagged, glowing shards tearing through everything in immediate reach.",
       "descriptionKey": "action.species.jalapeno.001.desc",
       "id": "action.species.jalapeno.001",
       "kindHint": "innate",
@@ -1716,6 +2386,15 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:16.480285+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "a2803dd3ab56cf8e6add48fcf4178b118c97f5df97487a3358a78b51d3446fae"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-surge",
@@ -1723,6 +2402,7 @@
         "atom.swiftness"
       ],
       "category": "attack",
+      "description": "The lantern's core erupts in a blinding flash of heat, incinerating everything in its immediate path.",
       "descriptionKey": "action.species.lanternchomper.001.desc",
       "id": "action.species.lanternchomper.001",
       "kindHint": "innate",
@@ -1743,12 +2423,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:19.335985+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "029dec3a5c9ca95de6238e88925d5ac04a55603206a587520e1f531f0119fd36"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-surge",
         "atom.volley"
       ],
       "category": "attack",
+      "description": "A sudden, blinding flare erupts from the pod, casting long, dancing shadows across the lawn.",
       "descriptionKey": "action.species.lanternpea.001.desc",
       "id": "action.species.lanternpea.001",
       "kindHint": "innate",
@@ -1769,12 +2459,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:22.271492+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "71f83beec368b34c21ac0bad7a4d9c84958c2c6922276586183ea374f0ee9bef"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.deathblast",
         "atom.midas"
       ],
       "category": "attack",
+      "description": "A swirling vortex of shimmering petals sweeps through the garden, turning everything it touches into solid gold.",
       "descriptionKey": "action.species.marigold.001.desc",
       "id": "action.species.marigold.001",
       "motifsUsed": [
@@ -1793,12 +2493,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:25.340475+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "1e5a395789aff5cfadc4cd5655cd5f825f6fad7b4c74edda056c006cdb157127"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.econ-graze",
         "atom.sust-husk"
       ],
       "category": "movement",
+      "description": "A shimmering trail of golden pollen lifts the petals upward, carrying the bloom on a sudden, fragrant updraft.",
       "descriptionKey": "action.species.marigold.002.desc",
       "id": "action.species.marigold.002",
       "kindHint": "innate",
@@ -1819,12 +2529,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:28.274772+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "6dfff739e25ac42d26d99a01ec62a683653e0c17d418f533cc35c952b5057856"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.freezing",
         "atom.retribution"
       ],
       "category": "attack",
+      "description": "A jagged shard of frost erupts from the rind, hurtling toward the nearest threat.",
       "descriptionKey": "action.species.melonpult.001.desc",
       "id": "action.species.melonpult.001",
       "kindHint": "innate",
@@ -1848,12 +2568,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:31.108173+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "002ea7c6f9241659cf1319d1b3beb310d9f3e82bd2bde4e273a0e704b751f1f1"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.arm-op",
         "atom.summoner"
       ],
       "category": "status",
+      "description": "A frantic, grasping hand reaches out from the fog to pull the unsuspecting walker into the fray.",
       "descriptionKey": "action.species.normalzombie.001.desc",
       "id": "action.species.normalzombie.001",
       "kindHint": "innate",
@@ -1875,6 +2605,15 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:34.237276+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "6e9d464f4aece3732b7442a06df3504f9b94a96a5c337c65002ea2d58a4e7a25"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.arm-plate",
@@ -1882,6 +2621,7 @@
         "atom.lifesteal"
       ],
       "category": "attack",
+      "description": "Frost-rimed jaws snap shut, draining the warmth from the intruder to fuel a sudden, icy surge of vitality.",
       "descriptionKey": "action.species.nutchomper.001.desc",
       "id": "action.species.nutchomper.001",
       "motifsUsed": [
@@ -1900,12 +2640,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:37.025026+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "55c1379204c02a65570ed07d7dfb55881e89cf0e6f4e46349729e7ffd8894331"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.bulwark",
         "atom.prec-focus"
       ],
       "category": "status",
+      "description": "The zombie's newspaper becomes a confusing blur of shifting ink and illegible symbols.",
       "descriptionKey": "action.species.paperzombie.001.desc",
       "id": "action.species.paperzombie.001",
       "kindHint": "innate",
@@ -1926,12 +2676,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:39.836281+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "dfc61b40183db7837647a1ed826ec4ae469b81fce3ee9e84e9c6b473ae237421"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.buttering",
         "atom.elpw-surfeit"
       ],
       "category": "attack",
+      "description": "A sudden, greasy flare erupts from the peachomper, turning its sticky coating into a roaring, golden blaze.",
       "descriptionKey": "action.species.peachomper.001.desc",
       "id": "action.species.peachomper.001",
       "kindHint": "innate",
@@ -1951,12 +2711,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:42.902332+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "1e13805352a0cae01372b647db49135664a191b35e5b5f953a5dcc3116025ddb"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.chilling",
         "atom.elpw-pierce"
       ],
       "category": "attack",
+      "description": "A jagged, crystalline coating erupts around the shell, crackling with a freezing aura that shatters upon impact.",
       "descriptionKey": "action.species.peanut.001.desc",
       "id": "action.species.peanut.001",
       "motifsUsed": [
@@ -1976,12 +2746,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:45.754075+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "abf9f92ac9c08c87acaaa634f92bb5fb4d8e4ec3996d1ffeb3ced9442962cdf2"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.deathblast",
         "atom.elpw-surfeit"
       ],
       "category": "attack",
+      "description": "A sudden, violent surge of kinetic energy erupts from the plant's core, shattering the ground beneath it.",
       "descriptionKey": "action.species.peasquash.001.desc",
       "id": "action.species.peasquash.001",
       "kindHint": "innate",
@@ -2003,12 +2783,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:48.708418+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "a916fe87973d291d943ac0430dfe7432dd28585d6cf18eb989512b58b57663a6"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-surge",
         "atom.gravedigging"
       ],
       "category": "attack",
+      "description": "A sudden, freezing surge of energy erupts from the stem, flash-freezing the earth beneath as a blinding frost-light radiates outward.",
       "descriptionKey": "action.species.plantern.001.desc",
       "id": "action.species.plantern.001",
       "kindHint": "innate",
@@ -2028,12 +2818,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:51.522868+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "9e6dfa3ad062126476d9733097e4fb09aeac8eb013f141527a619af06c7e549a"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.marking",
         "atom.sust-husk"
       ],
       "category": "defense",
+      "description": "A crystalline frost hardens around the stem, shimmering with a protective, translucent sheen.",
       "descriptionKey": "action.species.plantern.002.desc",
       "id": "action.species.plantern.002",
       "motifsUsed": [
@@ -2052,12 +2852,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:54.185978+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "2db3567dfd7a2c1c10b5b8222b186416da287b2fba859273f822ce7d36079183"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.prec-focus",
         "atom.swiftness"
       ],
       "category": "movement",
+      "description": "A sudden, powerful spring off the pole sends the zombie soaring through the air.",
       "descriptionKey": "action.species.polevaulterzombie.001.desc",
       "id": "action.species.polevaulterzombie.001",
       "kindHint": "innate",
@@ -2077,12 +2887,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:11:57.399528+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "0654b05927fd917e7e728fad647abcd23dbfcf1d030cdd704ad3bba973a479da"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-surge",
         "atom.prec-reckoning"
       ],
       "category": "attack",
+      "description": "A brilliant, blinding flare erupts from the petals, washing over the garden in a wave of pure, revitalizing radiance.",
       "descriptionKey": "action.species.pot.001.desc",
       "id": "action.species.pot.001",
       "kindHint": "innate",
@@ -2103,12 +2923,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:00.209839+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "3dd3f00e9e35bd4d8f245e1f2f60a0937bb65e678f64386b69781a8ea8c86dc6"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.precision",
         "atom.shld-surge"
       ],
       "category": "status",
+      "description": "A thick layer of frost crystallizes across the rind, hardening the shell into an unbreakable icy crust.",
       "descriptionKey": "action.species.pumpkin.001.desc",
       "id": "action.species.pumpkin.001",
       "kindHint": "innate",
@@ -2130,12 +2960,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:03.012827+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "c62d5a3ceee6aeb6c5bc4a9247f9c3ed243487deb0660d5e2ef166988d6e71bc"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.regeneration",
         "atom.sporing"
       ],
       "category": "attack",
+      "description": "A sudden, shimmering cloud of neon dust erupts from the cap, momentarily blinding everything in its immediate vicinity.",
       "descriptionKey": "action.species.scaredyshroom.001.desc",
       "id": "action.species.scaredyshroom.001",
       "motifsUsed": [
@@ -2156,12 +2996,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:05.904723+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "3662cb13cf70a3dae7af00043d3148cfe9a8aab9ee162348fad598ba7870d823"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-surge",
         "atom.resilience"
       ],
       "category": "support",
+      "description": "A frantic, rhythmic pulsing of its cap sends a wave of nervous energy through the soil.",
       "descriptionKey": "action.species.scaredyshroom.002.desc",
       "id": "action.species.scaredyshroom.002",
       "kindHint": "innate",
@@ -2184,6 +3034,15 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:08.892959+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "58774b9274cc62f9232b82df3e5870b54d65458f8a4fbe967a04fbc1f5ee22e3"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.freezing",
@@ -2191,6 +3050,7 @@
         "atom.volley"
       ],
       "category": "attack",
+      "description": "A rapid-fire barrage of frost-coated projectiles shreds through the air, leaving a trail of biting sleet in its wake.",
       "descriptionKey": "action.species.snowgatling.001.desc",
       "id": "action.species.snowgatling.001",
       "kindHint": "innate",
@@ -2210,12 +3070,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:11.723947+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "94647a894d86a12d4e31050a84913e39e813b568a847b30118774bbc731a9c5d"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.chilling",
         "atom.rotting"
       ],
       "category": "status",
+      "description": "A relentless barrage of frost-rimed ice shatters against the target, leaving a trail of numbing slush in its wake.",
       "descriptionKey": "action.species.snowgatling.002.desc",
       "id": "action.species.snowgatling.002",
       "motifsUsed": [
@@ -2234,12 +3104,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:14.637966+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "b65f3cd9743338bd7227c1ea33ab2dcfbd536e4334d61020aca3abca62eb5caf"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.shield-capacity",
         "atom.shld-breach"
       ],
       "category": "attack",
+      "description": "A jagged shard of ice erupts from the stem, shattering the surrounding air into a flurry of frost.",
       "descriptionKey": "action.species.snowpeashooter.001.desc",
       "id": "action.species.snowpeashooter.001",
       "kindHint": "innate",
@@ -2261,12 +3141,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:17.551815+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "4c87bb3aefa3ec9b314a829da4d7b5f36556d53d586f5c50f8ea74818db2759c"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.deathblast",
         "atom.shield-regen"
       ],
       "category": "attack",
+      "description": "A sudden, crystalline burst erupts from the plant, freezing the air into a protective, shimmering frost.",
       "descriptionKey": "action.species.snowsplit.001.desc",
       "id": "action.species.snowsplit.001",
       "kindHint": "innate",
@@ -2287,12 +3177,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:20.510549+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "6b0b5dd9f9584a45bb713c7f9751bd1d358e5ab39280c794c9d5df42eaa9113d"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-override",
         "atom.sparking"
       ],
       "category": "movement",
+      "description": "The air thickens and shrieks as the weight of the sky collapses directly onto the target.",
       "descriptionKey": "action.species.squash.001.desc",
       "id": "action.species.squash.001",
       "kindHint": "innate",
@@ -2312,12 +3212,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:23.410187+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "a3d707c0123f1cda5591fccc63fb60b91207138ebb616c846205cf8d53e3fe25"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.prec-focus",
         "atom.stalwart"
       ],
       "category": "attack",
+      "description": "A blinding, concentrated beam of sunlight arcs from the fruit's core, searing through the air in a singular, unwavering line.",
       "descriptionKey": "action.species.starfruit.001.desc",
       "id": "action.species.starfruit.001",
       "kindHint": "innate",
@@ -2338,12 +3248,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:26.291247+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "452ec267d158c3e626d1cc44cb37e8d32566ad989fcf8249ae50b4e3a94e68b6"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-overflow",
         "atom.sust-freshgraft"
       ],
       "category": "attack",
+      "description": "A brilliant, celestial glow erupts from the center of the bloom, pulsing with a rhythmic, cosmic energy.",
       "descriptionKey": "action.species.starpea.001.desc",
       "id": "action.species.starpea.001",
       "kindHint": "innate",
@@ -2364,12 +3284,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:29.050927+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "9e38caeb134358f84e067530940a54ca686940ba7a3d55350836701acbde3c31"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.evd-shift",
         "atom.tempo-pulse"
       ],
       "category": "defense",
+      "description": "A rhythmic distortion ripples through the petals, warping the very space around the plant.",
       "descriptionKey": "action.species.starpea.002.desc",
       "id": "action.species.starpea.002",
       "motifsUsed": [
@@ -2388,12 +3318,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:31.912724+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "3eb7e132af2526adf26f8086894296c04312a00debab6a2851172c5cd207de73"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-overflow",
         "atom.tempo-stampede"
       ],
       "category": "attack",
+      "description": "A sudden, rhythmic surge of solar energy causes the plant to lunge forward with frantic, pulsing momentum.",
       "descriptionKey": "action.species.sunchomper.001.desc",
       "id": "action.species.sunchomper.001",
       "kindHint": "innate",
@@ -2414,12 +3354,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:34.727402+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "175d024d58e2be6fb1ddd77178a339b16becb3269f2ce7a1d71f3ce7d1d0a3c0"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-overflow",
         "atom.tempo-yield"
       ],
       "category": "attack",
+      "description": "A blinding radiance erupts from the petals, turning the sunflower into a miniature, pulsing sun.",
       "descriptionKey": "action.species.sunflower.001.desc",
       "id": "action.species.sunflower.001",
       "motifsUsed": [
@@ -2438,12 +3388,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:37.535198+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "070c3ae8484bb8026457adcc3be0f8937a8e505a431db8eac28c9003ec3d6ebb"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.retribution",
         "atom.ward-brace"
       ],
       "category": "defense",
+      "description": "A blinding burst of radiance erupts from the petals, forming a shimmering barrier of pure light.",
       "descriptionKey": "action.species.sunflower.002.desc",
       "id": "action.species.sunflower.002",
       "motifsUsed": [
@@ -2464,12 +3424,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:40.533975+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "f44a8ec4746a39c9a161d272f4369e292a521a2d4cb1cb0246b3b4611c8589f1"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-surge",
         "atom.ward-link"
       ],
       "category": "attack",
+      "description": "A sudden surge of energy pulses through the leaves, causing three simultaneous bursts of projectiles to arc toward the horizon.",
       "descriptionKey": "action.species.threepeater.001.desc",
       "id": "action.species.threepeater.001",
       "kindHint": "innate",
@@ -2490,12 +3460,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:43.219604+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "9d037b8c65c0a84f51ef9fe077af5911827564c468587f558fafe3f29655cb46"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.elpw-surge",
         "atom.warded"
       ],
       "category": "support",
+      "description": "A shimmering, protective aura pulses through the trio, heightening their senses and fortifying their stems.",
       "descriptionKey": "action.species.threeplantern.001.desc",
       "id": "action.species.threeplantern.001",
       "kindHint": "innate",
@@ -2517,12 +3497,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:46.168612+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "1f14775c7a213dcb1f699de74a3270d67ee595eb25d8053200f54784b5de6477"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.bloodletting",
         "atom.sunbloom"
       ],
       "category": "attack",
+      "description": "A sudden, blinding radiance erupts from the petals, washing over the garden in a searing wave of pure light.",
       "descriptionKey": "action.species.twinflower.001.desc",
       "id": "action.species.twinflower.001",
       "kindHint": "innate",
@@ -2544,12 +3534,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:48.925270+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "97bb07cddca428ea8dc33bf34c6dc33894c18bbe6a5bc937ab60db3677c9060b"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.cleansing",
         "atom.tempo-yield"
       ],
       "category": "movement",
+      "description": "A rhythmic, golden glow carries the Twinflower gracefully across the soil.",
       "descriptionKey": "action.species.twinflower.002.desc",
       "id": "action.species.twinflower.002",
       "motifsUsed": [
@@ -2570,12 +3570,22 @@
       "targetMode": "single"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:51.801153+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "64cf7c9ec9a4947010cc7a086595115e2d4755a3cec9e5f05c52a2e2080f6972"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.arm-hardening",
         "atom.death-glean"
       ],
       "category": "support",
+      "description": "A shimmering, calcified layer ripples across the shell, absorbing the impact of every passing strike.",
       "descriptionKey": "action.species.wallnut.001.desc",
       "id": "action.species.wallnut.001",
       "kindHint": "innate",
@@ -2597,12 +3607,22 @@
       "targetMode": "self"
     },
     {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T06:12:54.585983+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "a23be2bf6c9a70725e2f3eb43c9855027cc41a3a82939f818b582a7eba9a329b"
+      },
       "areaShape": null,
       "atomFamilies": [
         "atom.dooming",
         "atom.evd-shift"
       ],
       "category": "movement",
+      "description": "The hard casing tilts and glides smoothly across the soil, leaving a faint trail of dust in its wake.",
       "descriptionKey": "action.species.wallnut.002.desc",
       "id": "action.species.wallnut.002",
       "motifsUsed": [

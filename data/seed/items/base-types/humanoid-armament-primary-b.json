@@ -30,7 +30,7 @@
       "class": "blade",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -67,7 +67,7 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.elemental-power",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -104,7 +104,7 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.deathblast",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -143,7 +143,7 @@
       "class": "launcher",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.elemental-power",
         "powerBand": "medium"
       },
       "socketMax": 3,
@@ -182,7 +182,7 @@
       "class": "blade",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.elemental-power",
         "powerBand": "medium"
       },
       "socketMax": 3,
@@ -219,7 +219,7 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -256,7 +256,7 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -294,7 +294,7 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
       "socketMax": 3,
@@ -332,7 +332,7 @@
       "class": "launcher",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.elemental-power",
         "powerBand": "low"
       },
       "socketMax": 4,
@@ -369,7 +369,7 @@
       "class": "launcher",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.elemental-power",
         "powerBand": "low"
       },
       "socketMax": 4,
@@ -407,7 +407,7 @@
       "class": "blade",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 4,
@@ -443,7 +443,7 @@
       "class": "launcher",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
       "socketMax": 4,
@@ -480,7 +480,7 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -509,18 +509,18 @@
     },
     {
       "id": "item.humanoid-main-hand-b-014",
-      "nameKey": "base.weighted-mace",
-      "name": "Weighted Mace",
+      "nameKey": "base-type.crushing-maul",
+      "name": "Crushing Maul",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-pen",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.weighted-mace",
+      "iconKey": "icon.base-type.crushing-maul",
       "flavorKey": "flavor.base.weighted-mace",
       "flavor": "A dense, iron-headed club designed to deliver crushing momentum through heavy armor.",
       "tags": [
@@ -552,7 +552,7 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.elemental-power",
         "powerBand": "medium"
       },
       "socketMax": 4,
@@ -581,18 +581,18 @@
     },
     {
       "id": "item.humanoid-main-hand-b-016",
-      "nameKey": "base.heavy-piledriver",
-      "name": "Heavy Piledriver",
+      "nameKey": "base-type.impact-driver",
+      "name": "Impact Driver",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.heavy-piledriver",
+      "iconKey": "icon.base-type.impact-driver",
       "flavorKey": "flavor.base.heavy-piledriver",
       "flavor": "A massive, pneumatic-assisted piston mounted to a reinforced chassis. It relies on sheer kinetic force to crush through armor and bone alike.",
       "tags": [
@@ -617,18 +617,18 @@
     },
     {
       "id": "item.humanoid-main-hand-b-017",
-      "nameKey": "base.heavy-piledriver",
-      "name": "Heavy Piledriver",
+      "nameKey": "base-type.impact-sledge",
+      "name": "Impact Sledge",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.heavy-piledriver",
+      "iconKey": "icon.base-type.impact-sledge",
       "flavorKey": "flavor.base.heavy-piledriver",
       "flavor": "A massive, pneumatic-assisted piston mounted to a reinforced chassis. It relies on sheer kinetic force to crush through heavy plating.",
       "tags": [
@@ -689,18 +689,18 @@
     },
     {
       "id": "item.humanoid-main-hand-b-019",
-      "nameKey": "base.heavy-piston-driver",
-      "name": "Heavy Piston-Driver",
+      "nameKey": "base-type.hydraulic-ram-driver",
+      "name": "Hydraulic Ram-Driver",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.elemental-power",
         "powerBand": "medium"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.heavy-piston-driver",
+      "iconKey": "icon.base-type.hydraulic-ram-driver",
       "flavorKey": "flavor.base.heavy-piston-driver",
       "flavor": "A pneumatic-assisted striking tool designed to deliver concentrated kinetic force through a reinforced driving head.",
       "tags": [
@@ -725,18 +725,18 @@
     },
     {
       "id": "item.humanoid-main-hand-b-020",
-      "nameKey": "base.heavy-piledriver",
-      "name": "Heavy Piledriver",
+      "nameKey": "base-type.kinetic-breaker",
+      "name": "Kinetic Breaker",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.elemental-power",
         "powerBand": "medium"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.heavy-piledriver",
+      "iconKey": "icon.base-type.kinetic-breaker",
       "flavorKey": "flavor.base.heavy-piledriver",
       "flavor": "A massive, pneumatic-assisted piston mounted to a reinforced chassis. It relies on sheer kinetic impact to shatter through heavy plating.",
       "tags": [
@@ -761,18 +761,18 @@
     },
     {
       "id": "item.humanoid-main-hand-b-021",
-      "nameKey": "base.tungsten-spiker",
-      "name": "Tungsten Spiker",
+      "nameKey": "base-type.tungsten-spike",
+      "name": "Tungsten Spike",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.shield-pen",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 4,
-      "iconKey": "icon.base.tungsten-spiker",
+      "iconKey": "icon.base-type.tungsten-spike",
       "flavorKey": "flavor.base.tungsten-spiker",
       "flavor": "A dense, heavy-headed rod designed to deliver concentrated kinetic force through thick plating.",
       "tags": [
@@ -804,7 +804,7 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -840,7 +840,7 @@
       "class": "launcher",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.deathblast",
         "powerBand": "medium"
       },
       "socketMax": 3,
@@ -869,18 +869,18 @@
     },
     {
       "id": "item.humanoid-main-hand-b-024",
-      "nameKey": "base.tungsten-spiker",
-      "name": "Tungsten Spiker",
+      "nameKey": "base-type.tungsten-lancet",
+      "name": "Tungsten Lancet",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.elemental-power",
         "powerBand": "medium"
       },
       "socketMax": 4,
-      "iconKey": "icon.base.tungsten-spiker",
+      "iconKey": "icon.base-type.tungsten-lancet",
       "flavorKey": "flavor.base.tungsten-spiker",
       "flavor": "A heavy, reinforced rod designed to deliver concentrated kinetic force through a single, devastating point of impact.",
       "tags": [
@@ -941,18 +941,18 @@
     },
     {
       "id": "item.humanoid-main-hand-b-026",
-      "nameKey": "base.tungsten-spiker",
-      "name": "Tungsten Spiker",
+      "nameKey": "base-type.tungsten-needle",
+      "name": "Tungsten Needle",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 3,
-      "iconKey": "icon.base.tungsten-spiker",
+      "iconKey": "icon.base-type.tungsten-needle",
       "flavorKey": "flavor.base.tungsten-spiker",
       "flavor": "A dense, weighted rod designed to deliver concentrated kinetic force through a single, devastating point of impact.",
       "tags": [
@@ -977,18 +977,18 @@
     },
     {
       "id": "item.humanoid-main-hand-b-027",
-      "nameKey": "base.tungsten-spiker",
-      "name": "Tungsten Spiker",
+      "nameKey": "base-type.tungsten-piercer",
+      "name": "Tungsten Piercer",
       "frame": "humanoid",
       "role": "armament-primary",
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.ferocity",
         "powerBand": "medium"
       },
       "socketMax": 4,
-      "iconKey": "icon.base.tungsten-spiker",
+      "iconKey": "icon.base-type.tungsten-piercer",
       "flavorKey": "flavor.base.tungsten-spiker",
       "flavor": "A dense, weighted rod designed to deliver concentrated kinetic energy through a single, devastating point of impact.",
       "tags": [

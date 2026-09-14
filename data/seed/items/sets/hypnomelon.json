@@ -25,7 +25,7 @@
       "id": "set.hypnomelon-001",
       "nameKey": "set.the-melon-volley",
       "name": "The Melon Volley",
-      "themeKey": "demon.hypnomelon",
+      "themeKey": "creature.hypnomelon",
       "members": [
         {
           "role": "armament-primary",

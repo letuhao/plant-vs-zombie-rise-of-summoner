@@ -25,7 +25,7 @@
       "id": "set.qingzombie-001",
       "nameKey": "set.sovereign-of-the-relic",
       "name": "Sovereign of the Relic",
-      "themeKey": "demon.qingzombie",
+      "themeKey": "creature.qingzombie",
       "members": [
         {
           "role": "armament-primary",

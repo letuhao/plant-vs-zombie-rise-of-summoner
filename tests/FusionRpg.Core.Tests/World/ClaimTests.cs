@@ -14,6 +14,48 @@ namespace FusionRpg.Core.Tests.World;
 /// </summary>
 public class ClaimTests
 {
+    /// <summary>Guard-kind contact resolves as a clean win — `actor-hub-and-combat-power-solid-fixing`
+    /// T20 made `BattleKinds.Guard` one of `DistrictAssaultResolver`'s refused non-district kinds, so
+    /// clearing a slot no longer happens on its own; this stands in so a `clear` campaign can still
+    /// reach the claim it is really testing.</summary>
+    sealed class GuardAlwaysClears : IBattleResolver
+    {
+        public BattleOutcome Resolve(BattleRequest request, IReadOnlyList<WorldEntity> combatants, ulong seed)
+        {
+            var attacker = combatants.Single(e => e.EntityId == request.AttackerEntityId);
+            return new BattleOutcome
+            {
+                BattleId = request.BattleId,
+                WinnerEntityId = attacker.EntityId,
+                GuardCleared = true,
+                Sides = new[] { new BattleSideOutcome { EntityId = attacker.EntityId, Survivors = attacker.Members } }
+            };
+        }
+    }
+
+    /// <summary>The attacker always routs, the defender always wins — T20 turned Sector-kind contact
+    /// into an honest no-op, so an explicit resolver manufactures the routed precondition this file's
+    /// contested-claim test needs.</summary>
+    sealed class AttackerAlwaysRouts : IBattleResolver
+    {
+        public BattleOutcome Resolve(BattleRequest request, IReadOnlyList<WorldEntity> combatants, ulong seed)
+        {
+            var attacker = combatants.Single(e => e.EntityId == request.AttackerEntityId);
+            var defender = combatants.Single(e => e.EntityId == request.DefenderEntityId);
+
+            return new BattleOutcome
+            {
+                BattleId = request.BattleId,
+                WinnerEntityId = defender.EntityId,
+                Sides = new[]
+                {
+                    new BattleSideOutcome { EntityId = defender.EntityId, Survivors = defender.Members },
+                    new BattleSideOutcome { EntityId = attacker.EntityId, Survivors = attacker.Members, Routed = true }
+                }
+            };
+        }
+    }
+
     static WorldState World() => WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 1);
 
     static WorldCommand Claim(string commander, string entityId, string sectorId) => new()
@@ -235,7 +277,7 @@ public class ClaimTests
             Move("dave", "e-dave-legion-1", "l-home-ember"),
             Claim("dave", "e-dave-legion-1", "ember-hollow"),
             Claim("wild", "e-wild-pack-1", "ember-hollow")
-        }, seed: 1);
+        }, seed: 1, new AttackerAlwaysRouts());
 
         // Dave's legion routs and falls back to homeworld before Snapshot's claim check runs — his
         // own claim is dropped for being routed, not for the ground being contested.
@@ -283,8 +325,8 @@ public class ClaimTests
         var t1 = TurnEngine.Step(state, new[] { Move("dave", "e-dave-legion-1", "l-home-ember") }, seed: 1);
         Assert.Equal("ember-hollow", t1.World.Entities.Single(e => e.EntityId == "e-dave-legion-1").AtSectorId);
 
-        var t2 = TurnEngine.Step(t1.World, new[] { Clear("dave", "e-dave-legion-1", "ember-hollow", 2) }, seed: 1);
-        var t3 = TurnEngine.Step(t2.World, new[] { Clear("dave", "e-dave-legion-1", "ember-hollow", 3) }, seed: 1);
+        var t2 = TurnEngine.Step(t1.World, new[] { Clear("dave", "e-dave-legion-1", "ember-hollow", 2) }, seed: 1, new GuardAlwaysClears());
+        var t3 = TurnEngine.Step(t2.World, new[] { Clear("dave", "e-dave-legion-1", "ember-hollow", 3) }, seed: 1, new GuardAlwaysClears());
         Assert.All(Sector(t3.World, "ember-hollow").Slots, sl => Assert.Equal(GuardState.Cleared, sl.GuardState));
 
         var t4 = TurnEngine.Step(t3.World, new[] { Claim("dave", "e-dave-legion-1", "ember-hollow") }, seed: 1);

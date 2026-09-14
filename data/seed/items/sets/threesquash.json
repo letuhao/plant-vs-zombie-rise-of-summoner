@@ -25,7 +25,7 @@
       "id": "set.threesquash-001",
       "nameKey": "set.triple-line-squash-launcher",
       "name": "Triple-Line Squash Launcher",
-      "themeKey": "demon.threesquash",
+      "themeKey": "creature.threesquash",
       "members": [
         {
           "role": "armament-primary",

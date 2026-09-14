@@ -1,4 +1,6 @@
+using System.Linq;
 using FusionRpg.Contracts;
+using FusionRpg.Core.Effects;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats;
 using FusionRpg.Core.Stats.Aptitudes;
@@ -62,7 +64,7 @@ public class ActorHubResolveTests
             {
               "schemaVersion": 1, "version": 1,
               "grant": { "aptitudePointsPerTheta": 3, "skillPointsPerTheta": 1 },
-              "pointEconomy": { "aptitudePointsPerThetaMilliByScope": { "commander": 3, "demonType": 4, "aspect": 4, "uniqueDemon": 6 }, "respecPrice": 10 }, "guardEconomy": { "flatCommitCost": 50, "absorbDrainSharePermille": 300, "riposteShareCapPermille": 400 }, "mitigation": { "scaleMilli": 1000, "families": ["combat.defense", "combat.dodge", "combat.parry", "combat.block", "combat.absorption", "combat.heal"] },
+              "pointEconomy": { "aptitudePointsPerThetaMilliByScope": { "commander": 3, "creatureType": 4, "aspect": 4, "uniqueCreature": 6 }, "respecPrice": 10 }, "guardEconomy": { "flatCommitCost": 50, "absorbDrainSharePermille": 300, "riposteShareCapPermille": 400 }, "mitigation": { "scaleMilli": 1000, "families": ["combat.defense", "combat.dodge", "combat.parry", "combat.block", "combat.absorption", "combat.heal"] },
               "read": { "contest": { "spanPoints": 100.0, "shareExponentMilli": 1000 }, "magnitude": { "shareExponentMilli": 1000 } },
               "recovery": { "scaleMilli": 374, "targetRecoveryShareMilli": 670, "families": ["resource.regen"] },
               "familyRead": { "progression.bonus.maxHp": "magnitude", "progression.bonus.atk": "magnitude" },
@@ -92,6 +94,76 @@ public class ActorHubResolveTests
         Assert.Equal(100 + expectedBonusMaxHp, result.AppliedCombat.Hp);
         Assert.Equal(10 + expectedBonusAtk, result.AppliedCombat.Atk);
         Assert.Equal(100, result.RuntimePrimary.MaxHp);
+    }
+
+    /// <summary>bound-loadout-hub (T14) end-to-end: the EXACT grant shape
+    /// <c>UniqueBoundLoadout.GrantBonus</c> produces (ownerKind "entity", overlay
+    /// <c>derived.channel</c>/<c>derived.op</c>/<c>derived.amount</c>, no catalog EffectDef) read
+    /// through <see cref="GrantedDerivedAtomReader"/> as a <c>boundDerivedAtoms</c> contributor —
+    /// proving the durable-grant replacement for the old Writer-absolute path actually reaches
+    /// <see cref="ActorResolveResult.AppliedCombat"/>, the same assertion
+    /// <see cref="Applied_combat_includes_progression_bonus_flats"/> makes for the aptitude feeder.</summary>
+    [Fact]
+    public void Applied_combat_includes_a_unique_bound_loadout_grant_shaped_bonus()
+    {
+        const string ptr = "1A2B";
+        var store = new FakeEntityGrantStore().Add(
+            EffectOwnerKeys.Entity(ptr), "progression.bonus.atk", "flat", 15.0, grantId: "unique.bound.atk:" + ptr);
+        store.Add(EffectOwnerKeys.Entity(ptr), "progression.bonus.maxHp", "flat", 200.0, grantId: "unique.bound.maxhp:" + ptr);
+
+        var stats = StatSystemBootstrap.CreateDefault();
+        var hub = ActorHubBootstrap.CreateDefault(stats,
+            boundDerivedAtoms: ctx => GrantedDerivedAtomReader.Read(store, ctx));
+
+        var ctx = stats.Contexts.ForPlant(ptr, new EntityBaseline { Hp = 300, MaxHp = 300, Atk = 40 });
+        var result = hub.Resolve(ctx);
+
+        Assert.Equal(300 + 200, result.AppliedCombat.MaxHp);
+        Assert.Equal(300 + 200, result.AppliedCombat.Hp);
+        Assert.Equal(40 + 15, result.AppliedCombat.Atk);
+        // Never leaks onto an unrelated entity -- the whole point of the entity: {ptr} scope.
+        var other = stats.Contexts.ForPlant("OTHER", new EntityBaseline { Hp = 300, MaxHp = 300, Atk = 40 });
+        var otherResult = hub.Resolve(other);
+        Assert.Equal(300, otherResult.AppliedCombat.MaxHp);
+        Assert.Equal(40, otherResult.AppliedCombat.Atk);
+    }
+
+    /// <summary>Minimal entity-scoped store for the test above -- mirrors
+    /// <c>GrantedDerivedAtomReaderTests.FakeGrantStore</c>'s shape (kept local rather than shared
+    /// across test assemblies for one field).</summary>
+    sealed class FakeEntityGrantStore : IEffectGrantStore
+    {
+        readonly List<EffectGrant> _grants = new();
+
+        public FakeEntityGrantStore Add(string ownerKey, string channel, string op, object amount, string grantId)
+        {
+            _grants.Add(new EffectGrant
+            {
+                GrantId = grantId,
+                EffectId = "unique.bound.derived",
+                OwnerKind = "entity",
+                OwnerKey = ownerKey,
+                Overlay = new Dictionary<string, object?>
+                {
+                    [GrantedDerivedAtomReader.ChannelKey] = channel,
+                    [GrantedDerivedAtomReader.OpKey] = op,
+                    [GrantedDerivedAtomReader.AmountKey] = amount,
+                },
+            });
+            return this;
+        }
+
+        public IReadOnlyList<EffectGrant> ForOwner(string? ownerKind, string ownerKey) =>
+            _grants.Where(g =>
+                string.Equals(g.OwnerKind, ownerKind, StringComparison.Ordinal) &&
+                string.Equals(g.OwnerKey, ownerKey, StringComparison.Ordinal)).ToList();
+
+        public EffectGrant? Get(string grantId) => _grants.FirstOrDefault(g => g.GrantId == grantId);
+        public IReadOnlyList<EffectGrant> All() => _grants;
+        public IReadOnlyList<EffectGrant> Matching(EffectEventDto ev) => _grants;
+        public void Upsert(EffectGrant grant) => _grants.Add(grant);
+        public bool Withdraw(string grantId) => _grants.RemoveAll(g => g.GrantId == grantId) > 0;
+        public void Clear() => _grants.Clear();
     }
 
     [Fact]

@@ -25,7 +25,7 @@
       "id": "set.squashblover-001",
       "nameKey": "set.the-heavy-spore",
       "name": "The Heavy Spore",
-      "themeKey": "demon.squashblover",
+      "themeKey": "creature.squashblover",
       "members": [
         {
           "role": "armament-primary",

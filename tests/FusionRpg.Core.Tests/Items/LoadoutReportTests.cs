@@ -39,7 +39,7 @@ public class LoadoutReportTests
     }
 
     /// <summary>The conflict names the CELL, not a count. A report that only said "1 conflict" is
-    /// exactly the answer "why is my other demon naked" cannot be built from.</summary>
+    /// exactly the answer "why is my other creature naked" cannot be built from.</summary>
     [Fact]
     public void The_refusal_lists_exactly_which_cells_hold_what()
     {
@@ -72,7 +72,7 @@ public class LoadoutReportTests
     }
 
     /// <summary>Two entries pinning the same worn copy strip that one cell once, not twice — a
-    /// duplicated strip line reads as two demons losing gear when only one did.</summary>
+    /// duplicated strip line reads as two creatures losing gear when only one did.</summary>
     [Fact]
     public void A_cell_contested_twice_is_stripped_once()
     {
@@ -86,7 +86,7 @@ public class LoadoutReportTests
         Assert.Single(plan.Stripped);
     }
 
-    /// <summary>Re-applying a preset to the demon already wearing it is not a conflict with itself.</summary>
+    /// <summary>Re-applying a preset to the creature already wearing it is not a conflict with itself.</summary>
     [Fact]
     public void An_item_already_in_the_target_cell_is_not_a_conflict()
     {
@@ -99,7 +99,7 @@ public class LoadoutReportTests
         Assert.Empty(plan.Conflicts);
     }
 
-    /// <summary>Same demon, different role still moves the item — so it is still a conflict, and the
+    /// <summary>Same creature, different role still moves the item — so it is still a conflict, and the
     /// cell it would leave is still named.</summary>
     [Fact]
     public void The_same_specimen_wearing_it_in_another_role_is_still_a_conflict()

@@ -25,7 +25,7 @@
       "id": "set.cherrypumpkin-001",
       "nameKey": "set.cherry-pumpkin-burst",
       "name": "Cherry Pumpkin Burst",
-      "themeKey": "demon.cherrypumpkin",
+      "themeKey": "creature.cherrypumpkin",
       "members": [
         {
           "role": "armament-primary",

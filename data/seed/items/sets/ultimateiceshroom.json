@@ -25,7 +25,7 @@
       "id": "set.ultimateiceshroom-001",
       "nameKey": "set.glacial-corpse-set",
       "name": "Glacial Corpse Set",
-      "themeKey": "demon.ultimateiceshroom",
+      "themeKey": "creature.ultimateiceshroom",
       "members": [
         {
           "role": "armament-primary",

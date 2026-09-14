@@ -86,7 +86,7 @@ paths — exactly where this migration would put it (the objective's own words: 
 > ⚠️ **Correction, 2026-09-02 — the "hot path" half of this section's own premise was wrong,**
 > found by actually reading `spec-power-ladder.md` and `PatronPolicy.cs` instead of trusting this
 > file's own earlier paraphrase. `PatronPolicy.AuraMilli` reads `PowerLadder.Value(pTheta)`
-> (`src/FusionRpg.Core/Demons/Patron/PatronPolicy.cs:58-59`) — **not**
+> (`src/FusionRpg.Core/Creatures/Patron/PatronPolicy.cs:58-59`) — **not**
 > `PowerReads.IntegerFifthRoot`. Those are two different functions in two different modules that
 > happen to share the letters `P`/`Θ`/`Power`: `PowerLadder.Value` is `spec-power-ladder.md`'s pure,
 > integer, **O(1)** closed-form arithmetic (`C + A·Θ + B·Θ(Θ−1)/2`, one rounding at the end) —

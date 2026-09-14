@@ -5,7 +5,7 @@ a replayed answer does not get for free.
 that turns a brief into an answer, and recorded that gap as *"the generation graph is not wired,
 and `--write` says so instead of writing nothing."* The graph's `generate` node takes an injected
 `call` (`make_generate_node(..., call=...)`) precisely so the transport is replaceable — the same
-seam `demon_anchor.py` and `effect_affix.py` already rely on for their tests. This module supplies
+seam `creature_anchor.py` and `effect_affix.py` already rely on for their tests. This module supplies
 the transport that reads answers a model already authored, from a file, instead of opening a
 socket. It imports nothing from `pipeline.llm_caller`, so a run driven by it **cannot** reach the
 network, and a test asserts that by module text.

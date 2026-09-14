@@ -62,7 +62,7 @@ public static class StatusCatalogBootstrap
         // 9.5 Nerve (P3, delve-attrition D2.19) -- the Darkest Dungeon affliction ladder, one id per
         // `nerveStage` registry member (bands.v1.json), in threshold order. The live instance is a
         // PROJECTION of the stack counter in party state (`DelveMemberState.NerveStacks`), never the
-        // counter itself -- `NervePolicy.Sync` keeps at most one of these three live per demon.
+        // counter itself -- `NervePolicy.Sync` keeps at most one of these three live per creature.
         Register(catalog, "nerve.unsettled", StatusKind.Debuff, "nerve", StatusL2bCategory.Dot, StatusStacking.Replace, StatusPayloadKind.ModifyStat);
         Register(catalog, "nerve.shaken", StatusKind.Debuff, "nerve", StatusL2bCategory.Dot, StatusStacking.Replace, StatusPayloadKind.ModifyStat);
         Register(catalog, "nerve.afflicted", StatusKind.Debuff, "nerve", StatusL2bCategory.Dot, StatusStacking.Replace, StatusPayloadKind.ModifyStat);

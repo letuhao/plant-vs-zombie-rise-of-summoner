@@ -75,7 +75,7 @@ derived-theme-packs · derived-player-copy ────────────�
 |---|---|
 | Catalog expand migration breaks Status rail | Golden join tests for resist.dot; keep status-id expand for open families |
 | Paint SSOT not landed yet | Implement resolveElementPaint here or wait CG-A1 — same module path |
-| UniqueDemon lean Pending | Sheet-preferred path; lean Pending honesty test |
+| UniqueCreature lean Pending | Sheet-preferred path; lean Pending honesty test |
 
 ## Explicitly out
 

@@ -25,7 +25,7 @@
       "id": "set.impking-001",
       "nameKey": "set.undead-monarch-s-decree",
       "name": "Undead Monarch's Decree",
-      "themeKey": "demon.impking",
+      "themeKey": "creature.impking",
       "members": [
         {
           "role": "armament-primary",

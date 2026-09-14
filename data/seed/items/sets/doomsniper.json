@@ -25,7 +25,7 @@
       "id": "set.doomsniper-001",
       "nameKey": "set.reaper-s-gale",
       "name": "Reaper's Gale",
-      "themeKey": "demon.doomsniper",
+      "themeKey": "creature.doomsniper",
       "members": [
         {
           "role": "armament-primary",

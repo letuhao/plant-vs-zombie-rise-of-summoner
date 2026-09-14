@@ -1,0 +1,20 @@
+{
+  "session": "debug-mcp-idea-20260913",
+  "program": "debug-mcp (proposed; idea stage, no capability map yet)",
+  "problem": "Write docs/architecture/debug-mcp-ideal.md: repo-grounded assessment of the Debug MCP proposal (FastMCP + Inspector + thin adapters + evidence-shaped verify tools)",
+  "mode": "direct",
+  "branch": "features/derived-stat-extension",
+  "worktree": null,
+  "paths": [
+    "docs/architecture/debug-mcp-ideal.md",
+    "docs/architecture/debug-mcp-map.md",
+    "docs/architecture/debug-mcp/spec-debug-mcp.md",
+    "tasks/debug-mcp-plan.md",
+    "tasks/debug-mcp-todo.md",
+    "tasks/sessions/debug-mcp-idea-20260913.json",
+    "AGENTS.md"
+  ],
+  "started": "2026-09-13T00:00:00Z",
+  "status": "active",
+  "scopeNote": "Idea-stage doc only (no spec, no code). Read in-session: validation-ssot (full), live-probe-standard (partial, lines 1-80, from the solid-run worktree copy — read-only, nothing touched there). NOT read: software-architecture.md, decisions.md. Stated per DESIGN-GATE section 5."
+}

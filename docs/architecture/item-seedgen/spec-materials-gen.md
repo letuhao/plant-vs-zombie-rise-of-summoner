@@ -21,7 +21,7 @@ them.
 
 1. `seedsmith items generate --kind material` exists — brief-and-answer shape, model supplies name/icon
    key/flavor text for a material id the CLOSED, fixed enum vocabulary already defines (Shard/Essence
-   ids sourced from `DemonRarityLadder.All`/`ElementRoster.Concrete`, per the existing audit) — the
+   ids sourced from `CreatureRarityLadder.All`/`ElementRoster.Concrete`, per the existing audit) — the
    generator never invents a NEW material id, only authors display content for ids the fixed vocabulary
    already lists.
 2. Confirms, before generating, that the target id is a real member of the closed vocabulary

@@ -16,7 +16,7 @@ const players = {
   currentPlayerId: 1
 };
 
-const boundDemon = {
+const boundCreature = {
   instanceId: "d1",
   bound: true,
   deployable: true,
@@ -51,10 +51,10 @@ async function mockSanctum(page: Page, opts?: { contracts?: unknown[]; expeditio
       loyaltyMax: 1000
     })
   );
-  await page.route("**/api/demons/catalog", (route) => fulfillJson(route, { species: [] }));
-  await page.route("**/api/demons/*/codex", (route) => fulfillJson(route, { entries: [] }));
-  await page.route("**/api/demons/*/summon-state", (route) => fulfillJson(route, { pity: 0 }));
-  await page.route("**/api/demons/*", (route) =>
+  await page.route("**/api/creatures/catalog", (route) => fulfillJson(route, { species: [] }));
+  await page.route("**/api/creatures/*/codex", (route) => fulfillJson(route, { entries: [] }));
+  await page.route("**/api/creatures/*/summon-state", (route) => fulfillJson(route, { pity: 0 }));
+  await page.route("**/api/creatures/*", (route) =>
     fulfillJson(route, {
       playerId: 1,
       items: [
@@ -73,14 +73,14 @@ async function mockSanctum(page: Page, opts?: { contracts?: unknown[]; expeditio
 }
 
 test.describe("Expeditions layer (T17)", () => {
-  test("locked with no bound demon", async ({ page }) => {
+  test("locked with no bound creature", async ({ page }) => {
     await mockSanctum(page);
     await page.goto("/#/sanctum");
     await expect(page.getByTestId("rail-expeditions")).toBeDisabled();
   });
 
-  test("unlocks and opens with a bound demon, Esc closes without unmounting the Sanctum", async ({ page }) => {
-    await mockSanctum(page, { contracts: [boundDemon] });
+  test("unlocks and opens with a bound creature, Esc closes without unmounting the Sanctum", async ({ page }) => {
+    await mockSanctum(page, { contracts: [boundCreature] });
     await page.goto("/#/sanctum");
     await expect(page.getByTestId("rail-expeditions")).not.toBeDisabled();
 
@@ -98,7 +98,7 @@ test.describe("Expeditions layer (T17)", () => {
     // in expeditionReturnWatcher.test.tsx, where timing is controllable) — a return already due
     // when the player opens the app is old news, not a toast-worthy one; this is the badge half.
     await mockSanctum(page, {
-      contracts: [boundDemon],
+      contracts: [boundCreature],
       expeditions: [
         {
           id: 1,
@@ -120,7 +120,7 @@ test.describe("Expeditions layer (T17)", () => {
   // AuditNav (the flat leftover sidebar this test used to check for a redundant link) is gone
   // entirely (GG-40, foundation.html F.2) — Expeditions is reachable only through the rail now.
   test("#/expeditions redirects into the layer", async ({ page }) => {
-    await mockSanctum(page, { contracts: [boundDemon] });
+    await mockSanctum(page, { contracts: [boundCreature] });
     await page.goto("/#/expeditions");
     await expect(page).toHaveURL(/#\/sanctum\?panel=expeditions/);
     await expect(page.getByTestId("expeditions-layer")).toBeVisible();
@@ -134,7 +134,7 @@ test.describe("Expeditions layer (T17)", () => {
     // only works for the rail-badge test, which reads a *different*, server-time-relative watcher).
     const now = Date.now();
     const iso = (ms: number) => new Date(ms).toISOString();
-    await mockSanctum(page, { contracts: [boundDemon] });
+    await mockSanctum(page, { contracts: [boundCreature] });
     // mockSanctum's own `/api/expeditions/*` route hardcodes `tiers: []` — override it so
     // "scout-30m" resolves to a real tier, otherwise every card's `due`/progress math silently
     // falls back to its zero-default (this is what broke on the first run of this test).

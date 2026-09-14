@@ -41,7 +41,7 @@ Owner decisions this module implements, quoted from the ideal's boxes and the re
   … validator: neighbouring rungs differ in `bandDelta` or a reward column, never only a penalty …
   `depth.bossBand` becomes `depth.bossBandDelta` on the last corridor's band; a rung whose band would
   clamp on a domain is not offered."*
-- **§11.10 R6** — *"Virtual time only — a downed demon sits out a tunable number of delves
+- **§11.10 R6** — *"Virtual time only — a downed creature sits out a tunable number of delves
   (`risk.downedRecoveryDelves`). The real-time clock is removed."* No key in either file may carry a
   day, hour or minute unit.
 - **§11.10 R4** — *"A clear at `maxRungWithoutOath` itself opens the next rung."* §5's
@@ -65,7 +65,7 @@ Owner decisions this module implements, quoted from the ideal's boxes and the re
 ### Registry files
 
 `data/seed/dungeon/_registry/<name>.v1.json`, one vocabulary per file, the envelope
-`data/seed/demons/_registry/families.v1.json:2-3` already uses (`schemaVersion`, `registryVersion`):
+`data/seed/creatures/_registry/families.v1.json:2-3` already uses (`schemaVersion`, `registryVersion`):
 
 | File | Members (starting shape) | Row fields beyond `id` |
 |---|---|---|
@@ -143,7 +143,7 @@ per-mille and every soul or item magnitude (see §Numeric types).
 | **Added by `event-deck` (wave 3):** `events.climateAffinity.{match,none,off}Milli` · `bands.hpBand.{low,half,high}.milli` | ‰ relative weight, long · ‰ of max hp, long | T | Affinity weights, never gates (seed contract §1.4); `hpBand` maps an anchor ordinal to the `HpBelowMilli`/`HpAboveMilli` leaf argument. Starting shapes 1000/1000/500 · 250/500/750 |
 | `quests.countBand.{few,some,most,all}Milli` · `quests.rewardBand.{modest,fair,rich}.{floorRung,ceilRung}` | ‰ of rooms long · rung id | T | Rung ids from the ten-rung ladder (`item-rarity.v1.json:7-18`) |
 | `wild.outcome.{eager,open,wary,hostile}.{joins,takesLeaves,flees,attacks}Milli` | ‰ long, rows sum to 1000 (loader-checked) | T | **`wild.joinMilli` does not exist.** The talk's disposition table replaces expeditions' one coin (`ExpeditionTuning.cs:59`); nothing here reads or copies `expeditions.v1.json:19` |
-| `wild.deltaBands[]` · `wild.deltaShiftRungs[]` · `wild.tide.{enabled,shiftRungs[]}` · `wild.offerPreference.{personality}.{souls,spirit,item,demon}` · `wild.offer.spiritPerSoulMilli` · `wild.offer.soulsMilliOfPullPrice` · `wild.provisionOverrideTag` | Θ int · rungs int · bool + rungs int · ordinal `craves·accepts·scorns` · ‰ long · ‰ long (≥ 1000, loader-checked) · override-tag id | T | Personality keys = `contracts.v1.json` `personalityRates` members, checked at load. **`soulsMilliOfPullPrice` is how R5's floor is expressed:** the price itself is `summoning.v1.json` `banners[altar.bannerId].costPerPull` (`SummoningTuning.cs:56`) through `SoulSinkPolicy.Price` at Θ_room — never a soul number here |
+| `wild.deltaBands[]` · `wild.deltaShiftRungs[]` · `wild.tide.{enabled,shiftRungs[]}` · `wild.offerPreference.{personality}.{souls,spirit,item,creature}` · `wild.offer.spiritPerSoulMilli` · `wild.offer.soulsMilliOfPullPrice` · `wild.provisionOverrideTag` | Θ int · rungs int · bool + rungs int · ordinal `craves·accepts·scorns` · ‰ long · ‰ long (≥ 1000, loader-checked) · override-tag id | T | Personality keys = `contracts.v1.json` `personalityRates` members, checked at load. **`soulsMilliOfPullPrice` is how R5's floor is expressed:** the price itself is `summoning.v1.json` `banners[altar.bannerId].costPerPull` (`SummoningTuning.cs:56`) through `SoulSinkPolicy.Price` at Θ_room — never a soul number here |
 | `capture.usableBelowMilli` · `capture.chanceMilli[hpBand][deltaBand]` · `capture.statusBonusMilli[countBand]` · `capture.sealTierShiftBands[]` · `capture.failStepBands` | ‰ long · ‰ long table · ‰ long · ‰ long · bands int | T | Table axes = `bands.v1.json` members, dimension-checked |
 |**Added / corrected by `wild-room` (wave 4):** `wild.talk.maxSteps` · `wild.talk.flatterMilli` · `wild.autopilot.rule` · `wild.cageMilli`; `wild.offer.spiritPerSoulMilli` (was `spiritMilli` — a ‰-of-max with no soul equivalence); `capture.sealTierShiftBands[]` (was `…ShiftMilli[]` — a seal shifts a band index, not a ‰)|steps int · ‰ long · id ∈ {`fight`, `leave-hostile`} · ‰ long; spirit units per soul (‰ long); bands int per seal tier|T|Starting shapes 2 · 500 · `fight` · 150; 2000; `[0, −1, −2]`. Every wild-room price still ends in `SoulSinkPolicy.Price` through `dungeon-loot`'s `DelvePrices`; no soul literal here|
 | `altar.bannerId` · `altar.poolFromDomain` | banner id · bool | T | **`altar.pullPriceSouls` does not exist** (S2-10). `sharedPity` is not a key: a boolean that must be `true` is *"a literal with extra ceremony"* (tunables-ssot §6) — it is a rule in `wild-room` |
@@ -164,7 +164,7 @@ read it; it lives with the `dungeon` adapter.
 | Block · keys | Unit / type | Class | Owner note |
 |---|---|---|---|
 | `slot.countBand.{lone,few,several,many}.{min,max}` | count int | T | Also resolves `retinueRule.perParty` — one vocabulary, one table (S2-10) |
-| `threatWindow.bossFloorRung` | threat rung id (`demon-threat.v1.json:3-14`) | T | **No `threatWindow.defaultRungs`:** a default window is a default (T5); `threatWindow` is required on every encounter anchor. `DemonThreatTuning.OffsetFor`'s fallback (`DemonThreatTuning.cs:19-29`) is the wiring gap `threat-audit` closes, not something this file papers over |
+| `threatWindow.bossFloorRung` | threat rung id (`creature-threat.v1.json:3-14`) | T | **No `threatWindow.defaultRungs`:** a default window is a default (T5); `threatWindow` is required on every encounter anchor. `CreatureThreatTuning.OffsetFor`'s fallback (`CreatureThreatTuning.cs:19-29`) is the wiring gap `threat-audit` closes, not something this file papers over |
 | `spread.{mono,dual,rainbow}.offClimateMilli` | ‰ long | T | Climate = `ElementTypeId` or `none` (`ActorElementTypes.cs:3-11`) |
 | `formation.{pack,party}.w` · `formation.party.slots.{min,max}` · `formation.party.maxRepeatedPosture` · `formation.boss.rankSpan` (added by `encounter-generator`: ranks int, starting shape 2) | width int · count int · count int | T | **The one owner of `W` outside the boss room.** §11.4's `tempo.*.wOverride` is retired: it would key on `attackTempo`, a vocabulary owned by seedsmith's schema (`anchor/schema.py:143`) that Core cannot read — `tempo` stays a species filter |
 | `boss.fightLengthTargetRounds.{min,max}` | rounds int | T | The calibration target for the shield share; the share's derivation from the `W` ratio is `encounter-generator`'s and adds a key here only through its own spec |
@@ -188,7 +188,7 @@ Registries load the same way (`DungeonRegistryLoader.Parse(name, json)`); Core n
 
 The `dungeon` adapter reads `data/seed/dungeon/_registry/*.json` **fresh on every call**, the
 `adapters/items/registries.py:1-6` discipline (*"read, never transcribed"*), and never the
-`adapters/demons/registries.py:3-9` shape (a mirror of C# enums, pinned by count). Every brief carries
+`adapters/creatures/registries.py:3-9` shape (a mirror of C# enums, pinned by count). Every brief carries
 the literal legal list generated from the registry at emit time (`spec-pipeline.md` §3.3), and every
 anchor's `_provenance.registryVersions` records the `registryVersion` of each file it validated
 against, so a registry bump identifies exactly the anchors to re-run.
@@ -329,7 +329,7 @@ Voice: pure parsers, no logging, rejections name the dotted key, comments say *w
 [x] I read every doc in the §1 row(s) for those subsystems, this session — tunables-ssot.md, spec-pipeline.md §3, the ideal §0/§5/§10/§11.1–§11.7/§11.9/§11.10, the audit §2–§4, the map, spec-expeditions.md, DESIGN-GATE §5.
 [x] I checked decisions.md for a lock covering this — :52 (magic numbers), :113-116 (the four party-dungeon rows); none contradicted.
 [x] Every factual claim cites file:line — code claims do; ideal/audit claims cite section and finding id.
-[x] I verified claims against CODE, not comments — ExpeditionTuning.cs, WorldTuning.cs, the three World catalogs, SummoningTuning.cs, SoulSinkPolicy.cs, CombatProbability.cs, ContentContext.cs, PredicateNode.cs, DemonThreatTuning.cs, publish.py, audit-magic-numbers.py, both registries.py files, all opened.
+[x] I verified claims against CODE, not comments — ExpeditionTuning.cs, WorldTuning.cs, the three World catalogs, SummoningTuning.cs, SoulSinkPolicy.cs, CombatProbability.cs, ContentContext.cs, PredicateNode.cs, CreatureThreatTuning.cs, publish.py, audit-magic-numbers.py, both registries.py files, all opened.
 [x] I read the surrounding section of every rule I quoted — tunables-ssot §1/§2/§3/§6/§7.2 read whole; spec-pipeline §3 read whole.
 [ ] I tested (not assumed) any constraint I am reporting — nothing here claims a golden moves; the one runtime claim (`--domain dungeon` needs no script edit) is read from `domain_of` at :173-180, not run. Honest gap: not executed.
 [x] Nothing contradicts a §2 invariant, or I named the contradiction explicitly — `raid.modes.*.pack.{rows,cols}` sits in a tuning file while the ideal calls it structural; resolved above (tunable in location, caps-register exemption in `_meta`) so `loot-pack` can decide S2-6 without a schema change.

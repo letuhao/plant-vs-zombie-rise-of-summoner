@@ -97,7 +97,7 @@ def build_set_brief(theme: Theme, tuning: SetCharmGenTuning, vocabulary: Vocabul
     higher = ladder[1:]
     capability_pool = vocabulary.capability
     stat_pool = legal_set_stat_pool(vocabulary, tuning)
-    identity = (f"the demon species '{theme.display_name}'" if theme.population == "species"
+    identity = (f"the creature species '{theme.display_name}'" if theme.population == "species"
                 else f"the build '{theme.display_name}' ({theme.aptitude} / {theme.archetype})")
     anti = (f"\nAvoid entirely: {', '.join(theme.anti_motifs)}." if theme.anti_motifs else "")
     lore = f"\nAdditional authored lore context: {theme.lore}" if theme.lore else ""
@@ -151,7 +151,7 @@ def build_charm_brief(theme: Theme, tuning: SetCharmGenTuning, vocabulary: Vocab
                         if axis_hint else "")
     class_instruction = (f"\nDeterministic class assignment: use charmClass `{class_hint}` for this subject."
                          if class_hint else "")
-    return f"""Author ONE charm for the demon species '{theme.display_name}'.
+    return f"""Author ONE charm for the creature species '{theme.display_name}'.
 
 Motifs to express: {', '.join(theme.motifs)}.{anti}{lore}
 How this theme expresses itself in an item: {theme.expression_item}

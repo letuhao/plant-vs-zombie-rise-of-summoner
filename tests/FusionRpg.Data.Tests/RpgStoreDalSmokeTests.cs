@@ -8,23 +8,23 @@ using Xunit;
 
 namespace FusionRpg.Data.Tests;
 
+[Trait("Category", "DiskSemantics")]
 public class RpgStoreDalSmokeTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
+    readonly string _dir;
 
     public RpgStoreDalSmokeTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-dal-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        // File-bound: this class asserts WAL journal mode and real hot/media files, so it keeps a real
+        // dir -- through the leak-proof helper (R2/R3).
+        _testStore = DataTestStore.CreateFileBacked();
+        _store = _testStore.Store;
+        _dir = _testStore.DataDir!;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     [Fact]
     public void Init_leaves_journal_mode_wal_on_hot_and_media()
@@ -71,6 +71,34 @@ public class RpgStoreDalSmokeTests : IDisposable
         Assert.True(LegacyMonoMigrator.TableExists(_store.MediaPath, "type_icon_layers"));
         Assert.False(LegacyMonoMigrator.TableExists(_store.HotPath, "type_icon_layers"));
         Assert.False(LegacyMonoMigrator.TableExists(_store.HotPath, "type_icons"));
+    }
+
+    [Fact]
+    public void Rift_asset_provenance_validates_pvz_dump_key_and_hashes_bytes_in_media_db()
+    {
+        var png = new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x01 };
+        _store.UpsertTypeIconLayers("plant", 9, new (string Name, string? Source, int Width, int Height, byte[] Png)[]
+        {
+            ("base", "captured", 32, 32, png)
+        });
+
+        Assert.False(_store.UpsertRiftAssetSource(
+            "onboarding.rift.storySprite", "storySprite", "pvz_dump", "plant", 9, "missing",
+            "dump://plant/9/missing", png));
+
+        Assert.True(_store.UpsertRiftAssetSource(
+            "onboarding.rift.storySprite", "storySprite", "pvz_dump", "PLANT", 9, "base",
+            "dump://plant/9/base", png, revision: 1, capturedUtc: "2026-01-01T00:00:00Z"));
+        var row = _store.GetRiftAssetSource("onboarding.rift.storySprite", "storySprite");
+        Assert.NotNull(row);
+        Assert.Equal("plant", row!.Side);
+        Assert.Equal("base", row.Layer);
+        Assert.Equal("pvz_dump", row.SourceKind);
+        Assert.Equal(Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(png)).ToLowerInvariant(), row.Sha256);
+
+        using var media = SqliteConnectionFactory.Open(_store.MediaPath);
+        Assert.Equal(1L, Convert.ToInt64(new SqliteCommand("SELECT COUNT(*) FROM rift_asset_sources;", media).ExecuteScalar()));
+        Assert.False(LegacyMonoMigrator.TableExists(_store.HotPath, "rift_asset_sources"));
     }
 
     [Fact]

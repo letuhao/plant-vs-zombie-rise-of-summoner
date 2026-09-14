@@ -25,7 +25,7 @@
       "id": "set.drownpult-c-001",
       "nameKey": "set.snow-beast-trident",
       "name": "Snow-Beast Trident",
-      "themeKey": "demon.drownpult_c",
+      "themeKey": "creature.drownpult_c",
       "members": [
         {
           "role": "armament-primary",

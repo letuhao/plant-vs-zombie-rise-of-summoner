@@ -278,7 +278,7 @@ rung) is a cross-family comparison and reads **R3**, `PowerScalar` with its ±25
 | Claim | Verified |
 |---|---|
 | a persisted per-player pity table | `rpg_summon_pity(player_id PK, pulls_since_epic, pulls_since_legendary, updated_utc)` (`src/FusionRpg.Data/Sqlite/RpgStore.cs:529-534`) |
-| two counters, cross-banner, visible | `PityState(PullsSinceHeirloom, PullsSinceSunwoven)` (`src/FusionRpg.Core/Demons/SummonRoller.cs:12`) — the SQL column names deliberately kept their old labels (`SummonRoller.cs:6-11`) |
+| two counters, cross-banner, visible | `PityState(PullsSinceHeirloom, PullsSinceSunwoven)` (`src/FusionRpg.Core/Creatures/SummonRoller.cs:12`) — the SQL column names deliberately kept their old labels (`SummonRoller.cs:6-11`) |
 | read and written inside the pull transaction | `RpgStore.Summons.cs:200`, `:210` |
 | hard pity at 25, soft ramp from 41, hard at 55, a 10-pull floor | stated in `SummonRoller.cs:23-30` |
 

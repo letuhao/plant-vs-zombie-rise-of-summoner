@@ -25,7 +25,7 @@
       "id": "set.melonblover-001",
       "nameKey": "set.watermelon-float",
       "name": "Watermelon Float",
-      "themeKey": "demon.melonblover",
+      "themeKey": "creature.melonblover",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.doomtorch-001",
       "nameKey": "set.embers-of-the-stump",
       "name": "Embers of the Stump",
-      "themeKey": "demon.doomtorch",
+      "themeKey": "creature.doomtorch",
       "members": [
         {
           "role": "armament-primary",

@@ -4,7 +4,7 @@
 shared atom library; every number (weight, tier, magnitude) is a table's job, never the model's
 (P1, restated for this content type).
 
-Two fields are 3-way voted, same machinery `demon-seed`'s `classify-pipelines` already proved
+Two fields are 3-way voted, same machinery `creature-seed`'s `classify-pipelines` already proved
 (Q25 precedent): the affix's own **name/identity** and its **ref bundle composition** — the two
 judgement calls with the highest cost of being wrong.
 """

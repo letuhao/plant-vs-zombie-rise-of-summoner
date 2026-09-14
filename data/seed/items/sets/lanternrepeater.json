@@ -25,7 +25,7 @@
       "id": "set.lanternrepeater-001",
       "nameKey": "set.continuous-laser-line",
       "name": "Continuous Laser Line",
-      "themeKey": "demon.lanternrepeater",
+      "themeKey": "creature.lanternrepeater",
       "members": [
         {
           "role": "armament-primary",

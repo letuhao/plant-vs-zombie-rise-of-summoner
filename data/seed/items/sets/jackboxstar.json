@@ -25,7 +25,7 @@
       "id": "set.jackboxstar-001",
       "nameKey": "set.starry-starfruit-clown",
       "name": "Starry Starfruit Clown",
-      "themeKey": "demon.jackboxstar",
+      "themeKey": "creature.jackboxstar",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.ultimatesnowzombie-001",
       "nameKey": "set.artificial-blade-s-farewell",
       "name": "Artificial Blade's Farewell",
-      "themeKey": "demon.ultimatesnowzombie",
+      "themeKey": "creature.ultimatesnowzombie",
       "members": [
         {
           "role": "armament-primary",

@@ -117,6 +117,6 @@ Size: **S** ≤ half a day · **M** ~a day.
   does with it. A separate, owner-timed decision with real wall-clock and call cost.
 - **A non-flat target-share curve.** Only worth building once evidence (replay or a real run) shows
   the flat-uniform default over- or under-corrects.
-- **The demon-species roster's own real findings** (grid occupancy 65/252, non-monotone rarity,
-  `posture: "unresolved"` invisible to existing metrics). Handed to `demon-seed`'s own todo per
+- **The creature-species roster's own real findings** (grid occupancy 65/252, non-monotone rarity,
+  `posture: "unresolved"` invisible to existing metrics). Handed to `creature-seed`'s own todo per
   `roster-balance-map.md` §0 — genuinely a different program's fix to make.

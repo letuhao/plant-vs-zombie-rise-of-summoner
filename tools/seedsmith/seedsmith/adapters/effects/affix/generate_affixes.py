@@ -13,7 +13,7 @@ by a guess at which atoms "should" be biddable, the whole shared library the mod
 ⛔ **T7.2 (2026-09-05): every draw is now a real 3-way vote, not a single unpermuted call.**
 `spec-affix-authoring.md`'s own "Voted fields" section requires the affix's **name/identity** and
 its **ref bundle composition** to be 3-way voted, "same machinery, same `resolve_vote` semantics" as
-`demon-seed`'s own `classify-pipelines` (Q25 precedent) — but until this pass, `generate_affixes.py`
+`creature-seed`'s own `classify-pipelines` (Q25 precedent) — but until this pass, `generate_affixes.py`
 made exactly one model call per draw, so there was never a second or third sample to vote over.
 `run_voted_draws` below is now that caller: THREE permuted samples per draw (`permute.order_for`,
 seeded with `sample_index` INSIDE the seed per spec-option-permutation.md §3 — three votes over three
@@ -26,7 +26,7 @@ reused machinery" boundary); no new permutation-seeding logic is added here.
 original pass used `resolve_vote(canonical_bundle_key(refs))` — scalar equality over the WHOLE sorted
 bundle — which a real run against the live model measured at ~90% `vote_unresolved` (9/10 and 9/10
 across two real 10-draw batches), the exact SMOKE BATCH failure mode already found and fixed for
-`demon-seed`'s own family/signature proposals: exact agreement across an entire 2+-member set, sampled
+`creature-seed`'s own family/signature proposals: exact agreement across an entire 2+-member set, sampled
 three times independently, is combinatorially rare even when every member was individually
 well-agreed. `resolve_set_vote` credits a member into the resolved bundle once 2 of 3 samples chose
 it, discarding nothing at the aggregation level that per-member evidence already settled. A resolved
@@ -86,7 +86,7 @@ ELEMENT_ROSTER = REPO_ROOT / "data" / "seed" / "elements" / "roster.json"
 PROMPT_VERSION = "affix-authoring/1"
 
 #: Every draw is voted over exactly this many permuted samples — spec-affix-authoring.md's own
-#: "Voted fields" section, same `resolve_vote` 3-0/2-1/1-1-1 contract as `demon-seed`.
+#: "Voted fields" section, same `resolve_vote` 3-0/2-1/1-1-1 contract as `creature-seed`.
 SAMPLES_PER_DRAW = 3
 
 
@@ -234,7 +234,7 @@ def run_voted_draws(
     id_prefix: "str | None" = None,
 ) -> "tuple[dict[str, dict], dict[str, dict], dict[str, dict]]":
     """Draws `count` affix bundles, THREE permuted samples each: `name` voted scalar via
-    `vote.resolve_vote` (`demon-seed`'s own `run_one_species` machinery, 2026-09-02), the ref bundle
+    `vote.resolve_vote` (`creature-seed`'s own `run_one_species` machinery, 2026-09-02), the ref bundle
     voted per-member via `vote.resolve_set_vote` (fixed 2026-09-06 — see the module docstring's own
     [[affix-authoring-vote-bug]] note).
 
@@ -267,8 +267,8 @@ def run_voted_draws(
     """
     from ....workflow.graphs.effect_affix import build_affix_authoring_graph
     from ....workflow.runner import run_many
-    from ...demons.anchor.permute import order_for
-    from ...demons.anchor.vote import resolve_set_vote, resolve_vote
+    from ...creatures.anchor.permute import order_for
+    from ...creatures.anchor.vote import resolve_set_vote, resolve_vote
     from .derive import derive_affix_class
 
     persisted: "dict[str, dict]" = {}
@@ -316,7 +316,7 @@ def run_voted_draws(
         # `resolve_vote(canonical_bundle_key(...))` because exact agreement across a whole 2+-member
         # bundle, sampled independently three times, is combinatorially rare even when every member
         # was individually well-agreed. `resolve_set_vote` credits a member the moment 2 of 3 samples
-        # pick it, the same fix `demon-seed`'s own SMOKE BATCH defect already applied.
+        # pick it, the same fix `creature-seed`'s own SMOKE BATCH defect already applied.
         refs_vote = resolve_set_vote([s.get("refs") or [] for s in samples])
 
         # Never the first sample by default (spec §4/vote.py's own explicit warning) — a 1-1-1 on

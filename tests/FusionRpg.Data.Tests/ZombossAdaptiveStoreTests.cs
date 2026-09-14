@@ -13,21 +13,19 @@ namespace FusionRpg.Data.Tests;
 /// advancement, and the delayed-reveal lookup.</summary>
 public class ZombossAdaptiveStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     const long PlayerId = 1;
 
     public ZombossAdaptiveStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-zomboss-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     static ZombossAdaptiveTuning Tuning(int loseStreakThreshold = 3, long counterBiasPermille = 600,
@@ -43,14 +41,18 @@ public class ZombossAdaptiveStoreTests : IDisposable
         // No stored state at all yet -- the store seeds LastLevel = level - 1 so the very first call
         // reads as a genuine level-up trigger through the selector's own unbiased weighted pool,
         // rather than deterministically landing on the same starting pattern for every new player.
+        //
+        // 2026-09-12: a fresh SAVE is a fresh player with no stored state, not a fresh database. The
+        // original shape built and `Init()`ed 30 separate `RpgStore`s here (30 whole schema builds,
+        // ~10s each, ~314s measured) to get 30 independent "no state" cases. That is the same
+        // observable state as 30 distinct player ids on the one already-initialized store -- the
+        // selector reads only this player's row (`ReadZombossStateUnlocked` -> null for each fresh id)
+        // and Dave's own allocation, both empty for every id here -- so variety still comes from the
+        // `seed` alone, exactly what this test asserts. Verified: same pattern-id set, 30x faster.
         var tuning = Tuning();
         var results = Enumerable.Range(0, 30)
-            .Select(seed =>
-            {
-                var freshStore = new RpgStore(Path.Combine(Path.GetTempPath(), "fusionrpg-zomboss-fresh-" + Guid.NewGuid().ToString("N")));
-                freshStore.Init();
-                return freshStore.SelectZombossPattern(PlayerId, level: 5, seed: (ulong)seed, tuning).PatternId;
-            })
+            .Select(seed => _store.SelectZombossPattern(
+                playerId: 1000 + seed, level: 5, seed: (ulong)seed, tuning).PatternId)
             .Distinct()
             .Count();
 

@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Power;
 using FusionRpg.Data;
@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -23,9 +24,9 @@ namespace FusionRpg.Server.Tests;
 /// insufficient balance, never refused for being a respec, and the pre-existing overbudget gate.</summary>
 public class SpeciesBuildEndpointsTests : IAsyncLifetime
 {
-    const int FumeshroomDemonTypeId = 60007;
+    const int FumeshroomCreatureTypeId = 60007;
 
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
@@ -33,10 +34,8 @@ public class SpeciesBuildEndpointsTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-respecep-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _playerId = _store.GetCurrentPlayerId();
 
         PowerTuningHub.Configure(
@@ -47,7 +46,7 @@ public class SpeciesBuildEndpointsTests : IAsyncLifetime
             FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "progression.v1.json"))));
         FusionRpg.Core.Progression.SpeciesProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.SpeciesProgressionTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "species-progression.v1.json"))));
-        DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        CreatureSpeciesCatalog.ConfigureFromCompiledDefault();
         SpeciesBuildPlanCatalog.Configure(new Dictionary<string, IReadOnlyDictionary<string, long>>(StringComparer.Ordinal)
         {
             ["fumeshroom"] = new Dictionary<string, long>(StringComparer.Ordinal)
@@ -63,7 +62,7 @@ public class SpeciesBuildEndpointsTests : IAsyncLifetime
             MaxAptitudesPerSpecies: 5, MinAptitudesPerSpecies: 2,
             RespecBasePrice: 50, RespecEscalationPermille: 500, RespecDecayDays: 3));
 
-        SeedSpeciesLevel(_playerId, FumeshroomDemonTypeId, level: 21, "fumeshroom"); // source = 20
+        SeedSpeciesLevel(_playerId, FumeshroomCreatureTypeId, level: 21, "fumeshroom"); // source = 20
 
         var port = GetFreeTcpPort();
         var baseUrl = $"http://127.0.0.1:{port}";
@@ -95,10 +94,10 @@ public class SpeciesBuildEndpointsTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
-    void SeedSpeciesLevel(long playerId, int demonTypeId, long level, string speciesId)
+    void SeedSpeciesLevel(long playerId, int creatureTypeId, long level, string speciesId)
     {
         using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
@@ -108,7 +107,7 @@ public class SpeciesBuildEndpointsTests : IAsyncLifetime
             VALUES ($p, 'species', $tid, $lvl, 0, $lvl, 0, 0, $now, $sk);
             """;
         cmd.Parameters.AddWithValue("$p", playerId);
-        cmd.Parameters.AddWithValue("$tid", demonTypeId);
+        cmd.Parameters.AddWithValue("$tid", creatureTypeId);
         cmd.Parameters.AddWithValue("$lvl", level);
         cmd.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));
         cmd.Parameters.AddWithValue("$sk", speciesId);

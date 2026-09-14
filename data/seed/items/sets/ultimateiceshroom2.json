@@ -25,7 +25,7 @@
       "id": "set.ultimateiceshroom2-001",
       "nameKey": "set.glacial-resonance",
       "name": "Glacial Resonance",
-      "themeKey": "demon.ultimateiceshroom2",
+      "themeKey": "creature.ultimateiceshroom2",
       "members": [
         {
           "role": "armament-primary",

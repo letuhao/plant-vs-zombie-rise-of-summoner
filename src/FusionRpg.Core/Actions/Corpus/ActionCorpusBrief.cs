@@ -22,4 +22,12 @@ public sealed record ActionCorpusBrief(
     /// description (`ssot-presentation.md` §3.6 L3 — a key, never the sentence). Required of every
     /// row in a real corpus file: <see cref="ActionCorpusBriefJson"/> rejects a brief that omits it.
     /// The default exists only so a hand-built test fixture stays constructible.</summary>
-    string DescriptionKey = "");
+    string DescriptionKey = "",
+    /// <summary>`basic-attack-seed` (T7, spec-basic-attack-seed.md): the brief's authored `kindHint`
+    /// (`"basic" | "innate" | "skill"`), parsed by <see cref="ActionCorpusBriefJson"/> — never a raw
+    /// string here, so an invalid value cannot survive parsing to reach the composer. `null` means the
+    /// brief carries no `kindHint` at all (the field is optional in the wire shape), and
+    /// <see cref="ActionCorpusComposer"/> defaults that case to <see cref="ActionKind.Skill"/> for
+    /// backward compatibility with every brief authored before this field was consumed. The default
+    /// here exists only so a hand-built test fixture stays constructible.</summary>
+    ActionKind? KindHint = null);

@@ -25,7 +25,7 @@
       "id": "set.jackboxzombie-001",
       "nameKey": "set.the-jester-s-guarantee",
       "name": "The Jester's Guarantee",
-      "themeKey": "demon.jackboxzombie",
+      "themeKey": "creature.jackboxzombie",
       "members": [
         {
           "role": "armament-primary",

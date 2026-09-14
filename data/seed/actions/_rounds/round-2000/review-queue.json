@@ -1,0 +1,82 @@
+{
+  "_meta": {
+    "candidateSetHash": "c5b63fc51cb9d244ec8ff9afb1a2419934dfdacf3cd0d5fe4431f0c81209f473",
+    "corpusHash": "a428db55391f9c46c10393317d61ad2c54e8431679efc520468d80e7ab1db25a",
+    "partition": "rounds",
+    "round": 2000,
+    "semanticEnabled": true,
+    "similarityFunctionId": "token-overlap-jaccard-milli",
+    "similarityFunctionVersion": 1,
+    "tuningVersion": 1
+  },
+  "entries": [
+    {
+      "candidateA": "action.general.0025",
+      "candidateB": "action.general.0030",
+      "id": "review.round-2000.0001",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.general.0025",
+      "candidateB": "action.general.0043",
+      "id": "review.round-2000.0002",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.general.0026",
+      "candidateB": "action.general.0031",
+      "id": "review.round-2000.0003",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.general.0026",
+      "candidateB": "action.general.0036",
+      "id": "review.round-2000.0004",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.general.0028",
+      "candidateB": "action.general.0033",
+      "id": "review.round-2000.0005",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.general.0028",
+      "candidateB": "action.general.0046",
+      "id": "review.round-2000.0006",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.general.0030",
+      "candidateB": "action.general.0043",
+      "id": "review.round-2000.0007",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.general.0031",
+      "candidateB": "action.general.0036",
+      "id": "review.round-2000.0008",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.general.0033",
+      "candidateB": "action.general.0046",
+      "id": "review.round-2000.0009",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.general.0034",
+      "candidateB": "action.general.0038",
+      "id": "review.round-2000.0010",
+      "similarityMilli": 1000
+    },
+    {
+      "candidateA": "action.species.abyssswordstar.001",
+      "candidateB": "action.species.abyssswordstar.002",
+      "id": "review.round-2000.0011",
+      "similarityMilli": 1000
+    }
+  ],
+  "kind": "action-review",
+  "schemaVersion": 1
+}

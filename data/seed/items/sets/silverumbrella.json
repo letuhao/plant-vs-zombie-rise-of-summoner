@@ -25,7 +25,7 @@
       "id": "set.silverumbrella-001",
       "nameKey": "set.gilded-chrono-shell",
       "name": "Gilded Chrono-Shell",
-      "themeKey": "demon.silverumbrella",
+      "themeKey": "creature.silverumbrella",
       "members": [
         {
           "role": "armament-primary",

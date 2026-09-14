@@ -295,7 +295,7 @@ class Gate3PlanReachabilityTests(unittest.TestCase):
 
 
 class FamilyRosterPendingTests(unittest.TestCase):
-    """Task C1 bullet 9: a manifest missing the family roster emits `_pending: ["demonFamilies"]`,
+    """Task C1 bullet 9: a manifest missing the family roster emits `_pending: ["creatureFamilies"]`,
     never silent generation against an empty roster."""
 
     def test_a_missing_family_mirror_returns_pending_never_an_empty_axis_that_raises(self) -> None:
@@ -310,26 +310,26 @@ class FamilyRosterPendingTests(unittest.TestCase):
         self.assertGreater(len(families), 0)
 
     def test_absent_family_roster_emits_pending_not_silence(self) -> None:
-        plan = {"roster": {"demonFamilies": []}, "_pending": ["demonFamilies"]}
+        plan = {"roster": {"creatureFamilies": []}, "_pending": ["creatureFamilies"]}
         invariants.check_pending_declared_for_empty_rosters(plan)  # must not raise
 
     def test_an_empty_roster_with_no_pending_declaration_is_refused(self) -> None:
-        plan = {"roster": {"demonFamilies": []}, "_pending": []}
+        plan = {"roster": {"creatureFamilies": []}, "_pending": []}
         with self.assertRaises(invariants.SilentEmptyRosterRefusal) as ex:
             invariants.check_pending_declared_for_empty_rosters(plan)
-        self.assertIn("demonFamilies", str(ex.exception))
+        self.assertIn("creatureFamilies", str(ex.exception))
 
     def test_a_nonempty_roster_needs_no_pending_declaration(self) -> None:
-        plan = {"roster": {"demonFamilies": ["bucket"]}, "_pending": []}
+        plan = {"roster": {"creatureFamilies": ["bucket"]}, "_pending": []}
         invariants.check_pending_declared_for_empty_rosters(plan)  # must not raise
 
     def test_the_real_committed_might_plan_declares_no_pending_families(self) -> None:
         # The real registry is non-empty, so a real emitted plan must carry an empty _pending and
-        # a nonempty roster.demonFamilies -- proving build_plan's own wiring, not just the helper.
+        # a nonempty roster.creatureFamilies -- proving build_plan's own wiring, not just the helper.
         tuning = plan_tuning.load()
         plan = plan_emit.build_plan(plan_emit.might_tree_spec(), tuning)
         self.assertEqual(plan["_pending"], [])
-        self.assertGreater(len(plan["roster"]["demonFamilies"]), 0)
+        self.assertGreater(len(plan["roster"]["creatureFamilies"]), 0)
 
 
 class TreeEqualValueTests(unittest.TestCase):

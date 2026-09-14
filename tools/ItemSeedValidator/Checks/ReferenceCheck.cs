@@ -116,8 +116,8 @@ public static class ReferenceCheck
             // themeKey is written as the theme's nameKey (theme.rot-bloom); accept both spellings.
             // Three populations share the field and cannot collide because each has its own
             // prefix: `theme.` (legacy, frozen), `build.` (item module 13's 36 aptitude x
-            // archetype build sets) and `demon.` (published by the demons feature). The first two
-            // resolve against ThemeIds once their prefix is stripped; `demon.` does not resolve
+            // archetype build sets) and `creature.` (published by the creatures feature). The first two
+            // resolve against ThemeIds once their prefix is stripped; `creature.` does not resolve
             // here at all yet and is a named, open gap rather than a silent pass.
             var candidate = registry == "themes"
                 ? StripThemePrefix(value)

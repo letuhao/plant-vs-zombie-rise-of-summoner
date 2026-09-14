@@ -25,7 +25,7 @@
       "id": "set.ultimateexplodecannon-001",
       "nameKey": "set.ultimate-cannon",
       "name": "Ultimate Cannon",
-      "themeKey": "demon.ultimateexplodecannon",
+      "themeKey": "creature.ultimateexplodecannon",
       "members": [
         {
           "role": "armament-primary",

@@ -106,9 +106,10 @@ public static class TreeChannelModel
     /// UNCHANGED for `H`/`F`/gate/ownership-cost (F7 found no defect in those -- the defect is only in
     /// how tree power was folded INTO combat afterward), then converts each tree's own
     /// <see cref="PerTreeChannelAmount"/> into one summed modifier on <see cref="RepresentativeChannel"/>
-    /// (additive: <see cref="BattleChannelMod"/> carries no op, "always additive" per
-    /// <see cref="AptitudeResolver.ResolveForBattle"/>'s own doc, so summing before wrapping is
-    /// equivalent to wrapping-then-summing and avoids one <see cref="BattleChannelMod"/> per tree).
+    /// (additive: <see cref="BattleChannelMod"/> carries no op, always additive by construction --
+    /// the same property the deleted <c>AptitudeResolver.ResolveForBattle</c> relied on -- so summing
+    /// before wrapping is equivalent to wrapping-then-summing and avoids one
+    /// <see cref="BattleChannelMod"/> per tree).
     /// </summary>
     public static IReadOnlyList<BattleChannelMod> ChannelModsFor(
         AptitudeAllocation allocation, long theta, long fmaxMilli, long wMilli, long b,

@@ -36,11 +36,11 @@ Where you meet it: [Almanac](almanac.md) · [Relics and builds](relics-and-build
 
 ---
 
-### B. Demon summon and fusion
+### B. Creature summon and fusion
 
 **Status:** Shipped (altar, pacts, tribute, fusion, wild joins from expeditions) · capture and patron **WIP**
 
-Souls → altar pulls. Pacts and tribute keep demons loyal. Fusion spends duplicates and essence into stronger forms. Wild joins and capture are other intakes. Gacha is one path, never the only one. This is the roster RPG.
+Souls → altar pulls. Pacts and tribute keep creatures loyal. Fusion spends duplicates and essence into stronger forms. Wild joins and capture are other intakes. Gacha is one path, never the only one. This is the roster RPG.
 
 Where you meet it: [Creatures](creatures.md) · [Expeditions](expeditions.md)
 
@@ -74,7 +74,7 @@ Where you meet it: [The lawn](the-lawn.md)
 
 **Status:** Shipped (dispatch → wait → collect) · interactive battles you play yourself **WIP** · ticks that start quests and world events **Vision**
 
-Monster Hunter–style: pick demons who are not on a live task, dispatch, wait, collect. No stamina. Four duration tiers. Materials for actors and empire (**not** loam — loam never banks). Sibling of the Delve, not a prototype to delete. Uses the wall-clock dispatch clock above.
+Monster Hunter–style: pick creatures who are not on a live task, dispatch, wait, collect. No stamina. Four duration tiers. Materials for actors and empire (**not** loam — loam never banks). Sibling of the Delve, not a prototype to delete. Uses the wall-clock dispatch clock above.
 
 Where you meet it: [Expeditions](expeditions.md)
 
@@ -92,7 +92,7 @@ The territorial loop, named so it cannot hide under “the rift”:
 | **Hunt** | Lawn kills, capture, wild joins, roaming, delves, map prey |
 | **Defend** | Fracture and neglect, Seat siege, homeworld as the spine you must not lose |
 
-**Enemy counter-development (Vision):** if you lean fire, the war grows fire-hard; if you lean summons, anti-summon shows up. Not “enemy level = Dave’s level.” Raise demons → a strategy works → the world counters → rebuild.
+**Enemy counter-development (Vision):** if you lean fire, the war grows fire-hard; if you lean summons, anti-summon shows up. Not “enemy level = Dave’s level.” Raise creatures → a strategy works → the world counters → rebuild.
 
 **Failure branches (Vision):** a lost sector, failed extract, or failed defense can open different ground — bandits, a domain, a new quest — not only a wipe. Consequence as content.
 

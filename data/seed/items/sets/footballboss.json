@@ -25,7 +25,7 @@
       "id": "set.footballboss-001",
       "nameKey": "set.soul-sieve-mantle",
       "name": "Soul-Sieve Mantle",
-      "themeKey": "demon.footballboss",
+      "themeKey": "creature.footballboss",
       "members": [
         {
           "role": "mantle",

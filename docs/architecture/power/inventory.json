@@ -118,14 +118,14 @@
       "id": 16,
       "scale": "PatronPolicy.AuraMilli(rarity, star, level)",
       "shape": "rarityBase + perStar*star + level, clamped",
-      "location": "src/FusionRpg.Core/Demons/Patron/PatronPolicy.cs",
+      "location": "src/FusionRpg.Core/Creatures/Patron/PatronPolicy.cs",
       "verdict": "different-axis-patron-own-level-T4.1"
     },
     {
       "id": 18,
       "scale": "thetaOffset - species threat rung",
       "shape": "table lookup, ten rungs, 0-40",
-      "location": "data/tuning/demon-threat.v1.json",
+      "location": "data/tuning/creature-threat.v1.json",
       "verdict": "inside-theta-additive-before-P-theta-seed-to-concrete-T0.1"
     },
     {
@@ -188,7 +188,7 @@
     },
     {
       "id": 27,
-      "scale": "Specimen (unique-demon) level - rpg_unique_actors.xp/level drained through RpgXpCurve.XpToNext",
+      "scale": "Specimen (unique-creature) level - rpg_unique_actors.xp/level drained through RpgXpCurve.XpToNext",
       "shape": "arithmetic, identical shape to row 6",
       "location": "src/FusionRpg.Data/Sqlite/RpgStore.UniqueActors.cs, data/tuning/progression.v1.json",
       "verdict": "cost-ladder-not-power-ladder-corrected-from-flat-100-2026-09-05"

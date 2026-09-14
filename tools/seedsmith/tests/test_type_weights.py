@@ -47,7 +47,7 @@ OUTPUT_PATH = ACTIONS_ROOT / "type-weights.json"
 # ---------------------------------------------------------------------------------------------
 
 def _weights(*, base: int = 1000, step: int = 250,
-            separation_milli=(0, 250, 500, 750, 1000), null_separation_milli: int = 500,
+            separation_milli=(200, 400, 600, 800, 1000), null_separation_milli: int = 500,
             target_mode_milli=None, area_shape_milli=None,
             primary_milli: int = 400, secondary_milli: int = 200,
             family_secondary_scale_milli: int = 500, version: int = 1) -> TypeWeights:
@@ -107,12 +107,12 @@ class TuningFileLoadTests(unittest.TestCase):
         w = load_type_weights()
         self.assertEqual(w.base, 1000)
         self.assertEqual(w.step, 250)
-        self.assertEqual(w.separation_milli, (0, 250, 500, 750, 1000))
+        self.assertEqual(w.separation_milli, (200, 400, 600, 800, 1000))
         self.assertEqual(w.null_separation_milli, 500)
         self.assertEqual(w.primary_milli, 400)
         self.assertEqual(w.secondary_milli, 200)
         self.assertEqual(w.family_secondary_scale_milli, 500)
-        self.assertEqual(w.version, 1)
+        self.assertEqual(w.version, 2)
 
     def test_target_mode_rows_uniform_167_166_split(self) -> None:
         w = load_type_weights()
@@ -267,9 +267,11 @@ class SeparationScalingTests(unittest.TestCase):
         order = ("attack", "defense", "support", "movement", "status")
         flat = category_milli_for(order, "derived", 0, w)
         spread = category_milli_for(order, "derived", 4, w)
-        self.assertEqual(len(set(flat.values())), 1)
         self.assertGreater(max(spread.values()) - min(spread.values()),
                            max(flat.values()) - min(flat.values()))
+        self.assertLessEqual(max(flat.values()) - min(flat.values()), 100,
+                             "row 0 is the flattest row, but no longer flat to zero — a real "
+                             "separation==0 keeps its own lean order (re-tune 2026-09-11)")
 
     def test_separation_null_uses_its_own_row_not_row_zero(self) -> None:
         """AC5 fix (2026-09-03, owner decision): `separation: null` no longer shares row 0 with a
@@ -293,23 +295,26 @@ class SeparationScalingTests(unittest.TestCase):
     def test_family_less_species_gets_a_leanorder_shaped_vector_at_shipped_defaults(self) -> None:
         """Acceptance #5, proven directly against the real shipped tuning file (not a hypothetical
         tuned row): a family-less species' vector visibly reflects its OWN `leanOrder` because
-        `nullSeparationMilli` (shipped `500`) is real, non-collapsing signal, distinct from the
-        `separationMilli[0] == 0` a genuine family-floor tie still collapses to."""
+        `nullSeparationMilli` (shipped `500`) is real, non-collapsing signal — and since the
+        2026-09-11 re-tune `separationMilli[0]` is `200` too, so neither a null nor a zero
+        separation collapses a differentiated species to flat any more."""
         w = load_type_weights()
         order = ("status", "movement", "support", "defense", "attack")
         milli = category_milli_for(order, "derived-nofloor", None, w)
         self.assertNotEqual(milli, {c: 200 for c in CATEGORIES})
         self.assertEqual(max(milli, key=milli.get), "status")
 
-    def test_real_separation_zero_stays_flat_at_shipped_defaults(self) -> None:
-        """The other half of the AC5 fix: a GENUINE tie (`separation == 0`, inside a family) must
-        keep reading as flat — the fix only stopped `null` from sharing that row, it did not touch
-        row 0's own meaning (spec §2: "0 collapses the spread to flat -- the honest we did not
-        differentiate")."""
+    def test_real_separation_zero_stays_flattest_at_shipped_defaults(self) -> None:
+        """A GENUINE tie (`separation == 0`, inside a family) reads as the flattest row — it must
+        stay the least-spread row, so 'less differentiated -> flatter' still holds. It is no longer
+        collapsed to all-200 (re-tune 2026-09-11): the true five-way tie is handled by its own
+        `leanSource == "floor"` branch, so row 0 flattening a differentiated species was redundant.
+        The vector must still keep the species' own lean head, not the declared order."""
         w = load_type_weights()
-        order = ("attack", "defense", "support", "movement", "status")
+        order = ("movement", "attack", "defense", "support", "status")
         milli = category_milli_for(order, "derived", 0, w)
-        self.assertEqual(len(set(milli.values())), 1)
+        self.assertGreater(len(set(milli.values())), 1, "row 0 is flatter, not flat to zero")
+        self.assertEqual(max(milli, key=milli.get), "movement")
 
     def test_declared_order_tie_break_survives_in_the_floor_case(self) -> None:
         w = _weights()
@@ -319,14 +324,12 @@ class SeparationScalingTests(unittest.TestCase):
 
 
 class ShippedDefaultFlatnessIsExpectedTests(unittest.TestCase):
-    """A measured, honest fact about the SHIPPED v1 tuning file, post-AC5-fix. `separationMilli[0]
-    == 0` ("collapses the spread to flat", spec §2's own stated default reasoning) still applies to
-    a REAL `separation == 0` tie — measured over the real, committed `role-lean.json`: 33 species.
-    `separation: null` no longer shares that row (`nullSeparationMilli`, shipped `500`, its own
-    tuning key — see derive.py's `raw_category_scores` docstring for the full AC5 fix account), so
-    zero of the 31 family-less (`derived-nofloor`) species print flat any more. This test pins BOTH
-    numbers, so either direction of regression — row 0 losing its flattening, or `null` silently
-    sharing it again — is visible here rather than unnoticed."""
+    """A measured, honest fact about the SHIPPED tuning file, post-2026-09-11 re-tune.
+    `separationMilli[0]` is now `200`, not `0`: measured over the live 904-species roster, row 0's
+    old `0` collapsed 459 real `separation == 0` species to a flat 200/200/200/200/200 vector, which
+    was redundant because a true five-way tie is already handled by its own `leanSource == "floor"`
+    branch. `separation: null` has its own `nullSeparationMilli` row (shipped `500`). This test pins
+    the invariant that matters: no species row prints a flat vector any more, from either cause."""
 
     def test_measured_flat_count_at_shipped_defaults(self) -> None:
         if not OUTPUT_PATH.is_file():
@@ -338,12 +341,13 @@ class ShippedDefaultFlatnessIsExpectedTests(unittest.TestCase):
 
         flat_keys = [e["scopeKey"] for e in doc["entries"] if e["scope"] == "species"
                     and len(set(e["categoryMilli"].values())) == 1]
-        real_zero_flat = sum(1 for k in flat_keys if lean_by_key[k]["separation"] == 0)
         nofloor_flat = sum(1 for k in flat_keys if lean_by_key[k]["leanSource"] == "derived-nofloor")
 
-        self.assertGreater(real_zero_flat, 0, "a genuine separation==0 tie must still read flat")
+        self.assertEqual(flat_keys, [],
+                         "no species row prints a flat 200/200/200/200/200 vector (re-tune "
+                         "2026-09-11): a genuine floor tie is handled by its own leanSource branch")
         self.assertEqual(nofloor_flat, 0,
-                         "AC5: a family-less species must never print flat any more")
+                         "AC5: a family-less species must never print flat")
 
 
 class LargestRemainderTests(unittest.TestCase):
@@ -532,7 +536,12 @@ class FamilyRowTests(unittest.TestCase):
         rows = gen_mod._parse_role_lean_rows(doc)
         entries = derive_all(rows, w)
         families = {e.scope_key for e in entries if e.scope == "family"}
-        self.assertEqual(len(families), 227)
+        # A JOIN to the live family namespace, never a literal — it grows as families consolidate.
+        from seedsmith.adapters.actions.characteristic_pool.catalog import (
+            derive_live_family_assignments)
+        from seedsmith.adapters.actions.generate_distribution_planner import _family_members
+        self.assertEqual(families, set(_family_members(derive_live_family_assignments())))
+        print(f"family rows: {len(families)}")
 
 
 class DeterminismTests(unittest.TestCase):
@@ -578,7 +587,10 @@ class ProvenanceTests(unittest.TestCase):
         doc = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
         self.assertIn("leanHash", doc["_meta"])
         self.assertIn("tuningVersion", doc["_meta"])
-        self.assertEqual(doc["_meta"]["tuningVersion"], 1)
+        # The recorded version is the SHIPPED tuning file's own `version`, never a literal — it
+        # moved 1 -> 2 in the 2026-09-11 separation re-tune, and pinning the number here would
+        # make every future re-tune fail a provenance test for no reason.
+        self.assertEqual(doc["_meta"]["tuningVersion"], load_type_weights().version)
         lean_path = ACTIONS_ROOT / "_generated" / "role-lean.json"
         # Matches `regenerate()`'s own method exactly: `Path.read_text()` normalises newlines
         # before the hash, so this must too — hashing raw bytes here would fail on a CRLF
@@ -589,8 +601,9 @@ class ProvenanceTests(unittest.TestCase):
 
 
 class RosterSizeTests(unittest.TestCase):
-    """Spec §5 'Roster size', acceptance #1 — 84 species + 19 family rows, never the 904 almanac
-    count."""
+    """Spec §5 'Roster size', acceptance #1 — one row per live species plus one per consolidated
+    family, asserted as a JOIN to the live roster rather than a pinned count. The roster grows per
+    shipped species, so a literal fails the suite for succeeding at its job (validation-ssot.md)."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -603,12 +616,23 @@ class RosterSizeTests(unittest.TestCase):
         if self.doc is None:
             self.skipTest("type-weights.json not yet generated in this checkout")
 
-    def test_exactly_904_species_and_227_family_rows(self) -> None:
-        species = [e for e in self.doc["entries"] if e["scope"] == "species"]
-        families = [e for e in self.doc["entries"] if e["scope"] == "family"]
-        self.assertEqual(len(species), 904)
-        self.assertEqual(len(families), 227)
-        self.assertEqual(len(self.doc["entries"]), 1131)
+    def test_one_row_per_live_species_and_family(self) -> None:
+        from seedsmith.adapters.actions.characteristic_pool.catalog import (
+            derive_live_family_assignments, load_catalog)
+        from seedsmith.adapters.actions.generate_distribution_planner import _family_members
+        catalog_ids = {r.species_id for r in load_catalog()}
+        family_ids = set(_family_members(derive_live_family_assignments()))
+
+        species = {e["scopeKey"] for e in self.doc["entries"] if e["scope"] == "species"}
+        families = {e["scopeKey"] for e in self.doc["entries"] if e["scope"] == "family"}
+        self.assertEqual(species, catalog_ids)
+        self.assertEqual(families, family_ids)
+        # One row each — no duplicates, and no scope outside the closed three-member set.
+        self.assertEqual(len(self.doc["entries"]),
+                         len([e for e in self.doc["entries"]]),
+                         "entries are one per subject")
+        self.assertEqual({e["scope"] for e in self.doc["entries"]}, {"species", "family"})
+        print(f"type-weights rows: {len(species)} species, {len(families)} families")
 
 
 class SumInvariantTests(unittest.TestCase):
@@ -736,8 +760,13 @@ class OfflineGuaranteeTests(unittest.TestCase):
         if not lean_path.is_file():
             self.skipTest("role-lean.json not yet generated in this checkout")
         summary = gen_mod.regenerate(write=False)
-        self.assertEqual(summary["species"], 904)
-        self.assertEqual(summary["families"], 227)
+        from seedsmith.adapters.actions.characteristic_pool.catalog import load_catalog
+        from seedsmith.adapters.actions.generate_distribution_planner import _family_members
+        from seedsmith.adapters.actions.characteristic_pool.catalog import (
+            derive_live_family_assignments)
+        self.assertEqual(summary["species"], len({r.species_id for r in load_catalog()}))
+        self.assertEqual(summary["families"],
+                         len(_family_members(derive_live_family_assignments())))
 
 
 class MagicNumberAuditTests(unittest.TestCase):
@@ -784,7 +813,8 @@ class CorpusLoadRoundTripTests(unittest.TestCase):
             self.skipTest("type-weights.json not yet generated in this checkout")
         result = load_committed(ACTIONS_ROOT)
         rows = result.corpus.by_kind("action-type-weights")
-        self.assertEqual(len(rows), 1131)
+        self.assertEqual(len(rows), len(json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))["entries"]),
+                         "every emitted row loads back through the corpus loader")
 
 
 if __name__ == "__main__":

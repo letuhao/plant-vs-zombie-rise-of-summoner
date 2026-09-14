@@ -25,7 +25,7 @@
       "id": "set.newyearzombie-001",
       "nameKey": "set.resplendent-revenant",
       "name": "Resplendent Revenant",
-      "themeKey": "demon.newyearzombie",
+      "themeKey": "creature.newyearzombie",
       "members": [
         {
           "role": "armament-primary",

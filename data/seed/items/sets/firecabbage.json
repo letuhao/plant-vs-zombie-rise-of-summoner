@@ -25,7 +25,7 @@
       "id": "set.firecabbage-001",
       "nameKey": "set.spicy-cabbage-burst",
       "name": "Spicy Cabbage Burst",
-      "themeKey": "demon.firecabbage",
+      "themeKey": "creature.firecabbage",
       "members": [
         {
           "role": "armament-primary",

@@ -10,7 +10,7 @@ Read first: [data-architecture.md](../data-architecture.md) §3 SSOT map, §6 DA
 Turn the two existing raw capture streams — `type_almanac_dump` (prose, media DB) and
 `spawn_stats`/`types` (numeric, hot DB, SSOT per data-architecture.md §3) — into **one clean,
 typed, per-type table** other gameplay systems can query without re-parsing rich text or guessing
-which numeric source is trustworthy. This is the generator the Demon program's species catalog
+which numeric source is trustworthy. This is the generator the Creature program's species catalog
 already commits to needing ([decisions.md:90](../decisions.md) — *"generated deterministically from
 captured game data (types/almanac/icons/spawn_stats)"*).
 
@@ -205,7 +205,7 @@ versioning a shape independently of code deploys. Note: those two live in `Fusio
 because they cross the Injector↔Server boundary as wire types; `AlmanacSeedContractVersion` does
 **not** need to (nothing in the Injector reads it — the rebuild is a pure server-side DAL operation,
 see above), so `AlmanacSeedDto` staying in `FusionRpg.Data` next to `AlmanacTextDumpDto` is a
-different, still-correct precedent, not the same one restated. Any *other* consumer (e.g. the Demon
+different, still-correct precedent, not the same one restated. Any *other* consumer (e.g. the Creature
 species-catalog generator this whole module exists to feed, per `decisions.md:90`) is expected to
 read it over HTTP like any other REST client, not via a C# type reference — so "lives in
 `FusionRpg.Data`" and "other systems will read this" are not in tension.
@@ -398,7 +398,7 @@ conventions:
   row, leave a field `NULL` rather than guess when parsing fails; keep external enrichment in its
   own table, joined, never merged into core columns.
 - **Ask first:** changing `AlmanacSeedContractVersion`'s meaning (what triggers a bump) once other
-  systems (Demon species catalog) start reading this table; adding a new parsed numeric field beyond
+  systems (Creature species catalog) start reading this table; adding a new parsed numeric field beyond
   cost/cooldown (needs its own format catalog first, per the "not attempting" note above); adding a
   second external enrichment source (name-matching heuristics multiply per source).
 - **Never:** read `types.hp_base`/`sample_json` for combat numbers; fold recipe data into this table

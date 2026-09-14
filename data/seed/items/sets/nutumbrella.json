@@ -25,7 +25,7 @@
       "id": "set.nutumbrella-001",
       "nameKey": "set.nut-guardian-umbrella",
       "name": "Nut Guardian Umbrella",
-      "themeKey": "demon.nutumbrella",
+      "themeKey": "creature.nutumbrella",
       "members": [
         {
           "role": "core-guard",

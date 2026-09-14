@@ -25,7 +25,7 @@
       "id": "set.goldmelon-001",
       "nameKey": "set.golden-melon-launcher",
       "name": "Golden Melon Launcher",
-      "themeKey": "demon.goldmelon",
+      "themeKey": "creature.goldmelon",
       "members": [
         {
           "role": "armament-primary",

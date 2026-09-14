@@ -39,7 +39,7 @@ public static class QuestProgress
             "gather-curio-kind" => Count(report.Events.Count(e => e.Kind == quest.TargetRef && e.Choice != "leave" && e.Outcome != "nothing"), need),
             "kill-boss" => Flag(report.Kills.Any(k => k.Role == "boss")),
             "extract-with-item-kind" => Flag(report.Haul.Any(h => h.Role == quest.TargetRef)),
-            "bring-demon-home-alive" => Flag(report.Members.All(m => !m.Downed)),
+            "bring-creature-home-alive" => Flag(report.Members.All(m => !m.Downed)),
             "finish-under-hunger" => Flag(report.Members.All(m => !m.Statuses.Contains(hungerExhaustedStatusId, StringComparer.Ordinal))),
             "survive-no-downed" => Flag(report.Members.All(m => !m.DownedOnce)),
             "spend-no-provision" => Flag(!report.Decisions.Any(d => d.Kind == "pack.drop" && d.By == "use")),

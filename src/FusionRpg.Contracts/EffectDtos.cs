@@ -165,6 +165,13 @@ public sealed class EffectEventDto
     [JsonPropertyName("sourceGrantId")] public string? SourceGrantId { get; set; }
     /// <summary>Merged physical hits this event represents (v2 coalescing); 1 = a single hit.</summary>
     [JsonPropertyName("hitCount")] public int HitCount { get; set; } = 1;
+    /// <summary>lawn-hit-attribution (T6): the SWING this OnDamageDealt event belongs to — a bullet's
+    /// own ptr (hex) for a projectile hit, or <c>actorPtr:frame</c> for melee. Distinct from
+    /// <see cref="ActorPtr"/> (the firing creature): one swing can carry N dealt events (one bullet
+    /// piercing N victims, or one multi-target bite), all sharing this id, so a future consumer can
+    /// fire one action trigger for N damage applications rather than N triggers. Additive nullable —
+    /// breaks no existing shape, every trigger that predates this field carries null.</summary>
+    [JsonPropertyName("swingId")] public string? SwingId { get; set; }
     /// <summary>E34 (spec-trigger-vocabulary.md §2.2): the wave number for OnWave. Additive nullable —
     /// breaks no existing shape, so FoundationContractVersion.Current stays at its current value.</summary>
     [JsonPropertyName("wave")] public int? Wave { get; set; }
@@ -184,6 +191,26 @@ public sealed class EffectEventDto
 
     /// <summary>See <see cref="TargetRow"/>.</summary>
     [JsonPropertyName("targetCol")] public int? TargetCol { get; set; }
+
+    /// <summary>
+    /// lawn-hit-entry (T9a, D8): true for exactly ONE of the N drained events sharing one
+    /// <see cref="SwingId"/> — a piercing bullet hitting five zombies produces five events, all
+    /// <see cref="SwingId"/>-equal, and exactly one has this true. A consumer that wants "the cost
+    /// is paid once per swing" (e.g. a future stamina charge) gates on this flag; the elemental
+    /// rider itself must NOT gate on it (every victim still needs its own delta). Additive,
+    /// defaults <c>true</c> — every trigger that predates this field, and every trigger with no
+    /// swing semantics at all (OnSpawn, taken-side, etc.), reads as "always fires", matching how
+    /// those triggers already behaved with no dedupe concept.
+    /// </summary>
+    [JsonPropertyName("isFirstOfSwing")] public bool IsFirstOfSwing { get; set; } = true;
+
+    /// <summary>
+    /// lawn-hit-entry (T9c): mirrors <c>GameEventRec.InstakillShaped</c> — true when the engine's
+    /// own <c>DamageType</c> marks this hit as instakill-shaped (lawnmower / board-wipe).
+    /// <c>DamagePacketBuilder</c> reads this to refuse an event-linked ("proportional") rider for
+    /// the hit; nothing else on this DTO changes. Additive, defaults <c>false</c>.
+    /// </summary>
+    [JsonPropertyName("instakillShaped")] public bool InstakillShaped { get; set; }
 }
 
 public sealed class EffectGrantDto

@@ -26,7 +26,7 @@ import { CraftBench } from "./Workbench";
  * `recipe.014` / `"Temper: Ultimate Enhancement"` and `recipe.022` / `"Socket: Gem Setting"`
  * (`recipes/recipes.json`), `gem.g1-001` / `"Ember Shard"` (`gems/g1.json`), `combo.pure-fire-3` and
  * `combo.ring-fire-ice` (`ResonanceGenerator`'s own generated ids), and `wallnut` / `坚果` /
- * `gameTypeId 3` (`DemonSpeciesCatalog.Generated.cs`).
+ * `gameTypeId 3` (`CreatureSpeciesCatalog.Generated.cs`).
  */
 
 /**
@@ -162,7 +162,7 @@ function routedFetch(over: Record<string, unknown> = {}) {
     const path = String(url);
     const body = (() => {
       for (const [fragment, value] of Object.entries(over)) if (path.includes(fragment)) return value;
-      if (path.includes("/api/demons/catalog")) return SPECIES_CATALOG;
+      if (path.includes("/api/creatures/catalog")) return SPECIES_CATALOG;
       if (path.includes("/api/unique/actors?")) {
         return {
           playerId: 1,

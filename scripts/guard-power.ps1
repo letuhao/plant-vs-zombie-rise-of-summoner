@@ -7,7 +7,7 @@ param(
     # False-positive survey (T4.1, 2026-08-24, spec-power-guard.md §5): G2's heuristic (a level/lvl/
     # index-named parameter with arithmetic on it) necessarily over-matches. Two real hits, each
     # reasoned, not silently swallowed:
-    #  - PatronPolicy.cs: AuraMilli(rarity, star, level) -- `level` is the PATRON DEMON's own level, a
+    #  - PatronPolicy.cs: AuraMilli(rarity, star, level) -- `level` is the PATRON CREATURE's own level, a
     #    different axis from the actor's Theta; added to ssot-power-scale.md S10.2 row 16 and
     #    inventory.json (so G3 also passes here, on its own separate check).
     #  - RpgProgression.cs: XpToNext/TotalToReach(kind, level) -- the XP COST ladder (SSOT S10.1 row 6,
@@ -22,7 +22,7 @@ param(
     # 4. SpeciesProgression.cs (species-build T1.1, module 3 species-xp) - SpeciesXpCurve.XpToNext
     #    is the identical arithmetic COST ladder shape RpgProgression.cs's own XpToNext already has
     #    (ssot-power-scale.md §10.1 row 26, same verdict as row 6: "cost ladder, not a power
-    #    ladder"), just for a demon SPECIES' own per-player level on its own separate tunable pair.
+    #    ladder"), just for a creature SPECIES' own per-player level on its own separate tunable pair.
     #    Already in inventory.json, so G3 passes on its own separate check.
     # 5. MasteryIndex.cs (task G4, spec-gate-counters.md §3.2/§9) - CountToReach/Reached take a
     #    parameter literally named `index` (the gate-counter's own mastery INDEX, never Theta or a

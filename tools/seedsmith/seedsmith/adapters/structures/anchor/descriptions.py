@@ -1,7 +1,7 @@
 """Prose for every structure anchor attribute (base-defense `structure-schema`, module 23,
 spec-structure-schema.md §1) — the reliability mechanism, not documentation. Each description
 states what the field means, what distinguishes it from its nearest neighbour, and an explicit
-**negative clause**: what the field is *not*. Ports `adapters/demons/anchor/descriptions.py`'s own
+**negative clause**: what the field is *not*. Ports `adapters/creatures/anchor/descriptions.py`'s own
 convention verbatim onto the structure anchor's 17-field contract.
 
 Edited far more often than schema.py's shape, which is why it lives in its own module.

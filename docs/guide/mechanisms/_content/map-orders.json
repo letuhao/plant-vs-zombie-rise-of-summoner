@@ -8,7 +8,7 @@
   "hook": "**WIP:** tools and orders beyond basic march and claim — wardens, cede, dowse, lenses, outliner. Not finished / not fully playable yet.",
   "blindSpots": [
     {"term": "WIP", "meaning": "Not finished. Basic march and claim ship; this richer toolkit is still hardening."},
-    {"term": "Warden", "meaning": "A demon bound to hold ground on the map — not a lawn-only role."},
+    {"term": "Warden", "meaning": "A creature bound to hold ground on the map — not a lawn-only role."},
     {"term": "Cede", "meaning": "Give up a sector on purpose — a deliberate retreat, not only a Fracture loss."},
     {"term": "Lens", "meaning": "A way to recolour how the map reads (supply, fog, and more) — not a combat element."}
   ],
@@ -21,7 +21,7 @@
       "title": "What it will feel like",
       "intro": "Orders and tools the adventure graph wants:",
       "cards": [
-        {"name": "Wardens", "body": "Bind demons to hold ground."},
+        {"name": "Wardens", "body": "Bind creatures to hold ground."},
         {"name": "Cede", "body": "Give up a sector on purpose."},
         {"name": "Dowse", "body": "A stance for reading the ground."},
         {"name": "Lenses / outliner", "body": "Switch map reads; list legions and holdings without hunting the canvas."}
@@ -63,7 +63,7 @@
   "doNote": "Stop when toolkit ≠ required for basic adventure. Related: [world map](world-map), [farm / hunt / defend](farm-hunt-defend).",
   "mixUps": [
     {"q": "Why can’t I cede a sector?", "a": "Cede is WIP. You can still lose ground to neglect / Fracture."},
-    {"q": "Are wardens the same as commanders?", "a": "No. Wardens bind demons to hold ground; commanders lead runs or legions."},
+    {"q": "Are wardens the same as commanders?", "a": "No. Wardens bind creatures to hold ground; commanders lead runs or legions."},
     {"q": "Is the outliner required to play?", "a": "No. It is a WIP convenience over the canvas."},
     {"q": "Do lenses change combat elements?", "a": "No. They change how the map reads."}
   ],

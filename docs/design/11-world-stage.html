@@ -191,8 +191,8 @@
         background: color-mix(in srgb, var(--bad) 12%, transparent); }
   .ws-flag--ward    { color: var(--info); border-color: color-mix(in srgb, var(--info) 60%, transparent); }
   .ws-flag--build   { color: var(--sun);  border-color: color-mix(in srgb, var(--sun) 55%, transparent); }
-  .ws-flag--unmade  { color: var(--side-demon); border-style: dashed;
-        border-color: color-mix(in srgb, var(--side-demon) 65%, transparent); }
+  .ws-flag--unmade  { color: var(--side-creature); border-style: dashed;
+        border-color: color-mix(in srgb, var(--side-creature) 65%, transparent); }
 
   /* yield readout — three named columns, sign glyph AND sign character AND word */
   .ws-yield { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
@@ -235,7 +235,7 @@
         background: var(--panel-inset); white-space: nowrap; }
   .ws-force[data-own="mine"]  { border-color: var(--side-plant); }
   .ws-force[data-own="enemy"] { border-color: var(--side-zombie); }
-  .ws-force[data-own="wild"]  { border-color: var(--side-demon); border-style: dashed; }
+  .ws-force[data-own="wild"]  { border-color: var(--side-creature); border-style: dashed; }
   .ws-force.ws-is-band { font-style: italic; color: var(--muted); }
 
   /* --- fog treatments ----------------------------------------------------- */
@@ -468,7 +468,7 @@
           <div class="ws-flags"><span class="ws-flag ws-flag--unmade">💀 the Unmade</span></div>
           <div class="ws-forces"><span class="ws-force" data-own="wild">💀 The Unmade · 4</span></div>
         </div>
-        <p class="ws-cap"><b>The Unmade spawned</b>Neglect ran out. Dashed demon-bordered chip; it is a real force, so it appears in <code>Forces</code> too</p>
+        <p class="ws-cap"><b>The Unmade spawned</b>Neglect ran out. Dashed creature-bordered chip; it is a real force, so it appears in <code>Forces</code> too</p>
       </div>
     </div>
 
@@ -551,7 +551,7 @@
         <tr><td class="fam">Heavy left rule + ⚠ pill</td><td class="fam">Shape · icon · text</td><td class="fam">The engine will drop this next turn if nothing changes</td><td class="fam"><code>WillReleaseNextTurn</code></td></tr>
         <tr><td class="fam">Outer ring + 🛡 seal pill</td><td class="fam">Shape · icon · text</td><td class="fam">A warden holds it — exempt from fade while bound</td><td class="fam"><code>WardenBindingId</code> <span class="tag tag--warn">not yet projected</span></td></tr>
         <tr><td class="fam">Tally marks ▮▮▮</td><td class="fam">Count · text</td><td class="fam">Turns sat untended — the Unmade's spawn clock</td><td class="fam"><code>NeglectedTurns</code> <span class="tag tag--warn">not yet projected</span></td></tr>
-        <tr><td class="fam">Dashed demon chip 💀</td><td class="fam">Border style · icon · text</td><td class="fam">The Unmade have taken the neglected ground</td><td class="fam"><code>Forces</code> owned by the wild faction</td></tr>
+        <tr><td class="fam">Dashed creature chip 💀</td><td class="fam">Border style · icon · text</td><td class="fam">The Unmade have taken the neglected ground</td><td class="fam"><code>Forces</code> owned by the wild faction</td></tr>
         <tr><td class="fam">Development pips</td><td class="fam">Count · number</td><td class="fam">How built-up the sector is</td><td class="fam"><code>DevelopmentLevel</code> (index, not per-mille)</td></tr>
         <tr><td class="fam">Danger lozenge ◆◆◆ 3</td><td class="fam">Count · number · word</td><td class="fam">How dangerous the ground is, as a band</td><td class="fam"><code>DangerBand</code> (index — never render as a %)</td></tr>
         <tr><td class="fam">Element dot + name</td><td class="fam">Colour · text</td><td class="fam">The era climate this sector fell under</td><td class="fam"><code>Climate</code> (null on the homeworld)</td></tr>
@@ -5766,7 +5766,7 @@
               <div class="wsd-blk">
                 <div class="wsd-blk-lbl"><span>Warden</span><span class="wsd-src">WardenBindingId</span></div>
                 <p class="ctx" style="margin:0 0 var(--sp-2)">
-                  A demon bound here holds the ground <b>for good</b> — this sector is then exempt
+                  A creature bound here holds the ground <b>for good</b> — this sector is then exempt
                   from fading and can never be the one released.
                 </p>
                 <div class="wsd-act is-off">
@@ -6131,7 +6131,7 @@
               <div class="wsd-stakerow"><span>&#10052;</span><span>Frost Mire stops fading, permanently</span><span class="amt">exempt</span></div>
             </div>
             <p class="ctx" style="margin:var(--sp-2) 0 0">
-              You keep the ground. You do not keep the demon.
+              You keep the ground. You do not keep the creature.
             </p>
           </div>
           <footer>

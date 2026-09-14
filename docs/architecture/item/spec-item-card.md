@@ -112,7 +112,7 @@ multiplier"*. **C2 was real and is fixed by another program**
 **Rule 1 — adopt the shipped conversion, do not write a second one.**
 
 ```ts
-// web/fusion-rpg-web/src/features/demons/patronView.ts:23  (verified)
+// web/fusion-rpg-web/src/features/creatures/patronView.ts:23  (verified)
 const pct = (milli: number) => `${(milli / 10).toFixed(1).replace(/\.0$/, "")}%`;
 ```
 
@@ -270,7 +270,7 @@ src/FusionRpg.Core/Items/Display/DisplayTemplates.cs    new — N1 loader + plac
 src/FusionRpg.Core/Items/Display/RarityPalette.cs       new — dark + light token sets and their rules
 src/FusionRpg.Data/Sqlite/RpgStore.ItemDisplay.cs       new — item_display_template
 content/display/en.json                                 new — N2
-web/fusion-rpg-web/src/features/demons/patronView.ts    edit — call the shared pct, stop owning it
+web/fusion-rpg-web/src/features/creatures/patronView.ts    edit — call the shared pct, stop owning it
 tests/FusionRpg.Core.Tests/Items/ItemDisplayTests.cs    new
 ```
 

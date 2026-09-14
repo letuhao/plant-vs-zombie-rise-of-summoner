@@ -8,12 +8,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
 public sealed class OnboardingEndpointsTests : IAsyncLifetime
 {
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
@@ -21,10 +22,8 @@ public sealed class OnboardingEndpointsTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-onboarding-api-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _playerId = _store.GetCurrentPlayerId();
         RpgXpCurve.Configure(ProgressionTuningLoader.Parse(
             File.ReadAllText(Path.Combine(FindRepoRoot(), "data", "tuning", "progression.v1.json"))));
@@ -45,7 +44,7 @@ public sealed class OnboardingEndpointsTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        try { Directory.Delete(_dir, recursive: true); } catch { }
+        _testStore.Dispose();
     }
 
     [Fact]
@@ -58,8 +57,45 @@ public sealed class OnboardingEndpointsTests : IAsyncLifetime
         Assert.NotNull(body);
         Assert.Equal(_playerId, body!.PlayerId);
         Assert.Equal(1, body.PlayerLevel);
-        Assert.Equal(0, body.Revision);
+        Assert.Equal(1, body.Revision);
         Assert.Empty(body.Checkpoints);
+        var story = Assert.Single(body.Stories);
+        Assert.Equal("rift-prologue", story.StoryId);
+        Assert.Equal(1, story.Version);
+        Assert.Equal("unseen", story.State);
+        Assert.Null(story.Outcome);
+        Assert.True(story.Eligible);
+    }
+
+    [Fact]
+    public async Task Rift_story_acknowledgement_is_durable_idempotent_and_conflict_safe()
+    {
+        var path = $"/api/onboarding/{_playerId}/stories/rift-prologue/ack";
+        var first = await _http.PostAsJsonAsync(path, new { version = 1, outcome = "completed" });
+        first.EnsureSuccessStatusCode();
+        var firstBody = await first.Content.ReadFromJsonAsync<OnboardingStoryAckDto>();
+        Assert.True(firstBody!.Ok);
+        Assert.Equal("acknowledged", firstBody.Story!.State);
+        Assert.Equal("completed", firstBody.Story.Outcome);
+        Assert.Equal(2, firstBody.Story.Revision);
+
+        var replay = await _http.PostAsJsonAsync(path, new { version = 1, outcome = "completed" });
+        replay.EnsureSuccessStatusCode();
+        var replayBody = await replay.Content.ReadFromJsonAsync<OnboardingStoryAckDto>();
+        Assert.True(replayBody!.Ok);
+        Assert.Equal(2, replayBody.Story!.Revision);
+
+        var conflict = await _http.PostAsJsonAsync(path, new { version = 1, outcome = "skipped" });
+        Assert.Equal(HttpStatusCode.Conflict, conflict.StatusCode);
+        var conflictBody = await conflict.Content.ReadFromJsonAsync<OnboardingStoryAckDto>();
+        Assert.Equal("onboarding.story-conflict", conflictBody!.Reason);
+
+        var state = await (await _http.GetAsync($"/api/onboarding/{_playerId}"))
+            .Content.ReadFromJsonAsync<OnboardingStateDto>();
+        var story = Assert.Single(state!.Stories);
+        Assert.Equal("completed", story.Outcome);
+        Assert.False(story.Eligible);
+        Assert.Equal(story.Revision, state.Revision);
     }
 
     [Fact]

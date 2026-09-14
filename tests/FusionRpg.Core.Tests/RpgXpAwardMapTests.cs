@@ -37,7 +37,7 @@ public class RpgXpAwardMapTests
         // typeId 7 resolves to 'fumeshroom' in the compiled roster (ContractTuningTestBootstrap
         // configures both the real species roster and species-progression tuning for the assembly).
         var awards = RpgXpAwardMap.FromActivity(
-            PvzActivityKinds.PlantPlaced, null, 7, sourceKind: "demon.progression.v1", sourceId: "general:fumeshroom");
+            PvzActivityKinds.PlantPlaced, null, 7, sourceKind: "creature.progression.v1", sourceId: "general:fumeshroom");
         var species = Assert.Single(awards, a => a.Kind == RpgActorKinds.Species);
         Assert.Equal("fumeshroom", species.ScopeKey);
         Assert.Equal(RpgXpReasons.PlantPlace, species.Reason);
@@ -48,7 +48,7 @@ public class RpgXpAwardMapTests
     public void ZombieSpawned_awardsTheResolvedSpecies_onlyWithAnExplicitEmpireGeneralClaim()
     {
         var awards = RpgXpAwardMap.FromActivity(
-            PvzActivityKinds.ZombieSpawned, null, 3, sourceKind: "demon.progression.v1", sourceId: "general:polevaulterzombie");
+            PvzActivityKinds.ZombieSpawned, null, 3, sourceKind: "creature.progression.v1", sourceId: "general:polevaulterzombie");
         var species = Assert.Single(awards, a => a.Kind == RpgActorKinds.Species);
         Assert.Equal(RpgXpReasons.ZombieSpawn, species.Reason);
         Assert.Equal(SpeciesProgressionTuningHub.Tuning.PlacementAward, species.Delta);
@@ -60,7 +60,7 @@ public class RpgXpAwardMapTests
         var awards = RpgXpAwardMap.FromActivity(
             PvzActivityKinds.ZombieSpawned, null, 3,
             """{"type":3,"source":"extra","instanceId":"specimen-7"}""",
-            sourceKind: "demon.progression.v1", sourceId: "unique:specimen-7:occurrence-1");
+            sourceKind: "creature.progression.v1", sourceId: "unique:specimen-7:occurrence-1");
 
         Assert.Contains(awards, a => a.Kind == RpgActorKinds.Zombie);
         Assert.DoesNotContain(awards, a => a.Kind == RpgActorKinds.Species);
@@ -71,10 +71,10 @@ public class RpgXpAwardMapTests
     {
         var unique = RpgXpAwardMap.FromActivity(
             PvzActivityKinds.ZombieSpawned, null, 3,
-            sourceKind: "demon.progression.v1", sourceId: "unique:specimen-7:occurrence-1");
+            sourceKind: "creature.progression.v1", sourceId: "unique:specimen-7:occurrence-1");
         var commander = RpgXpAwardMap.FromActivity(
             PvzActivityKinds.ZombieSpawned, null, 3,
-            sourceKind: "demon.progression.v1", sourceId: "commander:dave");
+            sourceKind: "creature.progression.v1", sourceId: "commander:dave");
 
         Assert.DoesNotContain(unique, a => a.Kind == RpgActorKinds.Species);
         Assert.DoesNotContain(commander, a => a.Kind == RpgActorKinds.Species);
@@ -95,7 +95,7 @@ public class RpgXpAwardMapTests
         var awards = RpgXpAwardMap.FromActivity(
             PvzActivityKinds.PlantPlaced, null, 7,
             payloadJson: "{\"type\":7,\"source\":\"extra\",\"instanceId\":\"opaque\"}",
-            sourceKind: "demon.progression.v1", sourceId: "general:fumeshroom");
+            sourceKind: "creature.progression.v1", sourceId: "general:fumeshroom");
 
         Assert.Contains(awards, a => a.Kind == RpgActorKinds.Species && a.ScopeKey == "fumeshroom");
     }

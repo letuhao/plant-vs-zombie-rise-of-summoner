@@ -49,22 +49,22 @@ class HardGateIdsTests(unittest.TestCase):
     def test_never_counts_a_different_familys_gating_metric(self) -> None:
         registry = MetricRegistry()
         registry.register(_closed_metric("PassiveTree/UnresolvedCount", gates=True))
-        other = _closed_metric("DemonRoster/UnresolvedCount", gates=True)
-        other.__class__.family = "DemonRoster"
+        other = _closed_metric("CreatureRoster/UnresolvedCount", gates=True)
+        other.__class__.family = "CreatureRoster"
         registry.register(other)
         self.assertEqual(verdict.hard_gate_ids(registry, "PassiveTree"), ["PassiveTree/UnresolvedCount"])
 
 
 class AssertExactlyOneHardGateTests(unittest.TestCase):
-    def test_passes_against_the_real_shipped_demon_roster_registry(self) -> None:
+    def test_passes_against_the_real_shipped_creature_roster_registry(self) -> None:
         """The one place §7.1's rule already holds in the real, shipped registry today
-        (`metrics/demon_roster.py:369`'s own promotion) — proof the invariant is not vacuous."""
-        from seedsmith.metrics.demon_roster import ALL_DEMON_ROSTER_METRICS
+        (`metrics/creature_roster.py:369`'s own promotion) — proof the invariant is not vacuous."""
+        from seedsmith.metrics.creature_roster import ALL_CREATURE_ROSTER_METRICS
 
         registry = MetricRegistry()
-        for metric_cls in ALL_DEMON_ROSTER_METRICS:
+        for metric_cls in ALL_CREATURE_ROSTER_METRICS:
             registry.register(metric_cls())
-        verdict.assert_exactly_one_hard_gate(registry, "DemonRoster")  # must not raise
+        verdict.assert_exactly_one_hard_gate(registry, "CreatureRoster")  # must not raise
 
     def test_raises_when_a_family_has_zero_hard_gates(self) -> None:
         """PassiveTree's own real state today: `PassiveTree/TreeEqualValue` (task C1) is the only

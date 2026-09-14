@@ -104,7 +104,7 @@ implementer doesn't have to re-discover it; **not** a new class of finding.
 - `Injector/GameDumps.cs:40,89` — `Plant(...)`/`Zombie(...)` dump functions already take `long
   hpBase, long maxHpBase` but `int attackBase` (and, for Zombie, `int armorBase, int
   armorMaxBase`) — the exact same asymmetry, one layer up (captured-data dump feeding
-  `DemonSpeciesGenerator`).
+  `CreatureSpeciesGenerator`).
 
 ### 2.2 The battle-engine combat channels (T2.1's exact target)
 
@@ -125,9 +125,9 @@ These are the load-bearing findings for Phase 2's Checkpoint — "hp/atk/defense
 
 ### 2.3 Souls and other currency/summon magnitudes
 
-`Demons/Patron/PatronPolicy.cs:18` (`SwitchCostSouls = 100`) and `:57` (`SoulsAfter`, the local
+`Creatures/Patron/PatronPolicy.cs:18` (`SwitchCostSouls = 100`) and `:57` (`SoulsAfter`, the local
 function inside `KillEarnWithPatron` computing the running soul total — distinct from the method name
-itself, which §1.1 already cleared). Both are souls, and `Demons/Fusion/StarPolicy.cs:34`
+itself, which §1.1 already cleared). Both are souls, and `Creatures/Fusion/StarPolicy.cs:34`
 (`FusionCost.Souls`, not itself flagged — already `long`) is the precedent both should match. Feeds
 directly into T3.6's earn-formula work (SSOT §11.7a) — widening these now means T3.6 isn't also doing
 a type migration while it changes the formula.
@@ -234,7 +234,7 @@ scenario builder — every call site types its own hp value directly in source; 
 
 ### 3.4 One-time, dev-only species-generation input
 
-`Demons/Generation/DemonSpeciesGenerator.cs:7` (`CapturedTypeSeed.HpBase`). **Proven cap:** per the
+`Creatures/Generation/CreatureSpeciesGenerator.cs:7` (`CapturedTypeSeed.HpBase`). **Proven cap:** per the
 file's own doc comment, this feeds a **dev-time generation pass** run once against captured vanilla
 PvZ Fusion data — *"the emitted C# is committed so a fresh install needs no game data
 (gameless-first)."* The base game's own zombie/plant HP values are modest (hundreds, per

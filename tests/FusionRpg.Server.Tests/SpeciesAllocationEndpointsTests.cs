@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Power;
 using FusionRpg.Data;
@@ -14,19 +14,20 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
-/// <summary>`species-build` T2.2 (module 5, `demon-type-allocation`) — GET/POST
+/// <summary>`species-build` T2.2 (module 5, `creature-type-allocation`) — GET/POST
 /// `/api/aptitudes/species/*` against a real, minimal in-process host (same pattern as
 /// `AptitudeEndpointsTests`/`AptitudesInjectorBroadcastTests`, not a mock): a baseline read with no
 /// override, an override round-trip, budget refusal, and the ⛔ both-groups broadcast this module's
 /// own spec calls out by name (the exact defect already found once for the Commander endpoint).</summary>
 public class SpeciesAllocationEndpointsTests : IAsyncLifetime
 {
-    const int FumeshroomDemonTypeId = 60007;
+    const int FumeshroomCreatureTypeId = 60007;
 
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
@@ -35,10 +36,8 @@ public class SpeciesAllocationEndpointsTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-speciesalloc-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _playerId = _store.GetCurrentPlayerId();
 
         FusionRpg.Core.Power.PowerTuningHub.Configure(
@@ -49,7 +48,7 @@ public class SpeciesAllocationEndpointsTests : IAsyncLifetime
             FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "progression.v1.json"))));
         FusionRpg.Core.Progression.SpeciesProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.SpeciesProgressionTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "species-progression.v1.json"))));
-        DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        CreatureSpeciesCatalog.ConfigureFromCompiledDefault();
         SpeciesBuildPlanCatalog.Configure(new Dictionary<string, IReadOnlyDictionary<string, long>>(StringComparer.Ordinal)
         {
             ["fumeshroom"] = new Dictionary<string, long>(StringComparer.Ordinal)
@@ -60,7 +59,7 @@ public class SpeciesAllocationEndpointsTests : IAsyncLifetime
         // The one remaining test here that mutates state now does so via `POST /api/species-build/respec`
         // (the old `/api/aptitudes/species/allocate` bypass was retired) -- needs the same tuning that
         // endpoint's own SpeciesBuildEndpointsTests.cs configures.
-        FusionRpg.Core.Demons.Generation.SpeciesBuildTuningHub.Configure(new FusionRpg.Core.Demons.Generation.SpeciesBuildTuning(
+        FusionRpg.Core.Creatures.Generation.SpeciesBuildTuningHub.Configure(new FusionRpg.Core.Creatures.Generation.SpeciesBuildTuning(
             SchemaVersion: 1, Version: 1,
             ParityFloorPermille: 50, ParityCeilingPermille: 200,
             LeanMinPermille: 350, LeanMaxPermille: 600,
@@ -68,7 +67,7 @@ public class SpeciesAllocationEndpointsTests : IAsyncLifetime
             MaxAptitudesPerSpecies: 5, MinAptitudesPerSpecies: 2,
             RespecBasePrice: 50, RespecEscalationPermille: 500, RespecDecayDays: 3));
 
-        SeedSpeciesLevel(_playerId, FumeshroomDemonTypeId, level: 21, "fumeshroom"); // source = 20
+        SeedSpeciesLevel(_playerId, FumeshroomCreatureTypeId, level: 21, "fumeshroom"); // source = 20
 
         var port = GetFreeTcpPort();
         _baseUrl = $"http://127.0.0.1:{port}";
@@ -104,10 +103,10 @@ public class SpeciesAllocationEndpointsTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
-    void SeedSpeciesLevel(long playerId, int demonTypeId, long level, string speciesId)
+    void SeedSpeciesLevel(long playerId, int creatureTypeId, long level, string speciesId)
     {
         using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
@@ -117,7 +116,7 @@ public class SpeciesAllocationEndpointsTests : IAsyncLifetime
             VALUES ($p, 'species', $tid, $lvl, 0, $lvl, 0, 0, $now, $sk);
             """;
         cmd.Parameters.AddWithValue("$p", playerId);
-        cmd.Parameters.AddWithValue("$tid", demonTypeId);
+        cmd.Parameters.AddWithValue("$tid", creatureTypeId);
         cmd.Parameters.AddWithValue("$lvl", level);
         cmd.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));
         cmd.Parameters.AddWithValue("$sk", speciesId);
@@ -147,7 +146,7 @@ public class SpeciesAllocationEndpointsTests : IAsyncLifetime
     // Allocate_overridesTheBaseline_androundTripsThroughGet, Allocate_overspending_isRefused_scopeLocally,
     // Allocate_notifies_a_client_joined_as_injector_not_just_web and Allocate_still_notifies_a_client_joined_as_web
     // all POSTed to `/api/aptitudes/species/allocate`, RETIRED by species-build-todo.md T4.3/Checkpoint 5's own
-    // named follow-up (owner decision, 2026-09-05: "retire it now") — it wrote a DemonType override with zero
+    // named follow-up (owner decision, 2026-09-05: "retire it now") — it wrote a CreatureType override with zero
     // pricing awareness, a live bypass of the `species-respec` economy. Their coverage (override round-trips,
     // scope-local budget refusal, both-groups broadcast) now lives on `POST /api/species-build/respec` in
     // `SpeciesBuildEndpointsTests.cs`, which exercises the same real write path through the priced/free surface

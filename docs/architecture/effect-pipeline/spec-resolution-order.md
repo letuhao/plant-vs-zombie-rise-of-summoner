@@ -118,8 +118,8 @@ named next step for whoever picks up this module's code again, not a silent gap.
 
 `effect-pipeline-ideal.md` §7 Q12, and `ssot-rarity.md` §3.6: rarity buys breadth and tier ceiling,
 never magnitude directly — *"a multiplier on the rung makes rarity dominant and destroys the overlap
-the owner asked for"* (`CurveInput.Rarity` is banned on `container_kind = 'item'`). A demon-seed
-`variant` (per `demon-seed`'s own `variants` anchor field) shifts a **resolution parameter**, and
+the owner asked for"* (`CurveInput.Rarity` is banned on `container_kind = 'item'`). A creature-seed
+`variant` (per `creature-seed`'s own `variants` anchor field) shifts a **resolution parameter**, and
 authors nothing:
 
 > **⛔ RE-VERIFIED 2026-09-03 (owner removed themselves as a gate) — the variant shift table is

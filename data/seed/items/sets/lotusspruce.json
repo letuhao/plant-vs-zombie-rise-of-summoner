@@ -25,7 +25,7 @@
       "id": "set.lotusspruce-001",
       "nameKey": "set.spruce-companion",
       "name": "Spruce Companion",
-      "themeKey": "demon.lotusspruce",
+      "themeKey": "creature.lotusspruce",
       "members": [
         {
           "role": "core-guard",

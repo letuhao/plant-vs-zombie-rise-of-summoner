@@ -25,7 +25,7 @@
       "id": "set.goldscarypot-001",
       "nameKey": "set.golden-card-recycler",
       "name": "Golden Card Recycler",
-      "themeKey": "demon.goldscarypot",
+      "themeKey": "creature.goldscarypot",
       "members": [
         {
           "role": "armament-primary",

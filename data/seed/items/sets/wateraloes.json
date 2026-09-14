@@ -25,7 +25,7 @@
       "id": "set.wateraloes-001",
       "nameKey": "set.frozen-aloe-spore",
       "name": "Frozen Aloe Spore",
-      "themeKey": "demon.wateraloes",
+      "themeKey": "creature.wateraloes",
       "members": [
         {
           "role": "armament-primary",

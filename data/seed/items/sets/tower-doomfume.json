@@ -25,7 +25,7 @@
       "id": "set.tower-doomfume-001",
       "nameKey": "set.spore-burst-manual",
       "name": "Spore Burst Manual",
-      "themeKey": "demon.tower_doomfume",
+      "themeKey": "creature.tower_doomfume",
       "members": [
         {
           "role": "armament-primary",

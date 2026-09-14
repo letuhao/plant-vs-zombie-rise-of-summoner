@@ -25,7 +25,7 @@
       "id": "set.goldiceshroom-001",
       "nameKey": "set.golden-frost-spore",
       "name": "Golden Frost Spore",
-      "themeKey": "demon.goldiceshroom",
+      "themeKey": "creature.goldiceshroom",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.sniperchomper-001",
       "nameKey": "set.gluttonous-fang-sniper",
       "name": "Gluttonous Fang Sniper",
-      "themeKey": "demon.sniperchomper",
+      "themeKey": "creature.sniperchomper",
       "members": [
         {
           "role": "armament-primary",

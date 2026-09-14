@@ -25,7 +25,7 @@
       "id": "set.diamondimitater-001",
       "nameKey": "set.diamond-s-debt",
       "name": "Diamond's Debt",
-      "themeKey": "demon.diamondimitater",
+      "themeKey": "creature.diamondimitater",
       "members": [
         {
           "role": "armament-primary",

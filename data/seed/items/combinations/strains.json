@@ -400,8 +400,8 @@
         }
       ],
       "minSockets": 4,
-      "name": "Stilled Pulse",
-      "nameKey": "combination.strain-focus-defense",
+      "name": "Iron Cadence",
+      "nameKey": "combination.iron-cadence",
       "shape": "strain"
     },
     {
@@ -670,8 +670,8 @@
         }
       ],
       "minSockets": 4,
-      "name": "Kinetic Recoil",
-      "nameKey": "combination.strain-onslaught-defense",
+      "name": "Impact Surge",
+      "nameKey": "combination.impact-surge",
       "shape": "strain"
     },
     {
@@ -706,8 +706,8 @@
         }
       ],
       "minSockets": 4,
-      "name": "Unstoppable Momentum",
-      "nameKey": "combination.strain-onslaught-offense",
+      "name": "Relentless Surge",
+      "nameKey": "combination.relentless-surge",
       "shape": "strain"
     },
     {
@@ -857,8 +857,8 @@
         }
       ],
       "minSockets": 4,
-      "name": "Vengeful Bastion",
-      "nameKey": "combination.strain-retribution-offense",
+      "name": "Wrathful Aegis",
+      "nameKey": "combination.wrathful-aegis",
       "shape": "strain"
     },
     {

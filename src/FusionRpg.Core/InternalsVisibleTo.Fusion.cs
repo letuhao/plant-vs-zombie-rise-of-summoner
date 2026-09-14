@@ -1,10 +1,10 @@
 using System.Runtime.CompilerServices;
 
 // T8.4/T8.5 (ds 18, fusion-recipe-runtime): FusionRpg.Data.Tests and FusionRpg.E2E.Tests own
-// bootstraps call DemonRecipeCatalog.BuildDeterministicOnly() (internal since T8.5's own "public
-// surface is gone" success criterion), matching DemonSpeciesCatalog.ConfigureFromCompiledDefault()'s
+// bootstraps call CreatureRecipeCatalog.BuildDeterministicOnly() (internal since T8.5's own "public
+// surface is gone" success criterion), matching CreatureSpeciesCatalog.ConfigureFromCompiledDefault()'s
 // own hermetic-test shape rather than reading the real committed seed file (that would need
-// DemonSpeciesCatalog configured from the real ~829-species corpus too, not the small compiled
+// CreatureSpeciesCatalog configured from the real ~829-species corpus too, not the small compiled
 // default these two assemblies' other tests already depend on — a far larger, unrelated change).
 //
 // Deliberately a C# attribute here, NOT an <InternalsVisibleTo> item in FusionRpg.Core.csproj:

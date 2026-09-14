@@ -1,7 +1,7 @@
 """seedsmith.adapters.actions.signature_propose.derive --- A-P3's own candidate assembly: per-
 sample bounded self-heal (F9's adapted contract) and majority-vote resolution over TWO fields --
 `atomFamilies` AND `differentiator` (spec-signature-propose.md SS2 "Which fields are voted": "Two
-voted fields this time"). Reuses `demons.anchor.vote.resolve_vote` and
+voted fields this time"). Reuses `creatures.anchor.vote.resolve_vote` and
 `pipeline.llm_caller.call_with_self_heal` directly, never reimplemented (this whole program's own
 reuse discipline) -- exactly as `family_propose/derive.py` and `general_propose/derive.py` do.
 
@@ -35,7 +35,8 @@ from typing import Any, Callable, Mapping, Sequence
 
 from ....pipeline.llm_caller import LlmCallerConfig, call_with_self_heal
 from ....pipeline.model import BLOCKED_FIELD
-from ...demons.anchor.vote import SetVoteResult, VoteResult, resolve_set_vote, resolve_vote
+from ...creatures.anchor.vote import SetVoteResult, VoteResult, resolve_set_vote, resolve_vote
+from ..coverage_assignment.derive import splice_payoff_enablers
 from .prompts import (
     SYSTEM_PROMPT,
     atom_families_are_allowed,
@@ -64,7 +65,7 @@ SAMPLE_COUNT = 3
 MAX_HEAL = 2
 
 #: The two fields voted over three permuted samples (spec SS2) -- pinned as a tuple so a third
-#: field needs a deliberate code change, matching `adapters/demons/anchor/vote.py`'s own
+#: field needs a deliberate code change, matching `adapters/creatures/anchor/vote.py`'s own
 #: `VOTED_FIELDS` frozenset discipline for this stage's own local pair.
 VOTED_FIELDS: "tuple[str, ...]" = ("atomFamilies", "differentiator")
 
@@ -215,7 +216,8 @@ def _is_unresolved(vote: VoteResult, sentinel: str) -> bool:
 
 
 def finalize_candidate(brief: Mapping[str, Any], drafts: Sequence[Mapping[str, Any]], *,
-                       candidate_id: str, provenance: "Mapping[str, Any] | None" = None) -> Candidate:
+                       candidate_id: str, provenance: "Mapping[str, Any] | None" = None,
+                       pairing_table: "Mapping[str, Sequence[str]] | None" = None) -> Candidate:
     """Pure -- zero model calls, so this is what `--dry-run` and the recorded-transcript replay
     test both exercise. Takes exactly `SAMPLE_COUNT` already-produced draft dicts (live-called-
     and-healed, or a recorded transcript replayed verbatim) and resolves ONE candidate:
@@ -271,6 +273,10 @@ def finalize_candidate(brief: Mapping[str, Any], drafts: Sequence[Mapping[str, A
     # own required family, ONLY on an accepted candidate -- deterministic, zero extra model calls,
     # omitted `requiredFamilies` is byte-identical to before this existed.
     atom_families = sorted(set(atom_vote.values) | set(brief.get("requiredFamilies") or ()))
+    if pairing_table:
+        atom_families = splice_payoff_enablers(
+            atom_families, pairing_table=pairing_table,
+            allowed_atom_families=brief.get("pool", {}).get("allowedAtomFamilies", ()))
     entry = entry_for(
         {**primary, "atomFamilies": atom_families, "differentiator": differentiator_vote.value},
         candidate_id=candidate_id, brief_id=brief_id, provenance=prov,
@@ -306,7 +312,8 @@ def propose_signature_action(brief: Mapping[str, Any], *, candidate_id: str,
 
     prov = dict(provenance or {})
     prov["healNotes"] = heal_notes
-    return finalize_candidate(brief, drafts, candidate_id=candidate_id, provenance=prov)
+    return finalize_candidate(brief, drafts, candidate_id=candidate_id, provenance=prov,
+                              pairing_table=pairing_table)
 
 
 def candidate_row(candidate: Candidate, *, pipeline_id: str = "A-P3", scope: str = "species") -> "dict[str, Any]":

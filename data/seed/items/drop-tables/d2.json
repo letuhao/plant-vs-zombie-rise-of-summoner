@@ -1001,8 +1001,8 @@
     },
     {
       "id": "droptable.d2-011",
-      "nameKey": "droptable.verdant-reliquary",
-      "name": "Verdant Reliquary",
+      "nameKey": "drop-table.emerald-relic",
+      "name": "Emerald Relic",
       "sourceAllow": [
         "web"
       ],
@@ -1161,8 +1161,8 @@
     },
     {
       "id": "droptable.d2-013",
-      "nameKey": "droptable.verdant-husk",
-      "name": "Verdant Husk",
+      "nameKey": "drop-table.mossy-carapace",
+      "name": "Mossy Carapace",
       "sourceAllow": [
         "web"
       ],
@@ -1241,8 +1241,8 @@
     },
     {
       "id": "droptable.d2-014",
-      "nameKey": "droptable.overgrowth-cache",
-      "name": "Overgrowth Cache",
+      "nameKey": "drop-table.verdant-overgrowth-cache",
+      "name": "Verdant Overgrowth Cache",
       "sourceAllow": [
         "web"
       ],
@@ -1321,8 +1321,8 @@
     },
     {
       "id": "droptable.d2-015",
-      "nameKey": "droptable.overgrowth-cache",
-      "name": "Overgrowth Cache",
+      "nameKey": "drop-table.wildwood-hoard",
+      "name": "Wildwood Hoard",
       "sourceAllow": [
         "web"
       ],
@@ -1481,8 +1481,8 @@
     },
     {
       "id": "droptable.d2-018",
-      "nameKey": "droptable.aetheric-husk",
-      "name": "Aetheric Husk",
+      "nameKey": "drop-table.void-touched-husk",
+      "name": "Void-Touched Husk",
       "sourceAllow": [
         "web"
       ],

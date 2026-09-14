@@ -1,5 +1,5 @@
 using System.Text.Json;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 
 namespace FusionRpg.Core.Match.Ai;
 
@@ -8,7 +8,7 @@ public sealed class ZombossDeployTuningRejection : Exception
     public ZombossDeployTuningRejection(string message) : base(message) { }
 }
 
-public sealed record ZombossWaveRarityCeiling(int MaxWaveAtLeast, DemonRarity RarityCeiling);
+public sealed record ZombossWaveRarityCeiling(int MaxWaveAtLeast, CreatureRarity RarityCeiling);
 
 /// <summary>T3.3's own weights — <see cref="ZombossDeployPolicy"/> never reads a bare literal for any
 /// of these, matching this repo's own tunables-ssot.md rule.</summary>
@@ -48,7 +48,7 @@ public static class ZombossDeployTuningLoader
         {
             var maxWaveAtLeast = Int(c, "maxWaveAtLeast");
             var rarityText = Str(c, "rarityCeiling");
-            if (!Enum.TryParse<DemonRarity>(rarityText, ignoreCase: false, out var rarity))
+            if (!Enum.TryParse<CreatureRarity>(rarityText, ignoreCase: false, out var rarity))
                 throw new ZombossDeployTuningRejection($"waveRarityCeilings: unknown rarityCeiling '{rarityText}'");
             ceilings.Add(new ZombossWaveRarityCeiling(maxWaveAtLeast, rarity));
         }
@@ -124,13 +124,13 @@ public static class ZombossDeployTuningHub
 ///
 /// <para><b>Named, reversible default (plan's own "Gates vs. checkpoints" section)</b>: "the same
 /// summonable species pool the player draws from" is
-/// <c>DemonSpeciesCatalog.All.Where(Acquisition.HasFlag(Summonable))</c> — the EXACT predicate
+/// <c>CreatureSpeciesCatalog.All.Where(Acquisition.HasFlag(Summonable))</c> — the EXACT predicate
 /// `SummonRoller.BandWithFallback` itself filters on (confirmed by direct read, not the sibling
 /// `Acquisition != CaptureOnly` convention some OTHER call sites use, which is a materially different
 /// filter — a `CaptureOnly|EventOnly` species with no `Summonable` flag would pass that one and fail
 /// this one). "Filtered to the current level's own threat band" substitutes `BaseRarity` (already on
-/// the live `DemonSpeciesDef` the summon roller reads) for the spec's own "threat band" language: a
-/// real per-species `ThreatBand` exists (`data/tuning/demon-threat.v1.json`) but is discarded during
+/// the live `CreatureSpeciesDef` the summon roller reads) for the spec's own "threat band" language: a
+/// real per-species `ThreatBand` exists (`data/tuning/creature-threat.v1.json`) but is discarded during
 /// species generation and unreachable from this catalog (`SlotFilter.cs`'s own doc comment, confirmed)
 /// — reusing the summon system's own "rarity is power" assumption is the closest available proxy, named
 /// explicitly here (and in the tuning file's own `_meta`) as a reversible substitution, not a permanent
@@ -142,7 +142,7 @@ public static class ZombossDeployRoster
     /// list `ZombossDeployTuningLoader.Parse` already enforces. `waveNumber` below every threshold
     /// (e.g. 0, before wave 1 starts) returns the lowest rung named — never throws, matching this
     /// module's own "the scorer declines gracefully, never crashes on an edge wave" boundary.</summary>
-    public static DemonRarity RarityCeilingForWave(int waveNumber, IReadOnlyList<ZombossWaveRarityCeiling> ceilings)
+    public static CreatureRarity RarityCeilingForWave(int waveNumber, IReadOnlyList<ZombossWaveRarityCeiling> ceilings)
     {
         var ceiling = ceilings[0].RarityCeiling;
         foreach (var c in ceilings)
@@ -159,16 +159,16 @@ public static class ZombossDeployRoster
     /// order of some other collection) so a caller's own later `SeededRng` pick over this list is
     /// reproducible too.</summary>
     public static IReadOnlyList<string> AvailableSpeciesFor(
-        int waveNumber, IReadOnlyList<DemonSpeciesDef> catalog, IReadOnlyList<ZombossWaveRarityCeiling> ceilings)
+        int waveNumber, IReadOnlyList<CreatureSpeciesDef> catalog, IReadOnlyList<ZombossWaveRarityCeiling> ceilings)
     {
         var ceiling = RarityCeilingForWave(waveNumber, ceilings);
         return catalog
-            .Where(s => s.Acquisition.HasFlag(DemonAcquisition.Summonable) && s.BaseRarity <= ceiling
+            .Where(s => s.Acquisition.HasFlag(CreatureAcquisition.Summonable) && s.BaseRarity <= ceiling
                 // T1.4's own established exclusion (ExpeditionStoreTests.cs/ContractGateTests.cs):
                 // HypnoAlly has no deploy path yet (DeployAsync refuses `deploy.hypno-ally-not-implemented`).
                 // Caught here proactively, not live: T3.4's own deploy-wiring research found this exact
                 // gap already existed in T2.1's own player-facing roster before it was fixed there.
-                && s.DeployMode != DemonDeployMode.HypnoAlly)
+                && s.DeployMode != CreatureDeployMode.HypnoAlly)
             .Select(s => s.SpeciesId)
             .OrderBy(id => id, StringComparer.Ordinal)
             .ToList();

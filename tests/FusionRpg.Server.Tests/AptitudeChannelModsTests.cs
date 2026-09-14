@@ -1,34 +1,45 @@
+using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
+using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
-/// <summary>class-system-todo.md P2.5/P9.1 — the battle-path seam, `WebMatchService.AptitudeChannelMods`.
-/// Now reads the real commander-scope allocation via `RpgStore.LoadAllocation`
+/// <summary>class-system-todo.md P2.5/P9.1 — the Hub aptitude path for the squad's commander scope.
+/// battle-hub-fuse T6: the `WebMatchService.AptitudeChannelMods` BattleChannelMod adapter is deleted;
+/// these tests prove the same seam through `AptitudeResolver.Resolve` (the Hub twin BattleHubCompose
+/// reads). Now reads the real commander-scope allocation via `RpgStore.LoadAllocation`
 /// (spec-aptitude-allocation-surface.md, 2026-08-27) instead of hardcoding `AptitudeAllocation.Empty` —
 /// these tests prove BOTH directions: an unset player still resolves inert (the wiring didn't regress
 /// the "zero goldens move" property), and a saved allocation actually reaches the resolved mods (the
 /// wire is load-bearing, not dead code that happens to compile).</summary>
 public class AptitudeChannelModsTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public AptitudeChannelModsTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-aptchanmods-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
+
+    static IReadOnlyList<DerivedModifier> ResolveCommander(RpgStore store, long playerId, int level) =>
+        AptitudeResolver.Resolve(
+            store.LoadAllocation(AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId)),
+            AptitudeTuningHub.Tuning,
+            new PowerLadder(PowerTuningHub.Tuning),
+            level,
+            DerivedStatRegistry.CreateDefault());
 
     [Fact]
     public void UnsetPlayer_stillProducesNoChannelMods()
@@ -36,8 +47,7 @@ public class AptitudeChannelModsTests : IDisposable
         // A player who has never allocated must resolve exactly as inert as the old hardcoded-Empty
         // behavior did -- LoadAllocation's own "load never saved returns empty" contract
         // (AllocationStoreTests.cs), not a special case this seam has to invent.
-        var mods = WebMatchService.AptitudeChannelMods(level: 50, playerId: 999, _store);
-        Assert.Empty(mods);
+        Assert.Empty(ResolveCommander(_store, playerId: 999, level: 50));
     }
 
     [Theory]
@@ -46,7 +56,7 @@ public class AptitudeChannelModsTests : IDisposable
     [InlineData(1000)]
     public void UnsetPlayer_stillProducesNoChannelMods_atAnyLevel(int level)
     {
-        Assert.Empty(WebMatchService.AptitudeChannelMods(level, playerId: 999, _store));
+        Assert.Empty(ResolveCommander(_store, playerId: 999, level));
     }
 
     [Fact]
@@ -59,14 +69,14 @@ public class AptitudeChannelModsTests : IDisposable
         var allocation = AptitudeAllocation.Single(AllocationScope.Commander, "Might", 100_000);
         _store.SaveAllocation(AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId), allocation);
 
-        var mods = WebMatchService.AptitudeChannelMods(level: 50, playerId, _store);
+        var mods = ResolveCommander(_store, playerId, level: 50);
 
         Assert.NotEmpty(mods);
-        Assert.Contains(mods, m => m.ChannelId == FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatPowerOmni);
+        Assert.Contains(mods, m => m.ChannelId == DerivedStatChannels.CombatPowerOmni);
 
         // A DIFFERENT player who never allocated, read through the same store, must still be inert --
         // proves the allocation is scoped per-player (ScopeKey), not accidentally global state.
-        Assert.Empty(WebMatchService.AptitudeChannelMods(level: 50, playerId: 43, _store));
+        Assert.Empty(ResolveCommander(_store, playerId: 43, level: 50));
     }
 
     /// <summary>class-system-todo.md P9.2's own prerequisite, found while building it: rpg_aptitude_
@@ -91,22 +101,22 @@ public class AptitudeChannelModsTests : IDisposable
         // the module initializer already set and this test does not need to override).
         var tuningDir = Path.Combine(FindRepoRoot(), "data", "tuning");
         string Read(string name) => File.ReadAllText(Path.Combine(tuningDir, name));
-        FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
-            FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(Read("contracts.v1.json")));
+        FusionRpg.Core.Creatures.Contracts.ContractPolicy.Configure(
+            FusionRpg.Core.Creatures.Contracts.ContractTuningLoader.Parse(Read("contracts.v1.json")));
         FusionRpg.Core.World.Loam.LoamPolicy.Configure(
             FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v4.json")));
         FusionRpg.Core.World.WorldTuningHub.Configure(
             FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v5.json")));
-        FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
-            FusionRpg.Core.Demons.SoulEarnTuningLoader.Parse(Read("souls.v1.json")));
-        FusionRpg.Core.Demons.Patron.PatronPolicy.Configure(
-            FusionRpg.Core.Demons.Patron.PatronTuningLoader.Parse(Read("patron.v1.json")));
-        FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
-            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(Read("fusion.v2.json")));
+        FusionRpg.Core.Creatures.SoulEarnPolicy.Configure(
+            FusionRpg.Core.Creatures.SoulEarnTuningLoader.Parse(Read("souls.v1.json")));
+        FusionRpg.Core.Creatures.Patron.PatronPolicy.Configure(
+            FusionRpg.Core.Creatures.Patron.PatronTuningLoader.Parse(Read("patron.v1.json")));
+        FusionRpg.Core.Creatures.Fusion.StarPolicy.Configure(
+            FusionRpg.Core.Creatures.Fusion.FusionTuningLoader.Parse(Read("fusion.v2.json")));
         FusionRpg.Core.SimDefaults.Configure(
             FusionRpg.Core.SimTuningLoader.Parse(Read("sim.v1.json")));
-        FusionRpg.Core.Demons.SummoningTuningHub.Configure(
-            FusionRpg.Core.Demons.SummoningTuningLoader.Parse(Read("summoning.v1.json")));
+        FusionRpg.Core.Creatures.SummoningTuningHub.Configure(
+            FusionRpg.Core.Creatures.SummoningTuningLoader.Parse(Read("summoning.v1.json")));
         FusionRpg.Core.World.Ai.WorldAiPolicy.Configure(
             FusionRpg.Core.World.Ai.WorldAiTuningLoader.Parse(Read("ai.v2.json")));
         FusionRpg.Data.Policies.SealedCompactionPolicy.Configure(
@@ -138,7 +148,7 @@ public class AptitudeChannelModsTests : IDisposable
         var service = new WebMatchService(_store, hub);
 
         // No roster seeded -- BuildSquad's own documented SIM fallback ("an empty roster still gets a
-        // deterministic synthetic squad") fields this without needing a real summoned demon at all.
+        // deterministic synthetic squad") fields this without needing a real summoned creature at all.
         var (ok, reason, outcome) = await service.RunWebMatchAsync(
             playerId, correlationId: "aptsnap-test-1", waveId: "rift-skirmish", squadInstanceIds: null);
         Assert.True(ok, reason);

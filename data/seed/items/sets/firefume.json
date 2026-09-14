@@ -25,7 +25,7 @@
       "id": "set.firefume-001",
       "nameKey": "set.red-heat-sporeburst",
       "name": "Red-Heat Sporeburst",
-      "themeKey": "demon.firefume",
+      "themeKey": "creature.firefume",
       "members": [
         {
           "role": "armament-primary",

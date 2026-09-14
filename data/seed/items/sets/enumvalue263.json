@@ -23,9 +23,9 @@
   "entries": [
     {
       "id": "set.enumvalue263-001",
-      "nameKey": "set.the-primordial-silt",
-      "name": "The Primordial Silt",
-      "themeKey": "demon.enumvalue263",
+      "nameKey": "set.ancient-sediment",
+      "name": "Ancient Sediment",
+      "themeKey": "creature.enumvalue263",
       "members": [
         {
           "role": "armament-primary",

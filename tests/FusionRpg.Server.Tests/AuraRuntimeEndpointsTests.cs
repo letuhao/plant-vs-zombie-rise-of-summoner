@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -16,7 +17,7 @@ namespace FusionRpg.Server.Tests;
 /// mock), real FIFO eviction at the real shipped `maxActiveAuras`, real typed refusal.</summary>
 public class AuraRuntimeEndpointsTests : IAsyncLifetime
 {
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
@@ -30,10 +31,8 @@ public class AuraRuntimeEndpointsTests : IAsyncLifetime
         // later test's "player 1" would inherit an earlier test's still-active aura.
         AuraRuntimeEndpoints.ResetForTests();
 
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-auraruntime-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _playerId = _store.GetCurrentPlayerId();
 
         AuraTuningHub.Configure(
@@ -57,7 +56,7 @@ public class AuraRuntimeEndpointsTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     void Equip(params string[] auraIds) =>

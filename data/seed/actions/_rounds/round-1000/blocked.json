@@ -1,0 +1,126 @@
+{
+  "_meta": {
+    "assemblyGateRejectCount": 0,
+    "candidateSetHash": "f607a658cccfc92e296f73682ae2478fd596b5a424aaaceeaedb7183ce50a440",
+    "differentiatorNoneRate": 0.0,
+    "disagreementRate": {},
+    "partition": "rounds",
+    "preflight": "skipped",
+    "restrictionUncheckedCount": 0,
+    "round": 1000
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "briefHash": "72b9b9a973551c47278cdb860f185e35783a92607ad2b51f9eddcc5b20fd4af4",
+        "briefsCorpusHash": "58724922af14ce2ded776856984d974ecc69a5b13972110cc5e6a5f6b5670b0b",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.001",
+      "candidateId": null,
+      "confidence": null,
+      "draft": null,
+      "outcome": "blocked",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "7f9cd21b5e01ec71bd879ad3ff43ec2202e4998ec0e9e389a9ac887912952574",
+        "briefsCorpusHash": "58724922af14ce2ded776856984d974ecc69a5b13972110cc5e6a5f6b5670b0b",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.002",
+      "candidateId": null,
+      "confidence": null,
+      "draft": null,
+      "outcome": "blocked",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "5a6d8f40d16581f8108e3e4f1f8b8aa1c990a0613fcf79f8ab3a1b306e353604",
+        "briefsCorpusHash": "58724922af14ce2ded776856984d974ecc69a5b13972110cc5e6a5f6b5670b0b",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.alchemical.005",
+      "candidateId": null,
+      "confidence": null,
+      "draft": null,
+      "outcome": "blocked",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "8a17fd99de7a7d4af154b0a85a7c3e756895887d6f147967ee6032c979efec98",
+        "briefsCorpusHash": "58724922af14ce2ded776856984d974ecc69a5b13972110cc5e6a5f6b5670b0b",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.allium.001",
+      "candidateId": null,
+      "confidence": null,
+      "draft": null,
+      "outcome": "blocked",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "5bc008befec8bad788539a0f25cf0a5d32707b480336c311b4c8705d128e38a3",
+        "briefsCorpusHash": "58724922af14ce2ded776856984d974ecc69a5b13972110cc5e6a5f6b5670b0b",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1"
+      },
+      "briefId": "brief.family.allium.002",
+      "candidateId": null,
+      "confidence": null,
+      "draft": null,
+      "outcome": "blocked",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    }
+  ],
+  "kind": "action-review",
+  "schemaVersion": 1
+}

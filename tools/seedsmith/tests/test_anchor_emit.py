@@ -1,9 +1,9 @@
-"""Tests for seedsmith.adapters.demons.anchor.emit (spec-anchor-emit.md, demon-seed module 8)."""
+"""Tests for seedsmith.adapters.creatures.anchor.emit (spec-anchor-emit.md, creature-seed module 8)."""
 from __future__ import annotations
 
 from pathlib import Path
 
-from seedsmith.adapters.demons.anchor.emit import (
+from seedsmith.adapters.creatures.anchor.emit import (
     assert_no_magnitude,
     build_index,
     entry_for,
@@ -13,7 +13,7 @@ from seedsmith.adapters.demons.anchor.emit import (
     stale_ids,
     write_family_file,
 )
-from seedsmith.adapters.demons.anchor.provenance import AnchorProvenance, PROMPT_VERSIONS
+from seedsmith.adapters.creatures.anchor.provenance import AnchorProvenance, PROMPT_VERSIONS
 
 ANCHOR_FIELDS = {
     "side": "plant", "speciesId": "peashooter", "gameTypeId": 0,

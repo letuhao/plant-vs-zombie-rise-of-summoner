@@ -34,7 +34,12 @@ public static class UniqueEquipmentCatalog
 
     static readonly string[] FlatAbsoluteKeys = { "hp", "maxHp", "atk", "HP", "MaxHp", "ATK" };
 
-    /// <summary>Known stub items operators may equip.</summary>
+    /// <summary>Known stub items operators may equip.
+    /// // DEBT stub — cold-equip-one: this dictionary is an item-id allowlist only, not combat
+    /// SSOT. Magnitudes come from the bound atoms' own seeded containers (reconciler binds them;
+    /// mods_json grants are skipped for atom-backed items). Delete when a rolled-grant path replaces
+    /// the stub definitions — blocked today: no concrete unique container has been minted, so there
+    /// is no rolled grant source to replace these definitions with (see class doc).</summary>
     public static IReadOnlyDictionary<string, EffectGrantDto> Items { get; } =
         new Dictionary<string, EffectGrantDto>(StringComparer.OrdinalIgnoreCase)
         {

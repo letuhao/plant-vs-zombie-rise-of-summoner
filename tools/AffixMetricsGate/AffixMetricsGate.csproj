@@ -12,7 +12,7 @@
          ContentMetrics.FamilyCoverageOf/ContainerFillRatesOf (already built, tested) and the new
          AffixMetricsGateEvaluator (data/tuning/affix-metrics.v1.json). Reuses SeedImportRunner
          (FusionRpg.Data.Seed) to collect the real committed data/seed/** tree into a pure SeedContent
-         — no database, matching DemonRecipeDistributionIndex's own "report tool, never a gate on the
+         — no database, matching CreatureRecipeDistributionIndex's own "report tool, never a gate on the
          database" shape. -->
     <ProjectReference Include="..\..\src\FusionRpg.Core\FusionRpg.Core.csproj" />
     <ProjectReference Include="..\..\src\FusionRpg.Data\FusionRpg.Data.csproj" />

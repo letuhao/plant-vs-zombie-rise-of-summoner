@@ -44,7 +44,7 @@ session.
     `Core.Tests` **4381/4381** — the exact pre-existing baseline, zero regression.
 
 - [x] **T2: `WhereScope`/`WhoSelector` types** · **S**
-  - `WhereScope` (Battlefield/WorldMap). `WhoSelector` (target/type/unique-demon/relation, the relation
+  - `WhereScope` (Battlefield/WorldMap). `WhoSelector` (target/type/unique-creature/relation, the relation
     case wrapping `RelationKind` from T1). Both with `Name()`/`TryParse()` pairs, matching
     `ActionTargetModes`/`ActionRelations`' own idiom exactly.
   - Acceptance: every value round-trips `Name()` → `TryParse()`; an unknown string rejects rather than
@@ -162,7 +162,7 @@ session.
 
 ## Phase 3 — `battlefield-scope`
 
-- [x] **T7: shared front end — target/type/unique-demon resolution + grant construction** · **M**
+- [x] **T7: shared front end — target/type/unique-creature resolution + grant construction** · **M**
   - Reuses `ActionTargetFilters.TypeIds` and `MatchUniqueBindingsFacet` directly — no reimplementation.
     Needs nothing from Phase 2 (this task's own seam, named in the plan §1.1).
   - Acceptance: each of the 3 WHO values reaches exactly the entities it should on a real multi-entity
@@ -181,7 +181,7 @@ session.
   - Grants per qualifying entity on a `membership-events` spawn/hypnotize-on transition;
     `EffectBag.WithdrawForOwner("entity", ptr)` on clear/hypnotize-off. Every grant carries a shared
     `PluginId` per aura source for bulk `EffectFunnel.WithdrawByPluginId` sweeps.
-  - Acceptance: a demon spawning mid-match gains the grant; one dying/clearing loses it; a
+  - Acceptance: a creature spawning mid-match gains the grant; one dying/clearing loses it; a
     hypnotize-toggle correctly re-scopes it (own-side membership follows specimen ownership, not
     `UniqueBinding.Side` — per the ideal document's §2.3/§4.1 resolution).
   - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~BattlefieldScope`
@@ -194,7 +194,7 @@ session.
     `IContainerEffectResolver`/`StubIntentSource` precedent for building against a seam before its
     full caller exists. `Cleared` withdraws unconditionally (safe no-op via `WithdrawForOwner` if
     nothing was granted) rather than re-querying the oracle, since the entity may already be gone by
-    then. The exact hypno-zombie-demon scenario (own-side flips as mind-control toggles) proven
+    then. The exact hypno-zombie-creature scenario (own-side flips as mind-control toggles) proven
     directly. Verify: 6/6 green.
 
 - [x] **T9: SIM host — `BattleEffectHost`/`BattleEffectSink` reader wiring** · **M**
@@ -274,9 +274,9 @@ session.
     acceptance criteria still need an actual human running these commands in a real match.
 
 - [ ] **T11: LIVE gate** *(owner-only — not a build task)* · —
-  - Matches `patron-demon`'s own precedent exactly: SIM passing is not proof for this host.
+  - Matches `patron-creature`'s own precedent exactly: SIM passing is not proof for this host.
   - Acceptance (owner checklist): deploy → grant an own-side scope in a real match → (1) debug effects
-    view shows one grant per qualifying entity, named correctly, (2) a demon spawning mid-match gains it
+    view shows one grant per qualifying entity, named correctly, (2) a creature spawning mid-match gains it
     without a restart, (3) one leaving loses it, (4) the G8-shaped kind confirmed **not** delivered as a
     grant at all, (5) perf probe shows no new hot-path cost.
   - Verify: `$env:FUSIONRPG_GAME_DIR = "<game dir>"; .\scripts\deploy-play.ps1 -NoServer`, then in a real
@@ -287,14 +287,14 @@ session.
   - **Explicitly decided, owner, 2026-08-29 — asked directly, not assumed:** the assistant session
     cannot execute or observe this gate (it needs a human watching a real, rendered game window; no
     amount of further building changes that). Presented with the choice directly, the owner chose
-    **"treat as tracked-separately"**, matching `patron-demon`'s own standing precedent in this exact
+    **"treat as tracked-separately"**, matching `patron-creature`'s own standing precedent in this exact
     repo (*"SIM shipped, LIVE owner gate open"*, unresolved for over a week without being treated as
     blocking or reopened). This decision — not a unilateral scope reduction — is what makes T11 an
     open, owner-only follow-up rather than a program-blocking gap.
 
 ### ✅ Checkpoint 3 — `battlefield-scope` closed (SIM proven; LIVE gate tracked separately) — **CLOSED 2026-08-29**
 - [x] Full 6-suite + 4-guard run green, zero goldens moved · G8 case confirmed live-only, not delivered
-  as a grant · **T11 (LIVE gate) does not block this checkpoint** — matches patron-demon's own
+  as a grant · **T11 (LIVE gate) does not block this checkpoint** — matches patron-creature's own
   "SIM shipped, LIVE gate open" shape; tracked as its own follow-up
   - **One real guard failure found and fixed, not stale-and-ignored.** `guard-funnel-delta.ps1`
     (and its xunit wrapper, `FunnelDeltaGuardTests`) failed on `Scope/ScopeCompatibility.cs` — a blunt
@@ -340,15 +340,15 @@ session.
     (`~WorldMapScope`), `Guard.Tests`' `~WorldDeterminismGuard` 6/6, `Data.Tests`'
     `~WorldWaveOneAcceptance` 6/6 including the golden.
 
-- [x] **T13: own-side + unique-demon resolution** · **S**
+- [x] **T13: own-side + unique-creature resolution** · **S**
   - Own-side: plain `OwnerFactionId` comparison (structurally identical to `ZoneOfControl.IsHostile`).
-    Unique-demon: walk `WorldState.Entities[].Members[]` for a matching `InstanceId`.
+    Unique-creature: walk `WorldState.Entities[].Members[]` for a matching `InstanceId`.
   - Acceptance: both proven against a real multi-faction, multi-member fixture.
   - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~WorldMapScope`
   - Files: `src/FusionRpg.Core/World/WorldMapScopeExecutor.cs` (extend)
   - **Done 2026-08-29.** Both proven directly against real `WorldEntity`/`WorldEntityMember` shapes
     (`OwnerFactionId`, `Members[].InstanceId`, confirmed against `WorldState.cs:212-227` before
-    writing any code). Unique-demon resolution proven against a legion carrying more than one member,
+    writing any code). Unique-creature resolution proven against a legion carrying more than one member,
     and proven to return null (not throw) when a specimen has no legion presence at all. Verify: 6/6
     green (shared file with T12's own tests, `~WorldMapScope`).
 
@@ -378,10 +378,10 @@ session.
     authorization explicitly, cites the ideal/map/specs/plan, and records the golden-fix finding so a
     future session doesn't re-trip either one.
 - [x] T11 (LIVE gate) remains the one owner-only item — not a blocker on calling this program's own
-  build complete, matching `patron-demon`'s precedent
+  build complete, matching `patron-creature`'s precedent
   - **Confirmed, not assumed:** asked the owner directly whether to run T11 now or track it
     separately; the owner chose to track it separately, explicitly citing (via this session's own
-    framing) `patron-demon`'s precedent. See T11's own entry above for the full record.
+    framing) `patron-creature`'s precedent. See T11's own entry above for the full record.
 
 ## Deferred — specced, not scheduled
 

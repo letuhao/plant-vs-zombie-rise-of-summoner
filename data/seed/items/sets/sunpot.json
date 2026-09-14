@@ -25,7 +25,7 @@
       "id": "set.sunpot-001",
       "nameKey": "set.solar-cultivator",
       "name": "Solar Cultivator",
-      "themeKey": "demon.sunpot",
+      "themeKey": "creature.sunpot",
       "members": [
         {
           "role": "armament-primary",

@@ -1,4 +1,4 @@
-/** Pure fusion-lab display logic (spec-demon-fusion.md F9) — vitest-covered. */
+/** Pure fusion-lab display logic (spec-creature-fusion.md F9) — vitest-covered. */
 
 export type FusionCostDto = {
   souls: number;

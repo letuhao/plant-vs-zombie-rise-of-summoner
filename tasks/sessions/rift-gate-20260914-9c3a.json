@@ -1,0 +1,15 @@
+{
+  "session": "rift-gate-20260914-9c3a",
+  "program": "rift-gate (proposed; idea stage)",
+  "problem": "Record the approved Rift Gate concept: permanent main-menu entry and compact menu affordances; host-backed show/hide controls; a first-open cached capture path that replaces player-facing debug/almanac-dump workarounds.",
+  "mode": "worktree",
+  "branch": "worktree-rift-gate-20260914",
+  "worktree": "D:/Works/source/plant-vs-zombie-rise-of-summoner/.kilo/worktrees/rift-gate-20260914",
+  "paths": [
+    "docs/ideas/rift-gate.md",
+    "tasks/sessions/rift-gate-20260914-9c3a.json"
+  ],
+  "started": "2026-09-14T00:00:00Z",
+  "status": "merged",
+  "scopeNote": "Idea artifact only. The session-boundary checker reports pre-existing unrelated drift among active direct sessions; this isolated worktree owns no overlapping paths. Any implementation, runtime API, generated asset, or specification path needs a boundary amendment or a separate session."
+}

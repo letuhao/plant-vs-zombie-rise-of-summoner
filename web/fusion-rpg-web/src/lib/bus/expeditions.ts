@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getJson, sendJson } from "./rest";
-import type { DemonSpecimenDto } from "./demons";
+import type { CreatureSpecimenDto } from "./creatures";
 import type { TurnOrderEntry } from "@/contract/types";
 
 // ---- DTOs (spec-expeditions.md wire shapes) ----
@@ -35,7 +35,7 @@ export type ExpeditionListDto = {
 
 export type ExpeditionTickDto = {
   tickIndex: number;
-  kind: "battle" | "boss-battle" | "quiet" | "found-souls" | "wild-demon-met" | "injury";
+  kind: "battle" | "boss-battle" | "quiet" | "found-souls" | "wild-creature-met" | "injury";
   battleIndex: number;
   souls: number;
   wildSpeciesId?: string | null;
@@ -63,17 +63,17 @@ export type ExpeditionCollectDto = {
   battles: ExpeditionBattleResultDto[];
   soulsAwarded: number;
   materials: { materialId: string; qty: number }[];
-  wildJoins: DemonSpecimenDto[];
+  wildJoins: CreatureSpecimenDto[];
   specimenXp: { instanceId: string; xp: number }[];
 };
 
-export type DemonMaterialsDto = { items: { materialId: string; qty: number }[] };
+export type CreatureMaterialsDto = { items: { materialId: string; qty: number }[] };
 
 // ---- Keys ----
 
 export const expeditionKeys = {
   list: (playerId: number) => ["expeditions", playerId] as const,
-  materials: (playerId: number) => ["demonMaterials", playerId] as const
+  materials: (playerId: number) => ["creatureMaterials", playerId] as const
 };
 
 // ---- Queries ----
@@ -90,10 +90,10 @@ export function useExpeditions(playerId: number) {
   });
 }
 
-export function useDemonMaterials(playerId: number) {
+export function useCreatureMaterials(playerId: number) {
   return useQuery({
     queryKey: expeditionKeys.materials(playerId),
-    queryFn: () => getJson<DemonMaterialsDto>(`/api/expeditions/${playerId}/materials`),
+    queryFn: () => getJson<CreatureMaterialsDto>(`/api/expeditions/${playerId}/materials`),
     enabled: playerId > 0
   });
 }
@@ -102,8 +102,8 @@ export function useDemonMaterials(playerId: number) {
 
 export function invalidateExpeditionQueries(qc: ReturnType<typeof useQueryClient>) {
   void qc.invalidateQueries({ queryKey: ["expeditions"] });
-  void qc.invalidateQueries({ queryKey: ["demonMaterials"] });
-  void qc.invalidateQueries({ queryKey: ["demonRoster"] });
+  void qc.invalidateQueries({ queryKey: ["creatureMaterials"] });
+  void qc.invalidateQueries({ queryKey: ["creatureRoster"] });
   void qc.invalidateQueries({ queryKey: ["souls"] });
 }
 

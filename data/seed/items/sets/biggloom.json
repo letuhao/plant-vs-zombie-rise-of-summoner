@@ -25,7 +25,7 @@
       "id": "set.biggloom-001",
       "nameKey": "set.spore-cloud-melancholy",
       "name": "Spore Cloud Melancholy",
-      "themeKey": "demon.biggloom",
+      "themeKey": "creature.biggloom",
       "members": [
         {
           "role": "armament-primary",

@@ -2,7 +2,7 @@
 
 **Rise of Summoner is an RPG plus empire-building game.**
 
-You raise demons, grow Dave’s power, run idle expeditions, and fight for ground across a fractured multiverse. The **lawn** is the first core loop — not the whole war. Find Zomboss’s fortress before your homeworld falls.
+You raise creatures, grow Dave’s power, run idle expeditions, and fight for ground across a fractured multiverse. The **lawn** is the first core loop — not the whole war. Find Zomboss’s fortress before your homeworld falls.
 
 **What you need:** *Plants vs. Zombies: Fusion* is a fan-made Plants vs. Zombies game (separate from EA’s official titles). Point the launcher at a **legal** install of that pack. Rise of Summoner does not replace it — it adds the RPG and empire layer. In this guide, **lawn** means those matches.
 
@@ -12,13 +12,13 @@ You raise demons, grow Dave’s power, run idle expeditions, and fight for groun
 
 ## Play the lawn
 
-- Keep playing **lawn matches** — kills become [souls](site/mechanisms/souls.html), encounters fill the [almanac](almanac.md), and demons you raised [deploy](the-lawn.md) back onto the board
+- Keep playing **lawn matches** — kills become [souls](site/mechanisms/souls.html), encounters fill the [almanac](almanac.md), and creatures you raised [deploy](the-lawn.md) back onto the board
 - Watch the live board in the control room while a match runs
 - After the first chapter, unlocked features stay playable with the **lawn game** closed
 
-## Raise demons
+## Raise creatures
 
-- Every demon is a **specimen** — level, gear, history — not a stack of copies ([Creatures](creatures.md))
+- Every creature is a **specimen** — level, gear, history — not a stack of copies ([Creatures](creatures.md))
 - Spend souls at the altar; bind pacts; fuse duplicates into stronger forms
 - Gacha is one path, never the only one — wild joins and capture are others
 
@@ -30,7 +30,7 @@ You raise demons, grow Dave’s power, run idle expeditions, and fight for groun
 
 ## Idle forever
 
-- Dispatch spare demons on [expeditions](expeditions.md) — wait thirty minutes to twenty hours, then collect
+- Dispatch spare creatures on [expeditions](expeditions.md) — wait thirty minutes to twenty hours, then collect
 - No stamina gate. Core loop forever — sibling of the Delve, not a throwaway prototype
 
 ## Build the empire

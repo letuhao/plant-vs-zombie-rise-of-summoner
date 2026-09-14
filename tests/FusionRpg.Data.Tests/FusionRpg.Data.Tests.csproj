@@ -22,5 +22,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\FusionRpg.Data\FusionRpg.Data.csproj" />
     <ProjectReference Include="..\..\src\FusionRpg.Contracts\FusionRpg.Contracts.csproj" />
+    <!-- CreatureSpeciesImportCliTests launches this tool's apphost as a genuinely separate process.
+         Referencing it makes the test host's own build produce that apphost next to the test dll —
+         without it the test relied on a prebuilt bin/ that nothing in the build (or CI) created, so
+         it only passed where the tool happened to have been built by hand. -->
+    <ProjectReference Include="..\..\tools\CreatureSpeciesImport\CreatureSpeciesImport.csproj" />
   </ItemGroup>
 </Project>

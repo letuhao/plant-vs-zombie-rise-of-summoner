@@ -47,6 +47,29 @@ public sealed class DerivedComposer
         };
     }
 
+    /// <summary>
+    /// sim-hub-parity (T15) — the SAME per-channel op-aware fold as <see cref="Compose"/>, but with a
+    /// caller-supplied <paramref name="baseline"/> standing in for <see cref="DerivedStatDef.DefaultValue"/>.
+    /// <see cref="ActorDerivedLookup"/>'s pinned snapshot value already IS "this actor's value with zero
+    /// bound contributions" — reusing this composer's exact <c>ComposeFlatReplace</c>/<c>ComposeMaxFlag</c>
+    /// logic against that baseline is "the same op-aware contribution fold as Hub," not a second,
+    /// possibly-drifting reimplementation (SOLID L/D, the spec's own boundary). An unregistered channel
+    /// returns <paramref name="baseline"/> unchanged — this never widens the registered vocabulary.
+    /// </summary>
+    public double ComposeChannelWithBaseline(string channelId, double baseline, IReadOnlyList<DerivedModifier> mods)
+    {
+        if (!_registry.TryResolveChannel(channelId, out var def)) return baseline;
+        var channelMods = mods.Where(m => string.Equals(m.ChannelId, channelId, StringComparison.Ordinal)).ToList();
+        return def.Compose switch
+        {
+            DerivedComposeKind.FlatSum => baseline + channelMods.Where(m => m.Op == DerivedModifierOp.Flat).Sum(m => m.Value),
+            DerivedComposeKind.FlatReplace => ComposeFlatReplace(baseline, channelMods),
+            DerivedComposeKind.SumIncreased => Cap(def, baseline + channelMods.Where(m => m.Op == DerivedModifierOp.Increased).Sum(m => m.Value)),
+            DerivedComposeKind.MaxPriorityFlag => ComposeMaxFlag(baseline, channelMods),
+            _ => baseline
+        };
+    }
+
     static double ComposeFlatReplace(double baseline, IReadOnlyList<DerivedModifier> mods)
     {
         var replaces = mods.Where(m => m.Op == DerivedModifierOp.Replace)

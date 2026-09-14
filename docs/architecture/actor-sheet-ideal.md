@@ -172,7 +172,7 @@ same sheet opens from Creatures and Commanders with Fusion closed.
 
 ## What this is
 
-The one surface where you **look at a unique demon (or the commander) and spend power**.
+The one surface where you **look at a unique creature (or the commander) and spend power**.
 
 You open it from the lawn dock, the roster, or the commander chip. Identity stays in the header.
 Tabs partition a **no-scroll floor**. Selecting a tile or a stat fills a **right inspector** — it
@@ -200,7 +200,7 @@ an unread seed is a **wiring gap**, never a wall.
 | `ActorHub.Resolve` + live `GET /api/actors/{id}/derived` and `GET /api/actors/{id}/sheet` with contributions, fiction labels, `composeKind` | [ActorHub.cs](../../src/FusionRpg.Core/Stats/Derived/ActorHub.cs); [AuraDerivedEndpoints.cs](../../src/FusionRpg.Server/AuraDerivedEndpoints.cs); [UniqueActorHubCompose.cs](../../src/FusionRpg.Server/UniqueActorHubCompose.cs) |
 | DerivedStatsTab already consumes that feed (raw `channelId`) | [DerivedStatsTab.tsx:22-60](../../web/fusion-rpg-web/src/ui/actor/DerivedStatsTab.tsx) |
 | Six-tab `ActorPanel` shell already ships | [ActorPanel.tsx:16-26](../../web/fusion-rpg-web/src/ui/actor/ActorPanel.tsx) — **hardcoded; target is `actor-sheet.v1.json` kinds** |
-| UniqueActor identity + DemonProfile (two concrete elements, nickname) | [UniqueActorDtos.cs:15-29](../../src/FusionRpg.Contracts/UniqueActorDtos.cs); [DemonDtos.cs:6-21](../../src/FusionRpg.Contracts/DemonDtos.cs) |
+| UniqueActor identity + CreatureProfile (two concrete elements, nickname) | [UniqueActorDtos.cs:15-29](../../src/FusionRpg.Contracts/UniqueActorDtos.cs); [CreatureDtos.cs:6-21](../../src/FusionRpg.Contracts/CreatureDtos.cs) |
 | Six resource **ids** registered | `hp stamina hunger spirit qi poise` ([DerivedStatChannels.cs:521](../../src/FusionRpg.Core/Stats/Derived/DerivedStatChannels.cs)) |
 | 24 locked statuses | [status-ssot.md](status-ssot.md) §9 — **C#-first today; target is `status-catalog.v1.json`** |
 | Shield stack: max 3, drain priority, `GetShields` / `Totals` | [ShieldRuntime.cs:220-243](../../src/FusionRpg.Core/Combat/Shield/ShieldRuntime.cs); [ShieldPolicy.cs:17](../../src/FusionRpg.Core/Combat/Shield/ShieldPolicy.cs) |
@@ -227,8 +227,8 @@ already reads the derived channel.
 | `channelLabel` still `idWords` the dotted id | [adapt.ts:898-899](../../web/fusion-rpg-web/src/contract/adapt.ts) — catalog unread by `src/`, `web/`, `tests/` |
 | Live derived list prints `c.channelId` | [DerivedStatsTab.tsx:55](../../web/fusion-rpg-web/src/ui/actor/DerivedStatsTab.tsx) |
 | “Open full derived-stat sheet” is a disabled button | [DerivedStatsTab.tsx:65-71](../../web/fusion-rpg-web/src/ui/actor/DerivedStatsTab.tsx) |
-| `/derived` + `/sheet` Hub fan-in is Server durable sources (progression + aptitude + equip + tree); UniqueDemon baseline / species sheet wiring still thin | [UniqueActorHubCompose.cs](../../src/FusionRpg.Server/UniqueActorHubCompose.cs); [AuraDerivedEndpoints.cs](../../src/FusionRpg.Server/AuraDerivedEndpoints.cs) |
-| UniqueDemon allocate: store + `UniqueDemonAllocation.Baseline` exist; no player POST | [AptitudeEndpoints.cs:12-18](../../src/FusionRpg.Server/AptitudeEndpoints.cs) |
+| `/derived` + `/sheet` Hub fan-in is Server durable sources (progression + aptitude + equip + tree); UniqueCreature baseline / species sheet wiring still thin | [UniqueActorHubCompose.cs](../../src/FusionRpg.Server/UniqueActorHubCompose.cs); [AuraDerivedEndpoints.cs](../../src/FusionRpg.Server/AuraDerivedEndpoints.cs) |
+| UniqueCreature allocate: store + `UniqueCreatureAllocation.Baseline` exist; no player POST | [AptitudeEndpoints.cs:12-18](../../src/FusionRpg.Server/AptitudeEndpoints.cs) |
 | Species GET exists; sheet does not use it | [AptitudeEndpoints.cs:67-72](../../src/FusionRpg.Server/AptitudeEndpoints.cs) |
 | Shield layers live in Core; no player `GET /api/actors/{id}/shields` | debug/sim only |
 | Six pools in Core; web `ResourceId` omits `poise` | [types.ts:664](../../web/fusion-rpg-web/src/contract/types.ts) five ids — **fixed by iterating resource-catalog, not by hardcoding six** |
@@ -308,7 +308,7 @@ rejected in this phase (not re-opened at `/spec` unless the owner reverses):
 | Kind (structural) | First paint | Inspector / footnote |
 |---|---|---|
 | **Condition** | HP radial with shield overlay · resource meters from catalog · five-axis Standing · live status glyphs | Glance. No dialog. |
-| **Aptitudes** | Tiles from aptitude-catalog, `+`/`−`, leftover meter, Reset / Confirm | Right: aptitude `reading` + what the share feeds (family displayNames). Commander-scope copy until UniqueDemon allocate wires. |
+| **Aptitudes** | Tiles from aptitude-catalog, `+`/`−`, leftover meter, Reset / Confirm | Right: aptitude `reading` + what the share feeds (family displayNames). Commander-scope copy until UniqueCreature allocate wires. |
 | **Derived** | Category segs from derived-stat-catalog, one collapse open, StatRow, Show unchanged | Right: unit sentence, compose sentence, cap or “more still counts”, sources (GG-49). Six states from spec-derived-stat-sheet §3. |
 | **Shield** | Three instance radials (empty well dashed) | Omni shield StatRows. Full combat×element matrix stays on Derived → Shield category. Noun is **Shield**, never Ward. |
 | **Status** | Glyphs (live / catalog / mastery segs) from status-catalog | Catalog reading. Mastery is player-lifetime, not a live stack. |

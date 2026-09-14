@@ -38,7 +38,7 @@ const TARGET_CANDIDATES: ScopeTargetCandidate[] = [
     rungState: readyActor("a1", "Emberling") as Extract<ActorRungState, { kind: "ready" }>
   }
 ];
-const UNIQUE_DEMON_CANDIDATES = [readyActor("d1", "Ashkell")];
+const UNIQUE_CREATURE_CANDIDATES = [readyActor("d1", "Ashkell")];
 const TYPE_OPTIONS = [
   { typeId: 3, label: "Sunflower" },
   { typeId: 7, label: "Peashooter" }
@@ -52,7 +52,7 @@ function Harness() {
       value={value}
       onChange={setValue}
       targetCandidates={TARGET_CANDIDATES}
-      uniqueDemonCandidates={UNIQUE_DEMON_CANDIDATES}
+      uniqueCreatureCandidates={UNIQUE_CREATURE_CANDIDATES}
       typeOptions={TYPE_OPTIONS}
     />
   );
@@ -63,7 +63,7 @@ describe("ActorMenuScopePicker", () => {
     render(<Harness />);
     expect(screen.getByTestId("scope-mode-target")).toBeInTheDocument();
     expect(screen.getByTestId("scope-mode-type")).toBeInTheDocument();
-    expect(screen.getByTestId("scope-mode-unique-demon")).toBeInTheDocument();
+    expect(screen.getByTestId("scope-mode-unique-creature")).toBeInTheDocument();
     expect(screen.getByTestId("scope-mode-relation")).toBeInTheDocument();
   });
 
@@ -83,7 +83,7 @@ describe("ActorMenuScopePicker", () => {
     expect(screen.getByTestId("scope-relation-ally")).toHaveAttribute("aria-checked", "false");
   });
 
-  it("Target and UniqueDemon modes both render through shared ActorCollection (T11)", async () => {
+  it("Target and UniqueCreature modes both render through shared ActorCollection (T11)", async () => {
     const user = userEvent.setup();
     render(<Harness />);
 
@@ -92,9 +92,9 @@ describe("ActorMenuScopePicker", () => {
     expect(screen.getByTestId("scope-target-collection")).toBeInTheDocument();
     expect(screen.getByTestId("actor-row")).toHaveTextContent("Emberling");
 
-    await user.click(screen.getByTestId("scope-mode-unique-demon"));
-    expect(screen.getByTestId("scope-uniqueDemon-list")).toBeInTheDocument();
-    expect(screen.getByTestId("scope-uniqueDemon-collection")).toBeInTheDocument();
+    await user.click(screen.getByTestId("scope-mode-unique-creature"));
+    expect(screen.getByTestId("scope-uniqueCreature-list")).toBeInTheDocument();
+    expect(screen.getByTestId("scope-uniqueCreature-collection")).toBeInTheDocument();
     expect(screen.getByTestId("actor-row")).toHaveTextContent("Ashkell");
   });
 

@@ -25,7 +25,7 @@
       "id": "set.firecannon-001",
       "nameKey": "set.spore-cannon",
       "name": "Spore Cannon",
-      "themeKey": "demon.firecannon",
+      "themeKey": "creature.firecannon",
       "members": [
         {
           "role": "armament-primary",

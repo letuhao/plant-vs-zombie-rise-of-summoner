@@ -217,7 +217,7 @@ public class InstanceProducerTests
         Assert.Null(instance);
     }
 
-    // ---- WAVE F2.1 (demon-standalone, 2026-09-07): forced pool picks -------------------------------
+    // ---- WAVE F2.1 (creature-standalone, 2026-09-07): forced pool picks -------------------------------
 
     [Fact]
     public void A_legal_forced_pick_appears_verbatim_and_shrinks_SuffixRolls_first()

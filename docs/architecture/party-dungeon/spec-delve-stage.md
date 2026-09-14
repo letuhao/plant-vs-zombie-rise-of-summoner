@@ -147,7 +147,7 @@ Every surface declares exactly one band (GG-5, `game-gui-principles.md:115`; its
 | **2 Panel** | **Descent picker** — found domains, difficulty names, raid mode, parties, provisioning | Opened from the Sanctum door; renders `DomainOfferDto` (`spec-domain-catalog.md:380`) |
 | **3 Dialog** | **The extraction summary** — the one result, with any wipe or permanent-loss notice **folded in** | The only band-3 result this stage produces (`ExtractionSettlement.Decide`, `spec-delve-attrition.md:423`; `DelveLoot.AtExtraction`, `spec-dungeon-loot.md:393`) |
 | **3 Dialog** | Descent confirm (single-descent domains, and the Oath), extract confirm, retreat confirm | Confirms, not results — they name what is staked before it is staked |
-| **4 Toast** | Drops · level-ups · a wild demon joining · a first clear | Queued, never racing band 3: a report arriving while the summary is open waits behind it |
+| **4 Toast** | Drops · level-ups · a wild creature joining · a first clear | Queued, never racing band 3: a report arriving while the summary is open waits behind it |
 
 **The lint this table earns:** a band-3 opener test. Nothing but the extraction summary and the three confirms may push a
 `dialog` entry from `stages/delve/` — a drop, join or level-up that opens one is the failure the review found

@@ -26,7 +26,7 @@ REAL_TEMPLATES = {
     "gather-curio-kind": {"targetKind": "curio-kind", "sinkAvoidance": False},
     "kill-boss": {"targetKind": "boss", "sinkAvoidance": False},
     "extract-with-item-kind": {"targetKind": "item-kind", "sinkAvoidance": False},
-    "bring-demon-home-alive": {"targetKind": "none", "sinkAvoidance": False},
+    "bring-creature-home-alive": {"targetKind": "none", "sinkAvoidance": False},
     "finish-under-hunger": {"targetKind": "none", "sinkAvoidance": True},
     "survive-no-downed": {"targetKind": "none", "sinkAvoidance": True},
     "spend-no-provision": {"targetKind": "none", "sinkAvoidance": True},
@@ -78,7 +78,7 @@ class CountLessTemplatesTests(unittest.TestCase):
         # QuestCatalog.cs's own CountLessTemplates, transcribed -- not derived from targetKind
         # (extract-with-item-kind has a real item-kind targetKind yet is still count-less).
         self.assertEqual(COUNT_LESS_TEMPLATES, frozenset({
-            "kill-boss", "extract-with-item-kind", "bring-demon-home-alive",
+            "kill-boss", "extract-with-item-kind", "bring-creature-home-alive",
             "finish-under-hunger", "survive-no-downed", "spend-no-provision",
         }))
 
@@ -116,7 +116,7 @@ class BuildQuestSchemaForCellTests(unittest.TestCase):
             self.assertEqual(set(schema["properties"]["countBand"]["enum"]), COUNT_BANDS, template_id)
 
     def test_a_none_or_boss_targetKind_pins_targetRef_to_none(self) -> None:
-        for template_id in ("explore-rooms", "kill-boss", "bring-demon-home-alive"):
+        for template_id in ("explore-rooms", "kill-boss", "bring-creature-home-alive"):
             schema = self._schema(template_id)
             self.assertEqual(schema["properties"]["targetRef"], {"type": "string", "const": "none"}, template_id)
 

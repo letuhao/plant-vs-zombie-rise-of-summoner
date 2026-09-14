@@ -25,7 +25,7 @@
       "id": "set.icefurnace-001",
       "nameKey": "set.lotus-hearth",
       "name": "Lotus Hearth",
-      "themeKey": "demon.icefurnace",
+      "themeKey": "creature.icefurnace",
       "members": [
         {
           "role": "armament-primary",

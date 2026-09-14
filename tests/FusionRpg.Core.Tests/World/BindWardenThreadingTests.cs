@@ -25,9 +25,9 @@ public class BindWardenThreadingTests
     [Fact]
     public void A_committed_bind_warden_order_sets_the_sectors_warden_binding_id()
     {
-        var result = TurnEngine.Step(World(), new[] { BindWarden("dave", "homeworld", "demon-1") }, seed: 1);
+        var result = TurnEngine.Step(World(), new[] { BindWarden("dave", "homeworld", "creature-1") }, seed: 1);
 
-        Assert.Equal("demon-1", result.World.Sectors.Single(s => s.SectorId == "homeworld").WardenBindingId);
+        Assert.Equal("creature-1", result.World.Sectors.Single(s => s.SectorId == "homeworld").WardenBindingId);
         Assert.Contains(result.Report.Entries,
             e => e.Kind == TurnReportKinds.CommandAccepted && e.Subject == "c-bind");
         Assert.Empty(result.Report.Dropped);
@@ -39,7 +39,7 @@ public class BindWardenThreadingTests
         // Not re-proving LoamForecast.Weakest's own exclusion (LoamTextureTests.cs already does,
         // seeding the field directly) — proving the *command* actually reaches that same state, so a
         // player's bind-warden order and a hand-seeded fixture are provably the same world shape.
-        var bound = TurnEngine.Step(World(), new[] { BindWarden("dave", "homeworld", "demon-1") }, seed: 1).World;
+        var bound = TurnEngine.Step(World(), new[] { BindWarden("dave", "homeworld", "creature-1") }, seed: 1).World;
         var component = TerritoryComponents.For(bound, "dave").Single(c => c.Contains("homeworld"));
 
         Assert.Null(LoamForecast.Weakest(bound, component, available: 0, upkeep: 999_999));
@@ -61,7 +61,7 @@ public class BindWardenThreadingTests
         };
         var report = new TurnReport();
 
-        var result = WardenResolver.Run(world, new[] { BindWarden("dave", "s", "demon-1") }, report, "snapshot");
+        var result = WardenResolver.Run(world, new[] { BindWarden("dave", "s", "creature-1") }, report, "snapshot");
 
         Assert.Null(result.Sectors.Single(s => s.SectorId == "s").WardenBindingId);
         Assert.Contains(report.Entries, e => e.Kind == TurnReportKinds.CommandDropped && e.Detail == "warden.not-yours");

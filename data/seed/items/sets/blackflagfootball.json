@@ -25,7 +25,7 @@
       "id": "set.blackflagfootball-001",
       "nameKey": "set.black-olive-vanguard",
       "name": "Black Olive Vanguard",
-      "themeKey": "demon.blackflagfootball",
+      "themeKey": "creature.blackflagfootball",
       "members": [
         {
           "role": "armament-primary",

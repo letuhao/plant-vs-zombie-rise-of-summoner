@@ -25,7 +25,7 @@
       "id": "set.silvernut-001",
       "nameKey": "set.silver-nut-shell",
       "name": "Silver Nut Shell",
-      "themeKey": "demon.silvernut",
+      "themeKey": "creature.silvernut",
       "members": [
         {
           "role": "core-guard",

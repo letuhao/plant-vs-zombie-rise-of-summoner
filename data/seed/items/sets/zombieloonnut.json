@@ -25,7 +25,7 @@
       "id": "set.zombieloonnut-001",
       "nameKey": "set.the-nutty-omen",
       "name": "The Nutty Omen",
-      "themeKey": "demon.zombieloonnut",
+      "themeKey": "creature.zombieloonnut",
       "members": [
         {
           "role": "armament-primary",

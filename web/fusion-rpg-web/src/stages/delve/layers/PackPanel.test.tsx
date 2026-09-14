@@ -10,7 +10,7 @@ function cell(overrides: Partial<PackCellView> = {}): PackCellView {
     col: 0,
     w: 1,
     h: 1,
-    kind: "demon",
+    kind: "creature",
     refId: "r-1",
     qty: { unit: "count", value: 1 },
     origin: "carryIn",

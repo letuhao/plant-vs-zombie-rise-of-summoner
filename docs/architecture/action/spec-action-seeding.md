@@ -26,7 +26,7 @@ Depends on **A12** (rung table, structure budget) and **A6** (catalog load and v
 ## Objective
 
 **Actions are seeded, never handcrafted.** This module decides *what a generated action is made of* — its
-atoms, its target shape, its conditional structure — so that a demon type's ten unlocks feel like that type
+atoms, its target shape, its conditional structure — so that a creature type's ten unlocks feel like that type
 without anyone authoring them one at a time.
 
 The [concrete roster](concrete-action-roster.md) is the hand-authored floor this is measured against, not
@@ -86,7 +86,7 @@ prose written per drop. So a rolled action's name composes from its atoms' famil
 **A predicate is neither identity nor magnitude** — it is structure, so it generates deterministically from
 a weighted template pool, exactly like atoms.
 
-### 3. A demon type is a weight vector — not a third vocabulary
+### 3. A creature type is a weight vector — not a third vocabulary
 
 The action taxonomy is already closed, **twice**:
 
@@ -95,7 +95,7 @@ The action taxonomy is already closed, **twice**:
 | `action-category` | `attack · defense · support · movement · status` | `skill.cooldown.{category}`, `skill.effectiveness.{category}` |
 | `tags_json` | `offensive · defensive · heal · buff · debuff · movement · summon · utility` | `A7`'s selection — *"AI reads tags, never internals"* |
 
-> **A demon type is a weight vector over the five shipped action-categories, plus its element/aspect bias.**
+> **A creature type is a weight vector over the five shipped action-categories, plus its element/aspect bias.**
 > One small authored row per type. A fire type weights `attack`; a warden type weights `defense`.
 
 **Inventing a third vocabulary is the exact defect the atom program exists to stop.**
@@ -113,8 +113,8 @@ enumerate. So the shape pool is **board-gated**, and the gate is loud rather tha
 
 ### 5. ⛔ Enabler/payoff pairing — the constraint pricing cannot substitute for
 
-**Owner, 2026-08-27:** *"rot is one of 21 statuses… a defence demon can be rotted, an attack demon carries a
-rot action, and that attack demon can attack that defence demon. So to apply x2 damage on a rotted demon is
+**Owner, 2026-08-27:** *"rot is one of 21 statuses… a defence creature can be rotted, an attack creature carries a
+rot action, and that attack creature can attack that defence creature. So to apply x2 damage on a rotted creature is
 not easy."*
 
 E9's four-factor chain prices that difficulty (ideal §8.6). **It does not make the combination exist.**

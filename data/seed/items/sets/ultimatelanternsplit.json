@@ -25,7 +25,7 @@
       "id": "set.ultimatelanternsplit-001",
       "nameKey": "set.luminous-annihilation",
       "name": "Luminous Annihilation",
-      "themeKey": "demon.ultimatelanternsplit",
+      "themeKey": "creature.ultimatelanternsplit",
       "members": [
         {
           "role": "armament-primary",

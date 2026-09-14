@@ -11,7 +11,7 @@ Reads:
                                                                 own module docstring)
     data/seed/actions/_generated/role-lean.json               A-S0 — leanOrder/leanSource/family/
                                                                 motifs
-    data/seed/demons/species/**/*.json                      the live roster, seed order + element
+    data/seed/creatures/species/**/*.json                      the live roster, seed order + element
                                                                 (parsed via `characteristic_pool.catalog`)
     data/tuning/action-innate-picker.v1.json                  this module's OWN tuning file (the
                                                                 five `w_t`)

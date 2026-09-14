@@ -1,24 +1,81 @@
 {
   "_meta": {
-    "corpusHash": "2ecc5b14a5824ede8a8d3677422a33c42abcc49b90a09e12816333af50f3baaf",
+    "corpusHash": "ce501e8b54d230e8b58aef9f5c860e54ea07616213be8a00e06f15648721517e",
     "partition": "innate",
     "tuningVersion": 1
   },
   "entries": [
     {
-      "eligibleCount": 2,
-      "id": "innate.allpeater",
-      "innateActionId": "action.species.allpeater.001",
-      "runnerUp": "action.species.allpeater.002",
-      "score": 23,
-      "speciesKey": "allpeater",
+      "eligibleCount": 4,
+      "id": "innate.abyssswordstar",
+      "innateActionId": "action.species.abyssswordstar.001",
+      "runnerUp": "action.species.abyssswordstar.003",
+      "score": 127,
+      "speciesKey": "abyssswordstar",
       "terms": {
-        "categoryScarcity": 1,
+        "categoryScarcity": 3,
         "elementMatch": 0,
         "motifCoverage": 1,
         "roleLeanMatch": 5,
         "rungCeiling": 10
       }
+    },
+    {
+      "eligibleCount": 4,
+      "id": "innate.acientsunnut",
+      "innateActionId": "action.species.acientsunnut.001",
+      "runnerUp": "action.species.acientsunnut.002",
+      "score": 127,
+      "speciesKey": "acientsunnut",
+      "terms": {
+        "categoryScarcity": 3,
+        "elementMatch": 0,
+        "motifCoverage": 1,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 3,
+      "id": "innate.allpeater",
+      "innateActionId": "action.species.allpeater.001",
+      "runnerUp": "action.species.allpeater.004",
+      "score": 35,
+      "speciesKey": "allpeater",
+      "terms": {
+        "categoryScarcity": 2,
+        "elementMatch": 0,
+        "motifCoverage": 1,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "eligibleCount": 3,
+      "id": "innate.apple",
+      "innateActionId": "action.species.apple.001",
+      "runnerUp": "action.species.apple.003",
+      "score": 89,
+      "speciesKey": "apple",
+      "terms": {
+        "categoryScarcity": 2,
+        "elementMatch": 0,
+        "motifCoverage": 5,
+        "roleLeanMatch": 4,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "id": "innate.armedgargantuar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "armedgargantuar"
+    },
+    {
+      "id": "innate.armoredimpzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "armoredimpzombie"
     },
     {
       "eligibleCount": 1,
@@ -36,6 +93,204 @@
       }
     },
     {
+      "id": "innate.balloonzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "balloonzombie"
+    },
+    {
+      "id": "innate.bamboo",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bamboo"
+    },
+    {
+      "id": "innate.bamboodragon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bamboodragon"
+    },
+    {
+      "id": "innate.bamboofurnace",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bamboofurnace"
+    },
+    {
+      "id": "innate.bamboospruce",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bamboospruce"
+    },
+    {
+      "id": "innate.bedrocksnowzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bedrocksnowzombie"
+    },
+    {
+      "id": "innate.bedrocktallnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bedrocktallnut"
+    },
+    {
+      "id": "innate.bigchomper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bigchomper"
+    },
+    {
+      "id": "innate.biggatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "biggatling"
+    },
+    {
+      "id": "innate.biggloom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "biggloom"
+    },
+    {
+      "id": "innate.bigpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bigpumpkin"
+    },
+    {
+      "id": "innate.bigseashroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bigseashroom"
+    },
+    {
+      "id": "innate.bigsunnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bigsunnut"
+    },
+    {
+      "id": "innate.bigsunshroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bigsunshroom"
+    },
+    {
+      "id": "innate.bigwallnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bigwallnut"
+    },
+    {
+      "id": "innate.blackelephantzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "blackelephantzombie"
+    },
+    {
+      "id": "innate.blackflagfootball",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "blackflagfootball"
+    },
+    {
+      "id": "innate.blackfootball",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "blackfootball"
+    },
+    {
+      "id": "innate.blackfootball_a",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "blackfootball_a"
+    },
+    {
+      "id": "innate.blackfootball_b",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "blackfootball_b"
+    },
+    {
+      "id": "innate.blackfootball_c",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "blackfootball_c"
+    },
+    {
+      "id": "innate.blackfootball_c2",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "blackfootball_c2"
+    },
+    {
+      "id": "innate.blackhorse",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "blackhorse"
+    },
+    {
+      "id": "innate.blackjackboxzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "blackjackboxzombie"
+    },
+    {
+      "id": "innate.blacktrainzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "blacktrainzombie"
+    },
+    {
+      "id": "innate.blover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "blover"
+    },
+    {
+      "id": "innate.blovermine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "blovermine"
+    },
+    {
+      "id": "innate.bloverpot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bloverpot"
+    },
+    {
+      "id": "innate.bloverumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bloverumbrella"
+    },
+    {
+      "id": "innate.blowerpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "blowerpumpkin"
+    },
+    {
+      "id": "innate.bluegargantuar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bluegargantuar"
+    },
+    {
+      "id": "innate.boatimp",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "boatimp"
+    },
+    {
+      "id": "innate.bucketdoom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bucketdoom"
+    },
+    {
       "eligibleCount": 1,
       "id": "innate.bucketnutzombie",
       "innateActionId": "action.species.bucketnutzombie.001",
@@ -51,10 +306,82 @@
       }
     },
     {
+      "id": "innate.bucketpaper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bucketpaper"
+    },
+    {
+      "id": "innate.bucketplant",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bucketplant"
+    },
+    {
       "id": "innate.bucketzombie",
       "innateActionId": null,
       "reason": "no eligible action",
       "speciesKey": "bucketzombie"
+    },
+    {
+      "id": "innate.bucketzombieduck",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bucketzombieduck"
+    },
+    {
+      "id": "innate.bungizombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "bungizombie"
+    },
+    {
+      "id": "innate.cabbageblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cabbageblover"
+    },
+    {
+      "id": "innate.cabbagecaltrop",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cabbagecaltrop"
+    },
+    {
+      "id": "innate.cabbagecannon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cabbagecannon"
+    },
+    {
+      "id": "innate.cabbagefume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cabbagefume"
+    },
+    {
+      "id": "innate.cabbagemelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cabbagemelon"
+    },
+    {
+      "id": "innate.cabbagenut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cabbagenut"
+    },
+    {
+      "id": "innate.cabbagepot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cabbagepot"
+    },
+    {
+      "id": "innate.cabbagepuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cabbagepuff"
     },
     {
       "eligibleCount": 2,
@@ -72,18 +399,36 @@
       }
     },
     {
-      "eligibleCount": 2,
+      "id": "innate.cabbagesquash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cabbagesquash"
+    },
+    {
+      "id": "innate.cabbageumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cabbageumbrella"
+    },
+    {
+      "id": "innate.cacstusstar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cacstusstar"
+    },
+    {
+      "eligibleCount": 1,
       "id": "innate.cactus",
-      "innateActionId": "action.family.cactus.001",
-      "runnerUp": "action.species.cactus.001",
-      "score": 71,
+      "innateActionId": "action.species.cactus.001",
+      "runnerUp": null,
+      "score": 11,
       "speciesKey": "cactus",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
-        "motifCoverage": 2,
+        "motifCoverage": 1,
         "roleLeanMatch": 5,
-        "rungCeiling": 7
+        "rungCeiling": 10
       }
     },
     {
@@ -102,42 +447,75 @@
       }
     },
     {
+      "id": "innate.cactuscaltrop",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cactuscaltrop"
+    },
+    {
+      "id": "innate.cactusfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cactusfume"
+    },
+    {
+      "id": "innate.cactusnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cactusnut"
+    },
+    {
+      "id": "innate.cactuspumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cactuspumpkin"
+    },
+    {
+      "id": "innate.cactusumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cactusumbrella"
+    },
+    {
       "eligibleCount": 1,
       "id": "innate.caltrop",
       "innateActionId": "action.species.caltrop.001",
       "runnerUp": null,
-      "score": 9,
+      "score": 7,
       "speciesKey": "caltrop",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 1,
-        "roleLeanMatch": 4,
+        "roleLeanMatch": 3,
         "rungCeiling": 10
       }
     },
     {
-      "eligibleCount": 2,
-      "id": "innate.caltropnut",
-      "innateActionId": "action.species.caltropnut.001",
-      "runnerUp": "action.species.caltropnut.002",
-      "score": 47,
-      "speciesKey": "caltropnut",
-      "terms": {
-        "categoryScarcity": 1,
-        "elementMatch": 0,
-        "motifCoverage": 3,
-        "roleLeanMatch": 5,
-        "rungCeiling": 10
-      }
+      "id": "innate.caltropfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "caltropfume"
+    },
+    {
+      "id": "innate.caltropkelp_land",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "caltropkelp_land"
+    },
+    {
+      "id": "innate.caltropkelp_water",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "caltropkelp_water"
     },
     {
       "eligibleCount": 3,
-      "id": "innate.cherrybomb",
-      "innateActionId": "action.species.cherrybomb.001",
-      "runnerUp": "action.species.cherrybomb.002",
-      "score": 212,
-      "speciesKey": "cherrybomb",
+      "id": "innate.caltropnut",
+      "innateActionId": "action.species.caltropnut.002",
+      "runnerUp": "action.species.caltropnut.001",
+      "score": 272,
+      "speciesKey": "caltropnut",
       "terms": {
         "categoryScarcity": 2,
         "elementMatch": 0,
@@ -145,6 +523,75 @@
         "roleLeanMatch": 5,
         "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.caltroppot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "caltroppot"
+    },
+    {
+      "id": "innate.catapultzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "catapultzombie"
+    },
+    {
+      "id": "innate.cattailgirl",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cattailgirl"
+    },
+    {
+      "id": "innate.cattaillour",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cattaillour"
+    },
+    {
+      "id": "innate.cattailplant",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cattailplant"
+    },
+    {
+      "id": "innate.cherryblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherryblover"
+    },
+    {
+      "eligibleCount": 2,
+      "id": "innate.cherrybomb",
+      "innateActionId": "action.species.cherrybomb.001",
+      "runnerUp": "action.species.cherrybomb.002",
+      "score": 35,
+      "speciesKey": "cherrybomb",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "id": "innate.cherrycatapultzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherrycatapultzombie"
+    },
+    {
+      "id": "innate.cherrychomper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherrychomper"
+    },
+    {
+      "id": "innate.cherryfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherryfume"
     },
     {
       "eligibleCount": 1,
@@ -162,14 +609,38 @@
       }
     },
     {
-      "eligibleCount": 3,
+      "id": "innate.cherryhypno",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherryhypno"
+    },
+    {
+      "id": "innate.cherryjalapeno",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherryjalapeno"
+    },
+    {
+      "id": "innate.cherrymagnet",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherrymagnet"
+    },
+    {
+      "id": "innate.cherrymine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherrymine"
+    },
+    {
+      "eligibleCount": 2,
       "id": "innate.cherrynut",
       "innateActionId": "action.species.cherrynut.001",
-      "runnerUp": "action.family.cherry.001",
-      "score": 212,
+      "runnerUp": "action.species.cherrynut.002",
+      "score": 35,
       "speciesKey": "cherrynut",
       "terms": {
-        "categoryScarcity": 2,
+        "categoryScarcity": 1,
         "elementMatch": 0,
         "motifCoverage": 2,
         "roleLeanMatch": 5,
@@ -177,29 +648,35 @@
       }
     },
     {
-      "eligibleCount": 3,
+      "eligibleCount": 6,
       "id": "innate.cherrynutzombie",
-      "innateActionId": "action.species.cherrynutzombie.001",
-      "runnerUp": "action.species.cherrynutzombie.002",
-      "score": 284,
+      "innateActionId": "action.family.afflicted.001",
+      "runnerUp": "action.family.afflicted.002",
+      "score": 559,
       "speciesKey": "cherrynutzombie",
       "terms": {
-        "categoryScarcity": 2,
+        "categoryScarcity": 1,
         "elementMatch": 0,
         "motifCoverage": 3,
         "roleLeanMatch": 5,
-        "rungCeiling": 10
+        "rungCeiling": 7
       }
     },
     {
-      "eligibleCount": 3,
+      "id": "innate.cherrypaperz95",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherrypaperz95"
+    },
+    {
+      "eligibleCount": 2,
       "id": "innate.cherrypaperzombie",
       "innateActionId": "action.species.cherrypaperzombie.001",
       "runnerUp": "action.species.cherrypaperzombie.002",
-      "score": 284,
+      "score": 47,
       "speciesKey": "cherrypaperzombie",
       "terms": {
-        "categoryScarcity": 2,
+        "categoryScarcity": 1,
         "elementMatch": 0,
         "motifCoverage": 3,
         "roleLeanMatch": 5,
@@ -207,19 +684,49 @@
       }
     },
     {
-      "eligibleCount": 3,
+      "id": "innate.cherrypot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherrypot"
+    },
+    {
+      "id": "innate.cherrypuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherrypuff"
+    },
+    {
+      "id": "innate.cherrypumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherrypumpkin"
+    },
+    {
+      "id": "innate.cherryscaredy",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherryscaredy"
+    },
+    {
+      "eligibleCount": 2,
       "id": "innate.cherryshooter",
-      "innateActionId": "action.family.cherry.001",
+      "innateActionId": "action.species.cherryshooter.002",
       "runnerUp": "action.species.cherryshooter.001",
-      "score": 103,
+      "score": 17,
       "speciesKey": "cherryshooter",
       "terms": {
         "categoryScarcity": 1,
         "elementMatch": 0,
         "motifCoverage": 2,
         "roleLeanMatch": 2,
-        "rungCeiling": 7
+        "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.cherryshooterzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherryshooterzombie"
     },
     {
       "eligibleCount": 1,
@@ -237,6 +744,18 @@
       }
     },
     {
+      "id": "innate.cherrysquash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherrysquash"
+    },
+    {
+      "id": "innate.cherrysubmarine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherrysubmarine"
+    },
+    {
       "eligibleCount": 1,
       "id": "innate.cherrythreepeater",
       "innateActionId": "action.species.cherrythreepeater.001",
@@ -250,6 +769,30 @@
         "roleLeanMatch": 5,
         "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.cherrytorch",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherrytorch"
+    },
+    {
+      "id": "innate.cherryultimatepumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherryultimatepumpkin"
+    },
+    {
+      "id": "innate.cherryumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cherryumbrella"
+    },
+    {
+      "id": "innate.chickenimp",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "chickenimp"
     },
     {
       "eligibleCount": 1,
@@ -267,6 +810,36 @@
       }
     },
     {
+      "id": "innate.chomperpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "chomperpumpkin"
+    },
+    {
+      "id": "innate.chompersquash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "chompersquash"
+    },
+    {
+      "id": "innate.chrysantheautumn",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "chrysantheautumn"
+    },
+    {
+      "id": "innate.coachpaper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "coachpaper"
+    },
+    {
+      "id": "innate.cobcannon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cobcannon"
+    },
+    {
       "eligibleCount": 1,
       "id": "innate.conezombie",
       "innateActionId": "action.species.conezombie.001",
@@ -280,6 +853,48 @@
         "roleLeanMatch": 5,
         "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.conezombieduck",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "conezombieduck"
+    },
+    {
+      "id": "innate.cornblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cornblover"
+    },
+    {
+      "id": "innate.corncabbage",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "corncabbage"
+    },
+    {
+      "id": "innate.corncaltrop",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "corncaltrop"
+    },
+    {
+      "id": "innate.cornfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cornfume"
+    },
+    {
+      "id": "innate.cornmelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cornmelon"
+    },
+    {
+      "id": "innate.cornnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cornnut"
     },
     {
       "eligibleCount": 1,
@@ -297,34 +912,52 @@
       }
     },
     {
-      "eligibleCount": 2,
+      "id": "innate.cornpuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cornpuff"
+    },
+    {
+      "eligibleCount": 1,
       "id": "innate.cornpult",
-      "innateActionId": "action.family.corn.001",
-      "runnerUp": "action.species.cornpult.001",
-      "score": 59,
+      "innateActionId": "action.species.cornpult.001",
+      "runnerUp": null,
+      "score": 11,
       "speciesKey": "cornpult",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 2,
-        "roleLeanMatch": 4,
-        "rungCeiling": 7
+        "roleLeanMatch": 3,
+        "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.cornumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "cornumbrella"
     },
     {
       "eligibleCount": 2,
       "id": "innate.dancepolzombie",
-      "innateActionId": "action.species.dancepolzombie.002",
-      "runnerUp": "action.species.dancepolzombie.001",
-      "score": 71,
+      "innateActionId": "action.species.dancepolzombie.001",
+      "runnerUp": "action.species.dancepolzombie.002",
+      "score": 53,
       "speciesKey": "dancepolzombie",
       "terms": {
         "categoryScarcity": 1,
         "elementMatch": 0,
-        "motifCoverage": 5,
-        "roleLeanMatch": 5,
+        "motifCoverage": 2,
+        "roleLeanMatch": 4,
         "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.dancepolzombie2",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "dancepolzombie2"
     },
     {
       "eligibleCount": 1,
@@ -342,17 +975,47 @@
       }
     },
     {
+      "id": "innate.deathchomper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "deathchomper"
+    },
+    {
+      "id": "innate.deathmine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "deathmine"
+    },
+    {
+      "id": "innate.diamondimitater",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "diamondimitater"
+    },
+    {
+      "id": "innate.diamondpotatonut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "diamondpotatonut"
+    },
+    {
+      "id": "innate.diamondrandomzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "diamondrandomzombie"
+    },
+    {
       "eligibleCount": 1,
       "id": "innate.dolldiamond",
       "innateActionId": "action.species.dolldiamond.001",
       "runnerUp": null,
-      "score": 19,
+      "score": 11,
       "speciesKey": "dolldiamond",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 3,
-        "roleLeanMatch": 4,
+        "roleLeanMatch": 2,
         "rungCeiling": 10
       }
     },
@@ -361,13 +1024,13 @@
       "id": "innate.dollgold",
       "innateActionId": "action.species.dollgold.001",
       "runnerUp": "action.species.dollgold.002",
-      "score": 35,
+      "score": 29,
       "speciesKey": "dollgold",
       "terms": {
         "categoryScarcity": 1,
         "elementMatch": 0,
         "motifCoverage": 2,
-        "roleLeanMatch": 5,
+        "roleLeanMatch": 4,
         "rungCeiling": 10
       }
     },
@@ -376,15 +1039,51 @@
       "id": "innate.dollsilver",
       "innateActionId": "action.species.dollsilver.001",
       "runnerUp": null,
-      "score": 9,
+      "score": 11,
       "speciesKey": "dollsilver",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 1,
-        "roleLeanMatch": 4,
+        "roleLeanMatch": 5,
         "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.dolphingatlingzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "dolphingatlingzombie"
+    },
+    {
+      "id": "innate.dolphinpaper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "dolphinpaper"
+    },
+    {
+      "id": "innate.dolphinpeazombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "dolphinpeazombie"
+    },
+    {
+      "id": "innate.dolphinrider",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "dolphinrider"
+    },
+    {
+      "id": "innate.doomblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomblover"
+    },
+    {
+      "id": "innate.doomcabbage",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomcabbage"
     },
     {
       "eligibleCount": 2,
@@ -402,25 +1101,175 @@
       }
     },
     {
+      "id": "innate.doomcherry",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomcherry"
+    },
+    {
+      "id": "innate.doomchomper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomchomper"
+    },
+    {
+      "id": "innate.doomcorn",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomcorn"
+    },
+    {
+      "id": "innate.doomfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomfume"
+    },
+    {
+      "id": "innate.doomgarlic",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomgarlic"
+    },
+    {
+      "id": "innate.doomgatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomgatling"
+    },
+    {
+      "id": "innate.doomjalapeno",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomjalapeno"
+    },
+    {
+      "id": "innate.doomkelp",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomkelp"
+    },
+    {
+      "id": "innate.doommelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doommelon"
+    },
+    {
+      "id": "innate.doomnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomnut"
+    },
+    {
+      "id": "innate.doompaper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doompaper"
+    },
+    {
+      "id": "innate.doompeashooter",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doompeashooter"
+    },
+    {
+      "id": "innate.doomplantern",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomplantern"
+    },
+    {
+      "id": "innate.doompumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doompumpkin"
+    },
+    {
+      "id": "innate.doomseashroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomseashroom"
+    },
+    {
+      "id": "innate.doomseed",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomseed"
+    },
+    {
+      "id": "innate.doomshroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomshroom"
+    },
+    {
+      "id": "innate.doomsniper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomsniper"
+    },
+    {
+      "id": "innate.doomsquash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomsquash"
+    },
+    {
+      "id": "innate.doomstar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomstar"
+    },
+    {
+      "id": "innate.doomsunflower",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomsunflower"
+    },
+    {
+      "id": "innate.doomthreepeater",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomthreepeater"
+    },
+    {
+      "id": "innate.doomtorch",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomtorch"
+    },
+    {
+      "id": "innate.doomzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doomzombie"
+    },
+    {
       "id": "innate.doorzombie",
       "innateActionId": null,
       "reason": "no eligible action",
       "speciesKey": "doorzombie"
     },
     {
-      "eligibleCount": 2,
+      "eligibleCount": 1,
       "id": "innate.doublecherry",
-      "innateActionId": "action.family.double.001",
-      "runnerUp": "action.species.doublecherry.001",
-      "score": 143,
+      "innateActionId": "action.species.doublecherry.001",
+      "runnerUp": null,
+      "score": 14,
       "speciesKey": "doublecherry",
       "terms": {
-        "categoryScarcity": 1,
+        "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 2,
-        "roleLeanMatch": 5,
-        "rungCeiling": 7
+        "roleLeanMatch": 4,
+        "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.doublepuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "doublepuff"
     },
     {
       "id": "innate.doubleshooter",
@@ -433,30 +1282,360 @@
       "id": "innate.doublesnow",
       "innateActionId": "action.species.doublesnow.001",
       "runnerUp": null,
-      "score": 17,
+      "score": 11,
       "speciesKey": "doublesnow",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 2,
-        "roleLeanMatch": 5,
+        "roleLeanMatch": 3,
         "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.driver_a",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "driver_a"
+    },
+    {
+      "id": "innate.driver_b",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "driver_b"
+    },
+    {
+      "id": "innate.driver_c",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "driver_c"
     },
     {
       "eligibleCount": 1,
       "id": "innate.driverzombie",
       "innateActionId": "action.species.driverzombie.001",
       "runnerUp": null,
-      "score": 29,
+      "score": 23,
       "speciesKey": "driverzombie",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 5,
-        "roleLeanMatch": 4,
+        "roleLeanMatch": 3,
         "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.drown_a",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "drown_a"
+    },
+    {
+      "id": "innate.drown_b",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "drown_b"
+    },
+    {
+      "id": "innate.drown_c",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "drown_c"
+    },
+    {
+      "id": "innate.drowngargantuar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "drowngargantuar"
+    },
+    {
+      "id": "innate.drownpult_a",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "drownpult_a"
+    },
+    {
+      "id": "innate.drownpult_b",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "drownpult_b"
+    },
+    {
+      "id": "innate.drownpult_c",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "drownpult_c"
+    },
+    {
+      "id": "innate.drownpultzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "drownpultzombie"
+    },
+    {
+      "id": "innate.drownzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "drownzombie"
+    },
+    {
+      "id": "innate.electriconion",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "electriconion"
+    },
+    {
+      "id": "innate.elephantzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "elephantzombie"
+    },
+    {
+      "id": "innate.elephantzombie_a",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "elephantzombie_a"
+    },
+    {
+      "id": "innate.elephantzombie_b",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "elephantzombie_b"
+    },
+    {
+      "id": "innate.elephantzombie_c",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "elephantzombie_c"
+    },
+    {
+      "id": "innate.elitepaperzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "elitepaperzombie"
+    },
+    {
+      "id": "innate.emeraldumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "emeraldumbrella"
+    },
+    {
+      "id": "innate.endoflame",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "endoflame"
+    },
+    {
+      "id": "innate.endoflamegirl",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "endoflamegirl"
+    },
+    {
+      "id": "innate.endoflamezombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "endoflamezombie"
+    },
+    {
+      "id": "innate.endpumpiner",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "endpumpiner"
+    },
+    {
+      "id": "innate.enumvalue261",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "enumvalue261"
+    },
+    {
+      "id": "innate.enumvalue262",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "enumvalue262"
+    },
+    {
+      "id": "innate.enumvalue263",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "enumvalue263"
+    },
+    {
+      "id": "innate.enumvalue264",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "enumvalue264"
+    },
+    {
+      "id": "innate.enumvalue265",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "enumvalue265"
+    },
+    {
+      "id": "innate.enumvalue266",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "enumvalue266"
+    },
+    {
+      "id": "innate.enumvalue267",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "enumvalue267"
+    },
+    {
+      "id": "innate.enumvalue268",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "enumvalue268"
+    },
+    {
+      "id": "innate.eternalzombie_a",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "eternalzombie_a"
+    },
+    {
+      "id": "innate.eternalzombie_b",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "eternalzombie_b"
+    },
+    {
+      "id": "innate.eternalzombie_c",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "eternalzombie_c"
+    },
+    {
+      "id": "innate.extract_single",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "extract_single"
+    },
+    {
+      "id": "innate.extract_ten",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "extract_ten"
+    },
+    {
+      "id": "innate.firecabbage",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firecabbage"
+    },
+    {
+      "id": "innate.firecaltrop",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firecaltrop"
+    },
+    {
+      "id": "innate.firecannon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firecannon"
+    },
+    {
+      "id": "innate.firecattail",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firecattail"
+    },
+    {
+      "id": "innate.firecracker",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firecracker"
+    },
+    {
+      "id": "innate.firefume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firefume"
+    },
+    {
+      "id": "innate.firegloom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firegloom"
+    },
+    {
+      "id": "innate.firekelp",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firekelp"
+    },
+    {
+      "id": "innate.firemelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firemelon"
+    },
+    {
+      "id": "innate.firemine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firemine"
+    },
+    {
+      "id": "innate.firenut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firenut"
+    },
+    {
+      "id": "innate.fireseashroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "fireseashroom"
+    },
+    {
+      "id": "innate.firesniper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firesniper"
+    },
+    {
+      "id": "innate.firespikerock",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firespikerock"
+    },
+    {
+      "id": "innate.firesquash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firesquash"
+    },
+    {
+      "id": "innate.firesunshroom_a",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firesunshroom_a"
+    },
+    {
+      "id": "innate.firesunshroom_b",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firesunshroom_b"
+    },
+    {
+      "id": "innate.firesunshroom_c",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "firesunshroom_c"
+    },
+    {
+      "id": "innate.flagfootball",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "flagfootball"
     },
     {
       "eligibleCount": 2,
@@ -474,10 +1653,52 @@
       }
     },
     {
+      "id": "innate.flyingthreepeater",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "flyingthreepeater"
+    },
+    {
+      "id": "innate.flyingthreepeater_sp",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "flyingthreepeater_sp"
+    },
+    {
+      "id": "innate.footballboss",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "footballboss"
+    },
+    {
+      "id": "innate.footballdolphin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "footballdolphin"
+    },
+    {
+      "id": "innate.footballdrown",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "footballdrown"
+    },
+    {
       "id": "innate.footballzombie",
       "innateActionId": null,
       "reason": "no eligible action",
       "speciesKey": "footballzombie"
+    },
+    {
+      "id": "innate.frozenpear",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "frozenpear"
+    },
+    {
+      "id": "innate.fumepumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "fumepumpkin"
     },
     {
       "eligibleCount": 1,
@@ -495,49 +1716,190 @@
       }
     },
     {
+      "id": "innate.gargantuar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "gargantuar"
+    },
+    {
       "eligibleCount": 1,
       "id": "innate.garlic",
       "innateActionId": "action.species.garlic.001",
       "runnerUp": null,
-      "score": 17,
+      "score": 14,
       "speciesKey": "garlic",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 2,
+        "roleLeanMatch": 4,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "id": "innate.garlicblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "garlicblover"
+    },
+    {
+      "id": "innate.garliccabbage",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "garliccabbage"
+    },
+    {
+      "id": "innate.garliccorn",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "garliccorn"
+    },
+    {
+      "id": "innate.garlicfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "garlicfume"
+    },
+    {
+      "id": "innate.garlicgatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "garlicgatling"
+    },
+    {
+      "id": "innate.garlicmelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "garlicmelon"
+    },
+    {
+      "id": "innate.garlicnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "garlicnut"
+    },
+    {
+      "eligibleCount": 2,
+      "id": "innate.garlicpea",
+      "innateActionId": "action.species.garlicpea.001",
+      "runnerUp": "action.species.garlicpea.002",
+      "score": 29,
+      "speciesKey": "garlicpea",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 4,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "id": "innate.garlicpot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "garlicpot"
+    },
+    {
+      "id": "innate.garlicpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "garlicpumpkin"
+    },
+    {
+      "id": "innate.garlicrepeater",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "garlicrepeater"
+    },
+    {
+      "id": "innate.garlicsniper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "garlicsniper"
+    },
+    {
+      "id": "innate.garlicsplit",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "garlicsplit"
+    },
+    {
+      "eligibleCount": 2,
+      "id": "innate.garlicthreepeater",
+      "innateActionId": "action.species.garlicthreepeater.001",
+      "runnerUp": "action.species.garlicthreepeater.002",
+      "score": 45,
+      "speciesKey": "garlicthreepeater",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 2,
         "roleLeanMatch": 5,
         "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.garlictorch",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "garlictorch"
+    },
+    {
+      "id": "innate.garlicultimatechomper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "garlicultimatechomper"
+    },
+    {
+      "id": "innate.garlicumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "garlicumbrella"
+    },
+    {
+      "id": "innate.gatlingblackfootball",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "gatlingblackfootball"
+    },
+    {
+      "id": "innate.gatlingdoomscaredy",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "gatlingdoomscaredy"
+    },
+    {
+      "id": "innate.gatlingfootballzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "gatlingfootballzombie"
+    },
+    {
+      "id": "innate.gatlingpaper_a",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "gatlingpaper_a"
     },
     {
       "eligibleCount": 3,
-      "id": "innate.garlicpea",
-      "innateActionId": "action.species.garlicpea.001",
-      "runnerUp": "action.family.garlic.002",
-      "score": 212,
-      "speciesKey": "garlicpea",
+      "id": "innate.gatlingpaper_b",
+      "innateActionId": "action.family.academic.001",
+      "runnerUp": "action.family.academic.002",
+      "score": 143,
+      "speciesKey": "gatlingpaper_b",
       "terms": {
-        "categoryScarcity": 2,
+        "categoryScarcity": 0,
         "elementMatch": 0,
-        "motifCoverage": 2,
-        "roleLeanMatch": 5,
-        "rungCeiling": 10
-      }
-    },
-    {
-      "eligibleCount": 4,
-      "id": "innate.garlicthreepeater",
-      "innateActionId": "action.family.garlic.001",
-      "runnerUp": "action.species.garlicthreepeater.001",
-      "score": 363,
-      "speciesKey": "garlicthreepeater",
-      "terms": {
-        "categoryScarcity": 2,
-        "elementMatch": 0,
-        "motifCoverage": 2,
+        "motifCoverage": 5,
         "roleLeanMatch": 5,
         "rungCeiling": 7
       }
+    },
+    {
+      "id": "innate.gatlingpaper_c",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "gatlingpaper_c"
     },
     {
       "eligibleCount": 2,
@@ -555,6 +1917,228 @@
       }
     },
     {
+      "id": "innate.gatlingpeazombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "gatlingpeazombie"
+    },
+    {
+      "id": "innate.gatlingpuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "gatlingpuff"
+    },
+    {
+      "id": "innate.gloomshroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "gloomshroom"
+    },
+    {
+      "id": "innate.goldbungizombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "goldbungizombie"
+    },
+    {
+      "id": "innate.goldcabbage",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "goldcabbage"
+    },
+    {
+      "id": "innate.goldcorn",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "goldcorn"
+    },
+    {
+      "id": "innate.golddoom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "golddoom"
+    },
+    {
+      "eligibleCount": 5,
+      "id": "innate.goldgarlic",
+      "innateActionId": "action.family.allium.004",
+      "runnerUp": "action.family.allium.001",
+      "score": 715,
+      "speciesKey": "goldgarlic",
+      "terms": {
+        "categoryScarcity": 3,
+        "elementMatch": 0,
+        "motifCoverage": 5,
+        "roleLeanMatch": 5,
+        "rungCeiling": 7
+      }
+    },
+    {
+      "id": "innate.goldhypnodoom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "goldhypnodoom"
+    },
+    {
+      "eligibleCount": 3,
+      "id": "innate.goldiceshroom",
+      "innateActionId": "action.family.alchemical.003",
+      "runnerUp": "action.family.alchemical.004",
+      "score": 427,
+      "speciesKey": "goldiceshroom",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 5,
+        "roleLeanMatch": 5,
+        "rungCeiling": 7
+      }
+    },
+    {
+      "id": "innate.goldmagnet",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "goldmagnet"
+    },
+    {
+      "id": "innate.goldmelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "goldmelon"
+    },
+    {
+      "id": "innate.goldnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "goldnut"
+    },
+    {
+      "id": "innate.goldpot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "goldpot"
+    },
+    {
+      "id": "innate.goldscarypot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "goldscarypot"
+    },
+    {
+      "id": "innate.goldsunflower",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "goldsunflower"
+    },
+    {
+      "id": "innate.goldthreeplantern",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "goldthreeplantern"
+    },
+    {
+      "id": "innate.goldthreetorch",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "goldthreetorch"
+    },
+    {
+      "id": "innate.goldumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "goldumbrella"
+    },
+    {
+      "id": "innate.goldzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "goldzombie"
+    },
+    {
+      "id": "innate.gravebuster",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "gravebuster"
+    },
+    {
+      "id": "innate.greengargantuar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "greengargantuar"
+    },
+    {
+      "id": "innate.hamburger",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hamburger"
+    },
+    {
+      "id": "innate.helmetfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "helmetfume"
+    },
+    {
+      "id": "innate.helmetgatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "helmetgatling"
+    },
+    {
+      "id": "innate.helmetplant",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "helmetplant"
+    },
+    {
+      "id": "innate.holographicplant",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "holographicplant"
+    },
+    {
+      "id": "innate.horseboss",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "horseboss"
+    },
+    {
+      "id": "innate.horsezombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "horsezombie"
+    },
+    {
+      "id": "innate.hugewallnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hugewallnut"
+    },
+    {
+      "id": "innate.hurricaneblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hurricaneblover"
+    },
+    {
+      "id": "innate.hypnoblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnoblover"
+    },
+    {
+      "id": "innate.hypnocattailgirl",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnocattailgirl"
+    },
+    {
+      "id": "innate.hypnocattailgirl_land",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnocattailgirl_land"
+    },
+    {
       "eligibleCount": 2,
       "id": "innate.hypnochomper",
       "innateActionId": "action.species.hypnochomper.001",
@@ -570,14 +2154,44 @@
       }
     },
     {
-      "eligibleCount": 3,
+      "id": "innate.hypnodoom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnodoom"
+    },
+    {
+      "id": "innate.hypnoemperor",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnoemperor"
+    },
+    {
+      "id": "innate.hypnofume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnofume"
+    },
+    {
+      "id": "innate.hypnogarlic",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnogarlic"
+    },
+    {
+      "id": "innate.hypnogatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnogatling"
+    },
+    {
+      "eligibleCount": 2,
       "id": "innate.hypnojalapeno",
       "innateActionId": "action.species.hypnojalapeno.001",
-      "runnerUp": "action.family.hypno.002",
-      "score": 200,
+      "runnerUp": "action.species.hypnojalapeno.002",
+      "score": 33,
       "speciesKey": "hypnojalapeno",
       "terms": {
-        "categoryScarcity": 2,
+        "categoryScarcity": 1,
         "elementMatch": 0,
         "motifCoverage": 1,
         "roleLeanMatch": 5,
@@ -585,14 +2199,50 @@
       }
     },
     {
-      "eligibleCount": 3,
+      "id": "innate.hypnojalapenopickaxezombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnojalapenopickaxezombie"
+    },
+    {
+      "id": "innate.hypnojalapenozombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnojalapenozombie"
+    },
+    {
+      "id": "innate.hypnomagnet",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnomagnet"
+    },
+    {
+      "id": "innate.hypnomelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnomelon"
+    },
+    {
+      "id": "innate.hypnomine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnomine"
+    },
+    {
+      "id": "innate.hypnonut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnonut"
+    },
+    {
+      "eligibleCount": 2,
       "id": "innate.hypnopeashooter",
       "innateActionId": "action.species.hypnopeashooter.001",
-      "runnerUp": "action.family.hypno.002",
-      "score": 200,
+      "runnerUp": "action.species.hypnopeashooter.002",
+      "score": 23,
       "speciesKey": "hypnopeashooter",
       "terms": {
-        "categoryScarcity": 2,
+        "categoryScarcity": 1,
         "elementMatch": 0,
         "motifCoverage": 1,
         "roleLeanMatch": 5,
@@ -600,34 +2250,232 @@
       }
     },
     {
-      "eligibleCount": 3,
+      "id": "innate.hypnopot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnopot"
+    },
+    {
+      "id": "innate.hypnopuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnopuff"
+    },
+    {
+      "id": "innate.hypnopumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnopumpkin"
+    },
+    {
+      "id": "innate.hypnoqueen",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnoqueen"
+    },
+    {
+      "id": "innate.hypnorepeater",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnorepeater"
+    },
+    {
+      "eligibleCount": 1,
       "id": "innate.hypnoshroom",
-      "innateActionId": "action.family.hypno.001",
-      "runnerUp": "action.family.hypno.002",
-      "score": 215,
+      "innateActionId": "action.species.hypnoshroom.001",
+      "runnerUp": null,
+      "score": 11,
       "speciesKey": "hypnoshroom",
       "terms": {
-        "categoryScarcity": 2,
+        "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 2,
-        "roleLeanMatch": 5,
-        "rungCeiling": 7
+        "roleLeanMatch": 3,
+        "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.hypnosplit",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnosplit"
+    },
+    {
+      "id": "innate.hypnosquash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnosquash"
+    },
+    {
+      "id": "innate.hypnotorch",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "hypnotorch"
+    },
+    {
+      "id": "innate.icebean",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icebean"
+    },
+    {
+      "id": "innate.iceblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "iceblover"
+    },
+    {
+      "id": "innate.icecabbage",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icecabbage"
+    },
+    {
+      "id": "innate.icecactus",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icecactus"
     },
     {
       "eligibleCount": 1,
       "id": "innate.icecaltrop",
       "innateActionId": "action.species.icecaltrop.001",
       "runnerUp": null,
-      "score": 17,
+      "score": 11,
       "speciesKey": "icecaltrop",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 2,
-        "roleLeanMatch": 5,
+        "roleLeanMatch": 3,
         "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.icecannon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icecannon"
+    },
+    {
+      "id": "innate.icecattail",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icecattail"
+    },
+    {
+      "id": "innate.icecherry",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icecherry"
+    },
+    {
+      "id": "innate.iceclawzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "iceclawzombie"
+    },
+    {
+      "id": "innate.icecorn",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icecorn"
+    },
+    {
+      "id": "innate.icedoom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icedoom"
+    },
+    {
+      "id": "innate.icefumeshroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icefumeshroom"
+    },
+    {
+      "id": "innate.icefurnace",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icefurnace"
+    },
+    {
+      "id": "innate.icegloom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icegloom"
+    },
+    {
+      "id": "innate.icehypno",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icehypno"
+    },
+    {
+      "id": "innate.icelaserumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icelaserumbrella"
+    },
+    {
+      "id": "innate.icelotus",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icelotus"
+    },
+    {
+      "id": "innate.icemine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icemine"
+    },
+    {
+      "id": "innate.icenut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icenut"
+    },
+    {
+      "id": "innate.icepeach",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icepeach"
+    },
+    {
+      "id": "innate.iceplantern",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "iceplantern"
+    },
+    {
+      "id": "innate.icepot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icepot"
+    },
+    {
+      "id": "innate.icepuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icepuff"
+    },
+    {
+      "id": "innate.icepumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icepumpkin"
+    },
+    {
+      "id": "innate.icescaredyshroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icescaredyshroom"
+    },
+    {
+      "id": "innate.iceseashroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "iceseashroom"
     },
     {
       "eligibleCount": 1,
@@ -645,19 +2493,265 @@
       }
     },
     {
+      "id": "innate.icespikerock",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icespikerock"
+    },
+    {
+      "id": "innate.icesquash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icesquash"
+    },
+    {
+      "id": "innate.icetorch",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "icetorch"
+    },
+    {
+      "id": "innate.ifvblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ifvblover"
+    },
+    {
+      "id": "innate.ifvironpuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ifvironpuff"
+    },
+    {
+      "id": "innate.ifvpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ifvpumpkin"
+    },
+    {
+      "id": "innate.ifvstar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ifvstar"
+    },
+    {
+      "id": "innate.imitater",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "imitater"
+    },
+    {
+      "id": "innate.imitatewheat",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "imitatewheat"
+    },
+    {
+      "id": "innate.impking",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "impking"
+    },
+    {
+      "id": "innate.impzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "impzombie"
+    },
+    {
+      "id": "innate.ironballoonzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ironballoonzombie"
+    },
+    {
+      "id": "innate.ironballoonzombie2",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ironballoonzombie2"
+    },
+    {
+      "id": "innate.ironconezombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ironconezombie"
+    },
+    {
+      "id": "innate.ironcorn",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ironcorn"
+    },
+    {
+      "id": "innate.ironfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ironfume"
+    },
+    {
+      "id": "innate.irongargantuar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "irongargantuar"
+    },
+    {
+      "id": "innate.ironmelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ironmelon"
+    },
+    {
+      "id": "innate.ironnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ironnut"
+    },
+    {
+      "id": "innate.ironpea",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ironpea"
+    },
+    {
+      "id": "innate.ironpeadoorzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ironpeadoorzombie"
+    },
+    {
       "eligibleCount": 2,
       "id": "innate.ironpeazombie",
-      "innateActionId": "action.species.ironpeazombie.001",
-      "runnerUp": "action.species.ironpeazombie.002",
-      "score": 45,
+      "innateActionId": "action.species.ironpeazombie.002",
+      "runnerUp": "action.species.ironpeazombie.001",
+      "score": 47,
       "speciesKey": "ironpeazombie",
       "terms": {
         "categoryScarcity": 1,
         "elementMatch": 0,
-        "motifCoverage": 2,
+        "motifCoverage": 3,
         "roleLeanMatch": 5,
         "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.ironpuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ironpuff"
+    },
+    {
+      "id": "innate.ironpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ironpumpkin"
+    },
+    {
+      "id": "innate.ironredgargantuar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ironredgargantuar"
+    },
+    {
+      "id": "innate.ironsquash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ironsquash"
+    },
+    {
+      "id": "innate.ironstar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ironstar"
+    },
+    {
+      "id": "innate.jackbox_a",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jackbox_a"
+    },
+    {
+      "id": "innate.jackbox_b",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jackbox_b"
+    },
+    {
+      "id": "innate.jackbox_c",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jackbox_c"
+    },
+    {
+      "id": "innate.jackboxdoom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jackboxdoom"
+    },
+    {
+      "id": "innate.jackboxjumpzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jackboxjumpzombie"
+    },
+    {
+      "id": "innate.jackboxplant",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jackboxplant"
+    },
+    {
+      "id": "innate.jackboxpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jackboxpumpkin"
+    },
+    {
+      "id": "innate.jackboxstar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jackboxstar"
+    },
+    {
+      "id": "innate.jackboxzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jackboxzombie"
+    },
+    {
+      "id": "innate.jackson_a",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jackson_a"
+    },
+    {
+      "id": "innate.jackson_b",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jackson_b"
+    },
+    {
+      "id": "innate.jackson_c",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jackson_c"
+    },
+    {
+      "id": "innate.jacksondriver",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jacksondriver"
+    },
+    {
+      "id": "innate.jacksondriverboss",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jacksondriverboss"
+    },
+    {
+      "id": "innate.jacksonzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jacksonzombie"
     },
     {
       "eligibleCount": 2,
@@ -675,6 +2769,18 @@
       }
     },
     {
+      "id": "innate.jalacorn",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jalacorn"
+    },
+    {
+      "id": "innate.jaladoubleshooter",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jaladoubleshooter"
+    },
+    {
       "eligibleCount": 1,
       "id": "innate.jalagatling",
       "innateActionId": "action.species.jalagatling.001",
@@ -690,17 +2796,29 @@
       }
     },
     {
+      "id": "innate.jalakelp",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jalakelp"
+    },
+    {
+      "id": "innate.jalamine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jalamine"
+    },
+    {
       "eligibleCount": 1,
       "id": "innate.jalapeashooter",
       "innateActionId": "action.species.jalapeashooter.001",
       "runnerUp": null,
-      "score": 7,
+      "score": 3,
       "speciesKey": "jalapeashooter",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 1,
-        "roleLeanMatch": 3,
+        "roleLeanMatch": 1,
         "rungCeiling": 10
       }
     },
@@ -720,10 +2838,133 @@
       }
     },
     {
-      "id": "innate.jalastar",
+      "id": "innate.jalapenozombie",
       "innateActionId": null,
       "reason": "no eligible action",
-      "speciesKey": "jalastar"
+      "speciesKey": "jalapenozombie"
+    },
+    {
+      "id": "innate.jalapumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jalapumpkin"
+    },
+    {
+      "id": "innate.jalasplit",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jalasplit"
+    },
+    {
+      "id": "innate.jalasquash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jalasquash"
+    },
+    {
+      "id": "innate.jalasquashzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jalasquashzombie"
+    },
+    {
+      "eligibleCount": 1,
+      "id": "innate.jalastar",
+      "innateActionId": "action.family.fruit.001",
+      "runnerUp": null,
+      "score": 11,
+      "speciesKey": "jalastar",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 0,
+        "roleLeanMatch": 2,
+        "rungCeiling": 7
+      }
+    },
+    {
+      "id": "innate.jalatorch",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "jalatorch"
+    },
+    {
+      "id": "innate.kelpfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "kelpfume"
+    },
+    {
+      "id": "innate.kelpmine_land",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "kelpmine_land"
+    },
+    {
+      "id": "innate.kelpmine_water",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "kelpmine_water"
+    },
+    {
+      "id": "innate.kelpnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "kelpnut"
+    },
+    {
+      "id": "innate.kelppuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "kelppuff"
+    },
+    {
+      "id": "innate.kelptorch",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "kelptorch"
+    },
+    {
+      "id": "innate.kirov_a",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "kirov_a"
+    },
+    {
+      "id": "innate.kirov_b",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "kirov_b"
+    },
+    {
+      "id": "innate.kirov_c",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "kirov_c"
+    },
+    {
+      "id": "innate.kirovzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "kirovzombie"
+    },
+    {
+      "id": "innate.ladderzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ladderzombie"
+    },
+    {
+      "id": "innate.landsubmarine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "landsubmarine"
+    },
+    {
+      "id": "innate.lanternblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "lanternblover"
     },
     {
       "id": "innate.lanterncactus",
@@ -747,6 +2988,30 @@
       }
     },
     {
+      "id": "innate.lanternfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "lanternfume"
+    },
+    {
+      "id": "innate.lanterngatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "lanterngatling"
+    },
+    {
+      "id": "innate.lanternmagnet",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "lanternmagnet"
+    },
+    {
+      "id": "innate.lanternnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "lanternnut"
+    },
+    {
       "eligibleCount": 1,
       "id": "innate.lanternpea",
       "innateActionId": "action.species.lanternpea.001",
@@ -762,19 +3027,268 @@
       }
     },
     {
+      "id": "innate.lanternpot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "lanternpot"
+    },
+    {
+      "id": "innate.lanternpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "lanternpumpkin"
+    },
+    {
+      "id": "innate.lanternrepeater",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "lanternrepeater"
+    },
+    {
+      "id": "innate.lanternsplit",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "lanternsplit"
+    },
+    {
+      "id": "innate.lanternstar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "lanternstar"
+    },
+    {
+      "id": "innate.lanternumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "lanternumbrella"
+    },
+    {
+      "id": "innate.laserumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "laserumbrella"
+    },
+    {
+      "id": "innate.legionsniperzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "legionsniperzombie"
+    },
+    {
+      "id": "innate.legionzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "legionzombie"
+    },
+    {
+      "id": "innate.levatationzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "levatationzombie"
+    },
+    {
+      "id": "innate.lilypad",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "lilypad"
+    },
+    {
+      "id": "innate.lotusaloes",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "lotusaloes"
+    },
+    {
+      "id": "innate.lotusbamboo",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "lotusbamboo"
+    },
+    {
+      "id": "innate.lotusspruce",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "lotusspruce"
+    },
+    {
+      "id": "innate.luckyblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "luckyblover"
+    },
+    {
+      "id": "innate.machinelevatation",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "machinelevatation"
+    },
+    {
+      "id": "innate.machinenut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "machinenut"
+    },
+    {
+      "id": "innate.machinenutzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "machinenutzombie"
+    },
+    {
+      "id": "innate.machineshardplant",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "machineshardplant"
+    },
+    {
+      "id": "innate.magicsnowpea",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "magicsnowpea"
+    },
+    {
+      "id": "innate.magicsnowpea2",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "magicsnowpea2"
+    },
+    {
+      "id": "innate.magnetblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "magnetblover"
+    },
+    {
+      "id": "innate.magnetbox",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "magnetbox"
+    },
+    {
+      "id": "innate.magnetcactus",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "magnetcactus"
+    },
+    {
+      "id": "innate.magnetcorn",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "magnetcorn"
+    },
+    {
+      "id": "innate.magnetdoom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "magnetdoom"
+    },
+    {
+      "id": "innate.magnetfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "magnetfume"
+    },
+    {
+      "id": "innate.magnetinterface",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "magnetinterface"
+    },
+    {
+      "id": "innate.magnetmelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "magnetmelon"
+    },
+    {
+      "id": "innate.magnetnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "magnetnut"
+    },
+    {
+      "id": "innate.magnetpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "magnetpumpkin"
+    },
+    {
+      "id": "innate.magnetshroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "magnetshroom"
+    },
+    {
+      "id": "innate.magnetstar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "magnetstar"
+    },
+    {
       "eligibleCount": 2,
       "id": "innate.marigold",
-      "innateActionId": "action.species.marigold.002",
-      "runnerUp": "action.species.marigold.001",
-      "score": 35,
+      "innateActionId": "action.species.marigold.001",
+      "runnerUp": "action.species.marigold.002",
+      "score": 33,
       "speciesKey": "marigold",
       "terms": {
         "categoryScarcity": 1,
         "elementMatch": 0,
-        "motifCoverage": 2,
+        "motifCoverage": 1,
         "roleLeanMatch": 5,
         "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.melonblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "melonblover"
+    },
+    {
+      "id": "innate.meloncaltrop",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "meloncaltrop"
+    },
+    {
+      "id": "innate.meloncannon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "meloncannon"
+    },
+    {
+      "id": "innate.melonfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "melonfume"
+    },
+    {
+      "eligibleCount": 1,
+      "id": "innate.melonnut",
+      "innateActionId": "action.family.nut.001",
+      "runnerUp": null,
+      "score": 23,
+      "speciesKey": "melonnut",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 0,
+        "roleLeanMatch": 5,
+        "rungCeiling": 7
+      }
+    },
+    {
+      "id": "innate.melonpot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "melonpot"
+    },
+    {
+      "id": "innate.melonpuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "melonpuff"
     },
     {
       "eligibleCount": 1,
@@ -792,34 +3306,172 @@
       }
     },
     {
+      "id": "innate.melonpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "melonpumpkin"
+    },
+    {
+      "id": "innate.melonumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "melonumbrella"
+    },
+    {
+      "id": "innate.minerzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "minerzombie"
+    },
+    {
+      "id": "innate.minisandmonster",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "minisandmonster"
+    },
+    {
+      "id": "innate.minisnowmonster",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "minisnowmonster"
+    },
+    {
+      "id": "innate.mixanim",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "mixanim"
+    },
+    {
+      "id": "innate.mixbomb",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "mixbomb"
+    },
+    {
+      "id": "innate.newyearzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "newyearzombie"
+    },
+    {
       "eligibleCount": 1,
       "id": "innate.normalzombie",
       "innateActionId": "action.species.normalzombie.001",
       "runnerUp": null,
-      "score": 19,
+      "score": 15,
       "speciesKey": "normalzombie",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 3,
-        "roleLeanMatch": 4,
+        "roleLeanMatch": 3,
         "rungCeiling": 10
       }
     },
     {
-      "eligibleCount": 2,
+      "id": "innate.nucleardoomcherry",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "nucleardoomcherry"
+    },
+    {
+      "id": "innate.nuclearsquash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "nuclearsquash"
+    },
+    {
+      "id": "innate.nutblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "nutblover"
+    },
+    {
+      "eligibleCount": 1,
       "id": "innate.nutchomper",
-      "innateActionId": "action.family.chomper.001",
-      "runnerUp": "action.species.nutchomper.001",
-      "score": 71,
+      "innateActionId": "action.species.nutchomper.001",
+      "runnerUp": null,
+      "score": 11,
       "speciesKey": "nutchomper",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
-        "motifCoverage": 2,
+        "motifCoverage": 1,
         "roleLeanMatch": 5,
-        "rungCeiling": 7
+        "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.nutfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "nutfume"
+    },
+    {
+      "id": "innate.nutpot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "nutpot"
+    },
+    {
+      "id": "innate.nutpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "nutpumpkin"
+    },
+    {
+      "id": "innate.nuttorch",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "nuttorch"
+    },
+    {
+      "id": "innate.nutumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "nutumbrella"
+    },
+    {
+      "id": "innate.obsidianclawzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "obsidianclawzombie"
+    },
+    {
+      "id": "innate.obsidianimpzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "obsidianimpzombie"
+    },
+    {
+      "id": "innate.obsidianjalapeno",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "obsidianjalapeno"
+    },
+    {
+      "id": "innate.obsidianspike",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "obsidianspike"
+    },
+    {
+      "id": "innate.obsidiantallnutzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "obsidiantallnutzombie"
+    },
+    {
+      "id": "innate.obsidianwallnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "obsidianwallnut"
+    },
+    {
+      "id": "innate.obsidianwheat",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "obsidianwheat"
     },
     {
       "eligibleCount": 1,
@@ -837,6 +3489,18 @@
       }
     },
     {
+      "id": "innate.passionfruit",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "passionfruit"
+    },
+    {
+      "id": "innate.peablover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "peablover"
+    },
+    {
       "eligibleCount": 1,
       "id": "innate.peachomper",
       "innateActionId": "action.species.peachomper.001",
@@ -852,49 +3516,67 @@
       }
     },
     {
-      "eligibleCount": 2,
+      "id": "innate.peafume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "peafume"
+    },
+    {
+      "id": "innate.peamine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "peamine"
+    },
+    {
+      "eligibleCount": 1,
       "id": "innate.peanut",
-      "innateActionId": "action.family.nut.001",
-      "runnerUp": "action.species.peanut.001",
-      "score": 59,
+      "innateActionId": "action.species.peanut.001",
+      "runnerUp": null,
+      "score": 11,
       "speciesKey": "peanut",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 2,
-        "roleLeanMatch": 4,
-        "rungCeiling": 7
-      }
-    },
-    {
-      "eligibleCount": 1,
-      "id": "innate.peashooter",
-      "innateActionId": "action.family.pea.002",
-      "runnerUp": null,
-      "score": 23,
-      "speciesKey": "peashooter",
-      "terms": {
-        "categoryScarcity": 0,
-        "elementMatch": 0,
-        "motifCoverage": 2,
-        "roleLeanMatch": 1,
-        "rungCeiling": 7
-      }
-    },
-    {
-      "eligibleCount": 2,
-      "id": "innate.peashooterzombie",
-      "innateActionId": "action.family.pea.001",
-      "runnerUp": "action.family.pea.002",
-      "score": 95,
-      "speciesKey": "peashooterzombie",
-      "terms": {
-        "categoryScarcity": 1,
-        "elementMatch": 0,
-        "motifCoverage": 2,
         "roleLeanMatch": 3,
-        "rungCeiling": 7
+        "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.peapot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "peapot"
+    },
+    {
+      "id": "innate.peapuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "peapuff"
+    },
+    {
+      "id": "innate.peapumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "peapumpkin"
+    },
+    {
+      "id": "innate.peascaredy",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "peascaredy"
+    },
+    {
+      "id": "innate.peashooter",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "peashooter"
+    },
+    {
+      "id": "innate.peashooterzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "peashooterzombie"
     },
     {
       "eligibleCount": 1,
@@ -918,6 +3600,72 @@
       "speciesKey": "peasunflower"
     },
     {
+      "id": "innate.penguinzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "penguinzombie"
+    },
+    {
+      "id": "innate.pickaxe_a",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "pickaxe_a"
+    },
+    {
+      "id": "innate.pickaxe_b",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "pickaxe_b"
+    },
+    {
+      "id": "innate.pickaxe_c",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "pickaxe_c"
+    },
+    {
+      "id": "innate.pickaxeplant",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "pickaxeplant"
+    },
+    {
+      "id": "innate.pickaxepumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "pickaxepumpkin"
+    },
+    {
+      "id": "innate.pickaxestar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "pickaxestar"
+    },
+    {
+      "id": "innate.pickaxezombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "pickaxezombie"
+    },
+    {
+      "id": "innate.pinefurnace",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "pinefurnace"
+    },
+    {
+      "id": "innate.pinkonion",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "pinkonion"
+    },
+    {
+      "id": "innate.pit",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "pit"
+    },
+    {
       "eligibleCount": 2,
       "id": "innate.plantern",
       "innateActionId": "action.species.plantern.001",
@@ -933,64 +3681,622 @@
       }
     },
     {
+      "id": "innate.pogozombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "pogozombie"
+    },
+    {
       "eligibleCount": 1,
       "id": "innate.polevaulterzombie",
       "innateActionId": "action.species.polevaulterzombie.001",
       "runnerUp": null,
-      "score": 11,
+      "score": 9,
       "speciesKey": "polevaulterzombie",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 1,
-        "roleLeanMatch": 5,
-        "rungCeiling": 10
-      }
-    },
-    {
-      "eligibleCount": 2,
-      "id": "innate.pot",
-      "innateActionId": "action.species.pot.001",
-      "runnerUp": "action.family.base.002",
-      "score": 116,
-      "speciesKey": "pot",
-      "terms": {
-        "categoryScarcity": 1,
-        "elementMatch": 0,
-        "motifCoverage": 2,
         "roleLeanMatch": 4,
         "rungCeiling": 10
       }
     },
     {
-      "eligibleCount": 2,
-      "id": "innate.pumpkin",
-      "innateActionId": "action.species.pumpkin.001",
-      "runnerUp": "action.family.base.002",
-      "score": 92,
-      "speciesKey": "pumpkin",
+      "id": "innate.polfootballzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "polfootballzombie"
+    },
+    {
+      "id": "innate.portalballoonzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "portalballoonzombie"
+    },
+    {
+      "id": "innate.portalcorn",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "portalcorn"
+    },
+    {
+      "id": "innate.portaldoom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "portaldoom"
+    },
+    {
+      "id": "innate.portalmelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "portalmelon"
+    },
+    {
+      "id": "innate.portalnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "portalnut"
+    },
+    {
+      "id": "innate.portalpea",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "portalpea"
+    },
+    {
+      "id": "innate.portalplant",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "portalplant"
+    },
+    {
+      "id": "innate.portalpolevaulter",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "portalpolevaulter"
+    },
+    {
+      "eligibleCount": 1,
+      "id": "innate.pot",
+      "innateActionId": "action.species.pot.001",
+      "runnerUp": null,
+      "score": 17,
+      "speciesKey": "pot",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
-        "motifCoverage": 3,
+        "motifCoverage": 2,
         "roleLeanMatch": 5,
         "rungCeiling": 10
       }
     },
     {
+      "id": "innate.potatochomper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "potatochomper"
+    },
+    {
+      "id": "innate.potatodoom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "potatodoom"
+    },
+    {
+      "id": "innate.potatofume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "potatofume"
+    },
+    {
+      "id": "innate.potatomine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "potatomine"
+    },
+    {
+      "id": "innate.potatonut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "potatonut"
+    },
+    {
+      "id": "innate.potatopuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "potatopuff"
+    },
+    {
+      "id": "innate.potatopumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "potatopumpkin"
+    },
+    {
+      "id": "innate.potatosquash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "potatosquash"
+    },
+    {
+      "id": "innate.potatosquashbody",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "potatosquashbody"
+    },
+    {
+      "id": "innate.present",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "present"
+    },
+    {
+      "id": "innate.presentzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "presentzombie"
+    },
+    {
+      "id": "innate.projectilezombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "projectilezombie"
+    },
+    {
+      "id": "innate.protalzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "protalzombie"
+    },
+    {
+      "id": "innate.pudding",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "pudding"
+    },
+    {
+      "id": "innate.puffdoom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "puffdoom"
+    },
+    {
+      "id": "innate.puffjalapeno",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "puffjalapeno"
+    },
+    {
+      "id": "innate.puffnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "puffnut"
+    },
+    {
+      "id": "innate.puffpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "puffpumpkin"
+    },
+    {
+      "id": "innate.puffseashroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "puffseashroom"
+    },
+    {
+      "id": "innate.puffsquash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "puffsquash"
+    },
+    {
+      "id": "innate.pumpiner",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "pumpiner"
+    },
+    {
+      "eligibleCount": 1,
+      "id": "innate.pumpkin",
+      "innateActionId": "action.species.pumpkin.001",
+      "runnerUp": null,
+      "score": 15,
+      "speciesKey": "pumpkin",
+      "terms": {
+        "categoryScarcity": 0,
+        "elementMatch": 0,
+        "motifCoverage": 3,
+        "roleLeanMatch": 3,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "id": "innate.qingzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "qingzombie"
+    },
+    {
+      "id": "innate.quickjacksonzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "quickjacksonzombie"
+    },
+    {
+      "id": "innate.randomgargantuar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "randomgargantuar"
+    },
+    {
+      "id": "innate.randompluszombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "randompluszombie"
+    },
+    {
+      "id": "innate.randomzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "randomzombie"
+    },
+    {
+      "id": "innate.redemeraldumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "redemeraldumbrella"
+    },
+    {
+      "id": "innate.redgargantuar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "redgargantuar"
+    },
+    {
+      "id": "innate.redzombieloonnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "redzombieloonnut"
+    },
+    {
+      "id": "innate.refrash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "refrash"
+    },
+    {
+      "id": "innate.sandjackson",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sandjackson"
+    },
+    {
+      "id": "innate.scaredfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "scaredfume"
+    },
+    {
+      "id": "innate.scaredsun",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "scaredsun"
+    },
+    {
+      "id": "innate.scaredyblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "scaredyblover"
+    },
+    {
+      "id": "innate.scaredydoom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "scaredydoom"
+    },
+    {
+      "id": "innate.scaredyhypno",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "scaredyhypno"
+    },
+    {
+      "id": "innate.scaredynut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "scaredynut"
+    },
+    {
+      "id": "innate.scaredypot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "scaredypot"
+    },
+    {
+      "id": "innate.scaredypotato",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "scaredypotato"
+    },
+    {
+      "id": "innate.scaredypumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "scaredypumpkin"
+    },
+    {
       "eligibleCount": 2,
       "id": "innate.scaredyshroom",
-      "innateActionId": "action.species.scaredyshroom.002",
-      "runnerUp": "action.species.scaredyshroom.001",
-      "score": 59,
+      "innateActionId": "action.species.scaredyshroom.001",
+      "runnerUp": "action.species.scaredyshroom.002",
+      "score": 47,
       "speciesKey": "scaredyshroom",
       "terms": {
         "categoryScarcity": 1,
         "elementMatch": 0,
-        "motifCoverage": 4,
-        "roleLeanMatch": 5,
+        "motifCoverage": 3,
+        "roleLeanMatch": 4,
         "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.scaredystar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "scaredystar"
+    },
+    {
+      "id": "innate.seablover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "seablover"
+    },
+    {
+      "id": "innate.seacactus",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "seacactus"
+    },
+    {
+      "id": "innate.seafume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "seafume"
+    },
+    {
+      "id": "innate.seahypno",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "seahypno"
+    },
+    {
+      "id": "innate.sealantern",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sealantern"
+    },
+    {
+      "id": "innate.seamagnet",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "seamagnet"
+    },
+    {
+      "id": "innate.seamine_land",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "seamine_land"
+    },
+    {
+      "id": "innate.seamine_water",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "seamine_water"
+    },
+    {
+      "id": "innate.seanut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "seanut"
+    },
+    {
+      "id": "innate.seapumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "seapumpkin"
+    },
+    {
+      "id": "innate.seascaredyshroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "seascaredyshroom"
+    },
+    {
+      "id": "innate.seashroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "seashroom"
+    },
+    {
+      "id": "innate.seasquash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "seasquash"
+    },
+    {
+      "id": "innate.seastarfruit",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "seastarfruit"
+    },
+    {
+      "id": "innate.seasunshroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "seasunshroom"
+    },
+    {
+      "id": "innate.shulkbamboo",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "shulkbamboo"
+    },
+    {
+      "id": "innate.shulkflower",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "shulkflower"
+    },
+    {
+      "id": "innate.shulkfurnace",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "shulkfurnace"
+    },
+    {
+      "id": "innate.shulklotus",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "shulklotus"
+    },
+    {
+      "id": "innate.silvercabbage",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "silvercabbage"
+    },
+    {
+      "id": "innate.silvercorn",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "silvercorn"
+    },
+    {
+      "id": "innate.silverdoom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "silverdoom"
+    },
+    {
+      "id": "innate.silvergarlic",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "silvergarlic"
+    },
+    {
+      "id": "innate.silvericeshroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "silvericeshroom"
+    },
+    {
+      "id": "innate.silvermelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "silvermelon"
+    },
+    {
+      "id": "innate.silvernut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "silvernut"
+    },
+    {
+      "id": "innate.silverpot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "silverpot"
+    },
+    {
+      "id": "innate.silversunflower",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "silversunflower"
+    },
+    {
+      "id": "innate.silverumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "silverumbrella"
+    },
+    {
+      "id": "innate.silverzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "silverzombie"
+    },
+    {
+      "id": "innate.smalliceshroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "smalliceshroom"
+    },
+    {
+      "id": "innate.smallpuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "smallpuff"
+    },
+    {
+      "id": "innate.smallumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "smallumbrella"
+    },
+    {
+      "id": "innate.sniperchomper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sniperchomper"
+    },
+    {
+      "id": "innate.sniperpea",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sniperpea"
+    },
+    {
+      "id": "innate.sniperpot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sniperpot"
+    },
+    {
+      "id": "innate.sniperpuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sniperpuff"
+    },
+    {
+      "id": "innate.snorklezombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "snorklezombie"
+    },
+    {
+      "id": "innate.snowbucketzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "snowbucketzombie"
+    },
+    {
+      "id": "innate.snowconezombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "snowconezombie"
+    },
+    {
+      "id": "innate.snowdolphinrider",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "snowdolphinrider"
+    },
+    {
+      "id": "innate.snowdrownzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "snowdrownzombie"
     },
     {
       "eligibleCount": 2,
@@ -1008,19 +4314,67 @@
       }
     },
     {
+      "id": "innate.snowgatlingpeazombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "snowgatlingpeazombie"
+    },
+    {
+      "id": "innate.snowgatlingpuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "snowgatlingpuff"
+    },
+    {
+      "id": "innate.snowgunzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "snowgunzombie"
+    },
+    {
+      "id": "innate.snowmonsterrider",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "snowmonsterrider"
+    },
+    {
+      "id": "innate.snowmonsterzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "snowmonsterzombie"
+    },
+    {
+      "id": "innate.snownormalzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "snownormalzombie"
+    },
+    {
       "eligibleCount": 1,
       "id": "innate.snowpeashooter",
       "innateActionId": "action.species.snowpeashooter.001",
       "runnerUp": null,
-      "score": 19,
+      "score": 23,
       "speciesKey": "snowpeashooter",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 3,
-        "roleLeanMatch": 4,
+        "roleLeanMatch": 5,
         "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.snowpresent",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "snowpresent"
+    },
+    {
+      "id": "innate.snowshieldzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "snowshieldzombie"
     },
     {
       "eligibleCount": 1,
@@ -1038,55 +4392,319 @@
       }
     },
     {
+      "id": "innate.snowzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "snowzombie"
+    },
+    {
+      "id": "innate.solarlily",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "solarlily"
+    },
+    {
+      "id": "innate.solarpot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "solarpot"
+    },
+    {
+      "id": "innate.solarsunflower",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "solarsunflower"
+    },
+    {
+      "id": "innate.spikerock",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "spikerock"
+    },
+    {
       "id": "innate.splitpea",
       "innateActionId": null,
       "reason": "no eligible action",
       "speciesKey": "splitpea"
     },
     {
+      "id": "innate.splitpuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "splitpuff"
+    },
+    {
+      "id": "innate.spreadfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "spreadfume"
+    },
+    {
+      "id": "innate.spreadscaredyshroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "spreadscaredyshroom"
+    },
+    {
+      "id": "innate.spruceballista",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "spruceballista"
+    },
+    {
+      "id": "innate.sprucefurnace",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sprucefurnace"
+    },
+    {
+      "id": "innate.spruceshooter",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "spruceshooter"
+    },
+    {
+      "id": "innate.spruceshulk",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "spruceshulk"
+    },
+    {
+      "id": "innate.squalour",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "squalour"
+    },
+    {
+      "id": "innate.squalourzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "squalourzombie"
+    },
+    {
       "eligibleCount": 1,
       "id": "innate.squash",
       "innateActionId": "action.species.squash.001",
       "runnerUp": null,
-      "score": 9,
+      "score": 5,
       "speciesKey": "squash",
       "terms": {
         "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 1,
-        "roleLeanMatch": 4,
+        "roleLeanMatch": 2,
         "rungCeiling": 10
       }
     },
     {
-      "eligibleCount": 2,
+      "id": "innate.squashblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "squashblover"
+    },
+    {
+      "id": "innate.squashcorn",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "squashcorn"
+    },
+    {
+      "id": "innate.squashkelp",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "squashkelp"
+    },
+    {
+      "id": "innate.squashmelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "squashmelon"
+    },
+    {
+      "id": "innate.squashnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "squashnut"
+    },
+    {
+      "id": "innate.squashpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "squashpumpkin"
+    },
+    {
+      "id": "innate.squashspike",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "squashspike"
+    },
+    {
+      "id": "innate.squashtorch",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "squashtorch"
+    },
+    {
+      "id": "innate.squashzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "squashzombie"
+    },
+    {
+      "id": "innate.starblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "starblover"
+    },
+    {
+      "eligibleCount": 1,
       "id": "innate.starfruit",
       "innateActionId": "action.species.starfruit.001",
-      "runnerUp": "action.family.fruit.001",
-      "score": 116,
+      "runnerUp": null,
+      "score": 17,
       "speciesKey": "starfruit",
       "terms": {
-        "categoryScarcity": 1,
-        "elementMatch": 0,
-        "motifCoverage": 2,
-        "roleLeanMatch": 4,
-        "rungCeiling": 10
-      }
-    },
-    {
-      "eligibleCount": 3,
-      "id": "innate.starpea",
-      "innateActionId": "action.species.starpea.001",
-      "runnerUp": "action.family.fruit.001",
-      "score": 212,
-      "speciesKey": "starpea",
-      "terms": {
-        "categoryScarcity": 2,
+        "categoryScarcity": 0,
         "elementMatch": 0,
         "motifCoverage": 2,
         "roleLeanMatch": 5,
         "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.starfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "starfume"
+    },
+    {
+      "id": "innate.starhypno",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "starhypno"
+    },
+    {
+      "id": "innate.starnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "starnut"
+    },
+    {
+      "eligibleCount": 2,
+      "id": "innate.starpea",
+      "innateActionId": "action.species.starpea.001",
+      "runnerUp": "action.species.starpea.002",
+      "score": 35,
+      "speciesKey": "starpea",
+      "terms": {
+        "categoryScarcity": 1,
+        "elementMatch": 0,
+        "motifCoverage": 2,
+        "roleLeanMatch": 5,
+        "rungCeiling": 10
+      }
+    },
+    {
+      "id": "innate.starpuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "starpuff"
+    },
+    {
+      "id": "innate.starpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "starpumpkin"
+    },
+    {
+      "id": "innate.starsniper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "starsniper"
+    },
+    {
+      "id": "innate.starsquash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "starsquash"
+    },
+    {
+      "id": "innate.startorch",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "startorch"
+    },
+    {
+      "id": "innate.stonedancer",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "stonedancer"
+    },
+    {
+      "id": "innate.submarine_a",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "submarine_a"
+    },
+    {
+      "id": "innate.submarine_b",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "submarine_b"
+    },
+    {
+      "id": "innate.submarine_b2",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "submarine_b2"
+    },
+    {
+      "id": "innate.submarine_c",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "submarine_c"
+    },
+    {
+      "id": "innate.submarine_c2",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "submarine_c2"
+    },
+    {
+      "id": "innate.submarinezombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "submarinezombie"
+    },
+    {
+      "id": "innate.summonedhorse",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "summonedhorse"
+    },
+    {
+      "id": "innate.sunblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sunblover"
+    },
+    {
+      "id": "innate.sunbomb",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sunbomb"
+    },
+    {
+      "id": "innate.suncabbage",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "suncabbage"
+    },
+    {
+      "id": "innate.suncaltrop",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "suncaltrop"
     },
     {
       "eligibleCount": 1,
@@ -1119,10 +4737,496 @@
       }
     },
     {
+      "id": "innate.sungatlingpuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sungatlingpuff"
+    },
+    {
+      "id": "innate.sunhypno",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sunhypno"
+    },
+    {
+      "id": "innate.suniceshroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "suniceshroom"
+    },
+    {
+      "id": "innate.sunjalapeno",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sunjalapeno"
+    },
+    {
+      "id": "innate.sunmagnet",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sunmagnet"
+    },
+    {
+      "id": "innate.sunmine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sunmine"
+    },
+    {
+      "id": "innate.sunnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sunnut"
+    },
+    {
+      "id": "innate.sunnutzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sunnutzombie"
+    },
+    {
+      "id": "innate.sunpot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sunpot"
+    },
+    {
+      "id": "innate.sunpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sunpumpkin"
+    },
+    {
+      "id": "innate.sunshroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sunshroom"
+    },
+    {
+      "id": "innate.sunsquash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sunsquash"
+    },
+    {
+      "id": "innate.sunstar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "sunstar"
+    },
+    {
+      "id": "innate.superblackfootball",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superblackfootball"
+    },
+    {
+      "id": "innate.superblackhorse",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superblackhorse"
+    },
+    {
+      "id": "innate.superbombthrower",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superbombthrower"
+    },
+    {
+      "id": "innate.supercaltrop",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supercaltrop"
+    },
+    {
+      "id": "innate.supercaltroppot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supercaltroppot"
+    },
+    {
+      "id": "innate.supercherrygatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supercherrygatling"
+    },
+    {
+      "id": "innate.supercherryshooter",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supercherryshooter"
+    },
+    {
+      "id": "innate.supercherryshooterzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supercherryshooterzombie"
+    },
+    {
+      "id": "innate.superchomper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superchomper"
+    },
+    {
+      "id": "innate.superdancepolzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superdancepolzombie"
+    },
+    {
+      "id": "innate.superdriver",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superdriver"
+    },
+    {
+      "id": "innate.superfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superfume"
+    },
+    {
+      "id": "innate.superfurnace",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superfurnace"
+    },
+    {
+      "id": "innate.supergargantuar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supergargantuar"
+    },
+    {
+      "id": "innate.supergatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supergatling"
+    },
+    {
+      "id": "innate.supergatlingpeamine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supergatlingpeamine"
+    },
+    {
+      "id": "innate.supergatlingpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supergatlingpumpkin"
+    },
+    {
+      "id": "innate.superhorse",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superhorse"
+    },
+    {
+      "id": "innate.superhurricaneblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superhurricaneblover"
+    },
+    {
+      "id": "innate.superhypno",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superhypno"
+    },
+    {
+      "id": "innate.superhypnodoom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superhypnodoom"
+    },
+    {
+      "id": "innate.superhypnogatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superhypnogatling"
+    },
+    {
+      "id": "innate.superjackboxzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superjackboxzombie"
+    },
+    {
+      "id": "innate.superjalanut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superjalanut"
+    },
+    {
+      "id": "innate.superkelp",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superkelp"
+    },
+    {
+      "id": "innate.superkirov",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superkirov"
+    },
+    {
+      "id": "innate.superladderzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superladderzombie"
+    },
+    {
+      "id": "innate.superlevatation",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superlevatation"
+    },
+    {
+      "id": "innate.supermachinenut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supermachinenut"
+    },
+    {
+      "id": "innate.supermachinenutzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supermachinenutzombie"
+    },
+    {
+      "id": "innate.supermachineshardplant",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supermachineshardplant"
+    },
+    {
+      "id": "innate.supermelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supermelon"
+    },
+    {
+      "id": "innate.supernutshooter",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supernutshooter"
+    },
+    {
+      "id": "innate.superpenguinzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superpenguinzombie"
+    },
+    {
+      "id": "innate.superpogozombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superpogozombie"
+    },
+    {
+      "id": "innate.superpolevaulter",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superpolevaulter"
+    },
+    {
+      "id": "innate.superpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superpumpkin"
+    },
+    {
+      "id": "innate.supersnowgatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supersnowgatling"
+    },
+    {
+      "id": "innate.supersnowmonsterzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supersnowmonsterzombie"
+    },
+    {
+      "id": "innate.superspruce",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superspruce"
+    },
+    {
+      "id": "innate.superstar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superstar"
+    },
+    {
+      "id": "innate.supersubmarine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supersubmarine"
+    },
+    {
+      "id": "innate.supersunnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supersunnut"
+    },
+    {
+      "id": "innate.supersunnutzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supersunnutzombie"
+    },
+    {
+      "id": "innate.superthreegatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superthreegatling"
+    },
+    {
+      "id": "innate.superthreepeater",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superthreepeater"
+    },
+    {
+      "id": "innate.superthreepeater_sp",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superthreepeater_sp"
+    },
+    {
+      "id": "innate.supertorch",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "supertorch"
+    },
+    {
+      "id": "innate.superumbrella",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "superumbrella"
+    },
+    {
+      "id": "innate.swordstar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "swordstar"
+    },
+    {
+      "id": "innate.tallfirenut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tallfirenut"
+    },
+    {
+      "id": "innate.tallfirenutzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tallfirenutzombie"
+    },
+    {
+      "id": "innate.tallicenut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tallicenut"
+    },
+    {
+      "id": "innate.tallicenutzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tallicenutzombie"
+    },
+    {
+      "id": "innate.tallnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tallnut"
+    },
+    {
+      "id": "innate.tallnutfootball",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tallnutfootball"
+    },
+    {
+      "id": "innate.tallnutfootballzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tallnutfootballzombie"
+    },
+    {
+      "id": "innate.tanglekelp",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tanglekelp"
+    },
+    {
+      "id": "innate.thorns",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "thorns"
+    },
+    {
+      "id": "innate.thornsbamboo",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "thornsbamboo"
+    },
+    {
+      "id": "innate.thornslotus",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "thornslotus"
+    },
+    {
+      "id": "innate.thornsshulk",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "thornsshulk"
+    },
+    {
+      "id": "innate.thornsspruce",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "thornsspruce"
+    },
+    {
       "id": "innate.threecabbage",
       "innateActionId": null,
       "reason": "no eligible action",
       "speciesKey": "threecabbage"
+    },
+    {
+      "id": "innate.threecorn",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "threecorn"
+    },
+    {
+      "id": "innate.threekelp",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "threekelp"
+    },
+    {
+      "id": "innate.threemelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "threemelon"
+    },
+    {
+      "id": "innate.threemine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "threemine"
+    },
+    {
+      "id": "innate.threenut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "threenut"
     },
     {
       "eligibleCount": 1,
@@ -1155,6 +5259,222 @@
       }
     },
     {
+      "id": "innate.threepot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "threepot"
+    },
+    {
+      "id": "innate.threepumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "threepumpkin"
+    },
+    {
+      "id": "innate.threespike",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "threespike"
+    },
+    {
+      "id": "innate.threesquash",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "threesquash"
+    },
+    {
+      "id": "innate.threetorch",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "threetorch"
+    },
+    {
+      "id": "innate.thronsaloes",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "thronsaloes"
+    },
+    {
+      "id": "innate.torchfirenut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "torchfirenut"
+    },
+    {
+      "id": "innate.torchfirepumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "torchfirepumpkin"
+    },
+    {
+      "id": "innate.torchfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "torchfume"
+    },
+    {
+      "id": "innate.torchmine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "torchmine"
+    },
+    {
+      "id": "innate.torchpumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "torchpumpkin"
+    },
+    {
+      "id": "innate.torchseashroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "torchseashroom"
+    },
+    {
+      "id": "innate.torchspike",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "torchspike"
+    },
+    {
+      "id": "innate.torchsunflower",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "torchsunflower"
+    },
+    {
+      "id": "innate.torchwood",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "torchwood"
+    },
+    {
+      "id": "innate.tower_bigsunshroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_bigsunshroom"
+    },
+    {
+      "id": "innate.tower_cherrychomper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_cherrychomper"
+    },
+    {
+      "id": "innate.tower_cherryshooter",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_cherryshooter"
+    },
+    {
+      "id": "innate.tower_doomfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_doomfume"
+    },
+    {
+      "id": "innate.tower_doomstar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_doomstar"
+    },
+    {
+      "id": "innate.tower_electriconion",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_electriconion"
+    },
+    {
+      "id": "innate.tower_gravebuster",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_gravebuster"
+    },
+    {
+      "id": "innate.tower_iceblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_iceblover"
+    },
+    {
+      "id": "innate.tower_icegloom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_icegloom"
+    },
+    {
+      "id": "innate.tower_lilypad",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_lilypad"
+    },
+    {
+      "id": "innate.tower_peapuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_peapuff"
+    },
+    {
+      "id": "innate.tower_peasunflower",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_peasunflower"
+    },
+    {
+      "id": "innate.tower_scaredyfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_scaredyfume"
+    },
+    {
+      "id": "innate.tower_squashnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_squashnut"
+    },
+    {
+      "id": "innate.tower_starnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_starnut"
+    },
+    {
+      "id": "innate.tower_sunmine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_sunmine"
+    },
+    {
+      "id": "innate.tower_sunshroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_sunshroom"
+    },
+    {
+      "id": "innate.tower_threemine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_threemine"
+    },
+    {
+      "id": "innate.tower_watercan",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "tower_watercan"
+    },
+    {
+      "id": "innate.trainingdummy",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "trainingdummy"
+    },
+    {
+      "id": "innate.treasuremine",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "treasuremine"
+    },
+    {
       "eligibleCount": 2,
       "id": "innate.twinflower",
       "innateActionId": "action.species.twinflower.001",
@@ -1170,19 +5490,673 @@
       }
     },
     {
+      "id": "innate.twinmarigold",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "twinmarigold"
+    },
+    {
+      "id": "innate.twinshulk",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "twinshulk"
+    },
+    {
+      "id": "innate.ulti_cherrygatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ulti_cherrygatling"
+    },
+    {
+      "id": "innate.ultimatebamboo",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatebamboo"
+    },
+    {
+      "id": "innate.ultimatebigchomper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatebigchomper"
+    },
+    {
+      "id": "innate.ultimatebiggatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatebiggatling"
+    },
+    {
+      "id": "innate.ultimatebigsniper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatebigsniper"
+    },
+    {
+      "id": "innate.ultimateblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimateblover"
+    },
+    {
+      "id": "innate.ultimatecabbage",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatecabbage"
+    },
+    {
+      "id": "innate.ultimatecabbagecannon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatecabbagecannon"
+    },
+    {
+      "id": "innate.ultimatecactus",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatecactus"
+    },
+    {
+      "id": "innate.ultimatecannon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatecannon"
+    },
+    {
+      "id": "innate.ultimatecattail",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatecattail"
+    },
+    {
+      "id": "innate.ultimatechomper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatechomper"
+    },
+    {
+      "id": "innate.ultimatecorn",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatecorn"
+    },
+    {
+      "id": "innate.ultimatecornfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatecornfume"
+    },
+    {
+      "id": "innate.ultimatedolphin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatedolphin"
+    },
+    {
+      "id": "innate.ultimatedoomgatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatedoomgatling"
+    },
+    {
+      "id": "innate.ultimatedoomscaredy",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatedoomscaredy"
+    },
+    {
+      "id": "innate.ultimateendoflamezombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimateendoflamezombie"
+    },
+    {
+      "id": "innate.ultimateexplodecannon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimateexplodecannon"
+    },
+    {
+      "id": "innate.ultimatefireseashroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatefireseashroom"
+    },
+    {
+      "id": "innate.ultimatefly",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatefly"
+    },
+    {
+      "id": "innate.ultimatefootballdrown",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatefootballdrown"
+    },
+    {
+      "id": "innate.ultimatefootballzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatefootballzombie"
+    },
+    {
+      "id": "innate.ultimatefume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatefume"
+    },
+    {
+      "id": "innate.ultimategargantuar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimategargantuar"
+    },
+    {
+      "id": "innate.ultimategarlicsplit",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimategarlicsplit"
+    },
+    {
+      "id": "innate.ultimategatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimategatling"
+    },
+    {
+      "id": "innate.ultimategatlingblover",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimategatlingblover"
+    },
+    {
+      "id": "innate.ultimategloom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimategloom"
+    },
+    {
+      "id": "innate.ultimategoldgargantuar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimategoldgargantuar"
+    },
+    {
+      "id": "innate.ultimatehelmetgatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatehelmetgatling"
+    },
+    {
+      "id": "innate.ultimatehorse",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatehorse"
+    },
+    {
+      "id": "innate.ultimatehorse2",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatehorse2"
+    },
+    {
+      "id": "innate.ultimatehugenut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatehugenut"
+    },
+    {
+      "id": "innate.ultimatehypno",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatehypno"
+    },
+    {
+      "id": "innate.ultimatehypnodoom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatehypnodoom"
+    },
+    {
+      "id": "innate.ultimatehypnopumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatehypnopumpkin"
+    },
+    {
+      "id": "innate.ultimateicedoom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimateicedoom"
+    },
+    {
+      "id": "innate.ultimateiceshroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimateiceshroom"
+    },
+    {
+      "id": "innate.ultimateiceshroom2",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimateiceshroom2"
+    },
+    {
+      "id": "innate.ultimateimpking",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimateimpking"
+    },
+    {
+      "id": "innate.ultimatejackboxzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatejackboxzombie"
+    },
+    {
+      "id": "innate.ultimatejacksondriver",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatejacksondriver"
+    },
+    {
+      "id": "innate.ultimatejalanut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatejalanut"
+    },
+    {
+      "id": "innate.ultimatejalapeno",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatejalapeno"
+    },
+    {
+      "id": "innate.ultimatejalapuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatejalapuff"
+    },
+    {
+      "id": "innate.ultimatekelp",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatekelp"
+    },
+    {
+      "id": "innate.ultimatekirovzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatekirovzombie"
+    },
+    {
+      "id": "innate.ultimatelanternsplit",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatelanternsplit"
+    },
+    {
+      "id": "innate.ultimatelegionzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatelegionzombie"
+    },
+    {
+      "id": "innate.ultimatelunarcabbage",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatelunarcabbage"
+    },
+    {
+      "id": "innate.ultimatemachinenut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatemachinenut"
+    },
+    {
+      "id": "innate.ultimatemachinenutzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatemachinenutzombie"
+    },
+    {
+      "id": "innate.ultimatemagnet",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatemagnet"
+    },
+    {
+      "id": "innate.ultimatemelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatemelon"
+    },
+    {
+      "id": "innate.ultimatemeloncannon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatemeloncannon"
+    },
+    {
+      "id": "innate.ultimatemelonpuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatemelonpuff"
+    },
+    {
+      "id": "innate.ultimateminigun",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimateminigun"
+    },
+    {
+      "id": "innate.ultimatepaperzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatepaperzombie"
+    },
+    {
+      "id": "innate.ultimateplantern",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimateplantern"
+    },
+    {
+      "id": "innate.ultimatepoisonfume",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatepoisonfume"
+    },
+    {
+      "id": "innate.ultimateportalnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimateportalnut"
+    },
+    {
+      "id": "innate.ultimateportalsniper",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimateportalsniper"
+    },
+    {
+      "id": "innate.ultimatepotatonut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatepotatonut"
+    },
+    {
+      "id": "innate.ultimatepumpkin",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatepumpkin"
+    },
+    {
+      "id": "innate.ultimateredlunar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimateredlunar"
+    },
+    {
+      "id": "innate.ultimateseashroom",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimateseashroom"
+    },
+    {
+      "id": "innate.ultimatesnipergatling",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatesnipergatling"
+    },
+    {
+      "id": "innate.ultimatesnowgatlingpuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatesnowgatlingpuff"
+    },
+    {
+      "id": "innate.ultimatesnowzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatesnowzombie"
+    },
+    {
+      "id": "innate.ultimatespring",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatespring"
+    },
+    {
+      "id": "innate.ultimatespruce",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatespruce"
+    },
+    {
+      "id": "innate.ultimatestar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatestar"
+    },
+    {
+      "id": "innate.ultimatestartorch",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatestartorch"
+    },
+    {
+      "id": "innate.ultimatesunflower",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatesunflower"
+    },
+    {
+      "id": "innate.ultimatesungatlingpuff",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatesungatlingpuff"
+    },
+    {
+      "id": "innate.ultimatesunmagnet",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatesunmagnet"
+    },
+    {
+      "id": "innate.ultimatesunnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatesunnut"
+    },
+    {
+      "id": "innate.ultimateswordzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimateswordzombie"
+    },
+    {
+      "id": "innate.ultimatetallnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatetallnut"
+    },
+    {
+      "id": "innate.ultimatetorch",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatetorch"
+    },
+    {
+      "id": "innate.ultimatewintermelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultimatewintermelon"
+    },
+    {
+      "id": "innate.ultiwatergargantuar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "ultiwatergargantuar"
+    },
+    {
+      "id": "innate.umbrellaleaf",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "umbrellaleaf"
+    },
+    {
+      "id": "innate.umbrellapot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "umbrellapot"
+    },
+    {
+      "id": "innate.vectorplant",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "vectorplant"
+    },
+    {
+      "id": "innate.voodoodollzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "voodoodollzombie"
+    },
+    {
       "eligibleCount": 2,
       "id": "innate.wallnut",
       "innateActionId": "action.species.wallnut.001",
       "runnerUp": "action.species.wallnut.002",
-      "score": 67,
+      "score": 31,
       "speciesKey": "wallnut",
       "terms": {
         "categoryScarcity": 1,
         "elementMatch": 0,
         "motifCoverage": 3,
-        "roleLeanMatch": 5,
+        "roleLeanMatch": 2,
         "rungCeiling": 10
       }
+    },
+    {
+      "id": "innate.wallnutzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "wallnutzombie"
+    },
+    {
+      "id": "innate.wateraloes",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "wateraloes"
+    },
+    {
+      "id": "innate.waterballista",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "waterballista"
+    },
+    {
+      "id": "innate.waterbamboo",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "waterbamboo"
+    },
+    {
+      "id": "innate.waterfurnace",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "waterfurnace"
+    },
+    {
+      "id": "innate.waterjackboxjumpzombie",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "waterjackboxjumpzombie"
+    },
+    {
+      "id": "innate.watershulk",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "watershulk"
+    },
+    {
+      "id": "innate.waterspruce",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "waterspruce"
+    },
+    {
+      "id": "innate.wheat",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "wheat"
+    },
+    {
+      "id": "innate.whitefootball",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "whitefootball"
+    },
+    {
+      "id": "innate.wintermelon",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "wintermelon"
+    },
+    {
+      "id": "innate.xxspot",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "xxspot"
+    },
+    {
+      "id": "innate.yellowfootball",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "yellowfootball"
+    },
+    {
+      "id": "innate.yellowgargantuar",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "yellowgargantuar"
+    },
+    {
+      "id": "innate.zombie9527",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "zombie9527"
+    },
+    {
+      "id": "innate.zombieboss",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "zombieboss"
+    },
+    {
+      "id": "innate.zombieboss2",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "zombieboss2"
+    },
+    {
+      "id": "innate.zombieduck",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "zombieduck"
+    },
+    {
+      "id": "innate.zombieendoflame",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "zombieendoflame"
+    },
+    {
+      "id": "innate.zombieloonnut",
+      "innateActionId": null,
+      "reason": "no eligible action",
+      "speciesKey": "zombieloonnut"
     }
   ],
   "kind": "action-innate",

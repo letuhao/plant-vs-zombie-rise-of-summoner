@@ -25,7 +25,7 @@
       "id": "set.cherrycatapultzombie-001",
       "nameKey": "set.perfect-cherry-blast",
       "name": "Perfect Cherry Blast",
-      "themeKey": "demon.cherrycatapultzombie",
+      "themeKey": "creature.cherrycatapultzombie",
       "members": [
         {
           "role": "armament-primary",

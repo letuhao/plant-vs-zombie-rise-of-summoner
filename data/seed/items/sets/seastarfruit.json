@@ -25,7 +25,7 @@
       "id": "set.seastarfruit-001",
       "nameKey": "set.starfruit-sporeburst",
       "name": "Starfruit Sporeburst",
-      "themeKey": "demon.seastarfruit",
+      "themeKey": "creature.seastarfruit",
       "members": [
         {
           "role": "armament-primary",

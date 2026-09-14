@@ -1,0 +1,1836 @@
+{
+  "_meta": {
+    "corpusHash": "a5d99a152f136e58c4839318290e86fb08786c716277548592bd9b111e85cc85",
+    "partition": "round-2000",
+    "round": 2000
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:02:32.949792+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "7879395458bfec6779f0be524fa33400962055a7e046b4181fb590d44156d1f6"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.rot-punisher"
+      ],
+      "category": "attack",
+      "description": "A flurry of scholarly precision strikes down the crowd with relentless, calculated force.",
+      "descriptionKey": "action.family.academic.001.desc",
+      "id": "action.family.academic.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "花园里",
+        "樱桃派",
+        "保证",
+        "僵尸",
+        "东西"
+      ],
+      "name": "The Harvest's Guarantee",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "payoff",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "academic",
+      "targetMode": "multi"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:13.693212+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "418bde71df1a870f7ccb49317d9e978875d3283aebdfcc34383f280e1b7482ae"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.rot-punisher",
+        "atom.rotting",
+        "atom.venomous"
+      ],
+      "category": "attack",
+      "description": "A sickly, dark haze seeps from the soil, causing the very essence of the intruder to wither and decay.",
+      "descriptionKey": "action.family.academic.002.desc",
+      "id": "action.family.academic.002",
+      "motifsUsed": [
+        "保证",
+        "东西",
+        "樱桃派",
+        "花园里",
+        "僵尸"
+      ],
+      "name": "Garden's Rotting Guarantee",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "enabler",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "academic",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:16.479843+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "8fc0fc766cd5bcc62a98805aaa8b24059ce2a2614d3a194c6681d390f368972e"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cherry-bloom",
+        "atom.econ-toll"
+      ],
+      "category": "attack",
+      "description": "A flurry of explosive petals rains down, fueled by the rapid, frantic growth of a sudden windfall.",
+      "descriptionKey": "action.family.academic.003.desc",
+      "id": "action.family.academic.003",
+      "motifsUsed": [
+        "樱桃派",
+        "东西",
+        "保证",
+        "僵尸",
+        "花园里"
+      ],
+      "name": "Garden's Reckoning",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "academic",
+      "targetMode": "single"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:19.513391+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "2b1750d0bbcbb324bcb78141866e3abed8719b1d713d7637a56cd446eb6a341c"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cherry-bloom",
+        "atom.chill-punisher",
+        "atom.freezing"
+      ],
+      "category": "attack",
+      "description": "A sudden, crystalline chill radiates outward, coating everything in sight with a layer of jagged ice.",
+      "descriptionKey": "action.family.afflicted.001.desc",
+      "id": "action.family.afflicted.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "樱桃",
+        "僵尸",
+        "一般"
+      ],
+      "name": "Frostbite Bloom",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "payoff",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "afflicted",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:22.371596+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "6fb68878476f4c4dd42cecb4c336fb98f15af5c5971a75f6cd14de53476499b6"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.freezing",
+        "atom.rotting"
+      ],
+      "category": "attack",
+      "description": "A sudden eruption of jagged ice pierces through the decaying flesh, freezing the rot mid-collapse.",
+      "descriptionKey": "action.family.afflicted.002.desc",
+      "id": "action.family.afflicted.002",
+      "motifsUsed": [
+        "樱桃",
+        "僵尸",
+        "一般"
+      ],
+      "name": "Frost-Blighted Burst",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "enabler",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "afflicted",
+      "targetMode": "single"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:25.172955+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "7223dcc5c11db26c539e4d772448b97c87d4eb0ba0ffdbb1c2f0895ca09341e3"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cherry-bloom",
+        "atom.rotting",
+        "atom.venomous"
+      ],
+      "category": "attack",
+      "description": "A sickly, dark nectar seeps from the petals, dissolving everything it touches into a foul-smelling sludge.",
+      "descriptionKey": "action.family.afflicted.004.desc",
+      "id": "action.family.afflicted.004",
+      "motifsUsed": [
+        "僵尸",
+        "樱桃",
+        "一般"
+      ],
+      "name": "Rotting Bloom",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "enabler",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "afflicted",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:27.918440+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "d89e92194e6b08019bc1326f0ee5cb799e1f99aadb3256bb2885e046bcf0bc8d"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cherry-bloom",
+        "atom.elemental-power"
+      ],
+      "category": "attack",
+      "description": "A sudden, violent eruption of petals carries a searing heat that sweeps through the crowd.",
+      "descriptionKey": "action.family.afflicted.005.desc",
+      "id": "action.family.afflicted.005",
+      "motifsUsed": [
+        "僵尸",
+        "一般",
+        "樱桃"
+      ],
+      "name": "Cherry Bloom Burst",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "afflicted",
+      "targetMode": "multi"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:30.823937+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "85d431965ec2970321152318ab2580f4d10543e76c737cf8455c5a1fe658cc59"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.freezing",
+        "atom.ward-harden"
+      ],
+      "category": "defense",
+      "description": "A crystalline shell of frost hardens around the plant, shimmering with an impenetrable, frozen sheen.",
+      "descriptionKey": "action.family.alchemical.002.desc",
+      "id": "action.family.alchemical.002",
+      "motifsUsed": [
+        "严寒",
+        "金质",
+        "带来",
+        "冰菇",
+        "稳定"
+      ],
+      "name": "Glacial Bastion",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "alchemical",
+      "targetMode": "single"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:33.581417+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "f6638baca1cc1d4ce5d892a9f21dc6716866ac5ccff18361130ce246ae485856"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.rot-punisher",
+        "atom.sporing"
+      ],
+      "category": "attack",
+      "description": "A shimmering, frost-coated spore erupts from the bloom, crystallizing the rot into a brittle, golden decay.",
+      "descriptionKey": "action.family.alchemical.003.desc",
+      "id": "action.family.alchemical.003",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "严寒",
+        "冰菇",
+        "带来",
+        "金质",
+        "稳定"
+      ],
+      "name": "Gilded Frostbloom",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "payoff",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "alchemical",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:36.310611+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "aa40d7e0c1ba96f7f10e4765a0a684391219cf47f19a1cca216f3225ef368a26"
+      },
+      "areaShape": "row",
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.evd-evd",
+        "atom.freezing"
+      ],
+      "category": "attack",
+      "description": "A sudden, violent fracture ripples through the air, shattering the frost into a thousand jagged shards.",
+      "descriptionKey": "action.family.alchemical.004.desc",
+      "id": "action.family.alchemical.004",
+      "motifsUsed": [
+        "带来",
+        "严寒",
+        "稳定",
+        "金质",
+        "冰菇"
+      ],
+      "name": "Glacial Sunder",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "alchemical",
+      "targetMode": "area"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:39.241249+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "0ba2e6415134a5f3c5007843cddf751e5326ef59963492c5f10b2fb4e3bbaad2"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chill-punisher",
+        "atom.rotting",
+        "atom.venomous"
+      ],
+      "category": "attack",
+      "description": "A shimmering, toxic maw snaps shut, leaving a trail of gilded decay in its wake.",
+      "descriptionKey": "action.family.allium.001.desc",
+      "id": "action.family.allium.001",
+      "motifsUsed": [
+        "金质",
+        "大蒜",
+        "僵尸",
+        "咬"
+      ],
+      "name": "Golden Bite",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "payoff",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "allium",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:42.209625+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "0bbcc3a64d011f06ef4c2f79520bce753f5b9e26265fe309a118346a9cc3ee41"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.freezing",
+        "atom.sust-callus"
+      ],
+      "category": "defense",
+      "description": "A sudden, sharp burst of garlic-scented frost ripples outward, freezing the air and knocking back anything that draws too close.",
+      "descriptionKey": "action.family.allium.002.desc",
+      "id": "action.family.allium.002",
+      "motifsUsed": [
+        "换行",
+        "咬",
+        "大蒜",
+        "金质",
+        "僵尸"
+      ],
+      "name": "Pungent Repulsion",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "allium",
+      "targetMode": "multi"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:45.095427+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "e22e59f074d4fea4e3e99a46428bff9e65945d46654178a6d287b291085a5e49"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.rot-punisher"
+      ],
+      "category": "status",
+      "description": "A sharp, stinging spray of onion juice leaves the target reeling and dazed.",
+      "descriptionKey": "action.family.allium.003.desc",
+      "id": "action.family.allium.003",
+      "motifsUsed": [
+        "咬",
+        "大蒜"
+      ],
+      "name": "Pungent Bite",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "payoff",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "allium",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:48.034435+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "502bcaa2ea11f1fdb9bf971819123e83060473c75a58a4edb10d248ac559772f"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.rotting",
+        "atom.venomous"
+      ],
+      "category": "attack",
+      "description": "A thick, sickly green haze rolls outward, carrying the unmistakable odor of decay.",
+      "descriptionKey": "action.family.allium.004.desc",
+      "id": "action.family.allium.004",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "金质",
+        "僵尸",
+        "大蒜",
+        "咬",
+        "换行"
+      ],
+      "name": "Stench of the Grave",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "enabler",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "allium",
+      "targetMode": "all"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:50.986495+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "34c917c06abb0f89b4ffd1ea3de6ff6e6a683aab0dd7fdde572eb0e90ddcbffd"
+      },
+      "areaShape": "column",
+      "atomFamilies": [
+        "atom.affliction",
+        "atom.prec-fixation",
+        "atom.rotting"
+      ],
+      "category": "status",
+      "description": "A thick, sickly haze of garlic vapor clings to the ground, causing the undead to stumble through a cloud of decay.",
+      "descriptionKey": "action.family.allium.005.desc",
+      "id": "action.family.allium.005",
+      "motifsUsed": [
+        "大蒜",
+        "僵尸",
+        "咬",
+        "金质",
+        "换行"
+      ],
+      "name": "Pungent Column",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "allium",
+      "targetMode": "area"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:54.087826+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "29b15bbda506a41e37d2a4e7b92006537514b42e00839f5b07c8d582772972a2"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.freezing",
+        "atom.marking"
+      ],
+      "category": "defense",
+      "description": "A crystalline glaze creeps across the surface, leaving a shimmering trail of frost in its wake.",
+      "descriptionKey": "action.general.0019.desc",
+      "id": "action.general.0019",
+      "name": "Frostbound Mark",
+      "pairedPayoffFamily": "atom.chill-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "single"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:56.756795+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "a63fe7587cfe71d06ce782cb4b7669e462741cadacdf6ffa1a621fc4134d938e"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.blighting",
+        "atom.rot-punisher",
+        "atom.withering"
+      ],
+      "category": "support",
+      "description": "A wave of sickly, grey spores sweeps across the garden, leaving only shriveled husks in its wake.",
+      "descriptionKey": "action.general.0020.desc",
+      "id": "action.general.0020",
+      "name": "Blighted Harvest",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "payoff",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "multi"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:03:59.390402+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "bbd1f031d1229d1b3dd37cd03c537012015ed614fcd975ce2573b64923162bb6"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.marking",
+        "atom.rotting",
+        "atom.venomous"
+      ],
+      "category": "movement",
+      "description": "A sickly, dark discoloration seeps into the ground beneath, leaving a trail of decay in its wake.",
+      "descriptionKey": "action.general.0021.desc",
+      "id": "action.general.0021",
+      "name": "Blighted Mark",
+      "pairedPayoffFamily": "atom.rot-punisher",
+      "pairingRole": "enabler",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "rolledTarget"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:02.192687+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "6219ca479546d01cda43dd0ecae7a650980afe83580a9a56a90e997264e949fc"
+      },
+      "areaShape": "row",
+      "atomFamilies": [
+        "atom.firelining",
+        "atom.fortitude",
+        "atom.searing-strike"
+      ],
+      "category": "attack",
+      "description": "A concentrated arc of white-hot flame lashes outward, incinerating everything in its path.",
+      "descriptionKey": "action.general.0023.desc",
+      "id": "action.general.0023",
+      "name": "Searing Sweep",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "area"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:04.998891+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "0d5785a9a09f5c1234af1d321ade7b249f65e4100789c00841f70a4dece7d75d"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.fortitude",
+        "atom.immunity",
+        "atom.mesmerizing"
+      ],
+      "category": "defense",
+      "description": "A shimmering, iridescent barrier ripples around the plant, turning its gaze into a hypnotic, impenetrable wall.",
+      "descriptionKey": "action.general.0024.desc",
+      "id": "action.general.0024",
+      "name": "Stalwart Shell",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:07.726888+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "95d263b6b660a476ec048676731274a59296864e2d9ed651a8230a3751a5fdca"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.life-surge",
+        "atom.mending",
+        "atom.might"
+      ],
+      "category": "support",
+      "description": "A vibrant, emerald glow pulses through the plant's veins, knitting together torn leaves and fueling a sudden burst of vigor.",
+      "descriptionKey": "action.general.0025.desc",
+      "id": "action.general.0025",
+      "name": "Vitality Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "single"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:10.713819+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "235a215913d42034bc789c0199903640fa2290ce47ae6d04fb70b6911155347a"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.swiftness",
+        "atom.tempo-haste",
+        "atom.tempo-surge",
+        "atom.venomous"
+      ],
+      "category": "movement",
+      "description": "A blur of emerald motion leaves a trail of toxic, shimmering mist in its wake.",
+      "descriptionKey": "action.general.0026.desc",
+      "id": "action.general.0026",
+      "name": "Sudden Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "multi"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:14.483592+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "0bd2bc55f336401eecfaf8d8422a50e6f4c36c87008027d91cfbcffcfa086225"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.sporing"
+      ],
+      "category": "status",
+      "description": "A sudden, crystalline mist clings to the target, turning their movements into brittle, shivering motions.",
+      "descriptionKey": "action.general.0027.desc",
+      "id": "action.general.0027",
+      "name": "Frostbite",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "rolledTarget"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:17.304420+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "854ce942f60363087bb2cb57056f19c99f2652e1734da8aebe0fa40f7e8e8223"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.chilling",
+        "atom.volley"
+      ],
+      "category": "attack",
+      "description": "A relentless barrage of frost-tipped projectiles sweeps across the battlefield in a freezing wave.",
+      "descriptionKey": "action.general.0028.desc",
+      "id": "action.general.0028",
+      "name": "Sudden Onslaught",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "all"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:20.425078+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "a51ee7352b8b7a7e04da75996945c558ea3b996b835ea727fab49e8f2d9759eb"
+      },
+      "areaShape": "column",
+      "atomFamilies": [
+        "atom.arm-hardening",
+        "atom.death-salvo"
+      ],
+      "category": "defense",
+      "description": "A sudden, metallic sheen coats the leaves just as a flurry of retaliatory thorns erupts from the stem.",
+      "descriptionKey": "action.general.0029.desc",
+      "id": "action.general.0029",
+      "name": "Reactive Bastion",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "area"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:23.124704+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "a579cd45fcc4005339e4a3d3846913fa6b76494ce8d45216179b069c946d2f40"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-override",
+        "atom.life-surge",
+        "atom.mending",
+        "atom.vitality"
+      ],
+      "category": "support",
+      "description": "A vibrant, emerald glow pulses through the leaves, knitting together frayed stems and revitalizing the spirit.",
+      "descriptionKey": "action.general.0030.desc",
+      "id": "action.general.0030",
+      "name": "Vitality Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:26.060766+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "a8e3aa397fe47bbfb638f6e1ba75dc1080f8a00aa10a83994f766e6a39e1cf23"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.mending",
+        "atom.swiftness",
+        "atom.tempo-surge"
+      ],
+      "category": "movement",
+      "description": "A rhythmic pulse of vitality propels the plant forward in a blur of emerald motion.",
+      "descriptionKey": "action.general.0031.desc",
+      "id": "action.general.0031",
+      "name": "Sudden Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "single"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:28.801226+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "e203296ae691d3ec7c9df1bdaeaee3486afdbb63ee0a45fee9dc79da4f43d7e3"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.affliction",
+        "atom.blighting",
+        "atom.swiftness"
+      ],
+      "category": "status",
+      "description": "A sickly, emerald haze clings to the ground, slowing every movement with its heavy, toxic weight.",
+      "descriptionKey": "action.general.0032.desc",
+      "id": "action.general.0032",
+      "name": "Lingering Blight",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "multi"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:31.780447+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "ad62f42f7bcb90828f42d7b58cb9d92f96a413bf4c8ebb634475b12647eefa61"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-surge",
+        "atom.ferocity"
+      ],
+      "category": "attack",
+      "description": "A frantic, overwhelming wave of relentless strikes crashes against the defenses.",
+      "descriptionKey": "action.general.0033.desc",
+      "id": "action.general.0033",
+      "name": "Sudden Onslaught",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "rolledTarget"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:34.653030+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "78cb4c6fa6891f7190faac905748f5d70eedc3d15a5f8f693a589728bc273ba6"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-hardening",
+        "atom.vitality"
+      ],
+      "category": "defense",
+      "description": "A dull, metallic sheen ripples across the leaves as the plant's core pulses with renewed vigor.",
+      "descriptionKey": "action.general.0034.desc",
+      "id": "action.general.0034",
+      "name": "Ironclad Resolve",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "all"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:37.459680+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "d041b4971b104aa2918e5c57e981633b6bf866bfe70bdb35c3abaf38a90d7280"
+      },
+      "areaShape": "square",
+      "atomFamilies": [
+        "atom.freezing",
+        "atom.mending",
+        "atom.vitality",
+        "atom.warding"
+      ],
+      "category": "support",
+      "description": "A shimmering aura of restorative frost washes over your allies, knitting wounds even as it numbs the pain.",
+      "descriptionKey": "action.general.0035.desc",
+      "id": "action.general.0035",
+      "name": "Vitality Field",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "area"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:40.444746+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "c74d20fdaeaf9c5ddd118852a64d77b04a5b654e35cce85246b823ed15d20d05"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.swiftness",
+        "atom.tempo-surge",
+        "atom.volley"
+      ],
+      "category": "movement",
+      "description": "A blur of rapid, rhythmic pulses propels the plant forward in a sudden burst of momentum.",
+      "descriptionKey": "action.general.0036.desc",
+      "id": "action.general.0036",
+      "name": "Sudden Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:43.136147+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "8589008ae78823cbc83ea862bf4fc3620742c21d10b6abbb4e752989ac3772f4"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.sust-husk",
+        "atom.volley"
+      ],
+      "category": "attack",
+      "description": "A rapid succession of jagged shards tears through the crowd, leaving nothing but splintered remains in their wake.",
+      "descriptionKey": "action.general.0037.desc",
+      "id": "action.general.0037",
+      "name": "Shattering Volley",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "multi"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:46.002921+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "6adcf1ef3c507a0e7f485941f32bab43f7d4a4639c22f651b7f2596eb18bcecd"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.retribution",
+        "atom.stalwart"
+      ],
+      "category": "defense",
+      "description": "A shimmering, metallic sheen hardens the plant's exterior, bracing them against the coming onslaught.",
+      "descriptionKey": "action.general.0038.desc",
+      "id": "action.general.0038",
+      "name": "Ironclad Resolve",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "rolledTarget"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:48.673487+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "7708d97a3f0218c190760b64be8d12726baf9ad1e852363bca8f158e91876da4"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-overflow",
+        "atom.mending",
+        "atom.vitality",
+        "atom.warding"
+      ],
+      "category": "support",
+      "description": "A surge of restorative energy ripples outward, weaving a protective veil around every nearby ally.",
+      "descriptionKey": "action.general.0039.desc",
+      "id": "action.general.0039",
+      "name": "Bastion's Call",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "all"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:52.218977+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "bdbc20d324e1357d107a165ad8ea6a9caa559b2c6a38e299a155414e60ddd535"
+      },
+      "areaShape": "rectangle",
+      "atomFamilies": [
+        "atom.econ-toll",
+        "atom.firelining",
+        "atom.tempo-surge",
+        "atom.terraforming"
+      ],
+      "category": "movement",
+      "description": "A sudden, rhythmic swell of earth and water sweeps outward, carrying everything in its path.",
+      "descriptionKey": "action.general.0040.desc",
+      "id": "action.general.0040",
+      "name": "Tidal Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "area"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:04:55.869827+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "2ac745a4148ba0c802e8a7846bf4f35c7faf3b10ad26fcc4deb3c8c023353104"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.affliction",
+        "atom.elemental-power",
+        "atom.rotting"
+      ],
+      "category": "status",
+      "description": "A sickly, dark haze clings to the target, causing their very essence to decay from within.",
+      "descriptionKey": "action.general.0041.desc",
+      "id": "action.general.0041",
+      "name": "Lingering Affliction",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:05:02.259202+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "18ead65b6f3f315ff2a2689e95616029c7744aec4e0c6cd6171d5bd7d2eaed90"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-hardening",
+        "atom.plating",
+        "atom.prec-fixation",
+        "atom.vitality"
+      ],
+      "category": "defense",
+      "description": "A dense, metallic sheen ripples across the surface, turning soft leaves into impenetrable plating.",
+      "descriptionKey": "action.general.0042.desc",
+      "id": "action.general.0042",
+      "name": "Ironclad Shell",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "multi"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:05:07.294886+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "7ef3624672a9c783832e67e8ec806570e6a363597426d04e71fba275f5689144"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.mending",
+        "atom.prec-truesight",
+        "atom.vitality"
+      ],
+      "category": "support",
+      "description": "A warm, emerald glow washes over the plant, mending frayed leaves and sharpening its focus.",
+      "descriptionKey": "action.general.0043.desc",
+      "id": "action.general.0043",
+      "name": "Vitality Surge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "rolledTarget"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:05:13.816120+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "4101e73fc673a77e04ce7f489cc9a2f651f0aca4166446199205de73d4bd0ece"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.econ-endure",
+        "atom.ferocity",
+        "atom.quickening"
+      ],
+      "category": "attack",
+      "description": "A frantic, rapid-fire surge of energy that turns a steady rhythm into a relentless storm.",
+      "descriptionKey": "action.general.0046.desc",
+      "id": "action.general.0046",
+      "name": "Sudden Onslaught",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:05:18.838697+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "18116e3d102b3009eab31686a213aaf78ec981fa49ddfb92ce434f141f0a2d49"
+      },
+      "areaShape": "column",
+      "atomFamilies": [
+        "atom.blighting",
+        "atom.ferocity"
+      ],
+      "category": "attack",
+      "description": "A relentless deluge of heavy, murky water crashes down, washing away everything in its path.",
+      "descriptionKey": "action.general.0051.desc",
+      "id": "action.general.0051",
+      "name": "Torrential Downpour",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "area"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:05:24.356827+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "e838c8fc04973b3b994e6596ad2733af4b65387ada0d9d1acb3bb256d48b4bb0"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-hardening",
+        "atom.elpw-surge"
+      ],
+      "category": "attack",
+      "description": "A sudden surge of kinetic energy ripples through the limbs, turning every strike into a crushing, steel-like impact.",
+      "descriptionKey": "action.species.abyssswordstar.001.desc",
+      "id": "action.species.abyssswordstar.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "形态"
+      ],
+      "name": "Abyssswordstar",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "abyssswordstar",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:05:28.953585+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "550003960b8747f82a15e53bdf260c7d55715ef44a29fe39117e7fd5973e102d"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-attune",
+        "atom.volley"
+      ],
+      "category": "support",
+      "description": "A rhythmic cascade of dark energy ripples outward, synchronizing the essence of nearby allies.",
+      "descriptionKey": "action.species.abyssswordstar.002.desc",
+      "id": "action.species.abyssswordstar.002",
+      "motifsUsed": [
+        "形态",
+        "巨剑",
+        "仙剑",
+        "从天而降",
+        "召唤"
+      ],
+      "name": "Abyssswordstar",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "abyssswordstar",
+      "targetMode": "multi"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:05:31.929504+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "0c9dc743b43468ab8bfbaf763c663ed190be7b3bd9e277212f91bab79937415d"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.deathblast",
+        "atom.elpw-surge"
+      ],
+      "category": "movement",
+      "description": "A violent, downward arc of starlight tears through the air, trailing shadows in its wake.",
+      "descriptionKey": "action.species.abyssswordstar.003.desc",
+      "id": "action.species.abyssswordstar.003",
+      "motifsUsed": [
+        "从天而降"
+      ],
+      "name": "Sky-Cleaving Descent",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "abyssswordstar",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:05:39.630188+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "a5cecbf86ebd335e81cc7f9efd260d165f042e8b8eb40a45ffa9274b21ad176d"
+      },
+      "areaShape": "row",
+      "atomFamilies": [
+        "atom.elpw-override",
+        "atom.sust-husk"
+      ],
+      "category": "status",
+      "description": "A violent updraft tears through the darkness, shredding the very essence of the void-born.",
+      "descriptionKey": "action.species.abyssswordstar.004.desc",
+      "id": "action.species.abyssswordstar.004",
+      "motifsUsed": [
+        "形态",
+        "从天而降",
+        "仙剑",
+        "召唤",
+        "巨剑"
+      ],
+      "name": "Sky-Severing Gale",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "abyssswordstar",
+      "targetMode": "area"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:05:47.175239+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "a1b4386cf8166ef888afa4c79a41a5f3944a4d0df65258dc01dda5abc6fc9859"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.retribution"
+      ],
+      "category": "attack",
+      "description": "A blinding flash erupts from the core, sending a shockwave of pure radiance outward in every direction.",
+      "descriptionKey": "action.species.acientsunnut.001.desc",
+      "id": "action.species.acientsunnut.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "消耗"
+      ],
+      "name": "Solar Flare Recoil",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "acientsunnut",
+      "targetMode": "self"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:05:53.102148+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "382334b0783bd2816e81a9530d74030922cf7a9e8910149d60daa2966bed8e62"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.econ-toll",
+        "atom.mending"
+      ],
+      "category": "support",
+      "description": "A warm, golden radiance washes over your allies, knitting their leaves back together and easing their burdens.",
+      "descriptionKey": "action.species.acientsunnut.002.desc",
+      "id": "action.species.acientsunnut.002",
+      "motifsUsed": [
+        "消耗",
+        "来回",
+        "坚果",
+        "手动",
+        "受伤"
+      ],
+      "name": "acientsunnut",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "acientsunnut",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:06:04.418312+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "3b8fef8397f4d86272b892749b8d7769c33312f5617845058bd1e29237300fc4"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elemental-power",
+        "atom.evd-shift"
+      ],
+      "category": "movement",
+      "description": "A blinding burst of radiance propels the seed upward, leaving a trail of shimmering heat in its wake.",
+      "descriptionKey": "action.species.acientsunnut.003.desc",
+      "id": "action.species.acientsunnut.003",
+      "motifsUsed": [
+        "来回"
+      ],
+      "name": "Solar Flare Leap",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "acientsunnut",
+      "targetMode": "all"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:06:09.438513+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "547a945cc80cb4c90291c237299d602023ae5bdf5260ba3dab1dc066230a7590"
+      },
+      "areaShape": "column",
+      "atomFamilies": [
+        "atom.elpw-overflow",
+        "atom.evd-evd"
+      ],
+      "category": "status",
+      "description": "A blinding pillar of concentrated radiance descends, incinerating everything caught in its searing path.",
+      "descriptionKey": "action.species.acientsunnut.004.desc",
+      "id": "action.species.acientsunnut.004",
+      "motifsUsed": [
+        "消耗",
+        "受伤"
+      ],
+      "name": "Solar Flare Column",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "acientsunnut",
+      "targetMode": "area"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:06:12.183590+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "2ba461376d4ab2360f01753cb779c2c9b166ed074f044a76ec39f8cc4a05d385"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.bonding",
+        "atom.tempo-pulse"
+      ],
+      "category": "movement",
+      "description": "A sudden, violent ripple in the air shudders through the garden, momentarily warping the very space around the plants.",
+      "descriptionKey": "action.species.allpeater.004.desc",
+      "id": "action.species.allpeater.004",
+      "motifsUsed": [
+        "模式"
+      ],
+      "name": "Atmospheric Displacement",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "allpeater",
+      "targetMode": "all"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:06:17.644993+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "d3cb0b3a056756a0ba935ccf7c1a814033f81b612764ec99951a779428c716b1"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-focus",
+        "atom.warding"
+      ],
+      "category": "support",
+      "description": "A sudden, crisp burst of juice creates a protective, sugary sheen over nearby allies.",
+      "descriptionKey": "action.species.apple.001.desc",
+      "id": "action.species.apple.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "苹",
+        "消灾",
+        "护",
+        "安",
+        "免难"
+      ],
+      "name": "苹",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "apple",
+      "targetMode": "multi"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:06:24.493546+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "5bd78076e5b391a5a5cd464ffe3284fadb8c80e14af0522a01be61055fd3fcd5"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evd-husk",
+        "atom.evd-shift"
+      ],
+      "category": "movement",
+      "description": "A sudden flash of brilliant light leaves behind a hollowed shell as the core vanishes.",
+      "descriptionKey": "action.species.apple.002.desc",
+      "id": "action.species.apple.002",
+      "motifsUsed": [
+        "苹"
+      ],
+      "name": "Luminous Translocation",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "apple",
+      "targetMode": "rolledTarget"
+    },
+    {
+      "_provenance": {
+        "budgetVersion": 0,
+        "finding": "Content/FieldMissing:actions:action-seed",
+        "generatedUtc": "2026-09-12T16:06:30.119332+00:00",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "seedsmith.adapters.actions.description_backfill",
+        "promptVersion": "actions/description-backfill/1",
+        "stalenessKey": "0c66d6ac322a38a0ff4a44b4ef01bcb11e11b8d013787f91ecabde64afa7a1a7"
+      },
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.ferocity",
+        "atom.immunity"
+      ],
+      "category": "status",
+      "description": "A soft, golden radiance washes over the orchard, dulling the hunger in their eyes.",
+      "descriptionKey": "action.species.apple.003.desc",
+      "id": "action.species.apple.003",
+      "motifsUsed": [
+        "安",
+        "护"
+      ],
+      "name": "Luminous Peace",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "apple",
+      "targetMode": "all"
+    }
+  ],
+  "kind": "action-seed",
+  "schemaVersion": 1
+}

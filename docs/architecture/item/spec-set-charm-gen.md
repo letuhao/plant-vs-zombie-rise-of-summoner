@@ -1,13 +1,13 @@
 # Spec: `set-charm-gen`
 
 **Module id:** `set-charm-gen` · **Program:** [item](../item-map.md) · **Build order:** 13 of 21 · ⭐ **model calls**
-**Depends on:** `affix-legality` (8), `threshold-grants` (12), **X4** (L0 pool composition) · upstream [seedsmith/spec-demon-themes.md](../seedsmith/spec-demon-themes.md)
+**Depends on:** `affix-legality` (8), `threshold-grants` (12), **X4** (L0 pool composition) · upstream [seedsmith/spec-creature-themes.md](../seedsmith/spec-creature-themes.md)
 **Rulings:** D12, D15, D17, D27 · lanes [ssot-sets.md](ssot-sets.md), [ssot-charms.md](ssot-charms.md)
 
 ## Objective
 
 The seedsmith pipeline that produces **36 build set families** (12 aptitudes × 3 archetypes) and **one
-set plus one charm per demon species** (84 today → ~904 at the full roster), consuming the demon **theme
+set plus one charm per creature species** (84 today → ~904 at the full roster), consuming the creature **theme
 registry** one-way.
 
 **And it owns set/charm atom effect distribution** — [item-map.md](../item-map.md) §7 row 2: *"no lane
@@ -132,7 +132,7 @@ three that generate variants (`atom.deathblast`, `atom.searing-strike`, `atom.wa
 
 **D17 accepts this, and its reasoning is what makes 15-to-1 defensible:** *"the bar for a species set is
 recognition, not differentiation. It does not need to be distinguishable from 903 others; it needs to feel
-like **that demon**."* Differentiation is carried by the **theme** — motifs, anti-motifs, expression rules,
+like **that creature**."* Differentiation is carried by the **theme** — motifs, anti-motifs, expression rules,
 name, flavour — not by the capability.
 
 ⚠ **But the honest reading is that the capability is nearly a *category*, not an identity, at roster
@@ -204,10 +204,10 @@ cells and are the right shape to extend, not the right metric to reuse unchanged
 
 ### The theme bridge — one-way, with explicit name-basis holdback
 
-`data/seed/demons/_registry/themes.v1.json` ships **904 themes** (`schemaVersion 1`, `registryVersion 1`),
+`data/seed/creatures/_registry/themes.v1.json` ships **904 themes** (`schemaVersion 1`, `registryVersion 1`),
 each carrying `speciesId`, `displayName`, `rarity`, `motifs`, `antiMotifs`, `expression.item`,
-`expression.action`, `basis`, `retired`. Demons publish; items consume; nothing in the items corpus writes
-a demon (`spec-demon-themes.md` §2.2).
+`expression.action`, `basis`, `retired`. Creatures publish; items consume; nothing in the items corpus writes
+a creature (`spec-creature-themes.md` §2.2).
 
 | Fact | Measured |
 |---|---|
@@ -217,7 +217,7 @@ a demon (`spec-demon-themes.md` §2.2).
 | Motif language | **Chinese** — `displayName` and `motifs` are the species' own zh tokens (`"分配"`, `"火力"`), while set names in the corpus are English (`"Stillmarch"`) |
 
 ✅ **RESOLVED — D34, and the question was malformed.** The owner: *"84 number is a defect
-… why don't you use pipeline to make LLM generate the name? other feature like demon species
+… why don't you use pipeline to make LLM generate the name? other feature like creature species
 generator, action generator do that."*
 
 **`basis = "name"` is not a property of a species — it is a record of what the pipeline had when it
@@ -247,16 +247,16 @@ sees the drift instead of inheriting it.
 "thresholds"}`. The 36 build sets are keyed on `(aptitude, archetype)` and belong to no species.
 
 > **Recommended: a third append-only theme population, prefix `build.`** — `build.might-offense`, 36 keys,
-> collision-free against `theme.*` (legacy, 5 in use) and `demon.*` by construction, exactly the namespace
+> collision-free against `theme.*` (legacy, 5 in use) and `creature.*` by construction, exactly the namespace
 > split §2.2a already established. **Alternative:** make `themeKey` optional on `set` — rejected, because
-> `spec-demon-themes.md` §7 lists making it *required* on `unique` as the intended direction, and
+> `spec-creature-themes.md` §7 lists making it *required* on `unique` as the intended direction, and
 > loosening it here reverses that. ✅ **RULED 2026-09-04: the third `build.` namespace.** `themeKey`
 > stays required on `set`.
 
-**2. A demon `themeKey` cannot go into a set id.**
+**2. A creature `themeKey` cannot go into a set id.**
 `naming.v1.json` (registryVersion **4**, `"frozen": true`) gives sets
 `idTemplate: "set.{themeId}-{seq:03}"` with `partitionKey: "themeId"` and **five** pinned `themeIds`. A
-demon theme key is `demon.allpeater` — substituting it yields `set.demon.allpeater-001`, **two dots**,
+creature theme key is `creature.allpeater` — substituting it yields `set.creature.allpeater-001`, **two dots**,
 which fails `definitions.md` §1's grammar (body is `[a-z0-9-]+`, no dot;
 `ContainerValidator.cs:17-19` mirrors it). Composed with ssot-sets §4.3's tier suffix it is worse.
 
@@ -403,7 +403,7 @@ findings today *because the gate is blind to D3*, and `Evenness` / `Inequality` 
 that are not a verdict. The thresholds above are what turn these commands into a decision.
 
 ⚠ **No `items` subcommand exists today.** `build_parser` (`tools/seedsmith/seedsmith/report/cli.py:776-901`)
-registers `check`, `report`, `metrics`, `demons`, `effects` and nothing else. The `demons run
+registers `check`, `report`, `metrics`, `creatures`, `effects` and nothing else. The `creatures run
 start|pause|resume|cancel|rerun|status` harness (`:869-871`) is the pattern to mirror — a ~1,000-entry run
 is exactly the shape that needs resume, and the resume path already holds a real atomic file lock.
 
@@ -474,14 +474,14 @@ THRESHOLD_PIECES = {"type": "integer", "enum": [2, 3, 4, 6]}
 | `set_eligible_is_never_requested_back_into_the_rarity_budget_registry` | module 7 dropped it under SC7; re-adding it without a consumer fails seed load |
 | `no_charm_carries_Increased_or_More` | ssot-charms §3.4 |
 | `no_family_appears_on_both_a_jewel_minor_base_and_a_charm` | ssot-charms §3.6 |
-| `a_species_set_id_uses_speciesId_never_themeKey` | ⭐ `set.demon.allpeater-001` is ungrammatical |
+| `a_species_set_id_uses_speciesId_never_themeKey` | ⭐ `set.creature.allpeater-001` is ungrammatical |
 | `a_tier_container_id_composes_to_one_dot_and_a_zero_padded_suffix` | `set.allpeater-001-04` |
 | `no_generated_id_collides_with_a_legacy_theme_partition` | the five in-use `theme.*` ids |
 | `no_theme_reaches_generation_at_basis_name` | ⭐ **D34** — `theme-enrich` ran; the population is empty, so the old flag test is replaced by an emptiness assertion |
 | `the_theme_registry_covers_every_shipped_species` | ⛔ **D34** — 84-vs-386 staleness cannot recur silently |
 | `nothing_generated_keys_on_theme_rarity` | §2.4a — rarity is a roster snapshot |
 | `a_build_set_has_a_legal_themeKey` | the `build.*` population, or the approved alternative |
-| `nothing_in_the_generator_writes_the_demons_corpus` | the one-way bridge, asserted structurally |
+| `nothing_in_the_generator_writes_the_creatures_corpus` | the one-way bridge, asserted structurally |
 | `re_running_over_unchanged_themes_is_byte_identical` | seedsmith's own content-addressing law |
 | `the_run_resumes_after_an_interrupt_without_duplicating_entries` | ~1,000 entries; resume is not optional |
 
@@ -504,8 +504,8 @@ the same generation run this module already performs for the ~904.
 **Never:** read a clean report from a metric that did not run — or from one that is blind to the
 ruling it is meant to enforce — as evidence of anything. Never let the model emit a weight, rate,
 duration or magnitude — `audit_schema` rejects a numeric
-field mechanically, and **that check is the enforcement, not review**. Never write into the demons corpus
-or read a demon row from the items adapter. Never key generated content on a theme's `rarity`. Never
+field mechanically, and **that check is the enforcement, not review**. Never write into the creatures corpus
+or read a creature row from the items adapter. Never key generated content on a theme's `rarity`. Never
 generate into `standard` (D14). Never put a set's member role outside the twelve. Never emit an id built
 from a `themeKey`.
 

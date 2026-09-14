@@ -74,7 +74,7 @@ Before anything else, because this tree already spends "unique" three ways and a
 
 | Meaning | Where it lives today | Keep? |
 |---|---|---|
-| A **specimen** — one durable individual demon | `rpg_unique_actors` (`src/FusionRpg.Data/Sqlite/RpgStore.cs:337`), `unique-actor-runtime.md` | Yes, unchanged. Nothing to do with items |
+| A **specimen** — one durable individual creature | `rpg_unique_actors` (`src/FusionRpg.Data/Sqlite/RpgStore.cs:337`), `unique-actor-runtime.md` | Yes, unchanged. Nothing to do with items |
 | The **equipment stub** hanging off those specimens | `rpg_unique_equipment` (`RpgStore.cs:356`), `UniqueEquipmentCatalog` (`src/FusionRpg.Core/Match/UniqueEquipmentCatalog.cs`) | **Legacy.** It is called "unique" because it belongs to unique *actors*, not because its three items are uniques. Retired by I2/I13 |
 | The SQL `UNIQUE` constraint | everywhere | Yes |
 | **This lane's content class** | new | Yes — and every table it adds is prefixed `item_unique_*` so it never reads as actor-unique |

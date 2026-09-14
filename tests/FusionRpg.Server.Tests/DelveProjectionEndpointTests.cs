@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -24,7 +25,7 @@ namespace FusionRpg.Server.Tests;
 /// finding).</summary>
 public class DelveProjectionEndpointTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly long _playerId;
     readonly RoomTypeCatalog _rooms;
@@ -34,10 +35,8 @@ public class DelveProjectionEndpointTests : IDisposable
     public DelveProjectionEndpointTests()
     {
         ConfigureDungeonTuningOnce();
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-delve-projection-endpoint-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _playerId = _store.GetCurrentPlayerId();
 
         var repoRoot = FindRepoRoot();
@@ -48,11 +47,11 @@ public class DelveProjectionEndpointTests : IDisposable
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     // This assembly's own [ModuleInitializer] (PowerAndAptitudeTuningTestBootstrap.cs) covers
-    // Power/Aptitude/DerivedStat/Rung/Aura/Items/DemonSpeciesCatalog only -- DungeonTuningHub is
+    // Power/Aptitude/DerivedStat/Rung/Aura/Items/CreatureSpeciesCatalog only -- DungeonTuningHub is
     // NOT among them (confirmed by reading that file directly), and DelveEndpoints.HandleGetDelve
     // reads it via DungeonTuningHub.Tuning. Configured here from the REAL shipped
     // data/tuning/dungeon.v3.json, matching DungeonHubTestBootstrap's own established convention in

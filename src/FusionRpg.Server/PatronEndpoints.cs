@@ -1,13 +1,13 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Patron;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Patron;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
 
 namespace FusionRpg.Server;
 
 /// <summary>
-/// Patron designation (spec-patron-demon.md): server-authoritative aura computed from the
+/// Patron designation (spec-patron-creature.md): server-authoritative aura computed from the
 /// specimen's rarity/star/level; changes broadcast to the web AND pushed to the injector as a
 /// `patron.aura` command (applied from the NEXT match — the plugin freezes the running one).
 /// </summary>
@@ -118,11 +118,11 @@ public static class PatronEndpoints
     {
         var row = store.GetPatron(playerId);
         if (row == null) return null;
-        var profile = store.GetDemonProfile(row.InstanceId);
-        var actor = profile == null ? null : store.ListDemonRoster(playerId).Items
+        var profile = store.GetCreatureProfile(row.InstanceId);
+        var actor = profile == null ? null : store.ListCreatureRoster(playerId).Items
             .FirstOrDefault(s => s.Profile.InstanceId == row.InstanceId)?.Actor;
         if (profile == null) return null;
-        if (!DemonRarityIds.TryParse(profile.Rarity, out var rarity)) return null;
+        if (!CreatureRarityIds.TryParse(profile.Rarity, out var rarity)) return null;
 
         // aura-skill T22 (owner sign-off 2026-08-30): the player's own Θ, read the SAME way
         // AptitudeEndpoints.cs's own ProjectState does — no DI thread needed through this class's 4

@@ -25,7 +25,7 @@
       "id": "set.drowngargantuar-001",
       "nameKey": "set.trident-scion-s-husk",
       "name": "Trident Scion's Husk",
-      "themeKey": "demon.drowngargantuar",
+      "themeKey": "creature.drowngargantuar",
       "members": [
         {
           "role": "armament-primary",

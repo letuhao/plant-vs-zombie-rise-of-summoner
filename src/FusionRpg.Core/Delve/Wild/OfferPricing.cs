@@ -1,6 +1,6 @@
 using FusionRpg.Core.Delve.Loot;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Contracts;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Power;
 
@@ -61,7 +61,7 @@ public static class OfferPricing
     /// `contract`: <c>ContractPolicy.RitualPrice(rarity, Θ_room, power) × loyalty / LoyaltyMax</c>
     /// (spec, verbatim), widened before the multiply, divided exactly once, at the end.
     /// </summary>
-    public static long Contract(DemonRarity rarity, int thetaRoom, int loyalty, int loyaltyMax, PowerTuning tuning)
+    public static long Contract(CreatureRarity rarity, int thetaRoom, int loyalty, int loyaltyMax, PowerTuning tuning)
     {
         if (loyaltyMax <= 0)
             throw new ArgumentOutOfRangeException(nameof(loyaltyMax), loyaltyMax, "must be positive");

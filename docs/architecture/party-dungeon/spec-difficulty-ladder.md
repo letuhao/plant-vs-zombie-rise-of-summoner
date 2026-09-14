@@ -86,7 +86,7 @@ this module composes the band and nothing else. `ContentContext` has no producti
 
 `P(Θ)` is `PowerLadder.Value` (`PowerLadder.cs:34-58`); `contentScale` is `ContentScale.Milli`
 (`ContentScale.cs:15-20`). `Θ_enemy = Θ_room + thetaOffset` is `encounter-generator`'s sum (offsets
-`demon-threat.v1.json`, §10 row 18; shape `SpeciesExpander.cs:66-67`). Two corrections to the ideal's
+`creature-threat.v1.json`, §10 row 18; shape `SpeciesExpander.cs:66-67`). Two corrections to the ideal's
 worked line: *"boss at band 6 → Θ 98"* was under the retired absolute `depth.bossBand`; *"×5.32"* is
 `contentScale(83)`, the soul faucet's read (`SoulEarnPolicy.cs:74-75`), not the loot pipeline's, which
 reads the room (`LootPipeline.cs:171-175`, `source.ContentLevel` and nothing else).
@@ -204,7 +204,7 @@ proposes** (not builds): the delve host composes `Θ_actor` per party member thr
 `delve-battle-profile` and `power-index` hydration (`spec-power-index.md` §2.5) decide whether that is
 `Level` or a new init-able field; it moves `BaseHp(level)` at `WebMatchService.cs:407` too and is
 theirs. **Fallback until it lands:** the gap closes on §10 row 27's cost ladder — **35 specimen levels
-per demon per +35 Θ**. The ladder never moves with the player: a `bandDelta` tied to `Θ_actor` is Last
+per creature per +35 Θ**. The ladder never moves with the player: a `bandDelta` tied to `Θ_actor` is Last
 Epoch corruption (ideal §11.2); the validator's actor-axis ban enforces that.
 
 ### 8. The reward read and PS-5

@@ -1,4 +1,4 @@
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Data;
 using Xunit;
@@ -11,17 +11,15 @@ namespace FusionRpg.Data.Tests;
 /// never-a-cap, and the shipped ledger path.</summary>
 public class SpeciesRespecTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     const string SpeciesId = "peashooter";
     const long PlayerId = 1;
 
     public SpeciesRespecTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-respec-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         SpeciesBuildTuningHub.Configure(new SpeciesBuildTuning(
             SchemaVersion: 1, Version: 1,
@@ -34,11 +32,11 @@ public class SpeciesRespecTests : IDisposable
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     static AptitudeAllocation Build(long points) =>
-        AptitudeAllocation.Single(AllocationScope.DemonType, "Might", points);
+        AptitudeAllocation.Single(AllocationScope.CreatureType, "Might", points);
 
     [Fact]
     public void First_override_is_free_and_does_not_touch_the_respec_counter()
@@ -51,8 +49,8 @@ public class SpeciesRespecTests : IDisposable
         Assert.Equal(0, result.PriceAmount);
         Assert.Equal(1000, _store.GetSoulBalance(PlayerId).Balance);
         Assert.Equal(0, _store.GetSpeciesRespecCount(PlayerId, SpeciesId));
-        Assert.Equal(3, _store.LoadAllocation(AllocationScope.DemonType,
-            Core.Stats.Aptitudes.SpeciesAllocation.ScopeKey(PlayerId, SpeciesId)).TotalForScope(AllocationScope.DemonType));
+        Assert.Equal(3, _store.LoadAllocation(AllocationScope.CreatureType,
+            Core.Stats.Aptitudes.SpeciesAllocation.ScopeKey(PlayerId, SpeciesId)).TotalForScope(AllocationScope.CreatureType));
     }
 
     [Fact]
@@ -117,7 +115,7 @@ public class SpeciesRespecTests : IDisposable
     {
         _store.TryRespecSpecies(PlayerId, SpeciesId, Build(1), "free-first"); // free, no souls needed
         var scopeKey = Core.Stats.Aptitudes.SpeciesAllocation.ScopeKey(PlayerId, SpeciesId);
-        var before = _store.LoadAllocation(AllocationScope.DemonType, scopeKey).PointsAt(AllocationScope.DemonType, "Might");
+        var before = _store.LoadAllocation(AllocationScope.CreatureType, scopeKey).PointsAt(AllocationScope.CreatureType, "Might");
 
         // Balance is 0 -- the very next change is priced (50) and must be refused outright.
         var refused = _store.TryRespecSpecies(PlayerId, SpeciesId, Build(2), "poor-1");
@@ -126,7 +124,7 @@ public class SpeciesRespecTests : IDisposable
         Assert.Equal("souls.insufficient", refused.Reason);
         Assert.Equal(0, _store.GetSoulBalance(PlayerId).Balance);
         Assert.Equal(0, _store.GetSpeciesRespecCount(PlayerId, SpeciesId)); // never a cap, and never incremented on refusal
-        Assert.Equal(before, _store.LoadAllocation(AllocationScope.DemonType, scopeKey).PointsAt(AllocationScope.DemonType, "Might")); // override unchanged
+        Assert.Equal(before, _store.LoadAllocation(AllocationScope.CreatureType, scopeKey).PointsAt(AllocationScope.CreatureType, "Might")); // override unchanged
     }
 
     [Fact]

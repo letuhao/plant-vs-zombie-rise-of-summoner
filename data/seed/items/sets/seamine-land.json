@@ -25,7 +25,7 @@
       "id": "set.seamine-land-001",
       "nameKey": "set.spore-mine",
       "name": "Spore Mine",
-      "themeKey": "demon.seamine_land",
+      "themeKey": "creature.seamine_land",
       "members": [
         {
           "role": "armament-primary",

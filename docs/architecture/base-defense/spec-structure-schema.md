@@ -27,12 +27,12 @@ value with zero tokens spent, and they make the expensive stage's inputs reviewa
 
 **Built.**
 
-- The **species anchor** shape — **415** files under `data/seed/demons/species/plant/`, **503** across
+- The **species anchor** shape — **415** files under `data/seed/creatures/species/plant/`, **503** across
   all species (measured 2026-09-04; the ideal's *"408"* and an earlier draft's *"~841"* are both stale —
   841 was the seedsmith **stage-run** figure, 841 anchors × 8 pipelines). Carries the `_provenance` and
   `_derived` machinery the ideal says to *"copy wholesale"*.
 - **`data/seed/` holds sixteen domains and none is structures** — actions, aptitudes, atoms,
-  channel-policy, channel-pools, containers, curves, demons, derived-stats, elements,
+  channel-policy, channel-pools, containers, curves, creatures, derived-stats, elements,
   external-reference, items, loot, rarity, resources, zomboss. This module adds the seventeenth.
 - `StructureCatalog` — **four hand-authored C# rows** and a `Validate` that already enforces kebab ids,
   no duplicates, no negative cost. The validation stance to extend.
@@ -178,7 +178,7 @@ data/seed/structures/
   works/<structure-id>.json
 ```
 
-Mirroring `data/seed/demons/species/`'s shape, because a reviewer already knows that shape.
+Mirroring `data/seed/creatures/species/`'s shape, because a reviewer already knows that shape.
 
 **Generated rows are committed.** *"A generated row nobody can diff is a row nobody can review."*
 

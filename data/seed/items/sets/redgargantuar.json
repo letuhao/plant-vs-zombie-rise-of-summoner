@@ -25,7 +25,7 @@
       "id": "set.redgargantuar-001",
       "nameKey": "set.insomniac-colossus",
       "name": "Insomniac Colossus",
-      "themeKey": "demon.redgargantuar",
+      "themeKey": "creature.redgargantuar",
       "members": [
         {
           "role": "armament-primary",

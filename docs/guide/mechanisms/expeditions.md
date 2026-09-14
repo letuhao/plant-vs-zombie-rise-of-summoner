@@ -9,7 +9,7 @@
 
 ## In one sentence
 
-**Expeditions** are the idle RPG loop — pick spare demons, dispatch them, wait on a real-world timer, then collect.
+**Expeditions** are the idle RPG loop — pick spare creatures, dispatch them, wait on a real-world timer, then collect.
 
 ---
 
@@ -20,7 +20,7 @@ These words get guessed wrong. Read them once before the rest of the page.
 | Word | What it actually means here |
 |---|---|
 | **Expedition** | An idle squad mission you start from the Expeditions layer (`E`). Not a lawn match and not a [delve](delve.md). |
-| **Dispatch** | Send demons who are not on a live task. The timer starts when you confirm. |
+| **Dispatch** | Send creatures who are not on a live task. The timer starts when you confirm. |
 | **Collect** | Claim the return when ready. Nothing expires if you forget — the report waits. |
 | **Stamina gate** | There is none. This build has no play-session stamina wall on expeditions. |
 
@@ -35,9 +35,9 @@ These words get guessed wrong. Read them once before the rest of the page.
 
 Monster Hunter–style idle play that stays forever. Playable with the lawn game closed once the layer is open.
 
-You pick demons, choose a duration tier, wait, and read the return report.
+You pick creatures, choose a duration tier, wait, and read the return report.
 
-> The Expeditions layer opens from the Sanctum rail (`E`) once you have a **bound demon** to field.
+> The Expeditions layer opens from the Sanctum rail (`E`) once you have a **bound creature** to field.
 
 ---
 
@@ -46,15 +46,15 @@ You pick demons, choose a duration tier, wait, and read the return report.
 Four duration tiers are built for real schedules:
 
 ```text
-  pick spare demons  ->  dispatch  ->  wait  ->  collect
+  pick spare creatures  ->  dispatch  ->  wait  ->  collect
                                          |
                                          +->  souls / XP / materials / wild join?
 ```
 
 | Piece | What it does |
 |---|---|
-| **While they are out** | A battle chain interleaved with quiet stretches, found souls, meeting a wild demon, or injuries. Outcome is sealed at dispatch by a recorded seed and revealed at collection. |
-| **What you bring home** | Souls and summoner XP, specimen XP for demons who fought, a chance a wave demon [joins](wild-joins.md) the roster, and fusion materials ([essence](essence.md)). Materials feed actors and empire — never loam. |
+| **While they are out** | A battle chain interleaved with quiet stretches, found souls, meeting a wild creature, or injuries. Outcome is sealed at dispatch by a recorded seed and revealed at collection. |
+| **What you bring home** | Souls and summoner XP, specimen XP for creatures who fought, a chance a wave creature [joins](wild-joins.md) the roster, and fusion materials ([essence](essence.md)). Materials feed actors and empire — never loam. |
 
 | Tier | Length |
 |---|---|
@@ -72,7 +72,7 @@ Four duration tiers are built for real schedules:
 Expeditions sit on the layer rail.
 
 1. Open Expeditions (`E`) when the rail shows it.
-2. Pick demons who are not on a live task.
+2. Pick creatures who are not on a live task.
 3. Choose a duration tier, dispatch, then collect when the timer finishes (or [recall](expedition-slots-recall.md) early).
 
 > Start short. Grow into overnight runs when the roster can carry them.
@@ -81,7 +81,7 @@ Expeditions sit on the layer rail.
 
 ## What you do (first time)
 
-1. Bind at least one demon so Expeditions can open.
+1. Bind at least one creature so Expeditions can open.
 2. Open Expeditions (`E`), pick a short tier and a spare squad, and dispatch.
 3. Collect when ready and read the return report once.
 

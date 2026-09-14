@@ -67,7 +67,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -142,7 +142,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -216,7 +216,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -292,7 +292,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -367,7 +367,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -442,7 +442,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -472,18 +472,18 @@
     },
     {
       "id": "item.plant-stem-a-013",
-      "nameKey": "base.knotted-burl",
-      "name": "Knotted Burl",
+      "nameKey": "base-type.twisted-tendril",
+      "name": "Twisted Tendril",
       "frame": "plant",
       "role": "core-guard",
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "trivial"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.knotted-burl",
+      "iconKey": "icon.base-type.twisted-tendril",
       "flavorKey": "flavor.base.knotted-burl",
       "flavor": "A dense, knotty protrusion of hardened wood that serves as a natural shield for the plant's most vital junctions.",
       "tags": [
@@ -508,18 +508,18 @@
     },
     {
       "id": "item.plant-stem-a-014",
-      "nameKey": "base.knotted-burl",
-      "name": "Knotted Burl",
+      "nameKey": "base-type.gnarled-shoot",
+      "name": "Gnarled Shoot",
       "frame": "plant",
       "role": "core-guard",
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.knotted-burl",
+      "iconKey": "icon.base-type.gnarled-shoot",
       "flavorKey": "flavor.base.knotted-burl",
       "flavor": "A dense, knotty protrusion of hardened sap and wood that serves as a natural shield for the plant's vital conduits.",
       "tags": [
@@ -544,18 +544,18 @@
     },
     {
       "id": "item.plant-stem-a-015",
-      "nameKey": "base.knotted-burl",
-      "name": "Knotted Burl",
+      "nameKey": "base-type.twisted-fibrous-stem",
+      "name": "Twisted Fibrous Stem",
       "frame": "plant",
       "role": "core-guard",
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.knotted-burl",
+      "iconKey": "icon.base-type.twisted-fibrous-stem",
       "flavorKey": "flavor.base.knotted-burl",
       "flavor": "A dense, knotty protrusion of hardened sap and wood, shaped to absorb the impact of a heavy blow.",
       "tags": [
@@ -581,18 +581,18 @@
     },
     {
       "id": "item.plant-stem-a-016",
-      "nameKey": "base.knotted-burl",
-      "name": "Knotted Burl",
+      "nameKey": "base-type.twisted-fibrous-stalk",
+      "name": "Twisted Fibrous Stalk",
       "frame": "plant",
       "role": "core-guard",
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.knotted-burl",
+      "iconKey": "icon.base-type.twisted-fibrous-stalk",
       "flavorKey": "flavor.base.knotted-burl",
       "flavor": "A dense, knotty protrusion of hardened growth that serves as a natural shield for the stem's vital conduits.",
       "tags": [
@@ -617,18 +617,18 @@
     },
     {
       "id": "item.plant-stem-a-017",
-      "nameKey": "base.knotted-burl",
-      "name": "Knotted Burl",
+      "nameKey": "base-type.gnarled-vine-core",
+      "name": "Gnarled Vine-Core",
       "frame": "plant",
       "role": "core-guard",
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "trivial"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.knotted-burl",
+      "iconKey": "icon.base-type.gnarled-vine-core",
       "flavorKey": "flavor.base.knotted-burl",
       "flavor": "A dense, irregular knot of hardened wood that serves as a natural shield against blunt impact.",
       "tags": [
@@ -653,18 +653,18 @@
     },
     {
       "id": "item.plant-stem-a-018",
-      "nameKey": "base.knotted-burl",
-      "name": "Knotted Burl",
+      "nameKey": "base-type.twisted-fibrous-tendril",
+      "name": "Twisted Fibrous Tendril",
       "frame": "plant",
       "role": "core-guard",
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.knotted-burl",
+      "iconKey": "icon.base-type.twisted-fibrous-tendril",
       "flavorKey": "flavor.base.knotted-burl",
       "flavor": "A dense, calcified knot of growth that has hardened into a natural shield. It feels unnaturally heavy for its size, as if it holds the weight of the entire plant's history.",
       "tags": [
@@ -697,7 +697,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -727,18 +727,18 @@
     },
     {
       "id": "item.plant-stem-a-020",
-      "nameKey": "base.knotted-burl",
-      "name": "Knotted Burl",
+      "nameKey": "base-type.gnarled-stalk",
+      "name": "Gnarled Stalk",
       "frame": "plant",
       "role": "core-guard",
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.regeneration",
         "powerBand": "medium"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.knotted-burl",
+      "iconKey": "icon.base-type.gnarled-stalk",
       "flavorKey": "flavor.base.knotted-burl",
       "flavor": "A dense, knotty protrusion of hardened sap and wood that serves as a natural shield for the plant's vital conduits.",
       "tags": [
@@ -763,18 +763,18 @@
     },
     {
       "id": "item.plant-stem-a-021",
-      "nameKey": "base.coiled-tendril",
-      "name": "Coiled Tendril",
+      "nameKey": "base-type.spiral-vine-segment",
+      "name": "Spiral Vine Segment",
       "frame": "plant",
       "role": "core-guard",
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.regeneration",
         "powerBand": "trivial"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.coiled-tendril",
+      "iconKey": "icon.base-type.spiral-vine-segment",
       "flavorKey": "flavor.base.coiled-tendril",
       "flavor": "A spring-loaded length of reinforced vine designed to lash out and ensnare encroaching threats.",
       "tags": [
@@ -806,7 +806,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -835,18 +835,18 @@
     },
     {
       "id": "item.plant-stem-a-023",
-      "nameKey": "base.coiled-tendril",
-      "name": "Coiled Tendril",
+      "nameKey": "base-type.spiralous-shoot",
+      "name": "Spiralous Shoot",
       "frame": "plant",
       "role": "core-guard",
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
       "socketMax": 1,
-      "iconKey": "icon.base.coiled-tendril",
+      "iconKey": "icon.base-type.spiralous-shoot",
       "flavorKey": "flavor.base.coiled-tendril",
       "flavor": "A spring-like length of reinforced vine designed to lash around a defender's limb. It tightens instinctively when it senses a sudden impact.",
       "tags": [
@@ -878,7 +878,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -907,18 +907,18 @@
     },
     {
       "id": "item.plant-stem-a-025",
-      "nameKey": "base.coiled-tendril",
-      "name": "Coiled Tendril",
+      "nameKey": "base-type.spiralized-vine-strand",
+      "name": "Spiralized Vine-Strand",
       "frame": "plant",
       "role": "core-guard",
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.regeneration",
         "powerBand": "trivial"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.coiled-tendril",
+      "iconKey": "icon.base-type.spiralized-vine-strand",
       "flavorKey": "flavor.base.coiled-tendril",
       "flavor": "A spring-loaded length of reinforced vine designed to lash out and ensnare encroaching threats.",
       "tags": [
@@ -950,7 +950,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -979,18 +979,18 @@
     },
     {
       "id": "item.plant-stem-a-027",
-      "nameKey": "base.verdant-bulwark",
-      "name": "Verdant Bulwark",
+      "nameKey": "base-type.emerald-bastion",
+      "name": "Emerald Bastion",
       "frame": "plant",
       "role": "core-guard",
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 2,
-      "iconKey": "icon.base.verdant-bulwark",
+      "iconKey": "icon.base-type.emerald-bastion",
       "flavorKey": "flavor.base.verdant-bulwark",
       "flavor": "A dense, cross-sectioned segment of a primary stem, reinforced with hardened sap to deflect incoming strikes.",
       "tags": [
@@ -1016,18 +1016,18 @@
     },
     {
       "id": "item.plant-stem-a-028",
-      "nameKey": "base.coiled-tendril",
-      "name": "Coiled Tendril",
+      "nameKey": "base-type.spiralous-vine-strand",
+      "name": "Spiralous Vine-Strand",
       "frame": "plant",
       "role": "core-guard",
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.regeneration",
         "powerBand": "medium"
       },
       "socketMax": 0,
-      "iconKey": "icon.base.coiled-tendril",
+      "iconKey": "icon.base-type.spiralous-vine-strand",
       "flavorKey": "flavor.base.coiled-tendril",
       "flavor": "A spring-like length of toughened vine designed to lash out and ensnare encroaching threats.",
       "tags": [

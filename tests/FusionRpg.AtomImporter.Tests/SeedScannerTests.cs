@@ -219,8 +219,8 @@ public class SeedScannerTests : IDisposable
 
     /// <summary>The exact same class of gap `effects/affixes`' own test above exists to catch,
     /// applied to `species-effects`' own writer — found live, 2026-09-06, while verifying real
-    /// generated content actually imports: `data/seed/demons/species-effects/**` held real,
-    /// importer-clean content that nothing swept, because `demons/species-effects` was never added
+    /// generated content actually imports: `data/seed/creatures/species-effects/**` held real,
+    /// importer-clean content that nothing swept, because `creatures/species-effects` was never added
     /// to <see cref="SeedScanner.OwnedFolders"/> when the writer was built.</summary>
     [Fact]
     public void AtomImporter_swept_folder_matches_seedsmiths_own_species_effects_write_path()
@@ -231,12 +231,12 @@ public class SeedScannerTests : IDisposable
 
         var source = File.ReadAllText(generatorPath);
         var match = System.Text.RegularExpressions.Regex.Match(
-            source, @"OUTPUT_DIR\s*=\s*REPO_ROOT\s*/\s*""data""\s*/\s*""seed""\s*/\s*""demons""\s*/\s*""species-effects""");
+            source, @"OUTPUT_DIR\s*=\s*REPO_ROOT\s*/\s*""data""\s*/\s*""seed""\s*/\s*""creatures""\s*/\s*""species-effects""");
         Assert.True(match.Success,
-            "seedsmith's species-effects OUTPUT_DIR no longer reads REPO_ROOT/data/seed/demons/species-effects — " +
-            "update SeedScanner.OwnedFolders's \"demons/species-effects\" entry to match, in the same change");
+            "seedsmith's species-effects OUTPUT_DIR no longer reads REPO_ROOT/data/seed/creatures/species-effects — " +
+            "update SeedScanner.OwnedFolders's \"creatures/species-effects\" entry to match, in the same change");
 
-        Assert.Contains("demons/species-effects", SeedScanner.OwnedFolders);
+        Assert.Contains("creatures/species-effects", SeedScanner.OwnedFolders);
     }
 
     [Fact]
@@ -248,8 +248,8 @@ public class SeedScannerTests : IDisposable
         var roots = SeedScanner.Roots(Path.Combine(root, "data", "seed"), explicitRoot: false, Directory.Exists);
         var files = SeedScanner.Files(roots);
 
-        Assert.Contains(files, f => f.Replace('\\', '/').EndsWith("demons/species-effects/plant/pilot-batch.json", StringComparison.Ordinal));
-        Assert.Contains(files, f => f.Replace('\\', '/').EndsWith("demons/species-effects/zombie/pilot-batch.json", StringComparison.Ordinal));
+        Assert.Contains(files, f => f.Replace('\\', '/').EndsWith("creatures/species-effects/plant/pilot-batch.json", StringComparison.Ordinal));
+        Assert.Contains(files, f => f.Replace('\\', '/').EndsWith("creatures/species-effects/zombie/pilot-batch.json", StringComparison.Ordinal));
     }
 
     // ---- D4.16 (spec-domain-catalog.md §1): the seven dungeon folders ----

@@ -25,7 +25,7 @@
       "id": "set.drown-a-001",
       "nameKey": "set.trident-of-the-new-cycle",
       "name": "Trident of the New Cycle",
-      "themeKey": "demon.drown_a",
+      "themeKey": "creature.drown_a",
       "members": [
         {
           "role": "armament-primary",

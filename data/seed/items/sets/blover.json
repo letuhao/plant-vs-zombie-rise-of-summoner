@@ -25,7 +25,7 @@
       "id": "set.blover-001",
       "nameKey": "set.verdant-fog-walker",
       "name": "Verdant Fog-Walker",
-      "themeKey": "demon.blover",
+      "themeKey": "creature.blover",
       "members": [
         {
           "role": "armament-primary",

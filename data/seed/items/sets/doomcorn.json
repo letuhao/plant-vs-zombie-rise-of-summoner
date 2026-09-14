@@ -25,7 +25,7 @@
       "id": "set.doomcorn-001",
       "nameKey": "set.ember-corn-launcher",
       "name": "Ember Corn Launcher",
-      "themeKey": "demon.doomcorn",
+      "themeKey": "creature.doomcorn",
       "members": [
         {
           "role": "armament-primary",

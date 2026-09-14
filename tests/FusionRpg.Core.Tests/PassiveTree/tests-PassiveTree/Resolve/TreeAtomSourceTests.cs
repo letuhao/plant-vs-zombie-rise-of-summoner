@@ -271,4 +271,30 @@ public class TreeAtomSourceTests
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             TreeAtomSource.BoundAtomsFor(tree, owned, tierReached: 10, thetaNode: 100, RealPowerTuning(), fMilli: 999));
     }
+
+    // ---- P4.2 -- `More` is representable on the shared op mapping --------------------------------
+
+    /// <summary>P4.2 (R2) acceptance: a source-shape test proves the shared
+    /// <see cref="FusionRpg.Core.PassiveTree.Resolve.TreeAtomSource"/> mapping handles <c>More</c>.
+    /// Battle now consumes this same Hub projection; its former re-shaping source was deleted when
+    /// battle-hub-fuse removed the duplicate read mode. This is a SOURCE-SHAPE test on purpose: the
+    /// mapping function is private and, correctly, a `More` atom on
+    /// the `stat.derived` side can never legitimately reach it (M3 refuses it at load and bind), so a
+    /// runtime test would be testing an unreachable state. What MUST hold is that the mapping does not
+    /// silently produce an empty string — which `AtomDerivedSubsystem.TryParseOp` would treat as a
+    /// dropped op — so both op-mapping functions name every enum member, `More` included.</summary>
+    [Fact]
+    public void Shared_projection_maps_every_NodeAtomOp_including_More()
+    {
+        // A switch expression over an enum that omits a member compiles and silently yields the
+        // default (""). This asserts the SOURCE names each member explicitly, so
+        // adding a future member without updating the mapping fails here rather than at runtime.
+        var source = File.ReadAllText(Path.Combine(
+            RepoRoot(), "src", "FusionRpg.Core", "PassiveTree", "Resolve", "TreeAtomSource.cs"));
+        foreach (var op in Enum.GetNames<NodeAtomOp>())
+        {
+            var wire = op.ToLowerInvariant();
+            Assert.Contains($"\"{wire}\"", source);
+        }
+    }
 }

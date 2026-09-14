@@ -73,7 +73,7 @@ def build_pool_entries(*, rungs_path: Path = RUNGS_PATH) -> "list[dict]":
             "fields": ["family", "motifs", "antiMotifs", "element", "themeKey", "rarity"],
             "sourceVocabulary": "catalog + motif-assignments.json + family-assignments.json + "
                                 "themes.v1.json; 6 elements ActorElementTypes.cs:3-11; 10 rarity "
-                                "rungs DemonRarity.cs:16-27",
+                                "rungs CreatureRarity.cs:16-27",
             "whoPicks": "read from the seed",
             "closedValues": {"element": list(_ELEMENTS), "rarity": list(RARITY_LADDER)},
         },

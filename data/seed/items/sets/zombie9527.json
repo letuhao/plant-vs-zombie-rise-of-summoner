@@ -25,7 +25,7 @@
       "id": "set.zombie9527-001",
       "nameKey": "set.urban-parkour-set",
       "name": "Urban Parkour Set",
-      "themeKey": "demon.zombie9527",
+      "themeKey": "creature.zombie9527",
       "members": [
         {
           "role": "armament-primary",

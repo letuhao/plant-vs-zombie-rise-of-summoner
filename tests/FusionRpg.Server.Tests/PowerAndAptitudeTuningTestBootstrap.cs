@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Aura;
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Stats.Derived;
@@ -36,7 +36,7 @@ internal static class PowerAndAptitudeTuningTestBootstrap
         FusionRpg.Core.Items.ItemsTuningHub.Configure(DefaultItems);
         // T4.7 step 2 / T4.8 (catalog-runtime) — behaviour-preserving; see the Core.Tests bootstrap's
         // own identical comment (tests/FusionRpg.Core.Tests/ContractTuningTestBootstrap.cs).
-        DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        CreatureSpeciesCatalog.ConfigureFromCompiledDefault();
         // D2.16 (party-dungeon) — DelveBattleSessionTests/DelveBattleSessionManagerTests resolve real
         // battles under the `delve` profile (`BattleModeProfileCatalog.Delve`), which throws unless
         // `BattleModeProfileCatalog.Configure` has run. Mirrors Core.Tests' own `ContractTuningTest
@@ -47,6 +47,12 @@ internal static class PowerAndAptitudeTuningTestBootstrap
         // policies too. Configure them once from the current shipped tuning files so test order
         // cannot turn a missing dependency into a misleading HTTP 500 response.
         var tuningDir = Path.Combine(FindRepoRoot(), "data", "tuning");
+        // Creature minting now auto-binds a contract and therefore reads ContractPolicy before the
+        // atom-push fixture reaches its subject. Keep this assembly-wide prerequisite here so test
+        // order cannot decide whether a server test has a configured contract capacity.
+        FusionRpg.Core.Creatures.Contracts.ContractPolicy.Configure(
+            FusionRpg.Core.Creatures.Contracts.ContractTuningLoader.Parse(
+                File.ReadAllText(Path.Combine(tuningDir, "contracts.v1.json"))));
         FusionRpg.Core.Battle.Board.BattleBoardTuningPolicy.Configure(
             FusionRpg.Core.Battle.Board.BattleBoardTuningLoader.Parse(
                 File.ReadAllText(Path.Combine(tuningDir, "battle-board.v1.json"))));
@@ -117,7 +123,7 @@ internal static class PowerAndAptitudeTuningTestBootstrap
 
     // Minimal, hand-authored -- not the shipped data/tuning/action-rungs.v1.json (tunables-ssot.md's
     // "construct one inline" convention). Every specimen in this assembly's tests holds zero action
-    // grants today (T22's own note: no production caller grants actions to a demon instance yet), so
+    // grants today (T22's own note: no production caller grants actions to a creature instance yet), so
     // AutoEquip.Select never actually ranks a real candidate against this table -- it only needs to be
     // a STRUCTURALLY valid one-rung table so RungPolicy.Table does not throw "not configured".
     public static readonly RungTable DefaultRungs = new(
@@ -183,6 +189,13 @@ internal static class PowerAndAptitudeTuningTestBootstrap
         PoolShareMilli: new Dictionary<string, int>(StringComparer.Ordinal)
         {
             ["stamina"] = 500, ["hunger"] = 500, ["spirit"] = 500, ["qi"] = 500, ["poise"] = 500,
+        },
+        // Regen share deliberately all-zero -- ambient fixture keeps the pre-T11 baseline
+        // (lawn-combat-wire T11, spec-lawn-combat-calibration.md); the real `stamina=50` share
+        // now lives in the shipped `battle-resources.v2.json`.
+        RegenPerSecondShareMilli: new Dictionary<string, int>(StringComparer.Ordinal)
+        {
+            ["stamina"] = 0, ["hunger"] = 0, ["spirit"] = 0, ["qi"] = 0, ["poise"] = 0,
         });
 
     public static readonly StatsTuning DefaultStats = new(
@@ -212,7 +225,7 @@ internal static class PowerAndAptitudeTuningTestBootstrap
         {
           "schemaVersion": 1, "version": 1,
           "grant": { "aptitudePointsPerTheta": 3, "skillPointsPerTheta": 1 },
-          "pointEconomy": { "aptitudePointsPerThetaMilliByScope": { "commander": 3, "demonType": 4, "aspect": 4, "uniqueDemon": 6 }, "respecPrice": 10 }, "guardEconomy": { "flatCommitCost": 50, "absorbDrainSharePermille": 300, "riposteShareCapPermille": 400 }, "mitigation": { "scaleMilli": 1000, "families": ["combat.defense", "combat.dodge", "combat.parry", "combat.block", "combat.absorption", "combat.heal"] },
+          "pointEconomy": { "aptitudePointsPerThetaMilliByScope": { "commander": 3, "creatureType": 4, "aspect": 4, "uniqueCreature": 6 }, "respecPrice": 10 }, "guardEconomy": { "flatCommitCost": 50, "absorbDrainSharePermille": 300, "riposteShareCapPermille": 400 }, "mitigation": { "scaleMilli": 1000, "families": ["combat.defense", "combat.dodge", "combat.parry", "combat.block", "combat.absorption", "combat.heal"] },
           "read": { "contest": { "spanPoints": 100.0, "shareExponentMilli": 1000 }, "magnitude": { "shareExponentMilli": 1000 } },
           "recovery": { "scaleMilli": 374, "targetRecoveryShareMilli": 670, "families": ["resource.regen"] },
           "familyRead": { "combat.power": "magnitude" },

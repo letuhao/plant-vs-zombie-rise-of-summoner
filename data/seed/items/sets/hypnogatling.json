@@ -23,9 +23,9 @@
   "entries": [
     {
       "id": "set.hypnogatling-001",
-      "nameKey": "set.item",
-      "name": "魅惑豌豆机枪",
-      "themeKey": "demon.hypnogatling",
+      "nameKey": "set.hypno-sprout-gatling",
+      "name": "Hypno-Sprout Gatling",
+      "themeKey": "creature.hypnogatling",
       "members": [
         {
           "role": "armament-primary",
@@ -83,7 +83,7 @@
           ]
         }
       ],
-      "flavor": "A rapid-fire mechanism that releases hypnotic, pea-sized projectiles to mesmerize the target.",
+      "flavor": "A rhythmic barrage of hypnotic seeds that leaves enemies dazed.",
       "tags": [],
       "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
     }

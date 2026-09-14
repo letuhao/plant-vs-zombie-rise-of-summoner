@@ -30,7 +30,7 @@ public class QuestCatalogTests
         ["gather-curio-kind"] = new("quest.gather", "gather-curio-kind", "shrine", "several", "modest", "delve", null),
         ["kill-boss"] = new("quest.kill-boss", "kill-boss", null, null, "rich", "delve", null),
         ["extract-with-item-kind"] = new("quest.extract", "extract-with-item-kind", "weapon", null, "fair", "delve", null),
-        ["bring-demon-home-alive"] = new("quest.bring-home", "bring-demon-home-alive", null, null, "modest", "roster", null),
+        ["bring-creature-home-alive"] = new("quest.bring-home", "bring-creature-home-alive", null, null, "modest", "roster", null),
         ["finish-under-hunger"] = new("quest.hunger", "finish-under-hunger", null, null, "fair", "delve", null),
         ["survive-no-downed"] = new("quest.survive", "survive-no-downed", null, null, "fair", "delve", null),
         ["spend-no-provision"] = new("quest.spend-no-provision", "spend-no-provision", null, null, "modest", "delve", null),
@@ -44,7 +44,7 @@ public class QuestCatalogTests
         var ids = Templates.Select(t => t.ObjectiveTemplateId).OrderBy(x => x, StringComparer.Ordinal).ToList();
         var expected = new[]
         {
-            "bring-demon-home-alive", "cleanse-fights", "explore-rooms", "extract-with-item-kind",
+            "bring-creature-home-alive", "cleanse-fights", "explore-rooms", "extract-with-item-kind",
             "finish-under-hunger", "gather-curio-kind", "kill-boss", "spend-no-provision", "survive-no-downed",
         }.OrderBy(x => x, StringComparer.Ordinal).ToList();
         Assert.Equal(expected, ids);

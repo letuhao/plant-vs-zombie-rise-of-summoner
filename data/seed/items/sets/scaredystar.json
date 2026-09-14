@@ -25,7 +25,7 @@
       "id": "set.scaredystar-001",
       "nameKey": "set.star-mimic-spore",
       "name": "Star-Mimic Spore",
-      "themeKey": "demon.scaredystar",
+      "themeKey": "creature.scaredystar",
       "members": [
         {
           "role": "armament-primary",

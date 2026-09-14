@@ -23,9 +23,9 @@
   "entries": [
     {
       "id": "set.cherryscaredy-001",
-      "nameKey": "set.cherry-panic-burst",
-      "name": "Cherry Panic Burst",
-      "themeKey": "demon.cherryscaredy",
+      "nameKey": "set.crimson-tremor",
+      "name": "Crimson Tremor",
+      "themeKey": "creature.cherryscaredy",
       "members": [
         {
           "role": "armament-primary",

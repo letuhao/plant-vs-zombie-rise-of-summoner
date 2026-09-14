@@ -23,9 +23,9 @@
   "entries": [
     {
       "id": "set.firesunshroom-b-001",
-      "nameKey": "set.item",
-      "name": "萤火阳光菇",
-      "themeKey": "demon.firesunshroom_b",
+      "nameKey": "set.firesunshroom-spore-cluster",
+      "name": "Firesunshroom Spore-Cluster",
+      "themeKey": "creature.firesunshroom_b",
       "members": [
         {
           "role": "armament-primary",
@@ -74,7 +74,7 @@
           ]
         }
       ],
-      "flavor": "在共生中绽放的微光，是植物与生命交织的呼吸。",
+      "flavor": "A glowing cluster of fungi that radiates a gentle, rhythmic warmth.",
       "tags": [],
       "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType ids are deterministic lookups over the existing base-type corpus; the model supplies only role/frame pairs."
     }

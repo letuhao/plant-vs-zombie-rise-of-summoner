@@ -1,8 +1,8 @@
 """seedsmith.adapters.items.setgen.emit — ids, and the one that would have shipped broken.
 
-⛔ **A demon `themeKey` cannot go into a set id.** `naming.v1.json` (registryVersion 4, frozen) gives
-sets `idTemplate: "set.{themeId}-{seq:03}"`. A demon theme key is `demon.allpeater`; substituting it
-yields `set.demon.allpeater-001` — **two dots**, which fails `definitions.md` §1's grammar (the body
+⛔ **A creature `themeKey` cannot go into a set id.** `naming.v1.json` (registryVersion 4, frozen) gives
+sets `idTemplate: "set.{themeId}-{seq:03}"`. A creature theme key is `creature.allpeater`; substituting it
+yields `set.creature.allpeater-001` — **two dots**, which fails `definitions.md` §1's grammar (the body
 after the first dot is `[a-z0-9-]+`, no dot; `ContainerValidator.cs` mirrors it). Composed with
 ssot-sets §4.3's tier suffix it is worse.
 
@@ -41,11 +41,11 @@ def _kebab_legal(token: str) -> bool:
 def container_species_id(species_id: str) -> str:
     """Return the stable kebab spelling used in item container ids.
 
-    The demon dump still contains a small legacy variant slice whose ``typeName`` uses
+    The creature dump still contains a small legacy variant slice whose ``typeName`` uses
     underscores (for example ``BlackFootball_a``).  Those names remain the authoritative
     ``speciesId`` in the theme registry, but ``definitions.md`` permits only kebab-case in a
     container id.  Normalise that representation at the item boundary instead of rewriting
-    demon identifiers or silently minting an invalid id.
+    creature identifiers or silently minting an invalid id.
     """
     token = species_id.strip().lower().replace("_", "-")
     if not _kebab_legal(token):
@@ -56,7 +56,7 @@ def container_species_id(species_id: str) -> str:
 
 def set_id(species_id: str, seq: int, *, legacy_partitions: "frozenset[str]" = frozenset()) -> str:
     """`set.{speciesId}-{seq:03}` — never the `themeKey`."""
-    if species_id.startswith(("demon.", "theme.", "build.")):
+    if species_id.startswith(("creature.", "theme.", "build.")):
         raise IdRefused(
             f"{species_id!r} is a themeKey, not a speciesId — substituting it yields "
             f"'set.{species_id}-{seq:03}', two dots, which fails definitions.md §1's container_id "

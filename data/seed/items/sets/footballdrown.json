@@ -25,7 +25,7 @@
       "id": "set.footballdrown-001",
       "nameKey": "set.deep-sea-striker",
       "name": "Deep Sea Striker",
-      "themeKey": "demon.footballdrown",
+      "themeKey": "creature.footballdrown",
       "members": [
         {
           "role": "armament-primary",

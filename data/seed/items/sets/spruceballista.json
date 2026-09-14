@@ -25,7 +25,7 @@
       "id": "set.spruceballista-001",
       "nameKey": "set.spruce-crossbow",
       "name": "Spruce Crossbow",
-      "themeKey": "demon.spruceballista",
+      "themeKey": "creature.spruceballista",
       "members": [
         {
           "role": "armament-primary",

@@ -466,10 +466,18 @@
       "id": "atom.evd-evd",
       "nameKey": "affix.evade",
       "name": "evade",
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
       "kindId": "stat.derived",
       "params": {
         "channel": "combat.dodge.{variant}",
         "op": "Flag"
+      },
+      "variants": {
+        "generate": "elements+omni"
       },
       "roles": [
         "core-guard",
@@ -484,12 +492,20 @@
     },
     {
       "id": "atom.evd-shift",
-      "nameKey": "affix.evade",
-      "name": "Evade",
+      "nameKey": "affix-family.agility",
+      "name": "Agility",
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
       "kindId": "stat.derived",
       "params": {
         "channel": "combat.crit.resist.damage.{variant}",
         "op": "Flat"
+      },
+      "variants": {
+        "generate": "elements+omni"
       },
       "roles": [
         "core-guard",

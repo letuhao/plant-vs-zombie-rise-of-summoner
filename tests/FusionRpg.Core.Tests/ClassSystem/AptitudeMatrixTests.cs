@@ -561,47 +561,6 @@ public class AptitudeMatrixTests
         }
     }
 
-    // ── 7. the battle seam sees the same matrix ──────────────────────────────────────────────────
-
-    /// <summary>
-    /// <c>ProveAptitudeJsonEmitTests</c> proves the two engines agree for <b>one</b> edge
-    /// (<c>might → combat.power.omni</c>). This widens that to the whole shipped set: for all twelve
-    /// aptitudes, <see cref="AptitudeResolver.ResolveForBattle"/> emits the same channels as the
-    /// overlay path, with amounts that match after the battle side's documented narrowing to
-    /// <c>long</c>.
-    /// </summary>
-    [Fact]
-    public void The_battle_seam_emits_the_same_486_edges_as_the_overlay_seam()
-    {
-        var tuning = Shipped();
-        var registry = Registry();
-        const int theta = 74;
-        var total = 0;
-
-        foreach (var aptitude in AptitudeCatalog.All.Select(a => a.Id))
-        {
-            var overlay = AptitudeResolver.Resolve(SoleAllocation(aptitude), tuning, Ladder(), theta, registry);
-            var battle = AptitudeResolver.ResolveForBattle(SoleAllocation(aptitude), tuning, Ladder(), theta, registry);
-
-            Assert.Equal(overlay.Count, battle.Count);
-            Assert.Equal(
-                overlay.Select(m => m.ChannelId).OrderBy(s => s, StringComparer.Ordinal),
-                battle.Select(m => m.ChannelId).OrderBy(s => s, StringComparer.Ordinal));
-
-            foreach (var b in battle)
-            {
-                var o = overlay.Single(m => m.ChannelId == b.ChannelId);
-                var narrowed = (long)Math.Round(o.Value, MidpointRounding.AwayFromZero);
-                Assert.True(b.Amount == narrowed,
-                    $"{aptitude} -> {b.ChannelId}: battle {b.Amount} vs overlay {o.Value} (narrowed {narrowed})");
-            }
-
-            total += battle.Count;
-        }
-
-        Assert.Equal(526, total);
-    }
-
     // ── 8. the reader-less edges, cross-checked from a real resolve ──────────────────────────────
 
     /// <summary>

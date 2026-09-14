@@ -14,7 +14,7 @@ public class OmniFallbackTests
 {
     static OverlayCombatRequest Request(
         ActorDerivedSnapshot? attacker = null, ActorDerivedSnapshot? defender = null,
-        double baseDamage = 100, bool? forceHit = null, bool? forceCrit = null) =>
+        long baseDamage = 100, bool? forceHit = null, bool? forceCrit = null) =>
         new()
         {
             BaseOverlayDamage = baseDamage,

@@ -25,7 +25,7 @@
       "id": "set.scaredypotato-001",
       "nameKey": "set.spore-cloud-spore-burst",
       "name": "Spore-Cloud Spore-Burst",
-      "themeKey": "demon.scaredypotato",
+      "themeKey": "creature.scaredypotato",
       "members": [
         {
           "role": "armament-primary",

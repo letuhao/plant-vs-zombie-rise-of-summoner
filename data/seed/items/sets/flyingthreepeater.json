@@ -25,7 +25,7 @@
       "id": "set.flyingthreepeater-001",
       "nameKey": "set.phoenix-ascent",
       "name": "Phoenix Ascent",
-      "themeKey": "demon.flyingthreepeater",
+      "themeKey": "creature.flyingthreepeater",
       "members": [
         {
           "role": "armament-primary",

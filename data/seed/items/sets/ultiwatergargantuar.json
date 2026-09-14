@@ -25,7 +25,7 @@
       "id": "set.ultiwatergargantuar-001",
       "nameKey": "set.bastion-s-low-hum",
       "name": "Bastion's Low Hum",
-      "themeKey": "demon.ultiwatergargantuar",
+      "themeKey": "creature.ultiwatergargantuar",
       "members": [
         {
           "role": "armament-primary",

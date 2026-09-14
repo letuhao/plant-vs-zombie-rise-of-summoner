@@ -78,6 +78,19 @@ public sealed record PowerInteractionRow(
     string KindA, string ChannelA, string KindB, string ChannelB, int CoeffMilli, PowerCategory Category);
 
 /// <summary>
+/// standing-coeff-tuning (T16, spec's own D4 finding): overrides <see cref="AtomKind.Categories"/>'
+/// kind-wide flag set for one combat channel FAMILY — the prefix before the trailing element slot
+/// (e.g. <c>"combat.dodge"</c> for <c>"combat.dodge.fire"</c>) — the same "a kind-wide flag set would
+/// blur this" reasoning <see cref="PowerInteractionRow.Category"/> already established for interaction
+/// rows, applied here to the base per-channel price instead. Family-level, not per-channel (the
+/// spec's own "family/mask first" default) — every one of <c>DerivedStatChannels.CombatChannelFamilies</c>'
+/// 28 families covers all ~196 combat channels via the shared element-roster expansion, so one row per
+/// family is enough; no per-slot duplication like <see cref="PowerInteractionRow"/> needs (that type
+/// pairs two SPECIFIC full channels, this one matches by stripping the trailing slot at lookup time).
+/// </summary>
+public sealed record PowerCategoryOverrideRow(string KindId, string ChannelFamily, PowerCategory Category);
+
+/// <summary>
 /// The coefficients and trigger frequencies a price is computed from.
 ///
 /// <para><b>Authored values live in rows; a sweep writes proposals to a side table and never touches
@@ -89,21 +102,26 @@ public sealed class PowerTables
     readonly Dictionary<(string Kind, string Channel), PowerCoefficientRow> _coefficients;
     readonly Dictionary<string, int> _frequency;
     readonly Dictionary<(string LeafId, string ArgKey), PredicateFrequencyRow> _predicateFrequency;
+    readonly Dictionary<(string Kind, string Family), PowerCategoryOverrideRow> _categoryOverrides;
 
     public PowerTables(
         IReadOnlyList<PowerCoefficientRow> coefficients, IReadOnlyList<TriggerFrequencyRow> frequencies,
         IReadOnlyList<PredicateFrequencyRow>? predicateFrequencies = null,
-        IReadOnlyList<PowerInteractionRow>? interactions = null)
+        IReadOnlyList<PowerInteractionRow>? interactions = null,
+        IReadOnlyList<PowerCategoryOverrideRow>? categoryOverrides = null)
     {
         Coefficients = coefficients;
         Frequencies = frequencies;
         PredicateFrequencies = predicateFrequencies ?? Array.Empty<PredicateFrequencyRow>();
         Interactions = interactions ?? Array.Empty<PowerInteractionRow>();
+        CategoryOverrides = categoryOverrides ?? Array.Empty<PowerCategoryOverrideRow>();
         _coefficients = new Dictionary<(string, string), PowerCoefficientRow>();
         foreach (var c in coefficients) _coefficients[(c.KindId, c.Channel)] = c;
         _frequency = frequencies.ToDictionary(f => f.Trigger, f => f.PerMinute, StringComparer.Ordinal);
         _predicateFrequency = new Dictionary<(string, string), PredicateFrequencyRow>();
         foreach (var p in PredicateFrequencies) _predicateFrequency[(p.LeafId, p.ArgKey)] = p;
+        _categoryOverrides = new Dictionary<(string, string), PowerCategoryOverrideRow>();
+        foreach (var c in CategoryOverrides) _categoryOverrides[(c.KindId, c.ChannelFamily)] = c;
     }
 
     public IReadOnlyList<PowerCoefficientRow> Coefficients { get; }
@@ -115,6 +133,28 @@ public sealed class PowerTables
     /// "no correction applies", not an error: <see cref="ActorPowerCache.Compose"/> degrades to its
     /// pre-E44 additive-per-channel behaviour rather than throwing on a table nobody populated.</summary>
     public IReadOnlyList<PowerInteractionRow> Interactions { get; }
+
+    /// <summary>T16's closed, named set of per-family category overrides — see
+    /// <see cref="PowerCategoryOverrideRow"/>. Empty for a caller that never passed any (every pre-T16
+    /// construction site), which degrades <see cref="CategoryOverrideFor"/> to always returning null —
+    /// exactly "no override applies," never an error.</summary>
+    public IReadOnlyList<PowerCategoryOverrideRow> CategoryOverrides { get; }
+
+    /// <summary>
+    /// The category override for one channel, if its family has an authored row — else null, which
+    /// tells the caller to fall back to the kind's own <see cref="AtomKind.Categories"/>. The family is
+    /// the channel with its trailing element slot stripped (<c>"combat.dodge.fire"</c> →
+    /// <c>"combat.dodge"</c>) — every combat channel this repo generates is <c>{family}.{elementId}</c>,
+    /// the same shape every per-family table in <c>DerivedStatChannels</c> already assumes.
+    /// </summary>
+    public PowerCategory? CategoryOverrideFor(string kindId, string? channel)
+    {
+        if (string.IsNullOrEmpty(channel)) return null;
+        var dot = channel.LastIndexOf('.');
+        if (dot <= 0) return null;
+        var family = channel[..dot];
+        return _categoryOverrides.TryGetValue((kindId, family), out var row) ? row.Category : null;
+    }
 
     /// <summary>
     /// The row for a kind and channel, falling back to the kind's channel-less row.
@@ -206,7 +246,52 @@ public sealed class PowerTables
             new(AtomTriggers.OnTimer, 12),
         };
 
-        return new PowerTables(coefficients, frequencies, interactions: AuthoredInteractions());
+        return new PowerTables(coefficients, frequencies,
+            interactions: AuthoredInteractions(), categoryOverrides: AuthoredCategoryOverrides());
+    }
+
+    /// <summary>
+    /// T16 (spec-standing-coeff-tuning.md, D4 finding 5): every <c>stat.derived</c> channel today
+    /// prices through <c>AtomKindRegistry</c>'s kind-wide <c>Offense|Survivability|Control</c> trisect,
+    /// so a purely defensive stat like dodge splits its price three ways instead of landing where it
+    /// belongs. None of the 28 combat channel families this covers are a Control mechanic — Control's
+    /// real combat-power content is <c>skill.cooldown</c>/<c>effectiveness</c> and
+    /// <c>status.power</c>/<c>resist</c> (<c>CombatPowerMembership</c>'s own locked table, T8), not raw
+    /// attack/defense math — so every row below is a clean two-way split: <c>Offense</c> for the
+    /// ATTACKER'S half of a contest pair, <c>Survivability</c> for the DEFENDER'S. 16 of the 28
+    /// families already carry that role in <c>DerivedStatChannels.CombatFamilyRole</c> (H.1); the
+    /// other 12 (crit/power/defense/accuracy/dodge/shield-capacity/shield-toughness/shield-regen) are
+    /// read the same way by plain domain meaning — none of them are ambiguous (dodge is the
+    /// spec's own worked example: purely a defender stat, purely Survivability).
+    /// </summary>
+    static IReadOnlyList<PowerCategoryOverrideRow> AuthoredCategoryOverrides()
+    {
+        var offense = new[]
+        {
+            "combat.power", "combat.crit.rate", "combat.crit.damage", "combat.accuracy",
+            DerivedStatChannels.CombatShieldPenPrefix, DerivedStatChannels.CombatPenetrationPrefix,
+            DerivedStatChannels.CombatAmplificationPrefix, DerivedStatChannels.CombatReflectResistRatePrefix,
+            DerivedStatChannels.CombatReflectResistDamagePrefix, DerivedStatChannels.CombatParryBreakPrefix,
+            DerivedStatChannels.CombatParryShredPrefix, DerivedStatChannels.CombatBlockBreakPrefix,
+            DerivedStatChannels.CombatBlockShredPrefix
+        };
+        var survivability = new[]
+        {
+            "combat.defense", "combat.crit.resist", "combat.crit.resist.damage", "combat.dodge",
+            DerivedStatChannels.CombatShieldCapacityPrefix, DerivedStatChannels.CombatShieldToughnessPrefix,
+            DerivedStatChannels.CombatShieldRegenPrefix, DerivedStatChannels.CombatAbsorptionPrefix,
+            DerivedStatChannels.CombatReductionPrefix, DerivedStatChannels.CombatReflectRatePrefix,
+            DerivedStatChannels.CombatReflectDamagePrefix, DerivedStatChannels.CombatParryRatePrefix,
+            DerivedStatChannels.CombatParryStrengthPrefix, DerivedStatChannels.CombatBlockRatePrefix,
+            DerivedStatChannels.CombatBlockStrengthPrefix
+        };
+
+        var rows = new List<PowerCategoryOverrideRow>();
+        foreach (var family in offense)
+            rows.Add(new PowerCategoryOverrideRow("stat.derived", family, PowerCategory.Offense));
+        foreach (var family in survivability)
+            rows.Add(new PowerCategoryOverrideRow("stat.derived", family, PowerCategory.Survivability));
+        return rows;
     }
 
     /// <summary>

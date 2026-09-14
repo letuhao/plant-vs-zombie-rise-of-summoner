@@ -60,7 +60,7 @@ def resolve_codex_summaries(
     """
     from ....workflow.graphs.species_codex import build_species_codex_graph, state_for_species_codex
     from ....workflow.runner import run_many
-    from ...demons.anchor.vote import resolve_vote
+    from ...creatures.anchor.vote import resolve_vote
 
     persisted: "dict[str, dict]" = {}
     app = build_species_codex_graph(

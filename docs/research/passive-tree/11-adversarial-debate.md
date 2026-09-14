@@ -62,9 +62,9 @@ not say how the review gets done.
 **What the player actually sees is not 25,900.** This is the strongest counter and it is decisive for
 the generic half.
 
-- A species tree is gated on the `UniqueDemon` scope — specimen level (`passive-tree-ideal.md:277`, and
+- A species tree is gated on the `UniqueCreature` scope — specimen level (`passive-tree-ideal.md:277`, and
   `rpg_unique_actors.level` is the only shipped source, [08](08-effort-power-reconciliation.md) §3).
-  **You cannot see a species tree for a species you do not own.** A player with 30 demons has
+  **You cannot see a species tree for a species you do not own.** A player with 30 creatures has
   1,560 + 30 × 29 = **2,430 nodes in reach**, not 25,900.
 - The browsing unit is the *tree*, never the node ([07](07-learnability-and-surface.md) §4.2, derived
   from the shipped volume rule at `CreaturesLayer.tsx:18-24`). One tree is 40 cells, render-all. Nodes
@@ -73,7 +73,7 @@ the generic half.
   at `Θ≈170` (`passive-tree-ideal.md:64`). Content the player has not reached yet is not a graveyard; it
   is the endless-grind SSOT working as designed.
 
-**And the generic 1,560 is not a large number for this repo.** The demon program already ships 841
+**And the generic 1,560 is not a large number for this repo.** The creature program already ships 841
 species entries across 503 files and 830 committed generated files
 ([01-static-vs-rolled.md](01-static-vs-rolled.md) §1 — counted, FACT). 1,560 nodes is smaller than work
 already delivered and reviewed here.
@@ -243,7 +243,7 @@ nowhere near exhausted at 1,760 capstones.
 **And "distinct" is the wrong bar for a species tree anyway.** [03](03-llm-stage-contract.md) §8.1 makes
 this explicit and it is the right call: a generic tree needs **differentiation** (50 trees must be
 tellable apart); a species tree needs **recognition** — *"it does not need to be distinguishable from 903
-others; it needs to feel like that demon."* Repetition across 841 species is not a defect there.
+others; it needs to feel like that creature."* Repetition across 841 species is not a defect there.
 
 **Also: the quota is enforced by refusal, not by hope.** The emit gate re-derives `class` from the bound
 atoms and *"refuses on disagreement. A declared class that the content contradicts is a rejection, not a
@@ -599,7 +599,7 @@ Specific, cited, offered as settled ground.
 
 9. **The whole enrichment set marks FACT / INFERENCE / RECALL and lists what it could not close.**
    [05](05-mechanism-taxonomy.md) §9 ticks its "tested the constraint" box as `[~] PARTIAL` and says which
-   claims are unmeasured. [03](03-llm-stage-contract.md) admits it never opened the 830 generated demon
+   claims are unmeasured. [03](03-llm-stage-contract.md) admits it never opened the 830 generated creature
    files it counted. That is the honest-gap discipline `DESIGN-GATE.md` §5 asks for, actually practised.
 
 10. **Standalone-first holds throughout.** Nothing in D1–D32 reads a Unity field, and the overlay combat

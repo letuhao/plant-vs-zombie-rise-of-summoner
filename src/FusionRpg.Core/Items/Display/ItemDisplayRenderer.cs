@@ -11,7 +11,7 @@ namespace FusionRpg.Core.Items.Display;
 public static class ItemDisplayRenderer
 {
     // ---- Rule 1 — the shipped percent conversion, adopted, not reinvented -------------------------
-    // web/fusion-rpg-web/src/features/demons/patronView.ts:23 (verified): (milli/10).toFixed(1),
+    // web/fusion-rpg-web/src/features/creatures/patronView.ts:23 (verified): (milli/10).toFixed(1),
     // trailing ".0" stripped. One convention; patronView is asked to call this instead of owning it.
     /// <remarks><c>long</c>, not <c>int</c> (widened 2026-09-06): a per-mille magnitude is something
     /// <c>contentScale</c> can touch, and AGENTS.md's rule is <c>long</c> for every magnitude. It was

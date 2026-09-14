@@ -25,7 +25,7 @@
       "id": "set.cabbagecaltrop-001",
       "nameKey": "set.cabbage-spikes",
       "name": "Cabbage Spikes",
-      "themeKey": "demon.cabbagecaltrop",
+      "themeKey": "creature.cabbagecaltrop",
       "members": [
         {
           "role": "armament-primary",

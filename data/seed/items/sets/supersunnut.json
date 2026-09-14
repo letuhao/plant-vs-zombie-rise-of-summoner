@@ -25,7 +25,7 @@
       "id": "set.supersunnut-001",
       "nameKey": "set.solar-strike-sphere",
       "name": "Solar Strike Sphere",
-      "themeKey": "demon.supersunnut",
+      "themeKey": "creature.supersunnut",
       "members": [
         {
           "role": "armament-primary",

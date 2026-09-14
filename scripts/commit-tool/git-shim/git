@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# PATH shim: block git write unless REPO_GIT_MCP=1 (set by perform_commit).
+set -euo pipefail
+SHIM_DIR="$(cd "$(dirname "$0")" && pwd)"
+REAL_GIT=""
+if [[ -x /usr/bin/git ]]; then
+  REAL_GIT=/usr/bin/git
+elif [[ -x /usr/local/bin/git ]]; then
+  REAL_GIT=/usr/local/bin/git
+else
+  while IFS= read -r cand; do
+    case "$cand" in
+      "$SHIM_DIR"/*) continue ;;
+      *) REAL_GIT=$cand; break ;;
+    esac
+  done < <(command -v -a git 2>/dev/null || true)
+fi
+if [[ -z "$REAL_GIT" ]]; then
+  echo "git-shim: cannot find real git" >&2
+  exit 1
+fi
+
+block=0
+for a in "$@"; do
+  case "$a" in
+    commit|push|merge|rebase|cherry-pick|am|revert|tag|update-ref|filter-branch|filter-repo)
+      block=1
+      break
+      ;;
+  esac
+done
+
+if [[ "${REPO_GIT_MCP:-}" == "1" ]]; then
+  block=0
+fi
+
+if [[ "$block" == "1" ]]; then
+  echo "Blocked: use MCP repo-git.commit for commits; push is owner-only." >&2
+  exit 1
+fi
+
+exec "$REAL_GIT" "$@"

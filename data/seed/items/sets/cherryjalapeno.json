@@ -25,7 +25,7 @@
       "id": "set.cherryjalapeno-001",
       "nameKey": "set.spicy-zombie-beast",
       "name": "Spicy Zombie Beast",
-      "themeKey": "demon.cherryjalapeno",
+      "themeKey": "creature.cherryjalapeno",
       "members": [
         {
           "role": "armament-primary",

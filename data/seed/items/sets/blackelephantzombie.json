@@ -25,7 +25,7 @@
       "id": "set.blackelephantzombie-001",
       "nameKey": "set.doctor-s-grave-decision",
       "name": "Doctor's Grave Decision",
-      "themeKey": "demon.blackelephantzombie",
+      "themeKey": "creature.blackelephantzombie",
       "members": [
         {
           "role": "armament-primary",

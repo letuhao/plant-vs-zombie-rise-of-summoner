@@ -1,0 +1,26 @@
+{
+  "session": "goal-23failures-20260913",
+  "program": "worktree-test-health (executes tasks/worktree-23-failures-plan.md P0-P6)",
+  "problem": "Fix the 23 default-profile failures on worktree-solid-run-20260912-eb53: 15 CRLF golden artifacts, 1 expedition hunt-hash drift, 1 turn-fixture drift, 4 E2E sweep contaminations, 2 armoury worktree-blindness",
+  "mode": "worktree",
+  "branch": "worktree-solid-run-20260912-eb53",
+  "worktree": "D:/Works/source/plant-vs-zombie-rise-of-summoner/.kilo/worktrees/solid-run-20260912-eb53",
+  "paths": [
+    "tests/FusionRpg.Core.Tests/Battle/Adoption/EventSequenceParityTests.cs",
+    "tests/FusionRpg.Core.Tests/Battle/Adoption/PreAdoptionFixtures.cs",
+    "tests/FusionRpg.Core.Tests/Actions/ActionAdoptionFixtures.cs",
+    "tests/FusionRpg.Core.Tests/Items/MaterialCorpusTests.cs",
+    "tests/FusionRpg.Core.Tests/Expeditions/ExpeditionResolverTests.cs",
+    "tests/FusionRpg.Data.Tests/Items/ArmouryTests.cs",
+    "tests/FusionRpg.E2E.Tests/WebMatchContentHashSweepTests.cs",
+    "tests/FusionRpg.E2E.Tests/WorldTurnFixtureTests.cs",
+    ".gitattributes",
+    "docs/contributing/dev-setup.md",
+    "tasks/worktree-23-failures-plan.md",
+    "tasks/sessions/goal-23failures-20260913.json"
+  ],
+  "started": "2026-09-13T00:00:00Z",
+  "status": "merged",
+  "closed": "2026-09-13 — all 5 commits landed (4 worktree + 1 main); default profile 23 -> 0 verified before committing.",
+  "scopeNote": "Owner-invoked via /goal to execute tasks/worktree-23-failures-plan.md. Edits land in the solid-run worktree on its own branch; solid-run-20260912-eb53 owns overlapping paths (tests/**) and remains active — changes are test-harness/golden only, no src/ product edits planned except none. Git hands-off: no commits by this session; owner commits via repo-git.commit with explicit paths."
+}

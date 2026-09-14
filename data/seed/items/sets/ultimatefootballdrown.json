@@ -25,7 +25,7 @@
       "id": "set.ultimatefootballdrown-001",
       "nameKey": "set.abyssal-trident",
       "name": "Abyssal Trident",
-      "themeKey": "demon.ultimatefootballdrown",
+      "themeKey": "creature.ultimatefootballdrown",
       "members": [
         {
           "role": "armament-primary",

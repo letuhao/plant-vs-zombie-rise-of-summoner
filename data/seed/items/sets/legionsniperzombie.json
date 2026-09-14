@@ -25,7 +25,7 @@
       "id": "set.legionsniperzombie-001",
       "nameKey": "set.echo-of-alpha",
       "name": "Echo of Alpha",
-      "themeKey": "demon.legionsniperzombie",
+      "themeKey": "creature.legionsniperzombie",
       "members": [
         {
           "role": "armament-primary",

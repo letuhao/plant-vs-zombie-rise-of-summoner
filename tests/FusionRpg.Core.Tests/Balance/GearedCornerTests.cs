@@ -25,11 +25,11 @@ namespace FusionRpg.Core.Tests.Balance;
 /// <see cref="BoundDerivedAtom"/> (<see cref="EquipAtomSource.DerivedAtomsFor"/>), and a way for the
 /// balance guards to pass one in.</para>
 ///
-/// <para><b>`class-system-map.md` §2a.0 does not forbid this.</b> Read in full: it decides
-/// <c>BattleStatComposer</c> runs no subsystems and that aptitudes reach battle via `ChannelMods`
-/// instead — "the composers stay separate". That is a rule against FUSING the two composers. Each
-/// side reading the same equipped atoms through its own seam is what "separate" means, not what it
-/// forbids.</para>
+/// <para><b>`class-system-map.md` §2a.0 no longer forbids anything here.</b> It used to say
+/// <c>BattleStatComposer</c> ran no subsystems and that aptitudes reached battle via `ChannelMods`
+/// instead — "the composers stay separate". battle-hub-fuse (T6) deleted `BattleStatComposer`; both
+/// seams are `ActorHub` now, just with different registered subsystems (battle-ops-parity T7 closed
+/// the remaining op-honoring gap between them).</para>
 ///
 /// <para><b>Why the non-regression tests below are the important half.</b> <see cref="ActorHub"/> is
 /// the shared derived-stat SSOT (`actor-hub-ssot.md`), not class-system's private property, and
@@ -151,50 +151,71 @@ public class GearedCornerTests
         Assert.Equal(t1, t2);
     }
 
-    // ── (b) the cross-check: the hub side folds what the PROVEN battle side computes ───────────────
+    // ── (b) the cross-check: battle Hub folds exactly what the sheet/overlay Hub computes ───────────
+
+    static BattleActorSetup BattleSetupWith(IReadOnlyList<BoundDerivedAtom>? gear) => new()
+    {
+        Key = "s1", Side = "squad", SpeciesId = "spec", TypeId = 1, Level = 5,
+        SpecimenId = "s1", MaxHp = 100, Atk = 50, Defense = 20,
+        HubInputs = gear is null ? null : new BattleHubInputs { BoundAtoms = gear },
+    };
 
     [Fact]
-    public void AnEquippedAtom_foldsIntoTheDerivedSnapshot_byExactlyWhatTheBattleSideComputes()
+    public void AnEquippedAtom_foldsIntoTheDerivedSnapshot_theSameWayOnBattleAndOverlayHub()
     {
+        // battle-ops-parity T7: battle-hub-fuse (T6) already made battle an ActorHub compose; this
+        // proves the SAME equipped-atom projection (DerivedAtomsFor -- the one parse EquipAtomSource
+        // carries now that ModsFor/BattleChannelMod is deleted) reaches an identical total on both the
+        // overlay/sheet Hub (ResolveHub, ActorHubBootstrap) and the battle Hub (BattleHubCompose).
         var equip = EquipWith(Atom(ShippedChannel, "flat", ShippedAmount));
-
-        // The battle side is module 5's already-proven math (An_equipped_item_changes_a_battle_number).
-        // Reading BOTH projections off the SAME source is the point: they share one parse, so this
-        // asserts agreement rather than re-deriving the number a second, drift-prone way.
-        var battleMods = equip.ModsFor("s1");
         var hubAtoms = equip.DerivedAtomsFor("s1");
 
-        Assert.Single(battleMods);
         Assert.Single(hubAtoms);
-        Assert.Equal(battleMods[0].ChannelId, hubAtoms[0].Channel);
-        Assert.Equal(battleMods[0].Amount, hubAtoms[0].Amount);
         Assert.Equal(DerivedModifierOp.Flat, hubAtoms[0].Op);
 
-        var bare = ResolveHub(null);
-        var geared = ResolveHub(hubAtoms);
+        var bareOverlay = ResolveHub(null);
+        var gearedOverlay = ResolveHub(hubAtoms);
+        var bareBattle = BattleHubCompose.Compose(BattleSetupWith(null));
+        var gearedBattle = BattleHubCompose.Compose(BattleSetupWith(hubAtoms));
 
-        Assert.Equal(bare.Get(ShippedChannel) + battleMods[0].Amount, geared.Get(ShippedChannel));
+        Assert.Equal(bareOverlay.Get(ShippedChannel) + ShippedAmount, gearedOverlay.Get(ShippedChannel));
+        Assert.Equal(bareBattle.Get(ShippedChannel) + ShippedAmount, gearedBattle.Get(ShippedChannel));
     }
 
     [Fact]
     public void AnUnequippedSpecimen_contributesNothing_onBothSides()
     {
         var equip = EquipWith(Atom(ShippedChannel, "flat", 999));
-        Assert.Empty(equip.ModsFor("someone-else"));
         Assert.Empty(equip.DerivedAtomsFor("someone-else"));
     }
 
     [Fact]
-    public void TheDerivedSide_honoursTheOp_whereTheBattleSideNamesItsOwnGap()
+    public void TheDerivedOpIsHonoured_onBattleHubToo_notJustOverlay()
     {
-        // Pinned, not fixed here. BattleStatComposer folds every equip mod additively, so an
-        // `increased` atom applies as `flat` in battle -- named in EquipAtomSource.ModsFor's own doc.
-        // The derived side has real ops and uses them; widening battle to match would move battle
-        // numbers, which is the battle program's change to make, not this seam's.
-        var equip = EquipWith(Atom(ShippedChannel, "increased", 40));
+        // battle-ops-parity T7 closed the gap this test used to pin as permanent: before the fuse,
+        // BattleStatComposer folded every equip mod additively, so an `increased` atom applied as
+        // `flat` in battle. Battle now composes through BattleHubCompose -> HubInputs.BoundAtoms, the
+        // same op-aware DerivedAtomsFor projection the overlay side always used -- both sides honour
+        // `increased` identically.
+        //
+        // Channel choice matters: `ShippedChannel` (combat.crit.rate.omni) is a FlatSum channel, whose
+        // own compose only sums Flat-op mods (DerivedComposer.ComposeChannel) -- an Increased-op atom
+        // on it is correctly dropped, not a battle-side bug. `StatusPowerOmni` is registered
+        // SumIncreased (DefaultValue 0), so an Increased contribution is the one this op can actually
+        // move on either engine.
+        var channel = DerivedStatChannels.StatusPowerOmni;
+        var equip = EquipWith(Atom(channel, "increased", 40));
+        var hubAtoms = equip.DerivedAtomsFor("s1");
 
-        Assert.Equal(DerivedModifierOp.Increased, Assert.Single(equip.DerivedAtomsFor("s1")).Op);
-        Assert.Equal(40, Assert.Single(equip.ModsFor("s1")).Amount); // battle: same number, wrong op
+        Assert.Equal(DerivedModifierOp.Increased, Assert.Single(hubAtoms).Op);
+
+        var bareBattle = BattleHubCompose.Compose(BattleSetupWith(null)).Get(channel);
+        var gearedBattle = BattleHubCompose.Compose(BattleSetupWith(hubAtoms)).Get(channel);
+        var bareOverlay = ResolveHub(null).Get(channel);
+        var gearedOverlay = ResolveHub(hubAtoms).Get(channel);
+
+        Assert.Equal(bareOverlay + 40, gearedOverlay);
+        Assert.Equal(bareBattle + 40, gearedBattle);
     }
 
     [Fact]

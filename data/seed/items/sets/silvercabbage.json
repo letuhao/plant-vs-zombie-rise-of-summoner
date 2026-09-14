@@ -25,7 +25,7 @@
       "id": "set.silvercabbage-001",
       "nameKey": "set.silver-cabbage-launcher",
       "name": "Silver Cabbage Launcher",
-      "themeKey": "demon.silvercabbage",
+      "themeKey": "creature.silvercabbage",
       "members": [
         {
           "role": "armament-primary",

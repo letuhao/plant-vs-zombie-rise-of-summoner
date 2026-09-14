@@ -2,32 +2,32 @@
 
 **Status:** idea phase, 2026-09-04. **Not a spec. No build authorized.** **Four owner decisions landed
 the same day — see §0.0; they are binding and should not be reopened.** This is the conversation
-[class-system-map.md](class-system-map.md) §2 module 14 reserved by name: *"`DemonType`/`UniqueDemon`/
+[class-system-map.md](class-system-map.md) §2 module 14 reserved by name: *"`CreatureType`/`UniqueCreature`/
 `Aspect` scopes and priced respec are named, undecided follow-ups (spec §6 'ask first')"*.
 
-**Owner framing, 2026-09-04:** *"the lawn game and current progression system level up demon specie by
-spawn them in the game"* · *"player will unlock basic variant of demon specie when play game"* · *"they
+**Owner framing, 2026-09-04:** *"the lawn game and current progression system level up creature specie by
+spawn them in the game"* · *"player will unlock basic variant of creature specie when play game"* · *"they
 will earn bonus when specie level up by auto primary stats distributions"* · *"we have 12 primary stats
-so we have 12 basic build for classes"* · *"i want demon have build favour so it will auto distribute the
-bonus primary stats, this is not unique demons so to avoid overwhelm users, we should auto distribute
+so we have 12 basic build for classes"* · *"i want creature have build favour so it will auto distribute the
+bonus primary stats, this is not unique creatures so to avoid overwhelm users, we should auto distribute
 stats, the zomboss will do the same"* · *"will also unlock feature allow user adjust distributions"* ·
 *"zomboss will have chance to rebalance his army base on user build favour (he will try to counter build
 user if he have lose streak or we will randomly change the build when he level up, this is randomly and
 tunable"* · *"zomboss will cheat, he can respec by change, user is not, we cost souls to respec, it will
-increase by demon specie level"* · *"this will be first feature that bring primary stats distribution to
-the game and bring our demon specie to the game"*.
+increase by creature specie level"* · *"this will be first feature that bring primary stats distribution to
+the game and bring our creature specie to the game"*.
 
 > Quotes are lightly normalized for the owner's known input-method artifact only (`respect` → respec).
 > No wording was otherwise changed.
 
 **Reads satisfied in the session that wrote this** (DESIGN-GATE §1 rows: *Anything at all* · *Stats* ·
-*Power/scaling* · *Any cap* · *Any tunable* · *Economy* · *Demon species generation* · *How the injector
+*Power/scaling* · *Any cap* · *Any tunable* · *Economy* · *Creature species generation* · *How the injector
 talks to the game* · *Match lifecycle* · *Standalone/web RPG*):
 [DESIGN-GATE.md](../DESIGN-GATE.md) (full) · [decisions.md](decisions.md) (full, both pages) ·
 [stat-system.md](stat-system.md) (full) · [rpg-progression.md](rpg-progression.md) (full) ·
 [class-system-ideal.md](class-system-ideal.md) §0.0–§0.1, §6–§6.3, §7c, §7b.5 ·
 [class-system-map.md](class-system-map.md) §2, §5, §6 ·
-[demons/spec-soul-economy.md](demons/spec-soul-economy.md) (full) ·
+[creatures/spec-soul-economy.md](creatures/spec-soul-economy.md) (full) ·
 [power/ssot-power-scale.md](power/ssot-power-scale.md) §11.2/§11.2a ·
 [actor-hub-ssot.md](actor-hub-ssot.md) §2 + the `progression.bonus.*` ban and channel rows ·
 [design/spec-magnitude-and-units.md](../design/spec-magnitude-and-units.md) §3 (`AptitudePoints`) ·
@@ -59,15 +59,15 @@ worth keeping — twice it was a better argument than the one the option carried
 | **3** | **A deterministic redistribution function, and no single-primary builds.** Owner: *"we need build a deterministic function, it will make re-distribution plan and reconcile the balance, current 12 primary stats distribution is most imbalance in the game"* · *"i suggest avoid 1 primary stat distribution, it cause some unit too strong and too weak at same time, mix up build at primary build is better"* | Rejects both offered options. The favour is an **input to a function**, not a distribution in itself. Pure 100/0 allocation is **out** — by owner reasoning, a one-stat unit is simultaneously too strong on its axis and too weak everywhere else. Raises a real technical fork the options did not: `pure` is consumed **today** by `SpeciesExpander` for base stats, so "no single-primary" has to declare whether it binds the allocation layer only, or base generation too. §3a. | §3a, §7 Q4 |
 | **4** | **Zomboss does both — variety on level-up AND counter-building on a lose streak — announced *after the next fight*.** | Not the "announced before" option offered, and the difference is the good part: **both sides act on one-fight-old information.** He counter-builds against the build you last beat him with; you learn the pattern he last used. Neither holds current information about the other. That is a bounded, symmetric, tunable asymmetry — and it defuses the DDA backlash finding precisely, because what those systems were punished for was adaptation that stayed *hidden*, not adaptation that arrived *lagged*. | §6.4 |
 | **5** | **"No single-primary" binds the ALLOCATION layer only. No base-stat regeneration.** Owner: *"about regenerate, i don't think we need"* | Closes §3a.1's fork on the cheap side. `pure` keeps its current meaning inside `SpeciesExpander`, all 829 generated stat files stay byte-stable, nothing re-blesses. **Consequence to carry:** base stats stay thematically skewed while allocations spread — a species' *identity* stays what it was classified as, and only its *growth* is mixed. That is coherent, and it is a deliberate split rather than an oversight. | §3a.1 |
-| **6** | **The rebalance is the deterministic function's job. The LLM does not help here.** Owner: *"this rebalance LLM cannot help us"* | Rules out the `demon-seed` prompt-calibration pass that §7's earlier draft offered as an alternative route to the skew. It also restates this repo's own standing line from the other direction: the model classifies a *category*, and **balance is arithmetic** — `SpeciesExpander`'s own header already says *"Model calls: none, ever — this module is the entire reason no model ever picks a number."* The favour is a classification; the distribution is computed. | §3a |
+| **6** | **The rebalance is the deterministic function's job. The LLM does not help here.** Owner: *"this rebalance LLM cannot help us"* | Rules out the `creature-seed` prompt-calibration pass that §7's earlier draft offered as an alternative route to the skew. It also restates this repo's own standing line from the other direction: the model classifies a *category*, and **balance is arithmetic** — `SpeciesExpander`'s own header already says *"Model calls: none, ever — this module is the entire reason no model ever picks a number."* The favour is a classification; the distribution is computed. | §3a |
 | **7** | **The function runs at GENERATION TIME, and its output is shipped static knowledge.** Owner: *"we should make the static knowledge to avoid user confuse when play game, they can adjust at they want, but need shipped static knowledge, avoid user much learn every time play the game"* | A **player-knowledge** argument, and it is stronger than the testability one that was offered. A species' build is a fact the player learns **once** and that stays true — a Pokédex, not a per-run roll. Three real consequences: (a) the plan is **content**, so changing it is a reviewable diff, never a silent per-run difference; (b) **runtime randomisation of the baseline is ruled out** — DQM's random growth spurt is prior art this design deliberately does not take; (c) the player override sits **on top of** the static baseline, never replacing the need for one. | §3a.2 |
 | **8** | **The function reconciles to DISTRIBUTION PARITY — spread species across the twelve.** | Chosen over targeting the termination invariant and the dominance matrix directly. Cheap to compute, cheap to verify, needs no combat simulation, and attacks the measured cause rather than a downstream symptom. It does **not** claim win-rate balance — it removes the input that currently guarantees imbalance. The HARD termination invariant and SOFT dominance matrix stay owned where they already are. | §3a.2 |
 | **9** | ⛔ **SUPERSEDED BY THE AUDIT — see A2.** Was: *"respec price scales with species level, pinned as a fraction of expected soul income at that level."* | **The quantity it names does not exist.** Souls are player-scoped and species level is per-species, so "income at that species' level" resolves to nothing; and soul income is **flat today** anyway, because every live earn passes the Θ pin (`RpgStore.Souls.cs:29`) so `contentScale = 1.000`. The intent — an escalation that can never outrun its faucet — is sound and survives; the formula does not. **Needs re-deciding (§12 item 2).** | §11 A2 |
-| **10** | **A `DemonType` allocation is keyed per-player, by `speciesId`.** | Matches `rpg_actor_progression`'s existing per-player grain and uses the demon corpus's own identity. The `game_type_id` bridge is then needed **only at the lawn boundary**, where a spawn event carries a PvZ type int — keeping PvZ ids out of the RPG layer, which is the direction seed-to-concrete has been moving. Global (shared) allocation was explicitly ruled out: one player's respec must never change another's roster. | §2, §7a |
+| **10** | **A `CreatureType` allocation is keyed per-player, by `speciesId`.** | Matches `rpg_actor_progression`'s existing per-player grain and uses the creature corpus's own identity. The `game_type_id` bridge is then needed **only at the lawn boundary**, where a spawn event carries a PvZ type int — keeping PvZ ids out of the RPG layer, which is the direction seed-to-concrete has been moving. Global (shared) allocation was explicitly ruled out: one player's respec must never change another's roster. | §2, §7a |
 | **11** | **Parity is measured over TOTAL ALLOCATED POINTS across the corpus — never over the primary field.** | The only reading consistent with decisions 3 and 5. Each species **keeps the lean it was classified with**; because no species is single-primary any more, it is the *remainders* the function steers, and the corpus-wide sum is what lands inside the band. The function therefore never overrides its own input — it shapes what it adds. Reassigning primaries was explicitly rejected: it would make the favour meaningless and detach a species' identity from its lore. | §3a.2 |
 | **12** | **The parity target is a BAND (floor and ceiling), not a point.** | No aptitude below a floor or above a ceiling, both tunable, rather than minimising deviation from an even 8.3%. Chosen so the corpus is allowed to genuinely have more attackers than counter-attackers — that is a real property of PvZ plants, not a defect — while `Ferocity` at 2 species is still fixed. Also the cheaper acceptance test: a band is a pass/fail check, not an optimisation. The floor and ceiling numbers are **tunables a balance pass owns**, not design constants. | §3a.2 |
 | **13** | **The web-battle endpoint promotion belongs to a SEPARATE program; this program declares the dependency.** | Refines decision 2 rather than retracting it. This program needs the *signal* — a resolved match that can level a species — not the *endpoint*. Promoting `/api/test/web-match` to a player-facing battle API carries its own GUI, contract and lifecycle questions, and `standalone-rpg` is its natural home. **What this program builds for standalone-first is the expedition path**; the web-battle path is a named dependency it consumes when another program ships it. | §4 |
-| **14** | **The `DemonType` budget source is SPECIES LEVEL, not almanac XP.** Closes audit finding A1. | Budget = `speciesLevel × 4`, restoring the locked ordering (60 &lt; 80 &lt; 120 at L20) and making the tier **exactly symmetric with `UniqueDemon`**, which already reads "specimen level". It also matches the original ask better than XP did — *"they will earn bonus when specie level up"* — because points arrive as a visible jump at level-up rather than trickling with every placement. **Three places still say "almanac XP" and are propagations owed:** `spec-point-economy.md:37`, `PointBudget.cs:12-18`, and `aptitudes.v5.json`'s `_scopeSourcesWhy`. **And the guard test must be fixed** — `PointBudgetTests.cs:84` deliberately holds the source constant, so it cannot see a source-unit defect. | §11 A1 |
+| **14** | **The `CreatureType` budget source is SPECIES LEVEL, not almanac XP.** Closes audit finding A1. | Budget = `speciesLevel × 4`, restoring the locked ordering (60 &lt; 80 &lt; 120 at L20) and making the tier **exactly symmetric with `UniqueCreature`**, which already reads "specimen level". It also matches the original ask better than XP did — *"they will earn bonus when specie level up"* — because points arrive as a visible jump at level-up rather than trickling with every placement. **Three places still say "almanac XP" and are propagations owed:** `spec-point-economy.md:37`, `PointBudget.cs:12-18`, and `aptitudes.v5.json`'s `_scopeSourcesWhy`. **And the guard test must be fixed** — `PointBudgetTests.cs:84` deliberately holds the source constant, so it cannot see a source-unit defect. | §11 A1 |
 | **15** | **The respec price rises with the RESPEC COUNT on that species, and decays over time. This replaces decision 9 entirely.** | Prices **churn**, not investment — which is what §7b.5 actually wants stopped (*"with free respec there is no build, only a lookup table keyed on the opponent"*). Well-defined, per-species, and **can never become a ceiling because the player controls the rate entirely** (PS-8 satisfied by construction, no dependence on an unwired Θ). Grim Dawn's shipped shape. **Checked against the lock:** it is not a cooldown — a cooldown *forbids*, this only prices, and the decay means **being away makes it cheaper**, which is the exact failure (*"punishes being away"*) the lock rules out. Two consequences: a per-species respec counter is **new persisted state**, and `RespecPolicy.PriceOf(tuning)` gains a count argument (`RespecPolicy.cs:32`) — never a level. | §11 A2 |
 | **16** | **The primary lean VARIES per species — crowded primaries lean less, rare primaries lean more.** Closes audit finding A7. | Dissolves the coupling rather than trading against it: the ceiling constraint only binds when the lean is uniform, so a per-species lean reaches any band. Reads as a rule a player can learn: **common archetypes are generalists, rare archetypes are specialists.** ⭐ **It also simplifies the spec** — combined with decisions 8/11/12, the lean stops being a separate tunable at all. The function emits a full share vector per species, and the lean **falls out of solving for the band** rather than being chosen and then checked. | §11 A7 |
 
@@ -117,16 +117,16 @@ proposal below is legal, stated in full so nobody has to go and find them.
 
 ## 1. What this program is for
 
-**One sentence:** give every demon species its own aptitude allocation, filled automatically from a
+**One sentence:** give every creature species its own aptitude allocation, filled automatically from a
 per-species *build favour* as that species levels through play, with the Zomboss doing the same
 visibly, and a priced respec for the player who wants to override it.
 
 It is the join that makes three finished programs matter to each other:
 
-- **`demon-seed`** classified 829 species and gave each one an `aptitudePrimary` — content with no
+- **`creature-seed`** classified 829 species and gave each one an `aptitudePrimary` — content with no
   consumer at the allocation layer.
 - **`class-system`** built the twelve aptitudes, the four allocation scopes, the point budgets, the
-  read functions and the Zomboss pattern table — a mechanism whose demon-facing half has no caller.
+  read functions and the Zomboss pattern table — a mechanism whose creature-facing half has no caller.
 - **`RpgProgression`** already levels a plant type when you place it on the lawn — a signal whose level
   grants nothing.
 
@@ -142,16 +142,16 @@ callers.** This is overwhelmingly a wiring program. Stated in the gate's own voc
 
 | The idea, in the owner's words | Verdict | Evidence |
 |---|---|---|
-| *"the lawn game … level up demon specie by spawn them in the game"* | **built** — and it has been shipping for weeks | `RpgXpAwardMap.FromActivity` awards `(plant, typeId)` on `PlantPlaced` and `(zombie, typeId)` on `ZombieSpawned` — `src/FusionRpg.Core/Progression/RpgXpAwardMap.cs:38-41`. Applied at `src/FusionRpg.Data/Sqlite/RpgStore.Progression.cs:19-49`, stored in `rpg_actor_progression` (`RpgStore.cs:355-368`). Curve is arithmetic per kind, plant `80/32`, unlimited levels (`rpg-progression.md` §Curve) |
+| *"the lawn game … level up creature specie by spawn them in the game"* | **built** — and it has been shipping for weeks | `RpgXpAwardMap.FromActivity` awards `(plant, typeId)` on `PlantPlaced` and `(zombie, typeId)` on `ZombieSpawned` — `src/FusionRpg.Core/Progression/RpgXpAwardMap.cs:38-41`. Applied at `src/FusionRpg.Data/Sqlite/RpgStore.Progression.cs:19-49`, stored in `rpg_actor_progression` (`RpgStore.cs:355-368`). Curve is arithmetic per kind, plant `80/32`, unlimited levels (`rpg-progression.md` §Curve) |
 | *"we have 12 primary stats"* | **built** | `AptitudeCatalog.All` — twelve, as 3 postures × 4, `src/FusionRpg.Core/Stats/Aptitudes/Aptitude.cs:30-52`. "Primary stat" and "aptitude" are the same concept (`class-system/spec-primary-stats.md`, and the web page is titled "Primary stats") |
-| *"demon have build favour so it will auto distribute the bonus primary stats"* | **built as a function — with the scope parameter already on it** | `ZombossPattern.ToAllocation(AllocationScope scope, long budget)` converts a per-aptitude permille share table into a real `AptitudeAllocation`, capped at the budget, widened-before-multiply, divided last — `src/FusionRpg.Core/Battle/Ai/ZombossPattern.cs:29-42`. **This is the auto-distributor, already written and tested.** It was written for the Zomboss; nothing stops it being called with `AllocationScope.DemonType` |
-| the favour itself, per species | **built as data** — 829 species already carry it | Every anchor carries `aptitudePrimary` / `aptitudeSecondary` / `pure` (e.g. `SunFlower` → `Focus`, `none`, `pure: true`, `data/seed/demons/species/plant/sunflower-kin.json`). The primary/secondary split constant already ships: `impureSecondaryShareMilli: 300` (70/30), `data/tuning/demon-shape.v1.json` |
-| the `DemonType` allocation scope | **wiring gap** | The scope exists (`AptitudeAllocation.cs:8`), its budget rate ships (`demonType: 4`, `data/tuning/aptitudes.v5.json`), and `PointBudget.PointsFor` ships with the source **already named in its own doc comment as "almanac XP"** (`src/FusionRpg.Core/Stats/Aptitudes/PointBudget.cs:12-18,31-39`). Only `Commander` is ever written — `src/FusionRpg.Server/AptitudeEndpoints.cs:76` |
+| *"creature have build favour so it will auto distribute the bonus primary stats"* | **built as a function — with the scope parameter already on it** | `ZombossPattern.ToAllocation(AllocationScope scope, long budget)` converts a per-aptitude permille share table into a real `AptitudeAllocation`, capped at the budget, widened-before-multiply, divided last — `src/FusionRpg.Core/Battle/Ai/ZombossPattern.cs:29-42`. **This is the auto-distributor, already written and tested.** It was written for the Zomboss; nothing stops it being called with `AllocationScope.CreatureType` |
+| the favour itself, per species | **built as data** — 829 species already carry it | Every anchor carries `aptitudePrimary` / `aptitudeSecondary` / `pure` (e.g. `SunFlower` → `Focus`, `none`, `pure: true`, `data/seed/creatures/species/plant/sunflower-kin.json`). The primary/secondary split constant already ships: `impureSecondaryShareMilli: 300` (70/30), `data/tuning/creature-shape.v1.json` |
+| the `CreatureType` allocation scope | **wiring gap** | The scope exists (`AptitudeAllocation.cs:8`), its budget rate ships (`creatureType: 4`, `data/tuning/aptitudes.v5.json`), and `PointBudget.PointsFor` ships with the source **already named in its own doc comment as "almanac XP"** (`src/FusionRpg.Core/Stats/Aptitudes/PointBudget.cs:12-18,31-39`). Only `Commander` is ever written — `src/FusionRpg.Server/AptitudeEndpoints.cs:76` |
 | *"unlock feature allow user adjust distributions"* | **built for one scope** | `GET /api/aptitudes/{playerId}` · `POST /api/aptitudes/allocate` (`AptitudeEndpoints.cs:24,30`), SignalR `AptitudesUpdated` (`:68,70`), consumed live on the lawn (`AptitudeSubsystem` via `CheatState.cs:47-49`) and in web battle (`WebMatchService.cs:415-422`). Player-reachable surface is `ui/actor/ProgressionTab.tsx`; `layers/aptitudes/AptitudesLayer.tsx` is imported by nothing — **wiring gap** |
 | *"the zomboss will do the same"* | **wiring gap** — nine patterns, no caller | `ZombossPatterns.cs:25-89` holds nine authored share tables (3 pure + 6 mixed), ordinal enumeration for determinism, throw-not-null resolution. `ZombossCommanderAllocation.cs:7-8` states in its own comment that these "already existed with ZERO production callers" |
 | *"he will try to counter build user if he have lose streak"* | **real gap** | No adaptive selection exists anywhere. Live enemy composition comes from `WaveCatalog` (`src/FusionRpg.Core/Battle/WaveCatalog.cs:144`), not from any commander AI |
-| *"we cost souls to respec, it will increase by demon specie level"* | **wiring gap + the exact decision the code is waiting for** | `RespecPolicy.PriceOf(tuning)` ships and returns a **flat** price with no level or scope argument — `src/FusionRpg.Core/Stats/Aptitudes/RespecPolicy.cs:32-36`, `respecPrice: 10`. Zero production callers. `RespecResource` has exactly one value, `Hunger`, and its own doc comment calls it a **"documented placeholder, not a code default masquerading as a decision"** and marks the choice **"Ask first"** (`RespecPolicy.cs:11-18`). §5 |
-| a spawn event knowing which *species* it is | ⛔ **CORRECTED by the audit (A5) — this is `built`, not a real gap** | `LawnElementIndex` is exactly `(Side, GameTypeId) → DemonSpeciesDef`, built once from the catalog and already hosted injector-side, deliberately keyed on the pair because `polevaulterzombie` and `wallnut` are both type `3` (`src/FusionRpg.Core/Demons/LawnElementIndex.cs:5-45`). `StatContext` already carries `Side` and `TypeId` (`StatContext.cs:15-16`). Only the **transport** lacks a species dimension (`RpgClient.cs:363-374` is hard-coded to `Commander`) — a **wiring gap** |
+| *"we cost souls to respec, it will increase by creature specie level"* | **wiring gap + the exact decision the code is waiting for** | `RespecPolicy.PriceOf(tuning)` ships and returns a **flat** price with no level or scope argument — `src/FusionRpg.Core/Stats/Aptitudes/RespecPolicy.cs:32-36`, `respecPrice: 10`. Zero production callers. `RespecResource` has exactly one value, `Hunger`, and its own doc comment calls it a **"documented placeholder, not a code default masquerading as a decision"** and marks the choice **"Ask first"** (`RespecPolicy.cs:11-18`). §5 |
+| a spawn event knowing which *species* it is | ⛔ **CORRECTED by the audit (A5) — this is `built`, not a real gap** | `LawnElementIndex` is exactly `(Side, GameTypeId) → CreatureSpeciesDef`, built once from the catalog and already hosted injector-side, deliberately keyed on the pair because `polevaulterzombie` and `wallnut` are both type `3` (`src/FusionRpg.Core/Creatures/LawnElementIndex.cs:5-45`). `StatContext` already carries `Side` and `TypeId` (`StatContext.cs:15-16`). Only the **transport** lacks a species dimension (`RpgClient.cs:363-374` is hard-coded to `Commander`) — a **wiring gap** |
 | a level granting *anything* | **wiring gap** — the seam is built and empty | `static readonly LevelChangePipeline ProgressionPipeline = new();` with no handlers registered, `RpgStore.Progression.cs:17`. `progression.bonus.*` is likewise gated on a `Func<StatContext,int>?` delegate that nothing in production passes (`rpg-progression.md` §Combat power) |
 
 **The single most useful sentence in this document:** the owner asked for an auto-distributor keyed on a
@@ -164,7 +164,7 @@ missing is a caller.
 
 ## 3. The build favour is real data — and it is badly skewed. Measured, not asserted.
 
-Counted this session across the whole committed corpus (`data/seed/demons/species/**`, `_`-prefixed
+Counted this session across the whole committed corpus (`data/seed/creatures/species/**`, `_`-prefixed
 files excluded), 840 rows:
 
 | | Count | Share |
@@ -217,7 +217,7 @@ files excluded), 840 rows:
 prompt was recalibrated (`fused` reached 55% of the corpus). Some of the Onslaught concentration is
 plausibly a classification artifact rather than a fact about PvZ plants, and it is cheap to test — a
 targeted `aptitude-primary` prompt-calibration pass, exactly like the one already run for rarity and
-`sunwoven`. That is a `demon-seed` job, not this program's, but this program is its first real
+`sunwoven`. That is a `creature-seed` job, not this program's, but this program is its first real
 consumer and therefore the reason to do it.
 
 ---
@@ -255,7 +255,7 @@ to the function's actual purpose.
 var hasSecondary = !anchor.Pure && anchor.AptitudeSecondary is not null;
 var primaryShareMilli = hasSecondary ? 1000L - shapeTuning.ImpureSecondaryShareMilli : 1000L;
 ```
-— `src/FusionRpg.Core/Demons/Generation/SpeciesExpander.cs:48-50`
+— `src/FusionRpg.Core/Creatures/Generation/SpeciesExpander.cs:48-50`
 
 So 666 species (79.3%) already have **base stats** derived from a 100/0 split, before any allocation
 exists. "Avoid 1 primary stat distribution" therefore has to declare its scope, and the two readings
@@ -264,7 +264,7 @@ have very different costs:
 | Reading | What changes | Cost |
 |---|---|---|
 | **(a) Allocation layer only** | The new per-level points are always spread; base stats stay as generated | Cheap. No regeneration, no golden movement in the species corpus. But a pure species stays a 100/0 creature at its base, and the mixing only dilutes as it levels |
-| **(b) Base generation too** | `pure`'s meaning changes, or `impureSecondaryShareMilli` applies universally | **Regenerates all 829 species' stats.** Every `data/generated/demons/*.json` moves; anything pinned to those numbers re-blesses. It is the honest reading of *"avoid one-stat units"*, and it is a real migration |
+| **(b) Base generation too** | `pure`'s meaning changes, or `impureSecondaryShareMilli` applies universally | **Regenerates all 829 species' stats.** Every `data/generated/creatures/*.json` moves; anything pinned to those numbers re-blesses. It is the honest reading of *"avoid one-stat units"*, and it is a real migration |
 
 > ### ✅ Decided 2026-09-04: **(a) — allocation layer only, no regeneration**
 >
@@ -291,7 +291,7 @@ option carried. A species' build is a fact the player learns **once** and that s
 playthroughs — a Pokédex entry, not a per-run roll. It has three consequences the spec must honour:
 
 - The plan is **content**. Changing it is a reviewable diff with a regenerable `--check`, exactly like
-  `data/generated/demons/*.json` — never a silent per-run difference between two players.
+  `data/generated/creatures/*.json` — never a silent per-run difference between two players.
 - **Runtime randomisation of the baseline is ruled out.** Dragon Quest Monsters' random growth spurt
   (a random level 15–74, +10 in one of six attributes) is prior art this design deliberately declines,
   because a random baseline is unlearnable by construction.
@@ -361,7 +361,7 @@ The block is one conditional, and it is deliberate:
 
 ```csharp
 // Web-mode runs never level PvZ almanac type actors (audit 2026-08-21) —
-// player-kind XP still flows (one economy); demon specimen XP is expedition-owned.
+// player-kind XP still flows (one economy); creature specimen XP is expedition-owned.
 if (!pvzGame && award.Kind != RpgActorKinds.Player)
     continue;
 ```
@@ -375,7 +375,7 @@ This is a **wiring gap, not a wall** — one condition, and the surrounding mach
 What already exists on the game-closed side:
 
 - **Expeditions are the shipped, player-facing, game-closed progression loop** — `ExpeditionEndpoints.cs:243,258,261`, resolver `ExpeditionResolver.cs`, `SpecimenXpPerBattleWon` at `:32,214`, applied at `RpgStore.Expeditions.cs:313-317`. It grants **instance** XP today, never species. **built** (the loop), **real gap** (a species signal from it).
-- **Web battle resolves real matches server-side** — `BattleEngine.Resolve`, squad built from the real demon roster (`WebMatchService.cs:285-346`), ingested as real events. Its only entry point is inside the `/api/test` group and gated on `FUSIONRPG_SIM=1` (`WebMatchService.cs:495-520`, `SimFlags.cs:5-9`) — **wiring gap, default-off**.
+- **Web battle resolves real matches server-side** — `BattleEngine.Resolve`, squad built from the real creature roster (`WebMatchService.cs:285-346`), ingested as real events. Its only entry point is inside the `/api/test` group and gated on `FUSIONRPG_SIM=1` (`WebMatchService.cs:495-520`, `SimFlags.cs:5-9`) — **wiring gap, default-off**.
 
 **The shape of the answer:** a species earns build points from *fielding it in a resolved match*, and
 the lawn is one source of that fact rather than the definition of it. The lawn then *enriches* (a
@@ -417,7 +417,7 @@ flat, `respecPrice: 10`, **zero production callers** (`RespecPolicy.cs:32-36`). 
   respec costs' an 'Ask first,' a mechanism choice this module cannot make alone"* (`RespecPolicy.cs:11-18`).
   **The owner's souls proposal is answering a question the code wrote down and left open.** It is not a
   conflict with a shipped decision; it *is* the decision.
-- **`PriceOf` takes no level and no scope.** "Increases by demon species level" is a signature change
+- **`PriceOf` takes no level and no scope.** "Increases by creature species level" is a signature change
   plus a curve — and a curve derived from a level is bound by principle 3: it goes through `P(Θ)`, or
   it earns a reviewed row in the power SSOT's §10 closed inventory. It may not be a private `f(level)`.
 
@@ -435,7 +435,7 @@ option."* The friction must make a build a commitment.
   therefore trades against *pulls*, not against *fighting*.
 
 That is a real distinction, not a technicality: hunger-priced respec makes respeccing cost you the
-fight you are in; souls-priced respec makes it cost you a demon you would otherwise have summoned.
+fight you are in; souls-priced respec makes it cost you a creature you would otherwise have summoned.
 **Both are defensible frictions. They are not the same friction, and only one of them is what the
 locked sentence says.**
 
@@ -648,7 +648,7 @@ on — *"a harder Zomboss is a higher `Θ` or a better allocation, never a stat 
 | 3 | What is the non-lawn source of species build points? | ✅ **Both** expeditions and web battle (decision 2) — with **expeditions built here** and **web battle a declared dependency on another program** (decision 13) |
 | 4 | Does the favour distribute directly, or softened? | ✅ **Neither — a deterministic function plans it**, and single-primary builds are out (decision 3) |
 | 5 | How adaptive may the Zomboss be? | ✅ **Both adaptations, revealed one fight late** (decision 4) — producing a symmetric information lag rather than a hidden one |
-| 6 | How is a `DemonType` allocation keyed? | ✅ **Per-player, by `speciesId`** (decision 10); global was ruled out so one player's respec cannot change another's roster |
+| 6 | How is a `CreatureType` allocation keyed? | ✅ **Per-player, by `speciesId`** (decision 10); global was ruled out so one player's respec cannot change another's roster |
 
 **Created by those answers, and also closed:**
 
@@ -691,7 +691,7 @@ an actual allocation backs it, never as a speculative preview.
 
 **Where the surface may live.** `game-gui-principles.md` GG-1 is binding: the player is on exactly one
 **stage**, and every other surface is a **layer drawn over it**, openable from anywhere, closing back
-to the identical stage state — *"a player mid-wave who wants to check a demon's loyalty must not lose
+to the identical stage state — *"a player mid-wave who wants to check a creature's loyalty must not lose
 the wave to do it."* It explicitly forbids *"routing to a sibling screen in order to look at
 something."* GG-10 caps depth at **three pushes** from the stage. The owner's *"unlock feature allow
 user adjust distributions"* is therefore a layer, not a page — and note that the shipped-but-unimported
@@ -709,7 +709,7 @@ surface is a `commander-surface`/`actor-sheet` question this program should not 
 - **Not the commander UI.** [commander-surface-ideal.md](commander-surface-ideal.md) owns the
   commander-scope surface, persistence and async handoff.
 - **Not `aspect-scope`.** The fourth allocation tier was **reverted 2026-08-31** and is explicitly *"not
-  authorized to build"* (`decisions.md`, *Demon program* row). This program touches `DemonType` only.
+  authorized to build"* (`decisions.md`, *Creature program* row). This program touches `CreatureType` only.
 - **Not a re-run of `residual-fit`.** It does not retune coefficients. It does, per §3, hand
   `residual-fit` a much more urgent reason to run.
 - **Not a new curve.** Species level → points must reuse `Θ`/`P(Θ)` and `PointBudget`; a private
@@ -763,7 +763,7 @@ precedent for making auto-allocation feel like an event rather than a spreadshee
 
 ```
 [x] I identified the subsystem(s) this touches.
-      stats/aptitudes · power ladder · caps · tunables · soul economy · demon-seed ·
+      stats/aptitudes · power ladder · caps · tunables · soul economy · creature-seed ·
       injector event pipeline · match lifecycle · standalone/web RPG · player GUI
 [~] I read every doc in the §1 row(s) for those subsystems, this session.
       ⛔ PARTIAL — and this box was ticked [x] in the first draft, which was wrong. The list below
@@ -791,7 +791,7 @@ precedent for making auto-allocation feel like an event rather than a spreadshee
       STILL NOT READ, each a named §1 row this feature touches:
         software-architecture.md (Anything at all)
         design/spec-derived-stat-sheet.md (Stats) — its sibling was read, this one was not
-        power-map.md (Power) · demon-seed-map.md + demon-seed/ specs (Demon species generation)
+        power-map.md (Power) · creature-seed-map.md + creature-seed/ specs (Creature species generation)
         match-runtime.md + unique-actor-runtime.md (Match lifecycle)
         design/information-architecture.md + fe-game-foundation.md (UI)
         standalone/spec-standalone-charter.md + standalone-rpg-map.md (Standalone) — only
@@ -818,7 +818,7 @@ precedent for making auto-allocation feel like an event rather than a spreadshee
       The corpus skew in §3 was MEASURED this session by counting the committed corpus
       (840 rows), not quoted. The standalone-first block was read as code
       (RpgStore.Progression.cs:32-35), not inferred. NOT tested: whether wiring the
-      DemonType scope moves any golden — no code was written, so nothing was run. That
+      CreatureType scope moves any golden — no code was written, so nothing was run. That
       belongs to the spec, and it should be checked rather than assumed, since
       AptitudeChannelMods already feeds real battle setups.
 [x] Nothing contradicts a §2 invariant, or I named the contradiction explicitly.
@@ -839,7 +839,7 @@ precedent for making auto-allocation feel like an event rather than a spreadshee
 **Honest gaps, stated rather than hidden:** no code was written or run, so no golden-movement claim is
 made either way. The `aptitudePrimary` skew is measured but its *cause* is not established — a
 classification artifact and a real property of the corpus would look identical from the counts alone,
-and distinguishing them needs a `demon-seed` calibration pass, not an assertion here.
+and distinguishing them needs a `creature-seed` calibration pass, not an assertion here.
 
 ---
 
@@ -850,7 +850,7 @@ thirteen decisions were **not executable as written** (all three findings have s
 suspicion the audit itself raised turned out to be **backwards**. Everything below is verified against
 code.
 
-### A1 ⛔ CRITICAL — the `DemonType` budget source inverts a locked ordering by ~176×
+### A1 ⛔ CRITICAL — the `CreatureType` budget source inverts a locked ordering by ~176×
 
 `PointBudget.PointsFor` is `sourceValue × rate` with **no unit conversion** — the tuning type's own doc
 is explicit: *"a shipped rate of `3` means exactly 3 points per source unit"* (`AptitudeTuning.cs:26-32`).
@@ -859,13 +859,13 @@ But the four scopes' sources are **not in the same units**:
 | Scope | Source (`spec-point-economy.md:37-39`) | Shape | Value at a normal mid-game point |
 |---|---|---|---|
 | Commander | `Θ_player` | an **index** | ~20 |
-| **DemonType** | **type almanac XP** | an **accumulation** | **2,640 at species L12** |
-| UniqueDemon | specimen level | an **index** | ~20 |
+| **CreatureType** | **type almanac XP** | an **accumulation** | **2,640 at species L12** |
+| UniqueCreature | specimen level | an **index** | ~20 |
 
 The plant XP curve is `XpToNext(L) = 80 + (L−1)×32` (`rpg-progression.md` §Curve), and that same doc's
 balance note puts a player at **L12–20 after 20 matches** — so these are ordinary values, not extremes:
 
-| Species level | Cumulative XP | DemonType budget (XP × 4) | Commander budget (Θ=20 × 3) | Ratio |
+| Species level | Cumulative XP | CreatureType budget (XP × 4) | Commander budget (Θ=20 × 3) | Ratio |
 |---|---|---|---|---|
 | 10 | 1,872 | 7,488 | 60 | 125× |
 | **12** | **2,640** | **10,560** | **60** | **176×** |
@@ -874,7 +874,7 @@ balance note puts a player at **L12–20 after 20 matches** — so these are ord
 
 This **inverts the locked ordering** — *"the commander tier is the SMALLEST and the unique tier the
 LARGEST"* — which exists for a stated reason: a commander allocation replicates across the whole roster,
-so a dominant one is the worst case. Wiring the DemonType source with raw XP makes the species tier
+so a dominant one is the worst case. Wiring the CreatureType source with raw XP makes the species tier
 dominate everything else by two to three orders of magnitude.
 
 **And the guard test cannot see it.** `PointBudgetTests.cs:84` holds the source constant on purpose:
@@ -942,10 +942,10 @@ unreachable error branch remains. Dead code, not a PS-8 violation.)*
 ### A5 ✅ Correction — the species join is BUILT, not a real gap
 
 §2's last row called "a spawn event knowing which species it is" a **real gap**. That is wrong.
-`LawnElementIndex` is exactly `(Side, GameTypeId) → DemonSpeciesDef`, built once from
-`DemonSpeciesCatalog.All`, already hosted injector-side, and already deliberately keyed on the pair
+`LawnElementIndex` is exactly `(Side, GameTypeId) → CreatureSpeciesDef`, built once from
+`CreatureSpeciesCatalog.All`, already hosted injector-side, and already deliberately keyed on the pair
 because *"`polevaulterzombie` and `wallnut` are both `3` in the shipped roster"*
-(`src/FusionRpg.Core/Demons/LawnElementIndex.cs:5-45`). `StatContext` already carries both `Side` and
+(`src/FusionRpg.Core/Creatures/LawnElementIndex.cs:5-45`). `StatContext` already carries both `Side` and
 `TypeId` (`StatContext.cs:15-16`). **Verdict corrected to `built`.** What is missing is only the
 *transport*: `/api/aptitudes/{playerId}` returns a flat share map hard-coded to `Commander`
 (`RpgClient.cs:363-374`), with no species dimension — a **wiring gap**, and it makes this feature
@@ -1037,7 +1037,7 @@ so a later reader does not re-raise it as an oversight.
 
 | Audit finding | Sent back as | Resolved by |
 |---|---|---|
-| **A1** — almanac XP inverts the tier ordering 176× | What feeds the `DemonType` budget? | **Decision 14: species level.** Restores the ordering and is symmetric with `UniqueDemon`'s specimen level |
+| **A1** — almanac XP inverts the tier ordering 176× | What feeds the `CreatureType` budget? | **Decision 14: species level.** Restores the ordering and is symmetric with `UniqueCreature`'s specimen level |
 | **A2** — the price names a quantity that does not exist | What formula prices a respec? | **Decision 15: rises with respec count on that species, decaying over time.** Prices churn rather than investment — which is what the friction was always for |
 | **A7** — lean and ceiling are arithmetically coupled | Which do you give up? | **Decision 16: neither — let the lean vary per species.** The constraint only binds when the lean is uniform |
 

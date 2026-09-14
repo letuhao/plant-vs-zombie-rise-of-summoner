@@ -36,12 +36,14 @@ public sealed class SpeciesAllocationSource
     readonly Func<string, AptitudeAllocation> _resolveSpeciesAllocation;
     readonly Func<long?, AptitudeAllocation> _resolveCommanderAllocation;
     readonly Action<string> _reportUnconfigured;
+    readonly Func<string, string?>? _resolveBoundInstanceId;
+    readonly Func<string, AptitudeAllocation>? _resolveUniqueAllocation;
 
     /// <param name="resolveSpeciesId">`(Side, GameTypeId) → SpeciesLookupResult` — in production,
     /// `LawnElementIndex.TryGet` wrapped to also report whether the index itself has been configured
     /// (`LawnElementResolverHost`'s own state). Injected, never a hard dependency — a test supplies a
     /// fake covering all three outcomes with no `LawnElementIndex` involved.</param>
-    /// <param name="resolveSpeciesAllocation">`speciesId → effective DemonType allocation` — in
+    /// <param name="resolveSpeciesAllocation">`speciesId → effective CreatureType allocation` — in
     /// production, the injector's own cached-by-speciesId dictionary (`allocation-transport`'s own
     /// cache, refreshed at the existing commander-cache cadence), never a server round trip.</param>
     /// <param name="resolveCommanderAllocation">`playerId? → Commander allocation` — in production,
@@ -49,28 +51,57 @@ public sealed class SpeciesAllocationSource
     /// <param name="reportUnconfigured">Called with a diagnostic message when the species index has
     /// not been configured yet — required, never silently swallowed (this repo's own "no silent
     /// default" discipline, applied here to a runtime reporting hook rather than a config key).</param>
+    /// <param name="resolveBoundInstanceId">`unique-lawn-wire` (aptitude-sheet AS-1.1) — `EntityKey`
+    /// (the live ptr hex) → the UniqueCreature `instanceId` it is currently Bound to, or null when this
+    /// entity is not a Bound specimen. Optional: omitted, every ctx resolves the species path exactly
+    /// as before (existing callers/tests are unaffected). When supplied, a Bound hit takes ABSOLUTE
+    /// priority over the species lookup below — never merged with it — which is what keeps a Bound
+    /// unique that happens to share a species id with a general from inheriting empire shares
+    /// (`spec-unique-lawn-wire.md`'s own G6 regression).</param>
+    /// <param name="resolveUniqueAllocation">`instanceId → effective UniqueCreature allocation` — in
+    /// production, the injector's own cached-by-instanceId dictionary, fetched via
+    /// `GET /api/aptitudes/unique/{instanceId}` at the same cadence as the commander/species caches.
+    /// Required whenever <paramref name="resolveBoundInstanceId"/> is supplied.</param>
     public SpeciesAllocationSource(
         Func<StatSide, int, SpeciesLookupResult> resolveSpeciesId,
         Func<string, AptitudeAllocation> resolveSpeciesAllocation,
         Func<long?, AptitudeAllocation> resolveCommanderAllocation,
-        Action<string> reportUnconfigured)
+        Action<string> reportUnconfigured,
+        Func<string, string?>? resolveBoundInstanceId = null,
+        Func<string, AptitudeAllocation>? resolveUniqueAllocation = null)
     {
         _resolveSpeciesId = resolveSpeciesId ?? throw new ArgumentNullException(nameof(resolveSpeciesId));
         _resolveSpeciesAllocation = resolveSpeciesAllocation ?? throw new ArgumentNullException(nameof(resolveSpeciesAllocation));
         _resolveCommanderAllocation = resolveCommanderAllocation ?? throw new ArgumentNullException(nameof(resolveCommanderAllocation));
         _reportUnconfigured = reportUnconfigured ?? throw new ArgumentNullException(nameof(reportUnconfigured));
+        if (resolveBoundInstanceId is not null && resolveUniqueAllocation is null)
+            throw new ArgumentNullException(nameof(resolveUniqueAllocation),
+                "resolveUniqueAllocation is required whenever resolveBoundInstanceId is supplied");
+        _resolveBoundInstanceId = resolveBoundInstanceId;
+        _resolveUniqueAllocation = resolveUniqueAllocation;
     }
 
-    /// <summary>The one resolve entry point: commander alone when there is no species to merge
-    /// (genuinely no species at this `(Side, TypeId)`, OR the index isn't configured yet — reported in
-    /// the latter case), commander merged with the species' effective allocation otherwise. `Side`
-    /// stays part of every lookup key, always — `polevaulterzombie`/`wallnut` share a `GameTypeId` but
-    /// never a `Side`, so they never collide here.</summary>
+    /// <summary>The one resolve entry point. A Bound UniqueCreature (when the caller wired
+    /// <c>resolveBoundInstanceId</c>) resolves commander merged with ITS OWN allocation and returns
+    /// immediately — the species lookup never runs for that ctx, so a Bound specimen sharing a species
+    /// id with a general can never inherit empire shares. Otherwise: commander alone when there is no
+    /// species to merge (genuinely no species at this `(Side, TypeId)`, OR the index isn't configured
+    /// yet — reported in the latter case), commander merged with the species' effective allocation
+    /// otherwise. `Side` stays part of every lookup key, always — `polevaulterzombie`/`wallnut` share a
+    /// `GameTypeId` but never a `Side`, so they never collide here.</summary>
     public AptitudeAllocation Resolve(StatContext ctx)
     {
         if (ctx is null) throw new ArgumentNullException(nameof(ctx));
 
         var commander = _resolveCommanderAllocation(ctx.PlayerId);
+
+        if (_resolveBoundInstanceId is not null)
+        {
+            var instanceId = _resolveBoundInstanceId(ctx.EntityKey);
+            if (!string.IsNullOrEmpty(instanceId))
+                return commander + _resolveUniqueAllocation!(instanceId);
+        }
+
         var lookup = _resolveSpeciesId(ctx.Side, ctx.TypeId);
 
         if (!lookup.IndexConfigured)

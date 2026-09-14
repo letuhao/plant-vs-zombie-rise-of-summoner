@@ -25,7 +25,7 @@
       "id": "set.magicsnowpea2-001",
       "nameKey": "set.frost-bean-shooter",
       "name": "Frost Bean Shooter",
-      "themeKey": "demon.magicsnowpea2",
+      "themeKey": "creature.magicsnowpea2",
       "members": [
         {
           "role": "armament-primary",

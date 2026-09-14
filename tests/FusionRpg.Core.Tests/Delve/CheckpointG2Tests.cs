@@ -2,7 +2,7 @@ using FusionRpg.Core.Battle;
 using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Delve.Battle;
 using FusionRpg.Core.Delve.Encounter;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Dungeon.Tuning;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Stats.Derived;
@@ -30,7 +30,7 @@ namespace FusionRpg.Core.Tests.Delve;
 /// </summary>
 public class CheckpointG2Tests
 {
-    static readonly DemonThreatTuning ThreatTuning = RealAnchorCorpusFixture.ThreatTuning;
+    static readonly CreatureThreatTuning ThreatTuning = RealAnchorCorpusFixture.ThreatTuning;
     static readonly EncounterTuning Tuning = EncounterTuningHub.Tuning;
     static readonly RaidModeTuning Solo = DungeonTuningHub.Tuning.RaidModes["solo"];
     static readonly DifficultyRungTuning Hard = DungeonTuningHub.Tuning.Rungs["hard"];

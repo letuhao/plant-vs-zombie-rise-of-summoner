@@ -147,9 +147,9 @@ src/FusionRpg.Core/Combat/Shield/ShieldMath.cs         (edit — derived bound, 
 src/FusionRpg.Core/Effects/ResourceDeltaMath.cs        (edit — derived bound, throw)
 src/FusionRpg.Data/Sqlite/RpgStore.Souls.cs            (edit — derived bound)
 src/FusionRpg.Data/Sqlite/RpgStore.Expeditions.cs      (edit — clamp -> throw, one policy)
-src/FusionRpg.Core/Demons/Contracts/ContractPolicy.cs  (edit — MaxSlots deleted)
-src/FusionRpg.Core/Demons/SoulEarnPolicy.cs            (edit — cap deleted, owner comment)
-src/FusionRpg.Core/Demons/Patron/PatronPolicy.cs       (edit — cap deleted)
+src/FusionRpg.Core/Creatures/Contracts/ContractPolicy.cs  (edit — MaxSlots deleted)
+src/FusionRpg.Core/Creatures/SoulEarnPolicy.cs            (edit — cap deleted, owner comment)
+src/FusionRpg.Core/Creatures/Patron/PatronPolicy.cs       (edit — cap deleted)
 docs/architecture/item/ssot-generation.md              (edit — 4.6 PvZ drop caps, unbuilt: doc only)
 tests/FusionRpg.Core.Tests/Power/CapsReconcileTests.cs
 ```

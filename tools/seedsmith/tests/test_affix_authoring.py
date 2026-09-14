@@ -1,5 +1,5 @@
 """T7.1 (`affix-authoring`, spec-affix-authoring.md, effect-pipeline module 9) — the named,
-multi-atom, slotted affix pipeline. Reuses `demon-seed`'s own `classify-pipelines` machinery
+multi-atom, slotted affix pipeline. Reuses `creature-seed`'s own `classify-pipelines` machinery
 (`permute`/`vote`) and T5.0's own `build_generation_graph` skeleton — this file proves BOTH: the
 domain logic (derivation, voting, numeric-smuggling), and that no second pipeline shape was forked
 to build it.
@@ -12,8 +12,8 @@ from pathlib import Path
 
 import pytest
 
-from seedsmith.adapters.demons.anchor.audit import numeric_audit
-from seedsmith.adapters.demons.anchor.vote import resolve_vote
+from seedsmith.adapters.creatures.anchor.audit import numeric_audit
+from seedsmith.adapters.creatures.anchor.vote import resolve_vote
 from seedsmith.adapters.effects.affix.derive import canonical_bundle_key, derive_affix_class
 from seedsmith.adapters.effects.affix.generate_affixes import next_draw_start_index, run_voted_draws
 from seedsmith.adapters.effects.affix.prompts import (
@@ -66,7 +66,7 @@ def test_affix_class_is_never_a_field_the_model_authors():
     assert "affixClass" not in entry
 
 
-# ---- named bundle composition is 3-way voted, same machinery as demon-seed --------------------------
+# ---- named bundle composition is 3-way voted, same machinery as creature-seed --------------------------
 
 
 def test_a_3_0_bundle_vote_resolves_high_confidence():
@@ -383,10 +383,10 @@ def test_entry_id_uses_the_declared_prefix():
     assert entry["id"].startswith(ID_PREFIX)
 
 
-# ---- pipeline shape: no fork, same skeleton demon-seed's classify-pipelines already proved -----------
+# ---- pipeline shape: no fork, same skeleton creature-seed's classify-pipelines already proved -----------
 
 
-def test_pipeline_shape_matches_demon_seeds_classify_pipelines_exactly():
+def test_pipeline_shape_matches_creature_seeds_classify_pipelines_exactly():
     """`effect_affix.py` must wire `build_generation_graph`, never construct its own `StateGraph`
     — the repo-wide sweep (`test_no_second_authoring_pipeline_shape_exists`, T5.0) already covers
     every file under `graphs/` including this one; this test additionally proves this specific

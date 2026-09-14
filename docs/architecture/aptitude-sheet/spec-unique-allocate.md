@@ -2,16 +2,16 @@
 
 **Program:** `aptitude-sheet` · **Map:** [../aptitude-sheet-map.md](../aptitude-sheet-map.md)  
 **Ideal locks:** Mode A · **D1** free-build · **D4** write contract · **A5** Done gate  
-**Code anchors:** `AptitudeEndpoints.cs` · `RpgStore.Aptitudes.cs` · `PointBudget` · `UniqueDemonAllocation` · `UniqueActorDto.Level`
+**Code anchors:** `AptitudeEndpoints.cs` · `RpgStore.Aptitudes.cs` · `PointBudget` · `UniqueCreatureAllocation` · `UniqueActorDto.Level`
 
 ---
 
 ## Objective
 
-Give players a real UniqueDemon allocate surface: **GET** persisted shares + budget honesty and
+Give players a real UniqueCreature allocate surface: **GET** persisted shares + budget honesty and
 **POST** save by `instanceId`, so ActorSheet Mode A is not forced onto the commander pool.
 
-Success: a UniqueActor with level ≥ 2 can spend UniqueDemon points within budget; overspend returns
+Success: a UniqueActor with level ≥ 2 can spend UniqueCreature points within budget; overspend returns
 409; empty allocation remains legal (zero unique Hub contribution until spend — D1).
 
 ---
@@ -19,7 +19,7 @@ Success: a UniqueActor with level ≥ 2 can spend UniqueDemon points within budg
 ## Tech stack
 
 - Server: ASP.NET Minimal APIs (`FusionRpg.Server`)
-- Store: `FusionRpg.Data` `SaveAllocation` / `LoadAllocation(AllocationScope.UniqueDemon, instanceId)`
+- Store: `FusionRpg.Data` `SaveAllocation` / `LoadAllocation(AllocationScope.UniqueCreature, instanceId)`
 - FE bus: React Query hooks mirroring `useAptitudes` / `useSaveAptitudes`
 
 ---
@@ -54,8 +54,8 @@ dotnet test tests/FusionRpg.Data.Tests --filter Allocation
 
 | Method | Route | Duty |
 |---|---|---|
-| GET | `/api/aptitudes/unique/{instanceId}` | Project UniqueDemon state for specimen |
-| POST | `/api/aptitudes/unique/allocate` | Body `{ instanceId, shares }`; save UniqueDemon |
+| GET | `/api/aptitudes/unique/{instanceId}` | Project UniqueCreature state for specimen |
+| POST | `/api/aptitudes/unique/allocate` | Body `{ instanceId, shares }`; save UniqueCreature |
 
 **Ownership:** specimen must exist (`GetUniqueActor`); player ownership check matches other actor APIs.
 
@@ -65,8 +65,8 @@ dotnet test tests/FusionRpg.Data.Tests --filter Allocation
 |---|---|---|
 | `instanceId` | string | |
 | `playerId` | long | owner |
-| `shares` | `Record<string, long>` | **Persisted** UniqueDemon only — not baseline fill (D1) |
-| `budget` | long | `PointBudget.PointsFor(UniqueDemon, UniqueDemonSourceFromLevel(level), tuning)` |
+| `shares` | `Record<string, long>` | **Persisted** UniqueCreature only — not baseline fill (D1) |
+| `budget` | long | `PointBudget.PointsFor(UniqueCreature, UniqueCreatureSourceFromLevel(level), tuning)` |
 | `spent` | long | scope total |
 | `leftover` | long | `budget - spent` (≥ 0 when within budget) |
 | `specimenLevel` | long | from UniqueActor |
@@ -78,10 +78,10 @@ minimum GET if host loads commander GET separately.
 
 ### POST behavior
 
-1. Parse `shares` → `AptitudeAllocation` with `AllocationScope.UniqueDemon`.
-2. `PointBudget.CheckScope(UniqueDemon, allocation, sourceFromLevel, tuning)`.
+1. Parse `shares` → `AptitudeAllocation` with `AllocationScope.UniqueCreature`.
+2. `PointBudget.CheckScope(UniqueCreature, allocation, sourceFromLevel, tuning)`.
 3. If over budget → **409** `{ reason: "aptitudes.overbudget", spent, budget }` — never clamp.
-4. `SaveAllocation(UniqueDemon, instanceId, allocation)`.
+4. `SaveAllocation(UniqueCreature, instanceId, allocation)`.
 5. Broadcast via `aptitudes-live-bus` (`scope: "unique"`, `instanceId`, `playerId`).
 6. Return fresh GET projection.
 
@@ -101,7 +101,7 @@ check budget, save, broadcast. Magnitudes `long`; widen before multiply inside P
 | Level | Cases |
 |---|---|
 | Server/Data | Empty shares OK; spend within budget; overspend 409; unknown id 400; wrong/missing instance 404 |
-| Isolation | POST unique must not write Commander or DemonType rows |
+| Isolation | POST unique must not write Commander or CreatureType rows |
 | FE (later host) | Hook query key `uniqueAptitudes(instanceId)` |
 
 ---
@@ -109,15 +109,15 @@ check budget, save, broadcast. Magnitudes `long`; widen before multiply inside P
 ## Boundaries
 
 - **Always:** Use existing `PointBudget` / store; 409 never clamp; raw shares only (D1).
-- **Ask first:** Changing Hub to auto-apply UniqueDemon baseline; new HTTP beyond these routes.
-- **Never:** Infer allocation from `typeId`/species; reopen Aspect; write DemonType from this route.
+- **Ask first:** Changing Hub to auto-apply UniqueCreature baseline; new HTTP beyond these routes.
+- **Never:** Infer allocation from `typeId`/species; reopen Aspect; write CreatureType from this route.
 
 ---
 
 ## Success criteria
 
 - [ ] GET/POST unique live; curl proves budget + leftover.
-- [ ] Hub `LoadAllocation(UniqueDemon, id)` matches POST after save.
+- [ ] Hub `LoadAllocation(UniqueCreature, id)` matches POST after save.
 - [ ] FE hooks exist and are unused by commander Mode C path.
 - [ ] Broadcast uses live-bus shape (depends on `aptitudes-live-bus`).
 

@@ -79,7 +79,7 @@ Verified against `src/` and `data/` on 2026-09-02.
 | **The rung table**, 10 authored rows: tier window, `poolRolls`, `qPowerMilli`, `costMulti`, `cdMulti`, `structureBudget` | `Rungs/RungRow.cs`, `data/tuning/action-rungs.v1.json` |
 | **"Stronger costs more" is already mechanized and measured** — `qPower = 1.75^((r-1)/2)` vs `qCost = 1.38^(r-1)`: across rungs 2–10 power ×9.38 against cost ×13.15, **a 1.40× escalation tax** | `action-rungs.v1.json` `_meta` |
 | **`structureBudget` per rung** — a closed list of complexity axes a rung may spend on (`scopeSplit`, `riderStatus`, `condition`, `sequence`, `consumption`, `reaction`, `restriction`), rejected at load naming rung and axis | `StructureBudgetGuard.cs:36`; the ladder in `action-rungs.v1.json` |
-| **The species signature already has a slot** — `SpeciesBasicsRow(SpeciesKey, Attack, Guard, Move, InnateActionId)`, keyed on an opaque `species_key`, deliberately **not** a join into the demon catalog | `Actions/ActionRow.cs:86` |
+| **The species signature already has a slot** — `SpeciesBasicsRow(SpeciesKey, Attack, Guard, Move, InnateActionId)`, keyed on an opaque `species_key`, deliberately **not** a join into the creature catalog | `Actions/ActionRow.cs:86` |
 | **The innate climbs the same rung curve** — a lagging `rung − 3` was rejected as *"a third curve for a small gain … the private-`f(x)` defect the power SSOT exists to end"* | `action-ideal.md` §1.3 |
 | **Action set assembly** — intrinsic + live grants, provenance kept per source, never collapsed | `Grants/ActionSetAssembler.cs` |
 | **The runtime roll** — atoms, target shape, name, all deterministic and seeded | `Seeding/ActionSeeder.cs:32,47` |
@@ -92,7 +92,7 @@ Verified against `src/` and `data/` on 2026-09-02.
 |---|---|
 | `Instantiator.TryInstantiate` has **zero production callers** | `effect-pipeline` module 4 owns wiring it |
 | `RendezvousLane` (link-strikes) built and tested, **zero production callers**, gated behind `RendezvousEnabled` which defaults off | `Battle/Timeline/RendezvousLane.cs`, `BattleModeProfile.cs:47` |
-| `data/seed/actions/` is **configuration, not a corpus** — neither file carries `kind` + `entries`, so `Corpus.load` cannot read it | `seedsmith/spec-demon-themes.md:253-256` |
+| `data/seed/actions/` is **configuration, not a corpus** — neither file carries `kind` + `entries`, so `Corpus.load` cannot read it | `seedsmith/spec-creature-themes.md:253-256` |
 
 ### Real gap — the subject of this document
 
@@ -238,7 +238,7 @@ scopeKey : null    | <family_id> | <species_key>
 ```
 
 - `general` ⇒ `scopeKey` is null; eligible for every species.
-- `family` ⇒ `scopeKey` names one of the **19 families the demon corpus already produced** (seedsmith
+- `family` ⇒ `scopeKey` names one of the **19 families the creature corpus already produced** (seedsmith
   D2, `family-consolidate`) — not a new taxonomy.
 - `species` ⇒ `scopeKey` is the same **opaque `species_key`** `SpeciesBasicsRow` already uses,
   deliberately not a join into the generated catalog, which the action program does not own and must
@@ -379,7 +379,7 @@ chooses and the model obeys.** Never a number, never free text. Six groups:
 | Group | Fields | Source vocabulary | Who picks |
 |---|---|---|---|
 | **A · Scope + anchor** | `scope` (general/family/species), `scopeKey` | §6 | planner |
-| **B · Identity context** | `family`, `motifs[]`, `antiMotifs[]`, `element`, `themeKey`, `threatBand`, `rarity` | demon corpus (D2/D4), `ElementTable` (6), `ssot-rarity` (10) | read from the seed |
+| **B · Identity context** | `family`, `motifs[]`, `antiMotifs[]`, `element`, `themeKey`, `threatBand`, `rarity` | creature corpus (D2/D4), `ElementTable` (6), `ssot-rarity` (10) | read from the seed |
 | **C · Mechanical slot** | `category` (5), `targetMode` (6), `areaShape` (4), `relation` (4), `kind` (3), `rungBand` | `ActionEnums.cs`, `ActionTargetSpec.cs`, `RungTable` | **planner** |
 | **D · Pool constraints** | `allowedAtomFamilies[]`, `forbiddenAtomFamilies[]`, `structureAxes[]` | atom catalog; `RungRow.StructureBudget` | planner |
 | **E · Pairing role** | `pairingRole` = `enabler` / `payoff` / `neutral`, plus `pairsWithStatus` when payoff | `StatusCatalog` (21) | **planner** |
@@ -458,10 +458,10 @@ merits rather than inherited from the dedup requirement.
 
 ```mermaid
 flowchart TD
-  Seed[("demon seed corpus<br/>families - motifs - antiMotifs<br/>themes - elements - rarity")]
+  Seed[("creature seed corpus<br/>families - motifs - antiMotifs<br/>themes - elements - rarity")]
 
   subgraph MF["model-free - build these first, they cost zero tokens"]
-    S0["S0 characteristic-pool<br/>reads: demon corpus, atom catalog,<br/>ActionEnums, RungTable, StatusCatalog<br/>makes: the closed pool + species role lean"]
+    S0["S0 characteristic-pool<br/>reads: creature corpus, atom catalog,<br/>ActionEnums, RungTable, StatusCatalog<br/>makes: the closed pool + species role lean"]
     S1["S1 distribution-planner - ENGINE 1<br/>reads: pool + targets + last coverage report<br/>makes: N fully-specified briefs<br/>owns: category, pairing role, quotas"]
     S3["S3 dedup-select<br/>reads: all candidates<br/>makes: survivors + rejects with reasons<br/>pure function, fixed order"]
     S5["S5 coverage-report<br/>reads: accepted corpus<br/>makes: per-cell counts, thin cells,<br/>next round targets"]
@@ -486,7 +486,7 @@ flowchart TD
 
 | # | Stage | Model? | Reads | Makes | Focus |
 |---|---|---|---|---|---|
-| **S0** | `characteristic-pool` | **No** | demon corpus, atom catalog, the four action enums, rung table, status catalog | the closed pool, **and the species role lean** | Makes every later stage's inputs reviewable before a token is spent |
+| **S0** | `characteristic-pool` | **No** | creature corpus, atom catalog, the four action enums, rung table, status catalog | the closed pool, **and the species role lean** | Makes every later stage's inputs reviewable before a token is spent |
 | **S1** | `distribution-planner` | **No** | pool + run targets + last coverage report | N briefs, each fully specified | **Engine 1.** Owns category, pairing role and every quota. The state machine |
 | **S2** | `action-propose` | **Yes** | exactly one brief | exactly one action seed | **Engine 2.** One judgement per call. No memory, no ordering |
 | **S3** | `dedup-select` | **No** | the complete candidate set | survivors + rejects with reasons | Pure, fixed-order, replayable |
@@ -510,7 +510,7 @@ shapes mechanically, before a call is made.
   "scope": "species",                            // general | family | species
   "scopeKey": "pyre-imp",
 
-  "anchor": {                                    // group B - read from the demon seed, never invented
+  "anchor": {                                    // group B - read from the creature seed, never invented
     "family": "infernal",
     "element": "fire",
     "rarity": "heirloom",
@@ -566,7 +566,7 @@ tier → value, from the container the accepted seed names. **One roll, the one 
 
 ## 17. Cost — and the saving that comes from the planner owning category
 
-Using the demon-seed measured rate (~1,162 calls/h on the local model).
+Using the creature-seed measured rate (~1,162 calls/h on the local model).
 
 At the owner's stated targets — 500 general, 5 x 19 families, 3 x 904 species = **3,307 actions**:
 
@@ -756,7 +756,7 @@ neighbours.
 
 ```mermaid
 flowchart TD
-  Seed[("demon seed corpus")]
+  Seed[("creature seed corpus")]
 
   subgraph MF1["model-free"]
     S0["S0 characteristic-pool<br/>+ species role lean (A2 hybrid)"]
@@ -859,7 +859,7 @@ identity a player gets.
 **Twelve is a measured outcome, not a decision.** The spec's own test: *"every aptitude is the best point
 somewhere, and none everywhere."* `balance-guard` re-answers it after every coefficient change.
 
-**Allocation is across four scopes** — Commander, DemonType, Aspect, UniqueDemon — each with its own
+**Allocation is across four scopes** — Commander, CreatureType, Aspect, UniqueCreature — each with its own
 grant rate, summing to a `share` per aptitude.
 
 ## 27. ⭐ The design pattern the grid already follows — floor and owner
@@ -1194,15 +1194,15 @@ recorded state, never a fabricated pick.
 Worth stating plainly, because §23 wrote S6 as if it were expanding the innate model, and the spec prose
 reads that way too. **It is not. This is built.**
 
-`spec-action-model.md` §1 named the innate's source as *"the actor's demon type"*, and
-[`concrete-action-roster.md`](action/concrete-action-roster.md) §8 ships **5 innates, one per demon-type
+`spec-action-model.md` §1 named the innate's source as *"the actor's creature type"*, and
+[`concrete-action-roster.md`](action/concrete-action-roster.md) §8 ships **5 innates, one per creature-type
 archetype**. Read together those suggest C2 (*a per-species pick*) is a structural change.
 
 **The code disagrees, and per [`DESIGN-GATE.md`](../DESIGN-GATE.md) the code wins:**
 
 | | Evidence |
 |---|---|
-| The innate is stored **on the species row**, not the demon type | [`ActionRow.cs:87`](../../src/FusionRpg.Core/Actions/ActionRow.cs#L87) — `SpeciesBasics(string SpeciesKey, …, string? InnateActionId)` |
+| The innate is stored **on the species row**, not the creature type | [`ActionRow.cs:87`](../../src/FusionRpg.Core/Actions/ActionRow.cs#L87) — `SpeciesBasics(string SpeciesKey, …, string? InnateActionId)` |
 | It is **nullable**, so "this species has none" is already legal | same line |
 | It is **already validated** — must exist, and must be `kind = innate` | [`ActionValidator.cs:107-115`](../../src/FusionRpg.Core/Actions/ActionValidator.cs#L107-L115), whose message reads *"species '{SpeciesKey}' innate …"* |
 | It is **already assembled** into the intrinsic set | [`ActionSetAssembler.cs:60-61`](../../src/FusionRpg.Core/Actions/Grants/ActionSetAssembler.cs#L60-L61) |
@@ -1214,7 +1214,7 @@ persistence all exist.
 
 **Sorted honestly:** **built** — every seam S6 needs. The only **real gap** is content (904 picks), which
 is what the corpus is for. **One line of doc drift** to correct: `spec-action-model.md` §1's Source cell
-said *"the actor's demon type"* where the shipped column is per-species. Corrected 2026-09-02.
+said *"the actor's creature type"* where the shipped column is per-species. Corrected 2026-09-02.
 
 ## 36. B1 and B3 are derived defaults with named re-tune triggers, not open values
 
@@ -1398,12 +1398,18 @@ Owner: *"now audit, debate, strenthen whole idea."* Four parallel audits plus a 
 held on architecture and failed on arithmetic and on citation** — which is the useful outcome, because
 the expensive errors are the ones that read as verified.
 
-**⛔ SOURCE-BOUNDARY CORRECTION 2026-09-10.** The historical 84-species finding in §39 is superseded.
-Seedsmith action generation reads `data/seed/demons/species/**/*.json` at run time, not SQLite and not
-the generated C# projection. The current live seed folder measures 904 species, 227 consolidated
-families, and 1,183 family memberships. The executable plan consequently contains 5,680 briefs:
-25 general, 1,135 family, and 4,520 species. Historical 84/53/19 measurements remain below as an
-incident record only and must not be used as current pipeline inputs.
+**⛔ SOURCE-BOUNDARY CORRECTION 2026-09-10, revised 2026-09-11.** The historical 84-species finding in
+§39 is superseded. Seedsmith action generation reads `data/seed/creatures/species/**/*.json` at run time,
+not SQLite and not the generated C# projection.
+
+**The roster, its family memberships, and the resulting brief totals are READINGS, not design
+constants.** The live seed folder is a population that grows every time a species ships, so its size
+and every figure derived from it (species, consolidated families, memberships, brief total, per-tier
+counts) change with content. The A-S1 planner emits over whatever the live roster is at run time; the
+executable plan's per-tier counts (general `generalCount`, five per family, five per species) are
+computed from it. Do not treat any of these as a fixed number in a spec or test —
+[validation-ssot.md](validation-ssot.md). Historical 84/53/19 measurements remain below as an incident
+record only and must not be used as current pipeline inputs.
 
 **Everything below is corrected in place above.** This part records what was wrong and why, so the same
 class of error is visible rather than quietly overwritten.
@@ -1414,17 +1420,17 @@ The original finding was measured against a generated C# projection on 2026-09-0
 
 | Source | Count |
 |---|---:|
-| `DemonSpeciesCatalog.Generated.cs` — `SpeciesId = "…"` rows | **84** |
+| `CreatureSpeciesCatalog.Generated.cs` — `SpeciesId = "…"` rows | **84** |
 | `_generated/motif-assignments.json` | **84** |
 | `_generated/family-assignments.json` | **53** |
 | `seedsmith-map.md:149` | *"84 eligible rows today, **rising toward ~904**"* |
 
-That conclusion is now superseded. The live source is the demon seed folder, which currently contains
+That conclusion is now superseded. The live source is the creature seed folder, which currently contains
 904 species records. The generated C# file remains an explicit legacy compatibility input for fixtures,
 not a source of truth for action generation.
 
 **Why this is not merely a number to divide by 10.** §16's brief block is explicit that the anchor is
-*"group B — read from the demon seed, **never invented**"*: `family`, `element`, `rarity`, `themeKey`,
+*"group B — read from the creature seed, **never invented**"*: `family`, `element`, `rarity`, `themeKey`,
 `motifs`, `antiMotifs`. Both model pipelines depend on it:
 
 - **`P-signature`** asks *"what makes THIS ONE creature unlike its siblings"* — needs species motifs and
@@ -1469,7 +1475,7 @@ change. **This is the single most important thing for the plan to absorb.**
 | 5 | **Part I §7** | corpus ~1,000; *"the gap closes through the roll"* | **Superseded by §17/§18/§36.1.** Banner added at the top of the document |
 | 6 | **§34.1** | *"the innate **climbs** with earn history"*, filed under *"verified in code and spec"* | **Unbuilt.** `action-ideal.md:137` says *"Recommended, **not yet ratified**"*; the innate's rung is the authored `ActionRow.Rung` column, and `UnlockLadder.Rung` is reachable only through a held unlock, which an innate never is. **The S6 conclusion survives on the free-sixth-slot half alone** — which is independently verified — but the argument as written overclaimed |
 | 7 | **§7** | *"5 categories × 4 target shapes bounds it at 20"* | **Wrong enum.** `ActionTargetMode` has **6** members; the 4 area shapes apply only under `Area`. 5 × 6 = 30, and the *"~20–40"* range had no derivation |
-| 8 | **§17** | *"the demon-seed measured rate (~1,162 calls/h)"* | **Unsourced.** `1162` appears nowhere else in the repo — no run log, no measurement note. The arithmetic on top of it is correct; the input is not evidenced. **Every hour figure in this document inherits that** |
+| 8 | **§17** | *"the creature-seed measured rate (~1,162 calls/h)"* | **Unsourced.** `1162` appears nowhere else in the repo — no run log, no measurement note. The arithmetic on top of it is correct; the input is not evidenced. **Every hour figure in this document inherits that** |
 | 9 | **§32** | *"every `transform.position =` is in `Fx/` pools"* | **Incomplete** — `Hud/ActorHudPool.cs:170,225,243` also writes positions. **The conclusion holds** (HUD objects are not `Plant`/`Zombie` transforms), but the same wrong sentence is committed in `decisions.md:105`, and if `guard-single-writer.ps1` is extended per that ADR, `Hud/` needs an exemption nobody has written down |
 | 10 | **§28** | efficiency rows still read *"Should be 12 ⛔"* | **Superseded** by §30 task 0.3, which decided **sparse**. Shipped reality: `resource.efficiency.{hp:2, stamina:3, hunger:2, spirit:2, qi:1, poise:2}` — sparse as decided. The poise rows got a ✅ callout; these did not |
 

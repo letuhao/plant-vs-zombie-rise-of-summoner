@@ -2,8 +2,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using FusionRpg.Core.Battle;
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Expeditions;
+using FusionRpg.Core.Stats.Derived;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Expeditions;
@@ -86,15 +87,15 @@ public class ExpeditionResolverTests
         for (ulong seed = 0; seed < 40; seed++)
         {
             var r = ExpeditionResolver.Resolve("warpath-20h", Squad(5), seed, 10);
-            foreach (var tick in r.Ticks.Where(t => t.Kind == ExpeditionTickKinds.WildDemonMet))
+            foreach (var tick in r.Ticks.Where(t => t.Kind == ExpeditionTickKinds.WildCreatureMet))
             {
-                var species = DemonSpeciesCatalog.Get(tick.WildSpeciesId!);
-                Assert.NotEqual(DemonAcquisition.CaptureOnly, species.Acquisition);
-                Assert.NotEqual(DemonRarity.Sunwoven, species.BaseRarity);
+                var species = CreatureSpeciesCatalog.Get(tick.WildSpeciesId!);
+                Assert.NotEqual(CreatureAcquisition.CaptureOnly, species.Acquisition);
+                Assert.NotEqual(CreatureRarity.Sunwoven, species.BaseRarity);
             }
 
             foreach (var join in r.Rewards.WildJoins)
-                Assert.True(DemonSpeciesCatalog.IsKnown(join.SpeciesId));
+                Assert.True(CreatureSpeciesCatalog.IsKnown(join.SpeciesId));
         }
     }
 
@@ -105,7 +106,7 @@ public class ExpeditionResolverTests
         Assert.True(r.Rewards.EventSouls >= 0);
         Assert.All(r.Rewards.Materials, m =>
         {
-            Assert.True(DemonMaterialCatalog.IsKnown(m.MaterialId), m.MaterialId);
+            Assert.True(CreatureMaterialCatalog.IsKnown(m.MaterialId), m.MaterialId);
             Assert.True(m.Qty > 0);
         });
         Assert.True(r.Rewards.SpecimenXpPerBattleWon > 0);
@@ -125,7 +126,16 @@ public class ExpeditionResolverTests
             if (laterBattle == null) continue;
 
             var member = laterBattle.Setup.Squad.Single(s => s.Key == injury.InjuredKey);
-            Assert.Contains(member.ChannelMods, m => m.Amount < 0);
+            // battle-hub-fuse T5: injuries ride as Hub inputs, not ChannelMods appends — and the
+            // debuff reaches the composed snapshot through the ExpeditionInjurySubsystem twin.
+            var injuries = member.HubInputs?.Injuries;
+            Assert.NotNull(injuries);
+            Assert.True(injuries!.TryGetValue(injury.InjuredKey!, out var count) && count > 0,
+                "injured member must carry a positive injury count in its Hub inputs");
+            var divisor = ExpeditionTuningHub.Tuning.EventRoll.InjuryPowerDivisor;
+            var expected = (double)(count * -Math.Max(1, member.Atk / divisor));
+            Assert.Equal(expected,
+                BattleHubCompose.Compose(member).Get(DerivedStatChannels.CombatPowerOmni, 0));
             return; // proven
         }
 
@@ -141,7 +151,7 @@ public class ExpeditionResolverTests
     }
 
     /// <summary>spec-rarity-migration.md §4: `ShardCommon`/`ShardRare` are string LITERALS, invisible
-    /// to every grep for `DemonRarity` — they do not mention the enum and would survive a future
+    /// to every grep for `CreatureRarity` — they do not mention the enum and would survive a future
     /// widening untouched, pointing at materials that no longer exist. This pins them against the
     /// live catalog directly rather than trusting the rename was applied everywhere it needed to be.
     /// Reflection over the private consts (not a text-file scan) so the check tracks the compiled
@@ -155,8 +165,8 @@ public class ExpeditionResolverTests
             var field = type.GetField(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
             Assert.True(field is not null, $"{type.FullName} no longer declares a const named {name}");
             var value = (string)field!.GetValue(null)!;
-            Assert.Contains(value, DemonMaterialCatalog.All);
-            Assert.DoesNotContain(value, LegacyDemonRarityIds.ForwardMap.Keys.Select(id => "shard." + id));
+            Assert.Contains(value, CreatureMaterialCatalog.All);
+            Assert.DoesNotContain(value, LegacyCreatureRarityIds.ForwardMap.Keys.Select(id => "shard." + id));
         }
     }
 
@@ -186,7 +196,7 @@ public class ExpeditionResolverTests
     // Why the roster touches this golden at all — a DIFFERENT class from every re-bless
     // above — those were serialization shape or magnitude churn with the roster fixed. This one is
     // a genuine content change. WildBand (ExpeditionResolver.cs:231) picks wild enemies from
-    // DemonSpeciesCatalog.All filtered by rarity and ordered by SpeciesId, then indexes with
+    // CreatureSpeciesCatalog.All filtered by rarity and ordered by SpeciesId, then indexes with
     // rng.NextInt(band.Count). Regenerating the catalog uncapped took it from 24 to 84 species, so
     // both the band's contents and its size changed and a different enemy is legitimately rolled.
     // Verified it is selection, not a determinism break: Same_inputs_resolve_identically and the
@@ -205,17 +215,34 @@ public class ExpeditionResolverTests
     // Re-blessed 2026-09-07 (combat-unification Phase 7 F1, owner decision: hybrid.
     // secondaryWeightMilli 0 -> 300) — checked before re-blessing, not assumed: `Squad()` above uses
     // a fixed synthetic "test-species" with no catalog-backed ElementSecondary, so the player side of
-    // every resolve is unaffected. The wild-enemy side (`WildBand`, real `DemonSpeciesCatalog.All`)
+    // every resolve is unaffected. The wild-enemy side (`WildBand`, real `CreatureSpeciesCatalog.All`)
     // is not — 21/841 real species carry a genuine secondary element (measured live 2026-09-07), and
     // any of the four rolls landing one now embeds a real two-component `elementPayload` on that
     // enemy's own `BattleSetup` where it carried one component before, which is exactly what moves
     // this hash. The resolver's own RNG stream and which enemy gets picked are unaffected — only the
     // embedded setup's own shape changed, the same class of move this golden's own history already
     // names as expected, not a regression signal.
-    const string ScoutHash = "DFC5BC6405D3985CDA41BDEAFC593D0B0F3B344379E7003AAEEE6A5569CA8182";
-    const string ForageHash = "01305D2A48438E873E83CD8575BEFB80351C651E109A556DBBBA7759DDA3DCD8";
-    const string HuntHash = "68F5FC90E0DBB0E6704623FBA5ACD2A86D573804F0D6ECE8672E4FE0C308FB91";
-    const string WarpathHash = "F1C4A2FA9CD6A296BE0A204A366BE37D97F8BFAE2CD36140409FBA658CFD2453";
+    // Re-blessed 2026-09-12 (vocabulary rename: the domain word for a summoned specimen becomes
+    // "creature", reserving the old word for a future sub-race) — the resolved `WildCreatureMet`
+    // tick's own `Kind` string is serialized into this hash, and it moved from "wild-demon-met" to
+    // "wild-creature-met". Proven the sole cause, not assumed: restoring the old wire string in
+    // `ExpeditionTickKinds.WildCreatureMet` reproduced these exact three previous hashes, and `hunt`
+    // is unchanged below because none of its rolls landed a wild-meet tick. The resolver's own math,
+    // RNG stream, and which enemy is picked are all unaffected — only one serialized literal moved,
+    // the same class of shape churn this golden's own history already names as expected.
+    // Re-blessed 2026-09-13 (actor-hub fuse T5, solid-run: injuries ride as Hub inputs, not
+    // ChannelMods appends) — proven the sole cause, not assumed: dumped the full hunt-8h/3003
+    // AND warpath-20h/4004 resolutions on both branches and diffed. Ticks identical (same wild
+    // picks, same RNG stream), rewards identical; the ONLY delta is the embedded BattleSetup
+    // injury representation: `ChannelMods: [{combat.power.omni, -7}]` became
+    // `HubInputs.Injuries` (hunt: squad:0/squad:1; warpath: squad:1). Scout/forage rolls never
+    // landed an injury tick, so their hashes are untouched — exactly what a representation-only
+    // move predicts. Sibling determinism tests (Same_inputs_resolve_identically, recall
+    // pro-rating) stayed green unchanged.
+    const string ScoutHash = "9DAC80588AD80CA004AAF659DA89F44A0E9C0644FF50E9C35F9FC1497DC571EB";
+    const string ForageHash = "D9ED9324519BBEACC17C28E73F571161548E86C3AEF86565CB8AACB396FC738A";
+    const string HuntHash = "09F61DF428B0CFCAC69A3EE218AD9BFFBDDE23213DCE2B7602FECF9FD7D153B9";
+    const string WarpathHash = "AACF2338C8381E5E53F7A936149B434F1F413542CD01B2FC42B92DADD648143C";
 
     [Fact]
     public void Tier_goldens_are_locked()

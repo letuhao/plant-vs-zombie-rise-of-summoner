@@ -1,12 +1,12 @@
-"""Tests for seedsmith.adapters.demons.power (spec-power-parse.md, demon-seed module 3)."""
+"""Tests for seedsmith.adapters.creatures.power (spec-power-parse.md, creature-seed module 3)."""
 from __future__ import annotations
 
 from pathlib import Path
 
 import pytest
 
-from seedsmith.adapters.demons.power.model import MagnitudeOverflow, PowerSeed
-from seedsmith.adapters.demons.power.parse import (
+from seedsmith.adapters.creatures.power.model import MagnitudeOverflow, PowerSeed
+from seedsmith.adapters.creatures.power.parse import (
     basis_histogram,
     disagreements,
     parse_flavor_text,
@@ -17,7 +17,7 @@ FIXTURES = Path(__file__).parent / "fixtures" / "power_text"
 
 
 def fixture(name: str) -> str:
-    """Real captured text, copied verbatim from data/seed/demons/_dump/almanac/*.json — never a
+    """Real captured text, copied verbatim from data/seed/creatures/_dump/almanac/*.json — never a
     hand-written approximation (spec's own testing-strategy rule)."""
     return (FIXTURES / name).read_text(encoding="utf-8")
 

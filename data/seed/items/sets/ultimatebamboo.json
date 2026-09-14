@@ -25,7 +25,7 @@
       "id": "set.ultimatebamboo-001",
       "nameKey": "set.spruce-bastion",
       "name": "Spruce Bastion",
-      "themeKey": "demon.ultimatebamboo",
+      "themeKey": "creature.ultimatebamboo",
       "members": [
         {
           "role": "armament-primary",

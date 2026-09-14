@@ -7,6 +7,7 @@ using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Progression;
 using FusionRpg.Data;
 using FusionRpg.Data.Abstractions;
+using FusionRpg.Data.Tests;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -30,7 +31,7 @@ namespace FusionRpg.Server.Tests;
 /// </summary>
 public class UniqueActorAtomRepushTests : IAsyncLifetime
 {
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
@@ -45,13 +46,11 @@ public class UniqueActorAtomRepushTests : IAsyncLifetime
         var tuningPath = Path.Combine(FindRepoRoot(), "data", "tuning", "progression.v1.json");
         ProgressionTuningHub.Configure(ProgressionTuningLoader.Parse(File.ReadAllText(tuningPath)));
         var soulTuningPath = Path.Combine(FindRepoRoot(), "data", "tuning", "souls.v1.json");
-        FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
-            FusionRpg.Core.Demons.SoulEarnTuningLoader.Parse(File.ReadAllText(soulTuningPath)));
+        FusionRpg.Core.Creatures.SoulEarnPolicy.Configure(
+            FusionRpg.Core.Creatures.SoulEarnTuningLoader.Parse(File.ReadAllText(soulTuningPath)));
 
-        var dir = Path.Combine(Path.GetTempPath(), "fusionrpg-unique-repush-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(dir);
-        var store = new RpgStore(dir);
-        store.Init();
+        var testStore = DataTestStore.Create();
+        var store = testStore.Store;
 
         var port = GetFreeTcpPort();
         var baseUrl = $"http://127.0.0.1:{port}";
@@ -100,7 +99,7 @@ public class UniqueActorAtomRepushTests : IAsyncLifetime
 
         await app.StartAsync();
 
-        _dir = dir;
+        _testStore = testStore;
         _store = store;
         _app = app;
         _http = new HttpClient { BaseAddress = new Uri(baseUrl), Timeout = TimeSpan.FromSeconds(30) };
@@ -110,7 +109,7 @@ public class UniqueActorAtomRepushTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     static int GetFreeTcpPort()

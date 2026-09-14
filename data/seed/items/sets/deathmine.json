@@ -25,7 +25,7 @@
       "id": "set.deathmine-001",
       "nameKey": "set.rotting-spore-tuber",
       "name": "Rotting Spore Tuber",
-      "themeKey": "demon.deathmine",
+      "themeKey": "creature.deathmine",
       "members": [
         {
           "role": "armament-primary",

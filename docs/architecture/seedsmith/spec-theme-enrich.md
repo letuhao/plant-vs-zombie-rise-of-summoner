@@ -4,7 +4,7 @@
 
 ## Objective
 
-Turn a name-only demon theme into usable item-generation context without relabelling model-authored
+Turn a name-only creature theme into usable item-generation context without relabelling model-authored
 text as observed almanac prose. The stage is resumable and only upgrades themes that are not already
 referenced by item content.
 
@@ -35,7 +35,7 @@ key, motif, numeric value or file destination.
 
 ```powershell
 cd tools/seedsmith
-python -m seedsmith demons theme-enrich --dry-run
+python -m seedsmith creatures theme-enrich --dry-run
 python -m pytest tests/test_theme_enrich.py -q
 ```
 

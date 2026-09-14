@@ -67,6 +67,16 @@ public static class DamagePacketBuilder
             var marker = JsonOverlay.FromObject(raw);
             if (JsonOverlay.GetString(marker, "eventField") is { } field)
             {
+                // lawn-hit-entry (T9c): an instakill-shaped hit (lawnmower / board-wipe — see
+                // GameEventRec.InstakillShaped / EffectEventDto.InstakillShaped) must not scale a
+                // rider off its own magnitude — a 1,000,000-damage lawnmower event would otherwise
+                // pass straight through this multiplier into a rider of the same magnitude.
+                // Deliberately a DamageType-driven refusal, never a numeric clamp (a clamp is a
+                // hard ceiling a balance pass would eventually cross legitimately — CLAUDE.md "No
+                // hard progression ceilings").
+                if (ev?.InstakillShaped == true)
+                    return 0;
+
                 var multiplierMilli = JsonOverlay.GetInt(marker, "multiplierMilli", 1000);
                 // Absent damage (no combat event, or an event with none) heals nothing rather than
                 // throwing — the same "never crash the hot path" rule every other overlay read follows.

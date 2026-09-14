@@ -7,7 +7,7 @@
   "loopLine": "Summon and fusion · Farm / hunt / defend",
   "hook": "**Essence** is element-matched material you stockpile for fusion (and for some buildings later) — fire essence is not the same as ice essence.",
   "blindSpots": [
-    {"term": "Essence", "meaning": "A **material stock** in your save, split by element. Not souls, not loam, not a demon’s health."},
+    {"term": "Essence", "meaning": "A **material stock** in your save, split by element. Not souls, not loam, not a creature’s health."},
     {"term": "Element-matched", "meaning": "A fusion that wants fire essence will not take ice essence instead. The colour (element) is the point of the bottleneck."},
     {"term": "Bank", "meaning": "Essence stays with your summoner across worlds — same idea as souls. [Loam](loam) does not."},
     {"term": "Fusion", "meaning": "Merging specimens in the Fusion lab (`F`). That is the main place you spend essence today."}
@@ -83,7 +83,7 @@
     "docs/guide/glossary.md §Currencies",
     "docs/guide/the-rift.md §stocks",
     "docs/architecture/empire-economy-ssot.md §Essence",
-    "docs/architecture/demons/spec-demon-fusion.md §Materials",
+    "docs/architecture/creatures/spec-creature-fusion.md §Materials",
     "web/fusion-rpg-web/src/features/fusion/fusionView.ts"
   ]
 }

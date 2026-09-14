@@ -25,7 +25,7 @@
       "id": "set.waterbamboo-001",
       "nameKey": "set.frozen-sprout-barrier",
       "name": "Frozen Sprout Barrier",
-      "themeKey": "demon.waterbamboo",
+      "themeKey": "creature.waterbamboo",
       "members": [
         {
           "role": "armament-primary",

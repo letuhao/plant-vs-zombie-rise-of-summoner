@@ -7,9 +7,11 @@ using Xunit;
 namespace FusionRpg.Core.Tests.ClassSystem;
 
 /// <summary>class-system-todo.md P1.11 — every channel an aptitude edge names must resolve through
-/// `BattleStatComposer`'s `ChannelMods` path without throwing "Unknown combat channel id". Widening
-/// the known-channel set is the whole fix (P1.11's own acceptance: compose LOGIC is unchanged) — this
-/// test proves the widened set, not just that it compiles.</summary>
+/// the battle compose path's `ChannelMods` overlay without throwing "Unknown combat channel id".
+/// Widening the known-channel set is the whole fix (P1.11's own acceptance: compose LOGIC is
+/// unchanged) — this test proves the widened set, not just that it compiles. battle-hub-fuse T6:
+/// `BattleHubCompose.Compose` reads the Hub's own registry for this check now (same unknown-channel
+/// refusal, re-homed with the composer's deletion).</summary>
 public class BattleKnownChannelsTests
 {
     [Fact]
@@ -35,7 +37,7 @@ public class BattleKnownChannelsTests
         Assert.True(missingFromRegistry.Count == 0,
             "aptitude edge channel(s) not registered at all: " + string.Join(", ", missingFromRegistry));
 
-        var ex = Record.Exception(() => BattleStatComposer.Compose(setup));
+        var ex = Record.Exception(() => BattleHubCompose.Compose(setup));
         Assert.Null(ex);
     }
 
@@ -46,7 +48,7 @@ public class BattleKnownChannelsTests
         // always sets (defense/accuracy/dodge/critRate/critResist) must still resolve to exactly the
         // documented formula, proving no compose logic moved alongside the set widening.
         var setup = MinimalSetup(Array.Empty<BattleChannelMod>());
-        var snap = BattleStatComposer.Compose(setup);
+        var snap = BattleHubCompose.Compose(setup);
 
         Assert.Equal(setup.Defense, snap.Get(DerivedStatChannels.CombatDefenseOmni));
         Assert.Equal(BattleRuleset.BaseAccuracy(setup.Index), snap.Get(DerivedStatChannels.CombatAccuracyOmni));

@@ -1,5 +1,5 @@
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Generation;
 using FusionRpg.Core.Progression;
 using FusionRpg.Core.Stats.Aptitudes;
 using Microsoft.Data.Sqlite;
@@ -16,7 +16,7 @@ namespace FusionRpg.Data;
 /// <para><b>Joins the existing <see cref="RpgStore"/> partial-class convention</b>
 /// (<c>RpgStore.ChannelPolicy.cs</c> is the template this file follows) rather than the standalone
 /// class spec-point-economy.md §5 literally names. That file listing predates this session's own
-/// survey of `FusionRpg.Data`'s real conventions: every other feature — souls, unique actors, demons,
+/// survey of `FusionRpg.Data`'s real conventions: every other feature — souls, unique actors, creatures,
 /// contracts — is a partial-class slice sharing ONE connection/lock (<c>_gate</c>), ONE
 /// <c>EnsureHotSchema</c> dispatch, and ONE <c>Reset()</c>. A standalone class with its own connection
 /// would fork that pipeline and silently drop out of <c>Reset()</c> — corrected in the spec in place,
@@ -53,20 +53,20 @@ public sealed partial class RpgStore
     public static string ScopeToText(AllocationScope scope) => scope switch
     {
         AllocationScope.Commander => "commander",
-        AllocationScope.DemonType => "demonType",
+        AllocationScope.CreatureType => "creatureType",
         AllocationScope.Aspect => "aspect",
-        AllocationScope.UniqueDemon => "uniqueDemon",
+        AllocationScope.UniqueCreature => "uniqueCreature",
         _ => throw new ArgumentOutOfRangeException(nameof(scope), scope, "unknown AllocationScope"),
     };
 
     public static AllocationScope ScopeFromText(string text) => text switch
     {
         "commander" => AllocationScope.Commander,
-        "demonType" => AllocationScope.DemonType,
+        "creatureType" => AllocationScope.CreatureType,
         "aspect" => AllocationScope.Aspect,
-        "uniqueDemon" => AllocationScope.UniqueDemon,
+        "uniqueCreature" => AllocationScope.UniqueCreature,
         _ => throw new ArgumentException(
-            $"'{text}' is not a known allocation scope (commander/demonType/aspect/uniqueDemon)", nameof(text)),
+            $"'{text}' is not a known allocation scope (commander/creatureType/aspect/uniqueCreature)", nameof(text)),
     };
 
     /// <summary>Persists ONLY this <c>(scope, scopeKey)</c>'s own points — one row per aptitude with a
@@ -151,11 +151,11 @@ public sealed partial class RpgStore
     }
 
     /// <summary>
-    /// `demon-type-allocation` (module 5) — THE named entry point for a species' effective allocation
-    /// (spec-demon-type-allocation.md: "composition lives behind a single named entry point... and
+    /// `creature-type-allocation` (module 5) — THE named entry point for a species' effective allocation
+    /// (spec-creature-type-allocation.md: "composition lives behind a single named entry point... and
     /// `LoadAllocation` is not called directly by any consumer of species allocation" —
     /// `SpeciesAllocationSeamTests` guards this). Override REPLACES the baseline wholesale, never
-    /// layers (spec's own "Override semantics"): a nonzero DemonType override wins outright; otherwise
+    /// layers (spec's own "Override semantics"): a nonzero CreatureType override wins outright; otherwise
     /// the baseline is computed fresh from the committed plan and the species' CURRENT level — never
     /// persisted (audit finding A9). A species the player has never overridden reads its baseline, not
     /// zero — the exact silent-zero risk this module's own design section calls out by name.
@@ -163,7 +163,7 @@ public sealed partial class RpgStore
     /// <para>An override whose OWN total happens to be zero is indistinguishable from "no override" —
     /// not a new gap: `SaveAllocation`'s delete-then-insert-nonzero-only shape already gives Commander
     /// this same property (an all-zero save leaves no rows, identical to never having allocated), so
-    /// DemonType inherits it rather than inventing a new "explicitly zero" state nothing else in this
+    /// CreatureType inherits it rather than inventing a new "explicitly zero" state nothing else in this
     /// codebase tracks.</para>
     ///
     /// <para><b>Best-effort on the committed plan</b> (found running the real `battle-allocation`
@@ -181,9 +181,9 @@ public sealed partial class RpgStore
         if (string.IsNullOrWhiteSpace(speciesId))
             throw new ArgumentException("speciesId must not be empty", nameof(speciesId));
 
-        var overrideAllocation = LoadAllocation(AllocationScope.DemonType,
+        var overrideAllocation = LoadAllocation(AllocationScope.CreatureType,
             Core.Stats.Aptitudes.SpeciesAllocation.ScopeKey(playerId, speciesId));
-        if (overrideAllocation.TotalForScope(AllocationScope.DemonType) > 0)
+        if (overrideAllocation.TotalForScope(AllocationScope.CreatureType) > 0)
             return overrideAllocation;
 
         return SpeciesBaselineAllocation(playerId, speciesId, tuning);
@@ -204,16 +204,16 @@ public sealed partial class RpgStore
         if (!SpeciesBuildPlanCatalog.IsConfigured)
             return AptitudeAllocation.Empty;
 
-        var demonTypeId = DemonSpeciesCatalog.Get(speciesId).DemonTypeId;
-        var level = GetRpgActor(playerId, RpgActorKinds.Species, demonTypeId)?.Level ?? 1;
+        var creatureTypeId = CreatureSpeciesCatalog.Get(speciesId).CreatureTypeId;
+        var level = GetRpgActor(playerId, RpgActorKinds.Species, creatureTypeId)?.Level ?? 1;
         var shares = SpeciesBuildPlanCatalog.SharesFor(speciesId);
         return Core.Stats.Aptitudes.SpeciesAllocation.Baseline(shares, level, tuning);
     }
 
-    /// <summary>Whether the player has ever set a DemonType override for this species — the exact
+    /// <summary>Whether the player has ever set a CreatureType override for this species — the exact
     /// signal <c>spec-allocation-surface.md</c>'s "shown as a deviation" UI needs to decide whether to
     /// render the override state at all, distinct from the override happening to equal the baseline.</summary>
     public bool HasSpeciesOverride(long playerId, string speciesId) =>
-        LoadAllocation(AllocationScope.DemonType, Core.Stats.Aptitudes.SpeciesAllocation.ScopeKey(playerId, speciesId))
-            .TotalForScope(AllocationScope.DemonType) > 0;
+        LoadAllocation(AllocationScope.CreatureType, Core.Stats.Aptitudes.SpeciesAllocation.ScopeKey(playerId, speciesId))
+            .TotalForScope(AllocationScope.CreatureType) > 0;
 }

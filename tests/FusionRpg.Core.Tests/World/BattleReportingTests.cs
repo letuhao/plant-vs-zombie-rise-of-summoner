@@ -44,7 +44,7 @@ public class BattleReportingTests
         };
 
         var report = new TurnReport();
-        BattleReporting.Fight(world, request, PlaceholderBattleResolver.Instance, report, "battles", seed: 1);
+        BattleReporting.Fight(world, request, DistrictAssaultResolver.Instance, report, "battles", seed: 1);
 
         var line = Assert.Single(report.Entries, e => e.Kind == TurnReportKinds.Battle);
         Assert.Equal("s1", line.SectorId);
@@ -63,7 +63,7 @@ public class BattleReportingTests
         };
 
         var report = new TurnReport();
-        BattleReporting.Fight(world, request, PlaceholderBattleResolver.Instance, report, "battles", seed: 1);
+        BattleReporting.Fight(world, request, DistrictAssaultResolver.Instance, report, "battles", seed: 1);
 
         var line = Assert.Single(report.Entries, e => e.Kind == TurnReportKinds.Battle);
         Assert.Null(line.SectorId);

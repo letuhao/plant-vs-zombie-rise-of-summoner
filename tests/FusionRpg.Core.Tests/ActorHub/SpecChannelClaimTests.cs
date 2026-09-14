@@ -50,11 +50,15 @@ public class SpecChannelClaimTests
     /// human-readable dotted labels distinct from the real `SubsystemId` string
     /// (`foundation.effect`/order 350 names `AtomDerivedSubsystem`, whose actual `SubsystemId` is
     /// `"atom.derived"`; `status.timed`/order 400 names `StatusDerivedSubsystem`, whose actual
-    /// `SubsystemId` is `"l2b.derived"` — verified in code, neither label is a stat channel).</summary>
+    /// `SubsystemId` is `"l2b.derived"` — verified in code, neither label is a stat channel).
+    /// `combat.v1.json` is a tuning file name (`data/tuning/combat.v1.json` exists), same category as
+    /// `status.v1.json`/`status.v2.json` above — named in `lawn-combat-wire-ideal.md`'s own [audit]
+    /// correction note explicitly stating that file does NOT own `matchupShareK`, not claiming it as
+    /// a channel. Added 2026-09-14.</summary>
     static readonly HashSet<string> KnownNonChannelTokens = new(StringComparer.Ordinal)
     {
         "combat.hit", "combat.hitland", "combat.something", "combat.timer",
-        "combat.power.pierce", "combat.power.overflow",
+        "combat.power.pierce", "combat.power.overflow", "combat.v1.json",
         "resource.delta", "resource.economy",
         "status.apply", "status.apply.duration", "status.apply.target", "status.clear", "status.spread",
         "status.v1.json", "status.v2.json", "status.WithdrawEntity", "status.resistance", "status.probability",

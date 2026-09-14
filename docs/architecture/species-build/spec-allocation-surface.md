@@ -23,7 +23,7 @@ and can change it in three interactions or fewer.
 *"At any moment the player is on exactly one stage… every other surface is a layer drawn over that
 stage, openable from anywhere, and closing it returns the player to exactly the stage state they left."*
 GG-1 explicitly forbids *"routing to a sibling screen in order to look at something"*, and its stated
-test case is the one that matters here: *"a player mid-wave who wants to check a demon's loyalty must
+test case is the one that matters here: *"a player mid-wave who wants to check a creature's loyalty must
 not lose the wave to do it."*
 
 **GG-10 caps depth at three pushes** from the stage to any player action.
@@ -47,7 +47,7 @@ Per species, three things and no more:
    learnable fact.
 2. **The player's override**, if any, shown as a deviation *from* the baseline rather than as a separate
    build — because that is what it is.
-3. **The remaining budget**, from `PointBudget.PointsFor(DemonType, speciesLevel, tuning)`.
+3. **The remaining budget**, from `PointBudget.PointsFor(CreatureType, speciesLevel, tuning)`.
 
 ### Rendering — the unit class already exists and its rule binds
 
@@ -75,7 +75,7 @@ switching repeatedly costs more, or the churn pricing is a hidden tax rather tha
 ### Copy
 
 Written from the player's side, per the GUI principles: *"a person manages notifications, not webhook
-config."* So — **"Sunflower's build"**, not "DemonType allocation scope"; **"Reset to default"**, not
+config."* So — **"Sunflower's build"**, not "CreatureType allocation scope"; **"Reset to default"**, not
 "delete override row". Engine vocabulary (`typeId`, `scope_key`, `AllocationScope`) never reaches this
 surface.
 
@@ -149,7 +149,7 @@ and `AptitudesUpdated` already broadcasts, so the panel refreshes without a seco
 8. **No engine vocabulary** in any rendered string — a lint-style test over the panel's copy.
 9. **E2E:** a species' build is visible, adjustable, revertible, and the change survives a reload.
 10. **The real plan resolves for the real roster** — asserted against the committed
-    `_species-build-plan.json` and the compiled `DemonSpeciesCatalog`, never a hand-built fixture keyed
+    `_species-build-plan.json` and the compiled `CreatureSpeciesCatalog`, never a hand-built fixture keyed
     to agree with the code under test. Criterion 1 is unfalsifiable without this: a fixture-fed baseline
     passes while every shipped species renders zero. *(Added 2026-09-05 — this is exactly what shipped.)*
 11. **Each state in §"States" is covered**, the failure and pending-price paths included — the two that

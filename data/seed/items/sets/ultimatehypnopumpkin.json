@@ -25,7 +25,7 @@
       "id": "set.ultimatehypnopumpkin-001",
       "nameKey": "set.the-hollowed-husk",
       "name": "The Hollowed Husk",
-      "themeKey": "demon.ultimatehypnopumpkin",
+      "themeKey": "creature.ultimatehypnopumpkin",
       "members": [
         {
           "role": "armament-primary",

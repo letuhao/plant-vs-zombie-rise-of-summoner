@@ -25,7 +25,7 @@
       "id": "set.sniperpuff-001",
       "nameKey": "set.spore-sniper",
       "name": "Spore Sniper",
-      "themeKey": "demon.sniperpuff",
+      "themeKey": "creature.sniperpuff",
       "members": [
         {
           "role": "armament-primary",

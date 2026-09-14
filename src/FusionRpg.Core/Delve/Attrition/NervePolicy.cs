@@ -10,7 +10,7 @@ public static class NerveStatusIds
     public static string For(string stage) => $"nerve.{stage}";
 
     /// <summary>Host-scoped grant id — `StatusRuntime.ClearGrant` withdraws exactly one actor's nerve
-    /// status. At most one `nerve.*` instance is ever live per demon (spec §4), so one grant id per
+    /// status. At most one `nerve.*` instance is ever live per creature (spec §4), so one grant id per
     /// host is enough — never per-stage, unlike <c>ExhaustionStatusIds</c>'s per-resource scoping.</summary>
     public static string GrantIdFor(string hostPtr) => $"nerve:{hostPtr}";
 }
@@ -25,7 +25,7 @@ public static class NerveStatusIds
 /// stack counter lives in party state (`DelveMemberState.NerveStacks`) and the live status is its
 /// PROJECTION: <see cref="NerveLadder.StageFor"/> turns stacks (plus spirit's own exhaustion) into a
 /// stage index, and <see cref="Sync"/> makes the runtime's live instance match it — at most one
-/// `nerve.*` instance per demon, never a status field.</para>
+/// `nerve.*` instance per creature, never a status field.</para>
 /// </summary>
 public sealed class NervePolicy
 {
@@ -49,7 +49,7 @@ public sealed class NervePolicy
     /// <see cref="NerveContainer.Load"/> in production, a hand-built fixture in tests. Validated here
     /// exactly like <see cref="Actions.Cost.ExhaustionPolicy"/>'s own constructor: a stage whose stat
     /// block touches spirit's own regen channel is the one true spiral (spirit is the pool nerve
-    /// stacks read) and is rejected at construction rather than surfacing as a demon that can never
+    /// stacks read) and is rejected at construction rather than surfacing as a creature that can never
     /// climb back down the ladder.</param>
     public NervePolicy(
         StatusCatalog catalog,
@@ -143,7 +143,7 @@ public sealed class NervePolicy
 /// per stage — deliberately never routed through the affix-roll `Instantiator`/`ContainerRow` pipeline
 /// (`Effects/Atoms/ContainerRow.cs`): that machinery exists for player-rolled items with a seed, a
 /// rarity and a tier window, none of which a nerve stage has. A nerve stage is shipped catalog
-/// content, identical for every demon that reaches it, so its "stat" block is parsed by the SAME,
+/// content, identical for every creature that reaches it, so its "stat" block is parsed by the SAME,
 /// already-shipped <see cref="StatusStatPayload.TryParse"/> an overlay-authored status already uses
 /// (`StatusEffectBridge.cs`) — one parser, not a second one for a second kind of "container".
 /// </summary>

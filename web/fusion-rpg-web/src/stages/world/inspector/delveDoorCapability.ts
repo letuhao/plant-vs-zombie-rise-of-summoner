@@ -12,8 +12,8 @@ import type { SlotView } from "@/contract/types";
  * (`Delve/Domains/DomainOffers.cs:95-103`) builds `DomainOfferDto` field-by-field and never copies
  * `Theme` onto it, so no domain "theme" value ever reaches this file; there is nothing on the wire to
  * read. And the six real domain seed files that do exist (`data/seed/dungeon/domains/*.json`) carry a
- * `theme` shaped like a demon-species reference (e.g. `domain.fire-001.json`'s own
- * `"theme": "demon.scaredyshroom"`), not an English word a slot kind could sensibly match against —
+ * `theme` shaped like a creature-species reference (e.g. `domain.fire-001.json`'s own
+ * `"theme": "creature.scaredyshroom"`), not an English word a slot kind could sensibly match against —
  * there is no live or content-authored link from a world-map slot kind to a specific domain anywhere
  * in the system today (a real, separate gap, named here rather than papered over with an invented
  * link). So the only mapping actually buildable today is the one this module owns: the map slot's

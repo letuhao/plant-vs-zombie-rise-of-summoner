@@ -25,7 +25,7 @@
       "id": "set.enumvalue266-001",
       "nameKey": "set.the-silt-rupture",
       "name": "The Silt Rupture",
-      "themeKey": "demon.enumvalue266",
+      "themeKey": "creature.enumvalue266",
       "members": [
         {
           "role": "armament-primary",

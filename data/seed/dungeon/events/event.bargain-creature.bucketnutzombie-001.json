@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.bargain-creature.bucketnutzombie-001",
+  "flavor": "A bloated, grey-skinned 僵尸 sits atop a pile of rusted iron scrap. Its head is unnaturally thick, polished to a dull sheen like a heavy anvil. It stares at the party with milky eyes, offering a heavy, jagged coin in exchange for a moment of your vitality.",
+  "kind": "bargain",
+  "name": "The Iron-Skulled Revenant",
+  "outcomes": [
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "encounter",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party encounters a sentient undead entity that trades essence for ancient currency.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.bucketnutzombie"
+}

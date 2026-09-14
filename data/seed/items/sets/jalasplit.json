@@ -25,7 +25,7 @@
       "id": "set.jalasplit-001",
       "nameKey": "set.bursting-pod-volley",
       "name": "Bursting Pod Volley",
-      "themeKey": "demon.jalasplit",
+      "themeKey": "creature.jalasplit",
       "members": [
         {
           "role": "armament-primary",

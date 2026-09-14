@@ -25,7 +25,7 @@
       "id": "set.superhurricaneblover-001",
       "nameKey": "set.clover-rot",
       "name": "Clover Rot",
-      "themeKey": "demon.superhurricaneblover",
+      "themeKey": "creature.superhurricaneblover",
       "members": [
         {
           "role": "armament-primary",

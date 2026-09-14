@@ -25,7 +25,7 @@
       "id": "set.ultimatepoisonfume-001",
       "nameKey": "set.spore-rot-spreader",
       "name": "Spore-Rot Spreader",
-      "themeKey": "demon.ultimatepoisonfume",
+      "themeKey": "creature.ultimatepoisonfume",
       "members": [
         {
           "role": "armament-primary",

@@ -9,7 +9,7 @@
 
 ## In one sentence
 
-Plants, zombies, and demons grow from **work they actually did** — type lines and individual specimens, not only Dave’s level.
+Plants, zombies, and creatures grow from **work they actually did** — type lines and individual specimens, not only Dave’s level.
 
 ---
 
@@ -19,7 +19,7 @@ These words get guessed wrong. Read them once before the rest of the page.
 
 | Word | What it actually means here |
 |---|---|
-| **Specimen XP** | Progress on one demon instance — that Peashooter-line specimen you fielded. |
+| **Specimen XP** | Progress on one creature instance — that Peashooter-line specimen you fielded. |
 | **Type XP** | Progress on a species / type line you have used and met — feeds how deep that line feels over time. |
 | **Almanac** | Dossiers for what you have met. Meeting types deepens reference — see [almanac](almanac.md). |
 | **Chronicle** | Your run and progression history — a place XP and levels show up. |
@@ -57,7 +57,7 @@ Type XP rewards learning and fielding a line — almanac and builds both care.
 
 ## What you do (first time)
 
-1. Field a bound demon on a lawn or expedition.
+1. Field a bound creature on a lawn or expedition.
 2. Afterward, open Creatures and notice that specimen’s progress.
 3. Open Almanac or Chronicle and see type / history catch up.
 
@@ -70,7 +70,7 @@ Type XP rewards learning and fielding a line — almanac and builds both care.
 **Does only Dave’s level matter?**  
 No. Specimens and types grow from work they did.
 
-**If I never field a demon, does it level?**  
+**If I never field a creature, does it level?**  
 Progress comes from work done — idle shelf pets stay behind.
 
 **Is type XP the same as fusion rarity?**  

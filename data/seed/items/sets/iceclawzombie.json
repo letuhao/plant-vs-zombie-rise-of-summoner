@@ -25,7 +25,7 @@
       "id": "set.iceclawzombie-001",
       "nameKey": "set.glacial-claw-set",
       "name": "Glacial Claw Set",
-      "themeKey": "demon.iceclawzombie",
+      "themeKey": "creature.iceclawzombie",
       "members": [
         {
           "role": "armament-primary",

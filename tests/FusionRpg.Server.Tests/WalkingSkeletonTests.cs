@@ -4,6 +4,7 @@ using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Power;
 using FusionRpg.Data;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -19,17 +20,17 @@ namespace FusionRpg.Server.Tests;
 /// <para><b>Real vs stubbed, honestly counted (verified against the repo, not assumed):</b></para>
 /// <list type="bullet">
 /// <item><b>Real (Phase 0):</b> the dump row itself — read directly from
-/// <c>data/seed/demons/demon/zombie/epic.json</c>'s own `conezombie` entry, not hardcoded blind, so
+/// <c>data/seed/creatures/creature/zombie/epic.json</c>'s own `conezombie` entry, not hardcoded blind, so
 /// this test breaks if the real dump ever changes shape.</item>
 /// <item><b>Stubbed:</b> parsed basis, threat rung and the classified anchor — `power-parse` and
 /// `threat-audit` are real Python modules (`tools/seedsmith/`), unreachable from a C# test process;
 /// the anchor is the LLM-classification step, and no real classified anchor exists for `conezombie`
-/// yet (grepped `data/seed/demons/_dump`/`_generated`/`_runs` directly — confirmed absent; T2.11's
+/// yet (grepped `data/seed/creatures/_dump`/`_generated`/`_runs` directly — confirmed absent; T2.11's
 /// real run, which would produce one, is the owner-run job this whole audit's Checkpoint 2 is
 /// blocked on). All three stand in with SHAPE-plausible values derived from the real dump row's own
 /// numbers, never invented from nothing.</item>
 /// <item><b>Stubbed:</b> the species-passive container's own generation — `species-generator`
-/// (demon-seed module 12) and `player-materialise` (module 16) are Phase 4 work, not built yet. The
+/// (creature-seed module 12) and `player-materialise` (module 16) are Phase 4 work, not built yet. The
 /// container itself is hand-built here, but it is a REAL <see cref="ContainerRow"/>, validated by the
 /// REAL <see cref="ContainerValidator"/> — the stub is "what generates this shape," not the shape
 /// itself.</item>
@@ -46,22 +47,20 @@ namespace FusionRpg.Server.Tests;
 /// </summary>
 public class WalkingSkeletonTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly AtomPushService _push;
 
     public WalkingSkeletonTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-skeleton-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         _push = new AtomPushService(_store);
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     static readonly PowerTuning Tuning = PowerTuning.Build(
@@ -85,7 +84,7 @@ public class WalkingSkeletonTests : IDisposable
     /// <summary>Seam 1 — the real dump row, read off disk, not hardcoded blind.</summary>
     static (int Hp, int Attack, int Armor) RealDumpRow()
     {
-        var path = Path.Combine(RepoRoot(), "data", "seed", "demons", "demon", "zombie", "epic.json");
+        var path = Path.Combine(RepoRoot(), "data", "seed", "creatures", "creature", "zombie", "epic.json");
         using var doc = JsonDocument.Parse(File.ReadAllText(path));
 
         foreach (var entry in doc.RootElement.GetProperty("entries").EnumerateArray())
@@ -124,7 +123,7 @@ public class WalkingSkeletonTests : IDisposable
 
         // ---- Seam 4: anchor (STUB — no real classified anchor exists for conezombie; T2.11 owner-run) --
         stubs.Add(new StubbedSeam("anchor",
-            "no real classified anchor for conezombie exists yet (verified absent under data/seed/demons/" +
+            "no real classified anchor for conezombie exists yet (verified absent under data/seed/creatures/" +
             "_dump, _generated, _runs) — T2.11, the LLM classification run that would produce one, is " +
             "explicitly owner-run and out of this audit's own reach"));
         var anchorSpeciesId = "conezombie";
@@ -132,7 +131,7 @@ public class WalkingSkeletonTests : IDisposable
 
         // ---- Seam 5: species-passive container (STUB generation, REAL shape+validation) ------------
         stubs.Add(new StubbedSeam("species-passive-generation",
-            "species-generator (demon-seed module 12) and player-materialise (module 16) are Phase 4 " +
+            "species-generator (creature-seed module 12) and player-materialise (module 16) are Phase 4 " +
             "work, not built yet — the container below is hand-built, but it is a real ContainerRow " +
             "validated by the real ContainerValidator, not a shape invented for this test"));
 

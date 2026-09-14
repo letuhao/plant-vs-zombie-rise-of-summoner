@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "none",
+  "eligibility": null,
+  "eventId": "event.encounter-event-creature.ashthreepeater-002",
+  "flavor": "In the center of the chamber, a rift of pure void pulses with a rhythm that feels like a heartbeat. It is a manifestation of 彻底 destruction, a tear in reality that seems to swallow the very concept of existence. To touch it is to invite a silence that can never be undone.",
+  "kind": "encounter-event",
+  "name": "The Echo of Absolute Ruin",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "extreme"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party must decide whether to harness the void's power to end the conflict instantly or risk being consumed by its infinite hunger.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.ashthreepeater"
+}

@@ -13,7 +13,7 @@ import { TypeMultiSelect } from "./TypeMultiSelect";
 export type ScopePickerValue =
   | { kind: "target"; targetPtr: string }
   | { kind: "type"; typeIds: number[] }
-  | { kind: "uniqueDemon"; instanceId: string }
+  | { kind: "uniqueCreature"; instanceId: string }
   | { kind: "relation"; relation: "ally" | "enemy" };
 
 export type ScopePickerMode = ScopePickerValue["kind"];
@@ -31,7 +31,7 @@ export type ScopeTargetCandidate =
 const MODES: TabItem[] = [
   { id: "target", label: "Target", testId: "scope-mode-target" },
   { id: "type", label: "Type", testId: "scope-mode-type" },
-  { id: "uniqueDemon", label: "Specific creature", testId: "scope-mode-unique-demon" },
+  { id: "uniqueCreature", label: "Specific creature", testId: "scope-mode-unique-creature" },
   { id: "relation", label: "My side / Enemy", testId: "scope-mode-relation" }
 ];
 
@@ -78,13 +78,13 @@ export function ActorMenuScopePicker({
   value,
   onChange,
   targetCandidates = [],
-  uniqueDemonCandidates = [],
+  uniqueCreatureCandidates = [],
   typeOptions = []
 }: {
   value: ScopePickerValue | null;
   onChange: (value: ScopePickerValue) => void;
   targetCandidates?: ScopeTargetCandidate[];
-  uniqueDemonCandidates?: ActorRungState[];
+  uniqueCreatureCandidates?: ActorRungState[];
   typeOptions?: { typeId: number; label: string }[];
 }) {
   const [mode, setMode] = useState<ScopePickerMode>(value?.kind ?? "relation");
@@ -114,11 +114,11 @@ export function ActorMenuScopePicker({
             onChange={onChange}
           />
         ) : null}
-        {mode === "uniqueDemon" ? (
+        {mode === "uniqueCreature" ? (
           <ActorListPickerPanel
-            kind="uniqueDemon"
-            candidates={uniqueDemonCandidates}
-            value={value?.kind === "uniqueDemon" ? value : null}
+            kind="uniqueCreature"
+            candidates={uniqueCreatureCandidates}
+            value={value?.kind === "uniqueCreature" ? value : null}
             onChange={onChange}
           />
         ) : null}

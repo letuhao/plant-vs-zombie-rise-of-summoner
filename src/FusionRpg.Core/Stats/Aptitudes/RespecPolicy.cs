@@ -1,4 +1,4 @@
-using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Creatures.Generation;
 
 namespace FusionRpg.Core.Stats.Aptitudes;
 

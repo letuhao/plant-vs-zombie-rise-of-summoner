@@ -83,7 +83,7 @@ mechanism — a handful of mods are hand-excluded from specific item bases despi
 Module 1 owns *what an affix is*. This module owns *which containers may draw which affixes* — a
 different axis, and one that changes independently: a new feature (module 9's own future callers) adds
 eligibility rules constantly without ever touching the affix entity's shape. Keeping them separate is
-what lets `species-effects` (demon-seed module 15) declare its own eligibility without a schema change
+what lets `species-effects` (creature-seed module 15) declare its own eligibility without a schema change
 here.
 
 ### Validation, additive to module 1's table

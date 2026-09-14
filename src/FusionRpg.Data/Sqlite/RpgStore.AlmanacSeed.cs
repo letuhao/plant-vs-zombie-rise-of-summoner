@@ -105,13 +105,13 @@ public sealed partial class RpgStore
     }
 
     /// <summary>
-    /// `demon-seed` module 13 (`catalog-runtime`) precondition: a fresh database's `almanac_seed`
+    /// `creature-seed` module 13 (`catalog-runtime`) precondition: a fresh database's `almanac_seed`
     /// table is empty until a player has manually browsed hundreds of live in-game almanac entries
     /// (`RebuildAlmanacSeed`'s own source, `type_almanac_dump`, only grows from that live capture) —
     /// which is why `species-import`'s own name resolution (`GetAlmanacSeed(side, gameTypeId)`)
-    /// silently fell back to a placeholder ("Demon 918") for every species on a database that has
+    /// silently fell back to a placeholder ("Creature 918") for every species on a database that has
     /// never had that manual browsing happen. The committed corpus dump
-    /// (`data/seed/demons/_dump/almanac/{plant,zombie}.json`, `corpus-dump`/module 1) already carries
+    /// (`data/seed/creatures/_dump/almanac/{plant,zombie}.json`, `corpus-dump`/module 1) already carries
     /// the SAME final, already-parsed shape `almanac_seed` stores — it is not raw capture text needing
     /// <see cref="RebuildAlmanacSeed"/>'s regex parsing, it is that parsing's own OUTPUT, captured
     /// once elsewhere and committed. This is the direct, one-transaction bulk load of that committed
@@ -377,7 +377,7 @@ public sealed partial class RpgStore
 
     /// <summary>
     /// Public, non-transactional twin of <see cref="LoadCombatBaselinesUnlocked"/> — same query
-    /// (earliest observed spawn_stats sample per side/type), exposed for `demon-seed`'s
+    /// (earliest observed spawn_stats sample per side/type), exposed for `creature-seed`'s
     /// `corpus-dump` module so the raw baseline can be dumped as its own file (spec-corpus-dump.md
     /// §1/§4) without a raw <c>SqliteCommand</c> ever appearing under `tools/`.
     /// </summary>

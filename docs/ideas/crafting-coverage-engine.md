@@ -231,11 +231,11 @@ the current set corpus.
 |---|---|---:|---:|---|
 | `general` | Broad theme available across ordinary item families | 2 | 4 | Starts as a small, splashable pair; later set-progression templates may claim more roles and expose more thresholds |
 | `family` | A declared family/theme with a narrower, coherent collection | 5 | 3 | Starts as a meaningful build choice and grows through later templates |
-| `unique-species` | One declared unique demon species; never inferred from a display name | 10 or 15 | exactly 2 | A parameterized species-bound signature/full kit with thresholds at 2 and the selected final role count; hybrids are ineligible |
+| `unique-species` | One declared unique creature species; never inferred from a display name | 10 or 15 | exactly 2 | A parameterized species-bound signature/full kit with thresholds at 2 and the selected final role count; hybrids are ineligible |
 
 `general` and `family` therefore have more bonus-tier capacity than the
 high-volume `unique-species` class. The latter needs a small default because
-there are already 900+ potential demon-species subjects; ten or fifteen members times a
+there are already 900+ potential creature-species subjects; ten or fifteen members times a
 long bonus ladder would multiply both authoring and balance debt faster than it
 adds meaningful build choices.
 
@@ -287,7 +287,7 @@ For every proposed set, the deterministic stage must prove:
 
 A unique-species set is a deliberately distinct class, not an oversized general
 set. Its template chooses ten or fifteen roles and exactly two thresholds. It
-is valid only for the declared non-hybrid unique demon species/body, and only
+is valid only for the declared non-hybrid unique creature species/body, and only
 with the class-specific total budget. The fifteen-role template must cover the
 complete body map; the ten-role template must retain its exact declared map. It
 can never be emitted as a generic or family template. The planner treats an

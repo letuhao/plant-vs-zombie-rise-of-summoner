@@ -25,7 +25,7 @@
       "id": "set.snorklezombie-001",
       "nameKey": "set.drowned-breath",
       "name": "Drowned Breath",
-      "themeKey": "demon.snorklezombie",
+      "themeKey": "creature.snorklezombie",
       "members": [
         {
           "role": "armament-primary",

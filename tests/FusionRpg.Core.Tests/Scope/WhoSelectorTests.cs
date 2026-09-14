@@ -9,7 +9,7 @@ public class WhoSelectorTests
     [Theory]
     [InlineData(WhoKind.Target)]
     [InlineData(WhoKind.Type)]
-    [InlineData(WhoKind.UniqueDemon)]
+    [InlineData(WhoKind.UniqueCreature)]
     [InlineData(WhoKind.Relation)]
     public void Every_WhoKind_value_round_trips_through_Name_and_TryParse(WhoKind kind)
     {

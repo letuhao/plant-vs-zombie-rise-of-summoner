@@ -16,7 +16,7 @@ spec, plan, proposal, or ADR — and read the documents its §1 row names for yo
 | **Before any design work** | **[DESIGN-GATE.md](DESIGN-GATE.md)** — mandatory reading gate + topic index |
 | **Anyone new** | [architecture/software-architecture.md](architecture/software-architecture.md) (whole system, one page) · [architecture/data-architecture.md](architecture/data-architecture.md) (all data, one page) |
 | **Players** | **[guide/](guide/)** (**product vision SSOT** — [vision site](guide/site/), [brief feature list](guide/features.md), loops, catalog) · [runbook/players.md](runbook/players.md) (install) · [SUPPORT.md](../SUPPORT.md) · [Releases](https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/releases) |
-| **Contributors** | [../CONTRIBUTING.md](../CONTRIBUTING.md) · [contributing/dev-setup.md](contributing/dev-setup.md) · [contributing/architecture-map.md](contributing/architecture-map.md) |
+| **Contributors** | [../CONTRIBUTING.md](../CONTRIBUTING.md) · [contributing/dev-setup.md](contributing/dev-setup.md) · [contributing/architecture-map.md](contributing/architecture-map.md) · [contributing/agent-git.md](contributing/agent-git.md) |
 
 Then architecture → protocol → module specs → [local-dev runbook](runbook/local-dev.md).
 
@@ -81,7 +81,7 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/effect-atom/completeness-audit.md](architecture/effect-atom/completeness-audit.md) | **Completeness audit (2026-08-23)** — all 21 modules read against `src/`: the parser-with-no-applier in E17, the content tables no host loads, the importer nothing runs, and a proposed wave 6 of seam modules |
 | [architecture/effect-atom/atom-catalog-ssot.md](architecture/effect-atom/atom-catalog-ssot.md) | **SSOT effect list** — the closed vocabulary: 5 attach points, 12 kinds, 7 triggers, 8 primary + 99 derived channels, 21 statuses (13 functional), refused-with-cause list, and the 7 silent failures that become rejections |
 | [architecture/effect-atom/definitions.md](architecture/effect-atom/definitions.md) | **Definitions** — the ~40 values the module specs referenced and never defined: units, tolerances, id grammars, NULL semantics, orderings, hash algorithm, the 30 rejection codes. Wins over any spec until that spec is rewritten |
-| [architecture/effect-atom/atom-family-library.md](architecture/effect-atom/atom-family-library.md) | **Family library** — ~55 authored affix families over the 12 kinds, element families generated not authored, side asymmetry (plant/zombie/demon), and the fire-rate channel gap |
+| [architecture/effect-atom/atom-family-library.md](architecture/effect-atom/atom-family-library.md) | **Family library** — ~55 authored affix families over the 12 kinds, element families generated not authored, side asymmetry (plant/zombie/creature), and the fire-rate channel gap |
 | [architecture/action-map.md](architecture/action-map.md) | **Capability map** — the action layer joining atoms (what) to the turn kernel (when): 9 modules, targeting, the four resource pools, selection. Blocked on the atom map's Checkpoint B; no build authorized |
 | [architecture/action/spec-action-model.md](architecture/action/spec-action-model.md) | **Spec A1** — the action data structure: `rpg_action` / `rpg_action_cost` / `rpg_action_effect_scope`, the membership rule, dataflow, and the six-case corpus. Awaiting approval; no build authorized |
 | [architecture/action/spec-targeting.md](architecture/action/spec-targeting.md) | **Spec A2** — typed closed targeting contract compiling to the shipped `TargetResolver`; caster-relative `Relation` (one action serves both factions) and Chebyshev range that passes with no board |
@@ -135,8 +135,8 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/battle-timeline-map.md](architecture/battle-timeline-map.md) | Battle timeline program: capability map, module ids T1–T8, dependency graph, build order; the kernel that combat action management is built on |
 | [architecture\battle\](architecture\battle\spec-virtual-time-core.md) | Module specs: virtual-time-core, turn-fsm, readiness-model, mode-profiles, kernel-adoption (T1–T5) |
 | [architecture/battle/audit-2026-08-21.md](architecture/battle/audit-2026-08-21.md) | Structured review of the timeline specs: four lenses, debates, adjudications, and the amendments they forced |
-| [architecture/demon-system-map.md](architecture/demon-system-map.md) | Demon gameplay program: capability map, vision→stack mapping, module build order |
-| [architecture/demons/](architecture/demons/spec-element-extension.md) | Module specs: element-extension, demon-core, soul-economy, demon-summoning (V1) |
+| [architecture/creature-system-map.md](architecture/creature-system-map.md) | Creature gameplay program: capability map, vision→stack mapping, module build order |
+| [architecture/creatures/](architecture/creatures/spec-element-extension.md) | Module specs: element-extension, creature-core, soul-economy, creature-summoning (V1) |
 | [architecture/decisions.md](architecture/decisions.md) | Locked choices |
 | [architecture/data-flow.md](architecture/data-flow.md) | Game → injector → server → web |
 
@@ -177,6 +177,7 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [testing/probes.md](testing/probes.md) | SIM-only reset / snapshot / `test.probe` |
 | [testing/player-pack-smoke.md](testing/player-pack-smoke.md) | Offline/online smoke for `dist/FusionRpg` (not SIM HTTP) |
 | [testing/web.md](testing/web.md) | Vitest coverage + Playwright e2e for the SPA |
+| [architecture/validation-ssot.md](architecture/validation-ssot.md) | **Standard** — a guardrail validates the CONTRACT and closed enums, never a population count or generated text; criteria must be stable across generations |
 
 ## 6. Runbook
 

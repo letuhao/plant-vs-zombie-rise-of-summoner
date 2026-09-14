@@ -25,7 +25,7 @@
       "id": "set.potatochomper-001",
       "nameKey": "set.the-patient-maw",
       "name": "The Patient Maw",
-      "themeKey": "demon.potatochomper",
+      "themeKey": "creature.potatochomper",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.superthreepeater-sp-001",
       "nameKey": "set.phoenix-winged-archer",
       "name": "Phoenix Winged Archer",
-      "themeKey": "demon.superthreepeater_sp",
+      "themeKey": "creature.superthreepeater_sp",
       "members": [
         {
           "role": "armament-primary",

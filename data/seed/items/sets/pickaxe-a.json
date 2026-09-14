@@ -25,7 +25,7 @@
       "id": "set.pickaxe-a-001",
       "nameKey": "set.netherline-industrialist",
       "name": "Netherline Industrialist",
-      "themeKey": "demon.pickaxe_a",
+      "themeKey": "creature.pickaxe_a",
       "members": [
         {
           "role": "armament-primary",

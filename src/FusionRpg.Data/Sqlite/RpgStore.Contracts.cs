@@ -1,17 +1,17 @@
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Contracts;
 using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.Data;
 
-/// <summary>One demon's contract. Rank is NOT stored — it is derived from <see cref="Loyalty"/>.</summary>
+/// <summary>One creature's contract. Rank is NOT stored — it is derived from <see cref="Loyalty"/>.</summary>
 public sealed record ContractRow(
     string InstanceId,
     long PlayerId,
     bool Bound,
     int Loyalty,
-    DemonPersonality Personality,
+    CreaturePersonality Personality,
     string? BoundUtc,
     string? ReleasedUtc,
     string GainDay,
@@ -33,8 +33,8 @@ public sealed record ContractStateRow(
 public sealed partial class RpgStore
 {
     /// <summary>
-    /// Contracts (spec-demon-contracts.md): a binding slot plus a loyalty record. Owning is
-    /// unlimited; FIELDING is finite. Unbound demons are free and frozen — no tribute, no decay,
+    /// Contracts (spec-creature-contracts.md): a binding slot plus a loyalty record. Owning is
+    /// unlimited; FIELDING is finite. Unbound creatures are free and frozen — no tribute, no decay,
     /// loyalty preserved — so a benched hoard costs nothing and a returning player never finds
     /// a dead army, only a poorer contracted one.
     /// </summary>
@@ -78,7 +78,7 @@ public sealed partial class RpgStore
     }
 
     /// <summary>
-    /// Mint-time binding: a new demon takes a free slot automatically (free — this is not churn),
+    /// Mint-time binding: a new creature takes a free slot automatically (free — this is not churn),
     /// and simply arrives unbound when capacity is full. Without this, every pull, fusion output,
     /// and wild-join would land unusable behind a button press nobody would enjoy.
     /// </summary>
@@ -106,10 +106,10 @@ public sealed partial class RpgStore
     /// <summary>
     /// Settles every whole UTC day since the last stamp, clamped to <see cref="ContractPolicy.MaxSettleDays"/>.
     /// Each day either charges the full tribute (one dedupe-keyed ledger row, so replays and crashes
-    /// cost nothing extra) or — when the balance cannot cover it — decays every bound demon instead.
+    /// cost nothing extra) or — when the balance cannot cover it — decays every bound creature instead.
     /// All-or-nothing per day: you either paid the tribute or you did not.
     /// </summary>
-    public (int DaysSettled, long SoulsPaid, int DemonsDecayed) SettleContracts(
+    public (int DaysSettled, long SoulsPaid, int CreaturesDecayed) SettleContracts(
         long playerId, DateTimeOffset? utcNow = null)
     {
         var now = utcNow ?? DateTimeOffset.UtcNow;
@@ -124,7 +124,7 @@ public sealed partial class RpgStore
         }
     }
 
-    internal (int DaysSettled, long SoulsPaid, int DemonsDecayed) SettleContractsUnlocked(
+    internal (int DaysSettled, long SoulsPaid, int CreaturesDecayed) SettleContractsUnlocked(
         SqliteConnection db, long playerId, DateTimeOffset now)
     {
         EnsureContractsMigratedUnlocked(db, playerId, now);
@@ -149,7 +149,7 @@ public sealed partial class RpgStore
         var decayed = new HashSet<string>(StringComparer.Ordinal);
         var firstDay = lastSettled.UtcDateTime.Date;
         var due = bound.Sum(c => (long)ContractPolicy.UpkeepPerDay(
-            rarities.TryGetValue(c.InstanceId, out var r) ? r : DemonRarity.Chaff, c.Personality));
+            rarities.TryGetValue(c.InstanceId, out var r) ? r : CreatureRarity.Chaff, c.Personality));
         for (var d = 1; d <= elapsed && bound.Count > 0; d++)
         {
             var day = firstDay.AddDays(d).ToString("yyyy-MM-dd");
@@ -190,7 +190,7 @@ public sealed partial class RpgStore
     {
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
-            UPDATE rpg_demon_contracts
+            UPDATE rpg_creature_contracts
                SET loyalty = $l, gain_day = $gd, gain_today = $gt, revision = revision + 1
              WHERE instance_id = $i;
             """;
@@ -202,21 +202,21 @@ public sealed partial class RpgStore
     }
 
     /// <summary>Rarity per contracted specimen — upkeep is rarity-scaled, so the bill needs the profiles.</summary>
-    Dictionary<string, DemonRarity> ReadContractRaritiesUnlocked(SqliteConnection db, long playerId)
+    Dictionary<string, CreatureRarity> ReadContractRaritiesUnlocked(SqliteConnection db, long playerId)
     {
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
             SELECT c.instance_id, p.rarity
-            FROM rpg_demon_contracts c
-            JOIN rpg_demon_profiles p ON p.instance_id = c.instance_id
+            FROM rpg_creature_contracts c
+            JOIN rpg_creature_profiles p ON p.instance_id = c.instance_id
             WHERE c.player_id = $p;
             """;
         cmd.Parameters.AddWithValue("$p", playerId);
-        var map = new Dictionary<string, DemonRarity>(StringComparer.Ordinal);
+        var map = new Dictionary<string, CreatureRarity>(StringComparer.Ordinal);
         using var r = cmd.ExecuteReader();
         while (r.Read())
         {
-            DemonRarityIds.TryParse(r.GetString(1), out var rarity);
+            CreatureRarityIds.TryParse(r.GetString(1), out var rarity);
             map[r.GetString(0)] = rarity;
         }
 
@@ -226,7 +226,7 @@ public sealed partial class RpgStore
     /// <summary>
     /// Signs a contract. Costs one day of upkeep up front — without that fee, binding before a
     /// battle and releasing after would dodge tribute entirely; with it, churn costs exactly what
-    /// keeping the demon would have. The fee dedupes per demon per UTC day, so a release and
+    /// keeping the creature would have. The fee dedupes per creature per UTC day, so a release and
     /// re-sign on the same day is free.
     /// </summary>
     public (bool Ok, string Reason, ContractRow? Contract) BindContract(
@@ -263,7 +263,7 @@ public sealed partial class RpgStore
             var fee = ContractPolicy.UpkeepPerDay(rarity, personality);
             if (ReadSoulBalanceUnlocked(db, playerId).Balance < fee)
                 return (false, "souls.insufficient", null);
-            // A false return means this demon's day is already paid (a same-day re-sign). Not an error.
+            // A false return means this creature's day is already paid (a same-day re-sign). Not an error.
             AppendSoulLedgerUnlocked(db, playerId, 0, -fee, SoulEarnPolicy.Reasons.Upkeep,
                 "contract", id, $"bind:{id}:{day}", stamp);
 
@@ -278,7 +278,7 @@ public sealed partial class RpgStore
     /// upkeep fee as <see cref="BindContract"/>, but the resulting bind is flagged non-releasable —
     /// <see cref="ReleaseContract"/> refuses it unconditionally, for the life of the world. Refuses
     /// an instance already bound as an ordinary (non-warden) contract, the same way binding an
-    /// already-bound demon does today.
+    /// already-bound creature does today.
     /// </summary>
     public (bool Ok, string Reason, ContractRow? Contract) BindAsWarden(
         long playerId, string instanceId, DateTimeOffset? utcNow = null)
@@ -316,7 +316,7 @@ public sealed partial class RpgStore
             var fee = ContractPolicy.UpkeepPerDay(rarity, personality);
             if (ReadSoulBalanceUnlocked(db, playerId).Balance < fee)
                 return (false, "souls.insufficient", null);
-            // A false return means this demon's day is already paid (a same-day re-sign). Not an error.
+            // A false return means this creature's day is already paid (a same-day re-sign). Not an error.
             AppendSoulLedgerUnlocked(db, playerId, 0, -fee, SoulEarnPolicy.Reasons.Upkeep,
                 "contract", id, $"bind:{id}:{day}", stamp);
 
@@ -326,8 +326,8 @@ public sealed partial class RpgStore
         }
     }
 
-    /// <summary>Frees the slot. Free of charge, and the demon keeps every point of loyalty it earned —
-    /// benched demons neither pay nor decay.</summary>
+    /// <summary>Frees the slot. Free of charge, and the creature keeps every point of loyalty it earned —
+    /// benched creatures neither pay nor decay.</summary>
     public (bool Ok, string Reason, ContractRow? Contract) ReleaseContract(
         long playerId, string instanceId, DateTimeOffset? utcNow = null)
     {
@@ -365,7 +365,7 @@ public sealed partial class RpgStore
         }
     }
 
-    /// <summary>A pact ritual: Souls for loyalty. The only way back for an insubordinate demon,
+    /// <summary>A pact ritual: Souls for loyalty. The only way back for an insubordinate creature,
     /// since it cannot be fielded to earn its way up.</summary>
     public (bool Ok, string Reason, ContractRow? Contract) PerformRitual(
         long playerId, string instanceId, string correlationId, DateTimeOffset? utcNow = null)
@@ -453,8 +453,8 @@ public sealed partial class RpgStore
     /// <summary>
     /// Credits one battle or expedition result to every contracted member of the squad. Wins are
     /// scaled by personality and metered by a rolling per-UTC-day window; losses are uncapped and
-    /// are the only thing that can push a demon under the deploy floor. Unbound demons are ignored:
-    /// a benched demon neither earns nor suffers.
+    /// are the only thing that can push a creature under the deploy floor. Unbound creatures are ignored:
+    /// a benched creature neither earns nor suffers.
     /// </summary>
     public int ApplyContractResults(
         long playerId, IReadOnlyList<string> instanceIds, bool won, DateTimeOffset? utcNow = null)
@@ -511,7 +511,7 @@ public sealed partial class RpgStore
     }
 
     /// <summary>Consumption (fusion) frees the slot in the same transaction that retires the specimen —
-    /// a Retired demon holding a contract would be a slot nobody could ever reclaim.</summary>
+    /// a Retired creature holding a contract would be a slot nobody could ever reclaim.</summary>
     internal void ReleaseContractOnRetireUnlocked(SqliteConnection db, string instanceId, string now)
     {
         if (ReadContractUnlocked(db, instanceId) is { Bound: true })
@@ -522,7 +522,7 @@ public sealed partial class RpgStore
     {
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
-            UPDATE rpg_demon_contracts
+            UPDATE rpg_creature_contracts
                SET bound = 0, released_utc = $now, revision = revision + 1
              WHERE instance_id = $i;
             """;
@@ -531,17 +531,17 @@ public sealed partial class RpgStore
         cmd.ExecuteNonQuery();
     }
 
-    /// <summary>A specimen this player may contract: owned, a demon, and not consumed.</summary>
-    (bool Ok, DemonRarity Rarity) ReadContractableSpecimenUnlocked(
+    /// <summary>A specimen this player may contract: owned, a creature, and not consumed.</summary>
+    (bool Ok, CreatureRarity Rarity) ReadContractableSpecimenUnlocked(
         SqliteConnection db, long playerId, string instanceId)
     {
         var actor = ReadUniqueActorUnlocked(db, instanceId);
         if (actor is null || actor.PlayerId != playerId
             || string.Equals(actor.Phase, UniqueActorPhases.Retired, StringComparison.Ordinal))
-            return (false, DemonRarity.Chaff);
-        var profile = ReadDemonProfileUnlocked(db, instanceId);
-        if (profile is null) return (false, DemonRarity.Chaff);
-        DemonRarityIds.TryParse(profile.Rarity, out var rarity);
+            return (false, CreatureRarity.Chaff);
+        var profile = ReadCreatureProfileUnlocked(db, instanceId);
+        if (profile is null) return (false, CreatureRarity.Chaff);
+        CreatureRarityIds.TryParse(profile.Rarity, out var rarity);
         return (true, rarity);
     }
 
@@ -560,7 +560,7 @@ public sealed partial class RpgStore
         }
     }
 
-    /// <summary>Test seam: puts a demon's loyalty where a long play history would have.</summary>
+    /// <summary>Test seam: puts a creature's loyalty where a long play history would have.</summary>
     internal void SetLoyaltyForTest(string instanceId, int loyalty)
     {
         lock (_gate)
@@ -568,7 +568,7 @@ public sealed partial class RpgStore
             using var db = OpenUnlocked();
             var row = ReadContractUnlocked(db, instanceId)
                 ?? throw new InvalidOperationException(
-                    $"no contract for '{instanceId}' — an unbound demon has no loyalty to set");
+                    $"no contract for '{instanceId}' — an unbound creature has no loyalty to set");
             WriteLoyaltyUnlocked(db, instanceId, loyalty, row.GainDay, row.GainToday);
         }
     }
@@ -617,7 +617,7 @@ public sealed partial class RpgStore
             using var db = OpenUnlocked();
             using var cmd = db.CreateCommand();
             cmd.CommandText = """
-                DELETE FROM rpg_demon_contracts WHERE player_id=$p;
+                DELETE FROM rpg_creature_contracts WHERE player_id=$p;
                 DELETE FROM rpg_contract_state WHERE player_id=$p;
                 """;
             cmd.Parameters.AddWithValue("$p", playerId);
@@ -633,7 +633,7 @@ public sealed partial class RpgStore
         cmd.CommandText = """
             SELECT instance_id, player_id, bound, loyalty, personality, bound_utc, released_utc,
                    gain_day, gain_today, revision, warden
-            FROM rpg_demon_contracts WHERE instance_id=$i;
+            FROM rpg_creature_contracts WHERE instance_id=$i;
             """;
         cmd.Parameters.AddWithValue("$i", instanceId);
         using var r = cmd.ExecuteReader();
@@ -646,7 +646,7 @@ public sealed partial class RpgStore
         cmd.CommandText = """
             SELECT instance_id, player_id, bound, loyalty, personality, bound_utc, released_utc,
                    gain_day, gain_today, revision, warden
-            FROM rpg_demon_contracts WHERE player_id=$p;
+            FROM rpg_creature_contracts WHERE player_id=$p;
             """;
         cmd.Parameters.AddWithValue("$p", playerId);
         using var r = cmd.ExecuteReader();
@@ -657,7 +657,7 @@ public sealed partial class RpgStore
 
     static ContractRow ReadContractFrom(SqliteDataReader r)
     {
-        DemonPersonalityIds.TryParse(r.GetString(4), out var personality);
+        CreaturePersonalityIds.TryParse(r.GetString(4), out var personality);
         return new ContractRow(
             r.GetString(0), r.GetInt64(1), r.GetInt64(2) != 0, (int)r.GetInt64(3), personality,
             r.IsDBNull(5) ? null : r.GetString(5), r.IsDBNull(6) ? null : r.GetString(6),
@@ -667,7 +667,7 @@ public sealed partial class RpgStore
     internal int CountBoundContractsUnlocked(SqliteConnection db, long playerId)
     {
         using var cmd = db.CreateCommand();
-        cmd.CommandText = "SELECT COUNT(*) FROM rpg_demon_contracts WHERE player_id=$p AND bound=1;";
+        cmd.CommandText = "SELECT COUNT(*) FROM rpg_creature_contracts WHERE player_id=$p AND bound=1;";
         cmd.Parameters.AddWithValue("$p", playerId);
         return Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
     }
@@ -707,7 +707,7 @@ public sealed partial class RpgStore
         cmd.ExecuteNonQuery();
     }
 
-    /// <summary>Binds (or re-binds) a specimen. Loyalty never drops on binding — a demon released
+    /// <summary>Binds (or re-binds) a specimen. Loyalty never drops on binding — a creature released
     /// and re-signed keeps what it earned. <paramref name="warden"/> flags a permanent bind
     /// (spec-loam-texture.md); once set it is never cleared by an ordinary re-sign.</summary>
     internal void BindContractRowUnlocked(
@@ -715,13 +715,13 @@ public sealed partial class RpgStore
     {
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
-            INSERT INTO rpg_demon_contracts(
+            INSERT INTO rpg_creature_contracts(
               instance_id, player_id, bound, loyalty, personality, bound_utc, released_utc,
               gain_day, gain_today, revision, warden)
             VALUES($i, $p, 1, $loyalty, $pers, $now, NULL, '', 0, 1, $warden)
             ON CONFLICT(instance_id) DO UPDATE SET
               bound = 1,
-              loyalty = MAX(rpg_demon_contracts.loyalty, $loyalty),
+              loyalty = MAX(rpg_creature_contracts.loyalty, $loyalty),
               bound_utc = $now,
               released_utc = NULL,
               warden = warden OR $warden,
@@ -737,22 +737,22 @@ public sealed partial class RpgStore
     }
 
     /// <summary>What every reader should use: the stored contract, or the default unbound view for a
-    /// demon that has never signed one. Personality is derivable, so an absent row loses nothing.</summary>
+    /// creature that has never signed one. Personality is derivable, so an absent row loses nothing.</summary>
     internal ContractRow ContractViewUnlocked(SqliteConnection db, long playerId, string instanceId) =>
         ReadContractUnlocked(db, instanceId)
         ?? new ContractRow(instanceId, playerId, false, ContractPolicy.BindLoyalty,
             ContractPolicy.PersonalityFor(instanceId), null, null, "", 0, 0, false);
 
-    sealed record MigrationCandidate(string InstanceId, DemonRarity Rarity, int Star, int Level, string CreatedUtc);
+    sealed record MigrationCandidate(string InstanceId, CreatureRarity Rarity, int Star, int Level, string CreatedUtc);
 
     /// <summary>Best-first ordering happens in C#, not SQL: rarity is a text column, so an
-    /// ORDER BY would sort alphabetically ("epic" before "rare") and quietly bind the wrong demons.</summary>
+    /// ORDER BY would sort alphabetically ("epic" before "rare") and quietly bind the wrong creatures.</summary>
     List<MigrationCandidate> ReadMigrationCandidatesUnlocked(SqliteConnection db, long playerId)
     {
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
             SELECT p.instance_id, p.rarity, p.star, a.level, a.created_utc
-            FROM rpg_demon_profiles p
+            FROM rpg_creature_profiles p
             JOIN rpg_unique_actors a ON a.instance_id = p.instance_id
             WHERE a.player_id = $p AND a.phase <> $retired;
             """;
@@ -763,7 +763,7 @@ public sealed partial class RpgStore
         {
             while (r.Read())
             {
-                DemonRarityIds.TryParse(r.GetString(1), out var rarity);
+                CreatureRarityIds.TryParse(r.GetString(1), out var rarity);
                 rows.Add(new MigrationCandidate(
                     r.GetString(0), rarity, (int)r.GetInt64(2), (int)r.GetInt64(3), r.GetString(4)));
             }

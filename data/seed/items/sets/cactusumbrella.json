@@ -25,7 +25,7 @@
       "id": "set.cactusumbrella-001",
       "nameKey": "set.cactus-aegis",
       "name": "Cactus Aegis",
-      "themeKey": "demon.cactusumbrella",
+      "themeKey": "creature.cactusumbrella",
       "members": [
         {
           "role": "armament-primary",

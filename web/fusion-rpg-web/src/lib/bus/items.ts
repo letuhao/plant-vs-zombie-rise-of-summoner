@@ -503,7 +503,7 @@ export function invalidateItemQueries(qc: ReturnType<typeof useQueryClient>) {
   void qc.invalidateQueries({ queryKey: ["itemCard"] });
   void qc.invalidateQueries({ queryKey: ["itemCompare"] });
   // Every verb but salvage debits materials, and salvage credits them.
-  void qc.invalidateQueries({ queryKey: ["demonMaterials"] });
+  void qc.invalidateQueries({ queryKey: ["creatureMaterials"] });
 }
 
 // ---- equip / unequip (item module 4 — `ItemEquipEndpoints.cs`) ---------------------------------

@@ -74,7 +74,7 @@ async function mockSanctum(page: Page, initialList = commanderListFixture) {
   await page.route("**/api/unique/actors**", (route) => fulfillJson(route, actors));
   await page.route("**/api/runs", (route) => fulfillJson(route, { items: [{ id: 1 }] }));
   await page.route("**/api/relics", (route) => fulfillJson(route, { items: [{ id: "r1" }] }));
-  await page.route("**/api/demons/roster/**", (route) => fulfillJson(route, { items: [] }));
+  await page.route("**/api/creatures/roster/**", (route) => fulfillJson(route, { items: [] }));
   await page.route("**/api/souls/**", (route) =>
     fulfillJson(route, { playerId: 1, balance: 500, earnedTotal: 500, spentTotal: 0, revision: 1, updatedUtc: "2026-01-01T00:00:00Z" })
   );

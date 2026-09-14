@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using FusionRpg.Data.Tests;
 
 namespace FusionRpg.Server.Tests;
 
@@ -66,7 +67,7 @@ public class ItemCardEndpointsTests : IAsyncLifetime
     /// cell's display key comes off the shipped corpus rather than a stand-in.</summary>
     const string EmberShard = "gem.g1-001";
 
-    string _dir = "";
+    DataTestStore _testStore = null!;
     RpgStore _store = null!;
     WebApplication _app = null!;
     HttpClient _http = null!;
@@ -162,10 +163,8 @@ public class ItemCardEndpointsTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-itemcard-http-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         var playerId = _store.GetCurrentPlayerId();
         _playerKey = playerId.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
@@ -279,7 +278,7 @@ public class ItemCardEndpointsTests : IAsyncLifetime
     {
         _http.Dispose();
         await _app.StopAsync();
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+        _testStore.Dispose();
     }
 
     static int GetFreeTcpPort()

@@ -25,7 +25,7 @@
       "id": "set.goldmagnet-001",
       "nameKey": "set.magnetic-bullet",
       "name": "Magnetic Bullet",
-      "themeKey": "demon.goldmagnet",
+      "themeKey": "creature.goldmagnet",
       "members": [
         {
           "role": "armament-primary",

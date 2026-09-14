@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useLocation } from "react-router-dom";
 import { renderWithProviders } from "@/test/render";
 import { getStageMountCount, resetStageMountCounts } from "@/shell/stageHost";
 import { SanctumStage } from "./SanctumStage";
@@ -10,8 +11,15 @@ const mockUseUniqueActors = vi.fn();
 const mockUseRuns = vi.fn();
 const mockUseSoulBalance = vi.fn();
 const mockUseRelics = vi.fn();
-const mockUseDemonRoster = vi.fn();
+const mockUseCreatureRoster = vi.fn();
 const mockUseCommanders = vi.fn();
+const mockUseOnboarding = vi.fn();
+const mockAcknowledgeStory = vi.fn();
+
+function RouteProbe() {
+  const location = useLocation();
+  return <output data-testid="route-probe">{location.pathname}</output>;
+}
 
 // Almanac/Chronicle mount CatalogPage/RecipesPage/MetricsPage/RpgProgressionPage/PvzStatsPage
 // once opened (T13: layers defer mounting until first open, not on every Sanctum render — see
@@ -29,8 +37,10 @@ vi.mock("@/lib/bus", async (importOriginal) => {
     useRuns: () => mockUseRuns(),
     useSoulBalance: () => mockUseSoulBalance(),
     useRelics: () => mockUseRelics(),
-    useDemonRoster: () => mockUseDemonRoster(),
+    useCreatureRoster: () => mockUseCreatureRoster(),
     useCommanders: () => mockUseCommanders(),
+    useOnboarding: () => mockUseOnboarding(),
+    useAcknowledgeOnboardingStory: () => ({ mutateAsync: mockAcknowledgeStory, isPending: false }),
     useSpeciesIndex: () => new Map(),
     useUniqueEquipment: () => ({ data: { items: [] } }),
     usePutUniqueEquipment: () => ({ mutate: vi.fn(), isPending: false })
@@ -77,8 +87,14 @@ beforeEach(() => {
     data: { playerId: 1, balance: 250, earnedTotal: 250, spentTotal: 0, revision: 1, updatedUtc: "" }
   });
   mockUseRelics.mockReturnValue({ data: { items: [] } });
-  mockUseDemonRoster.mockReturnValue({ data: { items: [] } });
+  mockUseCreatureRoster.mockReturnValue({ data: { items: [] } });
   mockUseCommanders.mockReturnValue({ data: commanderListView });
+  // `useOnboarding` serves both the established milestone reveal and the Rift
+  // story gate. Keep both halves of its response in the fixture so the mock
+  // matches the production contract instead of hiding an integration error.
+  mockUseOnboarding.mockReturnValue({ data: { checkpoints: [], stories: [] } });
+  mockAcknowledgeStory.mockReset();
+  mockAcknowledgeStory.mockResolvedValue({ ok: true });
   mockUseContracts.mockReturnValue({
     data: {
       contracts: [],
@@ -103,6 +119,22 @@ describe("SanctumStage", () => {
     renderWithProviders(<SanctumStage />, { withGlobalKeys: true });
     expect(screen.getByTestId("focus-card-first-run")).toBeInTheDocument();
     expect(screen.queryByTestId("focus-card-actor")).not.toBeInTheDocument();
+  });
+
+  it("sends every successful Rift exit to the existing lawn destination", async () => {
+    const user = userEvent.setup();
+    mockUseOnboarding.mockReturnValue({
+      data: {
+        checkpoints: [],
+        stories: [{ storyId: "rift-prologue", version: 1, state: "unseen", outcome: null, eligible: true, acknowledgedUtc: null, revision: 1 }]
+      }
+    });
+    renderWithProviders(<><SanctumStage /><RouteProbe /></>, { route: "/sanctum", withGlobalKeys: true });
+    await waitFor(() => expect(screen.getByTestId("rift-prologue-dialog")).toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: "Skip intro" }));
+    await waitFor(() => expect(screen.getByTestId("route-probe")).toHaveTextContent("/lawn"));
+    expect(mockAcknowledgeStory).toHaveBeenCalledWith({ storyId: "rift-prologue", version: 1, outcome: "skipped" });
   });
 
   it("HUD shows identity and souls from real state, and the summoner level honestly as pending", () => {
@@ -223,8 +255,8 @@ describe("SanctumStage — with a bound creature", () => {
     expect(screen.getByTestId("sanctum-home")).toBeInTheDocument();
   });
 
-  it("Fusion unlocks once the player has a demon to fuse (T15)", () => {
-    mockUseDemonRoster.mockReturnValue({
+  it("Fusion unlocks once the player has a creature to fuse (T15)", () => {
+    mockUseCreatureRoster.mockReturnValue({
       data: { items: [{ profile: { instanceId: "d1" }, actor: { level: 1 } }] }
     });
     renderWithProviders(<SanctumStage />, { withGlobalKeys: true });
@@ -233,9 +265,9 @@ describe("SanctumStage — with a bound creature", () => {
 
   // T26 (plate 01 §C): "overdue tribute beats a returned expedition beats ... 'start a run'."
   describe("T26 — the focus card's priority rule", () => {
-    it("an overdue pact outranks everything else, and names the real demon", () => {
+    it("an overdue pact outranks everything else, and names the real creature", () => {
       mockUseUniqueActors.mockReturnValue({ data: oneActor });
-      mockUseDemonRoster.mockReturnValue({
+      mockUseCreatureRoster.mockReturnValue({
         data: { items: [{ profile: { instanceId: "d1", speciesId: "sp-imp", nickname: null }, actor: { level: 5 } }] }
       });
       mockUseContracts.mockReturnValue({
@@ -255,7 +287,7 @@ describe("SanctumStage — with a bound creature", () => {
     it("clicking the overdue-tribute CTA opens the real Pacts layer", async () => {
       const user = userEvent.setup();
       mockUseUniqueActors.mockReturnValue({ data: oneActor });
-      mockUseDemonRoster.mockReturnValue({
+      mockUseCreatureRoster.mockReturnValue({
         data: { items: [{ profile: { instanceId: "d1", speciesId: "sp-imp", nickname: null }, actor: { level: 5 } }] }
       });
       mockUseContracts.mockReturnValue({

@@ -25,7 +25,7 @@
       "id": "set.ultimatepaperzombie-001",
       "nameKey": "set.professor-s-scholarly-decree",
       "name": "Professor's Scholarly Decree",
-      "themeKey": "demon.ultimatepaperzombie",
+      "themeKey": "creature.ultimatepaperzombie",
       "members": [
         {
           "role": "armament-primary",

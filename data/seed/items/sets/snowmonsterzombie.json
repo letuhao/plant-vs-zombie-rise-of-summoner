@@ -25,7 +25,7 @@
       "id": "set.snowmonsterzombie-001",
       "nameKey": "set.edgar-s-feral-pelt",
       "name": "Edgar's Feral Pelt",
-      "themeKey": "demon.snowmonsterzombie",
+      "themeKey": "creature.snowmonsterzombie",
       "members": [
         {
           "role": "armament-primary",

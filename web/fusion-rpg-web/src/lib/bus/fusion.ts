@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getJson, sendJson } from "./rest";
-import type { DemonSpecimenDto, SoulBalanceDto } from "./demons";
+import type { CreatureSpecimenDto, SoulBalanceDto } from "./creatures";
 import type { FusionCostDto, PickableAtom, SelectedPick } from "@/features/fusion/fusionView";
 
-// ---- DTOs (spec-demon-fusion.md wire shapes; undiscovered recipes carry no identity) ----
+// ---- DTOs (spec-creature-fusion.md wire shapes; undiscovered recipes carry no identity) ----
 
 export type FusionMode = "star-merge" | "promotion" | "recipe";
 export type { PickableAtom, SelectedPick };
@@ -37,8 +37,8 @@ export type FusionPreviewDto = {
 export type FusionOutcomeDto = {
   replayed: boolean;
   mode: FusionMode;
-  base?: DemonSpecimenDto | null;
-  minted?: DemonSpecimenDto | null;
+  base?: CreatureSpecimenDto | null;
+  minted?: CreatureSpecimenDto | null;
   recipeId?: string | null;
   newlyDiscovered: boolean;
   discoverySouls: number;
@@ -84,10 +84,10 @@ export function useFusionExecute() {
     mutationFn: (req: FusionRequestBody) =>
       sendJson<FusionOutcomeDto>("/api/fusion/execute", "POST", req),
     onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ["demonRoster"] });
-      void qc.invalidateQueries({ queryKey: ["demonCodex"] });
+      void qc.invalidateQueries({ queryKey: ["creatureRoster"] });
+      void qc.invalidateQueries({ queryKey: ["creatureCodex"] });
       void qc.invalidateQueries({ queryKey: ["souls"] });
-      void qc.invalidateQueries({ queryKey: ["demonMaterials"] });
+      void qc.invalidateQueries({ queryKey: ["creatureMaterials"] });
       void qc.invalidateQueries({ queryKey: ["fusionRecipes"] });
     }
   });

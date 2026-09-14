@@ -25,7 +25,7 @@
       "id": "set.torchsunflower-001",
       "nameKey": "set.solar-bullet-bloom",
       "name": "Solar Bullet Bloom",
-      "themeKey": "demon.torchsunflower",
+      "themeKey": "creature.torchsunflower",
       "members": [
         {
           "role": "armament-primary",

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { msg } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
-import { useDemonRoster, usePlayers, useRelics, useRuns } from "@/lib/bus";
+import { useCreatureRoster, usePlayers, useRelics, useRuns } from "@/lib/bus";
 import { useContracts } from "@/lib/bus/contracts";
 import { useDevModeLive } from "@/dev/useDevModeLive";
 import { LawnPage } from "@/features/lawn/LawnPage";
@@ -58,15 +58,15 @@ export function LawnStage() {
   const runsQuery = useRuns();
   const contractsQuery = useContracts(playerId);
   const relicsQuery = useRelics();
-  const demonRosterQuery = useDemonRoster(playerId);
+  const creatureRosterQuery = useCreatureRoster(playerId);
   const { returnedCount } = useExpeditionReturnWatcher(playerId);
   const railInputs: RailUnlockInputs = {
     currentStageId: "lawn",
     hasCompletedARun: (runsQuery.data?.length ?? 0) > 0,
-    hasAnyDemon: (demonRosterQuery.data?.items.length ?? 0) > 0,
+    hasAnyCreature: (creatureRosterQuery.data?.items.length ?? 0) > 0,
     hasAnyContract: (contractsQuery.data?.contracts.length ?? 0) > 0,
     hasAnyRelic: (relicsQuery.data?.items.length ?? 0) > 0,
-    hasAnyBoundDemon: contractsQuery.data?.contracts.some((c) => c.bound) ?? false,
+    hasAnyBoundCreature: contractsQuery.data?.contracts.some((c) => c.bound) ?? false,
     returnedExpeditionCount: returnedCount,
     unreadResultCount: 0
   };

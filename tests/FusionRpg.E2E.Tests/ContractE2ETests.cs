@@ -1,8 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Contracts;
 using Xunit;
 
 namespace FusionRpg.E2E.Tests;
@@ -28,12 +28,12 @@ public class ContractE2ETests : IAsyncLifetime
 
     public Task DisposeAsync() => Task.CompletedTask;
 
-    static readonly string SpeciesId = DemonSpeciesCatalog.All
-        .First(s => s.Acquisition != DemonAcquisition.CaptureOnly).SpeciesId;
+    static readonly string SpeciesId = CreatureSpeciesCatalog.All
+        .First(s => s.Acquisition != CreatureAcquisition.CaptureOnly).SpeciesId;
 
-    async Task<string> MintDemon()
+    async Task<string> MintCreature()
     {
-        var resp = await _http.PostAsJsonAsync($"/api/test/mint-demon?speciesId={SpeciesId}", new { });
+        var resp = await _http.PostAsJsonAsync($"/api/test/mint-creature?speciesId={SpeciesId}", new { });
         resp.EnsureSuccessStatusCode();
         return (await resp.Content.ReadFromJsonAsync<JsonElement>())
             .GetProperty("actor").GetProperty("instanceId").GetString()!;
@@ -52,9 +52,9 @@ public class ContractE2ETests : IAsyncLifetime
         .First(c => c.GetProperty("instanceId").GetString() == instanceId);
 
     [Fact]
-    public async Task A_new_demon_arrives_contracted_and_shows_its_tribute()
+    public async Task A_new_creature_arrives_contracted_and_shows_its_tribute()
     {
-        var id = await MintDemon();
+        var id = await MintCreature();
         var state = await State();
 
         Assert.Equal(1, state.GetProperty("capacity").GetProperty("used").GetInt32());
@@ -74,12 +74,12 @@ public class ContractE2ETests : IAsyncLifetime
     {
         // Minting binds for free; RE-binding costs the pact fee, so this player needs a balance.
         (await _http.PostAsJsonAsync("/api/test/seed-souls-demo?amount=500", new { })).EnsureSuccessStatusCode();
-        var id = await MintDemon();
+        var id = await MintCreature();
         (await _http.PostAsJsonAsync("/api/contracts/release", new { instanceId = id }))
             .EnsureSuccessStatusCode();
         Assert.Equal(0, (await State()).GetProperty("capacity").GetProperty("used").GetInt32());
 
-        // The web-battle path refuses a released demon by name.
+        // The web-battle path refuses a released creature by name.
         var battle = await _http.PostAsJsonAsync("/api/test/web-match",
             new { correlationId = "wm-unbound", waveId = "rift-skirmish", squad = new[] { id } });
         Assert.Equal(HttpStatusCode.BadRequest, battle.StatusCode);
@@ -117,8 +117,8 @@ public class ContractE2ETests : IAsyncLifetime
     public async Task Time_travel_charges_tribute_once_per_day()
     {
         (await _http.PostAsJsonAsync("/api/test/seed-souls-demo?amount=2000", new { })).EnsureSuccessStatusCode();
-        await MintDemon();
-        await MintDemon();
+        await MintCreature();
+        await MintCreature();
         var tribute = (await State()).GetProperty("dailyTribute").GetInt64();
         var before = await Souls();
 
@@ -139,9 +139,9 @@ public class ContractE2ETests : IAsyncLifetime
     /// battle, not a lecture about their roster.
     /// </summary>
     [Fact]
-    public async Task A_squadless_match_skips_unbound_demons_instead_of_failing()
+    public async Task A_squadless_match_skips_unbound_creatures_instead_of_failing()
     {
-        var id = await MintDemon();
+        var id = await MintCreature();
         (await _http.PostAsJsonAsync("/api/contracts/release", new { instanceId = id }))
             .EnsureSuccessStatusCode();
 
@@ -151,7 +151,7 @@ public class ContractE2ETests : IAsyncLifetime
         Assert.True((await match.Content.ReadFromJsonAsync<JsonElement>())
             .GetProperty("runId").GetInt64() > 0);
 
-        // The released demon sat it out, so nothing credited it.
+        // The released creature sat it out, so nothing credited it.
         Assert.Equal(300, Row(await State(), id).GetProperty("loyalty").GetInt32());
     }
 
@@ -160,8 +160,8 @@ public class ContractE2ETests : IAsyncLifetime
     public async Task An_expedition_moves_the_loyalty_of_everyone_who_went()
     {
         (await _http.PostAsJsonAsync("/api/test/seed-souls-demo?amount=5000", new { })).EnsureSuccessStatusCode();
-        var a = await MintDemon();
-        var b = await MintDemon();
+        var a = await MintCreature();
+        var b = await MintCreature();
         var before = Row(await State(), a).GetProperty("loyalty").GetInt32();
 
         var dispatch = await _http.PostAsJsonAsync("/api/expeditions/dispatch",
@@ -183,10 +183,10 @@ public class ContractE2ETests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task An_insubordinate_demon_is_refused_until_a_ritual_pays_for_it()
+    public async Task An_insubordinate_creature_is_refused_until_a_ritual_pays_for_it()
     {
         (await _http.PostAsJsonAsync("/api/test/seed-souls-demo?amount=5000", new { })).EnsureSuccessStatusCode();
-        var id = await MintDemon();
+        var id = await MintCreature();
 
         // Lose enough battles to fall under the floor: 10 defeats from a fresh 300.
         for (var i = 0; i < 11; i++)

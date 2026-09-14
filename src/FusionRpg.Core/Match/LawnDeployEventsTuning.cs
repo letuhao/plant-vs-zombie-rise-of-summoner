@@ -42,7 +42,7 @@ public static class LawnDeployEventsTuningHub
 }
 
 /// <summary>Pure parser, no file I/O (tunables-ssot.md §7.2) — mirrors
-/// <see cref="Demons.Patron.PatronTuningLoader"/>'s own explicit, path-qualified-failure shape.</summary>
+/// <see cref="Creatures.Patron.PatronTuningLoader"/>'s own explicit, path-qualified-failure shape.</summary>
 public static class LawnDeployEventsTuningLoader
 {
     public static LawnDeployEventsTuning Parse(string json)

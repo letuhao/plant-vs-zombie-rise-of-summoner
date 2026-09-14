@@ -66,7 +66,7 @@ def census_escalated_nodes(outcomes: "Sequence") -> "tuple[str, ...]":
 
 
 def census_unresolved_nodes(outcomes: "Sequence") -> "tuple[str, ...]":
-    """Population #3: the 1-1-1 vote splits (§3.2's own table: "the demon run's 695 two-to-one
+    """Population #3: the 1-1-1 vote splits (§3.2's own table: "the creature run's 695 two-to-one
     splits were resolved by majority and no human adjudicated one — do not repeat that"). Same
     input shape and same "no durable store yet" caveat as `census_escalated_nodes` above."""
     return tuple(o.subject_id for o in outcomes if o.outcome == "unresolved")

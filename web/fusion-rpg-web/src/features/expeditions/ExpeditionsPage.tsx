@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { usePlayers } from "@/lib/bus";
-import { newCorrelationId, useDemonRoster, useSpeciesIndex } from "@/lib/bus/demons";
+import { newCorrelationId, useCreatureRoster, useSpeciesIndex } from "@/lib/bus/creatures";
 import {
   useCollectExpedition,
-  useDemonMaterials,
+  useCreatureMaterials,
   useDispatchExpedition,
   useExpeditions,
   type ExpeditionCollectDto,
@@ -15,7 +15,7 @@ import { Badge, Banner, Button, EmptyState, Panel, TypeIcon } from "@/ui";
 import { cn } from "@/lib/cn";
 import { expeditionProgress, formatRemaining } from "./expeditionTime";
 import { useContracts } from "@/lib/bus/contracts";
-import { conditionOf, contractIndex, fieldingBlockReason } from "../demons/contractView";
+import { conditionOf, contractIndex, fieldingBlockReason } from "../creatures/contractView";
 
 /**
  * Expeditions (spec-expeditions.md): dispatch from the Active roster with tier slot gating,
@@ -25,12 +25,12 @@ export function ExpeditionsPage() {
   const players = usePlayers();
   const playerId = players.data?.currentPlayerId ?? 0;
   const speciesById = useSpeciesIndex();
-  const roster = useDemonRoster(playerId);
+  const roster = useCreatureRoster(playerId);
   // Contracts gate dispatch server-side; showing the same rule here means the refusal never
   // arrives as a surprise error banner.
   const contractRows = contractIndex(useContracts(playerId).data);
   const expeditions = useExpeditions(playerId);
-  const materials = useDemonMaterials(playerId);
+  const materials = useCreatureMaterials(playerId);
   const dispatch = useDispatchExpedition();
   const collect = useCollectExpedition();
 
@@ -200,7 +200,7 @@ export function ExpeditionsPage() {
         ? `${tick.kind === "boss-battle" ? "Boss battle" : "Battle"} — ${battle?.outcome ?? "?"}`
         : tick.kind === "found-souls"
           ? `Found ${tick.souls} Souls`
-          : tick.kind === "wild-demon-met"
+          : tick.kind === "wild-creature-met"
             ? tick.wildJoins
               ? `A wild ${speciesById.get(tick.wildSpeciesId ?? "")?.name ?? tick.wildSpeciesId} joined!`
               : `Met a wild ${speciesById.get(tick.wildSpeciesId ?? "")?.name ?? tick.wildSpeciesId} — it slipped away`
@@ -225,7 +225,7 @@ export function ExpeditionsPage() {
   }
 
   return (
-    <Page title="Expeditions" description="Send demon squads into the rifts — timers run without the game.">
+    <Page title="Expeditions" description="Send creature squads into the rifts — timers run without the game.">
       {error ? <Banner tone="error">{error}</Banner> : null}
 
       {reveal ? (
@@ -257,12 +257,12 @@ export function ExpeditionsPage() {
         title="Active expeditions"
         // T30: the plate's subtitle reads "N returned · N away · N berths free" — "berths" implies a
         // single shared capacity number, but squad slots are per-tier (`tier.squadSlots`), not a
-        // roster-wide pool, so that exact number isn't real here. "demons available" (roster minus
+        // roster-wide pool, so that exact number isn't real here. "creatures available" (roster minus
         // whoever's already out) is the honest equivalent: it answers the same question — can I
         // dispatch another one right now — with a real count instead of an invented one.
         description={
           active.length > 0 || (roster.data?.items.length ?? 0) > 0
-            ? `${returnedCount} returned · ${active.length - returnedCount} away · ${(roster.data?.items.length ?? 0) - lockedIds.size} demons available`
+            ? `${returnedCount} returned · ${active.length - returnedCount} away · ${(roster.data?.items.length ?? 0) - lockedIds.size} creatures available`
             : undefined
         }
       >
@@ -336,7 +336,7 @@ export function ExpeditionsPage() {
               dispatch.isPending
                 ? "Dispatching…"
                 : squad.length === 0
-                  ? "Pick at least one demon"
+                  ? "Pick at least one creature"
                   : undefined
             }
           >

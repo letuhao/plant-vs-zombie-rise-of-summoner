@@ -25,7 +25,7 @@
       "id": "set.icesquash-001",
       "nameKey": "set.frozen-squash-core",
       "name": "Frozen Squash Core",
-      "themeKey": "demon.icesquash",
+      "themeKey": "creature.icesquash",
       "members": [
         {
           "role": "armament-primary",

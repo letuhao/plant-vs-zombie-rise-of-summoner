@@ -39,7 +39,7 @@ registry) and D36 (a boundary I should not have been reasoning across at all):
 | **D41** | Socket recipes are **unordered** — a multiset match | 102 combinations stay 102; `bind_ordinal` is display-only |
 
 ⛔ **Standing rule this round produced.** I derived *"hybrids are 6% of species"* from
-`themes.v1.json`'s **84** entries to argue against D3. `data/seed/demons/species/` holds **386**. The
+`themes.v1.json`'s **84** entries to argue against D3. `data/seed/creatures/species/` holds **386**. The
 registry is a stale snapshot of a *generated* corpus. **Never derive a design proportion from a
 snapshot of a generated corpus** — count it, or don't quote it.
 
@@ -183,7 +183,7 @@ charm/gem/set kinds shipped, there are no charms, so the hole cannot be exercise
 >
 > ✅ **The equip-runtime wiring this checkpoint originally left open is now CLOSED, 2026-09-07** — the
 > "`UniqueOwnerBinder.BindGrant` call" framing above turned out to be half right: its EXISTING wired
-> caller (`UniqueLoadoutSpec.BindToPtr`) really is a different, unrelated mechanism (a demon specimen's
+> caller (`UniqueLoadoutSpec.BindToPtr`) really is a different, unrelated mechanism (a creature specimen's
 > own bound-loadout stat mods) — but the underlying need it pointed at was real, just solvable
 > server-side rather than via the injector build that framing assumed was required. Three real gaps
 > found and fixed this session: (a) Battle: `stat.modify` equip atoms never reached `BattleEngine.Resolve`
@@ -252,7 +252,7 @@ preview and the combination compendium from nicety to requirement at 127 combina
 
 ⛔ **The bar is the baseline, not zero.** Measured 2026-09-04, before any item code:
 `Guard` **162/162** and `seedsmith` **1489** are clean — zero-tolerance. But `Core` carries **14**
-inherited failures and `Data` **2**, all owned by the demon/seedsmith and world-stage streams, which are
+inherited failures and `Data` **2**, all owned by the creature/seedsmith and world-stage streams, which are
 building in this tree. **Compare against 14 and 2, never against green** — and do not fix them from
 here. Full diagnosis in [item-todo.md](item-todo.md)'s baseline section.
 

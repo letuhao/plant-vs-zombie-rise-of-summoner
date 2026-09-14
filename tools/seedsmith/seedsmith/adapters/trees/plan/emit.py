@@ -285,17 +285,17 @@ def species_tree_spec(species_id: str, ordinal: int, mechanical_favour: "tuple[s
        modules) resolves the species roster's own position and the favour lock, and hands both in.
     2. **`gate_quantity` reuses `aptitudePoints`' own evidence row, with a real, checked caveat
        recorded here rather than silently assumed.** §8.1's own investigation: specimen level (the
-       quantity) is live and `AllocationScope.UniqueDemon` (the scope) is declared and rate-loaded,
-       but "the caller that binds the two is ABSENT" — nothing in `src/` passes `UniqueDemon` to
+       quantity) is live and `AllocationScope.UniqueCreature` (the scope) is declared and rate-loaded,
+       but "the caller that binds the two is ABSENT" — nothing in `src/` passes `UniqueCreature` to
        `PointBudget.PointsFor`/`CheckScope`. `data/seed/passive-tree/gate-evidence.v1.json`'s own
        `aptitudePoints` row cites `PointBudget.PointsFor(AllocationScope.Commander, ...)` as its
-       evidence — Commander, not UniqueDemon — so reusing that row's `"carrier"` state here is
+       evidence — Commander, not UniqueCreature — so reusing that row's `"carrier"` state here is
        REUSING evidence that does not, strictly, cover this scope. §8.1 explicitly reasons this is
        SAFE regardless ("generating the species corpus early does not strand it... only on a
        binding whose twin already ships") and just as explicitly assigns fixing the binding itself
        to `tree-state`, not this module — so this function does not add a new `gateIndexKind` row
        to the governed evidence file (that file's own hand-edit rule requires naming a real shipped
-       carrier line, and `UniqueDemon`'s does not exist yet); it reuses the existing kind, with
+       carrier line, and `UniqueCreature`'s does not exist yet); it reuses the existing kind, with
        this paragraph as the disclosed reason why that is the correct scope of what J8 owns.
 
     Raises `ValueError` if any of the favour triple's three members is empty — never a silent
@@ -314,7 +314,7 @@ def species_tree_spec(species_id: str, ordinal: int, mechanical_favour: "tuple[s
     gate_state = gates_mod.resolve_gate_state(gate_index_kind, evidence)
     return TreeSpec(
         tree_id=species_id, category="species", ordinal=ordinal,
-        gate_quantity=f"aptitude.{aptitude}@UniqueDemon", gate_index_kind=gate_index_kind,
+        gate_quantity=f"aptitude.{aptitude}@UniqueCreature", gate_index_kind=gate_index_kind,
         gate_state=gate_state, mechanical_favour=mechanical_favour,
     )
 
@@ -444,11 +444,11 @@ def build_plan(spec: TreeSpec, tuning: dict, existing_plan: "dict | None" = None
     root = seed_root or (REPO_ROOT / "data" / "seed")
     roster = load_roster(root)
     vocab = load_property_vocabulary(TIER_COUNT, root)
-    demon_families, families_pending = load_family_roster_or_pending(root)
+    creature_families, families_pending = load_family_roster_or_pending(root)
 
     pending: "list[str]" = []
     if families_pending:
-        pending.append("demonFamilies")
+        pending.append("creatureFamilies")
 
     gate_currency = "aptitudePoints"
     if gate_currency != "aptitudePoints":
@@ -519,8 +519,8 @@ def build_plan(spec: TreeSpec, tuning: dict, existing_plan: "dict | None" = None
             "aptitudes": list(roster.aptitudes),
             "elements": list(roster.elements),
             "statuses": list(roster.statuses),
-            "demonFamilies": list(demon_families),
-            "counts": {**roster.counts, "demonFamilies": len(demon_families)},
+            "creatureFamilies": list(creature_families),
+            "counts": {**roster.counts, "creatureFamilies": len(creature_families)},
         },
         "_pending": pending,
         "propertyVocabulary": {axis: list(members) for axis, members in vocab.axes.items()},
@@ -606,7 +606,7 @@ _MANIFEST_INPUT_FILES: "tuple[tuple[str, ...], ...]" = (
     ("statuses", "roster.json"),
     ("passive-tree", "vocabulary.json"),
     ("derived-stats", "catalog.json"),
-    ("demons", "_registry", "families.v1.json"),  # optional — F=0 is a declared `_pending`, not a refusal
+    ("creatures", "_registry", "families.v1.json"),  # optional — F=0 is a declared `_pending`, not a refusal
     ("passive-tree", "gate-evidence.v1.json"),     # task C2's own new input (R-G1's evidence row)
 )
 
@@ -685,10 +685,10 @@ def build_manifest(specs: "list[TreeSpec]", tuning: dict, seed_root: "Path | Non
 
     roster = load_roster(root)
     vocab = load_property_vocabulary(TIER_COUNT, root)
-    demon_families, families_pending = load_family_roster_or_pending(root)
+    creature_families, families_pending = load_family_roster_or_pending(root)
     pending: "list[str]" = []
     if families_pending:
-        pending.append("demonFamilies")
+        pending.append("creatureFamilies")
 
     ladder_cfg = tuning["tierLadder"]
     potency_cfg = tuning["potency"]
@@ -723,8 +723,8 @@ def build_manifest(specs: "list[TreeSpec]", tuning: dict, seed_root: "Path | Non
             "aptitudes": list(roster.aptitudes),
             "elements": list(roster.elements),
             "statuses": list(roster.statuses),
-            "demonFamilies": list(demon_families),
-            "counts": {**roster.counts, "demonFamilies": len(demon_families), "trees": len(specs)},
+            "creatureFamilies": list(creature_families),
+            "counts": {**roster.counts, "creatureFamilies": len(creature_families), "trees": len(specs)},
         },
         "ladder": {
             "tierCount": TIER_COUNT,

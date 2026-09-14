@@ -313,11 +313,11 @@ Examples: [examples/status/](examples/status/).
 
 | Id | Kind | Host | Role |
 |---|---|---|---|
-| `nerve.unsettled` | Debuff ModifyStat | Actor (party demon) | Stage 0 of 3 — `nerveStage` registry order |
-| `nerve.shaken` | Debuff ModifyStat | Actor (party demon) | Stage 1 of 3 |
-| `nerve.afflicted` | Debuff ModifyStat | Actor (party demon) | Stage 2 of 3 — also forced whenever spirit is exhausted, regardless of stack count |
+| `nerve.unsettled` | Debuff ModifyStat | Actor (party creature) | Stage 0 of 3 — `nerveStage` registry order |
+| `nerve.shaken` | Debuff ModifyStat | Actor (party creature) | Stage 1 of 3 |
+| `nerve.afflicted` | Debuff ModifyStat | Actor (party creature) | Stage 2 of 3 — also forced whenever spirit is exhausted, regardless of stack count |
 
-Family `nerve`, stacking `Replace` — at most one of the three is ever live per demon, matching the
+Family `nerve`, stacking `Replace` — at most one of the three is ever live per creature, matching the
 single stack counter (`DelveMemberState.NerveStacks`) it projects. Never re-applied by `Refresh`: a
 stage change is a different `statusId` entirely (`Replace` removes the old id, adds the new one), so
 two different stages are never simultaneously live even transiently. Each stage's `stat` payload is a

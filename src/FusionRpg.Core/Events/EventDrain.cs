@@ -74,6 +74,96 @@ public sealed class EventDrain
     // ops once per structural change, correct by construction (merges/suppression included).
     readonly Dictionary<IntPtr, int> _pendingByPtr = new();
 
+    // lawn-hit-entry (T9a, D8): one swing (a piercing bullet's own ptr, or (ActorPtr,Frame) for
+    // melee — the SAME identity ToDto already derives for EffectEventDto.SwingId) fires its
+    // per-swing "action trigger" exactly once, however many victim records it carries. Counted
+    // down to zero and removed on the record's own kind (CombatHit/ChainSynthetic only — the
+    // "dealt" kinds ToDto maps to OnDamageDealt); a ptr-reuse-safe design, unlike a set that only
+    // ever grows: once every record for a swing has drained, its entry disappears, so a bullet
+    // pointer recycled for a brand-new swing later starts fresh rather than being permanently
+    // "already triggered". EventCoalescer.Merge can fold two DIFFERENT swings that happen to share
+    // (ActorPtr,TargetPtr) into one record (its own doc: "a coalesced record's swing id degrades to
+    // the (ActorPtr,Frame) fallback") — the merged record is then treated as one swing, which can
+    // leave one or two orphaned counter entries (never decremented) until the match ends and
+    // FlushAllAndReset clears this dictionary outright; the trigger for the merged record's own
+    // synthesized key still correctly fires (falls into the "never seen this key" defensive branch
+    // below, which answers "yes, first" rather than silently blocking a real hit's trigger).
+    readonly struct SwingKey : IEquatable<SwingKey>
+    {
+        readonly IntPtr _ptr;   // bullet ptr (nonzero) OR ActorPtr when melee (SwingPtr == Zero)
+        readonly int _frame;    // meaningful only for the melee (ActorPtr,Frame) shape
+        readonly bool _isBullet;
+
+        public SwingKey(IntPtr swingPtr, IntPtr actorPtr, int frame)
+        {
+            if (swingPtr != IntPtr.Zero) { _ptr = swingPtr; _frame = 0; _isBullet = true; }
+            else { _ptr = actorPtr; _frame = frame; _isBullet = false; }
+        }
+
+        public bool Equals(SwingKey other) =>
+            _isBullet == other._isBullet && _ptr == other._ptr && (_isBullet || _frame == other._frame);
+        public override bool Equals(object? obj) => obj is SwingKey k && Equals(k);
+        public override int GetHashCode() => _isBullet ? HashCode.Combine(true, _ptr) : HashCode.Combine(false, _ptr, _frame);
+    }
+
+    sealed class SwingCounter
+    {
+        public int Pending;
+        public bool Triggered;
+    }
+
+    readonly Dictionary<SwingKey, SwingCounter> _swingCounters = new();
+
+    static bool HasSwingIdentity(GameEventKind kind) => kind is GameEventKind.CombatHit or GameEventKind.ChainSynthetic;
+
+    void SwingBump(in GameEventRec rec, int delta)
+    {
+        if (!HasSwingIdentity(rec.Kind)) return;
+        var key = new SwingKey(rec.SwingPtr, rec.ActorPtr, rec.Frame);
+        if (delta > 0)
+        {
+            if (_swingCounters.TryGetValue(key, out var c)) c.Pending++;
+            else _swingCounters[key] = new SwingCounter { Pending = 1 };
+        }
+    }
+
+    /// <summary>Returns true exactly once per swing key — the first record of a swing to reach
+    /// this call "wins" the trigger; every subsequent record for the same swing gets false. Not a
+    /// swing kind at all (taken-side, OnSpawn, …) always answers true — those triggers never had a
+    /// dedupe concept and must keep firing every time, matching their pre-T9 behaviour.</summary>
+    bool ConsumeSwingTriggerAndRelease(in GameEventRec rec)
+    {
+        if (!HasSwingIdentity(rec.Kind)) return true;
+        var key = new SwingKey(rec.SwingPtr, rec.ActorPtr, rec.Frame);
+        if (!_swingCounters.TryGetValue(key, out var counter))
+            return true; // defensive: never block a real hit's trigger on an internal bookkeeping miss
+        var isFirst = !counter.Triggered;
+        counter.Triggered = true;
+        counter.Pending--;
+        if (counter.Pending <= 0) _swingCounters.Remove(key);
+        return isFirst;
+    }
+
+    // lawn-hit-entry (T9c): a nested FlushForPtr (called while `_active` — e.g. a drained record's
+    // own action kills a DIFFERENT entity, whose death handler calls FlushForPtr for THAT ptr) must
+    // not pull records out of `_carry`/`_ring` while the outer pass is still iterating them — but it
+    // must not silently forget the ptr either, or that ptr's still-pending records would drain AFTER
+    // its grants withdraw (the exact defect this class exists to prevent). So it queues the ptr
+    // instead; whichever call is CURRENTLY active (Drain/FlushForPtr/FlushAllAndReset) drains this
+    // queue in its own `finally`, right after `_active` flips back to false and before returning —
+    // so by the time a nested caller's own caller resumes (e.g. GameHooks.cs about to withdraw
+    // grants), this ptr's records have already been forced through, same as an unnested flush.
+    readonly List<IntPtr> _pendingNestedFlushes = new();
+
+    void DrainPendingNestedFlushes()
+    {
+        if (_pendingNestedFlushes.Count == 0) return;
+        var due = _pendingNestedFlushes.ToArray();
+        _pendingNestedFlushes.Clear();
+        foreach (var ptr in due)
+            FlushForPtr(ptr); // no longer nested here — runs for real; may itself re-queue, handled by ITS OWN finally
+    }
+
     void IndexBump(IntPtr ptr, int delta)
     {
         if (ptr == IntPtr.Zero) return;
@@ -100,9 +190,29 @@ public sealed class EventDrain
 
     bool Append(in GameEventRec rec)
     {
-        if (!_ring.TryAppend(rec)) return false;
+        if (!_ring.TryAppend(rec))
+        {
+            // lawn-hit-entry (T9b, D9): the ring's own fixed capacity used to mean "drop the
+            // incoming record, counted" (GameEventRing's own doc, event-pipeline-v2-ssot.md §3.3
+            // "drop droppable kinds with a counter"). That was correct while combat.hit had no
+            // consumer; every record that reaches Record() now already passed a live-grant gate at
+            // the caller (EventDrainHost.TryRecordDealtFromBullet/TryRecordTaken/TryRecordMeleeDealt
+            // all refuse to record without HasOnDamageDealtGrant()/HasOnDamageTakenGrant() first),
+            // so EVERY record the ring could overflow on is now effect-bearing — dropping it here
+            // is exactly the "dropping gameplay, not telemetry" case the spec forbids. Divert to
+            // the carry tier instead: it still drains (this pass or a later one), never lost.
+            // GameEventRing.Dropped keeps counting this as a backlog-pressure signal (still useful
+            // telemetry — a rising rate means the ring is undersized for the load — it just no
+            // longer means the record was lost).
+            _carry.Add(rec);
+            IndexBump(rec.ActorPtr, +1);
+            IndexBump(rec.TargetPtr, +1);
+            SwingBump(rec, +1);
+            return true;
+        }
         IndexBump(rec.ActorPtr, +1);
         IndexBump(rec.TargetPtr, +1);
+        SwingBump(rec, +1);
         return true;
     }
 
@@ -176,9 +286,18 @@ public sealed class EventDrain
                 _carry.Clear();
                 _carryCursor = 0;
                 _pendingByPtr.Clear();
+                _swingCounters.Clear();
+                _pendingNestedFlushes.Clear();
                 _matchKeys.Clear();
                 _grantIds.Clear();
                 _ptrHex.Clear();
+            }
+            else
+            {
+                // T9c: any FlushForPtr calls that came in WHILE this Drain was active got queued
+                // instead of run (see FlushForPtr) — this is the first safe point to run them,
+                // now that _active is false again and DrainCore's own carry/ring iteration is done.
+                DrainPendingNestedFlushes();
             }
         }
     }
@@ -271,10 +390,23 @@ public sealed class EventDrain
     /// dropped with a counter (its grants withdraw immediately after, so late processing would
     /// find nothing — shedding is the honest semantics under extreme kill rates).
     /// Returns timestamp ticks spent, so the host can pool a per-frame death-flush allowance.
+    /// T9c: returns <c>-1</c> when called from inside an already-active drain/flush pass — pulling
+    /// this ptr's records out of <c>_carry</c>/<c>_ring</c> right now would corrupt the outer
+    /// pass's own iteration, so the ptr is queued instead and forced through once that outer call's
+    /// own `finally` runs (see <see cref="DrainPendingNestedFlushes"/>) — always before the outer
+    /// call returns to ITS caller. A caller that gets <c>-1</c> must not withdraw this ptr's grants
+    /// yet; a caller that gets <c>&gt;= 0</c> (handled inline, the overwhelmingly common case) may
+    /// withdraw immediately, exactly as before this fix.
     /// </summary>
     public long FlushForPtr(IntPtr ptr, long budgetTicks = -1)
     {
-        if (_active || ptr == IntPtr.Zero) return 0;
+        if (ptr == IntPtr.Zero) return 0;
+        if (_active)
+        {
+            if (PendingCountFor(ptr) > 0 && !_pendingNestedFlushes.Contains(ptr))
+                _pendingNestedFlushes.Add(ptr);
+            return -1;
+        }
         if (PendingCountFor(ptr) == 0) return 0; // A3: O(1) no-op — the common case per death
         var start = _timestamp();
         _active = true;
@@ -339,6 +471,8 @@ public sealed class EventDrain
                 _carry.Clear();
                 _carryCursor = 0;
                 _pendingByPtr.Clear();
+                _swingCounters.Clear();
+                _pendingNestedFlushes.Clear();
                 _matchKeys.Clear();
                 _grantIds.Clear();
                 _ptrHex.Clear();
@@ -346,6 +480,9 @@ public sealed class EventDrain
             else
             {
                 RebuildIndex();
+                // T9c: same as Drain's own finally — run anything a nested FlushForPtr queued
+                // while THIS flush was active, now that it is safe to.
+                DrainPendingNestedFlushes();
             }
         }
         return _timestamp() - start;
@@ -367,6 +504,8 @@ public sealed class EventDrain
             _carry.Clear();
             _carryCursor = 0;
             _pendingByPtr.Clear();
+            _swingCounters.Clear();
+            _pendingNestedFlushes.Clear();
             _resetRequested = true;
             return;
         }
@@ -390,6 +529,8 @@ public sealed class EventDrain
         _carry.Clear();
         _carryCursor = 0;
         _pendingByPtr.Clear();
+        _swingCounters.Clear();
+        _pendingNestedFlushes.Clear();
         _matchKeys.Clear();
         _grantIds.Clear();
         _ptrHex.Clear();
@@ -408,11 +549,16 @@ public sealed class EventDrain
             if (age > stats.MaxLatencyFrames) stats.MaxLatencyFrames = age;
         }
 
+        // lawn-hit-entry (T9a, D8): consumed once, here, regardless of what the callback does with
+        // it — this is the ONE place a record transitions from "pending" to "processed", so it is
+        // the only correct place to decide "am I the first of my swing".
+        var isFirstOfSwing = ConsumeSwingTriggerAndRelease(rec);
+
         var t0 = _timestamp();
         _recordDepth = (byte)Math.Min(byte.MaxValue, rec.ChainDepth + 1);
         try
         {
-            _process(ToDto(rec));
+            _process(ToDto(rec, isFirstOfSwing));
         }
         finally
         {
@@ -437,7 +583,7 @@ public sealed class EventDrain
     }
 
     /// <summary>Mirror of EffectEventAdapterCore's hot-kind mappings, from values instead of dicts.</summary>
-    EffectEventDto ToDto(in GameEventRec rec)
+    EffectEventDto ToDto(in GameEventRec rec, bool isFirstOfSwing = true)
     {
         var matchKey = _matchKeys.Get(rec.MatchKeyIdx);
         var sourceGrant = _grantIds.Get(rec.SourceGrantIdx);
@@ -459,7 +605,21 @@ public sealed class EventDrain
                     HitCount = rec.HitCount,
                     ChainDepth = rec.ChainDepth,
                     SourceGrantId = sourceGrant,
-                    Tick = rec.Seq
+                    Tick = rec.Seq,
+                    // lawn-hit-attribution (T6): the SWING identity, separate from ActorPtr (now the
+                    // firing creature). A projectile's own ptr for a bullet hit — one bullet piercing
+                    // N victims shares one SwingId across N dealt records; a melee record has no
+                    // SwingPtr, so this falls back to (ActorPtr, Frame), the same identity
+                    // `_meleePairsByTarget`/`_meleePairsFrame` already scope melee bookkeeping by.
+                    SwingId = rec.SwingPtr != IntPtr.Zero
+                        ? PtrHex(rec.SwingPtr)
+                        : (rec.ActorPtr != IntPtr.Zero ? PtrHex(rec.ActorPtr) + ":" + rec.Frame : null),
+                    // lawn-hit-entry (T9a, D8): exactly one of the N records sharing one SwingId
+                    // reads true — see ConsumeSwingTriggerAndRelease.
+                    IsFirstOfSwing = isFirstOfSwing,
+                    // lawn-hit-entry (T9c): threaded straight from the record — DamagePacketBuilder
+                    // is the consumer, refusing a proportional rider for this class of hit.
+                    InstakillShaped = rec.InstakillShaped
                 };
             case GameEventKind.PlantDamage:
             case GameEventKind.ZombieDamage:

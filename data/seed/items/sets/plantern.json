@@ -25,7 +25,7 @@
       "id": "set.plantern-001",
       "nameKey": "set.radiant-burst",
       "name": "Radiant Burst",
-      "themeKey": "demon.plantern",
+      "themeKey": "creature.plantern",
       "members": [
         {
           "role": "armament-primary",

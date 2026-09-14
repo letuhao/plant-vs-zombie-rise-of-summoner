@@ -1,6 +1,6 @@
 /**
  * base-defense `board-render` (module 16): "kind → sprite: a caller-supplied mapping — the layer
- * knows nothing about demons, plants, zombies or walls" (spec-board-render.md §1). `VisualMap` is
+ * knows nothing about creatures, plants, zombies or walls" (spec-board-render.md §1). `VisualMap` is
  * generic over the descriptor type on purpose: the lawn's own occupants need a color, a shape and an
  * icon key (see `SyncFromModelSystem.ts`'s `makeOccupantGo`/`makeMarkerGo`), while a siege board's own
  * visual needs are not yet specced (`battle` has no spec at all — spec-board-render.md's own Decision

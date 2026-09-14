@@ -25,7 +25,7 @@
       "id": "set.doompumpkin-001",
       "nameKey": "set.reactor-pumpkin",
       "name": "Reactor Pumpkin",
-      "themeKey": "demon.doompumpkin",
+      "themeKey": "creature.doompumpkin",
       "members": [
         {
           "role": "armament-primary",

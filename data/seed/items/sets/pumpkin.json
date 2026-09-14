@@ -25,7 +25,7 @@
       "id": "set.pumpkin-001",
       "nameKey": "set.roofing-vine",
       "name": "Roofing Vine",
-      "themeKey": "demon.pumpkin",
+      "themeKey": "creature.pumpkin",
       "members": [
         {
           "role": "core-guard",

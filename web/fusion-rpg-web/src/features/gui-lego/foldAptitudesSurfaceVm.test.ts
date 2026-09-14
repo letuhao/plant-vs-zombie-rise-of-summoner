@@ -31,6 +31,7 @@ describe("foldAptitudesSurfaceVm", () => {
     expect(vm.leftover.leftover).toBe(90);
     expect(vm.decision.dirty).toBe(true);
     expect(vm.scopeChip.title).toBe("Unique specimen");
+    expect(vm.scopeChip.subtitle).toBe("Lv 14");
     expect(vm.scopeChip.commanderAddOn).toBe("Commander add-on");
     expect(vm.bands[0]?.displayName).toBe("Force");
     expect(vm.inspect.fedFamilies).toEqual([{ displayName: "Power" }, { displayName: "Crit" }]);
@@ -56,7 +57,51 @@ describe("foldAptitudesSurfaceVm", () => {
       availability: "ready"
     });
     expect(vm.scopeChip.title).toBe("Commander");
+    expect(vm.scopeChip.subtitle).toBe("Ladder 100");
     expect(vm.speciesChrome).toBeUndefined();
+  });
+
+  it("chip-honesty (T10): scope subtitle never labels level/ladder as power, for any mode", () => {
+    const draft: Record<string, number> = {};
+    for (const row of surface.aptitudes) draft[row.id] = 0;
+    for (const mode of ["unique", "species", "commander"] as const) {
+      const vm = foldAptitudesSurfaceVm({
+        mode,
+        surface,
+        draftShares: draft,
+        budget: 100,
+        spent: 0,
+        leftover: 100,
+        dirty: false,
+        withinBudget: true,
+        saving: false,
+        selectedAptitudeId: null,
+        theta: 42,
+        availability: "ready"
+      });
+      expect(vm.scopeChip.subtitle as string).not.toMatch(/power/i);
+      expect(vm.scopeChip.subtitle as string).not.toMatch(/Θ/);
+    }
+  });
+
+  it("chip-honesty (T10): missing theta renders an honest placeholder, never a fabricated number", () => {
+    const draft: Record<string, number> = {};
+    for (const row of surface.aptitudes) draft[row.id] = 0;
+    const vm = foldAptitudesSurfaceVm({
+      mode: "unique",
+      surface,
+      draftShares: draft,
+      budget: 100,
+      spent: 0,
+      leftover: 100,
+      dirty: false,
+      withinBudget: true,
+      saving: false,
+      selectedAptitudeId: null,
+      theta: undefined,
+      availability: "ready"
+    });
+    expect(vm.scopeChip.subtitle).toBe("Lv —");
   });
 
   it("Mode B includes species chrome + price on decision when everRespecced", () => {
@@ -85,5 +130,6 @@ describe("foldAptitudesSurfaceVm", () => {
     expect(vm.speciesChrome?.hasOverride).toBe(true);
     expect(vm.decision.priceAmount).toBe(50);
     expect(vm.bands.find((b) => b.postureId === "finesse")?.displayName).toBe("Finesse");
+    expect(vm.scopeChip.subtitle).toBe("Lv 20");
   });
 });

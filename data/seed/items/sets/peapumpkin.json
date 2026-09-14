@@ -25,7 +25,7 @@
       "id": "set.peapumpkin-001",
       "nameKey": "set.pea-pod-volley",
       "name": "Pea Pod Volley",
-      "themeKey": "demon.peapumpkin",
+      "themeKey": "creature.peapumpkin",
       "members": [
         {
           "role": "armament-primary",

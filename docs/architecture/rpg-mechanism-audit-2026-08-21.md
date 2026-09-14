@@ -2,7 +2,7 @@
 
 **Purpose:** ground the next design round (a map / world layer) in what the RPG *actually is in code today*, not what the specs say it will be. Every number below was read out of `src/`; where a doc and the code disagree, the code wins and the drift is listed in §4.
 
-**Method:** read the architecture set (combat stack, demon program, standalone program), then verified each claim against `FusionRpg.Core`, `FusionRpg.Data`, and the task lists. Grep and build results are quoted where they carry a finding.
+**Method:** read the architecture set (combat stack, creature program, standalone program), then verified each claim against `FusionRpg.Core`, `FusionRpg.Data`, and the task lists. Grep and build results are quoted where they carry a finding.
 
 **Moving-target caveat (important):** `src/FusionRpg.Core/Battle/` was being edited during this audit — `BattleEngine.cs` changed at 18:19 while the audit was in progress. At 18:1x the tree did not compile (`BattleEngine` still referenced the retired `BattleRuleset.Hit*Milli` constants); at 18:2x `dotnet build src/FusionRpg.Core` is clean, with the SSOT resolver, `DamageApplyPipeline`, and `ShieldRuntime` wired into the engine. Battle internals in §2.1 are a snapshot of a stream that is still landing — re-read before building on them.
 
@@ -42,11 +42,11 @@ That is exactly the shape where a world/map layer adds the most — and also the
 
 | Catalog | Size | Notes |
 |---|---|---|
-| Species (`DemonSpeciesCatalog.Generated.cs`) | **24** — 12 common / 6 rare / 4 epic / 2 legendary | 18 zombie-side, 6 plant-side; 2 capture-only (8.3%, inside the ≤15% guardrail; neither legendary ✓); 2 hypno-ally deploy mode, unused |
+| Species (`CreatureSpeciesCatalog.Generated.cs`) | **24** — 12 common / 6 rare / 4 epic / 2 legendary | 18 zombie-side, 6 plant-side; 2 capture-only (8.3%, inside the ≤15% guardrail; neither legendary ✓); 2 hypno-ally deploy mode, unused |
 | Battle traits (`TraitBattleCatalog`) | **13** | 7 funnel-routed, 6 engine behaviors; all passive — no activation, no cooldown |
 | Waves (`WaveCatalog`) | **4** | skirmish / warband / onslaught / tyrant, built from rarity bands |
 | Expedition tiers | **4** | 30 m · 6 ticks · 1 battle · 2 slots → 20 h · 10 ticks · 4 + boss · 5 slots |
-| Tick events | **4** | quiet 40% / found-souls 35% / wild-demon-met 15% / injury 10% |
+| Tick events | **4** | quiet 40% / found-souls 35% / wild-creature-met 15% / injury 10% |
 | Statuses | 21 | almost none reachable in web battles (F-A5) |
 | Skills | **0** | wave E2 of battle-enrichment, unstarted |
 
@@ -112,7 +112,7 @@ Severity: **S1** = will distort or block the next layer if built on as-is · **S
 | # | Doc says | Code says |
 |---|---|---|
 | D1 | [combat-unification-map.md](combat-unification-map.md): "Build is held until the owner confirms the battle stream is finished" | U1–U8 and U15–U16 are checked off, and `BattleEngine` already runs the SSOT resolver, `DamageApplyPipeline`, and battle shields — U11–U13 material is in the tree ahead of the todo's own gate note |
-| D2 | [demon-system-map.md](demon-system-map.md) lists `patron-demon` as "next"; [demons/spec-patron-demon.md](demons/spec-patron-demon.md) says "implementation not started" | `Core/Demons/Patron/PatronPolicy.cs`, `Data/Sqlite/RpgStore.Patron.cs`, the `rpg_patron` table, and the `patron` earn reason all exist |
+| D2 | [creature-system-map.md](creature-system-map.md) lists `patron-creature` as "next"; [creatures/spec-patron-creature.md](creatures/spec-patron-creature.md) says "implementation not started" | `Core/Creatures/Patron/PatronPolicy.cs`, `Data/Sqlite/RpgStore.Patron.cs`, the `rpg_patron` table, and the `patron` earn reason all exist |
 | D3 | [standalone/spec-expeditions.md](standalone/spec-expeditions.md): the 20 h tier ends on "a boss wave using a hypno-ally species as enemy" | boss = `rift-tyrant`, the ordinary tier-4 wave |
 | D4 | `RulesetVersion = 2` is stamped in `BattleRuleset` | the golden re-baseline + expedition sweep that the bump requires is task U14, unchecked — version stamp and goldens are out of step until it lands |
 | D5 | [shield-system-spec.md](shield-system-spec.md): standalone absorption "lands with Battle-C2"; the `BattleActorSetup` innate seam "is deferred" | `BattleInnateShield` and the shield event vocabulary are in `BattleModels.cs`, and the engine mounts a battle-local `ShieldRuntime` + gate |

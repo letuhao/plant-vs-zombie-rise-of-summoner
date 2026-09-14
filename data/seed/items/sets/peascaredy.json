@@ -25,7 +25,7 @@
       "id": "set.peascaredy-001",
       "nameKey": "set.trembling-spore",
       "name": "Trembling Spore",
-      "themeKey": "demon.peascaredy",
+      "themeKey": "creature.peascaredy",
       "members": [
         {
           "role": "armament-primary",

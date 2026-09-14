@@ -166,7 +166,7 @@ none of them invents a rendering.
 | **Commanders** | `K` | Player-empire commanders; set default lawn leader; open commander Actor sheet; map/legion stubs | Actor row / **panel** | *(new — no legacy route)* |
 | **Relics** | `R` | Items and containers held; equip and compare; storage tabs | Container card · Atom row · **comparison** | `/storage` |
 | **Fusion** | `F` | Two parents → result; recipe browse; preview of what is gained and lost | Actor card · **comparison** · recipe row | `/fusion`, part of `/recipes` |
-| **Pacts** | `P` | Demon contracts, loyalty, tribute, terms, renegotiation | Contract card / panel · Actor chip | `/demons` |
+| **Pacts** | `P` | Creature contracts, loyalty, tribute, terms, renegotiation | Contract card / panel · Actor chip | `/creatures` |
 | **Expeditions** | `E` | Dispatch, in-progress timers, returns and their rewards | Expedition row · Actor chip | `/expeditions` |
 | **Almanac** | `A` | The reference: creature types, elements and the ring, statuses, recipes, effect families | Every token in plate §C · Actor card | `/types`, `/recipes` |
 | **Chronicle** | `H` | Run history, progression dossier, XP ledger, the PvZ modifier sheet | Run card / row · charts | `/runs`, `/rpg-progression`, `/pvz-stats` |
@@ -350,7 +350,7 @@ static end state does not also carry.
 | `/lawn` | **Lawn stage** | stage |
 | `/world` | **World stage** | stage |
 | `/roster` | Creatures | player |
-| `/demons` | Pacts | player |
+| `/creatures` | Pacts | player |
 | `/expeditions` | Expeditions | player |
 | `/fusion` | Fusion | player |
 | `/sim` | Developer → Sim | dev |

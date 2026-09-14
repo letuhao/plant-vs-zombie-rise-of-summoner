@@ -25,7 +25,7 @@
       "id": "set.magnetblover-001",
       "nameKey": "set.magnetic-clover",
       "name": "Magnetic Clover",
-      "themeKey": "demon.magnetblover",
+      "themeKey": "creature.magnetblover",
       "members": [
         {
           "role": "armament-primary",

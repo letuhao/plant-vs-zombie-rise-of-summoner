@@ -1,0 +1,16 @@
+{
+  "session": "screenshot-color-space-20260915",
+  "program": "live-probe",
+  "problem": "Make Unity screenshot and sprite capture color-space handling explicit so Linear projects encode sRGB output correctly by default.",
+  "mode": "direct",
+  "branch": "features/derived-stat-extension",
+  "worktree": null,
+  "paths": [
+    "src/FusionRpg.Injector/ScreenshotRunner.cs",
+    "src/FusionRpg.Injector/TypeIconCapture.cs",
+    "tasks/sessions/screenshot-color-space-20260915.json"
+  ],
+  "started": "2026-09-15T00:00:00+07:00",
+  "status": "merged",
+  "scopeNote": "Follow-up to the merged lawn-screenshot module; no server, game binary, or deployment changes. Injector build passed. Core verifier ran but reported unrelated pre-existing performance/filesystem failures."
+}

@@ -87,7 +87,7 @@ public class WaveCatalogLoaderTests
     {
         // The one test that touches shared state, kept minimal and immediately restored. A
         // concurrently-running unrelated test could in principle observe the overridden roster mid-call
-        // -- the same class of risk this codebase already accepts for DemonSpeciesCatalog.Configure,
+        // -- the same class of risk this codebase already accepts for CreatureSpeciesCatalog.Configure,
         // called from several existing test files the same way.
         var compiledCount = WaveCatalog.Build().Count;
         try

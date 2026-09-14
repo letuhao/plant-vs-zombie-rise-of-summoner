@@ -7,20 +7,20 @@
 
 ---
 
-## Phase 0 — Truth + UniqueDemon write (Wave 0)
+## Phase 0 — Truth + UniqueCreature write (Wave 0)
 
 - [x] **AS-0.1** Stale-doc amend (D5) — `stale-doc-amend`
   - Accept: actor-sheet aptitudes-tab, class-system allocation-surface, guide aptitudes, menu queue P4 claim aptitude-sheet; no active commander-only-v1 claims
   - Accept (G1): `aptitude-sheet-ideal.md` hand-off points at map + `docs/architecture/aptitude-sheet/`
-  - Verify: `rg -n "commander-scope|commander scope only|UniqueDemon.*out of scope" docs/` (struck/superseded OK)
+  - Verify: `rg -n "commander-scope|commander scope only|UniqueCreature.*out of scope" docs/` (struck/superseded OK)
   - Files: docs listed in `spec-stale-doc-amend.md`
   - Deps: None
   - Scope: S
 
-- [x] **AS-0.2** UniqueDemon GET/POST + FE hooks — `unique-allocate`
-  - Accept: `GET /api/aptitudes/unique/{instanceId}` returns persisted shares + budget/leftover (no EffectiveUnique); `POST .../unique/allocate` saves UniqueDemon; overspend 409; empty legal; ownership checks
+- [x] **AS-0.2** UniqueCreature GET/POST + FE hooks — `unique-allocate`
+  - Accept: `GET /api/aptitudes/unique/{instanceId}` returns persisted shares + budget/leftover (no EffectiveUnique); `POST .../unique/allocate` saves UniqueCreature; overspend 409; empty legal; ownership checks
   - Accept: FE `useUniqueAptitudes` / `useSaveUniqueAptitudes` (names flexible)
-  - Accept (G2): after POST, `LoadAllocation(UniqueDemon, instanceId)` equals saved shares; unique hooks unused by Mode C commander path; shares/budget/leftover are `long` (no float magnitudes)
+  - Accept (G2): after POST, `LoadAllocation(UniqueCreature, instanceId)` equals saved shares; unique hooks unused by Mode C commander path; shares/budget/leftover are `long` (no float magnitudes)
   - Verify: `dotnet test tests\FusionRpg.Server.Tests --filter UniqueAptitude`; curl GET/POST
   - Files: `AptitudeEndpoints.cs`, RpgStore aptitudes, `web/.../lib/bus/*`, Server.Tests
   - Deps: None (parallel with 0.1)
@@ -52,7 +52,7 @@
 
 ### Checkpoint 0
 
-- [x] Unique GET/POST curl green; empty UniqueDemon legal
+- [x] Unique GET/POST curl green; empty UniqueCreature legal
 - [x] Scoped SignalR on unique allocate; FE species typing present
 - [x] D5 `rg` clean; icons + posture packs load
 - [x] Review Phase 0 before lawn wire
@@ -61,13 +61,57 @@
 
 ## Phase 1 — Lawn + presentation contracts (Wave 1)
 
-- [ ] **AS-1.1** Injector Bound UniqueDemon apply — `unique-lawn-wire`
-  - Accept: Bound Hot resolve = commander + UniqueDemon(instanceId); generals stay commander+species; fetch via **unique GET only** (S4); empty unique legal
-  - Accept (G6): Bound unique sharing a species id with a general still resolves `commander+UniqueDemon`, never empire species shares
-  - Verify: Injector/Core unit; live probe after allocate+AptitudesUpdated; `.\scripts\guard-secondary-no-unity.ps1`
-  - Files: `RpgClient.cs`, `CheatState.cs`, Hot resolve path
+- [x] **AS-1.1** Injector Bound UniqueCreature apply — `unique-lawn-wire`
+  - Accept: Bound Hot resolve = commander + UniqueCreature(instanceId); generals stay commander+species; fetch via **unique GET only** (S4); empty unique legal
+  - Accept (G6): Bound unique sharing a species id with a general still resolves `commander+UniqueCreature`, never empire species shares
+  - Verify: Core unit green (`SpeciesAllocationSourceTests` — 4 new Bound-priority cases, 11/11 total). Injector/live probe **not run in this session** — `FusionRpg.Injector` needs a game-dir interop build this sandbox has no `FUSIONRPG_GAME_DIR`/MelonLoader install for; `.\scripts\guard-secondary-no-unity.ps1` not run for the same reason. Owner: build + deploy-play + live Bound-allocate probe still owed before calling the Injector half proven, not just written.
+  - Files: `SpeciesAllocationSource.cs` (Core: optional Bound-priority branch, backward-compatible — sole production caller is `CheatState.cs`), `RpgClient.cs` (new `RefreshUniqueAptitudesAsync`: enumerates Bound instanceIds off `MatchHost.Runtime.ToSnapshot().Bindings`, one `GET /api/aptitudes/unique/{instanceId}` per id, wholesale-replaces the cache; wired at StartAsync/Reconnected/`aptitudes.allocation.reload`), `CheatState.cs` (`_uniqueAllocations` cache + `ApplyUniqueAllocations` + `ResolveBoundInstanceId` via the SAME `MatchHost` ptr→binding index `UniqueBoundLoadout` already uses), `CheatCommandRunner.cs` (reload wiring)
   - Deps: AS-0.2, AS-0.3
+  - **Cross-linked (2026-09-13):** built to unblock `actor-hub-and-combat-power-solid-fixing`'s T12 (`lawn-aptitude-parity`) and T19 bullet 3 (`prove-hub-combat`), per owner instruction not to leave a real cross-program block deferred. Both revisited same session — see their own entries for what's now closed vs. what still needs the live probe.
+  - **⚠ LIVE PROBE RUN 2026-09-13 — found an incomplete trigger set; see AS-1.1b.** The live probe this
+    entry owed was finally run against a real game+server. Result: the resolve logic is **correct**
+    (a Bound specimen with a cache entry resolves `bonusAtk 1330` / `bonusAtkContribs
+    "aptitude.Might:Flat:1330"`, written through to the live Unity field). But the fetch cadence is
+    incomplete: `RefreshUniqueAptitudesAsync` runs only at StartAsync / Reconnected /
+    `aptitudes.allocation.reload`, and the cache is keyed by **currently Bound** instanceIds — so a
+    specimen allocated *before* it is deployed is in no fetch's key set and its allocation never
+    loads. `allocate → deploy` silently produced an unbuffed actor; `deploy → allocate` worked. Spec
+    gap, not an implementation slip: `spec-unique-lawn-wire.md` named only those three triggers while
+    `aptitude-sheet-map.md`'s module row said "on reload/**bind**". Spec amended 2026-09-13 with the
+    full 4-trigger cadence table + a required cadence test.
   - Scope: M
+
+- [x] **AS-1.1b** Bind-edge refresh for the unique allocation cache — `unique-lawn-wire` (fix)
+  - **Why:** AS-1.1's cadence omits the one trigger where the cache's KEY SET moves. Confirmed live
+    2026-09-13 (see AS-1.1 above and `DESIGN-GATE.md` §4). Third instance of this bug class in this
+    codebase — now also codified as `DESIGN-GATE.md` §2.16.
+  - [x] Accept: a specimen entering `Bound` triggers the refresh — `MatchHost.ConsumeLastBound`'s edge
+    now also calls the new `RpgClient.TriggerBoundAptitudeRefresh()`, fire-and-forget, right alongside
+    the existing `UniqueBoundLoadout.TryApply` call (`e4e2548`).
+  - [x] Accept (**the regression that matters**): **order-independent**, proven live 2026-09-14 —
+    `POST /api/aptitudes/unique/allocate` (Might 141) on a Roster specimen, THEN
+    `POST /api/unique/actors/{id}/deploy`. Live read via `debug.board-stats`:
+    `attack:2721, attackDamage:2721` (ptr `2887A74BB40`, instanceId `5dd73a05c09a4bc6afcebbf1acd5e847`,
+    level 148) — vanilla baseline is `attack:1`. This is the EXACT `allocate → deploy` order that
+    produced `bonusAtk 0` / `attack 1` in the 2026-09-13 incident this task exists because of.
+  - [x] Accept: all 4 cadence triggers covered —
+    `tests/FusionRpg.Injector.Tests/UniqueAptitudeRefreshCadenceTests.cs` (7/7): source-scan for
+    triggers 1-3 (StartAsync, SignalR reconnect, `aptitudes.allocation.reload`) and a behavioral test
+    for trigger 4 (the new bind edge, fire-and-forget, never awaited on the hot path).
+  - [x] Accept: no redundant refetch storm — `RpgClient.TriggerBoundAptitudeRefresh` coalesces
+    concurrent binds into at most one extra round trip after an in-flight fetch completes (since
+    `RefreshUniqueAptitudesAsync` always reads the CURRENT Bound set live, never a snapshot taken at
+    trigger time); proven by a real-HTTP behavioral test (10 rapid triggers → far fewer than 10 actual
+    fetch runs).
+  - [x] Verify: `dotnet test tests/FusionRpg.Injector.Tests --filter "FullyQualifiedName~UniqueAptitudeRefreshCadenceTests"`
+    (7/7) + full `tests/FusionRpg.Injector.Tests` (38/38, no regressions) + `guard-actor-hub.ps1` +
+    `guard-secondary-no-unity.ps1` (both green); then the live probe above (persisted-state read alone
+    was explicitly NOT accepted as closing this, per the spec's own standard).
+  - Files: `src/FusionRpg.Injector/Match/MatchHost.cs` (hook the bind edge),
+    `src/FusionRpg.Injector/RpgClient.cs` (`TriggerBoundAptitudeRefresh` + coalescing state machine),
+    `tests/FusionRpg.Injector.Tests/UniqueAptitudeRefreshCadenceTests.cs`
+  - Deps: AS-1.1
+  - Scope: S
 
 - [x] **AS-1.2** Piece HTML drafts — `aptitude-pieces` (drafts)
   - Accept: drafts for scope-chip, leftover-gauge, allocate-decision-strip, preset-entry, posture-band, aptitude-tile, aptitude-inspect, species-build-chrome, aptitudes-layout, preset-distribution-chart (donut)
@@ -94,7 +138,12 @@
 
 ### Checkpoint 1
 
-- [ ] Bound unique lawn reflects UniqueDemon after allocate+reload
+- [x] Bound unique lawn reflects UniqueCreature after allocate+reload — **both orders now proven
+      live.** `deploy → allocate` (2026-09-13): `bonusAtk 1330`, `bonusMaxHp 1110` from
+      Vigor+Fortitude, board read `attack 223 hp 1410 maxHp 1410`. `allocate → deploy` (2026-09-14,
+      after AS-1.1b): Might 141 allocated on a Roster specimen, then deployed — board read
+      `attack 2721 attackDamage 2721` (vanilla baseline `attack 1`) on the live Unity entity. Both
+      orders pass — this box now ticks for real
 - [x] Fold fixtures show leftover + decision in-band
 - [x] Piece landmark tests green; HTML drafts present
 - [x] Review Phase 1 before hosts
@@ -104,7 +153,7 @@
 ## Phase 2 — Hosts (Wave 2)
 
 - [x] **AS-2.1** ActorSheet role gate Mode A/C — `host-role-gate`
-  - Accept: creature → UniqueDemon draft/Confirm; commander → commander; thin RecipeMount; shell mirror Confirm/**Cancel** (S8); no DemonType write from sheet
+  - Accept: creature → UniqueCreature draft/Confirm; commander → commander; thin RecipeMount; shell mirror Confirm/**Cancel** (S8); no CreatureType write from sheet
   - Accept (G8): scope-chip title/fiction matches Mode A vs C
   - Accept: Activate path = `POST /api/aptitude-presets/activate` only when presets wired (Done gated on AS-3.5)
   - Verify: `npm test -- --run AptitudesTab ActorPanel`
@@ -174,9 +223,9 @@
 
 ### Checkpoint 3 — program Done
 
-- [x] Map success criteria checklist all met (or explicitly deferred items only A6/E6 keep-aligned) — FE A/B/C + presets proven; AS-1.1 Bound UniqueDemon lawn wire remains injector
+- [x] Map success criteria checklist all met (or explicitly deferred items only A6/E6 keep-aligned) — FE A/B/C + presets proven; AS-1.1 Injector wire written 2026-09-13, live probe still owed (see AS-1.1)
 - [x] Guards: DAL green (this stream); secondary-no-unity N/A for FE-only
-- [ ] Live: Bound unique after Activate/allocate shows UniqueDemon
+- [ ] Live: Bound unique after Activate/allocate shows UniqueCreature — blocked on the AS-1.1 live probe, not on missing code
 - [ ] Menu queue P4 Aptitudes evidence noted on map/queue
 
 ---

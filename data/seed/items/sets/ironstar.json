@@ -25,7 +25,7 @@
       "id": "set.ironstar-001",
       "nameKey": "set.star-spiked-starfruit",
       "name": "Star-Spiked Starfruit",
-      "themeKey": "demon.ironstar",
+      "themeKey": "creature.ironstar",
       "members": [
         {
           "role": "armament-primary",

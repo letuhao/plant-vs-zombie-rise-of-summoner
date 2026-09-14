@@ -25,7 +25,7 @@
       "id": "set.firecracker-001",
       "nameKey": "set.thunderous-silk-fuse",
       "name": "Thunderous Silk Fuse",
-      "themeKey": "demon.firecracker",
+      "themeKey": "creature.firecracker",
       "members": [
         {
           "role": "armament-primary",

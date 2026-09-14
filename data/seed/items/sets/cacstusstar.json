@@ -25,7 +25,7 @@
       "id": "set.cacstusstar-001",
       "nameKey": "set.star-spined-starfruit",
       "name": "Star-Spined Starfruit",
-      "themeKey": "demon.cacstusstar",
+      "themeKey": "creature.cacstusstar",
       "members": [
         {
           "role": "armament-primary",

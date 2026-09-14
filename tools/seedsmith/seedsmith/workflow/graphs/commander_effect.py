@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
-from ...adapters.demons.commander_effect import (
+from ...adapters.creatures.commander_effect import (
     COMMANDER_EFFECT_SCHEMA,
     SYSTEM_PROMPT,
     VALIDATORS,

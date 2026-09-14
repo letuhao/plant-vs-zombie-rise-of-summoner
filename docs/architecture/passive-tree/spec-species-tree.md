@@ -12,7 +12,7 @@ the program.
 
 ## Objective
 
-Generate **840 unique per-species passive trees** — one per demon species, 40 nodes each, nodes no
+Generate **840 unique per-species passive trees** — one per creature species, 40 nodes each, nodes no
 other tree has — under a build-favour lock the planner assigns *before* generation, and emit the one
 extra artifact that makes the corpus usable: a summary sentence per species for the Codex.
 
@@ -42,7 +42,7 @@ the generic pipeline** — a species tree's brief is a *creature*, and five thin
 | **Population** | 42 trees (D51, 2026-09-06: 24 statuses, not 21) | **840 species** — 20× |
 | **Input** | one roster row | the **species anchor**: 18 classified fields plus the almanac lore, already committed |
 | **Quota axes** | 6 (nodeClass, trigger, element, status, channelFamily, exclusionForm) | the same **plus the D17 favour triple** — the axis with the measured 166× problem |
-| **Distinctness bar** | *differentiation* — 42 trees must be tellable apart | ⭐ **recognition** — *"it does not need to be distinguishable from 903 others; it needs to feel like that demon"* (`spec-set-charm-gen.md` D17) |
+| **Distinctness bar** | *differentiation* — 42 trees must be tellable apart | ⭐ **recognition** — *"it does not need to be distinguishable from 903 others; it needs to feel like that creature"* (`spec-set-charm-gen.md` D17) |
 | **Uniqueness** | nodes drawn from a shared affix library | **nodes no other tree has** (§5) |
 
 Two of those are differences of *kind*, not degree, and either alone justifies a separate module:
@@ -70,7 +70,7 @@ sentence (§6) — and inherits the rest verbatim.
 
 ### 2. The corpus, counted
 
-**FACT, counted 2026-09-05 over `data/seed/demons/species/`:**
+**FACT, counted 2026-09-05 over `data/seed/creatures/species/`:**
 
 | | Count |
 |---|---:|
@@ -112,8 +112,8 @@ because a pipeline that locks against a distribution should be able to count it.
 
 #### 2.1 The blind spot this module must not inherit
 
-`tools/DemonQualityReport/Program.cs:77` skips any file beginning with `_`, and
-`data/seed/demons/species/zombie/_needs-review.json` begins with `_`. It holds one entry: a stale
+`tools/CreatureQualityReport/Program.cs:77` skips any file beginning with `_`, and
+`data/seed/creatures/species/zombie/_needs-review.json` begins with `_`. It holds one entry: a stale
 2026-09-02 `SnorkleZombie` disagreeing with the indexed 2026-09-04 copy on `rarity` (`chaff` vs
 `sprout`), `elementPrimary` (`dark` vs `earth`) and `family` (`["aquatic undead"]` vs
 `["undead","aquatic-reanimates"]`). The tool that reported *"840 indexed — clean"* could not see it.
@@ -191,7 +191,7 @@ per element); a small explicit per-axis exception is declared **as data** — `e
 That exception lives in `data/tuning/passive-tree-targets.v1.json` under `legitimateSkew`, with a
 `_why` recording that a row there is **a claim that an imbalance is theme, not bias**. The judgement
 §9 of the ideal demanded gets argued **once, in a file**, instead of re-litigated per species. The
-file is shaped like `data/tuning/demon-roster-targets.v1.json` — integer per-mille throughout, a
+file is shaped like `data/tuning/creature-roster-targets.v1.json` — integer per-mille throughout, a
 `_note` recording provenance, and no axis listing its own members (aptitudes come from
 `data/seed/aptitudes/roster.json`, elements from `data/seed/elements/roster.json`, statuses from the
 status catalog mirror, **so a thirteenth aptitude changes the grid by construction rather than by a
@@ -213,7 +213,7 @@ field:
 
 | Field | Owner | Means | Distribution |
 |---|---|---|---|
-| `elementPrimary`, `aptitudePrimary`, `posture`, `traits`, `reason` | the demon corpus, already committed | **what this creature is** | whatever the lore is — 45% earth is *correct* here |
+| `elementPrimary`, `aptitudePrimary`, `posture`, `traits`, `reason` | the creature corpus, already committed | **what this creature is** | whatever the lore is — 45% earth is *correct* here |
 | `mechanicalFavour: { aptitude, element, status }` | **this module's planner** | **what building into this species rewards** | quota-assigned, near-uniform, D32 |
 
 **Three things follow, and each is worth the field on its own:**
@@ -284,7 +284,7 @@ archetype carries 16 to 24 of those (`spec-tree-plan.md` §4: `gated-deep` 16, `
 
 **The bill, stated in the same terms as before:** 840 × 8 = **6,720** authored affixes against a
 shipped authored corpus of **two**, and against a shared library of 98 affix families. That is about
-**2.6× one of the demon corpus's own reprompt passes** (2,584 calls, ~106 min) — larger than the 4
+**2.6× one of the creature corpus's own reprompt passes** (2,584 calls, ~106 min) — larger than the 4
 this spec proposed, and still an order of magnitude below the 33,600 that k = 40 would demand. The
 number is a **tunable** in `data/tuning/passive-tree-targets.v1.json`, so a later move is a file save
 and a regeneration of one lot, not a spec change.
@@ -347,16 +347,16 @@ where a species tree lives on the player surface, and the finding is load-bearin
 output contract:
 
 > **A species tree is not a choice, so it needs no chooser.** Every other browse exists because the
-> player picks from it. A player cannot pick a bloodline — it is a property of the demon they bound.
+> player picks from it. A player cannot pick a bloodline — it is a property of the creature they bound.
 > There is no build-planning reason to put 840 of them side by side, because no decision is taken by
 > comparing them.
 
-So the tree is reached two ways: **to spend**, from that demon's own actor sheet, pinned above the
-shared paths; **to read**, from the Demon Codex, which already ships as a species reference with a
-discovery state (`web/fusion-rpg-web/src/features/demons/DemonsPage.tsx:365-390` renders one card per
+So the tree is reached two ways: **to spend**, from that creature's own actor sheet, pinned above the
+shared paths; **to read**, from the Creature Codex, which already ships as a species reference with a
+discovery state (`web/fusion-rpg-web/src/features/creatures/CreaturesPage.tsx:365-390` renders one card per
 species with a name and a rarity badge, greyed until `seen`/`discovered`).
 
-**The one real cross-species question is a collection question, not a build question:** *"which demon
+**The one real cross-species question is a collection question, not a build question:** *"which creature
 should I bind next?"* The Codex answers it at the resolution the Codex already works at — a rarity
 badge, an element, the favour triple, and **one line naming what the bloodline is for.** Not by 40
 node descriptions × 840.
@@ -378,7 +378,7 @@ pipeline now, expensive as a second pass over 841 artifacts"* — 841 there is t
 make 33,600 nodes usable: a player reads 840 sentences over the life of the game, and never 33,600
 node lines.
 
-⚠ **One live defect sits on the surface this lands on.** `DemonsPage.tsx:367-388` maps the **entire**
+⚠ **One live defect sits on the surface this lands on.** `CreaturesPage.tsx:367-388` maps the **entire**
 species catalog into a grid with no volume strategy — `(catalog.data?.species ?? []).map(...)` — which
 is 840 DOM subtrees against a search-first threshold of 240
 (`CreaturesLayer.tsx:21-22`). It is a live GG-50 violation today, independent of passive trees, and it
@@ -410,7 +410,7 @@ Three **measured** rates from this repo's own runs bracket the wall clock:
 
 | Measured run | Rate | 105,840 calls |
 |---|---:|---:|
-| 2,860 calls in ~80 min, `workers=4` (`tasks/demon-corpus-self-heal-todo.md:165`) | 2,145/h | **49 h** |
+| 2,860 calls in ~80 min, `workers=4` (`tasks/creature-corpus-self-heal-todo.md:165`) | 2,145/h | **49 h** |
 | 2,584 calls in ~106 min, `workers=4` (`:281`) | 1,463/h | **72 h** |
 | 16,272 calls ≈ 14 h (`03-llm-stage-contract.md:723`) | 1,162/h | **91 h** |
 
@@ -421,16 +421,16 @@ already ship for exactly this shape, and a run that cannot resume is a run that 
 **Extended 2026-09-06 with `tree-language`'s own real per-tree yield, measured across the 12 primary
 trees (H9) — two corrections to the headline `100,800`/`105,840` figures, both real not estimated:**
 
-1. **The three bracketing rates above are all `workers=4`, from the DEMON corpus's own pipeline —
+1. **The three bracketing rates above are all `workers=4`, from the CREATURE corpus's own pipeline —
    `tree-language`'s own real `--workers` test found the OPPOSITE result at just `workers=2`: a 56%
    escalation rate against a ~30% sequential baseline on the SAME tree.** The cause was not
    conclusively isolated (genuine concurrency interference vs. batch-to-batch variance), so this is
-   not a claim that species generation must run sequential — it is a caution that the demon corpus's
+   not a claim that species generation must run sequential — it is a caution that the creature corpus's
    own `workers=4` throughput is **not evidence** that `tree-language`'s adapter tolerates it
    equally well, since the two are different pipelines under this same map (`tree-language` vs. the
-   demon program's own generator). Whoever schedules the real species run should re-measure
+   creature program's own generator). Whoever schedules the real species run should re-measure
    `--workers` on ONE species tree first, the same way this session did for the primary trees, before
-   assuming the demon corpus's rate transfers.
+   assuming the creature corpus's rate transfers.
 2. **A real, single `--write` pass over one tree does not reach 100% acceptance, and the headline call
    count assumes it does.** Measured across the first 12 real trees generated (might through
    ferocity): first-pass accept rates ranged **57.5%–97.5%** (median ≈ 75%), zero escalations once the
@@ -458,7 +458,7 @@ From [`tree-review`](spec-tree-review.md) §1.3, applied to the 840-tree species
 | Tier 3 — 200 nodes @ 30 s | 1.7 |
 | **One full pass** | **≈ 33** |
 
-**Budget two to three passes.** The demon corpus needed **three** corpus-wide reprompts after its
+**Budget two to three passes.** The creature corpus needed **three** corpus-wide reprompts after its
 first run completed — `attackTempo`, `rarity` and `sunwoven` — each root-caused, fixed in the prompt,
 and redeployed at pipeline scope for about one call per unit. So:
 
@@ -474,7 +474,7 @@ structural and nothing a human judged has changed.
 **Review capacity is measured in trees.** At 90 s per card and a 40-hour pass, the ceiling is ~1,600
 trees. This module asks for 840 of the program's 879. **It fits, with room.**
 
-The volume that does *not* fit is the demon-**family** axis. `family` is an OPEN axis and the corpus
+The volume that does *not* fit is the creature-**family** axis. `family` is an OPEN axis and the corpus
 carries **698 distinct family tokens across the 840 indexed entries** (counted 2026-09-05; the 699
 figure in the research includes the stale duplicate's `"aquatic undead"`). Resolved as one tree per
 token, the roster becomes ~1,580 trees — at the ceiling on the first pass and over it on every
@@ -488,7 +488,7 @@ Named here so they are raised at task start rather than discovered mid-run.
 | Dependency | State | Effect on this module |
 |---|---|---|
 | **`provenance-supersede`** | seedsmith core backlog, **unbuilt**. `ProvenanceLedger.record` raises on a re-recorded row — *"a second write means idempotence failed"* (`pipeline/provenance.py:109-118`) | ⛔ **Hard.** A prompt-version bump cannot regenerate. §7.2 budgets 2–3 passes, and pass 2 cannot start without this |
-| **The theme registry** | `data/seed/demons/_registry/themes.v1.json` ships **84** themes against **840** species (counted). `theme-refresh` / `theme-enrich` are named as the fix and unbuilt | ⚠ The brief's motif source is 10× too coarse. Mitigable — the anchor's own `traits` and `reason` carry per-species motifs — but say so before the run |
+| **The theme registry** | `data/seed/creatures/_registry/themes.v1.json` ships **84** themes against **840** species (counted). `theme-refresh` / `theme-enrich` are named as the fix and unbuilt | ⚠ The brief's motif source is 10× too coarse. Mitigable — the anchor's own `traits` and `reason` carry per-species motifs — but say so before the run |
 | **An atom-tag vocabulary** | `AffixTags.cs` ships (124 lines, tested) with no production call site; the affix corpus carries exactly **3** semantic tag values | ⚠ **Soft.** D14's property-keyed exclusion can key on posture and little else. Nodes may carry `excludeProps`; the vocabulary can be enriched later without regenerating |
 | **`element.convert` (D16)** | Real gap: no kind among the 17 writes an element payload, and the failure is silent. Specced 2026-09-06 (D56, [`spec-element-conversion.md`](spec-element-conversion.md)), not built | ⛔ **Allocate no budget to conversion nodes.** A conversion node would contribute zero forever, with no error |
 | **Coefficient resolution** | The shipped field is `PowerLadderKMilli`, an `int` in **per-mille** (`ValueSpec.cs:92`) | Owned by [`tree-binder`](spec-tree-binder.md), which re-derived the error at D29's ten tiers: **tier 1 is +63%, not the 17% this spec used to carry** (that figure was computed at seven tiers). `PowerLadderKMicro` is the fix it proposes. Not a blocker for authoring; a blocker for believing the numbers |
@@ -519,8 +519,8 @@ position. They are not, and the difference is worth stating precisely rather tha
 | Piece | State, verified 2026-09-05 |
 |---|---|
 | **The quantity itself — specimen level** | ✅ **Live and persisted.** `rpg_unique_actors.level` (`RpgStore.cs:398`) is written by `AwardUniqueActorXpUnlocked` (`RpgStore.UniqueActors.cs`, by symbol), which levels on `RpgXpCurve.XpToNext(RpgActorKinds.Specimen, level)` and writes the new level back. It reaches the client as `UniqueActorDto.Level` (`UniqueActorDtos.cs:22`) |
-| **The scope that prices it** | ✅ Declared and rate-loaded. `AllocationScope.UniqueDemon` (`AptitudeAllocation.cs:8`), its rate row (`AptitudeTuning.cs:204`), and the store's TEXT↔enum round trip (`RpgStore.Aptitudes.cs:58,67`) |
-| **The caller that binds the two** | ⛔ **Absent.** Nothing in `src/` passes `AllocationScope.UniqueDemon` to `PointBudget.PointsFor` or `CheckScope` — every call site is `Commander` or `DemonType` (`AptitudeEndpoints.cs:50,95,129,160`, `SpeciesBuildEndpoints.cs:58`, `SpeciesAllocation.cs:35`, `ZombossCommanderAllocation.cs:54`) |
+| **The scope that prices it** | ✅ Declared and rate-loaded. `AllocationScope.UniqueCreature` (`AptitudeAllocation.cs:8`), its rate row (`AptitudeTuning.cs:204`), and the store's TEXT↔enum round trip (`RpgStore.Aptitudes.cs:58,67`) |
+| **The caller that binds the two** | ⛔ **Absent.** Nothing in `src/` passes `AllocationScope.UniqueCreature` to `PointBudget.PointsFor` or `CheckScope` — every call site is `Commander` or `CreatureType` (`AptitudeEndpoints.cs:50,95,129,160`, `SpeciesBuildEndpoints.cs:58`, `SpeciesAllocation.cs:35`, `ZombossCommanderAllocation.cs:54`) |
 
 **The position, stated plainly: this is a wiring gap, and it is a different kind of thing from
 §13.4's two.** `element_mastery` and `status_applied` have no quantity anywhere — nothing counts them,
@@ -530,8 +530,8 @@ stored and levelled in production today, so this module's gap is one step shorte
 both owned and scheduled, and they remain different *kinds* of work — a counter to build there, a
 binding to write here. What is missing here is the binding
 from that index to an aptitude budget, and its twin already ships: `SpeciesAllocation.cs:35,62` does
-exactly this for `DemonType`, including the index transform (`PointBudget.DemonTypeSourceFromLevel`,
-`PointBudget.cs:40`) that a `UniqueDemon` source would mirror — *"species level is an index, so it is
+exactly this for `CreatureType`, including the index transform (`PointBudget.CreatureTypeSourceFromLevel`,
+`PointBudget.cs:40`) that a `UniqueCreature` source would mirror — *"species level is an index, so it is
 `max(0, level − 1)`."*
 
 **So §13.4's finding does not extend to the 840 species trees, and this module is not gated on it.**
@@ -690,7 +690,7 @@ exists.
 rule 3); recompute a species affix id from a node's position instead of reading the minted one back;
 let the language stage pick a favour from an open enum — that is the measured 166× defect,
 and permutation and voting do not fix aggregate shape; use the anchor's `elementPrimary` as the
-mechanical lock; re-classify anything the demon corpus already decided; write a number in any
+mechanical lock; re-classify anything the creature corpus already decided; write a number in any
 response schema; skip the rebalance after a forced override; allocate budget to a conversion node
 until `element.convert` lands (D56, [`spec-element-conversion.md`](spec-element-conversion.md)); author
 a species tree that fails U1 or U2; ship a species without a
@@ -724,23 +724,23 @@ spec carried were answered by the owner on 2026-09-05; the third (below) read as
 G7 closed it 2026-09-06. All three are recorded below with their answers, because a closed question
 that vanishes gets re-asked.
 
-1. ~~**Does a species tree gate on `UniqueDemon` specimen level, and does that satisfy D26's ladder?**~~
-   **CLOSED 2026-09-06 by task G7: yes.** `PointBudget.UniqueDemonSourceFromLevel(specimenLevel) =>
-   Math.Max(0, specimenLevel - 1)` ships (`PointBudget.cs:53`), mirroring `DemonTypeSourceFromLevel`
-   exactly, and `UniqueDemonAllocation.cs` (new, sibling to `SpeciesAllocation.cs` — keyed by
+1. ~~**Does a species tree gate on `UniqueCreature` specimen level, and does that satisfy D26's ladder?**~~
+   **CLOSED 2026-09-06 by task G7: yes.** `PointBudget.UniqueCreatureSourceFromLevel(specimenLevel) =>
+   Math.Max(0, specimenLevel - 1)` ships (`PointBudget.cs:53`), mirroring `CreatureTypeSourceFromLevel`
+   exactly, and `UniqueCreatureAllocation.cs` (new, sibling to `SpeciesAllocation.cs` — keyed by
    `instanceId`, one specimen, not `(playerId, speciesId)`) is a real production caller. A species
    tree's tier ladder now reads non-zero on an actor with a levelled specimen, independently
    re-verified. Corrected here by an adversarial spec audit that found this question still presented
    as open. Kept below as the historical record of the investigation that led to the fix:
 
-   `AllocationScope.UniqueDemon` ships (`AptitudeAllocation.cs:8`), and **counted this session it has
+   `AllocationScope.UniqueCreature` ships (`AptitudeAllocation.cs:8`), and **counted this session it has
    exactly three references in `src/`** — the tuning table's own row (`AptitudeTuning.cs:204`) and the
    store's scope-key round-trip (`RpgStore.Aptitudes.cs:58,67`). **No production code ever saves or
    loads an allocation at that scope**, and `Aspect` is in the identical position
    (`AptitudeTuning.cs:203`, `RpgStore.Aptitudes.cs:57,66`). ✅ **One correction to the ideal while
-   verifying this:** §13.2's row *"every caller passes `Commander`"* is stale — `DemonType` **is**
+   verifying this:** §13.2's row *"every caller passes `Commander`"* is stale — `CreatureType` **is**
    wired end to end (`SpeciesAllocation.cs:35,62`, `AptitudeEndpoints.cs:85-99`,
-   `RpgClient.cs:394`). So two scopes are reached, not one, and the gap is `Aspect` and `UniqueDemon`.
+   `RpgClient.cs:394`). So two scopes are reached, not one, and the gap is `Aspect` and `UniqueCreature`.
    The tier gate must read **one** index; the ideal's half-closed finding is that specimen levels now
    share the arithmetic curve with aptitude points, so they finally have the same *shape*. Whether
    that is *sufficient* is `tree-state`'s call, not this module's — and this module needs the answer

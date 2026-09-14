@@ -76,7 +76,7 @@ would make every difference in §5's table unattributable.
 `EffectiveSpeciesAllocation` (`WebMatchService.AptitudeChannelMods`) — and the species scope keys on
 `player:{playerId}:species:{speciesId}` (`SpeciesAllocation.cs:15`). **So two squad members of the same
 species cannot differ today.** Counted across non-test `src/`: `AllocationScope.Commander` 19
-occurrences, `DemonType` 21, `Aspect` 3, `UniqueDemon` 3 — and all three `UniqueDemon` sites are a
+occurrences, `CreatureType` 21, `Aspect` 3, `UniqueCreature` 3 — and all three `UniqueCreature` sites are a
 tuning rate row (`AptitudeTuning.cs:204`) and a scope-key string pair (`RpgStore.Aptitudes.cs:58,67`).
 There is no producer and no reader.
 
@@ -140,7 +140,7 @@ index (`WaveCatalog.cs:116-119`, `:135-145`). A Θ=100 squad against a Θ=10 wav
 measures nothing. Parameterising the wave roster by Θ is `src/` work this module may not do (§13).
 
 **Decision: squad-vs-squad is the primary mode.** It is the direct analogue of the dominance matrix,
-it needs no `DemonSpeciesCatalog` and no wave content, and it is what "does the ordering transfer"
+it needs no `CreatureSpeciesCatalog` and no wave content, and it is what "does the ordering transfer"
 actually asks. Squad-vs-wave ships as a mode behind `--opponent wave` and is reported separately,
 never mixed into the transfer table.
 
@@ -842,7 +842,7 @@ answerable from code and has been answered.
 | §4 D25's ownership cost folded in before D28 is re-read | **D25**, **D36** |
 | §4, §11 the soul track must enter the model before any Θ > 300 claim | **D3**, doc 16 |
 | §6 D28's four credit rules re-run at squad scope; the largest-mate rule reports, never decides | **D28** |
-| §1.1 six actors, six budgets — a demon must not read `Θ_player` | **D34** |
+| §1.1 six actors, six budgets — a creature must not read `Θ_player` | **D34** |
 | §10 mechanism nodes must be scoreable, and the blocked classes are named | **D13**, ideal §3.5 |
 | §3, §10 the harness reads one shared catalog shape; nothing rolls per run | **D24** |
 | §6, §13 every number it settles is a tunable key with a unit; it writes none of them | ideal **§14**, map assumption 5 |

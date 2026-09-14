@@ -159,7 +159,7 @@ element mastery and almanac XP interchangeably, because they grow at different e
 Half-closed since — specimen level now reads the shared arithmetic curve
 (`ssot-power-scale.md` §10.2 row 27), so it and aptitude points finally share a shape.
 **`element_mastery` is comments only** (`PointBudget.cs:13,15,22`, which says outright that it *"is
-owned by the demon program's `aspect-scope` module and does not exist yet"*) and **`status_applied`
+owned by the creature program's `aspect-scope` module and does not exist yet"*) and **`status_applied`
 has zero `src/` hits** — both re-grepped this session, and neither fact moved.
 
 **What did move is ownership. D37 gives both quantities to a new wave-0 module,
@@ -340,16 +340,16 @@ D39 keeps that rule and fixes what the quantity is: **the allocation the actor h
 
 **The red team's F4 finding is real, the owner has looked at it, and it is parked on purpose.**
 [06-red-team.md](../../research/passive-tree/06-red-team.md) §5: D2 lists four acquisition sources —
-skill points, aptitude thresholds, items/affixes, demon aspect — and the amendment names **only
+skill points, aptitude thresholds, items/affixes, creature aspect — and the amendment names **only
 gear**. So:
 
 > Self-spend 100% of your points in one tree → `H_nodes = 1` → `F = Fmax`.
-> Take all your breadth from gear, aptitude thresholds and demon aspect.
+> Take all your breadth from gear, aptitude thresholds and creature aspect.
 > You now hold a wide build **and** a pure build's focus multiplier.
 
 That strictly dominates an honest pure build: same `F`, more total tree power. It is worse on the two
 unnamed sources than on gear — an aptitude-threshold grant is **self-directed** (the player chose
-where the aptitude points went, so "not self-spent" is a fiction), and a demon-aspect grant is
+where the aptitude points went, so "not self-spent" is a fiction), and a creature-aspect grant is
 per-actor under D21, so *whose `H` it enters* has never been asked.
 
 > ### ✅ D39, 2026-09-05 — parked, with the condition written down
@@ -357,7 +357,7 @@ per-actor under D21, so *whose `H` it enters* has never been asked.
 > **The exploit stands, and it is acceptable only while `F` measures as doing little.** `Fmax` sits in
 > D5's 1.15–1.25 band, §3.5 found no `Fmax` that reverses the concentration ordering, and the whole
 > term is provisional (§5.4). Buying a four-source provenance rule — which needs a defined meaning for
-> "self-spent" on an aptitude *threshold* grant, and an answer to whose `H` a demon-aspect grant enters
+> "self-spent" on an aptitude *threshold* grant, and an answer to whose `H` a creature-aspect grant enters
 > — to close a ≤25% edge on a term that may be withdrawn is work in the wrong order.
 >
 > **Revisit trigger, stated so it is not rediscovered: if `F` ever gets teeth.** Concretely — `Fmax`
@@ -385,7 +385,7 @@ Four rules on it, all buildable and testable today:
 3. **A tree with no self-bought node is absent from the vector**, not present at zero — the same rule
    §5.1 states for empty denominators. Membership never invents a row.
 4. **Membership, settled under D39: nodes bought with skill points the actor spent directly, and soul
-   levels the actor bought directly.** Item-granted, aptitude-threshold and demon-aspect unlocks are
+   levels the actor bought directly.** Item-granted, aptitude-threshold and creature-aspect unlocks are
    excluded, and a test asserts that exclusion is a **stated rule** rather than an accident — so
    widening it when the revisit trigger fires is a one-line change in `tree-state` with a golden that
    moves, not an archaeology exercise.
@@ -754,7 +754,7 @@ hypothetical).
 **Answer: `H` reads the final allocation, self-spent only, and the F4 breadth exploit is parked
 deliberately with a revisit trigger.** Stated in full in §5.1 and §5.2. Membership is settled — skill
 points the actor spent directly and soul levels the actor bought directly; item-granted,
-aptitude-threshold and demon-aspect unlocks are out — so nothing in this module is waiting on a
+aptitude-threshold and creature-aspect unlocks are out — so nothing in this module is waiting on a
 ruling, and the four rules on the projection are all buildable today.
 
 Kept as a numbered entry rather than deleted because the *condition* is the useful part: the parking
@@ -771,7 +771,7 @@ module's, and it is worth booking rather than discovering.
 ### 15.3 The stance group for non-aptitude trees
 
 §4.1 defaults a tree with no declared group to `credit = 0`, which is safe and matches every
-measurement taken. Whether the six elements, twenty-one statuses and the demon families should have
+measurement taken. Whether the six elements, twenty-one statuses and the creature families should have
 groups of their own is a `tree-catalog` content question with a balance consequence, and it is
 cheaper to answer once the harness can measure it.
 

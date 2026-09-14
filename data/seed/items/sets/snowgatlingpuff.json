@@ -25,7 +25,7 @@
       "id": "set.snowgatlingpuff-001",
       "nameKey": "set.frostfire-spore-gun",
       "name": "Frostfire Spore-Gun",
-      "themeKey": "demon.snowgatlingpuff",
+      "themeKey": "creature.snowgatlingpuff",
       "members": [
         {
           "role": "armament-primary",

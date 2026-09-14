@@ -25,7 +25,7 @@
       "id": "set.seacactus-001",
       "nameKey": "set.abyssal-spore-reef",
       "name": "Abyssal Spore Reef",
-      "themeKey": "demon.seacactus",
+      "themeKey": "creature.seacactus",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.ironfume-001",
       "nameKey": "set.iron-barrel-spore",
       "name": "Iron Barrel Spore",
-      "themeKey": "demon.ironfume",
+      "themeKey": "creature.ironfume",
       "members": [
         {
           "role": "core-guard",

@@ -25,7 +25,7 @@
       "id": "set.hypnoemperor-001",
       "nameKey": "set.fungal-necromancer",
       "name": "Fungal Necromancer",
-      "themeKey": "demon.hypnoemperor",
+      "themeKey": "creature.hypnoemperor",
       "members": [
         {
           "role": "armament-primary",

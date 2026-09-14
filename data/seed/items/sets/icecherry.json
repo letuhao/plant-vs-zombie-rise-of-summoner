@@ -25,7 +25,7 @@
       "id": "set.icecherry-001",
       "nameKey": "set.frozen-card-deck",
       "name": "Frozen Card Deck",
-      "themeKey": "demon.icecherry",
+      "themeKey": "creature.icecherry",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.torchfirenut-001",
       "nameKey": "set.flame-core-nut",
       "name": "Flame-Core Nut",
-      "themeKey": "demon.torchfirenut",
+      "themeKey": "creature.torchfirenut",
       "members": [
         {
           "role": "armament-primary",

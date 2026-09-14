@@ -25,7 +25,7 @@
       "id": "set.zombieendoflame-001",
       "nameKey": "set.red-lotus-decay",
       "name": "Red Lotus Decay",
-      "themeKey": "demon.zombieendoflame",
+      "themeKey": "creature.zombieendoflame",
       "members": [
         {
           "role": "armament-primary",

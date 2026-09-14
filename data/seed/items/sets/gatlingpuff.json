@@ -25,7 +25,7 @@
       "id": "set.gatlingpuff-001",
       "nameKey": "set.pea-shooter-sprout",
       "name": "Pea Shooter Sprout",
-      "themeKey": "demon.gatlingpuff",
+      "themeKey": "creature.gatlingpuff",
       "members": [
         {
           "role": "armament-primary",

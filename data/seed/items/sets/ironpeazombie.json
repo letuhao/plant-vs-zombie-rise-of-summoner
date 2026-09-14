@@ -25,7 +25,7 @@
       "id": "set.ironpeazombie-001",
       "nameKey": "set.tarot-pea-volley",
       "name": "Tarot Pea Volley",
-      "themeKey": "demon.ironpeazombie",
+      "themeKey": "creature.ironpeazombie",
       "members": [
         {
           "role": "armament-primary",

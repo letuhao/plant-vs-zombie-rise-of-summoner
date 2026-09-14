@@ -25,7 +25,7 @@
       "id": "set.ultimatelegionzombie-001",
       "nameKey": "set.alpha-legion",
       "name": "Alpha Legion",
-      "themeKey": "demon.ultimatelegionzombie",
+      "themeKey": "creature.ultimatelegionzombie",
       "members": [
         {
           "role": "armament-primary",

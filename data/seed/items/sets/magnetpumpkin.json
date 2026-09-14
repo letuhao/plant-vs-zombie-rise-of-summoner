@@ -25,7 +25,7 @@
       "id": "set.magnetpumpkin-001",
       "nameKey": "set.magnetic-gourd",
       "name": "Magnetic Gourd",
-      "themeKey": "demon.magnetpumpkin",
+      "themeKey": "creature.magnetpumpkin",
       "members": [
         {
           "role": "core-guard",

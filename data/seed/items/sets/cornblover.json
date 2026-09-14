@@ -25,7 +25,7 @@
       "id": "set.cornblover-001",
       "nameKey": "set.golden-kernel-float",
       "name": "Golden Kernel Float",
-      "themeKey": "demon.cornblover",
+      "themeKey": "creature.cornblover",
       "members": [
         {
           "role": "infusion",

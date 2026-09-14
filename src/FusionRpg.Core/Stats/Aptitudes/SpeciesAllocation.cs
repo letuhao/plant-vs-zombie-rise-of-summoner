@@ -1,14 +1,14 @@
 namespace FusionRpg.Core.Stats.Aptitudes;
 
 /// <summary>
-/// `demon-type-allocation` (module 5) — makes <see cref="AllocationScope.DemonType"/> real
-/// (spec-demon-type-allocation.md). Pure math only: the DB-facing compose-at-read entry point lives in
+/// `creature-type-allocation` (module 5) — makes <see cref="AllocationScope.CreatureType"/> real
+/// (spec-creature-type-allocation.md). Pure math only: the DB-facing compose-at-read entry point lives in
 /// `RpgStore.Aptitudes.cs` (`EffectiveSpeciesAllocation`), which calls <see cref="Baseline"/> here —
 /// this type never touches a store, matching `SpeciesBuildPlanner`'s own Core-only discipline.
 /// </summary>
 public static class SpeciesAllocation
 {
-    /// <summary>The one place the DemonType `scope_key` is encoded (spec's own "one place beside the
+    /// <summary>The one place the CreatureType `scope_key` is encoded (spec's own "one place beside the
     /// Commander encoding" rule) — mirrors `AptitudeEndpoints.ScopeKey(playerId)`'s
     /// <c>"player:{id}"</c> shape, extended with the species so two players (decision 10) or two
     /// species never collide.</summary>
@@ -16,10 +16,10 @@ public static class SpeciesAllocation
 
     /// <summary>
     /// The baseline — computed, never persisted (audit finding A9): the plan's share vector (permille,
-    /// summing to 1000) scaled by the DemonType budget at this species level. **Zero shares →
+    /// summing to 1000) scaled by the CreatureType budget at this species level. **Zero shares →
     /// <see cref="AptitudeAllocation.Empty"/>, zero budget → <see cref="AptitudeAllocation.Empty"/>**
     /// (never a thrown error) — a species missing from the plan, or a never-levelled species
-    /// (`speciesLevel &lt;= 1` ⇒ `PointBudget.DemonTypeSourceFromLevel` = 0 ⇒ budget = 0), both
+    /// (`speciesLevel &lt;= 1` ⇒ `PointBudget.CreatureTypeSourceFromLevel` = 0 ⇒ budget = 0), both
     /// legitimately have no baseline yet. Widened before multiplying, largest-remainder rounding (same
     /// rule `SpeciesBuildPlanner` uses) so the twelve shares' points sum to exactly the budget rather
     /// than losing a few points to integer-division truncation on every read.
@@ -31,8 +31,8 @@ public static class SpeciesAllocation
         if (tuning is null) throw new ArgumentNullException(nameof(tuning));
         if (planSharePermille.Count == 0) return AptitudeAllocation.Empty;
 
-        var source = PointBudget.DemonTypeSourceFromLevel(speciesLevel);
-        var budget = PointBudget.PointsFor(AllocationScope.DemonType, source, tuning);
+        var source = PointBudget.CreatureTypeSourceFromLevel(speciesLevel);
+        var budget = PointBudget.PointsFor(AllocationScope.CreatureType, source, tuning);
         if (budget == 0) return AptitudeAllocation.Empty;
 
         var baseShares = new Dictionary<string, long>(StringComparer.Ordinal);
@@ -59,7 +59,7 @@ public static class SpeciesAllocation
             var points = baseShares[aptId];
             if (leftover > 0) { points++; leftover--; }
             if (points > 0)
-                allocation += AptitudeAllocation.Single(AllocationScope.DemonType, aptId, points);
+                allocation += AptitudeAllocation.Single(AllocationScope.CreatureType, aptId, points);
         }
         return allocation;
     }

@@ -2,8 +2,8 @@
 spec-species-tree.md §2.1, §4).
 
 **The blind spot this must not inherit, stated with the real file that proves it exists today.**
-`tools/DemonQualityReport/Program.cs:77` skips any file beginning with `_`, so it never sees
-`data/seed/demons/species/zombie/_needs-review.json` — which, checked directly against the real
+`tools/CreatureQualityReport/Program.cs:77` skips any file beginning with `_`, so it never sees
+`data/seed/creatures/species/zombie/_needs-review.json` — which, checked directly against the real
 committed corpus while writing this module (2026-09-07), STILL holds a live conflict: `SnorkleZombie`
 is indexed at `zombie/undead.json` (the current, corrected copy — `aptitudePrimary: "Onslaught"`) but
 `_needs-review.json` ALSO defines a `SnorkleZombie` entry (a stale draft, `confidence.
@@ -32,7 +32,7 @@ from pathlib import Path
 from typing import Mapping
 
 REPO_ROOT = Path(__file__).resolve().parents[6]
-SPECIES_ROOT = REPO_ROOT / "data" / "seed" / "demons" / "species"
+SPECIES_ROOT = REPO_ROOT / "data" / "seed" / "creatures" / "species"
 INDEX_FILENAME = "_index.json"
 
 

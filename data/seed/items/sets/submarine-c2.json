@@ -25,7 +25,7 @@
       "id": "set.submarine-c2-001",
       "nameKey": "set.centrifugal-kinetic-core",
       "name": "Centrifugal Kinetic Core",
-      "themeKey": "demon.submarine_c2",
+      "themeKey": "creature.submarine_c2",
       "members": [
         {
           "role": "armament-primary",

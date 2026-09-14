@@ -8,15 +8,15 @@ import { PathCard } from "./PathBrowse";
 type TreeReport = Extract<BloodlineReadState, { kind: "tree" }>["report"];
 
 /**
- * Level 0b's READ route (passive-tree-todo.md I5, spec-tree-surface.md §3). This is the Demon
+ * Level 0b's READ route (passive-tree-todo.md I5, spec-tree-surface.md §3). This is the Creature
  * Codex's entry point into the canonical tree surface (GG-9: "other surfaces link into the
  * canonical one rather than re-implementing it") -- read-only, no Unlock verb, no deepen stepper,
  * because nothing reachable from the Codex is spendable. The SPEND route (this creature's own actor
  * sheet, the bloodline pinned above the shared paths) is a separate task; this component only has
  * to answer "what does this bloodline look like," never "let the player allocate into it."
  *
- * Deliberately NOT wired into `DemonsPage.tsx` by this task. That file's own codex grid
- * (`DemonsPage.tsx:367-388`) has a live, unrelated GG-50 volume defect (840 species mapped with no
+ * Deliberately NOT wired into `CreaturesPage.tsx` by this task. That file's own codex grid
+ * (`CreaturesPage.tsx:367-388`) has a live, unrelated GG-50 volume defect (840 species mapped with no
  * windowing strategy) that is another program's file to fix (§3's own callout;
  * passive-tree-todo.md's non-blocking-asks table: "I5 ships without the Codex entry point and the
  * route is added after"). This component IS the "after" -- self-contained, fixture-tested, ready to
@@ -32,7 +32,7 @@ export function BloodlineTree({
   report
 }: {
   /** Player-facing species name. Rendered only once the bloodline is known -- an undiscovered
-   * bloodline never prints it, matching `DemonsPage.tsx`'s own "???" idiom. */
+   * bloodline never prints it, matching `CreaturesPage.tsx`'s own "???" idiom. */
   speciesName: string;
   discovery: BloodlineDiscovery;
   report: Pending<TreeReport>;
@@ -40,7 +40,7 @@ export function BloodlineTree({
   const state = bloodlineReadState(discovery, report);
 
   if (state.kind === "silhouette") {
-    // §9's silhouette presentation, the exact idiom `DemonsPage.tsx:377-383` already ships for the
+    // §9's silhouette presentation, the exact idiom `CreaturesPage.tsx:377-383` already ships for the
     // species catalog grid -- reused rather than invented a second time: grayscale, "???", no tree
     // content of any kind. Never a distance and never a condition (those are §9's other two
     // presentations, reserved for a deep tier and a gate-less path respectively -- not for this).

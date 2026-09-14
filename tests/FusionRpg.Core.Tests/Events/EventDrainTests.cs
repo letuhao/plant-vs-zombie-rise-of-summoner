@@ -31,12 +31,14 @@ public class EventDrainTests
             long target = 0xB,
             byte chainDepth = 0,
             long amount = -10,
-            int pairId = 0)
+            int pairId = 0,
+            long swingPtr = 0)
             => new(kind, frame: 1, seq: Drain.NextSeq(), actorPtr: new IntPtr(0xA),
                 targetPtr: new IntPtr(target), typeId: 1, targetTypeId: 2,
                 side: GameEventSide.Zombie, amount: amount, hitCount: 1,
                 chainDepth: chainDepth, sourceGrantIdx: -1,
-                matchKeyIdx: Drain.InternMatchKey("m1"), pairId: pairId);
+                matchKeyIdx: Drain.InternMatchKey("m1"), pairId: pairId,
+                swingPtr: new IntPtr(swingPtr));
     }
 
     [Fact]
@@ -96,6 +98,48 @@ public class EventDrainTests
         Assert.Equal("B", dto.TargetPtr);
         Assert.Equal("m1", dto.MatchKey);
         Assert.Equal(1, dto.HitCount);
+    }
+
+    [Fact]
+    public void Dto_swing_id_is_the_bullet_ptr_for_a_projectile_hit()
+    {
+        // lawn-hit-attribution (T6): a projectile hit's swing id is the bullet's own ptr, carried
+        // independently of ActorPtr (now the firing creature) — "the record gains a swing-id field"
+        // and "the DTO carries attacker and swing id independently" (spec-lawn-hit-attribution.md).
+        var h = new Harness();
+        h.Drain.Record(h.Rec(swingPtr: 0xC0FFEE));
+        h.Drain.Drain(1000);
+        var dto = Assert.Single(h.Seen);
+        Assert.Equal("A", dto.ActorPtr);
+        Assert.Equal("C0FFEE", dto.SwingId);
+        Assert.NotEqual(dto.ActorPtr, dto.SwingId);
+    }
+
+    [Fact]
+    public void Dto_swing_id_falls_back_to_actor_and_frame_for_melee()
+    {
+        // Melee has no bullet-shaped identity — the swing id derives from (ActorPtr, Frame), the
+        // same identity _meleePairsByTarget/_meleePairsFrame already scope melee bookkeeping by.
+        var h = new Harness();
+        h.Drain.Record(h.Rec()); // no swingPtr — melee-shaped
+        h.Drain.Drain(1000);
+        var dto = Assert.Single(h.Seen);
+        Assert.Equal("A:1", dto.SwingId);
+    }
+
+    [Fact]
+    public void Two_records_sharing_one_swing_id_are_recognisable_as_one_swing()
+    {
+        // The dedupe key `lawn-hit-entry` (T9) will use: a piercing bullet hitting two different
+        // victims records TWO GameEventRecs (one per target) that share ONE swing id.
+        var h = new Harness();
+        h.Drain.Record(h.Rec(target: 0xB, swingPtr: 0xBEEF));
+        h.Drain.Record(h.Rec(target: 0xC, swingPtr: 0xBEEF));
+        h.Drain.Drain(10_000);
+        Assert.Equal(2, h.Seen.Count);
+        Assert.Equal(h.Seen[0].SwingId, h.Seen[1].SwingId);
+        Assert.Equal("BEEF", h.Seen[0].SwingId);
+        Assert.NotEqual(h.Seen[0].TargetPtr, h.Seen[1].TargetPtr);
     }
 
     [Fact]
@@ -443,24 +487,32 @@ public class EventDrainTests
     }
 
     [Fact]
-    public void Reentrant_flush_during_flush_is_safe()
+    public void Reentrant_flush_during_flush_forces_the_nested_ptr_through_before_returning()
     {
+        // T9c (lawn-hit-entry): a nested FlushForPtr used to silently no-op, leaving its ptr's
+        // records pending until the NEXT natural drain — which meant a caller that took "flushed"
+        // as permission to withdraw grants was lied to (the records would then drain AFTER the
+        // withdraw). It must now be forced through before the OUTER FlushForPtr call returns, and
+        // must tell its own caller (via a negative return) that it was nested so grant-withdraw
+        // can be deferred rather than assumed safe.
         var h = new Harness();
         var nested = false;
         h.OnProcess = _ =>
         {
             if (nested) return;
             nested = true;
-            h.Drain.Record(h.Rec(target: 0xD));      // new record mid-flush
-            h.Drain.FlushForPtr(new IntPtr(0xD));    // nested flush must no-op, record stays
+            h.Drain.Record(h.Rec(target: 0xD));                    // new record mid-flush
+            var spent = h.Drain.FlushForPtr(new IntPtr(0xD));       // nested
+            Assert.True(spent < 0);                                // T9c sentinel: caller must defer forget
         };
         h.Drain.Record(h.Rec(target: 0xB));
         h.Drain.FlushForPtr(new IntPtr(0xB));
 
-        Assert.Single(h.Seen);                       // only the flushed ptr processed
-        Assert.Equal(1, h.Drain.PendingCount);       // mid-flush record survived for next drain
-        h.Drain.Drain(100_000);
+        // The nested ptr's record was forced through by the time the OUTER call returned — never
+        // left dangling for a later drain, and never lost.
         Assert.Equal(2, h.Seen.Count);
+        Assert.Contains(h.Seen, d => d.TargetPtr == "D");
+        Assert.Equal(0, h.Drain.PendingCount);
     }
 
     [Fact]
@@ -482,5 +534,127 @@ public class EventDrainTests
         Assert.Equal(1, stats.ExpensiveDeferred);         // second StatusHook deferred
         Assert.Contains(h.Seen, d => d.TargetPtr == "4"); // cheap record behind it still ran
         Assert.True(h.Drain.PendingCount >= 1);
+    }
+
+    // --- lawn-hit-entry (T9a, D8): one swing id -> exactly one action trigger, N damage
+    // applications. IsFirstOfSwing is the mechanism a future consumer (e.g. a stamina charge)
+    // gates a per-swing action on; the elemental rider (Damage/TargetPtr per record) must never
+    // be gated by it. ---
+
+    [Fact]
+    public void One_swing_five_victims_exactly_one_is_first_of_swing()
+    {
+        var h = new Harness();
+        for (var i = 1; i <= 5; i++)
+            h.Drain.Record(h.Rec(target: i, swingPtr: 0xBEEF));
+        h.Drain.Drain(100_000);
+
+        Assert.Equal(5, h.Seen.Count);                                  // N damage applications
+        Assert.Equal(1, h.Seen.Count(d => d.IsFirstOfSwing));            // exactly one trigger
+        Assert.Equal(4, h.Seen.Count(d => !d.IsFirstOfSwing));
+        Assert.All(h.Seen, d => Assert.Equal("BEEF", d.SwingId));        // all one swing
+        Assert.Equal(new[] { "1", "2", "3", "4", "5" },
+            h.Seen.Select(d => d.TargetPtr).OrderBy(x => x).ToArray());  // each victim still hit
+    }
+
+    [Fact]
+    public void One_melee_swing_two_victims_exactly_one_is_first_of_swing()
+    {
+        // Melee swing identity is (ActorPtr, Frame), no SwingPtr — same dedupe must apply there.
+        var h = new Harness();
+        h.Drain.Record(h.Rec(target: 1));
+        h.Drain.Record(h.Rec(target: 2));
+        h.Drain.Drain(100_000);
+
+        Assert.Equal(2, h.Seen.Count);
+        Assert.Equal(1, h.Seen.Count(d => d.IsFirstOfSwing));
+    }
+
+    [Fact]
+    public void Two_different_swings_each_get_their_own_trigger()
+    {
+        // Falsifier: the dedupe must not over-suppress across genuinely different swings.
+        var h = new Harness();
+        h.Drain.Record(h.Rec(target: 1, swingPtr: 0xAAAA));
+        h.Drain.Record(h.Rec(target: 2, swingPtr: 0xBBBB));
+        h.Drain.Drain(100_000);
+
+        Assert.Equal(2, h.Seen.Count(d => d.IsFirstOfSwing));
+    }
+
+    [Fact]
+    public void Swing_split_across_a_budget_carry_still_triggers_exactly_once()
+    {
+        // The persistent-counter design's whole point: a swing whose victims get split across two
+        // Drain() calls (budget exhaustion mid-window) must not re-trigger for the carried half.
+        var h = new Harness { CostPerProcess = 60 };
+        h.Drain.Record(h.Rec(target: 1, swingPtr: 0xC0FFEE));
+        h.Drain.Record(h.Rec(target: 2, swingPtr: 0xC0FFEE));
+        h.Drain.Record(h.Rec(target: 3, swingPtr: 0xC0FFEE));
+
+        var s1 = h.Drain.Drain(budgetTicks: 100); // processes some, carries the rest
+        Assert.True(s1.Processed < 3);
+        h.Drain.Drain(100_000);                    // next "frame" drains the carried remainder
+
+        Assert.Equal(3, h.Seen.Count);
+        Assert.Equal(1, h.Seen.Count(d => d.IsFirstOfSwing)); // still exactly one, not one per frame
+    }
+
+    [Fact]
+    public void A_swing_pointer_reused_after_full_drain_starts_a_fresh_trigger()
+    {
+        // Ptr-reuse safety: once a swing's records fully drain, its counter entry is removed — a
+        // LATER, unrelated swing that happens to reuse the same bullet pointer must still fire.
+        var h = new Harness();
+        h.Drain.Record(h.Rec(target: 1, swingPtr: 0xF00D));
+        h.Drain.Drain(100_000);
+        Assert.True(h.Seen.Single().IsFirstOfSwing);
+
+        h.Seen.Clear();
+        h.Drain.Record(h.Rec(target: 2, swingPtr: 0xF00D)); // same ptr, brand-new swing
+        h.Drain.Drain(100_000);
+        Assert.True(h.Seen.Single().IsFirstOfSwing); // not permanently "already triggered"
+    }
+
+    [Fact]
+    public void Non_swing_kinds_always_read_as_first()
+    {
+        // OnSpawn/taken-side triggers never had a dedupe concept and must keep firing every time.
+        var h = new Harness();
+        h.Drain.Record(new GameEventRec(GameEventKind.PlantDamage, 1, h.Drain.NextSeq(),
+            new IntPtr(0xA), new IntPtr(0xB), 1, 2, GameEventSide.Plant, -10, 1, 0, -1, -1, 0));
+        h.Drain.Record(new GameEventRec(GameEventKind.PlantDamage, 1, h.Drain.NextSeq(),
+            new IntPtr(0xA), new IntPtr(0xC), 1, 2, GameEventSide.Plant, -10, 1, 0, -1, -1, 0));
+        h.Drain.Drain(100_000);
+
+        Assert.Equal(2, h.Seen.Count);
+        Assert.All(h.Seen, d => Assert.True(d.IsFirstOfSwing));
+    }
+
+    // --- lawn-hit-entry (T9b, D9): an effect-bearing hit is never dropped under budget/ring
+    // exhaustion — carried and coalesced. Every record that reaches EventDrain.Record already
+    // passed a live-grant gate at the caller, so a ring-capacity overflow can no longer mean
+    // "lost"; it must divert to the carry tier instead. ---
+
+    [Fact]
+    public void Ring_overflow_diverts_to_carry_instead_of_dropping()
+    {
+        var h = new Harness();
+        var capacity = GameEventRing.DefaultCapacity;
+        // One over capacity — the ring itself can hold `capacity`, so this one record must
+        // overflow it under the OLD "drop" contract.
+        for (var i = 0; i < capacity + 1; i++)
+            Assert.True(h.Drain.Record(h.Rec(target: i, amount: -1))); // Record() itself never refuses this
+
+        Assert.Equal(capacity + 1, h.Drain.PendingCount); // nothing lost before drain even runs
+
+        long totalDamage = 0;
+        h.Drain.Drain(long.MaxValue); // unlimited budget — everything should come through
+        foreach (var dto in h.Seen)
+            totalDamage += dto.Damage ?? 0;
+
+        Assert.Equal(capacity + 1, h.Seen.Count);   // every single record delivered — D9
+        Assert.Equal(-(capacity + 1), totalDamage);  // total damage preserved exactly
+        Assert.Equal(0, h.Drain.PendingCount);
     }
 }

@@ -1,4 +1,4 @@
-"""Tests for the run-control orchestrator (spec-run-control.md §2, demon-seed module 9).
+"""Tests for the run-control orchestrator (spec-run-control.md §2, creature-seed module 9).
 `workflow.graphs.*` imports LangGraph (an optional extra) — same guard as test_workflow_runtime.py.
 """
 from __future__ import annotations
@@ -9,8 +9,8 @@ import pytest
 
 pytest.importorskip("langgraph.graph")
 
-from seedsmith.adapters.demons.anchor.prompts import PIPELINES, SpeciesLore  # noqa: E402
-from seedsmith.adapters.demons.run.orchestrator import run_one_species, run_selection  # noqa: E402
+from seedsmith.adapters.creatures.anchor.prompts import PIPELINES, SpeciesLore  # noqa: E402
+from seedsmith.adapters.creatures.run.orchestrator import run_one_species, run_selection  # noqa: E402
 
 LORE_A = SpeciesLore("a", "plant", "A", "flavor A", None)
 LORE_B = SpeciesLore("b", "plant", "B", "flavor B", None)
@@ -47,7 +47,7 @@ def test_run_one_species_calls_every_pipeline_and_votes_the_six_load_bearing_fie
     """basis='inferred' makes THREAT_AUDIT voted too (Q26: inferred/blocked genuinely choose the
     rung), so all 6 VOTED_FIELDS pipelines fire 3 samples and the other 2 fire 1 — 6*3 + 2*1 = 20,
     never a flat 8 (spec-option-permutation.md §6's own budget: 2 EXTRA calls per voted field).
-    `attackTempo` (kit-shape) joined the voted 6 on 2026-09-04 (demon-corpus-self-heal C1) — was
+    `attackTempo` (kit-shape) joined the voted 6 on 2026-09-04 (creature-corpus-self-heal C1) — was
     18 (5*3 + 3*1) before."""
     calls = []
 

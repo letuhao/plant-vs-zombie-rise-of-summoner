@@ -450,12 +450,20 @@
     },
     {
       "id": "atom.prec-focus",
-      "nameKey": "affix.precision",
-      "name": "precision",
+      "nameKey": "affix.prec-focus",
+      "name": "Focused Aim",
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
       "kindId": "stat.derived",
       "params": {
         "channel": "combat.accuracy.{variant}",
         "op": "Increased"
+      },
+      "variants": {
+        "generate": "elements+omni"
       },
       "roles": [
         "armament-primary"
@@ -469,12 +477,20 @@
     },
     {
       "id": "atom.prec-sync",
-      "nameKey": "affix.precision",
-      "name": "Precision",
+      "nameKey": "affix.prec-sync",
+      "name": "Synchronised Aim",
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
       "kindId": "stat.derived",
       "params": {
         "channel": "combat.crit.rate.{variant}",
         "op": "Flag"
+      },
+      "variants": {
+        "generate": "elements+omni"
       },
       "roles": [
         "armament-primary"

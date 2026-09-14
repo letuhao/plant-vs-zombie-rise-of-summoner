@@ -56,7 +56,7 @@ def resolve_favour_fit(
         state_for_species_favour_fit,
     )
     from ....workflow.runner import run_many
-    from ...demons.anchor.vote import resolve_vote
+    from ...creatures.anchor.vote import resolve_vote
 
     fresh: "dict[str, dict]" = {}
     unresolved: "dict[str, dict]" = {}

@@ -126,9 +126,13 @@ public static class TurnEngine
     }
 
     /// <summary>
-    /// <paramref name="resolver"/> defaults to the wave-1 placeholder. It is a parameter rather than
-    /// a container registration on purpose: the world module is the only thing that names it, so
-    /// nothing else can start depending on its numbers before the real combat seam lands.
+    /// <paramref name="resolver"/> defaults to <see cref="DistrictAssaultResolver"/> — the one real,
+    /// shipped `IBattleResolver` (base-defense's siege resolver). It is a parameter rather than a
+    /// container registration on purpose: the world module is the only thing that names it. Since
+    /// `actor-hub-and-combat-power-solid-fixing`'s `placeholder-battle-hub` (T20) deleted the wave-1
+    /// Hp×Level stand-in, there is no longer a second resolver to default to — every battle kind
+    /// `DistrictAssaultResolver` cannot really simulate (non-district, or a degenerate district
+    /// request) resolves to a refused/no-op outcome rather than an invented winner.
     /// </summary>
     public static TurnResult Step(
         WorldState world, IReadOnlyList<WorldCommand> commands, ulong seed, IBattleResolver? resolver = null,
@@ -136,7 +140,7 @@ public static class TurnEngine
     {
         var report = new TurnReport();
         var turn = world.CurrentTurn + 1;
-        var battles = resolver ?? PlaceholderBattleResolver.Instance;
+        var battles = resolver ?? DistrictAssaultResolver.Instance;
 
         // A rout is spent at the *top* of the turn it costs, not at the bottom. Clearing it here
         // rather than in Snapshot is what lets a force that is broken again during this same turn

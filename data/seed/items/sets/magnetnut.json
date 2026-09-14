@@ -25,7 +25,7 @@
       "id": "set.magnetnut-001",
       "nameKey": "set.magnetic-nut",
       "name": "Magnetic Nut",
-      "themeKey": "demon.magnetnut",
+      "themeKey": "creature.magnetnut",
       "members": [
         {
           "role": "armament-primary",

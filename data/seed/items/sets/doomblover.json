@@ -25,7 +25,7 @@
       "id": "set.doomblover-001",
       "nameKey": "set.clover-of-ruin",
       "name": "Clover of Ruin",
-      "themeKey": "demon.doomblover",
+      "themeKey": "creature.doomblover",
       "members": [
         {
           "role": "armament-primary",

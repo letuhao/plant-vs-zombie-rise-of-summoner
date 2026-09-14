@@ -25,7 +25,7 @@
       "id": "set.goldnut-001",
       "nameKey": "set.golden-nut-shell",
       "name": "Golden Nut Shell",
-      "themeKey": "demon.goldnut",
+      "themeKey": "creature.goldnut",
       "members": [
         {
           "role": "core-guard",

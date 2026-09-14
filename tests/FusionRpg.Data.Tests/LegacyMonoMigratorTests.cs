@@ -5,6 +5,7 @@ using Xunit;
 
 namespace FusionRpg.Data.Tests;
 
+[Trait("Category", "DiskSemantics")]
 public class LegacyMonoMigratorTests
 {
     [Fact]
@@ -39,7 +40,7 @@ public class LegacyMonoMigratorTests
         }
         finally
         {
-            try { Directory.Delete(dir, true); } catch { /* temp */ }
+            SqliteConnection.ClearAllPools(); Directory.Delete(dir, recursive: true);
         }
     }
 
@@ -56,7 +57,7 @@ public class LegacyMonoMigratorTests
         }
         finally
         {
-            try { Directory.Delete(dir, true); } catch { /* temp */ }
+            SqliteConnection.ClearAllPools(); Directory.Delete(dir, recursive: true);
         }
     }
 
@@ -80,7 +81,7 @@ public class LegacyMonoMigratorTests
         }
         finally
         {
-            try { Directory.Delete(dir, true); } catch { /* temp */ }
+            SqliteConnection.ClearAllPools(); Directory.Delete(dir, recursive: true);
         }
     }
 
@@ -110,7 +111,7 @@ public class LegacyMonoMigratorTests
         }
         finally
         {
-            try { Directory.Delete(dir, true); } catch { /* temp */ }
+            SqliteConnection.ClearAllPools(); Directory.Delete(dir, recursive: true);
         }
     }
 

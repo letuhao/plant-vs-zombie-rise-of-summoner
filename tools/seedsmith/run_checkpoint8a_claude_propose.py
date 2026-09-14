@@ -2,7 +2,7 @@
 local LM Studio model (which this environment cannot reach) — see
 tasks/seed-to-concrete-todo.md's Checkpoint 8a entry for the full rationale. Each of the 14 real
 Almanac deficits gets a genuinely reasoned candidate pair (element-match first, matching
-DemonRecipeCatalog's own established A/B preference; ring-related element as fallback for the
+CreatureRecipeCatalog's own established A/B preference; ring-related element as fallback for the
 elements — "air" — with zero same-element candidates in the pool; loose thematic fit as the final
 tie-break), fed through the REAL, unmodified reconcile()/per-member-vote/validation pipeline exactly
 as a real model's samples would be. Not presented as identical to a live model vote — recorded
@@ -16,11 +16,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from seedsmith.adapters.demons.fusion import reconcile as reconcile_mod
-from seedsmith.adapters.demons.fusion.emit import write as emit_write, DEFAULT_OUTPUT_RELATIVE
+from seedsmith.adapters.creatures.fusion import reconcile as reconcile_mod
+from seedsmith.adapters.creatures.fusion.emit import write as emit_write, DEFAULT_OUTPUT_RELATIVE
 
 # Reasoned pair per deficit output — see the session's own reasoning: element-match first
-# (matching DemonRecipeCatalog's own A-candidate preference), ring-related fallback for "air"
+# (matching CreatureRecipeCatalog's own A-candidate preference), ring-related fallback for "air"
 # (no same-element candidate exists anywhere in the real pool), thematic fit as the tie-break.
 REASONED_PAIRS: "dict[str, tuple[str, str]]" = {
     "jacksonzombie": ("legionzombie", "legionsniperzombie"),

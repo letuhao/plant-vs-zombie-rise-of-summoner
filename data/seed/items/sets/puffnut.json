@@ -25,7 +25,7 @@
       "id": "set.puffnut-001",
       "nameKey": "set.nut-shell-spore",
       "name": "Nut Shell Spore",
-      "themeKey": "demon.puffnut",
+      "themeKey": "creature.puffnut",
       "members": [
         {
           "role": "armament-primary",

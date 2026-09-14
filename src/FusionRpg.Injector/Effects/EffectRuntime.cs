@@ -219,6 +219,23 @@ public static class EffectRuntime
         return g;
     }
 
+    /// <summary>
+    /// lawn-combat-wire T10: the SAME <c>Bag.Grant</c> call <see cref="Grant"/> makes, minus its
+    /// per-call <c>debug.effect.granted</c> telemetry emit. `DebugRuntime.Emit` is unconditional (no
+    /// `SessionActive` gate, unlike <c>MaybeEmitCombatPacketTrace</c>) and always routes through
+    /// `GameHooks.Emit` — `MatchHost.Apply` + `EffectRuntime.OnCapture` + a queued
+    /// `RpgHost.Client.Enqueue` network payload. That is fine for a rare, manual cheat/debug grant
+    /// (<see cref="Grant"/>'s existing callers); it is exactly the "N synchronous heavy operations on a
+    /// mass spawn" this program's own acceptance criteria refuse for a grant bound once per lawn actor.
+    /// Never a second grant route — still <c>Ensure</c>d, still <c>Bag.Grant</c>, still the one gate
+    /// every Secondary caller shares.
+    /// </summary>
+    public static EffectGrant GrantQuiet(EffectGrantDto dto)
+    {
+        Ensure();
+        return Bag.Grant(dto);
+    }
+
     public static bool Withdraw(string grantId)
     {
         Ensure();
@@ -324,6 +341,10 @@ public static class EffectRuntime
         using var _perf = PerfProbe.Measure(PerfSection.EffectOnCapture);
         Ensure();
         if (!Bag.HasAnyGrant() && !(Bag.Funnel?.HasPending ?? false)) return;
+        // lawn-combat-wire T12 (spec-basic-attack-cost.md, D2/D6: "no resource, no [RPG] trigger"):
+        // untouched passthrough for every trigger but OnDamageDealt, and for OnDamageDealt whenever the
+        // feature's kill switch is off -- see LawnBasicAttackCostCharger.ShouldApplyRider's own doc.
+        if (!LawnBasicAttackCostCharger.ShouldApplyRider(ev)) return;
         try
         {
             // BEFORE the bag: EffectBag.OnEvent flushes the Funnel inside itself, so a Secondary
@@ -509,7 +530,13 @@ public static class EffectRuntime
             ElementHub.Default,
             bag.CombatRng,
             (breakdown, packet, targetPtr) =>
-                InjectorCombatBridge.EmitOverlayBreakdown(breakdown, packet, targetPtr));
+            {
+                InjectorCombatBridge.EmitOverlayBreakdown(breakdown, packet, targetPtr);
+                // lawn-combat-observer (Task 0, lawn-combat-wire): unconditional RPG-delta capture,
+                // additive alongside EmitOverlayBreakdown (which stays session-gated) — never a
+                // replacement for it, never a new gate on it.
+                LawnCombatObserverBridge.RecordRpgDelta(breakdown, packet, targetPtr);
+            });
         bag.CombatMath = new ConditionalOverlayCombatMath(overlay)
         {
             IsEnabled = () => OverlayCombatFeature.Enabled

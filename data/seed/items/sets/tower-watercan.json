@@ -25,7 +25,7 @@
       "id": "set.tower-watercan-001",
       "nameKey": "set.nepenthes-mortar",
       "name": "Nepenthes Mortar",
-      "themeKey": "demon.tower_watercan",
+      "themeKey": "creature.tower_watercan",
       "members": [
         {
           "role": "armament-primary",

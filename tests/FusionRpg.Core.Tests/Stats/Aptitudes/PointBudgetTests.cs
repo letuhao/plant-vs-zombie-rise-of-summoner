@@ -32,7 +32,7 @@ public class PointBudgetTests
     // pointEconomy.skillPointsPerThetaMilliByScope is absent, deliberately -- see
     // AptitudePointEconomy's own doc comment). The tests below that need real scoped skill rates load
     // the CURRENT shipped file (the one RpgHost.cs/Program.cs actually load) -- v7 as of D55
-    // (2026-09-06, spec-tree-state.md open question 3: demonType/aspect/uniqueDemon moved from the
+    // (2026-09-06, spec-tree-state.md open question 3: creatureType/aspect/uniqueCreature moved from the
     // borrowed-placeholder {4,4,6} to the {3,4,4,6}-ratio-derived {15,15,22}); v6 was the first
     // version to carry the table at all.
 
@@ -60,9 +60,9 @@ public class PointBudgetTests
         // own testing table so a future change to either side is caught from both directions.
         var allocation =
             AptitudeAllocation.Single(AllocationScope.Commander, "Might", 10)
-            + AptitudeAllocation.Single(AllocationScope.DemonType, "Might", 20)
+            + AptitudeAllocation.Single(AllocationScope.CreatureType, "Might", 20)
             + AptitudeAllocation.Single(AllocationScope.Aspect, "Might", 30)
-            + AptitudeAllocation.Single(AllocationScope.UniqueDemon, "Might", 40)
+            + AptitudeAllocation.Single(AllocationScope.UniqueCreature, "Might", 40)
             + AptitudeAllocation.Single(AllocationScope.Commander, "Vigor", 100);
 
         Assert.Equal(100, allocation.Total("Might")); // 10+20+30+40, all four scopes summed
@@ -84,7 +84,7 @@ public class PointBudgetTests
         var commanderBudget = PointBudget.PointsFor(AllocationScope.Commander, sourceValue: 100, tuning);
         Assert.Equal(100 * commanderRate, commanderBudget);
 
-        // Spend OVER the commander budget, while leaving demonType entirely unspent (a huge surplus
+        // Spend OVER the commander budget, while leaving creatureType entirely unspent (a huge surplus
         // there, if scopes could cover each other).
         var overspentCommander = AptitudeAllocation.Single(AllocationScope.Commander, "Might", commanderBudget + 1);
 
@@ -93,7 +93,7 @@ public class PointBudgetTests
         Assert.False(check.WithinBudget);
         Assert.Equal(commanderBudget + 1, check.Spent);
         Assert.Equal(commanderBudget, check.Budget);
-        // The unspent demonType scope has no bearing on this check at all -- CheckScope never reads
+        // The unspent creatureType scope has no bearing on this check at all -- CheckScope never reads
         // any scope but the one it was asked about, so there is no code path for a surplus elsewhere
         // to "cover" this shortfall.
     }
@@ -105,20 +105,20 @@ public class PointBudgetTests
         // the source constant on purpose ONLY proves the RATE table's own ordering (3 < 4 <= 4 < 6) --
         // it does NOT prove the BUDGET ordering the old name claimed, because the four scopes' real
         // sources are in different UNITS (an index vs an accumulation). That gap is exactly what let
-        // the DemonType-source defect (almanac XP, a 176x inversion at species L12) ship undetected --
+        // the CreatureType-source defect (almanac XP, a 176x inversion at species L12) ship undetected --
         // this test kept passing straight through it. See Real_budgets_are_ordered_at_representative_sources
         // below for the test that actually proves the budget claim.
         var tuning = ShippedTuning();
         const long sameSourceValue = 100; // isolates the RATE ordering from any per-scope source difference.
 
         var commander = PointBudget.PointsFor(AllocationScope.Commander, sameSourceValue, tuning);
-        var demonType = PointBudget.PointsFor(AllocationScope.DemonType, sameSourceValue, tuning);
+        var creatureType = PointBudget.PointsFor(AllocationScope.CreatureType, sameSourceValue, tuning);
         var aspect = PointBudget.PointsFor(AllocationScope.Aspect, sameSourceValue, tuning);
-        var uniqueDemon = PointBudget.PointsFor(AllocationScope.UniqueDemon, sameSourceValue, tuning);
+        var uniqueCreature = PointBudget.PointsFor(AllocationScope.UniqueCreature, sameSourceValue, tuning);
 
-        Assert.True(commander < demonType, $"commander ({commander}) must be < demonType ({demonType})");
-        Assert.True(demonType <= aspect, $"demonType ({demonType}) must be <= aspect ({aspect})");
-        Assert.True(aspect < uniqueDemon, $"aspect ({aspect}) must be < uniqueDemon ({uniqueDemon})");
+        Assert.True(commander < creatureType, $"commander ({commander}) must be < creatureType ({creatureType})");
+        Assert.True(creatureType <= aspect, $"creatureType ({creatureType}) must be <= aspect ({aspect})");
+        Assert.True(aspect < uniqueCreature, $"aspect ({aspect}) must be < uniqueCreature ({uniqueCreature})");
     }
 
     [Fact]
@@ -134,15 +134,15 @@ public class PointBudgetTests
         // scale to Theta_player and specimen level, unlike the old "almanac XP" accumulation (2,640 at
         // species L12) that was never comparable to anything:
         //   commander:   Theta_player = 20        (ssot-power-scale.md's own pin, "P(20) = 680")
-        //   demonType:   species level 21 -> DemonTypeSourceFromLevel(21) = 20
-        //   uniqueDemon: specimen level 20         (rpg-progression.md's own balance note:
+        //   creatureType:   species level 21 -> CreatureTypeSourceFromLevel(21) = 20
+        //   uniqueCreature: specimen level 20         (rpg-progression.md's own balance note:
         //                                            "L12-20 after 20 matches" -- the range's own top)
         //
         // Aspect is deliberately EXCLUDED. Its real source, `element_mastery`, does not exist yet --
-        // it is owned by the demon program's `aspect-scope` module, itself reverted and not authorized
-        // to build (decisions.md, "Demon program" row). Inventing a value for it here would decide the
+        // it is owned by the creature program's `aspect-scope` module, itself reverted and not authorized
+        // to build (decisions.md, "Creature program" row). Inventing a value for it here would decide the
         // very ordering this test exists to prove, which is the same "fabricated source" defect this
-        // module exists to fix -- so this test asserts commander < demonType < uniqueDemon over real
+        // module exists to fix -- so this test asserts commander < creatureType < uniqueCreature over real
         // sources only, and leaves Aspect's own ordering proof to whoever builds that tier for real.
         var tuning = ShippedTuning();
 
@@ -151,60 +151,60 @@ public class PointBudgetTests
         const long specimenLevel = 20;
 
         var commanderBudget = PointBudget.PointsFor(AllocationScope.Commander, thetaPlayer, tuning);
-        var demonTypeBudget = PointBudget.PointsFor(
-            AllocationScope.DemonType, PointBudget.DemonTypeSourceFromLevel(speciesLevel), tuning);
-        var uniqueDemonBudget = PointBudget.PointsFor(AllocationScope.UniqueDemon, specimenLevel, tuning);
+        var creatureTypeBudget = PointBudget.PointsFor(
+            AllocationScope.CreatureType, PointBudget.CreatureTypeSourceFromLevel(speciesLevel), tuning);
+        var uniqueCreatureBudget = PointBudget.PointsFor(AllocationScope.UniqueCreature, specimenLevel, tuning);
 
-        Assert.True(commanderBudget < demonTypeBudget,
-            $"commander ({commanderBudget}) must be < demonType ({demonTypeBudget}) at real sources");
-        Assert.True(demonTypeBudget < uniqueDemonBudget,
-            $"demonType ({demonTypeBudget}) must be < uniqueDemon ({uniqueDemonBudget}) at real sources");
+        Assert.True(commanderBudget < creatureTypeBudget,
+            $"commander ({commanderBudget}) must be < creatureType ({creatureTypeBudget}) at real sources");
+        Assert.True(creatureTypeBudget < uniqueCreatureBudget,
+            $"creatureType ({creatureTypeBudget}) must be < uniqueCreature ({uniqueCreatureBudget}) at real sources");
     }
 
     [Fact]
-    public void DemonTypeSourceFromLevel_isZero_atLevelZeroAndLevelOne()
+    public void CreatureTypeSourceFromLevel_isZero_atLevelZeroAndLevelOne()
     {
         // species-build T0.4 -- an unrecorded actor's progression defaults to Level = 1
         // (RpgStore.Progression.cs's own DefaultPlayerDtoUnlocked), so a never-levelled species must
         // carry EXACTLY ZERO points or every battle/expedition golden would move the moment
-        // `demon-type-allocation`'s compose-at-read baseline lands.
-        Assert.Equal(0, PointBudget.DemonTypeSourceFromLevel(0));
-        Assert.Equal(0, PointBudget.DemonTypeSourceFromLevel(1));
-        Assert.Equal(1, PointBudget.DemonTypeSourceFromLevel(2));
-        Assert.Equal(11, PointBudget.DemonTypeSourceFromLevel(12));
+        // `creature-type-allocation`'s compose-at-read baseline lands.
+        Assert.Equal(0, PointBudget.CreatureTypeSourceFromLevel(0));
+        Assert.Equal(0, PointBudget.CreatureTypeSourceFromLevel(1));
+        Assert.Equal(1, PointBudget.CreatureTypeSourceFromLevel(2));
+        Assert.Equal(11, PointBudget.CreatureTypeSourceFromLevel(12));
     }
 
     [Fact]
-    public void PointsFor_demonType_atLevelZeroOrOne_isZeroBudget()
+    public void PointsFor_creatureType_atLevelZeroOrOne_isZeroBudget()
     {
-        // The composed proof: PointsFor(DemonType, DemonTypeSourceFromLevel(level)) is zero for a
-        // never-levelled species, at any real DemonType rate.
+        // The composed proof: PointsFor(CreatureType, CreatureTypeSourceFromLevel(level)) is zero for a
+        // never-levelled species, at any real CreatureType rate.
         var tuning = ShippedTuning();
-        Assert.Equal(0, PointBudget.PointsFor(AllocationScope.DemonType, PointBudget.DemonTypeSourceFromLevel(0), tuning));
-        Assert.Equal(0, PointBudget.PointsFor(AllocationScope.DemonType, PointBudget.DemonTypeSourceFromLevel(1), tuning));
+        Assert.Equal(0, PointBudget.PointsFor(AllocationScope.CreatureType, PointBudget.CreatureTypeSourceFromLevel(0), tuning));
+        Assert.Equal(0, PointBudget.PointsFor(AllocationScope.CreatureType, PointBudget.CreatureTypeSourceFromLevel(1), tuning));
     }
 
     [Fact]
-    public void UniqueDemonSourceFromLevel_isZero_atLevelZeroAndLevelOne()
+    public void UniqueCreatureSourceFromLevel_isZero_atLevelZeroAndLevelOne()
     {
-        // passive-tree G7 -- the exact UniqueDemon-scope mirror of
-        // DemonTypeSourceFromLevel_isZero_atLevelZeroAndLevelOne above: RpgStore.CreateUniqueActor
+        // passive-tree G7 -- the exact UniqueCreature-scope mirror of
+        // CreatureTypeSourceFromLevel_isZero_atLevelZeroAndLevelOne above: RpgStore.CreateUniqueActor
         // starts every specimen at level 1 (never 0), so a never-levelled specimen must carry EXACTLY
         // ZERO points here too, or every roster entry ever created gets a free non-empty allocation.
-        Assert.Equal(0, PointBudget.UniqueDemonSourceFromLevel(0));
-        Assert.Equal(0, PointBudget.UniqueDemonSourceFromLevel(1));
-        Assert.Equal(1, PointBudget.UniqueDemonSourceFromLevel(2));
-        Assert.Equal(11, PointBudget.UniqueDemonSourceFromLevel(12));
+        Assert.Equal(0, PointBudget.UniqueCreatureSourceFromLevel(0));
+        Assert.Equal(0, PointBudget.UniqueCreatureSourceFromLevel(1));
+        Assert.Equal(1, PointBudget.UniqueCreatureSourceFromLevel(2));
+        Assert.Equal(11, PointBudget.UniqueCreatureSourceFromLevel(12));
     }
 
     [Fact]
-    public void PointsFor_uniqueDemon_atLevelZeroOrOne_isZeroBudget()
+    public void PointsFor_uniqueCreature_atLevelZeroOrOne_isZeroBudget()
     {
-        // The composed proof: PointsFor(UniqueDemon, UniqueDemonSourceFromLevel(level)) is zero for a
-        // never-levelled specimen, at any real UniqueDemon rate -- the same property DemonType has.
+        // The composed proof: PointsFor(UniqueCreature, UniqueCreatureSourceFromLevel(level)) is zero for a
+        // never-levelled specimen, at any real UniqueCreature rate -- the same property CreatureType has.
         var tuning = ShippedTuning();
-        Assert.Equal(0, PointBudget.PointsFor(AllocationScope.UniqueDemon, PointBudget.UniqueDemonSourceFromLevel(0), tuning));
-        Assert.Equal(0, PointBudget.PointsFor(AllocationScope.UniqueDemon, PointBudget.UniqueDemonSourceFromLevel(1), tuning));
+        Assert.Equal(0, PointBudget.PointsFor(AllocationScope.UniqueCreature, PointBudget.UniqueCreatureSourceFromLevel(0), tuning));
+        Assert.Equal(0, PointBudget.PointsFor(AllocationScope.UniqueCreature, PointBudget.UniqueCreatureSourceFromLevel(1), tuning));
     }
 
     [Fact]
@@ -216,15 +216,15 @@ public class PointBudgetTests
         var tuning = ShippedTuning();
         const long enormousSourceValue = 10_000_000_000; // far past any Theta a real player reaches today.
 
-        var budget = PointBudget.PointsFor(AllocationScope.UniqueDemon, enormousSourceValue, tuning);
-        var rate = tuning.PointEconomy.AptitudePointsPerThetaMilliByScope[AllocationScope.UniqueDemon];
+        var budget = PointBudget.PointsFor(AllocationScope.UniqueCreature, enormousSourceValue, tuning);
+        var rate = tuning.PointEconomy.AptitudePointsPerThetaMilliByScope[AllocationScope.UniqueCreature];
 
         Assert.Equal(enormousSourceValue * rate, budget); // exact, not clamped to any ceiling.
 
         // The spend side is equally uncapped -- AptitudeAllocation.Single accepts the same enormous
         // figure without throwing (Phase 1's own PS-8 guarantee; confirmed here from point-economy's
         // own testing table, not re-derived from AptitudeAllocation's own tests alone).
-        var allocation = AptitudeAllocation.Single(AllocationScope.UniqueDemon, "Might", budget);
+        var allocation = AptitudeAllocation.Single(AllocationScope.UniqueCreature, "Might", budget);
         Assert.Equal(budget, allocation.Total("Might"));
     }
 
@@ -264,7 +264,7 @@ public class PointBudgetTests
     [Fact]
     public void PointsFor_zeroSourceValue_isZeroBudget_notRejected()
     {
-        // A fresh actor with no progression yet (Theta_player=0, a brand-new demon type, etc.) is
+        // A fresh actor with no progression yet (Theta_player=0, a brand-new creature type, etc.) is
         // ordinary, not an error -- only a NEGATIVE source value is a validation failure.
         var tuning = ShippedTuning();
         Assert.Equal(0, PointBudget.PointsFor(AllocationScope.Commander, 0, tuning));
@@ -296,7 +296,7 @@ public class PointBudgetTests
     public void SkillPointsFor_zeroSourceValue_isZeroBudget_notRejected()
     {
         // Mirrors PointsFor_zeroSourceValue_isZeroBudget_notRejected -- a fresh actor (Theta_player=0,
-        // a brand-new demon type) is ordinary, not an error; only a NEGATIVE source value is rejected.
+        // a brand-new creature type) is ordinary, not an error; only a NEGATIVE source value is rejected.
         var tuning = ShippedTuningWithSkillScopes();
         Assert.Equal(0, PointBudget.SkillPointsFor(AllocationScope.Commander, 0, tuning));
     }
@@ -319,8 +319,8 @@ public class PointBudgetTests
         var tuning = ShippedTuningWithSkillScopes();
         const long enormousSourceValue = 10_000_000_000;
 
-        var budget = PointBudget.SkillPointsFor(AllocationScope.UniqueDemon, enormousSourceValue, tuning);
-        var rate = tuning.PointEconomy.SkillPointsPerThetaMilliByScope[AllocationScope.UniqueDemon];
+        var budget = PointBudget.SkillPointsFor(AllocationScope.UniqueCreature, enormousSourceValue, tuning);
+        var rate = tuning.PointEconomy.SkillPointsPerThetaMilliByScope[AllocationScope.UniqueCreature];
 
         Assert.Equal(enormousSourceValue * rate, budget); // exact, never clamped
     }
@@ -335,20 +335,20 @@ public class PointBudgetTests
         // back to Theta_player silently.
         var tuning = ShippedTuning(); // v2.json -- no skillPointsPerThetaMilliByScope at all
         var ex = Assert.Throws<AptitudeTuningRejection>(
-            () => PointBudget.SkillPointsFor(AllocationScope.DemonType, 100, tuning));
-        Assert.Contains("DemonType", ex.Message, StringComparison.Ordinal);
+            () => PointBudget.SkillPointsFor(AllocationScope.CreatureType, 100, tuning));
+        Assert.Contains("CreatureType", ex.Message, StringComparison.Ordinal);
         Assert.Contains("skillPointsPerThetaMilliByScope", ex.Message, StringComparison.Ordinal);
     }
 
     /// <summary>D34 — the module's own required proof. Positive half: four scopes read the SAME
     /// shared Theta-shaped source value and resolve to a DIFFERENT budget per scope, because each
     /// reads its own rate. Unlike the sibling aptitude-point table, this one carries no
-    /// commander-smallest/uniqueDemon-largest ordering claim -- D38's commander = 11 is calibrated
+    /// commander-smallest/uniqueCreature-largest ordering claim -- D38's commander = 11 is calibrated
     /// independently (the corner-share derivation) and happens to be the LARGEST of the four shipped
     /// rates, not the smallest; the other three are UNMEASURED placeholders borrowed verbatim from the
-    /// sibling table's own {4,4,6} (demonType and aspect legitimately tie at 4, same as the sibling).
-    /// Negative half: a demon actor that (by mistake) read the COMMANDER scope's rate against its own
-    /// source value gets a WRONG, visibly different number from reading its own DemonType scope
+    /// sibling table's own {4,4,6} (creatureType and aspect legitimately tie at 4, same as the sibling).
+    /// Negative half: a creature actor that (by mistake) read the COMMANDER scope's rate against its own
+    /// source value gets a WRONG, visibly different number from reading its own CreatureType scope
     /// correctly -- proving scope isolation actually matters here, not merely that the configured
     /// numbers happen to differ.</summary>
     [Fact]
@@ -358,28 +358,28 @@ public class PointBudgetTests
         const long sharedSourceValue = 100; // one shared actor-Theta-shaped value, fed to all four scopes.
 
         var commander = PointBudget.SkillPointsFor(AllocationScope.Commander, sharedSourceValue, tuning);
-        var demonType = PointBudget.SkillPointsFor(AllocationScope.DemonType, sharedSourceValue, tuning);
+        var creatureType = PointBudget.SkillPointsFor(AllocationScope.CreatureType, sharedSourceValue, tuning);
         var aspect = PointBudget.SkillPointsFor(AllocationScope.Aspect, sharedSourceValue, tuning);
-        var uniqueDemon = PointBudget.SkillPointsFor(AllocationScope.UniqueDemon, sharedSourceValue, tuning);
+        var uniqueCreature = PointBudget.SkillPointsFor(AllocationScope.UniqueCreature, sharedSourceValue, tuning);
 
         // Positive proof: each scope reads its OWN rate against the same shared source value. commander
-        // and uniqueDemon are each distinct from every other scope; demonType and aspect legitimately
+        // and uniqueCreature are each distinct from every other scope; creatureType and aspect legitimately
         // tie (D55, 2026-09-06: both derived from the sibling {3,4,4,6} ratio's shared "4" for
-        // demonType/aspect, scaled against commander=11 -- 15 each) -- a tie is not a bug here, so it
+        // creatureType/aspect, scaled against commander=11 -- 15 each) -- a tie is not a bug here, so it
         // is asserted explicitly rather than folded into a blanket "all four differ" claim that would
         // be false against the shipped numbers.
-        Assert.NotEqual(commander, demonType);
+        Assert.NotEqual(commander, creatureType);
         Assert.NotEqual(commander, aspect);
-        Assert.NotEqual(commander, uniqueDemon);
-        Assert.Equal(demonType, aspect); // legal tie -- both 15, D55's ratio-derived rate
-        Assert.NotEqual(aspect, uniqueDemon);
-        Assert.NotEqual(demonType, uniqueDemon);
+        Assert.NotEqual(commander, uniqueCreature);
+        Assert.Equal(creatureType, aspect); // legal tie -- both 15, D55's ratio-derived rate
+        Assert.NotEqual(aspect, uniqueCreature);
+        Assert.NotEqual(creatureType, uniqueCreature);
 
-        // Negative proof (D34's own named failure mode): a demon actor is scoped DemonType. If its
-        // code path mistakenly read the COMMANDER rate against the demon's own source value instead
+        // Negative proof (D34's own named failure mode): a creature actor is scoped CreatureType. If its
+        // code path mistakenly read the COMMANDER rate against the creature's own source value instead
         // (the "every actor reads Theta_player" bug this table exists to prevent), the number it would
         // get is WRONG -- it must not equal the correct, own-scope answer.
-        var demonReadingCommanderScopeByMistake = PointBudget.SkillPointsFor(AllocationScope.Commander, sharedSourceValue, tuning);
-        Assert.NotEqual(demonType, demonReadingCommanderScopeByMistake);
+        var creatureReadingCommanderScopeByMistake = PointBudget.SkillPointsFor(AllocationScope.Commander, sharedSourceValue, tuning);
+        Assert.NotEqual(creatureType, creatureReadingCommanderScopeByMistake);
     }
 }

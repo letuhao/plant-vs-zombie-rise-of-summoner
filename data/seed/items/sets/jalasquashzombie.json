@@ -25,7 +25,7 @@
       "id": "set.jalasquashzombie-001",
       "nameKey": "set.explosive-squash-core",
       "name": "Explosive Squash Core",
-      "themeKey": "demon.jalasquashzombie",
+      "themeKey": "creature.jalasquashzombie",
       "members": [
         {
           "role": "armament-primary",

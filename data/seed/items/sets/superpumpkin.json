@@ -25,7 +25,7 @@
       "id": "set.superpumpkin-001",
       "nameKey": "set.cactus-patch-fabricator",
       "name": "Cactus Patch Fabricator",
-      "themeKey": "demon.superpumpkin",
+      "themeKey": "creature.superpumpkin",
       "members": [
         {
           "role": "armament-primary",

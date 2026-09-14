@@ -25,7 +25,7 @@
       "id": "set.tower-sunmine-001",
       "nameKey": "set.solar-spud-detonator",
       "name": "Solar Spud Detonator",
-      "themeKey": "demon.tower_sunmine",
+      "themeKey": "creature.tower_sunmine",
       "members": [
         {
           "role": "armament-primary",

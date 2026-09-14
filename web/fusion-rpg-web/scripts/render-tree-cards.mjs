@@ -49,7 +49,7 @@ const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..", "..", "..");
 
 export const DEFAULT_CATALOG_DIR = path.join(repoRoot, "data", "generated", "passive-tree");
-export const DEFAULT_ANCHOR_DIR = path.join(repoRoot, "data", "seed", "demons", "species");
+export const DEFAULT_ANCHOR_DIR = path.join(repoRoot, "data", "seed", "creatures", "species");
 export const DEFAULT_REVIEW_DIR = path.join(repoRoot, "data", "seed", "passive-tree", "_review");
 //: H7's own path (spec-tree-review.md "Project structure": "docs/research/passive-tree/_review/
 //: <lot>/sheet.html — the corpus sheet - COMMITTED"). The `sheet.json` sidecar
@@ -106,7 +106,7 @@ export function loadLot(catalogDir, treeIds = null) {
   return files.map(loadTree);
 }
 
-/** Species anchors (`data/seed/demons/species/**`) keyed by `speciesId`, for the `reason`/`traits`
+/** Species anchors (`data/seed/creatures/species/**`) keyed by `speciesId`, for the `reason`/`traits`
  * panel (§5.2 rule 4). Skips any `_`-prefixed file on purpose — `_needs-review.json`'s stale
  * duplicate (spec-tree-review.md §7) must never win a species id over the indexed copy, and the
  * only safe way to guarantee that here is to never read one. That is `tree-review`'s own

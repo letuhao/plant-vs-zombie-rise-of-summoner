@@ -25,7 +25,7 @@
       "id": "set.tower-electriconion-001",
       "nameKey": "set.conductive-bulb",
       "name": "Conductive Bulb",
-      "themeKey": "demon.tower_electriconion",
+      "themeKey": "creature.tower_electriconion",
       "members": [
         {
           "role": "armament-primary",

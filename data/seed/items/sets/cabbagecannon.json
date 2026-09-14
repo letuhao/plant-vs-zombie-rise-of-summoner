@@ -25,7 +25,7 @@
       "id": "set.cabbagecannon-001",
       "nameKey": "set.cabbage-mortar",
       "name": "Cabbage Mortar",
-      "themeKey": "demon.cabbagecannon",
+      "themeKey": "creature.cabbagecannon",
       "members": [
         {
           "role": "armament-primary",

@@ -25,7 +25,7 @@
       "id": "set.cactus-001",
       "nameKey": "set.jade-needle-spire",
       "name": "Jade Needle Spire",
-      "themeKey": "demon.cactus",
+      "themeKey": "creature.cactus",
       "members": [
         {
           "role": "armament-primary",

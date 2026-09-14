@@ -7,14 +7,14 @@ correct and still cited below). Builds on
 [docs/architecture/seedsmith/spec-pipeline.md](seedsmith/spec-pipeline.md) and
 [seedsmith-map.md](seedsmith-map.md), the existing per-generator specs under
 [seedsmith/](seedsmith/), and [item-content-ideal.md](item-content-ideal.md) /
-[demon-seed-ideal.md](demon-seed-ideal.md) / [action-corpus-ideal.md](action-corpus-ideal.md)
+[creature-seed-ideal.md](creature-seed-ideal.md) / [action-corpus-ideal.md](action-corpus-ideal.md)
 where each domain's own generator already exists.
 
 ## Which loop(s) this extends
 
 Not a new loop — a cross-cutting content-pipeline standard that serves **every spine and place loop
 that ships seedsmith-generated player-facing text**: Spine A (level up and power — passive trees),
-Spine B (demon summon and fusion — species names/lore), Spine C (item collection — item
+Spine B (creature summon and fusion — species names/lore), Spine C (item collection — item
 names/flavor), and Quests and events (delve events, expedition ticks). `the-loops.md` names none of
 these as a loop of their own because this is infrastructure, not something the player does — it
 exists so the loops above render correctly, in whatever language, whether their content was
@@ -34,7 +34,7 @@ Two intertwined problems, one standard:
    generated, a stale record left behind after a prompt version changed, a name collision refused
    and never retried. Right now, detecting "missing" is real for passive-tree (its own ledger) and
    items (`Quality/FlavourMissing`); detecting "stale" is real, live code written independently five
-   times but only WIRED to an actual regeneration path in one domain (demons — see below, audit
+   times but only WIRED to an actual regeneration path in one domain (creatures — see below, audit
    correction 2026-09-08); actions has genuinely nothing at all. Nothing today says "resume this
    run and it will find and fill every real gap, in every domain, the same way."
 2. **Localization.** Every domain's generated text is English-only, with no locale dimension
@@ -57,7 +57,7 @@ localization) that no domain has today, generalized once instead of five times.
 **Built:**
 - `spec-pipeline.md`'s own header ("Nothing is built") is **stale** — real, shared infrastructure
   exists and is imported across multiple domains: `tools/seedsmith/seedsmith/pipeline/model.py`
-  (the generic `Pipeline` scaffold — items, actions, demons, dungeon and trees adapters all import
+  (the generic `Pipeline` scaffold — items, actions, creatures, dungeon and trees adapters all import
   it), `pipeline/llm_caller.py`, `pipeline/open_loop.py`, `pipeline/provenance.py`,
   `pipeline/run_ledger.py`. The GENERIC MECHANISM exists; **adoption of it does not** — see wiring
   gaps below.
@@ -69,7 +69,7 @@ localization) that no domain has today, generalized once instead of five times.
   session's own H9/J9 work ran it repeatedly and it correctly skipped every already-accepted node
   on every resume.
 - `_provenance` (pipeline id, model, prompt version, timestamp) is real, written content, in at
-  least two domains: demons (`data/seed/demons/species/plant/aerial-flora.json:8-18`) and
+  least two domains: creatures (`data/seed/creatures/species/plant/aerial-flora.json:8-18`) and
   structures (`data/seed/structures/bank/reliquary.json:7-10`).
 - The web app's general i18n system (Lingui) is real and working for Chrome text (unchanged from
   `passive-tree-i18n-ideal.md`'s own finding — cited here rather than re-derived).
@@ -79,7 +79,7 @@ localization) that no domain has today, generalized once instead of five times.
   now, translated text later" shape has already been independently invented twice, unprompted, by
   two different generators. Nobody has connected either key to an actual second-language catalog.
 - **A real, working "detect stale, regenerate exactly that" loop exists — audit correction, found
-  2026-09-08.** `adapters/demons/generate_commander_effects.py:97-99` (`elif args.stale: wanted =
+  2026-09-08.** `adapters/creatures/generate_commander_effects.py:97-99` (`elif args.stale: wanted =
   set(stale_ids(list(existing.values()), subjects))`) genuinely computes a staleness diff and
   regenerates ONLY the stale subjects — a real precedent, stronger than passive-tree's own ledger
   (which only ever detects "never attempted," never "attempted but now stale"). **Two real
@@ -95,15 +95,15 @@ localization) that no domain has today, generalized once instead of five times.
   found 2026-09-08.** `workflow/validators/language.py:26`'s `language_consistency` (added
   2026-09-01 after a real incident: *"87% [of a real 84-draft run] were code-switched: English
   prose with Chinese motif tokens spliced in"*) rejects a value mixing CJK and Latin prose. Its own
-  docstring states it is deliberately general, "not a demons-specific one" — confirmed: it is
-  wired into TWO real domains, `adapters/demons/commander_effect.py` and
+  docstring states it is deliberately general, "not a creatures-specific one" — confirmed: it is
+  wired into TWO real domains, `adapters/creatures/commander_effect.py` and
   `adapters/trees/nodegen/run.py` (grep-confirmed, no other adapter imports it).
 
 **Wiring gap** (the mechanism exists somewhere; it is not reaching every domain):
 - `Quality/FlavourMissing` structurally cannot fire outside items —
   `metrics/quality.py:21`'s own `FLAVOR_EXPECTED_KINDS` frozenset names only item kinds
   (`base-type`, `unique`, `charm`, `consumable`, `gem`, `set`); its own docstring says "deliberately
-  excludes machinery... and material." Demons, actions and dungeon/events were never added to this
+  excludes machinery... and material." Creatures, actions and dungeon/events were never added to this
   set — not because they don't need the check, but because nobody extended it.
 - `Quality/FlavourMissing` is `gates = False` even for the one domain it covers
   (`metrics/quality.py:28`), and CI's own `--gate` invocation for items
@@ -111,12 +111,12 @@ localization) that no domain has today, generalized once instead of five times.
   detector exists, nothing stops a missing flavor from shipping today.
 - The "detect stale, regenerate only that" SHAPE (`stale_ids`: compare a recorded key against a
   freshly-computed one) is written independently **five times** —
-  `adapters/demons/anchor/emit.py:47`, `adapters/demons/commander_effect.py:121`,
+  `adapters/creatures/anchor/emit.py:47`, `adapters/creatures/commander_effect.py:121`,
   `adapters/dungeon/provenance.py:50`, `adapters/items/uniques/audit.py:173`,
   `adapters/structures/generate_anchor.py:201-206` — but **audit correction, 2026-09-08: only TWO
   of the five are real, LIVE code with actual callers, and both are in the SAME domain.**
-  `demons/anchor/emit.py:47` is called from `demons/run/selectors.py:10,73`;
-  `demons/commander_effect.py:121` is called from `generate_commander_effects.py:97-99` (the
+  `creatures/anchor/emit.py:47` is called from `creatures/run/selectors.py:10,73`;
+  `creatures/commander_effect.py:121` is called from `generate_commander_effects.py:97-99` (the
   `--stale` path). The other three — dungeon, items, structures — are confirmed DEAD: zero
   production callers anywhere in the repo, only test imports or none at all. This sharpens, not
   weakens, the owner's own "make it a standard" instruction: the mechanism is proven live exactly
@@ -128,7 +128,7 @@ localization) that no domain has today, generalized once instead of five times.
   confirmed (2026-09-08) its only importer anywhere in the repo is its own test file
   (`tests/test_dungeon_idempotency.py`); the real writer (`adapters/dungeon/emit.py`'s own
   `write_entry`/`write_corpus`) never imports or calls it, so the committed content never carries
-  the field (`data/seed/dungeon/events/event.bargain-demon.allpeater-001.json` has no `_provenance`
+  the field (`data/seed/dungeon/events/event.bargain-creature.allpeater-001.json` has no `_provenance`
   key at all). This is aspirational code with zero production callers, one step further gone than
   "built but not wired."
 - **The live Chinese-fragment defect (below) is a WIRING gap, precisely root-caused 2026-09-08 —
@@ -149,7 +149,7 @@ localization) that no domain has today, generalized once instead of five times.
   (`adapters/actions/load.py:31,59-72`), not a ledger; `data/seed/actions/committed-round-1.json`
   has zero `_provenance` occurrences. This is the domain furthest behind, not merely inconsistent.
 - **No locale dimension anywhere, in any domain** — confirmed for passive-tree already; confirmed
-  again here for items (`flavorKey` mints an id, never a translation), demons, actions, and
+  again here for items (`flavorKey` mints an id, never a translation), creatures, actions, and
   dungeon/events. Zero exceptions found across the whole repeat check.
 - **No cross-domain, generalized "gap detector + LLM backfill on resume" engine.** Five
   domain-specific stale-id checks exist; the one REAL, WORKING regeneration loop

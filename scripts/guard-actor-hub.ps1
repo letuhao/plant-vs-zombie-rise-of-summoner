@@ -1,4 +1,13 @@
-# Guard: player combat/derived compose must go through ActorHub — sole Hot gate (ADR 2026-09-07).
+# Guard: player combat/derived compose must go through ActorHub — sole Hot gate
+# (ADR 2026-09-07; dual-compose exception overturned 2026-09-12 as architectural debt;
+# battle-hub-fuse T6 deleted BattleStatComposer -- BattleHubCompose/ActorHub is the only path now).
+#
+# Listed ChannelMods producer (TraitAtomSource) remains: it still feeds BattleTraitSubsystem its
+# BattleChannelMod-shaped rows. battle-ops-parity T7 deleted the other two former entries
+# (EquipAtomSource.ModsFor, Battle.TreeAtomSource) as proven-dead ignore-op folds -- equip and tree
+# now reach battle exclusively as op-aware BoundDerivedAtom via HubInputs.BoundAtoms. NEW parallel
+# composers and NEW BattleChannelMod producer files outside the allowlist fail this guard.
+#
 # Usage (repo root): .\scripts\guard-actor-hub.ps1
 param(
     [string]$Root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
@@ -52,11 +61,15 @@ foreach ($full in $serverTargets) {
     }
 }
 
-# Ban new private *DerivedComposer* classes outside Core/Stats/Derived and Battle exception
+# Ban new private *Composer* types that touch Derived / AppliedCombat outside allowlist.
+# Allowlist = Hub-path DerivedComposer + orthogonal Pvz sheet. BattleStatComposer is gone (T6);
+# BattleHubCompose lives under Stats/Derived-adjacent Battle/ but composes via ActorHub itself, so
+# it never trips the DerivedModifier/ContributeDerived/AppliedCombat/BattleChannelMod match below.
+# Other *Composer* names (HUD, corpus, items, power index, …) are fine unless they touch combat derive.
 $allowComposer = @(
     '[\\/]FusionRpg\.Core[\\/]Stats[\\/]Derived[\\/]',
-    '[\\/]FusionRpg\.Core[\\/]Battle[\\/]BattleStatComposer\.cs',
     '[\\/]FusionRpg\.Core[\\/]Stats[\\/]PvzStatsSheetComposer\.cs',
+    '[\\/]FusionRpg\.Core[\\/]Stats[\\/]StatComposer\.cs',
     '[\\/]obj[\\/]',
     '[\\/]bin[\\/]'
 )
@@ -71,8 +84,37 @@ if (Test-Path $Src) {
         }
         if ($allowed) { return }
         $code = Get-CodeLines (Get-Content -LiteralPath $full -Raw)
-        if ($code -match 'DerivedModifier|ActorDerivedSnapshot|ContributeDerived') {
-            $failures += "${rel}: private derived composer outside ActorHub / BattleStatComposer allowlist"
+        if ($code -match 'DerivedModifier|ActorDerivedSnapshot|ContributeDerived|AppliedCombat|BattleChannelMod') {
+            $failures += "${rel}: new parallel composer touching Derived/AppliedCombat — ActorHub only (BattleStatComposer is debt, not a template)"
+        }
+    }
+}
+
+# BattleStatComposer.Compose no longer exists anywhere (deleted in T6) — no call-site check needed;
+# any reintroduction is a straight compile error, a stronger guarantee than a text-match guard gave.
+
+# BattleChannelMod construction = still-live producers feeding the Hub subsystems their rows
+# (EquipAtomSource/TraitAtomSource/TreeAtomSource — BattleTraitSubsystem etc. read *.ModsFor and
+# convert BattleChannelMod -> DerivedModifier). T6 deleted the composer-only producers this list used
+# to also carry (AptitudeResolver.ResolveForBattle, WebMatchService's 4 methods, BossBuild.ResolveKit,
+# DraughtProjection.Apply) — proven zero production callers, so they are gone, not merely allowlisted.
+$allowChannelModProducers = @(
+    '[\\/]FusionRpg\.Core[\\/]Battle[\\/]TraitAtomSource\.cs$',
+    '[\\/]obj[\\/]',
+    '[\\/]bin[\\/]'
+)
+if (Test-Path $Src) {
+    Get-ChildItem -Path $Src -Recurse -Filter "*.cs" -ErrorAction SilentlyContinue | ForEach-Object {
+        $full = $_.FullName
+        $allowed = $false
+        foreach ($pat in $allowChannelModProducers) {
+            if ($full -match $pat) { $allowed = $true; break }
+        }
+        if ($allowed) { return }
+        $rel = $full.Substring($Root.Length).TrimStart('\', '/')
+        $code = Get-CodeLines (Get-Content -LiteralPath $full -Raw)
+        if ($code -match 'new\s+BattleChannelMod\s*\(') {
+            $failures += "${rel}: new BattleChannelMod producer outside debt allowlist — contribute via ActorHub / atoms instead"
         }
     }
 }

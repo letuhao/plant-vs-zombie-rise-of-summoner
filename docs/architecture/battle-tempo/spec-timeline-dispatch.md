@@ -472,7 +472,7 @@ mechanism stays exactly as inert as before whenever `WReact = 0` or the dispatch
 `resource.regen.*` derived channel for any of the six resource ids, for any actor, anywhere.
 `ActorResourcePools.CreateFull` reads exactly those channels, so `PoiseLedger.TryCommit` correctly,
 honestly refuses every counter attempt today — the mechanism is not broken; the derived-stat input it
-depends on does not exist yet. Deciding how much poise a demon should have (scaled by level? a flat
+depends on does not exist yet. Deciding how much poise a creature should have (scaled by level? a flat
 amount? tied to a trait?) is a real balance/design question, out of `RL2`'s own "intent, cost, and
 payoff" scope and not decided here.
 

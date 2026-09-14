@@ -457,7 +457,7 @@ export type AptitudesState = {
   species?: Record<string, Record<string, number>>;
 };
 
-/** aptitude-sheet unique-allocate — GET/POST UniqueDemon by instanceId (Mode A). Persisted shares only. */
+/** aptitude-sheet unique-allocate — GET/POST UniqueCreature by instanceId (Mode A). Persisted shares only. */
 export type UniqueAptitudesState = {
   instanceId: string;
   playerId: number;

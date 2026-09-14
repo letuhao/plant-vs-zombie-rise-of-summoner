@@ -23,7 +23,7 @@ silently clobbering their work."
       `run_*_draws`) returns a raw model-parsed `dict` with zero `_provenance` attached at the
       generation layer either — confirmed by reading `pipelines.py:326-346` directly; (3) there is
       no committed CLI orchestrator anywhere in this repo connecting the two — `report/cli.py`'s own
-      `add_parser` calls name `demons`/`items`/`effects`/`structures`/`trees`/`numerics`, never
+      `add_parser` calls name `creatures`/`items`/`effects`/`structures`/`trees`/`numerics`, never
       `dungeon` (grep-confirmed). The committed content was produced by some means this repo has no
       record of, not by a bug in the two modules named above.
 - [x] **Confirms Task 4b's own fixed, bidirectional `language_consistency` is what gets registered
@@ -113,7 +113,7 @@ non-empty `flavor`); and the two defect-specific regression tests (below).
 
 ### 12c — Fix the live defect, with real before/after proof
 
-**File:** `data/seed/dungeon/events/event.bargain-demon.allpeater-001.json` (the one sanctioned
+**File:** `data/seed/dungeon/events/event.bargain-creature.allpeater-001.json` (the one sanctioned
 content edit).
 
 **Before** (captured by directly reading the file at the start of this task, and independently
@@ -201,7 +201,7 @@ python -m pytest tools/seedsmith/tests/test_dungeon_completeness.py tools/seedsm
 24 passed in 0.55s
 ```
 
-- [x] `event.bargain-demon.allpeater-001.json` regenerated clean, confirmed by directly reading the
+- [x] `event.bargain-creature.allpeater-001.json` regenerated clean, confirmed by directly reading the
       file after the fix, backed by a real before-failing/after-passing test pair
 - [~] "Every other dungeon event carries a real `_provenance` stamp after a fresh generation pass"
       — **not achieved, named honestly rather than claimed**: there is no fresh generation pass to
@@ -230,14 +230,14 @@ just asserted:
   `adapters.dungeon.emit`, `adapters.dungeon.provenance`, or `language_consistency` at all.
 - `git status` at the time of this run shows a CONCURRENT session actively modifying/adding
   `data/seed/dungeon/rooms/*` (12 files), `dungeon/events/_index.json`, two new
-  `event.story-demon.*` files, `data/seed/items/drop-tables/d1.json`, and
+  `event.story-creature.*` files, `data/seed/items/drop-tables/d1.json`, and
   `data/seed/actions/committed-round-*.json` — plus three OTHER Phase agents from this same program
-  running concurrently (evidence: `tools/seedsmith/seedsmith/adapters/demons/completeness.py`,
+  running concurrently (evidence: `tools/seedsmith/seedsmith/adapters/creatures/completeness.py`,
   `adapters/actions/description_backfill/`, `tasks/seedsmith-content-standard-phase1-items-evidence.md`
   all appeared mid-session, none authored by this task).
 - Every one of the 15 failures is a corpus-COUNT-drift assertion (atom families 100→112, items
   entry count 1513→1516, charm count 70→71, action family/pairing counts) in domains (items,
-  actions, passive-tree vocab, demon themes, distribution planner, usage stats) this phase never
+  actions, passive-tree vocab, creature themes, distribution planner, usage stats) this phase never
   touches — the exact same failure SHAPE the Checkpoint 0 evidence already documented for the same
   reason (concurrent corpus growth from sibling sessions), not a new class of failure.
 
@@ -254,7 +254,7 @@ language-related test.
 - `tools/seedsmith/seedsmith/report/cli.py` (edited — `cmd_check`'s dungeon branch only, Task 12)
 - `tools/seedsmith/tests/test_dungeon_completeness.py` (new, Task 12)
 - `tools/seedsmith/tests/test_dungeon_idempotency.py` (edited — added `ProvenanceStampingTests`, Task 12)
-- `data/seed/dungeon/events/event.bargain-demon.allpeater-001.json` (edited — the one sanctioned
+- `data/seed/dungeon/events/event.bargain-creature.allpeater-001.json` (edited — the one sanctioned
   content fix, Task 12)
 - `tasks/seedsmith-content-standard-phase4-dungeon-evidence.md` (this file)
 
@@ -268,7 +268,7 @@ working Phases 1-3 concurrently in those files).
    functions to `emit.py`'s real writer — confirmed by grep, `report/cli.py` has no `dungeon`
    subcommand at all. Building one is a genuinely separate, larger piece of work than "wire the
    writer" (spec §2).
-2. **Dungeon has no `PROMPT_VERSION` constant** the way passive-tree/demons do (grep-confirmed: zero
+2. **Dungeon has no `PROMPT_VERSION` constant** the way passive-tree/creatures do (grep-confirmed: zero
    matches in `adapters/dungeon/`) — so a real staleness key for dungeon's own MAIN event-generation
    prompt cannot be computed today; this task's own repair used an honestly-distinct one-off
    version string instead (`dungeon-event-flavor-repair/1`).

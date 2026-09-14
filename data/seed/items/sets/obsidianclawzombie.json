@@ -25,7 +25,7 @@
       "id": "set.obsidianclawzombie-001",
       "nameKey": "set.obsidian-shard-reassembly",
       "name": "Obsidian Shard Reassembly",
-      "themeKey": "demon.obsidianclawzombie",
+      "themeKey": "creature.obsidianclawzombie",
       "members": [
         {
           "role": "armament-primary",

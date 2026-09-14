@@ -21,7 +21,7 @@ These words get guessed wrong. Read them once before the rest of the page.
 |---|---|
 | **Lawn** | The live PvZ board match on your machine, watched and fed by Rise of Summoner — not the rift map and not a web-only puzzle. |
 | **First core** | What you play first and what feeds almost every spine loop. It is not the win condition and not optional flavour. |
-| **Replace the game** | What Rise of Summoner does **not** do. It observes, records, and can deploy demons back — it does not rewrite the binary. |
+| **Replace the game** | What Rise of Summoner does **not** do. It observes, records, and can deploy creatures back — it does not rewrite the binary. |
 | **Lawn-only forever** | Unlocked web features stay playable with the lawn game closed once opened. Nothing essential stays lawn-only forever. |
 | **Same save** | Progress lands in your Rise of Summoner save. The lawn game’s own saves stay that game’s. |
 
@@ -36,7 +36,7 @@ These words get guessed wrong. Read them once before the rest of the page.
 
 Legal Plants vs. Zombies: Fusion on your machine, with the control room watching.
 
-You play the board. Rise of Summoner records what happened and can send roster demons back into the fight.
+You play the board. Rise of Summoner records what happened and can send roster creatures back into the fight.
 
 > Point the launcher at a legal install. Uninstalling the plugin is deleting a folder.
 
@@ -49,7 +49,7 @@ A normal lawn level ends when the wave ends. Here it leaves something:
 ```text
   legal match  ->  play board  ->  souls / XP / almanac / levels
                       |
-                      +->  deploy roster demons (when bound)
+                      +->  deploy roster creatures (when bound)
 ```
 
 | Piece | What it does |
@@ -57,7 +57,7 @@ A normal lawn level ends when the wave ends. Here it leaves something:
 | **Souls** | Kills and victories feed the soul ledger. |
 | **Almanac and types** | Plants and zombies you meet feed type progression and the almanac. |
 | **Specimen levels** | Specimens gain levels from work they actually did. |
-| **Deployed demons** | Bound demons you field fight with the traits and element you gave them. |
+| **Deployed creatures** | Bound creatures you field fight with the traits and element you gave them. |
 
 ---
 
@@ -79,7 +79,7 @@ A normal lawn level ends when the wave ends. Here it leaves something:
 2. Open Lawn in the control room and confirm the live mirror is moving.
 3. Finish a wave and look for souls / almanac / specimen progress in your save.
 
-> Read the board under pressure: [live mirror and unit HUD](lawn-mirror-hud.md). Field roster demons: [bound demon deploy](lawn-deploy.md).
+> Read the board under pressure: [live mirror and unit HUD](lawn-mirror-hud.md). Field roster creatures: [bound creature deploy](lawn-deploy.md).
 
 ---
 
@@ -106,7 +106,7 @@ No. Souls already pay from play. Blessing (WIP) is meant to boost later idle —
 
 - Next: [Live mirror and unit HUD](lawn-mirror-hud.md)
 - [Live mirror and unit HUD](lawn-mirror-hud.md)
-- [Bound demon deploy](lawn-deploy.md)
+- [Bound creature deploy](lawn-deploy.md)
 - [Souls](souls.md)
 - [Almanac dossiers](almanac.md)
 - Pillar: [The lawn](../the-lawn.md)

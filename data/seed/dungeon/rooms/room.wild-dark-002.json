@@ -3,10 +3,10 @@
   "dispositionBase": "wary",
   "encounterRef": "encounter.pack-mono-001",
   "eventPool": [
-    "event.story-demon.allpeater-001",
-    "event.story-demon.ashthreepeater-001",
-    "event.story-demon.cactus-001",
-    "event.story-demon.dolldiamond-001"
+    "event.story-creature.allpeater-001",
+    "event.story-creature.ashthreepeater-001",
+    "event.story-creature.cactus-001",
+    "event.story-creature.dolldiamond-001"
   ],
   "flavor": "A vast, hollowed-out ribcage of some forgotten titan forms the ceiling of this chamber. Thick, violet incense drifts from braziers carved from obsidian, and the air tastes of copper and old prayers. In the center, a massive iron cage hangs suspended by chains of cold-forged shadow, swaying rhythmically in a wind that shouldn't exist.",
   "hazardBand": "heavy",

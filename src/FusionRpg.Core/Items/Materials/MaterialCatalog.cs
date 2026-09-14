@@ -1,4 +1,4 @@
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Items.Materials;
@@ -34,7 +34,7 @@ public sealed class MaterialVocabularyRejection : Exception
 
 /// <summary>
 /// The 27-id closed cost vocabulary every other sink spends in (`salvage-craft` §1). Wraps
-/// <see cref="DemonMaterialCatalog"/> for the sixteen ids that already ship rather than re-minting
+/// <see cref="CreatureMaterialCatalog"/> for the sixteen ids that already ship rather than re-minting
 /// them — the spec's own instruction, and the reason the four legacy shard ids keep resolving here
 /// exactly as they do there.
 ///
@@ -63,7 +63,7 @@ public static class MaterialCatalog
     /// Twenty-seven. Souls carry no id — they are a ledger balance (`rpg_soul_ledger`), which is the
     /// whole reason the count is 27 rather than 28.
     /// </summary>
-    // Lazy for the same reason DemonMaterialCatalog is: it reads another catalog's statics, and a
+    // Lazy for the same reason CreatureMaterialCatalog is: it reads another catalog's statics, and a
     // static-initialiser cycle is a silent empty list rather than a throw.
     public static IReadOnlyList<string> All => _all ??= Build();
 
@@ -71,9 +71,9 @@ public static class MaterialCatalog
     {
         var ids = new List<string>();
 
-        // The sixteen shipped ids come from DemonMaterialCatalog, never re-derived here — the spec's
+        // The sixteen shipped ids come from CreatureMaterialCatalog, never re-derived here — the spec's
         // "reuse, not re-mint" line. Its own order is essence-then-shard; this list is class order.
-        foreach (var rarity in DemonRarityLadder.All)
+        foreach (var rarity in CreatureRarityLadder.All)
             ids.Add($"shard.{rarity.ToId()}");
 
         foreach (var frame in SubstrateFrames)
@@ -101,17 +101,17 @@ public static class MaterialCatalog
     /// True for an issuable id OR one of the four legacy shard ids (`shard.common` / `rare` / `epic` /
     /// `legendary`), which stay resolvable for one release so a stale client or a saved reference does
     /// not hard-fail (`spec-rarity-migration.md` §4 point 4). Delegates to
-    /// <see cref="DemonMaterialCatalog.IsKnown"/> for those rather than re-listing them.
+    /// <see cref="CreatureMaterialCatalog.IsKnown"/> for those rather than re-listing them.
     /// </summary>
     public static bool IsKnown(string? materialId) =>
-        IsIssuable(materialId) || (materialId != null && DemonMaterialCatalog.IsKnown(materialId));
+        IsIssuable(materialId) || (materialId != null && CreatureMaterialCatalog.IsKnown(materialId));
 
     /// <summary>True only for the four retired band ids — resolvable, never minted, and never a legal
     /// cost line, because a recipe demanding one is a recipe nothing can ever pay.</summary>
     public static bool IsLegacyShardId(string? materialId) =>
         materialId != null &&
         materialId.StartsWith("shard.", StringComparison.Ordinal) &&
-        LegacyDemonRarityIds.IsLegacyId(materialId.Substring("shard.".Length));
+        LegacyCreatureRarityIds.IsLegacyId(materialId.Substring("shard.".Length));
 
     /// <summary>
     /// Which class an id belongs to. Throws on anything outside the closed vocabulary — including a
@@ -176,7 +176,7 @@ public static class MaterialCatalog
         return parts.Length == 3 && SubstrateFrames.Contains(parts[1], StringComparer.Ordinal) ? parts[1] : null;
     }
 
-    public static string ShardId(DemonRarity rarity) => $"shard.{rarity.ToId()}";
+    public static string ShardId(CreatureRarity rarity) => $"shard.{rarity.ToId()}";
 
     public static string EssenceId(string elementId) => $"essence.{elementId}";
 

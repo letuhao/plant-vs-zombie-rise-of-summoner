@@ -1,10 +1,10 @@
-"""Tests for seedsmith.adapters.demons.anchor.review_queue (spec-classify-pipelines.md §3,
-demon-seed module 7 pipeline 5 `threat-audit`, T2.5)."""
+"""Tests for seedsmith.adapters.creatures.anchor.review_queue (spec-classify-pipelines.md §3,
+creature-seed module 7 pipeline 5 `threat-audit`, T2.5)."""
 from __future__ import annotations
 
 from pathlib import Path
 
-from seedsmith.adapters.demons.anchor.review_queue import (
+from seedsmith.adapters.creatures.anchor.review_queue import (
     ThreatAuditReviewEntry,
     build_review_queue,
     read_review_queue,

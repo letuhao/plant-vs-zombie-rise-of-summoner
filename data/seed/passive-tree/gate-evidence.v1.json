@@ -22,9 +22,9 @@
       "evidence": "StatusAppliedSource.AptitudePointEquivalents -- shipped (spec-gate-counters.md §5.2/§5.3, task G4), registered at the real composition root (GateCounterEndpoints.cs:104) and live-probed end to end 2026-09-06 (task G6: injector credit -> 5s accumulator flush -> POST /api/gate-counters/credit -> RpgStore.FlushGateCounters -> GET read-back, against a real running save)"
     },
     {
-      "gateIndexKind": "demonTypeLevel",
+      "gateIndexKind": "creatureTypeLevel",
       "gateState": "carrier",
-      "evidence": "PointBudget.DemonTypeSourceFromLevel -- shipped (spec-tree-plan.md §7 table, family category)"
+      "evidence": "PointBudget.CreatureTypeSourceFromLevel -- shipped (spec-tree-plan.md §7 table, family category)"
     }
   ]
 }

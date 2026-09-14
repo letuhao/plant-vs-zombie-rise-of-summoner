@@ -55,4 +55,4 @@ dotnet test tests\FusionRpg.Core.Tests    # constant + profile catalog tests onl
 
 ## Success criteria
 
-1. decisions.md + software-architecture.md updated and consistent with this charter. 2. `webrpg-1` exists in the profile vocabulary with a unit test. 3. The demon-program specs' SIM-provability requirements now trace to a named rule (gameless-first) instead of convention.
+1. decisions.md + software-architecture.md updated and consistent with this charter. 2. `webrpg-1` exists in the profile vocabulary with a unit test. 3. The creature-program specs' SIM-provability requirements now trace to a named rule (gameless-first) instead of convention.

@@ -7,7 +7,7 @@
   "loopLine": "Session — how you play",
   "hook": "Layers on the rail **unlock as you play** — locked entries stay visible and tell you what opens them, instead of vanishing or sitting as dead grey weight.",
   "blindSpots": [
-    {"term": "Beat", "meaning": "A play milestone (first item, first demon you can fuse, first bound demon…). Not a music beat, not Dave’s level number."},
+    {"term": "Beat", "meaning": "A play milestone (first item, first creature you can fuse, first bound creature…). Not a music beat, not Dave’s level number."},
     {"term": "Unlock ladder", "meaning": "The live order those beats open layers. Today this ladder is beat-based, not level-gated."},
     {"term": "Locked", "meaning": "You can see the layer on the rail; you cannot use it yet. The UI should say what unlocks it."},
     {"term": "Dave-level chapters", "meaning": "A Vision drip of features by Dave’s level. Not what gates the live rail today — see [unlock chapters](unlock-chapters)."}
@@ -25,9 +25,9 @@
         "rows": [
           ["Creatures, Commanders", "Session start"],
           ["Relics", "You hold your first item"],
-          ["Fusion", "You have a demon you can fuse"],
+          ["Fusion", "You have a creature you can fuse"],
           ["Pacts", "A contract is first offered"],
-          ["Expeditions", "You have a bound demon to field"],
+          ["Expeditions", "You have a bound creature to field"],
           ["Almanac, Chronicle", "After your first run"]
         ]
       },
@@ -56,7 +56,7 @@
   ],
   "doNote": "Stop when locked entries feel like promises, not bugs. Optional Vision contrast: [unlock chapters](unlock-chapters).",
   "mixUps": [
-    {"q": "Why is Fusion locked when I have demons?", "a": "You need a demon the lab can actually fuse. Owning a roster is not always enough."},
+    {"q": "Why is Fusion locked when I have creatures?", "a": "You need a creature the lab can actually fuse. Owning a roster is not always enough."},
     {"q": "I hit Dave level 10 — where are Relics?", "a": "Dave chapters are Vision. Relics open when you hold your first item (this page’s table)."},
     {"q": "Did the game hide Almanac?", "a": "No. It unlocks after your first run. Until then it should still show as locked with a reason."},
     {"q": "Is this the same as naming ritual?", "a": "No. Naming ritual is a first-session WIP beat in the hall — see [naming ritual](naming-ritual)."},

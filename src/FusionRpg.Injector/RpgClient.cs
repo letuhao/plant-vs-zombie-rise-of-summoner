@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -63,6 +64,8 @@ public sealed class RpgClient
         await RefreshStatsAsync().ConfigureAwait(false);
         await RefreshPvzStatsAsync().ConfigureAwait(false);
         await RefreshCommanderAllocationAsync().ConfigureAwait(false);
+        await RefreshUniqueAptitudesAsync().ConfigureAwait(false);
+        await RefreshTreeBoundAtomsAsync().ConfigureAwait(false);
         await RefreshCommanderSnapshotCacheAsync().ConfigureAwait(false);
         await RefreshLawnDeployRosterCacheAsync().ConfigureAwait(false);
         await RefreshPowerIndexAsync().ConfigureAwait(false);
@@ -96,14 +99,22 @@ public sealed class RpgClient
             {
                 CheatCommandRunner.Enqueue(new CommandDto { Name = "aptitudes.allocation.reload" });
             });
+            // lawn-tree-hydrate (T13): PassiveTreeEndpoints.cs already broadcasts this to BOTH groups
+            // (line ~150-152) -- the injector simply never listened. A tree spend changes the SAME
+            // commander-scope shared-tree atoms TreeBoundAtomsCache below caches, so it is a Hub
+            // invalidation like AptitudesUpdated, not merely a UI refresh signal.
+            _hub.On<object>("PassiveTreeUpdated", _ =>
+            {
+                CheatCommandRunner.Enqueue(new CommandDto { Name = "passive-tree.bound-atoms.reload" });
+            });
             _hub.On<object>("CommandersUpdated", _ =>
             {
                 CheatCommandRunner.Enqueue(new CommandDto { Name = "commander.snapshot.reload" });
             });
-            // demon-lawn-deploy T2.1: DemonsUpdated previously reached only WebGroup — a new specimen
+            // creature-lawn-deploy T2.1: CreaturesUpdated previously reached only WebGroup — a new specimen
             // (summon/fusion) changes the plant-side deploy roster, so the injector's own session cache
-            // needs to hear it too (DemonEndpoints.cs/FusionEndpoints.cs now also send to InjectorGroup).
-            _hub.On<object>("DemonsUpdated", _ =>
+            // needs to hear it too (CreatureEndpoints.cs/FusionEndpoints.cs now also send to InjectorGroup).
+            _hub.On<object>("CreaturesUpdated", _ =>
             {
                 CheatCommandRunner.Enqueue(new CommandDto { Name = "lawn-deploy.roster.reload" });
             });
@@ -111,11 +122,11 @@ public sealed class RpgClient
             {
                 try { RpgHost.Log.Info("[cheat-cmd] signalr " + (cmd?.Name ?? "?")); } catch { }
                 // Patron designation is state, not a cheat action — cache it here and keep it
-                // out of the cheat runner (spec-patron-demon.md; applies from the NEXT match).
+                // out of the cheat runner (spec-patron-creature.md; applies from the NEXT match).
                 if (string.Equals(cmd?.Name, "patron.aura", StringComparison.OrdinalIgnoreCase))
                 {
                     try { Effects.PatronCommand.Apply(cmd!); } catch (Exception ex) { RpgHost.Log.Warning("patron.aura: " + ex.Message); }
-                    // demon-lawn-deploy T2.1: a patron reassignment changes WHO is excluded from the
+                    // creature-lawn-deploy T2.1: a patron reassignment changes WHO is excluded from the
                     // deploy roster — reuse this already-pushed signal instead of adding a second one.
                     CheatCommandRunner.Enqueue(new CommandDto { Name = "lawn-deploy.roster.reload" });
                     return;
@@ -135,6 +146,8 @@ public sealed class RpgClient
                     // allocation/Θ change made during the disconnected window was silently lost until
                     // the next full injector process restart, not just the next reconnect.
                     await RefreshCommanderAllocationAsync().ConfigureAwait(false);
+                    await RefreshUniqueAptitudesAsync().ConfigureAwait(false);
+                    await RefreshTreeBoundAtomsAsync().ConfigureAwait(false);
                     await RefreshCommanderSnapshotCacheAsync().ConfigureAwait(false);
                     await RefreshLawnDeployRosterCacheAsync().ConfigureAwait(false);
                     await RefreshPowerIndexAsync().ConfigureAwait(false);
@@ -308,6 +321,62 @@ public sealed class RpgClient
         }
     }
 
+    /// <summary>Fire-and-forget lawn screenshot upload (binary PNG, not the event queue).</summary>
+    public void EnqueueScreenshot(byte[] png, string tag)
+    {
+        if (png == null || png.Length == 0) return;
+        _ = UploadScreenshotAsync(png, ScreenshotCapture.SanitizeTag(tag));
+    }
+
+    async Task UploadScreenshotAsync(byte[] png, string tag)
+    {
+        try
+        {
+            using var content = new ByteArrayContent(png);
+            content.Headers.ContentType =
+                new System.Net.Http.Headers.MediaTypeHeaderValue("image/png");
+            var resp = await Http().PostAsync(
+                $"{_base}/api/debug/screenshot/upload?tag={Uri.EscapeDataString(tag)}", content)
+                .ConfigureAwait(false);
+            if (!resp.IsSuccessStatusCode)
+                RpgHost.Log.Warning($"[screenshot] upload {tag} -> {(int)resp.StatusCode}");
+            else
+                RpgHost.Log.Info($"[screenshot] uploaded {tag} {png.Length}B");
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+            try { RpgHost.Log.Warning("[screenshot] upload failed: " + ex.Message); } catch { }
+        }
+    }
+
+    /// <summary>Fire-and-forget raw scene dump upload (JSON, not the event queue).</summary>
+    public void EnqueueDump(string json, string tag)
+    {
+        if (string.IsNullOrEmpty(json)) return;
+        _ = UploadDumpAsync(json, ScreenshotCapture.SanitizeTag(tag));
+    }
+
+    async Task UploadDumpAsync(string json, string tag)
+    {
+        try
+        {
+            var payload = JsonSerializer.Serialize(new { tag, json }, Json);
+            using var content = new StringContent(payload, Encoding.UTF8, "application/json");
+            var resp = await Http().PostAsync(
+                $"{_base}/api/debug/dump/upload", content).ConfigureAwait(false);
+            if (!resp.IsSuccessStatusCode)
+                RpgHost.Log.Warning($"[dump] upload {tag} -> {(int)resp.StatusCode}");
+            else
+                RpgHost.Log.Info($"[dump] uploaded {tag} {json.Length} chars");
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+            try { RpgHost.Log.Warning("[dump] upload failed: " + ex.Message); } catch { }
+        }
+    }
+
     public void Enqueue(string kind, object? payload, string? matchKey = null)
     {
         var n = Volatile.Read(ref _queued);
@@ -433,12 +502,180 @@ public sealed class RpgClient
                     {
                         if (!share.Value.TryGetInt64(out var points) || points == 0) continue;
                         speciesAllocation += FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Single(
-                            FusionRpg.Core.Stats.Aptitudes.AllocationScope.DemonType, share.Name, points);
+                            FusionRpg.Core.Stats.Aptitudes.AllocationScope.CreatureType, share.Name, points);
                     }
                     speciesAllocations[speciesEntry.Name] = speciesAllocation;
                 }
             }
             CheatState.ApplySpeciesAllocations(speciesAllocations);
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+        }
+    }
+
+    /// <summary>`unique-lawn-wire` (aptitude-sheet AS-1.1) — S4-locked fetch strategy: one
+    /// <c>GET /api/aptitudes/unique/{instanceId}</c> per currently-Bound specimen (never a `uniques`
+    /// map folded into <see cref="RefreshCommanderAllocationAsync"/>'s response, which the spec
+    /// explicitly rules out). The Bound set comes from the SAME <c>MatchHost.Runtime</c> ptr↔instance
+    /// index <see cref="FusionRpg.Injector.Match.UniqueBoundLoadout"/> already reads — never a second
+    /// tracking structure. Replaces <c>CheatState</c>'s whole unique-allocation cache each call
+    /// (matching <see cref="ApplySpeciesAllocations"/>'s own "wholesale replace" contract): a specimen
+    /// no longer Bound this round simply stops appearing, so its allocation cannot go stale. One dead
+    /// specimen's fetch failing (404 after it was released between snapshot and request, or a
+    /// transient network error) is caught PER INSTANCE and skipped — it must never blank out every
+    /// other still-Bound specimen's already-fetched allocation in the same round. Called at the same
+    /// cadence as <see cref="RefreshCommanderAllocationAsync"/>: session start, reconnect, and the
+    /// server's <c>"AptitudesUpdated"</c> broadcast — never a per-hit poll.</summary>
+    public async Task RefreshUniqueAptitudesAsync()
+    {
+        try
+        {
+            var bound = FusionRpg.Injector.Match.MatchHost.Runtime.ToSnapshot().Bindings
+                .Where(b => b.Phase == FusionRpg.Core.Match.UniqueBindingPhase.Bound)
+                .Select(b => b.InstanceId)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct(StringComparer.Ordinal)
+                .ToArray();
+
+            var byInstanceId = new Dictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation>(StringComparer.Ordinal);
+            foreach (var instanceId in bound)
+            {
+                try
+                {
+                    var json = await Http().GetStringAsync(_base + "/api/aptitudes/unique/" + Uri.EscapeDataString(instanceId))
+                        .ConfigureAwait(false);
+                    using var doc = JsonDocument.Parse(json);
+                    if (!doc.RootElement.TryGetProperty("shares", out var sharesEl) || sharesEl.ValueKind != JsonValueKind.Object)
+                        continue;
+
+                    var allocation = FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty;
+                    foreach (var share in sharesEl.EnumerateObject())
+                    {
+                        if (!share.Value.TryGetInt64(out var points) || points == 0) continue;
+                        allocation += FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Single(
+                            FusionRpg.Core.Stats.Aptitudes.AllocationScope.UniqueCreature, share.Name, points);
+                    }
+                    byInstanceId[instanceId] = allocation;
+                }
+                catch (Exception ex)
+                {
+                    // Per-instance only -- one released/unreachable specimen must not blank the rest.
+                    LastError = ex.Message;
+                }
+            }
+            CheatState.ApplyUniqueAllocations(byInstanceId);
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+        }
+    }
+
+    bool _uniqueRefreshInFlight;
+    bool _uniqueRefreshRerunQueued;
+    readonly object _uniqueRefreshGate = new();
+    Task? _uniqueRefreshLoopTask;
+
+    /// <summary>Read-only, incremented once per actual <see cref="RefreshUniqueAptitudesAsync"/>
+    /// attempt made from <see cref="RunBoundAptitudeRefreshLoop"/> — for a coalescing test only (same
+    /// idiom as <c>LawnElementResolver.BoardLookupCount</c>): proves N rapid
+    /// <see cref="TriggerBoundAptitudeRefresh"/> calls cost far fewer than N actual fetches.</summary>
+    public int UniqueRefreshRunCount { get; private set; }
+
+    /// <summary>Test seam only: awaits whatever refresh loop <see cref="TriggerBoundAptitudeRefresh"/>
+    /// most recently started, so a test can assert coalescing deterministically instead of racing a
+    /// fire-and-forget background task. Never called by production code — every real call site fires
+    /// and forgets, exactly as before this seam existed.</summary>
+    public Task WaitForUniqueRefreshLoopForTest() => _uniqueRefreshLoopTask ?? Task.CompletedTask;
+
+    /// <summary>aptitude-sheet AS-1.1b (unique-lawn-wire fix) — the bind-edge cadence trigger
+    /// `MatchHost.ConsumeLastBound` calls fire-and-forget. Coalesces concurrent binds into at most ONE
+    /// extra round trip after the in-flight fetch completes, rather than one full
+    /// <see cref="RefreshUniqueAptitudesAsync"/> sweep per bind: a bind that lands while a fetch is
+    /// already running just sets a "run once more" flag, since the next run reads the CURRENT Bound
+    /// set live (never a snapshot captured at trigger time) and so already covers every bind that
+    /// happened during the in-flight fetch, however many there were. Safe to call from any thread —
+    /// the injector main loop is single-threaded today, but this makes no assumption of that.</summary>
+    public void TriggerBoundAptitudeRefresh()
+    {
+        lock (_uniqueRefreshGate)
+        {
+            if (_uniqueRefreshInFlight) { _uniqueRefreshRerunQueued = true; return; }
+            _uniqueRefreshInFlight = true;
+            _uniqueRefreshLoopTask = RunBoundAptitudeRefreshLoop();
+        }
+    }
+
+    async Task RunBoundAptitudeRefreshLoop()
+    {
+        try
+        {
+            while (true)
+            {
+                UniqueRefreshRunCount++;
+                await RefreshUniqueAptitudesAsync().ConfigureAwait(false);
+                lock (_uniqueRefreshGate)
+                {
+                    if (!_uniqueRefreshRerunQueued)
+                    {
+                        _uniqueRefreshInFlight = false;
+                        return;
+                    }
+                    _uniqueRefreshRerunQueued = false;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            lock (_uniqueRefreshGate)
+            {
+                _uniqueRefreshInFlight = false;
+                _uniqueRefreshRerunQueued = false;
+            }
+            LastError = ex.Message;
+        }
+    }
+
+    /// <summary>lawn-tree-hydrate (T13): the transport half of the tree bound-atoms delegate
+    /// <c>CheatState.ActorHub</c> needs. Mirrors <see cref="RefreshCommanderAllocationAsync"/>'s own
+    /// shape exactly (same current-player lookup, same try/catch-to-LastError) — the Injector has no
+    /// SQL store, so <c>TreeBoundAtoms.ForPlayer</c> (SQL-backed) cannot run in-process; this reads
+    /// the one HTTP round trip the Server exposes for it,
+    /// <c>GET /api/passive-tree/bound-atoms/{playerId}</c>, rather than shipping tuning JSON and a
+    /// store into the injector. Called at session start (<see cref="StartAsync"/>), on reconnect, and
+    /// on the same <c>"PassiveTreeUpdated"</c> SignalR broadcast <c>PassiveTreeEndpoints.cs</c> already
+    /// sends on every allocate — never on a per-hit poll.</summary>
+    public async Task RefreshTreeBoundAtomsAsync()
+    {
+        try
+        {
+            var playerJson = await Http().GetStringAsync(_base + "/api/players/current").ConfigureAwait(false);
+            using var playerDoc = JsonDocument.Parse(playerJson);
+            var playerId = playerDoc.RootElement.TryGetProperty("id", out var idEl) && idEl.TryGetInt64(out var pid)
+                ? pid
+                : 0L;
+            if (playerId <= 0) return;
+            var json = await Http().GetStringAsync(_base + "/api/passive-tree/bound-atoms/" + playerId).ConfigureAwait(false);
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.ValueKind != JsonValueKind.Array) return;
+
+            var atoms = new List<FusionRpg.Core.Stats.Derived.Subsystems.BoundDerivedAtom>();
+            foreach (var el in doc.RootElement.EnumerateArray())
+            {
+                var channel = el.TryGetProperty("channel", out var cEl) ? cEl.GetString() : null;
+                var opText = el.TryGetProperty("op", out var oEl) ? oEl.GetString() : null;
+                var sourceId = el.TryGetProperty("sourceId", out var sEl) ? sEl.GetString() : null;
+                if (string.IsNullOrEmpty(channel) || string.IsNullOrEmpty(opText) || string.IsNullOrEmpty(sourceId))
+                    continue;
+                if (!el.TryGetProperty("amount", out var aEl) || !aEl.TryGetDouble(out var amount))
+                    continue;
+                if (!Enum.TryParse<FusionRpg.Core.Stats.Derived.DerivedModifierOp>(opText, ignoreCase: true, out var op))
+                    continue; // an unrecognized op is skipped visibly here, never coerced to Flat
+                atoms.Add(new FusionRpg.Core.Stats.Derived.Subsystems.BoundDerivedAtom(channel, op, amount, sourceId));
+            }
+            FusionRpg.Injector.Stats.TreeBoundAtomsCache.Apply(atoms);
         }
         catch (Exception ex)
         {
@@ -481,7 +718,7 @@ public sealed class RpgClient
         }
     }
 
-    /// <summary>demon-lawn-deploy T2.1: session cache for the plant-side deploy roster at
+    /// <summary>creature-lawn-deploy T2.1: session cache for the plant-side deploy roster at
     /// board.start — same cadence and same "caller resolves, cache stores" split as
     /// <see cref="RefreshCommanderSnapshotCacheAsync"/>. Never called from MatchHost.Apply. A roster
     /// or patron read failure leaves the PREVIOUS cache standing (matching this method's own sibling)
@@ -498,8 +735,8 @@ public sealed class RpgClient
                 : 0L;
             if (playerId <= 0) return;
 
-            var rosterJson = await Http().GetStringAsync(_base + "/api/demons/" + playerId).ConfigureAwait(false);
-            var roster = JsonSerializer.Deserialize<DemonRosterDto>(rosterJson, Json);
+            var rosterJson = await Http().GetStringAsync(_base + "/api/creatures/" + playerId).ConfigureAwait(false);
+            var roster = JsonSerializer.Deserialize<CreatureRosterDto>(rosterJson, Json);
             if (roster == null) return;
 
             string? patronInstanceId = null;
@@ -520,20 +757,20 @@ public sealed class RpgClient
                 return;
             }
 
-            // demon-lawn-deploy live-check (2026-09-07): a HypnoAlly-mode species has no deploy path
+            // creature-lawn-deploy live-check (2026-09-07): a HypnoAlly-mode species has no deploy path
             // yet (T1.4's own refusal, `DeployAsync` returns `deploy.hypno-ally-not-implemented`) —
             // caught live by actually clicking a real fired prompt's own accept button, not guessed.
-            // `DemonSpeciesCatalog` is already `Configure`d on this process at mod load
+            // `CreatureSpeciesCatalog` is already `Configure`d on this process at mod load
             // (`RpgHost.Initialize`), so this is an in-process lookup against the same 829-species
             // roster the frontend's own species index resolves display info from — no new REST call.
             // Unknown-species and not-yet-configured both fail CLOSED (excluded), matching this
             // method's own patron-read-failure branch above: fewer options, never a guess.
             var eligible = roster.Items
                 .Where(it => !string.Equals(it.Actor.InstanceId, patronInstanceId, StringComparison.Ordinal))
-                .Where(it => FusionRpg.Core.Demons.DemonSpeciesCatalog.IsConfigured
-                    && FusionRpg.Core.Demons.DemonSpeciesCatalog.IsKnown(it.Profile.SpeciesId)
-                    && FusionRpg.Core.Demons.DemonSpeciesCatalog.Get(it.Profile.SpeciesId).DeployMode
-                        != FusionRpg.Core.Demons.DemonDeployMode.HypnoAlly)
+                .Where(it => FusionRpg.Core.Creatures.CreatureSpeciesCatalog.IsConfigured
+                    && FusionRpg.Core.Creatures.CreatureSpeciesCatalog.IsKnown(it.Profile.SpeciesId)
+                    && FusionRpg.Core.Creatures.CreatureSpeciesCatalog.Get(it.Profile.SpeciesId).DeployMode
+                        != FusionRpg.Core.Creatures.CreatureDeployMode.HypnoAlly)
                 .Select(it => new FusionRpg.Core.Match.LawnDeployRosterEntry(it.Actor.InstanceId, it.Profile.SpeciesId))
                 .ToList();
             FusionRpg.Core.Match.LawnDeployRosterSessionCache.Apply(eligible);

@@ -15,7 +15,7 @@ namespace FusionRpg.Core.Battle;
 /// returns exactly the single full-weight primary component the engine built before E3 existed — same
 /// shape, same 1.0 — so every golden is unmoved. Raising it is a balance decision
 /// <c>combat-unification-todo.md</c> marks <b>ask-first</b>, and it <b>moves the expedition
-/// goldens</b>: wave demons carry a real <c>ElementSecondary</c> (<c>WaveCatalog.cs:115</c>) even
+/// goldens</b>: wave creatures carry a real <c>ElementSecondary</c> (<c>WaveCatalog.cs:115</c>) even
 /// though the hand-built battle goldens do not.</para>
 /// </summary>
 public static class HybridPayload
@@ -51,5 +51,30 @@ public static class HybridPayload
             new ElementPayloadComponent(p, 1.0 - secondaryWeight),
             new ElementPayloadComponent(s, secondaryWeight),
         };
+    }
+
+    /// <summary>
+    /// The grant-overlay shape of <see cref="Build"/>'s result: the same
+    /// <c>[{"element": id, "weight": w}, ...]</c> list <c>AtomCompiler.EmitDefAndGrant</c> bakes into a
+    /// compiled grant's <c>elementPayload</c> (Phase 7 F3.1), and <c>DamagePacketBuilder.FromOverlay</c>
+    /// reads back. Extracted here (lawn-combat-wire T10, spec-basic-attack-grant.md) so a SECOND caller
+    /// — the per-actor lawn basic-attack grant, which bakes an owner's element directly rather than
+    /// through the atom compiler — produces byte-identical overlay shape without a second
+    /// implementation of this mapping. A Neutral owner (no primary) returns null, never an empty list
+    /// riding the overlay — matching <see cref="Build"/>'s own "two ways to have no hybrid" collapse.
+    /// </summary>
+    public static List<Dictionary<string, object?>>? BuildOverlay(
+        ElementTypeId? primary, ElementTypeId? secondary, int secondaryWeightMilli)
+    {
+        var components = Build(primary, secondary, secondaryWeightMilli);
+        if (components.Length == 0) return null;
+
+        return components
+            .Select(c => new Dictionary<string, object?>(StringComparer.Ordinal)
+            {
+                ["element"] = c.Element.ToElementId(),
+                ["weight"] = c.Weight,
+            })
+            .ToList();
     }
 }

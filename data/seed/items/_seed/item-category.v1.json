@@ -24,7 +24,7 @@
       "stackIntent": "qty",
       "ownerScope": "player",
       "store": "stack",
-      "consumer": "DemonMaterialCatalog (inventory rows with validated ids; demon-fusion consumes these)",
+      "consumer": "CreatureMaterialCatalog (inventory rows with validated ids; creature-fusion consumes these)",
       "declareOnly": false
     },
     {

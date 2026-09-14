@@ -25,7 +25,7 @@
       "id": "set.cornfume-001",
       "nameKey": "set.spore-headed-zombie",
       "name": "Spore-Headed Zombie",
-      "themeKey": "demon.cornfume",
+      "themeKey": "creature.cornfume",
       "members": [
         {
           "role": "armament-primary",

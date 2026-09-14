@@ -25,7 +25,7 @@
       "id": "set.cherryumbrella-001",
       "nameKey": "set.cherry-umbrella",
       "name": "Cherry Umbrella",
-      "themeKey": "demon.cherryumbrella",
+      "themeKey": "creature.cherryumbrella",
       "members": [
         {
           "role": "core-guard",

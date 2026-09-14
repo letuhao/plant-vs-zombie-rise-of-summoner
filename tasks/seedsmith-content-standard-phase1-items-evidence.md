@@ -7,8 +7,8 @@ Spec: [docs/architecture/seedsmith-content-standard/spec-content-completeness-it
 This file is a standalone evidence log — `tasks/seedsmith-content-standard-todo.md` is NOT edited
 by this work (other sessions are building Phases 2-5 in parallel against it right now; confirmed via
 `git status` showing uncommitted concurrent edits to `adapters/actions/description_backfill/`,
-`adapters/demons/completeness.py`, `adapters/dungeon/completeness.py`, and a new, untracked
-`spec-content-completeness-demons.md` at the time this work started).
+`adapters/creatures/completeness.py`, `adapters/dungeon/completeness.py`, and a new, untracked
+`spec-content-completeness-creatures.md` at the time this work started).
 
 ---
 
@@ -203,7 +203,7 @@ drift continuing, not from this task's own work. Evidence for every one of the 1
 ```
 $ grep -nE "content_completeness|pipeline\.staleness|pipeline\.backfill|language_consistency|from seedsmith.report.cli|basetypegen\.run|droptablegen\.run|recipegen\.run|milestonegen\.run" \
     tests/adapters/trees/test_nodegen_vocab.py tests/test_actions_adapter.py tests/test_coverage_report.py \
-    tests/test_demon_themes.py tests/test_distribution_planner.py tests/test_dungeon_registries.py \
+    tests/test_creature_themes.py tests/test_distribution_planner.py tests/test_dungeon_registries.py \
     tests/test_items_adapter.py tests/test_sampling_quality.py tests/test_usage_stats.py
 (no matches in any of the 9 files)
 ```
@@ -212,18 +212,18 @@ $ grep -nE "content_completeness|pipeline\.staleness|pipeline\.backfill|language
 failures are about — atom-family/affix vocabulary (`tests/adapters/trees/test_nodegen_vocab.py`,
 `test_actions_adapter.py`, `test_coverage_report.py`, `test_distribution_planner.py`,
 `test_dungeon_registries.py`, `test_usage_stats.py`, all asserting a stale "100 families" count
-against a corpus that is really 112 today) and items/demon corpus growth
-(`test_items_adapter.py`, `test_sampling_quality.py`, `test_demon_themes.py`):
+against a corpus that is really 112 today) and items/creature corpus growth
+(`test_items_adapter.py`, `test_sampling_quality.py`, `test_creature_themes.py`):
 
 ```
 M  data/seed/items/drop-tables/d1.json
 M  data/seed/dungeon/events/_index.json
-A  data/seed/dungeon/events/event.story-demon.cactus-001.json
-A  data/seed/dungeon/events/event.story-demon.dolldiamond-001.json
+A  data/seed/dungeon/events/event.story-creature.cactus-001.json
+A  data/seed/dungeon/events/event.story-creature.dolldiamond-001.json
 M  data/seed/dungeon/rooms/room.wild-*.json  (10 files)
 AM tools/seedsmith/seedsmith/adapters/actions/description_backfill/__init__.py
 M  tools/seedsmith/seedsmith/adapters/actions/kinds.py
-A  tools/seedsmith/seedsmith/adapters/demons/completeness.py
+A  tools/seedsmith/seedsmith/adapters/creatures/completeness.py
 A  tools/seedsmith/seedsmith/adapters/dungeon/completeness.py
 ```
 (full listing is longer; these are the rows that explain the 15 failures — other Phases of this
@@ -238,7 +238,7 @@ AssertionError: 1516 != 1513
 # test's own comment: "...3 new consumables... 2 new milestones, 2 new recipes... all landed in
 # the same live corpus this test loads" -- a self-documented moving baseline, not a regression.
 
-$ python -m pytest tests/test_demon_themes.py -q
+$ python -m pytest tests/test_creature_themes.py -q
 AssertionError: the corpus moved -- re-measure before trusting this test's count
 assert 40 == 38
 # test's own assertion message literally states the corpus is expected to move.

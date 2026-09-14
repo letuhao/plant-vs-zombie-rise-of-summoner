@@ -14,12 +14,12 @@ or the adventure-spell label.
 [fe-game-foundation.md](../architecture/fe-game-foundation.md) · DPLP observe≠control ·
 [spec-primary-stats.md](../architecture/class-system/spec-primary-stats.md) ·
 [definitions.md](../architecture/effect-atom/definitions.md) §7 standing axes ·
-[demon-system-map.md](../architecture/demon-system-map.md) Vocabulary ·
+[creature-system-map.md](../architecture/creature-system-map.md) Vocabulary ·
 [resource-hub-ssot.md](../architecture/resource-hub-ssot.md) ·
 [ssot-equip-slots.md](../architecture/item/ssot-equip-slots.md) §2.10
 
 **Why this file exists.** Five perspectives ran on the first draft (UX / game-ui-ux, DPLP,
-character-sheet systems, GG-9 FE duplication, demon / HoMM3 vocabulary). They agreed the *split*
+character-sheet systems, GG-9 FE duplication, creature / HoMM3 vocabulary). They agreed the *split*
 (one collection, one sheet, overlap on canvas, commander off-tile, two Suns) and rejected the
 *wording* that contradicted closed vocabularies.
 
@@ -36,7 +36,7 @@ plate E and §7 adventure labelling do **not**.
 | DPLP | revise before `/spec` | Intent enqueue; no FE A2; `sel` = `instanceId` only; Unity does not pause under sheet |
 | Character sheet | do not implement from plate E | Closed twelve, five Standing axes, HP not Vitality, unlock-honest doll |
 | GG-9 FE | does not hold as extract-and-wire | New `ActorCollection`; Creatures consumes; occupant adapter required |
-| Demon / HoMM3 | do not graduate | Combat book, not adventure; Fielded / Wave, not Yours / Wild |
+| Creature / HoMM3 | do not graduate | Combat book, not adventure; Fielded / Wave, not Yours / Wild |
 
 ---
 
@@ -46,7 +46,7 @@ plate E and §7 adventure labelling do **not**.
 |---|---|---|
 | 1 | Right overlay ~320px hid spawn columns on a **12-col** lawn at 1280×720 | Reserved **left** column; camera shrinks; one dock-width token |
 | 2 | Inspect, spawn, and orders shared Enter / Space / click. IA: Space = pause. `wireKeyboardNav` also confirms on Space | §10.1 `ActionTargeting`. Space = pause. Enter confirms. Esc cancels armed order first. Occupied click does not clobber targeting |
-| 3 | `?sel=` for general demons | `sel` is `instanceId` only. Generals are in-memory, die-cleared |
+| 3 | `?sel=` for general creatures | `sel` is `instanceId` only. Generals are in-memory, die-cleared |
 | 4 | “Range is real here” / “confirm casts” implied FE battle A2 on the PvZ lawn | Enqueue Intent with declared target kind; server/injector re-resolves; highlights are observe chrome |
 | 5 | Plate primaries were six invented names (Grace, Ward, Insight, Fury, Calm) | Closed twelve from `spec-primary-stats.md` |
 | 6 | Standing drew three bars / truncated labels | All five `definitions.md` axes. Stale `PowerCategory` in `types.ts` called out |
@@ -66,7 +66,7 @@ sheet-over-Phaser. HUD fielded chips are `ActorChip` on bound uniques, not `#typ
 ## Manufactured owner questions (struck)
 
 Always-list on singleton cells, and wave Paths = read-only species tree, were already decided in
-the first draft. Real leftover: **Dave `CommanderId` vs unique-demon Commander** (Vocabulary
+the first draft. Real leftover: **Dave `CommanderId` vs unique-creature Commander** (Vocabulary
 2026-09-06).
 
 ---

@@ -1,8 +1,8 @@
 using System.Text.Json;
 using FusionRpg.Contracts;
-using FusionRpg.Core.Demons;
-using FusionRpg.Core.Demons.Fusion;
-using FusionRpg.Core.Demons.Materialise;
+using FusionRpg.Core.Creatures;
+using FusionRpg.Core.Creatures.Fusion;
+using FusionRpg.Core.Creatures.Materialise;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived;
 using Microsoft.Data.Sqlite;
@@ -16,7 +16,7 @@ public static class FusionModes
     public const string Recipe = "recipe";
 }
 
-/// <summary>WAVE F2.4 (demon-standalone, 2026-09-07): one player-selected inheritance pick — an atom
+/// <summary>WAVE F2.4 (creature-standalone, 2026-09-07): one player-selected inheritance pick — an atom
 /// a fusion output should carry verbatim from one of its two sacrifices' own materialised roll
 /// (F2.2). <see cref="SourceInstanceId"/> must name one of the request's own
 /// <see cref="FusionRequest.SacrificeInstanceIds"/>; <see cref="AtomId"/> must be an atom that
@@ -33,14 +33,14 @@ public sealed record FusionRequest(
 public sealed record FusionOutcome(
     bool Replayed,
     string Mode,
-    DemonSpecimenDto? Base,
-    DemonSpecimenDto? Minted,
+    CreatureSpecimenDto? Base,
+    CreatureSpecimenDto? Minted,
     string? RecipeId,
     bool NewlyDiscovered,
     long DiscoverySouls,
     SoulBalanceDto Balance);
 
-public sealed record DemonLineageRow(long Id, string InstanceId, string Event, string DetailJson, string T);
+public sealed record CreatureLineageRow(long Id, string InstanceId, string Event, string DetailJson, string T);
 
 public sealed partial class RpgStore
 {
@@ -48,7 +48,7 @@ public sealed partial class RpgStore
     internal Action? FusionMidTestHook;
 
     /// <summary>
-    /// The fusion transaction (spec-demon-fusion.md): replay-check → validate → spend Souls +
+    /// The fusion transaction (spec-creature-fusion.md): replay-check → validate → spend Souls +
     /// materials → consume sacrifices → mutate base or mint output → lineage → log — ONE
     /// gate-serialized transaction, refusals write nothing (ExecuteSummon discipline).
     /// </summary>
@@ -130,7 +130,7 @@ public sealed partial class RpgStore
         using (var cmd = db.CreateCommand())
         {
             cmd.CommandText = """
-                UPDATE rpg_demon_profiles SET star = $s, revision = revision + 1
+                UPDATE rpg_creature_profiles SET star = $s, revision = revision + 1
                 WHERE instance_id = $id;
                 """;
             cmd.Parameters.AddWithValue("$s", targetStar);
@@ -161,19 +161,19 @@ public sealed partial class RpgStore
         if (!StarPolicy.CanPromote(baseRarity, baseProfile!.Star, baseProfile.Promoted))
             return (false, "promotion.not-ready", null);
 
-        var newRarity = DemonRarityLadder.OneRungAbove(baseRarity);
+        var newRarity = CreatureRarityLadder.OneRungAbove(baseRarity);
         var cost = FusionCostTable.Promotion(newRarity);
         var spendReason = SpendFusionCostsUnlocked(db, playerId, corr, cost, baseProfile.ElementPrimary, now);
         if (spendReason != "") return (false, spendReason, null);
         FusionMidTestHook?.Invoke();
 
-        var species = DemonSpeciesCatalog.Get(baseProfile.SpeciesId);
+        var species = CreatureSpeciesCatalog.Get(baseProfile.SpeciesId);
         var traits = FusionRoller.RollPromotionTraits(
             species, baseProfile.TraitIds, FusionRoller.SlotsFor(newRarity), seed);
         using (var cmd = db.CreateCommand())
         {
             cmd.CommandText = """
-                UPDATE rpg_demon_profiles SET
+                UPDATE rpg_creature_profiles SET
                   rarity = $r, star = 0, promoted = 1, traits_json = $traits, revision = revision + 1
                 WHERE instance_id = $id;
                 """;
@@ -198,15 +198,15 @@ public sealed partial class RpgStore
     (bool Ok, string Reason, FusionOutcome? Outcome) RecipeUnlocked(
         SqliteConnection db, long playerId, string corr, FusionRequest request, ulong seed, string now)
     {
-        // Recipe mode has no base — refusing a stray base id beats silently ignoring a demon the
+        // Recipe mode has no base — refusing a stray base id beats silently ignoring a creature the
         // caller thought was participating (2026-08-21 review S4).
         if (request.BaseInstanceId != null) return (false, "base.unexpected", null);
         var validation = ValidateSacrificesUnlocked(db, playerId, request, requiredCount: 2, requireRarity: null);
         if (validation != "") return (false, validation, null);
 
-        var profileA = ReadDemonProfileUnlocked(db, request.SacrificeInstanceIds[0])!;
-        var profileB = ReadDemonProfileUnlocked(db, request.SacrificeInstanceIds[1])!;
-        var recipe = DemonRecipeCatalog.TryMatch(profileA.SpeciesId, profileB.SpeciesId);
+        var profileA = ReadCreatureProfileUnlocked(db, request.SacrificeInstanceIds[0])!;
+        var profileB = ReadCreatureProfileUnlocked(db, request.SacrificeInstanceIds[1])!;
+        var recipe = CreatureRecipeCatalog.TryMatch(profileA.SpeciesId, profileB.SpeciesId);
         if (recipe is null) return (false, "recipe.unknown", null);
 
         var combinedTraits = profileA.TraitIds.Concat(profileB.TraitIds)
@@ -215,9 +215,9 @@ public sealed partial class RpgStore
         if (!combinedTraits.Contains(request.PickedTraitId, StringComparer.Ordinal))
             return (false, "trait.not-on-inputs", null);
 
-        var output = DemonSpeciesCatalog.Get(recipe.OutputSpeciesId);
+        var output = CreatureSpeciesCatalog.Get(recipe.OutputSpeciesId);
 
-        // WAVE F2.4 (demon-standalone, 2026-09-07): player-selected inheritance picks — validated
+        // WAVE F2.4 (creature-standalone, 2026-09-07): player-selected inheritance picks — validated
         // and priced before any spend, matching this method's own established refusal order.
         var picks = request.Picks ?? Array.Empty<FusionPick>();
         IReadOnlyList<ForcedPoolPick> forcedPicks = Array.Empty<ForcedPoolPick>();
@@ -247,7 +247,7 @@ public sealed partial class RpgStore
             foreach (var pick in picks)
             {
                 MaterialisedRoll? pickSourceRoll;
-                DemonProfileDto sourceProfile;
+                CreatureProfileDto sourceProfile;
                 if (pick.SourceInstanceId == request.SacrificeInstanceIds[0])
                 {
                     pickSourceRoll = sourceRollA ??= GetSpecimenMaterialisedRoll(pick.SourceInstanceId);
@@ -269,13 +269,13 @@ public sealed partial class RpgStore
                 if (atom is null) return (false, "picks.atom-not-rolled", null);
                 resolvedAtoms.Add(atom);
 
-                if (!DemonRarityIds.TryParse(sourceProfile.Rarity, out var sourceRarity))
+                if (!CreatureRarityIds.TryParse(sourceProfile.Rarity, out var sourceRarity))
                     return (false, "picks.source-rarity-unknown", null);
                 // InheritCostByRarity only covers OutputEligibilityFloor-and-above (Cultivated..
                 // Almanac, the same rung set RecipeCost itself covers) — a below-floor source has no
                 // entry, and FusionCostTable.InheritPick throws rather than guessing a price. Guard
                 // here so a below-floor pick is a named refusal, never an unhandled exception.
-                if (!DemonRarityLadder.AtLeast(sourceRarity, DemonRecipeCatalog.OutputEligibilityFloor))
+                if (!CreatureRarityLadder.AtLeast(sourceRarity, CreatureRecipeCatalog.OutputEligibilityFloor))
                     return (false, "picks.source-below-inherit-floor", null);
                 picksSouls += FusionCostTable.InheritPick(sourceRarity);
             }
@@ -295,7 +295,7 @@ public sealed partial class RpgStore
         FusionMidTestHook?.Invoke();
 
         var roll = FusionRoller.Roll(output, output.BaseRarity, request.PickedTraitId!, combinedTraits, seed);
-        var minted = MintDemonUnlocked(db, playerId, new DemonMintSpec
+        var minted = MintCreatureUnlocked(db, playerId, new CreatureMintSpec
         {
             SpeciesId = output.SpeciesId,
             Side = output.Side,
@@ -461,20 +461,20 @@ public sealed partial class RpgStore
 
     // ---- shared validation + spend helpers ----
 
-    (bool Ok, string Reason, UniqueActorDto? Actor, DemonProfileDto? Profile, DemonRarity Rarity)
+    (bool Ok, string Reason, UniqueActorDto? Actor, CreatureProfileDto? Profile, CreatureRarity Rarity)
         ReadFusionBaseUnlocked(SqliteConnection db, long playerId, string? instanceId)
     {
         if (string.IsNullOrWhiteSpace(instanceId))
             return (false, "base.missing", null, null, default);
         var actor = ReadUniqueActorUnlocked(db, instanceId.Trim());
-        var profile = actor == null ? null : ReadDemonProfileUnlocked(db, actor.InstanceId);
+        var profile = actor == null ? null : ReadCreatureProfileUnlocked(db, actor.InstanceId);
         if (actor is null || actor.PlayerId != playerId || profile is null)
             return (false, "base.missing", null, null, default);
         if (!string.Equals(actor.Phase, UniqueActorPhases.Roster, StringComparison.Ordinal))
             return (false, "base.phase", null, null, default);
         if (HasActiveExpeditionMembershipUnlocked(db, actor.InstanceId))
             return (false, "base.on-expedition", null, null, default);
-        if (!DemonRarityIds.TryParse(profile.Rarity, out var rarity))
+        if (!CreatureRarityIds.TryParse(profile.Rarity, out var rarity))
             return (false, "base.rarity", null, null, default);
         return (true, "", actor, profile, rarity);
     }
@@ -482,7 +482,7 @@ public sealed partial class RpgStore
     /// <summary>"" = valid; otherwise the refusal reason. Locked specimens are player-protected
     /// from consumption — the lock's teeth (owner lock 1/7).</summary>
     string ValidateSacrificesUnlocked(
-        SqliteConnection db, long playerId, FusionRequest request, int requiredCount, DemonRarity? requireRarity)
+        SqliteConnection db, long playerId, FusionRequest request, int requiredCount, CreatureRarity? requireRarity)
     {
         var ids = request.SacrificeInstanceIds;
         if (ids.Count != requiredCount) return "sacrifices.count";
@@ -492,7 +492,7 @@ public sealed partial class RpgStore
             if (string.Equals(id, request.BaseInstanceId, StringComparison.Ordinal))
                 return "sacrifice.is-base";
             var actor = ReadUniqueActorUnlocked(db, id);
-            var profile = actor == null ? null : ReadDemonProfileUnlocked(db, id);
+            var profile = actor == null ? null : ReadCreatureProfileUnlocked(db, id);
             if (actor is null || actor.PlayerId != playerId || profile is null)
                 return "sacrifice.invalid";
             if (!string.Equals(actor.Phase, UniqueActorPhases.Roster, StringComparison.Ordinal))
@@ -500,11 +500,11 @@ public sealed partial class RpgStore
             if (profile.Locked) return "sacrifice.locked";
             if (HasActiveExpeditionMembershipUnlocked(db, id)) return "sacrifice.on-expedition";
             // The designation has teeth like the lock: the active patron is unconsumable
-            // (spec-patron-demon.md) — it may still LEAD a merge, only consumption refuses.
+            // (spec-patron-creature.md) — it may still LEAD a merge, only consumption refuses.
             if (IsPatronUnlocked(db, playerId, id)) return "sacrifice.is-patron";
             if (requireRarity is { } band)
             {
-                if (!DemonRarityIds.TryParse(profile.Rarity, out var rarity) || rarity != band)
+                if (!CreatureRarityIds.TryParse(profile.Rarity, out var rarity) || rarity != band)
                     return "sacrifice.rarity";
             }
         }
@@ -524,7 +524,7 @@ public sealed partial class RpgStore
             ("shard." + cost.ShardRarity.ToId(), cost.ShardCount),
             ("essence." + resultElementId, cost.EssenceCount)
         };
-        if (!TrySpendDemonMaterialsUnlocked(db, playerId, drops, now))
+        if (!TrySpendCreatureMaterialsUnlocked(db, playerId, drops, now))
             return "materials.insufficient";
 
         if (!AppendSoulLedgerUnlocked(db, playerId, 0, -cost.Souls, SoulEarnPolicy.Reasons.Fusion,
@@ -533,16 +533,16 @@ public sealed partial class RpgStore
         return "";
     }
 
-    bool TrySpendDemonMaterialsUnlocked(
+    bool TrySpendCreatureMaterialsUnlocked(
         SqliteConnection db, long playerId, IReadOnlyList<(string MaterialId, long Qty)> needs, string now)
     {
         foreach (var (materialId, qty) in needs)
         {
-            if (!DemonMaterialCatalog.IsKnown(materialId))
-                throw new ArgumentException($"Unknown demon material id '{materialId}'.");
+            if (!CreatureMaterialCatalog.IsKnown(materialId))
+                throw new ArgumentException($"Unknown creature material id '{materialId}'.");
             using var cmd = db.CreateCommand();
             cmd.CommandText = """
-                UPDATE rpg_demon_materials SET qty = qty - $q, updated_utc = $t
+                UPDATE rpg_creature_materials SET qty = qty - $q, updated_utc = $t
                 WHERE player_id = $p AND material_id = $m AND qty >= $q;
                 """;
             cmd.Parameters.AddWithValue("$q", qty);
@@ -583,7 +583,7 @@ public sealed partial class RpgStore
     {
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
-            INSERT INTO rpg_demon_lineage(instance_id, event, detail_json, t)
+            INSERT INTO rpg_creature_lineage(instance_id, event, detail_json, t)
             VALUES($i, $e, $d, $t);
             """;
         cmd.Parameters.AddWithValue("$i", instanceId);
@@ -614,22 +614,22 @@ public sealed partial class RpgStore
 
     // ---- reads ----
 
-    public List<DemonLineageRow> ListDemonLineage(string instanceId, int limit = 100)
+    public List<CreatureLineageRow> ListCreatureLineage(string instanceId, int limit = 100)
     {
         lock (_gate)
         {
             using var db = OpenUnlocked();
             using var cmd = db.CreateCommand();
             cmd.CommandText = """
-                SELECT id, instance_id, event, detail_json, t FROM rpg_demon_lineage
+                SELECT id, instance_id, event, detail_json, t FROM rpg_creature_lineage
                 WHERE instance_id = $i ORDER BY id ASC LIMIT $l;
                 """;
             cmd.Parameters.AddWithValue("$i", instanceId ?? "");
             cmd.Parameters.AddWithValue("$l", limit);
             using var r = cmd.ExecuteReader();
-            var rows = new List<DemonLineageRow>();
+            var rows = new List<CreatureLineageRow>();
             while (r.Read())
-                rows.Add(new DemonLineageRow(r.GetInt64(0), r.GetString(1), r.GetString(2), r.GetString(3), r.GetString(4)));
+                rows.Add(new CreatureLineageRow(r.GetInt64(0), r.GetString(1), r.GetString(2), r.GetString(3), r.GetString(4)));
             return rows;
         }
     }
@@ -660,11 +660,11 @@ public sealed partial class RpgStore
         return (r.GetString(0), r.GetString(1), r.GetString(2), ParseSeed(r.GetString(3)));
     }
 
-    DemonSpecimenDto? ReadSpecimenUnlocked(SqliteConnection db, string instanceId)
+    CreatureSpecimenDto? ReadSpecimenUnlocked(SqliteConnection db, string instanceId)
     {
         var actor = ReadUniqueActorUnlocked(db, instanceId);
-        var profile = actor == null ? null : ReadDemonProfileUnlocked(db, instanceId);
-        return actor == null || profile == null ? null : new DemonSpecimenDto { Actor = actor, Profile = profile };
+        var profile = actor == null ? null : ReadCreatureProfileUnlocked(db, instanceId);
+        return actor == null || profile == null ? null : new CreatureSpecimenDto { Actor = actor, Profile = profile };
     }
 
     /// <summary>
@@ -678,8 +678,8 @@ public sealed partial class RpgStore
     {
         using var doc = JsonDocument.Parse(log.OutputJson);
         var root = doc.RootElement;
-        DemonSpecimenDto? baseSpecimen = null;
-        DemonSpecimenDto? minted = null;
+        CreatureSpecimenDto? baseSpecimen = null;
+        CreatureSpecimenDto? minted = null;
         string? recipeId = null;
         if (root.TryGetProperty("baseInstanceId", out var b) && b.GetString() is { } baseId)
             baseSpecimen = ReadSpecimenUnlocked(db, baseId);

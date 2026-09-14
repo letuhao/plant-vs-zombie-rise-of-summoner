@@ -25,7 +25,7 @@
       "id": "set.scaredfume-001",
       "nameKey": "set.spore-cloud-burst",
       "name": "Spore Cloud Burst",
-      "themeKey": "demon.scaredfume",
+      "themeKey": "creature.scaredfume",
       "members": [
         {
           "role": "armament-primary",

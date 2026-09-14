@@ -6,7 +6,7 @@ stage chrome. **Architecture capability map (SPECIFY):**
 [lawn-interactive/](../architecture/lawn-interactive/). ActorSheet tabs are a **sibling** program
 ([actor-sheet-map.md](../architecture/actor-sheet-map.md)) — do not implement lawn chrome from this
 file alone, and do not park lawn work inside `tasks/actor-sheet-*`. **Audit fold same day** — five
-perspectives (UX, DPLP, character-sheet systems, GG-9 FE, demon vocabulary). Findings that changed
+perspectives (UX, DPLP, character-sheet systems, GG-9 FE, creature vocabulary). Findings that changed
 the draft are in §16; do not implement from the first pass of plate E aptitude names or the
 adventure-spell label.
 
@@ -18,7 +18,7 @@ acceptance: [12-lawn-stage.html](12-lawn-stage.html). Architecture locks it must
 [information-architecture.md](information-architecture.md) §2.3.
 
 **Loop this extends:** [the-loops.md](../guide/the-loops.md) place **1. Lawn — first core**. It also
-surfaces spine A (power), B (demons on the board), C (gear on a unique). It does not invent a
+surfaces spine A (power), B (creatures on the board), C (gear on a unique). It does not invent a
 parallel pitch and it does not make the lawn the whole war. Multi-perspective audit:
 [lawn-interactive-audit-2026-09-06.md](../research/lawn-interactive-audit-2026-09-06.md).
 
@@ -28,13 +28,13 @@ parallel pitch and it does not make the lawn the whole war. Multi-perspective au
 
 ```
 [x] Subsystems: player GUI, lawn projector (DPLP), unique actor, actor hub / derived stats,
-    resources, actions, demon vocabulary (general vs unique vs commander).
+    resources, actions, creature vocabulary (general vs unique vs commander).
 [x] Read this session: game-gui-principles.md · information-architecture.md · design/README.md ·
     fe-game-foundation.md (to RT-15 + stage lifetime) · decisions.md Game GUI / Resource /
     UniqueActor / Lawn projector rows (grep + section) · spec-derived-stat-sheet.md ·
     spec-action-layer.md · spec-equip-and-paperdoll.md · spec-magnitude-and-units.md (spine) ·
     actor-hud-ideal.md · resource-hub-ssot.md §1–§2 · unique-actor-runtime.md §1–§3 ·
-    demon-system-map.md Vocabulary · the-loops.md · the-lawn.md · software-architecture.md §1–§3 ·
+    creature-system-map.md Vocabulary · the-loops.md · the-lawn.md · software-architecture.md §1–§3 ·
     plates 04, 08, 10, 11 headers · ActorPanel.tsx and tab bodies against CODE.
 [x] decisions.md Game GUI lock held: one stage, layers over it, bands, no new top-level route.
 [x] Factual claims cite file:line. Code beats plate 08 comments.
@@ -61,14 +61,14 @@ A downstream session reads this file. These constrain every component below:
 3. **RPG features live in the RPG layer.** Cell occupancy, resources, actions, trees, gear are RPG
    readouts and Intent chrome. They are not a rewrite of PvZ `Plant` fields.
 4. **Commander never fights.** Commander and Patron are off-board aura roles
-   (`demon-system-map.md` Vocabulary). The lawn order bar is this-match Commander's
+   (`creature-system-map.md` Vocabulary). The lawn order bar is this-match Commander's
    **combat book** — HoMM3 *combat* hero spells while stacks fight (hero is not a hex, one
    portrait off-field). It is **not** the adventure-map book (View Air / Dimension Door); those
    verbs belong to the world-map Orders loop. Do not draw the commander as a lawn tile.
    **Today** the commander identity in code is Crazy Dave (`CommanderId`). Vocabulary 2026-09-06
-   says a unique demon; that promotion is an owner decision (§14), not two hotbars.
+   says a unique creature; that promotion is an owner decision (§14), not two hotbars.
 5. **General vs unique is an identity axis, not a UI theme.** A cell can hold engine-spawned
-   general demons (species stats only, no `instanceId`) and player unique demons (`UniqueActor`).
+   general creatures (species stats only, no `instanceId`) and player unique creatures (`UniqueActor`).
    One collection, one sheet; the sheet *locks* what a general cannot have (GG-17), it does not
    fork into two sheets (GG-9).
 6. **Six actor resources, one set, labels at display.** `hp` `stamina` `hunger` `spirit` `qi`
@@ -142,7 +142,7 @@ on the lawn is a cluster that *composes* them.
 | **`LawnMatchHud`** | Match strip | 1 | Sun *bank*, wave/clock/phase, commander + aura chips, deployed uniques, connection. Extends plate 04 §A / `spec-lawn-hud-chip.md`. |
 | **`CellStack`** | Occupants on a tile | 0 (Phaser) | Draw every living occupant in the cell with a stable overlap offset so the player can *see* a stack without clicking. Per-unit HUD stays plate 10. |
 | **`CellOccupancyDock`** | This cell | 2 | **Reserved left column** (rail side), one width token. The Phaser camera **shrinks** so all **12** columns stay on screen — including spawn lanes 9–11. Do not overlay the right edge. Select a row → **`ActorSheet`**. Occupants adapt through §4.5 before they become `ActorRow` |
-| **`SpawnTray`** | Field a creature | 2 | Unique demons eligible to deploy, through **`ActorCollection`**. Confirm cell via existing `SpawnTargeting` ghost (DPLP InteractionMode). No `typeId` typing. |
+| **`SpawnTray`** | Field a creature | 2 | Unique creatures eligible to deploy, through **`ActorCollection`**. Confirm cell via existing `SpawnTargeting` ghost (DPLP InteractionMode). No `typeId` typing. |
 | **`CommanderActionBar`** | Orders | 1 | Off-board **combat book** (1–9). HoMM3 combat-hero pattern: pick order → target on the board → **enqueue Intent**. Uses `spec-action-layer.md` action card / cost cluster / refusal. FE does not run A10 range math on the PvZ lawn |
 
 ### 2.3 Already specified — compose, do not redraw
@@ -171,7 +171,7 @@ on the lawn is a cluster that *composes* them.
 | Temptation | Why it is refused |
 |---|---|
 | `LawnActorSheet` vs `RosterActorSheet` | GG-9. Role prop (`creature` / `commander` / `lawn-bound`) changes chrome, not the sheet |
-| `CellDemonList` copy of CreaturesLayer | The whole point of `ActorCollection` |
+| `CellCreatureList` copy of CreaturesLayer | The whole point of `ActorCollection` |
 | Per-cell React overlay of names | Phaser owns the board (DPLP). Overlap is `CellStack`. Chrome is React docks |
 | Commander drawn on a lawn tile | Vocabulary: commander never fights |
 | Sun meter on the character sheet that reads the match bank | Wrong scope. Bank = HUD; `hunger` = actor |
@@ -219,7 +219,7 @@ control. Paths lattice may push once more (`spec-tree-surface.md`) — that is t
 
 `ptr` is never a player-facing id (GG-23). Bound unique is titled by display name + **Fielded**.
 General by species name + **Wave** (plant or zombie). Do not write **Wild** — that word is capture /
-wild-join (`demon-system-map.md`). Engine generals include plants the player sun-planted; they are
+wild-join (`creature-system-map.md`). Engine generals include plants the player sun-planted; they are
 still wave troops, not specimens.
 
 ### 3.3 Tab inventory — every closed list has a home
@@ -247,7 +247,7 @@ counters over the same 24 ids.
 
 **Element mastery** is player-lifetime `element_mastery.<id>` over the six concrete elements. Built.
 **Aspect-scope is REVERTED** — show species `ElementPrimary`/`Secondary`, lock “six aspects” with that
-reason. **Demon family** has no canonical vocabulary in `src/` — lock, do not invent.
+reason. **Creature family** has no canonical vocabulary in `src/` — lock, do not invent.
 
 ### 3.4 What this retires
 
@@ -264,7 +264,7 @@ reason. **Demon family** has no canonical vocabulary in `src/` — lock, do not 
 | Loading | Shell + pulse wells; no fake Emberling |
 | Empty | Collection empty is the collection; a tab with a closed list of zero live rows still shows the catalog / locked empty |
 | Error | What failed + Retry. Stage behind stays up (GG-14) |
-| Locked | General-demon locks as in §3.2, reason on the control (GG-55) |
+| Locked | General-creature locks as in §3.2, reason on the control (GG-55) |
 
 ---
 
@@ -293,7 +293,7 @@ cutoffs matter there. **Declare once in `ActorCollection`, not again in the dock
 | Source | Rows are | Select does |
 |---|---|---|
 | **Cell** | Living occupants on `(lane, column)` from `LawnViewModel` (content SSOT) | Opens `ActorSheet` for that occupant |
-| **Roster deployable** | Unique demons legal to field this match (not expedition-locked, not already Bound) | Enters `SpawnTargeting` with that `instanceId` |
+| **Roster deployable** | Unique creatures legal to field this match (not expedition-locked, not already Bound) | Enters `SpawnTargeting` with that `instanceId` |
 | **Creatures layer** | Full roster | Opens `ActorSheet` Cold |
 | **Scope picker** | Candidates for target / unique | Sets picker value (replaces `ActorListPickerPanel` body) |
 
@@ -359,7 +359,7 @@ Flow (existing FSM, honest chrome):
 developer tree). Side toggle plant/zombie on the player tray is wrong for uniques: the specimen
 already has a side.
 
-General-demon debug inject remains a developer surface.
+General-creature debug inject remains a developer surface.
 
 ---
 
@@ -373,7 +373,7 @@ the **world-map Orders** loop. Our Commander **never enters the lawn as a unit**
 the combat-hero analogue, 1–9, no round lock:
 
 - Caster: **this-match Commander**. Today that identity in code is Crazy Dave (`CommanderId`).
-  Vocabulary 2026-09-06 wants a unique demon; until that promotion, do not draw a second hotbar.
+  Vocabulary 2026-09-06 wants a unique creature; until that promotion, do not draw a second hotbar.
 - Verbs: actions whose membership is `spec-action-layer.md` / action-ideal. Summon-to-cell is an
   action. A passive aura is not. Example verbs (Sunfall, Lane bolt) are **combat orders onto the
   lawn**, not adventure travel.
@@ -463,7 +463,7 @@ URL (`GG-8`) — `sel` is **`instanceId` only**:
 #/lawn/{matchKey}?panel=creatures          existing layer over lawn
 ```
 
-General-demon inspect is in-memory, dies with the occupant, **not in the address bar**. Do not
+General-creature inspect is in-memory, dies with the occupant, **not in the address bar**. Do not
 invent a fourth durable id. Do not put `ptr` in the URL.
 
 ---
@@ -549,7 +549,7 @@ not invent a power curve.
   actor-sheet work, called out as a dependency.
 - Commanders list private `CommanderRow` and Pacts opening AptitudesLayer — not v1 `ActorCollection`
   consumers until they retire those rows.
-- Promoting `CommanderId` from Crazy Dave to a unique demon (Vocabulary 2026-09-06). Until then the
+- Promoting `CommanderId` from Crazy Dave to a unique creature (Vocabulary 2026-09-06). Until then the
   order bar is Dave's combat book; a unique Commander would be ineligible to spawn.
 
 ---
@@ -564,7 +564,7 @@ Already decided in this file (not re-asked):
 Still owner:
 
 1. **Commander identity.** Keep Crazy Dave as this-match commander (current `CommanderId`) until
-   unique-demon Commander ships, **or** promote now? Recommendation: **keep Dave for v1 lawn GUI**;
+   unique-creature Commander ships, **or** promote now? Recommendation: **keep Dave for v1 lawn GUI**;
    do not draw two bars. When a unique takes the role, they leave the spawn tray.
 
 ---
@@ -594,7 +594,7 @@ from the first-pass plate E. ActorSheet plan stays parked behind its own Draft g
 ## 16. Audit fold (2026-09-06)
 
 Five perspectives: UX (game-ui-ux), DPLP observe≠control, character-sheet systems, GG-9 FE
-duplication, demon / HoMM3 vocabulary. Consensus: **architecture split is right; first-pass plate
+duplication, creature / HoMM3 vocabulary. Consensus: **architecture split is right; first-pass plate
 contradicted closed vocabularies. Do not graduate, do not implement from plate E as first drawn.**
 
 What this fold changed:
@@ -618,4 +618,4 @@ What this fold changed:
 | Overlay-pause vs sheet | Unity keeps running; F10 is overlay pause |
 
 Verdicts (research log): UX fix-before-review · DPLP revise before `/spec` · character sheet do not
-implement from first plate E · GG-9 does not hold as extract-and-wire · demon/HoMM3 do not graduate.
+implement from first plate E · GG-9 does not hold as extract-and-wire · creature/HoMM3 do not graduate.

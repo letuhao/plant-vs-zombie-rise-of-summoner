@@ -7,10 +7,10 @@ import { deriveRailEntries, type RailUnlockInputs } from "./railState";
 const baseInputs: RailUnlockInputs = {
   currentStageId: "sanctum",
   hasCompletedARun: true,
-  hasAnyDemon: false,
+  hasAnyCreature: false,
   hasAnyContract: false,
   hasAnyRelic: false,
-  hasAnyBoundDemon: false,
+  hasAnyBoundCreature: false,
   returnedExpeditionCount: 0,
   unreadResultCount: 2
 };

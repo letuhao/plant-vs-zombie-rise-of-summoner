@@ -25,7 +25,7 @@
       "id": "set.bedrocksnowzombie-001",
       "nameKey": "set.eternal-frost-bastion",
       "name": "Eternal Frost Bastion",
-      "themeKey": "demon.bedrocksnowzombie",
+      "themeKey": "creature.bedrocksnowzombie",
       "members": [
         {
           "role": "core-guard",

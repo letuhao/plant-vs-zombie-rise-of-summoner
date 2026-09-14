@@ -25,7 +25,7 @@
       "id": "set.sunjalapeno-001",
       "nameKey": "set.sun-chili-corpse",
       "name": "Sun-Chili Corpse",
-      "themeKey": "demon.sunjalapeno",
+      "themeKey": "creature.sunjalapeno",
       "members": [
         {
           "role": "armament-primary",

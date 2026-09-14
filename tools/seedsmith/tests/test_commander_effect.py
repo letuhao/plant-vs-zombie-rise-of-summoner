@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from seedsmith.adapters.demons.commander_effect import (
+from seedsmith.adapters.creatures.commander_effect import (
     COMMANDER_EFFECT_SCHEMA,
     ID_PREFIX,
     build_brief,
@@ -18,7 +18,7 @@ from seedsmith.briefkit.render import CITATION_PATTERNS
 from seedsmith.pipeline.model import audit_schema
 from seedsmith.pipeline.open_loop import audit_open_loop_schema
 
-DEMONS_ROOT = Path(__file__).resolve().parents[3] / "data" / "seed" / "demons"
+CREATURES_ROOT = Path(__file__).resolve().parents[3] / "data" / "seed" / "creatures"
 
 SUBJ = {
     "speciesId": "wallnut",
@@ -62,16 +62,16 @@ def test_schema_has_no_verdict_field():
 def test_entry_id_is_namespaced():
     entry = entry_for("wallnut", {"name": "n", "doctrine": "d"}, basis="text")
     assert entry["id"] == "commander-effect.wallnut"
-    assert entry["demonId"] == "wallnut"
+    assert entry["creatureId"] == "wallnut"
 
 
-def test_an_unprefixed_id_collides_with_the_demon_and_fails_corpus_load():
+def test_an_unprefixed_id_collides_with_the_creature_and_fails_corpus_load():
     """`Corpus.add` raises on a duplicate id ACROSS ALL KINDS — `entries` is one global dict and
     only `by_kind` is partitioned. Asserted so a later refactor cannot lose the prefix."""
     from seedsmith.corpus.model import Corpus, CorpusLoadError, Entry
 
     c = Corpus()
-    c.add(Entry(id="wallnut", kind="demon", partition="p", path="d.json", data={"id": "wallnut"}))
+    c.add(Entry(id="wallnut", kind="creature", partition="p", path="d.json", data={"id": "wallnut"}))
     with pytest.raises(CorpusLoadError):
         c.add(Entry(id="wallnut", kind="commander-effect", partition="p", path="c.json",
                     data={"id": "wallnut"}))
@@ -79,15 +79,15 @@ def test_an_unprefixed_id_collides_with_the_demon_and_fails_corpus_load():
                 data={"id": ID_PREFIX + "wallnut"}))
 
 
-# ---- Subject selection: a blocked demon generates nothing -----------------------------------------
+# ---- Subject selection: a blocked creature generates nothing -----------------------------------------
 
 
-def test_a_blocked_demon_is_not_a_subject(tmp_path):
-    root = tmp_path / "demons"
+def test_a_blocked_creature_is_not_a_subject(tmp_path):
+    root = tmp_path / "creatures"
     (root / "_generated").mkdir(parents=True)
-    (root / "demon").mkdir()
-    (root / "demon" / "a.json").write_text(json.dumps(
-        {"kind": "demon", "entries": [{"id": "ok", "name": "OK"}, {"id": "blk", "name": "B"}]}),
+    (root / "creature").mkdir()
+    (root / "creature" / "a.json").write_text(json.dumps(
+        {"kind": "creature", "entries": [{"id": "ok", "name": "OK"}, {"id": "blk", "name": "B"}]}),
         encoding="utf-8")
     (root / "_generated" / "motif-assignments.json").write_text(json.dumps({
         "ok": {"motifs": ["m"], "antiMotifs": [], "basis": "text"},
@@ -95,11 +95,11 @@ def test_a_blocked_demon_is_not_a_subject(tmp_path):
     }), encoding="utf-8")
 
     ids = [s["speciesId"] for s in load_subjects(root)]
-    assert ids == ["ok"], "a blocked demon must produce nothing — an answer, not a failure"
+    assert ids == ["ok"], "a blocked creature must produce nothing — an answer, not a failure"
 
 
 def test_real_corpus_subjects_all_carry_motifs():
-    for s in load_subjects(DEMONS_ROOT):
+    for s in load_subjects(CREATURES_ROOT):
         assert s["motifs"], f"{s['speciesId']} became a subject with no motifs"
 
 
@@ -107,7 +107,7 @@ def test_post_g1_subjects_do_not_carry_stat_vocabulary():
     """G1 must land before G4 runs: generating from 一类 ('armour-class one') or 优先 ('priority')
     would bake stat vocabulary into committed, append-only content."""
     banned = {"一类", "优先"}
-    for s in load_subjects(DEMONS_ROOT):
+    for s in load_subjects(CREATURES_ROOT):
         assert not (banned & set(s["motifs"])), f"{s['speciesId']} still carries stat vocabulary"
 
 
@@ -170,7 +170,7 @@ def test_entry_records_the_motifs_it_was_generated_from():
 
 
 def test_an_entry_whose_motifs_still_match_is_not_stale():
-    from seedsmith.adapters.demons.commander_effect import stale_ids
+    from seedsmith.adapters.creatures.commander_effect import stale_ids
 
     entries = [entry_for("w", {"name": "n", "doctrine": "d"}, basis="text", motifs=["a", "b"])]
     subjects = [{"speciesId": "w", "motifs": ["a", "b"]}]
@@ -178,9 +178,9 @@ def test_an_entry_whose_motifs_still_match_is_not_stale():
 
 
 def test_an_entry_generated_from_different_motifs_is_stale():
-    """The real case: G1's `l`-tag fix changed 9 demons' motifs, so their committed effects were
+    """The real case: G1's `l`-tag fix changed 9 creatures' motifs, so their committed effects were
     generated from vocabulary that no longer exists."""
-    from seedsmith.adapters.demons.commander_effect import stale_ids
+    from seedsmith.adapters.creatures.commander_effect import stale_ids
 
     entries = [entry_for("w", {"name": "n", "doctrine": "d"}, basis="text",
                          motifs=["从那之后", "僵尸"])]
@@ -191,7 +191,7 @@ def test_an_entry_generated_from_different_motifs_is_stale():
 def test_an_entry_with_no_recorded_motifs_is_reported_stale():
     """It cannot be proven current. Silently assuming it is current is exactly how the theme
     registry rotted through four phases without a single gate noticing."""
-    from seedsmith.adapters.demons.commander_effect import stale_ids
+    from seedsmith.adapters.creatures.commander_effect import stale_ids
 
     entries = [entry_for("w", {"name": "n", "doctrine": "d"}, basis="text")]
     assert stale_ids(entries, [{"speciesId": "w", "motifs": ["a"]}]) == ["w"]
@@ -199,18 +199,18 @@ def test_an_entry_with_no_recorded_motifs_is_reported_stale():
 
 def test_every_committed_entry_is_current_against_the_live_corpus():
     """The end-to-end invariant. Fails the moment motifs change without the effects being
-    regenerated — the gap that let 7 demons ship with narrative connectives forced into their
+    regenerated — the gap that let 7 creatures ship with narrative connectives forced into their
     doctrine by `motif_coverage`."""
     import json
 
-    from seedsmith.adapters.demons.commander_effect import stale_ids
+    from seedsmith.adapters.creatures.commander_effect import stale_ids
 
     entries = json.loads(
-        (DEMONS_ROOT / "commander-effect" / "all.json").read_text(encoding="utf-8"))["entries"]
-    stale = stale_ids(entries, load_subjects(DEMONS_ROOT))
+        (CREATURES_ROOT / "commander-effect" / "all.json").read_text(encoding="utf-8"))["entries"]
+    stale = stale_ids(entries, load_subjects(CREATURES_ROOT))
     assert stale == [], (
         f"{len(stale)} committed effect(s) were generated from outdated motifs — re-run "
-        f"`python -m seedsmith.adapters.demons.generate_commander_effects --stale`: {stale[:5]}")
+        f"`python -m seedsmith.adapters.creatures.generate_commander_effects --stale`: {stale[:5]}")
 
 
 def test_no_committed_effect_contains_a_narrative_connective():
@@ -219,9 +219,9 @@ def test_no_committed_effect_contains_a_narrative_connective():
     import json
 
     entries = json.loads(
-        (DEMONS_ROOT / "commander-effect" / "all.json").read_text(encoding="utf-8"))["entries"]
+        (CREATURES_ROOT / "commander-effect" / "all.json").read_text(encoding="utf-8"))["entries"]
     banned = ("从那之后", "发现自己", "一段时间", "随处可见", "毋庸置疑",
               "更进一步", "并不知道", "很难说", "不多见")
-    hits = [(e["demonId"], t) for e in entries for t in banned
+    hits = [(e["creatureId"], t) for e in entries for t in banned
             if t in e["name"] or t in e["doctrine"]]
     assert hits == [], f"narrative connectives reached committed content: {hits}"

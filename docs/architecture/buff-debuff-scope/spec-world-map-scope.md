@@ -38,7 +38,7 @@ different one.
 `m.InstanceId` ([WorldCanonical.cs:49-59](../../../src/FusionRpg.Core/World/WorldCanonical.cs)). So
 **own-side resolution at the world-map layer is a plain `OwnerFactionId` comparison** — structurally
 identical in shape to `ZoneOfControl.IsHostile`'s *"pure faction-id comparison"*
-([spec-ai-commander.md](../world/spec-ai-commander.md)) — and **unique-demon resolution has a real path**:
+([spec-ai-commander.md](../world/spec-ai-commander.md)) — and **unique-creature resolution has a real path**:
 walk `WorldState.Entities[].Members[]` for a matching `InstanceId`, the world-map equivalent of
 `MatchUniqueBindingsFacet.TryGet`.
 
@@ -121,7 +121,7 @@ turns, matching `spec-ai-commander.md`'s own stated code style for this director
   the same command log twice reproduces the identical hash.
 - **Own-side resolution:** `OwnerFactionId` comparison proven directly against a multi-faction, multi-
   entity fixture.
-- **Unique-demon resolution:** a `Members[].InstanceId` lookup proven against a legion carrying more than
+- **Unique-creature resolution:** a `Members[].InstanceId` lookup proven against a legion carrying more than
   one member.
 - **Determinism:** same `(WorldState, scope)` twice ⇒ byte-identical result; `WorldDeterminismGuardTests`
   stays green with no exemption added.
@@ -139,7 +139,7 @@ turns, matching `spec-ai-commander.md`'s own stated code style for this director
 
 1. A modifier round-trips through `WorldCanonical`'s hash in both directions (present changes it, absent
    doesn't drift it).
-2. Own-side and unique-demon resolution both proven against real multi-faction fixtures.
+2. Own-side and unique-creature resolution both proven against real multi-faction fixtures.
 3. Replay byte-identity holds across two runs of the same command log.
 4. `WorldDeterminismGuardTests` and all Core/Data suites green.
 

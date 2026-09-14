@@ -5,7 +5,11 @@ namespace FusionRpg.Core.Stats.Aptitudes;
 /// dominant one is the worst case). The relative BUDGET each scope gets is `point-economy`'s call
 /// (P6.1); this type only needs the four buckets to sum into, in the order the decision states them.
 /// Append-only, like every other ordinal roster in this codebase — never reorder.</summary>
-public enum AllocationScope { Commander, DemonType, Aspect, UniqueDemon }
+public enum AllocationScope { Commander, CreatureType, Aspect, UniqueCreature }
+
+/// <summary>One JSON-canonical allocation row. Sorted by (scope, aptitude) on the way out so the
+/// serialized bytes are stable regardless of insertion order (golden hashes depend on it).</summary>
+public sealed record AllocationEntry(AllocationScope Scope, string AptitudeId, long Points);
 
 /// <summary>
 /// An actor's aptitude allocation — immutable, `long`-valued points per (scope, aptitude id).
@@ -32,6 +36,39 @@ public sealed class AptitudeAllocation
     public static readonly AptitudeAllocation Empty = new(new Dictionary<(AllocationScope, string), long>());
 
     AptitudeAllocation(IReadOnlyDictionary<(AllocationScope, string), long> points) => _points = points;
+
+    /// <summary>
+    /// JSON round-trip for web-match log setupJson re-resolve: a logged match carries the squad's
+    /// <c>BattleHubInputs</c>, and the boot sweep deserializes them back. Without this, any row
+    /// with a non-null aptitude crashed the sweep with <c>NotSupportedException</c> instead of
+    /// healing. Validation matches <see cref="Single"/>; a missing/empty entry list reads as
+    /// <see cref="Empty"/> so rows written before this existed (serialized as <c>{}</c>) still read.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonConstructor]
+    public AptitudeAllocation(IReadOnlyList<AllocationEntry>? entries)
+    {
+        var merged = new Dictionary<(AllocationScope, string), long>();
+        if (entries is not null)
+            foreach (var e in entries)
+            {
+                if (!AptitudeCatalog.IsAptitudeId(e.AptitudeId))
+                    throw new ArgumentException($"unknown aptitude id '{e.AptitudeId}'", nameof(entries));
+                if (e.Points < 0)
+                    throw new ArgumentOutOfRangeException(nameof(entries), "allocation points cannot be negative");
+                if (e.Points == 0)
+                    continue;
+                var key = (e.Scope, e.AptitudeId);
+                checked { merged[key] = merged.GetValueOrDefault(key) + e.Points; }
+            }
+        _points = merged;
+    }
+
+    /// <summary>Canonical serialization form, sorted by (scope, aptitude id) for stable bytes.</summary>
+    public IReadOnlyList<AllocationEntry> Entries => _points
+        .OrderBy(kv => kv.Key.Item1)
+        .ThenBy(kv => kv.Key.Item2, StringComparer.Ordinal)
+        .Select(kv => new AllocationEntry(kv.Key.Item1, kv.Key.Item2, kv.Value))
+        .ToList();
 
     public static AptitudeAllocation Single(AllocationScope scope, string aptitudeId, long points)
     {

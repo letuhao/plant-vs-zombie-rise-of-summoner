@@ -263,8 +263,8 @@
     },
     {
       "id": "atom.sporing",
-      "nameKey": "affix.sporing",
-      "name": "Spore Burst",
+      "nameKey": "affix.spore-infestation",
+      "name": "Spore Infestation",
       "kindId": "status.apply",
       "params": {
         "status": "spore"

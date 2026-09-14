@@ -25,7 +25,7 @@
       "id": "set.ultimatefume-001",
       "nameKey": "set.spore-cloud-frost",
       "name": "Spore Cloud Frost",
-      "themeKey": "demon.ultimatefume",
+      "themeKey": "creature.ultimatefume",
       "members": [
         {
           "role": "armament-primary",

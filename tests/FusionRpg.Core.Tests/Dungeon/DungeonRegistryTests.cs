@@ -87,7 +87,7 @@ public class DungeonRegistryTests
         Assert.Equal(
             new[]
             {
-                "bring-demon-home-alive", "cleanse-fights", "explore-rooms", "extract-with-item-kind",
+                "bring-creature-home-alive", "cleanse-fights", "explore-rooms", "extract-with-item-kind",
                 "finish-under-hunger", "gather-curio-kind", "kill-boss", "spend-no-provision", "survive-no-downed"
             }.OrderBy(x => x, StringComparer.Ordinal),
             ids);

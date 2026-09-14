@@ -25,7 +25,7 @@
       "id": "set.lanternpumpkin-001",
       "nameKey": "set.luminous-gourd",
       "name": "Luminous Gourd",
-      "themeKey": "demon.lanternpumpkin",
+      "themeKey": "creature.lanternpumpkin",
       "members": [
         {
           "role": "core-guard",

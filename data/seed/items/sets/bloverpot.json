@@ -25,7 +25,7 @@
       "id": "set.bloverpot-001",
       "nameKey": "set.the-verdant-vessel",
       "name": "The Verdant Vessel",
-      "themeKey": "demon.bloverpot",
+      "themeKey": "creature.bloverpot",
       "members": [
         {
           "role": "armament-primary",

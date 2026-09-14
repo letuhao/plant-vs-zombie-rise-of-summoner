@@ -1,13 +1,13 @@
 """seedsmith.adapters.actions.characteristic_pool.anchors — the classified species anchor tree
-(spec §2's fifth "Reads" row: `data/seed/demons/species/**/*.json`, the optional 19-species
+(spec §2's fifth "Reads" row: `data/seed/creatures/species/**/*.json`, the optional 19-species
 enrichment of posture/reach/targetPreference/attackTempo).
 
 **A live-data finding, not a defect in this module — read before trusting any specific count.**
-Spec §1 cites `data/seed/demons/species/_index.json` at "28 entries" and a four-way join of "8"
+Spec §1 cites `data/seed/creatures/species/_index.json` at "28 entries" and a four-way join of "8"
 (measured 2026-09-03, the day the spec was written). As of this module's own build (same day,
 later), that file is **modified but uncommitted** (`git status`: `M
-data/seed/demons/species/_index.json`, plus dozens of untracked `plant/*.json` anchor files) — a
-concurrent, unrelated demon-species-classification pass is actively growing the tree WHILE this
+data/seed/creatures/species/_index.json`, plus dozens of untracked `plant/*.json` anchor files) — a
+concurrent, unrelated creature-species-classification pass is actively growing the tree WHILE this
 module was being written: three separate measurements taken minutes apart during this module's
 own build returned three different totals (28 -> 68 -> 87 unique anchor rows), and the
 catalog-matching subset moved too (19 -> 23). This loader reads whatever is on disk at run time —
@@ -26,7 +26,7 @@ from pathlib import Path
 __all__ = ["AnchorRow", "AnchorTree", "load_anchor_tree", "SPECIES_ROOT"]
 
 REPO_ROOT = Path(__file__).resolve().parents[6]
-SPECIES_ROOT = REPO_ROOT / "data" / "seed" / "demons" / "species"
+SPECIES_ROOT = REPO_ROOT / "data" / "seed" / "creatures" / "species"
 INDEX_NAME = "_index.json"
 
 # The three closed anchor axes step 4 scores (`ATTACK_TEMPO` deliberately absent — spec §3 step 4:

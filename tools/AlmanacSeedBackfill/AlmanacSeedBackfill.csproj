@@ -9,7 +9,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- The data project, for RpgStore.UpsertAlmanacSeedBulk. This tool issues no SQL of its own —
-         same discipline DemonSpeciesImport/AtomImporter already follow. -->
+         same discipline CreatureSpeciesImport/AtomImporter already follow. -->
     <ProjectReference Include="..\..\src\FusionRpg.Data\FusionRpg.Data.csproj" />
   </ItemGroup>
 </Project>

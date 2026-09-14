@@ -241,7 +241,7 @@ Plus **4 status-channel families** (not element-expanded): `affliction` (`status
 
 ## 4. Domains — who can carry which family
 
-This game is not one ARPG character sheet. It has towers, creeps, demons in battle, and a world of sectors with constructible slots. A family declares where it can live.
+This game is not one ARPG character sheet. It has towers, creeps, creatures in battle, and a world of sectors with constructible slots. A family declares where it can live.
 
 ### 4.1 Mitigation is side-agnostic — only the vanilla armor fields are not
 
@@ -271,7 +271,7 @@ Consequence: a `warding` atom bound to a single plant **silently does nothing fo
 |---|---|---|
 | **Plant (tower)** | stat, mitigation, economy, board control, spawn | `warding`, `sunbloom`, `terraforming`, `gardener` |
 | **Zombie (creep)** | stat, mitigation, elite scaling, pressure, the two armor families | `plating`, `carapace`, `savagery`, `summoner` |
-| **Demon (battle)** | derived-channel, HP-delta, shield families **today** | expands as the action/skill program lands — see §4.3 |
+| **Creature (battle)** | derived-channel, HP-delta, shield families **today** | expands as the action/skill program lands — see §4.3 |
 | **World (sector / slot / lane)** | a domain this library does not yet serve | see §4.4 |
 
 ### 4.3 The battle constraint is a snapshot, not a law
@@ -282,7 +282,7 @@ Battle consumes one opcode *today*. That is a statement about what has been buil
 - Battle enrichment (on-hit status riders, species skills, hybrid payloads) is specified and unstarted.
 - The atom map's own runtime-support matrix is written as a **living audited table** precisely so it grows when a runtime grows a consumer.
 
-So demon-facing families are narrow **in wave 1** and widen on someone else's schedule. The library should mark families `battle: pending` rather than `battle: never`.
+So creature-facing families are narrow **in wave 1** and widen on someone else's schedule. The library should mark families `battle: pending` rather than `battle: never`.
 
 ### 4.4 The world domain is missing from this library
 
@@ -329,7 +329,7 @@ So G8 resolves as:
 
 | Layer | Count |
 |---|---|
-| Domains served | plant · zombie · demon(pending) · **world (scopes only)** (§4.4) |
+| Domains served | plant · zombie · creature(pending) · **world (scopes only)** (§4.4) |
 | Attach points | 5 |
 | Kinds | 12 |
 | **Authored families** | **71** (§3.1–3.5 tables, counted) |

@@ -147,7 +147,7 @@ class SpeciesTreeSpecTests(unittest.TestCase):
         self.assertEqual("species", spec.category)
         self.assertEqual("AbyssSwordStar", spec.tree_id)
         self.assertEqual(3, spec.ordinal)
-        self.assertEqual("aptitude.Onslaught@UniqueDemon", spec.gate_quantity)
+        self.assertEqual("aptitude.Onslaught@UniqueCreature", spec.gate_quantity)
         self.assertEqual("aptitudePoints", spec.gate_index_kind)
         self.assertEqual(("Onslaught", "air", "spark"), spec.mechanical_favour)
 

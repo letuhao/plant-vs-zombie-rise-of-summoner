@@ -14,7 +14,7 @@ Depends on `workflow-runtime`. Consumed by every generator.
 Decide whether generated content is **good**, not merely well-shaped — and be honest about which of
 those two questions each check actually answers.
 
-**This module exists because of a measured failure.** An 8-demon run scored **8/8 first-attempt
+**This module exists because of a measured failure.** An 8-creature run scored **8/8 first-attempt
 validator pass, 0/8 anti-motif violations**. Reading the same eight outputs:
 
 > `cherrynut` → *"会以极高的 **伤害** 压制 **僵尸**"* — motifs inserted with spaces around them,
@@ -76,7 +76,7 @@ Chain-of-verification, in four steps:
 | CoVe form | agreed with human judgement |
 |---|---|
 | **Subjective** — *"does this use the keyword meaningfully?"* | **1/3.** Passed *both* shoehorned cases, rationalising them: *"'一类' defines a specific category of behavior"* |
-| **Source-grounded** — *"what does the source say this demon does? is the draft consistent?"* | **2/3.** Caught **both** shoehorned cases |
+| **Source-grounded** — *"what does the source say this creature does? is the draft consistent?"* | **2/3.** Caught **both** shoehorned cases |
 
 **Any text can be rationalised**, so a subjective verifier defaults to charitable and catches
 nothing. A verifier answering a question **from source** has something to be wrong against.
@@ -89,7 +89,7 @@ form on the first attempt. That ambiguity is why this rule is now explicit.)*
 #### ⚠️ False positives are real — reject only on explicit contradiction
 
 Source-grounded CoVe's one miss was a **false positive**: it rejected *good* content because the
-source said *"nuts have hard shells"* and the verifier objected that it *"does not describe a demon."*
+source said *"nuts have hard shells"* and the verifier objected that it *"does not describe a creature."*
 
 A verifier that rejects good content burns budget and can loop. So: reject **only** on explicit
 contradiction, and route a CoVe rejection to **`escalate` (human review), never to auto-repair.** An

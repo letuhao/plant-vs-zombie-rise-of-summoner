@@ -50,7 +50,7 @@ pool and **deliberately left `skill` containers on the core alone**: *"`trait.{t
 container, so `prefix_rolls = suffix_rolls = 0` and the draw never runs. **D24 is the shipped
 contract, not a new ask** — something would have to change to lose it.
 
-This does not break seed → concrete. It lands on the split the demon program already uses and
+This does not break seed → concrete. It lands on the split the creature program already uses and
 [DESIGN-GATE.md:45](../../DESIGN-GATE.md) states directly: *"Species stats are deterministic and
 shared; only effects roll, per player, at runtime."* The tree catalog belongs to the shared half.
 
@@ -67,7 +67,7 @@ Two record types ship. Both are content; neither carries a magnitude.
 | Field | Type | Notes |
 |---|---|---|
 | `treeId` | `string` | authored, allocated once from the roster (D9/D27). Never a position |
-| `category` | `enum { Primary, Elemental, Status, Family, Species }` | which roster it came from. **Five, confirmed by ruling R7** — species is a category, not a variant, and the map gives it its own module. `tree-plan` emits only the first four and uses different tokens for two of them (`aptitude` → `Primary`, `demonFamily` → `Family`); that rename is a straight enum mismatch that would surface as a failed check at import, so **the importer maps the plan's tokens onto these five and refuses any token outside the map, naming it** |
+| `category` | `enum { Primary, Elemental, Status, Family, Species }` | which roster it came from. **Five, confirmed by ruling R7** — species is a category, not a variant, and the map gives it its own module. `tree-plan` emits only the first four and uses different tokens for two of them (`aptitude` → `Primary`, `creatureFamily` → `Family`); that rename is a straight enum mismatch that would surface as a failed check at import, so **the importer maps the plan's tokens onto these five and refuses any token outside the map, naming it** |
 | `gateQuantity` | `string` | the ONE index this tree's tier gate reads. Never four incommensurable quantities at one threshold. **Two of the quantities the roster needs do not exist in code yet** — `element_mastery` and `status_applied.<id>` — and as of **D37** they are built by the wave-0 module [`gate-counters`](spec-gate-counters.md), so a tree naming one is **waiting, not orphaned**. The catalog stores the name either way and never disables a tree for it; `tree-resolve` §3.3 reports *which kind of zero* a tier-0 tree is |
 | `shapeArchetype` | `string` | D15 — the plan's archetype id (broad-flat, spiked, gated-deep …) |
 | `tiers` | `int` | 10 (D29). **Structural**, not tunable — it is what the tree *is* |
@@ -338,10 +338,10 @@ under the canonical names ruling R2 fixes, **each carrying its own unit in the k
 to close is that writing `1.2` into a per-mille key yields `F = 1.0012` and passes every test either
 spec currently writes.
 
-**The precedent is on disk, not in a plan.** `data/generated/demons/` holds **831 committed JSON
+**The precedent is on disk, not in a plan.** `data/generated/creatures/` holds **831 committed JSON
 files** (counted 2026-09-05; the research docs say 830, counted a day earlier — the difference is
 uncommitted generation, not a disputed rule). ⚠ Two documents still assert `data/generated/` does not
-exist — `demon-seed-map.md:47` and `spec-species-generator.md:24`, the latter now struck through in
+exist — `creature-seed-map.md:47` and `spec-species-generator.md:24`, the latter now struck through in
 place. Do not read either as evidence.
 
 **The generator is C#, not Python**, for `spec-species-generator.md:32-42`'s three reasons, all of
@@ -371,7 +371,7 @@ to match; no `_registry/` directory is missing work, it is a superseded design.
 1. `tools/TreeBinder` (shipped 2026-09-06; this spec's earlier drafts named it `PassiveTreeGen` before
    `spec-tree-binder.md` built it under its own module name — verified against the real directory,
    `tools/PassiveTreeGen` does not exist) writes `data/generated/passive-tree/`. Committed. `--check`
-   gates CI on staleness, copied verbatim from `tools/DemonSpeciesGen/Program.cs:17`.
+   gates CI on staleness, copied verbatim from `tools/CreatureSpeciesGen/Program.cs:17`.
 2. A **boot-time importer inside `FusionRpg.Data`** reads the generated files into SQLite in one
    all-or-nothing transaction and bumps `catalog_revision` once. SQL lives only in `FusionRpg.Data`
    (`data-architecture.md`; `scripts/guard-dal.ps1` enforces it and scans `src/`, so a generator in
@@ -496,7 +496,7 @@ already share — nothing new is invented.
 | `a_reflect_node_ships_its_two_atoms_under_one_affix` | why the roll unit is an affix and one is not enough |
 | `a_node_share_above_the_ceiling_is_refused` | §2.5, driven by a **synthetic** over-budget row. There is deliberately no test asserting the shipped corpus proves the ceiling binds — it cannot, and saying so is the point |
 | `the_ceiling_and_the_share_use_the_same_denominator` | ‰ of one branch on both sides; the 2× the old `budgetTotal` form hid |
-| `a_plan_category_token_outside_the_five_is_refused_naming_it` | R7, and the `aptitude`/`demonFamily` rename |
+| `a_plan_category_token_outside_the_five_is_refused_naming_it` | R7, and the `aptitude`/`creatureFamily` rename |
 | `regeneration_reads_the_allocated_node_key_and_never_recomputes_it` | R3 — the property `tree-review`'s `O(diff)` rests on |
 | `import_is_all_or_nothing_and_bumps_revision_once` | `definitions.md:279-283` |
 | `an_unknown_node_id_fails_the_import_not_an_actor_load` | R5 — the defect at `AptitudeAllocation.cs:39` is not repeated |
@@ -509,7 +509,7 @@ already share — nothing new is invented.
 **Always:** store coefficients; `long` for every magnitude field; widen before multiplying; divide by
 1000 exactly once, last; compose the id from the plan's allocated coordinates; commit the generated
 output; refuse at load naming the offending id; keep `data/seed/` and `data/generated/` in the shape
-the demon program already uses.
+the creature program already uses.
 
 **Ask first:** adding a field to `NodeRecord` — it widens a contract four modules read. ⚠ **Three such
 changes were made on 2026-09-05 and are called out rather than slipped in:** `affixId` (string) became
@@ -572,10 +572,10 @@ one remains — species-tree sizing (#2), owned by that module, not this documen
 2. **Does the species tree (D23/D30) ship as catalog data, or derive at import?** Both satisfy §1's
    freeze line. Shipping the data makes ~~~35,200~~ ~~35,160~~ **35,280** nodes across **882 trees**
    (D51, 2026-09-06: 24 statuses, not 21 — was 879/35,160) reviewable and diffable (840 species × 40 +
-   42 generic × 40; counted in `data/seed/demons/species/_index.json`, and `tree-review` §1.1 is the
+   42 generic × 40; counted in `data/seed/creatures/species/_index.json`, and `tree-review` §1.1 is the
    source the whole program cites); deriving keeps the repo
-   smaller and moves the review surface into a generator. The demon program chose *ship the data*
-   (`demon-seed-map.md:41`), and map assumption 4 says species trees reuse this record — so the size
+   smaller and moves the review surface into a generator. The creature program chose *ship the data*
+   (`creature-seed-map.md:41`), and map assumption 4 says species trees reuse this record — so the size
    is the owner's call, not this document's. Owned by `species-tree`; recorded here because it is this
    record's blast radius.
 3. ~~**May a node author a slot resolved at bake time (L2)?**~~ **CLOSED 2026-09-06 by D59

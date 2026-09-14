@@ -25,7 +25,7 @@
       "id": "set.superspruce-001",
       "nameKey": "set.spruce-gale",
       "name": "Spruce Gale",
-      "themeKey": "demon.superspruce",
+      "themeKey": "creature.superspruce",
       "members": [
         {
           "role": "armament-primary",

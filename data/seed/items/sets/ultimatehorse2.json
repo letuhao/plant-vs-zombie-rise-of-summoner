@@ -25,7 +25,7 @@
       "id": "set.ultimatehorse2-001",
       "nameKey": "set.ironclad-sovereign",
       "name": "Ironclad Sovereign",
-      "themeKey": "demon.ultimatehorse2",
+      "themeKey": "creature.ultimatehorse2",
       "members": [
         {
           "role": "armament-primary",

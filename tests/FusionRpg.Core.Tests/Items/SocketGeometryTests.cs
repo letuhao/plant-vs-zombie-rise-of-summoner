@@ -151,7 +151,10 @@ public class SocketGeometryTests
             }
         }
 
-        Assert.Equal(721, checkedCount); // the live, non-`standard`, socketMax-carrying corpus (720 + 1: base-types-gen's real new entry, item.humanoid-torso-b-013, 2026-09-07)
+        // CONTRACT, not a count: the base-type corpus is generator-authored and grows every generation
+        // (721 → 1158 and climbing), so the checked total is stale by construction. What matters is
+        // that the sweep actually READ the live socketMax-carrying corpus (not zero, not a stub) and
+        // that every entry it read passes its role ceiling.
         Assert.True(checkedCount > 600, $"only {checkedCount} live entries checked — the corpus read is wrong");
     }
 

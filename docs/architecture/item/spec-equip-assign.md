@@ -61,7 +61,7 @@ covered them.
 
 ### D19's surviving half — the equip gate — lands here
 
-D19 split I11: per-species aptitude vectors went to the demon program, and *"the equip gate: **frame +
+D19 split I11: per-species aptitude vectors went to the creature program, and *"the equip gate: **frame +
 level**, and any faction clause"* stayed. **No module claimed it.** It is a bind-time refusal with a
 reason payload, so it belongs beside the assignment that triggers it.
 
@@ -102,7 +102,7 @@ gap board's own `locked` cell state (I13 §5.9). That is a fifteenth against a c
 ### The three I11 mechanisms nobody owned
 
 D19 kept *"frame + level and any faction clause"* here and moved the per-species attribute vectors to
-the demon program. Three mechanisms sat in the gap between those halves. Each is settled below; one of
+the creature program. Three mechanisms sat in the gap between those halves. Each is settled below; one of
 them is settled by **refusing** it.
 
 #### 1. A requirement that lapses — the item stays on

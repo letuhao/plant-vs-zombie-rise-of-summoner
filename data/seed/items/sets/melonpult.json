@@ -25,7 +25,7 @@
       "id": "set.melonpult-001",
       "nameKey": "set.watermelon-launcher",
       "name": "Watermelon Launcher",
-      "themeKey": "demon.melonpult",
+      "themeKey": "creature.melonpult",
       "members": [
         {
           "role": "armament-primary",

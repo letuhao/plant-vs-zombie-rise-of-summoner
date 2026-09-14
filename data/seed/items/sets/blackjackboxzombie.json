@@ -25,7 +25,7 @@
       "id": "set.blackjackboxzombie-001",
       "nameKey": "set.iron-mask-center",
       "name": "Iron Mask Center",
-      "themeKey": "demon.blackjackboxzombie",
+      "themeKey": "creature.blackjackboxzombie",
       "members": [
         {
           "role": "armament-primary",

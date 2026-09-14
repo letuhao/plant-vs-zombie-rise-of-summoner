@@ -25,7 +25,7 @@
       "id": "set.deathchomper-001",
       "nameKey": "set.dead-maw-bloom",
       "name": "Dead Maw Bloom",
-      "themeKey": "demon.deathchomper",
+      "themeKey": "creature.deathchomper",
       "members": [
         {
           "role": "armament-primary",

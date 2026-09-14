@@ -25,7 +25,7 @@
       "id": "set.firekelp-001",
       "nameKey": "set.flame-wreathed-aquatic-flora",
       "name": "Flame-Wreathed Aquatic Flora",
-      "themeKey": "demon.firekelp",
+      "themeKey": "creature.firekelp",
       "members": [
         {
           "role": "armament-primary",

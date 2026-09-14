@@ -25,7 +25,7 @@ POWER_BANDS = frozenset({"trivial", "low", "medium", "high", "extreme"})
 OVERRIDE_TAGS = frozenset({"herbs", "key", "holy", "bait", "watch"})
 
 
-def _schema(kind: str = "curio", theme: str = "demon.wallnut", event_id: str = "event.curio-demon.wallnut-001") -> dict:
+def _schema(kind: str = "curio", theme: str = "creature.wallnut", event_id: str = "event.curio-creature.wallnut-001") -> dict:
     cell = Cell("dungeon-event", (kind, theme), f"{kind}-{theme}")
     return build_event_schema_for_cell(
         cell, event_id,
@@ -43,10 +43,10 @@ class EventKindFirstShipTests(unittest.TestCase):
 
 class BuildEventSchemaForCellTests(unittest.TestCase):
     def test_eventId_kind_theme_are_pinned_to_the_real_cell(self) -> None:
-        schema = _schema(kind="shrine", theme="demon.pot", event_id="event.shrine-demon.pot-003")
-        self.assertEqual(schema["properties"]["eventId"]["const"], "event.shrine-demon.pot-003")
+        schema = _schema(kind="shrine", theme="creature.pot", event_id="event.shrine-creature.pot-003")
+        self.assertEqual(schema["properties"]["eventId"]["const"], "event.shrine-creature.pot-003")
         self.assertEqual(schema["properties"]["kind"]["const"], "shrine")
-        self.assertEqual(schema["properties"]["theme"]["const"], "demon.pot")
+        self.assertEqual(schema["properties"]["theme"]["const"], "creature.pot")
 
     def test_eligibility_is_pinned_to_json_null_never_a_string_sentinel(self) -> None:
         schema = _schema()
@@ -99,7 +99,7 @@ class BuildEventSchemaForCellTests(unittest.TestCase):
 
 class BuildEventBriefTests(unittest.TestCase):
     def test_brief_names_the_kind_and_the_allocated_motifs(self) -> None:
-        cell = Cell("dungeon-event", ("trap", "demon.pot"), "trap-demon.pot")
+        cell = Cell("dungeon-event", ("trap", "creature.pot"), "trap-creature.pot")
         brief = build_event_brief(cell, {"motifs": ["屋顶", "植物"], "antiMotifs": ["铁头功"]})
         self.assertIn("trap", brief)
         self.assertIn("屋顶", brief)
@@ -109,12 +109,12 @@ class BuildEventBriefTests(unittest.TestCase):
 
     def test_every_kind_produces_a_nonempty_brief_with_no_crash(self) -> None:
         for kind in EVENT_KIND_FIRST_SHIP:
-            cell = Cell("dungeon-event", (kind, "demon.wallnut"), f"{kind}-demon.wallnut")
+            cell = Cell("dungeon-event", (kind, "creature.wallnut"), f"{kind}-creature.wallnut")
             brief = build_event_brief(cell, {"motifs": ["a"], "antiMotifs": []})
             self.assertTrue(brief.strip())
 
     def test_an_empty_motif_allocation_still_produces_a_readable_brief(self) -> None:
-        cell = Cell("dungeon-event", ("curio", "demon.wallnut"), "curio-demon.wallnut")
+        cell = Cell("dungeon-event", ("curio", "creature.wallnut"), "curio-creature.wallnut")
         brief = build_event_brief(cell, {"motifs": [], "antiMotifs": []})
         self.assertIn("none allocated", brief)
 

@@ -25,7 +25,7 @@
       "id": "set.peashooterzombie-001",
       "nameKey": "set.spasmodic-maw",
       "name": "Spasmodic Maw",
-      "themeKey": "demon.peashooterzombie",
+      "themeKey": "creature.peashooterzombie",
       "members": [
         {
           "role": "armament-primary",

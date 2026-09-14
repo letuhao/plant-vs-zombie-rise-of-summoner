@@ -25,7 +25,7 @@
       "id": "set.kelpnut-001",
       "nameKey": "set.aquatic-nut-shell",
       "name": "Aquatic Nut Shell",
-      "themeKey": "demon.kelpnut",
+      "themeKey": "creature.kelpnut",
       "members": [
         {
           "role": "armament-primary",

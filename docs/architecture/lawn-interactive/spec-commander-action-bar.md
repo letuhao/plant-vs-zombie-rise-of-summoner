@@ -15,7 +15,7 @@
 1. This is the HoMM3 **combat-hero** book analogue: commander **off the hex**, stacks fight, 1–9
    orders. It is **not** the adventure-map book (world-map Orders).
 2. Commander **never** drawn as a lawn tile. Today identity is Crazy Dave (`CommanderId`) until
-   owner promotes to unique demon (design §14) — **one** bar, not two.
+   owner promotes to unique creature (design §14) — **one** bar, not two.
 3. FE does **not** run A10 / battle A2 range math. Highlights are observe chrome; Server/injector
    re-resolve. Do not say the player "casts."
 4. Costs name the **stock** — match `pvz.*` sun or commander actor pools — never bare `40` (GG-46).
@@ -115,7 +115,7 @@ action tuning owners.
 ## Boundaries
 
 - **Always:** Intent only; labeled costs; combat book not adventure; one commander bar.
-- **Ask first:** Promoting CommanderId to unique demon; enqueue-from-sheet.
+- **Ask first:** Promoting CommanderId to unique creature; enqueue-from-sheet.
 - **Never:** Draw commander on a tile; FE range oracle; Ward slot name; hide empty bar.
 
 ---

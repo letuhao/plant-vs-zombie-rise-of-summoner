@@ -90,17 +90,17 @@ class RunTuningLoadTests(unittest.TestCase):
     def test_shipped_defaults(self) -> None:
         t = load_run_tuning()
         self.assertEqual(t.mode, "full")
-        self.assertEqual(t.general_count, 25)
+        self.assertEqual(t.general_count, 1000)
         self.assertEqual(t.per_family_count, 5)
         self.assertEqual(t.per_species_count, 5)
         self.assertEqual(t.multiplicative_pairs, (("atom.keen-edge", "atom.cruelty"),))
         self.assertEqual(t.family_motif_max, 6)
-        self.assertEqual(t.version, 2)
+        self.assertEqual(t.version, 3)
 
     def test_meta_states_untuned(self) -> None:
         doc = json.loads(RUN_TUNING_PATH.read_text(encoding="utf-8"))
         self.assertEqual(doc["_meta"]["default"], "full-live-seed-roster")
-        self.assertIn("live demon species seed folder", doc["_meta"]["note"])
+        self.assertIn("live creature species seed folder", doc["_meta"]["note"])
 
     def test_stale_citation_avoidNeighbourK_is_shipped_but_unused(self) -> None:
         """**A found spec self-contradiction, documented rather than silently resolved either
@@ -243,17 +243,19 @@ class FamilyMotifDerivationTests(unittest.TestCase):
         self.assertEqual(anti, ())
         self.assertEqual(basis, "intersection")
 
-    def test_all_nineteen_families_intersect_nonempty_against_real_data(self) -> None:
-        fam_path = REPO_ROOT / "data" / "seed" / "demons" / "_generated" / "family-assignments.json"
+    def test_every_family_intersects_nonempty_against_real_data(self) -> None:
+        fam_path = REPO_ROOT / "data" / "seed" / "creatures" / "_generated" / "family-assignments.json"
         lean_path = ACTIONS_ROOT / "_generated" / "role-lean.json"
         if not fam_path.is_file() or not lean_path.is_file():
             self.skipTest("A-S0 outputs not yet generated in this checkout")
         family_assignments = json.loads(fam_path.read_text(encoding="utf-8"))
         species_anchor = dp.parse_species_anchor(json.loads(lean_path.read_text(encoding="utf-8")))
         members = gen_mod._family_members(family_assignments)
-        self.assertEqual(len(members), 19)
+        # A JOIN, not a pinned family count: the member map's keys are exactly the assignment values.
+        declared = {f for v in family_assignments.values() for f in (v if isinstance(v, list) else [v])}
+        self.assertEqual(set(members), declared)
+        self.assertTrue(members, "the real family map is non-empty")
 
-        cherry_seen = False
         for family_id, species_ids in members.items():
             rows = [(species_anchor[s].motifs, species_anchor[s].anti_motifs)
                    for s in species_ids if s in species_anchor]
@@ -261,14 +263,12 @@ class FamilyMotifDerivationTests(unittest.TestCase):
             self.assertEqual(basis, "intersection", f"family {family_id!r} needed a fallback")
             self.assertGreater(len(motifs), 0)
             self.assertEqual(len(anti), 5, f"family {family_id!r} anti-motif union != 5")
-            if family_id == "cherry":
-                cherry_seen = True
-                self.assertEqual(motifs, ("僵尸", "樱桃"))
-                self.assertEqual(len(species_ids), 7)
-        self.assertTrue(cherry_seen, "cherry family not found in the real corpus")
 
-    def test_family_size_histogram_matches_spec_measurement(self) -> None:
-        fam_path = REPO_ROOT / "data" / "seed" / "demons" / "_generated" / "family-assignments.json"
+    def test_family_size_histogram_reconciles(self) -> None:
+        """The histogram is a READING of the current family map (it moves as species ship), so the
+        contract is reconciliation: bin counts sum to the distinct-family count, and the membership
+        total is the per-species sum — never a pinned `{7:1, ...}` snapshot (validation-ssot.md)."""
+        fam_path = REPO_ROOT / "data" / "seed" / "creatures" / "_generated" / "family-assignments.json"
         if not fam_path.is_file():
             self.skipTest("family-assignments.json not present in this checkout")
         family_assignments = json.loads(fam_path.read_text(encoding="utf-8"))
@@ -276,9 +276,14 @@ class FamilyMotifDerivationTests(unittest.TestCase):
         sizes = {}
         for v in members.values():
             sizes[len(v)] = sizes.get(len(v), 0) + 1
-        self.assertEqual(sizes, {7: 1, 5: 2, 4: 1, 3: 3, 2: 11, 1: 1})
-        self.assertEqual(sum(len(v) for v in members.values()), 53)
-        self.assertEqual(len(members), 19)
+        self.assertEqual(sum(sizes.values()), len(members),
+                         "the family-size histogram bins every family exactly once")
+        self.assertEqual(sum(len(v) for v in members.values()),
+                         sum(len(v if isinstance(v, list) else [v])
+                             for v in family_assignments.values()),
+                         "memberships reconcile to the per-species sum")
+        self.assertTrue(all(len(v) >= 1 for v in members.values()), "no empty family bin")
+        print(f"families: {len(members)} over {sum(len(v) for v in members.values())} memberships")
 
 
 class LargestRemainderAndExpandTests(unittest.TestCase):
@@ -295,16 +300,186 @@ class LargestRemainderAndExpandTests(unittest.TestCase):
         counts = dp.largest_remainder_count(weights, CATEGORIES, 0)
         self.assertEqual(set(counts.values()), {0})
 
-    def test_expand_counts_is_declared_order_grouped(self) -> None:
+    def test_expand_counts_spreads_each_quota_instead_of_grouping_it(self) -> None:
+        """The 2026-09-11 sequencing fix: each key's quota is spread across the sequence by round
+        (stride), never emitted back-to-back. Grouping made the JOINT frame constant for long
+        stretches once two blocked vectors were zipped — measured 134-long runs and 15 total frames
+        in the 1,000-brief general tier, which drove A-S3 to reject 56% of a batch as near-dupes.
+        Marginals are preserved exactly; only order changes."""
         counts = {"attack": 2, "defense": 0, "support": 1, "movement": 0, "status": 1}
         seq = dp.expand_counts(counts, CATEGORIES)
-        self.assertEqual(seq, ["attack", "attack", "support", "status"])
+        self.assertEqual(seq, ["attack", "support", "status", "attack"])
+        self.assertEqual(sorted(seq), ["attack", "attack", "status", "support"])
+
+    def test_expand_counts_preserves_every_marginal(self) -> None:
+        counts = {"attack": 200, "defense": 200, "support": 200, "movement": 200, "status": 200}
+        seq = dp.expand_counts(counts, CATEGORIES)
+        self.assertEqual(len(seq), 1000)
+        self.assertEqual({c: seq.count(c) for c in CATEGORIES}, counts)
+
+    def test_expand_counts_has_no_long_run_at_the_shipped_general_size(self) -> None:
+        import itertools
+        counts = {"attack": 200, "defense": 200, "support": 200, "movement": 200, "status": 200}
+        seq = dp.expand_counts(counts, CATEGORIES)
+        longest = max(len(list(g)) for _, g in itertools.groupby(seq))
+        self.assertEqual(longest, 1, "a 200-quota key must not emit 200 identical slots in a row")
+
+    def test_joint_frames_stay_diverse_across_a_batch(self) -> None:
+        """The defect the sequencing fix targets: the JOINT (category, targetMode) frame must vary
+        across a proposal batch's own contiguous slice, because a batch draws consecutive ordinals
+        and the model sees one frame per call."""
+        cat = dp.expand_counts({c: 200 for c in CATEGORIES}, CATEGORIES)
+        tm = dp.expand_counts({m: 167 for m in TARGET_MODES}, TARGET_MODES)
+        frames = list(zip(cat, tm))
+        self.assertGreater(len(set(frames)), 20, "the general tier must not collapse to a few frames")
+        # The first 40 ordinals are one small batch; they must not all share a single frame.
+        self.assertGreater(len(set(frames[:40])), 20)
 
     def test_independent_of_dict_insertion_order(self) -> None:
         a = {"attack": 7, "defense": 3, "support": 5, "movement": 2, "status": 1}
         b = {"status": 1, "movement": 2, "support": 5, "defense": 3, "attack": 7}
         self.assertEqual(dp.largest_remainder_count(a, CATEGORIES, 18),
                          dp.largest_remainder_count(b, CATEGORIES, 18))
+
+
+class TwoLevelAllocationTests(unittest.TestCase):
+    """The scope-level allocation engine. It replaced the per-subject largest-remainder split, which
+    was measured inert at `count == 5` (a member needs weight >= 400 per-mille for a 2nd slot; the
+    shipped `base=1000, step=250` tops out at 267, so all 1,131 subjects got the identical
+    `1/1/1/1/1` vector on category and, on the six-member `targetMode`, always dropped `area`)."""
+
+    @staticmethod
+    def _rows(n: int, *, lean: str = "attack", order=None) -> "list[tuple[str, dict]]":
+        order = order or CATEGORIES
+        rows = []
+        for i in range(n):
+            milli = {c: 200 for c in order}
+            if lean in milli:
+                milli[lean] += 60
+                other = next(c for c in reversed(order) if c != lean)
+                milli[other] -= 60
+            rows.append((f"s{i:03d}", milli))
+        return rows
+
+    def test_every_row_sums_to_count(self) -> None:
+        for count in (1, 2, 3, 5, 8, 25):
+            alloc = dp.apportion_axis(self._rows(37), count, CATEGORIES)
+            for key, counts in alloc.items():
+                self.assertEqual(sum(counts.values()), count, key)
+
+    def test_column_sums_equal_scope_quota_exactly(self) -> None:
+        rows = self._rows(37)
+        for count in (1, 3, 5, 10):
+            alloc = dp.apportion_axis(rows, count, CATEGORIES)
+            col = {c: sum(v[c] for v in alloc.values()) for c in CATEGORIES}
+            aggregate = {c: sum(m[c] for _, m in rows) for c in CATEGORIES}
+            expected = dp.largest_remainder_apportion(aggregate, CATEGORIES, count * len(rows))
+            self.assertEqual(col, expected, f"count={count}")
+
+    def test_not_flat_at_the_shipped_count(self) -> None:
+        alloc = dp.apportion_axis(self._rows(40), 5, CATEGORIES)
+        self.assertGreater(len({tuple(sorted(v.items())) for v in alloc.values()}), 1)
+
+    def test_lean_head_wins_extra_slots_when_quota_permits(self) -> None:
+        alloc = dp.apportion_axis(self._rows(60, lean="attack"), 5, CATEGORIES)
+        winners = sum(1 for v in alloc.values() if v["attack"] >= 2)
+        self.assertGreater(winners, 0, "an attack-leaning roster must place extra attack briefs")
+
+    def test_deterministic(self) -> None:
+        rows = self._rows(50)
+        self.assertEqual(dp.apportion_axis(rows, 5, CATEGORIES),
+                         dp.apportion_axis(rows, 5, CATEGORIES))
+
+    def test_empty_and_zero_count(self) -> None:
+        self.assertEqual(dp.apportion_axis([], 5, CATEGORIES), {})
+        alloc = dp.apportion_axis(self._rows(4), 0, CATEGORIES)
+        self.assertTrue(all(v == {c: 0 for c in CATEGORIES} for v in alloc.values()))
+
+    def test_target_mode_is_generic_over_any_axis(self) -> None:
+        """`apportion_axis` must work for the SIX-member `targetMode` axis, not just five
+        categories — the bug was that targetMode still used the inert per-subject method."""
+        rows = self._rows(60, lean="area", order=TARGET_MODES)
+        alloc = dp.apportion_axis(rows, 5, TARGET_MODES)
+        col = {m: sum(v[m] for v in alloc.values()) for m in TARGET_MODES}
+        aggregate = {m: sum(mm[m] for _, mm in rows) for m in TARGET_MODES}
+        self.assertEqual(col, dp.largest_remainder_apportion(aggregate, TARGET_MODES, 5 * len(rows)))
+        self.assertTrue(all(sum(v.values()) == 5 for v in alloc.values()))
+        self.assertGreater(sum(1 for v in alloc.values() if v["area"] > 0), 0)
+
+    def test_no_large_per_subject_count_guard_to_trip(self) -> None:
+        """The deficit-greedy fill has no swap-repair guard; it is exact by construction at any
+        count. Exercise a large per-subject count with a lopsided roster."""
+        rows = []
+        for i in range(120):
+            milli = {c: 50 for c in CATEGORIES}
+            milli["attack" if i % 2 == 0 else "defense"] += 750
+            rows.append((f"s{i:03d}", milli))
+        for count in (40, 120, 200):
+            alloc = dp.apportion_axis(rows, count, CATEGORIES)
+            for key, counts in alloc.items():
+                self.assertEqual(sum(counts.values()), count, key)
+            col = {c: sum(v[c] for v in alloc.values()) for c in CATEGORIES}
+            aggregate = {c: sum(m[c] for _, m in rows) for c in CATEGORIES}
+            self.assertEqual(col, dp.largest_remainder_apportion(aggregate, CATEGORIES, count * len(rows)))
+
+
+class AreaShapeAllocationTests(unittest.TestCase):
+    """`apportion_area_shapes` — the third level of the same defect. `areaShape` is a conditional
+    sub-vector consulted only for `targetMode == "area"`; per-subject largest remainder at a subject's
+    own area count (0 or 1 at family/species scope) tied all four shapes and the declared-order
+    tie-break always picked `row` — measured 750/750 species and 188/188 family area briefs were
+    `row`, so `column`/`square`/`rectangle` were unreachable."""
+
+    @staticmethod
+    def _rows(n: int) -> "list[tuple[str, dict]]":
+        return [(f"s{i:03d}", {s: 250 for s in AREA_SHAPES}) for i in range(n)]
+
+    def test_all_four_shapes_reachable_when_slots_allow(self) -> None:
+        rows = self._rows(40)
+        slots = {key: 1 for key, _ in rows}
+        alloc = dp.apportion_area_shapes(rows, slots)
+        col = {s: sum(v[s] for v in alloc.values()) for s in AREA_SHAPES}
+        self.assertEqual(set(col), set(AREA_SHAPES))
+        self.assertTrue(all(n > 0 for n in col.values()),
+                        f"every shape must be reachable, got {col}")
+
+    def test_per_subject_sums_to_the_area_slot_count(self) -> None:
+        rows = self._rows(30)
+        slots = {key: (i % 3) for i, (key, _) in enumerate(rows)}
+        alloc = dp.apportion_area_shapes(rows, slots)
+        for key, _ in rows:
+            self.assertEqual(sum(alloc[key].values()), slots[key], key)
+
+    def test_zero_area_slots_are_never_consulted(self) -> None:
+        rows = self._rows(10)
+        alloc = dp.apportion_area_shapes(rows, {key: 0 for key, _ in rows})
+        self.assertTrue(all(v == {s: 0 for s in AREA_SHAPES} for v in alloc.values()))
+
+    def test_exact_scope_quota(self) -> None:
+        rows = self._rows(37)
+        slots = {key: (1 if i % 2 else 2) for i, (key, _) in enumerate(rows)}
+        alloc = dp.apportion_area_shapes(rows, slots)
+        col = {s: sum(v[s] for v in alloc.values()) for s in AREA_SHAPES}
+        total = sum(slots.values())
+        aggregate = {s: sum(mm[s] * slots[key] for key, mm in rows) for s in AREA_SHAPES}
+        self.assertEqual(col, dp.largest_remainder_apportion(aggregate, AREA_SHAPES, total))
+
+    def test_deterministic(self) -> None:
+        rows = self._rows(25)
+        slots = {key: 1 for key, _ in rows}
+        self.assertEqual(dp.apportion_area_shapes(rows, slots),
+                         dp.apportion_area_shapes(rows, slots))
+
+    def test_one_implementation_backs_both_apportioners(self) -> None:
+        """`largest_remainder_count` and `largest_remainder_apportion` must round and tie-break
+        identically — the review's duplication finding was that a second copy could disagree with the
+        per-subject split the quota must match. At base 1000 they are the same function."""
+        weights = {c: 200 for c in CATEGORIES}
+        weights["attack"] = 260
+        weights["status"] = 140
+        for total in (0, 1, 3, 5, 97):
+            self.assertEqual(dp.largest_remainder_count(weights, CATEGORIES, total),
+                             dp.largest_remainder_apportion(weights, CATEGORIES, total))
 
 
 class OverflowTests(unittest.TestCase):
@@ -475,7 +650,7 @@ class PairingRoleTests(unittest.TestCase):
         pairings.json was unreachable. Now that two payoffs are real, family/general scope DOES
         pair (by design -- see `plan_subject`'s species-scope guard); species scope must not,
         since a species subject's own count (2) is small enough that pairing would force EVERY
-        one of ~84 species into the identical pair, destroying per-species distinctiveness."""
+        one of ~900 species into the identical pair, destroying per-species distinctiveness."""
         if not OUTPUT_PATH.is_file():
             self.skipTest("round-1.json not yet generated in this checkout")
         doc = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
@@ -722,10 +897,19 @@ class CorpusLoadRoundTripTests(unittest.TestCase):
             self.skipTest("round-1.json not yet generated in this checkout")
         result = load_committed(ACTIONS_ROOT)
         rows = result.corpus.by_kind("action-brief")
-        self.assertEqual(len(rows), 5680)
+        tuning = load_run_tuning()
+        # Subject counts recomputed from the LIVE roster, never literals — the roster grows per
+        # shipped species. The expected total is the planner's own formula over the live inputs.
+        from seedsmith.adapters.actions.characteristic_pool.catalog import (
+            derive_live_family_assignments, load_catalog)
+        species_count = len({r.species_id for r in load_catalog()})
+        family_count = len(gen_mod._family_members(derive_live_family_assignments()))
+        expected = (tuning.general_count + family_count * tuning.per_family_count
+                    + species_count * tuning.per_species_count)
+        self.assertEqual(len(rows), expected)
         kind_spec = next(k for k in KINDS if k.kind == "action-brief")
         edges = result.corpus.discover_edges(kind_spec.id_pattern, skip_fields=frozenset({"name"}))
-        self.assertEqual(len(edges), 5680)
+        self.assertEqual(len(edges), expected)
 
 
 class FullRunRefusalTests(unittest.TestCase):
@@ -774,6 +958,34 @@ class FullRunRefusalTests(unittest.TestCase):
             }}), encoding="utf-8")
             self.assertTrue(gen_mod.is_passing_quality_gate(path))
 
+    def test_gate_reads_the_verdict_flag_not_the_gap_list(self) -> None:
+        """T1.3 (2026-09-12): the gate must defer to A-S5's own `gates`-aware verdict rather than
+        re-deriving a second, divergent rule from `gapMetrics`. A `pass` verdict whose `gapMetrics`
+        is non-empty is a legitimate report — the GAPs are unpromoted readings (spec-metrics §4) —
+        and the gate must accept it. Before this, the gate re-imposed `gapMetrics == []`, which is
+        the very definition A-S5 had to stop using, so the two disagreed: A-S5 said `pass`, the gate
+        said no. The verdict is the single source of truth; the gate never re-interprets it.
+
+        `NOT_MEASURED` stays blocking: a pass verdict can never contain one (A-S5 refuses to emit
+        `pass` in that case), and the gate keeps its own belt-and-braces check against a hand-written
+        report that claims `pass` while listing an unevaluated metric."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "coverage-round-1.json"
+            path.write_text(json.dumps({"kind": "action-coverage", "_meta": {
+                "round": 1, "verdict": {"verdict": "pass", "notMeasuredMetrics": [],
+                                          "gapMetrics": ["action.corpus.thinCell"]},
+            }}), encoding="utf-8")
+            self.assertTrue(gen_mod.is_passing_quality_gate(path),
+                            "a pass with unpromoted GAPs is a valid gate — the GAPs do not gate")
+
+            path.write_text(json.dumps({"kind": "action-coverage", "_meta": {
+                "round": 1, "verdict": {"verdict": "pass",
+                                          "notMeasuredMetrics": ["action.corpus.pairingReach"],
+                                          "gapMetrics": []},
+            }}), encoding="utf-8")
+            self.assertFalse(gen_mod.is_passing_quality_gate(path),
+                             "a pass cannot list an unevaluated metric")
+
     def test_gate_rejects_wrong_kind_or_round(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "coverage-round-1.json"
@@ -796,7 +1008,7 @@ class DryRunAndOfflineTests(unittest.TestCase):
             with patch.object(gen_mod, "SMOKE_GATE_EVIDENCE_PATH", gate_path):
                 summary = gen_mod.regenerate(
                     actions_root=tmp_path / "actions",
-                    demons_root=REPO_ROOT / "data" / "seed" / "demons",
+                    creatures_root=REPO_ROOT / "data" / "seed" / "creatures",
                     full_flag=True, write=False)
             self.assertFalse((tmp_path / "actions" / "_briefs" / "round-1.json").exists())
             self.assertFalse(summary["written"])
@@ -812,7 +1024,9 @@ class DryRunAndOfflineTests(unittest.TestCase):
 
 
 class RosterSizeTests(unittest.TestCase):
-    """The planner must cover the live species roster and every derived family namespace."""
+    """The planner must cover the live species roster and every derived family namespace — asserted
+    as JOINS to the plan, never as roster literals. The corpus grows per shipped species, so a pinned
+    904/227/1,183 fails the suite for succeeding at its job (validation-ssot.md)."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -825,24 +1039,43 @@ class RosterSizeTests(unittest.TestCase):
         if self.doc is None:
             self.skipTest("round-1.json not yet generated in this checkout")
 
-    def test_species_and_family_subject_counts(self) -> None:
+    def test_plan_subjects_cover_the_live_roster_and_family_namespace(self) -> None:
+        from seedsmith.adapters.actions.characteristic_pool.catalog import (
+            derive_live_family_assignments, load_catalog)
+        catalog_ids = {r.species_id for r in load_catalog()}
+        family_members = gen_mod._family_members(derive_live_family_assignments())
+
         species_briefs = [e for e in self.doc["entries"] if e["scope"] == "species"]
         family_briefs = [e for e in self.doc["entries"] if e["scope"] == "family"]
         general_briefs = [e for e in self.doc["entries"] if e["scope"] == "general"]
-        self.assertEqual(len({e["scopeKey"] for e in species_briefs}), 904)
-        self.assertEqual(len({e["scopeKey"] for e in family_briefs}), 227)
-        self.assertEqual(len(general_briefs), 25)
+
+        self.assertEqual({e["scopeKey"] for e in species_briefs}, catalog_ids,
+                         "every live species receives species-scoped briefs, and no stray key")
+        self.assertEqual({e["scopeKey"] for e in family_briefs}, set(family_members),
+                         "every consolidated family receives family-scoped briefs")
+        print(f"plan subjects: {len(catalog_ids)} species, {len(family_members)} families")
+        # The general tier is one pseudo-subject whose count is the run tuning's `generalCount`,
+        # never a literal — it moved 25 -> 1000 in the 2026-09-11 general-tier change.
+        self.assertEqual(len(general_briefs), load_run_tuning().general_count)
 
     def test_family_assigned_species_count_is_live_memberships(self) -> None:
+        """The reconciliation the old literal stood in for: memberships == the per-species sum, and
+        every species contributes at least one."""
         from seedsmith.adapters.actions.characteristic_pool.catalog import derive_live_family_assignments
         family_assignments = derive_live_family_assignments()
         members = gen_mod._family_members(family_assignments)
-        self.assertEqual(sum(len(v) for v in members.values()), 1183)
+        self.assertEqual(sum(len(v) for v in members.values()),
+                         sum(len(v if isinstance(v, list) else [v])
+                             for v in family_assignments.values()))
+        self.assertTrue(all(v for v in family_assignments.values()))
+        print(f"family memberships: {sum(len(v) for v in members.values())}")
 
 
 class QuotaExactnessTests(unittest.TestCase):
-    """Acceptance #3 -- per-subject category counts equal the largest-remainder allocation of
-    A-T1's real weights, spot-checked directly against the shipped type-weights.json."""
+    """Acceptance #3 -- per-subject category counts come from the SCOPE-level two-level allocation
+    (`apportion_categories`), spot-checked against the shipped plan. A per-subject largest-remainder
+    split was the pre-2026-09-11 method and was inert at `count == 5` (all 1,131 subjects got the
+    identical 1/1/1/1/1 vector); this class now pins the aggregate-exact replacement instead."""
 
     def setUp(self) -> None:
         tw_path = ACTIONS_ROOT / "type-weights.json"
@@ -852,26 +1085,232 @@ class QuotaExactnessTests(unittest.TestCase):
                          for e in json.loads(tw_path.read_text(encoding="utf-8"))["entries"]}
         self.round_doc = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
 
-    def test_species_category_counts_match_largest_remainder_exactly(self) -> None:
+    def test_species_category_counts_match_scope_allocation_exactly(self) -> None:
+        subjects = sorted(
+            (key, row["categoryMilli"]) for (scope, key), row in self.tw_by_key.items()
+            if scope == "species")
+        expected_all = dp.apportion_categories(subjects, 5)
         for scope_key in ("cherrybomb", "peashooter"):
-            row = self.tw_by_key.get(("species", scope_key))
-            if row is None:
+            if ("species", scope_key) not in self.tw_by_key:
                 continue
             briefs = [e for e in self.round_doc["entries"]
                      if e["scope"] == "species" and e["scopeKey"] == scope_key]
             self.assertEqual(len(briefs), 5)          # perSpeciesCount == 5 at the shipped default
-            expected = dp.largest_remainder_count(row["categoryMilli"], CATEGORIES, 5)
             actual = {c: 0 for c in CATEGORIES}
             for b in briefs:
                 actual[b["slot"]["category"]] += 1
-            self.assertEqual(actual, expected)
+            self.assertEqual(actual, expected_all[scope_key])
+            self.assertEqual(sum(actual.values()), 5)
+
+    def test_scope_aggregate_matches_quota_and_is_not_flat(self) -> None:
+        subjects = sorted(
+            (key, row["categoryMilli"]) for (scope, key), row in self.tw_by_key.items()
+            if scope == "species")
+        alloc = dp.apportion_categories(subjects, 5)
+        col = {c: 0 for c in CATEGORIES}
+        for counts in alloc.values():
+            for c in CATEGORIES:
+                col[c] += counts[c]
+        self.assertEqual(sum(col.values()), 5 * len(subjects))
+        # The whole point of the fix: the corpus is no longer flat-by-construction.
+        self.assertGreater(len({tuple(sorted(v.items())) for v in alloc.values()}), 1,
+                           "the scope allocation must differentiate subjects")
+
+
+class TopUpRoundTests(unittest.TestCase):
+    """T2.1/T2.2/T2.3/T2.4 (2026-09-12) — the `S5 → S1` top-up round the design specifies
+    (`action-corpus-ideal.md` §15 `S5 -->|"round n+1 targets"| S1`; `spec-coverage-report.md` §7
+    "Depended on by: A-S1, which reads the report to build round n+1's briefs") but which was never
+    wired. One round can never fill its own quota (measured ~66% yield), so `thinCell` was
+    permanently short and the full-run gate unreachable.
+
+    These tests use SYNTHETIC report targets, never the live corpus, so they keep testing after the
+    corpus is repaired (`spec-metrics.md` §6)."""
+
+    @staticmethod
+    def _report(entries: "list[dict]") -> dict:
+        return {"schemaVersion": 1, "kind": "action-coverage",
+                "_meta": {"round": 1, "mode": "smoke"}, "entries": entries}
+
+    def test_reads_next_target_rows_by_scope_key_and_category(self) -> None:
+        """T2.1 — the reader returns `{(scope, scopeKey): {category: want}}`, ignoring non-target
+        entries, so the planner can ask "how many more of what does this subject need?"."""
+        report = self._report([
+            {"kindOfEntry": "next-target", "scope": "species", "scopeKey": "alpha",
+             "category": "attack", "want": 2},
+            {"kindOfEntry": "next-target", "scope": "species", "scopeKey": "alpha",
+             "category": "defense", "want": 1},
+            {"kindOfEntry": "next-target", "scope": "family", "scopeKey": "fam1",
+             "category": "support", "want": 3},
+            {"kindOfEntry": "next-target", "scope": "general", "scopeKey": None,
+             "category": "attack", "want": 5},
+            {"kindOfEntry": "cell", "scope": "species", "category": "attack", "count": 0},
+        ])
+        got = gen_mod.read_top_up_targets(report)
+        self.assertEqual(got[("species", "alpha")], {"attack": 2, "defense": 1})
+        self.assertEqual(got[("family", "fam1")], {"support": 3})
+        self.assertEqual(got[("general", None)], {"attack": 5})
+
+    def test_a_zero_want_target_is_dropped(self) -> None:
+        """A `want` of 0 is not a deficiency; carrying it would emit a zero-count subject and
+        perturb the allocation for no reason."""
+        report = self._report([
+            {"kindOfEntry": "next-target", "scope": "species", "scopeKey": "alpha",
+             "category": "attack", "want": 0},
+        ])
+        self.assertEqual(gen_mod.read_top_up_targets(report), {})
+
+    def test_duplicate_targets_for_one_subject_category_sum(self) -> None:
+        """Two rows naming the same `(scope, scopeKey, category)` — never written by A-S5, but a
+        hand-merged or concatenated report must not silently lose one."""
+        report = self._report([
+            {"kindOfEntry": "next-target", "scope": "species", "scopeKey": "a",
+             "category": "attack", "want": 2},
+            {"kindOfEntry": "next-target", "scope": "species", "scopeKey": "a",
+             "category": "attack", "want": 3},
+        ])
+        self.assertEqual(gen_mod.read_top_up_targets(report)[("species", "a")]["attack"], 5)
+
+    def test_wrong_kind_is_refused_by_name(self) -> None:
+        """A report of the wrong kind is a caller error, not an empty shortfall — silently reading
+        zero would plan a duplicate round 1 and look like success."""
+        with self.assertRaises(ValueError) as ctx:
+            gen_mod.read_top_up_targets({"kind": "action-brief", "entries": []})
+        self.assertIn("action-coverage", str(ctx.exception))
+
+    def test_missing_file_is_refused_by_name(self) -> None:
+        """T2.1 acceptance: 'a missing/malformed report is refused by name, never silently treated
+        as zero shortfall'. The loader takes a PATH (the planner's real input)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            missing = Path(tmp) / "coverage-round-99.json"
+            with self.assertRaises(FileNotFoundError):
+                gen_mod.load_top_up_targets(missing)
+
+
+class NoTopUpIsRoundOneTests(unittest.TestCase):
+    """T2.3 — round 1 reads no report (the cycle stays broken by construction), so round 1's plan is
+    byte-identical to what it was before the top-up path existed."""
+
+    def test_round_one_without_a_report_is_unchanged(self) -> None:
+        """Passing no report must reproduce the current round-1 plan exactly: the top-up path is
+        additive and inert when no report is supplied."""
+        if not OUTPUT_PATH.is_file():
+            self.skipTest("round-1.json not yet generated in this checkout")
+        shipped = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as tmp:
+            actions_root = Path(tmp) / "actions"
+            gate_path = Path(tmp) / "coverage-round-1.json"
+            _write_passing_gate(gate_path)
+            with patch.object(gen_mod, "SMOKE_GATE_EVIDENCE_PATH", gate_path):
+                summary = gen_mod.regenerate(actions_root=actions_root, full_flag=True, write=True)
+            fresh = json.loads((actions_root / "_briefs" / "round-1.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(fresh["entries"]), len(shipped["entries"]),
+                         "no report -> no top-up -> identical brief count")
+        self.assertEqual(summary["topUpSubjects"], 0)
+
+
+class TopUpMergeTests(unittest.TestCase):
+    """T2.2 — a top-up round plans EXACTLY the shortfall, never a fresh full base. Round n's accepted
+    rows already persist in the committed corpus and already count against the quota, so re-planning
+    the base would generate duplicates of rows that were accepted; the `want` field is precisely the
+    shortfall. A subject with no target needs nothing and gets no briefs."""
+
+    @staticmethod
+    def _kwargs(**over):
+        species_anchor = {
+            "a": dp.SpeciesAnchorRow("a", "fam", "fire", "chaff", "creature.a", ("m1", "m2"), ()),
+            "b": dp.SpeciesAnchorRow("b", "fam", "fire", "chaff", "creature.b", ("m1", "m2"), ()),
+        }
+        kwargs = dict(
+            species_ids=["a", "b"], family_members={"fam": ["a", "b"]}, species_anchor=species_anchor,
+            weights_by_key={("species", "a"): _weights(), ("species", "b"): _weights(),
+                            ("family", "fam"): _weights()},
+            rung_table=dp.load_rung_table(REPO_ROOT / "data" / "tuning" / "action-rungs.v1.json"),
+            family_ids=FAMILY_IDS, pairing_table={}, general_count=2, per_species_count=1,
+            per_family_count=1, multiplicative_pairs=(("atom.keen-edge", "atom.cruelty"),),
+            family_motif_max=6, corpus_hash="fixed", tuning_version=1,
+        )
+        kwargs.update(over)
+        return kwargs
+
+    def test_a_short_subject_gets_exactly_its_shortfall_and_nothing_else(self) -> None:
+        base = dp.plan_round(**self._kwargs())
+        topped = dp.plan_round(**self._kwargs(
+            top_up={("species", "a"): {"attack": 3}, ("species", "b"): {"defense": 1}}))
+        a_top = [b for b in topped if b["scope"] == "species" and b["scopeKey"] == "a"]
+        b_top = [b for b in topped if b["scope"] == "species" and b["scopeKey"] == "b"]
+        self.assertEqual(len(a_top), 3, "subject a plans exactly its 3 shortfall briefs")
+        self.assertEqual(len(b_top), 1, "subject b plans exactly its 1 shortfall brief")
+        self.assertGreater(len(base), 0, "sanity: the base round is non-empty")
+
+    def test_the_planned_briefs_are_the_requested_categories(self) -> None:
+        topped = dp.plan_round(**self._kwargs(
+            top_up={("species", "a"): {"attack": 3, "defense": 1}}))
+        a_rows = [b for b in topped if b["scope"] == "species" and b["scopeKey"] == "a"]
+        by_cat = {}
+        for b in a_rows:
+            by_cat[b["slot"]["category"]] = by_cat.get(b["slot"]["category"], 0) + 1
+        self.assertEqual(by_cat, {"attack": 3, "defense": 1},
+                         "the category counts are exactly what the report asked for")
+
+    def test_a_subject_with_no_target_gets_no_briefs(self) -> None:
+        topped = dp.plan_round(**self._kwargs(top_up={("species", "a"): {"attack": 2}}))
+        b_rows = [b for b in topped if b["scope"] == "species" and b["scopeKey"] == "b"]
+        self.assertEqual(b_rows, [], "a covered subject needs nothing from a top-up round")
+
+    def test_no_top_up_is_byte_identical_to_no_parameter(self) -> None:
+        self.assertEqual(dp.plan_round(**self._kwargs()),
+                         dp.plan_round(**self._kwargs(top_up=None)))
+
+    def test_an_empty_top_up_plans_nothing(self) -> None:
+        self.assertEqual(dp.plan_round(**self._kwargs(top_up={})), [])
+
+    def test_a_top_up_round_is_still_deterministic(self) -> None:
+        kw = self._kwargs(top_up={("species", "a"): {"attack": 2}, ("family", "fam"): {"status": 1}})
+        self.assertEqual(dp.plan_round(**kw), dp.plan_round(**kw))
+
+    def test_a_top_up_round_carries_the_normal_brief_contract(self) -> None:
+        """Every top-up brief is an ordinary brief: unique id, a legal category/target/role, a rung
+        band, and the same required keys — so nothing downstream needs a special case."""
+        topped = dp.plan_round(**self._kwargs(top_up={("species", "a"): {"attack": 2}}))
+        base = dp.plan_round(**self._kwargs())
+        for b in topped:
+            self.assertEqual(set(b.keys()), set(base[0].keys()))
+            self.assertIn(b["slot"]["category"], CATEGORIES)
+            self.assertIn(b["slot"]["targetMode"], TARGET_MODES)
+            dp.validate_rung_band(b["scope"], b["slot"]["rungBand"])
+        ids = [b["briefId"] for b in topped]
+        self.assertEqual(len(ids), len(set(ids)), "briefIds are unique within the round")
+
+
+class ConvergenceBoundTests(unittest.TestCase):
+    """T2.4 — a round loop must be bounded and report WHY it stopped, never run unbounded."""
+
+    def test_stops_when_no_cell_is_thin(self) -> None:
+        decision = gen_mod.convergence_decision(thin_cell_count=0, rounds_done=1, max_rounds=10)
+        self.assertEqual(decision["stop"], True)
+        self.assertEqual(decision["reason"], "converged")
+
+    def test_stops_at_the_declared_round_cap(self) -> None:
+        decision = gen_mod.convergence_decision(thin_cell_count=5, rounds_done=10, max_rounds=10)
+        self.assertEqual(decision["stop"], True)
+        self.assertEqual(decision["reason"], "round-cap")
+
+    def test_continues_while_thin_and_under_the_cap(self) -> None:
+        decision = gen_mod.convergence_decision(thin_cell_count=5, rounds_done=2, max_rounds=10)
+        self.assertEqual(decision["stop"], False)
+        self.assertEqual(decision["reason"], "thin-cells-remain")
+
+    def test_a_non_positive_cap_is_refused(self) -> None:
+        with self.assertRaises(ValueError):
+            gen_mod.convergence_decision(thin_cell_count=1, rounds_done=0, max_rounds=0)
 
 
 class DeterminismTests(unittest.TestCase):
     """Spec §5 'Determinism', acceptance #9."""
 
     def test_plan_round_pure_function_is_repeatable(self) -> None:
-        species_anchor = {"a": dp.SpeciesAnchorRow("a", "fam", "fire", "chaff", "demon.a",
+        species_anchor = {"a": dp.SpeciesAnchorRow("a", "fam", "fire", "chaff", "creature.a",
                                                     ("m1", "m2"), ())}
         weights_by_key = {("species", "a"): _weights(), ("family", "fam"): _weights()}
         kwargs = dict(
@@ -931,7 +1370,7 @@ class DeterminismTests(unittest.TestCase):
         doc = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
         self.assertIn("corpusHash", doc["_meta"])
         self.assertEqual(doc["_meta"]["round"], 1)
-        self.assertEqual(doc["_meta"]["tuningVersion"], 2)
+        self.assertEqual(doc["_meta"]["tuningVersion"], load_run_tuning().version)
         for e in doc["entries"]:
             self.assertEqual(e["_provenance"]["corpusHash"], doc["_meta"]["corpusHash"])
             self.assertEqual(e["_provenance"]["round"], 1)

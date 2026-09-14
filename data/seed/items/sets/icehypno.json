@@ -25,7 +25,7 @@
       "id": "set.icehypno-001",
       "nameKey": "set.frozen-nut-husk",
       "name": "Frozen Nut Husk",
-      "themeKey": "demon.icehypno",
+      "themeKey": "creature.icehypno",
       "members": [
         {
           "role": "armament-primary",

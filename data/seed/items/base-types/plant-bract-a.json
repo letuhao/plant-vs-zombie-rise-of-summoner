@@ -30,7 +30,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.keen-edge",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -67,7 +67,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.precision",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -104,7 +104,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.keen-edge",
+        "family": "atom.might",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -141,7 +141,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.precision",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -178,7 +178,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.keen-edge",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 0,
@@ -215,7 +215,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.precision",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -252,7 +252,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.keen-edge",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 0,
@@ -289,7 +289,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.precision",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -326,7 +326,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "medium"
       },
       "socketMax": 0,
@@ -363,7 +363,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.precision",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -400,7 +400,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.precision",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -437,7 +437,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 0,

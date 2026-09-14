@@ -32,7 +32,7 @@ building this module (2026-09-07):**
    already refuses a legacy id at GENERATION time (acceptance #1's own gate), so this generator
    could never reproduce the defect — but it also could never repair it, since it only mints NEW
    recipes, never re-authors the 30 pre-existing hand-authored ones. See sibling module
-   `recipegen.migrate_legacy_shards` (detect + fix, mirroring `LegacyDemonRarityIds.ForwardMap`
+   `recipegen.migrate_legacy_shards` (detect + fix, mirroring `LegacyCreatureRarityIds.ForwardMap`
    exactly), now applied to the real corpus — `build_reference_reports()`'s `cost_lines.unresolved`
    is `[]` today.
 """

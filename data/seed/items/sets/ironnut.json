@@ -25,7 +25,7 @@
       "id": "set.ironnut-001",
       "nameKey": "set.ferrous-nut-husk",
       "name": "Ferrous Nut Husk",
-      "themeKey": "demon.ironnut",
+      "themeKey": "creature.ironnut",
       "members": [
         {
           "role": "core-guard",

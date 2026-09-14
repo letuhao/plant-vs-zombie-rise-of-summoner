@@ -14,7 +14,16 @@ namespace FusionRpg.Server;
 
 /// <summary>
 /// Commander-scope shared-tree <c>stat.derived</c> atoms for Server Hub fan-in.
-/// Injector does not hydrate <see cref="PassiveTreeTuningHub"/> today — lawn tree is a named gap.
+///
+/// <para>lawn-tree-hydrate (T13, 2026-09-13): "Injector does not hydrate <see cref="PassiveTreeTuningHub"/>
+/// -- lawn tree is a named gap" is CLOSED, not by configuring this hub in the Injector process (it
+/// still isn't, and does not need to be -- the SQL-backed resolve below stays Server-only) but by a
+/// thin HTTP round trip: <c>PassiveTreeEndpoints.MapGet("/bound-atoms/{playerId}")</c> calls this exact
+/// method and serializes its result; <c>RpgClient.RefreshTreeBoundAtomsAsync</c> fetches it and caches
+/// it in <c>FusionRpg.Injector.Stats.TreeBoundAtomsCache</c>, fanned into the Injector's own
+/// <c>ActorHub</c> via its <c>boundDerivedAtoms</c> delegate alongside the live-grant reader
+/// (<c>CheatState.cs</c>) -- the same "Injector has no store, Server does the SQL work once" shape
+/// <c>RpgClient.RefreshCommanderAllocationAsync</c> already uses for commander aptitude.</para>
 /// </summary>
 public static class TreeBoundAtoms
 {

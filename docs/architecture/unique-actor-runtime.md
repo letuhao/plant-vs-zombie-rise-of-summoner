@@ -273,7 +273,7 @@ When extending, cite this file + [match-runtime.md](match-runtime.md) and do not
 ### 11.1 Party-dungeon `delve-attrition` (2026-09-05, specced, unbuilt)
 
 `Retired` gains a **second producer**: extraction from a delve on a permadeath rung (`PermadeathGate.Applies`)
-retires a `downedOnce` demon — the release path in `RpgStore.UniqueActors.cs:216` stops being the only
+retires a `downedOnce` creature — the release path in `RpgStore.UniqueActors.cs:216` stops being the only
 write. `Recovering` becomes a **durable** row for a delve wound, counted down **in delves** at `CloseDelve`
 (never timed — no `*_utc` column, no `ElapsedDays`), left by the counter reaching 0 or by the recovery
 ritual. The W4 one-write note (§6 Recover: `ActiveBound → Recovering → Roster` in one step) still holds for

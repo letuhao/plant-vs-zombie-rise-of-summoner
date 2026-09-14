@@ -25,7 +25,7 @@
       "id": "set.ultimatetallnut-001",
       "nameKey": "set.obsidian-nut",
       "name": "Obsidian Nut",
-      "themeKey": "demon.ultimatetallnut",
+      "themeKey": "creature.ultimatetallnut",
       "members": [
         {
           "role": "core-guard",

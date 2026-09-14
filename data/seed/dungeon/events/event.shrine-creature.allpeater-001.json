@@ -1,0 +1,37 @@
+{
+  "chainRef": "none",
+  "climateAffinity": "fire",
+  "eligibility": null,
+  "eventId": "event.shrine-creature.allpeater-001",
+  "flavor": "A jagged monolith of obsidian stands in the center of the chamber, its surface etched with runes that pulse with a rhythmic, hungry heat. The air smells of ozone and scorched iron, as if the very atmosphere is being consumed by a focused stream of concentrated energy. A heavy sense of 分配 weighs upon the room, as if the stone itself is deciding how much life to grant and how much to take.",
+  "kind": "shrine",
+  "name": "The Altar of Calculated Attrition",
+  "outcomes": [
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.warding",
+          "powerBand": "high"
+        }
+      ],
+      "ordinal": "good"
+    },
+    {
+      "consequence": "scout",
+      "dropBand": "frequent",
+      "effects": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "ordinal": "bad"
+    }
+  ],
+  "reason": "The party encounters a site of intense energy exchange that requires a sacrifice of resources to alter their current combat trajectory.",
+  "repeatScope": "once-per-player",
+  "supplyOverride": "none",
+  "theme": "creature.allpeater"
+}

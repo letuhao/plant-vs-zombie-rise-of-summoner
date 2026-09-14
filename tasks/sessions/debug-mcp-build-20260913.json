@@ -1,0 +1,17 @@
+{
+  "session": "debug-mcp-build-20260913",
+  "program": "debug-mcp",
+  "problem": "Build tasks/debug-mcp-todo.md in order, one task per increment (TDD + incremental). Current task: T1 scaffold + shared modules.",
+  "mode": "direct",
+  "branch": "features/derived-stat-extension",
+  "worktree": null,
+  "paths": [
+    "tools/debug-mcp/**",
+    "tasks/debug-mcp-todo.md",
+    "tasks/sessions/debug-mcp-build-20260913.json"
+  ],
+  "started": "2026-09-13T00:00:00Z",
+  "status": "merged",
+  "closed": "2026-09-13 — T1-T10 done (T4 absorbed debug_logs CUT), pytest 44/44, guards clean. Uncommitted (git hands-off); handoff per task in final report.",
+  "scopeNote": "Build session (distinct from debug-mcp-idea-20260913 which did idea/spec/plan). Baseline: main-tree dirt is own planning artifacts (ideal/map/spec/plan/todo/records, uncommitted) + another stream's first-light-turn.json (leave alone). Git hands-off: no commits by this session; per-task handoff = one-line message + paths."
+}

@@ -25,7 +25,7 @@
       "id": "set.yellowgargantuar-001",
       "nameKey": "set.record-breaking-husk",
       "name": "Record-Breaking Husk",
-      "themeKey": "demon.yellowgargantuar",
+      "themeKey": "creature.yellowgargantuar",
       "members": [
         {
           "role": "armament-primary",

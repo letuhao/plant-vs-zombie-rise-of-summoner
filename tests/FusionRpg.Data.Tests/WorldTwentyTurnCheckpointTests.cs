@@ -22,20 +22,18 @@ public class WorldTwentyTurnCheckpointTests : IDisposable
     /// <summary>The one commander with no policy — the only one the auto-fill leaves alone.</summary>
     const string Human = "dave";
 
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public WorldTwentyTurnCheckpointTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-cp2-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
     /// <summary>The scripted log: every commander stands fast, every turn.</summary>

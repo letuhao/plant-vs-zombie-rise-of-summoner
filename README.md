@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/assets/banner.svg" alt="Rise of Summoner — an RPG plus empire-building game. Play the lawn. Raise demons. Take back the multiverse." width="100%">
+<img src="docs/assets/banner.svg" alt="Rise of Summoner — an RPG plus empire-building game. Play the lawn. Raise creatures. Take back the multiverse." width="100%">
 
 <br>
 
@@ -14,7 +14,7 @@
 
 ## An RPG plus empire-building game
 
-**Play the lawn. Raise demons. Run idle expeditions. Build the empire. Take back the multiverse.**
+**Play the lawn. Raise creatures. Run idle expeditions. Build the empire. Take back the multiverse.**
 
 Rise of Summoner is an RPG plus empire-building game. The **lawn** is the **first core loop** — souls, levels, almanac, deploy — not the whole war. Idle expeditions run while you play. The rift is adventure and empire: farm, hunt, and defend ground that can fade if you neglect it.
 
@@ -30,9 +30,9 @@ Short feature list: **[docs/guide/features.md](docs/guide/features.md)**. Tabbed
 
 ## How the war is played
 
-You start on the **lawn**. You raise demons. You send spare demons on **expeditions**. When you are ready, you step onto the **rift**: adventure on the map, empire on the world stage, crawls in delves, quests tying it together.
+You start on the **lawn**. You raise creatures. You send spare creatures on **expeditions**. When you are ready, you step onto the **rift**: adventure on the map, empire on the world stage, crawls in delves, quests tying it together.
 
-- Kills become souls; encounters fill the almanac; demons you raised deploy back onto the board
+- Kills become souls; encounters fill the almanac; creatures you raised deploy back onto the board
 - Summon, bind, and fuse at home — gacha is one path, never the only one
 - Dispatch idle expeditions with no stamina; march sectors, hold loam, End Turn against Zomboss
 - After the first chapter, unlocked features stay playable with the **lawn game** closed
@@ -44,7 +44,7 @@ You start on the **lawn**. You raise demons. You send spare demons on **expediti
 ## What you get
 
 - **Play the lawn** — the lawn is the first core loop; souls, almanac, and deploy feed everything else
-- **Raise demons** — persistent specimens; summon, bind, fuse; gacha is one path, never the only one
+- **Raise creatures** — persistent specimens; summon, bind, fuse; gacha is one path, never the only one
 - **Fight for real** — six elements, shields, statuses; the roster you build is the roster that performs
 - **Idle forever** — expeditions from 30 minutes to 20 hours; no stamina
 - **Build the empire** — rift map, End Turn, loam, Zomboss as a real opponent; take his fortress or lose yours
@@ -57,9 +57,9 @@ You start on the **lawn**. You raise demons. You send spare demons on **expediti
 <!-- SCREENSHOT SLOT — drop real captures here once you have them, e.g.
      <p align="center">
        <img src="docs/assets/shot-lawn.png"   alt="Live lawn mirror" width="49%">
-       <img src="docs/assets/shot-roster.png" alt="Demon roster"     width="49%">
+       <img src="docs/assets/shot-roster.png" alt="Creature roster"     width="49%">
      </p>
-     Shot list: lawn mirror mid-run · roster with gear · demon codex · rift map · almanac dossier -->
+     Shot list: lawn mirror mid-run · roster with gear · creature codex · rift map · almanac dossier -->
 
 ---
 

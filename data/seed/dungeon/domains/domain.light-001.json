@@ -15,8 +15,8 @@
   },
   "name": "The Gilded Orchard of Noon",
   "questPool": [
-    "quest.bring-demon-home-alive-delve-001",
-    "quest.bring-demon-home-alive-roster-001",
+    "quest.bring-creature-home-alive-delve-001",
+    "quest.bring-creature-home-alive-roster-001",
     "quest.cleanse-fights-delve-001",
     "quest.cleanse-fights-domain-001",
     "quest.cleanse-fights-roster-001",
@@ -80,6 +80,6 @@
     "room.wild-light-002"
   ],
   "tags": [],
-  "theme": "demon.sunflower",
+  "theme": "creature.sunflower",
   "variants": []
 }

@@ -111,10 +111,10 @@ Types defined in **`actor-hud-core`**; populated by **`actor-hud-dump`**; consum
 
 | Field | Owner | Shape / rule |
 |-------|-------|--------------|
-| `identity.tier` | dump | `"normal"` \| `"elite"` \| `"boss"` \| `"unique"` — **v1:** emit `unique` from `flags.unique`; `elite` from demon/rarity when wired; **omit `boss`** until expedition |
+| `identity.tier` | dump | `"normal"` \| `"elite"` \| `"boss"` \| `"unique"` — **v1:** emit `unique` from `flags.unique`; `elite` from creature/rarity when wired; **omit `boss`** until expedition |
 | `identity.role` | dump | `"specimen"` when `instanceId` bound; else `"vanilla"` |
 | `identity.levelBand` | dump | Display `int` from `progression.power` Θ band — **not** raw Θ or `theLevel` |
-| `identity.flags` | dump | `string[]` e.g. `"unique"`, `"demon"` |
+| `identity.flags` | dump | `string[]` e.g. `"unique"`, `"creature"` |
 | `resources.shield` | dump | `{ hp, max, stacks: [{ element, hp, max }] }` from `ShieldRuntime` |
 | `resources.hpSliver` | dump | **Omit in v1** (`hpSliverEnabled: false` in tunables) |
 | `resources.meters` | dump | Optional `{ id, ratio }[]` — v1 may omit if no lawn meters |

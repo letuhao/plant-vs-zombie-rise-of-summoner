@@ -25,7 +25,7 @@
       "id": "set.nutchomper-001",
       "nameKey": "set.the-maw-of-sediment",
       "name": "The Maw of Sediment",
-      "themeKey": "demon.nutchomper",
+      "themeKey": "creature.nutchomper",
       "members": [
         {
           "role": "armament-primary",

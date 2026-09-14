@@ -25,7 +25,7 @@
       "id": "set.threemelon-001",
       "nameKey": "set.three-line-melon-launcher",
       "name": "Three-Line Melon Launcher",
-      "themeKey": "demon.threemelon",
+      "themeKey": "creature.threemelon",
       "members": [
         {
           "role": "armament-primary",

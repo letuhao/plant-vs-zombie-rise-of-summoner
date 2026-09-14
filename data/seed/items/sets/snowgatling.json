@@ -25,7 +25,7 @@
       "id": "set.snowgatling-001",
       "nameKey": "set.glacial-spike-volley",
       "name": "Glacial Spike Volley",
-      "themeKey": "demon.snowgatling",
+      "themeKey": "creature.snowgatling",
       "members": [
         {
           "role": "armament-primary",

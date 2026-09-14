@@ -25,7 +25,7 @@
       "id": "set.hypnoqueen-001",
       "nameKey": "set.emperor-s-fungal-grave",
       "name": "Emperor's Fungal Grave",
-      "themeKey": "demon.hypnoqueen",
+      "themeKey": "creature.hypnoqueen",
       "members": [
         {
           "role": "armament-primary",

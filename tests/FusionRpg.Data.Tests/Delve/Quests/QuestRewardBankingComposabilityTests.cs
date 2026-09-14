@@ -20,15 +20,13 @@ namespace FusionRpg.Data.Tests.Delve.Quests;
 /// </summary>
 public class QuestRewardBankingComposabilityTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public QuestRewardBankingComposabilityTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-quest-bank-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
         Assert.True(_store.UpsertAtom(new AtomRow
         {
             AtomId = AtomRow.DeriveId("atom.vitality", "", 1),
@@ -43,10 +41,7 @@ public class QuestRewardBankingComposabilityTests : IDisposable
         }).IsOk);
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static readonly PowerTuning Tuning = PowerTuning.Build(
         1, 1, 80_000, 0, 20, 680, 1000, 25000, 250, 1000, 5000, 5000, 25000);

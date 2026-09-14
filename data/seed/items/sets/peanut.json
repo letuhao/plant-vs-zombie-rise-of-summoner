@@ -25,7 +25,7 @@
       "id": "set.peanut-001",
       "nameKey": "set.hardened-nut-spike",
       "name": "Hardened Nut Spike",
-      "themeKey": "demon.peanut",
+      "themeKey": "creature.peanut",
       "members": [
         {
           "role": "armament-primary",

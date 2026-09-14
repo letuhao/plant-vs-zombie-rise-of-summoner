@@ -77,7 +77,7 @@ Called from occupant sync after position update, alongside existing `setHpDispla
 |-----------|---------------|-------|
 | `identity.tier` | `tierFrame` Graphics or sprite | border color by tier |
 | `identity.levelBand` | `levelBadge` Text | mono font, small |
-| `identity.role` | `rolePip` Text/icon | demon vs vanilla |
+| `identity.role` | `rolePip` Text/icon | creature vs vanilla |
 | `resources.shield.stacks` | `shieldBar` rectangles | element colors |
 | `statuses[]` | `statusToken_*` Text/icon | Catalog `hudToken` + `color` (ideal §4.1); never id-slice |
 | `overflow.statusCount` | `overflowPip` Text | `+N` |

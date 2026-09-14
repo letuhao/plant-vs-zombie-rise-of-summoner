@@ -5,8 +5,8 @@
 **What it serves:** [base-defense-ideal.md](base-defense-ideal.md) needs a structure corpus —
 §5.21 estimates **24–40 types** against the ~~**4**~~ **7** that exist (recounted 2026-09-05, see §2.3). This document is how that corpus gets
 authored, and it is written against the worked example rather than from scratch:
-[demon-seed-map.md](demon-seed-map.md) and the ~~**408**~~ **502** shipped species anchors under
-`data/seed/demons/species/` (recounted 2026-09-05 — 415 plant + 87 zombie anchor files; `_index.json`
+[creature-seed-map.md](creature-seed-map.md) and the ~~**408**~~ **502** shipped species anchors under
+`data/seed/creatures/species/` (recounted 2026-09-05 — 415 plant + 87 zombie anchor files; `_index.json`
 maps 840 game species ids onto them, many-to-one).
 
 ---
@@ -46,7 +46,7 @@ A downstream session reads this document, not its links.
 
 | Thing | Evidence |
 |---|---|
-| **A complete seed → anchor pipeline at scale** | ~~**408**~~ **502** species files under `data/seed/demons/species/plant/` plus zombie (**corrected 2026-09-05:** 415 plant + 87 zombie anchors on disk, `zombie/_needs-review.json` excluded; the 408 was the count at the 2026-09-04 write-up), with `_index.json` keyed by species id (840 entries — several game species share one anchor) |
+| **A complete seed → anchor pipeline at scale** | ~~**408**~~ **502** species files under `data/seed/creatures/species/plant/` plus zombie (**corrected 2026-09-05:** 415 plant + 87 zombie anchors on disk, `zombie/_needs-review.json` excluded; the 408 was the count at the 2026-09-04 write-up), with `_index.json` keyed by species id (840 entries — several game species share one anchor) |
 | **The anchor shape, and it is enums-only** | `aerial-flora.json`: `aptitudePrimary: "Bulwark"`, `attackTempo: "steady"`, `threatBand: "nuisance"`, `reach: "short"`, `rarity: "fused"`, `deployMode: "PlantAvatar"`. **Not one magnitude.** The only number is `gameTypeId: 1204`, an identity key |
 | **Provenance that makes idempotency checkable** | `_provenance` carries per-field `attempts`, per-field `confidence`, `dumpHash`, `emittedUtc`, `minorityValues`, `promptVersions`, `auditVerdict`, `basis` |
 | **`_derived` declares ownership in-file** | `"_derived": ["basis", "posture", "pure"]` — the anchor states which of its own fields it did not author |
@@ -72,13 +72,13 @@ static readonly IReadOnlyList<StructureDef> Seed = new StructureDef[]
 ```
 
 The variable is *called* `Seed` and is a hardcoded array of ~~**four**~~ **seven** rows. Compare ~~408~~ 502 JSON anchors for
-demons. **Corrected 2026-09-05 (party-dungeon audit §6, verified against `StructureCatalog.cs`):** the
+creatures. **Corrected 2026-09-05 (party-dungeon audit §6, verified against `StructureCatalog.cs`):** the
 array holds seven `StructureId =` rows — `loam-source-placeholder`, `well`, `waystation`, `granary`,
 `soul-conduit`, `extractor`, `hatchery` (`StructureCatalog.cs:86-152`) — and `StructureKind` has three values,
 `LoamSource`, `Storage`, `Yield` (`:7-22`; `Yield` landed with world-map W56). The four/two counts below and in §7
 were true when this was written on 2026-09-04 and are left as the reasoning trail; the conclusion — a hardcoded
 array, no seed corpus, no generator — is unchanged by the recount. And `data/seed/` holds **sixteen** domains — actions, aptitudes, atoms, channel-policy,
-channel-pools, containers, curves, demons, derived-stats, elements, external-reference, items, loot,
+channel-pools, containers, curves, creatures, derived-stats, elements, external-reference, items, loot,
 rarity, resources, zomboss — **and none is structures**.
 
 **So the first module is not a generator. It is making structures seed content at all**, and it is
@@ -95,18 +95,18 @@ reviewable."*
 
 ---
 
-## 3. The generation shape is **not** the demon generator's, and this is the load-bearing difference
+## 3. The generation shape is **not** the creature generator's, and this is the load-bearing difference
 
-**The demon pipeline classifies an existing corpus.** A Peashooter already exists — it has a name, an
+**The creature pipeline classifies an existing corpus.** A Peashooter already exists — it has a name, an
 almanac entry, art, a `gameTypeId`. The model reads it and assigns enums. Identity is *given*; the
 model's job is judgement about a thing that already is.
 
 **A structure corpus has to be invented.** There is no almanac of trenches.
 
-That changes three things, and a spec written against the demon pipeline without noticing would get all
+That changes three things, and a spec written against the creature pipeline without noticing would get all
 three wrong:
 
-| | Demon (classify) | Structure (invent) |
+| | Creature (classify) | Structure (invent) |
 |---|---|---|
 | Input | one captured almanac entry per call | a **combination** — (role × slot kind × climate) |
 | Failure mode | mis-assignment; caught by majority vote and confidence | **mode collapse and generic flavour** — nine variations of "Sturdy Wall". Vote does not catch it |
@@ -114,8 +114,8 @@ three wrong:
 
 ⚠️ **And the PvZ corpus is not available for reuse here.** PvZ's static plants — Wall-nut, Tall-nut,
 Pumpkin, Spikeweed, Lily Pad — are exactly structures in our terms, and would be the obvious corpus.
-**They are already demons.** The owner's own framing: *"cannot use soul to summon a wall, that confuse
-with wallnut demon family."* Reclassifying them would take content out of the summon roster.
+**They are already creatures.** The owner's own framing: *"cannot use soul to summon a wall, that confuse
+with wallnut creature family."* Reclassifying them would take content out of the summon roster.
 
 **So the source material is the design research, not a datamine:** base-defense §5.18's seventeen
 historical works reduced to four obstacle kinds, and §5.21's ten economic roles. That is ~25–30 seed
@@ -223,7 +223,7 @@ Every number this introduces. None is a `const`, and none is in a seed file.
 | Was | Decision | Answer |
 |---|---|---|
 | Own program or a module? | **45** | ⛔ **A module set inside `base-defense`.** Decision 30 is revised. This document stays as the design record; only the program boundary changed |
-| Do static plants stay demons? | **43** | **Yes** — confirming §3's own argument. So the pipeline is **INVENTION**, not datamine: the source is the design research (§5.18 + §5.21), hand-authored first, generated second |
+| Do static plants stay creatures? | **43** | **Yes** — confirming §3's own argument. So the pipeline is **INVENTION**, not datamine: the source is the design research (§5.18 + §5.21), hand-authored first, generated second |
 
 **Three obligations were added while these were open**, and they are part of the module set:
 
@@ -241,9 +241,9 @@ Every number this introduces. None is a `const`, and none is in a seed file.
 <details><summary>The questions as originally posed</summary>
 
 1. **Is this its own program, or a module of `base-defense`?** It has its own corpus, its own pipeline
-   and its own metrics, which argues for its own map — the same shape `demon-seed` has beside
-   `demon-system`. But it exists only to serve base defense.
-2. **Do PvZ's static plants stay demons?** The owner's framing says yes. Worth confirming, because it
+   and its own metrics, which argues for its own map — the same shape `creature-seed` has beside
+   `creature-system`. But it exists only to serve base defense.
+2. **Do PvZ's static plants stay creatures?** The owner's framing says yes. Worth confirming, because it
    is the difference between a datamine-classify pipeline (cheap, proven) and an invention pipeline
    (§3, and a different failure surface).
 

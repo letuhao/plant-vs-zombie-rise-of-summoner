@@ -74,7 +74,7 @@ A slot ships only when its row is wired and the Read API is used exclusively.
 | `identity.role` | `MatchUniqueBindingsFacet` | `MatchHost.Runtime.UniqueBindings.TryGetByPtr(ptr)` | wired |
 | `identity.levelBand` | `ActorDerivedSnapshot` pin | `InjectorDerivedOverride.TryGet(ptr)` → `progression.power` → `PowerBandDisplay` | wired at EntityApply |
 | `identity.tier` unique | BoardProjection / spawn observe | `flags.unique` on occupant path | partial |
-| `identity.tier` elite | Demon/rarity derived | TBD — **omit v1** if no pin/signal | inert |
+| `identity.tier` elite | Creature/rarity derived | TBD — **omit v1** if no pin/signal | inert |
 | `identity.tier` boss | Expedition spawn | **omit v1** | inert |
 | `resources.shield` | `ShieldRuntime` | `EffectRuntime.Bag.ShieldGate.Runtime` totals/stacks — same path as `GameDumps.AddRpgShield` | partial |
 | `statuses[]` | `StatusRuntime` | Instance enumeration by owner ptr (combat owner key) | partial |
@@ -134,7 +134,7 @@ Verified: `EntityApply` already calls `ActorHub.Resolve` — pin is one line per
 | Condition | `identity.tier` |
 |-----------|-----------------|
 | `flags.unique` | `unique` |
-| Bound demon specimen (when profile wired) | `elite` (interim) |
+| Bound creature specimen (when profile wired) | `elite` (interim) |
 | Default | `normal` |
 | Expedition boss | **omit** — do not emit `boss` until signal exists |
 

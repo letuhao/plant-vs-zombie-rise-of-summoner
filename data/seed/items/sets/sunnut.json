@@ -25,7 +25,7 @@
       "id": "set.sunnut-001",
       "nameKey": "set.sun-dried-husk",
       "name": "Sun-Dried Husk",
-      "themeKey": "demon.sunnut",
+      "themeKey": "creature.sunnut",
       "members": [
         {
           "role": "armament-primary",

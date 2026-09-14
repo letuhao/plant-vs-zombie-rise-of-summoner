@@ -65,7 +65,7 @@ public sealed class EventIngest : BackgroundService
         if (IsPvzGameEvent(env))
         {
             EffectGrantSessionRecorder.NoteMatchLifecycle(_grants, env.Kind);
-            // Patron aura (spec-patron-demon.md): the marker is a SESSION grant per pvzrh match —
+            // Patron aura (spec-patron-creature.md): the marker is a SESSION grant per pvzrh match —
             // recorded server-side so a mid-match injector reconnect rehydrates it with the rest
             // of the session, and board.end's lifecycle Clear ends it with the match.
             if (string.Equals(env.Kind, "board.start", StringComparison.OrdinalIgnoreCase))

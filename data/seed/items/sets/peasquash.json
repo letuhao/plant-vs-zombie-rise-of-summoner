@@ -25,7 +25,7 @@
       "id": "set.peasquash-001",
       "nameKey": "set.peasquash-volley",
       "name": "Peasquash Volley",
-      "themeKey": "demon.peasquash",
+      "themeKey": "creature.peasquash",
       "members": [
         {
           "role": "armament-primary",

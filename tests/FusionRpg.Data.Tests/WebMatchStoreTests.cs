@@ -13,21 +13,16 @@ namespace FusionRpg.Data.Tests;
 /// </summary>
 public class WebMatchStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public WebMatchStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-webmatch-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static BattleSetup Setup() => new()
     {
@@ -187,57 +182,44 @@ public class WebMatchStoreTests : IDisposable
         // A pre-stamp database: rpg_web_match_log exists WITHOUT environment_stamp and already
         // holds a row. Init() must migrate it (EnsureColumn) so old rows read null — the sweep
         // guard treats null as "trust the version columns alone", never a crash or a refusal.
-        var dir = Path.Combine(Path.GetTempPath(), "fusionrpg-webmatch-mig-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(dir);
-        try
+        // Built in memory via CreateWithPreInitHot: the legacy table shape is seeded before Init.
+        using var test = DataTestStore.CreateWithPreInitHot(seed =>
         {
-            using (var db = new SqliteConnection($"Data Source={Path.Combine(dir, "rpg-hot.sqlite")}"))
-            {
-                db.Open();
-                using var cmd = db.CreateCommand();
-                cmd.CommandText = """
-                    CREATE TABLE rpg_web_match_log (
-                      id INTEGER PRIMARY KEY AUTOINCREMENT,
-                      player_id INTEGER NOT NULL,
-                      correlation_id TEXT NOT NULL,
-                      match_key TEXT NOT NULL UNIQUE,
-                      setup_json TEXT NOT NULL,
-                      seed TEXT NOT NULL,
-                      engine_version INTEGER NOT NULL,
-                      ruleset_version INTEGER NOT NULL,
-                      rng_algo_version INTEGER NOT NULL,
-                      run_id INTEGER,
-                      t TEXT NOT NULL,
-                      UNIQUE(player_id, correlation_id)
-                    );
-                    INSERT INTO rpg_web_match_log(player_id, correlation_id, match_key, setup_json, seed,
-                      engine_version, ruleset_version, rng_algo_version, t)
-                    VALUES(1,'corr-legacy','web-legacy','{}','9',1,1,1,'2026-01-01T00:00:00Z');
-                    """;
-                cmd.ExecuteNonQuery();
-            }
-            SqliteConnection.ClearAllPools();
+            using var cmd = seed.CreateCommand();
+            cmd.CommandText = """
+                CREATE TABLE rpg_web_match_log (
+                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  player_id INTEGER NOT NULL,
+                  correlation_id TEXT NOT NULL,
+                  match_key TEXT NOT NULL UNIQUE,
+                  setup_json TEXT NOT NULL,
+                  seed TEXT NOT NULL,
+                  engine_version INTEGER NOT NULL,
+                  ruleset_version INTEGER NOT NULL,
+                  rng_algo_version INTEGER NOT NULL,
+                  run_id INTEGER,
+                  t TEXT NOT NULL,
+                  UNIQUE(player_id, correlation_id)
+                );
+                INSERT INTO rpg_web_match_log(player_id, correlation_id, match_key, setup_json, seed,
+                  engine_version, ruleset_version, rng_algo_version, t)
+                VALUES(1,'corr-legacy','web-legacy','{}','9',1,1,1,'2026-01-01T00:00:00Z');
+                """;
+            cmd.ExecuteNonQuery();
+        });
 
-            var store = new RpgStore(dir);
-            store.Init();
+        var store = test.Store;
+        var legacy = store.TryGetWebMatchLog(1, "corr-legacy");
+        Assert.NotNull(legacy);
+        Assert.Null(legacy!.EnvironmentStamp);
+        Assert.Equal("web-legacy", legacy.MatchKey);
 
-            var legacy = store.TryGetWebMatchLog(1, "corr-legacy");
-            Assert.NotNull(legacy);
-            Assert.Null(legacy!.EnvironmentStamp);
-            Assert.Equal("web-legacy", legacy.MatchKey);
-
-            var (created, entry) = store.AppendWebMatchLog(
-                1, "corr-new", "web-migrated", "{}", 2,
-                BattleRuleset.EngineVersion, BattleRuleset.RulesetVersion, SeededRng.RngAlgoVersion,
-                "test-stamp");
-            Assert.True(created);
-            Assert.Equal("test-stamp", entry.EnvironmentStamp);
-        }
-        finally
-        {
-            SqliteConnection.ClearAllPools();
-            try { Directory.Delete(dir, true); } catch { /* temp */ }
-        }
+        var (created, entry) = store.AppendWebMatchLog(
+            1, "corr-new", "web-migrated", "{}", 2,
+            BattleRuleset.EngineVersion, BattleRuleset.RulesetVersion, SeededRng.RngAlgoVersion,
+            "test-stamp");
+        Assert.True(created);
+        Assert.Equal("test-stamp", entry.EnvironmentStamp);
     }
 
     [Fact]

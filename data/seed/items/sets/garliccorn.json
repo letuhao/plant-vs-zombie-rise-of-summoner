@@ -25,7 +25,7 @@
       "id": "set.garliccorn-001",
       "nameKey": "set.corn-kernel-volley",
       "name": "Corn Kernel Volley",
-      "themeKey": "demon.garliccorn",
+      "themeKey": "creature.garliccorn",
       "members": [
         {
           "role": "armament-primary",

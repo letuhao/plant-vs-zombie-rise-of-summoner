@@ -25,7 +25,7 @@
       "id": "set.lanternpot-001",
       "nameKey": "set.luminous-vessel",
       "name": "Luminous Vessel",
-      "themeKey": "demon.lanternpot",
+      "themeKey": "creature.lanternpot",
       "members": [
         {
           "role": "core-guard",

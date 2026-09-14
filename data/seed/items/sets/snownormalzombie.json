@@ -25,7 +25,7 @@
       "id": "set.snownormalzombie-001",
       "nameKey": "set.frozen-adventurer-s-scars",
       "name": "Frozen Adventurer's Scars",
-      "themeKey": "demon.snownormalzombie",
+      "themeKey": "creature.snownormalzombie",
       "members": [
         {
           "role": "armament-primary",

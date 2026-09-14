@@ -54,7 +54,7 @@ slots answer the same question, one must go (plate 10 §B).
 | Player question | Ideal slot | Today (user pain) |
 |-----------------|------------|-------------------|
 | Boss or elite? | Tier frame + level band | No frame on unit; level not on lawn |
-| My demon / bound specimen? | Role badge | No badge; binding only in Inspector when selected |
+| My creature / bound specimen? | Role badge | No badge; binding only in Inspector when selected |
 | Why isn't my hit doing damage? | Shield element segments + resource row | Unity bar shows fill only — no element read; Phaser has no shield |
 | What's afflicting this unit? | Status strip (icons) | Unity: motion VFX only; web: comma-separated chip **text** in Inspector |
 | Which unit is the threat? | Side + type icon (identity row) | Type icon in Inspector only; canvas shows HP bar without identity |
@@ -74,7 +74,7 @@ no status icons on canvas; crowding is unreadable if we relied on Inspector text
 icons. **Today:** VFX motion is present on Unity; no static icon strip; shield bar does not encode
 element identity at a glance.
 
-**Bound demon plant.** A specimen the player deployed from the roster should be recognizable on the
+**Bound creature plant.** A specimen the player deployed from the roster should be recognizable on the
 lawn without selecting it. **Ideal read:** role pip + level band on identity row. **Today:** web fold
 may carry `instanceId` when bound, but nothing draws on the unit sprite or Phaser cell.
 

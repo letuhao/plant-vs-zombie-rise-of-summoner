@@ -25,7 +25,7 @@
       "id": "set.blackfootball-b-001",
       "nameKey": "set.eternal-sentinel",
       "name": "Eternal Sentinel",
-      "themeKey": "demon.blackfootball_b",
+      "themeKey": "creature.blackfootball_b",
       "members": [
         {
           "role": "armament-primary",

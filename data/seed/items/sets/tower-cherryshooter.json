@@ -25,7 +25,7 @@
       "id": "set.tower-cherryshooter-001",
       "nameKey": "set.cherry-burst-launcher",
       "name": "Cherry Burst Launcher",
-      "themeKey": "demon.tower_cherryshooter",
+      "themeKey": "creature.tower_cherryshooter",
       "members": [
         {
           "role": "armament-primary",

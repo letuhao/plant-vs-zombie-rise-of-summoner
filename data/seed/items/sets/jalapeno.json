@@ -25,7 +25,7 @@
       "id": "set.jalapeno-001",
       "nameKey": "set.spike-skin-corpse",
       "name": "Spike-Skin Corpse",
-      "themeKey": "demon.jalapeno",
+      "themeKey": "creature.jalapeno",
       "members": [
         {
           "role": "armament-primary",

@@ -1,4 +1,4 @@
-using FusionRpg.Core.Demons;
+using FusionRpg.Core.Creatures;
 using FusionRpg.Data;
 
 namespace FusionRpg.Server;
@@ -25,7 +25,7 @@ public static class ZombossDeployEndpoints
         var g = app.MapGroup("/api/zomboss");
 
         // zomboss-deploy-ai T3.4 (Correction 3): composes two ALREADY-EXISTING, already-proven
-        // primitives (MintDemon, UniqueActorService.DeployAsync) — no new write logic, no shortcut.
+        // primitives (MintCreature, UniqueActorService.DeployAsync) — no new write logic, no shortcut.
         // The decision (whether/which) was already made injector-side by ZombossDeployPolicy.Decide,
         // which needs live board state (ILawnBoardView) this server process never sees; this endpoint
         // performs only the privileged DB half that decision cannot reach on its own.
@@ -34,7 +34,7 @@ public static class ZombossDeployEndpoints
             body ??= new ZombossDeployRequest();
             if (string.IsNullOrWhiteSpace(body.SpeciesId))
                 return Results.BadRequest(new { error = "speciesId required" });
-            if (!DemonSpeciesCatalog.IsKnown(body.SpeciesId))
+            if (!CreatureSpeciesCatalog.IsKnown(body.SpeciesId))
                 return Results.BadRequest(new { error = "unknown speciesId '" + body.SpeciesId + "'" });
 
             var specimen = store.MintForZomboss(body.SpeciesId, body.MatchSeed);

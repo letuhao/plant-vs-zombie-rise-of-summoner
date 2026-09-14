@@ -31,6 +31,48 @@ public static class EntityStatWriter
 
     public static void Clear() => Registry.Clear();
 
+    /// <summary>
+    /// Unity-boundary narrowing (combat-numerics, lawn-combat-wire T4) — this int32 width is a
+    /// STRUCTURAL HOST LIMIT, not a choice this codebase made: <c>thePlantHealth</c>,
+    /// <c>theAttackDamage</c>, the armor/shield fields, etc. are genuinely <c>int</c> fields on the
+    /// host game's own <c>Plant</c>/<c>Zombie</c> classes (<c>Bridges/&lt;profile&gt;/ZombieCombatFields.cs</c>),
+    /// which this Injector may not rewrite (AGENTS.md hard boundary: "never download or patch the PVZ
+    /// Fusion game binary"). CLAUDE.md's caps rule exempts a structural host limit from "never clamp
+    /// silently" PROVIDED it reports rather than silently saturating — a `long`/per-mille magnitude
+    /// that genuinely exceeds <c>int32</c> here is a real gameplay event (gear finally out-scaled a
+    /// three-decade-old engine's own field width), not a rounding detail, so it is proofed through the
+    /// same channel every other writer proof already uses (<c>ProofWrite</c>'s own
+    /// <c>SYS-EMIT-PROOF</c>/<c>GameHooks.Emit</c> shape) before the clamp is applied. Every call site
+    /// in this file that used to call <c>ZombieCombatFields.ClampToInt32</c> directly goes through
+    /// this wrapper instead, so the report is never accidentally skipped at a new call site.
+    /// </summary>
+    static int ClampToInt32Reporting(long value, string field, string source)
+    {
+        var clamped = ZombieCombatFields.ClampToInt32(value);
+        if (value > int.MaxValue || value < int.MinValue)
+        {
+            CheatState.Error(
+                $"writer.clampBoundary: {field} src={source} value={value} exceeds Unity's int32 field width -- clamped to {clamped}");
+            if (CheatState.EmitProof && CheatState.On("SYS-EMIT-PROOF"))
+            {
+                try
+                {
+                    var payload = new Dictionary<string, object>
+                    {
+                        ["field"] = field,
+                        ["source"] = source ?? "",
+                        ["value"] = value,
+                        ["clamped"] = clamped
+                    };
+                    CheatState.TagProbe(payload);
+                    GameHooks.Emit("stat.writer.clampBoundary", payload);
+                }
+                catch { /* never break combat writes for proof */ }
+            }
+        }
+        return clamped;
+    }
+
     public static void WritePlant(Plant p, EntityFinal y, long previousHp, long previousMax, bool preserveHpRatio, string source)
     {
         if (p == null || y == null) return;
@@ -40,14 +82,14 @@ public static class EntityStatWriter
             var beforeMax = p.thePlantMaxHealth;
             var beforeAtk = p.attackDamage;
 
-            var max = ZombieCombatFields.ClampToInt32(Math.Max(1L, y.MaxHp));
+            var max = ClampToInt32Reporting(Math.Max(1L, y.MaxHp), "plant.maxHp", source);
             var preserve = preserveHpRatio || StatSystem.PreserveLiveCurrentHp(source);
-            var hp = ZombieCombatFields.ClampToInt32(
-                StatSystem.CurrentHpForWrite(preserve, previousHp, previousMax, y.Hp, y.MaxHp));
+            var hp = ClampToInt32Reporting(
+                StatSystem.CurrentHpForWrite(preserve, previousHp, previousMax, y.Hp, y.MaxHp), "plant.hp", source);
             p.thePlantMaxHealth = max;
             p.thePlantHealth = hp;
             if (!CheatState.On("D-PROBE-BULLET"))
-                p.attackDamage = ZombieCombatFields.ClampToInt32(y.Atk);
+                p.attackDamage = ClampToInt32Reporting(y.Atk, "plant.atk", source);
 
             // E16: fire rate and sun rate, composed. A zero means the baseline had none, so there
             // is nothing to write — never a zero interval, which is a divide-by-zero or an infinite
@@ -61,7 +103,7 @@ public static class EntityStatWriter
             // is captured from a genuine live field on the plant's own side (EntityApply.cs), so a
             // composed zero is an ordinary value ("no shield right now"), never a missing stat, and
             // is written unconditionally, the same as Hp/Atk.
-            p.theShieldHealth = ZombieCombatFields.ClampToInt32(y.PlantShield);
+            p.theShieldHealth = ClampToInt32Reporting(y.PlantShield, "plant.shield", source);
             // attackCountdown/produceCountdown share the interval floor's structural reason (driven
             // to zero or below is the same divide-by-zero / infinite-fire-rate risk) but compose
             // unconditionally — see StatComposer.IntervalAlways's own doc comment.
@@ -77,8 +119,8 @@ public static class EntityStatWriter
             // left alone, exactly like the two intervals above.
             if (y.PlantSpeed > 0) p.thePlantSpeed = (float)y.PlantSpeed;
             if (y.PlantMoveSpeed > 0) p.moveSpeed = (float)y.PlantMoveSpeed;
-            p.theLevel = ZombieCombatFields.ClampToInt32(y.PlantLevel);
-            p.shootingLevel = ZombieCombatFields.ClampToInt32(y.ShootingLevel);
+            p.theLevel = ClampToInt32Reporting(y.PlantLevel, "plant.level", source);
+            p.shootingLevel = ClampToInt32Reporting(y.ShootingLevel, "plant.shootingLevel", source);
 
             try { p.UpdateText(); } catch { }
 
@@ -103,11 +145,11 @@ public static class EntityStatWriter
             var hp = StatSystem.CurrentHpForWrite(preserve, previousHp, previousMax, y.Hp, y.MaxHp);
             ZombieCombatFields.SetMaxHp(z, max);
             ZombieCombatFields.SetHp(z, hp);
-            if (y.Arm1Max > 0) z.theFirstArmorMaxHealth = ZombieCombatFields.ClampToInt32(y.Arm1Max);
-            if (y.Arm1 > 0) z.theFirstArmorHealth = ZombieCombatFields.ClampToInt32(y.Arm1);
-            if (y.Arm2Max > 0) z.theSecondArmorMaxHealth = ZombieCombatFields.ClampToInt32(y.Arm2Max);
-            if (y.Arm2 > 0) z.theSecondArmorHealth = ZombieCombatFields.ClampToInt32(y.Arm2);
-            z.theAttackDamage = ZombieCombatFields.ClampToInt32(Math.Max(1L, y.Atk));
+            if (y.Arm1Max > 0) z.theFirstArmorMaxHealth = ClampToInt32Reporting(y.Arm1Max, "zombie.arm1Max", source);
+            if (y.Arm1 > 0) z.theFirstArmorHealth = ClampToInt32Reporting(y.Arm1, "zombie.arm1", source);
+            if (y.Arm2Max > 0) z.theSecondArmorMaxHealth = ClampToInt32Reporting(y.Arm2Max, "zombie.arm2Max", source);
+            if (y.Arm2 > 0) z.theSecondArmorHealth = ClampToInt32Reporting(y.Arm2, "zombie.arm2", source);
+            z.theAttackDamage = ClampToInt32Reporting(Math.Max(1L, y.Atk), "zombie.atk", source);
             if (y.ZombieSpeed > 0) z.uniqueSpeed = (float)y.ZombieSpeed;
 
             // E38 (spec-entity-fields-12plus.md): four more zombie fields, composed — same
@@ -188,7 +230,7 @@ public static class EntityStatWriter
                     return;
                 }
 
-                var hp = ZombieCombatFields.ClampToInt32(next);
+                var hp = ClampToInt32Reporting(next, "plant.hp", source);
                 p.thePlantHealth = hp;
                 try { p.UpdateText(); } catch { }
                 Remember(p.Pointer, hp, p.thePlantMaxHealth, p.attackDamage, source);
@@ -234,8 +276,8 @@ public static class EntityStatWriter
             // hp arrives long (RPG-scaled); thePlantHealth is Unity's own int field, so it is
             // clamped at the write boundary — the same pattern WritePlant already uses — instead
             // of the implicit narrowing cast this signature used to hide.
-            var max = ZombieCombatFields.ClampToInt32(Math.Max(p.thePlantMaxHealth, hp));
-            var clamped = ZombieCombatFields.ClampToInt32(hp);
+            var max = ClampToInt32Reporting(Math.Max(p.thePlantMaxHealth, hp), "plant.maxHp", source);
+            var clamped = ClampToInt32Reporting(hp, "plant.hp", source);
             p.thePlantMaxHealth = max;
             p.thePlantHealth = clamped;
             try { p.UpdateText(); } catch { }
@@ -373,7 +415,11 @@ public static class EntityStatWriter
     [HarmonyPatch(typeof(Plant), nameof(Plant.LimHealth))]
     public static class PlantLimHealthPolicy
     {
-        static readonly ConcurrentDictionary<IntPtr, (int hp, int max)> BeforeCall = new();
+        // combat-numerics (lawn-combat-wire T4): `long`, not `int` -- audit-overflow.py A3 flags any
+        // `int` holding an hp/max-shaped value. thePlantHealth/thePlantMaxHealth are themselves Unity
+        // `int` fields (the same structural host limit ClampToInt32Reporting documents above), so this
+        // widen loses nothing and just keeps the diagnostic snapshot off the audit's A3 list.
+        static readonly ConcurrentDictionary<IntPtr, (long hp, long max)> BeforeCall = new();
         static DateTime _lastObserveUtc = DateTime.MinValue;
 
         public static bool Prefix(Plant __instance)

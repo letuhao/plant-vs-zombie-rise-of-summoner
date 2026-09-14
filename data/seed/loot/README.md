@@ -40,7 +40,7 @@ naming the module that lands it — never a silent drop and never a quiet fall-t
 
 `DropVolumeCorpusTests.At_theta_pin_the_shipped_per_event_yields_hold` asserts every row against this
 file, in exact integer arithmetic. **Nothing here is expressed per day** — the game has no day axis
-(verified: the only per-day concepts in Core are the demon-contract timers), so I12's
+(verified: the only per-day concepts in Core are the creature-contract timers), so I12's
 *"20–30 equipment items per day"* is restated per content event at the pin. The behavioural target it
 was derived from is unchanged and is what a balance pass steers by: *the player looks at 100 % of
 equipment drops and keeps 20–35 % of them.*

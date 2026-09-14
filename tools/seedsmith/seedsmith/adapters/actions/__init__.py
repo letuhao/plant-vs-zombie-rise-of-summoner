@@ -62,7 +62,7 @@ class ActionsAdapter:
             if set(paired) == {"targetMode", "areaShape"} and paired["targetMode"] != "area":
                 # ActionTargetSpec.Shape is `Area`-only ("`Area` only", ActionTargetSpec.cs:86) —
                 # an areaShape value paired with any other target mode is not a real combination,
-                # the same real-rule-not-invented-example discipline `items`/`demons` document for
+                # the same real-rule-not-invented-example discipline `items`/`creatures` document for
                 # their own one illegal pair (base.py's own warning: a `LegalityFn` returning
                 # `True` unconditionally turns every real illegal pair into a permanent false
                 # Coverage finding).
@@ -83,7 +83,7 @@ class ActionsAdapter:
         )
 
     def channels(self) -> "list[Channel]":
-        # Deliberately empty, same reasoning `adapters/demons` states for itself (§2.6): constraint
+        # Deliberately empty, same reasoning `adapters/creatures` states for itself (§2.6): constraint
         # 1 — "an atom names a POOL; element, tier and cell resolve at layer 4, per player, at roll
         # time" — so a generated action-seed carries no magnitude at all, only pool references.
         # `numerics` is consumed only via `adapter.channels()`; an empty list makes "never a

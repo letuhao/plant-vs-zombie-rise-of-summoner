@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 440" width="1280" height="440" role="img" aria-label="Rise of Summoner — command demons, hold the lawn, take back the multiverse">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 440" width="1280" height="440" role="img" aria-label="Rise of Summoner — command creatures, hold the lawn, take back the multiverse">
   <defs>
     <linearGradient id="soil" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#1c1712"/>
@@ -83,7 +83,7 @@
     <text x="64" y="120" font-size="16" letter-spacing="4.2" fill="#a89880">A PERSISTENT RPG BUILT ON YOUR PVZ FUSION RUNS</text>
     <text x="62" y="206" font-size="78" font-weight="bold" fill="#f2ead8" textLength="322" lengthAdjust="spacingAndGlyphs">RISE OF</text>
     <text x="62" y="284" font-size="78" font-weight="bold" fill="#e0b44b" textLength="524" lengthAdjust="spacingAndGlyphs">SUMMONER</text>
-    <text x="64" y="352" font-size="22" fill="#c9bca6">Command demons. Hold the lawn. Take back the multiverse.</text>
+    <text x="64" y="352" font-size="22" fill="#c9bca6">Command creatures. Hold the lawn. Take back the multiverse.</text>
     <text x="216" y="398" font-size="13" letter-spacing="2.4" fill="#7d7060">SIX ELEMENTS &#183; A LIVING ROSTER &#183; A WAR MAP</text>
   </g>
 

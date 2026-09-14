@@ -60,9 +60,15 @@ public static class ActionCorpusComposer
             throw new ActionCorpusComposeRejection(
                 $"brief '{brief.Id}': rungBand ceiling {rung} has no row in the loaded rung table");
 
-        // Reject naming the category, never default silently (T59.1's own contract) -- this module's
-        // own acceptance criterion, exercised for real rather than assumed from CategoryOf's doc comment.
-        var costTemplateRow = costTemplate.CategoryOf(category);
+        // T7 (basic-attack-seed): the brief's own Kind, honoring `kindHint` -- absent defaults to
+        // Skill, the exact pre-T7 behaviour, so every brief authored before this field existed still
+        // composes to `Kind = Skill` unchanged.
+        var kind = brief.KindHint ?? ActionKind.Skill;
+
+        // Reject naming the category/kind, never default silently (T59.1's own contract, extended by
+        // T7 to be Kind-aware) -- this module's own acceptance criterion, exercised for real rather
+        // than assumed from ResolveFor's doc comment.
+        var costTemplateRow = costTemplate.ResolveFor(kind, category);
 
         // ---- pool composition: UniqueContainerBuild.From's shape, generalized to N families ----
         var candidates = new List<(string Family, AtomRow Atom)>();
@@ -141,7 +147,7 @@ public static class ActionCorpusComposer
             // A key the corpus authored is the one the string catalog is authored against; a key
             // this composer invented from the id would silently miss the catalog row.
             DescriptionKey = brief.DescriptionKey,
-            Kind = ActionKind.Skill,
+            Kind = kind,
             Rung = rung,
             RungBand = rungBand,
             Enabled = true,

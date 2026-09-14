@@ -125,8 +125,8 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
   - Pass `elementTypes:` in both bridges, mirroring `BattleEngine.cs:36` including the secondary-collapse
     rule. Cache per actor per match — and **leave `ResolveElementTypesFromHub` faster than found**; it is
     already the per-hit board scan the perf audit blamed.
-  - **New Core types** (`src/FusionRpg.Core/Demons/`): `LawnElementIndex` — the `(Side, GameTypeId) ->
-    DemonSpeciesDef` lookup, deterministic lowest-`SpeciesId` tie-break on a collision, reports once at
+  - **New Core types** (`src/FusionRpg.Core/Creatures/`): `LawnElementIndex` — the `(Side, GameTypeId) ->
+    CreatureSpeciesDef` lookup, deterministic lowest-`SpeciesId` tie-break on a collision, reports once at
     build. `LawnElementResolver` — the per-`(matchKey, ptrKey)` cache wrapping it; `boardLookup` is a
     lazy `Func` so the board scan only ever runs on a cache miss (spec §2.4 algorithm, steps 1-5
     verbatim), an unmapped `(side, typeId)` or an undefined `ElementTypeId` both resolve `Neutral` and
@@ -140,7 +140,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     `elementTypes:` into their `ForZombie`/`ForPlant` calls. `InjectorElementOverride`'s precedence
     (checked first, unconditionally short-circuits) is now stated in `InjectorCombatBridge.cs`'s own
     comment, and now overrides a real resolved value rather than a Neutral default (criterion 6).
-  - **Evidence:** `tests/FusionRpg.Core.Tests/Demons/LawnElementResolverTests.cs` — 13 tests: index key
+  - **Evidence:** `tests/FusionRpg.Core.Tests/Creatures/LawnElementResolverTests.cs` — 13 tests: index key
     is `(side, typeId)` not `typeId` alone (`polevaulterzombie`/`wallnut` both `3`); miss returns false
     not a default; duplicate-pair tie-break + collision report; known species resolves its element;
     secondary==primary collapse (criterion 3); real secondary survives; miss resolves Neutral not a
@@ -625,7 +625,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
        Enabler, Payoff}` (`None` is a real value, never an omission, matching the spec's own
        correction of the earlier `enablesStatus` draft).
     3. **`ActionRow`** (`ActionRow.cs`) gained `Scope`, `ScopeKey` (opaque — never a foreign key into
-       the demon catalog, matching `SpeciesBasicsRow`'s own discipline, `ActionRow.cs:83`),
+       the creature catalog, matching `SpeciesBasicsRow`'s own discipline, `ActionRow.cs:83`),
        `Category` (nullable, reuses the existing `ActionCategory` enum — never a second vocabulary),
        `PairingRole`, `StructureAxes`/`AtomFamilies` (opaque `IReadOnlyList<string>`, this module does
        not validate membership — that's A-C1's job), and `RungBand` — a new `RungBand(int Floor, int
@@ -640,9 +640,9 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     5. **`FamilyMap`** (same file) — a pure `Parse(json)` parser (no I/O, matching
        `EnablerPayoffPairings.Parse`'s own discipline) for the committed projection
        `data/seed/actions/_generated/family-map.json` — **generated this session** as a flat
-       `speciesKey → familyId` projection of `data/seed/demons/_generated/family-assignments.json`,
+       `speciesKey → familyId` projection of `data/seed/creatures/_generated/family-assignments.json`,
        re-verified fresh rather than trusted from the spec's prose: 53 entries, every key an exact,
-       already-lowercase `SpeciesId` from the 84-row `DemonSpeciesCatalog.Generated.cs`, every value
+       already-lowercase `SpeciesId` from the 84-row `CreatureSpeciesCatalog.Generated.cs`, every value
        list exactly length 1 (0 bad entries), 19 distinct families — matching §3.2's three measured
        justifications exactly. The projection is A-S0's eventual home per the spec; committing it now
        unblocks A-E1's own tests without introducing any catalog coupling in C#.
@@ -1133,7 +1133,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
       regenerating over an unchanged catalog is byte-identical — done, two tests; (4) an authored
       affix is never silently overwritten — done, test 7.
 - [x] **E43 `family-expand`** · **L** · Deps: E30, **E42** · `spec-family-expand.md`
-  - Built as a generator with a `--check` mode on the `DemonSpeciesGen` pattern, per the spec's own
+  - Built as a generator with a `--check` mode on the `CreatureSpeciesGen` pattern, per the spec's own
     2026-09-03 §3.1 decision: `tools/FamilyExpandGen` reads the 98 authored `affix-families/*.json`
     entries + `data/seed/items/_tuning/tier-bands.v1.json` + `_registry/bands.v1.json` as generator
     input and writes atom rows to `data/seed/atoms/generated/family-expand.{g-life,g-attack,
@@ -1182,7 +1182,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     `Reproduces_every_retired_hand_written_id_and_allows_growth` — asserts the generated catalog
     reproduces every retired id exactly AND is a superset, tolerating growth — plus a companion test
     proving the assertion shape itself tolerates a manufactured past-16 case.
-  - `FamilyExpandGen --check` wired into `ci.yml` right after `DemonSpeciesGen --check`.
+  - `FamilyExpandGen --check` wired into `ci.yml` right after `CreatureSpeciesGen --check`.
   - **12 new tests**, `tests/FusionRpg.Core.Tests/Atoms/Generation/FamilyExpansionTests.cs`, covering
     all 10 of spec §5's named cases: determinism, `--check`-equivalent drift detection (plus a
     manufactured-drift positive case), id-derivation exactness, zero `(family,tier,variant)`
@@ -1254,8 +1254,8 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     just the delegated agent's own report): `dotnet build` clean on all four touched projects
     (Server, Data, Launcher, tools/AtomImporter). **Full 9-project sweep, all green except two
     pre-existing, unrelated failures confirmed not caused by this module**: `Data.Tests` 627/629 (2
-    failures both in `DemonSpeciesImportCliTests`, which references neither `SeedScanner` nor
-    `SeedImportRunner` nor any file this module touched — matches pre-existing uncommitted demon-
+    failures both in `CreatureSpeciesImportCliTests`, which references neither `SeedScanner` nor
+    `SeedImportRunner` nor any file this module touched — matches pre-existing uncommitted creature-
     corpus drift already visible in `git status` from before this module's work, not a regression).
     `Server.Tests` 97/97 (was 94 — 3 net new). `Guard.Tests` 162/162. `AtomImporter.Tests` 27/27 (one
     isolated-run transient failure on the real-cold-process test, reproduced clean on immediate
@@ -1340,7 +1340,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
   the 53 with families — done, F12-corrected: 31 family-less species carry a real derivation
   (`leanSource: "derived-nofloor"`), never a discarded uniform tie.
   - New package `tools/seedsmith/seedsmith/adapters/actions/characteristic_pool/` (`catalog.py`
-    parses the 84-species roster straight from `DemonSpeciesCatalog.Generated.cs`, never hand-copied;
+    parses the 84-species roster straight from `CreatureSpeciesCatalog.Generated.cs`, never hand-copied;
     `anchors.py`, `derive.py` — steps 2-5 of spec §3; `pool.py` — the six A-F groups) plus
     `generate_characteristic_pool.py` (writes both outputs through A-C1's envelope, `--dry-run`
     supported). New tuning file `data/tuning/action-role-lean.v1.json` — every weight cell `1000`
@@ -1355,8 +1355,8 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     every species, since nothing in any shipped C# or spec text says which category a given trait
     (e.g. `soul-eater`) structurally belongs to before the weight scales it. No such mapping exists
     anywhere in the corpus this module reads. The build filled the gap rather than stall on it:
-    trait→category is grounded in `DemonTraitCatalog.cs`'s own blurb text (an attacking blurb reads
-    `attack`, a shielding one `defense`); posture→category reuses the demons adapter's own shipped
+    trait→category is grounded in `CreatureTraitCatalog.cs`'s own blurb text (an attacking blurb reads
+    `attack`, a shielding one `defense`); posture→category reuses the creatures adapter's own shipped
     `APTITUDE_POSTURE` semantics (`Bastion`→defense is that module's own validator rule, not invented
     here); **element→category has no textual grounding at all** — assigned only to spread the 6
     elements across the 5 categories rather than leave that block silently flat too. This is real,
@@ -1364,7 +1364,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     per-mille weight) is the genuinely tunable surface the `.v1.json` file owns, but the map itself
     is not. **Recorded here for the owner, not resolved by further guessing.**
   - **Real, ongoing environmental hazard, correctly handled defensively rather than papered over**: the
-    species anchor tree (`data/seed/demons/species/**`) is being **actively regenerated by a
+    species anchor tree (`data/seed/creatures/species/**`) is being **actively regenerated by a
     concurrent, unrelated process** while this module was built and while this evidence was verified
     — `git status` shows 63 changed/new files there, several modified within the last 30 minutes, and
     three measurements taken minutes apart during the build returned three different anchor-row
@@ -1440,7 +1440,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
   - **Confirmed environmental hazard, not a regression in this module**: the full seedsmith suite
     shows one failure outside this module's own tests —
     `test_characteristic_pool.py::AttackTempoExclusionTests::test_live_anchor_tree_attack_tempo_is_constant`
-    — traced directly to the concurrent, unrelated demon-classification pipeline (flagged in A-S0's
+    — traced directly to the concurrent, unrelated creature-classification pipeline (flagged in A-S0's
     own evidence above) having since written an anchor row with `attackTempo: "slow"`, where A-S0's
     own test measured a constant `"steady"` at build time. Confirmed by reading the failure directly
     (`observed = {'slow'}`, expected `{'steady'}`) — a real, live change to shared data this module
@@ -1496,7 +1496,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     report**: `test_distribution_planner.py` in isolation — **87/87 clean**. Full suite — 985
     passed, 1 failed (the same pre-existing `AttackTempoExclusionTests` environmental hazard
     already flagged in A-S0's and A-T1's evidence, confirmed unrelated: `git status` shows only
-    demon-species/effect-pipeline/world-stage files outside this module's own scope changed).
+    creature-species/effect-pipeline/world-stage files outside this module's own scope changed).
     **Direct inspection of the real `round-1.json`** (not trusted from the report): 108 briefs
     exactly (84+19+5); every `pairing.role` is `"none"`; zero ids outside the real 98-family
     namespace; `allowedAtomFamilies` is the **exact same 98-id set** across all three tiers
@@ -1580,7 +1580,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     read of `ssot-power-scale.md` §11.2 confirms the register row is present and correctly worded.
     **Full Core.Tests: 5276/5276** (was 5255 — 21 net new, zero regressions), targeted 76/76 on the
     changed classes run in isolation first. **Data.Tests: 630/632** — the 2 failures are the same
-    `DemonSpeciesImportCliTests` pre-existing environmental hazard already documented in A-G1's own
+    `CreatureSpeciesImportCliTests` pre-existing environmental hazard already documented in A-G1's own
     peers this session (a live `GarlicPumpkin` entry with `rarity: 'unresolved'` from the concurrent,
     unrelated species-generation pipeline — confirmed by reading the failure directly, unrelated to
     rungs/budget/structure-axes). **Full seedsmith suite: 988 passed** (was 985 — net +3 matching the
@@ -1654,7 +1654,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
   - New `tools/seedsmith/seedsmith/adapters/actions/coverage_report/` (`ctx.py`, `derive.py` — all
     7 algorithm steps + all 12 metrics' logic) + `metrics/action_coverage.py` (the 12 `Metric`
     subclasses) + `generate_coverage_report.py`. `metrics/model.py` extended with an
-    `"action_coverage"` `Ctx` field/valid-need, matching the exact precedent an earlier `demon_dump`
+    `"action_coverage"` `Ctx` field/valid-need, matching the exact precedent an earlier `creature_dump`
     addition already established — no new mechanism invented. **37 new tests**,
     `test_coverage_report.py`.
   - **`Loop.OPEN + gates=True` raising at registration confirmed already enforced, not aspirational**
@@ -1876,7 +1876,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     "transient consumes zero heal budget" was tested at the boundary this module actually owns
     (a call absorbed by `call_model`'s own internal retry never touches heal budget) rather than
     building a full pause/resume run-control driver, which belongs to a separate, much larger,
-    already-shipped module (`demons/run/runner.py`) this module correctly doesn't duplicate;
+    already-shipped module (`creatures/run/runner.py`) this module correctly doesn't duplicate;
     `heal_count`'s exact arithmetic (subtracting 1 when the final, discarded exhaustion attempt
     carries a `FAILED:` entry) was verified against real call counts through the loopback mock
     server, not assumed from the helper's own docstring.
@@ -1956,7 +1956,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
   - **The mirror-image anchor check, resolved against real data rather than the spec's literal
     field name**: no field literally named `speciesKey` exists anywhere in A-S1's real output
     (`distribution_planner/derive.py`'s `brief_anchor()`) — the real species-scope signal is
-    `themeKey` (e.g. `"demon.cherrybomb"`), populated only for species-scoped briefs. The raise
+    `themeKey` (e.g. `"creature.cherrybomb"`), populated only for species-scoped briefs. The raise
     condition checks `element`/species-level `motifs`/`themeKey` (the three real species signals)
     while still keeping a defensive literal `speciesKey` check for the spec's own literal wording,
     should a schema ever add one. **Independently re-verified directly against the real
@@ -2074,7 +2074,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
   done.**
   - **The "8 fully-anchored species" figure was itself confirmed stale before the run started** —
     `characteristic_pool/anchors.py`'s own docstring already documented the live anchor tree
-    (`data/seed/demons/species/**`) as actively, concurrently growing throughout this session
+    (`data/seed/creatures/species/**`) as actively, concurrently growing throughout this session
     (28→68→87 rows measured minutes apart during an earlier module's own build). Recomputed fresh
     at run time via the real four-way join (catalog 84 ∩ motif 84 ∩ family 53 ∩ the now-764-row
     anchor tree): **24 species across 12 families**
@@ -2363,8 +2363,8 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     speed" from the bare id alone, one of which cannot legally belong to a **general**, side-
     agnostic action at all. The model was never conformance-broken; it was picking blind among
     near-synonym-sounding ids with no way to judge fit.
-  - **Precedent identified and reused, not invented**: `adapters/demons/anchor/descriptions.py` (the
-    demon-seed classification pipeline's own module, cited by name in this task's own brief) already
+  - **Precedent identified and reused, not invented**: `adapters/creatures/anchor/descriptions.py` (the
+    creature-seed classification pipeline's own module, cited by name in this task's own brief) already
     solves the identical problem for `resolve_vote`'s other real callers (`elementPrimary`,
     `aptitudePrimary`, `rarity`, `threatBand`, `deployMode`, `attackTempo`) with a rich, per-value
     prose description stating what each value means and — critically — what it is **not**, so the
@@ -2694,7 +2694,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     **general 60.0% → 13.3% unresolved, family 63.2% → 13.2%, combined 62.3% → 13.2%** over the
     same real briefs, same model (`google/gemma-4-26b-a4b-qat`), same unmodified `.env`.
     - **The defect.** `atomFamilies` is a SET-valued field, but it was being voted with the SCALAR
-      `resolve_vote` (`demons/anchor/vote.py` — `Sequence[str]`, exact `Counter` equality). To reach
+      `resolve_vote` (`creatures/anchor/vote.py` — `Sequence[str]`, exact `Counter` equality). To reach
       it, each sample's whole set was flattened into one string by `canonical_family_key`
       (`"|".join(sorted(set(values)))`). So three samples picking `{a,b}` / `{a,c}` / `{a,d}` scored
       as three distinct values — a 1-1-1 split, **unresolved** — even though `a` was chosen
@@ -2705,7 +2705,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
       between look-alike ids) and then stalled, and why the worked-example probe moved it backwards:
       **no prompt change can fix an aggregation that throws the signal away after the model answers.**
     - **The fix — an EXTENSION, not a fork.** New `resolve_set_vote` + `SetVoteResult` added
-      **beside** `resolve_vote` in the same shared module (`demons/anchor/vote.py`); the scalar path
+      **beside** `resolve_vote` in the same shared module (`creatures/anchor/vote.py`); the scalar path
       is byte-identical and pinned by a new regression test. A member joins the resolved set when a
       majority of samples (2 of 3) chose it. The denominator stays `SAMPLE_COUNT`, never "samples
       that answered", preserving exactly the rule the old unresolved-sample sentinel enforced.
@@ -2818,7 +2818,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     claim**: ran the full `FusionRpg.Core.Tests` suite myself before checking anything else — same
     16 failures (agent reported 14; further concurrent-pipeline drift between its own check and
     mine, not a regression — see below), all traced to the well-documented, unrelated missing
-    `data/seed/demons/species/plant/pea.json` file; **zero failures mention Movement, CompiledAction,
+    `data/seed/creatures/species/plant/pea.json` file; **zero failures mention Movement, CompiledAction,
     or ActionCompiler by name**, confirmed by direct grep.
   - New `src/FusionRpg.Core/Actions/Movement/` (`MovementPayloadTuning.cs`,
     `MovementPayloadTuningLoader.cs` — pure parser + cross-checker,
@@ -2852,7 +2852,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     **20/20**. `FusionRpg.Guard.Tests` filtered to `MovementPayload` — **3/3**. Full
     `FusionRpg.Core.Tests` — 5375 passed / 16 failed, all the same pre-existing, unrelated
     concurrent-species-drift class (confirmed by reading one failure's own stack trace directly:
-    `FileNotFoundException` on `data/seed/demons/species/plant/pea.json`), zero Movement-related.
+    `FileNotFoundException` on `data/seed/creatures/species/plant/pea.json`), zero Movement-related.
     **All 4 boundary guards independently re-run and green.** Direct read of the real tuning file
     confirms the no-numeric-value claim and every description's negative clause.
   - Acceptance against the spec's own §5: (1) — done, re-verified, zero numeric values; (2) — done,
@@ -3629,7 +3629,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     `order_for(draw_id, "eligibleAtoms", sample_index, eligible)` (`sample_index` inside the seed,
     per this repo's own binding option-permutation rule), voting independently on `name` and on
     `canonical_bundle_key(refs)` via the exact, unmodified `resolve_vote` — imported straight from
-    `seedsmith.adapters.demons.anchor.{permute,vote}`, confirmed via direct grep that no new
+    `seedsmith.adapters.creatures.anchor.{permute,vote}`, confirmed via direct grep that no new
     voting/permutation logic was written. A 1-1-1 split on either field is recorded `unresolved` and
     never persisted as a guess — matching this program's own `default_for=lambda k,o: None`
     discipline.
@@ -3677,11 +3677,11 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     - **Affinity — CLOSED, fully built, proven end-to-end — as a property of a (container, affix)
       PAIRING, owned by whichever feature pipeline draws a shared affix, never a property of the
       affix entity `affix-authoring` itself produces.** The exact `core`/`likely`/`occasional`
-      vocabulary already ships, verbatim, in a sibling program: `demon-seed`'s `species-effects`
-      (T5.3) — `tools/seedsmith/seedsmith/adapters/demons/effects/schema.py:13` (`AFFINITIES = ("core",
+      vocabulary already ships, verbatim, in a sibling program: `creature-seed`'s `species-effects`
+      (T5.3) — `tools/seedsmith/seedsmith/adapters/creatures/effects/schema.py:13` (`AFFINITIES = ("core",
       "likely", "occasional")`), consumed by `entry_for` (`prompts.py:114-152` in that adapter) to
       split picks into a container's fixed core (`core`) vs. its weighted pool (`likely`/`occasional`,
-      weighted via `data/tuning/demon-species-effects.v1.json`'s `poolAffinityWeightMilli: {likely:
+      weighted via `data/tuning/creature-species-effects.v1.json`'s `poolAffinityWeightMilli: {likely:
       700, occasional: 300}` and bounded by `fixedCoreBandByRarity`). Read in full — this is a real,
       shipped, tested pattern, not a stub. But its own schema (`schema.py:18-28`) pairs affinity with
       an `affixId` **the species is drawing from the shared library**, not with a bundle it is itself
@@ -3690,7 +3690,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
       container-agnostically, before any container has chosen to draw it. `spec-affix-schema.md`'s
       own A2 section names the budget table as "module 9's concern" — literally effect-pipeline's own
       module 9, i.e. this module — but the actual precedent that got built lives under a *different*
-      program's own module numbering (`demon-seed` T5.3) and answers a per-feature question, not a
+      program's own module numbering (`creature-seed` T5.3) and answers a per-feature question, not a
       per-shared-affix one. That line in `spec-affix-schema.md` is what's stale, not the built
       pattern: attaching `affinity` to this module's output would mean one shared, cross-feature
       bundle carries ONE hardcoded affinity for every container that ever draws it — the same
@@ -3982,7 +3982,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     - **Test evidence, independently re-run**: `dotnet test tests/FusionRpg.Core.Tests` filtered to
       Power/CostFunction/ContentValidation/PowerInteraction/ActorPowerTests/RungPowerBudgetTests —
       **260/260 passing**. Full suite: **6558/6572 passing**; the 14 remaining failures are
-      pre-existing, unrelated (`Battle`/`Demons.StarPolicy`/`Expeditions`/`ClassSystem.ProveAptitude`,
+      pre-existing, unrelated (`Battle`/`Creatures.StarPolicy`/`Expeditions`/`ClassSystem.ProveAptitude`,
       every one failing on an unconfigured `BattleStatComposer`/tuning-bootstrap gap from other
       uncommitted work this session — none touch Power/Atoms/ContentValidation, confirmed by name and
       by stack trace). One genuinely related, pre-existing stale assertion was found and fixed in the

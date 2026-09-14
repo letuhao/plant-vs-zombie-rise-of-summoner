@@ -18,9 +18,11 @@ namespace FusionRpg.Core.World.Turn;
 /// `ContactResolver.SectorContacts` (`World/Movement/MovementPhase.cs`), which unconditionally builds a
 /// `BattleKinds.Sector` request for any two hostile forces sharing a sector — never `BattleKinds.District`
 /// — confirmed by reading that file directly. `DistrictAssaultResolver`'s own delegation guard then
-/// correctly (per its own contract) sends that Sector-kind request straight to
-/// `PlaceholderBattleResolver`, so a second-and-later turn of the same siege silently resolves as an
-/// ordinary open-field placeholder fight instead of continuing on the real board. Fixing this needs
+/// correctly (per its own contract) refuses that Sector-kind request outright (`placeholder-battle-hub`,
+/// T20: no engine resolves a non-district kind, so no winner is invented for one either) — a
+/// second-and-later turn of the same siege now honestly does nothing instead of continuing on the real
+/// board, where before this fix it silently resolved as an ordinary open-field placeholder fight.
+/// Neither is decision 24's real fix. Fixing this needs
 /// `MovementPhase`/`ContactResolver` to detect an ongoing district siege (via <see cref="IsUnderSiege"/>
 /// below) and emit `BattleKinds.District` with a real `BoardProjection` instead — a design call that
 /// touches a phase neither this module nor `siege-resolver`'s own task list currently names, and is

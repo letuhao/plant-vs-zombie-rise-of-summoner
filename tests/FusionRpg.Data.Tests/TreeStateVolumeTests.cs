@@ -11,22 +11,21 @@ namespace FusionRpg.Data.Tests;
 /// re-asserted here at volume).</summary>
 public class TreeStateVolumeTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
 
     public TreeStateVolumeTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-treevolume-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
     }
 
     public void Dispose()
     {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+        _testStore.Dispose();
     }
 
+    [Trait("Category", "Heavy")]
     [Fact]
     public void Two_thousand_actors_times_forty_nodes_stores_exactly_eighty_thousand_rows()
     {
@@ -39,14 +38,14 @@ public class TreeStateVolumeTests : IDisposable
             var nodes = new Dictionary<string, long>();
             for (var n = 0; n < nodesPerActor; n++)
                 nodes[$"skill.might-off-t1-n{n}"] = 0;
-            keys[a] = (AllocationScope.UniqueDemon, $"instance:{a}");
-            _store.SaveTreeNodeState(AllocationScope.UniqueDemon, $"instance:{a}", nodes);
+            keys[a] = (AllocationScope.UniqueCreature, $"instance:{a}");
+            _store.SaveTreeNodeState(AllocationScope.UniqueCreature, $"instance:{a}", nodes);
         }
 
         // The REAL total row count in the table -- not just the sum over the keys this test wrote,
         // so a hypothetical cross-join defect that also wrote rows under keys never touched here
         // would still be caught.
-        using var db = SqliteConnectionFactory.Open(_store.HotPath, readOnly: true);
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "SELECT COUNT(*) FROM rpg_tree_node_state;";
         var rowCount = (long)cmd.ExecuteScalar()!;
@@ -72,8 +71,8 @@ public class TreeStateVolumeTests : IDisposable
         var keys = new (AllocationScope, string)[200];
         for (var i = 0; i < 200; i++)
         {
-            keys[i] = (AllocationScope.UniqueDemon, $"instance:{i}");
-            _store.SaveTreeNodeState(AllocationScope.UniqueDemon, $"instance:{i}",
+            keys[i] = (AllocationScope.UniqueCreature, $"instance:{i}");
+            _store.SaveTreeNodeState(AllocationScope.UniqueCreature, $"instance:{i}",
                 new Dictionary<string, long> { ["a"] = bigSoulLevel + i });
         }
 
@@ -81,6 +80,6 @@ public class TreeStateVolumeTests : IDisposable
 
         Assert.Equal(200, batch.Count);
         for (var i = 0; i < 200; i++)
-            Assert.Equal(bigSoulLevel + i, batch[(AllocationScope.UniqueDemon, $"instance:{i}")]["a"]);
+            Assert.Equal(bigSoulLevel + i, batch[(AllocationScope.UniqueCreature, $"instance:{i}")]["a"]);
     }
 }

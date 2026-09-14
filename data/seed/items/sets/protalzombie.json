@@ -25,7 +25,7 @@
       "id": "set.protalzombie-001",
       "nameKey": "set.temporal-pea",
       "name": "Temporal Pea",
-      "themeKey": "demon.protalzombie",
+      "themeKey": "creature.protalzombie",
       "members": [
         {
           "role": "armament-primary",

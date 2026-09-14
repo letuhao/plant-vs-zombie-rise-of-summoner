@@ -25,7 +25,7 @@
       "id": "set.potatopuff-001",
       "nameKey": "set.spore-sprawl",
       "name": "Spore Sprawl",
-      "themeKey": "demon.potatopuff",
+      "themeKey": "creature.potatopuff",
       "members": [
         {
           "role": "armament-primary",

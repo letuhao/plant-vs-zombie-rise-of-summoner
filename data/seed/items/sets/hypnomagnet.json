@@ -25,7 +25,7 @@
       "id": "set.hypnomagnet-001",
       "nameKey": "set.iron-grave-magnet",
       "name": "Iron Grave Magnet",
-      "themeKey": "demon.hypnomagnet",
+      "themeKey": "creature.hypnomagnet",
       "members": [
         {
           "role": "armament-primary",

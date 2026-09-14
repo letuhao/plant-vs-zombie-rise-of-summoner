@@ -267,10 +267,10 @@ re-bless budget one field at a time.
     would themselves produce), the same technique W6 used for sector-truth columns. Verify: `dotnet
     test tests\FusionRpg.Server.Tests` → 102/102 passed (29s). `dotnet test
     tests\FusionRpg.Data.Tests` → 630/632 passed; the 2 failures
-    (`DemonSpeciesImportCliTests.A_real_import_against_the_real_committed_tree_succeeds…` and
+    (`CreatureSpeciesImportCliTests.A_real_import_against_the_real_committed_tree_succeeds…` and
     `…A_stale_committed_file_refuses_the_whole_import…`) are unrelated to this task — a concurrent,
     already-known background process (seedsmith species generation, see `git status` showing live
-    edits under `data/seed/demons/species/`) has a mid-write `GarlicPumpkin` entry with an
+    edits under `data/seed/creatures/species/`) has a mid-write `GarlicPumpkin` entry with an
     `unresolved` rarity; confirmed stable/reproducible and confirmed via `git status` that the
     touched files are entirely outside `src/FusionRpg.Core`, `src/FusionRpg.Contracts`,
     `src/FusionRpg.Server` and `tests/`. `dotnet test tests\FusionRpg.Core.Tests` (not required by
@@ -493,7 +493,7 @@ re-bless budget one field at a time.
     Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~World` → 737/737
     passed. `dotnet test tests\FusionRpg.Data.Tests` → 630/632 passed; the 2 failures are the same
     pre-existing, unrelated, concurrent-background-writer defect already logged in W7's note
-    (`DemonSpeciesImportCliTests` / a mid-write `GarlicPumpkin` species file with an `unresolved`
+    (`CreatureSpeciesImportCliTests` / a mid-write `GarlicPumpkin` species file with an `unresolved`
     rarity) — confirmed unchanged in count and identity from before this task's edits.
 
 - [x] **W13: `MovementPhase` stops putting non-sectors in the sector slot — fog defect B**
@@ -1051,8 +1051,8 @@ re-bless budget one field at a time.
     `StateHash` as a turn with no commands at all, confirming `WorldCanonical` never hashes commands.
     Verified: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~World` → **746/746
     passed**; `dotnet test tests\FusionRpg.Data.Tests` → **637/639 passed**, the 2 failures being the
-    pre-existing, unrelated `DemonSpeciesImportCliTests` cases (a concurrent background seedsmith
-    species-generation process mutates the committed demon tree these tests read against — confirmed
+    pre-existing, unrelated `CreatureSpeciesImportCliTests` cases (a concurrent background seedsmith
+    species-generation process mutates the committed creature tree these tests read against — confirmed
     same failure signature as prior sessions, not a regression from this change).
 
 - [x] **W25: Thread the cede preference into the one `Weakest`**
@@ -1164,7 +1164,7 @@ re-bless budget one field at a time.
     that files no `cede` order resolves identically to version 5, so `bind-warden` (W28) and `dowse`
     (W30) land under this same number without a second bump. Verified: `dotnet test
     tests\FusionRpg.Data.Tests` → **637/639 passed**, the 2 failures being the same pre-existing,
-    unrelated `DemonSpeciesImportCliTests` cases already documented at W24/W25 (concurrent background
+    unrelated `CreatureSpeciesImportCliTests` cases already documented at W24/W25 (concurrent background
     seedsmith species-generation activity) — critically, `WorldWaveOneAcceptanceTests.GoldenFinalHash`
     is **not** among the failures, confirming the bump alone (no cede order filed in that 20-turn
     scenario) moved no golden, exactly as the acceptance requires; `dotnet test
@@ -1223,7 +1223,7 @@ re-bless budget one field at a time.
     exactly like W22's `Amount`/`StructureId`, plus the test fixture). Verified: `dotnet test
     tests\FusionRpg.Core.Tests --filter FullyQualifiedName~World` → **764/764 passed** (up from 753,
     +11); `dotnet test tests\FusionRpg.Data.Tests` (full) → **637/639 passed**, the 2 failures the same
-    pre-existing, unrelated `DemonSpeciesImportCliTests` cases (no golden moved).
+    pre-existing, unrelated `CreatureSpeciesImportCliTests` cases (no golden moved).
 
 - [x] **W29: `POST /api/world/{worldId}/bind-warden` — the first production `BindAsWarden` call site**
   - Description: `FusionRpg.Core.csproj` declares exactly one `ProjectReference` —
@@ -1259,7 +1259,7 @@ re-bless budget one field at a time.
     rollback) is documented in the class doc comment, not engineered around. Added `BindWardenRequest`
     and `BindWardenResultDto` to `WorldDtos.cs` (typed response, not an anonymous object, matching the
     file's existing `WorldCommandResultDto`/`WorldTurnCommitDto` style). New
-    `tests/FusionRpg.Server.Tests/WorldBindWardenEndpointTests.cs`: mints a real unbound demon
+    `tests/FusionRpg.Server.Tests/WorldBindWardenEndpointTests.cs`: mints a real unbound creature
     (`MintUnboundWithFreeSlot`, the identical fixture `WardenContractTests.cs` already established),
     files the call with a deliberately bogus `commanderId` so step 2 genuinely fails at
     `WorldCommandAdmission` (`"commander.unknown"`) — proving step 1 already ran (contract bound,
@@ -1367,8 +1367,8 @@ paragraph and the map's own Gate A.
       `npm test` pass below (1 pre-existing, unrelated GG-55 failure, verified present before this
       session's changes).
 - [x] All five .NET suites green: `dotnet test tests\FusionRpg.Core.Tests` → **5327/5327**;
-      `...\FusionRpg.Data.Tests` → **637/639** (2 pre-existing, unrelated `DemonSpeciesImportCliTests`
-      failures — a concurrent background seedsmith process mutating the committed demon tree these
+      `...\FusionRpg.Data.Tests` → **637/639** (2 pre-existing, unrelated `CreatureSpeciesImportCliTests`
+      failures — a concurrent background seedsmith process mutating the committed creature tree these
       tests read, confirmed same signature every run this session, no golden hash ever among them);
       `...\FusionRpg.Server.Tests` → **124/124**; `...\FusionRpg.E2E.Tests` → **201/201**;
       `...\FusionRpg.Guard.Tests` → **162/162**. Run fresh 2026-09-04 after W30 landed.
@@ -3216,9 +3216,9 @@ no stage dependency. This phase ends at **Gate B**.
     `dotnet test tests/FusionRpg.E2E.Tests --filter FullyQualifiedName~WorldCatalog` → **4/4
     passed**. `dotnet test tests/FusionRpg.Core.Tests --filter FullyQualifiedName~World` →
     **767/767 passed**. `dotnet test tests/FusionRpg.Server.Tests` → 98/124 passed; the 26 failures
-    are pre-existing and unrelated — every one is an atom/demon-content/loadout/reforge test (none
+    are pre-existing and unrelated — every one is an atom/creature-content/loadout/reforge test (none
     touch `World`/`Catalog` code), and `git status` confirms a live, concurrent seedsmith
-    species-generation process is actively rewriting `data/seed/demons/species/*.json` right now
+    species-generation process is actively rewriting `data/seed/creatures/species/*.json` right now
     (files timestamped minutes before this run) — the same class of environmental interference this
     session's memory already tracks, not a regression from this change.
 
@@ -4112,7 +4112,7 @@ standing exemptions retired in the same change, and the GG-50 registry closed.
 
 - [x] **W100: The warden gate, as a pure function of the balance** — done 2026-09-05 (assistant).
   - Description: write `wardenGate.ts` — `needsSayItBack(balance, fee, upkeepPerDay) => balance < fee + upkeepPerDay`. Step 2 is a function of the balance, not a flag someone remembers to set, and the threshold is computed from **the same values the engine charges** (`ContractPolicy.UpkeepPerDay`, taken at bind in `RpgStore.Contracts.cs:316`), never a magic number.
-  - Acceptance: the boundary is asserted on both sides and exactly at `fee + upkeepPerDay`; the function has no store access and no React import; the balance comes from `/api/souls/{playerId}` the client already reads (`lib/bus/demons.ts:135-136`).
+  - Acceptance: the boundary is asserted on both sides and exactly at `fee + upkeepPerDay`; the function has no store access and no React import; the balance comes from `/api/souls/{playerId}` the client already reads (`lib/bus/creatures.ts:135-136`).
   - Verify: `cd web\fusion-rpg-web; npm test`
   - Files: `src/stages/world/confirms/wardenGate.ts`, `wardenGate.test.ts`.
   - Dependencies: None.
@@ -4130,7 +4130,7 @@ standing exemptions retired in the same change, and the GG-50 registry closed.
 
 - [x] **W102: Bind a warden — permanent, and the fee is the first day's upkeep** — done 2026-09-05 (assistant).
   - Description: build `BindWardenDialog.tsx` step 1. This is the one act on the stage the rest of the game will not undo: `ReleaseContract` checks the warden flag **before every other release blocker** and refuses unconditionally (`RpgStore.Contracts.cs:351-353`). So the copy states the loss in full with no hedging. **The fee taken now and the daily upkeep are the same number**, because binding charges day one (`fee = ContractPolicy.UpkeepPerDay(...)`, `:316`) — the dialog shows two rows because they are two obligations, shows the same rate twice, and **says so**. The verb is **"Bind a warden here"**, never "Ward": `WardLevel` sits on a lane and `WardenBindingId` on a sector, and an earlier plate called both "Ward" so choosing the irreversible one got you the road overlay.
-  - Acceptance: the dialog contains the words *"can never be released"* and *"You do not keep the demon."* — a copy test on purpose, because that is the sentence GG-22 requires and the one a later refactor would soften; the five rows (slot spent, fee, never-ending upkeep, permanence, exemption gained) are all present, with one sentence stating the fee and the daily rate are the same number; the four engine refusals — `capacity.full`, `souls.insufficient`, `contract.already-bound`, `specimen.missing` — render as sentences **before** the act (GG-55); the word "Ward" appears nowhere in this dialog.
+  - Acceptance: the dialog contains the words *"can never be released"* and *"You do not keep the creature."* — a copy test on purpose, because that is the sentence GG-22 requires and the one a later refactor would soften; the five rows (slot spent, fee, never-ending upkeep, permanence, exemption gained) are all present, with one sentence stating the fee and the daily rate are the same number; the four engine refusals — `capacity.full`, `souls.insufficient`, `contract.already-bound`, `specimen.missing` — render as sentences **before** the act (GG-55); the word "Ward" appears nowhere in this dialog.
   - Verify: `cd web\fusion-rpg-web; npm test` then `dotnet test tests\FusionRpg.Data.Tests`
   - Files: `src/stages/world/confirms/BindWardenDialog.tsx`, `BindWardenDialog.test.tsx`.
   - Dependencies: W100, Phase 0 `world-commands` (the first production `BindAsWarden` call site).

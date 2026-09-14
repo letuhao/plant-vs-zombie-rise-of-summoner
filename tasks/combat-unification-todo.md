@@ -169,7 +169,7 @@ section, which was corrected first; **this header was missed in that pass and is
         the byte-identity claim true rather than merely likely.
     - **Suite after both clauses:** full Core **16 failed / 5588 passed** against the stable 14. The
       two extras are both known and neither is this work: the atom stream's in-flight
-      `AtomCatalogSsotDriftTests`, and `DemonQualityReportTests`, the parallel-load flake characterised
+      `AtomCatalogSsotDriftTests`, and `CreatureQualityReportTests`, the parallel-load flake characterised
       under B29. Four guards green; `M1 = 0`; overflow A1/A2 clean.
 - [x] ~~**Wave E2: Species skills (v4)** — `SkillCatalog`, deterministic selection, actions via resolver/pipeline/ShieldRuntime/StatusRuntime only; `skill.used` events; zero-skill invariant.~~ ⛔ **SUPERSEDED 2026-09-04 — moved to Phase 6 below.** Not rebased, **replaced**: all five pieces (`SkillDef`, rounds-based cooldown, action kind, targeting policy, `SkillCatalog`) shipped under other names, so building this as drafted would create a fifth content system. See [spec-species-skills.md](../docs/architecture/combat/spec-species-skills.md).
 - [x] **Wave E3: Hybrid payloads** — **MECHANISM DONE 2026-09-04 (inert; dial is owner-gated)** — secondary element as weighted component; dual-type matchup tables golden.
@@ -184,7 +184,7 @@ section, which was corrected first; **this header was missed in that pass and is
       leaves exactly the gated part open. Raising it is then a config edit, not a rebuild.
     - ⛔ **Why that matters more here than it did for the other inert mechanisms: this one MOVES
       GOLDENS when switched on.** `WaveCatalog.cs:115` and `WebMatchService.cs:297` both copy a
-      species' real `ElementSecondary` onto wave demons, so a non-zero weight changes every expedition
+      species' real `ElementSecondary` onto wave creatures, so a non-zero weight changes every expedition
       resolve — while the hand-built battle goldens, which set no secondary, would not move at all.
       **A predicted-delta write-up and a `RulesetVersion` bump are therefore required before the dial
       is raised**, and neither is required to land the mechanism.
@@ -217,7 +217,7 @@ section, which was corrected first; **this header was missed in that pass and is
       guards). Expeditions resolve.
     - ⏳ **What is deliberately left to the owner, not skipped:** E3's `secondaryWeightMilli` is the
       constant this todo marks **ask-first**, and raising it above 0 **moves the expedition goldens**
-      (wave demons carry a real `ElementSecondary`). That is a predicted-delta + re-bless decision, and
+      (wave creatures carry a real `ElementSecondary`). That is a predicted-delta + re-bless decision, and
       it is the only thing standing between E3-inert and E3-live.
     - **Commit draft** for both waves is in the session hand-off; git stays hands-off.
 
@@ -228,7 +228,7 @@ section, which was corrected first; **this header was missed in that pass and is
 Spec: [spec-species-skills.md](../docs/architecture/combat/spec-species-skills.md). Depends on
 `battle-adoption` and battle T5 + T19 — **all shipped, nothing blocks S1.**
 ⚠️ **Baseline superseded 2026-09-04 — re-measure, never assume.** The 14/2 figure below was true when
-this phase started and is not now: the demon and world-stage streams fixed most of theirs mid-run, so
+this phase started and is not now: the creature and world-stage streams fixed most of theirs mid-run, so
 the tree stands at **2 red Core / 3 red Data**, Guard **171/171**. And **any Core change invalidates
 every `tools/` binary that references it** — six tests that shell out with `--no-build` reported false
 regressions until the eleven tools were rebuilt. Rebuild tools, then measure, then compare.
@@ -328,7 +328,7 @@ not zero.** `RulesetVersion` stays **4**; this phase re-blesses nothing.
       different fixes, and the old wording ("unbuilt") conflated them.
 
 - [x] ✅ **S5: species → action eligibility content — CLOSED 2026-09-04.** Unblocked by this session's
-  own demon-corpus fix (the two mis-rarified starter plants), then closed by **verifying the shipped
+  own creature-corpus fix (the two mis-rarified starter plants), then closed by **verifying the shipped
   content** rather than authoring more of it.
   - ⭐ **The reframe that closed it: the content already existed.** This task was parked as *"author
     eligibility rows"*, and the assumption that none existed was never checked. They do — the
@@ -338,7 +338,7 @@ not zero.** `RulesetVersion` stays **4**; this phase re-blesses nothing.
     What was genuinely missing was any proof that they *resolve*.
   - ⛔ **And that gap was real, not theoretical.** `EligibilityAxisTests` covers the mechanism
     thoroughly, but **every one of its scope cases is a synthetic row** — nothing read the shipped
-    files. A `family`/`species` row whose `scopeKey` had gone stale during the demon re-classification
+    files. A `family`/`species` row whose `scopeKey` had gone stale during the creature re-classification
     would resolve to nothing, **silently**: the action stays authored, shipped, and unreachable, with
     no test saying a word. That is precisely the risk this task was parked on.
   - **Acceptance, both clauses met against the real files** —
@@ -366,13 +366,13 @@ not zero.** `RulesetVersion` stays **4**; this phase re-blesses nothing.
   - Which species hold which actions is **eligibility**, and `A-E1 eligibility-axis` already shipped it
     (`content-stack-todo.md:528`) — `ActionRow` carries `scope`/`scope_key`, `ActionEligibility`
     evaluates it. This task **consumes** that; it adds no mapping table.
-  - ⛔ **Blocked on `demon-corpus-self-heal` C2/C3/D1.** The species id scheme just changed (186
+  - ⛔ **Blocked on `creature-corpus-self-heal` C2/C3/D1.** The species id scheme just changed (186
     deletions / 289 additions uncommitted, 14 Core tests red on renamed anchors) and two model reruns
     are still open. Authoring eligibility rows against those ids today means redoing them after.
     - ⛔ **Blocker verified LIVE and ACTIVE 2026-09-04 20:31 — the corpus is being rewritten as this
-      is written.** `find data/seed/demons/species -newermt "-120 minutes"` returns **200 files**, the
+      is written.** `find data/seed/creatures/species -newermt "-120 minutes"` returns **200 files**, the
       newest stamped **20:27** — four minutes old. `git status` on that tree shows **391 untracked /
-      220 deleted / 105 modified**. The demon-corpus `C2` pass (`rerun --pipeline kit-shape --all`) is
+      220 deleted / 105 modified**. The creature-corpus `C2` pass (`rerun --pipeline kit-shape --all`) is
       **still in flight** (`C3` and `D1` are `[x]`; `C2` is `[~]`, second pass running). **Authoring
       eligibility rows against these ids right now would mean redoing them** — precisely the condition
       this task is parked on. Strongest form of the check: not "the tests are still red", but "the
@@ -381,7 +381,7 @@ not zero.** `RulesetVersion` stays **4**; this phase re-blesses nothing.
       condition" rule.** Corpus writes **stopped at 20:27** (three polls a minute apart, zero files
       touched in the trailing 3 minutes each time; the only `python` processes on the box date from
       9/3). **So C2's writing is finished — and the condition still did NOT clear.**
-    - ⛔ **Re-tested after the writes stopped, and the id scheme is still inconsistent:** the demon
+    - ⛔ **Re-tested after the writes stopped, and the id scheme is still inconsistent:** the creature
       suite is **4 failed / 179 passed**, and the failure is precisely the anchor churn this task is
       parked on — `Peashooter_carries_every_catalog_runtime_field_straight_from_its_real_anchor` gets
       `["normal","mutated","corrupted","blessed","cursed", …]` where it expects `["normal","mutated"]`.
@@ -396,15 +396,15 @@ not zero.** `RulesetVersion` stays **4**; this phase re-blesses nothing.
       so at least one of `rarity`/`variants` is wrong on the corpus's own terms. **Authoring eligibility rows
       against a corpus that currently mis-rarities its starter species would bake in a regression** —
       the precise harm this task was parked to avoid. Full write-up handed to the owning stream in
-      `tasks/demon-corpus-self-heal-todo.md`.
-      Authoring eligibility rows against it now would key content to ids the demon stream is still
+      `tasks/creature-corpus-self-heal-todo.md`.
+      Authoring eligibility rows against it now would key content to ids the creature stream is still
       reconciling. **The unblock is that suite going green, not the writes stopping.**
     - ✅ **Also re-verified via tests, 2026-09-04** — an unchecked blocker is a claim, and this one
-      was tested before being restated. The demon stream is still mid-flight: `SpeciesExpanderTests`
+      was tested before being restated. The creature stream is still mid-flight: `SpeciesExpanderTests`
       (3) and `SpeciesCatalogDiffTests` (1) are red in this run's own full-Core output, on exactly the
       renamed-anchor and variant-band assertions this line describes (`Expected: ["normal","mutated"]`
       vs an actual list that now carries `corrupted`/`blessed`/`cursed`). **The condition holds; S5
-      stays deferred.** The count moved (4 demon reds, not 14) because that stream has been fixing them
+      stays deferred.** The count moved (4 creature reds, not 14) because that stream has been fixing them
       — which is the blocker resolving, not the blocker being wrong.
   - Acceptance: authored rows resolve, and S1's neutral invariant still holds for actors with none.
   - Verify: `--filter ~Eligibility` + full Core. Scope: M.
@@ -435,13 +435,13 @@ not zero.** `RulesetVersion` stays **4**; this phase re-blesses nothing.
       **`CoverageReport`'s doc was corrected instead**, to separate "the predictor cannot see it" from
       "nothing reads it" — two different problems with different fixes, which the old wording
       ("unbuilt") conflated.
-    - ⏸ **S5 remains open on its stated condition** (`demon-corpus-self-heal` C2/C3/D1), not on a date —
+    - ⏸ **S5 remains open on its stated condition** (`creature-corpus-self-heal` C2/C3/D1), not on a date —
       and this checkpoint's own final criterion is that the deferral is *recorded with the condition
       that releases it*, which it is. Every other criterion is met, so the checkpoint closes and S5
       stays visible as the one piece of content still owed.
       description of an action; S5's deferral is recorded with the condition that releases it.
 
-## Phase 7 — hybrid typing goes live (owner decision 2026-09-07, `demon-mechanism-gaps-ideal.md` §2.6)
+## Phase 7 — hybrid typing goes live (owner decision 2026-09-07, `creature-mechanism-gaps-ideal.md` §2.6)
 
 Wave E3 (Phase 5) shipped the mechanism inert on purpose, with exactly one thing left owner-gated:
 *"raising `secondaryWeightMilli` above 0... is the only thing standing between E3-inert and E3-live."*
@@ -471,7 +471,7 @@ reconcile — gains real new code that calls the **same** `HybridPayload.Build`,
   - **Predicted-delta checked for real, not assumed:** `ExpeditionResolverTests.Tier_goldens_are_locked`
     moved (all 4 tier hashes). Verified before re-blessing: `Squad()`'s own player-side fixture is a
     synthetic `"test-species"` with no catalog-backed `ElementSecondary`, so the player side of every
-    resolve is unaffected; the wild-enemy side (`WildBand`, real `DemonSpeciesCatalog.All`) is not — 21
+    resolve is unaffected; the wild-enemy side (`WildBand`, real `CreatureSpeciesCatalog.All`) is not — 21
     of 841 real species carry a genuine secondary element, and a roll landing one now embeds a real
     two-component `elementPayload` on that enemy's own `BattleSetup`. Re-blessed with the real new
     hashes, documented inline with the same reasoning.
@@ -485,13 +485,13 @@ reconcile — gains real new code that calls the **same** `HybridPayload.Build`,
     `tests/FusionRpg.Core.Tests/Expeditions/ExpeditionResolverTests.cs`.
 
 - [x] **F2a: derive `elementSecondary` from fusion-recipe lineage — DONE 2026-09-07** · content, not code
-  - Owner-suggested (2026-09-07): most demon species are fusion outputs, and their real fusion
+  - Owner-suggested (2026-09-07): most creature species are fusion outputs, and their real fusion
     parents already carry real elements the per-species lore classifier can never see (it reads
     only one species' own flavor text). Sized against the real 713-recipe corpus before building:
     `inputA` is already assigned to match the output's own `elementPrimary` by design (confirmed
     live, 685/693) so it carries no new signal — `inputB`'s own element is the real, previously
     unused signal.
-  - New deterministic pass, `seedsmith demons run fix-secondary-from-fusion`
+  - New deterministic pass, `seedsmith creatures run fix-secondary-from-fusion`
     (`resolve_secondary_element_from_fusion_lineage` in `anchor/derive.py`,
     `fix_secondary_from_fusion_lineage` orchestration in `run/runner.py`) — runs AFTER
     `fusion-recipe-reconcile` (needs the committed `_fusion-recipes.json`, not just species
@@ -499,7 +499,7 @@ reconcile — gains real new code that calls the **same** `HybridPayload.Build`,
     framing). Only fires when EXACTLY ONE parent's `elementPrimary` differs from the output's own —
     owner direction: both parents agreeing is real signal the species is intentionally
     single-typed (left `"none"`, never invented); both parents disagreeing is *also* left
-    unresolved, since `DemonRecipeCatalog.TryFindPair`'s own A-preference ordering is confirmed-live
+    unresolved, since `CreatureRecipeCatalog.TryFindPair`'s own A-preference ordering is confirmed-live
     to be a soft tie-break, not a filter — when neither candidate at a rung matches, `inputA` carries
     no elemental meaning and can't be trusted over `inputB` with any real confidence. Provenance
     stamped `"fusion-lineage-derived"` (never `"deterministic-fallback"` — that tag means "no real
@@ -509,8 +509,8 @@ reconcile — gains real new code that calls the **same** `HybridPayload.Build`,
     (matching the pre-build sizing analysis exactly); real elementSecondary coverage
     **21/841 → 452/841 (~54%)**. Idempotent (0 fixes on immediate re-run).
   - **Full cascade re-run** (this repo's own established "an anchor edit needs the whole chain"
-    rule): `DemonSpeciesGen` (840 species, 431 files regenerated, matching exactly), `DemonSpeciesImport`
-    (431 written / 409 unchanged / 0 deleted), `DemonBuildPlanGen` (68/840 planned, unchanged — the
+    rule): `CreatureSpeciesGen` (840 species, 431 files regenerated, matching exactly), `CreatureSpeciesImport`
+    (431 written / 409 unchanged / 0 deleted), `CreatureBuildPlanGen` (68/840 planned, unchanged — the
     build plan never reads `elementSecondary`). `fusion-recipe-reconcile --check` clean, 713/713
     unchanged, exactly as designed — this pass never touches `elementPrimary`/`rarity`/`acquisition`,
     the only fields the recipe assignment depends on, so it can never invalidate a committed recipe.
@@ -519,30 +519,30 @@ reconcile — gains real new code that calls the **same** `HybridPayload.Build`,
     clean-single-candidate case from both A and B, both-agree, both-disagree, no-recipe, dry-run,
     and idempotency); full seedsmith suite (3124 passed, 15 pre-existing failures confirmed
     unrelated — all in items/passive-tree/actions/tree-plan, on files a concurrent session has
-    modified uncommitted, none touching `demons/`/`fusion/`/`anchor/`); `dotnet test
-    tests/FusionRpg.Core.Tests --filter "Expedition|DemonSpecies|DemonRecipe|SpeciesBuildPlan"`
+    modified uncommitted, none touching `creatures/`/`fusion/`/`anchor/`); `dotnet test
+    tests/FusionRpg.Core.Tests --filter "Expedition|CreatureSpecies|CreatureRecipe|SpeciesBuildPlan"`
     60/60, no golden-hash movement.
-  - Files: `tools/seedsmith/seedsmith/adapters/demons/anchor/derive.py`,
-    `tools/seedsmith/seedsmith/adapters/demons/run/runner.py`,
+  - Files: `tools/seedsmith/seedsmith/adapters/creatures/anchor/derive.py`,
+    `tools/seedsmith/seedsmith/adapters/creatures/run/runner.py`,
     `tools/seedsmith/seedsmith/report/cli.py` (new `fix-secondary-from-fusion` verb),
     `tools/seedsmith/tests/test_anchor_derive.py`, `tools/seedsmith/tests/test_run_runner.py`,
-    431 regenerated `data/generated/demons/*.json` + `data/seed/demons/species/**` anchor files.
+    431 regenerated `data/generated/creatures/*.json` + `data/seed/creatures/species/**` anchor files.
 
 - [ ] **F2b (non-blocking, tracked): author real `ElementSecondary` for non-fusion species**
   · content, not code · **re-sized 2026-09-07, real gap is 127, not 389**
   - F2a closed the fusion-lineage-derivable slice (431 species). Of the 389 species still
     `elementSecondary: "none"`, **262 are correctly `"none"` already** — F2a's own "both parents
-    agree" (259) and "conflict" (3) cases, matching the owner's own stated rule ("not every demon
+    agree" (259) and "conflict" (3) cases, matching the owner's own stated rule ("not every creature
     needs one, that's normal"). **The real, unexamined gap is 127 species: those with no fusion
     recipe at all** — measured 2026-09-07 by cross-referencing `_fusion-recipes.json`'s output set
     against every species still carrying `"none"`.
   - No deterministic signal exists for these 127 (no fusion lineage to borrow from) — closing this
     needs a genuine content pass: rerunning the existing `element-secondary` classify-pipeline
-    (`tools/seedsmith/seedsmith/adapters/demons/anchor/prompts.py:135-161`) against just this
+    (`tools/seedsmith/seedsmith/adapters/creatures/anchor/prompts.py:135-161`) against just this
     127-species selector, the same class of cost as the T2.11 classification run (a real local-model
     job, though far smaller — 127 species × 1 call each for this one pipeline, not the full 8-pipeline
     per-species budget, since `element-secondary` is a single-attribute prompt). **Do not run
-    concurrently with an in-progress `demons run start/resume`** — both would contend for the same
+    concurrently with an in-progress `creatures run start/resume`** — both would contend for the same
     local model.
   - Not a code task — does not gate F1 or F3, and is not owed a fixed acceptance bar since "which of
     these 127 should get a second element" is itself a content/balance judgment call, not something
@@ -624,38 +624,38 @@ reconcile — gains real new code that calls the **same** `HybridPayload.Build`,
           "Dominance baseline drift" pattern, not a regression from this change).
         - Files: `src/FusionRpg.Server/AtomPushService.cs`, `src/FusionRpg.Core/Battle/BattleModels.cs`.
       - ### ✅ Live-lawn proof — **DONE 2026-09-07**
-        - No debug/cheat endpoint existed to hand-place a specific demon species or a bound atom onto
+        - No debug/cheat endpoint existed to hand-place a specific creature species or a bound atom onto
           a specimen, and gacha odds for one of the 15 known dual-typed species were too low to gamble
           the real player's souls on (best case ~1/45 within a rarity tier). Owner direction: *"debug
           apis for this test coverage purpose, this is repo standard, you should try multiple
-          mechanism[s] too."* Three new debug endpoints added to `DemonEndpoints.cs`, each reusing an
+          mechanism[s] too."* Three new debug endpoints added to `CreatureEndpoints.cs`, each reusing an
           existing production primitive rather than a parallel implementation:
-          - `POST /api/demons/debug/grant` — mints a named species via the real `RpgStore.MintDemon`
+          - `POST /api/creatures/debug/grant` — mints a named species via the real `RpgStore.MintCreature`
             atomic path (the same one summon/fusion/capture/delve already use), no soul cost.
-          - `POST /api/demons/debug/spawn-unique-actor` — a bare `UniqueActor` (no demon profile) at a
+          - `POST /api/creatures/debug/spawn-unique-actor` — a bare `UniqueActor` (no creature profile) at a
             given side+`gameTypeId`, deployed with a synthetic ptr via the exact
             `CreateUniqueActor` → `TryBeginUniqueDeploy` → `TryAckUniqueSpawn` sequence
-            `AtomPushServiceInstanceOwnerRewriteTests` already proves at the unit level. No demon
-            profile means the demon-contracts deploy gate never fires (it only fires when
-            `ReadDemonProfileUnlocked` finds a row) — the real player's contract-slot/loyalty state is
+            `AtomPushServiceInstanceOwnerRewriteTests` already proves at the unit level. No creature
+            profile means the creature-contracts deploy gate never fires (it only fires when
+            `ReadCreatureProfileUnlocked` finds a row) — the real player's contract-slot/loyalty state is
             never touched. `OwnerElements` (`AtomPushService.cs`) reads only `Side`/`TypeId` via
-            `LawnElementIndex`, never the demon profile, so this is sufficient for the real wiring.
-          - `POST /api/demons/debug/grant-test-atom/{instanceId}` — binds one fixed, idempotent
+            `LawnElementIndex`, never the creature profile, so this is sufficient for the real wiring.
+          - `POST /api/creatures/debug/grant-test-atom/{instanceId}` — binds one fixed, idempotent
             `resource.delta` (→ `ApplyResourceDelta`) test atom directly to a `UniqueActor`, via the
             same `UpsertAtom`/`UpsertContainer`/`Instantiator.TryInstantiate`/`Bind` primitives the
             equip pipeline already uses, bypassing the whole item-roll/equip flow.
-          - `GET /api/demons/debug/atoms-preview/{instanceId}` — calls the real
+          - `GET /api/creatures/debug/atoms-preview/{instanceId}` — calls the real
             `AtomPushService.Build` for exactly that one owner and returns the raw compiled grants
             (plus `ResolveBindings`'s own accepted/refused counts for diagnosis) — the same production
             compile path every real push already goes through, never a second one.
         - **A real, previously-undiscovered wrinkle found along the way, not assumed:** a freshly
-          debug-granted demon specimen (`phase: Roster`, no traits) compiled **zero** grants — not a
+          debug-granted creature specimen (`phase: Roster`, no traits) compiled **zero** grants — not a
           bug, but `AtomPushService.Build`'s own documented P1.5-L behavior (`AtomPushService.cs:345-357`):
           any grant for a `UniqueActor` with no live `LastPtr` (never deployed) is dropped rather than
           sent, since the injector refuses a durable `instance:` owner key outright. This is exactly
           why the acceptance criterion said "deployed live," not "existing on the roster" — confirmed
           empirically, not by re-reading the comment alone.
-        - **All 5 new/updated E2E tests green** (`tests/FusionRpg.E2E.Tests/DemonDebugGrantE2ETests.cs`,
+        - **All 5 new/updated E2E tests green** (`tests/FusionRpg.E2E.Tests/CreatureDebugGrantE2ETests.cs`,
           new file): grant mints the named species with its real elements at no soul cost; unknown
           species rejected; atoms-preview compiles for a real instance and 404s for an unknown one; and
           the full proof — a dual-typed deployed specimen with a bound test atom compiles a genuine
@@ -673,13 +673,13 @@ reconcile — gains real new code that calls the **same** `HybridPayload.Build`,
           (`AtomCompiler|Hybrid|BattleRuleset` in Core.Tests 88/88, `AtomPush|CompiledPush` in
           Server.Tests 28/28); a full-suite run of both `FusionRpg.E2E.Tests` (207/218) and
           `FusionRpg.Server.Tests` (316/341) showed failures exclusively in World/District/Zomboss and
-          one `DemonLawnDeployAtomPushTests` file — traced via `git status`/`git log` to a **concurrent
+          one `CreatureLawnDeployAtomPushTests` file — traced via `git status`/`git log` to a **concurrent
           session's own uncommitted edit** to that exact test file (10 insertions since its last
           commit, made by neither me nor this task), matching this repo's own established
           "concurrent-session drift" pattern, not a regression from this work.
 
 ### ✅ Checkpoint 7 — hybrid typing is real on both surfaces, through one shared mechanism — **CLOSED 2026-09-07**
-- [x] F1 done: web-battle demons with a real secondary element attack with both, goldens re-blessed
+- [x] F1 done: web-battle creatures with a real secondary element attack with both, goldens re-blessed
       against a checked (not assumed) predicted delta.
 - [x] F3 done: the SAME is true on the lawn, via the SAME `HybridPayload.Build` — confirmed live
       against the real running server/DB (`elementPayload":[{"earth",0.7},{"fire",0.3}]` for a real,

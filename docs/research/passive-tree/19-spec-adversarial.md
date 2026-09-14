@@ -26,7 +26,7 @@ at `:535`; `CombatDamageDispatcher.TryReflect` (`:85`) has exactly one caller, `
 exist** anywhere in the repo; `ssot-power-scale.md` §10 and `inventory.json` both carry **27 rows** and
 neither mentions a passive tree, `req(t)`, `W(T)` or `nodesOwned`; `data/tuning/passive-tree.v1.json`
 and `passive-tree-targets.v1.json` **do not exist**; exactly **one** seedsmith metric gates today
-(`DemonRoster/UnresolvedCount`, `metrics/demon_roster.py:370`). The program has design documents and
+(`CreatureRoster/UnresolvedCount`, `metrics/creature_roster.py:370`). The program has design documents and
 no code, no tuning data, no SSOT row, and a locked placeholder tab.
 
 ---
@@ -219,7 +219,7 @@ Gate 1 is `audit_schema`, which raises at `Pipeline.__post_init__` before a mode
 (`:390`); gate 6 is `run_preflight`; gates 7/9 are `run_g1`/`run_g2`; gate 11 is `verify_permutation`;
 gate 14 is `should_generate` over `ProvenanceLedger`; gate 20 is `setgen/dedup.py`'s local Jaccard,
 chosen deliberately over the shared MinHash because *"the shared MinHash over-reports 7× on real
-pairs"* (`:409`). Every one of these has run against the 840-entry demon corpus.
+pairs"* (`:409`). Every one of these has run against the 840-entry creature corpus.
 
 **The specs already say which gates cannot pass yet, in the required word.**
 `spec-tree-language.md:229-234`: *"until an atom-tag registry lands … a predicate can key on
@@ -232,8 +232,8 @@ is therefore not a green checkbox — it blocks the lot.
 `spec-tree-language.md:421-434` promotes exactly one metric to `gates=True` and explains why the rest
 start `False`: *"a threshold promoted before a real run is a threshold nobody can name in advance."*
 Counted this session, **that is exactly the shipped posture**: of 47 registered seedsmith metrics,
-precisely one gates — `DemonRoster/UnresolvedCount` (`metrics/demon_roster.py:370`) — and
-`metrics/distribution.py:8-10` states the reason in its own words. `DemonQualityReport` likewise
+precisely one gates — `CreatureRoster/UnresolvedCount` (`metrics/creature_roster.py:370`) — and
+`metrics/distribution.py:8-10` states the reason in its own words. `CreatureQualityReport` likewise
 reports and does not gate (`Program.cs:23-24`). The specs are copying a working discipline, not
 inventing a permissive one.
 
@@ -408,7 +408,7 @@ construction."* It does, and that is the hazard, not the feature.
 
 This is not hypothetical shape. D27 explicitly ships the roster whole and sequences family trees as
 *build-order work* (`ideal:67`), so a roster append is a planned event, not an edge case. The first
-demon-family roster lands `F` trees at once.
+creature-family roster lands `F` trees at once.
 
 **(4) An atom-kind change has no price anywhere.** The 17th kind (D16/B2) is the one change that
 alters what a node can express. `spec-mechanism-wiring.md:608-647` scopes the code cost carefully
@@ -674,7 +674,7 @@ Specific, cited, and each one is settled as far as I can tell.
 
 12. **D8's exploit is not hidden.** `spec-tree-resolve.md:235-258` states the dominance argument in
     full — self-spend one tree for `F = Fmax`, take all breadth from gear, aptitude thresholds and
-    demon aspect — notes that the amendment named only gear, and defines the `selfSpent` projection as
+    creature aspect — notes that the amendment named only gear, and defines the `selfSpent` projection as
     an owner ruling rather than an implementation detail, with a test asserting the exclusion is a
     stated rule.
 
@@ -686,7 +686,7 @@ Specific, cited, and each one is settled as far as I can tell.
     listed and forbidden.
 
 14. **`species-tree` reads the corpus rather than the ideal, and corrects both.** 840 species, not
-    841 (`spec-tree-review.md:42-53`, with §9's skew table shifted by two cells); `DemonType` is wired
+    841 (`spec-tree-review.md:42-53`, with §9's skew table shifted by two cells); `CreatureType` is wired
     end to end so two `AllocationScope`s are reached, not one (`spec-species-tree.md:565-577`). It
     also decouples the thematic favour from the mechanical lock, which is the ideal §9 corollary that
     keeps flavour honest without turning "plants are earthy" into "everyone plays earth".

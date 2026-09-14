@@ -7,7 +7,7 @@
 
 ## Objective
 
-Overturn in-repo docs that still teach “commander-scope v1 / UniqueDemon out of scope” so Done cannot
+Overturn in-repo docs that still teach “commander-scope v1 / UniqueCreature out of scope” so Done cannot
 contradict the map. Wave 0 — docs only; no behavior change required in this module alone.
 
 ---
@@ -16,7 +16,7 @@ contradict the map. Wave 0 — docs only; no behavior change required in this mo
 
 ```powershell
 # Review-only — no tests required beyond doc links resolve
-rg -n "commander-scope|commander scope only|UniqueDemon.*out of scope" docs/
+rg -n "commander-scope|commander scope only|UniqueCreature.*out of scope" docs/
 ```
 
 ---
@@ -25,9 +25,9 @@ rg -n "commander-scope|commander scope only|UniqueDemon.*out of scope" docs/
 
 | Doc | Required amend |
 |---|---|
-| [../actor-sheet/spec-aptitudes-tab.md](../actor-sheet/spec-aptitudes-tab.md) | Point to aptitude-sheet map; UniqueActor → UniqueDemon; commander role → Mode C |
-| [../class-system/spec-aptitude-allocation-surface.md](../class-system/spec-aptitude-allocation-surface.md) | Specimen picker = ActorSheet; UniqueDemon in scope via aptitude-sheet |
-| [../../guide/mechanisms/aptitudes.md](../../guide/mechanisms/aptitudes.md) (+ html/json siblings if present) | Stop “other scopes still ahead” for UniqueDemon/species player surfaces |
+| [../actor-sheet/spec-aptitudes-tab.md](../actor-sheet/spec-aptitudes-tab.md) | Point to aptitude-sheet map; UniqueActor → UniqueCreature; commander role → Mode C |
+| [../class-system/spec-aptitude-allocation-surface.md](../class-system/spec-aptitude-allocation-surface.md) | Specimen picker = ActorSheet; UniqueCreature in scope via aptitude-sheet |
+| [../../guide/mechanisms/aptitudes.md](../../guide/mechanisms/aptitudes.md) (+ html/json siblings if present) | Stop “other scopes still ahead” for UniqueCreature/species player surfaces |
 | [../gui-lego/menu-refactor-queue.md](../gui-lego/menu-refactor-queue.md) | P4 Aptitudes claimed by `aptitude-sheet` stream |
 | [../aptitude-sheet-ideal.md](../aptitude-sheet-ideal.md) | Hand-off points at map/specs (idea supersession note) |
 

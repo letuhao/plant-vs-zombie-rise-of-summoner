@@ -25,7 +25,7 @@
       "id": "set.goldthreeplantern-001",
       "nameKey": "set.luminous-parasite",
       "name": "Luminous Parasite",
-      "themeKey": "demon.goldthreeplantern",
+      "themeKey": "creature.goldthreeplantern",
       "members": [
         {
           "role": "armament-primary",

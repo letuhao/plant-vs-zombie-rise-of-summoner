@@ -25,7 +25,7 @@
       "id": "set.bigseashroom-001",
       "nameKey": "set.spore-bound-husk",
       "name": "Spore-Bound Husk",
-      "themeKey": "demon.bigseashroom",
+      "themeKey": "creature.bigseashroom",
       "members": [
         {
           "role": "armament-primary",

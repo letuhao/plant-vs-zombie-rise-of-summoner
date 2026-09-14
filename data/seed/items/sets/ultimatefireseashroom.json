@@ -25,7 +25,7 @@
       "id": "set.ultimatefireseashroom-001",
       "nameKey": "set.explosive-spore-core",
       "name": "Explosive Spore Core",
-      "themeKey": "demon.ultimatefireseashroom",
+      "themeKey": "creature.ultimatefireseashroom",
       "members": [
         {
           "role": "armament-primary",

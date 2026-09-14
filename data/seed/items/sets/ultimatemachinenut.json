@@ -25,7 +25,7 @@
       "id": "set.ultimatemachinenut-001",
       "nameKey": "set.iron-nut-bastion",
       "name": "Iron Nut Bastion",
-      "themeKey": "demon.ultimatemachinenut",
+      "themeKey": "creature.ultimatemachinenut",
       "members": [
         {
           "role": "core-guard",

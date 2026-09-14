@@ -24,12 +24,12 @@ One **player-scoped armoury** holding everything a player owns, with two storage
 specimen does not *hold* items; an assignment (module 4) points from a `(specimen, role)` cell at an
 item in the armoury.
 
-The consequence is why it is the right shape: *"swap this helm onto that demon"* is a single row
-update, and *"which of my 48 demons could use this?"* is one query rather than 48.
+The consequence is why it is the right shape: *"swap this helm onto that creature"* is a single row
+update, and *"which of my 48 creatures could use this?"* is one query rather than 48.
 
 ### Two storage grades — the thing that makes D1 affordable
 
-D1 makes gear uncapped: the commander and every unique demon may wear the full set. §3.1's option D
+D1 makes gear uncapped: the commander and every unique creature may wear the full set. §3.1's option D
 is what keeps that from meaning 720 hand-placed rows.
 
 | Grade | What | Storage |
@@ -111,7 +111,7 @@ guard, which is ours.
   `missing` marker, so the player sees the hole.
 - **Two presets wanting one item:** apply **refuses by default** with `LoadoutConflict`, listing exactly
   which cells hold what; `force = true` steals and **reports what it stripped**. Never a silent strip —
-  *"why is my other demon naked"* is one silent strip away.
+  *"why is my other creature naked"* is one silent strip away.
 
 ⚠ **Sequencing, not a header dependency:** apply writes `rpg_item_assignment`, which is **module 4's**
 table, so the apply path lands with or after module 4. The library, the conflict report and G-C ship

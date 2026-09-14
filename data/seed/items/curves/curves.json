@@ -133,7 +133,7 @@
         }
       ],
       "tags": [],
-      "notes": "VALUE curve, base=1: resolvedValue = multiplierPerMille/1000 IS the `material_band` integer (1 common, 2 rare, 3 epic, 4 legendary). Directly reproduces decision-d3-cost-rarity-rebase.md §Q1.3's band map (itself sourced from ssot-rarity.md:298-303, R3: 'material_band ... populated from I1's own DemonRarity -> ordinal band map'). This column does not exist in core.v1.json yet (a genuine registry gap, same one entry-shapes.md §3 flags for `materials.v1.json`) — this curve is the interim authoritative source until that column lands. Also reused directly by I7's reroll costs, which need `b` (material_band) as a linear multiplier on `catalyst.flux` qty for Reforge (b) and Imprint (2b) — no separate curve needed for those; a consumer reads this curve and multiplies."
+      "notes": "VALUE curve, base=1: resolvedValue = multiplierPerMille/1000 IS the `material_band` integer (1 common, 2 rare, 3 epic, 4 legendary). Directly reproduces decision-d3-cost-rarity-rebase.md §Q1.3's band map (itself sourced from ssot-rarity.md:298-303, R3: 'material_band ... populated from I1's own CreatureRarity -> ordinal band map'). This column does not exist in core.v1.json yet (a genuine registry gap, same one entry-shapes.md §3 flags for `materials.v1.json`) — this curve is the interim authoritative source until that column lands. Also reused directly by I7's reroll costs, which need `b` (material_band) as a linear multiplier on `catalyst.flux` qty for Reforge (b) and Imprint (2b) — no separate curve needed for those; a consumer reads this curve and multiplies."
     },
     {
       "id": "curve.003",

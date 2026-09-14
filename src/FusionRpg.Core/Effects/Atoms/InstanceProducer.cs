@@ -18,7 +18,7 @@ namespace FusionRpg.Core.Effects.Atoms;
 /// </summary>
 /// <summary>
 /// One already-resolved pool pick forced into a <see cref="InstanceProducer.Compose"/> call —
-/// demon-standalone WAVE F2.1/F2.4: an atom (or affix-bundle's worth of atoms) lifted VERBATIM from a
+/// creature-standalone WAVE F2.1/F2.4: an atom (or affix-bundle's worth of atoms) lifted VERBATIM from a
 /// parent specimen's own materialised roll (F2.2 finds it; this type only carries it), never
 /// re-rolled or re-frozen.
 ///
@@ -27,7 +27,7 @@ namespace FusionRpg.Core.Effects.Atoms;
 /// inheritance is inherently cross-species (a sacrifice's own species-passive pool feeding a
 /// DIFFERENT output species' roll), and real content confirms every species' pool uses opaque,
 /// per-species-authored affix ids with zero overlap between species
-/// (`data/seed/demons/species-effects/plant/pilot-batch.json`: `affix.authored.affix-draw-008`) — a
+/// (`data/seed/creatures/species-effects/plant/pilot-batch.json`: `affix.authored.affix-draw-008`) — a
 /// same-pool check would refuse nearly every real inheritance pick, defeating the mechanic's entire
 /// point (a fused child is supposed to carry something its OWN species could never roll on its own).
 /// <see cref="AffixId"/> is kept only as provenance/logging — which pool member on the SOURCE
@@ -40,7 +40,7 @@ public readonly record struct ForcedPoolPick(string AffixId, IReadOnlyList<Insta
 
 public static class InstanceProducer
 {
-    // WAVE F2.1 (demon-standalone, 2026-09-07): one code with a namespaced payload
+    // WAVE F2.1 (creature-standalone, 2026-09-07): one code with a namespaced payload
     // (item-ideal.md §2b.1), never a second entry in the closed 33-code AtomRejectionReason list.
     static InstanceProducer() => ContentRuleNamespaces.Register("fusion-inherit");
 
@@ -51,7 +51,7 @@ public static class InstanceProducer
     /// in. <c>PowerJson</c> stays null on every row: power is backfilled later (E9), never computed on
     /// this path (`effect-pipeline-ideal.md` A3).
     ///
-    /// <para><paramref name="forcedPicks"/> (WAVE F2.1/F2.4, demon-mechanism-gaps-ideal.md §3.4):
+    /// <para><paramref name="forcedPicks"/> (WAVE F2.1/F2.4, creature-mechanism-gaps-ideal.md §3.4):
     /// atoms a fusion output inherits verbatim from a sacrificed parent's own roll, never re-rolled —
     /// deliberately NOT validated against this container's own pool (see
     /// <see cref="ForcedPoolPick"/>'s own 2026-09-07 correction — inheritance is cross-species by

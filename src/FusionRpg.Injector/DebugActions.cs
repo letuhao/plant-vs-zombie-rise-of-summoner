@@ -1367,6 +1367,155 @@ public static class DebugActions
         }
     }
 
+    /// <summary>Answers "where is current game state, right now" by reading the game's own live
+    /// objects directly -- never reconstructed from event history. Real problem this replaces
+    /// (2026-09-14): every prior attempt at this question read the event log for the most recent
+    /// board.economy/match.result/etc., which is fragile by construction (a long enough session, a
+    /// clamped query window, or a signal that simply never fires for a given transition all produce a
+    /// wrong answer with no way to tell it apart from a right one). <c>Board.Instance</c> and
+    /// <c>InitBoard.Instance</c> are the same live accessors <c>CheatActions.cs</c>/
+    /// <c>DebugActions.cs</c> already read everywhere else in this file -- this command exists only to
+    /// surface them as one direct, synchronous answer instead of requiring a caller to infer the same
+    /// thing from a trickle of past events.
+    ///
+    /// <c>hasInitBoard</c> is a best-effort signal, not a certainty. Live-verified 2026-09-14:
+    /// <c>InitBoard.Instance</c> stays non-null once ANY level has been entered this session --
+    /// a real probe mid-match returned <c>hasBoard:true, hasInitBoard:true</c> together -- so it
+    /// does NOT distinguish "on the seed-picker" from "in a match" after the first entry. Whether
+    /// it clears after backing out to the main menu is still unverified; treat that specific
+    /// question as open until checked against a real return-to-menu.</summary>
+    public static void GameState()
+    {
+        var dump = new Dictionary<string, object>();
+        try
+        {
+            var board = GameHooks.Board ?? Board.Instance;
+            var init = InitBoard.Instance;
+            dump["hasBoard"] = board != null;
+            dump["hasInitBoard"] = init != null;
+            try { dump["theBoardType"] = (int)GameAPP.theBoardType; dump["theBoardTypeName"] = GameAPP.theBoardType.ToString(); } catch { }
+            try { dump["theBoardLevel"] = GameAPP.theBoardLevel; } catch { }
+            if (board != null)
+            {
+                try { dump["sceneType"] = (int)board.sceneType; } catch { }
+            }
+
+            var matchSnap = Match.MatchHost.Runtime.ToSnapshot();
+            var phase = matchSnap.Phase.ToString();
+            dump["matchPhase"] = phase;
+            dump["matchPhaseNote"] = "MatchHost.Runtime's own tracked FSM -- can desync from the real " +
+                "game after a server restart (real incident 2026-09-14: reported InMatch with living " +
+                "entities while the operator's screen showed a genuine defeat). Cross-checked below " +
+                "against real Unity object counts -- trust those over this phase when they disagree.";
+
+            // Real counts from the live Unity objects (same FindObjectsOfType approach
+            // DebugRuntime.BoardEntityStats already uses for debug.board-stats), NOT
+            // MatchHost.Runtime's tracked counters -- those can desync from the real board (see note
+            // above and matchSnap.PlantCount/ZombieCount, deliberately not used here anymore).
+            var realPlantCount = 0;
+            var realZombieCount = 0;
+            try { realPlantCount = UnityEngine.Object.FindObjectsOfType<Plant>().Count(p => p != null && p.thePlantType != PlantType.Nothing); } catch { }
+            try { realZombieCount = UnityEngine.Object.FindObjectsOfType<Zombie>().Count(z => z != null && z.theZombieType != ZombieType.Nothing); } catch { }
+            dump["plantCount"] = realPlantCount;
+            dump["zombieCount"] = realZombieCount;
+
+            // A phase claiming an active match with zero real living entities is itself evidence of
+            // the desync named above -- surfaced explicitly rather than silently trusted or silently
+            // overridden (zero entities does not ALWAYS mean the match ended -- e.g. between waves --
+            // so this is a flag to investigate, not an automatic re-classification).
+            var phaseClaimsActive = phase is "InMatch" or "Paused" or "Starting";
+            dump["phaseMismatch"] = phaseClaimsActive && realPlantCount == 0 && realZombieCount == 0;
+
+            // Real bug found live 2026-09-14: a defeated board (Board.Instance still alive, the
+            // game's own overlay not yet torn down) reported "InMatch" because this only checked
+            // hasBoard, never matchPhase -- MatchRuntime.Apply had already driven the phase to Idle
+            // (via board.end/match.result) while the Board object itself still existed. board!=null
+            // is necessary but not sufficient for "a match is actually running"; the phase FSM is the
+            // authority on that -- except when phaseMismatch is true above, in which case neither
+            // signal alone is trustworthy and a caller should treat liveState as unconfirmed.
+            dump["liveState"] = board == null
+                ? (init != null ? "SeedPickerOrPersistentInitBoard" : "AtMainMenuOrNoBoard")
+                : phase switch
+                {
+                    "Paused" => "Paused",
+                    "InMatch" => "InMatch",
+                    "Starting" => "Starting",
+                    "Idle" or "Ending" => "MatchEndedBoardStillAlive",
+                    _ => phase
+                };
+            dump["ok"] = true;
+            DebugRuntime.Emit("debug.game-state", dump);
+        }
+        catch (Exception ex)
+        {
+            dump["ok"] = false;
+            dump["error"] = ex.Message;
+            DebugRuntime.Emit("debug.game-state", dump);
+            CheatState.Error("debug.game-state: " + ex.Message);
+        }
+    }
+
+    /// <summary>Calls one real <c>UIMgr</c> static navigation entry point, chosen by name. Real
+    /// problem this replaces (2026-09-14): forcing <c>debug.enter-level(force:true)</c> straight over
+    /// a defeated-but-still-alive <c>Board</c> never acked, live, twice (automated and manual) --
+    /// consistent with the already-known hazard that repeated/rapid forced entry can destabilize the
+    /// engine (see force-debug-enter-level memory). The fix attempt was <c>UIMgr.BackToMenu()</c>
+    /// (already Harmony-hooked, emits <c>menu.enter</c>) -- proven live to leave the dead board, but it
+    /// landed on the game's PREVIOUS menu layer (Challenge Mode select), not the true main menu: this
+    /// game's menu stack is not flat, so one guessed method is not enough. Exposing every real
+    /// <c>UIMgr</c> static navigation method by name here lets a caller find the actual working
+    /// sequence live instead of hard-coding a single guess that only holds for one menu depth.
+    /// Never fabricates -- every action below is the literal real static method call.</summary>
+    public static void UiNav(JsonElement p)
+    {
+        var action = Str(p, "action") ?? "";
+        var dump = new Dictionary<string, object> { ["action"] = action };
+        try
+        {
+            switch (action)
+            {
+                case "back-to-menu": UIMgr.BackToMenu(); break;
+                case "enter-main-menu": UIMgr.EnterMainMenu(); break;
+                case "back-to-game": UIMgr.BackToGame(); break;
+                case "enter-pause-menu": UIMgr.EnterPauseMenu(); break;
+                case "enter-lose-menu": UIMgr.EnterLoseMenu(Str(p, "reason") ?? ""); break;
+                case "enter-challenge-menu": UIMgr.EnterChallengeMenu(); break;
+                case "enter-classic-travel": UIMgr.EnterClassicTravel(); break;
+                case "enter-travel-adv": UIMgr.EnterTravelAdv(); break;
+                case "enter-travel-game": UIMgr.EnterTravelGame(); break;
+                case "enter-travel-challenge": UIMgr.EnterTravelChallenge(); break;
+                case "enter-treasure-menu": UIMgr.EnterTreasureMenu(); break;
+                case "enter-tower-menu": UIMgr.EnterTowerMenu(); break;
+                case "enter-iz-menu": UIMgr.EnterIZMenu(); break;
+                case "enter-survival-e-menu": UIMgr.EnterSurvivalEMenu(); break;
+                case "menu-normal-settings": UIMgr.MenuNormalSettings(); break;
+                case "enter-help-menu": UIMgr.EnterHelpMenu(); break;
+                case "enter-other-menu": UIMgr.EnterOtherMenu(); break;
+                case "enter-option-menu": UIMgr.EnterOptionMenu(); break;
+                case "enter-explore-menu": UIMgr.EnterExploreMenu(); break;
+                case "enter-almanac": UIMgr.EnterAlmanac(); break;
+                case "enter-garden": UIMgr.EnterGarden(); break;
+                case "enter-zuma": UIMgr.EnterZuma(); break;
+                default:
+                    dump["ok"] = false;
+                    dump["error"] = $"unknown action '{action}'";
+                    DebugRuntime.Emit("debug.ui-nav", dump);
+                    CheatState.Error("debug.ui-nav: unknown action " + action);
+                    return;
+            }
+            dump["ok"] = true;
+            DebugRuntime.Emit("debug.ui-nav", dump);
+            CheatState.Note("debug.ui-nav: " + action);
+        }
+        catch (Exception ex)
+        {
+            dump["ok"] = false;
+            dump["error"] = ex.Message;
+            DebugRuntime.Emit("debug.ui-nav", dump);
+            CheatState.Error("debug.ui-nav: " + ex.Message);
+        }
+    }
+
     static LevelType ParseLevelType(JsonElement p)
     {
         if (p.TryGetProperty("levelType", out var el))

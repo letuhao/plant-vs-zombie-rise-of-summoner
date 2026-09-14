@@ -54,8 +54,8 @@ role    — which position on that body      (armament-primary, core-guard, …)
 faction — plant or zombie allegiance       (element rings, capture side)  ← not I2, not the item system
 ```
 
-`DemonSpeciesDef.Side` carries faction **and** body in one field —
-`src/FusionRpg.Core/Demons/DemonSpeciesCatalog.cs:11` documents it as *"linked capture side (plant |
+`CreatureSpeciesDef.Side` carries faction **and** body in one field —
+`src/FusionRpg.Core/Creatures/CreatureSpeciesCatalog.cs:11` documents it as *"linked capture side (plant |
 zombie) — portrait/body source"*, and `Validate` at `:76` rejects anything but `plant|zombie`. The
 generated roster contains zombie-side entries with plant bodies (`peashooterzombie`, `cherrynutzombie`).
 `rpg_unique_actors.side` repeats the conflation at row level
@@ -241,7 +241,7 @@ Roles open on **actor level**, read from `rpg_unique_actors.level`
 (`src/FusionRpg.Data/Sqlite/RpgStore.cs:343`) — the column already exists and already advances.
 
 A new specimen starts with **four** open roles, not fifteen. This directly answers the ideal's §8
-worry that twenty demons × twelve slots is a gearing chore: a bench specimen at level 1 needs four
+worry that twenty creatures × twelve slots is a gearing chore: a bench specimen at level 1 needs four
 items, and only the actors you actually level reach fifteen.
 
 | Level | Role opened | Frame note |
@@ -469,7 +469,7 @@ resolve cache, and not before.
 
 | Where | Today | Needed |
 |---|---|---|
-| `DemonSpeciesDef` | `Side` only, `plant\|zombie`, documented as body *and* faction (`DemonSpeciesCatalog.cs:11`, validated `:76`) | a new `Frame` field, its own validation, set at generation — never computed from `Side` |
+| `CreatureSpeciesDef` | `Side` only, `plant\|zombie`, documented as body *and* faction (`CreatureSpeciesCatalog.cs:11`, validated `:76`) | a new `Frame` field, its own validation, set at generation — never computed from `Side` |
 | `rpg_unique_actors` | `side TEXT` (`RpgStore.cs:340`) | a `frame TEXT` column, backfilled from the species record once |
 | the commander | does not exist as an entity at all (item-ideal §3) | frame declared at creation |
 
@@ -692,12 +692,12 @@ nothing else takes.
 
 ### 8.2 Gearing a new specimen is a chore
 
-**The failure:** the ideal names it in §8 — twenty demons × fifteen slots is 300 equipped items before
+**The failure:** the ideal names it in §8 — twenty creatures × fifteen slots is 300 equipped items before
 anything sits in a bag. Either most specimens go bare or inventory management becomes the game.
 
 **What prevents it here:** the unlock ladder (§2.10). A level-1 specimen has **four** slots and 355‰ of
 its budget available; the fifteenth arrives at level 36. Gearing scales with investment, so a bench
-demon is a four-item job and only your actual squad is a fifteen-item job.
+creature is a four-item job and only your actual squad is a fifteen-item job.
 
 **Honest limit:** this softens the problem, it does not decide it. The roster-scale gear economy — shared
 pools, disposable gear, or a small deployable squad — is still open and still belongs to whoever owns
@@ -729,7 +729,7 @@ mechanic means, and neither has a humanoid word behind it.
 
 Ten families is a healthy cluster on paper. In practice most of them are lawn-facing:
 `board.action`, `grid.spawn`, `grid.clear`, and `box.set` are PvZ-mode kinds, and
-[atom-family-library.md](../effect-atom/atom-family-library.md) §4.2 records the demon/battle domain as
+[atom-family-library.md](../effect-atom/atom-family-library.md) §4.2 records the creature/battle domain as
 carrying only derived-channel, HP-delta, and shield families **today**. SC8 requires every mechanic to
 be fully usable with the game closed, and `retinue` currently leans on families that are not.
 
@@ -757,9 +757,9 @@ get their answer, once, by a human.
 
 1. **E6 / the atom program — a durable per-actor owner scope.** This is the hardest blocker in the
    lane. Equipping is a binding, and a binding needs an owner key. The seven scopes are `match`,
-   `plant:N`, `zombie:N`, `entity:hex`, `player:N`, `sector:id`, `slot:id`. A roster demon is none of
+   `plant:N`, `zombie:N`, `entity:hex`, `player:N`, `sector:id`, `slot:id`. A roster creature is none of
    them: `entity:` is *session-scoped and never durable* by contract, `plant:N`/`zombie:N` are type-wide
-   (equipping one demon would equip every copy), and `player:N` is the whole account. The shipped stub
+   (equipping one creature would equip every copy), and `player:N` is the whole account. The shipped stub
    already invented an eighth — `OwnerKind = "instance"`, `OwnerKey = "instance:pending"`
    (`UniqueEquipmentCatalog.cs:124-125`) — which parses as nothing. **An `actor:{instanceId}` scope is
    needed, and adding a scope is "ask first" under E6's boundaries.** Nothing in §5.7 step 3 can land
@@ -793,7 +793,7 @@ get their answer, once, by a human.
 7. **E12 and the action layer — a battle consumer for `retinue`'s families, or an owner decision to
    cut the role.** §8.5. This does not block anything before level 32.
 
-8. **The demon / species stream — a `Frame` field on `DemonSpeciesDef` and a `frame` column on
+8. **The creature / species stream — a `Frame` field on `CreatureSpeciesDef` and a `frame` column on
    `rpg_unique_actors`.** Four Fusion crossbreeds need a human answer at generation time (§5.5). Frame
    must never be derived from `Side`.
 
@@ -837,7 +837,7 @@ get their answer, once, by a human.
 
 6. **Should the unlock ladder be per-actor level or per-account progression?** I chose per-actor level
    because the column exists and because it makes a fresh specimen cheap to gear. Account-wide unlocking
-   would mean a level-1 demon inherits all fifteen slots — better for a roster game, worse for the chore
+   would mean a level-1 creature inherits all fifteen slots — better for a roster game, worse for the chore
    problem in §8.2. I did not decide this one lightly and it is reversible: the gate reads one number,
    and which number it reads is one line.
 
@@ -847,14 +847,14 @@ get their answer, once, by a human.
 
 ```
 [x] Subsystems identified — effect-atom container/instance/binding, unique-actor equip flow,
-    demon species, the action layer seam.
+    creature species, the action layer seam.
 [x] Read this session: item-ideal.md, enrichment-contract.md, definitions.md (§1, §2, §4, §5,
     §6, §8, §9, §10), spec-container-schema.md, spec-instance-and-binding.md,
     atom-family-library.md, action-map.md §10.6.
 [x] Every repo claim cites file:line — UniqueEquipmentCatalog.cs:12/50/23-26/124-125,
     RpgStore.cs:340/343/356-361, RpgStore.UniqueActors.cs:626/629/658/693,
     UniqueActorEndpoints.cs:79/85/95/100/108, RosterPage.tsx:33,
-    DemonSpeciesCatalog.cs:11/76, RpgProgression.cs:32.
+    CreatureSpeciesCatalog.cs:11/76, RpgProgression.cs:32.
 [x] Verified against CODE, not comments — the allowlist, the equip path, the owner-scope list,
     the species Side validation, and the absence of a level cap were all opened.
 [x] Read the surrounding section of every rule quoted — G8 in both definitions §6 and

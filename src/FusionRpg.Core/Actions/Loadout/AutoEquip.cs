@@ -10,7 +10,7 @@ public readonly record struct AutoEquipCandidate(string ActionId, int Rung);
 
 /// <summary>
 /// T22 (action-todo.md, spec-loadout.md §3): auto-equip. "Every actor with no loadout row auto-
-/// equips" — a Zomboss pattern, a generated demon, or any AI-driven actor must never fight with
+/// equips" — a Zomboss pattern, a generated creature, or any AI-driven actor must never fight with
 /// three basics just because nobody chose for it.
 ///
 /// <para><b>Power scale is the shipped rung ladder, named as a stand-in</b> (spec §3: "the rung as a

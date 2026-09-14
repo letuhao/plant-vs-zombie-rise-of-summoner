@@ -25,7 +25,7 @@
       "id": "set.meloncannon-001",
       "nameKey": "set.watermelon-artillery",
       "name": "Watermelon Artillery",
-      "themeKey": "demon.meloncannon",
+      "themeKey": "creature.meloncannon",
       "members": [
         {
           "role": "armament-primary",

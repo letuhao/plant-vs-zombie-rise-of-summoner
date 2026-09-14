@@ -83,7 +83,7 @@ transaction. Use existing correlation/dedupe conventions; never perform grants f
 ### Task 4: typed normal PvZ spawn producer
 
 **Description:** Update the ordinary plant/zombie spawn producer to carry canonical
-`demon.progression.v1` `sourceKind`/`sourceId` fields into the existing spawn payload. Preserve
+`creature.progression.v1` `sourceKind`/`sourceId` fields into the existing spawn payload. Preserve
 record-then-drain and avoid scans, waits, or player-id transport. Keep extra/unique/commander producers
 on their own classifications.
 
@@ -102,7 +102,7 @@ on their own classifications.
 
 **Estimated scope:** Medium.
 
-**Implementation note:** `EntityApply` now emits a typed `demon.progression.v1:general:<species>` claim
+**Implementation note:** `EntityApply` now emits a typed `creature.progression.v1:general:<species>` claim
 only from the vanilla `start`/`initHealth` lifecycle entry points. Debug, recapture, extra, unique,
 commander, and other opaque paths stay unclassified. The deploy path now builds the injector and
 passes its freshness guard; producer behavior is also confirmed by live typed spawn telemetry.
@@ -136,7 +136,7 @@ and allocation projection; do not persist a second manual allocation.
 **Acceptance criteria:**
 - [x] Level-3 checkpoint requires player level ≥3 and qualifying general evidence in the same settled PvZ run.
 - [x] Payload values equal the post-transaction XP ledger/progression/allocation values.
-- [x] A unique or commander demon with the same species/type cannot satisfy the checkpoint.
+- [x] A unique or commander creature with the same species/type cannot satisfy the checkpoint.
 
 **Verification:** Core/Data projection tests and a web-mode negative test proving `webrpg-1` cannot satisfy
       the lawn checkpoint; the focused onboarding Data suite now reports 8 passed.
@@ -345,7 +345,7 @@ and `git diff --check`.
 checks; the importer reported `26 file(s): 164 atom(s)` with a stable catalog revision. The real game
 reported `injectorConnected=true` with `simEnabled=false`, and `POST /api/debug/lawn/quick-start` returned
 `ok=true`, `levelType=Advanture`, plus live target and plant pointers. A fresh run emitted real
-`zombie.spawn` rows carrying `sourceKind=demon.progression.v1` and `sourceId=general:normalzombie`,
+`zombie.spawn` rows carrying `sourceKind=creature.progression.v1` and `sourceId=general:normalzombie`,
 followed by `debug.run-steps.done` and `debug.effect.board-snapshot`. The simulator now covers the
 game-driven `match.result` settlement path and the durable checkpoint sequence; a real victory window
 remains optional smoke coverage.

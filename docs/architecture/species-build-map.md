@@ -16,7 +16,7 @@ inline rather than quietly absorbing it.
 | 2 | `budget-source` | [spec-budget-source.md](species-build/spec-budget-source.md) |
 | 3 | `species-xp` | [spec-species-xp.md](species-build/spec-species-xp.md) |
 | 4 | `redistribution-plan` | [spec-redistribution-plan.md](species-build/spec-redistribution-plan.md) |
-| 5 | `demon-type-allocation` | [spec-demon-type-allocation.md](species-build/spec-demon-type-allocation.md) |
+| 5 | `creature-type-allocation` | [spec-creature-type-allocation.md](species-build/spec-creature-type-allocation.md) |
 | 6 | `allocation-transport` | [spec-allocation-transport.md](species-build/spec-allocation-transport.md) |
 | 7 | `species-respec` | [spec-species-respec.md](species-build/spec-species-respec.md) |
 | 8 | `zomboss-adaptive` | [spec-zomboss-adaptive.md](species-build/spec-zomboss-adaptive.md) |
@@ -50,7 +50,7 @@ and tasks at `tasks/species-build-plan.md` / `tasks/species-build-todo.md`.
 
 ## 1. What this program is for
 
-Give every demon species its own aptitude allocation, filled automatically from a per-species build
+Give every creature species its own aptitude allocation, filled automatically from a per-species build
 favour as that species levels through play, with the Zomboss doing the same visibly, and a priced
 respec for the player who wants to override it.
 
@@ -73,10 +73,10 @@ Stable kebab-case ids. Referenced by every downstream plan and task.
 | # | Module id | Responsibility | Depends on |
 |---|---|---|---|
 | 1 | `resolver-memo` | **Perf prerequisite, and it stands alone.** `AptitudeResolver.Resolve` recomputes per entity per apply — **526** tuning edges × a 48-lookup `Share()` each, roughly **25,000 dictionary lookups per entity resolve**, on the status/hit path too (`AptitudeSubsystem.cs:51-57`, `InjectorStatusBridge.cs:58`). Add a memo keyed `(Side, TypeId, **Theta**)` — Θ is per-actor and an earlier draft omitted it, which would have served stale builds — cleared on `Stats.Invalidate()` and at the match edges where the commander cache already refreshes (`MatchHost.cs:169,194`). **Semantically a no-op — zero goldens** — and it makes the per-species design net faster than today's commander-only path (ideal §11 A6) | — |
-| 2 | `budget-source` | **Audit fix A1, pure correction, no new mechanism.** The `DemonType` budget source becomes **species level**, not almanac XP — an accumulation inverted the locked tier ordering by 176× at ordinary play levels. Fixes the guard test that could not see it (`PointBudgetTests.cs:84` holds its source constant on purpose), and corrects the three places that still say "almanac XP" (`spec-point-economy.md:37`, `PointBudget.cs:12-18`, `aptitudes.v5.json`'s `_scopeSourcesWhy`) | — |
+| 2 | `budget-source` | **Audit fix A1, pure correction, no new mechanism.** The `CreatureType` budget source becomes **species level**, not almanac XP — an accumulation inverted the locked tier ordering by 176× at ordinary play levels. Fixes the guard test that could not see it (`PointBudgetTests.cs:84` holds its source constant on purpose), and corrects the three places that still say "almanac XP" (`spec-point-economy.md:37`, `PointBudget.cs:12-18`, `aptitudes.v5.json`'s `_scopeSourcesWhy`) | — |
 | 3 | `species-xp` | **The progression signal, and one real identity question.** A species must have a per-player level. `rpg_actor_progression` already levels a PvZ *type* per player on `PlantPlaced` (`RpgXpAwardMap.FromActivity`'s own `PlantPlaced`/`ZombieSpawned` cases) and `LawnElementIndex` already maps `(Side, GameTypeId) → species` — so this may be a **join rather than a new store**, and the module must decide that rather than assume it. Also owns: the **expedition source** (standalone-first, ideal §4), and a verdict on the **per-placement faucet** (A10 — it rewards volume, the failure mode §9's prior art documents) | — |
 | 4 | `redistribution-plan` | **The one genuinely new mechanism.** A deterministic, generation-time function that reads each species' classified favour and emits a **full share vector per species**, solved so corpus-wide allocated points land inside a tunable parity **band**. Output is checked-in, diffable, `--check`-regenerable static content — **shipped knowledge a player learns once** (decisions 3, 6, 7, 8, 11, 12, 16). No single-primary vectors; the per-species lean **falls out of solving for the band**, it is not a separate knob | — |
-| 5 | `demon-type-allocation` | The `AllocationScope.DemonType` scope made real: persistence **keyed per-player by `speciesId`** (decision 10), baseline **composed at read time** from (static plan × that player's species level) rather than materialised — `AptitudeAllocation` is explicit that empty means all-zero, never an invented default, so `LoadAllocation` alone stops being sufficient (A9). Persists the **override only** ("save inputs, not computed totals") | 2 · 3 · 4 |
+| 5 | `creature-type-allocation` | The `AllocationScope.CreatureType` scope made real: persistence **keyed per-player by `speciesId`** (decision 10), baseline **composed at read time** from (static plan × that player's species level) rather than materialised — `AptitudeAllocation` is explicit that empty means all-zero, never an invented default, so `LoadAllocation` alone stops being sufficient (A9). Persists the **override only** ("save inputs, not computed totals") | 2 · 3 · 4 |
 | 6 | `allocation-transport` | The wiring gap that keeps the whole thing off the lawn: `/api/aptitudes/{playerId}` returns a flat share map hard-coded to `Commander` (`RpgClient.cs:363-374`), with no species dimension. Adds it, caches N entries injector-side on the existing refresh cadence, and resolves `(Side, TypeId) → speciesId → allocation` through the **already-built** `LawnElementIndex` (A5). Must guard the empty-index bootstrap window, which has already produced one silent-zero defect here | 1 · 5 |
 | 7 | `species-respec` | Decision 15: price **rises with the respec count on that species and decays over time** — churn-priced, not investment-priced. New persisted per-species counter + decay rate (both tunables). `RespecPolicy.PriceOf` gains a count argument, never a level. Its own feature endpoint and reason, and it **must use the ledger path the shipped sinks use** — `TrySpendSouls` has zero production callers (A4) | 5 |
 | 8 | `zomboss-adaptive` | Decision 4: wire the nine already-authored patterns (`ZombossPatterns.cs:25-89`, zero production callers), add **level-up rotation + lose-streak counter-build, revealed after the next fight**, rate-limited so adaptation can never converge on "every player build is equally bad". **Battle and expedition surfaces only** — `ZombossPattern` appears in zero injector files and lawn waves are the host game's (A8). Its real seam is server-side (`WebMatchService`/`ExpeditionEndpoints`), and `ZombossCommanderAllocation` hard-codes the Commander scope today | **—** |
@@ -88,7 +88,7 @@ Stable kebab-case ids. Referenced by every downstream plan and task.
 ```text
 resolver-memo ──────────────────────────┬─► allocation-transport ──► allocation-surface
 budget-source ──┐                       │        (lawn)
-species-xp ─────┼─► demon-type-allocation┤
+species-xp ─────┼─► creature-type-allocation┤
 redistribution-plan ┘                    ├─► battle-allocation      (battle + expedition)
                                          └─► species-respec
 
@@ -121,7 +121,7 @@ Run 2026-09-05 as a traceability audit. **A decision with no module is a hole**,
 | **7** generation time, static shipped knowledge | 4 |
 | **8** distribution parity as the objective | 4 |
 | **9** ⛔ superseded by audit A2 | 7 (replaced by decision 15) |
-| **10** per-player, by `speciesId` | 5 `demon-type-allocation` |
+| **10** per-player, by `speciesId` | 5 `creature-type-allocation` |
 | **11** parity over total points, favour never overridden | 4 (test 7) |
 | **12** a band, not a point | 4 (Phase 3 refuses out-of-band) |
 | **13** web endpoint is another program's | 3 · map §4 |
@@ -173,9 +173,9 @@ would mean a species-aptitude change and a perf change landing together, so a re
 would be attributable to neither — and it would let "species aptitudes made the game slow" become the
 story of a cost that was already there.
 
-**`budget-source` is separate from `demon-type-allocation`.** It is a correction to already-shipped
+**`budget-source` is separate from `creature-type-allocation`.** It is a correction to already-shipped
 code and a already-shipped test, provable on its own with no new mechanism, and it must land before
-anything computes a `DemonType` budget or that thing is built on an inverted ordering.
+anything computes a `CreatureType` budget or that thing is built on an inverted ordering.
 
 ---
 
@@ -186,7 +186,7 @@ anything computes a `DemonType` budget or that thing is built on an inverted ord
 | Promoting web battle out of `FUSIONRPG_SIM=1` | `standalone-rpg`, or a dedicated module (decision 13) | This program needs the **signal**, not the endpoint. `species-xp` consumes it when it exists; the **expedition** path is what satisfies standalone-first here |
 | Passive skills / build trees | [passive-tree-ideal.md](passive-tree-ideal.md) | This program allocates points; that one decides what a point can additionally buy |
 | The commander-scope surface | [commander-surface-ideal.md](commander-surface-ideal.md) | `allocation-surface` is the **species** scope only |
-| The `Aspect` tier | reverted 2026-08-31, not authorized to build | `decisions.md` *Demon program* row |
+| The `Aspect` tier | reverted 2026-08-31, not authorized to build | `decisions.md` *Creature program* row |
 | Coefficient fitting | `class-system` module 12 `residual-fit` | Clean division: **this program shapes the inputs, `residual-fit` fits the coefficients** |
 | Re-classifying the corpus to reduce the Onslaught skew | nobody — **ruled out** (decision 6) | The model classifies a category; balance is arithmetic |
 
@@ -227,5 +227,5 @@ Not aspirations — each has a guard or audit that already runs.
 ## 7. Related
 
 [species-build-ideal.md](species-build-ideal.md) · [class-system-map.md](class-system-map.md) (this
-program is its module 14's named follow-up) · [demon-seed-map.md](demon-seed-map.md) (supplies the
+program is its module 14's named follow-up) · [creature-seed-map.md](creature-seed-map.md) (supplies the
 favour) · [power/ssot-power-scale.md](power/ssot-power-scale.md) · [decisions.md](decisions.md)

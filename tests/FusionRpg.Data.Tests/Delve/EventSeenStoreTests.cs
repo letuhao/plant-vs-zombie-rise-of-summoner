@@ -15,17 +15,15 @@ namespace FusionRpg.Data.Tests.Delve;
 /// own established "provably correct, zero production trigger yet" posture.</summary>
 public class EventSeenStoreTests : IDisposable
 {
-    readonly string _dir;
+    readonly DataTestStore _testStore;
     readonly RpgStore _store;
     readonly RoomTypeCatalog _rooms;
     readonly DoorTypeCatalog _doors;
 
     public EventSeenStoreTests()
     {
-        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-event-seen-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_dir);
-        _store = new RpgStore(_dir);
-        _store.Init();
+        _testStore = DataTestStore.Create();
+        _store = _testStore.Store;
 
         var registryDir = FindRepoRoot();
         var registries = DungeonRegistryLoader.LoadAll(Path.Combine(registryDir, "data", "seed", "dungeon", "_registry"));
@@ -33,10 +31,7 @@ public class EventSeenStoreTests : IDisposable
         _doors = new DoorTypeCatalog(registries.DoorKinds);
     }
 
-    public void Dispose()
-    {
-        try { Directory.Delete(_dir, true); } catch { /* temp */ }
-    }
+    public void Dispose() => _testStore.Dispose();
 
     static string FindRepoRoot()
     {
@@ -110,12 +105,12 @@ public class EventSeenStoreTests : IDisposable
     {
         var delveId = CreateOneDelve(1, "domain.fire-shallow-001", "delve-mr-2", "corr-mr-2");
         _store.MarkRoom(delveId, "r0c0", visited: true, resolvedKind: "event",
-            eventId: "event.bargain-demon.allpeater-001", resolvedArchetypeId: "room.fight-none-001");
+            eventId: "event.bargain-creature.allpeater-001", resolvedArchetypeId: "room.fight-none-001");
 
         var room = _store.LoadDelveRooms(delveId).Single(r => r.SectorId == "r0c0");
         Assert.True(room.Visited);
         Assert.Equal("event", room.ResolvedKind);
-        Assert.Equal("event.bargain-demon.allpeater-001", room.EventId);
+        Assert.Equal("event.bargain-creature.allpeater-001", room.EventId);
         Assert.Equal("room.fight-none-001", room.ResolvedArchetypeId);
     }
 

@@ -50,6 +50,45 @@ def load_existing(role: str, frame: str, band: str, *,
     return {e["id"]: e for e in doc.get("entries", [])}
 
 
+def load_corpus_names(*, base_types_dir: "Path | None" = None) -> "dict[str, str]":
+    """`collision_key -> existing entry id`, over EVERY base-type partition, not just one.
+
+    ⛔ 2026-09-12: `brief.py` used to list only the CURRENT partition file's names, and the model
+    was told to avoid those. That is why 65 display names shipped twice across partitions (e.g.
+    "Tungsten Spiker" in both `humanoid-armament-primary-a.json` and `-b.json`): the second
+    partition's brief never mentioned the first partition's name. `seed-contract.md` §6 makes
+    `nameKey` uniqueness GLOBAL and `NamingCheck` collides names corpus-wide, so generation must
+    see the corpus-wide set. The brief cannot be handed all 860 names (that is ~16k chars of prompt
+    per draw), so the guard is the reject below, not prompt bloat — the same disposition
+    `trees/nodegen/run.py` `_derive_unique_name_key` reached for the identical failure.
+
+    The key matches `NameNormalizer`'s shape closely enough for seed-time rejection: case-folded,
+    non-alphanumerics collapsed, word order preserved (the validator's full normalization also
+    sorts tokens and folds a small synonym set; a superset here would over-reject, so this keeps the
+    conservative subset and the validator remains the authority).
+    """
+    directory = base_types_dir or tuning.BASE_TYPES_DIR
+    by_key: "dict[str, str]" = {}
+    for path in sorted(directory.glob("**/*.json")):
+        if path.name.startswith("_") or path.parent.name.startswith("_"):
+            continue
+        try:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        for entry in doc.get("entries", []):
+            name = entry.get("name")
+            if isinstance(name, str) and name.strip():
+                by_key.setdefault(collision_key(name), entry["id"])
+    return by_key
+
+
+def collision_key(name: str) -> str:
+    """Case-folded, non-alphanumeric-collapsed comparison key for a display name."""
+    import re as _re
+    return " ".join(_re.findall(r"[a-z0-9]+", name.casefold()))
+
+
 def _draw_prefix(role: str, frame: str, band: str) -> str:
     return f"basetype-draw-{role}-{frame}-{band}-"
 
@@ -155,12 +194,21 @@ def resolve_answer(answer: dict, *, partition: "brief_mod.PartitionContext", seq
 
 def run_draws(plan: RunPlan, *, ledger: RunLedger,
              call: "Callable[[str, dict], dict]",
-             persist: "Callable[[dict], None] | None" = None
+             persist: "Callable[[dict], None] | None" = None,
+             corpus_names: "dict[str, str] | None" = None
              ) -> "tuple[dict[str, dict], dict[str, dict]]":
     """Executes every subject in `plan`, marking each resolved draw done in `ledger` as it
-    completes — not all-or-nothing, mirroring `milestonegen.run.run_draws`."""
+    completes — not all-or-nothing, mirroring `milestonegen.run.run_draws`.
+
+    `corpus_names` is the corpus-wide `collision_key -> entry id` map (see `load_corpus_names`).
+    When supplied, a draw whose accepted `name` collides with an already-shipped name is re-asked
+    once, then refused — the generator never writes a duplicate display name (the defect the
+    2026-09-12 name-collision audit found 65 of). A refused draw is recorded as blocked with its
+    reason, never as a silent duplicate.
+    """
     gt = tuning.load_gen_tuning()
     existing = dict(plan.existing)
+    names = dict(corpus_names) if corpus_names is not None else None
     fresh: "dict[str, dict]" = {}
     blocked: "dict[str, dict]" = {}
 
@@ -175,6 +223,18 @@ def run_draws(plan: RunPlan, *, ledger: RunLedger,
         if answer.get("blocked"):
             blocked[subject.subject_id] = {"reason": answer["blocked"]}
             continue
+
+        # Re-ask once on a corpus-wide name collision (the brief cannot list all 860 names).
+        if names is not None and _name_collides(answer, names):
+            answer = _reask_for_distinct_name(call, subject, answer, names)
+            if answer.get("blocked"):
+                blocked[subject.subject_id] = {"reason": answer["blocked"]}
+                continue
+            if _name_collides(answer, names):
+                blocked[subject.subject_id] = {
+                    "reason": f"name {answer.get('name')!r} already exists in the base-type corpus"}
+                continue
+
         try:
             entry = resolve_answer(answer, partition=plan.partition, seq=subject.seq, gen_tuning=gt)
         except ValueError as exc:
@@ -190,12 +250,35 @@ def run_draws(plan: RunPlan, *, ledger: RunLedger,
             persist(entry)
         fresh[entry["id"]] = entry
         existing[entry["id"]] = entry
+        if names is not None:
+            names[collision_key(entry["name"])] = entry["id"]
         ledger.mark_done(subject.subject_id, {
             "entryId": entry["id"], "class": entry["class"],
             "implicitFamily": entry["implicit"]["family"],
         })
 
     return fresh, blocked
+
+
+def _name_collides(answer: dict, names: "dict[str, str]") -> bool:
+    name = answer.get("name")
+    return bool(isinstance(name, str) and name.strip() and collision_key(name) in names)
+
+
+def _reask_for_distinct_name(call: "Callable[[str, dict], dict]", subject: Subject,
+                             answer: dict, names: "dict[str, str]") -> dict:
+    """One repair ask naming the colliding name, mirroring `llm_caller`'s own one-repair discipline."""
+    taken = answer.get("name")
+    repair_brief = (
+        f"{subject.brief}\n\n"
+        f"Your previous answer named {taken!r}, which an already-shipped base type uses. "
+        "Return exactly one JSON object with a DIFFERENT, specific name for this same object "
+        "(and its matching flavor); keep the class, implicitFamily and tags you already chose.\n"
+    )
+    try:
+        return call(repair_brief, subject.schema)
+    except ValueError:
+        return {"blocked": f"name {taken!r} collides; repair ask failed"}
 
 
 def write_corpus(role: str, frame: str, band: str, fresh: "dict[str, dict]", *,
@@ -289,7 +372,7 @@ def main(argv=None) -> int:
         persisted[entry["id"]] = entry
 
     fresh, blocked = run_draws(plan, ledger=ledger, call=live_answer_caller(config),
-                               persist=persist)
+                               persist=persist, corpus_names=load_corpus_names())
     print(json.dumps({"planned": len(plan.subjects), "fresh": len(fresh),
                       "blocked": len(blocked), "blockedReasons": blocked},
                      ensure_ascii=False, indent=2))

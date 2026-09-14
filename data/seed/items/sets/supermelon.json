@@ -25,7 +25,7 @@
       "id": "set.supermelon-001",
       "nameKey": "set.fruit-salvo-launcher",
       "name": "Fruit Salvo Launcher",
-      "themeKey": "demon.supermelon",
+      "themeKey": "creature.supermelon",
       "members": [
         {
           "role": "armament-primary",

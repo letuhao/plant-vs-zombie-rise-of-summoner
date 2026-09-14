@@ -25,7 +25,7 @@
       "id": "set.xxspot-001",
       "nameKey": "set.rotting-planter",
       "name": "Rotting Planter",
-      "themeKey": "demon.xxspot",
+      "themeKey": "creature.xxspot",
       "members": [
         {
           "role": "armament-primary",

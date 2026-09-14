@@ -25,7 +25,7 @@
       "id": "set.potatopumpkin-001",
       "nameKey": "set.bursting-gourd",
       "name": "Bursting Gourd",
-      "themeKey": "demon.potatopumpkin",
+      "themeKey": "creature.potatopumpkin",
       "members": [
         {
           "role": "armament-primary",

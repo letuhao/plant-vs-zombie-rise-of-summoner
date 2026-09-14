@@ -25,7 +25,7 @@
       "id": "set.obsidianwallnut-001",
       "nameKey": "set.black-steel-spore-nut",
       "name": "Black Steel Spore-Nut",
-      "themeKey": "demon.obsidianwallnut",
+      "themeKey": "creature.obsidianwallnut",
       "members": [
         {
           "role": "armament-primary",

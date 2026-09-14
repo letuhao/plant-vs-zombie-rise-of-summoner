@@ -69,7 +69,7 @@ def resolve_tree_identities(
     """
     from ....workflow.graphs.tree_identity import build_tree_identity_graph, state_for_tree_identity
     from ....workflow.runner import run_many
-    from ...demons.anchor.vote import resolve_vote
+    from ...creatures.anchor.vote import resolve_vote
 
     persisted: "dict[str, dict]" = {}
     app = build_tree_identity_graph(

@@ -8,7 +8,7 @@ decision (`ssot-power-scale.md` §5.3's caveat applies to all of them).
 Module id `encounter-generator` in the [party-dungeon map](../party-dungeon-map.md) (row 6, first of
 wave 2). Depends on `difficulty-ladder` (`RoomTheta.Compose`, `RungDef`), `dungeon-seed-contract` (the
 encounter anchor, §1.6), `dungeon-registries` (`encounter.v1.json`, `raid.modes.*`, `difficulty.rungs[]`)
-and `delve-graph-roll` (`Facts`: `kind`, `archetypeId → encounterRef`). **External:** demon-seed module 7
+and `delve-graph-roll` (`Facts`: `kind`, `archetypeId → encounterRef`). **External:** creature-seed module 7
 `threat-audit` (gate: before this module ships — map §External dependencies row 1). **Consumed later,
 never gating:** base-defense `siege-board` + `board-render` (A10 — v1 ships 1-D rank, R1) and
 `siege-waves` roster-add / `combatant-kind` (summoner and fixture bosses). Ideal: §4.4, §4.8, §11.4, §8 box
@@ -23,7 +23,7 @@ with one difference that is the whole point: every enemy's level is **`θ_enemy 
 the sum nothing computes today (`WaveCatalog.cs:140` sets `Level = theta` from a content constant;
 `SpeciesExpander.cs:66-67` adds the offset to a *species base*, never to a room). The player's half is not
 this module's: the delve host builds it as `WebMatchService.BuildSquad` does (`WebMatchService.cs:390-410`),
-one setup per standing demon across every party at the rendezvous. Success looks like: a `fight` room on a
+one setup per standing creature across every party at the rendezvous. Success looks like: a `fight` room on a
 `rich` domain at `hard` resolves raiders at `θ = 83` from a `pack` anchor, byte-identical on replay; a boss
 room at 4 parties fields the domain's tyrant at `θ = 127` with a retinue, a wider `W` and a shield pool, and
 lands inside `boss.fightLengthTargetRounds` over a 32-seed sweep; and every battle golden and expedition
@@ -47,7 +47,7 @@ hash is untouched, because this module emits setups only for delve content.
   here; enemy *count* is encounter design and does not."* This module owns count, retinue, `W`, kit tiers
   and the shield share; it owns no curve.
 - **Ideal §11.4:** *"A slot is a filter tuple over anchor ordinals, never a new noun"*; *"Boss is a role,
-  not a species field"* — `DemonDeployMode.HypnoAlly` (`DemonRarity.cs:41-45`) is a lawn expression, never
+  not a species field"* — `CreatureDeployMode.HypnoAlly` (`CreatureRarity.cs:41-45`) is a lawn expression, never
   read here; *"Elite = one slot with an affix roll … through `Instantiator.TryInstantiate` — the item roll,
   unchanged."* **S2-13:** *"An encounter is a filter over the species corpus, never a list of species."*
 - **Determinism (`BattleModels.cs:261-266`):** *"the pattern is part of the SETUP, resolved before the battle
@@ -69,7 +69,7 @@ and passes `none`); the **`RaidMode`** row (`raid.modes.*.{parties,squadSlots,bo
 as `ConcreteSpecies` rows (`ConcreteSpecies.cs:13-68` — `Theta`, `RangeCells :34`, `ElementPrimary`,
 `TraitPool`, `AttackIntervalMs`) joined to their anchor ordinals (`aptitudePrimary`, `reach`,
 `targetPreference`, `threatBand`, `attackTempo` — the fields `aerial-flora.json` carries); the domain's
-`bossSpeciesRef`; `EncounterTuning`; `DemonThreatTuning` (`DemonThreatTuning.cs:12-13`).
+`bossSpeciesRef`; `EncounterTuning`; `CreatureThreatTuning` (`CreatureThreatTuning.cs:12-13`).
 
 Output `EncounterHalf { Enemies, int W, Warnings, Cell }` — `Cell = (postureMultiset, elementSpread,
 formation)` for §8's metric. `W` is returned, never serialized (a `W` on `BattleSetup` moves all four
@@ -87,7 +87,7 @@ the name `delve-graph-roll` reserved and never draws.
    uniformly; `rainbow` → all six; under `climate = none` all six with no off-climate weight. Element
    weight per candidate: 1000 on climate, `spread.*.offClimateMilli` off climate inside the set, 0 outside.
 2. **Filter** — no draw. Candidates = rows where **`threatBand` is present** and its rung ∈
-   `[threatWindow.floorRung, ceilRung]` (`demon-threat.v1.json` rungs 1–10); **posture** = `roster.json`'s
+   `[threatWindow.floorRung, ceilRung]` (`creature-threat.v1.json` rungs 1–10); **posture** = `roster.json`'s
    `posture` for `aptitudePrimary` (`roster.json:11-22`, case-insensitive — anchors write `Bastion`, the
    roster `bastion`; the file's own `posture` is the `_derived` echo and is never trusted); `reach`,
    `targetPreference`, `tempo` (→ `attackTempo`) match unless the slot says `none`; element in the set.
@@ -106,14 +106,14 @@ the name `delve-graph-roll` reserved and never draws.
 ### 3. Stats — the Θ sum, and the first place it exists
 
 ```text
-θ_enemy = RoomTheta.Theta + DemonThreatTuning.OffsetFor(anchor.threatBand)     // int + int, checked
+θ_enemy = RoomTheta.Theta + CreatureThreatTuning.OffsetFor(anchor.threatBand)     // int + int, checked
 MaxHp   = BattleRuleset.BaseHp(θ_enemy)      Atk = BaseAtk(θ_enemy)      Defense = BaseDefense(θ_enemy)
 ```
 
 `BaseHp/Atk/Defense` (`BattleModels.cs:218-221`) are the only three reads that touch the ladder; the contest
 baselines (`:239-242`) read `Level` inside `BattleStatComposer`, so `Level = θ_enemy` is also what makes a
 `hard`-rung raider hit the party at the ladder spec's §7 rates. `OffsetFor` is called **only after** step 2
-has refused a null `threatBand`; its `inferredDefaultRung` fallback (`DemonThreatTuning.cs:27-29`, rung 4
+has refused a null `threatBand`; its `inferredDefaultRung` fallback (`CreatureThreatTuning.cs:27-29`, rung 4
 `raider` +13) is a species-generator convenience this module never reaches. Worked rows (ladder spec §1):
 `Θ_room 70` + raider → `θ 83`, `MaxHp 3,616`; boss `Θ_room 100` + tyrant +27 → `θ 127`, `MaxHp 6,608`. Each
 setup carries `SpeciesId`, `TypeId`, `ElementPrimary/Secondary`, `TraitIds = TraitPool`, `AttackIntervalMs`
@@ -380,12 +380,12 @@ static IReadOnlyList<ConcreteAnchor> Candidates(
     return list;
 }
 
-static BattleActorSetup Emit(ConcreteAnchor a, int roomTheta, DemonThreatTuning threat, int n)
+static BattleActorSetup Emit(ConcreteAnchor a, int roomTheta, CreatureThreatTuning threat, int n)
 {
     var theta = checked(roomTheta + threat.OffsetFor(a.ThreatBand));      // Θ_room + thetaOffset — the sum
     return new()
     {
-        Key = $"wave:{n}", Side = "wave", SpeciesId = a.SpeciesId, TypeId = a.DemonTypeId, Level = theta,
+        Key = $"wave:{n}", Side = "wave", SpeciesId = a.SpeciesId, TypeId = a.CreatureTypeId, Level = theta,
         ElementPrimary = a.ElementPrimary, ElementSecondary = a.ElementSecondary, TraitIds = a.TraitPool,
         MaxHp = BattleRuleset.BaseHp(theta), Atk = BattleRuleset.BaseAtk(theta),
         Defense = BattleRuleset.BaseDefense(theta), AttackIntervalMs = a.AttackIntervalMs
@@ -453,7 +453,7 @@ location row, §10 unchanged. 7. `audit-magic-numbers.py --domain dungeon` adds 
 
 ```
 [x] Subsystems: battle kernel (setup, SideIndex, W, innate shields), power ladder (Θ sum, P(Θ) read),
-    shield system, effect atoms (containers, Instantiator), demon species corpus, party dungeon.
+    shield system, effect atoms (containers, Instantiator), creature species corpus, party dungeon.
 [x] Read this session, in order: party-dungeon-map.md (row 6, external deps, G2/G4); the five approved
     wave-1 specs; ideal §4.4, §4.8, §11.4 in full, §8 box 3, §10, §11.10 R1/R9; audit §1(d), S1-7, S2-5,
     S2-9, §9; 08-endless-scaling §1.2; spec-expeditions.md (format); decisions.md:42 (amended clause present).
@@ -463,8 +463,8 @@ location row, §10 unchanged. 7. `audit-magic-numbers.py --domain dungeon` adds 
     is :273 (not :220); BattleEngine adjacency is :598-609 (not :573-576), the W/slots read :401 and the
     PerSide economy key :386-387 (not :357-358); BattleRunState materialises Actors at :204-206 (not
     :182-184), BindContainers is :426 (grant block :445), PositionOf is :474 with its null-board comment at :459-461 (not
-    :428); TraitBattleMath is inside TraitBattleCatalog.cs :62-72 (no separate file); DemonThreatTuning.cs is
-    under Demons/Generation/; ZombossPatterns' nine entries are :33-77 (the ideal's :74-117 is stale); the
+    :428); TraitBattleMath is inside TraitBattleCatalog.cs :62-72 (no separate file); CreatureThreatTuning.cs is
+    under Creatures/Generation/; ZombossPatterns' nine entries are :33-77 (the ideal's :74-117 is stale); the
     species _index.json is a speciesId → file map (840 keys), so anchor counts came from the 503 species
     files (841 anchors).
 [x] Verified against CODE, not comments: OffsetFor's fallback body; ShieldMath.MaxInput's derivation and the

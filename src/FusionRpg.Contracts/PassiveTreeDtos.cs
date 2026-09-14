@@ -184,3 +184,19 @@ public sealed class PreviewTreeStateRequest
     [JsonPropertyName("nodes")] public Dictionary<string, long>? Nodes { get; set; }
     [JsonPropertyName("aptitudeDelta")] public Dictionary<string, long>? AptitudeDelta { get; set; }
 }
+
+/// <summary>
+/// lawn-tree-hydrate (T13) — the wire twin of <c>FusionRpg.Core.Stats.Derived.Subsystems.
+/// BoundDerivedAtom</c>. A plain field-for-field mirror (op as its enum name string, e.g. "Flat"),
+/// used only by <c>GET /api/passive-tree/bound-atoms/{playerId}</c> so the Injector can fan the
+/// SAME commander-scope shared-tree atoms <c>TreeBoundAtoms.ForPlayer</c> already gives the Server
+/// sheet into its own Hot ActorHub, without duplicating the SQL-backed resolve (tree state/catalog/
+/// allocation reads) client-side — the Injector has no store, only this HTTP round trip.
+/// </summary>
+public sealed class BoundDerivedAtomDto
+{
+    [JsonPropertyName("channel")] public string Channel { get; set; } = "";
+    [JsonPropertyName("op")] public string Op { get; set; } = "";
+    [JsonPropertyName("amount")] public double Amount { get; set; }
+    [JsonPropertyName("sourceId")] public string SourceId { get; set; } = "";
+}

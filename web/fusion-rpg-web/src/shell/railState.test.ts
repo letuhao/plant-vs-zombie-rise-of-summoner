@@ -35,10 +35,10 @@ describe("STAGE_IDS — spec-delve-stage.md §4: the count assertion becomes a p
 const allLocked: RailUnlockInputs = {
   currentStageId: "sanctum",
   hasCompletedARun: false,
-  hasAnyDemon: false,
+  hasAnyCreature: false,
   hasAnyContract: false,
   hasAnyRelic: false,
-  hasAnyBoundDemon: false,
+  hasAnyBoundCreature: false,
   returnedExpeditionCount: 0,
   unreadResultCount: 0
 };
@@ -89,9 +89,9 @@ describe("deriveRailEntries — GG-44, renders from state", () => {
     );
   });
 
-  it("Fusion unlocks once the player has a demon to fuse (T15)", () => {
+  it("Fusion unlocks once the player has a creature to fuse (T15)", () => {
     expect(deriveRailEntries(allLocked).find((e) => e.id === "fusion")!.state).toBe("locked");
-    const entries = deriveRailEntries({ ...allLocked, hasAnyDemon: true });
+    const entries = deriveRailEntries({ ...allLocked, hasAnyCreature: true });
     expect(entries.find((e) => e.id === "fusion")!.state).toBe("available");
   });
 
@@ -100,14 +100,14 @@ describe("deriveRailEntries — GG-44, renders from state", () => {
     expect(entries.find((e) => e.id === "pacts")!.state).toBe("available");
   });
 
-  it("Expeditions unlocks once the player has a bound demon to field (T17)", () => {
+  it("Expeditions unlocks once the player has a bound creature to field (T17)", () => {
     expect(deriveRailEntries(allLocked).find((e) => e.id === "expeditions")!.state).toBe("locked");
-    const entries = deriveRailEntries({ ...allLocked, hasAnyBoundDemon: true });
+    const entries = deriveRailEntries({ ...allLocked, hasAnyBoundCreature: true });
     expect(entries.find((e) => e.id === "expeditions")!.state).toBe("available");
   });
 
   it("Expeditions badges with the returned-but-uncollected count once unlocked", () => {
-    const entries = deriveRailEntries({ ...allLocked, hasAnyBoundDemon: true, returnedExpeditionCount: 2 });
+    const entries = deriveRailEntries({ ...allLocked, hasAnyBoundCreature: true, returnedExpeditionCount: 2 });
     const expeditions = entries.find((e) => e.id === "expeditions")!;
     expect(expeditions.state).toBe("badged");
     expect(expeditions.badgeCount).toBe(2);
