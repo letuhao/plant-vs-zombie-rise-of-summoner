@@ -58,6 +58,11 @@ def setup(scenario="lab-overlay", level=1, timeout=60, transport=None):
         "levelType": payload.get("levelType"),
         "targetPtr": payload.get("targetPtr"),
         "plantPtr": payload.get("plantPtr"),
+        # Real Unity plant/zombie counts + liveState, read by the server the same request
+        # (debug.game-state) -- so a caller sees whether the board is ACTUALLY live without a
+        # separate debug_game_state round trip. None when that read itself failed/timed out;
+        # never a substitute for calling debug_game_state again if this comes back null.
+        "liveEntities": payload.get("liveEntities"),
         "note": payload.get("note"),
         "scope": result["scope"],
     }

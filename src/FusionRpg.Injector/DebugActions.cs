@@ -1462,10 +1462,14 @@ public static class DebugActions
     /// engine (see force-debug-enter-level memory). The fix attempt was <c>UIMgr.BackToMenu()</c>
     /// (already Harmony-hooked, emits <c>menu.enter</c>) -- proven live to leave the dead board, but it
     /// landed on the game's PREVIOUS menu layer (Challenge Mode select), not the true main menu: this
-    /// game's menu stack is not flat, so one guessed method is not enough. Exposing every real
-    /// <c>UIMgr</c> static navigation method by name here lets a caller find the actual working
-    /// sequence live instead of hard-coding a single guess that only holds for one menu depth.
-    /// Never fabricates -- every action below is the literal real static method call.</summary>
+    /// game's menu stack is not flat, so one guessed method was not enough on its own. Exposing every
+    /// real <c>UIMgr</c> static navigation method by name here lets a caller reach any specific menu
+    /// directly. Never fabricates -- every action below is the literal real static method call.
+    ///
+    /// <para><b>2026-09-15 fix:</b> "back-to-menu" itself now chains <c>EnterMainMenu()</c> after
+    /// <c>BackToMenu()</c> (see that case) instead of leaving the two-call recovery dance to every
+    /// caller -- an action named "back to menu" that silently lands one layer short of the menu is a
+    /// defect in the action, not a caller-side workaround to keep re-deriving.</para></summary>
     public static void UiNav(JsonElement p)
     {
         var action = Str(p, "action") ?? "";
@@ -1474,7 +1478,20 @@ public static class DebugActions
         {
             switch (action)
             {
-                case "back-to-menu": UIMgr.BackToMenu(); break;
+                case "back-to-menu":
+                    UIMgr.BackToMenu();
+                    // 2026-09-15 fix: BackToMenu() alone only pops one menu layer -- proven live,
+                    // repeatedly, that it lands on the game's PREVIOUS layer (Challenge Mode
+                    // select), never the true main menu (see this method's own class doc). Every
+                    // caller this session that wanted the true main menu had to replay the same
+                    // two-call dance by hand (back-to-menu, then a SEPARATE enter-main-menu) --
+                    // that is not a caller decision, it is this action under-delivering on its own
+                    // name. EnterMainMenu() is the same static entry point "enter-main-menu" already
+                    // calls standalone, proven safe to call unconditionally from any menu depth
+                    // (used successfully as its own action many times this session); chaining it
+                    // here makes "back-to-menu" actually mean what it says.
+                    UIMgr.EnterMainMenu();
+                    break;
                 case "enter-main-menu": UIMgr.EnterMainMenu(); break;
                 case "back-to-game": UIMgr.BackToGame(); break;
                 case "enter-pause-menu": UIMgr.EnterPauseMenu(); break;

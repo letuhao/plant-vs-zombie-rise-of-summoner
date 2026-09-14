@@ -15,7 +15,10 @@ def _ok_stub(method, url, body, params=None):
     return {"status": 200, "body": {"ok": True, "entered": True,
                                    "levelType": "adventure",
                                    "targetPtr": "0xabc",
-                                   "plantPtr": "0xdef"}}
+                                   "plantPtr": "0xdef",
+                                   "liveEntities": {"plantCount": 1, "zombieCount": 1,
+                                                    "liveState": "InMatch",
+                                                    "phaseMismatch": False}}}
 
 
 def test_healthy_board_returns_ptrs():
@@ -24,6 +27,29 @@ def test_healthy_board_returns_ptrs():
     assert out["targetPtr"] == "0xabc"
     assert out["plantPtr"] == "0xdef"
     assert out["scope"] == "game-injector-debug"
+
+
+def test_healthy_board_passes_through_live_entities():
+    # The server folds a real debug.game-state read into quick-start's own response so a
+    # caller sees actual plant/zombie counts without a separate debug_game_state round trip
+    # (2026-09-15: every live probe this session needed that as an extra call because
+    # entered:true/ready:true alone could not tell a stale seed-picker from a live board).
+    out = lawn.setup(transport=_ok_stub)
+    assert out["liveEntities"] == {"plantCount": 1, "zombieCount": 1,
+                                    "liveState": "InMatch", "phaseMismatch": False}
+
+
+def test_missing_live_entities_reads_as_none_not_a_failure():
+    def send(method, url, body, params=None):
+        return {"status": 200, "body": {"ok": True, "entered": True,
+                                        "levelType": "adventure",
+                                        "targetPtr": "0xabc", "plantPtr": "0xdef"}}
+        # no liveEntities key at all -- the server-side game-state read can time out/fail
+        # without failing the whole quick-start; the adapter must degrade to None, not KeyError.
+
+    out = lawn.setup(transport=send)
+    assert out["ready"] is True
+    assert out["liveEntities"] is None
 
 
 def test_injector_down_returns_not_ready_with_fix():
