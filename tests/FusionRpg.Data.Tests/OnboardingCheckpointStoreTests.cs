@@ -51,8 +51,7 @@ public sealed class OnboardingCheckpointStoreTests : IDisposable
         Assert.Equal(2, ack.Row!.Revision);
         Assert.Empty(_store.ListOnboardingCheckpoints(player.Id)!);
 
-        var reopened = new RpgStore(_dir);
-        reopened.Init();
+        using var reopened = _testStore.Reopen();
         var story = Assert.Single(reopened.ListOnboardingStories(player.Id)!);
         Assert.Equal("acknowledged", story.State);
         Assert.Equal("completed", story.Outcome);

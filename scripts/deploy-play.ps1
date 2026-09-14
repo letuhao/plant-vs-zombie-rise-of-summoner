@@ -225,7 +225,7 @@ if ($QuickTest) {
     Write-Warning "    proof, and before commit/merge."
 } else {
     Write-Host "==> Default test profile (test-fast.ps1)"
-    & (Join-Path $Root "scripts\test-fast.ps1")
+    & (Join-Path $Root "scripts\test-fast.ps1") -AllDefault
     if ($LASTEXITCODE -ne 0) { throw "default test profile failed — see output above" }
 }
 

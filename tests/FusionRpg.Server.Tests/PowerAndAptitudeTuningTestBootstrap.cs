@@ -47,6 +47,12 @@ internal static class PowerAndAptitudeTuningTestBootstrap
         // policies too. Configure them once from the current shipped tuning files so test order
         // cannot turn a missing dependency into a misleading HTTP 500 response.
         var tuningDir = Path.Combine(FindRepoRoot(), "data", "tuning");
+        // Creature minting now auto-binds a contract and therefore reads ContractPolicy before the
+        // atom-push fixture reaches its subject. Keep this assembly-wide prerequisite here so test
+        // order cannot decide whether a server test has a configured contract capacity.
+        FusionRpg.Core.Creatures.Contracts.ContractPolicy.Configure(
+            FusionRpg.Core.Creatures.Contracts.ContractTuningLoader.Parse(
+                File.ReadAllText(Path.Combine(tuningDir, "contracts.v1.json"))));
         FusionRpg.Core.Battle.Board.BattleBoardTuningPolicy.Configure(
             FusionRpg.Core.Battle.Board.BattleBoardTuningLoader.Parse(
                 File.ReadAllText(Path.Combine(tuningDir, "battle-board.v1.json"))));
