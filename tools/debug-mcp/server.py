@@ -20,6 +20,7 @@ from tools.debug_lawn_setup import setup as debug_lawn_setup_impl
 from tools.debug_ui_nav import nav as debug_ui_nav_impl, ACTIONS as _UI_NAV_ACTIONS
 from tools.debug_restart_game import restart as debug_restart_game_impl
 from tools.debug_game_state import state as debug_game_state_impl
+from tools.debug_screenshot import screenshot as debug_screenshot_impl
 
 mcp = FastMCP("debug-mcp")
 
@@ -105,6 +106,19 @@ def debug_restart_game(timeout_sec: int = 120) -> dict:
 def debug_game_state() -> dict:
     """Scope: game-injector-debug. Synchronous read of live Unity objects, no event-log history."""
     return debug_game_state_impl()
+
+
+@mcp.tool(description=(
+    "Capture the live Unity game frame and return it as base64 PNG (Playwright "
+    "browser_screenshot analogue): trigger POST /api/debug/screenshot, poll for "
+    "debug.screenshot.ready, fetch the stored frame. Shows what the engine "
+    "renders -- proves nothing about the server. Optional save_to writes the "
+    "PNG to disk as well."
+))
+def debug_screenshot(tag: str = "probe", timeout: int = 30,
+                     save_to: Optional[str] = None) -> dict:
+    """Scope: game-injector-debug. Adapter over the screenshot endpoints only."""
+    return debug_screenshot_impl(tag=tag, timeout=timeout, save_to=save_to)
 
 
 def resolve_transport(argv=None):
