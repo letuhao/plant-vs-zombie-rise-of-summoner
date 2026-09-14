@@ -52,6 +52,9 @@ public static class GameHooks
         // lawn-combat-wire T10: a ptr queued for a basic-attack grant bind in a match that ended
         // before its next drain must not bind against the NEXT match's board.
         try { Effects.LawnBasicAttackGrantBinder.ClearPending(); } catch { }
+        // lawn-combat-wire T12b: drop this match's regen-telemetry baseline -- the pools themselves
+        // are already dropped by InjectorEntityRegistry.Clear() below.
+        try { Effects.LawnBasicAttackCostCharger.ClearMatchState(); } catch { }
         Effects.InjectorEntityRegistry.Clear();
         Effects.InjectorBoardSnapshot.Invalidate();
         Applied.Clear();

@@ -71,7 +71,14 @@ public static class CheatState
         // IActorStatSubsystem so a status's own `stat.<combat.*|status.*>.<op>` writes reach the
         // composed value instead of landing in the primary bag no subsystem reads. Additive next to
         // boundDerivedAtoms above — same opt-in shape, same fully-qualified-on-purpose reason.
-        statusDerivedMods: FusionRpg.Injector.Stats.StatusDerivedMods.For);
+        statusDerivedMods: FusionRpg.Injector.Stats.StatusDerivedMods.For,
+        // lawn-combat-wire T12a (spec-basic-attack-cost.md wire 2): the injector's Hub never opted
+        // into ResourceBaselineSubsystem before this line, so `resource.max.*`/`resource.regen.*`
+        // resolved to 0 for every lawn actor -- indistinguishable from this whole feature's own bug.
+        // Sole prior `true` caller was UniqueActorHubCompose.cs (Server's cold /sheet compose); this
+        // is the injector's own opt-in, from the SAME already-shipped ResourceBaselineSubsystem/
+        // BattleRuleset.BaseResourceMax/BaseResourceRegen -- never a second seed mechanism.
+        seedResourceBaseline: true);
 
     /// <summary>aura-skill T5 (W1): cached commander-scope allocation — <see cref="ActorHub"/>'s
     /// hot-path <c>aptitudeAllocation</c> delegate reads only this cache, never the server

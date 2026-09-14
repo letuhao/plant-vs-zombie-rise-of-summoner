@@ -68,6 +68,14 @@ public static class KernelDriveHost
     /// interprets them, which is what keeps it testable with no game attached.</summary>
     const int KindDotPulse = 1;
     const int KindShieldUpkeep = 2;
+    /// <summary>`lawn-combat-wire` T12b (spec-basic-attack-cost.md, wire 3: "regen as a third kernel
+    /// kind" — the inert line this wire fixes was exactly "KernelDriveHost.cs:69-70 has KindDotPulse
+    /// and KindShieldUpkeep; regen is not among them"). NOT load-bearing for cost-charging
+    /// correctness — <c>ActorResourcePools</c> already resolves regen lazily off
+    /// <c>NowTicks</c> with no periodic tick required. This kind exists to give the lawn's own regen
+    /// a real, bounded settle point on the SAME 100 ms grid DoT/shield upkeep already use, producing
+    /// the observer's (T0) "regen accrued" telemetry — see <c>LawnBasicAttackCostCharger.KernelTick</c>.</summary>
+    const int KindResourceRegen = 3;
 
     /// <summary>Kill switch mirroring <c>FUSIONRPG_EVENT_V2</c>: <c>FUSIONRPG_KERNEL_GRIDS=0</c> keeps
     /// the legacy accumulators driving the two grids, exactly as before T13.</summary>
@@ -114,6 +122,10 @@ public static class KernelDriveHost
             // final frame's damage.
             _queue.Schedule(UpkeepPeriodTicks, "match", KindDotPulse, 0);
             _queue.Schedule(UpkeepPeriodTicks, "match", KindShieldUpkeep, 0);
+            // T12b: scheduled unconditionally (matching the two kinds above) -- Dispatch's own kill
+            // switch check (LawnBasicAttackFeature.Enabled) is what keeps this a no-op while the
+            // feature is off, exactly like GridsOnKernel already gates the two existing kinds below.
+            _queue.Schedule(UpkeepPeriodTicks, "match", KindResourceRegen, 0);
         }
     }
 
@@ -191,6 +203,17 @@ public static class KernelDriveHost
         // carry-corrected clock exists to prevent.
         var next = e.DueTick + UpkeepPeriodTicks;
         lock (Gate) _queue?.Schedule(next, e.OwnerKey, e.Kind, e.Tag);
+
+        // T12b: the regen kind has its OWN kill switch (LawnBasicAttackFeature, checked inside
+        // LawnBasicAttackCostCharger.KernelTick itself) -- it must not be gated by GridsOnKernel below,
+        // which is FUSIONRPG_KERNEL_GRIDS, an unrelated DoT/shield-grid toggle. Dispatched before that
+        // check returns, and wrapped the same way the two existing kinds are: a throwing pulse must
+        // not kill the drive.
+        if (e.Kind == KindResourceRegen)
+        {
+            try { LawnBasicAttackCostCharger.KernelTick(); } catch { }
+            return;
+        }
 
         if (!GridsOnKernel) return;   // kill switch: legacy accumulators are driving instead
 

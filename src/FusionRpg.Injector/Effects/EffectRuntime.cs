@@ -341,6 +341,10 @@ public static class EffectRuntime
         using var _perf = PerfProbe.Measure(PerfSection.EffectOnCapture);
         Ensure();
         if (!Bag.HasAnyGrant() && !(Bag.Funnel?.HasPending ?? false)) return;
+        // lawn-combat-wire T12 (spec-basic-attack-cost.md, D2/D6: "no resource, no [RPG] trigger"):
+        // untouched passthrough for every trigger but OnDamageDealt, and for OnDamageDealt whenever the
+        // feature's kill switch is off -- see LawnBasicAttackCostCharger.ShouldApplyRider's own doc.
+        if (!LawnBasicAttackCostCharger.ShouldApplyRider(ev)) return;
         try
         {
             // BEFORE the bag: EffectBag.OnEvent flushes the Funnel inside itself, so a Secondary

@@ -187,6 +187,14 @@ public static class RpgHost
         FusionRpg.Core.Actions.ActionTimingPolicy.Configure(
             FusionRpg.Core.Actions.ActionTimingTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "action-timing.v1.json"))));
+        // lawn-combat-wire T12a (spec-basic-attack-cost.md wire 2): without this, ResourceBaselineSubsystem
+        // (now registered on CheatState.ActorHub) reads BattleRuleset.ResourceTuning before Configure has
+        // ever run, throwing on the injector's very first resource-max resolve. Same file, same call
+        // Server/Program.cs already makes for the identical reason -- one shared tuning read, no second
+        // copy of the arithmetic. v2 (not v1): the real, non-zero stamina regen share T11 authored.
+        FusionRpg.Core.Battle.BattleRuleset.ConfigureResources(
+            FusionRpg.Core.Battle.BattleResourceTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "battle-resources.v2.json"))));
 
         IsInitialized = true;
     }
