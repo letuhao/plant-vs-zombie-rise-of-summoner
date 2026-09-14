@@ -75,7 +75,7 @@ public static class KernelDriveHost
     /// <c>NowTicks</c> with no periodic tick required. This kind exists to give the lawn's own regen
     /// a real, bounded settle point on the SAME 100 ms grid DoT/shield upkeep already use, producing
     /// the observer's (T0) "regen accrued" telemetry — see <c>LawnBasicAttackCostCharger.KernelTick</c>.</summary>
-    const int KindResourceRegen = 3;
+    const int KindResourceTick = 3;
 
     /// <summary>Kill switch mirroring <c>FUSIONRPG_EVENT_V2</c>: <c>FUSIONRPG_KERNEL_GRIDS=0</c> keeps
     /// the legacy accumulators driving the two grids, exactly as before T13.</summary>
@@ -125,7 +125,7 @@ public static class KernelDriveHost
             // T12b: scheduled unconditionally (matching the two kinds above) -- Dispatch's own kill
             // switch check (LawnBasicAttackFeature.Enabled) is what keeps this a no-op while the
             // feature is off, exactly like GridsOnKernel already gates the two existing kinds below.
-            _queue.Schedule(UpkeepPeriodTicks, "match", KindResourceRegen, 0);
+            _queue.Schedule(UpkeepPeriodTicks, "match", KindResourceTick, 0);
         }
     }
 
@@ -209,7 +209,7 @@ public static class KernelDriveHost
         // which is FUSIONRPG_KERNEL_GRIDS, an unrelated DoT/shield-grid toggle. Dispatched before that
         // check returns, and wrapped the same way the two existing kinds are: a throwing pulse must
         // not kill the drive.
-        if (e.Kind == KindResourceRegen)
+        if (e.Kind == KindResourceTick)
         {
             try { LawnBasicAttackCostCharger.KernelTick(); } catch { }
             return;
