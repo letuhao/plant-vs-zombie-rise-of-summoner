@@ -28,6 +28,7 @@
     "tools/debug-mcp/tests/test_http_mode.py"
   ],
   "started": "2026-09-14T00:00:00Z",
-  "status": "active",
-  "scopeNote": "Worktree session (owner-authorized full build + live run + MCP tool 2026-09-14). Task 4 built in-house: adapter + tests + registration + README + count pin, all verified (75/75) and proven live (mcplive3 menu frame opened). Main tree verified clean before writing; merge coordination with debug-mcp-live-readiness-20260914 is owner-side. All other regions disjoint by construction. Merge is owner-side."
+  "status": "merged",
+  "closed": "2026-09-14 — all 4 slices built, verified, proven live (menu frame opened via curl + MCP), committed as 5 worktree commits + record, merged to features/derived-stat-extension as 4abe03bd. No push (owner-only).",
+  "scopeNote": "Worktree session (owner-authorized full build + live run + MCP tool 2026-09-14). Done."
 }
