@@ -500,23 +500,53 @@ call site · **Scope:** L
 **Description:** Run the real proof on a real board, **outside a debug session**. Produces no source.
 
 **Acceptance — seven proofs, each with its falsifier:**
-- [ ] **Not inside a debug session** — confirmed, not assumed (a stamped `scenarioId` is the tell).
-- [ ] 1 Attribution: recorded attacker is the firing plant, and its composed power differs from a
-      weaker shooter's.
+- [x] **Not inside a debug session** — confirmed, not assumed (a stamped `scenarioId` is the tell).
+      `EventDrainActiveProvenThroughout=True` on every run since the fifth-defect fix (2026-09-15),
+      `DebugRuntime.SessionActive=false` checked both injector- and server-side, `debug_call
+      /session/end` issued before every observed window. Real, repeated, not a one-off.
+- [ ] 1 Attribution: **first half done** — the recorded attacker is provably the firing plant's own
+      ptr (`swing=<plantPtr>:N` in the observer sample, not the bullet's), fixed and live-proven
+      2026-09-15 (the fifth-defect fix above). **Second half not done**: "composed power differs from
+      a weaker shooter's" needs two live runs with different `derivedProfile` values on the plant
+      (`debug.spawn-plant`'s own param, already used by this scenario) against the same defender,
+      comparing `rpgDelta` magnitude. Not attempted this session.
 - [ ] 2 Element: **one species, two element assignments**, against a defender proven **non-Neutral**
       and Strong to one / Weak to the other, with the expected ratio computed from
       `stats.v1.json:10 matchupShareK` **before** the run. Falsifier: the same species against a
-      Neutral defender must produce **equal** damage.
-- [ ] 3 One swing, one trigger — N victims still each take damage.
+      Neutral defender must produce **equal** damage. *Not attempted — every run so far used the
+      scenario's default Earth/Earth (Same matchup) pairing, real numbers (`rpgDelta=-53`/`-33` etc.,
+      2026-09-15) but not the two-assignment comparison this proof specifies.*
+- [ ] 3 One swing, one trigger — N victims still each take damage. *Partially evidenced: every swing
+      this session produced exactly one trigger (2026-09-15, `actionTriggers` now tracks real swings
+      1:1). Not evidenced: the "N victims" half needs a piercing/multi-target weapon (e.g. a
+      Threepeater-shaped bullet hitting several zombies in one swing) — every live test so far was
+      single-target.*
 - [ ] 4 Exhausted actor: vanilla number lands, no delta; after regen **the same ptr** contributes again
-      (never a respawn — pools are full at spawn).
-- [ ] 5 Stat bleed intact while exhausted.
-- [ ] 6 A plain PvZ-spawned creature gets a rider.
-- [ ] 7 No double-kill: one `die` event per death.
+      (never a respawn — pools are full at spawn). *A real exhaustion event fired unforced
+      (2026-09-15, `exhaustionEvents=1`), but the plant died to the zombie's own vanilla attack (187
+      dmg vs 300 HP, ~2 hits) before a regen-then-recontribute window could be observed on the same
+      ptr — needs either a longer-lived actor (buffed HP) or a weaker opposing zombie.*
+- [ ] 5 Stat bleed intact while exhausted. *Not attempted — depends on proof 4's own setup.*
+- [ ] 6 A plain PvZ-spawned creature gets a rider. *Not attempted — `lab-overlay` spawns both sides
+      via `debug.spawn-plant`/`debug.spawn-zombie`, never a real wave. Needs a non-`lab-overlay`
+      scenario with waves NOT frozen, or a real Adventure playthrough.*
+- [ ] 7 No double-kill: one `die` event per death. *Supporting evidence only: every `plant.die`/
+      `zombie.die` this session carries a unique `(ptr, lifecycleOccurrence)` pair, no duplicates
+      found (2026-09-15, 17 death events surveyed) — but this was passive observation, not a
+      dedicated falsifier test deliberately trying to trigger a double-kill (e.g. overlapping AOE +
+      basic attack lethal in the same frame).*
 - [ ] **Perf: fresh baseline with the trigger-mask ON.** Ceiling **≤ 6% frame share at 300z**. On
-      breach the feature ships behind the kill switch **defaulted off**.
+      breach the feature ships behind the kill switch **defaulted off**. *Not attempted — every
+      measured `drainTickFrameSharePercent` so far is from a 1v1 lab-overlay board (0.04%-0.33%
+      observed 2026-09-15), nowhere near the 300z ceiling this proof requires.*
 - [ ] Real numbers recorded, never a boolean. An honest FAIL correctly reported is this task
       succeeding.
+
+**Status after the fifth-defect fix (2026-09-15): the blocking defect that made every one of these
+proofs read zero/inert is resolved and live-proven. The task itself is NOT closed** — proof 1 is
+half done, proof 3 is half done, proof 7 has supporting (not dedicated) evidence, and proofs 2/4/5/6
+plus the perf ceiling are not attempted. Each remaining proof is a genuine, separate live-setup task,
+not a rerun of what already ran.
 
 **Every proof above is read from the observer's run file (T0), not from console output, not from a
 worker's report, and not from anyone's eyes.**
