@@ -324,12 +324,28 @@ after fix 3 too. Diagnostic tracing (temporary, reverted — never committed) sh
 combat.hit events occurring at all** in the later live attempts: a zombie walked straight through the
 plant's column without colliding, both left `living:true`, unharmed — a live-environment/scenario
 reproduction problem (repeated `debug.spawn-*`/`debug.lawn/quick-start` calls against one long-running
-game/server session), not yet distinguished from a genuine T12 gating bug. `Bag.HasAnyGrant()` and
-`ShouldApplyRider`'s own gate read correctly by code inspection (global grant existence check, not
-per-owner) and are not obviously at fault. **Next step should be a Core/Injector-level deterministic
-test of `ShouldApplyRider`/`EffectRuntime.OnDrained`'s gating (per this program's own "test the RPG
-server, not the live PvZ engine" standard) instead of chasing this live flakiness further** — a fresh
-game+server restart before the next live attempt is also worth trying first.
+game/server session), not yet distinguished from a genuine T12 gating bug.
+
+**Ruled out by code inspection, not the cause:** `Bag.HasAnyGrant()` and `ShouldApplyRider`'s own gate
+read correctly (a global grant-existence check, not per-owner). `EventDrain`'s swing dedupe
+(`ConsumeSwingTriggerAndRelease`) already has passing Core.Tests coverage proving a single-target hit
+gets `IsFirstOfSwing=true` (`EventDrainTests.cs:611,616`) — the RPG-side gate/dedupe logic is not where
+this is broken; more unit tests there would just re-confirm what already passes.
+
+**A real methodology confound found while investigating:** `debug.lawn/quick-start`'s `lab-overlay`
+scenario itself calls `debug.combat.silence-vanilla` with `plant:true`
+(`DebugScenarios.cs:1093,1132,1170`), which zeroes `A-P-ATK%`/`P-ATK` for every plant on the board —
+**deliberately**, so the scenario's own plant can't one-shot a zombie during setup. That is
+server-side `CheatState`, so it persists across a game-process restart within the same server run.
+Using `lab-overlay`'s own plant for a T12 action-trigger proof is very likely the wrong scenario for
+that specific proof — a plain, non-silenced `debug.spawn-plant`/`debug.spawn-zombie` pair (`typeId:0`
+for both — the field is `typeId`, not `plantType`/`col` alone; `x` positions a zombie, not `col`) is
+the correct live setup for T12/T13, not `lab-overlay`. Not yet re-tried with this corrected setup.
+
+**Next step:** a fresh server restart (clears `CheatState` including any stuck silence-vanilla), then
+re-run live with the corrected non-silenced spawn setup above; if `actionTriggers` still reads 0 with
+confirmed real vanilla hits landing, that is the first point where a genuine T12 defect (not a
+test-setup mistake) would be indicated.
 
 ---
 
