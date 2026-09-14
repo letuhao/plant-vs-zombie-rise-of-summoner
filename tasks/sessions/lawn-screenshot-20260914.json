@@ -1,0 +1,33 @@
+{
+  "session": "lawn-screenshot-20260914",
+  "program": "live-probe",
+  "problem": "Injector lawn screenshot for live testing: build module lawn-screenshot (live-probe #4) — capture (injector) + transport/store (server) + viewer (web) + MCP screenshot tool (Playwright-like). Captures the rendered Unity frame on demand via a Game-Injector-Debug command so live probes no longer depend on eyeballing the game screen.",
+  "mode": "worktree",
+  "branch": "worktree-lawn-screenshot-20260914",
+  "worktree": "D:/Works/source/plant-vs-zombie-rise-of-summoner/.kilo/worktrees/lawn-screenshot-20260914",
+  "paths": [
+    "docs/architecture/live-probe/ideal-lawn-screenshot.md",
+    "docs/architecture/live-probe/spec-lawn-screenshot.md",
+    "docs/architecture/live-probe-map.md",
+    "tasks/live-probe-screenshot-plan.md",
+    "tasks/live-probe-screenshot-todo.md",
+    "tasks/sessions/lawn-screenshot-20260914.json",
+    "src/FusionRpg.Injector/ScreenshotCapture.cs",
+    "src/FusionRpg.Injector/ScreenshotRunner.cs",
+    "src/FusionRpg.Injector/CheatCommandRunner.cs",
+    "src/FusionRpg.Injector/RpgClient.cs",
+    "src/FusionRpg.Injector/Fx/VfxDirector.cs",
+    "src/FusionRpg.Injector.MelonLoader.39/FusionRpg.Injector.MelonLoader.39.csproj",
+    "src/FusionRpg.Server/DebugEndpoints.cs",
+    ".gitignore",
+    "web/fusion-rpg-web/src/**",
+    "tools/debug-mcp/tools/debug_screenshot.py",
+    "tools/debug-mcp/tests/test_debug_screenshot.py",
+    "tools/debug-mcp/server.py",
+    "tools/debug-mcp/README.md",
+    "tools/debug-mcp/tests/test_http_mode.py"
+  ],
+  "started": "2026-09-14T00:00:00Z",
+  "status": "active",
+  "scopeNote": "Worktree session (owner-authorized full build + live run + MCP tool 2026-09-14). Task 4 built in-house: adapter + tests + registration + README + count pin, all verified (75/75) and proven live (mcplive3 menu frame opened). Main tree verified clean before writing; merge coordination with debug-mcp-live-readiness-20260914 is owner-side. All other regions disjoint by construction. Merge is owner-side."
+}
