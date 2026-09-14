@@ -156,6 +156,14 @@ public static class MatchHost
                 if (bound != null)
                 {
                     try { UniqueBoundLoadout.TryApply(bound); } catch { }
+                    // aptitude-sheet AS-1.1b (unique-lawn-wire fix, DESIGN-GATE.md §2.16 3rd instance):
+                    // the bind edge is the one cadence trigger AS-1.1's original 3-trigger set missed --
+                    // it is the edge where RefreshUniqueAptitudesAsync's own Bound-instanceId KEY SET
+                    // moves. Without this, `allocate -> deploy` (allocate before this specimen was ever
+                    // Bound) leaves the cache never keyed for it, so its shares never load -- confirmed
+                    // live 2026-09-13. Fire-and-forget, off the hot path (async HTTP); TriggerBoundAptitudeRefresh
+                    // coalesces concurrent binds into at most one extra round trip rather than one per bind.
+                    try { RpgHost.Client?.TriggerBoundAptitudeRefresh(); } catch { }
                 }
 
                 if (isEnd)
