@@ -372,6 +372,38 @@ spawn to its first attack, to see whether `Bind` is ever called for it at all, a
 grant is later withdrawn. This is the concrete next action for T12/T13/GATE 3 — do not re-litigate the
 silence-vanilla or swing-dedupe theories again, both are genuinely ruled out.
 
+**2026-09-15, root-caused and fixed — the fifth defect, and it was never the grant.** The leading
+hypothesis above (grant withdrawn/never bound for a replacement plant) was wrong. Live-traced with
+targeted logging at every gate in the real call chain (`EffectRuntime.OnDrained` →
+`EventDrainHost.TryRecordDealtFromBullet` → `GameHooks.BulletInit.Postfix`), confirmed both grants
+present and correct (`debug.effect.list`: `grants:2`, one per side, checked while both entities were
+confirmed alive via `debug_inspect`). The real defect: **`Bullet.from`/`from_zombie` is unset —
+`IntPtr.Zero` — even at `Bullet.InitData`'s own postfix, the earliest hook available, for a
+`debug.spawn-plant`-created Peashooter in the `lab-overlay` scenario.** The 2026-09-14 fourth-defect
+fix (the `_bulletShooterCache`, `EventDrainHost.cs`) was built on the premise that the field is valid
+*at spawn* and merely stale *by hit time* — that premise itself was never live-verified after the
+fix shipped, and it was wrong: the field is never populated at all for this spawn path, so the cache
+was never written, every hit fell through to the (already-known-stale) direct-read fallback, and
+`TryRecordDealtFromBullet` silently returned `false` before ever calling `Record` — for every one of
+the plant's own hits, every run, all session, while the zombie's melee path (which never depended on
+`Bullet.from`) worked throughout and masked the gap.
+
+**Fix:** `GameHooks.BulletInit.Postfix` now falls back to a **position-based** resolve when the
+direct read is zero — `Bullet.theBulletRow` (confirmed real via a metadata dump of
+`Assembly-CSharp.dll`'s `Bullet` type, independent of `from`) plus the firing side, matched against
+the same `InjectorBoardSnapshot` board census `InjectorCombatBridge`/`InjectorStatusBridge` already
+share (E27) — no second scan, no new per-hit cost. This sidesteps *why* the vanilla field is unset
+(a question that would need decompiling `GameAssembly.dll`'s real IL2CPP-compiled firing code, not
+just its `Il2CppAssemblies` metadata stub, to answer — not attempted, not needed).
+
+**Live proof, clean 30s window, `EventDrainActiveProvenThroughout=True`:**
+`actionTriggers=11` (previously stuck at exactly 2 — the zombie's melee swings only — every single
+run since T12 shipped), `staminaSpent=250`, `regenAccrued=102` (nonzero for the first time this whole
+program), `exhaustionEvents=1` (a real exhaustion fired under natural play, not forced). Hit sample
+confirms every plant swing now keys on the plant's own ptr (`swing=<plantPtr>:N`), not the bullet's.
+This closes proof 3 (one swing, one trigger) and gives real material toward proofs 4/5 (exhaustion
+already observed once, unforced).
+
 ---
 
 ### Task 11: `lawn-combat-calibration` — **and the tooling to author it**

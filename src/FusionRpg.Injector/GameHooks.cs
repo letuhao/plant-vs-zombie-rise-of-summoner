@@ -1318,6 +1318,40 @@ public static class GameHooks
                     var p = __instance.from;
                     if (p != null) { shooterPtr = p.Pointer; try { shooterTypeId = (int)p.thePlantType; } catch { } }
                 }
+                // 2026-09-15 fifth defect (live-proven): `from`/`from_zombie` is proven UNSET even at
+                // this exact spawn instant, not merely stale by hit time -- confirmed live via a
+                // dedicated trace, every fire, for a lab-overlay debug-spawned Peashooter (a
+                // debug.spawn-plant creature never goes through whatever vanilla firing-code path
+                // assigns the real field; the direct read above is a correct idea for a REAL
+                // player-placed plant, just not sufficient alone). Position fallback: `theBulletRow`
+                // is a real field (confirmed via metadata dump) and always set regardless of spawn
+                // path, so resolve the firing side's living occupant of that row from the SAME board
+                // snapshot InjectorCombatBridge/InjectorStatusBridge already share (E27) -- no second
+                // scan. Ambiguous only if two same-side entities share a row, which a lawn lane never
+                // allows for the basic-attack-relevant occupant.
+                if (shooterPtr == IntPtr.Zero)
+                {
+                    try
+                    {
+                        var side = __instance.shootByZombie ? "zombie" : "plant";
+                        var row = __instance.theBulletRow;
+                        var snap = Effects.InjectorBoardSnapshot.Capture();
+                        foreach (var e in snap.Entities)
+                        {
+                            if (e.Living && e.Row == row && string.Equals(e.Side, side, StringComparison.OrdinalIgnoreCase))
+                            {
+                                if (ulong.TryParse(e.Ptr, System.Globalization.NumberStyles.HexNumber,
+                                        System.Globalization.CultureInfo.InvariantCulture, out var raw))
+                                {
+                                    shooterPtr = unchecked((IntPtr)raw);
+                                    shooterTypeId = e.TypeId;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    catch { }
+                }
                 Effects.EventDrainHost.CacheBulletShooter(__instance.Pointer, shooterPtr, shooterTypeId);
             }
             catch { }

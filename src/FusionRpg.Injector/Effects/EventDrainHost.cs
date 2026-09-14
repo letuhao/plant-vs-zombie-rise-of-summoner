@@ -131,7 +131,8 @@ public static class EventDrainHost
         // Cache first (see _bulletShooterCache doc): bullet.from/from_zombie is proven stale by hit
         // time. Direct read stays as a fallback for a bullet whose spawn predates this cache (e.g.
         // one already in flight when the feature turned on mid-match).
-        if (_bulletShooterCache.TryGetValue(bullet.Pointer, out var cached))
+        var cacheHit = _bulletShooterCache.TryGetValue(bullet.Pointer, out var cached);
+        if (cacheHit)
         {
             shooterPtr = cached.ShooterPtr;
             shooterTypeId = cached.ShooterTypeId;
