@@ -342,10 +342,35 @@ that specific proof — a plain, non-silenced `debug.spawn-plant`/`debug.spawn-z
 for both — the field is `typeId`, not `plantType`/`col` alone; `x` positions a zombie, not `col`) is
 the correct live setup for T12/T13, not `lab-overlay`. Not yet re-tried with this corrected setup.
 
-**Next step:** a fresh server restart (clears `CheatState` including any stuck silence-vanilla), then
-re-run live with the corrected non-silenced spawn setup above; if `actionTriggers` still reads 0 with
-confirmed real vanilla hits landing, that is the first point where a genuine T12 defect (not a
-test-setup mistake) would be indicated.
+**2026-09-14, re-run with vanilla ATK genuinely restored (`POST /api/debug/reset-mods`, confirmed by
+`vanilla=20` instead of the silenced `vanilla=1`): `actionTriggers`/`staminaSpent` STILL read 0 over a
+40s window with 14 real vanilla hits and `rpgDeltaMergedHits=16`.** The silence-vanilla confound is
+now genuinely ruled out — this is a real, distinct defect, not a test-setup mistake.
+
+**The real shape, found via `debug.effect.list` mid-run:** exactly ONE grant exists on the board
+(`grants:1`) at any time, and it belongs to the ZOMBIE (`lawn-basic-attack@<zombieptr>`) — the
+currently-attacking PLANT (a `lab-overlay` replacement spawn, ptr differs from the scenario's
+originally-reported `plantPtr`, meaning the first plant died and this one is a mid-match respawn) has
+**no grant of its own**. `GrantId` is correctly ptr-scoped
+(`BasicAttackGrantBuilder.GrantIdFor`, `GrantPrefix + "@" + ptr`) — ruled out as a same-key collision
+between the two actors. `HasOnDamageDealtGrant()`'s gate is global (any grant, not per-owner), so this
+alone should not block the PLANT's own OnDamageDealt records from reaching
+`EffectRuntime.OnDrained`/`ShouldApplyRider` — but whatever is happening, the net live effect across
+every attempt this session is that **at most one of the two board actors ever holds a grant, and
+`RecordActionTrigger` never fires for the one that's actually landing the observed hits.** Not yet
+root-caused to a specific line — the leading hypothesis is that the REPLACEMENT plant's spawn (an
+organic respawn inside an already-running match, not `debug.spawn-plant`) hits the same
+"resolves later than `MaxRetryFrames` covers" race the 2nd defect fix (`d465f93b`) was meant to close,
+just on a spawn path/timing that fix's live retest didn't happen to cover, OR the grant genuinely
+binds and is later silently withdrawn (`GameHooks.ForgetEntity`/ptr-reuse path) without a fresh one
+replacing it.
+
+**Next step (not done — context budget ran out this session):** add temporary trace logging (same
+proven technique as defects 1-3) to `LawnBasicAttackGrantBinder.Bind`/`Tick`/`ClearPending` AND to
+whatever calls `EffectRuntime.Bag.Withdraw`, specifically watching the REPLACEMENT plant's ptr from
+spawn to its first attack, to see whether `Bind` is ever called for it at all, and if so, whether the
+grant is later withdrawn. This is the concrete next action for T12/T13/GATE 3 — do not re-litigate the
+silence-vanilla or swing-dedupe theories again, both are genuinely ruled out.
 
 ---
 
