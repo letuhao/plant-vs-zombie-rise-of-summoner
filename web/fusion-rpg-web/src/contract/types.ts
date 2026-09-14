@@ -953,11 +953,22 @@ export type OnboardingCheckpoint = {
   revision: number;
 };
 
+export type OnboardingStory = {
+  storyId: string;
+  version: number;
+  state: "unseen" | "acknowledged" | string;
+  outcome: "completed" | "skipped" | null | string;
+  eligible: boolean;
+  acknowledgedUtc: string | null;
+  revision: number;
+};
+
 export type OnboardingState = {
   playerId: number;
   playerLevel: number;
   revision: number;
   checkpoints: OnboardingCheckpoint[];
+  stories: OnboardingStory[];
 };
 
 export type CommanderListView = {

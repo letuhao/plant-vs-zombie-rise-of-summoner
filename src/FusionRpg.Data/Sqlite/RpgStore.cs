@@ -67,6 +67,10 @@ public sealed partial class RpgStore : IRpgDb
             var pid = GetCurrentPlayerIdUnlocked(db);
             Exec(db, $"UPDATE events SET player_id = {pid} WHERE player_id IS NULL;");
             Exec(db, $"UPDATE runs SET player_id = {pid} WHERE player_id IS NULL;");
+            // Legacy event/run rows need their profile first. Bootstrap afterwards so a
+            // pre-existing victory is correctly treated as a settled prologue skip at Init,
+            // rather than waiting for the first onboarding read to repair it.
+            EnsureOnboardingStoryRowsUnlocked(db);
 
             if (GetSettingUnlocked(db, "stats") is null)
                 PutStatsUnlocked(db, new StatsConfig());
@@ -377,6 +381,18 @@ public sealed partial class RpgStore : IRpgDb
             );
             CREATE INDEX IF NOT EXISTS ix_rpg_onboarding_checkpoint_player
               ON rpg_onboarding_checkpoint(player_id, checkpoint_id);
+            CREATE TABLE IF NOT EXISTS rpg_onboarding_story (
+              player_id INTEGER NOT NULL,
+              story_id TEXT NOT NULL,
+              version INTEGER NOT NULL,
+              state TEXT NOT NULL,
+              outcome TEXT,
+              acknowledged_utc TEXT,
+              revision INTEGER NOT NULL DEFAULT 1,
+              PRIMARY KEY (player_id, story_id, version)
+            );
+            CREATE INDEX IF NOT EXISTS ix_rpg_onboarding_story_player
+              ON rpg_onboarding_story(player_id, story_id, version);
             CREATE TABLE IF NOT EXISTS rpg_actor_progression (
               player_id INTEGER NOT NULL,
               kind TEXT NOT NULL,
@@ -821,6 +837,21 @@ public sealed partial class RpgStore : IRpgDb
               updated_utc TEXT NOT NULL,
               PRIMARY KEY (side, type_id)
             );
+            CREATE TABLE IF NOT EXISTS rift_asset_sources (
+              asset_id TEXT NOT NULL,
+              role TEXT NOT NULL,
+              source_kind TEXT NOT NULL CHECK (source_kind IN ('pvz_dump', 'generated', 'licensed')),
+              side TEXT,
+              type_id INTEGER,
+              layer TEXT,
+              source_uri TEXT,
+              sha256 TEXT,
+              captured_utc TEXT NOT NULL,
+              revision INTEGER NOT NULL DEFAULT 1,
+              PRIMARY KEY (asset_id, role, revision)
+            );
+            CREATE INDEX IF NOT EXISTS ix_rift_asset_sources_pvz
+              ON rift_asset_sources(source_kind, side, type_id, layer);
             CREATE TABLE IF NOT EXISTS type_almanac_dump (
               side TEXT NOT NULL,
               type_id INTEGER NOT NULL,
@@ -871,6 +902,7 @@ public sealed partial class RpgStore : IRpgDb
                              "DELETE FROM rpg_player_commander;",
                              "DELETE FROM rpg_demon_contracts;", "DELETE FROM rpg_contract_state;",
                              "DELETE FROM rpg_unique_actors;",
+                             "DELETE FROM rpg_onboarding_story;",
                              "DELETE FROM rpg_unique_lawn_xp_receipts;",
                              "DELETE FROM rpg_unique_lawn_sessions;",
                              "DELETE FROM rpg_aptitude_allocation;",
@@ -918,7 +950,8 @@ public sealed partial class RpgStore : IRpgDb
             {
                 foreach (var sql in new[]
                          {
-                             "DELETE FROM type_almanac_dump;", "DELETE FROM type_icon_layers;", "DELETE FROM type_icons;"
+                             "DELETE FROM type_almanac_dump;", "DELETE FROM type_icon_layers;",
+                             "DELETE FROM type_icons;", "DELETE FROM rift_asset_sources;"
                          })
                 {
                     try { Exec(media, sql); } catch { /* table may not exist yet */ }
@@ -1018,6 +1051,7 @@ public sealed partial class RpgStore : IRpgDb
         var id = (long)(cmd.ExecuteScalar() ?? 0L);
         EnsurePvzStatsRevisionUnlocked(db, id);
         EnsurePvzActivityRevisionUnlocked(db, id);
+        EnsureOnboardingStoryRowUnlocked(db, id);
         return GetPlayerUnlocked(db, id)!;
     }
 
@@ -1775,6 +1809,11 @@ public sealed partial class RpgStore : IRpgDb
             return;
         if (FusionRpg.Core.Activity.PvzActivityKinds.NormalizeMatchResult(TryString(payload, "result")) != "victory")
             return;
+
+        // The Rift prologue is presentation-only. A player who reaches a settled PvZ victory
+        // through a bypassed/failed story request is considered to have skipped it; this does not
+        // touch checkpoint settlement or rewards.
+        MarkOnboardingStorySkippedUnlocked(db, playerId, t);
 
         var rewardPayload = JsonSerializer.Serialize(new
         {

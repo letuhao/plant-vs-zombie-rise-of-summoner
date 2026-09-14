@@ -1,5 +1,6 @@
 using FusionRpg.Contracts;
 using Microsoft.Data.Sqlite;
+using System.Security.Cryptography;
 
 namespace FusionRpg.Data;
 
@@ -22,8 +23,106 @@ public sealed class TypeIconDumpDto
     public string? ComposedUrl { get; set; }
 }
 
+public sealed record RiftAssetSourceRow(
+    string AssetId,
+    string Role,
+    string SourceKind,
+    string? Side,
+    int? TypeId,
+    string? Layer,
+    string? SourceUri,
+    string? Sha256,
+    string CapturedUtc,
+    int Revision);
+
 public sealed partial class RpgStore
 {
+    public bool UpsertRiftAssetSource(
+        string assetId, string role, string sourceKind, string? side, int? typeId, string? layer,
+        string? sourceUri, byte[]? sourceBytes, int revision = 1, string? capturedUtc = null)
+    {
+        if (string.IsNullOrWhiteSpace(assetId) || string.IsNullOrWhiteSpace(role))
+            throw new ArgumentException("assetId and role are required");
+        if (sourceKind is not ("pvz_dump" or "generated" or "licensed"))
+            throw new ArgumentException("unsupported Rift asset source kind", nameof(sourceKind));
+        if (revision < 1) throw new ArgumentOutOfRangeException(nameof(revision));
+        side = string.IsNullOrWhiteSpace(side) ? null : NormSide(side);
+        if (sourceKind == "pvz_dump" && (side is null || typeId is null || string.IsNullOrWhiteSpace(layer)))
+            throw new ArgumentException("pvz_dump requires side, typeId, and layer");
+
+        var hash = sourceBytes is { Length: > 0 }
+            ? Convert.ToHexString(SHA256.HashData(sourceBytes)).ToLowerInvariant()
+            : null;
+        var captured = capturedUtc ?? DateTime.UtcNow.ToString("o");
+        lock (_gate)
+        {
+            using var db = OpenMediaUnlocked();
+            if (sourceKind == "pvz_dump")
+            {
+                using var exists = db.CreateCommand();
+                exists.CommandText = "SELECT 1 FROM type_icon_layers WHERE side=$s AND type_id=$t AND layer=$l;";
+                exists.Parameters.AddWithValue("$s", side!);
+                exists.Parameters.AddWithValue("$t", typeId!.Value);
+                exists.Parameters.AddWithValue("$l", layer!.Trim());
+                if (exists.ExecuteScalar() is null) return false;
+            }
+
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = """
+                INSERT INTO rift_asset_sources(
+                  asset_id, role, source_kind, side, type_id, layer, source_uri, sha256, captured_utc, revision)
+                VALUES($a,$r,$k,$s,$t,$l,$u,$h,$c,$v)
+                ON CONFLICT(asset_id, role, revision) DO UPDATE SET
+                  source_kind=excluded.source_kind,
+                  side=excluded.side,
+                  type_id=excluded.type_id,
+                  layer=excluded.layer,
+                  source_uri=excluded.source_uri,
+                  sha256=excluded.sha256,
+                  captured_utc=excluded.captured_utc;
+                """;
+            cmd.Parameters.AddWithValue("$a", assetId.Trim());
+            cmd.Parameters.AddWithValue("$r", role.Trim());
+            cmd.Parameters.AddWithValue("$k", sourceKind);
+            cmd.Parameters.AddWithValue("$s", (object?)side ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$t", (object?)typeId ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$l", (object?)layer?.Trim() ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$u", (object?)sourceUri ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$h", (object?)hash ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$c", captured);
+            cmd.Parameters.AddWithValue("$v", revision);
+            cmd.ExecuteNonQuery();
+            return true;
+        }
+    }
+
+    public RiftAssetSourceRow? GetRiftAssetSource(string assetId, string role, int revision = 1)
+    {
+        lock (_gate)
+        {
+            using var db = OpenMediaUnlocked();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = """
+                SELECT asset_id, role, source_kind, side, type_id, layer, source_uri, sha256, captured_utc, revision
+                FROM rift_asset_sources
+                WHERE asset_id=$a AND role=$r AND revision=$v;
+                """;
+            cmd.Parameters.AddWithValue("$a", assetId);
+            cmd.Parameters.AddWithValue("$r", role);
+            cmd.Parameters.AddWithValue("$v", revision);
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read()) return null;
+            return new RiftAssetSourceRow(
+                reader.GetString(0), reader.GetString(1), reader.GetString(2),
+                reader.IsDBNull(3) ? null : reader.GetString(3),
+                reader.IsDBNull(4) ? null : reader.GetInt32(4),
+                reader.IsDBNull(5) ? null : reader.GetString(5),
+                reader.IsDBNull(6) ? null : reader.GetString(6),
+                reader.IsDBNull(7) ? null : reader.GetString(7),
+                reader.GetString(8), reader.GetInt32(9));
+        }
+    }
+
     public bool HasTypeIconDump(string side, int typeId)
     {
         side = NormSide(side);

@@ -62,6 +62,10 @@ public static class VfxCueIds
     public const string DebugProbe = "debug.probe";
     /// <summary>Shield pool broke (shield-system-spec.md §2.6) — art/tuning owned by the VFX stream.</summary>
     public const string ShieldBroken = "shield.broken";
+    public const string RiftPortalOpen = "rift.portal.open";
+    public const string RiftPortalSurge = "rift.portal.surge";
+    public const string RiftQuarantineSeal = "rift.quarantine.seal";
+    public const string RiftQuarantineFade = "rift.quarantine.fade";
 }
 
 /// <summary>
@@ -430,6 +434,95 @@ public static class VfxSeedCatalog
                     FixedRgb = ProbeOrange,
                     LifeSeconds = VfxRules.BurstLifeSeconds,
                     Count = 28
+                }
+            }
+        },
+        new VfxRecipe
+        {
+            CueId = VfxCueIds.RiftPortalOpen,
+            Primitives = new[]
+            {
+                new VfxPrimitiveSpec
+                {
+                    Kind = VfxPrimitiveKind.Burst,
+                    Color = VfxColorSourceKind.Fixed,
+                    FixedRgb = (210, 100, 255),
+                    Shape = VfxBurstShape.Radial,
+                    LifeSeconds = VfxRules.BurstLifeSeconds,
+                    Count = 24,
+                    SizeScale = 1.25f
+                },
+                new VfxPrimitiveSpec
+                {
+                    Kind = VfxPrimitiveKind.Flash,
+                    Color = VfxColorSourceKind.Fixed,
+                    FixedRgb = (165, 70, 255),
+                    LifeSeconds = 0.22f
+                }
+            }
+        },
+        new VfxRecipe
+        {
+            CueId = VfxCueIds.RiftPortalSurge,
+            Primitives = new[]
+            {
+                new VfxPrimitiveSpec
+                {
+                    Kind = VfxPrimitiveKind.Burst,
+                    Color = VfxColorSourceKind.Fixed,
+                    FixedRgb = (190, 255, 70),
+                    Shape = VfxBurstShape.Directional,
+                    LifeSeconds = VfxRules.BurstLifeSeconds,
+                    Count = 32,
+                    SizeScale = 1.35f
+                },
+                new VfxPrimitiveSpec
+                {
+                    Kind = VfxPrimitiveKind.Flash,
+                    Color = VfxColorSourceKind.Fixed,
+                    FixedRgb = (225, 255, 120),
+                    LifeSeconds = 0.18f
+                }
+            }
+        },
+        new VfxRecipe
+        {
+            CueId = VfxCueIds.RiftQuarantineSeal,
+            Primitives = new[]
+            {
+                new VfxPrimitiveSpec
+                {
+                    Kind = VfxPrimitiveKind.Burst,
+                    Color = VfxColorSourceKind.Fixed,
+                    FixedRgb = (120, 220, 255),
+                    Shape = VfxBurstShape.Directional,
+                    LifeSeconds = VfxRules.BurstLifeSeconds,
+                    Count = 20,
+                    SizeScale = 1.1f
+                },
+                new VfxPrimitiveSpec
+                {
+                    Kind = VfxPrimitiveKind.Flash,
+                    Color = VfxColorSourceKind.Fixed,
+                    FixedRgb = (180, 240, 255),
+                    LifeSeconds = 0.2f
+                }
+            }
+        },
+        new VfxRecipe
+        {
+            CueId = VfxCueIds.RiftQuarantineFade,
+            Primitives = new[]
+            {
+                new VfxPrimitiveSpec
+                {
+                    Kind = VfxPrimitiveKind.Burst,
+                    Color = VfxColorSourceKind.Fixed,
+                    FixedRgb = (150, 120, 220),
+                    Shape = VfxBurstShape.Rising,
+                    LifeSeconds = VfxRules.BurstLifeSeconds,
+                    Count = 14,
+                    SizeScale = 0.9f
                 }
             }
         }

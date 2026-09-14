@@ -31,20 +31,47 @@ public static class OnboardingEndpoints
                 };
                 return result.Ok ? Results.Ok(body) : Results.Json(body, statusCode: StatusCodes.Status409Conflict);
             });
+
+        g.MapPost("/{playerId:long}/stories/{storyId}/ack",
+            (long playerId, string storyId, OnboardingStoryAckRequest request, RpgStore store) =>
+            {
+                if (!store.PlayerExists(playerId)) return Results.NotFound();
+                var result = store.AcknowledgeOnboardingStory(playerId, storyId, request.Version, request.Outcome);
+                var body = new OnboardingStoryAckDto
+                {
+                    Ok = result.Ok,
+                    Reason = result.Reason,
+                    Story = result.Row is null ? null : ProjectStory(result.Row)
+                };
+                if (result.Ok) return Results.Ok(body);
+                var status = result.Reason == "onboarding.story-conflict"
+                    ? StatusCodes.Status409Conflict
+                    : StatusCodes.Status400BadRequest;
+                return Results.Json(body, statusCode: status);
+            });
     }
 
     internal static OnboardingStateDto? ProjectState(RpgStore store, long playerId)
     {
         if (!store.PlayerExists(playerId)) return null;
         var rows = store.ListOnboardingCheckpoints(playerId) ?? Array.Empty<RpgStore.OnboardingCheckpointRow>();
+        var stories = store.ListOnboardingStories(playerId) ?? Array.Empty<RpgStore.OnboardingStoryRow>();
         var player = store.GetRpgActor(playerId, RpgActorKinds.Player, 0)
                      ?? store.GetRpgProgressionSummary(playerId)?.Player;
         return new OnboardingStateDto
         {
             PlayerId = playerId,
             PlayerLevel = player?.Level ?? 1,
-            Revision = rows.Count == 0 ? 0 : rows.Max(x => x.Revision),
-            Checkpoints = rows.Select(ProjectCheckpoint).ToList()
+            // The envelope revision must cover every durable member of the response. Story
+            // acknowledgements are independent from reward checkpoints, so omitting them made a
+            // fresh story row (and later story-only acknowledgements) invisible to revision-aware
+            // consumers.
+            Revision = rows.Select(x => x.Revision)
+                .Concat(stories.Select(x => x.Revision))
+                .DefaultIfEmpty(0)
+                .Max(),
+            Checkpoints = rows.Select(ProjectCheckpoint).ToList(),
+            Stories = stories.Select(ProjectStory).ToList()
         };
     }
 
@@ -57,6 +84,17 @@ public static class OnboardingEndpoints
         PayloadJson = row.PayloadJson,
         EarnedUtc = row.EarnedUtc,
         ClaimedUtc = row.ClaimedUtc,
+        Revision = row.Revision
+    };
+
+    static OnboardingStoryDto ProjectStory(RpgStore.OnboardingStoryRow row) => new()
+    {
+        StoryId = row.StoryId,
+        Version = row.Version,
+        State = row.State,
+        Outcome = row.Outcome,
+        Eligible = row.Eligible,
+        AcknowledgedUtc = row.AcknowledgedUtc,
         Revision = row.Revision
     };
 }

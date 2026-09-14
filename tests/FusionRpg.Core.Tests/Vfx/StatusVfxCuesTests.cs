@@ -139,7 +139,7 @@ public class StatusVfxCuesTests
         Assert.Equal(VfxAuraStyle.CommandCrownPulse,
             VfxSeedCatalog.StatusSustainFx.First(s => s.Id == "command").Aura);
 
-        // 3 combat/debug cues + shield.broken + 21 status cues
-        Assert.Equal(25, catalog.Ids.Count);
+        // 3 combat/debug cues + shield.broken + 4 Rift cues + 21 status cues
+        Assert.Equal(29, catalog.Ids.Count);
     }
 }

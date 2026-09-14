@@ -64,6 +64,15 @@
       <Link>data\generated\demons\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <!-- Same menu overlay asset as the BepInEx twin. -->
+    <Content Include="..\..\web\fusion-rpg-web\public\assets\onboarding\rift-portal-pvz-style.png">
+      <Link>assets\onboarding\rift-portal-pvz-style.png</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\web\fusion-rpg-web\public\assets\onboarding\rift-icon-pvz-style-64.png">
+      <Link>assets\onboarding\rift-icon-pvz-style-64.png</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup Condition="'$(HasMelonRefs)' == 'true'">

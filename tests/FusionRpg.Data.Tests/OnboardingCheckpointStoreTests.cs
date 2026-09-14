@@ -3,6 +3,8 @@ using FusionRpg.Contracts;
 using FusionRpg.Core.Demons;
 using FusionRpg.Core.Progression;
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Data.Sqlite;
+using Microsoft.Data.Sqlite;
 using Xunit;
 
 namespace FusionRpg.Data.Tests;
@@ -33,6 +35,150 @@ public sealed class OnboardingCheckpointStoreTests : IDisposable
 
         Assert.NotNull(rows);
         Assert.Empty(rows!);
+
+        var stories = _store.ListOnboardingStories(player.Id);
+        var story = Assert.Single(stories!);
+        Assert.Equal("rift-prologue", story.StoryId);
+        Assert.Equal(1, story.Version);
+        Assert.Equal("unseen", story.State);
+        Assert.Null(story.Outcome);
+        Assert.True(story.Eligible);
+    }
+
+    [Fact]
+    public void Story_acknowledgement_survives_store_restart_without_creating_a_checkpoint()
+    {
+        var player = _store.GetCurrentPlayer()!;
+        var ack = _store.AcknowledgeOnboardingStory(player.Id, "rift-prologue", 1, "completed");
+
+        Assert.True(ack.Ok);
+        Assert.Equal(2, ack.Row!.Revision);
+        Assert.Empty(_store.ListOnboardingCheckpoints(player.Id)!);
+
+        var reopened = new RpgStore(_dir);
+        reopened.Init();
+        var story = Assert.Single(reopened.ListOnboardingStories(player.Id)!);
+        Assert.Equal("acknowledged", story.State);
+        Assert.Equal("completed", story.Outcome);
+        Assert.Equal(2, story.Revision);
+        Assert.False(story.Eligible);
+        Assert.Empty(reopened.ListOnboardingCheckpoints(player.Id)!);
+    }
+
+    [Fact]
+    public void Existing_settled_victory_backfills_story_as_skipped_and_first_victory_skips_unseen_story()
+    {
+        var player = _store.GetCurrentPlayer()!;
+        var match = "story-skip-" + Guid.NewGuid().ToString("N");
+        _store.InsertEvents(new[]
+        {
+            new EventEnvelope
+            {
+                Game = RpgConstants.GameId, Kind = "board.start", MatchKey = match,
+                T = "2026-01-01T00:00:00Z", Payload = new { levelName = "lawn", levelType = "classic", boardLevel = 1 }
+            },
+            new EventEnvelope
+            {
+                Game = RpgConstants.GameId, Kind = "match.result", MatchKey = match,
+                T = "2026-01-01T00:01:00Z", Payload = new { result = "victory" }
+            }
+        });
+
+        var story = Assert.Single(_store.ListOnboardingStories(player.Id)!);
+        Assert.Equal("acknowledged", story.State);
+        Assert.Equal("skipped", story.Outcome);
+        Assert.False(story.Eligible);
+        Assert.Single(_store.ListOnboardingCheckpoints(player.Id)!);
+
+        // A second delivery is replay-safe: it cannot change the story revision or add a checkpoint.
+        _store.InsertEvents(new[]
+        {
+            new EventEnvelope
+            {
+                Game = RpgConstants.GameId, Kind = "match.result", MatchKey = match,
+                T = "2026-01-01T00:01:00Z", Payload = new { result = "victory" }
+            }
+        });
+        var replay = Assert.Single(_store.ListOnboardingStories(player.Id)!);
+        Assert.Equal(story.Revision, replay.Revision);
+        Assert.Single(_store.ListOnboardingCheckpoints(player.Id)!);
+    }
+
+    [Fact]
+    public void Legacy_unseen_story_repairs_after_run_backfill_without_overwriting_an_explicit_outcome()
+    {
+        var player = _store.GetCurrentPlayer()!;
+        var match = "story-legacy-repair-" + Guid.NewGuid().ToString("N");
+        _store.InsertEvents(new[]
+        {
+            new EventEnvelope
+            {
+                Game = RpgConstants.GameId, Kind = "board.start", MatchKey = match,
+                T = "2026-01-04T00:00:00Z", Payload = new { levelName = "lawn", levelType = "classic", boardLevel = 1 }
+            },
+            new EventEnvelope
+            {
+                Game = RpgConstants.GameId, Kind = "match.result", MatchKey = match,
+                T = "2026-01-04T00:01:00Z", Payload = new { result = "victory" }
+            }
+        });
+
+        // Simulate the historic ordering bug: story bootstrap ran before legacy run rows had
+        // acquired their player id, leaving an unseen row beside an already-settled victory.
+        using (var db = SqliteConnectionFactory.Open(_store.HotPath))
+        using (var reset = db.CreateCommand())
+        {
+            reset.CommandText = """
+                UPDATE rpg_onboarding_story
+                SET state='unseen', outcome=NULL, acknowledged_utc=NULL, revision=1
+                WHERE player_id=$player AND story_id='rift-prologue' AND version=1;
+                """;
+            reset.Parameters.AddWithValue("$player", player.Id);
+            Assert.Equal(1, reset.ExecuteNonQuery());
+        }
+
+        var repaired = Assert.Single(_store.ListOnboardingStories(player.Id)!);
+        Assert.Equal("acknowledged", repaired.State);
+        Assert.Equal("skipped", repaired.Outcome);
+        Assert.False(repaired.Eligible);
+
+        // The migration repair is deliberately narrow: it must never replace a durable player
+        // choice just because that player later has a settled PvZ victory.
+        using (var db = SqliteConnectionFactory.Open(_store.HotPath))
+        using (var completed = db.CreateCommand())
+        {
+            completed.CommandText = """
+                UPDATE rpg_onboarding_story
+                SET state='acknowledged', outcome='completed', acknowledged_utc='2026-01-04T00:02:00Z', revision=9
+                WHERE player_id=$player AND story_id='rift-prologue' AND version=1;
+                """;
+            completed.Parameters.AddWithValue("$player", player.Id);
+            Assert.Equal(1, completed.ExecuteNonQuery());
+        }
+
+        var preserved = Assert.Single(_store.ListOnboardingStories(player.Id)!);
+        Assert.Equal("acknowledged", preserved.State);
+        Assert.Equal("completed", preserved.Outcome);
+        Assert.Equal(9, preserved.Revision);
+    }
+
+    [Fact]
+    public void Active_pvz_run_hides_eligible_story_without_acknowledging_it()
+    {
+        var player = _store.GetCurrentPlayer()!;
+        _store.InsertEvents(new[]
+        {
+            new EventEnvelope
+            {
+                Game = RpgConstants.GameId, Kind = "board.start", MatchKey = "story-active",
+                T = "2026-01-02T00:00:00Z", Payload = new { levelName = "lawn", levelType = "classic", boardLevel = 1 }
+            }
+        });
+
+        var story = Assert.Single(_store.ListOnboardingStories(player.Id)!);
+        Assert.Equal("unseen", story.State);
+        Assert.False(story.Eligible);
+        Assert.Null(story.Outcome);
     }
 
     [Fact]
