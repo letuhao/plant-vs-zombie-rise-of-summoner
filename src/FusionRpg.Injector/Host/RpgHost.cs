@@ -195,6 +195,20 @@ public static class RpgHost
         FusionRpg.Core.Battle.BattleRuleset.ConfigureResources(
             FusionRpg.Core.Battle.BattleResourceTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "battle-resources.v2.json"))));
+        // lawn-combat-wire T12 (spec-basic-attack-cost.md), sixth defect (2026-09-14): the same
+        // "Server/Program.cs already does this, this is the injector's own copy" gap as the two
+        // Configure calls above, just missed at the time -- Program.cs's own RungPolicy.Configure
+        // call carries a comment ("actions are battle-mode and the injector never sees one, so the
+        // rung ladder has no reason to load there") that was true until this lawn-combat-wire T12
+        // module gave LawnBasicAttackCostGate/CostLedger a real injector-side RungPolicy.Table read
+        // (rung 1 is RungPolicy's own shipped inert row, CostMulti=1000). Unconfigured, every
+        // TryChargeForSwing call threw "RungPolicy.Configure(...) has not run", caught by
+        // LawnBasicAttackCostCharger.ShouldApplyRider's own try/catch and failed closed -- silently
+        // zeroing actionTriggers/staminaSpent forever, confirmed live: real combat, a real bound
+        // grant, drainTickTotalMs > 0, yet actionTriggers stayed 0 until this fix.
+        FusionRpg.Core.Actions.Rungs.RungPolicy.Configure(
+            FusionRpg.Core.Actions.Rungs.RungTableLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "action-rungs.v1.json"))));
 
         IsInitialized = true;
     }

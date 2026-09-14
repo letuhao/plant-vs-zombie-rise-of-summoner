@@ -38,6 +38,30 @@ public static class EventDrainHost
     // runs after the patched method throws) cannot leak a stale attacker past its own frame.
     static IntPtr _ambientMeleeAttackerPtr = IntPtr.Zero;
     static int _ambientMeleeAttackerTypeId;
+
+    /// <summary>2026-09-14 fix (lawn-combat-wire T10/T12, fourth defect): <c>Bullet.from</c>/
+    /// <c>from_zombie</c> is only valid AT SPAWN — live trace proved it reads back
+    /// <c>IntPtr.Zero</c> 100% of the time by the moment <c>TryRecordDealtFromBullet</c> runs
+    /// (`Bullet.HitZombie`/`HitPlant`), for every one of 15 real hits in a clean session-ended
+    /// window. The engine clears/does not retain the owner reference across the bullet's own
+    /// flight lifetime (same pooling-shaped hazard as <c>InjectorEntityRegistry</c>'s Start()-once
+    /// defect, different object). Fix: capture the shooter ptr/typeId once, in
+    /// <c>GameHooks.BulletInit.Postfix</c> — the one point <c>from</c>/<c>from_zombie</c> is proven
+    /// live — and read it back here by bullet ptr instead of re-reading the stale field. Cleared on
+    /// read (a bullet fires its hit hook at most once) so this never grows across a match; a ptr
+    /// that never hits (lands on ground, despawns) is simply never removed — one wasted 12-byte
+    /// entry per whiffed bullet in a Dictionary keyed by ptr that Bullet.InitData will overwrite the
+    /// next time that same freed address is reused, never a real leak. Main-thread only, exactly
+    /// like <see cref="_ambientMeleeAttackerPtr"/> above.</summary>
+    static readonly Dictionary<IntPtr, (IntPtr ShooterPtr, int ShooterTypeId)> _bulletShooterCache = new();
+
+    /// <summary>Called from <c>GameHooks.BulletInit.Postfix</c> right after a bullet spawns, while
+    /// its owner reference is still live. No-op for a zero ptr on either side.</summary>
+    public static void CacheBulletShooter(IntPtr bulletPtr, IntPtr shooterPtr, int shooterTypeId)
+    {
+        if (bulletPtr == IntPtr.Zero || shooterPtr == IntPtr.Zero) return;
+        _bulletShooterCache[bulletPtr] = (shooterPtr, shooterTypeId);
+    }
     static int _ambientMeleeAttackerFrame = -1;
 
     public static EventDrain Drain => _drain ??= new EventDrain(EffectRuntime.OnDrained);
@@ -104,28 +128,40 @@ public static class EventDrainHost
 
         var shooterPtr = IntPtr.Zero;
         var shooterTypeId = 0;
-        try
+        // Cache first (see _bulletShooterCache doc): bullet.from/from_zombie is proven stale by hit
+        // time. Direct read stays as a fallback for a bullet whose spawn predates this cache (e.g.
+        // one already in flight when the feature turned on mid-match).
+        if (_bulletShooterCache.TryGetValue(bullet.Pointer, out var cached))
         {
-            if (bullet.shootByZombie)
-            {
-                var z = bullet.from_zombie;
-                if (z != null)
-                {
-                    shooterPtr = z.Pointer;
-                    try { shooterTypeId = (int)z.theZombieType; } catch { }
-                }
-            }
-            else
-            {
-                var p = bullet.from;
-                if (p != null)
-                {
-                    shooterPtr = p.Pointer;
-                    try { shooterTypeId = (int)p.thePlantType; } catch { }
-                }
-            }
+            shooterPtr = cached.ShooterPtr;
+            shooterTypeId = cached.ShooterTypeId;
+            _bulletShooterCache.Remove(bullet.Pointer);
         }
-        catch { shooterPtr = IntPtr.Zero; }
+        else
+        {
+            try
+            {
+                if (bullet.shootByZombie)
+                {
+                    var z = bullet.from_zombie;
+                    if (z != null)
+                    {
+                        shooterPtr = z.Pointer;
+                        try { shooterTypeId = (int)z.theZombieType; } catch { }
+                    }
+                }
+                else
+                {
+                    var p = bullet.from;
+                    if (p != null)
+                    {
+                        shooterPtr = p.Pointer;
+                        try { shooterTypeId = (int)p.thePlantType; } catch { }
+                    }
+                }
+            }
+            catch { shooterPtr = IntPtr.Zero; }
+        }
 
         // A null shooter is ordinary — the firer already died, or an engine-spawned projectile with
         // no owner — never an error, and NEVER a fallback to the bullet's own ptr: that would

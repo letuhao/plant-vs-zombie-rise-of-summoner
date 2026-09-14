@@ -1299,6 +1299,28 @@ public static class GameHooks
             // BumpBullet is the authoritative bullets_spawned source; always count.
             RpgHost.Client?.BumpBullet();
             if (__instance == null) return;
+            // lawn-combat-wire T10/T12 fourth defect: bullet.from/from_zombie is only live HERE, at
+            // spawn — proven stale (always IntPtr.Zero) by the time Bullet.HitZombie/HitPlant reads
+            // it. Cache the shooter now so EventDrainHost.TryRecordDealtFromBullet can look it up by
+            // bullet ptr instead of re-reading the dead field. Unconditional — cheap, and every other
+            // gate below this line may return before the record path ever runs.
+            try
+            {
+                var shooterPtr = IntPtr.Zero;
+                var shooterTypeId = 0;
+                if (__instance.shootByZombie)
+                {
+                    var z = __instance.from_zombie;
+                    if (z != null) { shooterPtr = z.Pointer; try { shooterTypeId = (int)z.theZombieType; } catch { } }
+                }
+                else
+                {
+                    var p = __instance.from;
+                    if (p != null) { shooterPtr = p.Pointer; try { shooterTypeId = (int)p.thePlantType; } catch { } }
+                }
+                Effects.EventDrainHost.CacheBulletShooter(__instance.Pointer, shooterPtr, shooterTypeId);
+            }
+            catch { }
             // Highest-rate kind (~per pea). Emit only when something consumes it: an OnSpawn
             // grant or a debug session. MatchHost ignores it; the server metric is redundant;
             // the web strips it (v2 audit §4c.2).
