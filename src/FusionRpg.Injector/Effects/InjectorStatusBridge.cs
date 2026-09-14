@@ -61,7 +61,7 @@ public static class InjectorStatusBridge
         // bridge's own board scan — a cache hit here is free when InjectorCombatBridge already
         // resolved the same ptr for the same match, and either bridge's first call for a ptr warms it
         // for the other.
-        var (side, typeId, elementTypes) = LawnElementResolverHost.Resolve(key);
+        var (side, typeId, elementTypes, _) = LawnElementResolverHost.Resolve(key);
 
         ctx = string.Equals(side, "zombie", StringComparison.OrdinalIgnoreCase)
             ? hub.Stats.Contexts.ForZombie(

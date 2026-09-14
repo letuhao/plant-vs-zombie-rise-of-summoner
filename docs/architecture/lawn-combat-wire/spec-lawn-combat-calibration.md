@@ -98,6 +98,33 @@ existing `eventField` marker so the rider scales off the vanilla hit's own damag
 this module's to make, not something this task decides. What this task closes is only the factual
 question of what happens **today**, unauthored: zero, always.
 
+### DECIDED (2026-09-14, T11 build): the amount is explicitly NOT authored in T11
+
+T11's own declared file scope (`tasks/lawn-combat-wire-todo.md` Task 11 — `tools/tuning/publish.py`,
+`battle-resources.v{n}.json`, `action-corpus-cost-templates.v{n}.json`) does not include either
+candidate home for this number, and for a real reason, not an oversight:
+
+- **`data/tuning/action-shares.v1.json` (the flat-authored-number shape).** `ActionShareTable`
+  (`src/FusionRpg.Core/Actions/Seeding/ActionShareTable.cs`) is the only reader of that file, and it has
+  **zero production callers** — confirmed the same way this spec's own retracted `sharePermille` claim
+  was confirmed false, by reading who calls it, not by the file's existence. Adding a row there would
+  be inert data: nothing compiles it into `EffectAtomCatalog.Generated.cs`'s `fx.overlay_damage` row,
+  so `ResolveAmount` would still see no `"amount"` key and still return the hardcoded `0` traced above.
+- **The `eventField` marker (the scaling shape).** Authoring `data/seed/atoms/fx-core.json`'s `amount`
+  key is editing **generated seed data** (CLAUDE.md/AGENTS.md hard rule: fix the generator and
+  regenerate, never hand-edit the emitted row) and then requires re-running the atom importer to
+  regenerate `EffectAtomCatalog.Generated.cs` — a materially different, larger change than "author a
+  tuning number," and it touches the same atom-compile pipeline `lawn-action-bridge`/T9's own
+  `DamagePacketBuilder.cs` work sits next to.
+
+Both shapes are real wiring, not tuning-file authoring, and neither is reachable from the three files
+T11 actually owns. **T11 leaves the atom's amount at its confirmed-today value: 0, unauthored,
+unwired.** This is the second disjunct of this task's own acceptance line ("magnitude authored, **or
+explicitly not authored**") — taken deliberately, not by default. A follow-up task (name suggested:
+`lawn-combat-rider-amount`) owns picking the shape and doing the wiring; until it lands, the standing
+`basic-attack-grant` fires with zero elemental rider damage, exactly as it does today — no regression,
+because nothing about T11 changes this atom's compiled row.
+
 ## Shipped anchors — derive from these, do not invent
 
 | Anchor | Value | Source |
@@ -138,17 +165,24 @@ would recognise as "my element matters", and the spec must state the resulting T
 
 ```powershell
 dotnet test tests/FusionRpg.Core.Tests --filter "Category=BalanceGuard"
-dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~ActionShareTable"
+dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~LawnCombatCalibrationGuardTests"
 python tools/tuning/resource_ownership.py --check
 ```
 
 ## Project structure
 
+**Built 2026-09-14 (T11).** `data/tuning/action-shares.v1.json` is deliberately **not** touched — see
+"DECIDED" above; the atom's amount stays a named, explicit follow-up.
+
 | Path | Duty |
 |---|---|
-| `data/tuning/action-shares.v1.json` | Gains the `atom.fx-overlay-damage` row (**or a v2 per the file's own rebalance convention**) |
-| `data/tuning/battle-resources.v1.json` | Gains its regen rows, now that `resource-subtick` makes them expressible |
-| Kind-aware cost template | Gains the Basic → `stamina` amount |
+| `tools/tuning/publish.py` | Gains `--add-regen-block`, mirroring the existing bespoke `--add-rung-power-budget` shape (T11's own citation) — the sanctioned way to add a first-time key `battle-resources.v1.json`'s own convention otherwise refuses |
+| `data/tuning/battle-resources.v2.json` | Gains `regenPerSecondShareMilli` — `stamina=50` (‰ of pool/s), the other four ids explicit `0`; v1 kept on disk |
+| `data/tuning/action-corpus-cost-templates.v2.json` | `kinds.basic.baseAmountAtRung1` re-derived from the pool/regen envelope (20 → 25); v1 kept on disk |
+| `src/FusionRpg.Core/Battle/BattleResourceTuning.cs` | Parses the new `regenPerSecondShareMilli` block (optional at parse time — absent ⇒ all-zero, so every v1-pinned reader stays byte-identical) |
+| `src/FusionRpg.Core/Battle/BattleModels.cs` | `BaseResourceRegen` reads the tuning instead of a hardcoded `0`; returns `double` (units/tick) now that S10.1 makes a sub-tick rate meaningful |
+| `src/FusionRpg.Server/Program.cs` | Both tuning file reads bumped to `v2` — the real, only production consumer this task needed to move |
+| `tests/FusionRpg.Core.Tests/Balance/LawnCombatCalibrationGuardTests.cs` | New `Category=BalanceGuard` tests reading the real v2 files, asserting the contract (never a pinned number) |
 
 ## Code style
 
@@ -164,12 +198,11 @@ Every authored value carries, in `_meta`: the anchor it derived from, the arithm
 
 | Level | Cases |
 |---|---|
-| Core unit | `ActionShareTable` resolves `atom.fx-overlay-damage` — the rejection path is gone |
-| Core unit | The derived rider at Θ=20 matches the arithmetic recorded in `_meta` (a test that fails if someone edits the number without editing the reasoning) |
-| Core unit | Sustainable-fire invariant: `cost ≤ regenPerSecond × attackInterval` at the pin, so a continuously-firing plant does not permanently dry out |
-| Core unit | Exhaustion is still **reachable** under burst fire — otherwise live-proof 4 cannot run |
-| BalanceGuard | Values are present and within the stated envelope; **no test pins an exact damage number** — that is a reading, not a contract |
-| Live | `lawn-combat-live-proof` proofs 2 and 4 both become runnable only once these exist |
+| BalanceGuard | `StaminaCostNeverExceedsSustainableRegenAtThePin` — the sustainable-fire invariant `cost ≤ regenPerSecond × attackInterval` at the pin, computed from the real shipped v2 files, never a hardcoded expected cost/regen pair |
+| BalanceGuard | `OnlyStaminaRegeneratesEveryOtherResourceStaysExplicitlyZero` — the closed-vocabulary half: poise/hunger/spirit/qi stay an explicit, deliberate `0` |
+| BalanceGuard | `V1StillParsesWithNoRegenBlockAndDefaultsEveryShareToZero` — the revert path: v1 stays on disk, still parses, defaults every share to 0 |
+| Core unit | `BattleResourceSeedTests`/`ResourceSubTickRegenTests` — the assembly's own ambient (all-zero) fixture stays byte-identical; unaffected by the real v2 numbers, which no ambient test reads |
+| Live | `lawn-combat-live-proof` proofs 2 and 4 become runnable only once `basic-attack-cost` (T12) actually charges/regens the numbers this task authored — T11 makes them defensible, T12 makes them consequential |
 
 ## Boundaries
 
@@ -186,13 +219,21 @@ Every authored value carries, in `_meta`: the anchor it derived from, the arithm
       resolved 2026-09-13: as authored and as compiled, the atom resolves to a hardcoded `0` on every
       hit (no `amount` key anywhere in its compiled row or its standing grant's overlay reaches
       `ResolveAmount`); it does not read the vanilla hit's own damage. See "RESOLVED" above for the
-      full trace. Everything else in this module depends on this, and it is now a fourth number (#4
-      above) to calibrate, not a reduction to cost + regen.
-- [ ] The authored amount's arithmetic and resulting TTK-versus-vanilla are recorded in `_meta`
-      (the module still must pick a shape — flat authored number, or the existing `eventField`
-      marker — before this can close).
-- [ ] `stamina` cost and lawn regen are authored, and satisfy `cost ≤ regenPerSecond × 1.5 s` at the
-      pin.
-- [ ] Exhaustion is reachable under burst fire — live-proof 4's falsifier can actually run.
-- [ ] Every value marked `UNMEASURED` and traceable to a named anchor.
-- [ ] No exact-damage assertion anywhere in the suite.
+      full trace.
+- [x] **The amount is explicitly NOT authored in T11** (see "DECIDED" above) — both candidate homes
+      (`action-shares.v1.json`'s dead `ActionShareTable`, or hand-editing generated atom seed data) sit
+      outside T11's declared file scope and outside "author a tuning number." Named follow-up:
+      `lawn-combat-rider-amount`.
+- [x] `stamina` cost and lawn regen are authored (`battle-resources.v2.json`,
+      `action-corpus-cost-templates.v2.json`), and satisfy `cost ≤ regenPerSecond × 1.5 s` at the pin —
+      proven by `LawnCombatCalibrationGuardTests.StaminaCostNeverExceedsSustainableRegenAtThePin`
+      reading the real shipped files, not a hardcoded pair.
+- [x] **Exhaustion-reachability moved out of T11** (`tasks/lawn-combat-wire-todo.md` Task 11's own
+      "Moved out of this task" note, 2026-09-13): the criterion cannot be decided until cost is
+      actually *charged*, which is `basic-attack-cost` (T12)'s job. It now belongs to T12 and
+      `lawn-combat-live-proof` proof 4. This spec is corrected to agree with the todo rather than
+      still asking T11 to prove something it structurally cannot.
+- [x] Every value marked `UNMEASURED` and traceable to a named anchor (`battle-resources.v2.json`
+      `_meta.regenDerivation`; `action-corpus-cost-templates.v2.json` `_meta.kindsNote`).
+- [x] No exact-damage assertion anywhere in the suite — the new BalanceGuard tests assert the
+      inequality and the zero/non-zero split, never a pinned cost or regen number.

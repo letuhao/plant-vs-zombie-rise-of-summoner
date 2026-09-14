@@ -176,6 +176,25 @@ public static class RpgHost
         FusionRpg.Core.Match.Ai.ZombossDeployTuningHub.Configure(
             FusionRpg.Core.Match.Ai.ZombossDeployTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "zomboss-deploy-ai.v1.json"))));
+        // lawn-combat-wire T8 (spec-lawn-action-bridge.md): without this, the first lawn touch of the
+        // hand-built basic-attack row throws -- ActionTimingDerivation.DeriveBasicAttack (called from
+        // BasicAttackFactory.Create) reads ActionTimingPolicy.Tuning, which throws
+        // InvalidOperationException until Configure has run. Server/Program.cs already does this for
+        // the Battle system; this is the injector's own copy, from the same shipped tuning file
+        // (already copied verbatim by every host .csproj's own `data\tuning\**\*.json` content rule --
+        // no build change needed). Ordered here, before RpgHost.Initialize returns and therefore before
+        // any lawn actor can be granted a basic attack -- never raced against host startup.
+        FusionRpg.Core.Actions.ActionTimingPolicy.Configure(
+            FusionRpg.Core.Actions.ActionTimingTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "action-timing.v1.json"))));
+        // lawn-combat-wire T12a (spec-basic-attack-cost.md wire 2): without this, ResourceBaselineSubsystem
+        // (now registered on CheatState.ActorHub) reads BattleRuleset.ResourceTuning before Configure has
+        // ever run, throwing on the injector's very first resource-max resolve. Same file, same call
+        // Server/Program.cs already makes for the identical reason -- one shared tuning read, no second
+        // copy of the arithmetic. v2 (not v1): the real, non-zero stamina regen share T11 authored.
+        FusionRpg.Core.Battle.BattleRuleset.ConfigureResources(
+            FusionRpg.Core.Battle.BattleResourceTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "battle-resources.v2.json"))));
 
         IsInitialized = true;
     }

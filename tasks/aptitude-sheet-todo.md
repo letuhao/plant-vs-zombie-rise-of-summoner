@@ -81,27 +81,35 @@
     full 4-trigger cadence table + a required cadence test.
   - Scope: M
 
-- [ ] **AS-1.1b** Bind-edge refresh for the unique allocation cache — `unique-lawn-wire` (fix)
+- [x] **AS-1.1b** Bind-edge refresh for the unique allocation cache — `unique-lawn-wire` (fix)
   - **Why:** AS-1.1's cadence omits the one trigger where the cache's KEY SET moves. Confirmed live
     2026-09-13 (see AS-1.1 above and `DESIGN-GATE.md` §4). Third instance of this bug class in this
     codebase — now also codified as `DESIGN-GATE.md` §2.16.
-  - Accept: a specimen entering `Bound` triggers `RefreshUniqueAptitudesAsync` (the
-    `MatchHost.ConsumeLastBound` edge, `MatchHost.cs:139-144`, which today calls only
-    `UniqueBoundLoadout.TryApply`). Fire-and-forget off the hot path — the fetch is async HTTP and
-    must not block the bind, matching every other refresh's own "never a per-hit poll" contract.
-  - Accept (**the regression that matters**): **order-independent.** `allocate → deploy` ends with
-    the shares on the live entity, exactly as `deploy → allocate` already does.
-  - Accept: all 4 cadence triggers from the amended spec have a test. `RefreshUniqueAptitudesAsync`
-    currently has **none** — its cache-population timing is the untested surface that let this ship
-    (`SpeciesAllocationSourceTests` injects a pre-populated cache as delegates, so it is green and
-    always was; it tests the Core resolve type, never the transport).
-  - Accept: no redundant refetch storm — binding N specimens in one tick must not issue N full
-    rounds of per-instance GETs (debounce/coalesce, or fetch just the newly-bound id).
-  - Verify: Core/Injector unit for the cadence; then a **live** probe per `live-probe-standard.md` —
-    allocate BEFORE deploy, then read the live entity back and assert the bonus reached Unity. A
-    persisted read alone does not close this (that is exactly what missed it the first time).
-  - Files: `MatchHost.cs` (hook the bind edge), `RpgClient.cs` (targeted/coalesced refresh entry
-    point), tests
+  - [x] Accept: a specimen entering `Bound` triggers the refresh — `MatchHost.ConsumeLastBound`'s edge
+    now also calls the new `RpgClient.TriggerBoundAptitudeRefresh()`, fire-and-forget, right alongside
+    the existing `UniqueBoundLoadout.TryApply` call (`e4e2548`).
+  - [x] Accept (**the regression that matters**): **order-independent**, proven live 2026-09-14 —
+    `POST /api/aptitudes/unique/allocate` (Might 141) on a Roster specimen, THEN
+    `POST /api/unique/actors/{id}/deploy`. Live read via `debug.board-stats`:
+    `attack:2721, attackDamage:2721` (ptr `2887A74BB40`, instanceId `5dd73a05c09a4bc6afcebbf1acd5e847`,
+    level 148) — vanilla baseline is `attack:1`. This is the EXACT `allocate → deploy` order that
+    produced `bonusAtk 0` / `attack 1` in the 2026-09-13 incident this task exists because of.
+  - [x] Accept: all 4 cadence triggers covered —
+    `tests/FusionRpg.Injector.Tests/UniqueAptitudeRefreshCadenceTests.cs` (7/7): source-scan for
+    triggers 1-3 (StartAsync, SignalR reconnect, `aptitudes.allocation.reload`) and a behavioral test
+    for trigger 4 (the new bind edge, fire-and-forget, never awaited on the hot path).
+  - [x] Accept: no redundant refetch storm — `RpgClient.TriggerBoundAptitudeRefresh` coalesces
+    concurrent binds into at most one extra round trip after an in-flight fetch completes (since
+    `RefreshUniqueAptitudesAsync` always reads the CURRENT Bound set live, never a snapshot taken at
+    trigger time); proven by a real-HTTP behavioral test (10 rapid triggers → far fewer than 10 actual
+    fetch runs).
+  - [x] Verify: `dotnet test tests/FusionRpg.Injector.Tests --filter "FullyQualifiedName~UniqueAptitudeRefreshCadenceTests"`
+    (7/7) + full `tests/FusionRpg.Injector.Tests` (38/38, no regressions) + `guard-actor-hub.ps1` +
+    `guard-secondary-no-unity.ps1` (both green); then the live probe above (persisted-state read alone
+    was explicitly NOT accepted as closing this, per the spec's own standard).
+  - Files: `src/FusionRpg.Injector/Match/MatchHost.cs` (hook the bind edge),
+    `src/FusionRpg.Injector/RpgClient.cs` (`TriggerBoundAptitudeRefresh` + coalescing state machine),
+    `tests/FusionRpg.Injector.Tests/UniqueAptitudeRefreshCadenceTests.cs`
   - Deps: AS-1.1
   - Scope: S
 
@@ -130,11 +138,12 @@
 
 ### Checkpoint 1
 
-- [ ] Bound unique lawn reflects UniqueCreature after allocate+reload — **live probe RUN 2026-09-13:
-      the `deploy → allocate` order PASSES for real** (`bonusAtk 1330`, `bonusMaxHp 1110` from
-      Vigor+Fortitude, all written to the live Unity entity: board read `attack 223 hp 1410 maxHp
-      1410`). The `allocate → deploy` order **FAILS** — blocked on AS-1.1b. This box ticks when both
-      orders pass, not one
+- [x] Bound unique lawn reflects UniqueCreature after allocate+reload — **both orders now proven
+      live.** `deploy → allocate` (2026-09-13): `bonusAtk 1330`, `bonusMaxHp 1110` from
+      Vigor+Fortitude, board read `attack 223 hp 1410 maxHp 1410`. `allocate → deploy` (2026-09-14,
+      after AS-1.1b): Might 141 allocated on a Roster specimen, then deployed — board read
+      `attack 2721 attackDamage 2721` (vanilla baseline `attack 1`) on the live Unity entity. Both
+      orders pass — this box now ticks for real
 - [x] Fold fixtures show leftover + decision in-band
 - [x] Piece landmark tests green; HTML drafts present
 - [x] Review Phase 1 before hosts

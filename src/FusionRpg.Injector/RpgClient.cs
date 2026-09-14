@@ -546,6 +546,71 @@ public sealed class RpgClient
         }
     }
 
+    bool _uniqueRefreshInFlight;
+    bool _uniqueRefreshRerunQueued;
+    readonly object _uniqueRefreshGate = new();
+    Task? _uniqueRefreshLoopTask;
+
+    /// <summary>Read-only, incremented once per actual <see cref="RefreshUniqueAptitudesAsync"/>
+    /// attempt made from <see cref="RunBoundAptitudeRefreshLoop"/> — for a coalescing test only (same
+    /// idiom as <c>LawnElementResolver.BoardLookupCount</c>): proves N rapid
+    /// <see cref="TriggerBoundAptitudeRefresh"/> calls cost far fewer than N actual fetches.</summary>
+    public int UniqueRefreshRunCount { get; private set; }
+
+    /// <summary>Test seam only: awaits whatever refresh loop <see cref="TriggerBoundAptitudeRefresh"/>
+    /// most recently started, so a test can assert coalescing deterministically instead of racing a
+    /// fire-and-forget background task. Never called by production code — every real call site fires
+    /// and forgets, exactly as before this seam existed.</summary>
+    public Task WaitForUniqueRefreshLoopForTest() => _uniqueRefreshLoopTask ?? Task.CompletedTask;
+
+    /// <summary>aptitude-sheet AS-1.1b (unique-lawn-wire fix) — the bind-edge cadence trigger
+    /// `MatchHost.ConsumeLastBound` calls fire-and-forget. Coalesces concurrent binds into at most ONE
+    /// extra round trip after the in-flight fetch completes, rather than one full
+    /// <see cref="RefreshUniqueAptitudesAsync"/> sweep per bind: a bind that lands while a fetch is
+    /// already running just sets a "run once more" flag, since the next run reads the CURRENT Bound
+    /// set live (never a snapshot captured at trigger time) and so already covers every bind that
+    /// happened during the in-flight fetch, however many there were. Safe to call from any thread —
+    /// the injector main loop is single-threaded today, but this makes no assumption of that.</summary>
+    public void TriggerBoundAptitudeRefresh()
+    {
+        lock (_uniqueRefreshGate)
+        {
+            if (_uniqueRefreshInFlight) { _uniqueRefreshRerunQueued = true; return; }
+            _uniqueRefreshInFlight = true;
+            _uniqueRefreshLoopTask = RunBoundAptitudeRefreshLoop();
+        }
+    }
+
+    async Task RunBoundAptitudeRefreshLoop()
+    {
+        try
+        {
+            while (true)
+            {
+                UniqueRefreshRunCount++;
+                await RefreshUniqueAptitudesAsync().ConfigureAwait(false);
+                lock (_uniqueRefreshGate)
+                {
+                    if (!_uniqueRefreshRerunQueued)
+                    {
+                        _uniqueRefreshInFlight = false;
+                        return;
+                    }
+                    _uniqueRefreshRerunQueued = false;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            lock (_uniqueRefreshGate)
+            {
+                _uniqueRefreshInFlight = false;
+                _uniqueRefreshRerunQueued = false;
+            }
+            LastError = ex.Message;
+        }
+    }
+
     /// <summary>lawn-tree-hydrate (T13): the transport half of the tree bound-atoms delegate
     /// <c>CheatState.ActorHub</c> needs. Mirrors <see cref="RefreshCommanderAllocationAsync"/>'s own
     /// shape exactly (same current-player lookup, same try/catch-to-LastError) — the Injector has no

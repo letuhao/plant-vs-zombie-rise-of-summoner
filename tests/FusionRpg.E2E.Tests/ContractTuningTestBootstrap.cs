@@ -480,7 +480,11 @@ internal static class ContractTuningTestBootstrap
         SpeciesTempoReferenceIntervalMs: 1500);
 
     /// <summary>Transcribed from the shipped data/tuning/battle-resources.v1.json. `hp` is absent on
-    /// purpose -- its max mirrors BattleActorSetup.MaxHp (spec-battle-resources.md S2.6).</summary>
+    /// purpose -- its max mirrors BattleActorSetup.MaxHp (spec-battle-resources.md S2.6).
+    ///
+    /// <para>Regen share deliberately stays all-zero — this assembly's ambient fixture keeps the
+    /// pre-T11 baseline (lawn-combat-wire T11, spec-lawn-combat-calibration.md); the real
+    /// `stamina=50` share now lives in the shipped `battle-resources.v2.json`.</para></summary>
     public static readonly FusionRpg.Core.Battle.BattleResourceTuning DefaultBattleResources = new(
         SchemaVersion: 1, Version: 1,
         PoolShareMilli: new Dictionary<string, int>(StringComparer.Ordinal)
@@ -490,6 +494,14 @@ internal static class ContractTuningTestBootstrap
             ["spirit"] = 500,
             ["qi"] = 500,
             ["poise"] = 500,
+        },
+        RegenPerSecondShareMilli: new Dictionary<string, int>(StringComparer.Ordinal)
+        {
+            ["stamina"] = 0,
+            ["hunger"] = 0,
+            ["spirit"] = 0,
+            ["qi"] = 0,
+            ["poise"] = 0,
         });
 
     public static readonly FusionRpg.Core.Actions.ActionTimingTuning DefaultActionTiming = new(

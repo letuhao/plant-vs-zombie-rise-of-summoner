@@ -60,6 +60,19 @@ public readonly struct GameEventRec
     /// </summary>
     public readonly IntPtr SwingPtr;
 
+    /// <summary>
+    /// lawn-hit-entry (T9c): true when the ENGINE'S OWN <c>DamageType</c> marks this hit as
+    /// instakill-shaped (the lawnmower / board-wipe family — <c>Squash</c>, <c>MaxDamage</c>,
+    /// <c>Crash</c>, <c>RealDamage</c>; see <c>GameHooks.cs</c>'s <c>IsInstakillShapedDamageType</c>).
+    /// Deliberately NOT a magnitude threshold (spec-lawn-hit-entry.md "Lifecycle correctness" —
+    /// a threshold is a magic number a balance pass will eventually cross legitimately). Consumed
+    /// by <c>DamagePacketBuilder.ResolveAmount</c> to refuse an event-linked ("proportional")
+    /// rider for a hit in this class, never to change the vanilla amount itself. Optional/trailing
+    /// like <see cref="SwingPtr"/>: every construction site that predates this field defaults to
+    /// <c>false</c>, i.e. "ordinary combat damage".
+    /// </summary>
+    public readonly bool InstakillShaped;
+
     public GameEventRec(
         GameEventKind kind,
         int frame,
@@ -75,7 +88,8 @@ public readonly struct GameEventRec
         int sourceGrantIdx,
         int matchKeyIdx,
         int pairId,
-        IntPtr swingPtr = default)
+        IntPtr swingPtr = default,
+        bool instakillShaped = false)
     {
         Kind = kind;
         Frame = frame;
@@ -92,6 +106,7 @@ public readonly struct GameEventRec
         MatchKeyIdx = matchKeyIdx;
         PairId = pairId;
         SwingPtr = swingPtr;
+        InstakillShaped = instakillShaped;
     }
 
     public bool IsCoalescible => ChainDepth == 0 && SourceGrantIdx < 0;

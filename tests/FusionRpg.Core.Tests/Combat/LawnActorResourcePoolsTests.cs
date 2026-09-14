@@ -1,4 +1,6 @@
 using FusionRpg.Core.Combat;
+using FusionRpg.Core.Power;
+using FusionRpg.Core.Stats;
 using FusionRpg.Core.Stats.Derived;
 using Xunit;
 
@@ -121,5 +123,73 @@ public class LawnActorResourcePoolsTests
 
         Assert.Equal(0, pools.Count);
         Assert.False(pools.TryGet("0xAAA", out _));
+    }
+
+    // ------------------------------------------------------------------------------------------
+    // `basic-attack-cost` T12a (spec-basic-attack-cost.md wire 2, the anti-silent-inert check):
+    // `resource.max.stamina` is 0 for every lawn actor UNLESS the injector's Hub opts into
+    // `seedResourceBaseline: true` (`ActorHub.cs:147`, sole prior `true` caller
+    // `UniqueActorHubCompose.cs:75`). CheatState.ActorHub is where the injector must now pass that
+    // flag too — these tests pin the SAME mechanism `ActorHubTests.SeedResourceBaseline_sets_
+    // resource_max_for_all_six_ids` already proves generically, framed against T12's own falsifier
+    // (a lawn-shaped plant AND zombie actor, through the real ambient tuning fixture this whole
+    // assembly runs under — `ContractTuningTestBootstrap.DefaultBattleResources` already carries the
+    // real `poolShareMilli.stamina = 500`, unchanged since v1, so this needs no ambient mutation).
+    [Fact]
+    public void SeedResourceBaseline_gives_a_lawn_plant_a_non_zero_resource_max_stamina()
+    {
+        var hub = ActorHubBootstrap.CreateDefault(
+            powerIndex: new FixedPowerIndexProvider(theta: 1), seedResourceBaseline: true);
+        var ctx = hub.Stats.Contexts.ForPlant(
+            "0xP1", new EntityBaseline { Hp = 300, MaxHp = 300, Atk = 20 }, typeId: 1);
+
+        var derived = hub.ResolveDerived(ctx);
+        var max = ResourceChannelReader.Max(derived, "stamina");
+
+        Assert.True(max > 0, $"resource.max.stamina must be non-zero for a real lawn actor once " +
+            $"seedResourceBaseline is wired -- 0 is indistinguishable from the bug this feature fixes. Got {max}.");
+
+        // The pool itself resolves at that same max the moment it is created -- the actual
+        // ActorResourcePools instance a lawn cost charge would read from.
+        var pools = new LawnActorResourcePools();
+        var actor = pools.GetOrCreate("0xP1", derived, atTick: 0);
+        Assert.Equal(max, actor.Resolve("stamina", 0, derived));
+    }
+
+    /// <summary>Zombies get the SAME Hub-seeded pool as plants — `LawnActorResourcePools` is keyed by
+    /// combat ptr with no side distinction at all (its own class doc), and `BasicAttackGrantBuilder`
+    /// (T10) binds the basic-attack grant to "every spawned lawn actor, plant and zombie" — so a
+    /// zombie actor resolved through the SAME Hub must show the SAME non-zero stamina max, not an
+    /// exemption. This is the acceptance criterion's own falsifier for "zombies get pools too."</summary>
+    [Fact]
+    public void SeedResourceBaseline_gives_a_lawn_zombie_the_same_non_zero_resource_max_stamina()
+    {
+        var hub = ActorHubBootstrap.CreateDefault(
+            powerIndex: new FixedPowerIndexProvider(theta: 1), seedResourceBaseline: true);
+        var plantCtx = hub.Stats.Contexts.ForPlant(
+            "0xP2", new EntityBaseline { Hp = 300, MaxHp = 300, Atk = 20 }, typeId: 1);
+        var zombieCtx = hub.Stats.Contexts.ForZombie(
+            "0xZ1", new EntityBaseline { Hp = 300, MaxHp = 300, Atk = 20 }, typeId: 1);
+
+        var plantMax = ResourceChannelReader.Max(hub.ResolveDerived(plantCtx), "stamina");
+        var zombieMax = ResourceChannelReader.Max(hub.ResolveDerived(zombieCtx), "stamina");
+
+        Assert.True(zombieMax > 0, $"a zombie actor must also resolve a non-zero resource.max.stamina. Got {zombieMax}.");
+        Assert.Equal(plantMax, zombieMax); // same Hub, same baseline shape -- no side-based exemption
+    }
+
+    /// <summary>The negative control this whole feature exists to distinguish itself from: a bare
+    /// `CreateDefault` (no `seedResourceBaseline`) is exactly today's bug — max reads 0. Kept here,
+    /// alongside the two tests above, so a reader sees both sides of the "0 is the bug, non-zero is
+    /// the fix" contrast in one file.</summary>
+    [Fact]
+    public void Bare_CreateDefault_without_seedResourceBaseline_still_reads_zero_stamina_max()
+    {
+        var hub = ActorHubBootstrap.CreateDefault(powerIndex: new FixedPowerIndexProvider(theta: 1));
+        var ctx = hub.Stats.Contexts.ForPlant("0xP3", new EntityBaseline { Hp = 300, MaxHp = 300, Atk = 20 });
+
+        var max = ResourceChannelReader.Max(hub.ResolveDerived(ctx), "stamina");
+
+        Assert.Equal(0, max);
     }
 }

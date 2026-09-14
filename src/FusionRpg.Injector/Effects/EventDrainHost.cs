@@ -45,6 +45,27 @@ public static class EventDrainHost
     /// <summary>Record path active — off in debug sessions (legacy fidelity path instead).</summary>
     static bool Active => Enabled && !DebugRuntime.SessionActive;
 
+    // lawn-hit-entry (T9c): ptrs known dead — a Unity object can linger "dying but not destroyed"
+    // for a frame or two (spec-lawn-hit-entry.md "Lifecycle correctness"), long enough for a SECOND
+    // physical hit already in flight (e.g. two projectiles landing on the same target one frame
+    // apart) to reach TryRecord*/TryRecordTaken against an already-dead ptr. Refusing those at
+    // RECORD time (below) is simpler and cheaper than filtering at drain time, and needs no change
+    // to DamagePacketBuilder/EntityStatWriter. Marked from GameHooks.ForgetEntity — the one shared
+    // point both PlantDie and NoteZombieDead already funnel through, so both sides get this for
+    // free. Cleared per-ptr only at match end (FlushAllAndReset), same lifetime as every other
+    // per-match set this host owns; a ptr reused for a brand-new entity within the same match can
+    // very slightly over-suppress until the next match boundary, which is the safe direction for a
+    // liveness guard to err in (never under-suppress a genuinely dead target).
+    static readonly HashSet<IntPtr> _deadPtrs = new();
+
+    /// <summary>See <see cref="_deadPtrs"/>.</summary>
+    public static void MarkDead(IntPtr ptr)
+    {
+        if (ptr != IntPtr.Zero) _deadPtrs.Add(ptr);
+    }
+
+    static bool IsDead(IntPtr ptr) => ptr != IntPtr.Zero && _deadPtrs.Contains(ptr);
+
     static int SafeFrame()
     {
         try { return Time.frameCount; }
@@ -67,10 +88,13 @@ public static class EventDrainHost
     /// precisely because per-INSTANCE attribution was missing. The bullet's own ptr survives as the
     /// record's <see cref="GameEventRec.SwingPtr"/> — the swing identity, not the attacker.</summary>
     public static bool TryRecordDealtFromBullet(
-        byte targetSide, Il2CppObjectBase? damageFrom, IntPtr targetPtr, int targetTypeId, int damage, out bool wasBullet)
+        byte targetSide, Il2CppObjectBase? damageFrom, IntPtr targetPtr, int targetTypeId, int damage, out bool wasBullet,
+        bool instakillShaped = false)
     {
         wasBullet = false;
         if (!Active || !EffectRuntime.HasOnDamageDealtGrant()) return false;
+        // T9c liveness guard: an already-dead-or-dying target absorbs no further delta.
+        if (IsDead(targetPtr)) return false;
         if (damageFrom == null) return false;
 
         Bullet? bullet = null;
@@ -118,7 +142,7 @@ public static class EventDrainHost
             amount: -Math.Abs(damage), hitCount: 1,
             chainDepth: d.RecordDepth, sourceGrantIdx: -1,
             matchKeyIdx: d.InternMatchKey(GameHooks.MatchKey), pairId: 0,
-            swingPtr: bullet.Pointer));
+            swingPtr: bullet.Pointer, instakillShaped: instakillShaped));
     }
 
     /// <summary>Melee dealt (zombie bite, or a plant-side area melee like Shulkflower's
@@ -128,9 +152,12 @@ public static class EventDrainHost
     /// from a hardcoded Plant so this one function serves both directions rather than forking a
     /// second copy for the reverse attacker/target shape.</summary>
     public static bool TryRecordMeleeDealt(
-        byte targetSide, IntPtr attackerPtr, int attackerTypeId, IntPtr targetPtr, int targetTypeId, int damage)
+        byte targetSide, IntPtr attackerPtr, int attackerTypeId, IntPtr targetPtr, int targetTypeId, int damage,
+        bool instakillShaped = false)
     {
         if (!Active || !EffectRuntime.HasOnDamageDealtGrant()) return false;
+        // T9c liveness guard: an already-dead-or-dying target absorbs no further delta.
+        if (IsDead(targetPtr)) return false;
         var d = Drain;
         var frame = SafeFrame();
         var pair = ++_pairSeq;
@@ -142,7 +169,8 @@ public static class EventDrainHost
             typeId: attackerTypeId, targetTypeId: targetTypeId, side: targetSide,
             amount: -Math.Abs(damage), hitCount: 1,
             chainDepth: d.RecordDepth, sourceGrantIdx: -1,
-            matchKeyIdx: d.InternMatchKey(GameHooks.MatchKey), pairId: pair));
+            matchKeyIdx: d.InternMatchKey(GameHooks.MatchKey), pairId: pair,
+            instakillShaped: instakillShaped));
         if (ok)
         {
             if (frame != _meleePairsFrame)
@@ -185,14 +213,16 @@ public static class EventDrainHost
     /// target this frame — the ambient path exists only to cover targets that hook never sees, and
     /// must never double-record one it already did.
     /// </summary>
-    public static bool TryRecordAmbientMeleeDealt(byte targetSide, IntPtr targetPtr, int targetTypeId, int damage)
+    public static bool TryRecordAmbientMeleeDealt(
+        byte targetSide, IntPtr targetPtr, int targetTypeId, int damage, bool instakillShaped = false)
     {
         if (_ambientMeleeAttackerPtr == IntPtr.Zero) return false;
         var frame = SafeFrame();
         if (_ambientMeleeAttackerFrame != frame) return false;
         if (_meleePairsFrame == frame && _meleePairsByTarget.ContainsKey(targetPtr)) return false;
         return TryRecordMeleeDealt(
-            targetSide, _ambientMeleeAttackerPtr, _ambientMeleeAttackerTypeId, targetPtr, targetTypeId, damage);
+            targetSide, _ambientMeleeAttackerPtr, _ambientMeleeAttackerTypeId, targetPtr, targetTypeId, damage,
+            instakillShaped);
     }
 
     /// <summary>Damage taken (OnDamageTaken trigger). Consumes a same-frame melee pair when the
@@ -200,6 +230,8 @@ public static class EventDrainHost
     public static bool TryRecordTaken(byte side, IntPtr targetPtr, int targetTypeId, IntPtr actorPtr, int damage)
     {
         if (!Active || !EffectRuntime.HasOnDamageTakenGrant()) return false;
+        // T9c liveness guard: an already-dead-or-dying target absorbs no further delta.
+        if (IsDead(targetPtr)) return false;
         var d = Drain;
 
         var pair = 0;
@@ -272,6 +304,21 @@ public static class EventDrainHost
         _expensiveDeferredWindow += stats.ExpensiveDeferred;
         if (stats.MaxLatencyFrames > _maxLatencyFramesWindow) _maxLatencyFramesWindow = stats.MaxLatencyFrames;
         if (stats.MaxRecordTicks > _maxRecordTicksWindow) _maxRecordTicksWindow = stats.MaxRecordTicks;
+
+        // T9c: Tick is the one call site guaranteed never to be nested itself — by the time
+        // _drain.Drain(...) above returns, EventDrain's own nested-flush queue has already forced
+        // through every ptr any nested FlushForPtr call queued during this pass, so it is now safe
+        // to run the grant-withdraw callbacks that were deferred alongside them.
+        if (_pendingForgets.Count > 0)
+        {
+            var due = _pendingForgets.ToArray();
+            _pendingForgets.Clear();
+            foreach (var (ptr, onSafeToForget) in due)
+            {
+                FlushForPtr(ptr); // mop up anything that arrived since the ptr was queued
+                onSafeToForget();
+            }
+        }
     }
 
     /// <summary>Perf-window stats for PerfReporter — returns and resets the rolling counters.</summary>
@@ -300,14 +347,27 @@ public static class EventDrainHost
         return d;
     }
 
+    // lawn-hit-entry (T9c): grant-withdraw callbacks deferred because the matching EventDrain.
+    // FlushForPtr call came back nested (-1) — see FlushForPtr's own doc. Drained by Tick(), the
+    // one call site that is NEVER itself nested (it is the top-level per-frame entry point), right
+    // after its own Drain() call returns — by which point EventDrain's own nested-flush queue (see
+    // EventDrain.DrainPendingNestedFlushes) has already forced every one of these ptrs' records
+    // through, so it is finally safe to withdraw their grants.
+    static readonly List<(IntPtr Ptr, Action OnSafeToForget)> _pendingForgets = new();
+
     /// <summary>
     /// Death barrier — pending hits for a dying entity drain before grant-withdraw (SSOT §A2).
     /// v4 item 1: bounded by a per-frame allowance (one drain-budget's worth); over-allowance
     /// records for dying entities are shed with a counter instead of blowing the frame.
+    /// Returns true when the flush ran for real (the common, non-nested case) — the caller may
+    /// then withdraw this ptr's grants immediately, exactly as before this method returned a
+    /// value at all. Returns false when the underlying <see cref="EventDrain.FlushForPtr"/> call
+    /// came back nested (T9c) — the caller must NOT withdraw grants yet; pass the withdraw action
+    /// to the <paramref name="onSafeToForget"/> overload instead of calling it directly.
     /// </summary>
-    public static void FlushForPtr(IntPtr ptr)
+    public static bool FlushForPtr(IntPtr ptr)
     {
-        if (_drain == null || _drain.PendingCount == 0) return;
+        if (_drain == null || _drain.PendingCount == 0) return true;
 
         var frame = SafeFrame();
         if (frame != _deathFlushFrame)
@@ -320,8 +380,35 @@ public static class EventDrainHost
         if (remaining <= 0) remaining = 0; // still processes nothing beyond budget; drops counted
 
         EffectRuntime.FreezeBoard();
-        _deathFlushSpent += _drain.FlushForPtr(ptr, remaining);
+        var spent = _drain.FlushForPtr(ptr, remaining);
+        if (spent < 0) return false; // nested — EventDrain queued it; do not spend/return yet
+        _deathFlushSpent += spent;
+        return true;
     }
+
+    /// <summary>
+    /// T9c: the caller-friendly form of <see cref="FlushForPtr(IntPtr)"/> — always safe to call
+    /// unconditionally in place of the old "flush then forget" two-step. Runs
+    /// <paramref name="onSafeToForget"/> (typically <c>() =&gt; ForgetEntity(ptr)</c>) immediately
+    /// when the flush was not nested (the overwhelmingly common case, byte-identical timing to
+    /// before this fix), or queues it to run from <see cref="Tick"/> once the outer drain pass that
+    /// nested this call has fully unwound (still strictly before grants withdraw — just not
+    /// synchronously inside the nested caller's own stack frame).
+    /// </summary>
+    public static void FlushForPtr(IntPtr ptr, Action onSafeToForget)
+    {
+        if (FlushForPtr(ptr)) onSafeToForget();
+        else DeferForget(ptr, onSafeToForget);
+    }
+
+    /// <summary>
+    /// T9c: queues a grant-withdraw for a ptr whose own <see cref="FlushForPtr(IntPtr)"/> call
+    /// already ran and returned false (nested) — for a caller that needs the flush and the
+    /// forget-or-defer decision at two DIFFERENT points in its own method (e.g. an Emit in
+    /// between), rather than the single combined <see cref="FlushForPtr(IntPtr, Action)"/> call.
+    /// Runs from <see cref="Tick"/> exactly like every other deferred forget.
+    /// </summary>
+    public static void DeferForget(IntPtr ptr, Action onSafeToForget) => _pendingForgets.Add((ptr, onSafeToForget));
 
     /// <summary>Match-edge barrier — drain everything, reset interning (board.end / match.result).</summary>
     public static void FlushAllAndReset()
@@ -332,6 +419,8 @@ public static class EventDrainHost
         _drain.FlushAllAndReset();
         _meleePairsByTarget.Clear();
         _meleePairsFrame = -1;
+        _deadPtrs.Clear();
+        _pendingForgets.Clear(); // match is over — nothing queued for it may fire into the next one
         EndAmbientMeleeAttacker();
     }
 }

@@ -49,6 +49,12 @@ public static class GameHooks
     {
         // Backstop: any records still pending at a match edge drain before state clears.
         try { Effects.EventDrainHost.FlushAllAndReset(); } catch { }
+        // lawn-combat-wire T10: a ptr queued for a basic-attack grant bind in a match that ended
+        // before its next drain must not bind against the NEXT match's board.
+        try { Effects.LawnBasicAttackGrantBinder.ClearPending(); } catch { }
+        // lawn-combat-wire T12b: drop this match's regen-telemetry baseline -- the pools themselves
+        // are already dropped by InjectorEntityRegistry.Clear() below.
+        try { Effects.LawnBasicAttackCostCharger.ClearMatchState(); } catch { }
         Effects.InjectorEntityRegistry.Clear();
         Effects.InjectorBoardSnapshot.Invalidate();
         Applied.Clear();
@@ -657,9 +663,20 @@ public static class GameHooks
         public static void Postfix(Plant __instance, Plant.DieReason reason)
         {
             if (__instance == null) return;
-            // v2 barrier: pending hit records for this plant drain before its grants withdraw.
-            try { Effects.EventDrainHost.FlushForPtr(__instance.Pointer); } catch { }
-            try { Effects.InjectorEntityRegistry.Remove(__instance.Pointer); } catch { }
+            var ptr = __instance.Pointer;
+            // lawn-hit-entry (T9c): mark dead BEFORE the flush — a hit already in flight for this
+            // ptr (e.g. a second projectile landing the same frame) must be refused at record
+            // time, not merely left to drain late. Marking early never blocks the flush below from
+            // delivering this ptr's own already-pending records (the liveness guard only gates
+            // NEW records, never drain-time processing of existing ones).
+            Effects.EventDrainHost.MarkDead(ptr);
+            // v2 barrier: pending hit records for this plant drain before its grants withdraw —
+            // same position as before this fix. `flushedNow` is false only when this death itself
+            // fired from inside an active drain pass (T9c); in that case ForgetEntity below must
+            // wait, or this ptr's still-pending records could drain AFTER the grant withdraws.
+            var flushedNow = true;
+            try { flushedNow = Effects.EventDrainHost.FlushForPtr(ptr); } catch { }
+            try { Effects.InjectorEntityRegistry.Remove(ptr); } catch { }
             Effects.InjectorBoardSnapshot.Invalidate();
             // OnDeath must see entity grants; ForgetEntity withdraws after Emit.
             var diePayload = new Dictionary<string, object>
@@ -671,9 +688,10 @@ public static class GameHooks
                 ["reasonName"] = GameDumps.EnumName(reason),
                 ["lifecycleOccurrence"] = Interlocked.Increment(ref _lifecycleOccurrence)
             };
-            AddFatalKiller(diePayload, TakeFatalKiller(__instance.Pointer));
+            AddFatalKiller(diePayload, TakeFatalKiller(ptr));
             Emit("plant.die", diePayload);
-            ForgetEntity(__instance.Pointer);
+            if (flushedNow) ForgetEntity(ptr);
+            else Effects.EventDrainHost.DeferForget(ptr, () => ForgetEntity(ptr));
         }
     }
 
@@ -734,8 +752,39 @@ public static class GameHooks
             Effects.LawnCombatObserverBridge.RecordVanillaHit("plant", __instance, damageFrom, damage);
             // v2 record path (Task 9) — mirrors ZombieTakeDamage; melee bites consume the
             // AttackPlant prefix's pending pair id inside TryRecordTaken.
-            var telemetry = s.LogDamage || (RpgHost.Client?.Stats.LogDamage ?? false) || DebugRuntime.SessionActive;
-            if (telemetry)
+            //
+            // lawn-hit-entry (T9a) — caller-side ordering audit: `v2Active` (Enabled && not a debug
+            // session) now decides FIRST, matching the already-correct RecordOrEmitMeleeAttackPlant
+            // site below. Previously `telemetry` (which folds in LogDamage, a normal non-session
+            // toggle, not just SessionActive) won the else-if BEFORE the recorder was even
+            // consulted — so leaving LogDamage on outside a debug session silently routed every
+            // hit down the legacy path forever, bypassing D8/D9's dedupe/never-drop rules entirely
+            // (see LawnCombatObserver's own class doc, which already flagged this exact defect).
+            // SessionActive alone still forces legacy fidelity (gate 2 — "must not be fixed").
+            var sessionActive = DebugRuntime.SessionActive;
+            var logDamage = s.LogDamage || (RpgHost.Client?.Stats.LogDamage ?? false);
+            var v2Active = Effects.EventDrainHost.Enabled && !sessionActive;
+            var instakillShaped = IsInstakillShapedDamageType(damageType);
+            if (v2Active)
+            {
+                var pType = 0;
+                try { pType = (int)__instance.thePlantType; } catch { }
+                var actorPtr = IntPtr.Zero;
+                try { if (damageFrom is Il2CppObjectBase dfObj) actorPtr = dfObj.Pointer; } catch { }
+                Effects.EventDrainHost.TryRecordDealtFromBullet(
+                    Core.Events.GameEventSide.Plant, damageFrom as Il2CppObjectBase, __instance.Pointer, pType, damage,
+                    out var wasBullet, instakillShaped);
+                if (!wasBullet)
+                {
+                    // Multi-target melee with no target param of its own (AttackPlants-shaped) —
+                    // the ambient attacker bracketed around that call fills in what damageFrom can't.
+                    Effects.EventDrainHost.TryRecordAmbientMeleeDealt(
+                        Core.Events.GameEventSide.Plant, __instance.Pointer, pType, damage, instakillShaped);
+                    Effects.EventDrainHost.TryRecordTaken(
+                        Core.Events.GameEventSide.Plant, __instance.Pointer, pType, actorPtr, damage);
+                }
+            }
+            else if (sessionActive || logDamage)
             {
                 var payload = new Dictionary<string, object>
                 {
@@ -751,24 +800,6 @@ public static class GameHooks
                 DebugRuntime.Stamp(payload);
                 Emit("plant.damage", payload);
             }
-            else if (Effects.EventDrainHost.Enabled)
-            {
-                var pType = 0;
-                try { pType = (int)__instance.thePlantType; } catch { }
-                var actorPtr = IntPtr.Zero;
-                try { if (damageFrom is Il2CppObjectBase dfObj) actorPtr = dfObj.Pointer; } catch { }
-                Effects.EventDrainHost.TryRecordDealtFromBullet(
-                    Core.Events.GameEventSide.Plant, damageFrom as Il2CppObjectBase, __instance.Pointer, pType, damage, out var wasBullet);
-                if (!wasBullet)
-                {
-                    // Multi-target melee with no target param of its own (AttackPlants-shaped) —
-                    // the ambient attacker bracketed around that call fills in what damageFrom can't.
-                    Effects.EventDrainHost.TryRecordAmbientMeleeDealt(
-                        Core.Events.GameEventSide.Plant, __instance.Pointer, pType, damage);
-                    Effects.EventDrainHost.TryRecordTaken(
-                        Core.Events.GameEventSide.Plant, __instance.Pointer, pType, actorPtr, damage);
-                }
-            }
             else if (Effects.EffectRuntime.HasOnDamageTakenGrant())
             {
                 var payload = new Dictionary<string, object>
@@ -782,7 +813,7 @@ public static class GameHooks
             }
             // Hit* Harmony skipped — drive on-hit arms + combat.hit identity from TakeDamage.
             try { DebugRuntime.OnCombatHit("plant", null, __instance); } catch (Exception ex) { CheatState.Error("debug onhit plant: " + ex.Message); }
-            if (!Effects.EventDrainHost.Enabled || telemetry)
+            if (!v2Active)
                 TryEmitCombatHitFromBullet("plant", damageFrom, plantTarget: __instance, zombieTarget: null, fallbackDamage: damage);
         }
 
@@ -864,8 +895,39 @@ public static class GameHooks
             Effects.LawnCombatObserverBridge.RecordVanillaHit("zombie", __instance, damageFrom, theDamage);
             // v2 record path (Task 9): telemetry/session keeps the legacy dict path for
             // fidelity; otherwise grants get compact records via the drain host.
-            var telemetry = s.LogDamage || (RpgHost.Client?.Stats.LogDamage ?? false) || DebugRuntime.SessionActive;
-            if (telemetry)
+            //
+            // lawn-hit-entry (T9a) — caller-side ordering audit: see the identical comment on
+            // PlantTakeDamage.Prefix. `v2Active` decides first; SessionActive alone still forces
+            // legacy fidelity, but a plain LogDamage toggle no longer preempts the recorder.
+            var sessionActive = DebugRuntime.SessionActive;
+            var logDamage = s.LogDamage || (RpgHost.Client?.Stats.LogDamage ?? false);
+            var v2Active = Effects.EventDrainHost.Enabled && !sessionActive;
+            var instakillShaped = IsInstakillShapedDamageType(theDamageType);
+            if (v2Active)
+            {
+                var zType = 0;
+                try { zType = (int)__instance.theZombieType; } catch { }
+                var actorPtr = IntPtr.Zero;
+                try { if (damageFrom is Il2CppObjectBase dfObj) actorPtr = dfObj.Pointer; } catch { }
+                // Bullet damage suppresses the taken record at source, matching v1 policy —
+                // including on ring overflow (I2: a dropped bullet-dealt must not turn into
+                // a spurious taken).
+                Effects.EventDrainHost.TryRecordDealtFromBullet(
+                    Core.Events.GameEventSide.Zombie, damageFrom as Il2CppObjectBase, __instance.Pointer, zType, theDamage,
+                    out var wasBullet, instakillShaped);
+                if (!wasBullet)
+                {
+                    // Symmetric with the plant-side branch above — currently a no-op in practice
+                    // since the plant-side area attack (Shulkflower/WaterShulk.AttackEffect) already
+                    // knows its exact victims and records them directly, but kept here so a future
+                    // zombie-target multi-attack with no target param gets the same fallback for free.
+                    Effects.EventDrainHost.TryRecordAmbientMeleeDealt(
+                        Core.Events.GameEventSide.Zombie, __instance.Pointer, zType, theDamage, instakillShaped);
+                    Effects.EventDrainHost.TryRecordTaken(
+                        Core.Events.GameEventSide.Zombie, __instance.Pointer, zType, actorPtr, theDamage);
+                }
+            }
+            else if (sessionActive || logDamage)
             {
                 var payload = new Dictionary<string, object>
                 {
@@ -881,29 +943,6 @@ public static class GameHooks
                 DebugRuntime.Stamp(payload);
                 Emit("zombie.damage", payload);
             }
-            else if (Effects.EventDrainHost.Enabled)
-            {
-                var zType = 0;
-                try { zType = (int)__instance.theZombieType; } catch { }
-                var actorPtr = IntPtr.Zero;
-                try { if (damageFrom is Il2CppObjectBase dfObj) actorPtr = dfObj.Pointer; } catch { }
-                // Bullet damage suppresses the taken record at source, matching v1 policy —
-                // including on ring overflow (I2: a dropped bullet-dealt must not turn into
-                // a spurious taken).
-                Effects.EventDrainHost.TryRecordDealtFromBullet(
-                    Core.Events.GameEventSide.Zombie, damageFrom as Il2CppObjectBase, __instance.Pointer, zType, theDamage, out var wasBullet);
-                if (!wasBullet)
-                {
-                    // Symmetric with the plant-side branch above — currently a no-op in practice
-                    // since the plant-side area attack (Shulkflower/WaterShulk.AttackEffect) already
-                    // knows its exact victims and records them directly, but kept here so a future
-                    // zombie-target multi-attack with no target param gets the same fallback for free.
-                    Effects.EventDrainHost.TryRecordAmbientMeleeDealt(
-                        Core.Events.GameEventSide.Zombie, __instance.Pointer, zType, theDamage);
-                    Effects.EventDrainHost.TryRecordTaken(
-                        Core.Events.GameEventSide.Zombie, __instance.Pointer, zType, actorPtr, theDamage);
-                }
-            }
             else if (Effects.EffectRuntime.HasOnDamageTakenGrant())
             {
                 // v2 host off: preserve the audit-4c.2 fix via the legacy path.
@@ -918,13 +957,35 @@ public static class GameHooks
             }
             // Hit* Harmony skipped — drive on-hit arms + combat.hit identity from TakeDamage.
             try { DebugRuntime.OnCombatHit("zombie", __instance, null); } catch (Exception ex) { CheatState.Error("debug onhit zombie: " + ex.Message); }
-            if (!Effects.EventDrainHost.Enabled || telemetry)
+            if (!v2Active)
                 TryEmitCombatHitFromBullet("zombie", damageFrom, plantTarget: null, zombieTarget: __instance, fallbackDamage: theDamage);
         }
 
         public static void Postfix(Zombie __instance, IDamageMaker damageFrom)
         {
             EndDamageSource(__instance?.Pointer ?? IntPtr.Zero);
+        }
+    }
+
+    /// <summary>
+    /// lawn-hit-entry (T9c): "instakill-shaped" is DEFINED via the engine's own
+    /// <c>DamageType</c> enum, never a magnitude threshold (spec-lawn-hit-entry.md "Lifecycle
+    /// correctness" — a threshold is a magic number a balance pass will eventually cross
+    /// legitimately; a 1,000,000-damage lawnmower event was observed live). These four are the
+    /// lawnmower/board-wipe family (<c>DamageType</c> has 19 members total; the rest are ordinary
+    /// combat damage). Defensive try/catch matches this file's own convention for every other
+    /// game-enum read — an unrecognised or inaccessible value reads as "not instakill-shaped"
+    /// rather than throwing across a Harmony hook.
+    /// </summary>
+    static bool IsInstakillShapedDamageType(DamageType t)
+    {
+        try
+        {
+            return t is DamageType.Squash or DamageType.MaxDamage or DamageType.Crash or DamageType.RealDamage;
+        }
+        catch
+        {
+            return false;
         }
     }
 
@@ -1269,8 +1330,13 @@ public static class GameHooks
         Effects.InjectorEntityRegistry.Remove(p);
         Effects.InjectorBoardSnapshot.Invalidate();
         if (!DeadZombies.Add(p)) return;
+        // lawn-hit-entry (T9c): mark dead before the flush — see PlantDie.Postfix's own comment.
+        Effects.EventDrainHost.MarkDead(p);
         // v2 barrier: pending hit records for this zombie drain before its grants withdraw.
-        try { Effects.EventDrainHost.FlushForPtr(p); } catch { }
+        // `flushedNow` false means this death fired from inside an active drain pass (T9c) — the
+        // ForgetEntity below must then wait (see the deferred branch at the end of this method).
+        var flushedNow = true;
+        try { flushedNow = Effects.EventDrainHost.FlushForPtr(p); } catch { }
         var diePayload = new Dictionary<string, object>
         {
             ["type"] = (int)z.theZombieType,
@@ -1281,9 +1347,11 @@ public static class GameHooks
         };
         AddFatalKiller(diePayload, TakeFatalKiller(p));
         DebugRuntime.Stamp(diePayload);
-        // OnDeath must see entity grants; ForgetEntity withdraws after Emit.
+        // OnDeath must see entity grants; ForgetEntity withdraws after Emit (or later still, if
+        // the flush above was nested).
         Emit("zombie.die", diePayload);
-        ForgetEntity(p);
+        if (flushedNow) ForgetEntity(p);
+        else Effects.EventDrainHost.DeferForget(p, () => ForgetEntity(p));
         try { DebugRuntime.OnZombieDying(z); } catch (Exception ex) { CheatState.Error("debug onkill: " + ex.Message); }
     }
 

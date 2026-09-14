@@ -2899,7 +2899,21 @@ public sealed partial class RpgStore : IRpgDb, IDisposable
     /// <summary>HTTP-facing: a caller-supplied `limit` is untrusted input, clamped to 500 so a
     /// response can never be arbitrarily large.</summary>
     public List<EventEnvelope> ListEvents(int limit, long afterId, long? playerId = null) =>
-        ListEventsCore(Math.Clamp(limit, 1, 500), afterId, playerId);
+        ListEventsCore(Math.Clamp(limit, 1, 500), afterId, playerId, kinds: null);
+
+    /// <summary>Kind-filtered read where the filter runs INSIDE the SQL query, before `limit` is
+    /// applied -- so a caller asking for `kinds` + `limit` gets the most recent `limit` MATCHING rows
+    /// after `afterId`, never "the oldest `limit` rows in the whole table, then whatever of those
+    /// happens to match". Real bug found live 2026-09-14 (lawn-combat-wire T0): the previous shape of
+    /// `GET /api/debug/events?kinds=...` called the unfiltered <see cref="ListEvents"/> above and
+    /// applied the kind filter to the result AFTER the SQL LIMIT. With `afterId` defaulting to 0 (the
+    /// endpoint's own documented usage) and this dev server's real events table having grown past
+    /// 300,000 rows, that always returned the table's very OLDEST rows -- filtered down to zero
+    /// matches for any kind that was not literally one of the first ever recorded (`debug.snapshot`
+    /// never is). This is the SQL-side half of the fix; the query itself now only ever considers
+    /// matching rows, so `limit` bounds the right population regardless of table size or `afterId`.</summary>
+    public List<EventEnvelope> ListEventsByKinds(int limit, long afterId, IReadOnlyCollection<string> kinds, long? playerId = null) =>
+        ListEventsCore(Math.Clamp(limit, 1, 500), afterId, playerId, kinds);
 
     /// <summary>Internal server-side scans only (e.g. `DebugEndpoints.cs`'s lifecycle-state helpers)
     /// -- never wire `limit` here to an HTTP route parameter. Real bug found live 2026-09-14: every
@@ -2913,15 +2927,30 @@ public sealed partial class RpgStore : IRpgDb, IDisposable
     /// silent truncation without loosening the real HTTP-facing limit those callers were never meant
     /// to share.</summary>
     public List<EventEnvelope> ListEventsForServerScan(int limit, long afterId, long? playerId = null) =>
-        ListEventsCore(Math.Clamp(limit, 1, 5000), afterId, playerId);
+        ListEventsCore(Math.Clamp(limit, 1, 5000), afterId, playerId, kinds: null);
 
-    List<EventEnvelope> ListEventsCore(int clampedLimit, long afterId, long? playerId)
+    List<EventEnvelope> ListEventsCore(int clampedLimit, long afterId, long? playerId, IReadOnlyCollection<string>? kinds)
     {
         using var db = Open();
         using var cmd = db.CreateCommand();
-        cmd.CommandText = playerId is null
-            ? "SELECT id, t, game, kind, payload, match_key, player_id, run_id FROM events WHERE id > $a ORDER BY id ASC LIMIT $l;"
-            : "SELECT id, t, game, kind, payload, match_key, player_id, run_id FROM events WHERE id > $a AND player_id = $p ORDER BY id ASC LIMIT $l;";
+        var where = new List<string> { "id > $a" };
+        var kindList = kinds?.Where(k => !string.IsNullOrWhiteSpace(k)).ToList();
+        if (kindList is { Count: > 0 })
+        {
+            var kindParamNames = new List<string>(kindList.Count);
+            for (var i = 0; i < kindList.Count; i++)
+            {
+                var pname = "$k" + i;
+                kindParamNames.Add(pname);
+                cmd.Parameters.AddWithValue(pname, kindList[i]);
+            }
+            // COLLATE NOCASE preserves the previous in-memory filter's StringComparer.OrdinalIgnoreCase
+            // semantics now that the match happens in SQL instead of after the fact.
+            where.Add($"kind COLLATE NOCASE IN ({string.Join(",", kindParamNames)})");
+        }
+        if (playerId is not null) where.Add("player_id = $p");
+        cmd.CommandText =
+            $"SELECT id, t, game, kind, payload, match_key, player_id, run_id FROM events WHERE {string.Join(" AND ", where)} ORDER BY id ASC LIMIT $l;";
         cmd.Parameters.AddWithValue("$a", afterId);
         cmd.Parameters.AddWithValue("$l", clampedLimit);
         if (playerId is { } pid)

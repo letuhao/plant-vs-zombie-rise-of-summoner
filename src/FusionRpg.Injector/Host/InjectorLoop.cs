@@ -86,6 +86,10 @@ public static class InjectorLoop
         // (spec-lawn-reposition.md §6 hazard 4, ships knowingly inert); a no-op while
         // MoveDrainHost.Enabled is false or nothing has called TryRecordMove.
         try { MoveDrainHost.Tick(unscaledDeltaTime); } catch { }
+        // lawn-combat-wire T10 — same record-then-drain slot again: every plant.spawn/zombie.spawn
+        // this frame queued a ptr in MatchHost.Apply; this is the one place they all get resolved and
+        // bound, after every spawn hook for the frame has already fired.
+        try { LawnBasicAttackGrantBinder.Tick(); } catch { }
         // battle-timeline T13 — the kernel drives DoT and shield upkeep as scheduled 100 ms events,
         // in the same slot and the same order the two accumulator grids used to occupy
         // (drain -> DoT -> shields; shield-system-spec.md §2.6). Same period, same work: only the

@@ -238,15 +238,13 @@ public static class AtomCompiler
             && !overlay.ContainsKey("elementPayload")
             && actions.Any(a => string.Equals(a.Action, EffectActions.ApplyResourceDelta, StringComparison.OrdinalIgnoreCase)))
         {
-            var components = HybridPayload.Build(primary, ownerElementSecondary, hybridSecondaryWeightMilli);
-            if (components.Length > 0)
-                overlay["elementPayload"] = components
-                    .Select(c => new Dictionary<string, object?>(StringComparer.Ordinal)
-                    {
-                        ["element"] = c.Element.ToElementId(),
-                        ["weight"] = c.Weight,
-                    })
-                    .ToList();
+            // lawn-combat-wire T10: the overlay-shape mapping moved to HybridPayload.BuildOverlay so
+            // the lawn's per-actor basic-attack grant (which bakes an owner's element directly, never
+            // through this compiler) produces byte-identical elementPayload shape from ONE
+            // implementation. Behaviour here is unchanged — same Build call, same "length>0" gate.
+            var built = HybridPayload.BuildOverlay(primary, ownerElementSecondary, hybridSecondaryWeightMilli);
+            if (built != null)
+                overlay["elementPayload"] = built;
         }
 
         // One grant per owner that sourced this group. With no owner map that is exactly one grant at

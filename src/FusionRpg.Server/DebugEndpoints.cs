@@ -205,14 +205,25 @@ public static class DebugEndpoints
         });
 
         // RPG Server Debug
+        // Real bug fixed live 2026-09-14 (lawn-combat-wire T0): `kinds` used to filter the result of
+        // an already-`limit`-truncated unfiltered read, so a caller relying on this endpoint's own
+        // documented usage (`afterId` defaulting to 0, e.g. `/snapshot`'s returned `note`) always saw
+        // the events table's OLDEST `limit` rows -- on a long-running dev server (measured live at
+        // 300,000+ rows) that is never going to contain a just-emitted `debug.snapshot`. The kind
+        // filter now runs inside the SQL query (RpgStore.ListEventsByKinds), so `limit` bounds the
+        // matching population, not the whole table.
         g.MapGet("/events", (RpgStore store, int limit = 200, long afterId = 0, string? kinds = null, string? scenarioId = null) =>
         {
-            var items = store.ListEvents(Math.Clamp(limit, 1, 500), afterId);
+            var clampedLimit = Math.Clamp(limit, 1, 500);
+            List<EventEnvelope> items;
             if (!string.IsNullOrWhiteSpace(kinds))
             {
-                var set = new HashSet<string>(kinds.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries),
-                    StringComparer.OrdinalIgnoreCase);
-                items = items.Where(e => set.Contains(e.Kind)).ToList();
+                var kindSet = kinds.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                items = store.ListEventsByKinds(clampedLimit, afterId, kindSet);
+            }
+            else
+            {
+                items = store.ListEvents(clampedLimit, afterId);
             }
             if (!string.IsNullOrWhiteSpace(scenarioId))
             {

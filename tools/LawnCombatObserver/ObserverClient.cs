@@ -104,17 +104,43 @@ public sealed class ObserverClient : IDisposable
         return ok ? body?.SessionActive : null;
     }
 
+    /// <summary>Exponential-then-binary search over <c>GET /api/events?afterId=X&amp;limit=1</c> for the
+    /// current tail of the event log, in O(log n) requests regardless of table size — the same
+    /// technique every PowerShell live-test/prove script's own <c>Get-MaxEventId</c> helper already
+    /// uses (e.g. <c>scripts/prove-overlay-combat.ps1</c>). A linear forward page-walk (the previous
+    /// shape here: 200 pages of 500 rows, i.e. capped at 100,000 events) is NOT equivalent on a
+    /// long-running dev server: this repo's real events table was measured live at 300,000+ rows
+    /// (confirmed 2026-09-14: <c>afterId=300000</c> still returns real rows, <c>afterId=350000</c>
+    /// does not), so that walk always exhausted its budget short of the true tail — landing "before"
+    /// on a stale, days-old event id. <see cref="TryReadInjectorSessionActiveAsync"/> then had no way
+    /// to ever catch up to a freshly emitted event within its 5s timeout, so it silently timed out
+    /// (returned null) on every call, in every session, regardless of whether the injector correctly
+    /// emitted <c>debug.snapshot</c> — which it does; the injector-side handler was verified correct.
+    /// This was the actual root cause of T0's `EventDrainActiveProvenThroughout` being unprovable.</summary>
     async Task<long> FindCurrentMaxEventIdAsync()
     {
-        long afterId = 0;
-        for (var page = 0; page < 200; page++)
+        async Task<bool> HasAfterAsync(long id)
         {
-            var (ok, _, body) = await GetAsync<EventPage>($"/api/events?limit=500&afterId={afterId}");
-            if (!ok || body?.Items is not { Count: > 0 } items) return afterId;
-            afterId = items[^1].Id ?? afterId;
-            if (items.Count < 500) return afterId;
+            var (ok, _, page) = await GetAsync<EventPage>($"/api/events?limit=1&afterId={id}");
+            return ok && page?.Items is { Count: > 0 };
         }
-        return afterId;
+
+        if (!await HasAfterAsync(0)) return 0L;
+
+        var lo = 0L;
+        var hi = 1L;
+        while (await HasAfterAsync(hi))
+        {
+            lo = hi;
+            if (hi > long.MaxValue / 2) break;
+            hi *= 2L;
+        }
+        while (lo + 1L < hi)
+        {
+            var mid = lo + (hi - lo) / 2L;
+            if (await HasAfterAsync(mid)) lo = mid; else hi = mid;
+        }
+        return lo;
     }
 
     public void Dispose() => _http.Dispose();

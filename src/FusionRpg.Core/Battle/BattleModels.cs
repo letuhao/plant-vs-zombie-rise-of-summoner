@@ -409,14 +409,34 @@ public static class BattleRuleset
     /// §11 — pools "persist across a run and refill <b>at rest</b>", a battle is not a rest, and a pool
     /// that refills mid-battle is the per-encounter model the hub explicitly rejects.</para>
     ///
-    /// <para>So this remains 0, but by the surviving reason rather than by a representation limit.
-    /// Authoring any non-zero rate is a balance act (`lawn-combat-wire` T11), not a wiring change;
-    /// S10.1 made rates <i>expressible</i>, deliberately without authoring one.</para>
+    /// <para><b>T11 (lawn-combat-wire, spec-lawn-combat-calibration.md, 2026-09-14) authors the first
+    /// non-zero row.</b> `stamina` now regenerates — the other four ids stay exactly 0, by the
+    /// surviving reason above (poise) or because nothing spends them yet (hunger/spirit/qi). The rate
+    /// is expressed as <see cref="BattleResourceTuning.RegenShareOf"/> — a per-mille SHARE of the
+    /// resource's OWN pool max, regenerated per second — so it projects through <see cref="BaseHp"/>
+    /// the same way <see cref="BaseResourceMax"/> already does, rather than forking a second,
+    /// theta-independent curve. `hp` carries no share row at all (mirrors <see cref="BaseResourceMax"/>'s
+    /// own hp special-case) and always returns 0 here.</para>
     ///
-    /// <para>A method rather than an inlined literal so the reasoning has somewhere to live and the
-    /// eventual authored rates have one place to land.</para>
+    /// <para>Returns UNITS PER TICK (the channel's own meaning, <see cref="ResourceChannelReader"/>),
+    /// as a <c>double</c> — the whole point of `resource-subtick` (S10.1) was making a SUB-tick rate
+    /// expressible, so this can no longer be a <c>long</c>: <c>regenPerSecond / TicksPerSecond</c>,
+    /// dividing once, at the end, from long arithmetic into the one double this method returns.</para>
     /// </summary>
-    public static long BaseResourceRegen(int theta, string resourceId) => 0;
+    public static double BaseResourceRegen(int theta, string resourceId)
+    {
+        if (resourceId == "hp") return 0;
+
+        var poolMax = checked(BaseHp(theta) * ResourceTuning.ShareOf(resourceId)) / 1000;
+        var regenPerSecond = checked(poolMax * ResourceTuning.RegenShareOf(resourceId)) / 1000;
+        return regenPerSecond / (double)TicksPerSecond;
+    }
+
+    /// <summary>The kernel's own tick period is 100 ms (`KernelDriveHost`, `EffectRuntime`'s shield
+    /// upkeep grid — both cite "the period stays 100 ms" as a substitution, not a redesign). Structural,
+    /// not a tunable: it is the sub-tick unit's own denominator, not a balance number a pass would
+    /// change — changing it would mean re-deriving every per-mille-per-tick rate in this file.</summary>
+    const int TicksPerSecond = 10;
 
     // The v1 per-mille Hit*/Crit* constants are retired (combat-unification ban test);
     // the SSOT resolver's sigmoid + CombatProbabilityPolicy own hit/crit math now.

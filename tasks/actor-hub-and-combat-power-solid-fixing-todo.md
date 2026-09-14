@@ -3,7 +3,7 @@
 **Plan:** [actor-hub-and-combat-power-solid-fixing-plan.md](actor-hub-and-combat-power-solid-fixing-plan.md)  
 **Map:** [docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md](../docs/architecture/actor-hub-and-combat-power-solid-fixing-map.md)  
 **Runbook / evidence:** [runbook](actor-hub-and-combat-power-solid-fixing-runbook.md) · [evidence map](actor-hub-and-combat-power-solid-fixing-evidence-map.md) · command `/solid-run`  
-**Status:** AUTO build COMPLETE (`/solid-run`, worktree `solid-run-20260912-eb53`) — all 5 waves executed, T1-T23 + final Checkpoint done, INCLUDING a real, live Playwright E2E + screenshot pass for T10/T11/T17 (owner-authorized: killed a stale port-5088 process, fixed an incidental broken FE build `fc674098`, then seeded the worktree's own stale species roster directly from the real committed corpus — same read path `RpgApiFactory` already uses for E2E, no cross-branch merge needed — and verified the live DOM/screenshots at all 3 required widths). Genuine, non-forced gaps: T12/`lawn-aptitude-parity` and T19-bullet-3 (both blocked on `aptitude-sheet`'s own unbuilt `unique-lawn-wire`, cross-linked, not this program's implementation scope); T21's Intel Strength drop was amended by the owner mid-execution (relocated, not zeroed, to avoid silently breaking the real `ai-commander` AI — see evidence map 21.2 and ideal.md's B4 amendment note); T14 stays deferred (depends on T12). Every other task is `PASS` with executed evidence. Awaiting the owner's sign-off on program close.
+**Status:** AUTO build COMPLETE (`/solid-run`, worktree `solid-run-20260912-eb53`) — all 5 waves executed, T1-T23 + final Checkpoint done, INCLUDING a real, live Playwright E2E + screenshot pass for T10/T11/T17 (owner-authorized: killed a stale port-5088 process, fixed an incidental broken FE build `fc674098`, then seeded the worktree's own stale species roster directly from the real committed corpus — same read path `RpgApiFactory` already uses for E2E, no cross-branch merge needed — and verified the live DOM/screenshots at all 3 required widths). **2026-09-14: T12/`lawn-aptitude-parity` and T19-bullet-3's shared blocker (`aptitude-sheet` AS-1.1b) landed and is live-proven — both closed** (`Might 141` allocated before deploy on a level-148 specimen now reaches Unity live, `attack 2721` vs vanilla baseline `attack 1`; see T12's own entry and the evidence map row 12.9). T21's Intel Strength drop was amended by the owner mid-execution (relocated, not zeroed, to avoid silently breaking the real `ai-commander` AI — see evidence map 21.2 and ideal.md's B4 amendment note). T14's own remaining gap is a SEPARATE live probe (Bound unique with a loadout JSON — never blocked on T12/AS-1.1b). Every other task is `PASS` with executed evidence. Awaiting the owner's sign-off on program close.
 
 ---
 
@@ -330,17 +330,21 @@ MelonLoader install, so the Injector half is un-buildable here — owner still o
 - [x] Fetch path is unique GET only (S4). — `RefreshUniqueAptitudesAsync` is the only new fetch, per-instanceId GET, no `uniques` map added to the commander payload
 - [x] General lawn creatures unchanged (species path). — Bound branch returns before the species lookup runs; a non-Bound ctx takes the untouched original path (`Not_Bound_falls_through_to_the_species_path_even_when_the_hook_is_wired`)
 - [x] Regression: unique with same species id as a general does not inherit empire allocation. — `Bound_unique_sharing_a_species_id_with_a_general_never_inherits_empire_shares`, proven
-- [ ] Parity prove: Bound lawn aptitude input matches Server UniqueCreature compose. — **live probe RUN
-      2026-09-13, split result.** The ActorHub compose chain is **PROVEN CORRECT end to end on a real
-      board**: a real specimen (minted via the real `MintCreature` path, levelled via the real
+- [x] Parity prove: Bound lawn aptitude input matches Server UniqueCreature compose. — **both orders
+      now proven live, closing this criterion for real.** `deploy → allocate` (2026-09-13): a real
+      specimen (minted via the real `MintCreature` path, levelled via the real
       `POST /api/unique/actors/{id}/xp`, allocated via the real `POST /api/aptitudes/unique/allocate`,
       deployed via the real `POST /api/unique/actors/{id}/deploy` to `phase: ActiveBound` with a real
       Unity ptr) resolved `bonusAtk 222` / `bonusMaxHp 1110` with contribs
       `aptitude.Might:Flat:222` and `aptitude.Vigor:Flat:666;aptitude.Fortitude:Flat:444`, composing
       `primaryAtk 20 + 222 = appliedAtk 242` and `primaryMaxHp 300 + 1110 = appliedMaxHp 1410`, and
-      `debug.board-stats` read the live Unity entity back as `attack 223 hp 1410 maxHp 1410`. Not a
-      fabricated actor at any step. **But it is order-dependent** — see the blocker below
-- [ ] HF-lawn ticked on ideal / maps. — held until the live parity prove above closes
+      `debug.board-stats` read the live Unity entity back as `attack 223 hp 1410 maxHp 1410`.
+      `allocate → deploy` (2026-09-14, after AS-1.1b landed): a real level-148 Roster specimen
+      (`5dd73a05c09a4bc6afcebbf1acd5e847`) allocated `Might 141` via `POST /api/aptitudes/unique/allocate`
+      WHILE still `Roster`, then deployed via `POST /api/unique/actors/{id}/deploy` — `debug.board-stats`
+      read the live Unity entity (ptr `2887A74BB40`) back as `attack 2721 attackDamage 2721` (vanilla
+      baseline `attack 1`). Not a fabricated actor at any step, either run.
+- [x] HF-lawn ticked on ideal / maps. — unblocked, both orders proven live
 - [x] aptitude-sheet `unique-lawn-wire` Done (or listed open criteria closed) before closing this task. — AS-1.1 code landed; its own live-probe line is the same open item as this task's parity prove
 
 **Verification:**
@@ -533,7 +537,7 @@ unset = Add) toward the target — `TryGuardMutation` structurally refuses `mode
 - [x] Script exists and documented (`prove-hub-combat.ps1` or extend `prove-aptitude.ps1`). — stale checkbox, fixed 2026-09-13: both `scripts/prove-hub-combat.ps1` and `tools/ProveHubCombat` exist, confirmed on disk
 - [x] Post-fuse battle Hub channel totals ≡ sheet Hub for same UniqueActor inputs (equip/tree; aptitude parity already proven separately by `prove-aptitude.ps1`, not duplicated here — see evidence 19.2).
 - [x] Standing rises when a membership combat channel rises via Hub writers — not when only Θ rises.
-- [ ] Bound lawn aptitude input matches Server UniqueCreature compose. — same open item as T12: AS-1.1 is now built and Core-proven (2026-09-13); this bullet needs the live probe, not new code
+- [x] Bound lawn aptitude input matches Server UniqueCreature compose. — same item as T12, now closed 2026-09-14 (AS-1.1b landed): live-proven both `deploy → allocate` (2026-09-13, `attack 223`) and `allocate → deploy` (2026-09-14, `attack 2721`, vanilla baseline `attack 1`) — see T12's own entry
 - [x] Ideal handoff prove path checked / runbook linked.
 
 **Verification:**

@@ -296,6 +296,82 @@ true. The atom already exists purpose-built: `atom.fx-overlay-damage`, `kind: re
 `guard-funnel-delta`, `guard-actor-hub`
 **Dependencies:** **T9**, T6, T3, T8 · **Files:** `MatchHost.cs`, `EffectRuntime.cs` · **Scope:** M
 
+**2026-09-14 live-inert investigation (T10/T12 built and committed; observer kept reading
+`actionTriggers=0, staminaSpent=0, exhaustionEvents=0, rpgDeltaMergedHits=0` on every live retest).
+Three real defects found and fixed, in order:**
+1. Module-boundary defect — `LawnBasicAttackFeature.Enabled` borrowed `CheatState`'s debug-registry
+   schema fallback as its only production default. Fixed: own `DefaultOn = true` const, `CheatState`
+   only consulted when explicitly user-set (`0110d5ad`).
+2. Grant-bind/registry-registration race — a debug-spawned ptr resolved before
+   `InjectorEntityRegistry.Add` ran for it, and the old resolver cache latched that miss as a
+   permanent Neutral. Fixed: requeue-and-retry (`MaxRetryFrames`) + the resolver no longer caches a
+   genuine board-miss (`d465f93b`).
+3. **Root cause, found after 1 and 2 still didn't close the symptom:** `typeId == 0` was used
+   throughout `LawnElementResolverHost`/`LawnElementResolver`/`LawnBasicAttackGrantBinder` as the "no
+   entity here" sentinel — but `data/generated/creatures/Peashooter.json` and `NormalZombie.json`
+   (the two most common default test subjects) are both `gameTypeId: 0`, a real species, not a
+   sentinel. Every Peashooter/NormalZombie was permanently treated as unresolved. Fixed: a real
+   `Found` bool, decoupled from the numeric typeId (`0896aa7c`).
+
+**Live-verified after fix 3:** fresh Peashooter vs NormalZombie via `LawnCombatObserver` now shows
+`rpgObserved=true` and `rpgDeltaMergedHits` matching `totalHits` — the elemental combat math
+(`InjectorCombatBridge`/`OverlayCombatMath`) is alive for these species for the first time this
+investigation.
+
+**Still open, NOT yet explained:** `actionTriggers`/`staminaSpent`/`exhaustionEvents` (T12's own
+counters, recorded only by `LawnBasicAttackCostCharger.ShouldApplyRider`) stayed at 0 in every retest
+after fix 3 too. Diagnostic tracing (temporary, reverted — never committed) showed **zero vanilla
+combat.hit events occurring at all** in the later live attempts: a zombie walked straight through the
+plant's column without colliding, both left `living:true`, unharmed — a live-environment/scenario
+reproduction problem (repeated `debug.spawn-*`/`debug.lawn/quick-start` calls against one long-running
+game/server session), not yet distinguished from a genuine T12 gating bug.
+
+**Ruled out by code inspection, not the cause:** `Bag.HasAnyGrant()` and `ShouldApplyRider`'s own gate
+read correctly (a global grant-existence check, not per-owner). `EventDrain`'s swing dedupe
+(`ConsumeSwingTriggerAndRelease`) already has passing Core.Tests coverage proving a single-target hit
+gets `IsFirstOfSwing=true` (`EventDrainTests.cs:611,616`) — the RPG-side gate/dedupe logic is not where
+this is broken; more unit tests there would just re-confirm what already passes.
+
+**A real methodology confound found while investigating:** `debug.lawn/quick-start`'s `lab-overlay`
+scenario itself calls `debug.combat.silence-vanilla` with `plant:true`
+(`DebugScenarios.cs:1093,1132,1170`), which zeroes `A-P-ATK%`/`P-ATK` for every plant on the board —
+**deliberately**, so the scenario's own plant can't one-shot a zombie during setup. That is
+server-side `CheatState`, so it persists across a game-process restart within the same server run.
+Using `lab-overlay`'s own plant for a T12 action-trigger proof is very likely the wrong scenario for
+that specific proof — a plain, non-silenced `debug.spawn-plant`/`debug.spawn-zombie` pair (`typeId:0`
+for both — the field is `typeId`, not `plantType`/`col` alone; `x` positions a zombie, not `col`) is
+the correct live setup for T12/T13, not `lab-overlay`. Not yet re-tried with this corrected setup.
+
+**2026-09-14, re-run with vanilla ATK genuinely restored (`POST /api/debug/reset-mods`, confirmed by
+`vanilla=20` instead of the silenced `vanilla=1`): `actionTriggers`/`staminaSpent` STILL read 0 over a
+40s window with 14 real vanilla hits and `rpgDeltaMergedHits=16`.** The silence-vanilla confound is
+now genuinely ruled out — this is a real, distinct defect, not a test-setup mistake.
+
+**The real shape, found via `debug.effect.list` mid-run:** exactly ONE grant exists on the board
+(`grants:1`) at any time, and it belongs to the ZOMBIE (`lawn-basic-attack@<zombieptr>`) — the
+currently-attacking PLANT (a `lab-overlay` replacement spawn, ptr differs from the scenario's
+originally-reported `plantPtr`, meaning the first plant died and this one is a mid-match respawn) has
+**no grant of its own**. `GrantId` is correctly ptr-scoped
+(`BasicAttackGrantBuilder.GrantIdFor`, `GrantPrefix + "@" + ptr`) — ruled out as a same-key collision
+between the two actors. `HasOnDamageDealtGrant()`'s gate is global (any grant, not per-owner), so this
+alone should not block the PLANT's own OnDamageDealt records from reaching
+`EffectRuntime.OnDrained`/`ShouldApplyRider` — but whatever is happening, the net live effect across
+every attempt this session is that **at most one of the two board actors ever holds a grant, and
+`RecordActionTrigger` never fires for the one that's actually landing the observed hits.** Not yet
+root-caused to a specific line — the leading hypothesis is that the REPLACEMENT plant's spawn (an
+organic respawn inside an already-running match, not `debug.spawn-plant`) hits the same
+"resolves later than `MaxRetryFrames` covers" race the 2nd defect fix (`d465f93b`) was meant to close,
+just on a spawn path/timing that fix's live retest didn't happen to cover, OR the grant genuinely
+binds and is later silently withdrawn (`GameHooks.ForgetEntity`/ptr-reuse path) without a fresh one
+replacing it.
+
+**Next step (not done — context budget ran out this session):** add temporary trace logging (same
+proven technique as defects 1-3) to `LawnBasicAttackGrantBinder.Bind`/`Tick`/`ClearPending` AND to
+whatever calls `EffectRuntime.Bag.Withdraw`, specifically watching the REPLACEMENT plant's ptr from
+spawn to its first attack, to see whether `Bind` is ever called for it at all, and if so, whether the
+grant is later withdrawn. This is the concrete next action for T12/T13/GATE 3 — do not re-litigate the
+silence-vanilla or swing-dedupe theories again, both are genuinely ruled out.
+
 ---
 
 ### Task 11: `lawn-combat-calibration` — **and the tooling to author it**
@@ -311,21 +387,30 @@ at all** (`_meta.regenIsAbsentOnPurpose`). So the regen rows cannot be authored 
 tool. **Extending `publish.py` with an add-key mode is part of this task**, mirroring the existing
 bespoke `--add-rung-power-budget` shape.
 
-**Acceptance:**
-- [ ] T1's answer applied: magnitude authored, or explicitly **not** authored.
-- [ ] `publish.py` gains a sanctioned way to add the regen block; the file is **not** hand-edited.
-- [ ] Output is `battle-resources.v2.json` with v1 kept for revert, per its own convention.
-- [ ] `_meta.regenIsAbsentOnPurpose` is **rewritten** — it currently documents regen's absence as a
-      design position, and shipping regen without updating it leaves the file lying about itself.
-- [ ] **Consumers resolve `v2`** — verified, not assumed.
-- [ ] Cost template (`action-corpus-cost-templates.v1.json`) follows *its* own convention: bump
-      `version`, keep v1 on disk.
-- [ ] `cost ≤ regenPerSecond × 1.5 s` at the pin (a Peashooter's `thePlantAttackInterval` is 1.5).
-- [ ] Every value marked `UNMEASURED` and traceable to a named anchor.
-- [ ] **No test pins an exact damage number** — that is a reading, not a contract.
-- [ ] **Resolve the retracted share claim.** The map retracted *"`sharePermille` missing ⇒ throws"*;
-      `spec-lawn-combat-calibration.md` still carries the original assertion in places. Pick one and
-      make spec and map agree.
+**Acceptance (built 2026-09-14):**
+- [x] T1's answer applied: **explicitly NOT authored** (spec's "DECIDED" section) — both candidate
+      homes (dead `ActionShareTable`, or hand-editing generated atom seed data) sit outside a
+      tuning-file change; named follow-up `lawn-combat-rider-amount` owns it.
+- [x] `publish.py` gains a sanctioned way to add the regen block (`--add-regen-block`, mirroring
+      `--add-rung-power-budget`); the file is **not** hand-edited.
+- [x] Output is `battle-resources.v2.json` with v1 kept for revert, per its own convention.
+- [x] `_meta.regenIsAbsentOnPurpose` is **rewritten** — it now documents that `stamina` regenerates
+      and the other four stay an explicit 0, with `_meta.regenDerivation` carrying the arithmetic.
+- [x] **Consumers resolve `v2`** — `src/FusionRpg.Server/Program.cs` (the one real consumer) bumped;
+      every other reader (tests/tools) pins v1 explicitly and stays byte-identical via the parser's
+      absent-block default, verified by `LawnCombatCalibrationGuardTests.V1StillParsesWithNoRegenBlockAndDefaultsEveryShareToZero`.
+- [x] Cost template (`action-corpus-cost-templates.v1.json`) follows *its* own convention: bumped to
+      v2 (`kinds.basic.baseAmountAtRung1` 20 → 25), v1 kept on disk.
+- [x] `cost ≤ regenPerSecond × 1.5 s` at the pin — proven by
+      `LawnCombatCalibrationGuardTests.StaminaCostNeverExceedsSustainableRegenAtThePin`, computed from
+      the real shipped files, never a hardcoded pair.
+- [x] Every value marked `UNMEASURED` and traceable to a named anchor.
+- [x] **No test pins an exact damage number** — the new BalanceGuard tests assert the inequality and
+      the zero/non-zero split, never a literal cost or regen value.
+- [x] **Resolved the retracted share claim.** Both `spec-lawn-combat-calibration.md` (already correct)
+      and `lawn-combat-wire-map.md` (had a stale self-contradicting paragraph, lines ~137-144 — fixed)
+      now agree: `sharePermille`/`ActionShareTable` never blocked anything; the real gap was
+      `atom.fx-overlay-damage`'s missing `amount`, and T11 left it explicitly unauthored.
 
 **Moved out of this task** *(it was circular — the criterion cannot be decided until cost is actually
 charged, which is T12, which depends on T11)*: *"exhaustion stays reachable under burst fire"* now

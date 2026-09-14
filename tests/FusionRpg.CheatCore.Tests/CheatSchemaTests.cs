@@ -84,6 +84,17 @@ public class CheatSchemaTests
     }
 
     [Fact]
+    public void LawnBasicAttackFeature_kill_switch_defaults_on_before_any_explicit_set()
+    {
+        // Real live incident (2026-09-14): a fresh boot (isSet=false, stored=false -- CheatEntry's
+        // own zero value before anything ever calls SetToggle) reads as effectively OFF in a real
+        // game, contradicting LawnBasicAttackFeature.cs's own doc comment ("Default ON"). This is
+        // the exact isSet=false path CheatState.On("LAWN-BASIC-ATTACK") takes on every fresh boot --
+        // reproduced here without a live game, in milliseconds, instead of a live combat round trip.
+        Assert.True(CheatSchema.EffectiveToggle("LAWN-BASIC-ATTACK", isSet: false, stored: false));
+    }
+
+    [Fact]
     public void ShouldStrip_ScaleFlat_and_Config_identity()
     {
         Assert.True(CheatSchema.ShouldStripFromDocument("A-P-HP+", true, 0, "number"));

@@ -58,7 +58,7 @@ public static class InjectorCombatBridge
             && !hub.Stats.TryGetBaseline(key.ToUpperInvariant(), out baseline))
             baseline = new EntityBaseline { Hp = 100, MaxHp = 100, Atk = 10 };
 
-        var (resolvedSide, typeId, elementTypes) = LawnElementResolverHost.Resolve(key);
+        var (resolvedSide, typeId, elementTypes, _) = LawnElementResolverHost.Resolve(key);
         side = resolvedSide;
 
         var ctx = string.Equals(side, "zombie", StringComparison.OrdinalIgnoreCase)

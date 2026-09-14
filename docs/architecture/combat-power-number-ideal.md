@@ -73,7 +73,7 @@ That number is **not**:
 
 | Gap | Evidence | Why not a wall |
 |---|---|---|
-| **HF-lawn** — Bound lawn aptitude input omits UniqueCreature | Lawn **does** use ActorHub; `CheatState.SpeciesAllocation` = commander + species by `typeId` only (`CheatState.cs` ~157–162). Bound bindings unused for aptitude | Spec `unique-lawn-wire` + Server Hub path exist. **Severity:** wiring that **violates** sole-Hot + ownership — not “Hub missing on lawn” / not UniqueActor FSM absent |
+| **HF-lawn** — Bound lawn aptitude input omits UniqueCreature — **RESOLVED 2026-09-14** | Lawn **does** use ActorHub; `CheatState.SpeciesAllocation` = commander + species by `typeId` only (`CheatState.cs` ~157–162). Bound bindings unused for aptitude | Spec `unique-lawn-wire` + Server Hub path exist. **Severity:** wiring that **violates** sole-Hot + ownership — not “Hub missing on lawn” / not UniqueActor FSM absent. `aptitude-sheet` AS-1.1 (Bound-priority resolve) + AS-1.1b (bind-edge cadence, `MatchHost.cs`/`RpgClient.cs`) close this — both `deploy → allocate` (2026-09-13) and `allocate → deploy` (2026-09-14) proven live: `attack 2721` on a level-148 specimen allocated `Might 141` before deploy, vanilla baseline `attack 1` |
 | **HF-standing** — Standing ignores aptitude (and other non-atom Hub combat writers) | `ProjectStanding` = equip + tree atoms only (~237–246); Hub Derived includes aptitude | See **Standing fold lock (D2)** below — synthetic `AtomRow`s + membership filter, then same `Compose` |
 | **HF-chip** — Aptitudes scope chip **is** specimen level labeled “power” | Unique GET has **no `theta`**; FE `theta ?? specimenLevel` → ``power ${n}`` (`AptitudeEndpoints`, `AptitudesTab`, `foldAptitudesSurfaceVm`) | Copy / fold honesty; do not put combat power on this chip until HF-standing |
 | **HF-copy** — surfaces that treat omni attack as “the power” | Design drift risk | Player “combat power” = O+S+C Standing compose |
@@ -232,7 +232,7 @@ Do not rediscover these in a later session:
 |---|---|---|
 | **HF-chip** | Wiring | Scope chip: `Lv`; optional `Θ`; never bare “power” for level |
 | **HF-standing** | Wiring + filter | Synthetics + membership filter → `ActorPowerCache.Compose` |
-| **HF-lawn** | Wiring (SSOT) | Bound → UniqueCreature via unique GET + `TryGetByPtr` |
+| **HF-lawn** — RESOLVED 2026-09-14 | Wiring (SSOT) | Bound → UniqueCreature via unique GET + `TryGetByPtr` — closed by aptitude-sheet AS-1.1/AS-1.1b, both orders live-proven |
 | **HF-copy** | Docs | “combat power” = O+S+C Standing |
 | **HF-bound-loadout** | Wrong use | Bound combat via Hub/atoms — not Writer-absolute beside Hub |
 | **HF-battle-tree** | Wiring / debt | Wire `Battle.TreeAtomSource` into composer or delete dead slot (prefer fuse into Hub) |

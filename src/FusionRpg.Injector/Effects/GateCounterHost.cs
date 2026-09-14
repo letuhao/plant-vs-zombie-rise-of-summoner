@@ -104,7 +104,7 @@ public static class GateCounterHost
         if (playerId <= 0) return null;
 
         string side;
-        try { (side, _, _) = LawnElementResolverHost.Resolve(CombatPtr.Normalize(ptr)); }
+        try { (side, _, _, _) = LawnElementResolverHost.Resolve(CombatPtr.Normalize(ptr)); }
         catch { return null; } // an unresolvable ptr credits nobody, never a guess (§2.1's closing rule).
 
         if (!string.Equals(side, "plant", StringComparison.OrdinalIgnoreCase))
