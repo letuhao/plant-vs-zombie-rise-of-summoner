@@ -534,6 +534,11 @@ public static class VfxDirector
             return;
         }
 
+        // lawn-screenshot: an armed capture runs here — Repaint is after every Camera and
+        // overlay Canvas, so a backbuffer read is the presented frame. Never in Tick/drain
+        // (mid-frame capture is undefined). One call, consumed by the runner itself.
+        try { ScreenshotRunner.CaptureOnRepaint(); } catch { }
+
         if (Floaters.Count == 0) return;
         // Camera resolves only here — with live floaters, on Repaint — never in Tick.
         // Re-resolve when the cached camera is destroyed OR merely disabled: scene switches

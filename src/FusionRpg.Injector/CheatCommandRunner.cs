@@ -322,6 +322,9 @@ public static class CheatCommandRunner
             case "debug.snapshot":
                 DebugRuntime.Emit("debug.snapshot", DebugRuntime.Snapshot());
                 break;
+            case "debug.screenshot":
+                ScreenshotCapture.TryArm(p);
+                break;
             case "debug.game-state":
                 DebugActions.GameState();
                 break;
