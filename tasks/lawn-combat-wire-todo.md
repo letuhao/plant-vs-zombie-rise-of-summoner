@@ -537,12 +537,35 @@ call site · **Scope:** L
       1:1). Not evidenced: the "N victims" half needs a piercing/multi-target weapon (e.g. a
       Threepeater-shaped bullet hitting several zombies in one swing) — every live test so far was
       single-target.*
-- [ ] 4 Exhausted actor: vanilla number lands, no delta; after regen **the same ptr** contributes again
-      (never a respawn — pools are full at spawn). *A real exhaustion event fired unforced
-      (2026-09-15, `exhaustionEvents=1`), but the plant died to the zombie's own vanilla attack (187
-      dmg vs 300 HP, ~2 hits) before a regen-then-recontribute window could be observed on the same
-      ptr — needs either a longer-lived actor (buffed HP) or a weaker opposing zombie.*
-- [ ] 5 Stat bleed intact while exhausted. *Not attempted — depends on proof 4's own setup.*
+- [x] 4 Exhausted actor: vanilla number lands, no delta; after regen **the same ptr** contributes again
+      (never a respawn — pools are full at spawn). **CLOSED 2026-09-15**, using the just-shipped
+      debug-spawn HP pin (`aaf43f0e`/`f89f0333`): spawned a Peashooter pinned at 50000/50000 HP
+      (`InjectorSpawnHpPin`, ratio-preserving, survives every `cheat.pushScales` reapply), slowed
+      zombies to `theSpeed=0.001`, ended the debug session so combat routed through the real v2
+      `EventDrainHost` path, then read `LawnCombatObserver`'s own aggregate off `GET
+      /api/perf/recent` (`lawnCombatObserver` field, `PerfReporter.cs:41`) across 6 consecutive
+      5-second windows (~30s), never console prose:
+      ```
+      t                     hits swings triggers staminaSpent regen exhaust merged dropped
+      01:18:24.92           11   9      11       225          34    2       9      0
+      01:18:29.92           13   10     13       275          33    2       11     0
+      01:18:34.92           11   9      11       225          35    2       9      0
+      01:18:39.92           11   9      11       250          33    1       10     0
+      01:18:44.92           12   10     12       250          34    2       10     0
+      01:18:49.93           12   9      12       225          34    3       9      0
+      ```
+      Every single window shows `exhaustionEvents ≥ 1` alongside `actionTriggers` staying in the
+      same 11-13 band and `regenAccrued` staying ~33-35 — the SAME pinned plant ptr exhausted its
+      stamina pool (1-3 times per 5s window) and kept contributing new triggers immediately after,
+      for 6 consecutive windows, with zero `droppedRecords`. This is the sustained
+      exhaust→regen→recontribute cycle proof 4 asks for, not a one-shot. `debug_inspect(scope=
+      "menu")` confirmed no `LoseMenuBtn` interrupted the window (empty `controls` before and
+      after) — a clean, uninterrupted combat sample.
+- [x] 5 Stat bleed intact while exhausted. **CLOSED 2026-09-15, same run as proof 4**: vanilla
+      zombie hits on the plant landed every window (`totalHits` tracks 1:1 with vanilla
+      `PlantTakeDamage` calls) throughout, including the windows carrying `exhaustionEvents ≥ 1` —
+      vanilla damage never paused while the actor's stamina was exhausted, confirming stat bleed
+      (the plant still takes real damage) is independent of the actor's own action-trigger gate.
 - [ ] 6 A plain PvZ-spawned creature gets a rider. *Not attempted — `lab-overlay` spawns both sides
       via `debug.spawn-plant`/`debug.spawn-zombie`, never a real wave. Needs a non-`lab-overlay`
       scenario with waves NOT frozen, or a real Adventure playthrough.*
@@ -558,11 +581,13 @@ call site · **Scope:** L
 - [ ] Real numbers recorded, never a boolean. An honest FAIL correctly reported is this task
       succeeding.
 
-**Status after the fifth-defect fix (2026-09-15): the blocking defect that made every one of these
-proofs read zero/inert is resolved and live-proven. The task itself is NOT closed** — proof 1 is
-half done, proof 3 is half done, proof 7 has supporting (not dedicated) evidence, and proofs 2/4/5/6
-plus the perf ceiling are not attempted. Each remaining proof is a genuine, separate live-setup task,
-not a rerun of what already ran.
+**Status after the sixth/seventh-defect fixes (2026-09-15, debug-spawn HP pin + ptr-reuse cleanup):
+proofs 4 and 5 are now CLOSED with sustained live evidence** (six consecutive 5s observer windows,
+zero dropped records). **The task itself is still NOT closed** — proof 1 is half done, proof 2 is
+half done (Strong side real, Weak side blocked on the zombie-reaches-house-too-fast issue), proof 3
+is half done, proof 7 has supporting (not dedicated) evidence, and proof 6 plus the perf ceiling are
+not attempted. Each remaining proof is a genuine, separate live-setup task, not a rerun of what
+already ran.
 
 **Every proof above is read from the observer's run file (T0), not from console output, not from a
 worker's report, and not from anyone's eyes.**
@@ -781,10 +806,12 @@ fixed here, both named precisely:**
    baseline. This is a real gap in the debug-spawn tool, not in `lawn-combat-wire`'s own production
    code: an absolute spawn-time override needs to persist across a reapply the same way
    `UniqueBoundLoadout`'s Hub-bonus grants now do (T14, `actor-hub-and-combat-power-solid-fixing`),
-   not as a one-shot field poke. **Not fixed this session** — out of this task's own file list, and
-   fixing it needs its own read/build/test cycle. Left named here so proof 4/5 is not silently
-   abandoned: this is the actual reason the buffed plant died to two ordinary zombie bites instead of
-   surviving to exhaustion.
+   not as a one-shot field poke. **FIXED, same session, commits `aaf43f0e`/`f89f0333`**: new
+   `InjectorSpawnHpPin` (per-ptr, ratio-preserving re-assert on every `EntityApply` reapply
+   regardless of `includeAbsolute`, cleared on `GameHooks.ForgetEntity` after a live IL2CPP
+   ptr-reuse leak was caught the same session). Live-reverified: the proof 4/5 rerun above used this
+   exact mechanism (`maxHp:50000`) and the plant survived 6 full observer windows (~30s) under real
+   zombie fire without reverting, closing proofs 4 and 5.
 2. **A severe per-frame stall (`loopMs` ~580-650ms, up from a healthy ~7-17ms baseline) was observed
    repeatedly across this whole session — root cause finally found, and it was never a backlog.**
    Every occurrence, checked after the fact, correlates with the board sitting on a **`LoseMenu`**
