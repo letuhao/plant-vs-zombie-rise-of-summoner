@@ -237,11 +237,11 @@ row, so its cost becomes config. Seed already authored: `data/seed/actions/autho
       *audit 2026-09-15 CONFIRMED: `ActionCorpusImportTests.cs:249`*
 - [x] `Program.cs`'s loader includes the authored file.
       *audit 2026-09-15 CONFIRMED: `Program.cs:415`*
-- [ ] **Every imported brief's Kind is its authored `kindHint` (else `Skill`) and its cost is the template row
+- [x] **Every imported brief's Kind is its authored `kindHint` (else `Skill`) and its cost is the template row
       for that (kind, category)** — no other Kind or cost drift. *(Reworded 2026-09-15 by L-N14, owner-visible:
       the original "All 179 existing briefs import unchanged" was false — one shipped brief authors
       `kindHint:"innate"` and correctly changes Kind — and pinned a population count.)*
-      **audit 2026-09-15 OPEN: FALSE — `ActionCorpusImporterTests.cs:182` says "That is false…" (24 shipped briefs, one documented Kind change); that test also pins population counts (24/3/21), which the guardrail rule bans. Next run L-N14**
+      *audit 2026-09-15 CONFIRMED (reworded bullet): `ActionCorpusImporterTests.TheRealShippedCorpusHonoursKindHintAndKindAwareCostForEveryImportedBrief` (5a9c5daa); mutation ignoring kindHint fails it.*
 - [x] No `committed-round-*.json` modified.
       *audit 2026-09-15 CONFIRMED: no commit in the T7 range touches `committed-round-*.json`*
 
