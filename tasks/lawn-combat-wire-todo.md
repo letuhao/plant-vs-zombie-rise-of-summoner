@@ -1280,6 +1280,9 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
 - [ ] **L-N3** Proof 6 live: real Adventure board (confirm board type ≠ `Nothing` and no stale
       lab-overlay entities, screenshot), a `zombie.spawn source:"start"` ptr with a non-Neutral
       element and a rider delta sourced from it; falsifier vs a Bound specimen.
+      *2026-09-15 PROGRESS (not ticked): a plain game-spawned Conehead (type 2, no `UniqueActor`, Adventure 2, no session) carried
+      an RPG rider on its bite — vanilla 50, crit −264, Hub power 42 (`_lawn-combat-observer-bite-differential-env-on.json`).
+      Its element, the `source:"start"` spawn and the Bound-specimen falsifier are still owed.*
 - [ ] **L-N5** Proof 7 real falsifier: a deferred RPG overlay delta as the lethal hit in the same frame
       as a vanilla lethal hit, outside a debug session; log both `Zombie.Die` and `DestoryZombie`
       hooks firing; exactly one `zombie.die` per death over several deaths.
@@ -1299,6 +1302,16 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       delta is a miss** (miss 3 → delta 0; crit 9 and hit 1 all non-zero; zero non-miss zeros). A miss comes from
       `OverlayCombatCalculator`'s hit roll: `pHitFinal = Sigmoid(accuracy − dodge)`, which is 0.5 with both channels at 0, so
       untuned actors miss about half their riders by construction. RPG records merged into vanilla records: 0 of 13 (L-N35).*
+      *2026-09-15 PROGRESS 2 (not ticked): after L-N35's join, the falsifier half reads cleanly — two different Peashooter
+      ptrs with the same Hub power (`debug.actor-derived`: `combat.power.omni` 853, `combat.accuracy.omni` 60.1) gave identical
+      per-outcome deltas for the same vanilla 2122 (crit −4326 from `2CCF8B8FD80` and `2CCF8D3A480`, hit −2833)
+      (`_lawn-combat-observer-rpg-join-env-on.json`). The positive half (two attackers of **different** Hub power against the
+      same victim) is blocked on this save: every Adventure picker (levels 2, 10, 30 inspected) offers only Sunflower and
+      Peashooter, so no second shooter species can be placed through a real card, and player 1's only shooter-species
+      allocation is Peashooter's. A zombie-bite variant (Sunflower victims) produced two bites in 120 s — too few
+      (`_lawn-combat-observer-bite-differential-env-on.json`: Conehead `2ccf8d66640`, Hub power 42, vanilla 50, crit −264).
+      Routes left: a Bound specimen with its own allocation beside a general Peashooter (live-probe Task 15's path), or a
+      save with more plants unlocked. No debug derived override — that input would be fabricated.*
 - [x] **L-N15** Gate hygiene: per-commit file-list review of the T3–T7 commits; mutant set in
       `scripts/mutants/` for `LawnElementResolver`, `OverlayCombatCalculator`, `EventDrain` with
       killed-mutant output; replace self-asserted "lead read the diff" boxes with commit hashes.
