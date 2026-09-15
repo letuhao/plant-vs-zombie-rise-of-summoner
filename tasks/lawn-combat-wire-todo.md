@@ -1144,8 +1144,9 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       (currently "BOUNDARY MISSING"); make `injector-fallback` run the injector host compile (scratch
       `OutputPath`) + single-writer/funnel/actor-hub/secondary guards instead of only Core.Tests.
       *Done: registry adds owners for `tests/FusionRpg.{Core,Data,Guard}.Tests/**` and the registry/verify scripts; `injector-fallback` now runs `injector-compile` (new `scripts/guard-injector-compile.ps1`, temp OutputPath, loud SKIPPED without a game dir; deliberate compile error → exit 1) + single-writer/funnel/actor-hub/secondary guards + Guard.Tests. First real run exposed `EntityFields12PlusGuardTests` stale since T4 `e6af60b5` (3 assertions) — fixed. `verify-change` EXIT=0: 5 guards OK, Guard.Tests 266/266.*
-- [ ] **L-N24** `tools/ElementEnumGen` `--effect-check` mode wired into CI so a stale
+- [x] **L-N24** `tools/ElementEnumGen` `--effect-check` mode wired into CI so a stale
       `EffectAtomCatalog.Generated.cs` fails (today no check mode exists).
+      *Done: `EffectCatalogGen.GenerateFromSeed`/`Matches`; `--effect-check <path>` exits 1 when stale. `EffectCatalogCheckTests` (3) runs in the already-CI `FusionRpg.ElementEnumGen.Tests` — no CI file edit. Falsified: seed `multiplierMilli -1000→-999` made `--effect-check` exit 1 and the test fail; seed restored clean. Registry: `effect-catalog-drift` seam + ElementEnumGen.Tests owner. verify-change EXIT=0: Core 13537, ElementEnumGen 17, Guard (boundary) 10.*
 - [x] **L-N25** Audit `plant:{tid}`/`zombie:{tid}` owner keys for the same OnDamageDealt either-side
       match fixed for `entity:` in `29cbb7f3` (they fall back to `TargetTypeId`); test both directions.
       *Done: `plant:` was already attacker-only. `zombie:` was a real defect — with `TypeId` absent it matched the victim's `TargetTypeId`. Explicit attacker-only `OnDamageDealt` arm added. `TypeOwnerKeyDirectionTests` 6/6; before the fix `Zombie_key_does_not_match_on_the_victims_type_when_the_attacker_type_is_absent` failed. Core.Tests 13524/13524.*

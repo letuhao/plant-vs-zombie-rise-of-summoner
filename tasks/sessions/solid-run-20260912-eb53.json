@@ -54,7 +54,9 @@
     "tools/LawnCombatObserver/**",
     "scripts/verification-boundaries.v1.json",
     "scripts/guard-injector-compile.ps1",
-    "docs/architecture/effect-atom/spec-value-spec-and-curve.md"
+    "docs/architecture/effect-atom/spec-value-spec-and-curve.md",
+    "tools/ElementEnumGen/**",
+    "tests/FusionRpg.ElementEnumGen.Tests/**"
   ],
   "started": "2026-09-12T14:38:04Z",
   "status": "active",

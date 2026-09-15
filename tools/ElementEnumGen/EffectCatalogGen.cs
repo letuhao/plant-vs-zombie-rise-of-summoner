@@ -12,6 +12,43 @@ namespace FusionRpg.Tools.ElementEnumGen;
 /// </summary>
 public static class EffectCatalogGen
 {
+    /// <summary>
+    /// Compiles the named fx-*.json seed files (an explicit allow-list, E43 spec-family-expand.md §3.3 —
+    /// never a glob) and renders the catalog source. Code 0 = Source set; 1 = compile refused; 2 = parse
+    /// failure. Message carries the def count on success, the reason otherwise.
+    /// </summary>
+    public static (int Code, string? Source, string Message) GenerateFromSeed(string seedRoot, IReadOnlyList<string> shippedFxFiles)
+    {
+        var atomsDir = Path.Combine(seedRoot, "atoms");
+        var files = shippedFxFiles
+            .Select(name => Path.Combine(atomsDir, name))
+            .Where(File.Exists)
+            .OrderBy(f => f, StringComparer.Ordinal)
+            .Select(f => (f, File.ReadAllText(f)))
+            .ToArray();
+
+        var collected = FusionRpg.Core.Effects.Atoms.AtomSeedFile.Collect(files);
+        if (!collected.IsOk)
+            return (2, null, "data/seed/atoms/fx-*.json did not parse:" + Environment.NewLine + "  " +
+                string.Join(Environment.NewLine + "  ", collected.Errors));
+
+        var compiled = FusionRpg.Core.Effects.Atoms.AtomCompiler.Compile(
+            collected.Content.Atoms, FusionRpg.Core.Effects.Atoms.RuntimeId.Lawn, 1, hostIsPlanner: true);
+        if (compiled.Rejected.Count > 0 || compiled.Runtime.Count > 0)
+            return (1, null,
+                $"refusing to emit: {compiled.Rejected.Count} rejected atom(s), {compiled.Runtime.Count} " +
+                "routed to the runner — the retired EffectSeedCatalog's replacement must compile whole");
+
+        var defs = compiled.Defs.Select(FusionRpg.Core.Effects.Atoms.AtomPushCodec.ToDef).ToList();
+        return (0, GenerateSource(defs), $"{defs.Count} def(s)");
+    }
+
+    /// <summary>Generated vs checked-in text, line-ending insensitive (git may normalise CRLF/LF).</summary>
+    public static bool Matches(string generated, string checkedIn) =>
+        string.Equals(Normalize(generated), Normalize(checkedIn), StringComparison.Ordinal);
+
+    static string Normalize(string s) => s.Replace("\r\n", "\n");
+
     public static string GenerateSource(IReadOnlyList<EffectDef> defs)
     {
         var w = new StringBuilder();
