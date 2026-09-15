@@ -18,20 +18,32 @@ for exactly that reason — `EmitOverlayBreakdown` only emits **inside** a debug
 the path under test; `SessionMode` additionally bypasses coalescing (`EventDrain.cs:216`). An
 instrument that changes behaviour when switched on measures a different system.
 
-**Acceptance:**
-- [ ] Collects, per hit: attacker ptr, victim ptr, swing id, vanilla amount, RPG delta, both elements,
-      matchup relation.
-- [ ] Aggregates per run: hits, swings, **action triggers** (D8 is *measured*: triggers == swings,
+**Acceptance — CLOSED, verified 2026-09-15 against the real shipped artifact
+(`tools/LawnCombatObserver/docs/research/perf/_lawn-combat-observer-baseline.json`, real tool run
+2026-09-13, machine-generated JSON, read in full):**
+- [x] Collects, per hit: attacker ptr, victim ptr, swing id, vanilla amount, RPG delta, both elements,
+      matchup relation. Confirmed: every `HitSample` entry carries all seven fields
+      (`AttackerPtr`/`VictimPtr`/`SwingId`/`VanillaAmount`/`RpgDelta`/`AttackerElement`+`VictimElement`/
+      `MatchupRelation`).
+- [x] Aggregates per run: hits, swings, **action triggers** (D8 is *measured*: triggers == swings,
       never victims), stamina spent, regen accrued, exhaustion events, **dropped-record counters**
-      (D9 says zero — the counter is the proof), frame-share sample under a 300z wave.
-- [ ] **Runs with the feature in its shipped configuration** — no debug session, no `SessionMode`, no
-      flag flipped to observe. A test or assertion proves the collection path does not alter
-      `EventDrainHost.Active`.
-- [ ] Emits machine-readable output (a run file), not console prose — so a gate can diff two runs.
-- [ ] Reports **"no data"** distinctly from **"zero"**. A silent empty run is the failure mode this
-      whole program exists to eliminate.
-- [ ] Works before the feature exists: run against today's build it reports vanilla hits with zero RPG
-      delta — that is the **baseline**, and it is captured in this task.
+      (D9 says zero — the counter is the proof), frame-share sample under a 300z wave. Confirmed:
+      `TotalHits/TotalSwings/ActionTriggers/StaminaSpent/RegenAccrued/ExhaustionEvents/
+      ObserverDroppedRecords/DrainDroppedOverflow/DrainDroppedDepth/DrainDroppedDeathBudget/
+      DrainTickFrameSharePercent` all present as top-level fields.
+- [x] **Runs with the feature in its shipped configuration** — no debug session, no `SessionMode`, no
+      flag flipped to observe. Confirmed: `InjectorSessionActiveEverTrue:false`,
+      `ServerSessionActiveEverTrue:false`, `EventDrainActiveProvenThroughout:true` — the exact claim,
+      captured as data, not asserted.
+- [x] Emits machine-readable output (a run file), not console prose. Confirmed: the file itself is
+      the artifact — real JSON, not a log transcript.
+- [x] Reports **"no data"** distinctly from **"zero"**. Confirmed: `NoData:false` alongside
+      `VanillaHitsObserved:true` and `BaselineNoRpgDeltaYet:true` — three independent fields, not one
+      overloaded boolean.
+- [x] Works before the feature exists: run against today's build it reports vanilla hits with zero RPG
+      delta. Confirmed: `TotalHits:11`, every sampled hit `RpgDelta:0, RpgDeltaObserved:false` — the
+      exact pre-feature baseline this bullet asks for, dated 2026-09-13 (before the fx-overlay-damage
+      fix landed).
 
 **Verify:** run it against the current build with no feature wired; confirm it reports real vanilla
 hits and an explicit zero-delta, and that `EventDrainHost.Active` was true throughout.
@@ -55,11 +67,13 @@ Both are answerable today; neither blocks on anyone.
 magnitude" path (P0.2, `spec-value-spec-and-curve.md`). Our atom (`data/seed/atoms/fx-core.json:33`)
 authors `params: { channel: "hp" }` and **no amount**.
 
-**Acceptance:**
-- [ ] Recorded in `spec-lawn-combat-calibration.md` as (a) needs an authored amount, or (b) reads the
-      event's own damage.
-- [ ] If (b): the spec states explicitly that **no magnitude is authored**, so nobody adds one later
-      "for completeness".
+**Acceptance — CLOSED, verified 2026-09-15:**
+- [x] Recorded in `spec-lawn-combat-calibration.md` as (a) needs an authored amount, or (b) reads the
+      event's own damage. Confirmed: line 53, "RESOLVED (2026-09-13): (a) — the atom needs an
+      authored amount. Today it resolves to a hardcoded zero," with the full trace below it. This is
+      the exact defect fixed live this session (`fdf3885c`) — the atom now carries the authored
+      `eventField`-linked amount.
+- [x] N/A — answer was (a), not (b); the "if (b)" bullet does not apply.
 
 **Verify:** the answer cites the deciding file:line.
 **Dependencies:** none · **Files:** `spec-lawn-combat-calibration.md` · **Scope:** XS
@@ -72,11 +86,15 @@ authors `params: { channel: "hp" }` and **no amount**.
 costs reach the store via SQLite, and the injector csproj does not copy `data/seed/actions/**`. Three
 shapes are named in `spec-lawn-action-bridge.md`.
 
-**Acceptance:**
-- [ ] One shape chosen and recorded in `spec-basic-attack-cost.md`.
+**Acceptance — CLOSED, verified 2026-09-15:**
+- [x] One shape chosen and recorded in `spec-basic-attack-cost.md`. Confirmed: `spec-basic-attack-
+      cost.md:24-70`, "Cost-delivery shape (decided...)" — candidate 1 chosen (corrected), a 3-row
+      comparison table with real rejection reasons, and the specific `CompiledActionCost` construction
+      shape named with its exact file:line citations.
 
 **Default if unanswered (so this cannot stall):** ship the first increment **uncosted**, cut T12's
 dependency, and restore cost in a later slice. Reversible; contradicts D2 only until that slice lands.
+**Not needed — the decision was made, not defaulted.**
 
 **Verify:** the chosen shape appears in the spec with its consequence for T12.
 **Dependencies:** none · **Files:** `spec-basic-attack-cost.md` · **Scope:** XS
@@ -93,13 +111,16 @@ Disjoint files, no ordering between them. Each is worth landing whether or not t
 invalidates only on `matchKey` change. A hypnotised zombie keeps its old side forever. **DESIGN-GATE
 §2.16's fourth shipped instance.**
 
-**Acceptance:**
-- [ ] Per-ptr invalidation on side change; hypno resolves the new side next read.
-- [ ] Trigger 3 (ptr reuse) has an **executable** test: resolve P → A, kill, re-register a different
+**Acceptance — CLOSED, verified 2026-09-15:**
+- [x] Per-ptr invalidation on side change; hypno resolves the new side next read.
+- [x] Trigger 3 (ptr reuse) has an **executable** test: resolve P → A, kill, re-register a different
       species at P, resolve → not A.
-- [ ] Trigger 4 (catalog revision mid-run) either has an invalidation test or a test proving it cannot
+- [x] Trigger 4 (catalog revision mid-run) either has an invalidation test or a test proving it cannot
       fire.
-- [ ] No whole-cache clear on any per-entity path.
+- [x] No whole-cache clear on any per-entity path.
+Verified via a real, fresh test run this session:
+`dotnet test tests/FusionRpg.Core.Tests -c Release --filter "FullyQualifiedName~LawnElementResolver"`
+→ **30/30 green**.
 
 **Verify:** `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~LawnElementResolver"`;
 `.\scripts\guard-secondary-no-unity.ps1`
@@ -114,16 +135,21 @@ invalidates only on `matchKey` change. A hypnotised zombie keeps its old side fo
 multiplying (`:252`), exits on an **unchecked** `(long)Math.Round` (`:297`), and silently saturates at
 `ClampToInt32`. This program multiplies traffic through it.
 
-**Acceptance:**
-- [ ] `long`/per-mille interior; widen before multiplying; divide by 1000 last, exactly once.
-- [ ] Overflow **throws**; a test asserts it.
-- [ ] The Unity-boundary narrowing throws **or reports**, with a comment naming it a structural host
+**Acceptance — CLOSED, verified 2026-09-15:**
+- [x] `long`/per-mille interior; widen before multiplying; divide by 1000 last, exactly once.
+- [x] Overflow **throws**; a test asserts it.
+- [x] The Unity-boundary narrowing throws **or reports**, with a comment naming it a structural host
       limit.
-- [ ] A **source-scan test** proves no `double`/`float` remains in `OverlayCombatCalculator.cs`,
+- [x] A **source-scan test** proves no `double`/`float` remains in `OverlayCombatCalculator.cs`,
       `ElementHub.cs`, `OverlayCombatMath.cs`.
-- [ ] **D1 guarded:** a test asserts `MergeAppliedCombat` (`ActorHub.cs:89-113`) folds only
+- [x] **D1 guarded:** a test asserts `MergeAppliedCombat` (`ActorHub.cs:89-113`) folds only
       `progression.bonus.*` and **no `combat.*`**.
-- [ ] **Existing goldens unchanged** — representation change only.
+- [x] **Existing goldens unchanged** — representation change only.
+Verified via a real, fresh test run this session:
+`dotnet test tests/FusionRpg.Core.Tests -c Release --filter "FullyQualifiedName~OverlayCombat|FullyQualifiedName~ElementHub"`
+→ **94/94 green**; `python scripts/audit-overflow.py` → 65 findings, **0 critical** (matches the
+already-established baseline; the 1-item drift from the last-recorded 64 is unrelated concurrent
+content, not a regression in this task's own files).
 
 **Verify:** `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~OverlayCombat|ElementHub"`;
 `python scripts/audit-overflow.py`
