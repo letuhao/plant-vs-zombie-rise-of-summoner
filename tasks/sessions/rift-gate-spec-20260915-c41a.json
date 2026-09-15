@@ -24,6 +24,13 @@
     "tests/FusionRpg.Core.Tests/Overlay/RiftMenuAnchorTests.cs"
   ],
   "planned_build_note": "These are the /build phase's intended files, recorded now so the guard tests a future build adds (e.g. a rift-gate no-navigation guard) can be scoped narrowly rather than claiming all of tests/FusionRpg.Guard.Tests/**, which an active session already owns.",
+  "phase": "spec + plan complete (2026-09-15); /build full authorized by the owner, same worktree and fence.",
+  "build_baseline": {
+    "head": "5a238f28b84b1186251d960c8a8d4e9a272d4ed0",
+    "branch": "rift-gate-spec",
+    "dirty_set": []
+  },
+  "build_env_note": "FUSIONRPG_ML_GAMEDIR is unset at User and Machine scope; .env only defines FUSIONRPG_ML_GAMEDIR_DEFAULT, which MSBuild does not read. Injector tasks must set FUSIONRPG_ML_GAMEDIR=H:\\Games\\PVZ-Fusion-3.9_MelonLoader and grep the build log for the 'Skipping FusionRpg.Injector.MelonLoader.39' stub warning — a green exit code alone is a false pass.",
   "started": "2026-09-15T04:22:53Z",
   "status": "active"
 }

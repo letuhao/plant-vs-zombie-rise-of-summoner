@@ -1,5 +1,6 @@
 # Plan: `rift-gate`
 
+**Status:** **approved 2026-09-15** (owner). Phase 2 (Plan) complete; implementation is authorized via `/build full`.
 **Map:** [../docs/architecture/rift-gate-map.md](../docs/architecture/rift-gate-map.md) (approved 2026-09-15; **Decision 17 adds the owner's "never fight the PVZ engine" rule**)
 **Ideal:** [../docs/architecture/rift-gate-ideal.md](../docs/architecture/rift-gate-ideal.md)
 **Specs:** `docs/architecture/rift-gate/spec-{menu-anchor,tombstone,overlay-hide,first-open-signal,entry-landing}.md`

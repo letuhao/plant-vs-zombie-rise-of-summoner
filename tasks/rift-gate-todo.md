@@ -1,8 +1,10 @@
 # Todo: `rift-gate`
 
+**Status:** **approved 2026-09-15** (owner). Phase 2 (Plan) complete; implementation is authorized via `/build full`.
+**13 tasks · 5 checkpoints · 0 gates.**
 **Plan:** [rift-gate-plan.md](rift-gate-plan.md) · **Map:**
 [../docs/architecture/rift-gate-map.md](../docs/architecture/rift-gate-map.md) ·
-**Specs:** `docs/architecture/rift-gate/spec-*.md`
+**Specs:** `docs/architecture/rift-gate/spec-{menu-anchor,tombstone,overlay-hide,first-open-signal,entry-landing}.md`
 
 > **Read the map's Audit section *and* Decision 17 first.** Its load-bearing points:
 > `overlay-hide` relays through the **existing** server→injector command path; `first-open-signal` is
@@ -16,7 +18,14 @@
 
 - [ ] `.\scripts\verify-change.ps1 -Paths <changed files> -Session <build-session-id>` selects the
       focused checks (required local workflow — never a broad suite from caution)
-- [ ] Injector tasks (T2–T6): `dotnet build src/FusionRpg.Injector.MelonLoader.39 -c Release -p:MlGameDir=$env:FUSIONRPG_ML_GAMEDIR -p:GameProfile=pvzrh-3.9` green — CI cannot build the interop
+- [ ] Injector tasks (T2–T6): **set the env var first, then check the log** —
+      `$env:FUSIONRPG_ML_GAMEDIR = 'H:\Games\PVZ-Fusion-3.9_MelonLoader'` then
+      `dotnet build src/FusionRpg.Injector.MelonLoader.39 -c Release -p:MlGameDir=$env:FUSIONRPG_ML_GAMEDIR -p:GameProfile=pvzrh-3.9`.
+      **A green exit code is not proof:** with no env var the csproj (`:16,29-36`) silently substitutes
+      `SkipStub.cs` and emits *"Skipping FusionRpg.Injector.MelonLoader.39 …"* at `Importance="high"` as a
+      **warning, not an error**. If that line appears, the build did **not** compile the real injector —
+      treat it as a blocker for the task, never a pass. `FUSIONRPG_ML_GAMEDIR` is unset at User/Machine
+      scope; `.env` defines only `FUSIONRPG_ML_GAMEDIR_DEFAULT`, which MSBuild does not read.
 - [ ] Const/tuning-introducing tasks: `python scripts/audit-magic-numbers.py` shows no new M1/M2
       (structural consts carry their T2 comment)
 - [ ] Web tasks: `npm run build` (tsc --noEmit) + `npm run check:bundle` green

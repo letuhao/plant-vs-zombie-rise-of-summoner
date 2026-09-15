@@ -66,9 +66,10 @@ story ledger.
    (`OverlayViewHost.PumpTick`'s `case Command.Hide: if (_visible) HideWindow(...)`, `:239-241`; the
    launcher's `HideOverlayToGame` is likewise safe to call when hidden, `:354-359`). The FE never waits
    on the effect.
-4. **The embed marker is a hash/query flag appended by each host at navigate time** (decision 16).
-   Verified same-origin-safe: `OverlayViewPolicy.IsSameOrigin` compares only scheme/host/port
-   (`:53-55`), so a marker does not trip the lock. The page must behave correctly with **no** marker.
+4. **The embed marker is the query flag `?embed=1`, appended by each host at navigate time** (decision
+   16, owner-confirmed 2026-09-15). Not the hash: the SPA's `HashRouter` owns the hash. Verified
+   same-origin-safe: `OverlayViewPolicy.IsSameOrigin` compares only scheme/host/port (`:53-55`), so a
+   query marker does not trip the lock. The page must behave correctly with **no** marker.
 5. **The pipe guard is extended, not paralleled.** `OverlayPipeContractGuardTests` already asserts
    *"every verb the client sends is one the server accepts"* (`:39-57`), so adding `Send("hide", ...)`
    plus a `"hide" => OverlayPipeCommand.Hide` row makes the new verb **guard-covered by construction**.
@@ -131,14 +132,14 @@ reflex.
 | Path | Duty |
 |---|---|
 | `src/FusionRpg.Core/Overlay/OverlayCommandNames.cs` (new) | The named vocabulary: `public const string Hide = "overlay.hide";` with a doc comment explaining *why* it lives here (the drain's misnomer) and that `CheatCommandRunner` is **not** renamed by this program |
-| `src/FusionRpg.Server/Program.cs` | One endpoint (e.g. `POST /api/overlay/leave`) that builds `new CommandDto { Name = OverlayCommandNames.Hide }` and sends via the **existing** `SendInjectorCommand` (`:1617`) |
+| `src/FusionRpg.Server/Program.cs` | One endpoint at **`POST /api/overlay/leave`** (owner-decided 2026-09-15; named for the player action, not the mechanism) that builds `new CommandDto { Name = OverlayCommandNames.Hide }` and sends via the **existing** `SendInjectorCommand` (`:1617`) |
 | `src/FusionRpg.Injector/CheatCommandRunner.cs` | One drain case: `if (name is OverlayCommandNames.Hide)` → injector-hosted `OverlayViewHost.Hide()` else `OverlaySwitch.RequestHide()` (pipe). Sits beside the refresh cases (`:57-105`) |
 | `src/FusionRpg.Injector/Hud/OverlaySwitch.cs` | `RequestHide()` enqueues the pipe `hide` verb (launcher host) or calls `OverlayViewHost.Hide()` (injector host) — reusing the same `Send`/`InjectorHosted` split already at `:58-59,172`. **Never touches the story ledger** |
 | `src/FusionRpg.Launcher/Services/OverlayPipeServer.cs` | `OverlayPipeCommand.Hide` + the `"hide" => OverlayPipeCommand.Hide` row (`:81-86`) |
 | `src/FusionRpg.Launcher/MainWindow.xaml.cs` | `case OverlayPipeCommand.Hide: HideOverlayToGame();` (`:286-299`) — the **same** hide Esc uses (`:354`) |
 | `src/FusionRpg.Injector/Hud/OverlayViewHost.cs` · `src/FusionRpg.Launcher/OverlayWindow.xaml.cs` | **The embed marker at open** (both hosts): append the marker at `Navigate` (`OverlayViewHost.cs:275-287`) and at `EnsureWebAsync`'s navigate (`OverlayWindow.xaml.cs:85-89`) |
 | `web/fusion-rpg-web/src/shell/OverlayLeave.tsx` (new) | The **Leave** control: renders only when the embed marker is present; posts the leave request; behaves correctly with no marker (not offered) |
-| `web/fusion-rpg-web/src/shell/overlayEmbed.ts` (new) | Pure read of the embed marker from `location.hash`/`search`. Testable with no host |
+| `web/fusion-rpg-web/src/shell/overlayEmbed.ts` (new) | Pure read of the embed marker from the **query string** (`?embed=1`, owner-decided). Testable with no host |
 | `docs/launcher/overlay-spec.md` | **Required deliverable** — see below |
 
 ## Code Style
@@ -260,17 +261,20 @@ export function OverlayLeave() {
 
 ## Open Questions
 
-1. **The endpoint's exact path and shape.** The map says "the endpoint that builds it via the existing
-   `SendInjectorCommand` helper" but does not fix the route. This spec proposes
-   `POST /api/overlay/leave` (named for the player action, not the mechanism — the internal verb is
-   `overlay.hide`). If the owner prefers the route to mirror the command name, that is a naming choice
-   with no behavioural difference.
-2. **Marker transport: hash vs query.** The SPA uses `HashRouter` (`App.tsx:13`), and `TitleScreen`'s
-   own settings mechanism uses `?system=1`/`?dev=` query params. Either works with the same-origin
-   lock. This spec prefers a **query** flag (e.g. `?embed=1`) because the hash is the router's own
-   domain and a marker there would be parsed as a route. Confirmed at implementation against
-   `App.tsx`'s HashRouter.
-3. **Should `hide` also be reachable from Esc/F10 inside the FE?** No — the native host already owns
+> **Decided (owner, 2026-09-15)** — the three choices below were proposed defaults and are now
+> **confirmed**, so they are recorded as decisions, not questions:
+>
+> 1. **Endpoint route: `POST /api/overlay/leave`** — named for the player action, not the mechanism; the
+>    internal command stays `overlay.hide` (`OverlayCommandNames.Hide`). Settled; no behaviour difference
+>    from a route mirroring the verb.
+> 2. **Embed marker: a query flag `?embed=1`** — not the hash. The SPA's `HashRouter` (`App.tsx:13`) owns
+>    the hash, so a marker there would be parsed as a route; `TitleScreen` already uses query params
+>    (`?system=1`/`?dev=`). Same-origin is unaffected (`OverlayViewPolicy.IsSameOrigin` compares only
+>    scheme/host/port, `:53-55`).
+>
+> No open question remains in this module.
+
+1. **Should `hide` also be reachable from Esc/F10 inside the FE?** No — the native host already owns
    those keys (`OverlayViewPolicy.IsCloseKey`), the FE must **not** bind F10 (`keymap.ts:18`), and the
-   FE's Esc is the layer stack's (`useGlobalKeys.ts`). The **Leave** control is the page's only
-   close affordance; the host keys remain the host's.
+   FE's Esc is the layer stack's (`useGlobalKeys.ts`). The **Leave** control is the page's only close
+   affordance; the host keys remain the host's. This is a boundary statement, not an open question.

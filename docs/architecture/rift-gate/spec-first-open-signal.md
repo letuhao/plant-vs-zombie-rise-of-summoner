@@ -201,11 +201,13 @@ spec records the class rule so the capture program inherits it and does not inve
 
 ## Open Questions
 
-1. **The fact's exact storage shape.** The map says "a row, mirroring `OnboardingStoryRow`". It could be
-   a column on an existing per-player row or a new `rpg_first_open` table. This spec proposes a small
-   dedicated row keyed `(player_id)` (simplest idempotency key, no join), but a column on an existing
-   per-player row is equally defensible if the owner wants to avoid a new table. Behaviour is identical.
-2. **Whether the "capture is complete" signal belongs to this program or the capture program.** The map
+> **Decided (owner, 2026-09-15)** — the storage shape below was a proposed default and is now
+> **confirmed**: **a dedicated row keyed `(player_id)`** (simplest idempotency key, no join), mirroring
+> `OnboardingStoryRow` (`RpgStore.Onboarding.cs:25`). Not a column on an existing per-player row. Settled;
+> behaviour is unchanged from the proposal.
+
+1. **Whether the "capture is complete" signal belongs to this program or the capture program.** The map
    is explicit that the **manifest** is the capture program's (`rift-gate-map.md:126`, gap
    "Capture completeness / manifest"). This module records only the *trigger fact*; the completion
    contract is not ours. Stated here so a downstream reader does not assume a completion signal exists.
+   This is a scope boundary, not an open question.
