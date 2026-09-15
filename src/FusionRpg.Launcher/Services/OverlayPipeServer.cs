@@ -16,7 +16,12 @@ public enum OverlayPipeCommand
     None = 0,
     Toggle,
     /// <summary>Availability probe — answers "a host is listening" and must not move the overlay.</summary>
-    Ping
+    Ping,
+    /// <summary>
+    /// Close the overlay window (rift-gate overlay-hide: the page's Leave control). One more route to
+    /// the SAME hide the Esc key uses — it is not a second behaviour, and it never touches the story.
+    /// </summary>
+    Hide
 }
 
 /// <summary>
@@ -82,6 +87,7 @@ public sealed class OverlayPipeServer : IDisposable
         {
             "toggle" => OverlayPipeCommand.Toggle,
             "ping" => OverlayPipeCommand.Ping,
+            "hide" => OverlayPipeCommand.Hide,
             _ => OverlayPipeCommand.None
         };
     }

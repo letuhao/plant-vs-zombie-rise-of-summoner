@@ -292,6 +292,11 @@ public partial class MainWindow : FluentWindow
                 case OverlayPipeCommand.Toggle:
                     await ToggleOverlayAsync();
                     break;
+                case OverlayPipeCommand.Hide:
+                    // The SAME hide the Esc key uses (overlay-spec.md: one toggle method, no entry
+                    // point gets its own behaviour). Not a toggle: the page asked to close, so it closes.
+                    HideOverlayToGame();
+                    break;
                 case OverlayPipeCommand.Ping:
                     break; // availability probe only — must not move the overlay
             }

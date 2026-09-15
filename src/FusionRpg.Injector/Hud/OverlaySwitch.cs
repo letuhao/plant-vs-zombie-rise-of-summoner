@@ -30,6 +30,7 @@ public static class OverlaySwitch
     static readonly Stopwatch Clock = Stopwatch.StartNew();
 
     static volatile bool _clickPending;
+    static volatile bool _hidePending;
     static volatile bool _probeInFlight;
     static volatile bool _sendDone;
     static volatile bool _sendOk;
@@ -42,6 +43,16 @@ public static class OverlaySwitch
 
     /// <summary>Called from OnGUI. Sets a flag only: no pipe, no log, no Unity work on the click.</summary>
     public static void RequestToggle() => _clickPending = true;
+
+    /// <summary>
+    /// Close the view on the page's behalf (`overlay.hide`). Same split as the toggle — the injector
+    /// host hides in-process, the launcher host is asked over the existing pipe — and the request is
+    /// only a flag, so no Unity API is touched off the main thread.
+    ///
+    /// Story-neutral by construction: this reaches neither the onboarding ledger nor any story write.
+    /// Closing the window must never be read as "the player finished or skipped the prologue".
+    /// </summary>
+    public static void RequestHide() => _hidePending = true;
 
     /// <summary>The launcher may have started or stopped between matches — re-probe.</summary>
     public static void OnMatchStart() => State.OnMatchStart();
@@ -86,6 +97,12 @@ public static class OverlaySwitch
 
         State.SettingsEnabled = OverlaySettings.OverlayButtonEnabled;
 
+        if (_hidePending)
+        {
+            _hidePending = false;
+            Send("hide", isProbe: false);
+        }
+
         if (_clickPending)
         {
             _clickPending = false;
@@ -125,6 +142,12 @@ public static class OverlaySwitch
             RpgHost.Log.Info(State.HostReachable
                 ? "In-game overlay view ready — button enabled."
                 : "In-game overlay view unavailable — hiding the button.");
+        }
+
+        if (_hidePending)
+        {
+            _hidePending = false;
+            OverlayViewHost.Hide(); // in-process host: no wire, and hiding twice is already a no-op
         }
 
         if (!_clickPending) return;
