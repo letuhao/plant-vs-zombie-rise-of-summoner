@@ -1,0 +1,19 @@
+{
+  "session": "story-ui-evidence-20260915-d5f2",
+  "program": "story-ui-evidence",
+  "problem": "Capture the shipped Rift prologue UI as reviewable e2e evidence and give its say-region stable test ids, so the story scene can be audited visually at every beat and viewport instead of only asserted in jsdom.",
+  "mode": "direct",
+  "branch": "features/derived-stat-extension",
+  "worktree": null,
+  "paths": [
+    "web/fusion-rpg-web/e2e/story-ui-evidence.spec.ts",
+    "web/fusion-rpg-web/src/features/onboarding/RiftPrologueDialog.tsx",
+    "tasks/sessions/story-ui-evidence-20260915-d5f2.json"
+  ],
+  "notes": [
+    "RiftPrologueDialog.tsx is shared with the story-scene program (branch story-scene-idea, its own worktree). Its committed edit (8075215b) is in the scene region (~line 167); this session's change is the say region (~line 184). Non-overlapping, so a merge is clean. T23 of story-scene replaces this dialog with the piece-based scene and will supersede these ids; they are transitional by design.",
+    "Artifacts under e2e/artifacts/story-ui/ are gitignored, like every other capture in this repo."
+  ],
+  "started": "2026-09-15T10:15:00Z",
+  "status": "active"
+}

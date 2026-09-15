@@ -181,10 +181,20 @@ export function RiftPrologueDialog({
             />
           )}
         </div>
-        <div aria-live="polite" className="rounded-sm border border-border bg-soil-raised p-3">
-          <p className="text-xs font-bold uppercase tracking-wide text-ok">{beat.speaker}</p>
-          <p className="mt-1 font-display text-lg text-text">“{beat.line}”</p>
-          <p className="mt-2 text-sm text-muted">{beat.teaching}</p>
+        <div
+          aria-live="polite"
+          className="rounded-sm border border-border bg-soil-raised p-3"
+          data-testid="rift-prologue-say"
+        >
+          <p className="text-xs font-bold uppercase tracking-wide text-ok" data-testid="rift-prologue-speaker">
+            {beat.speaker}
+          </p>
+          <p className="mt-1 font-display text-lg text-text" data-testid="rift-prologue-line">
+            “{beat.line}”
+          </p>
+          <p className="mt-2 text-sm text-muted" data-testid="rift-prologue-teaching">
+            {beat.teaching}
+          </p>
         </div>
         {ackError ? <p className="text-xs text-bad" role="status">We’ll try again next time. You can continue to the lawn.</p> : null}
       </div>
