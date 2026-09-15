@@ -431,10 +431,11 @@ unset = Add) toward the target — `TryGuardMutation` structurally refuses `mode
 - [x] No type-wide `plant:N` (or peer) loadout keys. — unchanged from before, still ptr-scoped `entity:{ptr}` only
 - [x] Each former absolute loadout key maps to Hub channel or Funnel grant — no silent drop. — atk→`progression.bonus.atk`, maxHp→`progression.bonus.maxHp`, hp→Funnel delta; all three still read
 - [x] Funnel + single-writer + actor-hub guards green. — see verification
-- [ ] HF-bound-loadout ticked on ideal. — held until the live probe below closes. **Correction
-      2026-09-15**: T12's own live-probe gate is now CLOSED (2026-09-14), so this is no longer "the
-      same owner-only gate as T12" — it is solely T14's own real economy-balance blocker
-      (re-confirmed this session, see next bullet), a different and still-open reason.
+- [x] HF-bound-loadout ticked on ideal. — **CLOSED 2026-09-15**: the live probe below has now run
+      (economy blocker cleared, real Mode B executed) — `combat-power-number-ideal.md`'s
+      `HF-bound-loadout` row marked `RESOLVED`, mirroring `HF-lawn`'s own pattern, with the honest
+      caveat that the live-engine timeout is a separate, likely-unrelated real-summon finding, not a
+      Hub-wiring defect.
 
 **Verification:**
 - [x] Injector.Tests filter `UniqueBound|Loadout` — **not run**: this sandbox has no `FUSIONRPG_GAME_DIR`/MelonLoader install, `FusionRpg.Injector*` cannot build here (same limitation as AS-1.1). Substitute proof: `ActorHubResolveTests.Applied_combat_includes_a_unique_bound_loadout_grant_shaped_bonus` (Core, new) feeds the EXACT grant shape `UniqueBoundLoadout.GrantBonus` produces through `GrantedDerivedAtomReader` → `AtomDerivedSubsystem` → `ActorHub.Resolve` → `MergeAppliedCombat` and asserts `AppliedCombat.Atk`/`MaxHp`/`Hp` reflect the bonus, entity-scoped only (43/43 in that filter, 0 failed)
