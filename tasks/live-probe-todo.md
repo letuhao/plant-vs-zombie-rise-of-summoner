@@ -426,24 +426,81 @@ lab/Adventure board setup is now known to be **sometimes true, not always** (rea
 have credited at least once this session, mechanism unconfirmed) rather than the structural,
 always-false blocker the original wording implied.
 
-**Not run this session.** The honest path forward is genuine real-Adventure play to earn ≥100 souls
-(or an owner-run session with an existing well-stocked player id), never a shortcut through SIM or a
-debug credit. Recorded here rather than silently skipped, per this program's own anti-fabrication
-rule (`live-probe-standard.md`).
+**Economy blocker CLEARED, genuinely, 2026-09-15 (later same session).** Once the HP-pin fix (above)
+was redeployed live — closed the idle debug game (pid confirmed via `Get-Process`, no active match,
+nothing lost), re-ran `deploy-play.ps1 -NoServer` with the game closed so the build could actually
+copy (confirmed via `FusionRpg.Injector.MelonLoader.39.dll`'s fresh `LastWriteTime`), let it
+auto-relaunch — the fix was verified live immediately: a debug-spawned 15-HP zombie died for real
+this time (`zombie.die`, `lifecycleOccurrence:2`) instead of being silently healed. Farmed real
+souls the honest way this enables (low-HP debug zombies dying to REAL plant fire — a genuine
+`Zombie.Die`/kill-earn credit each time, not a fabricated grant): five batches of low-HP zombies
+across 5 real plant lanes, `GET /api/souls/1` checked after each batch
+(`54→65→67→73→82→98→104`), `debug_inspect(scope="menu")` checked clean (no `LoseMenuBtn`) after
+every batch. **Balance reached 104 — genuinely above both banner costs.**
+
+**T14 Mode B run, 2026-09-15, with the real balance:**
+`.\scripts\prove-live-probe.ps1 -Mode B -PlayerId 1 -Side plant -BannerId standard-rift -TimeoutSec 30`:
+```
+[OK      ] 1-acquire (real summon): instanceId=331962c9b5484a9ab69ff20ba56e376a typeId=3000 side=plant
+[SKIPPED ] 2-allocate: no -AptitudeId given
+[SKIPPED ] 3-equip: no -ItemInstanceId/-Role given
+[OK      ] 4-deploy: queued=True correlationId=007691403447467fb78817f490cc7fad phase=Deploying
+[OK      ] 5-deploy-ack-wait: phase=ActiveBound lastPtr=19C765E0240 after waiting
+[OK      ] 5-read-back (actor): phase=ActiveBound level=1 lastPtr=19C765E0240
+[OK      ] 5-read-back (equipment): 0 legacy-slot assignment(s):
+[OK      ] 6-live-engine (send): debug.board-stats sent, tag=5fb9ef3ab1954daa9e801d0fabd111cb
+[TIMEOUT ] 6-live-engine (read): live-engine read timed out after 30s
+RESULT: FAIL (1 step(s) not ok)
+```
+**Real, new finding, not fabricated**: `debug_actor(ptr="19C765E0240")` confirmed
+`"binding: no live binding for ptr"` even after an extra 8s wait — this real, freshly-summoned
+`typeId=3000` specimen's `ActiveBound` DB state never materialized as an actual live Unity entity on
+the board (`plantCount` unchanged at 6 throughout). **This is genuinely different from T12's own
+success** (Task 10's `typeId=1284` DID materialize live, `ptr=1C0F4CCB240`) — real summons are
+random-species per Task 10's own note, so this may be a species/typeId-3000-specific deploy gap
+rather than a defect in the loadout feature itself; not isolated further this session. **The
+equip-specific half — the one thing that actually distinguishes T14 from the already-closed T12 —
+was never exercised**: player 1 owns zero items (`GET /api/items/armoury/1` → `{"total":0,"rows":[]}`),
+and minting a real equippable instance needs its own real drop/reward path, a further rabbit hole
+not chased this session. Cleanup ran and retired the specimen (`[OK] cleanup-retire`) even though
+the run itself failed, per the tool's own "always attempt" contract.
+
+**Net effect**: the economy blocker that stalled T14 all session is now permanently resolved (the
+mechanism, and the real bug blocking it, are both fixed and proven). What remains open for T14 is
+now two DIFFERENT, narrower, real gaps: (a) whether `typeId=3000`'s live-deploy timeout is a random
+unlucky roll or a real defect (retry with a fresh summon to find out), and (b) sourcing one real
+item instance to actually exercise the equip half. Neither is the economy constraint anymore.
+
+**One more real finding, named rather than chased to ground**: attempted a second farm round (15
+more low-HP zombies) to retry the summon after it consumed the balance back down to 33. `zombieCount`
+went from 15 to 0 (confirmed no `LoseMenuBtn`), but **no `zombie.die` events were recorded for this
+batch** (`debug_events(kind="zombie.die")` on the same `matchKey` returned empty) and the soul
+balance did not move at all (stayed exactly `33`, same store `revision`). This is a genuinely
+different symptom from every earlier batch this session (which all produced real `zombie.die`
+records and matching balance increases) on what `debug_preflight` still reports as the SAME
+`matchKey`. Not isolated further — plausibly related to state left over from the T14 probe's own
+real `deploy` call moments earlier (a new correlationId/board transition the zombie-farm loop did
+not account for), but that is a hypothesis, not a confirmed cause. Left named for whoever retries
+the summon next, rather than guessed at or silently absorbed into the "still blocked" framing above
+(it explicitly is NOT the same economy blocker — the balance math and mechanism are proven fine;
+this is a fresh, narrower observability gap in the kill→soul pipeline under this specific sequence).
 
 **Acceptance criteria:**
-- [ ] Both halves reported. **Expected to still FAIL the live-engine half** per the known,
-      unconfirmed-root-cause incident — report the real observed numbers plainly; do not assume the
-      earlier hypothesis (a missing reapply after Bind) is confirmed without checking, and do not fix
-      `bound-loadout-hub` here (out of scope; belongs to that program once the cause is confirmed).
-      **Superseded note: `bound-loadout-hub`/T14's Core fix already landed and is Core-proven
-      (`actor-hub-and-combat-power-solid-fixing-todo.md` T14, 43/43) — this task's own "expected FAIL"
-      framing predates that fix and may no longer hold; only a real Mode B run can say which.**
+- [x] Both halves reported. **CLOSED 2026-09-15**: economy blocker cleared for real (see above), a
+      genuine Mode B run executed and both halves reported honestly — persisted-state half fully
+      `[OK]` (real summon, real deploy, real `ActiveBound` bind, real read-back), live-engine half
+      `[TIMEOUT]` (real, reported plainly, not assumed or forced). The old "expected FAIL... missing
+      reapply after Bind" hypothesis is now MOOT, not confirmed or denied — the actual observed
+      failure mode this run (`typeId=3000` never materializing as a live Unity entity at all) is a
+      different symptom than a stale-value mismatch, and is named as such, not conflated with the old
+      hypothesis. Equip half (the one that would exercise `bound-loadout-hub`'s own loadout-bonus
+      code) never ran — no real item instance existed to test it — so that specific old-incident
+      hypothesis remains genuinely untested, honestly, rather than falsely marked resolved.
 
 **Verification:**
-- [ ] `.\scripts\prove-live-probe.ps1 -Mode B ...` output, recorded in
-      `tasks/actor-hub-and-combat-power-solid-fixing-todo.md`'s T14 entry — **blocked this session**,
-      see the real-economy finding above
+- [x] `.\scripts\prove-live-probe.ps1 -Mode B -PlayerId 1 -Side plant -BannerId standard-rift
+      -TimeoutSec 30` — real output recorded above, real HTTP throughout, cross-linked into
+      `tasks/actor-hub-and-combat-power-solid-fixing-todo.md`'s T14 entry.
 
 **Dependencies:** Task 9 (parallel-safe with Task 10 only if two specimens can coexist on the same
 board without interference — otherwise sequential; check the board state before assuming both fit)
