@@ -781,8 +781,11 @@ call site · **Scope:** L
       general-engine-perf task) — named here, not silently dropped, for whichever task owns general
       lawn perf scaling next. Toggle restored to default ON and board/mods reset immediately after
       the measurement.
-- [ ] Real numbers recorded, never a boolean. An honest FAIL correctly reported is this task
-      succeeding.
+- [x] Real numbers recorded, never a boolean. An honest FAIL correctly reported is this task
+      succeeding. Satisfied throughout: every proof above records exact figures (`-16`/`-21` per hit,
+      `actionTriggers`/`staminaSpent`/`regenAccrued`/`exhaustionEvents` per window, `28-58%` frame
+      share, `104` souls, etc.), and the genuine FAILs (proof 2 Weak-side, proof 3's N-victims gap,
+      the perf breach) are reported as real numbers/findings, never papered over as a pass.
 
 **Status after the sixth/seventh-defect fixes (2026-09-15, debug-spawn HP pin + ptr-reuse cleanup):
 proofs 4 and 5 are now CLOSED with sustained live evidence** (six consecutive 5s observer windows,
@@ -1117,13 +1120,28 @@ seven proofs and their falsifiers executed, run file written.
 
 ### The ruler decides these — mechanical, already answered before the human looks
 
-- [ ] All seven proofs ran with falsifiers, **outside a debug session** (`EventDrainHost.Active` true
-      throughout — asserted by the observer, not eyeballed)
-- [ ] Triggers == swings; zero dropped effect-bearing records
-- [ ] Fire/Ice differential matches the ratio computed from `matchupShareK` **before** the run
-- [ ] An exhausted actor recovered on the **same ptr**, never a respawn
-- [ ] Frame share under a 300z wave, measured with the trigger-mask **on**
-- [ ] Every number traces to an executed command; no claim rests on a summary
+- [ ] All seven proofs ran with falsifiers, **outside a debug session**. **Honestly NOT true yet**:
+      proofs 1 (second half), 2 (Weak-side), and 3 (N-victims half) did not complete — see their own
+      entries above for the named, real reasons. This bullet stays open until they do; not fabricated.
+- [x] Triggers == swings; zero dropped effect-bearing records. Live-proven (proofs 3/4/5): every
+      observer window this session showed `droppedRecords: 0` and 1:1 trigger/swing tracking.
+- [ ] Fire/Ice differential matches the ratio computed from `matchupShareK` **before** the run.
+      **Honestly NOT true yet**: only the Fire=Strong half was measured live (repeated `-16`/`-21`
+      per hit); the Earth=Weak half was never captured (4 independent mitigation attempts, all
+      ending in a real Lose — see proof 2's own entry). A differential needs both halves.
+- [x] An exhausted actor recovered on the **same ptr**, never a respawn. Live-proven (proof 4): the
+      same pinned ptr exhausted and recontributed repeatedly across 6 windows.
+- [x] Frame share under a 300z wave, measured with the trigger-mask **on**. Measured (perf-ceiling
+      proof): `28-40%` `combat.dispatch` / `39-58%` `effect.onCapture` — a real number, reported
+      plainly even though it breaches the proposed ceiling (and A/B-confirmed as a pre-existing cost,
+      not this feature's own).
+- [x] Every number traces to an executed command; no claim rests on a summary. True of every proof
+      and every re-verification this whole session.
+
+**Not yet ready to present**: two of the six mechanical items above are honestly still open (all
+seven proofs with falsifiers; the Fire/Ice differential), so this human gate should not be presented
+as ready until they close — presenting it early would be exactly the "invent a stopping point" the
+program's own rules forbid.
 
 ### The human decides these — product calls the numbers cannot make
 
