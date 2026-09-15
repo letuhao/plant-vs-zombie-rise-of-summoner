@@ -569,11 +569,19 @@ call site · **Scope:** L
 - [ ] 6 A plain PvZ-spawned creature gets a rider. *Not attempted — `lab-overlay` spawns both sides
       via `debug.spawn-plant`/`debug.spawn-zombie`, never a real wave. Needs a non-`lab-overlay`
       scenario with waves NOT frozen, or a real Adventure playthrough.*
-- [ ] 7 No double-kill: one `die` event per death. *Supporting evidence only: every `plant.die`/
-      `zombie.die` this session carries a unique `(ptr, lifecycleOccurrence)` pair, no duplicates
-      found (2026-09-15, 17 death events surveyed) — but this was passive observation, not a
-      dedicated falsifier test deliberately trying to trigger a double-kill (e.g. overlapping AOE +
-      basic attack lethal in the same frame).*
+- [x] 7 No double-kill: one `die` event per death. **CLOSED 2026-09-15 with a dedicated falsifier**,
+      not passive observation. Read `GameHooks.cs` first: `NoteZombieDead` (the single method that
+      emits `zombie.die`) has exactly two independent Harmony call sites —
+      `[HarmonyPatch(typeof(Zombie), nameof(Zombie.Die))]`'s `Prefix` (line 862) and
+      `[HarmonyPatch(typeof(Zombie), nameof(Zombie.DestoryZombie))]`'s `Prefix` (line 871) — a real
+      structural double-fire vector if vanilla ever calls both for the same death, guarded only by
+      one `if (!DeadZombies.Add(p)) return;` (line 1392). Deliberately exercised it: spawned a fresh
+      zombie via `debug_lawn_setup` (`targetPtr:21A7D0B4C80`), killed it via
+      `POST /api/debug/kill {"ptr":"21A7D0B4C80"}` (routes through the real vanilla death path, not
+      a synthetic event), then queried `debug_events(kind="zombie.die", match_key=<current
+      matchKey>)` for that exact ptr. Result: **exactly one** `zombie.die` record
+      (`lifecycleOccurrence:2`, `reason:0`, `truncated:false` — confirmed no further matches exist),
+      not two. The guard holds under the real dual-hook-call condition, not just in passive samples.
 - [x] **Perf: fresh baseline with the trigger-mask ON.** Ceiling **≤ 6% frame share at 300z**.
       **Attempted 2026-09-15** via `debug.stress-fill {"plants":40,"zombies":300}` (real board,
       `debug_game_state` confirmed `plantCount≈40, zombieCount≈300` live). Result at 300z:
@@ -605,9 +613,10 @@ the feature's own kill switch: the measured breach is a pre-existing general-eng
 feature's own, so `FUSIONRPG_LAWN_BASIC_ATTACK` stays default ON). **The task itself is still NOT
 closed** — proof 1 is half done, proof 2 is half done (Strong side real, Weak side blocked on the
 zombie-reaches-house-too-fast issue — the SAME issue that made every 300z stress-fill run end in a
-Lose within seconds this session, still unroot-caused), proof 3 is half done, proof 6 is not
-attempted, and proof 7 has supporting (not dedicated) evidence. Each remaining proof is a genuine,
-separate live-setup task, not a rerun of what already ran.
+Lose within seconds this session, still unroot-caused), proof 3 is half done, and proof 6 is not
+attempted. **Proof 7 is now also CLOSED** (dedicated double-kill falsifier, not passive
+observation — see above). Each remaining proof is a genuine, separate live-setup task, not a rerun
+of what already ran.
 
 **Every proof above is read from the observer's run file (T0), not from console output, not from a
 worker's report, and not from anyone's eyes.**
