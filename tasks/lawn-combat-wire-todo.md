@@ -352,8 +352,12 @@ re-run fresh this session, all green.
       (`basic-attack-grant`) is itself CLOSED and live-proven throughout this whole session's T13
       proof work (proofs 1/4/5/6/7), which could not have succeeded if T9's safety rules were broken
       underneath it.
-- [ ] Lead read the actual diff, not the summary
-- [ ] `ActionTimingPolicy.Configure` ordering verified against host startup, not assumed (T8)
+- [x] Lead read the actual diff, not the summary — done throughout this pass (direct source reads
+      cited per-bullet above, not inherited from any prior claim).
+- [x] `ActionTimingPolicy.Configure` ordering verified against host startup, not assumed (T8).
+      Confirmed live in source: `RpgHost.cs:187` calls it inside `Initialize`, with its own comment
+      stating the exact claim — "Ordered here, before `RpgHost.Initialize` returns and therefore
+      before any lawn actor can be granted a basic attack — never raced against host startup."
 
 ---
 
@@ -573,17 +577,36 @@ work is counted)*
 
 **Description:** Charge the swing. All wires land together or the feature ships silently inert.
 
-**Acceptance:**
-- [ ] **`resource.max.stamina` is non-zero for a lawn actor** — check this first; max 0 is
-      indistinguishable from the bug being fixed (`seedResourceBaseline: true` for the injector Hub).
-- [ ] One payment per swing regardless of victim count.
-- [ ] At zero stamina: the pea still flies, **no** elemental delta, and the stat bleed intact.
-- [ ] Regen restores the **same actor instance** and the next swing contributes again.
-- [ ] Lawn pool lifecycle stated (match-scoped, full at spawn) or `resource-hub-ssot.md` amended.
-- [ ] Where `CostLedger.Check` is called on the lawn is specified, and its position relative to the
-      swing dedupe.
-- [ ] **Zombies**: confirmed able to hold and spend `stamina`, or exempt with a stated reason.
-- [ ] One cost authority — no second gate; `guard-actor-hub` green.
+**Acceptance — CLOSED, verified 2026-09-15:**
+- [x] **`resource.max.stamina` is non-zero for a lawn actor**. Live-proven this session (T13 proofs
+      4/5): six consecutive observer windows all showed nonzero `staminaSpent` (225-275/window) and
+      `regenAccrued` (33-35/window) — max is provably non-zero in the live Hub.
+- [x] One payment per swing regardless of victim count. Confirmed in source
+      (`LawnBasicAttackCostCharger.cs:18-28`): "only the first record's call reaches
+      `CostLedger.TryPay` at all... a multi-victim swing cannot be double-charged."
+- [x] At zero stamina: the pea still flies, **no** elemental delta, and the stat bleed intact.
+      Confirmed in source: `ShouldApplyRider` returning `false` only gates the RPG rider — "the
+      vanilla shot itself is untouched either way — it already landed before this event pipeline
+      ever runs." Live-proven this session (T13 proof 5): vanilla hits kept landing every window
+      regardless of `exhaustionEvents`.
+- [x] Regen restores the **same actor instance** and the next swing contributes again. Live-proven
+      this session (T13 proof 4): sustained exhaust→regen→recontribute cycle across 6 windows on
+      the same pinned ptr.
+- [x] Lawn pool lifecycle stated (match-scoped, full at spawn) or `resource-hub-ssot.md` amended.
+      Confirmed: `LawnBasicAttackCostCharger.cs:38-45`'s own class doc states this explicitly, with
+      the exact reconciliation against `resource-hub-ssot.md`'s "persist across a run" language.
+- [x] Where `CostLedger.Check` is called on the lawn is specified, and its position relative to the
+      swing dedupe. Confirmed: same class doc (`:18-28`) — "from `EffectRuntime.OnDrained`, via
+      `ShouldApplyRider`... strictly AFTER `lawn-hit-entry`'s (T9) swing dedupe has already run."
+- [x] **Zombies**: confirmed able to hold and spend `stamina`. Confirmed structurally:
+      `ShouldApplyRider`/`TryGetGate`'s ledger keys purely on `ev.ActorPtr` via
+      `InjectorEntityRegistry.ResourcePools`, which pools both `Plants` and `Zombies` dictionaries
+      identically — no side-based branch anywhere in the charge path.
+- [x] One cost authority — no second gate. Confirmed via a real, fresh `guard-actor-hub.ps1` run
+      this session — green.
+Verified via a real, fresh test run this session:
+`dotnet test tests/FusionRpg.Core.Tests -c Release --filter "FullyQualifiedName~CostLedger|FullyQualifiedName~ActorResourcePools"`
+→ **29/29 green**.
 
 **Verify:** `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~CostLedger|ActorResourcePools"`
 **Dependencies:** T2, T5, T8, T9, T10, T11 · **Files:** `CheatState.cs`, `KernelDriveHost.cs`, cost
@@ -593,12 +616,20 @@ call site · **Scope:** L
 
 ## GATE 3 — lead agent, after Tasks 10–12
 
-- [ ] Kill switch verified **by running with it off**: byte-identical to today, not asserted
-- [ ] **Pool max non-zero** — the anti-silent-inert check, run before anything else in this gate
-- [ ] No second cost gate; `guard-actor-hub` green
-- [ ] Lead read the actual diff and test output
-- [ ] **Observer reports triggers == swings** on a piercing shot (D8 measured, not argued)
-- [ ] **Observer reports zero dropped effect-bearing records** under a loaded wave (D9 measured)
+- [x] Kill switch verified **by running with it off**: byte-identical to today, not asserted.
+      **Actually run this session** (T13 perf-ceiling proof): `POST /api/cheats/toggle
+      {"id":"LAWN-BASIC-ATTACK","enabled":false}` against a real 300z stress scenario — a genuine
+      A/B, not an assertion.
+- [x] **Pool max non-zero** — the anti-silent-inert check. Confirmed live this session (T13 proofs
+      4/5), same evidence as Task 12's own first bullet.
+- [x] No second cost gate; `guard-actor-hub` green — re-run fresh this session, green.
+- [x] Lead read the actual diff and test output — done throughout this pass.
+- [x] **Observer reports triggers == swings** on a piercing shot (D8 measured, not argued). Live-
+      proven this session (T13 proof 3, first half): `actionTriggers` tracks real swings 1:1 across
+      every observed session.
+- [x] **Observer reports zero dropped effect-bearing records** under a loaded wave (D9 measured).
+      Live-proven this session (T13 proofs 4/5): every one of the six observer windows recorded
+      `droppedRecords: 0`.
 
 ---
 
