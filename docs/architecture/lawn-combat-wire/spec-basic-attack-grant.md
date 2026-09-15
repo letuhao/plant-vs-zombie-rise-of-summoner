@@ -83,6 +83,13 @@ which is the whole point.
 
 ## The hypno re-bake seam — [audit], and neither module owned it
 
+> **Superseded 2026-09-15 — owner ruling (lawn-combat-wire `L-N11`): hypno changes side, never element;
+> no re-bake.** A charmed zombie keeps its species, so the baked `elementPayload` stays correct. The cached
+> side is object kind, not allegiance (`spec-element-cache-invalidate.md` trigger 2; control state rides
+> separately as `MindControlled`), and `LawnElementResolverTests.Trigger2_hypno_cannot_change_a_cached_side_because_side_is_object_kind_not_allegiance`
+> asserts the absence of a hypno trigger. The "Required" paragraph below is kept only as the history of
+> the original audit and is not a requirement.
+
 `elementPayload` is baked **at bind/compile time** from the owner's species element
 (`AtomCompiler.cs:237-243`). `element-cache-invalidate` fixes the **resolver cache**, so after a hypno
 a fresh *resolve* returns the new side — but this grant's **already-baked payload is still the old

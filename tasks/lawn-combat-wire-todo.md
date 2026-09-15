@@ -125,7 +125,9 @@ invalidates only on `matchKey` change. A hypnotised zombie keeps its old side fo
 §2.16's fourth shipped instance.**
 
 **Acceptance:**
-- [ ] Per-ptr invalidation on side change; hypno resolves the new side next read.
+- [ ] Hypno is not an invalidation trigger: side is object kind, so a charmed zombie keeps its cached
+      `(side, elements)`, and a test asserts that absence.
+      *(reworded 2026-09-15 per owner ruling L-N11 — was "per-ptr invalidation on side change; hypno resolves the new side next read"; not ticked in this change)*
       **audit 2026-09-15 OPEN: premise superseded — `spec-element-cache-invalidate.md:70` says hypno is NOT a trigger (tests `Trigger2_hypno_cannot_change…`). Needs rewording, not a tick. Next run L-N11**
 - [x] Trigger 3 (ptr reuse) has an **executable** test: resolve P → A, kill, re-register a different
       species at P, resolve → not A.
@@ -150,15 +152,18 @@ multiplying (`:252`), exits on an **unchecked** `(long)Math.Round` (`:297`), and
 `ClampToInt32`. This program multiplies traffic through it.
 
 **Acceptance:**
-- [ ] `long`/per-mille interior; widen before multiplying; divide by 1000 last, exactly once.
+- [ ] The magnitude handed to the Funnel is a checked `long`; integer per-mille arithmetic widens before
+      multiplying and divides by 1000 last, exactly once. Floating-point is allowed inside the calculation.
+      *(reworded 2026-09-15 per owner ruling L-N12 — was "`long`/per-mille interior"; not ticked in this change)*
       **audit 2026-09-15 OPEN: FALSE as written — `OverlayCombatCalculator.cs:225-228` still `/ 1000.0` on a `double` interior; spec `spec-combat-numerics.md:74` unamended. Next run L-N12**
 - [x] Overflow **throws**; a test asserts it.
       *audit 2026-09-15 CONFIRMED: `OverlayCombatNumericsTests.cs:70` `Assert.Throws<OverflowException>`*
 - [x] The Unity-boundary narrowing throws **or reports**, with a comment naming it a structural host
       limit.
       *audit 2026-09-15 CONFIRMED: `EntityStatWriter.cs:49` `ClampToInt32Reporting`*
-- [ ] A **source-scan test** proves no `double`/`float` remains in `OverlayCombatCalculator.cs`,
-      `ElementHub.cs`, `OverlayCombatMath.cs`.
+- [ ] No floating-point ban: `OverlayCombatCalculator.cs`, `ElementHub.cs`, `OverlayCombatMath.cs` carry no
+      source-scan test that forbids `double`/`float`.
+      *(reworded 2026-09-15 per owner ruling L-N12 — was "a source-scan test proves no double/float remains"; not ticked in this change)*
       **audit 2026-09-15 OPEN: FALSE — the scan test (`OverlayCombatNumericsTests.cs:29-43`) uses an allowlist and says the absolute claim does not hold; spec box `:92` still `[ ]`. Next run L-N12**
 - [x] **D1 guarded:** a test asserts `MergeAppliedCombat` (`ActorHub.cs:89-113`) folds only
       `progression.bonus.*` and **no `combat.*`**.
@@ -368,8 +373,9 @@ true. The atom already exists purpose-built: `atom.fx-overlay-damage`, `kind: re
 - [x] `elementPayload` baked from the owner's species element, sourced at bind from
       `LawnElementResolverHost.Resolve(ptr)`.
       *audit 2026-09-15 CONFIRMED: `LawnBasicAttackGrantBinder.Bind` → `Resolve(ptr)`*
-- [ ] **Hypno re-bake:** a side change re-bakes or re-binds the grant — invalidating the resolver cache
-      alone leaves a stale baked payload. A hypnotised zombie deals damage with its **new** element.
+- [ ] **Hypno needs no re-bake:** hypno changes side, never element, so the grant's baked
+      `elementPayload` stays correct and nothing re-binds on charm.
+      *(reworded 2026-09-15 per owner ruling L-N11 — was "a side change re-bakes or re-binds the grant … new element"; not ticked in this change)*
       **audit 2026-09-15 OPEN: argument that elements are hypno-invariant is sound, but `spec-basic-attack-grant.md:91` still says "Required: … re-bakes" — amend spec, then tick. Next run L-N11**
 - [x] Grants withdraw **before** ptr reuse; a test recycles an address.
       *audit 2026-09-15 CONFIRMED: `BasicAttackGrantRecycleTests` (4) recycle ptr P through `EffectBag.WithdrawForOwner` (the Core call behind `EffectRuntime.WithdrawEntity`); mutation (withdraw counts but does not remove) fails 2 of 4. Ordering before re-registration is `GameHooks.ForgetEntity`.*
