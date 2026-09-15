@@ -1145,8 +1145,9 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       `EffectAtomCatalog.Generated.cs` fails (today no check mode exists).
 - [ ] **L-N25** Audit `plant:{tid}`/`zombie:{tid}` owner keys for the same OnDamageDealt either-side
       match fixed for `entity:` in `29cbb7f3` (they fall back to `TargetTypeId`); test both directions.
-- [ ] **L-N5a** Bug: `debug.kill` ignores the request `ptr` (`DebugActions.Kill` → `OneShotSelected`).
+- [x] **L-N5a** Bug: `debug.kill` ignores the request `ptr` (`DebugActions.Kill` → `OneShotSelected`).
       Honour `ptr` or reject it loudly; test the route contract.
+      *Done: `DebugActions.Kill` routes an explicit `ptr` to `KillByPtr` (exact match, `CheatState.Error` when absent, no selection fallback). `DebugKillPtrContractGuardTests` 2/2; mutation (ptr read removed) fails `Kill_reads_ptr_before_any_selection_fallback`. Injector compiled to scratch; not live-deployed (game running).*
 
 ### Phase B — owner decisions (escalations the run wrongly made itself)
 

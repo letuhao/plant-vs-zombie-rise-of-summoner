@@ -1078,6 +1078,15 @@ public static class DebugActions
 
     public static void Kill(JsonElement p, bool plants)
     {
+        // An explicit ptr is exact: kill that entity or fail loudly. Never fall back to the selection —
+        // a caller naming ptr X must not have a different entity killed and read it back as X's death.
+        var ptrHex = Str(p, "ptr");
+        if (!string.IsNullOrWhiteSpace(ptrHex))
+        {
+            KillByPtr(ptrHex!, plants);
+            return;
+        }
+
         var target = Str(p, "target") ?? "selected";
         if (plants)
         {
@@ -1097,6 +1106,29 @@ public static class DebugActions
             CheatActions.DeleteAllZombies();
         else
             CheatActions.OneShotSelected();
+    }
+
+    static void KillByPtr(string ptrHex, bool plants)
+    {
+        if (plants)
+        {
+            foreach (var pl in UObject.FindObjectsOfType<Plant>())
+            {
+                if (pl == null || !string.Equals(GameDumps.Ptr(pl), ptrHex, StringComparison.OrdinalIgnoreCase)) continue;
+                EntityStatWriter.ForceKillPlant(pl, "debug.kill-plant");
+                return;
+            }
+            CheatState.Error("debug.kill-plant: no living plant ptr=" + ptrHex);
+            return;
+        }
+
+        foreach (var z in UObject.FindObjectsOfType<Zombie>())
+        {
+            if (z == null || !string.Equals(GameDumps.Ptr(z), ptrHex, StringComparison.OrdinalIgnoreCase)) continue;
+            EntityStatWriter.ForceKillZombie(z, "debug.kill");
+            return;
+        }
+        CheatState.Error("debug.kill: no living zombie ptr=" + ptrHex);
     }
 
     public static void WaveFreeze(bool enabled)
