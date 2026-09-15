@@ -75,6 +75,15 @@ public static class EffectCatalogGen
         double d => d.ToString("R", CultureInfo.InvariantCulture).Contains('.') || d.ToString("R", CultureInfo.InvariantCulture).Contains('E')
             ? d.ToString("R", CultureInfo.InvariantCulture)
             : d.ToString("R", CultureInfo.InvariantCulture) + ".0",
+        // An event-linked ValueSpec (spec-value-spec-and-curve.md "Event-linked magnitudes") compiles
+        // to a nested {"eventField":..., "multiplierMilli":...} marker — the first shipped atom to use
+        // it (fx.overlay_damage). A dictionary is otherwise an object-graph shape this catalog never
+        // carries, so this stays narrow (dictionary-of-primitives only) rather than a general
+        // recursive-literal escape hatch.
+        System.Collections.Generic.Dictionary<string, object?> nested =>
+            "new Dictionary<string, object?> { " +
+            string.Join(", ", nested.Select(kv => $"[{Str(kv.Key)}] = {Literal(kv.Value)}")) +
+            " }",
         _ => throw new NotSupportedException(
             $"EffectCatalogGen has no literal emission for value type {value.GetType().FullName} ('{value}') — " +
             "the real 16 defs carry only string/int/double; a new type means new content this generator " +

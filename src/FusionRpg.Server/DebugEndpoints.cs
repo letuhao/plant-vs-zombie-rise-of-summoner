@@ -927,6 +927,29 @@ public static class DebugEndpoints
             if (runDone is null)
                 return Results.Conflict(new { ok = false, error = $"scenario '{scenarioId}' steps did not complete within {timeoutSec}s", waitedMs = sw.ElapsedMilliseconds, defeatReset });
 
+            // 2026-09-15 (live-probe-mcp overview): a caller could read entered:true/ready:true here
+            // purely from injector ack events while the real board sat on a stale seed-picker screen
+            // or, worse, empty (0 plants/0 zombies) -- the exact ambiguity debug_game_state exists to
+            // resolve, but every live probe this session had to make that as a SEPARATE round trip
+            // because quick-start never checked. Fold the same real-Unity-object read in here so the
+            // response is honest about what is actually alive, not just what the ack chain claims.
+            // Best-effort: a missing/failed game-state read degrades to liveEntities:null, never a
+            // hard failure -- the ptrs/scenario proof above already stands on their own.
+            object? liveEntities = null;
+            var beforeGameState = store.GetMaxEventId();
+            await Send(hub, inbox, "debug.game-state", new { });
+            var gameStateAck = await PollForKind(store, beforeGameState, "debug.game-state", TimeSpan.FromSeconds(Math.Min(timeoutSec, 10)));
+            if (gameStateAck is not null && PayloadBool(gameStateAck.Payload, "ok"))
+            {
+                liveEntities = new
+                {
+                    plantCount = PayloadInt(gameStateAck.Payload, "plantCount", 0),
+                    zombieCount = PayloadInt(gameStateAck.Payload, "zombieCount", 0),
+                    liveState = PayloadString(gameStateAck.Payload, "liveState"),
+                    phaseMismatch = PayloadBool(gameStateAck.Payload, "phaseMismatch")
+                };
+            }
+
             EventEnvelope? snapshot = null;
             var beforeSnapshot = store.GetMaxEventId();
             var snapshotDeadline = DateTime.UtcNow.AddSeconds(15);
@@ -962,6 +985,7 @@ public static class DebugEndpoints
                 plantPtr,
                 setupSkip = setupSkipOk,
                 defeatReset,
+                liveEntities,
                 elapsedMs = sw.ElapsedMilliseconds,
                 note = snapshot is null ? "no board snapshot arrived — targetPtr/plantPtr unavailable" : null
             });
@@ -1389,6 +1413,11 @@ public static class DebugEndpoints
         payload is JsonElement el && el.ValueKind == JsonValueKind.Object
         && el.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String
             ? v.GetString() : null;
+
+    static int PayloadInt(object? payload, string name, int dflt) =>
+        payload is JsonElement el && el.ValueKind == JsonValueKind.Object
+        && el.TryGetProperty(name, out var v) && v.TryGetInt32(out var i)
+            ? i : dflt;
 
     /// <summary>Newest `board.start` with no later `board.end` — in-process port of
     /// `setup-lab-run.ps1`'s `Get-LatestBoardStart`/`Test-BoardStillLive` (external, HTTP-bound,

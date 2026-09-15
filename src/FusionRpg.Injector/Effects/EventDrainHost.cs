@@ -131,7 +131,8 @@ public static class EventDrainHost
         // Cache first (see _bulletShooterCache doc): bullet.from/from_zombie is proven stale by hit
         // time. Direct read stays as a fallback for a bullet whose spawn predates this cache (e.g.
         // one already in flight when the feature turned on mid-match).
-        if (_bulletShooterCache.TryGetValue(bullet.Pointer, out var cached))
+        var cacheHit = _bulletShooterCache.TryGetValue(bullet.Pointer, out var cached);
+        if (cacheHit)
         {
             shooterPtr = cached.ShooterPtr;
             shooterTypeId = cached.ShooterTypeId;
@@ -168,10 +169,15 @@ public static class EventDrainHost
         // silently reintroduce the stub-resolve bug this module removes. No RPG contribution; the
         // caller still treats this as "was a bullet" (wasBullet stays true above) so the vanilla
         // taken-side record stays suppressed, matching existing bullet policy.
-        if (shooterPtr == IntPtr.Zero) return false;
+        if (shooterPtr == IntPtr.Zero)
+        {
+            if (FsmTrace.Enabled)
+                CheatState.Note($"fsm-trace EventDrainHost.TryRecordDealtFromBullet DROPPED bulletPtr={bullet.Pointer:X} shooterPtr=0 (no shooter resolved)");
+            return false;
+        }
 
         var d = Drain;
-        return d.Record(new GameEventRec(
+        var recorded = d.Record(new GameEventRec(
             GameEventKind.CombatHit, SafeFrame(), d.NextSeq(),
             actorPtr: shooterPtr, targetPtr: targetPtr,
             typeId: shooterTypeId, targetTypeId: targetTypeId, side: targetSide,
@@ -179,6 +185,9 @@ public static class EventDrainHost
             chainDepth: d.RecordDepth, sourceGrantIdx: -1,
             matchKeyIdx: d.InternMatchKey(GameHooks.MatchKey), pairId: 0,
             swingPtr: bullet.Pointer, instakillShaped: instakillShaped));
+        if (FsmTrace.Enabled)
+            CheatState.Note($"fsm-trace EventDrainHost.TryRecordDealtFromBullet recorded={recorded} shooterPtr={shooterPtr:X} targetPtr={targetPtr:X} damage={damage}");
+        return recorded;
     }
 
     /// <summary>Melee dealt (zombie bite, or a plant-side area melee like Shulkflower's

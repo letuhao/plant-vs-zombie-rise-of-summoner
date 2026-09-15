@@ -53,6 +53,7 @@ public static class DebugActions
             CheatState.Note($"debug spawn plant {typeId} @{CheatState.SpawnCol},{CheatState.SpawnRow}");
             MaybePinDerived(p, plant.Pointer.ToString("X"));
             MaybePinElement(p, plant.Pointer.ToString("X"));
+            MaybePinSpawnHp(p, plant.Pointer.ToString("X"));
             return true;
         }
         catch (Exception ex)
@@ -117,6 +118,7 @@ public static class DebugActions
             CheatState.Note($"debug spawn zombie {typeId} row={CheatState.SpawnRow}");
             MaybePinDerived(p, z.Pointer.ToString("X"));
             MaybePinElement(p, z.Pointer.ToString("X"));
+            MaybePinSpawnHp(p, z.Pointer.ToString("X"));
             return true;
         }
         catch (Exception ex)
@@ -1076,6 +1078,15 @@ public static class DebugActions
 
     public static void Kill(JsonElement p, bool plants)
     {
+        // An explicit ptr is exact: kill that entity or fail loudly. Never fall back to the selection —
+        // a caller naming ptr X must not have a different entity killed and read it back as X's death.
+        var ptrHex = Str(p, "ptr");
+        if (!string.IsNullOrWhiteSpace(ptrHex))
+        {
+            KillByPtr(ptrHex!, plants);
+            return;
+        }
+
         var target = Str(p, "target") ?? "selected";
         if (plants)
         {
@@ -1095,6 +1106,29 @@ public static class DebugActions
             CheatActions.DeleteAllZombies();
         else
             CheatActions.OneShotSelected();
+    }
+
+    static void KillByPtr(string ptrHex, bool plants)
+    {
+        if (plants)
+        {
+            foreach (var pl in UObject.FindObjectsOfType<Plant>())
+            {
+                if (pl == null || !string.Equals(GameDumps.Ptr(pl), ptrHex, StringComparison.OrdinalIgnoreCase)) continue;
+                EntityStatWriter.ForceKillPlant(pl, "debug.kill-plant");
+                return;
+            }
+            CheatState.Error("debug.kill-plant: no living plant ptr=" + ptrHex);
+            return;
+        }
+
+        foreach (var z in UObject.FindObjectsOfType<Zombie>())
+        {
+            if (z == null || !string.Equals(GameDumps.Ptr(z), ptrHex, StringComparison.OrdinalIgnoreCase)) continue;
+            EntityStatWriter.ForceKillZombie(z, "debug.kill");
+            return;
+        }
+        CheatState.Error("debug.kill: no living zombie ptr=" + ptrHex);
     }
 
     public static void WaveFreeze(bool enabled)
@@ -1462,10 +1496,14 @@ public static class DebugActions
     /// engine (see force-debug-enter-level memory). The fix attempt was <c>UIMgr.BackToMenu()</c>
     /// (already Harmony-hooked, emits <c>menu.enter</c>) -- proven live to leave the dead board, but it
     /// landed on the game's PREVIOUS menu layer (Challenge Mode select), not the true main menu: this
-    /// game's menu stack is not flat, so one guessed method is not enough. Exposing every real
-    /// <c>UIMgr</c> static navigation method by name here lets a caller find the actual working
-    /// sequence live instead of hard-coding a single guess that only holds for one menu depth.
-    /// Never fabricates -- every action below is the literal real static method call.</summary>
+    /// game's menu stack is not flat, so one guessed method was not enough on its own. Exposing every
+    /// real <c>UIMgr</c> static navigation method by name here lets a caller reach any specific menu
+    /// directly. Never fabricates -- every action below is the literal real static method call.
+    ///
+    /// <para><b>2026-09-15 fix:</b> "back-to-menu" itself now chains <c>EnterMainMenu()</c> after
+    /// <c>BackToMenu()</c> (see that case) instead of leaving the two-call recovery dance to every
+    /// caller -- an action named "back to menu" that silently lands one layer short of the menu is a
+    /// defect in the action, not a caller-side workaround to keep re-deriving.</para></summary>
     public static void UiNav(JsonElement p)
     {
         var action = Str(p, "action") ?? "";
@@ -1474,7 +1512,20 @@ public static class DebugActions
         {
             switch (action)
             {
-                case "back-to-menu": UIMgr.BackToMenu(); break;
+                case "back-to-menu":
+                    UIMgr.BackToMenu();
+                    // 2026-09-15 fix: BackToMenu() alone only pops one menu layer -- proven live,
+                    // repeatedly, that it lands on the game's PREVIOUS layer (Challenge Mode
+                    // select), never the true main menu (see this method's own class doc). Every
+                    // caller this session that wanted the true main menu had to replay the same
+                    // two-call dance by hand (back-to-menu, then a SEPARATE enter-main-menu) --
+                    // that is not a caller decision, it is this action under-delivering on its own
+                    // name. EnterMainMenu() is the same static entry point "enter-main-menu" already
+                    // calls standalone, proven safe to call unconditionally from any menu depth
+                    // (used successfully as its own action many times this session); chaining it
+                    // here makes "back-to-menu" actually mean what it says.
+                    UIMgr.EnterMainMenu();
+                    break;
                 case "enter-main-menu": UIMgr.EnterMainMenu(); break;
                 case "back-to-game": UIMgr.BackToGame(); break;
                 case "enter-pause-menu": UIMgr.EnterPauseMenu(); break;
@@ -1838,6 +1889,35 @@ public static class DebugActions
         catch (Exception ex)
         {
             CheatState.Error("debug spawn element pin: " + ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// lawn-combat-wire (2026-09-15 finding): `ApplyAbsoluteProps`'s own "hp"/"maxHp" write the
+    /// GLOBAL `P-HP`/`P-MAXHP` Tab-B channels, which the very next `includeAbsolute: false` reapply
+    /// (e.g. `cheat.pushScales`) silently drops for every plant/zombie on the board — a debug-spawned
+    /// entity's own spawn-time HP override does not survive normal cheat-state churn. Pin it
+    /// per-ptr too, via <see cref="InjectorSpawnHpPin"/>, so <see cref="EntityApply"/> can re-assert
+    /// it on every future reapply for this one ptr regardless of that flag. Additive: the global
+    /// channel write in `ApplyAbsoluteProps` is unchanged, so Tab-B's own board-wide behaviour is
+    /// untouched — this only makes the SAME spawn-time value durable for the one ptr it was meant for.
+    /// </summary>
+    static void MaybePinSpawnHp(JsonElement p, string ptr)
+    {
+        // Prefer "maxHp" (the durable target this pin exists to protect); "hp" alone covers the
+        // common full-health spawn shape where the caller only gave one number for both.
+        int target;
+        if (HasInt(p, "maxHp", out var maxHp)) target = maxHp;
+        else if (HasInt(p, "hp", out var hp)) target = hp;
+        else return;
+
+        try
+        {
+            InjectorSpawnHpPin.Pin(ptr, target);
+        }
+        catch (Exception ex)
+        {
+            CheatState.Error("debug spawn hp pin: " + ex.Message);
         }
     }
 }

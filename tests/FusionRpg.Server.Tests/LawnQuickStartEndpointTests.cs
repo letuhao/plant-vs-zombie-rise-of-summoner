@@ -22,6 +22,7 @@ namespace FusionRpg.Server.Tests;
 /// Unity-side enter-level/board.start/run-steps.done handshake can't be proven here, only the server's
 /// own decision logic around it (matching this session's established precedent for debug-orchestration
 /// code paths that terminate at "sent a command, waiting for a real game to answer").</summary>
+[Trait("VerificationId", "server.lawn-quick-start")]
 public class LawnQuickStartEndpointTests : IAsyncLifetime
 {
     DataTestStore _testStore = null!;
@@ -373,6 +374,150 @@ public class LawnQuickStartEndpointTests : IAsyncLifetime
         var sentAfter = seen.Concat(inbox.Drain(int.MaxValue)).Select(c => c.Name).ToList();
         Assert.Contains("debug.wave-freeze", sentAfter);
         Assert.Contains("debug.run-steps", sentAfter);
+    }
+
+    [Fact]
+    public async Task Post_scenarioCompletes_foldsRealGameStateIntoLiveEntities()
+    {
+        // 2026-09-15 (live-probe-mcp overview): quick-start used to return ok:true purely from the
+        // injector ack chain, with no honest read of whether the board was ACTUALLY live -- every
+        // live probe session had to make a SEPARATE debug_game_state call afterward to find out
+        // (real incident: a caller read entered:true against a board still stuck on the seed-picker
+        // with zero real plants/zombies). quick-start must now fold a real debug.game-state read
+        // into its own response so a caller sees the truth in one round trip.
+        _store.Heartbeat(RpgConstants.SourceInjector);
+        SeedLiveBoardStart();
+        var inbox = _app.Services.GetRequiredService<InjectorCommandInbox>();
+
+        var request = _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { scenario = "lab-overlay", timeoutSec = 5 });
+
+        List<CommandDto> seen = new();
+        async Task WaitFor(string name)
+        {
+            for (var i = 0; i < 120 && !seen.Any(c => c.Name == name); i++)
+            {
+                await Task.Delay(25);
+                seen.AddRange(inbox.Drain(int.MaxValue));
+            }
+            Assert.Contains(seen, c => c.Name == name);
+        }
+
+        await WaitFor("debug.skip-setup");
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "debug.setup.skip",
+            Payload = JsonSerializer.SerializeToElement(new { ok = true, method = "quick" })
+        });
+
+        await WaitFor("debug.run-steps");
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "debug.run-steps.done",
+            Payload = JsonSerializer.SerializeToElement(new { })
+        });
+
+        await WaitFor("debug.game-state");
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "debug.game-state",
+            Payload = JsonSerializer.SerializeToElement(new
+            {
+                ok = true,
+                plantCount = 1,
+                zombieCount = 1,
+                liveState = "InMatch",
+                phaseMismatch = false
+            })
+        });
+
+        await WaitFor("debug.effect.board-snapshot");
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "debug.effect.board-snapshot",
+            Payload = JsonSerializer.SerializeToElement(new
+            {
+                entities = new[]
+                {
+                    new { ptr = "0xz1", side = "zombie", living = true },
+                    new { ptr = "0xp1", side = "plant", living = true }
+                }
+            })
+        });
+
+        var resp = await request;
+        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        var liveEntities = (JsonElement)body!["liveEntities"];
+        Assert.Equal(1, liveEntities.GetProperty("plantCount").GetInt32());
+        Assert.Equal(1, liveEntities.GetProperty("zombieCount").GetInt32());
+        Assert.Equal("InMatch", liveEntities.GetProperty("liveState").GetString());
+        Assert.False(liveEntities.GetProperty("phaseMismatch").GetBoolean());
+        Assert.Equal("0xz1", body["targetPtr"].ToString());
+        Assert.Equal("0xp1", body["plantPtr"].ToString());
+    }
+
+    [Fact]
+    public async Task Post_gameStateReadTimesOut_stillReturnsSuccess_withLiveEntitiesNull()
+    {
+        // The game-state fold-in is best-effort: a slow/missing ack must never turn an otherwise
+        // real, successful setup into a failure -- it degrades to liveEntities:null.
+        _store.Heartbeat(RpgConstants.SourceInjector);
+        SeedLiveBoardStart();
+        var inbox = _app.Services.GetRequiredService<InjectorCommandInbox>();
+
+        // Kept small so the deliberately-unanswered debug.game-state poll (min(timeoutSec, 10)s)
+        // resolves quickly instead of stretching this test out.
+        var request = _http.PostAsJsonAsync("/api/debug/lawn/quick-start", new { scenario = "lab-overlay", timeoutSec = 2 });
+
+        List<CommandDto> seen = new();
+        async Task WaitFor(string name, int maxIterations = 120)
+        {
+            for (var i = 0; i < maxIterations && !seen.Any(c => c.Name == name); i++)
+            {
+                await Task.Delay(25);
+                seen.AddRange(inbox.Drain(int.MaxValue));
+            }
+            Assert.Contains(seen, c => c.Name == name);
+        }
+
+        await WaitFor("debug.skip-setup");
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "debug.setup.skip",
+            Payload = JsonSerializer.SerializeToElement(new { ok = true, method = "quick" })
+        });
+
+        await WaitFor("debug.run-steps");
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "debug.run-steps.done",
+            Payload = JsonSerializer.SerializeToElement(new { })
+        });
+
+        // debug.game-state is sent but deliberately never acked here -- its own bounded poll
+        // (min(timeoutSec, 10)s = 2s) must time out without failing the request. The NEXT command
+        // (debug.effect.board-snapshot) only gets sent after that full wait elapses, so give this
+        // WaitFor enough iterations to outlast it (2s poll + scheduling slack).
+        await WaitFor("debug.effect.board-snapshot", maxIterations: 200);
+        _store.InsertEvent(new EventEnvelope
+        {
+            T = DateTime.UtcNow.ToString("o"),
+            Kind = "debug.effect.board-snapshot",
+            Payload = JsonSerializer.SerializeToElement(new { entities = Array.Empty<object>() })
+        });
+
+        var resp = await request;
+        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+        var body = await resp.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+        // A JSON null deserializes to a C# null reference here (Dictionary<string, object>), not a
+        // boxed JsonElement -- assert the reference directly rather than casting it.
+        Assert.Null(body!["liveEntities"]);
     }
 
     [Fact]

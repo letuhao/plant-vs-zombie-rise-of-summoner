@@ -55,6 +55,8 @@ public static class GameHooks
         // lawn-combat-wire T12b: drop this match's regen-telemetry baseline -- the pools themselves
         // are already dropped by InjectorEntityRegistry.Clear() below.
         try { Effects.LawnBasicAttackCostCharger.ClearMatchState(); } catch { }
+        // Pins on entities still alive at match end would otherwise leak onto next match's reused ptrs.
+        try { Stats.InjectorSpawnHpPin.Clear(); } catch { }
         Effects.InjectorEntityRegistry.Clear();
         Effects.InjectorBoardSnapshot.Invalidate();
         Applied.Clear();
@@ -877,6 +879,8 @@ public static class GameHooks
     {
         public static void Prefix(Zombie __instance, ref int theDamage, IDamageMaker damageFrom, DamageType theDamageType, PlantType reportType, bool fix)
         {
+            if (Effects.FsmTrace.Enabled)
+                CheatState.Note($"fsm-trace ZombieTakeDamage.Prefix RAW theDamage={theDamage} zombiePtr={__instance?.Pointer:X} zGod={CheatState.On("Z-GOD")}");
             BeginDamageSource(__instance?.Pointer ?? IntPtr.Zero, damageFrom);
             using var _perf = PerfProbe.Measure(PerfSection.TakeDamagePrefix);
             if (CheatState.On("Z-GOD")) { theDamage = 0; return; }
@@ -1318,7 +1322,60 @@ public static class GameHooks
                     var p = __instance.from;
                     if (p != null) { shooterPtr = p.Pointer; try { shooterTypeId = (int)p.thePlantType; } catch { } }
                 }
+                // 2026-09-15 fifth defect (live-proven): `from`/`from_zombie` is proven UNSET even at
+                // this exact spawn instant, not merely stale by hit time -- confirmed live via a
+                // dedicated trace, every fire, for a lab-overlay debug-spawned Peashooter (a
+                // debug.spawn-plant creature never goes through whatever vanilla firing-code path
+                // assigns the real field; the direct read above is a correct idea for a REAL
+                // player-placed plant, just not sufficient alone). Position fallback: `theBulletRow`
+                // is a real field (confirmed via metadata dump) and always set regardless of spawn
+                // path, so resolve the firing side's living occupant of that row from the SAME board
+                // snapshot InjectorCombatBridge/InjectorStatusBridge already share (E27) -- no second
+                // scan. A row holds many same-side entities (Sunflower, Wall-nut, shooter), so row alone
+                // is not an identity: InitData runs at the bullet's spawn point, i.e. the shooter's own
+                // cell, so match the nearest same-side entity by column (<= 1 away). No column, no
+                // candidate, or a tie ⇒ leave shooterPtr zero (no RPG record) rather than credit a guess.
+                // Known residual: a multi-lane shot (Threepeater side peas) can still match an adjacent-
+                // lane occupant at the same column -- tracked in lawn-combat-wire-todo next-run tasks.
+                if (shooterPtr == IntPtr.Zero)
+                {
+                    try
+                    {
+                        var side = __instance.shootByZombie ? "zombie" : "plant";
+                        var row = __instance.theBulletRow;
+                        var bulletCol = FusionRpg.Injector.Lawn.LawnCoords.ColFromX(__instance.transform.position.x);
+                        if (bulletCol >= 0)
+                        {
+                            var snap = Effects.InjectorBoardSnapshot.Capture();
+                            FusionRpg.Core.Combat.BoardEntitySnap? best = null;
+                            var bestScore = int.MaxValue;
+                            var tie = false;
+                            foreach (var e in snap.Entities)
+                            {
+                                if (!e.Living || e.Row != row || !string.Equals(e.Side, side, StringComparison.OrdinalIgnoreCase))
+                                    continue;
+                                var dist = Math.Abs(e.Col - bulletCol);
+                                if (dist > 1) continue;
+                                // Prefer the occupant behind (plant) / ahead-of-house (zombie) side of the pea.
+                                var behind = side == "plant" ? e.Col <= bulletCol : e.Col >= bulletCol;
+                                var score = dist * 2 + (behind ? 0 : 1);
+                                if (score < bestScore) { best = e; bestScore = score; tie = false; }
+                                else if (score == bestScore) tie = true;
+                            }
+                            if (best != null && !tie &&
+                                ulong.TryParse(best.Ptr, System.Globalization.NumberStyles.HexNumber,
+                                    System.Globalization.CultureInfo.InvariantCulture, out var raw))
+                            {
+                                shooterPtr = unchecked((IntPtr)raw);
+                                shooterTypeId = best.TypeId;
+                            }
+                        }
+                    }
+                    catch { }
+                }
                 Effects.EventDrainHost.CacheBulletShooter(__instance.Pointer, shooterPtr, shooterTypeId);
+                if (Effects.FsmTrace.Enabled)
+                    CheatState.Note($"fsm-trace BulletInit.Postfix bulletPtr={__instance.Pointer:X} shooterPtr={shooterPtr:X} shooterTypeId={shooterTypeId}");
             }
             catch { }
             // Highest-rate kind (~per pea). Emit only when something consumes it: an OnSpawn
@@ -1513,6 +1570,9 @@ public static class GameHooks
         try { Effects.LawnElementResolverHost.Invalidate(ptr.ToString("X")); } catch { }
         try { Hud.ActorHudCache.Remove(ptr.ToString("X")); } catch { }
         try { Hud.ActorHudPool.ReleaseOwner(ptr.ToString("X")); } catch { }
+        // Same ptr-reuse hazard as LawnElementResolverHost.Invalidate above, same fix shape —
+        // see InjectorSpawnHpPin.Remove's own doc comment (confirmed live, not theoretical).
+        try { Stats.InjectorSpawnHpPin.Remove(ptr.ToString("X")); } catch { }
     }
 
     internal static void RecapturePlant(Plant p, string source)
