@@ -59,6 +59,11 @@ public sealed class RunReport
     public long DrainDroppedDepth { get; set; }
     public long DrainDroppedDeathBudget { get; set; }
 
+    /// <summary>The drain's drop counters are cumulative, so the three values above are differences from a zero
+    /// point: <c>last-window-before-run</c> when the ring still held one, else <c>first-window-in-run</c> (drops
+    /// inside that first window are then not counted).</summary>
+    public string? DrainDropsZeroPoint { get; set; }
+
     // ---- frame share (perf sample under load) ----
     public double DrainTickTotalMs { get; set; }
     public double WindowTotalMs { get; set; }

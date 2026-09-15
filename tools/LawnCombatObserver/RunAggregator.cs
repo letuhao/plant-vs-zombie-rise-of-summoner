@@ -14,6 +14,18 @@ public sealed class RunAggregator
 {
     readonly HashSet<string> _seenWindowTimestamps = new(StringComparer.Ordinal);
     readonly int _hitSampleCap;
+
+    readonly record struct DropCounters(long Overflow, long Depth, long DeathBudget)
+    {
+        public static DropCounters Of(DrainStatsDto d) => new(d.DroppedOverflow, d.DroppedDepth, d.DroppedDeathBudget);
+    }
+
+    DropCounters? _dropBaseline;
+    DateTime? _dropBaselineT;
+    DropCounters _dropFirstInRun;
+    DateTime? _dropFirstInRunT;
+    DropCounters _dropLast;
+    DateTime? _dropLastT;
     public RunReport Report { get; }
 
     public RunAggregator(string baseUrl, DateTime startedAtUtc, int requestedDurationSec, int hitSampleCap)
@@ -50,7 +62,17 @@ public sealed class RunAggregator
             if (!DateTime.TryParse(w.T, null, DateTimeStyles.RoundtripKind, out var t))
                 continue; // unparseable timestamp — skip rather than guess which run it belongs to
             if (t.Kind != DateTimeKind.Utc) t = t.ToUniversalTime();
-            if (t < lower || t > upper) continue; // belongs to a different run (a long-lived server)
+            if (t < lower)
+            {
+                // The newest window before the run is the zero point for the drain's cumulative drop counters.
+                if (w.Drain is { } before && (_dropBaselineT is null || t > _dropBaselineT))
+                {
+                    _dropBaselineT = t;
+                    _dropBaseline = DropCounters.Of(before);
+                }
+                continue;
+            }
+            if (t > upper) continue; // belongs to a different run (a long-lived server)
 
             Report.WindowsObserved++;
             Report.WindowTotalMs += w.WindowMs;
@@ -60,9 +82,17 @@ public sealed class RunAggregator
 
             if (w.Drain is { } drain)
             {
-                Report.DrainDroppedOverflow += drain.DroppedOverflow;
-                Report.DrainDroppedDepth += drain.DroppedDepth;
-                Report.DrainDroppedDeathBudget += drain.DroppedDeathBudget;
+                // lawn-combat-wire L-N9: EventDrain's drop counters are cumulative for the drain's lifetime
+                // (1623 → 1777 across one live 300z run), so summing them per window inflated the run's drops ~14x.
+                // The run's drops are the last observed value minus the zero point.
+                var now = DropCounters.Of(drain);
+                if (_dropFirstInRunT is null || t < _dropFirstInRunT) { _dropFirstInRunT = t; _dropFirstInRun = now; }
+                if (_dropLastT is null || t > _dropLastT) { _dropLastT = t; _dropLast = now; }
+                var zero = _dropBaseline ?? _dropFirstInRun;
+                Report.DrainDroppedOverflow = Math.Max(0, _dropLast.Overflow - zero.Overflow);
+                Report.DrainDroppedDepth = Math.Max(0, _dropLast.Depth - zero.Depth);
+                Report.DrainDroppedDeathBudget = Math.Max(0, _dropLast.DeathBudget - zero.DeathBudget);
+                Report.DrainDropsZeroPoint = _dropBaseline is null ? "first-window-in-run" : "last-window-before-run";
                 if (drain.Enabled) Report.DrainEnabledObservedAtLeastOnce = true;
                 else Report.DrainDisabledObservedAtLeastOnce = true;
             }

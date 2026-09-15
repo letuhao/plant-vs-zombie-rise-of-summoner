@@ -52,6 +52,7 @@
     "src/FusionRpg.Injector.MelonLoader.39/**",
     "src/FusionRpg.Injector.BepInEx/**",
     "tools/LawnCombatObserver/**",
+    "tools/LawnCombatObserver.Tests/**",
     "scripts/verification-boundaries.v1.json",
     "scripts/guard-injector-compile.ps1",
     "docs/architecture/effect-atom/spec-value-spec-and-curve.md",
