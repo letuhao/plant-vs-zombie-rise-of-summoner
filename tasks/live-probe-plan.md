@@ -97,3 +97,8 @@ timed out) and was funded by souls from debug-spawned kills after the run delete
 **Binding rule added:** funding, items and creatures consumed by a Mode B probe must come from paths real
 gameplay creates. Kill-earn from debug-spawned entities is Game Injector Debug state and never funds an
 RPG Server Debug proof. Changing that rule is an owner decision, never a mid-run substitution.
+
+**Task 18 landed offline (`0f82fe81`):** `zombie.die`/`plant.die` carry `spawnOrigin` and Mode B step 0
+fails the run when kill souls came from debug- or cheat-spawned entities. Kills captured before that
+commit read as `Unrecorded`, so player 1's existing balance stays unproven, never clean — consistent with
+Task 13's "tainted" default. Task 19 is the live check after the injector redeploy.

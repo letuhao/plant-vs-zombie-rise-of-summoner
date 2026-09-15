@@ -262,8 +262,8 @@ row, so its cost becomes config. Seed already authored: `data/seed/actions/autho
       *audit 2026-09-15 CONFIRMED: `e6af60b5` (T4) and `4ec65b4e` (T5) change no golden file*
 - [x] Battle behaviour byte-identical (T5)
       *audit 2026-09-15 CONFIRMED: `ResourceSubTickRegenTests.cs:248`*
-- [ ] Lead read each diff: files changed are the files the task named, nothing else moved
-      **audit 2026-09-15 OPEN: unverified — `4ec65b4e` also touched `ResourcePoolState.cs`, `BattleModels.cs`; needs a per-commit file-list review. Next run L-N15**
+- [x] Lead read each diff: files changed are the files the task named, nothing else moved
+      *audit 2026-09-15 L-N15 REVIEWED per commit (`git show --name-only`, non-comment hunks of every file outside the task's Files line): T3 `b45ddb25` +`GameHooks.cs` = one `LawnElementResolverHost.Invalidate` call (the task's own trigger set); T4 `e6af60b5` +`OverlayCombatMath.cs` = one `checked((long)...)` cast (the task's overflow rule); T5 `4ec65b4e` +`ResourcePoolState.cs` = the `Carry` field the regen unit needs, +`BattleModels.cs` = XML doc only; T6 `059ae9fe` +`EffectDtos.cs` = additive `SwingId`; T7 `2bc88565` +`ActionCorpusBrief.cs`/`ActionCorpusCostTemplate.cs`/tuning JSON = the named cost template. Nothing unrelated moved.*
 - [x] `git status` on shared files (`GameHooks.cs`, `Program.cs`) clean of other sessions' work
       *audit 2026-09-15 CONFIRMED: `git status --porcelain` clean at audit time*
 - [ ] Negative cases exist — each task naming a falsifier has a test that fails when the code is wrong
@@ -347,8 +347,8 @@ FSM — a general creature has no binding). Owns the four gates and every correc
 - [x] T9's rules proven before T10 makes them load-bearing — **this gate is the ordering constraint**;
       the lead does not dispatch T10 until it passes
       *audit 2026-09-15 CONFIRMED: git order: `f74a58ab` 05:43 before `62ec0b9e` 06:49*
-- [ ] Lead read the actual diff, not the summary
-      **audit 2026-09-15 OPEN: self-assertion; cite commit hashes instead. Next run L-N15**
+- [x] Lead read the actual diff, not the summary
+      *audit 2026-09-15 L-N15 REVIEWED: T8 `82aac585` (factory, `BattleRunState.cs`, injector host init `RpgHost.cs`, row + tests — as named); T9 `f74a58ab` +`GameEventRec.cs` (instakill flag), +`EffectDtos.cs`, +`GameEventRing.cs` (comment only), +`event-pipeline-v2-ssot.md` (the amendment T9 requires). The T9 liveness rule it shipped was incomplete — fixed in `80d7a9da` (L-N16).*
 - [x] `ActionTimingPolicy.Configure` ordering verified against host startup, not assumed (T8)
       *audit 2026-09-15 CONFIRMED: `RpgHost.cs:187`*
 
@@ -585,8 +585,8 @@ call site · **Scope:** L
       *audit 2026-09-15 CONFIRMED: as Task 12*
 - [x] No second cost gate; `guard-actor-hub` green
       *audit 2026-09-15 CONFIRMED: guard OK at audit*
-- [ ] Lead read the actual diff and test output
-      **audit 2026-09-15 OPEN: self-assertion. Next run L-N15**
+- [x] Lead read the actual diff and test output
+      *audit 2026-09-15 L-N15 REVIEWED: T10 `62ec0b9e` +CheatRegistry/CheatSchema/CheatState/InjectorLoop (the kill switch), +`HybridPayload.BuildOverlay` extracted from `AtomCompiler` (behaviour-preserving, shared with the grant builder); T11 `c30275e5` +tuning bootstraps in four test projects (new v2 tuning files), `Program.cs` v1->v2 file names, `BattleResourceTuning.cs` regen-share row, and `BattleModels.BaseResourceRegen` changed from constant 0 to the tuned rate — a shared seam (`ResourceBaselineSubsystem`), so every `seedResourceBaseline` Hub caller now regenerates stamina, not only the lawn (intended by the calibration spec; cross-mode effect not re-checked here — L-N28); T12 `a4ce3d68` as named plus `GameHooks`/`EffectRuntime` call sites. Test output: re-run at audit — Core.Tests 13571/13571 and Guard.Tests 283/283 via verify-change (`b244fb69`), covering `BasicAttackGrantBuilderTests`, `LawnCostLedgerChargeTests`, `LawnCombatCalibrationGuardTests`.*
 - [ ] **Observer reports triggers == swings** on a piercing shot (D8 measured, not argued)
       **audit 2026-09-15 OPEN: FALSE if ticked — every live run was single-target; recorded window reads hits 11 / swings 9 / triggers 11. Next run L-N4**
 - [ ] **Observer reports zero dropped effect-bearing records** under a loaded wave (D9 measured)
@@ -1110,7 +1110,7 @@ metric.*
 
 ---
 
-## Next run — audit 2026-09-15 gaps (`L-N1` … `L-N27`)
+## Next run — audit 2026-09-15 gaps (`L-N1` … `L-N28`)
 
 Ordered by the plan's "Next run" phases. Every task reports commands run and raw output; a box is
 ticked only when evidence matches the bullet's exact wording — never reword a bullet to tick it.
@@ -1166,6 +1166,8 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
 
 ### Phase B — owner decisions (escalations the run wrongly made itself)
 
+*Added by the audit continuation: **L-N28** (battle stamina regen on or lawn-only — see its findings in Phase C list).*
+
 - [ ] **L-N1** Perf ceiling breached (T13). Plan: breach escalates to owner; spec default on breach is
       **kill switch defaulted off**. Owner rules ship / ship-behind-switch-off / stop after L-N8 data.
 - [ ] **L-N11** Spec amendments: `spec-element-cache-invalidate.md` / `spec-basic-attack-grant.md:84-92`
@@ -1203,9 +1205,16 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       not), or use a real long lawn; capture Earth-vs-Ice alongside Fire-vs-Ice.
 - [ ] **L-N7** Proof 1 second half: explain `rpgDelta:0` with the `derived:{"combat.power.omni":2000}`
       overlay first (trace `InjectorDerivedOverride` → `ResolveActor`), then the two-shooter differential.
-- [ ] **L-N15** Gate hygiene: per-commit file-list review of the T3–T7 commits; mutant set in
+- [x] **L-N15** Gate hygiene: per-commit file-list review of the T3–T7 commits; mutant set in
       `scripts/mutants/` for `LawnElementResolver`, `OverlayCombatCalculator`, `EventDrain` with
       killed-mutant output; replace self-asserted "lead read the diff" boxes with commit hashes.
+      *Done: (1) per-commit file-list review recorded with hashes on GATE 1/2/3's three "lead read the diff" boxes
+      (T3–T12 extras each justified; T11's shared-seam regen change became L-N28). (2) `scripts/mutants/lawn-combat.json`,
+      21 mutants (`LawnElementResolver` 6, `OverlayCombatCalculator` 7, `EventDrain` 8). First run: 1 real survivor —
+      `FlushForPtr` re-appending kept records in reverse order; the only order test left one record behind. Added
+      `EventDrainTests.FlushForPtr_leaves_every_other_ptrs_records_in_their_original_order`. Re-run: `every mutant was
+      caught` (21/21), and a separate build per mutant proved all 21 compile, so no catch is a build failure. Command:
+      `mutate.ps1 -Set lawn-combat -Filter "...LawnElementResolver|...OverlayCombat|FusionRpg.Core.Tests.Events|...DamagePacket|...ShieldGate|...EvasionChain"`.*
 - [ ] **L-N26** Live-tooling defects seen in the run: `lab-overlay` reports `theBoardType:"Nothing"`;
       `enter-level` left stale entities under a main-menu overlay; a kill batch produced no
       `zombie.die` events and no soul credit on the same `matchKey`; `debug_restart_game` ran 30 min
@@ -1218,3 +1227,18 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       which also sees dying objects. Also confirm `Zombie.InitHealth` never fires on a dying zombie
       between `Die` and `DestoryZombie` — that would re-open the once-per-death latch and emit a second
       `zombie.die`.
+- [ ] **L-N28** Cross-mode regen check (found by L-N15): T11 `c30275e5` made `BattleModels.BaseResourceRegen`
+      non-zero through `ResourceBaselineSubsystem`, shared by every `seedResourceBaseline: true` Hub caller
+      (lawn `CheatState.ActorHub`, `UniqueActorHubCompose`). List every such caller, confirm which modes
+      now regenerate stamina, and confirm battle/expedition goldens did not move (or that the move is
+      the calibration spec's intent). Verify: caller list with file:line + the golden test run output.
+      *audit 2026-09-15 FINDINGS (left open — owner decision): `ResourceBaselineSubsystem` (the only caller of
+      `BaseResourceRegen`) is registered by three composes — lawn `CheatState.cs:81`, `/sheet`
+      `UniqueActorHubCompose.cs:75`, and battle `BattleHubCompose.cs:47`. So since `c30275e5` production battle actors
+      regenerate stamina at 5% of pool per second (`battle-resources.v2.json`). `spec-resource-subtick.md` sanctions
+      regen rows "in both battle and the lawn", but `BattleModels.cs:395-417` still says in-battle regen stays 0 because
+      "a battle is not a rest" (resource-hub-ssot.md §11: pools "refill at rest"), and no test reads the real v2 numbers
+      in battle (the ambient fixture is all-zero). Server sheet/audit tests pass (9/9, filter
+      `ActorSheet|DerivedAudit|ProjectStanding|UniqueActorHub`); Core battle goldens pass (13572). Owner rules: battle
+      stamina regen on (amend §11 and the BattleModels doc, add a battle test on real v2 numbers) or lawn-only (regen
+      opt-in per compose, battle off).*

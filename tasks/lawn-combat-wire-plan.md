@@ -248,4 +248,14 @@ traces on the hot path and a row-only shooter guess.
 
 **Owner decisions owed (Phase B):** perf ceiling ship/switch-off/stop (`L-N1`); hypno re-bake spec
 wording (`L-N11`); T4 double interior vs spec amendment (`L-N12`); whether the debug-funded soul balance
-is acceptable (live-probe Task 13).
+is acceptable (live-probe Task 13); battle stamina regen on or lawn-only (`L-N28` — `BattleHubCompose` shares
+`ResourceBaselineSubsystem`, so T11's lawn calibration also regenerates stamina mid-battle, against resource-hub-ssot §11).
+
+**Audit continuation, same day (Phase A closed).** `L-N10`, `L-N13`, `L-N16`, `L-N20` landed with tests and
+killed mutants; `L-N15` added `scripts/mutants/lawn-combat.json` (21 mutants over `LawnElementResolver`,
+`OverlayCombatCalculator`, `EventDrain`) and closed the one survivor with a test. Two more real defects
+were found and fixed on the way: a hit recorded before its target died still reached `AddZombieHp` and ran
+a second `Die()`, and dead-ptr marks never cleared on spawn, so a recycled address refused every RPG hit
+(`80d7a9da`). Follow-ups added: `L-N27` (liveness on pooled reactivation — live) and `L-N28` (T11's regen
+change reaches every `seedResourceBaseline` Hub caller, not only the lawn). None of this is deployed:
+`L-N22` still gates every Phase C proof.
