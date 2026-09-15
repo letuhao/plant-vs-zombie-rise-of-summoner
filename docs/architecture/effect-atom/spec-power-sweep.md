@@ -159,7 +159,8 @@ bulk of the corpus and one that does not.
   starting point, not an end state — and the drift test exists because it will move again.
 - **Re-run a refuted attempt** (§3) without introducing non-linearity.
 - **Change `CostFunction`'s integer contract.** Per-mille, `long`, widen before multiplying, divide by
-  1000 last, overflow throws. A sweep that needs floats has the wrong output type.
+  1000 last, overflow throws. *(The former "a sweep that needs floats has the wrong output type" is
+  superseded 2026-09-15: floating-point allowed.)*
 - **Fit against synthetic data alone.** `RungMonotonicity` already prices one synthetic vector and proves
   nothing about real content — that is the mistake to avoid repeating at scale.
 - **Silently widen `ContentValidation.Drift`'s ±25%** to accommodate a poor fit.

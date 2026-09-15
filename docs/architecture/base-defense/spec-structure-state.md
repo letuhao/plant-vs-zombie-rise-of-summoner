@@ -331,7 +331,7 @@ the code rather than this spec.**
 
 | Value | Type | Justification |
 |---|---|---|
-| `StructureDef.MaxHp` | **`long`** | magnitude, `contentScale` reaches it. `float` fails at index 232 |
+| `StructureDef.MaxHp` | **`long`** | magnitude, `contentScale` reaches it; per-mille `int` range fails at index 3,213 |
 | `WorldSlot.StructureHp` | **`long?`** | same, plus the null default that keeps the row silent |
 | `RepairCost` | **`long`**, `checked` | product of three magnitudes |
 | `SlotDepletionMilli` | `int` | bounded ratio 0..1000 — exempt, and the comment says so |
@@ -344,7 +344,7 @@ on every magnitude product · `long` for HP.
 **Ask first:** giving the four shipped structures non-zero `MaxHp` (that is content, and it belongs to
 `structure-seed`) · any change to `WorldSector.DepletionMilli`, which is the loam program's.
 
-**Never:** `float` HP · a `Math.Min` on a magnitude (`AGENTS.md`: an absolute bound is *derived and
+**Never:** a `Math.Min` on a magnitude (`AGENTS.md`: an absolute bound is *derived and
 throws, never clamps*) · reuse `WorldSector.DepletionMilli` · append to the existing `slot` canonical
 row.
 

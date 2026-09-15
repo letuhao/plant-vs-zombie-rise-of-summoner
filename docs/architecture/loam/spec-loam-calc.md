@@ -194,7 +194,7 @@ tuned repeatedly belong together, each with the sentence explaining why it is wh
 
 ## Code style
 
-Integer only; the float guard enumerates all world sources and needs no extension. Per-mille for
+Per-mille for
 multipliers and rates; **`long` for quantities**, so arithmetic promotes without a cast. **Multiply in `long`, divide exactly once** — the
 `long` prevents the overflow above, the single division keeps rounding in one place — the W34 lesson, where a curve that rounded three times drifted off
 the curve it was named after.
@@ -235,7 +235,7 @@ tests that coverage reports as fully covered.
   reasoning; a mutant set authored with the module; fixtures hand-built, not `first-light`.
 - **Ask first:** re-introducing the distance multiplier (A3); merging `TerritoryComponents` with `SupplyGraph.ConnectedSectors` (they answer different questions); any constant that would make loam stop
   binding (**P3**); adding a sixth calculator.
-- **Never:** calling any of this from `TurnEngine` in this module; floats; a second implementation of
+- **Never:** calling any of this from `TurnEngine` in this module; a second implementation of
   supply connectivity — `SupplyGraph.ConnectedSectors` is the one; `WorldState` inside anything
   `World/Ai/` will later consume.
 

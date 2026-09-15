@@ -188,7 +188,7 @@ the tuning file itself names as the fix.
 - [x] Per-mille accumulation with a carried `long` remainder; divide by 1000 exactly once.
 - [x] **No drift** over ≥10,000 ticks: accrued == `floor(rate × ticks / 1000)`.
 - [x] A capped pool discards overflow **and** the carry.
-- [x] Integer-only; no `double`/`float`.
+- [x] Integer per-mille carry with no drift. *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
 - [x] `BaseResourceRegen` still returns 0 — this makes rates *expressible*, it does not author them.
 - [x] **Battle byte-identical** while regen rows remain absent.
 

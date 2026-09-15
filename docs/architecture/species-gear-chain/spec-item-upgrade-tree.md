@@ -253,7 +253,7 @@ if (!RequirementProfile.Met(owner, successor))
 
 - Costs are **`long`** and price on a rung, so they scale with the ladder.
 - **Widen before multiplying; divide by 1000 last, exactly once; overflow throws, never wraps.**
-- **Never `float`** — integer-exactness fails at `Θ` = 232, inside normal play.
+- **Floating-point is allowed** (owner ruling 2026-09-15) — a `float` not being integer-exact past 2^24 is precision, not overflow.
 - Class `rung` is a small identity `int` — an ordering position, **never a magnitude and never a
   multiplier.** An upgraded item is not a scaled item; its magnitudes come from its new base type
   through the paths that already exist.

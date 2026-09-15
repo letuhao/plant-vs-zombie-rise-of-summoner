@@ -223,7 +223,7 @@ Grounding: `chaos-backend-service/docs/action-core` and `docs/combat-core`.
 
 | Chaos design | Why not here |
 |---|---|
-| `f64` throughout | This repo is integer ticks and per-mille. Floating point is banned in kernel code by a source guard, for byte-identical replay. |
+| `f64` throughout | This repo is integer ticks and per-mille. *(The former "floating point is banned in kernel code by a source guard" is superseded 2026-09-15: floating-point allowed; a hashed `double` records the platform stamp.)* |
 | `Instant::now()` progress tracking | We have a virtual clock. Wall-clock reads are the determinism hazard the timeline program exists to remove. |
 | `rng.gen::<f64>()` for interrupt chance | Draws must come from a named seeded stream, or replay breaks. |
 | Multi-level L1/L2/L3 caches with TTL | TTL is wall clock. And the 2026-08 perf audit found caching complexity, not cache absence, near the hot path. |
@@ -598,7 +598,7 @@ The kernel's own slot tests are thorough but drive `ActionSlots` directly. The t
 
 [audit-2026-08-22.md](action/audit-2026-08-22.md): three Critical, six Important, one Minor, all fixed in the specs they affect. Every Critical was found by reading shipped code rather than the specs:
 
-- **C1 — `Core/Actions/` had no determinism guard.** `A1` §9 correctly sites the runtime outside the *tick-path* rules, but that silently dropped the *purity* rules too — so a wall-clock read, an ambient `Random`, or a `double` would compile, pass CI, and break every replay. Fixed: scan the directory with purity rules, tick-path exempt, reusing the mechanism that already exempts `BattleTrace.cs`.
+- **C1 — `Core/Actions/` had no determinism guard.** `A1` §9 correctly sites the runtime outside the *tick-path* rules, but that silently dropped the *purity* rules too — so a wall-clock read, an ambient `Random`, or a `double` would compile, pass CI, and break every replay *(`double` part superseded 2026-09-15: floating-point allowed)*. Fixed: scan the directory with purity rules, tick-path exempt, reusing the mechanism that already exempts `BattleTrace.cs`.
 - **C2 — `Random` targeting had no RNG stream.** The battle names `initiative`, `crit`, `essence`, `status` — there is no `target`. An unnamed draw is nondeterministic; a borrowed one desyncs everything after it, which is worse because the battle still looks plausible.
 - **C3 — a claimed property the code does not have.** `A2` said precompiling `TargetSpec` avoids a per-call dictionary; `FilterPool` re-parses the filter dictionary on **every** resolve, inside the shipped resolver, and `A7` calls it per candidate.
 

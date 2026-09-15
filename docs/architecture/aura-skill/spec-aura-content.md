@@ -202,7 +202,7 @@ exist and are waiting. Tracked as **D7** in
 2. **The determinism guard does not forbid division.** The guard is
    `TimelinePurityGuardTests.Kernel_sources_contain_no_wall_clock_rng_or_floating_point` — a **source
    scan** for the tokens `DateTime`, `Random`, `double `, `float `. It bans floating-point **types**,
-   not arithmetic. `baseCD * 1000 / (1000 + hasteMilli)` is pure `long` and passes trivially.
+   not arithmetic. *(Its floating-point ban is superseded 2026-09-15: floating-point allowed.)* `baseCD * 1000 / (1000 + hasteMilli)` is pure `long` and passes trivially.
 3. **Integer divisive haste already ships in the same directory, under the same guard.**
    `TurnReadiness.EffectiveRate` (`Battle/Timeline/TurnReadiness.cs:49-54`) is
    `speed * NominalHasteMilli / haste` with `NominalHasteMilli = 1000`, backed by the registered

@@ -165,7 +165,7 @@ marginal read can.
 free"* (`CoefficientTable.cs:71-74`). Every read here surfaces `unpriced` as its own outcome. A read that
 coerces it to `0` is a bug, and test `unpriced_never_reads_as_zero` is what says so.
 
-**2. Integer, `long`-safe, no float on any magnitude path.** E9 is already integer-exact and says why
+**2. Integer, `long`-safe.** *(Former "no float on any magnitude path" superseded 2026-09-15: floating-point allowed.)* E9 is already integer-exact and says why
 (`PowerVector.cs:14-16`). This module adds no arithmetic that leaves that discipline: shares are
 per-mille integers, divided by 1000 exactly once, at the end.
 
@@ -236,7 +236,7 @@ public static ImplicitShare Read(AtomRow implicitAtom, int rarityCeiling, ItemPo
 | `aptitude_price_uses_the_marginal_read` | R4 prices with `MarginalRead.Of`, not the stored context-free price |
 | `aptitude_read_is_inert_and_says_why_without_its_vocabulary` | no `AllocationScope` item value and no `aptitude.*` family ⇒ a named refusal, never a guessed number |
 | `flat_coefficients_are_reported_not_hidden` | every read that is coefficient-sensitive carries the X6 caveat in its result object |
-| `no_float_on_any_read_path` | reflection over the module's public surface — magnitudes are `long`/`int` only |
+| `no_float_on_any_read_path` | reflection over the module's public surface — magnitudes are `long`/`int` only — *superseded 2026-09-15: floating-point allowed* |
 
 ## Boundaries
 
@@ -251,7 +251,7 @@ setting `grantedActionShareCapMilli` to a gating value; changing `powerDisplayBa
 **Never:** re-implement a cost function, a coefficient table or a power vector inside the item program
 — that is D13-VOID's whole content, and `seedsmith-map.md` §3b already named the pattern (*"burying a
 general fix inside a feature is how it becomes feature-shaped by accident"*). Never treat an unpriced
-atom as free. Never introduce a `float` on a magnitude path. Never gate a drop on a power read.
+atom as free. Never gate a drop on a power read.
 
 ## Success criteria
 

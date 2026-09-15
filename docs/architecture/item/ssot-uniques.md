@@ -583,7 +583,7 @@ expressible in the shipped schema today; what this lane adds is the *class*, its
 | `container_id` | TEXT PK, FK → `effect_container` | must have `container_kind = 'item'` and an `item_base_type` row | the validator; every check in §6 |
 | `derived_from` | TEXT NOT NULL, FK → `item_base_type` | the parent base type, **for display and inheritance of class/frame flavour** — "Kiln Nozzle — Pea Nozzle" | G3's tooltip; the salvage/compare UI (I13) |
 | `counter_pressure` | TEXT NOT NULL | `drawback` \| `conditional` \| `narrow` — checked against content (§3.7) | the import validator |
-| `budget_ae` | INTEGER NOT NULL | the author's declared total in **AE × 100** (integer; SC4 forbids floats in content) | the budget check; E9 replaces it with a power read when one exists |
+| `budget_ae` | INTEGER NOT NULL | the author's declared total in **AE × 100** (integer column) | the budget check; E9 replaces it with a power read when one exists |
 | `power_axis` | TEXT NOT NULL | one of the five power categories (definitions §7) — the axis the item *is about* | `UniqueAxisCollision` |
 | `acquisition` | TEXT NOT NULL | `drop` \| `source-locked` \| `deterministic` (§4.5) | I12's table builder; the ≥ 90 check |
 | `enhance_scope` | TEXT NOT NULL DEFAULT `'magnitude-only'` | §4.4 | I6 |
@@ -808,7 +808,7 @@ unique allowance  = baseline + 1.5 AE                                   = 5.00 A
 | Variance slot, `searing_strike` t3 | one rolled affix = 1.0 AE by definition, discounted for sitting below the window midpoint | **+0.80** |
 | **Total** | | **3.93 AE ≤ 5.00** ✅ |
 
-`budget_ae = 393` (AE × 100, integer — SC4 forbids floats in content).
+`budget_ae = 393` (AE × 100, integer column).
 
 **The soft spot, named:** the 2.00 AE for the Lava capability is a number an author wrote down, and
 nothing can check it until E9 prices a verb with no magnitude. That is SC9's situation exactly — the

@@ -114,7 +114,7 @@ def tally(rows: "Sequence[Mapping]") -> "Counter[str]":
 | `evenness_is_computed_over_the_full_98_population` | a family with zero picks affects the number, not merely absent families |
 | `never_used_families_are_named_individually` | the emitted list, not just a count |
 | `all_time_and_latest_round_are_reported_separately` | and are demonstrably different on a fixture where they diverge |
-| `PLANTED_VIOLATION_a_float_threshold_in_the_tuning_file_is_refused` | per-mille integers only |
+| `PLANTED_VIOLATION_a_float_threshold_in_the_tuning_file_is_refused` | per-mille integers only — *(superseded 2026-09-15: floating-point allowed)* |
 | `the_real_corpus_reproduces_the_measured_baseline` | 216 accepted / 59 of 98 used / 39 never-used / top-10 share ≈45.1% |
 | `the_report_is_byte_identical_across_two_runs` | sorted keys, never dict/filesystem order |
 | `an_unreadable_round_file_is_a_named_error_not_a_silent_skip` | corrupt/missing file surfaces, not vanishes |

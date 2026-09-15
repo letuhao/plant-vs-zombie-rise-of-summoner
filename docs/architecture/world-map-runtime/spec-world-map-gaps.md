@@ -361,7 +361,7 @@ const screenR = PIN_DISC_PX / 2; // a11y disc; not a yield
 const worldR = screenR / scene.cameras.main.zoom;
 ```
 
-Magnitudes on pins (net loam) stay `long` via `world-numbers`. No `float` HP. No new `P(Θ)`.
+Magnitudes on pins (net loam) stay `long` via `world-numbers`. No new `P(Θ)`.
 Camera min/max, `FIT_MAX` / `DETAIL_MIN`, `PIN_DISC_PX`, drag threshold, edge-scroll margin remain
 **structural**.
 

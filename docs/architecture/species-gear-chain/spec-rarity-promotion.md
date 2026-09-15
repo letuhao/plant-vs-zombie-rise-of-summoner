@@ -197,8 +197,7 @@ would be a different feature.
 - Costs are **`long`**, and they price on `rung`, so they scale with the ladder.
 - **Widen before multiplying** (`(long)a * b`, never `(long)(a * b)`); **divide by 1000 last, exactly
   once**; **overflow throws, never wraps**.
-- **Never `float`** — integer-exactness fails at `Θ` = 232, inside normal play, and `float` is
-  non-deterministic across runtimes, which is disqualifying on a hashed/persisted path.
+- **Floating-point is allowed** (owner ruling 2026-09-15) — a `float` not being integer-exact past 2^24 is precision, not overflow; a `double` feeding a hashed or persisted value records the platform stamp (`ssot-power-scale.md` §10.7).
 - `promoted_from_ordinal` is a small identity `int` — an ordinal, never a magnitude, and **never a
   multiplier**.
 

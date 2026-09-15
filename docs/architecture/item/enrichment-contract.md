@@ -109,7 +109,7 @@ needs one, and flag the addition as a reviewed change against E5:
 Anything beyond these four must be justified, not assumed. Prefer expressing a mechanic with an existing
 kind over minting a new one.
 
-### SC4 — Units, and no floats in content
+### SC4 — Units
 
 From definitions §2, non-negotiable:
 
@@ -117,7 +117,7 @@ From definitions §2, non-negotiable:
 |---|---|
 | Primary-channel magnitudes (`hp`, `atk`, …) | game units |
 | Derived-channel magnitudes (`combat.*`) | **resolver points** — sigmoid scale, `CritRateScale = 100.0` |
-| Chances, ratios, multipliers | **integer per-mille** |
+| Chances, ratios, multipliers | **per-mille** (shipped convention; floating-point is allowed — owner ruling 2026-09-15) |
 | Durations | integer ms |
 
 `+10 hp` and `+10 fire power` differ by roughly an order of magnitude in effect. **Tier bands are

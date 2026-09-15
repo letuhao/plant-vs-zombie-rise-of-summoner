@@ -280,15 +280,15 @@ Every number this introduces, and which `data/tuning/` file owns it. No `const` 
 
 ## Numeric types
 
-`durability_max`/`durability_current` are `long` (SQLite `INTEGER`, C# `long`) — a magnitude, never
-`float`/`double` per `CLAUDE.md` "Numeric overflow": a `float` magnitude stops being integer-exact at
-`Θ=232`, inside normal play, and durability is exactly the kind of per-instance magnitude that table
-governs. `wearPerBattleMilli`/`deathDropDecayMilli`/`repairRatioMilli`/destruction-chance are `long`
+`durability_max`/`durability_current` are `long` (SQLite `INTEGER`, C# `long`) — an integer magnitude
+whose range must hold reachable values (`CLAUDE.md` "Numeric types"). *(The former "never `float`/`double`
+— a `float` stops being integer-exact at `Θ=232`" justification is superseded 2026-09-15: that was
+precision, not overflow, and floating-point is allowed.)* `wearPerBattleMilli`/`deathDropDecayMilli`/`repairRatioMilli`/destruction-chance are `long`
 per-mille values (CLAUDE.md rule 4: divide by 1000 exactly once, last). `missingFraction` and every
 intermediate in the repair-cost formula are `checked` `long`, widened before multiplying (CLAUDE.md
 rule 3 — `(long)a * b`, never `(long)(a * b)`), matching `StructurePolicy.RepairCost`'s own proven
 shape verbatim. `MutationOpKind`/`CraftOperation` additions are `int`-backed enums (existing shape,
-unchanged). No new `double`, no `System.Random` — every roll goes through `SeededRng.DeriveStream` on
+unchanged). No `System.Random` — every roll goes through `SeededRng.DeriveStream` on
 a named stream, matching `MutationOpKinds.StreamName`'s existing per-op-kind domain separation.
 
 ## Commands
@@ -461,7 +461,7 @@ public static long RepairCost(long soulsFee, long forgeLegPerUnit, long max, lon
 [ ] The exact field-repair endpoint/call site (where a live delve or expedition session would invoke
     field touch-up) was not pinpointed this session — it has no caller today because `ICarriedSupplyCheck`
     has no real implementation yet (`loot-pack` unbuilt); naming the precise file is implementation's task.
-[x] No §2 invariant contradicted: `long` for every magnitude (no `float`), widen-before-multiply /
+[x] *(reworded 2026-09-15 per owner ruling: floating-point allowed)* No §2 invariant contradicted: `long` for every integer magnitude, widen-before-multiply /
     divide-by-1000-last throughout, no hard progression ceiling (destruction is a chance, not a wall;
     `repairRatioMilli` is a bounded ratio with its PS-8 exemption comment owed at the tuning file), SQL
     only in `FusionRpg.Data`, no second ActorHub composer, Foundation/PvZ untouched, no bare literal on

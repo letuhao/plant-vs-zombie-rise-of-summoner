@@ -38,7 +38,7 @@ would have refused.
   nowhere to hang — the roller throws; it never shrinks, pads or floors.
 - **Raid-wide extraction (S2-16):** *"a party may hold at a rest, never bank"* — graph-level facts: any room
   is an extraction node; a `rest` room is a hold point; nothing in the graph banks.
-- **Determinism (`spec-turn-engine.md:76`):** *"Integer or fixed-point only … stable ordering by entity id
+- **Determinism (`spec-turn-engine.md:76`):** *"Stable ordering by entity id
   everywhere, never dictionary enumeration · seeded per-system RNG streams … using the existing
   `SeededRng`, never `System.Random` · no wall-clock read anywhere."* `spec-world-model.md:68` likewise.
 

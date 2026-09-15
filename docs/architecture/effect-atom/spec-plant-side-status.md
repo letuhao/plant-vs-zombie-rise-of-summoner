@@ -112,8 +112,8 @@ visible on the wire — that is the whole difference between this and the state 
 - **Do not add a `FindObjectsOfType` scan on the per-hit path.** The 2026-08 perf audit named per-hit
   board scans as the cause of combat lag; the registry lookup exists precisely to avoid them.
 - **`long` for any magnitude** this path carries (a DoT's per-tick amount rides FA10, not FA2, but the
-  rule holds wherever E39 touches one) — **never `float`**, widen before multiplying, divide by 1000
-  last, and let overflow **throw**.
+  rule holds wherever E39 touches one) — widen before multiplying, divide by 1000 last in integer
+  per-mille math, and let integer overflow **throw**; floating-point is allowed (owner ruling 2026-09-15).
 - **No hard ceiling.** Nothing here caps duration or stacks; stacking and ICD are the status runtime's,
   and any limit that appears is a **structural** bound on a loop or buffer and must say so in a comment.
   Durations, ICDs and stack limits a balance pass would touch belong in `data/tuning/status.v1.json`.

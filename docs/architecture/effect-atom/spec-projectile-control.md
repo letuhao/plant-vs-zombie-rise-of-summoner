@@ -177,7 +177,7 @@ adding `BulletModify` beside them rather than making it three. Criterion 4 asser
   member behind it is E17's exact defect, and it fails silently at execute.
 - **No new rejection reason code.** The list is closed at 33 (`definitions.md` §10). A bullet whose
   target is gone is a runtime `return false`, not a load-time code.
-- **`long` for every magnitude, never `float`.** `Bullet.Damage` is a Unity `int`, so clamp at the
+- **`long` for every integer magnitude** (floating-point is allowed — owner ruling 2026-09-15). `Bullet.Damage` is a Unity `int`, so clamp at the
   **write boundary** the way `EntityStatWriter` already does (`ZombieCombatFields.ClampToInt32`,
   `EntityStatWriter.cs:50`) — never by narrowing mid-arithmetic.
 - **Widen before multiplying** (`(long)a * b`, never `(long)(a * b)`), and **divide by 1000 exactly
@@ -233,7 +233,7 @@ plan-item shape, pricing, validation. The sink's forwarding is covered by a text
 5. A `bullet.modify` grant changes the damage of a bullet the **game** fired, with no cheat key set.
 6. Cheat state still wins over a `bullet.modify` grant, asserted by an ordering test.
 7. `bullet.modify` has a coefficient row; no atom of this kind ever reports `unpriced`.
-8. Overflow on `op: scale` throws, and no `float` appears anywhere on the damage path.
+8. Overflow on `op: scale` throws. *(Former "no `float` on the damage path" clause removed 2026-09-15 per owner ruling: floating-point allowed.)*
 
 ## 6. Dependencies and cross-program hazards
 

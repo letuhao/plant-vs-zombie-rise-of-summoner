@@ -195,15 +195,15 @@ against, so a registry bump identifies exactly the anchors to re-run.
 
 ## Numeric types
 
-Per the overflow thresholds computed from the shipped curve (`B = 0.4`): `float` stops being
-integer-exact at `Θ = 232` and `int` per-mille at `Θ = 3,213`, so **`long` for every per-mille and
-every soul, price or item magnitude**
+Per the range thresholds computed from the shipped curve (`B = 0.4`): `int` per-mille exceeds its
+range at `Θ = 3,213`, so **`long` for every per-mille and every soul, price or item magnitude**
 (`hungerPerMille`, `*Milli`, `*MultMilli`, `recoveryRitualSouls.*`, `extendSlotChanceMicro`) — a ‰ is
 a factor the runtime multiplies into a `P(Θ)` magnitude, and widening before the multiply means the
 rate side is already `long`. **`int` for bands, counts, rows, cells, rungs, Θ deltas** — bounded by
 the graph or the ladder (`ContentContext.DangerBand` is `int`, `ContentContext.cs:16`). Parsers use
-`TryGetInt64`/`TryGetInt32` exactly; a fractional value is a rejection, never a truncation. No `double`
-anywhere in either schema.
+`TryGetInt64`/`TryGetInt32` exactly; a fractional value is a rejection, never a truncation. Both
+schemas ship integer-typed fields. *(Reworded 2026-09-15 per owner ruling: floating-point allowed — the
+former "no `double` anywhere" ban is removed.)*
 
 ## Commands
 
@@ -296,8 +296,8 @@ Voice: pure parsers, no logging, rejections name the dotted key, comments say *w
   affordance — ideal §11.1 calls kind *"the expensive axis"*); adding a tuning key another module's
   spec did not derive; changing a starting value (T7: never in the same change as code).
 - **Never:** a default for a missing key; a second registry for the same vocabulary (including a C#
-  enum that mirrors a registry file); a number copied from another domain's tuning file; a `float` or
-  `double`; a day/hour/minute unit; a spelled number as an ordinal; a magnitude on a registry row.
+  enum that mirrors a registry file); a number copied from another domain's tuning file; a day/hour/minute
+  unit; a spelled number as an ordinal; a magnitude on a registry row.
 
 ## Success criteria
 

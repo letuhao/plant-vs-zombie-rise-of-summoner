@@ -275,7 +275,7 @@ reward_per_skill_point_is_within_band_over_every_shipped_archetype_and_every_tie
   for each archetype in tree-plan's shipped set:
       for T in 1..10:
           N    = Σ_{t≤T} width[t]                   # ACTUAL widths, both branches, never 40/10
-          r[a] = (T·(T+1)/2) / (N·(N+4))            # b cancels; exact integer ratio, no float
+          r[a] = (T·(T+1)/2) / (N·(N+4))            # b cancels; exact integer ratio
       assert max(r) / min(r) <= archetype.rewardSpreadMaxRatioMilli / 1000
   assert the spread is EXACTLY 1000‰ at T == tierCount
 ```
@@ -657,11 +657,12 @@ already large, and "compare my creatures' builds" is exactly the surface that wo
 
 ### 7. Numeric types
 
-**`long` everywhere on both sides of the comparison.** CLAUDE.md's measured thresholds, applied:
+**`long` everywhere on both sides of the comparison.** CLAUDE.md's range thresholds ("Numeric types"),
+applied — *(table corrected 2026-09-15 per owner ruling: overflow is range; floating-point is allowed)*:
 
-| Type | Exact-integer ceiling | First `Θ` that breaks it | Used here? |
+| Type | Largest value it holds | First `Θ` whose magnitude exceeds it | Used here? |
 |---|---|---|---|
-| `float` | 16,777,216 | **232** | **never** — inside normal play, and non-deterministic |
+| `float` | ≈3.4 × 10^38 | not reachable | allowed; not used by the shipped integer comparison |
 | `int` (per-mille) | 2,147,483,647 | **3,213** | never |
 | `int` (whole units) | 2,147,483,647 | 103,557 | never for a magnitude |
 | `long` | 9,223,372,036,854,775,807 | 214,748,300 | **the default for everything here** |
@@ -896,7 +897,7 @@ public static long CostOfNextNode(long nodesOwned, PassiveTreeTuning tuning)
 | `battle_setup_never_calls_the_single_key_loader` | the seam, guarded |
 | `no_math_min_and_no_narrowing_cast_on_the_price_or_budget` | grep test, PS-8 |
 | `budget_overflow_throws_never_wraps` | `Θ` at `PowerLadder.MaxIndex` |
-| `every_stored_and_derived_magnitude_is_long` | reflection; a `float` or `int` fails |
+| `every_stored_and_derived_magnitude_is_long` | reflection; an `int` fails *("a `float` fails" superseded 2026-09-15: floating-point allowed)* |
 
 Mutation set worth adding to `scripts/mutants/`: flipping `first`/`step`, dropping the `checked`, and
 turning the batch loader into a loop — each should be caught by a named test above.
@@ -942,8 +943,8 @@ regression, not a slot; join tree state onto the unpaged `ListCreatureRoster`; m
 - [ ] Every actor's budget reads its **own** scope rate; a creature reading `Θ_player` fails a test.
 - [ ] One unknown node id fails the import with a report and leaves every actor loadable.
 - [ ] A six-actor squad's tree state loads in **one** query, one lock acquisition, one connection.
-- [ ] `scripts/audit-overflow.py` reports no critical finding; no `float` and no narrowing cast on any
-      magnitude or budget path.
+- [ ] `scripts/audit-overflow.py` reports no critical finding; no unchecked narrowing cast on any
+      magnitude or budget path. *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
 - [ ] `scripts/guard-dal.ps1` green; no SQL outside `FusionRpg.Data`.
 - [ ] §10.2 **row 29**, the **§11.10 caps-register row** (§9.2) and the `inventory.json` mirror row
       all exist before this module is called done — no guard checks any of the three, so they are

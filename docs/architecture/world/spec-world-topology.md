@@ -128,7 +128,7 @@ Tested against **hand-built graph shapes** with known answers rather than only a
 
 - **Always:** ordinal iteration order; integer costs; recompute per turn; take a sector filter rather than assuming the whole map.
 - **Ask first:** adding betweenness centrality (the fancier reading — real, but not yet needed); caching results between turns; adding a graph dependency.
-- **Never:** floating point; `System.Random`; letting topology read faction *belief* — it works on the public graph, and filtering by ownership is the caller's job.
+- **Never:** `System.Random`; letting topology read faction *belief* — it works on the public graph, and filtering by ownership is the caller's job.
 
 ### The human sees this too
 

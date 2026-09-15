@@ -60,7 +60,7 @@ Two asks, cleanly separable:
 | B7 | **`affix_channel` ∈ {drop, boss}`** — a per-entry, content-authored fact distinguishing a trash drop's affix pool from a boss drop's | `spec-drop-volume.md` "X4 — this module supplies the drop and boss channels"; `DropTableModel.cs:34-36` | Read directly |
 | B8 | **Bad-luck protection** — per-player pity counters on two guarded rungs (`heirloom`=70, `sunwoven`=90), a floor on incidental drops (every Nth incidental drop is at least rung 30), rung 100 deliberately unguarded but given a deterministic source (first-clear grant) | `ssot-rarity.md` §3.8; `LootPity.cs` | Read directly |
 | B9 | **The kill-drop roll is independent of the rarity roll** (D38, owner-decided 2026-09-04): a flat, tunable 5% "does anything drop" roll, then a *separate* table decides which rung — never conflated | `spec-drop-volume.md` "D38" | Read directly |
-| B10 | **`long`/`checked` arithmetic throughout**, per CLAUDE.md's numeric-overflow rules — no float, no silent wrap, matches the same discipline already audited elsewhere this session | `Instantiator.cs`, `DropTableModel.cs`, `ContentScale.cs` | Read directly |
+| B10 | **`long`/`checked` arithmetic throughout**, per CLAUDE.md's numeric-overflow rules — no silent wrap, matches the same discipline already audited elsewhere this session | `Instantiator.cs`, `DropTableModel.cs`, `ContentScale.cs` | Read directly |
 
 ## 3. Wiring gaps — built but not connected, one call from being real
 

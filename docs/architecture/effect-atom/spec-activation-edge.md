@@ -213,7 +213,7 @@ same shape.
 - **No position write.** `decisions.md` row 105 (Lawn position write) is DRAFTED, not built, and is
   `action-corpus`'s. A movement action's reposition is not this module's.
 - **No magnitude is chosen here** — this module carries no numbers at all. Where the repo's numeric
-  rules would apply they still bind: a magnitude is `long`, never `float`; widen before multiplying;
+  rules would apply they still bind: an integer magnitude is `long` (floating-point allowed); widen before multiplying;
   divide by 1000 last, exactly once; overflow throws rather than wraps; and any number a balance pass
   would turn lives in `data/tuning/<domain>.v{n}.json`, never in code.
 

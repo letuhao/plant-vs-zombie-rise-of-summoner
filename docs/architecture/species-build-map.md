@@ -198,7 +198,7 @@ Not aspirations — each has a guard or audit that already runs.
 
 | Standard | Check |
 |---|---|
-| Magnitudes are `long`; never `float`; widen before multiplying; divide by 1000 last; overflow throws | `python scripts/audit-overflow.py` |
+| Integer magnitudes are `long`; floating-point allowed (owner ruling 2026-09-15); widen before multiplying; divide by 1000 last; integer overflow throws | `python scripts/audit-overflow.py` |
 | No hard progression ceilings (PS-8); bounded ratios exempt **and must say so in a comment** | [power/ssot-power-scale.md](power/ssot-power-scale.md) §11 |
 | Balance surface is config — every rate/band/decay in `data/tuning/<domain>.v{n}.json`, never a literal | `python scripts/audit-magic-numbers.py` |
 | One power ladder — no private `f(level)`; a budget from a level reads an index | `scripts/guard-power.ps1` |

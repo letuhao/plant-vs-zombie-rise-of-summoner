@@ -116,7 +116,7 @@ Conflicts and their rulings:
 
 ### 3.5 Determinism rules (the same discipline the battle engine already runs)
 
-Integer or fixed-point only in game-affecting branches · stable ordering by entity id, never dictionary enumeration · seeded per-system RNG streams · no wall-clock reads anywhere in `step` · every resolution stamped with `(engineVersion, rulesetVersion, seed)`.
+Stable ordering by entity id, never dictionary enumeration · seeded per-system RNG streams · no wall-clock reads anywhere in `step` · every resolution stamped with `(engineVersion, rulesetVersion, seed)`. *("Integer or fixed-point only" superseded 2026-09-15: floating-point allowed; a `double` feeding a hashed or persisted result records the platform stamp.)*
 
 The payoff: a save is `(worldSeed, command log)`, a golden test is a turn log with an expected end state, a bug report is reproducible by construction, and **one turn is one transaction** — correlation-idempotent, exactly like a summon or a fusion today.
 

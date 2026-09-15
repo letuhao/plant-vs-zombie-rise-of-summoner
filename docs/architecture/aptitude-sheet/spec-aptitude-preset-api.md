@@ -137,7 +137,7 @@ checked
 }
 ```
 
-No `float` magnitudes. No silent clamp when `lo > hi`.
+No silent clamp when `lo > hi`.
 
 ---
 

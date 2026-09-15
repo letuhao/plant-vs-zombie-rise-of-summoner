@@ -29,7 +29,7 @@ drift, deterministically — after which regen earns its tuning rows in **both**
 
 ## Tech stack
 
-`FusionRpg.Core` — `ResourceChannelReader`, `ActorResourcePools`. Unity-free, integer-only.
+`FusionRpg.Core` — `ResourceChannelReader`, `ActorResourcePools`. Unity-free.
 
 ## Commands
 
@@ -51,7 +51,7 @@ dotnet test tests/FusionRpg.Core.Tests --filter "Category=BalanceGuard"
 Accumulate in per-mille, carry the remainder, divide exactly once:
 
 ```csharp
-// per pool, per tick — integer only, no float, no drift
+// per pool, per tick — integer per-mille carry, no drift
 acc += regenPerMilleTick;          // long
 long whole = acc / 1000L;          // divide LAST, exactly once
 acc -= whole * 1000L;              // carry the remainder forward
@@ -69,7 +69,7 @@ carry-correction for *how much*. Cite that precedent rather than inventing a rat
 |---|---|
 | Core unit | A rate below one unit per tick accrues correctly over N ticks (e.g. 300‰/tick yields exactly 3 units in 10 ticks, not 0 and not 10) |
 | Core unit | **No drift**: over 10,000 ticks the accrued total equals `floor(rate × ticks / 1000)` exactly |
-| Core unit | Determinism: integer-only, same sequence every run and platform |
+| Core unit | Determinism: same sequence every run and platform |
 | Core unit | A zero rate accrues nothing and never touches the pool |
 | Core unit | The remainder survives a pool read; reading does not silently reset the carry |
 | Core unit | Accrual never exceeds `resource.max.*` — overflow into a capped pool discards the excess *and the carry*, so a full pool does not bank a windfall |
@@ -77,17 +77,17 @@ carry-correction for *how much*. Cite that precedent rather than inventing a rat
 
 ## Boundaries
 
-- **Always:** integer-only; divide by 1000 last, exactly once; carry the remainder.
+- **Always:** in integer per-mille accrual, divide by 1000 last, exactly once; carry the remainder.
 - **Always:** leave `BaseResourceRegen` returning 0 in this module. Making regen *expressible* and
   *choosing its values* are different acts; the second is a balance pass.
 - **Ask first:** changing the per-mille unit to something finer. 1/1000 is chosen to match the repo's
   existing per-mille convention; a different denominator fragments it.
-- **Never:** float accumulation; per-tick rounding; a second regen path beside `ActorResourcePools`.
+- **Never:** drifting accumulation; per-tick rounding; a second regen path beside `ActorResourcePools`. *("float accumulation" ban removed 2026-09-15 per owner ruling: floating-point allowed)*
 
 ## Success criteria
 
 - [ ] A sub-whole-unit regen rate accrues exactly over time, proven by a drift test over ≥10,000 ticks.
-- [ ] Integer-only; no `double`/`float` introduced.
+- [ ] Accrual is exact with no drift. *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
 - [ ] Battle behaviour **byte-identical** with regen rows still absent.
 - [ ] `BaseResourceRegen` still returns 0 — this module unblocks the rows, it does not author them.
 - [ ] The capped-pool case discards carry as well as overflow, with a test.

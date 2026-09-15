@@ -131,8 +131,8 @@ A fully absorbed hit (`FullyAbsorbed`, `:36-38`) earns nothing: the element reac
 
 **(c) Each component once, never weighted.** A packet carrying fire 0.6 / ice 0.4 credits fire +1
 **and** ice +1. *Rejected: weighting by share.* `ElementPayloadComponent`'s weight is a `double`, and
-CLAUDE.md forbids a float on a magnitude path; a per-mille accumulator would be a second unit for no
-gain. *Rejected: crediting only the largest component.* That makes a hybrid-element build strictly
+a per-mille accumulator would be a second unit for no gain. *(The former "CLAUDE.md forbids a float on a
+magnitude path" reason is superseded 2026-09-15: floating-point allowed.)* *Rejected: crediting only the largest component.* That makes a hybrid-element build strictly
 slower at the gate than a mono build, which fights D28's cross-unlock rule instead of supporting it.
 
 **(d) Direct hits, never DoT pulses.** A typed DoT pulses through the same apply tail
@@ -398,8 +398,8 @@ CLAUDE.md's thresholds, applied line by line:
 
 | Rule | Here |
 |---|---|
-| **`long` for any magnitude** | `count`, `CountToReach`, the index and the equivalents are all `long`. The `int` per-mille ceiling is `Θ = 3,213`; the `float` ceiling is **`Θ = 232`**, inside normal play |
-| **Never `float`** | The index is found by integer binary search, never `Math.Sqrt`. `spec-tree-resolve.md` §3.1 ruled that *"a float has no place on a gate that decides whether content exists"*; the quantity the gate is measured against gets the same rule. Element component weights are `double` in the shipped payload and are therefore **read for presence only, never multiplied into a count** (§2.2c) |
+| **`long` for any magnitude** | `count`, `CountToReach`, the index and the equivalents are all `long`. The `int` per-mille range is exceeded at `Θ = 3,213` |
+| **Integer index** | The index is found by integer binary search (shipped). *(Superseded 2026-09-15: floating-point allowed — `spec-tree-resolve.md` §3.1's "a float has no place on a gate" ruling is void.)* Element component weights are `double` in the shipped payload and are therefore **read for presence only, never multiplied into a count** (§2.2c) |
 | **Widen before multiplying** | `(index − 1) * ratePoints`, both operands already `long`. No `(long)(a * b)` anywhere |
 | **Divide by 1000 last, exactly once** | There is no per-mille quantity in this module — counts, indices and equivalents are whole units. Stated so a later change does not quietly introduce one |
 | **Overflow throws** | Every accumulate and every ladder sum is `checked`. A counter that would wrap is a thrown `OverflowException`, never a silently reset player |
@@ -525,8 +525,8 @@ public static class MasteryIndex
 
     /// <summary>
     /// The index a raw count has reached. <b>Integer binary search, never <c>Math.Sqrt</c></b> —
-    /// <c>spec-tree-resolve.md</c> §3.1 ruled that "a float has no place on a gate that decides whether
-    /// content exists", and the quantity the gate is measured against gets the same rule. About 63
+    /// exact at every ladder boundary (the former §3.1 "no float on a gate" rationale is superseded
+    /// 2026-09-15: floating-point allowed). About 63
     /// comparisons, exact at every magnitude.
     ///
     /// <para><b>No cap.</b> The upper bound is found by doubling, not declared — a constant ceiling
@@ -632,7 +632,7 @@ counter is exactly the shape where a covered line asserted by nothing is worth n
 |---:|---|---|
 | 1 | `Index_of_zero_is_one_and_equivalents_are_zero` | Day-one saves opening tier 1 on 30 trees for free (D51: was 27; §5.3) |
 | 2 | `Index_is_monotone_and_exact_at_every_ladder_boundary` | An off-by-one at `CountToReach(m)` exactly |
-| 3 | `Index_never_uses_a_float` | Text guard: no `Math.Sqrt`, `double` or `float` in `MasteryIndex.cs` |
+| 3 | `Index_never_uses_a_float` | Text guard: no `Math.Sqrt`, `double` or `float` in `MasteryIndex.cs` — *superseded 2026-09-15: floating-point allowed; this float scan is void* |
 | 4 | `Index_search_survives_a_count_at_long_MaxValue` | The overflow a naive doubling search has (§6) |
 | 5 | `A_resisted_application_earns_nothing` | §2.1b — drive `StatusRuntime.Apply` to a resist |
 | 6 | `A_refresh_earns_nothing_and_a_fresh_host_earns_one` | §2.1c, the cheapest farm in the game |
@@ -738,7 +738,6 @@ search's doubling bound (an overflow bound, not a progression cap).
 - **Store the index or the equivalents.** A derived value in the store is a second SSOT
   (`RpgStore.Aptitudes.cs:12-14`).
 - **Cap a count**, or clamp one at a bound. AGENTS.md: an absolute bound is derived and throws.
-- **Use a `float` or `double` on any counter, index or equivalent.** The `float` ceiling is `Θ = 232`.
 - **Put per-hit state on the lawn hot path** — no ICD map, no per-target dedupe cache (§2.3).
 - **Change `StatusRuntime.OnApplied`'s signature.** Three sites assign it and one chains by hand.
 - **Generate tree content for a category whose counter is not wired end to end.** R-G1

@@ -60,8 +60,8 @@ A downstream session reads this doc, not its links.
 6. **The balance surface is data**, in `data/tuning/<domain>.v{n}.json`.
 7. **No hard progression ceilings.** Caps on magnitudes are soft; absolute bounds **throw, never
    clamp silently**. Structural per-frame caps are exempt and must say so.
-8. **`long` for magnitudes; never `float`.** Widen before multiplying; divide by 1000 last, exactly
-   once; overflow throws.
+8. **`long` for integer magnitudes; floating-point allowed** (owner ruling 2026-09-15). Widen before
+   multiplying; divide by 1000 last, exactly once, in integer per-mille math; integer overflow throws.
 9. **Unbuilt means build it.** Owner, 2026-09-13: *"when i ask for a feature mean you must pursuit
    how to fix it, not defer it because unbuilt."* A dependency being unbuilt is scope, not an excuse
    — this doc therefore designs the resource-regen fix rather than handing it to another program.
@@ -336,7 +336,7 @@ the fix:
 > a spend of 100 … **A sub-tick unit is a named follow-up (spec S10.1)** and regen earns its rows
 > then."*
 
-**Design — integer-only, deterministic, no float:**
+**Design — integer per-mille carry, deterministic:**
 
 - Regen is read and accumulated in **per-mille units per tick** in a `long`, never rounded per tick.
 - Each pool carries a `long` remainder. On each tick: `acc += regenPerMilleTick`; whole units are

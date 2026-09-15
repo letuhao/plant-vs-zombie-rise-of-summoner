@@ -321,7 +321,7 @@ absent on `solo` by schema, not by default) and `formation.boss.rankSpan` (int, 
 | every `*Milli`, `hpThresholdMilli` | `long` | a ‰ multiplies into a `P(Θ)` magnitude; the threshold test is `hp * 1000 < threshold * maxHp` in `long` |
 | `rollSeed` | `ulong` → `long` | `NextULong()` reinterpreted for `Instantiator`'s `long rollSeed` |
 
-No `float`/`double` in this module; `AptitudeResolver`'s doubles stay inside its own boundary.
+`AptitudeResolver`'s doubles stay inside its own boundary. *(Former "no `float`/`double`" clause removed 2026-09-15 per owner ruling: floating-point allowed.)*
 
 ## Commands
 
@@ -425,7 +425,7 @@ static BattleActorSetup Emit(ConcreteAnchor a, int roomTheta, CreatureThreatTuni
   `BattleModels.cs:279` — the pattern's `AuraId` exists, enemy-side delivery is not specified here).
 - **Never:** an HP multiplier per party; a species id in an anchor; a fourth role vocabulary; a private
   `f(level)`; an affix invented when the library is empty; drawing from the rung-4 fallback; a retry loop;
-  `System.Random`/`DateTime`; a `float` magnitude; a new `ssot-power-scale.md` §10 row; a `W` or profile
+  `System.Random`/`DateTime`; a new `ssot-power-scale.md` §10 row; a `W` or profile
   field on `BattleSetup`; `WaveCatalog.ProfileForExpedition` or `ProfileForWave` on the delve path.
 
 ## Success criteria

@@ -108,7 +108,7 @@ The range gate runs **after** the resolver rather than inside it, so the shipped
 
 - Ordering follows `Ordering` (§2a). The range gate must be a **stable filter** over that order, never a re-sort.
 - The gate applies **before** the random pick, or the same seed gives different results depending on who was out of range.
-- `Core/Actions/` is outside the **tick-path** rules but **inside the purity rules** (`A1` §9). LINQ and per-call allocation are permitted here; a wall-clock read, an ambient `Random`, or a `double` is not.
+- `Core/Actions/` is outside the **tick-path** rules but **inside the purity rules** (`A1` §9). LINQ, per-call allocation and floating point (owner ruling 2026-09-15) are permitted here; a wall-clock read or an ambient `Random` is not.
 
 #### 6a. `Random` needs a named stream — it does not have one (audit C2)
 

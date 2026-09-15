@@ -608,9 +608,9 @@ explanation next to the code.
 **This module introduces no new magnitude arithmetic**, and that is the point of stating the rules
 rather than the reason to skip them.
 
-- **Any magnitude this module's downstream content touches is `long`.** `CLAUDE.md`'s measured table:
-  `float` stops being integer-exact at `Θ` = **232** and `int` per-mille at **3,213** — both inside
-  normal play. Erosion's per-stack `E` is a per-mille share of `P(Θ)`, so it is computed where the
+- **Any integer magnitude this module's downstream content touches is `long`.** `CLAUDE.md`'s range
+  table: `int` per-mille exceeds its range at **3,213** — inside normal play (floating-point is allowed,
+  owner ruling 2026-09-15). Erosion's per-stack `E` is a per-mille share of `P(Θ)`, so it is computed where the
   ladder is already read correctly: `AtomCompiler.cs:463-464` widens with `(long)spec.PowerLadderKMilli
   * pThetaValue`, divides by 1000 exactly once, and is `checked` so overflow **throws**. Nothing in
   this module recomputes it.
@@ -622,8 +622,8 @@ rather than the reason to skip them.
 - **Widen before multiplying, divide last, let overflow throw.** No `unchecked` anywhere in the new
   code. There is no multiply in the subsystem at all — it forwards an already-resolved value.
 - **`double` in the derived layer is legal here, by the table's own rule.** `DerivedModifier.Value` and
-  `ActorDerivedSnapshot` are `double` by shipped design. `CLAUDE.md` bans `double` *"in a hashed or
-  persisted path"*; the derived snapshot is neither — `actor-hub-ssot.md` §7 bans persisting it as SSOT
+  `ActorDerivedSnapshot` are `double` by shipped design. `CLAUDE.md` asks a `double` *in a hashed or
+  persisted path* to record the platform stamp (it no longer bans it — 2026-09-15); the derived snapshot is neither — `actor-hub-ssot.md` §7 bans persisting it as SSOT
   outright. **Widening this layer to `long` is not in scope and must not be attempted as a side effect.**
 - **The `(int)` narrowing at `ActorHub.cs:92-95` is not reached.** `MergeAppliedCombat` narrows
   `progression.bonus.*`; this subsystem contributes only `combat.*` and the eight `status.power.*` /
@@ -777,7 +777,7 @@ That costs no code at all, and it should be tried before a kind is proposed.
 - Never gate a passive-tree feature on the lawn. The overlay resolver is default-off
   (`OverlayCombatFeature.cs:13`) and that is **B4d, soft** — Battle and Sim run the resolver
   unconditionally, and standalone-first says the injector may enrich a feature, never gate one.
-- Never introduce a magnitude cap, a `float` magnitude, or a bare balance literal.
+- Never introduce a magnitude cap or a bare balance literal.
 
 ---
 

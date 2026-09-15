@@ -81,7 +81,7 @@ High-risk work is deliberately early: determinism and the turn transaction land 
 
 | Risk | Impact | Mitigation |
 |---|---|---|
-| Determinism drift via dictionary iteration, float, or wall clock | High | W8 guard tests (symbol scan, hash stability, replay), stable-ordering asserts in every golden |
+| Determinism drift via dictionary iteration or wall clock *("float" removed 2026-09-15 per owner ruling: floating-point allowed; a hashed `double` records the platform stamp)* | High | W8 guard tests (symbol scan, hash stability, replay), stable-ordering asserts in every golden |
 | Event-queue bugs — a missed or mis-ordered crossing is silent | High | monotonicity assert on every enqueue; property test over random speed/progress pairs; crossing point must lie between both start positions |
 | Seven new tables land before gameplay proves the shape | Medium | W2 proves the model in memory first; W3 persists only what W2 validated; `EnsureColumn` keeps later columns cheap |
 | Placeholder resolver quietly becomes permanent | Medium | behind `IBattleResolver`, named `Placeholder*`, test asserts no production registration outside the world module; wave 3 deletes it as an explicit task |
@@ -131,7 +131,7 @@ Three questions the owner explicitly delegated — "use web search and algorithm
 | What does `scout` cost? | **Half a turn's movement for twice the sight** | Total War already prices sight in movement — ambush trades all of it. Half follows Sid Meier's *double it or cut it by half* |
 | Is intel age shown to the player? | **Yes, explicitly — "seen N turns ago"** | Sid Meier's *the player should have the fun, not the computer*. Hiding the date creates note-taking, not tension |
 
-The band's two readings are also the AI's whole estimation model: **ceiling when deciding whether to defend, midpoint when deciding whether to attack.** Pessimism where being wrong is fatal, realism where it is merely expensive — no probability, no priors, no floats.
+The band's two readings are also the AI's whole estimation model: **ceiling when deciding whether to defend, midpoint when deciding whether to attack.** Pessimism where being wrong is fatal, realism where it is merely expensive — no probability, no priors.
 
 ## Architecture decisions (from the specs — locked)
 

@@ -134,7 +134,7 @@ called from it, one line each — the same reason `SiegePhase` and `MovementPhas
 
 ## Code style
 
-Integer only. Multiply before dividing, divide once. Report entries name their sector structurally via
+Multiply before dividing, divide once. Report entries name their sector structurally via
 `SectorId`, never by writing the name into prose — W39 established that, and the reason was that
 matching a sector name out of a sentence works until somebody writes a different sentence.
 
@@ -169,8 +169,8 @@ matching a sector name out of a sentence works until somebody writes a different
   property, re-run at `RulesetVersion` 4.
 - A stored `RulesetVersion` 3 report **refuses** to re-derive rather than fabricating.
 
-**Guards:** all four scripts, plus `WorldDeterminismGuardTests` — no wall clock, no unowned RNG, no
-floats.
+**Guards:** all four scripts, plus `WorldDeterminismGuardTests` — no wall clock, no unowned RNG. *(Its
+float ban is superseded 2026-09-15: floating-point allowed.)*
 
 ## Boundaries
 
@@ -187,7 +187,7 @@ floats.
 2. Replay from `(seed, template, command log)` is byte-identical at `RulesetVersion` 4.
 3. Exactly one golden re-bless in this module, reason recorded.
 4. A version-3 stored report refuses re-derivation.
-5. All four guard scripts green; no new float, clock or RNG violation.
+5. All four guard scripts green; no new clock or RNG violation. *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
 
 ## Decided (2026-08-23)
 

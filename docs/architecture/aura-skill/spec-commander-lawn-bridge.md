@@ -134,9 +134,9 @@ it to:
 - **Plants have no defense-shaped Unity field at all.** `WritePlant` writes five fields, none of them
   mitigation (the only near-neighbour is `theShieldHealth`, which is vanilla PvZ's own shield int and
   unrelated to `combat.shield.*`).
-- **The zombie candidates are `float`** — `z.theArmor`, `z.takeDmgMultiplier`. Routing a `long`
-  magnitude through them collides head-on with the repo's own rule (*"Never `float` for a magnitude"*),
-  which fails at `Θ`=232, inside normal play.
+- **The zombie candidates are `float`** — `z.theArmor`, `z.takeDmgMultiplier`. *(Superseded 2026-09-15:
+  floating-point allowed — the former objection that routing a `long` magnitude through them breaks a
+  "never `float`" rule at `Θ`=232 is void; that was precision, not overflow.)*
 - **The live defense path consults ActorHub for AppliedCombat.** `GameHooks.EnsureDamageScaleCache`
   resolves `CheatState.ActorHub.Resolve(...)` (not bare `Stats.Resolve`) and reads merged
   `AppliedCombat` — guarded by `scripts/guard-actor-hub.ps1`. The cache is still a **global per-side**
@@ -224,6 +224,6 @@ change. Matches the `patron-creature` and `buff-debuff-scope` T11 precedent: an 
 1. **Where does the injector get the allocation — pull, or push over the existing SignalR hub?** Push
    fits the cold-loop model better (`overlay-control-loops.md`); pull is simpler. → resolve in build.
 2. ~~**W6**~~ **CLOSED 2026-08-30 — do not wire Unity defense fields.** No plant-side defense field
-   exists; zombie candidates are `float` (banned for magnitudes). Hub/Sim apply paths use
+   exists; zombie candidates are `float` (the "banned for magnitudes" reason is superseded 2026-09-15: floating-point allowed). Hub/Sim apply paths use
    `ActorHub.Resolve` (2026-09-07); remaining lawn gap is the **global** damage-scale cache, not
    “reads StatSystem never the hub.” See §4.3.

@@ -551,7 +551,7 @@ LootMintResult MintRelicUnlocked(SqliteConnection db, SqliteTransaction tx, Loot
     in `data/tuning/loam-relics-wonders.v1.json`/`relics.v1.json`, not a literal (§Tunables).
 [x] No hard progression ceilings: relic volume is a drop weight, never an existence cap; `Boundaries`
     states this explicitly.
-[x] `long` for magnitudes, never `float`: this module introduces no new magnitude field (§Numeric
+[x] *(reworded 2026-09-15 per owner ruling: floating-point allowed)* `long` for integer magnitudes: this module introduces no new magnitude field (§Numeric
     types) — a relic carries no combat-stat number by construction.
 [x] Generated seed data is never hand-edited: `data/seed/items/relics/` is new generator output
     from day one, authored through the new `relic` `KindSpec` (§Design 1) — no hand-typed JSON.

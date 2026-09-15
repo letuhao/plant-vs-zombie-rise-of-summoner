@@ -187,7 +187,7 @@ Also cut for role reasons, all with stated causes:
 **World of Warcraft's Ra-den shipped at ~1.5 billion HP — 70% of the signed 32-bit ceiling.** This
 forced **four game-wide stat squishes.**
 
-This repo's rule — `long` for any magnitude, never `float`, widen before multiplying — has a corpse
+This repo's rule — `long` for any integer magnitude, widen before multiplying *(the former "never `float`" clause is superseded 2026-09-15: floating-point allowed; the rule is about range)* — has a corpse
 attached.
 
 ---

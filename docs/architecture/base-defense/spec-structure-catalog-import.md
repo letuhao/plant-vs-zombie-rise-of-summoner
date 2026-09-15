@@ -128,7 +128,7 @@ unknown ordinal · keep `Validate` throwing at load.
 **Ask first:** deleting the C# fallback before byte-identity is proven.
 
 **Never:** a static field initializer reading the corpus · two interval tables · a silent default for an
-unknown ordinal · a `float` magnitude · ship the literal and the corpus as parallel sources.
+unknown ordinal · ship the literal and the corpus as parallel sources.
 
 ---
 

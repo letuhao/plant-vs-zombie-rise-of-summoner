@@ -21,7 +21,7 @@ Success: one shared FE (or DTO helper) computes `combatPowerLabel = Offense + Su
 
 - FE: Condition surface VM / ActorPanel standing widgets
 - Optional Server: precomputed `combatPower` on standing DTO — **ask first**; default FE sum of three longs from existing DTO
-- Magnitudes: display may format `long`; no float combat power
+- Magnitudes: display may format `long`
 
 ---
 

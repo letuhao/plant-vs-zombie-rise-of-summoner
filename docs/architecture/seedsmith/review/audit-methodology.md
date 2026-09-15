@@ -461,7 +461,7 @@ instance of it, without showing the adaptation.
 **Severity: NOTE**
 
 `spec-analytics.md` §1.1: `relative_c = (o_c - e_c) / e_c` — ordinary floating-point division.
-`spec-numerics.md` §9.3 states a general project discipline: "no float reaches a seed file **or a
+`spec-numerics.md` §9.3 states a general project discipline *(superseded 2026-09-15: floating-point allowed)*: "no float reaches a seed file **or a
 comparison**... Float equality in a validator is how a gate becomes flaky" — but that section is
 scoped to `numerics`, and it's left unstated whether `metrics`' distribution/tolerance comparisons
 (which do gate, per `spec-metrics.md` §1) are held to the same rule. In practice the risk here is

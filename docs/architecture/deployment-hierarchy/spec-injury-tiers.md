@@ -301,7 +301,7 @@ multiplying, divided last (`checked(hpLost * 1000 / maxHp)`, matching `PhaseGran
 `int stage`) — never itself a magnitude. `untreated_settles` is `INTEGER` in SQLite / `int` in C#: a
 **count of settlement events**, structurally bounded by tier count × threshold, never scaled by `Θ` —
 exempt from the no-hard-ceilings rule as a structural counter, not a magnitude, and this comment is
-the required exemption note (CLAUDE.md "Caps"). No `float`, no `double`, no `System.Random` — matches
+the required exemption note (CLAUDE.md "Caps"). No `System.Random` — matches
 `ExhaustionPolicy`/`NervePolicy`'s own `FixedStatusRng(0)` discipline.
 
 ## Commands

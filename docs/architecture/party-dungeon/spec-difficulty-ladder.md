@@ -250,7 +250,7 @@ Validators: a unit in every key name (T6); the band-shaped keys are `int`; `rows
 | Quantity | Type | Why |
 |---|---|---|
 | band, `bandDelta`, `rowStep`, `n`; `Θ` | `int` | counts of bands, widened to `long` inside the composer (`:84-91`); `ContentContext`/`PowerAxisReport.Total` are `int` and the `checked((int)…)` at `:93` throws past it |
-| `P(Θ)`, `contentScale` numerator, souls, ‰ columns | `long` | `PowerLadder.Value` / `ContentScale.Apply` — the repo's `long`-for-magnitudes rule (`ssot-power-scale.md` §4); widen before multiplying, divide by 1000 last, once; never `float`/`double` |
+| `P(Θ)`, `contentScale` numerator, souls, ‰ columns | `long` | `PowerLadder.Value` / `ContentScale.Apply` — the repo's `long`-for-magnitudes rule (`ssot-power-scale.md` §4); widen before multiplying, divide by 1000 last, once (floating-point allowed — owner ruling 2026-09-15) |
 | `MaxIndex` | `long` | `PowerLadder.MaxIndex` — read, never restated as a literal; overflow throws (tail pre-check refuses, `Guard` throws, nothing clamps) |
 
 ## Commands
@@ -339,8 +339,7 @@ clear-opens-next (§4).
 
 **Never** — a `rungThetaOffset` column (two names for `Wm·Δband`); a multiplier on hp, atk, damage or
 yield; a rung column naming an actor axis; a day/time key on any rung; a silent clamp anywhere; a new
-`ssot-power-scale.md` §10 row; a `boss-lair` band copy; `Θ_actor` in `bandDelta`; a `float`/`double`
-magnitude.
+`ssot-power-scale.md` §10 row; a `boss-lair` band copy; `Θ_actor` in `bandDelta`.
 
 ## Success criteria
 

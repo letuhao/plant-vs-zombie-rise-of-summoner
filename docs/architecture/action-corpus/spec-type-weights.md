@@ -82,8 +82,8 @@ surface — per-channel `sharePermille`. This module does not touch it.
 }
 ```
 
-**Every value is an integer per-mille and every vector sums to exactly 1000.** No floats anywhere, in
-the file or in the code that writes it.
+**Every value is an integer per-mille and every vector sums to exactly 1000.** *(The former "No floats
+anywhere" clause is superseded 2026-09-15: floating-point allowed.)*
 
 **⛔ CORRECTED 2026-09-03 (review F10).** The keys were PascalCase enum member names (`"Self"`,
 `"Area"`, `"Row"`). Every key is the **wire string** the code of record returns — `"self" "single"
@@ -181,8 +181,9 @@ rebuild — which is why these are rows and not constants.
 - **Never let a model choose, adjust or review a weight.** *"A model has no calibrated sense of scale,
   so a number it picks is a plausible-looking guess that survives review because nothing looks wrong
   with it."* A weight is a probability; that is the deepest part of the deny-list.
-- **Never emit a `float` or a `double`.** Every magnitude is `long` and every published value is an
-  integer per-mille. A `float` magnitude stops being integer-exact at index 232, inside normal play.
+- Every integer magnitude is `long` and every published value is an integer per-mille (this file's
+  format). *(The former "never emit a `float` or a `double`" ban and its index-232 justification are
+  superseded 2026-09-15: floating-point allowed; that was precision, not overflow.)*
 - Never introduce a category, tag, mode, shape or element that is not already in the C# enums. A third
   vocabulary is the defect this whole neighbourhood exists to prevent.
 - **Never zero a category to zero out a pool.** A zero weight is a soft absence in a roll; it must
@@ -203,7 +204,7 @@ rebuild — which is why these are rows and not constants.
 |---|---|
 | **Determinism** | two runs over an unchanged `role-lean.json` produce a byte-identical `type-weights.json`, asserted by hash |
 | **Sum invariant** | every `categoryMilli`, `targetModeMilli`, `areaShapeMilli` and `elementBiasMilli` sums to **exactly 1000**, over all live species and family rows (measured 2026-09-11: **904** species, **227** families) |
-| **Planted violation — a float** | a coefficient authored as `0.4` in the tuning file is **refused at load**, naming the row. The audit tests all four smuggling shapes, including a string `"400"` and an enum of numeric strings |
+| **Planted violation — a float** *(superseded 2026-09-15: floating-point allowed)* | a coefficient authored as `0.4` in the tuning file is **refused at load**, naming the row. The audit tests all four smuggling shapes, including a string `"400"` and an enum of numeric strings |
 | **Planted violation — unknown member** | a tuning row keyed on `"economy"`, on a seventh target mode, or on a PascalCase `"Area"`/`"Row"` is refused, naming the key |
 | **Planted violation — hard gate** | a species row with a category at 0 is legal, and a test asserts the generator still treats that category as *reachable*, so a zero weight never becomes a family-access gate |
 | **Largest remainder** | a hand-built vector whose exact division leaves 3 remainder units distributes them to the three largest fractions, and shuffling the input order changes nothing |
@@ -216,7 +217,7 @@ rebuild — which is why these are rows and not constants.
 1. `data/seed/actions/type-weights.json` exists, loads through A-C1's envelope, and carries one row per
    live species (**904**) plus one per consolidated family (**227**) — see the roster-size note in §5.
 2. Every vector in the file sums to exactly 1000, and every value is a non-negative integer.
-3. No `float`, `double`, or decimal literal appears anywhere in the file or in the module's source.
+3. ~~No `float`, `double`, or decimal literal appears anywhere in the file or in the module's source.~~ *(superseded 2026-09-15: floating-point allowed)*
 4. Every coefficient the algorithm uses is a row in `data/tuning/action-type-weights.v1.json`; a magic
    number audit over the module reports zero targets.
 4b. That file **exists and ships with the stated neutral defaults** (the table above §3):

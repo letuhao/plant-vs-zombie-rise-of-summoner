@@ -157,8 +157,8 @@ sentence in five boundaries sections.
   that makes `LoadoutSet` reject rather than truncate: *"truncation silently picks a winner and the
   player never learns which."*
 - **Put the budget number in code.** `data/tuning/`, published, with its derivation in `_meta`.
-- **Use `float`.** Per-mille integers, widen to `long` before multiplying, divide by 1000 last, overflow
-  throws.
+- **Let integer arithmetic overflow silently.** Widen to `long` before multiplying, divide by 1000 last,
+  overflow throws. *(Former "use `float`" prohibition superseded 2026-09-15: floating-point allowed.)*
 
 ---
 

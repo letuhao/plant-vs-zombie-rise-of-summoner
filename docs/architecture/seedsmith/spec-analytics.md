@@ -4,7 +4,7 @@
 ([seedsmith-map.md](../seedsmith-map.md) §3). Nothing is built.
 
 Every algorithm here is deterministic and dependency-free — Python stdlib plus, at most, integer
-arithmetic. No model is consulted, no floating-point value reaches a seed file, and every function
+arithmetic. No model is consulted, and every function
 is a pure function of the corpus and the budget.
 
 ---
@@ -327,7 +327,8 @@ become dynamic, switch to **Sainte-Laguë**, which is divisor-based and immune.
 
 ### 9.3 Integers everywhere
 
-Per-mille integers end to end; no float reaches a seed file or a comparison. Where division is
+Per-mille integers end to end (this module's representation; floating-point is allowed per owner
+ruling 2026-09-15). Where division is
 unavoidable, round half to even and state it. Float equality in a validator is how a gate becomes
 flaky.
 

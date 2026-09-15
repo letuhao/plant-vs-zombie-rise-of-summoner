@@ -13,7 +13,7 @@ Shorthand — `CORE` = `dotnet test tests\FusionRpg.Core.Tests` · `ALL` = Core 
 
 ## Phase 0 — numeric overflow
 
-Thresholds: `float` breaks at **Θ 232** · `int` per-mille **3,213** · `int` whole **103,557** · `long` **214,748,300**.
+Range thresholds: `int` per-mille **3,213** · `int` whole **103,557** · `long` **214,748,300**. *(Former "`float` breaks at Θ 232" was precision, not overflow — superseded 2026-09-15: floating-point allowed.)*
 Baseline: **0 critical, 92 A3, 14 A7**.
 
 - [x] **P0.1** Standard in `CLAUDE.md`, `AGENTS.md`, `DESIGN-GATE.md`, the spec skill, and the patch record

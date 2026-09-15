@@ -142,8 +142,9 @@ spawn loop on the Unity main thread, which is unrecoverable rather than merely w
 - **No self-triggering.** §2.3's `ChainDepth` refusal is not optional and not a runtime nicety.
 - **No magnitude chosen by a model.** `timerMs` and any tier band come from authored content or a value
   spec, and the numbers a balance pass would turn — the hold floor included — live in
-  `data/tuning/match.v1.json`, not in code. `long` for any magnitude, never `float`; widen before
-  multiplying; divide by 1000 last, exactly once; overflow throws rather than wrapping or clamping.
+  `data/tuning/match.v1.json`, not in code. `long` for any integer magnitude (floating-point is allowed —
+  owner ruling 2026-09-15); widen before multiplying; divide by 1000 last, exactly once; integer overflow
+  throws rather than wrapping or clamping.
 - **No wave-number predicate.** *"Only after wave 10"* is an E3 predicate leaf, and E34 says the same.
 - **No opcode without the published list growing with it.** §2.1. `WaveControl` enters
   `/effects/contract`'s `actions` array in the same change as the constant. A published list that lies

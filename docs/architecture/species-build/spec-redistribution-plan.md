@@ -112,7 +112,7 @@ keeps untouched; sharing it would couple two layers that were deliberately separ
 Permille `long` throughout. **Widen before multiplying, divide by 1000 last, exactly once.** Shares are
 bounded ratios and say so in a comment (exempt from PS-8). Rounding uses the **largest-remainder
 method with an ordinal tiebreak** so a vector always sums to exactly 1000 and the same input always
-produces the same bytes. No `float` anywhere.
+produces the same bytes.
 
 ## Commands
 
@@ -172,7 +172,7 @@ same `_`-prefix skipping, same "refuse the whole thing rather than write half" d
   keep every band/lean number in tuning.
 - **Ask first:** the band values themselves (a balance pass owns them — shipping a guess is fine,
   calling it balance is not); adding a runtime component; letting the planner read anything player-scoped.
-- **Never:** reassign a species' primary; regenerate base stats (decision 5); call a model; use `float`;
+- **Never:** reassign a species' primary; regenerate base stats (decision 5); call a model;
   emit a plan that fails Phase 3; introduce randomness — a random baseline is unlearnable, which is
   exactly why decision 7 declined Dragon Quest Monsters' growth-spurt precedent.
 

@@ -116,8 +116,9 @@ the reason `k` is a single tunable rather than a table of ten thresholds. **A te
 would let a balance pass break the flatness silently.**
 
 `tierReached` is computed by an **ascending integer loop bounded by the catalog's own authored tier
-count**, never by a closed form — solving `k·t(t+1)/2 ≤ g` needs a square root, and a float has no
-place on a gate that decides whether content exists. The loop bound is structural (the tree's own
+count**, never by a closed form — solving `k·t(t+1)/2 ≤ g` needs a square root. *(The former ruling that
+"a float has no place on a gate that decides whether content exists" is superseded 2026-09-15:
+floating-point allowed; the integer loop stands as the shipped design.)* The loop bound is structural (the tree's own
 shape, like `SacrificesForStar`'s range) and must say so in a comment: it is a **content bound, not a
 progression cap**. Nothing is refused; there is simply no node above the authored depth to buy.
 
@@ -477,18 +478,21 @@ reviewed change to that document and this spec requests it rather than making it
 CLAUDE.md's table, with the `Θ` at which each type stops being able to hold a magnitude on the
 shipped curve (`B = 0.4`):
 
-| Type | Exact-integer ceiling | First `Θ` that breaks it | Use in this module |
+*(Table corrected 2026-09-15 per owner ruling: overflow is range, not exact-integer precision;
+floating-point is allowed. See `CLAUDE.md` "Numeric types".)*
+
+| Type | Largest value it holds | First `Θ` whose magnitude exceeds it | Use in this module |
 |---|---|---|---|
-| `float` | 16,777,216 | **232** | **Never.** Fails inside normal play, and it is non-deterministic |
+| `float` | ≈3.4 × 10^38 | not reachable | Allowed |
 | `int`, per-mille | 2,147,483,647 | **3,213** | **Never** for a magnitude or a per-mille coefficient |
 | `int`, whole units | 2,147,483,647 | 103,557 | Only for a tier index and a node count, both bounded by the catalog |
-| `double` | 9,007,199,254,740,992 | 6,710,822 | Only at the hand-off in §7.3, which is a decided exception |
+| `double` | ≈1.8 × 10^308 | not reachable | Allowed; used at the hand-off in §7.3 (integer-exact to 2^53, first passed at `Θ` 6,710,822 — precision, not overflow) |
 | `long` | 9,223,372,036,854,775,807 | 214,748,300 | **The default for every magnitude in this module** |
 
 ### 7.2 The four rules, and where each one bites here
 
 1. **`long` for any magnitude.** Every node contribution, every intermediate, every emitted amount.
-2. **Never `float`.** Row 1.
+2. **Floating-point is allowed** (owner ruling 2026-09-15). Rows 1 and 4.
 3. **Widen before multiplying.** `(long)a * b`, never `(long)(a * b)` — the cast binds to the result,
    so the multiply has already overflowed.
 4. **Divide by 1000 last, exactly once.** Two per-mille factors (`kMilli`, `fMilli`) compound against
@@ -665,7 +669,7 @@ D21 gives every actor its own state, so the memo is not optional.
 | 10 | `Souls_move_theta_never_the_coefficient` | Depth 0 → 9 changes `Θ_node`, and the emitted coefficient is unchanged |
 | 11 | `Power_is_linear_in_effort_across_the_soul_track` | Cumulative soul cost against `P(Θ_node)` holds a constant ratio. §6.2, and §10.5's promise |
 | 12 | `Contest_channels_read_theta_linearly` | A depth gap on `combat.crit.rate.*` is worth the same at `Θ=10` and `Θ=10,000`. PS-3 |
-| 13 | `Magnitude_overflows_throw_and_never_wrap` | At the `Θ` the §7.1 table names, per type. Red on `int`, red on `float` |
+| 13 | `Magnitude_overflows_throw_and_never_wrap` | At the `Θ` the §7.1 table names, per type. Red on `int` *(the "red on `float`" case is superseded 2026-09-15: `float`'s range is not reachable)* |
 | 13a | `The_soul_read_throws_rather_than_wrapping_at_long` | `Θ_node = Θ_actor + Ws·soulLevel` on a soul level large enough to overflow `long` throws, and the widening happens before the multiply — `(long)Ws * soulLevel`, never `(long)(Ws * soulLevel)`. PS-8 makes an unbounded soul level a legal input, so this is a reachable path, not a theoretical one |
 | 14 | `Divide_happens_once_and_last` | A per-mille-first implementation is measurably wrong at tier 1 by more than one tier step |
 | 15 | `Lawn_and_battle_resolve_to_the_same_totals` | The two adapters over one resolver. The parity shape `TraitAtomSource` already proves for traits |
@@ -715,7 +719,7 @@ hypothetical).
 - Cap a magnitude. The authored tier count is a content bound, not a ceiling, and it says so in a
   comment (PS-8).
 - Clamp an overflow. Absolute bounds throw.
-- Hold a magnitude in `float`, or in `int` past the §7.1 thresholds.
+- Hold a magnitude in `int` past the §7.1 thresholds.
 - Sum cross-unlock credits, or credit a second mate.
 - Let a skill point — however it was granted — move a tier gate. That is D12, and §3.3 is why it costs
   no enforcement code.

@@ -302,8 +302,8 @@ No structural constants: every number above is a feel number; the pool rail is `
 
 Pools, drains, heals, ritual prices: **`long`** (`ResourcePoolState.Stored`, `:9`; `ResourceChannelReader`
 rounds once at the boundary, `:16-20`); two ‰ factors multiplied then divided by 10⁶ once, in `checked`.
-Stacks, thresholds, activations, the recovery counter, `PartyIndex`: `int`. `theta_run`: `int`. No `float`
-or `double` here — `StatusStatMod.Value` (`StatusStatPayload.cs:14`) is the status layer's, read, never computed.
+Stacks, thresholds, activations, the recovery counter, `PartyIndex`: `int`. `theta_run`: `int`. `StatusStatMod.Value`
+(`StatusStatPayload.cs:14`) is the status layer's, read, never computed. *(Former "no `float`/`double`" clause removed 2026-09-15 per owner ruling: floating-point allowed.)*
 
 ## Commands
 

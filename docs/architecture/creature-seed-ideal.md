@@ -43,8 +43,9 @@ bug with no symptom.
 `data/tuning/<domain>.v{n}.json`. A number in code costs an edit, a rebuild and a test run; a number
 in config costs a file save.
 
-**7. Magnitudes are `long`.** Never `float` — it stops being integer-exact at `Θ` = 232, inside normal
-play. Widen before multiplying, divide by 1000 last, let overflow throw.
+**7. Integer magnitudes are `long`.** Per-mille `int` exceeds its range at `Θ` = 3,213. Floating-point is
+allowed (owner ruling 2026-09-15 — precision is not overflow). Widen before multiplying, divide by 1000
+last, let integer overflow throw.
 
 **8. The vocabularies are closed on purpose.** 5 attach points · 12 atom kinds · 7 triggers ·
 6 elements + `omni` · 6 resources · 12 aptitudes · 10 item rarity rungs. Adding one is a reviewed

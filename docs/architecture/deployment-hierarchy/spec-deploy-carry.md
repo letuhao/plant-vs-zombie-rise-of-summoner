@@ -135,7 +135,7 @@ rest/nerve numbers) — there is nothing here a balance pass would touch directl
 ## Numeric types
 
 Every id in `CarryInPools`/`DelveMemberState.Pools` is `long` (`ActorResourcePools`'s existing
-six-pool contract; `DerivedStatChannels.ResourceIds`). No `float`, no `double`, no new magnitude.
+six-pool contract; `DerivedStatChannels.ResourceIds`). No new magnitude.
 `atTick` parameters are `long` ms (the existing virtual-time contract, `battle-turn-ideal.md` §4). This
 module performs no multiplication and introduces no overflow-relevant arithmetic — it only routes
 already-typed values between two existing shapes (a `DelveMemberState`'s dictionary and a

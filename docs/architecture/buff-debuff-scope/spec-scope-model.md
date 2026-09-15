@@ -99,7 +99,7 @@ actual scope. Matches the existing sibling-directory convention (`Actions/`, `Ba
 `World/`, `Match/` are already flat siblings under `Core/`).
 
 **Gets its own purity guard, same shape as `ActionsPurityGuardTests` (P0.1's own precedent):** no wall
-clock, no ambient RNG, no floating point, no dictionary enumeration. No tick-path exemption needed —
+clock, no ambient RNG, no dictionary enumeration (floating point allowed — owner ruling 2026-09-15). No tick-path exemption needed —
 nothing here has `TargetResolver`'s LINQ requirement, so the default kernel-wide ban stays on,
 unweakened, for this directory.
 
@@ -147,8 +147,9 @@ per-mille weight appears here, it belongs in `data/tuning/`, not `Scope/` (same 
   resolves to the per-entity-grant shape — the direct test for Assumption 2, proving the table
   distinguishes hosts rather than only claiming to in prose.
 - **Purity:** `ScopePurityGuardTests` — a full scan plus the same six planted-violation cases
-  `ActionsPurityGuardTests` uses (`DateTime`, `Random`, `Guid.NewGuid`, `.GetHashCode(`, `double`,
-  `float`, dictionary enumeration), with no tick-path exemption to prove absent.
+  `ActionsPurityGuardTests` uses (`DateTime`, `Random`, `Guid.NewGuid`, `.GetHashCode(`, dictionary
+  enumeration), with no tick-path exemption to prove absent. *(`double`/`float` planted cases removed
+  2026-09-15 per owner ruling: floating-point allowed.)*
 - **Architecture:** a source-scan test asserting nothing under `Core/Scope/` references
   `FusionRpg.Core.Battle`, `FusionRpg.Core.World`, or `FusionRpg.Core.Effects` — dependency direction
   stays outward, matching T33's "an architecture test fails if the intent source touches battle state

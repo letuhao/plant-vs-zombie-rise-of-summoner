@@ -73,7 +73,7 @@ Why this over sampling the turn N times: a crossing point is *exact* rather than
 
 ### Determinism rules
 
-Integer or fixed-point only in game-affecting branches · stable ordering by entity id everywhere, never dictionary enumeration · seeded per-system RNG streams derived as `(worldSeed, turn, streamName)` using the existing `SeededRng`, never `System.Random` · **no wall-clock read anywhere inside `Step`** · every turn stamped `(engineVersion, rulesetVersion, seed)`.
+Stable ordering by entity id everywhere, never dictionary enumeration · seeded per-system RNG streams derived as `(worldSeed, turn, streamName)` using the existing `SeededRng`, never `System.Random` · **no wall-clock read anywhere inside `Step`** · every turn stamped `(engineVersion, rulesetVersion, seed)`. *("Integer or fixed-point only" superseded 2026-09-15: floating-point allowed; a `double` feeding a hashed or persisted result records the platform stamp.)*
 
 ### Outputs
 

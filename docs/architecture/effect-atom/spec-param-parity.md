@@ -104,9 +104,10 @@ declared **and** read in the same change, which is the only shape this module pe
 - **Widen a vocabulary beyond its runtime.** `status.clear` reaches what that runtime can withdraw — no
   more. An unwithdrawable status is a **named refusal**, not a pretend success.
 - **Silently clamp.** Out of range is a refusal that names the value.
-- **Use `float` for a magnitude**, or divide before the last step. `long`, widen before multiplying,
-  divide by 1000 once, overflow throws. **`ExecEconomy` already casts a magnitude to `float`
-  (`InjectorEffectActionSink.cs:452`) — pre-existing, and this module should not add a second.**
+- **Divide before the last step** in integer per-mille math. `long`, widen before multiplying,
+  divide by 1000 once, integer overflow throws. *(The former "use `float` for a magnitude" prohibition,
+  and the note calling `ExecEconomy`'s `float` cast at `InjectorEffectActionSink.cs:452` a defect not to
+  repeat, are superseded 2026-09-15: floating-point allowed.)*
 - **Cap a magnitude.** `count`'s floor of 1 is structural and must carry the comment `AGENTS.md` requires.
 - **Change `fx.set_dirt_box`'s id or family.** Only the wrong value.
 

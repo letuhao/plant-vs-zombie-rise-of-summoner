@@ -812,7 +812,7 @@ Restated once, inline, because each of the seven sections below leans on them.
 6. **One power ladder; grid density computed, not estimated** (~3.6 entries per cell is the safe band,
    ~12.6 the failure zone); **rarity buys breadth and ceiling, never power**; **tag absence is a stat**
    (every closed enum admits `none`); **no new vocabulary where one exists** (predicates, resources,
-   triggers, categories, roles); **`long`, no `float`, no `const` balance number, no hard ceiling.**
+   triggers, categories, roles); **`long` for integer magnitudes, no `const` balance number, no hard ceiling** (floating-point allowed — owner ruling 2026-09-15).
 
 ## 11. The seven groups
 
@@ -1419,7 +1419,7 @@ Status ×2.5 /
 ×1.5; Great ×1.5, Ultra ×2. Here only the shape survives: hp term → an **hp band** ordinal; level term →
 the same **Δ band** as recruit; status → a **count band**; `‰ = capture.chanceMilli[hpBand][ΔBand] +
 statusBonusMilli[countBand] + sealTierShift` — a table lookup, integer per-mille, one draw on
-`dungeon:capture:{r}:{c}:{attempt}`. No exponent, no float. **Does rarity lower the chance?** Pokémon
+`dungeon:capture:{r}:{c}:{attempt}`. No exponent. **Does rarity lower the chance?** Pokémon
 yes, SMT no. **Recommend no**: rarity buys breadth, never power; scarcity of high rungs lives in the
 *encounter* roll (the 840/150/10 shape of `RollWildSpecies`), the power term is the threat band, already
 in Δ. **Spam:** every attempt costs a seal and an action-point turn, plus a **per-target ramp** — each
@@ -1580,8 +1580,8 @@ in** as well as what you **carry out**.
    roll. This gives *"a raid can carry more out, and it has more to lose"* its literal mechanism.
 4. **Arrangement.** Auto-arrange is **first-fit decreasing** by footprint area, then manifest grant
    index, then id ordinal — integer cells, no RNG, a pure function of `(pack, grants)`, so autopilot
-   and replay are byte-identical; skyline packing is rejected unless integer-only (a `float` height map
-   is Law 5 in a UI). Manual moves (`pack.move`, `pack.drop`) are decisions in the trace, like intents.
+   and replay are byte-identical; skyline packing is rejected unless it is deterministic *(the former "integer-only / a `float` height
+   map is Law 5" wording is superseded 2026-09-15: floating-point allowed)*. Manual moves (`pack.move`, `pack.drop`) are decisions in the trace, like intents.
    At each reveal, grants that do not fit go to a *floor* list; the player drops a pack item to make
    room or leaves the grant. Dark and Darker's lesson is value-per-cell. **Charms do not occupy cells**
    — they sit in the AP pouch bound at run start, which is Diablo 4's fix for Diablo 2's charm problem

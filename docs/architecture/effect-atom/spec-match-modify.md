@@ -165,15 +165,16 @@ round-trips `E-ZARM` through `SetLong` rather than `SetFloatQuiet`.
 **Why not the other option — "prove the value bounded and say so".** A bound does exist: PvZ's own
 `zombieStartAmmor` is an `int`, and nothing content authors can make the host field wider. But the
 float hop *below* that bound is where the value actually dies: `FVal`'s `(float)` cast stops being
-integer-exact at **16,777,216** (`CLAUDE.md`'s measured table, row 1), which is far under `int.MaxValue`
+integer-exact at **16,777,216** (2^24 — a precision limit, not overflow), which is far under `int.MaxValue`
 and well inside what `contentScale` reaches. A cursed armour value of 20,000,000 would arrive as a
 different number with no error, no log and no throw. **A bound whose violation is silent is not a
 bound** — it is the `fx.set_dirt_box` class of defect with arithmetic instead of a name. The `int`
 ceiling stays, as a derived absolute bound that **throws** at the `checked` narrow; the float hop goes.
 
 This is one new pair of accessors on a class that already has four (`On`, `FVal`, `IVal`, `IsUserSet`),
-and it is the only place in Wave 8 where the repo's *"`long` for any magnitude, never `float`"* rule
-meets a shipped store that cannot hold one.
+and it is the only place in Wave 8 where an integer `long` magnitude meets a shipped store that cannot
+hold one exactly. *(The rule formerly quoted here, "never `float`", is superseded 2026-09-15: floating-point
+allowed; this fix stands on exact integer transport, not on a float ban.)*
 
 ### 2.4 Seed JSON
 
@@ -265,12 +266,14 @@ Writing the field directly would fork the writer and lose both.
 - **No `row`/`col`/`cells` param.** Anything needing a cell is `Board`, not `Match` (§2.1).
 - **No magnitude chosen by a model.** Every `amount` in shipped content is authored or rolled from a
   value spec; band and tier numbers belong in `data/tuning/`, never in `AtomKindRegistry` or the
-  executor. `long` for a magnitude, never `float`; widen before multiplying; divide by 1000 last,
-  exactly once; overflow throws rather than clamping or wrapping.
+  executor. `long` for an integer magnitude (floating-point is allowed — owner ruling 2026-09-15); widen
+  before multiplying; divide by 1000 last, exactly once; integer overflow throws rather than clamping or
+  wrapping.
 - **No cap on `zombieStartAmmor` or any multiplier** beyond the `checked` narrowing that the host field
   type forces. An absolute bound derived from the arithmetic throws; it does not clamp.
-- **No `float` on the `zombieStartAmmor` path.** §2.3's `long` channel is the point; routing it through
-  `SetFloat`/`FVal` reintroduces the silent 16,777,216 corruption the correction there describes.
+- **Keep `zombieStartAmmor` on the `long` channel.** §2.3's exact integer transport is the point; routing
+  it through `SetFloat`/`FVal` reintroduces the silent loss of integer precision above 16,777,216 the
+  correction there describes (precision, not overflow — not a float ban).
 - **No blanket `LoadBoardConfigIntoCheats()` on match end.** §2.6. The restore is scoped to the ids a
   grant wrote, and it clears them rather than overwriting them with the level's values. An operator's
   hand-set `E-*` key is not this module's to touch.
@@ -321,7 +324,7 @@ level's own value.
    `zombieStartAmmor`; the boundary conversion divides by 1000 once and narrows `checked`.
 6. Only `match` and `player:` owner keys bind; anything else is `ScopeUnsupported`.
 7. The executor's only write path is `CheatState` + `CheatActions.ApplyBoardConfig`, and
-   `zombieStartAmmor` travels it through a **`long`** channel — no `float` hop anywhere (§2.3).
+   `zombieStartAmmor` travels it through a **`long`** channel end to end (§2.3).
 8. Match end restores **only the `E-*` ids a `match.modify` grant wrote**, by clearing them, and
    leaves an operator's hand-set key untouched; `BoardConfigLocked` clears only when nothing else
    holds an `E-*` key user-set (§2.6).

@@ -124,7 +124,7 @@ Structural constants in code, each with the exemption comment: `ShapeLadder = [1
 
 ## Numeric types
 
-`rows`, `cols`, `r`, `c`, `w`, `h`, cell counts, stack caps, `partyIndex` are `int` — bounded by the grid or the ladder (registries §Numeric types: *"`int` for bands, counts, rows, cells, rungs, Θ deltas"*). Stack quantities are `long` (`LootGrant.Count`, `LootPipeline.cs:35`); the split is `checked` long arithmetic and only the resulting stack **count** narrows to cells, after the fit check. Per-mille tunables are `long`. **This module holds no magnitude of its own**: rarity ordinal and item level pass through as the pipeline's `int`s; a price is `dungeon-loot`'s `long` and is not read here. No `float`, no `double`, no `System.Random`.
+`rows`, `cols`, `r`, `c`, `w`, `h`, cell counts, stack caps, `partyIndex` are `int` — bounded by the grid or the ladder (registries §Numeric types: *"`int` for bands, counts, rows, cells, rungs, Θ deltas"*). Stack quantities are `long` (`LootGrant.Count`, `LootPipeline.cs:35`); the split is `checked` long arithmetic and only the resulting stack **count** narrows to cells, after the fit check. Per-mille tunables are `long`. **This module holds no magnitude of its own**: rarity ordinal and item level pass through as the pipeline's `int`s; a price is `dungeon-loot`'s `long` and is not read here. No `System.Random`. *(Former "no `float`/`double`" clause removed 2026-09-15 per owner ruling: floating-point allowed.)*
 
 ## Commands
 
@@ -155,7 +155,7 @@ UNTOUCHED: LootPipeline.cs, DropVolume.cs, RpgStore.Items.cs, RpgStore.Loot.cs, 
 
 ## Code style
 
-Pure functions over records; catalog discipline (unknown → throw at load); integer-only; the store partial mirrors `RpgStore.World.cs` (gate-serialized, one transaction, revision bump); no SQL outside Data.
+Pure functions over records; catalog discipline (unknown → throw at load); the store partial mirrors `RpgStore.World.cs` (gate-serialized, one transaction, revision bump); no SQL outside Data.
 
 ```csharp
 public static class Footprint

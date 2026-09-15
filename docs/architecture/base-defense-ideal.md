@@ -419,14 +419,14 @@ one is stated here in full for that reason.
      > and `:146`, which re-resolve from `(setup, seed)` rather than reading a stored report — and
      > that is why `DecisionTrace` exists.
 
-8. **World determinism.** Integer/fixed-point only in game-affecting branches, stable ordering by
+8. **World determinism.** Stable ordering by
    entity id (never dictionary enumeration), seeded per-system streams, **no wall-clock read anywhere
-   inside `step`**, every resolution stamped `(engineVersion, rulesetVersion, seed)`. A save is
+   inside `step`**, every resolution stamped `(engineVersion, rulesetVersion, seed)` *("Integer or fixed-point only" superseded 2026-09-15: floating-point allowed; a `double` feeding a hashed or persisted result records the platform stamp.)*. A save is
    `(seed, template, command log)` and replay must be byte-identical.
 
-9. **Magnitudes are `long`.** The ladder is quadratic; `float` stops being integer-exact at Θ=232 and
-   per-mille `int` at Θ=3,213, both inside normal play. Widen before multiplying, divide by 1000 last
-   exactly once, let overflow throw.
+9. **Integer magnitudes are `long`.** The ladder is quadratic; per-mille `int` exceeds its range at
+   Θ=3,213, inside normal play. Floating-point is allowed (owner ruling 2026-09-15 — precision is not
+   overflow). Widen before multiplying, divide by 1000 last exactly once, let integer overflow throw.
 
 10. **Closed vocabularies — do not start a third.** The action layer already owns a grid vocabulary
     (`GridPos`, Chebyshev distance, four area shapes, `ChosenCell` anchoring). Inventing a second

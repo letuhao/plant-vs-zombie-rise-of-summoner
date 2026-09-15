@@ -177,8 +177,8 @@ explicitly.** If any part of this module lands in C#:
 - Overflow throws; no silent `unchecked`.
 
 `thetaOffset` itself is a small signed integer added into `Θ` before `P(Θ)`. Because `P(Θ)` is
-quadratic, every magnitude downstream is `long`: a `float` stops being integer-exact at `Θ` = 232,
-inside normal play, and per-mille `int` breaks at `Θ` = 3,213 (`CLAUDE.md` "Numeric overflow").
+quadratic, every integer magnitude downstream is `long`: per-mille `int` exceeds its range at
+`Θ` = 3,213 (`CLAUDE.md` "Numeric types"; floating-point is allowed).
 
 ## ActorHub gate
 

@@ -276,8 +276,9 @@ the band is too tight and the number moves; if nothing fires, it is doing nothin
 - **Introduce a second roll.** The draw runs on `Instantiator`'s existing `AtomRandom` stream and is
   frozen into the `InstanceRow`, under the same reproducibility contract over
   `(container_id, catalog_revision, roll_seed)`.
-- **Use `float` anywhere.** `long` for every magnitude, widen before multiplying, divide by 1000 last,
-  overflow throws.
+- **Let an integer magnitude wrap.** `long` for every integer magnitude, widen before multiplying,
+  divide by 1000 last, overflow throws. *(The former "use `float` anywhere" prohibition is superseded
+  2026-09-15: floating-point allowed.)*
 - **Cap a magnitude.** `count`'s floor of 1 is a **structural** bound (a draw of zero members is not an
   effect) and must carry a comment saying so, per `AGENTS.md`.
 

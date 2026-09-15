@@ -442,7 +442,7 @@ inherited unchanged for the same reason (`CLAUDE.md` "Numeric overflow" — any 
 `party_index` is `int`, matching every other `PartyIndex`-shaped field in `loot-pack`'s own spec
 (`spec-loot-pack.md` §Numeric types: *"`partyIndex` are `int`"*). No new magnitude of any kind is
 introduced by this module — it moves existing rows and existing pack cells; it computes nothing that
-scales with `Θ` or level. No `float`, no `double`, no `System.Random` anywhere in this module.
+scales with `Θ` or level. No `System.Random` anywhere in this module. *(Former "no `float`/`double`" clause removed 2026-09-15 per owner ruling: floating-point allowed.)*
 
 ## Commands
 

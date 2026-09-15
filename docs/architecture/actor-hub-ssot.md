@@ -486,8 +486,9 @@ awkward. So `DerivedStatDef` is untouched, and what §H actually owes is three d
 3. **Register every bounded-ratio cap in §11.6** with the exemption comment PS-8 requires. A `0.95`
    with no comment is indistinguishable from a progression ceiling.
 
-§10.7's one exclusion still bites: **a new `double` magnitude *outside* the composition path is A1,
-not A7**, and the audit will keep flagging it. That is exactly what item 2 prevents.
+*(Superseded 2026-09-15: floating-point allowed.)* §10.7's former exclusion — "a new `double` magnitude
+outside the composition path is A1" — is removed by owner ruling; item 2 stands only as a range /
+checked-narrowing concern at the boundary, not as a float ban.
 
 Two tests assert the generated roster count and move with R1/R2, as designed:
 [DerivedStatRegistryTests.cs:22](../../tests/FusionRpg.Core.Tests/ActorHub/DerivedStatRegistryTests.cs) ·

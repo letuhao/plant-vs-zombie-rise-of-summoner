@@ -340,7 +340,6 @@ scope, named here so nobody asserts otherwise.**
 - Multiply a base that contains the commander-scope contribution.
 - Emit `Increased` on a `combat.*` channel.
 - Restate the share→effect curve, `P(Θ)`, or shield priority.
-- Use `float` for a magnitude.
 
 ---
 

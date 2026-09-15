@@ -108,7 +108,7 @@ Term by term, each an integer with a stated maximum so the positional weights be
 | `categoryScarcity` | `eligibleCount - (count of eligible actions sharing this action's category)`. Scarcer inside the species' own set ranks higher | 0..eligibleCount-1 |
 | `-rungCeiling` | the **negated** upper bound of the action's `rungBand`. Lower ceiling wins, because the innate is a permanent grant outside the budget that prices every other action, and it must not be the biggest thing the species owns | -10..-1 |
 
-### 3.3 Making the tuple tunable without making it float
+### 3.3 Making the tuple tunable
 
 Lexicographic order is the shipped default; the **weights are the tunable**, because a balance pass
 will absolutely want to change how much role-lean match outweighs motif coverage.
@@ -127,7 +127,7 @@ score  = Σ_t ( (long)base_t * (term_t + offset_t) * w_t ) / 1000     # ONE divi
 - Maxima are observed per species rather than fixed, so the scheme stays exact with no cap on the
   eligible count — there is no progression ceiling here to remove.
 - `long` throughout, **widen before multiplying** (`(long)base_t * term`, never `(long)(base_t * term)`),
-  divide by 1000 **last, exactly once**, and let overflow **throw** rather than wrap. Never `float`.
+  divide by 1000 **last, exactly once**, and let overflow **throw** rather than wrap.
 
 ### 3.4 The pick
 
@@ -169,7 +169,6 @@ score  = Σ_t ( (long)base_t * (term_t + offset_t) * w_t ) / 1000     # ONE divi
 - **Never pick a `general`-scoped action**, and never pick one already promoted for another species.
 - **Never fabricate a pick.** No eligible action means `null`.
 - **Never put a weight in code.** All five `w_t` are rows in `data/tuning/action-innate-picker.v1.json`.
-- **Never use `float` or `double`.** Every term and the score are `long`.
 - **Never introduce a second rung curve.** The picker reads `rungBand`; it does not shift, lag or scale
   a rung. A lagging climb was already rejected as *"a third curve for a small gain"*.
 - Never run before A-S3. It writes the committed corpus, and running it on unfiltered candidates would
@@ -203,8 +202,7 @@ score  = Σ_t ( (long)base_t * (term_t + offset_t) * w_t ) / 1000     # ONE divi
 5. The same input produces byte-identical output, and the output is independent of candidate ordering.
 6. All five term multipliers live in `data/tuning/action-innate-picker.v1.json`; the magic-number audit
    reports zero targets for this module.
-7. Every arithmetic path is `long`, widened before multiplying, divided by 1000 once; no `float` or
-   `double` appears in the module.
+7. Every arithmetic path is `long`, widened before multiplying, divided by 1000 once. *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
 8. Each entry records its five terms, its score, the runner-up and the eligible count, so a pick can be
    argued with rather than trusted.
 9. Every promoted seed passes `ActionValidator`'s innate check.

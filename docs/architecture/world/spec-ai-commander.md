@@ -122,7 +122,7 @@ Read it as: a **fresh** sighting is a sharp, local fear. A **three-turn-old** si
 
 Threat outlives the intel ladder on purpose: `IntelLadder.FreshTurns = 5` is when a memory stops being *shown* as scouted, and 7 is when it stops being *worth acting on*. A rumour you no longer trust still makes you nervous for two more turns.
 
-The two readings *are* the estimation model — pessimism where being wrong is fatal, realism where it is merely expensive. No probability, no priors, no floating point.
+The two readings *are* the estimation model — pessimism where being wrong is fatal, realism where it is merely expensive. No probability, no priors.
 
 ### ValueMap — worth, relative to this empire
 
@@ -322,7 +322,7 @@ web/fusion-rpg-web/src/features/world/ → send the rendered turn with End Turn
 tests/FusionRpg.Core.Tests/World/Ai/ → one file per table, one per rule, curve tests
 ```
 
-Under `Core/World/` so it inherits `WorldDeterminismGuardTests` for free — that scan is `SearchOption.AllDirectories` over `src/FusionRpg.Core/World`, so the no-clock, no-`System.Random` and no-floating-point rules cover `Ai/` the moment the folder exists, with nothing to wire up.
+Under `Core/World/` so it inherits `WorldDeterminismGuardTests` for free — that scan is `SearchOption.AllDirectories` over `src/FusionRpg.Core/World`, so the no-clock and no-`System.Random` rules cover `Ai/` (its no-floating-point rule is superseded 2026-09-15) the moment the folder exists, with nothing to wire up.
 
 ## Code style
 

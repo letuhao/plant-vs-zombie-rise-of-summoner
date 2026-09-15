@@ -382,8 +382,8 @@ are `int` — matching every existing `Θ`/turn field already read this session 
 `CacheRecoveryItem` is `long`, inherited unchanged from `rpg_corpse_cache_item.qty`'s own type (`spec-
 corpse-cache.md` §Numeric types: *"a haul stack can, in principle, exceed `int` range"*). The success roll
 uses `SeededRng.NextPerMille()` (an `int` per-mille draw against a `long`-typed bounded-ratio tunable, the
-identical shape `cache-decay-void`'s own per-item roll already uses) — never `double`, never `System.
-Random`, never `ICombatRng`'s sigmoid regime (§Design 5).
+identical shape `cache-decay-void`'s own per-item roll already uses) — never `System.Random`, never
+`ICombatRng`'s sigmoid regime (§Design 5). *(Former "no `float`/`double`" clause removed 2026-09-15 per owner ruling: floating-point allowed.)*
 
 ## Commands
 

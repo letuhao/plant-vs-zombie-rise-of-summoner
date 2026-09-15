@@ -42,7 +42,7 @@ Size: **S** ≤ half a day · **M** ~a day.
 - [x] **0.6 Tuning file + report emission** · **S** · Deps: 0.4, 0.5
   - `data/tuning/action-family-usage.v1.json` (`minEvennessMilli: 850`, `maxTop10SharePermille: 300`,
     `minFamiliesUsedShare: 400`); report to `docs/research/action-corpus/_usage-<date>.json`.
-  - **Acceptance:** every threshold is per-mille integer, refused if float; two runs byte-identical.
+  - **Acceptance:** every threshold is per-mille integer; two runs byte-identical. *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
   - **Verify:** `PLANTED_VIOLATION_a_float_threshold_in_the_tuning_file_is_refused`,
     `the_report_is_byte_identical_across_two_runs`
 

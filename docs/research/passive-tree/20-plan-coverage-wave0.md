@@ -80,7 +80,7 @@ rows.
 | GC-3 | §2.2 one credit per element component on a direct landed hit; DoT pulses excluded | COVERED | **C2**, verbatim |
 | GC-4 | §2.2b `Outcome == Applied` **and** `AppliedAmount != 0`; a fully-absorbed hit earns nothing | PARTIAL | C2's acceptance and verification cover the pulse rule only. §11 test 7 is the pipeline's deliberate zero-delta miss-telemetry parity |
 | GC-5 | §3 the index is the square-root transform; `c = 23`; tier-10 parity within 5% from tier 4 up | COVERED | **C3** ("Tier 10 opens within 5% of the primary tree's Θ from tier 4 up") |
-| GC-6 | §6/§9 integer-only index (no `Math.Sqrt`, no `double`), division-based predicate, survives a count at `long.MaxValue` | PARTIAL | Only the standing `audit-overflow.py` line. §11 tests 3 and 4 are named tests the spec asks for |
+| GC-6 | §6/§9 integer-only index (no `Math.Sqrt`, no `double` — *(superseded 2026-09-15: floating-point allowed)*), division-based predicate, survives a count at `long.MaxValue` | PARTIAL | Only the standing `audit-overflow.py` line. §11 tests 3 and 4 are named tests the spec asks for |
 | GC-7 | §4.1 `rpg_gate_counter`, sparse, raw counts only, no cap, `owner_kind`/`owner_key` | COVERED | **C1** |
 | GC-8 | §4.2 SQL only in `RpgStore.GateCounters.cs`, a partial slice sharing `_gate`, `EnsureHotSchema` and `Reset()` | PARTIAL | `guard-dal` is in the standing block; the `Reset()`-participation test the spec asks for is unnamed |
 | GC-9 | §4.3 in-memory accumulator, 5 s + match-end flush, one batched transaction, no hot-path write | COVERED | **C1** |
@@ -148,7 +148,7 @@ four-stage plan (S1–S4). None of S1's core, and none of S2/S3/S4, has a task.
 | SH-5 | §4 the tree model — `req(t)`, `W(T)`, `H`, `F` per actor; D25's ownership cost in S2 | MISSING | |
 | SH-6 | §5 the three columns (`duelClosedForm` / `duelTrials` / `squadTrials`), `orderingByColumn`, `transfers`, `_scope-transfer.json`, `_squad-scope.json` | PARTIAL | B4's *"the 1v1 baseline is shown beside it"* is one column of three and no artifact |
 | SH-7 | §6 the keys it settles — `concentration.fmaxMilli`, `concentration.wMilli`, `soulTrack.thetaPerSoulLevelMilli`, D28's four credit rules | MISSING | These are named by `tree-plan` and `tree-resolve` and taken as given. Nothing produces them |
-| SH-8 | §7 determinism: `seed(a,d,k)`, common random numbers, `long`/`checked` counts, no `float`, no `double` in the hash | PARTIAL | B4's verification is *"same seed, same numbers"* |
+| SH-8 | §7 determinism: `seed(a,d,k)`, common random numbers, `long`/`checked` counts, no `float`, no `double` in the hash *(superseded 2026-09-15: floating-point allowed)* | PARTIAL | B4's verification is *"same seed, same numbers"* |
 | SH-9 | §8 stalemates leave the denominator; a high-stalemate cell is refused, not scored | COVERED | **B4** ("Stalemate cells refused, not scored") |
 | SH-10 | §9.1 the SHA-256 determinism hash with provenance blanked; `A_second_process_reproduces_the_hash`; parallel/serial agreement | MISSING | The module's hard requirement, asserted three ways in the spec |
 | SH-11 | §9.2 two-stage screening (3,000) then `--refine` (40,000) only on cells inside their own half-width; the *"cannot separate"* wording for doc 16's Θ ≈ 300 crossover | MISSING | B4 asks for a half-width but not the machinery that reaches 1.0pp |

@@ -185,8 +185,8 @@ does not change how the game feels, only whether a bug is caught.
 | `hScore` | **`long`** | it is compared against `f`, and a mixed-width comparison is where a widen gets forgotten |
 | cell index | `int` | bounded by `board.maxCells` |
 
-**No `float`.** A Euclidean heuristic would be both non-integer and *inadmissible* against Chebyshev
-movement — wrong twice.
+**No Euclidean heuristic.** It would be *inadmissible* against Chebyshev movement. *(The former
+"No `float`" framing is superseded 2026-09-15: floating-point allowed; admissibility is the reason.)*
 
 ## Boundaries
 
@@ -196,7 +196,7 @@ integer arithmetic.
 **Ask first:** switching to jump-point search or any hierarchical scheme (both change which equal-cost
 route is returned, which is a replay change) · caching paths across rounds.
 
-**Never:** a `float` heuristic · `int.MaxValue` for unreachable · reading `BoardState` directly
+**Never:** an inadmissible (Euclidean) heuristic · `int.MaxValue` for unreachable · reading `BoardState` directly
 instead of through `IBoardOccupancy` · `HashSet`/`Dictionary` enumeration anywhere the result depends
 on order.
 
@@ -229,7 +229,7 @@ the failure that reproduces on one machine and not another; a single run proves 
 2. The heap implementation and a linear-scan reference return byte-identical paths on 50 random
    boards.
 3. Admissibility holds under an adversarial cost table.
-4. No `float`, no unordered enumeration, no `int.MaxValue` sentinel.
+4. No unordered enumeration, no `int.MaxValue` sentinel. *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
 5. `Core/Battle` still passes the Gate-0-extended determinism guard.
 
 ## Open questions

@@ -111,8 +111,9 @@ Lives under `World/`, inheriting `WorldDeterminismGuardTests`'s existing scan fo
 
 ## Code style
 
-Integer per-mille throughout, matching `UpkeepHandicapMilli`'s own convention — never `double`/`float`
-(the kernel-wide ban already covers `World/`). Pure functions over `WorldState`, nothing cached between
+Integer per-mille throughout, matching `UpkeepHandicapMilli`'s own convention. *(The former "never
+`double`/`float` — the kernel-wide ban already covers `World/`" clause is superseded 2026-09-15:
+floating-point allowed.)* Pure functions over `WorldState`, nothing cached between
 turns, matching `spec-ai-commander.md`'s own stated code style for this directory tree.
 
 ## Testing strategy
@@ -132,7 +133,7 @@ turns, matching `spec-ai-commander.md`'s own stated code style for this director
   logic).
 - **Ask first:** which of the two design shapes above ships first — this is a real open call, not a style
   preference.
-- **Never:** a `double`/`float` magnitude; state that isn't hashed (an unhashed modifier is invisible to
+- **Never:** state that isn't hashed (an unhashed modifier is invisible to
   replay and to every determinism test this program already has).
 
 ## Success criteria

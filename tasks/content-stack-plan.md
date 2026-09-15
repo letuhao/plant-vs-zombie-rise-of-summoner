@@ -257,8 +257,8 @@ From the Wave 6 retrospective — defects in **shipped** code, recorded in each 
 
 ## 7. Rules that apply to every task here
 
-- **`long` for every magnitude, never `float`.** Widen before multiplying, divide by 1000 last, overflow
-  throws.
+- **`long` for every integer magnitude** (floating-point allowed — owner ruling 2026-09-15). Widen before
+  multiplying, divide by 1000 last, integer overflow throws.
 - **A number a balance pass would change lives in `data/tuning/`**, published via `publish.py`.
 - **No hard progression ceilings.** Structural limits are exempt **and must say so in a comment**.
 - **The LLM writes identity; deterministic code writes magnitude.** Enforced by schema audit, never review.

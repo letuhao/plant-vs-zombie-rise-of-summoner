@@ -521,7 +521,7 @@ text, not a mapping row.
 **Other things checked and found complete:**
 
 - **The overflow rules.** Every magnitude in every spec is `long`; `float` is refused by name in six of
-  them; `tree-resolve` §7.2 adopts `AptitudeReadFunctions`' `decimal` widening verbatim rather than
+  them *(superseded 2026-09-15: floating-point allowed)*; `tree-resolve` §7.2 adopts `AptitudeReadFunctions`' `decimal` widening verbatim rather than
   re-deriving it; the `int` narrowing at `AtomCompiler.cs:465` is named in three specs, each with the Θ
   at which it bites.
 - **No hard ceilings.** Every bound in the set is either a soft economic bound proved unbounded

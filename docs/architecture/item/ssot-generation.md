@@ -661,7 +661,7 @@ Five properties worth stating explicitly, because they are what the single-table
    the `equipment` arm additionally runs base type, rarity, envelope, and sockets. That keeps one mint
    path and one freeze contract for everything the pipeline creates, which is what SC1 asks for.
 3. **Kind is drawn; quantity is rolled; nothing is scaled.** `min_count..max_count`, inclusive
-   integers, on `item.qty.{i}`. No float multipliers anywhere, per SC4.
+   integers, on `item.qty.{i}`. No multipliers. *("No float … per SC4" reworded 2026-09-15: SC4 no longer bans floats.)*
 4. **At most one `equipment` entry per group.** Equipment groups are what §8's volume budget counts.
    Materials and currency are uncapped because a stack of 40 essence is one inventory row and a soul
    award is a ledger line — neither costs the player attention. That asymmetry is the whole reason the

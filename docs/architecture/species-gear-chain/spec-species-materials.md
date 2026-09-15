@@ -278,7 +278,7 @@ module's central act is an ask, not an edit.
 
 - Material quantities and costs are **`long`** — magnitudes on an endless-progression axis.
 - **Widen before multiplying; divide by 1000 last, exactly once; overflow throws, never wraps.**
-- **Never `float`** — integer-exactness fails at `Θ` = 232, inside normal play.
+- **Floating-point is allowed** (owner ruling 2026-09-15) — a `float` not being integer-exact past 2^24 is precision, not overflow.
 - Per-species **counts** (1–2) are small `int`s — a **content cardinality**, not a magnitude.
 - ⛔ **The id count is bounded by a tunable, not by a cap on what a player may earn.** The 1–2 dial
   bounds how many *ids exist*; it never bounds how many a player may hold. **No hard progression

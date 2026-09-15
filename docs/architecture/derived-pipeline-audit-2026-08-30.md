@@ -169,7 +169,7 @@ neither.**
 - **Nothing is replaced** — `ApplyReduction` has zero production callers (see above). It is a stub.
 - **The guard does not forbid it.** `TimelinePurityGuardTests.Kernel_sources_contain_no_wall_clock_rng_or_floating_point`
   is a **source scan** for `DateTime` / `Random` / `double ` / `float ` — it bans floating-point
-  **types**, not division. `baseCD * 1000 / (1000 + hasteMilli)` is pure `long`.
+  **types**, not division *(that float ban is superseded 2026-09-15: floating-point allowed)*. `baseCD * 1000 / (1000 + hasteMilli)` is pure `long`.
 - **Integer divisive haste already ships in the same directory under the same guard** —
   `TurnReadiness.EffectiveRate` is `speed * NominalHasteMilli / haste` (`NominalHasteMilli = 1000`),
   with a registered `turn.haste` channel, a live consumer (`ReadinessDriver`), and tests.

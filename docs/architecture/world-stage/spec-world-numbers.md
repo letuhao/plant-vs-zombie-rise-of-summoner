@@ -118,8 +118,8 @@ second half, and it must not special-case the four names — the whole point is 
 consulted.
 
 **One numeric note that belongs in this module and nowhere else.** `Magnitude.value` is a TypeScript
-`number` — an IEEE double, integer-exact to 9,007,199,254,740,992, the `double` row of the overflow
-table in `CLAUDE.md`. That is enough for any loam magnitude the ladder can produce, **on a display
+`number` — an IEEE double, integer-exact to 9,007,199,254,740,992 (a precision limit, not overflow —
+`CLAUDE.md` "Numeric types"). That is enough for any loam magnitude the ladder can produce, **on a display
 path only**. The FE never computes a loam number (`spec-loam-fe.md` is explicit; the server already
 computes every one), so no magnitude here ever re-enters arithmetic that reaches the server.
 

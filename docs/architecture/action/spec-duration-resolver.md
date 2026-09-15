@@ -159,7 +159,7 @@ tests/FusionRpg.Core.Tests/Actions/DurationResolverTests.cs
 | Bounded-ratio comment | an architecture test asserts the PS-8 exemption comment exists at the declaration |
 | DoT and buff families | resolve in **ticks**, never through the turn path — a planted turn-authored DoT is rejected |
 | No resolver registered | throws naming the mode, **never** silently defaults to ticks |
-| Float leakage | an architecture test: no `float`/`double` crosses `ToTicks`'s boundary |
+| ~~Float leakage~~ | ~~an architecture test: no `float`/`double` crosses `ToTicks`'s boundary~~ *(superseded 2026-09-15: floating-point allowed)* The seconds-to-ticks narrowing is checked or reported |
 | Determinism | integer ticks only; no wall-clock read anywhere in the module — purity scan |
 
 ## Boundaries
@@ -179,4 +179,4 @@ clamp at authoring time; a silent default when no resolver is registered.
 2. A duration-stacking build is bounded, proven against a planted authoring-time clamp.
 3. At the bound, further rungs still increase total effect via intensity.
 4. `Θ` never moves a resolved turn count.
-5. No float and no wall-clock survives the boundary.
+5. No wall-clock survives the boundary. *(reworded 2026-09-15 per owner ruling: floating-point allowed)*

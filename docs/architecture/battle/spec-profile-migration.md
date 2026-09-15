@@ -111,7 +111,7 @@ implies** — it is not free.
 
 Both are gates on this module and neither is discretionary.
 
-**(a) Close the `KernelPurityScan` hole.** The scan matches the `float ` / `double ` declaration
+**(a) Close the `KernelPurityScan` hole.** *(Superseded 2026-09-15: floating-point allowed — the float half of this scan is void.)* The scan matches the `float ` / `double ` declaration
 tokens, so `var x = 1.5f;` inside `Timeline/` slips past undetected — planted and verified during
 B25, and left at the time as the owner's call because tightening a guard can redden unrelated files.
 **Answered 2026-09-04: fix it.** Determinism is the foundation this module is about to lean on

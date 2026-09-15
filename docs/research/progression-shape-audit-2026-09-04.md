@@ -76,7 +76,8 @@ RpgStore.Progression.cs:226   Xp = r.GetDouble(1)
 ```
 
 `CLAUDE.md`'s numeric rule is explicit: **`long` is "the default for every magnitude"**, and `double` is
-*"never in a hashed or persisted path — non-deterministic across runtimes."* XP is a progression
+*"never in a hashed or persisted path — non-deterministic across runtimes."* *(superseded 2026-09-15: floating-point allowed)* The `long` fix
+stands on range and exact integer storage, not on that rule. XP is a progression
 magnitude, it is persisted as SQLite `REAL`, and it is read back through `GetDouble`.
 
 **Severity: low today, and it grows on a schedule.** Cumulative XP is quadratic in level, so even at

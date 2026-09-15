@@ -740,7 +740,7 @@ battlefield-scoped flags — decision 25 is untouched.
     `AuraTuningRejection` naming the offending rung), never merely discovered later at read time.
   - **Real gap found and fixed before it shipped:** the spec's own §5 "Project structure" table places
     `AuraMagnitude.cs` under `Actions/Aura/` — building it there and running the full suite caught
-    `ActionsPurityGuardTests` failing immediately: `Core/Actions/` bans any bare `double` with **no
+    `ActionsPurityGuardTests` failing immediately *(that float ban is superseded 2026-09-15: floating-point allowed)*: `Core/Actions/` bans any bare `double` with **no
     exceptions**, and `share` (bounded [0,1], the same shape `AptitudeReadFunctions.Magnitude` itself
     already takes) needs one. Moved both new files to `Core/Aura/` (a sibling of `Actions/`, not nested
     inside it) — the same reason `AptitudeReadFunctions` itself lives in `Stats/Aptitudes/` rather than

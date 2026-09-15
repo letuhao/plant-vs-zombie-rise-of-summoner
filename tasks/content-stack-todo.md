@@ -329,7 +329,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     boxed `double` for every whole-number param, never `int`/`long` — pre-existing since each method
     was written, not something this session introduced. Harmless for callers going through
     `JsonOverlay.GetInt` (`Convert.ToInt32` tolerates a boxed double), which is why nothing ever
-    surfaced it — but a real type defect against CLAUDE.md's own overflow table (`double` loses
+    surfaced it — but a real type defect against CLAUDE.md's own overflow table *(superseded 2026-09-15: floating-point allowed)* (`double` loses
     exact-integer precision above 2^53 and is non-deterministic across runtimes in a hashed/persisted
     path — `long`/`int` were always the intended types). **Fix, both sites**: cast the integer branch
     to `(object)` before the ternary — `TryGetInt32(out var i) ? (object)i : el.GetDouble()` — which
@@ -1143,7 +1143,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     `FamilyExpansionTypes.cs`, `AffixFamilyFile.cs`, `TierBandsFile.cs`) ports `formulas.py`'s
     `round_legible`/`tier_ladder`/`band`/`primary_channel_m1` shape to `long`-only, `checked`,
     widen-before-multiply, divide-by-1000-last C# — no `float`/`double` anywhere in the magnitude
-    path (CLAUDE.md's binding numeric rule). `RoundLegible` is long-safe round-half-up
+    path (CLAUDE.md's numeric rule at the time *(superseded 2026-09-15: floating-point allowed)*). `RoundLegible` is long-safe round-half-up
     (`(numerator + denominator/2) / denominator`), proven against `bands.v1.json`'s own two worked
     examples (vitality 30‰×680/1000=20.4→20, might 45‰×92/1000=4.14→4). Element-typed
     (`{variant}`-templated) channels resolve through a fixed, non-inferred table to one of E30's 12

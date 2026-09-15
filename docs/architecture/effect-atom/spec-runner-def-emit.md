@@ -127,7 +127,7 @@ with the same `const` doing the same job.
 - **Resolve a rolled value at emit time.** The roll is the runner's, per hit, on its own stream. Folding
   it into the def would be a second roll and would break replay.
 - **Widen `Compilability.Classify`.** What routes where is not this module's decision.
-- **Let a magnitude be `float`, or divide before the last step.** `long` throughout; overflow throws.
+- **Divide before the last step** in integer per-mille math. Integer overflow throws. *(The "let a magnitude be `float`" prohibition is superseded 2026-09-15: floating-point allowed.)*
 - **Silently skip an entry it cannot translate.** An untranslatable `RunnerEntry` is a **refusal with its
   id**, never a missing def that resurfaces as `unknown effect_id` at grant time — that is the exact
   failure this module exists to end.

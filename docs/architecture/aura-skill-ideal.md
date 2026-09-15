@@ -639,8 +639,8 @@ content at all**, which makes it the natural first slice.
 ## 5. Tunables
 
 **Everything below lives in `data/tuning/aura.v1.json`.** No `const` on this surface. Integer
-per-mille throughout (`float` is banned for magnitudes; the ladder is quadratic and `float` stops being
-integer-exact at `Θ`=232, inside normal play). Follows the established file convention:
+per-mille throughout (the file's chosen convention; floating-point is allowed per owner ruling
+2026-09-15 — a `float` losing integer precision is not overflow). Follows the established file convention:
 `schemaVersion` · `version` · `_meta{owner,status,note,coverage,measurable}` · typed blocks.
 
 | Block | What it holds | Why it is tunable |

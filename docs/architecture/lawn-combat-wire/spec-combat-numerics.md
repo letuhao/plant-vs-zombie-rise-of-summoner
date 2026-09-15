@@ -20,7 +20,7 @@ more traffic through it, so the violations must be fixed before they are amplifi
 
 | Violation | Where | Rule broken |
 |---|---|---|
-| `double BaseOverlayDamage`; whole interior in `double` | `OverlayCombatCalculator.cs:9` | `long` for any magnitude, never `float`/`double` — `double` is non-deterministic across runtimes and must never sit in a hashed or persisted path |
+| `double BaseOverlayDamage`; whole interior in `double` | `OverlayCombatCalculator.cs:9` | ~~`long` for any magnitude, never `float`/`double` — `double` is non-deterministic across runtimes and must never sit in a hashed or persisted path~~ *(superseded 2026-09-15, see the amendment above: floating-point allowed; a hashed `double` records the platform stamp)* |
 | `combinedMult = 1.0` | `ElementHub.cs:17` | same |
 | divides by `1000.0` **before** multiplying | `OverlayCombatCalculator.cs:252` | divide by 1000 **last**, exactly once — per-mille intermediates are 1000× closer to the ceiling |
 | exit `(long)Math.Round(...)` **unchecked** | `OverlayCombatCalculator.cs:297` | overflow **throws**, never wraps |

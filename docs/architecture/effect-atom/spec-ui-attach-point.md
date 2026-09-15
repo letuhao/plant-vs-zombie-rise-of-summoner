@@ -209,9 +209,9 @@ apparent budget, and it must not tax one either.
   resolves for combat lag; a `ui.present` on `OnDamageDealt` fires at combat frequency, so it goes
   through the same merge/throttle the damage floater already uses (`DamageFxDto.MergedCount`,
   `DamageFxDtos.cs:25`).
-- **`long` for any magnitude it displays, never `float`** — a displayed number is a magnitude that has
-  already overflowed if it was ever a `float`. Widen before multiplying; **divide by 1000 exactly once,
-  last** for `ratio`; **overflow throws**.
+- **A displayed magnitude's type must hold its range** — `long` for an integer magnitude; floating-point is
+  allowed (owner ruling 2026-09-15; a `float` losing integer precision is rounding, not overflow). Widen
+  before multiplying; **divide by 1000 exactly once, last** for `ratio`; **integer overflow throws**.
 - **No hard ceiling.** No cap on a displayed number — a capped display lies about a magnitude the game
   is actually using, which is worse than a long string. `ratio`'s 0–1000 bound is a **bounded ratio**
   and exempt; the meter-count limit is **structural** (a fixed HUD row) — both must say so in a comment.

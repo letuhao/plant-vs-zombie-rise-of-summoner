@@ -303,8 +303,9 @@ they need no ladder and cannot decay.
 | The composed product | **`long`, `checked`** | four multiplies before any divide — the widen is the safety argument |
 | Distances, radii, cell indices | `int` | board-bounded, structural |
 
-**No `float`.** A power chain in floating point produces a different last digit on a different runtime,
-and this chain feeds a hashed battle report.
+*(Superseded 2026-09-15: floating-point allowed.)* This chain feeds a hashed battle report, so a
+floating-point chain would record the platform stamp (`ssot-power-scale.md` §10.7); the shipped chain is
+per-mille integer.
 
 ## Boundaries
 
@@ -314,7 +315,7 @@ surface each factor separately on the wire · a destroyed obstacle projects noth
 
 **Ask first:** a fifth multiplier · making an obstruction a hard block · stacking cover.
 
-**Never:** `P(Θ)` on a multiplier · a `float` in the chain · combining the four divides into one ·
+**Never:** `P(Θ)` on a multiplier · combining the four divides into one ·
 blocking a shot outright (decision 35 says *reduce*) · a cover grant on `combat.dodge.omni` · spending
 the vocabulary-change budget here.
 
@@ -355,7 +356,7 @@ the vocabulary-change budget here.
 ## Success criteria
 
 1. Four mechanics, each with its own tests and tunables.
-2. Every multiplier per-mille and scale-free; **no `P(Θ)`, no `float`** in this module.
+2. Every multiplier scale-free; **no `P(Θ)`** in this module. *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
 3. The line trace is deterministic over 10,000 runs, symmetric, with a stated tie-break.
 4. `RequiresLineOfSight` has a reader, meaning *pays obstruction*, never *blocked*.
 5. Destroying an obstacle removes cover **and** obstruction, proven together.

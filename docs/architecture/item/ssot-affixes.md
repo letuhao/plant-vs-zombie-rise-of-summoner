@@ -358,8 +358,7 @@ HP. That is the ARPG shape.
 
 **This family exposes a real limit of the method, and it is worth naming rather than hiding.** The base
 attack curve is small, so `m_1 = 4` and the tier-1 band is three integers wide. `hi_1 = 5` and `lo_2 = 5`
-are *equal*, not overlapping — the overlap invariant holds only as a tie. Integer arithmetic (SC4: no
-floats in content) sets a floor on band resolution at roughly `m_1 ≥ 5`. **The fix is not to invent
+are *equal*, not overlapping — the overlap invariant holds only as a tie. Integer arithmetic (integer by this table's convention; SC4 no longer forbids floats — owner ruling 2026-09-15) sets a floor on band resolution at roughly `m_1 ≥ 5`. **The fix is not to invent
 decimals; it is to let the `Increased` sibling carry the fine grain** — `ferocity` below has 20× the
 resolution of `might` at every tier and covers exactly the same fantasy. The lint in §6.3 flags any family
 with `m_1 < 5`; `might` trips it knowingly.
@@ -1256,7 +1255,7 @@ Numbered, each naming the lane, each a thing I8 cannot decide alone.
     quarantine (D6), the G8 scope rule, and the weight-0 behaviour are read from shipped specs and
     code, not executed. Before any of them justifies a build decision, run the suite.
 [x] Nothing contradicts a §2 invariant of the enrichment contract — no new atom kind, no second
-    modifier mechanism, no float in content, no silently ignored input.
+    modifier mechanism, no silently ignored input. *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
 [ ] Corrections propagated to prose, Structure, Testing, Boundaries, map, and tasks.
     **Gap: no item map, plan, or task list exists yet.** This is a lane SSOT; those artefacts are
     written when the program graduates. The 70-vs-71 family-count correction in §4.2 is a finding

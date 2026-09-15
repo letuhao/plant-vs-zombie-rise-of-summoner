@@ -304,7 +304,7 @@ divide by 1000 last, once.
 - Add a fourth composition path, unify the two composers, or change `BattleStatComposer`'s compose
   logic (§2a) — T5's byte-identical gate is why.
 - Accumulate inside `Contribute`, or expect `WithdrawSource` to undo a respec (§2).
-- `float` or `int` on a magnitude path.
+- `int` on a magnitude path.
 - Read `Posture` (it is a UI/AI read, [spec-primary-stats.md](spec-primary-stats.md) §2.2).
 
 ---

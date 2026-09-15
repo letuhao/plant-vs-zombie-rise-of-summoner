@@ -20,7 +20,7 @@
 - [x] **AS-0.2** UniqueCreature GET/POST + FE hooks — `unique-allocate`
   - Accept: `GET /api/aptitudes/unique/{instanceId}` returns persisted shares + budget/leftover (no EffectiveUnique); `POST .../unique/allocate` saves UniqueCreature; overspend 409; empty legal; ownership checks
   - Accept: FE `useUniqueAptitudes` / `useSaveUniqueAptitudes` (names flexible)
-  - Accept (G2): after POST, `LoadAllocation(UniqueCreature, instanceId)` equals saved shares; unique hooks unused by Mode C commander path; shares/budget/leftover are `long` (no float magnitudes)
+  - Accept (G2): after POST, `LoadAllocation(UniqueCreature, instanceId)` equals saved shares; unique hooks unused by Mode C commander path; shares/budget/leftover are `long` *(reworded 2026-09-15 per owner ruling: floating-point allowed)*
   - Verify: `dotnet test tests\FusionRpg.Server.Tests --filter UniqueAptitude`; curl GET/POST
   - Files: `AptitudeEndpoints.cs`, RpgStore aptitudes, `web/.../lib/bus/*`, Server.Tests
   - Deps: None (parallel with 0.1)

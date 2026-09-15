@@ -46,7 +46,7 @@ needs no game data at all.
 never contain a magnitude a model chose** — magnitudes come from the ladder, and a model-invented
 number looks plausible while being anchored to nothing.
 
-**Magnitudes are `long`**, never `float` (integer-exact fails at `Θ`=232, inside normal play).
+**Integer magnitudes are `long`** (floating-point is allowed — owner ruling 2026-09-15; precision is not overflow).
 **The balance surface is data** — a number a balance pass would change lives in
 `data/tuning/<domain>.v{n}.json`, not in code. **No hard progression ceilings.**
 

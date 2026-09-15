@@ -180,7 +180,7 @@ draw rule — determinism guarantees, not balance.
 
 Weights are `int` per-mille — a **bounded ratio**, exempt and commented as such.
 `UnmadeMemberHp` is already `long` (`LoamPolicy.cs:205`) and stays `long`: it is an hp magnitude, and
-`P(Θ)` is quadratic, so a `float` would stop being integer-exact at `Θ` = 232, inside normal play.
+`P(Θ)` is quadratic, so its range must hold the value at reachable `Θ` (`CLAUDE.md` "Numeric types").
 **This module must not narrow it** when the per-member hp starts varying by species.
 
 ## ActorHub gate

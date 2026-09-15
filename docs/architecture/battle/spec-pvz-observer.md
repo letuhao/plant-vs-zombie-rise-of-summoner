@@ -71,7 +71,7 @@ placed there is untested forever. The injector calls it; it holds no Unity type.
 4. **Terminal states are terminal**: `Dead` and `Withdrawn` project as such and are recognised by
    `TurnTransitions.IsTerminal`, so an observed lawn agrees with the kernel about what "gone" means.
 5. **No scheduling API is reachable** from this file — asserted by the existing kernel purity scan,
-   which already bans wall clock, RNG, floating point and dictionary enumeration here.
+   which already bans wall clock, RNG and dictionary enumeration here (its floating-point ban is superseded 2026-09-15).
 
 ## Boundaries
 
