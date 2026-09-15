@@ -38,6 +38,7 @@ public static class DebugActions
                 return false;
             }
 
+            Match.SpawnOriginTags.Mark(plant.Pointer, Match.SpawnOriginTags.Debug);
             // Force re-apply with absolutes if Start already ran without them.
             GameHooks.Applied.Remove(plant.Pointer);
             EntityApply.RunPlant(plant, "debug.spawn", includeAbsolute: true);
@@ -101,6 +102,7 @@ public static class DebugActions
                 return false;
             }
 
+            Match.SpawnOriginTags.Mark(z.Pointer, Match.SpawnOriginTags.Debug);
             GameHooks.Applied.Remove(z.Pointer);
             EntityApply.RunZombie(z, "debug.spawn", includeAbsolute: true);
             CheatState.Select(z.Pointer, "zombie");
@@ -615,6 +617,7 @@ public static class DebugActions
                 CheatState.Error("debug.ice-road: spawn null");
                 return;
             }
+            Match.SpawnOriginTags.Mark(z.Pointer, Match.SpawnOriginTags.Debug);
 
             string typeName = "?";
             try { typeName = z.theZombieType.ToString(); } catch { try { typeName = z.GetIl2CppType().Name; } catch { } }

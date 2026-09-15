@@ -57,6 +57,7 @@ public static class GameHooks
         try { Effects.LawnBasicAttackCostCharger.ClearMatchState(); } catch { }
         // Pins on entities still alive at match end would otherwise leak onto next match's reused ptrs.
         try { Stats.InjectorSpawnHpPin.Clear(); } catch { }
+        try { Match.SpawnOriginTags.Clear(); } catch { }
         Effects.InjectorEntityRegistry.Clear();
         Effects.InjectorBoardSnapshot.Invalidate();
         Applied.Clear();
@@ -690,7 +691,9 @@ public static class GameHooks
                 ["ptr"] = GameDumps.Ptr(__instance),
                 ["reason"] = (int)reason,
                 ["reasonName"] = GameDumps.EnumName(reason),
-                ["lifecycleOccurrence"] = Interlocked.Increment(ref _lifecycleOccurrence)
+                ["lifecycleOccurrence"] = Interlocked.Increment(ref _lifecycleOccurrence),
+                // live-probe Task 18: game | debug | cheat — rides onto the PlantLost fact.
+                ["spawnOrigin"] = Match.SpawnOriginTags.TakeOnDeath(ptr)
             };
             AddFatalKiller(diePayload, TakeFatalKiller(ptr));
             Emit("plant.die", diePayload);
@@ -1420,7 +1423,10 @@ public static class GameHooks
             ["typeName"] = GameDumps.EnumName(z.theZombieType),
             ["ptr"] = p.ToString("X"),
             ["reason"] = reason,
-            ["lifecycleOccurrence"] = Interlocked.Increment(ref _lifecycleOccurrence)
+            ["lifecycleOccurrence"] = Interlocked.Increment(ref _lifecycleOccurrence),
+            // live-probe Task 18: game | debug | cheat — rides onto the ZombieKilled fact, which the
+            // soul ledger's kill rows reference, so a debug-funded balance is attributable.
+            ["spawnOrigin"] = Match.SpawnOriginTags.TakeOnDeath(p)
         };
         AddFatalKiller(diePayload, TakeFatalKiller(p));
         DebugRuntime.Stamp(diePayload);
@@ -1571,6 +1577,7 @@ public static class GameHooks
         // Same ptr-reuse hazard as LawnElementResolverHost.Invalidate above, same fix shape —
         // see InjectorSpawnHpPin.Remove's own doc comment (confirmed live, not theoretical).
         try { Stats.InjectorSpawnHpPin.Remove(ptr.ToString("X")); } catch { }
+        try { Match.SpawnOriginTags.Forget(ptr); } catch { }
     }
 
     internal static void RecapturePlant(Plant p, string source)

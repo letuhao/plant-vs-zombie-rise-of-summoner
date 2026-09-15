@@ -47,6 +47,10 @@ public static class Program
         }
         else
         {
+            // live-probe Task 18: attribute the souls the summon is about to spend, before spending them.
+            // Not a hard stop — a debug-funded balance is reported (and fails the run), the recipe still runs.
+            persisted.Add(await client.GetSoulProvenanceAsync(options.PlayerId));
+
             var (step, result) = await client.SummonAsync(options.PlayerId, options.BannerId);
             persisted.Add(step);
             if (step.Outcome != StepOutcome.Ok) return await Finish(client, options, persisted, liveEngine, instanceId);

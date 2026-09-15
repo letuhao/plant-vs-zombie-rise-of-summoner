@@ -99,6 +99,50 @@ public sealed class LiveProbeClient : IDisposable
             $"instanceId={body!.InstanceId} ptr={body.Ptr} (synthetic, debug-only)"), body);
     }
 
+    // ---- step 0 (soul provenance, Mode B) ---------------------------------------------------------
+
+    /// <summary>live-probe Task 18. Plain RPG reads, no debug route: <c>GET /api/souls/{id}</c>, the
+    /// ledger pages behind it (<c>GET /api/souls/{id}/ledger</c>, newest first, <c>afterId</c> = smallest id
+    /// seen), and — per run that earned kill souls — that run's <c>ZombieKilled</c> facts
+    /// (<c>GET /api/pvz-activity/{id}/facts</c>), whose payload carries the victim's <c>spawnOrigin</c>.</summary>
+    public async Task<StepResult> GetSoulProvenanceAsync(long? playerId, int maxLedgerPages = 20)
+    {
+        if (playerId is not { } pid)
+            return new StepResult("0-soul-provenance", StepOutcome.Skipped,
+                "no -PlayerId given, so the balance the summon spends cannot be attributed");
+
+        var (balOk, balStatus, balance, balRaw) = await GetAsync<SoulBalanceDto>($"/api/souls/{pid}");
+        if (!balOk || balance is null)
+            return new StepResult("0-soul-provenance", StepOutcome.Refused,
+                $"soul balance read refused: HTTP {balStatus} {TryExtractReason(balRaw) ?? balRaw}");
+
+        const int pageSize = 500;
+        var ledger = new List<SoulLedgerEntryDto>();
+        var afterId = 0L;
+        var truncated = false;
+        for (var page = 0; ; page++)
+        {
+            if (page == maxLedgerPages) { truncated = true; break; }
+            var (ok, status, body, raw) = await GetAsync<SoulLedgerDto>($"/api/souls/{pid}/ledger?limit={pageSize}&afterId={afterId}");
+            if (!ok || body is null)
+                return new StepResult("0-soul-provenance", StepOutcome.Refused,
+                    $"soul ledger read refused: HTTP {status} {TryExtractReason(raw) ?? raw}");
+            ledger.AddRange(body.Items);
+            if (body.Items.Count < pageSize) break;
+            afterId = body.Items.Min(i => i.Id);
+        }
+
+        var facts = new List<PvzActivityFactDto>();
+        foreach (var runId in ledger.Where(SoulProvenance.IsKillEarn).Select(r => r.RunId).Distinct())
+        {
+            var (ok, _, body, _) = await GetAsync<PvzActivityFactsPageDto>(
+                $"/api/pvz-activity/{pid}/facts?kind=ZombieKilled&runId={runId}&limit=500");
+            if (ok && body is not null) facts.AddRange(body.Items);
+        }
+
+        return SoulProvenance.ToStep(SoulProvenance.Summarize(balance.Balance, ledger, truncated, facts));
+    }
+
     /// <summary>Mode B's acquire — the only acquisition path that reaches a real Unity-spawned entity.
     /// Never the debug shortcut (<see cref="Guardrails.CheckModeBAcquisition"/> refuses that combination
     /// before this method is ever called).</summary>

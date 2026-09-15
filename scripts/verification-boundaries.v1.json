@@ -5,7 +5,8 @@
     "data": "tests/FusionRpg.Data.Tests/FusionRpg.Data.Tests.csproj",
     "server": "tests/FusionRpg.Server.Tests/FusionRpg.Server.Tests.csproj",
     "guard": "tests/FusionRpg.Guard.Tests/FusionRpg.Guard.Tests.csproj",
-    "elementenumgen": "tests/FusionRpg.ElementEnumGen.Tests/FusionRpg.ElementEnumGen.Tests.csproj"
+    "elementenumgen": "tests/FusionRpg.ElementEnumGen.Tests/FusionRpg.ElementEnumGen.Tests.csproj",
+    "proveliveprobe": "tools/ProveLiveProbe.Tests/ProveLiveProbe.Tests.csproj"
   },
   "guards": {
     "dal": "scripts/guard-dal.ps1",
@@ -34,6 +35,8 @@
     ,{ "id": "core-tests-fallback", "kind": "owner", "paths": ["tests/FusionRpg.Core.Tests/**"], "project": "core", "level": "module", "guards": [] }
     ,{ "id": "data-tests-fallback", "kind": "owner", "paths": ["tests/FusionRpg.Data.Tests/**"], "project": "data", "level": "module", "guards": [] }
     ,{ "id": "guard-tests-fallback", "kind": "owner", "paths": ["tests/FusionRpg.Guard.Tests/**"], "project": "guard", "level": "module", "guards": [] }
+    ,{ "id": "proveliveprobe-fallback", "kind": "owner", "paths": ["tools/ProveLiveProbe/**", "tools/ProveLiveProbe.Tests/**"], "project": "proveliveprobe", "level": "module", "guards": ["debug-scope"] }
+    ,{ "id": "mutant-sets-fallback", "kind": "owner", "paths": ["scripts/mutants/**"], "project": "core", "level": "module", "guards": [] }
     ,{ "id": "server-tests-fallback", "kind": "owner", "paths": ["tests/FusionRpg.Server.Tests/**"], "project": "server", "level": "module", "guards": [] }
   ]
 }

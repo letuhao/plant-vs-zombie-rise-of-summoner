@@ -56,7 +56,9 @@
     "scripts/guard-injector-compile.ps1",
     "docs/architecture/effect-atom/spec-value-spec-and-curve.md",
     "tools/ElementEnumGen/**",
-    "tests/FusionRpg.ElementEnumGen.Tests/**"
+    "tests/FusionRpg.ElementEnumGen.Tests/**",
+    "tools/ProveLiveProbe.Tests/**",
+    "scripts/mutants/lawn-combat.json"
   ],
   "started": "2026-09-12T14:38:04Z",
   "status": "active",
@@ -67,5 +69,6 @@
   "scopeAmended5": "2026-09-13T21:20:00Z - added docs/research/pvz-engine-surface/**. Tracking doc for a FUTURE injector-extension program: the PvZ Fusion engine's own effect/damage/hook surface, read from the shipped assembly with Mono.Cecil. Research only, no proposals.",
   "scopeAmended6": "2026-09-13T21:58:00Z - added tasks/lawn-combat-wire-{plan,todo}.md. /plan phase for the lawn-combat-wire program: 13 tasks over 4 phases covering all 11 module specs.",
   "scopeAmended7": "2026-09-13T22:30:00Z - BUILD scope for lawn-combat-wire, owner-authorized ('we will build all'). 15 tasks across Core/Injector/data/tuning/tools. Adds tools/tuning (publish.py needs an add-key mode), the seedsmith actions vocab mirror, event-pipeline-v2-ssot.md (T9b amends it), the injector host csprojs, a new observer tool, and Injector.Tests. This program was born from this session's own live finding and the owner chose to build it here rather than open a second session.",
-  "scopeAmended8": "2026-09-15T11:20:00Z - audit of the long run (owner request: audit, fix bugs, extend plan). Added scripts/verification-boundaries.v1.json: injector-fallback ran only Core.Tests with no guards and tests/FusionRpg.Core.Tests/** had no owner (lawn-combat-wire L-N23). Recorded mismatch: this record says mode=worktree/branch worktree-solid-run-20260912-eb53, but the run and audit edited the main worktree on features/derived-stat-extension."
+  "scopeAmended8": "2026-09-15T11:20:00Z - audit of the long run (owner request: audit, fix bugs, extend plan). Added scripts/verification-boundaries.v1.json: injector-fallback ran only Core.Tests with no guards and tests/FusionRpg.Core.Tests/** had no owner (lawn-combat-wire L-N23). Recorded mismatch: this record says mode=worktree/branch worktree-solid-run-20260912-eb53, but the run and audit edited the main worktree on features/derived-stat-extension.",
+  "scopeAmended9": "2026-09-15 audit: live-probe Task 18 offline tests (tools/ProveLiveProbe.Tests) and the lawn-combat-wire L-N15 mutant set (scripts/mutants/lawn-combat.json)."
 }

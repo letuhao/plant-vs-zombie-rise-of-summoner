@@ -583,6 +583,17 @@ honestly split if T14 is still failing).
       vs deploy defect) before any T14 re-run relies on a random roll.
 - [ ] **Task 17 — kill→soul observability gap.** A batch of kills on the same `matchKey` produced no
       `zombie.die` events and no balance change, while earlier batches did. Reproduce and name the owner.
-- [ ] **Task 18 — provenance visible in the tool.** `ProveLiveProbe -Mode B` prints the soul-ledger
+- [x] **Task 18 — provenance visible in the tool.** `ProveLiveProbe -Mode B` prints the soul-ledger
       reasons behind the balance it spends, so a debug-funded acquire is visible in the report.
       Offline test in `tools/ProveLiveProbe.Tests`.
+      *Done 2026-09-15 (offline half): new step `0-soul-provenance` in Mode B reads `GET /api/souls/{id}`, pages the
+      ledger, and joins every `kill` row (`refKind=activity_fact`) to its `ZombieKilled` fact; the injector now stamps
+      `spawnOrigin` (`game`|`debug`|`cheat`) on `zombie.die`/`plant.die` (`Match/SpawnOriginTags.cs`, marked in
+      `DebugActions.SpawnPlant/SpawnZombie/IceRoad` and `CheatActions.SpawnPlant/SpawnZombie`). Debug/cheat kill souls make
+      the step `Mismatch` (RESULT: FAIL, `DEBUG-FUNDED: N souls`); pre-stamping kills print as `Unrecorded`, never as
+      clean. Tests: `tools/ProveLiveProbe.Tests/SoulProvenanceTests.cs` (13 cases, suite 55/55),
+      `tests/FusionRpg.Guard.Tests/SpawnOriginStampGuardTests.cs`. Live half is Task 19.*
+- [ ] **Task 19 — Task 18 live check.** After the injector redeploy (lawn-combat-wire L-N22): debug-spawn one zombie,
+      kill it on a real board, then run `prove-live-probe.ps1 -Mode B -PlayerId <id>` and confirm step 0 reports
+      `Debug:>0` and `DEBUG-FUNDED`; kill one game-spawned zombie and confirm it lands under `Game`. Verify: the two
+      report lines and the fact payloads from `GET /api/pvz-activity/{id}/facts?kind=ZombieKilled`.
