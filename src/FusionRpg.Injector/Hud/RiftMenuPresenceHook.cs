@@ -36,7 +36,7 @@ static class RiftMenuPresenceHook
     [HarmonyPatch(typeof(MainMenu), "Start")]
     static class MainMenuStart
     {
-        static void Postfix()
+        static void Postfix(MainMenu __instance)
         {
             Anchor.Set(RiftMenuSurface.MainMenu);
             if (!_loggedStart)
@@ -44,6 +44,10 @@ static class RiftMenuPresenceHook
                 _loggedStart = true;
                 RpgHost.Log.Info("[rift] main menu present (presence signal set, observe-only)");
             }
+
+            // Decision 17/18: attach the uGUI affordance into the menu's own hierarchy. This is the
+            // only place the tombstone is built, and it is an attach — never a navigation call.
+            RiftMenuTombstone.Attach(__instance.transform);
         }
     }
 
@@ -58,6 +62,7 @@ static class RiftMenuPresenceHook
         {
             if (__instance is not MainMenu) return;
             Anchor.Clear(RiftMenuSurface.MainMenu);
+            RiftMenuTombstone.OnMenuGone();
             LogClearOnce("OnHide");
         }
     }
@@ -70,6 +75,7 @@ static class RiftMenuPresenceHook
         {
             if (__instance is not MainMenu) return;
             Anchor.Clear(RiftMenuSurface.MainMenu);
+            RiftMenuTombstone.OnMenuGone();
             LogClearOnce("OnExit");
         }
     }

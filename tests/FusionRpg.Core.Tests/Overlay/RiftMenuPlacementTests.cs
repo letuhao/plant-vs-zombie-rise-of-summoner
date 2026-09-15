@@ -12,15 +12,7 @@ public class RiftMenuPlacementTests
 {
     static RiftMenuPlacementTests()
     {
-        OverlayTuningHub.Configure(new OverlayTuning(
-            SchemaVersion: 1, Version: 1,
-            Pause: new OverlayPauseTuning(0f, 10f),
-            SwitchLayout: new OverlaySwitchLayoutTuning(72f, 28f, 16f, 1080f, 1f, 3f),
-            SwitchState: new OverlaySwitchStateTuning(300, 30000, 3000),
-            SettingsGui: new OverlaySettingsGuiTuning(280f, 196f),
-            RiftMenu: new RiftMenuTuning(
-                AnchorCenterX: 0.5f, AnchorCenterY: 0.62f,
-                WidthFraction: 0.11f, HeightFraction: 0.16f, MinDevicePx: 44f)));
+        OverlayTuningHub.Configure(DefaultTuning());
     }
 
     [Theory]
@@ -91,6 +83,114 @@ public class RiftMenuPlacementTests
         // Decision 17 removed the wobble-vs-hitbox problem, but purity still matters: the rect must
         // not depend on any hidden animation state. Same inputs, same rect.
         Assert.Equal(RiftMenuPlacement.Resolve(1920f, 1080f), RiftMenuPlacement.Resolve(1920f, 1080f));
+    }
+
+    // ---- Decision 18: the normalized anchor rect a uGUI node is placed with ----
+
+    [Fact]
+    public void Normalized_rect_is_inside_the_parent()
+    {
+        var n = RiftMenuPlacement.ResolveNormalized();
+        Assert.InRange(n.MinX, 0f, 1f);
+        Assert.InRange(n.MinY, 0f, 1f);
+        Assert.InRange(n.MaxX, 0f, 1f);
+        Assert.InRange(n.MaxY, 0f, 1f);
+        Assert.True(n.Width > 0f && n.Height > 0f);
+        Assert.True(n.MaxX >= n.MinX && n.MaxY >= n.MinY);
+    }
+
+    [Fact]
+    public void Normalized_rect_matches_the_tuning_fractions()
+    {
+        var n = RiftMenuPlacement.ResolveNormalized();
+        Assert.Equal(0.11f, n.Width, 4);
+        Assert.Equal(0.16f, n.Height, 4);
+        // Centred on (0.5, 0.62).
+        Assert.Equal(0.5f, (n.MinX + n.MaxX) / 2f, 4);
+        Assert.Equal(0.62f, (n.MinY + n.MaxY) / 2f, 4);
+    }
+
+    [Fact]
+    public void A_box_wider_than_the_parent_is_clamped_inside_it()
+    {
+        // A pathological tuning (fraction 1.0) must still yield anchors inside 0..1, never outside.
+        OverlayTuningHub.Configure(new OverlayTuning(
+            SchemaVersion: 1, Version: 1,
+            Pause: new OverlayPauseTuning(0f, 10f),
+            SwitchLayout: new OverlaySwitchLayoutTuning(72f, 28f, 16f, 1080f, 1f, 3f),
+            SwitchState: new OverlaySwitchStateTuning(300, 30000, 3000),
+            SettingsGui: new OverlaySettingsGuiTuning(280f, 196f),
+            RiftMenu: new RiftMenuTuning(1.5f, 1.5f, 1.0f, 1.0f, 44f)));
+
+        var n = RiftMenuPlacement.ResolveNormalized();
+        Assert.Equal(0f, n.MinX, 4);
+        Assert.Equal(0f, n.MinY, 4);
+        Assert.Equal(1f, n.MaxX, 4);
+        Assert.Equal(1f, n.MaxY, 4);
+
+        // Restore the shared fixture for the remaining tests in the class.
+        OverlayTuningHub.Configure(DefaultTuning());
+    }
+
+    static OverlayTuning DefaultTuning() => new(
+        SchemaVersion: 1, Version: 1,
+        Pause: new OverlayPauseTuning(0f, 10f),
+        SwitchLayout: new OverlaySwitchLayoutTuning(72f, 28f, 16f, 1080f, 1f, 3f),
+        SwitchState: new OverlaySwitchStateTuning(300, 30000, 3000),
+        SettingsGui: new OverlaySettingsGuiTuning(280f, 196f),
+        RiftMenu: new RiftMenuTuning(0.5f, 0.62f, 0.11f, 0.16f, 44f));
+}
+
+/// <summary>
+/// The mini companion's placement as anchors inside the art node (Decision 18). The parent does NOT
+/// start at 0,0, so this is where the frame-relative math is easy to get wrong: uGUI anchors are
+/// relative to the parent rect, not to the screen.
+/// </summary>
+public class RiftMenuMiniCompanionTests
+{
+    [Fact]
+    public void The_companion_stays_inside_its_parent()
+    {
+        var parent = RiftMenuPlacement.ResolveNormalized().ToOverlayRect();
+        var mini = RiftMenuOverlayLayout.MiniCompanionInParent(parent);
+
+        Assert.InRange(mini.X, 0f, 1f);
+        Assert.InRange(mini.Y, 0f, 1f);
+        Assert.InRange(mini.X + mini.Width, 0f, 1f);
+        Assert.InRange(mini.Y + mini.Height, 0f, 1f);
+        Assert.True(mini.Width > 0f && mini.Height > 0f);
+    }
+
+    /// <summary>
+    /// Pins the actual value at the real call site's parent (0.445, 0.54, 0.11, 0.16). Before the
+    /// origin subtraction this returned ~(4.7, 4.05), i.e. the companion sat ~4 parents away.
+    ///
+    /// The width and height fractions DIFFER (0.18 vs 0.1238) on purpose: the parent is not square
+    /// (0.11 x 0.16), and the companion keeps its own square source aspect, so expressing that square
+    /// in a non-square parent's normalized space cannot use one fraction for both axes.
+    /// </summary>
+    [Fact]
+    public void The_companion_lands_in_the_lower_right_of_the_tear()
+    {
+        var parent = RiftMenuPlacement.ResolveNormalized().ToOverlayRect();
+        var mini = RiftMenuOverlayLayout.MiniCompanionInParent(parent);
+
+        // 0.76/0.74 anchoring of an 0.18-of-width square source.
+        Assert.Equal(0.67f, mini.X, 2);
+        Assert.Equal(0.68f, mini.Y, 2);
+        Assert.Equal(0.18f, mini.Width, 2);
+        Assert.Equal(0.1238f, mini.Height, 3);
+
+        // It is square in the parent's pixels, which is what preserving the source aspect means.
+        Assert.Equal(mini.Width * parent.Width, mini.Height * parent.Height, 4);
+    }
+
+    [Fact]
+    public void A_zero_sized_parent_yields_a_zero_rect_rather_than_a_divide_by_zero()
+    {
+        var mini = RiftMenuOverlayLayout.MiniCompanionInParent(new RiftOverlayRect(0.5f, 0.5f, 0f, 0f));
+        Assert.Equal(0f, mini.Width);
+        Assert.Equal(0f, mini.Height);
     }
 }
 

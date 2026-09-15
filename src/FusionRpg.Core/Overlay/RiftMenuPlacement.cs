@@ -8,6 +8,20 @@ public readonly record struct RiftMenuRect(float X, float Y, float Width, float 
 }
 
 /// <summary>
+/// A normalized anchor rect (0..1 of the parent), the form uGUI wants. Decision 18 places the art +
+/// affordance node by anchoring it into the menu's own RectTransform, so the game's canvas scaling
+/// owns the final pixel size.
+/// </summary>
+public readonly record struct RiftMenuNormalizedRect(float MinX, float MinY, float MaxX, float MaxY)
+{
+    public float Width => MaxX - MinX;
+    public float Height => MaxY - MinY;
+
+    /// <summary>The 0..1 rect in the shape the art's own composition helpers take.</summary>
+    public RiftOverlayRect ToOverlayRect() => new(MinX, MinY, Width, Height);
+}
+
+/// <summary>
 /// The tombstone's placement, derived from <see cref="RiftMenuTuning"/> and the current screen size.
 ///
 /// Decision 17 replaced the old hand-derived *hit box*: hit-testing now belongs to the game's own
@@ -50,5 +64,27 @@ public static class RiftMenuPlacement
         if (screenH > 0f) y = Math.Clamp(y, 0f, screenH - h);
 
         return new RiftMenuRect(x, y, w, h);
+    }
+
+    /// <summary>
+    /// The same placement as a normalized anchor rect for a uGUI node (Decision 18). Kept here beside
+    /// <see cref="Resolve"/> so the art node and the affordance read one source and cannot drift.
+    /// Always inside 0..1: the centre is clamped by half the size, so a wide box on a narrow parent
+    /// pins to the edge rather than hanging off it.
+    /// </summary>
+    public static RiftMenuNormalizedRect ResolveNormalized()
+    {
+        var t = OverlayTuningHub.Tuning.RiftMenu;
+
+        var w = Math.Clamp(t.WidthFraction, 0f, 1f);
+        var h = Math.Clamp(t.HeightFraction, 0f, 1f);
+        var cx = Math.Clamp(t.AnchorCenterX, 0f, 1f);
+        var cy = Math.Clamp(t.AnchorCenterY, 0f, 1f);
+
+        // Keep the box inside the parent: clamp the centre by half the size on each axis.
+        cx = Math.Clamp(cx, w / 2f, 1f - w / 2f);
+        cy = Math.Clamp(cy, h / 2f, 1f - h / 2f);
+
+        return new RiftMenuNormalizedRect(cx - w / 2f, cy - h / 2f, cx + w / 2f, cy + h / 2f);
     }
 }
