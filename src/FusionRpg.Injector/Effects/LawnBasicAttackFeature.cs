@@ -9,9 +9,10 @@ namespace FusionRpg.Injector.Effects;
 /// <para><b>Default OFF — owner decision 2026-09-15 (lawn-combat-wire L-N1).</b> T13's 300-zombie wave
 /// breached the frame budget with the feature on; the owner chose "ship behind the switch, default off"
 /// until a measured perf pass clears it. The env var decides first and is read once at process start:
-/// <c>"0"</c> forces off, <c>"1"</c> forces on (the only way a live proof may enable it — a mid-match debug
-/// toggle leaves already-bound grants live, L-N8). With the env var unset, an explicit debug/QA toggle
-/// may override the default.</para>
+/// <c>"0"</c> forces off, <c>"1"</c> forces on (the only way a live proof may enable it: a mid-match toggle on
+/// never binds actors that spawned while it was off). With the env var unset, an explicit debug/QA toggle
+/// may override the default; turning it off mid-match withdraws every bound basic-attack grant
+/// (<c>LawnBasicAttackGrantBinder.Tick</c>, L-N8).</para>
 ///
 /// <para><b>2026-09-14 correction (lawn-combat-wire T10/T12 live-inert investigation):</b> this used to
 /// read <c>CheatState.On(CheatToggleId)</c> directly, borrowing <c>CheatSchema.EffectiveToggle</c>'s

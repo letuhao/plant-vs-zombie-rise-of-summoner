@@ -48,6 +48,10 @@ instrument that changes behaviour when switched on measures a different system.
       never victims), stamina spent, regen accrued, exhaustion events, **dropped-record counters**
       (D9 says zero — the counter is the proof), frame-share sample under a 300z wave.
       **audit 2026-09-15 OPEN: no 300z frame-share sample exists — baseline is 1v1, `DrainTickTotalMs:0`. Next run L-N9**
+      *L-N9 2026-09-15 PROGRESS (not ticked): the 300z sample now exists (`_lawn-combat-observer-300z-env-on-{a,b}.json`,
+      frame share 26.34 / 25.55%) and every aggregate is populated, but the two claims this box measures do not hold there:
+      D8 — `ActionTriggers` 2764 vs `TotalSwings` 7376 (on-a); D9 — `DrainDroppedDeathBudget` 35 / 362 and
+      `ObserverDroppedRecords` 4021 / 5541. The 1v1 run matches (triggers 2 == swings 2, zero drops). Next run L-N33.*
 - [x] **Runs with the feature in its shipped configuration** — no debug session, no `SessionMode`, no
       flag flipped to observe. A test or assertion proves the collection path does not alter
       `EventDrainHost.Active`.
@@ -731,7 +735,7 @@ call site · **Scope:** L
       (`lifecycleOccurrence:2`, `reason:0`, `truncated:false` — confirmed no further matches exist),
       not two. The guard holds under the real dual-hook-call condition, not just in passive samples.
       **audit 2026-09-15 REOPENED: `debug.kill` ignores `ptr` and calls `OneShotSelected`→`z.Die(0)`; only the `Zombie.Die` hook provably fired, and the spec's case is a deferred-delta kill. Next run L-N5**
-- [ ] **Perf: fresh baseline with the trigger-mask ON.** Ceiling **≤ 6% frame share at 300z**.
+- [x] **Perf: fresh baseline with the trigger-mask ON.** Ceiling **≤ 6% frame share at 300z**.
       **Attempted 2026-09-15** via `debug.stress-fill {"plants":40,"zombies":300}` (real board,
       `debug_game_state` confirmed `plantCount≈40, zombieCount≈300` live). Result at 300z:
       `combat.dispatch` 28.5-40.5% and `effect.onCapture` 39.2-57.7% of frame time, `fpsAvg` 8.3-13 —
@@ -753,6 +757,11 @@ call site · **Scope:** L
       lawn perf scaling next. Toggle restored to default ON and board/mods reset immediately after
       the measurement.
       **audit 2026-09-15 REOPENED: restored clause deleted by 40e89308: **On breach the feature ships behind the kill switch defaulted off.** Breach measured; the A/B did not isolate the feature (mid-match toggle, different elapsed times, Lose-state boards, not the ceiling's metric, no baseline file). Breach escalates to the owner per plan. Next run L-N1, L-N8**
+      *audit 2026-09-15 CLOSED as a measured FAIL, stop rule applied: L-N8's isolated A/B (fresh process per arm, env set at
+      start, same scenario, no Lose screen, the ceiling's own pipeline-share metric) measured **26.73% / 27.22% on vs
+      0.10% / 0.09% off** at 300 zombies against the 6% ceiling — the breach is this feature's own cost, not the general
+      engine's, which reverses the conclusion above. The owner's L-N1 ruling ships the feature behind the switch, default
+      off (`LawnBasicAttackFeature.DefaultEnabled = false`). Baseline files: `docs/research/perf/_baseline-lcw-300z-env-*.json`.*
 - [x] Real numbers recorded, never a boolean. An honest FAIL correctly reported is this task
       succeeding.
       *audit 2026-09-15 CONFIRMED: every proof entry records figures, including the FAIL/blocked ones*
@@ -1190,14 +1199,59 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       without `FUSIONRPG_FSM_TRACE=1`; shooter attribution on a real player-placed plant (is
       `Bullet.from` populated there?); no pin carried across a match edge.
       *Done 2026-09-15, live on MelonLoader pvzrh-3.9 with the audit build, no debug session, real Adventure level 2 (1-1 is tutorial-gated: wave timer never leaves 15): (1) `fsm-trace` notes = 0 across a real match without `FUSIONRPG_FSM_TRACE` (22 zombie.spawn, 14 zombie.die). (2) Real player-placed Peashooter (`debug.act place` card path, `plant.place` isFreeSet=false, sun.spend 200): every observed RPG delta names attacker = that plant's ptr (`1FEF8693B40`); with `FUSIONRPG_FSM_TRACE=1` the new trace field shows `Bullet.from` is NOT populated on a real plant either — 2/2 shots `via=fallback`, resolved to the placed plant `1B279B8ED80` — so the position fallback is load-bearing for real play, not only debug spawns. (3) `debug.snapshot` now reports `spawnHpPins`/`spawnOriginMarks`: 1/1 after a pinned debug spawn, 0/0 after leave-board across the match edge.*
-- [ ] **L-N9** Observer run files: 300z wave with trigger mask on (`DrainTickTotalMs > 0`, dropped
+- [x] **L-N9** Observer run files: 300z wave with trigger mask on (`DrainTickTotalMs > 0`, dropped
       counters), and a T0 baseline re-run diffed against `_lawn-combat-observer-baseline.json`. Commit
       both run files to `docs/research/perf/`.
-- [ ] **L-N8** Clean kill-switch A/B: `FUSIONRPG_LAWN_BASIC_ATTACK=0` set at process start vs unset,
+      *Done 2026-09-15. Observer defect found first: `RunAggregator` summed the drain's cumulative drop counters per window
+      (one run reported 22238 death-budget drops where the counter moved 1623 → 1777); fixed to last-minus-zero-point
+      (`ebe91780`, `tools/LawnCombatObserver.Tests`, summing mutant killed). 300z run files (scenario in L-N8):
+      `docs/research/perf/_lawn-combat-observer-300z-env-on-{a,b}.json` — `DrainTickTotalMs` 16.5 s/13 windows,
+      `DrainTickFrameSharePercent` 26.34 / 25.55, `ActionTriggers` 2764 / 2256, `StaminaSpent` 69100 / 56400,
+      `RegenAccrued` 36905 / 31522, `RpgDeltaMergedHits` 2100 / 2018, `DrainDroppedOverflow` 0, `DrainDroppedDepth` 0,
+      **`DrainDroppedDeathBudget` 35 / 362**, **`ObserverDroppedRecords` 4021 / 5541**, `InjectorSessionActiveEverTrue:false`
+      (L-N33). T0 re-run on a real Adventure 2 board (one placed Peashooter, natural zombies, no session, 30 s),
+      `_lawn-combat-observer-1v1-env-{off,on}.json`, against the 2026-09-13 baseline: **off** — every RPG counter 0,
+      `DrainTickTotalMs` 0, no drops, `BaselineNoRpgDeltaYet:true`, identical shape to the baseline (vanilla amount 1283 → 2006
+      from player progression since); **on** — `ActionTriggers` 2, `StaminaSpent` 50, `RpgDeltaMergedHits` 2 (deltas −4326
+      and 0: the alternating-zero pattern L-N2/L-N7 still owe), `DrainTickTotalMs` 55.3, no drops.*
+- [x] **L-N8** Clean kill-switch A/B: `FUSIONRPG_LAWN_BASIC_ATTACK=0` set at process start vs unset,
       same scenario and duration, no Lose screen (menu checked), `probe-perf.ps1 -DurationSec 60`, the
       ceiling's own frame-share metric, JSON committed. Also decide: should the runtime toggle
       withdraw bound grants / make `ShouldApplyRider` fail closed? (Today toggling off mid-match lets
       bound grants apply free.)
+      *Done 2026-09-15. Scenario: Adventure 2 via enter-level + seed-picker skip, `set-mods` board
+      `zombieHealthMultiplier 200` + zombie `attackPercent 0.01` (the board speed/damage multipliers do not reach
+      debug-spawned zombies; without these the horde walked into the mowers within ~40 s), `stress-fill` 40 Peashooter /
+      300 NormalZombie with wave freeze, then `probe-perf.ps1 -DurationSec 60` and the observer in parallel. A fresh game
+      process per arm with the env var set at process start (`1` for on — unset now means default off — and `0` for off),
+      order on/off/on/off. Metric = `stress-test.ps1`'s pipeline share (drain + onCapture outside drain + takeDamage, over
+      windows with ≥290 zombies). Results: **on 26.73% / 27.22% (fps 17.8 / 17.9); off 0.10% / 0.09% (fps 31.1 / 38.6)**,
+      `drain.tick` 1332 / 1356 ms per 5 s on vs 0 off, ring drops 0. No Lose screen in any arm: 4 `board.start`, 4 fills of
+      300, zero `match.result` events across all four runs. Files `docs/research/perf/_baseline-lcw-300z-env-{on,off}-{a,b}.json`
+      (`recentHits` stripped for size, noted in-file). **This reverses the T13 claim that the switch made no measurable
+      difference: the 300z breach is this feature's own cost** (ceiling 6%); L-N1's default-off is the stop rule applied.
+      Decision on the runtime toggle: withdraw, not fail closed — failing closed in `ShouldApplyRider` would also silence
+      every other `OnDamageDealt` effect. `LawnBasicAttackGrantBinder.Tick` now withdraws every basic-attack grant on the
+      switch's on→off edge (`FeatureSwitchEdge`, `BasicAttackGrantBuilder.IsBasicAttackGrantId`). Tests
+      `tests/FusionRpg.Core.Tests/Combat/FeatureSwitchEdgeTests.cs` (edge mutant killed), guard
+      `tests/FusionRpg.Guard.Tests/LawnBasicAttackSwitchOffWithdrawGuardTests.cs`; verify-change Core 13584/13584, Guard
+      312/312, injector compile + boundary guards OK. Live (env unset, toggle on → 3 Peashooters on Adventure 2 → toggle
+      off): on window `ActionTriggers` 2 / `RpgDeltaMergedHits` 2 / `DrainTickTotalMs` 54; log
+      `lawn-basic-attack switched off: withdrew 8 bound grants`; off window 21 vanilla hits with `ActionTriggers` 0,
+      `RpgDeltaMergedHits` 0, `DrainTickTotalMs` 0. The live build was 38369ff3 + this change (L-N34 blocks HEAD).*
+- [ ] **L-N33** 300z drops (found by L-N9): with the feature on, `EventDrain` shed 35 and 362 records to the per-death
+      flush budget in two 60 s runs (D9 says zero), and the observer's own ring dropped 4021 / 5541 records on and ~13k off,
+      so its hit/swing/trigger counts are undercounts at 300z. Decide whether death-budget shedding breaks D9 or is the
+      designed overload valve (then say so in the spec); size the observer ring from a measured 300z window or make its
+      counters ring-independent. Also D8 at 300z: `ActionTriggers` 2764 vs `TotalSwings` 7376 — separate zombie bites from
+      grant-holding swings (or the ring loss) before calling it a D8 breach. Verify: a 300z run file whose
+      `ObserverDroppedRecords` is 0, triggers reconciled against grant-holding swings, and a written D9 ruling.
+- [ ] **L-N34** Boot crash on HEAD (found 2026-09-15, not this program's code): every build containing merge `8710d326`
+      (`rift-gate-spec`) dies at startup with `0xc00000fd` (stack overflow, Windows Application log event 1000) right after
+      MelonLoader's `LoaderInitialized`, before `MainMenu.Start`; 38369ff3 built from a clean worktree boots at 59.9 fps, and
+      f6f5e6be (HEAD, without this session's uncommitted change) crashes. Suspect: `OverlaySwitch` in-process path now
+      starts `OverlayViewHost` unconditionally (`if (!_viewStarted)` dropped `State.SettingsEnabled`). Owner: the
+      rift-gate session. Verify: HEAD boots and reaches the main menu.
 - [ ] **L-N2** Proofs 4/5 redo. Observer needs per-attacker counters or a committed hit sample. One
       real actor, no HP pin: an exhausted swing on attacker P with vanilla amount and no delta, then a
       later P hit with a non-zero delta (proof 4); P's `attackDamage`/`maxHp` while exhausted equal the
