@@ -1135,9 +1135,10 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
 - [ ] **L-N20** Move the debug-spawn HP pin from a post-write re-assert into a Hub override input
       (`InjectorDerivedOverride` pattern) so a pin never clobbers Hub maxHp bonuses; move pin/ratio
       math into Core with unit tests (currently zero tests, Injector.Tests not in CI).
-- [ ] **L-N21** Move the bullet-shooter fallback matcher (`GameHooks.BulletInit.Postfix`, fixed in
+- [x] **L-N21** Move the bullet-shooter fallback matcher (`GameHooks.BulletInit.Postfix`, fixed in
       `7073ffcb`) into a pure Core function with tests: Sunflower in same row, tie → drop, no column →
       drop, zombie-side bullet, adjacent-lane (Threepeater side pea) residual pinned as a known case.
+      *Done: `FusionRpg.Core.Combat.BulletShooterMatch.Resolve`; `GameHooks.BulletInit.Postfix` calls it. `BulletShooterMatchTests` 8/8 incl. the pinned Threepeater residual; mutation (tie rule removed) fails `Two_candidates_with_the_same_score_drop_the_hit`. verify-change EXIT=0: Core.Tests 13532, injector compile + 4 guards OK, Guard.Tests 266. Live check on a real placed plant is still L-N22.*
 - [x] **L-N23** Verification boundaries: add an owner mapping for `tests/FusionRpg.Core.Tests/Atoms/**`
       (currently "BOUNDARY MISSING"); make `injector-fallback` run the injector host compile (scratch
       `OutputPath`) + single-writer/funnel/actor-hub/secondary guards instead of only Core.Tests.

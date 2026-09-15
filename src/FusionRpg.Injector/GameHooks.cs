@@ -1344,31 +1344,14 @@ public static class GameHooks
                         var side = __instance.shootByZombie ? "zombie" : "plant";
                         var row = __instance.theBulletRow;
                         var bulletCol = FusionRpg.Injector.Lawn.LawnCoords.ColFromX(__instance.transform.position.x);
-                        if (bulletCol >= 0)
+                        var best = FusionRpg.Core.Combat.BulletShooterMatch.Resolve(
+                            Effects.InjectorBoardSnapshot.Capture().Entities, side, row, bulletCol);
+                        if (best != null &&
+                            ulong.TryParse(best.Ptr, System.Globalization.NumberStyles.HexNumber,
+                                System.Globalization.CultureInfo.InvariantCulture, out var raw))
                         {
-                            var snap = Effects.InjectorBoardSnapshot.Capture();
-                            FusionRpg.Core.Combat.BoardEntitySnap? best = null;
-                            var bestScore = int.MaxValue;
-                            var tie = false;
-                            foreach (var e in snap.Entities)
-                            {
-                                if (!e.Living || e.Row != row || !string.Equals(e.Side, side, StringComparison.OrdinalIgnoreCase))
-                                    continue;
-                                var dist = Math.Abs(e.Col - bulletCol);
-                                if (dist > 1) continue;
-                                // Prefer the occupant behind (plant) / ahead-of-house (zombie) side of the pea.
-                                var behind = side == "plant" ? e.Col <= bulletCol : e.Col >= bulletCol;
-                                var score = dist * 2 + (behind ? 0 : 1);
-                                if (score < bestScore) { best = e; bestScore = score; tie = false; }
-                                else if (score == bestScore) tie = true;
-                            }
-                            if (best != null && !tie &&
-                                ulong.TryParse(best.Ptr, System.Globalization.NumberStyles.HexNumber,
-                                    System.Globalization.CultureInfo.InvariantCulture, out var raw))
-                            {
-                                shooterPtr = unchecked((IntPtr)raw);
-                                shooterTypeId = best.TypeId;
-                            }
+                            shooterPtr = unchecked((IntPtr)raw);
+                            shooterTypeId = best.TypeId;
                         }
                     }
                     catch { }
