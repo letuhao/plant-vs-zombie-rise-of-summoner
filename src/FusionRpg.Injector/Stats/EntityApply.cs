@@ -102,6 +102,14 @@ public static class EntityApply
             if (hasExtras)
                 EntityStatWriter.WritePlantExtras(p);
 
+            // lawn-combat-wire (2026-09-15 finding): re-assert a debug-spawn max-HP pin on every
+            // apply, regardless of includeAbsolute — see InjectorSpawnHpPin's own doc for why the
+            // global P-HP/P-MAXHP channel this bypasses does not survive an includeAbsolute:false
+            // reapply (e.g. cheat.pushScales). Ratio-preserving, never a full-heal: a no-op both for
+            // every plant that was never pinned and for one whose live max already meets the pin.
+            if (InjectorSpawnHpPin.TryGet(key, out var pinnedMaxHp) && p.thePlantHealth > 0)
+                EntityStatWriter.ForceSetPlantMaxHpPreserveRatio(p, pinnedMaxHp, source + ":hp-pin");
+
             if (shouldWrite && RpgHost.Client != null)
             {
                 try
@@ -231,6 +239,10 @@ public static class EntityApply
 
             if (hasExtras)
                 EntityStatWriter.WriteZombieExtras(z);
+
+            // See the identical comment on RunPlant above — same fix, same reason.
+            if (InjectorSpawnHpPin.TryGet(key, out var pinnedMaxHpZ) && ZombieCombatFields.GetHp(z) > 0)
+                EntityStatWriter.ForceSetZombieMaxHpPreserveRatio(z, pinnedMaxHpZ, source + ":hp-pin");
 
             if (shouldWrite && RpgHost.Client != null)
             {

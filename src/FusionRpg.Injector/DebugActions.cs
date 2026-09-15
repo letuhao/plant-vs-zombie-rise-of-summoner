@@ -53,6 +53,7 @@ public static class DebugActions
             CheatState.Note($"debug spawn plant {typeId} @{CheatState.SpawnCol},{CheatState.SpawnRow}");
             MaybePinDerived(p, plant.Pointer.ToString("X"));
             MaybePinElement(p, plant.Pointer.ToString("X"));
+            MaybePinSpawnHp(p, plant.Pointer.ToString("X"));
             return true;
         }
         catch (Exception ex)
@@ -117,6 +118,7 @@ public static class DebugActions
             CheatState.Note($"debug spawn zombie {typeId} row={CheatState.SpawnRow}");
             MaybePinDerived(p, z.Pointer.ToString("X"));
             MaybePinElement(p, z.Pointer.ToString("X"));
+            MaybePinSpawnHp(p, z.Pointer.ToString("X"));
             return true;
         }
         catch (Exception ex)
@@ -1855,6 +1857,35 @@ public static class DebugActions
         catch (Exception ex)
         {
             CheatState.Error("debug spawn element pin: " + ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// lawn-combat-wire (2026-09-15 finding): `ApplyAbsoluteProps`'s own "hp"/"maxHp" write the
+    /// GLOBAL `P-HP`/`P-MAXHP` Tab-B channels, which the very next `includeAbsolute: false` reapply
+    /// (e.g. `cheat.pushScales`) silently drops for every plant/zombie on the board — a debug-spawned
+    /// entity's own spawn-time HP override does not survive normal cheat-state churn. Pin it
+    /// per-ptr too, via <see cref="InjectorSpawnHpPin"/>, so <see cref="EntityApply"/> can re-assert
+    /// it on every future reapply for this one ptr regardless of that flag. Additive: the global
+    /// channel write in `ApplyAbsoluteProps` is unchanged, so Tab-B's own board-wide behaviour is
+    /// untouched — this only makes the SAME spawn-time value durable for the one ptr it was meant for.
+    /// </summary>
+    static void MaybePinSpawnHp(JsonElement p, string ptr)
+    {
+        // Prefer "maxHp" (the durable target this pin exists to protect); "hp" alone covers the
+        // common full-health spawn shape where the caller only gave one number for both.
+        int target;
+        if (HasInt(p, "maxHp", out var maxHp)) target = maxHp;
+        else if (HasInt(p, "hp", out var hp)) target = hp;
+        else return;
+
+        try
+        {
+            InjectorSpawnHpPin.Pin(ptr, target);
+        }
+        catch (Exception ex)
+        {
+            CheatState.Error("debug spawn hp pin: " + ex.Message);
         }
     }
 }

@@ -302,6 +302,57 @@ public static class EntityStatWriter
         catch (Exception ex) { CheatState.Error("force zombie hp: " + ex.Message); }
     }
 
+    /// <summary>
+    /// Re-asserts a debug-spawn's pinned max HP without full-healing (<see cref="InjectorSpawnHpPin"/>,
+    /// lawn-combat-wire 2026-09-15) — <see cref="ForceSetPlantHp"/> sets current HP to its own `hp`
+    /// argument unconditionally, which is exactly wrong for a per-reapply re-assert: it would snap the
+    /// plant back to full health every time the max-HP override needed correcting, undoing whatever
+    /// real damage combat had already dealt. No-op when the live max already meets or exceeds the pin
+    /// (the common case, once applied) — only fires the one time an <c>includeAbsolute: false</c>
+    /// reapply has actually reverted it.
+    /// </summary>
+    public static void ForceSetPlantMaxHpPreserveRatio(Plant p, long targetMaxHp, string source)
+    {
+        if (p == null) return;
+        try
+        {
+            var liveMax = (long)p.thePlantMaxHealth;
+            if (liveMax >= targetMaxHp) return;
+            var liveHp = (long)p.thePlantHealth;
+            var ratio = liveMax > 0 ? (double)liveHp / liveMax : 1.0;
+            var newHp = Math.Clamp((long)Math.Round(targetMaxHp * ratio), 1, targetMaxHp);
+            var max = ClampToInt32Reporting(targetMaxHp, "plant.maxHp", source);
+            var hp = ClampToInt32Reporting(newHp, "plant.hp", source);
+            p.thePlantMaxHealth = max;
+            p.thePlantHealth = hp;
+            try { p.UpdateText(); } catch { }
+            Remember(p.Pointer, hp, max, p.attackDamage, source);
+            ProofWrite("plant", p.Pointer, source, liveHp, liveMax, p.attackDamage, hp, max, p.attackDamage);
+        }
+        catch (Exception ex) { CheatState.Error("force plant maxhp preserve-ratio: " + ex.Message); }
+    }
+
+    /// <summary>Zombie overload of <see cref="ForceSetPlantMaxHpPreserveRatio"/> — see that overload's
+    /// doc for the shared contract.</summary>
+    public static void ForceSetZombieMaxHpPreserveRatio(Zombie z, long targetMaxHp, string source)
+    {
+        if (z == null) return;
+        try
+        {
+            var liveMax = ZombieCombatFields.GetMaxHp(z);
+            if (liveMax >= targetMaxHp) return;
+            var liveHp = ZombieCombatFields.GetHp(z);
+            var ratio = liveMax > 0 ? (double)liveHp / liveMax : 1.0;
+            var newHp = Math.Clamp((long)Math.Round(targetMaxHp * ratio), 1, targetMaxHp);
+            ZombieCombatFields.SetMaxHp(z, targetMaxHp);
+            ZombieCombatFields.SetHp(z, newHp);
+            try { z.UpdateHealthText(); } catch { }
+            Remember(z.Pointer, newHp, targetMaxHp, z.theAttackDamage, source);
+            ProofWrite("zombie", z.Pointer, source, liveHp, liveMax, z.theAttackDamage, newHp, targetMaxHp, z.theAttackDamage);
+        }
+        catch (Exception ex) { CheatState.Error("force zombie maxhp preserve-ratio: " + ex.Message); }
+    }
+
     public static void ForceKillPlant(Plant p, string source)
     {
         if (p == null) return;
