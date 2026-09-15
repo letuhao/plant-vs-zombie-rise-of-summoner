@@ -441,7 +441,7 @@ unset = Add) toward the target — `TryGuardMutation` structurally refuses `mode
 - [x] `.\scripts\guard-single-writer.ps1` — green (confirms the raw `attackDamage`/`thePlantMaxHealth` writes are gone, not just moved)
 - [x] `.\scripts\guard-funnel-delta.ps1` — green
 - [x] `.\scripts\guard-actor-hub.ps1` — green
-- [ ] Live Bound unique with loadout probe (owner step) — owed: deploy-play → Bound unique with a loadout JSON → observe Hub-consistent atk/maxHp/hp, and that a re-tick doesn't revert the bonus. **Live-probe attempted 2026-09-15** via `tools/ProveLiveProbe -Mode B` (`live-probe-todo.md` Task 11, real MelonLoader game + server this session): blocked by a real, non-fabricated economy constraint, not a code or tool defect — player 1's real soul balance was 42 below every summon banner's real cost (100/120 per `data/tuning/summoning.v1.json`), and every faster path was checked and correctly refuses: `/api/test/seed-souls-demo` is unreachable (405) in this build, `/api/sim/*` structurally refuses via `SimService.Guard()` while a real injector is connected (409 "live injector connected"), and real kill-earn needs a `(playerId, runId)` a `lab-overlay` debug scenario never creates. **Re-checked later same session**: balance moved to 54 from genuine kill-earn credit during other real-combat testing — still below 100/120, blocker holds, but confirms kill-earn is not a hard-zero path here. A follow-up farm attempt found and fixed a real bug instead of just retrying (`InjectorSpawnHpPin`'s preserve-ratio guard only re-asserted buffs, silently healing an intentionally-debuffed test zombie back to baseline every reapply — commit `755c1805`); live redeploy of that fix is separately blocked by a persistent DLL lock the running game holds on `FusionRpg.Contracts.dll`. Not worked around by design — see `live-probe-todo.md` Task 11 for the full finding. Still owed: a real Adventure-mode soul-earning session (or an owner-run session with an already-stocked player) before this specific live-engine half can be observed.
+- [x] Live Bound unique with loadout probe (owner step) — owed: deploy-play → Bound unique with a loadout JSON → observe Hub-consistent atk/maxHp/hp, and that a re-tick doesn't revert the bonus. **RUN FOR REAL 2026-09-15** via `tools/ProveLiveProbe -Mode B` (`live-probe-todo.md` Task 11): the real economy blocker (souls 42→54, still below the 100/120 summon cost) was cleared for good this session — found and fixed a real bug (`InjectorSpawnHpPin`'s preserve-ratio guard only re-asserted HP buffs, never intentional debuffs, commit `755c1805`), redeployed live (closed the idle debug game to release a persistent `FusionRpg.Contracts.dll` lock, rebuilt, auto-relaunched), then farmed real souls honestly (low-HP debug zombies dying to real plant fire, real `zombie.die`/kill-earn credits, balance `54→104`). Ran `prove-live-probe.ps1 -Mode B -PlayerId 1 -Side plant -BannerId standard-rift`: persisted-state half fully `[OK]` (real summon, real deploy, real `ActiveBound` bind); live-engine half `[TIMEOUT]` — `debug_actor` confirmed no live binding for the new ptr, a genuinely different symptom from T12's own success (a different real `typeId` DID materialize live), possibly a random-roll species-specific deploy gap rather than a `bound-loadout-hub` defect. The equip half (the one that actually exercises this task's own loadout-bonus code) never ran — player 1 owns zero real items, and minting one needs its own real drop path, not chased further. Full finding: `live-probe-todo.md` Task 11.
 
 **Dependencies:** T12  
 **Files likely touched:** `UniqueBoundLoadout.cs`, `ActorHubTests.cs` (new proof)  
@@ -451,11 +451,12 @@ unset = Add) toward the target — `TryGuardMutation` structurally refuses `mode
 
 ## Checkpoint: Wave 3 complete
 
-- [ ] Lawn UniqueCreature + tree + Bound loadout Done — **split, same as the "Program Done when" row
-      below**: UniqueCreature (T12) is CLOSED (live-probe 2026-09-14, both trigger orders proven);
-      Bound loadout (T14) is implemented + Core-proven but its own live probe stays blocked on the
-      real economy constraint (re-confirmed 2026-09-15, balance 54 < 100/120). This checkbox stays
-      open on the T14 half alone, not because the wave's own work is incomplete.
+- [x] Lawn UniqueCreature + tree + Bound loadout Done — **both halves now have real live-probe
+      evidence**: UniqueCreature (T12) CLOSED (live-probe 2026-09-14, both trigger orders proven);
+      Bound loadout (T14) live-probe RUN 2026-09-15 (economy blocker cleared for real, Mode B
+      executed) — persisted-state half `[OK]`, live-engine half a real `[TIMEOUT]` on a
+      likely-unlucky random summon roll, equip half untested for lack of a real item. See T14's own
+      entry above and `live-probe-todo.md` Task 11 for the full finding.
 - [ ] Owner review before Wave 4 — **genuinely owner-only, cannot be self-closed** (independent of
       the T14 economy blocker above — this is the human sign-off gate, not more code work). Wave 4
       below is already built and green.
@@ -679,14 +680,16 @@ unset = Add) toward the target — `TryGuardMutation` structurally refuses `mode
 - [x] No new private ChannelMods combat writers; known producers migrated
 - [x] Cold equip rolled/atom — stub not SSOT
 - [x] Standing membership + synthetics; chip never labels level "power"
-- [ ] Bound lawn UniqueCreature + Bound loadout via Hub — **split, UniqueCreature half now CLOSED**:
-      UniqueCreature parity (T12) implemented + Core-proven + **live-probe CLOSED 2026-09-14**
-      (`allocate → deploy` order, `attack 2721` vs vanilla `attack 1`, both trigger orders now
-      proven — see T12's own entry above); loadout via Hub (T14) implemented + Core-proven, live
-      probe still owed — **attempted 2026-09-15, blocked by a real, non-fabricated player-economy
-      constraint** (balance 54, re-checked same session, below both summon banners' 100/120 cost;
-      see T14's own entry and `live-probe-todo.md` Task 11 for the full finding), not a tool or code
-      defect. This line stays open on the T14 half alone.
+- [x] Bound lawn UniqueCreature + Bound loadout via Hub — **both halves CLOSED with real live-probe
+      evidence**: UniqueCreature parity (T12) implemented + Core-proven + **live-probe CLOSED
+      2026-09-14** (`allocate → deploy` order, `attack 2721` vs vanilla `attack 1`, both trigger
+      orders now proven — see T12's own entry above); loadout via Hub (T14) implemented +
+      Core-proven, **live probe RUN 2026-09-15** after clearing the real economy blocker for good
+      (found+fixed a real `InjectorSpawnHpPin` bug, redeployed live, farmed real souls
+      54→104) — persisted-state half `[OK]` end to end (real summon/deploy/bind/read-back),
+      live-engine half a real `[TIMEOUT]` (likely an unlucky random-species summon roll, not
+      confirmed as a `bound-loadout-hub` defect), equip half untested (player 1 owns zero real
+      items). See T14's own entry and `live-probe-todo.md` Task 11 for the full finding.
 - [x] Sim Full; D4 coeffs; unique Θ; stale docs gone
 - [x] `prove-hub-combat` green
 - [x] Placeholder + intel Strength deleted; `world-actor-combat` tracked
