@@ -43,9 +43,10 @@ public class LawnBasicAttackFeatureFlagTests
     /// trip whatsoever — this assertion cannot be broken by a rehydrate bug, a reset, or a stale
     /// session document, because nothing in its evaluation touches any of those systems.</summary>
     [Fact]
-    public void DefaultOn_constant_is_true()
+    public void DefaultEnabled_constant_is_false_by_owner_decision()
     {
-        Assert.True(LawnBasicAttackFeature.DefaultOn);
+        // 2026-09-15 owner decision (lawn-combat-wire L-N1): ship behind the switch, default off.
+        Assert.False(LawnBasicAttackFeature.DefaultEnabled);
     }
 
     /// <summary>Reproduces the exact live shape: nobody has ever explicitly toggled the id this
@@ -56,10 +57,10 @@ public class LawnBasicAttackFeatureFlagTests
     /// fallback at all for its default — only an explicit override (<see cref="CheatState.IsUserSet"/>
     /// true) can move it off <see cref="LawnBasicAttackFeature.DefaultOn"/>.</summary>
     [Fact]
-    public void Enabled_defaults_on_with_no_explicit_toggle_ever_set()
+    public void Enabled_defaults_off_with_no_explicit_toggle_ever_set()
     {
         Assert.False(CheatState.IsUserSet(LawnBasicAttackFeature.CheatToggleId));
-        Assert.True(LawnBasicAttackFeature.Enabled);
+        Assert.False(LawnBasicAttackFeature.Enabled);
     }
 
     /// <summary>The debug/QA override surface this module's doc comment promises is still real: a
@@ -97,11 +98,11 @@ public class LawnBasicAttackFeatureFlagTests
     /// raw <see cref="CheatEntry.Enabled"/> field itself being <c>false</c> must never leak into this
     /// flag's default once nothing has explicitly set it.</summary>
     [Fact]
-    public void Enabled_ignores_a_stale_false_backing_field_when_never_explicitly_set()
+    public void Enabled_ignores_a_stale_true_backing_field_when_never_explicitly_set()
     {
-        CheatState.Get(LawnBasicAttackFeature.CheatToggleId).Enabled = false; // corrupt the backing field directly
+        CheatState.Get(LawnBasicAttackFeature.CheatToggleId).Enabled = true; // corrupt the backing field directly
         Assert.False(CheatState.IsUserSet(LawnBasicAttackFeature.CheatToggleId)); // still not user-set
 
-        Assert.True(LawnBasicAttackFeature.Enabled);
+        Assert.False(LawnBasicAttackFeature.Enabled);
     }
 }

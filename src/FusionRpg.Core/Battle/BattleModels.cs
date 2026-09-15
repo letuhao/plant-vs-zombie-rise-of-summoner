@@ -387,15 +387,31 @@ public static class BattleRuleset
     /// the single <c>/1000</c> happens last. <c>checked</c> so an absurd share throws rather than
     /// wrapping — PS-8 exempt as an arithmetic guard, not a progression ceiling.</para>
     /// </summary>
-    public static long BaseResourceMax(int theta, string resourceId, long setupMaxHp)
+    public static long BaseResourceMax(int theta, string resourceId, long setupMaxHp) =>
+        BaseResourceMax(theta, resourceId, setupMaxHp, ResourceTuning);
+
+    /// <summary><see cref="BaseResourceMax(int, string, long)"/> against an explicit tuning instance
+    /// instead of the configured one — lets a test read a real shipped file without mutating ambient
+    /// state shared by parallel test collections.</summary>
+    public static long BaseResourceMax(int theta, string resourceId, long setupMaxHp, BattleResourceTuning tuning)
     {
+        ArgumentNullException.ThrowIfNull(tuning);
         if (resourceId == "hp") return setupMaxHp;
-        return checked(BaseHp(theta) * ResourceTuning.ShareOf(resourceId)) / 1000;
+        return checked(BaseHp(theta) * tuning.ShareOf(resourceId)) / 1000;
     }
 
     /// <summary>
-    /// `battle-tempo` `battle-resources` — in-battle regen, which is <b>0 for every resource</b>, and
-    /// that is a design position rather than an unset placeholder (spec §2.5).
+    /// `battle-tempo` `battle-resources` — per-tick regen for every Hub compose that seeds the resource
+    /// baseline: the lawn, the <c>/sheet</c>, and battle (<c>BattleHubCompose</c>).
+    ///
+    /// <para><b>Owner decision 2026-09-15 (lawn-combat-wire L-N28): battle stamina regen is ON.</b> T11's
+    /// stamina row reaches battle through the shared <c>ResourceBaselineSubsystem</c> on purpose, as
+    /// <c>spec-resource-subtick.md</c> said ("regen earns its tuning rows in both battle and the lawn").
+    /// <c>resource-hub-ssot.md</c> §11 is amended to match: pools persist and refill at rest, and a resource
+    /// with an authored regen row also regenerates during an encounter. The history below is kept
+    /// because it explains why the other rows stay 0.</para>
+    ///
+    /// <para>Originally in-battle regen was <b>0 for every resource</b> as a design position (spec §2.5).</para>
     ///
     /// <para>Two independent reasons were originally given. (1) — <b>resolved by S10.1, 2026-09-13</b>
     /// — the reader used to round the channel to a whole <c>long</c>, so the smallest expressible
@@ -405,13 +421,13 @@ public static class BattleRuleset
     /// between that and "nothing". <see cref="Stats.Derived.ResourceChannelReader.RegenPerMilleTick"/>
     /// now reads the rate in per-mille per tick and <see cref="Actions.Cost.ResourcePoolState"/>
     /// carries the remainder, so 999 rates exist inside that former gap and a rate is no longer
-    /// forced to be coarse. (2) still stands, and is now the whole of the reason: `resource-hub-ssot.md`
-    /// §11 — pools "persist across a run and refill <b>at rest</b>", a battle is not a rest, and a pool
-    /// that refills mid-battle is the per-encounter model the hub explicitly rejects.</para>
+    /// forced to be coarse. (2) was that `resource-hub-ssot.md` §11 said pools "refill <b>at rest</b>" and
+    /// a battle is not a rest — superseded for authored rows by the 2026-09-15 decision above (§11
+    /// amended); it still argues for keeping a row at 0 until something deliberately authors it.</para>
     ///
     /// <para><b>T11 (lawn-combat-wire, spec-lawn-combat-calibration.md, 2026-09-14) authors the first
-    /// non-zero row.</b> `stamina` now regenerates — the other four ids stay exactly 0, by the
-    /// surviving reason above (poise) or because nothing spends them yet (hunger/spirit/qi). The rate
+    /// non-zero row.</b> `stamina` now regenerates, in battle as well as on the lawn — the other four ids
+    /// stay exactly 0, by poise's scarcity argument or because nothing spends them yet (hunger/spirit/qi). The rate
     /// is expressed as <see cref="BattleResourceTuning.RegenShareOf"/> — a per-mille SHARE of the
     /// resource's OWN pool max, regenerated per second — so it projects through <see cref="BaseHp"/>
     /// the same way <see cref="BaseResourceMax"/> already does, rather than forking a second,
@@ -423,12 +439,18 @@ public static class BattleRuleset
     /// expressible, so this can no longer be a <c>long</c>: <c>regenPerSecond / TicksPerSecond</c>,
     /// dividing once, at the end, from long arithmetic into the one double this method returns.</para>
     /// </summary>
-    public static double BaseResourceRegen(int theta, string resourceId)
+    public static double BaseResourceRegen(int theta, string resourceId) =>
+        BaseResourceRegen(theta, resourceId, ResourceTuning);
+
+    /// <summary><see cref="BaseResourceRegen(int, string)"/> against an explicit tuning instance — see
+    /// the matching <see cref="BaseResourceMax(int, string, long, BattleResourceTuning)"/> overload.</summary>
+    public static double BaseResourceRegen(int theta, string resourceId, BattleResourceTuning tuning)
     {
+        ArgumentNullException.ThrowIfNull(tuning);
         if (resourceId == "hp") return 0;
 
-        var poolMax = checked(BaseHp(theta) * ResourceTuning.ShareOf(resourceId)) / 1000;
-        var regenPerSecond = checked(poolMax * ResourceTuning.RegenShareOf(resourceId)) / 1000;
+        var poolMax = checked(BaseHp(theta) * tuning.ShareOf(resourceId)) / 1000;
+        var regenPerSecond = checked(poolMax * tuning.RegenShareOf(resourceId)) / 1000;
         return regenPerSecond / (double)TicksPerSecond;
     }
 

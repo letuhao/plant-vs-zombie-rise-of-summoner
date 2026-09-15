@@ -1098,13 +1098,13 @@ seven proofs and their falsifiers executed, run file written.
 - [ ] Is the measured frame cost worth the feature (ceiling ≤ 6% at 300z is a proposal, not a verdict)
 - [ ] Does the elemental VFX read clearly on a busy board
 - [ ] Is the exhaustion cadence a mechanic or an annoyance
-- [ ] **Ship / ship-behind-switch-defaulted-off / stop**
+- [x] **Ship / ship-behind-switch-defaulted-off / stop**
 
 *Eyes are a secondary signal here — visual breakage the instrument has no channel for. Never the
 metric.*
 
 ### Program close
-
+      *Owner ruling 2026-09-15 (asked directly in the audit session): **ship behind the switch, defaulted off.** Implemented under L-N1.*
 - [ ] Deferred items still tracked in the ideal, none silently absorbed or dropped
 - [ ] The observer's run file committed as the program's evidence record
 
@@ -1168,8 +1168,9 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
 
 *Added by the audit continuation: **L-N28** (battle stamina regen on or lawn-only — see its findings in Phase C list).*
 
-- [ ] **L-N1** Perf ceiling breached (T13). Plan: breach escalates to owner; spec default on breach is
+- [x] **L-N1** Perf ceiling breached (T13). Plan: breach escalates to owner; spec default on breach is
       **kill switch defaulted off**. Owner rules ship / ship-behind-switch-off / stop after L-N8 data.
+      *Done: owner ruled "ship behind switch, default OFF" (2026-09-15). `LawnBasicAttackFeature.DefaultEnabled = false`; env `FUSIONRPG_LAWN_BASIC_ATTACK=0` forces off, `=1` forces on at process start (the only sanctioned enable for live proofs, per L-N8); CheatSchema/CheatRegistry display default follows. Tests: `LawnBasicAttackDefaultOffGuardTests` (Guard, CI), `CheatSchemaTests` (CheatCore 41/41), `LawnBasicAttackFeatureFlagTests` (Injector.Tests 5/5, local only). Also fixed a verification-boundary defect: `src/FusionRpg.CheatCore/**` mapped to Core.Tests and never ran CheatCore.Tests. verify-change: Core 13575, Guard 293, CheatCore 41, injector-compile + 4 guards OK.*
 - [ ] **L-N11** Spec amendments: `spec-element-cache-invalidate.md` / `spec-basic-attack-grant.md:84-92`
       still require hypno re-bake; the finding says elements are hypno-invariant. Owner approves the
       rewording; then T3 bullet 1 and T10 hypno bullet are reworded and ticked.
@@ -1227,7 +1228,7 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       which also sees dying objects. Also confirm `Zombie.InitHealth` never fires on a dying zombie
       between `Die` and `DestoryZombie` — that would re-open the once-per-death latch and emit a second
       `zombie.die`.
-- [ ] **L-N28** Cross-mode regen check (found by L-N15): T11 `c30275e5` made `BattleModels.BaseResourceRegen`
+- [x] **L-N28** Cross-mode regen check (found by L-N15): T11 `c30275e5` made `BattleModels.BaseResourceRegen`
       non-zero through `ResourceBaselineSubsystem`, shared by every `seedResourceBaseline: true` Hub caller
       (lawn `CheatState.ActorHub`, `UniqueActorHubCompose`). List every such caller, confirm which modes
       now regenerate stamina, and confirm battle/expedition goldens did not move (or that the move is
@@ -1242,3 +1243,4 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       `ActorSheet|DerivedAudit|ProjectStanding|UniqueActorHub`); Core battle goldens pass (13572). Owner rules: battle
       stamina regen on (amend §11 and the BattleModels doc, add a battle test on real v2 numbers) or lawn-only (regen
       opt-in per compose, battle off).*
+      *Done: owner ruled "battle regen on" (2026-09-15). `resource-hub-ssot.md` §11 amended (authored regen rows also regenerate during an encounter; pools still not refilled per encounter); `BattleModels.BaseResourceRegen` doc records the decision; explicit-tuning overloads + optional `ResourceBaselineSubsystem` tuning param let `BattleStaminaRegenTests` (3) read the real `battle-resources.v2.json` without mutating ambient state: battle compose seeds the seam, only stamina regenerates, a spent battle pool recovers `min(max, ticks*rate/1000)`. Mutant (subsystem ignores explicit tuning) fails 2 of 3.*

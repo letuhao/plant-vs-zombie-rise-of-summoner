@@ -568,9 +568,10 @@ honestly split if T14 is still failing).
 
 ## Next run — audit 2026-09-15 gaps
 
-- [ ] **Task 13 — owner ruling on T14 funding.** The 54→104 soul balance came from debug-spawned
+- [x] **Task 13 — owner ruling on T14 funding.** The 54→104 soul balance came from debug-spawned
       zombie kills (standard violation, see Task 11 audit note). Owner rules: accept, or treat player
       1's balance and the retired `typeId=3000` specimen as tainted. Default until ruled: tainted.
+      *Owner ruling 2026-09-15: **tainted.** Player 1's debug-funded balance and the retired `typeId=3000` specimen are never evidence for an RPG Server proof; T14 waits for souls earned on a real board. Task 18's step 0 now fails any Mode B run whose kill souls came from debug- or cheat-spawned entities.*
 - [ ] **Task 14 — real owned item.** Obtain one equippable item instance for the probe player through a
       real drop/reward path (no debug mint, no SIM). Verify: `GET /api/items/armoury/{playerId}` lists
       it with a real provenance.

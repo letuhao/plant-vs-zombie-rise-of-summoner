@@ -283,6 +283,12 @@ Keeping the second line is what stops this becoming a fifth content system.
 
 Pools **persist across a run and refill at rest.** They are not per-encounter.
 
+**Amended 2026-09-15 (owner decision, lawn-combat-wire `L-N28`):** a resource with an authored regen row
+(`data/tuning/battle-resources.v{n}.json` `regenPerSecondShareMilli`) also regenerates **during** an
+encounter — on the lawn and in battle alike, through the one shared `ResourceBaselineSubsystem`. Today
+that is `stamina` only (T11, `battle-resources.v2.json`); every other row is an explicit `0`. Pools are
+still not per-encounter: nothing refills them to max when an encounter starts.
+
 ---
 
 ## 12. What this hub does not own

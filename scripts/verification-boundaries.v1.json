@@ -6,7 +6,8 @@
     "server": "tests/FusionRpg.Server.Tests/FusionRpg.Server.Tests.csproj",
     "guard": "tests/FusionRpg.Guard.Tests/FusionRpg.Guard.Tests.csproj",
     "elementenumgen": "tests/FusionRpg.ElementEnumGen.Tests/FusionRpg.ElementEnumGen.Tests.csproj",
-    "proveliveprobe": "tools/ProveLiveProbe.Tests/ProveLiveProbe.Tests.csproj"
+    "proveliveprobe": "tools/ProveLiveProbe.Tests/ProveLiveProbe.Tests.csproj",
+    "cheatcore": "tests/FusionRpg.CheatCore.Tests/FusionRpg.CheatCore.Tests.csproj"
   },
   "guards": {
     "dal": "scripts/guard-dal.ps1",
@@ -26,7 +27,7 @@
     { "id": "data-fallback", "kind": "owner", "paths": ["src/FusionRpg.Data/**"], "project": "data", "level": "module", "guards": ["dal", "test-substrate"] },
     { "id": "server-fallback", "kind": "owner", "paths": ["src/FusionRpg.Server/**"], "project": "server", "level": "module", "guards": ["dal"] },
     { "id": "contracts-fallback", "kind": "owner", "paths": ["src/FusionRpg.Contracts/**"], "project": "core", "level": "module", "guards": [] },
-    { "id": "cheatcore-fallback", "kind": "owner", "paths": ["src/FusionRpg.CheatCore/**"], "project": "core", "level": "module", "guards": [] }
+    { "id": "cheatcore-fallback", "kind": "owner", "paths": ["src/FusionRpg.CheatCore/**", "tests/FusionRpg.CheatCore.Tests/**"], "project": "cheatcore", "level": "module", "guards": [] }
     ,{ "id": "injector-fallback", "kind": "owner", "paths": ["src/FusionRpg.Injector/**", "src/FusionRpg.Injector.BepInEx/**", "src/FusionRpg.Injector.MelonLoader/**", "src/FusionRpg.Injector.MelonLoader.39/**", "scripts/guard-injector-compile.ps1"], "project": "guard", "level": "module", "guards": ["injector-compile", "single-writer", "funnel-delta", "actor-hub", "secondary-no-unity"] }
     ,{ "id": "launcher-fallback", "kind": "owner", "paths": ["src/FusionRpg.Launcher/**"], "project": "guard", "level": "module", "guards": [] }
     ,{ "id": "seed-atoms-fallback", "kind": "owner", "paths": ["data/seed/atoms/**", "tools/ElementEnumGen/**"], "project": "core", "level": "module", "guards": [] }
@@ -37,6 +38,7 @@
     ,{ "id": "guard-tests-fallback", "kind": "owner", "paths": ["tests/FusionRpg.Guard.Tests/**"], "project": "guard", "level": "module", "guards": [] }
     ,{ "id": "proveliveprobe-fallback", "kind": "owner", "paths": ["tools/ProveLiveProbe/**", "tools/ProveLiveProbe.Tests/**"], "project": "proveliveprobe", "level": "module", "guards": ["debug-scope"] }
     ,{ "id": "mutant-sets-fallback", "kind": "owner", "paths": ["scripts/mutants/**"], "project": "core", "level": "module", "guards": [] }
+    ,{ "id": "injector-tests-fallback", "kind": "owner", "paths": ["tests/FusionRpg.Injector.Tests/**"], "project": "guard", "level": "module", "guards": ["injector-compile"] }
     ,{ "id": "server-tests-fallback", "kind": "owner", "paths": ["tests/FusionRpg.Server.Tests/**"], "project": "server", "level": "module", "guards": [] }
   ]
 }

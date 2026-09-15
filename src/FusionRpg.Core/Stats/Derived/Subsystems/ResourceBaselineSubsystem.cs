@@ -15,10 +15,14 @@ namespace FusionRpg.Core.Stats.Derived.Subsystems;
 public sealed class ResourceBaselineSubsystem : IActorStatSubsystem
 {
     readonly IPowerIndexProvider _powerIndex;
+    readonly BattleResourceTuning? _tuning;
 
-    public ResourceBaselineSubsystem(IPowerIndexProvider? powerIndex = null)
+    /// <param name="tuning">Explicit battle-resources tuning; null reads the one
+    /// <see cref="BattleRuleset.ConfigureResources"/> installed (every production caller).</param>
+    public ResourceBaselineSubsystem(IPowerIndexProvider? powerIndex = null, BattleResourceTuning? tuning = null)
     {
         _powerIndex = powerIndex ?? new StubPowerIndexProvider();
+        _tuning = tuning;
     }
 
     public string SubsystemId => ContributionSourceIds.ResourceBaseline;
@@ -35,12 +39,12 @@ public sealed class ResourceBaselineSubsystem : IActorStatSubsystem
             mods.Add(new DerivedModifier(
                 DerivedStatChannels.ResourceMax(id),
                 DerivedModifierOp.Flat,
-                BattleRuleset.BaseResourceMax(theta, id, baseHp),
+                _tuning is null ? BattleRuleset.BaseResourceMax(theta, id, baseHp) : BattleRuleset.BaseResourceMax(theta, id, baseHp, _tuning),
                 SourceId: ContributionSourceIds.ResourceBaseline));
             mods.Add(new DerivedModifier(
                 DerivedStatChannels.ResourceRegen(id),
                 DerivedModifierOp.Flat,
-                BattleRuleset.BaseResourceRegen(theta, id),
+                _tuning is null ? BattleRuleset.BaseResourceRegen(theta, id) : BattleRuleset.BaseResourceRegen(theta, id, _tuning),
                 SourceId: ContributionSourceIds.ResourceBaseline));
         }
     }
