@@ -85,22 +85,28 @@ exposes the patch target and that the hierarchy paths resolve. That is a single 
 implementation, **not** a hedge this design carries. Verified here already: the type, the `Start` method,
 and the lifecycle callbacks — so what remains for Task 1 is the live path resolution below.
 
-**Remaining verification for Task 1 (settled there, not carried as a program risk):**
+**Task 1 result (2026-09-15, static verification against the real 3.9 interop):**
 
-- **The hierarchy object names.** `Grave/LowerButtons`, `LanguagesButton`, `UpdateInfoButton`,
-  `GraveBackground` are the reference's paths under **3.8.1**. A scene object's name lives in the scene,
-  not in `Assembly-CSharp.dll`, so a DLL string search cannot settle it. Task 1 resolves them live **once**
-  (per the owner: the architecture does not change between versions), and the code degrades to a **named
-  warning** when a path misses — never a null-deref, never a silent no-op.
-- **Whether `OnHide`/`OnExit` fire on every real exit path** (including the game's own animated
-  transitions). Task 1 confirms live; a path that hides `MainMenu` without either firing is a real defect
-  and a named follow-up, not something to paper over.
-- **The BepInEx host is secondary and settled, not open.** On this machine `BepInEx/` contains only
-  `plugins/` (no `interop/`) and `deploy-play.ps1:5` calls that install *"the older 3.8.1 install, kept
-  for BepInEx-specific testing"*; **MelonLoader is the deployed default** (`deploy-play.ps1:39,115`).
-  **MelonLoader is the first target.** Whether the BepInEx interop exposes `MainMenu` is checked when that
-  host is touched; if not, the tombstone is MelonLoader-only and BepInEx keeps **F10** — a scoped
-  difference stated plainly, not a design input.
+| Item | Result |
+|---|---|
+| `Il2Cpp.MainMenu : BaseMenu` | **Confirmed** |
+| `MainMenu.Start` | **Confirmed**, `Start_Private_Void` (token 100674800) → patch by **string name** `"Start"` |
+| `BaseMenu` lifecycle | **Confirmed:** `Awake` (protected virtual), `OnExit`, `OnBackEnter`, `OnHide`, `PopMenu`, `BackToMainMenu`, `PopAllMenu`, `PushMenuUp`, `PopMenuWithAnim`, `PushMenuUpWithAnim`. **No `OnDestroy`** — the hide/exit callbacks are the clearance path |
+| BepInEx 3.9 interop | **Confirmed absent** — `PVZ-Fusion-3.9_BepInEx\BepInEx\interop` holds only `assembly-hash.txt` + two `.db` files, no `Assembly-CSharp.dll`. **MelonLoader-only is verified fact, not a hedge.** |
+
+**Task 1 finding that changes `tombstone`'s anchor (recorded, not papered over):** the reference mod's
+3.8.1 scene paths **do not exist in 3.9**. A chunked binary scan of
+`PlantsVsZombiesRH_Data\data.unity3d` found **0** hits for `LowerButtons`, `GraveBackground`,
+`LanguagesButton`, `UpdateInfoButton` (the four names the reference uses). So the reference's
+`mainMenu.Find("Grave/…")` anchor strategy **cannot be copied**; it is a named miss, not an assumption.
+
+**The replacement anchor is stronger and observe-only.** `MainMenu` exposes **public typed fields** —
+`TravelEnter`, `MystriousEnter`, `RecipeEnter`, `GardenEnter`, `hotLevelEnter` (`GameObject`),
+`updateItem` (`GameObject`), `challengeLevel`/`izLevel`/`survivalLevel` (`UIButton_mainMenu`). The
+affordance therefore attaches under the live `MainMenu` transform and orders itself relative to one of
+these real menu nodes — **no `Find` path at all**, which removes the "path may miss" failure mode from
+`tombstone`. `tombstone`'s Task 4 uses this; the exact field to anchor against is chosen live (the game
+is not running in this session), with a logged warning on a null field.
 
 ## Tech stack
 

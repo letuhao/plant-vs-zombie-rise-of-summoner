@@ -107,18 +107,21 @@ still carries exactly one action and stays IMGUI.
    capture-free** method group is the simpler shape and is what this spec prefers — if the interop still
    demands a delegate conversion for a method group, that one conversion is used, but **class injection
    is not**.
-3. **The hierarchy object names are confirmed once, live, in Task 1.** `Grave/…`, `LowerButtons`,
-   `LanguagesButton`, `UpdateInfoButton` are the reference's paths under **3.8.1**; a scene object's name
-   is not in `Assembly-CSharp.dll`, so decompiling cannot settle it. **Per the owner (2026-09-15), the
-   menu architecture does not change between versions** — so Task 1 resolves them **once**, and every
-   `Find` miss logs a named warning and returns cleanly (never a null-deref, never a silent no-op). A
-   missing path degrades to "no affordance" with a log — the honest failure.
-4. **The anchor to attach to.** The reference hangs its clickable off an existing decorative child
-   (`Flower1`). Our tombstone has no such child, so it needs its **own** anchor under the menu transform.
-   Decision 18 supplies it: with the art **also** moving to uGUI, the art node itself is the natural
-   anchor (the affordance and the sprite share one node/subtree). Task 1 names the confirmed-live subtree;
-   if none resolves, the fallback is a rect-anchored child under the `MainMenu` transform, recorded, not
-   silently taken.
+3. **The reference's 3.8.1 scene paths do NOT exist in 3.9 — and that is resolved, not a risk.** Task 1
+   verified (chunked scan of `PlantsVsZombiesRH_Data\data.unity3d`): **0** hits for `LowerButtons`,
+   `GraveBackground`, `LanguagesButton`, `UpdateInfoButton`. So `mainMenu.Find("Grave/…")` **cannot** be
+   copied. **The replacement is stronger:** `MainMenu` exposes **public typed fields** — `TravelEnter`,
+   `MystriousEnter`, `RecipeEnter`, `GardenEnter`, `hotLevelEnter` (`GameObject`), `updateItem`
+   (`GameObject`), `challengeLevel`/`izLevel`/`survivalLevel` (`UIButton_mainMenu`). The affordance
+   therefore attaches under the live `MainMenu` transform and orders itself against one of these real
+   nodes — **no `Find` path at all**, which removes the "path may miss" failure mode. A null field logs a
+   named warning and disables cleanly.
+4. **The anchor to attach to.** The reference hangs its clickable off a decorative child (`Flower1`,
+   absent here). Decision 18 supplies the anchor: the art node and the affordance share one subtree under
+   the **`MainMenu` transform** (not a `Find` path), positioned from the same `riftMenu` placement numbers.
+   Which sibling it orders against is chosen live against the confirmed `MainMenu` fields (the game is not
+   running in this session); the fallback is a rect-anchored child under the `MainMenu` transform, recorded,
+   not silently taken.
 5. **Gap 6 decision (unchanged, from the first draft): yes, the button preference still suppresses the
    in-match button while the menu entry stays live — they are different affordances.** But
    `OverlaySwitch.cs:111-117` starts the injector host **only** when `State.SettingsEnabled`, with the
