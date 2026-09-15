@@ -371,8 +371,8 @@ true. The atom already exists purpose-built: `atom.fx-overlay-damage`, `kind: re
 - [ ] **Hypno re-bake:** a side change re-bakes or re-binds the grant — invalidating the resolver cache
       alone leaves a stale baked payload. A hypnotised zombie deals damage with its **new** element.
       **audit 2026-09-15 OPEN: argument that elements are hypno-invariant is sound, but `spec-basic-attack-grant.md:91` still says "Required: … re-bakes" — amend spec, then tick. Next run L-N11**
-- [ ] Grants withdraw **before** ptr reuse; a test recycles an address.
-      **audit 2026-09-15 OPEN: ordering in source (`ForgetEntity`→`WithdrawEntity`) but no address-recycle test (grant spec :142 `[ ]`). Next run L-N17**
+- [x] Grants withdraw **before** ptr reuse; a test recycles an address.
+      *audit 2026-09-15 CONFIRMED: `BasicAttackGrantRecycleTests` (4) recycle ptr P through `EffectBag.WithdrawForOwner` (the Core call behind `EffectRuntime.WithdrawEntity`); mutation (withdraw counts but does not remove) fails 2 of 4. Ordering before re-registration is `GameHooks.ForgetEntity`.*
 - [x] No per-actor push storm on a mass spawn.
       *audit 2026-09-15 CONFIRMED: `EffectRuntime.GrantQuiet` (no Emit); `InjectorBoardSnapshot.Capture` per-frame cache*
 - [ ] **A feature kill switch** disables grant-binding and cost-charging **together**; with it off,
@@ -1127,7 +1127,8 @@ ticked only when evidence matches the bullet's exact wording — never reword a 
       *Done: T7 bullet reworded in this commit (not ticked — tick is a separate change). `TheRealShippedCorpusHasExactlyOneDocumentedKindChangeAndNoOthers` (pinned 24/3/21 + named ids) replaced by `TheRealShippedCorpusHonoursKindHintAndKindAwareCostForEveryImportedBrief`: reconciliation (imported + rejected = parsed) and per-imported-brief Kind == kindHint ?? Skill, cost resource == template row. Mutation (composer ignores kindHint) fails it. Data.Tests 1231/1231 via verify-change.*
 - [ ] **L-N16** Test: a record queued for a ptr later marked dead applies no delta and runs no `Die()`
       on the funnel path; fixture for `EventDrainHost.DeferForget` ordering (T9, GATE 2).
-- [ ] **L-N17** Test: bind grant at ptr P, forget P, re-register P → no stale grant (T10).
+- [x] **L-N17** Test: bind grant at ptr P, forget P, re-register P → no stale grant (T10).
+      *Done: `BasicAttackGrantRecycleTests` 4/4 — forget withdraws; new entity at P carries only its own element; withdraw catches a differently-cased ptr spelling (BasicAttackGrantBuilder keys GrantId on the raw spelling, so two spellings CAN coexist until withdraw); same-ptr rebind is an upsert. Mutation fails 2/4. Core.Tests 13541 via verify-change.*
 - [ ] **L-N18** Test `ResourceBaselineSubsystem` for side=zombie (max stamina > 0, spend succeeds),
       or record a stated exemption in `spec-basic-attack-cost.md` (T12).
 - [x] **L-N19** `fx.overlay_damage` sign contract. Producers disagree: lawn records store
