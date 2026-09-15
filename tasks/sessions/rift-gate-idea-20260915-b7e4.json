@@ -12,5 +12,6 @@
     "tasks/sessions/rift-gate-idea-20260915-b7e4.json"
   ],
   "started": "2026-09-15T00:00:00Z",
-  "status": "active"
+  "status": "merged",
+  "problem_note": "Idea phase complete: docs/architecture/rift-gate-ideal.md + rift-gate-map.md committed in ea4d58a7. Marked merged 2026-09-15 so the follow-on spec session (rift-gate-spec-20260915-c41a, worktree) can own docs/architecture/rift-gate/** without an active-fence overlap."
 }

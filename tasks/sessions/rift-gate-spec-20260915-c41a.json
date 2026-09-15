@@ -1,0 +1,16 @@
+{
+  "session": "rift-gate-spec-20260915-c41a",
+  "program": "rift-gate",
+  "problem": "Write the five rift-gate module specs under docs/architecture/rift-gate/ and the program plan+todo (tasks/rift-gate-plan.md, tasks/rift-gate-todo.md) from the approved capability map. No runtime code.",
+  "mode": "worktree",
+  "branch": "rift-gate-spec",
+  "worktree": "D:\\Works\\source\\plant-vs-zombie-rise-of-summoner\\.kilo\\worktrees\\rift-gate-spec",
+  "paths": [
+    "docs/architecture/rift-gate/**",
+    "tasks/rift-gate-plan.md",
+    "tasks/rift-gate-todo.md",
+    "tasks/sessions/rift-gate-spec-20260915-c41a.json"
+  ],
+  "started": "2026-09-15T04:22:53Z",
+  "status": "active"
+}
