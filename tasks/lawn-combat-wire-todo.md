@@ -615,7 +615,7 @@ ended before observing — see gotcha below):**
 | 2 | `ZombieTakeDamage.Prefix` RAW (`GameHooks.cs`) | `fsm-trace ZombieTakeDamage.Prefix RAW theDamage=1 zombiePtr=1F77947C320` | yes — vanilla damage is genuinely **1** (silenced), matching the owner's own screen observation, not the `vanilla=20` this file reported earlier this program (see finding B) |
 | 3 | `EventDrainHost.TryRecordDealtFromBullet` | `fsm-trace EventDrainHost.TryRecordDealtFromBullet recorded=True shooterPtr=1F779420900 targetPtr=1F77947C320 damage=1` | yes — event recorded with the correct (fifth-defect-fixed) shooter identity |
 | 4 | `EffectRuntime.OnDrained` (event in) | `fsm-trace EffectRuntime.OnDrained ev trigger=OnDamageDealt actorPtr=1F779420900 targetPtr=1F77947C320 damage=-1 swingId=1F77B66DD20 isFirstOfSwing=True` | yes — the event Core's `EffectBag` actually receives carries the **plant's** ptr as attacker, not the bullet's |
-| 5 | `CombatDamageDispatcher.OnDamageApplied` (FSM apply) | `fsm-trace CombatDamageDispatcher.OnDamageApplied outcome=Applied appliedAmount=0 absorbedAmount=0 origin=DirectHit attackerPtr=1F779420900` | yes — `FireGrant` for `lawn-basic-attack` demonstrably runs per hit, attacker correctly identified; **appliedAmount=0** is explained, not a mystery — finding C |
+| 5 | `CombatDamageDispatcher.OnDamageApplied` (FSM apply) | `fsm-trace CombatDamageDispatcher.OnDamageApplied outcome=Applied appliedAmount=0 absorbedAmount=0 origin=DirectHit attackerPtr=1F779420900` | yes — `FireGrant` for `lawn-basic-attack` demonstrably runs per hit, attacker correctly identified. **`appliedAmount=0` here was itself the symptom of a real defect, fixed same session — see "Finding C (supersedes Finding B)" below; after the fix this same node reads real nonzero values, e.g. `appliedAmount=-16`** |
 | 6 | `EntityStatWriter.ProofWrite` (final Unity write) | (separate run, zombie melee vs plant) `writer.plant src=effect.fa10:lawn-basic-attack@1F779420240 ptr=1F779420240 hp 300/300->194/300` | yes — the terminal Unity HP write fires and is logged **whenever the applied amount is non-zero**; a zero-amount apply (node 5 above) produces no writer line, confirmed by its absence in the same window |
 
 **Finding A — legacy-path gotcha (real, cost ~10 minutes of misleading data this session):**
@@ -645,12 +645,65 @@ finding above) but not yet capturing a non-zero plant-attack `appliedAmount`. **
 with the plant's HP buffed (or the zombie's ATK floored) so the plant survives past its first real
 volley.
 
-**Net effect on this task's status:** proof 1 (attribution) is now confirmed **twice over** — once via
-the observer's `swing=<plantPtr>:N` sample (already recorded above) and once via this independent FSM
-log trail (nodes 1-5), which is the stronger of the two since it is not reading the same instrument the
-proof exists to validate. The "never proves the attack triggers" objection is answered: it does, at
-every node, with the correct identity. What remains open is unchanged in substance (proofs 2/4/5/6/7 and
-perf), plus the one new item above (a non-zero plant-attack RPG delta, un-confounded by silence-vanilla).
+**Finding C (supersedes Finding B) — `fx.overlay_damage` never carried an "amount" at all; every
+direct basic-attack RPG delta silently resolved to zero, for BOTH sides, always, regardless of
+silence-vanilla:** Finding B's explanation (a zeroed ATK from `silence-vanilla` correctly computing a
+zero delta) was wrong — or at best an unfalsified guess that happened to fit the data, exactly the
+kind of claim this whole session exists to catch. Traced properly this session (2026-09-15, second
+pass): with vanilla ATK confirmed genuinely un-silenced (`RAW theDamage=20`, real, not floored to 1),
+`appliedAmount=0` for the plant's own attack **persisted** — ruling Finding B out completely, since a
+real nonzero ATK feeding a correctly-computed elemental/defense formula cannot legitimately land on
+exactly zero, run after run, on three separate independent test sessions (different plant/zombie
+ptrs, different elements, one on a freshly restarted game process). The real cause, found by reading
+the actual dispatch chain rather than guessing from the number: `data/seed/atoms/fx-core.json`'s
+`fx.overlay_damage` atom — the ONE atom `BasicAttackGrantBuilder`'s "lawn-basic-attack" grant points
+at — only ever authored `{"channel":"hp"}` in its params. No `"amount"` key at all.
+`DamagePacketBuilder.ResolveAmount` (`DamagePacketBuilder.cs:63-93`) defaults `SignedAmount` to `0`
+when the key is simply absent — so **every direct hit through this atom computed a zero HP delta from
+the moment the grant was ever bound**, independent of the real incoming vanilla damage, independent of
+silence-vanilla, independent of element or side. The only reason ANY nonzero RPG delta was ever
+observed all program — the `-53`/`-33`/`-46` numbers this file and the earlier "self-kill" investigation
+both read as real basic-attack damage — was the T5.4 **reflection** mechanic's own bounce packet
+(`CombatDamageDispatcher.TryReflect`), which builds its `SignedAmount` directly in code and never goes
+through `DamagePacketBuilder`'s broken resolution at all. Every one of those numbers was a zombie
+reflecting part of the plant's own (silently zero) hit back onto the plant — never a genuine direct
+hit landing.
+
+**Fixed, same session**: authored the already-built, never-used event-linked `ValueSpec` marker
+(`{"eventField":"damage","multiplierMilli":1000}`) into `fx.overlay_damage`'s params — a wiring gap,
+not a new mechanism (`AtomRowValidator` already scopes `eventField` to `resource.delta` atoms
+specifically for this shape, and `"damage"` is already the one closed `EventFields` member).
+Regenerated `EffectAtomCatalog.Generated.cs` via `tools/ElementEnumGen --effect-emit`, which needed
+teaching first (`EffectCatalogGen.Literal` had no case for the nested `Dictionary<string,object?>`
+the compiled marker produces, since no shipped atom had ever used one). Updated
+`MigrationParityTests`' frozen-oracle exception list (a third deliberate, unmirrored content
+correction, alongside `fx.set_dirt_box`/`fx.grid_item_cycle`). **2348/2348** across the
+Atoms/Effects/Combat Core.Tests namespaces, including the corrected parity test. Committed
+`fdf3885c`.
+
+**Live-verified, same session, fresh game process, real un-silenced ATK, session ended (real v2
+path)**: the plant's own attack now produces genuine nonzero HP writes on the **zombie**:
+```
+fsm-trace CombatDamageDispatcher.OnDamageApplied outcome=Applied appliedAmount=-16 ... attackerPtr=<plantPtr>
+writer.zombie src=effect.fa10:lawn-basic-attack@<plantPtr> ptr=<zombiePtr> hp 793/840->756/840
+```
+repeated across 5 consecutive real hits (-37, -16, -32, -21, -16), source correctly stamped with the
+**plant's own ptr** (not a reflection bounce, not the bullet's ptr) — the direct proof the owner asked
+for from the start of this whole investigation: the plant's attack triggers, and it now actually deals
+real RPG damage to the zombie. (A minor, non-blocking curiosity noted for later: `OnDamageApplied`
+still fires twice per hit, one of the two often reading `0` — worth a follow-up look at
+`TargetResolver.Resolve`'s ptr count for this grant shape, but it does not affect the correctness of
+the nonzero write observed.)
+
+**Net effect on this task's status:** proof 1 (attribution) is now confirmed **three ways** — the
+observer's `swing=<plantPtr>:N` sample, the independent FSM log trail (nodes 1-5), and now a genuine
+nonzero RPG damage write on the correct victim sourced from the correct grantor. The "never proves the
+attack triggers" objection is answered completely: it triggers, it computes a real number, and that
+number reaches the zombie's HP. What remains open is unchanged in substance (proofs 2/4/5/6/7 and
+perf) — the fix above removes a confound from all of them (proof 2's element-ratio comparison, proof
+4/5's exhaustion math, and the perf-ceiling proof's own frame cost all now measure a REAL delta
+instead of a silently-zero one), so re-attempting any of them should be more informative than before,
+not less.
 
 **Two more real findings, from a proof-4/5 (exhaustion/regen) attempt this same session — neither
 fixed here, both named precisely:**
