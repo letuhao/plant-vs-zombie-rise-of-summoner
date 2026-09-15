@@ -769,23 +769,26 @@ fixed here, both named precisely:**
    fixing it needs its own read/build/test cycle. Left named here so proof 4/5 is not silently
    abandoned: this is the actual reason the buffed plant died to two ordinary zombie bites instead of
    surviving to exhaustion.
-2. **A severe per-frame stall (`loopMs` ~580-620ms, up from a healthy ~7-17ms baseline) was observed
-   for several minutes straight this session**, persisting across `session/end`, across deleting the
-   only plant on the board, and across board-state changes generally — ruling out both "legacy
-   debug-session overhead" (this session's own earlier, separately-resolved finding) and "a huge-HP
-   entity is expensive to render/update" as the cause. `fps` stayed a steady 60 throughout (the render
-   thread itself was never blocked), so the cost was inside the mod's own per-tick handler, off the
-   frame-critical path. **Resolved by itself, confirmed, not just assumed**: after a ~30-minute idle
-   gap with no further debug calls (an unrelated `debug_restart_game` MCP call sat waiting the whole
-   time), `loopMs` was back to `7.26-7.86ms` — a clean recovery with no restart, no code change, and
-   no session/end in between the stall and the recovery. This matches a transient backlog from this
-   session's own unusually high rate of back-to-back `debug_call`/`debug_inspect` invocations (each
-   queued and drained a few per frame), not a persistent production defect — but this is inferred from
-   the recovery pattern, not measured directly (no per-command queue-depth metric exists to confirm
-   it), so it is named as the likely explanation, not a proven one. Flagged for whoever runs the T13
-   perf-ceiling proof (≤6% frame share at 300z) next: space out debug calls during that measurement,
-   or don't drive combat via rapid debug commands at all, so a transient backlog like this one can
-   never be mistaken for the feature's own frame cost.
+2. **A severe per-frame stall (`loopMs` ~580-650ms, up from a healthy ~7-17ms baseline) was observed
+   repeatedly across this whole session — root cause finally found, and it was never a backlog.**
+   Every occurrence, checked after the fact, correlates with the board sitting on a **`LoseMenu`**
+   (a zombie reached the house — the same real vanilla end-state root-caused earlier in this file for
+   the "plant stopped firing" finding). This was the SAME underlying cause both times, not two
+   different mysteries: `debug_inspect(scope="menu")` was only ever checked for `PauseMenu_Btn` during
+   the earlier "resolved by itself" investigation, so the LoseMenu was invisible to that check too —
+   the ~30-minute idle gap that appeared to "fix" it on its own most likely just gave enough real time
+   for a manual dismiss-and-retry cycle to happen incidentally, not a genuine self-resolving backlog.
+   **The earlier "transient debug-command backlog" explanation in this same file is retracted** — it
+   was a plausible-sounding guess fitted to incomplete data, exactly the kind of claim this whole
+   session exists to catch in others' work. Confirmed by direct observation this time: `loopMs` stuck
+   at ~630-650ms for 5+ straight minutes while a `LoseMenuBtn` control was live on screen (checked via
+   `debug_inspect(scope="menu")` mid-stall), and recovered the moment the dialog was dismissed and a
+   fresh board was set up. **Standing lesson for this program's own live-probe discipline**: check
+   `debug_inspect(scope="menu")` for both `PauseMenu_Btn` and `LoseMenuBtn` (and a win-equivalent, not
+   yet named) before trusting ANY "nothing is happening" or "loopMs is elevated" observation — the
+   injector's own perf/combat telemetry has no dedicated signal for "the level already ended," so a
+   dead board reads identically to a live one until a screenshot or an explicit menu check says
+   otherwise.
 
 ---
 
