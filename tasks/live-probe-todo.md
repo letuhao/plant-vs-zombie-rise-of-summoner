@@ -599,7 +599,15 @@ honestly split if T14 is still failing).
       `Debug:>0` and `DEBUG-FUNDED`; kill one game-spawned zombie and confirm it lands under `Game`. Verify: the two
       report lines and the fact payloads from `GET /api/pvz-activity/{id}/facts?kind=ZombieKilled`.
       *Done 2026-09-15 live: real level-2 kills stamped `spawnOrigin: game` (14 die payloads, latest 20 ZombieKilled facts `game`, ledger `kill` rows refId → those facts); a debug-spawned zombie (`1B279DB3000`) killed by the real Peashooter emitted `spawnOrigin: debug`, fact 9058 `debug`, ledger kill refId 9058. `ProveLiveProbe -Mode B -PlayerId 1 -BannerId no-such-banner…` printed `[MISMATCH] 0-soul-provenance: DEBUG-FUNDED: 2 souls … killSoulsByOrigin{Game:26, Debug:2, Cheat:0, Unrecorded:1511, FactNotFound:645}` and RESULT: FAIL; the unknown banner refused the summon so no souls were spent. FactNotFound is the facts API's 500-per-run cap — Task 20.*
-- [ ] **Task 20 — provenance coverage past 500 kills per run.** `GET /api/pvz-activity/{id}/facts` returns at most
+- [x] **Task 20 — provenance coverage past 500 kills per run.** `GET /api/pvz-activity/{id}/facts` returns at most
       500 rows per run and has no cursor, so step 0 reports 645 kill souls as `FactNotFound` (unproven, never clean).
       Add `afterId` paging to the facts endpoint (Data + Server) and page it in `LiveProbeClient.GetSoulProvenanceAsync`.
       Verify: player 1's report has `FactNotFound:0` for runs with facts on disk; offline test pages two facts pages.
+      *Done 2026-09-15: `RpgStore.ListPvzActivityFacts(..., afterId)` (id < afterId, newest first) and the facts endpoint's
+      `afterId` query; the probe pages each run's facts, refuses the step on a failed facts read (was a silent break that
+      turned into FactNotFound), and refuses when a Server ignores `afterId` rather than counting the same page twice.
+      Tests: `tests/FusionRpg.Data.Tests/PvzActivityFactsPagingTests.cs` (2), `tools/ProveLiveProbe.Tests/SoulProvenancePagingTests.cs`
+      (700 facts over two pages; stale-Server refusal). Mutants killed: store filter disabled (Data test fails), cursor never
+      advanced (both probe tests fail). verify-change: Data 1233/1233, Server 444/444, ProveLiveProbe 55/55, dal/debug-scope/
+      test-substrate guards OK. Live, Server republished: `killSoulsByOrigin{Game:26, Debug:2, Cheat:0, Unrecorded:2156, FactNotFound:0}`
+      (was `FactNotFound:645`). The 2156 `Unrecorded` are kills from before the `spawnOrigin` stamp shipped; they stay unproven.*

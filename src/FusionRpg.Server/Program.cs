@@ -979,9 +979,9 @@ app.MapGet("/api/pvz-activity/{playerId:long}", (long playerId, RpgStore store) 
     var rollup = store.GetPvzActivityRollup(playerId);
     return rollup is null ? Results.NotFound() : Results.Ok(rollup);
 });
-app.MapGet("/api/pvz-activity/{playerId:long}/facts", (long playerId, RpgStore store, string? kind, long? runId, int limit = 100) =>
+app.MapGet("/api/pvz-activity/{playerId:long}/facts", (long playerId, RpgStore store, string? kind, long? runId, int limit = 100, long afterId = 0) =>
 {
-    var page = store.ListPvzActivityFacts(playerId, kind, runId, limit);
+    var page = store.ListPvzActivityFacts(playerId, kind, runId, limit, afterId);
     return page is null ? Results.NotFound() : Results.Ok(page);
 });
 app.MapPost("/api/pvz-activity/{playerId:long}/facts/append", async (long playerId, PvzActivityAppendRequest body, RpgStore store, IHubContext<RpgHub> hub) =>

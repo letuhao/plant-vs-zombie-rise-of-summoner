@@ -27,9 +27,14 @@ public sealed class LiveProbeClient : IDisposable
 
     readonly HttpClient _http;
 
-    public LiveProbeClient(string baseUrl)
+    public LiveProbeClient(string baseUrl) : this(baseUrl, new HttpClientHandler())
     {
-        _http = new HttpClient { BaseAddress = new Uri(baseUrl) };
+    }
+
+    /// <summary>Offline tests pass a handler that answers the Server's routes from memory.</summary>
+    public LiveProbeClient(string baseUrl, HttpMessageHandler handler)
+    {
+        _http = new HttpClient(handler) { BaseAddress = new Uri(baseUrl) };
         _http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     }
 
@@ -132,12 +137,29 @@ public sealed class LiveProbeClient : IDisposable
             afterId = body.Items.Min(i => i.Id);
         }
 
+        // live-probe Task 20: page each run's facts (newest first, afterId = smallest id seen) instead of stopping at
+        // the endpoint's 500-row cap, which left older kills reported as FactNotFound.
         var facts = new List<PvzActivityFactDto>();
         foreach (var runId in ledger.Where(SoulProvenance.IsKillEarn).Select(r => r.RunId).Distinct())
         {
-            var (ok, _, body, _) = await GetAsync<PvzActivityFactsPageDto>(
-                $"/api/pvz-activity/{pid}/facts?kind=ZombieKilled&runId={runId}&limit=500");
-            if (ok && body is not null) facts.AddRange(body.Items);
+            var factsAfter = 0L;
+            for (var page = 0; page < maxLedgerPages; page++)
+            {
+                var (ok, status, body, raw) = await GetAsync<PvzActivityFactsPageDto>(
+                    $"/api/pvz-activity/{pid}/facts?kind=ZombieKilled&runId={runId}&limit={pageSize}&afterId={factsAfter}");
+                if (!ok || body is null)
+                    return new StepResult("0-soul-provenance", StepOutcome.Refused,
+                        $"run {runId} facts read refused: HTTP {status} {TryExtractReason(raw) ?? raw}");
+                if (body.Items.Count == 0) break;
+                var oldest = body.Items.Min(i => i.Id);
+                // A Server that predates the cursor ignores afterId and answers the newest page again.
+                if (factsAfter > 0 && oldest >= factsAfter)
+                    return new StepResult("0-soul-provenance", StepOutcome.Refused,
+                        $"run {runId} facts endpoint ignored afterId={factsAfter}; restart the Server on a build with facts paging");
+                facts.AddRange(body.Items);
+                if (body.Items.Count < pageSize) break;
+                factsAfter = oldest;
+            }
         }
 
         return SoulProvenance.ToStep(SoulProvenance.Summarize(balance.Balance, ledger, truncated, facts));

@@ -1617,7 +1617,10 @@ public sealed partial class RpgStore : IRpgDb, IDisposable
         return ReadPvzActivityRollupUnlocked(db, playerId);
     }
 
-    public PvzActivityFactsPageDto? ListPvzActivityFacts(long playerId, string? kind = null, long? runId = null, int limit = 100)
+    /// <param name="afterId">Descending cursor, the same shape as <see cref="ListSoulLedger"/>: pass the smallest id
+    /// already seen to get the next OLDER page; 0 = newest page. live-probe Task 20 — without it a run with more than
+    /// 500 facts could never be read in full.</param>
+    public PvzActivityFactsPageDto? ListPvzActivityFacts(long playerId, string? kind = null, long? runId = null, int limit = 100, long afterId = 0)
     {
         using var db = Open();
         if (GetPlayerUnlocked(db, playerId) is null) return null;
@@ -1641,6 +1644,11 @@ public sealed partial class RpgStore : IRpgDb, IDisposable
             {
                 sql += " AND run_id=$r";
                 cmd.Parameters.AddWithValue("$r", rid);
+            }
+            if (afterId > 0)
+            {
+                sql += " AND id < $after";
+                cmd.Parameters.AddWithValue("$after", afterId);
             }
             sql += " ORDER BY id DESC LIMIT $lim;";
             cmd.Parameters.AddWithValue("$lim", limit);
