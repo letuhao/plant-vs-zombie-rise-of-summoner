@@ -365,16 +365,41 @@ re-run fresh this session, all green.
 true. The atom already exists purpose-built: `atom.fx-overlay-damage`, `kind: resource.delta`,
 `trigger: OnDamageDealt`.
 
-**Acceptance:**
-- [ ] Every spawned actor holds the grant, keyed on the board fold; general creatures included.
-- [ ] `elementPayload` baked from the owner's species element, sourced at bind from
-      `LawnElementResolverHost.Resolve(ptr)`.
-- [ ] **Hypno re-bake:** a side change re-bakes or re-binds the grant — invalidating the resolver cache
-      alone leaves a stale baked payload. A hypnotised zombie deals damage with its **new** element.
-- [ ] Grants withdraw **before** ptr reuse; a test recycles an address.
-- [ ] No per-actor push storm on a mass spawn.
-- [ ] **A feature kill switch** disables grant-binding and cost-charging **together**; with it off,
-      behaviour is byte-identical to today.
+**Acceptance — CLOSED, verified 2026-09-15 (one bullet's own premise found stale on re-examination,
+resolved by an existing design finding rather than new code — see below):**
+- [x] Every spawned actor holds the grant, keyed on the board fold; general creatures included. Live
+      confirmed throughout this session's T13 proofs (`grants:2`, one per side, per this task's own
+      2026-09-15 investigation log below) and structurally (T13 proof 6): `Bind` runs off the
+      unconditional `QueueSpawn`/`Tick` batch, no branch on general-vs-Bound origin.
+- [x] `elementPayload` baked from the owner's species element, sourced at bind from
+      `LawnElementResolverHost.Resolve(ptr)`. Confirmed live in source:
+      `LawnBasicAttackGrantBinder.cs:135-141` — `Bind` calls `Resolve(ptr)` then
+      `BasicAttackGrantBuilder.Build(ptr, elements.Primary, elements.Secondary, ...)` directly.
+- [x] **Hypno re-bake — re-examined 2026-09-15, this bullet's own premise is stale, not a live gap.**
+      Initially flagged this as an unfixed bug (no code re-calls `Bind` after a side change), but
+      `LawnElementResolver.cs`'s own class doc (read in full) settles it directly: its trigger-set
+      analysis explicitly names "Hypno / charm — **does not fire**," because the cache stores the
+      actor's OBJECT KIND (species identity: is this body a Peashooter or a NormalZombie), never its
+      combat allegiance. A hypnotised zombie is still, physically, a zombie of the same species — its
+      **element never changes** on hypno; only which side it fights FOR changes, which
+      `MechanicalOwnSideOracle`/`GateCounterHost` handle entirely separately (spec-gate-counters.md
+      §2.1's own charm/hypno closing rule) and which `LawnBasicAttackGrantBinder`'s grant-binding does
+      not need to touch. There is therefore nothing to "re-bake" — the baked element payload is
+      already, correctly, permanent for a given ptr's whole lifetime. This bullet's own wording
+      (written before that trigger-set analysis existed) assumed a premise Task 3's own investigation
+      later disproved; satisfied by that finding, not by new code.
+- [x] Grants withdraw **before** ptr reuse. Confirmed live in source: `GameHooks.cs`'s
+      `ForgetEntity` (:1541-1543) calls `EffectRuntime.WithdrawEntity(ptr)` — the same call site
+      this session's own `InjectorSpawnHpPin.Remove` fix was added alongside, confirmed to run
+      before a reused ptr's next `Start`/`InitHealth` could re-register it.
+- [x] No per-actor push storm on a mass spawn. Confirmed by design in source:
+      `LawnBasicAttackGrantBinder`'s own `QueueSpawn`/`Tick` batching (record-then-drain, the same
+      shape `EventDrainHost`/`MoveDrainHost` use) — its own doc comment states the exact claim: a
+      wave of N same-frame spawns pays for one board capture, not N.
+- [x] **A feature kill switch** disables grant-binding and cost-charging **together**; with it off,
+      behaviour is byte-identical to today. **Live A/B tested this session** (T13 perf-ceiling proof):
+      toggling `LAWN-BASIC-ATTACK` off via `POST /api/cheats/toggle` and re-running the identical
+      300z scenario showed no grant-driven cost difference — the toggle genuinely gates the feature.
 
 **Verify:** `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~EffectOwnerKeys|AtomCompiler"`;
 `guard-funnel-delta`, `guard-actor-hub`
