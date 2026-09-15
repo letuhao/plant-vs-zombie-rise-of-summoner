@@ -506,10 +506,22 @@ call site · **Scope:** L
       /session/end` issued before every observed window. Real, repeated, not a one-off.
 - [ ] 1 Attribution: **first half done** — the recorded attacker is provably the firing plant's own
       ptr (`swing=<plantPtr>:N` in the observer sample, not the bullet's), fixed and live-proven
-      2026-09-15 (the fifth-defect fix above). **Second half not done**: "composed power differs from
-      a weaker shooter's" needs two live runs with different `derivedProfile` values on the plant
-      (`debug.spawn-plant`'s own param, already used by this scenario) against the same defender,
-      comparing `rpgDelta` magnitude. Not attempted this session.
+      2026-09-15 (the fifth-defect fix above). **Second half attempted 2026-09-15, not closed — a
+      new, real, unexplained anomaly found instead of a clean comparison**: read
+      `OverlayCombatCalculator.Compute` first to confirm the claim is even meaningful (it is —
+      `CombatDerivedReader.Power(attacker.Derived, element)` reads `combat.power.omni +
+      combat.power.{element}` and is subtracted against the defender's own defense before the final
+      signed delta, so a higher-power attacker SHOULD produce a larger magnitude for an identical
+      base hit). Spawned a plant with `debug.spawn-plant`'s `derived:{"combat.power.omni":2000}`
+      overlay against a fixed, high-HP, slowed zombie — real 20-damage bullets confirmed firing
+      (`bullet.init`), but **every resulting hit read `rpgDeltaObserved:false, rpgDelta:0`** in
+      `LawnCombatObserver`'s own `recentHits`, unlike every prior successful run this session (which
+      showed real nonzero deltas under the identical base setup, minus the `derived` overlay). Not
+      root-caused — could be the overlay interacting badly with grant resolution, a wrong channel
+      key, or something else entirely; not guessed at further. Board reset to a clean, known-good
+      `lab-overlay` state afterward (`targetPtr:21A7D5B6960`, `plantPtr:21A7D86DB40`). **Left
+      genuinely open, named precisely**: whoever attempts this next should treat the `rpgDelta:0`
+      regression itself as the first thing to explain, not just retry the A/B comparison.
 - [ ] 2 Element: **one species, two element assignments**, against a defender proven **non-Neutral**
       and Strong to one / Weak to the other, with the expected ratio computed from
       `stats.v1.json:10 matchupShareK` **before** the run. Falsifier: the same species against a
