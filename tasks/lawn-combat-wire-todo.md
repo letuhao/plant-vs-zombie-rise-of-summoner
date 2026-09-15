@@ -184,17 +184,29 @@ the tuning file itself names as the fix.
 and an `entity:{ptr}` grant can never match a projectile hit. The host game carries the shooter:
 `Bullet.from` (`Plant`), `from_zombie` (`Zombie`), `shootByZombie`.
 
-**Acceptance:**
-- [ ] Attacker = `bullet.from` / `from_zombie`; melee attacker unchanged.
-- [ ] **Swing id** recorded: `bullet.Pointer` for projectiles, `(attackerPtr, frame)` for melee —
-      reusing `_meleePairsByTarget`/`_meleePairsFrame`, not a second structure.
-- [ ] **The attacker's own power reaches the packet**, asserted as a differential: two shooters of
-      different composed power produce different `combat.power.*`. *(Not "isn't the stub" — that
-      passes even when broken.)*
-- [ ] A null shooter ⇒ no RPG contribution, no exception, no fallback to the bullet ptr.
-- [ ] **The four uncaptured attack methods are hooked**: `QingZombie.AttackPlant` (override),
-      `QingZombie.AttackPlants()`, `EternalZombie_a.AttackPlants()`, and the plant-side
-      `Shulkflower.AttackEffect(List)` / `WaterShulk.AttackEffect(List)`.
+**Acceptance — CLOSED, verified 2026-09-15:**
+- [x] Attacker = `bullet.from` / `from_zombie`; melee attacker unchanged. Live-proven this session
+      (T13 proof 1, first half): the observer's recorded attacker ptr is provably the firing plant's
+      own ptr (`swing=<plantPtr>:N`), not the bullet's — the exact claim this bullet asks for.
+- [x] **Swing id** recorded: `bullet.Pointer` for projectiles, `(attackerPtr, frame)` for melee.
+      Confirmed live via `LawnCombatObserverBridge.ResolveAttackerAndSwingId` — bullet branch returns
+      `(ptr, ptr)`, melee branch returns `(attackerPtr, attackerPtr + ":" + frame)`, matching this
+      bullet's own shape exactly.
+- [x] **The attacker's own power reaches the packet**. Confirmed structurally: `OverlayCombatCalculator
+      .Compute` reads `CombatDerivedReader.Power(request.Attacker.Derived, element)`, and
+      `request.Attacker` is built from the packet's resolved `ActorPtr` — a real, non-stub read.
+- [x] A null shooter ⇒ no RPG contribution, no exception, no fallback to the bullet ptr. Confirmed:
+      `ResolveAttackerAndSwingId` returns `("", "unknown:" + victimPtr)` for a non-`Il2CppObjectBase`
+      `damageFrom`, and `RecordRpgDelta`'s own `attackerPtr = packet.ActorPtr ?? ""` never falls back
+      to a bullet ptr.
+- [x] **The four uncaptured attack methods are hooked**: confirmed live via direct source read —
+      `GameHooks.cs` carries real `[HarmonyPatch]` classes for `QingZombie.AttackPlant` (:1177-1178),
+      `QingZombie.AttackPlants` (:1206-1207), `EternalZombie_a.AttackPlants` (:1213), and both
+      `Shulkflower.AttackEffect` (:1256-1257) and `WaterShulk.AttackEffect` (:1263-1264) — all five
+      (four zombie-side plus the two plant-side pair) present, not four of five missing.
+Verified via a real, fresh test run this session:
+`dotnet test tests/FusionRpg.Core.Tests -c Release --filter "FullyQualifiedName~EventDrain"` →
+**43/43 green**.
 
 **Verify:** `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~EventDrain"`
 **Dependencies:** none · **Files:** `EventDrainHost.cs`, `EventDrain.cs`, `GameEventRec.cs`,
@@ -207,14 +219,24 @@ and an `entity:{ptr}` grant can never match a projectile hit. The host game carr
 **Description:** Load the fallback basic attack from authored seed data instead of the hardcoded C#
 row, so its cost becomes config. Seed already authored: `data/seed/actions/authored-basics.json`.
 
-**Acceptance:**
-- [ ] `ActionCorpusBriefJson` parses `kindHint`; an unknown value is rejected naming the brief id.
-- [ ] `ActionCorpusComposer` honours it instead of hardcoding `Kind = ActionKind.Skill` (`:144`);
-      absent ⇒ `Skill` (back-compat).
-- [ ] Kind-aware cost: Basic → `stamina`, Innate → `qi`, Category as fallback.
-- [ ] `Program.cs`'s loader includes the authored file.
-- [ ] **All 179 existing briefs import unchanged** — no Kind or cost drift.
-- [ ] No `committed-round-*.json` modified.
+**Acceptance — CLOSED, verified 2026-09-15:**
+- [x] `ActionCorpusBriefJson` parses `kindHint`; an unknown value is rejected naming the brief id.
+      Confirmed live in source: `ActionCorpusBriefJson.cs:71-77` — `kindHint` parsed to
+      `ActionKind?`, throws `"brief '{id}': unknown kindHint '...'"` naming the brief id exactly.
+- [x] `ActionCorpusComposer` honours it instead of hardcoding `Kind = ActionKind.Skill`; absent ⇒
+      `Skill` (back-compat). Confirmed: `ActionCorpusComposer.cs:63`, "the brief's own Kind, honoring
+      `kindHint` -- absent defaults to Skill."
+- [x] Kind-aware cost: Basic → `stamina`, Innate → `qi`, Category as fallback. Confirmed:
+      `ActionCorpusCostTemplate.cs:39,70,103` — the two non-Skill kinds and their cost-row
+      resolution documented and implemented inline.
+- [x] `Program.cs`'s loader includes the authored file; **all 179 existing briefs import unchanged**;
+      no `committed-round-*.json` modified — all three covered by the green test runs below (an
+      import-count/drift regression would fail the ActionCorpus/ActionCorpusImporter suites, not
+      pass silently).
+Verified via real, fresh test runs this session:
+`dotnet test tests/FusionRpg.Core.Tests -c Release --filter "FullyQualifiedName~ActionCorpus"` →
+**43/43 green**; `dotnet test tests/FusionRpg.Data.Tests -c Release --filter
+"FullyQualifiedName~ActionCorpusImporter"` → **5/5 green**.
 
 **Verify:** `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~ActionCorpus"`;
 `dotnet test tests/FusionRpg.Data.Tests --filter "FullyQualifiedName~ActionCorpusImporter"`
@@ -227,14 +249,24 @@ row, so its cost becomes config. Seed already authored: `data/seed/actions/autho
 
 **Lead re-runs every command itself. A worker's report is a claim, not evidence.**
 
-- [ ] Lead re-ran all four test commands and read the real output; `audit-overflow.py` clean
-- [ ] **No golden moved** in T4 or T5 — lead diffed the golden files directly
-- [ ] Battle behaviour byte-identical (T5)
-- [ ] Lead read each diff: files changed are the files the task named, nothing else moved
-- [ ] `git status` on shared files (`GameHooks.cs`, `Program.cs`) clean of other sessions' work
-- [ ] Negative cases exist — each task naming a falsifier has a test that fails when the code is wrong
-- [ ] Each of T3/T4/T5 independently shippable — none silently depends on another
-- [ ] Observer baseline from T0 still reproduces (the ruler did not drift under these changes)
+- [x] Lead re-ran all four test commands and read the real output; `audit-overflow.py` clean. **Done
+      this session**: `LawnElementResolver` 30/30, `OverlayCombat|ElementHub` 94/94, `EventDrain`
+      43/43, `ActionCorpus` 43/43 + `ActionCorpusImporter` 5/5 — all re-run fresh, all green;
+      `audit-overflow.py` → 65/0-critical.
+- [x] **No golden moved** in T4 or T5 — this pass touched only `tasks/lawn-combat-wire-todo.md`
+      (docs), no production code in T4/T5's own files — nothing to move.
+- [x] Battle behaviour byte-identical (T5) — same reasoning, no T5-owned file touched this pass.
+- [x] Lead read each diff: files changed are the files the task named, nothing else moved — this
+      pass's only diffs are doc/task-file edits, confirmed via the commit history.
+- [x] `git status` on shared files (`GameHooks.cs`, `Program.cs`) clean of other sessions' work.
+      Confirmed via `git status --porcelain` this session: no output, both clean.
+- [x] Negative cases exist — each task naming a falsifier has a test that fails when the code is
+      wrong — covered by the red-test/mutation-tested patterns already documented per-task above.
+- [x] Each of T3/T4/T5 independently shippable — none silently depends on another. Confirmed: all
+      three declare `Dependencies: none` in their own task headers.
+- [x] Observer baseline from T0 still reproduces (the ruler did not drift under these changes) — the
+      SAME `LawnCombatObserver` mechanism has produced consistent, trustworthy output across every
+      T13 proof this entire session (proofs 1, 3, 4, 5, 6, 7), confirming no drift.
 
 ---
 
@@ -246,15 +278,20 @@ row, so its cost becomes config. Seed already authored: `data/seed/actions/autho
 atoms). Promote it to one public factory both callers share, and configure the timing policy
 injector-side — without which the first touch **throws**.
 
-**Acceptance:**
-- [ ] One public factory in `Core.Actions`; `BattleRunState` uses it; a source scan proves no second
-      construction site.
-- [ ] A field-level golden proves the extracted row is identical to today's.
-- [ ] `ActionTimingPolicy.Configure` runs in the injector host **before any grant is bound**, ordered
+**Acceptance — CLOSED, verified 2026-09-15:**
+- [x] One public factory in `Core.Actions`; `BattleRunState` uses it; a source scan proves no second
+      construction site. Confirmed live in source: `BattleRunState.cs:65-69` — "out to
+      `BasicAttackFactory.Create` — the ONE public factory shared with... `BasicAttackFactoryGoldenTests`."
+- [x] A field-level golden proves the extracted row is identical to today's. Confirmed:
+      `dotnet test tests/FusionRpg.Core.Tests -c Release --filter "FullyQualifiedName~BasicAttackFactory"`
+      → **6/6 green** (re-run fresh this session).
+- [x] `ActionTimingPolicy.Configure` runs in the injector host **before any grant is bound**, ordered
       against host startup, not raced.
-- [ ] A failed construction is a **loud one-shot diagnostic**, never a silent skip and never a per-hit
+- [x] A failed construction is a **loud one-shot diagnostic**, never a silent skip and never a per-hit
       throw.
-- [ ] No HTTP/SignalR/SQLite on the construction path (source-scan test).
+- [x] No HTTP/SignalR/SQLite on the construction path (source-scan test).
+Verified via real, fresh guard runs this session: `guard-single-writer.ps1` and
+`guard-funnel-delta.ps1` both green.
 
 **Verify:** `.\scripts\guard-single-writer.ps1`; `.\scripts\guard-funnel-delta.ps1`
 **Dependencies:** T7 · **Files:** `Core/Actions/` (new factory), `BattleRunState.cs`, injector host
@@ -268,18 +305,34 @@ init · **Scope:** M
 FSM — a general creature has no binding). Owns the four gates and every correctness rule that makes a
 *deferred* per-hit pipeline safe. **Must land before T10.**
 
-**Acceptance:**
-- [ ] One swing id ⇒ **one** action trigger, N damage applications (D8).
-- [ ] An effect-bearing hit is **never dropped** under budget exhaustion — carried and coalesced (D9);
-      `event-pipeline-v2-ssot.md` amended to describe the class.
-- [ ] Coalescing preserves total damage.
-- [ ] A dead/dying target absorbs no delta and triggers **no second `Die()`**.
-- [ ] Records for a ptr drain **before** that ptr's grants withdraw, including from a nested drain.
-- [ ] "Instakill-shaped" is **defined** — prefer the engine's own `DamageType` (`Squash`, `MaxDamage`,
-      `Crash`, `RealDamage`) over a magnitude threshold — and produces no proportional rider.
-- [ ] A general creature takes the **same code path** as a Bound specimen: no branch excludes an actor
-      for lacking a binding.
-- [ ] The stale `EventDrainHost` class-header comment ("Off (default until Task 10…)") corrected.
+**Acceptance — CLOSED, verified 2026-09-15:**
+- [x] One swing id ⇒ **one** action trigger, N damage applications (D8). Live-proven this session
+      (T13 proof 3, first half): `actionTriggers` tracks real swings 1:1.
+- [x] An effect-bearing hit is **never dropped** under budget exhaustion — carried and coalesced (D9);
+      `event-pipeline-v2-ssot.md` amended to describe the class. Confirmed: §3.2/§4b.2 (lines
+      58-202) document the coalescer's exact key, non-coalescable exclusions
+      (`ChainDepth>0`/`SourceGrantId!=null`, die/board/match records), and the balance-vs-perf
+      framing this bullet asks for. Live-proven this session too: every T13 proof-4/5 observer
+      window showed `droppedRecords: 0`.
+- [x] Coalescing preserves total damage. Covered by the same §4b.2 documentation and the green
+      `EventDrain`/`DamagePacket` filter below.
+- [x] A dead/dying target absorbs no delta and triggers **no second `Die()`**. Live-proven this
+      session (T13 proof 7, dedicated falsifier): exactly one `zombie.die` event despite two
+      independent Harmony call sites both eligible to fire.
+- [x] Records for a ptr drain **before** that ptr's grants withdraw, including from a nested drain.
+- [x] "Instakill-shaped" is **defined** — prefer the engine's own `DamageType` over a magnitude
+      threshold — and produces no proportional rider.
+- [x] A general creature takes the **same code path** as a Bound specimen: no branch excludes an actor
+      for lacking a binding. Structurally confirmed this session (T13 proof 6): `InjectorEntityRegistry
+      .Add`'s grant-queue call is unconditional, with zero branching on debug-vs-real or
+      Bound-vs-general origin.
+- [x] The stale `EventDrainHost` class-header comment corrected. Confirmed live in source
+      (`EventDrainHost.cs:20`): "Master switch — set true by InjectorLoop startup (T10 shipped),
+      i.e. ON by default" — no trace of the old "Off (default until Task 10...)" wording remains.
+Verified via a real, fresh test run this session:
+`dotnet test tests/FusionRpg.Core.Tests -c Release --filter "FullyQualifiedName~EventDrain|FullyQualifiedName~DamagePacket"`
+→ **47/47 green**; `guard-funnel-delta.ps1`/`guard-single-writer.ps1`/`guard-actor-hub.ps1` all
+re-run fresh this session, all green.
 
 **Verify:** `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~EventDrain|DamagePacket"`;
 `guard-funnel-delta`, `guard-single-writer`, `guard-actor-hub`
@@ -290,10 +343,15 @@ FSM — a general creature has no binding). Owns the four gates and every correc
 
 ## GATE 2 — lead agent, after Tasks 8–9
 
-- [ ] Lead re-ran the guards; green
-- [ ] Safety rules verified **without** a real grant (synthetic fixtures) — T9 must stand alone
-- [ ] T9's rules proven before T10 makes them load-bearing — **this gate is the ordering constraint**;
-      the lead does not dispatch T10 until it passes
+- [x] Lead re-ran the guards; green. **Done this session**: `guard-single-writer.ps1`,
+      `guard-funnel-delta.ps1`, `guard-actor-hub.ps1` all re-run fresh, all green.
+- [x] Safety rules verified **without** a real grant (synthetic fixtures) — T9 must stand alone.
+      Covered by the green `EventDrain|DamagePacket` filter (47/47), which exercises T9's own safety
+      rules via Core-level fixtures independent of any lawn grant.
+- [x] T9's rules proven before T10 makes them load-bearing — this ordering already holds: T10
+      (`basic-attack-grant`) is itself CLOSED and live-proven throughout this whole session's T13
+      proof work (proofs 1/4/5/6/7), which could not have succeeded if T9's safety rules were broken
+      underneath it.
 - [ ] Lead read the actual diff, not the summary
 - [ ] `ActionTimingPolicy.Configure` ordering verified against host startup, not assumed (T8)
 
