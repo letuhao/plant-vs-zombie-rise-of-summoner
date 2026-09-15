@@ -343,7 +343,7 @@ the first draft:
 | First-draft `menu-anchor` | Reference pattern (adopt this) |
 |---|---|
 | New patch on `UIMgr.EnterMainMenu` — a **nav call** that may or may not fire | Patch `MainMenu.Start` — the **screen's own** lifecycle; fires iff the screen exists |
-| Six hand-enumerated exit edges (match/submenu/pause/modal/lose/quit), each needing its own test | **Exit edges dissolve**: the affordance is a child of the menu object, so Unity destroys it with the menu. Enter/exit are the screen's own `Start`/`OnDestroy` |
+| Six hand-enumerated exit edges (match/submenu/pause/modal/lose/quit), each needing its own test | **Exit edges dissolve, but NOT via `OnDestroy`** — corrected from this map's first draft. Verified with `ilspycmd` against the real 3.9 interop: `BaseMenu` declares `Awake`, `GetCol`, `OnExit`, `OnBackEnter`, `OnHide`, `PopMenu`, `BackToMainMenu`, `PopAllMenu`, `PushMenuUp`, `PopMenuWithAnim`, `PushMenuUpWithAnim` and **does NOT declare `OnDestroy`**. The menus are **hidden and re-shown** (they carry `canvasGroup`, `anim`, `collider2Ds`), not destroyed and re-`Start`ed. So the boolean clears on the screen's own **hide/exit lifecycle** (`OnHide`/`OnExit`, both `virtual` on `BaseMenu`, so a base patch catches `MainMenu`, type-guarded by `__instance is MainMenu`). The **affordance** needs no clearing at all — it is parented into the menu hierarchy and the menu's own show/hide takes it. Both are lifecycle callbacks, **not** navigation calls, so this stays inside decision 17. |
 | Hand-derived axis-aligned hit box + a "never cover a host primary action" policy (gap 5) | The game's **own** uGUI raycast/layout owns hit-testing; the wobble-vs-hitbox problem does not exist |
 | An IMGUI rect over the menu can eat a host click (gap 7) | A UI element **inside** the menu hierarchy, ordered by the game's own sibling order |
 | Gap 4 (the over-broad `Board == null` paint) needed correcting | Moot for the affordance: it exists only while `MainMenu` exists. (The existing decorative paint is a separate, smaller cleanup.) |
@@ -406,7 +406,8 @@ open enrichment question (below), and it belongs to `tombstone`.
 **Consequences for the module set (unchanged count, changed content):**
 - `menu-anchor` becomes **"the menu-screen presence signal"**: patch the menu screen's lifecycle, hold a
   boolean, expose a closed surface enum. Its real work is no longer six exit edges but **proving the
-  signal's presence semantics** (fires on the screen, clears with it) and the 3.9 verification above.
+  signal's presence semantics** — set on the screen's own `Start`, cleared on its own `OnHide`/`OnExit`,
+  with the non-`MainMenu` type guard proving one menu's hide cannot clear another's presence.
 - `tombstone` becomes **"attach a uGUI affordance to the menu hierarchy"**, consuming the presence
   signal; the hit-box contract (gap 5) is largely replaced by the game's own layout, and the
   "never-cover" policy (gap 7) becomes "order ourselves below the game's primary buttons", as the
